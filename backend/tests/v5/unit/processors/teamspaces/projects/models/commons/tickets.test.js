@@ -206,7 +206,7 @@ const updateImagesTestHelper = async (updateMany, isView) => {
 	const nTickets = updateMany ? 10 : 1;
 
 	TemplatesModel.generateFullSchema.mockImplementationOnce((t) => t);
-	const response = times(nTickets, generateRandomObject);
+	const response = [];
 
 	if (updateMany) {
 		TicketsModel.updateManyTickets.mockResolvedValueOnce(response);
@@ -223,6 +223,7 @@ const updateImagesTestHelper = async (updateMany, isView) => {
 		const updatePropBuffer = Buffer.from(generateRandomString());
 		const updateModPropBuffer = Buffer.from(generateRandomString());
 		tickets.push(imageTestData.data[i].ticket);
+		response.push({ ...generateRandomObject(), changes: generateRandomObject() });
 
 		return {
 			properties: {
@@ -597,7 +598,7 @@ const updateGroupTestsHelper = (updateMany) => {
 				delete modules[moduleName][propName];
 				/* eslint-enable no-param-reassign */
 
-				response.push(generateRandomObject());
+				response.push({ ...generateRandomObject(), changes: generateRandomObject() });
 
 				return data;
 			});
@@ -622,7 +623,7 @@ const updateGroupTestsHelper = (updateMany) => {
 					},
 				};
 
-				response.push(generateRandomObject());
+				response.push({ ...generateRandomObject(), changes: generateRandomObject() });
 
 				return data;
 			});
@@ -661,7 +662,7 @@ const updateGroupTestsHelper = (updateMany) => {
 					},
 				};
 
-				response.push(generateRandomObject());
+				response.push({ ...generateRandomObject(), changes: generateRandomObject() });
 
 				return data;
 			});
@@ -691,7 +692,7 @@ const updateGroupTestsHelper = (updateMany) => {
 						[propName]: updatedPropData,
 					},
 				};
-				response.push(generateRandomObject());
+				response.push({ ...generateRandomObject(), changes: generateRandomObject() });
 				return data;
 			});
 
@@ -923,7 +924,7 @@ const testUpdateManyTickets = () => {
 					properties: {},
 				});
 
-				response.push(generateRandomObject());
+				response.push({ ...generateRandomObject(), changes: generateRandomObject() });
 				return generateTicket(template);
 			});
 			TemplatesModel.generateFullSchema.mockReset();
@@ -969,7 +970,7 @@ const testUpdateManyTickets = () => {
 						properties: {},
 						comments: times(ticketCount, generateRandomObject) });
 
-					response.push(generateRandomObject());
+					response.push({ ...generateRandomObject(), changes: generateRandomObject() });
 					return generateTicket(template);
 				});
 
@@ -998,6 +999,45 @@ const testUpdateManyTickets = () => {
 							model,
 							...res });
 				});
+
+				expect(CommentsProcessor.importComments).toHaveBeenCalledTimes(tickets.length);
+				tickets.forEach(({ _id }, i) => {
+					expect(CommentsProcessor.importComments).toHaveBeenCalledWith(teamspace, project, model, _id,
+						updateData[i].comments, author);
+				});
+			});
+
+			test(`should not trigger ${events.UPDATE_TICKET} events if there are only comments update`, async () => {
+				const updateData = [];
+				const response = [];
+
+				const tickets = times(ticketCount, () => {
+					updateData.push({
+						properties: {},
+						comments: times(ticketCount, generateRandomObject) });
+
+					response.push({ ...generateRandomObject(), changes: {} });
+					return generateTicket(template);
+				});
+
+				TemplatesModel.generateFullSchema.mockReset();
+				TemplatesModel.generateFullSchema.mockImplementationOnce((t) => t);
+				TicketsModel.updateManyTickets.mockResolvedValueOnce(response);
+
+				await expect(Tickets.updateManyTickets(teamspace, project, model, template, tickets,
+					updateData, author))
+					.resolves.toBeUndefined();
+
+				expect(TicketsModel.updateManyTickets).toHaveBeenCalledTimes(1);
+				expect(TicketsModel.updateManyTickets).toHaveBeenCalledWith(teamspace, project, model, tickets,
+					updateData.map(({ comments, ...others }) => others), author);
+				expect(TemplatesModel.generateFullSchema).toHaveBeenCalledTimes(1);
+				expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(template);
+
+				expect(FilesManager.storeFile).not.toHaveBeenCalled();
+				expect(FilesManager.removeFile).not.toHaveBeenCalled();
+
+				expect(EventsManager.publish).not.toHaveBeenCalled();
 
 				expect(CommentsProcessor.importComments).toHaveBeenCalledTimes(tickets.length);
 				tickets.forEach(({ _id }, i) => {
