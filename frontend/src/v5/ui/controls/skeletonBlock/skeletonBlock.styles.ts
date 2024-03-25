@@ -23,3 +23,8 @@ export const SkeletonBlock = styled(Skeleton)<{ delay?: number }>`
 	position: relative;
 	animation-delay: ${({ delay }) => `${delay || 0}s`};
 `;
+
+export const ButtonSkeleton = styled(SkeletonBlock)`
+	height: 50px;
+	width: calc(100% - 20px);
+`;

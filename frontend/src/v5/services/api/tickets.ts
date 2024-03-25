@@ -63,10 +63,10 @@ export const fetchContainerTickets = async (
 	teamspace: string,
 	projectId: string,
 	containerId: string,
-	filter?: string[],
+	filters?: string[],
 ): Promise<FetchTicketsResponse> => {
 	let path = `teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets`;
-	if (filter?.length) path += `?filter=${filter.join()}`;
+	if (filters?.length) path += `?filters=${filters.join()}`;
 	const { data } = await api.get(path);
 	return data.tickets;
 };
@@ -75,10 +75,10 @@ export const fetchFederationTickets = async (
 	teamspace: string,
 	projectId: string,
 	federationId: string,
-	filter?: string[],
+	filters?: string[],
 ): Promise<FetchTicketsResponse> => {
 	let path = `teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets`;
-	if (filter?.length) path += `?filter=${filter.join()}`;
+	if (filters?.length) path += `?filters=${filters.join()}`;
 	const { data } = await api.get(path);
 	return data.tickets;
 };

@@ -21,6 +21,10 @@ export const Button = styled(LabelButton)`
 	margin: 0;
 	width: 135px;
 
+	.MuiButton-startIcon {
+		max-width: 14px;
+	}
+
 	&.Mui-disabled {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 		border: 1px solid ${({ theme }) => theme.palette.base.lightest};

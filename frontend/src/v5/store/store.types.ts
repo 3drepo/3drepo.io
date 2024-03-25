@@ -21,6 +21,8 @@ export type ContainerId = { containerId: string };
 export type FederationId = { federationId: string };
 export type ModelId = { modelId: string };
 export type TicketId = { ticketId: string };
+export type DrawingId = { drawingId: string };
+
 
 export type OnSuccess = { onSuccess: () => void };
 export type OnError = { onError: (error) => void };
@@ -38,6 +40,10 @@ export type ProjectAndFederationId = ProjectId & FederationId;
 export type SuccessAndErrorCallbacks = OnSuccess & OnError;
 
 export type TeamspaceProjectAndModel = TeamspaceId & ProjectId & ModelId;
+
+export type ProjectAndDrawingId = ProjectId & DrawingId;
+
+export type TeamspaceProjectAndDrawingId  = TeamspaceId & ProjectAndDrawingId;
 
 export type SurveyPoint = {
 	latLong: [number, number];
