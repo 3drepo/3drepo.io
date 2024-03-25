@@ -908,12 +908,12 @@ const testUpdateManyTickets = () => {
 	describe('Update many tickets', () => {
 		const template = generateTemplate();
 		const ticketCount = 10;
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		const author = generateRandomString();
 
 		test('should call updateManyTickets in model', async () => {
-			const teamspace = generateRandomString();
-			const project = generateRandomString();
-			const model = generateRandomString();
-
 			const updateData = [];
 			const response = [];
 
@@ -926,7 +926,6 @@ const testUpdateManyTickets = () => {
 				response.push(generateRandomObject());
 				return generateTicket(template);
 			});
-			const author = generateRandomString();
 			TemplatesModel.generateFullSchema.mockReset();
 			TemplatesModel.generateFullSchema.mockImplementationOnce((t) => t);
 			TicketsModel.updateManyTickets.mockResolvedValueOnce(response);
@@ -958,6 +957,55 @@ const testUpdateManyTickets = () => {
 		test('should process screenshot from view data and store a ref', () => updateImagesTestHelper(true, true));
 
 		updateGroupTestsHelper(true);
+
+		describe('Update tickets with comments', () => {
+			test('should call importComments if there are comments', async () => {
+				const updateData = [];
+				const response = [];
+
+				const tickets = times(ticketCount, () => {
+					updateData.push({
+						title: generateRandomString(),
+						properties: {},
+						comments: times(ticketCount, generateRandomObject) });
+
+					response.push(generateRandomObject());
+					return generateTicket(template);
+				});
+
+				TemplatesModel.generateFullSchema.mockReset();
+				TemplatesModel.generateFullSchema.mockImplementationOnce((t) => t);
+				TicketsModel.updateManyTickets.mockResolvedValueOnce(response);
+
+				await expect(Tickets.updateManyTickets(teamspace, project, model, template, tickets,
+					updateData, author))
+					.resolves.toBeUndefined();
+
+				expect(TicketsModel.updateManyTickets).toHaveBeenCalledTimes(1);
+				expect(TicketsModel.updateManyTickets).toHaveBeenCalledWith(teamspace, project, model, tickets,
+					updateData.map(({ comments, ...others }) => others), author);
+				expect(TemplatesModel.generateFullSchema).toHaveBeenCalledTimes(1);
+				expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(template);
+
+				expect(FilesManager.storeFile).not.toHaveBeenCalled();
+				expect(FilesManager.removeFile).not.toHaveBeenCalled();
+
+				expect(EventsManager.publish).toHaveBeenCalledTimes(ticketCount);
+				response.forEach((res) => {
+					expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET,
+						{ teamspace,
+							project,
+							model,
+							...res });
+				});
+
+				expect(CommentsProcessor.importComments).toHaveBeenCalledTimes(tickets.length);
+				tickets.forEach(({ _id }, i) => {
+					expect(CommentsProcessor.importComments).toHaveBeenCalledWith(teamspace, project, model, _id,
+						updateData[i].comments, author);
+				});
+			});
+		});
 	});
 };
 
