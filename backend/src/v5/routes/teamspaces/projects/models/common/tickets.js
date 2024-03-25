@@ -22,6 +22,7 @@ const {
 	getTicketResourceAsStream: getConTicketResourceAsStream,
 	importTickets: importConTickets,
 	updateTicket: updateConTicket,
+	updateManyTickets: updateManyConTickets,
 } = require('../../../../../processors/teamspaces/projects/models/containers');
 const {
 	addTicket: addFedTicket,
@@ -30,6 +31,7 @@ const {
 	getTicketResourceAsStream: getFedTicketResourceAsStream,
 	importTickets: importFedTickets,
 	updateTicket: updateFedTicket,
+	updateManyTickets: updateManyFedTickets,
 } = require('../../../../../processors/teamspaces/projects/models/federations');
 const {
 	hasCommenterAccessToContainer,
@@ -39,7 +41,7 @@ const {
 } = require('../../../../../middleware/permissions/permissions');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
 const { serialiseFullTicketTemplate, serialiseTemplatesList, serialiseTicket, serialiseTicketList } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
-const { templateExists, validateImportTickets, validateNewTicket, validateUpdateTicket } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
+const { templateExists, validateImportTickets, validateNewTicket, validateUpdateMultipleTickets, validateUpdateTicket } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../../processors/teamspaces/projects');
@@ -152,6 +154,27 @@ const updateTicket = (isFed) => async (req, res) => {
 	try {
 		const update = isFed ? updateFedTicket : updateConTicket;
 		await update(teamspace, project, model, template, oldTicket, updatedTicket, user);
+
+		respond(req, res, templates.ok);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const updateManyTickets = (isFed) => async (req, res) => {
+	const {
+		templateData: template,
+		ticketsData: oldTickets,
+		params,
+		body,
+	} = req;
+	const { teamspace, project, model } = params;
+	const user = getUserFromSession(req.session);
+
+	try {
+		const update = isFed ? updateManyFedTickets : updateManyConTickets;
+		await update(teamspace, project, model, template, oldTickets, body.tickets, user);
 
 		respond(req, res, templates.ok);
 	} catch (err) {
@@ -302,7 +325,7 @@ const establishRoutes = (isFed) => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/import:
 	 *   post:
 	 *     description: Import multiple existing tickets into the model
 	 *     tags: [Tickets]
@@ -623,6 +646,118 @@ const establishRoutes = (isFed) => {
 	 *
 	 */
 	router.get('/', hasReadAccess, validateListSortAndFilter, getTicketsInModel(isFed), serialiseTicketList);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets:
+	 *   patch:
+	 *     description: Update multiple tickets
+	 *     tags: [Tickets]
+	 *     operationId: updateManyTickets
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: type
+	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
+	 *       - name: model
+	 *         description: Container/ Federation ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: template
+	 *         description: Template ID
+	 *         in: query
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     requestBody:
+	 *       content:
+	 *         application/json:
+	 *           schema:
+	 *             type: object
+	 *             properties:
+	 *                 tickets:
+	 *                   type: array
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       title:
+	 *                         type: string
+	 *                         description: Title of the ticket
+	 *                         example: Doorway too narrow
+	 *                       properties:
+	 *                         type: object
+	 *                         description: properties within the ticket
+	 *                         properties:
+	 *                           Description:
+	 *                             type: string
+	 *                             description: A detailed description of the ticket
+	 *                             example: The door way is too narrow for disable access
+	 *                           CustomProperty1:
+	 *                             type: string
+	 *                             description: Any custom properties in the ticket should be filled in this way
+	 *                             example: Data1
+	 *                       modules:
+	 *                         type: object
+	 *                         description: modules within the ticket
+	 *                         properties:
+	 *                           Module1:
+	 *                             type: object
+	 *                             description: properties within Module1
+	 *                             properties:
+	 *                               Property1:
+	 *                                 type: string
+	 *                                 description: Any properties in the module should be filled in this way
+	 *                                 example: Data1
+	 *                       comments:
+	 *                         type: array
+	 *                         description: array of comments to import as part of the ticket
+	 *                         items:
+	 *                           type: object
+	 *                           properties:
+	 *                             message:
+	 *                               type: string
+	 *                               description: Content of the comment
+	 *                               example: Example message
+	 *                             originalAuthor:
+	 *                               type: string
+	 *                               description: Original author of the message
+	 *                             createdAt:
+	 *                               type: number
+	 *                               description: When the original comment was created (in epoch timestamp)
+	 *                             images:
+	 *                               description: Images of the comment
+	 *                               type: array
+	 *                               items:
+	 *                                 type: string
+	 *                                 description: Image in a Base64 format or an ID of an image currently used in the comment
+	 *
+	 *
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: ticket has been successfully updated
+	 */
+	router.patch('/', hasCommenterAccess, validateUpdateMultipleTickets, updateManyTickets(isFed));
 
 	/**
 	 * @openapi

@@ -881,6 +881,158 @@ const testUpdateTicket = () => {
 	});
 };
 
+const testUpdateManyTickets = () => {
+	describe('Update many tickets', () => {
+		const { users, teamspace, project, con, fed } = generateBasicData();
+		const template = ServiceHelper.generateTemplate(false, false, { comments: true });
+		const nTickets = 10;
+
+		const deprecatedTemplate = ServiceHelper.generateTemplate(false);
+		con.depTemTicket = ServiceHelper.generateTicket(deprecatedTemplate);
+		fed.depTemTicket = ServiceHelper.generateTicket(deprecatedTemplate);
+
+		con.tickets = times(nTickets, () => ServiceHelper.generateTicket(template));
+		fed.tickets = times(nTickets, () => ServiceHelper.generateTicket(template));
+		con.ticketsCommentTest1 = times(nTickets, () => ServiceHelper.generateTicket(template));
+		fed.ticketsCommentTest1 = times(nTickets, () => ServiceHelper.generateTicket(template));
+		con.ticketsCommentTest2 = times(nTickets, () => ServiceHelper.generateTicket(template));
+		fed.ticketsCommentTest2 = times(nTickets, () => ServiceHelper.generateTicket(template));
+
+		beforeAll(async () => {
+			await setupBasicData(users, teamspace, project, [con, fed], [template, deprecatedTemplate]);
+
+			await Promise.all([fed, con].map(async (model) => {
+				const modelType = fed === model ? 'federation' : 'container';
+				const addTicketRoute = (modelId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets?key=${users.tsAdmin.apiKey}`;
+
+				const { tickets, ticketsCommentTest1, ticketsCommentTest2, depTemTicket } = model;
+				/* eslint-disable no-param-reassign */
+				await Promise.all([...tickets, ...ticketsCommentTest1, ...ticketsCommentTest2, depTemTicket].map(
+					async (ticketToAdd) => {
+						const res = await agent.post(addTicketRoute(model._id)).send(ticketToAdd);
+						if (!res.body._id) {
+							throw new Error(`Could not add a new ticket: ${res.body.message}`);
+						}
+						ticketToAdd._id = res.body._id;
+						ticketToAdd.properties[basePropertyLabels.UPDATED_AT] = new Date();
+					}));
+
+				await updateOne(teamspace, 'templates', { _id: stringToUUID(deprecatedTemplate._id) }, { $set: { deprecated: true } });
+			}));
+		});
+
+		const checkTicketLogByDate = async (updatedDate) => {
+			const ticketLog = await findOne(teamspace, 'tickets.logs', { timestamp: new Date(updatedDate) });
+			expect(ticketLog).not.toBeUndefined();
+		};
+
+		const generateTestData = (isFed) => {
+			const modelType = isFed ? 'federation' : 'container';
+			const wrongTypeModel = isFed ? con : fed;
+			const model = isFed ? fed : con;
+			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+
+			const baseRouteParams = {
+				key: users.tsAdmin.apiKey,
+				modelType,
+				projectId: project.id,
+				model,
+				tickets: model.tickets,
+				templateId: template._id,
+			};
+
+			return [
+				['the user does not have a valid session', false, { ...baseRouteParams, key: null }, templates.notLoggedIn],
+				['the user is not a member of the teamspace', false, { ...baseRouteParams, key: users.nobody.apiKey }, templates.teamspaceNotFound],
+				['the project does not exist', false, { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, templates.projectNotFound],
+				[`the ${modelType} does not exist`, false, { ...baseRouteParams, modelId: ServiceHelper.generateRandomString() }, modelNotFound],
+				[`the model provided is a ${modelType}`, false, { ...baseRouteParams, modelId: wrongTypeModel._id }, modelNotFound],
+				['the user does not have access to the federation', false, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, templates.notAuthorized],
+				['the templateId provided does not exist', false, { ...baseRouteParams, templateId: ServiceHelper.generateUUIDString() }, templates.templateNotFound],
+				['the templateId provided is not a UUID string', false, { ...baseRouteParams, templateId: ServiceHelper.generateRandomString() }, templates.templateNotFound],
+				['the templateId is not provided', false, { ...baseRouteParams, templateId: null }, templates.invalidArguments],
+				['the ticket data does not conforms to the template', false, baseRouteParams, templates.invalidArguments, () => ({ properties: { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() } })],
+				['the ticket data does not contain any update (no properties provided)', false, baseRouteParams, templates.invalidArguments],
+				['the ticket data does not contain any update (properties with existing data)', false, baseRouteParams, templates.invalidArguments, ({ title }) => ({ title })],
+				['the tickets to update are not following the provided template', false, { ...baseRouteParams, templateId: deprecatedTemplate._id }, templates.invalidArguments, () => ({ title: ServiceHelper.generateRandomString() })],
+				['the ticket data conforms to a deprecated template', true, { ...baseRouteParams, templateId: deprecatedTemplate._id, tickets: [model.depTemTicket] }, undefined, () => ({ title: ServiceHelper.generateRandomString() })],
+				['the ticket data conforms to the template but the user is a viewer', false, { ...baseRouteParams, key: users.viewer.apiKey }, templates.notAuthorized, () => ({ title: ServiceHelper.generateRandomString() })],
+				['the ticket data contains comments but the template does not support it', false, { ...baseRouteParams, templateId: deprecatedTemplate._id, tickets: [model.depTemTicket] }, templates.invalidArguments, () => ({ title: ServiceHelper.generateRandomString(), comments: times(10, ServiceHelper.generateImportedComment) })],
+				['the ticket data contains invalid comments', false, baseRouteParams, templates.invalidArguments, () => ({ comments: times(10, ServiceHelper.generateComment) })],
+				['the ticket data conforms to the template', true, baseRouteParams, undefined, () => ({ title: ServiceHelper.generateRandomString() })],
+				['the ticket data contains just comments', true, { ...baseRouteParams, tickets: model.ticketsCommentTest1 }, undefined, () => ({ comments: times(10, ServiceHelper.generateImportedComment) })],
+				['the ticket data contains comments', true, { ...baseRouteParams, tickets: model.ticketsCommentTest2 }, undefined, () => ({ title: ServiceHelper.generateRandomString(), comments: times(10, ServiceHelper.generateImportedComment) })],
+			];
+		};
+
+		const runTest = (desc, success, { model, tickets, ...routeParams }, expectedOutput, payloadChanges) => {
+			const updateTicketsRoute = ({ key, projectId, modelId, modelType, templateId } = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets${ServiceHelper.createQueryString({ key, template: templateId })}`;
+			const getTicketRoute = ({ key, projectId, modelId, ticketId, modelType } = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/${ticketId}${ServiceHelper.createQueryString({ key })}`;
+			const getTicketCommentsRoute = ({ key, projectId, modelId, ticketId, modelType } = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/${ticketId}/comments${ServiceHelper.createQueryString({ key })}`;
+
+			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+				const finalisedParams = { modelId: model._id, ...routeParams };
+				const endpoint = updateTicketsRoute(finalisedParams);
+
+				const payload = {
+					tickets: tickets.map((ticket) => {
+						const data = payloadChanges ? payloadChanges(ticket) : {};
+						data._id = ticket._id;
+						return data;
+					}),
+				};
+
+				const res = await agent.patch(endpoint).send(payload).expect(expectedStatus);
+
+				if (success) {
+					await Promise.all(tickets.map(async (ticket, i) => {
+						const getParams = { ...finalisedParams, ticketId: ticket._id };
+						const updatedTicketRes = await agent.get(getTicketRoute(
+							getParams)).expect(templates.ok.status);
+
+						const updatedTicket = updatedTicketRes.body;
+
+						expect(updatedTicket).toHaveProperty('number');
+						expect(updatedTicket.properties).toHaveProperty(basePropertyLabels.UPDATED_AT);
+						expect(updatedTicket.properties).toHaveProperty(basePropertyLabels.CREATED_AT);
+						expect(updatedTicket.properties).toHaveProperty(basePropertyLabels.STATUS);
+						expect(updatedTicket.properties).toHaveProperty(basePropertyLabels.OWNER);
+						expect(updatedTicket.properties[basePropertyLabels.UPDATED_AT])
+							.not.toEqual(ticket.properties[basePropertyLabels.UPDATED_AT]);
+
+						const { comments, ...ticketUpdates } = payload.tickets[i];
+						const expectedUpdatedTicket = { ...cloneDeep(ticket), ...ticketUpdates };
+						expectedUpdatedTicket.number = updatedTicket.number;
+						expectedUpdatedTicket.properties = {
+							...ticket.properties,
+							[basePropertyLabels.UPDATED_AT]: updatedTicket.properties[basePropertyLabels.UPDATED_AT],
+							[basePropertyLabels.CREATED_AT]: updatedTicket.properties[basePropertyLabels.CREATED_AT],
+							[basePropertyLabels.STATUS]: updatedTicket.properties[basePropertyLabels.STATUS],
+							[basePropertyLabels.OWNER]: updatedTicket.properties[basePropertyLabels.OWNER],
+							...(payloadChanges?.properties ?? {}),
+						};
+
+						expect(updatedTicket).toEqual(expectedUpdatedTicket);
+						await checkTicketLogByDate(updatedTicket.properties[basePropertyLabels.UPDATED_AT]);
+
+						if (comments?.length) {
+							const { body: commentRes } = await agent.get(getTicketCommentsRoute(
+								getParams)).expect(templates.ok.status);
+							expect(commentRes.comments?.length).toEqual(payload.tickets[i].comments.length);
+						}
+					}));
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
+
+		describe.each(generateTestData(true))('Federations', runTest);
+		describe.each(generateTestData())('Containers', runTest);
+	});
+};
+
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -895,4 +1047,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	testGetTicket();
 	testGetTicketList();
 	testUpdateTicket();
+	testUpdateManyTickets();
 });

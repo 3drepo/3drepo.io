@@ -82,8 +82,8 @@ const validateTicketImportData = (isNew) => async (req, res, next) => {
 			throw createResponseCode(templates.invalidArguments, 'Template has been deprecated');
 		}
 
-		req.body.tickets = await Promise.all(req.body.tickets.map(async (ticket) => {
-			const existingData = isNew ? undefined : req.ticketsData[ticket._id];
+		req.body.tickets = await Promise.all(req.body.tickets.map(async (ticket, i) => {
+			const existingData = isNew ? undefined : req.ticketsData[i];
 			const validatedTicket = await processTicket(teamspace,
 				project, model, template, user, ticket, existingData, true);
 			if (isNew) validatedTicket.type = template._id;
@@ -134,7 +134,10 @@ const checkAllTicketsExist = async (req, res, next) => {
 
 		req.templateData = await getTemplateById(teamspace, template);
 
+		const ticketIdStrs = [];
+
 		const ticketIds = tickets.map(({ _id }) => {
+			ticketIdStrs.push(_id);
 			if (_id) return stringToUUID(_id);
 			throw createResponseCode(templates.invalidArguments, '_id field must be provided for all tickets');
 		});
@@ -144,18 +147,18 @@ const checkAllTicketsExist = async (req, res, next) => {
 
 		const idToData = {};
 
-		ticketsData.forEach(({ _id, ...data }) => {
-			const idStr = UUIDToString(_id);
-			idToData[idStr] = data;
+		ticketsData.forEach((ticketData) => {
+			const idStr = UUIDToString(ticketData._id);
+			idToData[idStr] = ticketData;
 		});
 
-		const idsNotFound = getArrayDifference(Object.keys(idToData), tickets.map(({ _id }) => _id));
+		const idsNotFound = getArrayDifference(Object.keys(idToData), ticketIdStrs);
 
 		if (idsNotFound.length) {
 			throw createResponseCode(templates.invalidArguments, `The following IDs were not found: ${idsNotFound.join(',')}`);
 		}
 
-		req.ticketsData = idToData;
+		req.ticketsData = ticketIdStrs.map((id) => idToData[id]);
 
 		await next();
 	} catch (err) {
