@@ -192,7 +192,7 @@ const establishRoutes = () => {
 	 *                 example: Europe/Berlin
 	 *               lod:
 	 *                 description: Level of Detail (0 - 6)
-	 *                 type: interger
+	 *                 type: integer
 	 *                 example: 0
 	 *               file:
 	 *                 type: string

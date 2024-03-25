@@ -387,6 +387,13 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *         example: a54e8776-da7c-11ec-9d64-0242ac120002,aaa1ffaa-da7c-11ec-9d64-0242ac120002
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"

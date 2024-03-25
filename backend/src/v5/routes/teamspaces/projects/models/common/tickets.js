@@ -374,14 +374,14 @@ const establishRoutes = (isFed) => {
 	 *                     type: object
 	 *                     properties:
 	 *                       title:
-	 *                       type: string
-	 *                       description: Title of the ticket
-	 *                       example: Doorway too narrow
+	 *                         type: string
+	 *                         description: Title of the ticket
+	 *                         example: Doorway too narrow
 	 *                       properties:
 	 *                         type: object
 	 *                         description: properties within the ticket
 	 *                         properties:
-	 *                           Created at
+	 *                           Created at:
 	 *                             type: number
 	 *                             description: Timestamp of when this ticket was created
 	 *                           Description:

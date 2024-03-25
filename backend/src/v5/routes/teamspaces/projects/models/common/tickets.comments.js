@@ -203,23 +203,25 @@ const establishRoutes = (isFed) => {
 	 *                 history:
 	 *                   type: array
 	 *                   description: The update history of the comment
-	 *                   properties:
-	 *                     timestamp:
-	 *                       type: number
-	 *                       example: 1632821119000
-	 *                       description: Timestamp of the update
-	 *                     message:
-	 *                       type: string
-	 *                       example: Example message
-	 *                       description: The content of the comment
-	 *                     images:
-	 *                       type: array
-	 *                       description: The images of the comment
-	 *                       items:
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       timestamp:
+	 *                         type: number
+	 *                         example: 1632821119000
+	 *                         description: Timestamp of the update
+	 *                       message:
 	 *                         type: string
-	 *                         format: uuid
-	 *                         description: The Id of the comment image
-	 *                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                         example: Example message
+	 *                         description: The content of the comment
+	 *                       images:
+	 *                         type: array
+	 *                         description: The images of the comment
+	 *                         items:
+	 *                           type: string
+	 *                           format: uuid
+	 *                           description: The Id of the comment image
+	 *                           example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 *                 deleted:
 	 *                   type: boolean
 	 *                   example: true
