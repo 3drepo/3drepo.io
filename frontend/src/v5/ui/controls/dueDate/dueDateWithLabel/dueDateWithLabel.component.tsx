@@ -23,21 +23,22 @@ type IDueDateWithLabel = {
 	value: number;
 	disabled?: boolean;
 	onChange?: (newValue) => void;
+	className?: string;
 };
 
-export const DueDateWithLabel = ({ value, disabled, onChange }: IDueDateWithLabel) => (
+export const DueDateWithLabel = ({ value, disabled, className, ...props }: IDueDateWithLabel) => (
 	<DateTimePicker
 		value={value}
 		disabled={disabled}
-		onChange={onChange}
 		renderInput={({ inputRef }) => (
 			<div ref={inputRef}>
 				{value ? (
-					<DueDateFilledLabel value={value} disabled={disabled} />
+					<DueDateFilledLabel value={value} disabled={disabled} className={className} />
 				) : (
-					<DueDateEmptyLabel disabled={disabled} />
+					<DueDateEmptyLabel disabled={disabled} className={className} />
 				)}
 			</div>
 		)}
+		{...props}
 	/>
 );

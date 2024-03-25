@@ -21,6 +21,7 @@ import { EmptyDateContainer } from './dueDateLabel.styles';
 export type IDueDateEmptyLabel = {
 	disabled?: boolean;
 	onClick?: () => void;
+	className?: string;
 };
 
 export const DueDateEmptyLabel = ({ disabled, ...props }: IDueDateEmptyLabel): JSX.Element => (

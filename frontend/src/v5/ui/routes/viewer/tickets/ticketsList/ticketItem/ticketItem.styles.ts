@@ -19,6 +19,7 @@ import { ControlledAssigneesSelect } from '@controls/assigneesSelect/controlledA
 import styled, { css } from 'styled-components';
 import { Title } from './ticketItemBaseInfo/ticketItemBaseInfo.styles';
 import { StatusChip } from '@controls/chip/statusChip/statusChip.component';
+import { DueDateWithLabel } from '@controls/dueDate/dueDateWithLabel/dueDateWithLabel.component';
 
 export const TicketItemContainer = styled.div<{ $selected?: boolean }>`
 	position: relative;
@@ -34,6 +35,10 @@ export const TicketItemContainer = styled.div<{ $selected?: boolean }>`
 			color: ${theme.palette.primary.dark}
 		}
 	`}
+`;
+
+export const DueDateLabel = styled(DueDateWithLabel)`
+	min-width: 131px;
 `;
 
 export const FlexRow = styled.div`

@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DueDateWithLabel } from '@controls/dueDate/dueDateWithLabel/dueDateWithLabel.component';
-import { IssuePropertiesRow } from '../ticketItem.styles';
+import { IssuePropertiesRow, DueDateLabel } from '../ticketItem.styles';
 import { PRIORITY_LEVELS_MAP } from '@controls/chip/chip.types';
 import { IssueProperties } from '../../../tickets.constants';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
@@ -45,7 +44,7 @@ export const TicketItemBottomRow = ({ _id: ticketId, properties }: ITicket) => {
 
 	return (
 		<IssuePropertiesRow>
-			<DueDateWithLabel value={dueDate} onChange={onChangeDueDate} disabled={readOnly} />
+			<DueDateLabel value={dueDate} onChange={onChangeDueDate} disabled={readOnly} />
 			<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />
 		</IssuePropertiesRow>
 	);
