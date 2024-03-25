@@ -111,3 +111,4 @@ backend/globalConfig.json
 *.swm
 backend/bouncer_worker.log
 *.swl
+.vscode/settings.json

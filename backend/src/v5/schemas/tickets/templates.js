@@ -16,12 +16,13 @@
  */
 
 const {
-	defaultProperties,
+	basePropertyLabels,
 	getApplicableDefaultProperties,
 	presetEnumValues,
 	presetModules,
 	presetModulesProperties,
-	propTypes } = require('./templates.constants');
+	propTypes,
+	statusTypes } = require('./templates.constants');
 
 const { isArray, isString } = require('../../utils/helper/typeCheck');
 const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
@@ -55,12 +56,25 @@ const pinColSchema = Yup.lazy((val) => {
 
 const blackListedChrsRegex = /^[^.,[\]]*$/;
 
+const uniqueTypeBlackList = [
+	propTypes.LONG_TEXT,
+	propTypes.BOOLEAN,
+	propTypes.IMAGE,
+	propTypes.VIEW,
+	propTypes.MEASUREMENTS,
+	propTypes.COORDS,
+];
+
 const propSchema = Yup.object().shape({
 	name: types.strings.title.required().min(1).matches(blackListedChrsRegex),
 	type: Yup.string().oneOf(Object.values(propTypes)).required(),
 	deprecated: defaultFalse,
 	required: defaultFalse,
 	immutable: defaultFalse,
+	readOnlyOnUI: defaultFalse,
+	unique: Yup.lazy((value) => Yup.boolean().strip(!value)
+		.when('type', (typeVal, schema) => schema.test('Unique check', `Unique attribute cannot be applied to properties of type: ${uniqueTypeBlackList.join(', ')}`,
+			(uniqueVal) => !(uniqueVal && uniqueTypeBlackList.includes(typeVal))))),
 	values: Yup.mixed().when('type', (val, schema) => {
 		if (val === propTypes.MANY_OF || val === propTypes.ONE_OF) {
 			return schema.test('Values check', 'Property values must of be an array of values or the name of a preset', (value) => {
@@ -146,6 +160,11 @@ const moduleSchema = Yup.object().shape({
 }).test('Name and type', 'Only provide a name or a type for a module, not both',
 	({ name, type }) => (name && !type) || (!name && type));
 
+const customStatus = Yup.object({
+	name: types.strings.title.required(),
+	type: Yup.string().oneOf(Object.values(statusTypes)).required(),
+});
+
 const configSchema = Yup.object().shape({
 	// If new configs are added, please ensure we add it to the e2e test case
 	comments: defaultFalse,
@@ -154,9 +173,11 @@ const configSchema = Yup.object().shape({
 	defaultView: defaultFalse,
 	defaultImage: Yup.boolean().when('defaultView', (defaultView, schema) => (defaultView ? schema.strip() : defaultFalse)),
 	pin: Yup.lazy((val) => (val?.color ? Yup.object({ color: pinColSchema }) : defaultFalse)),
+	status: Yup.object({
+		values: Yup.array().of(customStatus).min(1).required(),
+		default: Yup.mixed().when('values', (values) => (values ? Yup.string().oneOf(values.map(({ name }) => name)).required() : Yup.mixed())),
+	}).default(undefined),
 }).default({});
-
-const defaultPropertyNames = defaultProperties.map(({ name }) => name);
 
 const pinMappingTest = (val, context) => {
 	const template = TemplateSchema.generateFullSchema(val);
@@ -201,7 +222,7 @@ const schema = Yup.object().shape({
 	config: configSchema,
 	deprecated: defaultFalse,
 	properties: propertyArray.test('No name clash', 'Cannot have the same name as a default property',
-		(val) => val.every(({ name }) => !defaultPropertyNames.includes(name))),
+		(val) => val.every(({ name }) => !Object.values(basePropertyLabels).includes(name))),
 	modules: Yup.array().default([]).of(moduleSchema).test((arr, context) => {
 		const modNames = new Set();
 		for (const { name, type } of arr) {

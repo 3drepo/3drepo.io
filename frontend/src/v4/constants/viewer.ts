@@ -108,7 +108,7 @@ export const DEFAULT_SETTINGS = {
 	viewerBackgroundColor: [0.95, 0.96, 0.99],
 	shadows: 'none',
 	xray: true,
-	caching: false,
+	caching: true,
 	statistics: false,
 	unityMemory: 0,
 	nearPlane: 10,

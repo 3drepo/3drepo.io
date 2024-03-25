@@ -19,6 +19,7 @@ const Templates = {};
 
 const TEMPLATES_COL = 'templates';
 const db = require('../handler/db');
+const { defaultTemplates } = require('./tickets.templates.constants');
 const { generateUUID } = require('../utils/helper/uuids');
 const { templates } = require('../utils/responseCodes');
 
@@ -32,6 +33,8 @@ const findOne = async (teamspace, query, projection) => {
 };
 
 const find = (teamspace, query, projection) => db.find(teamspace, TEMPLATES_COL, query, projection);
+
+Templates.addDefaultTemplates = (teamspace) => db.insertMany(teamspace, TEMPLATES_COL, defaultTemplates);
 
 Templates.addTemplate = async (teamspace, template) => {
 	const _id = generateUUID();

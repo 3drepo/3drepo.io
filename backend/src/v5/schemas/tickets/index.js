@@ -18,7 +18,6 @@
 const { UUIDToString, stringToUUID } = require('../../utils/helper/uuids');
 const {
 	basePropertyLabels,
-	defaultProperties,
 	modulePropertyLabels,
 	presetEnumValues,
 	presetModules,
@@ -35,12 +34,14 @@ const Yup = require('yup');
 const { deserialiseGroupSchema } = require('./tickets.groups');
 const { generateFullSchema } = require('./templates');
 const { getJobNames } = require('../../models/jobs');
+const { getTicketsByQuery } = require('../../models/tickets');
 const { logger } = require('../../utils/logger');
 const { propTypesToValidator } = require('./validators');
 
 const Tickets = {};
 
-const generatePropertiesValidator = async (teamspace, properties, oldProperties, isNewTicket) => {
+const generatePropertiesValidator = async (teamspace, project, model, templateId, moduleName,
+	properties, oldProperties, isNewTicket) => {
 	const obj = {};
 
 	const proms = properties.map(async (prop) => {
@@ -74,6 +75,20 @@ const generatePropertiesValidator = async (teamspace, properties, oldProperties,
 				} else {
 					logger.logError(`Property values found for a non selection type (${prop.type})`);
 				}
+			}
+
+			if (prop.unique) {
+				validator = validator.test('Unique property', `The value of unique property ${prop.name} is already used in another ticket`,
+					async (value) => {
+						if (value !== undefined && value !== null) {
+							const query = { type: templateId, [`${moduleName ? `modules.${moduleName}` : 'properties'}.${prop.name}`]: value };
+							const duplicateTickets = await getTicketsByQuery(teamspace, project,
+								model, query, { _id: 1 });
+							return !duplicateTickets.length;
+						}
+
+						return true;
+					});
 			}
 
 			if (isNewTicket) {
@@ -120,13 +135,14 @@ const generatePropertiesValidator = async (teamspace, properties, oldProperties,
 	return Yup.object(obj).default({});
 };
 
-const generateModuleValidator = async (teamspace, modules, oldModules, isNewTicket, cleanUpPass) => {
+const generateModuleValidator = async (teamspace, project, model, templateId, modules, oldModules,
+	isNewTicket, cleanUpPass) => {
 	const moduleToSchema = {};
 	const proms = modules.map(async (module) => {
 		if (!module.deprecated) {
 			const id = module.name || module.type;
-			const modValidator = await generatePropertiesValidator(teamspace, module.properties,
-				oldModules?.[id], isNewTicket);
+			const modValidator = await generatePropertiesValidator(teamspace, project, model, templateId, id,
+				module.properties, oldModules?.[id], isNewTicket);
 			moduleToSchema[id] = cleanUpPass
 				? stripWhen(modValidator, (val) => isEqual(val, {}) || !val) : modValidator;
 		}
@@ -137,17 +153,18 @@ const generateModuleValidator = async (teamspace, modules, oldModules, isNewTick
 	return moduleToSchema;
 };
 
-Tickets.validateTicket = async (teamspace, template, newTicket, oldTicket) => {
+Tickets.validateTicket = async (teamspace, project, model, template, newTicket, oldTicket) => {
 	const fullTem = generateFullSchema(template);
 	const isNewTicket = !oldTicket;
 
 	const validatorObj = {
 		title: isNewTicket ? types.strings.title.required()
 			: stripWhen(types.strings.title, (t) => isEqual(t, oldTicket?.title)),
-		properties: await generatePropertiesValidator(teamspace, fullTem.properties,
-			oldTicket?.properties, isNewTicket),
+		properties: await generatePropertiesValidator(teamspace, project, model, template._id,
+			undefined, fullTem.properties, oldTicket?.properties, isNewTicket),
 		modules: Yup.object(
-			await generateModuleValidator(teamspace, fullTem.modules, oldTicket?.modules, isNewTicket),
+			await generateModuleValidator(teamspace, project, model, template._id,
+				fullTem.modules, oldTicket?.modules, isNewTicket),
 		).default({}),
 		type: isNewTicket ? Yup.mixed().required() : Yup.mixed().strip(),
 	};
@@ -155,8 +172,8 @@ Tickets.validateTicket = async (teamspace, template, newTicket, oldTicket) => {
 	const validatedTicket = await Yup.object(validatorObj).validate(newTicket, { stripUnknown: true });
 
 	// Run it again so we can check for unchanged properties that looked changed due to default values
-	validatorObj.modules = Yup.object(
-		await generateModuleValidator(teamspace, fullTem.modules, oldTicket?.modules, isNewTicket, true),
+	validatorObj.modules = Yup.object(await generateModuleValidator(teamspace, project, model, template._id,
+		fullTem.modules, oldTicket?.modules, isNewTicket, true),
 	).default({});
 
 	return Yup.object(validatorObj).validate(validatedTicket, { stripUnknown: true });
@@ -317,10 +334,10 @@ Tickets.deserialiseUUIDsInTicket = (ticket, template) => {
 	return caster.cast(ticket);
 };
 
+// NOTE: this function assumes the full template is being passed in - i.e. generateFullSchema has been called.
 Tickets.serialiseTicket = (ticket, fullTemplate, stripDeprecated) => {
 	const caster = generateCastObject({
 		...fullTemplate,
-		properties: fullTemplate.properties.concat(defaultProperties),
 	}, stripDeprecated);
 	return caster.cast(ticket);
 };
