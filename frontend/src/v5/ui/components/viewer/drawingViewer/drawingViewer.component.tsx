@@ -25,7 +25,7 @@ import ZoomInIcon from '@assets/icons/viewer/zoom_in.svg';
 import { FileInputField } from '@controls/fileInputField/fileInputField.component';
 import { Button } from '@controls/button/button.component';
 import { FormattedMessage } from 'react-intl';
-import { SvgViewer, Zoomer } from './svgVieweer.component';
+import { Zoomer, SvgViewer } from './svgViewer.component';
 
 
 export const DrawingViewer = () => {
@@ -48,7 +48,7 @@ export const DrawingViewer = () => {
 	return (
 		<>
 			<FileInputField
-				accept=".svg"
+				accept=".svg,.png"
 				onChange={onClickButton as any}
 				multiple
 			>
