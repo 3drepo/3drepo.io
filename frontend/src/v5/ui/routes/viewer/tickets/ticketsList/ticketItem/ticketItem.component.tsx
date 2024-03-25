@@ -17,17 +17,19 @@
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useEffect, useRef } from 'react';
-import { FlexRow, TicketItemContainer } from './ticketItem.styles';
+import { Assignees, FloatingStatus, TicketItemContainer } from './ticketItem.styles';
 import { TicketItemBaseInfo as BaseInfo } from './ticketItemBaseInfo/ticketItemBaseInfo.component';
-import { TicketItemChips as Chips } from './ticketItemChips/ticketItemChips.component';
 import { TicketItemBottomRow as BottomRow } from './ticketItemBottomRow/ticketItemBottomRow.component';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { TicketItemThumbnail } from './ticketItemThumbnail/ticketItemThumbnail.component';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { hasDefaultPin } from '../../ticketsForm/properties/coordsProperty/coordsProperty.helpers';
-import { has } from 'lodash';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
+import { Id } from './ticketItemBaseInfo/ticketItemBaseInfo.styles';
+import { Highlight } from '@controls/highlight/highlight.component';
+import { IssueProperties } from '../../tickets.constants';
+import { isEqual } from 'lodash';
+import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -38,9 +40,22 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 	const ref = useRef<HTMLDivElement>();
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const isSelected = selectedTicketId === ticket._id;
-	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket.type);
+	const isFederation = modelIsFederation(containerOrFederation);
 
-	const templateHasThumbnail = has(template, ['config', 'defaultView']) || has(template, ['config', 'defaultImage']);
+	const hasIssueProperties = !!ticket.properties.priority;
+
+	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket.type);
+	const queries = TicketsCardHooksSelectors.selectFilteringQueries();
+	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
+
+	const assignees = ticket.properties.assignees;
+
+	const updateTicketProperty = (value) => TicketsActionsDispatchers
+		.updateTicket(teamspace, project, containerOrFederation, ticket._id, { properties: value }, isFederation);
+
+	const onBlurAssignees = (newVals) => {
+		if (!isEqual(newVals, assignees)) updateTicketProperty({ [IssueProperties.ASSIGNEES]: newVals });
+	};
 
 	const onClickTicket = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
 		event.stopPropagation();
@@ -64,12 +79,15 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 			$selected={isSelected}
 			ref={ref}
 		>
-			<FlexRow>
-				{templateHasThumbnail && <TicketItemThumbnail ticket={ticket} />}
-				<BaseInfo {...ticket} />
-			</FlexRow>
-			<Chips {...ticket} />
+			<BaseInfo ticket={ticket} />
+			{hasIssueProperties && (<Assignees value={assignees} onBlur={onBlurAssignees} disabled={readOnly} />)}
+			<Id>
+				<Highlight search={queries}>
+					{`${template?.code}:${ticket.number}`}
+				</Highlight>
+			</Id>
 			<BottomRow {...ticket} />
+			<FloatingStatus value={ticket.properties.Status} modelId={containerOrFederation} templateId={ticket.type} variant="outlined" />
 		</TicketItemContainer>
 	);
 };

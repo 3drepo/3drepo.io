@@ -16,9 +16,8 @@
  */
 
 import { DueDateWithLabel } from '@controls/dueDate/dueDateWithLabel/dueDateWithLabel.component';
-import { Assignees, IssuePropertiesRow } from '../ticketItem.styles';
+import { IssuePropertiesRow } from '../ticketItem.styles';
 import { PRIORITY_LEVELS_MAP } from '@controls/chip/chip.types';
-import { isEqual } from 'lodash';
 import { IssueProperties } from '../../../tickets.constants';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { getPropertiesInCamelCase, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
@@ -33,15 +32,13 @@ export const TicketItemBottomRow = ({ _id: ticketId, properties }: ITicket) => {
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const isFederation = modelIsFederation(containerOrFederation);
 
-	const { dueDate = null, priority, assignees = [] } = getPropertiesInCamelCase(properties);
+	const { dueDate = null, priority } = getPropertiesInCamelCase(properties);
 
 	if (!priority) return null;
 
 	const updateTicketProperty = (value) => TicketsActionsDispatchers
 		.updateTicket(teamspace, project, containerOrFederation, ticketId, { properties: value }, isFederation);
-	const onBlurAssignees = (newVals) => {
-		if (!isEqual(newVals, assignees)) updateTicketProperty({ [IssueProperties.ASSIGNEES]: newVals });
-	};
+
 	const onChangeDueDate = (newVal) => {
 		if (newVal !== dueDate) updateTicketProperty({ [IssueProperties.DUE_DATE]: newVal });
 	};
@@ -50,7 +47,6 @@ export const TicketItemBottomRow = ({ _id: ticketId, properties }: ITicket) => {
 		<IssuePropertiesRow>
 			<DueDateWithLabel value={dueDate} onChange={onChangeDueDate} disabled={readOnly} />
 			<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />
-			<Assignees value={assignees} onBlur={onBlurAssignees} disabled={readOnly} />
 		</IssuePropertiesRow>
 	);
 };

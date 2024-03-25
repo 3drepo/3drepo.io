@@ -20,29 +20,31 @@ import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
-import { BaseInfoContainer, Description, Id, Title } from './ticketItemBaseInfo.styles';
-import { CreationInfo } from '@components/shared/creationInfo/creationInfo.component';
+import { BaseInfoContainer, Description, Title } from './ticketItemBaseInfo.styles';
+import { FlexRow } from '../ticketItem.styles';
+import { TicketItemThumbnail } from '../ticketItemThumbnail/ticketItemThumbnail.component';
+import { has } from 'lodash';
 
-export const TicketItemBaseInfo = ({ number, type, title, properties }) => {
+export const TicketItemBaseInfo = ({ ticket }) => {
+	const { type, properties, title } = ticket;
 	const { containerOrFederation } = useParams<ViewerParams>();
-	const queries = TicketsCardHooksSelectors.selectFilteringQueries();
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, type);
-	const { description = '', createdAt, owner } = getPropertiesInCamelCase(properties);
+	const queries = TicketsCardHooksSelectors.selectFilteringQueries();
+	const { description = '' } = getPropertiesInCamelCase(properties);
+
+	const templateHasThumbnail = has(template, ['config', 'defaultView']) || has(template, ['config', 'defaultImage']);
 
 	return (
-		<BaseInfoContainer>
-			<Id>
-				<Highlight search={queries}>
-					{`${template?.code}:${number}`}
-				</Highlight>
-			</Id>
-			<Title>
-				<Highlight search={queries}>
-					{title}
-				</Highlight>
-			</Title>
-			<CreationInfo owner={owner} createdAt={createdAt} />
-			{ description && <Description>{description}</Description>}
-		</BaseInfoContainer>
+		<FlexRow>
+			<BaseInfoContainer>
+				<Title>
+					<Highlight search={queries}>
+						{title}
+					</Highlight>
+				</Title>
+				{description && <Description>{description}</Description>}
+			</BaseInfoContainer>
+			{templateHasThumbnail && <TicketItemThumbnail ticket={ticket} />}
+		</FlexRow>
 	);
 };

@@ -20,8 +20,10 @@ import styled, { css } from 'styled-components';
 import ViewpointIconBase from '@assets/icons/outlined/cube_in_square-outlined.svg';
 import { Title } from './ticketItemBaseInfo/ticketItemBaseInfo.styles';
 import { OverlappingContainer } from '@controls/overlappingContainer/overlappingContainer.styles';
+import { StatusChip } from '@controls/chip/statusChip/statusChip.component';
 
 export const TicketItemContainer = styled.div<{ $selected?: boolean }>`
+	position: relative;
 	display: flex;
 	flex-flow: column;
 	cursor: pointer;
@@ -48,9 +50,10 @@ export const IssuePropertiesRow = styled(FlexRow)`
 `;
 
 export const ThumbnailContainer = styled(OverlappingContainer)`
-	height: 75px;
-	width: 75px;
-	min-width: 75px;
+	margin-left: auto;
+	height: 50px;
+	width: 50px;
+	min-width: 50px;
 	box-sizing: border-box;
 	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 	border-radius: 5px;
@@ -92,21 +95,6 @@ export const ImagePlaceholder = styled.div`
 	line-height: 12px;
 `;
 
-export const ChipList = styled(FlexRow)`
-	>* {
-		flex-shrink: 0;
-		flex-grow: 0;
-		min-width: 0;
-
-		&:first-child {
-			flex-shrink: 1;
-		}
-		&:last-child {
-			flex-grow: 1;
-		}
-	}
-`;
-
 export const Assignees = styled(ControlledAssigneesSelect).attrs({
 	maxItems: 5,
 	showEmptyText: true,
@@ -114,4 +102,11 @@ export const Assignees = styled(ControlledAssigneesSelect).attrs({
 })`
 	margin-left: auto;
 	height: 28px;
+`;
+
+export const FloatingStatus = styled(StatusChip)`
+	position: absolute;
+	right: 10px;
+	bottom: 10px;
+	max-width: 125px;
 `;
