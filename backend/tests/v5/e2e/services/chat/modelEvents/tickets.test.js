@@ -460,7 +460,8 @@ const ticketsUpdatedTest = () => {
 			{ type: 'federation', model: federation._id, tickets: federationTickets },
 		].forEach(({ type, model, tickets }) => {
 			const updateEvent = type === 'container' ? EVENTS.CONTAINER_UPDATE_TICKET : EVENTS.FEDERATION_UPDATE_TICKET;
-			test(`!!!should trigger ${updateEvent} events when ${type} tickets has been updated`, async () => {
+			const newCommentEvent = type === 'container' ? EVENTS.CONTAINER_NEW_TICKET_COMMENT : EVENTS.FEDERATION_NEW_TICKET_COMMENT;
+			test(`should trigger ${updateEvent} events when ${type} tickets has been updated`, async () => {
 				const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
 
 				const data = { teamspace, project: project.id, model };
@@ -523,13 +524,53 @@ const ticketsUpdatedTest = () => {
 					};
 				});
 
-				const { body } = await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/${type}s/${model}/tickets${ServiceHelper.createQueryString({ key: user.apiKey, template: templateWithComments._id })}`)
+				await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/${type}s/${model}/tickets${ServiceHelper.createQueryString({ key: user.apiKey, template: templateWithComments._id })}`)
 					.send({ tickets: updateData })
 					.expect(templates.ok.status);
 
 				const eventData = await socketPromise;
 
 				ServiceHelper.outOfOrderArrayEqual(eventData, expectedData);
+
+				socket.close();
+			});
+
+			test(`should NOT trigger ${updateEvent} events when ${type} tickets has been updated with only comments`, async () => {
+				const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+
+				const data = { teamspace, project: project.id, model };
+				await ServiceHelper.socket.joinRoom(socket, data);
+
+				const nComments = 2;
+
+				const socketPromise = new Promise((resolve, reject) => {
+					const updateEvents = [];
+					const commentEvents = [];
+					const nEventsToWait = nComments * nTickets;
+					socket.on(updateEvent, (eventData) => {
+						updateEvents.push(eventData);
+					});
+
+					socket.on(newCommentEvent, (eventData) => {
+						commentEvents.push(eventData);
+						if (commentEvents.length === nEventsToWait) resolve({ updateEvents, commentEvents });
+					});
+					setTimeout(reject, 1000);
+				});
+
+				const updateData = tickets.map(({ _id }) => ({
+					_id,
+					comments: times(nComments, () => ServiceHelper.generateImportedComment(user.user)),
+				}));
+
+				await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/${type}s/${model}/tickets${ServiceHelper.createQueryString({ key: user.apiKey, template: templateWithComments._id })}`)
+					.send({ tickets: updateData })
+					.expect(templates.ok.status);
+
+				const { updateEvents, commentEvents } = await socketPromise;
+
+				expect(updateEvents.length).toBe(0);
+				expect(commentEvents.length).toBe(nTickets * nComments);
 
 				socket.close();
 			});

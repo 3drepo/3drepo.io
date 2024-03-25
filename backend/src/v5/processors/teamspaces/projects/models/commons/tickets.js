@@ -26,10 +26,10 @@ const {
 	viewGroups,
 } = require('../../../../../schemas/tickets/templates.constants');
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
+const { deleteIfUndefined, isEmpty } = require('../../../../../utils/helper/objects');
 const { getFileWithMetaAsStream, removeFile, storeFile } = require('../../../../../services/filesManager');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
-const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
 const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
 const { getArrayDifference } = require('../../../../../utils/helper/arrays');
@@ -252,11 +252,13 @@ Tickets.updateManyTickets = async (teamspace, project, model, template, oldTicke
 	]);
 
 	changeSet.forEach((data) => {
-		publish(events.UPDATE_TICKET, {
-			teamspace,
-			project,
-			model,
-			...data });
+		if (!isEmpty(data.changes)) {
+			publish(events.UPDATE_TICKET, {
+				teamspace,
+				project,
+				model,
+				...data });
+		}
 	});
 };
 
