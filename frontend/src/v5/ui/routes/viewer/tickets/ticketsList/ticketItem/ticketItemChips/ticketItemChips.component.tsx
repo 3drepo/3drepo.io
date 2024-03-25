@@ -15,20 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { RISK_LEVELS_MAP, STATUS_MAP, TREATMENT_LEVELS_MAP } from '@controls/chip/chip.types';
-import { FlexRow } from '../ticketItem.styles';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { useParams } from 'react-router-dom';
+import { RISK_LEVELS_MAP, TREATMENT_LEVELS_MAP } from '@controls/chip/chip.types';
+import { ChipList } from '../ticketItem.styles';
 import { Chip } from '@controls/chip/chip.component';
 import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { StatusChip } from '@controls/chip/statusChip/statusChip.component';
 
-export const TicketItemChips = ({ properties, modules: { safetibase = {} } }: ITicket) => {
+export const TicketItemChips = ({ type, properties, modules: { safetibase = {} } }: ITicket) => {
+	const { containerOrFederation } = useParams<ViewerParams>();
 	const { status } = getPropertiesInCamelCase(properties);
 	const { treatmentStatus = null, levelOfRisk = null } = getPropertiesInCamelCase(safetibase);
 	return (
-		<FlexRow>
-			<Chip {...STATUS_MAP[status]} variant="outlined" />
+		<ChipList>
+			<StatusChip value={status} modelId={containerOrFederation} templateId={type} variant="outlined" />
 			{levelOfRisk && <Chip {...RISK_LEVELS_MAP[levelOfRisk]} variant="filled" />}
 			{treatmentStatus && <Chip {...TREATMENT_LEVELS_MAP[treatmentStatus]} variant="filled" />}
-		</FlexRow>
+		</ChipList>
 	);
 };

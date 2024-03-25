@@ -40,6 +40,7 @@ export type IChipMapItem = {
 	icon?: ReactElement;
 	color?: string;
 	tooltip?: string;
+	value?: string;
 };
 export type IChipMap = { [key: string]: IChipMapItem };
 
@@ -56,13 +57,7 @@ export enum RiskLevels {
 	HIGH = 'High',
 	VERY_HIGH = 'Very High',
 }
-export enum TicketStatuses {
-	OPEN = 'Open',
-	IN_PROGRESS = 'In Progress',
-	FOR_APPROVAL = 'For Approval',
-	CLOSED = 'Closed',
-	VOID = 'Void',
-}
+
 export enum TreatmentStatuses {
 	UNTREATED = 'Untreated',
 	PROPOSED = 'Proposed',
@@ -122,34 +117,6 @@ export const RISK_LEVELS_MAP = {
 	},
 };
 
-export const STATUS_MAP = {
-	[TicketStatuses.OPEN]: {
-		label: formatMessage({ id: 'chip.ticketStatus.open', defaultMessage: 'Open' }),
-		color: COLOR.BASE_MAIN,
-		icon: <StarIcon />,
-	},
-	[TicketStatuses.IN_PROGRESS]: {
-		label: formatMessage({ id: 'chip.ticketStatus.inProgress', defaultMessage: 'In Progress' }),
-		color: '#7356F6',
-		icon: <ClockIcon />,
-	},
-	[TicketStatuses.FOR_APPROVAL]: {
-		label: formatMessage({ id: 'chip.ticketStatus.forApproval', defaultMessage: 'For Approval' }),
-		color: '#0288D1',
-		icon: <BellIcon />,
-	},
-	[TicketStatuses.CLOSED]: {
-		label: formatMessage({ id: 'chip.ticketStatus.closed', defaultMessage: 'Closed' }),
-		color: '#2E7D32',
-		icon: <TickIcon />,
-	},
-	[TicketStatuses.VOID]: {
-		label: formatMessage({ id: 'chip.ticketStatus.void', defaultMessage: 'Void' }),
-		color: '#000',
-		icon: <PaddedCrossIcon />,
-	},
-};
-
 export const TREATMENT_LEVELS_MAP = {
 	[TreatmentStatuses.UNTREATED]: {
 		label: formatMessage({ id: 'chip.treatmentLevel.untreated', defaultMessage: 'Untreated' }),
@@ -175,4 +142,70 @@ export const TREATMENT_LEVELS_MAP = {
 		label: formatMessage({ id: 'chip.treatmentLevel.void', defaultMessage: 'Void' }),
 		color: '#000000',
 	},
+};
+
+// Custom Status
+
+export enum TicketStatusTypes {
+	OPEN = 'open',
+	ACTIVE = 'active',
+	REVIEW = 'review',
+	DONE = 'done',
+	VOID = 'void',
+}
+export const STATUS_TYPE_MAP = {
+	[TicketStatusTypes.OPEN]: {
+		color: COLOR.BASE_MAIN,
+		icon: <StarIcon />,
+	},
+	[TicketStatusTypes.ACTIVE]: {
+		color: '#7356F6',
+		icon: <ClockIcon />,
+	},
+	[TicketStatusTypes.REVIEW]: {
+		color: '#0288D1',
+		icon: <BellIcon />,
+	},
+	[TicketStatusTypes.DONE]: {
+		color: '#2E7D32',
+		icon: <TickIcon />,
+	},
+	[TicketStatusTypes.VOID]: {
+		color: '#000',
+		icon: <PaddedCrossIcon />,
+	},
+};
+
+enum TicketStatusDefaultValues {
+	OPEN = 'Open',
+	IN_PROGRESS = 'In Progress',
+	FOR_APPROVAL = 'For Approval',
+	CLOSED = 'Closed',
+	VOID = 'Void',
+}
+
+export const DEFAULT_STATUS_CONFIG = {
+	values: [
+		{
+			name: TicketStatusDefaultValues.OPEN,
+			type: TicketStatusTypes.OPEN,
+			label: formatMessage({ id: 'chip.ticketStatus.open', defaultMessage: 'Open' }),
+		}, {
+			name: TicketStatusDefaultValues.IN_PROGRESS,
+			type: TicketStatusTypes.ACTIVE,
+			label: formatMessage({ id: 'chip.ticketStatus.inProgress', defaultMessage: 'In Progress' }),
+		}, {
+			name: TicketStatusDefaultValues.FOR_APPROVAL,
+			type: TicketStatusTypes.REVIEW,
+			label: formatMessage({ id: 'chip.ticketStatus.forApproval', defaultMessage: 'For Approval' }),
+		}, {
+			name: TicketStatusDefaultValues.CLOSED,
+			type: TicketStatusTypes.DONE,
+			label: formatMessage({ id: 'chip.ticketStatus.closed', defaultMessage: 'Closed' }),
+		}, {
+			name: TicketStatusDefaultValues.VOID,
+			type: TicketStatusTypes.VOID,
+			label: formatMessage({ id: 'chip.ticketStatus.void', defaultMessage: 'Void' }),
+		},
+	],
 };

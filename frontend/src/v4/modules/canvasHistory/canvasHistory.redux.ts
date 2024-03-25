@@ -16,7 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { ELEMENT_TYPES } from '../../routes/components/screenshotDialog/screenshotDialog.helpers';
+import { ELEMENT_TYPES } from '../../routes/components/screenshotDialog/markupStage/markupStage.helpers';
 
 export const { Types: CanvasHistoryTypes, Creators: CanvasHistoryActions } = createActions({
 	setActiveSuccess: ['isActive'],

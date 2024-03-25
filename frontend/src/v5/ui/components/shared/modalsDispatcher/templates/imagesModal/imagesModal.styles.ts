@@ -43,24 +43,6 @@ const FlexRow = styled.div`
 	justify-content: center;
 `;
 
-export const FloatingButton = styled(NavbarButton)`
-	height: 36px;
-	min-width: 36px;
-	width: 36px;
-	box-sizing: border-box;
-	cursor: pointer;
-	margin: 0;
-	border: none;
-	background-color: ${({ theme }) => hexToOpacity(theme.palette.primary.contrast, 3.9)};
-
-	&&.Mui-disabled {
-		pointer-events: none;
-		opacity: .25;
-		color: ${({ theme }) => theme.palette.primary.contrast};
-		border-color: ${({ theme }) => theme.palette.primary.contrast};
-	}
-`;
-
 export const TopBar = styled(FlexRow)`
 	justify-content: space-between;
 	margin: 16px 0 42px;
@@ -83,7 +65,29 @@ export const Counter = styled.div<{ $counterChars: number }>`
 	place-items: center;
 `;
 
-export const TopBarButton = styled(FloatingButton)`
+const Button = styled(NavbarButton)`
+	height: 36px;
+	min-width: 36px;
+	width: 36px;
+	box-sizing: border-box;
+	cursor: pointer;
+	margin: 0;
+	border: none;
+	background-color: ${({ theme }) => hexToOpacity(theme.palette.primary.contrast, 3.9)};
+
+	&&.Mui-disabled {
+		pointer-events: none;
+		opacity: .25;
+		color: ${({ theme }) => theme.palette.primary.contrast};
+	}
+`;
+
+export const CloseButton = styled(Button)`
+	align-self: flex-end;
+	margin-left: auto;
+`;
+
+export const TopBarButton = styled(Button)`
 	border-radius: 8px;
 
 	svg {
@@ -142,19 +146,23 @@ export const ImageWithArrows = styled(FlexRow)`
 	gap: 22px;
 `;
 
-export const NextButton = styled(FloatingButton)<{ disabled?: boolean }>`
-	height: 38px;
-	min-width: 38px;
-	width: 38px;
+export const NextButton = styled(NavbarButton)<{ disabled?: boolean }>`
+	box-sizing: border-box;
+	cursor: pointer;
+	margin: 0;
+	background-color: ${({ theme }) => hexToOpacity(theme.palette.primary.contrast, 3.9)};
+	border: none;
+
+	&&.Mui-disabled {
+		pointer-events: none;
+		opacity: .25;
+		color: ${({ theme }) => theme.palette.primary.contrast};
+	}
 
 	& svg {
 		margin-left: 1px;
 		height: 25px;
 	}
-
-	${({ disabled }) => disabled && css`
-		pointer-events: none;
-	`}
 `;
 
 export const PreviousButton = styled(NextButton)`

@@ -63,7 +63,7 @@ export const OverflowContainer = styled.div`
 `;
 
 export const CellChipText = styled(Cell)`
-	.MuiChip-root {
+	>.MuiChip-root {
 		padding-left: 0;
 	}
 `;

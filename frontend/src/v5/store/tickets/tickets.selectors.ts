@@ -21,6 +21,7 @@ import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants'
 import { ITicketsState } from './tickets.redux';
 import { ticketWithGroups } from './ticketsGroups.helpers';
 import { ITemplate, ITicket } from './tickets.types';
+import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
 
@@ -108,4 +109,9 @@ export const selectTicketsByContainersAndFederations = createSelector(
 		const tickets = modelsIds.flatMap((modelId) => selectTickets(storeState, modelId));
 		return sortTicketsByCreationDate(tickets);
 	},
+);
+
+export const selectStatusConfigByTemplateId = createSelector(
+	selectTemplateById,
+	(template) => template?.config?.status || DEFAULT_STATUS_CONFIG,
 );

@@ -92,6 +92,21 @@ export const ImagePlaceholder = styled.div`
 	line-height: 12px;
 `;
 
+export const ChipList = styled(FlexRow)`
+	>* {
+		flex-shrink: 0;
+		flex-grow: 0;
+		min-width: 0;
+
+		&:first-child {
+			flex-shrink: 1;
+		}
+		&:last-child {
+			flex-grow: 1;
+		}
+	}
+`;
+
 export const Assignees = styled(ControlledAssigneesSelect).attrs({
 	maxItems: 5,
 	showEmptyText: true,

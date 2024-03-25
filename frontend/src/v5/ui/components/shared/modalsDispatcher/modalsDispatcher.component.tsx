@@ -21,8 +21,9 @@ import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { selectDialogs } from '@/v5/store/dialogs/dialogs.selectors';
 import { IDialogConfig } from '@/v5/store/dialogs/dialogs.redux';
 import { MODAL_TEMPLATES } from './templates';
+import { useSyncPropsEffect } from '@/v5/helpers/syncProps.hooks';
 
-const ModalTemplateContainer = ({ id, modalType, props }: IDialogConfig) => {
+const ModalTemplateContainer = ({ id, modalType, props, syncProps }: IDialogConfig) => {
 	const [openState, setOpenState] = useState(true);
 
 	const onClickClose = () => {
@@ -30,8 +31,14 @@ const ModalTemplateContainer = ({ id, modalType, props }: IDialogConfig) => {
 		setTimeout(() => DialogsActionsDispatchers.close(id), 500);
 	};
 
+	const modalProps = useSyncPropsEffect(syncProps || props || {});
+
+	if (syncProps) {
+		Object.assign(modalProps, props);
+	}
+
 	const Modal = (typeof modalType === 'string') ? MODAL_TEMPLATES[modalType] : modalType;
-	return (<Modal open={openState} onClickClose={onClickClose} {...props} />);
+	return (<Modal open={openState} onClickClose={onClickClose} {...modalProps} />);
 };
 
 export const ModalsDispatcher = (): JSX.Element => {

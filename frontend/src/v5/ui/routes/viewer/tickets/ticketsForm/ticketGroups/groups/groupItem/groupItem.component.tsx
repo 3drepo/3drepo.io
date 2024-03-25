@@ -117,15 +117,13 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	};
 
 	useEffect(() => {
-		if (isHighlighted) {
-			highlightGroupObjects();
-		}
-	}, [override, setHighlightedIndex]);
-
-	useEffect(() => {
 		if (!isHighlighted && isHidden && checked) {
 			const objects = convertToV4GroupNodes((group as Group).objects);
 			dispatch(TreeActions.hideNodesBySharedIds(objects));
+		}
+
+		if (isHighlighted) {
+			highlightGroupObjects();
 		}
 	}, [isHighlighted]);
 

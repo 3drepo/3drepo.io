@@ -37,10 +37,14 @@ export const hexGroupColorToRgb = ({ opacity, color }: HexGroupColor): RgbGroupC
 	color: hexToRgb(color),
 });
 
+export const hexToDecimal = (hex) => parseInt(hex, 16);
+export const decimalToHex = (decimal) => decimal.toString(16).padStart(2, '0');
+
 export const getColorIsValid = (color: string) => !color || /[0-9a-f]{6}/.test(color?.toLocaleLowerCase());
 
 export const UNSET_RGB_COLOR: RgbArray = [120, 120, 120];
 export const UNSET_HEX_COLOR = '#787878';
+export const NON_TRANSPARENT_OPTION = '#000000';
 export const DEFAULT_SUGGESTED_HEX_COLORS = [
 	'#ffffff',
 	'#75140c',
