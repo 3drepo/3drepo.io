@@ -30,7 +30,6 @@ const getTicketByModelId = (state, modelId, ticketId) => (
 export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	fetchTickets: ['teamspace', 'projectId', 'modelId', 'isFederation', 'filter'],
 	fetchTicket: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation', 'revision'],
-	fetchTicketsList: ['teamspace', 'projectId', 'modelId', 'isFederation'],
 	fetchTicketsSuccess: ['modelId', 'tickets'],
 	fetchTemplates: ['teamspace', 'projectId', 'modelId', 'isFederation', 'getDetails'],
 	fetchTemplate: ['teamspace', 'projectId', 'modelId', 'templateId', 'isFederation'],
@@ -129,7 +128,6 @@ export interface ITicketsState {
 
 export type FetchTicketsAction = Action<'FETCH_TICKETS'> & TeamspaceProjectAndModel & { isFederation: boolean, filter?: string[] };
 export type FetchTicketAction = Action<'FETCH_TICKET'> & TeamspaceProjectAndModel & { ticketId: string, isFederation: boolean, revision?: string };
-export type FetchTicketsListAction = Action<'FETCH_TICKETS_LIST'> & TeamspaceProjectAndModel & { isFederation: boolean };
 export type UpdateTicketAction = Action<'UPDATE_TICKET'> & TeamspaceProjectAndModel & { ticketId: string, ticket: Partial<ITicket>, isFederation: boolean };
 export type CreateTicketAction = Action<'CREATE_TICKET'> & TeamspaceProjectAndModel & { ticket: NewTicket, isFederation: boolean, onSuccess: (ticketId) => void };
 export type FetchTicketsSuccessAction = Action<'FETCH_TICKETS_SUCCESS'> & ModelId & { tickets: ITicket[] };
@@ -163,12 +161,6 @@ export interface ITicketsActionCreators {
 		isFederation: boolean,
 		revision?: string,
 	) => FetchTicketAction;
-	fetchTicketsList: (
-		teamspace: string,
-		projectId: string,
-		modelId: string,
-		isFederation: boolean,
-	) => FetchTicketsAction;
 	updateTicket: (
 		teamspace: string,
 		projectId: string,

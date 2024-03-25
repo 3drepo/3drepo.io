@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
+import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { SnackbarActions } from '@/v4/modules/snackbar';
@@ -37,10 +37,9 @@ import {
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
 import { ITicket, ViewpointState } from './tickets.types';
-import { selectTemplates, selectTicketByIdRaw, selectTicketsGroups } from './tickets.selectors';
+import { selectTicketByIdRaw, selectTicketsGroups } from './tickets.selectors';
 import { selectContainersByFederationId } from '../federations/federations.selectors';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
-import { AdditionalProperties, BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation, filter }: FetchTicketsAction) {
 	try {
@@ -74,27 +73,6 @@ export function* fetchTicket({ teamspace, projectId, modelId, ticketId, isFedera
 				{ id: 'tickets.fetchTicket.error', defaultMessage: 'trying to fetch the ticket details for {model}' },
 				{ model: getContainerOrFederationFormattedText(isFederation) },
 			),
-			error,
-		}));
-	}
-}
-export function* fetchTicketsList({ teamspace, projectId, modelId, isFederation }: FetchTicketAction) {
-	try {
-		yield put(TicketsActions.fetchTemplates(teamspace, projectId, modelId, isFederation, true));
-		yield take(TicketsTypes.FETCH_TEMPLATES_SUCCESS);
-		const templates = yield select(selectTemplates, modelId);
-		const requiredProperties = templates.reduce((acc, template) => {
-			const configColor = template.config?.pin?.color;
-			if (!configColor?.property) return acc;
-			const { property: { module, name } } = configColor;
-			const path = module ? `${module}.${name}` : name;
-			return [...acc, path];
-		}, [BaseProperties.DESCRIPTION, AdditionalProperties.DEFAULT_IMAGE]);
-		yield put(TicketsActions.fetchTickets(teamspace, projectId, modelId, isFederation, requiredProperties));
-
-	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'tickets.fetchTicketsList.error', defaultMessage: 'trying to fetch the tickets list' }),
 			error,
 		}));
 	}
@@ -269,7 +247,6 @@ export function* upsertTicketAndFetchGroups({ teamspace, projectId, modelId, tic
 export default function* ticketsSaga() {
 	yield takeEvery(TicketsTypes.FETCH_TICKETS, fetchTickets);
 	yield takeEvery(TicketsTypes.FETCH_TICKET, fetchTicket);
-	yield takeEvery(TicketsTypes.FETCH_TICKETS_LIST, fetchTicketsList);
 	yield takeLatest(TicketsTypes.FETCH_TEMPLATES, fetchTemplates);
 	yield takeEvery(TicketsTypes.FETCH_TEMPLATE, fetchTemplate);
 	yield takeLatest(TicketsTypes.UPDATE_TICKET, updateTicket);
