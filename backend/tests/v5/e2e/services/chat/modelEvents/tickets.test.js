@@ -25,51 +25,53 @@ const { basePropertyLabels, propTypes } = require('../../../../../../src/v5/sche
 const { EVENTS } = require(`${src}/services/chat/chat.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
-const user = ServiceHelper.generateUserCredentials();
-const teamspace = ServiceHelper.generateRandomString();
-const project = ServiceHelper.generateRandomProject();
-const container = ServiceHelper.generateRandomModel();
-const federation = ServiceHelper.generateRandomModel({ isFederation: true });
-const template = ServiceHelper.generateTemplate();
-const templateWithComments = ServiceHelper.generateTemplate(false, false, { comments: true });
-const containerTicket = ServiceHelper.generateTicket(template);
-const federationTicket = ServiceHelper.generateTicket(template);
-const containerComment = ServiceHelper.generateComment(user.user);
-const federationComment = ServiceHelper.generateComment(user.user);
-
 let agent;
-const setupData = async () => {
-	await ServiceHelper.db.createTeamspace(teamspace, [user.user]);
-	await Promise.all([
-		ServiceHelper.db.createModel(
-			teamspace,
-			container._id,
-			container.name,
-			container.properties,
-		),
-		ServiceHelper.db.createModel(
-			teamspace,
-			federation._id,
-			federation.name,
-			federation.properties,
-		),
-	]);
-	await Promise.all([
-		ServiceHelper.db.createUser(user, [teamspace]),
-		ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, federation._id],
-			[user.user]),
-	]);
-	await ServiceHelper.db.createTemplates(teamspace, [template, templateWithComments]);
-	await ServiceHelper.db.createTicket(teamspace, project.id, container._id, containerTicket);
-	await ServiceHelper.db.createTicket(teamspace, project.id, federation._id, federationTicket);
-	await ServiceHelper.db.createComment(teamspace, project.id, container._id, containerTicket._id,
-		containerComment);
-	await ServiceHelper.db.createComment(teamspace, project.id, federation._id, federationTicket._id,
-		federationComment);
-};
 
 const ticketAddedTest = () => {
 	describe('On adding a new ticket', () => {
+		const user = ServiceHelper.generateUserCredentials();
+		const teamspace = ServiceHelper.generateRandomString();
+		const project = ServiceHelper.generateRandomProject();
+		const container = ServiceHelper.generateRandomModel();
+		const federation = ServiceHelper.generateRandomModel({ isFederation: true });
+		const template = ServiceHelper.generateTemplate();
+		const templateWithComments = ServiceHelper.generateTemplate(false, false, { comments: true });
+		const containerTicket = ServiceHelper.generateTicket(template);
+		const federationTicket = ServiceHelper.generateTicket(template);
+		const containerComment = ServiceHelper.generateComment(user.user);
+		const federationComment = ServiceHelper.generateComment(user.user);
+
+		beforeAll(async () => {
+			await ServiceHelper.db.createTeamspace(teamspace, [user.user]);
+			await Promise.all([
+				ServiceHelper.db.createModel(
+					teamspace,
+					container._id,
+					container.name,
+					container.properties,
+				),
+				ServiceHelper.db.createModel(
+					teamspace,
+					federation._id,
+					federation.name,
+					federation.properties,
+				),
+			]);
+			await Promise.all([
+				ServiceHelper.db.createUser(user, [teamspace]),
+				ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, federation._id],
+					[user.user]),
+			]);
+			await ServiceHelper.db.createTemplates(teamspace, [template, templateWithComments]);
+			await ServiceHelper.db.createTicket(teamspace, project.id, container._id, containerTicket);
+			await ServiceHelper.db.createTicket(teamspace, project.id, federation._id, federationTicket);
+			await ServiceHelper.db.createComment(teamspace, project.id, container._id, containerTicket._id,
+				containerComment);
+			await ServiceHelper.db.createComment(teamspace, project.id, federation._id, federationTicket._id,
+				federationComment);
+		},
+		);
+
 		test(`should trigger a ${EVENTS.CONTAINER_NEW_TICKET} event when a new container ticket has been added`, async () => {
 			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
 
@@ -154,6 +156,49 @@ const ticketAddedTest = () => {
 
 const ticketsImportedTest = () => {
 	describe('On importing tickets', () => {
+		const user = ServiceHelper.generateUserCredentials();
+		const teamspace = ServiceHelper.generateRandomString();
+		const project = ServiceHelper.generateRandomProject();
+		const container = ServiceHelper.generateRandomModel();
+		const federation = ServiceHelper.generateRandomModel({ isFederation: true });
+		const template = ServiceHelper.generateTemplate();
+		const templateWithComments = ServiceHelper.generateTemplate(false, false, { comments: true });
+		const containerTicket = ServiceHelper.generateTicket(template);
+		const federationTicket = ServiceHelper.generateTicket(template);
+		const containerComment = ServiceHelper.generateComment(user.user);
+		const federationComment = ServiceHelper.generateComment(user.user);
+
+		beforeAll(async () => {
+			await ServiceHelper.db.createTeamspace(teamspace, [user.user]);
+			await Promise.all([
+				ServiceHelper.db.createModel(
+					teamspace,
+					container._id,
+					container.name,
+					container.properties,
+				),
+				ServiceHelper.db.createModel(
+					teamspace,
+					federation._id,
+					federation.name,
+					federation.properties,
+				),
+			]);
+			await Promise.all([
+				ServiceHelper.db.createUser(user, [teamspace]),
+				ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, federation._id],
+					[user.user]),
+			]);
+			await ServiceHelper.db.createTemplates(teamspace, [template, templateWithComments]);
+			await ServiceHelper.db.createTicket(teamspace, project.id, container._id, containerTicket);
+			await ServiceHelper.db.createTicket(teamspace, project.id, federation._id, federationTicket);
+			await ServiceHelper.db.createComment(teamspace, project.id, container._id, containerTicket._id,
+				containerComment);
+			await ServiceHelper.db.createComment(teamspace, project.id, federation._id, federationTicket._id,
+				federationComment);
+		},
+		);
+
 		test(`should trigger ${EVENTS.CONTAINER_NEW_TICKET} events when a list of new container tickets have been added`, async () => {
 			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
 
@@ -199,8 +244,7 @@ const ticketsImportedTest = () => {
 				};
 			}));
 
-			expect(eventData.length).toEqual(expectedData.length);
-			expect(eventData).toEqual(expect.arrayContaining(expectedData));
+			ServiceHelper.outOfOrderArrayEqual(eventData, expectedData);
 
 			socket.close();
 		});
@@ -375,6 +419,49 @@ const ticketsImportedTest = () => {
 
 const ticketUpdatedTest = () => {
 	describe('On updating a ticket', () => {
+		const user = ServiceHelper.generateUserCredentials();
+		const teamspace = ServiceHelper.generateRandomString();
+		const project = ServiceHelper.generateRandomProject();
+		const container = ServiceHelper.generateRandomModel();
+		const federation = ServiceHelper.generateRandomModel({ isFederation: true });
+		const template = ServiceHelper.generateTemplate();
+		const templateWithComments = ServiceHelper.generateTemplate(false, false, { comments: true });
+		const containerTicket = ServiceHelper.generateTicket(template);
+		const federationTicket = ServiceHelper.generateTicket(template);
+		const containerComment = ServiceHelper.generateComment(user.user);
+		const federationComment = ServiceHelper.generateComment(user.user);
+
+		beforeAll(async () => {
+			await ServiceHelper.db.createTeamspace(teamspace, [user.user]);
+			await Promise.all([
+				ServiceHelper.db.createModel(
+					teamspace,
+					container._id,
+					container.name,
+					container.properties,
+				),
+				ServiceHelper.db.createModel(
+					teamspace,
+					federation._id,
+					federation.name,
+					federation.properties,
+				),
+			]);
+			await Promise.all([
+				ServiceHelper.db.createUser(user, [teamspace]),
+				ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, federation._id],
+					[user.user]),
+			]);
+			await ServiceHelper.db.createTemplates(teamspace, [template, templateWithComments]);
+			await ServiceHelper.db.createTicket(teamspace, project.id, container._id, containerTicket);
+			await ServiceHelper.db.createTicket(teamspace, project.id, federation._id, federationTicket);
+			await ServiceHelper.db.createComment(teamspace, project.id, container._id, containerTicket._id,
+				containerComment);
+			await ServiceHelper.db.createComment(teamspace, project.id, federation._id, federationTicket._id,
+				federationComment);
+		},
+		);
+
 		test(`should trigger a ${EVENTS.CONTAINER_UPDATE_TICKET} event when a container ticket has been updated`, async () => {
 			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
 
@@ -438,10 +525,38 @@ const ticketUpdatedTest = () => {
 const ticketsUpdatedTest = () => {
 	describe('On updating many tickets', () => {
 		const nTickets = 10;
+		const user = ServiceHelper.generateUserCredentials();
+		const teamspace = ServiceHelper.generateRandomString();
+		const project = ServiceHelper.generateRandomProject();
+		const container = ServiceHelper.generateRandomModel();
+		const federation = ServiceHelper.generateRandomModel({ isFederation: true });
+		const templateWithComments = ServiceHelper.generateTemplate(false, false, { comments: true });
 		const containerTickets = times(nTickets, () => ServiceHelper.generateTicket(templateWithComments));
 		const federationTickets = times(nTickets, () => ServiceHelper.generateTicket(templateWithComments));
 
 		beforeAll(async () => {
+			await ServiceHelper.db.createTeamspace(teamspace, [user.user]);
+			await Promise.all([
+				ServiceHelper.db.createModel(
+					teamspace,
+					container._id,
+					container.name,
+					container.properties,
+				),
+				ServiceHelper.db.createModel(
+					teamspace,
+					federation._id,
+					federation.name,
+					federation.properties,
+				),
+			]);
+			await Promise.all([
+				ServiceHelper.db.createUser(user, [teamspace]),
+				ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, federation._id],
+					[user.user]),
+			]);
+			await ServiceHelper.db.createTemplates(teamspace, [templateWithComments]);
+
 			const addTicketRoute = (modelType, modelId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets?key=${user.apiKey}`;
 
 			await Promise.all([
@@ -580,6 +695,48 @@ const ticketsUpdatedTest = () => {
 
 const commentAddedTest = () => {
 	describe('On adding a new comment', () => {
+		const user = ServiceHelper.generateUserCredentials();
+		const teamspace = ServiceHelper.generateRandomString();
+		const project = ServiceHelper.generateRandomProject();
+		const container = ServiceHelper.generateRandomModel();
+		const federation = ServiceHelper.generateRandomModel({ isFederation: true });
+		const template = ServiceHelper.generateTemplate();
+		const templateWithComments = ServiceHelper.generateTemplate(false, false, { comments: true });
+		const containerTicket = ServiceHelper.generateTicket(template);
+		const federationTicket = ServiceHelper.generateTicket(template);
+		const containerComment = ServiceHelper.generateComment(user.user);
+		const federationComment = ServiceHelper.generateComment(user.user);
+
+		beforeAll(async () => {
+			await ServiceHelper.db.createTeamspace(teamspace, [user.user]);
+			await Promise.all([
+				ServiceHelper.db.createModel(
+					teamspace,
+					container._id,
+					container.name,
+					container.properties,
+				),
+				ServiceHelper.db.createModel(
+					teamspace,
+					federation._id,
+					federation.name,
+					federation.properties,
+				),
+			]);
+			await Promise.all([
+				ServiceHelper.db.createUser(user, [teamspace]),
+				ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, federation._id],
+					[user.user]),
+			]);
+			await ServiceHelper.db.createTemplates(teamspace, [template, templateWithComments]);
+			await ServiceHelper.db.createTicket(teamspace, project.id, container._id, containerTicket);
+			await ServiceHelper.db.createTicket(teamspace, project.id, federation._id, federationTicket);
+			await ServiceHelper.db.createComment(teamspace, project.id, container._id, containerTicket._id,
+				containerComment);
+			await ServiceHelper.db.createComment(teamspace, project.id, federation._id, federationTicket._id,
+				federationComment);
+		},
+		);
 		test(`should trigger a ${EVENTS.CONTAINER_NEW_TICKET_COMMENT} event when a new container ticket comment has been added`, async () => {
 			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
 
@@ -603,7 +760,13 @@ const commentAddedTest = () => {
 			const { createdAt, author, images, message } = getRes.body;
 			await expect(socketPromise).resolves.toEqual({
 				...data,
-				data: { _id: commentId, ticket: containerTicket._id, createdAt, author, images, message },
+				data: { _id: commentId,
+					ticket: containerTicket._id,
+					createdAt,
+					updatedAt: createdAt,
+					author,
+					images,
+					message },
 			});
 
 			socket.close();
@@ -632,7 +795,13 @@ const commentAddedTest = () => {
 			const { createdAt, author, images, message } = getRes.body;
 			await expect(socketPromise).resolves.toEqual({
 				...data,
-				data: { _id: commentId, ticket: federationTicket._id, createdAt, author, images, message },
+				data: { _id: commentId,
+					ticket: federationTicket._id,
+					createdAt,
+					updatedAt: createdAt,
+					author,
+					images,
+					message },
 			});
 
 			socket.close();
@@ -642,6 +811,48 @@ const commentAddedTest = () => {
 
 const commentUpdatedTest = () => {
 	describe('On updating a comment', () => {
+		const user = ServiceHelper.generateUserCredentials();
+		const teamspace = ServiceHelper.generateRandomString();
+		const project = ServiceHelper.generateRandomProject();
+		const container = ServiceHelper.generateRandomModel();
+		const federation = ServiceHelper.generateRandomModel({ isFederation: true });
+		const template = ServiceHelper.generateTemplate();
+		const templateWithComments = ServiceHelper.generateTemplate(false, false, { comments: true });
+		const containerTicket = ServiceHelper.generateTicket(template);
+		const federationTicket = ServiceHelper.generateTicket(template);
+		const containerComment = ServiceHelper.generateComment(user.user);
+		const federationComment = ServiceHelper.generateComment(user.user);
+
+		beforeAll(async () => {
+			await ServiceHelper.db.createTeamspace(teamspace, [user.user]);
+			await Promise.all([
+				ServiceHelper.db.createModel(
+					teamspace,
+					container._id,
+					container.name,
+					container.properties,
+				),
+				ServiceHelper.db.createModel(
+					teamspace,
+					federation._id,
+					federation.name,
+					federation.properties,
+				),
+			]);
+			await Promise.all([
+				ServiceHelper.db.createUser(user, [teamspace]),
+				ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, federation._id],
+					[user.user]),
+			]);
+			await ServiceHelper.db.createTemplates(teamspace, [template, templateWithComments]);
+			await ServiceHelper.db.createTicket(teamspace, project.id, container._id, containerTicket);
+			await ServiceHelper.db.createTicket(teamspace, project.id, federation._id, federationTicket);
+			await ServiceHelper.db.createComment(teamspace, project.id, container._id, containerTicket._id,
+				containerComment);
+			await ServiceHelper.db.createComment(teamspace, project.id, federation._id, federationTicket._id,
+				federationComment);
+		},
+		);
 		test(`should trigger a ${EVENTS.CONTAINER_UPDATE_TICKET_COMMENT} event when a container ticket comment has been updated`, async () => {
 			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
 
@@ -742,11 +953,37 @@ const commentUpdatedTest = () => {
 
 const groupUpdatedTest = () => {
 	describe('Updating a group', () => {
+		const user = ServiceHelper.generateUserCredentials();
+		const teamspace = ServiceHelper.generateRandomString();
+		const project = ServiceHelper.generateRandomProject();
+		const container = ServiceHelper.generateRandomModel();
+		const federation = ServiceHelper.generateRandomModel({ isFederation: true });
 		const templateWithView = ServiceHelper.generateTemplate(false, true);
 		const containerTicketWithView = ServiceHelper.generateTicket(templateWithView);
 		const federationTicketWithView = ServiceHelper.generateTicket(templateWithView);
 
 		beforeAll(async () => {
+			await ServiceHelper.db.createTeamspace(teamspace, [user.user]);
+			await Promise.all([
+				ServiceHelper.db.createModel(
+					teamspace,
+					container._id,
+					container.name,
+					container.properties,
+				),
+				ServiceHelper.db.createModel(
+					teamspace,
+					federation._id,
+					federation.name,
+					federation.properties,
+				),
+			]);
+			await Promise.all([
+				ServiceHelper.db.createUser(user, [teamspace]),
+				ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, federation._id],
+					[user.user]),
+			]);
+
 			await ServiceHelper.db.createTemplates(teamspace, [templateWithView]);
 			const addTicketRoute = (modelType, modelId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets?key=${user.apiKey}`;
 			const getTicketRoute = (modelType, modelId, ticketId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets/${ticketId}?key=${user.apiKey}`;
@@ -840,9 +1077,10 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		server = await ServiceHelper.app();
 		chatApp = await ServiceHelper.chatApp();
 		agent = await SuperTest(server);
-		await setupData();
 	});
+
 	afterAll(() => Promise.all([
+		ServiceHelper.db.reset(),
 		ServiceHelper.closeApp(server),
 		chatApp.close()]));
 
