@@ -30,7 +30,7 @@ const testGetApplicableDefaultProperties = () => {
 
 		const basicProp = [{ name: baseProps.DESCRIPTION, type: TemplateConstants.propTypes.LONG_TEXT },
 			{ name: baseProps.OWNER, type: TemplateConstants.propTypes.TEXT, readOnly: true },
-			{ name: baseProps.CREATED_AT, type: TemplateConstants.propTypes.DATE, readOnly: true },
+			{ name: baseProps.CREATED_AT, type: TemplateConstants.propTypes.PAST_DATE, readOnly: true },
 			{ name: baseProps.UPDATED_AT, type: TemplateConstants.propTypes.DATE, readOnly: true },
 			{ name: baseProps.STATUS, type: TemplateConstants.propTypes.ONE_OF, values: ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], default: 'Open' }];
 

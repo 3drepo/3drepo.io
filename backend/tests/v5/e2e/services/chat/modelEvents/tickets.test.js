@@ -435,6 +435,108 @@ const ticketUpdatedTest = () => {
 	});
 };
 
+const ticketsUpdatedTest = () => {
+	describe('On updating many tickets', () => {
+		const nTickets = 10;
+		const containerTickets = times(nTickets, () => ServiceHelper.generateTicket(templateWithComments));
+		const federationTickets = times(nTickets, () => ServiceHelper.generateTicket(templateWithComments));
+
+		beforeAll(async () => {
+			const addTicketRoute = (modelType, modelId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets?key=${user.apiKey}`;
+
+			await Promise.all([
+				{ type: 'container', model: container._id, tickets: containerTickets },
+				{ type: 'federation', model: federation._id, tickets: federationTickets },
+			].map(async ({ type, model, tickets }) => {
+				await Promise.all(tickets.map(async (ticket) => {
+					const { body: { _id } } = await agent.post(addTicketRoute(type, model)).send(ticket);
+					// eslint-disable-next-line no-param-reassign
+					ticket._id = _id;
+				}));
+			}));
+		});
+		[
+			{ type: 'container', model: container._id, tickets: containerTickets },
+			{ type: 'federation', model: federation._id, tickets: federationTickets },
+		].forEach(({ type, model, tickets }) => {
+			const updateEvent = type === 'container' ? EVENTS.CONTAINER_UPDATE_TICKET : EVENTS.FEDERATION_UPDATE_TICKET;
+			test(`!!!should trigger ${updateEvent} events when ${type} tickets has been updated`, async () => {
+				const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+
+				const data = { teamspace, project: project.id, model };
+				await ServiceHelper.socket.joinRoom(socket, data);
+
+				const socketPromise = new Promise((resolve, reject) => {
+					const eventsReceived = [];
+					socket.on(updateEvent, (eventData) => {
+						eventsReceived.push(eventData);
+						if (eventsReceived.length === nTickets) resolve(eventsReceived);
+					});
+					setTimeout(reject, 1000);
+				});
+
+				const propToUpdate = templateWithComments.properties.find((p) => p.type === propTypes.NUMBER
+                && !p.deprecated).name;
+
+				const modToUpdate = templateWithComments.modules.find((m) => m.properties.length > 0);
+				const modPropToUpdate = modToUpdate.properties.find((p) => p.type === propTypes.TEXT
+                && !p.deprecated).name;
+				const modPropToUnset = modToUpdate.properties.find((p) => p.type === propTypes.NUMBER
+                && !p.deprecated).name;
+
+				const expectedData = [];
+
+				const updateData = tickets.map(({ _id }) => {
+					const newTitle = ServiceHelper.generateRandomString();
+					const newPropValue = ServiceHelper.generateRandomNumber();
+					const newModPropValue = ServiceHelper.generateRandomString();
+
+					expectedData.push({
+						...data,
+						data: {
+							_id,
+							title: newTitle,
+							properties: {
+								[propToUpdate]: newPropValue,
+							},
+							modules: {
+								[modToUpdate.name]: {
+									[modPropToUpdate]: newModPropValue,
+									[modPropToUnset]: null,
+								},
+							},
+						},
+					});
+
+					return {
+						_id,
+						title: newTitle,
+						properties: {
+							[propToUpdate]: newPropValue,
+						},
+						modules: {
+							[modToUpdate.name]: {
+								[modPropToUpdate]: newModPropValue,
+								[modPropToUnset]: null,
+							},
+						},
+					};
+				});
+
+				const { body } = await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/${type}s/${model}/tickets${ServiceHelper.createQueryString({ key: user.apiKey, template: templateWithComments._id })}`)
+					.send({ tickets: updateData })
+					.expect(templates.ok.status);
+
+				const eventData = await socketPromise;
+
+				ServiceHelper.outOfOrderArrayEqual(eventData, expectedData);
+
+				socket.close();
+			});
+		});
+	});
+};
+
 const commentAddedTest = () => {
 	describe('On adding a new comment', () => {
 		test(`should trigger a ${EVENTS.CONTAINER_NEW_TICKET_COMMENT} event when a new container ticket comment has been added`, async () => {
@@ -706,6 +808,7 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	ticketAddedTest();
 	ticketsImportedTest();
 	ticketUpdatedTest();
+	ticketsUpdatedTest();
 	commentAddedTest();
 	commentUpdatedTest();
 	groupUpdatedTest();

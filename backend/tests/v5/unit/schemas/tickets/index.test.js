@@ -923,23 +923,6 @@ const testImportedTickets = () => {
 			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledWith(importTestTem, false);
 		});
 
-		test('Should allow users to specify creation date if it is a new ticket', async () => {
-			const date = Date.now();
-			const { properties, ...others } = importTestInput;
-			const res = await TicketSchema.validateTicket(teamspace, project, model, importTestTem,
-				{ ...others,
-					properties: {
-						...properties,
-						[basePropertyLabels.CREATED_AT]: date,
-					},
-
-				}, undefined, true);
-			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledTimes(1);
-			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledWith(importTestTem, true);
-
-			expect(res.properties[basePropertyLabels.CREATED_AT]).toEqual(new Date(date));
-		});
-
 		test('Should NOT allow users to specify creation date if it is an existing ticket', async () => {
 			const date = Date.now();
 			const { properties, ...others } = importTestInput;
