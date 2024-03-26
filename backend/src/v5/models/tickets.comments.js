@@ -70,10 +70,10 @@ TicketComments.addComment = async (teamspace, project, model, ticket, commentDat
 	return comment;
 };
 
-TicketComments.importComments = async (teamspace, project, model, ticket, comments, author) => {
+TicketComments.importComments = async (teamspace, project, model, commentsPerTicket, author) => {
 	const currDate = new Date();
 	const toReturn = [];
-	const docsToInsert = comments.map((comment) => {
+	const docsToInsert = commentsPerTicket.flatMap(({ ticket, comments }) => comments.map((comment) => {
 		const fullComment = { ...comment,
 			_id: generateUUID(),
 			updatedAt: currDate,
@@ -85,7 +85,7 @@ TicketComments.importComments = async (teamspace, project, model, ticket, commen
 			teamspace,
 			project,
 			model };
-	});
+	}));
 
 	await insertMany(teamspace, docsToInsert);
 

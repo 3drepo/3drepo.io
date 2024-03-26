@@ -850,11 +850,11 @@ const testImportTickets = () => {
 						project,
 						model,
 						tickets: expectedOutput });
-				expect(CommentsProcessor.importComments).toHaveBeenCalledTimes(tickets.length);
-				expectedOutput.forEach(({ _id }, i) => {
-					expect(CommentsProcessor.importComments).toHaveBeenCalledWith(teamspace, project, model, _id,
-						tickets[i].comments, author);
-				});
+
+				const ticketsComments = tickets.map(({ comments }, i) => ({ ticket: expectedOutput[i]._id, comments }));
+				expect(CommentsProcessor.importComments).toHaveBeenCalledTimes(1);
+				expect(CommentsProcessor.importComments).toHaveBeenCalledWith(teamspace, project,
+					model, ticketsComments, author);
 			});
 		});
 	});

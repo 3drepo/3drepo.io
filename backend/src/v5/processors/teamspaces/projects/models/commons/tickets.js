@@ -191,13 +191,12 @@ Tickets.importTickets = async (teamspace, project, model, template, tickets, aut
 		tickets.map(({ comments, ...others }) => others));
 
 	const ids = [];
-
-	await Promise.all(tickets.map(async ({ comments }, i) => {
+	const commentsByTickets = tickets.flatMap(({ comments }, i) => {
 		ids.push(savedTickets[i]._id);
-		if (comments?.length) {
-			await importComments(teamspace, project, model, ids[i], comments, author);
-		}
-	}));
+		return comments?.length ? { ticket: savedTickets[i]._id, comments } : [];
+	});
+
+	if (commentsByTickets.length) await importComments(teamspace, project, model, commentsByTickets, author);
 
 	publish(events.TICKETS_IMPORTED,
 		{ teamspace,

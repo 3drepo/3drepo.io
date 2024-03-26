@@ -168,19 +168,24 @@ const testImportComments = () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
-			const ticket = generateRandomString();
+			const nIterations = 10;
+
 			const author = generateRandomString();
-			const newComments = times(10, (i) => ({
-				message: generateRandomString(),
-				images: [generateRandomString()],
-				originalAuthor: generateRandomString(),
-				createdAt: new Date() - i,
+			const newComments = times(nIterations, (i) => ({
+				ticket: generateRandomString(),
+				comments: times(nIterations, () => ({
+					message: generateRandomString(),
+					images: [generateRandomString()],
+					originalAuthor: generateRandomString(),
+					createdAt: new Date() - i,
+				})),
 			}));
 
-			const fn = jest.spyOn(db, 'insertMany').mockResolvedValueOnce(newComments);
+			const fn = jest.spyOn(db, 'insertMany');
 
-			const returnedComments = await Comments.importComments(teamspace, project, model, ticket,
-				newComments, author);
+			const returnedComments = await Comments.importComments(teamspace, project, model, newComments, author);
+
+			expect(returnedComments.length).toBe(nIterations * nIterations);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, commentCol,

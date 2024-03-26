@@ -103,24 +103,28 @@ const testImportComments = () => {
 		const teamspace = generateRandomString();
 		const project = generateRandomString();
 		const model = generateRandomString();
-		const ticket = generateRandomString();
 		const author = generateRandomString();
+		const nIterations = 10;
 
 		test('should call addComment in model and return whatever it returns', async () => {
-			const commentData = times(10, () => ({
-				message: generateRandomString(),
+			const commentData = times(nIterations, () => ({
+				ticket: generateRandomString(),
+				comments: times(nIterations, () => ({
+					message: generateRandomString(),
+				})),
 			}));
 
-			const expectedOutput = commentData.map((comment) => ({ ...comment, _id: generateUUID() }));
+			const expectedOutput = commentData.flatMap(({ comments }) => comments
+				.map((comment) => ({ ...comment, _id: generateUUID() })));
 
 			CommentsModel.importComments.mockResolvedValueOnce(expectedOutput);
 
-			await expect(Comments.importComments(teamspace, project, model, ticket, commentData, author))
+			await expect(Comments.importComments(teamspace, project, model, commentData, author))
 				.resolves.toEqual(expectedOutput.map(({ _id }) => _id));
 
 			expect(CommentsModel.importComments).toHaveBeenCalledTimes(1);
 			expect(CommentsModel.importComments).toHaveBeenCalledWith(teamspace, project, model,
-				ticket, commentData, author);
+				commentData, author);
 
 			expect(FilesManager.storeFile).not.toHaveBeenCalled();
 
@@ -135,32 +139,37 @@ const testImportComments = () => {
 		});
 
 		test('should process image and store a ref', async () => {
-			const commentData = times(10, () => ({
-				[generateRandomString()]: generateRandomString(),
-				images: [generateRandomBuffer()],
+			const commentData = times(nIterations, () => ({
+				ticket: generateRandomString(),
+				comments: times(nIterations, () => ({
+					[generateRandomString()]: generateRandomString(),
+					images: [generateRandomBuffer()],
+				})),
 			}));
-			const expectedOutput = commentData.map((comment) => ({ ...comment, _id: generateUUID() }));
+			const expectedOutput = commentData.flatMap(({ comments }) => comments
+				.map((comment) => ({ ...comment, _id: generateUUID() })));
 
 			CommentsModel.importComments.mockResolvedValueOnce(expectedOutput);
 
-			await expect(Comments.importComments(teamspace, project, model, ticket, cloneDeep(commentData), author))
+			await expect(Comments.importComments(teamspace, project, model, cloneDeep(commentData), author))
 				.resolves.toEqual(expectedOutput.map(({ _id }) => _id));
 
-			const commentsWithRefs = CommentsModel.importComments.mock.calls[0][4];
+			const commentsWithRefs = CommentsModel.importComments.mock.calls[0][3];
 
 			expect(CommentsModel.importComments).toHaveBeenCalledTimes(1);
-			expect(CommentsModel.importComments).toHaveBeenCalledWith(teamspace, project, model, ticket,
+			expect(CommentsModel.importComments).toHaveBeenCalledWith(teamspace, project, model,
 				expect.any(Array), author);
 
 			expect(FilesManager.storeFile).toHaveBeenCalledTimes(expectedOutput.length);
-			commentsWithRefs.forEach(({ images: [imgRef], ...others }, i) => {
-				const { images, ...orgComment } = commentData[i];
-				expect(others).toEqual(orgComment);
+			commentsWithRefs.forEach(({ ticket, comments }, i) => comments.forEach(
+				({ images: [imgRef], ...others }, j) => {
+					const { images, ...orgComment } = commentData[i].comments[j];
+					expect(others).toEqual(orgComment);
 
-				const meta = { teamspace, project, model, ticket };
-				expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL,
-					imgRef, images[0], meta);
-			});
+					const meta = { teamspace, project, model, ticket };
+					expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL,
+						imgRef, images[0], meta);
+				}));
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(expectedOutput.length);
 			expectedOutput.forEach((data) => {
