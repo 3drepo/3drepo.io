@@ -232,22 +232,22 @@ Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, up
 };
 
 Tickets.updateManyTickets = async (teamspace, project, model, template, oldTickets, updateData, author) => {
-	const commentsPromises = [];
+	const commentsByTickets = [];
 	const dataWithoutComments = updateData.map(({ comments, _id, ...others }, i) => {
 		if (comments?.length) {
-			commentsPromises.push(
-				importComments(teamspace, project, model, oldTickets[i]._id, comments, author),
-			);
+			commentsByTickets.push({ ticket: oldTickets[i]._id, comments });
 		}
 
 		return others;
 	});
 
+	const commentsPromises = importComments(teamspace, project, model, commentsByTickets, author);
+
 	const externalDataDelta = processSpecialProperties(template, oldTickets, dataWithoutComments);
 	const changeSet = await updateManyTickets(teamspace, project, model, oldTickets, dataWithoutComments, author);
 	await Promise.all([
 		processExternalData(teamspace, project, model, oldTickets.map(({ _id }) => _id), externalDataDelta),
-		...commentsPromises,
+		commentsPromises,
 	]);
 
 	changeSet.forEach((data) => {

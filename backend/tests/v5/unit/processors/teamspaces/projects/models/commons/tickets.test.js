@@ -963,15 +963,20 @@ const testUpdateManyTickets = () => {
 			test('should call importComments if there are comments', async () => {
 				const updateData = [];
 				const response = [];
+				const commentsByTickets = [];
 
 				const tickets = times(ticketCount, () => {
+					const comments = times(ticketCount, generateRandomObject);
 					updateData.push({
 						title: generateRandomString(),
 						properties: {},
-						comments: times(ticketCount, generateRandomObject) });
+						comments });
 
 					response.push({ ...generateRandomObject(), changes: generateRandomObject() });
-					return generateTicket(template);
+					const ticket = generateTicket(template);
+
+					commentsByTickets.push({ ticket: ticket._id, comments });
+					return ticket;
 				});
 
 				TemplatesModel.generateFullSchema.mockReset();
@@ -1000,24 +1005,23 @@ const testUpdateManyTickets = () => {
 							...res });
 				});
 
-				expect(CommentsProcessor.importComments).toHaveBeenCalledTimes(tickets.length);
-				tickets.forEach(({ _id }, i) => {
-					expect(CommentsProcessor.importComments).toHaveBeenCalledWith(teamspace, project, model, _id,
-						updateData[i].comments, author);
-				});
+				expect(CommentsProcessor.importComments).toHaveBeenCalledTimes(1);
+				expect(CommentsProcessor.importComments).toHaveBeenCalledWith(teamspace,
+					project, model, commentsByTickets, author);
 			});
 
 			test(`should not trigger ${events.UPDATE_TICKET} events if there are only comments update`, async () => {
 				const updateData = [];
 				const response = [];
+				const commentsByTickets = [];
 
 				const tickets = times(ticketCount, () => {
-					updateData.push({
-						properties: {},
-						comments: times(ticketCount, generateRandomObject) });
+					const comments = times(ticketCount, generateRandomObject);
+					updateData.push({ comments });
+					const ticket = generateTicket(template);
 
-					response.push({ ...generateRandomObject(), changes: {} });
-					return generateTicket(template);
+					commentsByTickets.push({ ticket: ticket._id, comments });
+					return ticket;
 				});
 
 				TemplatesModel.generateFullSchema.mockReset();
@@ -1039,11 +1043,9 @@ const testUpdateManyTickets = () => {
 
 				expect(EventsManager.publish).not.toHaveBeenCalled();
 
-				expect(CommentsProcessor.importComments).toHaveBeenCalledTimes(tickets.length);
-				tickets.forEach(({ _id }, i) => {
-					expect(CommentsProcessor.importComments).toHaveBeenCalledWith(teamspace, project, model, _id,
-						updateData[i].comments, author);
-				});
+				expect(CommentsProcessor.importComments).toHaveBeenCalledTimes(1);
+				expect(CommentsProcessor.importComments).toHaveBeenCalledWith(teamspace, project, model,
+					commentsByTickets, author);
 			});
 		});
 	});
