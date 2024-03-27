@@ -25,7 +25,7 @@ import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component
 import { get } from 'lodash';
 import { LOD_VALUES } from '@/v5/store/containerRevisions/containerRevisions.types';
 import { Heading, AnimationsCheckbox, TimezoneSelect, Title, FlexContainer, HiddenMenuItem } from './sidebarForm.styles';
-import { extensionIsRevit, extensionIsSpm } from '../uploadContainerRevisionForm.helpers';
+import { extensionIsRevit, extensionIsSpm } from '../extensions.helpers';
 import { useContext } from 'react';
 import { UploadFilesContext } from '@components/shared/uploadFiles/uploadFilesContext';
 
