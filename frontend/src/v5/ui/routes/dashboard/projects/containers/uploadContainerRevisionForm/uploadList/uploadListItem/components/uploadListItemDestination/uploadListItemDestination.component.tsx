@@ -23,7 +23,7 @@ import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelec
 import { canUploadToBackend, prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
 import { formatMessage } from '@/v5/services/intl';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
-import { name as containerNameScheme } from '@/v5/validation/containerAndFederationSchemes/validators';
+import { name as containerNameScheme } from '@/v5/validation/shared/validators';
 import { isCollaboratorRole } from '@/v5/store/store.helpers';
 import { DestinationAutocomplete, DestinationInput, NewOrExisting, OptionsBox } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/uploadListItemDestination.styles';
 import { getFilteredDestinationOptions, sortByName } from '@components/shared/uploadFiles/uploadFiles.helpers';

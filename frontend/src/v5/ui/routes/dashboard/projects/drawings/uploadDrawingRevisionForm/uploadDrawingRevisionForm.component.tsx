@@ -126,12 +126,14 @@ export const UploadDrawingRevisionForm = ({
 					const fileAsPdf = await fileToPdf(fileAsGeneric);
 					const pageCount = fileAsPdf.getPageCount();
 					if (pageCount > 1) {
-						// alert(`${fileName} has ${pageCount} pages, only the first one will be kept`);
+						// TODO - communicate 2+ pages PDFs only retain first one
+						alert(`${fileName} has ${pageCount} pages, only the first one will be kept`);
 						const pdfSinglePage = await getPdfFirstPage(fileAsPdf);
 						file = await pdfToFile(pdfSinglePage, fileName);
 					}
 				} catch (e) {
-					// alert(`Error: ${fileName} was processed as a PDF, but it seems corrupted. It will be skipped`);
+					// TODO - communicate error parsing PDF file
+					alert(`Error: ${fileName} was processed as a PDF, but it seems corrupted. It will be skipped`);
 					continue;
 				}
 			}

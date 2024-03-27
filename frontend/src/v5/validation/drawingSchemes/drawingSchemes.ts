@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import * as Yup from 'yup';
-import { alphaNumericHyphens, desc, name, revisionDesc, uploadFile } from '../containerAndFederationSchemes/validators';
+import { revisionDesc } from '../containerAndFederationSchemes/validators';
+import { desc, name, alphaNumericHyphens, uploadFile, trimmedString } from '../shared/validators';
 import { revisionName } from './validators';
 import { formatMessage } from '@/v5/services/intl';
-import { trimmedString } from '../shared/validators';
 import { selectRevisions } from '@/v5/store/drawingRevisions/drawingRevisions.selectors';
 import { getState } from '@/v4/modules/store';
 

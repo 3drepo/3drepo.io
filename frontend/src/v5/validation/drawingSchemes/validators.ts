@@ -16,7 +16,7 @@
  */
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
-import { alphaNumericHyphens } from '../containerAndFederationSchemes/validators';
+import { alphaNumericHyphens } from '../shared/validators';
 import { DrawingRevisionsActionDispatchers } from '@/v5/services/actionsDispatchers';
 import { selectRevisions, selectRevisionsPending } from '@/v5/store/drawingRevisions/drawingRevisions.selectors';
 import { getState } from '@/v4/modules/store';

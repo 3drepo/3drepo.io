@@ -26,7 +26,7 @@ import { Role } from '@/v5/store/currentUser/currentUser.types';
 import { isCollaboratorRole } from '@/v5/store/store.helpers';
 import { orderBy } from 'lodash';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
-import { name as drawingNameScheme } from '@/v5/validation/containerAndFederationSchemes/validators';
+import { name as drawingNameScheme } from '@/v5/validation/shared/validators';
 import { DestinationAutocomplete, DestinationInput, NewOrExisting, OptionsBox } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/uploadListItemDestination.styles';
 import { AlreadyUsedName } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/options/alreadyUsedName/alreadyUsedName.component';
 import { NewDestination } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/options/newDestination/newDestination.component';
