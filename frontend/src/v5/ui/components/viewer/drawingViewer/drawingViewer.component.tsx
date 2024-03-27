@@ -25,41 +25,63 @@ import ZoomInIcon from '@assets/icons/viewer/zoom_in.svg';
 import { FileInputField } from '@controls/fileInputField/fileInputField.component';
 import { Button } from '@controls/button/button.component';
 import { FormattedMessage } from 'react-intl';
-import { Zoomer, SvgViewer } from './svgViewer.component';
+import { SvgViewer } from './svgViewer.component';
+import { PanZoomHandler, centredPanZoom } from './centredPanZoom';
+
 
 
 export const DrawingViewer = () => {
 	const [svgContent, setSvgContent] = useState('');
+	const [imgContent, setImgContent] = useState('');
+	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
 
-	const zoomer = useRef<Zoomer>();
+	const imgRef = useRef<HTMLImageElement | SVGSVGElement>();
 
-	const onClickButton = async (files: File[]) => {
-		setSvgContent(await files[0].text());
+	const onClickButton = async ([file]: File[]) => {
+		if (file.type.includes('svg')) { 
+			setSvgContent(await file.text());
+			setImgContent('');
+		}
+
+		if (file.type.includes('png')) { 
+			var base64String = btoa(String.fromCharCode.apply(null, new Uint8Array(await file.arrayBuffer())));
+			setImgContent('data:image/png;base64,' + base64String);
+			setSvgContent('');
+		}
 	};
 
 	const onClickZoomIn = () => {
-		zoomer.current?.zoomIn();
+		zoomHandler.zoomIn();
 	};
 
 	const onClickZoomOut = () => {
-		zoomer.current?.zoomOut();
+		zoomHandler.zoomOut();
+	};
+
+	const onImageLoad = () => {
+		if (zoomHandler) {
+			zoomHandler.dispose();
+		}
+
+		setZoomHandler(centredPanZoom(imgRef.current, 20, 20));
 	};
 
 	return (
-		<>
+		<div style={{ overflow:'hidden', width:'100%', height:'100%' }}>
 			<FileInputField
 				accept=".svg,.png"
 				onChange={onClickButton as any}
 				multiple
 			>
-				<Button component="span" variant="contained" color="primary" style={{ position:'absolute', zIndex: 10 }}>
+				<Button component="span" variant="contained" color="primary" style={{ position: 'absolute', zIndex: 10 }}>
 					<FormattedMessage
 						id="uploads.fileInput.browse"
 						defaultMessage="Browse"
 					/>
 				</Button>
 			</FileInputField>
-			<SvgViewer svgContent={svgContent} zRef={zoomer}/>
+			{svgContent && <SvgViewer svgContent={svgContent} ref={imgRef} onLoad={onImageLoad}/>}
+			{imgContent && <img src={imgContent} ref={imgRef as any} onLoad={onImageLoad} />}
 			<ToolbarContainer>
 				<MainToolbar>
 					<ToolbarButton
@@ -74,6 +96,6 @@ export const DrawingViewer = () => {
 					/>
 				</MainToolbar>
 			</ToolbarContainer>
-		</>
+		</div>
 	);
 };
