@@ -29,6 +29,8 @@ export interface MinimumDrawing {
 	name: string;
 	role: Role;
 	isFavourite: boolean;
+	category: string; // TODO - add category types?
+	drawingNumber: string;
 }
 
 // TODO: Unfinished interface
@@ -37,8 +39,6 @@ export interface IDrawing extends MinimumDrawing {
 	lastUpdated?: Date;
 	latestRevision?: string;
 	calibration?: CalibrationStates;
-	category: string; // TODO - add category types?
-	drawingNumber: string;
 	status: DrawingUploadStatus;
 	revisionsCount: number;
 	role: any;

@@ -34,20 +34,19 @@ const categories =  ['A drawing category', 'Another drawing category', 'Yet anot
 
 const arr = (new Array(10)).fill(0);
 
-const drawings = arr.map((_, index) => {
-	return {
-		_id: uuid(),
-		name: 'A drawing ' + index,
-		isFavourite: (Math.random() > 0.5),
-		role: Role.ADMIN,
-		category: categories[Math.round(Math.random() * (categories.length - 1))],
-		status: DrawingUploadStatus.OK,
-		revisionsCount: 2,
-		latestRevision: null,
-		lastUpdated: null,
-		hasStatsPending: false,
-	};
-});
+const drawings: MinimumDrawing[] = arr.map((_, index) => ({
+	_id: uuid(),
+	name: 'A drawing ' + index,
+	drawingNumber: uuid(),
+	isFavourite: (Math.random() > 0.5),
+	role: Role.ADMIN,
+	category: categories[Math.round(Math.random() * (categories.length - 1))],
+	status: DrawingUploadStatus.OK,
+	revisionsCount: 2,
+	latestRevision: null,
+	lastUpdated: null,
+	hasStatsPending: false,
+}));
 
 const randCal = () => {
 	const i = Math.round(Math.random() * 2);
