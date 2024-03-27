@@ -30,7 +30,7 @@
 		"compile": "node ./internals/intl/compile.js",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build -o ../public/storybook",
-		"circular:test": "yarn dpdm src/main.tsx --exclude node_modules/ --warning false --tree false"
+		"circular:test": "yarn dpdm src/main.tsx --warning false --tree false"
 	},
 	"keywords": [
 		"3drepo",
