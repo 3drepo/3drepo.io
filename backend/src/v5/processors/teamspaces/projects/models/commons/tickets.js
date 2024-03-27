@@ -27,7 +27,7 @@ const {
 } = require('../../../../../schemas/tickets/templates.constants');
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { deleteIfUndefined, isEmpty } = require('../../../../../utils/helper/objects');
-const { getFileWithMetaAsStream, removeFile, storeFile } = require('../../../../../services/filesManager');
+const { getFileWithMetaAsStream, removeFiles, storeFiles } = require('../../../../../services/filesManager');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
@@ -148,13 +148,9 @@ const processSpecialProperties = (template, oldTickets, updatedTickets) => {
 	});
 };
 
-const storeFiles = (teamspace, project, model, ticket, binaryData) => Promise.all(
-	binaryData.map(({ ref, data }) => storeFile(
-		teamspace, TICKETS_RESOURCES_COL, ref, data, { teamspace, project, model, ticket },
-	)),
-);
-
 const processExternalData = async (teamspace, project, model, ticketIds, data) => {
+	const refsToRemove = [];
+	const binariesToSave = [];
 	await Promise.all(ticketIds.map(async (ticketId, i) => {
 		const { binaries, groups } = data[i];
 
@@ -169,14 +165,25 @@ const processExternalData = async (teamspace, project, model, ticketIds, data) =
 				throw createResponseCode(templates.invalidArguments, `The following groups are not found: ${notFoundGroups.join(',')}`);
 			}
 		}
+
+		refsToRemove.push(...binaries.toRemove);
+
+		binariesToSave.push(...binaries.toAdd.map(({ ref, data: bin }) => ({
+			ref, data: bin, meta: { teamspace, project, model, ticket: ticketId } })));
+
 		await Promise.all([
-			...binaries.toRemove.map((ref) => removeFile(teamspace, TICKETS_RESOURCES_COL, ref)),
-			storeFiles(teamspace, project, model, ticketId, binaries.toAdd),
 			groups.toAdd.length ? addGroups(teamspace, project, model, ticketId, groups.toAdd) : Promise.resolve(),
 			groups.toRemove.length ? deleteGroups(teamspace, project, model, ticketId,
 				groups.toRemove) : Promise.resolve(),
 		]);
 	}));
+
+	const promsToWait = [];
+
+	if (refsToRemove.length) promsToWait.push(removeFiles(teamspace, TICKETS_RESOURCES_COL, refsToRemove));
+	if (binariesToSave.length) promsToWait.push(storeFiles(teamspace, TICKETS_RESOURCES_COL, binariesToSave));
+
+	await Promise.all(promsToWait);
 };
 
 const processNewTickets = async (teamspace, project, model, template, tickets) => {

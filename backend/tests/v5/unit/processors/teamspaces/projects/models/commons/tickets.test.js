@@ -144,23 +144,24 @@ const insertTicketsImageTest = async (isImport, isView) => {
 		const modProp = proTick.modules[imageTestData.moduleName][imageTestData.propName];
 
 		const expectedTicket = cloneDeep(tickets[i]);
+		const meta = { ticket: expectedOutput[i]._id, teamspace, project, model };
 
 		if (isView) {
 			expectedTicket.properties[imageTestData.propName].screenshot = prop.screenshot;
 			expectedTicket.modules[imageTestData.moduleName][imageTestData.propName].screenshot = modProp.screenshot;
 
 			refFiles.push({ ref: prop.screenshot,
-				buffer: imageTestData.data[i].propBuffer,
-				ticket: expectedOutput[i]._id });
+				data: imageTestData.data[i].propBuffer,
+				meta });
 			refFiles.push({ ref: modProp.screenshot,
-				buffer: imageTestData.data[i].modPropBuffer,
-				ticket: expectedOutput[i]._id });
+				data: imageTestData.data[i].modPropBuffer,
+				meta });
 		} else {
 			expectedTicket.properties[imageTestData.propName] = prop;
 			expectedTicket.modules[imageTestData.moduleName][imageTestData.propName] = modProp;
 
-			refFiles.push({ ref: prop, buffer: imageTestData.data[i].propBuffer, ticket: expectedOutput[i]._id });
-			refFiles.push({ ref: modProp, buffer: imageTestData.data[i].modPropBuffer, ticket: expectedOutput[i]._id });
+			refFiles.push({ ref: prop, data: imageTestData.data[i].propBuffer, meta });
+			refFiles.push({ ref: modProp, data: imageTestData.data[i].modPropBuffer, meta });
 		}
 
 		return expectedTicket;
@@ -173,14 +174,8 @@ const insertTicketsImageTest = async (isImport, isView) => {
 	expect(TemplatesModel.generateFullSchema).toHaveBeenCalledTimes(1);
 	expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(imageTestData.template);
 
-	expect(FilesManager.storeFile).toHaveBeenCalledTimes(refFiles.length);
-
-	refFiles.forEach(({ ref, buffer, ticket }) => {
-		const meta = { teamspace, project, model, ticket };
-		expect(FilesManager.storeFile).toHaveBeenCalledWith(
-			teamspace, TICKETS_RESOURCES_COL, ref, buffer, meta,
-		);
-	});
+	expect(FilesManager.storeFiles).toHaveBeenCalledTimes(1);
+	expect(FilesManager.storeFiles).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL, refFiles);
 
 	expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 	if (isImport) {
@@ -212,7 +207,6 @@ const updateImagesTestHelper = async (updateMany, isView) => {
 
 	const tickets = [];
 
-	const fileEntries = [];
 	const updateData = times(nTickets, (i) => {
 		const updatePropBuffer = Buffer.from(generateRandomString());
 		const updateModPropBuffer = Buffer.from(generateRandomString());
@@ -248,6 +242,9 @@ const updateImagesTestHelper = async (updateMany, isView) => {
 	const processedTickets = updateMany ? TicketsModel.updateManyTickets.mock.calls[0][4]
 		: [TicketsModel.updateTicket.mock.calls[0][4]];
 
+	const refsToDelete = [];
+	const refFiles = [];
+
 	const expectedUpdateData = processedTickets.map(({ properties, modules }, i) => {
 		let propRef;
 		let modPropRef;
@@ -275,8 +272,11 @@ const updateImagesTestHelper = async (updateMany, isView) => {
 			oldPropRef = tickets[i].properties[imageTestData.propName];
 			oldModPropRef = tickets[i].modules[imageTestData.moduleName][imageTestData.propName];
 		}
-		fileEntries.push({ ticket: tickets[i]._id, ref: propRef, buffer: propBuffer, oldRef: oldPropRef });
-		fileEntries.push({ ticket: tickets[i]._id, ref: modPropRef, buffer: modPropBuffer, oldRef: oldModPropRef });
+
+		refsToDelete.push(oldPropRef, oldModPropRef);
+		const meta = { ticket: tickets[i]._id, project, teamspace, model };
+		refFiles.push({ meta, ref: propRef, data: propBuffer });
+		refFiles.push({ meta, ref: modPropRef, data: modPropBuffer });
 
 		return {
 			properties: { [imageTestData.propName]: generatePropData(propRef, isView) },
@@ -301,18 +301,12 @@ const updateImagesTestHelper = async (updateMany, isView) => {
 	expect(TemplatesModel.generateFullSchema).toHaveBeenCalledTimes(1);
 	expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(imageTestData.template);
 
-	expect(FilesManager.storeFile).toHaveBeenCalledTimes(fileEntries.length);
-	expect(FilesManager.removeFile).toHaveBeenCalledTimes(fileEntries.length);
+	expect(FilesManager.storeFiles).toHaveBeenCalledTimes(1);
+	expect(FilesManager.storeFiles).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL, refFiles);
 
-	fileEntries.forEach(({ ticket, ref, buffer, oldRef }) => {
-		const meta = { teamspace, project, model, ticket };
-		expect(FilesManager.storeFile).toHaveBeenCalledWith(
-			teamspace, TICKETS_RESOURCES_COL, ref, buffer, meta,
-		);
-		expect(FilesManager.removeFile).toHaveBeenCalledWith(
-			teamspace, TICKETS_RESOURCES_COL, oldRef,
-		);
-	});
+	expect(FilesManager.removeFiles).toHaveBeenCalledTimes(1);
+	expect(FilesManager.removeFiles).toHaveBeenCalledWith(
+		teamspace, TICKETS_RESOURCES_COL, refsToDelete);
 
 	expect(EventsManager.publish).toHaveBeenCalledTimes(response.length);
 	response.forEach((res) => {
@@ -783,7 +777,7 @@ const insertTicketsTestHelper = (isImport) => {
 		expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledWith(teamspace, project, model,
 			template._id, tickets);
 
-		expect(FilesManager.storeFile).not.toHaveBeenCalled();
+		expect(FilesManager.storeFiles).not.toHaveBeenCalled();
 		expect(CommentsProcessor.importComments).not.toHaveBeenCalled();
 
 		expect(EventsManager.publish).toHaveBeenCalledTimes(1);
@@ -842,7 +836,7 @@ const testImportTickets = () => {
 				expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledWith(teamspace, project, model,
 					template._id, tickets.map(({ comments, ...others }) => others));
 
-				expect(FilesManager.storeFile).not.toHaveBeenCalled();
+				expect(FilesManager.storeFiles).not.toHaveBeenCalled();
 
 				expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 				expect(EventsManager.publish).toHaveBeenCalledWith(events.TICKETS_IMPORTED,
@@ -887,8 +881,8 @@ const testUpdateTicket = () => {
 			expect(TemplatesModel.generateFullSchema).toHaveBeenCalledTimes(1);
 			expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(template);
 
-			expect(FilesManager.storeFile).not.toHaveBeenCalled();
-			expect(FilesManager.removeFile).not.toHaveBeenCalled();
+			expect(FilesManager.storeFiles).not.toHaveBeenCalled();
+			expect(FilesManager.removeFiles).not.toHaveBeenCalled();
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET,
@@ -899,7 +893,7 @@ const testUpdateTicket = () => {
 		});
 
 		test('should process image and store a ref', () => updateImagesTestHelper(false));
-		test('!!!should process screenshot from view data and store a ref', () => updateImagesTestHelper(false, true));
+		test('should process screenshot from view data and store a ref', () => updateImagesTestHelper(false, true));
 
 		updateGroupTestsHelper(false);
 	});
@@ -941,8 +935,8 @@ const testUpdateManyTickets = () => {
 			expect(TemplatesModel.generateFullSchema).toHaveBeenCalledTimes(1);
 			expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(template);
 
-			expect(FilesManager.storeFile).not.toHaveBeenCalled();
-			expect(FilesManager.removeFile).not.toHaveBeenCalled();
+			expect(FilesManager.storeFiles).not.toHaveBeenCalled();
+			expect(FilesManager.removeFiles).not.toHaveBeenCalled();
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(ticketCount);
 			response.forEach((res) => {
@@ -993,8 +987,8 @@ const testUpdateManyTickets = () => {
 				expect(TemplatesModel.generateFullSchema).toHaveBeenCalledTimes(1);
 				expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(template);
 
-				expect(FilesManager.storeFile).not.toHaveBeenCalled();
-				expect(FilesManager.removeFile).not.toHaveBeenCalled();
+				expect(FilesManager.storeFiles).not.toHaveBeenCalled();
+				expect(FilesManager.removeFiles).not.toHaveBeenCalled();
 
 				expect(EventsManager.publish).toHaveBeenCalledTimes(ticketCount);
 				response.forEach((res) => {
@@ -1039,8 +1033,8 @@ const testUpdateManyTickets = () => {
 				expect(TemplatesModel.generateFullSchema).toHaveBeenCalledTimes(1);
 				expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(template);
 
-				expect(FilesManager.storeFile).not.toHaveBeenCalled();
-				expect(FilesManager.removeFile).not.toHaveBeenCalled();
+				expect(FilesManager.storeFiles).not.toHaveBeenCalled();
+				expect(FilesManager.removeFiles).not.toHaveBeenCalled();
 
 				expect(EventsManager.publish).not.toHaveBeenCalled();
 

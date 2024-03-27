@@ -18,7 +18,7 @@
 const { times } = require('lodash');
 const { src } = require('../../helper/path');
 const config = require('../../../../src/v5/utils/config');
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString, generateRandomObject } = require('../../helper/services');
 const { PassThrough } = require('stream');
 
 jest.mock('../../../../src/v5/handler/db');
@@ -431,9 +431,9 @@ const testStoreFile = () => {
 
 			expect(FSHandler.storeFile).toHaveBeenCalledTimes(1);
 			expect(FSHandler.storeFile).toHaveBeenCalledWith(data);
-			expect(FileRefs.insertRef).toHaveBeenCalledTimes(1);
-			expect(FileRefs.insertRef).toHaveBeenCalledWith(teamspace, collection,
-				{ ...refInfo, _id: id, mimeType: DEFAULT_MIME_TYPE });
+			expect(FileRefs.insertManyRefs).toHaveBeenCalledTimes(1);
+			expect(FileRefs.insertManyRefs).toHaveBeenCalledWith(teamspace, collection,
+				[{ ...refInfo, _id: id, mimeType: DEFAULT_MIME_TYPE }]);
 
 			config.defaultStorage = defaultStorage;
 		});
@@ -453,9 +453,96 @@ const testStoreFile = () => {
 				.resolves.toEqual(undefined);
 			expect(GridFSHandler.storeFile).toHaveBeenCalledTimes(1);
 			expect(GridFSHandler.storeFile).toHaveBeenCalledWith(teamspace, collection, data);
-			expect(FileRefs.insertRef).toHaveBeenCalledTimes(1);
-			expect(FileRefs.insertRef).toHaveBeenCalledWith(teamspace, collection,
-				{ ...refInfo, _id: id, mimeType: DEFAULT_MIME_TYPE });
+			expect(FileRefs.insertManyRefs).toHaveBeenCalledTimes(1);
+			expect(FileRefs.insertManyRefs).toHaveBeenCalledWith(teamspace, collection,
+				[{ ...refInfo, _id: id, mimeType: DEFAULT_MIME_TYPE }]);
+
+			config.defaultStorage = defaultStorage;
+		});
+	});
+};
+
+const testStoreFiles = () => {
+	describe('Store multiple files in fileshare', () => {
+		const nEntries = 10;
+		test('should throw error if the default type is not recognised', async () => {
+			const { defaultStorage } = config;
+			config.defaultStorage = 'unrecognised storage type';
+
+			const entries = times(nEntries, () => ({
+				id: generateRandomString(),
+				data: generateRandomString(),
+				meta: generateRandomObject(),
+			}));
+
+			await expect(FilesManager.storeFiles(
+				generateRandomString(),
+				generateRandomString(),
+				entries,
+			)).rejects.toEqual(templates.unknown);
+
+			config.defaultStorage = defaultStorage;
+		});
+
+		test('should store file if default storage type is fs', async () => {
+			const { defaultStorage } = config;
+			config.defaultStorage = 'fs';
+
+			const refInfo = generateRandomObject();
+
+			const entries = times(nEntries, () => ({
+				id: generateRandomString(),
+				data: generateRandomString(),
+				meta: generateRandomObject(),
+			}));
+
+			FSHandler.storeFile.mockResolvedValue(refInfo);
+			const teamspace = generateRandomString();
+			const collection = generateRandomString();
+
+			await expect(FilesManager.storeFiles(teamspace, collection, entries))
+				.resolves.toEqual(undefined);
+
+			expect(FSHandler.storeFile).toHaveBeenCalledTimes(entries.length);
+			const expectedInsertRefsParam = entries.map(({ id, meta, data }) => {
+				expect(FSHandler.storeFile).toHaveBeenCalledWith(data);
+				return { ...meta, _id: id, ...refInfo, mimeType: DEFAULT_MIME_TYPE };
+			});
+
+			expect(FileRefs.insertManyRefs).toHaveBeenCalledTimes(1);
+			expect(FileRefs.insertManyRefs).toHaveBeenCalledWith(teamspace, collection,
+				expectedInsertRefsParam);
+
+			config.defaultStorage = defaultStorage;
+		});
+
+		test('should store file if default storage type is gridfs', async () => {
+			const { defaultStorage } = config;
+			config.defaultStorage = 'gridfs';
+
+			const refInfo = generateRandomObject();
+
+			const entries = times(nEntries, () => ({
+				id: generateRandomString(),
+				data: generateRandomString(),
+			}));
+
+			GridFSHandler.storeFile.mockResolvedValue(refInfo);
+			const teamspace = generateRandomString();
+			const collection = generateRandomString();
+
+			await expect(FilesManager.storeFiles(teamspace, collection, entries))
+				.resolves.toEqual(undefined);
+
+			expect(GridFSHandler.storeFile).toHaveBeenCalledTimes(entries.length);
+
+			const expectedInsertRefsParam = entries.map(({ data, id }) => {
+				expect(GridFSHandler.storeFile).toHaveBeenCalledWith(teamspace, collection, data);
+				return { _id: id, ...refInfo, mimeType: DEFAULT_MIME_TYPE };
+			});
+			expect(FileRefs.insertManyRefs).toHaveBeenCalledTimes(1);
+			expect(FileRefs.insertManyRefs).toHaveBeenCalledWith(teamspace, collection,
+				expectedInsertRefsParam);
 
 			config.defaultStorage = defaultStorage;
 		});
@@ -616,6 +703,7 @@ describe('services/filesManager', () => {
 	testGetFileAsStream();
 	testGetFileWithMetaAsStream();
 	testStoreFile();
+	testStoreFiles();
 	testStoreFileStream();
 	testFileExists();
 });
