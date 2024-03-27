@@ -23,7 +23,7 @@ import { selectDrawingById } from '../drawings/drawings.selectors';
 const selectRevisionsDomain = (state): IDrawingRevisionsState => state.drawingRevisions;
 const selectDrawingIdParam = (_, drawingId: string) => drawingId;
 
-export const selectRevisionsByDrawing = createSelector(
+const selectRevisionsByDrawing = createSelector(
 	selectRevisionsDomain,
 	(state) => state.revisionsByDrawing || {},
 );
@@ -31,8 +31,7 @@ export const selectRevisionsByDrawing = createSelector(
 export const selectRevisions = createSelector(
 	selectRevisionsByDrawing,
 	selectDrawingIdParam,
-	(revisionsByDrawing, drawingId) => revisionsByDrawing[drawingId]?.map((revision) => prepareRevisionData(revision))
-		|| [],
+	(revisionsByDrawing, drawingId) => revisionsByDrawing[drawingId]?.map((revision) => prepareRevisionData(revision)) || [],
 );
 
 export const selectRevisionsPending = createSelector(
@@ -41,7 +40,7 @@ export const selectRevisionsPending = createSelector(
 	(revisions, drawing) => revisions.length !== drawing.revisionsCount,
 );
 
-export const selectIsPending: (any, string) => boolean = createSelector(
+export const selectIsPending = createSelector(
 	selectRevisionsDomain,
 	selectDrawingIdParam,
 	(state, drawingId) => state.isPending[drawingId],
@@ -57,13 +56,13 @@ export const selectUploadIsComplete = createSelector(
 	(uploadStates) => Object.keys(uploadStates).every((id) => uploadStates[id].isComplete),
 );
 
-export const selectUploadError: (any, string) => string = createSelector(
+export const selectUploadError = createSelector(
 	selectUploads,
 	selectDrawingIdParam,
 	(uploadStates, drawingId) => uploadStates[drawingId]?.errorMessage || null,
 );
 
-export const selectUploadProgress: (any, string) => number = createSelector(
+export const selectUploadProgress = createSelector(
 	selectUploads,
 	selectDrawingIdParam,
 	(uploadStates, drawingId) => uploadStates[drawingId]?.progress || 0,
