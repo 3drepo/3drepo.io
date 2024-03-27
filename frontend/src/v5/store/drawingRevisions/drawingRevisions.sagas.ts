@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, select, takeEvery, takeLatest } from 'redux-saga/effects';
+import { put, select, takeEvery } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
@@ -30,9 +30,11 @@ import { CreateRevisionAction,
 import { DrawingsActions } from '../drawings/drawings.redux';
 import { DrawingUploadStatus } from '../drawings/drawings.types';
 import { createDrawingFromRevisionBody, createFormDataFromRevisionBody } from './drawingRevisions.helpers';
-import { selectRevisions } from './drawingRevisions.selectors';
+import { selectIsPending, selectRevisions } from './drawingRevisions.selectors';
 
 export function* fetch({ teamspace, projectId, drawingId, onSuccess }: FetchAction) {
+	if (yield select(selectIsPending, drawingId)) return;
+
 	yield put(DrawingRevisionsActions.setIsPending(drawingId, true));
 	try {
 		const { data: { revisions } } = yield API.DrawingRevisions.fetchRevisions(teamspace, projectId, drawingId);
@@ -110,7 +112,7 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 }
 
 export default function* RevisionsSaga() {
-	yield takeLatest(DrawingRevisionsTypes.FETCH, fetch);
-	yield takeLatest(DrawingRevisionsTypes.SET_VOID_STATUS, setVoidStatus);
+	yield takeEvery(DrawingRevisionsTypes.FETCH, fetch);
+	yield takeEvery(DrawingRevisionsTypes.SET_VOID_STATUS, setVoidStatus);
 	yield takeEvery(DrawingRevisionsTypes.CREATE_REVISION, createRevision);
 }

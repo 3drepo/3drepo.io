@@ -36,7 +36,6 @@ import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingRevisionsActionDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { UploadList } from './uploadList/uploadList.component';
 import { parseFileName, reduceFileData, isPdf, getPdfFirstPage, fileToPdf, pdfToFile } from '@components/shared/uploadFiles/uploadFiles.helpers';
-import { sanitiseDrawing } from './uploadDrawingRevisionForm.helpers';
 
 type UploadModalLabelTypes = {
 	isUploading: boolean;
@@ -87,7 +86,6 @@ export const UploadDrawingRevisionForm = ({
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const allUploadsComplete = DrawingRevisionsHooksSelectors.selectUploadIsComplete();
 	const presetDrawing = DrawingsHooksSelectors.selectDrawingById(presetDrawingId);
-	const drawings = DrawingsHooksSelectors.selectDrawings();
 
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 
@@ -145,7 +143,11 @@ export const UploadDrawingRevisionForm = ({
 				statusCode: '',
 				revisionCode: '',
 				revisionDesc: '',
-				...sanitiseDrawing(drawing),
+				drawingId: drawing?._id || '',
+				drawingName: drawing?.name?.trim() || '',
+				drawingNumber: drawing?.drawingNumber || '',
+				drawingDesc: drawing?.desc || '',
+				drawingCategory: drawing?.category || '',
 			});
 		}
 		append(filesToAppend);
@@ -178,7 +180,6 @@ export const UploadDrawingRevisionForm = ({
 			addFilesToList([presetFile], presetDrawing);
 		}
 		DrawingsActionsDispatchers.fetchCategories(teamspace, project);
-		drawings.forEach((drawing) => DrawingRevisionsActionDispatchers.fetch(teamspace, project, drawing._id));
 	}, []);
 
 	return (

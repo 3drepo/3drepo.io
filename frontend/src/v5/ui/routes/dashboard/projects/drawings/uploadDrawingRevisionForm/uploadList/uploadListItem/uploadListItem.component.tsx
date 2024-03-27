@@ -132,7 +132,6 @@ export const UploadListItem = ({
 				disabled={isUploading}
 			/>
 			<UploadListItemCode
-				key={uploadId}
 				name={`${revisionPrefix}.revisionCode`}
 				disabled={isUploading}
 			/>
