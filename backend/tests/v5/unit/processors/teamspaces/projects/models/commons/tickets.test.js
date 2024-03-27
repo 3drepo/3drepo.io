@@ -1020,6 +1020,7 @@ const testUpdateManyTickets = () => {
 					updateData.push({ comments });
 					const ticket = generateTicket(template);
 
+					response.push({});
 					commentsByTickets.push({ ticket: ticket._id, comments });
 					return ticket;
 				});
