@@ -29,9 +29,8 @@ import { UploadListItemFileIcon } from '@components/shared/uploadFiles/uploadLis
 import { UploadListItemTitle } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemTitle/uploadListItemTitle.component';
 import { UploadProgress } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadProgress/uploadProgress.component';
 import { formatMessage } from '@/v5/services/intl';
-import { DrawingUploadStatus } from '@/v5/store/drawings/drawings.types';
-import { sanitiseDrawing } from '../../uploadDrawingRevisionForm.helpers';
-import { get } from 'lodash';
+import { DrawingUploadStatus, IDrawing } from '@/v5/store/drawings/drawings.types';
+import { useParams } from 'react-router-dom';
 import { DrawingRevisionsActionDispatchers } from '@/v5/services/actionsDispatchers';
 
 const UNEXPETED_STATUS_ERROR = undefined;
@@ -75,37 +74,46 @@ export const UploadListItem = ({
 	isUploading,
 }: IUploadListItem): JSX.Element => {
 	const revisionPrefix = `uploads.${index}`;
+	const { teamspace, project } = useParams();
 	const uploadErrorMessage: string = DrawingRevisionsHooksSelectors.selectUploadError(uploadId);
 	const { watch, trigger, setValue } = useFormContext();
 	const drawingId = watch(`${revisionPrefix}.drawingId`);
 	const statusCode = watch(`${revisionPrefix}.statusCode`);
 	const revisionCode = watch(`${revisionPrefix}.revisionCode`);
 	const selectedDrawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
+	const selectedDrawingRevisions = DrawingRevisionsHooksSelectors.selectRevisions(selectedDrawing?._id);
 	const progress = DrawingRevisionsHooksSelectors.selectUploadProgress(uploadId);
 	const uploadStatus = getUploadStatus(progress, uploadErrorMessage);
+
+	const sanitiseDrawing = (drawing: IDrawing) => ({
+		drawingNumber: drawing?.drawingNumber || '',
+		drawingDesc: drawing?.desc || '',
+		drawingCategory: drawing?.category || '',
+	});
 
 	useEffect(() => {
 		if (revisionCode) {
 			trigger(`${revisionPrefix}.revisionCode`);
 		}
-	}, [drawingId, statusCode]);
+	}, [drawingId, statusCode, selectedDrawingRevisions.length]);
 
 	useEffect(() => {
 		trigger(`${revisionPrefix}.statusCode`);
-	}, [drawingId, revisionCode]);
+	}, [drawingId, revisionCode, selectedDrawingRevisions.length]);
 
 	useEffect(() => {
-		const { drawingName, ...drawingData } = sanitiseDrawing(selectedDrawing);
-		for (const [key, val] of Object.entries(drawingData)) {
+		for (const [key, val] of Object.entries(sanitiseDrawing(selectedDrawing))) {
 			setValue(`${revisionPrefix}.${key}`, val);
+		}
+		if (selectedDrawing?._id) {
+			DrawingRevisionsActionDispatchers.fetch(teamspace, project, selectedDrawing._id);
 		}
 	}, [JSON.stringify(selectedDrawing)]);
 
 	return (
-		<UploadListItemRow selected={isSelected}>
+		<UploadListItemRow selected={isSelected} key={uploadId}>
 			<UploadListItemFileIcon extension={fileData.extension} />
 			<UploadListItemTitle
-				key={`${uploadId}.title`}
 				revisionPrefix={revisionPrefix}
 				isSelected={isSelected}
 				name={fileData.name}
@@ -114,18 +122,17 @@ export const UploadListItem = ({
 			<InputController
 				Input={UploadListItemDestination}
 				name={`${revisionPrefix}.drawingName`}
-				key={`${uploadId}.drawingName`}
+				key={drawingId}
 				index={index}
 				revisionPrefix={revisionPrefix}
 				disabled={isUploading}
 			/>
 			<UploadListItemCode
-				key={`${uploadId}.statusCode`}
 				name={`${revisionPrefix}.statusCode`}
 				disabled={isUploading}
 			/>
 			<UploadListItemCode
-				key={`${uploadId}.revisionCode`}
+				key={uploadId}
 				name={`${revisionPrefix}.revisionCode`}
 				disabled={isUploading}
 			/>
