@@ -241,7 +241,8 @@ Tickets.updateManyTickets = async (teamspace, project, model, template, oldTicke
 		return others;
 	});
 
-	const commentsPromises = importComments(teamspace, project, model, commentsByTickets, author);
+	const commentsPromises = commentsByTickets.length
+		? importComments(teamspace, project, model, commentsByTickets, author) : Promise.resolve();
 
 	const externalDataDelta = processSpecialProperties(template, oldTickets, dataWithoutComments);
 	const changeSet = await updateManyTickets(teamspace, project, model, oldTickets, dataWithoutComments, author);
