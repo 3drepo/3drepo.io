@@ -22,3 +22,8 @@ export const selectDialogDomain = (state):IDialogState => state.dialogsV5;
 export const selectDialogs = createSelector(
 	selectDialogDomain, (state) => state.dialogs,
 );
+
+export const selectIsAlertOpen = createSelector(
+	selectDialogs,
+	(dialogs) => dialogs.some(({ modalType }) => modalType === 'alert'),
+);

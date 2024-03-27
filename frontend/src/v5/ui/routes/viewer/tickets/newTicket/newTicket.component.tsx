@@ -85,6 +85,7 @@ export const NewTicketCard = () => {
 				resolve();
 				goToTicketDetails(ticketId);
 			},
+			resolve,
 		);
 
 		await promiseToResolve;

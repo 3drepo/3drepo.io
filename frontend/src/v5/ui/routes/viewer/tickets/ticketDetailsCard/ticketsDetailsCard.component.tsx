@@ -18,7 +18,7 @@
 import { ArrowBack, CardContainer, CardHeader, HeaderButtons } from '@components/viewer/cards/card.styles';
 import { useContext, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DialogsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { findEditedGroup, modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
@@ -46,6 +46,7 @@ export const TicketDetailsCard = () => {
 	const { teamspace, project, containerOrFederation, revision } = useParams();
 	const [, setTicketId] = useSearchParam('ticketId');
 
+	const isAlertOpen = DialogsHooksSelectors.selectIsAlertOpen();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const filteredTickets = TicketsCardHooksSelectors.selectTicketsWithAllFiltersApplied() as any;
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
@@ -91,6 +92,7 @@ export const TicketDetailsCard = () => {
 	});
 
 	const onBlurHandler = async () => {
+		if (isAlertOpen) return;
 		const formValues = formData.getValues();
 		let errors = {};
 		try {
@@ -118,7 +120,8 @@ export const TicketDetailsCard = () => {
 
 		sanitizeViewVals(validVals, ticket, template);
 		if (isEmpty(validVals)) return;
-		TicketsActionsDispatchers.updateTicket(teamspace, project, containerOrFederation, ticket._id, validVals, isFederation);
+		const onError = () => formData.reset(ticket);
+		TicketsActionsDispatchers.updateTicket(teamspace, project, containerOrFederation, ticket._id, validVals, isFederation, onError);
 	};
 
 	useEffect(() => {

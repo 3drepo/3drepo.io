@@ -25,7 +25,9 @@ export interface PropertyDefinition {
 	type: PropertyTypeDefinition;
 	values?: string[] | 'jobsAndUsers' | 'riskCategories';
 	default?: string;
+	unique?: boolean;
 	readOnly?: boolean;
+	readOnlyOnUI?: boolean;
 	immutable?: boolean;
 	required?: boolean;
 	deprecated?: boolean;
