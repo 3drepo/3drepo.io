@@ -47,7 +47,7 @@ export const selectIsPending: (any, string) => boolean = createSelector(
 	(state, containerId) => state.isPending[containerId],
 );
 
-const selectUploads = createSelector(
+export const selectUploads = createSelector(
 	selectRevisionsDomain,
 	(revisionsState) => revisionsState.revisionsUploadStatus,
 );

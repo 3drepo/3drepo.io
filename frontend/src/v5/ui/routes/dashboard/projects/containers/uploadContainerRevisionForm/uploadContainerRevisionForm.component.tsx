@@ -182,18 +182,6 @@ export const UploadContainerRevisionForm = ({
 		FederationsActionsDispatchers.fetchFederations(teamspace, project);
 	}, []);
 
-	console.log('re-render');
-	useEffect(() => {console.log('presetContainerId', presetContainerId);}, [presetContainerId]);
-	useEffect(() => {console.log('presetFile', presetFile);}, [presetFile]);
-	useEffect(() => {console.log('open', open);}, [open]);
-	useEffect(() => {console.log('onClickClose', onClickClose);}, [onClickClose]);
-	useEffect(() => { console.log('teamspace', teamspace); }, [teamspace]);
-	useEffect(() => { console.log('project', project); }, [project]);
-	useEffect(() => { console.log('allUploadsComplete', allUploadsComplete); }, [JSON.stringify(allUploadsComplete)]);
-	useEffect(() => { console.log('presetContainer', presetContainer); }, [JSON.stringify(presetContainer)]);
-	useEffect(() => { console.log('isUploading', isUploading); }, [JSON.stringify(isUploading)]);
-	useEffect(() => { console.log('fields', fields); }, [JSON.stringify(fields)]);
-
 	return (
 		<FormProvider {...formData}>
 			{/* @ts-ignore */}
