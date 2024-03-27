@@ -67,6 +67,13 @@ export const DrawingsListItem = memo(({
 		}
 	};
 
+	useEffect(() => {
+		if (isMainList) {
+			// TODO - add realtime events
+		}
+		return null;
+	}, [drawing._id]);
+
 	return (
 		<DashboardListItem selected={isSelected} key={drawing._id}>
 			<DashboardListItemRow selected={isSelected} onClick={() => onSelectOrToggleItem(drawing._id)}>
@@ -127,7 +134,7 @@ export const DrawingsListItem = memo(({
 			{isSelected && (
 				<div>
 					{revisions.map((rev) => (
-						<div>{rev.name} - {rev.timestamp}</div>
+						<div>{rev.name} - {+rev.timestamp}</div>
 					))}
 				</div>
 			)}
