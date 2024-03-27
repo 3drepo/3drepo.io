@@ -34,7 +34,6 @@ export interface MinimumDrawing {
 // TODO: Unfinished interface
 export interface IDrawing extends MinimumDrawing {
 	desc?: string;
-	total: number;
 	lastUpdated?: Date;
 	latestRevision?: string;
 	calibration?: CalibrationStates;
@@ -57,12 +56,12 @@ export interface DrawingStats {
 	revisions : {
 		total: number;
 		lastUpdated?: number;
-		drawingNumber: string,
 		latestRevision?: string,
-		calibration?: CalibrationStates,
-		category?: string, // TODO - add category types
-		status?: any, // TODO - add drawing statuses
 	};
+	drawingNumber: string,
+	calibration?: CalibrationStates,
+	category?: string, // TODO - add category types
+	status?: any, // TODO - add drawing statuses
 	errorReason?: {
 		message: string;
 		timestamp: number;

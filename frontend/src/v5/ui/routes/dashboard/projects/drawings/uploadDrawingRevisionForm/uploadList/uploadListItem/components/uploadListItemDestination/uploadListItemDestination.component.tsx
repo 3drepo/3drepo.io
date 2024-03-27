@@ -20,7 +20,7 @@ import { useFormContext } from 'react-hook-form';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { createFilterOptions } from '@mui/material';
 import { DrawingsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { canUploadToBackend, prepareSingleDrawingData } from '@/v5/store/drawings/drawing.helpers';
+import { canUploadToBackend, prepareSingleDrawingData } from '@/v5/store/drawings/drawings.helpers';
 import { formatMessage } from '@/v5/services/intl';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
 import { isCollaboratorRole } from '@/v5/store/store.helpers';

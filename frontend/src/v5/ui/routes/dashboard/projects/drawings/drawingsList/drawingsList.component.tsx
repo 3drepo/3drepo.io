@@ -25,7 +25,7 @@ import { VirtualList } from '@controls/virtualList/virtualList.component';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { CollapseSideElementGroup, Container } from '../../containers/containersList/containersList.styles';
-import { UploadFileForm } from '../../containers/uploadFileForm/uploadFileForm.component';
+import { UploadDrawingRevisionForm } from '../uploadDrawingRevisionForm/uploadDrawingRevisionForm.component';
 import { AddCircleIcon } from '../../federations/editFederationModal/editFederation/editFederationContainersList/editFederationContainersListItem/groupOption/groupOption.styles';
 import { SearchInput } from '../../tickets/tickets.styles';
 import { useCallback, useContext, useState } from 'react';
@@ -85,7 +85,7 @@ export const DrawingsList = ({
 								startIcon={<ArrowUpCircleIcon />}
 								variant="contained"
 								color="primary"
-								onClick={() => DialogsActionsDispatchers.open(UploadFileForm)}
+								onClick={() => DialogsActionsDispatchers.open(UploadDrawingRevisionForm)}
 							>
 								<FormattedMessage id="drawings.mainHeader.uploadFiles" defaultMessage="Upload files" />
 							</Button>
@@ -97,7 +97,7 @@ export const DrawingsList = ({
 					<DashboardListHeaderLabel name="name" {...DRAWING_LIST_COLUMN_WIDTHS.name}>
 						<FormattedMessage id="drawings.list.header.drawing" defaultMessage="Drawing" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="total" {...DRAWING_LIST_COLUMN_WIDTHS.total}>
+					<DashboardListHeaderLabel name="revisionsCount" {...DRAWING_LIST_COLUMN_WIDTHS.revisionsCount}>
 						<FormattedMessage id="drawings.list.header.revisions" defaultMessage="Revisions" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="calibration" {...DRAWING_LIST_COLUMN_WIDTHS.calibration}>

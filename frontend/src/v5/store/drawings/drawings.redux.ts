@@ -73,8 +73,9 @@ export const fetchCategoriesSuccess = (state: DrawingsState, { projectId, catego
 export const createDrawingSuccess = (state: DrawingsState, { projectId, drawing }:CreateDrawingSuccessAction ) => {
 	state.drawingsByProject[projectId] = (state.drawingsByProject[projectId] || []).concat([{
 		...drawing,
-		total: 0,
+		revisionsCount: 0,
 		calibration: CalibrationStates.EMPTY,
+		status: DrawingUploadStatus.OK,
 	}]);
 };
 
