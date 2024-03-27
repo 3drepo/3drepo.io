@@ -150,18 +150,18 @@ const insertTicketsImageTest = async (isImport, isView) => {
 			expectedTicket.properties[imageTestData.propName].screenshot = prop.screenshot;
 			expectedTicket.modules[imageTestData.moduleName][imageTestData.propName].screenshot = modProp.screenshot;
 
-			refFiles.push({ ref: prop.screenshot,
+			refFiles.push({ id: prop.screenshot,
 				data: imageTestData.data[i].propBuffer,
 				meta });
-			refFiles.push({ ref: modProp.screenshot,
+			refFiles.push({ id: modProp.screenshot,
 				data: imageTestData.data[i].modPropBuffer,
 				meta });
 		} else {
 			expectedTicket.properties[imageTestData.propName] = prop;
 			expectedTicket.modules[imageTestData.moduleName][imageTestData.propName] = modProp;
 
-			refFiles.push({ ref: prop, data: imageTestData.data[i].propBuffer, meta });
-			refFiles.push({ ref: modProp, data: imageTestData.data[i].modPropBuffer, meta });
+			refFiles.push({ id: prop, data: imageTestData.data[i].propBuffer, meta });
+			refFiles.push({ id: modProp, data: imageTestData.data[i].modPropBuffer, meta });
 		}
 
 		return expectedTicket;
@@ -275,8 +275,8 @@ const updateImagesTestHelper = async (updateMany, isView) => {
 
 		refsToDelete.push(oldPropRef, oldModPropRef);
 		const meta = { ticket: tickets[i]._id, project, teamspace, model };
-		refFiles.push({ meta, ref: propRef, data: propBuffer });
-		refFiles.push({ meta, ref: modPropRef, data: modPropBuffer });
+		refFiles.push({ meta, id: propRef, data: propBuffer });
+		refFiles.push({ meta, id: modPropRef, data: modPropBuffer });
 
 		return {
 			properties: { [imageTestData.propName]: generatePropData(propRef, isView) },

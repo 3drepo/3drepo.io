@@ -169,7 +169,7 @@ const processExternalData = async (teamspace, project, model, ticketIds, data) =
 		refsToRemove.push(...binaries.toRemove);
 
 		binariesToSave.push(...binaries.toAdd.map(({ ref, data: bin }) => ({
-			ref, data: bin, meta: { teamspace, project, model, ticket: ticketId } })));
+			id: ref, data: bin, meta: { teamspace, project, model, ticket: ticketId } })));
 
 		await Promise.all([
 			groups.toAdd.length ? addGroups(teamspace, project, model, ticketId, groups.toAdd) : Promise.resolve(),
