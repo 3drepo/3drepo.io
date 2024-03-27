@@ -15,27 +15,41 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// TODO: Unfinished interface
-export interface IDrawing {
+import { Role } from '../currentUser/currentUser.types';
+
+export enum CalibrationStates {
+	CALIBRATED = 'calibrated',
+	OUT_OF_SYNC = 'outOfSync',
+	UNCALIBRATED = 'uncalibrated',
+	EMPTY = 'empty',
+}
+
+export interface MinimumDrawing {
 	_id: string;
 	name: string;
+	role: Role;
+	isFavourite: boolean;
+}
+
+// TODO: Unfinished interface
+export interface IDrawing extends MinimumDrawing {
 	desc?: string;
+	total: number;
+	lastUpdated?: Date;
+	latestRevision?: string;
+	calibration?: CalibrationStates;
+	category: string; // TODO - add category types?
 	drawingNumber: string;
-	category: string;
 	status: DrawingUploadStatus;
 	revisionsCount: number;
 	role: any;
-	latestRevision: string;
-	lastUpdated: Date;
 	isFavourite: boolean;
-	hasStatsPending: boolean;
+	hasStatsPending?: boolean;
 	errorReason?: {
 		message: string;
 		timestamp: Date | null;
 	};
 }
-
-export type MinimumDrawing = Pick<IDrawing, '_id' | 'name' | 'drawingNumber' | 'category' | 'role' | 'isFavourite'>;
 
 // TODO: Unfinished interface
 export interface DrawingStats {
@@ -43,13 +57,16 @@ export interface DrawingStats {
 	revisions : {
 		total: number;
 		lastUpdated?: number;
-		latestRevision?: string;
+		drawingNumber: string,
+		latestRevision?: string,
+		calibration?: CalibrationStates,
+		category?: string, // TODO - add category types
+		status?: any, // TODO - add drawing statuses
 	};
 	errorReason?: {
 		message: string;
 		timestamp: number;
 	};
-	status: DrawingUploadStatus;
 }
 
 export type NewDrawing = {

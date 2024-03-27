@@ -22,7 +22,7 @@ import * as CanvasHistorySelectors from '@/v4/modules/canvasHistory/canvasHistor
 import * as ContainersSelectors from '@/v5/store/containers/containers.selectors';
 import * as ContainerRevisionsSelectors from '@/v5/store/containerRevisions/containerRevisions.selectors';
 import * as CurrentUserSelectors from '@/v5/store/currentUser/currentUser.selectors';
-import * as DrawingSelectors from '@/v5/store/drawings/drawings.selectors';
+import * as DrawingsSelectors from '@/v5/store/drawings/drawings.selectors';
 import * as DrawingRevisionsSelectors from '@/v5/store/drawingRevisions/drawingRevisions.selectors';
 import * as ProjectsSelectors from '@/v5/store/projects/projects.selectors';
 import * as FederationsSelectors from '@/v5/store/federations/federations.selectors';
@@ -45,7 +45,7 @@ export const BimHooksSelectors = createHooksSelectors(BimSelectors);
 export const ContainersHooksSelectors = createHooksSelectors(ContainersSelectors);
 export const CanvasHistoryHooksSelectors = createHooksSelectors(CanvasHistorySelectors);
 export const CurrentUserHooksSelectors = createHooksSelectors(CurrentUserSelectors);
-export const DrawingsHooksSelectors = createHooksSelectors(DrawingSelectors);
+export const DrawingsHooksSelectors = createHooksSelectors(DrawingsSelectors);
 export const DrawingRevisionsHooksSelectors = createHooksSelectors(DrawingRevisionsSelectors);
 export const FederationsHooksSelectors = createHooksSelectors(FederationsSelectors);
 export const GroupsHooksSelectors = createHooksSelectors(GroupsSelectors);
