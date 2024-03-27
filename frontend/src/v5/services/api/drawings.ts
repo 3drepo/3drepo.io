@@ -58,16 +58,18 @@ export const fetchDrawings = (teamspace, projectId): Promise<IDrawing[]> => {
 };
 
 export const fetchDrawingsStats = async (teamspace, projectId, drawingId): Promise<DrawingStats> => {
-	const stats =   [{
+	const stats = [{
 		_id: drawings[0]._id,
 		revisions : { total: 2, lastUpdated: 1709569331628,  latestRevision:'rev2' },
+		status: DrawingUploadStatus.OK,
 	},
 	{
 		_id: drawings[1]._id,
 		revisions : { total: 2, lastUpdated: 1709569331628,  latestRevision:'rev2' },
+		status: DrawingUploadStatus.OK,
 	}];
 
-	return delay<DrawingStats>(Math.random() * 250, stats.find(((s)=> s._id === drawingId))) ;
+	return delay<DrawingStats>(Math.random() * 250, stats.find(((s)=> s._id === drawingId)));
 };
 
 

@@ -45,7 +45,6 @@ export interface DrawingStats {
 		lastUpdated?: number;
 		latestRevision?: string;
 	};
-	type: string;
 	errorReason?: {
 		message: string;
 		timestamp: number;
