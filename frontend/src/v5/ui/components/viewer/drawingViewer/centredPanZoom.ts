@@ -23,9 +23,27 @@ import { PanZoom, PanZoomOptions } from 'panzoom';
 const panzoom = (target: HTMLElement | SVGElement, options) => {
 	const transform = { scale:1, x: 0, y: 0 };
 	const zoomStep = 0.2;
+	target.style.transformOrigin = '0 0';
+	target.style.userSelect = 'none';
+	target.setAttribute('draggable', 'false');
+	const scrollHorizontal = document.createElement('div');
+	const scrollVertical = document.createElement('div');
+	scrollHorizontal.style.width = 'fit-content';
+	scrollHorizontal.style.height = 'fit-content';
+	scrollVertical.style.width = 'fit-content';
+	scrollVertical.style.height = 'fit-content';
+	const container = target.parentElement;
+
+	target.parentElement.replaceChild(scrollHorizontal, target);
 	
+	scrollHorizontal.appendChild(scrollVertical);
+	scrollVertical.appendChild(target);
+
+	const speed = { x:0, y: 0 };
+
+
 	const onWheel = (ev: WheelEvent) => {
-		const newScale = transform.scale + zoomStep * -Math.sign(ev.deltaY);
+		const newScale = transform.scale * (1 + zoomStep * -Math.sign(ev.deltaY));
 		const originalRect = target.getBoundingClientRect();
 		const targetPos = { x: ev.clientX - originalRect.x, y: ev.clientY - originalRect.y } ;
 
@@ -36,36 +54,83 @@ const panzoom = (target: HTMLElement | SVGElement, options) => {
 		transform.x = newPos.x;
 		transform.y = newPos.y;
 
-		target.style.transform = 'scale(' + transform.scale + ') translateX(' + transform.x / transform.scale + 'px) translateY(' + transform.y / transform.scale  + 'px)';
+		scrollHorizontal.style.transition = 'none';
+		scrollVertical.style.transition = 'none';
+
+		target.style.transform = 'scale(' + transform.scale + ')'; 
+		scrollHorizontal.style.transform = 'translateX(' + transform.x + 'px)';
+		scrollVertical.style.transform = 'translateY(' + transform.y + 'px)';
+
+		speed.x = 0;
+		speed.y = 0;
 	};
 
 	const onMouseMove = (ev: MouseEvent) => {
 		transform.x += ev.movementX;
 		transform.y += ev.movementY;
-		target.style.transform = 'scale(' + transform.scale + ') translateX(' + transform.x / transform.scale + 'px) translateY(' + transform.y / transform.scale  + 'px)';
+	
+		target.style.transform = 'scale(' + transform.scale + ')'; 
+		scrollHorizontal.style.transform = 'translateX(' + transform.x + 'px)';
+		scrollVertical.style.transform = 'translateY(' + transform.y + 'px)';
+
+		speed.x = ev.movementX * 10;
+		speed.y = ev.movementY * 10;
 	};
 
 	const onMouseDown = () => {
-		target.parentElement.addEventListener('mousemove', onMouseMove);
+		
+		const parentRect = container.getBoundingClientRect();
+
+		transform.x = scrollHorizontal.getBoundingClientRect().x - parentRect.x;
+		transform.y = scrollVertical.getBoundingClientRect().y - parentRect.y;
+		
+		
+		scrollHorizontal.style.transition = 'none';
+		scrollVertical.style.transition = 'none';
+		
+		scrollHorizontal.style.transform = 'translateX(' + transform.x + 'px)';
+		scrollVertical.style.transform = 'translateY(' + transform.y + 'px)';
+
+		speed.x = 0;
+		speed.y = 0;
+		
+		container.addEventListener('mousemove', onMouseMove);
 	};
 
 	const onMouseUp = () => {
-		target.parentElement.removeEventListener('mousemove', onMouseMove);
+		container.removeEventListener('mousemove', onMouseMove);
+
+		const acc = 9.8;
+		const tx = Math.abs((speed.x / acc) / 10);
+		const ty = Math.abs((speed.y / acc) / 10);
+		const t = Math.max(tx,ty);
+
+		const acc2 =  acc * 2;
+
+		transform.x += speed.x ** 2  * Math.sign(speed.x) / acc2;
+		transform.y += speed.y ** 2  * Math.sign(speed.y) / acc2;
+
+
+
+		scrollHorizontal.style.transition = `all ${t}s cubic-bezier(0,.33,.66,1)`;
+		scrollVertical.style.transition = `all ${t}s cubic-bezier(0,.33,.66,1)`;
+		
+		scrollHorizontal.style.transform = 'translateX(' + transform.x + 'px)';
+		scrollVertical.style.transform = 'translateY(' + transform.y + 'px)';
 	};
 
 	const subscribeToEvents = () => {
-		target.parentElement.addEventListener('wheel', onWheel);
-		target.parentElement.addEventListener('mousedown', onMouseDown);
-		target.parentElement.addEventListener('mouseup', onMouseUp);
+		container.addEventListener('wheel', onWheel);
+		container.addEventListener('mousedown', onMouseDown);
+		container.addEventListener('mouseup', onMouseUp);
 	};
 
 	const unSubscribeToEvents = () => {
-		// target.parentElement.removeEventListener('wheel', onWheel);
-		// target.parentElement.removeEventListener('mousemove', onMouseMove);
+		container.removeEventListener('wheel', onWheel);
+		container.removeEventListener('mousemove', onMouseDown);
+		container.removeEventListener('mousedown', onMouseMove);
+		container.removeEventListener('mouseup', onMouseUp);
 	};
-
-	target.style.transformOrigin = '0 0';
-	target.setAttribute('draggable', 'false');
 
 	subscribeToEvents();
 
@@ -121,23 +186,23 @@ export const centredPanZoom = (target: HTMLImageElement | SVGSVGElement, padding
 	const actualPaddingW = (parentRect.width - size.scaledWidth) / 2 ;
 	const actualPaddingH = (parentRect.height -  size.scaledHeight ) / 2 ;
 
-	pz.on('transform', () => {
-		const targetRect = target.getBoundingClientRect();
-		const t = pz.getTransform();
+	// pz.on('transform', () => {
+	// 	const targetRect = target.getBoundingClientRect();
+	// 	const t = pz.getTransform();
 
-		const maxX =  actualPaddingW * t.scale;
-		const minX =  parentRect.width - targetRect.width - actualPaddingW * t.scale;
+	// 	const maxX =  actualPaddingW * t.scale;
+	// 	const minX =  parentRect.width - targetRect.width - actualPaddingW * t.scale;
 
 
-		const maxY =  actualPaddingH * t.scale;
-		const minY =  parentRect.height - targetRect.height - actualPaddingH * t.scale;
+	// 	const maxY =  actualPaddingH * t.scale;
+	// 	const minY =  parentRect.height - targetRect.height - actualPaddingH * t.scale;
 
-		if (t.x > maxX || t.x < minX || t.y > maxY || t.y < minY) {
-			const x = Math.max(Math.min(t.x, maxX), minX);
-			const y = Math.max(Math.min(t.y, maxY), minY);
-			pz.moveTo(x, y);
-		}
-	});
+	// 	if (t.x > maxX || t.x < minX || t.y > maxY || t.y < minY) {
+	// 		const x = Math.max(Math.min(t.x, maxX), minX);
+	// 		const y = Math.max(Math.min(t.y, maxY), minY);
+	// 		pz.moveTo(x, y);
+	// 	}
+	// });
 
 
 	const zoom = (scale) => {
