@@ -57,7 +57,7 @@ const testAddComment = () => {
 			expect(CommentsModel.addComment).toHaveBeenCalledWith(teamspace, project, model,
 				ticket, commentData, author);
 
-			expect(FilesManager.storeFile).not.toHaveBeenCalled();
+			expect(FilesManager.storeFiles).not.toHaveBeenCalled();
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(
@@ -84,9 +84,9 @@ const testAddComment = () => {
 				{ ...commentData, images: [imgRef] }, author);
 
 			const meta = { teamspace, project, model, ticket };
-			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
-			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL,
-				imgRef, imageBuffer, meta);
+			expect(FilesManager.storeFiles).toHaveBeenCalledTimes(1);
+			expect(FilesManager.storeFiles).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL,
+				[{ id: imgRef, data: imageBuffer, meta }]);
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(
@@ -126,7 +126,7 @@ const testImportComments = () => {
 			expect(CommentsModel.importComments).toHaveBeenCalledWith(teamspace, project, model,
 				commentData, author);
 
-			expect(FilesManager.storeFile).not.toHaveBeenCalled();
+			expect(FilesManager.storeFiles).not.toHaveBeenCalled();
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(expectedOutput.length);
 			expectedOutput.forEach((data) => {
@@ -160,16 +160,17 @@ const testImportComments = () => {
 			expect(CommentsModel.importComments).toHaveBeenCalledWith(teamspace, project, model,
 				expect.any(Array), author);
 
-			expect(FilesManager.storeFile).toHaveBeenCalledTimes(expectedOutput.length);
-			commentsWithRefs.forEach(({ ticket, comments }, i) => comments.forEach(
+			expect(FilesManager.storeFiles).toHaveBeenCalledTimes(expectedOutput.length);
+			const storeFilesParams = commentsWithRefs.flatMap(({ ticket, comments }, i) => comments.map(
 				({ images: [imgRef], ...others }, j) => {
 					const { images, ...orgComment } = commentData[i].comments[j];
 					expect(others).toEqual(orgComment);
 
 					const meta = { teamspace, project, model, ticket };
-					expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL,
-						imgRef, images[0], meta);
+					return { id: imgRef, data: images[0], meta };
 				}));
+
+			expect(FilesManager.storeFiles).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL, storeFilesParams);
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(expectedOutput.length);
 			expectedOutput.forEach((data) => {
@@ -201,7 +202,7 @@ const testUpdateComment = () => {
 			expect(CommentsModel.updateComment).toHaveBeenCalledWith(teamspace, project, model, ticket,
 				oldComment, updateData);
 
-			expect(FilesManager.storeFile).not.toHaveBeenCalled();
+			expect(FilesManager.storeFiles).not.toHaveBeenCalled();
 		});
 
 		test('should process image and store a ref', async () => {
@@ -220,9 +221,9 @@ const testUpdateComment = () => {
 				oldComment, updateData);
 
 			const meta = { teamspace, project, model, ticket };
-			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
-			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL,
-				imgRef, imageBuffer, meta);
+			expect(FilesManager.storeFiles).toHaveBeenCalledTimes(1);
+			expect(FilesManager.storeFiles).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL,
+				[{ id: imgRef, data: imageBuffer, meta }]);
 		});
 	});
 };
