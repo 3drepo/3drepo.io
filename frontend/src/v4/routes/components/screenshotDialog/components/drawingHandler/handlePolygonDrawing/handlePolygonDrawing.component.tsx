@@ -16,7 +16,7 @@
  */
 
 import { between } from '../../../../../../helpers/between';
-import { ELEMENT_TYPES } from '../../../screenshotDialog.helpers';
+import { ELEMENT_TYPES } from '../../../markupStage/markupStage.helpers';
 import { createDrawnLine } from '../handleBaseDrawing/handleBaseDrawing.helpers';
 
 import {
