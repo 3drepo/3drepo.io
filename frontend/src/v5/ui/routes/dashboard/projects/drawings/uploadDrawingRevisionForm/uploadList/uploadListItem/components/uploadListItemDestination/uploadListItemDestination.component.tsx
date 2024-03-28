@@ -64,11 +64,13 @@ interface IUploadListItemDestination {
 	disabled?: boolean;
 	className?: string;
 	index: number;
+	onSelectNewDestination: () => void;
 }
 export const UploadListItemDestination = memo(({
 	value,
 	revisionPrefix,
 	index,
+	onSelectNewDestination,
 	...props
 }: IUploadListItemDestination): JSX.Element => {
 	const [newOrExisting, setNewOrExisting] = useState<NewOrExisting>('');
@@ -173,6 +175,10 @@ export const UploadListItemDestination = memo(({
 	const onDestinationChange = (e, newVal: IDrawing | null) => {
 		setValue(`${revisionPrefix}.drawingName`, newVal?.name?.trim() || '');
 		setValue(`${revisionPrefix}.drawingId`, newVal?._id || '', { shouldValidate: true });
+
+		if (!newVal?._id) {
+			onSelectNewDestination();
+		}
 	};
 
 	const onOpen = () => {

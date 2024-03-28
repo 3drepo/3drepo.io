@@ -126,6 +126,7 @@ export const UploadListItem = ({
 				index={index}
 				revisionPrefix={revisionPrefix}
 				disabled={isUploading}
+				onSelectNewDestination={onClickEdit}
 			/>
 			<UploadListItemCode
 				name={`${revisionPrefix}.statusCode`}
