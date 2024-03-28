@@ -160,7 +160,7 @@ const testImportComments = () => {
 			expect(CommentsModel.importComments).toHaveBeenCalledWith(teamspace, project, model,
 				expect.any(Array), author);
 
-			expect(FilesManager.storeFiles).toHaveBeenCalledTimes(expectedOutput.length);
+			expect(FilesManager.storeFiles).toHaveBeenCalledTimes(1);
 			const storeFilesParams = commentsWithRefs.flatMap(({ ticket, comments }, i) => comments.map(
 				({ images: [imgRef], ...others }, j) => {
 					const { images, ...orgComment } = commentData[i].comments[j];
