@@ -23,7 +23,7 @@ import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
 import { ContainerStats, IContainer, NewContainer, UploadStatus, ContainerSettings } from './containers.types';
 import { TeamspaceProjectAndContainerId, ProjectAndContainerId, TeamspaceAndProjectId, ProjectId, SuccessAndErrorCallbacks, View } from '../store.types';
-import { IContainerRevision } from '../containerRevisions/containerRevisions.types';
+import { IContainerRevision } from './containerRevisions/containerRevisions.types';
 import { Role } from '../currentUser/currentUser.types';
 
 export const { Types: ContainersTypes, Creators: ContainersActions } = createActions({

@@ -17,7 +17,7 @@
 
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import { CreateDrawingRevisionBody, IDrawingRevision } from './drawingRevisions.types';
-import { NewDrawing } from '../drawings/drawings.types';
+import { NewDrawing } from '../drawings.types';
 
 export const prepareRevisionData = (revision): IDrawingRevision => ({
 	...revision,

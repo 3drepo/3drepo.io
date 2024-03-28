@@ -27,8 +27,8 @@ import { CreateRevisionAction,
 	ContainerRevisionsTypes,
 	SetRevisionVoidStatusAction,
 } from './containerRevisions.redux';
-import { ContainersActions } from '../containers/containers.redux';
-import { UploadStatus } from '../containers/containers.types';
+import { ContainersActions } from '../containers.redux';
+import { UploadStatus } from '../containers.types';
 import { createContainerFromRevisionBody, createFormDataFromRevisionBody } from './containerRevisions.helpers';
 import { selectRevisions } from './containerRevisions.selectors';
 

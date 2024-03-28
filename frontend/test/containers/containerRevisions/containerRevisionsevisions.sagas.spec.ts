@@ -15,16 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { mockServer } from '../../internals/testing/mockServer';
-import { ContainerRevisionsActions } from '@/v5/store/containerRevisions/containerRevisions.redux';
+import { mockServer } from '../../../internals/testing/mockServer';
+import { ContainerRevisionsActions } from '@/v5/store/containers/containerRevisions/containerRevisions.redux';
 import api from '@/v5/services/api/default';
 import { ContainersActions } from '@/v5/store/containers/containers.redux';
 import { mockCreateRevisionBody, containerRevisionsMockFactory } from './containerRevisions.fixtures';
 import { UploadStatus } from '@/v5/store/containers/containers.types';
-import { createTestStore, spyOnAxiosApiCallWithFile } from '../test.helpers';
-import { selectRevisions, selectUploads } from '@/v5/store/containerRevisions/containerRevisions.selectors';
+import { createTestStore, spyOnAxiosApiCallWithFile } from '../../test.helpers';
+import { selectRevisions, selectUploads } from '@/v5/store/containers/containerRevisions/containerRevisions.selectors';
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
-import { containerMockFactory } from '../containers/containers.fixtures';
+import { containerMockFactory } from '../containers.fixtures';
 import { selectContainerById } from '@/v5/store/containers/containers.selectors';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 

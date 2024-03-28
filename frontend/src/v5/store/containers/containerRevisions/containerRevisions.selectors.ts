@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2024 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,34 +16,35 @@
  */
 
 import { createSelector } from 'reselect';
-import { prepareRevisionData } from './drawingRevisions.helpers';
-import { IDrawingRevisionsState } from './drawingRevisions.redux';
-import { selectDrawingById } from '../drawings/drawings.selectors';
+import { prepareRevisionData } from './containerRevisions.helpers';
+import { IContainerRevisionsState } from './containerRevisions.redux';
+import { selectContainerById } from '../containers.selectors';
 
-const selectRevisionsDomain = (state): IDrawingRevisionsState => state.drawingRevisions;
-const selectDrawingIdParam = (_, drawingId: string) => drawingId;
+const selectRevisionsDomain = (state): IContainerRevisionsState => state.containerRevisions;
+const selectContainerIdParam = (_, containerId: string) => containerId;
 
-const selectRevisionsByDrawing = createSelector(
+export const selectRevisionsByContainer = createSelector(
 	selectRevisionsDomain,
-	(state) => state.revisionsByDrawing || {},
+	(state) => state.revisionsByContainer || {},
 );
 
 export const selectRevisions = createSelector(
-	selectRevisionsByDrawing,
-	selectDrawingIdParam,
-	(revisionsByDrawing, drawingId) => revisionsByDrawing[drawingId]?.map((revision) => prepareRevisionData(revision)) || [],
+	selectRevisionsByContainer,
+	selectContainerIdParam,
+	(revisionsByContainer, containerId) => revisionsByContainer[containerId]?.map((revision) => prepareRevisionData(revision))
+		|| [],
 );
 
 export const selectRevisionsPending = createSelector(
 	selectRevisions,
-	selectDrawingById,
-	(revisions, drawing) => revisions.length !== drawing.revisionsCount,
+	selectContainerById,
+	(revisions, container) => revisions.length !== container.revisionsCount,
 );
 
-export const selectIsPending = createSelector(
+export const selectIsPending: (any, string) => boolean = createSelector(
 	selectRevisionsDomain,
-	selectDrawingIdParam,
-	(state, drawingId) => state.isPending[drawingId],
+	selectContainerIdParam,
+	(state, containerId) => state.isPending[containerId],
 );
 
 export const selectUploads = createSelector(
@@ -58,12 +59,12 @@ export const selectUploadIsComplete = createSelector(
 
 export const selectUploadError = createSelector(
 	selectUploads,
-	selectDrawingIdParam,
-	(uploadStates, drawingId) => uploadStates[drawingId]?.errorMessage || null,
+	selectContainerIdParam,
+	(uploadStates, containerId) => uploadStates[containerId]?.errorMessage || null,
 );
 
 export const selectUploadProgress = createSelector(
 	selectUploads,
-	selectDrawingIdParam,
-	(uploadStates, drawingId) => uploadStates[drawingId]?.progress || 0,
+	selectContainerIdParam,
+	(uploadStates, containerId) => uploadStates[containerId]?.progress || 0,
 );

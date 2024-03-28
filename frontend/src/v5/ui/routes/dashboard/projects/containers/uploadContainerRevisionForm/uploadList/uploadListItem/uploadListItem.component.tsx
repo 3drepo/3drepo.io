@@ -26,7 +26,7 @@ import { UploadListItemButton } from './uploadListItem.styles';
 import { useFormContext } from 'react-hook-form';
 import { useEffect } from 'react';
 import { IContainer, UploadStatus } from '@/v5/store/containers/containers.types';
-import { UploadItemFields } from '@/v5/store/containerRevisions/containerRevisions.types';
+import { UploadItemFields } from '@/v5/store/containers/containerRevisions/containerRevisions.types';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { UploadListItemFileIcon } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemTitle } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemTitle/uploadListItemTitle.component';

@@ -18,7 +18,7 @@ import { IContainer } from '@/v5/store/containers/containers.types';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { IProject } from '@/v5/store/projects/projects.types';
 import { generatePath } from 'react-router';
-import { IContainerRevision } from '@/v5/store/containerRevisions/containerRevisions.types';
+import { IContainerRevision } from '@/v5/store/containers/containerRevisions/containerRevisions.types';
 import { VIEWER_ROUTE, PROJECT_ROUTE_BASE, PROJECT_ROUTE, BOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 
 export const projectRoute = (teamspace: string, project: IProject | string) => {

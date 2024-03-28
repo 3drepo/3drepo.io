@@ -19,7 +19,7 @@ import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import { alphaNumericHyphens, stripIfBlankString } from '../shared/validators';
 import { getState } from '@/v4/modules/store';
-import { selectRevisions, selectRevisionsPending } from '@/v5/store/containerRevisions/containerRevisions.selectors';
+import { selectRevisions, selectRevisionsPending } from '@/v5/store/containers/containerRevisions/containerRevisions.selectors';
 import { ContainerRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 export const nullableNumberField = Yup.number()

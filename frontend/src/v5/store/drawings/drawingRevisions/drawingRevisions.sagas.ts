@@ -27,8 +27,8 @@ import { CreateRevisionAction,
 	DrawingRevisionsTypes,
 	SetRevisionVoidStatusAction,
 } from './drawingRevisions.redux';
-import { DrawingsActions } from '../drawings/drawings.redux';
-import { DrawingUploadStatus } from '../drawings/drawings.types';
+import { DrawingsActions } from '../drawings.redux';
+import { DrawingUploadStatus } from '../drawings.types';
 import { createDrawingFromRevisionBody, createFormDataFromRevisionBody } from './drawingRevisions.helpers';
 import { selectIsPending, selectRevisions } from './drawingRevisions.selectors';
 

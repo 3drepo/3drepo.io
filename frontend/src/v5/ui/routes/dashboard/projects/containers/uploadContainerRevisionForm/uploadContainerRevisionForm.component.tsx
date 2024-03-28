@@ -23,7 +23,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { formatMessage } from '@/v5/services/intl';
 import { ContainerRevisionsActionsDispatchers, FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { IContainer } from '@/v5/store/containers/containers.types';
-import { UploadFieldArray } from '@/v5/store/containerRevisions/containerRevisions.types';
+import { UploadFieldArray } from '@/v5/store/containers/containerRevisions/containerRevisions.types';
 import { UploadsSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
 import {
 	TeamspacesHooksSelectors,

@@ -19,7 +19,7 @@ import { revisionDesc } from '../containerAndFederationSchemes/validators';
 import { desc, name, alphaNumericHyphens, uploadFile, trimmedString } from '../shared/validators';
 import { revisionName } from './validators';
 import { formatMessage } from '@/v5/services/intl';
-import { selectRevisions } from '@/v5/store/drawingRevisions/drawingRevisions.selectors';
+import { selectRevisions } from '@/v5/store/drawings/drawingRevisions/drawingRevisions.selectors';
 import { getState } from '@/v4/modules/store';
 
 const drawingNumber = Yup.string().matches(alphaNumericHyphens,

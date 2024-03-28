@@ -19,7 +19,7 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 import { generateV5ApiUrl } from './default';
 import { delay } from '@/v4/helpers/async';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
-import { IDrawingRevision } from '@/v5/store/drawingRevisions/drawingRevisions.types';
+import { IDrawingRevision } from '@/v5/store/drawings/drawingRevisions/drawingRevisions.types';
 import { uuid } from '@/v4/helpers/uuid';
 /* eslint-disable @typescript-eslint/no-unused-vars */
 

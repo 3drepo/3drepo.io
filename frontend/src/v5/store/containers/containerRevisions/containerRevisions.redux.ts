@@ -19,7 +19,7 @@ import { createActions, createReducer } from 'reduxsauce';
 import { Action } from 'redux';
 import { Constants } from '@/v5/helpers/actions.helper';
 import { produceAll } from '@/v5/helpers/reducers.helper';
-import { TeamspaceProjectAndContainerId, ContainerId, OnSuccess } from '../store.types';
+import { TeamspaceProjectAndContainerId, ContainerId, OnSuccess } from '../../store.types';
 import { CreateContainerRevisionBody, CreateContainerRevisionPayload, IContainerRevision, IContainerRevisionUpdate, IUploadStatus } from './containerRevisions.types';
 
 export const { Types: ContainerRevisionsTypes, Creators: ContainerRevisionsActions } = createActions({

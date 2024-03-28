@@ -16,7 +16,7 @@
  */
 /* eslint-disable implicit-arrow-linebreak */
 
-import { IContainerRevision, IContainerRevisionUpdate } from '@/v5/store/containerRevisions/containerRevisions.types';
+import { IContainerRevision, IContainerRevisionUpdate } from '@/v5/store/containers/containerRevisions/containerRevisions.types';
 import { ContainersActionsDispatchers, ContainerRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { subscribeToRoomEvent } from './realtime.service';
 

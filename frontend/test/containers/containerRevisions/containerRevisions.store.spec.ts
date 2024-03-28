@@ -16,7 +16,7 @@
  */
 
 import { ContainersActions } from '@/v5/store/containers/containers.redux';
-import { ContainerRevisionsActions } from '@/v5/store/containerRevisions/containerRevisions.redux';
+import { ContainerRevisionsActions } from '@/v5/store/containers/containerRevisions/containerRevisions.redux';
 import {
 	selectIsPending,
 	selectRevisions,
@@ -24,10 +24,10 @@ import {
 	selectUploadIsComplete,
 	selectUploadProgress,
 	selectUploads,
-} from '@/v5/store/containerRevisions/containerRevisions.selectors';
+} from '@/v5/store/containers/containerRevisions/containerRevisions.selectors';
 import { times } from 'lodash';
-import { createTestStore } from '../test.helpers';
-import { containerMockFactory } from '../containers/containers.fixtures';
+import { createTestStore } from '../../test.helpers';
+import { containerMockFactory } from '../containers.fixtures';
 import { containerRevisionsMockFactory } from './containerRevisions.fixtures';
 
 describe('Container Revisions: store', () => {

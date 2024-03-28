@@ -20,7 +20,7 @@ import { selectCanUploadToProject, selectContainerById, selectContainers, select
 import { times } from 'lodash';
 import { containerMockFactory, prepareMockSettingsReply, prepareMockStats, prepareMockViews } from './containers.fixtures';
 import { NewContainer, UploadStatus } from '@/v5/store/containers/containers.types';
-import { containerRevisionsMockFactory } from '../containerRevisions/containerRevisions.fixtures';
+import { containerRevisionsMockFactory } from './containerRevisions/containerRevisions.fixtures';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { createTestStore, listContainsElementWithId } from '../test.helpers';
 import { Role } from '@/v5/store/currentUser/currentUser.types';

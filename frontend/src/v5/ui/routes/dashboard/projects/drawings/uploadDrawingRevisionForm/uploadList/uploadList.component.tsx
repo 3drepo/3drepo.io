@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { UploadItemFields } from '@/v5/store/drawingRevisions/drawingRevisions.types';
+import { UploadItemFields } from '@/v5/store/drawings/drawingRevisions/drawingRevisions.types';
 import { useContext } from 'react';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';

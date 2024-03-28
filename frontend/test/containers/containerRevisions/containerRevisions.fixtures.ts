@@ -16,7 +16,7 @@
  */
 
 import * as faker from 'faker';
-import { CreateContainerRevisionBody, IContainerRevision } from '@/v5/store/containerRevisions/containerRevisions.types';
+import { CreateContainerRevisionBody, IContainerRevision } from '@/v5/store/containers/containerRevisions/containerRevisions.types';
 
 export const containerRevisionsMockFactory = (overrides?: Partial<IContainerRevision>): IContainerRevision => ({
 	_id: faker.datatype.uuid(),
