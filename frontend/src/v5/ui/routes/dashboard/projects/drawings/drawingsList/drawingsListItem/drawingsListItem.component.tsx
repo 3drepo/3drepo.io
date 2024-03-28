@@ -35,7 +35,7 @@ import { DRAWING_LIST_COLUMN_WIDTHS } from '@/v5/store/drawings/drawings.helpers
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
-import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingRevisionDetails } from '@components/shared/drawingRevisionDetails/drawingRevisionDetails.component';
 
 interface IDrawingsListItem {
 	isSelected: boolean;
@@ -50,7 +50,6 @@ export const DrawingsListItem = memo(({
 }: IDrawingsListItem) => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const isMainList = useContext(IsMainList);
-	const revisions = DrawingRevisionsHooksSelectors.selectRevisions(drawing._id);
 
 	useEffect(() => {
 		if (isMainList) {
@@ -132,11 +131,11 @@ export const DrawingsListItem = memo(({
 				</DashboardListItemIcon>
 			</DashboardListItemRow>
 			{isSelected && (
-				<div>
-					{revisions.map((rev) => (
-						<div>{rev.name} - {+rev.timestamp}</div>
-					))}
-				</div>
+				<DrawingRevisionDetails
+					drawingId={drawing._id}
+					revisionsCount={drawing.revisionsCount}
+					status={drawing.status}
+				/>
 			)}
 		</DashboardListItem>
 	);

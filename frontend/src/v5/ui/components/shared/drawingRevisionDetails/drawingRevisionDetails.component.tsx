@@ -20,12 +20,12 @@ import { min, range } from 'lodash';
 
 import { Button } from '@controls/button';
 import ArrowUpCircleIcon from '@assets/icons/filled/arrow_up_circle-filled.svg';
-import { ContainerRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { ProjectsHooksSelectors, ContainerRevisionsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingRevisionsActionDispatchers } from '@/v5/services/actionsDispatchers';
+import { ProjectsHooksSelectors, TeamspacesHooksSelectors, DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
-import { UploadStatus } from '@/v5/store/containers/containers.types';
-import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
-import { uploadToContainer } from '@/v5/ui/routes/dashboard/projects/containers/uploadContainerRevisionForm/uploadContainerRevisionForm.helpers';
+import { DrawingUploadStatus } from '@/v5/store/drawings/drawings.types';
+import { canUploadToBackend } from '@/v5/store/drawings/drawings.helpers';
+import { uploadToDrawing } from '@/v5/ui/routes/dashboard/projects/drawings/uploadDrawingRevisionForm/uploadDrawingRevisionForm.helpers';
 import { SkeletonListItem } from '../revisionDetails/components/skeletonListItem/skeletonListItem.component';
 import { RevisionsListItem } from '../revisionDetails/components/revisionsListItem/revisionsListItem.component';
 import { RevisionsListHeaderLabel } from '../revisionDetails/components/revisionsListHeaderLabel/revisionsListHeaderLabel.component';
@@ -38,31 +38,30 @@ import {
 	RevisionsListEmptyContainer,
 	RevisionsListEmptyText,
 } from '../revisionDetails/revisionDetails.styles';
-import { getRevisionFileUrl } from '@/v5/services/api/containerRevisions';
-import { selectHasCollaboratorAccess } from '@/v5/store/containers/containers.selectors';
+import { getRevisionFileUrl } from '@/v5/services/api/drawingRevisions';
+import { selectHasCollaboratorAccess } from '@/v5/store/drawings/drawings.selectors';
 import { getState } from '@/v4/modules/store';
 
-interface IContainerRevisionDetails {
-	containerId: string;
+interface IDrawingRevisionDetails {
+	drawingId: string;
 	revisionsCount: number;
-	status?: UploadStatus
+	status?: DrawingUploadStatus;
 }
-
-export const ContainerRevisionDetails = ({ containerId, revisionsCount, status }: IContainerRevisionDetails): JSX.Element => {
+export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: IDrawingRevisionDetails): JSX.Element => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
-	const isLoading = ContainerRevisionsHooksSelectors.selectIsPending(containerId);
-	const revisions = ContainerRevisionsHooksSelectors.selectRevisions(containerId)
+	const isLoading = DrawingRevisionsHooksSelectors.selectIsPending(drawingId);
+	const revisions = DrawingRevisionsHooksSelectors.selectRevisions(drawingId)
 		.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 	const selected = revisions.findIndex((r) => !r.void);
 
 	const handleDownloadRevision = (revisionId) => {
-		window.location.href = getRevisionFileUrl(teamspace, project, containerId, revisionId);
+		window.location.href = getRevisionFileUrl(teamspace, project, drawingId, revisionId);
 	};
 
 	useEffect(() => {
 		if (!revisions.length) {
-			ContainerRevisionsActionsDispatchers.fetch(teamspace, project, containerId);
+			DrawingRevisionsActionDispatchers.fetch(teamspace, project, drawingId);
 		}
 	}, []);
 
@@ -74,20 +73,20 @@ export const ContainerRevisionDetails = ({ containerId, revisionsCount, status }
 						canUploadToBackend(status) ? (
 							<>
 								<RevisionsListEmptyText>
-									<FormattedMessage id="containers.revisions.emptyMessage" defaultMessage="You haven’t added any Files." />
+									<FormattedMessage id="drawings.revisions.emptyMessage" defaultMessage="You haven’t added any Files." />
 								</RevisionsListEmptyText>
 								<Button
 									startIcon={<ArrowUpCircleIcon />}
 									variant="contained"
 									color="primary"
-									onClick={() => uploadToContainer(containerId)}
+									onClick={() => uploadToDrawing(drawingId)}
 								>
-									<FormattedMessage id="containers.revisions.uploadFile" defaultMessage="Upload File" />
+									<FormattedMessage id="drawings.revisions.uploadFile" defaultMessage="Upload File" />
 								</Button>
 							</>
 						) : (
 							<RevisionsListEmptyText>
-								<FormattedMessage id="containers.revisions.emptyMessageBusy" defaultMessage="Your files are being processed at this moment, please wait before creating new revisions for this container." />
+								<FormattedMessage id="drawings.revisions.emptyMessageBusy" defaultMessage="Your files are being processed at this moment, please wait before creating new revisions for this drawing." />
 							</RevisionsListEmptyText>
 						)
 					}
@@ -99,11 +98,11 @@ export const ContainerRevisionDetails = ({ containerId, revisionsCount, status }
 	return (
 		<Container>
 			<RevisionsListHeaderContainer>
-				<RevisionsListHeaderLabel width={140} tabletWidth={94}><FormattedMessage id="containerRevisionDetails.addedOn" defaultMessage="Added on" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel width={170} tabletWidth={155}><FormattedMessage id="containerRevisionDetails.addedBy" defaultMessage="Added by" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel width={150} tabletWidth={300}><FormattedMessage id="containerRevisionDetails.revisionCode" defaultMessage="Revision name" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel hideWhenSmallerThan={1140}><FormattedMessage id="containerRevisionDetails.description" defaultMessage="Description" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel width={90} tabletWidth={45} hideWhenSmallerThan={800}><FormattedMessage id="containerRevisionDetails.format" defaultMessage="Format" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={140} tabletWidth={94}><FormattedMessage id="drawingRevisionDetails.addedOn" defaultMessage="Added on" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={170} tabletWidth={155}><FormattedMessage id="drawingRevisionDetails.addedBy" defaultMessage="Added by" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={150} tabletWidth={300}><FormattedMessage id="drawingRevisionDetails.revisionCode" defaultMessage="Revision name" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel hideWhenSmallerThan={1140}><FormattedMessage id="drawingRevisionDetails.description" defaultMessage="Description" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={90} tabletWidth={45} hideWhenSmallerThan={800}><FormattedMessage id="drawingRevisionDetails.format" defaultMessage="Format" /></RevisionsListHeaderLabel>
 			</RevisionsListHeaderContainer>
 			<RevisionsList>
 				{isLoading ? (
@@ -118,12 +117,12 @@ export const ContainerRevisionDetails = ({ containerId, revisionsCount, status }
 						>
 							<RevisionsListItem
 								onSetVoidStatus={(voidStatus) => (
-									ContainerRevisionsActionsDispatchers.setVoidStatus(teamspace, project, containerId, revision._id, voidStatus)
+									DrawingRevisionsActionDispatchers.setVoidStatus(teamspace, project, drawingId, revision._id, voidStatus)
 								)}
 								{...revision}
 								voidStatus={revision.void}
 								onDownloadRevision={() => handleDownloadRevision(revision._id)}
-								hasPermission={selectHasCollaboratorAccess(getState(), containerId)}
+								hasPermission={selectHasCollaboratorAccess(getState(), drawingId)}
 							/>
 						</RevisionsListItemWrapper>
 					))

@@ -16,13 +16,8 @@
  */
 import { SyntheticEvent } from 'react';
 
-import { IContainerRevision } from '@/v5/store/containers/containerRevisions/containerRevisions.types';
-import { ContainerRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { viewerRoute } from '@/v5/services/routing/routing';
 import { FormattedMessage } from 'react-intl';
 import { Tooltip } from '@mui/material';
-import { getRevisionFileUrl } from '@/v5/services/api/containerRevisions';
-import { ContainersHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Container, DownloadButton, DownloadIcon, RevisionsListItemTag } from './revisionsListItem.styles';
 import { RevisionsListItemAuthor } from './revisionsListItemAuthor/revisionsListItemAuthor.component';
 import { RevisionsListItemText } from './revisionsListItemText/revisionsListItemText.component';
@@ -30,48 +25,61 @@ import { RevisionsListItemButton } from './revisionsListItemButton/revisionsList
 import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 
 type IRevisionsListItem = {
-	revision: IContainerRevision;
-	containerId: string;
+	onSetVoidStatus: (voidStatus: boolean) => void;
+	hasPermission: boolean;
+	timestamp,
+	desc?: string,
+	author: string,
+	tag: string,
+	voidStatus: boolean,
+	format: string,
+	onDownloadRevision: () => void;
+	redirectTo?: string;
 };
 
-export const RevisionsListItem = ({ revision, containerId }: IRevisionsListItem): JSX.Element => {
-	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
-	const project = ProjectsHooksSelectors.selectCurrentProject();
-	const { timestamp, desc, author, tag, void: voidStatus, format } = revision;
+export const RevisionsListItem = ({
+	onSetVoidStatus,
+	hasPermission,
+	timestamp,
+	desc = '',
+	author,
+	tag,
+	voidStatus,
+	format,
+	redirectTo = null,
+	onDownloadRevision,
+}: IRevisionsListItem): JSX.Element => {
 	const disabled = voidStatus;
 
 	const toggleVoidStatus = (e: SyntheticEvent) => {
 		e.preventDefault();
 		e.stopPropagation();
-		ContainerRevisionsActionsDispatchers.setVoidStatus(teamspace, project, containerId, tag || revision._id, !voidStatus);
+		onSetVoidStatus(!voidStatus);
 	};
 
 	const downloadRevision = (e: SyntheticEvent) => {
 		e.preventDefault();
-		window.location.href = getRevisionFileUrl(teamspace, project, containerId, revision._id);
+		onDownloadRevision();
 	};
-	const hasCollaboratorAccess = ContainersHooksSelectors.selectHasCollaboratorAccess(containerId);
 
 	return (
-		<Container to={disabled ? null : viewerRoute(teamspace, project, containerId, revision)} disabled={disabled}>
+		<Container to={disabled ? null : redirectTo} disabled={disabled}>
 			<RevisionsListItemText width={140} tabletWidth={94}> {formatShortDateTime(timestamp)} </RevisionsListItemText>
 			<RevisionsListItemAuthor width={170} tabletWidth={155} authorName={author} />
 			<RevisionsListItemTag width={150} tabletWidth={300}> {tag} </RevisionsListItemTag>
 			<RevisionsListItemText hideWhenSmallerThan={1140}> {desc} </RevisionsListItemText>
 			<RevisionsListItemText width={90} tabletWidth={45} hideWhenSmallerThan={800}> {(format || '').toLowerCase()} </RevisionsListItemText>
-			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} disabled={!hasCollaboratorAccess} />
-			{ hasCollaboratorAccess && (
+			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} disabled={!hasPermission} />
+			{hasPermission && (
 				<Tooltip
 					title={(
 						<FormattedMessage
-							id="containerRevisionDetails.list.item.download.tooltip"
+							id="revisionDetails.list.item.download.tooltip"
 							defaultMessage="Download revision"
 						/>
 					)}
 				>
-					<DownloadButton
-						onClick={downloadRevision}
-					>
+					<DownloadButton onClick={downloadRevision}>
 						<DownloadIcon />
 					</DownloadButton>
 				</Tooltip>

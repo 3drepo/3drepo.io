@@ -27,7 +27,9 @@ const revisions: IDrawingRevision[] = [
 	{
 		_id: uuid(),
 		name: 'rev1',
-		timestamp: 1409009331628,
+		timestamp: new Date(1409009331628),
+		tag: '',
+		desc: 'this is a description',
 		author: 'John',
 		format: '.dwg',
 		statusCode: '1',
@@ -35,7 +37,8 @@ const revisions: IDrawingRevision[] = [
 	}, {
 		_id: uuid(),
 		name: 'rev2',
-		timestamp: 1709569331628,
+		timestamp: new Date(1709569331628),
+		tag: 'tag example',
 		author: 'John',
 		format: '.pdf',
 		revisionCode: '2',
