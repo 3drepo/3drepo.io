@@ -17,8 +17,7 @@
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import { alphaNumericHyphens } from '../shared/validators';
-import { DrawingRevisionsActionDispatchers } from '@/v5/services/actionsDispatchers';
-import { selectRevisions, selectRevisionsPending } from '@/v5/store/drawingRevisions/drawingRevisions.selectors';
+import { selectRevisions } from '@/v5/store/drawingRevisions/drawingRevisions.selectors';
 import { getState } from '@/v4/modules/store';
 
 export const revisionName = Yup.string()
@@ -46,15 +45,7 @@ export const revisionName = Yup.string()
 		}),
 		async (nameValue, testContext) => {
 			const { drawingId } = testContext.parent;
-
 			if (!drawingId) return true; // Is a new drawing, it has no revisions
-
-			const isPending = selectRevisionsPending(getState(), drawingId);
-
-			if (isPending) {
-				const { teamspace, project }  = testContext.options.context;
-				await new Promise((resolve) => DrawingRevisionsActionDispatchers.fetch(teamspace, project, drawingId, resolve as any));
-			}
 
 			const revisions = selectRevisions(getState(), drawingId);
 			return !revisions.find(({ name }) => nameValue === name);

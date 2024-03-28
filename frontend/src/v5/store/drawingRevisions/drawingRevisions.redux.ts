@@ -128,7 +128,7 @@ export interface IDrawingRevisionsActionCreators {
 	SetRevisionVoidStatusAction;
 	setVoidStatusSuccess: (drawingId: string, revisionId: string, isVoid: boolean) =>
 	SetRevisionVoidStatusSuccessAction;
-	fetch: (teamspace: string, projectId: string, drawingId: string, onSuccess?: OnSuccess ) => FetchAction;
+	fetch: (teamspace: string, projectId: string, drawingId: string, onSuccess?: () => void ) => FetchAction;
 	fetchSuccess: (drawingId: string, revisions: IDrawingRevision[]) => FetchSuccessAction;
 	setIsPending: (drawingId: string, isPending: boolean) => SetIsPendingAction;
 	createRevision: (teamspace: string,
