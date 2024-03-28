@@ -3922,7 +3922,7 @@
     "@types/express" "^4.7.0"
     file-system-cache "2.3.0"
 
-"@svgedit/svgcanvas@^7.2.2":
+"@svgedit/svgcanvas@7.2.2":
   version "7.2.2"
   resolved "https://registry.yarnpkg.com/@svgedit/svgcanvas/-/svgcanvas-7.2.2.tgz#1109629183c16fa663194a07f9f0e2504030f265"
   integrity sha512-7lDSHsaL5VhyworiYdUPQFsJMuTetpU8iHkoVu02fbeQsdtob1aqHArioPeHXxv2I9+/nEklAtRwYPjKti1QGw==
@@ -10919,7 +10919,7 @@ pako@~0.2.0:
   resolved "https://registry.yarnpkg.com/pako/-/pako-0.2.9.tgz#f3f7522f4ef782348da8161bad9ecfd51bf83a75"
   integrity sha512-NUcwaKxUxWrZLpDG+z/xZaCgQITkA/Dv4V/T6bw7VON6l1Xz/VnrBqrYjZQ12TamKHzITTfOEIYUj48y2KXImA==
 
-panzoom@^9.4.3:
+panzoom@9.4.3:
   version "9.4.3"
   resolved "https://registry.yarnpkg.com/panzoom/-/panzoom-9.4.3.tgz#195c4031bb643f2e6c42f1de0ca87cc10e224042"
   integrity sha512-xaxCpElcRbQsUtIdwlrZA90P90+BHip4Vda2BC8MEb4tkI05PmR6cKECdqUCZ85ZvBHjpI9htJrZBxV5Gp/q/w==
