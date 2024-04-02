@@ -21,7 +21,6 @@ import ViewpointIconBase from '@assets/icons/outlined/camera_side-outlined.svg';
 import { CentredContainer } from '@controls/centredContainer';
 
 export const ThumbnailContainer = styled(OverlappingContainer)`
-	position: relative;
 	margin-left: auto;
 	height: 50px;
 	width: 50px;
@@ -30,6 +29,7 @@ export const ThumbnailContainer = styled(OverlappingContainer)`
 	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 	border-radius: 5px;
 	overflow: hidden;
+	margin-bottom: 5px;
 `;
 
 export const Thumbnail = styled.img`
@@ -57,4 +57,11 @@ export const ViewpointOverlay = styled.div`
 export const ViewpointIcon = styled(ViewpointIconBase)`
 	color: ${({ theme }) => theme.palette.base.main};
 	margin: 2px 2px 1px 3px;
+`;
+
+export const TitleAndDesc = styled.div`
+	width: 100%;
+	display: flex;
+	flex-flow: column;
+	gap: 6px;
 `;

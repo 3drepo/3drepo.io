@@ -17,18 +17,48 @@
 
 import { ControlledAssigneesSelect } from '@controls/assigneesSelect/controlledAssigneesSelect.component';
 import styled, { css } from 'styled-components';
-import { Title } from './ticketItemBaseInfo/ticketItemBaseInfo.styles';
-import { StatusChip } from '@controls/chip/statusChip/statusChip.component';
+import { StatusChip as StatusChipBase } from '@controls/chip/statusChip/statusChip.component';
 import { DueDateWithLabel } from '@controls/dueDate/dueDateWithLabel/dueDateWithLabel.component';
+import { TextOverflow } from '@controls/textOverflow';
 
-export const TicketItemContainer = styled.div<{ $selected?: boolean }>`
-	position: relative;
+export const FlexRow = styled.div`
 	display: flex;
+	gap: 6px;
+	width: 100%;
+`;
+
+export const FlexColumn = styled(FlexRow)`
+	min-width: 0;
 	flex-flow: column;
+	height: auto;
+`;
+
+export const Title = styled(TextOverflow)`
+	color: ${({ theme }) => theme.palette.base.main};
+	font-weight: 600;
+	font-size: 12px;
+	line-height: 12px;
+	height: 12px;
+	min-height: 12px;
+	width: fit-content;
+	max-width: 100%;
+	flex-grow: 0;
+`;
+
+export const Description = styled(TextOverflow).attrs({
+	lines: 2,
+})`
+	color: ${({ theme }) => theme.palette.base.main};
+	${({ theme }) => theme.typography.label};
+	line-height: 11px;
+`;
+
+export const TicketItemContainer = styled(FlexColumn)<{ $selected?: boolean }>`
 	cursor: pointer;
+	box-sizing: border-box;
 	padding: 10px;
-	gap: 10px;
-	background-color: ${({ theme, $selected }) => ($selected ? theme.palette.primary.lightest : theme.palette.primary.contrast)};
+	min-height: 65px;
+	background-color: ${({ theme }) =>  theme.palette.primary.contrast};
 	${({ theme, $selected }) => $selected && css`
 		background-color: ${theme.palette.primary.lightest};
 		${Title} {
@@ -38,32 +68,45 @@ export const TicketItemContainer = styled.div<{ $selected?: boolean }>`
 `;
 
 export const DueDateLabel = styled(DueDateWithLabel)`
+	height: 12px;
 	min-width: 131px;
+	>* {
+		height: 12px;
+		display: flex;
+	}
 `;
 
-export const FlexRow = styled.div`
-	display: inline-flex;
-	gap: 7px;
-	width: 100%;
-`;
-
-export const IssuePropertiesRow = styled(FlexRow)`
+export const BottomRow = styled(FlexRow)`
 	align-items: center;
-	gap: 0;
+	margin-top: auto;
+	height: 10px;
+	margin-bottom: 5px;
 `;
 
 export const Assignees = styled(ControlledAssigneesSelect).attrs({
 	maxItems: 5,
-	showEmptyText: true,
 	multiple: true,
+	showAddButton: true,
 })`
-	margin-left: auto;
-	height: 28px;
 `;
 
-export const FloatingStatus = styled(StatusChip)`
-	position: absolute;
-	right: 10px;
-	bottom: 10px;
+export const StatusChip = styled(StatusChipBase)`
 	max-width: 125px;
+	margin-left: auto;
+`;
+
+export const IssuePropertiesContainer = styled(FlexColumn)`
+	margin-top: auto;
+	${FlexRow} { 
+		height: 12px;
+		.MuiChip-root {
+			margin-top: -4px;
+		}
+	}
+`;
+
+export const Id = styled.div`
+	color: ${({ theme }) => theme.palette.secondary.main};
+	${({ theme }) => theme.typography.kicker}
+	font-weight: 400;
 `;
