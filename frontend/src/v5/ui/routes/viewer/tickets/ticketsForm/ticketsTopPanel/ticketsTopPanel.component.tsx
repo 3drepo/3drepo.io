@@ -32,7 +32,6 @@ import { DescriptionProperty, TopPanel, CreationInfo, FlexContainer } from './ti
 import { ErrorTextGap } from '../ticketsForm.styles';
 import { StatusProperty } from './statusProperty/statusProperty.component';
 import { AssigneesProperty } from './assignessProperty/assigneesProperty.component';
-import { InputContainer } from '@controls/inputs/inputContainer/inputContainer.styles';
 
 type ITicketsTopPanel = {
 	title: string;
@@ -97,13 +96,9 @@ export const TicketsTopPanel = ({
 			</DescriptionProperty>
 			<FlexContainer>
 				{hasIssueProperties ? (
-					<FlexContainer>
-						<IssuePropertiesInputs onBlur={onPropertyBlur} readOnly={readOnly} />
-					</FlexContainer>
+					<IssuePropertiesInputs onBlur={onPropertyBlur} readOnly={readOnly} />
 				) : (
-					<InputContainer>
-						<StatusProperty onBlur={onPropertyBlur} readOnly={readOnly} />
-					</InputContainer>
+					<StatusProperty onBlur={onPropertyBlur} readOnly={readOnly} />
 				)}
 			</FlexContainer>
 			{hasIssueProperties && (<AssigneesProperty onBlur={onPropertyBlur} readOnly={readOnly} />)}
