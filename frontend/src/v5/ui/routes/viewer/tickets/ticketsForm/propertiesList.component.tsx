@@ -40,7 +40,7 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 	const { containerOrFederation } = useParams<DashboardTicketsParams>();
 
 	const { formState } = useFormContext();
-	const isReadOnly = TicketsCardHooksSelectors.selectReadOnly();
+	const ticketIsReadOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const isNewTicket = TicketsCardHooksSelectors.selectView() === TicketsCardViews.New;
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const ticketFromStore = TicketsHooksSelectors.selectTicketById(containerOrFederation, selectedTicketId);
@@ -52,6 +52,7 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 				name,
 				type: basicType,
 				readOnly: disabled,
+				readOnlyOnUI,
 				required,
 				values,
 				immutable,
@@ -62,11 +63,11 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 				const formError = get(formState.errors, inputName);
 				const immutableDisabled = immutable && !isNewTicket && !isUndefined(get(ticketFromStore, inputName));
 				return (
-					<Fragment key={name}>
+					<Fragment key={inputName}>
 						<InputController
 							Input={PropertyComponent}
 							label={name}
-							disabled={disabled || isReadOnly || immutableDisabled}
+							disabled={disabled || ticketIsReadOnly || readOnlyOnUI || immutableDisabled}
 							required={required}
 							name={inputName}
 							formError={formError}
