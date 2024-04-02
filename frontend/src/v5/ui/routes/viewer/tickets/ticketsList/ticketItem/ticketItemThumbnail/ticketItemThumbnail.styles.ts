@@ -40,7 +40,7 @@ export const Thumbnail = styled.img`
 export const ImagePlaceholder = styled(CentredContainer)`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	${({ theme }) => theme.typography.label};
-	color: ${({ theme }) => theme.palette.base.main};
+	color: ${({ theme }) => theme.palette.base.lighter};
 `;
 
 export const ViewpointOverlay = styled.div`
@@ -50,7 +50,7 @@ export const ViewpointOverlay = styled.div`
 	height: 16px;
 	width: 18px;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	opacity: 0.75;
+	opacity: 0.5;
 	border-radius: 5px 0 0 0;
 `;
 
