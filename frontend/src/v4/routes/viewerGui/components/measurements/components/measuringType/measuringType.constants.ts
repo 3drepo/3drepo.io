@@ -27,6 +27,8 @@ import {
 } from '@/v4/modules/measurements/measurements.constants';
 
 import { VIEWER_MEASURING_MODE } from '@/v4/constants/viewer';
+import PolylineIcon from '@assets/icons/measurements/polyline.svg';
+import AngleIcon from '@assets/icons/measurements/angle.svg';
 
 export const MEASURING_TYPES = [
 	{
@@ -40,6 +42,11 @@ export const MEASURING_TYPES = [
 		Icon: PointToPointIcon,
 	},
 	{
+		name: MEASURING_TYPE.POLYLINE,
+		mode: VIEWER_MEASURING_MODE.POLYLINE,
+		Icon: PolylineIcon,
+	},
+	{
 		name: MEASURING_TYPE.RAY_CAST,
 		mode: VIEWER_MEASURING_MODE.RAY_CAST,
 		Icon: RayCastIcon,
@@ -48,6 +55,11 @@ export const MEASURING_TYPES = [
 		name: MEASURING_TYPE.MINIMUM_DISTANCE,
 		mode: VIEWER_MEASURING_MODE.MINIMUM_DISTANCE,
 		Icon: MinimumDistanceIcon,
+	},
+	{
+		name: MEASURING_TYPE.ANGLE,
+		mode: VIEWER_MEASURING_MODE.ANGLE,
+		Icon: AngleIcon,
 	},
 	{
 		name: MEASURING_TYPE.SAM,
@@ -63,5 +75,7 @@ export const MEASURING_TYPES = [
 
 export const BASIC_TYPES = [
 	VIEWER_MEASURING_MODE.POINT_TO_POINT,
-	VIEWER_MEASURING_MODE.CSAM
+	VIEWER_MEASURING_MODE.CSAM,
+	VIEWER_MEASURING_MODE.POLYLINE,
+	VIEWER_MEASURING_MODE.ANGLE
 ];

@@ -49,6 +49,7 @@ interface IProps {
 	model: string;
 	measurements: IMeasure[];
 	areaMeasurements: IMeasure[];
+	angleMeasurements: IMeasure[];
 	lengthMeasurements: IMeasure[];
 	pointMeasurements: IMeasure[];
 	removeMeasurement: (uuid) => void;
@@ -165,7 +166,7 @@ export class Measurements extends PureComponent<IProps, IState> {
 
 	public render() {
 		const { isViewerReady } = this.state;
-		const { areaMeasurements, lengthMeasurements, pointMeasurements } = this.props;
+		const { areaMeasurements, lengthMeasurements, pointMeasurements, angleMeasurements } = this.props;
 		return (
 			<ViewsContainer
 				Icon={this.getTitleIcon()}
@@ -174,9 +175,9 @@ export class Measurements extends PureComponent<IProps, IState> {
 				id={this.props.id}
 			>
 				<Container>
-					{this.renderEmptyState(isEmpty(areaMeasurements) && isEmpty(lengthMeasurements) && isEmpty(pointMeasurements))}
+					{this.renderEmptyState(isEmpty(areaMeasurements) && isEmpty(lengthMeasurements) && isEmpty(pointMeasurements) && isEmpty(angleMeasurements))}
 					{this.renderMeasurementDetails(
-							!isEmpty(areaMeasurements) || !isEmpty(lengthMeasurements) || !isEmpty(pointMeasurements)
+							!isEmpty(areaMeasurements) || !isEmpty(lengthMeasurements) || !isEmpty(pointMeasurements) || !isEmpty(angleMeasurements)
 					)}
 				</Container>
 				{this.renderFooterContent()}

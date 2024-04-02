@@ -55,7 +55,7 @@ export const Filled = {
 export const Measure = {
 	title: 'Icons/Measure',
 	args: {
-		icons: getIcons(require.context('@assets/icons/measure/', false, /\.*(svg)/), 'measure'),
+		icons: getIcons(require.context('@assets/icons/measurements/', false, /\.*(svg)/), 'measurements'),
 	},
 };
 

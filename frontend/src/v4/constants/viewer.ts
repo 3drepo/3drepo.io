@@ -175,8 +175,10 @@ export const NEW_PIN_ID = 'newPinId';
 export const VIEWER_MEASURING_MODE = {
 	POINT: 'PointPin',
 	RAY_CAST: 'Raycast',
+	POLYLINE: 'PolyLine',
 	MINIMUM_DISTANCE: 'MinimumDistance',
 	SAM: 'SurfaceArea',
 	CSAM: 'PolygonArea',
+	ANGLE: 'Angle',
 	POINT_TO_POINT: 'Point',
 } as const;
