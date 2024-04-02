@@ -19,18 +19,21 @@ export const MEASURE_TYPE = {
 	POINT: -1,
 	LENGTH: 0,
 	AREA: 1,
+	ANGLE: 2,
 };
 
 export const MEASURE_TYPE_NAME = {
 	[MEASURE_TYPE.POINT]: 'Point',
 	[MEASURE_TYPE.LENGTH]: 'Length',
 	[MEASURE_TYPE.AREA]: 'Area',
+	[MEASURE_TYPE.ANGLE]: 'Angle',
 };
 
 export const MEASURE_TYPE_STATE_MAP = {
 	[MEASURE_TYPE.POINT]: 'pointMeasurements',
 	[MEASURE_TYPE.LENGTH]: 'lengthMeasurements',
 	[MEASURE_TYPE.AREA]: 'areaMeasurements',
+	[MEASURE_TYPE.ANGLE]: 'angleMeasurements',
 };
 
 export const MEASURING_TYPE = {
@@ -40,4 +43,6 @@ export const MEASURING_TYPE = {
 	POINT: 'Locate Point',
 	POINT_TO_POINT: 'Point to Point',
 	RAY_CAST: 'Ray Cast',
+	ANGLE: 'Angle',
+	POLYLINE: 'Polyline',
 };
