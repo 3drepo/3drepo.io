@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ControlledAssigneesSelect } from '@controls/assigneesSelect/controlledAssigneesSelect.component';
 import styled, { css } from 'styled-components';
 import { StatusChip as StatusChipBase } from '@controls/chip/statusChip/statusChip.component';
 import { DueDateWithLabel } from '@controls/dueDate/dueDateWithLabel/dueDateWithLabel.component';
 import { TextOverflow } from '@controls/textOverflow';
+import { Chip } from '@controls/chip/chip.component';
 
 export const FlexRow = styled.div`
 	display: flex;
@@ -35,14 +35,11 @@ export const FlexColumn = styled(FlexRow)`
 
 export const Title = styled(TextOverflow)`
 	color: ${({ theme }) => theme.palette.base.main};
+	${({ theme }) => theme.typography.body1};
+	line-height: 1em;
+	height: 1em;
+	min-height: 1em;
 	font-weight: 600;
-	font-size: 12px;
-	line-height: 12px;
-	height: 12px;
-	min-height: 12px;
-	width: fit-content;
-	max-width: 100%;
-	flex-grow: 0;
 `;
 
 export const Description = styled(TextOverflow).attrs({
@@ -83,13 +80,6 @@ export const BottomRow = styled(FlexRow)`
 	margin-bottom: 5px;
 `;
 
-export const Assignees = styled(ControlledAssigneesSelect).attrs({
-	maxItems: 5,
-	multiple: true,
-	showAddButton: true,
-})`
-`;
-
 export const StatusChip = styled(StatusChipBase)`
 	max-width: 125px;
 	margin-left: auto;
@@ -97,11 +87,14 @@ export const StatusChip = styled(StatusChipBase)`
 
 export const IssuePropertiesContainer = styled(FlexColumn)`
 	margin-top: auto;
-	${FlexRow} { 
+`;
+
+export const PriorityChip = styled(Chip).attrs({
+	variant: 'text',
+})`
+	height: 12px;
+	.MuiChip-root {
 		height: 12px;
-		.MuiChip-root {
-			margin-top: -4px;
-		}
 	}
 `;
 

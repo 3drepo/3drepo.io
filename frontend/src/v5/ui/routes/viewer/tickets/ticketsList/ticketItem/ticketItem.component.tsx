@@ -17,20 +17,19 @@
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useEffect, useRef } from 'react';
-import { Assignees, IssuePropertiesContainer, DueDateLabel, FlexRow, BottomRow, StatusChip, TicketItemContainer, Description, Id, Title, FlexColumn } from './ticketItem.styles';
+import { IssuePropertiesContainer, DueDateLabel, FlexRow, BottomRow, StatusChip, TicketItemContainer, Description, Id, Title, FlexColumn, PriorityChip } from './ticketItem.styles';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { hasDefaultPin } from '../../ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
+import { ControlledAssigneesSelect as Assignees } from '@controls/assigneesSelect/controlledAssigneesSelect.component';
 import { Highlight } from '@controls/highlight/highlight.component';
 import { IssueProperties, TicketBaseKeys } from '../../tickets.constants';
 import { has, isEqual } from 'lodash';
 import { getPropertiesInCamelCase, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { TicketItemThumbnail } from './ticketItemThumbnail/ticketItemThumbnail.component';
 import { PRIORITY_LEVELS_MAP } from '@controls/chip/chip.types';
-import { Chip } from '@controls/chip/chip.component';
-import { TitleAndDesc } from './ticketItemThumbnail/ticketItemThumbnail.styles';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -79,20 +78,18 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 		<TicketItemContainer key={ticket._id} ref={ref} onClick={onClickTicket} $selected={isSelected}>
 			<FlexRow>
 				<FlexColumn>
-					<TitleAndDesc>
-						<Title>
-							<Highlight search={queries}>
-								{ticket.title}
-							</Highlight>
-						</Title>
-						{description && <Description>{description}</Description>}
-					</TitleAndDesc>
+					<Title>
+						<Highlight search={queries}>
+							{ticket.title}
+						</Highlight>
+					</Title>
+					{description && <Description>{description}</Description>}
 					{hasIssueProperties && (
 						<IssuePropertiesContainer>
 							<Assignees value={assignees} maxItems={5} multiple showAddButton onBlur={onBlurAssignees} disabled={readOnly} />
 							<FlexRow>
 								<DueDateLabel value={dueDate} onChange={onChangeDueDate} disabled={readOnly} />
-								<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />
+								<PriorityChip {...PRIORITY_LEVELS_MAP[priority]} />
 							</FlexRow>
 						</IssuePropertiesContainer>
 					)}
