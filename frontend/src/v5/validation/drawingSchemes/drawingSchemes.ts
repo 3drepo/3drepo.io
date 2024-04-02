@@ -22,11 +22,17 @@ import { formatMessage } from '@/v5/services/intl';
 import { selectRevisions } from '@/v5/store/drawings/drawingRevisions/drawingRevisions.selectors';
 import { getState } from '@/v4/modules/store';
 
-const drawingNumber = Yup.string().matches(alphaNumericHyphens,
-	formatMessage({
-		id: 'validation.drawing.drawingNumber',
-		defaultMessage: 'Drawing Number can only consist of letters, numbers, hyphens or underscores',
-	}))
+const drawingNumber = Yup.string()
+	.matches(alphaNumericHyphens,
+		formatMessage({
+			id: 'validation.drawing.drawingNumber',
+			defaultMessage: 'Drawing Number can only consist of letters, numbers, hyphens or underscores',
+		}))
+	.max(50,
+		formatMessage({
+			id: 'validation.drawing.error.error.max',
+			defaultMessage: 'Drawing Number is limited to 50 characters',
+		}))
 	.required(
 		formatMessage({
 			id: 'validation.drawingNumber.error.required',
