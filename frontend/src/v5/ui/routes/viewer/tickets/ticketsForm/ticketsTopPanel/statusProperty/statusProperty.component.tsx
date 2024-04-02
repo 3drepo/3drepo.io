@@ -15,36 +15,50 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { STATUS_MAP } from '@controls/chip/chip.types';
+import { useParams } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { FormChipSelect } from '@controls/inputs/formInputs.component';
 import { formatMessage } from '@/v5/services/intl';
 import { BaseProperties } from '../../../tickets.constants';
 import { PropertyTitle, Property } from './statusProperty.styles';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
+import { useMemo } from 'react';
+import { getStatusPropertyValues } from '@controls/chip/statusChip/statusChip.helpers';
 
 type StatusPropertyProps = {
 	onBlur: () => void;
 	readOnly: boolean;
 };
-export const StatusProperty = ({ onBlur, readOnly }: StatusPropertyProps) => (
-	<Property>
-		<PropertyTitle>
-			<FormattedMessage
-				id="ticket.topPanel.status.label"
-				defaultMessage="Status"
+
+export const StatusProperty = ({ onBlur, readOnly }: StatusPropertyProps) => {
+	const { containerOrFederation, template: templateIdTabularView } = useParams<DashboardTicketsParams>();
+	const templateIdExistingTicket = TicketsCardHooksSelectors.selectSelectedTicket()?.type;
+	const templateIdNewTicket = TicketsCardHooksSelectors.selectSelectedTemplateId() || templateIdTabularView;
+	const templateId = templateIdTabularView || templateIdExistingTicket || templateIdNewTicket;
+
+	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(containerOrFederation, templateId);
+	const values = useMemo(() => getStatusPropertyValues(statusConfig), [templateId]);
+	return (
+		<Property>
+			<PropertyTitle>
+				<FormattedMessage
+					id="ticket.topPanel.status.label"
+					defaultMessage="Status"
+				/>
+			</PropertyTitle>
+			<FormChipSelect
+				variant="text"
+				tooltip={formatMessage({
+					id: 'ticket.topPanel.status.tooltip',
+					defaultMessage: 'Set status',
+				})}
+				name={`properties.${BaseProperties.STATUS}`}
+				onBlur={onBlur}
+				key={BaseProperties.STATUS}
+				values={values}
+				disabled={readOnly}
 			/>
-		</PropertyTitle>
-		<FormChipSelect
-			variant="text"
-			tooltip={formatMessage({
-				id: 'ticket.topPanel.status.tooltip',
-				defaultMessage: 'Set status',
-			})}
-			name={`properties.${BaseProperties.STATUS}`}
-			onBlur={onBlur}
-			key={BaseProperties.STATUS}
-			values={STATUS_MAP}
-			disabled={readOnly}
-		/>
-	</Property>
-);
+		</Property>
+	);
+};

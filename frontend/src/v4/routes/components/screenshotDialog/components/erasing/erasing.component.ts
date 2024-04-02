@@ -16,12 +16,12 @@
  */
 
 import { PureComponent } from 'react';
+import { COLOR } from '@/v4/styles';
 import { MODE_OPERATION } from '../../screenshotDialog.helpers';
 
 declare const Konva;
 
 interface IProps {
-	color: string;
 	size: number;
 	mode: string;
 	height: number;
@@ -54,7 +54,7 @@ export class Erasing extends PureComponent<IProps, any> {
 		this.lastPointerPosition = this.props.stage.getPointerPosition();
 		this.lastLine = new Konva.Line({
 			name: 'erasing',
-			stroke: this.props.color,
+			stroke: COLOR.WHITE,
 			strokeWidth: this.props.size,
 			globalCompositeOperation: MODE_OPERATION[this.props.mode],
 			points: [this.lastPointerPosition.x, this.lastPointerPosition.y],

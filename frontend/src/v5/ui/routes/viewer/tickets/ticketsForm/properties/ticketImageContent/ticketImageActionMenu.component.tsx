@@ -21,13 +21,12 @@ import { uploadFile } from '@controls/fileUploader/uploadFile';
 import { FormattedMessage } from 'react-intl';
 import FileIcon from '@assets/icons/outlined/file-outlined.svg';
 import { EllipsisMenu } from '@controls/ellipsisMenu';
-import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useContext } from 'react';
 import { EllipsisMenuItemDelete, EllipsisMenuItem } from './ticketImageAction/ticketImageAction.styles';
 import { ViewActionMenu } from '../ticketView/viewActionMenu/viewActionMenu.component';
 import { TicketContext } from '../../../ticket.context';
 
-export const TicketImageActionMenu = ({ value, onChange, disabled = false }) => {
+export const TicketImageActionMenu = ({ value, onChange, disabled = false, onClick }) => {
 	const { isViewer } = useContext(TicketContext);
 	const uploadScreenshot = async () => onChange(await ViewerService.getScreenshot());
 
@@ -42,7 +41,7 @@ export const TicketImageActionMenu = ({ value, onChange, disabled = false }) => 
 	return (
 		<ViewActionMenu
 			disabled={!value}
-			onClick={() => DialogsActionsDispatchers.open('images', { images: [value] })}
+			onClick={onClick}
 			Icon={FileIcon}
 			title={<FormattedMessage id="viewer.card.ticketView.actionMenu.image" defaultMessage="Image" />}
 		>

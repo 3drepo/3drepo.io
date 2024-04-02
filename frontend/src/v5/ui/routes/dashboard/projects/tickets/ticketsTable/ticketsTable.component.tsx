@@ -51,7 +51,7 @@ import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
 import { TicketSlide } from '../ticketsList/slides/ticketSlide.component';
 import { useSelectedModels } from './newTicketMenu/useSelectedModels';
-import { getTicketIsCompleted } from '@/v5/store/tickets/card/ticketsCard.helpers';
+import { ticketIsCompleted } from '@controls/chip/statusChip/statusChip.helpers';
 
 type FormType = {
 	containersAndFederations: string[],
@@ -92,7 +92,7 @@ export const TicketsTable = () => {
 	const isCreatingNewTicket = containerOrFederation && !selectedTicketId && !hasRequiredViewerProperties(selectedTemplate);
 
 	const ticketsFilteredByTemplate = useMemo(() => {
-		const ticketsToShow = tickets.filter((t) => getTicketIsCompleted(t) === showCompleted);
+		const ticketsToShow = tickets.filter((t) => ticketIsCompleted(t, selectedTemplate) === showCompleted);
 		return ticketsToShow.filter(({ type }) => type === template);
 	}, [template, tickets, showCompleted]);
 	const newTicketButtonIsDisabled = !containersAndFederations.length || models.filter(({ role }) => isCommenterRole(role)).length === 0;
@@ -273,7 +273,7 @@ export const TicketsTable = () => {
 				{containerOrFederation && (
 					<MuiThemeProvider theme={theme}>
 						<TicketContextComponent isViewer={false}>
-							{selectedTicketId && (<TicketSlide ticket={sidePanelTicket as ITicket} template={selectedTemplate} />)}
+							{selectedTicketId && (<TicketSlide ticketId={sidePanelTicket._id} template={selectedTemplate} />)}
 							{!selectedTicketId && (
 								<NewTicketSlide
 									defaultValue={sidePanelTicket}

@@ -19,7 +19,6 @@ import EmptyImageIcon from '@assets/icons/outlined/add_image_thin-outlined.svg';
 import EnlargeImageIcon from '@assets/icons/outlined/enlarge_image-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { OverlappingContainer } from '@controls/overlappingContainer/overlappingContainer.styles';
-import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import {
 	EmptyImageContainer,
 	EnlargeContainer,
@@ -28,20 +27,22 @@ import {
 	Container,
 } from './ticketImageDisplayer.styles';
 
-const LoadedImage = ({ imgSrc }) => (
-	<OverlappingContainer onClick={() => DialogsActionsDispatchers.open('images', { images: [imgSrc] })}>
-		<Image
-			src={imgSrc}
-			alt={formatMessage({ id: 'viewer.cards.ticketImage.image', defaultMessage: 'image' })}
-		/>
-		<EnlargeContainer>
-			<EnlargeImageIcon />
-			<IconText>
-				<FormattedMessage id="viewer.cards.ticketImage.enlarge" defaultMessage="Enlarge" />
-			</IconText>
-		</EnlargeContainer>
-	</OverlappingContainer>
-);
+const LoadedImage = ({ imgSrc, onClick }) => {
+	return (
+		<OverlappingContainer onClick={onClick}>
+			<Image
+				src={imgSrc}
+				alt={formatMessage({ id: 'viewer.cards.ticketImage.image', defaultMessage: 'image' })}
+			/>
+			<EnlargeContainer>
+				<EnlargeImageIcon />
+				<IconText>
+					<FormattedMessage id="viewer.cards.ticketImage.enlarge" defaultMessage="Enlarge" />
+				</IconText>
+			</EnlargeContainer>
+		</OverlappingContainer>
+	);
+};
 
 const EmptyImage = ({ disabled, onClick }) => (
 	<EmptyImageContainer disabled={disabled} onClick={onClick}>
@@ -56,13 +57,14 @@ const EmptyImage = ({ disabled, onClick }) => (
 
 type TicketImageDisplayerProps = {
 	onEmptyImageClick: () => void,
+	onImageClick?: () => void,
 	imgSrc: string,
 	disabled?: boolean,
 	className?: string,
 };
-export const TicketImageDisplayer = ({ onEmptyImageClick, imgSrc, disabled, className }: TicketImageDisplayerProps) => (
+export const TicketImageDisplayer = ({ onEmptyImageClick, imgSrc, disabled, className, onImageClick }: TicketImageDisplayerProps) => (
 	<Container className={className}>
 		{!imgSrc && <EmptyImage disabled={disabled} onClick={onEmptyImageClick} />}
-		{imgSrc && <LoadedImage imgSrc={imgSrc} />}
+		{imgSrc && <LoadedImage imgSrc={imgSrc} onClick={onImageClick} />}
 	</Container>
 );
