@@ -188,7 +188,7 @@ const testValidateImportTickets = () => {
 	const validation = (t, p, m, tem, ticket) => {
 		if (ticket === badTicket) return Promise.reject(templates.invalidArguments);
 		if (ticket === throwTicket) return Promise.reject(new Error('abc'));
-		return Promise.resolve(ticket);
+		return Promise.resolve({ ...ticket, type: tem._id });
 	};
 	const processReadOnly = (e, ticket) => {
 		// eslint-disable-next-line no-param-reassign
@@ -208,7 +208,7 @@ const testValidateImportTickets = () => {
 		['tickets is not an array', { body: { tickets: 1 } }, false, createResponseCode(templates.invalidArguments, 'Expected body to contain an array of tickets')],
 		['ticket array is empty', { body: { tickets: [] } }, false, createResponseCode(templates.invalidArguments, 'Must contain at least 1 ticket')],
 		['ticket array contains a bad ticket', { body: { tickets: [...goodTickets, badTicket] } }, false, templates.invalidArguments],
-		['all tickets are valid', {}, true],
+		['!!!all tickets are valid', {}, true],
 	])('Validate import tickets', (desc, additionalReq, success, expectedRes) => {
 		afterEach(() => {
 			jest.clearAllMocks();

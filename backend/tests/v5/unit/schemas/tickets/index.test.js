@@ -91,14 +91,14 @@ const testPropertyTypes = (testData, moduleProperty, isNewTicket = true) => {
 
 					const oldTicket = isNewTicket ? undefined : {
 						title: generateRandomString(),
-						type: generateUUID(),
+						type: template._id,
 						properties: {},
 						modules: {},
 					};
 
 					const fullData = ({
 						title: generateRandomString(),
-						type: generateUUID(),
+						type: template._id,
 						properties: moduleProperty ? {} : propObj,
 						modules: moduleProperty ? {
 							[presetModules.SEQUENCING]: propObj,
@@ -147,7 +147,7 @@ const testPropertyConditions = () => {
 
 				const oldTicket = isNewTicket ? undefined : {
 					title: generateRandomString(),
-					type: generateRandomString(),
+					type: template._id,
 					properties: {
 						[fieldName]: generateRandomString(),
 					},
@@ -160,7 +160,7 @@ const testPropertyConditions = () => {
 
 				const fullData = ({
 					title: isNewTicket ? generateRandomString() : undefined,
-					type: isNewTicket ? generateRandomString() : undefined,
+					type: isNewTicket ? template._id : undefined,
 					properties: moduleProperty ? {} : propObjIn,
 					modules: moduleProperty ? { [modName]: propObjIn } : {},
 				});
@@ -241,7 +241,6 @@ const testPresetValues = () => {
 		const createData = (a, b) => ({
 
 			title: generateRandomString(),
-			type: generateUUID(),
 			properties: {
 				[prop]: a,
 			},
@@ -767,7 +766,7 @@ const testCompositeTypes = () => {
 
 			const input = {
 				title: generateRandomString(),
-				type: generateUUID(),
+				type: template._id,
 				properties: {
 					[propName]: {
 						camera: {
@@ -1033,7 +1032,7 @@ const testValidateTicket = () => {
 				modules: {},
 			};
 			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
-				.resolves.toEqual(input);
+				.resolves.toEqual({ ...input, type: template._id });
 		});
 
 		test('Should created default properties/modules object if it is not present', async () => {
@@ -1048,7 +1047,7 @@ const testValidateTicket = () => {
 
 			const input = {
 				title: generateRandomString(),
-				type: generateUUID(),
+				type: template._id,
 			};
 			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
 				.resolves.toEqual({ ...input, properties: {}, modules: {} });

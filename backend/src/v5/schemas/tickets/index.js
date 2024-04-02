@@ -167,7 +167,7 @@ Tickets.validateTicket = async (teamspace, project, model, template, newTicket, 
 			await generateModuleValidator(teamspace, project, model, template._id,
 				fullTem.modules, oldTicket?.modules, isNewTicket),
 		).default({}),
-		type: isNewTicket ? Yup.mixed().required() : Yup.mixed().strip(),
+		type: Yup.mixed().strip(),
 	};
 
 	if (isImport) {
@@ -184,7 +184,13 @@ Tickets.validateTicket = async (teamspace, project, model, template, newTicket, 
 		fullTem.modules, oldTicket?.modules, isNewTicket, true),
 	).default({});
 
-	return Yup.object(validatorObj).validate(validatedTicket, { stripUnknown: true });
+	const retVal = await Yup.object(validatorObj).validate(validatedTicket, { stripUnknown: true });
+
+	if (isNewTicket) {
+		retVal.type = template._id;
+	}
+
+	return retVal;
 };
 
 const calculateLevelOfRisk = (likelihood, consequence) => {
