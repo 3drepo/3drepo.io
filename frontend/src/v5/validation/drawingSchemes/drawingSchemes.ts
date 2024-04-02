@@ -102,7 +102,7 @@ export const SidebarSchema = Yup.object().shape({
 			defaultMessage: 'Category is a required field',
 		}),
 	),
-	drwaingDesc: desc,
+	drawingDesc: desc,
 });
 
 export const UploadsSchema = Yup.object().shape({
