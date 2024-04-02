@@ -49,7 +49,7 @@ export const ViewpointOverlay = styled.div`
 	width: 18px;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	opacity: 0.5;
-	border-radius: 5px 0 0 0;
+	border-radius: 5px 0 0;
 `;
 
 export const ViewpointIcon = styled(ViewpointIconBase)`
