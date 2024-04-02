@@ -24,7 +24,7 @@ import { hasDefaultPin } from '../../ticketsForm/properties/coordsProperty/coord
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
 import { Highlight } from '@controls/highlight/highlight.component';
-import { AdditionalProperties, IssueProperties, TicketBaseKeys } from '../../tickets.constants';
+import { IssueProperties, TicketBaseKeys } from '../../tickets.constants';
 import { has, isEqual } from 'lodash';
 import { getPropertiesInCamelCase, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { TicketItemThumbnail } from './ticketItemThumbnail/ticketItemThumbnail.component';
@@ -46,9 +46,8 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 	const queries = TicketsCardHooksSelectors.selectFilteringQueries();
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const { description = '', assignees = [], priority, dueDate = null } = getPropertiesInCamelCase(ticket[TicketBaseKeys.PROPERTIES]);
-	const hasIssueProperties = has(template, ['config', 'issueProperties']);
-	const hasThumbnail = has(template, [TicketBaseKeys.CONFIG, AdditionalProperties.DEFAULT_VIEW])
-		|| has(template, [TicketBaseKeys.CONFIG, AdditionalProperties.DEFAULT_IMAGE]);
+	const hasIssueProperties = has(template, [TicketBaseKeys.CONFIG, 'issueProperties']);
+	const hasThumbnail = has(template, [TicketBaseKeys.CONFIG, 'defaultView']) || has(template, [TicketBaseKeys.CONFIG, 'defaultImage']);
 
 	const updateTicketProperty = (value) => TicketsActionsDispatchers
 		.updateTicket(teamspace, project, containerOrFederation, ticket._id, { properties: value }, isFederation);
