@@ -31,11 +31,11 @@ export const DueDateWithLabel = ({ value, disabled, className, ...props }: IDueD
 		value={value}
 		disabled={disabled}
 		renderInput={({ inputRef }) => (
-			<div ref={inputRef}>
+			<div ref={inputRef} className={className}>
 				{value ? (
-					<DueDateFilledLabel value={value} disabled={disabled} className={className} />
+					<DueDateFilledLabel value={value} disabled={disabled} />
 				) : (
-					<DueDateEmptyLabel disabled={disabled} className={className} />
+					<DueDateEmptyLabel disabled={disabled} />
 				)}
 			</div>
 		)}

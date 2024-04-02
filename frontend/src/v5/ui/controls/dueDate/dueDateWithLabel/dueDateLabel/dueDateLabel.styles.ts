@@ -24,16 +24,12 @@ export const DueStateContainer = styled.span`
 export const DateContainer = styled.span<{ isOverdue?: boolean; disabled?: boolean }>`
 	font-size: 10px;
 	user-select: none;
-	color: ${({ theme }) => theme.palette.secondary.main};
 	display: inline-flex;
 	gap: 3px;
 	align-items: center;
 
 	${({ isOverdue, theme }) => !isOverdue ? css`
-		${DueStateContainer} {
-			color: ${theme.palette.base.main};
-		}
-		color: ${theme.palette.secondary.main};
+		color: ${theme.palette.base.main};
 	` : css`
 		color: ${theme.palette.error.main};
 	`};
