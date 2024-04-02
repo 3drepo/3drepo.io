@@ -56,14 +56,17 @@ export const UploadList = ({
 				<Label name="filename" minWidth={122} sort>
 					<FormattedMessage id="drawing.uploads.list.header.filename" defaultMessage="Filename" />
 				</Label>
-				<Label name="destination" width={352}>
+				<Label width={352}>
 					<FormattedMessage id="drawing.uploads.list.header.destination" defaultMessage="Drawing Destination" />*
 				</Label>
-				<Label name="statusCode" width={352}>
+				<Label width={352}>
 					<FormattedMessage id="drawing.uploads.list.header.statusCode" defaultMessage="Status Code" />
 				</Label>
-				<Label name="revisionCode" width={isUploading ? 359 : 399}>
+				<Label width={isUploading ? 359 : 399}>
 					<FormattedMessage id="drawing.uploads.list.header.revisionName" defaultMessage="Revision Code" />*
+				</Label>
+				<Label width={297} hidden={!isUploading}>
+					<FormattedMessage id="drawing.uploads.list.header.progress" defaultMessage="Upload Progress" />
 				</Label>
 			</DashboardListHeader>
 			<ListContainer>
