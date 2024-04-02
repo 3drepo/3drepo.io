@@ -47,8 +47,7 @@ export const ChipWrapper = styled.div<{ variant: string; color: string; disabled
 	display: inline-flex;
 	max-width: 100%;
 	.MuiChip-root {
-		${({ theme }) => theme.typography.body2};
-		font-size: 0.5rem;
+		font-size: 8px;
 		text-transform: uppercase;
 		padding: 3px 7px;
 		border-width: 1px;
@@ -61,9 +60,9 @@ export const ChipWrapper = styled.div<{ variant: string; color: string; disabled
 		margin: 0;
 		letter-spacing: 0.3px;
 		svg {
-			height: 11px;
-			width: 11px;
-			min-width: 11px;
+			height: 10px;
+			width: 10px;
+			min-width: 10px;
 			color: currentColor;
 			&.MuiChip-icon {
 				color: inherit;
@@ -83,6 +82,7 @@ export const ChipWrapper = styled.div<{ variant: string; color: string; disabled
 		}
 		.MuiChip-label {
 			padding: 0;
+			line-height: normal;
 		}
 		${({ variant, color }) => {
 		switch (variant) {

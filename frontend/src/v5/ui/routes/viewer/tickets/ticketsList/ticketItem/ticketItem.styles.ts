@@ -93,13 +93,16 @@ export const PriorityChip = styled(Chip).attrs({
 	variant: 'text',
 })`
 	height: 12px;
+	pointer-events: none;
 	.MuiChip-root {
-		height: 12px;
+		height: inherit;
 	}
 `;
 
 export const Id = styled.div`
 	color: ${({ theme }) => theme.palette.secondary.main};
 	${({ theme }) => theme.typography.kicker}
+	font-size: 8px;
+	line-height: 10px;
 	font-weight: 400;
 `;
