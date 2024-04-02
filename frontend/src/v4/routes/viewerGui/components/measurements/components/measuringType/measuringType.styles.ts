@@ -23,12 +23,3 @@ export const Wrapper = styled.div<{ active: boolean }>`
 	margin: 0 12px 0 0;
 	color: ${({active, theme}) => active ?  theme.palette.primary.main  : theme.palette.base.main };
 `;
-
-export const Icon2 = styled.img`
-	max-height: 24px;
-	max-width: 24px;
-`;
-
-export const Icon = styled.div`
-	
-`;
