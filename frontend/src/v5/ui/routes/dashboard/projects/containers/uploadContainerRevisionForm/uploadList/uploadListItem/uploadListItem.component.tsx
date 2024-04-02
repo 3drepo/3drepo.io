@@ -35,11 +35,11 @@ import { formatMessage } from '@/v5/services/intl';
 
 const UNEXPETED_STATUS_ERROR = undefined;
 const STATUS_TEXT_BY_UPLOAD = {
-	[UNEXPETED_STATUS_ERROR]: formatMessage({ id: 'uploads.progress.status.unexpectedError', defaultMessage: 'Unexpected error' }),
-	[UploadStatus.FAILED]: formatMessage({ id: 'uploads.progress.status.failed', defaultMessage: 'Upload failed' }),
-	[UploadStatus.UPLOADED]: formatMessage({ id: 'uploads.progress.status.uploaded', defaultMessage: 'Upload complete' }),
-	[UploadStatus.UPLOADING]: formatMessage({ id: 'uploads.progress.status.uploading', defaultMessage: 'Uploading' }),
-	[UploadStatus.QUEUED]: formatMessage({ id: 'uploads.progress.status.queued', defaultMessage: 'Waiting to upload' }),
+	[UNEXPETED_STATUS_ERROR]: formatMessage({ id: 'container.uploads.progress.status.unexpectedError', defaultMessage: 'Unexpected error' }),
+	[UploadStatus.FAILED]: formatMessage({ id: 'container.uploads.progress.status.failed', defaultMessage: 'Upload failed' }),
+	[UploadStatus.UPLOADED]: formatMessage({ id: 'container.uploads.progress.status.uploaded', defaultMessage: 'Upload complete' }),
+	[UploadStatus.UPLOADING]: formatMessage({ id: 'container.uploads.progress.status.uploading', defaultMessage: 'Uploading' }),
+	[UploadStatus.QUEUED]: formatMessage({ id: 'container.uploads.progress.status.queued', defaultMessage: 'Waiting to upload' }),
 };
 
 const getUploadStatus = (progress, errorMessage) => {

@@ -54,16 +54,16 @@ export const UploadList = ({
 		<>
 			<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
 				<Label name="file.name" minWidth={122} sort>
-					<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
+					<FormattedMessage id="container.uploads.list.header.filename" defaultMessage="Filename" />
 				</Label>
 				<Label width={352}>
-					<FormattedMessage id="uploads.list.header.destination" defaultMessage="Destination" />
+					<FormattedMessage id="container.uploads.list.header.destination" defaultMessage="Destination" />
 				</Label>
 				<Label width={isUploading ? 359 : 399}>
-					<FormattedMessage id="uploads.list.header.revisionName" defaultMessage="Revision Name" />
+					<FormattedMessage id="container.uploads.list.header.revisionName" defaultMessage="Revision Name" />
 				</Label>
 				<Label width={297} hidden={!isUploading}>
-					<FormattedMessage id="uploads.list.header.progress" defaultMessage="Upload Progress" />
+					<FormattedMessage id="container.uploads.list.header.progress" defaultMessage="Upload Progress" />
 				</Label>
 			</DashboardListHeader>
 			<ListContainer>

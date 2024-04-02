@@ -45,26 +45,26 @@ type UploadModalLabelTypes = {
 const uploadModalLabels = ({ isUploading, fileCount }: UploadModalLabelTypes) => (isUploading
 	? {
 		title: formatMessage({
-			id: 'uploads.modal.title.uploading',
+			id: 'drawing.uploads.modal.title.uploading',
 			defaultMessage: '{fileCount, plural, one {Uploading file} other {Uploading files}}',
 		}, { fileCount }),
 		subtitle: formatMessage({
-			id: 'uploads.modal.subtitle.uploading',
+			id: 'drawing.uploads.modal.subtitle.uploading',
 			defaultMessage: '{fileCount, plural, one {Do not close this window until the upload is complete} other {Do not close this window until uploads are complete}}',
 		}, { fileCount }),
-		confirmLabel: formatMessage({ id: 'uploads.modal.buttonText.uploading', defaultMessage: 'Finished' }),
+		confirmLabel: formatMessage({ id: 'drawing.uploads.modal.buttonText.uploading', defaultMessage: 'Finished' }),
 	}
 	: {
 		title: formatMessage({
-			id: 'uploads.modal.title.preparing',
+			id: 'drawing.uploads.modal.title.preparing',
 			defaultMessage: '{fileCount, plural, =0 {Add files for upload} one {Prepare file for upload} other {Prepare files for upload}}',
 		}, { fileCount }),
 		subtitle: formatMessage({
-			id: 'uploads.modal.title.preparing',
+			id: 'drawing.uploads.modal.title.preparing',
 			defaultMessage: '{fileCount, plural, =0 {Drag and drop or browse your computer} other {Select a file to add Drawing/Revision details}}',
 		}, { fileCount }),
 		confirmLabel: formatMessage({
-			id: 'uploads.modal.buttonText.preparing',
+			id: 'drawing.uploads.modal.buttonText.preparing',
 			defaultMessage: '{fileCount, plural, one {Upload file} other {Upload files}}',
 		}, { fileCount }),
 	});
@@ -173,7 +173,7 @@ export const UploadDrawingRevisionForm = ({
 	}), [fields.length]);
 
 	const supportedFilesMessage = formatMessage({
-		id: 'drawingRevision.uploads.dropzone.message',
+		id: 'drawing.uploads.dropzone.message',
 		defaultMessage: 'Supported file formats: PDF and DWG{br}Note: AutoCalibration is only possible with DWG formats.',
 	}, { br: <br /> });
 

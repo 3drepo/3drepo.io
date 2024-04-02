@@ -34,12 +34,12 @@ import { NewDestinationInUse } from '@components/shared/uploadFiles/uploadList/u
 import { ExistingDestination } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/options/existingDestination/existingDestination.component';
 
 const NO_OPTIONS_TEXT_ADMIN = formatMessage({
-	id: 'uploads.destination.noOptions.admin',
+	id: 'drawing.uploads.destination.noOptions.admin',
 	defaultMessage: 'Start typing to create a new Drawing.',
 });
 
 const NO_OPTIONS_TEXT_NON_ADMIN = formatMessage({
-	id: 'uploads.destination.noOptions.nonAdmin',
+	id: 'drawing.uploads.destination.noOptions.nonAdmin',
 	defaultMessage: 'There are no Drawings to upload to.',
 });
 
@@ -139,8 +139,8 @@ export const UploadListItemDestination = memo(({
 
 			if (isProjectAdmin) {
 				const message = formatMessage({
-					id: 'uploads.destination.addNewDestination',
-					defaultMessage: 'Add <Bold>{name}</Bold> as a new container',
+					id: 'drawing.uploads.destination.addNewDestination',
+					defaultMessage: 'Add <Bold>{name}</Bold> as a new drawing',
 				}, { Bold: (val: string) => <b>{val}</b>, name: option.name });
 				return (<NewDestination message={message} {...optionProps} />);
 			}
@@ -150,7 +150,7 @@ export const UploadListItemDestination = memo(({
 		if (option._id) {
 			if (option._id === NEW_ID) {
 				const message = formatMessage({
-					id: 'uploads.destination.newDrawing',
+					id: 'drawing.uploads.destination.newDrawing',
 					defaultMessage: ' <Bold>{name}</Bold> is a new drawing',
 				}, { Bold: (val: string) => <b>{val}</b>, name: option.name });
 				return (<NewDestinationInUse message={message} {...optionProps} />);

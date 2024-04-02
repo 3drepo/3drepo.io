@@ -95,31 +95,31 @@ export const SidebarForm = () => {
 			</FlexContainer>
 			<FormTextField
 				name={`${revisionPrefix}.containerCode`}
-				label={formatMessage({ id: 'uploads.sidebar.containerCode', defaultMessage: 'Container Code' })}
+				label={formatMessage({ id: 'container.uploads.sidebar.containerCode', defaultMessage: 'Container Code' })}
 				formError={getError('containerCode')}
 				disabled={!isNewEditableContainer}
 			/>
 			<FormTextField
 				name={`${revisionPrefix}.containerDesc`}
-				label={formatMessage({ id: 'uploads.sidebar.containerDesc', defaultMessage: 'Container Description' })}
+				label={formatMessage({ id: 'container.uploads.sidebar.containerDesc', defaultMessage: 'Container Description' })}
 				formError={getError('containerDesc')}
 				disabled={!isNewEditableContainer}
 			/>
 
 			<Heading>
-				<FormattedMessage id="uploads.sidebar.containerRevisionDetails" defaultMessage="Revision details" />
+				<FormattedMessage id="container.uploads.sidebar.containerRevisionDetails" defaultMessage="Revision details" />
 			</Heading>
 
 			<FormTextField
 				name={`${revisionPrefix}.revisionDesc`}
-				label={formatMessage({ id: 'uploads.sidebar.revisionDesc', defaultMessage: 'Revision Description' })}
+				label={formatMessage({ id: 'container.uploads.sidebar.revisionDesc', defaultMessage: 'Revision Description' })}
 				formError={getError('revisionDesc')}
 			/>
 			{extensionIsRevit(extension) && (
 				<FormSelect
 					required
 					name={`${revisionPrefix}.lod`}
-					label={formatMessage({ id: 'uploads.sidebar.lod', defaultMessage: 'Level of Detail' })}
+					label={formatMessage({ id: 'container.uploads.sidebar.lod', defaultMessage: 'Level of Detail' })}
 				>
 					{LOD_VALUES.map((type) => (
 						<MenuItem key={type.value} value={type.value}>
@@ -133,11 +133,11 @@ export const SidebarForm = () => {
 				<>
 					<AnimationsCheckbox
 						name={`${revisionPrefix}.importAnimations`}
-						label={formatMessage({ id: 'uploads.sidebar.importAnimations', defaultMessage: 'Import transformations' })}
+						label={formatMessage({ id: 'container.uploads.sidebar.importAnimations', defaultMessage: 'Import transformations' })}
 					/>
 					<TimezoneSelect
 						name={`${revisionPrefix}.timezone`}
-						label={formatMessage({ id: 'uploads.sidebar.timezone', defaultMessage: 'Timezone' })}
+						label={formatMessage({ id: 'container.uploads.sidebar.timezone', defaultMessage: 'Timezone' })}
 					>
 						{getTimezoneOptions().map((opt) => (
 							<MenuItem key={opt.name} value={opt.name}>

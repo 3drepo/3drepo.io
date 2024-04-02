@@ -35,11 +35,11 @@ import { DrawingRevisionsActionDispatchers } from '@/v5/services/actionsDispatch
 
 const UNEXPETED_STATUS_ERROR = undefined;
 const STATUS_TEXT_BY_UPLOAD = {
-	[UNEXPETED_STATUS_ERROR]: formatMessage({ id: 'uploads.progress.status.unexpectedError', defaultMessage: 'Unexpected error' }),
-	[DrawingUploadStatus.FAILED]: formatMessage({ id: 'uploads.progress.status.failed', defaultMessage: 'Upload failed' }),
-	[DrawingUploadStatus.UPLOADED]: formatMessage({ id: 'uploads.progress.status.uploaded', defaultMessage: 'Upload complete' }),
-	[DrawingUploadStatus.UPLOADING]: formatMessage({ id: 'uploads.progress.status.uploading', defaultMessage: 'Uploading' }),
-	[DrawingUploadStatus.QUEUED]: formatMessage({ id: 'uploads.progress.status.queued', defaultMessage: 'Waiting to upload' }),
+	[UNEXPETED_STATUS_ERROR]: formatMessage({ id: 'drawing.uploads.progress.status.unexpectedError', defaultMessage: 'Unexpected error' }),
+	[DrawingUploadStatus.FAILED]: formatMessage({ id: 'drawing.uploads.progress.status.failed', defaultMessage: 'Upload failed' }),
+	[DrawingUploadStatus.UPLOADED]: formatMessage({ id: 'drawing.uploads.progress.status.uploaded', defaultMessage: 'Upload complete' }),
+	[DrawingUploadStatus.UPLOADING]: formatMessage({ id: 'drawing.uploads.progress.status.uploading', defaultMessage: 'Uploading' }),
+	[DrawingUploadStatus.QUEUED]: formatMessage({ id: 'drawing.uploads.progress.status.queued', defaultMessage: 'Waiting to upload' }),
 };
 
 const getUploadStatus = (progress, errorMessage) => {
