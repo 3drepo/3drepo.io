@@ -22,6 +22,7 @@ import { StyledIndicator } from './indicator.styles';
 interface IProps {
 	color?: string;
 	size: number;
+	isEraser: boolean;
 }
 
 export class Indicator extends PureComponent <IProps, any> {

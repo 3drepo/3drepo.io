@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { COLOR } from '../../../../../styles';
 
-export const StyledIndicator = styled.div`
+export const StyledIndicator = styled.div<{ isEraser }>`
 	border-radius: 100%;
 	width: ${(props: any) => props.size}px;
 	min-width: ${(props: any) => props.size}px;
@@ -31,4 +31,9 @@ export const StyledIndicator = styled.div`
 	left: 0;
 	top: 0;
 	pointer-events: none;
+
+	${({ isEraser }) => isEraser && css`
+		background-color: ${COLOR.WHITE};
+		border-color: ${COLOR.BLACK};
+	`}
 ` as any;

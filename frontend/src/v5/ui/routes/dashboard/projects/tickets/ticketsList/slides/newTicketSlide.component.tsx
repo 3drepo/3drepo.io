@@ -79,6 +79,7 @@ export const NewTicketSlide = ({ defaultValue, template, onSave, onDirtyStateCha
 				onSave(ticketId);
 				resolve();
 			},
+			resolve,
 		);
 
 		await promiseToResolve;
