@@ -57,7 +57,7 @@ export const UploadList = ({
 					<FormattedMessage id="drawing.uploads.list.header.filename" defaultMessage="Filename" />
 				</Label>
 				<Label name="destination" width={352}>
-					<FormattedMessage id="drawing.uploads.list.header.destination" defaultMessage="Drawing Destination" />
+					<FormattedMessage id="drawing.uploads.list.header.destination" defaultMessage="Drawing Destination" />*
 				</Label>
 				<Label name="statusCode" width={352}>
 					<FormattedMessage id="drawing.uploads.list.header.statusCode" defaultMessage="Status Code" />
