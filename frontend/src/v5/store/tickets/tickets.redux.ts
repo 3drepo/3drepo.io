@@ -35,8 +35,8 @@ export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	fetchTemplate: ['teamspace', 'projectId', 'modelId', 'templateId', 'isFederation'],
 	replaceTemplateSuccess: ['modelId', 'template'],
 	fetchTemplatesSuccess: ['modelId', 'templates'],
-	updateTicket: ['teamspace', 'projectId', 'modelId', 'ticketId', 'ticket', 'isFederation'],
-	createTicket: ['teamspace', 'projectId', 'modelId', 'ticket', 'isFederation', 'onSuccess'],
+	updateTicket: ['teamspace', 'projectId', 'modelId', 'ticketId', 'ticket', 'isFederation', 'onError'],
+	createTicket: ['teamspace', 'projectId', 'modelId', 'ticket', 'isFederation', 'onSuccess', 'onError'],
 	upsertTicketSuccess: ['modelId', 'ticket'],
 	fetchRiskCategories: ['teamspace'],
 	fetchRiskCategoriesSuccess: ['riskCategories'],
@@ -128,8 +128,8 @@ export interface ITicketsState {
 
 export type FetchTicketsAction = Action<'FETCH_TICKETS'> & TeamspaceProjectAndModel & { isFederation: boolean, filter?: string[] };
 export type FetchTicketAction = Action<'FETCH_TICKET'> & TeamspaceProjectAndModel & { ticketId: string, isFederation: boolean, revision?: string };
-export type UpdateTicketAction = Action<'UPDATE_TICKET'> & TeamspaceProjectAndModel & { ticketId: string, ticket: Partial<ITicket>, isFederation: boolean };
-export type CreateTicketAction = Action<'CREATE_TICKET'> & TeamspaceProjectAndModel & { ticket: NewTicket, isFederation: boolean, onSuccess: (ticketId) => void };
+export type UpdateTicketAction = Action<'UPDATE_TICKET'> & TeamspaceProjectAndModel & { ticketId: string, ticket: Partial<ITicket>, isFederation: boolean, onError?: () => void };
+export type CreateTicketAction = Action<'CREATE_TICKET'> & TeamspaceProjectAndModel & { ticket: NewTicket, isFederation: boolean, onSuccess: (ticketId) => void, onError: () => void };
 export type FetchTicketsSuccessAction = Action<'FETCH_TICKETS_SUCCESS'> & ModelId & { tickets: ITicket[] };
 export type UpsertTicketSuccessAction = Action<'UPSERT_TICKET_SUCCESS'> & ModelId & { ticket: Partial<ITicket> };
 export type UpsertTicketAndFetchGroupsAction = Action<'UPSERT_TICKET_AND_FETCH_GROUPS'> & TeamspaceProjectAndModel & { ticket: Partial<ITicket>, revision?: string };
@@ -168,6 +168,7 @@ export interface ITicketsActionCreators {
 		ticketId: string,
 		ticket: Partial<ITicket>,
 		isFederation: boolean,
+		onError?: () => void,
 	) => UpdateTicketAction;
 	createTicket: (
 		teamspace: string,
@@ -176,6 +177,7 @@ export interface ITicketsActionCreators {
 		ticket: NewTicket,
 		isFederation: boolean,
 		onSuccess: (ticketId) => void,
+		onError: () => void,
 	) => CreateTicketAction;
 	fetchTicketsSuccess: (
 		modelId: string,
