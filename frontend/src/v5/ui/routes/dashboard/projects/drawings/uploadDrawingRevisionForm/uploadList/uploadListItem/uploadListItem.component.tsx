@@ -21,7 +21,7 @@ import { DrawingsHooksSelectors, DrawingRevisionsHooksSelectors } from '@/v5/ser
 import { InputController } from '@controls/inputs/inputController.component';
 import { DashboardListItemRow as UploadListItemRow } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { UploadListItemDestination } from './components/uploadListItemDestination/uploadListItemDestination.component';
-import { UploadListItemCode } from './components/uploadListItemRevisionCode/uploadListItemRevisionCode.component';
+import { UploadListItemCode } from './components/uploadListItemCode/uploadListItemCode.component';
 import { UploadListItemButton } from './uploadListItem.styles';
 import { useFormContext } from 'react-hook-form';
 import { useEffect } from 'react';
