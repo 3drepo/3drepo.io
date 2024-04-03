@@ -53,7 +53,7 @@ export const UploadList = ({
 	return (
 		<>
 			<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
-				<Label name="filename" minWidth={122} sort>
+				<Label name="file.name" minWidth={122} sort>
 					<FormattedMessage id="drawing.uploads.list.header.filename" defaultMessage="Filename" />
 				</Label>
 				<Label width={352}>
