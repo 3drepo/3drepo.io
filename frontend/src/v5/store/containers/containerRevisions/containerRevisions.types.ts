@@ -121,7 +121,3 @@ export type UploadItemFields = CreateContainerRevisionBody & {
 	extension: string;
 };
 
-export type UploadFieldArray = {
-	uploads: UploadItemFields[];
-};
-

@@ -77,7 +77,3 @@ export type UploadItemFields = CreateDrawingRevisionBody & {
 	progress: number;
 	extension: string;
 };
-
-export type UploadFieldArray = {
-	uploads: UploadItemFields[];
-};

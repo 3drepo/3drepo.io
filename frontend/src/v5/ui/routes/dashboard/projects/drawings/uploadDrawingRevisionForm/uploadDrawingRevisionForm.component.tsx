@@ -30,17 +30,19 @@ import {
 } from '@/v5/services/selectorsHooks';
 import { getSupportedDrawingRevisionsFileExtensions } from '@controls/fileUploader/uploadFile';
 import { UploadFiles } from '@components/shared/uploadFiles/uploadFiles.component';
-import { UploadFilesContextComponent } from '@components/shared/uploadFiles/uploadFilesContext';
+import { UploadFieldArray, UploadFilesContextComponent } from '@components/shared/uploadFiles/uploadFilesContext';
 import { SidebarForm } from './sidebarForm/sidebarForm.component';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingRevisionsActionDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { UploadList } from './uploadList/uploadList.component';
 import { parseFileName, reduceFileData, isPdf, getPdfFirstPage, fileToPdf, pdfToFile } from '@components/shared/uploadFiles/uploadFiles.helpers';
+import { UploadItemFields } from '@/v5/store/drawings/drawingRevisions/drawingRevisions.types';
 
 type UploadModalLabelTypes = {
 	isUploading: boolean;
 	fileCount: number;
 };
+type FormType = UploadFieldArray<UploadItemFields>;
 
 const uploadModalLabels = ({ isUploading, fileCount }: UploadModalLabelTypes) => (isUploading
 	? {
@@ -89,7 +91,7 @@ export const UploadDrawingRevisionForm = ({
 
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 
-	const formData = useForm<{ uploads: any[] }>({
+	const formData = useForm<FormType>({
 		mode: 'onChange',
 		resolver: !isUploading ? yupResolver(UploadsSchema) : undefined,
 		context: {
