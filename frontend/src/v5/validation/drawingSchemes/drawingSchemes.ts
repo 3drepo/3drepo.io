@@ -25,23 +25,23 @@ import { getState } from '@/v4/modules/store';
 const drawingNumber = Yup.string()
 	.matches(alphaNumericHyphens,
 		formatMessage({
-			id: 'validation.drawing.drawingNumber',
+			id: 'validation.drawing.drawingNumber.error.characters',
 			defaultMessage: 'Drawing Number can only consist of letters, numbers, hyphens or underscores',
 		}))
 	.max(50,
 		formatMessage({
-			id: 'validation.drawing.error.error.max',
+			id: 'validation.drawing.drawingNumber.error.max',
 			defaultMessage: 'Drawing Number is limited to 50 characters',
 		}))
 	.required(
 		formatMessage({
-			id: 'validation.drawingNumber.error.required',
+			id: 'validation.drawing.drawingNumber.error.required',
 			defaultMessage: 'Drawing Number is a required field',
 		}),
 	).test(
 		'alreadyExistingNumbers',
 		formatMessage({
-			id: 'validation.drawingNumber.alreadyExisting',
+			id: 'validation.drawing.drawingNumber.error.alreadyExisting',
 			defaultMessage: 'Your Drawing Number is already in use, please use a unique Drawing Number',
 		}),
 		(value, testContext) => {
@@ -62,38 +62,36 @@ const testCombinationIsUnique = (val, testContext) => {
 	const revisions = selectRevisions(getState(), testContext.parent.drawingId);
 	return !revisions.some((rev) => isSameCode(rev.statusCode, testContext.parent.statusCode) && isSameCode(rev.revisionCode, testContext.parent.revisionCode));
 };
+const statusCodeAndRevisionCodeMustBeUniqueMessage = formatMessage({
+	id: 'validation.drawing.statusCode.error.characters',
+	defaultMessage: 'Status Code can only consist of letters, numbers, hyphens or underscores',
+});
 export const ListItemSchema = Yup.object().shape({
 	file: uploadFile,
 	revisionName,
 	statusCode: trimmedString.matches(alphaNumericHyphens,
 		formatMessage({
-			id: 'validation.drawing.statusCode',
+			id: 'validation.drawing.statusCode.error.characters',
 			defaultMessage: 'Status Code can only consist of letters, numbers, hyphens or underscores',
 		}),
 	).test(
 		'statusCodeAndRevisionCodeAreUnique',
-		formatMessage({
-			id: 'validation.statusCodeAndRevisionCodeUnique.error',
-			defaultMessage: 'The combination of "Status Code" and "Revision Code" must be unique',
-		}),
+		statusCodeAndRevisionCodeMustBeUniqueMessage,
 		testCombinationIsUnique,
 	),
 	revisionCode: trimmedString.matches(alphaNumericHyphens,
 		formatMessage({
-			id: 'validation.drawing.statusCode',
+			id: 'validation.drawing.revisionCode.error.characters',
 			defaultMessage: 'Revision Code can only consist of letters, numbers, hyphens or underscores',
 		}),
 	).required(
 		formatMessage({
-			id: 'validation.revisionCode.required',
+			id: 'validation.drawing.revisionCode.error.required',
 			defaultMessage: 'Revision Code is a required field',
 		}),
 	).test(
 		'statusCodeAndRevisionCodeAreUnique',
-		formatMessage({
-			id: 'validation.statusCodeAndRevisionCodeUnique.error',
-			defaultMessage: 'The combination of "Status Code" and "Revision Code" must be unique',
-		}),
+		statusCodeAndRevisionCodeMustBeUniqueMessage,
 		testCombinationIsUnique,
 	),
 	revisionDesc,
@@ -104,7 +102,7 @@ export const SidebarSchema = Yup.object().shape({
 	drawingNumber,
 	drawingCategory: Yup.string().required(
 		formatMessage({
-			id: 'validation.drawingCategory.required',
+			id: 'validation.drawing.drawingCategory.error.required',
 			defaultMessage: 'Category is a required field',
 		}),
 	),
