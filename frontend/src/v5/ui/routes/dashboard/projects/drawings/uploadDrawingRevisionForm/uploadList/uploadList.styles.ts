@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,26 +16,19 @@
  */
 
 import styled, { css } from 'styled-components';
-import { CircleButton } from '@controls/circleButton';
 import { Container as ItemRowContainer } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemRow/dashboardListItemRow.styles';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
+import { RevisionCodeField } from './uploadListItem/components/uploadListItemCode/uploadListItemCode.styles';
 import { DestinationAutocomplete } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/uploadListItemDestination.styles';
-import { RevisionTagField } from './components/uploadListItemRevisionTag/uploadListItemRevisionTag.styles';
 
-export const UploadListItemButton = styled(CircleButton)`
-	margin: 0;
-	&:hover, &.Mui-focusVisible { 
-		box-shadow: none;
-	}
-`;
-
-const DestinationAndTagDimensions = css`
+const DestinationAndNameDimensions = css`
 	width: 340px;
 	height: 35px;
 `;
 
 export const UploadListItemRowWrapper = styled(DashboardListItem)<{ selected: boolean; order: number }>`
 	${({ order }) => css`order: ${order}`};
+
 	${ItemRowContainer} {
 		padding: 8px 15px 8px 5px;
 		height: auto;
@@ -43,11 +36,14 @@ export const UploadListItemRowWrapper = styled(DashboardListItem)<{ selected: bo
 		overflow: hidden;
 
 		${DestinationAutocomplete} {
-			${DestinationAndTagDimensions}
+			${DestinationAndNameDimensions}
 		}
 
-		${RevisionTagField} {
-			${DestinationAndTagDimensions}
+		${RevisionCodeField} {
+			&:not(:last-of-type) {
+				margin-right: 0;
+			}
+			${DestinationAndNameDimensions}
 			${({ selected, theme }) => selected && css`
 				>.MuiOutlinedInput-root:not(.Mui-error) {
 					background-color: ${theme.palette.secondary.light};

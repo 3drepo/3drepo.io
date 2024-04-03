@@ -24,7 +24,7 @@ import { DashboardListHeader, DashboardListHeaderLabel as Label } from '@compone
 import { FormattedMessage } from 'react-intl';
 import { UploadListItem } from './uploadListItem/uploadListItem.component';
 import { ListContainer } from '@components/shared/uploadFiles/uploadList/uploadList.styles';
-import { UploadListItemRowWrapper } from './uploadListItem/uploadListItem.styles';
+import { UploadListItemRowWrapper } from './uploadList.styles';
 
 type IUploadList = {
 	values: UploadItemFields[];

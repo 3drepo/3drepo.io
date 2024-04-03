@@ -22,7 +22,7 @@ import { InputController } from '@controls/inputs/inputController.component';
 import { DashboardListItemRow as UploadListItemRow } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { UploadListItemDestination } from './components/uploadListItemDestination/uploadListItemDestination.component';
 import { UploadListItemRevisionTag } from './components/uploadListItemRevisionTag/uploadListItemRevisionTag.component';
-import { UploadListItemButton } from './uploadListItem.styles';
+import { UploadListItemButton } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItem.styles';
 import { useFormContext } from 'react-hook-form';
 import { useEffect } from 'react';
 import { IContainer, UploadStatus } from '@/v5/store/containers/containers.types';

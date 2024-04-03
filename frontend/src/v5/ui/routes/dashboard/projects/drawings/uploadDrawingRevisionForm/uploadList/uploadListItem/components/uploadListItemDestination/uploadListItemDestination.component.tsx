@@ -96,7 +96,6 @@ export const UploadListItemDestination = memo(({
 		try {
 			drawingNameScheme.validateSync(
 				trimmedValue,
-				// here was the fed names
 				{ context: { alreadyExistingNames: [] } },
 			);
 			setError('');
