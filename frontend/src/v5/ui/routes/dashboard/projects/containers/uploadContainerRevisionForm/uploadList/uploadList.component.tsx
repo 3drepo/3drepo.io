@@ -23,7 +23,7 @@ import { UploadFilesContext } from '@components/shared/uploadFiles/uploadFilesCo
 import { DashboardListHeader, DashboardListHeaderLabel as Label } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
 import { UploadListItem } from './uploadListItem/uploadListItem.component';
-import { ListContainer } from './uploadList.styles';
+import { ListContainer } from '@components/shared/uploadFiles/uploadList/uploadList.styles';
 import { UploadListItemRowWrapper } from './uploadListItem/uploadListItem.styles';
 
 type IUploadList = {
