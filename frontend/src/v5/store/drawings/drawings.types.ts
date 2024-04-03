@@ -24,6 +24,16 @@ export enum CalibrationStates {
 	EMPTY = 'empty',
 }
 
+// TODO - fix once they are sure
+export enum DrawingUploadStatus {
+	OK = 'ok',
+	FAILED = 'failed',
+	UPLOADING = 'uploading',
+	UPLOADED = 'uploaded',
+	QUEUED = 'queued',
+	PROCESSING = 'processing',
+}
+
 export interface MinimumDrawing {
 	_id: string;
 	name: string;
@@ -61,7 +71,7 @@ export interface DrawingStats {
 	drawingNumber: string,
 	calibration?: CalibrationStates,
 	category?: string, // TODO - add category types
-	status?: any, // TODO - add drawing statuses
+	status?: DrawingUploadStatus,
 	errorReason?: {
 		message: string;
 		timestamp: number;
@@ -75,12 +85,3 @@ export type NewDrawing = {
 	drawingNumber: string;
 	desc?: string;
 };
-
-export enum DrawingUploadStatus {
-	OK = 'ok',
-	FAILED = 'failed',
-	UPLOADING = 'uploading',
-	UPLOADED = 'uploaded',
-	QUEUED = 'queued',
-	PROCESSING = 'processing',
-}
