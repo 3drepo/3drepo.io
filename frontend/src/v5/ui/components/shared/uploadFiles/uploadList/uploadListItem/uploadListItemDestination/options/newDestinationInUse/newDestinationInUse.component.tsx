@@ -16,15 +16,15 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { Message, NewContainerOption } from './newDestinationInUse.styles';
+import { Message, NewDestinationOption } from './newDestinationInUse.styles';
 import { InUseText } from '../existingDestination/existingDestination.styles';
 
 interface INewDestinationInUse { message: string; }
 export const NewDestinationInUse = ({ message, ...props }: INewDestinationInUse) => (
-	<NewContainerOption {...props}>
+	<NewDestinationOption {...props}>
 		<Message>{message}</Message>
 		<InUseText>
 			<FormattedMessage id="uploads.destination.destinationInUse" defaultMessage="Already in use in another file upload" />
 		</InUseText>
-	</NewContainerOption>
+	</NewDestinationOption>
 );
