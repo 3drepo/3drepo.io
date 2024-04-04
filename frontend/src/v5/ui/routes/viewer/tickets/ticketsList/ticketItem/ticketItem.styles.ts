@@ -53,7 +53,7 @@ export const Description = styled(TextOverflow).attrs({
 export const TicketItemContainer = styled(FlexColumn)<{ $selected?: boolean }>`
 	cursor: pointer;
 	box-sizing: border-box;
-	padding: 10px;
+	padding: 12px;
 	min-height: 65px;
 	background-color: ${({ theme }) =>  theme.palette.primary.contrast};
 	${({ theme, $selected }) => $selected && css`
@@ -69,7 +69,7 @@ export const DueDate = styled(DueDateBase)`
 	>* {
 		height: inherit;
 		align-content: center;
-	};
+	}
 `;
 
 export const BottomRow = styled(FlexRow)`
@@ -104,4 +104,5 @@ export const Id = styled.div`
 	font-size: 8px;
 	line-height: 10px;
 	font-weight: 400;
+	user-select: none;
 `;

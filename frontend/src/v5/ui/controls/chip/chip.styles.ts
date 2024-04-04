@@ -46,6 +46,7 @@ const textStyles = (color: string) => css`
 export const ChipWrapper = styled.div<{ variant: string; color: string; disabled: boolean }>`
 	display: inline-flex;
 	max-width: 100%;
+	pointer-events: ${({ disabled }) => (disabled ? 'none' : 'auto')};
 	.MuiChip-root {
 		font-size: 8px;
 		text-transform: uppercase;
@@ -56,7 +57,6 @@ export const ChipWrapper = styled.div<{ variant: string; color: string; disabled
 		gap: 4px;
 		user-select: none;
 		cursor: pointer;
-		pointer-events: ${({ disabled }) => (disabled ? 'none' : 'auto')};
 		margin: 0;
 		letter-spacing: 0.3px;
 		svg {

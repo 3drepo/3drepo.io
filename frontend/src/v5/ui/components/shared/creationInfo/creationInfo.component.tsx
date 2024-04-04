@@ -42,7 +42,7 @@ export const CreationInfo = ({
 
 	const Username = () => (
 		<ShrinkValue>
-			<HoverPopover anchor={(props) => <span {...props}>{`${ownerDetails.firstName} ${ownerDetails.lastName}`}</span>}>
+			<HoverPopover anchor={(props) => <span {...props}>{owner}</span>}>
 				<UserPopover user={ownerDetails} />
 			</HoverPopover>
 		</ShrinkValue>
