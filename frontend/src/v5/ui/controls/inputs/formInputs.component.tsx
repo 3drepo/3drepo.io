@@ -16,7 +16,7 @@
  */
 
 import { ChipSelect, ChipSelectProps } from '@controls/chip/chipSelect/chipSelect.component';
-import { DueDateWithIcon, DueDateWithIconProps } from '@controls/dueDate/dueDateWithIcon/dueDateWithIcon.component';
+import { DueDate, DueDateProps } from '@controls/dueDate/dueDate.component';
 import { forwardRef } from 'react';
 import { AssigneesSelect, AssigneesSelectProps } from '@controls/assigneesSelect/assigneesSelect.component';
 import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
@@ -38,7 +38,7 @@ export const FormTextArea = forwardRef((props: InputControllerProps<TextAreaProp
 export const FormTextAreaFixedSize = forwardRef((props: InputControllerProps<TextAreaFixedSizeProps>, ref) => (<InputController Input={TextAreaFixedSize} {...props} ref={ref} />));
 
 // calendar inputs
-export const FormDueDateWithIcon = (props: InputControllerProps<DueDateWithIconProps>) => (<InputController Input={DueDateWithIcon} {...props} />);
+export const FormDueDate = (props: InputControllerProps<DueDateProps>) => (<InputController Input={DueDate} {...props} />);
 
 // select inputs
 export const FormSelectView = (props: InputControllerProps<SelectViewProps>) => (<InputController Input={SelectView} {...props} />);

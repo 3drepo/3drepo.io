@@ -17,7 +17,7 @@
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useEffect, useRef } from 'react';
-import { IssuePropertiesContainer, DueDateLabel, FlexRow, BottomRow, StatusChip, TicketItemContainer, Description, Id, Title, FlexColumn, PriorityChip } from './ticketItem.styles';
+import { IssuePropertiesContainer, FlexRow, BottomRow, StatusChip, TicketItemContainer, Description, Id, Title, FlexColumn, PriorityChip, DueDate } from './ticketItem.styles';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { hasDefaultPin } from '../../ticketsForm/properties/coordsProperty/coordsProperty.helpers';
@@ -88,7 +88,7 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 						<IssuePropertiesContainer>
 							<Assignees value={assignees} maxItems={5} multiple showAddButton onBlur={onBlurAssignees} disabled={readOnly} />
 							<FlexRow>
-								<DueDateLabel value={dueDate} onChange={onChangeDueDate} disabled={readOnly} />
+								<DueDate value={dueDate} onChange={onChangeDueDate} disabled={readOnly} />
 								<PriorityChip {...PRIORITY_LEVELS_MAP[priority]} />
 							</FlexRow>
 						</IssuePropertiesContainer>

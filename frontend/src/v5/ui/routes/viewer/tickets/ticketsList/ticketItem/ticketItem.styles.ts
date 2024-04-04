@@ -17,9 +17,9 @@
 
 import styled, { css } from 'styled-components';
 import { StatusChip as StatusChipBase } from '@controls/chip/statusChip/statusChip.component';
-import { DueDateWithLabel } from '@controls/dueDate/dueDateWithLabel/dueDateWithLabel.component';
 import { TextOverflow } from '@controls/textOverflow';
 import { Chip } from '@controls/chip/chip.component';
+import { DueDate as DueDateBase } from '@controls/dueDate/dueDate.component';
 
 export const FlexRow = styled.div`
 	display: flex;
@@ -64,13 +64,12 @@ export const TicketItemContainer = styled(FlexColumn)<{ $selected?: boolean }>`
 	`}
 `;
 
-export const DueDateLabel = styled(DueDateWithLabel)`
+export const DueDate = styled(DueDateBase)`
 	height: 12px;
-	min-width: 131px;
 	>* {
-		height: 12px;
-		display: flex;
-	}
+		height: inherit;
+		align-content: center;
+	};
 `;
 
 export const BottomRow = styled(FlexRow)`
