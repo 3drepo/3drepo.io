@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ViewpointOverlay, ImagePlaceholder, Thumbnail, ThumbnailContainer, ViewpointIcon } from './ticketItemThumbnail.styles';
+import { ViewpointOverlay, ImagePlaceholder, Thumbnail, ThumbnailContainer, ViewpointIcon, ImageIcon } from './ticketItemThumbnail.styles';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { hasDefaultPin } from '../../../ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { get, has } from 'lodash';
@@ -23,7 +23,6 @@ import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
 import { getTicketResourceUrl, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
-import ImageIcon from '@assets/icons/outlined/image_thin-outlined.svg';
 import { AdditionalProperties } from '../../../tickets.constants';
 
 export const TicketItemThumbnail = ({ ticket }) => {
