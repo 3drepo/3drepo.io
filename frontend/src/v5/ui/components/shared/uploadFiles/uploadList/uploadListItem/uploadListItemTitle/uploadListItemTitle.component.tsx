@@ -17,9 +17,10 @@
 
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { Tooltip } from '@mui/material';
-import { get, useFormState } from 'react-hook-form';
+import { get, useFormContext } from 'react-hook-form';
 import filesize from 'filesize';
-import { DashboardListItemTitle } from './uploadListItemTitle.styles';
+import { DashboardListItemTitle, SubTitleError } from './uploadListItemTitle.styles';
+import { FormattedMessage } from 'react-intl';
 
 type IUploadListItemTitle = {
 	name: string;
@@ -34,10 +35,26 @@ export const UploadListItemTitle = ({
 	revisionPrefix,
 	isSelected,
 }: IUploadListItemTitle): JSX.Element => {
-	const { errors } = useFormState();
+	const { formState: { errors }, getValues } = useFormContext();
 	const errorMessage = get(errors, `${revisionPrefix}.file`)?.message;
+	const isMultiPagePdf = getValues(`${revisionPrefix}.isMultiPagePdf`);
+
+	const SubTitle = () => (
+		<>
+			{filesize(size)}
+			{isMultiPagePdf && (
+				<SubTitleError>
+					<FormattedMessage
+						id="drawing.uploads.pdf.useFirstPage.message"
+						defaultMessage="This PDF contains multiple pages. Only the first page will be used"
+					/>
+				</SubTitleError>
+			)}
+		</>
+	);
+
 	return (
-		<DashboardListItemTitle key={revisionPrefix} subtitle={filesize(size)} selected={isSelected}>
+		<DashboardListItemTitle key={revisionPrefix} subtitle={<SubTitle />} selected={isSelected}>
 			<Tooltip title={name} placement="bottom-start">
 				<span>{name}</span>
 			</Tooltip>

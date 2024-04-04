@@ -21,11 +21,6 @@ import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { RevisionCodeField } from './uploadListItem/components/uploadListItemCode/uploadListItemCode.styles';
 import { DestinationAutocomplete } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/uploadListItemDestination.styles';
 
-const DestinationAndNameDimensions = css`
-	width: 340px;
-	height: 35px;
-`;
-
 export const UploadListItemRowWrapper = styled(DashboardListItem)<{ selected: boolean; order: number }>`
 	${({ order }) => css`order: ${order}`};
 
@@ -36,14 +31,18 @@ export const UploadListItemRowWrapper = styled(DashboardListItem)<{ selected: bo
 		overflow: hidden;
 
 		${DestinationAutocomplete} {
-			${DestinationAndNameDimensions}
+			width: 340px;
+			height: 35px;
 		}
 
 		${RevisionCodeField} {
+			width: 146px;
+			height: 35px;
+
 			&:not(:last-of-type) {
 				margin-right: 0;
 			}
-			${DestinationAndNameDimensions}
+
 			${({ selected, theme }) => selected && css`
 				>.MuiOutlinedInput-root:not(.Mui-error) {
 					background-color: ${theme.palette.secondary.light};

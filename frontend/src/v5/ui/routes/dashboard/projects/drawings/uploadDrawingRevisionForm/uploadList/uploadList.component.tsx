@@ -59,10 +59,10 @@ export const UploadList = ({
 				<Label width={352}>
 					<FormattedMessage id="drawing.uploads.list.header.destination" defaultMessage="Drawing Destination" />*
 				</Label>
-				<Label width={352}>
+				<Label width={160}>
 					<FormattedMessage id="drawing.uploads.list.header.statusCode" defaultMessage="Status Code" />
 				</Label>
-				<Label width={isUploading ? 359 : 399}>
+				<Label width={isUploading ? 160 : 209}>
 					<FormattedMessage id="drawing.uploads.list.header.revisionName" defaultMessage="Revision Code" />*
 				</Label>
 				<Label width={297} hidden={!isUploading}>

@@ -30,3 +30,7 @@ export const DashboardListItemTitle = styled(ListItemTitle)`
 		overflow: hidden;
 	}
 `;
+export const SubTitleError = styled.i`
+	color: ${({ theme }) => theme.palette.error.main};
+	padding: 0 2px 0 5px;
+`;

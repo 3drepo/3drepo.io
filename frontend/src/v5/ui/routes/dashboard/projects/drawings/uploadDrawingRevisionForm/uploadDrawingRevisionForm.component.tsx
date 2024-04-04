@@ -122,25 +122,23 @@ export const UploadDrawingRevisionForm = ({
 		const filesToAppend = [];
 		for (let fileAsGeneric of files) {
 			const fileName = fileAsGeneric.name;
-			let file: File = fileAsGeneric;
-			if (isPdf(file)) {
+			const fileData = {
+				file: fileAsGeneric,
+				isMultiPagePdf: false,
+			};
+			if (isPdf(fileAsGeneric)) {
 				try {
 					const fileAsPdf = await fileToPdf(fileAsGeneric);
 					const pageCount = fileAsPdf.getPageCount();
 					if (pageCount > 1) {
-						// TODO - communicate 2+ pages PDFs only retain first one
-						alert(`${fileName} has ${pageCount} pages, only the first one will be kept`);
+						fileData.isMultiPagePdf = true;
 						const pdfSinglePage = await getPdfFirstPage(fileAsPdf);
-						file = await pdfToFile(pdfSinglePage, fileName);
+						fileData.file = await pdfToFile(pdfSinglePage, fileName);
 					}
-				} catch (e) {
-					// TODO - communicate error parsing PDF file
-					alert(`Error: ${fileName} was processed as a PDF, but it seems corrupted. It will be skipped`);
-					continue;
-				}
+				} catch (e) { /** let backend catch corrupted PDFs */}
 			}
 			filesToAppend.push({
-				file,
+				...fileData,
 				progress: 0,
 				extension: fileName.split('.').slice(-1)[0].toLocaleLowerCase(),
 				revisionName: parseFileName(fileName, revisionNameMaxLength),
