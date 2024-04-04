@@ -37,13 +37,12 @@ export const TicketItemThumbnail = ({ ticket }) => {
 		getTicketResourceUrl(teamspace, project, containerOrFederation, ticket._id, resourceId, isFederation) : null;
 
 	const goToViewpoint = (event) => {
-		if (!hasViewpoint) return;
 		event.stopPropagation();
-
 		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
 		TicketsCardActionsDispatchers.setSelectedTicketPin(hasDefaultPin(ticket) ? ticket._id : null);
 		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id);
-
+		
+		if (!hasViewpoint) return;
 		goToView(defaultView); 
 	};
 
