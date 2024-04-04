@@ -130,6 +130,13 @@ export class UnityUtil {
 	public static verbose = false;
 
 	/**
+	 * Temporarily holds an image reference that the calibration tool plug-in will retrieve.
+	 * The plug-in will set this to null once it has been read.
+	 */
+	/** @hidden */
+	public static calibrationToolPreviewImage: TexImageSource;
+
+	/**
 	 * Contains a list of calls to make during the Unity Update method. One
 	 * call is made per Unity frame.
 	 */
@@ -500,6 +507,7 @@ export class UnityUtil {
 		const point = JSON.parse(pointInfo);
 		if (UnityUtil.viewer && UnityUtil.viewer.objectSelected) {
 			UnityUtil.viewer.objectSelected(point);
+			console.log(pointInfo);
 		}
 	}
 
@@ -2337,6 +2345,87 @@ export class UnityUtil {
 		});
 	}
 
+	/**
+	 * Deactives the Calibration Tool and hides all its 3D UI.
+	 * @category Calibration
+	 */
+	public static disableCalibrationTool() {
+		UnityUtil.toUnity('DisableCalibrationTool', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
+	 * Sets the active Calibration Tool and enables it, if not already enabled.
+	 * @category Calibration
+	 * @param mode A string, "Vector", "Vertical" or "Preview". A value not one of these will disable the tool.
+	 */
+	public static setCalibrationToolMode(mode: string) {
+		UnityUtil.toUnity('SetCalibrationToolMode', UnityUtil.LoadingState.VIEWER_READY, mode);
+	}
+
+	/**
+	 * Highlights the Lower Floor Plane in Vertical mode, and makes it interactive.
+	 * @category Calibration
+	 */
+	public static selectCalibrationToolLowerPlane() {
+		UnityUtil.toUnity('SelectCalibrationToolLowerPlane', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
+	 * Highlights the Upper Floor Plane in Vertical mode, and makes it interactive.
+	 * @category Calibration
+	 */
+	public static selectCalibrationToolUpperPlane() {
+		UnityUtil.toUnity('SelectCalibrationToolUpperPlane', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
+	 * Aligns the Lower floor plane to the top of the specified mesh, and the Upper floor plane to the default floor height above this.
+	 * The interactive state of the planes is unchanged.
+	 * @category Calibration
+	 */
+	public static setCalibrationToolFloorToObject(teamspace: string, modelid: string, meshid: string) {
+		var parms = {
+			teamspace: teamspace,
+			modelId: modelid,
+			meshes: [ meshid ],
+		};
+		UnityUtil.toUnity('SetCalibrationToolFloorToObject', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(parms));
+	}
+
+	/**
+	 * Removes the Start of the Calibration Vector so the user can place it again.
+	 * @category Calibration
+	 */
+	public static deleteCalibrationToolVectorStart() {
+		UnityUtil.toUnity('DeleteCalibrationToolVectorStart', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
+	 * Removes the End of the Calibration Vector so the user can place it again.
+	 * @category Calibration
+	 */
+	public static deleteCalibrationToolVectorEnd() {
+		UnityUtil.toUnity('DeleteCalibrationToolVectorEnd', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
+	 * Removes the End of the Calibration Vector so the user can place it again.
+	 * @category Calibration
+	 */
+	public static setCalibrationToolPreview(image: TexImageSource, rect: any, height: Number) {
+		this.calibrationToolPreviewImage = image; // Store a reference to the image, as the viewer will request it momentarily
+		var parms = {
+			worldRect: rect,
+			height: height,
+		};
+		UnityUtil.toUnity('SetCalibrationToolPreview', UnityUtil.LoadingState.VIEWER_READY, parms);
+	}
+
+	// Temporary for debugging
+	public static getCalibrationToolTexture(texture: any) {
+		
+	}
+	
 	/**
 	 * Sets the maximum number of responses WebRequestManager2 should attempt to
 	 * handle at any one time. The higher this is the faster models will load but
