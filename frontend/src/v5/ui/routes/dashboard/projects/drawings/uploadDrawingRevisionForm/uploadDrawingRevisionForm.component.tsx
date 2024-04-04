@@ -36,7 +36,7 @@ import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingRevisionsActionDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { UploadList } from './uploadList/uploadList.component';
 import { parseFileName, reduceFileData, isPdf, getPdfFirstPage, fileToPdf, pdfToFile } from '@components/shared/uploadFiles/uploadFiles.helpers';
-import { UploadItemFields } from '@/v5/store/drawings/drawingRevisions/drawingRevisions.types';
+import { UploadItemFields } from '@/v5/store/drawings/revisions/drawingRevisions.types';
 
 type UploadModalLabelTypes = {
 	isUploading: boolean;

@@ -16,7 +16,7 @@
  */
 import { SyntheticEvent } from 'react';
 
-import { IContainerRevision } from '@/v5/store/containers/containerRevisions/containerRevisions.types';
+import { IContainerRevision } from '@/v5/store/containers/revisions/containerRevisions.types';
 import { ContainerRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { viewerRoute } from '@/v5/services/routing/routing';
 import { FormattedMessage } from 'react-intl';

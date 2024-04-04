@@ -27,7 +27,7 @@ import { GroupsActions } from '@/v4/modules/groups';
 import { JobsActions } from '@/v4/modules/jobs';
 import { MeasurementsActions } from '@/v4/modules/measurements';
 import { IProjectsActionCreators, ProjectsActions } from '@/v5/store/projects/projects.redux';
-import { IContainerRevisionsActionCreators, ContainerRevisionsActions } from '@/v5/store/containers/containerRevisions/containerRevisions.redux';
+import { IContainerRevisionsActionCreators, ContainerRevisionsActions } from '@/v5/store/containers/revisions/containerRevisions.redux';
 import { ITeamspacesActionCreators, TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { SequencesActions } from '@/v4/modules/sequences';
 import { TicketsActions, ITicketsActionCreators } from '@/v5/store/tickets/tickets.redux';
@@ -41,7 +41,7 @@ import { Action } from 'redux';
 import { CanvasHistoryActions } from '@/v4/modules/canvasHistory';
 
 import { ClipMode, GizmoMode, MeasureMode, NavigationMode, ProjectionMode } from '../ui/routes/viewer/toolbar/toolbar.types';
-import { DrawingRevisionsActions, IDrawingRevisionsActionCreators } from '../store/drawings/drawingRevisions/drawingRevisions.redux';
+import { DrawingRevisionsActions, IDrawingRevisionsActionCreators } from '../store/drawings/revisions/drawingRevisions.redux';
 
 interface IBimActionCreators {
 	setIsActive: (active: boolean) => Action;

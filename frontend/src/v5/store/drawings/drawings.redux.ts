@@ -22,7 +22,7 @@ import { TeamspaceAndProjectId, ProjectId, ProjectAndDrawingId, TeamspaceProject
 import { IDrawing, DrawingStats, DrawingUploadStatus, NewDrawing, CalibrationStates } from './drawings.types';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
-import { IDrawingRevision } from './drawingRevisions/drawingRevisions.types';
+import { IDrawingRevision } from './revisions/drawingRevisions.types';
 import { prepareSingleDrawingData } from './drawings.helpers';
 
 export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions({
