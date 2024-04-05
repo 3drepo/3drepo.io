@@ -20,11 +20,11 @@ import { useContext } from 'react';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { UploadFilesContext } from '@components/shared/uploadFiles/uploadFilesContext';
-import { DashboardListHeader, DashboardListHeaderLabel as Label } from '@components/dashboard/dashboardList';
+import { DashboardListHeader } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
 import { UploadListItem } from './uploadListItem/uploadListItem.component';
 import { ListContainer } from '@components/shared/uploadFiles/uploadList/uploadList.styles';
-import { UploadListItemRowWrapper } from './uploadList.styles';
+import { UploadListItemRowWrapper, Label } from './uploadList.styles';
 
 type IUploadList = {
 	values: UploadItemFields[];
@@ -56,14 +56,14 @@ export const UploadList = ({
 				<Label name="file.name" minWidth={122} sort>
 					<FormattedMessage id="drawing.uploads.list.header.filename" defaultMessage="Filename" />
 				</Label>
-				<Label width={352}>
-					<FormattedMessage id="drawing.uploads.list.header.destination" defaultMessage="Drawing Destination" />*
+				<Label width={352} required>
+					<FormattedMessage id="drawing.uploads.list.header.destination" defaultMessage="Drawing Destination" />
 				</Label>
 				<Label width={160}>
 					<FormattedMessage id="drawing.uploads.list.header.statusCode" defaultMessage="Status Code" />
 				</Label>
-				<Label width={isUploading ? 160 : 209}>
-					<FormattedMessage id="drawing.uploads.list.header.revisionName" defaultMessage="Revision Code" />*
+				<Label width={isUploading ? 160 : 209} required>
+					<FormattedMessage id="drawing.uploads.list.header.revisionName" defaultMessage="Revision Code" />
 				</Label>
 				<Label width={297} hidden={!isUploading}>
 					<FormattedMessage id="drawing.uploads.list.header.progress" defaultMessage="Upload Progress" />
