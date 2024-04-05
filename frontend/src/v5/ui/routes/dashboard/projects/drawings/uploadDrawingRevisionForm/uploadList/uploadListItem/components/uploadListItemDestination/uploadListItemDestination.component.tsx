@@ -159,7 +159,7 @@ export const UploadListItemDestination = memo(({
 				<ExistingDestination
 					key={option.name}
 					drawing={option}
-					inUse={(nameIsTaken(option))}
+					inUse={nameIsTaken(option)}
 					name={option.name}
 					latestRevision={option.latestRevision}
 					hasRevisions={!!option.revisionsCount}
@@ -175,7 +175,7 @@ export const UploadListItemDestination = memo(({
 		setValue(`${revisionPrefix}.drawingName`, newVal?.name?.trim() || '');
 		setValue(`${revisionPrefix}.drawingId`, newVal?._id || '', { shouldValidate: true });
 
-		if (!newVal?._id) {
+		if (!newVal?._id && newVal?.name) {
 			onSelectNewDestination();
 		}
 	};
