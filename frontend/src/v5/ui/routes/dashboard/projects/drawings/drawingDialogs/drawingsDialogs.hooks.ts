@@ -16,7 +16,7 @@
  */
 
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { DrawingHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingFormSchema } from '@/v5/validation/drawingSchemes/drawingSchemes';
 import { nameAlreadyExists, numberAlreadyExists } from '@/v5/validation/errors.helpers';
@@ -35,13 +35,13 @@ export interface IFormInput {
 export const useDrawingForm = (defaultValues?: IDrawing) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
-	const categories = DrawingHooksSelectors.selectCategories();
-	const isCategoriesPending = DrawingHooksSelectors.selectIsCategoriesPending();
+	const categories = DrawingsHooksSelectors.selectCategories();
+	const isCategoriesPending = DrawingsHooksSelectors.selectIsCategoriesPending();
 	
 	const drawingsNames = [];
 	const drawingNumbers = [];
 
-	DrawingHooksSelectors.selectDrawings().forEach((d) => {
+	DrawingsHooksSelectors.selectDrawings().forEach((d) => {
 		if (d._id === defaultValues?._id) return;
 		drawingsNames.push(d.name);
 		drawingNumbers.push(d.drawingNumber);

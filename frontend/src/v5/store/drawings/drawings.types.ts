@@ -15,18 +15,53 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// TODO: Unfinished interface
-export interface IDrawing {
+import { Role } from '../currentUser/currentUser.types';
+
+export enum CalibrationStates {
+	CALIBRATED = 'calibrated',
+	OUT_OF_SYNC = 'outOfSync',
+	UNCALIBRATED = 'uncalibrated',
+	EMPTY = 'empty',
+}
+
+export interface MinimumDrawing {
 	_id: string;
 	name: string;
+	role: Role;
+	isFavourite: boolean;
+}
+
+// TODO: Unfinished interface
+export interface IDrawing extends MinimumDrawing {
 	desc?: string;
+	total: number;
+	lastUpdated?: Date;
+	latestRevision?: string;
+	calibration?: CalibrationStates;
+	category?: string; // TODO - add category types?
 	drawingNumber: string;
-	category: string;
+	hasStatsPending?: boolean;
+	status?: any; // TODO - add drawing statuses
+	errorReason?: {
+		message: string;
+		timestamp: Date | null;
+	};
 }
 
 // TODO: Unfinished interface
 export interface DrawingStats {
-	_id: string;
-	revisions : { total: number, lastUpdated?: number, latestRevision?: string }
+	_id: string,
+	revisions: {
+		total: number,
+		lastUpdated?: number,
+		drawingNumber: string,
+		latestRevision?: string,
+		calibration?: CalibrationStates,
+		category?: string, // TODO - add category types
+		status?: any, // TODO - add drawing statuses
+		errorReason?: {
+			message: string,
+			timestamp: number,
+		},
+	}
 }
-

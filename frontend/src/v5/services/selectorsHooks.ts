@@ -36,7 +36,7 @@ import * as TeamspacesSelectors from '@/v5/store/teamspaces/teamspaces.selectors
 import * as UsersSelectors from '@/v5/store/users/users.selectors';
 import * as ViewerSelectors from '@/v5/store/viewer/viewer.selectors';
 import * as ViewerGuiSelectors from '@/v4/modules/viewerGui/viewerGui.selectors';
-import * as DrawingSelectors from '@/v5/store/drawings/drawings.selectors';
+import * as DrawingsSelectors from '@/v5/store/drawings/drawings.selectors';
 
 
 export const AuthHooksSelectors = createHooksSelectors(AuthSelectors);
@@ -44,7 +44,7 @@ export const BimHooksSelectors = createHooksSelectors(BimSelectors);
 export const ContainersHooksSelectors = createHooksSelectors(ContainersSelectors);
 export const CanvasHistoryHooksSelectors = createHooksSelectors(CanvasHistorySelectors);
 export const CurrentUserHooksSelectors = createHooksSelectors(CurrentUserSelectors);
-export const DrawingHooksSelectors = createHooksSelectors(DrawingSelectors);
+export const DrawingsHooksSelectors = createHooksSelectors(DrawingsSelectors);
 export const FederationsHooksSelectors = createHooksSelectors(FederationsSelectors);
 export const GroupsHooksSelectors = createHooksSelectors(GroupsSelectors);
 export const ModelHooksSelectors = createHooksSelectors(ModelSelectors);

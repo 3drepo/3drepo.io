@@ -20,7 +20,7 @@ import { FormTextField, FormSelect } from '@controls/inputs/formInputs.component
 import { MenuItem } from '@mui/material';
 import { SubmitHandler } from 'react-hook-form';
 import { FormModal } from '@controls/formModal/formModal.component';
-import { DrawingHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { nameAlreadyExists, numberAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
@@ -29,7 +29,7 @@ import { IFormInput, useDrawingForm } from './drawingsDialogs.hooks';
 export const CreateDrawingDialog = ({ open, onClickClose }) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
-	const categories = DrawingHooksSelectors.selectCategories();
+	const categories = DrawingsHooksSelectors.selectCategories();
 
 	const { onSubmitError, formData } = useDrawingForm();
 
