@@ -40,23 +40,19 @@ const emptyStyles = css`
 	background-color: ${({ theme }) => theme.palette.secondary.lightest};
 `;
 
+export const CALIBRATION_STYLE = {
+	[CalibrationStates.CALIBRATED]: calibratedStyles,
+	[CalibrationStates.OUT_OF_SYNC]: outOfSyncStyles,
+	[CalibrationStates.UNCALIBRATED]: uncalibratedStyles,
+	[CalibrationStates.EMPTY]: emptyStyles,
+};
 export const DrawingsCalibrationButton = styled(DashboardListItemButton).attrs<{ calibration: CalibrationStates }>(({ calibration }) => ({
 	children: CALIBRATION_MAP[calibration]?.label,
 	startIcon: CALIBRATION_MAP[calibration]?.icon,
 }))<{ calibration: string }>`
 	.MuiButtonBase-root {
-		${({ calibration }) => {
-		switch (calibration) {
-			case CalibrationStates.CALIBRATED:
-				return calibratedStyles;
-			case CalibrationStates.OUT_OF_SYNC:
-				return outOfSyncStyles;
-			case CalibrationStates.UNCALIBRATED:
-				return uncalibratedStyles;
-			default:
-				return emptyStyles;
-		}
-	}}}
+		${({ calibration }) => CALIBRATION_STYLE[calibration]}
+	}
 	/* Need to set visibility to visible to fix weird bug where icons in bottom list disappear when top list is collapsed */
 	svg {
 		visibility: visible;

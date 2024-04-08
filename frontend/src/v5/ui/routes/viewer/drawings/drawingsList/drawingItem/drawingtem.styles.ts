@@ -19,30 +19,6 @@ import styled from 'styled-components';
 import { DrawingsCalibrationButton as DrawingsCalibrationButtonBase } from '@/v5/ui/routes/dashboard/projects/drawings/drawingsList/drawingsListItem/drawingsCalibrationButton/drawingsCalibrationButton.styles';
 import { CalibrationStates } from '@/v5/store/drawings/drawings.types';
 
-export const Id = styled.div`
-	color: ${({ theme }) => theme.palette.base.main};
-	font-weight: 500;
-	font-size: 10px;
-	line-height: 14px;
-`;
-
-export const Title = styled.div`
-	color: ${({ theme }) => theme.palette.secondary.main};
-	font-weight: 500;
-	font-size: 12px;
-	line-height: 16px;
-	padding-top: 5px;
-	width: fit-content;
-	max-width: 100%;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-
-	&:hover {
-		text-decoration: underline;
-	}
-`;
-
 // TODO - fix after new palette is released
 export const Drawing = styled.div<{ $selected?: boolean }>`
 	position: relative;
@@ -51,16 +27,16 @@ export const Drawing = styled.div<{ $selected?: boolean }>`
 	background-color: ${({ theme, $selected }) => ($selected ? '#edf0f8' : theme.palette.primary.contrast)};
 `;
 
-export const DrawingsCalibrationButton = styled(DrawingsCalibrationButtonBase)<{ calibration: CalibrationStates, tooltipTitle }>`
+export const DrawingsCalibrationButton = styled(DrawingsCalibrationButtonBase).attrs({ width: 103 })<{ calibration: CalibrationStates }>`
 	.MuiButton-root {
-		border-radius: 4px;
-		border: solid 1px currentColor;
+		border-radius: 5px;
+		border: solid 1px ${({ theme, calibration }) => calibration === CalibrationStates.CALIBRATED ? theme.palette.success.light : theme.palette.warning.light};
 		width: 103px;
 		height: 24px;
 	}
 `;
 
-export const FlexContainer = styled.div`
+export const MainBody = styled.div`
 	display: flex;
 	flex-direction: row;
 	gap: 10px;
@@ -72,4 +48,70 @@ export const ImageContainer = styled.div`
 	box-sizing: border-box;
 	height: 75px;
 	width: 75px;
+	overflow: hidden;
+`;
+
+export const InfoContainer = styled.div`
+	width: 235px;
+`;
+
+export const BreakingLine = styled.div`
+	padding-bottom: 5px;
+	line-height: 10px;
+`;
+
+export const BlueText = styled.span`
+	color: ${({ theme }) => theme.palette.secondary.main};
+	line-height: 10px;
+	padding-bottom: 5px;
+	font-size: 10px;
+`;
+
+export const Title = styled(BlueText)`
+	font-weight: 600;
+	font-size: 12px;
+	line-height: 18px;
+	width: fit-content;
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+
+	&:hover {
+		text-decoration: underline;
+	}
+`;
+
+export const GrayText = styled(BlueText)`
+	color: ${({ theme }) => theme.palette.base.main};
+`;
+
+export const BottomLine = styled.div`
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+	margin-top: 5px;
+`;
+
+export const Description = styled(BlueText)`
+	width: 100%;
+	max-width: 100%;
+	display: block;
+
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+
+	@supports (-webkit-line-clamp: 3) {
+		/* stylelint-disable-next-line */
+		display: -webkit-box;
+		/* stylelint-disable-next-line */
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 3;
+		white-space: initial;
+		padding-bottom: 1px;
+		margin-bottom: 4px;
+	}
 `;
