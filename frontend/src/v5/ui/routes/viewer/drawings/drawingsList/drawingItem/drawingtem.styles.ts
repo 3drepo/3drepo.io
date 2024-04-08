@@ -93,6 +93,10 @@ export const BottomLine = styled.div`
 	align-items: center;
 	width: 100%;
 	margin-top: 5px;
+
+	${BreakingLine} {
+		padding-bottom: 0;
+	}
 `;
 
 export const Description = styled(BlueText)`
