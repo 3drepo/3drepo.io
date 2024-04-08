@@ -103,6 +103,7 @@ export const UploadListItem = ({
 
 	useEffect(() => {
 		for (const [key, val] of Object.entries(sanitiseDrawing(selectedDrawing))) {
+			console.log(sanitiseDrawing(selectedDrawing));
 			setValue(`${revisionPrefix}.${key}`, val);
 		}
 		if (selectedDrawing?._id) {
@@ -111,9 +112,10 @@ export const UploadListItem = ({
 	}, [JSON.stringify(selectedDrawing)]);
 
 	return (
-		<UploadListItemRow selected={isSelected} key={uploadId}>
+		<UploadListItemRow selected={isSelected}>
 			<UploadListItemFileIcon extension={fileData.extension} />
 			<UploadListItemTitle
+				key={`${uploadId}.title`}
 				revisionPrefix={revisionPrefix}
 				isSelected={isSelected}
 				name={fileData.name}
@@ -122,17 +124,19 @@ export const UploadListItem = ({
 			<InputController
 				Input={UploadListItemDestination}
 				name={`${revisionPrefix}.drawingName`}
-				key={drawingId}
+				key={`${uploadId}.dest`}
 				index={index}
 				revisionPrefix={revisionPrefix}
 				disabled={isUploading}
 				onSelectNewDestination={onClickEdit}
 			/>
 			<UploadListItemCode
+				key={`${uploadId}.statusCode`}
 				name={`${revisionPrefix}.statusCode`}
 				disabled={isUploading}
 			/>
 			<UploadListItemCode
+				key={`${uploadId}.revisionCode`}
 				name={`${revisionPrefix}.revisionCode`}
 				disabled={isUploading}
 			/>
