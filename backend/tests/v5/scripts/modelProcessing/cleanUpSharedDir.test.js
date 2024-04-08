@@ -114,7 +114,7 @@ const runTest = () => {
 				throw new Error();
 			});
 
-			await expect(CleanUpSharedDir.run(threshold)).resolves.toBeUndefined();
+			await CleanUpSharedDir.run(threshold);
 
 			checkFilesExist(data.map(({ name }) => name), true);
 		});
