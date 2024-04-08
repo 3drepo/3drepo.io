@@ -40,6 +40,7 @@ const drawings = arr.map((_, index) => {
 		name: 'A drawing ' + index,
 		isFavourite: (Math.random() > 0.5),
 		role: Role.ADMIN,
+		desc: 'This is a very long text that I need to use to see what the description will look like for a drawing in the viewer drawing card. This is then some extra text to make sure it is long enough',
 	};
 });
 
