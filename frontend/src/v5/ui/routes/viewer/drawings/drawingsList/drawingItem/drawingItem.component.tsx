@@ -19,6 +19,7 @@ import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { Drawing, Title, DrawingsCalibrationButton, MainBody, ImageContainer, GrayText, BlueText, Description, BottomLine, InfoContainer, BreakingLine } from './drawingtem.styles';
 import { FormattedMessage } from 'react-intl';
 import { formatShortDateTime } from '@/v5/helpers/intl.helper';
+import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 type DrawingItemProps = {
 	drawing: IDrawing;
@@ -26,9 +27,9 @@ type DrawingItemProps = {
 };
 
 export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
+	const [latestRevision] = DrawingRevisionsHooksSelectors.selectRevisions(drawing._id);
 	const { calibration, name, drawingNumber, lastUpdated, desc } = drawing;
-	// TODO - use latest revision
-	const { statusCode, revisionCode } = { statusCode: Math.random() > .5 ? 'st-code' : null, revisionCode: 'rev-code' };
+	const { statusCode, revisionCode } = latestRevision || {};
 
 	return (
 		<Drawing onClick={onClick} key={drawing._id} >
