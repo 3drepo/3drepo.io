@@ -32,14 +32,15 @@ export const removeFavourite = (teamspace, projectId, drawingId): Promise<AxiosR
 
 const categories =  ['A drawing category', 'Another drawing category', 'Yet another one'];
 
-const arr = (new Array(1000)).fill(0);
+const arr = (new Array(20)).fill(0);
 
 const drawings = arr.map((_, index) => {
+	const role = Role[Object.keys(Role)[index % 4]];
 	return {
 		_id: uuid(),
-		name: 'A drawing ' + index,
+		name: 'A drawing ' + index + ' - ' + role,
 		isFavourite: (Math.random() > 0.5),
-		role: Role.ADMIN,
+		role,
 	};
 });
 

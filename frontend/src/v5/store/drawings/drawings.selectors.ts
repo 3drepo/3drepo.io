@@ -18,8 +18,8 @@
 import { createSelector } from 'reselect';
 import { selectCurrentProject, selectIsProjectAdmin } from '../projects/projects.selectors';
 import { DrawingsState } from './drawings.redux';
+import { isCollaboratorRole, isCommenterRole, isViewerRole } from '../store.helpers';
 import { Role } from '../currentUser/currentUser.types';
-import { isCollaboratorRole } from '../store.helpers';
 
 const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
 
@@ -75,4 +75,15 @@ export const selectIsCategoriesPending = createSelector(
 	selectDrawingsDomain, selectCurrentProject,
 	// Checks if the categories for the project have been fetched
 	(state, currentProject) => !state.categoriesByProject[currentProject],
+);
+
+
+export const selectHasCommenterAccess = createSelector(
+	selectDrawingRole,
+	(role): boolean => isCommenterRole(role),
+);
+
+export const selectHasViewerAccess = createSelector(
+	selectDrawingRole,
+	(role): boolean => isViewerRole(role),
 );
