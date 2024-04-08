@@ -20,79 +20,75 @@ import { noop } from 'lodash';
 import { PanZoom, PanZoomOptions } from 'panzoom';
 
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const panzoom = (target: HTMLElement | SVGElement, options) => {
 	const transform = { scale:1, x: 0, y: 0 };
 	const zoomStep = 0.2;
 	target.style.transformOrigin = '0 0';
 	target.style.userSelect = 'none';
 	target.setAttribute('draggable', 'false');
-	const scrollHorizontal = document.createElement('div');
-	const scrollVertical = document.createElement('div');
-	scrollHorizontal.style.width = 'fit-content';
-	scrollHorizontal.style.height = 'fit-content';
-	scrollVertical.style.width = 'fit-content';
-	scrollVertical.style.height = 'fit-content';
 	const container = target.parentElement;
 
-	target.parentElement.replaceChild(scrollHorizontal, target);
-	
-	scrollHorizontal.appendChild(scrollVertical);
-	scrollVertical.appendChild(target);
-
 	const speed = { x:0, y: 0 };
+	
+	const applyTransform = () => {
+		const { scale, x, y } = transform;
+		target.style.transform = `matrix(${scale}, 0, 0, ${scale}, ${x}, ${y}`;
+	};
 
-
-	const onWheel = (ev: WheelEvent) => {
-		const newScale = transform.scale * (1 + zoomStep * -Math.sign(ev.deltaY));
+	const zoomTo = (x: number, y: number, newScale: number) => {
 		const originalRect = target.getBoundingClientRect();
-		const targetPos = { x: ev.clientX - originalRect.x, y: ev.clientY - originalRect.y } ;
+		const relativeX =  x - originalRect.x;
+		const relativeY = y - originalRect.y;
 
 		const scaleChange = newScale / transform.scale;
-		const newPos = { x: transform.x + targetPos.x * (1 - scaleChange), y: transform.y + targetPos.y * ( 1 - scaleChange) };
+		const newPos = { x: transform.x + relativeX * (1 - scaleChange), y: transform.y + relativeY * ( 1 - scaleChange) };
 
 		transform.scale = newScale;
 		transform.x = newPos.x;
 		transform.y = newPos.y;
-
-		scrollHorizontal.style.transition = 'none';
-		scrollVertical.style.transition = 'none';
-
-		target.style.transform = 'scale(' + transform.scale + ')'; 
-		scrollHorizontal.style.transform = 'translateX(' + transform.x + 'px)';
-		scrollVertical.style.transform = 'translateY(' + transform.y + 'px)';
-
+		
 		speed.x = 0;
 		speed.y = 0;
+		applyTransform();
+	};
+
+	const smoothZoom = (x:number, y:number, scaleFactor: number) => {
+		target.style.transition = '0.25s ease-in-out';
+		zoomTo(x, y, transform.scale * scaleFactor);
+	};
+
+	const onWheel = (ev: WheelEvent) => {
+		const newScale = transform.scale * (1 + zoomStep * -Math.sign(ev.deltaY));
+		zoomTo(ev.clientX, ev.clientY, newScale);
+
+		target.style.transition = 'none';
+		applyTransform();
 	};
 
 	const onMouseMove = (ev: MouseEvent) => {
 		transform.x += ev.movementX;
 		transform.y += ev.movementY;
-	
-		target.style.transform = 'scale(' + transform.scale + ')'; 
-		scrollHorizontal.style.transform = 'translateX(' + transform.x + 'px)';
-		scrollVertical.style.transform = 'translateY(' + transform.y + 'px)';
 
 		speed.x = ev.movementX * 10;
 		speed.y = ev.movementY * 10;
+
+		applyTransform();
 	};
 
 	const onMouseDown = () => {
-		
 		const parentRect = container.getBoundingClientRect();
+		const rect = target.getBoundingClientRect();
 
-		transform.x = scrollHorizontal.getBoundingClientRect().x - parentRect.x;
-		transform.y = scrollVertical.getBoundingClientRect().y - parentRect.y;
-		
-		
-		scrollHorizontal.style.transition = 'none';
-		scrollVertical.style.transition = 'none';
-		
-		scrollHorizontal.style.transform = 'translateX(' + transform.x + 'px)';
-		scrollVertical.style.transform = 'translateY(' + transform.y + 'px)';
+		transform.x = rect.x - parentRect.x;
+		transform.y = rect.y - parentRect.y;
 
 		speed.x = 0;
 		speed.y = 0;
+
+		target.style.transition = 'none';
+
+		applyTransform();
 		
 		container.addEventListener('mousemove', onMouseMove);
 	};
@@ -101,22 +97,22 @@ const panzoom = (target: HTMLElement | SVGElement, options) => {
 		container.removeEventListener('mousemove', onMouseMove);
 
 		const acc = 9.8;
-		const tx = Math.abs((speed.x / acc) / 10);
-		const ty = Math.abs((speed.y / acc) / 10);
-		const t = Math.max(tx,ty);
 
-		const acc2 =  acc * 2;
+		const t =  (((speed.x ** 2 + speed.y ** 2) **  0.5) / acc) / 10 ;
 
-		transform.x += speed.x ** 2  * Math.sign(speed.x) / acc2;
-		transform.y += speed.y ** 2  * Math.sign(speed.y) / acc2;
+		if (t) {
+			const acc2 =  acc * 2;
+	
+			transform.x += speed.x ** 2  * Math.sign(speed.x) / acc2;
+			transform.y += speed.y ** 2  * Math.sign(speed.y) / acc2;
+	
+			target.style.transition = `all ${t}s cubic-bezier(0,.33,.66,1)`;
+		} else {
+			target.style.transition = 'none';
+		}
 
 
-
-		scrollHorizontal.style.transition = `all ${t}s cubic-bezier(0,.33,.66,1)`;
-		scrollVertical.style.transition = `all ${t}s cubic-bezier(0,.33,.66,1)`;
-		
-		scrollHorizontal.style.transform = 'translateX(' + transform.x + 'px)';
-		scrollVertical.style.transform = 'translateY(' + transform.y + 'px)';
+		applyTransform();
 	};
 
 	const subscribeToEvents = () => {
@@ -135,11 +131,12 @@ const panzoom = (target: HTMLElement | SVGElement, options) => {
 	subscribeToEvents();
 
 	const getTransform = () => transform;
+	
 	return { 
 		getTransform, 
 		dispose: unSubscribeToEvents, 
 		on: noop, 
-		smoothZoom:noop,
+		smoothZoom,
 		moveTo: noop,
 	};
 };
@@ -183,25 +180,25 @@ export const centredPanZoom = (target: HTMLImageElement | SVGSVGElement, padding
 	
 	const pz = panzoom(target, options);
 
-	const actualPaddingW = (parentRect.width - size.scaledWidth) / 2 ;
-	const actualPaddingH = (parentRect.height -  size.scaledHeight ) / 2 ;
+	// const actualPaddingW = (parentRect.width - size.scaledWidth) / 2 ;
+	// const actualPaddingH = (parentRect.height -  size.scaledHeight ) / 2 ;
 
 	// pz.on('transform', () => {
-	// 	const targetRect = target.getBoundingClientRect();
-	// 	const t = pz.getTransform();
+	// const targetRect = target.getBoundingClientRect();
+	// const t = pz.getTransform();
 
-	// 	const maxX =  actualPaddingW * t.scale;
-	// 	const minX =  parentRect.width - targetRect.width - actualPaddingW * t.scale;
+	// const maxX =  actualPaddingW * t.scale;
+	// const minX =  parentRect.width - targetRect.width - actualPaddingW * t.scale;
 
 
-	// 	const maxY =  actualPaddingH * t.scale;
-	// 	const minY =  parentRect.height - targetRect.height - actualPaddingH * t.scale;
+	// const maxY =  actualPaddingH * t.scale;
+	// const minY =  parentRect.height - targetRect.height - actualPaddingH * t.scale;
 
-	// 	if (t.x > maxX || t.x < minX || t.y > maxY || t.y < minY) {
-	// 		const x = Math.max(Math.min(t.x, maxX), minX);
-	// 		const y = Math.max(Math.min(t.y, maxY), minY);
-	// 		pz.moveTo(x, y);
-	// 	}
+	// if (t.x > maxX || t.x < minX || t.y > maxY || t.y < minY) {
+	// const x = Math.max(Math.min(t.x, maxX), minX);
+	// const y = Math.max(Math.min(t.y, maxY), minY);
+	// pz.moveTo(x, y);
+	// }
 	// });
 
 
