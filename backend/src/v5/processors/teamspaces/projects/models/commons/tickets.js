@@ -210,6 +210,7 @@ Tickets.importTickets = async (teamspace, project, model, template, tickets, aut
 			project,
 			model,
 			tickets: savedTickets,
+			author,
 		});
 
 	return ids;

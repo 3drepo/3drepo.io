@@ -116,6 +116,7 @@ const insertTicketsImageTest = async (isImport, isView) => {
 	const teamspace = generateRandomString();
 	const project = generateRandomString();
 	const model = generateRandomString();
+	const author = generateRandomString();
 	const imageTestData = generateImageTestData(false, isView, isImport ? 10 : 1);
 	const tickets = [];
 	const expectedOutput = imageTestData.data.map(({ ticket }) => {
@@ -129,7 +130,7 @@ const insertTicketsImageTest = async (isImport, isView) => {
 
 	if (isImport) {
 		await expect(Tickets.importTickets(teamspace, project, model, imageTestData.template,
-			tickets)).resolves.toEqual(expectedOutput.map(({ _id }) => _id));
+			tickets, author)).resolves.toEqual(expectedOutput.map(({ _id }) => _id));
 	} else {
 		await expect(Tickets.addTicket(teamspace, project, model, imageTestData.template,
 			tickets[0])).resolves.toEqual(expectedOutput[0]._id);
@@ -183,6 +184,7 @@ const insertTicketsImageTest = async (isImport, isView) => {
 			{ teamspace,
 				project,
 				model,
+				author,
 				tickets: expectedOutput });
 	} else {
 		expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_TICKET,
@@ -368,6 +370,7 @@ const insertTicketsGroupTests = (isImport) => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
+			const author = generateRandomString();
 
 			const testData = generateGroupsTestData(false, isImport ? 10 : 1);
 
@@ -378,7 +381,7 @@ const insertTicketsGroupTests = (isImport) => {
 
 			if (isImport) {
 				await expect(Tickets.importTickets(teamspace, project, model, testData.template,
-					testData.tickets)).resolves.toEqual(expectedOutput.map(({ _id }) => _id));
+					testData.tickets, author)).resolves.toEqual(expectedOutput.map(({ _id }) => _id));
 			} else {
 				await expect(Tickets.addTicket(teamspace, project, model, testData.template,
 					testData.tickets[0])).resolves.toEqual(expectedOutput[0]._id);
@@ -431,6 +434,7 @@ const insertTicketsGroupTests = (isImport) => {
 					{ teamspace,
 						project,
 						model,
+						author,
 						tickets: expectedOutput });
 			} else {
 				expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_TICKET,
@@ -732,6 +736,7 @@ const insertTicketsTestHelper = (isImport) => {
 		const teamspace = generateRandomString();
 		const project = generateRandomString();
 		const model = generateRandomString();
+		const author = generateRandomString();
 
 		const expectedOutput = tickets.map((ticketData) => ({ ...ticketData, _id: generateRandomString() }));
 
@@ -739,7 +744,7 @@ const insertTicketsTestHelper = (isImport) => {
 		TemplatesModel.generateFullSchema.mockImplementationOnce((t) => t);
 
 		if (isImport) {
-			await expect(Tickets.importTickets(teamspace, project, model, template, tickets))
+			await expect(Tickets.importTickets(teamspace, project, model, template, tickets, author))
 				.resolves.toEqual(expectedOutput.map(({ _id }) => _id));
 		} else {
 			await expect(Tickets.addTicket(teamspace, project, model, template, tickets[0]))
@@ -762,6 +767,7 @@ const insertTicketsTestHelper = (isImport) => {
 				{ teamspace,
 					project,
 					model,
+					author,
 					tickets: expectedOutput });
 		} else {
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_TICKET,
@@ -819,6 +825,7 @@ const testImportTickets = () => {
 					{ teamspace,
 						project,
 						model,
+						author,
 						tickets: expectedOutput });
 
 				const ticketsComments = tickets.map(({ comments }, i) => ({ ticket: expectedOutput[i]._id, comments }));

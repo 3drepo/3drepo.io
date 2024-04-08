@@ -108,7 +108,7 @@ Tickets.updateTickets = async (teamspace, project, model, oldTickets, data, auth
 				timestamp: updateData.properties[basePropertyLabels.UPDATED_AT],
 			});
 			return { updateOne: {
-				filter: { _id: oldTicket._id },
+				filter: { _id: oldTicket._id, teamspace, project, model },
 				update: actions,
 
 			} };

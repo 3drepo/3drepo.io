@@ -381,12 +381,6 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - name: ids
-	 *         description: list of model ids to remove (comma separated)
-	 *         in: query
-	 *         schema:
-	 *           type: string
-	 *         example: a54e8776-da7c-11ec-9d64-0242ac120002,aaa1ffaa-da7c-11ec-9d64-0242ac120002
 	 *       - name: type
  	 *         description: Model type
 	 *         in: path
@@ -394,6 +388,12 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *           enum: [containers, federations]
+	 *       - name: ids
+	 *         description: list of model ids to remove (comma separated)
+	 *         in: query
+	 *         schema:
+	 *           type: string
+	 *         example: a54e8776-da7c-11ec-9d64-0242ac120002,aaa1ffaa-da7c-11ec-9d64-0242ac120002
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"

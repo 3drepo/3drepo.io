@@ -272,7 +272,7 @@ const testUpdateTickets = () => {
 				modules: {},
 			});
 
-			expectedCmd.push({ updateOne: { filter: { _id },
+			expectedCmd.push({ updateOne: { filter: { _id, teamspace, project, model },
 				update: {
 					$set: {
 						[`properties.${propToUpdate}`]: newPropValue,
@@ -319,7 +319,7 @@ const testUpdateTickets = () => {
 				modules: { [moduleName]: { [propToUpdate]: oldPropValue } },
 			});
 
-			expectedCmd.push({ updateOne: { filter: { _id },
+			expectedCmd.push({ updateOne: { filter: { _id, teamspace, project, model },
 				update: {
 					$set: {
 						[`modules.${moduleName}.${propToUpdate}`]: newPropValue,
@@ -364,7 +364,7 @@ const testUpdateTickets = () => {
 				modules: { module: { propToUnset: null } },
 			});
 
-			expectedCmd.push({ updateOne: { filter: { _id },
+			expectedCmd.push({ updateOne: { filter: { _id, teamspace, project, model },
 				update: {
 					$set: { [`properties.${basePropertyLabels.UPDATED_AT}`]: date, [propToUpdate]: newPropValue },
 					$unset: { 'modules.module.propToUnset': 1, 'properties.propToUnset': 1 },
@@ -416,7 +416,7 @@ const testUpdateTickets = () => {
 				});
 				const expectedValue = { ...oldPropValue, ...newPropValue };
 
-				expectedCmd.push({ updateOne: { filter: { _id },
+				expectedCmd.push({ updateOne: { filter: { _id, teamspace, project, model },
 					update: {
 						$set: {
 							[`properties.${basePropertyLabels.UPDATED_AT}`]: date,
@@ -474,7 +474,7 @@ const testUpdateTickets = () => {
 				const expectedValue = { ...oldPropValue, ...newPropValue };
 				delete expectedValue[embeddedFieldName];
 
-				expectedCmd.push({ updateOne: { filter: { _id },
+				expectedCmd.push({ updateOne: { filter: { _id, teamspace, project, model },
 					update: {
 						$set: {
 							[`properties.${basePropertyLabels.UPDATED_AT}`]: date,
@@ -527,7 +527,7 @@ const testUpdateTickets = () => {
 
 				const expectedValue = { ...oldPropValue, ...newPropValue };
 
-				expectedCmd.push({ updateOne: { filter: { _id },
+				expectedCmd.push({ updateOne: { filter: { _id, teamspace, project, model },
 					update: {
 						$set: {
 							[`properties.${basePropertyLabels.UPDATED_AT}`]: date,
@@ -582,7 +582,7 @@ const testUpdateTickets = () => {
 				const expectedValue = { ...oldPropValue, ...newPropValue };
 				delete expectedValue[embeddedFieldName];
 
-				expectedCmd.push({ updateOne: { filter: { _id },
+				expectedCmd.push({ updateOne: { filter: { _id, teamspace, project, model },
 					update: {
 						$set: {
 							[`properties.${basePropertyLabels.UPDATED_AT}`]: date,
