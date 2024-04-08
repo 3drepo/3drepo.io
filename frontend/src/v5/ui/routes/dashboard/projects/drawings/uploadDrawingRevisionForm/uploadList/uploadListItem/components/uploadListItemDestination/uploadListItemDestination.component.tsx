@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { createFilterOptions } from '@mui/material';
@@ -85,11 +85,12 @@ export const UploadListItemDestination = memo(({
 	const [newDrawingsInModal, setNewDrawingsInModal] = useState([]);
 	const [drawingsNamesInModal, setDrawingNamesInModal] = useState([]);
 
-
 	const takenDrawingNames = [
 		...drawingsNamesInModal,
 		...processingDrawingsNames,
 	];
+
+	const [currentDrawingId, currentDrawingName] = getValues([`${revisionPrefix}.drawingId`, `${revisionPrefix}.drawingName`]);
 
 	const handleInputChange = (_, newValue: string) => {
 		const trimmedValue = newValue?.trim();
@@ -174,10 +175,6 @@ export const UploadListItemDestination = memo(({
 	const onDestinationChange = (e, newVal: IDrawing | null) => {
 		setValue(`${revisionPrefix}.drawingName`, newVal?.name?.trim() || '');
 		setValue(`${revisionPrefix}.drawingId`, newVal?._id || '', { shouldValidate: true });
-
-		if (!newVal?._id && newVal?.name) {
-			onSelectNewDestination();
-		}
 	};
 
 	const onOpen = () => {
@@ -200,6 +197,12 @@ export const UploadListItemDestination = memo(({
 				.map(({ name }) => name),
 		);
 	};
+
+	useEffect(() => {
+		if (currentDrawingName && !currentDrawingId) {
+			onSelectNewDestination();
+		}
+	}, [currentDrawingName]);
 
 	return (
 		<DestinationAutocomplete

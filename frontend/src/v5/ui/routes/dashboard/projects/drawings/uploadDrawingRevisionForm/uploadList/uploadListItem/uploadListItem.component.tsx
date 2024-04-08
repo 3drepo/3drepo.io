@@ -103,7 +103,6 @@ export const UploadListItem = ({
 
 	useEffect(() => {
 		for (const [key, val] of Object.entries(sanitiseDrawing(selectedDrawing))) {
-			console.log(sanitiseDrawing(selectedDrawing));
 			setValue(`${revisionPrefix}.${key}`, val);
 		}
 		if (selectedDrawing?._id) {
