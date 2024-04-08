@@ -63,7 +63,7 @@ export const SequencingProperty = ({ onChange, onBlur, value, ...props }: DateTi
 		<Container>
 			<DateTimePicker
 				components={{
-					OpenPickerIcon: () => value && (
+					OpenPickerIcon: () => !!value && (
 						<IconContainer onClick={clearValue}>
 							<CloseIcon />
 						</IconContainer>
@@ -80,7 +80,7 @@ export const SequencingProperty = ({ onChange, onBlur, value, ...props }: DateTi
 				{...props}
 				label={LABELS[props.name]}
 			/>
-			{value && isViewer && (
+			{!!value && isViewer && (
 				<SequenceIconContainer onClick={openSequencesCard} disabled={!hasSequences}>
 					<SequencingIcon />
 				</SequenceIconContainer>
