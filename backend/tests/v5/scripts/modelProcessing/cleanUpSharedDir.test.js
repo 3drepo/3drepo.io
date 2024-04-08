@@ -33,9 +33,8 @@ const CleanUpSharedDir = require(`${utilScripts}/modelProcessing/cleanUpSharedDi
 const createFile = async (filePath, daysOld) => {
 	const fd = await open(filePath, 'w');
 
-	const modifiedDate = new Date();
-	modifiedDate.setDate(modifiedDate.getDate() - daysOld);
-
+	const daysInMS = daysOld * 24 * 60 * 60 * 1000;
+	const modifiedDate = new Date(Date.now() - daysInMS);
 	await fd.utimes(modifiedDate, modifiedDate);
 
 	await fd.close();
