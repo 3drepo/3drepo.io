@@ -17,9 +17,18 @@
 import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DrawingItem } from './drawingItem/drawingItem.component';
 import { List } from './drawingsList.styles';
+import { CentredContainer } from '@controls/centredContainer';
+import { Loader } from '@/v4/routes/components/loader/loader.component';
 
 export const DrawingsList = () => {
 	const drawings = DrawingsHooksSelectors.selectCalibratedDrawings();
+	const isLoading = DrawingsHooksSelectors.selectAreStatsPending();
+
+	if (isLoading) return (
+		<CentredContainer>
+			<Loader />
+		</CentredContainer>
+	);
 
 	return (
 		<List>
