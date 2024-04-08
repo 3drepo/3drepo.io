@@ -51,7 +51,7 @@ Tickets.addTicketsWithTemplate = async (teamspace, project, model, templateId, t
 	return response;
 };
 
-Tickets.updateManyTickets = async (teamspace, project, model, oldTickets, data, author) => {
+Tickets.updateTickets = async (teamspace, project, model, oldTickets, data, author) => {
 	const changeSet = [];
 
 	const writeOps = data.flatMap((updateData, i) => {
@@ -124,10 +124,6 @@ Tickets.updateManyTickets = async (teamspace, project, model, oldTickets, data, 
 	return changeSet;
 };
 
-Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, author) => {
-	const [changeSet] = await Tickets.updateManyTickets(teamspace, project, model, [oldTicket], [updateData], author);
-	return changeSet;
-};
 Tickets.removeAllTicketsInModel = async (teamspace, project, model) => {
 	await DbHandler.deleteMany(teamspace, TICKETS_COL, { teamspace, project, model });
 };

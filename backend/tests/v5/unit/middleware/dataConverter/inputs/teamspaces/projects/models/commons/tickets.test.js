@@ -40,6 +40,8 @@ const Tickets = require(`${src}/middleware/dataConverter/inputs/teamspaces/proje
 const { createResponseCode, templates } = require(`${src}/utils/responseCodes`);
 const { UUIDToString, stringToUUID, generateUUIDString } = require(`${src}/utils/helper/uuids`);
 
+const ticketArrTestErrorMsg = 'Expected body to contain an array of tickets';
+
 const testValidateNewTicket = () => {
 	describe('Validate new ticket', () => {
 		test(`Should respond with ${templates.invalidArguments.code} if template is not provided`, async () => {
@@ -202,13 +204,13 @@ const testValidateImportTickets = () => {
 		['template does not exist', { query: { template: generateUUIDString() } }, false],
 		['template is provided within the ticket', { query: {}, body: { tickets: [{ type: knownTemplateID }] } }, false, createResponseCode(templates.invalidArguments, 'Template must be provided')],
 		['a deprecated template is provided', { query: { template: deprecatedTemplateID } }, false, createResponseCode(templates.invalidArguments, 'Template has been deprecated')],
-		['the request has invalid body', { body: 1 }, false, createResponseCode(templates.invalidArguments, 'Expected body to contain an array of tickets')],
+		['the request has invalid body', { body: 1 }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['validation caused an unrecognised error', { body: { tickets: [throwTicket] } }, false, createResponseCode(templates.invalidArguments, 'abc')],
-		['tickets array doesn\'t exist', { body: { } }, false, createResponseCode(templates.invalidArguments, 'Expected body to contain an array of tickets')],
-		['tickets is not an array', { body: { tickets: 1 } }, false, createResponseCode(templates.invalidArguments, 'Expected body to contain an array of tickets')],
-		['ticket array is empty', { body: { tickets: [] } }, false, createResponseCode(templates.invalidArguments, 'Must contain at least 1 ticket')],
+		['tickets array doesn\'t exist', { body: { } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
+		['tickets is not an array', { body: { tickets: 1 } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
+		['ticket array is empty', { body: { tickets: [] } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['ticket array contains a bad ticket', { body: { tickets: [...goodTickets, badTicket] } }, false, templates.invalidArguments],
-		['!!!all tickets are valid', {}, true],
+		['all tickets are valid', {}, true],
 	])('Validate import tickets', (desc, additionalReq, success, expectedRes) => {
 		afterEach(() => {
 			jest.clearAllMocks();
@@ -425,10 +427,10 @@ const testValidateUpdateMultipleTickets = () => {
 		['template is not provided (query set to null)', { query: null }, false, createResponseCode(templates.invalidArguments, 'Template must be provided')],
 		['template does not exist', { query: { template: generateUUIDString() } }, false],
 		['template is provided within the ticket', { query: {}, body: { tickets: [{ type: knownTemplateID }] } }, false, createResponseCode(templates.invalidArguments, 'Template must be provided')],
-		['the request has invalid body', { body: 1 }, false, createResponseCode(templates.invalidArguments, 'Payload should contain an array of tickets to update')],
-		['tickets array doesn\'t exist', { body: { } }, false, createResponseCode(templates.invalidArguments, 'Payload should contain an array of tickets to update')],
-		['tickets is not an array', { body: { tickets: 1 } }, false, createResponseCode(templates.invalidArguments, 'Payload should contain an array of tickets to update')],
-		['ticket array is empty', { body: { tickets: [] } }, false, createResponseCode(templates.invalidArguments, 'Payload should contain an array of tickets to update')],
+		['the request has invalid body', { body: 1 }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
+		['tickets array doesn\'t exist', { body: { } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
+		['tickets is not an array', { body: { tickets: 1 } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
+		['ticket array is empty', { body: { tickets: [] } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['ticket array contains a ticket with no _id', { body: { tickets: [{ ...goodTickets[0], _id: undefined }] } }, false, createResponseCode(templates.invalidArguments, '_id field must be provided for all tickets')],
 		['ticket array contains a ticket with invalid _id', { body: { tickets: [{ ...goodTickets[0], _id: idNotFound }] } }, false, createResponseCode(templates.invalidArguments, `The following IDs were not found: ${idNotFound}`)],
 		['ticket array contains a bad ticket', { body: { tickets: [badTicket] } }, false, createResponseCode(templates.invalidArguments)],

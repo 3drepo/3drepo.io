@@ -62,19 +62,22 @@ const validateTicket = (isNewTicket) => async (req, res, next) => {
 	}
 };
 
-const validateTicketImportData = (isNew) => async (req, res, next) => {
-	const { teamspace, project, model } = req.params;
+const bodyContainsTicketsArray = async (req, res, next) => {
 	try {
-		if (!req?.body?.tickets || !isArray(req.body.tickets)) {
+		const tickets = req?.body?.tickets;
+		if (!tickets || !isArray(tickets) || !tickets.length) {
 			throw createResponseCode(
 				templates.invalidArguments, 'Expected body to contain an array of tickets');
 		}
+		await next();
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
 
-		if (!req.body.tickets.length) {
-			throw createResponseCode(
-				templates.invalidArguments, 'Must contain at least 1 ticket');
-		}
-
+const validateTicketImportData = (isNew) => async (req, res, next) => {
+	const { teamspace, project, model } = req.params;
+	try {
 		const template = req.templateData;
 		const user = getUserFromSession(req.session);
 
@@ -128,8 +131,6 @@ const checkAllTicketsExist = async (req, res, next) => {
 	const { tickets } = req.body;
 
 	try {
-		if (!isArray(tickets) || !tickets.length) throw createResponseCode(templates.invalidArguments, 'Payload should contain an array of tickets to update');
-
 		req.templateData = await getTemplateById(teamspace, template);
 
 		const ticketIdStrs = [];
@@ -165,13 +166,13 @@ const checkAllTicketsExist = async (req, res, next) => {
 };
 
 TicketsMiddleware.validateImportTickets = validateMany([templateIDToParams(true), checkTicketTemplateExists,
-	validateTicketImportData(true)]);
+	bodyContainsTicketsArray, validateTicketImportData(true)]);
 
 TicketsMiddleware.validateNewTicket = validateMany([templateIDToParams(false), checkTicketTemplateExists,
 	validateTicket(true)]);
 TicketsMiddleware.validateUpdateTicket = validateMany([TicketsMiddleware.checkTicketExists, validateTicket(false)]);
 TicketsMiddleware.validateUpdateMultipleTickets = validateMany([
-	templateIDToParams(true), checkTicketTemplateExists,
+	templateIDToParams(true), checkTicketTemplateExists, bodyContainsTicketsArray,
 	checkAllTicketsExist, validateTicketImportData(false)]);
 
 TicketsMiddleware.templateExists = checkTicketTemplateExists;

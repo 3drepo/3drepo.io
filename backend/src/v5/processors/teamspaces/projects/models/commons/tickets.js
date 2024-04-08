@@ -17,7 +17,7 @@
 
 const { UUIDToString, generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { addGroups, deleteGroups, getGroupsByIds } = require('./tickets.groups');
-const { addTicketsWithTemplate, getAllTickets, getTicketById, updateManyTickets, updateTicket } = require('../../../../../models/tickets');
+const { addTicketsWithTemplate, getAllTickets, getTicketById, updateTickets } = require('../../../../../models/tickets');
 const {
 	basePropertyLabels,
 	modulePropertyLabels,
@@ -228,14 +228,17 @@ Tickets.addTicket = async (teamspace, project, model, template, ticket) => {
 
 Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, updateData, author) => {
 	const externalDataDelta = processSpecialProperties(template, [oldTicket], [updateData]);
-	const data = await updateTicket(teamspace, project, model, oldTicket, updateData, author);
+	const changeSet = await updateTickets(teamspace, project, model, [oldTicket], [updateData], author);
 	await processExternalData(teamspace, project, model, [oldTicket._id], externalDataDelta);
 
-	publish(events.UPDATE_TICKET, {
-		teamspace,
-		project,
-		model,
-		...data });
+	if (changeSet.length) {
+		const data = changeSet[0];
+		publish(events.UPDATE_TICKET, {
+			teamspace,
+			project,
+			model,
+			...data });
+	}
 };
 
 Tickets.updateManyTickets = async (teamspace, project, model, template, oldTickets, updateData, author) => {
@@ -252,7 +255,7 @@ Tickets.updateManyTickets = async (teamspace, project, model, template, oldTicke
 		? importComments(teamspace, project, model, commentsByTickets, author) : Promise.resolve();
 
 	const externalDataDelta = processSpecialProperties(template, oldTickets, dataWithoutComments);
-	const changeSet = await updateManyTickets(teamspace, project, model, oldTickets, dataWithoutComments, author);
+	const changeSet = await updateTickets(teamspace, project, model, oldTickets, dataWithoutComments, author);
 	await Promise.all([
 		processExternalData(teamspace, project, model, oldTickets.map(({ _id }) => _id), externalDataDelta),
 		commentsPromises,

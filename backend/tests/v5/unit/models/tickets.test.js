@@ -225,25 +225,19 @@ const testGetTicketsByQuery = () => {
 	});
 };
 
-const runUpdateTests = (isUpdateMany) => {
+const testUpdateTickets = () => {
 	const teamspace = generateRandomString();
 	const project = generateRandomString();
 	const model = generateRandomString();
 	const author = generateRandomString();
 	const propToUpdate = generateRandomString();
-	const ticketCount = isUpdateMany ? 10 : 1;
+	const ticketCount = 10;
 
 	const runTest = async (oldTickets, updateData, expectedCmd, changeSet) => {
 		const fn = jest.spyOn(db, 'bulkWrite').mockResolvedValueOnce(undefined);
 
-		if (isUpdateMany) {
-			await expect(Ticket.updateManyTickets(teamspace, project, model,
-				oldTickets, updateData, author)).resolves.toEqual(changeSet);
-		} else {
-			const expectedVal = changeSet?.length ? changeSet[0] : undefined;
-			await expect(Ticket.updateTicket(teamspace, project, model,
-				oldTickets[0], updateData[0], author)).resolves.toEqual(expectedVal);
-		}
+		await expect(Ticket.updateTickets(teamspace, project, model,
+			oldTickets, updateData, author)).resolves.toEqual(changeSet);
 
 		if (changeSet.length) {
 			expect(fn).toHaveBeenCalledTimes(1);
@@ -643,24 +637,11 @@ const runUpdateTests = (isUpdateMany) => {
 	});
 };
 
-const testUpdateManyTickets = () => {
-	describe('Update many tickets', () => {
-		runUpdateTests(true);
-	});
-};
-
-const testUpdateTicket = () => {
-	describe('Update ticket', () => {
-		runUpdateTests(false);
-	});
-};
-
 describe(determineTestGroup(__filename), () => {
 	testAddTicketsWithTemplate();
 	testRemoveAllTickets();
 	testGetTicketById();
-	testUpdateTicket();
-	testUpdateManyTickets();
+	testUpdateTickets();
 	testGetAllTickets();
 	testGetTicketsByQuery();
 });

@@ -384,6 +384,7 @@ const establishRoutes = (isFed) => {
 	 *                           Created at:
 	 *                             type: number
 	 *                             description: Timestamp of when this ticket was created
+	 *                             example: 1712569456400
 	 *                           Description:
 	 *                             type: string
 	 *                             description: A detailed description of the ticket
@@ -443,12 +444,9 @@ const establishRoutes = (isFed) => {
 	 *                 tickets:
 	 *                   type: array
 	 *                   items:
-	 *                     type: object
-	 *                     properties:
-	 *                       _id:
-	 *                         type: string
-	 *                         format: uuid
-	 *                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                     type: string
+	 *                     format: uuid
+	 *                     example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 */
 	router.post('/import', hasCommenterAccess, validateImportTickets, importTickets(isFed));
 
@@ -697,6 +695,11 @@ const establishRoutes = (isFed) => {
 	 *                   items:
 	 *                     type: object
 	 *                     properties:
+	 *                       _id:
+	 *                         type: string
+	 *                         description: id of the ticket
+	 *                         format: uuid
+	 *                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 *                       title:
 	 *                         type: string
 	 *                         description: Title of the ticket

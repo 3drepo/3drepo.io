@@ -225,11 +225,7 @@ const updateImagesTestHelper = async (updateMany, isView) => {
 		};
 	});
 
-	if (updateMany) {
-		TicketsModel.updateManyTickets.mockResolvedValueOnce(response);
-	} else {
-		TicketsModel.updateTicket.mockResolvedValueOnce(response[0]);
-	}
+	TicketsModel.updateTickets.mockResolvedValueOnce(response);
 
 	if (updateMany) {
 		await expect(Tickets.updateManyTickets(teamspace, project, model, imageTestData.template,
@@ -239,8 +235,7 @@ const updateImagesTestHelper = async (updateMany, isView) => {
 			cloneDeep(tickets[0]), cloneDeep(updateData[0]), author)).resolves.toBeUndefined();
 	}
 
-	const processedTickets = updateMany ? TicketsModel.updateManyTickets.mock.calls[0][4]
-		: [TicketsModel.updateTicket.mock.calls[0][4]];
+	const processedTickets = TicketsModel.updateTickets.mock.calls[0][4];
 
 	const refsToDelete = [];
 	const refFiles = [];
@@ -288,15 +283,9 @@ const updateImagesTestHelper = async (updateMany, isView) => {
 		};
 	});
 
-	if (updateMany) {
-		expect(TicketsModel.updateManyTickets).toHaveBeenCalledTimes(1);
-		expect(TicketsModel.updateManyTickets).toHaveBeenCalledWith(teamspace, project, model, tickets,
-			expectedUpdateData, author);
-	} else {
-		expect(TicketsModel.updateTicket).toHaveBeenCalledTimes(1);
-		expect(TicketsModel.updateTicket).toHaveBeenCalledWith(teamspace, project, model, tickets[0],
-			expectedUpdateData[0], author);
-	}
+	expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
+	expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, model, tickets,
+		expectedUpdateData, author);
 
 	expect(TemplatesModel.generateFullSchema).toHaveBeenCalledTimes(1);
 	expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(imageTestData.template);
@@ -463,28 +452,15 @@ const updateGroupTestsHelper = (updateMany) => {
 
 		const runTest = async (response, template, tickets, propName, moduleName, toUpdate) => {
 			TemplatesModel.generateFullSchema.mockImplementationOnce((t) => t);
-			if (updateMany) TicketsModel.updateManyTickets.mockResolvedValueOnce(response);
-			else TicketsModel.updateTicket.mockResolvedValueOnce(response[0]);
-			if (updateMany) {
-				await expect(Tickets.updateManyTickets(teamspace, project, model, template,
-					tickets, toUpdate)).resolves.toBeUndefined();
-			} else {
-				await expect(Tickets.updateTicket(teamspace, project, model, template,
-					tickets[0], toUpdate[0])).resolves.toBeUndefined();
-			}
+			TicketsModel.updateTickets.mockResolvedValueOnce(response);
+			await expect(Tickets.updateManyTickets(teamspace, project, model, template,
+				tickets, toUpdate)).resolves.toBeUndefined();
 
-			if (updateMany) {
-				expect(TicketsModel.updateManyTickets).toHaveBeenCalledTimes(1);
-				expect(TicketsModel.updateManyTickets).toHaveBeenCalledWith(teamspace, project, model,
-					tickets, expect.any(Object), undefined);
-			} else {
-				expect(TicketsModel.updateTicket).toHaveBeenCalledTimes(1);
-				expect(TicketsModel.updateTicket).toHaveBeenCalledWith(teamspace, project, model,
-					tickets[0], expect.any(Object), undefined);
-			}
+			expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
+			expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, model,
+				tickets, expect.any(Object), undefined);
 
-			const processedTickets = updateMany ? TicketsModel.updateManyTickets.mock.calls[0][4]
-				: [TicketsModel.updateTicket.mock.calls[0][4]];
+			const processedTickets = TicketsModel.updateTickets.mock.calls[0][4];
 
 			const groupsCreated = [];
 			const groupsRemoved = [];
@@ -869,15 +845,15 @@ const testUpdateTicket = () => {
 			const author = generateRandomString();
 			TemplatesModel.generateFullSchema.mockImplementationOnce((t) => t);
 			const response = generateRandomObject();
-			TicketsModel.updateTicket.mockResolvedValueOnce(response);
+			TicketsModel.updateTickets.mockResolvedValueOnce([response]);
 
 			await expect(Tickets.updateTicket(teamspace, project, model, template, ticket,
 				updateData, author))
 				.resolves.toBeUndefined();
 
-			expect(TicketsModel.updateTicket).toHaveBeenCalledTimes(1);
-			expect(TicketsModel.updateTicket).toHaveBeenCalledWith(teamspace, project, model, ticket,
-				updateData, author);
+			expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
+			expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, model, [ticket],
+				[updateData], author);
 			expect(TemplatesModel.generateFullSchema).toHaveBeenCalledTimes(1);
 			expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(template);
 
@@ -890,6 +866,34 @@ const testUpdateTicket = () => {
 					project,
 					model,
 					...response });
+		});
+
+		test('should not trigger event if there was no change', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const updateData = {
+				title: generateRandomString(),
+				properties: {},
+			};
+			const author = generateRandomString();
+			TemplatesModel.generateFullSchema.mockImplementationOnce((t) => t);
+			TicketsModel.updateTickets.mockResolvedValueOnce([]);
+
+			await expect(Tickets.updateTicket(teamspace, project, model, template, ticket,
+				updateData, author))
+				.resolves.toBeUndefined();
+
+			expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
+			expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, model, [ticket],
+				[updateData], author);
+			expect(TemplatesModel.generateFullSchema).toHaveBeenCalledTimes(1);
+			expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(template);
+
+			expect(FilesManager.storeFiles).not.toHaveBeenCalled();
+			expect(FilesManager.removeFiles).not.toHaveBeenCalled();
+
+			expect(EventsManager.publish).not.toHaveBeenCalled();
 		});
 
 		test('should process image and store a ref', () => updateImagesTestHelper(false));
@@ -923,14 +927,14 @@ const testUpdateManyTickets = () => {
 			});
 			TemplatesModel.generateFullSchema.mockReset();
 			TemplatesModel.generateFullSchema.mockImplementationOnce((t) => t);
-			TicketsModel.updateManyTickets.mockResolvedValueOnce(response);
+			TicketsModel.updateTickets.mockResolvedValueOnce(response);
 
 			await expect(Tickets.updateManyTickets(teamspace, project, model, template, tickets,
 				updateData, author))
 				.resolves.toBeUndefined();
 
-			expect(TicketsModel.updateManyTickets).toHaveBeenCalledTimes(1);
-			expect(TicketsModel.updateManyTickets).toHaveBeenCalledWith(teamspace, project, model, tickets,
+			expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
+			expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, model, tickets,
 				updateData, author);
 			expect(TemplatesModel.generateFullSchema).toHaveBeenCalledTimes(1);
 			expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(template);
@@ -975,14 +979,14 @@ const testUpdateManyTickets = () => {
 
 				TemplatesModel.generateFullSchema.mockReset();
 				TemplatesModel.generateFullSchema.mockImplementationOnce((t) => t);
-				TicketsModel.updateManyTickets.mockResolvedValueOnce(response);
+				TicketsModel.updateTickets.mockResolvedValueOnce(response);
 
 				await expect(Tickets.updateManyTickets(teamspace, project, model, template, tickets,
 					updateData, author))
 					.resolves.toBeUndefined();
 
-				expect(TicketsModel.updateManyTickets).toHaveBeenCalledTimes(1);
-				expect(TicketsModel.updateManyTickets).toHaveBeenCalledWith(teamspace, project, model, tickets,
+				expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
+				expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, model, tickets,
 					updateData.map(({ comments, ...others }) => others), author);
 				expect(TemplatesModel.generateFullSchema).toHaveBeenCalledTimes(1);
 				expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(template);
@@ -1021,14 +1025,14 @@ const testUpdateManyTickets = () => {
 
 				TemplatesModel.generateFullSchema.mockReset();
 				TemplatesModel.generateFullSchema.mockImplementationOnce((t) => t);
-				TicketsModel.updateManyTickets.mockResolvedValueOnce(response);
+				TicketsModel.updateTickets.mockResolvedValueOnce(response);
 
 				await expect(Tickets.updateManyTickets(teamspace, project, model, template, tickets,
 					updateData, author))
 					.resolves.toBeUndefined();
 
-				expect(TicketsModel.updateManyTickets).toHaveBeenCalledTimes(1);
-				expect(TicketsModel.updateManyTickets).toHaveBeenCalledWith(teamspace, project, model, tickets,
+				expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
+				expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, model, tickets,
 					updateData.map(({ comments, ...others }) => others), author);
 				expect(TemplatesModel.generateFullSchema).toHaveBeenCalledTimes(1);
 				expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(template);
