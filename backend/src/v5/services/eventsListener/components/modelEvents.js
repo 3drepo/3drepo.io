@@ -118,9 +118,8 @@ const ticketsImported = async ({ teamspace, project, model, tickets }) => {
 	]);
 
 	const fullTemplate = generateFullSchema(template);
-
+	const event = isFed ? chatEvents.FEDERATION_NEW_TICKET : chatEvents.CONTAINER_NEW_TICKET;
 	await Promise.all(tickets.map(async (ticket) => {
-		const event = isFed ? chatEvents.FEDERATION_NEW_TICKET : chatEvents.CONTAINER_NEW_TICKET;
 		const serialisedTicket = serialiseTicket(ticket, fullTemplate);
 		await createModelMessage(event, serialisedTicket, teamspace, project, model);
 	}));

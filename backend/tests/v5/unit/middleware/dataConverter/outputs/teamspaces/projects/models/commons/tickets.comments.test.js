@@ -59,7 +59,7 @@ const testSerialiseComment = () => {
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, { ...output });
 		});
 
-		test('Should cast dates correctly (imported comment', () => {
+		test('Should cast dates correctly (imported comment)', () => {
 			const commentData = {
 				createdAt: generateRandomDate(),
 				updatedAt: generateRandomDate(),

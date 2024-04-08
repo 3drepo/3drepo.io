@@ -32,8 +32,8 @@ const testValidateComment = () => {
 	};
 	describe.each([
 		['with empty message (new comment)', false, { message: '' }],
-		['with no object', false, undefined],
-		['with no object', false, null],
+		['with no object (undefined)', false, undefined],
+		['with no object (null)', false, null],
 		['with too long message (new comment)', false, { message: generateRandomString(1201) }],
 		['with valid message (new comment)', true, { message: generateRandomString() }],
 		['with invalid images (new comment)', false, { images: [] }],
@@ -43,7 +43,6 @@ const testValidateComment = () => {
 		['with too long message (update comment)', false, { message: generateRandomString(1201) }, existingComment],
 		['with valid message (update comment)', true, { message: generateRandomString() }, existingComment],
 		['with invalid images (update comment)', false, { images: [] }, existingComment],
-		['with valid image (update comment)', true, { images: [readFileSync(image, { encoding: 'base64' })] }, existingComment],
 		['with valid image (update comment)', true, { images: [readFileSync(image, { encoding: 'base64' })] }, existingComment],
 		['with empty body (update comment)', false, {}, existingComment],
 		['with valid image refs (update comment)', true, { images: [existingRef, existingRef2] }, existingComment],
