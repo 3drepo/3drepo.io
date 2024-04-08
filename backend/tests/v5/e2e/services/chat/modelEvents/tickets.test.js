@@ -27,20 +27,29 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 let agent;
 
+const generateBasicData = () => {
+	const basicData = {
+		user: ServiceHelper.generateUserCredentials(),
+		teamspace: ServiceHelper.generateRandomString(),
+		project: ServiceHelper.generateRandomProject(),
+		container: ServiceHelper.generateRandomModel(),
+		federation: ServiceHelper.generateRandomModel({ isFederation: true }),
+		template: ServiceHelper.generateTemplate(),
+		templateWithComments: ServiceHelper.generateTemplate(false, false, { comments: true }),
+	};
+
+	return basicData;
+};
+
 const ticketAddedTest = () => {
 	describe('On adding a new ticket', () => {
-		const user = ServiceHelper.generateUserCredentials();
-		const teamspace = ServiceHelper.generateRandomString();
-		const project = ServiceHelper.generateRandomProject();
-		const container = ServiceHelper.generateRandomModel();
-		const federation = ServiceHelper.generateRandomModel({ isFederation: true });
-		const template = ServiceHelper.generateTemplate();
-		const templateWithComments = ServiceHelper.generateTemplate(false, false, { comments: true });
+		const { user, teamspace, project, container, federation,
+			template, templateWithComments } = generateBasicData();
+
 		const containerTicket = ServiceHelper.generateTicket(template);
 		const federationTicket = ServiceHelper.generateTicket(template);
 		const containerComment = ServiceHelper.generateComment(user.user);
 		const federationComment = ServiceHelper.generateComment(user.user);
-
 		beforeAll(async () => {
 			await ServiceHelper.db.createTeamspace(teamspace, [user.user]);
 			await Promise.all([
@@ -156,13 +165,9 @@ const ticketAddedTest = () => {
 
 const ticketsImportedTest = () => {
 	describe('On importing tickets', () => {
-		const user = ServiceHelper.generateUserCredentials();
-		const teamspace = ServiceHelper.generateRandomString();
-		const project = ServiceHelper.generateRandomProject();
-		const container = ServiceHelper.generateRandomModel();
-		const federation = ServiceHelper.generateRandomModel({ isFederation: true });
-		const template = ServiceHelper.generateTemplate();
-		const templateWithComments = ServiceHelper.generateTemplate(false, false, { comments: true });
+		const { user, teamspace, project, container, federation,
+			template, templateWithComments } = generateBasicData();
+
 		const containerTicket = ServiceHelper.generateTicket(template);
 		const federationTicket = ServiceHelper.generateTicket(template);
 		const containerComment = ServiceHelper.generateComment(user.user);
@@ -419,13 +424,9 @@ const ticketsImportedTest = () => {
 
 const ticketUpdatedTest = () => {
 	describe('On updating a ticket', () => {
-		const user = ServiceHelper.generateUserCredentials();
-		const teamspace = ServiceHelper.generateRandomString();
-		const project = ServiceHelper.generateRandomProject();
-		const container = ServiceHelper.generateRandomModel();
-		const federation = ServiceHelper.generateRandomModel({ isFederation: true });
-		const template = ServiceHelper.generateTemplate();
-		const templateWithComments = ServiceHelper.generateTemplate(false, false, { comments: true });
+		const { user, teamspace, project, container, federation,
+			template, templateWithComments } = generateBasicData();
+
 		const containerTicket = ServiceHelper.generateTicket(template);
 		const federationTicket = ServiceHelper.generateTicket(template);
 		const containerComment = ServiceHelper.generateComment(user.user);
@@ -525,12 +526,9 @@ const ticketUpdatedTest = () => {
 const ticketsUpdatedTest = () => {
 	describe('On updating many tickets', () => {
 		const nTickets = 10;
-		const user = ServiceHelper.generateUserCredentials();
-		const teamspace = ServiceHelper.generateRandomString();
-		const project = ServiceHelper.generateRandomProject();
-		const container = ServiceHelper.generateRandomModel();
-		const federation = ServiceHelper.generateRandomModel({ isFederation: true });
-		const templateWithComments = ServiceHelper.generateTemplate(false, false, { comments: true });
+		const { user, teamspace, project, container, federation,
+			templateWithComments } = generateBasicData();
+
 		const containerTickets = times(nTickets, () => ServiceHelper.generateTicket(templateWithComments));
 		const federationTickets = times(nTickets, () => ServiceHelper.generateTicket(templateWithComments));
 
@@ -695,13 +693,9 @@ const ticketsUpdatedTest = () => {
 
 const commentAddedTest = () => {
 	describe('On adding a new comment', () => {
-		const user = ServiceHelper.generateUserCredentials();
-		const teamspace = ServiceHelper.generateRandomString();
-		const project = ServiceHelper.generateRandomProject();
-		const container = ServiceHelper.generateRandomModel();
-		const federation = ServiceHelper.generateRandomModel({ isFederation: true });
-		const template = ServiceHelper.generateTemplate();
-		const templateWithComments = ServiceHelper.generateTemplate(false, false, { comments: true });
+		const { user, teamspace, project, container, federation,
+			template, templateWithComments } = generateBasicData();
+
 		const containerTicket = ServiceHelper.generateTicket(template);
 		const federationTicket = ServiceHelper.generateTicket(template);
 		const containerComment = ServiceHelper.generateComment(user.user);
@@ -811,13 +805,9 @@ const commentAddedTest = () => {
 
 const commentUpdatedTest = () => {
 	describe('On updating a comment', () => {
-		const user = ServiceHelper.generateUserCredentials();
-		const teamspace = ServiceHelper.generateRandomString();
-		const project = ServiceHelper.generateRandomProject();
-		const container = ServiceHelper.generateRandomModel();
-		const federation = ServiceHelper.generateRandomModel({ isFederation: true });
-		const template = ServiceHelper.generateTemplate();
-		const templateWithComments = ServiceHelper.generateTemplate(false, false, { comments: true });
+		const { user, teamspace, project, container, federation,
+			template, templateWithComments } = generateBasicData();
+
 		const containerTicket = ServiceHelper.generateTicket(template);
 		const federationTicket = ServiceHelper.generateTicket(template);
 		const containerComment = ServiceHelper.generateComment(user.user);
@@ -953,11 +943,8 @@ const commentUpdatedTest = () => {
 
 const groupUpdatedTest = () => {
 	describe('Updating a group', () => {
-		const user = ServiceHelper.generateUserCredentials();
-		const teamspace = ServiceHelper.generateRandomString();
-		const project = ServiceHelper.generateRandomProject();
-		const container = ServiceHelper.generateRandomModel();
-		const federation = ServiceHelper.generateRandomModel({ isFederation: true });
+		const { user, teamspace, project, container, federation } = generateBasicData();
+
 		const templateWithView = ServiceHelper.generateTemplate(false, true);
 		const containerTicketWithView = ServiceHelper.generateTicket(templateWithView);
 		const federationTicketWithView = ServiceHelper.generateTicket(templateWithView);
