@@ -18,6 +18,8 @@
 import { ChangeEvent } from 'react';
 
 export const getSupportedFileExtensions = () => ClientConfig.acceptedFormat.map((format) => `.${format}`).toString();
+// TODO - use config file when available
+export const getSupportedDrawingRevisionsFileExtensions = () => '.pdf,.dwg';
 
 export const uploadFile = (accept, multiple = false) => new Promise((resolve) => {
 	const input = document.createElement('input');

@@ -19,8 +19,8 @@ import { ContainersActions } from '@/v5/store/containers/containers.redux';
 import { selectCanUploadToProject, selectContainerById, selectContainers, selectFavouriteContainers, selectHasCollaboratorAccess, selectHasCommenterAccess } from '@/v5/store/containers/containers.selectors';
 import { times } from 'lodash';
 import { containerMockFactory, prepareMockSettingsReply, prepareMockStats, prepareMockViews } from './containers.fixtures';
-import { NewContainer, UploadStatuses } from '@/v5/store/containers/containers.types';
-import { revisionsMockFactory } from '../revisions/revisions.fixtures';
+import { NewContainer, UploadStatus } from '@/v5/store/containers/containers.types';
+import { containerRevisionsMockFactory } from './containerRevisions/containerRevisions.fixtures';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { createTestStore, listContainsElementWithId } from '../test.helpers';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
@@ -79,8 +79,8 @@ describe('Containers: store', () => {
 		});
 
 		it('should update container status', () => {
-			const newStatus = UploadStatuses.OK;
-			const newContainer = createAndAddContainerToStore({ status: UploadStatuses.GENERATING_BUNDLES });
+			const newStatus = UploadStatus.OK;
+			const newContainer = createAndAddContainerToStore({ status: UploadStatus.GENERATING_BUNDLES });
 			dispatch(ContainersActions.setContainerStatus(projectId, newContainer._id, newStatus));
 			const containerFromState = selectContainerById(getState(), newContainer._id);
 
@@ -117,7 +117,7 @@ describe('Containers: store', () => {
 		});
 
 		it('should update revision processing status', () => {
-			const newRevision = revisionsMockFactory();
+			const newRevision = containerRevisionsMockFactory();
 			const newContainer = createAndAddContainerToStore();
 			dispatch(ContainersActions.containerProcessingSuccess(projectId, newContainer._id, newRevision));
 			const containerFromState = selectContainerById(getState(), newContainer._id);

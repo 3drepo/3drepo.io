@@ -35,6 +35,7 @@ import { DRAWING_LIST_COLUMN_WIDTHS } from '@/v5/store/drawings/drawings.helpers
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
+import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 interface IDrawingsListItem {
 	isSelected: boolean;
@@ -49,6 +50,7 @@ export const DrawingsListItem = memo(({
 }: IDrawingsListItem) => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const isMainList = useContext(IsMainList);
+	const revisions = DrawingRevisionsHooksSelectors.selectRevisions(drawing._id);
 
 	useEffect(() => {
 		if (isMainList) {
@@ -65,6 +67,13 @@ export const DrawingsListItem = memo(({
 		}
 	};
 
+	useEffect(() => {
+		if (isMainList) {
+			// TODO - add realtime events
+		}
+		return null;
+	}, [drawing._id]);
+
 	return (
 		<DashboardListItem selected={isSelected} key={drawing._id}>
 			<DashboardListItemRow selected={isSelected} onClick={() => onSelectOrToggleItem(drawing._id)}>
@@ -78,12 +87,12 @@ export const DrawingsListItem = memo(({
 					tooltipTitle={
 						<FormattedMessage id="drawings.list.item.revisions.tooltip" defaultMessage="View revisions" />
 					}
-					{...DRAWING_LIST_COLUMN_WIDTHS.total}
+					{...DRAWING_LIST_COLUMN_WIDTHS.revisionsCount}
 				>
 					<FormattedMessage
 						id="drawings.list.item.revisions"
 						defaultMessage="{count, plural, =0 {No revisions} one {# revision} other {# revisions}}"
-						values={{ count: drawing.total }}
+						values={{ count: drawing.revisionsCount }}
 					/>
 				</DashboardListItemButton>
 				<DrawingsCalibrationButton
@@ -123,7 +132,11 @@ export const DrawingsListItem = memo(({
 				</DashboardListItemIcon>
 			</DashboardListItemRow>
 			{isSelected && (
-				<div> Revisions...</div>
+				<div>
+					{revisions.map((rev) => (
+						<div>{rev.name} - {+rev.timestamp}</div>
+					))}
+				</div>
 			)}
 		</DashboardListItem>
 	);
