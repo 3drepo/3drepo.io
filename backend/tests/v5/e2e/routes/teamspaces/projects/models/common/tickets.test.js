@@ -635,7 +635,7 @@ const testGetTicketList = () => {
 			const modelNoTickets = isFed ? fedNoTickets : conNoTickets;
 			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
 			const moduleName = Object.keys(model.tickets[0].modules)[0];
-			const filter = `${Object.keys(model.tickets[0].properties)[0]},${moduleName}.${Object.keys(model.tickets[0].modules[moduleName])[0]}`;
+			const filters = `${Object.keys(model.tickets[0].properties)[0]},${moduleName}.${Object.keys(model.tickets[0].modules[moduleName])[0]}`;
 			const baseRouteParams = { key: users.tsAdmin.apiKey, modelType, projectId: project.id, model };
 
 			const checkTicketList = (ascending = true) => (tickets) => {
@@ -658,7 +658,7 @@ const testGetTicketList = () => {
 				['the user does not have access to the federation', { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 				['the model has no tickets', { ...baseRouteParams, model: modelNoTickets }, true, []],
 				['the model has tickets', baseRouteParams, true, model.tickets],
-				['the model has tickets with filter imposed', { ...baseRouteParams, options: { filter } }, true, model.tickets],
+				['the model has tickets with filter imposed', { ...baseRouteParams, options: { filters } }, true, model.tickets],
 				['the model returning only tickets updated since now', { ...baseRouteParams, options: { updatedSince: Date.now() + 1000000 } }, true, []],
 				['the model returning tickets sorted by updated at in ascending order', { ...baseRouteParams, options: { sortBy: basePropertyLabels.UPDATED_AT, sortDesc: false }, checkTicketList: checkTicketList() }, true, model.tickets],
 				['the model returning tickets sorted by updated at in descending order', { ...baseRouteParams, options: { sortBy: basePropertyLabels.UPDATED_AT, sortDesc: true }, checkTicketList: checkTicketList(false) }, true, model.tickets],
@@ -682,15 +682,15 @@ const testGetTicketList = () => {
 							expect(tickOut).toEqual(expect.objectContaining({ _id, title, type }));
 						});
 
-						if (options.filter) {
-							const [propName, moduleFilter] = options.filter.split(',');
+						if (options.filters) {
+							const [propName, moduleFilter] = options.filters.split(',');
 							const [moduleName, moduleProp] = moduleFilter.split('.');
 
 							const ticketContainingProps = res.body.tickets
 								.filter((t) => t.properties[propName] && t.modules[moduleName]
 								&& t.modules[moduleName][moduleProp]);
 
-							expect(ticketContainingProps).toBeDefined();
+							expect(ticketContainingProps.length).toBeTruthy();
 						}
 					}
 				} else {
