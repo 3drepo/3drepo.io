@@ -26,7 +26,7 @@ import { FileInputField } from '@controls/fileInputField/fileInputField.componen
 import { Button } from '@controls/button/button.component';
 import { FormattedMessage } from 'react-intl';
 import { SvgViewer } from './svgViewer.component';
-import { PanZoomHandler, centredPanZoom } from './centredPanZoom';
+import { PanZoomHandler, centredPanZoom } from './panzoom/centredPanZoom';
 
 
 
