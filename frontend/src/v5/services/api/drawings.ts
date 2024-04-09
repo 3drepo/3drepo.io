@@ -18,7 +18,7 @@
 
 import { delay } from '@/v4/helpers/async';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
-import { CalibrationStates, DrawingStats, MinimumDrawing } from '@/v5/store/drawings/drawings.types';
+import { DrawingStats, DrawingUploadStatus, CalibrationStates, MinimumDrawing } from '@/v5/store/drawings/drawings.types';
 import { AxiosResponse } from 'axios';
 import uuid from 'uuidv4';
 
@@ -32,19 +32,24 @@ export const removeFavourite = (teamspace, projectId, drawingId): Promise<AxiosR
 
 const categories =  ['A drawing category', 'Another drawing category', 'Yet another one'];
 
-const arr = (new Array(1000)).fill(0);
+const arr = (new Array(10)).fill(0);
 
-const drawings = arr.map((_, index) => {
-	return {
-		_id: uuid(),
-		name: 'A drawing ' + index,
-		isFavourite: (Math.random() > 0.5),
-		role: Role.ADMIN,
-	};
-});
+const drawings: MinimumDrawing[] = arr.map((_, index) => ({
+	_id: uuid(),
+	name: 'A drawing ' + index,
+	drawingNumber: uuid(),
+	isFavourite: (Math.random() > 0.5),
+	role: Role.ADMIN,
+	category: categories[Math.round(Math.random() * (categories.length - 1))],
+	status: DrawingUploadStatus.OK,
+	revisionsCount: 2,
+	latestRevision: null,
+	lastUpdated: null,
+	hasStatsPending: false,
+}));
 
 const randCal = () => {
-	const i  = Math.round(Math.random() * 2);
+	const i = Math.round(Math.random() * 2);
 	switch (i) {
 		case 0:
 			return CalibrationStates.CALIBRATED;
@@ -62,19 +67,19 @@ const stats = arr.map((_, index) => {
 
 	const calibration = total ? randCal() : CalibrationStates.EMPTY;
 	const latestRevision = total ? 'Revision ' + total : undefined;
-	const status = total ? 'status' : undefined;
+	const status = total ? DrawingUploadStatus.OK : undefined;
 
 	return {
 		_id: drawings[index]._id,
 		revisions : {
 			lastUpdated,
-			drawingNumber: uuid(), 
 			total,
-			calibration,
-			category: categories[Math.round(Math.random() * (categories.length - 1))],
 			latestRevision,
-			status,
 		},
+		drawingNumber: uuid(), 
+		calibration,
+		category: categories[Math.round(Math.random() * (categories.length - 1))],
+		status,
 	} as DrawingStats;
 });
 

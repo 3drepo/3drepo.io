@@ -20,12 +20,14 @@ import * as AuthSelectors from '@/v5/store/auth/auth.selectors';
 import * as BimSelectors from '@/v4/modules/bim/bim.selectors';
 import * as CanvasHistorySelectors from '@/v4/modules/canvasHistory/canvasHistory.selectors';
 import * as ContainersSelectors from '@/v5/store/containers/containers.selectors';
+import * as ContainerRevisionsSelectors from '@/v5/store/containers/revisions/containerRevisions.selectors';
 import * as CurrentUserSelectors from '@/v5/store/currentUser/currentUser.selectors';
+import * as DrawingsSelectors from '@/v5/store/drawings/drawings.selectors';
+import * as DrawingRevisionsSelectors from '@/v5/store/drawings/revisions/drawingRevisions.selectors';
 import * as ProjectsSelectors from '@/v5/store/projects/projects.selectors';
 import * as FederationsSelectors from '@/v5/store/federations/federations.selectors';
 import * as GroupsSelectors from '@/v4/modules/groups/groups.selectors';
 import * as ModelSelectors from '@/v4/modules/model/model.selectors';
-import * as RevisionsSelectors from '@/v5/store/revisions/revisions.selectors';
 import * as RouterSelectors from '@/v4/modules/router/router.selectors';
 import * as SequencesSelctors from '@/v4/modules/sequences/sequences.selectors';
 import * as TreeSelectors from '@/v4/modules/tree/tree.selectors';
@@ -36,7 +38,6 @@ import * as TeamspacesSelectors from '@/v5/store/teamspaces/teamspaces.selectors
 import * as UsersSelectors from '@/v5/store/users/users.selectors';
 import * as ViewerSelectors from '@/v5/store/viewer/viewer.selectors';
 import * as ViewerGuiSelectors from '@/v4/modules/viewerGui/viewerGui.selectors';
-import * as DrawingsSelectors from '@/v5/store/drawings/drawings.selectors';
 
 
 export const AuthHooksSelectors = createHooksSelectors(AuthSelectors);
@@ -45,12 +46,13 @@ export const ContainersHooksSelectors = createHooksSelectors(ContainersSelectors
 export const CanvasHistoryHooksSelectors = createHooksSelectors(CanvasHistorySelectors);
 export const CurrentUserHooksSelectors = createHooksSelectors(CurrentUserSelectors);
 export const DrawingsHooksSelectors = createHooksSelectors(DrawingsSelectors);
+export const DrawingRevisionsHooksSelectors = createHooksSelectors(DrawingRevisionsSelectors);
 export const FederationsHooksSelectors = createHooksSelectors(FederationsSelectors);
 export const GroupsHooksSelectors = createHooksSelectors(GroupsSelectors);
 export const ModelHooksSelectors = createHooksSelectors(ModelSelectors);
 export const ProjectsHooksSelectors = createHooksSelectors(ProjectsSelectors);
-export const RevisionsHooksSelectors = createHooksSelectors(RevisionsSelectors);
 export const RouterHooksSelectors = createHooksSelectors(RouterSelectors);
+export const ContainerRevisionsHooksSelectors = createHooksSelectors(ContainerRevisionsSelectors);
 export const SequencesHooksSelectors = createHooksSelectors(SequencesSelctors);
 export const TicketsHooksSelectors = createHooksSelectors(TicketsSelectors);
 export const TicketsCardHooksSelectors = createHooksSelectors(TicketsCardSelectors);
