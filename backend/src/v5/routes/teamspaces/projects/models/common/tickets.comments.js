@@ -203,23 +203,25 @@ const establishRoutes = (isFed) => {
 	 *                 history:
 	 *                   type: array
 	 *                   description: The update history of the comment
-	 *                   properties:
-	 *                     timestamp:
-	 *                       type: number
-	 *                       example: 1632821119000
-	 *                       description: Timestamp of the update
-	 *                     message:
-	 *                       type: string
-	 *                       example: Example message
-	 *                       description: The content of the comment
-	 *                     images:
-	 *                       type: array
-	 *                       description: The images of the comment
-	 *                       items:
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       timestamp:
+	 *                         type: number
+	 *                         example: 1632821119000
+	 *                         description: Timestamp of the update
+	 *                       message:
 	 *                         type: string
-	 *                         format: uuid
-	 *                         description: The Id of the comment image
-	 *                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                         example: Example message
+	 *                         description: The content of the comment
+	 *                       images:
+	 *                         type: array
+	 *                         description: The images of the comment
+	 *                         items:
+	 *                           type: string
+	 *                           format: uuid
+	 *                           description: The Id of the comment image
+	 *                           example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 *                 deleted:
 	 *                   type: boolean
 	 *                   example: true
@@ -228,6 +230,10 @@ const establishRoutes = (isFed) => {
 	 *                   type: string
 	 *                   example: username1
 	 *                   description: The username of the comment's author
+   	 *                 originalAuthor:
+	 *                   type: string
+	 *                   example: John
+	 *                   description: (Imported comments only) returns the original author of the imported comment
 	 *                 createdAt:
 	 *                   type: number
 	 *                   example: 1632821119000
@@ -236,6 +242,10 @@ const establishRoutes = (isFed) => {
 	 *                   type: number
 	 *                   example: 1632821119000
 	 *                   description: Timestamp of when the comment was last updated
+   	 *                 importedAt:
+	 *                   type: number
+	 *                   example: 1632821119000
+	 *                   description: (Imported comments only) returns the time when the comment was imported
 	 */
 	router.get('/:comment', hasReadAccess, checkTicketExists, getComment(isFed), serialiseComment);
 
@@ -335,6 +345,10 @@ const establishRoutes = (isFed) => {
 	 *                     type: string
 	 *                     example: username1
 	 *                     description: The username of the comment's author
+   	 *                   originalAuthor:
+	 *                     type: string
+	 *                     example: John
+	 *                     description: (Imported comments only) returns the original author of the imported comment
 	 *                   createdAt:
 	 *                     type: number
 	 *                     example: 1632821119000
@@ -343,6 +357,10 @@ const establishRoutes = (isFed) => {
 	 *                     type: number
 	 *                     example: 1632821119000
 	 *                     description: Timestamp of when the comment was last updated
+   	 *                   importedAt:
+	 *                     type: number
+	 *                     example: 1632821119000
+	 *                     description: (Imported comments only) returns the time when the comment was imported
 	 */
 	router.get('', hasReadAccess, checkTicketExists, validateListSortAndFilter, getAllComments(isFed), serialiseCommentList);
 

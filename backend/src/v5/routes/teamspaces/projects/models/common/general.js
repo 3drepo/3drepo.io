@@ -381,6 +381,13 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
 	 *       - name: ids
 	 *         description: list of model ids to remove (comma separated)
 	 *         in: query

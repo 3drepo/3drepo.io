@@ -15,92 +15,67 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CSAMIcon from '@assets/icons/measure/custom_surface_area_measurement.svg';
-import CSAMActiveIcon from '@assets/icons/measure/custom_surface_area_measurement_selected.svg';
-import MinimumDistanceIcon from '@assets/icons/measure/minimum_distance.svg';
-import MinimumDistanceActiveIcon from '@assets/icons/measure/minimum_distance_selected.svg';
-import PointIcon from '@assets/icons/measure/point.svg';
-import PointActiveIcon from '@assets/icons/measure/point_selected.svg';
-import Point2PointIcon from '@assets/icons/measure/point_to_point.svg';
-import Point2PointActiveIcon from '@assets/icons/measure/point_to_point_selected.svg';
-import RayCastIcon from '@assets/icons/measure/ray_cast.svg';
-import RayCastActiveIcon from '@assets/icons/measure/ray_cast_selected.svg';
-import SAMIcon from '@assets/icons/measure/surface_area_measurement.svg';
-import SAMActiveIcon from '@assets/icons/measure/surface_area_measurement_selected.svg';
+import CSAMIcon from '@assets/icons/measurements/custom_surface_area_measurement.svg';
+import MinimumDistanceIcon from '@assets/icons/measurements/minimum_distance.svg';
+import PointIcon from '@assets/icons/measurements/point.svg';
+import PointToPointIcon from '@assets/icons/measurements/point_to_point.svg';
+import RayCastIcon from '@assets/icons/measurements/ray_cast.svg';
+import SAMIcon from '@assets/icons/measurements/surface_area_measurement.svg';
 
 import {
-	ACTIVE, DEFAULT, MEASURING_TYPE
+	MEASURING_TYPE
 } from '@/v4/modules/measurements/measurements.constants';
 
 import { VIEWER_MEASURING_MODE } from '@/v4/constants/viewer';
-
-const MEASURING_TYPE_ICON = {
-	[MEASURING_TYPE.POINT]: {
-		[DEFAULT]: PointIcon,
-		[ACTIVE]: PointActiveIcon,
-	},
-	[MEASURING_TYPE.POINT_TO_POINT]: {
-		[DEFAULT]: Point2PointIcon,
-		[ACTIVE]: Point2PointActiveIcon,
-	},
-	[MEASURING_TYPE.SAM]: {
-		[DEFAULT]: SAMIcon,
-		[ACTIVE]: SAMActiveIcon,
-	},
-	[MEASURING_TYPE.CSAM]: {
-		[DEFAULT]: CSAMIcon,
-		[ACTIVE]: CSAMActiveIcon,
-	},
-	[MEASURING_TYPE.MINIMUM_DISTANCE]: {
-		[DEFAULT]: MinimumDistanceIcon,
-		[ACTIVE]: MinimumDistanceActiveIcon,
-	},
-	[MEASURING_TYPE.RAY_CAST]: {
-		[DEFAULT]: RayCastIcon,
-		[ACTIVE]: RayCastActiveIcon,
-	},
-};
+import PolylineIcon from '@assets/icons/measurements/polyline.svg';
+import AngleIcon from '@assets/icons/measurements/angle.svg';
 
 export const MEASURING_TYPES = [
 	{
 		name: MEASURING_TYPE.POINT,
 		mode: VIEWER_MEASURING_MODE.POINT,
-		icon: MEASURING_TYPE_ICON[MEASURING_TYPE.POINT][DEFAULT],
-		activeIcon: MEASURING_TYPE_ICON[MEASURING_TYPE.POINT][ACTIVE],
+		Icon: PointIcon,
 	},
 	{
 		name: MEASURING_TYPE.POINT_TO_POINT,
 		mode: VIEWER_MEASURING_MODE.POINT_TO_POINT,
-		icon: MEASURING_TYPE_ICON[MEASURING_TYPE.POINT_TO_POINT][DEFAULT],
-		activeIcon: MEASURING_TYPE_ICON[MEASURING_TYPE.POINT_TO_POINT][ACTIVE],
+		Icon: PointToPointIcon,
+	},
+	{
+		name: MEASURING_TYPE.POLYLINE,
+		mode: VIEWER_MEASURING_MODE.POLYLINE,
+		Icon: PolylineIcon,
 	},
 	{
 		name: MEASURING_TYPE.RAY_CAST,
 		mode: VIEWER_MEASURING_MODE.RAY_CAST,
-		icon: MEASURING_TYPE_ICON[MEASURING_TYPE.RAY_CAST][DEFAULT],
-		activeIcon: MEASURING_TYPE_ICON[MEASURING_TYPE.RAY_CAST][ACTIVE],
+		Icon: RayCastIcon,
 	},
 	{
 		name: MEASURING_TYPE.MINIMUM_DISTANCE,
 		mode: VIEWER_MEASURING_MODE.MINIMUM_DISTANCE,
-		icon: MEASURING_TYPE_ICON[MEASURING_TYPE.MINIMUM_DISTANCE][DEFAULT],
-		activeIcon: MEASURING_TYPE_ICON[MEASURING_TYPE.MINIMUM_DISTANCE][ACTIVE],
+		Icon: MinimumDistanceIcon,
+	},
+	{
+		name: MEASURING_TYPE.ANGLE,
+		mode: VIEWER_MEASURING_MODE.ANGLE,
+		Icon: AngleIcon,
 	},
 	{
 		name: MEASURING_TYPE.SAM,
 		mode: VIEWER_MEASURING_MODE.SAM,
-		icon: MEASURING_TYPE_ICON[MEASURING_TYPE.SAM][DEFAULT],
-		activeIcon: MEASURING_TYPE_ICON[MEASURING_TYPE.SAM][ACTIVE],
+		Icon: SAMIcon,
 	},
 	{
 		name: MEASURING_TYPE.CSAM,
 		mode: VIEWER_MEASURING_MODE.CSAM,
-		icon: MEASURING_TYPE_ICON[MEASURING_TYPE.CSAM][DEFAULT],
-		activeIcon: MEASURING_TYPE_ICON[MEASURING_TYPE.CSAM][ACTIVE],
+		Icon: CSAMIcon,
 	},
 ];
 
 export const BASIC_TYPES = [
 	VIEWER_MEASURING_MODE.POINT_TO_POINT,
-	VIEWER_MEASURING_MODE.CSAM
+	VIEWER_MEASURING_MODE.CSAM,
+	VIEWER_MEASURING_MODE.POLYLINE,
+	VIEWER_MEASURING_MODE.ANGLE
 ];
