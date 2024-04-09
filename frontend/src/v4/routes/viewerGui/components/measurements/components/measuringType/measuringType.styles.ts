@@ -17,17 +17,9 @@
 
 import styled from 'styled-components';
 
-export const Wrapper = styled.div`
+export const Wrapper = styled.div<{ active: boolean }>`
 	width: 24px;
 	cursor: pointer;
-	margin: 0 3px;
-
-	&& + && {
-		margin: 0 10px;
-	}
-`;
-
-export const Icon = styled.img`
-	max-height: 24px;
-	max-width: 24px;
+	margin: 0 12px 0 0;
+	color: ${({active, theme}) => active ?  theme.palette.primary.main  : theme.palette.base.main };
 `;
