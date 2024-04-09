@@ -20,6 +20,7 @@ const {
 	getRefEntry,
 	getRefEntryByQuery,
 	getRefsByQuery,
+	insertManyRefs,
 	insertRef,
 	removeRefsByQuery,
 } = require('../models/fileRefs');
@@ -165,26 +166,32 @@ FilesManager.removeFiles = async (teamspace, collection, ids) => {
 
 FilesManager.removeFile = (teamspace, collection, id) => FilesManager.removeFiles(teamspace, collection, [id]);
 
-FilesManager.storeFile = async (teamspace, collection, id, data, meta = {}) => {
-	const mimeTypeProm = fileMimeFromBuffer(data);
-	await FilesManager.removeFile(teamspace, collection, id);
-	let refInfo;
+FilesManager.storeFiles = async (teamspace, collection, dataEntry) => {
+	const refObjs = await Promise.all(dataEntry.map(async ({ id, data, meta = {} }) => {
+		const [mimeType] = await Promise.all([
+			fileMimeFromBuffer(data),
+			FilesManager.removeFile(teamspace, collection, id),
+		]);
+		let refInfo;
+		switch (config.defaultStorage) {
+		case 'fs':
+			refInfo = await FSHandler.storeFile(data);
+			break;
+		case 'gridfs':
+			refInfo = await GridFSHandler.storeFile(teamspace, collection, data);
+			break;
+		default:
+			logger.logError(`Unrecognised external service: ${config.defaultStorage}`);
+			throw templates.unknown;
+		}
+		return { ...meta, ...refInfo, _id: id, mimeType: mimeType || DEFAULT_MIME_TYPE };
+	}));
 
-	switch (config.defaultStorage) {
-	case 'fs':
-		refInfo = await FSHandler.storeFile(data);
-		break;
-	case 'gridfs':
-		refInfo = await GridFSHandler.storeFile(teamspace, collection, data);
-		break;
-	default:
-		logger.logError(`Unrecognised external service: ${config.defaultStorage}`);
-		throw templates.unknown;
-	}
-
-	const mimeType = (await mimeTypeProm) ?? DEFAULT_MIME_TYPE;
-	await insertRef(teamspace, collection, { ...meta, ...refInfo, _id: id, mimeType });
+	await insertManyRefs(teamspace, collection, refObjs);
 };
+
+FilesManager.storeFile = (teamspace, collection, id, data, meta = {}) => FilesManager.storeFiles(
+	teamspace, collection, [{ id, meta, data }]);
 
 FilesManager.storeFileStream = async (teamspace, collection, id, dataStream, meta = {}) => {
 	await FilesManager.removeFile(teamspace, collection, id);

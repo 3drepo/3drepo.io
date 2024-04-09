@@ -24,6 +24,7 @@ import * as ContainerRevisionsSelectors from '@/v5/store/containers/revisions/co
 import * as CurrentUserSelectors from '@/v5/store/currentUser/currentUser.selectors';
 import * as DrawingsSelectors from '@/v5/store/drawings/drawings.selectors';
 import * as DrawingRevisionsSelectors from '@/v5/store/drawings/revisions/drawingRevisions.selectors';
+import * as DialogsSelectors from '@/v5/store/dialogs/dialogs.selectors';
 import * as ProjectsSelectors from '@/v5/store/projects/projects.selectors';
 import * as FederationsSelectors from '@/v5/store/federations/federations.selectors';
 import * as GroupsSelectors from '@/v4/modules/groups/groups.selectors';
@@ -47,6 +48,7 @@ export const CanvasHistoryHooksSelectors = createHooksSelectors(CanvasHistorySel
 export const CurrentUserHooksSelectors = createHooksSelectors(CurrentUserSelectors);
 export const DrawingsHooksSelectors = createHooksSelectors(DrawingsSelectors);
 export const DrawingRevisionsHooksSelectors = createHooksSelectors(DrawingRevisionsSelectors);
+export const DialogsHooksSelectors = createHooksSelectors(DialogsSelectors);
 export const FederationsHooksSelectors = createHooksSelectors(FederationsSelectors);
 export const GroupsHooksSelectors = createHooksSelectors(GroupsSelectors);
 export const ModelHooksSelectors = createHooksSelectors(ModelSelectors);

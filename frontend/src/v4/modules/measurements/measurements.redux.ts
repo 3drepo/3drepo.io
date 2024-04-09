@@ -16,7 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { MEASURE_TYPE, MEASURE_TYPE_NAME, MEASURE_TYPE_STATE_MAP } from './measurements.constants';
+import { MEASURE_TYPE_STATE_MAP } from './measurements.constants';
 
 export const { Types: MeasurementsTypes, Creators: MeasurementsActions } = createActions({
 	setMeasureMode: ['mode'],
@@ -50,6 +50,7 @@ export interface IMeasurementState {
 	areaMeasurements: any[];
 	lengthMeasurements: any[];
 	pointMeasurements: any[];
+	angleMeasurements: any[];
 	edgeSnapping: boolean;
 	xyzDisplay: boolean;
 }
@@ -61,6 +62,7 @@ export const INITIAL_STATE: IMeasurementState = {
 	areaMeasurements: [],
 	lengthMeasurements: [],
 	pointMeasurements: [],
+	angleMeasurements: [],
 	edgeSnapping: true,
 	xyzDisplay: false,
 };
@@ -80,6 +82,7 @@ export const clearMeasurementsSuccess  = (state = INITIAL_STATE) => ({
 	areaMeasurements: INITIAL_STATE.areaMeasurements,
 	lengthMeasurements: INITIAL_STATE.lengthMeasurements,
 	pointMeasurements: INITIAL_STATE.pointMeasurements,
+	angleMeasurements: INITIAL_STATE.angleMeasurements,
 });
 
 export const removeMeasurementSuccess = (state = INITIAL_STATE, { uuid }) => ({
@@ -87,6 +90,7 @@ export const removeMeasurementSuccess = (state = INITIAL_STATE, { uuid }) => ({
 	areaMeasurements: state.areaMeasurements.filter((measurement) => measurement.uuid !== uuid),
 	lengthMeasurements: state.lengthMeasurements.filter((measurement) => measurement.uuid !== uuid),
 	pointMeasurements: state.pointMeasurements.filter((measurement) => measurement.uuid !== uuid),
+	angleMeasurements: state.angleMeasurements.filter((measurement) => measurement.uuid !== uuid),
 });
 
 export const addMeasurementSuccess = (state = INITIAL_STATE, { measurement }) => {
@@ -115,6 +119,7 @@ export const setMeasurementColorSuccess = (state = INITIAL_STATE, { uuid, color 
 	const areaMeasurement = state.areaMeasurements.find((measure) => measure.uuid === uuid);
 	const lengthMeasurement = state.lengthMeasurements.find((measure) => measure.uuid === uuid);
 	const pointMeasurement = state.pointMeasurements.find((measure) => measure.uuid === uuid);
+	const angleMeasurement = state.angleMeasurements.find((measure) => measure.uuid === uuid);
 
 	if (areaMeasurement) {
 		areaMeasurement.customColor = color;
@@ -125,6 +130,9 @@ export const setMeasurementColorSuccess = (state = INITIAL_STATE, { uuid, color 
 	} else if (pointMeasurement) {
 		pointMeasurement.customColor = color;
 		return ({ ...state, pointMeasurements: [...state.pointMeasurements]});
+	} else if (angleMeasurement) {
+		angleMeasurement.customColor = color;
+		return ({ ...state, angleMeasurements: [...state.angleMeasurements]});
 	}
 
 	return ({ ...state });
@@ -135,12 +143,14 @@ export const resetMeasurementColorsSuccess = (state = INITIAL_STATE, {}) => {
 	const areaMeasurements = state.areaMeasurements.map(removeCustomColor);
 	const lengthMeasurements = state.lengthMeasurements.map(removeCustomColor);
 	const pointMeasurements = state.pointMeasurements.map(removeCustomColor);
+	const angleMeasurements = state.angleMeasurements.map(removeCustomColor);
 
 	return ({
 		...state,
 		areaMeasurements,
 		lengthMeasurements,
 		pointMeasurements,
+		angleMeasurements,
 	});
 };
 

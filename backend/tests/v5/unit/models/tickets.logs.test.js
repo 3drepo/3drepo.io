@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
 const { src } = require('../../helper/path');
-const { generateRandomString, determineTestGroup, generateRandomObject } = require('../../helper/services');
+const { generateUUID, generateRandomString, determineTestGroup, generateRandomObject } = require('../../helper/services');
 
 const TicketLogs = require(`${src}/models/tickets.logs`);
 const db = require(`${src}/handler/db`);
@@ -79,7 +80,42 @@ const testAddGroupUpdateLog = () => {
 	});
 };
 
+const testAddImportedLog = () => {
+	describe('Add ticket imported logs', () => {
+		test('Should add ticket imported logs', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+
+			const tickets = times(10, () => ({
+				...generateRandomObject(),
+				author: generateRandomString(),
+				_id: generateUUID(),
+			}));
+			const fn = jest.spyOn(db, 'insertMany').mockResolvedValueOnce(undefined);
+
+			await TicketLogs.addImportedLogs(teamspace, project, model, tickets);
+
+			const expectedDocs = tickets.map(({ _id, author, ...imported }) => ({
+				teamspace,
+				project,
+				model,
+				ticket: _id,
+				author,
+				timestamp: expect.any(Date),
+				imported,
+				_id: expect.anything(),
+			}));
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, 'tickets.logs',
+				expectedDocs);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testAddTicketLog();
 	testAddGroupUpdateLog();
+	testAddImportedLog();
 });

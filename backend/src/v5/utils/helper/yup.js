@@ -108,6 +108,12 @@ YupHelper.types.date = Yup.date().transform((n, orgVal) => {
 		Number.isNaN(valAsNum) ? orgVal : valAsNum);
 });
 
+YupHelper.types.dateInThePast = YupHelper.types.date.test(('date-in-the-past', 'Date must be in the past', (v, { createError, path }) => {
+	const now = new Date();
+	if (!v || (now - v) >= 0) return true;
+	return createError({ message: `${path || 'Date'} must be in the past` });
+}));
+
 const imageValidityTests = (yupType, isNullable) => yupType.test('image-validity-test', 'Image is not valid', async (value, { createError, originalValue }) => {
 	if (isUUIDString(originalValue)) {
 		return true;
