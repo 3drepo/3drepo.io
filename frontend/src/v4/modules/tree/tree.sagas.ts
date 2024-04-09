@@ -281,8 +281,14 @@ function* getSelectedNodes() {
 		yield delay(100);
 		const objectsStatus = yield Viewer.getObjectsStatus();
 
-		if (objectsStatus && objectsStatus.highlightedNodes) {
-			yield put(TreeActions.setSelectedNodesSuccess(objectsStatus.highlightedNodes));
+		if (objectsStatus?.highlightedNodes) {
+			const { highlightedNodes } = objectsStatus;
+
+			if (highlightedNodes?.length === 1 && !highlightedNodes[0].shared_ids?.length) {
+				yield put(TreeActions.setSelectedNodesSuccess([]));
+			} else {
+				yield put(TreeActions.setSelectedNodesSuccess(highlightedNodes));
+			}
 		}
 	} catch (error) {
 		console.error(error);
@@ -387,7 +393,7 @@ function* hideTreeNodes(nodesIds = [], skipNested = false) {
 	yield waitForTreeToBeReady();
 
 	try {
-		yield put(TreeActions.deselectNodes({ nodesIds }))
+		yield put(TreeActions.deselectNodes(nodesIds))
 		yield put(TreeActions.setTreeNodesVisibility(nodesIds, VISIBILITY_STATES.INVISIBLE, skipNested, skipNested));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('hide', 'nodes', error));
