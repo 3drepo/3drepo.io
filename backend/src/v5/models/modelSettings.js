@@ -30,7 +30,7 @@ const findModels = (ts, query, projection, sort) => db.find(ts, SETTINGS_COL, qu
 const insertOneModel = (ts, data) => db.insertOne(ts, SETTINGS_COL, data);
 const updateOneModel = (ts, query, action) => db.updateOne(ts, SETTINGS_COL, query, action);
 const findOneAndUpdateModel = (ts, query, action, projection) => db.findOneAndUpdate(
-	ts, SETTINGS_COL, query, action, projection,
+	ts, SETTINGS_COL, query, action, { projection },
 );
 
 const noFederations = { federate: { $ne: true } };
