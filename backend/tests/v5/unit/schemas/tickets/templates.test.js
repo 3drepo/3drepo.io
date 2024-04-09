@@ -347,7 +347,6 @@ const testValidate = () => {
 				name: `${generateRandomString()}[]`,
 				type: propTypes.TEXT,
 			}] }, false],
-
 		['property with enum type without values', { name: generateRandomString(),
 			code: generateRandomString(3),
 			properties: [{
@@ -853,6 +852,43 @@ const testGenerateFullSchema = () => {
 				...expectedOutput.properties];
 			expect(output).toEqual(expectedOutput);
 		});
+
+		test('should validate created at to not be read only if import is set to true', () => {
+			const template = {
+				name: generateRandomString(),
+				config: {
+					issueProperties: true,
+				},
+				properties: [
+					{
+						name: generateRandomString(),
+						type: propTypes.TEXT,
+					},
+				],
+				modules: [],
+			};
+
+			const { properties: outProps, ...output } = TemplateSchema.generateFullSchema(template, true);
+
+			const { properties: temProps, ...expectedOutput } = cloneDeep(template);
+			const expectedProps = [
+				...getApplicableDefaultProperties(template.config, true),
+				...temProps];
+
+			expect(output).toEqual(expectedOutput);
+
+			const createdAtProp = outProps.find(({ name }) => name === basePropertyLabels.CREATED_AT);
+			expect(createdAtProp).toEqual(
+				{
+					name: basePropertyLabels.CREATED_AT,
+					type: propTypes.PAST_DATE,
+
+				});
+
+			expect(outProps.length).toEqual(expectedProps.length);
+			expect(outProps).toEqual(expect.arrayContaining(expectedProps));
+		});
+
 		test('should fill preset modules with default properties', () => {
 			const template = {
 				name: generateRandomString(),

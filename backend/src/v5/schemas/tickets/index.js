@@ -35,6 +35,7 @@ const { deserialiseGroupSchema } = require('./tickets.groups');
 const { generateFullSchema } = require('./templates');
 const { getJobNames } = require('../../models/jobs');
 const { getTicketsByQuery } = require('../../models/tickets');
+const { importCommentSchema } = require('./tickets.comments');
 const { logger } = require('../../utils/logger');
 const { propTypesToValidator } = require('./validators');
 
@@ -153,9 +154,9 @@ const generateModuleValidator = async (teamspace, project, model, templateId, mo
 	return moduleToSchema;
 };
 
-Tickets.validateTicket = async (teamspace, project, model, template, newTicket, oldTicket) => {
-	const fullTem = generateFullSchema(template);
+Tickets.validateTicket = async (teamspace, project, model, template, newTicket, oldTicket, isImport) => {
 	const isNewTicket = !oldTicket;
+	const fullTem = generateFullSchema(template, isNewTicket && isImport);
 
 	const validatorObj = {
 		title: isNewTicket ? types.strings.title.required()
@@ -166,8 +167,15 @@ Tickets.validateTicket = async (teamspace, project, model, template, newTicket, 
 			await generateModuleValidator(teamspace, project, model, template._id,
 				fullTem.modules, oldTicket?.modules, isNewTicket),
 		).default({}),
-		type: isNewTicket ? Yup.mixed().required() : Yup.mixed().strip(),
+		type: Yup.mixed().strip(),
 	};
+
+	if (isImport) {
+		if (template.config.comments) validatorObj.comments = Yup.array().min(1).of(importCommentSchema);
+		else if (newTicket.comments) {
+			throw new Error('Comments are not supported for this template type.');
+		}
+	}
 
 	const validatedTicket = await Yup.object(validatorObj).validate(newTicket, { stripUnknown: true });
 
@@ -176,7 +184,13 @@ Tickets.validateTicket = async (teamspace, project, model, template, newTicket, 
 		fullTem.modules, oldTicket?.modules, isNewTicket, true),
 	).default({});
 
-	return Yup.object(validatorObj).validate(validatedTicket, { stripUnknown: true });
+	const retVal = await Yup.object(validatorObj).validate(validatedTicket, { stripUnknown: true });
+
+	if (isNewTicket) {
+		retVal.type = template._id;
+	}
+
+	return retVal;
 };
 
 const calculateLevelOfRisk = (likelihood, consequence) => {
@@ -254,7 +268,7 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 		props.forEach(({ type, name, deprecated }) => {
 			if (stripDeprecated && deprecated) {
 				res[name] = Yup.mixed().strip();
-			} else if (type === propTypes.DATE) {
+			} else if (type === propTypes.DATE || type === propTypes.PAST_DATE) {
 				res[name] = Yup.number().transform((_, val) => val.getTime());
 			} else if (type === propTypes.VIEW) {
 				res[name] = Yup.object({
