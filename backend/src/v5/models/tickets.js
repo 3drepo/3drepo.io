@@ -48,8 +48,9 @@ Tickets.addTicketsWithTemplate = async (teamspace, project, model, templateId, t
 	const startCounter = await reserveTicketNumbers(teamspace, project, model, templateId, tickets.length);
 
 	const processedTickets = tickets.map((ticketData, i) => {
-		const fullData = { ...ticketData, _id: generateUUID(), number: Long.fromNumber(startCounter + i) };
-		response.push(fullData);
+		const ticketNum = startCounter + i;
+		const fullData = { ...ticketData, _id: generateUUID(), number: Long.fromNumber(ticketNum) };
+		response.push({ ...fullData, number: ticketNum });
 
 		return { ...fullData, teamspace, project, model };
 	});

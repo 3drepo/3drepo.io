@@ -23,9 +23,12 @@ const Ticket = require(`${src}/models/tickets`);
 const { basePropertyLabels } = require(`${src}/schemas/tickets/templates.constants`);
 
 const db = require(`${src}/handler/db`);
+const { Long } = db.dataTypes;
 const { templates } = require(`${src}/utils/responseCodes`);
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
 const ticketCol = 'tickets';
+const ticketCounterCol = 'tickets.counters';
 
 const testAddTicketsWithTemplate = () => {
 	describe('Add tickets with template', () => {
@@ -67,11 +70,11 @@ const testAddTicketsWithTemplate = () => {
 						project,
 						model,
 						_id: res[i]._id,
-						number: number + i })));
+						number: Long.fromNumber(number + i) })));
 
 			expect(getLastNumber).toHaveBeenCalledTimes(1);
-			expect(getLastNumber).toHaveBeenCalledWith(teamspace, ticketCol,
-				{ teamspace, project, model, type: templateType }, { number: 1 }, { number: -1 });
+			expect(getLastNumber).toHaveBeenCalledWith(teamspace, ticketCounterCol,
+				{ _id: [project, model, templateType].map(UUIDToString).join('_') }, expect.any(Object), { upsert: true });
 		});
 
 		test('should add the ticket with number set to 1 if this is the first ticket', async () => {
@@ -88,11 +91,11 @@ const testAddTicketsWithTemplate = () => {
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
-				[{ ...data, teamspace, project, model, _id: res._id, number: 1 }]);
+				[{ ...data, teamspace, project, model, _id: res._id, number: Long.fromNumber(1) }]);
 
 			expect(getLastNumber).toHaveBeenCalledTimes(1);
-			expect(getLastNumber).toHaveBeenCalledWith(teamspace, ticketCol,
-				{ teamspace, project, model, type: templateType }, { number: 1 }, { number: -1 });
+			expect(getLastNumber).toHaveBeenCalledWith(teamspace, ticketCounterCol,
+				{ _id: [project, model, templateType].map(UUIDToString).join('_') }, expect.any(Object), { upsert: true });
 		});
 	});
 };
