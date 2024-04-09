@@ -66,6 +66,7 @@ export const TicketItemContainer = styled(FlexColumn)<{ $selected?: boolean }>`
 
 export const DueDate = styled(DueDateBase)`
 	height: 12px;
+	width: 110px;
 	>* {
 		height: inherit;
 		align-content: center;
