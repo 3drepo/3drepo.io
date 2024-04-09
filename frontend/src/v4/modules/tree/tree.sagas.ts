@@ -387,6 +387,7 @@ function* hideTreeNodes(nodesIds = [], skipNested = false) {
 	yield waitForTreeToBeReady();
 
 	try {
+		yield put(TreeActions.deselectNodes({ nodesIds }))
 		yield put(TreeActions.setTreeNodesVisibility(nodesIds, VISIBILITY_STATES.INVISIBLE, skipNested, skipNested));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('hide', 'nodes', error));
