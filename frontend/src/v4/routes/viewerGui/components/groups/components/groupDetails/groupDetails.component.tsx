@@ -143,7 +143,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 	));
 
 	public componentDidMount() {
-		this.setState({ isFormDirty: this.isNewGroup, isFormValid: this.isNewGroup && !!this.objectsCount });
+		this.setState({ isFormDirty: this.isNewGroup, isFormValid: this.isNewGroup && !!this.props.objectsCount });
 	}
 
 	public componentDidUpdate(prevProps: Readonly<PropsWithChildren<IProps>>) {
@@ -160,13 +160,13 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 
 			// if it is a smart group, we ignore the manual selection because it depends on the rules
 			const selectionChanged = !this.isSmartGroup &&
-				!hasSameSharedIds(this.props.selectedNodes, this.editingGroup.objects);
+				!hasSameSharedIds(this.props.selectedNodes, this.editingGroup.objects)
 
 			this.setIsFormDirty(wasUpdated || selectionChanged || rulesChanged);
 		}
 
 		// if it is a smart group, we ignore the manual selection because it depends on the rules
-		const groupHasValidSelection = this.isSmartGroup || this.props.selectedNodes.length > 0;
+		const groupHasValidSelection = this.isSmartGroup || this.objectsCount > 0;
 		this.setIsFormValid(GroupSchema.isValidSync(this.editingGroup) && groupHasValidSelection);
 	}
 
