@@ -225,7 +225,7 @@ DBHandler.bulkWrite = async (database, colName, instructions) => {
 	await collection.bulkWrite(instructions);
 };
 
-DBHandler.findOneAndUpdate = async (database, colName, query, action, options) => {
+DBHandler.findOneAndUpdate = async (database, colName, query, action, options = {}) => {
 	const collection = await getCollection(database, colName);
 	const { value } = await collection.findOneAndUpdate(query, action, deleteIfUndefined(options));
 	return value;
