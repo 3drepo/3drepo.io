@@ -282,7 +282,7 @@ function* getSelectedNodes() {
 		const objectsStatus = yield Viewer.getObjectsStatus();
 
 		if (objectsStatus && objectsStatus.highlightedNodes) {
-			yield put(TreeActions.getSelectedNodesSuccess(objectsStatus.highlightedNodes));
+			yield put(TreeActions.setSelectedNodesSuccess(objectsStatus.highlightedNodes));
 		}
 	} catch (error) {
 		console.error(error);

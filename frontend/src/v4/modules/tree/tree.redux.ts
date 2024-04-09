@@ -24,7 +24,7 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	stopListenOnSelections: [],
 	clearSelectedNodes: [],
 	getSelectedNodes: [],
-	getSelectedNodesSuccess: ['selectedNodes'],
+	setSelectedNodesSuccess: ['selectedNodes'],
 	showAllNodes: [],
 	hideSelectedNodes: [],
 	isolateSelectedNodes: ['nodeId'],
@@ -97,7 +97,7 @@ const clearSelectedNodes = (state = INITIAL_STATE, {}) => {
 	return { ...state, selectedNodes: [] };
 };
 
-const getSelectedNodesSuccess = (state = INITIAL_STATE, { selectedNodes }) => {
+const setSelectedNodesSuccess = (state = INITIAL_STATE, { selectedNodes }) => {
 	return { ...state, selectedNodes };
 };
 
@@ -149,7 +149,7 @@ const setIsTreeProcessed = (state = INITIAL_STATE, { isTreeProcessed }) => {
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[TreeTypes.CLEAR_SELECTED_NODES]: clearSelectedNodes,
-	[TreeTypes.GET_SELECTED_NODES_SUCCESS]: getSelectedNodesSuccess,
+	[TreeTypes.SET_SELECTED_NODES_SUCCESS]: setSelectedNodesSuccess,
 	[TreeTypes.SET_COMPONENT_STATE]: setComponentState,
 	[TreeTypes.SET_IS_PENDING]: setIsPending,
 	[TreeTypes.RESET_COMPONENT_STATE]: resetComponentState,
