@@ -53,7 +53,7 @@ const testAddTicketsWithTemplate = () => {
 			const number = generateRandomNumber();
 
 			const fn = jest.spyOn(db, 'insertMany');
-			const getLastNumber = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ number: number - 1 });
+			const getLastNumber = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValueOnce({ seq: number - 1 });
 
 			const res = await Ticket.addTicketsWithTemplate(teamspace, project, model, templateType, tickets);
 
@@ -79,7 +79,7 @@ const testAddTicketsWithTemplate = () => {
 			const data = { [generateRandomString()]: generateRandomString(), type: templateType };
 
 			const fn = jest.spyOn(db, 'insertMany').mockResolvedValueOnce(data);
-			const getLastNumber = jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
+			const getLastNumber = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValueOnce(undefined);
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
