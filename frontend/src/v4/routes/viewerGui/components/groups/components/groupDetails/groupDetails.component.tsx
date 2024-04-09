@@ -57,7 +57,7 @@ interface IProps {
 	isPending: boolean;
 	deleteGroup: (id: string | null) => void;
 	isReadOnly: boolean;
-	getObjectsCount: (meshesIds: any[]) => number;
+	objectsCount: number;
 }
 
 interface IState {
@@ -86,14 +86,6 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 
 	get editingGroup() {
 		return this.props.editingGroup;
-	}
-
-	get objectsCount() {
-		if (!this.isNewGroup) {
-			return this.editingGroup.totalSavedMeshes;
-		}
-		const sharedIds = (this.props.selectedNodes || []).flatMap((node) => node.shared_ids);
-		return this.props.getObjectsCount(sharedIds);
 	}
 
 	get isFormValid() {
@@ -159,14 +151,13 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 			const rulesChanged = this.isSmartGroup && !rulesAreEqual(this.editingGroup, this.props.originalGroup);
 
 			// if it is a smart group, we ignore the manual selection because it depends on the rules
-			const selectionChanged = !this.isSmartGroup &&
-				!hasSameSharedIds(this.props.selectedNodes, this.editingGroup.objects)
+			const selectionChanged = !this.isSmartGroup && !hasSameSharedIds(this.props.selectedNodes, this.editingGroup.objects);
 
 			this.setIsFormDirty(wasUpdated || selectionChanged || rulesChanged);
 		}
 
 		// if it is a smart group, we ignore the manual selection because it depends on the rules
-		const groupHasValidSelection = this.isSmartGroup || this.objectsCount > 0;
+		const groupHasValidSelection = this.isSmartGroup || this.props.objectsCount > 0;
 		this.setIsFormValid(GroupSchema.isValidSync(this.editingGroup) && groupHasValidSelection);
 	}
 
@@ -197,7 +188,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 			totalMeshes={this.props.totalMeshes}
 			canUpdate={this.props.canUpdate}
 			handleChange={this.handleFieldChange}
-			objectsCount={this.objectsCount}
+			objectsCount={this.props.objectsCount}
 		/>
 	)
 

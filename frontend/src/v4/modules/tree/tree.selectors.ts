@@ -296,6 +296,16 @@ export const selectGetNumNodesByMeshSharedIdsArray = (meshes = []) => createSele
 		return foundNodes.size;
 	}
 );
+
+export const selectNumOfVisibleSelectedNodes = createSelector(
+	selectTreeDomain,
+	selectSelectedNodes,
+	(state, meshes) => {
+		const meshesIds = (meshes || []).flatMap((node) => node.shared_ids);
+		return selectGetNumNodesByMeshSharedIdsArray(meshesIds)(state);
+	}
+);
+
 type MyObject = {
 	shared_ids: string[]
 }

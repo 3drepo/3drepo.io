@@ -115,7 +115,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	const getFormIsValid = () => {
 		if (!isValid) return false;
 		if (isSmart) return isDirty;
-		if (!selectedNodes.length) return false;
+		if (!objectsCount) return false;
 		const objectsAreDifferent = !isEqual(
 			sortBy(selectedNodes),
 			inputObjects,
