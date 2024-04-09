@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { createFilterOptions } from '@mui/material';
@@ -34,12 +34,12 @@ import { NewDestinationInUse } from '@components/shared/uploadFiles/uploadList/u
 import { ExistingDestination } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/options/existingDestination/existingDestination.component';
 
 const NO_OPTIONS_TEXT_ADMIN = formatMessage({
-	id: 'uploads.destination.noOptions.admin',
+	id: 'drawing.uploads.destination.noOptions.admin',
 	defaultMessage: 'Start typing to create a new Drawing.',
 });
 
 const NO_OPTIONS_TEXT_NON_ADMIN = formatMessage({
-	id: 'uploads.destination.noOptions.nonAdmin',
+	id: 'drawing.uploads.destination.noOptions.nonAdmin',
 	defaultMessage: 'There are no Drawings to upload to.',
 });
 
@@ -85,18 +85,18 @@ export const UploadListItemDestination = memo(({
 	const [newDrawingsInModal, setNewDrawingsInModal] = useState([]);
 	const [drawingsNamesInModal, setDrawingNamesInModal] = useState([]);
 
-
 	const takenDrawingNames = [
 		...drawingsNamesInModal,
 		...processingDrawingsNames,
 	];
+
+	const [currentDrawingId, currentDrawingName] = getValues([`${revisionPrefix}.drawingId`, `${revisionPrefix}.drawingName`]);
 
 	const handleInputChange = (_, newValue: string) => {
 		const trimmedValue = newValue?.trim();
 		try {
 			drawingNameScheme.validateSync(
 				trimmedValue,
-				// here was the fed names
 				{ context: { alreadyExistingNames: [] } },
 			);
 			setError('');
@@ -139,8 +139,8 @@ export const UploadListItemDestination = memo(({
 
 			if (isProjectAdmin) {
 				const message = formatMessage({
-					id: 'uploads.destination.addNewDestination',
-					defaultMessage: 'Add <Bold>{name}</Bold> as a new container',
+					id: 'drawing.uploads.destination.addNewDestination',
+					defaultMessage: 'Add <Bold>{name}</Bold> as a new drawing',
 				}, { Bold: (val: string) => <b>{val}</b>, name: option.name });
 				return (<NewDestination message={message} {...optionProps} />);
 			}
@@ -150,7 +150,7 @@ export const UploadListItemDestination = memo(({
 		if (option._id) {
 			if (option._id === NEW_ID) {
 				const message = formatMessage({
-					id: 'uploads.destination.newDrawing',
+					id: 'drawing.uploads.destination.newDrawing',
 					defaultMessage: ' <Bold>{name}</Bold> is a new drawing',
 				}, { Bold: (val: string) => <b>{val}</b>, name: option.name });
 				return (<NewDestinationInUse message={message} {...optionProps} />);
@@ -160,7 +160,7 @@ export const UploadListItemDestination = memo(({
 				<ExistingDestination
 					key={option.name}
 					drawing={option}
-					inUse={(nameIsTaken(option))}
+					inUse={nameIsTaken(option)}
 					name={option.name}
 					latestRevision={option.latestRevision}
 					hasRevisions={!!option.revisionsCount}
@@ -175,10 +175,6 @@ export const UploadListItemDestination = memo(({
 	const onDestinationChange = (e, newVal: IDrawing | null) => {
 		setValue(`${revisionPrefix}.drawingName`, newVal?.name?.trim() || '');
 		setValue(`${revisionPrefix}.drawingId`, newVal?._id || '', { shouldValidate: true });
-
-		if (!newVal?._id) {
-			onSelectNewDestination();
-		}
 	};
 
 	const onOpen = () => {
@@ -201,6 +197,12 @@ export const UploadListItemDestination = memo(({
 				.map(({ name }) => name),
 		);
 	};
+
+	useEffect(() => {
+		if (currentDrawingName && !currentDrawingId) {
+			onSelectNewDestination();
+		}
+	}, [currentDrawingName]);
 
 	return (
 		<DestinationAutocomplete

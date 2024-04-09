@@ -15,16 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { UploadItemFields } from '@/v5/store/drawings/drawingRevisions/drawingRevisions.types';
+import { UploadItemFields } from '@/v5/store/drawings/revisions/drawingRevisions.types';
 import { useContext } from 'react';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { UploadFilesContext } from '@components/shared/uploadFiles/uploadFilesContext';
-import { DashboardListHeader, DashboardListHeaderLabel as Label } from '@components/dashboard/dashboardList';
+import { DashboardListHeader } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
 import { UploadListItem } from './uploadListItem/uploadListItem.component';
-import { ListContainer } from './uploadList.styles';
-import { UploadListItemRowWrapper } from './uploadListItem/uploadListItem.styles';
+import { ListContainer } from '@components/shared/uploadFiles/uploadList/uploadList.styles';
+import { UploadListItemRowWrapper, Label } from './uploadList.styles';
 
 type IUploadList = {
 	values: UploadItemFields[];
@@ -53,20 +53,20 @@ export const UploadList = ({
 	return (
 		<>
 			<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
-				<Label name="filename" minWidth={122} sort>
+				<Label name="file.name" minWidth={122} sort>
 					<FormattedMessage id="drawing.uploads.list.header.filename" defaultMessage="Filename" />
 				</Label>
-				<Label name="destination" width={352}>
+				<Label width={352} required>
 					<FormattedMessage id="drawing.uploads.list.header.destination" defaultMessage="Drawing Destination" />
 				</Label>
-				<Label name="statusCode" width={352}>
+				<Label width={160}>
 					<FormattedMessage id="drawing.uploads.list.header.statusCode" defaultMessage="Status Code" />
 				</Label>
-				<Label name="revisionCode" width={isUploading ? 359 : 399}>
-					<FormattedMessage id="drawing.uploads.list.header.revisionName" defaultMessage="Revision Code" />*
+				<Label width={isUploading ? 160 : 209} required>
+					<FormattedMessage id="drawing.uploads.list.header.revisionName" defaultMessage="Revision Code" />
 				</Label>
-				<Label name="description" width={297} hidden={!isUploading}>
-					<FormattedMessage id="drawing.uploads.list.header.description" defaultMessage="Description" />
+				<Label width={297} hidden={!isUploading}>
+					<FormattedMessage id="drawing.uploads.list.header.progress" defaultMessage="Upload Progress" />
 				</Label>
 			</DashboardListHeader>
 			<ListContainer>

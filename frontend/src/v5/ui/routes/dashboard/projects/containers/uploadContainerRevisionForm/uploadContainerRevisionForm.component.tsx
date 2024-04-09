@@ -23,7 +23,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { formatMessage } from '@/v5/services/intl';
 import { ContainerRevisionsActionsDispatchers, FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { IContainer } from '@/v5/store/containers/containers.types';
-import { UploadFieldArray } from '@/v5/store/containers/containerRevisions/containerRevisions.types';
+import { UploadItemFields } from '@/v5/store/containers/revisions/containerRevisions.types';
 import { UploadsSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
 import {
 	TeamspacesHooksSelectors,
@@ -33,7 +33,7 @@ import {
 } from '@/v5/services/selectorsHooks';
 import { getSupportedFileExtensions } from '@controls/fileUploader/uploadFile';
 import { UploadFiles } from '@components/shared/uploadFiles/uploadFiles.component';
-import { UploadFilesContextComponent } from '@components/shared/uploadFiles/uploadFilesContext';
+import { UploadFieldArray, UploadFilesContextComponent } from '@components/shared/uploadFiles/uploadFilesContext';
 import { extensionIsSpm } from './extensions.helpers';
 import { UploadList } from './uploadList/uploadList.component';
 import { SidebarForm } from './sidebarForm/sidebarForm.component';
@@ -43,30 +43,31 @@ type UploadModalLabelTypes = {
 	isUploading: boolean;
 	fileCount: number;
 };
+type FormType = UploadFieldArray<UploadItemFields>;
 
 const uploadModalLabels = ({ isUploading, fileCount }: UploadModalLabelTypes) => (isUploading
 	? {
 		title: formatMessage({
-			id: 'uploads.modal.title.uploading',
+			id: 'container.uploads.modal.title.uploading',
 			defaultMessage: '{fileCount, plural, one {Uploading file} other {Uploading files}}',
 		}, { fileCount }),
 		subtitle: formatMessage({
-			id: 'uploads.modal.subtitle.uploading',
+			id: 'container.uploads.modal.subtitle.uploading',
 			defaultMessage: '{fileCount, plural, one {Do not close this window until the upload is complete} other {Do not close this window until uploads are complete}}',
 		}, { fileCount }),
-		confirmLabel: formatMessage({ id: 'uploads.modal.buttonText.uploading', defaultMessage: 'Finished' }),
+		confirmLabel: formatMessage({ id: 'container.uploads.modal.buttonText.uploading', defaultMessage: 'Finished' }),
 	}
 	: {
 		title: formatMessage({
-			id: 'uploads.modal.title.preparing',
+			id: 'container.uploads.modal.title.preparing',
 			defaultMessage: '{fileCount, plural, =0 {Add files for upload} one {Prepare file for upload} other {Prepare files for upload}}',
 		}, { fileCount }),
 		subtitle: formatMessage({
-			id: 'uploads.modal.title.preparing',
+			id: 'container.uploads.modal.title.preparing',
 			defaultMessage: '{fileCount, plural, =0 {Drag and drop or browse your computer} other {Select a file to add Container/Revision details}}',
 		}, { fileCount }),
 		confirmLabel: formatMessage({
-			id: 'uploads.modal.buttonText.preparing',
+			id: 'container.uploads.modal.buttonText.preparing',
 			defaultMessage: '{fileCount, plural, one {Upload file} other {Upload files}}',
 		}, { fileCount }),
 	});
@@ -91,7 +92,7 @@ export const UploadContainerRevisionForm = ({
 
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 
-	const formData = useForm<UploadFieldArray>({
+	const formData = useForm<FormType>({
 		mode: 'onChange',
 		resolver: !isUploading ? yupResolver(UploadsSchema) : undefined,
 		context: { alreadyExistingNames: [], teamspace, project },
@@ -142,7 +143,7 @@ export const UploadContainerRevisionForm = ({
 		remove(fields.findIndex((field) => field.uploadId === uploadId));
 	}, [fields.length]);
 
-	const onSubmit = useCallback(handleSubmit(async ({ uploads }: UploadFieldArray) => {
+	const onSubmit = useCallback(handleSubmit(async ({ uploads }: FormType) => {
 		if (isUploading) {
 			setIsUploading(false);
 			onClickClose();
@@ -156,7 +157,7 @@ export const UploadContainerRevisionForm = ({
 	}), [fields.length]);
 
 	const supportedFilesMessage = formatMessage({
-		id: 'containerRevision.uploads.dropzone.message',
+		id: 'container.uploads.dropzone.message',
 		defaultMessage: 'Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>',
 	}, {
 		MoreLink: (child: string) => (

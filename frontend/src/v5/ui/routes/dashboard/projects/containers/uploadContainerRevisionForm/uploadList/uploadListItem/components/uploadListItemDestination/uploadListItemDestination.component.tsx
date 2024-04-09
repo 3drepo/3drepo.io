@@ -33,12 +33,12 @@ import { NewDestinationInUse } from '@components/shared/uploadFiles/uploadList/u
 import { ExistingDestination } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/options/existingDestination/existingDestination.component';
 
 const NO_OPTIONS_TEXT_ADMIN = formatMessage({
-	id: 'uploads.destination.noOptions.admin',
+	id: 'container.uploads.destination.noOptions.admin',
 	defaultMessage: 'Start typing to create a new Container.',
 });
 
 const NO_OPTIONS_TEXT_NON_ADMIN = formatMessage({
-	id: 'uploads.destination.noOptions.nonAdmin',
+	id: 'container.uploads.destination.noOptions.nonAdmin',
 	defaultMessage: 'There are no Containers to upload to.',
 });
 
@@ -131,7 +131,7 @@ export const UploadListItemDestination = memo(({
 
 			if (isProjectAdmin) {
 				const message = formatMessage({
-					id: 'uploads.destination.addNewContainer',
+					id: 'container.uploads.destination.addNewContainer',
 					defaultMessage: 'Add <Bold>{name}</Bold> as a new container',
 				}, {
 					Bold: (val: string) => <b>{val}</b>,
@@ -145,7 +145,7 @@ export const UploadListItemDestination = memo(({
 		if (option._id) {
 			if (option._id === NEW_ID) {
 				const message = formatMessage({
-					id: 'uploads.destination.newContainer',
+					id: 'container.uploads.destination.newContainer',
 					defaultMessage: '<Bold>{name}</Bold> is a new container',
 				}, {
 					Bold: (val: string) => <b>{val}</b>,

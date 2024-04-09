@@ -37,6 +37,7 @@ export const StatusText = styled(Typography).attrs({
 	display: inline-flex;
 	color: ${({ uploadstatus }) => getProgressBarColor(uploadstatus)};
 	align-items: center;
+	text-align: right;
 
 	@media (max-width: ${Display.Tablet}px) {
 		display: none;

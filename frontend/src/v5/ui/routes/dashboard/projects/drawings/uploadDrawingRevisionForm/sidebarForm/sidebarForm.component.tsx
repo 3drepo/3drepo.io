@@ -43,14 +43,14 @@ export const SidebarForm = () => {
 			<FlexContainer>
 				<FormTextField
 					name={`${revisionPrefix}.drawingNumber`}
-					label={formatMessage({ id: 'uploads.sidebar.drawing.drawingNumber', defaultMessage: 'Drawing Number' })}
+					label={formatMessage({ id: 'drawing.uploads.sidebar.drawing.drawingNumber', defaultMessage: 'Drawing Number' })}
 					formError={getError('drawingNumber')}
 					disabled={disableDrawingFields}
 					required
 				/>
 				<FormSelect
 					name={`${revisionPrefix}.drawingCategory`}
-					label={formatMessage({ id: 'uploads.sidebar.drawing.category', defaultMessage: 'Category' })}
+					label={formatMessage({ id: 'drawing.uploads.sidebar.drawing.category', defaultMessage: 'Category' })}
 					formError={getError('drawingCategory')}
 					disabled={disableDrawingFields}
 					required
@@ -61,17 +61,17 @@ export const SidebarForm = () => {
 				</FormSelect>
 				<FormTextField
 					name={`${revisionPrefix}.drawingDesc`}
-					label={formatMessage({ id: 'uploads.sidebar.drawing.description', defaultMessage: 'Description' })}
+					label={formatMessage({ id: 'drawing.uploads.sidebar.drawing.description', defaultMessage: 'Description' })}
 					formError={getError('drawingDesc')}
 					disabled={disableDrawingFields}
 				/>
 			</FlexContainer>
 			<Heading>
-				<FormattedMessage id="uploads.sidebar.drawingRevisionDetails" defaultMessage="Revision details" />
+				<FormattedMessage id="drawing.uploads.sidebar.drawingRevisionDetails" defaultMessage="Revision details" />
 			</Heading>
 			<FormTextField
 				name={`${revisionPrefix}.revisionDesc`}
-				label={formatMessage({ id: 'uploads.sidebar.revisionDesc', defaultMessage: 'Revision Description' })}
+				label={formatMessage({ id: 'drawing.uploads.sidebar.revisionDesc', defaultMessage: 'Revision Description' })}
 				formError={getError('revisionDesc')}
 			/>
 		</>

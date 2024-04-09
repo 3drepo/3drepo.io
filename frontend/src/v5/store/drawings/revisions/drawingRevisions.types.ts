@@ -34,20 +34,6 @@ export interface IDrawingRevisionUploadStatus {
 	progress: number;
 }
 
-export type FetchDrawingRevisionsPayload = {
-	teamspace: string;
-	projectId: string;
-	drawingId: string;
-};
-
-export type DrawingRevisionVoidStatusPayload = {
-	teamspace?: string;
-	projectId: string;
-	drawingId: string;
-	revisionId: string;
-	isVoid: boolean;
-};
-
 export type CreateDrawingRevisionBody = {
 	name: string;
 	description?: string;
@@ -78,8 +64,4 @@ export type UploadItemFields = CreateDrawingRevisionBody & {
 	uploadId: string;
 	progress: number;
 	extension: string;
-};
-
-export type UploadFieldArray = {
-	uploads: UploadItemFields[];
 };

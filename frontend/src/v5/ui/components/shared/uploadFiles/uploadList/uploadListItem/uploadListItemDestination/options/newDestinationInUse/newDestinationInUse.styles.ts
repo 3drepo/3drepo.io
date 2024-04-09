@@ -17,8 +17,7 @@
 
 import styled from 'styled-components';
 
-
-export const NewContainerOption = styled.div`
+export const NewDestinationOption = styled.div`
 	&& {
 		display: flex;
 		color: ${({ theme }) => theme.palette.primary.dark};
@@ -27,7 +26,6 @@ export const NewContainerOption = styled.div`
 		padding: 12px;
 	}
 `;
-
 
 export const Message = styled.div`
 	width: calc(100% - 30px);

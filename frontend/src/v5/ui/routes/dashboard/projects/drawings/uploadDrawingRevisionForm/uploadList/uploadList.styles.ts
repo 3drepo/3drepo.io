@@ -15,13 +15,54 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+import { Container as ItemRowContainer } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemRow/dashboardListItemRow.styles';
+import { DashboardListHeaderLabel, DashboardListItem } from '@components/dashboard/dashboardList';
+import { RevisionCodeField } from './uploadListItem/components/uploadListItemCode/uploadListItemCode.styles';
+import { DestinationAutocomplete } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/uploadListItemDestination.styles';
 
-export const ListContainer = styled.ul`
-	padding: 0;
-	margin: 0 0 20px;
-	display: flex;
-	flex-direction: column;
-	border-radius: 10px;
-	overflow: hidden;
+export const Label = styled(DashboardListHeaderLabel)<{ required?: boolean }>`
+	${({ required, theme }) => required && css`
+		&::after {
+			content: '*';
+			color: ${theme.palette.error.main};
+		}
+	`}
+`;
+
+export const UploadListItemRowWrapper = styled(DashboardListItem)<{ selected: boolean; order: number }>`
+	${({ order }) => css`order: ${order}`};
+
+	${ItemRowContainer} {
+		padding: 8px 15px 8px 5px;
+		height: auto;
+		cursor: default;
+		overflow: hidden;
+
+		${DestinationAutocomplete} {
+			width: 340px;
+			height: 35px;
+		}
+
+		${RevisionCodeField} {
+			width: 146px;
+			height: 35px;
+
+			&:not(:last-of-type) {
+				margin-right: 0;
+			}
+
+			${({ selected, theme }) => selected && css`
+				>.MuiOutlinedInput-root:not(.Mui-error) {
+					background-color: ${theme.palette.secondary.light};
+					input {
+						color: ${theme.palette.primary.contrast};
+					}
+					&:not(.Mui-focused) fieldset {
+						border: unset;
+					}
+				}
+			`}
+		}
+	}
 `;

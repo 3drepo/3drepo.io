@@ -17,7 +17,7 @@
 
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { useFormContext, useFormState } from 'react-hook-form';
-import { RevisionCodeField } from './uploadListItemRevisionCode.styles';
+import { RevisionCodeField } from './uploadListItemCode.styles';
 import { get } from 'lodash';
 
 type IUploadListItemCode = {

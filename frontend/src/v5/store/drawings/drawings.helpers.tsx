@@ -92,7 +92,7 @@ export const prepareSingleDrawingData = (
 	category: stats?.category ?? '',
 	drawingNumber: stats?.drawingNumber ?? '',
 	calibration: stats?.calibration ?? CalibrationStates.UNCALIBRATED,
-	status: stats?.status ?? '',
+	status: stats?.status ?? DrawingUploadStatus.OK,
 	hasStatsPending: !stats,
 	errorReason: stats?.errorReason && {
 		message: stats.errorReason.message,

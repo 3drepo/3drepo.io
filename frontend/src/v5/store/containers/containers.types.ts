@@ -103,17 +103,20 @@ export const CONTAINER_UNITS = [
 	},
 ];
 
-export interface IContainer {
-	_id: string;
-	name: string;
+export interface MinimumContainer {
+	_id: string,
+	name: string,
+	role: Role,
+	isFavourite: boolean
+}
+
+export interface IContainer extends MinimumContainer {
 	latestRevision: string;
 	revisionsCount?: number;
 	lastUpdated: Date;
 	type: string;
 	code: string;
 	status: UploadStatus;
-	isFavourite: boolean;
-	role: Role;
 	hasStatsPending: boolean;
 	errorReason?: {
 		message: string;
@@ -125,13 +128,6 @@ export interface IContainer {
 	angleFromNorth?: number;
 	defaultView?: string;
 	unit?: string;
-}
-
-export interface MinimumContainer {
-	_id: string,
-	name: string,
-	role: Role,
-	isFavourite: boolean
 }
 
 export type NewContainer = {

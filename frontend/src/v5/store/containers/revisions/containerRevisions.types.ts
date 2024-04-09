@@ -64,20 +64,6 @@ export interface IUploadStatus {
 	progress: number;
 }
 
-export type FetchContainerRevisionsPayload = {
-	teamspace: string;
-	projectId: string;
-	containerId: string;
-};
-
-export type ContainerRevisionVoidStatusPayload = {
-	teamspace?: string;
-	projectId: string;
-	containerId: string;
-	revisionId: string;
-	isVoid: boolean;
-};
-
 export type CreateContainerRevisionBody = {
 	revisionTag: string;
 	revisionDesc?: string;
@@ -119,9 +105,5 @@ export type UploadItemFields = CreateContainerRevisionBody & {
 	uploadId: string;
 	progress: number;
 	extension: string;
-};
-
-export type UploadFieldArray = {
-	uploads: UploadItemFields[];
 };
 

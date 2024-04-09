@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { UploadItemFields } from '@/v5/store/containers/containerRevisions/containerRevisions.types';
+import { UploadItemFields } from '@/v5/store/containers/revisions/containerRevisions.types';
 import { useContext } from 'react';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
@@ -23,8 +23,8 @@ import { UploadFilesContext } from '@components/shared/uploadFiles/uploadFilesCo
 import { DashboardListHeader, DashboardListHeaderLabel as Label } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
 import { UploadListItem } from './uploadListItem/uploadListItem.component';
-import { ListContainer } from './uploadList.styles';
-import { UploadListItemRowWrapper } from './uploadListItem/uploadListItem.styles';
+import { ListContainer } from '@components/shared/uploadFiles/uploadList/uploadList.styles';
+import { UploadListItemRowWrapper } from './uploadList.styles';
 
 type IUploadList = {
 	values: UploadItemFields[];
@@ -54,16 +54,16 @@ export const UploadList = ({
 		<>
 			<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
 				<Label name="file.name" minWidth={122} sort>
-					<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
+					<FormattedMessage id="container.uploads.list.header.filename" defaultMessage="Filename" />
 				</Label>
 				<Label width={352}>
-					<FormattedMessage id="uploads.list.header.destination" defaultMessage="Destination" />
+					<FormattedMessage id="container.uploads.list.header.destination" defaultMessage="Destination" />
 				</Label>
 				<Label width={isUploading ? 359 : 399}>
-					<FormattedMessage id="uploads.list.header.revisionName" defaultMessage="Revision Name" />
+					<FormattedMessage id="container.uploads.list.header.revisionName" defaultMessage="Revision Name" />
 				</Label>
 				<Label width={297} hidden={!isUploading}>
-					<FormattedMessage id="uploads.list.header.progress" defaultMessage="Upload Progress" />
+					<FormattedMessage id="container.uploads.list.header.progress" defaultMessage="Upload Progress" />
 				</Label>
 			</DashboardListHeader>
 			<ListContainer>

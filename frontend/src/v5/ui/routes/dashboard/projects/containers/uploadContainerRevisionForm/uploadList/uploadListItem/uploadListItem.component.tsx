@@ -22,11 +22,11 @@ import { InputController } from '@controls/inputs/inputController.component';
 import { DashboardListItemRow as UploadListItemRow } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { UploadListItemDestination } from './components/uploadListItemDestination/uploadListItemDestination.component';
 import { UploadListItemRevisionTag } from './components/uploadListItemRevisionTag/uploadListItemRevisionTag.component';
-import { UploadListItemButton } from './uploadListItem.styles';
+import { UploadListItemButton } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItem.styles';
 import { useFormContext } from 'react-hook-form';
 import { useEffect } from 'react';
 import { IContainer, UploadStatus } from '@/v5/store/containers/containers.types';
-import { UploadItemFields } from '@/v5/store/containers/containerRevisions/containerRevisions.types';
+import { UploadItemFields } from '@/v5/store/containers/revisions/containerRevisions.types';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { UploadListItemFileIcon } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemTitle } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemTitle/uploadListItemTitle.component';
@@ -35,11 +35,11 @@ import { formatMessage } from '@/v5/services/intl';
 
 const UNEXPETED_STATUS_ERROR = undefined;
 const STATUS_TEXT_BY_UPLOAD = {
-	[UNEXPETED_STATUS_ERROR]: formatMessage({ id: 'uploads.progress.status.unexpectedError', defaultMessage: 'Unexpected error' }),
-	[UploadStatus.FAILED]: formatMessage({ id: 'uploads.progress.status.failed', defaultMessage: 'Upload failed' }),
-	[UploadStatus.UPLOADED]: formatMessage({ id: 'uploads.progress.status.uploaded', defaultMessage: 'Upload complete' }),
-	[UploadStatus.UPLOADING]: formatMessage({ id: 'uploads.progress.status.uploading', defaultMessage: 'Uploading' }),
-	[UploadStatus.QUEUED]: formatMessage({ id: 'uploads.progress.status.queued', defaultMessage: 'Waiting to upload' }),
+	[UNEXPETED_STATUS_ERROR]: formatMessage({ id: 'container.uploads.progress.status.unexpectedError', defaultMessage: 'Unexpected error' }),
+	[UploadStatus.FAILED]: formatMessage({ id: 'container.uploads.progress.status.failed', defaultMessage: 'Upload failed' }),
+	[UploadStatus.UPLOADED]: formatMessage({ id: 'container.uploads.progress.status.uploaded', defaultMessage: 'Upload complete' }),
+	[UploadStatus.UPLOADING]: formatMessage({ id: 'container.uploads.progress.status.uploading', defaultMessage: 'Uploading' }),
+	[UploadStatus.QUEUED]: formatMessage({ id: 'container.uploads.progress.status.queued', defaultMessage: 'Waiting to upload' }),
 };
 
 const getUploadStatus = (progress, errorMessage) => {

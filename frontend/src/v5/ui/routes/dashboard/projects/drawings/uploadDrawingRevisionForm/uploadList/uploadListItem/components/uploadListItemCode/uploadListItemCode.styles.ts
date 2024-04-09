@@ -20,6 +20,7 @@ import { TextField } from '../../../inputs';
 
 export const RevisionCodeField = styled(TextField)`
 	margin: 0 12px;
+	width: 100px;
 
 	.MuiFormHelperText-root {
 		display: none;

@@ -30,41 +30,43 @@ import {
 } from '@/v5/services/selectorsHooks';
 import { getSupportedDrawingRevisionsFileExtensions } from '@controls/fileUploader/uploadFile';
 import { UploadFiles } from '@components/shared/uploadFiles/uploadFiles.component';
-import { UploadFilesContextComponent } from '@components/shared/uploadFiles/uploadFilesContext';
+import { UploadFieldArray, UploadFilesContextComponent } from '@components/shared/uploadFiles/uploadFilesContext';
 import { SidebarForm } from './sidebarForm/sidebarForm.component';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingRevisionsActionDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { UploadList } from './uploadList/uploadList.component';
 import { parseFileName, reduceFileData, isPdf, getPdfFirstPage, fileToPdf, pdfToFile } from '@components/shared/uploadFiles/uploadFiles.helpers';
+import { UploadItemFields } from '@/v5/store/drawings/revisions/drawingRevisions.types';
 
 type UploadModalLabelTypes = {
 	isUploading: boolean;
 	fileCount: number;
 };
+type FormType = UploadFieldArray<UploadItemFields>;
 
 const uploadModalLabels = ({ isUploading, fileCount }: UploadModalLabelTypes) => (isUploading
 	? {
 		title: formatMessage({
-			id: 'uploads.modal.title.uploading',
+			id: 'drawing.uploads.modal.title.uploading',
 			defaultMessage: '{fileCount, plural, one {Uploading file} other {Uploading files}}',
 		}, { fileCount }),
 		subtitle: formatMessage({
-			id: 'uploads.modal.subtitle.uploading',
+			id: 'drawing.uploads.modal.subtitle.uploading',
 			defaultMessage: '{fileCount, plural, one {Do not close this window until the upload is complete} other {Do not close this window until uploads are complete}}',
 		}, { fileCount }),
-		confirmLabel: formatMessage({ id: 'uploads.modal.buttonText.uploading', defaultMessage: 'Finished' }),
+		confirmLabel: formatMessage({ id: 'drawing.uploads.modal.buttonText.uploading', defaultMessage: 'Finished' }),
 	}
 	: {
 		title: formatMessage({
-			id: 'uploads.modal.title.preparing',
+			id: 'drawing.uploads.modal.title.preparing',
 			defaultMessage: '{fileCount, plural, =0 {Add files for upload} one {Prepare file for upload} other {Prepare files for upload}}',
 		}, { fileCount }),
 		subtitle: formatMessage({
-			id: 'uploads.modal.title.preparing',
+			id: 'drawing.uploads.modal.title.preparing',
 			defaultMessage: '{fileCount, plural, =0 {Drag and drop or browse your computer} other {Select a file to add Drawing/Revision details}}',
 		}, { fileCount }),
 		confirmLabel: formatMessage({
-			id: 'uploads.modal.buttonText.preparing',
+			id: 'drawing.uploads.modal.buttonText.preparing',
 			defaultMessage: '{fileCount, plural, one {Upload file} other {Upload files}}',
 		}, { fileCount }),
 	});
@@ -89,7 +91,7 @@ export const UploadDrawingRevisionForm = ({
 
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 
-	const formData = useForm<{ uploads: any[] }>({
+	const formData = useForm<FormType>({
 		mode: 'onChange',
 		resolver: !isUploading ? yupResolver(UploadsSchema) : undefined,
 		context: {
@@ -120,25 +122,23 @@ export const UploadDrawingRevisionForm = ({
 		const filesToAppend = [];
 		for (let fileAsGeneric of files) {
 			const fileName = fileAsGeneric.name;
-			let file: File = fileAsGeneric;
-			if (isPdf(file)) {
+			const fileData = {
+				file: fileAsGeneric,
+				isMultiPagePdf: false,
+			};
+			if (isPdf(fileAsGeneric)) {
 				try {
 					const fileAsPdf = await fileToPdf(fileAsGeneric);
 					const pageCount = fileAsPdf.getPageCount();
 					if (pageCount > 1) {
-						// TODO - communicate 2+ pages PDFs only retain first one
-						alert(`${fileName} has ${pageCount} pages, only the first one will be kept`);
+						fileData.isMultiPagePdf = true;
 						const pdfSinglePage = await getPdfFirstPage(fileAsPdf);
-						file = await pdfToFile(pdfSinglePage, fileName);
+						fileData.file = await pdfToFile(pdfSinglePage, fileName);
 					}
-				} catch (e) {
-					// TODO - communicate error parsing PDF file
-					alert(`Error: ${fileName} was processed as a PDF, but it seems corrupted. It will be skipped`);
-					continue;
-				}
+				} catch (e) { /** let backend catch corrupted PDFs */}
 			}
 			filesToAppend.push({
-				file,
+				...fileData,
 				progress: 0,
 				extension: fileName.split('.').slice(-1)[0].toLocaleLowerCase(),
 				revisionName: parseFileName(fileName, revisionNameMaxLength),
@@ -173,7 +173,7 @@ export const UploadDrawingRevisionForm = ({
 	}), [fields.length]);
 
 	const supportedFilesMessage = formatMessage({
-		id: 'drawingRevision.uploads.dropzone.message',
+		id: 'drawing.uploads.dropzone.message',
 		defaultMessage: 'Supported file formats: PDF and DWG{br}Note: AutoCalibration is only possible with DWG formats.',
 	}, { br: <br /> });
 

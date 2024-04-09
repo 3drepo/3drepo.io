@@ -21,8 +21,8 @@ import { DrawingsHooksSelectors, DrawingRevisionsHooksSelectors } from '@/v5/ser
 import { InputController } from '@controls/inputs/inputController.component';
 import { DashboardListItemRow as UploadListItemRow } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { UploadListItemDestination } from './components/uploadListItemDestination/uploadListItemDestination.component';
-import { UploadListItemCode } from './components/uploadListItemRevisionCode/uploadListItemRevisionCode.component';
-import { UploadListItemButton } from './uploadListItem.styles';
+import { UploadListItemCode } from './components/uploadListItemCode/uploadListItemCode.component';
+import { UploadListItemButton } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItem.styles';
 import { useFormContext } from 'react-hook-form';
 import { useEffect } from 'react';
 import { UploadListItemFileIcon } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemFileIcon/uploadListItemFileIcon.component';
@@ -35,11 +35,11 @@ import { DrawingRevisionsActionDispatchers } from '@/v5/services/actionsDispatch
 
 const UNEXPETED_STATUS_ERROR = undefined;
 const STATUS_TEXT_BY_UPLOAD = {
-	[UNEXPETED_STATUS_ERROR]: formatMessage({ id: 'uploads.progress.status.unexpectedError', defaultMessage: 'Unexpected error' }),
-	[DrawingUploadStatus.FAILED]: formatMessage({ id: 'uploads.progress.status.failed', defaultMessage: 'Upload failed' }),
-	[DrawingUploadStatus.UPLOADED]: formatMessage({ id: 'uploads.progress.status.uploaded', defaultMessage: 'Upload complete' }),
-	[DrawingUploadStatus.UPLOADING]: formatMessage({ id: 'uploads.progress.status.uploading', defaultMessage: 'Uploading' }),
-	[DrawingUploadStatus.QUEUED]: formatMessage({ id: 'uploads.progress.status.queued', defaultMessage: 'Waiting to upload' }),
+	[UNEXPETED_STATUS_ERROR]: formatMessage({ id: 'drawing.uploads.progress.status.unexpectedError', defaultMessage: 'Unexpected error' }),
+	[DrawingUploadStatus.FAILED]: formatMessage({ id: 'drawing.uploads.progress.status.failed', defaultMessage: 'Upload failed' }),
+	[DrawingUploadStatus.UPLOADED]: formatMessage({ id: 'drawing.uploads.progress.status.uploaded', defaultMessage: 'Upload complete' }),
+	[DrawingUploadStatus.UPLOADING]: formatMessage({ id: 'drawing.uploads.progress.status.uploading', defaultMessage: 'Uploading' }),
+	[DrawingUploadStatus.QUEUED]: formatMessage({ id: 'drawing.uploads.progress.status.queued', defaultMessage: 'Waiting to upload' }),
 };
 
 const getUploadStatus = (progress, errorMessage) => {
@@ -111,9 +111,10 @@ export const UploadListItem = ({
 	}, [JSON.stringify(selectedDrawing)]);
 
 	return (
-		<UploadListItemRow selected={isSelected} key={uploadId}>
+		<UploadListItemRow selected={isSelected}>
 			<UploadListItemFileIcon extension={fileData.extension} />
 			<UploadListItemTitle
+				key={`${uploadId}.title`}
 				revisionPrefix={revisionPrefix}
 				isSelected={isSelected}
 				name={fileData.name}
@@ -122,17 +123,19 @@ export const UploadListItem = ({
 			<InputController
 				Input={UploadListItemDestination}
 				name={`${revisionPrefix}.drawingName`}
-				key={drawingId}
+				key={`${uploadId}.dest`}
 				index={index}
 				revisionPrefix={revisionPrefix}
 				disabled={isUploading}
 				onSelectNewDestination={onClickEdit}
 			/>
 			<UploadListItemCode
+				key={`${uploadId}.statusCode`}
 				name={`${revisionPrefix}.statusCode`}
 				disabled={isUploading}
 			/>
 			<UploadListItemCode
+				key={`${uploadId}.revisionCode`}
 				name={`${revisionPrefix}.revisionCode`}
 				disabled={isUploading}
 			/>
