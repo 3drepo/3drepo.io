@@ -17,8 +17,17 @@
 
 import { aspectRatio } from '@/v4/helpers/aspectRatio';
 import { noop } from 'lodash';
-import { PanZoom, PanZoomOptions } from 'panzoom';
+import EventEmitter from 'eventemitter3';
+import BezierEasing from 'bezier-easing';
+import { animate } from './animate';
 
+
+const inertiaFunction = BezierEasing(0, 0.33, 0.66, 1);
+
+
+export const Events = {
+	transform: 'transform',
+};
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const panzoom = (target: HTMLElement | SVGElement, options) => {
@@ -28,12 +37,20 @@ const panzoom = (target: HTMLElement | SVGElement, options) => {
 	target.style.userSelect = 'none';
 	target.setAttribute('draggable', 'false');
 	const container = target.parentElement;
+	const emitter = new EventEmitter();
+
+	const isSVG = target.tagName.toLowerCase() === 'svg';
 
 	const speed = { x:0, y: 0 };
 	
 	const applyTransform = () => {
 		const { scale, x, y } = transform;
-		target.style.transform = `matrix(${scale}, 0, 0, ${scale}, ${x}, ${y}`;
+
+		if (isSVG) {
+			target.setAttribute('transform', `matrix(${scale} 0 0 ${scale} ${x} ${y})`);
+		} else {
+			target.style.transform = `matrix(${scale}, 0, 0, ${scale}, ${x}, ${y})`;
+		}
 	};
 
 	const zoomTo = (x: number, y: number, newScale: number) => {
@@ -54,7 +71,7 @@ const panzoom = (target: HTMLElement | SVGElement, options) => {
 	};
 
 	const smoothZoom = (x:number, y:number, scaleFactor: number) => {
-		target.style.transition = '0.25s ease-in-out';
+		// target.style.transition = '0.25s ease-in-out';
 		zoomTo(x, y, transform.scale * scaleFactor);
 	};
 
@@ -62,7 +79,7 @@ const panzoom = (target: HTMLElement | SVGElement, options) => {
 		const newScale = transform.scale * (1 + zoomStep * -Math.sign(ev.deltaY));
 		zoomTo(ev.clientX, ev.clientY, newScale);
 
-		target.style.transition = 'none';
+		// target.style.transition = 'none';
 		applyTransform();
 	};
 
@@ -86,7 +103,7 @@ const panzoom = (target: HTMLElement | SVGElement, options) => {
 		speed.x = 0;
 		speed.y = 0;
 
-		target.style.transition = 'none';
+		// target.style.transition = 'none';
 
 		applyTransform();
 		
@@ -98,19 +115,34 @@ const panzoom = (target: HTMLElement | SVGElement, options) => {
 
 		const acc = 9.8;
 
-		const t =  (((speed.x ** 2 + speed.y ** 2) **  0.5) / acc) / 10 ;
+		const t =  ((((speed.x ** 2 + speed.y ** 2) **  0.5) / acc) / 10 ) * 1000;
 
 		if (t) {
 			const acc2 =  acc * 2;
-	
-			transform.x += speed.x ** 2  * Math.sign(speed.x) / acc2;
-			transform.y += speed.y ** 2  * Math.sign(speed.y) / acc2;
-	
-			target.style.transition = `all ${t}s cubic-bezier(0,.33,.66,1)`;
-		} else {
-			target.style.transition = 'none';
-		}
+			
+			const initialPos = { ...transform };
 
+			const diffPos =  {
+				x: speed.x ** 2  * Math.sign(speed.x) / acc2,
+				y: speed.y ** 2  * Math.sign(speed.y) / acc2,
+			};
+
+
+			animate((currentTime) => {
+				const progress = inertiaFunction(currentTime / t);
+				transform.x = initialPos.x + diffPos.x * progress;
+				transform.y = initialPos.y + diffPos.y * progress;
+
+
+				applyTransform();
+				if (currentTime >= t) return true;
+			});
+	
+
+			// target.style.transition = `all ${t}s cubic-bezier(0,.33,.66,1)`;
+		} else {
+			// target.style.transition = 'none';
+		}
 
 		applyTransform();
 	};
@@ -135,12 +167,13 @@ const panzoom = (target: HTMLElement | SVGElement, options) => {
 	return { 
 		getTransform, 
 		dispose: unSubscribeToEvents, 
-		on: noop, 
+		on: emitter.on,
 		smoothZoom,
 		moveTo: noop,
 	};
 };
 
+export type PanZoom = ReturnType<typeof panzoom>;
 
 export type PanZoomHandler = PanZoom & { zoomIn : () => void, zoomOut: () => void };
 
@@ -172,7 +205,7 @@ export const centredPanZoom = (target: HTMLImageElement | SVGSVGElement, padding
 	// resizeObserver.current.observe(svgContainer);
 	// scaleSVG();
 
-	const options:PanZoomOptions = {
+	const options = {
 		maxZoom: 10,
 		minZoom: 1,
 		bounds: parentRect,
