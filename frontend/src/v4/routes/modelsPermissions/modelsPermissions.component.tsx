@@ -19,7 +19,7 @@ import memoizeOne from 'memoize-one';
 import * as queryString from 'query-string';
 
 import { formatMessage } from '@/v5/services/intl';
-import { ModelTypes } from '@/v5/store/projects/projects.helpers';
+import { getModelType } from '@/v5/store/projects/projects.helpers';
 import { MODEL_ROLES_LIST } from '../../constants/model-permissions';
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
 import { CustomTable, CELL_TYPES } from '../components/customTable/customTable.component';
@@ -44,17 +44,9 @@ const MODEL_TABLE_CELLS = [{
 
 const getModelsTableRows = memoizeOne((models = [], selectedModels = []) => {
 	return models.map((model) => {
-		let modelType = ModelTypes.CONTAINER;
-		if (model.federate) {
-			modelType = ModelTypes.FEDERATION;
-		}
-		if (model.drawingNumber) {
-			modelType = ModelTypes.DRAWING;
-		}
-
 		const data = [{
 			name: model.name,
-			modelType,
+			modelType: getModelType(model),
 		}];
 
 		const selected = selectedModels.some((selectedModel) => selectedModel.model === model.model);

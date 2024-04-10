@@ -17,7 +17,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { delay } from '@/v4/helpers/async';
-import { Role } from '@/v5/store/currentUser/currentUser.types';
+import { drawingIds, mockDrawings } from '@/v5/store/drawings/drawing.foo';
 import { CalibrationStates, DrawingStats, MinimumDrawing } from '@/v5/store/drawings/drawings.types';
 import { AxiosResponse } from 'axios';
 import uuid from 'uuidv4';
@@ -32,18 +32,6 @@ export const removeFavourite = (teamspace, projectId, drawingId): Promise<AxiosR
 
 const categories =  ['A drawing category', 'Another drawing category', 'Yet another one'];
 
-const arr = (new Array(20)).fill(0);
-
-const drawings = arr.map((_, index) => {
-	const role = Role[Object.keys(Role)[index % 4]];
-	return {
-		_id: uuid(),
-		name: 'A drawing ' + index + ' - ' + role,
-		isFavourite: (Math.random() > 0.5),
-		role,
-	};
-});
-
 const randCal = () => {
 	const i  = Math.round(Math.random() * 2);
 	switch (i) {
@@ -57,7 +45,7 @@ const randCal = () => {
 };
 
 
-const stats = arr.map((_, index) => {
+const stats = drawingIds.map((_id) => {
 	const lastUpdated = (Math.random() > 0.5) ? 1709569331628 + Math.round( Math.random() * 31556952000) : null;
 	const total = lastUpdated ?  Math.round(Math.random() * 10) : 0;
 
@@ -66,7 +54,7 @@ const stats = arr.map((_, index) => {
 	const status = total ? 'status' : undefined;
 
 	return {
-		_id: drawings[index]._id,
+		_id,
 		revisions : {
 			lastUpdated,
 			drawingNumber: uuid(), 
@@ -81,7 +69,7 @@ const stats = arr.map((_, index) => {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const fetchDrawings = (teamspace, projectId): Promise<MinimumDrawing[]> => {
-	return delay<MinimumDrawing[]>(Math.random() *  300, drawings);
+	return delay<MinimumDrawing[]>(Math.random() *  300, mockDrawings);
 };
 
 export const fetchDrawingsStats = async (teamspace, projectId, drawingId): Promise<DrawingStats> => {

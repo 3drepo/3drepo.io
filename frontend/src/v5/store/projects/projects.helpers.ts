@@ -33,3 +33,10 @@ export enum ModelTypes {
 	FEDERATION,
 	DRAWING,
 }
+
+export const getModelType = (model) => {
+	if (model.federate) return ModelTypes.FEDERATION;
+	if (model.units) return ModelTypes.CONTAINER;
+	if (model.drawingNumber) return ModelTypes.DRAWING;
+	return null;
+};
