@@ -25,7 +25,6 @@ export interface IDrawingRevision {
 	statusCode?: string;
 	revisionCode: string;
 	void?: boolean;
-	tag: string;
 }
 
 export interface IDrawingRevisionUploadStatus {
