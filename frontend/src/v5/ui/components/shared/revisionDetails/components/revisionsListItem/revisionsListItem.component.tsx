@@ -18,21 +18,14 @@ import { SyntheticEvent } from 'react';
 
 import { FormattedMessage } from 'react-intl';
 import { Tooltip } from '@mui/material';
-import { Container, DownloadButton, DownloadIcon, RevisionsListItemTag } from './revisionsListItem.styles';
-import { RevisionsListItemAuthor } from './revisionsListItemAuthor/revisionsListItemAuthor.component';
-import { RevisionsListItemText } from './revisionsListItemText/revisionsListItemText.component';
+import { Container, DownloadButton, DownloadIcon } from './revisionsListItem.styles';
 import { RevisionsListItemButton } from './revisionsListItemButton/revisionsListItemButton.component';
-import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 
 type IRevisionsListItem = {
 	onSetVoidStatus: (voidStatus: boolean) => void;
 	hasPermission: boolean;
-	timestamp,
-	desc?: string,
-	author: string,
-	tag: string,
 	voidStatus: boolean,
-	format: string,
+	children: any,
 	onDownloadRevision: () => void;
 	redirectTo?: string;
 };
@@ -40,14 +33,10 @@ type IRevisionsListItem = {
 export const RevisionsListItem = ({
 	onSetVoidStatus,
 	hasPermission,
-	timestamp,
-	desc = '',
-	author,
-	tag,
 	voidStatus,
-	format,
 	redirectTo = null,
 	onDownloadRevision,
+	children,
 }: IRevisionsListItem): JSX.Element => {
 	const disabled = voidStatus;
 
@@ -64,11 +53,7 @@ export const RevisionsListItem = ({
 
 	return (
 		<Container to={disabled ? null : redirectTo} disabled={disabled}>
-			<RevisionsListItemText width={140} tabletWidth={94}> {formatShortDateTime(timestamp)} </RevisionsListItemText>
-			<RevisionsListItemAuthor width={170} tabletWidth={155} authorName={author} />
-			<RevisionsListItemTag width={150} tabletWidth={300}> {tag} </RevisionsListItemTag>
-			<RevisionsListItemText hideWhenSmallerThan={1140}> {desc} </RevisionsListItemText>
-			<RevisionsListItemText width={90} tabletWidth={45} hideWhenSmallerThan={800}> {(format || '').toLowerCase()} </RevisionsListItemText>
+			{children}
 			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} disabled={!hasPermission} />
 			{hasPermission && (
 				<Tooltip

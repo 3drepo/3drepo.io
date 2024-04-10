@@ -41,6 +41,10 @@ import {
 import { getRevisionFileUrl } from '@/v5/services/api/containerRevisions';
 import { selectHasCollaboratorAccess } from '@/v5/store/containers/containers.selectors';
 import { getState } from '@/v4/modules/store';
+import { formatShortDateTime } from '@/v5/helpers/intl.helper';
+import { RevisionsListItemText } from '../revisionDetails/components/revisionsListItem/revisionsListItemText/revisionsListItemText.component';
+import { RevisionsListItemAuthor } from '../revisionDetails/components/revisionsListItem/revisionsListItemAuthor/revisionsListItemAuthor.component';
+import { RevisionsListItemTag } from '../revisionDetails/components/revisionsListItem/revisionsListItem.styles';
 
 interface IContainerRevisionDetails {
 	containerId: string;
@@ -120,11 +124,16 @@ export const ContainerRevisionDetails = ({ containerId, revisionsCount, status }
 								onSetVoidStatus={(voidStatus) => (
 									ContainerRevisionsActionsDispatchers.setVoidStatus(teamspace, project, containerId, revision._id, voidStatus)
 								)}
-								{...revision}
 								voidStatus={revision.void}
 								onDownloadRevision={() => handleDownloadRevision(revision._id)}
 								hasPermission={selectHasCollaboratorAccess(getState(), containerId)}
-							/>
+							>
+								<RevisionsListItemText width={140} tabletWidth={94}> {formatShortDateTime(revision.timestamp)} </RevisionsListItemText>
+								<RevisionsListItemAuthor width={170} tabletWidth={155} authorName={revision.author} />
+								<RevisionsListItemTag width={150} tabletWidth={300}> {revision.tag} </RevisionsListItemTag>
+								<RevisionsListItemText hideWhenSmallerThan={1140}> {revision.desc || ''} </RevisionsListItemText>
+								<RevisionsListItemText width={90} tabletWidth={45} hideWhenSmallerThan={800}> {(revision.format || '').toLowerCase()} </RevisionsListItemText>
+							</RevisionsListItem>
 						</RevisionsListItemWrapper>
 					))
 				)}

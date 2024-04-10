@@ -41,6 +41,10 @@ import {
 import { getRevisionFileUrl } from '@/v5/services/api/drawingRevisions';
 import { selectHasCollaboratorAccess } from '@/v5/store/drawings/drawings.selectors';
 import { getState } from '@/v4/modules/store';
+import { RevisionsListItemText } from '../revisionDetails/components/revisionsListItem/revisionsListItemText/revisionsListItemText.component';
+import { RevisionsListItemAuthor } from '../revisionDetails/components/revisionsListItem/revisionsListItemAuthor/revisionsListItemAuthor.component';
+import { RevisionsListItemTag } from '../revisionDetails/components/revisionsListItem/revisionsListItem.styles';
+import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 
 interface IDrawingRevisionDetails {
 	drawingId: string;
@@ -100,7 +104,8 @@ export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: ID
 			<RevisionsListHeaderContainer>
 				<RevisionsListHeaderLabel width={140} tabletWidth={94}><FormattedMessage id="drawingRevisionDetails.addedOn" defaultMessage="Added on" /></RevisionsListHeaderLabel>
 				<RevisionsListHeaderLabel width={170} tabletWidth={155}><FormattedMessage id="drawingRevisionDetails.addedBy" defaultMessage="Added by" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel width={150} tabletWidth={300}><FormattedMessage id="drawingRevisionDetails.revisionCode" defaultMessage="Revision name" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={150} tabletWidth={300}><FormattedMessage id="drawingRevisionDetails.statusCode" defaultMessage="Status code" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={150} tabletWidth={300}><FormattedMessage id="drawingRevisionDetails.revisionCode" defaultMessage="Revision code" /></RevisionsListHeaderLabel>
 				<RevisionsListHeaderLabel hideWhenSmallerThan={1140}><FormattedMessage id="drawingRevisionDetails.description" defaultMessage="Description" /></RevisionsListHeaderLabel>
 				<RevisionsListHeaderLabel width={90} tabletWidth={45} hideWhenSmallerThan={800}><FormattedMessage id="drawingRevisionDetails.format" defaultMessage="Format" /></RevisionsListHeaderLabel>
 			</RevisionsListHeaderContainer>
@@ -119,11 +124,17 @@ export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: ID
 								onSetVoidStatus={(voidStatus) => (
 									DrawingRevisionsActionDispatchers.setVoidStatus(teamspace, project, drawingId, revision._id, voidStatus)
 								)}
-								{...revision}
 								voidStatus={revision.void}
 								onDownloadRevision={() => handleDownloadRevision(revision._id)}
 								hasPermission={selectHasCollaboratorAccess(getState(), drawingId)}
-							/>
+							>
+								<RevisionsListItemText width={140} tabletWidth={94}> {formatShortDateTime(revision.timestamp)} </RevisionsListItemText>
+								<RevisionsListItemAuthor width={170} tabletWidth={155} authorName={revision.author} />
+								<RevisionsListItemTag width={150} tabletWidth={300}> {revision.statusCode || ''} </RevisionsListItemTag>
+								<RevisionsListItemTag width={150} tabletWidth={300}> {revision.revisionCode} </RevisionsListItemTag>
+								<RevisionsListItemText hideWhenSmallerThan={1140}> {revision.desc || ''} </RevisionsListItemText>
+								<RevisionsListItemText width={90} tabletWidth={45} hideWhenSmallerThan={800}> {(revision.format || '').toLowerCase()} </RevisionsListItemText>
+							</RevisionsListItem>
 						</RevisionsListItemWrapper>
 					))
 				)}
