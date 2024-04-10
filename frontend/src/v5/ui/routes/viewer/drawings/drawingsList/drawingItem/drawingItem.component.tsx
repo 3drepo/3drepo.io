@@ -16,20 +16,56 @@
  */
 
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
-import { Drawing, Title, DrawingsCalibrationButton, MainBody, ImageContainer, GrayText, BlueText, Description, BottomLine, InfoContainer, BreakingLine } from './drawingtem.styles';
+import { Drawing, Title, DrawingsCalibrationButton, MainBody, ImageContainer, Property, PropertyValue, Description, BottomLine, InfoContainer, BreakingLine, SkeletonText } from './drawingtem.styles';
 import { FormattedMessage } from 'react-intl';
-import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { formatShortDateTime } from '@/v5/helpers/intl.helper';
+import { formatMessage } from '@/v5/services/intl';
+
+const STATUS_CODE_TEXT = formatMessage({ id: 'drawings.list.item.statusCode', defaultMessage: 'Status code' });
+const REVISION_CODE_TEXT = formatMessage({ id: 'drawings.list.item.revisionCode', defaultMessage: 'Revision code' });
 
 type DrawingItemProps = {
 	drawing: IDrawing;
 	onClick: React.MouseEventHandler<HTMLDivElement>;
 };
-
 export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	const [latestRevision] = DrawingRevisionsHooksSelectors.selectRevisions(drawing._id);
 	const { calibration, name, drawingNumber, lastUpdated, desc } = drawing;
 	const { statusCode, revisionCode } = latestRevision || {};
+	const areStatsPending = !revisionCode;
+
+	const LoadingCodes = () => (
+		<>
+			<BreakingLine>
+				<Property>
+					{STATUS_CODE_TEXT}: <SkeletonText width={120} />
+				</Property>
+			</BreakingLine>
+			<BreakingLine>
+				<Property>
+					{REVISION_CODE_TEXT}: <SkeletonText width={120} />
+				</Property>
+			</BreakingLine>
+		</>
+	);
+	
+	const LoadedCodes = () => (
+		<>
+			{statusCode && (
+				<BreakingLine>
+					<Property>
+						{STATUS_CODE_TEXT}: <PropertyValue>{statusCode}</PropertyValue>
+					</Property>
+				</BreakingLine>
+			)}
+			<BreakingLine>
+				<Property>
+					{REVISION_CODE_TEXT}: <PropertyValue>{revisionCode}</PropertyValue>
+				</Property>
+			</BreakingLine>
+		</>
+	);
 
 	return (
 		<Drawing onClick={onClick} key={drawing._id} >
@@ -39,38 +75,21 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 				</ImageContainer>
 				<InfoContainer>
 					<BreakingLine>
-						<GrayText>{drawingNumber}</GrayText>
+						<Property>{drawingNumber}</Property>
 					</BreakingLine>
 					<BreakingLine>
 						<Title>{name}</Title>
 					</BreakingLine>
-					{statusCode && (
-						<BreakingLine>
-							<GrayText>
-								<FormattedMessage id="drawings.list.item.statusCode" defaultMessage="Status code" />:
-							</GrayText>
-							<BlueText>&nbsp;{statusCode}</BlueText>
-						</BreakingLine>
-					)}
-					<BreakingLine>
-						<GrayText>
-							<FormattedMessage id="drawings.list.item.revisionCode" defaultMessage="Revision code" />:
-						</GrayText>
-						<BlueText>&nbsp;{revisionCode}</BlueText>
-					</BreakingLine>
-					<Description>
-						{desc}
-					</Description>
+					{areStatsPending ? <LoadingCodes /> : <LoadedCodes />}
+					<Description>{desc}</Description>
 				</InfoContainer>
 			</MainBody>
 			<BottomLine>
 				<BreakingLine>
-					<GrayText>
+					<Property>
 						<FormattedMessage id="drawings.list.item.lastUpdated" defaultMessage="Last updated" />:
-					</GrayText>
-					<BlueText>
-						&nbsp;{formatShortDateTime(lastUpdated)}
-					</BlueText>
+						<PropertyValue>&nbsp;{formatShortDateTime(lastUpdated)}</PropertyValue>
+					</Property>
 				</BreakingLine>
 				<DrawingsCalibrationButton
 					onClick={() => {}}

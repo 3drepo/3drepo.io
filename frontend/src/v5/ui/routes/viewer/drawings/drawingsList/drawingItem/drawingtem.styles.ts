@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 import { DrawingsCalibrationButton as DrawingsCalibrationButtonBase } from '@/v5/ui/routes/dashboard/projects/drawings/drawingsList/drawingsListItem/drawingsCalibrationButton/drawingsCalibrationButton.styles';
 import { CalibrationStates } from '@/v5/store/drawings/drawings.types';
+import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.styles';
 
 // TODO - fix after new palette is released
 export const Drawing = styled.div<{ $selected?: boolean }>`
@@ -60,14 +61,14 @@ export const BreakingLine = styled.div`
 	line-height: 10px;
 `;
 
-export const BlueText = styled.span`
+export const PropertyValue = styled.span`
 	color: ${({ theme }) => theme.palette.secondary.main};
 	line-height: 10px;
 	padding-bottom: 5px;
 	font-size: 10px;
 `;
 
-export const Title = styled(BlueText)`
+export const Title = styled(PropertyValue)`
 	font-weight: 600;
 	font-size: 12px;
 	line-height: 18px;
@@ -82,7 +83,7 @@ export const Title = styled(BlueText)`
 	}
 `;
 
-export const GrayText = styled(BlueText)`
+export const Property = styled(PropertyValue)`
 	color: ${({ theme }) => theme.palette.base.main};
 `;
 
@@ -99,7 +100,12 @@ export const BottomLine = styled.div`
 	}
 `;
 
-export const Description = styled(BlueText)`
+export const SkeletonText = styled(SkeletonBlock)`
+	display: inline-block;
+	margin-bottom: -2px;
+`;
+
+export const Description = styled(PropertyValue)`
 	width: 100%;
 	max-width: 100%;
 	display: block;
