@@ -18,7 +18,7 @@
 import { normalize } from 'normalizr';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
-import { addDrawingsToObject } from '@/v5/store/drawings/drawing.foo';
+import { addDrawingsToObject } from '@/v5/store/drawings/drawings.temp';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import * as API from '../../services/api';
 import { ChatActions } from '../chat';

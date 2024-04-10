@@ -47,9 +47,10 @@ export const drawingIds = [
 	'97933311-draw-4178-a241-1fe8219fffb6',
 ];
 
-const mockRole = (index) => Role[Object.keys(Role)[index % 4]];
+// This selects a random role but skips the admin role as this is determined by project settings
+export const mockRole = (index) => Role[Object.keys(Role)[(index % 3) + 1]];
 
-export const mockDrawing = (_id, index) => {
+const mockDrawingForV4 = (_id, index) => {
 	const role = mockRole(index);
 	return {
 		_id,
@@ -61,8 +62,6 @@ export const mockDrawing = (_id, index) => {
 	};
 };
 
-export const mockDrawings = drawingIds.map(mockDrawing);
-
 export const mockModelPermissions = (modelIds: string[], users) => modelIds.map((model) => ({
 	model,
 	permissions: users.map(({ user }, index) => ({
@@ -73,7 +72,7 @@ export const mockModelPermissions = (modelIds: string[], users) => modelIds.map(
 
 export const addDrawingsToObject = (object) => {
 	const clonedObject = { ...object };
-	drawingIds.forEach((drawingId, index) => clonedObject[drawingId] = mockDrawing(drawingId, index));
+	drawingIds.forEach((drawingId, index) => clonedObject[drawingId] = mockDrawingForV4(drawingId, index));
 	return clonedObject;
 };
 

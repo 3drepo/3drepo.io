@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { appendDrawingsToAxiosResponse } from '@/v5/store/drawings/drawing.foo';
+import { appendDrawingsToAxiosResponse } from '@/v5/store/drawings/drawings.temp';
 import { API as api } from './default';
 
 /**

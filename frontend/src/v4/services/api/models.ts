@@ -16,7 +16,7 @@
  */
 
 import { delay } from '@/v4/helpers/async';
-import { mockModelPermissions } from '@/v5/store/drawings/drawing.foo';
+import { mockModelPermissions } from '@/v5/store/drawings/drawings.temp';
 import { fetchUsers } from './users';
 import { API as api } from './default';
 

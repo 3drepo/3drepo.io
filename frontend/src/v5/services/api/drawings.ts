@@ -17,7 +17,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { delay } from '@/v4/helpers/async';
-import { drawingIds, mockRole } from '@/v5/store/drawings/drawing.foo';
+import { drawingIds, mockRole } from '@/v5/store/drawings/drawings.temp';
 import { DrawingStats, DrawingUploadStatus, CalibrationStates, MinimumDrawing } from '@/v5/store/drawings/drawings.types';
 import { AxiosResponse } from 'axios';
 import uuid from 'uuidv4';
@@ -36,7 +36,7 @@ const arr = (new Array(10)).fill(0);
 
 const drawings: MinimumDrawing[] = arr.map((_, index) => ({
 	_id: drawingIds[index] ?? uuid(),
-	name: 'A drawing ' + index,
+	name: 'A drawing ' + index + ' - ' + mockRole(index),
 	drawingNumber: uuid(),
 	isFavourite: (Math.random() > 0.5),
 	role: mockRole(index),
