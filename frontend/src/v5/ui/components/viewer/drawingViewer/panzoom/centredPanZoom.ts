@@ -22,7 +22,7 @@ export type PanZoomHandler = PanZoom & { zoomIn : () => void, zoomOut: () => voi
 
 export const centredPanZoom = (target: HTMLImageElement | SVGSVGElement, paddingW: number, paddingH: number) => {
 	const targetContainer = target.parentElement;
-	const parentRect = targetContainer.getBoundingClientRect();
+
 	const originalSize = { width: 0, height: 0 };
 
 	if (target.tagName.toLocaleLowerCase() === 'img') {
@@ -36,16 +36,6 @@ export const centredPanZoom = (target: HTMLImageElement | SVGSVGElement, padding
 		originalSize.height = svg.viewBox.baseVal.height;
 	}
 
-	const size = aspectRatio(originalSize.width, originalSize.height, parentRect.width - paddingW * 2, parentRect.height - paddingH * 2);
-
-	target.setAttribute('width', size.scaledWidth + 'px');
-	target.setAttribute('height', size.scaledHeight + 'px');
-
-	// const targetSize = target.getBoundingClientRect();
-
-	// resizeObserver.current = new ResizeObserver(scaleSVG);
-	// resizeObserver.current.observe(svgContainer);
-	// scaleSVG();
 
 	const options = {
 		maxZoom: 10,
@@ -54,13 +44,14 @@ export const centredPanZoom = (target: HTMLImageElement | SVGSVGElement, padding
 	
 	const pz = panzoom(target, options);
 
-	const actualPaddingW = (parentRect.width - size.scaledWidth) / 2 ;
-	const actualPaddingH = (parentRect.height -  size.scaledHeight ) / 2 ;
+	let size = { scaledWidth: 0, scaledHeight:0 };
 
-	pz.on('transform', () => {
+	const onTransform = () => {
+		const parentRect = targetContainer.getBoundingClientRect();
+		const actualPaddingW = (parentRect.width - size.scaledWidth) / 2 ;
+		const actualPaddingH = (parentRect.height - size.scaledHeight ) / 2 ;
 		const targetRect = target.getBoundingClientRect();
 		const t = pz.getTransform();
-
 		const maxX =  actualPaddingW * t.scale;
 		const minX =  parentRect.width - targetRect.width - actualPaddingW * t.scale;
 
@@ -73,7 +64,21 @@ export const centredPanZoom = (target: HTMLImageElement | SVGSVGElement, padding
 			const y = Math.max(Math.min(t.y, maxY), minY);
 			pz.moveTo(x, y);
 		}
-	});
+	};
+
+
+	const scaleTarget = () => {
+		const parentRect = targetContainer.getBoundingClientRect();
+		size = aspectRatio(originalSize.width, originalSize.height, parentRect.width - paddingW * 2, parentRect.height - paddingH * 2);
+		target.setAttribute('width', size.scaledWidth + 'px');
+		target.setAttribute('height', size.scaledHeight + 'px');
+		onTransform();
+	};
+
+	const resizeObserver = new ResizeObserver(scaleTarget);
+	resizeObserver.observe(targetContainer);
+
+	pz.on('transform', onTransform);
 
 
 	const zoom = (scale) => {
