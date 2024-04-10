@@ -20,14 +20,6 @@ import { DrawingsCalibrationButton as DrawingsCalibrationButtonBase } from '@/v5
 import { CalibrationStates } from '@/v5/store/drawings/drawings.types';
 import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.styles';
 
-// TODO - fix after new palette is released
-export const Drawing = styled.div<{ $selected?: boolean }>`
-	position: relative;
-	cursor: pointer;
-	padding: 12px 14px 16px;
-	background-color: ${({ theme, $selected }) => ($selected ? '#edf0f8' : theme.palette.primary.contrast)};
-`;
-
 export const DrawingsCalibrationButton = styled(DrawingsCalibrationButtonBase).attrs({ width: 103 })<{ calibration: CalibrationStates }>`
 	.MuiButton-root {
 		border-radius: 5px;

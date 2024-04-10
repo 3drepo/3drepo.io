@@ -16,9 +16,9 @@
  */
 import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DrawingItem } from './drawingItem/drawingItem.component';
-import { List } from './drawingsList.styles';
 import { CentredContainer } from '@controls/centredContainer';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
+import { CardList } from '@components/viewer/cards/card.styles';
 
 export const DrawingsList = () => {
 	const drawings = DrawingsHooksSelectors.selectCalibratedDrawings();
@@ -31,7 +31,7 @@ export const DrawingsList = () => {
 	);
 
 	return (
-		<List>
+		<CardList>
 			{drawings.map((drawing) => (
 				<DrawingItem
 					drawing={drawing}
@@ -39,6 +39,6 @@ export const DrawingsList = () => {
 					onClick={() => {}}
 				/>
 			))}
-		</List>
+		</CardList>
 	);
 };

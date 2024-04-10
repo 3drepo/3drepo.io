@@ -16,11 +16,12 @@
  */
 
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
-import { Drawing, Title, DrawingsCalibrationButton, MainBody, ImageContainer, Property, PropertyValue, Description, BottomLine, InfoContainer, BreakingLine, SkeletonText } from './drawingtem.styles';
+import { Title, DrawingsCalibrationButton, MainBody, ImageContainer, Property, PropertyValue, Description, BottomLine, InfoContainer, BreakingLine, SkeletonText } from './drawingItem.styles';
 import { FormattedMessage } from 'react-intl';
 import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
+import { CardListItem } from '@components/viewer/cards/card.styles';
 
 const STATUS_CODE_TEXT = formatMessage({ id: 'drawings.list.item.statusCode', defaultMessage: 'Status code' });
 const REVISION_CODE_TEXT = formatMessage({ id: 'drawings.list.item.revisionCode', defaultMessage: 'Revision code' });
@@ -68,7 +69,7 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	);
 
 	return (
-		<Drawing onClick={onClick} key={drawing._id} >
+		<CardListItem onClick={onClick} key={drawing._id} >
 			<MainBody>
 				<ImageContainer>
 					<img src="https://placedog.net/73/73" />
@@ -96,6 +97,6 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 					calibration={calibration}
 				/>
 			</BottomLine>
-		</Drawing>
+		</CardListItem>
 	);
 };
