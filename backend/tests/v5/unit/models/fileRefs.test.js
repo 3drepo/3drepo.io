@@ -132,6 +132,25 @@ const testInsertRef = () => {
 	});
 };
 
+const testInsertManyRefs = () => {
+	describe('Insert many file refs', () => {
+		test('should insert file refs', async () => {
+			const teamspace = generateRandomString();
+			const collection = generateRandomString();
+			const refInfo = times(10, () => ({
+				_id: generateUUID(),
+				name: generateRandomString(),
+			}));
+
+			const fn = jest.spyOn(db, 'insertMany').mockResolvedValueOnce(undefined);
+			await expect(FileRefs.insertManyRefs(teamspace, collection, refInfo)).resolves.toEqual(undefined);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${collection}.ref`, refInfo);
+		});
+	});
+};
+
 const testRemoveRef = () => {
 	describe('Remove file ref', () => {
 		test('should remove file ref', async () => {
@@ -186,6 +205,7 @@ describe('models/fileRefs', () => {
 	testGetAllRemovableEntriesByType();
 	testGetRefEntry();
 	testInsertRef();
+	testInsertManyRefs();
 	testRemoveRef();
 	testGetRefsByQuery();
 	testRemoveRefsByQuery();

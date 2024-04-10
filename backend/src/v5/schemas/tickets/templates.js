@@ -240,9 +240,9 @@ const schema = Yup.object().shape({
 
 TemplateSchema.validate = (template) => schema.validateSync(template, { stripUnknown: true });
 
-TemplateSchema.generateFullSchema = (template) => {
+TemplateSchema.generateFullSchema = (template, isImport = false) => {
 	const result = cloneDeep(template);
-	result.properties = [...getApplicableDefaultProperties(template.config), ...result.properties];
+	result.properties = [...getApplicableDefaultProperties(template.config, isImport), ...result.properties];
 	result.modules.forEach((module) => {
 		if (module.type && presetModulesProperties[module.type]) {
 			// eslint-disable-next-line no-param-reassign
