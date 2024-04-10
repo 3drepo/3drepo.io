@@ -38,7 +38,6 @@ interface IGroup {
 	name: string;
 	color: string;
 	rules: any[];
-	totalSavedMeshes: number;
 	objects: object[];
 }
 
@@ -47,8 +46,8 @@ interface IProps {
 	currentUser: any;
 	totalMeshes: number;
 	canUpdate: boolean;
-	selectedNodes: any[];
 	handleChange: (event) => void;
+	objectsCount: number;
 }
 
 export class GroupDetailsForm extends PureComponent<IProps, any> {
@@ -69,7 +68,8 @@ export class GroupDetailsForm extends PureComponent<IProps, any> {
 
 	public render() {
 		const {
-			group: { updatedAt, type, desc, name, color, rules, totalSavedMeshes }
+			objectsCount,
+			group: { updatedAt, type, desc, name, color, rules },
 		} = this.props;
 		const initialValues = { type, desc , name, color, rules };
 
@@ -86,7 +86,7 @@ export class GroupDetailsForm extends PureComponent<IProps, any> {
 					<FieldsRow>
 						<StyledTextField
 							label={<LongLabel>Number of objects</LongLabel>}
-							value={(totalSavedMeshes || 0).toString()}
+							value={objectsCount.toString()}
 							disabled
 						/>
 						<StyledTextField

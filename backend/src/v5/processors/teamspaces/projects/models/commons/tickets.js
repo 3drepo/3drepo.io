@@ -17,7 +17,7 @@
 
 const { UUIDToString, generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { addGroups, deleteGroups, getGroupsByIds } = require('./tickets.groups');
-const { addTicket, getAllTickets, getTicketById, updateTicket } = require('../../../../../models/tickets');
+const { addTicketsWithTemplate, getAllTickets, getTicketById, updateTickets } = require('../../../../../models/tickets');
 const {
 	basePropertyLabels,
 	modulePropertyLabels,
@@ -26,13 +26,16 @@ const {
 	viewGroups,
 } = require('../../../../../schemas/tickets/templates.constants');
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
-const { getFileWithMetaAsStream, removeFile, storeFile } = require('../../../../../services/filesManager');
+const { deleteIfUndefined, isEmpty } = require('../../../../../utils/helper/objects');
+const { getFileWithMetaAsStream, removeFiles, storeFiles } = require('../../../../../services/filesManager');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
-const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
+const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
 const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
 const { getArrayDifference } = require('../../../../../utils/helper/arrays');
+const { importComments } = require('./tickets.comments');
 const { isUUID } = require('../../../../../utils/helper/typeCheck');
+const { publish } = require('../../../../../services/eventsManager/eventsManager');
 
 const Tickets = {};
 
@@ -70,29 +73,19 @@ const processGroupsUpdate = (oldData, newData, fields, groupsState) => {
  *           the image itself will be stored via filesManager
  *  Groups - Groups will come in embedded, however we will store the group separately with a group id as reference
  */
-const processSpecialProperties = (template, oldTicket, updatedTicket) => {
+const processSpecialProperties = (template, oldTickets, updatedTickets) => {
 	const fullTemplate = generateFullSchema(template);
 
-	const res = {
-		binaries: {
-			toRemove: [],
-			toAdd: [],
-		},
-		groups: {
-			toAdd: [],
-			old: new Set(),
-			stillUsed: new Set(),
-		},
-	};
+	const res = [];
 
-	const updateReferences = (templateProperties, oldProperties = {}, updatedProperties = {}) => {
+	const updateReferences = (templateProperties, externalReferences, oldProperties = {}, updatedProperties = {}) => {
 		templateProperties.forEach(({ type, name }) => {
 			const processImageUpdate = (field) => {
 				const oldProp = field ? getNestedProperty(oldProperties[name], field) : oldProperties[name];
 				const newProp = field ? getNestedProperty(updatedProperties[name], field) : updatedProperties[name];
 
 				if (oldProp && newProp !== undefined) {
-					res.binaries.toRemove.push(oldProp);
+					externalReferences.binaries.toRemove.push(oldProp);
 				}
 
 				if (newProp) {
@@ -103,7 +96,7 @@ const processSpecialProperties = (template, oldTicket, updatedTicket) => {
 						// eslint-disable-next-line no-param-reassign
 						updatedProperties[name] = ref;
 					}
-					res.binaries.toAdd.push({ ref, data: newProp });
+					externalReferences.binaries.toAdd.push({ ref, data: newProp });
 				}
 			};
 
@@ -114,64 +107,170 @@ const processSpecialProperties = (template, oldTicket, updatedTicket) => {
 				processImageUpdate('screenshot');
 				processGroupsUpdate(oldProperties[name], updatedProperties[name],
 					Object.values(viewGroups).map((groupName) => `state.${groupName}`),
-					res.groups);
+					externalReferences.groups);
 			}
 		});
 	};
 
-	updateReferences(fullTemplate.properties, oldTicket?.properties, updatedTicket.properties);
+	const isUpdate = !!oldTickets?.length;
+	updatedTickets.forEach((updateData, i) => {
+		const externalReferences = {
+			binaries: {
+				toRemove: [],
+				toAdd: [],
+			},
+			groups: {
+				toAdd: [],
+				old: new Set(),
+				stillUsed: new Set(),
+			},
+		};
+
+		updateReferences(fullTemplate.properties, externalReferences,
+			isUpdate ? oldTickets[i]?.properties : undefined, updateData.properties);
+
+		res.push(externalReferences);
+	});
 
 	fullTemplate.modules.forEach(({ properties, name, type }) => {
 		const id = name ?? type;
-		updateReferences(properties, oldTicket?.modules?.[id], updatedTicket?.modules?.[id]);
+		updatedTickets.forEach((updateData, i) => {
+			updateReferences(properties, res[i],
+				isUpdate ? oldTickets[i]?.modules?.[id] : undefined, updateData?.modules?.[id]);
+		});
 	});
 
-	res.groups.toRemove = getArrayDifference(Array.from(res.groups.stillUsed),
-		Array.from(res.groups.old)).map(stringToUUID);
+	return res.map(({ groups: { toRemove, old, stillUsed, ...otherGroups }, ...others }) => {
+		const toRemoveCalculated = getArrayDifference(Array.from(stillUsed),
+			Array.from(old)).map(stringToUUID);
 
-	delete res.groups.old;
+		return { groups: { toRemove: toRemoveCalculated, stillUsed, ...otherGroups }, ...others };
+	});
+};
 
+const processExternalData = async (teamspace, project, model, ticketIds, data) => {
+	const refsToRemove = [];
+	const binariesToSave = [];
+	await Promise.all(ticketIds.map(async (ticketId, i) => {
+		const { binaries, groups } = data[i];
+
+		if (groups.stillUsed.size) {
+			const stillUsed = Array.from(groups.stillUsed);
+			const existingGroups = await getGroupsByIds(teamspace, project, model, ticketId,
+				stillUsed, { _id: 1 });
+
+			if (existingGroups.length !== stillUsed.length) {
+				const notFoundGroups = getArrayDifference(existingGroups.map(({ _id }) => UUIDToString(_id)),
+					stillUsed);
+				throw createResponseCode(templates.invalidArguments, `The following groups are not found: ${notFoundGroups.join(',')}`);
+			}
+		}
+
+		refsToRemove.push(...binaries.toRemove);
+
+		binariesToSave.push(...binaries.toAdd.map(({ ref, data: bin }) => ({
+			id: ref, data: bin, meta: { teamspace, project, model, ticket: ticketId } })));
+
+		await Promise.all([
+			groups.toAdd.length ? addGroups(teamspace, project, model, ticketId, groups.toAdd) : Promise.resolve(),
+			groups.toRemove.length ? deleteGroups(teamspace, project, model, ticketId,
+				groups.toRemove) : Promise.resolve(),
+		]);
+	}));
+
+	const promsToWait = [];
+
+	if (refsToRemove.length) promsToWait.push(removeFiles(teamspace, TICKETS_RESOURCES_COL, refsToRemove));
+	if (binariesToSave.length) promsToWait.push(storeFiles(teamspace, TICKETS_RESOURCES_COL, binariesToSave));
+
+	await Promise.all(promsToWait);
+};
+
+const processNewTickets = async (teamspace, project, model, template, tickets) => {
+	const externalDataDelta = processSpecialProperties(template, undefined, tickets);
+	const res = await addTicketsWithTemplate(teamspace, project, model, template._id, tickets);
+	await processExternalData(teamspace, project, model, res.map(({ _id }) => _id), externalDataDelta);
 	return res;
 };
 
-const storeFiles = (teamspace, project, model, ticket, binaryData) => Promise.all(
-	binaryData.map(({ ref, data }) => storeFile(
-		teamspace, TICKETS_RESOURCES_COL, ref, data, { teamspace, project, model, ticket },
-	)),
-);
+Tickets.importTickets = async (teamspace, project, model, template, tickets, author) => {
+	const savedTickets = await processNewTickets(teamspace, project, model, template,
+		tickets.map(({ comments, ...others }) => others));
 
-const processExternalData = async (teamspace, project, model, ticketId, { binaries, groups }) => {
-	const stillUsed = Array.from(groups.stillUsed);
-	if (stillUsed.length) {
-		const existingGroups = await getGroupsByIds(teamspace, project, model, ticketId,
-			stillUsed.map(stringToUUID), { _id: 1 });
+	const ids = [];
+	const commentsByTickets = tickets.flatMap(({ comments }, i) => {
+		ids.push(savedTickets[i]._id);
+		return comments?.length ? { ticket: savedTickets[i]._id, comments } : [];
+	});
 
-		if (existingGroups.length !== stillUsed.length) {
-			const notFoundGroups = getArrayDifference(existingGroups.map(({ _id }) => UUIDToString(_id)),
-				stillUsed);
-			throw createResponseCode(templates.invalidArguments, `The following groups are not found: ${notFoundGroups.join(',')}`);
-		}
-	}
+	if (commentsByTickets.length) await importComments(teamspace, project, model, commentsByTickets, author);
 
-	await Promise.all([
-		binaries.toRemove.map((ref) => removeFile(teamspace, TICKETS_RESOURCES_COL, ref)),
-		storeFiles(teamspace, project, model, ticketId, binaries.toAdd),
-		groups.toAdd.length ? addGroups(teamspace, project, model, ticketId, groups.toAdd) : Promise.resolve(),
-		groups.toRemove.length ? deleteGroups(teamspace, project, model, ticketId, groups.toRemove) : Promise.resolve(),
-	]);
+	publish(events.TICKETS_IMPORTED,
+		{ teamspace,
+			project,
+			model,
+			tickets: savedTickets,
+			author,
+		});
+
+	return ids;
 };
 
 Tickets.addTicket = async (teamspace, project, model, template, ticket) => {
-	const externalDataDelta = processSpecialProperties(template, undefined, ticket);
-	const res = await addTicket(teamspace, project, model, ticket);
-	await processExternalData(teamspace, project, model, res, externalDataDelta);
-	return res;
+	const [savedTicket] = await processNewTickets(teamspace, project, model, template, [ticket]);
+	publish(events.NEW_TICKET,
+		{ teamspace,
+			project,
+			model,
+			ticket: savedTicket,
+		});
+	return savedTicket._id;
 };
 
 Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, updateData, author) => {
-	const externalDataDelta = processSpecialProperties(template, oldTicket, updateData);
-	await updateTicket(teamspace, project, model, oldTicket, updateData, author);
-	await processExternalData(teamspace, project, model, oldTicket._id, externalDataDelta);
+	const externalDataDelta = processSpecialProperties(template, [oldTicket], [updateData]);
+	const changeSet = await updateTickets(teamspace, project, model, [oldTicket], [updateData], author);
+	await processExternalData(teamspace, project, model, [oldTicket._id], externalDataDelta);
+
+	if (changeSet.length) {
+		const data = changeSet[0];
+		publish(events.UPDATE_TICKET, {
+			teamspace,
+			project,
+			model,
+			...data });
+	}
+};
+
+Tickets.updateManyTickets = async (teamspace, project, model, template, oldTickets, updateData, author) => {
+	const commentsByTickets = [];
+	const dataWithoutComments = updateData.map(({ comments, _id, ...others }, i) => {
+		if (comments?.length) {
+			commentsByTickets.push({ ticket: oldTickets[i]._id, comments });
+		}
+
+		return others;
+	});
+
+	const commentsPromises = commentsByTickets.length
+		? importComments(teamspace, project, model, commentsByTickets, author) : Promise.resolve();
+
+	const externalDataDelta = processSpecialProperties(template, oldTickets, dataWithoutComments);
+	const changeSet = await updateTickets(teamspace, project, model, oldTickets, dataWithoutComments, author);
+	await Promise.all([
+		processExternalData(teamspace, project, model, oldTickets.map(({ _id }) => _id), externalDataDelta),
+		commentsPromises,
+	]);
+
+	changeSet.forEach((data) => {
+		if (!isEmpty(data.changes)) {
+			publish(events.UPDATE_TICKET, {
+				teamspace,
+				project,
+				model,
+				...data });
+		}
+	});
 };
 
 Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource) => getFileWithMetaAsStream(

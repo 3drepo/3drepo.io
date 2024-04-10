@@ -15,48 +15,70 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addComment, deleteComment, getCommentById, getCommentsByTicket, updateComment } = require('../../../../../models/tickets.comments');
+const { addComment, deleteComment, getCommentById, getCommentsByTicket, importComments, updateComment } = require('../../../../../models/tickets.comments');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
+const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
 const { generateUUID } = require('../../../../../utils/helper/uuids');
 const { isBuffer } = require('../../../../../utils/helper/typeCheck');
-const { storeFile } = require('../../../../../services/filesManager');
+const { publish } = require('../../../../../services/eventsManager/eventsManager');
+const { storeFiles } = require('../../../../../services/filesManager');
 
 const Comments = {};
 
-const storeFiles = (teamspace, project, model, ticket, binaryData) => Promise.all(
-	binaryData.map(({ ref, data }) => storeFile(
-		teamspace, TICKETS_RESOURCES_COL, ref, data, { teamspace, project, model, ticket },
-	)),
-);
-
-const processCommentImages = (images = []) => {
-	const refsAndBinary = [];
+const processCommentImages = (teamspace, project, model, ticket, images = []) => {
+	const refsAndBinaries = [];
+	const meta = { teamspace, project, model, ticket };
 
 	for (let i = 0; i < images.length; i++) {
 		const data = images[i];
 
 		if (isBuffer(data)) {
-			const ref = generateUUID();
-			refsAndBinary.push({ data, ref });
+			const id = generateUUID();
+			refsAndBinaries.push({ data, id, meta });
 			// eslint-disable-next-line no-param-reassign
-			images[i] = ref;
+			images[i] = id;
 		}
 	}
 
-	return refsAndBinary;
+	return refsAndBinaries;
 };
 
 Comments.addComment = async (teamspace, project, model, ticket, commentData, author) => {
-	const refsAndBinary = processCommentImages(commentData.images);
+	const refsAndBinaries = processCommentImages(teamspace, project, model, ticket, commentData.images);
 	const res = await addComment(teamspace, project, model, ticket, commentData, author);
-	await storeFiles(teamspace, project, model, ticket, refsAndBinary);
-	return res;
+	if (refsAndBinaries.length) await storeFiles(teamspace, TICKETS_RESOURCES_COL, refsAndBinaries);
+
+	publish(events.NEW_COMMENT, { teamspace,
+		project,
+		model,
+		data: res });
+
+	return res._id;
 };
 
 Comments.updateComment = async (teamspace, project, model, ticket, oldComment, updateData) => {
-	const refsAndBinary = processCommentImages(updateData.images);
+	const refsAndBinaries = processCommentImages(teamspace, project, model, ticket, updateData.images);
 	await updateComment(teamspace, project, model, ticket, oldComment, updateData);
-	await storeFiles(teamspace, project, model, ticket, refsAndBinary);
+	if (refsAndBinaries.length) await storeFiles(teamspace, TICKETS_RESOURCES_COL, refsAndBinaries);
+};
+
+Comments.importComments = async (teamspace, project, model, commentsByTickets, author) => {
+	const refsAndBinaries = commentsByTickets.flatMap(({ ticket, comments }) => comments.flatMap(
+		({ images }) => processCommentImages(teamspace, project, model, ticket, images)));
+
+	const res = await importComments(teamspace, project, model, commentsByTickets, author);
+	if (refsAndBinaries.length) await storeFiles(teamspace, TICKETS_RESOURCES_COL, refsAndBinaries);
+
+	return res.map((data) => {
+		publish(events.NEW_COMMENT, {
+			teamspace,
+			project,
+			model,
+			data,
+		});
+
+		return data._id;
+	});
 };
 
 Comments.deleteComment = deleteComment;

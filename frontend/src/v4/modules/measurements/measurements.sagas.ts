@@ -34,6 +34,7 @@
 	 MeasurementsActions,
 	 MeasurementsTypes,
 	 selectXyzDisplay,
+	 selectAngleMeasurements,
  } from './';
 
 const onMeasurementCreated = (measure) => {
@@ -144,6 +145,7 @@ export function* resetMeasurementColors() {
 		const areaMeasurements = yield select(selectAreaMeasurements);
 		const lengthMeasurements = yield select(selectLengthMeasurements);
 		const pointMeasurements = yield select(selectPointMeasurements);
+		const angleMeasurements = yield select(selectAngleMeasurements);
 
 		const setDefaultColor = async ({ uuid, color }) => {
 			await Viewer.setMeasurementColor(uuid, color);
@@ -159,6 +161,10 @@ export function* resetMeasurementColors() {
 
 		if (pointMeasurements.length) {
 			pointMeasurements.forEach(setDefaultColor);
+		}
+
+		if (angleMeasurements.length) {
+			angleMeasurements.forEach(setDefaultColor);
 		}
 
 		yield put(MeasurementsActions.resetMeasurementColorsSuccess());
@@ -199,8 +205,9 @@ export function* clearMeasurements() {
 	try {
 		const areaMeasurements = yield select(selectAreaMeasurements);
 		const lengthMeasurements = yield select(selectLengthMeasurements);
+		const angleMeasurements = yield select(selectAngleMeasurements);
 
-		[...areaMeasurements, ...lengthMeasurements].forEach(({uuid}) => Viewer.removeMeasurement(uuid));
+		[...areaMeasurements, ...lengthMeasurements, ...angleMeasurements].forEach(({uuid}) => Viewer.removeMeasurement(uuid));
 		yield put(MeasurementsActions.clearMeasurementsSuccess());
 	} catch (error) {
 		DialogActions.showErrorDialog('clear', 'measurements', error);

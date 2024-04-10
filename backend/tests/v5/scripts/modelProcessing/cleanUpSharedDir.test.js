@@ -26,16 +26,15 @@ const { utilScripts, src } = require('../../helper/path');
 
 const { cn_queue: { shared_storage: sharedDir } } = require(`${src}/utils/config`);
 const Path = require('path');
-const { open } = require('fs/promises');
+const FS = require('fs/promises');
 
 const CleanUpSharedDir = require(`${utilScripts}/modelProcessing/cleanUpSharedDir`);
 
 const createFile = async (filePath, daysOld) => {
-	const fd = await open(filePath, 'w');
+	const fd = await FS.open(filePath, 'w');
 
-	const modifiedDate = new Date();
-	modifiedDate.setDate(modifiedDate.getDate() - daysOld);
-
+	const daysInMS = daysOld * 24 * 60 * 60 * 1000;
+	const modifiedDate = new Date(Date.now() - daysInMS);
 	await fd.utimes(modifiedDate, modifiedDate);
 
 	await fd.close();
@@ -111,11 +110,9 @@ const runTest = () => {
 		test('Should ignore any errors on file removal', async () => {
 			const threshold = 10;
 
-			jest.spyOn(Path, 'join').mockImplementation(() => {
-				throw new Error();
-			});
+			jest.spyOn(FS, 'stat').mockRejectedValue('abc');
 
-			await expect(CleanUpSharedDir.run(threshold)).resolves.toBeUndefined();
+			await CleanUpSharedDir.run(threshold);
 
 			checkFilesExist(data.map(({ name }) => name), true);
 		});

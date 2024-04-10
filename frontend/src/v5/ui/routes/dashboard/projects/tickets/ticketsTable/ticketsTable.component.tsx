@@ -273,7 +273,7 @@ export const TicketsTable = () => {
 				{containerOrFederation && (
 					<MuiThemeProvider theme={theme}>
 						<TicketContextComponent isViewer={false}>
-							{selectedTicketId && (<TicketSlide ticket={sidePanelTicket as ITicket} template={selectedTemplate} />)}
+							{selectedTicketId && (<TicketSlide ticketId={sidePanelTicket._id} template={selectedTemplate} />)}
 							{!selectedTicketId && (
 								<NewTicketSlide
 									defaultValue={sidePanelTicket}
