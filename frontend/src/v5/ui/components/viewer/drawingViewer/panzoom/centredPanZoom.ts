@@ -16,7 +16,6 @@
  */
 
 import { aspectRatio } from '@/v4/helpers/aspectRatio';
-import { noop } from 'lodash';
 import EventEmitter from 'eventemitter3';
 import BezierEasing from 'bezier-easing';
 import { animate } from './animate';
@@ -39,10 +38,20 @@ const panzoom = (target: HTMLElement | SVGElement, options) => {
 	const container = target.parentElement;
 	const emitter = new EventEmitter();
 
+	let animation = null;
+
 	const isSVG = target.tagName.toLowerCase() === 'svg';
 
 	const speed = { x:0, y: 0 };
+
 	
+	const stopInertia = () => {
+		speed.x = 0;
+		speed.y = 0;
+		
+		animation?.cancel();
+	};
+
 	const applyTransform = () => {
 		const { scale, x, y } = transform;
 
@@ -53,6 +62,17 @@ const panzoom = (target: HTMLElement | SVGElement, options) => {
 		}
 	};
 
+	const moveTo = (x: number, y: number) => {
+		if (x === transform.x && transform.y === y ) return;
+
+		transform.x = x;
+		transform.y = y;
+		
+		emitter.emit(Events.transform);
+		applyTransform();
+	};
+
+
 	const zoomTo = (x: number, y: number, newScale: number) => {
 		const originalRect = target.getBoundingClientRect();
 		const relativeX =  x - originalRect.x;
@@ -62,51 +82,40 @@ const panzoom = (target: HTMLElement | SVGElement, options) => {
 		const newPos = { x: transform.x + relativeX * (1 - scaleChange), y: transform.y + relativeY * ( 1 - scaleChange) };
 
 		transform.scale = newScale;
-		transform.x = newPos.x;
-		transform.y = newPos.y;
-		
-		speed.x = 0;
-		speed.y = 0;
-		applyTransform();
+
+		moveTo(newPos.x, newPos.y);
 	};
 
 	const smoothZoom = (x:number, y:number, scaleFactor: number) => {
-		// target.style.transition = '0.25s ease-in-out';
-		zoomTo(x, y, transform.scale * scaleFactor);
+		stopInertia();
+
+		const initialScale = transform.scale;
+		const diffScale =  transform.scale * scaleFactor - initialScale;
+
+		const t = 200;
+
+		animation = animate((currentTime) => {
+			const progress = inertiaFunction(currentTime / t);
+			zoomTo(x, y, initialScale + progress * diffScale );
+			return currentTime >= t;
+		});
 	};
 
 	const onWheel = (ev: WheelEvent) => {
+		stopInertia();
 		const newScale = transform.scale * (1 + zoomStep * -Math.sign(ev.deltaY));
 		zoomTo(ev.clientX, ev.clientY, newScale);
-
-		// target.style.transition = 'none';
-		applyTransform();
 	};
 
 	const onMouseMove = (ev: MouseEvent) => {
-		transform.x += ev.movementX;
-		transform.y += ev.movementY;
-
 		speed.x = ev.movementX * 10;
 		speed.y = ev.movementY * 10;
-
-		applyTransform();
+		
+		moveTo(transform.x + ev.movementX, transform.y + ev.movementY);
 	};
 
 	const onMouseDown = () => {
-		const parentRect = container.getBoundingClientRect();
-		const rect = target.getBoundingClientRect();
-
-		transform.x = rect.x - parentRect.x;
-		transform.y = rect.y - parentRect.y;
-
-		speed.x = 0;
-		speed.y = 0;
-
-		// target.style.transition = 'none';
-
-		applyTransform();
-		
+		stopInertia();
 		container.addEventListener('mousemove', onMouseMove);
 	};
 
@@ -128,23 +137,13 @@ const panzoom = (target: HTMLElement | SVGElement, options) => {
 			};
 
 
-			animate((currentTime) => {
+			animation = animate((currentTime) => {
 				const progress = inertiaFunction(currentTime / t);
-				transform.x = initialPos.x + diffPos.x * progress;
-				transform.y = initialPos.y + diffPos.y * progress;
-
-
-				applyTransform();
-				if (currentTime >= t) return true;
+				moveTo(initialPos.x + diffPos.x * progress, initialPos.y + diffPos.y * progress);
+				return currentTime >= t;
 			});
 	
-
-			// target.style.transition = `all ${t}s cubic-bezier(0,.33,.66,1)`;
-		} else {
-			// target.style.transition = 'none';
 		}
-
-		applyTransform();
 	};
 
 	const subscribeToEvents = () => {
@@ -167,9 +166,9 @@ const panzoom = (target: HTMLElement | SVGElement, options) => {
 	return { 
 		getTransform, 
 		dispose: unSubscribeToEvents, 
-		on: emitter.on,
+		on: emitter.on.bind(emitter),
 		smoothZoom,
-		moveTo: noop,
+		moveTo,
 	};
 };
 
@@ -208,31 +207,30 @@ export const centredPanZoom = (target: HTMLImageElement | SVGSVGElement, padding
 	const options = {
 		maxZoom: 10,
 		minZoom: 1,
-		bounds: parentRect,
 	};
 	
 	const pz = panzoom(target, options);
 
-	// const actualPaddingW = (parentRect.width - size.scaledWidth) / 2 ;
-	// const actualPaddingH = (parentRect.height -  size.scaledHeight ) / 2 ;
+	const actualPaddingW = (parentRect.width - size.scaledWidth) / 2 ;
+	const actualPaddingH = (parentRect.height -  size.scaledHeight ) / 2 ;
 
-	// pz.on('transform', () => {
-	// const targetRect = target.getBoundingClientRect();
-	// const t = pz.getTransform();
+	pz.on('transform', () => {
+		const targetRect = target.getBoundingClientRect();
+		const t = pz.getTransform();
 
-	// const maxX =  actualPaddingW * t.scale;
-	// const minX =  parentRect.width - targetRect.width - actualPaddingW * t.scale;
+		const maxX =  actualPaddingW * t.scale;
+		const minX =  parentRect.width - targetRect.width - actualPaddingW * t.scale;
 
 
-	// const maxY =  actualPaddingH * t.scale;
-	// const minY =  parentRect.height - targetRect.height - actualPaddingH * t.scale;
+		const maxY =  actualPaddingH * t.scale;
+		const minY =  parentRect.height - targetRect.height - actualPaddingH * t.scale;
 
-	// if (t.x > maxX || t.x < minX || t.y > maxY || t.y < minY) {
-	// const x = Math.max(Math.min(t.x, maxX), minX);
-	// const y = Math.max(Math.min(t.y, maxY), minY);
-	// pz.moveTo(x, y);
-	// }
-	// });
+		if (t.x > maxX || t.x < minX || t.y > maxY || t.y < minY) {
+			const x = Math.max(Math.min(t.x, maxX), minX);
+			const y = Math.max(Math.min(t.y, maxY), minY);
+			pz.moveTo(x, y);
+		}
+	});
 
 
 	const zoom = (scale) => {

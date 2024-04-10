@@ -27,11 +27,13 @@ export const animate = (onAnimate: (current:number, elapsed?: number) => boolean
 		const elapsed = currentTime - prevTime;
 		if (!onAnimate(total, elapsed)) {
 			prevTime = currentTime;
-			requestAnimationFrame(animationFrame);
+			animFrame = requestAnimationFrame(animationFrame);
 		} else {
 			cancelAnimationFrame(animFrame);
 		}
 	};
 
 	animFrame = requestAnimationFrame(animationFrame);
+
+	return { cancel: () => cancelAnimationFrame(animFrame) };
 };
