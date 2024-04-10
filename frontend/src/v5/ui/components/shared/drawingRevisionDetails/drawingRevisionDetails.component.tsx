@@ -20,7 +20,7 @@ import { min, range } from 'lodash';
 
 import { Button } from '@controls/button';
 import ArrowUpCircleIcon from '@assets/icons/filled/arrow_up_circle-filled.svg';
-import { DrawingRevisionsActionDispatchers } from '@/v5/services/actionsDispatchers';
+import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors, DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
 import { DrawingUploadStatus } from '@/v5/store/drawings/drawings.types';
@@ -65,7 +65,7 @@ export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: ID
 
 	useEffect(() => {
 		if (!revisions.length) {
-			DrawingRevisionsActionDispatchers.fetch(teamspace, project, drawingId);
+			DrawingRevisionsActionsDispatchers.fetch(teamspace, project, drawingId);
 		}
 	}, []);
 
@@ -122,7 +122,7 @@ export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: ID
 						>
 							<RevisionsListItem
 								onSetVoidStatus={(voidStatus) => (
-									DrawingRevisionsActionDispatchers.setVoidStatus(teamspace, project, drawingId, revision._id, voidStatus)
+									DrawingRevisionsActionsDispatchers.setVoidStatus(teamspace, project, drawingId, revision._id, voidStatus)
 								)}
 								voidStatus={revision.void}
 								onDownloadRevision={() => handleDownloadRevision(revision._id)}
