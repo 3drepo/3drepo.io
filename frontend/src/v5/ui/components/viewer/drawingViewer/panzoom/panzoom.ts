@@ -20,7 +20,7 @@ import EventEmitter from 'eventemitter3';
 import BezierEasing from 'bezier-easing';
 
 const inertiaFunction = BezierEasing(0, 0.33, 0.66, 1);
-
+const zoomEasing = BezierEasing(0, 1.02, 0.65, 1);
 export const Events = {
 	transform: 'transform',
 };
@@ -89,12 +89,12 @@ export const panzoom = (target: HTMLElement | SVGElement, options) => {
 		const initialScale = transform.scale;
 		const diffScale =  transform.scale * scaleFactor - initialScale;
 
-		const t = 200;
+		const duration = 300;
 
 		animation = animate((currentTime) => {
-			const progress = inertiaFunction(currentTime / t);
+			const progress = zoomEasing(currentTime / duration);
 			zoomTo(x, y, initialScale + progress * diffScale );
-			return currentTime >= t;
+			return currentTime >= duration;
 		});
 	};
 
@@ -122,9 +122,9 @@ export const panzoom = (target: HTMLElement | SVGElement, options) => {
 
 		const acc = 9.8;
 
-		const t =  ((((speed.x ** 2 + speed.y ** 2) **  0.5) / acc) / 10 ) * 1000;
+		const duration =  ((((speed.x ** 2 + speed.y ** 2) **  0.5) / acc) / 10 ) * 1000;
 
-		if (t) {
+		if (duration) {
 			const acc2 =  acc * 2;
 			
 			const initialPos = { ...transform };
@@ -139,10 +139,10 @@ export const panzoom = (target: HTMLElement | SVGElement, options) => {
 			speed.y = 0;
 
 			animation = animate((currentTime) => {
-				const progress = inertiaFunction(currentTime / t);
+				const progress = inertiaFunction(currentTime / duration);
 				moveTo(initialPos.x + diffPos.x * progress, initialPos.y + diffPos.y * progress);
 				emitter.emit(Events.transform);
-				return currentTime >= t;
+				return currentTime >= duration;
 			});
 	
 		}
