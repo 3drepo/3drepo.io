@@ -20,7 +20,7 @@ import WarningIcon from '@assets/icons/outlined/warning-outlined.svg';
 import CalibratedIcon from '@assets/icons/filled/calibration-filled.svg';
 import NotCalibrated from '@assets/icons/filled/no_calibration-filled.svg';
 import { Display } from '@/v5/ui/themes/media';
-import { CalibrationStates, DrawingStats, IDrawing, MinimumDrawing } from './drawings.types';
+import { CalibrationStates, DrawingStats, DrawingUploadStatus, IDrawing, MinimumDrawing } from './drawings.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 
 export const DRAWING_LIST_COLUMN_WIDTHS = {
@@ -28,7 +28,7 @@ export const DRAWING_LIST_COLUMN_WIDTHS = {
 		// width: 234,
 		minWidth: 90,
 	},
-	total: {
+	revisionsCount: {
 		width: 155,
 		hideWhenSmallerThan: Display.Desktop,
 	},
@@ -71,23 +71,32 @@ export const CALIBRATION_MAP = {
 		icon: <NotCalibrated />,
 	},
 };
+// TODO - fix (if necessary) when backend is available
+export const canUploadToBackend = (status?: DrawingUploadStatus): boolean => {
+	const statusesForUpload = [
+		DrawingUploadStatus.OK,
+		DrawingUploadStatus.FAILED,
+	];
+
+	return statusesForUpload.includes(status);
+};
 
 export const prepareSingleDrawingData = (
-	Drawing: MinimumDrawing,
+	drawing: MinimumDrawing,
 	stats?: DrawingStats,
 ): IDrawing => ({
-	...Drawing,
-	total: stats?.revisions.total ?? 0,
+	...drawing,
+	revisionsCount: stats?.revisions?.total ?? 0,
 	lastUpdated: getNullableDate(stats?.revisions.lastUpdated),
 	latestRevision: stats?.revisions.latestRevision ?? '',
-	category: stats?.revisions.category ?? '',
-	drawingNumber: stats?.revisions.drawingNumber ?? '',
-	calibration: stats?.revisions.calibration ?? CalibrationStates.UNCALIBRATED,
-	status: stats?.revisions.status ?? '',
+	category: stats?.category ?? '',
+	drawingNumber: stats?.drawingNumber ?? '',
+	calibration: stats?.calibration ?? CalibrationStates.UNCALIBRATED,
+	status: stats?.status ?? DrawingUploadStatus.OK,
 	hasStatsPending: !stats,
-	errorReason: stats?.revisions.errorReason && {
-		message: stats.revisions.errorReason.message,
-		timestamp: getNullableDate(stats?.revisions.errorReason.timestamp),
+	errorReason: stats?.errorReason && {
+		message: stats.errorReason.message,
+		timestamp: getNullableDate(stats?.errorReason.timestamp),
 	},
 });
 

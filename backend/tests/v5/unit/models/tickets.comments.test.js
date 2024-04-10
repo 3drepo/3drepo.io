@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
 const { generateRandomString } = require('../../helper/services');
 const { src } = require('../../helper/path');
 
@@ -152,19 +153,43 @@ const testAddComment = () => {
 
 			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(newComment);
 
-			const _id = await Comments.addComment(teamspace, project, model, ticket, newComment, author);
+			const comment = await Comments.addComment(teamspace, project, model, ticket, newComment, author);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			const { updatedAt } = fn.mock.calls[0][2];
-			const { createdAt } = fn.mock.calls[0][2];
 			expect(fn).toHaveBeenCalledWith(teamspace, commentCol,
-				{ _id, teamspace, project, model, ticket, author, ...newComment, updatedAt, createdAt });
+				{ ...comment, teamspace, project, model });
+		});
+	});
+};
 
-			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_COMMENT, { teamspace,
-				project,
-				model,
-				data: { ticket, _id, author, createdAt, ...newComment } });
+const testImportComments = () => {
+	describe('Import comments', () => {
+		test('should insert all the comments', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const nIterations = 10;
+
+			const author = generateRandomString();
+			const newComments = times(nIterations, (i) => ({
+				ticket: generateRandomString(),
+				comments: times(nIterations, () => ({
+					message: generateRandomString(),
+					images: [generateRandomString()],
+					originalAuthor: generateRandomString(),
+					createdAt: new Date() - i,
+				})),
+			}));
+
+			const fn = jest.spyOn(db, 'insertMany');
+
+			const returnedComments = await Comments.importComments(teamspace, project, model, newComments, author);
+
+			expect(returnedComments.length).toBe(nIterations * nIterations);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, commentCol,
+				returnedComments.map((comment) => ({ ...comment, teamspace, project, model })));
 		});
 	});
 };
@@ -323,6 +348,7 @@ describe('models/tickets.comments', () => {
 	testGetCommentById();
 	testGetCommentsByTicket();
 	testAddComment();
+	testImportComments();
 	testUpdateComment();
 	testDeleteComment();
 });

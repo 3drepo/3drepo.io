@@ -24,6 +24,7 @@ import { DrawingsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/se
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { EditDrawingDialog } from '../../../drawingDialogs/editDrawingDialog.component';
+import { uploadToDrawing } from '../../../uploadDrawingRevisionForm/uploadDrawingRevisionForm.helpers';
 
 type DrawingsEllipsisMenuProps = {
 	selected?: boolean,
@@ -67,7 +68,7 @@ export const DrawingsEllipsisMenu = ({
 					defaultMessage: 'Calibrate',
 				})}
 				onClick={() => { }} // TODO - add calibration functionality
-				disabled={!drawing.total}
+				disabled={!drawing.revisionsCount}
 				hidden={!hasCollaboratorAccess}
 			/>
 			<EllipsisMenuItem
@@ -90,7 +91,7 @@ export const DrawingsEllipsisMenu = ({
 					id: 'drawings.ellipsisMenu.upload',
 					defaultMessage: 'Upload',
 				})}
-				onClick={() => { }} // TODO - add upload modal call
+				onClick={() => uploadToDrawing(drawing._id)}
 				hidden={!hasCollaboratorAccess}
 			/>
 			<EllipsisMenuItem

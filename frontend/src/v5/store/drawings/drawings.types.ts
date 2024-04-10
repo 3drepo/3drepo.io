@@ -24,24 +24,36 @@ export enum CalibrationStates {
 	EMPTY = 'empty',
 }
 
+// TODO - fix once they are sure
+export enum DrawingUploadStatus {
+	OK = 'ok',
+	FAILED = 'failed',
+	UPLOADING = 'uploading',
+	UPLOADED = 'uploaded',
+	QUEUED = 'queued',
+	PROCESSING = 'processing',
+}
+
 export interface MinimumDrawing {
 	_id: string;
 	name: string;
 	role: Role;
 	isFavourite: boolean;
+	category: string; // TODO - add category types?
+	drawingNumber: string;
 }
 
 // TODO: Unfinished interface
 export interface IDrawing extends MinimumDrawing {
 	desc?: string;
-	total: number;
 	lastUpdated?: Date;
 	latestRevision?: string;
 	calibration?: CalibrationStates;
-	category?: string; // TODO - add category types?
-	drawingNumber: string;
+	status: DrawingUploadStatus;
+	revisionsCount: number;
+	role: any;
+	isFavourite: boolean;
 	hasStatsPending?: boolean;
-	status?: any; // TODO - add drawing statuses
 	errorReason?: {
 		message: string;
 		timestamp: Date | null;
@@ -50,18 +62,26 @@ export interface IDrawing extends MinimumDrawing {
 
 // TODO: Unfinished interface
 export interface DrawingStats {
-	_id: string,
-	revisions: {
-		total: number,
-		lastUpdated?: number,
-		drawingNumber: string,
+	_id: string;
+	revisions : {
+		total: number;
+		lastUpdated?: number;
 		latestRevision?: string,
-		calibration?: CalibrationStates,
-		category?: string, // TODO - add category types
-		status?: any, // TODO - add drawing statuses
-		errorReason?: {
-			message: string,
-			timestamp: number,
-		},
-	}
+	};
+	drawingNumber: string,
+	calibration?: CalibrationStates,
+	category?: string, // TODO - add category types
+	status?: DrawingUploadStatus,
+	errorReason?: {
+		message: string;
+		timestamp: number;
+	};
 }
+
+export type NewDrawing = {
+	_id?: string;
+	name: string;
+	category: string;
+	drawingNumber: string;
+	desc?: string;
+};

@@ -35,17 +35,16 @@ import { SkeletonListItem } from '../containers/containersList/skeletonListItem/
 export const Drawings = () => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
-
 	const isListPending = DrawingsHooksSelectors.selectIsListPending();
 	const drawings = DrawingsHooksSelectors.selectDrawings();
 	const favouriteDrawings = DrawingsHooksSelectors.selectFavouriteDrawings();
-
-	const onClickCreate = () => DialogsActionsDispatchers.open(CreateDrawingDialog);
 
 	useEffect(() => {
 		if (!project) return;
 		DrawingsActionsDispatchers.fetchDrawings(teamspace, project);
 	}, [project]);
+
+	const onClickCreate = () => DialogsActionsDispatchers.open(CreateDrawingDialog);
 
 	if (isListPending) return (<DashboardSkeletonList itemComponent={<SkeletonListItem />} />);
 

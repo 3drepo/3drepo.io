@@ -62,6 +62,10 @@ FileRefs.getAllRemovableEntriesByType = async (teamspace, collection) => {
 	return Object.values(res);
 };
 
+FileRefs.insertManyRefs = async (teamspace, collection, entries) => {
+	await db.insertMany(teamspace, collectionName(collection), entries);
+};
+
 FileRefs.insertRef = async (teamspace, collection, refInfo) => {
 	await db.insertOne(teamspace, collectionName(collection), refInfo);
 };

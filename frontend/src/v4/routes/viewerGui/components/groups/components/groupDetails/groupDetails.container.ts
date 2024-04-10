@@ -30,7 +30,7 @@ import {
 } from '../../../../../../modules/groups/groups.selectors';
 import { GroupsActions } from '../../../../../../modules/groups';
 import { selectSettings } from '../../../../../../modules/model';
-import { selectSelectedNodes, selectTotalMeshes } from '../../../../../../modules/tree';
+import { selectGetNumNodesByMeshSharedIdsArray, selectSelectedNodes, selectTotalMeshes } from '../../../../../../modules/tree';
 import { GroupDetails } from './groupDetails.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -44,6 +44,7 @@ const mapStateToProps = createStructuredSelector({
 	criteriaFieldState: selectCriteriaFieldState,
 	isPending: selectFetchingDetailsIsPending,
 	isReadOnly: selectReadOnly,
+	getObjectsCount: (state) => (meshedIds) => selectGetNumNodesByMeshSharedIdsArray(meshedIds)(state),
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -51,7 +52,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	updateEditingGroup: GroupsActions.updateEditingGroup,
 	updateGroup: GroupsActions.updateGroup,
 	createGroup: GroupsActions.createGroup,
-	setCriteriaState: GroupsActions.setCriteriaFieldState
+	setCriteriaState: GroupsActions.setCriteriaFieldState,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(GroupDetails);

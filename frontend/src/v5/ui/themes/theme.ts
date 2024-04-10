@@ -1135,10 +1135,6 @@ export const theme = createTheme({
 					'&.Mui-error': {
 						color: COLOR.ERROR_MAIN,
 					},
-
-					'&.Mui-disabled .MuiInputLabel-asterisk': {
-						display: 'none',
-					},
 				},
 			},
 		},

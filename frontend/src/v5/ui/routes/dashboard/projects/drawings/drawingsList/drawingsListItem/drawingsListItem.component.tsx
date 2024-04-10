@@ -35,7 +35,7 @@ import { DRAWING_LIST_COLUMN_WIDTHS } from '@/v5/store/drawings/drawings.helpers
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors, DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 interface IDrawingsListItem {
 	isSelected: boolean;
@@ -51,13 +51,7 @@ export const DrawingsListItem = memo(({
 	const { teamspace, project } = useParams<DashboardParams>();
 	const isMainList = useContext(IsMainList);
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
-
-	useEffect(() => {
-		if (isMainList) {
-			// TODO - add realtime events
-		}
-		return null;
-	}, [drawing._id]);
+	const revisions = DrawingRevisionsHooksSelectors.selectRevisions(drawing._id);
 
 	const onChangeFavourite = ({ currentTarget: { checked } }) => {
 		if (checked) {
@@ -66,6 +60,13 @@ export const DrawingsListItem = memo(({
 			DrawingsActionsDispatchers.removeFavourite(teamspace, project, drawing._id);
 		}
 	};
+
+	useEffect(() => {
+		if (isMainList) {
+			// TODO - add realtime events
+		}
+		return null;
+	}, [drawing._id]);
 
 	return (
 		<DashboardListItem selected={isSelected} key={drawing._id}>
@@ -80,12 +81,12 @@ export const DrawingsListItem = memo(({
 					tooltipTitle={
 						<FormattedMessage id="drawings.list.item.revisions.tooltip" defaultMessage="View revisions" />
 					}
-					{...DRAWING_LIST_COLUMN_WIDTHS.total}
+					{...DRAWING_LIST_COLUMN_WIDTHS.revisionsCount}
 				>
 					<FormattedMessage
 						id="drawings.list.item.revisions"
 						defaultMessage="{count, plural, =0 {No revisions} one {# revision} other {# revisions}}"
-						values={{ count: drawing.total }}
+						values={{ count: drawing.revisionsCount }}
 					/>
 				</DashboardListItemButton>
 				<DrawingsCalibrationButton
@@ -129,7 +130,11 @@ export const DrawingsListItem = memo(({
 				</DashboardListItemIcon>
 			</DashboardListItemRow>
 			{isSelected && (
-				<div> Revisions...</div>
+				<div>
+					{revisions.map((rev) => (
+						<div>{rev.name} - {+rev.timestamp}</div>
+					))}
+				</div>
 			)}
 		</DashboardListItem>
 	);
