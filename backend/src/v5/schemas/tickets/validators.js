@@ -94,6 +94,8 @@ Validators.propTypesToValidator = (propType, isUpdate, required) => {
 		return isUpdate ? Yup.boolean() : Yup.boolean().default(false);
 	case propTypes.DATE:
 		return imposeNullableRule(types.date);
+	case propTypes.PAST_DATE:
+		return imposeNullableRule(types.dateInThePast);
 	case propTypes.NUMBER:
 		return imposeNullableRule(Yup.number());
 	case propTypes.ONE_OF:

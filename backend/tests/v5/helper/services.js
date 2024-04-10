@@ -467,11 +467,11 @@ ServiceHelper.generateRandomModelProperties = (isFed = false) => ({
 	defaultLegend: ServiceHelper.generateUUIDString(),
 });
 
-ServiceHelper.generateTemplate = (deprecated, hasView = false) => ({
+ServiceHelper.generateTemplate = (deprecated, hasView = false, configOptions = {}) => ({
 	_id: ServiceHelper.generateUUIDString(),
 	code: ServiceHelper.generateRandomString(3),
 	name: ServiceHelper.generateRandomString(),
-	config: {},
+	config: configOptions,
 	properties: [
 		{
 			name: ServiceHelper.generateRandomString(),
@@ -591,6 +591,11 @@ ServiceHelper.generateTicket = (template, internalType = false, container) => {
 
 	return ticket;
 };
+
+ServiceHelper.generateImportedComment = (author = ServiceHelper.generateRandomString()) => ({
+	...ServiceHelper.generateComment(author),
+	originalAuthor: ServiceHelper.generateRandomString(),
+});
 
 ServiceHelper.generateComment = (author = ServiceHelper.generateRandomString()) => {
 	const base64img = fs.readFileSync(image).toString('base64');

@@ -15,8 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { cloneDeep, times } = require('lodash');
+
 const { src } = require('../../../../../../helper/path');
-const { generateRandomString, generateUUIDString, generateRandomBuffer } = require('../../../../../../helper/services');
+const { determineTestGroup, generateRandomString, generateRandomObject, generateUUID, generateUUIDString, generateRandomBuffer } = require('../../../../../../helper/services');
 
 const Comments = require(`${src}/processors/teamspaces/projects/models/commons/tickets.comments`);
 
@@ -28,6 +30,10 @@ const { TICKETS_RESOURCES_COL } = require(`${src}/models/tickets.constants`);
 jest.mock('../../../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
 
+jest.mock('../../../../../../../../src/v5/services/eventsManager/eventsManager');
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+
 const testAddComment = () => {
 	describe('Add comment', () => {
 		const teamspace = generateRandomString();
@@ -35,20 +41,30 @@ const testAddComment = () => {
 		const model = generateRandomString();
 		const ticket = generateRandomString();
 		const author = generateRandomString();
-		const expectedOutput = generateRandomString();
+		const expectedOutput = {
+			_id: generateRandomString(),
+			...generateRandomObject(),
+		};
 
 		test('should call addComment in model and return whatever it returns', async () => {
 			const commentData = generateRandomString();
 			CommentsModel.addComment.mockResolvedValueOnce(expectedOutput);
 
 			await expect(Comments.addComment(teamspace, project, model, ticket, commentData, author))
-				.resolves.toEqual(expectedOutput);
+				.resolves.toEqual(expectedOutput._id);
 
 			expect(CommentsModel.addComment).toHaveBeenCalledTimes(1);
 			expect(CommentsModel.addComment).toHaveBeenCalledWith(teamspace, project, model,
 				ticket, commentData, author);
 
-			expect(FilesManager.storeFile).not.toHaveBeenCalled();
+			expect(FilesManager.storeFiles).not.toHaveBeenCalled();
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(
+				events.NEW_COMMENT, { teamspace,
+					project,
+					model,
+					data: expectedOutput });
 		});
 
 		test('should process image and store a ref', async () => {
@@ -60,7 +76,7 @@ const testAddComment = () => {
 			CommentsModel.addComment.mockResolvedValueOnce(expectedOutput);
 
 			await expect(Comments.addComment(teamspace, project, model, ticket, commentData, author))
-				.resolves.toEqual(expectedOutput);
+				.resolves.toEqual(expectedOutput._id);
 
 			const imgRef = CommentsModel.addComment.mock.calls[0][4].images[0];
 			expect(CommentsModel.addComment).toHaveBeenCalledTimes(1);
@@ -68,9 +84,102 @@ const testAddComment = () => {
 				{ ...commentData, images: [imgRef] }, author);
 
 			const meta = { teamspace, project, model, ticket };
-			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
-			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL,
-				imgRef, imageBuffer, meta);
+			expect(FilesManager.storeFiles).toHaveBeenCalledTimes(1);
+			expect(FilesManager.storeFiles).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL,
+				[{ id: imgRef, data: imageBuffer, meta }]);
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(
+				events.NEW_COMMENT, { teamspace,
+					project,
+					model,
+					data: expectedOutput });
+		});
+	});
+};
+
+const testImportComments = () => {
+	describe('Import comments', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		const author = generateRandomString();
+		const nIterations = 10;
+
+		test('should call addComment in model and return whatever it returns', async () => {
+			const commentData = times(nIterations, () => ({
+				ticket: generateRandomString(),
+				comments: times(nIterations, () => ({
+					message: generateRandomString(),
+				})),
+			}));
+
+			const expectedOutput = commentData.flatMap(({ comments }) => comments
+				.map((comment) => ({ ...comment, _id: generateUUID() })));
+
+			CommentsModel.importComments.mockResolvedValueOnce(expectedOutput);
+
+			await expect(Comments.importComments(teamspace, project, model, commentData, author))
+				.resolves.toEqual(expectedOutput.map(({ _id }) => _id));
+
+			expect(CommentsModel.importComments).toHaveBeenCalledTimes(1);
+			expect(CommentsModel.importComments).toHaveBeenCalledWith(teamspace, project, model,
+				commentData, author);
+
+			expect(FilesManager.storeFiles).not.toHaveBeenCalled();
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(expectedOutput.length);
+			expectedOutput.forEach((data) => {
+				expect(EventsManager.publish).toHaveBeenCalledWith(
+					events.NEW_COMMENT, { teamspace,
+						project,
+						model,
+						data });
+			});
+		});
+
+		test('should process image and store a ref', async () => {
+			const commentData = times(nIterations, () => ({
+				ticket: generateRandomString(),
+				comments: times(nIterations, () => ({
+					[generateRandomString()]: generateRandomString(),
+					images: [generateRandomBuffer()],
+				})),
+			}));
+			const expectedOutput = commentData.flatMap(({ comments }) => comments
+				.map((comment) => ({ ...comment, _id: generateUUID() })));
+
+			CommentsModel.importComments.mockResolvedValueOnce(expectedOutput);
+
+			await expect(Comments.importComments(teamspace, project, model, cloneDeep(commentData), author))
+				.resolves.toEqual(expectedOutput.map(({ _id }) => _id));
+
+			const commentsWithRefs = CommentsModel.importComments.mock.calls[0][3];
+
+			expect(CommentsModel.importComments).toHaveBeenCalledTimes(1);
+			expect(CommentsModel.importComments).toHaveBeenCalledWith(teamspace, project, model,
+				expect.any(Array), author);
+
+			expect(FilesManager.storeFiles).toHaveBeenCalledTimes(1);
+			const storeFilesParams = commentsWithRefs.flatMap(({ ticket, comments }, i) => comments.map(
+				({ images: [imgRef], ...others }, j) => {
+					const { images, ...orgComment } = commentData[i].comments[j];
+					expect(others).toEqual(orgComment);
+
+					const meta = { teamspace, project, model, ticket };
+					return { id: imgRef, data: images[0], meta };
+				}));
+
+			expect(FilesManager.storeFiles).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL, storeFilesParams);
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(expectedOutput.length);
+			expectedOutput.forEach((data) => {
+				expect(EventsManager.publish).toHaveBeenCalledWith(
+					events.NEW_COMMENT, { teamspace,
+						project,
+						model,
+						data });
+			});
 		});
 	});
 };
@@ -93,7 +202,7 @@ const testUpdateComment = () => {
 			expect(CommentsModel.updateComment).toHaveBeenCalledWith(teamspace, project, model, ticket,
 				oldComment, updateData);
 
-			expect(FilesManager.storeFile).not.toHaveBeenCalled();
+			expect(FilesManager.storeFiles).not.toHaveBeenCalled();
 		});
 
 		test('should process image and store a ref', async () => {
@@ -112,9 +221,9 @@ const testUpdateComment = () => {
 				oldComment, updateData);
 
 			const meta = { teamspace, project, model, ticket };
-			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
-			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL,
-				imgRef, imageBuffer, meta);
+			expect(FilesManager.storeFiles).toHaveBeenCalledTimes(1);
+			expect(FilesManager.storeFiles).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL,
+				[{ id: imgRef, data: imageBuffer, meta }]);
 		});
 	});
 };
@@ -219,8 +328,9 @@ const testGetCommentById = () => {
 	});
 };
 
-describe('processors/teamspaces/projects/models/commons/tickets.comments', () => {
+describe(determineTestGroup(__filename), () => {
 	testAddComment();
+	testImportComments();
 	testUpdateComment();
 	testDeleteComment();
 	testGetCommentsByTicket();
