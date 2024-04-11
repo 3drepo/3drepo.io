@@ -36,59 +36,56 @@ export const centredPanZoom = (target: HTMLImageElement | SVGSVGElement, padding
 		originalSize.height = svg.viewBox.baseVal.height;
 	}
 
+	target.setAttribute('width', originalSize.width + 'px');
+	target.setAttribute('height', originalSize.height + 'px');
 
 	const options = {
-		maxZoom: 10,
-		minZoom: 1,
+		maxZoom: 3,
 	};
 	
 	const pz = panzoom(target, options);
 
 	let size = { scaledWidth: 0, scaledHeight:0 };
 
-	const onTransform = () => {
+	const scaleTarget = () => {
+		const parentRect = targetContainer.getBoundingClientRect();
+		size = aspectRatio(originalSize.width, originalSize.height, parentRect.width - paddingW * 2, parentRect.height - paddingH * 2);
+
+		pz.setMinZoom(Math.min(size.scaledWidth / originalSize.width, size.scaledHeight / originalSize.height ));
+	};
+
+	scaleTarget();
+	const resizeObserver = new ResizeObserver(scaleTarget);
+	resizeObserver.observe(targetContainer);
+	pz.zoom(pz.getMinZoom(), false);
+
+	pz.on('transform', () => {
 		const parentRect = targetContainer.getBoundingClientRect();
 		const actualPaddingW = (parentRect.width - size.scaledWidth) / 2 ;
 		const actualPaddingH = (parentRect.height - size.scaledHeight ) / 2 ;
 		const targetRect = target.getBoundingClientRect();
 		const t = pz.getTransform();
-		const maxX =  actualPaddingW * t.scale;
-		const minX =  parentRect.width - targetRect.width - actualPaddingW * t.scale;
 
+		const paddingScale =  targetRect.width / size.scaledWidth;
 
-		const maxY =  actualPaddingH * t.scale;
-		const minY =  parentRect.height - targetRect.height - actualPaddingH * t.scale;
+		console.log(paddingScale);
+
+		const maxX =  actualPaddingW * paddingScale;
+		const minX =  parentRect.width - targetRect.width - actualPaddingW * paddingScale;
+
+		const maxY =  actualPaddingH * paddingScale;
+		const minY =  parentRect.height - targetRect.height - actualPaddingH * paddingScale;
 
 		if (t.x > maxX || t.x < minX || t.y > maxY || t.y < minY) {
 			const x = Math.max(Math.min(t.x, maxX), minX);
 			const y = Math.max(Math.min(t.y, maxY), minY);
 			pz.moveTo(x, y);
 		}
-	};
+	});
 
+	const zoomIn = () => pz.zoom(1.5);
 
-	const scaleTarget = () => {
-		const parentRect = targetContainer.getBoundingClientRect();
-		size = aspectRatio(originalSize.width, originalSize.height, parentRect.width - paddingW * 2, parentRect.height - paddingH * 2);
-		target.setAttribute('width', size.scaledWidth + 'px');
-		target.setAttribute('height', size.scaledHeight + 'px');
-		onTransform();
-	};
-
-	const resizeObserver = new ResizeObserver(scaleTarget);
-	resizeObserver.observe(targetContainer);
-
-	pz.on('transform', onTransform);
-
-
-	const zoom = (scale) => {
-		const contRect = targetContainer.getBoundingClientRect();
-		pz.smoothZoom(contRect.width / 2 + contRect.x, contRect.height / 2 + contRect.y, scale);
-	};
-
-	const zoomIn = () => zoom(1.5);
-
-	const zoomOut = () => zoom(1 / 1.5);
+	const zoomOut = () => pz.zoom(1 / 1.5);
 
 	return { ...pz, zoomIn, zoomOut } ;
 };
