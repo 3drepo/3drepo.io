@@ -64,18 +64,15 @@ export const centredPanZoom = (target: HTMLImageElement | SVGSVGElement, padding
 		const actualPaddingW = (parentRect.width - size.scaledWidth) / 2 ;
 		const actualPaddingH = (parentRect.height - size.scaledHeight ) / 2 ;
 		const targetRect = target.getBoundingClientRect();
-		const t = pz.getTransform();
-
+		
 		const paddingScale =  targetRect.width / size.scaledWidth;
-
-		console.log(paddingScale);
-
 		const maxX =  actualPaddingW * paddingScale;
 		const minX =  parentRect.width - targetRect.width - actualPaddingW * paddingScale;
-
+		
 		const maxY =  actualPaddingH * paddingScale;
 		const minY =  parentRect.height - targetRect.height - actualPaddingH * paddingScale;
-
+		
+		const t = pz.getTransform();
 		if (t.x > maxX || t.x < minX || t.y > maxY || t.y < minY) {
 			const x = Math.max(Math.min(t.x, maxX), minX);
 			const y = Math.max(Math.min(t.y, maxY), minY);
