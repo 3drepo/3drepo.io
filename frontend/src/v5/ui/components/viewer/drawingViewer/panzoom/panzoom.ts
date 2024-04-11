@@ -25,6 +25,7 @@ export const Events = {
 	transform: 'transform',
 };
 
+/* eslint-disable @typescript-eslint/no-use-before-define */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const panzoom = (target: HTMLElement | SVGElement, options) => {
 	const transform = { scale:1, x: 0, y: 0 };
@@ -35,14 +36,28 @@ export const panzoom = (target: HTMLElement | SVGElement, options) => {
 	const container = target.parentElement;
 	const emitter = new EventEmitter();
 
+	let prevContainerRect = container.getBoundingClientRect();
+
 	let animation = null;
 
 	const isSVG = target.tagName.toLowerCase() === 'svg';
 
 	const speed = { x:0, y: 0 };
 
-	const minZoom = options.minZoom || 0.5;
-	const maxZoom = options.maxZoom || 10;
+	let minZoom = options.minZoom || 0.5;
+	let maxZoom = options.maxZoom || 10;
+
+	const keepCenter = () => {
+		const rect =  container.getBoundingClientRect();
+		const diff = { diffX: rect.width - prevContainerRect.width, diffY: rect.height - prevContainerRect.height };
+
+		prevContainerRect = rect;
+		moveTo(transform.x + (diff.diffX / 2), transform.y + (diff.diffY / 2) );
+		emitter.emit(Events.transform);
+	};
+
+	const resizeObserver = new ResizeObserver(keepCenter);
+	resizeObserver.observe(container);
 
 	const stopInertia = () => {
 		speed.x = 0;
@@ -83,19 +98,36 @@ export const panzoom = (target: HTMLElement | SVGElement, options) => {
 		emitter.emit(Events.transform);
 	};
 
+	
 	const smoothZoom = (x:number, y:number, scaleFactor: number) => {
 		stopInertia();
-
+		
 		const initialScale = transform.scale;
 		const diffScale =  transform.scale * scaleFactor - initialScale;
-
+		
 		const duration = 300;
-
+		
 		animation = animate((currentTime) => {
 			const progress = zoomEasing(currentTime / duration);
 			zoomTo(x, y, initialScale + progress * diffScale );
 			return currentTime >= duration;
 		});
+	};
+
+	const zoom = (scaleFactor, smooth:boolean = true) => {
+		const contRect = container.getBoundingClientRect();
+		const pos = { x :contRect.width / 2 - contRect.x,  y: contRect.height / 2 + contRect.y };
+
+		if (smooth) smoothZoom(pos.x, pos.y, scaleFactor);
+		else zoomTo(pos.x, pos.y, transform.scale * scaleFactor);
+	};
+
+	const setMinZoom = (mZoom) => {
+		if (transform.scale < mZoom) {
+			zoom(transform.scale * mZoom);
+		} 
+
+		minZoom = mZoom;
 	};
 
 	const onWheel = (ev: WheelEvent) => {
@@ -153,7 +185,6 @@ export const panzoom = (target: HTMLElement | SVGElement, options) => {
 		container.addEventListener('mousedown', onMouseDown);
 		container.addEventListener('mouseup', onMouseUp);
 		container.addEventListener('mouseleave', onMouseUp);
-
 	};
 
 	const unSubscribeToEvents = () => {
@@ -166,6 +197,7 @@ export const panzoom = (target: HTMLElement | SVGElement, options) => {
 
 	const dispose = () => {
 		stopInertia();
+		resizeObserver.disconnect();
 		unSubscribeToEvents();
 	};
 	
@@ -181,6 +213,9 @@ export const panzoom = (target: HTMLElement | SVGElement, options) => {
 		},
 		smoothZoom,
 		moveTo,
+		setMinZoom,
+		getMinZoom: () => minZoom,
+		zoom,
 	};
 };
 
