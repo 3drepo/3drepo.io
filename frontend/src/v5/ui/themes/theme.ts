@@ -510,6 +510,7 @@ export const theme = createTheme({
 					backgroundColor: COLOR.SECONDARY_DARK,
 					padding: '7px 10px 8px 10px',
 					borderRadius: '8px',
+					userSelect: 'none',
 					...typography.caption,
 				},
 				tooltipPlacementBottom: {
