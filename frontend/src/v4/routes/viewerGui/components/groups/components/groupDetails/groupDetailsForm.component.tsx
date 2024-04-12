@@ -84,16 +84,20 @@ export class GroupDetailsForm extends PureComponent<IProps, any> {
 			>
 				<Form>
 					<FieldsRow>
-						<StyledTextField
-							label={<LongLabel>Number of objects</LongLabel>}
-							value={objectsCount.toString()}
-							disabled
-						/>
-						<StyledTextField
-							label="Last updated"
-							value={formatShortDateTime(updatedAt)}
-							disabled
-						/>
+						{!this.isNewGroup && (
+							<>
+								<StyledTextField
+									label={<LongLabel>Number of objects</LongLabel>}
+									value={objectsCount.toString()}
+									disabled
+								/>
+								<StyledTextField
+									label="Last updated"
+									value={formatShortDateTime(updatedAt)}
+									disabled
+								/>
+							</>
+						)}
 						<StyledFormControl>
 							<InputLabel>Group type</InputLabel>
 							<Field name="type" render={({ field, form }) => (
