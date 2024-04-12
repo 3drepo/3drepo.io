@@ -26,7 +26,6 @@ export const Events = {
 };
 
 /* eslint-disable @typescript-eslint/no-use-before-define */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const panzoom = (target: HTMLElement | SVGElement, options) => {
 	const transform = { scale:1, x: 0, y: 0 };
 	const zoomStep = 0.2;

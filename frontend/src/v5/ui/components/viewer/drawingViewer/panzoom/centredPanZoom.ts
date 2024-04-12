@@ -32,8 +32,8 @@ export const centredPanZoom = (target: HTMLImageElement | SVGSVGElement, padding
 		originalSize.height = img.naturalHeight;
 	} else {
 		const svg:SVGSVGElement = target as SVGSVGElement;
-		originalSize.width = svg.viewBox.baseVal.width;
-		originalSize.height = svg.viewBox.baseVal.height;
+		originalSize.width = svg.viewBox.baseVal.width || svg.width.baseVal.value;
+		originalSize.height = svg.viewBox.baseVal.height || svg.height.baseVal.value;;
 	}
 
 	target.setAttribute('width', originalSize.width + 'px');
