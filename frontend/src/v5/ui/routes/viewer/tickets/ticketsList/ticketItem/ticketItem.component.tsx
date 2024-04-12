@@ -59,12 +59,16 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 		if (newVal !== dueDate) updateTicketProperty({ [IssueProperties.DUE_DATE]: newVal });
 	};
 
-	const onClickTicket = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+	const selectTicket = (event) => {
 		event.stopPropagation();
-		TicketsCardActionsDispatchers.openTicket(ticket._id);
 		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
 		TicketsCardActionsDispatchers.setSelectedTicketPin(hasDefaultPin(ticket) ? ticket._id : null);
 		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id, revision);
+	};
+
+	const onClickTicket = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+		selectTicket(event);
+		TicketsCardActionsDispatchers.openTicket(ticket._id);
 	};
 
 	useEffect(() => {
@@ -94,7 +98,7 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 						</IssuePropertiesContainer>
 					)}
 				</FlexColumn>
-				{hasThumbnail && <TicketItemThumbnail ticket={ticket} />}
+				{hasThumbnail && <TicketItemThumbnail ticket={ticket} selectTicket={selectTicket} />}
 			</FlexRow>
 			<BottomRow>
 				<Id>

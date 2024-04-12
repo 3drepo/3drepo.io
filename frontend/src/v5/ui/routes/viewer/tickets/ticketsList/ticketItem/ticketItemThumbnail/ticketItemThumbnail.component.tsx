@@ -16,16 +16,20 @@
  */
 
 import { ViewpointOverlay, ImagePlaceholder, Thumbnail, ThumbnailContainer, ViewpointIcon, ImageIcon } from './ticketItemThumbnail.styles';
-import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { hasDefaultPin } from '../../../ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { get, has } from 'lodash';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
 import { getTicketResourceUrl, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { AdditionalProperties } from '../../../tickets.constants';
+import { ITicket } from '@/v5/store/tickets/tickets.types';
 
-export const TicketItemThumbnail = ({ ticket }) => {
+type ITicketItemThumbnail = {
+	ticket: ITicket;
+	selectTicket: (e) => void;
+};
+
+export const TicketItemThumbnail = ({ ticket, selectTicket }: ITicketItemThumbnail) => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 
@@ -37,10 +41,7 @@ export const TicketItemThumbnail = ({ ticket }) => {
 		getTicketResourceUrl(teamspace, project, containerOrFederation, ticket._id, resourceId, isFederation) : null;
 
 	const goToViewpoint = (event) => {
-		event.stopPropagation();
-		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
-		TicketsCardActionsDispatchers.setSelectedTicketPin(hasDefaultPin(ticket) ? ticket._id : null);
-		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id);
+		selectTicket(event);
 		
 		if (!hasViewpoint) return;
 		goToView(defaultView); 
