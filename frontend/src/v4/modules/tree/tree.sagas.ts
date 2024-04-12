@@ -17,6 +17,7 @@
 import { all, call, put, select, take, takeLatest, delay } from 'redux-saga/effects';
 
 import { selectHasViewerAccess } from '@/v5/store/containers/containers.selectors';
+import _ from 'lodash';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
@@ -41,8 +42,8 @@ import {
 	selectActiveNode,
 	selectDefaultHiddenNodesIds,
 	selectExpandedNodesMap,
-	selectFullySelectedNodesIds,
 	selectGetNodesByIds,
+	selectNodesByMeshSharedIdsArray,
 	selectGetNodesIdsFromSharedIds,
 	selectHiddenGeometryVisible,
 	selectIsTreeProcessed,
@@ -50,6 +51,7 @@ import {
 	selectSelectionMap,
 	selectSubModelsRootNodes,
 	selectTreeNodesList,
+	selectSelectedNodes,
 } from './tree.selectors';
 import { TreeActions, TreeTypes } from './tree.redux';
 
@@ -274,27 +276,6 @@ function* handleNodesClickBySharedIds({ objects = [] }) {
 	yield put(TreeActions.handleNodesClick(nodes));
 }
 
-function* getSelectedNodes() {
-	yield waitForTreeToBeReady();
-
-	try {
-		yield delay(100);
-		const objectsStatus = yield Viewer.getObjectsStatus();
-
-		if (objectsStatus?.highlightedNodes) {
-			const { highlightedNodes } = objectsStatus;
-
-			if (highlightedNodes?.length === 1 && !highlightedNodes[0].shared_ids?.length) {
-				yield put(TreeActions.setSelectedNodesSuccess([]));
-			} else {
-				yield put(TreeActions.setSelectedNodesSuccess(highlightedNodes));
-			}
-		}
-	} catch (error) {
-		console.error(error);
-	}
-}
-
 function* clearCurrentlySelected(keepMetadataOpen = false) {
 	yield waitForTreeToBeReady();
 
@@ -321,7 +302,7 @@ function* clearCurrentlySelected(keepMetadataOpen = false) {
 		}
 	}
 
-	yield put(TreeActions.getSelectedNodes());
+	yield put(TreeActions.setSelectedNodesSuccess([]));
 }
 
 /**
@@ -373,8 +354,8 @@ function* showTreeNodes(nodesIds = [], skipNested = false) {
 function* hideSelectedNodes() {
 	yield waitForTreeToBeReady();
 
-	const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
-	yield hideTreeNodes(fullySelectedNodes);
+	const selectedNodes = yield select(selectSelectedNodes);
+	yield hideTreeNodes(selectedNodes);
 }
 
 function* hideNodesBySharedIds({ objects = [], resetTree = false }) {
@@ -433,8 +414,8 @@ function* isolateSelectedNodes({ nodeId }) {
 		const meshes = yield TreeProcessing.getMeshesByNodeIds([nodeId]);
 		Viewer.zoomToObjects({entries: meshes});
 	} else {
-		const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
-		yield isolateNodes(fullySelectedNodes);
+		const selectedNodes = yield select(selectSelectedNodes);
+		yield isolateNodes(selectedNodes);
 	}
 }
 
@@ -479,8 +460,12 @@ function* deselectNodes({ nodesIds = [] }) {
 			yield put(BimActions.setActiveMeta(null));
 		}
 
+		const selectedSharedIds = (yield select(selectGetNodesByIds(nodesIds))).map((n) => n.shared_id);
+		const nodesToDeselect = yield select(selectNodesByMeshSharedIdsArray, selectedSharedIds);
+		const selectedNodes = yield select(selectSelectedNodes);
+
+		yield put(TreeActions.setSelectedNodesSuccess(selectedNodes.filter((node) => !nodesToDeselect.includes(node))));
 		yield put(TreeActions.updateDataRevision());
-		yield put(TreeActions.getSelectedNodes());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('deselect', 'node', error));
 	}
@@ -506,6 +491,7 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipSelecting = false
 			return;
 		}
 
+		let result;
 		if (!skipSelecting) {
 			let lastNodeId = nodesIds[nodesIds.length - 1];
 			let [lastNode] = yield select(selectGetNodesByIds([lastNodeId]));
@@ -515,7 +501,7 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipSelecting = false
 				[lastNode] = yield select(selectGetNodesByIds([lastNodeId]));
 			}
 
-			const [result] = yield all([
+			[result] = yield all([
 				call(TreeProcessing.selectNodes, { nodesIds }),
 				call(handleMetadata, lastNode)
 			]);
@@ -524,21 +510,21 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipSelecting = false
 				yield call(expandToNode, lastNode);
 			}
 
-			const selectionMap = yield select(selectSelectionMap);
-			highlightObjects(result.highlightedObjects, selectionMap, colour);
-
 			yield put(TreeActions.setActiveNode(lastNodeId));
 		} else {
-			const [result] = yield all([
+			[result] = yield all([
 				call(TreeProcessing.selectNodes, { nodesIds }),
 			]);
-
-			const selectionMap = yield select(selectSelectionMap);
-			highlightObjects(result.highlightedObjects, selectionMap, colour);
 		}
+		const selectionMap = yield select(selectSelectionMap);
+		highlightObjects(result.highlightedObjects, selectionMap, colour);
 
+		const selectedSharedIds = (yield select(selectGetNodesByIds(nodesIds))).map((n) => n.shared_id);
+		const nodesToSelect = yield select(selectNodesByMeshSharedIdsArray, selectedSharedIds);
+		const selectedNodes = yield select(selectSelectedNodes);
+
+		yield put(TreeActions.setSelectedNodesSuccess(_.uniq(selectedNodes.concat(nodesToSelect))));
 		yield put(TreeActions.updateDataRevision());
-		yield put(TreeActions.getSelectedNodes());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('select', 'nodes', error));
 	}
@@ -599,8 +585,8 @@ function* setTreeNodesVisibility({ nodesIds, visibility }) {
 function* setSelectedNodesVisibility({ nodeId, visibility }) {
 	yield waitForTreeToBeReady();
 
-	const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
-	const hasSelectedNodes = !!fullySelectedNodes.length;
+	const delectedNodes = yield select(selectSelectedNodes);
+	const hasSelectedNodes = !!delectedNodes.length;
 	yield put(TreeActions.setTreeNodesVisibility([nodeId], visibility, hasSelectedNodes));
 }
 
@@ -697,7 +683,6 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.FETCH_FULL_TREE, fetchFullTree);
 	yield takeLatest(TreeTypes.START_LISTEN_ON_SELECTIONS, startListenOnSelections);
 	yield takeLatest(TreeTypes.STOP_LISTEN_ON_SELECTIONS, stopListenOnSelections);
-	yield takeLatest(TreeTypes.GET_SELECTED_NODES, getSelectedNodes);
 	yield takeLatest(TreeTypes.SHOW_ALL_NODES, showAllNodes);
 	yield takeLatest(TreeTypes.HIDE_SELECTED_NODES, hideSelectedNodes);
 	yield takeLatest(TreeTypes.ISOLATE_SELECTED_NODES, isolateSelectedNodes);

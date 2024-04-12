@@ -47,7 +47,7 @@ interface IProps {
 	modelSettings: any;
 	totalMeshes: number;
 	canUpdate: boolean;
-	selectedNodes: any;
+	selectedNodes: any[];
 	criteriaFieldState: ICriteriaFieldState;
 	createGroup: (teamspace: any, modelId: any, revision: any) => void;
 	updateGroup: (teamspace: any, modelId: any, revision: any, groupId: any) => void;
@@ -57,7 +57,6 @@ interface IProps {
 	isPending: boolean;
 	deleteGroup: (id: string | null) => void;
 	isReadOnly: boolean;
-	objectsCount: number;
 }
 
 interface IState {
@@ -82,6 +81,10 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 
 	get isSmartGroup() {
 		return this.editingGroup.type === GROUPS_TYPES.SMART;
+	}
+
+	get objectsCount() {
+		return this.props.selectedNodes.length;
 	}
 
 	get editingGroup() {
@@ -135,7 +138,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 	));
 
 	public componentDidMount() {
-		this.setState({ isFormDirty: this.isNewGroup, isFormValid: this.isNewGroup && !!this.props.objectsCount });
+		this.setState({ isFormDirty: this.isNewGroup, isFormValid: this.isNewGroup && !!this.objectsCount });
 	}
 
 	public componentDidUpdate(prevProps: Readonly<PropsWithChildren<IProps>>) {
@@ -157,7 +160,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 		}
 
 		// if it is a smart group, we ignore the manual selection because it depends on the rules
-		const groupHasValidSelection = this.isSmartGroup || this.props.objectsCount > 0;
+		const groupHasValidSelection = this.isSmartGroup || this.objectsCount > 0;
 		this.setIsFormValid(GroupSchema.isValidSync(this.editingGroup) && groupHasValidSelection);
 	}
 
@@ -188,7 +191,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 			totalMeshes={this.props.totalMeshes}
 			canUpdate={this.props.canUpdate}
 			handleChange={this.handleFieldChange}
-			objectsCount={this.props.objectsCount}
+			objectsCount={this.objectsCount}
 		/>
 	)
 

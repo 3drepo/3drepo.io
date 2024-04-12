@@ -28,7 +28,7 @@ import TreeProcessing from './treeProcessing/treeProcessing';
 export const selectTreeDomain = (state) => ({...state.tree});
 
 export const selectSelectedNodes = createSelector(
-	selectTreeDomain, (state) => state.selectedNodes
+	selectTreeDomain, (state) => state.selectedNodes || []
 );
 
 export const selectIsPending = createSelector(
@@ -277,11 +277,14 @@ export const selectGetMeshesByIds = (nodesIds = []) => createSelector(
 	}
 );
 
-export const selectGetNumNodesByMeshSharedIdsArray = (meshes = []) => createSelector(
-	selectTreeNodesList, selectNodesIndexesMap, selectNodesBySharedIdsMap,
-	(nodeList, nodeMap, nodesBySharedIds) => {
+export const selectNodesByMeshSharedIdsArray = createSelector(
+	selectTreeNodesList,
+	selectNodesIndexesMap,
+	selectNodesBySharedIdsMap,
+	(state, meshes) => meshes,
+	(nodeList, nodeMap, nodesBySharedIds, meshes) => {
 		if (!(nodeList && nodeMap && nodesBySharedIds)) {
-			return meshes.length;
+			return meshes;
 		}
 		const foundNodes = new Set();
 
@@ -293,17 +296,13 @@ export const selectGetNumNodesByMeshSharedIdsArray = (meshes = []) => createSele
 			}
 		});
 
-		return foundNodes.size;
+		return Array.from(foundNodes);
 	}
 );
 
-export const selectNumOfVisibleSelectedNodes = createSelector(
-	selectTreeDomain,
-	selectSelectedNodes,
-	(state, meshes) => {
-		const meshesIds = (meshes || []).flatMap((node) => node.shared_ids);
-		return selectGetNumNodesByMeshSharedIdsArray(meshesIds)(state);
-	}
+export const selectNumNodesByMeshSharedIdsArray = createSelector(
+	selectNodesByMeshSharedIdsArray,
+	(nodes) => nodes.length
 );
 
 type MyObject = {

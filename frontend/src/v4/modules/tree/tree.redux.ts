@@ -23,7 +23,6 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	startListenOnSelections: [],
 	stopListenOnSelections: [],
 	clearSelectedNodes: [],
-	getSelectedNodes: [],
 	setSelectedNodesSuccess: ['selectedNodes'],
 	showAllNodes: [],
 	hideSelectedNodes: [],
