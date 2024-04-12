@@ -138,7 +138,7 @@ TemplateConstants.presetModulesProperties = {
 		createPropertyEntry('Status', propTypes.ONE_OF, { [propOptions.VALUES]: ['Active', 'Reviewed', 'Approved', 'Resolved'], default: 'Active', [propOptions.REQUIRED]: true }),
 		createPropertyEntry('Assigned to', propTypes.TEXT),
 		createPropertyEntry('Approved by', propTypes.TEXT),
-		createPropertyEntry('Approved at', propTypes.TEXT),
+		createPropertyEntry('Approved at', propTypes.DATE),
 	],
 
 };
