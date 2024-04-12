@@ -452,7 +452,8 @@ const testFindOneAndUpdate = () => {
 
 		test('Should return then update matching document (projection)', async () => {
 			const newProp = generateRandomString();
-			await expect(DB.findOneAndUpdate(dbName, col, { _id: data[2]._id }, { $set: { newProp } }, { projection: { n: 0 } }))
+			await expect(DB.findOneAndUpdate(dbName, col, { _id: data[2]._id }, { $set: { newProp } },
+				{ projection: { n: 0 } }))
 				.resolves.toEqual({ ...data[2], n: undefined });
 
 			await expect(DB.findOne(dbName, col, { _id: data[2]._id })).resolves.toEqual({ ...data[2], newProp });
