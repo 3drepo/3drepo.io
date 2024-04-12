@@ -18,7 +18,16 @@ import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DrawingItem } from './drawingItem/drawingItem.component';
 import { CentredContainer } from '@controls/centredContainer';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
-import { CardList } from '@components/viewer/cards/card.styles';
+import { IDrawing } from '@/v5/store/drawings/drawings.types';
+import { VirtualisedList } from './drawingsList.styles';
+import { CardContent, CardList, CardListItem } from '@components/viewer/cards/card.styles';
+import { forwardRef } from 'react';
+
+const Table = forwardRef(({ children, ...props }, ref: any) => (
+	<table ref={ref} {...props}>
+		<CardContent>{children}</CardContent>
+	</table>
+));
 
 export const DrawingsList = () => {
 	const drawings = DrawingsHooksSelectors.selectCalibratedDrawings();
@@ -31,14 +40,22 @@ export const DrawingsList = () => {
 	);
 
 	return (
-		<CardList>
-			{drawings.map((drawing) => (
+		// @ts-ignore
+		<VirtualisedList
+			data={drawings}
+			totalCount={drawings.length}
+			components={{
+				Table,
+				TableBody: CardList,
+				TableRow: CardListItem,
+			}}
+			itemContent={(index, drawing: IDrawing) => (
 				<DrawingItem
 					drawing={drawing}
 					key={drawing._id}
 					onClick={() => {}}
 				/>
-			))}
-		</CardList>
+			)}
+		/>
 	);
 };

@@ -39,16 +39,16 @@ export const DrawingsListCard = () => {
 				<DrawingsIcon />
 				<FormattedMessage id="viewer.cards.drawings.title" defaultMessage="Drawings" />
 			</CardHeader>
-			<CardContent>
-				{drawings.length
-					? (<DrawingsList />)
-					: (
+			{drawings.length
+				? (<DrawingsList />)
+				: (
+					<CardContent>
 						<EmptyListMessage>
 							<FormattedMessage id="viewer.cards.drawings.noDrawings" defaultMessage="No drawings have been created yet" />
 						</EmptyListMessage>
-					)
-				}
-			</CardContent>
+					</CardContent>
+				)
+			}
 		</CardContainer>
 	);
 };
