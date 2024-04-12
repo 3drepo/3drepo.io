@@ -28,6 +28,7 @@ export const DueDateContainer = styled.div`
 	font-weight: ${FONT_WEIGHT.MEDIUM};
 	height: 20px;
 	box-sizing: border-box;
+	align-content: center;
 `;
 
 export const CalendarIcon = styled(CalendarIconBase)`
@@ -43,7 +44,7 @@ export const DueStateContainer = styled.span`
 export const DateContainer = styled.span<{ isOverdue?: boolean; disabled?: boolean }>`
 	font-size: 10px;
 	user-select: none;
-	display: inline-flex;
+	display: flex;
 	gap: 3px;
 	height: inherit;
 	align-items: center;
