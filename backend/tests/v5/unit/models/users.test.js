@@ -516,13 +516,13 @@ const testVerify = () => {
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { user: username },
 				{ $unset: { 'customData.inactive': 1, 'customData.emailVerifyToken': 1 } },
-				{
+				{ projection: {
 					'customData.firstName': 1,
 					'customData.lastName': 1,
 					'customData.email': 1,
 					'customData.billing.billingInfo.company': 1,
 					'customData.mailListOptOut': 1,
-				});
+				} });
 		});
 	});
 };
