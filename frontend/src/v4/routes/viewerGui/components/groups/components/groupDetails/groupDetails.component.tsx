@@ -89,9 +89,6 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 	}
 
 	get objectsCount() {
-		if (!this.isNewGroup) {
-			return this.editingGroup.totalSavedMeshes;
-		}
 		const sharedIds = (this.props.selectedNodes || []).flatMap((node) => node.shared_ids);
 		return this.props.getObjectsCount(sharedIds);
 	}
