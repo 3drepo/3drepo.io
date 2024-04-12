@@ -189,8 +189,8 @@ export const panzoom = (target: HTMLElement | SVGElement, options) => {
 
 	const unSubscribeToEvents = () => {
 		container.removeEventListener('wheel', onWheel);
-		container.removeEventListener('mousemove', onMouseDown);
-		container.removeEventListener('mousedown', onMouseMove);
+		container.removeEventListener('mousemove', onMouseMove);
+		container.removeEventListener('mousedown', onMouseDown);
 		container.removeEventListener('mouseup', onMouseUp);
 		container.removeEventListener('mouseleave', onMouseUp);
 	};
@@ -198,6 +198,7 @@ export const panzoom = (target: HTMLElement | SVGElement, options) => {
 	const dispose = () => {
 		stopInertia();
 		resizeObserver.disconnect();
+		emitter.removeAllListeners();
 		unSubscribeToEvents();
 	};
 	
