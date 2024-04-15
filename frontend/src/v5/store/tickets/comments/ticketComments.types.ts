@@ -30,6 +30,9 @@ export type ITicketComment = {
 	updatedAt: Date,
 	deleted: boolean,
 	history?: TicketCommentHistoryBlock[],
+	// imported tickets
+	originalAuthor?: string,
+	importedAt?: Date,
 };
 
 export type TicketCommentReplyMetadata = {

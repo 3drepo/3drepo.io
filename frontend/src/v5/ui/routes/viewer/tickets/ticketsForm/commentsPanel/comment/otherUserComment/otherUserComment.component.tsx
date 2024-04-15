@@ -22,6 +22,7 @@ import { TicketButton } from '../../../../ticketButton/ticketButton.styles';
 import { Comment, AuthorAvatar } from './otherUserComment.styles';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 import { CommentButtons, CommentWithButtonsContainer } from '../basicComment/basicComment.styles';
+import { getDefaultUserNotFound } from '@/v5/store/users/users.helpers';
 
 type OtherUserCommentProps = ITicketComment & {
 	commentAge: string;
@@ -33,12 +34,13 @@ export const OtherUserComment = ({
 	_id,
 	deleted,
 	author,
+	originalAuthor,
 	onReply,
 	isFirstOfBlock,
 	...props
 }: OtherUserCommentProps) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
-	const user = UsersHooksSelectors.selectUser(teamspace, author);
+	const user = originalAuthor ? getDefaultUserNotFound(originalAuthor) : UsersHooksSelectors.selectUser(teamspace, author);
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const authorDisplayName = isFirstOfBlock ? `${user.firstName} ${user.lastName}` : null;
 
