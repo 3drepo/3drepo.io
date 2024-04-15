@@ -17,24 +17,24 @@
 import { Tooltip } from '@mui/material';
 
 import { formatMessage } from '@/v5/services/intl';
-import { ModelTypes } from '@/v5/store/projects/projects.helpers';
+import { ModelType } from '@/v5/store/projects/projects.helpers';
 import { Highlight } from '../highlight/highlight.component';
 import { Container, Detail, Name } from './modelItem.styles';
 
 interface IProps {
 	name: string;
-	modelType?: ModelTypes
+	modelType?: ModelType
 	searchText?: string;
 }
 
 export const ModelItem = ({name, modelType, searchText = ''}: IProps) => {
 	const modelTypeLabel = () => {
 		switch (modelType) {
-			case ModelTypes.CONTAINER:
+			case ModelType.CONTAINER:
 				return formatMessage({ id: 'userPermissions.modelTable.modelType.container', defaultMessage: 'Container'})
-			case ModelTypes.FEDERATION:
+			case ModelType.FEDERATION:
 				return formatMessage({ id: 'userPermissions.modelTable.modelType.federation', defaultMessage: 'Federation'})
-			case ModelTypes.DRAWING:
+			case ModelType.DRAWING:
 				return formatMessage({ id: 'userPermissions.modelTable.modelType.drawing', defaultMessage: 'Drawing'})
 			default:
 				return modelType
