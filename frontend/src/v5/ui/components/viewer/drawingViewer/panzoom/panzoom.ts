@@ -26,7 +26,6 @@ export const Events = {
 };
 
 /* eslint-disable @typescript-eslint/no-use-before-define */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const panzoom = (target: HTMLElement | SVGElement, options) => {
 	const transform = { scale:1, x: 0, y: 0 };
 	const zoomStep = 0.2;
@@ -189,8 +188,8 @@ export const panzoom = (target: HTMLElement | SVGElement, options) => {
 
 	const unSubscribeToEvents = () => {
 		container.removeEventListener('wheel', onWheel);
-		container.removeEventListener('mousemove', onMouseDown);
-		container.removeEventListener('mousedown', onMouseMove);
+		container.removeEventListener('mousemove', onMouseMove);
+		container.removeEventListener('mousedown', onMouseDown);
 		container.removeEventListener('mouseup', onMouseUp);
 		container.removeEventListener('mouseleave', onMouseUp);
 	};
@@ -198,6 +197,7 @@ export const panzoom = (target: HTMLElement | SVGElement, options) => {
 	const dispose = () => {
 		stopInertia();
 		resizeObserver.disconnect();
+		emitter.removeAllListeners();
 		unSubscribeToEvents();
 	};
 	
