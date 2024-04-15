@@ -44,6 +44,7 @@ export const CommentNonMessageContent = ({
 	onUploadImages,
 	onDeleteImage,
 	onEditImage,
+	originalAuthor,
 }: CommentNonMessageContentProps) => {
 	const { teamspace, project, containerOrFederation } = useParams();
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
@@ -76,6 +77,7 @@ export const CommentNonMessageContent = ({
 			{author && (<CommentAuthor>{author}</CommentAuthor>)}
 			{metadata && (
 				<CommentReply
+					originalAuthor={originalAuthor}
 					variant={isCurrentUserComment ? 'secondary' : 'primary'}
 					{...metadata}
 				/>

@@ -30,12 +30,14 @@ type CommentReplyProps = TicketCommentReplyMetadata & {
 	variant?: 'primary' | 'secondary',
 	shortMessage?: boolean,
 	images?: string[],
+	originalAuthor?: boolean,
 };
 export const CommentReply = ({
 	message,
 	author,
 	variant = 'primary',
 	images = [],
+	originalAuthor,
 	...props
 }: CommentReplyProps) => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
@@ -45,9 +47,12 @@ export const CommentReply = ({
 	const currentUser = CurrentUserHooksSelectors.selectUsername();
 	const user = UsersHooksSelectors.selectUser(teamspace, author);
 
-	const authorDisplayName = (author === currentUser)
-		? formatMessage({ id: 'comment.currentUser.author', defaultMessage: 'You' })
-		: `${user.firstName} ${user.lastName}`;
+	let authorDisplayName = author;
+	if (!originalAuthor) {
+		authorDisplayName = (author === currentUser)
+			? formatMessage({ id: 'comment.currentUser.author', defaultMessage: 'You' })
+			: `${user.firstName} ${user.lastName}`;
+	}
 	const imagesSrcs = images.map((image) => getTicketResourceUrl(
 		teamspace,
 		project,

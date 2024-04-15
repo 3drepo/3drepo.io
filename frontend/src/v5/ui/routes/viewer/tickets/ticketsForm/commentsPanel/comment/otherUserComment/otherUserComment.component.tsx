@@ -53,6 +53,7 @@ export const OtherUserComment = ({
 				author={authorDisplayName}
 				isCurrentUserComment={false}
 				isFirstOfBlock={isFirstOfBlock}
+				originalAuthor={originalAuthor}
 				{...props}
 			/>
 			{!readOnly && (

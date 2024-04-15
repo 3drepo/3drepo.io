@@ -48,9 +48,10 @@ export const extractMetadata = (message: string): TicketCommentReplyMetadata => 
 	images: extractMetadataImages(message),
 });
 
-export const createMetadata = (comment: ITicketComment): TicketCommentReplyMetadata => (
-	_.pick(comment, '_id', 'author', 'message', 'images') as TicketCommentReplyMetadata
-);
+export const createMetadata = (comment: ITicketComment): TicketCommentReplyMetadata => ({
+	..._.pick(comment, '_id', 'message', 'images'),
+	author: comment?.originalAuthor || comment?.author,
+}) as TicketCommentReplyMetadata;
 
 export const stripMetadata = (message: string = '') => message.replaceAll(/\[[_a-z]*\]:- "([^"]*)"(\n)+/g, '');
 export const sanitiseMessage = (message: string = '') => message.replaceAll('"', '&#34;');
