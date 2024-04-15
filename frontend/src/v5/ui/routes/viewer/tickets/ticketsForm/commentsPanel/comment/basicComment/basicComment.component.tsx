@@ -32,7 +32,6 @@ export type BasicCommentProps = Partial<Omit<ITicketComment, 'history' | '_id'>>
 	onEditImage?: (img, index) => void;
 };
 export const BasicComment = ({
-	author,
 	message,
 	commentAge,
 	createdAt,
