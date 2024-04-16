@@ -33,6 +33,7 @@ const propTypes = createConstantMapping([
 	'longText',
 	'boolean',
 	'date',
+	'pastDate',
 	'number',
 	'oneOf',
 	'manyOf',
@@ -47,6 +48,7 @@ const propOptions = createConstantMapping([
 	'required',
 	'default',
 	'readOnly',
+	'allowWriteOnImport',
 	'availableIf',
 	'immutable',
 	'readOnlyOnUI',
@@ -136,7 +138,7 @@ TemplateConstants.presetModulesProperties = {
 		createPropertyEntry('Status', propTypes.ONE_OF, { [propOptions.VALUES]: ['Active', 'Reviewed', 'Approved', 'Resolved'], default: 'Active', [propOptions.REQUIRED]: true }),
 		createPropertyEntry('Assigned to', propTypes.TEXT),
 		createPropertyEntry('Approved by', propTypes.TEXT),
-		createPropertyEntry('Approved at', propTypes.TEXT),
+		createPropertyEntry('Approved at', propTypes.DATE),
 	],
 
 };
@@ -144,7 +146,7 @@ TemplateConstants.presetModulesProperties = {
 const defaultProperties = [
 	createPropertyEntry('Description', propTypes.LONG_TEXT),
 	createPropertyEntry('Owner', propTypes.TEXT, { [propOptions.READ_ONLY]: true }),
-	createPropertyEntry('Created at', propTypes.DATE, { [propOptions.READ_ONLY]: true }),
+	createPropertyEntry('Created at', propTypes.PAST_DATE, { [propOptions.READ_ONLY]: true, [propOptions.ALLOW_WRITE_ON_IMPORT]: true }),
 	createPropertyEntry('Updated at', propTypes.DATE, { [propOptions.READ_ONLY]: true }),
 	createPropertyEntry('Default Image', propTypes.IMAGE, { [propOptions.AVAILABLE_IF]: ({ defaultImage }) => defaultImage }),
 	createPropertyEntry('Default View', propTypes.VIEW, { [propOptions.AVAILABLE_IF]: ({ defaultView }) => defaultView }),
@@ -187,14 +189,26 @@ Object.keys(TemplateConstants.presetModulesProperties).forEach((module) => {
 	);
 });
 
-TemplateConstants.getApplicableDefaultProperties = (config) => [
+const processProperty = (prop, config, isImport) => {
+	const isAvailable = !prop[propOptions.AVAILABLE_IF] || prop[propOptions.AVAILABLE_IF](config);
+	if (isAvailable) {
+		const result = { ...prop };
+		if (isImport && result[propOptions.ALLOW_WRITE_ON_IMPORT]) {
+			delete result[propOptions.READ_ONLY];
+		}
+		delete result[propOptions.AVAILABLE_IF];
+		delete result[propOptions.ALLOW_WRITE_ON_IMPORT];
+		return result;
+	}
+	return [];
+};
+
+TemplateConstants.getApplicableDefaultProperties = (config, isImport) => [
 	...defaultProperties.flatMap(
-		({ availableIf, ...prop }) => (!availableIf || availableIf(config) ? prop : []),
+		(prop) => processProperty(prop, config, isImport),
 	),
-	...customisableProperties.flatMap((createFn) => {
-		const { availableIf, ...prop } = createFn(config);
-		return !availableIf || availableIf(config) ? prop : [];
-	}),
+	...customisableProperties.flatMap((createFn) => processProperty(createFn(config), config, isImport),
+	),
 ];
 
 module.exports = TemplateConstants;
