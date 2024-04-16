@@ -25,6 +25,8 @@ import { ExternalWebRequestHandler } from './unity-externalwebrequesthandler';
 declare let SendMessage;
 declare let createUnityInstance;
 
+type DrawingImageSource = ImageBitmap | ImageData | HTMLImageElement | HTMLCanvasElement | OffscreenCanvas;
+
 export class UnityUtil {
 	/** @hidden */
 	private static errorCallback: any;
@@ -130,11 +132,19 @@ export class UnityUtil {
 	public static verbose = false;
 
 	/**
-	 * Temporarily holds an image reference that the calibration tool plug-in will retrieve.
-	 * The plug-in will set this to null once it has been read.
+	 * Temporarily holds references to DOM objects that can be bound to a WebGL texture by id (a number).
+	 * Use the corresponding counter to ensure numbers are unique. References will be removed automatically
+	 * by bindWebGLTexture. DrawingImageSource is a subset of types defined for TexImageSource, but not
+	 * including video types.
 	 */
 	/** @hidden */
-	public static calibrationToolPreviewImage: TexImageSource;
+	private static domTextureReferences: { [id: number] : DrawingImageSource } = {};
+
+	/**
+	 * Convenience member to provide ids for domTextureReferences.
+	 */
+	/** @hidden */
+	private static domTextureReferenceCounter = 0;
 
 	/**
 	 * Contains a list of calls to make during the Unity Update method. One
@@ -643,6 +653,40 @@ export class UnityUtil {
 		if (UnityUtil.viewer && UnityUtil.viewer.measurementsCleared) {
 			UnityUtil.viewer.measurementsCleared();
 		}
+	}
+
+	/**
+	 * Called by the Calibration Tool when a user action changes the state of the Vector.
+	 * The line is given as a start position and end position in Project coordinates.
+	 */
+	/** @hidden */
+	public static calibrationVectorChanged(line) {
+		// eslint-disable-next-line no-console
+		console.log(JSON.parse(line));
+	}
+
+	/**
+	 * Called by the Calibration Tool when a user action changes the heights of the vertical planes.
+	 * Heights are given in Project coordinates from the origin.
+	 */
+	/** @hidden */
+	public static calibrationPlanesChanged(planes) {
+		// eslint-disable-next-line no-console
+		console.log(JSON.parse(planes));
+	}
+
+	/**
+	 * Called by the Calibration Tool when the user makes adjustments to the calibration in Preview mode.
+	 * The point provided is the adjusted centroid of the image in Project coordinates. That is, if an image were given
+	 * with worldRect [0,0, 2,0, 0,1] and height 1, this would be [1,1,0.5]. If the user moved the calibration forward
+	 * by one unit, and up by 0.5 unit, point would be [1,1.5,1.5]. The Frontend should re-compute the calibration and
+	 * update the viewer by calling visualiseDrawing with image being null, within one frame, to keep the interaction
+	 * smooth.
+	 */
+	/** @hidden */
+	public static calibrationPointChanged(point) {
+		// eslint-disable-next-line no-console
+		console.log(JSON.parse(point));
 	}
 
 	/*
@@ -2346,17 +2390,9 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Deactives the Calibration Tool and hides all its 3D UI.
+	 * Sets and enables the active Calibration Mode. There is no need to explicitly enable or disable the Calibration Tool.
 	 * @category Calibration
-	 */
-	public static disableCalibrationTool() {
-		UnityUtil.toUnity('DisableCalibrationTool', UnityUtil.LoadingState.VIEWER_READY);
-	}
-
-	/**
-	 * Sets the active Calibration Tool and enables it, if not already enabled.
-	 * @category Calibration
-	 * @param mode A string, "Vector", "Vertical" or "Preview". A value not one of these will disable the tool.
+	 * @param mode A string, ["Vector", "Vertical", "Preview", "None"].
 	 */
 	public static setCalibrationToolMode(mode: string) {
 		UnityUtil.toUnity('SetCalibrationToolMode', UnityUtil.LoadingState.VIEWER_READY, mode);
@@ -2379,6 +2415,19 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Sets the lower and upper range of the vertical planes (the floor) in Project coordinates.
+	 * This does not change the default floor height even if the magnitude of the range is different.
+	 * @category Calibration
+	 */
+	public static setCalibrationToolVerticalPlanes(min: number, max: number) {
+		var range = {
+			min,
+			max,
+		};
+		UnityUtil.toUnity('SetCalibrationToolVerticalPlanes', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(range));
+	}
+
+	/**
 	 * Aligns the Lower floor plane to the top of the specified mesh, and the Upper floor plane to the default floor height above this.
 	 * The interactive state of the planes is unchanged.
 	 * @category Calibration
@@ -2393,37 +2442,54 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Removes the Start of the Calibration Vector so the user can place it again.
+	 * Sets or removes the Start and End of the Calibration Vector. If Start or End are set to null, the tool
+	 * will immediately allow the user to place them again. Vector Mode must be explicitly enabled - calling
+	 * this will not automatically enable the tool.
 	 * @category Calibration
 	 */
-	public static deleteCalibrationToolVectorStart() {
-		UnityUtil.toUnity('DeleteCalibrationToolVectorStart', UnityUtil.LoadingState.VIEWER_READY);
+	public static setCalibrationToolVector(start: number[] | null, end: number[] | null) {
+		UnityUtil.toUnity('SetCalibrationToolVector', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({ start, end }));
 	}
 
 	/**
-	 * Removes the End of the Calibration Vector so the user can place it again.
+	 * Shows the DrawingImageSource at the location specified by rect and height. rect should be the size and location
+	 * of the image, given as the location of three corners (bottomLeft, bottomRight, topLeft) in Project coordinates.
+	 * height should be the vertical offset from the origin in Project coordinates. If image is null, the location of
+	 * the existing image is updated. If no image has ever been loaded, a white rectangle is shown in its place.
 	 * @category Calibration
 	 */
-	public static deleteCalibrationToolVectorEnd() {
-		UnityUtil.toUnity('DeleteCalibrationToolVectorEnd', UnityUtil.LoadingState.VIEWER_READY);
-	}
+	public static visualiseDrawing(image: DrawingImageSource, rect: number[], height: number) {
+		let index = -1;
+		let dimensions = [0, 0];
 
-	/**
-	 * Removes the End of the Calibration Vector so the user can place it again.
-	 * @category Calibration
-	 */
-	public static setCalibrationToolPreview(image: TexImageSource, rect: any, height: Number) {
-		this.calibrationToolPreviewImage = image; // Store a reference to the image, as the viewer will request it momentarily
+		if (image !== null) {
+			index = this.domTextureReferenceCounter++;
+			this.domTextureReferences[index] = image; // Store a reference to the image, as the viewer will request it momentarily
+			dimensions = [image.width, image.height];
+		}
+
 		var parms = {
-			worldRect: rect,
-			height: height,
+			worldRect: rect, //[bottomLeftX, bottomLeftY, bottomRightX, bottomRightY, topLeftX, topLeftY]
+			height,
+			domId: index,
+			dimensions,
 		};
-		UnityUtil.toUnity('SetCalibrationToolPreview', UnityUtil.LoadingState.VIEWER_READY, parms);
+		UnityUtil.toUnity('VisualiseDrawing', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(parms));
 	}
 
-	// Temporary for debugging
-	public static getCalibrationToolTexture(texture: any) {
-		
+	/**
+	 * Populates the provided WebGLTexture texture with the contents of the DrawingImageSource indexed by id.
+	 * (This method could be moved entirely inside Unity if desired in the future.)
+	 * @param ctx The rendering context used by Module
+	 * @param id The index of the DrawingImageSource in domTextureReferences. This will be removed from domTextureReferences.
+	 * @param texture The WebGLTexture created by Unity
+	 */
+	/** @hidden */
+	public static copyToWebGLTexture(ctx: WebGL2RenderingContext, index: number, texture: WebGLTexture) {
+		ctx.bindTexture(ctx.TEXTURE_2D, texture);
+		const image = this.domTextureReferences[index];
+		ctx.texSubImage2D(ctx.TEXTURE_2D, 0, 0, 0, image.width, image.height, ctx.RGBA, ctx.UNSIGNED_BYTE, image);
+		delete this.domTextureReferences[index];
 	}
 	
 	/**
