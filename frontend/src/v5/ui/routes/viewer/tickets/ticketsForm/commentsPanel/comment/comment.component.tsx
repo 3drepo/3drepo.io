@@ -44,7 +44,7 @@ export const Comment = ({
 }: CommentProps) => {
 	const [commentAge, setCommentAge] = useState('');
 
-	const isCurrentUser = CurrentUserHooksSelectors.selectUsername() === (originalAuthor || author);
+	const isCurrentUser = !!originalAuthor ? false : CurrentUserHooksSelectors.selectUsername() === author;
 	const metadata = extractMetadata(message);
 	const noMetadataMessage = !deleted ? stripMetadata(message) : message;
 
