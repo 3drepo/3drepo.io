@@ -37,13 +37,14 @@ export const BasicComment = ({
 	createdAt,
 	updatedAt,
 	className,
+	originalAuthor,
 	...props
 }: BasicCommentProps) => {
 	const isEdited = updatedAt && (createdAt !== updatedAt);
 	return (
 		<CommentContainer className={className}>
-			<CommentNonMessageContent {...props} hasMessage={!!message} />
-			{isEdited && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
+			<CommentNonMessageContent {...props} originalAuthor={originalAuthor} hasMessage={!!message} />
+			{isEdited && !originalAuthor && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
 			{message && (<CommentMarkDown>{message}</CommentMarkDown>)}
 			<CommentAge>{commentAge}</CommentAge>
 		</CommentContainer>
