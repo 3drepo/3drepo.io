@@ -30,7 +30,7 @@ type CommentReplyProps = TicketCommentReplyMetadata & {
 	variant?: 'primary' | 'secondary',
 	shortMessage?: boolean,
 	images?: string[],
-	originalAuthor?: boolean,
+	originalAuthor?: string,
 };
 export const CommentReply = ({
 	message,

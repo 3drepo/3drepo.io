@@ -44,16 +44,14 @@ const extractMetadataImages = (message: string) => {
 export const extractMetadata = (message: string): TicketCommentReplyMetadata => ({
 	_id: extractMetadataValue(message, '_id'),
 	author: extractMetadataValue(message, 'author'),
+	originalAuthor: extractMetadataValue(message, 'originalAuthor'),
 	message: extractMetadataValue(message, 'message'),
 	images: extractMetadataImages(message),
 });
 
-export const createMetadata = (comment: ITicketComment): TicketCommentReplyMetadata => ({
-	..._.pick(comment, '_id', 'message', 'images'),
-	author: comment?.originalAuthor || comment?.author,
-}) as TicketCommentReplyMetadata;
+export const createMetadata = (comment: ITicketComment): TicketCommentReplyMetadata => _.pick(comment, '_id', 'message', 'images', 'author', 'originalAuthor');
 
-export const stripMetadata = (message: string = '') => message.replaceAll(/\[[_a-z]*\]:- "([^"]*)"(\n)+/g, '');
+export const stripMetadata = (message: string = '') => message.replaceAll(/\[[_a-zA-Z]*\]:- "([^"]*)"(\n)+/g, '');
 export const sanitiseMessage = (message: string = '') => message.replaceAll('"', '&#34;');
 export const desanitiseMessage = (message: string = '') => message.replaceAll('&#34;', '"');
 
@@ -61,9 +59,10 @@ const createMetadataValue = (metadataName: keyof TicketCommentReplyMetadata, met
 	`[${metadataName}]:- "${metadataValue}"\n`
 );
 
-const stringifyMetadata = ({ author, _id, message, images = [] }: TicketCommentReplyMetadata) => {
+const stringifyMetadata = ({ originalAuthor = '', author, _id, message, images = [] }: TicketCommentReplyMetadata) => {
 	const metadata = [
 		createMetadataValue('_id', _id),
+		createMetadataValue('originalAuthor', originalAuthor),
 		createMetadataValue('author', author),
 		createMetadataValue('message', stripMetadata(message)),
 		createMetadataValue('images', images.join(',')),

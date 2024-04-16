@@ -39,5 +39,6 @@ export type TicketCommentReplyMetadata = {
 	_id: string,
 	message?: string,
 	author: string,
+	originalAuthor?: string,
 	images?: string[],
 };
