@@ -35,7 +35,7 @@ import { DRAWING_LIST_COLUMN_WIDTHS } from '@/v5/store/drawings/drawings.helpers
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
-import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors, DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 interface IDrawingsListItem {
 	isSelected: boolean;
@@ -50,14 +50,8 @@ export const DrawingsListItem = memo(({
 }: IDrawingsListItem) => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const isMainList = useContext(IsMainList);
+	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const revisions = DrawingRevisionsHooksSelectors.selectRevisions(drawing._id);
-
-	useEffect(() => {
-		if (isMainList) {
-			// TODO - add realtime events
-		}
-		return null;
-	}, [drawing._id]);
 
 	const onChangeFavourite = ({ currentTarget: { checked } }) => {
 		if (checked) {
@@ -97,9 +91,13 @@ export const DrawingsListItem = memo(({
 				</DashboardListItemButton>
 				<DrawingsCalibrationButton
 					calibration={drawing.calibration}
-					onClick={() => { }} // TODO - add calibrate functionality
+					onClick={() => {
+						if (!isProjectAdmin) return;
+						// eslint-disable-next-line no-console
+						console.log('Do calibrate');
+					}} // TODO - add calibrate functionality
 					tooltipTitle={
-						<FormattedMessage id="drawings.list.item.calibration.tooltip" defaultMessage="Calibrate" />
+						isProjectAdmin && <FormattedMessage id="drawings.list.item.calibration.tooltip" defaultMessage="Calibrate" />
 					}
 					{...DRAWING_LIST_COLUMN_WIDTHS.calibration}
 				/>
