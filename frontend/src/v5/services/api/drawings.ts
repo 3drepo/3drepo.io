@@ -32,7 +32,7 @@ export const removeFavourite = (teamspace, projectId, drawingId): Promise<AxiosR
 
 const categories =  ['A drawing category', 'Another drawing category', 'Yet another one'];
 
-const arr = (new Array(10)).fill(0);
+const arr = (new Array(1000)).fill(0);
 
 const drawings: MinimumDrawing[] = arr.map((_, index) => ({
 	_id: uuid(),
@@ -46,6 +46,7 @@ const drawings: MinimumDrawing[] = arr.map((_, index) => ({
 	latestRevision: null,
 	lastUpdated: null,
 	hasStatsPending: false,
+	desc: 'This is a very long text that I need to use to see what the description will look like for a drawing in the viewer drawing card. This is then some extra text to make sure it is long enough',
 }));
 
 const randCal = () => {

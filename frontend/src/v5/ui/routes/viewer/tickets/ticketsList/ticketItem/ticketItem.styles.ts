@@ -42,14 +42,6 @@ export const Title = styled.div`
 	}
 `;
 
-// TODO - fix after new palette is released
-export const Ticket = styled.div<{ $selected?: boolean }>`
-	position: relative;
-	cursor: pointer;
-	padding: 12px 14px 16px;
-	background-color: ${({ theme, $selected }) => ($selected ? '#edf0f8' : theme.palette.primary.contrast)};
-`;
-
 export const ChipList = styled.div`
 	display: inline-flex;
 	gap: 7px;

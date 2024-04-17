@@ -66,6 +66,7 @@ export const COLOR = {
 	SUCCESS_LIGHTEST: '#EAF2EA',
 	WARNING_MAIN: '#ED6C02',
 	WARNING_DARK: '#BD5601',
+	WARNING_LIGHT: '#F6B580',
 	WARNING_LIGHTEST: '#FDF0E5',
 	FAVOURITE_MAIN: '#F5CB34',
 	FAVOURITE_DARK: '#D4AE26',
@@ -237,6 +238,7 @@ export const palette = {
 	warning: {
 		main: COLOR.WARNING_MAIN,
 		dark: COLOR.WARNING_DARK,
+		light: COLOR.WARNING_LIGHT,
 		lightest: COLOR.WARNING_LIGHTEST,
 	},
 	favourite: {

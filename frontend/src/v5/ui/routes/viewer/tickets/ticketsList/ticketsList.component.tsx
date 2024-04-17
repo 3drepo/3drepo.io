@@ -28,10 +28,11 @@ import { FormattedMessage } from 'react-intl';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { TicketItem } from './ticketItem/ticketItem.component';
-import { List, Filters, CompletedFilterChip } from './ticketsList.styles';
+import { Filters, CompletedFilterChip } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
 import { hasDefaultPin } from '../ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { TicketSearchInput } from './ticketSearchInput/ticketSearchInput.component';
+import { CardList } from '@components/viewer/cards/card.styles';
 
 type TicketsListProps = {
 	tickets: ITicket[];
@@ -99,7 +100,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 				})}
 			</Filters>
 			{filteredItems.length ? (
-				<List>
+				<CardList>
 					{filteredItems.map((ticket) => (
 						<TicketItem
 							ticket={ticket}
@@ -108,7 +109,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 							selected={ticketIsSelected(ticket)}
 						/>
 					))}
-				</List>
+				</CardList>
 			) : (
 				<EmptyListMessage>
 					<FormattedMessage id="viewer.cards.tickets.noResults" defaultMessage="No tickets found. Please try another search." />

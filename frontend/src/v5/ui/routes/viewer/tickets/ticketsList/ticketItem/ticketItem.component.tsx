@@ -27,9 +27,10 @@ import { isEqual } from 'lodash';
 import { useParams } from 'react-router-dom';
 import { Highlight } from '@controls/highlight';
 import { useEffect, useRef } from 'react';
-import { Ticket, Id, Title, ChipList, Assignees, IssuePropertiesRow } from './ticketItem.styles';
+import { Id, Title, ChipList, Assignees, IssuePropertiesRow } from './ticketItem.styles';
 import { IssueProperties, SafetibaseProperties } from '../../tickets.constants';
 import { StatusChip } from '@controls/chip/statusChip/statusChip.component';
+import { CardListItem } from '@components/viewer/cards/card.styles';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -70,7 +71,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	}, []);
 
 	return (
-		<Ticket
+		<CardListItem
 			onClick={onClick}
 			key={ticket._id}
 			$selected={selected}
@@ -98,6 +99,6 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 					<Assignees value={assignees} onBlur={onBlurAssignees} disabled={readOnly} />
 				</IssuePropertiesRow>
 			)}
-		</Ticket>
+		</CardListItem>
 	);
 };
