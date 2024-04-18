@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
 const { UUIDToString } = require('../../../../../src/v5/utils/helper/uuids');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
@@ -607,6 +608,52 @@ const testModelEventsListener = () => {
 			);
 		};
 
+		const importTicketsTest = async (isFederation) => {
+			const waitOnEvent = eventTriggeredPromise(events.TICKETS_IMPORTED);
+			const template = generateTemplate();
+			const type = generateRandomString();
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				tickets: times(10, () => ({
+					type,
+					...generateRandomObject(),
+				})),
+			};
+
+			TicketTemplates.getTemplateById.mockResolvedValueOnce(template);
+			ModelSettings.isFederation.mockResolvedValueOnce(isFederation);
+			const event = isFederation ? chatEvents.FEDERATION_NEW_TICKET : chatEvents.CONTAINER_NEW_TICKET;
+			EventsManager.publish(events.TICKETS_IMPORTED, data);
+			expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
+
+			expect(TicketLogs.addImportedLogs).toHaveBeenCalledTimes(1);
+			expect(TicketLogs.addImportedLogs).toHaveBeenCalledWith(
+				data.teamspace,
+				data.project,
+				data.model,
+				data.tickets,
+			);
+
+			await waitOnEvent;
+
+			expect(TicketTemplates.getTemplateById).toHaveBeenCalledTimes(1);
+			expect(TicketTemplates.getTemplateById).toHaveBeenCalledWith(data.teamspace, type);
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(data.tickets.length);
+
+			data.tickets.forEach((ticket) => {
+				expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+					event,
+					ticket,
+					data.teamspace,
+					data.project,
+					data.model,
+				);
+			});
+		};
+
 		test(`Should create a ${chatEvents.CONTAINER_NEW_TICKET} if there
 				is a ${events.NEW_TICKET} (Container)`, async () => {
 			await addTicketTest(false);
@@ -615,6 +662,16 @@ const testModelEventsListener = () => {
 		test(`Should create a ${chatEvents.FEDERATION_NEW_TICKET} if there
 				is a ${events.NEW_TICKET} (Federation)`, async () => {
 			await addTicketTest(true);
+		});
+
+		test(`Should create ${chatEvents.CONTAINER_NEW_TICKET} events if there
+				is a ${events.TICKETS_IMPORTED} (Container)`, async () => {
+			await importTicketsTest(false);
+		});
+
+		test(`Should create ${chatEvents.FEDERATION_NEW_TICKET} events if there
+				is a ${events.TICKETS_IMPORTED} (Federation)`, async () => {
+			await importTicketsTest(true);
 		});
 
 		const addCommentTest = async (isFederation) => {

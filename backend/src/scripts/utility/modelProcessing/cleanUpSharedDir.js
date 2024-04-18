@@ -26,7 +26,7 @@ const { v5Path } = require('../../../interop');
 const { logger } = require(`${v5Path}/utils/logger`);
 const { cn_queue: { shared_storage: sharedDir } } = require(`${v5Path}/utils/config`);
 const Path = require('path');
-const { readdir, stat, rm } = require('fs/promises');
+const FS = require('fs/promises');
 
 const DEFAULT_THRESHOLD = 14;
 
@@ -37,21 +37,21 @@ const run = async (threshold = DEFAULT_THRESHOLD) => {
 
 	logger.logInfo(`Removing files/directories in shared directory that are older than ${threshold} days`);
 
-	const files = await readdir(sharedDir, { withFileTypes: true });
+	const files = await FS.readdir(sharedDir, { withFileTypes: true });
 
 	logger.logInfo(`${files.length} files/directories found.`);
 	const currTime = new Date();
 	const filesToRemove = (await Promise.all(files.map(async (fileObj) => {
 		try {
 			const fullPath = Path.join(sharedDir, fileObj.name);
-			const { mtime } = await stat(fullPath);
+			const { mtime } = await FS.stat(fullPath);
 			const lastMod = new Date(mtime);
 			const diffInDays = (currTime - lastMod) / (1000 * 60 * 60 * 24);
 
 			const shouldDelete = (diffInDays >= threshold);
 
 			if (shouldDelete) {
-				await rm(fullPath, { recursive: true });
+				await FS.rm(fullPath, { recursive: true });
 				return fullPath;
 			}
 			return [];

@@ -26,6 +26,7 @@ const eventList = [
 	'MODEL_IMPORT_FINISHED',
 	// Model Tickets
 	'NEW_TICKET', 'UPDATE_TICKET', 'NEW_COMMENT', 'UPDATE_COMMENT', 'UPDATE_TICKET_GROUP',
+	'TICKETS_IMPORTED',
 	// Revisions
 	'NEW_REVISION', 'REVISION_UPDATED',
 	// Queue specific

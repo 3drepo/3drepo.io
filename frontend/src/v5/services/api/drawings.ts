@@ -17,7 +17,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { delay } from '@/v4/helpers/async';
-import { Role } from '@/v5/store/currentUser/currentUser.types';
+import { drawingIds, mockRole } from '@/v5/store/drawings/drawings.temp';
 import { DrawingStats, DrawingUploadStatus, CalibrationStates, MinimumDrawing } from '@/v5/store/drawings/drawings.types';
 import { AxiosResponse } from 'axios';
 import uuid from 'uuidv4';
@@ -35,11 +35,11 @@ const categories =  ['A drawing category', 'Another drawing category', 'Yet anot
 const arr = (new Array(10)).fill(0);
 
 const drawings: MinimumDrawing[] = arr.map((_, index) => ({
-	_id: uuid(),
-	name: 'A drawing ' + index,
+	_id: drawingIds[index] ?? uuid(),
+	name: 'A drawing ' + index + ' - ' + mockRole(index),
 	drawingNumber: uuid(),
 	isFavourite: (Math.random() > 0.5),
-	role: Role.ADMIN,
+	role: mockRole(index),
 	category: categories[Math.round(Math.random() * (categories.length - 1))],
 	status: DrawingUploadStatus.OK,
 	revisionsCount: 2,
@@ -61,7 +61,7 @@ const randCal = () => {
 };
 
 
-const stats = arr.map((_, index) => {
+const stats = drawingIds.map((_id) => {
 	const lastUpdated = (Math.random() > 0.5) ? 1709569331628 + Math.round( Math.random() * 31556952000) : null;
 	const total = lastUpdated ?  Math.round(Math.random() * 10) : 0;
 
@@ -70,7 +70,7 @@ const stats = arr.map((_, index) => {
 	const status = total ? DrawingUploadStatus.OK : undefined;
 
 	return {
-		_id: drawings[index]._id,
+		_id,
 		revisions : {
 			lastUpdated,
 			total,

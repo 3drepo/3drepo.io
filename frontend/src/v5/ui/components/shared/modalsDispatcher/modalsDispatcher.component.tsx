@@ -16,12 +16,11 @@
  */
 
 import { useState } from 'react';
-import { useSelector } from 'react-redux';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { selectDialogs } from '@/v5/store/dialogs/dialogs.selectors';
 import { IDialogConfig } from '@/v5/store/dialogs/dialogs.redux';
 import { MODAL_TEMPLATES } from './templates';
 import { useSyncPropsEffect } from '@/v5/helpers/syncProps.hooks';
+import { DialogsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 const ModalTemplateContainer = ({ id, modalType, props, syncProps }: IDialogConfig) => {
 	const [openState, setOpenState] = useState(true);
@@ -42,7 +41,7 @@ const ModalTemplateContainer = ({ id, modalType, props, syncProps }: IDialogConf
 };
 
 export const ModalsDispatcher = (): JSX.Element => {
-	const dialogs = useSelector(selectDialogs);
+	const dialogs = DialogsHooksSelectors.selectDialogs();
 
 	return (
 		<>

@@ -57,6 +57,7 @@ interface IProps {
 	isPending: boolean;
 	deleteGroup: (id: string | null) => void;
 	isReadOnly: boolean;
+	getObjectsCount: (meshesIds: any[]) => number;
 }
 
 interface IState {
@@ -85,6 +86,11 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 
 	get editingGroup() {
 		return this.props.editingGroup;
+	}
+
+	get selectedObjectsCount() {
+		const sharedIds = (this.props.selectedNodes || []).flatMap((node) => node.shared_ids);
+		return this.props.getObjectsCount(sharedIds);
 	}
 
 	get isFormValid() {
@@ -134,7 +140,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 	));
 
 	public componentDidMount() {
-		this.setState({ isFormDirty: this.isNewGroup, isFormValid: false });
+		this.setState({ isFormDirty: this.isNewGroup, isFormValid: this.isNewGroup && !!this.selectedObjectsCount });
 	}
 
 	public componentDidUpdate(prevProps: Readonly<PropsWithChildren<IProps>>) {
@@ -188,7 +194,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 			totalMeshes={this.props.totalMeshes}
 			canUpdate={this.props.canUpdate}
 			handleChange={this.handleFieldChange}
-			selectedNodes={this.props.selectedNodes}
+			objectsCount={this.editingGroup.totalSavedMeshes}
 		/>
 	)
 
