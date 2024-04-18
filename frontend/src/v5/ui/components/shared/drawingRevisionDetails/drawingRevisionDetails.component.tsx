@@ -117,7 +117,6 @@ export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: ID
 						<RevisionsListItemWrapper
 							selected={i === selected}
 							isBeforeSelected={i === selected - 1}
-							onClick={() => {}}
 							key={revision._id}
 						>
 							<RevisionsListItem
