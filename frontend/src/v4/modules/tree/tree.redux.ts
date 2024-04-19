@@ -22,8 +22,7 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	fetchFullTree: ['teamspace', 'modelId', 'revision'],
 	startListenOnSelections: [],
 	stopListenOnSelections: [],
-	clearSelectedNodes: [],
-	setSelectedNodesSuccess: ['selectedNodes'],
+	setSelectedObjectsSuccess: ['selectedObjects'],
 	showAllNodes: [],
 	hideSelectedNodes: [],
 	isolateSelectedNodes: ['nodeId'],
@@ -68,7 +67,7 @@ export interface ITreeComponentState {
 }
 
 export interface ITreeState {
-	selectedNodes: any;
+	selectedObjects: any;
 	treeNodesList: any[];
 	expandedNodesMap: any;
 	isPending?: boolean;
@@ -78,7 +77,7 @@ export interface ITreeState {
 }
 
 export const INITIAL_STATE: ITreeState = {
-	selectedNodes: [],
+	selectedObjects: [],
 	treeNodesList: [],
 	isPending: true,
 	expandedNodesMap: {},
@@ -92,12 +91,8 @@ export const INITIAL_STATE: ITreeState = {
 	}
 };
 
-const clearSelectedNodes = (state = INITIAL_STATE, {}) => {
-	return { ...state, selectedNodes: [] };
-};
-
-const setSelectedNodesSuccess = (state = INITIAL_STATE, { selectedNodes }) => {
-	return { ...state, selectedNodes };
+const setSelectedObjects = (state = INITIAL_STATE, { selectedObjects }) => {
+	return { ...state, selectedObjects };
 };
 
 const setIsPending = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
@@ -147,8 +142,7 @@ const setIsTreeProcessed = (state = INITIAL_STATE, { isTreeProcessed }) => {
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
-	[TreeTypes.CLEAR_SELECTED_NODES]: clearSelectedNodes,
-	[TreeTypes.SET_SELECTED_NODES_SUCCESS]: setSelectedNodesSuccess,
+	[TreeTypes.SET_SELECTED_OBJECTS_SUCCESS]: setSelectedObjects,
 	[TreeTypes.SET_COMPONENT_STATE]: setComponentState,
 	[TreeTypes.SET_IS_PENDING]: setIsPending,
 	[TreeTypes.RESET_COMPONENT_STATE]: resetComponentState,

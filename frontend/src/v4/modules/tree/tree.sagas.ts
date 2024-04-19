@@ -43,7 +43,7 @@ import {
 	selectDefaultHiddenNodesIds,
 	selectExpandedNodesMap,
 	selectGetNodesByIds,
-	selectNodesByMeshSharedIdsArray,
+	selectSelectedObjects,
 	selectGetNodesIdsFromSharedIds,
 	selectHiddenGeometryVisible,
 	selectIsTreeProcessed,
@@ -302,7 +302,7 @@ function* clearCurrentlySelected(keepMetadataOpen = false) {
 		}
 	}
 
-	yield put(TreeActions.setSelectedNodesSuccess([]));
+	yield put(TreeActions.setSelectedObjectsSuccess([]));
 }
 
 /**
@@ -447,8 +447,8 @@ function* deselectNodes({ nodesIds = [] }) {
 	yield waitForTreeToBeReady();
 
 	try {
-		const result = yield TreeProcessing.deselectNodes({ nodesIds });
-		unhighlightObjects(result.unhighlightedObjects);
+		const { unhighlightedObjects } = yield TreeProcessing.deselectNodes({ nodesIds });
+		unhighlightObjects(unhighlightedObjects);
 		const isBimVisible = yield select(selectIsMetadataVisible);
 		const activeMeta = yield select(selectActiveMeta);
 
@@ -460,11 +460,20 @@ function* deselectNodes({ nodesIds = [] }) {
 			yield put(BimActions.setActiveMeta(null));
 		}
 
-		const selectedSharedIds = (yield select(selectGetNodesByIds(nodesIds))).map((n) => n.shared_id);
-		const nodesToDeselect = yield select(selectNodesByMeshSharedIdsArray, selectedSharedIds);
-		const selectedNodes = yield select(selectSelectedNodes);
+		const selectedObjects = yield select(selectSelectedObjects);
 
-		yield put(TreeActions.setSelectedNodesSuccess(selectedNodes.filter((node) => !nodesToDeselect.includes(node))));
+		if (unhighlightedObjects.length) {
+			unhighlightedObjects.forEach(({ teamspace, meshes, modelId }) => {
+				const existingObjectIndex = selectedObjects.findIndex((o) => o.teamspace === teamspace && o.modelId === modelId);
+				const existingObject = selectedObjects[existingObjectIndex];
+				if (existingObject.meshes.length === meshes.length) {
+					selectedObjects.splice(existingObjectIndex, 1);
+					return;
+				}
+				existingObject.meshes = _.difference(existingObject.meshes, meshes);
+			});
+			yield put(TreeActions.setSelectedObjectsSuccess([...selectedObjects]));
+		}
 		yield put(TreeActions.updateDataRevision());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('deselect', 'node', error));
@@ -519,11 +528,14 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipSelecting = false
 		const selectionMap = yield select(selectSelectionMap);
 		highlightObjects(result.highlightedObjects, selectionMap, colour);
 
-		const selectedSharedIds = (yield select(selectGetNodesByIds(nodesIds))).map((n) => n.shared_id);
-		const nodesToSelect = yield select(selectNodesByMeshSharedIdsArray, selectedSharedIds);
-		const selectedNodes = yield select(selectSelectedNodes);
+		const selectedObjects = yield select(selectSelectedObjects);
+		const newSelectedObjects = _.mergeWith(
+			result.highlightedObjects,
+			selectedObjects,
+			(a, b) => (_.isArray(a) ? _.uniq(a.concat(b)) : undefined),
+		);
 
-		yield put(TreeActions.setSelectedNodesSuccess(_.uniq(selectedNodes.concat(nodesToSelect))));
+		yield put(TreeActions.setSelectedObjectsSuccess(newSelectedObjects));
 		yield put(TreeActions.updateDataRevision());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('select', 'nodes', error));
