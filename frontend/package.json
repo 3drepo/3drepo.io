@@ -23,14 +23,14 @@
 		"unity-util": "webpack --config ./internals/webpack/webpack.unityutil.config.js",
 		"lint:ts": "eslint . --rulesdir internals/eslint-rules/",
 		"lint:css": "stylelint ./**/*.styles.ts",
-		"lint": "yarn circular:test && yarn lint:ts && yarn lint:css",
+		"lint": "yarn circular:test & yarn lint:ts & yarn lint:css",
 		"lint:fix": "yarn lint:ts --fix",
 		"docs": "typedoc --out ./docs --entryPointStrategy expand ./src/globals --options ./internals/typedoc.js",
 		"extract": "node ./internals/intl/extract.js",
 		"compile": "node ./internals/intl/compile.js",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build -o ../public/storybook",
-		"circular:test": "yarn dpdm src/main.tsx --exclude node_modules/ --warning false --tree false"
+		"circular:test": "yarn dpdm src/main.tsx --warning false --tree false"
 	},
 	"keywords": [
 		"3drepo",
