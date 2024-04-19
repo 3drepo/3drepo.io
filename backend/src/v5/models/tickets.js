@@ -15,21 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { UUIDToString, generateUUID } = require('../utils/helper/uuids');
 const { deleteIfUndefined, isEqual } = require('../utils/helper/objects');
 const { getNestedProperty, setNestedProperty } = require('../utils/helper/objects');
 const { isDate, isObject, isUUID } = require('../utils/helper/typeCheck');
 const DbHandler = require('../handler/db');
 const { basePropertyLabels } = require('../schemas/tickets/templates.constants');
-const { generateUUID } = require('../utils/helper/uuids');
 const { templates } = require('../utils/responseCodes');
+
+const { Long } = DbHandler.dataTypes;
 
 const Tickets = {};
 const TICKETS_COL = 'tickets';
+const TICKETS_COUNTER_COL = 'tickets.counters';
 
-const determineTicketNumber = async (teamspace, project, model, type) => {
-	const lastTicket = await DbHandler.findOne(teamspace, TICKETS_COL,
-		{ teamspace, project, model, type }, { number: 1 }, { number: -1 });
-	return (lastTicket?.number ?? 0) + 1;
+const reserveTicketNumbers = async (teamspace, project, model, type, nToReserve) => {
+	const _id = [project, model, type].map(UUIDToString).join('_');
+	const lastNumber = await DbHandler.findOneAndUpdate(teamspace, TICKETS_COUNTER_COL,
+		{ _id },
+		{ $inc: { seq: Long.fromNumber(nToReserve) } },
+		{ upsert: true },
+	);
+
+	return lastNumber?.seq ? lastNumber.seq + 1 : 1;
 };
 
 // We expect all tickets to have the same template (i.e. type field should be the same in all tickets provided)
@@ -37,11 +45,12 @@ Tickets.addTicketsWithTemplate = async (teamspace, project, model, templateId, t
 	if (!tickets?.length) return [];
 
 	const response = [];
-	const startCounter = await determineTicketNumber(teamspace, project, model, templateId);
+	const startCounter = await reserveTicketNumbers(teamspace, project, model, templateId, tickets.length);
 
 	const processedTickets = tickets.map((ticketData, i) => {
-		const fullData = { ...ticketData, _id: generateUUID(), number: startCounter + i };
-		response.push(fullData);
+		const ticketNum = startCounter + i;
+		const fullData = { ...ticketData, _id: generateUUID(), number: Long.fromNumber(ticketNum) };
+		response.push({ ...fullData, number: ticketNum });
 
 		return { ...fullData, teamspace, project, model };
 	});
