@@ -22,7 +22,7 @@ export default ({ className }: IProps) => (
 	<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
 		<g className="perspective-o">
 			<g className="highlight">
-				<rect x="0.632812" y="4.42969" width="12.9375" height="12.9375" fill="currentColor" />
+				<rect x="0.632812" y="4.42969" width="12.9375" height="12.9375" fill="currentColor" opacity=".5" />
 			</g>
 			<g className="primary">
 				<path d="M8.42322 10.3487L10.1576 8.60553L9.2604 7.71286L7.52602 9.45602L8.42322 10.3487Z" fill="currentColor" />

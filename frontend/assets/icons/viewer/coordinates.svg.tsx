@@ -29,7 +29,7 @@ export default ({ className }: IProps) => (
 				fill="currentColor"
 			/>
 			<circle
-				className="highlight"
+				className="primary"
 				cx="9"
 				cy="9"
 				r="2.63672"
@@ -37,7 +37,7 @@ export default ({ className }: IProps) => (
 			/>
 		</g>
 		<defs>
-			<clipPath className="highlight">
+			<clipPath className="primary">
 				<rect width="18" height="18" fill="currentColor" />
 			</clipPath>
 		</defs>

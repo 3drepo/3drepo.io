@@ -34,7 +34,7 @@ export default ({ className }: IProps) => (
 				/>
 			</g>
 			<path
-				className="highlight"
+				className="primary"
 				d="M7.1685 8.06348C7.02457 8.34438 6.94336 8.66273 6.94336 9.00005C6.94336 10.1359 7.86415 11.0567 9 11.0567C9.33732 11.0567 9.65567 10.9755 9.93657 10.8315L7.1685 8.06348Z"
 				fill="currentColor"
 			/>

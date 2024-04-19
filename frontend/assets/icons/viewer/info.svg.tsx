@@ -27,7 +27,7 @@ export default ({ className }: IProps) => (
 				d="M9 16.7344C13.2716 16.7344 16.7344 13.2716 16.7344 9C16.7344 4.72842 13.2716 1.26562 9 1.26562C4.72842 1.26562 1.26562 4.72842 1.26562 9C1.26562 13.2716 4.72842 16.7344 9 16.7344ZM9 18C13.9706 18 18 13.9706 18 9C18 4.02944 13.9706 0 9 0C4.02944 0 0 4.02944 0 9C0 13.9706 4.02944 18 9 18Z"
 				fill="currentColor"
 			/>
-			<g className="highlight">
+			<g className="primary">
 				<path
 					fillRule="evenodd"
 					clipRule="evenodd"

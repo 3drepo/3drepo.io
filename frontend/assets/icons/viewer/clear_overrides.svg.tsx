@@ -21,7 +21,7 @@ type IProps = {
 export default ({ className }: IProps) => (
 	<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
 		<g className="clear-overrides-o">
-			<g className="highlight">
+			<g className="primary">
 				<path
 					d="M8.99024 8.30058C8.99023 11.2271 8.99023 14.0905 8.99025 17.2266C11.3817 17.2266 13.463 15.8608 14.5362 13.8466L8.99024 8.30058Z"
 					fill="currentColor"

@@ -23,7 +23,7 @@ const selectedStyles = css`
 	}
 
 	.highlight {
-		color: ${({ theme }) => theme.palette.primary.contrast};
+		color: ${({ theme }) => theme.palette.primary.darkest};
 	}
 `;
 
@@ -44,7 +44,7 @@ export const ViewerIconContainer = styled.div<{ selected?: boolean, disabled?: b
 	}
 
 	.highlight {
-		color: ${({ theme }) => theme.palette.base.main};
+		color: ${({ theme }) => theme.palette.base.light};
 	}
 
 	${({ selected }) => selected && selectedStyles}

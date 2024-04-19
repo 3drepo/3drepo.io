@@ -29,7 +29,7 @@ export default ({ className }: IProps) => (
 				fill="currentColor"
 			/>
 			<path
-				className="highlight"
+				className="primary"
 				fillRule="evenodd"
 				clipRule="evenodd"
 				d="M9 6.50391C7.62145 6.50391 6.50391 7.62145 6.50391 9C6.50391 10.3786 7.62145 11.4961 9 11.4961C10.3786 11.4961 11.4961 10.3786 11.4961 9C11.4961 7.62145 10.3786 6.50391 9 6.50391Z"
