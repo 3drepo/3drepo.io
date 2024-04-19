@@ -17,12 +17,13 @@
 
 import styled from 'styled-components';
 import { Container as ToolbarButtonContainer } from '../../toolbarButton/toolbarButton.styles';
+import { subMenuIndicatorStyles } from '@controls/toolbarSelect/toolbarSelect.styles';
 
-export const ColorIcon = styled.div<{ color: string }>`
+export const ColorIcon = styled.div<{ color: string, $expanded?: boolean }>`
 	width: 18px;
 	height: 18px;
 	border-radius: 50%;
-	border: solid 1px ${({ theme }) => theme.palette.base.light};
+	border: solid 1px ${({ theme: { palette }, $expanded }) => $expanded ? palette.primary.main : palette.base.light};
 	box-sizing: border-box;
 	background-color: ${({ color }) => color};
 `;
@@ -34,18 +35,10 @@ export const PickerContainer = styled.div`
 	z-index: 10;
 `;
 
-export const ButtonOptionsContainer = styled.div<{ disabled?: boolean; }> `
+export const ButtonOptionsContainer = styled.div<{ disabled?: boolean; $expanded?: boolean }> `
 	position: relative;
 
 	& > ${ /* sc-selector */ToolbarButtonContainer}::after {
-		content: '';
-		position: absolute;
-		height: 0;
-		width: 0;
-		top: 6px;
-		right: 6px;
-		border: solid 3px ${({ theme }) => theme.palette.base.main};
-		border-left-color: transparent;
-		border-bottom-color: transparent;
+		${subMenuIndicatorStyles}
 	}
 `;
