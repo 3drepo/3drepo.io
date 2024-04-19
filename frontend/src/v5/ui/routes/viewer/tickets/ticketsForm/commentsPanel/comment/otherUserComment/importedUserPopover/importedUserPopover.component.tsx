@@ -40,11 +40,11 @@ export const ImportedUserPopover = ({ className, user, author, originalAuthor, i
 					{originalAuthor} <ExternalLabel />
 				</Heading>
 				<Info>
-					<FormattedMessage id="importedUserPopover.author" defaultMessage="imported by:" />
+					<FormattedMessage id="importedUserPopover.author" defaultMessage="Imported by:" />
 					&nbsp;{author}
 				</Info>
 				<Info>
-					<FormattedMessage id="importedUserPopover.time" defaultMessage="imported on:" />
+					<FormattedMessage id="importedUserPopover.time" defaultMessage="Imported on:" />
 					&nbsp;{formatShortDateTime(importedAt)}
 				</Info>
 			</Data>
