@@ -44,10 +44,9 @@ interface IGroup {
 interface IProps {
 	group: IGroup;
 	currentUser: any;
-	totalMeshes: number;
+	objectsCount: number;
 	canUpdate: boolean;
 	handleChange: (event) => void;
-	objectsCount: number;
 }
 
 export class GroupDetailsForm extends PureComponent<IProps, any> {

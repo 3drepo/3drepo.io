@@ -45,7 +45,6 @@ interface IProps {
 	expandDetails: boolean;
 	currentUser: any;
 	modelSettings: any;
-	totalMeshes: number;
 	canUpdate: boolean;
 	selectedNodes: any[];
 	criteriaFieldState: ICriteriaFieldState;
@@ -84,7 +83,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 	}
 
 	get objectsCount() {
-		return this.props.selectedNodes.length;
+		return this.editingGroup.totalSavedMeshes ?? this.props.selectedNodes.length;
 	}
 
 	get editingGroup() {
@@ -138,7 +137,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 	));
 
 	public componentDidMount() {
-		this.setState({ isFormDirty: this.isNewGroup, isFormValid: this.isNewGroup && !!this.objectsCount });
+		this.setState({ isFormDirty: this.isNewGroup, isFormValid: this.isNewGroup && this.objectsCount > 0 });
 	}
 
 	public componentDidUpdate(prevProps: Readonly<PropsWithChildren<IProps>>) {
@@ -188,10 +187,9 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 			key={`${this.editingGroup._id}.${this.editingGroup.updatedAt}`}
 			group={this.editingGroup}
 			currentUser={this.props.currentUser}
-			totalMeshes={this.props.totalMeshes}
+			objectsCount={this.objectsCount}
 			canUpdate={this.props.canUpdate}
 			handleChange={this.handleFieldChange}
-			objectsCount={this.objectsCount}
 		/>
 	)
 

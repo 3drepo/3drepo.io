@@ -30,7 +30,7 @@ import {
 } from '../../../../../../modules/groups/groups.selectors';
 import { GroupsActions } from '../../../../../../modules/groups';
 import { selectSettings } from '../../../../../../modules/model';
-import { selectSelectedNodes, selectTotalMeshes } from '../../../../../../modules/tree';
+import { selectSelectedNodes } from '../../../../../../modules/tree';
 import { GroupDetails } from './groupDetails.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -39,7 +39,6 @@ const mapStateToProps = createStructuredSelector({
 	modelSettings: selectSettings,
 	expandDetails: selectExpandDetails,
 	currentUser: selectCurrentUser,
-	totalMeshes: selectTotalMeshes,
 	selectedNodes: selectSelectedNodes,
 	criteriaFieldState: selectCriteriaFieldState,
 	isPending: selectFetchingDetailsIsPending,
