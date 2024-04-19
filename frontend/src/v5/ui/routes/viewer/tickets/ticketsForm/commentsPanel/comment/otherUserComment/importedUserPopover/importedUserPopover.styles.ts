@@ -15,10 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { formatMessage } from '@/v5/services/intl';
 import { Typography } from '@mui/material';
 import styled from 'styled-components';
 
 export const Info = styled(Typography)`
 	${({ theme }) => theme.typography.caption};
 	margin-top: 2px;
+`;
+
+export const ExternalLabel = styled.i`
+	&::after {
+		content: "${formatMessage({ id: 'importedUserPopover.external', defaultMessage: '(External)' })}";
+		font-size: 10px;
+		font-weight: 400;
+	}
 `;

@@ -17,7 +17,7 @@
 import { AvatarWrapper, PopoverContainer, Heading, Data } from '@components/shared/popoverCircles/userPopoverCircle/userPopover/userPopover.styles';
 import { UserCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.styles';
 import { FormattedMessage } from 'react-intl';
-import { Info } from './importedUserPopover.styles';
+import { Info, ExternalLabel } from './importedUserPopover.styles';
 import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { IUser } from '@/v5/store/users/users.redux';
@@ -36,13 +36,15 @@ export const ImportedUserPopover = ({ className, user, author, originalAuthor, i
 				<UserCircle user={user} />
 			</AvatarWrapper>
 			<Data>
-				<Heading>{originalAuthor}</Heading>
+				<Heading>
+					{originalAuthor} <ExternalLabel />
+				</Heading>
 				<Info>
-					<FormattedMessage id="importedUserPopover.imported.author" defaultMessage="imported by:" />
+					<FormattedMessage id="importedUserPopover.author" defaultMessage="imported by:" />
 					&nbsp;{author}
 				</Info>
 				<Info>
-					<FormattedMessage id="importedUserPopover.imported.time" defaultMessage="imported on:" />
+					<FormattedMessage id="importedUserPopover.time" defaultMessage="imported on:" />
 					&nbsp;{formatShortDateTime(importedAt)}
 				</Info>
 			</Data>

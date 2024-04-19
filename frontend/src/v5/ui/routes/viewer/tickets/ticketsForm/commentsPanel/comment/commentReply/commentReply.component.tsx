@@ -25,6 +25,7 @@ import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CommentMarkDown, CommentImage, OriginalMessage, CameraIcon } from './commentReply.styles';
 import { CommentAuthor } from '../commentNonMessageContent/commentNonMessageContent.styles';
 import { QuotedMessage } from '../quotedMessage/quotedMessage.styles';
+import { ExternalLabel } from '../otherUserComment/importedUserPopover/importedUserPopover.styles';
 
 type CommentReplyProps = TicketCommentReplyMetadata & {
 	variant?: 'primary' | 'secondary',
@@ -69,7 +70,11 @@ export const CommentReply = ({
 	return (
 		<QuotedMessage variant={variant} {...props}>
 			<div>
-				{authorDisplayName && (<CommentAuthor>{authorDisplayName}</CommentAuthor>)}
+				{authorDisplayName && (
+					<CommentAuthor>
+						{authorDisplayName} {originalAuthor && <ExternalLabel />}
+					</CommentAuthor>
+				)}
 				<OriginalMessage>
 					{images.length > 0 && (<CameraIcon />)}
 					<CommentMarkDown>
