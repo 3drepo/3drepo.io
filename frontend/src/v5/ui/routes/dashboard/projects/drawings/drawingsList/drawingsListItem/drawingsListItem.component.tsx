@@ -35,7 +35,8 @@ import { DRAWING_LIST_COLUMN_WIDTHS } from '@/v5/store/drawings/drawings.helpers
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
-import { ProjectsHooksSelectors, DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingRevisionDetails } from '@components/shared/drawingRevisionDetails/drawingRevisionDetails.component';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 interface IDrawingsListItem {
 	isSelected: boolean;
@@ -51,7 +52,6 @@ export const DrawingsListItem = memo(({
 	const { teamspace, project } = useParams<DashboardParams>();
 	const isMainList = useContext(IsMainList);
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
-	const revisions = DrawingRevisionsHooksSelectors.selectRevisions(drawing._id);
 
 	const onChangeFavourite = ({ currentTarget: { checked } }) => {
 		if (checked) {
@@ -130,11 +130,11 @@ export const DrawingsListItem = memo(({
 				</DashboardListItemIcon>
 			</DashboardListItemRow>
 			{isSelected && (
-				<div>
-					{revisions.map((rev) => (
-						<div>{rev.name} - {+rev.timestamp}</div>
-					))}
-				</div>
+				<DrawingRevisionDetails
+					drawingId={drawing._id}
+					revisionsCount={drawing.revisionsCount}
+					status={drawing.status}
+				/>
 			)}
 		</DashboardListItem>
 	);

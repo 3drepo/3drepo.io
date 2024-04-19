@@ -21,30 +21,25 @@ import { delay } from '@/v4/helpers/async';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 import { IDrawingRevision } from '@/v5/store/drawings/revisions/drawingRevisions.types';
 import { uuid } from '@/v4/helpers/uuid';
+import faker from 'faker';
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-const revisions: IDrawingRevision[] = [
-	{
-		_id: uuid(),
-		name: 'rev1',
-		timestamp: 1409009331628,
-		author: 'John',
-		format: '.dwg',
-		statusCode: '1',
-		revisionCode: '1',
-	}, {
-		_id: uuid(),
-		name: 'rev2',
-		timestamp: 1709569331628,
-		author: 'John',
-		format: '.pdf',
-		revisionCode: '2',
-	},
-];
+const getRevisions = (length) => Array(length ?? Math.round(Math.random() ** 2 * 5)).fill(0).map((_, index) => ({
+	_id: uuid(),
+	name: 'rev' + index,
+	timestamp: new Date(1_409_000_000_000 + Math.random() * 10 ** 8),
+	desc: Math.random() > .5 ? 'this is a description' : undefined,
+	author: 'John',
+	format: Math.random() > .5 ? '.dwg' : '.pdf',
+	statusCode: faker.datatype.string() + Math.round(Math.random() * 10 ** (Math.random())),
+	revisionCode: faker.datatype.string() + Math.round(Math.random() * 10 ** (Math.random())),
+})) as IDrawingRevision[];
 
-export const fetchRevisions = (teamspace: string, projectId: string, drawingId: string, showVoid = true): Promise<any> => {
+// TODO - remove last param, it's for demo only
+export const fetchRevisions = (teamspace: string, projectId: string, drawingId: string, revisionsCount, showVoid = true): Promise<any> => {
 	// throw new Error('name already exists');
 	// throw new Error('Drawing number already exists');
+	const revisions = getRevisions(revisionsCount);
 	return delay(500, { data: { revisions } });
 };
 

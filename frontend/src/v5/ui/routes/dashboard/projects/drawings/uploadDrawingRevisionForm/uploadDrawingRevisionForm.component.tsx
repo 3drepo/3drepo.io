@@ -33,7 +33,7 @@ import { UploadFiles } from '@components/shared/uploadFiles/uploadFiles.componen
 import { UploadFieldArray, UploadFilesContextComponent } from '@components/shared/uploadFiles/uploadFilesContext';
 import { SidebarForm } from './sidebarForm/sidebarForm.component';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
-import { DrawingRevisionsActionDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DrawingRevisionsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { UploadList } from './uploadList/uploadList.component';
 import { parseFileName, reduceFileData, isPdf, getPdfFirstPage, fileToPdf, pdfToFile } from '@components/shared/uploadFiles/uploadFiles.helpers';
 import { UploadItemFields } from '@/v5/store/drawings/revisions/drawingRevisions.types';
@@ -167,7 +167,7 @@ export const UploadDrawingRevisionForm = ({
 			setIsUploading(true);
 			uploads.forEach((revision, index) => {
 				const { uploadId } = fields[index];
-				DrawingRevisionsActionDispatchers.createRevision(teamspace, project, uploadId, revision);
+				DrawingRevisionsActionsDispatchers.createRevision(teamspace, project, uploadId, revision);
 			});
 		}
 	}), [fields.length]);
