@@ -83,7 +83,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 	}
 
 	get objectsCount() {
-		return this.editingGroup.totalSavedMeshes ?? this.props.selectedNodes.length;
+		return this.isNewGroup ? this.props.selectedNodes.length : this.editingGroup.totalSavedMeshes;
 	}
 
 	get editingGroup() {
