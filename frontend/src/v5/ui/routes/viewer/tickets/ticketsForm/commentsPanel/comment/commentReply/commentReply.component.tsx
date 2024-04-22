@@ -48,7 +48,7 @@ export const CommentReply = ({
 	const currentUser = CurrentUserHooksSelectors.selectUsername();
 	const user = UsersHooksSelectors.selectUser(teamspace, author);
 
-	let authorDisplayName = author;
+	let authorDisplayName = originalAuthor;
 	if (!originalAuthor) {
 		authorDisplayName = (author === currentUser)
 			? formatMessage({ id: 'comment.currentUser.author', defaultMessage: 'You' })
