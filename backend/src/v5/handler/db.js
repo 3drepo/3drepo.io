@@ -16,7 +16,7 @@
  */
 
 const { DEFAULT: DEFAULT_ROLE, ROLES_COL } = require('../models/roles.constants');
-const { GridFSBucket, MongoClient } = require('mongodb');
+const { GridFSBucket, Long, MongoClient } = require('mongodb');
 const { ADMIN_DB } = require('./db.constants');
 const { PassThrough } = require('stream');
 const config = require('../utils/config');
@@ -225,10 +225,9 @@ DBHandler.bulkWrite = async (database, colName, instructions) => {
 	await collection.bulkWrite(instructions);
 };
 
-DBHandler.findOneAndUpdate = async (database, colName, query, action, projection) => {
+DBHandler.findOneAndUpdate = async (database, colName, query, action, options = {}) => {
 	const collection = await getCollection(database, colName);
-	const options = deleteIfUndefined({ projection });
-	const { value } = await collection.findOneAndUpdate(query, action, options);
+	const { value } = await collection.findOneAndUpdate(query, action, deleteIfUndefined(options));
 	return value;
 };
 
@@ -435,6 +434,10 @@ DBHandler.getSessionStore = /* istanbul ignore next */() => {
 		stringify: false,
 	});
 	return Promise.resolve(sessionStore);
+};
+
+DBHandler.dataTypes = {
+	Long,
 };
 
 module.exports = DBHandler;

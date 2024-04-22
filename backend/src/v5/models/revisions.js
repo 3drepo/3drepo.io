@@ -67,7 +67,7 @@ Revisions.updateRevisionStatus = async (teamspace, project, model, revision, sta
 	const res = await db.findOneAndUpdate(teamspace, collectionName(model),
 		{ $or: [{ _id: revision }, { tag: revision }] },
 		{ $set: { void: status } },
-		{ _id: 1 });
+		{ projection: { _id: 1 } });
 
 	if (!res) {
 		throw templates.revisionNotFound;
