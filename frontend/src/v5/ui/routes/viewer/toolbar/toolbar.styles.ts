@@ -39,7 +39,7 @@ export const Container = styled.div`
 		justify-content: space-evenly;
 	}
 
-	* {
+	& {
 		transition: all .3s;
 	}
 `;
