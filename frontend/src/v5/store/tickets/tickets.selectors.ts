@@ -25,7 +25,7 @@ import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
 
-export const getTemplateDefaultStatus = (template: ITemplate) => template.properties?.find(({ name }) => name === BaseProperties.STATUS)?.default;
+const getTemplateDefaultStatus = (template: ITemplate) => template.properties?.find(({ name }) => name === BaseProperties.STATUS)?.default;
 
 export const getTicketWithStatus = (ticket: ITicket, template: ITemplate) => {
 	if (ticket.properties[BaseProperties.STATUS] || !template) return ticket;

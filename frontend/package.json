@@ -23,7 +23,7 @@
 		"unity-util": "webpack --config ./internals/webpack/webpack.unityutil.config.js",
 		"lint:ts": "eslint . --rulesdir internals/eslint-rules/",
 		"lint:css": "stylelint ./**/*.styles.ts",
-		"lint": "yarn circular:test && yarn lint:ts && yarn lint:css",
+		"lint": "yarn circular:test & yarn lint:ts & yarn lint:css",
 		"lint:fix": "yarn lint:ts --fix",
 		"docs": "typedoc --out ./docs --entryPointStrategy expand ./src/globals --options ./internals/typedoc.js",
 		"extract": "node ./internals/intl/extract.js",
