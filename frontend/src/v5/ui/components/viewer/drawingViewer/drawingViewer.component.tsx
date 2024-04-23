@@ -18,7 +18,7 @@
 import { formatMessage } from '@/v5/services/intl';
 import { ToolbarButton } from '@/v5/ui/routes/viewer/toolbar/buttons/toolbarButton.component';
 import { ToolbarContainer, MainToolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.styles';
-import { useRef, useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import ZoomOutIcon from '@assets/icons/viewer/zoom_out.svg';
 import ZoomInIcon from '@assets/icons/viewer/zoom_in.svg';
 
@@ -27,15 +27,19 @@ import { Button } from '@controls/button/button.component';
 import { FormattedMessage } from 'react-intl';
 import { SvgViewer } from './svgViewer.component';
 import { PanZoomHandler, centredPanZoom } from './panzoom/centredPanZoom';
+import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 
 
 
 export const DrawingViewer = () => {
+	const { panelWidth } = useContext(ViewerCanvasesContext);
 	const [svgContent, setSvgContent] = useState('');
 	const [imgContent, setImgContent] = useState('');
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
 
 	const imgRef = useRef<HTMLImageElement | SVGSVGElement>();
+	const windowWidth = document.documentElement.clientWidth;
+	const xPosition = ((windowWidth - panelWidth) / 2) + 'px';
 
 	const onClickButton = async ([file]: File[]) => {
 		if (file.type.includes('svg')) { 
@@ -82,7 +86,7 @@ export const DrawingViewer = () => {
 			</FileInputField>
 			{svgContent && <SvgViewer svgContent={svgContent} ref={imgRef} onLoad={onImageLoad}/>}
 			{imgContent && <img src={imgContent} ref={imgRef as any} onLoad={onImageLoad} />}
-			<ToolbarContainer>
+			<ToolbarContainer xPosition={xPosition}>
 				<MainToolbar>
 					<ToolbarButton
 						Icon={ZoomOutIcon}
