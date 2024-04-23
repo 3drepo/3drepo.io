@@ -18,6 +18,7 @@
 import { ReactNode } from 'react';
 
 import { AppBar } from '@components/shared/appBar';
+import { ProjectNavigation } from '@components/shared/navigationTabs';
 import { Content } from './dashboardProjectLayout.styles';
 import { DashboardProjectDataFetcher } from './dashboardProjectDataFetcher.component';
 
@@ -25,10 +26,11 @@ interface IDashboardProjectLayout {
 	children: ReactNode;
 }
 
-export const DashboardProjectLayout = ({ children }: IDashboardProjectLayout): JSX.Element => (
+export const DashboardProjectTabsLayout = ({ children }: IDashboardProjectLayout): JSX.Element => (
 	<>
 		<DashboardProjectDataFetcher />
 		<AppBar />
+		<ProjectNavigation />
 		<Content>
 			{children}
 		</Content>
