@@ -17,9 +17,20 @@
 
 import { PropsWithChildren } from 'react';
 import BaseSplitPane, { SplitPaneProps } from 'react-split-pane';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps>>`
+const MoveLineIcon = '"data:image/svg+xml,%3Csvg width=\'18\' height=\'18\' viewBox=\'0 0 18 18\' fill=\'none\' xmlns=\'http://www.w3.org/2000/svg\' %3E%3Cpath '
+	+ 'd=\'M9 0C9.34949 0 9.63281 0.28332 9.63281 0.632812V17.3672C9.63281 17.7167 9.34949 18 9 18C8.65051 18 8.36719 17.7167 8.36719 17.3672V0.632812C8.36719 '
+	+ '0.28332 8.65051 0 9 0Z\' fill=\'%23ffffff\'/%3E%3Cpath d=\'M2.58028 7.05249C2.82741 7.29962 2.82741 7.70029 2.58028 7.94742L2.16056 '
+	+ '8.36714H5.88281C6.23231 8.36714 6.51563 8.65046 6.51563 8.99995C6.51563 9.34945 6.23231 9.63277 5.88281 9.63277H2.16056L2.58028 10.0525C2.82741 10.2996 '
+	+ '2.82741 10.7003 2.58028 10.9474C2.33315 11.1945 1.93248 11.1945 1.68535 10.9474L0.185347 9.44742C0.0666711 9.32874 0 9.16779 0 8.99995C0 8.83212 '
+	+ '0.0666711 8.67116 0.185347 8.55249L1.68535 7.05249C1.93248 6.80536 2.33315 6.80536 2.58028 7.05249Z\' fill=\'%23ffffff\'/%3E%3Cpath d=\'M15.4139 '
+	+ '7.94742C15.1667 7.70029 15.1667 7.29962 15.4139 7.05249C15.661 6.80536 16.0617 6.80536 16.3088 7.05249L17.8088 8.55249C17.9275 8.67116 17.9941 8.83212 '
+	+ '17.9941 8.99995C17.9941 9.16779 17.9275 9.32874 17.8088 9.44742L16.3088 10.9474C16.0617 11.1945 15.661 11.1945 15.4139 10.9474C15.1667 10.7003 15.1667 '
+	+ '10.2996 15.4139 10.0525L15.8336 9.63277H12.1113C11.7618 9.63277 11.4785 9.34945 11.4785 8.99995C11.4785 8.65046 11.7618 8.36714 12.1113 '
+	+ '8.36714H15.8336L15.4139 7.94742Z\' fill=\'%23ffffff\'/%3E%3C/svg%3E"';
+
+export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps & { is2DOpen: boolean; }>>`
 	.Resizer {
 		box-sizing: border-box;
 		background-clip: padding-box;
@@ -31,27 +42,36 @@ export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps>
 			cursor: col-resize;
 			border-left: 12px solid transparent;
 			border-right: 11px solid transparent;
+			flex-shrink: 0;
+
+			&:hover {
+				background-color: ${({ theme }) => theme.palette.tertiary.light};
+			}
+			&:active {
+				background-color: ${({ theme }) => theme.palette.tertiary.mid};
+			}
+
+			::after {
+				content: url(${MoveLineIcon});
+				height: 40px;
+				width: 24px;
+				border-radius: 4px;
+				background-color: inherit;
+				box-sizing: border-box;
+				position: absolute;
+				bottom: 140px;
+				align-content: center;
+				text-align: center;
+				transform: translateX(-50%);
+			}
 		}
 	}
-`;
-
-export const PaneNodule = styled.div`
-	width: 24px;
-	height: 40px;
-	background-color: ${({ theme }) => theme.palette.base.light};
-	border-radius: 4px;
-	display: block;
-	color: ${({ theme }) => theme.palette.primary.contrast};
-	position: relative;
-	top: 85%;
-	left: -12px;
-	z-index: 1;
-	align-content: center;
-	text-align: center;
-	&:hover {
-		background-color: ${({ theme }) => theme.palette.tertiary.light};
-	}
-	&:active {
-		background-color: ${({ theme }) => theme.palette.tertiary.mid};
-	}
+	${({ is2DOpen }) => !is2DOpen && css`
+		>.Resizer,>.Pane2 {
+			display: none;
+		}
+		>.Pane1 {
+			width: 100% !important;
+		}
+	`}
 `;

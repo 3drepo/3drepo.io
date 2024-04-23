@@ -19,26 +19,24 @@ import { ViewerCanvas as Canvas3D } from '@/v4/routes/viewerCanvas';
 import { DrawingViewer as Canvas2D } from '@components/viewer/drawingViewer/drawingViewer.component';
 import { useLocation } from 'react-router-dom';
 import { SplitPane } from './viewerCanvases.styles';
+import { ViewerCanvasesContext, ViewerCanvasesContextType } from '../../viewer/viewerCanvases.context';
 
 export const ViewerCanvases = () => {
 	const { pathname } = useLocation();
 	return (
-		<SplitPane
-			split="vertical"
-			minSize={68}
-			defaultSize="50%"
-			onChange={(size) => {
-				console.log('size:', size);
-			}}
-			onDragStarted={() => {
-				console.log('dragStarted' );
-			}}
-			onDragFinished={() => {
-				console.log('dragFinished' );
-			}}
-		>
-			<Canvas3D location={{ pathname }} />
-			<Canvas2D />
-		</SplitPane>
+		<ViewerCanvasesContext.Consumer>
+			{({ is2DOpen, setPanelWidth }: ViewerCanvasesContextType) => (
+				<SplitPane
+					split="vertical"
+					minSize={68}
+					defaultSize="50%"
+					is2DOpen={is2DOpen}
+					onChange={setPanelWidth}
+				>
+					<Canvas3D location={{ pathname }} />
+					<Canvas2D />
+				</SplitPane>
+			)}
+		</ ViewerCanvasesContext.Consumer>
 	);
 };
