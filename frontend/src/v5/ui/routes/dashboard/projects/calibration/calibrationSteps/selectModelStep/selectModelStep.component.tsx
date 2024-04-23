@@ -15,32 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { sortByName } from '@/v5/store/store.helpers';
-import { openUnsavedNewTicketWarningModal } from './selectMenus.helpers';
-import { formatMessage } from '@/v5/services/intl';
-import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
-import { SelectProps } from '@controls/inputs/select/select.component';
-import { InputControllerProps, InputController } from '@controls/inputs/inputController.component';
 import { FormattedMessage } from 'react-intl';
-import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
-import { ListSubheader } from './selectMenus.styles';
+import { formatMessage } from '@/v5/services/intl';
+import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { FormSearchSelect } from '@controls/inputs/formInputs.component';
+import { sortByName } from '@/v5/store/store.helpers';
+import { ListSubheader } from '@components/shared/modelSelect/modelSelect.styles';
+import { MenuItem } from '@mui/material';
 
-type ContainersAndFederationsSelectProps = { isNewTicketDirty?: boolean } & SelectProps;
-export const ContainersAndFederationsSelect = ({ isNewTicketDirty, ...props }: ContainersAndFederationsSelectProps) => {
+type SelectModelStepProps = { name: string };
+export const SelectModelStep = ({ ...props }: SelectModelStepProps) => {
 	const containers = ContainersHooksSelectors.selectContainers();
 	const federations = FederationsHooksSelectors.selectFederations();
 
-	const handleOpen = () => {
-		if (!isNewTicketDirty) return;
-		openUnsavedNewTicketWarningModal();
-	};
-
-	const getRenderText = (ids) => {
+	const getRenderText = (ids: any[] | null = []) => {
 		const itemsLength = ids.length;
 		if (itemsLength === 1) {
 			const [id] = ids;
-			return ((containers.find(({ _id }) => _id === id) || federations.find(({ _id }) => _id === id)) || {}).name;
+			return (containers.find(({ _id }) => _id === id) || federations.find(({ _id }) => _id === id)).name;
 		}
 
 		return formatMessage({
@@ -50,28 +42,23 @@ export const ContainersAndFederationsSelect = ({ isNewTicketDirty, ...props }: C
 	};
 
 	return (
-		<SearchSelect
-			multiple
-			onOpen={handleOpen}renderValue={(ids: any[] | null = []) => (<b>{getRenderText(ids)}</b>)}
+		<FormSearchSelect
 			{...props}
 			label={formatMessage({ id: 'ticketTable.modelSelection.placeholder', defaultMessage: 'Select Federation / Container' })}
 			renderValue={(ids: any[] | null = []) => (<b>{getRenderText(ids)}</b>)}
-			onOpen={handleOpen}
 		>
 			<ListSubheader>
 				<FormattedMessage id="ticketTable.modelSelection.federations" defaultMessage="Federations" />
 			</ListSubheader>
 			{...sortByName(federations).map(({ name, _id }) => (
-				<MultiSelectMenuItem key={_id} value={_id}>{name}</MultiSelectMenuItem>
+				<MenuItem key={_id} value={_id}>{name}</MenuItem>
 			))}
 			<ListSubheader>
 				<FormattedMessage id="ticketTable.modelSelection.containers" defaultMessage="Containers" />
 			</ListSubheader>
 			{...sortByName(containers).map(({ name, _id }) => (
-				<MultiSelectMenuItem key={_id} value={_id}>{name}</MultiSelectMenuItem>
+				<MenuItem key={_id} value={_id}>{name}</MenuItem>
 			))}
-		</SearchSelect>
+		</FormSearchSelect>
 	);
 };
-
-export  const ContainersAndFederationsFormSelect = (props: InputControllerProps<SelectProps>) => (<InputController Input={ContainersAndFederationsSelect} {...props} />);
