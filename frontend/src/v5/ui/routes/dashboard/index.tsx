@@ -51,7 +51,6 @@ import { UserSignup } from '../userSignup/userSignup.component';
 import { UserVerification } from '../userVerification/userVerification.component';
 import { TeamspaceLayout } from './teamspaces/teamspaceLayout/teamspaceLayout.component';
 import { UserSignupSSO } from '../userSignup/userSignUpSSO/userSignUpSSO.component';
-import { DrawingViewer } from '@components/viewer/drawingViewer/drawingViewer.component';
 
 export const MainRoute = () => {
 	const { path } = useRouteMatch();
@@ -60,7 +59,6 @@ export const MainRoute = () => {
 	return (
 		<>
 			<GlobalStyle />
-			<ViewerCanvases />
 			<Switch>
 				<Route title={formatMessage({ id: 'pageTitle.login', defaultMessage: 'Log in' })} exact path={LOGIN_PATH}>
 					<Login />
@@ -118,12 +116,8 @@ export const MainRoute = () => {
 				</AuthenticatedRoute>
 				<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.viewer', defaultMessage: ':containerOrFederation :revision - Viewer' })} path={VIEWER_ROUTE}>
 					<DashboardViewerLayout>
+						<ViewerCanvases />
 						<Viewer />
-					</DashboardViewerLayout>
-				</AuthenticatedRoute>
-				<AuthenticatedRoute title="2d Viewer" path="/v5/2dviewer">
-					<DashboardViewerLayout>
-						<DrawingViewer />
 					</DashboardViewerLayout>
 				</AuthenticatedRoute>
 				<AuthenticatedRoute exact path={path}>
