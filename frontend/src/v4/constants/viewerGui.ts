@@ -44,6 +44,7 @@ export const VIEWER_PANELS = {
 	MEASUREMENTS: 'measurements',
 	ACTIVITIES: 'activities',
 	LEGEND: 'legend',
+	DRAWINGS: 'drawings'
 };
 
 export const VIEWER_PANELS_ICONS = {
@@ -57,6 +58,7 @@ export const VIEWER_PANELS_ICONS = {
 	[VIEWER_PANELS.GIS]: GisIcon,
 	[VIEWER_PANELS.SEQUENCES]: SequencesIcon,
 	[VIEWER_PANELS.MEASUREMENTS]: MeasureIcon,
+	[VIEWER_PANELS.DRAWINGS]: CompareIcon,
 };
 
 export const VIEWER_PANELS_MIN_HEIGHTS = {
@@ -70,6 +72,7 @@ export const VIEWER_PANELS_MIN_HEIGHTS = {
 	[VIEWER_PANELS.GIS]: 185,
 	[VIEWER_PANELS.SEQUENCES]: 200,
 	[VIEWER_PANELS.MEASUREMENTS]: 200,
+	[VIEWER_PANELS.DRAWINGS]: 200,
 };
 
 export const VIEWER_PANELS_TITLES = {
@@ -83,6 +86,7 @@ export const VIEWER_PANELS_TITLES = {
 	[VIEWER_PANELS.GIS]: 'GIS',
 	[VIEWER_PANELS.SEQUENCES]: 'Sequences',
 	[VIEWER_PANELS.MEASUREMENTS]: 'Measurements',
+	[VIEWER_PANELS.DRAWINGS]: 'DRAWINGS',
 };
 
 const getPanelConfig = (panelType) => ({
@@ -102,6 +106,7 @@ export const getViewerLeftPanels = () =>  [
 	VIEWER_PANELS.GIS,
 	VIEWER_PANELS.SEQUENCES,
 	VIEWER_PANELS.MEASUREMENTS,
+	VIEWER_PANELS.DRAWINGS,
 ].filter((panel) =>
 (clientConfigService.sequencesEnabled || panel !== VIEWER_PANELS.SEQUENCES)).map(getPanelConfig);
 

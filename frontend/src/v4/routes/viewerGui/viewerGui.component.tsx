@@ -44,6 +44,7 @@ import { Tree } from './components/tree';
 import { ViewerLoader } from './components/viewerLoader';
 import { Views } from './components/views';
 import { Container, DraggablePanels, GuiContainer, LeftPanels, LeftPanelsButtons, RightPanels } from './viewerGui.styles';
+import { Foo } from './foo';
 
 interface IProps {
 	viewer: any;
@@ -277,6 +278,7 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 		[VIEWER_PANELS.GIS]: Gis,
 		[VIEWER_PANELS.SEQUENCES]: Sequences,
 		[VIEWER_PANELS.MEASUREMENTS]: Measurements,
+		[VIEWER_PANELS.DRAWINGS]: Foo,
 	};
 
 	private renderLeftPanels = (panels) => (
