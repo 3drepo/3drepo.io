@@ -52,6 +52,7 @@ import {
 	selectSubModelsRootNodes,
 	selectTreeNodesList,
 	selectSelectedNodes,
+	selectFullySelectedNodesIds,
 } from './tree.selectors';
 import { TreeActions, TreeTypes } from './tree.redux';
 
@@ -354,8 +355,8 @@ function* showTreeNodes(nodesIds = [], skipNested = false) {
 function* hideSelectedNodes() {
 	yield waitForTreeToBeReady();
 
-	const selectedNodes = yield select(selectSelectedNodes);
-	yield hideTreeNodes(selectedNodes);
+	const selectedNodesIds = yield select(selectFullySelectedNodesIds);
+	yield hideTreeNodes(selectedNodesIds);
 }
 
 function* hideNodesBySharedIds({ objects = [], resetTree = false }) {
@@ -414,8 +415,8 @@ function* isolateSelectedNodes({ nodeId }) {
 		const meshes = yield TreeProcessing.getMeshesByNodeIds([nodeId]);
 		Viewer.zoomToObjects({entries: meshes});
 	} else {
-		const selectedNodes = yield select(selectSelectedNodes);
-		yield isolateNodes(selectedNodes);
+		const selectedNodesIds = yield select(selectFullySelectedNodesIds);
+		yield isolateNodes(selectedNodesIds);
 	}
 }
 
@@ -597,8 +598,8 @@ function* setTreeNodesVisibility({ nodesIds, visibility }) {
 function* setSelectedNodesVisibility({ nodeId, visibility }) {
 	yield waitForTreeToBeReady();
 
-	const selectedNodes = yield select(selectSelectedNodes);
-	const hasSelectedNodes = !!selectedNodes.length;
+	const delectedNodes = yield select(selectSelectedNodes);
+	const hasSelectedNodes = !!delectedNodes.length;
 	yield put(TreeActions.setTreeNodesVisibility([nodeId], visibility, hasSelectedNodes));
 }
 
