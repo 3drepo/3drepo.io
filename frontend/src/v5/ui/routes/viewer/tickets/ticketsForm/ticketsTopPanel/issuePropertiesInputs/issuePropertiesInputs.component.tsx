@@ -17,7 +17,7 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { PRIORITY_LEVELS_MAP } from '@controls/chip/chip.types';
-import { FormChipSelect, FormDueDateWithIcon } from '@controls/inputs/formInputs.component';
+import { FormChipSelect, FormDueDate } from '@controls/inputs/formInputs.component';
 import { FormattedMessage } from 'react-intl';
 import { IssueProperties } from '../../../tickets.constants';
 import { Property, PropertyTitle } from '../statusProperty/statusProperty.styles';
@@ -57,7 +57,7 @@ export const IssuePropertiesInputs = ({ onBlur, readOnly }: IIssuePropertiesInpu
 					defaultMessage="Due"
 				/>
 			</PropertyTitle>
-			<FormDueDateWithIcon
+			<FormDueDate
 				tooltip={formatMessage({
 					id: 'customTicket.topPanel.dueDate.tooltip',
 					defaultMessage: 'Set due date',
