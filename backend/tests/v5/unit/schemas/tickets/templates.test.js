@@ -268,7 +268,7 @@ const testValidate = () => {
 			modules: undefined,
 		}, false],
 		['status that is valid', {
-			name: generateRandomString(),
+			name: generateRandomString(15),
 			code: generateRandomString(3),
 			config: {
 				status: {
