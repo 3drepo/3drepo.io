@@ -261,14 +261,14 @@ const testValidate = () => {
 			config: {
 				status: {
 					values: statusValues,
-					default: generateRandomString(),
+					default: generateRandomString(15),
 				},
 			},
 			properties: undefined,
 			modules: undefined,
 		}, false],
 		['status that is valid', {
-			name: generateRandomString(15),
+			name: generateRandomString(),
 			code: generateRandomString(3),
 			config: {
 				status: {
