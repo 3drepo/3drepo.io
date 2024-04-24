@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,18 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { deletedCommentMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { formatMessage } from '@/v5/services/intl';
-import { Comment } from './deletedComment.styles';
+import { Typography } from '@mui/material';
+import styled from 'styled-components';
 
-export const DeletedComment = ({ user, author, isFirstOfBlock }) => (
-	<Comment
-		author={author}
-		isFirstOfBlock={isFirstOfBlock}
-		message={deletedCommentMessage}
-		commentAge={formatMessage({
-			id: 'customTicket.otherUser.comment.time.deleted',
-			defaultMessage: '{name} deleted this message',
-		}, { name: user.firstName })}
-	/>
-);
+export const Info = styled(Typography)`
+	${({ theme }) => theme.typography.caption};
+	margin-top: 2px;
+`;
+
+export const ExternalLabel = styled.i`
+	&::after {
+		content: "${formatMessage({ id: 'importedUserPopover.external', defaultMessage: '(External)' })}";
+		font-size: 10px;
+		font-weight: 400;
+	}
+`;
