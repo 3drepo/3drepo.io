@@ -597,8 +597,8 @@ function* setTreeNodesVisibility({ nodesIds, visibility }) {
 function* setSelectedNodesVisibility({ nodeId, visibility }) {
 	yield waitForTreeToBeReady();
 
-	const delectedNodes = yield select(selectSelectedNodes);
-	const hasSelectedNodes = !!delectedNodes.length;
+	const selectedNodes = yield select(selectSelectedNodes);
+	const hasSelectedNodes = !!selectedNodes.length;
 	yield put(TreeActions.setTreeNodesVisibility([nodeId], visibility, hasSelectedNodes));
 }
 
