@@ -76,7 +76,7 @@ TicketComments.importComments = async (teamspace, project, model, commentsPerTic
 	const docsToInsert = commentsPerTicket.flatMap(({ ticket, comments }) => comments.map((comment) => {
 		const fullComment = { ...comment,
 			_id: generateUUID(),
-			updatedAt: currDate,
+			updatedAt: comment.createdAt,
 			importedAt: currDate,
 			author,
 			ticket };

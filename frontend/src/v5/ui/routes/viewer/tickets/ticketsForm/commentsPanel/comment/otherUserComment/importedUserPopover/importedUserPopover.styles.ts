@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,23 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import { formatMessage } from '@/v5/services/intl';
+import { Typography } from '@mui/material';
+import styled from 'styled-components';
 
-export const DateContainer = styled.span<{ isOverdue?: boolean; disabled?: boolean }>`
-	font-size: 10px;
-	user-select: none;
-	color: ${({ theme, isOverdue = false }) => (isOverdue ? theme.palette.error.main : theme.palette.secondary.main)};
-	${({ disabled }) => !disabled && css`
-		cursor: pointer;
-		&:hover {
-			text-decoration: underline;
-		}
-	`}
-	display: inline-flex;
-	gap: 3px;
-	align-items: center;
+export const Info = styled(Typography)`
+	${({ theme }) => theme.typography.caption};
+	margin-top: 2px;
 `;
 
-export const EmptyDateContainer = styled(DateContainer)`
-	color: ${({ theme }) => theme.palette.base.main};
+export const ExternalLabel = styled.i`
+	&::after {
+		content: "${formatMessage({ id: 'importedUserPopover.external', defaultMessage: '(External)' })}";
+		font-size: 10px;
+		font-weight: 400;
+	}
 `;

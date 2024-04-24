@@ -25,17 +25,20 @@ import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CommentMarkDown, CommentImage, OriginalMessage, CameraIcon } from './commentReply.styles';
 import { CommentAuthor } from '../commentNonMessageContent/commentNonMessageContent.styles';
 import { QuotedMessage } from '../quotedMessage/quotedMessage.styles';
+import { ExternalLabel } from '../otherUserComment/importedUserPopover/importedUserPopover.styles';
 
 type CommentReplyProps = TicketCommentReplyMetadata & {
 	variant?: 'primary' | 'secondary',
 	shortMessage?: boolean,
 	images?: string[],
+	originalAuthor?: string,
 };
 export const CommentReply = ({
 	message,
 	author,
 	variant = 'primary',
 	images = [],
+	originalAuthor,
 	...props
 }: CommentReplyProps) => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
@@ -45,9 +48,12 @@ export const CommentReply = ({
 	const currentUser = CurrentUserHooksSelectors.selectUsername();
 	const user = UsersHooksSelectors.selectUser(teamspace, author);
 
-	const authorDisplayName = (author === currentUser)
-		? formatMessage({ id: 'comment.currentUser.author', defaultMessage: 'You' })
-		: `${user.firstName} ${user.lastName}`;
+	let authorDisplayName = originalAuthor;
+	if (!originalAuthor) {
+		authorDisplayName = (author === currentUser)
+			? formatMessage({ id: 'comment.currentUser.author', defaultMessage: 'You' })
+			: `${user.firstName} ${user.lastName}`;
+	}
 	const imagesSrcs = images.map((image) => getTicketResourceUrl(
 		teamspace,
 		project,
@@ -64,7 +70,11 @@ export const CommentReply = ({
 	return (
 		<QuotedMessage variant={variant} {...props}>
 			<div>
-				{authorDisplayName && (<CommentAuthor>{authorDisplayName}</CommentAuthor>)}
+				{authorDisplayName && (
+					<CommentAuthor>
+						{authorDisplayName} {originalAuthor && <ExternalLabel />}
+					</CommentAuthor>
+				)}
 				<OriginalMessage>
 					{images.length > 0 && (<CameraIcon />)}
 					<CommentMarkDown>
