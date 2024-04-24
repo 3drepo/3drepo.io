@@ -107,9 +107,10 @@ const testRemoveAllTickets = () => {
 			const project = generateRandomString();
 			const model = generateRandomString();
 			const fn = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce(undefined);
-			await expect(Ticket.removeAllTicketsInModel(teamspace, project, model)).resolves.toBeUndefined();
-			expect(fn).toHaveBeenCalledTimes(1);
+			await Ticket.removeAllTicketsInModel(teamspace, project, model);
+			expect(fn).toHaveBeenCalledTimes(2);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { teamspace, project, model });
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCounterCol, { _id: expect.anything() });
 		});
 	});
 };
