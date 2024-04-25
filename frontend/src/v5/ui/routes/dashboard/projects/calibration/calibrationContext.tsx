@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useState } from 'react';
 
 export interface CalibrationContextType {
 	step: number;
@@ -31,10 +31,6 @@ CalibrationContext.displayName = 'CalibrationContext';
 export const CalibrationContextComponent = ({ children }) => {
 	const [step, setStep] = useState(0);
 	const [isStepValid, setIsStepValid] = useState(false);
-
-	useEffect(() => {
-		setIsStepValid(false);
-	}, [step]);
 
 	return (
 		<CalibrationContext.Provider value={{ step, setStep, isStepValid, setIsStepValid }}>
