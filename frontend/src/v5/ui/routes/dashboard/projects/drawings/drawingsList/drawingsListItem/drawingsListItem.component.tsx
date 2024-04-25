@@ -16,7 +16,7 @@
  */
 
 import { memo, useContext, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { generatePath, useHistory, useParams } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import {
 	DashboardListItemButton,
@@ -32,7 +32,7 @@ import { DrawingsCalibrationButton } from './drawingsCalibrationButton/drawingsC
 import { IsMainList } from '../../../containers/mainList.context';
 import { DrawingsEllipsisMenu } from './drawingsEllipsisMenu/drawingsEllipsisMenu.component';
 import { DRAWING_LIST_COLUMN_WIDTHS } from '@/v5/store/drawings/drawings.helpers';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { CALIBRATION_ROUTE, DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingRevisionDetails } from '@components/shared/drawingRevisionDetails/drawingRevisionDetails.component';
@@ -50,8 +50,11 @@ export const DrawingsListItem = memo(({
 	onSelectOrToggleItem,
 }: IDrawingsListItem) => {
 	const { teamspace, project } = useParams<DashboardParams>();
+	const history = useHistory();
 	const isMainList = useContext(IsMainList);
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
+
+	const goToCalibrationPage = () => history.push(generatePath(CALIBRATION_ROUTE, { teamspace, project, drawing: drawing._id }));
 
 	const onChangeFavourite = ({ currentTarget: { checked } }) => {
 		if (checked) {
@@ -91,11 +94,8 @@ export const DrawingsListItem = memo(({
 				</DashboardListItemButton>
 				<DrawingsCalibrationButton
 					calibration={drawing.calibration}
-					onClick={() => {
-						if (!isProjectAdmin) return;
-						// eslint-disable-next-line no-console
-						console.log('Do calibrate');
-					}} // TODO - add calibrate functionality
+					onClick={goToCalibrationPage}
+					disabled={!isProjectAdmin}
 					tooltipTitle={
 						isProjectAdmin && <FormattedMessage id="drawings.list.item.calibration.tooltip" defaultMessage="Calibrate" />
 					}

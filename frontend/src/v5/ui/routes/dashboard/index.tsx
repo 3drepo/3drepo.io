@@ -20,6 +20,7 @@ import { GlobalStyle } from '@/v5/ui/themes/global';
 import { formatMessage } from '@/v5/services/intl';
 import { NotFound } from '@/v5/ui/routes/notFound';
 import { DashboardProjectLayout } from '@components/dashboard/dashboardProjectLayout/dashboardProjectLayout.component';
+import { DashboardProjectTabsLayout } from '@components/dashboard/dashboardProjectLayout/dashboardProjectTabsLayout.component';
 import { DashboardViewerLayout } from '@components/dashboard/dashboardViewerLayout/dashboardViewerLayout.component';
 import { Route } from '@/v5/services/routing/route.component';
 import { AuthenticatedRoute } from '@/v5/services/routing/authenticatedRoute.component';
@@ -32,6 +33,7 @@ import { ProjectContent } from './projects/projectContent/projectContent';
 import { Login } from '../login';
 import { Viewer } from '../viewer/viewer';
 import {
+	CALIBRATION_ROUTE,
 	DASHBOARD_ROUTE,
 	LOGIN_PATH,
 	PASSWORD_CHANGE_PATH,
@@ -53,6 +55,7 @@ import { UserSignupSSO } from '../userSignup/userSignUpSSO/userSignUpSSO.compone
 import { useEffect } from 'react';
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
+import { Calibration } from './projects/calibration/calibration.component';
 
 export const MainRoute = () => {
 	const { path } = useRouteMatch();
@@ -108,8 +111,13 @@ export const MainRoute = () => {
 						</Switch>
 					</TeamspaceLayout>
 				</AuthenticatedRoute>
-				<AuthenticatedRoute path={PROJECT_ROUTE_BASE}>
+				<AuthenticatedRoute path={CALIBRATION_ROUTE} title={formatMessage({ id: 'pageTitle.calibration', defaultMessage: ':project - Calibration' })}>
 					<DashboardProjectLayout>
+						<Calibration />
+					</DashboardProjectLayout>
+				</AuthenticatedRoute>
+				<AuthenticatedRoute path={PROJECT_ROUTE_BASE}>
+					<DashboardProjectTabsLayout>
 						<Switch>
 							<Route exact path={PROJECT_ROUTE_BASE}>
 								<Redirect to={`${discardSlash(pathname)}/t/federations`} />
@@ -121,7 +129,7 @@ export const MainRoute = () => {
 								<ProjectContent />
 							</Route>
 						</Switch>
-					</DashboardProjectLayout>
+					</DashboardProjectTabsLayout>
 				</AuthenticatedRoute>
 				<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.viewer', defaultMessage: ':containerOrFederation :revision - Viewer' })} path={VIEWER_ROUTE}>
 					<DashboardViewerLayout>
