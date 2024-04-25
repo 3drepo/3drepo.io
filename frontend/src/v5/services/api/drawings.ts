@@ -18,7 +18,7 @@
 
 import { delay } from '@/v4/helpers/async';
 import { drawingIds, mockRole } from '@/v5/store/drawings/drawings.temp';
-import { DrawingStats, DrawingUploadStatus, CalibrationStates, MinimumDrawing } from '@/v5/store/drawings/drawings.types';
+import { DrawingStats, DrawingUploadStatus, CalibrationStates, MinimumDrawing, IDrawing } from '@/v5/store/drawings/drawings.types';
 import { AxiosResponse } from 'axios';
 import uuid from 'uuidv4';
 
@@ -32,53 +32,55 @@ export const removeFavourite = (teamspace, projectId, drawingId): Promise<AxiosR
 
 const categories =  ['A drawing category', 'Another drawing category', 'Yet another one'];
 
-const arr = (new Array(1000)).fill(0);
+const arr = (new Array(100)).fill(0);
 
-const drawings: MinimumDrawing[] = arr.map((_, index) => ({
-	_id: drawingIds[index] ?? uuid(),
-	name: 'A drawing ' + index + ' - ' + mockRole(index),
-	drawingNumber: uuid(),
-	isFavourite: (Math.random() > 0.5),
-	role: mockRole(index),
-	category: categories[Math.round(Math.random() * (categories.length - 1))],
-	status: DrawingUploadStatus.OK,
-	revisionsCount: 2,
-	latestRevision: null,
-	lastUpdated: null,
-	hasStatsPending: false,
-	desc: 'This is a very long text that I need to use to see what the description will look like for a drawing in the viewer drawing card. This is then some extra text to make sure it is long enough',
-}));
-
-const randCal = () => {
-	const i = Math.round(Math.random() * 2);
-	switch (i) {
+const randCal = (revisionsCount) => {
+	switch (revisionsCount) {
 		case 0:
-			return CalibrationStates.CALIBRATED;
+			return CalibrationStates.EMPTY;
 		case 1:
 			return CalibrationStates.OUT_OF_SYNC;
 		case 2:
 			return CalibrationStates.UNCALIBRATED;
+		default:
+			return CalibrationStates.CALIBRATED;
 	}
 };
 
+const drawings: IDrawing[] = arr.map((_, index) => {
+	const revisionsCount = Math.round(Math.random() * 3);
+	return {
+		_id: drawingIds[index] ?? uuid(),
+		name: 'A drawing ' + index + ' - ' + mockRole(index),
+		drawingNumber: uuid(),
+		isFavourite: (Math.random() > 0.5),
+		role: mockRole(index),
+		category: categories[Math.round(Math.random() * (categories.length - 1))],
+		status: DrawingUploadStatus.OK,
+		calibration: randCal(revisionsCount),
+		revisionsCount,
+		latestRevision: null,
+		lastUpdated: null,
+		hasStatsPending: false,
+		desc: 'This is a very long text that I need to use to see what the description will look like for a drawing in the viewer drawing card. This is then some extra text to make sure it is long enough',
+	};
+});
 
-const stats = drawingIds.map((_id) => {
+
+const stats = drawings.map(({ revisionsCount, _id }) => {
 	const lastUpdated = (Math.random() > 0.5) ? 1709569331628 + Math.round( Math.random() * 31556952000) : null;
-	const total = lastUpdated ?  Math.round(Math.random() * 10) : 0;
 
-	const calibration = total ? randCal() : CalibrationStates.EMPTY;
-	const latestRevision = total ? 'Revision ' + total : undefined;
-	const status = total ? DrawingUploadStatus.OK : undefined;
+	const latestRevision = revisionsCount ? 'Revision ' + revisionsCount : undefined;
+	const status = revisionsCount ? DrawingUploadStatus.OK : undefined;
 
 	return {
 		_id,
 		revisions : {
 			lastUpdated,
-			total,
+			total: revisionsCount,
 			latestRevision,
 		},
 		drawingNumber: uuid(), 
-		calibration,
 		category: categories[Math.round(Math.random() * (categories.length - 1))],
 		status,
 	} as DrawingStats;

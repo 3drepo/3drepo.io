@@ -89,9 +89,7 @@ export const prepareSingleDrawingData = (
 	revisionsCount: stats?.revisions?.total ?? 0,
 	lastUpdated: getNullableDate(stats?.revisions.lastUpdated),
 	latestRevision: stats?.revisions.latestRevision ?? '',
-	category: stats?.category ?? '',
 	drawingNumber: stats?.drawingNumber ?? '',
-	calibration: stats?.calibration ?? CalibrationStates.UNCALIBRATED,
 	status: stats?.status ?? DrawingUploadStatus.OK,
 	hasStatsPending: !stats,
 	errorReason: stats?.errorReason && {
@@ -100,10 +98,4 @@ export const prepareSingleDrawingData = (
 	},
 });
 
-export const prepareDrawingsData = (
-	drawings: Array<MinimumDrawing>,
-	stats?: DrawingStats[],
-) => drawings.map<IDrawing>((Drawing, index) => {
-	const drawingStats = stats?.[index];
-	return prepareSingleDrawingData(Drawing, drawingStats);
-});
+export const prepareDrawingsData = (drawings: Array<MinimumDrawing>) => drawings.map<IDrawing>((d) => prepareSingleDrawingData(d, null));
