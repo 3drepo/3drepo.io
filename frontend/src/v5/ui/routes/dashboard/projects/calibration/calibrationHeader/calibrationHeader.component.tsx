@@ -34,6 +34,8 @@ export const CalibrationHeader = () => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const { step, setStep, isStepValid } = useContext(CalibrationContext);
 
+	const pathToDrawings = generatePath(DRAWINGS_ROUTE, { teamspace, project });
+
 	return (
 		<>
 			<Stepper activeStep={step} alternativeLabel>
@@ -46,11 +48,15 @@ export const CalibrationHeader = () => {
 			<div>
 				<Button onClick={() => setStep(step - 1)} disabled={step === 0}>Back</Button>
 				<Button>
-					<Link to={generatePath(DRAWINGS_ROUTE, { teamspace, project })}>
-						Cancel
-					</Link>
+					<Link to={pathToDrawings}>Cancel</Link>
 				</Button>
-				<Button onClick={() => setStep(step + 1)} disabled={!isStepValid || step === 4}>Continue</Button>
+				{step === 4 ? (
+					<Button onClick={() => setStep(step + 1)} disabled={!isStepValid}>
+						<Link to={pathToDrawings}>Confirm</Link>
+					</Button>
+				) : (
+					<Button onClick={() => setStep(step + 1)} disabled={!isStepValid}>Continue</Button>
+				)}
 			</div>
 		</>
 	);
