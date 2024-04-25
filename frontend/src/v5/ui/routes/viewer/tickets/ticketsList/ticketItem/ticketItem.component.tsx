@@ -17,6 +17,7 @@
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useEffect, useRef } from 'react';
+import { IssuePropertiesContainer, FlexRow, BottomRow, StatusChip, TicketItemContainer, Description, Id, Title, FlexColumn, PriorityChip, DueDate } from './ticketItem.styles';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { hasDefaultPin } from '../../ticketsForm/properties/coordsProperty/coordsProperty.helpers';
@@ -24,12 +25,11 @@ import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
 import { ControlledAssigneesSelect as Assignees } from '@controls/assigneesSelect/controlledAssigneesSelect.component';
 import { Highlight } from '@controls/highlight/highlight.component';
+import { IssueProperties, TicketBaseKeys } from '../../tickets.constants';
 import { has, isEqual } from 'lodash';
 import { getPropertiesInCamelCase, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { TicketItemThumbnail } from './ticketItemThumbnail/ticketItemThumbnail.component';
 import { PRIORITY_LEVELS_MAP } from '@controls/chip/chip.types';
-import { IssueProperties, TicketBaseKeys } from '../../tickets.constants';
-import { BottomRow, Description, DueDate, FlexColumn, FlexRow, Id, IssuePropertiesContainer, PriorityChip, StatusChip, TicketItemContainer, Title } from './ticketItem.styles';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -46,6 +46,7 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const { description = '', assignees = [], priority, dueDate = null } = getPropertiesInCamelCase(ticket[TicketBaseKeys.PROPERTIES]);
 	const hasIssueProperties = has(template, [TicketBaseKeys.CONFIG, 'issueProperties']);
+	const hasThumbnail = has(template, [TicketBaseKeys.CONFIG, 'defaultView']) || has(template, [TicketBaseKeys.CONFIG, 'defaultImage']);
 
 	const updateTicketProperty = (value) => TicketsActionsDispatchers
 		.updateTicket(teamspace, project, containerOrFederation, ticket._id, { properties: value }, isFederation);
@@ -97,7 +98,7 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 						</IssuePropertiesContainer>
 					)}
 				</FlexColumn>
-				<TicketItemThumbnail ticket={ticket} selectTicket={selectTicket} />
+				{hasThumbnail && <TicketItemThumbnail ticket={ticket} selectTicket={selectTicket} />}
 			</FlexRow>
 			<BottomRow>
 				<Id>
