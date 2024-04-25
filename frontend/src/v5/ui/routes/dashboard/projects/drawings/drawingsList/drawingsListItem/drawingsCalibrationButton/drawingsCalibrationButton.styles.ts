@@ -38,6 +38,8 @@ const uncalibratedStyles = css`
 const emptyStyles = css`
 	color: ${({ theme }) => theme.palette.base.mid};
 	background-color: ${({ theme }) => theme.palette.secondary.lightest};
+	pointer-events: none;
+	cursor: initial;
 `;
 
 export const CALIBRATION_STYLE = {
