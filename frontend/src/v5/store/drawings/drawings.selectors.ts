@@ -51,6 +51,11 @@ export const selectIsListPending = createSelector(
 	(state, currentProject) => !state.drawingsByProject[currentProject],
 );
 
+export const selectCalibratedDrawingsHaveStatsPending = createSelector(
+	selectCalibratedDrawings,
+	(drawings) => drawings.some(({ hasStatsPending }) => hasStatsPending),
+);
+
 export const selectAreStatsPending = createSelector(
 	selectDrawings,
 	(drawings) => drawings.some(({ hasStatsPending }) => hasStatsPending),
