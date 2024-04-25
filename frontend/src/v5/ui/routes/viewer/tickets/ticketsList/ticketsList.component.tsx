@@ -19,7 +19,7 @@ import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { uniq, xor } from 'lodash';
 import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { formatMessage } from '@/v5/services/intl';
@@ -28,18 +28,17 @@ import { FormattedMessage } from 'react-intl';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { TicketItem } from './ticketItem/ticketItem.component';
-import { Filters, CompletedFilterChip } from './ticketsList.styles';
+import { Filters, CompletedFilterChip, List } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
-import { hasDefaultPin } from '../ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { TicketSearchInput } from './ticketSearchInput/ticketSearchInput.component';
-import { CardList } from '@components/viewer/cards/card.styles';
+// import { CardList } from '@components/viewer/cards/card.styles';
 
 type TicketsListProps = {
 	tickets: ITicket[];
 };
 
 export const TicketsList = ({ tickets }: TicketsListProps) => {
-	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
+	const { containerOrFederation } = useParams<ViewerParams>();
 	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
 	const selectedTicket = TicketsCardHooksSelectors.selectSelectedTicket();
 	const selectedTemplates = TicketsCardHooksSelectors.selectFilteringTemplates();
@@ -47,26 +46,10 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	const availableTemplatesIds = uniq(tickets.map(({ type }) => type));
 	const availableTemplates = templates.filter(({ _id }) => availableTemplatesIds.includes(_id));
 
-	const ticketIsSelected = (ticket: ITicket) => selectedTicket?._id === ticket._id;
 	const filteredByQueriesAndCompleted = TicketsCardHooksSelectors.selectTicketsFilteredByQueriesAndCompleted();
 	const filteredItems = TicketsCardHooksSelectors.selectTicketsWithAllFiltersApplied();
 
 	const toggleTemplate = (templateId: string) => TicketsCardActionsDispatchers.setTemplateFilters(xor(selectedTemplates, [templateId]));
-
-	const onTicketClick = (ticket: ITicket, event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-		event.stopPropagation();
-
-		const wasSelected = ticketIsSelected(ticket);
-
-		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
-		TicketsCardActionsDispatchers.setSelectedTicketPin(hasDefaultPin(ticket) ? ticket._id : null);
-
-		if (wasSelected) {
-			TicketsCardActionsDispatchers.openTicket(ticket._id);
-		}
-
-		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id, revision);
-	};
 
 	useEffect(() => {
 		TicketsCardActionsDispatchers.setSelectedTicketPin(selectedTicket?._id);
@@ -100,16 +83,9 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 				})}
 			</Filters>
 			{filteredItems.length ? (
-				<CardList>
-					{filteredItems.map((ticket) => (
-						<TicketItem
-							ticket={ticket}
-							key={ticket._id}
-							onClick={(e) => onTicketClick(ticket, e)}
-							selected={ticketIsSelected(ticket)}
-						/>
-					))}
-				</CardList>
+				<List>
+					{filteredItems.map((ticket) => <TicketItem ticket={ticket} key={ticket._id} />)}
+				</List>
 			) : (
 				<EmptyListMessage>
 					<FormattedMessage id="viewer.cards.tickets.noResults" defaultMessage="No tickets found. Please try another search." />

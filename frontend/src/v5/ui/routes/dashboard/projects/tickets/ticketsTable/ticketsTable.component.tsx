@@ -25,12 +25,11 @@ import { formatMessage } from '@/v5/services/intl';
 import { useParams, generatePath, useHistory } from 'react-router-dom';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { getTemplateDefaultStatus, selectTemplateById, selectTicketsHaveBeenFetched } from '@/v5/store/tickets/tickets.selectors';
+import { selectTicketsHaveBeenFetched } from '@/v5/store/tickets/tickets.selectors';
 import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { CircleButton } from '@controls/circleButton';
-import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { FormProvider, useForm } from 'react-hook-form';
 import _ from 'lodash';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material';
@@ -88,7 +87,6 @@ export const TicketsTable = () => {
 		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
 		: !ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
 	const selectedTicketId = sidePanelTicket?._id;
-	const templateIsFetched = templateAlreadyFetched(selectedTemplate || {} as any);
 	const isCreatingNewTicket = containerOrFederation && !selectedTicketId && !hasRequiredViewerProperties(selectedTemplate);
 
 	const ticketsFilteredByTemplate = useMemo(() => {
@@ -165,11 +163,6 @@ export const TicketsTable = () => {
 	}, [containersAndFederations]);
 
 	useEffect(() => {
-		if (templateIsFetched) return;
-		ProjectsActionsDispatchers.fetchTemplate(teamspace, project, template);
-	}, [template]);
-
-	useEffect(() => {
 		const newURL = generatePath(TICKETS_ROUTE, {
 			...params,
 			groupBy: _.snakeCase(groupBy),
@@ -199,19 +192,14 @@ export const TicketsTable = () => {
 	}, [readOnly]);
 
 	useEffect(() => {
-		_.uniqBy(ticketsFilteredByTemplate, 'modelId').forEach(({ modelId, type }) => {
-			const tmpl = selectTemplateById(getState(), modelId, type);
-			if (!tmpl || !getTemplateDefaultStatus(tmpl)) {
-				TicketsActionsDispatchers.fetchTemplates(
-					teamspace,
-					project,
-					modelId,
-					isFederation(modelId),
-					true,
-				);
-			}
-		});
-	}, [ticketsFilteredByTemplate]);
+		if (templates.length) return;
+
+		ProjectsActionsDispatchers.fetchTemplates(
+			teamspace,
+			project,
+			true,
+		);
+	}, []);
 
 	return (
 		<SearchContextComponent items={ticketsFilteredByTemplate} filteringFunction={filterTickets}>

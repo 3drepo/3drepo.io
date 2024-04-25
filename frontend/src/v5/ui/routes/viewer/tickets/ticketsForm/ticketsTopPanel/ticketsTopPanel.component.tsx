@@ -19,7 +19,6 @@ import { formatMessage } from '@/v5/services/intl';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 
-import { CreationInfo } from '@components/shared/creationInfo/creationInfo.component';
 import { FormTextAreaFixedSize } from '@controls/inputs/formInputs.component';
 import { useFormContext } from 'react-hook-form';
 import { useEffect, useRef } from 'react';
@@ -28,12 +27,11 @@ import _ from 'lodash';
 import { BaseProperties, IssueProperties } from '../../tickets.constants';
 import { TitleProperty } from '../properties/titleProperty.component';
 import { PropertiesList } from '../propertiesList.component';
-import { BaseTicketInfo, DescriptionProperty, TopPanel, FlexContainer } from './ticketsTopPanel.styles';
 import { IssuePropertiesInputs } from './issuePropertiesInputs/issuePropertiesInputs.component';
+import { DescriptionProperty, TopPanel, CreationInfo, FlexContainer } from './ticketsTopPanel.styles';
 import { ErrorTextGap } from '../ticketsForm.styles';
 import { StatusProperty } from './statusProperty/statusProperty.component';
 import { AssigneesProperty } from './assignessProperty/assigneesProperty.component';
-import { InputContainer } from '@controls/inputs/inputContainer/inputContainer.styles';
 
 type ITicketsTopPanel = {
 	title: string;
@@ -68,47 +66,43 @@ export const TicketsTopPanel = ({
 
 	return (
 		<TopPanel>
-			<BaseTicketInfo>
-				<TitleProperty
-					name={BaseProperties.TITLE}
-					defaultValue={title}
-					formError={formState.errors[BaseProperties.TITLE]}
-					onBlur={onPropertyBlur}
-					disabled={readOnly}
-					ref={ref}
+			<TitleProperty
+				name={BaseProperties.TITLE}
+				defaultValue={title}
+				formError={formState.errors[BaseProperties.TITLE]}
+				onBlur={onPropertyBlur}
+				disabled={readOnly}
+				ref={ref}
+			/>
+			{createdAt && (
+				<CreationInfo
+					owner={owner}
+					createdAt={createdAt}
+					updatedAt={updatedAt}
 				/>
-				{createdAt && (
-					<CreationInfo
-						owner={owner}
-						createdAt={createdAt}
-						updatedAt={updatedAt}
-					/>
-				)}
-				<DescriptionProperty>
-					<FormTextAreaFixedSize
-						name={`properties.${BaseProperties.DESCRIPTION}`}
-						onBlur={onPropertyBlur}
-						placeholder={formatMessage({
-							id: 'customTicket.topPanel.description',
-							defaultMessage: 'Description',
-						})}
-						formError={_.get(formState.errors, `properties.${BaseProperties.DESCRIPTION}`)}
-						disabled={readOnly}
-					/>
-					{_.get(formState.errors, `properties.${BaseProperties.DESCRIPTION}`) && <ErrorTextGap />}
-				</DescriptionProperty>
+			)}
+			<DescriptionProperty>
+				<FormTextAreaFixedSize
+					name={`properties.${BaseProperties.DESCRIPTION}`}
+					onBlur={onPropertyBlur}
+					placeholder={formatMessage({
+						id: 'customTicket.topPanel.description',
+						defaultMessage: 'Description',
+					})}
+					formError={_.get(formState.errors, `properties.${BaseProperties.DESCRIPTION}`)}
+					disabled={readOnly}
+				/>
+				{_.get(formState.errors, `properties.${BaseProperties.DESCRIPTION}`) && <ErrorTextGap />}
+			</DescriptionProperty>
+			<FlexContainer>
 				{hasIssueProperties ? (
-					<FlexContainer>
-						<IssuePropertiesInputs onBlur={onPropertyBlur} readOnly={readOnly} />
-					</FlexContainer>
+					<IssuePropertiesInputs onBlur={onPropertyBlur} readOnly={readOnly} />
 				) : (
-					<InputContainer>
-						<StatusProperty onBlur={onPropertyBlur} readOnly={readOnly} />
-					</InputContainer>
+					<StatusProperty onBlur={onPropertyBlur} readOnly={readOnly} />
 				)}
-				{hasIssueProperties && (<AssigneesProperty onBlur={onPropertyBlur} readOnly={readOnly} />)}
-				<PropertiesList module="properties" properties={extraProperties} onPropertyBlur={onPropertyBlur} />
-			</BaseTicketInfo>
+			</FlexContainer>
+			{hasIssueProperties && (<AssigneesProperty onBlur={onPropertyBlur} readOnly={readOnly} />)}
+			<PropertiesList module="properties" properties={extraProperties} onPropertyBlur={onPropertyBlur} />
 		</TopPanel>
 	);
 };
