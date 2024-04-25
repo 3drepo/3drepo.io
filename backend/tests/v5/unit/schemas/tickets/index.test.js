@@ -18,6 +18,7 @@ const { times, cloneDeep } = require('lodash');
 
 const { src, image } = require('../../../helper/path');
 const {
+	determineTestGroup,
 	generateGroup,
 	generateRandomString,
 	generateRandomNumber,
@@ -1333,8 +1334,34 @@ const testDeserialiseUUIDsInTicket = () => {
 	});
 };
 
-describe('schema/tickets/validators', () => {
+const testSerialiseTicket = () => {
+	describe('Serialise a ticket', () => {
+		test('Should serialise dates as null correctly', () => {
+			const dateName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{
+					type: propTypes.DATE,
+					name: dateName,
+				}],
+				modules: [],
+			};
+			const ticket = {
+				properties: {
+					[dateName]: null,
+				},
+				modules: {},
+			};
+
+			expect(TicketSchema.serialiseTicket(ticket, template)).toEqual(ticket);
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	testValidateTicket();
 	testProcessReadOnlyValues();
 	testDeserialiseUUIDsInTicket();
+	testDeserialiseUUIDsInTicket();
+	testSerialiseTicket();
 });
