@@ -32,11 +32,11 @@ import { useContext } from 'react';
 import { ViewerCanvasesContext } from '../viewerCanvases.context';
 
 export const Toolbar = () => {
-	const { panelWidth, is2DOpen } = useContext(ViewerCanvasesContext);
+	const { leftPanelRatio, is2DOpen } = useContext(ViewerCanvasesContext);
 	const hasMetaData = ModelHooksSelectors.selectMetaKeysExist();
 	const showBIMPanel = BimHooksSelectors.selectIsActive();
 	const showCoords = ViewerGuiHooksSelectors.selectIsCoordViewActive();
-	const xPosition = is2DOpen ? (panelWidth / 2) + 'px' : '50%';
+	const xPosition = is2DOpen ? (leftPanelRatio / 2) : 50;
 
 	const setBIMPanelVisibililty = (visible) => {
 		BimActionsDispatchers.setIsActive(visible);

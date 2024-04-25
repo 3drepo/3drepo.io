@@ -19,24 +19,36 @@ import { ViewerCanvas as Canvas3D } from '@/v4/routes/viewerCanvas';
 import { DrawingViewer as Canvas2D } from '@components/viewer/drawingViewer/drawingViewer.component';
 import { useLocation } from 'react-router-dom';
 import { SplitPane } from './viewerCanvases.styles';
-import { ViewerCanvasesContext, ViewerCanvasesContextType } from '../../viewer/viewerCanvases.context';
+import { ViewerCanvasesContext } from '../../viewer/viewerCanvases.context';
+import { useContext, useState } from 'react';
+
+const MIN_PANEL_SIZE = 68;
 
 export const ViewerCanvases = () => {
 	const { pathname } = useLocation();
+	const windowWidth = window.innerWidth;
+	const { is2DOpen, leftPanelRatio, setLeftPanelRatio } = useContext(ViewerCanvasesContext);
+	const [manualSize, setManualSize] = useState(windowWidth / 2);
+
+	const handleResize = () => {
+		const windowWidth2 = window.innerWidth;
+		setManualSize(leftPanelRatio * windowWidth2);
+	};
+	window.addEventListener('resize', handleResize);
+
+	const onDragResize = (size) => setLeftPanelRatio((size / windowWidth) * 100);
 	return (
-		<ViewerCanvasesContext.Consumer>
-			{({ is2DOpen, setPanelWidth }: ViewerCanvasesContextType) => (
-				<SplitPane
-					split="vertical"
-					minSize={68}
-					defaultSize="50%"
-					is2DOpen={is2DOpen}
-					onChange={setPanelWidth}
-				>
-					<Canvas3D location={{ pathname }} />
-					<Canvas2D />
-				</SplitPane>
-			)}
-		</ ViewerCanvasesContext.Consumer>
+		<SplitPane
+			split="vertical"
+			size={manualSize} // This is for manually resizing the panels when the viewport width changes
+			minSize={MIN_PANEL_SIZE}
+			maxSize={windowWidth - MIN_PANEL_SIZE}
+			defaultSize="50%"
+			is2DOpen={is2DOpen}
+			onChange={onDragResize}
+		>
+			<Canvas3D location={{ pathname }} />
+			<Canvas2D />
+		</SplitPane>
 	);
 };

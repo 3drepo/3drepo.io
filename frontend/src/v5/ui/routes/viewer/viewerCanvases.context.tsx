@@ -16,31 +16,30 @@
  */
 import { createContext, useState } from 'react';
 
-export interface ViewerCanvasesContextType {
+interface ViewerCanvasesContextType {
 	is2DOpen?: boolean;
 	toggle2DPanel: () => void;
-	panelWidth: number;
-	setPanelWidth: (size) => void;
+	leftPanelRatio: number;
+	setLeftPanelRatio: (size) => void;
 }
 
 const defaultValue: ViewerCanvasesContextType = {
 	is2DOpen: false,
 	toggle2DPanel: () => { },
-	panelWidth: null,
-	setPanelWidth: () => { },
+	leftPanelRatio: 50,
+	setLeftPanelRatio: () => { },
 };
 export const ViewerCanvasesContext = createContext(defaultValue);
 ViewerCanvasesContext.displayName = 'ViewerCanvasesContext';
 
 export const ViewerCanvasesContextComponent = ({ children }) => {
-	const windowWidth = document.documentElement.clientWidth;
 	const [is2DOpen, setIs2DOpen] = useState(false);
-	const [panelWidth, setPanelWidth] = useState(windowWidth / 2);
+	const [leftPanelRatio, setLeftPanelRatio] = useState(50);
 
 	const toggle2DPanel = () => setIs2DOpen(!is2DOpen);
 
 	return (
-		<ViewerCanvasesContext.Provider value={{ is2DOpen, toggle2DPanel, panelWidth, setPanelWidth }}>
+		<ViewerCanvasesContext.Provider value={{ is2DOpen, toggle2DPanel, leftPanelRatio, setLeftPanelRatio }}>
 			{children}
 		</ViewerCanvasesContext.Provider>
 	);

@@ -17,11 +17,11 @@
 
 import styled from 'styled-components';
 
-export const ToolbarContainer = styled.div<{ xPosition: string }>`
+export const ToolbarContainer = styled.div<{ xPosition?: number }>`
 	border-radius: 24px;
 	position: absolute;
 	bottom: 35px;
-	left: ${({ xPosition }) => xPosition};
+	left: ${({ xPosition }) => xPosition || 50}%;
 	transform: translateX(-50%);
 	pointer-events: all;
 	z-index: 2;
@@ -47,4 +47,11 @@ export const ToolbarContainer = styled.div<{ xPosition: string }>`
 export const MainToolbar = styled.div`
 	background-color: ${({ theme }) => theme.palette.secondary.main};
 	z-index: 1;
+`;
+
+export const Foo = styled('div')`
+	/* svg {
+		width: unset;
+		height: unset;
+	} */
 `;

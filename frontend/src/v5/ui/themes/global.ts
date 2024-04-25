@@ -40,12 +40,18 @@ export const GlobalStyle = createGlobalStyle`
 		color: currentColor;
 	}
 
+	#viewer {
+		height: calc(100vh - 62px);
+		width: 100%;
+		position: relative;
+    	box-sizing: border-box;
+	}
+
 	#viewer #unityViewer {
 		position: absolute;
-		height: calc(100% - 62px) !important;
+		height: 100%;
 		width: 100% !important;
 		overflow: hidden;
-		margin-top: 62px;
 		background: ${COLOR.TRANSPARENT} !important;
 	}
 
