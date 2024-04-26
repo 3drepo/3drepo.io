@@ -31,7 +31,7 @@ const Table = forwardRef(({ children, ...props }, ref: any) => (
 
 export const DrawingsList = () => {
 	const drawings = DrawingsHooksSelectors.selectCalibratedDrawings();
-	const isLoading = DrawingsHooksSelectors.selectAreStatsPending();
+	const isLoading = DrawingsHooksSelectors.selectCalibratedDrawingsHaveStatsPending();
 
 	if (isLoading) return (
 		<CentredContainer>
