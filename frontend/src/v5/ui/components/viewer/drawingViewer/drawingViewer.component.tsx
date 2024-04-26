@@ -34,6 +34,8 @@ export const DrawingViewer = () => {
 	const [svgContent, setSvgContent] = useState('');
 	const [imgContent, setImgContent] = useState('');
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
+	const [isMinZoom, setIsMinZoom] = useState(false);
+	const [isMaxZoom, setIsMaxZoom] = useState(false);
 
 	const imgRef = useRef<HTMLImageElement | SVGSVGElement>();
 
@@ -63,7 +65,14 @@ export const DrawingViewer = () => {
 			zoomHandler.dispose();
 		}
 
-		setZoomHandler(centredPanZoom(imgRef.current, 20, 20));
+		const pz = centredPanZoom(imgRef.current, 20, 20);
+		setZoomHandler(pz);
+		pz.on('transform', () => {
+			const cantZoomOut = pz.getMinZoom() >= pz.getTransform().scale;
+			const cantZoomIn = pz.getMaxZoom() <= pz.getTransform().scale;
+			setIsMinZoom(cantZoomOut);
+			setIsMaxZoom(cantZoomIn);
+		});
 	};
 
 	return (
@@ -87,11 +96,13 @@ export const DrawingViewer = () => {
 					<ToolbarButton
 						Icon={ZoomOutIcon}
 						onClick={onClickZoomOut}
+						disabled={isMinZoom}
 						title={formatMessage({ id: 'drawingWiewer.toolbar.zoomIn', defaultMessage: 'Zoom out' })}
 					/>
 					<ToolbarButton
 						Icon={ZoomInIcon}
 						onClick={onClickZoomIn}
+						disabled={isMaxZoom}
 						title={formatMessage({ id: 'drawingWiewer.toolbar.zoomOut', defaultMessage: 'Zoom in' })}
 					/>
 				</MainToolbar>
