@@ -69,8 +69,6 @@ export function* fetchDrawings({ teamspace, projectId }: FetchDrawingsAction) {
 			yield put(DrawingsActions.fetchDrawingsSuccess(projectId, drawingsWithoutStats));
 		}
 		
-		yield put(DrawingsActions.fetchDrawingsSuccess(projectId, drawingsWithoutStats));
-
 		yield all(
 			drawingsWithoutStats.map(
 				(drawing) => put(DrawingsActions.fetchDrawingStats(teamspace, projectId, drawing._id)),

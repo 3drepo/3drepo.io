@@ -26,9 +26,9 @@ import { FormattedMessage } from 'react-intl';
 import { UploadStatus } from '@/v5/store/containers/containers.types';
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
 import { uploadToContainer } from '@/v5/ui/routes/dashboard/projects/containers/uploadContainerRevisionForm/uploadContainerRevisionForm.helpers';
-import { SkeletonListItem } from './components/skeletonListItem/skeletonListItem.component';
-import { RevisionsListItem } from './components/revisionsListItem/revisionsListItem.component';
-import { RevisionsListHeaderLabel } from './components/revisionsListHeaderLabel/revisionsListHeaderLabel.component';
+import { SkeletonListItem } from '../revisionDetails/components/skeletonListItem/skeletonListItem.component';
+import { RevisionsListItem } from '../revisionDetails/components/revisionsListItem/revisionsListItem.component';
+import { RevisionsListHeaderLabel } from '../revisionDetails/components/revisionsListHeaderLabel/revisionsListHeaderLabel.component';
 import {
 	Container,
 	RevisionsListHeaderContainer,
@@ -37,7 +37,15 @@ import {
 	RevisionsListEmptyWrapper,
 	RevisionsListEmptyContainer,
 	RevisionsListEmptyText,
-} from './containerRevisionDetails.styles';
+} from '../revisionDetails/revisionDetails.styles';
+import { getRevisionFileUrl } from '@/v5/services/api/containerRevisions';
+import { selectHasCollaboratorAccess } from '@/v5/store/containers/containers.selectors';
+import { getState } from '@/v4/modules/store';
+import { formatShortDateTime } from '@/v5/helpers/intl.helper';
+import { RevisionsListItemText } from '../revisionDetails/components/revisionsListItem/revisionsListItemText/revisionsListItemText.component';
+import { RevisionsListItemAuthor } from '../revisionDetails/components/revisionsListItem/revisionsListItemAuthor/revisionsListItemAuthor.component';
+import { RevisionsListItemTag } from '../revisionDetails/components/revisionsListItem/revisionsListItem.styles';
+import { viewerRoute } from '@/v5/services/routing/routing';
 
 interface IContainerRevisionDetails {
 	containerId: string;
@@ -52,6 +60,10 @@ export const ContainerRevisionDetails = ({ containerId, revisionsCount, status }
 	const revisions = ContainerRevisionsHooksSelectors.selectRevisions(containerId)
 		.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 	const selected = revisions.findIndex((r) => !r.void);
+
+	const handleDownloadRevision = (revisionId) => {
+		window.location.href = getRevisionFileUrl(teamspace, project, containerId, revisionId);
+	};
 
 	useEffect(() => {
 		if (!revisions.length) {
@@ -106,10 +118,23 @@ export const ContainerRevisionDetails = ({ containerId, revisionsCount, status }
 						<RevisionsListItemWrapper
 							selected={i === selected}
 							isBeforeSelected={i === selected - 1}
-							onClick={() => {}}
 							key={revision._id}
 						>
-							<RevisionsListItem revision={revision} containerId={containerId} />
+							<RevisionsListItem
+								onSetVoidStatus={(voidStatus) => (
+									ContainerRevisionsActionsDispatchers.setVoidStatus(teamspace, project, containerId, revision._id, voidStatus)
+								)}
+								voidStatus={revision.void}
+								onDownloadRevision={() => handleDownloadRevision(revision._id)}
+								hasPermission={selectHasCollaboratorAccess(getState(), containerId)}
+								redirectTo={viewerRoute(teamspace, project, containerId, revision)}
+							>
+								<RevisionsListItemText width={140} tabletWidth={94}> {formatShortDateTime(revision.timestamp)} </RevisionsListItemText>
+								<RevisionsListItemAuthor width={170} tabletWidth={155} authorName={revision.author} />
+								<RevisionsListItemTag width={150} tabletWidth={300}> {revision.tag} </RevisionsListItemTag>
+								<RevisionsListItemText hideWhenSmallerThan={1140}> {revision.desc || ''} </RevisionsListItemText>
+								<RevisionsListItemText width={90} tabletWidth={45} hideWhenSmallerThan={800}> {(revision.format || '').toLowerCase()} </RevisionsListItemText>
+							</RevisionsListItem>
 						</RevisionsListItemWrapper>
 					))
 				)}

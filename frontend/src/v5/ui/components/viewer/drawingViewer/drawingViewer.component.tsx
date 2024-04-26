@@ -27,6 +27,7 @@ import { Button } from '@controls/button/button.component';
 import { FormattedMessage } from 'react-intl';
 import { SvgViewer } from './svgViewer.component';
 import { PanZoomHandler, centredPanZoom } from './panzoom/centredPanZoom';
+import { DrawingViewerContainer } from './drawingViewer.styles';
 
 
 
@@ -34,6 +35,8 @@ export const DrawingViewer = () => {
 	const [svgContent, setSvgContent] = useState('');
 	const [imgContent, setImgContent] = useState('');
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
+	const [isMinZoom, setIsMinZoom] = useState(false);
+	const [isMaxZoom, setIsMaxZoom] = useState(false);
 
 	const imgRef = useRef<HTMLImageElement | SVGSVGElement>();
 
@@ -63,11 +66,18 @@ export const DrawingViewer = () => {
 			zoomHandler.dispose();
 		}
 
-		setZoomHandler(centredPanZoom(imgRef.current, 20, 20));
+		const pz = centredPanZoom(imgRef.current, 20, 20);
+		setZoomHandler(pz);
+		pz.on('transform', () => {
+			const cantZoomOut = pz.getMinZoom() >= pz.getTransform().scale;
+			const cantZoomIn = pz.getMaxZoom() <= pz.getTransform().scale;
+			setIsMinZoom(cantZoomOut);
+			setIsMaxZoom(cantZoomIn);
+		});
 	};
 
 	return (
-		<div style={{ overflow:'hidden', width:'100%', height:'100%' }}>
+		<DrawingViewerContainer>
 			<FileInputField
 				accept=".svg,.png"
 				onChange={onClickButton as any}
@@ -87,15 +97,17 @@ export const DrawingViewer = () => {
 					<ToolbarButton
 						Icon={ZoomOutIcon}
 						onClick={onClickZoomOut}
-						title={formatMessage({ id: 'drawingWiewer.toolbar.zoomIn', defaultMessage: 'Zoom out' })}
+						disabled={isMinZoom}
+						title={formatMessage({ id: 'drawingViewer.toolbar.zoomIn', defaultMessage: 'Zoom out' })}
 					/>
 					<ToolbarButton
 						Icon={ZoomInIcon}
 						onClick={onClickZoomIn}
-						title={formatMessage({ id: 'drawingWiewer.toolbar.zoomOut', defaultMessage: 'Zoom in' })}
+						disabled={isMaxZoom}
+						title={formatMessage({ id: 'drawingViewer.toolbar.zoomOut', defaultMessage: 'Zoom in' })}
 					/>
 				</MainToolbar>
 			</ToolbarContainer>
-		</div>
+		</DrawingViewerContainer>
 	);
 };

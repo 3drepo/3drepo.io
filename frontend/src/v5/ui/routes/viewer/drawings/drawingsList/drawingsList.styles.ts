@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,24 +14,22 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { CardList } from '@components/teamspace/teamspaceList/teamspaceList.styles';
+import { TableVirtuoso } from 'react-virtuoso';
+import styled from 'styled-components';
 
-import styled, { css } from 'styled-components';
+export const VirtualisedList = styled(TableVirtuoso)`
+	height: 100%;
+	box-sizing: border-box;
+	overflow-x: hidden;
 
-export const DateContainer = styled.span<{ isOverdue?: boolean; disabled?: boolean }>`
-	font-size: 10px;
-	user-select: none;
-	color: ${({ theme, isOverdue = false }) => (isOverdue ? theme.palette.error.main : theme.palette.secondary.main)};
-	${({ disabled }) => !disabled && css`
-		cursor: pointer;
-		&:hover {
-			text-decoration: underline;
+	${/* sc-selector */CardList} {
+		width: 100%;
+		box-sizing: border-box;
+		height: 100%;
+
+		& > * {
+			width: 100%;
 		}
-	`}
-	display: inline-flex;
-	gap: 3px;
-	align-items: center;
-`;
-
-export const EmptyDateContainer = styled(DateContainer)`
-	color: ${({ theme }) => theme.palette.base.main};
+	}
 `;

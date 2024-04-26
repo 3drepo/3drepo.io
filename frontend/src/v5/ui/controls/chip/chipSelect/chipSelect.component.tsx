@@ -66,6 +66,7 @@ export const ChipSelect = ({
 				defaultValue={defaultValue}
 				error={error}
 				helperText={helperText}
+				MenuProps={{ style: { pointerEvents: open ? 'auto' : 'none' } }}
 			>
 				{arrayOfListItems.map(({ label, ...itemProps }) => (
 					<SelectItem key={label} value={label} label={label} {...itemProps} />

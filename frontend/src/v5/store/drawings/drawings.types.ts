@@ -69,7 +69,6 @@ export interface DrawingStats {
 		latestRevision?: string,
 	};
 	drawingNumber: string,
-	calibration?: CalibrationStates,
 	category?: string, // TODO - add category types
 	status?: DrawingUploadStatus,
 	errorReason?: {

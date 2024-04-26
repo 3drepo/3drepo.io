@@ -22,12 +22,13 @@ import { onlyText } from 'react-children-utilities';
 import { Container, Tooltip } from './textOverflow.styles';
 
 interface ITextOverflow {
+	lines?: number;
+	tooltipText?: string;
 	children: ReactNode;
 	className?: string;
-	tooltipText?: string;
 }
 
-export const TextOverflow = ({ children, className, tooltipText }: ITextOverflow): JSX.Element => {
+export const TextOverflow = ({ children, className, tooltipText, lines }: ITextOverflow): JSX.Element => {
 	const ref = useRef(null);
 	const [isTruncated, setIsTruncated] = useState(false);
 
@@ -35,7 +36,7 @@ export const TextOverflow = ({ children, className, tooltipText }: ITextOverflow
 		if (!ref.current) return false;
 
 		const { current } = ref;
-		return current.scrollWidth > current.clientWidth;
+		return current.scrollWidth > current.clientWidth || current.scrollHeight > current.clientHeight;
 	}, [children]);
 
 	useEffect(() => {
@@ -49,7 +50,7 @@ export const TextOverflow = ({ children, className, tooltipText }: ITextOverflow
 				style={{ pointerEvents: isTruncated ? 'all' : 'none' }}
 				placement="bottom"
 			>
-				<Container ref={ref} className={className}>
+				<Container ref={ref} lines={lines} className={className}>
 					{children}
 				</Container>
 			</Tooltip>

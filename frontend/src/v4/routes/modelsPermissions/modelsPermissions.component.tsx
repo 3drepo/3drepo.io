@@ -18,6 +18,8 @@ import { PureComponent } from 'react';
 import memoizeOne from 'memoize-one';
 import * as queryString from 'query-string';
 
+import { formatMessage } from '@/v5/services/intl';
+import { getModelType } from '@/v5/store/projects/projects.helpers';
 import { MODEL_ROLES_LIST } from '../../constants/model-permissions';
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
 import { CustomTable, CELL_TYPES } from '../components/customTable/customTable.component';
@@ -32,7 +34,7 @@ import {
 } from './modelsPermissions.styles';
 
 const MODEL_TABLE_CELLS = [{
-	name: 'Container/federation',
+	name: formatMessage({ id: 'userPermissions.modelTable.header', defaultMessage: 'Container/federation/drawing'}),
 	type: CELL_TYPES.NAME,
 	HeadingComponent: CellUserSearch,
 	CellComponent: ModelItem,
@@ -44,7 +46,7 @@ const getModelsTableRows = memoizeOne((models = [], selectedModels = []) => {
 	return models.map((model) => {
 		const data = [{
 			name: model.name,
-			isFederation: model.federate
+			modelType: getModelType(model),
 		}];
 
 		const selected = selectedModels.some((selectedModel) => selectedModel.model === model.model);
@@ -170,8 +172,10 @@ export class ModelsPermissions extends PureComponent<IProps, IState> {
 	public render() {
 		const { models, permissions, selectedModels, className, location } = this.props;
 		const { permissionsRevision } = this.state;
-		// eslint-disable-next-line max-len
-		const textOverlayMessage = `Select a container or federation to view the users permissions`;
+		const textOverlayMessage = formatMessage({
+			id: 'userPermissions.permissionsTable.textOverlay',
+			defaultMessage: `Select a container, federation, or drawing to view the users permissions`,
+		});
 
 		return (
 			<Container
