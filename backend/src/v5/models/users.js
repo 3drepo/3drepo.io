@@ -179,13 +179,13 @@ User.verify = async (username) => {
 				'customData.emailVerifyToken': 1,
 			},
 		},
-		{
+		{ projection: {
 			'customData.firstName': 1,
 			'customData.lastName': 1,
 			'customData.email': 1,
 			'customData.billing.billingInfo.company': 1,
 			'customData.mailListOptOut': 1,
-		});
+		} });
 
 	return customData;
 };

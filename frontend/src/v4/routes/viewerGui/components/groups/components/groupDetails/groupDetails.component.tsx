@@ -88,7 +88,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 		return this.props.editingGroup;
 	}
 
-	get objectsCount() {
+	get selectedObjectsCount() {
 		const sharedIds = (this.props.selectedNodes || []).flatMap((node) => node.shared_ids);
 		return this.props.getObjectsCount(sharedIds);
 	}
@@ -140,7 +140,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 	));
 
 	public componentDidMount() {
-		this.setState({ isFormDirty: this.isNewGroup, isFormValid: this.isNewGroup && !!this.objectsCount });
+		this.setState({ isFormDirty: this.isNewGroup, isFormValid: this.isNewGroup && !!this.selectedObjectsCount });
 	}
 
 	public componentDidUpdate(prevProps: Readonly<PropsWithChildren<IProps>>) {
@@ -194,7 +194,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 			totalMeshes={this.props.totalMeshes}
 			canUpdate={this.props.canUpdate}
 			handleChange={this.handleFieldChange}
-			objectsCount={this.objectsCount}
+			objectsCount={this.editingGroup.totalSavedMeshes}
 		/>
 	)
 

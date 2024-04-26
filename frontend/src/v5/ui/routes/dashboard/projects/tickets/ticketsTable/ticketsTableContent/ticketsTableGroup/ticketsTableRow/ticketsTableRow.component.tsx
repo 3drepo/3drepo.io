@@ -21,7 +21,7 @@ import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
 import { useContext } from 'react';
 import { SearchContext } from '@controls/search/searchContext';
 import { Highlight } from '@controls/highlight';
-import { DueDateWithIcon } from '@controls/dueDate/dueDateWithIcon/dueDateWithIcon.component';
+import { DueDate } from '@controls/dueDate/dueDate.component';
 import { Chip } from '@controls/chip/chip.component';
 import { PRIORITY_LEVELS_MAP, RISK_LEVELS_MAP, TREATMENT_LEVELS_MAP } from '@controls/chip/chip.types';
 import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.component';
@@ -106,7 +106,7 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelId, selec
 				<UserPopoverCircle user={ownerAsUser} />
 			</CellOwner>
 			<CellDate width={147} hidden={!hasProperties}>
-				{!!dueDate && (<DueDateWithIcon value={dueDate} disabled />)}
+				{!!dueDate && (<DueDate value={dueDate} disabled />)}
 			</CellDate>
 			<CellChipText width={90} hidden={!hasProperties}>
 				<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />

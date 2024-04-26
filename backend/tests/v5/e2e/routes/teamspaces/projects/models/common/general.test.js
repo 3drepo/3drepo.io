@@ -260,6 +260,7 @@ const testGetModelStats = () => {
 			const latestRev = revs.length ? revs[revs.length - 1] : undefined;
 			const res = {
 				code,
+				unit,
 				status,
 			};
 
@@ -285,7 +286,6 @@ const testGetModelStats = () => {
 				};
 
 				res.type = type;
-				res.unit = unit;
 			}
 
 			if (status === 'failed') {

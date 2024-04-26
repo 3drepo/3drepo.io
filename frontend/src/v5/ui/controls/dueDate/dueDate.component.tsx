@@ -20,18 +20,17 @@ import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
-import { CalendarIcon, DueDateWithIconContainer } from '../dueDate.styles';
-import { DateContainer, EmptyDateContainer } from '../dueDateWithLabel/dueDateLabel/dueDateLabel.styles';
+import { CalendarIcon, DateContainer, DueDateContainer, EmptyDateContainer } from './dueDate.styles';
 
-export type DueDateWithIconProps = Omit<FormInputProps, 'onBlur'> & {
+export type DueDateProps = Omit<FormInputProps, 'onBlur'> & {
 	tooltip?: string;
 	onBlur?: () => void;
 };
 
-export const DueDateWithIcon = ({ value, disabled, tooltip, ...props }: DueDateWithIconProps) => {
+export const DueDate = ({ value, disabled, tooltip, className, ...props }: DueDateProps) => {
 	const isOverdue = value < Date.now();
 	return (
-		<DueDateWithIconContainer>
+		<DueDateContainer className={className}>
 			<DateTimePicker
 				value={value}
 				disabled={disabled}
@@ -46,9 +45,9 @@ export const DueDateWithIcon = ({ value, disabled, tooltip, ...props }: DueDateW
 							) : (
 								<EmptyDateContainer {...args} ref={inputRef} disabled={disabled}><CalendarIcon />
 									{ disabled ? (
-										<FormattedMessage id="dueDate.withIcon.unset.enabled" defaultMessage="Date unset" />
+										<FormattedMessage id="dueDate.unset.enabled" defaultMessage="Date unset" />
 									) : (
-										<FormattedMessage id="dueDate.withIcon.unset.disabled" defaultMessage="Set date" />
+										<FormattedMessage id="dueDate.unset.disabled" defaultMessage="Set date" />
 									)}
 								</EmptyDateContainer>
 							)}
@@ -57,6 +56,6 @@ export const DueDateWithIcon = ({ value, disabled, tooltip, ...props }: DueDateW
 				}
 				{...props}
 			/>
-		</DueDateWithIconContainer>
+		</DueDateContainer>
 	);
 };

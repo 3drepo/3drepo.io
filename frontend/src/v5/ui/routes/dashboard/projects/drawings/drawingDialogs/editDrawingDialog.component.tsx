@@ -41,6 +41,7 @@ export const EditDrawingDialog = ({ open, onClickClose, drawing }:Props) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const categories = DrawingsHooksSelectors.selectCategories();
+	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 
 	const { onSubmitError, formData } = useDrawingForm(drawing);
 
@@ -87,6 +88,7 @@ export const EditDrawingDialog = ({ open, onClickClose, drawing }:Props) => {
 				name="name"
 				label={formatMessage({ id: 'drawings.creation.form.name', defaultMessage: 'Name' })}
 				formError={errors.name}
+				disabled={!isProjectAdmin}
 				required
 			/>
 
@@ -95,13 +97,15 @@ export const EditDrawingDialog = ({ open, onClickClose, drawing }:Props) => {
 				name="drawingNumber"
 				label={formatMessage({ id: 'drawings.creation.form.drawingNumber', defaultMessage: 'Drawing Number' })}
 				formError={errors.drawingNumber}
+				disabled={!isProjectAdmin}
 				required
 			/>
 			<FormSelect
-				required
 				control={control}
-				label={formatMessage({ id: 'drawings.creation.form.category', defaultMessage: 'Category' })}
 				name="category"
+				label={formatMessage({ id: 'drawings.creation.form.category', defaultMessage: 'Category' })}
+				disabled={!isProjectAdmin}
+				required
 			>
 				{categories.map((category) => (
 					<MenuItem key={category} value={category}> {category}</MenuItem>
@@ -112,6 +116,7 @@ export const EditDrawingDialog = ({ open, onClickClose, drawing }:Props) => {
 				name="desc"
 				label={formatMessage({ id: 'drawings.creation.form.description', defaultMessage: 'Description' })}
 				formError={errors.desc}
+				disabled={!isProjectAdmin}
 			/>
 			<UnhandledErrorInterceptor expectedErrorValidators={[nameAlreadyExists, numberAlreadyExists]} />
 		</FormModal>
