@@ -261,7 +261,7 @@ const testValidate = () => {
 			config: {
 				status: {
 					values: statusValues,
-					default: generateRandomString(),
+					default: generateRandomString(15),
 				},
 			},
 			properties: undefined,
