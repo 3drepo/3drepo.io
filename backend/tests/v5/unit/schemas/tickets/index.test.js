@@ -1362,6 +1362,5 @@ describe(determineTestGroup(__filename), () => {
 	testValidateTicket();
 	testProcessReadOnlyValues();
 	testDeserialiseUUIDsInTicket();
-	testDeserialiseUUIDsInTicket();
 	testSerialiseTicket();
 });
