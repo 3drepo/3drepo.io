@@ -29,6 +29,7 @@ const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
 const Yup = require('yup');
 const { cloneDeep } = require('../../utils/helper/objects');
 const { propTypesToValidator } = require('./validators');
+const { uniqueElements } = require('../../utils/helper/arrays');
 
 const TemplateSchema = {};
 
@@ -84,6 +85,8 @@ const propSchema = Yup.object().shape({
 					typeToCheck = Yup.string().oneOf(Object.values(presetEnumValues)).required();
 				} else {
 					typeToCheck = Yup.array().of(propTypesToValidator(propTypes.ONE_OF)).min(1).required()
+						.test('Values check',
+							'values must be unique', (vals) => vals.length === uniqueElements(vals))
 						.strict(true);
 				}
 
@@ -174,7 +177,8 @@ const configSchema = Yup.object().shape({
 	defaultImage: Yup.boolean().when('defaultView', (defaultView, schema) => (defaultView ? schema.strip() : defaultFalse)),
 	pin: Yup.lazy((val) => (val?.color ? Yup.object({ color: pinColSchema }) : defaultFalse)),
 	status: Yup.object({
-		values: Yup.array().of(customStatus).min(1).required(),
+		values: Yup.array().of(customStatus).min(1).required()
+			.test('Custom status', 'values must be unique', (vals) => uniqueElements(vals.map(({ name }) => name)).length === vals.length),
 		default: Yup.mixed().when('values', (values) => (values ? Yup.string().oneOf(values.map(({ name }) => name)).required() : Yup.mixed())),
 	}).default(undefined),
 }).default({});
