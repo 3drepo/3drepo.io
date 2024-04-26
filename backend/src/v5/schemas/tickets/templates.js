@@ -161,7 +161,7 @@ const moduleSchema = Yup.object().shape({
 	({ name, type }) => (name && !type) || (!name && type));
 
 const customStatus = Yup.object({
-	name: types.strings.title.required(),
+	name: Yup.string().min(1).max(15).required(),
 	type: Yup.string().oneOf(Object.values(statusTypes)).required(),
 });
 

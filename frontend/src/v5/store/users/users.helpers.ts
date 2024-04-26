@@ -30,3 +30,10 @@ export const getUserInitials = ({ firstName, lastName }: ICurrentUser | IUser) =
 		.map((name) => name.trim().charAt(0).toUpperCase())
 		.join('');
 };
+
+export const getDefaultUserNotFound = (name: string): IUser => ({
+	firstName: name,
+	lastName: '',
+	avatarUrl: '',
+	user: name,
+});
