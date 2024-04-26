@@ -18,14 +18,20 @@
 import { createSelector } from 'reselect';
 import { selectCurrentProject, selectIsProjectAdmin } from '../projects/projects.selectors';
 import { DrawingsState } from './drawings.redux';
+import { isCollaboratorRole, isCommenterRole, isViewerRole } from '../store.helpers';
 import { Role } from '../currentUser/currentUser.types';
-import { isCollaboratorRole } from '../store.helpers';
+import { CalibrationStates } from './drawings.types';
 
 const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
 
 export const selectDrawings = createSelector(
 	selectDrawingsDomain, selectCurrentProject,
 	(state, currentProject) => (state.drawingsByProject[currentProject] ?? []),
+);
+
+export const selectCalibratedDrawings = createSelector(
+	selectDrawings,
+	(drawings) => (drawings.filter((d) => [CalibrationStates.CALIBRATED, CalibrationStates.OUT_OF_SYNC].includes(d.calibration))),
 );
 
 export const selectFavouriteDrawings = createSelector(
@@ -43,6 +49,11 @@ export const selectIsListPending = createSelector(
 	selectDrawingsDomain, selectCurrentProject,
 	// Checks if the drawings for the project have been fetched
 	(state, currentProject) => !state.drawingsByProject[currentProject],
+);
+
+export const selectCalibratedDrawingsHaveStatsPending = createSelector(
+	selectCalibratedDrawings,
+	(drawings) => drawings.some(({ hasStatsPending }) => hasStatsPending),
 );
 
 export const selectAreStatsPending = createSelector(
@@ -75,4 +86,15 @@ export const selectIsCategoriesPending = createSelector(
 	selectDrawingsDomain, selectCurrentProject,
 	// Checks if the categories for the project have been fetched
 	(state, currentProject) => !state.categoriesByProject[currentProject],
+);
+
+
+export const selectHasCommenterAccess = createSelector(
+	selectDrawingRole,
+	(role): boolean => isCommenterRole(role),
+);
+
+export const selectHasViewerAccess = createSelector(
+	selectDrawingRole,
+	(role): boolean => isViewerRole(role),
 );

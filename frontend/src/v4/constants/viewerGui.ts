@@ -25,6 +25,7 @@ import ViewsIcon from '@mui/icons-material/PhotoCamera';
 import IssuesIcon from '@mui/icons-material/Place';
 import MeasureIcon from '@mui/icons-material/Straighten';
 import TicketsIcon from '@assets/icons/filled/tickets-filled.svg';
+import DrawingsIcon from '@assets/icons/outlined/drawings-outlined.svg';
 
 import { RisksIcon } from '../routes/viewerGui/components/risks/components/riskIcon/riskIcon.component';
 
@@ -42,9 +43,9 @@ export const VIEWER_PANELS = {
 	COMPARE: 'compare',
 	SEQUENCES: 'sequences',
 	MEASUREMENTS: 'measurements',
+	DRAWINGS: 'drawings',
 	ACTIVITIES: 'activities',
 	LEGEND: 'legend',
-	DRAWINGS: 'drawings'
 };
 
 export const VIEWER_PANELS_ICONS = {
@@ -58,7 +59,7 @@ export const VIEWER_PANELS_ICONS = {
 	[VIEWER_PANELS.GIS]: GisIcon,
 	[VIEWER_PANELS.SEQUENCES]: SequencesIcon,
 	[VIEWER_PANELS.MEASUREMENTS]: MeasureIcon,
-	[VIEWER_PANELS.DRAWINGS]: CompareIcon,
+	[VIEWER_PANELS.DRAWINGS]: DrawingsIcon as ComponentType,
 };
 
 export const VIEWER_PANELS_MIN_HEIGHTS = {
@@ -86,7 +87,7 @@ export const VIEWER_PANELS_TITLES = {
 	[VIEWER_PANELS.GIS]: 'GIS',
 	[VIEWER_PANELS.SEQUENCES]: 'Sequences',
 	[VIEWER_PANELS.MEASUREMENTS]: 'Measurements',
-	[VIEWER_PANELS.DRAWINGS]: 'DRAWINGS',
+	[VIEWER_PANELS.DRAWINGS]: 'Drawings',
 };
 
 const getPanelConfig = (panelType) => ({

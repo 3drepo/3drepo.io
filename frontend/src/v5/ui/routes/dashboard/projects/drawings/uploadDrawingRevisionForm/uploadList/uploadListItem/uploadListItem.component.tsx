@@ -31,7 +31,7 @@ import { UploadProgress } from '@components/shared/uploadFiles/uploadList/upload
 import { formatMessage } from '@/v5/services/intl';
 import { DrawingUploadStatus, IDrawing } from '@/v5/store/drawings/drawings.types';
 import { useParams } from 'react-router-dom';
-import { DrawingRevisionsActionDispatchers } from '@/v5/services/actionsDispatchers';
+import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 const UNEXPETED_STATUS_ERROR = undefined;
 const STATUS_TEXT_BY_UPLOAD = {
@@ -106,7 +106,7 @@ export const UploadListItem = ({
 			setValue(`${revisionPrefix}.${key}`, val);
 		}
 		if (selectedDrawing?._id) {
-			DrawingRevisionsActionDispatchers.fetch(teamspace, project, selectedDrawing._id);
+			DrawingRevisionsActionsDispatchers.fetch(teamspace, project, selectedDrawing._id);
 		}
 	}, [JSON.stringify(selectedDrawing)]);
 

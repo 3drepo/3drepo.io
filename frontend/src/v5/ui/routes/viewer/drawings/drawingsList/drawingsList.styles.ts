@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,18 +14,22 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { CardList } from '@components/teamspace/teamspaceList/teamspaceList.styles';
+import { TableVirtuoso } from 'react-virtuoso';
+import styled from 'styled-components';
 
-import { useContext } from 'react';
-import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
-import { Button } from '@controls/button';
-import { CardContainer } from '@components/viewer/cards/card.styles';
+export const VirtualisedList = styled(TableVirtuoso)`
+	height: 100%;
+	box-sizing: border-box;
+	overflow-x: hidden;
 
-export const Foo = () => {
-	const { is2DOpen, toggle2DPanel } = useContext(ViewerCanvasesContext);
+	${/* sc-selector */CardList} {
+		width: 100%;
+		box-sizing: border-box;
+		height: 100%;
 
-	return (
-		<CardContainer>
-			<Button onClick={toggle2DPanel}>{is2DOpen ? 'Close ' : 'Open '} 2D</Button>
-		</CardContainer>
-	);
-};
+		& > * {
+			width: 100%;
+		}
+	}
+`;

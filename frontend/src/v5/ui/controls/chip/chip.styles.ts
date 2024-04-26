@@ -17,9 +17,12 @@
 
 import styled, { css } from 'styled-components';
 import CrossIcon from '@assets/icons/outlined/close-outlined.svg';
+import { contrastColor } from 'contrast-color';
+
+const isLight = (color) => contrastColor({ bgColor: color, threshold: 170 }) === '#000000';
 
 const filledStyles = (color: string) => css`
-	color: ${({ theme }) => theme.palette.primary.contrast};
+	color: ${({ theme }) => isLight(color) ? '#20232A' : theme.palette.primary.contrast};
 	background-color: ${color};
 	border-color: ${color};
 `;
@@ -43,9 +46,9 @@ const textStyles = (color: string) => css`
 export const ChipWrapper = styled.div<{ variant: string; color: string; disabled: boolean }>`
 	display: inline-flex;
 	max-width: 100%;
+	pointer-events: ${({ disabled }) => (disabled ? 'none' : 'auto')};
 	.MuiChip-root {
-		${({ theme }) => theme.typography.body2};
-		font-size: 0.5rem;
+		font-size: 8px;
 		text-transform: uppercase;
 		padding: 3px 7px;
 		border-width: 1px;
@@ -54,13 +57,12 @@ export const ChipWrapper = styled.div<{ variant: string; color: string; disabled
 		gap: 4px;
 		user-select: none;
 		cursor: pointer;
-		pointer-events: ${({ disabled }) => (disabled ? 'none' : 'auto')};
 		margin: 0;
 		letter-spacing: 0.3px;
 		svg {
-			height: 11px;
-			width: 11px;
-			min-width: 11px;
+			height: 10px;
+			width: 10px;
+			min-width: 10px;
 			color: currentColor;
 			&.MuiChip-icon {
 				color: inherit;
@@ -80,6 +82,7 @@ export const ChipWrapper = styled.div<{ variant: string; color: string; disabled
 		}
 		.MuiChip-label {
 			padding: 0;
+			line-height: normal;
 		}
 		${({ variant, color }) => {
 		switch (variant) {

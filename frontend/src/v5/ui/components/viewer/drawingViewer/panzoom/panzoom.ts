@@ -215,6 +215,7 @@ export const panzoom = (target: HTMLElement | SVGElement, options) => {
 		moveTo,
 		setMinZoom,
 		getMinZoom: () => minZoom,
+		getMaxZoom: () => maxZoom,
 		zoom,
 	};
 };

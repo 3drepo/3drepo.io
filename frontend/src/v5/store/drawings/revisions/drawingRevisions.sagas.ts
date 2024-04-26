@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, select, takeEvery } from 'redux-saga/effects';
+import { put, select, takeEvery, delay } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
-import { DrawingRevisionsActionDispatchers } from '@/v5/services/actionsDispatchers';
+import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { orderBy } from 'lodash';
 import { CreateRevisionAction,
 	FetchAction,
@@ -31,13 +31,21 @@ import { DrawingsActions } from '../drawings.redux';
 import { DrawingUploadStatus } from '../drawings.types';
 import { createDrawingFromRevisionBody, createFormDataFromRevisionBody } from './drawingRevisions.helpers';
 import { selectIsPending, selectRevisions } from './drawingRevisions.selectors';
+import { uuid } from '@/v4/helpers/uuid';
+import { selectUsername } from '../../currentUser/currentUser.selectors';
+import { selectDrawingById } from '../drawings.selectors';
 
 export function* fetch({ teamspace, projectId, drawingId, onSuccess }: FetchAction) {
 	if (yield select(selectIsPending, drawingId)) return;
 
+	// TODO - remove next line after backend is wired in
+	if ((yield select(selectRevisions, drawingId)).length) return;
+
 	yield put(DrawingRevisionsActions.setIsPending(drawingId, true));
 	try {
-		const { data: { revisions } } = yield API.DrawingRevisions.fetchRevisions(teamspace, projectId, drawingId);
+		// TODO - delete next line and remove last param of API.DrawingRevisions.fetchRevisions, it's for demo
+		const drawing = yield select(selectDrawingById, drawingId);
+		const { data: { revisions } } = yield API.DrawingRevisions.fetchRevisions(teamspace, projectId, drawingId, drawing.revisionsCount);
 		onSuccess?.();
 		yield put(DrawingRevisionsActions.fetchSuccess(drawingId, revisions));
 	} catch (error) {
@@ -96,11 +104,29 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 			teamspace,
 			projectId,
 			drawingId,
-			(percent) => DrawingRevisionsActionDispatchers.setUploadProgress(uploadId, percent),
+			(percent) => DrawingRevisionsActionsDispatchers.setUploadProgress(uploadId, percent),
 			createFormDataFromRevisionBody(body),
 		);
 		yield put(DrawingsActions.setDrawingStatus(projectId, drawingId, DrawingUploadStatus.QUEUED));
 		yield put(DrawingRevisionsActions.setUploadComplete(uploadId, true));
+		// TODO - remove until catch bock after backend is wired in
+		yield delay(Math.random() * 1000);
+		yield put(DrawingsActions.setDrawingStatus(projectId, drawingId, DrawingUploadStatus.OK));
+		const revisions = yield select(selectRevisions, drawingId);
+		const author = yield select(selectUsername);
+		const newRevisions = [...revisions, {
+			_id: uuid(),
+			name: body.drawingName,
+			timestamp: new Date(),
+			desc: body.drawingDesc,
+			author,
+			format: body.file.name.split('.').slice(-1)[0],
+			statusCode: body.statusCode,
+			revisionCode: body.revisionCode,
+			void: false,
+		}];
+		yield put(DrawingRevisionsActions.fetchSuccess(drawingId, newRevisions));
+		yield put(DrawingsActions.updateDrawingSuccess(projectId, drawingId, { latestRevision: body.revisionCode, revisionsCount: newRevisions.length }));
 	} catch (error) {
 		let errorMessage = error.message;
 		if (error.response) {

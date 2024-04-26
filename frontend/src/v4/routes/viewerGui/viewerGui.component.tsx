@@ -22,6 +22,7 @@ import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
 import { AdditionalProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { DrawingsListCard } from '@/v5/ui/routes/viewer/drawings/drawingsList/drawingsListCard.component';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { getViewerLeftPanels, VIEWER_PANELS } from '../../constants/viewerGui';
 import { getWindowHeight, getWindowWidth, renderWhenTrue } from '../../helpers/rendering';
@@ -44,7 +45,6 @@ import { Tree } from './components/tree';
 import { ViewerLoader } from './components/viewerLoader';
 import { Views } from './components/views';
 import { Container, DraggablePanels, GuiContainer, LeftPanels, LeftPanelsButtons, RightPanels } from './viewerGui.styles';
-import { Foo } from './foo';
 
 interface IProps {
 	viewer: any;
@@ -278,7 +278,7 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 		[VIEWER_PANELS.GIS]: Gis,
 		[VIEWER_PANELS.SEQUENCES]: Sequences,
 		[VIEWER_PANELS.MEASUREMENTS]: Measurements,
-		[VIEWER_PANELS.DRAWINGS]: Foo,
+		[VIEWER_PANELS.DRAWINGS]: DrawingsListCard,
 	};
 
 	private renderLeftPanels = (panels) => (
