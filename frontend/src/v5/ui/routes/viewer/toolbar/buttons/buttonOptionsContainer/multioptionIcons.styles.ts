@@ -19,7 +19,7 @@ import styled, { css } from 'styled-components';
 import { Container } from '../toolbarButton.styles';
 import { ToolbarButton } from '../toolbarButton.component';
 
-export const ButtonOptionsContainer = styled.div<{ disabled?: boolean }>`
+export const ButtonOptionsContainer = styled.div<{ $expanded?: boolean }>`
 	position: relative;
 
 	& > ${/* sc-selector */Container}::after {
@@ -33,9 +33,9 @@ export const ButtonOptionsContainer = styled.div<{ disabled?: boolean }>`
 		border: solid 3px ${({ theme }) => theme.palette.base.main};
 	}
 
-	&:hover > ${/* sc-selector */Container}::after {
-		${({ disabled, theme }) => !disabled && css`
-			border-color: ${theme.palette.primary.contrast};
+	${/* sc-selector */Container}::after {
+		${({ $expanded, theme }) => $expanded && css`
+			border-color: ${theme.palette.primary.main};
 		`}
 	}
 

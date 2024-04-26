@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 export const FloatingButtonsContainer = styled.div`
 	display: flex;
@@ -25,19 +25,26 @@ export const FloatingButtonsContainer = styled.div`
 	z-index: 10;
 `;
 
-export const Container = styled.div<{ disabled?: boolean; }>`
+export const subMenuIndicatorStyles = css<{ $expanded?: boolean }>`
+	content: '';
+	position: absolute;
+	height: 0;
+	width: 0;
+	top: 6px;
+	right: 6px;
+	color: ${({ theme }) => theme.palette.base.main};
+	border: solid 3px currentColor;
+	${({ $expanded, theme }) => $expanded && css`
+		border-color: ${theme.palette.primary.main};
+	`}
+	border-left-color: transparent;
+	border-bottom-color: transparent;
+`;
+
+export const Container = styled.div<{ disabled?: boolean; $expanded?: boolean }>`
 	position: relative;
 
 	&::after {
-		content: '';
-		position: absolute;
-		height: 0;
-		width: 0;
-		top: 6px;
-		right: 6px;
-		color: ${({ theme }) => theme.palette.base.main};
-		border: solid 3px currentColor;
-		border-left-color: transparent;
-		border-bottom-color: transparent;
+		${subMenuIndicatorStyles}
 	}
 `;

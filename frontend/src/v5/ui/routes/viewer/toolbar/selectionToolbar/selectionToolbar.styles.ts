@@ -24,7 +24,6 @@ export const Section = styled.div`
 
 export const Container = styled.div`
 	background-color: ${({ theme }) => theme.palette.secondary.mid};
-	transition: all .3s;
 	width: fit-content;
 	padding-left: 31px;
 	margin-left: -45px;
@@ -57,6 +56,7 @@ export const ClearButton = styled.div`
 	padding: 11px;
 	box-sizing: border-box;
 	white-space: nowrap;
+	transition: all .3s;
 
 	&[hidden] {
 		width: 0;
@@ -65,5 +65,9 @@ export const ClearButton = styled.div`
 
 	&:not([hidden]) {
 		width: fit-content;
+	}
+
+	&:hover {
+		color: ${({ theme }) => theme.palette.primary.main};
 	}
 `;

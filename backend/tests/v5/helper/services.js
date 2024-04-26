@@ -314,7 +314,7 @@ ServiceHelper.generateRandomRvtId = () => Math.floor(Math.random() * 10000);
 ServiceHelper.generateRandomURL = () => `http://${ServiceHelper.generateRandomString()}.com/`;
 
 ServiceHelper.generateCustomStatusValues = () => Object.values(statusTypes).map((type) => ({
-	name: ServiceHelper.generateRandomString(),
+	name: ServiceHelper.generateRandomString(15),
 	type,
 }));
 
