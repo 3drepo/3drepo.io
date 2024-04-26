@@ -78,7 +78,7 @@ const propSchema = Yup.object().shape({
 			(uniqueVal) => !(uniqueVal && uniqueTypeBlackList.includes(typeVal))))),
 	values: Yup.mixed().when('type', (val, schema) => {
 		if (val === propTypes.MANY_OF || val === propTypes.ONE_OF) {
-			return schema.test('Values check', 'Property values must of be an array of values or the name of a preset', (value) => {
+			return schema.test('Values check', 'Property values must of be an array of unique values or the name of a preset', (value) => {
 				if (value === undefined) return false;
 				let typeToCheck;
 				if (isString(value)) {
@@ -86,7 +86,7 @@ const propSchema = Yup.object().shape({
 				} else {
 					typeToCheck = Yup.array().of(propTypesToValidator(propTypes.ONE_OF)).min(1).required()
 						.test('Values check',
-							'values must be unique', (vals) => vals.length === uniqueElements(vals))
+							'values must be unique', (vals) => vals.length === uniqueElements(vals).length)
 						.strict(true);
 				}
 

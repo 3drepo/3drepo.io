@@ -278,7 +278,7 @@ const testValidate = () => {
 			},
 			properties: undefined,
 			modules: undefined,
-		}, true],
+		}, false],
 		['status that is valid', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
@@ -371,14 +371,14 @@ const testValidate = () => {
 				name: generateRandomString(),
 				type: propTypes.ONE_OF,
 				values: [generateRandomString(), generateRandomString(), 'a', 'a'],
-			}] }, true],
+			}] }, false],
 		['property with enum type with duplicated values', { name: generateRandomString(),
 			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.MANY_OF,
 				values: [generateRandomString(), generateRandomString(), 'a', 'a'],
-			}] }, true],
+			}] }, false],
 		['property with enum type with values', { name: generateRandomString(),
 			code: generateRandomString(3),
 			properties: [{
