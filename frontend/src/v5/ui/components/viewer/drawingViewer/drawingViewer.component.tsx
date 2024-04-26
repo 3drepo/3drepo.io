@@ -27,6 +27,7 @@ import { Button } from '@controls/button/button.component';
 import { FormattedMessage } from 'react-intl';
 import { SvgViewer } from './svgViewer.component';
 import { PanZoomHandler, centredPanZoom } from './panzoom/centredPanZoom';
+import { DrawingViewerContainer } from './drawingViewer.styles';
 
 
 
@@ -76,7 +77,7 @@ export const DrawingViewer = () => {
 	};
 
 	return (
-		<div style={{ overflow:'hidden', width:'100%', height:'100%' }}>
+		<DrawingViewerContainer>
 			<FileInputField
 				accept=".svg,.png"
 				onChange={onClickButton as any}
@@ -97,16 +98,16 @@ export const DrawingViewer = () => {
 						Icon={ZoomOutIcon}
 						onClick={onClickZoomOut}
 						disabled={isMinZoom}
-						title={formatMessage({ id: 'drawingWiewer.toolbar.zoomIn', defaultMessage: 'Zoom out' })}
+						title={formatMessage({ id: 'drawingViewer.toolbar.zoomIn', defaultMessage: 'Zoom out' })}
 					/>
 					<ToolbarButton
 						Icon={ZoomInIcon}
 						onClick={onClickZoomIn}
 						disabled={isMaxZoom}
-						title={formatMessage({ id: 'drawingWiewer.toolbar.zoomOut', defaultMessage: 'Zoom in' })}
+						title={formatMessage({ id: 'drawingViewer.toolbar.zoomOut', defaultMessage: 'Zoom in' })}
 					/>
 				</MainToolbar>
 			</ToolbarContainer>
-		</div>
+		</DrawingViewerContainer>
 	);
 };
