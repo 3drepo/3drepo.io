@@ -29,7 +29,7 @@ import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.compo
 import { Tooltip } from '@mui/material';
 import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { Row, Cell, CellChipText, CellOwner, OverflowContainer, SmallFont, CellDate } from './ticketsTableRow.styles';
-import { StatusChip } from '@controls/chip/statusChip/statusChip.component';
+import { getChipPropsFromConfig } from '@controls/chip/statusChip/statusChip.helpers';
 
 type TicketsTableRowProps = {
 	ticket: ITicket,
@@ -43,6 +43,7 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelId, selec
 	const { _id: id, title, properties, number, type, modules } = ticket;
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
 	const { name: modelName } = ContainersHooksSelectors.selectContainerById(modelId) || FederationsHooksSelectors.selectFederationById(modelId);
+	const statusConfig = ProjectsHooksSelectors.selectStatusConfigByTemplateId(type);
 
 	if (!properties || !template?.code) return null;
 
@@ -112,7 +113,7 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelId, selec
 				<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />
 			</CellChipText>
 			<CellChipText width={150}>
-				<StatusChip value={status} templateId={template._id} modelId={modelId} variant="outlined" />
+				<Chip {...getChipPropsFromConfig(statusConfig, status)} />
 			</CellChipText>
 			<Cell width={137} hidden={!hasSafetibase}>
 				<Chip {...RISK_LEVELS_MAP[levelOfRisk]} variant="filled" />
