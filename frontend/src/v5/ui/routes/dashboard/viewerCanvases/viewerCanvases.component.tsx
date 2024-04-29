@@ -36,7 +36,7 @@ export const ViewerCanvases = () => {
 	};
 	window.addEventListener('resize', handleResize);
 
-	const onDragResize = (size) => setLeftPanelRatio((size / windowWidth) * 100);
+	const onDragResize = (size) => setLeftPanelRatio(size / windowWidth);
 	return (
 		<SplitPane
 			split="vertical"
