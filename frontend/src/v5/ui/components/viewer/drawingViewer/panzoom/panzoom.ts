@@ -25,6 +25,11 @@ export const Events = {
 	transform: 'transform',
 };
 
+const millisecondsPerSecond = 1000;
+const acc = 9.8;
+const mass = 10;
+
+
 /* eslint-disable @typescript-eslint/no-use-before-define */
 export const panzoom = (target: HTMLElement | SVGElement, options) => {
 	const transform = { scale:1, x: 0, y: 0 };
@@ -151,9 +156,7 @@ export const panzoom = (target: HTMLElement | SVGElement, options) => {
 	const onMouseUp = () => {
 		container.removeEventListener('mousemove', onMouseMove);
 
-		const acc = 9.8;
-
-		const duration =  ((((speed.x ** 2 + speed.y ** 2) **  0.5) / acc) / 10 ) * 1000;
+		const duration =  (((speed.x ** 2 + speed.y ** 2) **  0.5) * millisecondsPerSecond) / (acc * mass ) ;
 
 		if (duration) {
 			const acc2 =  acc * 2;
