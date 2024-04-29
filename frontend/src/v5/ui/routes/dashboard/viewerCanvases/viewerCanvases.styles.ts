@@ -22,13 +22,15 @@ import styled from 'styled-components';
 import { ComponentToString } from '@/v5/helpers/react.helper';
 
 export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps>>`
-	.Resizer:has(+ .Pane2:empty) {
-		display: none;
-	}
 	.Resizer {
 		box-sizing: border-box;
 		background-clip: padding-box;
 		z-index: 1;
+
+		// Hide nodule when 2d viewer is hidden
+		&:has(+ .Pane2:empty) {
+			display: none;
+		}
 		&.vertical {
 			background-color: ${({ theme }) => theme.palette.base.light};
 			width: 24px;
@@ -45,6 +47,7 @@ export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps>
 				background-color: ${({ theme }) => theme.palette.tertiary.mid};
 			}
 
+			// Panel resizer nodule
 			::after {
 				content: url('data:image/svg+xml;utf8,${ComponentToString(ResizePaneIcon)}');
 				padding-top: 3px;
