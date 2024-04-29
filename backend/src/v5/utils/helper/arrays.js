@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { difference, intersection } = require('lodash');
+const { difference, intersection, uniq } = require('lodash');
 
 const ArrayHelper = {};
 
@@ -31,5 +31,7 @@ ArrayHelper.splitArrayIntoChunks = (array, maxLength) => {
 	}
 	return res;
 };
+
+ArrayHelper.uniqueElements = uniq;
 
 module.exports = ArrayHelper;
