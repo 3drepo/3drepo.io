@@ -18,7 +18,7 @@ import styled from 'styled-components';
 
 export const SvgContainer = styled.div`
 	svg {
-		background-color: ${({ theme }) => theme.palette.primary.contrast};;
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
 		border: 1px solid ${({ theme }) => theme.palette.base.light};
 	}
 
