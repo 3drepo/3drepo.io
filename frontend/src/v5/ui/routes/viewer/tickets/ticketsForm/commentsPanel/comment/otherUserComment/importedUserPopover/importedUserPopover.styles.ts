@@ -15,23 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Tooltip, TooltipProps } from '@mui/material';
-import { Container } from './toolbarButton.styles';
+import { formatMessage } from '@/v5/services/intl';
+import { Typography } from '@mui/material';
+import styled from 'styled-components';
 
-type ToolbarButtonProps = {
-	hidden?: boolean;
-	disabled?: boolean;
-	selected?: boolean;
-	$expanded?: boolean;
-	onClick?: () => void;
-	Icon: any;
-	title: string;
-	tooltipProps?: Omit<TooltipProps, 'title' | 'children'>;
-};
-export const ToolbarButton = ({ Icon, title, tooltipProps, ...props }: ToolbarButtonProps) => (
-	<Tooltip {...tooltipProps} title={title}>
-		<Container {...props}>
-			<Icon />
-		</Container>
-	</Tooltip>
-);
+export const Info = styled(Typography)`
+	${({ theme }) => theme.typography.caption};
+	margin-top: 2px;
+`;
+
+export const ExternalLabel = styled.i`
+	&::after {
+		content: "${formatMessage({ id: 'importedUserPopover.external', defaultMessage: '(External)' })}";
+		font-size: 10px;
+		font-weight: 400;
+	}
+`;

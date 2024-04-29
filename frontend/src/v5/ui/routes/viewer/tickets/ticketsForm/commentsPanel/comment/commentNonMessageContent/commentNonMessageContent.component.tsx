@@ -26,6 +26,7 @@ import { CommentAuthor } from './commentNonMessageContent.styles';
 import { CommentReply } from '../commentReply/commentReply.component';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useSyncProps } from '@/v5/helpers/syncProps.hooks';
+import { ExternalLabel } from '../otherUserComment/importedUserPopover/importedUserPopover.styles';
 
 export type CommentNonMessageContentProps = Partial<Omit<ITicketComment, 'history' | '_id'>> & {
 	metadata?: TicketCommentReplyMetadata;
@@ -44,6 +45,7 @@ export const CommentNonMessageContent = ({
 	onUploadImages,
 	onDeleteImage,
 	onEditImage,
+	originalAuthor,
 }: CommentNonMessageContentProps) => {
 	const { teamspace, project, containerOrFederation } = useParams();
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
@@ -73,9 +75,14 @@ export const CommentNonMessageContent = ({
 			{images.length === 1 && (
 				<CommentImages images={imgsSrcs} onImageClick={openImagesModal} />
 			)}
-			{author && (<CommentAuthor>{author}</CommentAuthor>)}
+			{author && (
+				<CommentAuthor>
+					{author} {originalAuthor && <ExternalLabel />}
+				</CommentAuthor>
+			)}
 			{metadata && (
 				<CommentReply
+					originalAuthor={originalAuthor}
 					variant={isCurrentUserComment ? 'secondary' : 'primary'}
 					{...metadata}
 				/>

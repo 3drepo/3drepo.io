@@ -18,14 +18,23 @@
 import styled, { css } from 'styled-components';
 import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.component';
 import { BasicComment } from '../basicComment/basicComment.component';
+import { ImportedUserPopover } from './importedUserPopover/importedUserPopover.component';
 
-export const AuthorAvatar = styled(UserPopoverCircle)`
+const authorAvatarStyles = css`
 	position: absolute;
 	top: 0;
 
 	.MuiAvatar-root {
 		border: none;
 	}
+`;
+
+export const ImportedAuthorAvatar = styled(ImportedUserPopover)`
+	${authorAvatarStyles}
+`;
+
+export const AuthorAvatar = styled(UserPopoverCircle)`
+	${authorAvatarStyles}
 `;
 
 export const Comment = styled(BasicComment)<{ isFirstOfBlock: boolean }>`

@@ -261,7 +261,19 @@ const testValidate = () => {
 			config: {
 				status: {
 					values: statusValues,
-					default: generateRandomString(),
+					default: generateRandomString(15),
+				},
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
+		['status with duplicated values', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				status: {
+					values: [...statusValues, ...statusValues],
+					default: statusValues[0].name,
 				},
 			},
 			properties: undefined,
@@ -352,6 +364,20 @@ const testValidate = () => {
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.ONE_OF,
+			}] }, false],
+		['property with enum type with duplicated values', { name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.ONE_OF,
+				values: [generateRandomString(), generateRandomString(), 'a', 'a'],
+			}] }, false],
+		['property with enum type with duplicated values', { name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.MANY_OF,
+				values: [generateRandomString(), generateRandomString(), 'a', 'a'],
 			}] }, false],
 		['property with enum type with values', { name: generateRandomString(),
 			code: generateRandomString(3),
