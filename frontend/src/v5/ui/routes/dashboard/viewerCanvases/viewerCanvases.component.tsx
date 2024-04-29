@@ -40,15 +40,14 @@ export const ViewerCanvases = () => {
 	return (
 		<SplitPane
 			split="vertical"
-			size={manualSize} // This is for manually resizing the panels when the viewport width changes
+			size={is2DOpen ? manualSize : '100%'} // This is for manually resizing the panels when the viewport width changes
 			minSize={MIN_PANEL_SIZE}
 			maxSize={windowWidth - MIN_PANEL_SIZE}
 			defaultSize="50%"
-			is2DOpen={is2DOpen}
 			onChange={onDragResize}
 		>
 			<Canvas3D location={{ pathname }} />
-			<Canvas2D />
+			{is2DOpen && <Canvas2D />}
 		</SplitPane>
 	);
 };

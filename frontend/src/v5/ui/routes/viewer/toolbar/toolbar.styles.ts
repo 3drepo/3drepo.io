@@ -48,10 +48,3 @@ export const MainToolbar = styled.div`
 	background-color: ${({ theme }) => theme.palette.secondary.main};
 	z-index: 1;
 `;
-
-export const Foo = styled('div')`
-	/* svg {
-		width: unset;
-		height: unset;
-	} */
-`;

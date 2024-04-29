@@ -18,10 +18,13 @@
 import { PropsWithChildren } from 'react';
 import BaseSplitPane, { SplitPaneProps } from 'react-split-pane';
 import ResizePaneIcon from '@assets/icons/outlined/horizontal_resize-outlined.svg';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { ComponentToString } from '@/v5/helpers/react.helper';
 
-export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps & { is2DOpen: boolean; }>>`
+export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps>>`
+	.Resizer:has(+ .Pane2:empty) {
+		display: none;
+	}
 	.Resizer {
 		box-sizing: border-box;
 		background-clip: padding-box;
@@ -58,12 +61,4 @@ export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps 
 			}
 		}
 	}
-	${({ is2DOpen }) => !is2DOpen && css`
-		>.Resizer,>.Pane2 {
-			display: none;
-		}
-		>.Pane1 {
-			width: 100% !important;
-		}
-	`}
 `;
