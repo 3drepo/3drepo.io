@@ -29,6 +29,7 @@ import {
 	PROJECT_ROUTE,
 	BOARD_ROUTE,
 	TICKETS_ROUTE,
+	CALIBRATION_ROUTE,
 } from '@/v5/ui/routes/routes.constants';
 import { useSelector } from 'react-redux';
 import { selectRevisions } from '@/v4/modules/model/model.selectors';
@@ -94,6 +95,39 @@ export const BreadcrumbsRouting = () => {
 		}));
 
 		breadcrumbs.push({ options });
+	}
+
+	if (matchesPath(CALIBRATION_ROUTE)) {
+		breadcrumbs = [
+			{
+				title: teamspace,
+				to: generatePath(TEAMSPACE_ROUTE_BASE, { teamspace }),
+			},
+			{
+				title: project?.name,
+				to: generatePath(FEDERATIONS_ROUTE, params),
+			},
+		];
+
+		if (containerOrFederationId) {
+			const selectedModel = (isFederation ? federations : containers).find(({ _id }) => _id === containerOrFederationId);
+			breadcrumbs.push({ title: selectedModel.name });
+
+			if (!isFederation) {
+				const noName = formatMessage({ id: 'breadcrumbs.revisions.noName', defaultMessage: '(no name)' });
+	
+				const revisionOptions = revisions.map(({ _id, tag }) => ({
+					title: tag || noName,
+					to: generatePath(CALIBRATION_ROUTE, { ...params, revision: tag || _id }),
+					selected: _id === revision || tag === revision,
+				}));
+	
+				breadcrumbs.push({
+					secondary: true,
+					options: revisionOptions,
+				});
+			}
+		}
 	}
 
 	if (matchesPath(VIEWER_ROUTE)) {

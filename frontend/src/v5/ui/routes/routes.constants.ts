@@ -30,7 +30,7 @@ export const TEAMSPACE_ROUTE_BASE_TAB = `${TEAMSPACE_ROUTE_BASE}/t`;
 export const TEAMSPACE_ROUTE = `${TEAMSPACE_ROUTE_BASE}/t/:tab`;
 export const PROJECT_ROUTE_BASE = `${TEAMSPACE_ROUTE_BASE}/:project`;
 
-export const CALIBRATION_ROUTE = `${PROJECT_ROUTE_BASE}/calibration/:drawing`;
+export const CALIBRATION_ROUTE = `${PROJECT_ROUTE_BASE}/calibration/:drawing/:containerOrFederation?/:revision?`;
 export const PROJECT_ROUTE_BASE_TAB = `${PROJECT_ROUTE_BASE}/t`;
 export const PROJECT_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/:tab`;
 export const CONTAINERS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/containers`;
@@ -65,6 +65,12 @@ export interface DashboardTicketsParams extends DashboardParams {
 }
 
 export interface ViewerParams extends DashboardParams {
+	containerOrFederation?: string;
+	revision?: string;
+}
+
+export interface CalibrationParams extends DashboardParams {
+	drawing: string;
 	containerOrFederation?: string;
 	revision?: string;
 }
