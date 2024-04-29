@@ -29,9 +29,8 @@ const MAX_PANEL_SIZE = windowWidth - MIN_PANEL_SIZE;
 
 export const ViewerCanvases = () => {
 	const { pathname } = useLocation();
-	const windowWidth = window.innerWidth;
 	const { is2DOpen, leftPanelRatio, setLeftPanelRatio } = useContext(ViewerCanvasesContext);
-	const [manualSize, setManualSize] = useState(windowWidth / 2);
+	const [size, setSize] = useState(windowWidth / 2);
 
 	const handleWindowResize = () => {
 		const windowWidth2 = window.innerWidth;
@@ -39,7 +38,11 @@ export const ViewerCanvases = () => {
 	};
 	window.addEventListener('resize', handleWindowResize);
 
-	const onDragResize = (size) => setLeftPanelRatio(size / windowWidth);
+	const onDragResize = (s: number) => {
+		setSize(s);
+		setLeftPanelRatio(s / windowWidth);
+	};
+
 	return (
 		<SplitPane
 			split="vertical"

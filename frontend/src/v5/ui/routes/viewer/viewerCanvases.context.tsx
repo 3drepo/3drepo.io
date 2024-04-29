@@ -26,7 +26,7 @@ interface ViewerCanvasesContextType {
 const defaultValue: ViewerCanvasesContextType = {
 	is2DOpen: false,
 	toggle2DPanel: () => { },
-	leftPanelRatio: 50,
+	leftPanelRatio: 0.5,
 	setLeftPanelRatio: () => { },
 };
 export const ViewerCanvasesContext = createContext(defaultValue);
@@ -34,7 +34,7 @@ ViewerCanvasesContext.displayName = 'ViewerCanvasesContext';
 
 export const ViewerCanvasesContextComponent = ({ children }) => {
 	const [is2DOpen, setIs2DOpen] = useState(false);
-	const [leftPanelRatio, setLeftPanelRatio] = useState(50);
+	const [leftPanelRatio, setLeftPanelRatio] = useState(0.5);
 
 	const toggle2DPanel = () => setIs2DOpen(!is2DOpen);
 

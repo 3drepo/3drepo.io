@@ -36,7 +36,7 @@ export const Toolbar = () => {
 	const hasMetaData = ModelHooksSelectors.selectMetaKeysExist();
 	const showBIMPanel = BimHooksSelectors.selectIsActive();
 	const showCoords = ViewerGuiHooksSelectors.selectIsCoordViewActive();
-	const xPosition = is2DOpen ? (leftPanelRatio / 2) : 50;
+	const xPosition = is2DOpen ? (leftPanelRatio * 50) : 50;
 
 	const setBIMPanelVisibililty = (visible) => {
 		BimActionsDispatchers.setIsActive(visible);
