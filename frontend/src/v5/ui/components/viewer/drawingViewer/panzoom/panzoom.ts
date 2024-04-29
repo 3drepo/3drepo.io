@@ -28,7 +28,7 @@ export const Events = {
 const millisecondsPerSecond = 1000;
 const acc = 9.8;
 const mass = 10;
-
+const zoomDuration = 300;
 
 /* eslint-disable @typescript-eslint/no-use-before-define */
 export const panzoom = (target: HTMLElement | SVGElement, options) => {
@@ -108,13 +108,11 @@ export const panzoom = (target: HTMLElement | SVGElement, options) => {
 		
 		const initialScale = transform.scale;
 		const diffScale =  transform.scale * scaleFactor - initialScale;
-		
-		const duration = 300;
-		
+				
 		animation = animate((currentTime) => {
-			const progress = zoomEasing(currentTime / duration);
+			const progress = zoomEasing(currentTime / zoomDuration);
 			zoomTo(x, y, initialScale + progress * diffScale );
-			return currentTime >= duration;
+			return currentTime >= zoomDuration;
 		});
 	};
 

@@ -504,6 +504,8 @@ export const theme = createTheme({
 				PopperProps: {
 					// This is necessary for overriding styles of v4 tooltips
 					container: () => document.getElementById('v4Overrides'),
+					// style: {userSelect:'none'},
+					draggable: false,
 				},
 				disableInteractive: true,
 			},
