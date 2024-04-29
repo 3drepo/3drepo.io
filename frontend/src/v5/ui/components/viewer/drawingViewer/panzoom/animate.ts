@@ -25,7 +25,9 @@ export const animate = (onAnimate: (current:number, elapsed?: number) => boolean
 		const currentTime = +new Date();
 		const total = currentTime - startTime;
 		const elapsed = currentTime - prevTime;
-		if (!onAnimate(total, elapsed)) {
+		const animationIsComplete  = onAnimate(total, elapsed);
+
+		if (!animationIsComplete) {
 			prevTime = currentTime;
 			animFrame = requestAnimationFrame(animationFrame);
 		} else {
