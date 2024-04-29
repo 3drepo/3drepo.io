@@ -26,9 +26,9 @@ const selectedStyles = css`
 
 const disabledStyles = css`
 	color: ${({ theme }) => theme.palette.base.main};
-	
+
 	.highlight {
-		color: ${({ theme }) => theme.palette.base.light};
+		color: ${({ theme }) => theme.palette.base.main};
 	}
 `;
 
