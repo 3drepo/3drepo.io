@@ -28,6 +28,7 @@ import { FormattedMessage } from 'react-intl';
 import { SvgViewer } from './svgViewer.component';
 import { PanZoomHandler, centredPanZoom } from './panzoom/centredPanZoom';
 import { DrawingViewerContainer } from './drawingViewer.styles';
+import { Events } from './panzoom/panzoom';
 
 
 
@@ -68,12 +69,13 @@ export const DrawingViewer = () => {
 
 		const pz = centredPanZoom(imgRef.current, 20, 20);
 		setZoomHandler(pz);
-		pz.on('transform', () => {
+		pz.on(Events.transform, () => {
 			const cantZoomOut = pz.getMinZoom() >= pz.getTransform().scale;
 			const cantZoomIn = pz.getMaxZoom() <= pz.getTransform().scale;
 			setIsMinZoom(cantZoomOut);
 			setIsMaxZoom(cantZoomIn);
 		});
+		
 	};
 
 	return (

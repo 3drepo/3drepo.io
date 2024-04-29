@@ -23,6 +23,8 @@ const inertiaFunction = BezierEasing(0, 0.33, 0.66, 1);
 const zoomEasing = BezierEasing(0, 1.02, 0.65, 1);
 export const Events = {
 	transform: 'transform',
+	startDrag: 'startDrag',
+	endDrag: 'endDrag',
 };
 
 const millisecondsPerSecond = 1000;
@@ -149,10 +151,12 @@ export const panzoom = (target: HTMLElement | SVGElement, options) => {
 	const onMouseDown = () => {
 		stopInertia();
 		container.addEventListener('mousemove', onMouseMove);
+		container.style.cursor = 'grabbing';
 	};
 
 	const onMouseUp = () => {
 		container.removeEventListener('mousemove', onMouseMove);
+		container.style.cursor = 'default';
 
 		const duration =  (((speed.x ** 2 + speed.y ** 2) **  0.5) * millisecondsPerSecond) / (acc * mass ) ;
 
