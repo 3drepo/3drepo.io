@@ -74,7 +74,7 @@ Tickets.updateTickets = async (teamspace, project, model, oldTickets, data, auth
 				const updateObjProp = `${prefix}${key}`;
 				const oldValue = getNestedProperty(oldTicket, updateObjProp);
 				let newValue = obj[key];
-				if (newValue) {
+				if (newValue !== null) {
 					if (isObject(newValue) && !isDate(newValue) && !isUUID(newValue)) {
 					// if this is an object it is a composite type, in which case
 					// we should merge the old value with the new value
