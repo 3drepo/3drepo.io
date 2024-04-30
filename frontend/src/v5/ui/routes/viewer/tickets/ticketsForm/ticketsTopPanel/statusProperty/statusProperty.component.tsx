@@ -21,7 +21,7 @@ import { FormChipSelect } from '@controls/inputs/formInputs.component';
 import { formatMessage } from '@/v5/services/intl';
 import { BaseProperties, TicketsCardViews } from '../../../tickets.constants';
 import { PropertyTitle, Property } from './statusProperty.styles';
-import { ProjectsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { useMemo } from 'react';
 import { getStatusPropertyValues } from '@controls/chip/statusChip/statusChip.helpers';
@@ -38,9 +38,7 @@ export const StatusProperty = ({ onBlur, readOnly }: StatusPropertyProps) => {
 	const ticketView = TicketsCardHooksSelectors.selectView();
 	const templateId = ticketView === TicketsCardViews.New ? templateIdNewTicket : templateIdExistingTicket ?? templateIdTabularView;
 
-	const statusConfig = templateIdTabularView
-		? ProjectsHooksSelectors.selectStatusConfigByTemplateId(templateId)
-		: TicketsHooksSelectors.selectStatusConfigByTemplateId(containerOrFederation, templateId);
+	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(containerOrFederation, templateId);
 	const values = useMemo(() => getStatusPropertyValues(statusConfig), [templateId]);
 	return (
 		<Property>

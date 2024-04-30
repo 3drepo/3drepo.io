@@ -16,7 +16,7 @@
  */
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors, TicketsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
 import { useContext } from 'react';
 import { SearchContext } from '@controls/search/searchContext';
@@ -43,7 +43,7 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelId, selec
 	const { _id: id, title, properties, number, type, modules } = ticket;
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
 	const { name: modelName } = ContainersHooksSelectors.selectContainerById(modelId) || FederationsHooksSelectors.selectFederationById(modelId);
-	const statusConfig = ProjectsHooksSelectors.selectStatusConfigByTemplateId(type);
+	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(type);
 
 	if (!properties || !template?.code) return null;
 

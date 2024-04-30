@@ -19,7 +19,6 @@ import { createSelector } from 'reselect';
 import { selectCurrentTeamspace } from '../teamspaces/teamspaces.selectors';
 import { IProjectsState } from './projects.redux';
 import { IProject } from './projects.types';
-import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
 
 const selectProjectsDomain = (state): IProjectsState => state?.projects;
 
@@ -66,9 +65,4 @@ export const selectCurrentProjectTemplateById = createSelector(
 	selectCurrentProjectTemplates,
 	(state, templateId) => templateId,
 	(templates, templateId) => templates.find(({ _id }) => _id === templateId),
-);
-
-export const selectStatusConfigByTemplateId = createSelector(
-	selectCurrentProjectTemplateById,
-	(template) => template?.config?.status || DEFAULT_STATUS_CONFIG,
 );
