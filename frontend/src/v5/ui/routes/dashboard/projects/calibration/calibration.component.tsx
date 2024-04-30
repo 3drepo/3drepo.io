@@ -23,10 +23,7 @@ import { useContainersData } from '../containers/containers.hooks';
 import { useFederationsData } from '../federations/federations.hooks';
 import { CalibrationParams, DRAWINGS_ROUTE } from '../../../routes.constants';
 import { EmptyPageView } from '@components/shared/emptyPageView/emptyPageView.styles';
-import { CalibrationStep } from './calibrationSteps/calibrationStep.component';
-import { Content } from '../projectContent/projectContent.styles';
-import { CalibrationContextComponent } from './calibrationContext';
-import { CalibrationHeader } from './calibrationHeader/calibrationHeader.component';
+import { CalibrationStep } from './calibrationStep/calibrationStep.component';
 import { Button } from '@controls/button';
 import { Link } from 'react-router-dom';
 import { useEffect } from 'react';
@@ -51,45 +48,34 @@ export const Calibration = () => {
 
 	if (!hasModels) {
 		return (
-			<Content>
-				<EmptyPageView>
-					<FormattedMessage
-						id="calibration.emptyModels"
-						defaultMessage="This project is empty. Please, proceed to create a container or a federation to access this content."
-					/>
-				</EmptyPageView>
-			</Content>
+			<EmptyPageView>
+				<FormattedMessage
+					id="calibration.emptyModels"
+					defaultMessage="This project is empty. Please, proceed to create a container or a federation to access this content."
+				/>
+			</EmptyPageView>
 		);
 	}
 
 	if (!selectedDrawing) {
 		return (
-			<Content>
-				<EmptyPageView>
-					<FormattedMessage
-						id="calibration.invalidDrawing"
-						defaultMessage="The selected drawing was not found. Please, go back to the drawings list select the drawing to calibrate from there."
-					/>
-					<br />
-					<Button variant="contained">
-						<Link to={generatePath(DRAWINGS_ROUTE, { teamspace, project })}>
-							<FormattedMessage
-								id="calibration.invalidDrawing.goToDrawings"
-								defaultMessage="Open drawings"
-							/>
-						</Link>
-					</Button>
-				</EmptyPageView>
-			</Content>
+			<EmptyPageView>
+				<FormattedMessage
+					id="calibration.invalidDrawing"
+					defaultMessage="The selected drawing was not found. Please, go back to the drawings list select the drawing to calibrate from there."
+				/>
+				<br />
+				<Button variant="contained">
+					<Link to={generatePath(DRAWINGS_ROUTE, { teamspace, project })}>
+						<FormattedMessage
+							id="calibration.invalidDrawing.goToDrawings"
+							defaultMessage="Open drawings"
+						/>
+					</Link>
+				</Button>
+			</EmptyPageView>
 		);
 	}
 
-	return (
-		<CalibrationContextComponent>
-			<CalibrationHeader />
-			<Content>
-				<CalibrationStep />
-			</Content>
-		</CalibrationContextComponent>
-	);
+	return (<CalibrationStep />);
 };

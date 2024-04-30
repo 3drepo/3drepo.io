@@ -15,27 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { CalibrationContextComponent } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
+import { DashboardProjectLayout } from './dashboardProjectLayout.component';
+import { CalibrationHeader } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationHeader/calibrationHeader.component';
+import { Content } from '@/v5/ui/routes/dashboard/projects/projectContent/projectContent.styles';
 
-import { TeamspacesActionsDispatchers, ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-
-export const DashboardProjectDataFetcher = () => {
-	const { teamspace, project } = useParams<DashboardParams>();
-
-	useEffect(() => {
-		if (teamspace) {
-			ProjectsActionsDispatchers.fetch(teamspace);
-			TeamspacesActionsDispatchers.setCurrentTeamspace(teamspace);
-		}
-	}, [teamspace]);
-
-	useEffect(() => {
-		if (project) {
-			ProjectsActionsDispatchers.setCurrentProject(project);
-		}
-	}, [project]);
-
-	return (<></>);
-};
+export const DashboardProjectCalibrationLayout = ({ children }) => (
+	<CalibrationContextComponent>
+		<DashboardProjectLayout NavigationBar={CalibrationHeader}>
+			<Content>
+				{children}
+			</Content>
+		</DashboardProjectLayout>
+	</CalibrationContextComponent>
+);

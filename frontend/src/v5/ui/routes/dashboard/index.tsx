@@ -56,6 +56,7 @@ import { useEffect } from 'react';
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Calibration } from './projects/calibration/calibration.component';
+import { DashboardProjectCalibrationLayout } from '@components/dashboard/dashboardProjectLayout/dashbaordProjectCalibrationLayout.component';
 
 export const MainRoute = () => {
 	const { path } = useRouteMatch();
@@ -112,12 +113,12 @@ export const MainRoute = () => {
 					</TeamspaceLayout>
 				</AuthenticatedRoute>
 				<AuthenticatedRoute path={CALIBRATION_ROUTE} title={formatMessage({ id: 'pageTitle.calibration', defaultMessage: ':project - Calibration' })}>
-					<DashboardProjectLayout>
+					<DashboardProjectCalibrationLayout>
 						<Calibration />
-					</DashboardProjectLayout>
+					</DashboardProjectCalibrationLayout>
 				</AuthenticatedRoute>
 				<AuthenticatedRoute path={PROJECT_ROUTE_BASE}>
-					<DashboardProjectTabsLayout>
+					<DashboardProjectLayout>
 						<Switch>
 							<Route exact path={PROJECT_ROUTE_BASE}>
 								<Redirect to={`${discardSlash(pathname)}/t/federations`} />
@@ -129,7 +130,7 @@ export const MainRoute = () => {
 								<ProjectContent />
 							</Route>
 						</Switch>
-					</DashboardProjectTabsLayout>
+					</DashboardProjectLayout>
 				</AuthenticatedRoute>
 				<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.viewer', defaultMessage: ':containerOrFederation :revision - Viewer' })} path={VIEWER_ROUTE}>
 					<DashboardViewerLayout>

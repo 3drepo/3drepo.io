@@ -15,22 +15,43 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 
 import { AppBar } from '@components/shared/appBar';
 import { Content } from './dashboardProjectLayout.styles';
-import { DashboardProjectDataFetcher } from './dashboardProjectDataFetcher.component';
+import { ProjectsActionsDispatchers, TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { useParams } from 'react-router-dom';
+import { ProjectNavigation } from '@components/shared/navigationTabs';
 
 interface IDashboardProjectLayout {
 	children: ReactNode;
+	NavigationBar?: any;
 }
 
-export const DashboardProjectLayout = ({ children }: IDashboardProjectLayout): JSX.Element => (
-	<>
-		<DashboardProjectDataFetcher />
-		<AppBar />
-		<Content>
-			{children}
-		</Content>
-	</>
-);
+export const DashboardProjectLayout = ({ children, NavigationBar = ProjectNavigation }: IDashboardProjectLayout): JSX.Element => {
+	const { teamspace, project } = useParams<DashboardParams>();
+
+	useEffect(() => {
+		if (teamspace) {
+			ProjectsActionsDispatchers.fetch(teamspace);
+			TeamspacesActionsDispatchers.setCurrentTeamspace(teamspace);
+		}
+	}, [teamspace]);
+
+	useEffect(() => {
+		if (project) {
+			ProjectsActionsDispatchers.setCurrentProject(project);
+		}
+	}, [project]);
+	
+	return (
+		<>
+			<AppBar />
+			<NavigationBar />
+			<Content>
+				{children}
+			</Content>
+		</>
+	);
+};
