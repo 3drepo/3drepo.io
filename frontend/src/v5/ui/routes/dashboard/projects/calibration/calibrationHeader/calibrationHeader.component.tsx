@@ -46,16 +46,24 @@ export const CalibrationHeader = () => {
 				))}
 			</Stepper>
 			<div>
-				<Button onClick={() => setStep(step - 1)} disabled={step === 0}>Back</Button>
+				<Button onClick={() => setStep(step - 1)} disabled={step === 0}>
+					Back
+				</Button>
 				<Button>
-					<Link to={pathToDrawings}>Cancel</Link>
+					<Link to={pathToDrawings}>
+						Cancel
+					</Link>
 				</Button>
 				{step === 4 ? (
-					<Button onClick={() => setStep(step + 1)} disabled={!isStepValid}>
-						<Link to={pathToDrawings}>Confirm</Link>
+					<Button disabled={!isStepValid}>
+						<Link to={pathToDrawings}>
+							Confirm
+						</Link>
 					</Button>
 				) : (
-					<Button onClick={() => setStep(step + 1)} disabled={!isStepValid}>Continue</Button>
+					<Button onClick={() => setStep(step + 1)} disabled={!isStepValid}>
+						Continue
+					</Button>
 				)}
 			</div>
 		</>

@@ -31,12 +31,7 @@ export const ContainersAndFederationsSelect = ({ isNewTicketDirty, ...props }: C
 	const containers = ContainersHooksSelectors.selectContainers();
 	const federations = FederationsHooksSelectors.selectFederations();
 
-	const handleOpen = () => {
-		if (!isNewTicketDirty) return;
-		openUnsavedNewTicketWarningModal();
-	};
-
-	const getRenderText = (ids) => {
+	const getRenderText = (ids: any[] | null = []) => {
 		const itemsLength = ids.length;
 		if (itemsLength === 1) {
 			const [id] = ids;
@@ -49,10 +44,14 @@ export const ContainersAndFederationsSelect = ({ isNewTicketDirty, ...props }: C
 		}, { itemsLength });
 	};
 
+	const handleOpen = () => {
+		if (!isNewTicketDirty) return;
+		openUnsavedNewTicketWarningModal();
+	};
+
 	return (
 		<SearchSelect
 			multiple
-			onOpen={handleOpen}renderValue={(ids: any[] | null = []) => (<b>{getRenderText(ids)}</b>)}
 			{...props}
 			label={formatMessage({ id: 'ticketTable.modelSelection.placeholder', defaultMessage: 'Select Federation / Container' })}
 			renderValue={(ids: any[] | null = []) => (<b>{getRenderText(ids)}</b>)}

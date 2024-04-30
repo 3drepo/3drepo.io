@@ -17,48 +17,48 @@
 
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
-import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { FormSearchSelect } from '@controls/inputs/formInputs.component';
+import { ContainersHooksSelectors, DrawingsHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { sortByName } from '@/v5/store/store.helpers';
-import { ListSubheader } from '@components/shared/modelSelect/modelSelect.styles';
-import { MenuItem } from '@mui/material';
+import { MenuItem, Select } from '@mui/material';
+import { ListSubheader } from '../../../tickets/selectMenus/selectMenus.styles';
+import { CalibrationParams } from '@/v5/ui/routes/routes.constants';
+import { useContext, useEffect } from 'react';
+import { CalibrationContext } from '../../calibrationContext';
+import { useParams } from 'react-router';
+import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
 
-type SelectModelStepProps = { name: string };
-export const SelectModelStep = ({ ...props }: SelectModelStepProps) => {
-	const containers = ContainersHooksSelectors.selectContainers();
-	const federations = FederationsHooksSelectors.selectFederations();
+export const SelectModelStep = ({ modelId, setModelId }) => {
+	const { drawing } = useParams<CalibrationParams>();
+	const { setIsStepValid } = useContext(CalibrationContext);
+	const selectedDrawing = DrawingsHooksSelectors.selectDrawingById(drawing);
+	const containers = ContainersHooksSelectors.selectContainers().filter((c) => !!c.latestRevision);
+	const federations = FederationsHooksSelectors.selectFederations().filter((f) => f.containers?.length);
 
-	const getRenderText = (ids: any[] | null = []) => {
-		const itemsLength = ids.length;
-		if (itemsLength === 1) {
-			const [id] = ids;
-			return (containers.find(({ _id }) => _id === id) || federations.find(({ _id }) => _id === id)).name;
-		}
-
-		return formatMessage({
-			id: 'ticketTable.modelSelection.selected',
-			defaultMessage: '{itemsLength} selected',
-		}, { itemsLength });
-	};
+	useEffect(() => { setIsStepValid(!!modelId); }, [modelId]);
 
 	return (
-		<FormSearchSelect
-			{...props}
-			label={formatMessage({ id: 'ticketTable.modelSelection.placeholder', defaultMessage: 'Select Federation / Container' })}
-			renderValue={(ids: any[] | null = []) => (<b>{getRenderText(ids)}</b>)}
-		>
-			<ListSubheader>
-				<FormattedMessage id="ticketTable.modelSelection.federations" defaultMessage="Federations" />
-			</ListSubheader>
-			{...sortByName(federations).map(({ name, _id }) => (
-				<MenuItem key={_id} value={_id}>{name}</MenuItem>
-			))}
-			<ListSubheader>
-				<FormattedMessage id="ticketTable.modelSelection.containers" defaultMessage="Containers" />
-			</ListSubheader>
-			{...sortByName(containers).map(({ name, _id }) => (
-				<MenuItem key={_id} value={_id}>{name}</MenuItem>
-			))}
-		</FormSearchSelect>
+		<>
+			<Select label="drawing" defaultValue={selectedDrawing.name} disabled>
+				<MenuItem value={selectedDrawing.name} selected>{selectedDrawing.name}</MenuItem>
+			</Select>
+			<SearchSelect
+				label={formatMessage({ id: 'calibration.modelSelection.placeholder', defaultMessage: 'Select Federation / Container' })}
+				value={modelId}
+				onChange={({ target: { value } }) => setModelId(value)}
+			>
+				<ListSubheader>
+					<FormattedMessage id="calibration.modelSelection.federations" defaultMessage="Federations" />
+				</ListSubheader>
+				{...sortByName(federations).map(({ name, _id }) => (
+					<MenuItem key={_id} value={_id}>{name}</MenuItem>
+				))}
+				<ListSubheader>
+					<FormattedMessage id="calibration.modelSelection.containers" defaultMessage="Containers" />
+				</ListSubheader>
+				{...sortByName(containers).map(({ name, _id }) => (
+					<MenuItem key={_id} value={_id}>{name}</MenuItem>
+				))}
+			</SearchSelect>
+		</>
 	);
 };
