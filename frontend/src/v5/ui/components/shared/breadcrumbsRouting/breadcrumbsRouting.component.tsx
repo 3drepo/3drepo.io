@@ -106,7 +106,8 @@ export const BreadcrumbsRouting = () => {
 		];
 
 		if (containerOrFederationId) {
-			const selectedModel = (isFederation ? federations : containers).find(({ _id }) => _id === containerOrFederationId);
+			const models: any[] = isFederation ? federations : containers;
+			const selectedModel = models.find(({ _id }) => _id === containerOrFederationId);
 			breadcrumbs.push({ title: selectedModel?.name });
 
 			if (!isFederation) {
