@@ -20,6 +20,6 @@ import styled from 'styled-components';
 
 export const Stepper = styled(StepperBase)`
 	border-radius: 0;
-    box-shadow: none;
+	box-shadow: none;
 	background-color: ${({ theme }) => theme.palette.secondary.main};
 `;
