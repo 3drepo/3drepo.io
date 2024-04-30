@@ -646,6 +646,12 @@ const updateGroupTestsHelper = (updateMany) => {
 					(_id) => ({ _id }))));
 
 			await runTest(response, template, tickets, propName, moduleName, toUpdate);
+
+			// Ensure getGroupsByIds is being called with UUID ids, not string
+
+			TicketGroupsModel.getGroupsByIds.mock.calls.forEach((callArgs) => {
+				expect(callArgs[4].every(isUUID)).toBeTruthy();
+			});
 		});
 
 		test('Old groups are retained if the update doesn\'t update the field', async () => {
@@ -675,6 +681,9 @@ const updateGroupTestsHelper = (updateMany) => {
 					(_id) => ({ _id }))));
 
 			await runTest(response, template, tickets, propName, moduleName, toUpdate);
+			TicketGroupsModel.getGroupsByIds.mock.calls.forEach((callArgs) => {
+				expect(callArgs[4].every(isUUID)).toBeTruthy();
+			});
 		});
 
 		test('Throw an error if retained groups contains group ids that does not exist', async () => {
@@ -725,6 +734,9 @@ const updateGroupTestsHelper = (updateMany) => {
 			}
 
 			expect(EventsManager.publish).not.toHaveBeenCalled();
+			TicketGroupsModel.getGroupsByIds.mock.calls.forEach((callArgs) => {
+				expect(callArgs[4].every(isUUID)).toBeTruthy();
+			});
 		});
 	});
 };
