@@ -19,7 +19,7 @@ import { generatePath, useHistory, useParams } from 'react-router';
 import { CALIBRATION_ROUTE, CalibrationParams } from '@/v5/ui/routes/routes.constants';
 import { ContainerRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ContainerRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { modelIsFederation } from '@/v5/store/store.helpers';
+import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { BasicStep } from '../basicStep.component';
 
 export const Calibration3DStep = () => {
