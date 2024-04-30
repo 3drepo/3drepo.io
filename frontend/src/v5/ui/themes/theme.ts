@@ -504,6 +504,7 @@ export const theme = createTheme({
 				PopperProps: {
 					// This is necessary for overriding styles of v4 tooltips
 					container: () => document.getElementById('v4Overrides'),
+					draggable: false,
 				},
 				disableInteractive: true,
 			},
@@ -512,6 +513,7 @@ export const theme = createTheme({
 					backgroundColor: COLOR.SECONDARY_DARK,
 					padding: '7px 10px 8px 10px',
 					borderRadius: '8px',
+					userSelect: 'none',
 					...typography.caption,
 				},
 				tooltipPlacementBottom: {
