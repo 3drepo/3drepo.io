@@ -100,13 +100,13 @@ export const DrawingViewer = () => {
 						Icon={ZoomOutIcon}
 						onClick={onClickZoomOut}
 						disabled={isMinZoom}
-						title={formatMessage({ id: 'drawingViewer.toolbar.zoomIn', defaultMessage: 'Zoom out' })}
+						title={formatMessage({ id: 'drawingViewer.toolbar.zoomOut', defaultMessage: 'Zoom out' })}
 					/>
 					<ToolbarButton
 						Icon={ZoomInIcon}
 						onClick={onClickZoomIn}
 						disabled={isMaxZoom}
-						title={formatMessage({ id: 'drawingViewer.toolbar.zoomOut', defaultMessage: 'Zoom in' })}
+						title={formatMessage({ id: 'drawingViewer.toolbar.zoomIn', defaultMessage: 'Zoom in' })}
 					/>
 				</MainToolbar>
 			</ToolbarContainer>
