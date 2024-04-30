@@ -20,7 +20,6 @@ import { GlobalStyle } from '@/v5/ui/themes/global';
 import { formatMessage } from '@/v5/services/intl';
 import { NotFound } from '@/v5/ui/routes/notFound';
 import { DashboardProjectLayout } from '@components/dashboard/dashboardProjectLayout/dashboardProjectLayout.component';
-import { DashboardProjectTabsLayout } from '@components/dashboard/dashboardProjectLayout/dashboardProjectTabsLayout.component';
 import { DashboardViewerLayout } from '@components/dashboard/dashboardViewerLayout/dashboardViewerLayout.component';
 import { Route } from '@/v5/services/routing/route.component';
 import { AuthenticatedRoute } from '@/v5/services/routing/authenticatedRoute.component';

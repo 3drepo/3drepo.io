@@ -31,7 +31,6 @@ import {
 	TICKETS_ROUTE,
 	CALIBRATION_ROUTE,
 } from '@/v5/ui/routes/routes.constants';
-import { useSelector } from 'react-redux';
 import { formatMessage } from '@/v5/services/intl';
 import { BreadcrumbItem } from '@controls/breadcrumbs/breadcrumbDropdown/breadcrumbDropdown.component';
 import { Breadcrumbs } from '@controls/breadcrumbs';
