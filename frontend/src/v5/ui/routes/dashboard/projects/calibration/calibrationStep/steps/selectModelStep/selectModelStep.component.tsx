@@ -20,10 +20,10 @@ import { formatMessage } from '@/v5/services/intl';
 import { ContainersHooksSelectors, DrawingsHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { sortByName } from '@/v5/store/store.helpers';
 import { MenuItem, Select } from '@mui/material';
-import { ListSubheader } from '../../../tickets/selectMenus/selectMenus.styles';
+import { ListSubheader } from '../../../../tickets/selectMenus/selectMenus.styles';
 import { CalibrationParams } from '@/v5/ui/routes/routes.constants';
 import { useContext, useEffect } from 'react';
-import { CalibrationContext } from '../../calibrationContext';
+import { CalibrationContext } from '../../../calibrationContext';
 import { useParams } from 'react-router';
 import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
 

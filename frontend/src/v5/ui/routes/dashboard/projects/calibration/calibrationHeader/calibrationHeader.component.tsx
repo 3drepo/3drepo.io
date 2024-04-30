@@ -18,7 +18,7 @@
 import { useContext } from 'react';
 import { CalibrationContext } from '../calibrationContext';
 import { Stepper } from './calibration.styles';
-import { Button, Step, StepLabel } from '@mui/material';
+import { Box, Button, Step, StepLabel } from '@mui/material';
 import { Link, generatePath, useParams } from 'react-router-dom';
 import { DRAWINGS_ROUTE, DashboardParams } from '@/v5/ui/routes/routes.constants';
 
@@ -45,7 +45,7 @@ export const CalibrationHeader = () => {
 					</Step>
 				))}
 			</Stepper>
-			<div>
+			<Box sx={{ display: 'flex', justifyContent: 'center' }}>
 				<Button onClick={() => setStep(step - 1)} disabled={step === 0}>
 					Back
 				</Button>
@@ -65,7 +65,7 @@ export const CalibrationHeader = () => {
 						Continue
 					</Button>
 				)}
-			</div>
+			</Box>
 		</>
 	);
 };
