@@ -25,7 +25,7 @@ type ToolbarSelectProps = {
 	disabled?: boolean;
 	onChange: (value) => void;
 	children: any;
-	renderToolbarButton?: ({ Icon, value, title }) => JSX.Element;
+	renderToolbarButton?: ({ Icon, value, title, expanded }) => JSX.Element;
 	value?: any;
 	defaultIcon?: any;
 	title: string;
@@ -58,7 +58,7 @@ export const ToolbarSelect = ({
 	return (
 		<ToolbarSelectContext.Provider value={{ onChange: handleChange, expanded, setExpanded, active, selectedValue: selectedData.value }}>
 			<ClickAwayListener onClickAway={() => setExpanded(false)}>
-				<Container>
+				<Container $expanded={expanded}>
 					{expanded && (
 						<FloatingButtonsContainer {...props}>
 							{children}
@@ -66,8 +66,8 @@ export const ToolbarSelect = ({
 					)}
 					<div onClick={() => setExpanded(!expanded)}>
 						{renderToolbarButton
-							? renderToolbarButton({ ...selectedData, title: tooltipTitle })
-							: <ToolbarButton title={tooltipTitle} Icon={selectedData.Icon} selected={active} />
+							? renderToolbarButton({ ...selectedData, title: tooltipTitle, expanded })
+							: <ToolbarButton title={tooltipTitle} Icon={selectedData.Icon} selected={active} $expanded={expanded} />
 						}
 					</div>
 				</Container>

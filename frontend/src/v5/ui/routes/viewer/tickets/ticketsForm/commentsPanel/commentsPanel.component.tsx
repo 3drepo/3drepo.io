@@ -53,8 +53,9 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 
 	const getCommentIsFirstOfBlock = (index) => {
 		if (index === 0) return true;
-		const commentAuthor = comments[index].author;
-		return comments[index - 1].author !== commentAuthor;
+		const comment = comments[index];
+		const previousComment = comments[index - 1];
+		return (previousComment.originalAuthor || previousComment.author) !== (comment.originalAuthor || comment.author);
 	};
 
 	const handleDeleteComment = (commentId) => {

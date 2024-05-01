@@ -20,7 +20,7 @@ import { Menu } from '@controls/actionMenu/actionMenu.styles';
 import MenuItemBase from '@mui/material/MenuItem';
 import { Button } from '@controls/button';
 import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
-import { Ticket } from './ticketItem/ticketItem.styles';
+import { TicketItemContainer } from './ticketItem/ticketItem.styles';
 
 export const List = styled.div`
 	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
@@ -29,7 +29,7 @@ export const List = styled.div`
 	display: inline-block;
 	width: 100%;
 	margin-bottom: 0;
-	${/* sc-selector */ Ticket}:not(:last-child) {
+	${/* sc-selector */ TicketItemContainer}:not(:last-child) {
 		border-bottom: solid 1px ${({ theme }) => theme.palette.base.lightest};
 	}
 `;

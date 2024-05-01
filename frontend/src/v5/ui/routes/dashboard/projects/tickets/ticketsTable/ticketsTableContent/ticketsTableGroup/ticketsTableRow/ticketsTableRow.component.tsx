@@ -16,12 +16,12 @@
  */
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors, TicketsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
 import { useContext } from 'react';
 import { SearchContext } from '@controls/search/searchContext';
 import { Highlight } from '@controls/highlight';
-import { DueDateWithIcon } from '@controls/dueDate/dueDateWithIcon/dueDateWithIcon.component';
+import { DueDate } from '@controls/dueDate/dueDate.component';
 import { Chip } from '@controls/chip/chip.component';
 import { PRIORITY_LEVELS_MAP, RISK_LEVELS_MAP, TREATMENT_LEVELS_MAP } from '@controls/chip/chip.types';
 import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.component';
@@ -29,7 +29,7 @@ import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.compo
 import { Tooltip } from '@mui/material';
 import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { Row, Cell, CellChipText, CellOwner, OverflowContainer, SmallFont, CellDate } from './ticketsTableRow.styles';
-import { StatusChip } from '@controls/chip/statusChip/statusChip.component';
+import { getChipPropsFromConfig } from '@controls/chip/statusChip/statusChip.helpers';
 
 type TicketsTableRowProps = {
 	ticket: ITicket,
@@ -43,6 +43,7 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelId, selec
 	const { _id: id, title, properties, number, type, modules } = ticket;
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
 	const { name: modelName } = ContainersHooksSelectors.selectContainerById(modelId) || FederationsHooksSelectors.selectFederationById(modelId);
+	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(type);
 
 	if (!properties || !template?.code) return null;
 
@@ -106,13 +107,13 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelId, selec
 				<UserPopoverCircle user={ownerAsUser} />
 			</CellOwner>
 			<CellDate width={147} hidden={!hasProperties}>
-				{!!dueDate && (<DueDateWithIcon value={dueDate} disabled />)}
+				{!!dueDate && (<DueDate value={dueDate} disabled />)}
 			</CellDate>
 			<CellChipText width={90} hidden={!hasProperties}>
 				<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />
 			</CellChipText>
 			<CellChipText width={150}>
-				<StatusChip value={status} templateId={template._id} modelId={modelId} variant="outlined" />
+				<Chip {...getChipPropsFromConfig(statusConfig, status)} />
 			</CellChipText>
 			<Cell width={137} hidden={!hasSafetibase}>
 				<Chip {...RISK_LEVELS_MAP[levelOfRisk]} variant="filled" />

@@ -251,6 +251,7 @@ const formatToStats = (settings, issueCount, riskCount, lastUpdated) => ({
 	...(settings.desc ? { desc: settings.desc } : {}),
 	...(settings.subModels ? { containers: settings.subModels } : {}),
 	code: settings.properties.code,
+	unit: settings.properties.unit,
 	status: settings.status,
 	lastUpdated,
 	tickets: {

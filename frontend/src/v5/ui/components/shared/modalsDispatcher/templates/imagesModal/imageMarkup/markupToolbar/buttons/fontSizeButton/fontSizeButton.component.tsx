@@ -24,9 +24,9 @@ import { Tooltip } from '@mui/material';
 import { ToolbarSelect } from '@controls/toolbarSelect/toolbarSelect.component';
 
 const VALUE_TO_SIZE = invert(FONT_SIZE);
-const Icon = ({ value, title }) => (
+const Icon = ({ value, title, expanded }) => (
 	<Tooltip title={title}>
-		<IconWithFooterContainer $footer={VALUE_TO_SIZE[value]}>
+		<IconWithFooterContainer $footer={VALUE_TO_SIZE[value]} $expanded={expanded}>
 			<TextIcon />
 		</IconWithFooterContainer>
 	</Tooltip>

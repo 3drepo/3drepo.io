@@ -18,7 +18,7 @@
 import { hexToOpacity } from '@/v5/ui/themes/theme';
 import styled, { css } from 'styled-components';
 
-export const Container = styled.div<{ disabled?: boolean, selected?: boolean }>`
+export const Container = styled.div<{ disabled?: boolean, selected?: boolean, $expanded?: boolean }>`
 	height: 40px;
 	width: 40px;
 	padding: 0 10px;
@@ -29,8 +29,11 @@ export const Container = styled.div<{ disabled?: boolean, selected?: boolean }>`
 	color: ${({ theme }) => theme.palette.secondary.main};
 	border-radius: 50%;
 
-	${({ selected, theme }) => selected && css`
+	${({ $expanded, selected, theme }) => ($expanded || selected) && css`
 		color: ${theme.palette.primary.main};
+	`}
+
+	${({ selected, theme }) => selected && css`
 		background-color: ${hexToOpacity(theme.palette.primary.light, 25)};
 	`}
 

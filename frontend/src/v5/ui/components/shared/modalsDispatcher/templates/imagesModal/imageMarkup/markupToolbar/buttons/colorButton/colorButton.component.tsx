@@ -50,7 +50,7 @@ export const ColorButton = ({ value, onChange }: ColorButtonProps) => {
 
 	return (
 		<ClickAwayListener onClickAway={() => setExpanded(false)}>
-			<ButtonOptionsContainer>
+			<ButtonOptionsContainer $expanded={expanded}>
 				<FloatingButtonsContainer>
 					{expanded && (
 						<PickerContainer onKeyDown={handleKeyDown}>
@@ -66,8 +66,9 @@ export const ColorButton = ({ value, onChange }: ColorButtonProps) => {
 					)}
 				</FloatingButtonsContainer>
 				<ToolbarButton
+					$expanded={expanded}
 					title={formatMessage({ id: 'imageMarkup.icon.title.color', defaultMessage: 'Colour' })}
-					Icon={() => (<ColorIcon color={value} />)}
+					Icon={() => (<ColorIcon color={value} $expanded={expanded} />)}
 					onClick={() => setExpanded(!expanded)}
 				/>
 			</ButtonOptionsContainer>
