@@ -29,7 +29,6 @@ import {
 	PROJECT_ROUTE,
 	BOARD_ROUTE,
 	TICKETS_ROUTE,
-	CALIBRATION_ROUTE,
 } from '@/v5/ui/routes/routes.constants';
 import { formatMessage } from '@/v5/services/intl';
 import { BreadcrumbItem } from '@controls/breadcrumbs/breadcrumbDropdown/breadcrumbDropdown.component';
@@ -91,40 +90,6 @@ export const BreadcrumbsRouting = () => {
 		}));
 
 		breadcrumbs.push({ options });
-	}
-
-	if (matchesPath(CALIBRATION_ROUTE)) {
-		breadcrumbs = [
-			{
-				title: teamspace,
-				to: generatePath(TEAMSPACE_ROUTE_BASE, { teamspace }),
-			},
-			{
-				title: project?.name,
-				to: generatePath(FEDERATIONS_ROUTE, params),
-			},
-		];
-
-		if (containerOrFederationId) {
-			const models: any[] = isFederation ? federations : containers;
-			const selectedModel = models.find(({ _id }) => _id === containerOrFederationId);
-			breadcrumbs.push({ title: selectedModel?.name });
-
-			if (!isFederation) {
-				const noName = formatMessage({ id: 'breadcrumbs.revisions.noName', defaultMessage: '(no name)' });
-	
-				const revisionOptions = revisions.map(({ _id, tag }) => ({
-					title: tag || noName,
-					to: generatePath(CALIBRATION_ROUTE, { ...params, revision: tag || _id }),
-					selected: _id === revision || tag === revision,
-				}));
-	
-				breadcrumbs.push({
-					secondary: true,
-					options: revisionOptions,
-				});
-			}
-		}
 	}
 
 	if (matchesPath(VIEWER_ROUTE)) {

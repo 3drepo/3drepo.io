@@ -24,13 +24,13 @@ export const SIGN_UP_SSO_PATH = '/v5/signup-sso';
 export const PASSWORD_CHANGE_PATH = '/v5/password-change';
 export const REGISTER_VERIFY_PATH = '/v5/register-verify';
 export const VIEWER_ROUTE = '/v5/viewer/:teamspace/:project/:containerOrFederation/:revision?';
+export const CALIBRATION_VIEWER_ROUTE = `${VIEWER_ROUTE}/calibration`;
 export const DASHBOARD_ROUTE = '/v5/dashboard';
 export const TEAMSPACE_ROUTE_BASE = `${DASHBOARD_ROUTE}/:teamspace`;
 export const TEAMSPACE_ROUTE_BASE_TAB = `${TEAMSPACE_ROUTE_BASE}/t`;
 export const TEAMSPACE_ROUTE = `${TEAMSPACE_ROUTE_BASE}/t/:tab`;
 export const PROJECT_ROUTE_BASE = `${TEAMSPACE_ROUTE_BASE}/:project`;
 
-export const CALIBRATION_ROUTE = `${PROJECT_ROUTE_BASE}/calibration/:drawing/:containerOrFederation?/:revision?`;
 export const PROJECT_ROUTE_BASE_TAB = `${PROJECT_ROUTE_BASE}/t`;
 export const PROJECT_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/:tab`;
 export const CONTAINERS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/containers`;
@@ -65,12 +65,6 @@ export interface DashboardTicketsParams extends DashboardParams {
 }
 
 export interface ViewerParams extends DashboardParams {
-	containerOrFederation?: string;
-	revision?: string;
-}
-
-export interface CalibrationParams extends DashboardParams {
-	drawing: string;
 	containerOrFederation?: string;
 	revision?: string;
 }

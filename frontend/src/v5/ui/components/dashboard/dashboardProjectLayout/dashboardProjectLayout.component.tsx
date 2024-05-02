@@ -29,7 +29,7 @@ interface IDashboardProjectLayout {
 	NavigationBar?: any;
 }
 
-export const DashboardProjectLayout = ({ children, NavigationBar = ProjectNavigation }: IDashboardProjectLayout): JSX.Element => {
+export const DashboardProjectLayout = ({ children }: IDashboardProjectLayout): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
 
 	useEffect(() => {
@@ -48,7 +48,7 @@ export const DashboardProjectLayout = ({ children, NavigationBar = ProjectNaviga
 	return (
 		<>
 			<AppBar />
-			<NavigationBar />
+			<ProjectNavigation />
 			<Content>
 				{children}
 			</Content>
