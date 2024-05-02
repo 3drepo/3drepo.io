@@ -15,51 +15,63 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useEffect, useState } from 'react';
+import { useContext } from 'react';
 import { CalibrationContext } from '../calibrationContext';
-import { SelectModelStep } from './steps/selectModelStep/selectModelStep.component';
-import { generatePath, useHistory, useParams } from 'react-router';
-import { CALIBRATION_ROUTE, CalibrationParams } from '@/v5/ui/routes/routes.constants';
-import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
-import { ContainerRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { Calibration3DStep } from './steps/calibration3DStep/calibration3DStep.component';
-import { Calibration2DStep } from './steps/calibration2DStep/calibration2DStep.component';
-import { VerticalSpatialBoundariesStep } from './steps/verticalSpatialBoundariesStep/verticalSpatialBoundariesStep.component';
-import { CalibrationConfirmationStep } from './steps/calibrationConfirmationStep/calibrationConfirmationStep.component';
+import { FakeSplitScreen } from './calibrationStep.styles';
+import { Calibration3DStep } from './calibration3DStep/calibration3DStep.component';
+import { Calibration2DStep } from './calibration2DStep/calibration2DStep.component';
+import { VerticalSpatialBoundariesStep } from './verticalSpatialBoundariesStep/verticalSpatialBoundariesStep.component';
+import { CalibrationConfirmationStep } from './calibrationConfirmationStep/calibrationConfirmationStep.component';
+import { LeftPanelsButtons } from '@/v4/routes/viewerGui/viewerGui.styles';
+import { ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
+import { PanelButton } from '@/v4/routes/viewerGui/components/panelButton/panelButton.component';
+import { getCalibrationViewerLeftPanels } from '@/v4/constants/viewerGui';
+import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
 
 export const CalibrationStep = () => {
-	const { teamspace, project, drawing, containerOrFederation } = useParams<CalibrationParams>();
-	const selectedContainer = ContainersHooksSelectors.selectContainerById(containerOrFederation);
-	const history = useHistory();
 	const { step } = useContext(CalibrationContext);
-	const [modelId, setModelId] = useState('');
-
-	useEffect(() => {
-		if (step === 0) {
-			history.replace(generatePath(CALIBRATION_ROUTE, { teamspace, project, drawing }));
-		}
-
-		if (step === 1 && !containerOrFederation) {
-			if (selectedContainer) {
-				ContainerRevisionsActionsDispatchers.fetch(teamspace, project, containerOrFederation);
-			}
-			history.replace(generatePath(CALIBRATION_ROUTE, {
-				teamspace,
-				project,
-				drawing,
-				containerOrFederation: modelId,
-				revision: selectedContainer?.latestRevision,
-			}));
-		}
-	}, [step]);
+	const leftPanels = ViewerGuiHooksSelectors.selectLeftPanels();
+	const show2DViewer = step < 2;
 
 	return (
-		<>
-			{step === 0 && <SelectModelStep modelId={modelId} setModelId={setModelId} />}
-			{step === 1 && <Calibration3DStep />}
-			{step === 2 && <Calibration2DStep />}
-			{step === 3 && <VerticalSpatialBoundariesStep />}
-			{step === 4 && <CalibrationConfirmationStep />}
-		</>
+		<FakeSplitScreen>
+			{/* Fake viewer waiting for 3d/2d screen split */}
+			<div style={{
+				backgroundImage: 'url("https://preview.free3d.com/img/2015/10/2212620326200674180/a5fnusz4.jpg")',
+				position: 'relative',
+				backgroundSize: 'contain',
+				backgroundRepeat: 'no-repeat',
+				backgroundPosition: 'center',
+			}}>
+				<Toolbar />
+				<LeftPanelsButtons>
+					{getCalibrationViewerLeftPanels().map(({ name, type }) => (
+						<PanelButton
+							key={type}
+							onClick={ViewerGuiActionsDispatchers.setPanelVisibility}
+							label={name}
+							type={type}
+							id={type + '-panel-button'}
+							active={leftPanels.includes(type)}
+						/>
+					))}
+				</LeftPanelsButtons>
+				{step === 0 && <Calibration3DStep />}
+				{step === 1 && <Calibration2DStep />}
+				{step === 2 && <VerticalSpatialBoundariesStep />}
+				{step === 3 && <CalibrationConfirmationStep />}
+			</div>
+			{show2DViewer && (
+				<div style={{
+					height: '100%',
+					width: '100%',
+					backgroundImage: 'url("https://wpmedia.roomsketcher.com/content/uploads/2022/01/27111154/Profile_Black-2D_Floor_Plan.jpg")',
+					backgroundSize: 'contain',
+					backgroundRepeat: 'no-repeat',
+					backgroundPosition: 'center',
+				}}/>
+			)}
+		</FakeSplitScreen>
 	);
 };

@@ -21,48 +21,34 @@ import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
 import { useContainersData } from '../containers/containers.hooks';
 import { useFederationsData } from '../federations/federations.hooks';
-import { CalibrationParams, DRAWINGS_ROUTE } from '../../../routes.constants';
+import { DRAWINGS_ROUTE, ViewerParams } from '../../../routes.constants';
 import { EmptyPageView } from '@components/shared/emptyPageView/emptyPageView.styles';
-import { CalibrationStep } from './calibrationStep/calibrationStep.component';
 import { Button } from '@controls/button';
 import { Link } from 'react-router-dom';
-import { useEffect } from 'react';
-import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { useSearchParam } from '../../../useSearchParam';
+import { CalibrationContextComponent } from './calibrationContext';
+import { CalibrationHeader } from './calibrationHeader/calibrationHeader.component';
+import { CalibrationStep } from './calibrationStep/calibrationStep.component';
+import { Container } from './calibration.styles';
 
 export const Calibration = () => {
-	const { teamspace, project, drawing } = useParams<CalibrationParams>();
+	const { teamspace, project } = useParams<ViewerParams>();
+	const [drawing] = useSearchParam('calibrationDrawing');
 
 	const selectedDrawing = DrawingsHooksSelectors.selectDrawingById(drawing);
-	const { isListPending: containersArePending, containers } = useContainersData();
-	const { isListPending: federationsArePending, federations } = useFederationsData();
+	const { isListPending: containersArePending } = useContainersData();
+	const { isListPending: federationsArePending } = useFederationsData();
 	const isLoadingModels = containersArePending || federationsArePending;
 	const isLoadingDrawings = DrawingsHooksSelectors.selectIsListPending();
-	const hasModels = !![...containers, ...federations].length;
-
-	useEffect(() => {
-		if (selectedDrawing || !teamspace || !project) return;
-		DrawingsActionsDispatchers.fetchDrawings(teamspace, project);
-	}, [teamspace, project]);
 
 	if (isLoadingModels || isLoadingDrawings) return (<Loader />);
-
-	if (!hasModels) {
-		return (
-			<EmptyPageView>
-				<FormattedMessage
-					id="calibration.emptyModels"
-					defaultMessage="This project is empty. Please, proceed to create a container or a federation to access this content."
-				/>
-			</EmptyPageView>
-		);
-	}
 
 	if (!selectedDrawing) {
 		return (
 			<EmptyPageView>
 				<FormattedMessage
 					id="calibration.invalidDrawing"
-					defaultMessage="The selected drawing was not found. Please, go back to the drawings list select the drawing to calibrate from there."
+					defaultMessage="The selected drawing was not found. Please, go back to the drawings list and select the drawing to calibrate from there."
 				/>
 				<br />
 				<Button variant="contained">
@@ -77,5 +63,12 @@ export const Calibration = () => {
 		);
 	}
 
-	return (<CalibrationStep />);
+	return (
+		<CalibrationContextComponent>
+			<Container>
+				<CalibrationHeader />
+				<CalibrationStep />
+			</Container>
+		</CalibrationContextComponent>
+	);
 };
