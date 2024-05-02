@@ -15,11 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Stepper as StepperBase } from '@mui/material';
-import styled from 'styled-components';
+import { useContext, useEffect } from 'react';
+import { CalibrationContext } from '../calibrationContext';
 
-export const Stepper = styled(StepperBase)`
-	border-radius: 0;
-	box-shadow: none;
-	background-color: ${({ theme }) => theme.palette.secondary.main};
-`;
+export const BasicStep = ({ text }) => {
+	const { setIsStepValid, step } = useContext(CalibrationContext);
+
+	useEffect(() => {
+		setIsStepValid(false);
+	}, [step]);
+
+	return (
+		<div style={{ position: 'absolute', left: '5%' }}>
+			<div style={{
+				borderRadius: 10,
+				width: 'fit-content',
+				padding: '50px 100px',
+				background: 'beige',
+				margin: 'auto',
+				display: 'grid',
+				placeContent: 'center',
+			}}>
+				<h2>This is the {text} step</h2>
+				<button type='button' onClick={() => setIsStepValid(true)}>VALIDATE</button>
+			</div>
+		</div>
+	);
+};

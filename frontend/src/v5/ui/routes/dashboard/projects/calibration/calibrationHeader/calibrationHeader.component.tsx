@@ -16,14 +16,13 @@
  */
 
 import { useContext } from 'react';
-import { CalibrationContext } from '../calibrationContext';
-import { Stepper } from './calibration.styles';
-import { Box, Button, Step, StepLabel } from '@mui/material';
+import { Stepper, Container, ButtonsContainer, Button } from './calibrationHeader.styles';
+import { Step, StepLabel } from '@mui/material';
 import { Link, generatePath, useParams } from 'react-router-dom';
 import { DRAWINGS_ROUTE, DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { CalibrationContext } from '../calibrationContext';
 
 const STEPS = [
-	'Container/Federation Ref',
 	'3D Calibration Points',
 	'2D Calibration Points',
 	'Vertical Spatial Boundaries',
@@ -33,11 +32,12 @@ const STEPS = [
 export const CalibrationHeader = () => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const { step, setStep, isStepValid } = useContext(CalibrationContext);
+	const isLastStep = step === 3;
 
 	const pathToDrawings = generatePath(DRAWINGS_ROUTE, { teamspace, project });
 
 	return (
-		<>
+		<Container>
 			<Stepper activeStep={step} alternativeLabel>
 				{STEPS.map((label) => (
 					<Step key={label}>
@@ -45,7 +45,7 @@ export const CalibrationHeader = () => {
 					</Step>
 				))}
 			</Stepper>
-			<Box sx={{ display: 'flex', justifyContent: 'center' }}>
+			<ButtonsContainer>
 				<Button onClick={() => setStep(step - 1)} disabled={step === 0}>
 					Back
 				</Button>
@@ -54,7 +54,7 @@ export const CalibrationHeader = () => {
 						Cancel
 					</Link>
 				</Button>
-				{step === 4 ? (
+				{isLastStep ? (
 					<Button disabled={!isStepValid}>
 						<Link to={pathToDrawings}>
 							Confirm
@@ -65,7 +65,7 @@ export const CalibrationHeader = () => {
 						Continue
 					</Button>
 				)}
-			</Box>
-		</>
+			</ButtonsContainer>
+		</Container>
 	);
 };
