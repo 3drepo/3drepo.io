@@ -27,7 +27,7 @@ export const FakeSplitScreen = styled.div`
 		height: 100%;
 
 		&:first-child {
-			border-right: solid 2px gray;
+			border-right: solid 2px #444444;
 		}
 	}
 `;
