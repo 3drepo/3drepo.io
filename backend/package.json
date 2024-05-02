@@ -44,7 +44,7 @@
     "csv-parse": "4.8.5",
     "dayjs": "1.10.7",
     "device": "0.3.12",
-    "ejs": "3.1.9",
+    "ejs": "3.1.10",
     "elastic-apm-node": "3.41.1",
     "express": "4.17.3",
     "express-body-parser-error-handler": "1.0.4",
