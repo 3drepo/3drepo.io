@@ -33,9 +33,7 @@ import { ViewerCanvases } from '../dashboard/viewerCanvases/viewerCanvases.compo
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
-
 	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
-
 	const isFetching = ViewerHooksSelectors.selectIsFetching();
 
 	const isLoading = isFetching || fetchPending;

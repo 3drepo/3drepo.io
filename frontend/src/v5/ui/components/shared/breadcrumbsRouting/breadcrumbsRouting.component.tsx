@@ -35,6 +35,7 @@ import { BreadcrumbItem } from '@controls/breadcrumbs/breadcrumbDropdown/breadcr
 import { Breadcrumbs } from '@controls/breadcrumbs';
 import { BreadcrumbItemOrOptions } from '@controls/breadcrumbs/breadcrumbs.component';
 import { sortBreadcrumbOptions } from '@controls/breadcrumbs/breadcrumbs.helpers';
+import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
 export const BreadcrumbsRouting = () => {
 	const params = useParams();
@@ -46,6 +47,7 @@ export const BreadcrumbsRouting = () => {
 	const federations = FederationsHooksSelectors.selectFederations();
 	const containers = ContainersHooksSelectors.selectContainers();
 	const revisions = ContainerRevisionsHooksSelectors.selectRevisions(containerOrFederationId);
+	const [calibrationDrawing] = useSearchParam('calibrationDrawing');
 
 	const isFederation = federations.some(({ _id }) => _id === containerOrFederationId);
 
@@ -93,6 +95,14 @@ export const BreadcrumbsRouting = () => {
 	}
 
 	if (matchesPath(VIEWER_ROUTE)) {
+		const generateViewerPath = (path, pathParams) => {
+			let newPath = generatePath(path, pathParams);
+			if (calibrationDrawing) {
+				newPath += `?calibrationDrawing=${calibrationDrawing}`;
+			}
+			return newPath;
+		};
+		
 		breadcrumbs = [
 			{
 				title: teamspace,
@@ -107,7 +117,7 @@ export const BreadcrumbsRouting = () => {
 		if (isFederation) { // In the case the user is viewing a federation
 			options = federations.map(({ _id, name }) => ({
 				title: name,
-				to: generatePath(VIEWER_ROUTE, { ...params, containerOrFederation: _id, revision: null }),
+				to: generateViewerPath(VIEWER_ROUTE, { ...params, containerOrFederation: _id, revision: null }),
 				selected: _id === containerOrFederationId,
 			}));
 
@@ -115,7 +125,7 @@ export const BreadcrumbsRouting = () => {
 		} else { // In the case that the user is viewing a container
 			options = containers.map(({ _id, name }) => ({
 				title: name,
-				to: generatePath(VIEWER_ROUTE, { ...params, containerOrFederation: _id, revision: null }),
+				to: generateViewerPath(VIEWER_ROUTE, { ...params, containerOrFederation: _id, revision: null }),
 				selected: _id === containerOrFederationId,
 			}));
 			breadcrumbs.push({ options: sortBreadcrumbOptions(options) });
@@ -125,7 +135,7 @@ export const BreadcrumbsRouting = () => {
 
 			const revisionOptions = revisions.map(({ _id, tag }) => ({
 				title: tag || noName,
-				to: generatePath(VIEWER_ROUTE, { ...params, revision: tag || _id }),
+				to: generateViewerPath(VIEWER_ROUTE, { ...params, revision: tag || _id }),
 				selected: _id === revision || tag === revision,
 			}));
 

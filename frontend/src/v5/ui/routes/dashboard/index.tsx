@@ -32,7 +32,6 @@ import { ProjectContent } from './projects/projectContent/projectContent';
 import { Login } from '../login';
 import { Viewer } from '../viewer/viewer';
 import {
-	CALIBRATION_ROUTE,
 	DASHBOARD_ROUTE,
 	LOGIN_PATH,
 	PASSWORD_CHANGE_PATH,
@@ -54,8 +53,6 @@ import { UserSignupSSO } from '../userSignup/userSignUpSSO/userSignUpSSO.compone
 import { useEffect } from 'react';
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
-import { Calibration } from './projects/calibration/calibration.component';
-import { DashboardProjectCalibrationLayout } from '@components/dashboard/dashboardProjectLayout/dashbaordProjectCalibrationLayout.component';
 
 export const MainRoute = () => {
 	const { path } = useRouteMatch();
@@ -110,11 +107,6 @@ export const MainRoute = () => {
 							</Route>
 						</Switch>
 					</TeamspaceLayout>
-				</AuthenticatedRoute>
-				<AuthenticatedRoute path={CALIBRATION_ROUTE} title={formatMessage({ id: 'pageTitle.calibration', defaultMessage: ':project - Calibration' })}>
-					<DashboardProjectCalibrationLayout>
-						<Calibration />
-					</DashboardProjectCalibrationLayout>
 				</AuthenticatedRoute>
 				<AuthenticatedRoute path={PROJECT_ROUTE_BASE}>
 					<DashboardProjectLayout>

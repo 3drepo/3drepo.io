@@ -16,7 +16,7 @@
  */
 
 import { generatePath, useHistory } from 'react-router-dom';
-import { CALIBRATION_VIEWER_ROUTE, ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { VIEWER_ROUTE, ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { FormModal } from '@controls/formModal/formModal.component';
 import { ListSubheader, MenuItem } from '@mui/material';
 import { DrawingsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -42,7 +42,7 @@ export const SelectModelForCalibration = ({ drawingId, onClickClose, ...props })
 	const federationsData = useFederationsData();
 	const { handleSubmit, control, watch } = useForm();
 	const model = watch('model');
-	const [, setDrawingId] = useSearchParam('drawing');
+	const [, setCalibrationDrawing] = useSearchParam('calibrationDrawing');
 	
 	const isLoadingModels = containersData.isListPending || federationsData.isListPending;
 	const containers = containersData.containers.filter((c) => !!c.latestRevision);
@@ -54,8 +54,8 @@ export const SelectModelForCalibration = ({ drawingId, onClickClose, ...props })
 		if (container) {
 			pathParams.revision = container.latestRevision;
 		}
-		history.replace(generatePath(CALIBRATION_VIEWER_ROUTE, pathParams));
-		setDrawingId(drawingId);
+		history.replace(generatePath(VIEWER_ROUTE, pathParams));
+		setCalibrationDrawing(drawingId);
 		onClickClose();
 	};
 

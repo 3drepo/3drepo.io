@@ -15,29 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { useEffect } from 'react';
-import { generatePath, useHistory, useParams } from 'react-router';
-import { CALIBRATION_ROUTE, CalibrationParams } from '@/v5/ui/routes/routes.constants';
-import { ContainerRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { useParams } from 'react-router';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { ContainerRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { BasicStep } from '../basicStep.component';
 
 export const Calibration3DStep = () => {
-	const { containerOrFederation, teamspace, project, drawing } = useParams<CalibrationParams>();
+	const { containerOrFederation, teamspace, project } = useParams<ViewerParams>();
 	const isFed = modelIsFederation(containerOrFederation);
-	const history = useHistory();
-	const revisions = ContainerRevisionsHooksSelectors.selectRevisions(containerOrFederation);
-	const latestRevision = revisions.at(-1);
 
 	useEffect(() => {
 		if (!containerOrFederation || isFed) return;
 		ContainerRevisionsActionsDispatchers.fetch(teamspace, project, containerOrFederation);
 	}, [containerOrFederation]);
-
-	useEffect(() => {
-		if (!latestRevision || isFed) return;
-		history.push(generatePath(CALIBRATION_ROUTE, { teamspace, project, drawing, containerOrFederation, revision: latestRevision }));
-	}, [latestRevision]);
 
 	return <BasicStep text="3d calibration" />;
 };
