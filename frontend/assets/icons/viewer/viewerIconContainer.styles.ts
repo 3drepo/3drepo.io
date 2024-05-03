@@ -18,17 +18,16 @@
 import styled, { css } from 'styled-components';
 
 const selectedStyles = css`
-	.primary {
-		color: ${({ theme }) => theme.palette.primary.main};
-	}
-
+	color: ${({ theme }) => theme.palette.primary.main};
 	.highlight {
-		color: ${({ theme }) => theme.palette.primary.contrast};
+		color: ${({ theme }) => theme.palette.primary.darkest};
 	}
 `;
 
 const disabledStyles = css`
-	.primary, .highlight {
+	color: ${({ theme }) => theme.palette.base.main};
+
+	.highlight {
 		color: ${({ theme }) => theme.palette.base.main};
 	}
 `;
@@ -39,12 +38,9 @@ export const ViewerIconContainer = styled.div<{ selected?: boolean, disabled?: b
 		width: 18px;
 	}
 	
-	.primary {
-		color: ${({ theme }) => theme.palette.secondary.lightest};
-	}
-
+	color: ${({ theme }) => theme.palette.secondary.lightest};
 	.highlight {
-		color: ${({ theme }) => theme.palette.base.main};
+		color: ${({ theme }) => theme.palette.base.light};
 	}
 
 	${({ selected }) => selected && selectedStyles}

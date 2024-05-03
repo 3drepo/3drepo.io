@@ -16,7 +16,7 @@
  */
 
 import { aspectRatio } from '@/v4/helpers/aspectRatio';
-import { PanZoom, panzoom } from './panzoom';
+import { Events, PanZoom, panzoom } from './panzoom';
 
 export type PanZoomHandler = PanZoom & { zoomIn : () => void, zoomOut: () => void };
 
@@ -59,7 +59,7 @@ export const centredPanZoom = (target: HTMLImageElement | SVGSVGElement, padding
 	resizeObserver.observe(targetContainer);
 	pz.zoom(pz.getMinZoom(), false);
 
-	pz.on('transform', () => {
+	pz.on(Events.transform, () => {
 		const parentRect = targetContainer.getBoundingClientRect();
 		const actualPaddingW = (parentRect.width - size.scaledWidth) / 2 ;
 		const actualPaddingH = (parentRect.height - size.scaledHeight ) / 2 ;

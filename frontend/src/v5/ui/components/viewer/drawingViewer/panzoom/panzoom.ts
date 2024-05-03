@@ -23,7 +23,14 @@ const inertiaFunction = BezierEasing(0, 0.33, 0.66, 1);
 const zoomEasing = BezierEasing(0, 1.02, 0.65, 1);
 export const Events = {
 	transform: 'transform',
+	startDrag: 'startDrag',
+	endDrag: 'endDrag',
 };
+
+const millisecondsPerSecond = 1000;
+const acc = 9.8;
+const mass = 10;
+const zoomDuration = 300;
 
 /* eslint-disable @typescript-eslint/no-use-before-define */
 export const panzoom = (target: HTMLElement | SVGElement, options) => {
@@ -103,13 +110,11 @@ export const panzoom = (target: HTMLElement | SVGElement, options) => {
 		
 		const initialScale = transform.scale;
 		const diffScale =  transform.scale * scaleFactor - initialScale;
-		
-		const duration = 300;
-		
+				
 		animation = animate((currentTime) => {
-			const progress = zoomEasing(currentTime / duration);
+			const progress = zoomEasing(currentTime / zoomDuration);
 			zoomTo(x, y, initialScale + progress * diffScale );
-			return currentTime >= duration;
+			return currentTime >= zoomDuration;
 		});
 	};
 
@@ -146,14 +151,14 @@ export const panzoom = (target: HTMLElement | SVGElement, options) => {
 	const onMouseDown = () => {
 		stopInertia();
 		container.addEventListener('mousemove', onMouseMove);
+		container.style.cursor = 'grabbing';
 	};
 
 	const onMouseUp = () => {
 		container.removeEventListener('mousemove', onMouseMove);
+		container.style.cursor = 'default';
 
-		const acc = 9.8;
-
-		const duration =  ((((speed.x ** 2 + speed.y ** 2) **  0.5) / acc) / 10 ) * 1000;
+		const duration =  (((speed.x ** 2 + speed.y ** 2) **  0.5) * millisecondsPerSecond) / (acc * mass ) ;
 
 		if (duration) {
 			const acc2 =  acc * 2;

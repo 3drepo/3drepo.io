@@ -27,6 +27,7 @@ export const ToolbarContainer = styled.div<{ xPosition?: number }>`
 	z-index: 2;
 	display: flex;
 	flex-direction: row;
+	transition: all .3s;
 
 	& > * {
 		border: solid 1px ${({ theme }) => theme.palette.secondary.light};
@@ -37,10 +38,6 @@ export const ToolbarContainer = styled.div<{ xPosition?: number }>`
 		flex-direction: row;
 		align-items: center;
 		justify-content: space-evenly;
-	}
-
-	* {
-		transition: all .3s;
 	}
 `;
 

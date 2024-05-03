@@ -30,7 +30,6 @@ interface Props {
 
 export const SvgViewer = forwardRef(({ svgContent, onLoad }: Props, ref) => {
 	const svgContainerRef = useRef<HTMLElement>(null);
-	const svgRef = useRef<SVGSVGElement>(null);
 
 	useEffect(() => {
 		if (!svgContainerRef.current || !svgContent) return;
@@ -48,9 +47,6 @@ export const SvgViewer = forwardRef(({ svgContent, onLoad }: Props, ref) => {
 
 		svgContainer.insertBefore(svg, svgContainer.children[0]);
 		
-		
-		svgRef.current = svg;
-
 		if (typeof ref === 'function') ref(svg);
 		if (typeof ref === 'object') ref.current = svg;
 

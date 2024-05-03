@@ -14,22 +14,20 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import { formatMessage } from '@/v5/services/intl';
+import { Typography } from '@mui/material';
 import styled from 'styled-components';
 
-export const SvgContainer = styled.div`
-	svg {
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
-		border: 1px solid ${({ theme }) => theme.palette.base.light};
-	}
-
-	width:100%;
-	height:100%;
-	overflow: hidden;
+export const Info = styled(Typography)`
+	${({ theme }) => theme.typography.caption};
+	margin-top: 2px;
 `;
 
-export const DrawingViewerContainer = styled.div`
-	overflow: hidden;
-	width: 100%;
-	height: 100%;
-	user-select: none;
+export const ExternalLabel = styled.i`
+	&::after {
+		content: "${formatMessage({ id: 'importedUserPopover.external', defaultMessage: '(External)' })}";
+		font-size: 10px;
+		font-weight: 400;
+	}
 `;

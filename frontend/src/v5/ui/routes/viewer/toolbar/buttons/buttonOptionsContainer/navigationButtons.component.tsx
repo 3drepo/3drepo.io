@@ -48,13 +48,13 @@ export const NavigationButtons = () => {
 	if (navigationMode === 'TURNTABLE') {
 		return (
 			<ClickAwayListener onClickAway={() => setExpanded(false)}>
-				<ButtonOptionsContainer>
+				<ButtonOptionsContainer $expanded={expanded}>
 					{expanded && (
 						<FloatingButtonsContainer>
 							<FloatingButton Icon={HelicopterIcon} onClick={() => setMode('HELICOPTER')} title={helicopterTooltipText} />
 						</FloatingButtonsContainer>
 					)}
-					<ToolbarButton Icon={RotateIcon} onClick={() => setExpanded(!expanded)} title={!expanded ? turntableTooltipText : ''} />
+					<ToolbarButton Icon={RotateIcon} selected={expanded} onClick={() => setExpanded(!expanded)} title={!expanded ? turntableTooltipText : ''} />
 				</ButtonOptionsContainer>
 			</ClickAwayListener>
 		);
@@ -62,7 +62,7 @@ export const NavigationButtons = () => {
 
 	return (
 		<ClickAwayListener onClickAway={() => setExpanded(false)}>
-			<ButtonOptionsContainer>
+			<ButtonOptionsContainer $expanded={expanded}>
 				{expanded && (
 					<FloatingButtonsContainer>
 						<FloatingButton
@@ -96,7 +96,7 @@ export const NavigationButtons = () => {
 						<FloatingButton Icon={RotateIcon} onClick={() => setMode('TURNTABLE')} title={turntableTooltipText}/>
 					</FloatingButtonsContainer>
 				)}
-				<ToolbarButton Icon={HelicopterIcon} onClick={() => setExpanded(!expanded)} title={!expanded ? helicopterTooltipText : ''} />
+				<ToolbarButton Icon={HelicopterIcon} selected={expanded} onClick={() => setExpanded(!expanded)} title={!expanded ? helicopterTooltipText : ''} />
 			</ButtonOptionsContainer>
 		</ClickAwayListener>
 	);
