@@ -16,20 +16,22 @@
  */
 
 import { ViewerGui } from '@/v4/routes/viewerGui';
-import { useParams } from 'react-router-dom';
+import { useParams, Switch } from 'react-router-dom';
 import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ProjectsActionsDispatchers, TeamspacesActionsDispatchers, TicketsCardActionsDispatchers, ViewerActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useEffect, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { CheckLatestRevisionReadiness } from './checkLatestRevisionReadiness/checkLatestRevisionReadiness.container';
-import { ViewerParams } from '../routes.constants';
+import { CALIBRATION_VIEWER_ROUTE, VIEWER_ROUTE, ViewerParams } from '../routes.constants';
 import { InvalidContainerOverlay, InvalidFederationOverlay } from './invalidViewerOverlay';
 import { OpenTicketFromUrl } from './openTicketFromUrl/openTicketFromUrl.component';
 import { SpinnerLoader } from '@controls/spinnerLoader';
 import { CentredContainer } from '@controls/centredContainer';
 import { TicketsCardViews } from './tickets/tickets.constants';
 import { ViewerCanvases } from '../dashboard/viewerCanvases/viewerCanvases.component';
+import { Calibration } from '../dashboard/projects/calibration/calibration.component';
+import { Route } from '@/v5/services/routing/route.component';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
@@ -104,7 +106,14 @@ export const Viewer = () => {
 			<OpenTicketFromUrl />
 			<CheckLatestRevisionReadiness />
 			<ViewerCanvases />
-			<ViewerGui match={v4Match} key={containerOrFederation} />
+			<Switch>
+				<Route exact path={CALIBRATION_VIEWER_ROUTE}>
+					<Calibration />
+				</Route>
+				<Route path={VIEWER_ROUTE}>
+					<ViewerGui match={v4Match} key={containerOrFederation} />
+				</Route>
+			</Switch>
 		</>
 	);
 };

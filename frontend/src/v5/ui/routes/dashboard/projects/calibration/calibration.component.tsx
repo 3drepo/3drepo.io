@@ -33,7 +33,7 @@ import { Container } from './calibration.styles';
 
 export const Calibration = () => {
 	const { teamspace, project } = useParams<ViewerParams>();
-	const [drawing] = useSearchParam('calibrationDrawing');
+	const [drawing] = useSearchParam('drawingId');
 
 	const selectedDrawing = DrawingsHooksSelectors.selectDrawingById(drawing);
 	const { isListPending: containersArePending } = useContainersData();
