@@ -18,14 +18,14 @@ import { createContext, useState } from 'react';
 
 interface ViewerCanvasesContextType {
 	is2DOpen?: boolean;
-	toggle2DPanel: () => void;
+	setIs2DOpen: (open: boolean) => void;
 	leftPanelRatio: number;
 	setLeftPanelRatio: (size) => void;
 }
 
 const defaultValue: ViewerCanvasesContextType = {
 	is2DOpen: false,
-	toggle2DPanel: () => { },
+	setIs2DOpen: () => { },
 	leftPanelRatio: 0.5,
 	setLeftPanelRatio: () => { },
 };
@@ -36,10 +36,8 @@ export const ViewerCanvasesContextComponent = ({ children }) => {
 	const [is2DOpen, setIs2DOpen] = useState(false);
 	const [leftPanelRatio, setLeftPanelRatio] = useState(0.5);
 
-	const toggle2DPanel = () => setIs2DOpen(!is2DOpen);
-
 	return (
-		<ViewerCanvasesContext.Provider value={{ is2DOpen, toggle2DPanel, leftPanelRatio, setLeftPanelRatio }}>
+		<ViewerCanvasesContext.Provider value={{ is2DOpen, setIs2DOpen, leftPanelRatio, setLeftPanelRatio }}>
 			{children}
 		</ViewerCanvasesContext.Provider>
 	);
