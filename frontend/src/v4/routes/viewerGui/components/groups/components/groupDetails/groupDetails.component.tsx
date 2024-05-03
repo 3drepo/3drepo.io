@@ -159,7 +159,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 		}
 
 		// if it is a smart group, we ignore the manual selection because it depends on the rules
-		const groupHasValidSelection = this.isSmartGroup || this.objectsCount > 0;
+		const groupHasValidSelection = this.isSmartGroup || this.props.selectedNodes.length > 0;
 		this.setIsFormValid(GroupSchema.isValidSync(this.editingGroup) && groupHasValidSelection);
 	}
 
