@@ -292,6 +292,7 @@ function* setClippingMode({ mode }) {
 	try {
 		const currentClipMode = yield select(selectClippingMode);
 		if (currentClipMode !== mode) {
+			yield put(ViewerGuiActions.setGizmoMode(VIEWER_GIZMO_MODES.TRANSLATE));
 			yield put(ViewerGuiActions.setClipModeSuccess(mode));
 			if (!mode) {
 				yield Viewer.clipToolDelete();

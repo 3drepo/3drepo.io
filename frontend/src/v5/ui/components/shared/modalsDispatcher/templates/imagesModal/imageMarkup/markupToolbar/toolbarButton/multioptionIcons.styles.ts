@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { ToolbarSelectItem } from '@controls/toolbarSelect/toolbarSelectItem/toolbarSelectItem.component';
 
 export const FloatingBar = styled.div`
@@ -48,7 +48,7 @@ export const FlatToolbarSelectItem = styled(ToolbarSelectItem)`
 	}
 `;
 
-export const IconWithFooterContainer = styled.div<{ $footer }> `
+export const IconWithFooterContainer = styled.div<{ $footer, $expanded?: boolean }> `
 	position: relative;
 	height: 40px;
 	width: 40px;
@@ -66,6 +66,9 @@ export const IconWithFooterContainer = styled.div<{ $footer }> `
 	&:hover {
 		color: ${({ theme }) => theme.palette.primary.main};
 	}
+	${({ $expanded }) => $expanded && css`
+		color: ${({ theme }) => theme.palette.primary.main};
+	`}
 
 	&::after {
 		content: "${({ $footer }) => $footer}";

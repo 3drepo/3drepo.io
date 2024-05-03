@@ -179,7 +179,11 @@ function * prefetchFrames() {
 function* updateSelectedStateDefinition() {
 	const selectedFrame = yield select(selectSelectedFrame);
 	const stateDefinitions = yield select(selectStateDefinitions);
-	yield put(SequencesActions.setSelectedStateDefinition(stateDefinitions[selectedFrame?.state]));
+	const selectedStateDefinition = stateDefinitions[selectedFrame?.state];
+	if (!selectedStateDefinition) {
+		return;
+	}
+	yield put(SequencesActions.setSelectedStateDefinition(selectedStateDefinition));
 }
 
 export function* setSelectedDate({ date }) {
