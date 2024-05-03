@@ -23,6 +23,9 @@ import { VirtualisedList } from './drawingsList.styles';
 import { CardContent, CardList, CardListItem } from '@components/viewer/cards/card.styles';
 import { forwardRef, useContext } from 'react';
 import { ViewerCanvasesContext } from '../../viewerCanvases.context';
+import { useSearchParam } from '../../../useSearchParam';
+import { ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 
 const Table = forwardRef(({ children, ...props }, ref: any) => (
 	<table ref={ref} {...props}>
@@ -33,7 +36,14 @@ const Table = forwardRef(({ children, ...props }, ref: any) => (
 export const DrawingsList = () => {
 	const drawings = DrawingsHooksSelectors.selectCalibratedDrawings();
 	const isLoading = DrawingsHooksSelectors.selectCalibratedDrawingsHaveStatsPending();
-	const { toggle2DPanel } = useContext(ViewerCanvasesContext);
+	const { setIs2DOpen } = useContext(ViewerCanvasesContext);
+	const [, setDrawingId] = useSearchParam('drawingId');
+
+	const onDrawingClick = (drawingId) => {
+		setIs2DOpen(true);
+		setDrawingId(drawingId);
+		ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.DRAWINGS, false);
+	};
 
 	if (isLoading) return (
 		<CentredContainer>
@@ -55,7 +65,7 @@ export const DrawingsList = () => {
 				<DrawingItem
 					drawing={drawing}
 					key={drawing._id}
-					onClick={toggle2DPanel}
+					onClick={() => onDrawingClick(drawing._id)}
 				/>
 			)}
 		/>

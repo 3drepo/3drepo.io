@@ -18,39 +18,31 @@
 import { formatMessage } from '@/v5/services/intl';
 import { ToolbarButton } from '@/v5/ui/routes/viewer/toolbar/buttons/toolbarButton.component';
 import { ToolbarContainer, MainToolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.styles';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ZoomOutIcon from '@assets/icons/viewer/zoom_out.svg';
 import ZoomInIcon from '@assets/icons/viewer/zoom_in.svg';
 
-import { FileInputField } from '@controls/fileInputField/fileInputField.component';
-import { Button } from '@controls/button/button.component';
-import { FormattedMessage } from 'react-intl';
 import { SvgViewer } from './svgViewer.component';
 import { PanZoomHandler, centredPanZoom } from './panzoom/centredPanZoom';
 import { DrawingViewerContainer } from './drawingViewer.styles';
 import { Events } from './panzoom/panzoom';
+import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
+
+import BluePrint from '@assets/drawings/blueprint.svg';
+import BluePrint2 from '@assets/drawings/blueprint2.svg';
+import Map from '@assets/drawings/map.svg';
+import Fly from '@assets/drawings/fly.svg';
+import { sample } from 'lodash';
+const SVGs = [ BluePrint, BluePrint2, Map, Fly];
 
 export const DrawingViewer = () => {
 	const [svgContent, setSvgContent] = useState('');
-	const [imgContent, setImgContent] = useState('');
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
+	const [drawingId] = useSearchParam('drawingId');
 
 	const imgRef = useRef<HTMLImageElement | SVGSVGElement>();
-
-	const onClickButton = async ([file]: File[]) => {
-		if (file.type.includes('svg')) { 
-			setSvgContent(await file.text());
-			setImgContent('');
-		}
-
-		if (file.type.includes('png')) { 
-			var base64String = btoa(String.fromCharCode.apply(null, new Uint8Array(await file.arrayBuffer())));
-			setImgContent('data:image/png;base64,' + base64String);
-			setSvgContent('');
-		}
-	};
 
 	const onClickZoomIn = () => {
 		zoomHandler.zoomIn();
@@ -73,25 +65,18 @@ export const DrawingViewer = () => {
 			setIsMinZoom(cantZoomOut);
 			setIsMaxZoom(cantZoomIn);
 		});
-		
 	};
+
+	useEffect(() => {
+		if (!drawingId) return;
+		const a = sample(SVGs);
+		const b = atob(a.replace(/data:image\/svg\+xml;base64,/, ''));
+		setSvgContent(b);
+	}, [drawingId]);
 
 	return (
 		<DrawingViewerContainer id="viewer">
-			<FileInputField
-				accept=".svg,.png"
-				onChange={onClickButton as any}
-				multiple
-			>
-				<Button component="span" variant="contained" color="primary" style={{ position: 'absolute', zIndex: 10 }}>
-					<FormattedMessage
-						id="uploads.fileInput.browse"
-						defaultMessage="Browse"
-					/>
-				</Button>
-			</FileInputField>
 			{svgContent && <SvgViewer svgContent={svgContent} ref={imgRef} onLoad={onImageLoad}/>}
-			{imgContent && <img src={imgContent} ref={imgRef as any} onLoad={onImageLoad} />}
 			<ToolbarContainer>
 				<MainToolbar>
 					<ToolbarButton
