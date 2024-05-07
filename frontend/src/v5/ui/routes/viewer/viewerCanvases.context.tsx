@@ -14,7 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { createContext, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
 interface ViewerCanvasesContextType {
 	is2DOpen?: boolean;
@@ -35,6 +36,11 @@ ViewerCanvasesContext.displayName = 'ViewerCanvasesContext';
 export const ViewerCanvasesContextComponent = ({ children }) => {
 	const [is2DOpen, setIs2DOpen] = useState(false);
 	const [leftPanelRatio, setLeftPanelRatio] = useState(0.5);
+	const { containerOrFederation, revision } = useParams();
+
+	useEffect(() => {
+		setIs2DOpen(false);
+	}, [containerOrFederation, revision]);
 
 	return (
 		<ViewerCanvasesContext.Provider value={{ is2DOpen, setIs2DOpen, leftPanelRatio, setLeftPanelRatio }}>
