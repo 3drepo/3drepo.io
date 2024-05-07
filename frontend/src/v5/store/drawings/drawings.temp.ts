@@ -18,6 +18,7 @@
 import { AxiosResponse } from 'axios';
 import { Role } from '../currentUser/currentUser.types';
 import { uuid } from '@/v4/helpers/uuid';
+import { sample } from 'lodash';
 
 // ! This is a temporary file to house functions and objects for the purpose of spoofing the backend for Drawings permissions
 // ! When the backend is introduced this file should be deleted.
@@ -46,6 +47,15 @@ export const drawingIds = [
 	'58cf451a-draw-41ac-8909-f646ab114783',
 	'97933311-draw-4178-a241-1fe8219fffb6',
 ];
+
+export const drawingFilesName = ['map.svg', 'fly.svg', 'blueprint.svg', 'blueprint2.svg', 'blueprint.png', 'blueprint2.png', 'blueprint3.png', 'blueprint4.png'];
+export const mapDrawingIdToName = (id) => {
+	const index = drawingIds.findIndex((d) => d === id);
+	if (index !== -1) {
+		return drawingFilesName[index % drawingFilesName.length];
+	}
+	return sample(drawingFilesName);
+};
 
 // This selects a random role but skips the admin role as this is determined by project settings
 export const mockRole = (index) => Role[Object.keys(Role)[(index % 3) + 1]];
