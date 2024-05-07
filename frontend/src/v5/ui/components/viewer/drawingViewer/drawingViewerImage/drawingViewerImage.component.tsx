@@ -17,20 +17,35 @@
 
 import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
-import { forwardRef, useEffect, useState } from 'react';
+import { forwardRef, useEffect, useRef, useState } from 'react';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
+import { DrawingViewerService } from '../drawingViewer.service';
+import { domToPng } from 'modern-screenshot';
+import { ImageContainer } from './drawingViewerImage.styles';
 
 type DrawingViewerImageProps = { onLoad: (...args) => void };
 export const DrawingViewerImage = forwardRef(({ onLoad }: DrawingViewerImageProps, ref: any) => {
 	const [drawingId] = useSearchParam('drawingId');
 	const [isLoading, setIsLoading] = useState(true);
 	const src = getDrawingImageSrc(drawingId);
+	const imgContainerRef = useRef();
 
 	useEffect(() => {
 		setIsLoading(true);
 		fetch(src).then(() => setIsLoading(false));
 	}, [drawingId]);
 
-	if (isLoading) return <Loader />;
-	return <img src={src} ref={ref} onLoad={onLoad}/>;
+	useEffect(() => {
+		DrawingViewerService.getScreenshot = () => domToPng(imgContainerRef.current);
+		return () => {
+			DrawingViewerService.getScreenshot = () => null;
+		};
+	}, []);
+
+	return (
+		<ImageContainer ref={imgContainerRef}>
+			{isLoading && <Loader />}
+			{!isLoading && <img src={src} ref={ref} onLoad={onLoad} />}
+		</ImageContainer>
+	);
 });

@@ -25,10 +25,15 @@ import { useContext } from 'react';
 import { EllipsisMenuItemDelete, EllipsisMenuItem } from './ticketImageAction/ticketImageAction.styles';
 import { ViewActionMenu } from '../ticketView/viewActionMenu/viewActionMenu.component';
 import { TicketContext } from '../../../ticket.context';
+import { ViewerCanvasesContext } from '../../../../viewerCanvases.context';
+import { DrawingViewerService } from '@components/viewer/drawingViewer/drawingViewer.service';
 
 export const TicketImageActionMenu = ({ value, onChange, disabled = false, onClick }) => {
 	const { isViewer } = useContext(TicketContext);
-	const uploadScreenshot = async () => onChange(await ViewerService.getScreenshot());
+	const { is2DOpen } = useContext(ViewerCanvasesContext);
+
+	const upload3DScreenshot = async () => onChange(await ViewerService.getScreenshot());
+	const upload2DScreenshot = async () => onChange(await DrawingViewerService.getScreenshot());
 
 	const uploadImage = async () => {
 		const file = await uploadFile(getSupportedImageExtensions());
@@ -47,9 +52,14 @@ export const TicketImageActionMenu = ({ value, onChange, disabled = false, onCli
 		>
 			<EllipsisMenu disabled={disabled}>
 				<EllipsisMenuItem
-					title={<FormattedMessage id="viewer.card.ticketImage.action.takeScreenshot" defaultMessage="Take screenshot" />}
-					onClick={uploadScreenshot}
+					title={<FormattedMessage id="viewer.card.ticketImage.action.takeScreenshot" defaultMessage="Take 3D screenshot" />}
+					onClick={upload3DScreenshot}
 					disabled={!isViewer}
+				/>
+				<EllipsisMenuItem
+					title={<FormattedMessage id="viewer.card.ticketImage.action.takeScreenshot" defaultMessage="Take 2D screenshot" />}
+					onClick={upload2DScreenshot}
+					disabled={!isViewer || !is2DOpen}
 				/>
 				<EllipsisMenuItem
 					title={<FormattedMessage id="viewer.card.ticketImage.action.uploadImage" defaultMessage="Upload image" />}
