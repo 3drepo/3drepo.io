@@ -18,36 +18,19 @@
 import { formatMessage } from '@/v5/services/intl';
 import { ToolbarButton } from '@/v5/ui/routes/viewer/toolbar/buttons/toolbarButton.component';
 import { ToolbarContainer, MainToolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.styles';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import ZoomOutIcon from '@assets/icons/viewer/zoom_out.svg';
 import ZoomInIcon from '@assets/icons/viewer/zoom_in.svg';
 
-import { SvgViewer } from './svgViewer.component';
 import { PanZoomHandler, centredPanZoom } from './panzoom/centredPanZoom';
 import { DrawingViewerContainer } from './drawingViewer.styles';
 import { Events } from './panzoom/panzoom';
-import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
-
-import BluePrint from '@assets/drawings/blueprint.svg';
-import BluePrint2 from '@assets/drawings/blueprint2.svg';
-import Map from '@assets/drawings/map.svg';
-import Fly from '@assets/drawings/fly.svg';
-import PngBluePrint from '@assets/drawings/blueprint.png';
-import PngBluePrint2 from '@assets/drawings/blueprint2.png';
-import PngBluePrint3 from '@assets/drawings/blueprint3.png';
-import PngBluePrint4 from '@assets/drawings/blueprint4.png';
-import { sample } from 'lodash';
-
-const SVGs = [BluePrint, BluePrint2, Map, Fly];
-const PNGs = [PngBluePrint, PngBluePrint2, PngBluePrint3, PngBluePrint4];
+import { DrawingViewerImage } from './drawingViewerImage/drawingViewerImage.component';
 
 export const DrawingViewer = () => {
-	const [svgContent, setSvgContent] = useState('');
-	const [imgContent, setImgContent] = useState('');
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
-	const [drawingId] = useSearchParam('drawingId');
 
 	const imgRef = useRef<HTMLImageElement | SVGSVGElement>();
 
@@ -74,25 +57,9 @@ export const DrawingViewer = () => {
 		});
 	};
 
-	useEffect(() => {
-		if (!drawingId) return;
-		const isSVG = Math.random() > 0.5;
-		
-		if (isSVG) {
-			const base64Svg = sample(SVGs);
-			const stringifiedSvg = atob(base64Svg.replace(/data:image\/svg\+xml;base64,/, ''));
-			setSvgContent(stringifiedSvg);
-			setImgContent('');
-		} else {
-			setImgContent(sample(PNGs));
-			setSvgContent('');
-		}
-	}, [drawingId]);
-
 	return (
 		<DrawingViewerContainer id="viewer">
-			{svgContent && <SvgViewer svgContent={svgContent} ref={imgRef} onLoad={onImageLoad}/>}
-			{imgContent && <img src={imgContent} ref={imgRef as any} onLoad={onImageLoad} />}
+			<DrawingViewerImage ref={imgRef} onLoad={onImageLoad} />
 			<ToolbarContainer>
 				<MainToolbar>
 					<ToolbarButton
