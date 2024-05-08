@@ -310,7 +310,7 @@ class Ticket extends View {
 		data = await beforeUpdate(data, oldTicket, userPermissions, systemComments);
 
 		if (systemComments.length > 0) {
-			data.comments = (oldTicket.comments || []).map(c => ({ ...c, sealed: true }));
+			data.comments = (data.comments ?? oldTicket.comments ?? []).map(c => ({ ...c, sealed: true }));
 			data.comments = data.comments.concat(systemComments);
 		}
 
@@ -346,6 +346,7 @@ class Ticket extends View {
 
 		if (Object.keys(data).length > 0) {
 			updateData["$set"] = data;
+			console.log(data?.comments);
 			await tickets.updateOne({ _id }, updateData);
 		}
 
