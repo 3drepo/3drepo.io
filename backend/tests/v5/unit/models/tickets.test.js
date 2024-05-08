@@ -107,9 +107,10 @@ const testRemoveAllTickets = () => {
 			const project = generateRandomString();
 			const model = generateRandomString();
 			const fn = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce(undefined);
-			await expect(Ticket.removeAllTicketsInModel(teamspace, project, model)).resolves.toBeUndefined();
-			expect(fn).toHaveBeenCalledTimes(1);
+			await Ticket.removeAllTicketsInModel(teamspace, project, model);
+			expect(fn).toHaveBeenCalledTimes(2);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { teamspace, project, model });
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCounterCol, { _id: expect.anything() });
 		});
 	});
 };
@@ -357,19 +358,19 @@ const testUpdateTickets = () => {
 			oldTickets.push({
 				_id,
 				type,
-				properties: { propToUnset: oldPropValue },
-				modules: { module: { propToUnset: oldPropValue } },
+				properties: { propToUnset: oldPropValue, numProp: 2 },
+				modules: { module: { propToUnset: oldPropValue, numProp: 2 } },
 			});
 
 			updateData.push({
 				[propToUpdate]: newPropValue,
-				properties: { propToUnset: null, [basePropertyLabels.UPDATED_AT]: date },
-				modules: { module: { propToUnset: null } },
+				properties: { propToUnset: null, numProp: 0, [basePropertyLabels.UPDATED_AT]: date },
+				modules: { module: { propToUnset: null, numProp: 0 } },
 			});
 
 			expectedCmd.push({ updateOne: { filter: { _id, teamspace, project, model },
 				update: {
-					$set: { [`properties.${basePropertyLabels.UPDATED_AT}`]: date, [propToUpdate]: newPropValue },
+					$set: { [`properties.${basePropertyLabels.UPDATED_AT}`]: date, 'properties.numProp': 0, [propToUpdate]: newPropValue, 'modules.module.numProp': 0 },
 					$unset: { 'modules.module.propToUnset': 1, 'properties.propToUnset': 1 },
 				} } });
 
@@ -379,8 +380,8 @@ const testUpdateTickets = () => {
 				timestamp: date,
 				changes: {
 					[propToUpdate]: { from: undefined, to: newPropValue },
-					properties: { propToUnset: { from: oldPropValue, to: null } },
-					modules: { module: { propToUnset: { from: oldPropValue, to: null } } },
+					properties: { propToUnset: { from: oldPropValue, to: null }, numProp: { from: 2, to: 0 } },
+					modules: { module: { propToUnset: { from: oldPropValue, to: null }, numProp: { from: 2, to: 0 } } },
 				},
 			});
 		});

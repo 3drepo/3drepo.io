@@ -15,72 +15,94 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ControlledAssigneesSelect } from '@controls/assigneesSelect/controlledAssigneesSelect.component';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+import { TextOverflow } from '@controls/textOverflow';
+import { Chip } from '@controls/chip/chip.component';
+import { DueDate as DueDateBase } from '@controls/dueDate/dueDate.component';
+
+export const FlexRow = styled.div`
+	display: flex;
+	gap: 6px;
+	width: 100%;
+`;
+
+export const FlexColumn = styled(FlexRow)`
+	min-width: 0;
+	flex-flow: column;
+	height: auto;
+`;
+
+export const Title = styled(TextOverflow)`
+	color: ${({ theme }) => theme.palette.base.main};
+	${({ theme }) => theme.typography.body1};
+	line-height: 1em;
+	height: 1em;
+	min-height: 1em;
+	font-weight: 600;
+`;
+
+export const Description = styled(TextOverflow).attrs({
+	lines: 2,
+})`
+	color: ${({ theme }) => theme.palette.base.main};
+	${({ theme }) => theme.typography.label};
+	line-height: 11px;
+`;
+
+export const TicketItemContainer = styled(FlexColumn)<{ $selected?: boolean }>`
+	cursor: pointer;
+	box-sizing: border-box;
+	padding: 12px;
+	min-height: 65px;
+	background-color: ${({ theme }) =>  theme.palette.primary.contrast};
+	${({ theme, $selected }) => $selected && css`
+		background-color: ${theme.palette.primary.lightest};
+		${Title} {
+			color: ${theme.palette.primary.dark}
+		}
+	`}
+`;
+
+export const DueDate = styled(DueDateBase)`
+	height: 12px;
+	width: 110px;
+	>* {
+		height: inherit;
+		align-content: center;
+	}
+`;
+
+export const BottomRow = styled(FlexRow)`
+	align-items: center;
+	margin-top: auto;
+	height: 10px;
+	margin-bottom: 5px;
+`;
+
+export const StatusChip = styled(Chip)`
+	max-width: 125px;
+	margin-left: auto;
+`;
+
+export const IssuePropertiesContainer = styled(FlexColumn)`
+	margin-top: auto;
+`;
+
+export const PriorityChip = styled(Chip).attrs({
+	variant: 'text',
+})`
+	height: 12px;
+	pointer-events: none;
+	.MuiChip-root {
+		height: inherit;
+	}
+`;
 
 export const Id = styled.div`
-	color: ${({ theme }) => theme.palette.base.main};
-	font-weight: 500;
-	font-size: 10px;
-	line-height: 14px;
-`;
-
-export const Title = styled.div`
 	color: ${({ theme }) => theme.palette.secondary.main};
-	font-weight: 500;
-	font-size: 12px;
-	line-height: 16px;
-	padding-top: 5px;
-	width: fit-content;
-	max-width: 100%;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-
-	&:hover {
-		text-decoration: underline;
-	}
-`;
-
-// TODO - fix after new palette is released
-export const Ticket = styled.div<{ $selected?: boolean }>`
-	position: relative;
-	cursor: pointer;
-	padding: 12px 14px 16px;
-	background-color: ${({ theme, $selected }) => ($selected ? '#edf0f8' : theme.palette.primary.contrast)};
-`;
-
-export const ChipList = styled.div`
-	display: inline-flex;
-	gap: 7px;
-	margin: 8px 0 0;
-	width: 100%;
-	>* {
-		flex-shrink: 0;
-		flex-grow: 0;
-		min-width: 0;
-
-		&:first-child {
-			flex-shrink: 1;
-		}
-		&:last-child {
-			flex-grow: 1;
-		}
-	}
-`;
-
-export const Assignees = styled(ControlledAssigneesSelect).attrs({
-	maxItems: 7,
-	showEmptyText: true,
-	multiple: true,
-})`
-	margin-left: auto;
-	height: 28px;
-`;
-
-export const IssuePropertiesRow = styled.div`
-	margin: 7px 0 0;
-	display: inline-flex;
-	width: 100%;
-	align-items: center;
+	${({ theme }) => theme.typography.kicker}
+	font-size: 8px;
+	line-height: 10px;
+	font-weight: 400;
+	user-select: none;
 `;

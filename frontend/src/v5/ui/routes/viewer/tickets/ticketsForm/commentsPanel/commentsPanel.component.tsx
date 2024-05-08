@@ -53,8 +53,9 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 
 	const getCommentIsFirstOfBlock = (index) => {
 		if (index === 0) return true;
-		const commentAuthor = comments[index].author;
-		return comments[index - 1].author !== commentAuthor;
+		const comment = comments[index];
+		const previousComment = comments[index - 1];
+		return (previousComment.originalAuthor || previousComment.author) !== (comment.originalAuthor || comment.author);
 	};
 
 	const handleDeleteComment = (commentId) => {
@@ -105,13 +106,13 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 		);
 		if (isFederation) {
 			return combineSubscriptions(
-				enableRealtimeFederationNewTicketComment(teamspace, project, containerOrFederation, ticketId),
-				enableRealtimeFederationUpdateTicketComment(teamspace, project, containerOrFederation, ticketId),
+				enableRealtimeFederationNewTicketComment(teamspace, project, containerOrFederation),
+				enableRealtimeFederationUpdateTicketComment(teamspace, project, containerOrFederation),
 			);
 		}
 		return combineSubscriptions(
-			enableRealtimeContainerNewTicketComment(teamspace, project, containerOrFederation, ticketId),
-			enableRealtimeContainerUpdateTicketComment(teamspace, project, containerOrFederation, ticketId),
+			enableRealtimeContainerNewTicketComment(teamspace, project, containerOrFederation),
+			enableRealtimeContainerUpdateTicketComment(teamspace, project, containerOrFederation),
 		);
 	}, [ticketId]);
 

@@ -25,9 +25,9 @@ import { ToolbarSelect } from '@controls/toolbarSelect/toolbarSelect.component';
 import { Tooltip } from '@mui/material';
 
 const VALUE_TO_WIDTH = invert(STROKE_WIDTH);
-const Icon = ({ value, title }) => (
+const Icon = ({ value, title, expanded }) => (
 	<Tooltip title={title}>
-		<IconWithFooterContainer $footer={VALUE_TO_WIDTH[value]}>
+		<IconWithFooterContainer $footer={VALUE_TO_WIDTH[value]} $expanded={expanded}>
 			<StrokeWidthIcon />
 		</IconWithFooterContainer>
 	</Tooltip>

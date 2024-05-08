@@ -19,9 +19,10 @@ import { TeamspacesHooksSelectors, TicketsCardHooksSelectors, UsersHooksSelector
 import ReplyIcon from '@assets/icons/outlined/reply_arrow-outlined.svg';
 import { TicketCommentReplyMetadata, ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { TicketButton } from '../../../../ticketButton/ticketButton.styles';
-import { Comment, AuthorAvatar } from './otherUserComment.styles';
+import { Comment, AuthorAvatar, ImportedAuthorAvatar } from './otherUserComment.styles';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 import { CommentButtons, CommentWithButtonsContainer } from '../basicComment/basicComment.styles';
+import { getDefaultUserNotFound } from '@/v5/store/users/users.helpers';
 
 type OtherUserCommentProps = ITicketComment & {
 	commentAge: string;
@@ -33,32 +34,56 @@ export const OtherUserComment = ({
 	_id,
 	deleted,
 	author,
+	originalAuthor,
 	onReply,
 	isFirstOfBlock,
+	importedAt,
 	...props
 }: OtherUserCommentProps) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
-	const user = UsersHooksSelectors.selectUser(teamspace, author);
+	const imported = !!originalAuthor;
+	const user = imported ? getDefaultUserNotFound(originalAuthor) : UsersHooksSelectors.selectUser(teamspace, author);
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const authorDisplayName = isFirstOfBlock ? `${user.firstName} ${user.lastName}` : null;
 
-	if (deleted) return (<DeletedComment user={user} author={authorDisplayName} isFirstOfBlock={isFirstOfBlock} />);
+	const Avatar = () => {
+		if (!imported) return <AuthorAvatar user={user} />;
+		return (
+			<ImportedAuthorAvatar
+				author={author}
+				originalAuthor={originalAuthor}
+				importedAt={importedAt}
+				user={user}
+			/>
+		);
+	};
 
 	return (
 		<CommentWithButtonsContainer>
-			{isFirstOfBlock && <AuthorAvatar user={user} />}
-			<Comment
-				author={authorDisplayName}
-				isCurrentUserComment={false}
-				isFirstOfBlock={isFirstOfBlock}
-				{...props}
-			/>
-			{!readOnly && (
-				<CommentButtons>
-					<TicketButton variant="primary" onClick={() => onReply(_id)}>
-						<ReplyIcon />
-					</TicketButton>
-				</CommentButtons>
+			{isFirstOfBlock && <Avatar />}
+			{deleted ? (
+				<DeletedComment
+					user={user}
+					author={authorDisplayName}
+					isFirstOfBlock={isFirstOfBlock}
+				/>
+			) : (
+				<>
+					<Comment
+						author={authorDisplayName}
+						isCurrentUserComment={false}
+						isFirstOfBlock={isFirstOfBlock}
+						originalAuthor={originalAuthor}
+						{...props}
+					/>
+					{!readOnly && (
+						<CommentButtons>
+							<TicketButton variant="primary" onClick={() => onReply(_id)}>
+								<ReplyIcon />
+							</TicketButton>
+						</CommentButtons>
+					)}
+				</>
 			)}
 		</CommentWithButtonsContainer>
 	);
