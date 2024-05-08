@@ -346,7 +346,6 @@ class Ticket extends View {
 
 		if (Object.keys(data).length > 0) {
 			updateData["$set"] = data;
-			console.log(data?.comments);
 			await tickets.updateOne({ _id }, updateData);
 		}
 
