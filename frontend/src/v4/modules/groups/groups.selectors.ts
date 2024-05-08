@@ -112,11 +112,6 @@ export const selectGroupsColourOverridesSet = createSelector(
 		 , new Set<string>())
 );
 
-
-export const selectTotalMeshes = createSelector(
-	selectComponentState, (state) => state.totalMeshes
-);
-
 export const selectCriteriaFieldState = createSelector(
 	selectComponentState, (state) => state.criteriaFieldState
 );

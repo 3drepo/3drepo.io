@@ -183,6 +183,8 @@ const expandedGroupItem = css`
 					}
 				}
 				${StyledFormControl} {
+					min-width: 106px;
+					max-width: 106px;
 					.MuiSelect-select {
 						margin-top: 0;
 						color: ${({ theme }) => theme.palette.secondary.main};
