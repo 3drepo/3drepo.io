@@ -18,6 +18,12 @@
 type GetScreenshot = () => null | Promise<string>;
 const DrawingViewerServiceCreator = () => {
 	let getScreenshot: GetScreenshot = () => null;
-	return { getScreenshot };
+	const reset = () => {
+		getScreenshot = () => null;
+	};
+	return {
+		getScreenshot,
+		reset,
+	};
 };
 export const DrawingViewerService = DrawingViewerServiceCreator();

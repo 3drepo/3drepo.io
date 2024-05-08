@@ -43,6 +43,8 @@ export const DrawingViewerImage = forwardRef(({ onLoad }: DrawingViewerImageProp
 		};
 	}, []);
 
+	useEffect(() => () => DrawingViewerService.reset(), []);
+	
 	return (
 		<ImageContainer ref={imgContainerRef}>
 			{isLoading && <CentredContainer><Loader /></CentredContainer>}
