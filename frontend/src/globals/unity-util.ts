@@ -2391,8 +2391,10 @@ export class UnityUtil {
 
 	/**
 	 * Sets and enables the active Calibration Mode. There is no need to explicitly enable or disable the Calibration Tool.
+	 * Enabling Vertical Mode will store the current clip planes, and disabling it will restore them - the frontend must
+	 * disable the Clip Tool itself however.
 	 * @category Calibration
-	 * @param mode A string, ["Vector", "Vertical", "Preview", "None"].
+	 * @param mode A string, ["Vector", "Vertical", "None"].
 	 */
 	public static setCalibrationToolMode(mode: string) {
 		UnityUtil.toUnity('SetCalibrationToolMode', UnityUtil.LoadingState.VIEWER_READY, mode);
@@ -2452,13 +2454,14 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Shows the DrawingImageSource at the location specified by rect and height. rect should be the size and location
-	 * of the image, given as the location of three corners (bottomLeft, bottomRight, topLeft) in Project coordinates.
-	 * height should be the vertical offset from the origin in Project coordinates. If image is null, the location of
-	 * the existing image is updated. If no image has ever been loaded, a white rectangle is shown in its place.
+	 * Shows the DrawingImageSource for the Lower and Upper vertical planes at the horizontal location specified by rect.
+	 * rect should be the size and location of the image, given as the location of three corners (bottomLeft, bottomRight,
+	 * topLeft) in Project coordinates. The height will be taken from the current state of the Vertical Planes. If image is
+	 * null, the location of the existing image is updated. If no image has ever been loaded, a white rectangle is shown in
+	 * its place.
 	 * @category Calibration
 	 */
-	public static visualiseDrawing(image: DrawingImageSource, rect: number[], height: number) {
+	public static setCalibrationToolDrawing(image: DrawingImageSource, rect: number[]) {
 		let index = -1;
 		let dimensions = [0, 0];
 
@@ -2470,11 +2473,10 @@ export class UnityUtil {
 
 		var parms = {
 			worldRect: rect, //[bottomLeftX, bottomLeftY, bottomRightX, bottomRightY, topLeftX, topLeftY]
-			height,
 			domId: index,
 			dimensions,
 		};
-		UnityUtil.toUnity('VisualiseDrawing', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(parms));
+		UnityUtil.toUnity('SetCalibrationToolDrawing', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(parms));
 	}
 
 	/**
