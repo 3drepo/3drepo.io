@@ -22,6 +22,7 @@ type ToolbarButtonProps = {
 	hidden?: boolean;
 	disabled?: boolean;
 	selected?: boolean;
+	$expanded?: boolean;
 	onClick?: () => void;
 	Icon: any;
 	title: string;

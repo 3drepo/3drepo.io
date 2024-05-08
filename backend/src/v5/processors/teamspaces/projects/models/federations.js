@@ -94,6 +94,7 @@ Federations.getFederationStats = async (teamspace, federation) => {
 
 	return {
 		code: properties.code,
+		unit: properties.unit,
 		status,
 		containers,
 		desc,
