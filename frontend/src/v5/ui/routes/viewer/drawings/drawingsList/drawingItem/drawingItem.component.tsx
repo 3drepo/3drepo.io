@@ -16,20 +16,8 @@
  */
 
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
-import {
-	Container,
-	Title,
-	DrawingsCalibrationButton,
-	MainBody,
-	ImageContainer,
-	Property,
-	PropertyValue,
-	Description,
-	BottomLine,
-	InfoContainer,
-	BreakingLine,
-	SkeletonText,
-} from './drawingItem.styles';
+import { Title, MainBody, ImageContainer, Property, PropertyValue, Description, BottomLine, InfoContainer, BreakingLine, SkeletonText } from './drawingItem.styles';
+import { DrawingsCalibrationMenu } from '../../drawingCalibrationMenu/drawingCalibrationMenu.component';
 import { FormattedMessage } from 'react-intl';
 import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatShortDateTime } from '@/v5/helpers/intl.helper';
@@ -44,8 +32,8 @@ type DrawingItemProps = {
 	onClick: React.MouseEventHandler<HTMLDivElement>;
 };
 export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
-	const [latestRevision] = DrawingRevisionsHooksSelectors.selectRevisions(drawing._id);
-	const { calibration, name, drawingNumber, lastUpdated, desc } = drawing;
+	const { calibration, name, drawingNumber, lastUpdated, desc, _id: drawingId } = drawing;
+	const [latestRevision] = DrawingRevisionsHooksSelectors.selectRevisions(drawingId);
 	const { statusCode, revisionCode } = latestRevision || {};
 	const areStatsPending = !revisionCode;
 	const [selectedDrawingId] = useSearchParam('drawingId');
@@ -83,7 +71,7 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	);
 
 	return (
-		<Container onClick={onClick} key={drawing._id} $selected={drawing._id === selectedDrawingId}>
+		<div onClick={onClick} key={drawingId} >
 			<MainBody>
 				<ImageContainer>
 					<img src="https://placedog.net/73/73" />
@@ -106,11 +94,8 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 						<PropertyValue>&nbsp;{formatShortDateTime(lastUpdated)}</PropertyValue>
 					</Property>
 				</BreakingLine>
-				<DrawingsCalibrationButton
-					onClick={() => {}}
-					calibration={calibration}
-				/>
+				<DrawingsCalibrationMenu calibration={calibration} drawingId={drawingId} />
 			</BottomLine>
-		</Container>
+		</div>
 	);
 };

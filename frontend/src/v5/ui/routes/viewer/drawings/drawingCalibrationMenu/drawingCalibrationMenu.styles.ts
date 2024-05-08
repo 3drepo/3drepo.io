@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CALIBRATION_MAP } from '@/v5/store/drawings/drawings.helpers';
-import { CalibrationStates } from '@/v5/store/drawings/drawings.types';
-import { DashboardListItemButton } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import styled, { css } from 'styled-components';
+import { CalibrationState } from '@/v5/store/drawings/drawings.types';
+import { CALIBRATION_MAP } from '@/v5/store/drawings/drawings.helpers';
+import { DashboardListItemButton } from '@components/dashboard/dashboardList/dashboardListItem/components';
 
 const calibratedStyles = css`
 	color: ${({ theme }) => theme.palette.success.main};
@@ -41,17 +41,19 @@ const emptyStyles = css`
 `;
 
 export const CALIBRATION_STYLE = {
-	[CalibrationStates.CALIBRATED]: calibratedStyles,
-	[CalibrationStates.OUT_OF_SYNC]: outOfSyncStyles,
-	[CalibrationStates.UNCALIBRATED]: uncalibratedStyles,
-	[CalibrationStates.EMPTY]: emptyStyles,
+	[CalibrationState.CALIBRATED]: calibratedStyles,
+	[CalibrationState.OUT_OF_SYNC]: outOfSyncStyles,
+	[CalibrationState.UNCALIBRATED]: uncalibratedStyles,
+	[CalibrationState.EMPTY]: emptyStyles,
 };
-export const DrawingsCalibrationButton = styled(DashboardListItemButton).attrs<{ calibration: CalibrationStates }>(({ calibration }) => ({
+export const DrawingsCalibrationButton = styled(DashboardListItemButton).attrs<{ calibration: CalibrationState }>(({ calibration }) => ({
 	children: CALIBRATION_MAP[calibration]?.label,
 	startIcon: CALIBRATION_MAP[calibration]?.icon,
 }))<{ calibration: string }>`
 	.MuiButtonBase-root {
 		${({ calibration }) => CALIBRATION_STYLE[calibration]}
+		border-radius: 8px;
+		/* border: solid 1px ${({ theme, calibration }) => calibration === CalibrationState.CALIBRATED ? theme.palette.success.light : theme.palette.warning.light}; */
 	}
 	/* Need to set visibility to visible to fix weird bug where icons in bottom list disappear when top list is collapsed */
 	svg {

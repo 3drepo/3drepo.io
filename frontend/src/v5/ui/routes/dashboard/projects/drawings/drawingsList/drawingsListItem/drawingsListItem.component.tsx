@@ -28,7 +28,6 @@ import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { DrawingsListItemTitle } from './drawingsListItemTitle/drawingsListItemTitle.component';
-import { DrawingsCalibrationButton } from './drawingsCalibrationButton/drawingsCalibrationButton.styles';
 import { IsMainList } from '../../../containers/mainList.context';
 import { DrawingsEllipsisMenu } from './drawingsEllipsisMenu/drawingsEllipsisMenu.component';
 import { DRAWING_LIST_COLUMN_WIDTHS } from '@/v5/store/drawings/drawings.helpers';
@@ -37,6 +36,7 @@ import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingRevisionDetails } from '@components/shared/drawingRevisionDetails/drawingRevisionDetails.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingsCalibrationMenu } from '@/v5/ui/routes/viewer/drawings/drawingCalibrationMenu/drawingCalibrationMenu.component';
 
 interface IDrawingsListItem {
 	isSelected: boolean;
@@ -52,12 +52,13 @@ export const DrawingsListItem = memo(({
 	const { teamspace, project } = useParams<DashboardParams>();
 	const isMainList = useContext(IsMainList);
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
+	const drawingId = drawing._id;
 
 	const onChangeFavourite = ({ currentTarget: { checked } }) => {
 		if (checked) {
-			DrawingsActionsDispatchers.addFavourite(teamspace, project, drawing._id);
+			DrawingsActionsDispatchers.addFavourite(teamspace, project, drawingId);
 		} else {
-			DrawingsActionsDispatchers.removeFavourite(teamspace, project, drawing._id);
+			DrawingsActionsDispatchers.removeFavourite(teamspace, project, drawingId);
 		}
 	};
 
@@ -66,18 +67,18 @@ export const DrawingsListItem = memo(({
 			// TODO - add realtime events
 		}
 		return null;
-	}, [drawing._id]);
+	}, [drawingId]);
 
 	return (
-		<DashboardListItem selected={isSelected} key={drawing._id}>
-			<DashboardListItemRow selected={isSelected} onClick={() => onSelectOrToggleItem(drawing._id)}>
+		<DashboardListItem selected={isSelected} key={drawingId}>
+			<DashboardListItemRow selected={isSelected} onClick={() => onSelectOrToggleItem(drawingId)}>
 				<DrawingsListItemTitle
 					drawing={drawing}
 					isSelected={isSelected}
 					{...DRAWING_LIST_COLUMN_WIDTHS.name}
 				/>
 				<DashboardListItemButton
-					onClick={() => onSelectOrToggleItem(drawing._id)}
+					onClick={() => onSelectOrToggleItem(drawingId)}
 					tooltipTitle={
 						<FormattedMessage id="drawings.list.item.revisions.tooltip" defaultMessage="View revisions" />
 					}
@@ -89,16 +90,10 @@ export const DrawingsListItem = memo(({
 						values={{ count: drawing.revisionsCount }}
 					/>
 				</DashboardListItemButton>
-				<DrawingsCalibrationButton
+				<DrawingsCalibrationMenu
 					calibration={drawing.calibration}
-					onClick={() => {
-						if (!isProjectAdmin) return;
-						// eslint-disable-next-line no-console
-						console.log('Do calibrate');
-					}} // TODO - add calibrate functionality
-					tooltipTitle={
-						isProjectAdmin && <FormattedMessage id="drawings.list.item.calibration.tooltip" defaultMessage="Calibrate" />
-					}
+					drawingId={drawingId}
+					disabled={!isProjectAdmin}
 					{...DRAWING_LIST_COLUMN_WIDTHS.calibration}
 				/>
 				<DashboardListItemText selected={isSelected} {...DRAWING_LIST_COLUMN_WIDTHS.drawingNumber}>
@@ -131,7 +126,7 @@ export const DrawingsListItem = memo(({
 			</DashboardListItemRow>
 			{isSelected && (
 				<DrawingRevisionDetails
-					drawingId={drawing._id}
+					drawingId={drawingId}
 					revisionsCount={drawing.revisionsCount}
 					status={drawing.status}
 				/>

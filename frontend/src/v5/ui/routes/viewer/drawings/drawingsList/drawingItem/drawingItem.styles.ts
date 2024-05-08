@@ -15,20 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
-import { DrawingsCalibrationButton as DrawingsCalibrationButtonBase } from '@/v5/ui/routes/dashboard/projects/drawings/drawingsList/drawingsListItem/drawingsCalibrationButton/drawingsCalibrationButton.styles';
-import { CalibrationStates } from '@/v5/store/drawings/drawings.types';
+import styled from 'styled-components';
 import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.styles';
 import { CardListItem } from '@components/viewer/cards/card.styles';
-
-export const DrawingsCalibrationButton = styled(DrawingsCalibrationButtonBase).attrs({ width: 103 })<{ calibration: CalibrationStates }>`
-	.MuiButton-root {
-		border-radius: 5px;
-		border: solid 1px ${({ theme, calibration }) => calibration === CalibrationStates.CALIBRATED ? theme.palette.success.light : theme.palette.warning.light};
-		width: 103px;
-		height: 24px;
-	}
-`;
 
 export const MainBody = styled.div`
 	display: flex;
