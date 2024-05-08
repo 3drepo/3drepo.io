@@ -30,7 +30,7 @@ import {
 } from '../../../../../../modules/groups/groups.selectors';
 import { GroupsActions } from '../../../../../../modules/groups';
 import { selectSettings } from '../../../../../../modules/model';
-import { selectGetNumNodesByMeshSharedIdsArray, selectSelectedNodes, selectTotalMeshes } from '../../../../../../modules/tree';
+import { selectSelectedNodes } from '../../../../../../modules/tree';
 import { GroupDetails } from './groupDetails.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -39,12 +39,10 @@ const mapStateToProps = createStructuredSelector({
 	modelSettings: selectSettings,
 	expandDetails: selectExpandDetails,
 	currentUser: selectCurrentUser,
-	totalMeshes: selectTotalMeshes,
 	selectedNodes: selectSelectedNodes,
 	criteriaFieldState: selectCriteriaFieldState,
 	isPending: selectFetchingDetailsIsPending,
 	isReadOnly: selectReadOnly,
-	getObjectsCount: (state) => (meshedIds) => selectGetNumNodesByMeshSharedIdsArray(meshedIds)(state),
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
