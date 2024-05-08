@@ -22,6 +22,7 @@ import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { DrawingViewerService } from '../drawingViewer.service';
 import { domToPng } from 'modern-screenshot';
 import { ImageContainer } from './drawingViewerImage.styles';
+import { CentredContainer } from '@controls/centredContainer';
 
 type DrawingViewerImageProps = { onLoad: (...args) => void };
 export const DrawingViewerImage = forwardRef(({ onLoad }: DrawingViewerImageProps, ref: any) => {
@@ -44,7 +45,7 @@ export const DrawingViewerImage = forwardRef(({ onLoad }: DrawingViewerImageProp
 
 	return (
 		<ImageContainer ref={imgContainerRef}>
-			{isLoading && <Loader />}
+			{isLoading && <CentredContainer><Loader /></CentredContainer>}
 			{!isLoading && <img src={src} ref={ref} onLoad={onLoad} />}
 		</ImageContainer>
 	);
