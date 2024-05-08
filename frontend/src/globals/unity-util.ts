@@ -675,20 +675,6 @@ export class UnityUtil {
 		console.log(JSON.parse(planes));
 	}
 
-	/**
-	 * Called by the Calibration Tool when the user makes adjustments to the calibration in Preview mode.
-	 * The point provided is the adjusted centroid of the image in Project coordinates. That is, if an image were given
-	 * with worldRect [0,0, 2,0, 0,1] and height 1, this would be [1,1,0.5]. If the user moved the calibration forward
-	 * by one unit, and up by 0.5 unit, point would be [1,1.5,1.5]. The Frontend should re-compute the calibration and
-	 * update the viewer by calling visualiseDrawing with image being null, within one frame, to keep the interaction
-	 * smooth.
-	 */
-	/** @hidden */
-	public static calibrationPointChanged(point) {
-		// eslint-disable-next-line no-console
-		console.log(JSON.parse(point));
-	}
-
 	/*
 	 * =============== TO UNITY ====================
 	 */
