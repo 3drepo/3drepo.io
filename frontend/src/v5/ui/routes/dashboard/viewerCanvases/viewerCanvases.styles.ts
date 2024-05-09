@@ -64,4 +64,8 @@ export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps>
 			}
 		}
 	}
+
+	.Pane2 {
+		display: contents;
+	}
 `;
