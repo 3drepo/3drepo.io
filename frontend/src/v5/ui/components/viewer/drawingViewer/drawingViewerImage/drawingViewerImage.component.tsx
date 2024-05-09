@@ -18,37 +18,19 @@
 import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { forwardRef, useEffect, useState } from 'react';
-import { SvgViewer } from '../svgViewer.component';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 
 type DrawingViewerImageProps = { onLoad: (...args) => void };
-export const DrawingViewerImage = forwardRef(({ onLoad }: DrawingViewerImageProps, ref) => {
+export const DrawingViewerImage = forwardRef(({ onLoad }: DrawingViewerImageProps, ref: any) => {
 	const [drawingId] = useSearchParam('drawingId');
-	const [status, setStatus] = useState<'loading' | 'svg' | 'png'>('loading');
-	const [svgContent, setSvgContent] = useState(null);
+	const [isLoading, setIsLoading] = useState(true);
 	const src = getDrawingImageSrc(drawingId);
 
-	const updateStatus = async () => {
-		setStatus('loading');
-		const response = await fetch(src);
-		const contentType = response.headers.get('content-type');
-		const isPng = contentType.startsWith('image/png');
-
-		if (isPng) {
-			setStatus('png');
-			setSvgContent(null);
-		} else {
-			setSvgContent(await response.text());
-			setStatus('svg');
-		}
-	};
-
 	useEffect(() => {
-		if (!drawingId) return;
-		updateStatus();
+		setIsLoading(true);
+		fetch(src).then(() => setIsLoading(false));
 	}, [drawingId]);
 
-	if (status === 'loading') return <Loader />;
-	if (status === 'png') return <img src={src} ref={ref as any} onLoad={onLoad} />;
-	return <SvgViewer svgContent={svgContent} ref={ref} onLoad={onLoad}/>;
+	if (isLoading) return <Loader />;
+	return <img src={src} ref={ref} onLoad={onLoad}/>;
 });
