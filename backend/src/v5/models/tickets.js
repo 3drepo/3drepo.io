@@ -74,7 +74,7 @@ Tickets.updateTickets = async (teamspace, project, model, oldTickets, data, auth
 				const updateObjProp = `${prefix}${key}`;
 				const oldValue = getNestedProperty(oldTicket, updateObjProp);
 				let newValue = obj[key];
-				if (newValue) {
+				if (newValue !== null) {
 					if (isObject(newValue) && !isDate(newValue) && !isUUID(newValue)) {
 					// if this is an object it is a composite type, in which case
 					// we should merge the old value with the new value
@@ -133,8 +133,13 @@ Tickets.updateTickets = async (teamspace, project, model, oldTickets, data, auth
 	return changeSet;
 };
 
-Tickets.removeAllTicketsInModel = async (teamspace, project, model) => {
-	await DbHandler.deleteMany(teamspace, TICKETS_COL, { teamspace, project, model });
+Tickets.removeAllTicketsInModel = (teamspace, project, model) => {
+	// eslint-disable-next-line security/detect-non-literal-regexp
+	const counterRegex = new RegExp(`^${UUIDToString(project)}_${model}_.*`);
+	return Promise.all([
+		DbHandler.deleteMany(teamspace, TICKETS_COL, { teamspace, project, model }),
+		DbHandler.deleteMany(teamspace, TICKETS_COUNTER_COL, { _id: counterRegex }),
+	]);
 };
 
 Tickets.getTicketById = async (

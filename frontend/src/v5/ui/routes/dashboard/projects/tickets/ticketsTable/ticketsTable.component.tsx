@@ -51,6 +51,7 @@ import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
 import { TicketSlide } from '../ticketsList/slides/ticketSlide.component';
 import { useSelectedModels } from './newTicketMenu/useSelectedModels';
 import { ticketIsCompleted } from '@controls/chip/statusChip/statusChip.helpers';
+import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 
 type FormType = {
 	containersAndFederations: string[],
@@ -194,12 +195,13 @@ export const TicketsTable = () => {
 	useEffect(() => {
 		if (templates.length) return;
 
-		ProjectsActionsDispatchers.fetchTemplates(
-			teamspace,
-			project,
-			true,
-		);
+		ProjectsActionsDispatchers.fetchTemplates(teamspace, project);
 	}, []);
+
+	useEffect(() => {
+		if (templateAlreadyFetched(selectedTemplate)) return;
+		ProjectsActionsDispatchers.fetchTemplate(teamspace, project, template);
+	}, [template]);
 
 	return (
 		<SearchContextComponent items={ticketsFilteredByTemplate} filteringFunction={filterTickets}>

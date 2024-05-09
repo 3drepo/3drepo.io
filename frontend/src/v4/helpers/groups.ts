@@ -18,7 +18,7 @@
 import {  isEqual, omit, pick } from 'lodash';
 import { select } from 'redux-saga/effects';
 import { GROUP_TYPES_ICONS, GROUPS_TYPES } from '../constants/groups';
-import { selectGetNumNodesByMeshSharedIdsArray } from '../modules/tree';
+import { selectNumNodesByMeshSharedIdsArray } from '../modules/tree';
 import { COLOR } from '../styles';
 import { getGroupHexColor, hexToArray } from './colors';
 import { prepareCriterion } from './criteria';
@@ -50,7 +50,7 @@ export function* prepareGroupWithCount(group) {
 	for (let i = 0; i < (group.objects || []).length; ++i) {
 		const entry = group.objects[i];
 
-		const nNodes = yield select(selectGetNumNodesByMeshSharedIdsArray(entry.shared_ids));
+		const nNodes = yield select(selectNumNodesByMeshSharedIdsArray, entry.shared_ids);
 		nodeCount += nNodes;
 	}
 
