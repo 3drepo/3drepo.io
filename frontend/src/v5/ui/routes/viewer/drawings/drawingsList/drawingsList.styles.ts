@@ -33,3 +33,9 @@ export const VirtualisedList = styled(TableVirtuoso)`
 		}
 	}
 `;
+
+export const TableRow = styled.div`
+	&:not(:last-child) > * {
+		border-bottom: solid 1px ${({ theme }) => theme.palette.base.lightest};
+	}
+`;

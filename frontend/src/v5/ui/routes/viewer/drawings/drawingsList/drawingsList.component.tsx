@@ -19,8 +19,8 @@ import { DrawingItem } from './drawingItem/drawingItem.component';
 import { CentredContainer } from '@controls/centredContainer';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
-import { VirtualisedList } from './drawingsList.styles';
-import { CardContent, CardList, CardListItem } from '@components/viewer/cards/card.styles';
+import { VirtualisedList, TableRow } from './drawingsList.styles';
+import { CardContent, CardList } from '@components/viewer/cards/card.styles';
 import { forwardRef, useContext } from 'react';
 import { ViewerCanvasesContext } from '../../viewerCanvases.context';
 import { useSearchParam } from '../../../useSearchParam';
@@ -56,7 +56,7 @@ export const DrawingsList = () => {
 			components={{
 				Table,
 				TableBody: CardList,
-				TableRow: CardListItem,
+				TableRow,
 			}}
 			itemContent={(index, drawing: IDrawing) => (
 				<DrawingItem
