@@ -24,8 +24,6 @@ import { CardContent, CardList, CardListItem } from '@components/viewer/cards/ca
 import { forwardRef, useContext } from 'react';
 import { ViewerCanvasesContext } from '../../viewerCanvases.context';
 import { useSearchParam } from '../../../useSearchParam';
-import { ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 
 const Table = forwardRef(({ children, ...props }, ref: any) => (
 	<table ref={ref} {...props}>
@@ -42,7 +40,6 @@ export const DrawingsList = () => {
 	const onDrawingClick = (drawingId) => {
 		setIs2DOpen(true);
 		setDrawingId(drawingId);
-		ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.DRAWINGS, false);
 	};
 
 	if (isLoading) return (
