@@ -20,7 +20,6 @@ import styled from 'styled-components';
 export const Content = styled.div`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	overflow-y: auto;
-	position: relative;
 	flex-grow: 1;
 	height: 100%;
 `;
