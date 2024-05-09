@@ -14,19 +14,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { createContext, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { createContext, useState } from 'react';
+import { useSearchParam } from '../useSearchParam';
 
 interface ViewerCanvasesContextType {
 	is2DOpen?: boolean;
-	setIs2DOpen: (open: boolean) => void;
+	close2D: () => void;
+	open2D: (drawingId) => void;
 	leftPanelRatio: number;
 	setLeftPanelRatio: (size) => void;
 }
 
 const defaultValue: ViewerCanvasesContextType = {
 	is2DOpen: false,
-	setIs2DOpen: () => { },
+	close2D: () => { },
+	open2D: () => { },
 	leftPanelRatio: 0.5,
 	setLeftPanelRatio: () => { },
 };
@@ -34,16 +36,17 @@ export const ViewerCanvasesContext = createContext(defaultValue);
 ViewerCanvasesContext.displayName = 'ViewerCanvasesContext';
 
 export const ViewerCanvasesContextComponent = ({ children }) => {
-	const [is2DOpen, setIs2DOpen] = useState(false);
 	const [leftPanelRatio, setLeftPanelRatio] = useState(0.5);
-	const { containerOrFederation, revision } = useParams();
-
-	useEffect(() => {
-		setIs2DOpen(false);
-	}, [containerOrFederation, revision]);
+	const [drawingId, setDrawingId] = useSearchParam('drawingId');
 
 	return (
-		<ViewerCanvasesContext.Provider value={{ is2DOpen, setIs2DOpen, leftPanelRatio, setLeftPanelRatio }}>
+		<ViewerCanvasesContext.Provider value={{
+			is2DOpen: !!drawingId,
+			close2D: () => setDrawingId(''),
+			open2D: setDrawingId,
+			leftPanelRatio,
+			setLeftPanelRatio,
+		}}>
 			{children}
 		</ViewerCanvasesContext.Provider>
 	);

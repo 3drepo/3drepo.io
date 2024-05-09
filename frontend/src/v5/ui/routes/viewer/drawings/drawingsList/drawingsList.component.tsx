@@ -23,7 +23,6 @@ import { VirtualisedList, TableRow } from './drawingsList.styles';
 import { CardContent, CardList } from '@components/viewer/cards/card.styles';
 import { forwardRef, useContext } from 'react';
 import { ViewerCanvasesContext } from '../../viewerCanvases.context';
-import { useSearchParam } from '../../../useSearchParam';
 
 const Table = forwardRef(({ children, ...props }, ref: any) => (
 	<table ref={ref} {...props}>
@@ -34,13 +33,7 @@ const Table = forwardRef(({ children, ...props }, ref: any) => (
 export const DrawingsList = () => {
 	const drawings = DrawingsHooksSelectors.selectCalibratedDrawings();
 	const isLoading = DrawingsHooksSelectors.selectCalibratedDrawingsHaveStatsPending();
-	const { setIs2DOpen } = useContext(ViewerCanvasesContext);
-	const [, setDrawingId] = useSearchParam('drawingId');
-
-	const onDrawingClick = (drawingId) => {
-		setIs2DOpen(true);
-		setDrawingId(drawingId);
-	};
+	const { open2D } = useContext(ViewerCanvasesContext);
 
 	if (isLoading) return (
 		<CentredContainer>
@@ -62,7 +55,7 @@ export const DrawingsList = () => {
 				<DrawingItem
 					drawing={drawing}
 					key={drawing._id}
-					onClick={() => onDrawingClick(drawing._id)}
+					onClick={() => open2D(drawing._id)}
 				/>
 			)}
 		/>
