@@ -32,11 +32,12 @@ import { IsMainList } from '../../../containers/mainList.context';
 import { DrawingsEllipsisMenu } from './drawingsEllipsisMenu/drawingsEllipsisMenu.component';
 import { DRAWING_LIST_COLUMN_WIDTHS } from '@/v5/store/drawings/drawings.helpers';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DialogsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingRevisionDetails } from '@components/shared/drawingRevisionDetails/drawingRevisionDetails.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DrawingsCalibrationMenu } from '@/v5/ui/routes/viewer/drawings/drawingCalibrationMenu/drawingCalibrationMenu.component';
+import { SelectModelForCalibration } from './selectModelForCalibration/selectModelForCalibration.component';
 
 interface IDrawingsListItem {
 	isSelected: boolean;
@@ -92,8 +93,9 @@ export const DrawingsListItem = memo(({
 				</DashboardListItemButton>
 				<DrawingsCalibrationMenu
 					calibration={drawing.calibration}
-					drawingId={drawingId}
+					onCalibrateClick={() => DialogsActionsDispatchers.open(SelectModelForCalibration, { drawingId })}
 					disabled={!isProjectAdmin}
+					drawingId={drawingId}
 					{...DRAWING_LIST_COLUMN_WIDTHS.calibration}
 				/>
 				<DashboardListItemText selected={isSelected} {...DRAWING_LIST_COLUMN_WIDTHS.drawingNumber}>

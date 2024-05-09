@@ -19,23 +19,23 @@ import { CalibrationState } from '@/v5/store/drawings/drawings.types';
 import { ActionMenu } from '@controls/actionMenu';
 import { Button } from '@controls/button';
 import { FormattedMessage } from 'react-intl';
-import { useParams } from 'react-router-dom';
 import { DrawingsCalibrationButton } from './drawingCalibrationMenu.styles';
-import { DialogsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { SelectModelForCalibration } from '../../../dashboard/projects/drawings/drawingsList/drawingsListItem/selectModelForCalibration/selectModelForCalibration.component';
 import { DashboardListItemButtonProps } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemButton/dashboardListItemButton.component';
 import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
+import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { useParams } from 'react-router-dom';
 
 type DrawingsCalibrationMenuProps = DashboardListItemButtonProps & {
-	calibration: CalibrationState,
-	drawingId: string,
+	calibration: CalibrationState;
+	onCalibrateClick: () => void;
+	drawingId: string;
 };
-export const DrawingsCalibrationMenu = ({ drawingId, calibration, ...props }: DrawingsCalibrationMenuProps) => {
+export const DrawingsCalibrationMenu = ({ calibration, onCalibrateClick, drawingId, ...props }: DrawingsCalibrationMenuProps) => {
 	const { teamspace, project } = useParams();
 	const disabled = props.disabled || calibration === CalibrationState.EMPTY;
 
-	const openCalibrationModelSelect = (close) => {
-		DialogsActionsDispatchers.open(SelectModelForCalibration, { drawingId });
+	const handleCalibrateClick = (close) => {
+		onCalibrateClick();
 		close();
 	};
 
@@ -65,12 +65,12 @@ export const DrawingsCalibrationMenu = ({ drawingId, calibration, ...props }: Dr
 							</Button>
 						)}
 						{[CalibrationState.CALIBRATED, CalibrationState.OUT_OF_SYNC].includes(calibration) && (
-							<Button onClick={() => openCalibrationModelSelect(close)}>
+							<Button onClick={() => handleCalibrateClick(close)}>
 								<FormattedMessage defaultMessage="Recalibrate" id="calibration.menu.recalibrate" />
 							</Button>
 						)}
 						{calibration === CalibrationState.UNCALIBRATED && (
-							<Button onClick={() => openCalibrationModelSelect(close)}>
+							<Button onClick={() => handleCalibrateClick(close)}>
 								<FormattedMessage defaultMessage="Calibrate" id="calibration.menu.calibrate" />
 							</Button>
 						)}
