@@ -92,7 +92,7 @@ describe("Teamspace", function() {
 	const mixedUser3 = {
 		user: "sub_all3",
 		password: "password",
-		quota: {spaceLimit: 1025, collaboratorLimit: 4, spaceUsed: 0}
+		quota: {spaceLimit: 1025, collaboratorLimit: 2, spaceUsed: 0}
 	};
 
 	const mixedUser4 = {
