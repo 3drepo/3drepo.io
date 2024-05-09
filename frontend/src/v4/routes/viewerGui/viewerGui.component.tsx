@@ -92,6 +92,7 @@ interface IProps {
 	subscribeOnRiskChanges: (teamspace, modelId) => void;
 	unsubscribeOnRiskChanges: (teamspace, modelId) => void;
 	setProjectionModeSuccess: (mode) => void;
+	clearCurrentlySelected: () => void;
 }
 
 interface IState {
@@ -217,6 +218,7 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 		this.props.resetModel();
 		this.props.resetViewerGui();
 		this.toggleViewerListeners(false);
+		this.props.clearCurrentlySelected();
 	}
 
 	private toggleViewerListeners = (enabled: boolean) => {

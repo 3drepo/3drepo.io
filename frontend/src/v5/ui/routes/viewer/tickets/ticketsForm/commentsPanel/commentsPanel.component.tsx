@@ -106,13 +106,13 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 		);
 		if (isFederation) {
 			return combineSubscriptions(
-				enableRealtimeFederationNewTicketComment(teamspace, project, containerOrFederation, ticketId),
-				enableRealtimeFederationUpdateTicketComment(teamspace, project, containerOrFederation, ticketId),
+				enableRealtimeFederationNewTicketComment(teamspace, project, containerOrFederation),
+				enableRealtimeFederationUpdateTicketComment(teamspace, project, containerOrFederation),
 			);
 		}
 		return combineSubscriptions(
-			enableRealtimeContainerNewTicketComment(teamspace, project, containerOrFederation, ticketId),
-			enableRealtimeContainerUpdateTicketComment(teamspace, project, containerOrFederation, ticketId),
+			enableRealtimeContainerNewTicketComment(teamspace, project, containerOrFederation),
+			enableRealtimeContainerUpdateTicketComment(teamspace, project, containerOrFederation),
 		);
 	}, [ticketId]);
 
