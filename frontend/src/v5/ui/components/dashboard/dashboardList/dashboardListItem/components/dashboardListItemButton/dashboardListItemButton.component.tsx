@@ -24,6 +24,7 @@ export interface DashboardListItemButtonProps extends FixedOrGrowContainerProps 
 	onClick?: Dispatch<SyntheticEvent>;
 	tooltipTitle?: ReactNode;
 	startIcon?: ReactNode;
+	endIcon?: ReactNode;
 	disabled?: boolean
 }
 export const DashboardListItemButton = ({
@@ -32,6 +33,7 @@ export const DashboardListItemButton = ({
 	disabled = false,
 	children,
 	startIcon,
+	endIcon,
 	...containerProps
 }: DashboardListItemButtonProps): JSX.Element => (
 	<FixedOrGrowContainer {...containerProps}>
@@ -45,6 +47,7 @@ export const DashboardListItemButton = ({
 						onClick(event);
 					}}
 					startIcon={startIcon}
+					endIcon={endIcon}
 				>
 					{children}
 				</Button>

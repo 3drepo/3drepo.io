@@ -52,8 +52,6 @@ export const DrawingsCalibrationButton = styled(DashboardListItemButton).attrs<{
 }))<{ calibration: string }>`
 	.MuiButtonBase-root {
 		${({ calibration }) => CALIBRATION_STYLE[calibration]}
-		border-radius: 8px;
-		/* border: solid 1px ${({ theme, calibration }) => calibration === CalibrationState.CALIBRATED ? theme.palette.success.light : theme.palette.warning.light}; */
 	}
 	/* Need to set visibility to visible to fix weird bug where icons in bottom list disappear when top list is collapsed */
 	svg {
