@@ -18,7 +18,7 @@
 import { formatMessage } from '@/v5/services/intl';
 import { ToolbarButton } from '@/v5/ui/routes/viewer/toolbar/buttons/toolbarButton.component';
 import { ToolbarContainer, MainToolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.styles';
-import { useRef, useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import ZoomOutIcon from '@assets/icons/viewer/zoom_out.svg';
 import ZoomInIcon from '@assets/icons/viewer/zoom_in.svg';
 
@@ -29,8 +29,11 @@ import { SvgViewer } from './svgViewer.component';
 import { PanZoomHandler, centredPanZoom } from './panzoom/centredPanZoom';
 import { DrawingViewerContainer } from './drawingViewer.styles';
 import { Events } from './panzoom/panzoom';
+import { CloseButton } from '@controls/button/closeButton/closeButton.component';
+import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 
 export const DrawingViewer = () => {
+	const { toggle2DPanel } = useContext(ViewerCanvasesContext);
 	const [svgContent, setSvgContent] = useState('');
 	const [imgContent, setImgContent] = useState('');
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
@@ -90,6 +93,7 @@ export const DrawingViewer = () => {
 					/>
 				</Button>
 			</FileInputField>
+			<CloseButton variant="secondary" onClick={toggle2DPanel} />
 			{svgContent && <SvgViewer svgContent={svgContent} ref={imgRef} onLoad={onImageLoad}/>}
 			{imgContent && <img src={imgContent} ref={imgRef as any} onLoad={onImageLoad} />}
 			<ToolbarContainer>
