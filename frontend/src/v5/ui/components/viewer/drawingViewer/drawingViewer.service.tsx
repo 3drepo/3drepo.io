@@ -15,15 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { domToPng } from 'modern-screenshot';
+
 type GetScreenshot = () => null | Promise<string>;
 const DrawingViewerServiceCreator = () => {
-	let getScreenshot: GetScreenshot = () => null;
-	const reset = () => {
-		getScreenshot = () => null;
-	};
+	let imgContainer = null;
+
+	const getScreenshot: GetScreenshot = () => imgContainer ? domToPng(imgContainer) : null;
+	const setImgContainer = (newImgContainer) => { imgContainer = newImgContainer; };
+
 	return {
 		getScreenshot,
-		reset,
+		setImgContainer,
 	};
 };
 export const DrawingViewerService = DrawingViewerServiceCreator();
