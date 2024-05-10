@@ -26,3 +26,8 @@ export const SvgContainer = styled.div`
 	height:100%;
 	overflow: hidden;
 `;
+
+export const ImageContainer = styled.div`
+	height: 100%;
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+`;
