@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ViewerCanvas as Canvas3D } from '@/v4/routes/viewerCanvas';
-import { DrawingViewer as Canvas2D } from '@components/viewer/drawingViewer/drawingViewer.component';
+import { Viewer3D } from '@/v4/routes/viewer3D';
+import { Viewer2D } from '@components/viewer/drawingViewer/viewer2D.component';
 import { useLocation } from 'react-router-dom';
 import { SplitPane } from './viewerCanvases.styles';
 import { ViewerCanvasesContext } from '../../viewer/viewerCanvases.context';
@@ -49,8 +49,8 @@ export const ViewerCanvases = () => {
 			maxSize={windowWidth - MIN_PANEL_SIZE}
 			onChange={onDragResize}
 		>
-			<Canvas3D location={{ pathname }} />
-			{is2DOpen && <Canvas2D />}
+			<Viewer3D location={{ pathname }} />
+			{is2DOpen && <Viewer2D />}
 		</SplitPane>
 	);
 };

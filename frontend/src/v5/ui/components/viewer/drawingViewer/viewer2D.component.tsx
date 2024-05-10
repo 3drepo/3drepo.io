@@ -27,12 +27,12 @@ import { Button } from '@controls/button/button.component';
 import { FormattedMessage } from 'react-intl';
 import { SvgViewer } from './svgViewer.component';
 import { PanZoomHandler, centredPanZoom } from './panzoom/centredPanZoom';
-import { DrawingViewerContainer } from './drawingViewer.styles';
+import { ViewerContainer } from '@/v4/routes/viewer3D/viewer3D.styles';
 import { Events } from './panzoom/panzoom';
 import { CloseButton } from '@controls/button/closeButton/closeButton.component';
 import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 
-export const DrawingViewer = () => {
+export const Viewer2D = () => {
 	const { toggle2DPanel } = useContext(ViewerCanvasesContext);
 	const [svgContent, setSvgContent] = useState('');
 	const [imgContent, setImgContent] = useState('');
@@ -80,7 +80,7 @@ export const DrawingViewer = () => {
 	};
 
 	return (
-		<DrawingViewerContainer id="viewer">
+		<ViewerContainer visible>
 			<FileInputField
 				accept=".svg,.png"
 				onChange={onClickButton as any}
@@ -112,6 +112,6 @@ export const DrawingViewer = () => {
 					/>
 				</MainToolbar>
 			</ToolbarContainer>
-		</DrawingViewerContainer>
+		</ViewerContainer>
 	);
 };

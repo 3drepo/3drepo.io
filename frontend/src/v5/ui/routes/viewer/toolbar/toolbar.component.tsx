@@ -28,15 +28,11 @@ import { ProjectionButtons } from './buttons/buttonOptionsContainer/projectionBu
 import { ToolbarButton } from './buttons/toolbarButton.component';
 import { ClipButtons } from './buttons/buttonOptionsContainer/clipButtons.component';
 import { SectionToolbar } from './selectionToolbar/selectionToolbar.component';
-import { useContext } from 'react';
-import { ViewerCanvasesContext } from '../viewerCanvases.context';
 
 export const Toolbar = () => {
-	const { leftPanelRatio, is2DOpen } = useContext(ViewerCanvasesContext);
 	const hasMetaData = ModelHooksSelectors.selectMetaKeysExist();
 	const showBIMPanel = BimHooksSelectors.selectIsActive();
 	const showCoords = ViewerGuiHooksSelectors.selectIsCoordViewActive();
-	const xPosition = is2DOpen ? (leftPanelRatio * 50) : 50;
 
 	const setBIMPanelVisibililty = (visible) => {
 		BimActionsDispatchers.setIsActive(visible);
@@ -49,7 +45,7 @@ export const Toolbar = () => {
 	};
 
 	return (
-		<ToolbarContainer xPosition={xPosition}>
+		<ToolbarContainer>
 			<MainToolbar>
 				<ToolbarButton
 					Icon={HomeIcon}
