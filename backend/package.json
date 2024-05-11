@@ -39,7 +39,7 @@
     "connect-mongo": "4.6.0",
     "cors": "2.8.5",
     "countries-and-timezones": "3.3.0",
-    "crypto-js": "4.0.0",
+    "crypto-js": "4.2.0",
     "cryptolens": "1.0.1-4.2",
     "csv-parse": "4.8.5",
     "dayjs": "1.10.7",
