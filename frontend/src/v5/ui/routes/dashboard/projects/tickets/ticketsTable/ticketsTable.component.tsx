@@ -119,7 +119,7 @@ export const TicketsTable = () => {
 		if (containersAndFederations.length > 1) {
 			elementsToFilter.push(ticket.modelName);
 		}
-		return elementsToFilter.some((str) => str.toLowerCase().includes(query.toLowerCase()));
+		return elementsToFilter.some((str = '') => str.toLowerCase().includes(query.toLowerCase()));
 	});
 
 	const getOpenInViewerLink = () => {
