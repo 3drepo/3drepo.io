@@ -124,7 +124,7 @@ export const Image = styled.img.attrs({
 	max-width: 100%;
 	max-height: 100%;
 	box-sizing: border-box;
-	border: solid 1px ${({ theme }) => theme.palette.base.light};
+	border: solid 1px ${({ theme }) => theme.palette.secondary.light};
 	border-radius: 10px;
 `;
 

@@ -57,6 +57,7 @@ export const ImagesModal = ({
 }: ImagesModalProps) => {
 	const [imageIndex, setImageIndex] = useState(displayImageIndex);
 	const [markupMode, setMarkupMode] = useState(false);
+	const previousImagesLength = useRef(images.length);
 	const imagesLength = images.length;
 	const imageRef = useRef<HTMLImageElement>(null);
 	const hasManyImages = imagesLength > 1;
@@ -128,6 +129,11 @@ export const ImagesModal = ({
 		if (!imagesLength) {
 			handleClose();
 		}
+
+		if (previousImagesLength.current < imagesLength) {
+			setImageIndex(imagesLength - 1);
+		}
+		previousImagesLength.current = imagesLength;
 	}, [imagesLength]);
 
 	useEffect(() => { centerSelectedThumbnail(); }, [imagesLength, imageIndex]);
