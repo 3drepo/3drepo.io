@@ -43,7 +43,6 @@ export type ImagesModalProps = {
 	onUpload?: () => void;
 	onDelete?: (index) => void;
 	disabledDeleteMessage?: string;
-	openInMarkupMode?: boolean;
 };
 export const ImagesModal = ({
 	images,
@@ -55,10 +54,9 @@ export const ImagesModal = ({
 	onDelete,
 	onAddMarkup,
 	disabledDeleteMessage,
-	openInMarkupMode = false,
 }: ImagesModalProps) => {
 	const [imageIndex, setImageIndex] = useState(displayImageIndex);
-	const [markupMode, setMarkupMode] = useState(openInMarkupMode);
+	const [markupMode, setMarkupMode] = useState(false);
 	const imagesLength = images.length;
 	const imageRef = useRef<HTMLImageElement>(null);
 	const hasManyImages = imagesLength > 1;
