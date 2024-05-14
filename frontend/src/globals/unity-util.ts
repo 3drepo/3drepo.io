@@ -1872,12 +1872,10 @@ export class UnityUtil {
 	/**
 	 * Set API host urls. This is needs to be called before loading model.
 	 * @category Configurations
-	 * @param hostNames - list of API names to use. (e.g ["https://api1.www.3drepo.io/api/"])
+	 * @param hostNames - list of API names to use in an object. (e.g ["https://api1.www.3drepo.io/api/"])
 	 */
-	public static setAPIHost(hostNames: [string]) {
-		UnityUtil.toUnity('SetAPIHost', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({
-			hostNames,
-		}));
+	public static setAPIHost(hostNames: { hostNames: string[] }) {
+		UnityUtil.toUnity('SetAPIHost', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(hostNames));
 		if (UnityUtil.externalWebRequestHandler !== undefined) {
 			UnityUtil.externalWebRequestHandler.setAPIHost(hostNames);
 		}
