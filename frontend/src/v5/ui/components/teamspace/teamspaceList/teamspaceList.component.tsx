@@ -32,6 +32,7 @@ export const TeamspaceList = ({ className }: ITeamspaceList): JSX.Element => {
 
 	const sortedTeamspaces = [...teamspaces].sort((a, b) => {
 		if (a.name === username) return -1; // personal teamspace appears first
+		if (b.name === username) return 1;
 		return a.name > b.name ? 1 : -1;
 	});
 
