@@ -1877,7 +1877,7 @@ export class UnityUtil {
 	public static setAPIHost(hostNames: { hostNames: string[] }) {
 		UnityUtil.toUnity('SetAPIHost', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(hostNames));
 		if (UnityUtil.externalWebRequestHandler !== undefined) {
-			UnityUtil.externalWebRequestHandler.setAPIHost(hostNames);
+			UnityUtil.externalWebRequestHandler.setAPIHost(hostNames.hostNames);
 		}
 	}
 
