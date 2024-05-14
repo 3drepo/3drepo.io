@@ -47,7 +47,7 @@ const singleFileMulterPromise = (req, fileName, fileFilter, maxSize,
 });
 
 const imageFilter = (req, file, cb) => {
-	const format = file.originalname.split('.').splice(-1)[0];
+	const format = file.originalname.split('.').splice(-1)[0].toLowerCase();
 
 	if (!uploadConfig.imageExtensions.includes(format)) {
 		const err = createResponseCode(templates.unsupportedFileFormat, `${format} is not a supported image format`);
