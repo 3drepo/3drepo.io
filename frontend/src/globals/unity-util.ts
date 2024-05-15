@@ -279,7 +279,10 @@ export class UnityUtil {
 			}
 		}
 
-		return this.checkIdb().then(() => UnityUtil.clearIdbfs()).then(() => UnityUtil._loadUnity(canvasDom, domainURL));
+		return this.checkIdb()
+			.then(() => UnityUtil.clearIdbfs())
+			.then(() => UnityUtil._loadUnity(canvasDom, domainURL))
+			.catch(console.error);
 	}
 
 	/** @hidden */
