@@ -62,7 +62,7 @@ export const IssuePropertiesInputs = ({ onBlur, readOnly }: IIssuePropertiesInpu
 					id: 'customTicket.topPanel.dueDate.tooltip',
 					defaultMessage: 'Set due date',
 				})}
-				name={`properties[${IssueProperties.DUE_DATE}]`}
+				name={`properties.${IssueProperties.DUE_DATE}`}
 				onBlur={onBlur}
 				key={IssueProperties.DUE_DATE}
 				disabled={readOnly}
