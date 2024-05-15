@@ -36,7 +36,7 @@ import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { isEqual } from 'lodash';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 
 const NEW_TICKET_ID = 'temporaryIdForNewTickets';
 
@@ -45,15 +45,15 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const [editMode, setEditMode] = useState(false);
 	const prevValue = useRef(undefined);
-	const { getValues, watch } = useFormContext();
+	const { getValues } = useFormContext();
 	const ticket = getValues() as ITicket;
 	const selectedTemplateId = TicketsCardHooksSelectors.selectSelectedTemplateId() ?? ticket?.type;
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, selectedTemplateId);
 	const selectedPin = TicketsCardHooksSelectors.selectSelectedTicketPinId();
 
 	const linkedPath = getLinkedValuePath(name, template);
-	watch(linkedPath); // this ensures the component updates when the linkev value changes
-	
+	useWatch({ name:linkedPath });
+
 	const isNewTicket = !ticket?._id;
 	const ticketId = !isNewTicket ? ticket._id : NEW_TICKET_ID;
 	const pinId = name === DEFAULT_PIN ? ticketId : `${ticketId}.${name}`;

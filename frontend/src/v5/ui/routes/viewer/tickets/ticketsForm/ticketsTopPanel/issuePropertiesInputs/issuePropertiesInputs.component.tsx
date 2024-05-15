@@ -43,7 +43,7 @@ export const IssuePropertiesInputs = ({ onBlur, readOnly }: IIssuePropertiesInpu
 					id: 'customTicket.topPanel.priority.tooltip',
 					defaultMessage: 'Set priority',
 				})}
-				name={`properties[${IssueProperties.PRIORITY}]`}
+				name={`properties.${IssueProperties.PRIORITY}`}
 				onBlur={onBlur}
 				key={IssueProperties.PRIORITY}
 				values={PRIORITY_LEVELS_MAP}
