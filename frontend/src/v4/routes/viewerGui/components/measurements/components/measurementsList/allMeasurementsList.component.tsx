@@ -32,6 +32,7 @@ export interface IProps {
 	setMeasurementColor: (uuid, color) => void;
 	setMeasurementName: (uuid, type, name) => void;
 	modelUnit: string;
+	canEdit?: boolean;
 }
 
 export const AllMeasurementsList = ({areaMeasurements, lengthMeasurements, pointMeasurements, angleMeasurements, ...props}: IProps) => {

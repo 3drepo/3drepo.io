@@ -186,6 +186,7 @@ class IssueDetailsFormComponent extends PureComponent<IProps, IState> {
 			setMeasureMode={this.props.setMeasureMode}
 			shapes={this.props.issue.shapes}
 			addButtonsEnabled={!this.props.horizontal}
+			canEdit={this.canEditResources}
 		/>
 	)
 
