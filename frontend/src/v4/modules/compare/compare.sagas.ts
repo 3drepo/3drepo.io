@@ -86,16 +86,21 @@ function* getCompareModelData({ isFederation, revision }) {
 				return prepareModelToCompare(teamspace, model, subModelData.name, false, subModelData.revisions);
 			});
 
-			const selectedModelsMap = compareModels.reduce((map, model) => {
-				map[model._id] = model.revisions?.length > 1;
+			const selectedDiffModels = compareModels.reduce((map, model) => {
+				map[model._id] = model.revisions?.length >= 1;
+				return map;
+			}, {});
+
+			const selectedClashModelsMap = compareModels.reduce((map, model) => {
+				map[model._id] = model.revisions?.length >= 1;
 				return map;
 			}, {});
 
 			yield put(CompareActions.setComponentState({
 				compareModels,
-				selectedDiffModelsMap: {...selectedModelsMap},
-				selectedClashModelsMap: {...selectedModelsMap},
-				targetDiffModels: {...selectedModelsMap},
+				selectedDiffModelsMap: {...selectedDiffModels},
+				selectedClashModelsMap,
+				targetDiffModels: {...selectedDiffModels},
 				isPending: false
 			}));
 		}
