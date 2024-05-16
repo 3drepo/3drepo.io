@@ -21,7 +21,6 @@ import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { isCommenterRole } from '@/v5/store/store.helpers';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useFormContext } from 'react-hook-form';
 import { useContext } from 'react';
 import { SortedTableComponent, SortedTableContext, SortedTableType } from '@controls/sortedTableContext/sortedTableContext';
 import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
@@ -57,13 +56,13 @@ type TicketsTableGroupProps = {
 };
 export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
 	const [modelsIds] = useSearchParam('models', Transformers.STRING_ARRAY);
-	const { getValues } = useFormContext();
+	const [templateId] = useSearchParam('template');
 
 	const showModelName = modelsIds.length > 1;
 	const models = useSelectedModels();
 
 	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;
-	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(getValues('template'));
+	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const hasProperties = template?.config?.issueProperties;
 	const hasSafetibase = template?.modules?.some((module) => module.type === 'safetibase');
 

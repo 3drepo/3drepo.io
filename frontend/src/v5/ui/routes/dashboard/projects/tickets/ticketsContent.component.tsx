@@ -29,6 +29,7 @@ import { TicketsSelection } from './ticketsSelection/ticketsSelection.component'
 import { useContainersData } from '../containers/containers.hooks';
 import { useFederationsData } from '../federations/federations.hooks';
 import { EmptyTicketsView } from './emptyTicketsView/emptyTicketsView.styles';
+import { TICKETS_ROUTE } from '../../../routes.constants';
 
 export const TicketsContent = () => {
 	const { teamspace, project } = useParams();
@@ -73,7 +74,7 @@ export const TicketsContent = () => {
 
 	return (
 		<Switch>
-			<Route exact path={`${path}/:template/:groupBy/:containerOrFederation?`}>
+			<Route exact path={TICKETS_ROUTE}>
 				<TicketsTable />
 			</Route>
 			<Route path={path}>

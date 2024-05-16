@@ -38,7 +38,7 @@ export const Transformers = {
 };
 
 // @ts-ignore
-export const useSearchParam = <T = string>(name: string, transformer: Transformer<T> = Transformers.DEFAULT) => {
+export const useSearchParam = <T = string>(name: string, transformer: Transformer<T> = Transformers.DEFAULT, pushInHistory?: boolean = false) => {
 	const history = useHistory();
 	const { location } = window;
 	const value = transformer.from(new URLSearchParams(location.search).get(name));
@@ -51,7 +51,12 @@ export const useSearchParam = <T = string>(name: string, transformer: Transforme
 		} else {
 			searchParams.delete(name);
 		}
-		history.replace({ search: searchParams.toString() });
+
+		if (pushInHistory) {
+			history.push({ search: searchParams.toString() });
+		} else {
+			history.replace({ search: searchParams.toString() });
+		}
 	};
 
 	return [value, setParam] as [T, (val?: T) => void];

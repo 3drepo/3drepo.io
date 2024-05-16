@@ -19,13 +19,15 @@ import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMen
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
 import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { FormSearchSelect } from '@controls/inputs/formInputs.component';
 import { sortByName } from '@/v5/store/store.helpers';
 import { ListSubheader } from '../tickets.styles';
 import { openUnsavedNewTicketWarningModal } from './selectMenus.helpers';
+import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
+import { SelectProps } from '@controls/inputs/select/select.component';
+import { InputControllerProps, InputController } from '@controls/inputs/inputController.component';
 
-type ContainersAndFederationsFormSelectProps = { isNewTicketDirty?: boolean, name: string };
-export const ContainersAndFederationsFormSelect = ({ isNewTicketDirty, ...props }: ContainersAndFederationsFormSelectProps) => {
+type ContainersAndFederationsSelectProps = { isNewTicketDirty?: boolean } & SelectProps;
+export const ContainersAndFederationsSelect = ({ isNewTicketDirty, ...props }: ContainersAndFederationsSelectProps) => {
 	const containers = ContainersHooksSelectors.selectContainers();
 	const federations = FederationsHooksSelectors.selectFederations();
 
@@ -48,7 +50,7 @@ export const ContainersAndFederationsFormSelect = ({ isNewTicketDirty, ...props 
 	};
 
 	return (
-		<FormSearchSelect
+		<SearchSelect
 			multiple
 			{...props}
 			label={formatMessage({ id: 'ticketTable.modelSelection.placeholder', defaultMessage: 'Select Federation / Container' })}
@@ -67,6 +69,8 @@ export const ContainersAndFederationsFormSelect = ({ isNewTicketDirty, ...props 
 			{...sortByName(containers).map(({ name, _id }) => (
 				<MultiSelectMenuItem key={_id} value={_id}>{name}</MultiSelectMenuItem>
 			))}
-		</FormSearchSelect>
+		</SearchSelect>
 	);
 };
+
+export  const ContainersAndFederationsFormSelect = (props: InputControllerProps<SelectProps>) => (<InputController Input={ContainersAndFederationsSelect} {...props} />);

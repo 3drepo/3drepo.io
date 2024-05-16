@@ -36,6 +36,9 @@ type TicketSlideProps = {
 	template: ITemplate,
 };
 export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
+	// console.log('+++++++++++++++++++++++++++++++++++++++++++++++++++++');
+	// console.log(ticketId);
+
 	const { teamspace, project, containerOrFederation } = useParams<DashboardTicketsParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
