@@ -74,7 +74,7 @@ export const TicketsTable = () => {
 	const [showCompleted, setShowCompleted] = useSearchParam('showCompleted', Transformers.BOOLEAN, true);
 	const [groupBy, setGroupBy] = useSearchParam('groupBy', undefined, true);
 
-	const [containerOrFederation] = useSearchParam('containerOrFederation');
+	const [containerOrFederation,, setContainerOrFederation] = useSearchParam('containerOrFederation');
 
 
 	const models = useSelectedModels();
@@ -88,9 +88,10 @@ export const TicketsTable = () => {
 	};
 
 	const setTicketId = (modelId,  ticket?: Partial<ITicket>) => {
-		const newParams = { ...params, ticketId: ticket?._id };
-		const args =  (window.location.search || '?') + '&containerOrFederation=' + modelId;
-		const path = generatePath(TICKETS_ROUTE + args, newParams);
+		const id = ( modelId && !ticket?._id ) ? 'new' : ticket?._id;
+		const newParams = { ...params, ticketId: id };
+		const search = '?' + setContainerOrFederation(modelId);
+		const path = generatePath(TICKETS_ROUTE +  search, newParams);
 		history.push(path);
 	};
 
@@ -100,7 +101,6 @@ export const TicketsTable = () => {
 
 	const isNewTicket = (ticketId || '').toLowerCase() === NEW_TICKET_ID;
 	const clearTicketId = () => setTicketId(null);
-
 
 	// const setTemplate = (newTemplate) => {
 	// 	const newParams = { ...params, template: newTemplate };
@@ -144,10 +144,7 @@ export const TicketsTable = () => {
 		return ticketsToShow.filter(({ type }) => type === template);
 	}, [template, tickets, showCompleted]);
 	
-	
-	const newTicketButtonIsDisabled = false;
-
-	// const newTicketButtonIsDisabled = !containersAndFederations.length || models.filter(({ role }) => isCommenterRole(role)).length === 0;
+	const newTicketButtonIsDisabled = !containersAndFederations.length || models.filter(({ role }) => isCommenterRole(role)).length === 0;
 
 	// const setSidePanelData = (modelId: string, ticket?: Partial<ITicket>) => {
 	// 	const newParams = {
@@ -160,8 +157,7 @@ export const TicketsTable = () => {
 	// 	setSidePanelTicket(ticket);
 	// };
 
-	// const onSaveTicket = (ticketId: string) => setSidePanelTicket({ _id: ticketId });
-	// const clearTicketId = () => setSidePanelData(null, null);
+	const onSaveTicket = (_id: string) => setTicketId(containerOrFederation, { _id });
 
 	const filterTickets = (items, query: string) => items.filter((ticket) => {
 		const templateCode = templates.find(({ _id }) => _id === ticket.type).code;
@@ -316,7 +312,7 @@ export const TicketsTable = () => {
 							{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate} />)}
 							{isNewTicket && (
 								<NewTicketSlide
-									defaultValue={sidePanelTicket}
+									defaultValue={{}}
 									template={selectedTemplate}
 									onSave={onSaveTicket}
 									onDirtyStateChange={setIsNewTicketDirty}

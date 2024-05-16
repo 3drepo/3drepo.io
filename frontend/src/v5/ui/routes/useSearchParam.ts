@@ -43,7 +43,7 @@ export const useSearchParam = <T = string>(name: string, transformer: Transforme
 	const { location } = window;
 	const value = transformer.from(new URLSearchParams(location.search).get(name));
 
-	const setParam = (newValue: T) => {
+	const getSearchParams = (newValue: T) => {
 		const searchParams = new URLSearchParams(location.search);
 		const transformedNewValue = transformer.to(newValue);
 		if (transformedNewValue) {
@@ -52,12 +52,18 @@ export const useSearchParam = <T = string>(name: string, transformer: Transforme
 			searchParams.delete(name);
 		}
 
+		return searchParams.toString();
+	};
+
+	const setParam = (newValue: T) => {
+		const search = getSearchParams(newValue);
+
 		if (pushInHistory) {
-			history.push({ search: searchParams.toString() });
+			history.push({ search });
 		} else {
-			history.replace({ search: searchParams.toString() });
+			history.replace({ search });
 		}
 	};
 
-	return [value, setParam] as [T, (val?: T) => void];
+	return [value, setParam, getSearchParams] as [T, (val?: T) => void,  (val?: T) => string];
 };

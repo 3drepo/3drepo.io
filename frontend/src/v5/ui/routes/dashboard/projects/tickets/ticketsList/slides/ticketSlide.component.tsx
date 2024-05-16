@@ -24,6 +24,7 @@ import { modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
+import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { TicketForm } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketForm.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty, set } from 'lodash';
@@ -36,10 +37,9 @@ type TicketSlideProps = {
 	template: ITemplate,
 };
 export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
-	// console.log('+++++++++++++++++++++++++++++++++++++++++++++++++++++');
-	// console.log(ticketId);
-
-	const { teamspace, project, containerOrFederation } = useParams<DashboardTicketsParams>();
+	const { teamspace, project } = useParams<DashboardTicketsParams>();
+	
+	const [containerOrFederation] = useSearchParam('containerOrFederation');
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
 	const templateValidationSchema = getValidators(template);
@@ -73,7 +73,7 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 
 	useEffect(() => {
 		formData.reset(ticket);
-	}, [ticket]);
+	}, [JSON.stringify(ticket)]);
 
 	useEffect(() => {
 		if (!containerOrFederation) return;
@@ -84,7 +84,6 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 			ticketId,
 			isFederation,
 		);
-		TicketsCardActionsDispatchers.setSelectedTicket(ticketId);
 	}, [ticketId, containerOrFederation]);
 
 	useEffect(() => {
