@@ -65,7 +65,7 @@ export const EditFederationContextComponent = ({ federation, children }: Props) 
 	const existingGroups = federations.flatMap((f) => f.containers.map(({ group }) => group));
 	const unsortedGroups = uniq(existingGroups.concat(Object.values(groupsByContainer))).filter(Boolean);
 	const groups = orderBy(unsortedGroups, (g) => g.toLowerCase());
-	const isReadOnly = federation && !FederationsHooksSelectors.selectHasCommenterAccess(federation._id);
+	const isReadOnly = federation && !FederationsHooksSelectors.selectHasCollaboratorAccess(federation._id);
 
 	useEffect(() => {
 		if (!containers.length || !federation?.containers) return;
