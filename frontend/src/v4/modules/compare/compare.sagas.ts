@@ -18,7 +18,7 @@
 import { cond, curry, intersection, isEqual, keys } from 'lodash';
 import { all, call, put, select, take, takeLatest } from 'redux-saga/effects';
 
-import { COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE, RENDERING_TYPES, VULNERABLE_PROPS } from '../../constants/compare';
+import { CLASH_COMPARE_TYPE, COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE, RENDERING_TYPES, VULNERABLE_PROPS } from '../../constants/compare';
 import { SORT_ORDER_TYPES } from '../../constants/sorting';
 import { VISIBILITY_STATES } from '../../constants/tree';
 import * as API from '../../services/api';
@@ -32,6 +32,7 @@ import {
 	selectBaseModelsList,
 	selectCompareModels,
 	selectComponentState,
+	selectUnselectedClashModelsIds,
 	selectIsCompareActive,
 	selectSelectedModelsMap,
 	selectSortOrder,
@@ -336,6 +337,15 @@ function* stopCompare() {
 		yield put(CompareActions.setIsActive(false));
 		handleRenderingTypeChange(RENDERING_TYPES.COMPARE);
 		Viewer.diffToolDisableAndClear();
+		const activeTab = yield select(selectActiveTab);
+		const isClash = activeTab === CLASH_COMPARE_TYPE;
+
+		if (isClash) {
+			const compareModels = yield select(selectCompareModels);
+			const modelsIdsToShow = yield select(selectUnselectedClashModelsIds);
+			const models = modelsIdsToShow.map((id) => compareModels.find((m) => m._id === id));
+			yield put(TreeActions.setSubmodelsVisibility(models, VISIBILITY_STATES.VISIBLE));
+		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('stop', 'comparison', error.message));
 	}
