@@ -86,7 +86,7 @@ export const NewTicketSlide = ({ template, containerOrFederation, preselectedVal
 	useEffect(() => {
 		if (isLoading) return;
 		reset(defaultValues);
-	}, [containerOrFederation, isLoading, preselectedValue]);
+	}, [containerOrFederation, template, isLoading, preselectedValue]);
 
 	useEffect(() => {
 		onDirtyStateChange(!isEmpty(dirtyFields));
