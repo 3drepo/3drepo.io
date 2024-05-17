@@ -32,28 +32,20 @@ import { SaveButton, RequiresViewerContainer, ButtonContainer, Link, Form } from
 import { hasRequiredViewerProperties } from '../../ticketsTable/ticketsTable.helper';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 
-const getGroupDefaultValue = (template, ticket) => {
-	let defaultValues = getDefaultTicket(template);
-
-	if ((defaultValues.modules?.safetibase && ticket?.modules?.safetibase) || (defaultValues.properties && ticket?.properties)) {
-		defaultValues = merge(defaultValues, ticket);
-	}
-
-	return defaultValues;
-};
-
 type NewTicketSlideProps = {
-	defaultValue?: Partial<ITicket>,
 	template: ITemplate,
+	containerOrFederation: string,
+	preselectedValue: object | null,
 	onSave: (newTicketId: string) => void,
 	onDirtyStateChange: (isDirty: boolean) => void,
 };
-export const NewTicketSlide = ({ defaultValue, template, onSave, onDirtyStateChange }: NewTicketSlideProps) => {
-	const { teamspace, project, containerOrFederation } = useParams<DashboardTicketsParams>();
-	const isLoading = !templateAlreadyFetched(template || {} as any) || !containerOrFederation;
-	const defaultValues = getGroupDefaultValue(template, defaultValue);
-	const isFederation = modelIsFederation(containerOrFederation);
 
+export const NewTicketSlide = ({ template, containerOrFederation, preselectedValue, onSave, onDirtyStateChange }: NewTicketSlideProps) => {
+	const { teamspace, project } = useParams<DashboardTicketsParams>();
+	const isLoading = !templateAlreadyFetched(template || {} as any) || !containerOrFederation;
+	const defaultValues = merge(getDefaultTicket(template), preselectedValue);
+	const isFederation = modelIsFederation(containerOrFederation);
+	
 	const formData = useForm({
 		resolver: yupResolver(getValidators(template)),
 		mode: 'onChange',
@@ -94,7 +86,7 @@ export const NewTicketSlide = ({ defaultValue, template, onSave, onDirtyStateCha
 	useEffect(() => {
 		if (isLoading) return;
 		reset(defaultValues);
-	}, [containerOrFederation, isLoading, defaultValue]);
+	}, [containerOrFederation, isLoading, preselectedValue]);
 
 	useEffect(() => {
 		onDirtyStateChange(!isEmpty(dirtyFields));

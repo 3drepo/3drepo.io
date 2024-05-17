@@ -29,6 +29,7 @@ import { Header, Headers, Group, NewTicketRow, NewTicketText, IconContainer } fr
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
+import { SetTicketValue } from '../../ticketsTable.helper';
 
 const SortingTableHeader = ({ name = null, children, hidden = false, ...props }) => {
 	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
@@ -51,7 +52,7 @@ const SortingTableHeader = ({ name = null, children, hidden = false, ...props })
 type TicketsTableGroupProps = {
 	selectedTicketId?: string;
 	tickets: ITicket[];
-	onEditTicket: (modelId: string, ticket: Partial<ITicket>) => void;
+	onEditTicket: SetTicketValue;
 	onNewTicket: (modelId: string) => void;
 };
 export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
@@ -115,7 +116,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 									ticket={ticket}
 									modelId={modelId}
 									showModelName={showModelName}
-									onClick={() => onEditTicket(modelId, ticket)}
+									onClick={() => onEditTicket(modelId, ticket._id)}
 									selected={selectedTicketId === ticket._id}
 								/>
 							))}

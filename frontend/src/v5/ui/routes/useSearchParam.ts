@@ -43,8 +43,8 @@ export const useSearchParam = <T = string>(name: string, transformer: Transforme
 	const { location } = window;
 	const value = transformer.from(new URLSearchParams(location.search).get(name));
 
-	const getSearchParams = (newValue: T) => {
-		const searchParams = new URLSearchParams(location.search);
+	const getSearchParams = (newValue: T, search?: string) => {
+		const searchParams = new URLSearchParams(search || location.search);
 		const transformedNewValue = transformer.to(newValue);
 		if (transformedNewValue) {
 			searchParams.set(name, transformedNewValue);
@@ -65,5 +65,5 @@ export const useSearchParam = <T = string>(name: string, transformer: Transforme
 		}
 	};
 
-	return [value, setParam, getSearchParams] as [T, (val?: T) => void,  (val?: T) => string];
+	return [value, setParam, getSearchParams] as [T, (val?: T) => void,  (val?: T, search?: string) => string];
 };
