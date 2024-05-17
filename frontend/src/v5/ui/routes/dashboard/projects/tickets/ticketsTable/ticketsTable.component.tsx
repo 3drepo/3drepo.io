@@ -29,7 +29,6 @@ import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { CircleButton } from '@controls/circleButton';
-import { set } from 'lodash';
 import { ThemeProvider as MuiThemeProvider, SelectChangeEvent } from '@mui/material';
 import { theme } from '@/v5/ui/routes/viewer/theme';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
@@ -50,7 +49,6 @@ import { TicketSlide } from '../ticketsList/slides/ticketSlide.component';
 import { useSelectedModels } from './newTicketMenu/useSelectedModels';
 import { ticketIsCompleted } from '@controls/chip/statusChip/statusChip.helpers';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
-import { IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 
 const paramToInputProps = (value, setter) => ({
 	value,
@@ -63,14 +61,18 @@ export const TicketsTable = () => {
 	const { teamspace, project,  template, ticketId } = params;
 	const [containersAndFederations, setContainersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY, true);
 	const [showCompleted, setShowCompleted] = useSearchParam('showCompleted', Transformers.BOOLEAN, true);
-	const [groupBy, setGroupBy] = useSearchParam('groupBy', undefined, true);
-	const [groupByValue,, setGroupByValue] = useSearchParam('groupByValue', undefined, true);
+	const [groupBy,, setGroupByParam] = useSearchParam('groupBy');
+	const [groupByValue,, setGroupByValue] = useSearchParam('groupByValue');
 	const [containerOrFederation,, setContainerOrFederation] = useSearchParam('containerOrFederation');
-	const [preselectedValue, setPreselectedValue] = useState<object>(null);
-
 	const models = useSelectedModels();
 
 	const { getState } = useStore();
+
+	const setGroupBy = (val) => {
+		// this is for clearing also the groupByValue when groupBy so we dont have an inconsistent groupByValue
+		const search =  '?' + setGroupByValue(null,  setGroupByParam(val)); 
+		history.push(location.pathname + search);
+	};
 
 	const setTemplate = (newTemplate) => {
 		const newParams = { ...params, template: newTemplate };
@@ -97,8 +99,6 @@ export const TicketsTable = () => {
 
 	const isNewTicket = (ticketId || '').toLowerCase() === NEW_TICKET_ID;
 	const clearTicketId = () => setTicketValue();
-
-	// const containersAndFederations = modelsIds;
 
 	const tickets = TicketsHooksSelectors.selectTicketsByContainersAndFederations(containersAndFederations);
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
@@ -147,7 +147,6 @@ export const TicketsTable = () => {
 	const isFed = (modelId) => !!selectFederationById(getState(), modelId);
 
 	useEffect(() => {
-		// setModelsIds(containersAndFederations);
 		if (!containersAndFederations.length) return;
 
 		containersAndFederations.forEach((modelId) => {
@@ -171,23 +170,6 @@ export const TicketsTable = () => {
 		});
 		return combineSubscriptions(...subscriptions);
 	}, [containersAndFederations]);
-
-	useEffect(()=> {
-		if (!groupBy)  {
-			setPreselectedValue(null);
-			return;
-		}
-
-		const val = groupBy !== IssueProperties.ASSIGNEES ? groupByValue : groupByValue.split(',').map((v) => v.trim());
-
-		let preselectedVal = set({}, `properties.${groupBy}`, val );
-
-		if (groupBy === SafetibaseProperties.TREATMENT_STATUS) {
-			preselectedVal = set({}, `modules.safetibase.${groupBy}`, groupByValue );
-		}
-
-		setPreselectedValue(preselectedVal);
-	}, [groupByValue, groupBy]);
 
 	useEffect(() => {
 		JobsActionsDispatchers.fetchJobs(teamspace);
@@ -273,7 +255,7 @@ export const TicketsTable = () => {
 							{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate} />)}
 							{isNewTicket && (
 								<NewTicketSlide
-									preselectedValue={preselectedValue}
+									preselectedValue={{ [groupBy]: groupByValue }}
 									template={selectedTemplate}
 									containerOrFederation={containerOrFederation}
 									onSave={onSaveTicket}
