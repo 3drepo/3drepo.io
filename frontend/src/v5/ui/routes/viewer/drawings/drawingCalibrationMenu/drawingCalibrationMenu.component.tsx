@@ -17,11 +17,9 @@
 
 import { CalibrationState } from '@/v5/store/drawings/drawings.types';
 import { ActionMenu } from '@controls/actionMenu';
-import { Button } from '@controls/button';
 import { FormattedMessage } from 'react-intl';
 import { DrawingsCalibrationButton } from './drawingCalibrationMenu.styles';
 import { DashboardListItemButtonProps } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemButton/dashboardListItemButton.component';
-import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useParams } from 'react-router-dom';
 import { MenuList } from '@mui/material';
@@ -37,15 +35,7 @@ export const DrawingsCalibrationMenu = ({ calibration, onCalibrateClick, drawing
 	const { teamspace, project } = useParams();
 	const disabled = props.disabled || calibration === CalibrationState.EMPTY;
 
-	const handleCalibrateClick = (close) => {
-		onCalibrateClick();
-		close();
-	};
-
-	const approveCalibration = (close) => {
-		DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawingId, { calibration: CalibrationState.CALIBRATED });
-		close();
-	};
+	const approveCalibration = () => DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawingId, { calibration: CalibrationState.CALIBRATED });
 
 	return (
 		<ActionMenu
@@ -68,13 +58,13 @@ export const DrawingsCalibrationMenu = ({ calibration, onCalibrateClick, drawing
 				)}
 				{[CalibrationState.CALIBRATED, CalibrationState.OUT_OF_SYNC].includes(calibration) && (
 					<EllipsisMenuItem
-						onClick={handleCalibrateClick}
+						onClick={onCalibrateClick}
 						title={formatMessage({ defaultMessage: 'Recalibrate', id: 'calibration.menu.recalibrate' })}
 					/>
 				)}
 				{calibration === CalibrationState.UNCALIBRATED && (
 					<EllipsisMenuItem
-						onClick={handleCalibrateClick}
+						onClick={onCalibrateClick}
 						title={formatMessage({ defaultMessage: 'Calibrate', id: 'calibration.menu.calibrate' })}
 					/>
 				)}
