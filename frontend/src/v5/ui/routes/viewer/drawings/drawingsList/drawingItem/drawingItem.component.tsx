@@ -23,7 +23,6 @@ import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
 import { useParams, useHistory, generatePath } from 'react-router-dom';
 import { CALIBRATION_VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
-import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
 const STATUS_CODE_TEXT = formatMessage({ id: 'drawings.list.item.statusCode', defaultMessage: 'Status code' });
 const REVISION_CODE_TEXT = formatMessage({ id: 'drawings.list.item.revisionCode', defaultMessage: 'Revision code' });
@@ -35,15 +34,14 @@ type DrawingItemProps = {
 export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	const params = useParams();
 	const history = useHistory();
-	const [, setCalibrationDrawing] = useSearchParam('drawingId');
 	const { calibration, name, drawingNumber, lastUpdated, desc, _id: drawingId } = drawing;
 	const [latestRevision] = DrawingRevisionsHooksSelectors.selectRevisions(drawingId);
 	const { statusCode, revisionCode } = latestRevision || {};
 	const areStatsPending = !revisionCode;
 	
 	const onCalibrateClick = () => {
-		history.push(generatePath(CALIBRATION_VIEWER_ROUTE, params));
-		setCalibrationDrawing(drawingId);
+		const path = generatePath(CALIBRATION_VIEWER_ROUTE, params);
+		history.push(`${path}?drawingId=${drawingId}`);
 	};
 
 	const LoadingCodes = () => (
