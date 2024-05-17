@@ -24,6 +24,9 @@ import { DashboardListItemButtonProps } from '@components/dashboard/dashboardLis
 import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useParams } from 'react-router-dom';
+import { MenuList } from '@mui/material';
+import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
+import { formatMessage } from '@/v5/services/intl';
 
 type DrawingsCalibrationMenuProps = DashboardListItemButtonProps & {
 	calibration: CalibrationState;
@@ -56,27 +59,26 @@ export const DrawingsCalibrationMenu = ({ calibration, onCalibrateClick, drawing
 				/>
 			)}
 		>
-			<ActionMenuContext.Consumer>
-				{({ close }) => (
-					<>
-						{calibration === CalibrationState.OUT_OF_SYNC && (
-							<Button onClick={() => approveCalibration(close)}>
-								<FormattedMessage defaultMessage="Approve Calibration" id="calibration.menu.approveCalibration" />
-							</Button>
-						)}
-						{[CalibrationState.CALIBRATED, CalibrationState.OUT_OF_SYNC].includes(calibration) && (
-							<Button onClick={() => handleCalibrateClick(close)}>
-								<FormattedMessage defaultMessage="Recalibrate" id="calibration.menu.recalibrate" />
-							</Button>
-						)}
-						{calibration === CalibrationState.UNCALIBRATED && (
-							<Button onClick={() => handleCalibrateClick(close)}>
-								<FormattedMessage defaultMessage="Calibrate" id="calibration.menu.calibrate" />
-							</Button>
-						)}
-					</>
+			<MenuList>
+				{calibration === CalibrationState.OUT_OF_SYNC && (
+					<EllipsisMenuItem
+						onClick={approveCalibration}
+						title={formatMessage({ defaultMessage: 'Approve Calibration', id: 'calibration.menu.approveCalibration' })}
+					/>
 				)}
-			</ActionMenuContext.Consumer>
+				{[CalibrationState.CALIBRATED, CalibrationState.OUT_OF_SYNC].includes(calibration) && (
+					<EllipsisMenuItem
+						onClick={handleCalibrateClick}
+						title={formatMessage({ defaultMessage: 'Recalibrate', id: 'calibration.menu.recalibrate' })}
+					/>
+				)}
+				{calibration === CalibrationState.UNCALIBRATED && (
+					<EllipsisMenuItem
+						onClick={handleCalibrateClick}
+						title={formatMessage({ defaultMessage: 'Calibrate', id: 'calibration.menu.calibrate' })}
+					/>
+				)}
+			</MenuList>
 		</ActionMenu>
 	);
 };
