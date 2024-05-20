@@ -30,7 +30,6 @@ import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { Gap } from '@controls/gap';
 import { FormSearchSelect } from '@controls/inputs/formInputs.component';
 import { useForm } from 'react-hook-form';
-import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
 
 export const SelectModelForCalibration = ({ drawingId, onClickClose, ...props }) => {
@@ -42,7 +41,6 @@ export const SelectModelForCalibration = ({ drawingId, onClickClose, ...props })
 	const federationsData = useFederationsData();
 	const { handleSubmit, control, watch } = useForm();
 	const model = watch('model');
-	const [, setCalibrationDrawing] = useSearchParam('drawingId');
 	
 	const isLoadingModels = containersData.isListPending || federationsData.isListPending;
 	const containers = containersData.containers.filter((c) => !!c.latestRevision);
@@ -54,8 +52,8 @@ export const SelectModelForCalibration = ({ drawingId, onClickClose, ...props })
 		if (container) {
 			pathParams.revision = container.latestRevision;
 		}
-		history.replace(generatePath(CALIBRATION_VIEWER_ROUTE, pathParams));
-		setCalibrationDrawing(drawingId);
+		const path = generatePath(CALIBRATION_VIEWER_ROUTE, pathParams);
+		history.push(`${path}?drawingId=${drawingId}`);
 		onClickClose();
 	};
 
