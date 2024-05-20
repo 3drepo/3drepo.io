@@ -19,10 +19,11 @@ import { DrawingItem } from './drawingItem/drawingItem.component';
 import { CentredContainer } from '@controls/centredContainer';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
-import { VirtualisedList, TableRow } from './drawingsList.styles';
-import { CardContent, CardList } from '@components/viewer/cards/card.styles';
-import { forwardRef, useContext } from 'react';
-import { ViewerCanvasesContext } from '../../viewerCanvases.context';
+import { VirtualisedList } from './drawingsList.styles';
+import { CardContent, CardList, CardListItem } from '@components/viewer/cards/card.styles';
+import { forwardRef } from 'react';
+import { useHistory, useParams, generatePath } from 'react-router-dom';
+import { CALIBRATION_VIEWER_ROUTE } from '../../../routes.constants';
 
 const Table = forwardRef(({ children, ...props }, ref: any) => (
 	<table ref={ref} {...props}>
@@ -33,13 +34,19 @@ const Table = forwardRef(({ children, ...props }, ref: any) => (
 export const DrawingsList = () => {
 	const drawings = DrawingsHooksSelectors.selectCalibratedDrawings();
 	const isLoading = DrawingsHooksSelectors.selectCalibratedDrawingsHaveStatsPending();
-	const { open2D } = useContext(ViewerCanvasesContext);
+	const params = useParams();
+	const history = useHistory();
 
 	if (isLoading) return (
 		<CentredContainer>
 			<Loader />
 		</CentredContainer>
 	);
+
+	const onDrawingClick = (drawingId) => {
+		const path = generatePath(CALIBRATION_VIEWER_ROUTE, params);
+		history.push(`${path}?drawingId=${drawingId}`);
+	};
 
 	return (
 		// @ts-ignore
@@ -55,7 +62,7 @@ export const DrawingsList = () => {
 				<DrawingItem
 					drawing={drawing}
 					key={drawing._id}
-					onClick={() => open2D(drawing._id)}
+					onClick={() => onDrawingClick(drawing._id)}
 				/>
 			)}
 		/>
