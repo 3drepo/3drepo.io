@@ -21,7 +21,7 @@ import ResizePaneIcon from '@assets/icons/outlined/horizontal_resize-outlined.sv
 import styled from 'styled-components';
 import { ComponentToString } from '@/v5/helpers/react.helper';
 
-export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps>>`
+export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps & { yPos: number }>>`
 	.Resizer {
 		box-sizing: border-box;
 		background-clip: padding-box;
@@ -35,7 +35,6 @@ export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps>
 			background-color: ${({ theme }) => theme.palette.base.light};
 			width: 24px;
 			margin: 0 -12px;
-			cursor: col-resize;
 			border-left: 12px solid transparent;
 			border-right: 11px solid transparent;
 			flex-shrink: 0;
@@ -48,7 +47,7 @@ export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps>
 			}
 
 			// Panel resizer nodule
-			::after {
+			&:hover::after {
 				content: url('data:image/svg+xml;utf8,${ComponentToString(ResizePaneIcon)}');
 				padding-top: 3px;
 				height: 40px;
@@ -57,11 +56,15 @@ export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps>
 				background-color: inherit;
 				box-sizing: border-box;
 				position: absolute;
-				bottom: 140px;
+				top: ${({ yPos }) => yPos - 65}px;
 				align-content: center;
 				text-align: center;
-				transform: translateX(-50%);
+				transform: translate(-50%, -50%);
 			}
 		}
+	}
+
+	.Pane2 {
+		display: contents;
 	}
 `;

@@ -20,7 +20,7 @@ import { Viewer2D } from '@components/viewer/drawingViewer/viewer2D.component';
 import { useLocation } from 'react-router-dom';
 import { SplitPane } from './viewerCanvases.styles';
 import { ViewerCanvasesContext } from '../../viewer/viewerCanvases.context';
-import { useCallback, useContext, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { clamp } from 'lodash';
 
 export const ViewerCanvases = () => {
@@ -29,17 +29,27 @@ export const ViewerCanvases = () => {
 	const { pathname } = useLocation();
 	const { is2DOpen, leftPanelRatio, setLeftPanelRatio } = useContext(ViewerCanvasesContext);
 	const [size, setSize] = useState(windowWidth * leftPanelRatio);
+	const [mouseY, setMouseY] = useState(windowWidth * leftPanelRatio);
 
 	const handleWindowResize = useCallback(({ currentTarget: { innerWidth } }) => {
 		const newSize = clamp(leftPanelRatio * innerWidth, MIN_PANEL_SIZE, innerWidth - MIN_PANEL_SIZE);
 		setSize(newSize);
 	}, [leftPanelRatio]);
-	window.addEventListener('resize', handleWindowResize);
 
 	const onDragResize = (s: number) => {
 		setSize(s);
 		setLeftPanelRatio(s / window.innerWidth);
 	};
+
+	useEffect(() => {
+		if (!is2DOpen) return;
+		window.addEventListener('resize', handleWindowResize);
+		window.addEventListener('pointermove', ({ clientY }) => setMouseY(clientY));
+		return () => {
+			window.removeEventListener('resize', handleWindowResize);
+			window.removeEventListener('pointermove', () => setMouseY(null));
+		};
+	}, [is2DOpen]);
 
 	return (
 		<SplitPane
@@ -48,6 +58,7 @@ export const ViewerCanvases = () => {
 			minSize={MIN_PANEL_SIZE}
 			maxSize={windowWidth - MIN_PANEL_SIZE}
 			onChange={onDragResize}
+			yPos={mouseY}
 		>
 			<Viewer3D location={{ pathname }} />
 			{is2DOpen && <Viewer2D />}
