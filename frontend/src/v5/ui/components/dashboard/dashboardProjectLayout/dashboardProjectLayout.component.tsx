@@ -44,7 +44,7 @@ export const DashboardProjectLayout = ({ children }: IDashboardProjectLayout): J
 			ProjectsActionsDispatchers.setCurrentProject(project);
 		}
 	}, [project]);
-	
+
 	return (
 		<>
 			<AppBar />
