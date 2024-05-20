@@ -19,44 +19,41 @@ import { generatePath, useParams } from 'react-router';
 import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
 import { DRAWINGS_ROUTE, ViewerParams } from '../../../routes.constants';
-import { EmptyPageView } from '@components/shared/emptyPageView/emptyPageView.styles';
 import { Button } from '@controls/button';
 import { Link } from 'react-router-dom';
 import { useSearchParam } from '../../../useSearchParam';
 import { CalibrationHeader } from './calibrationHeader/calibrationHeader.component';
 import { CalibrationStep } from './calibrationStep/calibrationStep.component';
-import { Container } from './calibration.styles';
+import { Container, EmptyPageView } from './calibration.styles';
 
 export const Calibration = () => {
 	const { teamspace, project } = useParams<ViewerParams>();
 	const [drawing] = useSearchParam('drawingId');
-
 	const selectedDrawing = DrawingsHooksSelectors.selectDrawingById(drawing);
-
-	if (!selectedDrawing) {
-		return (
-			<EmptyPageView>
-				<FormattedMessage
-					id="calibration.invalidDrawing"
-					defaultMessage="The selected drawing was not found. Please, go back to the drawings list and select the drawing to calibrate from there."
-				/>
-				<br />
-				<Button variant="contained">
-					<Link to={generatePath(DRAWINGS_ROUTE, { teamspace, project })}>
-						<FormattedMessage
-							id="calibration.invalidDrawing.goToDrawings"
-							defaultMessage="Open drawings"
-						/>
-					</Link>
-				</Button>
-			</EmptyPageView>
-		);
-	}
 
 	return (
 		<Container>
 			<CalibrationHeader />
-			<CalibrationStep />
+			{selectedDrawing
+				? <CalibrationStep />
+				: (
+					<EmptyPageView>
+						<FormattedMessage
+							id="calibration.invalidDrawing"
+							defaultMessage="The selected drawing was not found. Please, go back to the drawings list and select the drawing to calibrate from there."
+						/>
+						<br />
+						<Button variant="contained">
+							<Link to={generatePath(DRAWINGS_ROUTE, { teamspace, project })}>
+								<FormattedMessage
+									id="calibration.invalidDrawing.goToDrawings"
+									defaultMessage="Open drawings"
+								/>
+							</Link>
+						</Button>
+					</EmptyPageView>
+				)
+			}
 		</Container>
 	);
 };
