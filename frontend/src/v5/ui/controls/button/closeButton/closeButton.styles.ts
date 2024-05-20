@@ -19,15 +19,15 @@ import { hexToOpacity } from '@/v5/ui/themes/theme';
 import { BaseCircleButton } from '@controls/circleButton/circleButton.styles';
 import styled from 'styled-components';
 
-export const Button = styled(BaseCircleButton)<{ $variant: 'primary' | 'secondary' }>`
+export const Button = styled(BaseCircleButton)<{ $variant?: 'primary' | 'secondary' }>`
 	color:  ${({ theme: { palette }, $variant }) => $variant === 'primary' ?  palette.primary.contrast : palette.base.main};
 	background-color: ${({ theme: { palette }, $variant }) => $variant === 'primary' ?  hexToOpacity(palette.primary.contrast, 3.9) : palette.primary.contrast};
 	align-self: flex-end;
 	margin-left: auto;
 	box-shadow: ${({ theme }) => theme.palette.shadows.level_3};
 	position: absolute;
-    right: 0;
-    z-index: 1;
+	right: 0;
+	z-index: 1;
 
 	&:hover, &.Mui-focusVisible {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};

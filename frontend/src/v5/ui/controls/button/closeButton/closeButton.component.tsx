@@ -20,7 +20,7 @@ import { Button } from './closeButton.styles';
 import { ButtonProps } from '@mui/material';
 
 type CloseButtonProps = Omit<ButtonProps, 'variant'> & {
-	variant: 'primary' | 'secondary',
+	variant?: 'primary' | 'secondary',
 };
 
 export const CloseButton = ({ variant, ...props }: CloseButtonProps) => (
