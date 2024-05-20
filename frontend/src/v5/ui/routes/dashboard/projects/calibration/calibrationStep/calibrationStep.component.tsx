@@ -38,11 +38,8 @@ export const CalibrationStep = () => {
 		<FakeSplitScreen>
 			{/* Fake viewer waiting for 3d/2d screen split */}
 			<div style={{
-				backgroundImage: 'url("https://preview.free3d.com/img/2015/10/2212620326200674180/a5fnusz4.jpg")',
 				position: 'relative',
-				backgroundSize: 'contain',
-				backgroundRepeat: 'no-repeat',
-				backgroundPosition: 'center',
+				background: 'transparent',
 			}}>
 				<Toolbar />
 				<LeftPanelsButtons>
@@ -70,6 +67,7 @@ export const CalibrationStep = () => {
 					backgroundSize: 'contain',
 					backgroundRepeat: 'no-repeat',
 					backgroundPosition: 'center',
+					backgroundColor: 'white',
 				}}/>
 			)}
 		</FakeSplitScreen>

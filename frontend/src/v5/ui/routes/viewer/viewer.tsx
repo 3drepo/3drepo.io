@@ -32,13 +32,17 @@ import { TicketsCardViews } from './tickets/tickets.constants';
 import { ViewerCanvases } from '../dashboard/viewerCanvases/viewerCanvases.component';
 import { Calibration } from '../dashboard/projects/calibration/calibration.component';
 import { Route } from '@/v5/services/routing/route.component';
+import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
+
 	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
+
 	const isFetching = ViewerHooksSelectors.selectIsFetching();
 
 	const isLoading = isFetching || fetchPending;
+	const isFed = modelIsFederation(containerOrFederation);
 
 	const selectedContainer = ContainersHooksSelectors.selectContainerById(containerOrFederation);
 	const selectedFederation = FederationsHooksSelectors.selectFederationById(containerOrFederation);
@@ -97,7 +101,7 @@ export const Viewer = () => {
 			model: containerOrFederation,
 			project,
 			teamspace,
-			revision,
+			revision: isFed ? undefined : revision,
 		},
 	};
 

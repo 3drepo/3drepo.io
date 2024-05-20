@@ -16,24 +16,33 @@
  */
 
 import { createContext, useState } from 'react';
+import { CALIBRATION_VIEWER_ROUTE, matchesPath } from '../../../routes.constants';
 
 export interface CalibrationContextType {
 	step: number;
 	setStep: (step: number) => void;
 	isStepValid: boolean;
 	setIsStepValid: (isValid: boolean) => void;
+	open: boolean;
 }
 
-const defaultValue: CalibrationContextType = { step: 0, setStep: () => {}, isStepValid: false, setIsStepValid: () => {} };
+const defaultValue: CalibrationContextType = {
+	step: 0,
+	setStep: () => {},
+	isStepValid: false,
+	setIsStepValid: () => {},
+	open: false,
+};
 export const CalibrationContext = createContext(defaultValue);
 CalibrationContext.displayName = 'CalibrationContext';
 
 export const CalibrationContextComponent = ({ children }) => {
 	const [step, setStep] = useState(0);
 	const [isStepValid, setIsStepValid] = useState(false);
+	const open = matchesPath(CALIBRATION_VIEWER_ROUTE);
 
 	return (
-		<CalibrationContext.Provider value={{ step, setStep, isStepValid, setIsStepValid }}>
+		<CalibrationContext.Provider value={{ step, setStep, isStepValid, setIsStepValid, open }}>
 			{children}
 		</CalibrationContext.Provider>
 	);

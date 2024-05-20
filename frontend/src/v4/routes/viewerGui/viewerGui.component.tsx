@@ -21,7 +21,10 @@ import { PureComponent } from 'react';
 import { AdditionalProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { CalibrationContext, CalibrationContextComponent } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { DrawingsListCard } from '@/v5/ui/routes/viewer/drawings/drawingsList/drawingsListCard.component';
+import { Calibration } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.component';
+import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { getViewerLeftPanels, VIEWER_PANELS } from '../../constants/viewerGui';
 import { getWindowHeight, getWindowWidth, renderWhenTrue } from '../../helpers/rendering';
@@ -237,10 +240,22 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 				<CloseFocusModeButton isFocusMode={isFocusMode} />
 				<Container id="gui-container" className={this.props.className} hidden={isFocusMode}>
 					<RevisionsSwitch />
-					{this.renderLeftPanelsButtons()}
-					{this.renderLeftPanels(leftPanels)}
-					{this.renderRightPanels(rightPanels)}
-					{this.renderDraggablePanels(draggablePanels)}
+					<CalibrationContextComponent>
+						<CalibrationContext.Consumer>
+							{({ open }) => open
+								? <Calibration />
+								: (
+									<>
+										<Toolbar />
+										{this.renderLeftPanelsButtons()}
+										{this.renderLeftPanels(leftPanels)}
+										{this.renderRightPanels(rightPanels)}
+										{this.renderDraggablePanels(draggablePanels)}
+									</>
+								)
+							}
+						</CalibrationContext.Consumer>
+					</CalibrationContextComponent>
 					{this.renderViewerLoader(viewer.hasInstance)}
 				</Container>
 			</GuiContainer>

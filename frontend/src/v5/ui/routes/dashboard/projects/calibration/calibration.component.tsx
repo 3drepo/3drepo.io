@@ -16,17 +16,13 @@
  */
 
 import { generatePath, useParams } from 'react-router';
-import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
-import { useContainersData } from '../containers/containers.hooks';
-import { useFederationsData } from '../federations/federations.hooks';
 import { DRAWINGS_ROUTE, ViewerParams } from '../../../routes.constants';
 import { EmptyPageView } from '@components/shared/emptyPageView/emptyPageView.styles';
 import { Button } from '@controls/button';
 import { Link } from 'react-router-dom';
 import { useSearchParam } from '../../../useSearchParam';
-import { CalibrationContextComponent } from './calibrationContext';
 import { CalibrationHeader } from './calibrationHeader/calibrationHeader.component';
 import { CalibrationStep } from './calibrationStep/calibrationStep.component';
 import { Container } from './calibration.styles';
@@ -36,12 +32,6 @@ export const Calibration = () => {
 	const [drawing] = useSearchParam('drawingId');
 
 	const selectedDrawing = DrawingsHooksSelectors.selectDrawingById(drawing);
-	const { isListPending: containersArePending } = useContainersData();
-	const { isListPending: federationsArePending } = useFederationsData();
-	const isLoadingModels = containersArePending || federationsArePending;
-	const isLoadingDrawings = DrawingsHooksSelectors.selectIsListPending();
-
-	if (isLoadingModels || isLoadingDrawings) return (<Loader />);
 
 	if (!selectedDrawing) {
 		return (
@@ -64,11 +54,9 @@ export const Calibration = () => {
 	}
 
 	return (
-		<CalibrationContextComponent>
-			<Container>
-				<CalibrationHeader />
-				<CalibrationStep />
-			</Container>
-		</CalibrationContextComponent>
+		<Container>
+			<CalibrationHeader />
+			<CalibrationStep />
+		</Container>
 	);
 };
