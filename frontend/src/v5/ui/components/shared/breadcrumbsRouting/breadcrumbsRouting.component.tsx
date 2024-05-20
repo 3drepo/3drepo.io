@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { useParams, generatePath, matchPath } from 'react-router-dom';
-import { TeamspacesHooksSelectors, ProjectsHooksSelectors, FederationsHooksSelectors, ContainersHooksSelectors, ContainerRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TeamspacesHooksSelectors, ProjectsHooksSelectors, FederationsHooksSelectors, ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { IProject } from '@/v5/store/projects/projects.types';
 import {
@@ -31,6 +31,8 @@ import {
 	TICKETS_ROUTE,
 	CALIBRATION_VIEWER_ROUTE,
 } from '@/v5/ui/routes/routes.constants';
+import { useSelector } from 'react-redux';
+import { selectRevisions } from '@/v4/modules/model/model.selectors';
 import { formatMessage } from '@/v5/services/intl';
 import { BreadcrumbItem } from '@controls/breadcrumbs/breadcrumbDropdown/breadcrumbDropdown.component';
 import { Breadcrumbs } from '@controls/breadcrumbs';
@@ -47,7 +49,8 @@ export const BreadcrumbsRouting = () => {
 
 	const federations = FederationsHooksSelectors.selectFederations();
 	const containers = ContainersHooksSelectors.selectContainers();
-	const revisions = ContainerRevisionsHooksSelectors.selectRevisions(containerOrFederationId);
+	// Because we are using v4 viewer for now, we use the v4 selector.
+	const revisions = useSelector(selectRevisions);
 	const [drawingId] = useSearchParam('drawingId');
 
 	const isFederation = federations.some(({ _id }) => _id === containerOrFederationId);
