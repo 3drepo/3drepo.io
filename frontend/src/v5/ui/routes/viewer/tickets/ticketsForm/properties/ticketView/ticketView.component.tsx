@@ -131,6 +131,7 @@ export const TicketView = ({
 	};
 
 	useEffect(() => onBlur?.(), [value]);
+	useEffect(() => { imgInModal.current = imgSrc; }, [imgSrc]);
 
 	const onGroupsClick = () => {
 		setDetailViewAndProps(TicketDetailsView.Groups, props);
