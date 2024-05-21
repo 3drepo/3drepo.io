@@ -77,7 +77,7 @@ export const Tickets = () => {
 	}, [containerOrFederation]);
 
 	return (
-		<TicketContextComponent isViewer>
+		<TicketContextComponent isViewer containerOrFederation={containerOrFederation}>
 			{view === TicketsCardViews.List && <TicketsListCard />}
 			{view === TicketsCardViews.Details && <TicketDetailsCard />}
 			{view === TicketsCardViews.New && <NewTicketCard />}

@@ -251,7 +251,7 @@ export const TicketsTable = () => {
 				</SlidePanelHeader>
 				{containerOrFederation && (
 					<MuiThemeProvider theme={theme}>
-						<TicketContextComponent isViewer={false}>
+						<TicketContextComponent isViewer={false} containerOrFederation={containerOrFederation}>
 							{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate} />)}
 							{isNewTicket && (
 								<NewTicketSlide

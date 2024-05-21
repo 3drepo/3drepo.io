@@ -29,6 +29,8 @@ import { useParams } from 'react-router-dom';
 import { TicketBaseKeys, SequencingProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint } from './tickets.types';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
+import { useContext } from 'react';
+import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 
 export const modelIsFederation = (modelId: string) => !!FederationsHooksSelectors.selectFederationById(modelId);
 
@@ -158,7 +160,8 @@ export const isResourceId = (str) => {
 };
 
 export const getImgSrc = (imgData) => {
-	const { teamspace, project, containerOrFederation } = useParams();
+	const { teamspace, project } = useParams();
+	const { containerOrFederation } = useContext(TicketContext);
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 
