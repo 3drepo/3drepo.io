@@ -53,6 +53,8 @@ const toDefaultValue = (preselected) => {
 	// ASSIGNEES is an array so conversion is needed
 	val = key !== IssueProperties.ASSIGNEES ? val : val.split(',').map((v) => v.trim());
 
+	if (!val) return null;
+
 	let preselectedVal = set({}, `properties.${key}`, val );
 
 	// If the preselected value is treatment status, then its on a different path
@@ -110,7 +112,7 @@ export const NewTicketSlide = ({ template, containerOrFederation, preselectedVal
 	useEffect(() => {
 		if (isLoading) return;
 		reset(defaultValues);
-	}, [containerOrFederation, template, isLoading, JSON.stringify(preselectedValue)]);
+	}, [containerOrFederation, template, isLoading]);
 
 	useEffect(() => {
 		onDirtyStateChange(!isEmpty(dirtyFields));
