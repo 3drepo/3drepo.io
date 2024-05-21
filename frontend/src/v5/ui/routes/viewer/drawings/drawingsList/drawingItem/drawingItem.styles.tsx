@@ -18,8 +18,6 @@
 import styled from 'styled-components';
 import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.styles';
 import { DrawingsCalibrationMenu } from '../../drawingCalibrationMenu/drawingCalibrationMenu.component';
-import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
-import { CalibrationState } from '@/v5/store/drawings/drawings.types';
 
 export const MainBody = styled.div`
 	display: flex;
@@ -84,28 +82,17 @@ export const BottomLine = styled.div`
 	}
 `;
  
-export const CalibrationButton = styled(DrawingsCalibrationMenu).attrs({ endIcon: <ChevronIcon /> })`
+export const CalibrationButton = styled(DrawingsCalibrationMenu)`
 	display: flex;
 	justify-content: end;
 
 	.MuiButtonBase-root {
-		border: solid 1px ${({ calibration, theme }) => calibration === CalibrationState.CALIBRATED ? theme.palette.success.light : theme.palette.warning.light};
 		border-radius: 5px;
 		width: 103px;
 		height: 24px;
 		text-transform: none;
 		letter-spacing: unset;
 		font-size: 10px;
-	}
-
-	.MuiButton-endIcon {
-		width: 9px;
-		height: 9px;
-	}
-
-	svg {
-		width: 11px;
-		height: 11px;
 	}
 `;
 

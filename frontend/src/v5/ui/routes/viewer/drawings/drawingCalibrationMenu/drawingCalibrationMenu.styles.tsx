@@ -19,6 +19,7 @@ import styled, { css } from 'styled-components';
 import { CalibrationState } from '@/v5/store/drawings/drawings.types';
 import { CALIBRATION_MAP } from '@/v5/store/drawings/drawings.helpers';
 import { DashboardListItemButton } from '@components/dashboard/dashboardList/dashboardListItem/components';
+import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
 
 const calibratedStyles = css`
 	color: ${({ theme }) => theme.palette.success.main};
@@ -49,12 +50,27 @@ export const CALIBRATION_STYLE = {
 export const DrawingsCalibrationButton = styled(DashboardListItemButton).attrs<{ calibration: CalibrationState }>(({ calibration }) => ({
 	children: CALIBRATION_MAP[calibration]?.label,
 	startIcon: CALIBRATION_MAP[calibration]?.icon,
+	endIcon: <ChevronIcon />,
 }))<{ calibration: string }>`
 	.MuiButtonBase-root {
 		${({ calibration }) => CALIBRATION_STYLE[calibration]}
+		border: solid 1px ${({ calibration, theme }) => {
+		if (calibration === CalibrationState.CALIBRATED) return theme.palette.success.light;
+		if (calibration === CalibrationState.OUT_OF_SYNC) return theme.palette.warning.light;
+		if (calibration === CalibrationState.UNCALIBRATED) return theme.palette.primary.light;
+		return theme.palette.base.light;
+	}};
 	}
+
+	.MuiButton-endIcon {
+		width: 9px;
+		height: 9px;
+	}
+
 	/* Need to set visibility to visible to fix weird bug where icons in bottom list disappear when top list is collapsed */
 	svg {
 		visibility: visible;
+		width: 11px;
+		height: 11px;
 	}
 `;
