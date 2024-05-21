@@ -32,8 +32,6 @@ import { formatMessage } from '@/v5/services/intl';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { PaddedCrossIcon } from '@controls/chip/chip.styles';
-import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { useParams } from 'react-router-dom';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { isEqual } from 'lodash';
 import { useFormContext, useWatch } from 'react-hook-form';
@@ -41,8 +39,7 @@ import { useFormContext, useWatch } from 'react-hook-form';
 const NEW_TICKET_ID = 'temporaryIdForNewTickets';
 
 export const CoordsProperty = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
-	const { isViewer } = useContext(TicketContext);
-	const { containerOrFederation } = useParams<ViewerParams>();
+	const { isViewer, containerOrFederation } = useContext(TicketContext);
 	const [editMode, setEditMode] = useState(false);
 	const prevValue = useRef(undefined);
 	const { getValues } = useFormContext();
