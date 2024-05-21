@@ -65,6 +65,7 @@ export const DrawingsCalibrationButton = styled(DashboardListItemButton).attrs<{
 	.MuiButton-endIcon {
 		width: 9px;
 		height: 9px;
+		margin-top: -2px;
 	}
 
 	/* Need to set visibility to visible to fix weird bug where icons in bottom list disappear when top list is collapsed */
