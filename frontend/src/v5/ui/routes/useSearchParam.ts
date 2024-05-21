@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 
 type Transformer<T> = {
 	from: (param: string) => T,
@@ -40,7 +40,7 @@ export const Transformers = {
 // @ts-ignore
 export const useSearchParam = <T = string>(name: string, transformer: Transformer<T> = Transformers.DEFAULT, pushInHistory?: boolean = false) => {
 	const history = useHistory();
-	const { location } = window;
+	const location = useLocation();
 	const value = transformer.from(new URLSearchParams(location.search).get(name));
 
 	const getSearchParams = (newValue: T, search?: string) => {

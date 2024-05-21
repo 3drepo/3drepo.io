@@ -55,11 +55,13 @@ const paramToInputProps = (value, setter) => ({
 	onChange: (ev: SelectChangeEvent<unknown>) =>  setter((ev.target as HTMLInputElement).value),
 });
 
+
 export const TicketsTable = () => {
 	const history = useHistory();
 	const params = useParams<DashboardTicketsParams>();
 	const { teamspace, project, template, ticketId } = params;
 	const prevTemplate = useRef(undefined);
+
 	const [containersAndFederations, setContainersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY, true);
 	const [showCompleted, setShowCompleted] = useSearchParam('showCompleted', Transformers.BOOLEAN, true);
 	const [groupBy,, setGroupByParam] = useSearchParam('groupBy');
@@ -148,15 +150,13 @@ export const TicketsTable = () => {
 	const isFed = (modelId) => !!selectFederationById(getState(), modelId);
 
 	useEffect(() => {
-		if (!containersAndFederations.length) return;
+		if (!models.length ) return;
 
 		containersAndFederations.forEach((modelId) => {
 			if (selectTicketsHaveBeenFetched(getState(), modelId)) return;
 			TicketsActionsDispatchers.fetchTickets(teamspace, project, modelId, isFed(modelId));
 		});
-	}, [containersAndFederations]);
 
-	useEffect(() => {
 		const subscriptions = containersAndFederations.flatMap((modelId) => {
 			if (isFed(modelId)) {
 				return [
@@ -170,7 +170,7 @@ export const TicketsTable = () => {
 			];
 		});
 		return combineSubscriptions(...subscriptions);
-	}, [containersAndFederations]);
+	}, [models, containersAndFederations]);
 
 	useEffect(() => {
 		JobsActionsDispatchers.fetchJobs(teamspace);
@@ -183,7 +183,6 @@ export const TicketsTable = () => {
 
 	useEffect(() => {
 		if (templates.length) return;
-
 		ProjectsActionsDispatchers.fetchTemplates(teamspace, project);
 	}, []);
 
@@ -238,7 +237,7 @@ export const TicketsTable = () => {
 				</FlexContainer>
 			</FiltersContainer>
 			<TicketsTableContent setTicketValue={setTicketValue} selectedTicketId={ticketId} groupBy={groupBy}/>
-			<SidePanel open={!!ticketId}>
+			<SidePanel open={!!ticketId && !!models.length}>
 				<SlidePanelHeader>
 					<Link to={getOpenInViewerLink()} target="_blank" disabled={isNewTicket}>
 						<OpenInViewerButton disabled={isNewTicket}>

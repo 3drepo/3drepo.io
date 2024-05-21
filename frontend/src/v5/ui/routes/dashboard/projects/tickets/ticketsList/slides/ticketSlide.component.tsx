@@ -17,7 +17,7 @@
 
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { dirtyValues, filterErrors, nullifyEmptyObjects, removeEmptyObjects } from '@/v5/helpers/form.helper';
-import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { enableRealtimeContainerUpdateTicket, enableRealtimeFederationUpdateTicket } from '@/v5/services/realtime/ticket.events';
 import { DialogsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
@@ -31,6 +31,7 @@ import { isEmpty, set } from 'lodash';
 import { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
+import { useSelectedModels } from '../../ticketsTable/newTicketMenu/useSelectedModels';
 
 type TicketSlideProps = {
 	ticketId: string,
@@ -44,6 +45,8 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
 	const templateValidationSchema = getValidators(template);
 	const isAlertOpen = DialogsHooksSelectors.selectIsAlertOpen();
+
+	const models = useSelectedModels();
 
 	const formData = useForm({
 		resolver: yupResolver(templateValidationSchema),
@@ -76,7 +79,7 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 	}, [JSON.stringify(ticket)]);
 
 	useEffect(() => {
-		if (!containerOrFederation) return;
+		if (!containerOrFederation || !models.length) return;
 		TicketsActionsDispatchers.fetchTicket(
 			teamspace,
 			project,
@@ -84,7 +87,7 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 			ticketId,
 			isFederation,
 		);
-	}, [ticketId, containerOrFederation]);
+	}, [ticketId, containerOrFederation, models]);
 
 	useEffect(() => {
 		return isFederation
