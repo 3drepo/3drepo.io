@@ -85,15 +85,6 @@ export const BottomLine = styled.div`
 export const CalibrationButton = styled(DrawingsCalibrationMenu)`
 	display: flex;
 	justify-content: end;
-
-	.MuiButtonBase-root {
-		border-radius: 5px;
-		width: 103px;
-		height: 24px;
-		text-transform: none;
-		letter-spacing: unset;
-		font-size: 10px;
-	}
 `;
 
 export const SkeletonText = styled(SkeletonBlock)`
