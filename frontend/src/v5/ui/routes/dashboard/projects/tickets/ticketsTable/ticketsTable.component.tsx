@@ -17,7 +17,7 @@
 
 import { JobsActionsDispatchers, ProjectsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useStore } from 'react-redux';
 import { selectFederationById } from '@/v5/store/federations/federations.selectors';
 import { FormattedMessage } from 'react-intl';
@@ -58,7 +58,8 @@ const paramToInputProps = (value, setter) => ({
 export const TicketsTable = () => {
 	const history = useHistory();
 	const params = useParams<DashboardTicketsParams>();
-	const { teamspace, project,  template, ticketId } = params;
+	const { teamspace, project, template, ticketId } = params;
+	const prevTemplate = useRef(undefined);
 	const [containersAndFederations, setContainersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY, true);
 	const [showCompleted, setShowCompleted] = useSearchParam('showCompleted', Transformers.BOOLEAN, true);
 	const [groupBy,, setGroupByParam] = useSearchParam('groupBy');
@@ -187,6 +188,8 @@ export const TicketsTable = () => {
 	}, []);
 
 	useEffect(() => {
+		if (prevTemplate.current && ticketId) clearTicketId();
+		prevTemplate.current = template;
 		if (templateAlreadyFetched(selectedTemplate)) return;
 		ProjectsActionsDispatchers.fetchTemplate(teamspace, project, template);
 	}, [template]);

@@ -48,4 +48,4 @@ export const TemplateSelect = ({ isNewTicketDirty, ...props }: TemplateFormSelec
 	);
 };
 
-export  const TemplateFormSelect = (props: InputControllerProps<SelectProps>) => (<InputController Input={TemplateSelect} {...props} />);
+export const TemplateFormSelect = (props: InputControllerProps<SelectProps>) => (<InputController Input={TemplateSelect} {...props} />);
