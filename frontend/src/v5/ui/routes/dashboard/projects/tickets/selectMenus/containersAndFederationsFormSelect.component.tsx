@@ -35,7 +35,7 @@ export const ContainersAndFederationsSelect = ({ isNewTicketDirty, ...props }: C
 		const itemsLength = ids.length;
 		if (itemsLength === 1) {
 			const [id] = ids;
-			return (containers.find(({ _id }) => _id === id) || federations.find(({ _id }) => _id === id)).name;
+			return ((containers.find(({ _id }) => _id === id) || federations.find(({ _id }) => _id === id)) || {}).name;
 		}
 
 		return formatMessage({
