@@ -20,8 +20,8 @@ import { BaseCircleButton } from '@controls/circleButton/circleButton.styles';
 import styled from 'styled-components';
 
 export const Button = styled(BaseCircleButton)<{ $variant?: 'primary' | 'secondary' }>`
-	color:  ${({ theme: { palette }, $variant }) => $variant === 'primary' ?  palette.primary.contrast : palette.base.main};
-	background-color: ${({ theme: { palette }, $variant }) => $variant === 'primary' ?  hexToOpacity(palette.primary.contrast, 3.9) : palette.primary.contrast};
+	color:  ${({ theme: { palette }, $variant }) => $variant === 'secondary' ?  palette.base.main : palette.primary.contrast};
+	background-color: ${({ theme: { palette }, $variant }) => $variant === 'secondary' ? palette.primary.contrast : hexToOpacity(palette.primary.contrast, 3.9)};
 	align-self: flex-end;
 	margin-left: auto;
 	box-shadow: ${({ theme }) => theme.palette.shadows.level_3};
@@ -32,5 +32,6 @@ export const Button = styled(BaseCircleButton)<{ $variant?: 'primary' | 'seconda
 	&:hover, &.Mui-focusVisible {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 		color: ${({ theme }) => theme.palette.secondary.main};
+		box-shadow: ${({ theme }) => theme.palette.shadows.level_3};
 	}
 `;

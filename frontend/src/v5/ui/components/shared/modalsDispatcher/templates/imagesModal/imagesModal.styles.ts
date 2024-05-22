@@ -88,6 +88,7 @@ export const CloseButton = styled(BaseCloseButton)`
 	height: 36px;
 	width: 36px;
 	min-width: 36px;
+	top: 16px;
 	box-sizing: border-box;
 `;
 
