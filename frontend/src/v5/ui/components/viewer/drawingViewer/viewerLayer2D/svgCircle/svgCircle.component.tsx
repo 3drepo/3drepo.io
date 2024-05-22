@@ -15,19 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { Offset } from '../svgArrow/svgArrow.component';
+import { Circle, Svg } from './svgCircle.styles';
 
-export const Container = styled.div`
-	position: absolute;
-	top: 0;
-	z-index: 1;
-`;
-
-export const LayerLevel = styled.div`
-	position: absolute;
-
-	& > * {
-		position: absolute;
-		top: 0;
-	}
-`;
+export const SvgCircle = ({ coords, scale }: { coords: Offset, scale: number }) => (
+	<Svg
+		xmlns="http://www.w3.org/2000/svg"
+		version="1.1"
+		xmlnsXlink="http://www.w3.org/1999/xlink"
+	>
+		<Circle cx={coords[0]} cy={coords[1]} r={4 / scale} strokeWidth={1 / scale} />
+	</Svg>
+);

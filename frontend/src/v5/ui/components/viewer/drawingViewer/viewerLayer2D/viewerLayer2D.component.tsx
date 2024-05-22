@@ -20,6 +20,7 @@ import { Container, LayerLevel } from './viewerLayer2D.styles';
 import { PanZoomHandler } from '../panzoom/centredPanZoom';
 import { isEqual } from 'lodash';
 import { Offset, SvgArrow } from './svgArrow/svgArrow.component';
+import { SvgCircle } from './svgCircle/svgCircle.component';
 
 export type ViewBoxType = ReturnType<PanZoomHandler['getOriginalSize']> & ReturnType<PanZoomHandler['getTransform']>;
 type ViewerLayer2DProps = {
@@ -27,11 +28,10 @@ type ViewerLayer2DProps = {
 	active: boolean,
 };
 export const ViewerLayer2D = ({ viewBox, active }: ViewerLayer2DProps) => {
-	const [offsetStart, setOffsetStart] = useState<Offset | null>(null);
-	const [offsetEnd, setOffsetEnd] = useState<Offset | null>(null);
-	const [isDrawing, setIsDrawing] = useState(false);
-	const previousOffset = useRef<Offset>([0, 0]);
-	const previousViewBox = useRef(null);
+	const [offsetStart, setOffsetStart] = useState<Offset>(null);
+	const [offsetEnd, setOffsetEnd] = useState<Offset>(null);
+	const previousViewBox = useRef<ViewBoxType>(null);
+	const [mousePosition, setMousePosition] = useState<Offset>(null);
 
 	const layerStyle: CSSProperties = {
 		transformOrigin: '0 0',
@@ -50,39 +50,33 @@ export const ViewerLayer2D = ({ viewBox, active }: ViewerLayer2DProps) => {
 
 	const handleMouseDown = () => previousViewBox.current = viewBox;
 
-	const handleMouseUp = (e) => {
+	const handleMouseUp = () => {
 		// check mouse up was fired after dragging or if it was an actual click
 		if (!isEqual(viewBox, previousViewBox.current)) return;
-		const offset = getCursorOffset(e);
 
-		if (isDrawing) {
-			setOffsetEnd(offset);
+		if (offsetEnd) {
+			setOffsetEnd(null);
+			setOffsetStart(mousePosition);
 		} else {
-			setOffsetEnd(offset);
-			setOffsetStart(offset);
-			previousOffset.current = offset;
+			setOffsetEnd(mousePosition);
 		}
-		setIsDrawing(!isDrawing);
 	};
 
 	const handleMouseMove = (e) => {
-		if (isDrawing) {
-			setOffsetEnd(getCursorOffset(e));
-		}
+		setMousePosition(getCursorOffset(e));
 	};
 
 	useEffect(() => {
-		if (isDrawing) {
+		if (!offsetEnd) {
 			setOffsetStart(null);
-			setOffsetEnd(null);
-			setIsDrawing(false);
 		}
 	}, [active]);
 	
 	return (
 		<Container>
 			<LayerLevel style={layerStyle}>
-				{offsetEnd && <SvgArrow start={offsetStart} end={offsetEnd} scale={viewBox.scale} />}
+				{offsetStart && <SvgArrow start={offsetStart} end={offsetEnd ?? mousePosition} scale={viewBox.scale} />}
+				{mousePosition && active && <SvgCircle coords={mousePosition} scale={viewBox.scale} />}
 			</LayerLevel>
 			{active && (
 				<LayerLevel

@@ -17,17 +17,12 @@
 
 import styled from 'styled-components';
 
-export const Container = styled.div`
-	position: absolute;
-	top: 0;
-	z-index: 1;
+export const Svg = styled.svg`
+	height: 100%;
+	width: 100%;
 `;
 
-export const LayerLevel = styled.div`
-	position: absolute;
-
-	& > * {
-		position: absolute;
-		top: 0;
-	}
+export const Circle = styled.circle`
+	stroke: ${({ theme }) => theme.palette.base.dark};
+	fill: ${({ theme }) => theme.palette.tertiary.light};
 `;
