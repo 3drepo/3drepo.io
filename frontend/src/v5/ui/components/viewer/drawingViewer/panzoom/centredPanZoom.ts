@@ -18,7 +18,11 @@
 import { aspectRatio } from '@/v4/helpers/aspectRatio';
 import { Events, PanZoom, panzoom } from './panzoom';
 
-export type PanZoomHandler = PanZoom & { zoomIn : () => void, zoomOut: () => void };
+export type PanZoomHandler = PanZoom & {
+	zoomIn : () => void,
+	zoomOut: () => void,
+	getOriginalSize: () => { width: number, height: number },
+};
 
 export const centredPanZoom = (target: HTMLImageElement | SVGSVGElement, paddingW: number, paddingH: number) => {
 	const targetContainer = target.parentElement;
@@ -84,5 +88,10 @@ export const centredPanZoom = (target: HTMLImageElement | SVGSVGElement, padding
 
 	const zoomOut = () => pz.zoom(1 / 1.5);
 
-	return { ...pz, zoomIn, zoomOut } ;
+	return {
+		...pz,
+		zoomIn,
+		zoomOut,
+		getOriginalSize: () => originalSize,
+	};
 };
