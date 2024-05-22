@@ -82,7 +82,7 @@ export const ViewerLayer2D = ({ viewBox, active }: ViewerLayer2DProps) => {
 	return (
 		<Container>
 			<LayerLevel style={layerStyle}>
-				{offsetEnd && <SvgArrow start={offsetStart} end={offsetEnd} />}
+				{offsetEnd && <SvgArrow start={offsetStart} end={offsetEnd} scale={viewBox.scale} />}
 			</LayerLevel>
 			{active && (
 				<LayerLevel
