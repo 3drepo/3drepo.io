@@ -18,7 +18,7 @@
 import { formatMessage } from '@/v5/services/intl';
 import { ToolbarButton } from '@/v5/ui/routes/viewer/toolbar/buttons/toolbarButton.component';
 import { ToolbarContainer, MainToolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.styles';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ZoomOutIcon from '@assets/icons/viewer/zoom_out.svg';
 import ZoomInIcon from '@assets/icons/viewer/zoom_in.svg';
 
@@ -26,13 +26,18 @@ import { PanZoomHandler, centredPanZoom } from './panzoom/centredPanZoom';
 import { DrawingViewerContainer } from './drawingViewer.styles';
 import { Events } from './panzoom/panzoom';
 import { DrawingViewerImage } from './drawingViewerImage/drawingViewerImage.component';
+import CalibrationIcon from '@assets/icons/filled/calibration-filled.svg';
+import { ViewBoxType } from './viewerLayer2D/viewerLayer2D.component';
 
+const DEFAULT_VIEWBOX = { scale: 1, x: 0, y: 0, width: 0, height: 0 };
 export const DrawingViewer = () => {
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
+	const [viewBox, setViewBox] = useState<ViewBoxType>(DEFAULT_VIEWBOX);
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
+	const [isDrawingVector, setIsDrawingVector] = useState(true);
 
-	const imgRef = useRef<HTMLImageElement | SVGSVGElement>();
+	const imgRef = useRef<HTMLImageElement>();
 
 	const onClickZoomIn = () => {
 		zoomHandler.zoomIn();
@@ -49,19 +54,44 @@ export const DrawingViewer = () => {
 
 		const pz = centredPanZoom(imgRef.current, 20, 20);
 		setZoomHandler(pz);
-		pz.on(Events.transform, () => {
-			const cantZoomOut = pz.getMinZoom() >= pz.getTransform().scale;
-			const cantZoomIn = pz.getMaxZoom() <= pz.getTransform().scale;
+	};
+
+	const onImageUnload = () => setZoomHandler(null);
+
+	const onCalibrationClick = () => setIsDrawingVector(!isDrawingVector);
+
+	useEffect(() => {
+		if (!zoomHandler) return;
+		zoomHandler.on(Events.transform, () => {
+			const transform = zoomHandler.getTransform();
+			const { scale } = transform;
+			const cantZoomOut = zoomHandler.getMinZoom() >= scale;
+			const cantZoomIn = zoomHandler.getMaxZoom() <= scale;
 			setIsMinZoom(cantZoomOut);
 			setIsMaxZoom(cantZoomIn);
+			setViewBox({ ...transform, ...zoomHandler.getOriginalSize() });
 		});
-	};
+	}, [zoomHandler]);
 
 	return (
 		<DrawingViewerContainer id="viewer">
-			<DrawingViewerImage ref={imgRef} onLoad={onImageLoad} />
+			<DrawingViewerImage
+				ref={imgRef}
+				onLoad={onImageLoad}
+				onUnload={onImageUnload}
+				isDrawing={isDrawingVector}
+				viewBox={viewBox}
+			/>
 			<ToolbarContainer>
 				<MainToolbar>
+					{zoomHandler && (
+						<ToolbarButton
+							Icon={CalibrationIcon}
+							onClick={onCalibrationClick}
+							title={formatMessage({ id: 'drawingViewer.toolbar.calibrate', defaultMessage: 'Calibrate' })}
+							selected={isDrawingVector}
+						/>
+					)}
 					<ToolbarButton
 						Icon={ZoomOutIcon}
 						onClick={onClickZoomOut}
