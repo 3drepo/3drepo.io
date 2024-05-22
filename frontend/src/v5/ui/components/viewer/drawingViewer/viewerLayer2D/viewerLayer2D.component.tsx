@@ -75,6 +75,7 @@ export const ViewerLayer2D = ({ viewBox, active }: ViewerLayer2DProps) => {
 		if (isDrawing) {
 			setOffsetStart(null);
 			setOffsetEnd(null);
+			setIsDrawing(false);
 		}
 	}, [active]);
 	
