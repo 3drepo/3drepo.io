@@ -56,8 +56,6 @@ export const DrawingViewer = () => {
 		setZoomHandler(pz);
 	};
 
-	const onImageUnload = () => setZoomHandler(null);
-
 	const onCalibrationClick = () => setIsDrawingVector(!isDrawingVector);
 
 	useEffect(() => {
@@ -78,20 +76,17 @@ export const DrawingViewer = () => {
 			<DrawingViewerImage
 				ref={imgRef}
 				onLoad={onImageLoad}
-				onUnload={onImageUnload}
 				isDrawing={isDrawingVector}
 				viewBox={viewBox}
 			/>
 			<ToolbarContainer>
 				<MainToolbar>
-					{zoomHandler && (
-						<ToolbarButton
-							Icon={CalibrationIcon}
-							onClick={onCalibrationClick}
-							title={formatMessage({ id: 'drawingViewer.toolbar.calibrate', defaultMessage: 'Calibrate' })}
-							selected={isDrawingVector}
-						/>
-					)}
+					<ToolbarButton
+						Icon={CalibrationIcon}
+						onClick={onCalibrationClick}
+						title={formatMessage({ id: 'drawingViewer.toolbar.calibrate', defaultMessage: 'Calibrate' })}
+						selected={isDrawingVector}
+					/>
 					<ToolbarButton
 						Icon={ZoomOutIcon}
 						onClick={onClickZoomOut}

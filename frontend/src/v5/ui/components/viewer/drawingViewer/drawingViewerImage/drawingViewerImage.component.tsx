@@ -23,11 +23,10 @@ import { ViewBoxType, ViewerLayer2D } from '../viewerLayer2D/viewerLayer2D.compo
 
 type DrawingViewerImageProps = {
 	onLoad: (...args) => void,
-	onUnload?: () => void,
 	viewBox: ViewBoxType,
 	isDrawing: boolean,
 };
-export const DrawingViewerImage = forwardRef(({ onLoad, onUnload, isDrawing, viewBox }: DrawingViewerImageProps, ref: any) => {
+export const DrawingViewerImage = forwardRef(({ onLoad, isDrawing, viewBox }: DrawingViewerImageProps, ref: any) => {
 	const [drawingId] = useSearchParam('drawingId');
 	const [isLoading, setIsLoading] = useState(true);
 	const src = getDrawingImageSrc(drawingId);
@@ -35,7 +34,6 @@ export const DrawingViewerImage = forwardRef(({ onLoad, onUnload, isDrawing, vie
 	useEffect(() => {
 		setIsLoading(true);
 		fetch(src).then(() => setIsLoading(false));
-		return () => onUnload?.();
 	}, [drawingId]);
 
 	if (isLoading) return <Loader />;
