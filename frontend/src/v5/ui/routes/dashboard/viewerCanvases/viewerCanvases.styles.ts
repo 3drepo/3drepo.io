@@ -21,13 +21,13 @@ import ResizePaneIcon from '@assets/icons/outlined/horizontal_resize-outlined.sv
 import styled from 'styled-components';
 import { ComponentToString } from '@/v5/helpers/react.helper';
 
-export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps & { yPos: number }>>`
+export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps & { mouseY: number }>>`
 	.Resizer {
 		box-sizing: border-box;
 		background-clip: padding-box;
 		z-index: 1;
 
-		// Hide nodule when 2d viewer is hidden
+		/* Hide nodule when 2d viewer is hidden */
 		&:has(+ .Pane2:empty) {
 			display: none;
 		}
@@ -46,8 +46,8 @@ export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps 
 				background-color: ${({ theme }) => theme.palette.tertiary.mid};
 			}
 
-			// Panel resizer nodule
-			&:hover::after {
+			/* Panel resizer nodule */
+			:is(&:hover, &:active)::after {
 				content: url('data:image/svg+xml;utf8,${ComponentToString(ResizePaneIcon)}');
 				padding-top: 3px;
 				height: 40px;
@@ -56,7 +56,7 @@ export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps 
 				background-color: inherit;
 				box-sizing: border-box;
 				position: absolute;
-				top: ${({ yPos }) => yPos - 65}px;
+				top: ${({ mouseY }) => mouseY - 65}px;
 				align-content: center;
 				text-align: center;
 				transform: translate(-50%, -50%);
@@ -64,6 +64,10 @@ export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps 
 		}
 	}
 
+	.Pane1 { 
+		min-width: 68px;
+		max-width: calc(100% - 68px);
+	}
 	.Pane2 {
 		display: contents;
 	}
