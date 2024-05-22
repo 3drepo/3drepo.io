@@ -38,6 +38,7 @@ export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps 
 			border-left: 12px solid transparent;
 			border-right: 11px solid transparent;
 			flex-shrink: 0;
+			cursor: pointer;
 
 			&:hover {
 				background-color: ${({ theme }) => theme.palette.tertiary.light};
