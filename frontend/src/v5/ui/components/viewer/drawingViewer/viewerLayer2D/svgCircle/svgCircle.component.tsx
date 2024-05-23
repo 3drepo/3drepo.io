@@ -19,7 +19,8 @@ import { mapValues } from 'lodash';
 import { Offset } from '../svgArrow/svgArrow.component';
 import { Circle, Svg } from './svgCircle.styles';
 
-export const SvgCircle = ({ coords, scale }: { coords: Offset, scale: number }) => {
+type SvgCircleProps = { coords: Offset, scale: number };
+export const SvgCircle = ({ coords, scale }: SvgCircleProps) => {
 	const measures = mapValues({
 		strokeWidth: 1,
 		radius: 3,
