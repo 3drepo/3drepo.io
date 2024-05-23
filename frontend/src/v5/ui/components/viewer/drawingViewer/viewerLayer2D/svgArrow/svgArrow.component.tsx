@@ -57,6 +57,7 @@ export const SvgArrow = ({ start, end, scale }: { start: Offset, end: Offset, sc
 					${arrowHeaderX1 - (Math.cos(perpedicularAngle) * measures.arrowHeadHalfWidth)}
 					${arrowHeaderY1 - (Math.sin(perpedicularAngle) * measures.arrowHeadHalfWidth)}
 				`}
+				strokeWidth={0}
 			/>
 			{/* Arrow line */}
 			<line
@@ -67,7 +68,7 @@ export const SvgArrow = ({ start, end, scale }: { start: Offset, end: Offset, sc
 				strokeWidth={measures.arrowWidth}
 			/>
 			{/* Base */}
-			<circle cx={x1} cy={y1} r={measures.circleRadius} />
+			<circle cx={x1} cy={y1} r={measures.circleRadius} strokeWidth={0} />
 			<CrossLine
 				x1={x1 + measures.cirleLineHalfLength}
 				y1={y1}

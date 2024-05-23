@@ -75,8 +75,8 @@ export const ViewerLayer2D = ({ viewBox, active }: ViewerLayer2DProps) => {
 	return (
 		<Container>
 			<LayerLevel style={layerStyle}>
-				{offsetStart && <SvgArrow start={offsetStart} end={offsetEnd ?? mousePosition} scale={viewBox.scale} />}
 				{mousePosition && active && <SvgCircle coords={mousePosition} scale={viewBox.scale} />}
+				{offsetStart && <SvgArrow start={offsetStart} end={offsetEnd ?? mousePosition} scale={viewBox.scale} />}
 			</LayerLevel>
 			{active && (
 				<LayerLevel
