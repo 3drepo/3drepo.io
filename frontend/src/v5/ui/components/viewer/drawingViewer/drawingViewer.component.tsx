@@ -58,6 +58,11 @@ export const DrawingViewer = () => {
 
 	const onCalibrationClick = () => setIsDrawingVector(!isDrawingVector);
 
+	// eslint-disable-next-line
+	const onDrawArrow = (arrow) => {
+		
+	};
+
 	useEffect(() => {
 		if (!zoomHandler) return;
 		zoomHandler.on(Events.transform, () => {
@@ -76,6 +81,7 @@ export const DrawingViewer = () => {
 			<DrawingViewerImage
 				ref={imgRef}
 				onLoad={onImageLoad}
+				onDrawArrow={onDrawArrow}
 				isDrawing={isDrawingVector}
 				viewBox={viewBox}
 			/>

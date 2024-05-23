@@ -23,10 +23,11 @@ import { ViewBoxType, ViewerLayer2D } from '../viewerLayer2D/viewerLayer2D.compo
 
 type DrawingViewerImageProps = {
 	onLoad: (...args) => void,
+	onDrawArrow?: (arrow) => void;
 	viewBox: ViewBoxType,
 	isDrawing: boolean,
 };
-export const DrawingViewerImage = forwardRef(({ onLoad, isDrawing, viewBox }: DrawingViewerImageProps, ref: any) => {
+export const DrawingViewerImage = forwardRef(({ onLoad, onDrawArrow, isDrawing, viewBox }: DrawingViewerImageProps, ref: any) => {
 	const [drawingId] = useSearchParam('drawingId');
 	const [isLoading, setIsLoading] = useState(true);
 	const src = getDrawingImageSrc(drawingId);
@@ -41,7 +42,7 @@ export const DrawingViewerImage = forwardRef(({ onLoad, isDrawing, viewBox }: Dr
 	return (
 		<>
 			<img src={src} ref={ref} onLoad={onLoad} />
-			<ViewerLayer2D active={isDrawing} viewBox={viewBox} />
+			<ViewerLayer2D active={isDrawing} viewBox={viewBox} onChange={onDrawArrow} />
 		</>
 	);
 });

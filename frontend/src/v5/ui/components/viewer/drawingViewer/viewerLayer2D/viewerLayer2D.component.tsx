@@ -26,8 +26,9 @@ export type ViewBoxType = ReturnType<PanZoomHandler['getOriginalSize']> & Return
 type ViewerLayer2DProps = {
 	viewBox: ViewBoxType,
 	active: boolean,
+	onChange?: (arrow: { start: Offset, end: Offset }) => void;
 };
-export const ViewerLayer2D = ({ viewBox, active }: ViewerLayer2DProps) => {
+export const ViewerLayer2D = ({ viewBox, active, onChange }: ViewerLayer2DProps) => {
 	const [offsetStart, setOffsetStart] = useState<Offset>(null);
 	const [offsetEnd, setOffsetEnd] = useState<Offset>(null);
 	const previousViewBox = useRef<ViewBoxType>(null);
@@ -59,6 +60,7 @@ export const ViewerLayer2D = ({ viewBox, active }: ViewerLayer2DProps) => {
 			setOffsetStart(mousePosition);
 		} else {
 			setOffsetEnd(mousePosition);
+			onChange?.({ start: offsetStart, end: mousePosition });
 		}
 	};
 
