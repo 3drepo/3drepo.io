@@ -87,7 +87,7 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 			ticketId,
 			isFederation,
 		);
-	}, [ticketId, containerOrFederation, models]);
+	}, [ticketId, containerOrFederation, models.length]);
 
 	useEffect(() => {
 		return isFederation

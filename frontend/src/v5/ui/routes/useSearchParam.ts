@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
 type Transformer<T> = {
@@ -41,9 +42,11 @@ export const Transformers = {
 export const useSearchParam = <T = string>(name: string, transformer: Transformer<T> = Transformers.DEFAULT, pushInHistory?: boolean = false) => {
 	const history = useHistory();
 	const location = useLocation();
-	const value = transformer.from(new URLSearchParams(location.search).get(name));
-
-	const getSearchParams = (newValue: T, search?: string) => {
+	const unprocessedValue = new URLSearchParams(location.search).get(name);
+	
+	const value = useMemo(() => transformer.from(unprocessedValue), [unprocessedValue]);
+	
+	const getSearchParams = useCallback((newValue: T, search?: string) => {
 		const searchParams = new URLSearchParams(search || location.search);
 		const transformedNewValue = transformer.to(newValue);
 		if (transformedNewValue) {
@@ -53,9 +56,9 @@ export const useSearchParam = <T = string>(name: string, transformer: Transforme
 		}
 
 		return searchParams.toString();
-	};
+	}, [name, history, location.search]);
 
-	const setParam = (newValue: T) => {
+	const setParam = useCallback((newValue: T) => {
 		const search = getSearchParams(newValue);
 
 		if (pushInHistory) {
@@ -63,7 +66,7 @@ export const useSearchParam = <T = string>(name: string, transformer: Transforme
 		} else {
 			history.replace({ search });
 		}
-	};
+	}, [getSearchParams]);
 
 	return [value, setParam, getSearchParams] as [T, (val?: T) => void,  (val?: T, search?: string) => string];
 };

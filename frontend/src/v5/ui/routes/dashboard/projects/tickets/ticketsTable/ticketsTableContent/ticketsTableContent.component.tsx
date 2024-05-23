@@ -52,7 +52,7 @@ export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy 
 		);
 	}
 
-	if (groupBy === NONE_OPTION) {
+	if (groupBy === NONE_OPTION || !groupBy) {
 		return (
 			<TicketsTableGroup
 				tickets={filteredItems}
