@@ -34,7 +34,7 @@ export const ViewerLayer2D = ({ viewBox, active, onChange }: ViewerLayer2DProps)
 	const previousViewBox = useRef<ViewBoxType>(null);
 	const [mousePosition, setMousePosition] = useState<Offset>(null);
 
-	const layerStyle: CSSProperties = {
+	const containerStyle: CSSProperties = {
 		transformOrigin: '0 0',
 		transform: `matrix(${viewBox.scale}, 0, 0, ${viewBox.scale}, ${viewBox.x}, ${viewBox.y})`,
 		width: `${viewBox.width}px`,
@@ -75,8 +75,8 @@ export const ViewerLayer2D = ({ viewBox, active, onChange }: ViewerLayer2DProps)
 	}, [active]);
 	
 	return (
-		<Container>
-			<LayerLevel style={layerStyle}>
+		<Container style={containerStyle}>
+			<LayerLevel>
 				{mousePosition && active && <SvgCircle coords={mousePosition} scale={viewBox.scale} />}
 				{offsetStart && <SvgArrow start={offsetStart} end={offsetEnd ?? mousePosition} scale={viewBox.scale} />}
 			</LayerLevel>
@@ -85,7 +85,6 @@ export const ViewerLayer2D = ({ viewBox, active, onChange }: ViewerLayer2DProps)
 					onMouseUp={handleMouseUp}
 					onMouseDown={handleMouseDown}
 					onMouseMove={handleMouseMove}
-					style={layerStyle}
 				/>
 			)}
 		</Container>

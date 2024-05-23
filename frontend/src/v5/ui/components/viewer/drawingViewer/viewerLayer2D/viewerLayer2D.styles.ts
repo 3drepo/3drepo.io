@@ -25,6 +25,8 @@ export const Container = styled.div`
 
 export const LayerLevel = styled.div`
 	position: absolute;
+	height: 100%;
+	width: 100%;
 
 	& > * {
 		position: absolute;
