@@ -135,8 +135,8 @@ export const groupTickets = (groupBy: string, tickets: ITicket[]): Record<string
 		case IssueProperties.DUE_DATE:
 			return groupByDate(tickets);
 		case BaseProperties.STATUS:
-			const { modelId, type } = tickets[0];
-			const config: IStatusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(modelId, type);
+			const { type } = tickets[0];
+			const config: IStatusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(type);
 			const labels = config.values.map(({ name, label }) => label || name);
 			return groupByList(tickets, groupBy, labels);
 		default:
