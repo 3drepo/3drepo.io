@@ -18,57 +18,27 @@
 import { SearchContext } from '@controls/search/searchContext';
 import { useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import _ from 'lodash';
 import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
-import { IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { TicketsTableGroup } from './ticketsTableGroup/ticketsTableGroup.component';
-import { GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE, groupTickets, ISSUE_PROPERTIES_GROUPS, NONE_OPTION, SAFETIBASE_PROPERTIES_GROUPS, UNSET } from '../ticketsTable.helper';
+import {  groupTickets, NEW_TICKET_ID, NONE_OPTION, SetTicketValue, UNSET } from '../ticketsTable.helper';
 import { EmptyTicketsView } from '../../emptyTicketsView/emptyTicketsView.styles';
 import { Container, Title } from './ticketsTableContent.styles';
 
 type TicketsTableContentProps = {
-	setSidePanelData: (modelId: string, ticket?: Partial<ITicket>) => void;
+	setTicketValue: SetTicketValue;
+	groupBy: string
 	selectedTicketId?: string;
 };
-export const TicketsTableContent = ({ setSidePanelData, selectedTicketId }: TicketsTableContentProps) => {
+export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy }: TicketsTableContentProps) => {
 	const { filteredItems } = useContext(SearchContext);
-	const { groupBy: groupByAsURLParam, template } = useParams<DashboardTicketsParams>();
-	const groupBy = GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE[groupByAsURLParam];
-
+	const { template } = useParams<DashboardTicketsParams>();
+	
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
-		if (groupByValue === UNSET) {
-			setSidePanelData(modelId, {});
-			return;
-		}
-
-		const defaultValue = {} as any;
-		const formattedGroupByValue = _.upperCase(groupByValue).replaceAll(' ', '_');
-
-		if (groupBy === SafetibaseProperties.TREATMENT_STATUS) {
-			defaultValue.modules = {
-				safetibase: {
-					[groupBy]: SAFETIBASE_PROPERTIES_GROUPS[groupBy][formattedGroupByValue],
-				},
-			};
-		}
-
-		if (groupBy in ISSUE_PROPERTIES_GROUPS) {
-			defaultValue.properties = {
-				[groupBy]: ISSUE_PROPERTIES_GROUPS[groupBy][formattedGroupByValue],
-			};
-		}
-
-		if (groupBy === IssueProperties.ASSIGNEES) {
-			defaultValue.properties = {
-				[groupBy]: groupByValue.split(', '),
-			};
-		}
-
-		setSidePanelData(modelId, defaultValue);
+		setTicketValue(modelId, NEW_TICKET_ID, (groupByValue === UNSET) ? null : groupByValue);
 	};
 
 	if (!filteredItems.length) {
@@ -82,12 +52,12 @@ export const TicketsTableContent = ({ setSidePanelData, selectedTicketId }: Tick
 		);
 	}
 
-	if (groupBy === NONE_OPTION) {
+	if (groupBy === NONE_OPTION || !groupBy) {
 		return (
 			<TicketsTableGroup
-				ticketsWithModelIdAndName={filteredItems}
+				tickets={filteredItems}
 				onNewTicket={onGroupNewTicket('')}
-				onEditTicket={setSidePanelData}
+				onEditTicket={setTicketValue}
 				selectedTicketId={selectedTicketId}
 			/>
 		);
@@ -97,21 +67,21 @@ export const TicketsTableContent = ({ setSidePanelData, selectedTicketId }: Tick
 
 	return (
 		<Container>
-			{_.entries(groups).map(([groupName, ticketsWithModelIdAndName]) => (
+			{_.entries(groups).map(([groupName, tickets]) => (
 				<DashboardListCollapse
 					title={(
 						<>
 							<Title>{groupName}</Title>
-							<CircledNumber disabled={!ticketsWithModelIdAndName.length}>{ticketsWithModelIdAndName.length}</CircledNumber>
+							<CircledNumber disabled={!tickets.length}>{tickets.length}</CircledNumber>
 						</>
 					)}
-					defaultExpanded={!!ticketsWithModelIdAndName.length}
-					key={groupBy + groupName + template + ticketsWithModelIdAndName}
+					defaultExpanded={!!tickets.length}
+					key={groupBy + groupName + template + tickets}
 				>
 					<TicketsTableGroup
-						ticketsWithModelIdAndName={ticketsWithModelIdAndName}
+						tickets={tickets}
 						onNewTicket={onGroupNewTicket(groupName)}
-						onEditTicket={setSidePanelData}
+						onEditTicket={setTicketValue}
 						selectedTicketId={selectedTicketId}
 					/>
 				</DashboardListCollapse>

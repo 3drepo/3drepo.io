@@ -61,6 +61,7 @@ YupHelper.types.strings.longDescription = Yup.string().min(1).max(1200);
 
 YupHelper.types.timestamp = Yup.number().min(new Date(2000, 1, 1).getTime()).integer()
 	.transform((value, originalValue) => {
+		if (originalValue === null) return null;
 		const ts = new Date(originalValue).getTime();
 		return ts > 0 ? ts : value;
 	})
@@ -103,10 +104,17 @@ YupHelper.types.strings.email = Yup.string().email();
 YupHelper.types.strings.name = Yup.string().min(1).max(35);
 
 YupHelper.types.date = Yup.date().transform((n, orgVal) => {
+	if (orgVal === null) return orgVal;
 	const valAsNum = Number(orgVal);
 	return new Date(
 		Number.isNaN(valAsNum) ? orgVal : valAsNum);
 });
+
+YupHelper.types.dateInThePast = YupHelper.types.date.test(('date-in-the-past', 'Date must be in the past', (v, { createError, path }) => {
+	const now = new Date();
+	if (!v || (now - v) >= 0) return true;
+	return createError({ message: `${path || 'Date'} must be in the past` });
+}));
 
 const imageValidityTests = (yupType, isNullable) => yupType.test('image-validity-test', 'Image is not valid', async (value, { createError, originalValue }) => {
 	if (isUUIDString(originalValue)) {

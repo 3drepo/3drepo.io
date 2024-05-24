@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { ExpandableImage as ExpandableImageBase } from '@controls/expandableImage/expandableImage.component';
+import { CommentImage as CommentImageBase } from '@/v5/ui/routes/viewer/tickets/ticketsForm/commentsPanel/commentImage/commentImage.component';
 import CameraIconBase from '@assets/icons/outlined/camera-outlined.svg';
 import { CommentMarkDown as CommentMarkDownBase } from '../commentMarkDown/commentMarkDown.component';
 
@@ -33,7 +33,7 @@ export const OriginalMessage = styled.div`
 	display: inline-block;
 `;
 
-export const ExpandableImage = styled(ExpandableImageBase)`
+export const CommentImage = styled(CommentImageBase)`
 	min-width: 67px;
 	height: 67px;
 `;

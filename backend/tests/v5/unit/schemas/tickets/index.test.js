@@ -18,12 +18,15 @@ const { times, cloneDeep } = require('lodash');
 
 const { src, image } = require('../../../helper/path');
 const {
+	determineTestGroup,
 	generateGroup,
 	generateRandomString,
 	generateRandomNumber,
 	generateUUID,
 	generateUUIDString,
 	generateRandomDate,
+	generateTemplate,
+	generateTicket,
 } = require('../../../helper/services');
 
 const FS = require('fs');
@@ -33,6 +36,9 @@ const TemplateSchema = require(`${src}/schemas/tickets/templates`);
 
 jest.mock('../../../../../src/v5/models/jobs');
 const JobsModel = require(`${src}/models/jobs`);
+
+jest.mock('../../../../../src/v5/models/tickets');
+const TicketsModel = require(`${src}/models/tickets`);
 
 const { isEqual, deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
@@ -58,6 +64,9 @@ const testPropertyTypes = (testData, moduleProperty, isNewTicket = true) => {
 		(desc, schema, goodTest, badTest) => {
 			test(desc, async () => {
 				const teamspace = generateRandomString();
+				const project = generateRandomString();
+				const model = generateRandomString();
+
 				const fieldName = generateRandomString();
 				const propArr = [
 					{
@@ -66,6 +75,7 @@ const testPropertyTypes = (testData, moduleProperty, isNewTicket = true) => {
 					},
 				];
 				const template = {
+					_id: generateUUID(),
 					properties: moduleProperty ? [] : propArr,
 					modules: moduleProperty ? [
 						{
@@ -82,21 +92,21 @@ const testPropertyTypes = (testData, moduleProperty, isNewTicket = true) => {
 
 					const oldTicket = isNewTicket ? undefined : {
 						title: generateRandomString(),
-						type: generateUUID(),
+						type: template._id,
 						properties: {},
 						modules: {},
 					};
 
 					const fullData = ({
 						title: generateRandomString(),
-						type: generateUUID(),
+						type: template._id,
 						properties: moduleProperty ? {} : propObj,
 						modules: moduleProperty ? {
 							[presetModules.SEQUENCING]: propObj,
 						} : {},
 					});
 
-					await TicketSchema.validateTicket(teamspace, template, fullData, oldTicket);
+					await TicketSchema.validateTicket(teamspace, project, model, template, fullData, oldTicket);
 				};
 
 				if (goodTest !== undefined) await expect(runTest(goodTest)).resolves.toBeUndefined();
@@ -106,73 +116,112 @@ const testPropertyTypes = (testData, moduleProperty, isNewTicket = true) => {
 		});
 };
 
-const testPropertyConditions = (testData, moduleProperty, isNewTicket) => {
-	describe.each(
-		testData,
-	)(`${moduleProperty ? '[Modules] ' : ''}Property Conditions`, (desc, schema, succeed, input, output) => {
-		test(desc, async () => {
-			const teamspace = generateRandomString();
-			const fieldName = generateRandomString();
-			const modName = generateRandomString();
-			const propArr = [
-				{
-					name: fieldName,
-					...schema,
-				},
-			];
-			const template = {
-				properties: moduleProperty ? [] : propArr,
-				modules: moduleProperty ? [
+const testPropertyConditions = () => {
+	const testFn = (testData, moduleProperty, isNewTicket) => {
+		describe.each(
+			testData,
+		)(`${moduleProperty ? '[Modules] ' : ''}Property Conditions`, (desc, schema, succeed, input, output) => {
+			test(desc, async () => {
+				const fieldName = generateRandomString();
+				const teamspace = generateRandomString();
+				const project = generateRandomString();
+				const model = generateRandomString();
+				const modName = generateRandomString();
+				const propArr = [
 					{
-						name: modName,
-						properties: propArr,
+						name: fieldName,
+						...schema,
 					},
-				] : [],
-			};
+				];
+				const template = {
+					_id: generateUUID(),
+					properties: moduleProperty ? [] : propArr,
+					modules: moduleProperty ? [
+						{
+							name: modName,
+							properties: propArr,
+						},
+					] : [],
+				};
 
-			const propObjIn = input === undefined ? {} : { [fieldName]: input };
+				const propObjIn = input === undefined ? {} : { [fieldName]: input };
 
-			const oldTicket = isNewTicket ? undefined : {
-				title: generateRandomString(),
-				type: generateRandomString(),
-				properties: {},
-				modules: {},
-			};
+				const oldTicket = isNewTicket ? undefined : {
+					title: generateRandomString(),
+					type: template._id,
+					properties: {
+						[fieldName]: generateRandomString(),
+					},
+					modules: moduleProperty ? {
+						[modName]: {
+							[fieldName]: generateRandomString(),
+						},
+					} : {},
+				};
 
-			const fullData = ({
-				title: isNewTicket ? generateRandomString() : undefined,
-				type: isNewTicket ? generateRandomString() : undefined,
-				properties: moduleProperty ? {} : propObjIn,
-				modules: moduleProperty ? { [modName]: propObjIn } : {},
-			});
-
-			if (succeed) {
-				const propObjOut = output === undefined ? {} : { [fieldName]: output };
-				const outData = ({
-					...fullData,
-					properties: moduleProperty ? {} : propObjOut,
-					modules: moduleProperty && output
-						? deleteIfUndefined({ [modName]: isEqual(propObjOut, {}) ? undefined : propObjOut }) : {},
+				const fullData = ({
+					title: isNewTicket ? generateRandomString() : undefined,
+					type: isNewTicket ? template._id : undefined,
+					properties: moduleProperty ? {} : propObjIn,
+					modules: moduleProperty ? { [modName]: propObjIn } : {},
 				});
 
-				await expect(TicketSchema.validateTicket(teamspace, template, fullData, oldTicket))
-					.resolves.toEqual(outData);
-			} else {
-				await expect(TicketSchema.validateTicket(teamspace, template, fullData, oldTicket)
-					.catch(() => Promise.reject())).rejects.toBeUndefined();
-			}
+				if (succeed) {
+					const propObjOut = output === undefined ? {} : { [fieldName]: output };
+					const outData = ({
+						...fullData,
+						properties: moduleProperty ? {} : propObjOut,
+						modules: moduleProperty && output
+							? deleteIfUndefined({ [modName]: isEqual(propObjOut, {}) ? undefined : propObjOut }) : {},
+					});
+
+					await expect(TicketSchema.validateTicket(teamspace, project, model, template, fullData, oldTicket))
+						.resolves.toEqual(outData);
+				} else {
+					await expect(TicketSchema.validateTicket(teamspace, project, model, template, fullData, oldTicket)
+						.catch(() => Promise.reject())).rejects.toBeUndefined();
+				}
+			});
 		});
-	});
+	};
+	const randomData = generateRandomString();
+
+	const commonPropertyConditionTests = [
+		['Should pass if optional field is not present', { type: propTypes.TEXT }, true],
+		['Should ignore deprecated fields', { type: propTypes.TEXT, deprecated: true }, true, generateRandomString()],
+		['Ignore values on N/A types', { type: propTypes.TEXT, values: [generateRandomString()] }, true, randomData, randomData],
+		['Should ignore read only fields', { type: propTypes.TEXT, readOnly: true }, true, generateRandomString()],
+		['Should ignore unrecognised types', { type: generateRandomString(), required: true }, true, generateRandomString()],
+	];
+
+	const addTicketPropertyConditionTests = commonPropertyConditionTests.concat([
+		['Should fill in default value if not present', { type: propTypes.TEXT, default: randomData }, true, undefined, randomData],
+		['Should fail if required field is not present', { type: propTypes.TEXT, required: true }, false],
+		['Should pass if property is immutable', { type: propTypes.TEXT, immutable: true }, true, randomData, randomData],
+	]);
+
+	const updateTicketPropertyConditionTests = commonPropertyConditionTests.concat([
+		['Should pass if required field is not present (ticket update)', { type: propTypes.TEXT, required: true }, true],
+		['Should fail if required field is set to null (ticket update)', { type: propTypes.TEXT, required: true }, false, null],
+		['Should fail if property is immutable (ticket update)', { type: propTypes.TEXT, immutable: true }, false, randomData],
+	]);
+
+	testFn(addTicketPropertyConditionTests, false, true);
+	testFn(addTicketPropertyConditionTests, true, true);
+	testFn(updateTicketPropertyConditionTests, true);
+	testFn(updateTicketPropertyConditionTests);
 };
 
 const testPresetValues = () => {
 	describe('Preset values', () => {
 		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
 		const module = generateRandomString();
 		const prop = generateRandomString();
 		const prop2 = generateRandomString();
 
-		const generateTemplate = (values) => ({
+		const generateTemplateWithValues = (values) => ({
 			properties: [{
 				name: prop,
 				type: propTypes.ONE_OF,
@@ -193,7 +242,6 @@ const testPresetValues = () => {
 		const createData = (a, b) => ({
 
 			title: generateRandomString(),
-			type: generateUUID(),
 			properties: {
 				[prop]: a,
 			},
@@ -207,7 +255,7 @@ const testPresetValues = () => {
 		const runTestCases = (template, testCases) => {
 			const runTest = async (data) => {
 				try {
-					await TicketSchema.validateTicket(teamspace, template, data);
+					await TicketSchema.validateTicket(teamspace, project, model, template, data);
 				} catch (err) {
 					throw undefined;
 				}
@@ -225,7 +273,7 @@ const testPresetValues = () => {
 		};
 
 		describe(presetEnumValues.JOBS_AND_USERS, () => {
-			const template = generateTemplate(presetEnumValues.JOBS_AND_USERS);
+			const template = generateTemplateWithValues(presetEnumValues.JOBS_AND_USERS);
 
 			const jobs = times(5, () => generateRandomString());
 			const users = times(5, () => generateRandomString());
@@ -242,7 +290,7 @@ const testPresetValues = () => {
 		});
 
 		describe(presetEnumValues.RISK_CATEGORIES, () => {
-			const template = generateTemplate(presetEnumValues.RISK_CATEGORIES);
+			const template = generateTemplateWithValues(presetEnumValues.RISK_CATEGORIES);
 
 			const categories = times(5, () => generateRandomString());
 			TeamspaceModel.getRiskCategories.mockResolvedValue(categories);
@@ -268,22 +316,30 @@ const testGroups = () => {
 			convertToTestParams('Have all groups', true, {
 				state: {
 					[viewGroups.HIDDEN]: [{ group: generateGroup(false, { hasId: false }) }],
-					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }),
+					[viewGroups.COLORED]: [{
+						group: generateGroup(false, { hasId: false }),
 						color: times(3, () => 0),
-						opacity: 1 }],
-					[viewGroups.TRANSFORMED]: [{ group: generateGroup(false, { hasId: false }),
-						transformation: times(16, () => 0) }],
+						opacity: 1,
+					}],
+					[viewGroups.TRANSFORMED]: [{
+						group: generateGroup(false, { hasId: false }),
+						transformation: times(16, () => 0),
+					}],
 				},
 			}),
 
 			convertToTestParams('Smart groups', true, {
 				state: {
 					[viewGroups.HIDDEN]: [{ group: generateGroup(true, { hasId: false }) }],
-					[viewGroups.COLORED]: [{ group: generateGroup(true, { hasId: false }),
+					[viewGroups.COLORED]: [{
+						group: generateGroup(true, { hasId: false }),
 						color: times(3, () => 0),
-						opacity: 1 }],
-					[viewGroups.TRANSFORMED]: [{ group: generateGroup(true, { hasId: false }),
-						transformation: times(16, () => 0) }],
+						opacity: 1,
+					}],
+					[viewGroups.TRANSFORMED]: [{
+						group: generateGroup(true, { hasId: false }),
+						transformation: times(16, () => 0),
+					}],
 				},
 			}),
 			convertToTestParams('Empty group', false, {
@@ -293,28 +349,38 @@ const testGroups = () => {
 			}),
 			convertToTestParams('Have prefix', true, {
 				state: {
-					[viewGroups.HIDDEN]: [{ group: generateGroup(false, { hasId: false }),
-						prefix: times(2, () => generateRandomString) }],
-					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }),
+					[viewGroups.HIDDEN]: [{
+						group: generateGroup(false, { hasId: false }),
+						prefix: times(2, () => generateRandomString),
+					}],
+					[viewGroups.COLORED]: [{
+						group: generateGroup(false, { hasId: false }),
 						color: times(3, () => 0),
 						opacity: 1,
-						prefix: times(2, () => generateRandomString) }],
-					[viewGroups.TRANSFORMED]: [{ group: generateGroup(false, { hasId: false }),
+						prefix: times(2, () => generateRandomString),
+					}],
+					[viewGroups.TRANSFORMED]: [{
+						group: generateGroup(false, { hasId: false }),
 						transformation: times(16, () => 0),
-						prefix: times(2, () => generateRandomString) }],
+						prefix: times(2, () => generateRandomString),
+					}],
 				},
 			}),
 			convertToTestParams('Invalid prefix type', false, {
 				state: {
-					[viewGroups.HIDDEN]: [{ group: generateGroup(false, { hasId: false }),
-						prefix: generateRandomString() }],
+					[viewGroups.HIDDEN]: [{
+						group: generateGroup(false, { hasId: false }),
+						prefix: generateRandomString(),
+					}],
 				},
 			}),
 			convertToTestParams('Colored groups', true, {
 				state: {
-					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }),
+					[viewGroups.COLORED]: [{
+						group: generateGroup(false, { hasId: false }),
 						color: times(3, () => 0),
-						opacity: 1 }],
+						opacity: 1,
+					}],
 				},
 			}),
 			convertToTestParams('Colored groups no color or opacity', false, {
@@ -324,20 +390,26 @@ const testGroups = () => {
 			}),
 			convertToTestParams('Colored groups - just colours', true, {
 				state: {
-					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }),
-						color: times(3, () => 0) }],
+					[viewGroups.COLORED]: [{
+						group: generateGroup(false, { hasId: false }),
+						color: times(3, () => 0),
+					}],
 				},
 			}),
 			convertToTestParams('Colored groups - not enough elements in the color array', false, {
 				state: {
-					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }),
-						color: times(2, () => 0) }],
+					[viewGroups.COLORED]: [{
+						group: generateGroup(false, { hasId: false }),
+						color: times(2, () => 0),
+					}],
 				},
 			}),
 			convertToTestParams('Colored groups - value too big', false, {
 				state: {
-					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }),
-						color: times(3, () => 1000) }],
+					[viewGroups.COLORED]: [{
+						group: generateGroup(false, { hasId: false }),
+						color: times(3, () => 1000),
+					}],
 				},
 			}),
 			convertToTestParams('Colored groups - just opacity', true, {
@@ -353,8 +425,10 @@ const testGroups = () => {
 			}),
 			convertToTestParams('Transformed groups', true, {
 				state: {
-					[viewGroups.TRANSFORMED]: [{ group: generateGroup(false, { hasId: false }),
-						transformation: times(16, () => 1) }],
+					[viewGroups.TRANSFORMED]: [{
+						group: generateGroup(false, { hasId: false }),
+						transformation: times(16, () => 1),
+					}],
 				},
 			}),
 			convertToTestParams('Transformed groups - no matrix', false, {
@@ -365,14 +439,18 @@ const testGroups = () => {
 			}),
 			convertToTestParams('Transformed groups - wrong type', false, {
 				state: {
-					[viewGroups.TRANSFORMED]: [{ group: generateGroup(false, { hasId: false }),
-						transformation: false }],
+					[viewGroups.TRANSFORMED]: [{
+						group: generateGroup(false, { hasId: false }),
+						transformation: false,
+					}],
 				},
 			}),
 			convertToTestParams('Transformed groups - wrong array size', false, {
 				state: {
-					[viewGroups.TRANSFORMED]: [{ group: generateGroup(false, { hasId: false }),
-						transformation: times(15, () => 1) }],
+					[viewGroups.TRANSFORMED]: [{
+						group: generateGroup(false, { hasId: false }),
+						transformation: times(15, () => 1),
+					}],
 				},
 			}),
 
@@ -381,8 +459,10 @@ const testGroups = () => {
 		const updateOnlyTestCase = (isUpdate) => [
 			convertToTestParams('Use group id instead of data', isUpdate, {
 				state: {
-					[viewGroups.TRANSFORMED]: [{ group: generateUUIDString(),
-						transformation: times(16, () => 1) }],
+					[viewGroups.TRANSFORMED]: [{
+						group: generateUUIDString(),
+						transformation: times(16, () => 1),
+					}],
 				},
 			}),
 		];
@@ -394,13 +474,80 @@ const testGroups = () => {
 	});
 };
 
-const testValidateTicket = () => {
-	describe('Validate ticket', () => {
+const testUniqueProperties = () => {
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const model = generateRandomString();
+	const moduleName = generateRandomString();
+	const uniquePropName = generateRandomString();
+
+	const template = {
+		_id: generateUUID(),
+		properties: [{
+			name: uniquePropName,
+			type: propTypes.TEXT,
+			unique: true,
+		}],
+		modules: [{
+			name: moduleName,
+			properties: [{
+				name: uniquePropName,
+				type: propTypes.TEXT,
+				unique: true,
+			}],
+		}],
+	};
+
+	describe.each([
+		['the value is unique', true, false],
+		['the value is unique (Module prop)', true, true],
+		['the value is null', true, false, null, {}],
+		['the value is null (Module prop)', true, true, null, {}],
+		['the value is duplicate', false, false],
+		['the value is duplicate (Module prop)', false, true],
+	])('Unique Properties', (desc, shouldPass, moduleProperty, propValue = generateRandomString(), oldTicket) => {
+		test(`Should ${shouldPass ? 'pass' : 'fail'} if ${desc}`, async () => {
+			if (propValue) {
+				times(shouldPass ? 2 : 1, () => TicketsModel.getTicketsByQuery.mockResolvedValueOnce(
+					shouldPass ? [] : [{ _id: generateUUID() }]));
+			}
+
+			const data = { [uniquePropName]: propValue };
+
+			const ticket = ({
+				title: generateRandomString(),
+				type: generateUUID(),
+				properties: moduleProperty ? {} : data,
+				modules: moduleProperty ? {
+					[moduleName]: data,
+				} : {},
+			});
+
+			if (shouldPass) {
+				await expect(TicketSchema.validateTicket(teamspace, project, model, template, ticket, oldTicket))
+					.resolves.not.toBeUndefined();
+			} else {
+				await expect(TicketSchema.validateTicket(teamspace, project, model, template, ticket, oldTicket))
+					.rejects.not.toBeUndefined();
+			}
+
+			if (propValue) {
+				const query = { type: template._id, [`${moduleProperty ? `modules.${moduleName}` : 'properties'}.${uniquePropName}`]: data[uniquePropName] };
+				expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledWith(teamspace, project,
+					model, query, { _id: 1 });
+			}
+		});
+	});
+};
+
+const testAllProperties = () => {
+	describe('Set & unset of all property types', () => {
 		const propertyTypeSetData = [
 			['Text', { type: propTypes.TEXT }, generateRandomString(), generateRandomString(121)],
 			['Long text', { type: propTypes.LONG_TEXT }, generateRandomString(), generateRandomString(1201)],
 			['Boolean', { type: propTypes.BOOLEAN }, true, new Date()],
 			['Date', { type: propTypes.DATE }, Date.now(), generateRandomString()],
+			['Past Date', { type: propTypes.PAST_DATE }, Date.now(), Date.now() + 1000],
 			['Number', { type: propTypes.NUMBER }, generateRandomNumber(), generateRandomString()],
 			['Coordinates', { type: propTypes.COORDS }, [1, 2, 3], [2, 3]],
 			['One Of', { type: propTypes.ONE_OF, values: ['a', 'b'] }, 'a', generateRandomString()],
@@ -437,6 +584,7 @@ const testValidateTicket = () => {
 			['Long text (unset)', { type: propTypes.LONG_TEXT }, null],
 			['Boolean (unset)', { type: propTypes.BOOLEAN }, null],
 			['Date (unset)', { type: propTypes.DATE }, null],
+			['Past Date (unset)', { type: propTypes.PAST_DATE }, null],
 			['Number (unset)', { type: propTypes.NUMBER }, null],
 			['Coordinates (unset)', { type: propTypes.COORDS }, null],
 			['One Of (unset)', { type: propTypes.ONE_OF, values: ['a', 'b'] }, null],
@@ -451,34 +599,421 @@ const testValidateTicket = () => {
 		testPropertyTypes(propertyTypeUnsetData, true, false);
 
 		testGroups();
-		const randomData = generateRandomString();
+	});
+};
 
-		const commonPropertyConditionTests = [
-			['Should pass if optional field is not present', { type: propTypes.TEXT }, true],
-			['Should ignore deprecated fields', { type: propTypes.TEXT, deprecated: true }, true, generateRandomString()],
-			['Ignore values on N/A types', { type: propTypes.TEXT, values: [generateRandomString()] }, true, randomData, randomData],
-			['Should ignore read only fields', { type: propTypes.TEXT, readOnly: true }, true, generateRandomString()],
-			['Should ignore unrecognised types', { type: generateRandomString(), required: true }, true, generateRandomString()],
-		];
+const testCompositeTypes = () => {
+	describe('Composite Types', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		test('Should remove the composite property if it is empty', async () => {
+			const propName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{
+					name: propName,
+					type: propTypes.VIEW,
+				}],
+				modules: [],
+			};
 
-		const addTicketPropertyConditionTests = commonPropertyConditionTests.concat([
-			['Should fill in default value if not present', { type: propTypes.TEXT, default: randomData }, true, undefined, randomData],
-			['Should fail if required field is not present', { type: propTypes.TEXT, required: true }, false],
-		]);
+			const input = {
+				properties: {
+					[propName]: {},
+				},
+			};
 
-		const updateTicketPropertyConditionTests = commonPropertyConditionTests.concat([
-			['Should pass if required field is not present (ticket update)', { type: propTypes.TEXT, required: true }, true],
-			['Should fail if required field is set to null (ticket update)', { type: propTypes.TEXT, required: true }, false, null],
-		]);
+			const oldTicket = {
+				title: generateRandomString(),
+				type: generateUUID(),
+				properties: {
+					[propName]: {
+						camera: {
+							type: 'perspective',
+							position: [1, 2, 3],
+							forward: [1, 2, 3],
+							up: [1, 2, 3],
+						},
+					},
+				},
+			};
+			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input, oldTicket))
+				.resolves.toEqual({ ...input, properties: {}, modules: {} });
+		});
 
-		testPropertyConditions(addTicketPropertyConditionTests, false, true);
-		testPropertyConditions(addTicketPropertyConditionTests, true, true);
-		testPropertyConditions(updateTicketPropertyConditionTests, true);
-		testPropertyConditions(updateTicketPropertyConditionTests);
+		test('Should remove composite property we are trying to set it to null when it\'s already empty', async () => {
+			const propName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{
+					name: propName,
+					type: propTypes.VIEW,
+				}],
+				modules: [],
+			};
+
+			const input = {
+				properties: {
+					[propName]: { camera: null },
+				},
+			};
+
+			const oldTicket = {
+				title: generateRandomString(),
+				type: generateUUID(),
+				properties: {
+
+				},
+			};
+			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input, oldTicket))
+				.resolves.toEqual({ ...input, properties: {}, modules: {} });
+		});
+
+		test('Should remove the property if it will be the same after default values', async () => {
+			const propName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{
+					name: propName,
+					type: propTypes.VIEW,
+				}],
+				modules: [],
+			};
+
+			const input = {
+				properties: {
+					[propName]: {
+						camera: {
+
+							position: [1, 2, 3],
+							forward: [1, 2, 3],
+							up: [1, 2, 3],
+						},
+					},
+				},
+			};
+
+			const oldTicket = {
+				title: generateRandomString(),
+				type: generateUUID(),
+				properties: {
+					[propName]: {
+						camera: {
+							type: 'perspective',
+							position: [1, 2, 3],
+							forward: [1, 2, 3],
+							up: [1, 2, 3],
+						},
+					},
+				},
+			};
+			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input, oldTicket))
+				.resolves.toEqual({ ...input, properties: {}, modules: {} });
+		});
+
+		test('Should remove the composite property if it is the same as before', async () => {
+			const propName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{
+					name: propName,
+					type: propTypes.VIEW,
+				}],
+				modules: [],
+			};
+
+			const input = {
+				properties: {
+					[propName]: {
+						camera: {
+							position: [1, 2, 3],
+							forward: [1, 2, 3],
+							up: [1, 2, 3],
+						},
+					},
+				},
+			};
+
+			const oldTicket = {
+				title: generateRandomString(),
+				type: generateUUID(),
+				properties: {
+					[propName]: {
+						camera: {
+							type: 'perspective',
+							position: [1, 2, 3],
+							forward: [1, 2, 3],
+							up: [1, 2, 3],
+						},
+					},
+				},
+			};
+			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input, oldTicket))
+				.resolves.toEqual({ ...input, properties: {}, modules: {} });
+		});
+
+		test('Should succeed if a required view only have a camera', async () => {
+			const propName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{
+					name: propName,
+					type: propTypes.VIEW,
+					required: true,
+				}],
+				modules: [],
+			};
+
+			const input = {
+				title: generateRandomString(),
+				type: template._id,
+				properties: {
+					[propName]: {
+						camera: {
+							position: [1, 2, 3],
+							forward: [1, 2, 3],
+							up: [1, 2, 3],
+							type: 'perspective',
+						},
+					},
+				},
+			};
+
+			await TicketSchema.validateTicket(teamspace, project, model, template, input);
+			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
+				.resolves.toEqual({ ...input, modules: {} });
+		});
+
+		test('Should fail if a required view property has no camera on creation', async () => {
+			const propName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{
+					name: propName,
+					type: propTypes.VIEW,
+					required: true,
+				}],
+				modules: [],
+			};
+
+			const input = {
+				title: generateRandomString(),
+				type: generateUUID(),
+				properties: {
+					[propName]: {
+						clippingPlanes: [{ normal: [1, 1, 1], clipDirection: -1, distance: 100 }],
+					},
+				},
+			};
+			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
+				.rejects.not.toBeUndefined();
+		});
+
+		test('Should fail if we are trying to remove the camera from a required view', async () => {
+			const propName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{
+					name: propName,
+					type: propTypes.VIEW,
+					required: true,
+				}],
+				modules: [],
+			};
+
+			const input = {
+				properties: {
+					[propName]: {
+						camera: null,
+					},
+				},
+			};
+
+			const oldTicket = {
+				title: generateRandomString(),
+				type: generateUUID(),
+				properties: {
+					[propName]: {
+						camera: {
+							type: 'perspective',
+							position: [1, 2, 3],
+							forward: [1, 2, 3],
+							up: [1, 2, 3],
+						},
+						clippingPlanes: [{ normal: [1, 1, 1], clipDirection: -1, distance: 100 }],
+					},
+				},
+			};
+			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input, oldTicket))
+				.rejects.not.toBeUndefined();
+		});
+
+		test('Should succeed if we are trying to remove the state/clip from a required view', async () => {
+			const propName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{
+					name: propName,
+					type: propTypes.VIEW,
+					required: true,
+				}],
+				modules: [],
+			};
+
+			const input = {
+				properties: {
+					[propName]: {
+						clippingPlanes: null,
+						state: null,
+					},
+				},
+			};
+
+			const oldTicket = {
+				title: generateRandomString(),
+				type: generateUUID(),
+				properties: {
+					[propName]: {
+						camera: {
+							type: 'perspective',
+							position: [1, 2, 3],
+							forward: [1, 2, 3],
+							up: [1, 2, 3],
+						},
+						clippingPlanes: [{ normal: [1, 1, 1], clipDirection: -1, distance: 100 }],
+						state: { showHidden: true },
+					},
+				},
+			};
+			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input, oldTicket))
+				.resolves.toEqual({ ...input, modules: {} });
+		});
+	});
+};
+
+const testImportedTickets = () => {
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const model = generateRandomString();
+	describe('Imported tickets', () => {
+		const importTestTem = {
+			_id: generateUUID(),
+			...generateTemplate(false, false, { comments: true }),
+		};
+
+		const importTestTemNoComments = {
+			_id: generateUUID(),
+			...generateTemplate(),
+		};
+
+		const importTestInput = generateTicket(importTestTem);
+
+		test('Should invoke generateFullSchema with isImport set to true if it is a new ticket and is in import mode', async () => {
+			await TicketSchema.validateTicket(teamspace, project, model, importTestTem,
+				importTestInput, undefined, true);
+			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledTimes(1);
+			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledWith(importTestTem, true);
+		});
+
+		test('Should invoke generateFullSchema with isImport set to false if it is not a new ticket and is in import mode', async () => {
+			await TicketSchema.validateTicket(teamspace, project, model, importTestTem,
+				importTestInput, importTestInput, true);
+			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledTimes(1);
+			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledWith(importTestTem, false);
+		});
+
+		test('Should NOT allow users to specify creation date if it is an existing ticket', async () => {
+			const date = Date.now();
+			const { properties, ...others } = importTestInput;
+			const res = await TicketSchema.validateTicket(teamspace, project, model, importTestTem,
+				{ ...others,
+					properties: {
+						...properties,
+						[basePropertyLabels.CREATED_AT]: date,
+					},
+
+				}, importTestInput, true);
+			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledTimes(1);
+			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledWith(importTestTem, false);
+
+			expect(res.properties[basePropertyLabels.CREATED_AT]).not.toEqual(new Date(date));
+		});
+
+		const comments = times(5, () => ({
+			message: generateRandomString(),
+			originalAuthor: generateRandomString(),
+			createdAt: Date.now(),
+		}));
+		describe.each([
+			['and should not contain comments in the output if it was not provided to begin with', true, importTestInput],
+			['and should contain comments in the output', true, { ...importTestInput, comments }],
+			['if the template does not support comments', false, { ...generateTicket(importTestTemNoComments), comments }, importTestTemNoComments],
+			['if the template does not support comments and there are no comments', true, { ...generateTicket(importTestTemNoComments) }, importTestTemNoComments],
+			['if comments is not of the right type', false, { ...importTestInput, comments: true }],
+			['if comments array is empty', false, { ...importTestInput, comments: [] }],
+			['if comments contains items of the incorrect type', false, { ...importTestInput, comments: [...comments, undefined, 1, true] }],
+			['if a comment does not have an original author', false, { ...importTestInput,
+				comments: [...comments, {
+					message: generateRandomString(),
+					createdAt: Date.now() }] }],
+			['if a comment does not have a created at date', false, { ...importTestInput,
+				comments: [...comments, {
+					message: generateRandomString(),
+					originalAuthor: generateRandomString(),
+				}] }],
+			['if a comment have a created at date in the future', false, { ...importTestInput,
+				comments: [...comments, {
+					message: generateRandomString(),
+					originalAuthor: generateRandomString(),
+					createdAt: Date.now() + 100000,
+				}] }],
+
+		])('Imported with comments', (desc, success, ticket, template = importTestTem) => {
+			times(2, (iLoop) => {
+				const isNewTicket = iLoop === 0;
+				test(`[${isNewTicket ? 'New Ticket' : 'Update Ticket'}] Should${success ? '' : ' not'} validate ${desc}`, async () => {
+					const test = TicketSchema.validateTicket(teamspace, project, model, template,
+						ticket, isNewTicket ? undefined : importTestInput, true);
+					if (success) {
+						const output = await test;
+						if (ticket.comments) {
+							expect(ticket.comments.length).toEqual(output.comments.length);
+							ticket.comments.forEach(({ others, createdAt }, i) => {
+								expect(output.comments[i]).toEqual(expect.objectContaining({ ...others,
+									createdAt: new Date(createdAt),
+								}));
+							});
+						} else {
+							expect(output.comments).toBeUndefined();
+						}
+					} else {
+						expect(test).rejects.not.toBeUndefined();
+					}
+
+					expect(TemplateSchema.generateFullSchema).toHaveBeenCalledTimes(1);
+					expect(TemplateSchema.generateFullSchema).toHaveBeenCalledWith(template, isNewTicket);
+				});
+			});
+		});
+	});
+};
+
+const testValidateTicket = () => {
+	describe('Validate ticket', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		testAllProperties();
+		testPropertyConditions();
+		testPresetValues();
+		testUniqueProperties();
+		testCompositeTypes();
+		testImportedTickets();
 
 		test('Should ignore deprecated modules', async () => {
-			const teamspace = generateRandomString();
 			const template = {
+				_id: generateUUID(),
 				properties: [],
 				modules: [{
 					name: generateRandomString(),
@@ -497,12 +1032,13 @@ const testValidateTicket = () => {
 				properties: {},
 				modules: {},
 			};
-			await expect(TicketSchema.validateTicket(teamspace, template, input)).resolves.toEqual(input);
+			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
+				.resolves.toEqual({ ...input, type: template._id });
 		});
 
 		test('Should created default properties/modules object if it is not present', async () => {
-			const teamspace = generateRandomString();
 			const template = {
+				_id: generateUUID(),
 				properties: [{
 					name: generateRandomString(),
 					type: propTypes.TEXT,
@@ -512,298 +1048,11 @@ const testValidateTicket = () => {
 
 			const input = {
 				title: generateRandomString(),
-				type: generateUUID(),
+				type: template._id,
 			};
-			await expect(TicketSchema.validateTicket(teamspace, template, input))
+			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
 				.resolves.toEqual({ ...input, properties: {}, modules: {} });
 		});
-
-		describe('Composite Types', () => {
-			test('Should remove the composite property if it is empty', async () => {
-				const teamspace = generateRandomString();
-				const propName = generateRandomString();
-				const template = {
-					properties: [{
-						name: propName,
-						type: propTypes.VIEW,
-					}],
-					modules: [],
-				};
-
-				const input = {
-					properties: {
-						[propName]: {},
-					},
-				};
-
-				const oldTicket = {
-					title: generateRandomString(),
-					type: generateUUID(),
-					properties: {
-						[propName]: {
-							camera: {
-								type: 'perspective',
-								position: [1, 2, 3],
-								forward: [1, 2, 3],
-								up: [1, 2, 3],
-							},
-						},
-					},
-				};
-				await expect(TicketSchema.validateTicket(teamspace, template, input, oldTicket))
-					.resolves.toEqual({ ...input, properties: {}, modules: {} });
-			});
-
-			test('Should remove composite property we are trying to set it to null when it\'s already empty', async () => {
-				const teamspace = generateRandomString();
-				const propName = generateRandomString();
-				const template = {
-					properties: [{
-						name: propName,
-						type: propTypes.VIEW,
-					}],
-					modules: [],
-				};
-
-				const input = {
-					properties: {
-						[propName]: { camera: null },
-					},
-				};
-
-				const oldTicket = {
-					title: generateRandomString(),
-					type: generateUUID(),
-					properties: {
-
-					},
-				};
-				await expect(TicketSchema.validateTicket(teamspace, template, input, oldTicket))
-					.resolves.toEqual({ ...input, properties: {}, modules: {} });
-			});
-
-			test('Should remove the property if it will be the same after default values', async () => {
-				const teamspace = generateRandomString();
-				const propName = generateRandomString();
-				const template = {
-					properties: [{
-						name: propName,
-						type: propTypes.VIEW,
-					}],
-					modules: [],
-				};
-
-				const input = {
-					properties: {
-						[propName]: {
-							camera: {
-
-								position: [1, 2, 3],
-								forward: [1, 2, 3],
-								up: [1, 2, 3],
-							},
-						},
-					},
-				};
-
-				const oldTicket = {
-					title: generateRandomString(),
-					type: generateUUID(),
-					properties: {
-						[propName]: {
-							camera: {
-								type: 'perspective',
-								position: [1, 2, 3],
-								forward: [1, 2, 3],
-								up: [1, 2, 3],
-							},
-						},
-					},
-				};
-				await expect(TicketSchema.validateTicket(teamspace, template, input, oldTicket))
-					.resolves.toEqual({ ...input, properties: {}, modules: {} });
-			});
-
-			test('Should remove the composite property if it is the same as before', async () => {
-				const teamspace = generateRandomString();
-				const propName = generateRandomString();
-				const template = {
-					properties: [{
-						name: propName,
-						type: propTypes.VIEW,
-					}],
-					modules: [],
-				};
-
-				const input = {
-					properties: {
-						[propName]: {
-							camera: {
-								position: [1, 2, 3],
-								forward: [1, 2, 3],
-								up: [1, 2, 3],
-							},
-						},
-					},
-				};
-
-				const oldTicket = {
-					title: generateRandomString(),
-					type: generateUUID(),
-					properties: {
-						[propName]: {
-							camera: {
-								type: 'perspective',
-								position: [1, 2, 3],
-								forward: [1, 2, 3],
-								up: [1, 2, 3],
-							},
-						},
-					},
-				};
-				await expect(TicketSchema.validateTicket(teamspace, template, input, oldTicket))
-					.resolves.toEqual({ ...input, properties: {}, modules: {} });
-			});
-
-			test('Should succeed if a required view only have a camera', async () => {
-				const teamspace = generateRandomString();
-				const propName = generateRandomString();
-				const template = {
-					properties: [{
-						name: propName,
-						type: propTypes.VIEW,
-						required: true,
-					}],
-					modules: [],
-				};
-
-				const input = {
-					title: generateRandomString(),
-					type: generateUUID(),
-					properties: {
-						[propName]: {
-							camera: {
-								position: [1, 2, 3],
-								forward: [1, 2, 3],
-								up: [1, 2, 3],
-								type: 'perspective',
-							},
-						},
-					},
-				};
-
-				await TicketSchema.validateTicket(teamspace, template, input);
-				await expect(TicketSchema.validateTicket(teamspace, template, input))
-					.resolves.toEqual({ ...input, modules: {} });
-			});
-
-			test('Should fail if a required view property has no camera on creation', async () => {
-				const teamspace = generateRandomString();
-				const propName = generateRandomString();
-				const template = {
-					properties: [{
-						name: propName,
-						type: propTypes.VIEW,
-						required: true,
-					}],
-					modules: [],
-				};
-
-				const input = {
-					title: generateRandomString(),
-					type: generateUUID(),
-					properties: {
-						[propName]: {
-							clippingPlanes: [{ normal: [1, 1, 1], clipDirection: -1, distance: 100 }],
-						},
-					},
-				};
-				await expect(TicketSchema.validateTicket(teamspace, template, input))
-					.rejects.not.toBeUndefined();
-			});
-
-			test('Should fail if we are trying to remove the camera from a required view', async () => {
-				const teamspace = generateRandomString();
-				const propName = generateRandomString();
-				const template = {
-					properties: [{
-						name: propName,
-						type: propTypes.VIEW,
-						required: true,
-					}],
-					modules: [],
-				};
-
-				const input = {
-					properties: {
-						[propName]: {
-							camera: null,
-						},
-					},
-				};
-
-				const oldTicket = {
-					title: generateRandomString(),
-					type: generateUUID(),
-					properties: {
-						[propName]: {
-							camera: {
-								type: 'perspective',
-								position: [1, 2, 3],
-								forward: [1, 2, 3],
-								up: [1, 2, 3],
-							},
-							clippingPlanes: [{ normal: [1, 1, 1], clipDirection: -1, distance: 100 }],
-						},
-					},
-				};
-				await expect(TicketSchema.validateTicket(teamspace, template, input, oldTicket))
-					.rejects.not.toBeUndefined();
-			});
-
-			test('Should succeed if we are trying to remove the state/clip from a required view', async () => {
-				const teamspace = generateRandomString();
-				const propName = generateRandomString();
-				const template = {
-					properties: [{
-						name: propName,
-						type: propTypes.VIEW,
-						required: true,
-					}],
-					modules: [],
-				};
-
-				const input = {
-					properties: {
-						[propName]: {
-							clippingPlanes: null,
-							state: null,
-						},
-					},
-				};
-
-				const oldTicket = {
-					title: generateRandomString(),
-					type: generateUUID(),
-					properties: {
-						[propName]: {
-							camera: {
-								type: 'perspective',
-								position: [1, 2, 3],
-								forward: [1, 2, 3],
-								up: [1, 2, 3],
-							},
-							clippingPlanes: [{ normal: [1, 1, 1], clipDirection: -1, distance: 100 }],
-							state: { showHidden: true },
-						},
-					},
-				};
-				await expect(TicketSchema.validateTicket(teamspace, template, input, oldTicket))
-					.resolves.toEqual({ ...input, modules: {} });
-			});
-		});
-
-		testPresetValues();
 	});
 };
 
@@ -1002,6 +1251,7 @@ const testDeserialiseUUIDsInTicket = () => {
 			const numberProp = generateRandomString();
 			const viewModProp = generateRandomString();
 			const template = {
+				_id: generateUUID(),
 				properties: [{
 					type: propTypes.VIEW,
 					name: viewProp,
@@ -1046,9 +1296,9 @@ const testDeserialiseUUIDsInTicket = () => {
 				title: generateRandomString(),
 				properties: {
 					[viewProp]:
-				{
-					state: generateStateObject(),
-				},
+					{
+						state: generateStateObject(),
+					},
 					[numberProp]: 1,
 				},
 				modules: {
@@ -1084,8 +1334,33 @@ const testDeserialiseUUIDsInTicket = () => {
 	});
 };
 
-describe('schema/tickets/validators', () => {
+const testSerialiseTicket = () => {
+	describe('Serialise a ticket', () => {
+		test('Should serialise dates as null correctly', () => {
+			const dateName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{
+					type: propTypes.DATE,
+					name: dateName,
+				}],
+				modules: [],
+			};
+			const ticket = {
+				properties: {
+					[dateName]: null,
+				},
+				modules: {},
+			};
+
+			expect(TicketSchema.serialiseTicket(ticket, template)).toEqual(ticket);
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	testValidateTicket();
 	testProcessReadOnlyValues();
 	testDeserialiseUUIDsInTicket();
+	testSerialiseTicket();
 });

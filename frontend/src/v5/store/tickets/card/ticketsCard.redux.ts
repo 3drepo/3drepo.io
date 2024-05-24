@@ -21,6 +21,7 @@ import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '@/v5/helpers/actions.helper';
 import { EditableTicket, ITicketsFilters, OverridesDicts } from '../tickets.types';
+import { TeamspaceProjectAndModel } from '../../store.types';
 
 export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createActions({
 	setSelectedTicket: ['ticketId'],
@@ -30,6 +31,7 @@ export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createA
 	setQueryFilters: ['searchQueries'],
 	toggleCompleteFilter: [],
 	resetFilters: [],
+	fetchTicketsList: ['teamspace', 'projectId', 'modelId', 'isFederation'],
 	setCardView: ['view', 'props'],
 	openTicket: ['ticketId'],
 	setReadOnly: ['readOnly'],
@@ -37,7 +39,6 @@ export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createA
 	setOverrides: ['overrides'],
 	setUnsavedTicket: ['ticket'],
 	setTransformations: ['transformations'],
-	goBackFromTicketGroups: ['ticket'],
 	setEditingGroups: ['isEditing'],
 }, { prefix: 'TICKETS_CARD/' }) as { Types: Constants<ITicketsCardActionCreators>; Creators: ITicketsCardActionCreators };
 
@@ -151,13 +152,13 @@ export type SetTemplateFiltersAction = Action<'SET_TEMPLATE_FILTERS'> & { templa
 export type SetQueryFiltersAction = Action<'SET_QUERY_FILTERS'> & { searchQueries: string[] };
 export type ToggleCompleteFilterAction = Action<'TOGGLE_COMPLETE_FILTER'>;
 export type ResetFiltersAction = Action<'RESET_FILTERS'>;
+export type FetchTicketsListAction = Action<'FETCH_TICKETS_LIST'> & TeamspaceProjectAndModel & { isFederation: boolean };
 export type SetCardViewAction = Action<'SET_CARD_VIEW'> & { view: TicketsCardViews, props?:any };
 export type OpenTicketAction = Action<'OPEN_TICKET'> & { ticketId: string };
 export type SetReadOnlyAction = Action<'SET_READ_ONLY'> & { readOnly: boolean };
 export type ResetStateAction = Action<'RESET_STATE'>;
 export type SetOverridesAction = Action<'SET_OVERRIDES'> & { overrides: OverridesDicts | null };
 export type SetUnsavedTicketAction = Action<'SET_UNSAVED_TICKET'> & { ticket: EditableTicket };
-export type GoBackFromTicketGroupsAction = Action<'GO_BACK_FROM_TICKET_GROUPS'> & { ticket: EditableTicket } ;
 export type SetEditingGroupsAction = Action<'SET_EDITING_GROUPS'> & { isEditing: boolean } ;
 
 
@@ -169,12 +170,17 @@ export interface ITicketsCardActionCreators {
 	setQueryFilters: (searchQueries: string[]) => SetQueryFiltersAction,
 	toggleCompleteFilter: () => ToggleCompleteFilterAction,
 	resetFilters: () => ResetFiltersAction,
+	fetchTicketsList: (
+		teamspace: string,
+		projectId: string,
+		modelId: string,
+		isFederation: boolean,
+	) => FetchTicketsListAction;
 	setCardView: (view: TicketsCardViews, props?: any) => SetCardViewAction,
 	openTicket: (ticketId: string) => OpenTicketAction,
 	setReadOnly: (readOnly: boolean) => SetReadOnlyAction,
 	resetState: () => ResetStateAction,
 	setOverrides: (overrides: OverridesDicts) => SetOverridesAction,
 	setUnsavedTicket: (ticket: EditableTicket) => SetUnsavedTicketAction,
-	goBackFromTicketGroups: (ticket: EditableTicket) => GoBackFromTicketGroupsAction
 	setEditingGroups: (isEditing:boolean) => SetEditingGroupsAction,
 }

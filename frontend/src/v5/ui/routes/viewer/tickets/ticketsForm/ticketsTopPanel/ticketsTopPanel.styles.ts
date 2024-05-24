@@ -16,25 +16,46 @@
  */
 
 import styled from 'styled-components';
+import { InputContainer } from '@controls/inputs/inputContainer/inputContainer.styles';
 import { ErrorTextGap } from '../ticketsForm.styles';
+import { CreationInfo as BaseCreationInfo } from '@components/shared/creationInfo/creationInfo.component';
 
 export const TopPanel = styled.div`
 	width: 100%;
 	position: relative;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	box-sizing: border-box;
-	display: unset; /* This is necessary for sticky child elements */
+	padding: 10px 15px 15px;
+	box-shadow: 0 6px 10px rgb(0 0 0 / 4%);
 `;
 
-export const BaseTicketInfo = styled.div`
-	padding: 10px 15px 15px;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	box-shadow: 0 6px 10px rgb(0 0 0 / 4%);
+export const CreationInfo = styled(BaseCreationInfo)`
+	margin: 0 10px;
 `;
 
 export const DescriptionProperty = styled.div`
 	margin: 10px 0;
 	&${ErrorTextGap} {
 		margin: 0;
+	}
+`;
+
+export const FlexContainer = styled(InputContainer)`
+	display: grid;
+	grid-template-columns: 98fr 65fr 100fr;
+	margin-top: 10px;
+
+	& > * {
+		overflow: hidden;
+		box-sizing: border-box;
+	}
+
+	& > *:not(:last-child) {
+		border-right: solid 1px ${({ theme }) => theme.palette.base.lightest};
+		padding-right: 10px;
+	}
+
+	& > *:not(:first-child) {
+		padding-left: 10px;
 	}
 `;

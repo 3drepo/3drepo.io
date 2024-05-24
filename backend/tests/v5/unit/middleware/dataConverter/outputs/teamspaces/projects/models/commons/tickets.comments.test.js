@@ -59,6 +59,32 @@ const testSerialiseComment = () => {
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, { ...output });
 		});
 
+		test('Should cast dates correctly (imported comment)', () => {
+			const commentData = {
+				createdAt: generateRandomDate(),
+				updatedAt: generateRandomDate(),
+				importedAt: generateRandomDate(),
+				author: generateRandomString(),
+				originalAuthor: generateRandomString(),
+				history: [{ timestamp: generateRandomDate() }],
+			};
+
+			const req = { commentData };
+
+			expect(CommentOutputMiddleware.serialiseComment(req, {})).toBeUndefined();
+
+			const output = {
+				...commentData,
+				createdAt: commentData.createdAt.getTime(),
+				updatedAt: commentData.updatedAt.getTime(),
+				importedAt: commentData.importedAt.getTime(),
+				history: [{ timestamp: commentData.history[0].timestamp.getTime() }],
+			};
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, { ...output });
+		});
+
 		test('Should cast uuids correctly', () => {
 			const commentData = { _id: generateUUID(), images: [generateUUID(), generateUUID()] };
 			const req = { commentData };

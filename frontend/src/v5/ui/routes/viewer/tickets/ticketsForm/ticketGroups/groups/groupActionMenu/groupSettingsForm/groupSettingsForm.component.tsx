@@ -17,13 +17,13 @@
 
 /* eslint-disable no-param-reassign */
 import { formatMessage } from '@/v5/services/intl';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors, TreeHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormTextField } from '@controls/inputs/formInputs.component';
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { SubmitButton } from '@controls/submitButton';
 import { Button } from '@controls/button';
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { GroupSettingsSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { cloneDeep, isEqual, isUndefined, omitBy, sortBy } from 'lodash';
@@ -32,8 +32,6 @@ import { Group, IGroupRule, IGroupSettingsForm } from '@/v5/store/tickets/ticket
 import { InputController } from '@controls/inputs/inputController.component';
 import { EmptyCardMessage } from '@components/viewer/cards/card.styles';
 import { ColorPicker } from '@controls/inputs/colorPicker/colorPicker.component';
-import { useSelector } from 'react-redux';
-import { selectGetNumNodesByMeshSharedIdsArray, selectSelectedNodes } from '@/v4/modules/tree/tree.selectors';
 import { convertToV4GroupNodes, convertToV5GroupNodes, meshObjectsToV5GroupNode } from '@/v5/helpers/viewpoint.helpers';
 import { getRandomSuggestedColor } from '@controls/inputs/colorPicker/colorPicker.helpers';
 import { Gap } from '@controls/gap';
@@ -68,6 +66,7 @@ import { RulesOptionsMenu } from './rulesOptionsMenu/rulesOptionsMenu.component'
 import { RulesField } from './rulesField/ruelsField.component';
 import { Popper } from '../../../ticketGroups.styles';
 import { appendCopySuffixToDuplicateNames } from '../../groupRulesForm/groupRulesForm.helpers';
+import { TicketContext } from '../../../../../ticket.context';
 
 type GroupSettingsFormProps = {
 	value?: IGroupSettingsForm,
@@ -85,13 +84,14 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	const [isPastingRules, setIsPastingRules] = useState(false);
 	const [selectedRule, setSelectedRule] = useState(null);
 	const isAdmin = !TicketsCardHooksSelectors.selectReadOnly();
-	const { teamspace, containerOrFederation, revision } = useParams<ViewerParams>();
+	const { teamspace, revision } = useParams<ViewerParams>();
+	const { containerOrFederation } = useContext(TicketContext);
+
 	const formRef = useRef(null);
 
 	const isNewGroup = !value;
-	const selectedNodes = useSelector(selectSelectedNodes);
-	const sharedIds = selectedNodes.flatMap((node) => node.shared_ids);
-	const objectsCount = useSelector(selectGetNumNodesByMeshSharedIdsArray(sharedIds));
+	const selectedNodes = TreeHooksSelectors.selectSelectedNodes();
+	const objectsCount = TreeHooksSelectors.selectSelectedObjectsCount();
 
 	const formData = useForm<IGroupSettingsForm>({
 		mode: 'onChange',
@@ -115,7 +115,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	const getFormIsValid = () => {
 		if (!isValid) return false;
 		if (isSmart) return isDirty;
-		if (!selectedNodes.length) return false;
+		if (!objectsCount) return false;
 		const objectsAreDifferent = !isEqual(
 			sortBy(selectedNodes),
 			inputObjects,

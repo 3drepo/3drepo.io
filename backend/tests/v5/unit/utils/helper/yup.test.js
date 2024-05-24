@@ -116,12 +116,27 @@ const testTimestamp = () => {
 		['', false],
 		['a', false],
 		[-1, false],
+		[null, false],
 		[new Date(2000, 1, 1).getTime() - 1, false],
 		[new Date(2000, 1, 1).getTime(), true],
 		[324093824093285092385094354340395834, false],
 	])('Timestamp validator', (data, res) => {
 		test(`${data} characters should return ${res}`, async () => {
 			await expect(YupHelper.types.timestamp.isValid(data)).resolves.toBe(res);
+		});
+	});
+};
+
+const testDateInThePast = () => {
+	describe.each([
+		['a', false],
+		[new Date(2000, 1, 1), true],
+		[new Date().getTime() + 10000, false],
+		[null, false],
+		[324093824093285092385094354340395834, false],
+	])('Date in the past validator', (data, res) => {
+		test(`${data} characters should return ${res}`, async () => {
+			await expect(YupHelper.types.dateInThePast.isValid(data)).resolves.toBe(res);
 		});
 	});
 };
@@ -164,4 +179,5 @@ describe('utils/helper/yup', () => {
 	testTimestamp();
 	testEmbeddedImage();
 	testEmbeddedImageOrRef();
+	testDateInThePast();
 });

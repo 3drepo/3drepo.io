@@ -31,7 +31,7 @@ import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsCardHooksSe
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers, UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsCardViews } from './tickets.constants';
 import { TicketsListCard } from './ticketsList/ticketsListCard.component';
-import { TicketDetailsCard } from './ticketDetails/ticketsDetailsCard.component';
+import { TicketDetailsCard } from './ticketDetailsCard/ticketsDetailsCard.component';
 import { NewTicketCard } from './newTicket/newTicket.component';
 import { ViewerParams } from '../../routes.constants';
 import { TicketContextComponent } from './ticket.context';
@@ -77,7 +77,7 @@ export const Tickets = () => {
 	}, [containerOrFederation]);
 
 	return (
-		<TicketContextComponent isViewer>
+		<TicketContextComponent isViewer containerOrFederation={containerOrFederation}>
 			{view === TicketsCardViews.List && <TicketsListCard />}
 			{view === TicketsCardViews.Details && <TicketDetailsCard />}
 			{view === TicketsCardViews.New && <NewTicketCard />}

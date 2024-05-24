@@ -33,7 +33,7 @@ import { ColorPicker } from '../../../colorPicker/colorPicker.component';
 import { MenuList } from '../../../filterPanel/components/filtersMenu/filtersMenu.styles';
 import { Eraser } from '../../../fontAwesomeIcon';
 import { SmallIconButton } from '../../../smallIconButon/smallIconButton.component';
-import { MODES } from '../../screenshotDialog.helpers';
+import { MODES } from '../../markupStage/markupStage.helpers';
 import { SHAPE_TYPES } from '../shape/shape.constants';
 import {
 	activeShapeIcon,

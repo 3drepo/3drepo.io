@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { cloneDeep, times } = require('lodash');
+const { cloneDeep, times, uniq } = require('lodash');
 const { src } = require('../../../../../../../../helper/path');
 const { generateTemplate, generateTicket, generateRandomString, generateRandomDate, generateUUID } = require('../../../../../../../../helper/services');
 
@@ -383,10 +383,11 @@ const testSerialiseTicket = () => {
 const testSerialiseTicketList = () => {
 	describe('Serialise ticket list', () => {
 		const teamspace = generateRandomString();
+		const templateData = times(3, () => ({ ...generateTemplate(), _id: generateRandomString() }));
+		const tickets = times(10, (i) => generateTicket(templateData[i % templateData.length], true));
+
 		test(`Should respond with ${templates.unknown.code} if an error has been thrown`, async () => {
 			TemplateModel.getTemplatesByQuery.mockRejectedValueOnce(new Error(generateRandomString()));
-
-			const tickets = times(5, () => ({ type: generateRandomString() }));
 
 			const req = { params: { teamspace }, tickets };
 
@@ -394,20 +395,16 @@ const testSerialiseTicketList = () => {
 
 			expect(TemplateModel.getTemplatesByQuery).toHaveBeenCalledTimes(1);
 			expect(TemplateModel.getTemplatesByQuery).toHaveBeenCalledWith(
-				teamspace, { _id: { $in: tickets.map(({ type }) => type) } },
+				teamspace, { _id: { $in: uniq(tickets.map(({ type }) => type)) } },
 			);
 
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.unknown);
 		});
 
 		test('Should serialise tickets correctly', async () => {
-			const templateData = times(3, () => ({ ...generateTemplate(), _id: generateRandomString() }));
-
 			TemplateModel.getTemplatesByQuery.mockResolvedValueOnce(templateData);
 
 			TicketTemplateSchema.generateFullSchema.mockImplementation((t) => t);
-
-			const tickets = times(10, (i) => generateTicket(templateData[i % templateData.length], true));
 
 			const req = { params: { teamspace }, tickets };
 

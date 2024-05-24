@@ -15,13 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ITicket, TicketWithModelIdAndName } from '@/v5/store/tickets/tickets.types';
+import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { FormattedMessage } from 'react-intl';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { isCommenterRole } from '@/v5/store/store.helpers';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useFormContext } from 'react-hook-form';
 import { useContext } from 'react';
 import { SortedTableComponent, SortedTableContext, SortedTableType } from '@controls/sortedTableContext/sortedTableContext';
 import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
@@ -30,6 +29,8 @@ import { Header, Headers, Group, NewTicketRow, NewTicketText, IconContainer } fr
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
+import { SetTicketValue } from '../../ticketsTable.helper';
+import { useParams } from 'react-router-dom';
 
 const SortingTableHeader = ({ name = null, children, hidden = false, ...props }) => {
 	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
@@ -51,28 +52,28 @@ const SortingTableHeader = ({ name = null, children, hidden = false, ...props })
 
 type TicketsTableGroupProps = {
 	selectedTicketId?: string;
-	ticketsWithModelIdAndName: TicketWithModelIdAndName[];
-	onEditTicket: (modelId: string, ticket: Partial<ITicket>) => void;
+	tickets: ITicket[];
+	onEditTicket: SetTicketValue;
 	onNewTicket: (modelId: string) => void;
 };
-export const TicketsTableGroup = ({ ticketsWithModelIdAndName, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
+export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
+	const { template: templateId } = useParams();
 	const [modelsIds] = useSearchParam('models', Transformers.STRING_ARRAY);
-	const { getValues } = useFormContext();
 
 	const showModelName = modelsIds.length > 1;
 	const models = useSelectedModels();
 
 	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;
-	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(getValues('template'));
+	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const hasProperties = template?.config?.issueProperties;
 	const hasSafetibase = template?.modules?.some((module) => module.type === 'safetibase');
 
 	return (
-		<SortedTableComponent items={ticketsWithModelIdAndName} sortingColumn={BaseProperties.CREATED_AT}>
+		<SortedTableComponent items={tickets} sortingColumn={BaseProperties.CREATED_AT}>
 			<SortedTableContext.Consumer>
-				{({ sortedItems }: SortedTableType<TicketWithModelIdAndName>) => (
+				{({ sortedItems }: SortedTableType<ITicket>) => (
 					<>
-						{!!ticketsWithModelIdAndName.length && (
+						{!!tickets.length && (
 							<Headers>
 								<SortingTableHeader width={80}>
 									<FormattedMessage id="ticketTable.column.header.id" defaultMessage="#id" />
@@ -89,7 +90,7 @@ export const TicketsTableGroup = ({ ticketsWithModelIdAndName, onEditTicket, onN
 								<SortingTableHeader name={`properties.${IssueProperties.ASSIGNEES}`} width={96} hidden={!hasProperties}> 
 									<FormattedMessage id="ticketTable.column.header.assignees" defaultMessage="assignees" />
 								</SortingTableHeader>
-								<SortingTableHeader name={`properties.${BaseProperties.OWNER}`} width={62}>
+								<SortingTableHeader name={`properties.${BaseProperties.OWNER}`} width={52}>
 									<FormattedMessage id="ticketTable.column.header.owner" defaultMessage="owner" />
 								</SortingTableHeader>
 								<SortingTableHeader name={`properties.${IssueProperties.DUE_DATE}`} width={147} hidden={!hasProperties}>
@@ -98,7 +99,7 @@ export const TicketsTableGroup = ({ ticketsWithModelIdAndName, onEditTicket, onN
 								<SortingTableHeader name={`properties.${IssueProperties.PRIORITY}`} width={90} hidden={!hasProperties}>
 									<FormattedMessage id="ticketTable.column.header.priority" defaultMessage="priority" />
 								</SortingTableHeader>
-								<SortingTableHeader name={`properties.${IssueProperties.STATUS}`} width={100} hidden={!hasProperties}>
+								<SortingTableHeader name={`properties.${BaseProperties.STATUS}`} width={150}>
 									<FormattedMessage id="ticketTable.column.header.status" defaultMessage="status" />
 								</SortingTableHeader>
 								<SortingTableHeader name={`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`} width={137} hidden={!hasSafetibase}>
@@ -110,13 +111,13 @@ export const TicketsTableGroup = ({ ticketsWithModelIdAndName, onEditTicket, onN
 							</Headers>
 						)}
 						<Group>
-							{sortedItems.map(({ modelId, modelName, ...ticket }) => (
+							{sortedItems.map(({ modelId, ...ticket }) => (
 								<TicketsTableRow
 									key={ticket._id}
 									ticket={ticket}
+									modelId={modelId}
 									showModelName={showModelName}
-									modelName={modelName}
-									onClick={() => onEditTicket(modelId, ticket)}
+									onClick={() => onEditTicket(modelId, ticket._id)}
 									selected={selectedTicketId === ticket._id}
 								/>
 							))}

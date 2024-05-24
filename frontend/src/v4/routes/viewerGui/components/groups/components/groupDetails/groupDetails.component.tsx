@@ -45,9 +45,8 @@ interface IProps {
 	expandDetails: boolean;
 	currentUser: any;
 	modelSettings: any;
-	totalMeshes: number;
 	canUpdate: boolean;
-	selectedNodes: any;
+	selectedNodes: any[];
 	criteriaFieldState: ICriteriaFieldState;
 	createGroup: (teamspace: any, modelId: any, revision: any) => void;
 	updateGroup: (teamspace: any, modelId: any, revision: any, groupId: any) => void;
@@ -81,6 +80,10 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 
 	get isSmartGroup() {
 		return this.editingGroup.type === GROUPS_TYPES.SMART;
+	}
+
+	get objectsCount() {
+		return this.isNewGroup ? this.props.selectedNodes.length : this.editingGroup.totalSavedMeshes;
 	}
 
 	get editingGroup() {
@@ -134,7 +137,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 	));
 
 	public componentDidMount() {
-		this.setState({ isFormDirty: this.isNewGroup, isFormValid: false });
+		this.setState({ isFormDirty: this.isNewGroup, isFormValid: this.isNewGroup && this.objectsCount > 0 });
 	}
 
 	public componentDidUpdate(prevProps: Readonly<PropsWithChildren<IProps>>) {
@@ -150,8 +153,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 			const rulesChanged = this.isSmartGroup && !rulesAreEqual(this.editingGroup, this.props.originalGroup);
 
 			// if it is a smart group, we ignore the manual selection because it depends on the rules
-			const selectionChanged = !this.isSmartGroup &&
-				!hasSameSharedIds(this.props.selectedNodes, this.editingGroup.objects);
+			const selectionChanged = !this.isSmartGroup && !hasSameSharedIds(this.props.selectedNodes, this.editingGroup.objects);
 
 			this.setIsFormDirty(wasUpdated || selectionChanged || rulesChanged);
 		}
@@ -185,10 +187,9 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 			key={`${this.editingGroup._id}.${this.editingGroup.updatedAt}`}
 			group={this.editingGroup}
 			currentUser={this.props.currentUser}
-			totalMeshes={this.props.totalMeshes}
+			objectsCount={this.objectsCount}
 			canUpdate={this.props.canUpdate}
 			handleChange={this.handleFieldChange}
-			selectedNodes={this.props.selectedNodes}
 		/>
 	)
 

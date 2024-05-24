@@ -108,7 +108,7 @@ export const DEFAULT_SETTINGS = {
 	viewerBackgroundColor: [0.95, 0.96, 0.99],
 	shadows: 'none',
 	xray: true,
-	caching: false,
+	caching: true,
 	statistics: false,
 	unityMemory: 0,
 	nearPlane: 10,
@@ -175,8 +175,10 @@ export const NEW_PIN_ID = 'newPinId';
 export const VIEWER_MEASURING_MODE = {
 	POINT: 'PointPin',
 	RAY_CAST: 'Raycast',
+	POLYLINE: 'PolyLine',
 	MINIMUM_DISTANCE: 'MinimumDistance',
 	SAM: 'SurfaceArea',
 	CSAM: 'PolygonArea',
+	ANGLE: 'Angle',
 	POINT_TO_POINT: 'Point',
 } as const;

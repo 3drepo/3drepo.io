@@ -33,6 +33,7 @@ interface IProps {
 	shapes: IMeasure[];
 	units: string;
 	measureMode: string;
+	canEdit: boolean;
 	removeMeasurement: (uuid) => void;
 	setMeasurementColor: (uuid, color) => void;
 	setMeasurementName: (uuid, type, name) => void;
@@ -49,6 +50,7 @@ export const ShapesFormTab = ({
 	const shapes = props.shapes || [];
 	const areaMeasurements = shapes.filter(({type}) => type === MEASURE_TYPE.AREA);
 	const lengthMeasurements = shapes.filter(({type}) => type === MEASURE_TYPE.LENGTH);
+	const angleMeasurements = shapes.filter(({type}) => type === MEASURE_TYPE.ANGLE);
 
 	useEffect(() => {
 		if (!active) {
@@ -60,7 +62,7 @@ export const ShapesFormTab = ({
 
 	return (
 		<Content active={active}>
-			{addButtonsEnabled &&
+			{addButtonsEnabled && props.canEdit &&
 				<MeasuringTypeContainer>
 					Create markup&nbsp; &nbsp;
 					<MeasuringType basicTypes setMeasureMode={setMeasureMode} measureMode={measureMode} />
@@ -71,6 +73,7 @@ export const ShapesFormTab = ({
 				areaMeasurements={areaMeasurements}
 				lengthMeasurements={lengthMeasurements}
 				pointMeasurements={[]}
+				angleMeasurements={angleMeasurements}
 				modelUnit={props.units}
 				units={props.units === 'ft' ? props.units : 'm'}
 			/>

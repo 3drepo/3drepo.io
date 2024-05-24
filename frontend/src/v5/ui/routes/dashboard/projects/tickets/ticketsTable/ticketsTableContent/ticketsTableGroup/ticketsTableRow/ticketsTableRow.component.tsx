@@ -16,31 +16,38 @@
  */
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { ProjectsHooksSelectors, TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors, TicketsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
 import { useContext } from 'react';
 import { SearchContext } from '@controls/search/searchContext';
 import { Highlight } from '@controls/highlight';
-import { DueDateWithIcon } from '@controls/dueDate/dueDateWithIcon/dueDateWithIcon.component';
+import { DueDate } from '@controls/dueDate/dueDate.component';
 import { Chip } from '@controls/chip/chip.component';
-import { PRIORITY_LEVELS_MAP, RISK_LEVELS_MAP, STATUS_MAP, TREATMENT_LEVELS_MAP } from '@controls/chip/chip.types';
+import { PRIORITY_LEVELS_MAP, RISK_LEVELS_MAP, TREATMENT_LEVELS_MAP } from '@controls/chip/chip.types';
 import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.component';
 import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 import { Tooltip } from '@mui/material';
 import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { Row, Cell, CellChipText, CellOwner, OverflowContainer, SmallFont, CellDate } from './ticketsTableRow.styles';
+import { getChipPropsFromConfig } from '@controls/chip/statusChip/statusChip.helpers';
 
 type TicketsTableRowProps = {
 	ticket: ITicket,
 	showModelName: boolean,
-	modelName: string,
+	modelId: string,
 	selected: boolean,
 	onClick: () => void,
 };
-export const TicketsTableRow = ({ ticket, onClick, showModelName, modelName, selected }: TicketsTableRowProps) => {
+export const TicketsTableRow = ({ ticket, onClick, showModelName, modelId, selected }: TicketsTableRowProps) => {
 	const { query } = useContext(SearchContext);
 	const { _id: id, title, properties, number, type, modules } = ticket;
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
+	const container = ContainersHooksSelectors.selectContainerById(modelId);
+	const federation = FederationsHooksSelectors.selectFederationById(modelId);
+
+	const { name: modelName } = container || federation || {};
+	
+	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(type);
 
 	if (!properties || !template?.code) return null;
 
@@ -100,17 +107,17 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelName, sel
 			<Cell width={96} hidden={!hasProperties}>
 				{!!assignees?.length && (<AssigneesSelect value={assignees} multiple disabled />)}
 			</Cell>
-			<CellOwner width={62}>
+			<CellOwner width={52}>
 				<UserPopoverCircle user={ownerAsUser} />
 			</CellOwner>
 			<CellDate width={147} hidden={!hasProperties}>
-				{!!dueDate && (<DueDateWithIcon value={dueDate} disabled />)}
+				{!!dueDate && (<DueDate value={dueDate} disabled />)}
 			</CellDate>
 			<CellChipText width={90} hidden={!hasProperties}>
 				<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />
 			</CellChipText>
-			<CellChipText width={100} hidden={!hasProperties}>
-				<Chip {...STATUS_MAP[status]} variant="text" />
+			<CellChipText width={150}>
+				<Chip {...getChipPropsFromConfig(statusConfig, status)} />
 			</CellChipText>
 			<Cell width={137} hidden={!hasSafetibase}>
 				<Chip {...RISK_LEVELS_MAP[levelOfRisk]} variant="filled" />

@@ -183,6 +183,8 @@ const expandedGroupItem = css`
 					}
 				}
 				${StyledFormControl} {
+					min-width: 106px;
+					max-width: 106px;
 					.MuiSelect-select {
 						margin-top: 0;
 						color: ${({ theme }) => theme.palette.secondary.main};
@@ -207,7 +209,6 @@ const expandedGroupItem = css`
 					
 					span {
 						display: inline-block;
-						height: 24px;
 						line-height: unset !important;
 						padding-top: 5px;
 						text-overflow: ellipsis;

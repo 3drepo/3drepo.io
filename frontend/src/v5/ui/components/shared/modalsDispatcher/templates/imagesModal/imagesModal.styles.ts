@@ -17,64 +17,189 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
-import { Modal as ModalBase, CloseButton as CloseButtonBase } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
+import { Dialog } from '@mui/material';
 import styled, { css } from 'styled-components';
+import { hexToOpacity } from '@/v5/ui/themes/theme';
 
-export const Modal = styled(ModalBase).attrs({
-	maxWidth: 'lg',
-})`
+export const Modal = styled(Dialog)`
 	.MuiPaper-root {
 		border-radius: 0;
+		width: 100vw;
+		max-width: unset;
+		height: 100vh;
+		max-height: unset;
+		margin: 0 22px;
+		box-sizing: border-box;
+
+		display: flex;
+		flex-direction: column;
 	}
 `;
 
-export const CloseButton = styled(CloseButtonBase)`
-	top: 35px;
-	right: 50px;
-	position: fixed;
-	color: ${({ theme }) => theme.palette.primary.contrast};
+const FlexRow = styled.div`
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
 `;
 
-const modalContentStyles = css`
-	height: 100%;
-	max-height: calc(100vh - 64px);
-	width: 100%;
-	max-width: calc(100vw - 64px);
+export const TopBar = styled(FlexRow)`
+	justify-content: space-between;
+	margin: 16px 0 42px;
+`;
+
+export const Buttons = styled(FlexRow)`
+	gap: 9px;
+`;
+
+export const Counter = styled.div<{ $counterChars: number }>`
+	background-color: ${({ theme }) => hexToOpacity(theme.palette.primary.contrast, 15)};
+	border-radius: 10px;
+	color: ${({ theme }) => theme.palette.primary.contrast};
+	font-weight: 600;
+	width: fit-content;
+	height: 36px;
+	padding: 0 16px;
+	font-variant-numeric: tabular-nums;
+	display: grid;
+	place-items: center;
+`;
+
+const Button = styled(NavbarButton)`
+	height: 36px;
+	min-width: 36px;
+	width: 36px;
+	box-sizing: border-box;
+	cursor: pointer;
+	margin: 0;
+	border: none;
+	background-color: ${({ theme }) => hexToOpacity(theme.palette.primary.contrast, 3.9)};
+
+	&&.Mui-disabled {
+		pointer-events: none;
+		opacity: .25;
+		color: ${({ theme }) => theme.palette.primary.contrast};
+	}
+`;
+
+export const CloseButton = styled(Button)`
+	align-self: flex-end;
+	margin-left: auto;
+`;
+
+export const TopBarButton = styled(Button)`
+	border-radius: 8px;
+
+	svg {
+		width: 17px;
+	}
+`;
+
+export const TextTopBarButton = styled(TopBarButton)`
+	font-weight: 600;
+	gap: 8px;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	color: ${({ theme }) => theme.palette.secondary.main};
+	width: 119px;
+
+	&:hover, &.Mui-focusVisible {
+		background-color: ${({ theme }) => theme.palette.secondary.main};
+		color: ${({ theme }) => theme.palette.primary.contrast};
+		text-decoration: none;
+	}
+
+	svg {
+		height: 18px;
+	}
+`;
+
+export const CenterBar = styled.div`
+	display: flex;
+	flex-direction: column;
 `;
 
 export const Image = styled.img.attrs({
 	alt: formatMessage({ id: 'modal.image', defaultMessage: 'Enlarged image' }),
 })`
-	${modalContentStyles}
-	object-fit: cover;
-	max-width: min(1200px, calc(100vw - 250px));
+	max-width: 100%;
+	max-height: 100%;
+	box-sizing: border-box;
+	border: solid 1px ${({ theme }) => theme.palette.secondary.light};
+	border-radius: 10px;
 `;
 
-export const Container = styled.div`
-	${modalContentStyles}
+export const ImageContainer = styled(FlexRow)<{ $isCarousel?: boolean }>`
+	height: calc(100vh - ${({ $isCarousel }) => $isCarousel ? 210 : 106}px);
+	width: 100%;
+`;
+
+export const BottomBar = styled.div`
 	display: flex;
+	gap: 12px;
+	margin: 12px 58px;
+	overflow-x: scroll;
+	flex-wrap: nowrap;
+	white-space: nowrap;
 `;
 
-export const NextButton = styled(NavbarButton)`
-	position: fixed;
-	top: calc(50% - 10px);
-	cursor: pointer;
-	right: 63px;
-	border-width: 2px;
-	height: 32px;
-	min-width: 32px;
-	width: 32px;
+export const ImageWithArrows = styled(FlexRow)`
+	gap: 22px;
+`;
 
-	&:hover {
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
+export const NextButton = styled(NavbarButton)<{ disabled?: boolean }>`
+	box-sizing: border-box;
+	cursor: pointer;
+	margin: 0;
+	background-color: ${({ theme }) => hexToOpacity(theme.palette.primary.contrast, 3.9)};
+	border: none;
+
+	&&.Mui-disabled {
+		pointer-events: none;
+		opacity: .25;
+		color: ${({ theme }) => theme.palette.primary.contrast};
 	}
+
 	& svg {
 		margin-left: 1px;
+		height: 25px;
 	}
 `;
 
 export const PreviousButton = styled(NextButton)`
 	transform: rotate(180deg);
-	right: unset;
-	left: 63px;
+`;
+
+export const ImageThumbnail = styled.img`
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+`;
+
+export const ImageThumbnailContainer = styled(FlexRow)<{ selected?: boolean }>`
+	box-sizing: border-box;
+	cursor: pointer;
+	border-radius: 8px;
+	min-width: 75px;
+	max-width: 75px;
+	height: 75px;
+	overflow: hidden;
+
+	&:first-of-type {
+		margin-left: auto;
+	}
+
+	&:last-of-type {
+		margin-right: auto;
+	}
+
+	${({ selected, theme }) => selected ? css`
+		border: solid 4px ${theme.palette.primary.main};
+	` : css`
+		border: solid 1px ${theme.palette.secondary.light};
+
+		background-color: ${theme.palette.secondary.main};
+		&:not(:hover) ${ImageThumbnail} {
+			opacity: .8;
+		}
+	`};
 `;

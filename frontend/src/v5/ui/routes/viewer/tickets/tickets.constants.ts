@@ -33,17 +33,18 @@ export enum BaseProperties {
 	OWNER = 'Owner',
 	CREATED_AT = 'Created at',
 	UPDATED_AT = 'Updated at',
+	STATUS = 'Status',
 }
 
 export enum IssueProperties {
 	DUE_DATE = 'Due Date',
-	STATUS = 'Status',
 	PRIORITY = 'Priority',
 	ASSIGNEES = 'Assignees',
 }
 
 export enum AdditionalProperties {
 	DEFAULT_VIEW = 'Default View',
+	DEFAULT_IMAGE = 'Default Image',
 	PIN = 'Pin',
 }
 

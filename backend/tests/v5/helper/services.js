@@ -42,7 +42,11 @@ const { initTeamspace } = require(`${src}/processors/teamspaces/teamspaces`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
+const { isArray } = require(`${src}/utils/helper/typeCheck`);
 const FilesManager = require('../../../src/v5/services/filesManager');
+
+const { statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
+const { generateFullSchema } = require(`${src}/schemas/tickets/templates`);
 
 const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
 
@@ -291,6 +295,12 @@ ServiceHelper.fileExists = (filePath) => {
 	}
 	return flag;
 };
+
+ServiceHelper.outOfOrderArrayEqual = (arr1, arr2) => {
+	expect(arr1.length).toEqual(arr2.length);
+	expect(arr1).toEqual(expect.arrayContaining(arr2));
+};
+
 ServiceHelper.generateUUIDString = () => UUIDToString(generateUUID());
 ServiceHelper.generateUUID = () => generateUUID();
 ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex').substring(0, length);
@@ -302,6 +312,11 @@ ServiceHelper.generateRandomIfcGuid = () => ServiceHelper.generateRandomString(2
 ServiceHelper.generateRandomRvtId = () => Math.floor(Math.random() * 10000);
 
 ServiceHelper.generateRandomURL = () => `http://${ServiceHelper.generateRandomString()}.com/`;
+
+ServiceHelper.generateCustomStatusValues = () => Object.values(statusTypes).map((type) => ({
+	name: ServiceHelper.generateRandomString(15),
+	type,
+}));
 
 ServiceHelper.generateSequenceEntry = (rid) => {
 	const startDate = ServiceHelper.generateRandomDate();
@@ -452,11 +467,11 @@ ServiceHelper.generateRandomModelProperties = (isFed = false) => ({
 	defaultLegend: ServiceHelper.generateUUIDString(),
 });
 
-ServiceHelper.generateTemplate = (deprecated, hasView = false) => ({
+ServiceHelper.generateTemplate = (deprecated, hasView = false, configOptions = {}) => ({
 	_id: ServiceHelper.generateUUIDString(),
 	code: ServiceHelper.generateRandomString(3),
 	name: ServiceHelper.generateRandomString(),
-	config: {},
+	config: configOptions,
 	properties: [
 		{
 			name: ServiceHelper.generateRandomString(),
@@ -516,16 +531,27 @@ ServiceHelper.generateTemplate = (deprecated, hasView = false) => ({
 const generateProperties = (propTemplate, internalType, container) => {
 	const properties = {};
 
-	propTemplate.forEach(({ name, deprecated, type }) => {
-		if (deprecated) return;
+	propTemplate.forEach(({ name, deprecated, readOnly, type, values }) => {
+		if (deprecated || readOnly) return;
 		if (type === propTypes.TEXT) {
 			properties[name] = ServiceHelper.generateRandomString();
 		} else if (type === propTypes.DATE) {
 			properties[name] = internalType ? new Date() : Date.now();
 		} else if (type === propTypes.NUMBER) {
 			properties[name] = ServiceHelper.generateRandomNumber();
+		} else if (type === propTypes.ONE_OF && isArray(values)) {
+			properties[name] = values[values.length - 1];
+		} else if (type === propTypes.MANY_OF && isArray(values)) {
+			properties[name] = values;
+		} else if (type === propTypes.COORDS) {
+			properties[name] = [0, 0, 0];
 		} else if (type === propTypes.VIEW) {
 			properties[name] = {
+				camera: {
+					position: [0, 0, 0],
+					forward: [0, 0, 0],
+					up: [0, 0, 0],
+				},
 				state: {
 					hidden: [
 						{ group: ServiceHelper.generateGroup(true, { serialised: true, hasId: false }) },
@@ -547,8 +573,9 @@ ServiceHelper.generateRandomObject = () => ({
 });
 
 ServiceHelper.generateTicket = (template, internalType = false, container) => {
+	const fullTemplate = generateFullSchema(template) ?? template;
 	const modules = {};
-	template.modules.forEach(({ name, type, deprecated, properties }) => {
+	(fullTemplate?.modules || []).forEach(({ name, type, deprecated, properties }) => {
 		if (deprecated) return;
 		const id = name ?? type;
 		modules[id] = generateProperties(properties, internalType, container);
@@ -556,14 +583,19 @@ ServiceHelper.generateTicket = (template, internalType = false, container) => {
 
 	const ticket = {
 		_id: ServiceHelper.generateUUIDString(),
-		type: template._id,
+		type: fullTemplate._id,
 		title: ServiceHelper.generateRandomString(),
-		properties: generateProperties(template.properties, internalType, container),
+		properties: generateProperties(fullTemplate.properties, internalType, container),
 		modules,
 	};
 
 	return ticket;
 };
+
+ServiceHelper.generateImportedComment = (author = ServiceHelper.generateRandomString()) => ({
+	...ServiceHelper.generateComment(author),
+	originalAuthor: ServiceHelper.generateRandomString(),
+});
 
 ServiceHelper.generateComment = (author = ServiceHelper.generateRandomString()) => {
 	const base64img = fs.readFileSync(image).toString('base64');

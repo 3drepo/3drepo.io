@@ -56,7 +56,7 @@ describe("Teamspace", function() {
 		user: "sub_all",
 		password: "password",
 		key: "eef3a905644d9cdcea53cf60ebc344d7",
-		quota: {spaceLimit: 23553, collaboratorLimit: "unlimited", spaceUsed: 0},
+		quota: {spaceLimit: 3073, collaboratorLimit: "unlimited", spaceUsed: 0},
 		subscriptions : {
 			"basic": {
 			  "collaborators": 0,
@@ -85,14 +85,14 @@ describe("Teamspace", function() {
 	const mixedUser2 = {
 		user: "sub_all2",
 		password: "password",
-		quota: {spaceLimit: 22529, collaboratorLimit: "unlimited", spaceUsed: 0},
+		quota: {spaceLimit: 2049, collaboratorLimit: "unlimited", spaceUsed: 0},
 		key: "bfc07b68267ab54bfdeb891fe77187be"
 	};
 
 	const mixedUser3 = {
 		user: "sub_all3",
 		password: "password",
-		quota: {spaceLimit: 21505, collaboratorLimit: 4, spaceUsed: 0}
+		quota: {spaceLimit: 1025, collaboratorLimit: 2, spaceUsed: 0}
 	};
 
 	const mixedUser4 = {
@@ -165,32 +165,6 @@ describe("Teamspace", function() {
 			agent.post("/logout")
 				.expect(200, done);
 		});
-	});
-
-	describe("user with paypal subscription", function(done) {
-		const user = paypalUser;
-		before(function(done) {
-			this.timeout(timeout);
-			agent.post("/login")
-				.send({username: user.user, password: user.password})
-				.expect(200, done);
-
-		});
-
-		it("should have basic & paypal quota", function(done) {
-			agent.get(`/${user.user}/quota`)
-				.expect(200, function(err, res) {
-					expect(res.body).to.deep.equal(user.quota);
-					done(err);
-				});
-		});
-
-		after(function(done) {
-			this.timeout(timeout);
-			agent.post("/logout")
-				.expect(200, done);
-		});
-
 	});
 
 	describe("user with enterprise subscription", function(done) {

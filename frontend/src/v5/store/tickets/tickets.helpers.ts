@@ -19,6 +19,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { FederationsHooksSelectors, SequencesHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { camelCase, isEmpty, isEqual, isObject, mapKeys } from 'lodash';
 import { getUrl } from '@/v5/services/api/default';
+import ClashIcon from '@assets/icons/outlined/clash-outlined.svg';
 import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
 import SafetibaseIcon from '@assets/icons/outlined/safetibase-outlined.svg';
 import ShapesIcon from '@assets/icons/outlined/shapes-outlined.svg';
@@ -28,6 +29,8 @@ import { useParams } from 'react-router-dom';
 import { TicketBaseKeys, SequencingProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint } from './tickets.types';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
+import { useContext } from 'react';
+import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 
 export const modelIsFederation = (modelId: string) => !!FederationsHooksSelectors.selectFederationById(modelId);
 
@@ -126,6 +129,7 @@ export const filterEmptyTicketValues = (ticket) => {
 };
 
 const moduleTypeProperties = {
+	clash: { title: formatMessage({ id: 'customTicket.panel.clash', defaultMessage: 'Clash' }), Icon: ClashIcon },
 	safetibase: { title: formatMessage({ id: 'customTicket.panel.safetibase', defaultMessage: 'Safetibase' }), Icon: SafetibaseIcon },
 	sequencing: { title: formatMessage({ id: 'customTicket.panel.sequencing', defaultMessage: 'Sequencing' }), Icon: SequencingIcon },
 	shapes: { title: formatMessage({ id: 'customTicket.panel.shapes', defaultMessage: 'Shapes' }), Icon: ShapesIcon },
@@ -156,7 +160,8 @@ export const isResourceId = (str) => {
 };
 
 export const getImgSrc = (imgData) => {
-	const { teamspace, project, containerOrFederation } = useParams();
+	const { teamspace, project } = useParams();
+	const { containerOrFederation } = useContext(TicketContext);
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 

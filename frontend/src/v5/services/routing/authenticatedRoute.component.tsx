@@ -52,12 +52,6 @@ const WrapAuthenticationRedirect = ({ children }) => {
 	}, [isAuthenticated, authenticationFetched]);
 
 	useEffect(() => {
-		if (!authenticationFetched) {
-			AuthActionsDispatchers.authenticate();
-		}
-	}, [authenticationFetched]);
-
-	useEffect(() => {
 		if (isAuthenticated) {
 			TeamspacesActionsDispatchers.fetch();
 		}

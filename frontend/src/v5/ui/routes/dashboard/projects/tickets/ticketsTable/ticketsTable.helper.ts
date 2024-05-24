@@ -18,8 +18,9 @@
 import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { formatMessage } from '@/v5/services/intl';
 import _ from 'lodash';
-import { PriorityLevels, RiskLevels, TicketStatuses, TreatmentStatuses } from '@controls/chip/chip.types';
-import { TicketWithModelIdAndName } from '@/v5/store/tickets/tickets.types';
+import { PriorityLevels, RiskLevels, TreatmentStatuses } from '@controls/chip/chip.types';
+import { IStatusConfig, ITicket } from '@/v5/store/tickets/tickets.types';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 export const NONE_OPTION = 'None';
 
@@ -37,23 +38,9 @@ const getOptionsForGroupsWithDueDate = () => [
 	formatMessage({ id: 'groupBy.dueDate.inSixPlusWeeks', defaultMessage: 'in 6+ weeks' }),
 ];
 
-const mapKeysToSnakeCase = (properties) => _.mapKeys(properties, (val, key) => _.snakeCase(key));
+export type SetTicketValue =  (modelId: string, ticketId?: string, groupValue?: string) => void;
 
-export const GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE = mapKeysToSnakeCase({
-	[NONE_OPTION]: NONE_OPTION,
-	[BaseProperties.OWNER]: BaseProperties.OWNER,
-	[IssueProperties.ASSIGNEES]: IssueProperties.ASSIGNEES,
-	[IssueProperties.DUE_DATE]: IssueProperties.DUE_DATE,
-	[IssueProperties.PRIORITY]: IssueProperties.PRIORITY,
-	[IssueProperties.STATUS]: IssueProperties.STATUS,
-	[SafetibaseProperties.LEVEL_OF_RISK]: SafetibaseProperties.LEVEL_OF_RISK,
-	[SafetibaseProperties.TREATMENT_STATUS]: SafetibaseProperties.TREATMENT_STATUS,
-});
-
-export const ISSUE_PROPERTIES_GROUPS = {
-	[IssueProperties.PRIORITY]: PriorityLevels,
-	[IssueProperties.STATUS]: TicketStatuses,
-};
+export const NEW_TICKET_ID = 'new';
 
 export const SAFETIBASE_PROPERTIES_GROUPS = {
 	[SafetibaseProperties.LEVEL_OF_RISK]: RiskLevels,
@@ -61,11 +48,11 @@ export const SAFETIBASE_PROPERTIES_GROUPS = {
 };
 
 const GROUP_NAMES_BY_TYPE = {
-	...ISSUE_PROPERTIES_GROUPS,
+	[IssueProperties.PRIORITY]: PriorityLevels,
 	...SAFETIBASE_PROPERTIES_GROUPS,
 };
 
-const groupByDate = (tickets: TicketWithModelIdAndName[]) => {
+const groupByDate = (tickets: ITicket[]) => {
 	const groups = {};
 	// eslint-disable-next-line prefer-const
 	let [ticketsWithUnsetDueDate, remainingTickets] = _.partition(tickets, ({ properties }) => !properties[IssueProperties.DUE_DATE]);
@@ -74,7 +61,7 @@ const groupByDate = (tickets: TicketWithModelIdAndName[]) => {
 	const dueDateOptions = getOptionsForGroupsWithDueDate();
 	const endOfCurrentWeek = new Date();
 
-	const ticketDueDateIsPassed = (ticket: TicketWithModelIdAndName) => ticket.properties[IssueProperties.DUE_DATE] < endOfCurrentWeek.getTime();
+	const ticketDueDateIsPassed = (ticket: ITicket) => ticket.properties[IssueProperties.DUE_DATE] < endOfCurrentWeek.getTime();
 
 	let currentWeekTickets;
 	while (dueDateOptions.length) {
@@ -86,7 +73,7 @@ const groupByDate = (tickets: TicketWithModelIdAndName[]) => {
 	return groups;
 };
 
-const groupByList = (tickets: TicketWithModelIdAndName[], groupType: string, groupValues: string[]) => {
+const groupByList = (tickets: ITicket[], groupType: string, groupValues: string[]) => {
 	const groups = {};
 	let remainingTickets = tickets;
 	let currentTickets = [];
@@ -102,7 +89,7 @@ const groupByList = (tickets: TicketWithModelIdAndName[], groupType: string, gro
 	return groups;
 };
 const getAssignees = (t) => _.get(t, `properties.${IssueProperties.ASSIGNEES}`);
-const groupByAssignees = (tickets: TicketWithModelIdAndName[]) => {
+const groupByAssignees = (tickets: ITicket[]) => {
 	const [ticketsWithAssignees, unsetAssignees] = _.partition(tickets, (ticket) => getAssignees(ticket)?.length > 0);
 
 	const ticketsWithSortedAssignees = ticketsWithAssignees.map((ticket) => {
@@ -130,7 +117,7 @@ const groupByAssignees = (tickets: TicketWithModelIdAndName[]) => {
 	return groups;
 };
 
-export const groupTickets = (groupBy: string, tickets: TicketWithModelIdAndName[]): Record<string, TicketWithModelIdAndName[]> => {
+export const groupTickets = (groupBy: string, tickets: ITicket[]): Record<string, ITicket[]> => {
 	switch (groupBy) {
 		case BaseProperties.OWNER:
 			return _.groupBy(tickets, `properties.${BaseProperties.OWNER}`);
@@ -138,6 +125,11 @@ export const groupTickets = (groupBy: string, tickets: TicketWithModelIdAndName[
 			return groupByAssignees(tickets);
 		case IssueProperties.DUE_DATE:
 			return groupByDate(tickets);
+		case BaseProperties.STATUS:
+			const { type } = tickets[0];
+			const config: IStatusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(type);
+			const labels = config.values.map(({ name, label }) => label || name);
+			return groupByList(tickets, groupBy, labels);
 		default:
 			return groupByList(tickets, groupBy, _.values(GROUP_NAMES_BY_TYPE[groupBy]));
 	}

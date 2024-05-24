@@ -66,7 +66,7 @@ export const COLOR = {
 	WARNING_MAIN: '#ED6C02',
 	FAVOURITE_MAIN: '#F5CB34',
 	FAVOURITE_DARK: '#D4AE26',
-	FAVOURITE_MID: '#F8D867',
+	FAVOURITE_MID: '#FDBF4E',
 	FAVOURITE_LIGHT: '#FAE59A',
 	FAVOURITE_LIGHTEST: '#FEFAEB',
 };
@@ -1128,10 +1128,6 @@ export const theme = createTheme({
 
 					'&.Mui-error': {
 						color: COLOR.ERROR_MAIN,
-					},
-
-					'&.Mui-disabled .MuiInputLabel-asterisk': {
-						display: 'none',
 					},
 				},
 			},

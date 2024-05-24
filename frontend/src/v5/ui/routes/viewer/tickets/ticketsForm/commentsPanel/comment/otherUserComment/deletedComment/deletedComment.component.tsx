@@ -17,21 +17,16 @@
 
 import { deletedCommentMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { formatMessage } from '@/v5/services/intl';
-import { AuthorAvatar } from '../otherUserComment.styles';
 import { Comment } from './deletedComment.styles';
-import { CommentWithButtonsContainer } from '../../basicComment/basicComment.styles';
 
 export const DeletedComment = ({ user, author, isFirstOfBlock }) => (
-	<CommentWithButtonsContainer>
-		{isFirstOfBlock && <AuthorAvatar user={user} />}
-		<Comment
-			author={author}
-			isFirstOfBlock={isFirstOfBlock}
-			message={deletedCommentMessage}
-			commentAge={formatMessage({
-				id: 'customTicket.otherUser.comment.time.deleted',
-				defaultMessage: '{name} deleted this message',
-			}, { name: user.firstName })}
-		/>
-	</CommentWithButtonsContainer>
+	<Comment
+		author={author}
+		isFirstOfBlock={isFirstOfBlock}
+		message={deletedCommentMessage}
+		commentAge={formatMessage({
+			id: 'customTicket.otherUser.comment.time.deleted',
+			defaultMessage: '{name} deleted this message',
+		}, { name: user.firstName })}
+	/>
 );

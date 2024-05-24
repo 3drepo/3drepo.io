@@ -15,35 +15,43 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FlexContainer, ClickListener, ExpandableImage } from './commentImages.styles';
+import { FlexContainer, CommentImage, MultiImagesContainer, SingleImage } from './commentImages.styles';
 
 type CommentImagesProps = {
 	images: string[];
+	onImageClick: (index) => void;
 };
-export const CommentImages = ({ images }: CommentImagesProps) => {
+export const CommentImages = ({ images, onImageClick, ...props }: CommentImagesProps) => {
+	if (images.length === 1) {
+		return (<SingleImage onClick={() => onImageClick(0)} src={images[0]} {...props} />);
+	}
+
 	if (images.length <= 3) {
 		return (
-			<FlexContainer>
-				{images.map((image, index) => (
-					<ExpandableImage images={images} displayImageIndex={index} key={image} />
-				))}
-			</FlexContainer>
+			<MultiImagesContainer>
+				<FlexContainer>
+					{images.map((image, index) => (
+						<CommentImage onClick={() => onImageClick(index)} src={image} key={image} {...props} />
+					))}
+				</FlexContainer>
+			</MultiImagesContainer>
 		);
 	}
+
 	if (images.length <= 5) {
 		return (
-			<>
+			<MultiImagesContainer>
 				<FlexContainer>
 					{(images.slice(0, 2)).map((image, index) => (
-						<ExpandableImage images={images} displayImageIndex={index} key={image} />
+						<CommentImage onClick={() => onImageClick(index)} src={image} key={image} {...props} />
 					))}
 				</FlexContainer>
 				<FlexContainer>
 					{(images.slice(2, 5)).map((image, index) => (
-						<ExpandableImage images={images} displayImageIndex={index + 2} key={image} />
+						<CommentImage onClick={() => onImageClick(index + 2)} src={image} key={image} {...props} />
 					))}
 				</FlexContainer>
-			</>
+			</MultiImagesContainer>
 		);
 	}
 
@@ -51,16 +59,16 @@ export const CommentImages = ({ images }: CommentImagesProps) => {
 	const preloadImages = () => images.slice(4).forEach(preloadImage);
 
 	return (
-		<ClickListener onClick={preloadImages}>
+		<MultiImagesContainer onClick={preloadImages}>
 			<FlexContainer>
 				{(images.slice(0, 2)).map((image, index) => (
-					<ExpandableImage images={images} displayImageIndex={index} key={image} />
+					<CommentImage onClick={() => onImageClick(index)} src={image} key={image} {...props} />
 				))}
 			</FlexContainer>
 			<FlexContainer>
-				<ExpandableImage images={images} displayImageIndex={2} />
-				<ExpandableImage images={images} displayImageIndex={3} showExtraImagesValue />
+				<CommentImage onClick={() => onImageClick(2)} src={images[2]} {...props} />
+				<CommentImage onClick={() => onImageClick(3)} src={images[3]} extraCount={images.length - 3} {...props} />
 			</FlexContainer>
-		</ClickListener>
+		</MultiImagesContainer>
 	);
 };

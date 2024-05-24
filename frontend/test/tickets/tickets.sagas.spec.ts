@@ -27,21 +27,22 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { containerMockFactory } from '../containers/containers.fixtures';
 import { federationMockFactory } from '../federations/federations.fixtures';
 import { createTestStore } from '../test.helpers';
-import { fullTemplateMockFactory, getBaseTicket, mockGroup, mockRiskCategories, templateMockFactory, ticketMockFactory, ticketWithGroupMockFactory } from './tickets.fixture';
+import { mockGroup, mockRiskCategories, templateMockFactory, ticketMockFactory, ticketWithGroupMockFactory } from './tickets.fixture';
 import { mockServer } from '../../internals/testing/mockServer';
 
 describe('Tickets: sagas', () => {
 	let onSuccess;
+	let onError;
 	let dispatch; let getState; let
 		waitForActions;
-	const group = mockGroup();
-	const groups = [group];
-	const ticket = ticketWithGroupMockFactory(group);
-	const tickets = [ticket];
 	const teamspace = 'teamspace';
 	const projectId = 'project';
 	const modelId = 'modelId';
 	const revision = 'revision';
+	const group = mockGroup();
+	const groups = [group];
+	const ticket = ticketWithGroupMockFactory(group, { modelId });
+	const tickets = [ticket];
 
 	const populateTicketsStore = () => dispatch(TicketsActions.fetchTicketsSuccess(modelId, tickets));
 	const populateGroupsStore = () => dispatch(TicketsActions.fetchTicketGroupsSuccess(groups));
@@ -54,6 +55,7 @@ describe('Tickets: sagas', () => {
 	};
 	beforeEach(() => {
 		onSuccess = jest.fn();
+		onError = jest.fn();
 		({ dispatch, getState, waitForActions } = createTestStore());
 		dispatch(TeamspacesActions.setCurrentTeamspace(teamspace));
 		dispatch(ProjectsActions.setCurrentProject(projectId));
@@ -119,10 +121,11 @@ describe('Tickets: sagas', () => {
 
 			const updateProp = { title: 'updatedContainerTicketName' };
 			await waitForActions(() => {
-				dispatch(TicketsActions.updateTicket(teamspace, projectId, modelId, ticket._id, updateProp, false));
+				dispatch(TicketsActions.updateTicket(teamspace, projectId, modelId, ticket._id, updateProp, false, onError));
 			}, [
 				TicketsActions.upsertTicketSuccess(modelId, { _id: ticket._id, ...updateProp }),
 			]);
+			expect(onError).not.toHaveBeenCalled();
 		});
 		it('should call updateContainerTicket with a 404', async () => {
 			populateTicketsStore();
@@ -132,11 +135,12 @@ describe('Tickets: sagas', () => {
 
 			const updateProp = { title: 'updatedContainerTicketName' };
 			await waitForActions(() => {
-				dispatch(TicketsActions.updateTicket(teamspace, projectId, modelId, ticket._id, updateProp, false));
+				dispatch(TicketsActions.updateTicket(teamspace, projectId, modelId, ticket._id, updateProp, false, onError));
 			}, [DialogsTypes.OPEN]);
 
 			const ticketsFromState = selectTickets(getState(), modelId);
 			expect(ticketsFromState).toEqual(tickets);
+			expect(onError).toHaveBeenCalled();
 		});
 
 		it('should call createContainerTicket endpoint', async () => {
@@ -149,10 +153,11 @@ describe('Tickets: sagas', () => {
 				.reply(200, { _id });
 
 			await waitForActions(() => {
-				dispatch(TicketsActions.createTicket(teamspace, projectId, modelId, newTicket, false, onSuccess));
+				dispatch(TicketsActions.createTicket(teamspace, projectId, modelId, newTicket, false, onSuccess, onError));
 			}, [TicketsActions.upsertTicketSuccess(modelId, { _id, ...newTicket })]);
 
 			expect(onSuccess).toHaveBeenCalledWith(_id);
+			expect(onError).not.toHaveBeenCalled();
 		});
 
 		it('should call createContainerTicket endpoint with a 404', async () => {
@@ -165,12 +170,13 @@ describe('Tickets: sagas', () => {
 				.reply(404, { _id });
 
 			await waitForActions(() => {
-				dispatch(TicketsActions.createTicket(teamspace, projectId, modelId, newTicket, false, onSuccess));
+				dispatch(TicketsActions.createTicket(teamspace, projectId, modelId, newTicket, false, onSuccess, onError));
 			}, [DialogsTypes.OPEN]);
 
 			const ticketsFromState = selectTickets(getState(), modelId);
 			expect(ticketsFromState).toEqual([]);
 			expect(onSuccess).not.toHaveBeenCalled();
+			expect(onError).toHaveBeenCalled();
 		});
 
 		// Federations
@@ -230,8 +236,9 @@ describe('Tickets: sagas', () => {
 			const updateProp = { _id: ticket._id, title: 'updatedFederationTicketName' };
 
 			await waitForActions(() => {
-				dispatch(TicketsActions.updateTicket(teamspace, projectId, modelId, ticket._id, updateProp, true));
+				dispatch(TicketsActions.updateTicket(teamspace, projectId, modelId, ticket._id, updateProp, true, onError));
 			}, [TicketsActions.upsertTicketSuccess(modelId, updateProp)]);
+			expect(onError).not.toHaveBeenCalled();
 		});
 
 		it('should call updateFederationTicket endpoint with a 404', async () => {
@@ -243,11 +250,12 @@ describe('Tickets: sagas', () => {
 			const updateProp = { _id: ticket._id, title: 'updatedFederationTicketName' };
 
 			await waitForActions(() => {
-				dispatch(TicketsActions.updateTicket(teamspace, projectId, modelId, ticket._id, updateProp, true));
+				dispatch(TicketsActions.updateTicket(teamspace, projectId, modelId, ticket._id, updateProp, true, onError));
 			}, [DialogsTypes.OPEN]);
 
 			const ticketsFromState = selectTickets(getState(), modelId);
 			expect(ticketsFromState).toEqual(tickets);
+			expect(onError).toHaveBeenCalled();
 		});
 
 		it('should call createFederationTicket endpoint', async () => {
@@ -260,9 +268,10 @@ describe('Tickets: sagas', () => {
 				.reply(200, { _id });
 
 			await waitForActions(() => {
-				dispatch(TicketsActions.createTicket(teamspace, projectId, modelId, newticket, true, onSuccess));
+				dispatch(TicketsActions.createTicket(teamspace, projectId, modelId, newticket, true, onSuccess, onError));
 			}, [TicketsActions.upsertTicketSuccess(modelId, { _id, ...newticket })]);
 			expect(onSuccess).toHaveBeenCalledWith(_id);
+			expect(onError).not.toHaveBeenCalled();
 		});
 
 		it('should call createFederationTicket endpoint with a 404', async () => {
@@ -274,12 +283,13 @@ describe('Tickets: sagas', () => {
 				.reply(404);
 
 			await waitForActions(() => {
-				dispatch(TicketsActions.createTicket(teamspace, projectId, modelId, newticket, true, onSuccess));
+				dispatch(TicketsActions.createTicket(teamspace, projectId, modelId, newticket, true, onSuccess, onError));
 			}, [DialogsTypes.OPEN]);
 
 			const ticketsFromState = selectTickets(getState(), modelId);
 			expect(ticketsFromState).toEqual([]);
 			expect(onSuccess).not.toHaveBeenCalled();
+			expect(onError).toHaveBeenCalled();
 		});
 		describe('groups', () => {
 			beforeEach(populateTicketsStore);

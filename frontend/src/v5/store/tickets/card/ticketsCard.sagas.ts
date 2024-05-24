@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, select, takeLatest } from 'redux-saga/effects';
+import { put, select, take, takeLatest } from 'redux-saga/effects';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
-import { TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { BaseProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ViewerGuiActions } from '@/v4/modules/viewerGui/viewerGui.redux';
-import { GoBackFromTicketGroupsAction, OpenTicketAction, TicketsCardActions, TicketsCardTypes } from './ticketsCard.redux';
-import { goToView } from '@/v5/helpers/viewpoint.helpers';
-import { get } from 'lodash';
-import { Viewpoint } from '../tickets.types';
-import { selectViewProps } from './ticketsCard.selectors';
+import { FetchTicketsListAction, OpenTicketAction, TicketsCardActions, TicketsCardTypes } from './ticketsCard.redux';
+import { TicketsActions, TicketsTypes } from '../tickets.redux';
+import { DialogsActions } from '../../dialogs/dialogs.redux';
+import { formatMessage } from '@/v5/services/intl';
+import { selectTemplates } from '../tickets.selectors';
 
 export function* openTicket({ ticketId }: OpenTicketAction) {
 	yield put(TicketsCardActions.setSelectedTicket(ticketId));
@@ -31,16 +31,29 @@ export function* openTicket({ ticketId }: OpenTicketAction) {
 	yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.TICKETS, true));
 }
 
-export function* goBackFromTicketGroups({ ticket }: GoBackFromTicketGroupsAction ) {
-	const viewProps = yield select(selectViewProps);
-	const viewpoint = get(ticket, viewProps.name) as Viewpoint;
-	const { state } = viewpoint || {};
-	goToView({ state });
-	yield put(TicketsCardActions.setOverrides(null));
-	yield put(TicketsCardActions.setCardView(TicketsCardViews.Details));
+export function* fetchTicketsList({ teamspace, projectId, modelId, isFederation }: FetchTicketsListAction) {
+	try {
+		yield put(TicketsActions.fetchTemplates(teamspace, projectId, modelId, isFederation, true));
+		yield take(TicketsTypes.FETCH_TEMPLATES_SUCCESS);
+		const templates = yield select(selectTemplates, modelId);
+		const requiredProperties = templates.reduce((acc, template) => {
+			const configColor = template.config?.pin?.color;
+			if (!configColor?.property) return acc;
+			const { property: { module, name } } = configColor;
+			const path = module ? `${module}.${name}` : name;
+			return [...acc, path];
+		}, [BaseProperties.DESCRIPTION]);
+		yield put(TicketsActions.fetchTickets(teamspace, projectId, modelId, isFederation, requiredProperties));
+
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'tickets.fetchTicketsList.error', defaultMessage: 'trying to fetch the tickets list' }),
+			error,
+		}));
+	}
 }
 
 export default function* ticketsCardSaga() {
 	yield takeLatest(TicketsCardTypes.OPEN_TICKET, openTicket);
-	yield takeLatest(TicketsCardTypes.GO_BACK_FROM_TICKET_GROUPS, goBackFromTicketGroups);
+	yield takeLatest(TicketsCardTypes.FETCH_TICKETS_LIST, fetchTicketsList);
 }

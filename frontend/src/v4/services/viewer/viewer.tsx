@@ -157,7 +157,7 @@ export class ViewerService {
 				resolve(null);
 			}
 
-			UnityUtil.setAPIHost(options.getAPI);
+			UnityUtil.setAPIHost({hostNames: options.getAPI.hostNames});
 
 			// Set option param from viewerDirective
 			this.options = options;
@@ -863,13 +863,6 @@ export class ViewerService {
 		UnityUtil.setMaxShadowDistance(value);
 	}
 
-	public setNumCacheThreads(value: number) {
-		if (value === undefined) {
- 			return;
-		}
-		UnityUtil.setNumCacheThreads(value);
-	}
-
 	public setNearPlane = (nearplane: number) => {
 		if (nearplane === undefined) {
  			return;
@@ -1175,9 +1168,9 @@ export class ViewerService {
 
 	public setModelCache = (cache: boolean) => {
 		if (cache) {
-			UnityUtil.enableCaching();
+			UnityUtil.enableExternalWebRequestHandler();
 		} else {
-			UnityUtil.disableCaching();
+			UnityUtil.disableExternalWebRequestHandler();
 		}
 	}
 

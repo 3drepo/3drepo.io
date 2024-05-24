@@ -48,6 +48,7 @@ import { selectInitialView, selectViewpointsDomain, ViewpointsActions, Viewpoint
 import { ViewerGuiActions, ViewerGuiTypes } from './viewerGui.redux';
 import {
 	selectClippingMode,
+	selectGizmoMode,
 	selectHelicopterSpeed,
 	selectIsClipEdit,
 } from './viewerGui.selectors';
@@ -325,12 +326,16 @@ function* setGizmoMode({ mode }) {
 function* setClipEdit({ isClipEdit }) {
 	try {
 		const currentClipEdit = yield select(selectIsClipEdit);
+		const clippingMode = yield select(selectClippingMode);
+		const gizmoMode = yield select(selectGizmoMode);
 		if (currentClipEdit !== isClipEdit) {
-			const clippingMode = yield select(selectClippingMode);
 			yield all([
 				isClipEdit ? Viewer.startClip(clippingMode === VIEWER_CLIP_MODES.SINGLE) : Viewer.stopClipEdit(),
 				put(ViewerGuiActions.setClipEditSuccess(isClipEdit)),
 			])
+		}
+		if (isClipEdit && (clippingMode === VIEWER_CLIP_MODES.SINGLE) && (gizmoMode === VIEWER_GIZMO_MODES.SCALE)) {
+			yield put(ViewerGuiActions.setGizmoMode(VIEWER_GIZMO_MODES.TRANSLATE));
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'clip edit', error));

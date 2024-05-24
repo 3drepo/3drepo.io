@@ -34,6 +34,7 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { MenuItem } from '@mui/material';
+import { ImagesModal } from '@components/shared/modalsDispatcher/templates/imagesModal/imagesModal.component';
 import {
 	Controls,
 	CharsCounter,
@@ -52,6 +53,7 @@ import {
 import { CommentReply } from '../comment/commentReply/commentReply.component';
 import { ActionMenu } from '../../../ticketsList/ticketsList.styles';
 import { TicketContext } from '../../../ticket.context';
+import { useSyncProps } from '@/v5/helpers/syncProps.hooks';
 
 type ImageToUpload = {
 	id: string,
@@ -70,11 +72,15 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 	const [isDraggingFile, setIsDraggingFile] = useState(false);
 	const containerRef = useRef<HTMLElement>();
 	const inputRef = useRef<any>();
-	const { isViewer } = useContext(TicketContext);
-	const { watch, reset, control } = useForm<{ message: string, images: File[] }>({ mode: 'all' });
+	const { isViewer, containerOrFederation } = useContext(TicketContext);
+	const { watch, reset, control } = useForm<{ message: string, images: File[] }>({
+		mode: 'all',
+		defaultValues: { message: '' },
+	});
 	const messageInput = watch('message');
 
-	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const { teamspace, project } = useParams<ViewerParams>();
+	
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const currentUser = CurrentUserHooksSelectors.selectCurrentUser();
@@ -118,6 +124,14 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 		);
 	};
 
+	const editImage = async (image, index) => {
+		imagesToUpload[index].src = image;
+		setImagesToUpload(imagesToUpload);
+	};
+
+	// @ts-ignore
+	const deleteImage = (index) => setImagesToUpload(imagesToUpload.toSpliced(index, 1));
+
 	const uploadFiles = async (files: File[]) => {
 		const images = await Promise.all(files.map(async (file) => ({
 			name: file.name,
@@ -133,6 +147,28 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 		await uploadFiles(files);
 	};
 
+	const syncProps = useSyncProps({
+		images: imagesToUpload.map(({ src }) => src),
+		onUpload: uploadImages,
+		onDelete: deleteImage,
+		onAddMarkup: editImage,
+	});
+	const openImagesDialog = (index) => DialogsActionsDispatchers.open(
+		ImagesModal,
+		{ displayImageIndex: index },
+		syncProps,
+	);
+
+	const handleDropFiles = async (files) => {
+		await uploadFiles(files);
+		openImagesDialog(imagesToUpload.length);
+	};
+
+	const handleUploadImages = async () => {
+		await uploadImages();
+		openImagesDialog(imagesToUpload.length);
+	};
+
 	const uploadScreenshot = async () => {
 		const image = await ViewerService.getScreenshot() as unknown as string;
 		const imageToUpload: ImageToUpload = {
@@ -140,17 +176,7 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 			id: uuid(),
 		};
 		setImagesToUpload(imagesToUpload.concat(imageToUpload));
-	};
-
-	const deleteImage = (idToDelete) => {
-		setImagesToUpload(imagesToUpload.filter(({ id }) => id !== idToDelete));
-	};
-
-	const openImagesModal = (imageIndex) => {
-		DialogsActionsDispatchers.open('images', {
-			images: imagesToUpload.map(({ src }) => src),
-			displayImageIndex: imageIndex,
-		});
+		openImagesDialog(imagesToUpload.length);
 	};
 
 	const handleDragLeave = ({ relatedTarget }) => {
@@ -193,7 +219,7 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 				}}
 				ref={inputRef}
 			/>
-			<DragAndDrop accept={getSupportedImageExtensions()} onDrop={uploadFiles} hidden={!isDraggingFile}>
+			<DragAndDrop accept={getSupportedImageExtensions()} onDrop={handleDropFiles} hidden={!isDraggingFile}>
 				<FormattedMessage
 					id="customTicket.comments.dropFiles"
 					defaultMessage="Drop your files here"
@@ -203,8 +229,8 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 				<Images>
 					{imagesToUpload.map(({ src, id, error }, index) => (
 						<ImageContainer key={id}>
-							<Image src={src} $error={error} onClick={() => openImagesModal(index)} draggable={false} />
-							<DeleteButton onClick={() => deleteImage(id)} error={error}>
+							<Image src={src} $error={error} onClick={() => openImagesDialog(index)} draggable={false} />
+							<DeleteButton onClick={() => deleteImage(index)} error={error}>
 								<DeleteIcon />
 							</DeleteButton>
 						</ImageContainer>
@@ -231,7 +257,7 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 						<MenuItem onClick={uploadScreenshot} disabled={!isViewer}>
 							<FormattedMessage id="customTicket.comments.action.createScreenshot" defaultMessage="Create screenshot" />
 						</MenuItem>
-						<MenuItem onClick={uploadImages}>
+						<MenuItem onClick={handleUploadImages}>
 							<FormattedMessage id="customTicket.comments.action.uploadImage" defaultMessage="Upload images" />
 						</MenuItem>
 					</ActionMenuItem>

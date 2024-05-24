@@ -25,9 +25,8 @@ import { DialogsActions, DialogsTypes } from '../dialogs/dialogs.redux';
 import { prepareFederationsData } from '../federations/federations.helpers';
 import { FederationsActions, FederationsTypes } from '../federations/federations.redux';
 import { selectContainersByFederationId } from '../federations/federations.selectors';
-import { TicketsActions, TicketsTypes } from '../tickets/tickets.redux';
+import { TicketsCardActions } from '../tickets/card/ticketsCard.redux';
 import { FetchDataAction, ViewerActions, ViewerTypes } from './viewer.redux';
-import { selectTemplates } from '../tickets/tickets.selectors';
 
 function* fetchData({ teamspace, containerOrFederation, project }: FetchDataAction) {
 	yield put(ViewerActions.setFetching(true));
@@ -71,17 +70,7 @@ function* fetchData({ teamspace, containerOrFederation, project }: FetchDataActi
 			}
 		}
 
-		yield put(TicketsActions.fetchTemplates(teamspace, project, containerOrFederation, isFederation, true));
-		yield take(TicketsTypes.FETCH_TEMPLATES_SUCCESS);
-		const templates = yield select(selectTemplates, containerOrFederation);
-		const filter = templates.reduce((acc, template) => {
-			const configColor = template.config?.pin?.color;
-			if (!configColor?.property) return acc;
-			const { module, property: { name } } = configColor;
-			const path = module ? `${module}.${name}` : name;
-			return [...acc, path];
-		}, []);
-		yield put(TicketsActions.fetchTickets(teamspace, project, containerOrFederation, isFederation, filter));
+		yield put(TicketsCardActions.fetchTicketsList(teamspace, project, containerOrFederation, isFederation));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'viewer.fetch.error', defaultMessage: 'trying to fetch viewer data' }),

@@ -15,9 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
+
 const { src } = require('../../../../../../../../helper/path');
 
-const { generateRandomString } = require('../../../../../../../../helper/services');
+const { generateRandomString, generateTemplate, generateTicket } = require('../../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -36,7 +38,9 @@ const TicketModelSchema = require(`${src}/models/tickets`);
 
 const Tickets = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets`);
 const { createResponseCode, templates } = require(`${src}/utils/responseCodes`);
-const { stringToUUID, generateUUIDString } = require(`${src}/utils/helper/uuids`);
+const { UUIDToString, stringToUUID, generateUUIDString } = require(`${src}/utils/helper/uuids`);
+
+const ticketArrTestErrorMsg = 'Expected body to contain an array of tickets';
 
 const testValidateNewTicket = () => {
 	describe('Validate new ticket', () => {
@@ -153,6 +157,103 @@ const testValidateNewTicket = () => {
 
 			expect(fn).toHaveBeenCalled();
 			expect(Responder.respond).not.toHaveBeenCalled();
+		});
+	});
+};
+
+const testValidateImportTickets = () => {
+	const template = generateTemplate();
+	const knownTemplateID = generateUUIDString();
+	const deprecatedTemplateID = generateUUIDString();
+
+	const goodTickets = times(5, () => generateTicket(template));
+
+	const badTicket = generateTicket(template);
+	const throwTicket = generateTicket(template);
+
+	const templateCheck = async (req, res, next) => {
+		const { template: tem } = req.params;
+
+		const temIdStr = UUIDToString(tem);
+		if (temIdStr === knownTemplateID) {
+			req.templateData = { ...template, _id: stringToUUID(knownTemplateID) };
+			await next();
+			return;
+		}
+
+		if (temIdStr === deprecatedTemplateID) {
+			req.templateData = { ...template, deprecated: true, _id: stringToUUID(deprecatedTemplateID) };
+			await next();
+		}
+	};
+
+	const validation = (t, p, m, tem, ticket) => {
+		if (ticket === badTicket) return Promise.reject(templates.invalidArguments);
+		if (ticket === throwTicket) return Promise.reject(new Error('abc'));
+		return Promise.resolve({ ...ticket, type: tem._id });
+	};
+	const processReadOnly = (e, ticket) => {
+		// eslint-disable-next-line no-param-reassign
+		ticket.processed = true;
+		return Promise.resolve();
+	};
+
+	describe.each([
+		['template is not provided', { query: {} }, false, createResponseCode(templates.invalidArguments, 'Template must be provided')],
+		['template is not provided (query set to null)', { query: null }, false, createResponseCode(templates.invalidArguments, 'Template must be provided')],
+		['template does not exist', { query: { template: generateUUIDString() } }, false],
+		['template is provided within the ticket', { query: {}, body: { tickets: [{ type: knownTemplateID }] } }, false, createResponseCode(templates.invalidArguments, 'Template must be provided')],
+		['a deprecated template is provided', { query: { template: deprecatedTemplateID } }, false, createResponseCode(templates.invalidArguments, 'Template has been deprecated')],
+		['the request has invalid body', { body: 1 }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
+		['validation caused an unrecognised error', { body: { tickets: [throwTicket] } }, false, createResponseCode(templates.invalidArguments, 'abc')],
+		['tickets array doesn\'t exist', { body: { } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
+		['tickets is not an array', { body: { tickets: 1 } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
+		['ticket array is empty', { body: { tickets: [] } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
+		['ticket array contains a bad ticket', { body: { tickets: [...goodTickets, badTicket] } }, false, templates.invalidArguments],
+		['all tickets are valid', {}, true],
+	])('Validate import tickets', (desc, additionalReq, success, expectedRes) => {
+		afterEach(() => {
+			jest.clearAllMocks();
+		});
+		test(`Should ${success ? 'succeed and call next()' : `fail and ${expectedRes ? `respond with ${expectedRes.code}` : 'not respond'}`} if ${desc}`, async () => {
+			const req = {
+				params: {},
+				query: { template: knownTemplateID },
+				body: { tickets: goodTickets },
+				...additionalReq,
+			};
+			const fn = jest.fn();
+			const res = {};
+
+			SettingsMW.checkTicketTemplateExists.mockImplementation(templateCheck);
+			TicketSchema.validateTicket.mockImplementation(validation);
+			TicketSchema.deserialiseUUIDsInTicket.mockImplementation((t) => t);
+			TicketSchema.processReadOnlyValues.mockImplementation(processReadOnly);
+
+			await Tickets.validateImportTickets(req, res, fn);
+
+			if (success) {
+				expect(fn).toHaveBeenCalledTimes(1);
+				expect(Responder.respond).not.toHaveBeenCalled();
+				req.body.tickets.forEach(({ processed, type }) => {
+					expect(processed).toBeTruthy();
+					expect(type).toEqual(stringToUUID(knownTemplateID));
+				});
+
+				expect(SettingsMW.checkTicketTemplateExists).toHaveBeenCalledTimes(1);
+				expect(SettingsMW.checkTicketTemplateExists).toHaveBeenCalledWith(req, res, expect.anything());
+				const nTickets = req.body.tickets.length;
+				expect(TicketSchema.validateTicket).toHaveBeenCalledTimes(nTickets);
+				expect(TicketSchema.deserialiseUUIDsInTicket).toHaveBeenCalledTimes(nTickets);
+				expect(TicketSchema.processReadOnlyValues).toHaveBeenCalledTimes(nTickets);
+			} else if (expectedRes) {
+				expect(fn).not.toHaveBeenCalled();
+				// We don't always expect a response - the response might've been done on a mocked function.
+				expect(Responder.respond).toHaveBeenCalledTimes(1);
+				expect(Responder.respond).toHaveBeenCalledWith(req, res, expectedRes);
+			} else {
+				expect(Responder.respond).not.toHaveBeenCalled();
+			}
 		});
 	});
 };
@@ -278,7 +379,113 @@ const testValidateUpdateTicket = () => {
 	});
 };
 
+const testValidateUpdateMultipleTickets = () => {
+	const template = generateTemplate();
+	const knownTemplateID = generateUUIDString();
+	const deprecatedTemplateID = generateUUIDString();
+	const existingTickets = [];
+
+	const goodTickets = times(5, () => {
+		const ticket = generateTicket(template);
+
+		existingTickets.push({ ...generateTicket(template), _id: stringToUUID(ticket._id) });
+
+		return ticket;
+	});
+
+	const badTicket = generateTicket(template);
+	existingTickets.push({ ...badTicket });
+
+	const templateCheck = async (req, res, next) => {
+		const { template: tem } = req.params;
+
+		const temIdStr = UUIDToString(tem);
+		if (temIdStr === knownTemplateID) {
+			req.templateData = { ...template, _id: stringToUUID(knownTemplateID) };
+			await next();
+			return;
+		}
+
+		if (temIdStr === deprecatedTemplateID) {
+			req.templateData = { ...template, deprecated: true, _id: stringToUUID(deprecatedTemplateID) };
+			await next();
+		}
+	};
+
+	const validation = (t, p, m, tem, ticket) => (ticket._id === badTicket._id
+		? Promise.reject(templates.invalidArguments) : Promise.resolve(ticket));
+	const processReadOnly = (e, ticket) => {
+		// eslint-disable-next-line no-param-reassign
+		ticket.processed = true;
+		return Promise.resolve();
+	};
+
+	const idNotFound = generateUUIDString();
+
+	describe.each([
+		['template is not provided', { query: {} }, false, createResponseCode(templates.invalidArguments, 'Template must be provided')],
+		['template is not provided (query set to null)', { query: null }, false, createResponseCode(templates.invalidArguments, 'Template must be provided')],
+		['template does not exist', { query: { template: generateUUIDString() } }, false],
+		['template is provided within the ticket', { query: {}, body: { tickets: [{ type: knownTemplateID }] } }, false, createResponseCode(templates.invalidArguments, 'Template must be provided')],
+		['the request has invalid body', { body: 1 }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
+		['tickets array doesn\'t exist', { body: { } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
+		['tickets is not an array', { body: { tickets: 1 } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
+		['ticket array is empty', { body: { tickets: [] } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
+		['ticket array contains a ticket with no _id', { body: { tickets: [{ ...goodTickets[0], _id: undefined }] } }, false, createResponseCode(templates.invalidArguments, '_id field must be provided for all tickets')],
+		['ticket array contains a ticket with invalid _id', { body: { tickets: [{ ...goodTickets[0], _id: idNotFound }] } }, false, createResponseCode(templates.invalidArguments, `The following IDs were not found: ${idNotFound}`)],
+		['ticket array contains a bad ticket', { body: { tickets: [badTicket] } }, false, createResponseCode(templates.invalidArguments)],
+		['all tickets are valid', {}, true],
+		['a deprecated template is provided', { query: { template: deprecatedTemplateID } }, true],
+	])('Validate update multiple tickets', (desc, additionalReq, success, expectedRes) => {
+		afterEach(() => {
+			jest.clearAllMocks();
+		});
+		test(`Should ${success ? 'succeed and call next()' : `fail and ${expectedRes ? `respond with ${expectedRes.code}` : 'not respond'}`} if ${desc}`, async () => {
+			const req = {
+				params: {},
+				query: { template: knownTemplateID },
+				body: { tickets: goodTickets },
+				...additionalReq,
+			};
+			const fn = jest.fn();
+			const res = {};
+
+			SettingsMW.checkTicketTemplateExists.mockImplementation(templateCheck);
+			TicketSchema.validateTicket.mockImplementation(validation);
+			TicketSchema.deserialiseUUIDsInTicket.mockImplementation((t) => t);
+			TicketSchema.processReadOnlyValues.mockImplementation(processReadOnly);
+			TicketModelSchema.getTicketsByQuery.mockResolvedValueOnce(existingTickets);
+
+			await Tickets.validateUpdateMultipleTickets(req, res, fn);
+
+			if (success) {
+				expect(fn).toHaveBeenCalledTimes(1);
+				expect(Responder.respond).not.toHaveBeenCalled();
+				req.body.tickets.forEach(({ processed }) => {
+					expect(processed).toBeTruthy();
+				});
+
+				expect(SettingsMW.checkTicketTemplateExists).toHaveBeenCalledTimes(1);
+				expect(SettingsMW.checkTicketTemplateExists).toHaveBeenCalledWith(req, res, expect.anything());
+				const nTickets = req.body.tickets.length;
+				expect(TicketSchema.validateTicket).toHaveBeenCalledTimes(nTickets);
+				expect(TicketSchema.deserialiseUUIDsInTicket).toHaveBeenCalledTimes(nTickets);
+				expect(TicketSchema.processReadOnlyValues).toHaveBeenCalledTimes(nTickets);
+			} else if (expectedRes) {
+				expect(fn).not.toHaveBeenCalled();
+				// We don't always expect a response - the response might've been done on a mocked function.
+				expect(Responder.respond).toHaveBeenCalledTimes(1);
+				expect(Responder.respond).toHaveBeenCalledWith(req, res, expectedRes);
+			} else {
+				expect(Responder.respond).not.toHaveBeenCalled();
+			}
+		});
+	});
+};
+
 describe('middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets', () => {
 	testValidateNewTicket();
+	testValidateImportTickets();
 	testValidateUpdateTicket();
+	testValidateUpdateMultipleTickets();
 });

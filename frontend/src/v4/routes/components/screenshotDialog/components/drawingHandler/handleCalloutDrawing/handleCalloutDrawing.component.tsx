@@ -19,7 +19,7 @@ import { isEmpty } from 'lodash';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { batchGroupBy } from '../../../../../../modules/canvasHistory/canvasHistory.helpers';
 import { COLOR } from '../../../../../../styles';
-import { MODES } from '../../../screenshotDialog.helpers';
+import { MODES } from '../../../markupStage/markupStage.helpers';
 
 import { SHAPE_TYPES } from '../../shape/shape.constants';
 import { TypingHandler } from '../../typingHandler/typingHandler.component';

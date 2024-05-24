@@ -26,26 +26,29 @@ export interface IProps {
 	pointMeasurements: IMeasure[];
 	lengthMeasurements: IMeasure[];
 	areaMeasurements: IMeasure[];
+	angleMeasurements: IMeasure[];
 	units: string;
 	removeMeasurement: (uuid) => void;
 	setMeasurementColor: (uuid, color) => void;
 	setMeasurementName: (uuid, type, name) => void;
 	modelUnit: string;
+	canEdit?: boolean;
 }
 
-export const AllMeasurementsList = ({areaMeasurements, lengthMeasurements, pointMeasurements, ...props}: IProps) => {
+export const AllMeasurementsList = ({areaMeasurements, lengthMeasurements, pointMeasurements, angleMeasurements, ...props}: IProps) => {
 	const [colors, setColors] = useState([]);
 
 	useEffect(() => {
 
 		const addColors = [
+			...(angleMeasurements || []),
 			...(areaMeasurements || []),
 			...(lengthMeasurements || []),
 			...(pointMeasurements || [])
 		].map(({customColor, color}) => GLToHexColor(customColor || color));
 
 		setColors(Array.from(new Set(addColors)));
-	}, [pointMeasurements, lengthMeasurements, areaMeasurements]);
+	}, [pointMeasurements, lengthMeasurements, areaMeasurements, angleMeasurements]);
 
 	return (
 		<div>
@@ -60,6 +63,10 @@ export const AllMeasurementsList = ({areaMeasurements, lengthMeasurements, point
 			{
 				!isEmpty(areaMeasurements) &&
 				<MeasurementsList {...props} measureType={MEASURE_TYPE.AREA} measurements={areaMeasurements} colors={colors} />
+			}
+			{
+				!isEmpty(angleMeasurements) &&
+				<MeasurementsList {...props} measureType={MEASURE_TYPE.ANGLE} measurements={angleMeasurements} colors={colors} />
 			}
 		</div>
 	);

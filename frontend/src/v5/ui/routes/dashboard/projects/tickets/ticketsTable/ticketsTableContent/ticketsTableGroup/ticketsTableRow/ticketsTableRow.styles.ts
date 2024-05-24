@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DueDateWithIconContainer } from '@controls/dueDate/dueDate.styles';
+import { DueDateContainer } from '@controls/dueDate/dueDate.styles';
 import styled, { css } from 'styled-components';
 import { Container as FixedOrGrowContainer } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.styles';
 
@@ -63,7 +63,7 @@ export const OverflowContainer = styled.div`
 `;
 
 export const CellChipText = styled(Cell)`
-	.MuiChip-root {
+	>.MuiChip-root {
 		padding-left: 0;
 	}
 `;
@@ -76,7 +76,7 @@ export const CellOwner = styled(Cell)`
 `;
 
 export const CellDate = styled(Cell)`
-	${DueDateWithIconContainer} {
+	${DueDateContainer} {
 		height: 18px;
 	}
 `;

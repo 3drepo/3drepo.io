@@ -31,6 +31,7 @@ import {
 	AxisLabel,
 	AxisValue,
 	Container,
+	DegreesSymbol,
 	MeasurementPoint,
 	MeasurementValue,
 	StyledForm,
@@ -57,6 +58,7 @@ interface IProps extends IMeasure {
 	setMeasurementName: (uuid, type, name) => void;
 	modelUnit: string;
 	colors: string[];
+	canEdit?: boolean;
 }
 
 const roundNumber = (num: number, numDP: number) => {
@@ -65,6 +67,9 @@ const roundNumber = (num: number, numDP: number) => {
 };
 
 export const getValue = (measureValue: number, units: string, type: number, modelUnits: string) => {
+	if (type === MEASURE_TYPE.ANGLE) {
+		return (measureValue * 180 / Math.PI).toFixed(2);
+	}
 	const isAreaMeasurement = type === MEASURE_TYPE.AREA;
 
 	const factor = isAreaMeasurement ? 2 : 1;
@@ -91,6 +96,9 @@ export const getUnits = (units: string, type: number) => {
 			</>
 		);
 	}
+	if (type === MEASURE_TYPE.ANGLE) {
+		return <DegreesSymbol />;
+	}
 	return units;
 };
 
@@ -99,7 +107,7 @@ const chopHexAlphaColor = (color) => color.substr(0, 7);
 const unChopGlAlpha = (color) => [...color.slice(0, 3), 1];
 
 export const MeasureItem = ({
-	uuid, index, name, typeName, value, units, color, removeMeasurement, type, position, customColor, ...props
+	uuid, index, name, typeName, value, units, color, removeMeasurement, type, position, customColor, canEdit, ...props
 }: IProps) => {
 	const textFieldRef = useRef(null);
 
@@ -119,6 +127,7 @@ export const MeasureItem = ({
 	};
 
 	const isPointTypeMeasure = type === MEASURE_TYPE.POINT;
+	const isAngleTypeMeasure = type === MEASURE_TYPE.ANGLE;
 
 	return (
 		<Container tall={Number(isPointTypeMeasure)}>
@@ -138,42 +147,45 @@ export const MeasureItem = ({
 							onChange={handleSave}
 							inputProps={{ maxLength: 15 }}
 							disableShowDefaultUnderline
+							disabled={!canEdit}
 						/>
 					</StyledForm>
 				</Tooltip>
 			</Formik>
 			<Actions>
-				{
-					isPointTypeMeasure ?
-					<>
-						<div>
-							<MeasurementPoint>
-								<AxisLabel>x:</AxisLabel>
-								<AxisValue>{getValue(position[0], units, type, props.modelUnit)} {getUnits(units, type)}</AxisValue>
-							</MeasurementPoint>
-							<MeasurementPoint>
-								<AxisLabel>y:</AxisLabel>
-								<AxisValue>{getValue(-position[2], units, type, props.modelUnit)} {getUnits(units, type)}</AxisValue>
-							</MeasurementPoint>
-							<MeasurementPoint>
-								<AxisLabel>z:</AxisLabel>
-								<AxisValue>{getValue(position[1], units, type, props.modelUnit)} {getUnits(units, type)}</AxisValue>
-							</MeasurementPoint>
-						</div>
-					</>
-					: <MeasurementValue>{getValue(value, units, type, props.modelUnit)} {getUnits(units, type)}</MeasurementValue>
-				}
+				{isPointTypeMeasure && (
+					<div>
+						<MeasurementPoint>
+							<AxisLabel>x:</AxisLabel>
+							<AxisValue>{getValue(position[0], units, type, props.modelUnit)} {getUnits(units, type)}</AxisValue>
+						</MeasurementPoint>
+						<MeasurementPoint>
+							<AxisLabel>y:</AxisLabel>
+							<AxisValue>{getValue(-position[2], units, type, props.modelUnit)} {getUnits(units, type)}</AxisValue>
+						</MeasurementPoint>
+						<MeasurementPoint>
+							<AxisLabel>z:</AxisLabel>
+							<AxisValue>{getValue(position[1], units, type, props.modelUnit)} {getUnits(units, type)}</AxisValue>
+						</MeasurementPoint>
+					</div>
+				)}
+				{isAngleTypeMeasure && (<MeasurementValue>{getValue(value, units, type, props.modelUnit)} {getUnits(units, type)}</MeasurementValue>)}
+				{!isPointTypeMeasure && !isAngleTypeMeasure && (<MeasurementValue>{getValue(value, units, type, props.modelUnit)} {getUnits(units, type)}</MeasurementValue>)}
 				<ColorPicker
 					value={chopGLAlpha(customColor || color)}
 					onChange={handleColorChange}
 					disableUnderline
 					predefinedColors={props.colors.map(chopHexAlphaColor)}
+					disabled={!canEdit}
 				/>
-				<SmallIconButton
-					Icon={RemoveIcon}
-					tooltip="Remove"
-					onClick={handleRemoveMeasurement}
-				/>
+				{canEdit &&
+					<SmallIconButton
+						Icon={RemoveIcon}
+						tooltip="Remove"
+						onClick={handleRemoveMeasurement}
+						disabled={!canEdit}
+					/>
+				}
 			</Actions>
 		</Container>
 	);

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { UUIDToString, stringToUUID } = require('../../../utils/helper/uuids');
-const { addGroupUpdateLog, addTicketLog } = require('../../../models/tickets.logs');
+const { addGroupUpdateLog, addImportedLogs, addTicketLog } = require('../../../models/tickets.logs');
 const { createModelMessage, createProjectMessage } = require('../../chat');
 const { deleteIfUndefined, setNestedProperty } = require('../../../utils/helper/objects');
 const { getRevisionByIdOrTag, getRevisionFormat } = require('../../../models/revisions');
@@ -102,9 +102,27 @@ const ticketAdded = async ({ teamspace, project, model, ticket }) => {
 		isFederationCheck(teamspace, model),
 		getTemplateById(teamspace, ticket.type),
 	]);
+
+	const fullTemplate = generateFullSchema(template);
+
 	const event = isFed ? chatEvents.FEDERATION_NEW_TICKET : chatEvents.CONTAINER_NEW_TICKET;
-	const serialisedTicket = serialiseTicket(ticket, template);
+	const serialisedTicket = serialiseTicket(ticket, fullTemplate);
 	await createModelMessage(event, serialisedTicket, teamspace, project, model);
+};
+
+const ticketsImported = async ({ teamspace, project, model, tickets }) => {
+	const [isFed, template] = await Promise.all([
+		isFederationCheck(teamspace, model),
+		getTemplateById(teamspace, tickets[0].type),
+		addImportedLogs(teamspace, project, model, tickets),
+	]);
+
+	const fullTemplate = generateFullSchema(template);
+	const event = isFed ? chatEvents.FEDERATION_NEW_TICKET : chatEvents.CONTAINER_NEW_TICKET;
+	await Promise.all(tickets.map(async (ticket) => {
+		const serialisedTicket = serialiseTicket(ticket, fullTemplate);
+		await createModelMessage(event, serialisedTicket, teamspace, project, model);
+	}));
 };
 
 const constructUpdatedObject = (changes) => {
@@ -194,6 +212,7 @@ ModelEventsListener.init = () => {
 	subscribe(events.NEW_MODEL, modelAdded);
 	subscribe(events.DELETE_MODEL, modelDeleted);
 	subscribe(events.NEW_TICKET, ticketAdded);
+	subscribe(events.TICKETS_IMPORTED, ticketsImported);
 	subscribe(events.UPDATE_TICKET, ticketUpdated);
 	subscribe(events.NEW_COMMENT, ticketCommentAdded);
 	subscribe(events.UPDATE_COMMENT, ticketCommentUpdated);

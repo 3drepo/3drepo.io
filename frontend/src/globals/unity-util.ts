@@ -19,6 +19,7 @@
 /* eslint-enable no-var */
 
 import { IndexedDbCache } from './unity-indexedbcache';
+import { ExternalWebRequestHandler } from './unity-externalwebrequesthandler';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare let SendMessage;
@@ -66,6 +67,9 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static unityInstance;
+
+	/** @hidden */
+	public static externalWebRequestHandler;
 
 	/** A URL pointing to the domain hosting a Unity distribution. E.g. www.3drepo.io/.
 	 * This is where the Unity Build folder and the IndexedDb worker can be found. */
@@ -125,6 +129,12 @@ export class UnityUtil {
 
 	public static verbose = false;
 
+	/** @hidden */
+	/** Start by assuming IndexedDB is available. If there are any access
+	 * failures during the preamble, then this will be set to false.
+	 */
+	private static indexedDBAvailable = true;
+
 	/**
 	 * Contains a list of calls to make during the Unity Update method. One
 	 * call is made per Unity frame.
@@ -145,6 +155,7 @@ export class UnityUtil {
 		UnityUtil.modelLoaderProgressCallback = modelLoaderProgressCallback;
 		UnityUtil.unityBuildSubdirectory = '/unity/Build'; // These directories are determined by webpack.common.config.js
 		UnityUtil.setUnityMemory(0); // This forces the browser to update the viewer with the autodetected memory. If the user has set it explicitly in viewer settings, it will be overridden later when they are processed.
+		//UnityUtil.setLegacyAssetMode(); // This must be called before the initial assets list is loaded, if it is to have any effect, so it is either called here, or not at all.
 	}
 
 	/** @hidden */
@@ -152,6 +163,36 @@ export class UnityUtil {
 		requestAnimationFrame(() => {
 			if (UnityUtil.progressCallback) {
 				UnityUtil.progressCallback(progress);
+			}
+		});
+	}
+
+	/**
+	 * Checks if access to IndexedDb is available, and updates the
+	 * indexedDBAvailable flag accordingly.
+	 */
+	private static checkIdb(): Promise<void> {
+		return new Promise((resolve) => {
+			// If something outside has signalled IndexedDb is unavailable, don't
+			// do anything further.
+			if (!this.indexedDBAvailable) {
+				resolve();
+			}
+
+			// Check if IndexedDB is available by accessing the databases list.
+			// This should catch both API availability and permissions issues.
+			try {
+				indexedDB.databases().then(() => {
+					resolve();
+				}).catch(() => {
+					console.warn('IndexedDB is unavailable.');
+					this.indexedDBAvailable = false;
+					resolve();
+				});
+			} catch {
+				console.warn('IndexedDB is unavailable.');
+				this.indexedDBAvailable = false;
+				resolve();
 			}
 		});
 	}
@@ -174,10 +215,9 @@ export class UnityUtil {
 		// a unique id, and then attempt to read it back. Only the tab whose id
 		// matches will embark on the clear operation.
 
-		const clearedFlagKey = 'repoV1CacheCleared';
-
 		try {
-			if (!window.localStorage.getItem(clearedFlagKey)) {
+			const clearedFlagKey = 'repoV1CacheCleared';
+			if (this.indexedDBAvailable && !window.localStorage.getItem(clearedFlagKey)) {
 				const id = (Math.floor(Math.random() * 100000)).toString();
 				window.localStorage.setItem(clearedFlagKey, id);
 				if (window.localStorage.getItem(clearedFlagKey) === id) {
@@ -200,7 +240,7 @@ export class UnityUtil {
 				}
 			}
 		} catch (error) {
-			console.error('Unable to clear IndexDbFs', error);
+			console.error('Unable to clear IndexDbFs.', error);
 		}
 		return Promise.resolve();
 	}
@@ -239,7 +279,7 @@ export class UnityUtil {
 			}
 		}
 
-		return this.clearIdbfs().then(() => UnityUtil._loadUnity(canvasDom, domainURL));
+		return this.checkIdb().then(() => UnityUtil.clearIdbfs()).then(() => UnityUtil._loadUnity(canvasDom, domainURL));
 	}
 
 	/** @hidden */
@@ -260,6 +300,9 @@ export class UnityUtil {
 		}
 
 		UnityUtil.unityDomain = new URL(domainURL || window.location.origin);
+		if (this.indexedDBAvailable) { // Currently, the only reason to use ExternalWebRequestHandler is to use IndexedDb, so don't create the handler if it's not supported
+			this.externalWebRequestHandler = new ExternalWebRequestHandler(new IndexedDbCache(this.unityDomain)); // IndexedDbCache expects to find the worker at in [unityDomain]/unity/indexeddbworker.js
+		}
 
 		const buildUrl = new URL(UnityUtil.unityBuildSubdirectory, UnityUtil.unityDomain);
 
@@ -634,6 +677,15 @@ export class UnityUtil {
 	/*
 	 * =============== TO UNITY ====================
 	 */
+
+	/**
+	 * Tells the viewer to use AssetBundles instead of RepoBundles, even if
+	 * RepoBundles are available.
+	 * @category Configurations
+	 */
+	public static setLegacyAssetMode() {
+		UnityUtil.toUnity('SetLegacyAssetsMode', UnityUtil.LoadingState.VIEWER_READY);
+	}
 
 	/**
 	 * Tells the viewer the maximum amount of memory it can expect to be able
@@ -1014,7 +1066,7 @@ export class UnityUtil {
 	 * Set the measure tool mode.
 	 * @category Measuring tool
 	 * @param mode - The measuring mode, accepted values are "Point", "Raycast", "MinimumDistance",
-	 * "SurfaceArea" or "PolygonArea".
+	 * "SurfaceArea", "PolygonArea", "PolyLine" or "Angle".
 	 */
 	public static setMeasureToolMode(mode) {
 		UnityUtil.toUnity('SetMeasureToolMode', undefined, mode);
@@ -1404,24 +1456,16 @@ export class UnityUtil {
 	 * Enable model caching
  	 * @category Configurations
 	 */
-	public static enableCaching() {
-		UnityUtil.toUnity('EnableCaching', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	public static enableExternalWebRequestHandler() {
+		UnityUtil.toUnity('EnableExternalWebRequestHandler', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**
 	 * Disable model caching
  	 * @category Configurations
 	 */
-	public static disableCaching() {
-		UnityUtil.toUnity('DisableCaching', UnityUtil.LoadingState.VIEWER_READY, undefined);
-	}
-
-	/**
-	 * Set the number of simultaneously threads for cache access
- 	 * @category Configurations
-	 */
-	public static setNumCacheThreads(thread) {
-		UnityUtil.toUnity('SetSimultaneousCacheAccess', UnityUtil.LoadingState.VIEWER_READY, thread);
+	public static disableExternalWebRequestHandler() {
+		UnityUtil.toUnity('DisableExternalWebRequestHandler', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**
@@ -1865,10 +1909,13 @@ export class UnityUtil {
 	/**
 	 * Set API host urls. This is needs to be called before loading model.
 	 * @category Configurations
-	 * @param hostname - list of API names to use. (e.g ["https://api1.www.3drepo.io/api/"])
+	 * @param hostNames - list of API names to use in an object. (e.g ["https://api1.www.3drepo.io/api/"])
 	 */
-	public static setAPIHost(hostname: [string]) {
-		UnityUtil.toUnity('SetAPIHost', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(hostname));
+	public static setAPIHost(hostNames: { hostNames: string[] }) {
+		UnityUtil.toUnity('SetAPIHost', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(hostNames));
+		if (UnityUtil.externalWebRequestHandler !== undefined) {
+			UnityUtil.externalWebRequestHandler.setAPIHost(hostNames.hostNames);
+		}
 	}
 
 	/**
@@ -1949,6 +1996,24 @@ export class UnityUtil {
 	 */
 	public static usePerspectiveProjection() {
 		UnityUtil.toUnity('UsePerspectiveProjection', UnityUtil.LoadingState.MODEL_LOADING, undefined);
+	}
+
+	/**
+	 * Tells the viewer to enable Textures if they have previously been disabled.
+	 * Any Geometry already loaded must be reloaded for Textures to show.
+	 * @category Configurations
+	 */
+	public static enableTextures() {
+		UnityUtil.toUnity('EnableTextures', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
+	 * Tells the viewer to disable textures. This means at runtime Textures will
+	 * not be loaded with Geometry even where available.
+	 * @category Configurations
+	 */
+	public static disableTextures() {
+		UnityUtil.toUnity('DisableTextures', UnityUtil.LoadingState.VIEWER_READY);
 	}
 
 	/**
@@ -2120,10 +2185,10 @@ export class UnityUtil {
 			UnityUtil.viewer.setClipMode(null);
 		}
 		if (clipPlane?.length === 1) {
-			UnityUtil.viewer.setClipMode('SINGLE');
+			//UnityUtil.viewer.setClipMode('SINGLE');
 		}
 		if (clipPlane?.length === 6) {
-			UnityUtil.viewer.setClipMode('BOX');
+			//UnityUtil.viewer.setClipMode('BOX');
 		}
 		param.requiresBroadcast = requireBroadcast;
 		UnityUtil.toUnity('UpdateClip', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
@@ -2310,11 +2375,20 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Creates an IndexedDbCache object which provides access to cached web requests using IndexedDb.
-	 * @param unityInstance
+	 * Sets the maximum number of responses WebRequestManager2 should attempt to
+	 * handle at any one time. The higher this is the faster models will load but
+	 * the more working memory is required. The default value is 5.
 	 * @category Configurations
 	 */
-	public static createIndexedDbCache(gameObjectName: string) {
-		this.unityInstance.repoDbCache = new IndexedDbCache(this.unityInstance, gameObjectName, this.unityDomain); // IndexedDbCache expects to find the worker at in [unityDomain]/unity/indexeddbworker.js
+	public static setMaxConcurrentResponses(max: number) {
+		UnityUtil.toUnity('SetMaxNumResponses', UnityUtil.LoadingState.VIEWER_READY, max);
+	}
+
+	/**
+	 * Creates the WebRequestHandler backend for the WebRequestHandler2 Component in Unity
+	 * @hidden
+	 */
+	public static createWebRequestHandler(gameObjectName: string) {
+		return this.externalWebRequestHandler && this.externalWebRequestHandler.setUnityInstance(this.unityInstance, gameObjectName);
 	}
 }

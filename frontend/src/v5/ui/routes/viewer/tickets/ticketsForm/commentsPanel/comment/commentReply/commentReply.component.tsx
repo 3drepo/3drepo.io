@@ -21,32 +21,43 @@ import { TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketCo
 import { useParams } from 'react-router-dom';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { formatMessage } from '@/v5/services/intl';
-import { CommentMarkDown, ExpandableImage, OriginalMessage, CameraIcon } from './commentReply.styles';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { CommentMarkDown, CommentImage, OriginalMessage, CameraIcon } from './commentReply.styles';
 import { CommentAuthor } from '../commentNonMessageContent/commentNonMessageContent.styles';
 import { QuotedMessage } from '../quotedMessage/quotedMessage.styles';
+import { ExternalLabel } from '../otherUserComment/importedUserPopover/importedUserPopover.styles';
+import { useContext } from 'react';
+import { TicketContext } from '../../../../ticket.context';
 
 type CommentReplyProps = TicketCommentReplyMetadata & {
 	variant?: 'primary' | 'secondary',
 	shortMessage?: boolean,
 	images?: string[],
+	originalAuthor?: string,
 };
 export const CommentReply = ({
 	message,
 	author,
 	variant = 'primary',
 	images = [],
+	originalAuthor,
 	...props
 }: CommentReplyProps) => {
-	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const { teamspace, project } = useParams<ViewerParams>();
+	const { containerOrFederation } = useContext(TicketContext);
+
 
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const currentUser = CurrentUserHooksSelectors.selectUsername();
 	const user = UsersHooksSelectors.selectUser(teamspace, author);
 
-	const authorDisplayName = (author === currentUser)
-		? formatMessage({ id: 'comment.currentUser.author', defaultMessage: 'You' })
-		: `${user.firstName} ${user.lastName}`;
+	let authorDisplayName = originalAuthor;
+	if (!originalAuthor) {
+		authorDisplayName = (author === currentUser)
+			? formatMessage({ id: 'comment.currentUser.author', defaultMessage: 'You' })
+			: `${user.firstName} ${user.lastName}`;
+	}
 	const imagesSrcs = images.map((image) => getTicketResourceUrl(
 		teamspace,
 		project,
@@ -56,12 +67,18 @@ export const CommentReply = ({
 		isFederation,
 	));
 
+	const openImagesModal = () => DialogsActionsDispatchers.open('images', { images: imagesSrcs });
+
 	if (!message && images.length === 0) return (<></>);
 
 	return (
 		<QuotedMessage variant={variant} {...props}>
 			<div>
-				{authorDisplayName && (<CommentAuthor>{authorDisplayName}</CommentAuthor>)}
+				{authorDisplayName && (
+					<CommentAuthor>
+						{authorDisplayName} {originalAuthor && <ExternalLabel />}
+					</CommentAuthor>
+				)}
 				<OriginalMessage>
 					{images.length > 0 && (<CameraIcon />)}
 					<CommentMarkDown>
@@ -69,7 +86,7 @@ export const CommentReply = ({
 					</CommentMarkDown>
 				</OriginalMessage>
 			</div>
-			{images.length > 0 && (<ExpandableImage images={imagesSrcs} showExtraImagesValue />)}
+			{images.length > 0 && (<CommentImage src={imagesSrcs[0]} extraCount={images.length} onClick={openImagesModal} />)}
 		</QuotedMessage>
 	);
 };

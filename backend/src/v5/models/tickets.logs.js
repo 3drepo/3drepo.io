@@ -21,6 +21,21 @@ const { generateUUID } = require('../utils/helper/uuids');
 const TicketLogs = {};
 const TICKET_LOGS_COL = 'tickets.logs';
 
+TicketLogs.addImportedLogs = async (teamspace, project, model, tickets) => {
+	const logs = tickets.map(({ _id: ticket, author, ...imported }) => ({
+		_id: generateUUID(),
+		teamspace,
+		project,
+		model,
+		ticket,
+		author,
+		timestamp: new Date(),
+		imported,
+	}));
+	await DB.insertMany(teamspace,
+		TICKET_LOGS_COL, logs);
+};
+
 TicketLogs.addGroupUpdateLog = async (teamspace, project, model, ticket, groupId, { author, changes, timestamp }) => {
 	const ticketLog = {
 		_id: generateUUID(),

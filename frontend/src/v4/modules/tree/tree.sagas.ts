@@ -17,6 +17,7 @@
 import { all, call, put, select, take, takeLatest, delay } from 'redux-saga/effects';
 
 import { selectHasViewerAccess } from '@/v5/store/containers/containers.selectors';
+import _ from 'lodash';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
@@ -41,8 +42,8 @@ import {
 	selectActiveNode,
 	selectDefaultHiddenNodesIds,
 	selectExpandedNodesMap,
-	selectFullySelectedNodesIds,
 	selectGetNodesByIds,
+	selectSelectedObjects,
 	selectGetNodesIdsFromSharedIds,
 	selectHiddenGeometryVisible,
 	selectIsTreeProcessed,
@@ -50,6 +51,8 @@ import {
 	selectSelectionMap,
 	selectSubModelsRootNodes,
 	selectTreeNodesList,
+	selectSelectedNodes,
+	selectFullySelectedNodesIds,
 } from './tree.selectors';
 import { TreeActions, TreeTypes } from './tree.redux';
 
@@ -274,21 +277,6 @@ function* handleNodesClickBySharedIds({ objects = [] }) {
 	yield put(TreeActions.handleNodesClick(nodes));
 }
 
-function* getSelectedNodes() {
-	yield waitForTreeToBeReady();
-
-	try {
-		yield delay(100);
-		const objectsStatus = yield Viewer.getObjectsStatus();
-
-		if (objectsStatus && objectsStatus.highlightedNodes) {
-			yield put(TreeActions.getSelectedNodesSuccess(objectsStatus.highlightedNodes));
-		}
-	} catch (error) {
-		console.error(error);
-	}
-}
-
 function* clearCurrentlySelected(keepMetadataOpen = false) {
 	yield waitForTreeToBeReady();
 
@@ -315,7 +303,7 @@ function* clearCurrentlySelected(keepMetadataOpen = false) {
 		}
 	}
 
-	yield put(TreeActions.getSelectedNodes());
+	yield put(TreeActions.setSelectedObjectsSuccess([]));
 }
 
 /**
@@ -367,8 +355,8 @@ function* showTreeNodes(nodesIds = [], skipNested = false) {
 function* hideSelectedNodes() {
 	yield waitForTreeToBeReady();
 
-	const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
-	yield hideTreeNodes(fullySelectedNodes);
+	const selectedNodesIds = yield select(selectFullySelectedNodesIds);
+	yield hideTreeNodes(selectedNodesIds);
 }
 
 function* hideNodesBySharedIds({ objects = [], resetTree = false }) {
@@ -387,6 +375,7 @@ function* hideTreeNodes(nodesIds = [], skipNested = false) {
 	yield waitForTreeToBeReady();
 
 	try {
+		yield put(TreeActions.deselectNodes(nodesIds))
 		yield put(TreeActions.setTreeNodesVisibility(nodesIds, VISIBILITY_STATES.INVISIBLE, skipNested, skipNested));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('hide', 'nodes', error));
@@ -426,8 +415,8 @@ function* isolateSelectedNodes({ nodeId }) {
 		const meshes = yield TreeProcessing.getMeshesByNodeIds([nodeId]);
 		Viewer.zoomToObjects({entries: meshes});
 	} else {
-		const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
-		yield isolateNodes(fullySelectedNodes);
+		const selectedNodesIds = yield select(selectFullySelectedNodesIds);
+		yield isolateNodes(selectedNodesIds);
 	}
 }
 
@@ -459,8 +448,8 @@ function* deselectNodes({ nodesIds = [] }) {
 	yield waitForTreeToBeReady();
 
 	try {
-		const result = yield TreeProcessing.deselectNodes({ nodesIds });
-		unhighlightObjects(result.unhighlightedObjects);
+		const { unhighlightedObjects } = yield TreeProcessing.deselectNodes({ nodesIds });
+		unhighlightObjects(unhighlightedObjects);
 		const isBimVisible = yield select(selectIsMetadataVisible);
 		const activeMeta = yield select(selectActiveMeta);
 
@@ -472,8 +461,21 @@ function* deselectNodes({ nodesIds = [] }) {
 			yield put(BimActions.setActiveMeta(null));
 		}
 
+		const selectedObjects = yield select(selectSelectedObjects);
+
+		if (unhighlightedObjects.length) {
+			unhighlightedObjects.forEach(({ teamspace, meshes, modelId }) => {
+				const existingObjectIndex = selectedObjects.findIndex((o) => o.teamspace === teamspace && o.modelId === modelId);
+				const existingObject = selectedObjects[existingObjectIndex];
+				if (existingObject.meshes.length === meshes.length) {
+					selectedObjects.splice(existingObjectIndex, 1);
+					return;
+				}
+				existingObject.meshes = _.difference(existingObject.meshes, meshes);
+			});
+			yield put(TreeActions.setSelectedObjectsSuccess([...selectedObjects]));
+		}
 		yield put(TreeActions.updateDataRevision());
-		yield put(TreeActions.getSelectedNodes());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('deselect', 'node', error));
 	}
@@ -499,6 +501,7 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipSelecting = false
 			return;
 		}
 
+		let result;
 		if (!skipSelecting) {
 			let lastNodeId = nodesIds[nodesIds.length - 1];
 			let [lastNode] = yield select(selectGetNodesByIds([lastNodeId]));
@@ -508,7 +511,7 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipSelecting = false
 				[lastNode] = yield select(selectGetNodesByIds([lastNodeId]));
 			}
 
-			const [result] = yield all([
+			[result] = yield all([
 				call(TreeProcessing.selectNodes, { nodesIds }),
 				call(handleMetadata, lastNode)
 			]);
@@ -517,21 +520,24 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipSelecting = false
 				yield call(expandToNode, lastNode);
 			}
 
-			const selectionMap = yield select(selectSelectionMap);
-			highlightObjects(result.highlightedObjects, selectionMap, colour);
-
 			yield put(TreeActions.setActiveNode(lastNodeId));
 		} else {
-			const [result] = yield all([
+			[result] = yield all([
 				call(TreeProcessing.selectNodes, { nodesIds }),
 			]);
-
-			const selectionMap = yield select(selectSelectionMap);
-			highlightObjects(result.highlightedObjects, selectionMap, colour);
 		}
+		const selectionMap = yield select(selectSelectionMap);
+		highlightObjects(result.highlightedObjects, selectionMap, colour);
 
+		const selectedObjects = yield select(selectSelectedObjects);
+		const newSelectedObjects = _.mergeWith(
+			result.highlightedObjects,
+			selectedObjects,
+			(a, b) => (_.isArray(a) ? _.uniq(a.concat(b)) : undefined),
+		);
+
+		yield put(TreeActions.setSelectedObjectsSuccess(newSelectedObjects));
 		yield put(TreeActions.updateDataRevision());
-		yield put(TreeActions.getSelectedNodes());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('select', 'nodes', error));
 	}
@@ -592,8 +598,8 @@ function* setTreeNodesVisibility({ nodesIds, visibility }) {
 function* setSelectedNodesVisibility({ nodeId, visibility }) {
 	yield waitForTreeToBeReady();
 
-	const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
-	const hasSelectedNodes = !!fullySelectedNodes.length;
+	const selectedNodes = yield select(selectSelectedNodes);
+	const hasSelectedNodes = !!selectedNodes.length;
 	yield put(TreeActions.setTreeNodesVisibility([nodeId], visibility, hasSelectedNodes));
 }
 
@@ -645,7 +651,7 @@ function* goToRootNode({ nodeId }) {
 		if (node.level === level) {
 			nodesToExpand.push(node._id);
 			nodesToCollapse.push(...node.childrenIds);
-			currentNodeIndex += node.deepChildrenNumber;
+			currentNodeIndex += (node.deepChildrenNumber || 1);
 		} else {
 			currentNodeIndex++;
 		}
@@ -690,7 +696,6 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.FETCH_FULL_TREE, fetchFullTree);
 	yield takeLatest(TreeTypes.START_LISTEN_ON_SELECTIONS, startListenOnSelections);
 	yield takeLatest(TreeTypes.STOP_LISTEN_ON_SELECTIONS, stopListenOnSelections);
-	yield takeLatest(TreeTypes.GET_SELECTED_NODES, getSelectedNodes);
 	yield takeLatest(TreeTypes.SHOW_ALL_NODES, showAllNodes);
 	yield takeLatest(TreeTypes.HIDE_SELECTED_NODES, hideSelectedNodes);
 	yield takeLatest(TreeTypes.ISOLATE_SELECTED_NODES, isolateSelectedNodes);
