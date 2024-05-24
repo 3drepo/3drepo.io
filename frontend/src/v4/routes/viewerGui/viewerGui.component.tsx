@@ -21,12 +21,15 @@ import { PureComponent } from 'react';
 import { AdditionalProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { CalibrationContext, CalibrationContextComponent } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { DrawingsListCard } from '@/v5/ui/routes/viewer/drawings/drawingsList/drawingsListCard.component';
-import { Calibration } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.component';
+import { ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { useParams } from 'react-router-dom';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
 import { VIEWER_EVENTS } from '../../constants/viewer';
-import { getViewerLeftPanels, VIEWER_PANELS } from '../../constants/viewerGui';
+import { getCalibrationViewerLeftPanels, getViewerLeftPanels, VIEWER_PANELS } from '../../constants/viewerGui';
 import { getWindowHeight, getWindowWidth, renderWhenTrue } from '../../helpers/rendering';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { Activities } from './components/activities/';
@@ -104,7 +107,7 @@ interface IState {
 	loaderProgress: number;
 }
 
-export class ViewerGui extends PureComponent<IProps, IState> {
+class ViewerGuiBase extends PureComponent<IProps, IState> {
 
 	private get urlParams() {
 		return this.props.match.params;
@@ -238,26 +241,28 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 		return (
 			<GuiContainer>
 				<CloseFocusModeButton isFocusMode={isFocusMode} />
-				<Container id="gui-container" className={this.props.className} hidden={isFocusMode}>
-					<RevisionsSwitch />
-					<CalibrationContextComponent>
-						<CalibrationContext.Consumer>
-							{({ open }) => open
-								? <Calibration />
+				<CalibrationContext.Consumer>
+					{({ open }) => (
+						<>
+							<Container id="gui-container" className={this.props.className} hidden={isFocusMode}>
+							<RevisionsSwitch />
+							<Toolbar />
+							{this.renderLeftPanels(leftPanels)}
+							{open
+								? this.renderCalibrationLeftPanelsButtons()
 								: (
 									<>
-										<Toolbar />
 										{this.renderLeftPanelsButtons()}
-										{this.renderLeftPanels(leftPanels)}
 										{this.renderRightPanels(rightPanels)}
 										{this.renderDraggablePanels(draggablePanels)}
 									</>
 								)
 							}
-						</CalibrationContext.Consumer>
-					</CalibrationContextComponent>
-					{this.renderViewerLoader(viewer.hasInstance)}
-				</Container>
+							{this.renderViewerLoader(viewer.hasInstance)}
+						</Container>
+						</>
+					)}
+				</CalibrationContext.Consumer>
 			</GuiContainer>
 		);
 	}
@@ -265,6 +270,21 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 	private handleTogglePanel = (panelType) => {
 		this.props.setPanelVisibility(panelType);
 	}
+
+	private renderCalibrationLeftPanelsButtons = () => (
+		<LeftPanelsButtons>
+			{getCalibrationViewerLeftPanels().map(({ name, type }) => (
+				<PanelButton
+					key={type}
+					onClick={ViewerGuiActionsDispatchers.setPanelVisibility}
+					label={name}
+					type={type}
+					id={type + '-panel-button'}
+					active={this.props.leftPanels.includes(type)}
+				/>
+			))}
+		</LeftPanelsButtons>
+	);
 
 	private renderLeftPanelsButtons = () => (
 		<LeftPanelsButtons>
@@ -323,4 +343,18 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 			/>}
 		</DraggablePanels>
 	)
+}
+
+export const ViewerGui = (props) => {
+	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
+	const isFed = modelIsFederation(containerOrFederation);
+	const v4Match = {
+		params: {
+			model: containerOrFederation,
+			project,
+			teamspace,
+			revision: isFed ? undefined : revision,
+		},
+	};
+	return <ViewerGuiBase match={v4Match} key={containerOrFederation} {...props} />
 }
