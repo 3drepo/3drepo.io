@@ -26,19 +26,19 @@ export const BasicStep = ({ text }) => {
 	}, [step]);
 
 	return (
-		<div style={{ position: 'absolute', left: '5%' }}>
-			<div style={{
-				borderRadius: 10,
-				width: 'fit-content',
-				padding: '50px 100px',
-				background: 'beige',
-				margin: 'auto',
-				display: 'grid',
-				placeContent: 'center',
-			}}>
-				<h2>This is the {text} step</h2>
-				<button type='button' onClick={() => setIsStepValid(true)}>VALIDATE</button>
-			</div>
+		<div style={{
+			borderRadius: 10,
+			width: 'fit-content',
+			padding: '50px 100px',
+			backgroundImage: 'radial-gradient(black, gray)',
+			margin: 'auto',
+			display: 'grid',
+			placeContent: 'center',
+			// REMINDER - the following property will be needed to be able to click inside the component
+			pointerEvents: 'all',
+		}}>
+			<h2>This is the {text} step</h2>
+			<button type='button' onClick={() => setIsStepValid(true)}>VALIDATE</button>
 		</div>
 	);
 };
