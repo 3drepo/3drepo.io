@@ -109,7 +109,7 @@ interface IState {
 	licencesLabel: string;
 	containerElement: Node;
 	panelKey: number;
-	limit: any;
+	limit: string | number;
 }
 
 const teamspacePermissions = values(TEAMSPACE_PERMISSIONS).map(
@@ -132,7 +132,7 @@ export class Users extends PureComponent<IProps, IState> {
 		};
 	}
 
-	public state = {
+	public state: IState = {
 		rows: [],
 		jobs: [],
 		licencesLabel: '',
@@ -285,7 +285,7 @@ export class Users extends PureComponent<IProps, IState> {
 		const { limit } = this.state;
 		const { users } = this.props;
 
-		const isButtonDisabled = limit <= users.length;
+		const isButtonDisabled = (limit || 0) as number <= users.length;
 
 		return (
 			<FloatingActionPanel
@@ -314,7 +314,7 @@ export class Users extends PureComponent<IProps, IState> {
 				}
 			});
 		};
-		return ['(', <PendingInvites key="pending" onClick={onClick}>{invitationsCount} pending</PendingInvites>, ')'];
+		return ['(', <PendingInvites key="pending" disabled={!invitationsCount} onClick={onClick}>{invitationsCount} pending</PendingInvites>, ')'];
 	}
 
 	/**
@@ -328,7 +328,7 @@ export class Users extends PureComponent<IProps, IState> {
 			return '';
 		}
 
-		const limitValue = isNumber(limit) ? limit : 'unlimited';
+		const limitValue = limit !== 'unlimited' ? limit || 0 : 'unlimited';
 
 		return [
 			`Assigned licences: ${users.length} `,
