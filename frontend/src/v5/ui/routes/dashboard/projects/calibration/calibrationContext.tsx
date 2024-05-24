@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import { CALIBRATION_VIEWER_ROUTE, matchesPath } from '../../../routes.constants';
+import { useParams } from 'react-router-dom';
 
 export interface CalibrationContextType {
 	step: number;
@@ -37,9 +38,15 @@ export const CalibrationContext = createContext(defaultValue);
 CalibrationContext.displayName = 'CalibrationContext';
 
 export const CalibrationContextComponent = ({ children }) => {
+	const { revision, containerOrFederation } = useParams();
 	const [step, setStep] = useState(0);
 	const [isStepValid, setIsStepValid] = useState(false);
 	const open = matchesPath(CALIBRATION_VIEWER_ROUTE);
+
+	useEffect(() => {
+		setStep(0);
+		setIsStepValid(false);
+	}, [containerOrFederation, revision]);
 
 	return (
 		<CalibrationContext.Provider value={{ step, setStep, isStepValid, setIsStepValid, open }}>
