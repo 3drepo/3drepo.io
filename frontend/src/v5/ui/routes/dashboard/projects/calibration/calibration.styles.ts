@@ -19,11 +19,7 @@ import styled from 'styled-components';
 import { EmptyPageView as EmptyPageViewBase } from '@components/shared/emptyPageView/emptyPageView.styles';
 
 export const Container = styled.div`
-	position: relative;
-	height: 100%;
-	overflow: hidden;
-	display: grid;
-	grid-template-rows: 85px auto;
+	margin: auto;
 `;
 
 export const EmptyPageView = styled(EmptyPageViewBase)`

@@ -22,7 +22,6 @@ import { DRAWINGS_ROUTE, ViewerParams } from '../../../routes.constants';
 import { Button } from '@controls/button';
 import { Link } from 'react-router-dom';
 import { useSearchParam } from '../../../useSearchParam';
-import { CalibrationHeader } from './calibrationHeader/calibrationHeader.component';
 import { CalibrationStep } from './calibrationStep/calibrationStep.component';
 import { Container, EmptyPageView } from './calibration.styles';
 
@@ -33,7 +32,6 @@ export const Calibration = () => {
 
 	return (
 		<Container>
-			<CalibrationHeader />
 			{selectedDrawing
 				? <CalibrationStep />
 				: (

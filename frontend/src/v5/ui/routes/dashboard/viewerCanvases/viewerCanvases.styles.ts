@@ -78,3 +78,9 @@ export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps>
 		display: contents;
 	}
 `;
+
+export const LeftPane = styled(OverlappingContainer)`
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+`;

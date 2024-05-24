@@ -32,17 +32,16 @@ import { TicketsCardViews } from './tickets/tickets.constants';
 import { ViewerCanvases } from '../dashboard/viewerCanvases/viewerCanvases.component';
 import { Calibration } from '../dashboard/projects/calibration/calibration.component';
 import { Route } from '@/v5/services/routing/route.component';
-import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { CalibrationContextComponent } from '../dashboard/projects/calibration/calibrationContext';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
 
-	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
+	const { teamspace, containerOrFederation, project } = useParams<ViewerParams>();
 
 	const isFetching = ViewerHooksSelectors.selectIsFetching();
 
 	const isLoading = isFetching || fetchPending;
-	const isFed = modelIsFederation(containerOrFederation);
 
 	const selectedContainer = ContainersHooksSelectors.selectContainerById(containerOrFederation);
 	const selectedFederation = FederationsHooksSelectors.selectFederationById(containerOrFederation);
@@ -96,17 +95,8 @@ export const Viewer = () => {
 		return <InvalidFederationOverlay containers={federationsContainers} />;
 	}
 
-	const v4Match = {
-		params: {
-			model: containerOrFederation,
-			project,
-			teamspace,
-			revision: isFed ? undefined : revision,
-		},
-	};
-
 	return (
-		<>
+		<CalibrationContextComponent>
 			<OpenTicketFromUrl />
 			<CheckLatestRevisionReadiness />
 			<ViewerCanvases />
@@ -118,6 +108,6 @@ export const Viewer = () => {
 					<ViewerGui match={v4Match} key={containerOrFederation} />
 				</Route>
 			</Switch>
-		</>
+		</CalibrationContextComponent>
 	);
 };
