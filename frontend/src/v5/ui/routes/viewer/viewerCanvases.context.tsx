@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { createContext, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import { useSearchParam } from '../useSearchParam';
 
 interface ViewerCanvasesContextType {
@@ -38,12 +38,22 @@ ViewerCanvasesContext.displayName = 'ViewerCanvasesContext';
 export const ViewerCanvasesContextComponent = ({ children }) => {
 	const [leftPanelRatio, setLeftPanelRatio] = useState(0.5);
 	const [drawingId, setDrawingId] = useSearchParam('drawingId');
+	const [is2DOpen, setIs2DOpen] = useState(false);
+
+	const open2D = (newDrawingId) => {
+		setIs2DOpen(true);
+		setDrawingId(newDrawingId);
+	};
+
+	useEffect(() => {
+		if (drawingId) setIs2DOpen(true);
+	}, [drawingId]);
 
 	return (
 		<ViewerCanvasesContext.Provider value={{
-			is2DOpen: !!drawingId,
-			close2D: () => setDrawingId(''),
-			open2D: setDrawingId,
+			is2DOpen,
+			close2D: () => setIs2DOpen(false),
+			open2D,
 			leftPanelRatio,
 			setLeftPanelRatio,
 		}}>
