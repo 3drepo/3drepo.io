@@ -42,7 +42,6 @@ import { CanvasHistoryActions } from '@/v4/modules/canvasHistory';
 
 import { ClipMode, GizmoMode, MeasureMode, NavigationMode, ProjectionMode } from '../ui/routes/viewer/toolbar/toolbar.types';
 import { DrawingRevisionsActions, IDrawingRevisionsActionCreators } from '../store/drawings/revisions/drawingRevisions.redux';
-import { Action } from '@/v4/routes/viewerGui/components/viewerPanel/viewerPanel.styles';
 
 interface IBimActionCreators {
 	setIsActive: (active: boolean) => Action;
