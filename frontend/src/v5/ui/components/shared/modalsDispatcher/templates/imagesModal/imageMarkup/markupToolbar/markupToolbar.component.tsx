@@ -52,6 +52,7 @@ type MarkupToolbarProps = {
 	onShapeChange,
 	onModeChange,
 	onCalloutChange,
+	allowSaveWithoutChanges?: boolean,
 };
 export const MarkupToolbar = ({
 	onSave,
@@ -68,6 +69,7 @@ export const MarkupToolbar = ({
 	callout,
 	onCalloutChange,
 	onClearClick,
+	allowSaveWithoutChanges,
 }: MarkupToolbarProps) => {
 	const hasFutureHistory = !!CanvasHistoryHooksSelectors.selectAreFutureElements();
 	const hasPastHistory = !!CanvasHistoryHooksSelectors.selectArePastElements();
@@ -118,7 +120,7 @@ export const MarkupToolbar = ({
 				disabled={!hasFutureHistory && !hasPastHistory}
 			/>
 			<Divider />
-			<SaveButton onClick={onSave} disabled={!hasPastHistory}>
+			<SaveButton onClick={onSave} disabled={!hasPastHistory && !allowSaveWithoutChanges}>
 				<SaveIcon />
 			</SaveButton>
 		</Toolbar>

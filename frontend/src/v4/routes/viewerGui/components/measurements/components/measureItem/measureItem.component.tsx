@@ -58,6 +58,7 @@ interface IProps extends IMeasure {
 	setMeasurementName: (uuid, type, name) => void;
 	modelUnit: string;
 	colors: string[];
+	canEdit?: boolean;
 }
 
 const roundNumber = (num: number, numDP: number) => {
@@ -106,7 +107,7 @@ const chopHexAlphaColor = (color) => color.substr(0, 7);
 const unChopGlAlpha = (color) => [...color.slice(0, 3), 1];
 
 export const MeasureItem = ({
-	uuid, index, name, typeName, value, units, color, removeMeasurement, type, position, customColor, ...props
+	uuid, index, name, typeName, value, units, color, removeMeasurement, type, position, customColor, canEdit, ...props
 }: IProps) => {
 	const textFieldRef = useRef(null);
 
@@ -146,6 +147,7 @@ export const MeasureItem = ({
 							onChange={handleSave}
 							inputProps={{ maxLength: 15 }}
 							disableShowDefaultUnderline
+							disabled={!canEdit}
 						/>
 					</StyledForm>
 				</Tooltip>
@@ -174,12 +176,16 @@ export const MeasureItem = ({
 					onChange={handleColorChange}
 					disableUnderline
 					predefinedColors={props.colors.map(chopHexAlphaColor)}
+					disabled={!canEdit}
 				/>
-				<SmallIconButton
-					Icon={RemoveIcon}
-					tooltip="Remove"
-					onClick={handleRemoveMeasurement}
-				/>
+				{canEdit &&
+					<SmallIconButton
+						Icon={RemoveIcon}
+						tooltip="Remove"
+						onClick={handleRemoveMeasurement}
+						disabled={!canEdit}
+					/>
+				}
 			</Actions>
 		</Container>
 	);

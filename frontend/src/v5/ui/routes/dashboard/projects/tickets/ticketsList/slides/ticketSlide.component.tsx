@@ -17,30 +17,36 @@
 
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { dirtyValues, filterErrors, nullifyEmptyObjects, removeEmptyObjects } from '@/v5/helpers/form.helper';
-import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { enableRealtimeContainerUpdateTicket, enableRealtimeFederationUpdateTicket } from '@/v5/services/realtime/ticket.events';
 import { DialogsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
+import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { TicketForm } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketForm.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty, set } from 'lodash';
 import { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
+import { useSelectedModels } from '../../ticketsTable/newTicketMenu/useSelectedModels';
 
 type TicketSlideProps = {
 	ticketId: string,
 	template: ITemplate,
 };
 export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
-	const { teamspace, project, containerOrFederation } = useParams<DashboardTicketsParams>();
+	const { teamspace, project } = useParams<DashboardTicketsParams>();
+	
+	const [containerOrFederation] = useSearchParam('containerOrFederation');
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
 	const templateValidationSchema = getValidators(template);
 	const isAlertOpen = DialogsHooksSelectors.selectIsAlertOpen();
+
+	const models = useSelectedModels();
 
 	const formData = useForm({
 		resolver: yupResolver(templateValidationSchema),
@@ -70,10 +76,10 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 
 	useEffect(() => {
 		formData.reset(ticket);
-	}, [ticket]);
+	}, [JSON.stringify(ticket)]);
 
 	useEffect(() => {
-		if (!containerOrFederation) return;
+		if (!containerOrFederation || !models.length) return;
 		TicketsActionsDispatchers.fetchTicket(
 			teamspace,
 			project,
@@ -81,8 +87,7 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 			ticketId,
 			isFederation,
 		);
-		TicketsCardActionsDispatchers.setSelectedTicket(ticketId);
-	}, [ticketId, containerOrFederation]);
+	}, [ticketId, containerOrFederation, models.length]);
 
 	useEffect(() => {
 		return isFederation

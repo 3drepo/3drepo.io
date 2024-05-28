@@ -157,7 +157,7 @@ export class ViewerService {
 				resolve(null);
 			}
 
-			UnityUtil.setAPIHost(options.getAPI.hostNames);
+			UnityUtil.setAPIHost({hostNames: options.getAPI.hostNames});
 
 			// Set option param from viewerDirective
 			this.options = options;
