@@ -35,6 +35,8 @@ export const CalibrationStep = () => {
 		else close2D();
 	}, [show2DViewer]);
 
+	useEffect(() => () => close2D(), []);
+
 	switch (step) {
 		case 0: return <Calibration3DStep />;
 		case 1: return <Calibration2DStep />;
