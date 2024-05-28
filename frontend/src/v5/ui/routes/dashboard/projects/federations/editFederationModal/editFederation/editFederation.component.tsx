@@ -88,7 +88,7 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 						allResults: <FormattedMessage id="modal.editFederation.included.removeAll" defaultMessage="Remove all" />,
 						filteredResults: <FormattedMessage id="modal.editFederation.included.removeShown" defaultMessage="Remove shown" />,
 					}}
-					iconButton={useCallback(({ container, isSelected }: IconButtonProps) => isCollaborator && (
+					iconButton={useCallback(({ container, isSelected }: IconButtonProps) => (
 						<Tooltip title={formatMessage({
 							id: 'modal.editFederation.available.remove.tooltip',
 							defaultMessage: 'Remove container',
@@ -100,6 +100,7 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 									removeContainers([container]);
 								}}
 								dark={isSelected}
+								hidden={!isCollaborator}
 							>
 								<RemoveIcon />
 							</ErrorIconContainer>
@@ -141,7 +142,7 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 						allResults: <FormattedMessage id="modal.editFederation.available.addAll" defaultMessage="Add all" />,
 						filteredResults: <FormattedMessage id="modal.editFederation.available.addShown" defaultMessage="Add shown" />,
 					}}
-					iconButton={useCallback(({ container, isSelected }: IconButtonProps) => isCollaborator && (
+					iconButton={useCallback(({ container, isSelected }: IconButtonProps) => (
 						<Tooltip title={formatMessage({
 							id: 'modal.editFederation.available.add.tooltip',
 							defaultMessage: 'Add container',
@@ -153,6 +154,7 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 									includeContainers([container]);
 								}}
 								dark={isSelected}
+								hidden={!isCollaborator}
 							>
 								<IncludeIcon />
 							</SuccessIconContainer>

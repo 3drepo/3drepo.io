@@ -72,14 +72,15 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 	const [isDraggingFile, setIsDraggingFile] = useState(false);
 	const containerRef = useRef<HTMLElement>();
 	const inputRef = useRef<any>();
-	const { isViewer } = useContext(TicketContext);
+	const { isViewer, containerOrFederation } = useContext(TicketContext);
 	const { watch, reset, control } = useForm<{ message: string, images: File[] }>({
 		mode: 'all',
 		defaultValues: { message: '' },
 	});
 	const messageInput = watch('message');
 
-	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const { teamspace, project } = useParams<ViewerParams>();
+	
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const currentUser = CurrentUserHooksSelectors.selectCurrentUser();

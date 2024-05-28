@@ -80,7 +80,6 @@ export const TicketView = ({
 		DialogsActionsDispatchers.open(ImagesModal, {
 			onClose: () => onSave(stripBase64Prefix(imgInModal.current)),
 			onAddMarkup: (newImg) => { imgInModal.current = newImg; },
-			openInMarkupMode: true,
 		}, syncProps);
 	};
 
