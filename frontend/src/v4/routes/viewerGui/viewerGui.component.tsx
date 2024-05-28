@@ -105,6 +105,7 @@ interface IState {
 	showLoader: boolean;
 	loaderType: string;
 	loaderProgress: number;
+	isCalibrating: boolean;
 }
 
 class ViewerGuiBase extends PureComponent<IProps, IState> {
@@ -122,7 +123,8 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 		loadedModelId: null,
 		showLoader: false,
 		loaderType: null,
-		loaderProgress: 0
+		loaderProgress: 0,
+		isCalibrating: false,
 	};
 
 	public renderViewerLoader = renderWhenTrue(() => <ViewerLoader />);
@@ -242,22 +244,15 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 			<GuiContainer>
 				<CloseFocusModeButton isFocusMode={isFocusMode} />
 				<CalibrationContext.Consumer>
-					{({ open }) => (
+					{({ open: isCalibrating }) => (
 						<>
 							<Container id="gui-container" className={this.props.className} hidden={isFocusMode}>
 							<RevisionsSwitch />
 							<Toolbar />
 							{this.renderLeftPanels(leftPanels)}
-							{open
-								? this.renderCalibrationLeftPanelsButtons()
-								: (
-									<>
-										{this.renderLeftPanelsButtons()}
-										{this.renderRightPanels(rightPanels)}
-										{this.renderDraggablePanels(draggablePanels)}
-									</>
-								)
-							}
+							{this.renderLeftPanelsButtons(isCalibrating)}
+							{this.renderRightPanels(rightPanels)}
+							{this.renderDraggablePanels(draggablePanels)}
 							{this.renderViewerLoader(viewer.hasInstance)}
 						</Container>
 						</>
@@ -271,36 +266,44 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 		this.props.setPanelVisibility(panelType);
 	}
 
-	private renderCalibrationLeftPanelsButtons = () => (
-		<LeftPanelsButtons>
-			{getCalibrationViewerLeftPanels().map(({ name, type }) => (
-				<PanelButton
-					key={type}
-					onClick={ViewerGuiActionsDispatchers.setPanelVisibility}
-					label={name}
-					type={type}
-					id={type + '-panel-button'}
-					active={this.props.leftPanels.includes(type)}
-				/>
-			))}
-		</LeftPanelsButtons>
-	);
+	private renderLeftPanelsButtons = (isCalibrating) => {
+		if (isCalibrating !== this.state.isCalibrating) {
+			ViewerGuiActionsDispatchers.resetPanels();
+			this.setState({ ...this.state, isCalibrating });
+		}
 
-	private renderLeftPanelsButtons = () => (
-		<LeftPanelsButtons>
-			{getViewerLeftPanels().map(({ name, type }) => (
-				<PanelButton
-					key={type}
-					onClick={this.handleTogglePanel}
-					label={name}
-					type={type}
-					id={type + '-panel-button'}
-					active={this.props.leftPanels.includes(type)}
-					disabled={this.props.disabledPanelButtons.has(type)}
-				/>
-			))}
-		</LeftPanelsButtons>
-	)
+		if (isCalibrating) {
+			return (
+				<LeftPanelsButtons>
+					{getCalibrationViewerLeftPanels().map(({ name, type }) => (
+						<PanelButton
+							key={type}
+							onClick={ViewerGuiActionsDispatchers.setPanelVisibility}
+							label={name}
+							type={type}
+							id={type + '-panel-button'}
+							active={this.props.leftPanels.includes(type)}
+						/>
+					))}
+				</LeftPanelsButtons>
+			);
+		}
+		return (
+			<LeftPanelsButtons>
+				{getViewerLeftPanels().map(({ name, type }) => (
+					<PanelButton
+						key={type}
+						onClick={this.handleTogglePanel}
+						label={name}
+						type={type}
+						id={type + '-panel-button'}
+						active={this.props.leftPanels.includes(type)}
+						disabled={this.props.disabledPanelButtons.has(type)}
+					/>
+				))}
+			</LeftPanelsButtons>
+		);
+	};
 
 	private panelsMap = {
 		[VIEWER_PANELS.ISSUES]: Issues,
