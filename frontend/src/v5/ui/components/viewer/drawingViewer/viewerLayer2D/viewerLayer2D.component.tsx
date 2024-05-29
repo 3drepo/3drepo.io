@@ -55,7 +55,7 @@ export const ViewerLayer2D = ({ viewBox, active, onChange }: ViewerLayer2DProps)
 		// check mouse up was fired after dragging or if it was an actual click
 		if (!isEqual(viewBox, previousViewBox.current)) return;
 
-		if (offsetEnd) {
+		if (offsetEnd || (!offsetEnd && !offsetStart)) {
 			setOffsetEnd(null);
 			setOffsetStart(mousePosition);
 		} else {
