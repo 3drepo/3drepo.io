@@ -22,6 +22,7 @@ import styled from 'styled-components';
 import { ComponentToString } from '@/v5/helpers/react.helper';
 
 export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps>>`
+	height: calc(100vh - 62px) !important;
 	.Resizer {
 		box-sizing: border-box;
 		background-clip: padding-box;

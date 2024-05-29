@@ -41,7 +41,8 @@ const getAdditionalStyles = ({ presentationMode, isPresentationPaused }) => {
 
 export const ViewerContainer = styled.div<{ visible?: boolean }>`
 	visibility: ${({ visible }) => visible ? 'visible' : 'hidden'};
-	height: calc(100vh - 62px);
+	/* height: calc(100vh - 62px); */
+	height: 100%;
 	width: 100%;
 	position: relative;
 	box-sizing: border-box;
