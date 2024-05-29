@@ -26,13 +26,12 @@ const STEPS = [
 	'3D Calibration Points',
 	'2D Calibration Points',
 	'Vertical Spatial Boundaries',
-	'Calibration Confirmation',
 ];
 
 export const CalibrationHeader = () => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const { step, setStep, isStepValid } = useContext(CalibrationContext);
-	const isLastStep = step === 3;
+	const isLastStep = step === 2;
 
 	const pathToDrawings = generatePath(DRAWINGS_ROUTE, { teamspace, project });
 

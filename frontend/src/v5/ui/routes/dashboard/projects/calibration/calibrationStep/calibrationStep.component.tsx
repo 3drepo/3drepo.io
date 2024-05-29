@@ -20,7 +20,6 @@ import { CalibrationContext } from '../calibrationContext';
 import { Calibration3DStep } from './calibration3DStep/calibration3DStep.component';
 import { Calibration2DStep } from './calibration2DStep/calibration2DStep.component';
 import { VerticalSpatialBoundariesStep } from './verticalSpatialBoundariesStep/verticalSpatialBoundariesStep.component';
-import { CalibrationConfirmationStep } from './calibrationConfirmationStep/calibrationConfirmationStep.component';
 import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
@@ -40,7 +39,6 @@ export const CalibrationStep = () => {
 	switch (step) {
 		case 0: return <Calibration3DStep />;
 		case 1: return <Calibration2DStep />;
-		case 2: return <VerticalSpatialBoundariesStep />;
-		default: return <CalibrationConfirmationStep />;
+		default: return <VerticalSpatialBoundariesStep />;
 	}
 };
