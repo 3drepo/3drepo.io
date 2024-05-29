@@ -16,13 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { EmptyPageView as EmptyPageViewBase } from '@components/shared/emptyPageView/emptyPageView.styles';
 
 export const Container = styled.div`
 	margin: auto;
-`;
-
-export const EmptyPageView = styled(EmptyPageViewBase)`
-	border-radius: 0%;
-	height: 100%;
 `;

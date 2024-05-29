@@ -20,17 +20,21 @@ import { Viewer2D } from '@components/viewer/drawingViewer/viewer2D.component';
 import { useLocation } from 'react-router-dom';
 import { SplitPane, LeftPane } from './viewerCanvases.styles';
 import { ViewerCanvasesContext } from '../../viewer/viewerCanvases.context';
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { CalibrationContext } from '../projects/calibration/calibrationContext';
 import { CalibrationHeader } from '../projects/calibration/calibrationHeader/calibrationHeader.component';
 import { Calibration } from '../projects/calibration/calibration.component';
 import { ViewerGui } from '@/v4/routes/viewerGui';
+import { useSearchParam } from '../../useSearchParam';
+import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 export const ViewerCanvases = () => {
 	const { pathname } = useLocation();
-	const { is2DOpen } = useContext(ViewerCanvasesContext);
-	const { open: isCalibrating } = useContext(CalibrationContext);
-	const [leftPanelRatio, setLeftPanelRatio] = useState(0.5);
+	const { is2DOpen, leftPanelRatio, setLeftPanelRatio } = useContext(ViewerCanvasesContext);
+	const { open: calibrationOpen } = useContext(CalibrationContext);
+	const [drawing] = useSearchParam('drawingId');
+	const drawingExists = !!DrawingsHooksSelectors.selectDrawingById(drawing);
+	const isCalibrating = calibrationOpen && drawingExists;
 
 	const dragFinish = (newSize) => setLeftPanelRatio(newSize / window.innerWidth);
 

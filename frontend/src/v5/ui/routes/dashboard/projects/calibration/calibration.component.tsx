@@ -15,43 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { generatePath, useParams } from 'react-router';
-import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { FormattedMessage } from 'react-intl';
-import { DRAWINGS_ROUTE, ViewerParams } from '../../../routes.constants';
-import { Button } from '@controls/button';
-import { Link } from 'react-router-dom';
-import { useSearchParam } from '../../../useSearchParam';
 import { CalibrationStep } from './calibrationStep/calibrationStep.component';
-import { Container, EmptyPageView } from './calibration.styles';
+import { Container } from './calibration.styles';
 
-export const Calibration = () => {
-	const { teamspace, project } = useParams<ViewerParams>();
-	const [drawing] = useSearchParam('drawingId');
-	const selectedDrawing = DrawingsHooksSelectors.selectDrawingById(drawing);
-
-	return (
-		<Container>
-			{selectedDrawing
-				? <CalibrationStep />
-				: (
-					<EmptyPageView>
-						<FormattedMessage
-							id="calibration.invalidDrawing"
-							defaultMessage="The selected drawing was not found. Please, go back to the drawings list and select the drawing to calibrate from there."
-						/>
-						<br />
-						<Button variant="contained">
-							<Link to={generatePath(DRAWINGS_ROUTE, { teamspace, project })}>
-								<FormattedMessage
-									id="calibration.invalidDrawing.goToDrawings"
-									defaultMessage="Open drawings"
-								/>
-							</Link>
-						</Button>
-					</EmptyPageView>
-				)
-			}
-		</Container>
-	);
-};
+export const Calibration = () => (
+	<Container>
+		 <CalibrationStep />
+	</Container>
+);
