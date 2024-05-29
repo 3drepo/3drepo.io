@@ -14,21 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useEffect } from 'react';
-import { useParams } from 'react-router';
-import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { ContainerRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { BasicStep } from '../basicStep.component';
 
 export const Calibration3DStep = () => {
-	const { containerOrFederation, teamspace, project } = useParams<ViewerParams>();
-	const isFed = modelIsFederation(containerOrFederation);
-
-	useEffect(() => {
-		if (!containerOrFederation || isFed) return;
-		ContainerRevisionsActionsDispatchers.fetch(teamspace, project, containerOrFederation);
-	}, [containerOrFederation]);
-
 	return <BasicStep text="3d calibration" />;
 };
