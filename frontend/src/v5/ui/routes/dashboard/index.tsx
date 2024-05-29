@@ -51,10 +51,20 @@ import { UserSignup } from '../userSignup/userSignup.component';
 import { UserVerification } from '../userVerification/userVerification.component';
 import { TeamspaceLayout } from './teamspaces/teamspaceLayout/teamspaceLayout.component';
 import { UserSignupSSO } from '../userSignup/userSignUpSSO/userSignUpSSO.component';
+import { useEffect } from 'react';
+import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 
 export const MainRoute = () => {
 	const { path } = useRouteMatch();
 	const { pathname } = useLocation();
+	const authenticationFetched: boolean = AuthHooksSelectors.selectAuthenticationFetched();
+
+	useEffect(() => {
+		if (!authenticationFetched) {
+			AuthActionsDispatchers.authenticate();
+		}
+	}, [authenticationFetched]);
 
 	return (
 		<>

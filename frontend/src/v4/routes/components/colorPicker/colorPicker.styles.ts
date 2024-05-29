@@ -22,7 +22,7 @@ import Input from '@mui/material/Input';
 import InputAdornment from '@mui/material/InputAdornment';
 import Popover from '@mui/material/Popover';
 import Slider from '@mui/material/Slider';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { COLOR, FONT_WEIGHT } from '../../../styles';
 import { CheckboxField } from '../customTable/customTable.component';
@@ -61,6 +61,10 @@ export const StyledIconButton = styled(IconButton)`
 		height: 28px;
 		margin-left: 5px;
 		padding: 0;
+
+		${({ disabled }) => disabled && css`
+			visibility: hidden;
+		`}
 	}
 `;
 

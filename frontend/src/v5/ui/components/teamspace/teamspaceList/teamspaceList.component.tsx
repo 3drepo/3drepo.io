@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { flatten, partition } from 'lodash';
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { TeamspacesHooksSelectors, CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TeamspaceCard } from '@components/shared/linkCard/teamspaceCard/teamspaceCard.component';
@@ -31,16 +30,15 @@ export const TeamspaceList = ({ className }: ITeamspaceList): JSX.Element => {
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
 	const teamspacesArePending = TeamspacesHooksSelectors.selectTeamspacesArePending();
 
-	const sortedTeamspaces = flatten(partition(teamspaces, (ts) => ts.name === username));
+	const sortedTeamspaces = [...teamspaces].sort((a, b) => {
+		if (a.name === username) return -1; // personal teamspace appears first
+		if (b.name === username) return 1;
+		return a.name > b.name ? 1 : -1;
+	});
 
 	return (
 		<CardList className={className}>
-			{sortedTeamspaces.map((teamspace) => (
-				<TeamspaceCard
-					key={teamspace.name}
-					teamspaceName={teamspace.name}
-				/>
-			))}
+			{sortedTeamspaces.map(({ name }) => <TeamspaceCard key={name} teamspaceName={name}/>)}
 			{teamspacesArePending && (
 				<>
 					<TeamspacePlaceholderCard />

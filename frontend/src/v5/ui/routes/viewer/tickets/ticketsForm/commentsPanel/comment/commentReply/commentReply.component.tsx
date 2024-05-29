@@ -26,6 +26,8 @@ import { CommentMarkDown, CommentImage, OriginalMessage, CameraIcon } from './co
 import { CommentAuthor } from '../commentNonMessageContent/commentNonMessageContent.styles';
 import { QuotedMessage } from '../quotedMessage/quotedMessage.styles';
 import { ExternalLabel } from '../otherUserComment/importedUserPopover/importedUserPopover.styles';
+import { useContext } from 'react';
+import { TicketContext } from '../../../../ticket.context';
 
 type CommentReplyProps = TicketCommentReplyMetadata & {
 	variant?: 'primary' | 'secondary',
@@ -41,7 +43,9 @@ export const CommentReply = ({
 	originalAuthor,
 	...props
 }: CommentReplyProps) => {
-	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const { teamspace, project } = useParams<ViewerParams>();
+	const { containerOrFederation } = useContext(TicketContext);
+
 
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();

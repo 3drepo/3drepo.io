@@ -19,7 +19,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { isEqual } from 'lodash';
 
 import { SORT_ORDER_TYPES } from '../../../../constants/sorting';
-import { VIEWER_EVENTS } from '../../../../constants/viewer';
+import { VIEWER_CLIP_MODES, VIEWER_EVENTS } from '../../../../constants/viewer';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { VIEWS_ACTIONS_ITEMS, VIEWS_ACTIONS_MENU } from '../../../../constants/views';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -75,6 +75,7 @@ interface IProps {
 	setState: (componentState: IViewpointsComponentState) => void;
 	fetchModelSettings: (teamspace: string, modelId: string) => void;
 	showPreset: (preset: string) => void;
+	setClippingMode: (clipMode) => void;
 	id?: string;
 	sortOrder?: string;
 	toggleSortOrder: () => void;
@@ -245,6 +246,7 @@ export class Views extends PureComponent<IProps, any> {
 		if (!this.props.editMode) {
 			const { teamspace, model } = this.props;
 			this.props.setActiveViewpoint(teamspace, model, viewpoint);
+			this.props.setClippingMode(viewpoint.clippingPlanes.length === 1 ? VIEWER_CLIP_MODES.SINGLE : VIEWER_CLIP_MODES.BOX)
 		}
 	}
 

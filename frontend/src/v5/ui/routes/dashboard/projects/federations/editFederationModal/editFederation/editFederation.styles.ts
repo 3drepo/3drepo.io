@@ -26,7 +26,7 @@ export const ErrorButton = styled(ErrorButtonBase)`
 	min-width: 100px;
 `;
 
-const iconContainerStyles = css`
+const iconContainerStyles = css<{ hidden?: boolean }>`
 	display: grid;
 	place-content: center;
 	width: 20px;
@@ -38,6 +38,10 @@ const iconContainerStyles = css`
 	&, &:hover, &:active, &:focus {
 		border-width: 2px;
 	}
+
+	${({ hidden }) => hidden && css`
+		visibility: hidden;
+	`}
 `;
 
 export const SuccessIconContainer = styled(SuccessButton)`

@@ -43,8 +43,7 @@ const selectTicketsDomain = (state): ITicketsState => state.tickets || {};
 
 export const selectTicketsHaveBeenFetched = createSelector(
 	selectTicketsDomain,
-	(state, modelId) => modelId,
-	(state, modelId) => modelId in state.ticketsByModelId,
+	(state): (modelId) => boolean => (modelId) => modelId in state.ticketsByModelId,
 );
 
 export const selectTemplates = createSelector(

@@ -57,6 +57,12 @@ export const selectFederationById = createSelector(
 	(federations, id): IFederation | null => federations.find((federation) => (federation._id === id)),
 );
 
+export const selectIsFederation = createSelector(
+	selectFederations,
+	(federations): (id:string) => boolean => 
+		(id: string) => !!federations?.find((federation) => (federation._id === id)),
+);
+
 export const selectContainersByFederationId = createSelector(
 	selectContainers,
 	selectFederationById,
