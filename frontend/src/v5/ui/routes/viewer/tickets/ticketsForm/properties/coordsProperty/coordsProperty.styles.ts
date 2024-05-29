@@ -36,6 +36,7 @@ export const Label = styled(InputLabel)`
 	max-width: 100%;
 	word-wrap: break-word;
 	text-overflow: ellipsis;
+	display: contents;
 `;
 
 export const CoordsAction = styled.div<{ selected?: boolean; disabled?: boolean }>`

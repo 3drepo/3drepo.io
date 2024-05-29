@@ -16,15 +16,14 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { FormSelect } from '@controls/inputs/formInputs.component';
 import { formatMessage } from '@/v5/services/intl';
 import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { useFormContext } from 'react-hook-form';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useEffect } from 'react';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { NONE_OPTION } from '../ticketsTable/ticketsTable.helper';
 import { MenuItem } from './selectMenus.styles';
+import { Select, SelectProps } from '@controls/inputs/select/select.component';
 
 const NONE_OPTION_MESSAGE = formatMessage({ id: 'tickets.selectOption.none', defaultMessage: 'None' });
 
@@ -38,16 +37,17 @@ const GROUP_OPTIONS = {
 	[SafetibaseProperties.TREATMENT_STATUS]: formatMessage({ id: 'groupBy.treatmentStatus', defaultMessage: 'Treatment status' }),
 };
 
-export const GroupByFormSelect = (props) => {
-	const { getValues, setValue } = useFormContext();
 
-	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(getValues('template'));
+type Props = { templateId: string } & SelectProps;
+
+export const GroupBySelect = ({ templateId, ...props }: Props) => {
+	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const templateWasFetched = templateAlreadyFetched(template);
 	const hasProperties = template?.config?.issueProperties;
 	const hasSafetibase = template?.modules?.some((module) => module.type === 'safetibase');
 
 	const templateAllowsGroup = () => {
-		const groupBy = getValues('groupBy');
+		const groupBy = props.value;
 		if (
 			!hasProperties && [
 				IssueProperties.ASSIGNEES,
@@ -61,11 +61,11 @@ export const GroupByFormSelect = (props) => {
 
 	useEffect(() => {
 		if (!templateWasFetched || templateAllowsGroup()) return;
-		setValue('groupBy', NONE_OPTION);
+		// setValue('groupBy', NONE_OPTION);
 	}, [template, templateWasFetched]);
 
 	return (
-		<FormSelect
+		<Select
 			{...props}
 			label={formatMessage({ id: 'ticketTable.groupBy.placeholder', defaultMessage: 'Group by:' })}
 			renderValue={(groupBy: string | null) => (
@@ -99,6 +99,6 @@ export const GroupByFormSelect = (props) => {
 			<MenuItem value={SafetibaseProperties.TREATMENT_STATUS} key={SafetibaseProperties.TREATMENT_STATUS} hidden={!hasSafetibase}>
 				{GROUP_OPTIONS[SafetibaseProperties.TREATMENT_STATUS]}
 			</MenuItem>
-		</FormSelect>
+		</Select>
 	);
 };

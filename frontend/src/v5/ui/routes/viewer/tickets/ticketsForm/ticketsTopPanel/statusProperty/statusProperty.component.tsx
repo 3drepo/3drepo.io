@@ -23,8 +23,9 @@ import { BaseProperties, TicketsCardViews } from '../../../tickets.constants';
 import { PropertyTitle, Property } from './statusProperty.styles';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
-import { useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 import { getStatusPropertyValues } from '@controls/chip/statusChip/statusChip.helpers';
+import { TicketContext } from '../../../ticket.context';
 
 type StatusPropertyProps = {
 	onBlur: () => void;
@@ -32,7 +33,9 @@ type StatusPropertyProps = {
 };
 
 export const StatusProperty = ({ onBlur, readOnly }: StatusPropertyProps) => {
-	const { containerOrFederation, template: templateIdTabularView } = useParams<DashboardTicketsParams>();
+	const { template: templateIdTabularView } = useParams<DashboardTicketsParams>();
+	const { containerOrFederation } = useContext(TicketContext);
+	
 	const templateIdExistingTicket = TicketsCardHooksSelectors.selectSelectedTicket()?.type;
 	const templateIdNewTicket = TicketsCardHooksSelectors.selectSelectedTemplateId() || templateIdTabularView;
 	const ticketView = TicketsCardHooksSelectors.selectView();

@@ -42,7 +42,11 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelId, selec
 	const { query } = useContext(SearchContext);
 	const { _id: id, title, properties, number, type, modules } = ticket;
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
-	const { name: modelName } = ContainersHooksSelectors.selectContainerById(modelId) || FederationsHooksSelectors.selectFederationById(modelId);
+	const container = ContainersHooksSelectors.selectContainerById(modelId);
+	const federation = FederationsHooksSelectors.selectFederationById(modelId);
+
+	const { name: modelName } = container || federation || {};
+	
 	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(type);
 
 	if (!properties || !template?.code) return null;

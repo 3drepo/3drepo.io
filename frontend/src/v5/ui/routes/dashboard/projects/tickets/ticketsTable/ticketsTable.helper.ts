@@ -38,18 +38,9 @@ const getOptionsForGroupsWithDueDate = () => [
 	formatMessage({ id: 'groupBy.dueDate.inSixPlusWeeks', defaultMessage: 'in 6+ weeks' }),
 ];
 
-const mapKeysToSnakeCase = (properties) => _.mapKeys(properties, (val, key) => _.snakeCase(key));
+export type SetTicketValue =  (modelId: string, ticketId?: string, groupValue?: string) => void;
 
-export const GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE = mapKeysToSnakeCase({
-	[NONE_OPTION]: NONE_OPTION,
-	[BaseProperties.OWNER]: BaseProperties.OWNER,
-	[IssueProperties.ASSIGNEES]: IssueProperties.ASSIGNEES,
-	[IssueProperties.DUE_DATE]: IssueProperties.DUE_DATE,
-	[IssueProperties.PRIORITY]: IssueProperties.PRIORITY,
-	[BaseProperties.STATUS]: BaseProperties.STATUS,
-	[SafetibaseProperties.LEVEL_OF_RISK]: SafetibaseProperties.LEVEL_OF_RISK,
-	[SafetibaseProperties.TREATMENT_STATUS]: SafetibaseProperties.TREATMENT_STATUS,
-});
+export const NEW_TICKET_ID = 'new';
 
 export const SAFETIBASE_PROPERTIES_GROUPS = {
 	[SafetibaseProperties.LEVEL_OF_RISK]: RiskLevels,

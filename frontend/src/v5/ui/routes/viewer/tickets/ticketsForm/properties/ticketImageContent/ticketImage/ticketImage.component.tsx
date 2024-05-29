@@ -49,11 +49,11 @@ export const TicketImage = ({ value, onChange, onBlur, disabled, label, helperTe
 		DialogsActionsDispatchers.open(ImagesModal, {
 			onClose: () => onChange(stripBase64Prefix(imgInModal.current)),
 			onAddMarkup: (newImg) => { imgInModal.current = newImg; },
-			openInMarkupMode: true,
 		}, syncProps);
 	};
 
 	useEffect(() => onBlur?.(), [value]);
+	useEffect(() => { imgInModal.current = imgSrc; }, [imgSrc]);
 
 	return (
 		<>

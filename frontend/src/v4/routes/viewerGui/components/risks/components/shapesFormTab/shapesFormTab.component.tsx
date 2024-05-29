@@ -33,6 +33,7 @@ interface IProps {
 	shapes: IMeasure[];
 	units: string;
 	measureMode: string;
+	canEdit: boolean;
 	removeMeasurement: (uuid) => void;
 	setMeasurementColor: (uuid, color) => void;
 	setMeasurementName: (uuid, type, name) => void;
@@ -61,7 +62,7 @@ export const ShapesFormTab = ({
 
 	return (
 		<Content active={active}>
-			{addButtonsEnabled &&
+			{addButtonsEnabled && props.canEdit &&
 				<MeasuringTypeContainer>
 					Create markup&nbsp; &nbsp;
 					<MeasuringType basicTypes setMeasureMode={setMeasureMode} measureMode={measureMode} />
