@@ -77,7 +77,8 @@ export const ViewerLayer2D = ({ viewBox, active, onChange }: ViewerLayer2DProps)
 	return (
 		<Container style={containerStyle}>
 			<LayerLevel>
-				{mousePosition && active && <SvgCircle coords={mousePosition} scale={viewBox.scale} />}
+				{/* {mousePosition && active && <SvgCircle coords={mousePosition} scale={viewBox.scale} />} */}
+				{mousePosition && active && Array(50).fill(0).map(() => <SvgCircle coords={mousePosition} scale={viewBox.scale} />)}
 				{offsetStart && <SvgArrow start={offsetStart} end={offsetEnd ?? mousePosition} scale={viewBox.scale} />}
 			</LayerLevel>
 			{active && (

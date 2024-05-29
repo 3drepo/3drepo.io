@@ -27,7 +27,7 @@ import { DrawingViewerContainer } from './drawingViewer.styles';
 import { Events } from './panzoom/panzoom';
 import { DrawingViewerImage } from './drawingViewerImage/drawingViewerImage.component';
 import CalibrationIcon from '@assets/icons/filled/calibration-filled.svg';
-import { ViewBoxType } from './viewerLayer2D/viewerLayer2D.component';
+import { ViewBoxType, ViewerLayer2D } from './viewerLayer2D/viewerLayer2D.component';
 
 const DEFAULT_VIEWBOX = { scale: 1, x: 0, y: 0, width: 0, height: 0 };
 export const DrawingViewer = () => {
@@ -78,12 +78,11 @@ export const DrawingViewer = () => {
 
 	return (
 		<DrawingViewerContainer id="viewer">
-			<DrawingViewerImage
-				ref={imgRef}
-				onLoad={onImageLoad}
-				onDrawArrow={onDrawArrow}
-				isDrawing={isDrawingVector}
+			<DrawingViewerImage ref={imgRef} onLoad={onImageLoad} />
+			<ViewerLayer2D
+				active={isDrawingVector}
 				viewBox={viewBox}
+				onChange={onDrawArrow}
 			/>
 			<ToolbarContainer>
 				<MainToolbar>
