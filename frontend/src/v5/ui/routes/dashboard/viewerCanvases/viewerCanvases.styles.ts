@@ -21,7 +21,7 @@ import ResizePaneIcon from '@assets/icons/outlined/horizontal_resize-outlined.sv
 import styled from 'styled-components';
 import { ComponentToString } from '@/v5/helpers/react.helper';
 
-export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps & { mouseY: number }>>`
+export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps>>`
 	.Resizer {
 		box-sizing: border-box;
 		background-clip: padding-box;
@@ -57,7 +57,7 @@ export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps 
 				background-color: inherit;
 				box-sizing: border-box;
 				position: absolute;
-				top: ${({ mouseY }) => mouseY - 65}px;
+				bottom: 112px;
 				align-content: center;
 				text-align: center;
 				transform: translate(-50%, -50%);
