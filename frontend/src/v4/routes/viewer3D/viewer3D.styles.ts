@@ -45,6 +45,7 @@ export const ViewerContainer = styled.div<{ visible?: boolean }>`
 	width: 100%;
 	position: relative;
 	box-sizing: border-box;
+	overflow: hidden;
 `;
 
 export const Border = styled.div<IContainer>`
