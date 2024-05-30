@@ -24,10 +24,12 @@ import ZoomInIcon from '@assets/icons/viewer/zoom_in.svg';
 
 import { PanZoomHandler, centredPanZoom } from './panzoom/centredPanZoom';
 import { ViewerContainer } from '@/v4/routes/viewer3D/viewer3D.styles';
+import { ImageContainer } from './viewer2D.styles';
 import { Events } from './panzoom/panzoom';
 import { DrawingViewerImage } from './drawingViewerImage/drawingViewerImage.component';
 import { CloseButton } from '@controls/button/closeButton/closeButton.component';
 import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
+import { DrawingViewerService } from './drawingViewer.service';
 
 export const Viewer2D = () => {
 	const { close2D } = useContext(ViewerCanvasesContext);
@@ -36,6 +38,7 @@ export const Viewer2D = () => {
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
 
 	const imgRef = useRef<HTMLImageElement | SVGSVGElement>();
+	const imgContainerRef = useRef();
 
 	const onClickZoomIn = () => {
 		zoomHandler.zoomIn();
@@ -50,6 +53,8 @@ export const Viewer2D = () => {
 			zoomHandler.dispose();
 		}
 
+		DrawingViewerService.setImgContainer(imgContainerRef.current);
+
 		const pz = centredPanZoom(imgRef.current, 20, 20);
 		setZoomHandler(pz);
 		pz.on(Events.transform, () => {
@@ -63,7 +68,9 @@ export const Viewer2D = () => {
 	return (
 		<ViewerContainer visible>
 			<CloseButton variant="secondary" onClick={close2D} />
-			<DrawingViewerImage ref={imgRef} onLoad={onImageLoad} />
+			<ImageContainer ref={imgContainerRef}>
+				<DrawingViewerImage ref={imgRef} onLoad={onImageLoad} />
+			</ImageContainer>
 			<ToolbarContainer>
 				<MainToolbar>
 					<ToolbarButton
