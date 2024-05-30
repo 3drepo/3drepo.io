@@ -18,7 +18,7 @@
 import { formatMessage } from '@/v5/services/intl';
 import { ToolbarButton } from '@/v5/ui/routes/viewer/toolbar/buttons/toolbarButton.component';
 import { ToolbarContainer, MainToolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.styles';
-import { useRef, useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import ZoomOutIcon from '@assets/icons/viewer/zoom_out.svg';
 import ZoomInIcon from '@assets/icons/viewer/zoom_in.svg';
 
@@ -26,8 +26,11 @@ import { PanZoomHandler, centredPanZoom } from './panzoom/centredPanZoom';
 import { ViewerContainer } from '@/v4/routes/viewer3D/viewer3D.styles';
 import { Events } from './panzoom/panzoom';
 import { DrawingViewerImage } from './drawingViewerImage/drawingViewerImage.component';
+import { CloseButton } from '@controls/button/closeButton/closeButton.component';
+import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 
 export const Viewer2D = () => {
+	const { close2D } = useContext(ViewerCanvasesContext);
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
@@ -59,6 +62,7 @@ export const Viewer2D = () => {
 
 	return (
 		<ViewerContainer visible>
+			<CloseButton variant="secondary" onClick={close2D} />
 			<DrawingViewerImage ref={imgRef} onLoad={onImageLoad} />
 			<ToolbarContainer>
 				<MainToolbar>
