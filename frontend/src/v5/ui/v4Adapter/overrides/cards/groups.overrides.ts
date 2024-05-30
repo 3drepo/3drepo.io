@@ -209,7 +209,6 @@ const expandedGroupItem = css`
 					
 					span {
 						display: inline-block;
-						height: 24px;
 						line-height: unset !important;
 						padding-top: 5px;
 						text-overflow: ellipsis;

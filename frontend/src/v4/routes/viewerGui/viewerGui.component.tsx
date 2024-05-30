@@ -18,7 +18,6 @@
 import { Tickets } from '@/v5/ui/routes/viewer/tickets/tickets.component';
 import { isEmpty, isEqual } from 'lodash';
 import { PureComponent } from 'react';
-import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
 import { AdditionalProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
@@ -238,7 +237,6 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 				<CloseFocusModeButton isFocusMode={isFocusMode} />
 				<Container id="gui-container" className={this.props.className} hidden={isFocusMode}>
 					<RevisionsSwitch />
-					<Toolbar />
 					{this.renderLeftPanelsButtons()}
 					{this.renderLeftPanels(leftPanels)}
 					{this.renderRightPanels(rightPanels)}

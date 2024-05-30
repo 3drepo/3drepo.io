@@ -23,7 +23,7 @@ import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { SubmitButton } from '@controls/submitButton';
 import { Button } from '@controls/button';
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { GroupSettingsSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { cloneDeep, isEqual, isUndefined, omitBy, sortBy } from 'lodash';
@@ -66,6 +66,7 @@ import { RulesOptionsMenu } from './rulesOptionsMenu/rulesOptionsMenu.component'
 import { RulesField } from './rulesField/ruelsField.component';
 import { Popper } from '../../../ticketGroups.styles';
 import { appendCopySuffixToDuplicateNames } from '../../groupRulesForm/groupRulesForm.helpers';
+import { TicketContext } from '../../../../../ticket.context';
 
 type GroupSettingsFormProps = {
 	value?: IGroupSettingsForm,
@@ -83,7 +84,9 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	const [isPastingRules, setIsPastingRules] = useState(false);
 	const [selectedRule, setSelectedRule] = useState(null);
 	const isAdmin = !TicketsCardHooksSelectors.selectReadOnly();
-	const { teamspace, containerOrFederation, revision } = useParams<ViewerParams>();
+	const { teamspace, revision } = useParams<ViewerParams>();
+	const { containerOrFederation } = useContext(TicketContext);
+
 	const formRef = useRef(null);
 
 	const isNewGroup = !value;

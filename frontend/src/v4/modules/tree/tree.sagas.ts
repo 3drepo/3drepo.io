@@ -651,7 +651,7 @@ function* goToRootNode({ nodeId }) {
 		if (node.level === level) {
 			nodesToExpand.push(node._id);
 			nodesToCollapse.push(...node.childrenIds);
-			currentNodeIndex += node.deepChildrenNumber;
+			currentNodeIndex += (node.deepChildrenNumber || 1);
 		} else {
 			currentNodeIndex++;
 		}

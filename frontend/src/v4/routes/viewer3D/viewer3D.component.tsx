@@ -18,6 +18,7 @@ import { PureComponent, createRef } from 'react';
 import { difference, differenceBy, isEqual } from 'lodash';
 import { dispatch } from '@/v4/modules/store';
 import { DialogActions } from '@/v4/modules/dialog';
+import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
 import {queuableFunction} from '../../helpers/async';
 
 import { ROUTES } from '../../constants/routes';
@@ -27,7 +28,7 @@ import { PresentationMode } from '../../modules/presentation/presentation.consta
 import { moveMeshes, resetMovedMeshes, transformationDiffChanges,
 transformationDiffRemoves } from '../../modules/sequences/sequences.helper';
 import { ViewerService } from '../../services/viewer/viewer';
-import { Border, Container } from './viewerCanvas.styles';
+import { Border, ViewerContainer } from './viewer3D.styles';
 
 interface IProps {
 	location: any;
@@ -62,7 +63,7 @@ interface IProps {
 	ticketPins: any;
 }
 
-export class ViewerCanvas extends PureComponent<IProps, any> {
+export class Viewer3D extends PureComponent<IProps, any> {
 	private containerRef = createRef<HTMLDivElement>();
 
 	private handleUnityError = (message: string, reload: boolean, isUnity: boolean) => {
@@ -253,12 +254,15 @@ export class ViewerCanvas extends PureComponent<IProps, any> {
 	public render() {
 		return (
 			<>
-				<Container
+				<ViewerContainer
 					visible={this.shouldBeVisible}
-					id="viewer"
-					ref={this.containerRef}
-					className={this.props.className}
-				/>
+				>
+					<div
+						ref={this.containerRef}
+						className={this.props.className}
+					/>
+					<Toolbar />
+				</ ViewerContainer>
 				<Border
 					presentationMode={this.props.presentationMode}
 					isPresentationPaused={this.props.isPresentationPaused}

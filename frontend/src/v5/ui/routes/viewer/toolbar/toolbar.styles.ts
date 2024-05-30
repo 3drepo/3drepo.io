@@ -17,17 +17,17 @@
 
 import styled from 'styled-components';
 
-export const ToolbarContainer = styled.div<{ xPosition?: number }>`
+export const ToolbarContainer = styled.div`
 	border-radius: 24px;
 	position: absolute;
 	bottom: 35px;
-	left: ${({ xPosition }) => xPosition || 50}%;
+	left: 50%;
 	transform: translateX(-50%);
 	pointer-events: all;
-	z-index: 2;
 	display: flex;
 	flex-direction: row;
 	transition: all .3s;
+	z-index: 2;
 
 	& > * {
 		border: solid 1px ${({ theme }) => theme.palette.secondary.light};

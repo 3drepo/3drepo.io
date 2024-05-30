@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,29 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Image, ExtraImages, OverlappingContainer } from './commentImage.styles';
+import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
+import { Button } from './closeButton.styles';
+import { ButtonProps } from '@mui/material';
 
-type CommentImageProps = {
-	src: string,
-	className?: string,
-	extraCount?: number,
-	onClick?: () => void,
+type CloseButtonProps = Omit<ButtonProps, 'variant'> & {
+	variant?: 'primary' | 'secondary',
 };
-export const CommentImage = ({
-	src,
-	extraCount,
-	className,
-	onClick,
-	...imgProps
-}: CommentImageProps) => {
-	if (!extraCount || extraCount === 1) {
-		return (<Image src={src} onClick={onClick} className={className} {...imgProps} />);
-	}
 
-	return (
-		<OverlappingContainer onClick={onClick} className={className}>
-			<Image src={src} {...imgProps} />
-			<ExtraImages>+{extraCount}</ExtraImages>
-		</OverlappingContainer>
-	);
-};
+export const CloseButton = ({ variant, ...props }: CloseButtonProps) => (
+	<Button $variant={variant} {...props}>
+		<CloseIcon />
+	</Button>
+);

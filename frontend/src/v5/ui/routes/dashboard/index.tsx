@@ -19,7 +19,6 @@ import { useRouteMatch, useLocation, Switch, Redirect } from 'react-router-dom';
 import { GlobalStyle } from '@/v5/ui/themes/global';
 import { formatMessage } from '@/v5/services/intl';
 import { NotFound } from '@/v5/ui/routes/notFound';
-import { ViewerCanvases } from './viewerCanvases/viewerCanvases.component';
 import { DashboardProjectLayout } from '@components/dashboard/dashboardProjectLayout/dashboardProjectLayout.component';
 import { DashboardViewerLayout } from '@components/dashboard/dashboardViewerLayout/dashboardViewerLayout.component';
 import { Route } from '@/v5/services/routing/route.component';
@@ -51,10 +50,20 @@ import { UserSignup } from '../userSignup/userSignup.component';
 import { UserVerification } from '../userVerification/userVerification.component';
 import { TeamspaceLayout } from './teamspaces/teamspaceLayout/teamspaceLayout.component';
 import { UserSignupSSO } from '../userSignup/userSignUpSSO/userSignUpSSO.component';
+import { useEffect } from 'react';
+import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 
 export const MainRoute = () => {
 	const { path } = useRouteMatch();
 	const { pathname } = useLocation();
+	const authenticationFetched: boolean = AuthHooksSelectors.selectAuthenticationFetched();
+
+	useEffect(() => {
+		if (!authenticationFetched) {
+			AuthActionsDispatchers.authenticate();
+		}
+	}, [authenticationFetched]);
 
 	return (
 		<>
@@ -116,7 +125,6 @@ export const MainRoute = () => {
 				</AuthenticatedRoute>
 				<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.viewer', defaultMessage: ':containerOrFederation :revision - Viewer' })} path={VIEWER_ROUTE}>
 					<DashboardViewerLayout>
-						<ViewerCanvases />
 						<Viewer />
 					</DashboardViewerLayout>
 				</AuthenticatedRoute>

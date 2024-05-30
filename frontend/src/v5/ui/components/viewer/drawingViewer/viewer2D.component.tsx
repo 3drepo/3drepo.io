@@ -23,11 +23,11 @@ import ZoomOutIcon from '@assets/icons/viewer/zoom_out.svg';
 import ZoomInIcon from '@assets/icons/viewer/zoom_in.svg';
 
 import { PanZoomHandler, centredPanZoom } from './panzoom/centredPanZoom';
-import { DrawingViewerContainer } from './drawingViewer.styles';
+import { ViewerContainer } from '@/v4/routes/viewer3D/viewer3D.styles';
 import { Events } from './panzoom/panzoom';
 import { DrawingViewerImage } from './drawingViewerImage/drawingViewerImage.component';
 
-export const DrawingViewer = () => {
+export const Viewer2D = () => {
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
@@ -58,7 +58,7 @@ export const DrawingViewer = () => {
 	};
 
 	return (
-		<DrawingViewerContainer id="viewer">
+		<ViewerContainer visible>
 			<DrawingViewerImage ref={imgRef} onLoad={onImageLoad} />
 			<ToolbarContainer>
 				<MainToolbar>
@@ -76,6 +76,6 @@ export const DrawingViewer = () => {
 					/>
 				</MainToolbar>
 			</ToolbarContainer>
-		</DrawingViewerContainer>
+		</ViewerContainer>
 	);
 };

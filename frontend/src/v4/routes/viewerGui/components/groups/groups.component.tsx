@@ -27,6 +27,7 @@ import Visibility from '@mui/icons-material/VisibilityOutlined';
 import { isEmpty, isEqual, size, stubTrue } from 'lodash';
 
 import { GroupsListComponent } from '@/v5/ui/routes/viewer/groups/groupsList.component';
+import { getSortedGroups } from '@/v5/ui/routes/viewer/groups/groupsList.helpers';
 import {
 	DEFAULT_OVERRIDE_COLOR,
 	GROUP_PANEL_NAME,
@@ -98,11 +99,13 @@ interface IProps {
 
 interface IState {
 	collapse: object;
+	groups: any[];
 }
 
 export class Groups extends PureComponent<IProps, IState> {
 	public state = {
 		collapse: {},
+		groups: [],
 	};
 
 	get type() {
@@ -133,8 +136,8 @@ export class Groups extends PureComponent<IProps, IState> {
 	}
 
 	get overridesAllGroups() {
-		const { groups, colorOverrides } = this.props;
-		return Boolean(groups.length) && groups.length === size(colorOverrides);
+		const { colorOverrides } = this.props;
+		return Boolean(this.state.groups.length) && this.state.groups.length === size(colorOverrides);
 	}
 
 	public get canAddOrUpdate() {
@@ -147,13 +150,13 @@ export class Groups extends PureComponent<IProps, IState> {
 	public groupsContainerRef = createRef<any>();
 
 	public renderHeaderNavigation = () => {
-		const initialIndex = this.props.groups.findIndex(({ _id }) => this.props.activeGroupId === _id);
+		const initialIndex = this.state.groups.findIndex(({ _id }) => this.props.activeGroupId === _id);
 
 		return (
 			<ListNavigation
 				panelType={this.type}
 				initialIndex={initialIndex}
-				itemsCount={this.props.groups.length}
+				itemsCount={this.state.groups.length}
 				onChange={this.handleNavigationChange}
 			/>
 		);
@@ -161,8 +164,8 @@ export class Groups extends PureComponent<IProps, IState> {
 
 	public renderGroupsList = renderWhenTrue(() =>
 		<GroupsListComponent
-			groups={this.props.groups}
-			collapse={[this.state.collapse, (collapse) => this.setState({collapse})]}
+			groups={this.state.groups}
+			collapse={[this.state.collapse, (collapse) => this.setState({ ...this.state, collapse })]}
 			disabled={!this.props.isModelLoaded}
 		/>
 	);
@@ -179,9 +182,9 @@ export class Groups extends PureComponent<IProps, IState> {
 		<>
 			<ViewerPanelContent onClick={this.resetActiveGroup}>
 				<div onClick={(event: MouseEvent<HTMLDivElement>) => event.stopPropagation()}>
-					{this.renderEmptyState(!this.props.searchEnabled && !this.props.groups.length)}
-					{this.renderNotFound(this.props.searchEnabled && !this.props.groups.length)}
-					{this.renderGroupsList(this.props.groups.length)}
+					{this.renderEmptyState(!this.props.searchEnabled && !this.state.groups.length)}
+					{this.renderNotFound(this.props.searchEnabled && !this.state.groups.length)}
+					{this.renderGroupsList(this.state.groups.length)}
 				</div>
 			</ViewerPanelContent>
 			<ViewerPanelFooter onClick={this.resetActiveGroup} container alignItems="center" justifyContent="space-between">
@@ -189,7 +192,7 @@ export class Groups extends PureComponent<IProps, IState> {
 					<FormattedMessage
 						id="groups.list.numberOfGroups"
 						defaultMessage="{groups, plural, =0 {No groups displayed} one {# group displayed} other {# groups displayed}}"
-						values={{ groups: this.props.groups.length }}
+						values={{ groups: this.state.groups.length }}
 					/>
 				</Summary>
 				<ViewerPanelButton
@@ -234,12 +237,17 @@ export class Groups extends PureComponent<IProps, IState> {
 		const { subscribeOnChanges, teamspace, model } = this.props;
 		this.toggleViewerEvents();
 		subscribeOnChanges(teamspace, model);
+		this.setState({ ...this.state, groups: getSortedGroups(this.props.groups) });
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
 		const { groups, selectedFilters, activeGroupId } = this.props;
 		const groupsChanged = !isEqual(prevProps.groups, groups);
 		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
+
+		if (groupsChanged) {
+			this.setState({ ...this.state, groups: getSortedGroups(this.props.groups) });
+		}
 
 		if (filtersChanged && activeGroupId) {
 			const isSelectedGroupVisible = prevProps.groups.some(({ _id }) => {
@@ -271,11 +279,11 @@ export class Groups extends PureComponent<IProps, IState> {
 	}
 
 	public handleCloseSearchMode = () => {
-		this.props.setState({ searchEnabled: false, selectedFilters: [] });
+		this.props.setState({ ...this.state, searchEnabled: false, selectedFilters: [] });
 	}
 
 	public handleOpenSearchMode = () => {
-		this.props.setState({ searchEnabled: true });
+		this.props.setState({ ...this.state, searchEnabled: true });
 	}
 
 	public renderTitleIcon = () => {
@@ -290,13 +298,13 @@ export class Groups extends PureComponent<IProps, IState> {
 	}
 
 	public handleDeleteGroups = () => {
-		const { groups, deleteGroups, teamspace, model } = this.props;
+		const { deleteGroups, teamspace, model } = this.props;
 
 		this.props.showConfirmDialog({
 			title: 'Delete groups',
 			content: `Delete all groups?`,
 			onConfirm: () => {
-				const allGroups = groups.map((group) => group._id).join(',');
+				const allGroups = this.state.groups.map((group) => group._id).join(',');
 				deleteGroups(teamspace, model, allGroups);
 			}
 		});
@@ -314,7 +322,7 @@ export class Groups extends PureComponent<IProps, IState> {
 				GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL,
 				GROUPS_ACTIONS_ITEMS.DOWNLOAD,
 			]
-			return !this.props.groups.length && optionsToDisableWhenGroupsIsEmpty.includes(name);
+			return !this.state.groups.length && optionsToDisableWhenGroupsIsEmpty.includes(name);
 		}
 		return (
 			<MenuList>
@@ -336,12 +344,12 @@ export class Groups extends PureComponent<IProps, IState> {
 	}
 
 	public handleNavigationChange = (currentIndex) => {
-		this.props.showGroupDetails(this.props.groups[currentIndex], this.props.revision);
+		this.props.showGroupDetails(this.state.groups[currentIndex], this.props.revision);
 	}
 
 	public renderActions = () => {
 		if (this.props.showDetails) {
-			const canBeNavigated = this.props.activeGroupId && this.props.groups.length >= 2;
+			const canBeNavigated = this.props.activeGroupId && this.state.groups.length >= 2;
 			return canBeNavigated ?
 					this.renderHeaderNavigation() : <PanelBarActions type={this.type} hideSearch hideMenu />;
 		}
@@ -384,7 +392,7 @@ export class Groups extends PureComponent<IProps, IState> {
 	}
 
 	public handleFilterChange = (selectedFilters) => {
-		this.props.setState({ selectedFilters });
+		this.props.setState({ ...this.state, selectedFilters });
 	}
 
 	public handleSaveGroup = (teamspace, model, group) => {

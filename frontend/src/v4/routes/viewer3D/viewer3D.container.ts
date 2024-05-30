@@ -33,7 +33,7 @@ import { selectIsLoadingFrameState, selectSelectedHiddenNodes,
 import { TreeActions } from '../../modules/tree';
 import { selectAllTransparencyOverrides, selectColorOverrides, selectTransformations } from '../../modules/viewerGui';
 import { withViewer } from '../../services/viewer/viewer';
-import { ViewerCanvas } from './viewerCanvas.component';
+import { Viewer3D } from './viewer3D.component';
 
 const mapStateToProps = createStructuredSelector({
 	colorOverrides: selectColorOverrides,
@@ -63,4 +63,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	handleTransparenciesVisibility: SequencesActions.handleTransparenciesVisibility
 }, dispatch);
 
-export default withViewer(connect(mapStateToProps, mapDispatchToProps)(ViewerCanvas));
+export default withViewer(connect(mapStateToProps, mapDispatchToProps)(Viewer3D));

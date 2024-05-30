@@ -15,44 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ViewerCanvas as Canvas3D } from '@/v4/routes/viewerCanvas';
-import { DrawingViewer as Canvas2D } from '@components/viewer/drawingViewer/drawingViewer.component';
+import { Viewer3D } from '@/v4/routes/viewer3D';
+import { Viewer2D } from '@components/viewer/drawingViewer/viewer2D.component';
 import { useLocation } from 'react-router-dom';
 import { SplitPane } from './viewerCanvases.styles';
 import { ViewerCanvasesContext } from '../../viewer/viewerCanvases.context';
 import { useContext, useState } from 'react';
-import { clamp } from 'lodash';
-
-const MIN_PANEL_SIZE = 68;
-const windowWidth = window.innerWidth;
-const MAX_PANEL_SIZE = windowWidth - MIN_PANEL_SIZE;
 
 export const ViewerCanvases = () => {
 	const { pathname } = useLocation();
-	const { is2DOpen: is2DViewerOpen, leftPanelRatio, setLeftPanelRatio } = useContext(ViewerCanvasesContext);
-	const [size, setSize] = useState(windowWidth / 2);
+	const { is2DOpen } = useContext(ViewerCanvasesContext);
+	const [leftPanelRatio, setLeftPanelRatio] = useState(0.5);
 
-	const handleWindowResize = () => {
-		const windowWidth2 = window.innerWidth;
-		setSize(clamp(leftPanelRatio * windowWidth2, MIN_PANEL_SIZE, MAX_PANEL_SIZE));
-	};
-	window.addEventListener('resize', handleWindowResize);
-
-	const onDragResize = (s: number) => {
-		setSize(s);
-		setLeftPanelRatio(s / windowWidth);
-	};
+	const dragFinish = (newSize) => setLeftPanelRatio(newSize / window.innerWidth);
 
 	return (
 		<SplitPane
 			split="vertical"
-			size={is2DViewerOpen ? size : '100%'}
-			minSize={MIN_PANEL_SIZE}
-			maxSize={MAX_PANEL_SIZE}
-			onChange={onDragResize}
+			size={is2DOpen ? leftPanelRatio * 100 + '%' : '100%'}
+			onDragFinished={dragFinish}
 		>
-			<Canvas3D location={{ pathname }} />
-			{is2DViewerOpen && <Canvas2D />}
+			<Viewer3D location={{ pathname }} />
+			{is2DOpen && <Viewer2D />}
 		</SplitPane>
 	);
 };
