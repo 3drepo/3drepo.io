@@ -16,16 +16,31 @@
  */
 import { Tooltip } from '@mui/material';
 
+import { formatMessage } from '@/v5/services/intl';
+import { ModelType } from '@/v5/store/projects/projects.helpers';
 import { Highlight } from '../highlight/highlight.component';
 import { Container, Detail, Name } from './modelItem.styles';
 
 interface IProps {
 	name: string;
-	isFederation?: boolean;
+	modelType?: ModelType
 	searchText?: string;
 }
 
-export const ModelItem = ({name, isFederation, searchText = ''}: IProps) => {
+export const ModelItem = ({name, modelType, searchText = ''}: IProps) => {
+	const modelTypeLabel = () => {
+		switch (modelType) {
+			case ModelType.CONTAINER:
+				return formatMessage({ id: 'userPermissions.modelTable.modelType.container', defaultMessage: 'Container'})
+			case ModelType.FEDERATION:
+				return formatMessage({ id: 'userPermissions.modelTable.modelType.federation', defaultMessage: 'Federation'})
+			case ModelType.DRAWING:
+				return formatMessage({ id: 'userPermissions.modelTable.modelType.drawing', defaultMessage: 'Drawing'})
+			default:
+				return modelType
+		}
+	}
+
 	return (
 		<Container>
 			<Tooltip title={name}>
@@ -39,7 +54,7 @@ export const ModelItem = ({name, isFederation, searchText = ''}: IProps) => {
 			<Detail>
 				<Highlight
 					search={searchText}
-					text={isFederation ? 'Federation' : 'Container'}
+					text={modelTypeLabel()}
 				/>
 			</Detail>
 		</Container>

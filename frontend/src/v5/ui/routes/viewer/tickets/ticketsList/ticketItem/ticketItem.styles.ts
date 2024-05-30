@@ -19,6 +19,7 @@ import styled, { css } from 'styled-components';
 import { TextOverflow } from '@controls/textOverflow';
 import { Chip } from '@controls/chip/chip.component';
 import { DueDate as DueDateBase } from '@controls/dueDate/dueDate.component';
+import { CardListItem } from '@components/viewer/cards/card.styles';
 
 export const FlexRow = styled.div`
 	display: flex;
@@ -49,7 +50,7 @@ export const Description = styled(TextOverflow).attrs({
 	line-height: 11px;
 `;
 
-export const TicketItemContainer = styled(FlexColumn)<{ $selected?: boolean }>`
+export const TicketItemContainer = styled(CardListItem)<{ $selected?: boolean }>`
 	cursor: pointer;
 	box-sizing: border-box;
 	padding: 12px;
@@ -74,7 +75,7 @@ export const DueDate = styled(DueDateBase)`
 
 export const BottomRow = styled(FlexRow)`
 	align-items: center;
-	margin-top: auto;
+	margin-top: 6px;
 	height: 10px;
 	margin-bottom: 5px;
 `;

@@ -24,13 +24,13 @@ import {
 import { View } from '@/v5/store/store.types';
 import api from './default';
 
-export const addFavourites = (teamspace, projectId, containerId): Promise<AxiosResponse<void>> => (
+export const addFavourite = (teamspace, projectId, containerId): Promise<AxiosResponse<void>> => (
 	api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/favourites`, {
 		containers: [containerId],
 	})
 );
 
-export const removeFavourites = (teamspace, projectId, containerId): Promise<AxiosResponse<void>> => (
+export const removeFavourite = (teamspace, projectId, containerId): Promise<AxiosResponse<void>> => (
 	api.delete(`teamspaces/${teamspace}/projects/${projectId}/containers/favourites?ids=${containerId}`)
 );
 

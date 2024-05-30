@@ -15,7 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const delay = async (time, val) => new Promise((resolve) => setTimeout(() => resolve(val), time));
+/**
+ * Returns a promise that will return the value 'val' after 'time' (in ms) has passed
+ * @param time The time in milliseconds that will wait before the promise resolves
+ * @param val The value in which the problem resolves
+ * @returns Promise<typeof val> the same param passed as val
+ */
+export const delay = async <T>(time, val: T) => new Promise<T>((resolve) => setTimeout(() => resolve(val), time));
 
 export const asyncTimeout = (time, func, ...args) => {
 	return new Promise(async (resolve, reject) => {

@@ -37,7 +37,7 @@ import { PasswordChange } from '../passwordChange';
 import { PasswordForgot } from '../passwordForgot';
 import RegisterRequest from '../registerRequest/registerRequest.container';
 import { RegisterVerify } from '../registerVerify';
-import { ViewerCanvas } from '../viewerCanvas';
+import { Viewer3D } from '../viewer3D';
 import { ViewerGui } from '../viewerGui';
 import { AppContainer } from './app.styles';
 
@@ -124,7 +124,7 @@ export class App extends PureComponent<IProps, IState> {
 	public render() {
 		return (
 			<AppContainer>
-				<Route component={ViewerCanvas} />
+				<Route component={Viewer3D} />
 				{this.renderHeader(!isStaticRoute(location.pathname))}
 				<Switch>
 					<Route exact path={ROUTES.PASSWORD_FORGOT} component={PasswordForgot} />

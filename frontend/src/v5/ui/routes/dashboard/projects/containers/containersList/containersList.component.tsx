@@ -40,7 +40,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { SearchContext, SearchContextType } from '@controls/search/searchContext';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { Container, CollapseSideElementGroup } from './containersList.styles';
-import { UploadFileForm } from '../uploadFileForm/uploadFileForm.component';
+import { UploadContainerRevisionForm } from '../uploadContainerRevisionForm/uploadContainerRevisionForm.component';
 import { ContainerListItemLoading } from './containerListItem/containerListItemLoading.component';
 import { VirtualList } from '@controls/virtualList/virtualList.component';
 
@@ -103,7 +103,7 @@ export const ContainersList = ({
 								startIcon={<ArrowUpCircleIcon />}
 								variant="contained"
 								color="primary"
-								onClick={() => DialogsActionsDispatchers.open(UploadFileForm)}
+								onClick={() => DialogsActionsDispatchers.open(UploadContainerRevisionForm)}
 							>
 								<FormattedMessage id="containers.mainHeader.uploadFiles" defaultMessage="Upload files" />
 							</Button>
@@ -124,8 +124,11 @@ export const ContainersList = ({
 					<DashboardListHeaderLabel name="type" width={173} hideWhenSmallerThan={Display.Tablet}>
 						<FormattedMessage id="containers.list.header.category" defaultMessage="Category" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="lastUpdated" width={210}>
+					<DashboardListHeaderLabel name="lastUpdated" width={120}>
 						<FormattedMessage id="containers.list.header.lastUpdated" defaultMessage="Last updated" />
+					</DashboardListHeaderLabel>
+					<DashboardListHeaderLabel name="isFavourite" width={90}>
+						<FormattedMessage id="containers.list.header.actions" defaultMessage="Actions" />
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>
 				<DashboardList>
