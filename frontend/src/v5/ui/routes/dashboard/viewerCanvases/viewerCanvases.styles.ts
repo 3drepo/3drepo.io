@@ -65,4 +65,16 @@ export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps>
 			}
 		}
 	}
+
+	.Pane1 { 
+		/* Adds minimum size to panes (only when Pane2 is open) */
+		min-width: 68px;
+		max-width: calc(100% - 68px);
+		&:has(~ .Pane2:empty) {
+			max-width: 100%;
+		}
+	}
+	.Pane2 {
+		display: contents;
+	}
 `;
