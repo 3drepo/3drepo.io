@@ -722,10 +722,36 @@ export class UnityUtil {
 	 * @param meshIDs - array of json objects each recording { model: <account.modelID>, meshID: [array of mesh IDs] }
 	 */
 	public static centreToPoint(meshIDs: [object]) {
-		const params = {
-			groups: meshIDs,
-		};
-		UnityUtil.toUnity('CentreToObject', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
+
+		Object.entries(meshIDs.entries).forEach((entry, index) => {
+			if(index < (meshIDs.entries.length-1))
+			{
+				UnityUtil.multipleCallInChunks(entry[1].meshID.length, (start,end) => {
+					const ids = entry[1].meshID.slice(start, end);
+					const params: any = {						
+						model: entry[1].model,
+						meshIDs: ids,
+					};
+					UnityUtil.toUnity('CentreToObjectAppend', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+				});
+			}
+			else{
+				UnityUtil.multipleCallInChunks(entry[1].meshID.length, (start,end) => {
+					const ids = entry[1].meshID.slice(start, end);
+					const params: any = {
+						model: entry[1].model,
+						meshIDs: ids,
+					};
+
+					if(end != undefined){
+						UnityUtil.toUnity('CentreToObjectAppend', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+					}
+					else{
+						UnityUtil.toUnity('CentreToObjectEnd', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+					}
+				});
+			}
+		});
 	}
 
 	/**
@@ -2217,7 +2243,38 @@ export class UnityUtil {
 	 * @category Configurations
 	 */
 	public static zoomToObjects(meshEntries: object[]) {
-		UnityUtil.toUnity('ZoomToObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(meshEntries));
+
+		Object.entries(meshEntries.entries).forEach((entry, index) => {
+			if(index < (meshEntries.entries.length-1))
+			{
+				UnityUtil.multipleCallInChunks(entry[1].meshes.length, (start,end) => {
+					const ids = entry[1].meshes.slice(start, end);
+					const params: any = {
+						teamspace: entry[1].teamspace,
+						modelId: entry[1].modelId,
+						meshes: ids,
+					};
+					UnityUtil.toUnity('ZoomToObjectsAppend', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+				});
+			}
+			else{
+				UnityUtil.multipleCallInChunks(entry[1].meshes.length, (start,end) => {
+					const ids = entry[1].meshes.slice(start, end);
+					const params: any = {
+						teamspace: entry[1].teamspace,
+						modelId: entry[1].modelId,
+						meshes: ids,
+					};
+
+					if(end != undefined){
+						UnityUtil.toUnity('ZoomToObjectsAppend', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+					}
+					else{
+						UnityUtil.toUnity('ZoomToObjectsEnd', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+					}
+				});
+			}
+		});
 	}
 
 	/**
