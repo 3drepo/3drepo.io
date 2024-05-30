@@ -21,6 +21,7 @@ import { PanZoomHandler } from '../panzoom/centredPanZoom';
 import { isEqual } from 'lodash';
 import { Offset, SvgArrow } from './svgArrow/svgArrow.component';
 import { SvgCircle } from './svgCircle/svgCircle.component';
+import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
 export type ViewBoxType = ReturnType<PanZoomHandler['getOriginalSize']> & ReturnType<PanZoomHandler['getTransform']>;
 type ViewerLayer2DProps = {
@@ -33,6 +34,7 @@ export const ViewerLayer2D = ({ viewBox, active, onChange }: ViewerLayer2DProps)
 	const [offsetEnd, setOffsetEnd] = useState<Offset>(null);
 	const previousViewBox = useRef<ViewBoxType>(null);
 	const [mousePosition, setMousePosition] = useState<Offset>(null);
+	const [drawingId] = useSearchParam('drawingId');
 
 	const containerStyle: CSSProperties = {
 		transformOrigin: '0 0',
@@ -68,17 +70,23 @@ export const ViewerLayer2D = ({ viewBox, active, onChange }: ViewerLayer2DProps)
 		setMousePosition(getCursorOffset(e));
 	};
 
+	const resetArrow = () => {
+		setOffsetStart(null);
+		setOffsetEnd(null);
+	};
+
 	useEffect(() => {
 		if (!offsetEnd) {
-			setOffsetStart(null);
+			resetArrow();
 		}
 	}, [active]);
+
+	useEffect(() => { resetArrow(); }, [drawingId]);
 	
 	return (
 		<Container style={containerStyle}>
 			<LayerLevel>
-				{/* {mousePosition && active && <SvgCircle coords={mousePosition} scale={viewBox.scale} />} */}
-				{mousePosition && active && Array(50).fill(0).map(() => <SvgCircle coords={mousePosition} scale={viewBox.scale} />)}
+				{mousePosition && active && <SvgCircle coords={mousePosition} scale={viewBox.scale} />}
 				{offsetStart && <SvgArrow start={offsetStart} end={offsetEnd ?? mousePosition} scale={viewBox.scale} />}
 			</LayerLevel>
 			{active && (
