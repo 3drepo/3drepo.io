@@ -21,7 +21,8 @@ import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { VirtualisedList } from './drawingsList.styles';
 import { CardContent, CardList, CardListItem } from '@components/viewer/cards/card.styles';
-import { forwardRef } from 'react';
+import { forwardRef, useContext } from 'react';
+import { ViewerCanvasesContext } from '../../viewerCanvases.context';
 
 const Table = forwardRef(({ children, ...props }, ref: any) => (
 	<table ref={ref} {...props}>
@@ -32,6 +33,7 @@ const Table = forwardRef(({ children, ...props }, ref: any) => (
 export const DrawingsList = () => {
 	const drawings = DrawingsHooksSelectors.selectCalibratedDrawings();
 	const isLoading = DrawingsHooksSelectors.selectCalibratedDrawingsHaveStatsPending();
+	const { toggle2DPanel } = useContext(ViewerCanvasesContext);
 
 	if (isLoading) return (
 		<CentredContainer>
@@ -53,7 +55,7 @@ export const DrawingsList = () => {
 				<DrawingItem
 					drawing={drawing}
 					key={drawing._id}
-					onClick={() => {}}
+					onClick={toggle2DPanel}
 				/>
 			)}
 		/>

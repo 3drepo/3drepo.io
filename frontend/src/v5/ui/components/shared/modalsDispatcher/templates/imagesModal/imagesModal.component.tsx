@@ -17,7 +17,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import ChevronIcon from '@assets/icons/outlined/small_chevron-outlined.svg';
-import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import UploadImageIcon from '@assets/icons/outlined/add_image-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
@@ -141,9 +140,7 @@ export const ImagesModal = ({
 	if (markupMode) return (
 		<Modal open={open}>
 			<TopBar>
-				<CloseButton onClick={() => setMarkupMode(false)}>
-					<CloseIcon />
-				</CloseButton>
+				<CloseButton onClick={() => setMarkupMode(false)} />
 			</TopBar>
 			<ImageMarkup image={currentImage} onSave={(img) => onAddMarkup(img, imageIndex)} onClose={() => setMarkupMode(false)} />
 		</Modal>
@@ -189,9 +186,7 @@ export const ImagesModal = ({
 						</Tooltip>
 					)}
 				</Buttons>
-				<CloseButton onClick={handleClose}>
-					<CloseIcon />
-				</CloseButton>
+				<CloseButton onClick={handleClose} />
 			</TopBar>
 			<CenterBar>
 				{!hasManyImages && (

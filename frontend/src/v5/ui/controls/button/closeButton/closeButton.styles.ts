@@ -14,22 +14,24 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import { hexToOpacity } from '@/v5/ui/themes/theme';
+import { BaseCircleButton } from '@controls/circleButton/circleButton.styles';
 import styled from 'styled-components';
 
-export const SvgContainer = styled.div`
-	svg {
+export const Button = styled(BaseCircleButton)<{ $variant?: 'primary' | 'secondary' }>`
+	color:  ${({ theme: { palette }, $variant }) => $variant === 'secondary' ?  palette.base.main : palette.primary.contrast};
+	background-color: ${({ theme: { palette }, $variant }) => $variant === 'secondary' ? palette.primary.contrast : hexToOpacity(palette.primary.contrast, 3.9)};
+	align-self: flex-end;
+	margin-left: auto;
+	box-shadow: ${({ theme }) => theme.palette.shadows.level_3};
+	position: absolute;
+	right: 0;
+	z-index: 1;
+
+	&:hover, &.Mui-focusVisible {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
-		border: 1px solid ${({ theme }) => theme.palette.base.light};
+		color: ${({ theme }) => theme.palette.secondary.main};
+		box-shadow: ${({ theme }) => theme.palette.shadows.level_3};
 	}
-
-	width:100%;
-	height:100%;
-	overflow: hidden;
-`;
-
-export const DrawingViewerContainer = styled.div`
-	overflow: hidden;
-	width: 100%;
-	height: 100%;
-	user-select: none;
 `;

@@ -18,7 +18,7 @@
 import { formatMessage } from '@/v5/services/intl';
 import { ToolbarButton } from '@/v5/ui/routes/viewer/toolbar/buttons/toolbarButton.component';
 import { ToolbarContainer, MainToolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.styles';
-import { useRef, useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import ZoomOutIcon from '@assets/icons/viewer/zoom_out.svg';
 import ZoomInIcon from '@assets/icons/viewer/zoom_in.svg';
 
@@ -27,12 +27,13 @@ import { Button } from '@controls/button/button.component';
 import { FormattedMessage } from 'react-intl';
 import { SvgViewer } from './svgViewer.component';
 import { PanZoomHandler, centredPanZoom } from './panzoom/centredPanZoom';
-import { DrawingViewerContainer } from './drawingViewer.styles';
+import { ViewerContainer } from '@/v4/routes/viewer3D/viewer3D.styles';
 import { Events } from './panzoom/panzoom';
+import { CloseButton } from '@controls/button/closeButton/closeButton.component';
+import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 
-
-
-export const DrawingViewer = () => {
+export const Viewer2D = () => {
+	const { toggle2DPanel } = useContext(ViewerCanvasesContext);
 	const [svgContent, setSvgContent] = useState('');
 	const [imgContent, setImgContent] = useState('');
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
@@ -79,7 +80,7 @@ export const DrawingViewer = () => {
 	};
 
 	return (
-		<DrawingViewerContainer>
+		<ViewerContainer visible>
 			<FileInputField
 				accept=".svg,.png"
 				onChange={onClickButton as any}
@@ -92,6 +93,7 @@ export const DrawingViewer = () => {
 					/>
 				</Button>
 			</FileInputField>
+			<CloseButton variant="secondary" onClick={toggle2DPanel} />
 			{svgContent && <SvgViewer svgContent={svgContent} ref={imgRef} onLoad={onImageLoad}/>}
 			{imgContent && <img src={imgContent} ref={imgRef as any} onLoad={onImageLoad} />}
 			<ToolbarContainer>
@@ -110,6 +112,6 @@ export const DrawingViewer = () => {
 					/>
 				</MainToolbar>
 			</ToolbarContainer>
-		</DrawingViewerContainer>
+		</ViewerContainer>
 	);
 };

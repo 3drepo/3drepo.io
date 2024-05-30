@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { useRef, useEffect, forwardRef } from 'react';
-import { SvgContainer } from './drawingViewer.styles';
+import { SvgContainer } from './viewer2D.styles';
 import { sanitizeSvg } from '@svgedit/svgcanvas/core/sanitize';
 
 export interface Zoomer { 

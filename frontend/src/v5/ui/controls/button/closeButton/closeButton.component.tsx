@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,33 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
+import { Button } from './closeButton.styles';
+import { ButtonProps } from '@mui/material';
 
-export const ToolbarContainer = styled.div`
-	border-radius: 24px;
-	position: absolute;
-	bottom: 35px;
-	left: 50%;
-	transform: translateX(-50%);
-	pointer-events: all;
-	display: flex;
-	flex-direction: row;
-	transition: all .3s;
-	z-index: 2;
+type CloseButtonProps = Omit<ButtonProps, 'variant'> & {
+	variant?: 'primary' | 'secondary',
+};
 
-	& > * {
-		border: solid 1px ${({ theme }) => theme.palette.secondary.light};
-		height: 48px;
-		border-radius: 24px;
-		padding: 0 10px;
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		justify-content: space-evenly;
-	}
-`;
-
-export const MainToolbar = styled.div`
-	background-color: ${({ theme }) => theme.palette.secondary.main};
-	z-index: 1;
-`;
+export const CloseButton = ({ variant, ...props }: CloseButtonProps) => (
+	<Button $variant={variant} {...props}>
+		<CloseIcon />
+	</Button>
+);
