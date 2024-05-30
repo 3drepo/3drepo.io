@@ -17,7 +17,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { delay } from '@/v4/helpers/async';
-import { drawingIds, mockRole } from '@/v5/store/drawings/drawings.temp';
+import { drawingFilesName, drawingIds, mockRole } from '@/v5/store/drawings/drawings.temp';
 import { DrawingStats, DrawingUploadStatus, CalibrationStates, MinimumDrawing, IDrawing } from '@/v5/store/drawings/drawings.types';
 import { AxiosResponse } from 'axios';
 import uuid from 'uuidv4';
@@ -47,7 +47,24 @@ const randCal = (revisionsCount) => {
 	}
 };
 
-const drawings: IDrawing[] = arr.map((_, index) => {
+const drawingsWithFixedDrawingURL = drawingFilesName.map((name, index) => ({
+	_id: drawingIds[index] ?? uuid(),
+	name: name.split('.').join(' as '),
+	drawingNumber: index,
+	isFavourite: true,
+	role: mockRole(index),
+	category: categories[index % 3],
+	status: DrawingUploadStatus.OK,
+	calibration: CalibrationStates.CALIBRATED,
+	revisionsCount: 1,
+	latestRevision: null,
+	lastUpdated: null,
+	hasStatsPending: false,
+	desc: 'This is a fixed drawing',
+})) as unknown as IDrawing[];
+
+const drawings: IDrawing[] = drawingsWithFixedDrawingURL.concat(arr.map((_, i) => {
+	const index = i + drawingFilesName.length;
 	const revisionsCount = Math.round(Math.random() * 3);
 	return {
 		_id: drawingIds[index] ?? uuid(),
@@ -64,7 +81,7 @@ const drawings: IDrawing[] = arr.map((_, index) => {
 		hasStatsPending: false,
 		desc: 'This is a very long text that I need to use to see what the description will look like for a drawing in the viewer drawing card. This is then some extra text to make sure it is long enough',
 	};
-});
+}));
 
 
 const stats = drawings.map(({ revisionsCount, _id }) => {

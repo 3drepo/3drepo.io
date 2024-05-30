@@ -22,38 +22,20 @@ import { useContext, useRef, useState } from 'react';
 import ZoomOutIcon from '@assets/icons/viewer/zoom_out.svg';
 import ZoomInIcon from '@assets/icons/viewer/zoom_in.svg';
 
-import { FileInputField } from '@controls/fileInputField/fileInputField.component';
-import { Button } from '@controls/button/button.component';
-import { FormattedMessage } from 'react-intl';
-import { SvgViewer } from './svgViewer.component';
 import { PanZoomHandler, centredPanZoom } from './panzoom/centredPanZoom';
 import { ViewerContainer } from '@/v4/routes/viewer3D/viewer3D.styles';
 import { Events } from './panzoom/panzoom';
+import { DrawingViewerImage } from './drawingViewerImage/drawingViewerImage.component';
 import { CloseButton } from '@controls/button/closeButton/closeButton.component';
 import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 
 export const Viewer2D = () => {
-	const { toggle2DPanel } = useContext(ViewerCanvasesContext);
-	const [svgContent, setSvgContent] = useState('');
-	const [imgContent, setImgContent] = useState('');
+	const { close2D } = useContext(ViewerCanvasesContext);
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
 
 	const imgRef = useRef<HTMLImageElement | SVGSVGElement>();
-
-	const onClickButton = async ([file]: File[]) => {
-		if (file.type.includes('svg')) { 
-			setSvgContent(await file.text());
-			setImgContent('');
-		}
-
-		if (file.type.includes('png')) { 
-			var base64String = btoa(String.fromCharCode.apply(null, new Uint8Array(await file.arrayBuffer())));
-			setImgContent('data:image/png;base64,' + base64String);
-			setSvgContent('');
-		}
-	};
 
 	const onClickZoomIn = () => {
 		zoomHandler.zoomIn();
@@ -76,26 +58,12 @@ export const Viewer2D = () => {
 			setIsMinZoom(cantZoomOut);
 			setIsMaxZoom(cantZoomIn);
 		});
-		
 	};
 
 	return (
 		<ViewerContainer visible>
-			<FileInputField
-				accept=".svg,.png"
-				onChange={onClickButton as any}
-				multiple
-			>
-				<Button component="span" variant="contained" color="primary" style={{ position: 'absolute', zIndex: 10 }}>
-					<FormattedMessage
-						id="uploads.fileInput.browse"
-						defaultMessage="Browse"
-					/>
-				</Button>
-			</FileInputField>
-			<CloseButton variant="secondary" onClick={toggle2DPanel} />
-			{svgContent && <SvgViewer svgContent={svgContent} ref={imgRef} onLoad={onImageLoad}/>}
-			{imgContent && <img src={imgContent} ref={imgRef as any} onLoad={onImageLoad} />}
+			<CloseButton variant="secondary" onClick={close2D} />
+			<DrawingViewerImage ref={imgRef} onLoad={onImageLoad} />
 			<ToolbarContainer>
 				<MainToolbar>
 					<ToolbarButton

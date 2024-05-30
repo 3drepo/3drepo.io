@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { DrawingsCalibrationButton as DrawingsCalibrationButtonBase } from '@/v5/ui/routes/dashboard/projects/drawings/drawingsList/drawingsListItem/drawingsCalibrationButton/drawingsCalibrationButton.styles';
 import { CalibrationStates } from '@/v5/store/drawings/drawings.types';
 import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.styles';
+import { CardListItem } from '@components/viewer/cards/card.styles';
 
 export const DrawingsCalibrationButton = styled(DrawingsCalibrationButtonBase).attrs({ width: 103 })<{ calibration: CalibrationStates }>`
 	.MuiButton-root {
@@ -116,4 +117,13 @@ export const Description = styled(PropertyValue)`
 		padding-bottom: 1px;
 		margin-bottom: 4px;
 	}
+`;
+
+export const Container = styled(CardListItem)<{ $selected: boolean }>`
+	${({ theme, $selected }) => $selected && css`
+		background-color: ${theme.palette.primary.lightest};
+		${Title} {
+			color: ${theme.palette.primary.dark}
+		}
+	`}
 `;

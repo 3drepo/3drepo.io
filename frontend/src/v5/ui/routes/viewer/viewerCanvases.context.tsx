@@ -15,25 +15,38 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { createContext, useState } from 'react';
+import { useSearchParam } from '../useSearchParam';
 
 interface ViewerCanvasesContextType {
 	is2DOpen?: boolean;
-	toggle2DPanel: () => void;
+	close2D: () => void;
+	open2D: (drawingId) => void;
+	leftPanelRatio: number;
+	setLeftPanelRatio: (size) => void;
 }
 
 const defaultValue: ViewerCanvasesContextType = {
 	is2DOpen: false,
-	toggle2DPanel: () => { },
+	close2D: () => { },
+	open2D: () => { },
+	leftPanelRatio: 0.5,
+	setLeftPanelRatio: () => { },
 };
 export const ViewerCanvasesContext = createContext(defaultValue);
 ViewerCanvasesContext.displayName = 'ViewerCanvasesContext';
 
 export const ViewerCanvasesContextComponent = ({ children }) => {
-	const [is2DOpen, setIs2DOpen] = useState(false);
-	const toggle2DPanel = () => setIs2DOpen(!is2DOpen);
+	const [leftPanelRatio, setLeftPanelRatio] = useState(0.5);
+	const [drawingId, setDrawingId] = useSearchParam('drawingId');
 
 	return (
-		<ViewerCanvasesContext.Provider value={{ is2DOpen, toggle2DPanel }}>
+		<ViewerCanvasesContext.Provider value={{
+			is2DOpen: !!drawingId,
+			close2D: () => setDrawingId(''),
+			open2D: setDrawingId,
+			leftPanelRatio,
+			setLeftPanelRatio,
+		}}>
 			{children}
 		</ViewerCanvasesContext.Provider>
 	);

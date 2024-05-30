@@ -16,11 +16,25 @@
  */
 
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
-import { Title, DrawingsCalibrationButton, MainBody, ImageContainer, Property, PropertyValue, Description, BottomLine, InfoContainer, BreakingLine, SkeletonText } from './drawingItem.styles';
+import {
+	Container,
+	Title,
+	DrawingsCalibrationButton,
+	MainBody,
+	ImageContainer,
+	Property,
+	PropertyValue,
+	Description,
+	BottomLine,
+	InfoContainer,
+	BreakingLine,
+	SkeletonText,
+} from './drawingItem.styles';
 import { FormattedMessage } from 'react-intl';
 import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
+import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
 const STATUS_CODE_TEXT = formatMessage({ id: 'drawings.list.item.statusCode', defaultMessage: 'Status code' });
 const REVISION_CODE_TEXT = formatMessage({ id: 'drawings.list.item.revisionCode', defaultMessage: 'Revision code' });
@@ -34,6 +48,7 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	const { calibration, name, drawingNumber, lastUpdated, desc } = drawing;
 	const { statusCode, revisionCode } = latestRevision || {};
 	const areStatsPending = !revisionCode;
+	const [selectedDrawingId] = useSearchParam('drawingId');
 
 	const LoadingCodes = () => (
 		<>
@@ -68,7 +83,7 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	);
 
 	return (
-		<div onClick={onClick} key={drawing._id} >
+		<Container onClick={onClick} key={drawing._id} $selected={drawing._id === selectedDrawingId}>
 			<MainBody>
 				<ImageContainer>
 					<img src="https://placedog.net/73/73" />
@@ -96,6 +111,6 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 					calibration={calibration}
 				/>
 			</BottomLine>
-		</div>
+		</Container>
 	);
 };

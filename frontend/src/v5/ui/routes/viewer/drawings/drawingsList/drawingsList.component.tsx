@@ -19,8 +19,8 @@ import { DrawingItem } from './drawingItem/drawingItem.component';
 import { CentredContainer } from '@controls/centredContainer';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
-import { VirtualisedList } from './drawingsList.styles';
-import { CardContent, CardList, CardListItem } from '@components/viewer/cards/card.styles';
+import { VirtualisedList, TableRow } from './drawingsList.styles';
+import { CardContent, CardList } from '@components/viewer/cards/card.styles';
 import { forwardRef, useContext } from 'react';
 import { ViewerCanvasesContext } from '../../viewerCanvases.context';
 
@@ -33,7 +33,7 @@ const Table = forwardRef(({ children, ...props }, ref: any) => (
 export const DrawingsList = () => {
 	const drawings = DrawingsHooksSelectors.selectCalibratedDrawings();
 	const isLoading = DrawingsHooksSelectors.selectCalibratedDrawingsHaveStatsPending();
-	const { toggle2DPanel } = useContext(ViewerCanvasesContext);
+	const { open2D } = useContext(ViewerCanvasesContext);
 
 	if (isLoading) return (
 		<CentredContainer>
@@ -49,13 +49,13 @@ export const DrawingsList = () => {
 			components={{
 				Table,
 				TableBody: CardList,
-				TableRow: CardListItem,
+				TableRow,
 			}}
 			itemContent={(index, drawing: IDrawing) => (
 				<DrawingItem
 					drawing={drawing}
 					key={drawing._id}
-					onClick={toggle2DPanel}
+					onClick={() => open2D(drawing._id)}
 				/>
 			)}
 		/>

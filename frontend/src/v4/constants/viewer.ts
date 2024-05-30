@@ -135,17 +135,6 @@ export const DEFAULT_SETTINGS = {
 	phElementLineAlpha: 0.3,
 };
 
-export const VIEWER_PANELS = {
-	METADATA: 'metadata',
-	RISKS: 'risks',
-	ISSUES: 'issues',
-	GROUPS: 'groups',
-	VIEWS: 'views',
-	TREE: 'tree',
-	COMPARE: 'compare',
-	GIS: 'gis'
-};
-
 export const VIEWER_PROJECTION_MODES = {
 	ORTHOGRAPHIC: 'orthographic',
 	PERSPECTIVE: 'perspective'
