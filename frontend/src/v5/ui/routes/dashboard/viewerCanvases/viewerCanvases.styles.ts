@@ -20,9 +20,10 @@ import BaseSplitPane, { SplitPaneProps } from 'react-split-pane';
 import ResizePaneIcon from '@assets/icons/outlined/horizontal_resize-outlined.svg';
 import styled from 'styled-components';
 import { ComponentToString } from '@/v5/helpers/react.helper';
+import { OverlappingContainer } from '@controls/overlappingContainer/overlappingContainer.styles';
 
-export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps>>`
-	height: calc(100vh - 62px) !important;
+export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps> & { $isCalibrating: boolean }>`
+	height: calc(100vh - ${({ $isCalibrating }) => $isCalibrating ? 142 : 62}px) !important;
 	.Resizer {
 		box-sizing: border-box;
 		background-clip: padding-box;
