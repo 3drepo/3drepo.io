@@ -24,7 +24,6 @@ import { useContext } from 'react';
 import { CalibrationContext } from '../projects/calibration/calibrationContext';
 import { CalibrationHeader } from '../projects/calibration/calibrationHeader/calibrationHeader.component';
 import { Calibration } from '../projects/calibration/calibration.component';
-import { ViewerGui } from '@/v4/routes/viewerGui';
 import { useSearchParam } from '../../useSearchParam';
 import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 
@@ -50,7 +49,6 @@ export const ViewerCanvases = () => {
 				<LeftPane>
 					<Viewer3D location={{ pathname }} />
 					{isCalibrating && <Calibration />}
-					<ViewerGui />
 				</LeftPane>
 				{is2DOpen && <Viewer2D />}
 			</SplitPane>

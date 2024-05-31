@@ -108,7 +108,7 @@ interface IState {
 	isCalibrating: boolean;
 }
 
-class ViewerGuiBase extends PureComponent<IProps, IState> {
+export class ViewerGui extends PureComponent<IProps, IState> {
 
 	private get urlParams() {
 		return this.props.match.params;
@@ -341,18 +341,4 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 			/>}
 		</DraggablePanels>
 	)
-}
-
-export const ViewerGui = (props) => {
-	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
-	const isFed = modelIsFederation(containerOrFederation);
-	const v4Match = {
-		params: {
-			model: containerOrFederation,
-			project,
-			teamspace,
-			revision: isFed ? undefined : revision,
-		},
-	};
-	return <ViewerGuiBase match={v4Match} key={containerOrFederation} {...props} />
 }
