@@ -115,7 +115,10 @@ export class ViewerService {
 		unityHolder.style['pointer-events'] = 'all';
 
 		this.element.appendChild(this.viewer);
-		this.viewer.appendChild(unityHolder);
+
+		if (!this.viewer.hasChildNodes()) {
+			this.viewer.appendChild(unityHolder);
+		}
 		this.canvas = unityHolder;
 
 		this.unityLoaderScript = document.createElement('script');
