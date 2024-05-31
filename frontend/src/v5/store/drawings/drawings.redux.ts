@@ -19,7 +19,7 @@ import { Constants } from '@/v5/helpers/actions.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { TeamspaceAndProjectId, ProjectId, ProjectAndDrawingId, TeamspaceProjectAndDrawingId, SuccessAndErrorCallbacks } from '../store.types';
-import { IDrawing, DrawingStats, DrawingUploadStatus, NewDrawing, CalibrationStates } from './drawings.types';
+import { IDrawing, DrawingStats, DrawingUploadStatus, NewDrawing, CalibrationState } from './drawings.types';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import { IDrawingRevision } from './revisions/drawingRevisions.types';
@@ -74,7 +74,7 @@ export const createDrawingSuccess = (state: DrawingsState, { projectId, drawing 
 	state.drawingsByProject[projectId] = (state.drawingsByProject[projectId] || []).concat([{
 		...drawing,
 		revisionsCount: 0,
-		calibration: CalibrationStates.EMPTY,
+		calibration: CalibrationState.EMPTY,
 		status: DrawingUploadStatus.OK,
 	}]);
 };
@@ -181,8 +181,8 @@ export interface IDrawingsActionCreators {
 		projectId: string, 
 		drawingId: string, 
 		drawing: Partial<IDrawing>, 
-		onSuccess: () => void, 
-		onError: (e:Error) => void
+		onSuccess?: () => void, 
+		onError?: (e:Error) => void
 	) => UpdateDrawingAction;
 	updateDrawingSuccess: (projecId: string, drawingId: string, drawing: Partial<IDrawing>) => UpdateDrawingSuccessAction;
 	drawingProcessingSuccess: (

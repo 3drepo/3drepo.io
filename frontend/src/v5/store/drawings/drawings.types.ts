@@ -17,7 +17,7 @@
 
 import { Role } from '../currentUser/currentUser.types';
 
-export enum CalibrationStates {
+export enum CalibrationState {
 	CALIBRATED = 'calibrated',
 	OUT_OF_SYNC = 'outOfSync',
 	UNCALIBRATED = 'uncalibrated',
@@ -48,7 +48,7 @@ export interface IDrawing extends MinimumDrawing {
 	desc?: string;
 	lastUpdated?: Date;
 	latestRevision?: string;
-	calibration?: CalibrationStates;
+	calibration?: CalibrationState;
 	status: DrawingUploadStatus;
 	revisionsCount: number;
 	role: any;
