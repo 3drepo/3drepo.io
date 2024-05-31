@@ -47,10 +47,10 @@ export const CALIBRATION_STYLE = {
 	[CalibrationState.UNCALIBRATED]: uncalibratedStyles,
 	[CalibrationState.EMPTY]: emptyStyles,
 };
-export const DrawingsCalibrationButton = styled(DashboardListItemButton).attrs<{ calibration: CalibrationState }>(({ calibration }) => ({
+export const DrawingsCalibrationButton = styled(DashboardListItemButton).attrs<{ calibration: CalibrationState }>(({ calibration, disabled }) => ({
 	children: CALIBRATION_MAP[calibration]?.label,
 	startIcon: CALIBRATION_MAP[calibration]?.icon,
-	endIcon: <ChevronIcon />,
+	endIcon: disabled ? null : <ChevronIcon />,
 }))<{ calibration: string }>`
 	.MuiButtonBase-root {
 		${({ calibration }) => CALIBRATION_STYLE[calibration]}
