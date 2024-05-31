@@ -243,21 +243,16 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 		return (
 			<GuiContainer>
 				<CloseFocusModeButton isFocusMode={isFocusMode} />
-				<CalibrationContext.Consumer>
-					{({ open: isCalibrating }) => (
-						<>
-							<Container id="gui-container" className={this.props.className} hidden={isFocusMode}>
-							<RevisionsSwitch />
-							<Toolbar />
-							{this.renderLeftPanels(leftPanels)}
-							{this.renderLeftPanelsButtons(isCalibrating)}
-							{this.renderRightPanels(rightPanels)}
-							{this.renderDraggablePanels(draggablePanels)}
-							{this.renderViewerLoader(viewer.hasInstance)}
-						</Container>
-						</>
-					)}
-				</CalibrationContext.Consumer>
+				<Container id="gui-container" className={this.props.className} hidden={isFocusMode}>
+					<RevisionsSwitch />
+					{this.renderLeftPanels(leftPanels)}
+					<CalibrationContext.Consumer>
+						{({ open: isCalibrating }) => this.renderLeftPanelsButtons(isCalibrating)}
+					</CalibrationContext.Consumer>
+					{this.renderRightPanels(rightPanels)}
+					{this.renderDraggablePanels(draggablePanels)}
+					{this.renderViewerLoader(viewer.hasInstance)}
+				</Container>
 			</GuiContainer>
 		);
 	}
