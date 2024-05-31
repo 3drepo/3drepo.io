@@ -356,6 +356,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 								}}
 							>
 								<GroupRulesForm
+									containerOrFederation={containerOrFederation}
 									rule={selectedRule?.value}
 									onSave={selectedRule ? (val) => update(selectedRule.index, val) : append}
 									onClose={resetFilterMenu}
