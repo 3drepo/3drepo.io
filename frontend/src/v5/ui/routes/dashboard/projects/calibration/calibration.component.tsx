@@ -20,6 +20,6 @@ import { Container } from './calibration.styles';
 
 export const Calibration = () => (
 	<Container>
-		 <CalibrationStep />
+		<CalibrationStep />
 	</Container>
 );
