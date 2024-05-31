@@ -21,12 +21,11 @@ export const ToolbarContainer = styled.div`
 	border-radius: 24px;
 	position: absolute;
 	bottom: 35px;
+	left: 50%;
+	transform: translateX(-50%);
 	pointer-events: all;
 	display: flex;
 	flex-direction: row;
-	justify-content: center;
-	transform: translateX(-50%);
-	left: 50%;
 	transition: all .3s;
 	z-index: 2;
 
