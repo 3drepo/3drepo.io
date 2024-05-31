@@ -30,9 +30,11 @@ import { DrawingViewerImage } from './drawingViewerImage/drawingViewerImage.comp
 import { CloseButton } from '@controls/button/closeButton/closeButton.component';
 import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 import { DrawingViewerService } from './drawingViewer.service';
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 
 export const Viewer2D = () => {
 	const { close2D } = useContext(ViewerCanvasesContext);
+	const { open: isCalibrating } = useContext(CalibrationContext);
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
@@ -67,7 +69,7 @@ export const Viewer2D = () => {
 
 	return (
 		<ViewerContainer visible>
-			<CloseButton variant="secondary" onClick={close2D} />
+			{!isCalibrating && <CloseButton variant="secondary" onClick={close2D} />}
 			<ImageContainer ref={imgContainerRef}>
 				<DrawingViewerImage ref={imgRef} onLoad={onImageLoad} />
 			</ImageContainer>
