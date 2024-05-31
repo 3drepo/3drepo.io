@@ -19,7 +19,7 @@ import { GroupRulesForm } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticket
 import { useEffect, useState } from 'react';
 import _, { uniqueId } from 'lodash';
 import { useParams } from 'react-router-dom';
-import { ViewerParams } from '../../routes.constants';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { Container } from './newCriterionForm.styles';
 
 interface IProps {
