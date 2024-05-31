@@ -31,20 +31,20 @@ type DrawingsCalibrationMenuProps = DashboardListItemButtonProps & {
 	onCalibrateClick: () => void;
 	drawingId: string;
 };
-export const DrawingsCalibrationMenu = ({ calibration, onCalibrateClick, drawingId, ...props }: DrawingsCalibrationMenuProps) => {
+export const DrawingsCalibrationMenu = ({ calibration, onCalibrateClick, drawingId, disabled, ...props }: DrawingsCalibrationMenuProps) => {
 	const { teamspace, project } = useParams();
-	const disabled = props.disabled || calibration === CalibrationState.EMPTY;
+	const disableButton = disabled || calibration === CalibrationState.EMPTY;
 
 	const approveCalibration = () => DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawingId, { calibration: CalibrationState.CALIBRATED });
 
 	return (
 		<ActionMenu
-			disabled={disabled}
+			disabled={disableButton}
 			TriggerButton={(
 				<DrawingsCalibrationButton
 					calibration={calibration}
-					disabled={disabled}
-					tooltipTitle={!disabled && <FormattedMessage id="calibration.menu.tooltip" defaultMessage="Calibrate" />}
+					disabled={disableButton}
+					tooltipTitle={!disableButton && <FormattedMessage id="calibration.menu.tooltip" defaultMessage="Calibrate" />}
 					{...props}
 				/>
 			)}
