@@ -18,8 +18,7 @@
 import { useContext } from 'react';
 import { Stepper, Container, ButtonsContainer, Button } from './calibrationHeader.styles';
 import { Step, StepLabel } from '@mui/material';
-import { Link, generatePath, useParams } from 'react-router-dom';
-import { DRAWINGS_ROUTE, DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { Link } from 'react-router-dom';
 import { CalibrationContext } from '../calibrationContext';
 
 const STEPS = [
@@ -29,11 +28,8 @@ const STEPS = [
 ];
 
 export const CalibrationHeader = () => {
-	const { teamspace, project } = useParams<DashboardParams>();
-	const { step, setStep, isStepValid } = useContext(CalibrationContext);
+	const { step, setStep, isStepValid, origin } = useContext(CalibrationContext);
 	const isLastStep = step === 2;
-
-	const pathToDrawings = generatePath(DRAWINGS_ROUTE, { teamspace, project });
 
 	return (
 		<Container>
@@ -49,13 +45,13 @@ export const CalibrationHeader = () => {
 					Back
 				</Button>
 				<Button>
-					<Link to={pathToDrawings}>
+					<Link to={origin}>
 						Cancel
 					</Link>
 				</Button>
 				{isLastStep ? (
 					<Button disabled={!isStepValid}>
-						<Link to={pathToDrawings}>
+						<Link to={origin}>
 							Confirm
 						</Link>
 					</Button>

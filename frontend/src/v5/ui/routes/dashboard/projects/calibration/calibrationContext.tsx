@@ -16,8 +16,8 @@
  */
 
 import { createContext, useEffect, useState } from 'react';
-import { CALIBRATION_VIEWER_ROUTE, matchesPath } from '../../../routes.constants';
-import { useParams } from 'react-router-dom';
+import { CALIBRATION_VIEWER_ROUTE, DRAWINGS_ROUTE, matchesPath } from '../../../routes.constants';
+import { generatePath, useParams } from 'react-router-dom';
 
 export interface CalibrationContextType {
 	step: number;
@@ -25,6 +25,8 @@ export interface CalibrationContextType {
 	isStepValid: boolean;
 	setIsStepValid: (isValid: boolean) => void;
 	open: boolean;
+	origin: string;
+	setOrigin: (origin: string) => void;
 }
 
 const defaultValue: CalibrationContextType = {
@@ -33,14 +35,17 @@ const defaultValue: CalibrationContextType = {
 	isStepValid: false,
 	setIsStepValid: () => {},
 	open: false,
+	origin: '',
+	setOrigin: () => {},
 };
 export const CalibrationContext = createContext(defaultValue);
 CalibrationContext.displayName = 'CalibrationContext';
 
 export const CalibrationContextComponent = ({ children }) => {
-	const { revision, containerOrFederation } = useParams();
+	const { teamspace, project, revision, containerOrFederation } = useParams();
 	const [step, setStep] = useState(0);
 	const [isStepValid, setIsStepValid] = useState(false);
+	const [origin, setOrigin] = useState(generatePath(DRAWINGS_ROUTE, { teamspace, project }));
 	const open = matchesPath(CALIBRATION_VIEWER_ROUTE);
 
 	useEffect(() => {
@@ -49,7 +54,7 @@ export const CalibrationContextComponent = ({ children }) => {
 	}, [containerOrFederation, revision]);
 
 	return (
-		<CalibrationContext.Provider value={{ step, setStep, isStepValid, setIsStepValid, open }}>
+		<CalibrationContext.Provider value={{ step, setStep, isStepValid, setIsStepValid, open, origin, setOrigin }}>
 			{children}
 		</CalibrationContext.Provider>
 	);

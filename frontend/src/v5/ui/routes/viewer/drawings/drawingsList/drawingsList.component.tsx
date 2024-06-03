@@ -21,9 +21,10 @@ import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { VirtualisedList, TableRow } from './drawingsList.styles';
 import { CardContent, CardList } from '@components/viewer/cards/card.styles';
-import { forwardRef } from 'react';
-import { useHistory, useParams, generatePath } from 'react-router-dom';
+import { forwardRef, useContext } from 'react';
+import { useHistory, useLocation, useParams, generatePath } from 'react-router-dom';
 import { CALIBRATION_VIEWER_ROUTE } from '../../../routes.constants';
+import { CalibrationContext } from '../../../dashboard/projects/calibration/calibrationContext';
 
 const Table = forwardRef(({ children, ...props }, ref: any) => (
 	<table ref={ref} {...props}>
@@ -32,10 +33,12 @@ const Table = forwardRef(({ children, ...props }, ref: any) => (
 ));
 
 export const DrawingsList = () => {
+	const { setOrigin } = useContext(CalibrationContext);
 	const drawings = DrawingsHooksSelectors.selectCalibratedDrawings();
 	const isLoading = DrawingsHooksSelectors.selectCalibratedDrawingsHaveStatsPending();
 	const params = useParams();
 	const history = useHistory();
+	const { pathname, search } = useLocation();
 
 	if (isLoading) return (
 		<CentredContainer>
@@ -46,6 +49,7 @@ export const DrawingsList = () => {
 	const onDrawingClick = (drawingId) => {
 		const path = generatePath(CALIBRATION_VIEWER_ROUTE, params);
 		history.push(`${path}?drawingId=${drawingId}`);
+		setOrigin(pathname + search);
 	};
 
 	return (
