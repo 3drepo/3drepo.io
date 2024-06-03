@@ -82,11 +82,6 @@ export const Viewer = () => {
 		ViewerActionsDispatchers.fetchData(teamspace, project, containerOrFederation);
 	}, [teamspace, project, containerOrFederation]);
 
-	useEffect(() => {
-		if (isFed || !teamspace || !project || !containerOrFederation) return;
-		ContainerRevisionsActionsDispatchers.fetch(teamspace, project, containerOrFederation);
-	}, [containerOrFederation]);
-
 	useEffect(() => { if (isFetching) setFetchPending(false); }, [isFetching]);
 
 	if (isLoading) return (<CentredContainer horizontal vertical><SpinnerLoader /></CentredContainer>);
