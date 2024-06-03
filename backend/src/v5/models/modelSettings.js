@@ -16,7 +16,7 @@
  */
 
 const Models = {};
-const { SETTINGS_COL, getInfoFromCode } = require('./modelSettings.constants');
+const { MODEL_TYPES, SETTINGS_COL, getInfoFromCode } = require('./modelSettings.constants');
 const db = require('../handler/db');
 const { deleteIfUndefined } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
@@ -34,6 +34,7 @@ const findOneAndUpdateModel = (ts, query, action, projection) => db.findOneAndUp
 );
 
 const noFederations = { federate: { $ne: true } };
+const noDrawings = { modelType: { $ne: MODEL_TYPES.drawing } };
 const onlyFederations = { federate: true };
 
 Models.findModels = findModels;
@@ -86,10 +87,23 @@ Models.isFederation = async (ts, model) => {
 
 Models.getContainerById = async (ts, container, projection) => {
 	try {
-		return await Models.getModelByQuery(ts, { _id: container, ...noFederations }, projection);
+		return await Models.getModelByQuery(ts, { _id: container, ...noFederations, ...noDrawings }, projection);
 	} catch (err) {
 		if (err?.code === templates.modelNotFound.code) {
 			throw templates.containerNotFound;
+		}
+
+		throw err;
+	}
+};
+
+Models.getDrawingById = (ts, drawing, projection) => {
+	try {
+		return Models.getModelByQuery(ts,
+			{ _id: drawing, ...noFederations, modelType: MODEL_TYPES.drawing }, projection);
+	} catch (err) {
+		if (err?.code === templates.modelNotFound.code) {
+			throw templates.drawingNotFound;
 		}
 
 		throw err;
@@ -114,6 +128,11 @@ Models.getContainers = (ts, ids, projection, sort) => {
 
 Models.getFederations = (ts, ids, projection, sort) => {
 	const query = { _id: { $in: ids }, ...onlyFederations };
+	return findModels(ts, query, projection, sort);
+};
+
+Models.getDrawings = (ts, ids, projection, sort) => {
+	const query = { _id: { $in: ids }, modelType: MODEL_TYPES.drawing };
 	return findModels(ts, query, projection, sort);
 };
 

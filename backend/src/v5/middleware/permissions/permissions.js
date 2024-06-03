@@ -16,7 +16,7 @@
  */
 
 const {
-	hasAdminAccessToContainer, hasAdminAccessToFederation, hasCommenterAccessToContainer,
+	hasAdminAccessToContainer, hasAdminAccessToDrawing, hasAdminAccessToFederation, hasCommenterAccessToContainer,
 	hasCommenterAccessToFederation, hasReadAccessToContainer, hasReadAccessToFederation,
 	hasWriteAccessToContainer, hasWriteAccessToFederation,
 } = require('./components/models');
@@ -37,6 +37,8 @@ Permissions.hasCommenterAccessToContainer = validateMany([
 	Permissions.hasAccessToTeamspace, hasCommenterAccessToContainer]);
 Permissions.hasWriteAccessToContainer = validateMany([Permissions.hasAccessToTeamspace, hasWriteAccessToContainer]);
 Permissions.hasAdminAccessToContainer = validateMany([Permissions.hasAccessToTeamspace, hasAdminAccessToContainer]);
+
+Permissions.hasAdminAccessToDrawing = validateMany([Permissions.hasAccessToTeamspace, hasAdminAccessToDrawing]);
 
 Permissions.hasReadAccessToFederation = validateMany([Permissions.hasAccessToTeamspace, hasReadAccessToFederation]);
 Permissions.hasCommenterAccessToFederation = validateMany([

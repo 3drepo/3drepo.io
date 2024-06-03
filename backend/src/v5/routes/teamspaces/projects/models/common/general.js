@@ -20,6 +20,7 @@ const { formatModelSettings, formatModelStats } = require('../../../../../middle
 const {
 	hasAccessToTeamspace,
 	hasAdminAccessToContainer,
+	hasAdminAccessToDrawing,
 	hasAdminAccessToFederation,
 	hasReadAccessToContainer,
 	hasReadAccessToFederation,
@@ -27,16 +28,24 @@ const {
 } = require('../../../../../middleware/permissions/permissions');
 const { validateAddModelData, validateUpdateSettingsData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings');
 const Containers = require('../../../../../processors/teamspaces/projects/models/containers');
+const Drawings = require('../../../../../processors/teamspaces/projects/models/drawings');
 const Federations = require('../../../../../processors/teamspaces/projects/models/federations');
+const { MODEL_TYPES } = require('../../../../../models/modelSettings.constants');
 const { Router } = require('express');
 const { canDeleteContainer } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { respond } = require('../../../../../utils/responder');
 
-const addModel = (isFed) => async (req, res) => {
+const addModel = (modelType) => async (req, res) => {
 	const { teamspace, project } = req.params;
 	try {
-		const fn = isFed ? Federations.addFederation : Containers.addContainer;
+		let fn;
+		if (modelType === MODEL_TYPES.federation) {
+			fn = Federations.addFederation;
+		} else {
+			fn = modelType === MODEL_TYPES.drawing ? Drawings.addDrawing : Containers.addContainer;
+		}
+
 		const modelId = await fn(teamspace, project, req.body);
 		respond(req, res, templates.ok, { _id: modelId });
 	} catch (err) {
@@ -45,10 +54,16 @@ const addModel = (isFed) => async (req, res) => {
 	}
 };
 
-const deleteModel = (isFed) => async (req, res) => {
+const deleteModel = (modelType) => async (req, res) => {
 	const { teamspace, project, model } = req.params;
 	try {
-		const fn = isFed ? Federations.deleteFederation : Containers.deleteContainer;
+		let fn;
+		if (modelType === MODEL_TYPES.federation) {
+			fn = Federations.deleteFederation;
+		} else {
+			fn = modelType === MODEL_TYPES.drawing ? Drawings.deleteDrawing : Containers.deleteContainer;
+		}
+
 		await fn(teamspace, project, model);
 		respond(req, res, templates.ok);
 	} catch (err) {
@@ -57,26 +72,37 @@ const deleteModel = (isFed) => async (req, res) => {
 	}
 };
 
-const getModelList = (isFed) => async (req, res) => {
+const getModelList = (modelType) => async (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
 
 	try {
-		const fn = isFed ? Federations.getFederationList : Containers.getContainerList;
+		const fn = modelType === MODEL_TYPES.federation ? Federations.getFederationList : Containers.getContainerList;
 		const models = await fn(teamspace, project, user);
-		respond(req, res, templates.ok, { [`${isFed ? 'federations' : 'containers'}`]: models });
+		respond(req, res, templates.ok, { [`${modelType === MODEL_TYPES.federation ? 'federations' : 'containers'}`]: models });
 	} catch (err) {
 		respond(req, res, err);
 	}
 };
 
-const appendFavourites = (isFed) => async (req, res) => {
+const appendFavourites = (modelType) => async (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
-	const favouritesToAdd = req.body[isFed ? 'federations' : 'containers'];
+
+	let favouritesToAdd;
+	let fn;
+	if (modelType === MODEL_TYPES.federation) {
+		fn = Federations.appendFavourites;
+		favouritesToAdd = req.body.federations;
+	} else if (modelType === MODEL_TYPES.container) {
+		fn = Containers.appendFavourites;
+		favouritesToAdd = req.body.containers;
+	} else {
+		fn = Drawings.appendFavourites;
+		favouritesToAdd = req.body.drawings;
+	}
 
 	try {
-		const { appendFavourites: fn } = isFed ? Federations : Containers;
 		await fn(user, teamspace, project, favouritesToAdd);
 		respond(req, res, templates.ok);
 	} catch (err) {
@@ -84,11 +110,17 @@ const appendFavourites = (isFed) => async (req, res) => {
 	}
 };
 
-const deleteFavourites = (isFed) => async (req, res) => {
+const deleteFavourites = (modelType) => async (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
 	try {
-		const { deleteFavourites: fn } = isFed ? Federations : Containers;
+		let fn;
+		if (modelType === MODEL_TYPES.federation) {
+			fn = Federations.deleteFavourites;
+		} else {
+			fn = modelType === MODEL_TYPES.drawing ? Drawings.deleteFavourites : Containers.deleteFavourites;
+		}
+
 		if (req.query.ids?.length) {
 			const favouritesToRemove = req.query.ids.split(',');
 
@@ -102,10 +134,11 @@ const deleteFavourites = (isFed) => async (req, res) => {
 	}
 };
 
-const getModelStats = (isFed) => async (req, res, next) => {
+const getModelStats = (modelType) => async (req, res, next) => {
 	const { teamspace, model } = req.params;
 	try {
-		const fn = isFed ? Federations.getFederationStats : Containers.getContainerStats;
+		const fn = modelType === MODEL_TYPES.federation
+			? Federations.getFederationStats : Containers.getContainerStats;
 		const stats = await fn(teamspace, model);
 		req.outputData = stats;
 		await next();
@@ -115,10 +148,15 @@ const getModelStats = (isFed) => async (req, res, next) => {
 	}
 };
 
-const updateModelSettings = (isFed) => async (req, res) => {
+const updateModelSettings = (modelType) => async (req, res) => {
 	const { teamspace, project, model } = req.params;
 	try {
-		const { updateSettings: fn } = isFed ? Federations : Containers;
+		let fn;
+		if (modelType === MODEL_TYPES.federation) {
+			fn = Federations.updateSettings;
+		} else {
+			fn = modelType === MODEL_TYPES.drawing ? Drawings.updateSettings : Containers.updateSettings;
+		}
 		await fn(teamspace, project, model, req.body);
 		respond(req, res, templates.ok);
 	} catch (err) {
@@ -127,10 +165,10 @@ const updateModelSettings = (isFed) => async (req, res) => {
 	}
 };
 
-const getModelSettings = (isFed) => async (req, res, next) => {
+const getModelSettings = (modelType) => async (req, res, next) => {
 	const { teamspace, model } = req.params;
 	try {
-		const { getSettings: fn } = isFed ? Federations : Containers;
+		const { getSettings: fn } = modelType === MODEL_TYPES.federation ? Federations : Containers;
 		const settings = await fn(teamspace, model);
 		req.outputData = settings;
 		await next();
@@ -140,11 +178,21 @@ const getModelSettings = (isFed) => async (req, res, next) => {
 	}
 };
 
-const establishRoutes = (isFed) => {
+const establishRoutes = (modelType) => {
 	const router = Router({ mergeParams: true });
-	const hasAdminAccessToModel = isFed ? hasAdminAccessToFederation : hasAdminAccessToContainer;
-	const hasReadAccessToModel = isFed ? hasReadAccessToFederation : hasReadAccessToContainer;
-	const canDeleteModel = isFed ? async (req, res, next) => { await next(); } : canDeleteContainer;
+
+	let hasAdminAccessToModel;
+	if (modelType === MODEL_TYPES.federation) {
+		hasAdminAccessToModel = hasAdminAccessToFederation;
+	} else {
+		hasAdminAccessToModel = modelType === MODEL_TYPES.drawing
+			? hasAdminAccessToDrawing : hasAdminAccessToContainer;
+	}
+
+	const hasReadAccessToModel = modelType === MODEL_TYPES.federation
+		? hasReadAccessToFederation : hasReadAccessToContainer;
+	const canDeleteModel = modelType === MODEL_TYPES.federation || modelType === MODEL_TYPES.drawing
+		? async (req, res, next) => { await next(); } : canDeleteContainer;
 	/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}:
@@ -171,7 +219,7 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *           enum: [containers, federations]
+	 *           enum: [containers, federations, drawings]
 	 *     requestBody:
 	 *       content:
    	 *         application/json:
@@ -249,7 +297,7 @@ const establishRoutes = (isFed) => {
 	 *                   description: Model ID
 	 *                   example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 */
-	router.post('/', isAdminToProject, validateAddModelData(isFed), addModel(isFed));
+	router.post('/', isAdminToProject, validateAddModelData(modelType), addModel(modelType));
 
 	/**
 	 * @openapi
@@ -311,7 +359,7 @@ const establishRoutes = (isFed) => {
 	 *
 	 *
 	 */
-	router.get('/', hasAccessToTeamspace, getModelList(isFed));
+	router.get('/', hasAccessToTeamspace, getModelList(modelType));
 
 	/**
 	 * @openapi
@@ -339,7 +387,7 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *           enum: [containers, federations]
+	 *           enum: [containers, federations, drawings]
 	 *     requestBody:
 	 *       content:
 	 *         application/json:
@@ -359,7 +407,7 @@ const establishRoutes = (isFed) => {
 	 *       200:
 	 *         description: adds the models found in the request body to the user's favourites list
 	 */
-	router.patch('/favourites', hasAccessToTeamspace, appendFavourites(isFed));
+	router.patch('/favourites', hasAccessToTeamspace, appendFavourites(modelType));
 
 	/**
 	 * @openapi
@@ -387,7 +435,7 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *           enum: [containers, federations]
+	 *           enum: [containers, federations, drawings]
 	 *       - name: ids
 	 *         description: list of model ids to remove (comma separated)
 	 *         in: query
@@ -402,7 +450,7 @@ const establishRoutes = (isFed) => {
 	 *       200:
 	 *         description: removes the models found in the request body from the user's favourites list
 	 */
-	router.delete('/favourites', hasAccessToTeamspace, deleteFavourites(isFed));
+	router.delete('/favourites', hasAccessToTeamspace, deleteFavourites(modelType));
 
 	/**
 	 * @openapi
@@ -489,7 +537,7 @@ const establishRoutes = (isFed) => {
 	 *                   description: Timestamp(ms) of when any of the submodels was updated
 	 *                   example: 1630598072000
 	 */
-	router.get('/:model/stats', hasReadAccessToModel, getModelStats(isFed), formatModelStats(isFed));
+	router.get('/:model/stats', hasReadAccessToModel, getModelStats(modelType), formatModelStats(modelType));
 
 	/**
 	 * @openapi
@@ -517,7 +565,7 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *           enum: [containers, federations]
+	 *           enum: [containers, federations, drawings]
    	 *       - name: model
 	 *         description: Model ID
 	 *         in: path
@@ -532,7 +580,7 @@ const establishRoutes = (isFed) => {
 	 *       200:
 	 *         description: Model removed.
 	 */
-	router.delete('/:model', hasAdminAccessToModel, canDeleteModel, deleteModel(isFed));
+	router.delete('/:model', hasAdminAccessToModel, canDeleteModel, deleteModel(modelType));
 
 	/**
 	 * @openapi
@@ -560,7 +608,7 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *           enum: [containers, federations]
+	 *           enum: [containers, federations, drawings]
 	 *       - name: model
 	 *         description: ID of model
 	 *         in: path
@@ -617,7 +665,7 @@ const establishRoutes = (isFed) => {
 	 *       200:
 	 *         description: updates the settings of the model
 	 */
-	router.patch('/:model', hasAdminAccessToModel, validateUpdateSettingsData(isFed), updateModelSettings(isFed));
+	router.patch('/:model', hasAdminAccessToModel, validateUpdateSettingsData(modelType), updateModelSettings(modelType));
 
 	/**
 	 * @openapi
@@ -664,7 +712,7 @@ const establishRoutes = (isFed) => {
 	 *             schema:
 	 *               $ref: "#/components/schemas/modelSettings"
 	 */
-	router.get('/:model', hasReadAccessToModel, getModelSettings(isFed), formatModelSettings);
+	router.get('/:model', hasReadAccessToModel, getModelSettings(modelType), formatModelSettings);
 	return router;
 };
 

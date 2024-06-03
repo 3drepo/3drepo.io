@@ -25,6 +25,7 @@ const CreateTicketGroupsRoutes = require('./teamspaces/projects/models/common/ti
 const CreateTicketRoutes = require('./teamspaces/projects/models/common/tickets');
 const CreateViewRoutes = require('./teamspaces/projects/models/common/views');
 const FederationRevisionRoutes = require('./teamspaces/projects/models/federations/revisions');
+const { MODEL_TYPES } = require('../models/modelSettings.constants');
 const MetadataRoutes = require('./teamspaces/projects/models/containers/metadata');
 const ProjectRoutes = require('./teamspaces/projects/projects');
 const ProjectSettingsRoutes = require('./teamspaces/projects/settings');
@@ -50,7 +51,7 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/settings', ProjectSettingsRoutes);
 
 	// Containers
-	app.use('/v5/teamspaces/:teamspace/projects/:project/containers', CreateModelGeneralRoutes());
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers', CreateModelGeneralRoutes(MODEL_TYPES.container));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/tickets', CreateTicketRoutes());
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/tickets/:ticket/comments', CreateTicketCommentsRoutes());
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/tickets/:ticket/groups', CreateTicketGroupsRoutes());
@@ -60,13 +61,16 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/metadata', MetadataRoutes);
 
 	// Federations
-	app.use('/v5/teamspaces/:teamspace/projects/:project/federations', CreateModelGeneralRoutes(true));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/federations', CreateModelGeneralRoutes(MODEL_TYPES.federation));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/tickets', CreateTicketRoutes(true));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/tickets/:ticket/comments', CreateTicketCommentsRoutes(true));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/tickets/:ticket/groups', CreateTicketGroupsRoutes(true));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/groups', CreateGroupRoutes(true));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/views', CreateViewRoutes(true));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:federation/revisions', FederationRevisionRoutes);
+
+	// Drawings
+	app.use('/v5/teamspaces/:teamspace/projects/:project/drawings', CreateModelGeneralRoutes(MODEL_TYPES.drawing));
 };
 
 module.exports = RoutesManager;

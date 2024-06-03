@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { MODEL_TYPES } = require('../../../../../../../../../../src/v5/models/modelSettings.constants');
 const { src } = require('../../../../../../../../helper/path');
 const { determineTestGroup, generateRandomModelProperties, generateUUID } = require('../../../../../../../../helper/services');
 
@@ -93,26 +94,26 @@ const testFormatModelSettings = () => {
 
 const testFormatModelStats = () => {
 	describe.each([
-		[true, { lastUpdated: new Date() }, 'lastUpdated field'],
-		[true, {}, 'no lastUpdated field'],
-		[false, { revisions: {} }, 'no data to convert'],
-		[false, { revisions: {
+		[MODEL_TYPES.federation, { lastUpdated: new Date() }, 'lastUpdated field'],
+		[MODEL_TYPES.federation, {}, 'no lastUpdated field'],
+		[MODEL_TYPES.container, { revisions: {} }, 'no data to convert'],
+		[MODEL_TYPES.container, { revisions: {
 			lastUpdated: new Date(),
 			latestRevision: generateUUID(),
 		},
 		errorReason: { timestamp: new Date() } }, 'data to convert'],
-	])('Format model stats data', (isFed, data, desc) => {
-		test(`[${isFed ? 'Federation' : 'Container'}] should format correctly with ${desc}`,
+	])('Format model stats data', (modelType, data, desc) => {
+		test(`[${modelType ? 'Federation' : 'Container'}] should format correctly with ${desc}`,
 			async () => {
 				const req = { outputData: cloneDeep(data) };
 				const res = {};
-				await ModelSettingsOutputMiddlewares.formatModelStats(isFed)(req, res);
+				await ModelSettingsOutputMiddlewares.formatModelStats(modelType)(req, res);
 
 				const formattedStats = {
 					...data,
 				};
 
-				if (isFed) {
+				if (modelType == MODEL_TYPES.federation) {
 					formattedStats.lastUpdated = data.lastUpdated ? data.lastUpdated.getTime() : undefined;
 				} else {
 					formattedStats.revisions.lastUpdated = formattedStats.revisions.lastUpdated

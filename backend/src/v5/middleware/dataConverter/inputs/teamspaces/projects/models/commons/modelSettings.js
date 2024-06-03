@@ -16,6 +16,7 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
+const { MODEL_TYPES } = require('../../../../../../../models/modelSettings.constants');
 const Yup = require('yup');
 const { checkLegendExists } = require('../../../../../../../models/legends');
 const { escapeRegexChrs } = require('../../../../../../../utils/helper/strings');
@@ -73,21 +74,29 @@ const modelNameType = (teamspace, project, model) => types.strings.title.test('n
 	}
 });
 
-const generateSchema = (newEntry, isFed, teamspace, project, modelId) => {
+const generateSchema = (newEntry, modelType, teamspace, project, modelId) => {
 	const name = modelNameType(teamspace, project, modelId);
-	const schema = {
+	const commonProps = {
 		name: newEntry ? name.required() : name,
-		unit: newEntry ? types.strings.unit.required() : types.strings.unit,
 		desc: types.strings.shortDescription,
-		code: types.strings.code,
-		surveyPoints: types.surveyPoints,
-		angleFromNorth: types.degrees,
-		...(isFed ? {} : { type: newEntry ? Yup.string().required() : Yup.string() }),
-		...(newEntry
-			? {}
+		...(modelType === MODEL_TYPES.federation ? {} : { type: newEntry ? Yup.string().required() : Yup.string() }),
+	};
+
+	const schema = {
+		...commonProps,
+		...(modelType === MODEL_TYPES.drawing
+			? { number: newEntry ? types.strings.title.required() : types.strings.title }
 			: {
-				defaultView: defaultViewType(teamspace, modelId),
-				defaultLegend: defaultLegendType(teamspace, modelId),
+				unit: newEntry ? types.strings.unit.required() : types.strings.unit,
+				code: types.strings.code,
+				surveyPoints: types.surveyPoints,
+				angleFromNorth: types.degrees,
+				...(newEntry
+					? {}
+					: {
+						defaultView: defaultViewType(teamspace, modelId),
+						defaultLegend: defaultLegendType(teamspace, modelId),
+					}),
 			}),
 	};
 
@@ -102,14 +111,16 @@ const generateSchema = (newEntry, isFed, teamspace, project, modelId) => {
 		);
 };
 
-ModelSettings.validateAddModelData = (isFed) => async (req, res, next) => {
+ModelSettings.validateAddModelData = (modelType) => async (req, res, next) => {
 	try {
 		const { teamspace, project } = req.params;
-		const schema = generateSchema(true, isFed, teamspace, project);
+		const schema = generateSchema(true, modelType, teamspace, project);
 		await schema.validate(req.body);
 
-		req.body.properties = { unit: req.body.unit.toLowerCase() };
-		delete req.body.unit;
+		if (req.body.unit) {
+			req.body.properties = { unit: req.body.unit.toLowerCase() };
+			delete req.body.unit;
+		}
 
 		if (req.body.code) {
 			req.body.properties.code = req.body.code;
@@ -122,11 +133,18 @@ ModelSettings.validateAddModelData = (isFed) => async (req, res, next) => {
 	}
 };
 
-ModelSettings.validateUpdateSettingsData = (isFed) => async (req, res, next) => {
+ModelSettings.validateUpdateSettingsData = (modelType) => async (req, res, next) => {
 	try {
 		const { teamspace, project } = req.params;
-		const model = isFed ? req.params.federation : req.params.container;
-		const schema = generateSchema(false, isFed, teamspace, project, model);
+
+		let model;
+		if (modelType === MODEL_TYPES.federation) {
+			model = req.params.federation;
+		} else {
+			model = modelType === MODEL_TYPES.container ? req.params.container : req.params.drawing;
+		}
+
+		const schema = generateSchema(false, modelType, teamspace, project, model);
 		req.body = await schema.validate(req.body);
 		convertBodyUUIDs(req);
 		next();
