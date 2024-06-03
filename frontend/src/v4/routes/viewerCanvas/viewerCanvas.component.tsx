@@ -117,9 +117,11 @@ export class ViewerCanvas extends PureComponent<IProps, any> {
 			const toRemove = pinsRemoved(prev, curr);
 			const toChangeSelection = pinsSelectionChanged(curr, prev);
 
-			toRemove.map(viewer.removePin.bind(viewer));
-			toShow.map(viewer.showPin.bind(viewer));
-			toChangeSelection.forEach(viewer.setSelectionPin.bind(viewer));
+			await Promise.all([
+				...toRemove.map(viewer.removePin.bind(viewer)),
+				...toChangeSelection.map(viewer.setSelectionPin.bind(viewer)),
+				...toShow.map(viewer.showPin.bind(viewer)),
+			]);
 		}
 	}
 
@@ -213,8 +215,7 @@ export class ViewerCanvas extends PureComponent<IProps, any> {
 		}
 
 		if (!isEqual(ticketPins, prevProps.ticketPins)) {
-			console.log(ticketPins, prevProps.ticketPins)
-			this.renderPins(prevProps.ticketPins, ticketPins);
+			await this.renderPins(prevProps.ticketPins, ticketPins);
 		}
 
 		if (hasGisCoordinates && !isEqual(prevProps.gisCoordinates, gisCoordinates)) {
