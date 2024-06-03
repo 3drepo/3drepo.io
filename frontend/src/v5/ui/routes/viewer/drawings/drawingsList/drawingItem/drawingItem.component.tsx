@@ -16,13 +16,27 @@
  */
 
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
-import { Title, MainBody, ImageContainer, Property, PropertyValue, Description, BottomLine, InfoContainer, BreakingLine, SkeletonText, CalibrationButton } from './drawingItem.styles';
+import {
+	Container,
+	Title,
+	MainBody,
+	ImageContainer,
+	Property,
+	PropertyValue,
+	Description,
+	BottomLine,
+	InfoContainer,
+	BreakingLine,
+	SkeletonText,
+	CalibrationButton,
+} from './drawingItem.styles';
 import { FormattedMessage } from 'react-intl';
 import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
 import { useParams, useHistory, generatePath } from 'react-router-dom';
 import { CALIBRATION_VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
 const STATUS_CODE_TEXT = formatMessage({ id: 'drawings.list.item.statusCode', defaultMessage: 'Status code' });
 const REVISION_CODE_TEXT = formatMessage({ id: 'drawings.list.item.revisionCode', defaultMessage: 'Revision code' });
@@ -38,6 +52,7 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	const [latestRevision] = DrawingRevisionsHooksSelectors.selectRevisions(drawingId);
 	const { statusCode, revisionCode } = latestRevision || {};
 	const areStatsPending = !revisionCode;
+	const [selectedDrawingId] = useSearchParam('drawingId');
 	
 	const onCalibrateClick = () => {
 		const path = generatePath(CALIBRATION_VIEWER_ROUTE, params);
@@ -77,7 +92,7 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	);
 
 	return (
-		<div onClick={onClick} key={drawingId} >
+		<Container onClick={onClick} key={drawing._id} $selected={drawing._id === selectedDrawingId}>
 			<MainBody>
 				<ImageContainer>
 					<img src="https://placedog.net/73/73" />
@@ -106,6 +121,6 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 					onCalibrateClick={onCalibrateClick}
 				/>
 			</BottomLine>
-		</div>
+		</Container>
 	);
 };

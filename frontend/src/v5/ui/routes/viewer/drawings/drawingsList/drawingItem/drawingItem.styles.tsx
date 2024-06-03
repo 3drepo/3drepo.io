@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.styles';
 import { DrawingsCalibrationMenu } from '../../drawingCalibrationMenu/drawingCalibrationMenu.component';
+import { CardListItem } from '@components/viewer/cards/card.styles';
 
 export const MainBody = styled.div`
 	display: flex;
@@ -111,4 +112,13 @@ export const Description = styled(PropertyValue)`
 		padding-bottom: 1px;
 		margin-bottom: 4px;
 	}
+`;
+
+export const Container = styled(CardListItem)<{ $selected: boolean }>`
+	${({ theme, $selected }) => $selected && css`
+		background-color: ${theme.palette.primary.lightest};
+		${Title} {
+			color: ${theme.palette.primary.dark}
+		}
+	`}
 `;
