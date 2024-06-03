@@ -17,6 +17,10 @@ module.exports = (options) => ({
 			import: './src/globals/unity-indexeddb-worker.ts',
 			filename: '../unity/indexeddbworker.js' // This particular entry should be in the unity folder, which is a sibling of dist
 		},
+		canvasRendererWorker: {
+			import: './src/v5/ui/components/viewer/drawingViewer/svgImage/canvasRendererWorker.ts',
+			filename: 'canvasRendererWorker.js' // This particular entry should be in the unity folder, which is a sibling of dist
+		},
 		...options.entry
 	},
 	output: {

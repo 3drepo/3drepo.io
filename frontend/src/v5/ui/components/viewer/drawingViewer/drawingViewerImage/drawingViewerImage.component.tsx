@@ -21,6 +21,13 @@ import { forwardRef, useEffect, useState } from 'react';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { CentredContainer } from '@controls/centredContainer';
 
+
+const w = new Worker('./dist/canvasRendererWorker.js');
+
+// eslint-disable-next-line @typescript-eslint/dot-notation
+window['canvasRender'] = w;
+
+
 type DrawingViewerImageProps = { onLoad: (...args) => void };
 export const DrawingViewerImage = forwardRef(({ onLoad }: DrawingViewerImageProps, ref: any) => {
 	const [drawingId] = useSearchParam('drawingId');
