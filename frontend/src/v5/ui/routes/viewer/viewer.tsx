@@ -18,7 +18,7 @@
 import { ViewerGui } from '@/v4/routes/viewerGui';
 import { useParams } from 'react-router-dom';
 import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
-import { ContainerRevisionsActionsDispatchers, ProjectsActionsDispatchers, TeamspacesActionsDispatchers, TicketsCardActionsDispatchers, ViewerActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { ProjectsActionsDispatchers, TeamspacesActionsDispatchers, TicketsCardActionsDispatchers, ViewerActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useEffect, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
@@ -29,7 +29,6 @@ import { OpenTicketFromUrl } from './openTicketFromUrl/openTicketFromUrl.compone
 import { SpinnerLoader } from '@controls/spinnerLoader';
 import { CentredContainer } from '@controls/centredContainer';
 import { TicketsCardViews } from './tickets/tickets.constants';
-import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ViewerCanvases } from '../dashboard/viewerCanvases/viewerCanvases.component';
 
 export const Viewer = () => {
@@ -38,7 +37,6 @@ export const Viewer = () => {
 	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
 
 	const isFetching = ViewerHooksSelectors.selectIsFetching();
-	const isFed = modelIsFederation(containerOrFederation);
 
 	const isLoading = isFetching || fetchPending;
 
