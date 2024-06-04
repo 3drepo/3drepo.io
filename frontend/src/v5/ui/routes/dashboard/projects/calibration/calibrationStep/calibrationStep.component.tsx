@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { CalibrationContext } from '../calibrationContext';
 import { Calibration3DStep } from './calibration3DStep/calibration3DStep.component';
 import { Calibration2DStep } from './calibration2DStep/calibration2DStep.component';
@@ -24,19 +24,16 @@ import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.cont
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
 export const CalibrationStep = () => {
-	const { step, origin } = useContext(CalibrationContext);
+	const { step } = useContext(CalibrationContext);
 	const { open2D, close2D } = useContext(ViewerCanvasesContext);
 	const show2DViewer = step < 2;
 	const [drawing] = useSearchParam('drawingId');
+	const drawingRef = useRef(drawing);
 
 	useEffect(() => {
-		if (show2DViewer) open2D(drawing);
+		if (show2DViewer) open2D(drawingRef.current);
 		else close2D();
 	}, [show2DViewer]);
-
-	useEffect(() => () => {
-		if (!origin.includes('?drawingId')) close2D();
-	});
 
 	switch (step) {
 		case 0: return <Calibration3DStep />;

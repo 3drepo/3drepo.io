@@ -24,16 +24,11 @@ import { useContext } from 'react';
 import { CalibrationContext } from '../projects/calibration/calibrationContext';
 import { CalibrationHeader } from '../projects/calibration/calibrationHeader/calibrationHeader.component';
 import { Calibration } from '../projects/calibration/calibration.component';
-import { useSearchParam } from '../../useSearchParam';
-import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 export const ViewerCanvases = () => {
 	const { pathname } = useLocation();
 	const { is2DOpen, leftPanelRatio, setLeftPanelRatio } = useContext(ViewerCanvasesContext);
-	const { open: calibrationOpen } = useContext(CalibrationContext);
-	const [drawing] = useSearchParam('drawingId');
-	const drawingExists = !!DrawingsHooksSelectors.selectDrawingById(drawing);
-	const isCalibrating = calibrationOpen && drawingExists;
+	const { open: isCalibrating } = useContext(CalibrationContext);
 
 	const dragFinish = (newSize) => setLeftPanelRatio(newSize / window.innerWidth);
 
