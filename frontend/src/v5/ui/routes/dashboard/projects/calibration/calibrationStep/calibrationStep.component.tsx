@@ -24,7 +24,7 @@ import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.cont
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
 export const CalibrationStep = () => {
-	const { step } = useContext(CalibrationContext);
+	const { step, origin } = useContext(CalibrationContext);
 	const { open2D, close2D } = useContext(ViewerCanvasesContext);
 	const show2DViewer = step < 2;
 	const [drawing] = useSearchParam('drawingId');
@@ -34,7 +34,9 @@ export const CalibrationStep = () => {
 		else close2D();
 	}, [show2DViewer]);
 
-	useEffect(() => () => close2D(), []);
+	useEffect(() => () => {
+		if (!origin.includes('?drawingId')) close2D();
+	});
 
 	switch (step) {
 		case 0: return <Calibration3DStep />;
