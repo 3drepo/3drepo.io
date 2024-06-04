@@ -19,7 +19,6 @@ import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import {
 	Container,
 	Title,
-	DrawingsCalibrationButton,
 	MainBody,
 	ImageContainer,
 	Property,
@@ -29,11 +28,14 @@ import {
 	InfoContainer,
 	BreakingLine,
 	SkeletonText,
+	CalibrationButton,
 } from './drawingItem.styles';
 import { FormattedMessage } from 'react-intl';
 import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
+import { useParams, useHistory, generatePath } from 'react-router-dom';
+import { CALIBRATION_VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
 const STATUS_CODE_TEXT = formatMessage({ id: 'drawings.list.item.statusCode', defaultMessage: 'Status code' });
@@ -44,11 +46,18 @@ type DrawingItemProps = {
 	onClick: React.MouseEventHandler<HTMLDivElement>;
 };
 export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
-	const [latestRevision] = DrawingRevisionsHooksSelectors.selectRevisions(drawing._id);
-	const { calibration, name, drawingNumber, lastUpdated, desc } = drawing;
+	const params = useParams();
+	const history = useHistory();
+	const { calibration, name, drawingNumber, lastUpdated, desc, _id: drawingId } = drawing;
+	const [latestRevision] = DrawingRevisionsHooksSelectors.selectRevisions(drawingId);
 	const { statusCode, revisionCode } = latestRevision || {};
 	const areStatsPending = !revisionCode;
 	const [selectedDrawingId] = useSearchParam('drawingId');
+	
+	const onCalibrateClick = () => {
+		const path = generatePath(CALIBRATION_VIEWER_ROUTE, params);
+		history.push(`${path}?drawingId=${drawingId}`);
+	};
 
 	const LoadingCodes = () => (
 		<>
@@ -106,9 +115,10 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 						<PropertyValue>&nbsp;{formatShortDateTime(lastUpdated)}</PropertyValue>
 					</Property>
 				</BreakingLine>
-				<DrawingsCalibrationButton
-					onClick={() => {}}
+				<CalibrationButton
 					calibration={calibration}
+					drawingId={drawingId}
+					onCalibrateClick={onCalibrateClick}
 				/>
 			</BottomLine>
 		</Container>
