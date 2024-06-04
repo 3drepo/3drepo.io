@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 type QueueItem<T> = { promise: Promise<T>, resolve, reject, args, resolved: boolean };
 export class LifoQueue<T> {
 	private queue: QueueItem<T>[] = [] ;
@@ -23,12 +22,15 @@ export class LifoQueue<T> {
 
 	private batchSize;
 
+	private argsToId;
+
 	private running = false;
 
 	private func: (...args) => Promise<T>;
 
-	private getPromise(args):QueueItem<T>  {
-		let prom = this.dict[JSON.stringify(args)];
+	private getPromise(args): QueueItem<T> {
+		const argsAsId = this.argsToId(args);
+		let prom = this.dict[argsAsId];
 		if (!prom) {
 			prom = {};
 			prom.promise = new Promise((resolve, reject) => {
@@ -38,7 +40,7 @@ export class LifoQueue<T> {
 			prom.args = args;
 			prom.resolved = false;
 
-			this.dict[JSON.stringify(args)] = prom;
+			this.dict[argsAsId] = prom;
 		}
 		
 		return prom;
@@ -83,8 +85,9 @@ export class LifoQueue<T> {
 		this.running = false;
 	}
 
-	public constructor(func: (...args) => Promise<T>, batchSize) {
+	public constructor(func: (...args) => Promise<T>, batchSize, argsToId = JSON.stringify) {
 		this.func = func;
 		this.batchSize = batchSize;
+		this.argsToId = argsToId;
 	}
 }
