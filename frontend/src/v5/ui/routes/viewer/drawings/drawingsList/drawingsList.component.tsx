@@ -21,8 +21,8 @@ import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { VirtualisedList, TableRow } from './drawingsList.styles';
 import { CardContent, CardList } from '@components/viewer/cards/card.styles';
-import { forwardRef } from 'react';
-import { useSearchParam } from '../../../useSearchParam';
+import { forwardRef, useContext } from 'react';
+import { ViewerCanvasesContext } from '../../viewerCanvases.context';
 
 const Table = forwardRef(({ children, ...props }, ref: any) => (
 	<table ref={ref} {...props}>
@@ -31,7 +31,7 @@ const Table = forwardRef(({ children, ...props }, ref: any) => (
 ));
 
 export const DrawingsList = () => {
-	const [, setDrawingId] = useSearchParam('drawingId');
+	const { open2D } = useContext(ViewerCanvasesContext);
 	const drawings = DrawingsHooksSelectors.selectCalibratedDrawings();
 	const isLoading = DrawingsHooksSelectors.selectCalibratedDrawingsHaveStatsPending();
 
@@ -55,7 +55,7 @@ export const DrawingsList = () => {
 				<DrawingItem
 					drawing={drawing}
 					key={drawing._id}
-					onClick={() => setDrawingId(drawing._id)}
+					onClick={() => open2D(drawing._id)}
 				/>
 			)}
 		/>
