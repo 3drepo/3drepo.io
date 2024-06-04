@@ -38,6 +38,7 @@ const expectedSettings = {
 ModelSettings.getModelById.mockImplementation(() => (expectedSettings));
 ModelSettings.getContainerById.mockImplementation(() => (expectedSettings));
 ModelSettings.getFederationById.mockImplementation(() => (expectedSettings));
+ModelSettings.getDrawingById.mockImplementation(() => (expectedSettings));
 Teamspaces.getTeamspaceAdmins.mockImplementation(() => (['tsAdmin']));
 Projects.getProjectAdmins.mockImplementation(() => (['projAdmin']));
 
@@ -304,6 +305,29 @@ const testHasAdminAccessToContainer = () => {
 	});
 };
 
+const testHasAdminAccessToDrawing = () => {
+	describe.each([
+		['a', false],
+		['b', false],
+		['c', false],
+		['projAdmin', true],
+		['tsAdmin', true],
+		['nobody', false],
+	])('Has admin access to drawing', (user, result) => {
+		test(`${user} ${result ? 'have' : 'does not have'} admin access`, async () => {
+			Projects.modelsExistInProject.mockImplementation(() => true);
+			expect(await Permissions.hasAdminAccessToDrawing('teamspace', 'project', 'model', user)).toBe(result);
+		});
+	});
+
+	describe('Drawing does not belong to the project', () => {
+		test('should return false if the drawing does not belong to the project', async () => {
+			Projects.modelsExistInProject.mockImplementation(() => false);
+			expect(await Permissions.hasAdminAccessToDrawing('teamspace', 'project', 'model', 'a')).toBe(false);
+		});
+	});
+};
+
 const testHasReadAccessToFederation = () => {
 	describe.each([
 		['a', false, true],
@@ -421,6 +445,8 @@ describe('utils/permissions', () => {
 	testHasWriteAccessToContainer();
 	testHasCommenterAccessToContainer();
 	testHasAdminAccessToContainer();
+
+	testHasAdminAccessToDrawing();
 
 	testHasReadAccessToFederation();
 	testHasWriteAccessToFederation();

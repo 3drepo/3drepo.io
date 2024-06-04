@@ -316,7 +316,7 @@ const testAddContainer = () => {
 				code: 'code99',
 				unit: 'mm',
 			};
-			const res = await Containers.addContainer('teamspace', 'project', 'tsAdmin', data);
+			const res = await Containers.addContainer('teamspace', 'project', data);
 			expect(res).toEqual(newContainerId);
 			expect(ProjectSettings.addModelToProject.mock.calls.length).toBe(1);
 		});

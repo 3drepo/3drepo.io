@@ -17,14 +17,15 @@
 
 const { createResponseCode, templates } = require('../../../../../../utils/responseCodes');
 const { validateAddModelData, validateUpdateSettingsData } = require('./commons/modelSettings');
+const { MODEL_TYPES } = require('../../../../../../models/modelSettings.constants');
 const { getModelByQuery } = require('../../../../../../models/modelSettings');
 const { respond } = require('../../../../../../utils/responder');
 const { validateNewRevisionData } = require('./commons/revisions');
 
 const Containers = {};
 
-Containers.validateAddModelData = validateAddModelData(false);
-Containers.validateUpdateSettingsData = validateUpdateSettingsData(false);
+Containers.validateAddModelData = validateAddModelData(MODEL_TYPES.container);
+Containers.validateUpdateSettingsData = validateUpdateSettingsData(MODEL_TYPES.container);
 
 Containers.canDeleteContainer = async (req, res, next) => {
 	try {

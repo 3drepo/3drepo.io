@@ -128,6 +128,16 @@ const deleteImage = async (req, res) => {
 	}
 };
 
+const getDrawingCategories = (req, res) => {
+	try {
+		const drawingCategories = Projects.getDrawingCategories();
+		respond(req, res, templates.ok, { drawingCategories });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 
@@ -426,6 +436,38 @@ const establishRoutes = () => {
 	 *         $ref: "#/components/responses/ok"
 	 */
 	router.delete('/:project/image', isAdminToProject, deleteImage);
+
+	/**
+	* @openapi
+	* /teamspaces/{teamspace}/projects/{project}/settings/drawingCategories:
+	*   get:
+	*     description: Get the list of drawing categories available within the project
+	*     tags: [Teamspaces]
+	*     parameters:
+	*       - name: teamspace
+	*         description: name of teamspace
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*     operationId: getDrawingCategories
+	*     responses:
+	*       401:
+	*         $ref: "#/components/responses/notLoggedIn"
+	*       200:
+	*         description: returns the array of drawing categories
+	*         content:
+	*           application/json:
+	*             schema:
+	*               type: object
+	*               properties:
+	*                 drawingCategories:
+	*                   type: array
+	*                   items:
+	*                     type: string
+	*                   example: ["Architectural", "Existing", "GIS"]
+	*/
+	router.get('/:project/settings/drawingCategories', getDrawingCategories);
 
 	return router;
 };

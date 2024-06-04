@@ -18,6 +18,7 @@
 const { times } = require('lodash');
 const { src } = require('../../helper/path');
 const { generateRandomString, generateUUIDString } = require('../../helper/services');
+const { MODEL_TYPES } = require('../../../../src/v5/models/modelSettings.constants');
 
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
@@ -76,6 +77,33 @@ const testGetContainerById = () => {
 			DBHandler.findOne.mockRejectedValueOnce(err);
 
 			await expect(Model.getContainerById('someTS', 'someContainer'))
+				.rejects.toEqual(err);
+		});
+	});
+};
+
+const testGetDrawingById = () => {
+	describe('GetDrawingById', () => {
+		test('should return content of drawing settings if found', async () => {
+			const expectedData = generateRandomString();
+			DBHandler.findOne.mockResolvedValueOnce(expectedData);
+
+			const res = await Model.getDrawingById(generateRandomString(), generateRandomString());
+			expect(res).toEqual(expectedData);
+		});
+
+		test('should return error if drawing does not exists', async () => {
+			DBHandler.findOne.mockResolvedValueOnce(undefined);
+
+			await expect(Model.getDrawingById(generateRandomString(), generateRandomString()))
+				.rejects.toEqual(templates.drawingNotFound);
+		});
+
+		test('should return error if some unknown error occured', async () => {
+			const err = generateRandomString();
+			DBHandler.findOne.mockRejectedValueOnce(err);
+
+			await expect(Model.getDrawingById(generateRandomString(), generateRandomString()))
 				.rejects.toEqual(err);
 		});
 	});
@@ -167,6 +195,34 @@ const testGetContainers = () => {
 			expect(DBHandler.find).toHaveBeenCalledTimes(1);
 			expect(DBHandler.find).toHaveBeenCalledWith(teamspace, SETTINGS_COL,
 				{ _id: { $in: modelIds }, federate: { $ne: true } }, undefined, undefined);
+		});
+	});
+};
+
+const testGetDrawings = () => {
+	describe('Get drawings', () => {
+		test('should return the list of drawings ', async () => {
+			const expectedData = [
+				{
+					_id: generateRandomString(),
+					name: generateRandomString(),
+				},
+				{
+					_id: generateRandomString(),
+					name: generateRandomString(),
+				},
+			];
+
+			DBHandler.find.mockResolvedValueOnce(expectedData);
+
+			const teamspace = generateRandomString();
+			const modelIds = [generateRandomString()];
+			const res = await Model.getDrawings(teamspace, modelIds);
+			expect(res).toEqual(expectedData);
+			expect(DBHandler.find).toHaveBeenCalledTimes(1);
+			expect(DBHandler.find).toHaveBeenCalledWith(teamspace, SETTINGS_COL,
+				{ _id: { $in: modelIds }, modelType: MODEL_TYPES.drawing },
+				undefined, undefined);
 		});
 	});
 };
@@ -795,9 +851,11 @@ const testIsFederation = () => {
 describe('models/modelSettings', () => {
 	testGetModelById();
 	testGetContainerById();
+	testGetDrawingById();
 	testGetFederationById();
 	testGetModelByQuery();
 	testGetContainers();
+	testGetDrawings();
 	testGetFederations();
 	testAddModel();
 	testDeleteModel();

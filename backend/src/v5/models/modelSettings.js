@@ -71,6 +71,7 @@ Models.deleteModel = async (teamspace, project, model) => {
 
 Models.getModelByQuery = async (ts, query, projection) => {
 	const res = await findOneModel(ts, query, projection);
+
 	if (!res) {
 		throw templates.modelNotFound;
 	}
@@ -97,9 +98,9 @@ Models.getContainerById = async (ts, container, projection) => {
 	}
 };
 
-Models.getDrawingById = (ts, drawing, projection) => {
+Models.getDrawingById = async (ts, drawing, projection) => {
 	try {
-		return Models.getModelByQuery(ts,
+		return await Models.getModelByQuery(ts,
 			{ _id: drawing, ...noFederations, modelType: MODEL_TYPES.drawing }, projection);
 	} catch (err) {
 		if (err?.code === templates.modelNotFound.code) {

@@ -18,6 +18,7 @@
 const { addModel, deleteModel, getModelList } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getDrawings, updateModelSettings } = require('../../../../models/modelSettings');
+const { MODEL_TYPES } = require('../../../../models/modelSettings.constants');
 const { getProjectById } = require('../../../../models/projectSettings');
 
 const Drawings = { };
@@ -30,7 +31,7 @@ const getDrawingList = async (teamspace, project, user) => {
 };
 
 Drawings.addDrawing = (teamspace, project, data) => addModel(teamspace, project,
-	{ ...data, modelType: 'drawing' });
+	{ ...data, modelType: MODEL_TYPES.drawing });
 
 Drawings.updateSettings = updateModelSettings;
 
