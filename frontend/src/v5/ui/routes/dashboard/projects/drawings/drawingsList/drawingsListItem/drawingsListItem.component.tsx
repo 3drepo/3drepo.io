@@ -28,7 +28,6 @@ import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { DrawingsListItemTitle } from './drawingsListItemTitle/drawingsListItemTitle.component';
-import { DrawingsCalibrationButton } from './drawingsCalibrationButton/drawingsCalibrationButton.styles';
 import { IsMainList } from '../../../containers/mainList.context';
 import { DrawingsEllipsisMenu } from './drawingsEllipsisMenu/drawingsEllipsisMenu.component';
 import { DRAWING_LIST_COLUMN_WIDTHS } from '@/v5/store/drawings/drawings.helpers';
@@ -37,6 +36,7 @@ import { DialogsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/serv
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingRevisionDetails } from '@components/shared/drawingRevisionDetails/drawingRevisionDetails.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingsCalibrationMenu } from '@/v5/ui/routes/viewer/drawings/drawingCalibrationMenu/drawingCalibrationMenu.component';
 import { SelectModelForCalibration } from './selectModelForCalibration/selectModelForCalibration.component';
 
 interface IDrawingsListItem {
@@ -91,13 +91,11 @@ export const DrawingsListItem = memo(({
 						values={{ count: drawing.revisionsCount }}
 					/>
 				</DashboardListItemButton>
-				<DrawingsCalibrationButton
+				<DrawingsCalibrationMenu
 					calibration={drawing.calibration}
-					onClick={() => DialogsActionsDispatchers.open(SelectModelForCalibration, { drawingId })}
+					onCalibrateClick={() => DialogsActionsDispatchers.open(SelectModelForCalibration, { drawingId })}
 					disabled={!isProjectAdmin}
-					tooltipTitle={
-						isProjectAdmin && <FormattedMessage id="drawings.list.item.calibration.tooltip" defaultMessage="Calibrate" />
-					}
+					drawingId={drawingId}
 					{...DRAWING_LIST_COLUMN_WIDTHS.calibration}
 				/>
 				<DashboardListItemText selected={isSelected} {...DRAWING_LIST_COLUMN_WIDTHS.drawingNumber}>

@@ -31,7 +31,6 @@ import { Gap } from '@controls/gap';
 import { FormSearchSelect } from '@controls/inputs/formInputs.component';
 import { useForm } from 'react-hook-form';
 
-
 export const SelectModelForCalibration = ({ drawingId, onClickClose, ...props }) => {
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();

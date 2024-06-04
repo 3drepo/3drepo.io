@@ -20,7 +20,7 @@ import WarningIcon from '@assets/icons/outlined/stepper_error-outlined.svg';
 import CalibratedIcon from '@assets/icons/filled/calibration-filled.svg';
 import NotCalibrated from '@assets/icons/filled/no_calibration-filled.svg';
 import { Display } from '@/v5/ui/themes/media';
-import { CalibrationStates, DrawingStats, DrawingUploadStatus, IDrawing, MinimumDrawing } from './drawings.types';
+import { CalibrationState, DrawingStats, DrawingUploadStatus, IDrawing, MinimumDrawing } from './drawings.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import { mapDrawingIdToName } from './drawings.temp';
 
@@ -55,19 +55,19 @@ export const DRAWING_LIST_COLUMN_WIDTHS = {
 export const DRAWINGS_SEARCH_FIELDS = ['name', 'latestRevision', 'category', 'drawingNumber', 'status'];
 
 export const CALIBRATION_MAP = {
-	[CalibrationStates.CALIBRATED]: {
+	[CalibrationState.CALIBRATED]: {
 		label: formatMessage({ id: 'drawings.calibration.calibrated', defaultMessage: 'Calibrated' }),
 		icon: <CalibratedIcon />,
 	},
-	[CalibrationStates.OUT_OF_SYNC]: {
+	[CalibrationState.OUT_OF_SYNC]: {
 		label: formatMessage({ id: 'drawings.calibration.outOfSync', defaultMessage: 'Calibrated' }),
 		icon: <WarningIcon />,
 	},
-	[CalibrationStates.UNCALIBRATED]: {
+	[CalibrationState.UNCALIBRATED]: {
 		label: formatMessage({ id: 'drawings.calibration.uncalibrated', defaultMessage: 'Uncalibrated' }),
 		icon: <NotCalibrated />,
 	},
-	[CalibrationStates.EMPTY]: {
+	[CalibrationState.EMPTY]: {
 		label: formatMessage({ id: 'drawings.calibration.empty', defaultMessage: 'Empty' }),
 		icon: <NotCalibrated />,
 	},
