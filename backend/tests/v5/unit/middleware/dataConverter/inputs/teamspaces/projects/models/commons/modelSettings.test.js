@@ -55,9 +55,14 @@ Legends.checkLegendExists.mockImplementation((teamspace, model, legend) => {
 	throw templates.legendNotFound;
 });
 
-const existingModelName = 'Another model name';
-ModelSettingsModel.getModelByQuery.mockImplementation((teamspace, { _id, name } = {}) => {
+const existingModelName = generateRandomString();
+const existingModelNumber = generateRandomString();
+
+ModelSettingsModel.getModelByQuery.mockImplementation((teamspace,
+	{ _id, name = null, number = null, modelType } = {}) => {
+	if ((modelType === MODEL_TYPES.drawing && existingModelNumber.match(number)) && _id?.$in?.length) return {};
 	if (existingModelName.match(name) && _id?.$in?.length) return {};
+
 	throw templates.modelNotFound;
 });
 
@@ -106,6 +111,7 @@ const testValidateUpdateSettingsData = () => {
 		[{ params, body: { defaultLegend: existingLegendID } }, MODEL_TYPES.container, true, 'with defaultLegend that exists'],
 		[{ body: {} }, MODEL_TYPES.container, false, 'with empty params, body'],
 		[{ params, body: { name: generateRandomString() } }, MODEL_TYPES.drawing, true, 'with drawing type and valid payload'],
+		[{ params, body: { number: existingModelNumber } }, MODEL_TYPES.drawing, false, 'with drawing type and duplicate number'],
 		[{ params, body: { unit: generateRandomString() } }, MODEL_TYPES.drawing, false, 'with drawing model and invalid payload'],
 		[{}, MODEL_TYPES.container, false, 'with undefined params, body'],
 	])('Check if req arguments for settings update are valid', (data, modelType, shouldPass, desc) => {
@@ -233,6 +239,11 @@ const testValidateAddModelData = () => {
 				number: generateRandomString(),
 				type: 'Structure',
 			} }, MODEL_TYPES.drawing, true, 'if model type is drawing and data is valid'],
+		[{ params,
+			body: {
+				name: generateRandomString(),
+				number: existingModelNumber,
+			} }, MODEL_TYPES.drawing, false, 'if model type is drawing and number already exists in project'],
 		[{ params,
 			body: {
 				name: generateRandomString(),

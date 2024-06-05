@@ -194,7 +194,9 @@ const testGetContainers = () => {
 			expect(res).toEqual(expectedData);
 			expect(DBHandler.find).toHaveBeenCalledTimes(1);
 			expect(DBHandler.find).toHaveBeenCalledWith(teamspace, SETTINGS_COL,
-				{ _id: { $in: modelIds }, federate: { $ne: true } }, undefined, undefined);
+				{ _id: { $in: modelIds },
+					federate: { $ne: true },
+					modelType: { $ne: MODEL_TYPES.drawing } }, undefined, undefined);
 		});
 	});
 };

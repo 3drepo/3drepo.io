@@ -57,25 +57,36 @@ const defaultLegendType = (teamspace, model) => types.id.nullable().test('check-
 	return true;
 });
 
-const modelNameType = (teamspace, project, model) => types.strings.title.test('name-already-used', 'Name is already used within the project', async (value) => {
+const isPropUnique = async (teamspace, project, model, modelType, propName, propValue) => {
 	try {
 		let { models } = await getProjectById(teamspace, project, { models: 1 });
 		if (model) {
 			models = models.flatMap((modelId) => (modelId === model ? [] : modelId));
 		}
 
-		// eslint-disable-next-line security/detect-non-literal-regexp
-		const query = { _id: { $in: models }, name: new RegExp(`^${escapeRegexChrs(value)}$`, 'i') };
+		const query = { _id: { $in: models },
+			...(modelType === MODEL_TYPES.drawing ? { modelType: MODEL_TYPES.drawing } : {}),
+			// eslint-disable-next-line security/detect-non-literal-regexp
+			[propName]: new RegExp(`^${escapeRegexChrs(propValue)}$`, 'i') };
+
 		await getModelByQuery(teamspace, query, { _id: 1 });
 		return false;
 	} catch (err) {
 		// We want this to error out. This means there's no model with the same name
 		return true;
 	}
-});
+};
+
+const modelNameType = (teamspace, project, model) => types.strings.title.test('name-already-used', 'Name is already used within the project',
+	(value) => isPropUnique(teamspace, project, model, MODEL_TYPES.container, 'name', value));
+
+const modelNumberType = (teamspace, project, model) => types.strings.title.test('number-already-used', 'Number is already used within the project',
+	(value) => isPropUnique(teamspace, project, model, MODEL_TYPES.drawing, 'number', value));
 
 const generateSchema = (newEntry, modelType, teamspace, project, modelId) => {
 	const name = modelNameType(teamspace, project, modelId);
+	const number = modelNumberType(teamspace, project, modelId);
+
 	const commonProps = {
 		name: newEntry ? name.required() : name,
 		desc: types.strings.shortDescription,
@@ -85,7 +96,7 @@ const generateSchema = (newEntry, modelType, teamspace, project, modelId) => {
 	const schema = {
 		...commonProps,
 		...(modelType === MODEL_TYPES.drawing
-			? { number: newEntry ? types.strings.title.required() : types.strings.title }
+			? { number: newEntry ? number.required() : number }
 			: {
 				unit: newEntry ? types.strings.unit.required() : types.strings.unit,
 				code: types.strings.code,

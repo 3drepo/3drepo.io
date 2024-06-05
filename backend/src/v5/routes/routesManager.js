@@ -28,7 +28,6 @@ const FederationRevisionRoutes = require('./teamspaces/projects/models/federatio
 const { MODEL_TYPES } = require('../models/modelSettings.constants');
 const MetadataRoutes = require('./teamspaces/projects/models/containers/metadata');
 const ProjectRoutes = require('./teamspaces/projects/projects');
-const ProjectSettingsRoutes = require('./teamspaces/projects/settings');
 const SsoRoutes = require('./sso');
 const TeamspaceJobRoutes = require('./teamspaces/jobs');
 const TeamspaceRoutes = require('./teamspaces/teamspaces');
@@ -48,7 +47,6 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/settings', TeamspaceSettingsRoutes);
 	app.use('/v5/teamspaces/:teamspace/jobs', TeamspaceJobRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects', ProjectRoutes);
-	app.use('/v5/teamspaces/:teamspace/projects/:project/settings', ProjectSettingsRoutes);
 
 	// Containers
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers', CreateModelGeneralRoutes(MODEL_TYPES.container));

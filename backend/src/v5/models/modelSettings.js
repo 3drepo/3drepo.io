@@ -123,7 +123,7 @@ Models.getFederationById = async (ts, federation, projection) => {
 };
 
 Models.getContainers = (ts, ids, projection, sort) => {
-	const query = { _id: { $in: ids }, ...noFederations };
+	const query = { _id: { $in: ids }, ...noFederations, ...noDrawings };
 	return findModels(ts, query, projection, sort);
 };
 

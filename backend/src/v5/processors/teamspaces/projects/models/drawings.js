@@ -23,7 +23,7 @@ const { getProjectById } = require('../../../../models/projectSettings');
 
 const Drawings = { };
 
-const getDrawingList = async (teamspace, project, user) => {
+Drawings.getDrawingList = async (teamspace, project, user) => {
 	const { models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
 	const modelSettings = await getDrawings(teamspace, models, { _id: 1, name: 1, permissions: 1 });
 
@@ -38,12 +38,12 @@ Drawings.updateSettings = updateModelSettings;
 Drawings.deleteDrawing = deleteModel;
 
 Drawings.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {
-	const accessibleDrawings = await getDrawingList(teamspace, project, username);
+	const accessibleDrawings = await Drawings.getDrawingList(teamspace, project, username);
 	return appendFavourites(username, teamspace, accessibleDrawings, favouritesToAdd);
 };
 
 Drawings.deleteFavourites = async (username, teamspace, project, favouritesToRemove) => {
-	const accessibleDrawings = await getDrawingList(teamspace, project, username);
+	const accessibleDrawings = await Drawings.getDrawingList(teamspace, project, username);
 	return deleteFavourites(username, teamspace, accessibleDrawings, favouritesToRemove);
 };
 

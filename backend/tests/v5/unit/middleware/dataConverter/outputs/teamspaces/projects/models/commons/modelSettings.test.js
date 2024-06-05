@@ -113,7 +113,7 @@ const testFormatModelStats = () => {
 					...data,
 				};
 
-				if (modelType == MODEL_TYPES.federation) {
+				if (modelType === MODEL_TYPES.federation) {
 					formattedStats.lastUpdated = data.lastUpdated ? data.lastUpdated.getTime() : undefined;
 				} else {
 					formattedStats.revisions.lastUpdated = formattedStats.revisions.lastUpdated

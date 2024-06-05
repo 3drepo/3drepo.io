@@ -76,10 +76,18 @@ const getModelList = (modelType) => async (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
 
+	let fn;
+	if (modelType === MODEL_TYPES.federation) {
+		fn = Federations.getFederationList;
+	} else if (modelType === MODEL_TYPES.container) {
+		fn = Containers.getContainerList;
+	} else {
+		fn = Drawings.getDrawingList;
+	}
+
 	try {
-		const fn = modelType === MODEL_TYPES.federation ? Federations.getFederationList : Containers.getContainerList;
 		const models = await fn(teamspace, project, user);
-		respond(req, res, templates.ok, { [`${modelType === MODEL_TYPES.federation ? 'federations' : 'containers'}`]: models });
+		respond(req, res, templates.ok, { [`${modelType}s`]: models });
 	} catch (err) {
 		respond(req, res, err);
 	}
@@ -249,6 +257,10 @@ const establishRoutes = (modelType) => {
 	 *                 type: string
 	 *                 example: LEGO_ARCHIT_001
 	 *                 description: Model reference code
+	 *               number:
+	 *                 type: string
+	 *                 example: SC1-SFT-V1-01-M3-ST-30_10_30-0001
+	 *                 description: Unique identifier of a drawing (drawings only)
 	 *               type:
 	 *                 type: string
 	 *                 example: Architecture
@@ -279,6 +291,34 @@ const establishRoutes = (modelType) => {
 	 *                 type: integer
 	 *                 example: 100
 	 *                 description: Angle from North in degrees
+	 *           examples:
+     *             container:
+	 *               summary: container
+     *               value:
+     *                 name: Lego House Architecture
+     *                 unit: mm
+	 *                 desc: The Architecture model of the Lego House
+	 *                 code: LEGO_ARCHIT_001
+	 *                 type: Architecture
+	 *                 angleFromNorth: 100
+	 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
+     *             federation:
+	 *               summary: federation
+     *               value:
+     *                 name: Lego House Federation
+     *                 unit: m
+	 *                 desc: The Structural model of the Lego House
+	 *                 code: LEGO_ARCHIT_002
+	 *                 type: Structural
+	 *                 angleFromNorth: 150
+ 	 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
+	 *             drawing:
+	 *               summary: drawing
+     *               value:
+     *                 name: Lego House Drawing
+     *                 number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
+	 *                 desc: The Drawing of the Lego House
+	 *                 type: Structural
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -536,6 +576,24 @@ const establishRoutes = (modelType) => {
 	 *                   type: integer
 	 *                   description: Timestamp(ms) of when any of the submodels was updated
 	 *                   example: 1630598072000
+	 *             examples:
+	 *               container:
+	 *                 summary: container
+     *                 value:
+     *                   code: STR-01
+     *                   status: ok
+	 *                   desc: Floor 1 MEP with Facade
+	 *                   lastUpdated: 1630598072000
+	 *                   tickets: { issues: 10, risks: 5 }
+	 *               federation:
+	 *                 summary: federation
+     *                 value:
+     *                   code: STR-01
+     *                   status: ok
+	 *                   desc: Floor 1 MEP with Facade
+	 *                   lastUpdated: 1630598072000
+	 *                   tickets: { issues: 10, risks: 5 }
+	 *                   containers: [{ group: Architectural, _id: 374bb150-065f-11ec-8edf-ab0f7cc84da8 }]
 	 */
 	router.get('/:model/stats', hasReadAccessToModel, getModelStats(modelType), formatModelStats(modelType));
 
@@ -627,6 +685,10 @@ const establishRoutes = (modelType) => {
 	 *               desc:
 	 *                 type: string
 	 *                 example: description1
+	 *               number:
+	 *                 type: string
+	 *                 example: SC1-SFT-V1-01-M3-ST-30_10_30-0001
+	 *                 description: Unique identifier of a drawing (drawings only)
 	 *               surveyPoints:
 	 *                 type: array
 	 *                 items:
@@ -657,6 +719,33 @@ const establishRoutes = (modelType) => {
 	 *                 type: string
 	 *                 format: uuid
 	 *                 example: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+	 *           examples:
+     *             container:
+	 *               summary: container
+     *               value:
+     *                 name: Lego House Container
+     *                 unit: mm
+	 *                 desc: The Container model of the Lego House
+	 *                 defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+	 *                 defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+	 *                 angleFromNorth: 100
+	 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
+     *             federation:
+	 *               summary: federation
+     *               value:
+     *                 name: Lego House Federation
+     *                 unit: m
+	 *                 desc: The Federation model of the Lego House
+	 *                 defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+	 *                 defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+	 *                 angleFromNorth: 120
+	 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
+	 *             drawing:
+	 *               summary: drawing
+     *               value:
+     *                 name: Lego House Drawing
+     *                 number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
+	 *                 desc: The Drawing of the Lego House
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"

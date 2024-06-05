@@ -467,7 +467,7 @@ const establishRoutes = () => {
 	*                     type: string
 	*                   example: ["Architectural", "Existing", "GIS"]
 	*/
-	router.get('/:project/settings/drawingCategories', getDrawingCategories);
+	router.get('/:project/settings/drawingCategories', isAdminToProject, getDrawingCategories);
 
 	return router;
 };
