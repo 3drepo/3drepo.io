@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { generatePath, useHistory } from 'react-router-dom';
-import { CALIBRATION_VIEWER_ROUTE, ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { useHistory } from 'react-router-dom';
 import { FormModal } from '@controls/formModal/formModal.component';
 import { ListSubheader, MenuItem } from '@mui/material';
 import { DrawingsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -30,6 +29,8 @@ import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { Gap } from '@controls/gap';
 import { FormSearchSelect } from '@controls/inputs/formInputs.component';
 import { useForm } from 'react-hook-form';
+import { viewerRoute } from '@/v5/services/routing/routing';
+import { appendSearchParams } from '@/v5/ui/routes/routes.constants';
 
 export const SelectModelForCalibration = ({ drawingId, onClickClose, ...props }) => {
 	const project = ProjectsHooksSelectors.selectCurrentProject();
@@ -46,13 +47,8 @@ export const SelectModelForCalibration = ({ drawingId, onClickClose, ...props })
 	const federations = federationsData.federations.filter((f) => f.containers?.length);
 
 	const onSubmit = () => {
-		const pathParams: ViewerParams = { teamspace, project, containerOrFederation: model };
-		const container = containers.find(({ _id }) => _id === model);
-		if (container) {
-			pathParams.revision = container.latestRevision;
-		}
-		const path = generatePath(CALIBRATION_VIEWER_ROUTE, pathParams);
-		history.push(`${path}?drawingId=${drawingId}`);
+		const path = viewerRoute(teamspace, project, model);
+		history.push(appendSearchParams(path, { drawingId, isCalibrating: true }));
 		onClickClose();
 	};
 

@@ -29,7 +29,7 @@ import {
 	PROJECT_ROUTE,
 	BOARD_ROUTE,
 	TICKETS_ROUTE,
-	CALIBRATION_VIEWER_ROUTE,
+	appendSearchParams,
 } from '@/v5/ui/routes/routes.constants';
 import { useSelector } from 'react-redux';
 import { selectRevisions } from '@/v4/modules/model/model.selectors';
@@ -38,7 +38,7 @@ import { BreadcrumbItem } from '@controls/breadcrumbs/breadcrumbDropdown/breadcr
 import { Breadcrumbs } from '@controls/breadcrumbs';
 import { BreadcrumbItemOrOptions } from '@controls/breadcrumbs/breadcrumbs.component';
 import { sortBreadcrumbOptions } from '@controls/breadcrumbs/breadcrumbs.helpers';
-import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
 export const BreadcrumbsRouting = () => {
 	const params = useParams();
@@ -52,6 +52,7 @@ export const BreadcrumbsRouting = () => {
 	// Because we are using v4 viewer for now, we use the v4 selector.
 	const revisions = useSelector(selectRevisions);
 	const [drawingId] = useSearchParam('drawingId');
+	const [isCalibrating] = useSearchParam('isCalibrating', Transformers.BOOLEAN);
 
 	const isFederation = federations.some(({ _id }) => _id === containerOrFederationId);
 
@@ -98,14 +99,10 @@ export const BreadcrumbsRouting = () => {
 		breadcrumbs.push({ options });
 	}
 
-	if (matchesSubPath(VIEWER_ROUTE)) {
+	if (matchesPath(VIEWER_ROUTE)) {
 		const generateViewerPath = (pathParams) => {
-			const hasDrawing = !!drawingId;
-			const route = hasDrawing ? CALIBRATION_VIEWER_ROUTE : VIEWER_ROUTE;
-			let path = generatePath(route, pathParams);
-			if (hasDrawing) {
-				path += `?drawingId=${drawingId}`;
-			}
+			let path = generatePath(VIEWER_ROUTE, pathParams);
+			path = appendSearchParams(path, { drawingId, isCalibrating });
 			return path;
 		};
 		

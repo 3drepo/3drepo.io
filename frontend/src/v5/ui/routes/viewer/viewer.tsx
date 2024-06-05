@@ -100,8 +100,6 @@ export const Viewer = () => {
 			model: containerOrFederation,
 			project,
 			teamspace,
-			// this is because, when calibrating a drawing with a federation,
-			// useParams thinks the "calibration" segment in the path is the revision
 			revision: isFed ? undefined : revision,
 		},
 	};

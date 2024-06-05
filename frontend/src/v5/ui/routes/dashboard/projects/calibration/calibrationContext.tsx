@@ -16,8 +16,9 @@
  */
 
 import { createContext, useEffect, useState } from 'react';
-import { CALIBRATION_VIEWER_ROUTE, DRAWINGS_ROUTE, matchesPath } from '../../../routes.constants';
+import { DRAWINGS_ROUTE } from '../../../routes.constants';
 import { generatePath, useParams } from 'react-router-dom';
+import { Transformers, useSearchParam } from '../../../useSearchParam';
 
 export interface CalibrationContextType {
 	step: number;
@@ -46,7 +47,7 @@ export const CalibrationContextComponent = ({ children }) => {
 	const [step, setStep] = useState(0);
 	const [isStepValid, setIsStepValid] = useState(false);
 	const [origin, setOrigin] = useState(generatePath(DRAWINGS_ROUTE, { teamspace, project }));
-	const open = matchesPath(CALIBRATION_VIEWER_ROUTE);
+	const [isCalibrating] = useSearchParam('isCalibrating', Transformers.BOOLEAN);
 
 	useEffect(() => {
 		setStep(0);
@@ -54,7 +55,7 @@ export const CalibrationContextComponent = ({ children }) => {
 	}, [containerOrFederation, revision]);
 
 	return (
-		<CalibrationContext.Provider value={{ step, setStep, isStepValid, setIsStepValid, open, origin, setOrigin }}>
+		<CalibrationContext.Provider value={{ step, setStep, isStepValid, setIsStepValid, open: isCalibrating, origin, setOrigin }}>
 			{children}
 		</CalibrationContext.Provider>
 	);

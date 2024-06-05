@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { isEmpty } from 'lodash';
 import { matchPath } from 'react-router';
 
 export const NOT_FOUND_ROUTE_PATH = '/v5/404';
@@ -24,7 +25,6 @@ export const SIGN_UP_SSO_PATH = '/v5/signup-sso';
 export const PASSWORD_CHANGE_PATH = '/v5/password-change';
 export const REGISTER_VERIFY_PATH = '/v5/register-verify';
 export const VIEWER_ROUTE = '/v5/viewer/:teamspace/:project/:containerOrFederation/:revision?';
-export const CALIBRATION_VIEWER_ROUTE = `${VIEWER_ROUTE}/calibration`;
 export const DASHBOARD_ROUTE = '/v5/dashboard';
 export const TEAMSPACE_ROUTE_BASE = `${DASHBOARD_ROUTE}/:teamspace`;
 export const TEAMSPACE_ROUTE_BASE_TAB = `${TEAMSPACE_ROUTE_BASE}/t`;
@@ -49,6 +49,12 @@ export const RELEASE_NOTES_ROUTE = 'https://help.3drepo.io/en/collections/335823
 export const matchesPath = (path) => Boolean(matchPath(location.pathname, { path, exact: true }));
 // eslint-disable-next-line no-restricted-globals
 export const matchesSubPath = (path) => Boolean(matchPath(location.pathname, { path }));
+
+export const appendSearchParams = (path, searchParams: Record<string, any>) => {
+	if (isEmpty(searchParams)) return path;
+	const queryString = '?' + Object.entries(searchParams).map(([key, value]) => `${key}=${value}`).join('&');
+	return path + queryString;
+};
 
 export interface TeamspaceParams {
 	teamspace?: string;
