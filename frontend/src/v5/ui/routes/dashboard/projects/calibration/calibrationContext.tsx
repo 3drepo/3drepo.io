@@ -52,7 +52,7 @@ export const CalibrationContextComponent = ({ children }) => {
 	useEffect(() => {
 		setStep(0);
 		setIsStepValid(false);
-	}, [containerOrFederation, revision]);
+	}, [containerOrFederation, revision, isCalibrating]);
 
 	return (
 		<CalibrationContext.Provider value={{ step, setStep, isStepValid, setIsStepValid, open: isCalibrating, origin, setOrigin }}>
