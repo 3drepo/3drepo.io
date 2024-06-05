@@ -15,24 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useEffect, useRef } from 'react';
+import { useContext, useEffect } from 'react';
 import { CalibrationContext } from '../calibrationContext';
 import { Calibration3DStep } from './calibration3DStep/calibration3DStep.component';
 import { Calibration2DStep } from './calibration2DStep/calibration2DStep.component';
 import { VerticalSpatialBoundariesStep } from './verticalSpatialBoundariesStep/verticalSpatialBoundariesStep.component';
 import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
-import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
 export const CalibrationStep = () => {
 	const { step } = useContext(CalibrationContext);
-	const { open2D, close2D } = useContext(ViewerCanvasesContext);
+	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
 	const show2DViewer = step < 2;
-	const [drawing] = useSearchParam('drawingId');
-	const drawingRef = useRef(drawing);
 
 	useEffect(() => {
-		if (show2DViewer) open2D(drawingRef.current);
-		else close2D();
+		setLeftPanelRatio(show2DViewer ? .5 : 1);
 	}, [show2DViewer]);
 
 	switch (step) {
