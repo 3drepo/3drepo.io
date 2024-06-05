@@ -694,12 +694,12 @@ export class UnityUtil {
 	}
 
 	/** @hidden */
-	public static measurementRemoved(measurmentId) {
+	public static measurementRemoved(measurementId) {
 		if(UnityUtil.verbose) {
 			console.debug("[FROM UNITY] measurementRemoved", measurementId);
 		}
 		if (UnityUtil.viewer && UnityUtil.viewer.measurementRemoved) {
-			UnityUtil.viewer.measurementRemoved(measurmentId);
+			UnityUtil.viewer.measurementRemoved(measurementId);
 		}
 	}
 
