@@ -14,10 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 const { fieldOperators, valueOperators } = require('../../models/metadata.rules.constants');
 const { presetModules, propTypes, statusTypes } = require('../../schemas/tickets/templates.constants');
-const { MODEL_TYPES } = require('../../models/modelSettings.constants');
 const { deleteIfUndefined } = require('../../utils/helper/objects');
 const { getSwaggerComponents } = require('../../utils/responseCodes');
 
@@ -474,101 +472,6 @@ Schemas.schemas.modelSettings = {
 			},
 		},
 	},
-};
-
-const modelSchemaProps = (modelType) => ({
-	name: {
-		type: 'string',
-		example: 'Lego House Architecture',
-		description: 'Name of the model - this has to be unique within the project',
-		maxLength: 120,
-	},
-	desc: {
-		type: 'string',
-		example: 'The Architecture model of the Lego House',
-		description: 'Model description',
-		maxLength: 50,
-	},
-	...(modelType === MODEL_TYPES.drawing ? {
-		number: {
-			type: 'string',
-			example: 'Unique identifier of the drawing',
-			description: 'SC1-SFT-V1-01-M3-ST-30_10_30-0001',
-			maxLength: 120,
-		},
-	} : {
-		...(modelType === MODEL_TYPES.container ? {
-			type: {
-				type: 'string',
-				example: 'Architecture',
-				description: 'Model type',
-			},
-		} : {}),
-		unit: {
-			type: 'string',
-			enum: ['mm', 'cm', 'dm', 'm', 'ft'],
-			example: 'mm',
-			description: 'Unit of measurement',
-		},
-		code: {
-			type: 'string',
-			example: 'LEGO_ARCHIT_001',
-			description: 'Model reference code',
-		},
-		surveyPoints: {
-			type: 'array',
-			description: 'Survey points for model location',
-			items: {
-				type: 'object',
-				properties: {
-					position: {
-						description: 'The point coordinate that maps to the latLong value (should be in OpenGL axis conventions)',
-						type: 'array',
-						items: {
-							type: 'number',
-							example: 23.45,
-							minItems: 3,
-							maxItems: 3,
-						},
-					},
-					latLong:
-					{
-						type: 'array',
-						description: 'The latitude and longitude of the survey point',
-						items: {
-							type: 'number',
-							example: 23.45,
-							minItems: 2,
-							maxItems: 2,
-						},
-					},
-				},
-			},
-		},
-		angleFromNorth: {
-			type: 'integer',
-			example: 100,
-			description: 'Angle from North in degrees',
-		},
-	}),
-});
-
-Schemas.schemas.federationSchema = {
-	type: 'object',
-	required: ['name', 'unit'],
-	properties: modelSchemaProps(MODEL_TYPES.federation),
-};
-
-Schemas.schemas.containerSchema = {
-	type: 'object',
-	required: ['name', 'unit', 'type'],
-	properties: modelSchemaProps(MODEL_TYPES.container),
-};
-
-Schemas.schemas.drawingSchema = {
-	type: 'object',
-	required: ['name', 'unit', 'number'],
-	properties: modelSchemaProps(MODEL_TYPES.drawing),
 };
 
 module.exports = Schemas;
