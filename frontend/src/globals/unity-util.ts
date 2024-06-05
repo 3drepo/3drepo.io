@@ -696,7 +696,7 @@ export class UnityUtil {
 	/** @hidden */
 	public static measurementRemoved(measurmentId) {
 		if(UnityUtil.verbose) {
-			console.debug("[FROM UNITY] measurementRemoved", meausrementId);
+			console.debug("[FROM UNITY] measurementRemoved", measurementId);
 		}
 		if (UnityUtil.viewer && UnityUtil.viewer.measurementRemoved) {
 			UnityUtil.viewer.measurementRemoved(measurmentId);
