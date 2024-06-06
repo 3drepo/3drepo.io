@@ -202,8 +202,9 @@ const createElasticRecord = (index, body, id) => {
 };
 
 const createActivityRecord = (status, code, latency, contentLength, user, method, originalUrl) => {
+	const host = config.host;
 	const timestamp = new Date();
-	const id = `${user}-${timestamp.valueOf()}`;
+	const id = `${host}-${user}-${timestamp.valueOf()}`;
 	const elasticBody = {
 		status: parseInt(status),
 		code,
@@ -212,7 +213,8 @@ const createActivityRecord = (status, code, latency, contentLength, user, method
 		user,
 		method,
 		originalUrl,
-		timestamp
+		timestamp,
+		host
 	};
 
 	return createElasticRecord(activityRecordIndex, elasticBody, id).catch((err) => {
