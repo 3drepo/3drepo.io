@@ -31,9 +31,9 @@ const Table = forwardRef(({ children, ...props }, ref: any) => (
 ));
 
 export const DrawingsList = () => {
-	const { open2D } = useContext(ViewerCanvasesContext);
 	const drawings = DrawingsHooksSelectors.selectCalibratedDrawings();
 	const isLoading = DrawingsHooksSelectors.selectCalibratedDrawingsHaveStatsPending();
+	const { open2D } = useContext(ViewerCanvasesContext);
 
 	if (isLoading) return (
 		<CentredContainer>
