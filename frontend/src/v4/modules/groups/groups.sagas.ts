@@ -61,16 +61,15 @@ function* fetchGroups({teamspace, modelId, revision}) {
 	yield put(GroupsActions.togglePendingState(false));
 }
 
-function* setActiveGroup({ group, revision }) {
+function* setActiveGroup({ group }) {
 	try {
-		const filteredGroups = yield select(selectFilteredGroups);
 		const activeGroupId = yield select(selectActiveGroupId);
 		if (group && group._id === activeGroupId) {
 			return;
 		}
 
 		yield all([
-			put(GroupsActions.selectGroup(group, filteredGroups, revision)),
+			put(GroupsActions.selectGroup(group)),
 			put(GroupsActions.setComponentState({ activeGroup: group ? group._id : null }))
 		]);
 
@@ -245,7 +244,7 @@ function* importGroups({ teamspace, modelId, file}) {
 }
 
 
-function* showDetails({ group, revision }) {
+function* showDetails({ group }) {
 	try {
 		yield put(GroupsActions.clearSelectionHighlights());
 		yield put(GroupsActions.highlightGroup(group));
