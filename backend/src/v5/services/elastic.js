@@ -15,46 +15,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { Client } = require("@elastic/elasticsearch");
+const { host } = require('../utils/config');
 
-const config = require('../utils/config');
-const { logger } = require('../utils/logger');
+const { v4Path } = require('../../interop');
+// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
+const { createElasticRecord } = require(`${v4Path}/handler/elastic`);
 
 const Elastic = {};
 
-const activityRecordIndex = "io-activity";
-
-const createElasticRecord = (index, body, id) => {
-	const elasticClient = new Client(config.elastic);
-	if (elasticClient && body) {
-		return elasticClient.create({
-			index,
-			id,
-			refresh: true,
-			body
-		});
-	}
-};
+const activityRecordIndex = 'io-activity';
 
 Elastic.createActivityRecord = (status, code, latency, contentLength, user, method, originalUrl) => {
-	const host = config.host;
 	const timestamp = new Date();
 	const id = `${host}-${user}-${timestamp.valueOf()}`;
 	const elasticBody = {
-		status: parseInt(status),
+		status: parseInt(status, 10),
 		code,
-		latency: parseInt(latency),
-		contentLength: parseInt(contentLength),
+		latency: parseInt(latency, 10),
+		contentLength: parseInt(contentLength, 10),
 		user,
 		method,
 		originalUrl,
 		timestamp,
-		host
+		host,
 	};
 
-	return createElasticRecord(activityRecordIndex, elasticBody, id).catch((err) => {
-		SystemLogger.logError(`Create ${activityRecordIndex} record on Elastic failed`, err);
-	});
+	createElasticRecord(activityRecordIndex, elasticBody, id);
 };
 
 module.exports = Elastic;

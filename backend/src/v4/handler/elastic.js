@@ -94,7 +94,7 @@ const establishIndices = async (client)=>{
 
 const elasticClientPromise = createElasticClient();
 
-const createElasticRecord = async (index, body, id) => {
+Elastic.createElasticRecord = async (index, body, id) => {
 	try {
 		const elasticClient = await elasticClientPromise;
 		if (elasticClient && body) {
@@ -131,7 +131,7 @@ Elastic.createLoginRecord = async (username, loginRecord) => {
 		"licenseKey": repoLicense
 	};
 
-	await createElasticRecord(loginRecordIndex, elasticBody, elasticBody.Id);
+	await Elastic.createElasticRecord(loginRecordIndex, elasticBody, elasticBody.Id);
 };
 
 Elastic.subscribeToV5Events = () => {
