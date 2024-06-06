@@ -28,7 +28,7 @@ const logLabels = {
 	network: "NET"
 };
 
-const outTag = '[OUT] ';
+const outTag = "[OUT] ";
 const activityRecordIndex = "io-activity";
 
 const stringFormat = ({ level, message, label, timestamp, stack }) => `${timestamp} [${level}] [${label || "APP"}] ${message}${stack ? ` - ${stack}` : ""}`;
@@ -119,7 +119,7 @@ function createLogger() {
  */
 const logMessage = (msg, meta, label) => {
 	if (config.elastic && label === logLabels.network) {
-		const [msgType, code, latency, contentLength, user, method, originalUrl] = msg.split('\t');
+		const [msgType, code, latency, contentLength, user, method, originalUrl] = msg.split("\t");
 		if (msgType.indexOf(outTag) === 0) {
 			const status = msgType.substring(outTag.length);
 			createActivityRecord(status, code, latency, contentLength, user, method, originalUrl);
