@@ -19,10 +19,10 @@ const { isBuffer, isString } = require('./helper/typeCheck');
 const { createResponseCode } = require('./responseCodes');
 const networkLabel = require('./logger').labels.network;
 const logger = require('./logger').logWithLabel(networkLabel);
+const { createActivityRecord } = require('../services/elastic');
 const { v4Path } = require('../../interop');
 // eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
 const { cachePolicy } = require(`${v4Path}/config`);
-const { createActivityRecord } = require(`${v4Path}/logger`).systemLogger;
 const zlib = require('zlib');
 
 const Responder = {};

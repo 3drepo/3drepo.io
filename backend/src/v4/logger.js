@@ -20,11 +20,7 @@ const config = require("./config.js");
 const winston = require("winston");
 require("winston-daily-rotate-file");
 
-const { Client } = require("@elastic/elasticsearch");
-
 const SystemLogger = {};
-
-const activityRecordIndex = "io-activity";
 
 const stringFormat = ({ level, message, label, timestamp, stack }) => `${timestamp} [${level}] [${label || "APP"}] ${message}${stack ? ` - ${stack}` : ""}`;
 
@@ -173,41 +169,6 @@ SystemLogger.logTrace = (msg, meta, label) => {
 SystemLogger.logFatal = (msg, meta, label) => {
 	logger && logger.fatal(logMessage(msg, meta, label), {label});
 };
-
-const createElasticRecord = (index, body, id) => {
-	const elasticClient = new Client(config.elastic);
-	if (elasticClient && body) {
-		return elasticClient.create({
-			index,
-			id,
-			refresh: true,
-			body
-		});
-	}
-};
-
-const createActivityRecord = (status, code, latency, contentLength, user, method, originalUrl) => {
-	const host = config.host;
-	const timestamp = new Date();
-	const id = `${host}-${user}-${timestamp.valueOf()}`;
-	const elasticBody = {
-		status: parseInt(status),
-		code,
-		latency: parseInt(latency),
-		contentLength: parseInt(contentLength),
-		user,
-		method,
-		originalUrl,
-		timestamp,
-		host
-	};
-
-	return createElasticRecord(activityRecordIndex, elasticBody, id).catch((err) => {
-		SystemLogger.logError(`Create ${activityRecordIndex} record on Elastic failed`, err);
-	});
-};
-
-SystemLogger.createActivityRecord = createActivityRecord;
 
 module.exports.systemLogger = SystemLogger;
 module.exports.logLabels = {
