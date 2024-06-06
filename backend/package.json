@@ -64,7 +64,7 @@
     "nodemailer": "6.9.9",
     "openapi-schema-validator": "12.0.0",
     "paypal-rest-sdk": "1.8.1",
-    "pug": "3.0.2",
+    "pug": "3.0.3",
     "serialize-javascript": "4.0.0",
     "serve-favicon": "2.5.0",
     "sharp": "0.32.6",
