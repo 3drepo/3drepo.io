@@ -24,11 +24,6 @@ const { Client } = require("@elastic/elasticsearch");
 
 const SystemLogger = {};
 
-const logLabels = {
-	network: "NET"
-};
-
-const outTag = "[OUT] ";
 const activityRecordIndex = "io-activity";
 
 const stringFormat = ({ level, message, label, timestamp, stack }) => `${timestamp} [${level}] [${label || "APP"}] ${message}${stack ? ` - ${stack}` : ""}`;
@@ -50,7 +45,7 @@ SystemLogger.formatResponseMsg = (
 			method,
 			originalUrl
 		} = resData;
-		return `${outTag}${status}\t${code}\t${latency}\t${contentLength}\t${user}\t${method}\t${originalUrl}`;
+		return `[OUT] ${status}\t${code}\t${latency}\t${contentLength}\t${user}\t${method}\t${originalUrl}`;
 	}
 };
 
@@ -117,17 +112,7 @@ function createLogger() {
  * @param {string} msg - Message to log
  * @param {Object} meta - Extra data to put into the log file
  */
-const logMessage = (msg, meta, label) => {
-	if (config.elastic && label === logLabels.network) {
-		const [msgType, code, latency, contentLength, user, method, originalUrl] = msg.split("\t");
-		if (msgType.indexOf(outTag) === 0) {
-			const status = msgType.substring(outTag.length);
-			createActivityRecord(status, code, latency, contentLength, user, method, originalUrl);
-		}
-	}
-
-	return `${msg} ${meta ? JSON.stringify(meta, label) : ""}`;
-};
+const logMessage = (msg, meta, label) => `${msg} ${meta ? JSON.stringify(meta, label) : ""}`;
 
 /**
  * Function to log an info message
@@ -222,5 +207,9 @@ const createActivityRecord = (status, code, latency, contentLength, user, method
 	});
 };
 
+SystemLogger.createActivityRecord = createActivityRecord;
+
 module.exports.systemLogger = SystemLogger;
-module.exports.logLabels = logLabels;
+module.exports.logLabels = {
+	network: "NET"
+};

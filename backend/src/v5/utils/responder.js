@@ -22,6 +22,7 @@ const logger = require('./logger').logWithLabel(networkLabel);
 const { v4Path } = require('../../interop');
 // eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
 const { cachePolicy } = require(`${v4Path}/config`);
+const { createActivityRecord } = require(`${v4Path}/logger`).systemLogger;
 const zlib = require('zlib');
 
 const Responder = {};
@@ -32,6 +33,9 @@ const genResponseLogging = ({ status, code }, contentLength, { session, startTim
 	const user = session?.user ? session.user.username : 'unknown';
 	const currentTime = Date.now();
 	const latency = startTime ? `${currentTime - startTime}` : '???';
+
+	createActivityRecord(status, code, latency, contentLength, user, method, originalUrl);
+
 	return logger.formatResponseMsg({ status, code, latency, contentLength, user, method, originalUrl });
 };
 
