@@ -30,7 +30,6 @@ import { Gap } from '@controls/gap';
 import { FormSearchSelect } from '@controls/inputs/formInputs.component';
 import { useForm } from 'react-hook-form';
 import { viewerRoute } from '@/v5/services/routing/routing';
-import { appendSearchParams } from '@/v5/helpers/url.helper';
 
 export const SelectModelForCalibration = ({ drawingId, onClickClose, ...props }) => {
 	const project = ProjectsHooksSelectors.selectCurrentProject();
@@ -47,7 +46,7 @@ export const SelectModelForCalibration = ({ drawingId, onClickClose, ...props })
 	const federations = federationsData.federations.filter((f) => f.containers?.length);
 
 	const onSubmit = () => {
-		const path = viewerRoute(teamspace, project, model, false, { drawingId, isCalibrating: true });
+		const path = viewerRoute(teamspace, project, model, undefined, false, { drawingId, isCalibrating: true });
 		history.push(path);
 		onClickClose();
 	};

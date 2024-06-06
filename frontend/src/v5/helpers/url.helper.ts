@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { isEmpty } from 'lodash';
 import { generatePath } from 'react-router-dom';
 
 const appendSlashIfNeeded = (uri) => (uri.at(-1) !== '/' ? `${uri}/` : uri);
@@ -64,6 +63,7 @@ export const generateFullPath = (pattern: string, params: object, keepSearchPara
 			searchParamsObj.delete(key);
 		}
 	});
+	// @ts-ignore
 	if (!searchParamsObj.size) return path;
 	return `${path}?${searchParamsObj}`;
 };
