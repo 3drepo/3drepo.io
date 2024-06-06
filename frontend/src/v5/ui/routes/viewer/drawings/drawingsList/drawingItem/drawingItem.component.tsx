@@ -39,7 +39,6 @@ import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { useContext } from 'react';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { viewerRoute } from '@/v5/services/routing/routing';
-import { appendSearchParams } from '@/v5/ui/routes/routes.constants';
 
 const STATUS_CODE_TEXT = formatMessage({ id: 'drawings.list.item.statusCode', defaultMessage: 'Status code' });
 const REVISION_CODE_TEXT = formatMessage({ id: 'drawings.list.item.revisionCode', defaultMessage: 'Revision code' });
@@ -60,8 +59,8 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	const [selectedDrawingId] = useSearchParam('drawingId');
 	
 	const onCalibrateClick = () => {
-		const path = viewerRoute(teamspace, project, containerOrFederation, revision);
-		history.push(appendSearchParams(path, { drawingId, isCalibrating: true }));
+		const path = viewerRoute(teamspace, project, containerOrFederation, revision, false, { drawingId, isCalibrating: true });
+		history.push(path);
 		setOrigin(pathname + search);
 	};
 
