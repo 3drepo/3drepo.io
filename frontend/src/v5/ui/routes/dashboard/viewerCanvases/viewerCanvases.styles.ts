@@ -85,3 +85,7 @@ export const LeftPane = styled(OverlappingContainer)`
 	height: 100%;
 	pointer-events: none;
 `;
+
+export const Container = styled.div`
+	margin: auto;
+`;
