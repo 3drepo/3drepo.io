@@ -25,7 +25,7 @@ export interface CalibrationContextType {
 	setStep: (step: number) => void;
 	isStepValid: boolean;
 	setIsStepValid: (isValid: boolean) => void;
-	open: boolean;
+	isCalibrating: boolean;
 	origin: string;
 	setOrigin: (origin: string) => void;
 }
@@ -35,7 +35,7 @@ const defaultValue: CalibrationContextType = {
 	setStep: () => {},
 	isStepValid: false,
 	setIsStepValid: () => {},
-	open: false,
+	isCalibrating: false,
 	origin: '',
 	setOrigin: () => {},
 };
@@ -55,7 +55,7 @@ export const CalibrationContextComponent = ({ children }) => {
 	}, [containerOrFederation, revision, isCalibrating]);
 
 	return (
-		<CalibrationContext.Provider value={{ step, setStep, isStepValid, setIsStepValid, open: isCalibrating, origin, setOrigin }}>
+		<CalibrationContext.Provider value={{ step, setStep, isStepValid, setIsStepValid, isCalibrating, origin, setOrigin }}>
 			{children}
 		</CalibrationContext.Provider>
 	);

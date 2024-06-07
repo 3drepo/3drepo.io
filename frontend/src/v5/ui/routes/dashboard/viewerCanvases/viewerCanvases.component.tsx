@@ -28,7 +28,7 @@ import { Calibration } from '../projects/calibration/calibration.component';
 export const ViewerCanvases = () => {
 	const { pathname } = useLocation();
 	const { is2DOpen, leftPanelRatio, setLeftPanelRatio } = useContext(ViewerCanvasesContext);
-	const { open: isCalibrating } = useContext(CalibrationContext);
+	const { isCalibrating } = useContext(CalibrationContext);
 
 	const dragFinish = (newSize) => setLeftPanelRatio(newSize / window.innerWidth);
 

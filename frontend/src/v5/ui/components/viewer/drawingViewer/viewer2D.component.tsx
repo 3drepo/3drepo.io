@@ -34,7 +34,7 @@ import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibratio
 
 export const Viewer2D = () => {
 	const { close2D } = useContext(ViewerCanvasesContext);
-	const { open: isCalibrating } = useContext(CalibrationContext);
+	const { isCalibrating } = useContext(CalibrationContext);
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);

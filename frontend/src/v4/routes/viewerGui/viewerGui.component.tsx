@@ -246,7 +246,7 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 				<Container id="gui-container" className={this.props.className} hidden={isFocusMode}>
 					<RevisionsSwitch />
 					<CalibrationContext.Consumer>
-						{({ open: isCalibrating }) => this.renderLeftPanelsButtons(isCalibrating)}
+						{({ isCalibrating }) => this.renderLeftPanelsButtons(isCalibrating)}
 					</CalibrationContext.Consumer>
 					{this.renderLeftPanels(leftPanels)}
 					{this.renderRightPanels(rightPanels)}
