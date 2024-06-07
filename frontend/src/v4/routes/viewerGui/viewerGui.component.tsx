@@ -17,17 +17,13 @@
 
 import { Tickets } from '@/v5/ui/routes/viewer/tickets/tickets.component';
 import { isEmpty, isEqual } from 'lodash';
-import { PureComponent } from 'react';
+import { PureComponent, useContext } from 'react';
 import { AdditionalProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { DrawingsListCard } from '@/v5/ui/routes/viewer/drawings/drawingsList/drawingsListCard.component';
 import { ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
-import { useParams } from 'react-router-dom';
-import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { getCalibrationViewerLeftPanels, getViewerLeftPanels, VIEWER_PANELS } from '../../constants/viewerGui';
 import { getWindowHeight, getWindowWidth, renderWhenTrue } from '../../helpers/rendering';
@@ -80,6 +76,7 @@ interface IProps {
 	treeNodesList: any;
 	ticketsCardView: TicketsCardViews;
 	isEditingGroups: boolean;
+	isCalibrating: boolean;
 	stopListenOnSelections: () => void;
 	stopListenOnModelLoaded: () => void;
 	stopListenOnClickPin: () => void;
@@ -105,10 +102,9 @@ interface IState {
 	showLoader: boolean;
 	loaderType: string;
 	loaderProgress: number;
-	isCalibrating: boolean;
 }
 
-export class ViewerGui extends PureComponent<IProps, IState> {
+export class ViewerGuiBase extends PureComponent<IProps, IState> {
 
 	private get urlParams() {
 		return this.props.match.params;
@@ -123,8 +119,7 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 		loadedModelId: null,
 		showLoader: false,
 		loaderType: null,
-		loaderProgress: 0,
-		isCalibrating: false,
+		loaderProgress: 0
 	};
 
 	public renderViewerLoader = renderWhenTrue(() => <ViewerLoader />);
@@ -165,7 +160,7 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps: IProps, prevState: IState) {
 		const changes = {} as IState;
-		const { match: { params }, queryParams, leftPanels } = this.props;
+		const { match: { params }, queryParams, leftPanels, isCalibrating } = this.props;
 		const teamspaceChanged = params.teamspace !== prevProps.match.params.teamspace;
 		const modelChanged = params.model !== prevProps.match.params.model;
 		const revisionChanged = params.revision !== prevProps.match.params.revision;
@@ -209,6 +204,10 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 			// This is for not refreshing the view when exiting a selected ticket or when the card is closed
 			goToView(currView);
 		}
+
+		if (!isEqual(isCalibrating, prevProps.isCalibrating)) {
+			ViewerGuiActionsDispatchers.resetPanels();
+		}
 	}
 
 	public componentWillUnmount() {
@@ -245,9 +244,7 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 				<CloseFocusModeButton isFocusMode={isFocusMode} />
 				<Container id="gui-container" className={this.props.className} hidden={isFocusMode}>
 					<RevisionsSwitch />
-					<CalibrationContext.Consumer>
-						{({ isCalibrating }) => this.renderLeftPanelsButtons(isCalibrating)}
-					</CalibrationContext.Consumer>
+					{this.renderLeftPanelsButtons()}
 					{this.renderLeftPanels(leftPanels)}
 					{this.renderRightPanels(rightPanels)}
 					{this.renderDraggablePanels(draggablePanels)}
@@ -261,11 +258,8 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 		this.props.setPanelVisibility(panelType);
 	}
 
-	private renderLeftPanelsButtons = (isCalibrating) => {
-		if (isCalibrating !== this.state.isCalibrating) {
-			ViewerGuiActionsDispatchers.resetPanels();
-			this.setState({ ...this.state, isCalibrating });
-		}
+	private renderLeftPanelsButtons = () => {
+		const { isCalibrating } = this.props;
 
 		if (isCalibrating) {
 			return (
@@ -342,3 +336,8 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 		</DraggablePanels>
 	)
 }
+
+export const ViewerGui = (props) => {
+	const { isCalibrating } = useContext(CalibrationContext);
+	return <ViewerGuiBase {...props} isCalibrating={isCalibrating} />;
+};
