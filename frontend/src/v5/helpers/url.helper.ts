@@ -52,9 +52,9 @@ export const getCurrentUrl = (searchParams = '') => addParams(window.location.hr
 
 export const getParams = () => new URL(window.location.href).searchParams;
 
-export const generateFullPath = (pattern: string, params: object, keepSearchParams: boolean = true, newSearchParams: Record<string, string> = {}) => {
+export const generateFullPath = (pattern: string, params: object, newSearchParams: Record<string, any> = {}, keepOldSearchParams: boolean = true) => {
 	const path = generatePath(pattern, params);
-	const searchParamsObj = keepSearchParams ? getParams() : new URLSearchParams();
+	const searchParamsObj = keepOldSearchParams ? getParams() : new URLSearchParams();
 	
 	Object.entries(newSearchParams).forEach(([key, val]) => {
 		if (val) {

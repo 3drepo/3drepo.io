@@ -46,7 +46,7 @@ export const SelectModelForCalibration = ({ drawingId, onClickClose, ...props })
 	const federations = federationsData.federations.filter((f) => f.containers?.length);
 
 	const onSubmit = () => {
-		const path = viewerRoute(teamspace, project, model, undefined, false, { drawingId, isCalibrating: true });
+		const path = viewerRoute(teamspace, project, model, undefined, { drawingId, isCalibrating: true }, false);
 		history.push(path);
 		onClickClose();
 	};

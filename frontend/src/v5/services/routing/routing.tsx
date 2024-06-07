@@ -34,13 +34,21 @@ export const projectTabRoute = (teamspace: string, project: IProject | string, t
 
 type RevisionParam = IContainerRevision | string | null | undefined;
 type ContainerOrFederationParam = IContainer | IFederation | string;
+type ViewerSearchParams = {
+	drawingId?: string,
+	isCalibrating?: boolean,
+	ticketId?: string,
+	issueId?: string,
+	riskId?: string,
+};
 
 export const viewerRoute = (
 	teamspace: string,
 	project,
 	containerOrFederation: ContainerOrFederationParam,
 	revision: RevisionParam = undefined,
-	...generateFullPathParams
+	newSearchParams: ViewerSearchParams = {},
+	keepSearchParams = true,
 ) => {
 	const containerOrFederationId = (containerOrFederation as IContainer | IFederation)?._id
 		|| (containerOrFederation as string);
@@ -54,7 +62,7 @@ export const viewerRoute = (
 		revision: revisionId,
 	};
 
-	return generateFullPath(VIEWER_ROUTE, params, ...generateFullPathParams);
+	return generateFullPath(VIEWER_ROUTE, params, newSearchParams, keepSearchParams);
 };
 
 export const boardRoute = (

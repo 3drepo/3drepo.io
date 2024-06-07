@@ -59,7 +59,7 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	const [selectedDrawingId] = useSearchParam('drawingId');
 	
 	const onCalibrateClick = () => {
-		const path = viewerRoute(teamspace, project, containerOrFederation, revision, false, { drawingId, isCalibrating: true });
+		const path = viewerRoute(teamspace, project, containerOrFederation, revision, { drawingId, isCalibrating: true }, false);
 		history.push(path);
 		setOrigin(pathname + search);
 	};
