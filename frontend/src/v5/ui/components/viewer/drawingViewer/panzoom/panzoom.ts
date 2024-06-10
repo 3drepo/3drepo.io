@@ -18,6 +18,7 @@
 import { animate } from './animate';
 import EventEmitter from 'eventemitter3';
 import BezierEasing from 'bezier-easing';
+import { ZoomableImage } from '../drawingViewerImage/drawingViewerImage.component';
 
 const inertiaFunction = BezierEasing(0, 0.33, 0.66, 1);
 const zoomEasing = BezierEasing(0, 1.02, 0.65, 1);
@@ -33,20 +34,16 @@ const mass = 10;
 const zoomDuration = 300;
 
 /* eslint-disable @typescript-eslint/no-use-before-define */
-export const panzoom = (target: HTMLElement | SVGElement, options) => {
+export const panzoom = (target: ZoomableImage, options) => {
 	const transform = { scale:1, x: 0, y: 0 };
 	const zoomStep = 0.2;
-	target.style.transformOrigin = '0 0';
-	target.style.userSelect = 'none';
-	target.setAttribute('draggable', 'false');
-	const container = target.parentElement;
+
+	const container = target.getEventsEmitter();
 	const emitter = new EventEmitter();
 
 	let prevContainerRect = container.getBoundingClientRect();
 
 	let animation = null;
-
-	const isSVG = target.tagName.toLowerCase() === 'svg';
 
 	const speed = { x:0, y: 0 };
 
@@ -73,13 +70,7 @@ export const panzoom = (target: HTMLElement | SVGElement, options) => {
 	};
 
 	const applyTransform = () => {
-		const { scale, x, y } = transform;
-
-		if (isSVG) {
-			target.setAttribute('transform', `matrix(${scale} 0 0 ${scale} ${x} ${y})`);
-		} else {
-			target.style.transform = `matrix(${scale}, 0, 0, ${scale}, ${x}, ${y})`;
-		}
+		target.setTransform(transform);
 	};
 
 	const moveTo = (x: number, y: number) => {

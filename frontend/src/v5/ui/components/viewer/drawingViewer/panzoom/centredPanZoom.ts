@@ -17,27 +17,16 @@
 
 import { aspectRatio } from '@/v4/helpers/aspectRatio';
 import { Events, PanZoom, panzoom } from './panzoom';
+import { ZoomableImage } from '../drawingViewerImage/drawingViewerImage.component';
 
 export type PanZoomHandler = PanZoom & { zoomIn : () => void, zoomOut: () => void };
 
-export const centredPanZoom = (target: HTMLImageElement | SVGSVGElement, paddingW: number, paddingH: number) => {
-	const targetContainer = target.parentElement;
+export const centredPanZoom = (target: ZoomableImage, paddingW: number, paddingH: number) => {
 
-	const originalSize = { width: 0, height: 0 };
+	const originalSize = target.getNaturalSize();
+	target.setSize(originalSize);
 
-	if (target.tagName.toLocaleLowerCase() === 'img') {
-		const img:HTMLImageElement = target as HTMLImageElement;
-
-		originalSize.width = img.naturalWidth;
-		originalSize.height = img.naturalHeight;
-	} else {
-		const svg:SVGSVGElement = target as SVGSVGElement;
-		originalSize.width = svg.viewBox.baseVal.width || svg.width.baseVal.value;
-		originalSize.height = svg.viewBox.baseVal.height || svg.height.baseVal.value;
-	}
-
-	target.setAttribute('width', originalSize.width + 'px');
-	target.setAttribute('height', originalSize.height + 'px');
+	const targetContainer = target.getEventsEmitter();
 
 	const options = {
 		maxZoom: 3,

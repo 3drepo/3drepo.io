@@ -14,9 +14,26 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
+let tiles = [];
 
 self.onmessage = (event) => {
-	// eslint-disable-next-line no-console
-	console.log('i got this message: ');
+	if (event.data.method) {
+		this[event.data.method]?.apply(this, event.data.payload);
+	} else {
+		console.log(event);
+	}
 };
+
+function setTiles(tt) {
+	tiles = tt;
+}
+
+function renderCanvas(index, bitmap ) {
+	const { width, height } = bitmap;
+	const canvas = tiles[index];
+	const ctx = canvas.getContext('2d');
+	ctx.clearRect(0, 0, width, height);
+	ctx.drawImage(bitmap, 0, 0);
+}
