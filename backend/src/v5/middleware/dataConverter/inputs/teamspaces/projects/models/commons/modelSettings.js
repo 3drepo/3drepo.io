@@ -78,7 +78,7 @@ const isPropUnique = async (teamspace, project, model, modelType, propName, prop
 };
 
 const modelNameType = (teamspace, project, model) => types.strings.title.test('name-already-used', 'Name is already used within the project',
-	(value) => isPropUnique(teamspace, project, model, MODEL_TYPES.container, 'name', value));
+	(value) => isPropUnique(teamspace, project, model, MODEL_TYPES.any, 'name', value));
 
 const modelNumberType = (teamspace, project, model) => types.strings.title.test('number-already-used', 'Number is already used within the project',
 	(value) => isPropUnique(teamspace, project, model, MODEL_TYPES.drawing, 'number', value));
