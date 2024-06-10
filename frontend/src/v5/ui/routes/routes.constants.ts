@@ -24,7 +24,6 @@ export const SIGN_UP_SSO_PATH = '/v5/signup-sso';
 export const PASSWORD_CHANGE_PATH = '/v5/password-change';
 export const REGISTER_VERIFY_PATH = '/v5/register-verify';
 export const VIEWER_ROUTE = '/v5/viewer/:teamspace/:project/:containerOrFederation/:revision?';
-export const CALIBRATION_VIEWER_ROUTE = `${VIEWER_ROUTE}/calibration`;
 export const DASHBOARD_ROUTE = '/v5/dashboard';
 export const TEAMSPACE_ROUTE_BASE = `${DASHBOARD_ROUTE}/:teamspace`;
 export const TEAMSPACE_ROUTE_BASE_TAB = `${TEAMSPACE_ROUTE_BASE}/t`;
@@ -35,6 +34,7 @@ export const PROJECT_ROUTE_BASE_TAB = `${PROJECT_ROUTE_BASE}/t`;
 export const PROJECT_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/:tab`;
 export const CONTAINERS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/containers`;
 export const FEDERATIONS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/federations`;
+export const DRAWINGS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/drawings`;
 export const BOARD_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/board/:type?/:containerOrFederation?`;
 export const TICKETS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/tickets/:template/:ticketId?`;
 

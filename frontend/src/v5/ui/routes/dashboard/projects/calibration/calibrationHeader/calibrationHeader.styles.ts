@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,10 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Stepper as StepperBase } from '@mui/material';
+import { Button as ButtonBase } from '@controls/button';
 import styled from 'styled-components';
 
-export const Content = styled.div`
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	flex-grow: 1;
-	height: 100%;
+export const Stepper = styled(StepperBase)`
+	border-radius: 0;
+	box-shadow: none;
 `;
+
+export const Container = styled.div`
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	background-color: ${({ theme }) => theme.palette.secondary.main};
+`;
+
+export const ButtonsContainer = styled.div`
+	display: grid;
+	place-content: center;
+	grid-template-columns: repeat(3, 1fr);
+`;
+
+export const Button = styled(ButtonBase).attrs({
+	variant: 'outlined',
+})``;

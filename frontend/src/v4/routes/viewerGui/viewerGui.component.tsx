@@ -17,13 +17,15 @@
 
 import { Tickets } from '@/v5/ui/routes/viewer/tickets/tickets.component';
 import { isEmpty, isEqual } from 'lodash';
-import { PureComponent } from 'react';
+import { PureComponent, useContext } from 'react';
 import { AdditionalProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { DrawingsListCard } from '@/v5/ui/routes/viewer/drawings/drawingsList/drawingsListCard.component';
+import { ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { VIEWER_EVENTS } from '../../constants/viewer';
-import { getViewerLeftPanels, VIEWER_PANELS } from '../../constants/viewerGui';
+import { getCalibrationViewerLeftPanels, getViewerLeftPanels, VIEWER_PANELS } from '../../constants/viewerGui';
 import { getWindowHeight, getWindowWidth, renderWhenTrue } from '../../helpers/rendering';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { Activities } from './components/activities/';
@@ -74,6 +76,7 @@ interface IProps {
 	treeNodesList: any;
 	ticketsCardView: TicketsCardViews;
 	isEditingGroups: boolean;
+	isCalibrating: boolean;
 	stopListenOnSelections: () => void;
 	stopListenOnModelLoaded: () => void;
 	stopListenOnClickPin: () => void;
@@ -101,7 +104,7 @@ interface IState {
 	loaderProgress: number;
 }
 
-export class ViewerGui extends PureComponent<IProps, IState> {
+export class ViewerGuiBase extends PureComponent<IProps, IState> {
 
 	private get urlParams() {
 		return this.props.match.params;
@@ -157,7 +160,7 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps: IProps, prevState: IState) {
 		const changes = {} as IState;
-		const { match: { params }, queryParams, leftPanels } = this.props;
+		const { match: { params }, queryParams, leftPanels, isCalibrating } = this.props;
 		const teamspaceChanged = params.teamspace !== prevProps.match.params.teamspace;
 		const modelChanged = params.model !== prevProps.match.params.model;
 		const revisionChanged = params.revision !== prevProps.match.params.revision;
@@ -200,6 +203,10 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 		if (!isEqual(prevView, currView) || this.props.treeNodesList !== prevProps.treeNodesList) {
 			// This is for not refreshing the view when exiting a selected ticket or when the card is closed
 			goToView(currView);
+		}
+
+		if (!isEqual(isCalibrating, prevProps.isCalibrating)) {
+			ViewerGuiActionsDispatchers.resetPanels();
 		}
 	}
 
@@ -251,21 +258,41 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 		this.props.setPanelVisibility(panelType);
 	}
 
-	private renderLeftPanelsButtons = () => (
-		<LeftPanelsButtons>
-			{getViewerLeftPanels().map(({ name, type }) => (
-				<PanelButton
-					key={type}
-					onClick={this.handleTogglePanel}
-					label={name}
-					type={type}
-					id={type + '-panel-button'}
-					active={this.props.leftPanels.includes(type)}
-					disabled={this.props.disabledPanelButtons.has(type)}
-				/>
-			))}
-		</LeftPanelsButtons>
-	)
+	private renderLeftPanelsButtons = () => {
+		const { isCalibrating } = this.props;
+
+		if (isCalibrating) {
+			return (
+				<LeftPanelsButtons>
+					{getCalibrationViewerLeftPanels().map(({ name, type }) => (
+						<PanelButton
+							key={type}
+							onClick={ViewerGuiActionsDispatchers.setPanelVisibility}
+							label={name}
+							type={type}
+							id={type + '-panel-button'}
+							active={this.props.leftPanels.includes(type)}
+						/>
+					))}
+				</LeftPanelsButtons>
+			);
+		}
+		return (
+			<LeftPanelsButtons>
+				{getViewerLeftPanels().map(({ name, type }) => (
+					<PanelButton
+						key={type}
+						onClick={this.handleTogglePanel}
+						label={name}
+						type={type}
+						id={type + '-panel-button'}
+						active={this.props.leftPanels.includes(type)}
+						disabled={this.props.disabledPanelButtons.has(type)}
+					/>
+				))}
+			</LeftPanelsButtons>
+		);
+	};
 
 	private panelsMap = {
 		[VIEWER_PANELS.ISSUES]: Issues,
@@ -309,3 +336,8 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 		</DraggablePanels>
 	)
 }
+
+export const ViewerGui = (props) => {
+	const { isCalibrating } = useContext(CalibrationContext);
+	return <ViewerGuiBase {...props} isCalibrating={isCalibrating} />;
+};

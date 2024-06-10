@@ -34,9 +34,11 @@ import { FormattedMessage } from 'react-intl';
 import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
-import { useParams, useHistory, generatePath } from 'react-router-dom';
-import { CALIBRATION_VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { useContext } from 'react';
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
+import { viewerRoute } from '@/v5/services/routing/routing';
 
 const STATUS_CODE_TEXT = formatMessage({ id: 'drawings.list.item.statusCode', defaultMessage: 'Status code' });
 const REVISION_CODE_TEXT = formatMessage({ id: 'drawings.list.item.revisionCode', defaultMessage: 'Revision code' });
@@ -46,8 +48,10 @@ type DrawingItemProps = {
 	onClick: React.MouseEventHandler<HTMLDivElement>;
 };
 export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
-	const params = useParams();
+	const { teamspace, project, containerOrFederation, revision } = useParams();
 	const history = useHistory();
+	const { pathname, search } = useLocation();
+	const { setOrigin } = useContext(CalibrationContext);
 	const { calibration, name, drawingNumber, lastUpdated, desc, _id: drawingId } = drawing;
 	const [latestRevision] = DrawingRevisionsHooksSelectors.selectRevisions(drawingId);
 	const { statusCode, revisionCode } = latestRevision || {};
@@ -55,8 +59,9 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	const [selectedDrawingId] = useSearchParam('drawingId');
 	
 	const onCalibrateClick = () => {
-		const path = generatePath(CALIBRATION_VIEWER_ROUTE, params);
-		history.push(`${path}?drawingId=${drawingId}`);
+		const path = viewerRoute(teamspace, project, containerOrFederation, revision, { drawingId, isCalibrating: true }, false);
+		history.push(path);
+		setOrigin(pathname + search);
 	};
 
 	const LoadingCodes = () => (

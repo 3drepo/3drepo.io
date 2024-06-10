@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,11 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { BasicStep } from '../basicStep.component';
 
-import styled from 'styled-components';
-
-export const Content = styled.div`
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	flex-grow: 1;
-	height: 100%;
-`;
+export const Calibration3DStep = () => {
+	return <BasicStep text="3d calibration" />;
+};
