@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 self.onmessage = (event) => {
 	// eslint-disable-next-line no-console
-	console.log('i got this message: ' + event.data);
+	console.log('i got this message: ');
 };
