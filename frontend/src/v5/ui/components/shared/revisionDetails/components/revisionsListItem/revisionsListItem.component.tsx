@@ -34,7 +34,7 @@ export const RevisionsListItem = ({
 	onSetVoidStatus,
 	hasPermission,
 	voidStatus,
-	redirectTo = '',
+	redirectTo,
 	onDownloadRevision,
 	children,
 }: IRevisionsListItem): JSX.Element => {
@@ -52,7 +52,7 @@ export const RevisionsListItem = ({
 	};
 
 	return (
-		<Container to={disabled ? '' : redirectTo} disabled={disabled}>
+		<Container to={(location) => (disabled || !redirectTo) ? location : redirectTo} disabled={disabled}>
 			{children}
 			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} disabled={!hasPermission} />
 			{hasPermission && (
