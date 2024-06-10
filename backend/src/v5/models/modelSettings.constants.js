@@ -74,10 +74,10 @@ ModelSettingConstants.STATUSES = {
 ModelSettingConstants.getInfoFromCode = (code) => importErrorMapping[code] || systemFailureMsg;
 
 ModelSettingConstants.MODEL_TYPES = {
-	container: 'container',
-	federation: 'federation',
-	drawing: 'drawing',
-	any: 'any',
+	CONTAINER: 'container',
+	FEDERATION: 'federation',
+	DRAWING: 'drawing',
+	ANY: 'any',
 };
 
 ModelSettingConstants.MODEL_CATEGORIES = [

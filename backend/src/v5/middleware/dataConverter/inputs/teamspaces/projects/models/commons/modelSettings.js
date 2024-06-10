@@ -65,7 +65,7 @@ const isPropUnique = async (teamspace, project, model, modelType, propName, prop
 		}
 
 		const query = { _id: { $in: models },
-			...(modelType === MODEL_TYPES.drawing ? { modelType: MODEL_TYPES.drawing } : {}),
+			...(modelType === MODEL_TYPES.DRAWING ? { modelType: MODEL_TYPES.DRAWING } : {}),
 			// eslint-disable-next-line security/detect-non-literal-regexp
 			[propName]: new RegExp(`^${escapeRegexChrs(propValue)}$`, 'i') };
 
@@ -78,10 +78,10 @@ const isPropUnique = async (teamspace, project, model, modelType, propName, prop
 };
 
 const modelNameType = (teamspace, project, model) => types.strings.title.test('name-already-used', 'Name is already used within the project',
-	(value) => isPropUnique(teamspace, project, model, MODEL_TYPES.any, 'name', value));
+	(value) => isPropUnique(teamspace, project, model, MODEL_TYPES.ANY, 'name', value));
 
 const modelNumberType = (teamspace, project, model) => types.strings.title.test('number-already-used', 'Number is already used within the project',
-	(value) => isPropUnique(teamspace, project, model, MODEL_TYPES.drawing, 'number', value));
+	(value) => isPropUnique(teamspace, project, model, MODEL_TYPES.DRAWING, 'number', value));
 
 const generateSchema = (newEntry, modelType, teamspace, project, modelId) => {
 	const name = modelNameType(teamspace, project, modelId);
@@ -90,12 +90,12 @@ const generateSchema = (newEntry, modelType, teamspace, project, modelId) => {
 	const commonProps = {
 		name: newEntry ? name.required() : name,
 		desc: types.strings.shortDescription,
-		...(modelType === MODEL_TYPES.federation ? {} : { type: newEntry ? Yup.string().required() : Yup.string() }),
+		...(modelType === MODEL_TYPES.FEDERATION ? {} : { type: newEntry ? Yup.string().required() : Yup.string() }),
 	};
 
 	const schema = {
 		...commonProps,
-		...(modelType === MODEL_TYPES.drawing
+		...(modelType === MODEL_TYPES.DRAWING
 			? { number: newEntry ? number.required() : number }
 			: {
 				unit: newEntry ? types.strings.unit.required() : types.strings.unit,
@@ -149,10 +149,10 @@ ModelSettings.validateUpdateSettingsData = (modelType) => async (req, res, next)
 		const { teamspace, project } = req.params;
 
 		let model;
-		if (modelType === MODEL_TYPES.federation) {
+		if (modelType === MODEL_TYPES.FEDERATION) {
 			model = req.params.federation;
 		} else {
-			model = modelType === MODEL_TYPES.container ? req.params.container : req.params.drawing;
+			model = modelType === MODEL_TYPES.CONTAINER ? req.params.container : req.params.drawing;
 		}
 
 		const schema = generateSchema(false, modelType, teamspace, project, model);

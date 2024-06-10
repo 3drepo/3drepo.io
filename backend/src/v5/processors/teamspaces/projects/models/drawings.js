@@ -31,7 +31,7 @@ Drawings.getDrawingList = async (teamspace, project, user) => {
 };
 
 Drawings.addDrawing = (teamspace, project, data) => addModel(teamspace, project,
-	{ ...data, modelType: MODEL_TYPES.drawing });
+	{ ...data, modelType: MODEL_TYPES.DRAWING });
 
 Drawings.updateSettings = updateModelSettings;
 

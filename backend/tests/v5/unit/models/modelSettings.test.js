@@ -196,7 +196,7 @@ const testGetContainers = () => {
 			expect(DBHandler.find).toHaveBeenCalledWith(teamspace, SETTINGS_COL,
 				{ _id: { $in: modelIds },
 					federate: { $ne: true },
-					modelType: { $ne: MODEL_TYPES.drawing } }, undefined, undefined);
+					modelType: { $ne: MODEL_TYPES.DRAWING } }, undefined, undefined);
 		});
 	});
 };
@@ -223,7 +223,7 @@ const testGetDrawings = () => {
 			expect(res).toEqual(expectedData);
 			expect(DBHandler.find).toHaveBeenCalledTimes(1);
 			expect(DBHandler.find).toHaveBeenCalledWith(teamspace, SETTINGS_COL,
-				{ _id: { $in: modelIds }, modelType: MODEL_TYPES.drawing },
+				{ _id: { $in: modelIds }, modelType: MODEL_TYPES.DRAWING },
 				undefined, undefined);
 		});
 	});

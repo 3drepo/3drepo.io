@@ -49,7 +49,7 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects', ProjectRoutes);
 
 	// Containers
-	app.use('/v5/teamspaces/:teamspace/projects/:project/containers', CreateModelGeneralRoutes(MODEL_TYPES.container));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers', CreateModelGeneralRoutes(MODEL_TYPES.CONTAINER));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/tickets', CreateTicketRoutes());
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/tickets/:ticket/comments', CreateTicketCommentsRoutes());
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/tickets/:ticket/groups', CreateTicketGroupsRoutes());
@@ -59,7 +59,7 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/metadata', MetadataRoutes);
 
 	// Federations
-	app.use('/v5/teamspaces/:teamspace/projects/:project/federations', CreateModelGeneralRoutes(MODEL_TYPES.federation));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/federations', CreateModelGeneralRoutes(MODEL_TYPES.FEDERATION));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/tickets', CreateTicketRoutes(true));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/tickets/:ticket/comments', CreateTicketCommentsRoutes(true));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/tickets/:ticket/groups', CreateTicketGroupsRoutes(true));
@@ -68,7 +68,7 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:federation/revisions', FederationRevisionRoutes);
 
 	// Drawings
-	app.use('/v5/teamspaces/:teamspace/projects/:project/drawings', CreateModelGeneralRoutes(MODEL_TYPES.drawing));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/drawings', CreateModelGeneralRoutes(MODEL_TYPES.DRAWING));
 };
 
 module.exports = RoutesManager;

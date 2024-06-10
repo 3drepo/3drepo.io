@@ -34,7 +34,7 @@ const findOneAndUpdateModel = (ts, query, action, projection) => db.findOneAndUp
 );
 
 const noFederations = { federate: { $ne: true } };
-const noDrawings = { modelType: { $ne: MODEL_TYPES.drawing } };
+const noDrawings = { modelType: { $ne: MODEL_TYPES.DRAWING } };
 const onlyFederations = { federate: true };
 
 Models.findModels = findModels;
@@ -101,7 +101,7 @@ Models.getContainerById = async (ts, container, projection) => {
 Models.getDrawingById = async (ts, drawing, projection) => {
 	try {
 		return await Models.getModelByQuery(ts,
-			{ _id: drawing, modelType: MODEL_TYPES.drawing }, projection);
+			{ _id: drawing, modelType: MODEL_TYPES.DRAWING }, projection);
 	} catch (err) {
 		if (err?.code === templates.modelNotFound.code) {
 			throw templates.drawingNotFound;
@@ -133,7 +133,7 @@ Models.getFederations = (ts, ids, projection, sort) => {
 };
 
 Models.getDrawings = (ts, ids, projection, sort) => {
-	const query = { _id: { $in: ids }, modelType: MODEL_TYPES.drawing };
+	const query = { _id: { $in: ids }, modelType: MODEL_TYPES.DRAWING };
 	return findModels(ts, query, projection, sort);
 };
 

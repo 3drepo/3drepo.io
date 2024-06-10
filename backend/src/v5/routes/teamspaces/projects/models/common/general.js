@@ -41,9 +41,9 @@ const addModel = (modelType) => async (req, res) => {
 	const { teamspace, project } = req.params;
 	try {
 		const fn = {
-			[MODEL_TYPES.container]: Containers.addContainer,
-			[MODEL_TYPES.federation]: Federations.addFederation,
-			[MODEL_TYPES.drawing]: Drawings.addDrawing,
+			[MODEL_TYPES.CONTAINER]: Containers.addContainer,
+			[MODEL_TYPES.FEDERATION]: Federations.addFederation,
+			[MODEL_TYPES.DRAWING]: Drawings.addDrawing,
 		};
 
 		const modelId = await fn[modelType](teamspace, project, req.body);
@@ -58,9 +58,9 @@ const deleteModel = (modelType) => async (req, res) => {
 	const { teamspace, project, model } = req.params;
 	try {
 		const fn = {
-			[MODEL_TYPES.container]: Containers.deleteContainer,
-			[MODEL_TYPES.federation]: Federations.deleteFederation,
-			[MODEL_TYPES.drawing]: Drawings.deleteDrawing,
+			[MODEL_TYPES.CONTAINER]: Containers.deleteContainer,
+			[MODEL_TYPES.FEDERATION]: Federations.deleteFederation,
+			[MODEL_TYPES.DRAWING]: Drawings.deleteDrawing,
 		};
 
 		await fn[modelType](teamspace, project, model);
@@ -76,9 +76,9 @@ const getModelList = (modelType) => async (req, res) => {
 	const { teamspace, project } = req.params;
 
 	const fn = {
-		[MODEL_TYPES.container]: Containers.getContainerList,
-		[MODEL_TYPES.federation]: Federations.getFederationList,
-		[MODEL_TYPES.drawing]: Drawings.getDrawingList,
+		[MODEL_TYPES.CONTAINER]: Containers.getContainerList,
+		[MODEL_TYPES.FEDERATION]: Federations.getFederationList,
+		[MODEL_TYPES.DRAWING]: Drawings.getDrawingList,
 	};
 
 	try {
@@ -94,9 +94,9 @@ const appendFavourites = (modelType) => async (req, res) => {
 	const { teamspace, project } = req.params;
 	const favouritesToAdd = req.body[`${modelType}s`];
 	const fn = {
-		[MODEL_TYPES.container]: Containers.appendFavourites,
-		[MODEL_TYPES.federation]: Federations.appendFavourites,
-		[MODEL_TYPES.drawing]: Drawings.appendFavourites,
+		[MODEL_TYPES.CONTAINER]: Containers.appendFavourites,
+		[MODEL_TYPES.FEDERATION]: Federations.appendFavourites,
+		[MODEL_TYPES.DRAWING]: Drawings.appendFavourites,
 	};
 
 	try {
@@ -111,9 +111,9 @@ const deleteFavourites = (modelType) => async (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
 	const fn = {
-		[MODEL_TYPES.container]: Containers.deleteFavourites,
-		[MODEL_TYPES.federation]: Federations.deleteFavourites,
-		[MODEL_TYPES.drawing]: Drawings.deleteFavourites,
+		[MODEL_TYPES.CONTAINER]: Containers.deleteFavourites,
+		[MODEL_TYPES.FEDERATION]: Federations.deleteFavourites,
+		[MODEL_TYPES.DRAWING]: Drawings.deleteFavourites,
 	};
 
 	try {
@@ -133,8 +133,8 @@ const deleteFavourites = (modelType) => async (req, res) => {
 const getModelStats = (modelType) => async (req, res, next) => {
 	const { teamspace, model } = req.params;
 	const fn = {
-		[MODEL_TYPES.container]: Containers.getContainerStats,
-		[MODEL_TYPES.federation]: Federations.getFederationStats,
+		[MODEL_TYPES.CONTAINER]: Containers.getContainerStats,
+		[MODEL_TYPES.FEDERATION]: Federations.getFederationStats,
 	};
 
 	try {
@@ -150,9 +150,9 @@ const getModelStats = (modelType) => async (req, res, next) => {
 const updateModelSettings = (modelType) => async (req, res) => {
 	const { teamspace, project, model } = req.params;
 	const fn = {
-		[MODEL_TYPES.container]: Containers.updateSettings,
-		[MODEL_TYPES.federation]: Federations.updateSettings,
-		[MODEL_TYPES.drawing]: Drawings.updateSettings,
+		[MODEL_TYPES.CONTAINER]: Containers.updateSettings,
+		[MODEL_TYPES.FEDERATION]: Federations.updateSettings,
+		[MODEL_TYPES.DRAWING]: Drawings.updateSettings,
 	};
 	try {
 		await fn[modelType](teamspace, project, model, req.body);
@@ -166,8 +166,8 @@ const updateModelSettings = (modelType) => async (req, res) => {
 const getModelSettings = (modelType) => async (req, res, next) => {
 	const { teamspace, model } = req.params;
 	const fn = {
-		[MODEL_TYPES.container]: Containers.getSettings,
-		[MODEL_TYPES.federation]: Federations.getSettings,
+		[MODEL_TYPES.CONTAINER]: Containers.getSettings,
+		[MODEL_TYPES.FEDERATION]: Federations.getSettings,
 	};
 	try {
 		const settings = await fn[modelType](teamspace, model);
@@ -183,21 +183,21 @@ const establishRoutes = (modelType) => {
 	const router = Router({ mergeParams: true });
 
 	const hasAdminAccessToModel = {
-		[MODEL_TYPES.container]: hasAdminAccessToContainer,
-		[MODEL_TYPES.federation]: hasAdminAccessToFederation,
-		[MODEL_TYPES.drawing]: hasAdminAccessToDrawing,
+		[MODEL_TYPES.CONTAINER]: hasAdminAccessToContainer,
+		[MODEL_TYPES.FEDERATION]: hasAdminAccessToFederation,
+		[MODEL_TYPES.DRAWING]: hasAdminAccessToDrawing,
 	};
 
 	const hasReadAccessToModel = {
-		[MODEL_TYPES.container]: hasReadAccessToContainer,
-		[MODEL_TYPES.federation]: hasReadAccessToFederation,
-		[MODEL_TYPES.drawing]: hasReadAccessToDrawing,
+		[MODEL_TYPES.CONTAINER]: hasReadAccessToContainer,
+		[MODEL_TYPES.FEDERATION]: hasReadAccessToFederation,
+		[MODEL_TYPES.DRAWING]: hasReadAccessToDrawing,
 	};
 
 	const canDeleteModel = {
-		[MODEL_TYPES.container]: canDeleteContainer,
-		[MODEL_TYPES.federation]: async (req, res, next) => { await next(); },
-		[MODEL_TYPES.drawing]: async (req, res, next) => { await next(); },
+		[MODEL_TYPES.CONTAINER]: canDeleteContainer,
+		[MODEL_TYPES.FEDERATION]: async (req, res, next) => { await next(); },
+		[MODEL_TYPES.DRAWING]: async (req, res, next) => { await next(); },
 	};
 
 	/**

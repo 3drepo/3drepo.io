@@ -94,10 +94,10 @@ const testFormatModelSettings = () => {
 
 const testFormatModelStats = () => {
 	describe.each([
-		[MODEL_TYPES.federation, { lastUpdated: new Date() }, 'lastUpdated field'],
-		[MODEL_TYPES.federation, {}, 'no lastUpdated field'],
-		[MODEL_TYPES.container, { revisions: {} }, 'no data to convert'],
-		[MODEL_TYPES.container, { revisions: {
+		[MODEL_TYPES.FEDERATION, { lastUpdated: new Date() }, 'lastUpdated field'],
+		[MODEL_TYPES.FEDERATION, {}, 'no lastUpdated field'],
+		[MODEL_TYPES.CONTAINER, { revisions: {} }, 'no data to convert'],
+		[MODEL_TYPES.CONTAINER, { revisions: {
 			lastUpdated: new Date(),
 			latestRevision: generateUUID(),
 		},
@@ -113,7 +113,7 @@ const testFormatModelStats = () => {
 					...data,
 				};
 
-				if (modelType === MODEL_TYPES.federation) {
+				if (modelType === MODEL_TYPES.FEDERATION) {
 					formattedStats.lastUpdated = data.lastUpdated ? data.lastUpdated.getTime() : undefined;
 				} else {
 					formattedStats.revisions.lastUpdated = formattedStats.revisions.lastUpdated

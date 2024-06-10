@@ -56,9 +56,9 @@ Permissions.hasProjectAdminPermissions = (perms, username) => perms.some(
 const modelPermCheck = (permCheck, modelType) => async (teamspace, project, modelID, username, adminCheck = true) => {
 	let getModelFn = getModelById;
 
-	if (modelType === MODEL_TYPES.container) {
+	if (modelType === MODEL_TYPES.CONTAINER) {
 		getModelFn = getContainerById;
-	} else if (modelType === MODEL_TYPES.federation) {
+	} else if (modelType === MODEL_TYPES.FEDERATION) {
 		getModelFn = getFederationById;
 	}
 
@@ -89,13 +89,13 @@ Permissions.hasReadAccessToSomeModels = async (teamspace, project, models, usern
 };
 
 Permissions.hasWriteAccessToModel = modelPermCheck(
-	(perm) => MODEL_WRITE_ROLES.includes(perm.permission), MODEL_TYPES.any,
+	(perm) => MODEL_WRITE_ROLES.includes(perm.permission), MODEL_TYPES.ANY,
 );
 Permissions.hasCommenterAccessToModel = modelPermCheck(
-	(perm) => MODEL_COMMENT_ROLES.includes(perm.permission), MODEL_TYPES.any,
+	(perm) => MODEL_COMMENT_ROLES.includes(perm.permission), MODEL_TYPES.ANY,
 );
 Permissions.hasReadAccessToModel = modelPermCheck(
-	(perm) => MODEL_READ_ROLES.includes(perm.permission), MODEL_TYPES.any,
+	(perm) => MODEL_READ_ROLES.includes(perm.permission), MODEL_TYPES.ANY,
 );
 
 const hasAdminAccessToModel = async (teamspace, project, model, username) => {
@@ -116,13 +116,13 @@ Permissions.hasAdminAccessToFederation = async (teamspace, project, federation, 
 	return fed && adminAccess;
 };
 Permissions.hasWriteAccessToFederation = modelPermCheck(
-	(perm) => MODEL_WRITE_ROLES.includes(perm.permission), MODEL_TYPES.federation,
+	(perm) => MODEL_WRITE_ROLES.includes(perm.permission), MODEL_TYPES.FEDERATION,
 );
 Permissions.hasCommenterAccessToFederation = modelPermCheck(
-	(perm) => MODEL_COMMENT_ROLES.includes(perm.permission), MODEL_TYPES.federation,
+	(perm) => MODEL_COMMENT_ROLES.includes(perm.permission), MODEL_TYPES.FEDERATION,
 );
 Permissions.hasReadAccessToFederation = modelPermCheck(
-	(perm) => MODEL_READ_ROLES.includes(perm.permission), MODEL_TYPES.federation,
+	(perm) => MODEL_READ_ROLES.includes(perm.permission), MODEL_TYPES.FEDERATION,
 );
 
 Permissions.hasAdminAccessToContainer = async (teamspace, project, container, username) => {
@@ -135,13 +135,13 @@ Permissions.hasAdminAccessToContainer = async (teamspace, project, container, us
 };
 
 Permissions.hasWriteAccessToContainer = modelPermCheck(
-	(perm) => MODEL_WRITE_ROLES.includes(perm.permission), MODEL_TYPES.container,
+	(perm) => MODEL_WRITE_ROLES.includes(perm.permission), MODEL_TYPES.CONTAINER,
 );
 Permissions.hasCommenterAccessToContainer = modelPermCheck(
-	(perm) => MODEL_COMMENT_ROLES.includes(perm.permission), MODEL_TYPES.container,
+	(perm) => MODEL_COMMENT_ROLES.includes(perm.permission), MODEL_TYPES.CONTAINER,
 );
 Permissions.hasReadAccessToContainer = modelPermCheck(
-	(perm) => MODEL_READ_ROLES.includes(perm.permission), MODEL_TYPES.container,
+	(perm) => MODEL_READ_ROLES.includes(perm.permission), MODEL_TYPES.CONTAINER,
 );
 
 Permissions.hasAdminAccessToDrawing = async (teamspace, project, drawingId, username) => {
@@ -154,7 +154,7 @@ Permissions.hasAdminAccessToDrawing = async (teamspace, project, drawingId, user
 };
 
 Permissions.hasReadAccessToDrawing = modelPermCheck(
-	(perm) => MODEL_READ_ROLES.includes(perm.permission), MODEL_TYPES.drawing,
+	(perm) => MODEL_READ_ROLES.includes(perm.permission), MODEL_TYPES.DRAWING,
 );
 
 module.exports = Permissions;

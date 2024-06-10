@@ -46,7 +46,7 @@ ModelSettings.formatModelSettings = (req, res) => {
 ModelSettings.formatModelStats = (modelType) => (req, res) => {
 	const { outputData } = req;
 
-	if (modelType === MODEL_TYPES.federation) {
+	if (modelType === MODEL_TYPES.FEDERATION) {
 		if (outputData.lastUpdated) outputData.lastUpdated = outputData.lastUpdated.getTime();
 	} else {
 		outputData.revisions.lastUpdated = outputData.revisions.lastUpdated

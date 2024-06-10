@@ -44,7 +44,7 @@ const testAddDrawing = () => {
 			expect(res).toEqual(newDrawingId);
 			expect(ModelList.addModel).toHaveBeenCalledTimes(1);
 			expect(ModelList.addModel).toHaveBeenCalledWith(teamspace, project,
-				{ ...data, modelType: MODEL_TYPES.drawing });
+				{ ...data, modelType: MODEL_TYPES.DRAWING });
 		});
 
 		test('should return error if addModel fails', async () => {
@@ -58,7 +58,7 @@ const testAddDrawing = () => {
 
 			expect(ModelList.addModel).toHaveBeenCalledTimes(1);
 			expect(ModelList.addModel).toHaveBeenCalledWith(teamspace, project,
-				{ ...data, modelType: MODEL_TYPES.drawing });
+				{ ...data, modelType: MODEL_TYPES.DRAWING });
 		});
 	});
 };
