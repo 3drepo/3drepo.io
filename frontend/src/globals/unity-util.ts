@@ -721,14 +721,13 @@ export class UnityUtil {
 	 * @category Navigations
 	 * @param meshIDs - array of json objects each recording { model: <account.modelID>, meshID: [array of mesh IDs] }
 	 */
-	public static centreToPoint(meshIDs: [object]) {
-
-		Object.entries(meshIDs.entries).forEach((entry) => {
-			UnityUtil.multipleCallInChunks(entry[1].meshID.length, (start,end) => {
-				const ids = entry[1].meshID.slice(start, end);
+	public static centreToPoint(meshIDs: Array<{ model: string, meshID: string[] }>) {
+		meshIDs.forEach((entry) => {
+			UnityUtil.multipleCallInChunks(entry.meshID.length, (start, end) => {
+				const ids = entry.meshID.slice(start, end);
 				const params: any = {
-					teamspace: "", // Empty string for compatability with zoomToObjects						
-					modelId: entry[1].model,
+					teamspace: '', // Empty string for compatability with zoomToObjects
+					modelId: entry.model,
 					meshes: ids,
 				};
 				UnityUtil.toUnity('ZoomToObjectsAppend', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
@@ -2229,20 +2228,17 @@ export class UnityUtil {
 	 * Zoom to a set of objects specified by their Ids
 	 * @category Configurations
 	 */
-	public static zoomToObjects(meshEntries: object[]) {
-
-		Object.entries(meshEntries.entries).forEach((entry) => {
-
-			UnityUtil.multipleCallInChunks(entry[1].meshes.length, (start,end) => {
-				const ids = entry[1].meshes.slice(start, end);
+	public static zoomToObjects(meshEntries: { entries: Array<{ modelId: string, teamspace: string, meshes: string[] }> }) {
+		meshEntries.entries.forEach((entry) => {
+			UnityUtil.multipleCallInChunks(entry.meshes.length, (start, end) => {
+				const ids = entry.meshes.slice(start, end);
 				const params: any = {
-					teamspace: entry[1].teamspace,
-					modelId: entry[1].modelId,
+					teamspace: entry.teamspace,
+					modelId: entry.modelId,
 					meshes: ids,
 				};
 				UnityUtil.toUnity('ZoomToObjectsAppend', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 			});
-
 		});
 
 		this.unityOnUpdateActions.push(() => {
