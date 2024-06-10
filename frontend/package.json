@@ -159,7 +159,7 @@
         "css-loader": "6.7.3",
         "cssnano": "5.1.7",
         "dpdm": "3.14.0",
-        "esbuild-loader": "2.20.0",
+        "esbuild-loader": "4.1.0",
         "eslint": "8.36.0",
         "eslint-config-airbnb-typescript": "17.1.0",
         "eslint-import-resolver-typescript": "3.5.3",

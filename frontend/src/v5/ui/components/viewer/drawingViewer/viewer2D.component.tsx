@@ -55,14 +55,16 @@ export const Viewer2D = () => {
 
 		DrawingViewerService.setImgContainer(imgContainerRef.current);
 
-		const pz = centredPanZoom(imgRef.current, 20, 20);
-		setZoomHandler(pz);
-		pz.on(Events.transform, () => {
-			const cantZoomOut = pz.getMinZoom() >= pz.getTransform().scale;
-			const cantZoomIn = pz.getMaxZoom() <= pz.getTransform().scale;
-			setIsMinZoom(cantZoomOut);
-			setIsMaxZoom(cantZoomIn);
-		});
+		console.log(imgRef.current);
+
+		// const pz = centredPanZoom(imgRef.current, 20, 20);
+		// setZoomHandler(pz);
+		// pz.on(Events.transform, () => {
+		// 	const cantZoomOut = pz.getMinZoom() >= pz.getTransform().scale;
+		// 	const cantZoomIn = pz.getMaxZoom() <= pz.getTransform().scale;
+		// 	setIsMinZoom(cantZoomOut);
+		// 	setIsMaxZoom(cantZoomIn);
+		// });
 	};
 
 	return (
