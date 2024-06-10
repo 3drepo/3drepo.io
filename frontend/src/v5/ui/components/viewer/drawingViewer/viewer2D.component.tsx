@@ -26,7 +26,7 @@ import { PanZoomHandler, centredPanZoom } from './panzoom/centredPanZoom';
 import { ViewerContainer } from '@/v4/routes/viewer3D/viewer3D.styles';
 import { ImageContainer } from './viewer2D.styles';
 import { Events } from './panzoom/panzoom';
-import { DrawingViewerImage } from './drawingViewerImage/drawingViewerImage.component';
+import { DrawingViewerImage, ZoomableImage } from './drawingViewerImage/drawingViewerImage.component';
 import { CloseButton } from '@controls/button/closeButton/closeButton.component';
 import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 import { DrawingViewerService } from './drawingViewer.service';
@@ -37,7 +37,7 @@ export const Viewer2D = () => {
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
 
-	const imgRef = useRef<HTMLImageElement | SVGSVGElement>();
+	const imgRef = useRef<ZoomableImage>();
 	const imgContainerRef = useRef();
 
 	const onClickZoomIn = () => {
@@ -55,16 +55,15 @@ export const Viewer2D = () => {
 
 		DrawingViewerService.setImgContainer(imgContainerRef.current);
 
-		console.log(imgRef.current);
 
-		// const pz = centredPanZoom(imgRef.current, 20, 20);
-		// setZoomHandler(pz);
-		// pz.on(Events.transform, () => {
-		// 	const cantZoomOut = pz.getMinZoom() >= pz.getTransform().scale;
-		// 	const cantZoomIn = pz.getMaxZoom() <= pz.getTransform().scale;
-		// 	setIsMinZoom(cantZoomOut);
-		// 	setIsMaxZoom(cantZoomIn);
-		// });
+		const pz = centredPanZoom(imgRef.current, 20, 20);
+		setZoomHandler(pz);
+		pz.on(Events.transform, () => {
+			const cantZoomOut = pz.getMinZoom() >= pz.getTransform().scale;
+			const cantZoomIn = pz.getMaxZoom() <= pz.getTransform().scale;
+			setIsMinZoom(cantZoomOut);
+			setIsMaxZoom(cantZoomIn);
+		});
 	};
 
 	return (

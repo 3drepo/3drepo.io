@@ -17,9 +17,7 @@
 
 import { useRef, useState, useEffect } from 'react';
 
-
-
-const worker = new Worker('canvasWorker.js');
+const worker = new Worker(new URL('./canvasRendererWorker.ts ', import.meta.url));
 
 const originalSize = { width:0, height:0 };
 
@@ -213,12 +211,11 @@ export const SVGImage = ({ content, scale, x, y, width, height }) => {
 		setPos({ x, y });
 		setZoo(scale);
 	
-	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [img, x, y, scale]);
 
 	return (
 		<div style={{ border:'3px solid #008bd180', width, height, scale: 2, overflow:'hidden' }}>
-			<div ref={rootRef} style={{ transformOrigin:'0 0' }}>			
+			<div ref={rootRef} style={{ transformOrigin:'0 0' }}>
 				<canvas width={width} height={height} style={{ position:'absolute', boxSizing:'border-box', border:'0' }} />
 				<canvas width={width} height={height} style={{ position:'absolute', boxSizing:'border-box', border:'0' }}/>
 				<canvas width={width} height={height} style={{ position:'absolute', boxSizing:'border-box', border:'0' }} />
