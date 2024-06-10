@@ -23,6 +23,7 @@ const {
 	hasAdminAccessToDrawing,
 	hasAdminAccessToFederation,
 	hasReadAccessToContainer,
+	hasReadAccessToDrawing,
 	hasReadAccessToFederation,
 	isAdminToProject,
 } = require('../../../../../middleware/permissions/permissions');
@@ -190,7 +191,7 @@ const establishRoutes = (modelType) => {
 	const hasReadAccessToModel = {
 		[MODEL_TYPES.container]: hasReadAccessToContainer,
 		[MODEL_TYPES.federation]: hasReadAccessToFederation,
-		[MODEL_TYPES.drawing]: hasReadAccessToContainer,
+		[MODEL_TYPES.drawing]: hasReadAccessToDrawing,
 	};
 
 	const canDeleteModel = {

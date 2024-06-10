@@ -17,7 +17,7 @@
 
 const {
 	hasAdminAccessToContainer, hasAdminAccessToDrawing, hasAdminAccessToFederation, hasCommenterAccessToContainer,
-	hasCommenterAccessToFederation, hasReadAccessToContainer, hasReadAccessToFederation,
+	hasCommenterAccessToFederation, hasReadAccessToContainer, hasReadAccessToDrawing, hasReadAccessToFederation,
 	hasWriteAccessToContainer, hasWriteAccessToFederation,
 } = require('./components/models');
 const { isTeamspaceAdmin, isTeamspaceMember } = require('./components/teamspaces');
@@ -38,6 +38,7 @@ Permissions.hasCommenterAccessToContainer = validateMany([
 Permissions.hasWriteAccessToContainer = validateMany([Permissions.hasAccessToTeamspace, hasWriteAccessToContainer]);
 Permissions.hasAdminAccessToContainer = validateMany([Permissions.hasAccessToTeamspace, hasAdminAccessToContainer]);
 
+Permissions.hasReadAccessToDrawing = validateMany([Permissions.hasAccessToTeamspace, hasReadAccessToDrawing]);
 Permissions.hasAdminAccessToDrawing = validateMany([Permissions.hasAccessToTeamspace, hasAdminAccessToDrawing]);
 
 Permissions.hasReadAccessToFederation = validateMany([Permissions.hasAccessToTeamspace, hasReadAccessToFederation]);

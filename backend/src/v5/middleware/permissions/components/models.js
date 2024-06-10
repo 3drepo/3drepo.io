@@ -22,6 +22,7 @@ const {
 	hasCommenterAccessToContainer,
 	hasCommenterAccessToFederation,
 	hasReadAccessToContainer,
+	hasReadAccessToDrawing,
 	hasReadAccessToFederation,
 	hasWriteAccessToContainer,
 	hasWriteAccessToFederation,
@@ -62,6 +63,7 @@ ModelPerms.hasCommenterAccessToContainer = permissionsCheckTemplate(hasCommenter
 	MODEL_TYPES.container);
 ModelPerms.hasAdminAccessToContainer = permissionsCheckTemplate(hasAdminAccessToContainer, MODEL_TYPES.container);
 
+ModelPerms.hasReadAccessToDrawing = permissionsCheckTemplate(hasReadAccessToDrawing, MODEL_TYPES.drawing);
 ModelPerms.hasAdminAccessToDrawing = permissionsCheckTemplate(hasAdminAccessToDrawing, MODEL_TYPES.drawing);
 
 ModelPerms.hasReadAccessToFederation = permissionsCheckTemplate(hasReadAccessToFederation, MODEL_TYPES.federation);

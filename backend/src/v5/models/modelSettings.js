@@ -101,7 +101,7 @@ Models.getContainerById = async (ts, container, projection) => {
 Models.getDrawingById = async (ts, drawing, projection) => {
 	try {
 		return await Models.getModelByQuery(ts,
-			{ _id: drawing, ...noFederations, modelType: MODEL_TYPES.drawing }, projection);
+			{ _id: drawing, modelType: MODEL_TYPES.drawing }, projection);
 	} catch (err) {
 		if (err?.code === templates.modelNotFound.code) {
 			throw templates.drawingNotFound;
