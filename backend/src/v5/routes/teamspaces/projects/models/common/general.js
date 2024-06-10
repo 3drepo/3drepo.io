@@ -39,14 +39,13 @@ const { respond } = require('../../../../../utils/responder');
 const addModel = (modelType) => async (req, res) => {
 	const { teamspace, project } = req.params;
 	try {
-		let fn;
-		if (modelType === MODEL_TYPES.federation) {
-			fn = Federations.addFederation;
-		} else {
-			fn = modelType === MODEL_TYPES.drawing ? Drawings.addDrawing : Containers.addContainer;
-		}
+		const fn = {
+			[MODEL_TYPES.container]: Containers.addContainer,
+			[MODEL_TYPES.federation]: Federations.addFederation,
+			[MODEL_TYPES.drawing]: Drawings.addDrawing,
+		};
 
-		const modelId = await fn(teamspace, project, req.body);
+		const modelId = await fn[modelType](teamspace, project, req.body);
 		respond(req, res, templates.ok, { _id: modelId });
 	} catch (err) {
 		// istanbul ignore next
@@ -57,14 +56,13 @@ const addModel = (modelType) => async (req, res) => {
 const deleteModel = (modelType) => async (req, res) => {
 	const { teamspace, project, model } = req.params;
 	try {
-		let fn;
-		if (modelType === MODEL_TYPES.federation) {
-			fn = Federations.deleteFederation;
-		} else {
-			fn = modelType === MODEL_TYPES.drawing ? Drawings.deleteDrawing : Containers.deleteContainer;
-		}
+		const fn = {
+			[MODEL_TYPES.container]: Containers.deleteContainer,
+			[MODEL_TYPES.federation]: Federations.deleteFederation,
+			[MODEL_TYPES.drawing]: Drawings.deleteDrawing,
+		};
 
-		await fn(teamspace, project, model);
+		await fn[modelType](teamspace, project, model);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
@@ -76,17 +74,14 @@ const getModelList = (modelType) => async (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
 
-	let fn;
-	if (modelType === MODEL_TYPES.federation) {
-		fn = Federations.getFederationList;
-	} else if (modelType === MODEL_TYPES.container) {
-		fn = Containers.getContainerList;
-	} else {
-		fn = Drawings.getDrawingList;
-	}
+	const fn = {
+		[MODEL_TYPES.container]: Containers.getContainerList,
+		[MODEL_TYPES.federation]: Federations.getFederationList,
+		[MODEL_TYPES.drawing]: Drawings.getDrawingList,
+	};
 
 	try {
-		const models = await fn(teamspace, project, user);
+		const models = await fn[modelType](teamspace, project, user);
 		respond(req, res, templates.ok, { [`${modelType}s`]: models });
 	} catch (err) {
 		respond(req, res, err);
@@ -96,22 +91,15 @@ const getModelList = (modelType) => async (req, res) => {
 const appendFavourites = (modelType) => async (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
-
-	let favouritesToAdd;
-	let fn;
-	if (modelType === MODEL_TYPES.federation) {
-		fn = Federations.appendFavourites;
-		favouritesToAdd = req.body.federations;
-	} else if (modelType === MODEL_TYPES.container) {
-		fn = Containers.appendFavourites;
-		favouritesToAdd = req.body.containers;
-	} else {
-		fn = Drawings.appendFavourites;
-		favouritesToAdd = req.body.drawings;
-	}
+	const favouritesToAdd = req.body[`${modelType}s`];
+	const fn = {
+		[MODEL_TYPES.container]: Containers.appendFavourites,
+		[MODEL_TYPES.federation]: Federations.appendFavourites,
+		[MODEL_TYPES.drawing]: Drawings.appendFavourites,
+	};
 
 	try {
-		await fn(user, teamspace, project, favouritesToAdd);
+		await fn[modelType](user, teamspace, project, favouritesToAdd);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		respond(req, res, err);
@@ -121,18 +109,17 @@ const appendFavourites = (modelType) => async (req, res) => {
 const deleteFavourites = (modelType) => async (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
-	try {
-		let fn;
-		if (modelType === MODEL_TYPES.federation) {
-			fn = Federations.deleteFavourites;
-		} else {
-			fn = modelType === MODEL_TYPES.drawing ? Drawings.deleteFavourites : Containers.deleteFavourites;
-		}
+	const fn = {
+		[MODEL_TYPES.container]: Containers.deleteFavourites,
+		[MODEL_TYPES.federation]: Federations.deleteFavourites,
+		[MODEL_TYPES.drawing]: Drawings.deleteFavourites,
+	};
 
+	try {
 		if (req.query.ids?.length) {
 			const favouritesToRemove = req.query.ids.split(',');
 
-			await fn(user, teamspace, project, favouritesToRemove);
+			await fn[modelType](user, teamspace, project, favouritesToRemove);
 			respond(req, res, templates.ok);
 		} else {
 			respond(req, res, createResponseCode(templates.invalidArguments, 'ids must be provided as part fo the query string'));
@@ -144,10 +131,13 @@ const deleteFavourites = (modelType) => async (req, res) => {
 
 const getModelStats = (modelType) => async (req, res, next) => {
 	const { teamspace, model } = req.params;
+	const fn = {
+		[MODEL_TYPES.container]: Containers.getContainerStats,
+		[MODEL_TYPES.federation]: Federations.getFederationStats,
+	};
+
 	try {
-		const fn = modelType === MODEL_TYPES.federation
-			? Federations.getFederationStats : Containers.getContainerStats;
-		const stats = await fn(teamspace, model);
+		const stats = await fn[modelType](teamspace, model);
 		req.outputData = stats;
 		await next();
 	} catch (err) {
@@ -158,14 +148,13 @@ const getModelStats = (modelType) => async (req, res, next) => {
 
 const updateModelSettings = (modelType) => async (req, res) => {
 	const { teamspace, project, model } = req.params;
+	const fn = {
+		[MODEL_TYPES.container]: Containers.updateSettings,
+		[MODEL_TYPES.federation]: Federations.updateSettings,
+		[MODEL_TYPES.drawing]: Drawings.updateSettings,
+	};
 	try {
-		let fn;
-		if (modelType === MODEL_TYPES.federation) {
-			fn = Federations.updateSettings;
-		} else {
-			fn = modelType === MODEL_TYPES.drawing ? Drawings.updateSettings : Containers.updateSettings;
-		}
-		await fn(teamspace, project, model, req.body);
+		await fn[modelType](teamspace, project, model, req.body);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
@@ -175,9 +164,12 @@ const updateModelSettings = (modelType) => async (req, res) => {
 
 const getModelSettings = (modelType) => async (req, res, next) => {
 	const { teamspace, model } = req.params;
+	const fn = {
+		[MODEL_TYPES.container]: Containers.getSettings,
+		[MODEL_TYPES.federation]: Federations.getSettings,
+	};
 	try {
-		const { getSettings: fn } = modelType === MODEL_TYPES.federation ? Federations : Containers;
-		const settings = await fn(teamspace, model);
+		const settings = await fn[modelType](teamspace, model);
 		req.outputData = settings;
 		await next();
 	} catch (err) {
@@ -189,18 +181,24 @@ const getModelSettings = (modelType) => async (req, res, next) => {
 const establishRoutes = (modelType) => {
 	const router = Router({ mergeParams: true });
 
-	let hasAdminAccessToModel;
-	if (modelType === MODEL_TYPES.federation) {
-		hasAdminAccessToModel = hasAdminAccessToFederation;
-	} else {
-		hasAdminAccessToModel = modelType === MODEL_TYPES.drawing
-			? hasAdminAccessToDrawing : hasAdminAccessToContainer;
-	}
+	const hasAdminAccessToModel = {
+		[MODEL_TYPES.container]: hasAdminAccessToContainer,
+		[MODEL_TYPES.federation]: hasAdminAccessToFederation,
+		[MODEL_TYPES.drawing]: hasAdminAccessToDrawing,
+	};
 
-	const hasReadAccessToModel = modelType === MODEL_TYPES.federation
-		? hasReadAccessToFederation : hasReadAccessToContainer;
-	const canDeleteModel = modelType === MODEL_TYPES.federation || modelType === MODEL_TYPES.drawing
-		? async (req, res, next) => { await next(); } : canDeleteContainer;
+	const hasReadAccessToModel = {
+		[MODEL_TYPES.container]: hasReadAccessToContainer,
+		[MODEL_TYPES.federation]: hasReadAccessToFederation,
+		[MODEL_TYPES.drawing]: hasReadAccessToContainer,
+	};
+
+	const canDeleteModel = {
+		[MODEL_TYPES.container]: canDeleteContainer,
+		[MODEL_TYPES.federation]: async (req, res, next) => { await next(); },
+		[MODEL_TYPES.drawing]: async (req, res, next) => { await next(); },
+	};
+
 	/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}:
@@ -595,7 +593,7 @@ const establishRoutes = (modelType) => {
 	 *                   tickets: { issues: 10, risks: 5 }
 	 *                   containers: [{ group: Architectural, _id: 374bb150-065f-11ec-8edf-ab0f7cc84da8 }]
 	 */
-	router.get('/:model/stats', hasReadAccessToModel, getModelStats(modelType), formatModelStats(modelType));
+	router.get('/:model/stats', hasReadAccessToModel[modelType], getModelStats(modelType), formatModelStats(modelType));
 
 	/**
 	 * @openapi
@@ -638,7 +636,7 @@ const establishRoutes = (modelType) => {
 	 *       200:
 	 *         description: Model removed.
 	 */
-	router.delete('/:model', hasAdminAccessToModel, canDeleteModel, deleteModel(modelType));
+	router.delete('/:model', hasAdminAccessToModel[modelType], canDeleteModel[modelType], deleteModel(modelType));
 
 	/**
 	 * @openapi
@@ -754,7 +752,7 @@ const establishRoutes = (modelType) => {
 	 *       200:
 	 *         description: updates the settings of the model
 	 */
-	router.patch('/:model', hasAdminAccessToModel, validateUpdateSettingsData(modelType), updateModelSettings(modelType));
+	router.patch('/:model', hasAdminAccessToModel[modelType], validateUpdateSettingsData(modelType), updateModelSettings(modelType));
 
 	/**
 	 * @openapi
@@ -801,7 +799,7 @@ const establishRoutes = (modelType) => {
 	 *             schema:
 	 *               $ref: "#/components/schemas/modelSettings"
 	 */
-	router.get('/:model', hasReadAccessToModel, getModelSettings(modelType), formatModelSettings);
+	router.get('/:model', hasReadAccessToModel[modelType], getModelSettings(modelType), formatModelSettings);
 	return router;
 };
 
