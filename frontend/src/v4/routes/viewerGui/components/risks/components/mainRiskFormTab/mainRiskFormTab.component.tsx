@@ -18,6 +18,7 @@ import { FunctionComponent } from 'react';
 import InputLabel from '@mui/material/InputLabel';
 import { Field } from 'formik';
 
+import RisksIcon from '@assets/icons/outlined/safetibase-outlined.svg'
 import {
 	LEVELS_OF_RISK,
 	RISK_CONSEQUENCES,
@@ -40,7 +41,6 @@ import {
 	FieldsRow,
 	StyledFormControl,
 } from '../riskDetails/riskDetails.styles';
-import { RisksIcon } from '../riskIcon/riskIcon.component';
 import { RiskSchema } from '../riskDetails/riskDetails.schema';
 import { DateFieldContainer } from './mainRiskFormTab.styles';
 
