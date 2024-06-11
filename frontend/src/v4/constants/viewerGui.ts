@@ -20,7 +20,7 @@ import CompareIcon from '@assets/icons/outlined/compare-outlined.svg';
 import TreeIcon from '@assets/icons/outlined/tree-outlined.svg';
 import GroupsIcon from '@assets/icons/outlined/groups-outlined.svg';
 import GisIcon from '@assets/icons/outlined/layers-outlined.svg';
-import SequencesIcon from '@assets/icons/outlined/sequence_calendar-outlined.svg';
+import SequencesIcon from '@assets/icons/outlined/sequence-outlined.svg';
 import ViewsIcon from '@assets/icons/outlined/view-outlined.svg';
 import IssuesIcon from '@assets/icons/outlined/issue-outlined.svg';
 import MeasureIcon from '@assets/icons/outlined/measure-outlined.svg';

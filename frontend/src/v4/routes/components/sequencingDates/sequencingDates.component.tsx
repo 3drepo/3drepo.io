@@ -17,7 +17,7 @@
 import { PureComponent, useState } from 'react';
 import InputLabel from '@mui/material/InputLabel';
 import CloseIcon from '@mui/icons-material/Close';
-import SequencesIcon from '@assets/icons/outlined/sequence_calendar-outlined.svg';
+import SequencesIcon from '@assets/icons/outlined/sequence-outlined.svg';
 import { Field } from 'formik';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
