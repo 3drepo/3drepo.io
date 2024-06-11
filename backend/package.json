@@ -25,7 +25,7 @@
     "run-scheduled-tasks": "cross-env NODE_CONFIG_DIR=../config node ./src/scripts/utility/scheduler"
   },
   "dependencies": {
-    "@azure/msal-node": "1.16.0",
+    "@azure/msal-node": "2.9.2",
     "@elastic/elasticsearch": "7.17.0",
     "amqplib": "0.8.0",
     "apidoc": "0.29.0",
