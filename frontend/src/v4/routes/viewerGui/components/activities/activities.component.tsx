@@ -19,7 +19,7 @@ import { debounce } from 'lodash';
 
 import IconButton from '@mui/material/IconButton';
 import ArrowBack from '@mui/icons-material/ArrowBack';
-import ActivitiesIcon from '@mui/icons-material/Movie';
+import ActivitiesIcon from '@assets/icons/outlined/sequence_calendar-outlined.svg';
 import { isEqual } from 'lodash';
 
 import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../../helpers/rendering';

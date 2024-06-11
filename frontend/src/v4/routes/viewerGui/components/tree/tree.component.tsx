@@ -16,7 +16,7 @@
  */
 import { PureComponent, createRef } from 'react';
 import Check from '@mui/icons-material/Check';
-import TreeIcon from '@mui/icons-material/DeviceHub';
+import TreeIcon from '@assets/icons/outlined/tree-outlined.svg';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList as List } from 'react-window';
 

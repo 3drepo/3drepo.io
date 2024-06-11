@@ -18,7 +18,7 @@
 import DeleteIcon from '@mui/icons-material/Delete';
 import EdgeSnappingIcon from '@mui/icons-material/PermDataSetting';
 import ResetIcon from '@mui/icons-material/RotateLeft';
-import UnitsIcon from '@mui/icons-material/Straighten';
+import UnitsIcon from '@assets/icons/outlined/measure-outlined.svg';
 import ShowXYZIcon from '@mui/icons-material/Toc';
 
 export const MEASURE_ACTIONS_ITEMS = {

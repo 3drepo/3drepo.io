@@ -16,18 +16,17 @@
  */
 
 import { ComponentType } from 'react';
-import CompareIcon from '@mui/icons-material/Compare';
-import TreeIcon from '@mui/icons-material/DeviceHub';
-import GroupsIcon from '@mui/icons-material/GroupWork';
-import GisIcon from '@mui/icons-material/Layers';
-import SequencesIcon from '@mui/icons-material/Movie';
-import ViewsIcon from '@mui/icons-material/PhotoCamera';
-import IssuesIcon from '@mui/icons-material/Place';
-import MeasureIcon from '@mui/icons-material/Straighten';
-import TicketsIcon from '@assets/icons/filled/tickets-filled.svg';
+import CompareIcon from '@assets/icons/outlined/compare-outlined.svg';
+import TreeIcon from '@assets/icons/outlined/tree-outlined.svg';
+import GroupsIcon from '@assets/icons/outlined/groups-outlined.svg';
+import GisIcon from '@assets/icons/outlined/layers-outlined.svg';
+import SequencesIcon from '@assets/icons/outlined/sequence_calendar-outlined.svg';
+import ViewsIcon from '@assets/icons/outlined/view-outlined.svg';
+import IssuesIcon from '@assets/icons/outlined/issue-outlined.svg';
+import MeasureIcon from '@assets/icons/outlined/measure-outlined.svg';
+import TicketsIcon from '@assets/icons/outlined/tickets-outlined.svg';
 import DrawingsIcon from '@assets/icons/outlined/drawings-outlined.svg';
-
-import { RisksIcon } from '../routes/viewerGui/components/risks/components/riskIcon/riskIcon.component';
+import RisksIcon from '@assets/icons/outlined/safetibase-outlined.svg'
 
 import { clientConfigService } from '../services/clientConfig';
 
