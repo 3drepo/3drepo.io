@@ -46,28 +46,28 @@ export const centredPanZoom = (target: ZoomableImage, paddingW: number, paddingH
 	scaleTarget();
 	const resizeObserver = new ResizeObserver(scaleTarget);
 	resizeObserver.observe(targetContainer);
-	pz.zoom(pz.getMinZoom(), false);
+	// pz.zoom(pz.getMinZoom(), false);
 
-	pz.on(Events.transform, () => {
-		const parentRect = targetContainer.getBoundingClientRect();
-		const actualPaddingW = (parentRect.width - size.scaledWidth) / 2 ;
-		const actualPaddingH = (parentRect.height - size.scaledHeight ) / 2 ;
-		const targetRect = target.getBoundingClientRect();
+	// pz.on(Events.transform, () => {
+	// 	const parentRect = targetContainer.getBoundingClientRect();
+	// 	const actualPaddingW = (parentRect.width - size.scaledWidth) / 2 ;
+	// 	const actualPaddingH = (parentRect.height - size.scaledHeight ) / 2 ;
+	// 	const targetRect = target.getBoundingClientRect();
 		
-		const paddingScale =  targetRect.width / size.scaledWidth;
-		const maxX =  actualPaddingW * paddingScale;
-		const minX =  parentRect.width - targetRect.width - actualPaddingW * paddingScale;
+	// 	const paddingScale =  targetRect.width / size.scaledWidth;
+	// 	const maxX =  actualPaddingW * paddingScale;
+	// 	const minX =  parentRect.width - targetRect.width - actualPaddingW * paddingScale;
 		
-		const maxY =  actualPaddingH * paddingScale;
-		const minY =  parentRect.height - targetRect.height - actualPaddingH * paddingScale;
+	// 	const maxY =  actualPaddingH * paddingScale;
+	// 	const minY =  parentRect.height - targetRect.height - actualPaddingH * paddingScale;
 		
-		const t = pz.getTransform();
-		if (t.x > maxX || t.x < minX || t.y > maxY || t.y < minY) {
-			const x = Math.max(Math.min(t.x, maxX), minX);
-			const y = Math.max(Math.min(t.y, maxY), minY);
-			pz.moveTo(x, y);
-		}
-	});
+	// 	const t = pz.getTransform();
+	// 	if (t.x > maxX || t.x < minX || t.y > maxY || t.y < minY) {
+	// 		const x = Math.max(Math.min(t.x, maxX), minX);
+	// 		const y = Math.max(Math.min(t.y, maxY), minY);
+	// 		pz.moveTo(x, y);
+	// 	}
+	// });
 
 	const zoomIn = () => pz.zoom(1.5);
 

@@ -34,6 +34,7 @@ import { ProjectSettings } from '../projectSettings/projectSettings.component';
 import { Board } from '../board/board.component';
 import { TicketsContent } from '../tickets/ticketsContent.component';
 import { Drawings } from '../drawings/drawings.component';
+import { SVGImage } from '@components/viewer/drawingViewer/svgImage/svgImage.component';
 
 export const ProjectContent = () => {
 	const { teamspace } = useParams<DashboardParams>();
@@ -75,6 +76,9 @@ export const ProjectContent = () => {
 					</Route>
 					<Route title={formatMessage({ id: 'pageTitle.userPermissions', defaultMessage: ':project - User Permissions' })} exact path={`${path}/t/user_permissions`}>
 						<UserPermissions />
+					</Route>
+					<Route title="2D viewer test" exact path={`${path}/t/2d`}>
+						<SVGImage src="/assets/drawings/fly.svg"  />
 					</Route>
 					<Route path="*">
 						<Redirect to={NOT_FOUND_ROUTE_PATH} />

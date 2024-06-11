@@ -18,22 +18,35 @@
 
 let tiles = [];
 
-self.onmessage = (event) => {
-	if (event.data.method) {
-		this[event.data.method]?.apply(this, event.data.payload);
-	} else {
-		console.log(event);
-	}
-};
-
 function setTiles(tt) {
+	console.log('set tiles');
 	tiles = tt;
 }
 
 function renderCanvas(index, bitmap ) {
+	console.log('rendering');
+	if (!bitmap) return;
+
 	const { width, height } = bitmap;
 	const canvas = tiles[index];
+	canvas.width = width;
+	canvas.height = height;
 	const ctx = canvas.getContext('2d');
-	ctx.clearRect(0, 0, width, height);
+	ctx.clearRect(0, 0, width + 1, height + 1);
 	ctx.drawImage(bitmap, 0, 0);
 }
+
+self.onmessage = (event) => {
+	console.log('hello there');
+
+	switch (event.data.method) {
+		case 'setTiles':
+			setTiles.apply(this, event.data.payload);
+			break;
+		case 'renderCanvas':
+			console.log('renderCanvas');
+			renderCanvas.apply(this, event.data.payload);
+			break;
+	}
+};
+

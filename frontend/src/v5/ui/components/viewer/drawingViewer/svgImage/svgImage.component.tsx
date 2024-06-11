@@ -15,11 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, forwardRef } from 'react';
+import { Size } from 'react-virtualized-auto-sizer';
+import { ZoomableImage, DrawingViewerImageProps } from '../drawingViewerImage/drawingViewerImage.component';
 
-const worker = new Worker(new URL('./canvasRendererWorker.ts ', import.meta.url));
 
-const originalSize = { width:0, height:0 };
+const worker = new Worker(new URL('./canvasRendererWorker', import.meta.url));
+worker.addEventListener('message', (ev) => {
+	console.log(ev);
+});
 
 
 type CanvasMatrixElem = { canv: HTMLCanvasElement,  canvID: number, col: number, row: number, toReposition: boolean, toRender: boolean, showing: boolean }; 
@@ -33,19 +37,12 @@ const rowCol = (x, y, width, height) => {
 };
 
 const drawInCanvas = async (img: HTMLImageElement, canvID, width, height, posX, posY, scale ) => {
-	// const {width, height} = canvas;
-
-	// const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-	// ctx.clearRect(0, 0, width, height);
-
-
 	if (!img.width) return;
 
 	createImageBitmap(img, posX / scale, posY / scale, width / scale,  height / scale, { resizeQuality: 'high', resizeHeight: height, resizeWidth: width }).then((bitmap) => {
+		console.log('rendering ', posX / scale, posY / scale, width / scale,  height / scale);
 		worker.postMessage({ method:'renderCanvas', payload: [canvID, bitmap] }, [bitmap]);
 	});
-
-	// ctx.drawImage(img, posX, posY, width/zoom,  height/zoom, 0,0, width, height);
 };
 
 
@@ -65,110 +62,69 @@ const renderTiles = (img, tiles: CanvasMatrixElem[], width, height, pos, zoom) =
 				canv.style.visibility = 'collapse';
 			} else {
 				canv.style.visibility = 'visible';
-				drawInCanvas(img, canvID, width, height,  col * width, row * height, zoom);
+				drawInCanvas(img, canvID, width, height ,  col * width, row * height, zoom);
 				elem.toRender = false;
 			}
 		}
-
 	});
 };
 
 const toIndex = (factor, col, row) => col + row * factor;
 const indexToColRow = (factor, index) => ({ col: index % factor, row: Math.floor(index / factor) });
 
-// cuando zoomea tengo que fijarme el tema de que siga mostrando la misma cosa 
-// hasta que haga el render de la nueva
-export const SVGImage = ({ content, scale, x, y, width, height }) => {
-	// canvasArrr :
-	// [ 0 | 1 ]
-	// [ 2 | 3 ]
+export const pannableSVG = (container: HTMLElement, src: string) => {
+	const tiles: CanvasMatrixElem[] = [];
+	const workerCanvases: OffscreenCanvas[] = [];
+	const cols = 2;
+	const rows = 2;
+	let transform = { x: 0, y:0, scale: 1 };
+	const img =  new Image();
+	img.src = src; 
 
+	img.addEventListener('load', () => {
+		img.width = img.naturalWidth;
+		img.height = img.naturalHeight;
+		// eslint-disable-next-line @typescript-eslint/no-use-before-define
+		render(transform);
+	});
 
-	const canvasMatrix = useRef<CanvasMatrixElem[]>([]);
+	const root:HTMLDivElement = document.createElement('div');
 
-	const [pos, setPos] = useState({ x:0, y:0 });
-	const [zoo, setZoo] = useState(1);
-	
-	const [img, setImage] = useState<HTMLImageElement>(new Image());
+	for (let i = 0 ; i < cols * rows; i++ ) {
+		const canv:HTMLCanvasElement = document.createElement('canvas');
+		canv.width = container.offsetWidth;
+		canv.height = container.offsetHeight;
+		canv.style.position = 'absolute';
+		canv.style.padding = '0';
+		canv.style.margin = '0';
+		canv.style.border = '0';
 
-	const rootRef = useRef<HTMLDivElement>(null);
+		root.appendChild(canv);
+		workerCanvases.push(canv.transferControlToOffscreen());
+		tiles.push({ canv, canvID: i, col: i % cols, row:Math.floor(i / rows), toReposition: true, toRender: true, showing: true });
+	}
 
+	container.appendChild(root);
 
-	useEffect(()=> {
-		if (!rootRef.current) return;
+	worker.postMessage({ method:'setTiles', payload: [workerCanvases] }, workerCanvases as any);
 
-		if (!canvasMatrix.current.length) {
-			const newCanvasArr:CanvasMatrixElem[] = [];
-			const canvasColl = rootRef.current.children as HTMLCollectionOf<HTMLCanvasElement>;			
-			newCanvasArr.push({ canv: canvasColl[0], canvID: 0, col: 0, row:0, toReposition: true, toRender: true, showing: true });
-			newCanvasArr.push({ canv: canvasColl[1], canvID: 1, col: 1, row:0, toReposition: true, toRender: true, showing: true });
-			newCanvasArr.push({ canv: canvasColl[2], canvID: 2, col: 0, row:1, toReposition: true, toRender: true, showing: true });
-			newCanvasArr.push({ canv: canvasColl[3], canvID: 3, col: 1, row:1, toReposition: true, toRender: true, showing: true });
+	const render = (t) => {
+		const width = container.offsetWidth;
+		const height = container.offsetHeight;
+		const { x, y, scale } = t;
 
-			canvasMatrix.current = newCanvasArr;
-			
-			const canvases = canvasMatrix.current.map(({ canv }) => canv.transferControlToOffscreen());
-			worker.postMessage({ method:'setTiles', payload: [canvases] }, canvases as any);
-		} 
+		const topLeft = { x: Math.round(Math.max((x % width), x)), y: Math.round(Math.max((y % height), y)) };
 		
-
-		return (() => {
-			console.log('unmount');
-		});
-	}, []);
-
-
-	// const drawAllInCanvas = useCallback((canvas) => {
-	// 	const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-	// 	ctx.drawImage(img, 0, 0, img.width,  img.height, 0,0, width, height);
-	// }, [img, width, height]);
-
-	useEffect(() => {
-		if (!content) return;
-		const svgContainer  = document.createElement('div');
-		svgContainer.innerHTML = content;
-		const svg = svgContainer.querySelector('svg') as SVGSVGElement;
-		const { width, height } = svg.viewBox.baseVal; 
-		svg.setAttribute('width', width.toString());
-		svg.setAttribute('height', height.toString());
-		// sanitizeSvg(svg);
-
-
-		originalSize.width = width;
-		originalSize.height = height;
-		const img =  new Image();
-		img.width = width;
-		img.height = height;
-		const binString = Array.from(new TextEncoder().encode(svg.outerHTML), (byte) => String.fromCodePoint(byte)).join('');
-		const base64 = btoa(binString);
-		img.src = `data:image/svg+xml;base64,${base64}`;
-
-		img.addEventListener('load', () => setImage(img));
-
-	}, [content]);
-
-	useEffect(() => {
-		if (!canvasMatrix.current.length) return;
-
-		canvasMatrix.current.forEach((val) => val.toRender = true);
-	}, [img]);
-
-
-	useEffect(() => {
-		if (!rootRef.current || !canvasMatrix.current.length ) return;	
-
-		const tiles = canvasMatrix.current;
-		const topLeft = { x: Math.max((x % width), x), y: Math.max((y % height), y) };
+		root.style.translate = `${topLeft.x}px ${topLeft.y}px`;
 		
-		rootRef.current.style.translate = `${topLeft.x}px ${topLeft.y}px`;
-		
-		const prevColRow = rowCol(pos.x, pos.y, width, height);
+		const prevColRow = rowCol(transform.x, transform.y, width, height);
 		const currentColRow = rowCol(x, y, width, height);
 		
 		const colChanged = !!(currentColRow.col - prevColRow.col); 
 		const rowChanged = !!(currentColRow.row - prevColRow.row);
-		const zoomChanged = !!(zoo - scale);
+		const zoomChanged = !!(transform.scale - scale);
 
+		console.log('rendering' + JSON.stringify(transform));
 
 		if (colChanged || rowChanged || zoomChanged) { // if there's a column change
 			const horizontalTiles = 2;
@@ -207,20 +163,76 @@ export const SVGImage = ({ content, scale, x, y, width, height }) => {
 		}
 		
 		renderTiles(img, tiles, width, height, { x, y }, scale);
-		
-		setPos({ x, y });
-		setZoo(scale);
+	};
 	
-	}, [img, x, y, scale]);
+	const addEventListener:typeof img.addEventListener =  (type, listener) => {
+		img.addEventListener(type, listener);
+	};
 
-	return (
-		<div style={{ border:'3px solid #008bd180', width, height, scale: 2, overflow:'hidden' }}>
-			<div ref={rootRef} style={{ transformOrigin:'0 0' }}>
-				<canvas width={width} height={height} style={{ position:'absolute', boxSizing:'border-box', border:'0' }} />
-				<canvas width={width} height={height} style={{ position:'absolute', boxSizing:'border-box', border:'0' }}/>
-				<canvas width={width} height={height} style={{ position:'absolute', boxSizing:'border-box', border:'0' }} />
-				<canvas width={width} height={height} style={{ position:'absolute', boxSizing:'border-box', border:'0' }}/>
-			</div>
-		</div>
-	);
+	return {
+		set transform(t) {
+			if (t.x === transform.x && t.y === transform.y && t.scale == transform.scale) return;
+			render(t);
+			transform = { ...t };
+		},
+		set src(s)  {
+			if (s === img.src) return;
+			img.src = s;
+		},
+		addEventListener,
+		get naturalHeight() { return img.naturalHeight;},
+		get naturalWidth() { return img.naturalWidth;},
+	};
 };
+
+    
+export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ onLoad, src }, ref ) => {
+	const containerRef = useRef<HTMLElement>();
+	const pannableImage = useRef<ReturnType<typeof pannableSVG>>();
+
+	useEffect(() => {
+		if (!containerRef.current || pannableImage.current) return;
+		pannableImage.current = pannableSVG(containerRef.current, src);
+		pannableImage.current.addEventListener('load', onLoad);
+	}, []);
+
+
+	useEffect(() => {
+		if (!pannableImage.current) return;
+		pannableImage.current.src = src;
+	}, [src]);
+
+
+	(ref as React.MutableRefObject<ZoomableImage>).current = {
+		setTransform: (t) => {
+			console.log('set transform' + JSON.stringify(t));
+
+			if (!pannableImage.current) return;
+			pannableImage.current.transform = t;
+		},
+
+		getEventsEmitter: () => {
+			return containerRef.current;
+		},
+		
+		getBoundingClientRect: () => {
+			const bound = containerRef.current.getBoundingClientRect();
+			// bound.x = transform.x; 
+			// bound.y = transform.y;
+			// bound.width *= transform.scale;
+			// bound.height *= transform.scale;
+			return bound ;
+		},
+		
+		getNaturalSize: () =>  {
+			return { width: pannableImage.current.naturalWidth, height: pannableImage.current.naturalHeight };
+		},
+
+		setSize: ({ width, height }: Size ) => {},
+	};
+
+	const width = 500;
+	const height = 500;
+
+	return (<div ref={containerRef as any} style={{ border:'3px solid #008bd180', width, height, overflow:'hidden' }} />);
+});
