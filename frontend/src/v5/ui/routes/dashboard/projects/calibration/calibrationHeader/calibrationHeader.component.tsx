@@ -16,9 +16,8 @@
  */
 
 import { useContext } from 'react';
-import { Stepper, Container, ButtonsContainer, Button, Connector } from './calibrationHeader.styles';
+import { Stepper, Container, ButtonsContainer, ContrastButton, Connector, PrimaryButton, Link } from './calibrationHeader.styles';
 import { Step, StepLabel } from '@mui/material';
-import { Link } from 'react-router-dom';
 import { CalibrationContext } from '../calibrationContext';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
@@ -43,24 +42,24 @@ export const CalibrationHeader = () => {
 				))}
 			</Stepper>
 			<ButtonsContainer>
-				<Button onClick={() => setStep(step - 1)} disabled={step === 0}>
+				<ContrastButton onClick={() => setStep(step - 1)} disabled={step === 0}>
 					<FormattedMessage defaultMessage="Back" id="calinration.button.back" />
-				</Button>
-				<Button>
+				</ContrastButton>
+				<ContrastButton>
 					<Link to={origin}>
 						<FormattedMessage defaultMessage="Cancel" id="calinration.button.cancel" />
 					</Link>
-				</Button>
+				</ContrastButton>
 				{isLastStep ? (
-					<Button disabled={!isStepValid}>
+					<PrimaryButton disabled={!isStepValid}>
 						<Link to={origin}>
 							<FormattedMessage defaultMessage="Confirm" id="calinration.button.confirm" />
 						</Link>
-					</Button>
+					</PrimaryButton>
 				) : (
-					<Button onClick={() => setStep(step + 1)} disabled={!isStepValid}>
+					<PrimaryButton onClick={() => setStep(step + 1)} disabled={!isStepValid}>
 						<FormattedMessage defaultMessage="Continue" id="calinration.button.continue" />
-					</Button>
+					</PrimaryButton>
 				)}
 			</ButtonsContainer>
 		</Container>
