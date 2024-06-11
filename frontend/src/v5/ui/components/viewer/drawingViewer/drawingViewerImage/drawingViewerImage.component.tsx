@@ -14,9 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
-import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { forwardRef, useEffect, useRef, useState } from 'react';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { CentredContainer } from '@controls/centredContainer';
@@ -27,7 +24,7 @@ type Transform = {
 	scale: number;
 };
 
-type Size = {
+export type Size = {
 	width: number;
 	height: number;
 };
@@ -40,24 +37,22 @@ export type ZoomableImage = {
 	setSize: (size: Size) => void;
 };
 
-type DrawingViewerImageProps = { onLoad: (...args) => void };
-export const DrawingViewerImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ onLoad }, ref ) => {
-	const [drawingId] = useSearchParam('drawingId');
+export type DrawingViewerImageProps = { 
+	onLoad?: (...args) => void, 
+	src: string 
+};
+export const DrawingViewerImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ onLoad, src }, ref ) => {
 	const [isLoading, setIsLoading] = useState(true);
 	const imgRef = useRef<HTMLImageElement>();
 
-	const src = getDrawingImageSrc(drawingId);
-
 	useEffect(() => {
 		setIsLoading(true);
-		fetch(src).then(() => setIsLoading(false));
-	}, [drawingId]);
+	}, [src]);
 
-	if (isLoading) return (
-		<CentredContainer>
-			<Loader />
-		</CentredContainer>
-	);
+	const onInternalLoad = (ev) => {
+		setIsLoading(false);
+		onLoad(ev);
+	};
 
 	(ref as any).current = {
 		setTransform: ({ scale, x, y }) => {
@@ -84,5 +79,15 @@ export const DrawingViewerImage = forwardRef<ZoomableImage, DrawingViewerImagePr
 		},
 	};
 
-	return <img src={src} onLoad={onLoad} ref={imgRef} style={{ transformOrigin: '0 0', userSelect: 'none' }} draggable={false} />;
+	return (
+		<>
+			{
+				isLoading && 
+				<CentredContainer>
+					<Loader />
+				</CentredContainer>
+			}
+			<img src={src} onLoad={onInternalLoad} ref={imgRef} style={{ transformOrigin: '0 0', userSelect: 'none' }} draggable={false} />
+		</>
+	);
 });

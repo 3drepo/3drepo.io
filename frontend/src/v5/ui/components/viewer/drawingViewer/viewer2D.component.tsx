@@ -30,8 +30,15 @@ import { DrawingViewerImage, ZoomableImage } from './drawingViewerImage/drawingV
 import { CloseButton } from '@controls/button/closeButton/closeButton.component';
 import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 import { DrawingViewerService } from './drawingViewer.service';
+import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
+import { SVGImage } from './svgImage/svgImage.component';
+// import { SVGImage } from './svgImage/svgImage.component';
 
 export const Viewer2D = () => {
+	const [drawingId] = useSearchParam('drawingId');
+	const src = getDrawingImageSrc(drawingId);
+	
 	const { close2D } = useContext(ViewerCanvasesContext);
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
 	const [isMinZoom, setIsMinZoom] = useState(false);
@@ -55,7 +62,6 @@ export const Viewer2D = () => {
 
 		DrawingViewerService.setImgContainer(imgContainerRef.current);
 
-
 		const pz = centredPanZoom(imgRef.current, 20, 20);
 		setZoomHandler(pz);
 		pz.on(Events.transform, () => {
@@ -70,7 +76,8 @@ export const Viewer2D = () => {
 		<ViewerContainer visible>
 			<CloseButton variant="secondary" onClick={close2D} />
 			<ImageContainer ref={imgContainerRef}>
-				<DrawingViewerImage ref={imgRef} onLoad={onImageLoad} />
+				<SVGImage ref={imgRef} src={src} onLoad={onImageLoad} />
+				{/* <DrawingViewerImage ref={imgRef} src={src} onLoad={onImageLoad} /> */}
 			</ImageContainer>
 			<ToolbarContainer>
 				<MainToolbar>

@@ -41,7 +41,7 @@ export const panzoom = (target: ZoomableImage, options) => {
 	const container = target.getEventsEmitter();
 	const emitter = new EventEmitter();
 
-	let prevContainerRect = container.getBoundingClientRect();
+	// let prevContainerRect = container.getBoundingClientRect();
 
 	let animation = null;
 
@@ -50,17 +50,17 @@ export const panzoom = (target: ZoomableImage, options) => {
 	let minZoom = options.minZoom || 0.5;
 	let maxZoom = options.maxZoom || 10;
 
-	const keepCenter = () => {
-		const rect =  container.getBoundingClientRect();
-		const diff = { diffX: rect.width - prevContainerRect.width, diffY: rect.height - prevContainerRect.height };
+	// const keepCenter = () => {
+	// 	const rect =  container.getBoundingClientRect();
+	// 	const diff = { diffX: rect.width - prevContainerRect.width, diffY: rect.height - prevContainerRect.height };
 
-		prevContainerRect = rect;
-		moveTo(transform.x + (diff.diffX / 2), transform.y + (diff.diffY / 2) );
-		emitter.emit(Events.transform);
-	};
+	// 	prevContainerRect = rect;
+	// 	moveTo(transform.x + (diff.diffX / 2), transform.y + (diff.diffY / 2) );
+	// 	emitter.emit(Events.transform);
+	// };
 
-	const resizeObserver = new ResizeObserver(keepCenter);
-	resizeObserver.observe(container);
+	// const resizeObserver = new ResizeObserver(keepCenter);
+	// resizeObserver.observe(container);
 
 	const stopInertia = () => {
 		speed.x = 0;
@@ -70,6 +70,7 @@ export const panzoom = (target: ZoomableImage, options) => {
 	};
 
 	const applyTransform = () => {
+		// console.log('applytransform:' + JSON.stringify(transform));
 		target.setTransform(transform);
 	};
 
@@ -83,9 +84,8 @@ export const panzoom = (target: ZoomableImage, options) => {
 	};
 
 	const zoomTo = (x: number, y: number, newScale: number) => {
-		const originalRect = target.getBoundingClientRect();
-		const relativeX = x - originalRect.x;
-		const relativeY = y - originalRect.y;
+		const relativeX = x - transform.x;
+		const relativeY = y - transform.y;
 
 		const scale = Math.max(Math.min(newScale, maxZoom), minZoom);
 		const scaleChange = scale / transform.scale;
@@ -111,7 +111,7 @@ export const panzoom = (target: ZoomableImage, options) => {
 
 	const zoom = (scaleFactor, smooth:boolean = true) => {
 		const contRect = container.getBoundingClientRect();
-		const pos = { x :contRect.width / 2 - contRect.x,  y: contRect.height / 2 + contRect.y };
+		const pos = { x :contRect.width / 2,  y: contRect.height / 2 };
 
 		if (smooth) smoothZoom(pos.x, pos.y, scaleFactor);
 		else zoomTo(pos.x, pos.y, transform.scale * scaleFactor);
@@ -128,7 +128,10 @@ export const panzoom = (target: ZoomableImage, options) => {
 	const onWheel = (ev: WheelEvent) => {
 		stopInertia();
 		const newScale = transform.scale * (1 + zoomStep * -Math.sign(ev.deltaY));
-		zoomTo(ev.clientX, ev.clientY, newScale);
+		const containerRect = container.getBoundingClientRect();
+		const x = ev.clientX - containerRect.left;
+		const y = ev.clientY - containerRect.top;
+		zoomTo(x, y, newScale);
 	};
 
 	const onMouseMove = (ev: MouseEvent) => {
@@ -192,7 +195,7 @@ export const panzoom = (target: ZoomableImage, options) => {
 
 	const dispose = () => {
 		stopInertia();
-		resizeObserver.disconnect();
+		// resizeObserver.disconnect();
 		emitter.removeAllListeners();
 		unSubscribeToEvents();
 	};
