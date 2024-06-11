@@ -20,6 +20,7 @@
 
 import { IndexedDbCache } from './unity-indexedbcache';
 import { ExternalWebRequestHandler } from './unity-externalwebrequesthandler';
+import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare let SendMessage;
@@ -1543,7 +1544,7 @@ export class UnityUtil {
 		toggleMode: boolean,
 		forceReHighlight: boolean,
 	) {
-		UnityUtil.multipleCallInChunks(idArr.length, (start, end) => {
+		return UnityUtil.multipleCallInChunks(idArr.length, (start, end) => {
 			const arr = idArr.slice(start, end);
 			const params: any = {
 				database: account,
@@ -2112,14 +2113,19 @@ export class UnityUtil {
 	 */
 	public static multipleCallInChunks(arrLength: number, func:(start: number, end: number) => any, chunkSize = 5000) {
 		let index = 0;
+		const { promiseToResolve, resolve } = getWaitablePromise();
 		while (index < arrLength) {
 			const end = index + chunkSize >= arrLength ? undefined : index + chunkSize;
 			const i = index; // For the closure
 			this.unityOnUpdateActions.push(() => {
 				func(i, end);
+				if (!end) {
+					resolve();
+				}
 			});
 			index += chunkSize;
 		}
+		return promiseToResolve;
 	}
 
 	/**
