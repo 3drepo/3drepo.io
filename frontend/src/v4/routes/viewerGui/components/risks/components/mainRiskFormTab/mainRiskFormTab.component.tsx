@@ -42,7 +42,7 @@ import {
 	StyledFormControl,
 } from '../riskDetails/riskDetails.styles';
 import { RiskSchema } from '../riskDetails/riskDetails.schema';
-import { DateFieldContainer } from './mainRiskFormTab.styles';
+import { DateFieldContainer, RiskLevelIconResizer } from './mainRiskFormTab.styles';
 
 interface IProps {
 	risk: any;
@@ -148,7 +148,9 @@ export const MainRiskFormTab: FunctionComponent<IProps> = ({
 
 				<FieldsContainer size={'tight'}>
 					<StyledFormControl>
-						<LevelOfRisk header="Level of Risk" level={values.level_of_risk} Icon={RisksIcon} />
+						<RiskLevelIconResizer>
+							<LevelOfRisk header="Level of Risk" level={values.level_of_risk} Icon={RisksIcon} />
+						</RiskLevelIconResizer>
 						<Field name="level_of_risk" render={({ field }) => (
 							<CellSelect
 								{...field}
