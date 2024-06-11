@@ -16,7 +16,7 @@
  */
 
 import { useContext } from 'react';
-import { Stepper, Container, ButtonsContainer, Button } from './calibrationHeader.styles';
+import { Stepper, Container, ButtonsContainer, Button, Connector } from './calibrationHeader.styles';
 import { Step, StepLabel } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { CalibrationContext } from '../calibrationContext';
@@ -33,10 +33,10 @@ export const CalibrationHeader = () => {
 
 	return (
 		<Container>
-			<Stepper activeStep={step} alternativeLabel>
+			<Stepper activeStep={step} alternativeLabel connector={<Connector />} >
 				{STEPS.map((label) => (
 					<Step key={label}>
-						<StepLabel>{label}</StepLabel>
+						<StepLabel StepIconComponent={({ icon }) => icon}>{label}</StepLabel>
 					</Step>
 				))}
 			</Stepper>

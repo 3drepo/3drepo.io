@@ -44,7 +44,7 @@ CalibrationContext.displayName = 'CalibrationContext';
 
 export const CalibrationContextComponent = ({ children }) => {
 	const { teamspace, project, revision, containerOrFederation } = useParams();
-	const [step, setStep] = useState(0);
+	const [step, setStep] = useState(2);
 	const [isStepValid, setIsStepValid] = useState(false);
 	const [origin, setOrigin] = useState(generatePath(DRAWINGS_ROUTE, { teamspace, project }));
 	const [isCalibrating] = useSearchParam('isCalibrating', Transformers.BOOLEAN);
