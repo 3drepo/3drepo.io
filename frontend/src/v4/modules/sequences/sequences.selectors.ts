@@ -132,6 +132,7 @@ export const selectSelectedStartingDate = createSelector(
 	}
 );
 
+const FRAMES_TO_FETCH = 4;
 export const selectNextKeyFramesDates =  createSelector(
 	selectSelectedStartingDate, selectStepScale, selectStepInterval , selectEndDate, selectFrames,
 		(startingDate, scale, interval, endDate, frames) => {
@@ -142,9 +143,9 @@ export const selectNextKeyFramesDates =  createSelector(
 			if (scale !== STEP_SCALE.FRAME) {
 				let lastFrame = frames[frameIndex];
 				let nextFrame = null;
-				let date = getDateByStep(startingDate, scale, interval);
+				let date = startingDate;
 				endDate = new Date(endDate);
-				for (let i = 0; i < 3 ; i++) {
+				for (let i = 0; i < FRAMES_TO_FETCH - 1; i++) {
 					date = getDateByStep(date, scale, interval);
 					nextFrame = getSelectedFrame(frames, date);
 
@@ -157,10 +158,9 @@ export const selectNextKeyFramesDates =  createSelector(
 					lastFrame = nextFrame;
 				}
 			} else {
-				for (let i = frameIndex; i < frameIndex + 3 && i < frames.length; ++i) {
+				for (let i = frameIndex + 1; i < frameIndex + FRAMES_TO_FETCH && i < frames.length; ++i) {
 					keyFrames.push(new Date(frames[i].dateTime));
 				}
-
 			}
 
 			return keyFrames.filter((d) => d <= endDate);
