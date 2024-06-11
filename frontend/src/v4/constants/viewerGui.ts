@@ -50,7 +50,7 @@ export const VIEWER_PANELS = {
 export const VIEWER_PANELS_ICONS = {
 	[VIEWER_PANELS.ISSUES]: IssuesIcon,
 	[VIEWER_PANELS.RISKS]: RisksIcon,
-	[VIEWER_PANELS.TICKETS]: TicketsIcon as ComponentType,
+	[VIEWER_PANELS.TICKETS]: TicketsIcon,
 	[VIEWER_PANELS.GROUPS]: GroupsIcon,
 	[VIEWER_PANELS.VIEWS]: ViewsIcon,
 	[VIEWER_PANELS.TREE]: TreeIcon,
@@ -58,8 +58,8 @@ export const VIEWER_PANELS_ICONS = {
 	[VIEWER_PANELS.GIS]: GisIcon,
 	[VIEWER_PANELS.SEQUENCES]: SequencesIcon,
 	[VIEWER_PANELS.MEASUREMENTS]: MeasureIcon,
-	[VIEWER_PANELS.DRAWINGS]: DrawingsIcon as ComponentType,
-};
+	[VIEWER_PANELS.DRAWINGS]: DrawingsIcon,
+} as Record<string, ComponentType>;
 
 export const VIEWER_PANELS_MIN_HEIGHTS = {
 	[VIEWER_PANELS.ISSUES]: 200,

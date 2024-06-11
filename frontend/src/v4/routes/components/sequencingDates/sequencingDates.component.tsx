@@ -77,7 +77,7 @@ const SequenceDate = ({ name, onChange, showSequenceDate, min, max, initialFocus
 			/>
 			{ value &&
 				<SequenceDateActions>
-					<SmallIconButton onClick={(e) => showSequenceDate(value)} Icon={SequencesIcon} disabled={!hasSequences} />
+					<SmallIconButton onClick={(e) => showSequenceDate(value)} Icon={SequencesIcon as any} disabled={!hasSequences} />
 					<SmallIconButton onClick={deleteValue} Icon={CloseIcon} />
 				</SequenceDateActions>
 			}

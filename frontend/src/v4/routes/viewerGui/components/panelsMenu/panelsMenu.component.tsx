@@ -65,7 +65,7 @@ export class PanelsMenu extends PureComponent<any, IState> {
 		);
 	}
 
-	private renderButtons = () => this.toolbarList.map((buttonProps, index) => (
+	private renderButtons = () => this.toolbarList.map((buttonProps: any, index) => (
 		<TooltipButton
 			{...buttonProps}
 			key={index}
