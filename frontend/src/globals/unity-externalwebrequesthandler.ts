@@ -48,9 +48,10 @@ export class ExternalWebRequestHandler {
 
 	/** Initialises this handler for an instance of Unity. Should be called by
 	 * the viewer once it is fully initialised. */
-	setUnityInstance(unityInstance: any, gameObjectName: string) {
+	setUnityInstance(unityInstance: any, gameObjectName: string) : boolean {
 		this.unityInstance = unityInstance;
 		this.gameObjectName = gameObjectName;
+		return true;
 	}
 
 	setAPIHost(hostNames: [string]) { // An array for backwards compatability reasons

@@ -17,7 +17,8 @@
 
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../helper/services');
-const { src } = require('../../../helper/path');
+const { image, src } = require('../../../helper/path');
+const fs = require('fs');
 const { generateRandomNumber, generateRandomModel, generateRandomProject, generateRandomString } = require('../../../helper/services');
 
 const { DEFAULT_OWNER_JOB } = require(`${src}/models/jobs.constants`);
@@ -77,7 +78,10 @@ const jobToUsers = [
 ];
 
 const project = generateRandomProject();
+const projectWithImage = generateRandomProject();
+
 const model = generateRandomModel({ collaborators: [userToRemoveFromTs.user] });
+const modelWithRev = generateRandomModel();
 const validExpiryDate = Date.now() + 100000;
 
 const setupData = async () => {
@@ -184,9 +188,22 @@ const setupData = async () => {
 		ServiceHelper.db.createJobs(teamspaces[0].name, jobToUsers),
 	]);
 
-	await ServiceHelper.db.createProject(tsWithUsersToRemove.name, project.id, project.name,
-		[], [userToRemoveFromTs.user]);
-	await ServiceHelper.db.createModel(tsWithUsersToRemove.name, model._id, model.name, model.properties);
+	await Promise.all([
+		ServiceHelper.db.createProject(tsWithUsersToRemove.name, project.id, project.name,
+			[], [userToRemoveFromTs.user]),
+		ServiceHelper.db.createProject(tsWithLicense.name, projectWithImage.id, projectWithImage.name,
+			[], [userWithLicense.user]),
+	]);
+
+	await Promise.all([
+		ServiceHelper.db.createProjectImage(tsWithLicense.name, projectWithImage.id, 'fs', fs.readFileSync(image)),
+		ServiceHelper.db.createModel(tsWithUsersToRemove.name, model._id, model.name, model.properties),
+		ServiceHelper.db.createModel(tsWithLicense.name, modelWithRev._id, modelWithRev.name,
+			modelWithRev.properties),
+	]);
+
+	await ServiceHelper.db.createRevision(tsWithLicense.name, modelWithRev._id,
+		ServiceHelper.generateRevisionEntry(false, true));
 };
 
 const testGetTeamspaceList = () => {
@@ -313,7 +330,7 @@ const testGetQuotaInfo = () => {
 			expect(res.body.code).toEqual(templates.licenceExpired.code);
 		});
 
-		test('should return quota if the user has a valid license', async () => {
+		test('should return quota if the user has a valid license and space is used', async () => {
 			const res = await agent.get(`${route()}/?key=${userWithLicense.apiKey}`)
 				.expect(templates.ok.status);
 			const collaboratorLimit = config.subscriptions?.basic?.collaborators === 'unlimited'
@@ -323,7 +340,7 @@ const testGetQuotaInfo = () => {
 				{
 					expiryDate: validExpiryDate,
 					freeTier: false,
-					data: { used: 0, available: spaceLimitInBytes },
+					data: { used: 642, available: spaceLimitInBytes },
 					seats: { used: 3, available: collaboratorLimit },
 				},
 			);

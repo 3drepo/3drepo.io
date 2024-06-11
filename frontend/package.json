@@ -1,6 +1,6 @@
 {
     "name": "3drepo.io-frontend",
-    "version": "5.8.3",
+    "version": "5.10.0",
     "description": "The frontend for 3drepo.io",
     "engines": {
         "node": "18.x.x"
@@ -75,6 +75,7 @@
         "markdown-linkify": "1.0.3",
         "memoize-one": "5.0.5",
         "mockdate": "3.0.5",
+        "modern-screenshot": "4.4.39",
         "normalize.css": "8.0.1",
         "normalizr": "3.4.0",
         "pdf-lib": "1.17.1",

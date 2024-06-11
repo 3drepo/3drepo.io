@@ -29,7 +29,7 @@ import {
 } from '@/v5/services/realtime/ticketComments.events';
 import { FormattedMessage } from 'react-intl';
 import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Gap } from '@controls/gap';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { sanitiseMessage, stripMetadata } from '@/v5/store/tickets/comments/ticketComments.helpers';
@@ -37,13 +37,15 @@ import { ViewerParams } from '../../../../routes.constants';
 import { Accordion, Comments, EmptyCommentsBox, VirtualisedList } from './commentsPanel.styles';
 import { Comment } from './comment/comment.component';
 import { CreateCommentBox } from './createCommentBox/createCommentBox.component';
+import { TicketContext } from '../../ticket.context';
 
 type CommentsPanelProps = {
 	scrollPanelIntoView: (event, isExpanding) => void,
 };
 export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 	const [commentReply, setCommentReply] = useState<ITicketComment>(null);
-	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const { teamspace, project } = useParams<ViewerParams>();
+	const { containerOrFederation } = useContext(TicketContext);
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
@@ -106,13 +108,13 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 		);
 		if (isFederation) {
 			return combineSubscriptions(
-				enableRealtimeFederationNewTicketComment(teamspace, project, containerOrFederation, ticketId),
-				enableRealtimeFederationUpdateTicketComment(teamspace, project, containerOrFederation, ticketId),
+				enableRealtimeFederationNewTicketComment(teamspace, project, containerOrFederation),
+				enableRealtimeFederationUpdateTicketComment(teamspace, project, containerOrFederation),
 			);
 		}
 		return combineSubscriptions(
-			enableRealtimeContainerNewTicketComment(teamspace, project, containerOrFederation, ticketId),
-			enableRealtimeContainerUpdateTicketComment(teamspace, project, containerOrFederation, ticketId),
+			enableRealtimeContainerNewTicketComment(teamspace, project, containerOrFederation),
+			enableRealtimeContainerUpdateTicketComment(teamspace, project, containerOrFederation),
 		);
 	}, [ticketId]);
 

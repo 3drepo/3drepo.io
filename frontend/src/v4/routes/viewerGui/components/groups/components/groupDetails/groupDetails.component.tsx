@@ -45,9 +45,8 @@ interface IProps {
 	expandDetails: boolean;
 	currentUser: any;
 	modelSettings: any;
-	totalMeshes: number;
 	canUpdate: boolean;
-	selectedNodes: any;
+	selectedNodes: any[];
 	criteriaFieldState: ICriteriaFieldState;
 	createGroup: (teamspace: any, modelId: any, revision: any) => void;
 	updateGroup: (teamspace: any, modelId: any, revision: any, groupId: any) => void;
@@ -57,7 +56,6 @@ interface IProps {
 	isPending: boolean;
 	deleteGroup: (id: string | null) => void;
 	isReadOnly: boolean;
-	getObjectsCount: (meshesIds: any[]) => number;
 }
 
 interface IState {
@@ -84,13 +82,12 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 		return this.editingGroup.type === GROUPS_TYPES.SMART;
 	}
 
-	get editingGroup() {
-		return this.props.editingGroup;
+	get objectsCount() {
+		return this.isNewGroup ? this.props.selectedNodes.length : this.editingGroup.totalSavedMeshes;
 	}
 
-	get selectedObjectsCount() {
-		const sharedIds = (this.props.selectedNodes || []).flatMap((node) => node.shared_ids);
-		return this.props.getObjectsCount(sharedIds);
+	get editingGroup() {
+		return this.props.editingGroup;
 	}
 
 	get isFormValid() {
@@ -140,7 +137,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 	));
 
 	public componentDidMount() {
-		this.setState({ isFormDirty: this.isNewGroup, isFormValid: this.isNewGroup && !!this.selectedObjectsCount });
+		this.setState({ isFormDirty: this.isNewGroup, isFormValid: this.isNewGroup && this.objectsCount > 0 });
 	}
 
 	public componentDidUpdate(prevProps: Readonly<PropsWithChildren<IProps>>) {
@@ -156,8 +153,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 			const rulesChanged = this.isSmartGroup && !rulesAreEqual(this.editingGroup, this.props.originalGroup);
 
 			// if it is a smart group, we ignore the manual selection because it depends on the rules
-			const selectionChanged = !this.isSmartGroup &&
-				!hasSameSharedIds(this.props.selectedNodes, this.editingGroup.objects);
+			const selectionChanged = !this.isSmartGroup && !hasSameSharedIds(this.props.selectedNodes, this.editingGroup.objects);
 
 			this.setIsFormDirty(wasUpdated || selectionChanged || rulesChanged);
 		}
@@ -191,10 +187,9 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 			key={`${this.editingGroup._id}.${this.editingGroup.updatedAt}`}
 			group={this.editingGroup}
 			currentUser={this.props.currentUser}
-			totalMeshes={this.props.totalMeshes}
+			objectsCount={this.objectsCount}
 			canUpdate={this.props.canUpdate}
 			handleChange={this.handleFieldChange}
-			objectsCount={this.editingGroup.totalSavedMeshes}
 		/>
 	)
 

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,4 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { default as ViewerCanvas } from './viewerCanvas.container';
+import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
+import { Button } from './closeButton.styles';
+import { ButtonProps } from '@mui/material';
+
+type CloseButtonProps = Omit<ButtonProps, 'variant'> & {
+	variant?: 'primary' | 'secondary',
+};
+
+export const CloseButton = ({ variant, ...props }: CloseButtonProps) => (
+	<Button $variant={variant} {...props}>
+		<CloseIcon />
+	</Button>
+);

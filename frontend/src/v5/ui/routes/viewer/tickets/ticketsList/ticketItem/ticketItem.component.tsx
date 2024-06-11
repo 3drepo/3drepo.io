@@ -30,6 +30,7 @@ import { has, isEqual } from 'lodash';
 import { getPropertiesInCamelCase, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { TicketItemThumbnail } from './ticketItemThumbnail/ticketItemThumbnail.component';
 import { PRIORITY_LEVELS_MAP } from '@controls/chip/chip.types';
+import { getChipPropsFromConfig } from '@controls/chip/statusChip/statusChip.helpers';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -47,6 +48,7 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 	const { description = '', assignees = [], priority, dueDate = null } = getPropertiesInCamelCase(ticket[TicketBaseKeys.PROPERTIES]);
 	const hasIssueProperties = has(template, [TicketBaseKeys.CONFIG, 'issueProperties']);
 	const hasThumbnail = has(template, [TicketBaseKeys.CONFIG, 'defaultView']) || has(template, [TicketBaseKeys.CONFIG, 'defaultImage']);
+	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(containerOrFederation, ticket.type);
 
 	const updateTicketProperty = (value) => TicketsActionsDispatchers
 		.updateTicket(teamspace, project, containerOrFederation, ticket._id, { properties: value }, isFederation);
@@ -106,7 +108,7 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 						{`${template?.code}:${ticket.number}`}
 					</Highlight>
 				</Id>
-				<StatusChip value={ticket.properties.Status} modelId={containerOrFederation} templateId={ticket.type} />
+				<StatusChip {...getChipPropsFromConfig(statusConfig, ticket.properties.Status)} />
 			</BottomRow>
 		</TicketItemContainer>
 	);

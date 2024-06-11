@@ -26,8 +26,9 @@ import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Overlay, Link } from './viewerInputContainer.styles';
 
 export const ViewerInputContainer = (props) => {
-	const { isViewer } = useContext(TicketContext);
-	const { teamspace, project, containerOrFederation } = useParams();
+	const { isViewer, containerOrFederation } = useContext(TicketContext);
+	const { teamspace, project } = useParams();
+	
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 
 	if (isViewer) return (<InputContainer {...props} />);

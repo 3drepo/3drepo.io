@@ -18,7 +18,7 @@
 import { UnityUtil } from "@/globals/unity-util";
 import { isEqual } from "lodash";
 import { getState } from "../modules/store";
-import { selectGetMeshesByIds, selectHiddenGeometryVisible, selectNodesBySharedIdsMap, selectTreeNodesList } from "../modules/tree";
+import { selectGetMeshesByIds, selectGetSharedIdsFromNodeIds, selectHiddenGeometryVisible, selectNodesBySharedIdsMap, selectTreeNodesList } from "../modules/tree";
 import { selectColorOverrides, selectTransformations } from "../modules/viewerGui";
 import { Viewer } from "../services/viewer/viewer";
 import { hexToArray } from "./colors";
@@ -304,13 +304,4 @@ export const getNodesIdsFromSharedIds = (objects) => {
 	return Array.from(ids);
 };
 
-export const toSharedIds = (node_ids: string[]) => {
-	const nodesSet = new Set(node_ids);
-	const nodesList = selectTreeNodesList(getState());
-	return nodesList.reduce((sharedIds, currentNode) => {
-		if (nodesSet.has(currentNode._id)) {
-			sharedIds.push(currentNode.shared_id);
-		}
-		return sharedIds;
-	}, []);
-};
+export const toSharedIds = (node_ids: string[]) => selectGetSharedIdsFromNodeIds(getState(), node_ids);

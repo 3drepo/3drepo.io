@@ -20,12 +20,10 @@ import { generatePath, useParams, useHistory } from 'react-router-dom';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormProvider, useForm } from 'react-hook-form';
-import _ from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { SubmitButton } from '@controls/submitButton';
 import { ContainersAndFederationsFormSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
 import { TemplateFormSelect } from '../selectMenus/templateFormSelect.component';
-import { NONE_OPTION } from '../ticketsTable/ticketsTable.helper';
 import { Form, Title, Image } from './ticketsSelection.styles';
 
 type FormType = {
@@ -51,14 +49,16 @@ export const TicketsSelection = () => {
 
 	const goToTableView = () => {
 		if (!isValid) return;
-		const path = generatePath(TICKETS_ROUTE, {
+
+		const route = TICKETS_ROUTE + `?models=${containersAndFederations.join(',')}`;
+		
+		const path = generatePath(route, {
 			teamspace,
 			project,
 			template,
-			groupBy: _.snakeCase(NONE_OPTION),
 		});
-		const searchParams = `?models=${containersAndFederations.join(',')}`;
-		history.push(path + searchParams);
+
+		history.push(path);
 	};
 
 	if (!teamspace || !project || !templates) return (<Loader />);

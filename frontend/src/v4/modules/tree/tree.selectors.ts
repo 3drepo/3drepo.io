@@ -22,26 +22,11 @@ import { selectUsername } from '@/v5/store/currentUser/currentUser.selectors';
 import { NODE_TYPES, VISIBILITY_STATES } from '../../constants/tree';
 import { mergeArrays } from '../../helpers/arrays';
 import { searchByFilters } from '../../helpers/searching';
-import { calculateTotalMeshes } from '../../helpers/tree';
 import TreeProcessing from './treeProcessing/treeProcessing';
 
+const selectTreeProccessing = () => TreeProcessing.data;
+
 export const selectTreeDomain = (state) => ({...state.tree});
-
-export const selectSelectedNodes = createSelector(
-	selectTreeDomain, (state) => state.selectedNodes
-);
-
-export const selectIsPending = createSelector(
-	selectTreeDomain, (state) => state.isPending
-);
-
-export const selectTotalMeshes = createSelector(
-	selectSelectedNodes, (selectedNodes) => calculateTotalMeshes(selectedNodes)
-);
-
-export const selectComponentState = createSelector(
-	selectTreeDomain, (state) => state.componentState
-);
 
 // This is used by other selectors, although the data seems not to be used.
 // The reason is that "dataRevision" acts as an ID that changes when
@@ -53,15 +38,49 @@ export const selectDataRevision = createSelector(
 	selectTreeDomain, (state) => state.dataRevision
 );
 
-export const selectActiveNode = createSelector(
-	selectTreeDomain, (state) => state.activeNode
-);
-
-const selectTreeProccessing = () => TreeProcessing.data;
-
 export const selectTreeNodesList = createSelector(
 	selectTreeProccessing, selectDataRevision,
 	(treeProcessingData) => treeProcessingData.nodesList || []
+);
+
+export const selectSelectedObjects = createSelector(
+	selectTreeDomain, (state) => state.selectedObjects || []
+);
+
+export const selectSelectedNodes = createSelector(
+	selectTreeProccessing,
+	selectSelectedObjects,
+	(treeProcessing, objects) => objects.map((o) => ({
+		model: o.modelId,
+		account: o.teamspace,
+		shared_ids: o.meshes.map((meshId) => treeProcessing.nodesList[treeProcessing.nodesIndexesMap[meshId]].shared_id),
+	})),
+);
+
+export const selectGetSharedIdsFromNodeIds = createSelector(
+	selectTreeNodesList,
+	(state, nodeIds: string[]) => nodeIds,
+	(nodesList, nodeIds) => {
+		const nodesSet = new Set(nodeIds);
+		return nodesList.reduce((sharedIds, currentNode) => {
+			if (nodesSet.has(currentNode._id)) {
+				sharedIds.push(currentNode.shared_id);
+			}
+			return sharedIds;
+		}, []);
+	}
+);
+
+export const selectIsPending = createSelector(
+	selectTreeDomain, (state) => state.isPending
+);
+
+export const selectComponentState = createSelector(
+	selectTreeDomain, (state) => state.componentState
+);
+
+export const selectActiveNode = createSelector(
+	selectTreeDomain, (state) => state.activeNode
 );
 
 export const selectSortedTreeNodesList = createSelector(
@@ -277,11 +296,14 @@ export const selectGetMeshesByIds = (nodesIds = []) => createSelector(
 	}
 );
 
-export const selectGetNumNodesByMeshSharedIdsArray = (meshes = []) => createSelector(
-	selectTreeNodesList, selectNodesIndexesMap, selectNodesBySharedIdsMap,
-	(nodeList, nodeMap, nodesBySharedIds) => {
+export const selectNodesByMeshSharedIdsArray = createSelector(
+	selectTreeNodesList,
+	selectNodesIndexesMap,
+	selectNodesBySharedIdsMap,
+	(state, meshes) => meshes,
+	(nodeList, nodeMap, nodesBySharedIds, meshes) => {
 		if (!(nodeList && nodeMap && nodesBySharedIds)) {
-			return meshes.length;
+			return meshes;
 		}
 		const foundNodes = new Set();
 
@@ -293,9 +315,24 @@ export const selectGetNumNodesByMeshSharedIdsArray = (meshes = []) => createSele
 			}
 		});
 
-		return foundNodes.size;
+		return Array.from(foundNodes);
 	}
 );
+
+export const selectNumNodesByMeshSharedIdsArray = createSelector(
+	selectNodesByMeshSharedIdsArray,
+	(nodes) => nodes.length
+);
+
+export const selectSelectedObjectsCount = createSelector(
+	selectSelectedNodes,
+	(state) => (meshes) => selectNodesByMeshSharedIdsArray(state, meshes),
+	(selectedNodes, getNodesByMeshSharedIdsArray) => {
+		const sharedIds = selectedNodes.flatMap((node) => node.shared_ids);
+		return getNodesByMeshSharedIdsArray(sharedIds).length;
+	}
+);
+
 type MyObject = {
 	shared_ids: string[]
 }

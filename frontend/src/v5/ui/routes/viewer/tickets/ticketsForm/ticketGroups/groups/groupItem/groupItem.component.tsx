@@ -30,7 +30,7 @@ import { CircularProgress } from '@mui/material';
 import { isString } from 'lodash';
 import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
 import { convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
-import { TreeActions, selectGetNumNodesByMeshSharedIdsArray } from '@/v4/modules/tree';
+import { TreeActions, selectNumNodesByMeshSharedIdsArray } from '@/v4/modules/tree';
 import { toSharedIds } from '@/v4/helpers/viewpoints';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -64,7 +64,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	const isHighlighted = highlightedIndex === index;
 
 	const sharedIds = toSharedIds(((group as Group).objects || []).flatMap(({ _ids }) => _ids));
-	const objectsCount = useSelector(selectGetNumNodesByMeshSharedIdsArray(sharedIds));
+	const objectsCount = useSelector((state) => selectNumNodesByMeshSharedIdsArray(state, sharedIds));
 
 	const preventPropagation = (e) => {
 		e.preventDefault();

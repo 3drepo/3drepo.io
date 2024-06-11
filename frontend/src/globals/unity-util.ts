@@ -129,6 +129,12 @@ export class UnityUtil {
 
 	public static verbose = false;
 
+	/** @hidden */
+	/** Start by assuming IndexedDB is available. If there are any access
+	 * failures during the preamble, then this will be set to false.
+	 */
+	private static indexedDBAvailable = true;
+
 	/**
 	 * Contains a list of calls to make during the Unity Update method. One
 	 * call is made per Unity frame.
@@ -162,6 +168,36 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Checks if access to IndexedDb is available, and updates the
+	 * indexedDBAvailable flag accordingly.
+	 */
+	private static checkIdb(): Promise<void> {
+		return new Promise((resolve) => {
+			// If something outside has signalled IndexedDb is unavailable, don't
+			// do anything further.
+			if (!this.indexedDBAvailable) {
+				resolve();
+			}
+
+			// Check if IndexedDB is available by accessing the databases list.
+			// This should catch both API availability and permissions issues.
+			try {
+				indexedDB.databases().then(() => {
+					resolve();
+				}).catch(() => {
+					console.warn('IndexedDB is unavailable.');
+					this.indexedDBAvailable = false;
+					resolve();
+				});
+			} catch {
+				console.warn('IndexedDB is unavailable.');
+				this.indexedDBAvailable = false;
+				resolve();
+			}
+		});
+	}
+
+	/**
 	 * Removes the IndexedDb database /idbfs, which emulates a synchronous
 	 * filesystem.
 	 * The viewer should not store anything use the File API between runs.
@@ -179,10 +215,9 @@ export class UnityUtil {
 		// a unique id, and then attempt to read it back. Only the tab whose id
 		// matches will embark on the clear operation.
 
-		const clearedFlagKey = 'repoV1CacheCleared';
-
 		try {
-			if (!window.localStorage.getItem(clearedFlagKey)) {
+			const clearedFlagKey = 'repoV1CacheCleared';
+			if (this.indexedDBAvailable && !window.localStorage.getItem(clearedFlagKey)) {
 				const id = (Math.floor(Math.random() * 100000)).toString();
 				window.localStorage.setItem(clearedFlagKey, id);
 				if (window.localStorage.getItem(clearedFlagKey) === id) {
@@ -205,7 +240,7 @@ export class UnityUtil {
 				}
 			}
 		} catch (error) {
-			console.error('Unable to clear IndexDbFs', error);
+			console.error('Unable to clear IndexDbFs.', error);
 		}
 		return Promise.resolve();
 	}
@@ -244,7 +279,7 @@ export class UnityUtil {
 			}
 		}
 
-		return this.clearIdbfs().then(() => UnityUtil._loadUnity(canvasDom, domainURL));
+		return this.checkIdb().then(() => UnityUtil.clearIdbfs()).then(() => UnityUtil._loadUnity(canvasDom, domainURL));
 	}
 
 	/** @hidden */
@@ -265,7 +300,9 @@ export class UnityUtil {
 		}
 
 		UnityUtil.unityDomain = new URL(domainURL || window.location.origin);
-		this.externalWebRequestHandler = new ExternalWebRequestHandler(new IndexedDbCache(this.unityDomain)); // IndexedDbCache expects to find the worker at in [unityDomain]/unity/indexeddbworker.js
+		if (this.indexedDBAvailable) { // Currently, the only reason to use ExternalWebRequestHandler is to use IndexedDb, so don't create the handler if it's not supported
+			this.externalWebRequestHandler = new ExternalWebRequestHandler(new IndexedDbCache(this.unityDomain)); // IndexedDbCache expects to find the worker at in [unityDomain]/unity/indexeddbworker.js
+		}
 
 		const buildUrl = new URL(UnityUtil.unityBuildSubdirectory, UnityUtil.unityDomain);
 
@@ -1872,13 +1909,13 @@ export class UnityUtil {
 	/**
 	 * Set API host urls. This is needs to be called before loading model.
 	 * @category Configurations
-	 * @param hostNames - list of API names to use. (e.g ["https://api1.www.3drepo.io/api/"])
+	 * @param hostNames - list of API names to use in an object. (e.g ["https://api1.www.3drepo.io/api/"])
 	 */
-	public static setAPIHost(hostNames: [string]) {
-		UnityUtil.toUnity('SetAPIHost', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({
-			hostNames,
-		}));
-		UnityUtil.externalWebRequestHandler.setAPIHost(hostNames);
+	public static setAPIHost(hostNames: { hostNames: string[] }) {
+		UnityUtil.toUnity('SetAPIHost', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(hostNames));
+		if (UnityUtil.externalWebRequestHandler !== undefined) {
+			UnityUtil.externalWebRequestHandler.setAPIHost(hostNames.hostNames);
+		}
 	}
 
 	/**
@@ -2148,10 +2185,10 @@ export class UnityUtil {
 			UnityUtil.viewer.setClipMode(null);
 		}
 		if (clipPlane?.length === 1) {
-			UnityUtil.viewer.setClipMode('SINGLE');
+			//UnityUtil.viewer.setClipMode('SINGLE');
 		}
 		if (clipPlane?.length === 6) {
-			UnityUtil.viewer.setClipMode('BOX');
+			//UnityUtil.viewer.setClipMode('BOX');
 		}
 		param.requiresBroadcast = requireBroadcast;
 		UnityUtil.toUnity('UpdateClip', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
@@ -2352,6 +2389,6 @@ export class UnityUtil {
 	 * @hidden
 	 */
 	public static createWebRequestHandler(gameObjectName: string) {
-		this.externalWebRequestHandler.setUnityInstance(this.unityInstance, gameObjectName);
+		return this.externalWebRequestHandler && this.externalWebRequestHandler.setUnityInstance(this.unityInstance, gameObjectName);
 	}
 }

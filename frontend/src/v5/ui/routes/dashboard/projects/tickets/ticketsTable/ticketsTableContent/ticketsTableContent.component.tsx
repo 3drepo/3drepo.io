@@ -18,83 +18,46 @@
 import { SearchContext } from '@controls/search/searchContext';
 import { useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import _ from 'lodash';
 import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
-import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { TicketsTableGroup } from './ticketsTableGroup/ticketsTableGroup.component';
-import { GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE, groupTickets, NONE_OPTION, SAFETIBASE_PROPERTIES_GROUPS, UNSET } from '../ticketsTable.helper';
-import { EmptyTicketsView } from '../../emptyTicketsView/emptyTicketsView.styles';
+import {  groupTickets, NEW_TICKET_ID, NONE_OPTION, SetTicketValue, UNSET } from '../ticketsTable.helper';
+import { EmptyPageView } from '../../../../../../components/shared/emptyPageView/emptyPageView.styles';
 import { Container, Title } from './ticketsTableContent.styles';
-import { PriorityLevels } from '@controls/chip/chip.types';
 
 type TicketsTableContentProps = {
-	setSidePanelData: (modelId: string, ticket?: Partial<ITicket>) => void;
+	setTicketValue: SetTicketValue;
+	groupBy: string
 	selectedTicketId?: string;
 };
-export const TicketsTableContent = ({ setSidePanelData, selectedTicketId }: TicketsTableContentProps) => {
+export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy }: TicketsTableContentProps) => {
 	const { filteredItems } = useContext(SearchContext);
-	const { groupBy: groupByAsURLParam, template } = useParams<DashboardTicketsParams>();
-	const groupBy = GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE[groupByAsURLParam];
-
+	const { template } = useParams<DashboardTicketsParams>();
+	
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
-		if (groupByValue === UNSET) {
-			setSidePanelData(modelId, {});
-			return;
-		}
-
-		const defaultValue = {} as any;
-		const formattedGroupByValue = _.upperCase(groupByValue).replaceAll(' ', '_');
-
-		if (groupBy === SafetibaseProperties.TREATMENT_STATUS) {
-			defaultValue.modules = {
-				safetibase: {
-					[groupBy]: SAFETIBASE_PROPERTIES_GROUPS[groupBy][formattedGroupByValue],
-				},
-			};
-		}
-
-		if (groupBy === IssueProperties.PRIORITY) {
-			defaultValue.properties = {
-				[groupBy]: PriorityLevels[formattedGroupByValue],
-			};
-		}
-
-		if (groupBy === BaseProperties.STATUS) {
-			defaultValue.properties = {
-				[groupBy]: groupByValue,
-			};
-		}
-
-		if (groupBy === IssueProperties.ASSIGNEES) {
-			defaultValue.properties = {
-				[groupBy]: groupByValue.split(', '),
-			};
-		}
-
-		setSidePanelData(modelId, defaultValue);
+		setTicketValue(modelId, NEW_TICKET_ID, (groupByValue === UNSET) ? null : groupByValue);
 	};
 
 	if (!filteredItems.length) {
 		return (
-			<EmptyTicketsView>
+			<EmptyPageView>
 				<FormattedMessage
 					id="ticketTable.emptyView"
 					defaultMessage="We couldn't find any tickets to show. Please refine your selection."
 				/>
-			</EmptyTicketsView>
+			</EmptyPageView>
 		);
 	}
 
-	if (groupBy === NONE_OPTION) {
+	if (groupBy === NONE_OPTION || !groupBy) {
 		return (
 			<TicketsTableGroup
 				tickets={filteredItems}
 				onNewTicket={onGroupNewTicket('')}
-				onEditTicket={setSidePanelData}
+				onEditTicket={setTicketValue}
 				selectedTicketId={selectedTicketId}
 			/>
 		);
@@ -118,7 +81,7 @@ export const TicketsTableContent = ({ setSidePanelData, selectedTicketId }: Tick
 					<TicketsTableGroup
 						tickets={tickets}
 						onNewTicket={onGroupNewTicket(groupName)}
-						onEditTicket={setSidePanelData}
+						onEditTicket={setTicketValue}
 						selectedTicketId={selectedTicketId}
 					/>
 				</DashboardListCollapse>

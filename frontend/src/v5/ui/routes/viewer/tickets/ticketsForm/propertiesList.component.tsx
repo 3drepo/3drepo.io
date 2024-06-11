@@ -19,14 +19,13 @@ import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { InputController } from '@controls/inputs/inputController.component';
 import { get, isUndefined } from 'lodash';
-import { Fragment } from 'react';
+import { Fragment, useContext } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { TicketProperty } from './properties/properties.helper';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
 import { ErrorTextGap, PropertiesListContainer } from './ticketsForm.styles';
 import { SEQUENCING_END_TIME, SEQUENCING_START_TIME, TicketsCardViews } from '../tickets.constants';
-import { useParams } from 'react-router-dom';
-import { DashboardTicketsParams } from '../../../routes.constants';
+import { TicketContext } from '../ticket.context';
 
 interface PropertiesListProps {
 	properties: PropertyDefinition[];
@@ -37,7 +36,7 @@ interface PropertiesListProps {
 const isSequencingProperty = (inputName: string) => [SEQUENCING_START_TIME, SEQUENCING_END_TIME].includes(inputName);
 
 export const PropertiesList = ({ module, properties, onPropertyBlur }: PropertiesListProps) => {
-	const { containerOrFederation } = useParams<DashboardTicketsParams>();
+	const { containerOrFederation } = useContext(TicketContext);
 
 	const { formState } = useFormContext();
 	const ticketIsReadOnly = TicketsCardHooksSelectors.selectReadOnly();

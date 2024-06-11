@@ -27,6 +27,8 @@ import { CommentReply } from '../commentReply/commentReply.component';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useSyncProps } from '@/v5/helpers/syncProps.hooks';
 import { ExternalLabel } from '../otherUserComment/importedUserPopover/importedUserPopover.styles';
+import { useContext } from 'react';
+import { TicketContext } from '../../../../ticket.context';
 
 export type CommentNonMessageContentProps = Partial<Omit<ITicketComment, 'history' | '_id'>> & {
 	metadata?: TicketCommentReplyMetadata;
@@ -47,7 +49,8 @@ export const CommentNonMessageContent = ({
 	onEditImage,
 	originalAuthor,
 }: CommentNonMessageContentProps) => {
-	const { teamspace, project, containerOrFederation } = useParams();
+	const { teamspace, project } = useParams();
+	const { containerOrFederation } = useContext(TicketContext);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const isFederation = modelIsFederation(containerOrFederation);
 

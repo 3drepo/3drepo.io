@@ -19,6 +19,7 @@ import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { forwardRef, useEffect, useState } from 'react';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
+import { CentredContainer } from '@controls/centredContainer';
 
 type DrawingViewerImageProps = {
 	onLoad: (...args) => void,
@@ -33,7 +34,11 @@ export const DrawingViewerImage = forwardRef(({ onLoad }: DrawingViewerImageProp
 		fetch(src).then(() => setIsLoading(false));
 	}, [drawingId]);
 
-	if (isLoading) return <Loader />;
+	if (isLoading) return (
+		<CentredContainer>
+			<Loader />
+		</CentredContainer>
+	);
 
 	return <img src={src} ref={ref} onLoad={onLoad} />;
 });

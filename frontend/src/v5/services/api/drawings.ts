@@ -18,7 +18,7 @@
 
 import { delay } from '@/v4/helpers/async';
 import { drawingFilesName, drawingIds, mockRole } from '@/v5/store/drawings/drawings.temp';
-import { DrawingStats, DrawingUploadStatus, CalibrationStates, MinimumDrawing, IDrawing } from '@/v5/store/drawings/drawings.types';
+import { DrawingStats, DrawingUploadStatus, CalibrationState, MinimumDrawing, IDrawing } from '@/v5/store/drawings/drawings.types';
 import { AxiosResponse } from 'axios';
 import uuid from 'uuidv4';
 
@@ -32,18 +32,18 @@ export const removeFavourite = (teamspace, projectId, drawingId): Promise<AxiosR
 
 const categories =  ['A drawing category', 'Another drawing category', 'Yet another one'];
 
-const arr = (new Array(100)).fill(0);
+const arr = (new Array(10)).fill(0);
 
 const randCal = (revisionsCount) => {
 	switch (revisionsCount) {
 		case 0:
-			return CalibrationStates.EMPTY;
+			return CalibrationState.EMPTY;
 		case 1:
-			return CalibrationStates.OUT_OF_SYNC;
+			return CalibrationState.OUT_OF_SYNC;
 		case 2:
-			return CalibrationStates.UNCALIBRATED;
+			return CalibrationState.UNCALIBRATED;
 		default:
-			return CalibrationStates.CALIBRATED;
+			return CalibrationState.CALIBRATED;
 	}
 };
 
@@ -55,7 +55,7 @@ const drawingsWithFixedDrawingURL = drawingFilesName.map((name, index) => ({
 	role: mockRole(index),
 	category: categories[index % 3],
 	status: DrawingUploadStatus.OK,
-	calibration: CalibrationStates.CALIBRATED,
+	calibration: CalibrationState.CALIBRATED,
 	revisionsCount: 1,
 	latestRevision: null,
 	lastUpdated: null,

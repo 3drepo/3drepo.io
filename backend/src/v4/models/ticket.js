@@ -310,7 +310,7 @@ class Ticket extends View {
 		data = await beforeUpdate(data, oldTicket, userPermissions, systemComments);
 
 		if (systemComments.length > 0) {
-			data.comments = (oldTicket.comments || []).map(c => ({ ...c, sealed: true }));
+			data.comments = (data.comments ?? oldTicket.comments ?? []).map(c => ({ ...c, sealed: true }));
 			data.comments = data.comments.concat(systemComments);
 		}
 

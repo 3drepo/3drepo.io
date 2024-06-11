@@ -90,7 +90,6 @@ export interface IGroupComponentState {
 	updatedGroup: any;
 	selectedFilters: any[];
 	highlightedGroups: Set<string>;
-	totalMeshes: number;
 	criteriaFieldState: ICriteriaFieldState;
 	allOverridden: boolean;
 	showSmart: boolean;
@@ -125,7 +124,6 @@ export const INITIAL_STATE: IGroupState = {
 		editingGroup: {},
 		updatedGroup: {},
 		selectedFilters: [],
-		totalMeshes: 0,
 		criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE,
 		allOverridden: false,
 		showSmart: true,

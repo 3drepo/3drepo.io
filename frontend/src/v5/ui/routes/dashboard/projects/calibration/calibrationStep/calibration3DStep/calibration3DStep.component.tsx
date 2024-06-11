@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,15 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { BasicStep } from '../basicStep.component';
 
-import { CentredContainer } from '@controls/centredContainer';
-import styled from 'styled-components';
-
-export const EmptyTicketsView = styled(CentredContainer)`
-	color: ${({ theme }) => theme.palette.base.main};
-	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
-	${({ theme }) => theme.typography.h2}
-	border-radius: 20px;
-	width: 100%;
-	height: 600px;
-`;
+export const Calibration3DStep = () => {
+	return <BasicStep text="3d calibration" />;
+};

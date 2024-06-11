@@ -359,7 +359,6 @@ function* setNewGroup() {
 
 		yield put(GroupsActions.setComponentState({
 			showDetails: true,
-			totalMeshes: 0,
 			editingGroup,
 			criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE
 		}));

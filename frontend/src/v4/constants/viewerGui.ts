@@ -111,6 +111,13 @@ export const getViewerLeftPanels = () =>  [
 ].filter((panel) =>
 (clientConfigService.sequencesEnabled || panel !== VIEWER_PANELS.SEQUENCES)).map(getPanelConfig);
 
+export const getCalibrationViewerLeftPanels = () =>  [
+	VIEWER_PANELS.GROUPS,
+	VIEWER_PANELS.VIEWS,
+	VIEWER_PANELS.TREE,
+].filter((panel) =>
+(clientConfigService.sequencesEnabled || panel !== VIEWER_PANELS.SEQUENCES)).map(getPanelConfig);
+
 export const VIEWER_DRAGGABLE_PANELS = [
 	VIEWER_PANELS.LEGEND,
 ];

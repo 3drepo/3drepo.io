@@ -21,8 +21,7 @@ import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 
 import { FormTextAreaFixedSize } from '@controls/inputs/formInputs.component';
 import { useFormContext } from 'react-hook-form';
-import { useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useContext, useEffect, useRef } from 'react';
 import _ from 'lodash';
 import { BaseProperties, IssueProperties } from '../../tickets.constants';
 import { TitleProperty } from '../properties/titleProperty.component';
@@ -32,6 +31,7 @@ import { DescriptionProperty, TopPanel, CreationInfo, FlexContainer } from './ti
 import { ErrorTextGap } from '../ticketsForm.styles';
 import { StatusProperty } from './statusProperty/statusProperty.component';
 import { AssigneesProperty } from './assignessProperty/assigneesProperty.component';
+import { TicketContext } from '../../ticket.context';
 
 type ITicketsTopPanel = {
 	title: string;
@@ -47,7 +47,9 @@ export const TicketsTopPanel = ({
 	onPropertyBlur,
 }: ITicketsTopPanel) => {
 	const { formState, getValues } = useFormContext();
-	const { containerOrFederation } = useParams();
+	const { containerOrFederation } = useContext(TicketContext);
+
+
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const ref = useRef<HTMLTextAreaElement>();
 

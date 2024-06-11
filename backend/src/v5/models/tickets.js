@@ -133,8 +133,13 @@ Tickets.updateTickets = async (teamspace, project, model, oldTickets, data, auth
 	return changeSet;
 };
 
-Tickets.removeAllTicketsInModel = async (teamspace, project, model) => {
-	await DbHandler.deleteMany(teamspace, TICKETS_COL, { teamspace, project, model });
+Tickets.removeAllTicketsInModel = (teamspace, project, model) => {
+	// eslint-disable-next-line security/detect-non-literal-regexp
+	const counterRegex = new RegExp(`^${UUIDToString(project)}_${model}_.*`);
+	return Promise.all([
+		DbHandler.deleteMany(teamspace, TICKETS_COL, { teamspace, project, model }),
+		DbHandler.deleteMany(teamspace, TICKETS_COUNTER_COL, { _id: counterRegex }),
+	]);
 };
 
 Tickets.getTicketById = async (

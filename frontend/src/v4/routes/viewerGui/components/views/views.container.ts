@@ -19,6 +19,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
+import { ViewerGuiActions } from '@/v4/modules/viewerGui';
 import { selectSettings, ModelActions } from '../../../../modules/model';
 import { selectIsAdmin, selectIsCommenter } from '../../../../modules/model/permissions.selectors';
 import {
@@ -66,6 +67,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	shareViewpointLink: ViewpointsActions.shareViewpointLink,
 	showPreset: ViewpointsActions.showPreset,
 	fetchModelSettings: ModelActions.fetchSettings,
+	setClippingMode: ViewerGuiActions.setClippingMode,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Views);

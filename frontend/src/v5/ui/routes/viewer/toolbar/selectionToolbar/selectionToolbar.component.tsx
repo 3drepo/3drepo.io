@@ -39,7 +39,7 @@ export const SectionToolbar = () => {
 	const [alignActive, setAlignActive] = useState(false);
 
 	const hasOverrides = !isEmpty(ViewerGuiHooksSelectors.selectColorOverrides());
-	const hasHighlightedObjects = !!TreeHooksSelectors.selectFullySelectedNodesIds().length;
+	const hasHighlightedObjects = !!TreeHooksSelectors.selectSelectedNodes().length;
 	const hasHiddenObjects = TreeHooksSelectors.selectModelHasHiddenNodes();
 	const clippingMode = ViewerGuiHooksSelectors.selectClippingMode();
 	const clippingSectionOpen = ViewerGuiHooksSelectors.selectIsClipEdit();

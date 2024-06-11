@@ -54,19 +54,23 @@ const updateHandlers = {
 };
 
 const callUpdateHandlers = (oldSettings, settings) => {
-	keys(oldSettings).forEach((key) => {
+	let bundleFadeDone = false;
+	keys(settings).forEach((key) => {
 		if (oldSettings[key] !== settings[key]) {
 			if (key.startsWith(BUNDLE_FADE_PREFIX)) {
-				const update = updateHandlers[BUNDLE_FADE_PREFIX];
-				if (!update) {
-					return;
-				}
+				if (!bundleFadeDone) {
+					const update = updateHandlers[BUNDLE_FADE_PREFIX];
+					if (!update) {
+						return;
+					}
 
-				update(
-					settings[`${BUNDLE_FADE_PREFIX}Distance`],
-					settings[`${BUNDLE_FADE_PREFIX}Bias`],
-					settings[`${BUNDLE_FADE_PREFIX}Power`]
-				);
+					update(
+						settings[`${BUNDLE_FADE_PREFIX}Distance`],
+						settings[`${BUNDLE_FADE_PREFIX}Bias`],
+						settings[`${BUNDLE_FADE_PREFIX}Power`]
+					);
+					bundleFadeDone = true;
+				}
 			} else {
 				const update = updateHandlers[key];
 				if (!update) {
@@ -94,13 +98,15 @@ function* updateSettings({username, settings}) {
 
 export function* fetchSettings() {
 	const { username } = yield select(selectCurrentUser);
+
+	// This function may be called prior to username is available.
+	const storedUserSettings = username ? window.localStorage.getItem(`${username}.visualSettings`) : null;
+	const legacyStoredSettings = window.localStorage.getItem('visualSettings');
+
 	const currentSettings  = {
 		...DEFAULT_SETTINGS,
 		...JSON.parse(
-			window.localStorage.getItem(`${username}.visualSettings`) ||
-			// If a user has already saved settings in a prev version lets load these settings the first time
-			window.localStorage.getItem('visualSettings') ||
-			'{}',
+			storedUserSettings || legacyStoredSettings || '{}',
 		),
 	};
 

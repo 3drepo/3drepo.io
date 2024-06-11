@@ -80,7 +80,6 @@ export const TicketView = ({
 		DialogsActionsDispatchers.open(ImagesModal, {
 			onClose: () => onSave(stripBase64Prefix(imgInModal.current)),
 			onAddMarkup: (newImg) => { imgInModal.current = newImg; },
-			openInMarkupMode: true,
 		}, syncProps);
 	};
 
@@ -131,6 +130,7 @@ export const TicketView = ({
 	};
 
 	useEffect(() => onBlur?.(), [value]);
+	useEffect(() => { imgInModal.current = imgSrc; }, [imgSrc]);
 
 	const onGroupsClick = () => {
 		setDetailViewAndProps(TicketDetailsView.Groups, props);

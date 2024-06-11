@@ -73,7 +73,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	unsubscribeOnIssueChanges: IssuesActions.unsubscribeOnIssueChanges,
 	subscribeOnRiskChanges: RisksActions.subscribeOnRiskChanges,
 	unsubscribeOnRiskChanges: RisksActions.unsubscribeOnRiskChanges,
-	setProjectionModeSuccess: ViewerGuiActions.setProjectionModeSuccess
+	setProjectionModeSuccess: ViewerGuiActions.setProjectionModeSuccess,
+	clearCurrentlySelected: TreeActions.clearCurrentlySelected
 }, dispatch);
 
 export default withDataCache(withViewer(connect(mapStateToProps, mapDispatchToProps)(ViewerGui)));

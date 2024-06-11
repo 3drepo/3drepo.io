@@ -26,7 +26,7 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 }, { prefix: 'VIEWER_CANVAS/' });
 
 export const INITIAL_STATE = {
-	settings: cloneDeep(DEFAULT_SETTINGS),
+	settings: {},
 };
 
 const updateSettingsSuccess = (state = INITIAL_STATE, {username,  settings }) => {

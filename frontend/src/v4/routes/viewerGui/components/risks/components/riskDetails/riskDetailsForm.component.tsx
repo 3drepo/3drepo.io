@@ -222,6 +222,7 @@ class RiskDetailsFormComponent extends PureComponent<IProps, IState> {
 			setMeasureMode={this.props.setMeasureMode}
 			shapes={this.props.risk.shapes}
 			addButtonsEnabled={!this.props.horizontal}
+			canEdit={this.canEditResources}
 		/>
 	)
 

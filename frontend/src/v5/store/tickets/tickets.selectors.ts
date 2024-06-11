@@ -22,6 +22,7 @@ import { ITicketsState } from './tickets.redux';
 import { ticketWithGroups } from './ticketsGroups.helpers';
 import { ITemplate, ITicket } from './tickets.types';
 import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
+import { selectCurrentProjectTemplateById } from '../projects/projects.selectors';
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
 
@@ -42,8 +43,7 @@ const selectTicketsDomain = (state): ITicketsState => state.tickets || {};
 
 export const selectTicketsHaveBeenFetched = createSelector(
 	selectTicketsDomain,
-	(state, modelId) => modelId,
-	(state, modelId) => modelId in state.ticketsByModelId,
+	(state): (modelId) => boolean => (modelId) => modelId in state.ticketsByModelId,
 );
 
 export const selectTemplates = createSelector(
@@ -111,7 +111,14 @@ export const selectTicketsByContainersAndFederations = createSelector(
 	},
 );
 
+// This selector takes a variable number of params depending on the template origin:
+// - template by project: (templateId)
+// - template by model: (modelId, templateId)
+// NOTE: the last param should always be the templateId
 export const selectStatusConfigByTemplateId = createSelector(
+	// select template by model
 	selectTemplateById,
-	(template) => template?.config?.status || DEFAULT_STATUS_CONFIG,
+	// select template by project
+	(state, ...args) => selectCurrentProjectTemplateById(state, args.at(-1)),
+	(ticketTemplate, projectTemplate) => ticketTemplate?.config?.status || projectTemplate?.config?.status || DEFAULT_STATUS_CONFIG,
 );

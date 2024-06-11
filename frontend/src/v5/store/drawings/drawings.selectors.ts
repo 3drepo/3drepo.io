@@ -20,7 +20,7 @@ import { selectCurrentProject, selectIsProjectAdmin } from '../projects/projects
 import { DrawingsState } from './drawings.redux';
 import { isCollaboratorRole, isCommenterRole, isViewerRole } from '../store.helpers';
 import { Role } from '../currentUser/currentUser.types';
-import { CalibrationStates } from './drawings.types';
+import { CalibrationState } from './drawings.types';
 
 const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
 
@@ -31,7 +31,7 @@ export const selectDrawings = createSelector(
 
 export const selectCalibratedDrawings = createSelector(
 	selectDrawings,
-	(drawings) => (drawings.filter((d) => [CalibrationStates.CALIBRATED, CalibrationStates.OUT_OF_SYNC].includes(d.calibration))),
+	(drawings) => (drawings.filter((d) => [CalibrationState.CALIBRATED, CalibrationState.OUT_OF_SYNC].includes(d.calibration))),
 );
 
 export const selectFavouriteDrawings = createSelector(

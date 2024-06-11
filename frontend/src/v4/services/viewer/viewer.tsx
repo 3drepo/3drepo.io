@@ -115,7 +115,10 @@ export class ViewerService {
 		unityHolder.style['pointer-events'] = 'all';
 
 		this.element.appendChild(this.viewer);
-		this.viewer.appendChild(unityHolder);
+
+		if (!this.viewer.hasChildNodes()) {
+			this.viewer.appendChild(unityHolder);
+		}
 		this.canvas = unityHolder;
 
 		this.unityLoaderScript = document.createElement('script');
@@ -157,7 +160,7 @@ export class ViewerService {
 				resolve(null);
 			}
 
-			UnityUtil.setAPIHost(options.getAPI.hostNames);
+			UnityUtil.setAPIHost({hostNames: options.getAPI.hostNames});
 
 			// Set option param from viewerDirective
 			this.options = options;

@@ -17,7 +17,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import ChevronIcon from '@assets/icons/outlined/small_chevron-outlined.svg';
-import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import UploadImageIcon from '@assets/icons/outlined/add_image-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
@@ -43,7 +42,6 @@ export type ImagesModalProps = {
 	onUpload?: () => void;
 	onDelete?: (index) => void;
 	disabledDeleteMessage?: string;
-	openInMarkupMode?: boolean;
 };
 export const ImagesModal = ({
 	images,
@@ -55,10 +53,10 @@ export const ImagesModal = ({
 	onDelete,
 	onAddMarkup,
 	disabledDeleteMessage,
-	openInMarkupMode = false,
 }: ImagesModalProps) => {
 	const [imageIndex, setImageIndex] = useState(displayImageIndex);
-	const [markupMode, setMarkupMode] = useState(openInMarkupMode);
+	const [markupMode, setMarkupMode] = useState(false);
+	const previousImagesLength = useRef(images.length);
 	const imagesLength = images.length;
 	const imageRef = useRef<HTMLImageElement>(null);
 	const hasManyImages = imagesLength > 1;
@@ -130,6 +128,11 @@ export const ImagesModal = ({
 		if (!imagesLength) {
 			handleClose();
 		}
+
+		if (previousImagesLength.current < imagesLength) {
+			setImageIndex(imagesLength - 1);
+		}
+		previousImagesLength.current = imagesLength;
 	}, [imagesLength]);
 
 	useEffect(() => { centerSelectedThumbnail(); }, [imagesLength, imageIndex]);
@@ -137,9 +140,7 @@ export const ImagesModal = ({
 	if (markupMode) return (
 		<Modal open={open}>
 			<TopBar>
-				<CloseButton onClick={() => setMarkupMode(false)}>
-					<CloseIcon />
-				</CloseButton>
+				<CloseButton onClick={() => setMarkupMode(false)} />
 			</TopBar>
 			<ImageMarkup image={currentImage} onSave={(img) => onAddMarkup(img, imageIndex)} onClose={() => setMarkupMode(false)} />
 		</Modal>
@@ -185,9 +186,7 @@ export const ImagesModal = ({
 						</Tooltip>
 					)}
 				</Buttons>
-				<CloseButton onClick={handleClose}>
-					<CloseIcon />
-				</CloseButton>
+				<CloseButton onClick={handleClose} />
 			</TopBar>
 			<CenterBar>
 				{!hasManyImages && (

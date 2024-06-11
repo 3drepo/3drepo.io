@@ -31,11 +31,11 @@ const getGroupNameParent = (group):string => {
 	return path.join('::');
 };
 
-export const groupsToTree = (groups) => {
+export const getSortedGroups = (groups = []) => {
 	// eslint-disable-next-line no-param-reassign
-	groups = sortByName(groups);
+	const clonedGroups = sortByName(groups);
 
-	groups.sort((groupA, groupB) => {
+	clonedGroups.sort((groupA, groupB) => {
 		const parentA = getGroupNameParent(groupA);
 		const parentB = getGroupNameParent(groupB);
 		const isAncestorA = groupB.name.startsWith(parentA);
@@ -47,9 +47,11 @@ export const groupsToTree = (groups) => {
 
 		return isAncestorA ? -1 : 1;
 	});
+	return clonedGroups;
+};
 
-	const treeDict = {
-	};
+export const groupsToTree = (groups) => {
+	const treeDict = {};
 
 	const tree = [];
 

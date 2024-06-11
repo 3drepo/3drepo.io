@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ViewerGui } from '@/v4/routes/viewerGui';
 import { useParams } from 'react-router-dom';
 import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ProjectsActionsDispatchers, TeamspacesActionsDispatchers, TicketsCardActionsDispatchers, ViewerActionsDispatchers } from '@/v5/services/actionsDispatchers';
@@ -29,6 +28,9 @@ import { OpenTicketFromUrl } from './openTicketFromUrl/openTicketFromUrl.compone
 import { SpinnerLoader } from '@controls/spinnerLoader';
 import { CentredContainer } from '@controls/centredContainer';
 import { TicketsCardViews } from './tickets/tickets.constants';
+import { ViewerCanvases } from '../dashboard/viewerCanvases/viewerCanvases.component';
+import { CalibrationContextComponent } from '../dashboard/projects/calibration/calibrationContext';
+import { ViewerGui } from '@/v4/routes/viewerGui';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
@@ -101,10 +103,11 @@ export const Viewer = () => {
 	};
 
 	return (
-		<>
+		<CalibrationContextComponent>
 			<OpenTicketFromUrl />
 			<CheckLatestRevisionReadiness />
+			<ViewerCanvases />
 			<ViewerGui match={v4Match} key={containerOrFederation} />
-		</>
+		</CalibrationContextComponent>
 	);
 };

@@ -43,6 +43,7 @@ interface IProps {
 	measureType: number;
 	modelUnit: string;
 	colors: string[];
+	canEdit?: boolean;
 }
 
 const getTotal = (measurements, type, units, modelUnit) => {
@@ -51,7 +52,7 @@ const getTotal = (measurements, type, units, modelUnit) => {
 };
 
 export const MeasurementsList = ({
-	measurements, units, measureType, removeMeasurement,
+	measurements, units, measureType, removeMeasurement, canEdit,
 	setMeasurementColor, setMeasurementName, colors, ...props
 }: IProps) => {
 	const [expanded, setExpanded] = useState(true);
@@ -92,6 +93,7 @@ export const MeasurementsList = ({
 							setMeasurementName={setMeasurementName}
 							{...measurement}
 							colors={colors}
+							canEdit={canEdit ?? true}
 						/>
 					))}
 				</List>

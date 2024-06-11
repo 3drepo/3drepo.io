@@ -20,18 +20,19 @@ import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types
 import { subscribeToRoomEvent } from './realtime.service';
 import { TicketCommentsActionsDispatchers } from '../actionsDispatchers';
 
+type CommentWithTicketId = ITicketComment & { ticket: string };
+
 // Container
 export const enableRealtimeContainerUpdateTicketComment = (
 	teamspace: string,
 	project: string,
 	containerId: string,
-	ticketId: string,
 ) => (
 	subscribeToRoomEvent(
 		{ teamspace, project, model: containerId },
 		'containerUpdateTicketComment',
-		(comment: Partial<ITicketComment>) => (
-			TicketCommentsActionsDispatchers.upsertCommentSuccess(ticketId, comment)
+		({ ticket, ...comment }: Partial<CommentWithTicketId>) => (
+			TicketCommentsActionsDispatchers.upsertCommentSuccess(ticket, comment)
 		),
 	)
 );
@@ -40,12 +41,11 @@ export const enableRealtimeContainerNewTicketComment = (
 	teamspace: string,
 	project: string,
 	containerId: string,
-	ticketId: string,
 ) => (
 	subscribeToRoomEvent(
 		{ teamspace, project, model: containerId },
 		'containerNewTicketComment',
-		(comment: ITicketComment) => TicketCommentsActionsDispatchers.upsertCommentSuccess(ticketId, comment),
+		({ ticket, ...comment }: CommentWithTicketId) => TicketCommentsActionsDispatchers.upsertCommentSuccess(ticket, comment),
 	)
 );
 
@@ -54,13 +54,12 @@ export const enableRealtimeFederationUpdateTicketComment = (
 	teamspace: string,
 	project: string,
 	federationId: string,
-	ticketId: string,
 ) => (
 	subscribeToRoomEvent(
 		{ teamspace, project, model: federationId },
 		'federationUpdateTicketComment',
-		(comment: Partial<ITicketComment>) => (
-			TicketCommentsActionsDispatchers.upsertCommentSuccess(ticketId, comment)
+		({ ticket, ...comment }: Partial<CommentWithTicketId>) => (
+			TicketCommentsActionsDispatchers.upsertCommentSuccess(ticket, comment)
 		),
 	)
 );
@@ -69,11 +68,10 @@ export const enableRealtimeFederationNewTicketComment = (
 	teamspace: string,
 	project: string,
 	federationId: string,
-	ticketId: string,
 ) => (
 	subscribeToRoomEvent(
 		{ teamspace, project, model: federationId },
 		'federationNewTicketComment',
-		(comment: ITicketComment) => TicketCommentsActionsDispatchers.upsertCommentSuccess(ticketId, comment),
+		({ ticket, ...comment }: CommentWithTicketId) => TicketCommentsActionsDispatchers.upsertCommentSuccess(ticket, comment),
 	)
 );

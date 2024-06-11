@@ -16,7 +16,6 @@
  */
 
 import styled, { css } from 'styled-components';
-import { StatusChip as StatusChipBase } from '@controls/chip/statusChip/statusChip.component';
 import { TextOverflow } from '@controls/textOverflow';
 import { Chip } from '@controls/chip/chip.component';
 import { DueDate as DueDateBase } from '@controls/dueDate/dueDate.component';
@@ -81,7 +80,7 @@ export const BottomRow = styled(FlexRow)`
 	margin-bottom: 5px;
 `;
 
-export const StatusChip = styled(StatusChipBase)`
+export const StatusChip = styled(Chip)`
 	max-width: 125px;
 	margin-left: auto;
 `;

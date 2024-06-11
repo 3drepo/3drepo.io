@@ -157,7 +157,7 @@ const processExternalData = async (teamspace, project, model, ticketIds, data) =
 		if (groups.stillUsed.size) {
 			const stillUsed = Array.from(groups.stillUsed);
 			const existingGroups = await getGroupsByIds(teamspace, project, model, ticketId,
-				stillUsed, { _id: 1 });
+				stillUsed.map(stringToUUID), { _id: 1 });
 
 			if (existingGroups.length !== stillUsed.length) {
 				const notFoundGroups = getArrayDifference(existingGroups.map(({ _id }) => UUIDToString(_id)),

@@ -30,7 +30,7 @@ export const CommentImage = ({
 	onClick,
 	...imgProps
 }: CommentImageProps) => {
-	if (!extraCount) {
+	if (!extraCount || extraCount === 1) {
 		return (<Image src={src} onClick={onClick} className={className} {...imgProps} />);
 	}
 

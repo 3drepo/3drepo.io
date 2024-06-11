@@ -84,6 +84,13 @@ export const selectTargetClashModels = createSelector(
 	selectComponentState, (state) => state.targetClashModels
 );
 
+export const selectUnselectedClashModelsIds = createSelector(
+	selectComponentState, (state) => {
+		const modelsMap = state.selectedClashModelsMap || [];
+		return Object.keys(modelsMap).filter((modelId) => !modelsMap[modelId]);
+	},
+);
+
 export const selectCanTestForClash = createSelector(
 	selectSelectedModelsMap,  selectTargetClashModels, (selectedModelsMap, targetClashModels) => {
 		const selectedModels = Object.keys(selectedModelsMap).filter((model) => selectedModelsMap[model]);

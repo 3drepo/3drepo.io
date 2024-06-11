@@ -184,6 +184,7 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 				onShapeChange={this.handleShapeChange}
 				onModeChange={this.handleModeChange}
 				onCalloutChange={this.handleCalloutChange}
+				allowSaveWithoutChanges
 			/>
 		</MarkupToolbarContainer>
 	));
@@ -200,7 +201,7 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 
 		return (
 			<Container height={container.height} width={container.width}>
-				{this.renderTools(this.markupRef.current)}
+				{this.renderTools(this.markupRef.current && !this.props.disabled)}
 				{this.renderLoader(!this.markupRef.current || imgIsLoading)}
 				{!imgIsLoading && (
 					<MarkupStage

@@ -17,22 +17,16 @@
 
 import { JobsActionsDispatchers, ProjectsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useEffect, useMemo, useState } from 'react';
-import { useStore } from 'react-redux';
-import { selectFederationById } from '@/v5/store/federations/federations.selectors';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
 import { useParams, generatePath, useHistory } from 'react-router-dom';
 import { SearchContextComponent } from '@controls/search/searchContext';
-import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { selectTicketsHaveBeenFetched } from '@/v5/store/tickets/tickets.selectors';
 import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { CircleButton } from '@controls/circleButton';
-import { FormProvider, useForm } from 'react-hook-form';
-import _ from 'lodash';
-import { ThemeProvider as MuiThemeProvider } from '@mui/material';
+import { ThemeProvider as MuiThemeProvider, SelectChangeEvent } from '@mui/material';
 import { theme } from '@/v5/ui/routes/viewer/theme';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { enableRealtimeContainerNewTicket, enableRealtimeContainerUpdateTicket, enableRealtimeFederationNewTicket, enableRealtimeFederationUpdateTicket } from '@/v5/services/realtime/ticket.events';
@@ -41,76 +35,93 @@ import { isCommenterRole } from '@/v5/store/store.helpers';
 import { TicketsTableContent } from './ticketsTableContent/ticketsTableContent.component';
 import { Transformers, useSearchParam } from '../../../../useSearchParam';
 import { DashboardTicketsParams, TICKETS_ROUTE, VIEWER_ROUTE } from '../../../../routes.constants';
-import { ContainersAndFederationsFormSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
-import { GroupByFormSelect } from '../selectMenus/groupByFormSelect.component';
-import { TemplateFormSelect } from '../selectMenus/templateFormSelect.component';
+import { ContainersAndFederationsSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
+import { GroupBySelect } from '../selectMenus/groupByFormSelect.component';
+import { TemplateSelect } from '../selectMenus/templateFormSelect.component';
 import { Link, FiltersContainer, NewTicketButton, SelectorsContainer, SearchInput, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, CompletedChip } from '../tickets.styles';
-import { GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE, NONE_OPTION, hasRequiredViewerProperties } from './ticketsTable.helper';
+import { NEW_TICKET_ID, NONE_OPTION } from './ticketsTable.helper';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
 import { TicketSlide } from '../ticketsList/slides/ticketSlide.component';
 import { useSelectedModels } from './newTicketMenu/useSelectedModels';
 import { ticketIsCompleted } from '@controls/chip/statusChip/statusChip.helpers';
+import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 
-type FormType = {
-	containersAndFederations: string[],
-	template: string,
-	groupBy: string,
-};
+const paramToInputProps = (value, setter) => ({
+	value,
+	onChange: (ev: SelectChangeEvent<unknown>) =>  setter((ev.target as HTMLInputElement).value),
+});
+
+
 export const TicketsTable = () => {
 	const history = useHistory();
 	const params = useParams<DashboardTicketsParams>();
-	const { teamspace, project, groupBy: groupByURLParam, template: templateURLParam, containerOrFederation } = params;
-	const [modelsIds, setModelsIds] = useSearchParam('models', Transformers.STRING_ARRAY);
-	const [showCompleted, setShowCompleted] = useSearchParam('showCompleted', Transformers.BOOLEAN);
+	const { teamspace, project, template, ticketId } = params;
+	const prevTemplate = useRef(undefined);
+
+	const [containersAndFederations, setContainersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY, true);
+	const [showCompleted, setShowCompleted] = useSearchParam('showCompleted', Transformers.BOOLEAN, true);
+	const [groupBy,, setGroupByParam] = useSearchParam('groupBy');
+	const [groupByValue,, setGroupByValue] = useSearchParam('groupByValue');
+	const [containerOrFederation,, setContainerOrFederation] = useSearchParam('containerOrFederation');
 	const models = useSelectedModels();
-	const { getState } = useStore();
-	const formData = useForm<FormType>({
-		defaultValues: {
-			containersAndFederations: modelsIds,
-			template: templateURLParam,
-			groupBy: GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE[groupByURLParam] || NONE_OPTION,
-		},
-	});
-	const { containersAndFederations, groupBy, template } = formData.watch();
+
+	const setGroupBy = (val) => {
+		// this is for clearing also the groupByValue when groupBy so we dont have an inconsistent groupByValue
+		const search =  '?' + setGroupByValue(null,  setGroupByParam(val)); 
+		history.push(location.pathname + search);
+	};
+
+	const setTemplate = useCallback((newTemplate) => {
+		const newParams = { ...params, template: newTemplate };
+		const path = generatePath(TICKETS_ROUTE + window.location.search, newParams);
+		history.push(path);
+	}, [params]);
+
+	const setTicketValue = useCallback((modelId?: string,  ticket_id?: string, groupByVal?: string, replace: boolean = false) => {
+		const id = (modelId && !ticket_id ) ? NEW_TICKET_ID : ticket_id;
+		const newParams = { ...params, ticketId: id };
+		const search = '?' + setGroupByValue(groupByVal, setContainerOrFederation(modelId));
+		const path = generatePath(TICKETS_ROUTE +  search, newParams);
+
+		if (replace) {
+			history.replace(path);
+		} else {
+			history.push(path);
+		}
+	}, [params]);
+
+	useEffect(() => {
+		TicketsCardActionsDispatchers.setSelectedTicket(ticketId);
+	}, [ticketId]);
+
+	const isNewTicket = (ticketId || '').toLowerCase() === NEW_TICKET_ID;
+	const clearTicketId = () => setTicketValue();
 
 	const tickets = TicketsHooksSelectors.selectTicketsByContainersAndFederations(containersAndFederations);
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
-	const [sidePanelTicket, setSidePanelTicket] = useState<Partial<ITicket>>(null);
 	const [isNewTicketDirty, setIsNewTicketDirty] = useState(false);
 	
-	const federations = FederationsHooksSelectors.selectFederations();
-	const isFederation = (modelId) => federations.some(({ _id }) => _id === modelId);
+	const isFed = FederationsHooksSelectors.selectIsFederation();
+	const ticketHasBeenFetched = TicketsHooksSelectors.selectTicketsHaveBeenFetched();
 
-	const readOnly = isFederation(containerOrFederation)
+	const readOnly = isFed(containerOrFederation)
 		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
 		: !ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
-	const selectedTicketId = sidePanelTicket?._id;
-	const isCreatingNewTicket = containerOrFederation && !selectedTicketId && !hasRequiredViewerProperties(selectedTemplate);
-
+	
 	const ticketsFilteredByTemplate = useMemo(() => {
 		const ticketsToShow = tickets.filter((t) => ticketIsCompleted(t, selectedTemplate) === showCompleted);
 		return ticketsToShow.filter(({ type }) => type === template);
 	}, [template, tickets, showCompleted]);
-	const newTicketButtonIsDisabled = !containersAndFederations.length || models.filter(({ role }) => isCommenterRole(role)).length === 0;
+	
+	const newTicketButtonIsDisabled = useMemo(() => 
+		!containersAndFederations.length || models.filter(({ role }) => isCommenterRole(role)).length === 0,
+	[models, containerOrFederation]);
 
-	const setSidePanelData = (modelId: string, ticket?: Partial<ITicket>) => {
-		const newParams = {
-			...params,
-			template,
-			containerOrFederation: modelId,
-		};
-		const path = generatePath(TICKETS_ROUTE, newParams);
-		history.replace(path + window.location.search);
-		setSidePanelTicket(ticket);
-	};
+	const onSaveTicket = (_id: string) => setTicketValue(containerOrFederation, _id, null, true);
 
-	const onSaveTicket = (ticketId: string) => setSidePanelTicket({ _id: ticketId });
-
-	const closeSidePanel = () => setSidePanelData(null, null);
-
-	const filterTickets = (items, query: string) => items.filter((ticket) => {
+	const filterTickets = useCallback((items, query: string) => items.filter((ticket) => {
 		const templateCode = templates.find(({ _id }) => _id === ticket.type).code;
 		const ticketCode = `${templateCode}:${ticket.number}`;
 
@@ -118,8 +129,8 @@ export const TicketsTable = () => {
 		if (containersAndFederations.length > 1) {
 			elementsToFilter.push(ticket.modelName);
 		}
-		return elementsToFilter.some((str) => str.toLowerCase().includes(query.toLowerCase()));
-	});
+		return elementsToFilter.some((str = '') => str.toLowerCase().includes(query.toLowerCase()));
+	}), [templates]);
 
 	const getOpenInViewerLink = () => {
 		if (!containerOrFederation) return '';
@@ -129,24 +140,18 @@ export const TicketsTable = () => {
 			project,
 			containerOrFederation: containerOrFederation || '',
 		});
-		return pathname + (selectedTicketId ? `?ticketId=${selectedTicketId}` : '');
+		return pathname + (ticketId ? `?ticketId=${ticketId}` : '');
 	};
 
-	// We are using getState here because is being used inside a function
-	const isFed = (modelId) => !!selectFederationById(getState(), modelId);
 
 	useEffect(() => {
-		setModelsIds(containersAndFederations);
-
-		if (!containersAndFederations.length) return;
+		if (!models.length ) return;
 
 		containersAndFederations.forEach((modelId) => {
-			if (selectTicketsHaveBeenFetched(getState(), modelId)) return;
+			if (ticketHasBeenFetched(modelId)) return;
 			TicketsActionsDispatchers.fetchTickets(teamspace, project, modelId, isFed(modelId));
 		});
-	}, [containersAndFederations]);
 
-	useEffect(() => {
 		const subscriptions = containersAndFederations.flatMap((modelId) => {
 			if (isFed(modelId)) {
 				return [
@@ -160,32 +165,12 @@ export const TicketsTable = () => {
 			];
 		});
 		return combineSubscriptions(...subscriptions);
-	}, [containersAndFederations]);
-
-	useEffect(() => {
-		const newURL = generatePath(TICKETS_ROUTE, {
-			...params,
-			groupBy: _.snakeCase(groupBy),
-			template,
-		});
-		history.push(newURL + window.location.search);
-	}, [groupBy, template]);
-
-	useEffect(() => () => {
-		setModelsIds();
-		formData.setValue('containersAndFederations', []);
-	}, [project]);
-
-	useEffect(() => {
-		TicketsCardActionsDispatchers.setSelectedTicket(selectedTicketId);
-	}, [selectedTicketId]);
+	}, [!models.length, containersAndFederations]);
 
 	useEffect(() => {
 		JobsActionsDispatchers.fetchJobs(teamspace);
 		TicketsActionsDispatchers.fetchRiskCategories(teamspace);
 	}, []);
-
-	useEffect(() => { closeSidePanel(); }, [template, containersAndFederations]);
 
 	useEffect(() => {
 		TicketsCardActionsDispatchers.setReadOnly(readOnly);
@@ -193,86 +178,88 @@ export const TicketsTable = () => {
 
 	useEffect(() => {
 		if (templates.length) return;
-
-		ProjectsActionsDispatchers.fetchTemplates(
-			teamspace,
-			project,
-			true,
-		);
+		ProjectsActionsDispatchers.fetchTemplates(teamspace, project);
 	}, []);
+
+	useEffect(() => {
+		if (prevTemplate.current && ticketId) clearTicketId();
+		prevTemplate.current = template;
+		if (templateAlreadyFetched(selectedTemplate)) return;
+		ProjectsActionsDispatchers.fetchTemplate(teamspace, project, template);
+	}, [template]);
 
 	return (
 		<SearchContextComponent items={ticketsFilteredByTemplate} filteringFunction={filterTickets}>
-			<FormProvider {...formData}>
-				<FiltersContainer>
-					<FlexContainer>
-						<SelectorsContainer>
-							<ContainersAndFederationsFormSelect
-								name="containersAndFederations"
-								isNewTicketDirty={isNewTicketDirty}
-							/>
-							<TemplateFormSelect
-								name="template"
-								isNewTicketDirty={isNewTicketDirty}
-							/>
-							<GroupByFormSelect name="groupBy" />
-						</SelectorsContainer>
-						<CompletedChip
-							selected={showCompleted}
-							icon={<TickIcon />}
-							onClick={() => setShowCompleted(!showCompleted)}
-							label={formatMessage({ id: 'ticketsTable.filters.completed', defaultMessage: 'Completed' })}
+			<FiltersContainer>
+				<FlexContainer>
+					<SelectorsContainer>
+						<ContainersAndFederationsSelect
+							isNewTicketDirty={isNewTicketDirty}
+							{...paramToInputProps(containersAndFederations, setContainersAndFederations)}
 						/>
-					</FlexContainer>
-					<FlexContainer>
-						<SearchInput
-							placeholder={formatMessage({ id: 'ticketsTable.search.placeholder', defaultMessage: 'Search...' })}
+						<TemplateSelect
+							isNewTicketDirty={isNewTicketDirty}
+							{...paramToInputProps(template, setTemplate)}
 						/>
-						<NewTicketMenu
-							TriggerButton={(
-								<NewTicketButton
-									startIcon={<AddCircleIcon />}
-									disabled={newTicketButtonIsDisabled}
-								>
-									<FormattedMessage id="ticketsTable.button.newTicket" defaultMessage="New Ticket" />
-								</NewTicketButton>
-							)}
-							disabled={newTicketButtonIsDisabled}
-							onContainerOrFederationClick={setSidePanelData}
+						<GroupBySelect 
+							templateId={template}
+							{...paramToInputProps(groupBy || NONE_OPTION, setGroupBy)}
 						/>
-					</FlexContainer>
-				</FiltersContainer>
-				<TicketsTableContent setSidePanelData={setSidePanelData} selectedTicketId={selectedTicketId} />
-			</FormProvider>
-			<SidePanel open={!!containerOrFederation}>
+					</SelectorsContainer>
+					<CompletedChip
+						icon={<TickIcon />}
+						label={formatMessage({ id: 'ticketsTable.filters.completed', defaultMessage: 'Completed' })}
+						selected={showCompleted}
+						onClick={() => setShowCompleted(!showCompleted)}
+					/>
+				</FlexContainer>
+				<FlexContainer>
+					<SearchInput
+						placeholder={formatMessage({ id: 'ticketsTable.search.placeholder', defaultMessage: 'Search...' })}
+					/>
+					<NewTicketMenu
+						TriggerButton={(
+							<NewTicketButton
+								startIcon={<AddCircleIcon />}
+								disabled={newTicketButtonIsDisabled}
+							>
+								<FormattedMessage id="ticketsTable.button.newTicket" defaultMessage="New Ticket" />
+							</NewTicketButton>
+						)}
+						disabled={newTicketButtonIsDisabled}
+						onContainerOrFederationClick={setTicketValue}
+					/>
+				</FlexContainer>
+			</FiltersContainer>
+			<TicketsTableContent setTicketValue={setTicketValue} selectedTicketId={ticketId} groupBy={groupBy}/>
+			<SidePanel open={!!ticketId && !!models.length && !!containerOrFederation}>
 				<SlidePanelHeader>
-					<Link to={getOpenInViewerLink()} target="_blank" disabled={isCreatingNewTicket}>
-						<OpenInViewerButton disabled={isCreatingNewTicket}>
+					<Link to={getOpenInViewerLink()} target="_blank" disabled={isNewTicket}>
+						<OpenInViewerButton disabled={isNewTicket}>
 							<FormattedMessage
 								id="ticketsTable.button.openIn3DViewer"
 								defaultMessage="Open in 3D viewer"
 							/>
 						</OpenInViewerButton>
 					</Link>
-					<CircleButton onClick={closeSidePanel}>
+					<CircleButton onClick={clearTicketId}>
 						<ExpandIcon />
 					</CircleButton>
 				</SlidePanelHeader>
-				{containerOrFederation && (
-					<MuiThemeProvider theme={theme}>
-						<TicketContextComponent isViewer={false}>
-							{selectedTicketId && (<TicketSlide ticketId={sidePanelTicket._id} template={selectedTemplate} />)}
-							{!selectedTicketId && (
-								<NewTicketSlide
-									defaultValue={sidePanelTicket}
-									template={selectedTemplate}
-									onSave={onSaveTicket}
-									onDirtyStateChange={setIsNewTicketDirty}
-								/>
-							)}
-						</TicketContextComponent>
-					</MuiThemeProvider>
-				)}
+				<MuiThemeProvider theme={theme}>
+					<TicketContextComponent isViewer={false} containerOrFederation={containerOrFederation}>
+						{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate} />)}
+						{isNewTicket && (
+							<NewTicketSlide
+								preselectedValue={{ [groupBy]: groupByValue }}
+								template={selectedTemplate}
+								containerOrFederation={containerOrFederation}
+								onSave={onSaveTicket}
+								onDirtyStateChange={setIsNewTicketDirty}
+							/>
+						)}
+					</TicketContextComponent>
+				</MuiThemeProvider>
 			</SidePanel>
 		</SearchContextComponent>
 	);

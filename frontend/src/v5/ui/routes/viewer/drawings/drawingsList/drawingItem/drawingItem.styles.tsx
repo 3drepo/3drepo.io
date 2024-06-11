@@ -16,19 +16,9 @@
  */
 
 import styled, { css } from 'styled-components';
-import { DrawingsCalibrationButton as DrawingsCalibrationButtonBase } from '@/v5/ui/routes/dashboard/projects/drawings/drawingsList/drawingsListItem/drawingsCalibrationButton/drawingsCalibrationButton.styles';
-import { CalibrationStates } from '@/v5/store/drawings/drawings.types';
 import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.styles';
+import { DrawingsCalibrationMenu } from '../../drawingCalibrationMenu/drawingCalibrationMenu.component';
 import { CardListItem } from '@components/viewer/cards/card.styles';
-
-export const DrawingsCalibrationButton = styled(DrawingsCalibrationButtonBase).attrs({ width: 103 })<{ calibration: CalibrationStates }>`
-	.MuiButton-root {
-		border-radius: 5px;
-		border: solid 1px ${({ theme, calibration }) => calibration === CalibrationStates.CALIBRATED ? theme.palette.success.light : theme.palette.warning.light};
-		width: 103px;
-		height: 24px;
-	}
-`;
 
 export const MainBody = styled.div`
 	display: flex;
@@ -91,6 +81,11 @@ export const BottomLine = styled.div`
 	${BreakingLine} {
 		padding-bottom: 0;
 	}
+`;
+ 
+export const CalibrationButton = styled(DrawingsCalibrationMenu)`
+	display: flex;
+	justify-content: end;
 `;
 
 export const SkeletonText = styled(SkeletonBlock)`

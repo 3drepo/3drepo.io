@@ -15,19 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { IChip } from '../chip.types';
-import { getChipPropsFromConfig } from '../statusChip/statusChip.helpers';
-import { Chip } from '../chip.component';
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { BasicStep } from '../basicStep.component';
 
-export type StatusChipProps = IChip & {
-	value: string,
-	templateId: string,
-	modelId: string,
-};
-export const StatusChip = ({ value, templateId, modelId, ...props }: StatusChipProps) => {
-	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(modelId, templateId);
-	const chipProps = getChipPropsFromConfig(statusConfig, value);
-	if (!value) return null;
-	return <Chip {...chipProps} {...props} />;
+export const VerticalSpatialBoundariesStep = () => {
+	return (<BasicStep text="Vertical spatial boundaries" />);
 };

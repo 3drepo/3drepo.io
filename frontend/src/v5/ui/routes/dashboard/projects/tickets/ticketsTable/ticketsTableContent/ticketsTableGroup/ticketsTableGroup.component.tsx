@@ -21,7 +21,6 @@ import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { isCommenterRole } from '@/v5/store/store.helpers';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useFormContext } from 'react-hook-form';
 import { useContext } from 'react';
 import { SortedTableComponent, SortedTableContext, SortedTableType } from '@controls/sortedTableContext/sortedTableContext';
 import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
@@ -30,6 +29,8 @@ import { Header, Headers, Group, NewTicketRow, NewTicketText, IconContainer } fr
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
+import { SetTicketValue } from '../../ticketsTable.helper';
+import { useParams } from 'react-router-dom';
 
 const SortingTableHeader = ({ name = null, children, hidden = false, ...props }) => {
 	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
@@ -52,18 +53,18 @@ const SortingTableHeader = ({ name = null, children, hidden = false, ...props })
 type TicketsTableGroupProps = {
 	selectedTicketId?: string;
 	tickets: ITicket[];
-	onEditTicket: (modelId: string, ticket: Partial<ITicket>) => void;
+	onEditTicket: SetTicketValue;
 	onNewTicket: (modelId: string) => void;
 };
 export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
+	const { template: templateId } = useParams();
 	const [modelsIds] = useSearchParam('models', Transformers.STRING_ARRAY);
-	const { getValues } = useFormContext();
 
 	const showModelName = modelsIds.length > 1;
 	const models = useSelectedModels();
 
 	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;
-	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(getValues('template'));
+	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const hasProperties = template?.config?.issueProperties;
 	const hasSafetibase = template?.modules?.some((module) => module.type === 'safetibase');
 
@@ -116,7 +117,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 									ticket={ticket}
 									modelId={modelId}
 									showModelName={showModelName}
-									onClick={() => onEditTicket(modelId, ticket)}
+									onClick={() => onEditTicket(modelId, ticket._id)}
 									selected={selectedTicketId === ticket._id}
 								/>
 							))}

@@ -18,19 +18,26 @@
 import { formatMessage } from '@/v5/services/intl';
 import { ToolbarButton } from '@/v5/ui/routes/viewer/toolbar/buttons/toolbarButton.component';
 import { ToolbarContainer, MainToolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.styles';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useContext, useRef, useState } from 'react';
 import ZoomOutIcon from '@assets/icons/viewer/zoom_out.svg';
 import ZoomInIcon from '@assets/icons/viewer/zoom_in.svg';
 
 import { PanZoomHandler, centredPanZoom } from './panzoom/centredPanZoom';
-import { DrawingViewerContainer } from './drawingViewer.styles';
+import { ViewerContainer } from '@/v4/routes/viewer3D/viewer3D.styles';
+import { ImageContainer } from './viewer2D.styles';
 import { Events } from './panzoom/panzoom';
 import { DrawingViewerImage } from './drawingViewerImage/drawingViewerImage.component';
+import { CloseButton } from '@controls/button/closeButton/closeButton.component';
+import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
+import { DrawingViewerService } from './drawingViewer.service';
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import CalibrationIcon from '@assets/icons/filled/calibration-filled.svg';
 import { ViewBoxType, ViewerLayer2D } from './viewerLayer2D/viewerLayer2D.component';
 
 const DEFAULT_VIEWBOX = { scale: 1, x: 0, y: 0, width: 0, height: 0 };
-export const DrawingViewer = () => {
+export const Viewer2D = () => {
+	const { close2D } = useContext(ViewerCanvasesContext);
+	const { isCalibrating } = useContext(CalibrationContext);
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
 	const [viewBox, setViewBox] = useState<ViewBoxType>(DEFAULT_VIEWBOX);
 	const [isMinZoom, setIsMinZoom] = useState(false);
@@ -38,6 +45,7 @@ export const DrawingViewer = () => {
 	const [isDrawingVector, setIsDrawingVector] = useState(true);
 
 	const imgRef = useRef<HTMLImageElement>();
+	const imgContainerRef = useRef();
 
 	const onClickZoomIn = () => {
 		zoomHandler.zoomIn();
@@ -51,6 +59,8 @@ export const DrawingViewer = () => {
 		if (zoomHandler) {
 			zoomHandler.dispose();
 		}
+
+		DrawingViewerService.setImgContainer(imgContainerRef.current);
 
 		const pz = centredPanZoom(imgRef.current, 20, 20);
 		setZoomHandler(pz);
@@ -77,8 +87,11 @@ export const DrawingViewer = () => {
 	}, [zoomHandler]);
 
 	return (
-		<DrawingViewerContainer id="viewer">
-			<DrawingViewerImage ref={imgRef} onLoad={onImageLoad} />
+		<ViewerContainer visible>
+			{!isCalibrating && <CloseButton variant="secondary" onClick={close2D} />}
+			<ImageContainer ref={imgContainerRef}>
+				<DrawingViewerImage ref={imgRef} onLoad={onImageLoad} />
+			</ImageContainer>
 			<ViewerLayer2D
 				active={isDrawingVector}
 				viewBox={viewBox}
@@ -106,6 +119,6 @@ export const DrawingViewer = () => {
 					/>
 				</MainToolbar>
 			</ToolbarContainer>
-		</DrawingViewerContainer>
+		</ViewerContainer>
 	);
 };

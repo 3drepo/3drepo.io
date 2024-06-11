@@ -39,11 +39,13 @@ const getAdditionalStyles = ({ presentationMode, isPresentationPaused }) => {
 	}
 };
 
-export const Container = styled.div<{ visible?: boolean }>`
-	position: absolute;
-	width: 100%;
-	height: 100%;
+export const ViewerContainer = styled.div<{ visible?: boolean }>`
 	visibility: ${({ visible }) => visible ? 'visible' : 'hidden'};
+	height: 100%;
+	width: 100%;
+	position: relative;
+	box-sizing: border-box;
+	overflow: hidden;
 `;
 
 export const Border = styled.div<IContainer>`
