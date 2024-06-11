@@ -332,7 +332,7 @@ function* showAllExceptMeshIDs(meshes = []) {
 	}
 }
 
-function* showNodesBySharedIds({ objects = [] }) {
+export function* showNodesBySharedIds({ objects = [] }) {
 	yield waitForTreeToBeReady();
 
 	const nodesIds = yield select(selectGetNodesIdsFromSharedIds(objects));
@@ -527,7 +527,7 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipSelecting = false
 			]);
 		}
 		const selectionMap = yield select(selectSelectionMap);
-		highlightObjects(result.highlightedObjects, selectionMap, colour);
+		yield highlightObjects(result.highlightedObjects, selectionMap, colour);
 
 		const selectedObjects = yield select(selectSelectedObjects);
 		const newSelectedObjects = _.mergeWith(
@@ -543,11 +543,11 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipSelecting = false
 	}
 }
 
-function* selectNodesBySharedIds({ objects = [], colour }: { objects: any[], colour?: number[]}) {
+export function* selectNodesBySharedIds({ objects = [], colour }: { objects: any[], colour?: number[]}) {
 	yield waitForTreeToBeReady();
 
 	const nodesIds = yield select(selectGetNodesIdsFromSharedIds(objects));
-	yield put(TreeActions.selectNodes(nodesIds, false, true, true, colour));
+	yield call(selectNodes, { nodesIds, skipExpand: false, skipSelecting: true, colour });
 }
 
 function* setSubmodelsVisibility({ models, visibility}) {
