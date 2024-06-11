@@ -61,15 +61,19 @@ export interface ISequance {
 	model: string;
 }
 
-type IDefinition = {
+type IColorDefinition = {
 	value: number[],
-	shared_id: string[],
+	shared_ids: string[],
+};
+type ITransparencyDefinition = {
+	value: number,
+	shared_ids: string[],
 };
 
 export type IStateDefinitions = {
-	transformation: IDefinition[],
-	color: IDefinition[],
-	transparency: IDefinition[],
+	transformation: IColorDefinition[],
+	color: IColorDefinition[],
+	transparency: ITransparencyDefinition[],
 };
 
 export interface ISequencesState {
