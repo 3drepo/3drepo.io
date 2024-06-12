@@ -20,11 +20,13 @@ import { Stepper, Container, ButtonsContainer, Button, Connector } from './calib
 import { Step, StepLabel } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { CalibrationContext } from '../calibrationContext';
+import { formatMessage } from '@/v5/services/intl';
+import { FormattedMessage } from 'react-intl';
 
 const STEPS = [
-	'3D Calibration Points',
-	'2D Calibration Points',
-	'Vertical Spatial Boundaries',
+	formatMessage({ defaultMessage: '3D Calibration Points', id: 'calibration.step.3dCalibration' }),
+	formatMessage({ defaultMessage: '2D Calibration Points', id: 'calibration.step.2dCalibration' }),
+	formatMessage({ defaultMessage: 'Vertical Spatial Boundaries', id: 'calibration.step.verticalSpatialBoundaries' }),
 ];
 
 export const CalibrationHeader = () => {
@@ -42,22 +44,22 @@ export const CalibrationHeader = () => {
 			</Stepper>
 			<ButtonsContainer>
 				<Button onClick={() => setStep(step - 1)} disabled={step === 0}>
-					Back
+					<FormattedMessage defaultMessage="Back" id="calinration.button.back" />
 				</Button>
 				<Button>
 					<Link to={origin}>
-						Cancel
+						<FormattedMessage defaultMessage="Cancel" id="calinration.button.cancel" />
 					</Link>
 				</Button>
 				{isLastStep ? (
 					<Button disabled={!isStepValid}>
 						<Link to={origin}>
-							Confirm
+							<FormattedMessage defaultMessage="Confirm" id="calinration.button.confirm" />
 						</Link>
 					</Button>
 				) : (
 					<Button onClick={() => setStep(step + 1)} disabled={!isStepValid}>
-						Continue
+						<FormattedMessage defaultMessage="Continue" id="calinration.button.continue" />
 					</Button>
 				)}
 			</ButtonsContainer>
