@@ -19,7 +19,7 @@ import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/
 import { CardContainer, CardHeader, CardContent } from '@components/viewer/cards/card.styles';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
-import TicketsIcon from '@assets/icons/filled/tickets-filled.svg';
+import TicketsIcon from '@assets/icons/outlined/tickets-outlined.svg';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { TicketsList } from './ticketsList.component';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
