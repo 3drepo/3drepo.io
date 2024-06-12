@@ -31,7 +31,7 @@ export const BasicStep = ({ text }) => {
 			width: 'fit-content',
 			padding: '50px 100px',
 			backgroundImage: 'radial-gradient(black, gray)',
-			margin: 'auto',
+			margin: '100px auto',
 			display: 'grid',
 			placeContent: 'center',
 			// REMINDER - the following property will be needed to be able to click inside the component
