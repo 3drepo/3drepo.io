@@ -16,8 +16,9 @@
  */
 
 import { StepConnector, Stepper as StepperBase } from '@mui/material';
-import { Button as ButtonBase } from '@controls/button';
+import { Button } from '@controls/button';
 import styled from 'styled-components';
+import { Link as LinkBase } from 'react-router-dom';
 
 export const Stepper = styled(StepperBase)`
 	border-radius: 0;
@@ -94,6 +95,30 @@ export const ButtonsContainer = styled.div`
 	grid-template-columns: repeat(3, 1fr);
 `;
 
-export const Button = styled(ButtonBase).attrs({
+export const ContrastButton = styled(Button).attrs({
 	variant: 'outlined',
+	color: 'secondary',
+})`
+	background: transparent;
+	color: ${({ theme }) => theme.palette.primary.contrast};
+	border-color: ${({ theme }) => theme.palette.base.light};
+
+	&:hover, &.Mui-focusVisible {
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
+		color: ${({ theme }) => theme.palette.secondary.main};
+	}
+
+	&.Mui-disabled {
+		color: ${({ theme }) => theme.palette.primary.contrast};
+		background-color: ${({ theme }) => theme.palette.base.lightest};
+	}
+`;
+
+export const PrimaryButton = styled(Button).attrs({
+	variant: 'contained',
+	color: 'primary',
 })``;
+
+export const Link = styled(LinkBase)`
+	text-decoration: none;
+`;
