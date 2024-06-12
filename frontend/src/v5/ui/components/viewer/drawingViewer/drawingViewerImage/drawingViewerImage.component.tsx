@@ -21,9 +21,7 @@ import { forwardRef, useEffect, useState } from 'react';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { CentredContainer } from '@controls/centredContainer';
 
-type DrawingViewerImageProps = {
-	onLoad: (...args) => void,
-};
+type DrawingViewerImageProps = { onLoad: (...args) => void };
 export const DrawingViewerImage = forwardRef(({ onLoad }: DrawingViewerImageProps, ref: any) => {
 	const [drawingId] = useSearchParam('drawingId');
 	const [isLoading, setIsLoading] = useState(true);
