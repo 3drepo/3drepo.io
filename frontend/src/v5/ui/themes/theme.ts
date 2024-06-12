@@ -73,6 +73,8 @@ export const COLOR = {
 	FAVOURITE_MID: '#FDBF4E',
 	FAVOURITE_LIGHT: '#FAE59A',
 	FAVOURITE_LIGHTEST: '#FEFAEB',
+	INFO_MAIN: '#0288D1',
+	INFO_LIGHT: '#80C3E8',
 };
 
 export const FONT_WEIGHT = {
@@ -248,6 +250,10 @@ export const palette = {
 		light: COLOR.FAVOURITE_LIGHT,
 		lightest: COLOR.FAVOURITE_LIGHTEST,
 		contrastText: COLOR.FAVOURITE_LIGHTEST,
+	},
+	info: {
+		main: COLOR.INFO_MAIN,
+		light: COLOR.INFO_LIGHT,
 	},
 	gradient: {
 		main: GRADIENT.MAIN,
