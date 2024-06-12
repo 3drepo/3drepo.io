@@ -16,16 +16,17 @@
  */
 
 import { ReactNode, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
 
 import { AppBar } from '@components/shared/appBar';
-import { ProjectNavigation } from '@components/shared/navigationTabs';
-import { TeamspacesActionsDispatchers, ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Content } from './dashboardProjectLayout.styles';
+import { ProjectsActionsDispatchers, TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { useParams } from 'react-router-dom';
+import { ProjectNavigation } from '@components/shared/navigationTabs';
 
 interface IDashboardProjectLayout {
 	children: ReactNode;
+	NavigationBar?: any;
 }
 
 export const DashboardProjectLayout = ({ children }: IDashboardProjectLayout): JSX.Element => {

@@ -91,10 +91,11 @@ interface IViewerGuiActionCreators {
 	setClippingMode: (mode: ClipMode) => Action;
 	setGizmoMode: (mode: GizmoMode) => Action;
 	setCoordView: (visible: boolean) => Action;
-	setPanelVisibility: (panelName: string, visible: boolean) => Action;
+	setPanelVisibility: (panelName: string, visible?: boolean) => Action;
 	setClipEdit: (isClipEdit: boolean) => Action;
 	clearColorOverrides: () => Action;
 	clearTransformations: () => Action;
+	resetPanels: () => Action;
 }
 
 export const AuthActionsDispatchers = createActionsDispatchers<IAuthActionCreators>(AuthActions);

@@ -18,11 +18,14 @@
 import { CentredContainer } from '@controls/centredContainer';
 import styled from 'styled-components';
 
-export const EmptyTicketsView = styled(CentredContainer)`
+export const EmptyPageView = styled(CentredContainer)`
 	color: ${({ theme }) => theme.palette.base.main};
 	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
 	${({ theme }) => theme.typography.h2}
 	border-radius: 20px;
 	width: 100%;
 	height: 600px;
+	padding: 50px;
+	text-align: center;
+	box-sizing: border-box;
 `;
