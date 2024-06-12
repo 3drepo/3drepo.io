@@ -31,10 +31,11 @@ import { CloseButton } from '@controls/button/closeButton/closeButton.component'
 import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 import { DrawingViewerService } from './drawingViewer.service';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
+import { CalibrationInfoBox } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationInfoBox/calibrationInfoBox.component';
 
 export const Viewer2D = () => {
 	const { close2D } = useContext(ViewerCanvasesContext);
-	const { isCalibrating } = useContext(CalibrationContext);
+	const { isCalibrating, step } = useContext(CalibrationContext);
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
@@ -69,6 +70,12 @@ export const Viewer2D = () => {
 
 	return (
 		<ViewerContainer visible>
+			{step === 1 && (
+				<CalibrationInfoBox
+					title={formatMessage({ defaultMessage: '2D Calibration Points', id: 'infoBox.title.secondStep' })}
+					description={formatMessage({ defaultMessage: 'Select base and target point in the 2D Model to calibrate.', id: 'infoBox.description.secondStep' })}
+				/>
+			)}
 			{!isCalibrating && <CloseButton variant="secondary" onClick={close2D} />}
 			<ImageContainer ref={imgContainerRef}>
 				<DrawingViewerImage ref={imgRef} onLoad={onImageLoad} />

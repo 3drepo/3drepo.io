@@ -19,6 +19,9 @@ import { difference, differenceBy, isEqual } from 'lodash';
 import { dispatch } from '@/v4/modules/store';
 import { DialogActions } from '@/v4/modules/dialog';
 import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
+import { CalibrationInfoBox } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationInfoBox/calibrationInfoBox.component';
+import { formatMessage } from '@/v5/services/intl';
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import {queuableFunction} from '../../helpers/async';
 
 import { ROUTES } from '../../constants/routes';
@@ -251,18 +254,43 @@ export class Viewer3D extends PureComponent<IProps, any> {
 		}
 	}
 
+	private renderCalibrationInfoBox = (step) => {
+		if (step === 0) {
+			return (
+				<CalibrationInfoBox
+					title={formatMessage({ defaultMessage: '3D Calibration Points', id: 'infoBox.title.firstStep' })}
+					description={formatMessage({ defaultMessage: 'Select base and target point in the 3D Model to calibrate.', id: 'infoBox.description.secondStep' })}
+				/>
+			);
+		};
+		if (step === 2) {
+			return (
+				<CalibrationInfoBox
+					title={formatMessage({ defaultMessage: '2D Calibration', id: 'infoBox.title.thirdStep' })}
+					description={formatMessage({
+						defaultMessage: 'Select the floor from the model tree or select an object from the model (the system will automatically set the drawing to central depth of selected object)',
+						id: 'infoBox.description.thirdStep',
+					})}
+					hideDescriptionIcon
+				/>
+			);
+		};
+		return null;
+	};
+
 	public render() {
 		return (
 			<>
-				<ViewerContainer
-					visible={this.shouldBeVisible}
-				>
+				<ViewerContainer visible={this.shouldBeVisible}>
+					<CalibrationContext.Consumer>
+						{({ step }) => this.renderCalibrationInfoBox(step)}
+					</CalibrationContext.Consumer>
 					<div
 						ref={this.containerRef}
 						className={this.props.className}
 					/>
 					<Toolbar />
-				</ ViewerContainer>
+				</ViewerContainer>
 				<Border
 					presentationMode={this.props.presentationMode}
 					isPresentationPaused={this.props.isPresentationPaused}
