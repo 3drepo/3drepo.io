@@ -18,8 +18,15 @@
 const { addModel, deleteModel, getModelList } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getDrawingById, getDrawings, updateModelSettings } = require('../../../../models/modelSettings');
+const { getRevisionByIdOrTag, getRevisionFormat, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const { MODEL_TYPES } = require('../../../../models/modelSettings.constants');
+const { deleteIfUndefined } = require('../../../../utils/helper/objects');
+const fs = require('fs/promises');
+const { getFileAsStream } = require('../../../../services/filesManager');
 const { getProjectById } = require('../../../../models/projectSettings');
+const { logger } = require('../../../../utils/logger');
+const { queueModelUpload } = require('../../../../services/modelProcessing');
+const { templates } = require('../../../../utils/responseCodes');
 
 const Drawings = { };
 
@@ -36,6 +43,39 @@ Drawings.addDrawing = (teamspace, project, data) => addModel(teamspace, project,
 Drawings.updateSettings = updateModelSettings;
 
 Drawings.deleteDrawing = deleteModel;
+
+Drawings.getRevisions = async (teamspace, drawing, showVoid) => {
+	const revisions = await getRevisions(teamspace,
+		drawing, showVoid, { _id: 1, author: 1, timestamp: 1, tag: 1, void: 1, desc: 1, rFile: 1 });
+
+	return revisions.map(({ rFile, ...r }) => {
+		const format = getRevisionFormat(rFile);
+		return { ...r, ...deleteIfUndefined({ format }) };
+	});
+};
+
+Drawings.newRevision = async (teamspace, drawing, data, file) => {
+	const { properties: { unit: units } = {} } = await getDrawingById(teamspace, drawing, { 'properties.unit': 1 });
+	await queueModelUpload(teamspace, drawing, { ...data, units }, file).finally(() => fs.rm(file.path).catch((e) => {
+		logger.logError(`Failed to delete uploaded file: ${e.message}`);
+	}));
+};
+
+Drawings.updateRevisionStatus = updateRevisionStatus;
+
+Drawings.downloadRevisionFiles = async (teamspace, drawing, revision) => {
+	const rev = await getRevisionByIdOrTag(teamspace, drawing, revision, { rFile: 1 });
+
+	if (!rev.rFile?.length) {
+		throw templates.fileNotFound;
+	}
+
+	// We currently only support single file fetches
+	const fileName = rev.rFile[0];
+	const fileNameFormatted = fileName.substr(36).replace(/_([^_]*)$/, '.$1');
+	const file = await getFileAsStream(teamspace, `${drawing}.history.ref`, fileName);
+	return { ...file, filename: fileNameFormatted };
+};
 
 Drawings.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {
 	const accessibleDrawings = await Drawings.getDrawingList(teamspace, project, username);

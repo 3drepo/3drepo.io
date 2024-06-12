@@ -18,7 +18,7 @@
 const { codeExists, createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const { getContainers, getModelById } = require('../../../../../../../models/modelSettings');
 const Path = require('path');
-const { STATUSES } = require('../../../../../../../models/modelSettings.constants');
+const { STATUSES, MODEL_TYPES } = require('../../../../../../../models/modelSettings.constants');
 const Yup = require('yup');
 const YupHelper = require('../../../../../../../utils/helper/yup');
 const { isString } = require('../../../../../../../utils/helper/typeCheck');
@@ -43,6 +43,8 @@ const ACCEPTED_MODEL_EXT = [
 	'.rvt', '.rfa', '.spm', '.dwg', '.dxf', '.nwd', '.nwc',
 ];
 
+const ACCEPTED_DRAWING_EXT = ['.dwg', '.pdf'];
+
 Revisions.validateUpdateRevisionData = async (req, res, next) => {
 	const schema = Yup.object().strict(true).noUnknown().shape({
 		void: Yup.bool('void must be of type boolean')
@@ -58,15 +60,21 @@ Revisions.validateUpdateRevisionData = async (req, res, next) => {
 	}
 };
 
-const fileFilter = (req, file, cb) => {
+const fileFilter = (acceptedExtentions) => (req, file, cb) => {
 	const { originalname } = file;
 	const fileExt = Path.extname(originalname).toLowerCase();
-	if (!ACCEPTED_MODEL_EXT.includes(fileExt)) {
+	if (!acceptedExtentions.includes(fileExt)) {
 		const err = createResponseCode(templates.unsupportedFileFormat, `${fileExt} is not a supported model format`);
 		cb(err, false);
 	} else {
 		cb(null, true);
 	}
+};
+
+const checkQuotaIsSufficient = async (req) => {
+	if (!req.file.size) throw createResponseCode(templates.invalidArguments, 'File cannot be empty');
+	const { teamspace } = req.params;
+	await sufficientQuota(teamspace, req.file.size);
 };
 
 const validateContainerRevisionUpload = async (req, res, next) => {
@@ -92,10 +100,30 @@ const validateContainerRevisionUpload = async (req, res, next) => {
 
 	try {
 		req.body = await schema.validate(req.body);
-		if (!req.file.size) throw createResponseCode(templates.invalidArguments, 'File cannot be empty');
-		const { teamspace } = req.params;
-		await sufficientQuota(teamspace, req.file.size);
+		await checkQuotaIsSufficient(req);
+		await next();
+	} catch (err) {
+		if (err?.code && codeExists(err.code)) respond(req, res, err);
+		else respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
 
+const validateDrawingRevisionUpload = async (req, res, next) => {
+	const schemaBase = {
+		statusCode: YupHelper.validators.alphanumeric(
+			Yup.string().min(1).max(2).strict(true),
+		),
+		revCode: Yup.string().min(1).max(10).matches(/^[\w|_|-|.]*$/,
+			// eslint-disable-next-line no-template-curly-in-string
+			'${path} can only contain alpha-numeric characters, full stops, hyphens or underscores'),
+		desc: YupHelper.types.strings.shortDescription,
+	};
+
+	const schema = Yup.object().noUnknown().required().shape(schemaBase);
+
+	try {
+		req.body = await schema.validate(req.body);
+		await checkQuotaIsSufficient(req);
 		await next();
 	} catch (err) {
 		if (err?.code && codeExists(err.code)) respond(req, res, err);
@@ -140,7 +168,16 @@ const validateFederationRevisionUpload = async (req, res, next) => {
 	}
 };
 
-Revisions.validateNewRevisionData = (isFederation) => (isFederation ? validateFederationRevisionUpload
-	: validateMany([singleFileUpload('file', fileFilter), validateContainerRevisionUpload]));
+Revisions.validateNewRevisionData = (modelType) => {
+	if (modelType === MODEL_TYPES.container) {
+		return validateMany([singleFileUpload('file', fileFilter(ACCEPTED_MODEL_EXT)), validateContainerRevisionUpload]);
+	}
+
+	if (modelType === MODEL_TYPES.drawing) {
+		return validateMany([singleFileUpload('file', fileFilter(ACCEPTED_DRAWING_EXT)), validateDrawingRevisionUpload]);
+	}
+
+	return validateFederationRevisionUpload;
+};
 
 module.exports = Revisions;

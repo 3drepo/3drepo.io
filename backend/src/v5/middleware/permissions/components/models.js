@@ -25,6 +25,7 @@ const {
 	hasReadAccessToDrawing,
 	hasReadAccessToFederation,
 	hasWriteAccessToContainer,
+	hasWriteAccessToDrawing,
 	hasWriteAccessToFederation,
 } = require('../../../utils/permissions/permissions');
 const { MODEL_TYPES } = require('../../../models/modelSettings.constants');
@@ -63,6 +64,7 @@ ModelPerms.hasCommenterAccessToContainer = permissionsCheckTemplate(hasCommenter
 ModelPerms.hasAdminAccessToContainer = permissionsCheckTemplate(hasAdminAccessToContainer, MODEL_TYPES.CONTAINER);
 
 ModelPerms.hasReadAccessToDrawing = permissionsCheckTemplate(hasReadAccessToDrawing, MODEL_TYPES.DRAWING);
+ModelPerms.hasWriteAccessToDrawing = permissionsCheckTemplate(hasWriteAccessToDrawing, MODEL_TYPES.DRAWING);
 ModelPerms.hasAdminAccessToDrawing = permissionsCheckTemplate(hasAdminAccessToDrawing, MODEL_TYPES.DRAWING);
 
 ModelPerms.hasReadAccessToFederation = permissionsCheckTemplate(hasReadAccessToFederation, MODEL_TYPES.FEDERATION);

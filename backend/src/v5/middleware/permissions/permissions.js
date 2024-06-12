@@ -17,8 +17,8 @@
 
 const {
 	hasAdminAccessToContainer, hasAdminAccessToDrawing, hasAdminAccessToFederation, hasCommenterAccessToContainer,
-	hasCommenterAccessToFederation, hasReadAccessToContainer, hasReadAccessToDrawing, hasReadAccessToFederation,
-	hasWriteAccessToContainer, hasWriteAccessToFederation,
+	hasCommenterAccessToFederation, hasReadAccessToContainer, hasReadAccessToFederation,
+	hasWriteAccessToContainer, hasWriteAccessToFederation, hasReadAccessToDrawing, hasWriteAccessToDrawing
 } = require('./components/models');
 const { isTeamspaceAdmin, isTeamspaceMember } = require('./components/teamspaces');
 const { convertAllUUIDs } = require('../dataConverter/pathParams');
@@ -39,6 +39,7 @@ Permissions.hasWriteAccessToContainer = validateMany([Permissions.hasAccessToTea
 Permissions.hasAdminAccessToContainer = validateMany([Permissions.hasAccessToTeamspace, hasAdminAccessToContainer]);
 
 Permissions.hasReadAccessToDrawing = validateMany([Permissions.hasAccessToTeamspace, hasReadAccessToDrawing]);
+Permissions.hasWriteAccessToDrawing = validateMany([Permissions.hasAccessToTeamspace, hasWriteAccessToDrawing]);
 Permissions.hasAdminAccessToDrawing = validateMany([Permissions.hasAccessToTeamspace, hasAdminAccessToDrawing]);
 
 Permissions.hasReadAccessToFederation = validateMany([Permissions.hasAccessToTeamspace, hasReadAccessToFederation]);

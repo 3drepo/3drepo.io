@@ -15,10 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { createResponseCode, templates } = require('../../../../../../utils/responseCodes');
+const { validateAddModelData, validateUpdateSettingsData } = require('./commons/modelSettings');
+const { MODEL_TYPES } = require('../../../../../../models/modelSettings.constants');
+const { getModelByQuery } = require('../../../../../../models/modelSettings');
+const { respond } = require('../../../../../../utils/responder');
 const { validateNewRevisionData } = require('./commons/revisions');
 
-const Federations = {};
+const Drawings = {};
 
-Federations.validateNewRevisionData = validateNewRevisionData(MODEL_TYPES.FEDERATION);
+Drawings.validateAddModelData = validateAddModelData(MODEL_TYPES.drawing);
+Drawings.validateUpdateSettingsData = validateUpdateSettingsData(MODEL_TYPES.drawing);
+Drawings.validateNewRevisionData = validateNewRevisionData(MODEL_TYPES.drawing);
 
-module.exports = Federations;
+module.exports = Drawings;

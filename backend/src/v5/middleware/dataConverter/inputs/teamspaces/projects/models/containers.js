@@ -41,6 +41,6 @@ Containers.canDeleteContainer = async (req, res, next) => {
 	}
 };
 
-Containers.validateNewRevisionData = validateNewRevisionData(false);
+Containers.validateNewRevisionData = validateNewRevisionData(MODEL_TYPES.container);
 
 module.exports = Containers;
