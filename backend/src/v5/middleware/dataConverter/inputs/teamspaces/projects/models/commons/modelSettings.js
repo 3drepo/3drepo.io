@@ -63,9 +63,8 @@ const isPropUnique = async (teamspace, project, model, modelType, propName, prop
 		if (model) {
 			models = models.flatMap((modelId) => (modelId === model ? [] : modelId));
 		}
-
 		const query = { _id: { $in: models },
-			...(modelType === MODEL_TYPES.DRAWING ? { modelType: MODEL_TYPES.DRAWING } : {}),
+			...(modelType ? { modelType } : {}),
 			// eslint-disable-next-line security/detect-non-literal-regexp
 			[propName]: new RegExp(`^${escapeRegexChrs(propValue)}$`, 'i') };
 
@@ -78,7 +77,7 @@ const isPropUnique = async (teamspace, project, model, modelType, propName, prop
 };
 
 const modelNameType = (teamspace, project, model) => types.strings.title.test('name-already-used', 'Name is already used within the project',
-	(value) => isPropUnique(teamspace, project, model, MODEL_TYPES.ANY, 'name', value));
+	(value) => isPropUnique(teamspace, project, model, undefined, 'name', value));
 
 const modelNumberType = (teamspace, project, model) => types.strings.title.test('number-already-used', 'Number is already used within the project',
 	(value) => isPropUnique(teamspace, project, model, MODEL_TYPES.DRAWING, 'number', value));
@@ -146,14 +145,7 @@ ModelSettings.validateAddModelData = (modelType) => async (req, res, next) => {
 
 ModelSettings.validateUpdateSettingsData = (modelType) => async (req, res, next) => {
 	try {
-		const { teamspace, project } = req.params;
-
-		let model;
-		if (modelType === MODEL_TYPES.FEDERATION) {
-			model = req.params.federation;
-		} else {
-			model = modelType === MODEL_TYPES.CONTAINER ? req.params.container : req.params.drawing;
-		}
+		const { teamspace, project, model } = req.params;
 
 		const schema = generateSchema(false, modelType, teamspace, project, model);
 		req.body = await schema.validate(req.body);

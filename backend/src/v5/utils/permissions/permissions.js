@@ -60,6 +60,8 @@ const modelPermCheck = (permCheck, modelType) => async (teamspace, project, mode
 		getModelFn = getContainerById;
 	} else if (modelType === MODEL_TYPES.FEDERATION) {
 		getModelFn = getFederationById;
+	} else if (modelType === MODEL_TYPES.DRAWING) {
+		getModelFn = getDrawingById;
 	}
 
 	const model = await getModelFn(teamspace, modelID, { permissions: 1 });
@@ -89,13 +91,13 @@ Permissions.hasReadAccessToSomeModels = async (teamspace, project, models, usern
 };
 
 Permissions.hasWriteAccessToModel = modelPermCheck(
-	(perm) => MODEL_WRITE_ROLES.includes(perm.permission), MODEL_TYPES.ANY,
+	(perm) => MODEL_WRITE_ROLES.includes(perm.permission), undefined,
 );
 Permissions.hasCommenterAccessToModel = modelPermCheck(
-	(perm) => MODEL_COMMENT_ROLES.includes(perm.permission), MODEL_TYPES.ANY,
+	(perm) => MODEL_COMMENT_ROLES.includes(perm.permission), undefined,
 );
 Permissions.hasReadAccessToModel = modelPermCheck(
-	(perm) => MODEL_READ_ROLES.includes(perm.permission), MODEL_TYPES.ANY,
+	(perm) => MODEL_READ_ROLES.includes(perm.permission), undefined,
 );
 
 const hasAdminAccessToModel = async (teamspace, project, model, username) => {

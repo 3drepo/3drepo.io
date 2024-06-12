@@ -305,6 +305,33 @@ const testHasAdminAccessToContainer = () => {
 	});
 };
 
+const testHasReadAccessToDrawing = () => {
+	describe.each([
+		['a', false, true],
+		['b', false, true],
+		['c', false, true],
+		['projAdmin', false, false],
+		['projAdmin', true, true],
+		['tsAdmin', false, false],
+		['tsAdmin', true, true],
+		['tsAdmin', undefined, true],
+		['nobody', false, false],
+		['nobody', true, false],
+	])('Has read access to drawing', (user, adminCheck, result) => {
+		test(`${user} ${result ? 'have' : 'does not have'} read access (adminCheck: ${adminCheck})`, async () => {
+			Projects.modelsExistInProject.mockImplementation(() => true);
+			expect(await Permissions.hasReadAccessToDrawing('teamspace', 'project', 'model', user, adminCheck)).toBe(result);
+		});
+	});
+
+	describe('Drawing does not belong to the project', () => {
+		test('should return false if the drawing does not belong to the project', async () => {
+			Projects.modelsExistInProject.mockImplementation(() => false);
+			expect(await Permissions.hasReadAccessToDrawing('teamspace', 'project', 'model', 'a', true)).toBe(false);
+		});
+	});
+};
+
 const testHasAdminAccessToDrawing = () => {
 	describe.each([
 		['a', false],
@@ -446,6 +473,7 @@ describe('utils/permissions', () => {
 	testHasCommenterAccessToContainer();
 	testHasAdminAccessToContainer();
 
+	testHasReadAccessToDrawing();
 	testHasAdminAccessToDrawing();
 
 	testHasReadAccessToFederation();

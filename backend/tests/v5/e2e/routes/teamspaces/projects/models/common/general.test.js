@@ -42,8 +42,7 @@ const generateBasicData = () => {
 		project: ServiceHelper.generateRandomProject(),
 		con: ServiceHelper.generateRandomModel({ viewers: [viewer.user] }),
 		fed: ServiceHelper.generateRandomModel({ viewers: [viewer.user], isFederation: true }),
-		draw: ServiceHelper.generateRandomModel({ viewers: [viewer.user],
-			properties: { modelType: MODEL_TYPES.DRAWING } }),
+		draw: ServiceHelper.generateRandomModel({ viewers: [viewer.user], isDrawing: true }),
 	};
 
 	return data;
@@ -770,7 +769,7 @@ const testUpdateModelSettings = () => {
 
 const testGetSettings = () => {
 	describe('Get Model Settings', () => {
-		const { users, teamspace, project, con, fed } = generateBasicData();
+		const { users, teamspace, project, con, fed, draw } = generateBasicData();
 
 		fed.properties = {
 			...fed.properties,
@@ -799,19 +798,35 @@ const testGetSettings = () => {
 
 		const fed2 = ServiceHelper.generateRandomModel({ isFederation: true });
 		const con2 = ServiceHelper.generateRandomModel();
+		const draw2 = ServiceHelper.generateRandomModel({ isDrawing: true });
 
 		beforeAll(async () => {
-			const models = [con, fed, fed2, con2];
+			const models = [con, fed, draw, fed2, con2, draw2];
 			await setupBasicData(users, teamspace, project, models);
 		});
 
-		const generateTestData = (isFed) => {
-			const modelType = isFed ? 'federation' : 'container';
-			const model = isFed ? fed : con;
-			const model2 = isFed ? fed2 : con2;
+		const generateTestData = (modelType) => {
+			let model;
+			let model2;
+			let wrongTypeModel;
+			let modelNotFound;
 
-			const wrongTypeModel = isFed ? con : fed;
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			if (modelType === MODEL_TYPES.CONTAINER) {
+				model = con;
+				model2 = con2;
+				wrongTypeModel = fed;
+				modelNotFound = templates.containerNotFound;
+			} else if (modelType === MODEL_TYPES.FEDERATION) {
+				model = fed;
+				model2 = fed2;
+				wrongTypeModel = con;
+				modelNotFound = templates.federationNotFound;
+			} else {
+				model = draw;
+				model2 = draw2;
+				wrongTypeModel = con;
+				modelNotFound = templates.drawingNotFound;
+			}
 
 			const getRoute = ({
 				projectId = project.id,
@@ -820,52 +835,60 @@ const testGetSettings = () => {
 			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}${key ? `?key=${key}` : ''}`;
 
 			return [
-				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
-				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
-				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-				[`the ${modelType} does not exist`, getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
-				[`the model is not a ${modelType}`, getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
-				[`the user does not have access to the ${modelType}`, getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
-				['the model exists and the user has access', getRoute(), true, model],
-				['the model exists and the user has access (2)', getRoute({ modelId: model2._id }), true, model2],
+				['the user does not have a valid session', modelType, getRoute({ key: null }), false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', modelType, getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+				['the project does not exist', modelType, getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				[`the ${modelType} does not exist`, modelType, getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
+				[`the model is not a ${modelType}`, modelType, getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
+				[`the user does not have access to the ${modelType}`, modelType, getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
+				['the model exists and the user has access', modelType, getRoute(), true, model],
+				['the model exists and the user has access (2)', modelType, getRoute({ modelId: model2._id }), true, model2],
 			];
 		};
 
-		const formatToSettings = (settings) => ({
+		const formatToSettings = (settings, modelType) => ({
 			_id: settings._id,
 			name: settings.name,
 			desc: settings.properties.desc,
-			code: settings.properties.properties.code,
-			unit: settings.properties.properties.unit,
 			type: settings.properties.type,
-			defaultView: settings.properties.defaultView ? UUIDToString(settings.properties.defaultView) : undefined,
-			defaultLegend: settings.properties.defaultLegend
-				? UUIDToString(settings.properties.defaultLegend) : undefined,
-			timestamp: settings.properties.timestamp ? settings.properties.timestamp.getTime() : undefined,
-			angleFromNorth: settings.properties.angleFromNorth,
-			status: settings.properties.status,
-			surveyPoints: settings.properties.surveyPoints,
-			errorReason: settings.properties.errorReason ? {
-				message: settings.properties.errorReason.message,
-				timestamp: settings.properties.errorReason.timestamp
-					? settings.properties.errorReason.timestamp.getTime() : undefined,
-				errorCode: settings.properties.errorReason.errorCode,
-			} : undefined,
+			...(modelType === MODEL_TYPES.DRAWING ? {
+				number: settings.properties.number,
+			} : {
+				code: settings.properties.properties.code,
+				unit: settings.properties.properties.unit,
+				defaultView: settings.properties.defaultView
+					? UUIDToString(settings.properties.defaultView) : undefined,
+				defaultLegend: settings.properties.defaultLegend
+					? UUIDToString(settings.properties.defaultLegend) : undefined,
+				timestamp: settings.properties.timestamp ? settings.properties.timestamp.getTime() : undefined,
+				angleFromNorth: settings.properties.angleFromNorth,
+				status: settings.properties.status,
+				surveyPoints: settings.properties.surveyPoints,
+				errorReason: settings.properties.errorReason ? {
+					message: settings.properties.errorReason.message,
+					timestamp: settings.properties.errorReason.timestamp
+						? settings.properties.errorReason.timestamp.getTime() : undefined,
+					errorCode: settings.properties.errorReason.errorCode,
+				} : undefined,
+			}),
 		});
 
-		const runTest = (desc, route, success, expectedOutput) => {
+		const runTest = (desc, modelType, route, success, expectedOutput) => {
 			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
 				const res = await agent.get(route).expect(expectedStatus);
 				if (success) {
-					expect(res.body).toEqual(formatToSettings(expectedOutput));
+					expect(res.body)
+						.toEqual(formatToSettings(expectedOutput, modelType));
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}
 			});
 		};
-		describe.each(generateTestData(true))('Federations', runTest);
-		describe.each(generateTestData())('Containers', runTest);
+
+		describe.each(generateTestData(MODEL_TYPES.FEDERATION))('Federations', runTest);
+		describe.each(generateTestData(MODEL_TYPES.CONTAINER))('Containers', runTest);
+		describe.each(generateTestData(MODEL_TYPES.DRAWING))('Drawings', runTest);
 	});
 };
 

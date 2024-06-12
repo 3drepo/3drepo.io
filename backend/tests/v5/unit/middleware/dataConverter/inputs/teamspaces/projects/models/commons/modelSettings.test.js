@@ -68,13 +68,13 @@ ModelSettingsModel.getModelByQuery.mockImplementation((teamspace,
 
 Projects.getProjectById.mockResolvedValue({ models: ['234'] });
 
-const params = { teamspace: 'ts', federation: '123', project: '123', container: '123' };
+const params = { teamspace: 'ts', federation: '123', project: '123', model: '123' };
 const testValidateUpdateSettingsData = () => {
 	describe.each([
 		[{ params, body: { name: null } }, MODEL_TYPES.CONTAINER, false, 'with null name'],
 		[{ params, body: { name: existingModelName } }, MODEL_TYPES.CONTAINER, false, 'with model name of some other model within the project'],
 		[{ params, body: { name: existingModelName.toUpperCase() } }, MODEL_TYPES.CONTAINER, false, 'with model name of some other model within the project (different case)'],
-		[{ params: { ...params, container: '234' }, body: { name: existingModelName } }, MODEL_TYPES.CONTAINER, true, 'with current model name of the model'],
+		[{ params: { ...params, model: '234' }, body: { name: existingModelName } }, MODEL_TYPES.CONTAINER, true, 'with current model name of the model'],
 		[{ params, body: { name: 'valid' } }, MODEL_TYPES.CONTAINER, true, 'with valid name'],
 		[{ params: _.omit(params, ['container']), body: { name: 'valid' } }, MODEL_TYPES.CONTAINER, true, 'with valid name (federation test)'],
 		[{ params, body: { desc: null } }, MODEL_TYPES.CONTAINER, false, 'with null desc'],
@@ -110,6 +110,7 @@ const testValidateUpdateSettingsData = () => {
 		[{ params, body: { defaultLegend: existingLegendID } }, MODEL_TYPES.CONTAINER, true, 'with defaultLegend that exists'],
 		[{ params, body: { defaultLegend: existingLegendID } }, MODEL_TYPES.CONTAINER, true, 'with defaultLegend that exists'],
 		[{ body: {} }, MODEL_TYPES.CONTAINER, false, 'with empty params, body'],
+		[{ params, body: { name: generateRandomString() } }, MODEL_TYPES.FEDERATION, true, 'with federation type and valid payload'],
 		[{ params, body: { name: generateRandomString() } }, MODEL_TYPES.DRAWING, true, 'with drawing type and valid payload'],
 		[{ params, body: { number: existingModelNumber } }, MODEL_TYPES.DRAWING, false, 'with drawing type and duplicate number'],
 		[{ params, body: { unit: generateRandomString() } }, MODEL_TYPES.DRAWING, false, 'with drawing model and invalid payload'],

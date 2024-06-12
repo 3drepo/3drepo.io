@@ -77,7 +77,6 @@ ModelSettingConstants.MODEL_TYPES = {
 	CONTAINER: 'container',
 	FEDERATION: 'federation',
 	DRAWING: 'drawing',
-	ANY: 'any',
 };
 
 ModelSettingConstants.MODEL_CATEGORIES = [

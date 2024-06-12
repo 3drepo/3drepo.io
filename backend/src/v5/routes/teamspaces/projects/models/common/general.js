@@ -168,11 +168,17 @@ const getModelSettings = (modelType) => async (req, res, next) => {
 	const fn = {
 		[MODEL_TYPES.CONTAINER]: Containers.getSettings,
 		[MODEL_TYPES.FEDERATION]: Federations.getSettings,
+		[MODEL_TYPES.DRAWING]: Drawings.getSettings,
 	};
 	try {
 		const settings = await fn[modelType](teamspace, model);
-		req.outputData = settings;
-		await next();
+
+		if (modelType === MODEL_TYPES.DRAWING) {
+			respond(req, res, templates.ok, settings);
+		} else {
+			req.outputData = settings;
+			await next();
+		}
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);

@@ -44,6 +44,7 @@ const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constant
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { isArray } = require(`${src}/utils/helper/typeCheck`);
 const FilesManager = require('../../../src/v5/services/filesManager');
+const { MODEL_TYPES } = require('../../../src/v5/models/modelSettings.constants');
 
 const { statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
 const { generateFullSchema } = require(`${src}/schemas/tickets/templates`);
@@ -396,7 +397,8 @@ ServiceHelper.generateRandomProject = (projectAdmins = []) => ({
 	permissions: projectAdmins.map(({ user }) => ({ user, permissions: ['admin_project'] })),
 });
 
-ServiceHelper.generateRandomModel = ({ isFederation, viewers, commenters, collaborators, properties = {} } = {}) => {
+ServiceHelper.generateRandomModel = ({ isFederation, isDrawing, viewers, commenters,
+	collaborators, properties = {} } = {}) => {
 	const permissions = [];
 	if (viewers?.length) {
 		permissions.push(...viewers.map((user) => ({ user, permission: 'viewer' })));
@@ -414,8 +416,13 @@ ServiceHelper.generateRandomModel = ({ isFederation, viewers, commenters, collab
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
 		properties: {
-			...ServiceHelper.generateRandomModelProperties(isFederation),
-			...(isFederation ? { federate: true } : {}),
+			...(isDrawing ? {
+				modelType: MODEL_TYPES.DRAWING,
+				number: ServiceHelper.generateRandomString(),
+				type: ServiceHelper.generateRandomString(),
+			} : {
+				...ServiceHelper.generateRandomModelProperties(isFederation),
+			}),
 			...properties,
 			permissions,
 		},

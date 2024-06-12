@@ -17,7 +17,7 @@
 
 const { addModel, deleteModel, getModelList } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
-const { getDrawings, updateModelSettings } = require('../../../../models/modelSettings');
+const { getDrawingById, getDrawings, updateModelSettings } = require('../../../../models/modelSettings');
 const { MODEL_TYPES } = require('../../../../models/modelSettings.constants');
 const { getProjectById } = require('../../../../models/projectSettings');
 
@@ -46,5 +46,8 @@ Drawings.deleteFavourites = async (username, teamspace, project, favouritesToRem
 	const accessibleDrawings = await Drawings.getDrawingList(teamspace, project, username);
 	return deleteFavourites(username, teamspace, accessibleDrawings, favouritesToRemove);
 };
+
+Drawings.getSettings = (teamspace, drawing) => getDrawingById(teamspace,
+	drawing, { name: 1, number: 1, type: 1, desc: 1 });
 
 module.exports = Drawings;

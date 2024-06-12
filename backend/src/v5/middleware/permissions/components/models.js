@@ -39,15 +39,14 @@ const permissionsCheckTemplate = (callback, modelType) => async (req, res, next)
 	const user = getUserFromSession(session);
 	const { teamspace, project } = params;
 
-	let model;
-	if (modelType === MODEL_TYPES.FEDERATION) {
-		model = params.federation;
-	} else {
-		model = modelType === MODEL_TYPES.DRAWING ? params.drawing : params.container;
-	}
+	const modelParam = {
+		[MODEL_TYPES.CONTAINER]: req.params.container,
+		[MODEL_TYPES.FEDERATION]: req.params.federation,
+		[MODEL_TYPES.DRAWING]: req.params.drawing,
+	};
 
 	try {
-		if (await callback(teamspace, project, model, user)) {
+		if (await callback(teamspace, project, modelParam[modelType], user)) {
 			next();
 		} else {
 			respond(req, res, templates.notAuthorized);

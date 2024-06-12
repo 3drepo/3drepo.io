@@ -28,7 +28,7 @@ const Favourites = require(`${src}/processors/teamspaces/projects/models/commons
 
 const Drawings = require(`${src}/processors/teamspaces/projects/models/drawings`);
 
-const { determineTestGroup, generateRandomString } = require('../../../../../helper/services');
+const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../../../../helper/services');
 const { MODEL_TYPES } = require('../../../../../../../src/v5/models/modelSettings.constants');
 
 const testAddDrawing = () => {
@@ -115,6 +115,23 @@ const testDeleteDrawing = () => {
 
 			expect(ModelList.deleteModel).toHaveBeenCalledTimes(1);
 			expect(ModelList.deleteModel).toHaveBeenCalledWith(teamspace, project, model);
+		});
+	});
+};
+
+const testGetSettings = () => {
+	describe('Get drawing settings', () => {
+		test('should return the drawing settings', async () => {
+			const drawingSettings = generateRandomObject();
+			const teamspace = generateRandomObject();
+			const drawing = generateRandomObject();
+			const projection = { name: 1, number: 1, type: 1, desc: 1 };
+			const getDrawingByIdMock = ModelSettings.getDrawingById.mockResolvedValueOnce(drawingSettings);
+
+			const res = await Drawings.getSettings(teamspace, drawing);
+			expect(res).toEqual(drawingSettings);
+			expect(getDrawingByIdMock).toHaveBeenCalledTimes(1);
+			expect(getDrawingByIdMock).toHaveBeenCalledWith(teamspace, drawing, projection);
 		});
 	});
 };
@@ -283,6 +300,7 @@ describe(determineTestGroup(__filename), () => {
 	testAddDrawing();
 	testUpdateSettings();
 	testDeleteDrawing();
+	testGetSettings();
 	testAppendFavourites();
 	testDeleteFavourites();
 });
