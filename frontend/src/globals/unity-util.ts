@@ -554,7 +554,6 @@ export class UnityUtil {
 		const point = JSON.parse(pointInfo);
 		if (UnityUtil.viewer && UnityUtil.viewer.objectSelected) {
 			UnityUtil.viewer.objectSelected(point);
-			console.log(pointInfo);
 		}
 	}
 
