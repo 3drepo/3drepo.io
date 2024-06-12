@@ -18,7 +18,7 @@
 const { times } = require('lodash');
 const { src } = require('../../helper/path');
 const { generateRandomString, generateUUIDString } = require('../../helper/services');
-const { MODEL_TYPES } = require('../../../../src/v5/models/modelSettings.constants');
+const { modelTypes } = require('../../../../src/v5/models/modelSettings.constants');
 
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
@@ -196,7 +196,7 @@ const testGetContainers = () => {
 			expect(DBHandler.find).toHaveBeenCalledWith(teamspace, SETTINGS_COL,
 				{ _id: { $in: modelIds },
 					federate: { $ne: true },
-					modelType: { $ne: MODEL_TYPES.DRAWING } }, undefined, undefined);
+					modelType: { $ne: modelTypes.DRAWING } }, undefined, undefined);
 		});
 	});
 };
@@ -223,7 +223,7 @@ const testGetDrawings = () => {
 			expect(res).toEqual(expectedData);
 			expect(DBHandler.find).toHaveBeenCalledTimes(1);
 			expect(DBHandler.find).toHaveBeenCalledWith(teamspace, SETTINGS_COL,
-				{ _id: { $in: modelIds }, modelType: MODEL_TYPES.DRAWING },
+				{ _id: { $in: modelIds }, modelType: modelTypes.DRAWING },
 				undefined, undefined);
 		});
 	});

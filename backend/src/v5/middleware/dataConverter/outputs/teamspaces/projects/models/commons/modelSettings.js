@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { MODEL_TYPES } = require('../../../../../../../models/modelSettings.constants');
+const { modelTypes } = require('../../../../../../../models/modelSettings.constants');
 const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
 const { respond } = require('../../../../../../../utils/responder');
 const { templates } = require('../../../../../../../utils/responseCodes');
@@ -46,7 +46,7 @@ ModelSettings.formatModelSettings = (req, res) => {
 ModelSettings.formatModelStats = (modelType) => (req, res) => {
 	const { outputData } = req;
 
-	if (modelType === MODEL_TYPES.FEDERATION) {
+	if (modelType === modelTypes.FEDERATION) {
 		if (outputData.lastUpdated) outputData.lastUpdated = outputData.lastUpdated.getTime();
 	} else {
 		outputData.revisions.lastUpdated = outputData.revisions.lastUpdated

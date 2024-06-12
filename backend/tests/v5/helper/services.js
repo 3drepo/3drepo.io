@@ -44,7 +44,7 @@ const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constant
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { isArray } = require(`${src}/utils/helper/typeCheck`);
 const FilesManager = require('../../../src/v5/services/filesManager');
-const { MODEL_TYPES } = require('../../../src/v5/models/modelSettings.constants');
+const { modelTypes } = require('../../../src/v5/models/modelSettings.constants');
 
 const { statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
 const { generateFullSchema } = require(`${src}/schemas/tickets/templates`);
@@ -417,7 +417,7 @@ ServiceHelper.generateRandomModel = ({ isFederation, isDrawing, viewers, comment
 		name: ServiceHelper.generateRandomString(),
 		properties: {
 			...(isDrawing ? {
-				modelType: MODEL_TYPES.DRAWING,
+				modelType: modelTypes.DRAWING,
 				number: ServiceHelper.generateRandomString(),
 				type: ServiceHelper.generateRandomString(),
 			} : {

@@ -31,7 +31,7 @@ const { validateAddModelData, validateUpdateSettingsData } = require('../../../.
 const Containers = require('../../../../../processors/teamspaces/projects/models/containers');
 const Drawings = require('../../../../../processors/teamspaces/projects/models/drawings');
 const Federations = require('../../../../../processors/teamspaces/projects/models/federations');
-const { MODEL_TYPES } = require('../../../../../models/modelSettings.constants');
+const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { Router } = require('express');
 const { canDeleteContainer } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { getUserFromSession } = require('../../../../../utils/sessions');
@@ -41,9 +41,9 @@ const addModel = (modelType) => async (req, res) => {
 	const { teamspace, project } = req.params;
 	try {
 		const fn = {
-			[MODEL_TYPES.CONTAINER]: Containers.addContainer,
-			[MODEL_TYPES.FEDERATION]: Federations.addFederation,
-			[MODEL_TYPES.DRAWING]: Drawings.addDrawing,
+			[modelTypes.CONTAINER]: Containers.addContainer,
+			[modelTypes.FEDERATION]: Federations.addFederation,
+			[modelTypes.DRAWING]: Drawings.addDrawing,
 		};
 
 		const modelId = await fn[modelType](teamspace, project, req.body);
@@ -58,9 +58,9 @@ const deleteModel = (modelType) => async (req, res) => {
 	const { teamspace, project, model } = req.params;
 	try {
 		const fn = {
-			[MODEL_TYPES.CONTAINER]: Containers.deleteContainer,
-			[MODEL_TYPES.FEDERATION]: Federations.deleteFederation,
-			[MODEL_TYPES.DRAWING]: Drawings.deleteDrawing,
+			[modelTypes.CONTAINER]: Containers.deleteContainer,
+			[modelTypes.FEDERATION]: Federations.deleteFederation,
+			[modelTypes.DRAWING]: Drawings.deleteDrawing,
 		};
 
 		await fn[modelType](teamspace, project, model);
@@ -76,9 +76,9 @@ const getModelList = (modelType) => async (req, res) => {
 	const { teamspace, project } = req.params;
 
 	const fn = {
-		[MODEL_TYPES.CONTAINER]: Containers.getContainerList,
-		[MODEL_TYPES.FEDERATION]: Federations.getFederationList,
-		[MODEL_TYPES.DRAWING]: Drawings.getDrawingList,
+		[modelTypes.CONTAINER]: Containers.getContainerList,
+		[modelTypes.FEDERATION]: Federations.getFederationList,
+		[modelTypes.DRAWING]: Drawings.getDrawingList,
 	};
 
 	try {
@@ -94,9 +94,9 @@ const appendFavourites = (modelType) => async (req, res) => {
 	const { teamspace, project } = req.params;
 	const favouritesToAdd = req.body[`${modelType}s`];
 	const fn = {
-		[MODEL_TYPES.CONTAINER]: Containers.appendFavourites,
-		[MODEL_TYPES.FEDERATION]: Federations.appendFavourites,
-		[MODEL_TYPES.DRAWING]: Drawings.appendFavourites,
+		[modelTypes.CONTAINER]: Containers.appendFavourites,
+		[modelTypes.FEDERATION]: Federations.appendFavourites,
+		[modelTypes.DRAWING]: Drawings.appendFavourites,
 	};
 
 	try {
@@ -111,9 +111,9 @@ const deleteFavourites = (modelType) => async (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
 	const fn = {
-		[MODEL_TYPES.CONTAINER]: Containers.deleteFavourites,
-		[MODEL_TYPES.FEDERATION]: Federations.deleteFavourites,
-		[MODEL_TYPES.DRAWING]: Drawings.deleteFavourites,
+		[modelTypes.CONTAINER]: Containers.deleteFavourites,
+		[modelTypes.FEDERATION]: Federations.deleteFavourites,
+		[modelTypes.DRAWING]: Drawings.deleteFavourites,
 	};
 
 	try {
@@ -133,8 +133,8 @@ const deleteFavourites = (modelType) => async (req, res) => {
 const getModelStats = (modelType) => async (req, res, next) => {
 	const { teamspace, model } = req.params;
 	const fn = {
-		[MODEL_TYPES.CONTAINER]: Containers.getContainerStats,
-		[MODEL_TYPES.FEDERATION]: Federations.getFederationStats,
+		[modelTypes.CONTAINER]: Containers.getContainerStats,
+		[modelTypes.FEDERATION]: Federations.getFederationStats,
 	};
 
 	try {
@@ -150,9 +150,9 @@ const getModelStats = (modelType) => async (req, res, next) => {
 const updateModelSettings = (modelType) => async (req, res) => {
 	const { teamspace, project, model } = req.params;
 	const fn = {
-		[MODEL_TYPES.CONTAINER]: Containers.updateSettings,
-		[MODEL_TYPES.FEDERATION]: Federations.updateSettings,
-		[MODEL_TYPES.DRAWING]: Drawings.updateSettings,
+		[modelTypes.CONTAINER]: Containers.updateSettings,
+		[modelTypes.FEDERATION]: Federations.updateSettings,
+		[modelTypes.DRAWING]: Drawings.updateSettings,
 	};
 	try {
 		await fn[modelType](teamspace, project, model, req.body);
@@ -166,14 +166,14 @@ const updateModelSettings = (modelType) => async (req, res) => {
 const getModelSettings = (modelType) => async (req, res, next) => {
 	const { teamspace, model } = req.params;
 	const fn = {
-		[MODEL_TYPES.CONTAINER]: Containers.getSettings,
-		[MODEL_TYPES.FEDERATION]: Federations.getSettings,
-		[MODEL_TYPES.DRAWING]: Drawings.getSettings,
+		[modelTypes.CONTAINER]: Containers.getSettings,
+		[modelTypes.FEDERATION]: Federations.getSettings,
+		[modelTypes.DRAWING]: Drawings.getSettings,
 	};
 	try {
 		const settings = await fn[modelType](teamspace, model);
 
-		if (modelType === MODEL_TYPES.DRAWING) {
+		if (modelType === modelTypes.DRAWING) {
 			respond(req, res, templates.ok, settings);
 		} else {
 			req.outputData = settings;
@@ -189,21 +189,21 @@ const establishRoutes = (modelType) => {
 	const router = Router({ mergeParams: true });
 
 	const hasAdminAccessToModel = {
-		[MODEL_TYPES.CONTAINER]: hasAdminAccessToContainer,
-		[MODEL_TYPES.FEDERATION]: hasAdminAccessToFederation,
-		[MODEL_TYPES.DRAWING]: hasAdminAccessToDrawing,
+		[modelTypes.CONTAINER]: hasAdminAccessToContainer,
+		[modelTypes.FEDERATION]: hasAdminAccessToFederation,
+		[modelTypes.DRAWING]: hasAdminAccessToDrawing,
 	};
 
 	const hasReadAccessToModel = {
-		[MODEL_TYPES.CONTAINER]: hasReadAccessToContainer,
-		[MODEL_TYPES.FEDERATION]: hasReadAccessToFederation,
-		[MODEL_TYPES.DRAWING]: hasReadAccessToDrawing,
+		[modelTypes.CONTAINER]: hasReadAccessToContainer,
+		[modelTypes.FEDERATION]: hasReadAccessToFederation,
+		[modelTypes.DRAWING]: hasReadAccessToDrawing,
 	};
 
 	const canDeleteModel = {
-		[MODEL_TYPES.CONTAINER]: canDeleteContainer,
-		[MODEL_TYPES.FEDERATION]: async (req, res, next) => { await next(); },
-		[MODEL_TYPES.DRAWING]: async (req, res, next) => { await next(); },
+		[modelTypes.CONTAINER]: canDeleteContainer,
+		[modelTypes.FEDERATION]: async (req, res, next) => { await next(); },
+		[modelTypes.DRAWING]: async (req, res, next) => { await next(); },
 	};
 
 	/**

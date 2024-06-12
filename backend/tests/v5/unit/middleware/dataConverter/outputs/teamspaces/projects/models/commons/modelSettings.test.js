@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { MODEL_TYPES } = require('../../../../../../../../../../src/v5/models/modelSettings.constants');
+const { modelTypes } = require('../../../../../../../../../../src/v5/models/modelSettings.constants');
 const { src } = require('../../../../../../../../helper/path');
 const { determineTestGroup, generateRandomModelProperties, generateUUID } = require('../../../../../../../../helper/services');
 
@@ -94,10 +94,10 @@ const testFormatModelSettings = () => {
 
 const testFormatModelStats = () => {
 	describe.each([
-		[MODEL_TYPES.FEDERATION, { lastUpdated: new Date() }, 'lastUpdated field'],
-		[MODEL_TYPES.FEDERATION, {}, 'no lastUpdated field'],
-		[MODEL_TYPES.CONTAINER, { revisions: {} }, 'no data to convert'],
-		[MODEL_TYPES.CONTAINER, { revisions: {
+		[modelTypes.FEDERATION, { lastUpdated: new Date() }, 'lastUpdated field'],
+		[modelTypes.FEDERATION, {}, 'no lastUpdated field'],
+		[modelTypes.CONTAINER, { revisions: {} }, 'no data to convert'],
+		[modelTypes.CONTAINER, { revisions: {
 			lastUpdated: new Date(),
 			latestRevision: generateUUID(),
 		},
@@ -113,7 +113,7 @@ const testFormatModelStats = () => {
 					...data,
 				};
 
-				if (modelType === MODEL_TYPES.FEDERATION) {
+				if (modelType === modelTypes.FEDERATION) {
 					formattedStats.lastUpdated = data.lastUpdated ? data.lastUpdated.getTime() : undefined;
 				} else {
 					formattedStats.revisions.lastUpdated = formattedStats.revisions.lastUpdated

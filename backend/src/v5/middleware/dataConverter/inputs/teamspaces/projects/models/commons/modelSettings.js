@@ -16,7 +16,7 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
-const { MODEL_TYPES } = require('../../../../../../../models/modelSettings.constants');
+const { modelTypes } = require('../../../../../../../models/modelSettings.constants');
 const Yup = require('yup');
 const { checkLegendExists } = require('../../../../../../../models/legends');
 const { escapeRegexChrs } = require('../../../../../../../utils/helper/strings');
@@ -80,7 +80,7 @@ const modelNameType = (teamspace, project, model) => types.strings.title.test('n
 	(value) => isPropUnique(teamspace, project, model, undefined, 'name', value));
 
 const modelNumberType = (teamspace, project, model) => types.strings.title.test('number-already-used', 'Number is already used within the project',
-	(value) => isPropUnique(teamspace, project, model, MODEL_TYPES.DRAWING, 'number', value));
+	(value) => isPropUnique(teamspace, project, model, modelTypes.DRAWING, 'number', value));
 
 const generateSchema = (newEntry, modelType, teamspace, project, modelId) => {
 	const name = modelNameType(teamspace, project, modelId);
@@ -89,12 +89,12 @@ const generateSchema = (newEntry, modelType, teamspace, project, modelId) => {
 	const commonProps = {
 		name: newEntry ? name.required() : name,
 		desc: types.strings.shortDescription,
-		...(modelType === MODEL_TYPES.FEDERATION ? {} : { type: newEntry ? Yup.string().required() : Yup.string() }),
+		...(modelType === modelTypes.FEDERATION ? {} : { type: newEntry ? Yup.string().required() : Yup.string() }),
 	};
 
 	const schema = {
 		...commonProps,
-		...(modelType === MODEL_TYPES.DRAWING
+		...(modelType === modelTypes.DRAWING
 			? { number: newEntry ? number.required() : number }
 			: {
 				unit: newEntry ? types.strings.unit.required() : types.strings.unit,
