@@ -34,6 +34,10 @@ import { VIEWER_CLIP_MODES, VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { GizmoModeButtons } from '../buttons/buttonOptionsContainer/gizmoModeButtons.component';
 import { Viewer } from '@/v4/services/viewer/viewer';
 import { useEffect, useState } from 'react';
+import { selectTransformations } from '@/v4/modules/viewpoints/viewpoints.selectors';
+import { useSelector } from 'react-redux';
+import { ViewpointsActions } from '@/v4/modules/viewpoints';
+import { dispatch } from '@/v4/modules/store';
 
 export const SectionToolbar = () => {
 	const [alignActive, setAlignActive] = useState(false);
@@ -44,7 +48,7 @@ export const SectionToolbar = () => {
 	const clippingMode = ViewerGuiHooksSelectors.selectClippingMode();
 	const clippingSectionOpen = ViewerGuiHooksSelectors.selectIsClipEdit();
 	const isBoxClippingMode = clippingMode === VIEWER_CLIP_MODES.BOX;
-	const hasTransformations = !isEmpty(ViewerGuiHooksSelectors.selectTransformations());
+	const hasTransformations = !isEmpty(useSelector(selectTransformations));
 
 	const onClickAlign = () => {
 		Viewer.clipToolRealign();
@@ -106,7 +110,7 @@ export const SectionToolbar = () => {
 				<ToolbarButton
 					Icon={ResetTransformationsIcons}
 					hidden={!hasTransformations}
-					onClick={() => ViewerGuiActionsDispatchers.clearTransformations()}
+					onClick={() => dispatch(ViewpointsActions.clearTransformations())}
 					title={formatMessage({ id: 'viewer.toolbar.icon.resetTransformation', defaultMessage: 'Reset Transformation' })}
 				/>
 			</Section>

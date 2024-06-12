@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { findIndex } from 'lodash';
+import { findIndex, isEmpty } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import { STEP_SCALE } from '../../constants/sequences';
 import { sortByField } from '../../helpers/sorting';
@@ -36,8 +36,7 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	setOpenOnTodaySuccess: ['openOnToday'],
 	fetchFrame: ['date'],
 	prefetchFrames: [],
-	setStateDefinition: ['stateId', 'stateDefinition'],
-	setSelectedStateDefinition: ['stateDefinition'],
+	updateFrameWithViewpoint: ['sequenceId', 'stateId', 'viewpoint'],
 	setStepInterval: ['stepInterval'],
 	setStepScale: ['stepScale'],
 	fetchActivitiesDefinitions: ['sequenceId'],
@@ -46,9 +45,6 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	showSequenceDate: ['date'],
 	handleTransparenciesVisibility: ['transparencies'],
 	restoreModelDefaultVisibility: [],
-	updateSelectedStateDefinition: [],
-	clearColorOverrides: [],
-	clearTransformations: [],
 	reset: []
 }, { prefix: 'SEQUENCES/' });
 
@@ -82,8 +78,6 @@ export interface ISequencesState {
 	lastSelectedSequence: null | string;
 	selectedDate: null | Date;
 	lastSelectedDate: null | Date;
-	stateDefinitions: Record<string, IStateDefinitions>;
-	selectedStateDefinition: Record<string, IStateDefinitions>;
 	statesPending: boolean;
 	stepInterval: number;
 	stepScale: STEP_SCALE;
@@ -99,8 +93,6 @@ export const INITIAL_STATE: ISequencesState = {
 	lastSelectedSequence: null,
 	selectedDate: null,
 	lastSelectedDate: null,
-	stateDefinitions: {},
-	selectedStateDefinition: {},
 	statesPending: false,
 	stepInterval: 1,
 	stepScale: STEP_SCALE.DAY,
@@ -177,12 +169,17 @@ export const setLastSelectedDateSuccess =  (state = INITIAL_STATE, { date }) => 
 	return {...state, lastSelectedDate: date};
 };
 
-export const setStateDefinition = (state = INITIAL_STATE, { stateId, stateDefinition}) => {
-	return {...state, stateDefinitions: {...state.stateDefinitions, [stateId]: stateDefinition}};
-};
+export const updateFrameWithViewpoint = (state = INITIAL_STATE, { sequenceId, stateId, viewpoint }) => {
+	if (isEmpty(viewpoint)) {
+		return state;
+	}
+	const sequenceToUpdate = state.sequences.find(({ _id }) => _id === sequenceId);
+	const frameToUpdate = sequenceToUpdate.frames.find(({ state: s }) => s === stateId);
 
-export const setSelectedStateDefinition = (state = INITIAL_STATE, { stateDefinition }) => {
-	return { ...state, selectedStateDefinition: stateDefinition };
+	Object.assign(frameToUpdate, viewpoint);
+	delete frameToUpdate.state;
+
+	return state;
 };
 
 export const setStepInterval = (state = INITIAL_STATE, { stepInterval }) => {
@@ -206,8 +203,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.SET_OPEN_ON_TODAY_SUCCESS]: setOpenOnTodaySuccess,
 	[SequencesTypes.SET_SELECTED_DATE_SUCCESS]: setSelectedDateSuccess,
 	[SequencesTypes.SET_LAST_SELECTED_DATE_SUCCESS]: setLastSelectedDateSuccess,
-	[SequencesTypes.SET_STATE_DEFINITION]: setStateDefinition,
-	[SequencesTypes.SET_SELECTED_STATE_DEFINITION]: setSelectedStateDefinition,
+	[SequencesTypes.UPDATE_FRAME_WITH_VIEWPOINT]: updateFrameWithViewpoint,
 	[SequencesTypes.SET_SELECTED_SEQUENCE_SUCCESS]: setSelectedSequenceSuccess,
 	[SequencesTypes.SET_STEP_INTERVAL]: setStepInterval,
 	[SequencesTypes.SET_STEP_SCALE]: setStepScale,

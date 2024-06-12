@@ -20,6 +20,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
+import { selectTransformations } from '@/v4/modules/viewpoints/viewpoints.selectors';
 import { selectGisLayers } from '../../modules/gis';
 import { selectHighlightedShapes as selectIssuesHighlightedShapes,
 	selectPins as selectIssuePins, selectShapes as selectIssuesShapes } from '../../modules/issues';
@@ -28,10 +29,9 @@ import { selectGISCoordinates, selectHasGISCoordinates } from '../../modules/mod
 import { selectIsPaused, selectIsViewerManipulationEnabled, selectPresentationMode } from '../../modules/presentation';
 import { selectHighlightedShapes as selectRisksHighlightedShapes,
 	selectPins as selectRiskPins, selectShapes as selectRisksShapes  } from '../../modules/risks';
-import { selectIsLoadingFrameState, selectSelectedHiddenNodes,
-	selectSelectedSequenceId, SequencesActions } from '../../modules/sequences';
+import { selectSelectedSequenceId, SequencesActions } from '../../modules/sequences';
 import { TreeActions } from '../../modules/tree';
-import { selectAllTransparencyOverrides, selectColorOverrides, selectTransformations } from '../../modules/viewerGui';
+import { selectAllTransparencyOverrides, selectColorOverrides } from '../../modules/viewerGui';
 import { withViewer } from '../../services/viewer/viewer';
 import { ViewerCanvas } from './viewerCanvas.component';
 
@@ -49,8 +49,6 @@ const mapStateToProps = createStructuredSelector({
 	isPresentationPaused: selectIsPaused,
 	transformations: selectTransformations,
 	selectedSequenceId: selectSelectedSequenceId,
-	isLoadingSequenceFrame: selectIsLoadingFrameState,
-	sequenceHiddenNodes: selectSelectedHiddenNodes,
 	issuesShapes: selectIssuesShapes,
 	issuesHighlightedShapes: selectIssuesHighlightedShapes,
 	risksShapes: selectRisksShapes,

@@ -30,10 +30,8 @@ import { createGroupsFromViewpoint, generateViewpoint,
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
-import { IssuesActions } from '../issues';
 import { ModelActions } from '../model';
 import { selectCurrentRevisionId } from '../model';
-import { RisksActions } from '../risks';
 import { SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { dispatch } from '../store';
@@ -192,10 +190,6 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 		while (!isViewpointLoaded(viewpoint, viewpointsGroups)) {
 			yield take(ViewpointsTypes.FETCH_GROUP_SUCCESS);
 			viewpointsGroups = yield select(selectViewpointsGroups);
-		}
-
-		if (viewpoint.override_groups) {
-			yield put(ViewerGuiActions.clearColorOverrides());
 		}
 
 		yield put(TreeActions.clearCurrentlySelected());

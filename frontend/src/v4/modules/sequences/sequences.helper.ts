@@ -14,12 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { isEqual } from 'lodash';
+import { isEqual, partition } from 'lodash';
 import { formatMessage } from '@/v5/services/intl';
+import { rgbaToHex } from '@/v4/helpers/colors';
+import { hexToOpacity } from '@/v5/ui/themes/theme';
 import { STEP_SCALE } from '../../constants/sequences';
 import { Viewer } from '../../services/viewer/viewer';
 import { getState } from '../store';
 import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds } from '../tree';
+import { IStateDefinitions } from './sequences.redux';
 
 export const getSelectedFrame = (frames, endingDate) => {
 	const index = getSelectedFrameIndex(frames, endingDate);
@@ -181,3 +184,48 @@ export const resetMovedMeshes = (sharedIds: any[]) => {
 	}
 
 };
+
+export const convertStateDefToViewpoint = ({ color = [], transparency: hiddenAndTransparency = [], transformation = [], ...other }: Partial<IStateDefinitions>) => {
+	const [hidden, transparency] = partition(hiddenAndTransparency, ({ value }) => value === 0);
+	const hidden_group = { objects: [{ shared_ids: hidden[0]?.shared_ids || [] }] }
+
+	const colorOverrides = color.map(({ shared_ids = [], value }) => ({
+		color: rgbaToHex(value.map((val) => val * 255).join()),
+		objects: [{ shared_ids }]
+	}));
+	const override_groups = transparency.reduce((acc, { value: transparencyValue, shared_ids: transparencyIds = [] }) => {
+		transparencyIds.forEach((id) => {
+			color.forEach(({ value: colorValue, shared_ids: colorIds = []}) => {
+				if (colorIds.includes(id)) {
+					const rgb = rgbaToHex(colorValue.map((val) => val * 255).join());
+					const rgba = hexToOpacity(rgb, transparencyValue * 100);
+					const overrideGroup = acc.find(({ color: c }) => c === rgba)
+					if (!!overrideGroup) {
+						overrideGroup.objects[0].shared_ids.push(id);
+					} else {
+						acc.push({
+							color: rgba,
+							objects: [{ shared_ids: [id] }]
+						})
+					}
+					return acc;
+				}
+			})
+		})
+		return acc
+	}, colorOverrides);
+
+	const transformation_groups = transformation.map(({ shared_ids = [], value }) => ({
+		transformation: value,
+		objects: [{ shared_ids }]
+	}))
+
+	return ({
+		viewpoint: {
+			hidden_group,
+			override_groups,
+			transformation_groups,
+			hideIfc: false,
+		}
+	})
+}

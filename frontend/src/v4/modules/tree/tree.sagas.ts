@@ -17,7 +17,7 @@
 import { all, call, put, select, take, takeLatest, delay } from 'redux-saga/effects';
 
 import { selectHasViewerAccess } from '@/v5/store/containers/containers.selectors';
-import _ from 'lodash';
+import _, { isEmpty } from 'lodash';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
@@ -365,7 +365,7 @@ function* hideNodesBySharedIds({ objects = [], resetTree = false }) {
 	const nodesIds: any[] = yield select(selectGetNodesIdsFromSharedIds(objects));
 
 	if (resetTree) {
-		yield showAllExceptMeshIDs(nodesIds);
+		yield showAllExceptMeshIDs(isEmpty(nodesIds) ? objects[0].shared_ids : nodesIds);
 	} else {
 		yield hideTreeNodes(nodesIds, true);
 	}

@@ -27,13 +27,13 @@ import {
 	selectShowDetails,
 	ActivitiesActions,
 } from '../../../../modules/activities';
-import { selectIsLoadingFrameState } from '../../../../modules/sequences';
+import { selectIsLoadingFrame } from '../../../../modules/sequences';
 import { Activities } from './activities.component';
 
 const mapStateToProps = createStructuredSelector({
 	searchEnabled: selectSearchEnabled,
 	searchQuery: selectSearchQuery,
-	isPending: selectIsLoadingFrameState,
+	isPending: selectIsLoadingFrame,
 	activities: selectFilteredActivities,
 	showDetails: selectShowDetails,
 	isDetailsPending: selectIsDetailsPending,
