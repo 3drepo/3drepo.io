@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { actionChannel, call, take } from 'redux-saga/effects';
+import { actionChannel, call, take, fork } from 'redux-saga/effects';
 
-export function* takeEveryInOrder(action: string, fn) {
+export const takeEveryInOrder = (action: string, fn) => fork(function*() {
 	const channel = yield actionChannel(action);
 	while (true) {
 		const fnParams = yield take(channel);
 		yield call(fn, fnParams);
 	}
-}
+});

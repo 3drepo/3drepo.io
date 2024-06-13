@@ -16,7 +16,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { call, all, put, select, take, takeLatest, actionChannel } from 'redux-saga/effects';
+import { call, all, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { takeEveryInOrder } from '@/v5/helpers/sagas.helpers';
 import { CHAT_CHANNELS } from '../../constants/chat';
