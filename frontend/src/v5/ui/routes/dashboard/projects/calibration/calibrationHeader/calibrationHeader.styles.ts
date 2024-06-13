@@ -23,12 +23,15 @@ import { Link as LinkBase } from 'react-router-dom';
 export const Stepper = styled(StepperBase)`
 	border-radius: 0;
 	box-shadow: none;
+	width: calc(100% - 295px);
 
 	.MuiStep-root {
-		width: 200px;
 		border-bottom: none;
 
 		.MuiStepLabel-label {
+			margin-top: 4px;
+			font-weight: 400;
+
 			&, &.Mui-active, &.Mui-completed, &.Mui-disabled {
 				color: ${({ theme }) => theme.palette.primary.contrast};
 			}
@@ -41,7 +44,6 @@ export const Stepper = styled(StepperBase)`
 			display: flex;
 			justify-content: center;
 			align-items: center;
-			font-weight: 500;
 			position: relative;
 			z-index: 1;
 
@@ -87,6 +89,7 @@ export const Container = styled.div`
 	flex-direction: row;
 	justify-content: space-between;
 	background-color: ${({ theme }) => theme.palette.secondary.main};
+	height: 58px;
 `;
 
 export const ButtonsContainer = styled.div`
