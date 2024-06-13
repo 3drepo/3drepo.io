@@ -22,25 +22,30 @@ export class LifoQueue<T> {
 
 	private batchSize;
 
-	private argsToId;
+	private reuseCall;
 
 	private running = false;
 
 	private func: (...args) => Promise<T>;
 
-	private getPromise(args): QueueItem<T> {
-		const argsAsId = this.argsToId(args);
-		let prom = this.dict[argsAsId];
-		if (!prom) {
-			prom = {};
-			prom.promise = new Promise((resolve, reject) => {
-				prom.resolve = resolve;
-				prom.reject = reject;
-			});
-			prom.args = args;
-			prom.resolved = false;
+	private createPromise(args) {
+		const prom = {} as QueueItem<T>;
+		prom.promise = new Promise((resolve, reject) => {
+			prom.resolve = resolve;
+			prom.reject = reject;
+		});
+		prom.args = args;
+		prom.resolved = false;
+		return prom;
+	}
 
-			this.dict[argsAsId] = prom;
+	private getPromise(args): QueueItem<T> {
+		if (!this.reuseCall) return this.createPromise(args);
+	
+		let prom = this.dict[JSON.stringify(args)];
+		if (!prom) {
+			prom = this.createPromise(args);
+			this.dict[JSON.stringify(args)] = prom;
 		}
 		
 		return prom;
@@ -85,9 +90,9 @@ export class LifoQueue<T> {
 		this.running = false;
 	}
 
-	public constructor(func: (...args) => Promise<T>, batchSize, argsToId = JSON.stringify) {
+	public constructor(func: (...args) => Promise<T>, batchSize, reuseCall = true) {
 		this.func = func;
 		this.batchSize = batchSize;
-		this.argsToId = argsToId;
+		this.reuseCall = reuseCall;
 	}
 }

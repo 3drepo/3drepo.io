@@ -19,7 +19,6 @@ import { difference, differenceBy, isEqual, omit } from 'lodash';
 import { dispatch } from '@/v4/modules/store';
 import { DialogActions } from '@/v4/modules/dialog';
 import { LifoQueue } from '@/v5/helpers/functions.helpers';
-import { uuid } from '@/v4/helpers/uuid';
 import {queuableFunction} from '../../helpers/async';
 
 import { ROUTES } from '../../constants/routes';
@@ -66,7 +65,7 @@ interface IProps {
 
 export class ViewerCanvas extends PureComponent<IProps, { updatesQueue }> {
 	private containerRef = createRef<HTMLDivElement>();
-	public state = { updatesQueue: new LifoQueue((prevProps, currProps) => this.onComponentDidUpdate(prevProps, currProps), 1, uuid) };
+	public state = { updatesQueue: new LifoQueue((prevProps, currProps) => this.onComponentDidUpdate(prevProps, currProps), 1, false) };
 
 	private handleUnityError = (message: string, reload: boolean, isUnity: boolean) => {
 		let errorType = '3D Repo Error';
