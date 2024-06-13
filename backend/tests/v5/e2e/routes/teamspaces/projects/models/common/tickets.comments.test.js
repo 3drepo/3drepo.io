@@ -20,7 +20,7 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 
-const { modelTypes } = require(`${src}/src/v5/models/modelSettings.constants`);
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 

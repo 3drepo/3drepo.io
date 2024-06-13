@@ -565,7 +565,8 @@ const testAddModel = () => {
 
 			const generatePayload = (name = ServiceHelper.generateRandomString()) => ({
 				name,
-				...(modelType === modelTypes.DRAWING ? { number: ServiceHelper.generateRandomString() } : { unit: 'mm' }),
+				number: modelType === modelTypes.DRAWING ? ServiceHelper.generateRandomString() : undefined,
+				unit: modelType === modelTypes.DRAWING ? undefined : 'mm',
 				type: modelType === modelTypes.FEDERATION ? undefined : ServiceHelper.generateRandomString(),
 			});
 
