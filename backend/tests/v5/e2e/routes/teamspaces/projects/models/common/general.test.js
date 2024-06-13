@@ -19,9 +19,9 @@ const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
-const { UUIDToString } = require('../../../../../../../../src/v5/utils/helper/uuids');
-const { modelTypes } = require('../../../../../../../../src/v5/models/modelSettings.constants');
 
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { updateOne } = require(`${src}/handler/db`);
@@ -72,7 +72,7 @@ const testGetModelList = () => {
 			...ServiceHelper.generateRandomModel({ isFederation: n % 2 === 0 }),
 			isFavourite: n % 3 === 0,
 		})),
-		...times(10, (n) => ({
+		...times(5, (n) => ({
 			...ServiceHelper.generateRandomModel({ properties: { modelType: modelTypes.DRAWING } }),
 			isFavourite: n % 3 === 0,
 		}))];

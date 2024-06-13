@@ -18,7 +18,6 @@
 const { times } = require('lodash');
 const { src } = require('../../helper/path');
 const { generateRandomString, generateUUIDString } = require('../../helper/services');
-const { modelTypes } = require('../../../../src/v5/models/modelSettings.constants');
 
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
@@ -29,6 +28,7 @@ jest.mock('../../../../src/v5/handler/db');
 const DBHandler = require(`${src}/handler/db`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 const { templates } = require(`${src}/utils/responseCodes`);
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
 const SETTINGS_COL = 'settings';
 
