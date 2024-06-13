@@ -20,6 +20,8 @@ const { src } = require('../../../../helper/path');
 const SuperTest = require('supertest');
 const { generateRandomString } = require('../../../../helper/services');
 
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+
 const { EVENTS } = require(`${src}/services/chat/chat.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -28,8 +30,8 @@ const teamspace = ServiceHelper.generateRandomString();
 const project = ServiceHelper.generateRandomProject();
 const container = ServiceHelper.generateRandomModel();
 const containerToBeDeleted = ServiceHelper.generateRandomModel();
-const federation = ServiceHelper.generateRandomModel({ isFederation: true });
-const federationToBeDeleted = ServiceHelper.generateRandomModel({ isFederation: true });
+const federation = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
+const federationToBeDeleted = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
 
 let agent;
 const setupData = async () => {

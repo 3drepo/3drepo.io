@@ -41,8 +41,8 @@ const generateBasicData = () => {
 		teamspace: ServiceHelper.generateRandomString(),
 		project: ServiceHelper.generateRandomProject(),
 		con: ServiceHelper.generateRandomModel({ viewers: [viewer.user] }),
-		fed: ServiceHelper.generateRandomModel({ viewers: [viewer.user], isFederation: true }),
-		draw: ServiceHelper.generateRandomModel({ viewers: [viewer.user], isDrawing: true }),
+		fed: ServiceHelper.generateRandomModel({ viewers: [viewer.user], modelType: modelTypes.FEDERATION }),
+		draw: ServiceHelper.generateRandomModel({ viewers: [viewer.user], modelType: modelTypes.DRAWING }),
 	};
 
 	return data;
@@ -68,14 +68,21 @@ const setupBasicData = async (users, teamspace, project, models) => {
 const testGetModelList = () => {
 	describe('Get model list', () => {
 		const { users, teamspace, project, con, fed, draw } = generateBasicData();
-		const models = [...times(10, (n) => ({
-			...ServiceHelper.generateRandomModel({ isFederation: n % 2 === 0 }),
-			isFavourite: n % 3 === 0,
-		})),
-		...times(5, (n) => ({
-			...ServiceHelper.generateRandomModel({ properties: { modelType: modelTypes.DRAWING } }),
-			isFavourite: n % 3 === 0,
-		}))];
+		const models = [...times(15, (n) => {
+			let modelType;
+			if (n % 2 === 0) {
+				modelType = modelTypes.FEDERATION;
+			} else if (n % 3 === 0) {
+				modelType = modelTypes.DRAWING;
+			} else {
+				modelType = modelTypes.CONTAINER;
+			}
+
+			return {
+				...ServiceHelper.generateRandomModel({ modelType }),
+				isFavourite: n % 5 === 0,
+			};
+		})];
 
 		models.push(con, fed, draw);
 
@@ -177,7 +184,7 @@ const testGetModelStats = () => {
 	describe('Get model stats', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
 		const [fedWithNoSubModel, fedWithNoRevInSubModel] = times(
-			2, () => ServiceHelper.generateRandomModel({ isFederation: true }),
+			2, () => ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
 		);
 
 		const [
@@ -325,9 +332,10 @@ const testGetModelStats = () => {
 const testAppendFavourites = () => {
 	describe('Append Favourites', () => {
 		const { users, teamspace, project, con, fed, draw } = generateBasicData();
-		const favFed = { ...ServiceHelper.generateRandomModel({ isFederation: true }), isFavourite: true };
+		const favFed = { ...ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
+			isFavourite: true };
 		const favCon = { ...ServiceHelper.generateRandomModel(), isFavourite: true };
-		const favDraw = { ...ServiceHelper.generateRandomModel({ properties: { modelType: modelTypes.DRAWING } }),
+		const favDraw = { ...ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING }),
 			isFavourite: true };
 
 		beforeAll(async () => {
@@ -417,9 +425,10 @@ const testAppendFavourites = () => {
 const testDeleteFavourites = () => {
 	describe('Remove Favourites', () => {
 		const { users, teamspace, project, con, fed, draw } = generateBasicData();
-		const favFed = { ...ServiceHelper.generateRandomModel({ isFederation: true }), isFavourite: true };
+		const favFed = { ...ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
+			isFavourite: true };
 		const favCon = { ...ServiceHelper.generateRandomModel(), isFavourite: true };
-		const favDraw = { ...ServiceHelper.generateRandomModel({ properties: { modelType: modelTypes.DRAWING } }),
+		const favDraw = { ...ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING }),
 			isFavourite: true };
 
 		beforeAll(async () => {
@@ -598,7 +607,7 @@ const testDeleteModel = () => {
 	describe('Delete Model', () => {
 		const { users, teamspace, project, con, fed, draw } = generateBasicData();
 		const conIsSubModel = ServiceHelper.generateRandomModel();
-		const fedOfSubModelCon = ServiceHelper.generateRandomModel({ isFederation: true });
+		const fedOfSubModelCon = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
 
 		fedOfSubModelCon.properties.subModels = [{ _id: conIsSubModel._id }];
 
@@ -678,7 +687,7 @@ const testUpdateModelSettings = () => {
 	describe('Update Settings', () => {
 		const { users, teamspace, project, con, fed, draw } = generateBasicData();
 		const conIsSubModel = ServiceHelper.generateRandomModel();
-		const fedOfSubModelCon = ServiceHelper.generateRandomModel({ isFederation: true });
+		const fedOfSubModelCon = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
 
 		fedOfSubModelCon.properties.subModels = [{ _id: conIsSubModel._id }];
 
@@ -796,9 +805,9 @@ const testGetSettings = () => {
 			},
 		};
 
-		const fed2 = ServiceHelper.generateRandomModel({ isFederation: true });
+		const fed2 = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
 		const con2 = ServiceHelper.generateRandomModel();
-		const draw2 = ServiceHelper.generateRandomModel({ isDrawing: true });
+		const draw2 = ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING });
 
 		beforeAll(async () => {
 			const models = [con, fed, draw, fed2, con2, draw2];

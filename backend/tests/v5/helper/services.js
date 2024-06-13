@@ -107,10 +107,12 @@ db.addSSO = async (user, id = ServiceHelper.generateRandomString()) => {
 db.createUser = (userCredentials, tsList = [], customData = {}) => {
 	const { user, password, apiKey, basicData = {} } = userCredentials;
 	const roles = tsList.map((ts) => ({ db: ts, role: 'team_member' }));
-	return DbHandler.createUser(user, password, { billing: { billingInfo: {} },
+	return DbHandler.createUser(user, password, {
+		billing: { billingInfo: {} },
 		...basicData,
 		...customData,
-		apiKey }, roles);
+		apiKey,
+	}, roles);
 };
 
 db.createTeamspaceRole = (ts) => createTeamspaceRole(ts);
@@ -397,7 +399,7 @@ ServiceHelper.generateRandomProject = (projectAdmins = []) => ({
 	permissions: projectAdmins.map(({ user }) => ({ user, permissions: ['admin_project'] })),
 });
 
-ServiceHelper.generateRandomModel = ({ isFederation, isDrawing, viewers, commenters,
+ServiceHelper.generateRandomModel = ({ modelType = modelTypes.CONTAINER, viewers, commenters,
 	collaborators, properties = {} } = {}) => {
 	const permissions = [];
 	if (viewers?.length) {
@@ -416,13 +418,7 @@ ServiceHelper.generateRandomModel = ({ isFederation, isDrawing, viewers, comment
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
 		properties: {
-			...(isDrawing ? {
-				modelType: modelTypes.DRAWING,
-				number: ServiceHelper.generateRandomString(),
-				type: ServiceHelper.generateRandomString(),
-			} : {
-				...ServiceHelper.generateRandomModelProperties(isFederation),
-			}),
+			...ServiceHelper.generateRandomModelProperties(modelType),
 			...properties,
 			permissions,
 		},
@@ -448,30 +444,36 @@ ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true) => {
 	return entry;
 };
 
-ServiceHelper.generateRandomModelProperties = (isFed = false) => ({
-	properties: {
-		code: ServiceHelper.generateRandomString(),
-		unit: 'm',
-	},
+ServiceHelper.generateRandomModelProperties = (modelType = modelTypes.CONTAINER) => ({
 	desc: ServiceHelper.generateRandomString(),
-	...(isFed ? { federate: true } : { type: ServiceHelper.generateRandomString() }),
-	status: 'ok',
-	surveyPoints: [
-		{
-			position: [
-				ServiceHelper.generateRandomNumber(),
-				ServiceHelper.generateRandomNumber(),
-				ServiceHelper.generateRandomNumber(),
-			],
-			latLong: [
-				ServiceHelper.generateRandomNumber(),
-				ServiceHelper.generateRandomNumber(),
-			],
+	...(modelType === modelTypes.DRAWING ? {
+		number: ServiceHelper.generateRandomString(),
+		type: ServiceHelper.generateRandomString(),
+		modelType,
+	} : {
+		properties: {
+			code: ServiceHelper.generateRandomString(),
+			unit: 'm',
 		},
-	],
-	angleFromNorth: 123,
-	defaultView: ServiceHelper.generateUUIDString(),
-	defaultLegend: ServiceHelper.generateUUIDString(),
+		...(modelType === modelTypes.FEDERATION ? { federate: true } : { type: ServiceHelper.generateRandomString() }),
+		status: 'ok',
+		surveyPoints: [
+			{
+				position: [
+					ServiceHelper.generateRandomNumber(),
+					ServiceHelper.generateRandomNumber(),
+					ServiceHelper.generateRandomNumber(),
+				],
+				latLong: [
+					ServiceHelper.generateRandomNumber(),
+					ServiceHelper.generateRandomNumber(),
+				],
+			},
+		],
+		angleFromNorth: 123,
+		defaultView: ServiceHelper.generateUUIDString(),
+		defaultLegend: ServiceHelper.generateUUIDString(),
+	}),
 });
 
 ServiceHelper.generateTemplate = (deprecated, hasView = false, configOptions = {}) => ({
