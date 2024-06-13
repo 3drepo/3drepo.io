@@ -39,7 +39,7 @@ export const Box = styled.div`
 	padding: 9px 16px;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	color: ${({ theme }) => theme.palette.secondary.main};
-	border: solid 1px ${({ theme }) => theme.palette.primary.mid};
+	border: solid 1px ${({ theme }) => theme.palette.tertiary.mid};
 	border-radius: 10px;
 	display: grid;
 	grid-template-columns: 28px 1fr;
