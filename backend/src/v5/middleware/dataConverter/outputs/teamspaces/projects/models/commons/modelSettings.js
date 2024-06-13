@@ -15,14 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { modelTypes } = require('../../../../../../../models/modelSettings.constants');
 const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
+const { modelTypes } = require('../../../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../../../utils/responder');
 const { templates } = require('../../../../../../../utils/responseCodes');
 
 const ModelSettings = {};
 
-ModelSettings.formatModelSettings = (req, res) => {
+ModelSettings.formatModelSettings = (modelType) => (req, res) => {
+	if (modelType === modelTypes.DRAWING) {
+		respond(req, res, templates.ok, req.outputData);
+		return;
+	}
+
 	const { defaultView, defaultLegend, ...settings } = req.outputData;
 	const formattedSettings = {
 		...settings,

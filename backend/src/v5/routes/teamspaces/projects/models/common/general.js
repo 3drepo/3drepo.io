@@ -173,12 +173,8 @@ const getModelSettings = (modelType) => async (req, res, next) => {
 	try {
 		const settings = await fn[modelType](teamspace, model);
 
-		if (modelType === modelTypes.DRAWING) {
-			respond(req, res, templates.ok, settings);
-		} else {
-			req.outputData = settings;
-			await next();
-		}
+		req.outputData = settings;
+		await next();
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -806,7 +802,7 @@ const establishRoutes = (modelType) => {
 	 *             schema:
 	 *               $ref: "#/components/schemas/modelSettings"
 	 */
-	router.get('/:model', hasReadAccessToModel[modelType], getModelSettings(modelType), formatModelSettings);
+	router.get('/:model', hasReadAccessToModel[modelType], getModelSettings(modelType), formatModelSettings(modelType));
 	return router;
 };
 
