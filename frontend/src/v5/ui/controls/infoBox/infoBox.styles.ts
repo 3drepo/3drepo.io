@@ -39,7 +39,7 @@ export const Box = styled.div`
 	padding: 9px 16px;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	color: ${({ theme }) => theme.palette.secondary.main};
-	border: solid 1px ${({ theme }) => theme.palette.info.light};
+	border: solid 1px ${({ theme }) => theme.palette.primary.mid};
 	border-radius: 10px;
 	display: grid;
 	grid-template-columns: 28px 1fr;
@@ -49,7 +49,7 @@ export const Box = styled.div`
 `;
 
 export const InfoIcon = styled(InfoIconBase)`
-	color: ${({ theme }) => theme.palette.info.main};
+	color: ${({ theme }) => theme.palette.tertiary.light};
 `;
 
 export const TitleBar = styled.div`
