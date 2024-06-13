@@ -2111,19 +2111,18 @@ export class UnityUtil {
 	 * A helper function to split the calls into multiple calls when the array is too large for SendMessage to handle
 	 */
 	public static multipleCallInChunks(arrLength: number, func:(start: number, end: number) => any, chunkSize = 5000) {
-		let index = 0;
-		let resolve;
-		const promiseToResolve = new Promise((res) => { resolve = res; });
-		while (index < arrLength) {
-			const end = index + chunkSize >= arrLength ? undefined : index + chunkSize;
-			const i = index; // For the closure
-			this.unityOnUpdateActions.push(() => {
-				func(i, end);
-			});
-			index += chunkSize;
-		}
-		this.unityOnUpdateActions.push(resolve);
-		return promiseToResolve;
+		return new Promise((resolve) => {
+			let index = 0;
+			while (index < arrLength) {
+				const end = index + chunkSize >= arrLength ? undefined : index + chunkSize;
+				const i = index; // For the closure
+				this.unityOnUpdateActions.push(() => {
+					func(i, end);
+				});
+				index += chunkSize;
+			}
+			this.unityOnUpdateActions.push(resolve);
+		});
 	}
 
 	/**
