@@ -23,24 +23,22 @@ const { templates } = require('../../../../../../../utils/responseCodes');
 const ModelSettings = {};
 
 ModelSettings.formatModelSettings = (modelType) => (req, res) => {
-	if (modelType === modelTypes.DRAWING) {
-		respond(req, res, templates.ok, req.outputData);
-		return;
-	}
-
 	const { defaultView, defaultLegend, ...settings } = req.outputData;
+
 	const formattedSettings = {
 		...settings,
-		timestamp: settings.timestamp ? settings.timestamp.getTime() : undefined,
-		code: settings.properties.code,
-		unit: settings.properties.unit,
-		...(defaultView ? { defaultView: UUIDToString(defaultView) } : {}),
-		...(defaultLegend ? { defaultLegend: UUIDToString(defaultLegend) } : {}),
-		errorReason: settings.errorReason ? {
-			message: settings.errorReason.message,
-			timestamp: settings.errorReason.timestamp ? settings.errorReason.timestamp.getTime() : undefined,
-			errorCode: settings.errorReason.errorCode,
-		} : undefined,
+		...(modelType === modelTypes.DRAWING ? { } : {
+			timestamp: settings.timestamp ? settings.timestamp.getTime() : undefined,
+			code: settings.properties.code,
+			unit: settings.properties.unit,
+			...(defaultView ? { defaultView: UUIDToString(defaultView) } : {}),
+			...(defaultLegend ? { defaultLegend: UUIDToString(defaultLegend) } : {}),
+			errorReason: settings.errorReason ? {
+				message: settings.errorReason.message,
+				timestamp: settings.errorReason.timestamp ? settings.errorReason.timestamp.getTime() : undefined,
+				errorCode: settings.errorReason.errorCode,
+			} : undefined,
+		}),
 	};
 
 	delete formattedSettings.properties;

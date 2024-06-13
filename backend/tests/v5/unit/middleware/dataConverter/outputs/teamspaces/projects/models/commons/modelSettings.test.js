@@ -56,33 +56,38 @@ const testFormatModelSettings = () => {
 		defaultLegend: generateUUID(),
 	};
 
+	const drawingProperties = generateRandomModelProperties(modelTypes.DRAWING);
+
 	describe.each([
 		[generateRandomModelProperties(), 'no timestamp, no errorReason'],
-		[withoutDefaultView, 'no defaultView'],
-		[withoutDefaultLegend, 'no defaultLegend'],
-		[withTimestamp, 'timestamp'],
-		[withErrorReason, 'errorReason'],
-		[withErrorReasonNoTimestamp, 'errorReason without timestamp'],
+		[withoutDefaultView, 'with no defaultView'],
+		[withoutDefaultLegend, 'with no defaultLegend'],
+		[withTimestamp, 'with timestamp'],
+		[withErrorReason, 'with errorReason'],
+		[withErrorReasonNoTimestamp, 'with errorReason without timestamp'],
 		[withUuidDefaultView, 'with defaultView that is UUID'],
 		[withUuidDefaultLegend, 'with defaultLegend that is UUID'],
-	])('Format model settings data', (data, desc) => {
-		test(`should format correctly with ${desc}`,
+		[drawingProperties, 'when model is a drawing', modelTypes.DRAWING],
+	])('Format model settings data', (data, desc, modelType = modelTypes.CONTAINER) => {
+		test(`should format correctly ${desc}`,
 			() => {
 				const req = { outputData: cloneDeep(data) };
 				const res = {};
-				ModelSettingsOutputMiddlewares.formatModelSettings(req, res, () => {});
+				ModelSettingsOutputMiddlewares.formatModelSettings(modelType)(req, res, () => {});
 				const formattedSettings = {
 					...data,
-					defaultView: UUIDToString(data.defaultView),
-					defaultLegend: UUIDToString(data.defaultLegend),
-					timestamp: data.timestamp ? data.timestamp.getTime() : undefined,
-					code: data.properties.code,
-					unit: data.properties.unit,
-					errorReason: data.errorReason ? {
-						message: data.errorReason.message,
-						errorCode: data.errorReason.errorCode,
-						timestamp: data.errorReason.timestamp ? data.errorReason.timestamp.getTime() : undefined,
-					} : undefined,
+					...(modelType === modelTypes.DRAWING ? {} : {
+						defaultView: UUIDToString(data.defaultView),
+						defaultLegend: UUIDToString(data.defaultLegend),
+						timestamp: data.timestamp ? data.timestamp.getTime() : undefined,
+						code: data.properties.code,
+						unit: data.properties.unit,
+						errorReason: data.errorReason ? {
+							message: data.errorReason.message,
+							errorCode: data.errorReason.errorCode,
+							timestamp: data.errorReason.timestamp ? data.errorReason.timestamp.getTime() : undefined,
+						} : undefined,
+					}),
 				};
 				delete formattedSettings.properties;
 
