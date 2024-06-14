@@ -366,7 +366,7 @@ const establishRoutes = (modelType) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *           enum: [containers, federations]
+	 *           enum: [containers, federations, drawings]
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -397,8 +397,19 @@ const establishRoutes = (modelType) => {
 	 *                       isFavourite:
 	 *                         type: boolean
 	 *                         description: whether the model is a favourited item for the user
-	 *
-	 *
+	 *             examples:
+     *               containers:
+	 *                 summary: containers
+     *                 value:
+	 *                   containers: [{ _id: 3549ddf6-885d-4977-87f1-eeac43a0e818, name: Lego House Container, role: admin, isFavourite: true }]
+     *               federations:
+	 *                 summary: federations
+     *                 value:
+     *                   federations: [{ _id: 3549ddf6-885d-4977-87f1-eeac43a0e818, name: Lego House Federation, role: admin, isFavourite: true }]
+     *               drawings:
+	 *                 summary: drawings
+     *                 value:
+     *                   drawings: [{ _id: 3549ddf6-885d-4977-87f1-eeac43a0e818, name: Lego House Drawing, role: admin, isFavourite: true }]
 	 */
 	router.get('/', hasAccessToTeamspace, getModelList(modelType));
 
