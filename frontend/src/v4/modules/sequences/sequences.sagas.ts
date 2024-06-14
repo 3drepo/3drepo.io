@@ -25,7 +25,7 @@ import { DataCache, STORE_NAME } from '../../services/dataCache';
 import { DialogActions } from '../dialog';
 import { selectCurrentModel, selectCurrentModelTeamspace, selectCurrentRevisionId, selectIsFederation } from '../model';
 import { dispatch } from '../store';
-import { selectHiddenGeometryVisible,  TreeActions } from '../tree';
+import { TreeActions } from '../tree';
 
 import { selectCacheSetting } from '../viewer';
 import { selectLeftPanels, ViewerGuiActions } from '../viewerGui';
@@ -176,7 +176,7 @@ export function* setSelectedDate({ date }) {
 
 		if (selectedSequence) {
 			// bound date by sequence start/end date
-			const { startDate, endDate, frames } = yield select(selectSelectedSequence);
+			const { startDate, endDate } = yield select(selectSelectedSequence);
 			let dateToSelect;
 
 			if (date) {
@@ -204,13 +204,6 @@ export function* setSelectedDate({ date }) {
 	}
 }
 
-export function* initializeSequences() {
-	const hiddenGeometryVisible = yield select(selectHiddenGeometryVisible);
-	if (!hiddenGeometryVisible) {
-		yield put(TreeActions.showHiddenGeometry());
-	}
-}
-
 export function* restoreModelDefaultVisibility() {
 	yield put(ViewerGuiActions.clearColorOverrides());
 	yield put(TreeActions.showAllNodes());
@@ -219,7 +212,6 @@ export function* restoreModelDefaultVisibility() {
 
 export function* setSelectedSequence({ sequenceId }) {
 	if (sequenceId) {
-		yield put(SequencesActions.initializeSequences());
 		yield put(SequencesActions.fetchSequence(sequenceId));
 		yield take(SequencesTypes.FETCH_SEQUENCE_SUCCESS);
 		yield put(SequencesActions.setSelectedSequenceSuccess(sequenceId));
@@ -270,7 +262,6 @@ export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.FETCH_SEQUENCE_LIST, fetchSequenceList);
 	yield takeLatest(SequencesTypes.UPDATE_SEQUENCE, updateSequence);
 	yield takeLatest(SequencesTypes.SET_SELECTED_DATE, setSelectedDate);
-	yield takeLatest(SequencesTypes.INITIALIZE_SEQUENCES, initializeSequences);
 	yield takeLatest(SequencesTypes.FETCH_FRAME, fetchFrame);
 	yield takeLatest(SequencesTypes.RESTORE_MODEL_DEFAULT_VISIBILITY, restoreModelDefaultVisibility);
 	yield takeLatest(SequencesTypes.FETCH_ACTIVITIES_DEFINITIONS, fetchActivitiesDefinitions);

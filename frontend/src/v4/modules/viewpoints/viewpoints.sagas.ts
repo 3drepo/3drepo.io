@@ -211,7 +211,7 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 	}
 }
 
-export function * deselectViewsAndLeaveClipping() {
+export function* deselectViewsAndLeaveClipping() {
 	const selectedViewpoint = yield select(selectSelectedViewpoint);
 	yield put(ViewpointsActions.setActiveViewpoint(null));
 
@@ -254,7 +254,7 @@ export function* fetchViewpointGroups({teamspace, modelId, view}) {
 			yield put(ViewpointsActions.addViewpointGroupsBeingLoaded(groupsToFetch));
 			const fetchedGroups =  (yield all(groupsToFetch.map((groupId) =>
 				API.getGroup(teamspace, modelId, groupId, revision))))
-				.map(({data}) => prepareGroup(data));
+					.map(({data}) => prepareGroup(data));
 
 			yield all(fetchedGroups.map((group) => put(ViewpointsActions.fetchGroupSuccess(group))));
 		}

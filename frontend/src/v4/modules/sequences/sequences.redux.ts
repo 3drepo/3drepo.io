@@ -23,7 +23,6 @@ import { sortByField } from '../../helpers/sorting';
 export const { Types: SequencesTypes, Creators: SequencesActions } = createActions({
 	fetchSequence: ['sequenceId'],
 	fetchSequenceList: [],
-	initializeSequences: [],
 	fetchSequenceSuccess: ['sequence'],
 	fetchSequenceListSuccess: ['sequences'],
 	updateSequence: ['sequenceId', 'newName'],
