@@ -181,6 +181,10 @@ export const updateFrameWithViewpoint = (state = INITIAL_STATE, { sequenceId, st
 	const sequenceToUpdate = state.sequences.find(({ _id }) => _id === sequenceId);
 	const frameToUpdate = sequenceToUpdate.frames.find(({ state: s }) => s === stateId);
 
+	if (!frameToUpdate) {
+		// If two successive dates correspond to the same frame updateFrameViewpoint can get called for a frame that has already been converted
+		return state;
+	}
 	Object.assign(frameToUpdate, viewpoint);
 	delete frameToUpdate.state;
 
