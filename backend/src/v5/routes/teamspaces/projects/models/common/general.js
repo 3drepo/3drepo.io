@@ -783,7 +783,7 @@ const establishRoutes = (modelType) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *           enum: [containers, federations]
+	 *           enum: [containers, federations, drawings]
 	 *       - name: model
 	 *         description: Model ID
 	 *         in: path
@@ -801,6 +801,46 @@ const establishRoutes = (modelType) => {
 	 *           application/json:
 	 *             schema:
 	 *               $ref: "#/components/schemas/modelSettings"
+	 *             examples:
+     *               container:
+	 *                 summary: container
+     *                 value:
+	 *                   _id: 3549ddf6-885d-4977-87f1-eeac43a0e818
+     *                   name: Lego House Container
+     *                   unit: mm
+	 *                   code: MOD1
+	 *                   type: Structural
+	 *                   desc: The Container model of the Lego House
+	 *                   timestamp: 1629976656315
+	 *                   status: ok
+	 *                   errorReason: { message: System error occured. Please contact support., timestamp: 1629976656315, errorCode: 14 }
+	 *                   defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+	 *                   defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+	 *                   angleFromNorth: 100
+	 *                   surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
+     *               federation:
+	 *                 summary: federation
+     *                 value:
+	 *                   _id: 3549ddf6-885d-4977-87f1-eeac43a0e818
+     *                   name: Lego House Federation
+     *                   unit: mm
+	 *                   code: MOD1
+	 *                   desc: The Federation model of the Lego House
+	 *                   timestamp: 1629976656315
+	 *                   status: ok
+	 *                   errorReason: { message: System error occured. Please contact support., timestamp: 1629976656315, errorCode: 14 }
+	 *                   defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+	 *                   defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+	 *                   angleFromNorth: 100
+	 *                   surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
+	 *               drawing:
+	 *                 summary: drawing
+     *                 value:
+	 *                   _id: 3549ddf6-885d-4977-87f1-eeac43a0e818
+     *                   name: Lego House Drawing
+     *                   number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
+	 *                   type: Structural
+	 *                   desc: The Drawing of the Lego House
 	 */
 	router.get('/:model', hasReadAccessToModel[modelType], getModelSettings(modelType), formatModelSettings(modelType));
 	return router;
