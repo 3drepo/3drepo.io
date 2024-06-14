@@ -66,6 +66,10 @@ export const selectActivitiesPending = createSelector(
 	selectSequencesDomain, (state) => state.activitiesPending
 );
 
+export const selectFramePending = createSelector(
+	selectSequencesDomain, (state) => state.framePending
+);
+
 export const selectSelectedSequence = createSelector(
 	selectSequences, selectSelectedSequenceId,
 		(sequences, id) => !sequences ? null :
@@ -186,17 +190,6 @@ export const selectSelectedStateId = createSelector(
 export const selectSelectedFrameViewpoint = createSelector(
 	selectSelectedFrame,  (frame) =>  (frame || {}).viewpoint
 );
-
-export const selectLastSelectedStateId = createSelector(
-	selectLastSelectedFrame, (frame) =>  (frame || {}).state
-);
-
-export const selectIsLoadingFrame = createSelector(
-	selectSelectedFrame, (frame) => {
-		return frame && !(frame || {}).hasOwnProperty('viewpoint');
-	}
-);
-
 
 // Filters the activities by range as well as it's subActivities
 const getActivitiesByRange = (activities, startDate, endDate) => {

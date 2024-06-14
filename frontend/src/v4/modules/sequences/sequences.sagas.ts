@@ -34,7 +34,6 @@ import { convertStateDefToViewpoint, getDateWithinBoundaries, getSelectedFrame, 
 import {
 	selectActivitiesDefinitions, selectFrames, selectNextKeyFramesDates, selectSelectedDate, selectSelectedFrameViewpoint,
 	selectSelectedSequence, selectSequences, selectSequenceModel, selectOpenOnToday,
-	selectIsLoadingFrame,
 } from './sequences.selectors';
 import { selectSelectedSequenceId, SequencesActions, SequencesTypes } from '.';
 
@@ -130,9 +129,9 @@ export function* fetchFrame({ date }) {
 					const viewpointFromState = convertStateDefToViewpoint(response.data);
 					dispatch(SequencesActions.updateFrameWithViewpoint(sequenceId, stateId, viewpointFromState));
 					if (dateIsSelectedDate) {
-						put(ViewpointsActions.fetchViewpointGroups(teamspace, model, { viewpoint: viewpointFromState }));
-						dispatch(ViewpointsActions.showViewpoint(teamspace, model, viewpointFromState, true));
+						put(ViewpointsActions.fetchViewpointGroups(teamspace, model, viewpointFromState));
 						dispatch(SequencesActions.setLastSelectedDateSuccess(date));
+						dispatch(SequencesActions.setFramePending(false));
 					}
 					if (cacheEnabled && !cachedData) {
 						DataCache.putValue(STORE_NAME.FRAMES, iDBKey, response.data);
@@ -145,7 +144,9 @@ export function* fetchFrame({ date }) {
 			// This is to avoid fetching the groups twice.
 			// When showViewpoint is called in showFrameViewpoint it fetches the groups
 			if (dateIsSelectedDate) {
-				yield put(ViewpointsActions.fetchViewpointGroups(teamspace, model, { viewpoint }));
+				yield dispatch(ViewpointsActions.fetchViewpointGroups(teamspace, model, { viewpoint }));
+				yield dispatch(SequencesActions.setLastSelectedDateSuccess(date));
+				yield dispatch(SequencesActions.setFramePending(false));
 			}
 		}
 	} catch (error) {
@@ -171,6 +172,7 @@ export function* setSelectedDate({ date }) {
 	try {
 		const selectedSequence = yield select(selectSelectedSequence);
 		const openOnToday = yield select(selectOpenOnToday);
+		yield put(SequencesActions.setFramePending(true));
 
 		if (selectedSequence) {
 			// bound date by sequence start/end date
@@ -193,7 +195,8 @@ export function* setSelectedDate({ date }) {
 				}
 			}
 			yield put(SequencesActions.setSelectedDateSuccess(dateToSelect));
-			yield put(SequencesActions.prefetchFrames());
+			yield call(prefetchFrames);
+			yield take(SequencesTypes.SET_FRAME_PENDING)
 			yield showFrameViewpoint();
 		}
 	} catch (error) {

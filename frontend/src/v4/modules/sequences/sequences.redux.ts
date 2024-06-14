@@ -42,6 +42,7 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	fetchActivitiesDefinitions: ['sequenceId'],
 	fetchActivitiesDefinitionsSuccess: ['sequenceId', 'activities'],
 	setActivitiesPending: ['isPending'],
+	setFramePending: ['isPending'],
 	showSequenceDate: ['date'],
 	handleTransparenciesVisibility: ['transparencies'],
 	restoreModelDefaultVisibility: [],
@@ -78,7 +79,7 @@ export interface ISequencesState {
 	lastSelectedSequence: null | string;
 	selectedDate: null | Date;
 	lastSelectedDate: null | Date;
-	statesPending: boolean;
+	framePending: boolean;
 	stepInterval: number;
 	stepScale: STEP_SCALE;
 	hiddenGeometryVisible: boolean;
@@ -93,7 +94,7 @@ export const INITIAL_STATE: ISequencesState = {
 	lastSelectedSequence: null,
 	selectedDate: null,
 	lastSelectedDate: null,
-	statesPending: false,
+	framePending: true,
 	stepInterval: 1,
 	stepScale: STEP_SCALE.DAY,
 	hiddenGeometryVisible: true,
@@ -139,6 +140,10 @@ export const fetchActivitiesDefinitionsSuccess = (state = INITIAL_STATE, { seque
 
 export const setActivitiesPending = (state = INITIAL_STATE, { isPending }) => {
 	return {...state, activitiesPending: isPending };
+};
+
+export const setFramePending = (state = INITIAL_STATE, { isPending }) => {
+	return {...state, framePending: isPending };
 };
 
 export const setSelectedSequenceSuccess = (state = INITIAL_STATE, { sequenceId }) => {
@@ -200,6 +205,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.UPDATE_SEQUENCE_SUCCESS]: updateSequenceSuccess,
 	[SequencesTypes.FETCH_ACTIVITIES_DEFINITIONS_SUCCESS]: fetchActivitiesDefinitionsSuccess,
 	[SequencesTypes.SET_ACTIVITIES_PENDING]: setActivitiesPending,
+	[SequencesTypes.SET_FRAME_PENDING]: setFramePending,
 	[SequencesTypes.SET_OPEN_ON_TODAY_SUCCESS]: setOpenOnTodaySuccess,
 	[SequencesTypes.SET_SELECTED_DATE_SUCCESS]: setSelectedDateSuccess,
 	[SequencesTypes.SET_LAST_SELECTED_DATE_SUCCESS]: setLastSelectedDateSuccess,
