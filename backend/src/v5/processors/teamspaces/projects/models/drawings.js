@@ -18,8 +18,8 @@
 const { addModel, deleteModel, getModelList } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getDrawingById, getDrawings, updateModelSettings } = require('../../../../models/modelSettings');
-const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { getProjectById } = require('../../../../models/projectSettings');
+const { modelTypes } = require('../../../../models/modelSettings.constants');
 
 const Drawings = { };
 
