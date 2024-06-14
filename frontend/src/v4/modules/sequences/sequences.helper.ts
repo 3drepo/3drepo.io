@@ -185,40 +185,49 @@ export const resetMovedMeshes = (sharedIds: any[]) => {
 
 };
 
-export const convertStateDefToViewpoint = ({ color = [], transparency: hiddenAndTransparency = [], transformation = [], ...other }: Partial<IStateDefinitions>) => {
-	const [hidden, transparency] = partition(hiddenAndTransparency, ({ value }) => value === 0);
-	const hidden_group = { objects: [{ shared_ids: hidden[0]?.shared_ids || [] }] }
+// State def colour is given as a normalised rgba. e.g. [1, 0, 0] is red
+const getOverrideHex = (color) => rgbaToHex(color.map((val) => val * 255).join());
+
+export const convertStateDefToViewpoint = ({ color = [], transparency: hiddenAndTransparent = [], transformation = [] }: Partial<IStateDefinitions>) => {
+	const [hidden, transparency] = partition(hiddenAndTransparent, ({ value }) => value === 0);
+	const hidden_group = { objects: [{ shared_ids: hidden[0]?.shared_ids || [] }] };
 
 	const colorOverrides = color.map(({ shared_ids = [], value }) => ({
-		color: rgbaToHex(value.map((val) => val * 255).join()),
-		objects: [{ shared_ids }]
+		color: getOverrideHex(value),
+		objects: [{ shared_ids }],
 	}));
 	const override_groups = transparency.reduce((acc, { value: transparencyValue, shared_ids: transparencyIds = [] }) => {
-		transparencyIds.forEach((id) => {
+		transparencyIds.forEach((transparencyId) => { // Find the associated colour of the transparent object
 			color.forEach(({ value: colorValue, shared_ids: colorIds = []}) => {
-				if (colorIds.includes(id)) {
-					const rgb = rgbaToHex(colorValue.map((val) => val * 255).join());
-					const rgba = hexToOpacity(rgb, transparencyValue * 100);
-					const overrideGroup = acc.find(({ color: c }) => c === rgba)
-					if (!!overrideGroup) {
-						overrideGroup.objects[0].shared_ids.push(id);
-					} else {
+				if (colorIds.includes(transparencyId)) {
+					const hexNoTransparency = getOverrideHex(colorValue);
+					const hex = hexToOpacity(hexNoTransparency, transparencyValue * 100);
+
+					const overrideGroup = acc.find(({ color: c }) => c === hex);
+					if (!!overrideGroup) { // If a group for this colour and opacity exists add it to that group
+						overrideGroup.objects[0].shared_ids.push(transparencyId);
+					} else { // Otherwise add a new group to the color_overrides
 						acc.push({
-							color: rgba,
-							objects: [{ shared_ids: [id] }]
+							color: hex,
+							objects: [{ shared_ids: [transparencyId] }],
 						})
 					}
+
+					// Remove the duplicate object id (which doesn't have opacity in its hex) from the color_overrides
+					const existingColorOverride = acc.find(({ color: overrideColor }) => overrideColor === hexNoTransparency).objects[0].shared_ids;
+					const indexToRemove = existingColorOverride.indexOf(transparencyId);
+					existingColorOverride.splice(indexToRemove, 1);
 					return acc;
 				}
 			})
 		})
-		return acc
+		return acc;
 	}, colorOverrides);
 
 	const transformation_groups = transformation.map(({ shared_ids = [], value }) => ({
 		transformation: value,
-		objects: [{ shared_ids }]
-	}))
+		objects: [{ shared_ids }],
+	}));
 
 	return ({
 		viewpoint: {
@@ -226,6 +235,6 @@ export const convertStateDefToViewpoint = ({ color = [], transparency: hiddenAnd
 			override_groups,
 			transformation_groups,
 			hideIfc: false,
-		}
+		},
 	})
 }
