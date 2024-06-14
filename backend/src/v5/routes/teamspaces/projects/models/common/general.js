@@ -238,6 +238,7 @@ const establishRoutes = (modelType) => {
 	 *               - name
 	 *               - unit
 	 *               - type
+	 *               - number
 	 *             properties:
 	 *               name:
 	 *                 type: string
@@ -261,7 +262,7 @@ const establishRoutes = (modelType) => {
 	 *               number:
 	 *                 type: string
 	 *                 example: SC1-SFT-V1-01-M3-ST-30_10_30-0001
-	 *                 description: Unique identifier of a drawing (drawings only)
+	 *                 description: Unique identifier of a drawing (Drawings only)
 	 *               type:
 	 *                 type: string
 	 *                 example: Architecture
@@ -310,7 +311,6 @@ const establishRoutes = (modelType) => {
      *                 unit: m
 	 *                 desc: The Structural model of the Lego House
 	 *                 code: LEGO_ARCHIT_002
-	 *                 type: Structural
 	 *                 angleFromNorth: 150
  	 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
 	 *             drawing:
