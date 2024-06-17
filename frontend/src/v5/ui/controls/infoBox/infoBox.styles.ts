@@ -46,6 +46,7 @@ export const Box = styled.div`
 	row-gap: 5px;
 	column-gap: 6px;
 	place-items: center;
+	cursor: default;
 `;
 
 export const InfoIcon = styled(InfoIconBase)`
