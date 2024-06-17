@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import CoordinatesIcon from '@assets/icons/viewer/coordinates.svg';
-import FocusIcon from '@assets/icons/viewer/focus.svg';
 import InfoIcon from '@assets/icons/viewer/info.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { BimActionsDispatchers, MeasurementsActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
@@ -28,6 +27,7 @@ import { ToolbarButton } from './buttons/toolbarButton.component';
 import { ClipButtons } from './buttons/buttonOptionsContainer/clipButtons.component';
 import { SectionToolbar } from './selectionToolbar/selectionToolbar.component';
 import { HomeButton } from './buttons/homeButton/homeButton.component';
+import { FocusButton } from './buttons/focusButton/focusButton.component';
 
 export const Toolbar = () => {
 	const hasMetaData = ModelHooksSelectors.selectMetaKeysExist();
@@ -50,11 +50,7 @@ export const Toolbar = () => {
 				<HomeButton />
 				<ProjectionButtons />
 				<NavigationButtons />
-				<ToolbarButton
-					Icon={FocusIcon}
-					onClick={() => ViewerGuiActionsDispatchers.setIsFocusMode(true)}
-					title={formatMessage({ id: 'viewer.toolbar.icon.focus', defaultMessage: 'Focus' })}
-				/>
+				<FocusButton />
 				<ClipButtons />
 				<ToolbarButton
 					Icon={CoordinatesIcon}
