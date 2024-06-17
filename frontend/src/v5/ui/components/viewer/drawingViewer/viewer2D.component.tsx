@@ -37,7 +37,7 @@ import { ViewBoxType, ViewerLayer2D } from './viewerLayer2D/viewerLayer2D.compon
 const DEFAULT_VIEWBOX = { scale: 1, x: 0, y: 0, width: 0, height: 0 };
 export const Viewer2D = () => {
 	const { close2D } = useContext(ViewerCanvasesContext);
-	const { isCalibrating } = useContext(CalibrationContext);
+	const { isCalibrating, arrow2D, setArrow2D } = useContext(CalibrationContext);
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
 	const [viewBox, setViewBox] = useState<ViewBoxType>(DEFAULT_VIEWBOX);
 	const [isMinZoom, setIsMinZoom] = useState(false);
@@ -68,11 +68,6 @@ export const Viewer2D = () => {
 
 	const onCalibrationClick = () => setIsDrawingVector(!isDrawingVector);
 
-	// eslint-disable-next-line
-	const onDrawArrow = (arrow) => {
-		
-	};
-
 	useEffect(() => {
 		if (!zoomHandler) return;
 		zoomHandler.on(Events.transform, () => {
@@ -94,7 +89,8 @@ export const Viewer2D = () => {
 				<ViewerLayer2D
 					active={isDrawingVector}
 					viewBox={viewBox}
-					onChange={onDrawArrow}
+					defaultValue={arrow2D}
+					onChange={setArrow2D}
 				/>
 			</ImageContainer>
 			<ToolbarContainer>

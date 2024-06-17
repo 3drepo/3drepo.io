@@ -19,6 +19,7 @@ import { createContext, useEffect, useState } from 'react';
 import { DRAWINGS_ROUTE } from '../../../routes.constants';
 import { generatePath, useParams } from 'react-router-dom';
 import { Transformers, useSearchParam } from '../../../useSearchParam';
+import { Arrow2D } from './calibration.types';
 
 export interface CalibrationContextType {
 	step: number;
@@ -28,6 +29,8 @@ export interface CalibrationContextType {
 	isCalibrating: boolean;
 	origin: string;
 	setOrigin: (origin: string) => void;
+	arrow2D: Arrow2D,
+	setArrow2D: (points: Arrow2D) => void,
 }
 
 const defaultValue: CalibrationContextType = {
@@ -38,6 +41,8 @@ const defaultValue: CalibrationContextType = {
 	isCalibrating: false,
 	origin: '',
 	setOrigin: () => {},
+	arrow2D: { start: null, end: null },
+	setArrow2D: () => {},
 };
 export const CalibrationContext = createContext(defaultValue);
 CalibrationContext.displayName = 'CalibrationContext';
@@ -48,6 +53,7 @@ export const CalibrationContextComponent = ({ children }) => {
 	const [isStepValid, setIsStepValid] = useState(false);
 	const [origin, setOrigin] = useState(generatePath(DRAWINGS_ROUTE, { teamspace, project }));
 	const [isCalibrating] = useSearchParam('isCalibrating', Transformers.BOOLEAN);
+	const [arrow2D, setArrow2D] = useState({ start: null, end: null });
 
 	useEffect(() => {
 		setStep(0);
@@ -55,7 +61,17 @@ export const CalibrationContextComponent = ({ children }) => {
 	}, [containerOrFederation, revision, isCalibrating]);
 
 	return (
-		<CalibrationContext.Provider value={{ step, setStep, isStepValid, setIsStepValid, isCalibrating, origin, setOrigin }}>
+		<CalibrationContext.Provider value={{
+			step,
+			setStep,
+			isStepValid,
+			setIsStepValid,
+			isCalibrating,
+			origin,
+			setOrigin,
+			arrow2D,
+			setArrow2D,
+		}}>
 			{children}
 		</CalibrationContext.Provider>
 	);
