@@ -14,53 +14,28 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import InfoIcon from '@assets/icons/viewer/info.svg';
-import { formatMessage } from '@/v5/services/intl';
-import { BimActionsDispatchers, MeasurementsActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { BimHooksSelectors, ModelHooksSelectors } from '@/v5/services/selectorsHooks';
-import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
+
 import { MainToolbar, ToolbarContainer } from './toolbar.styles';
 import { NavigationButtons } from './buttons/buttonOptionsContainer/navigationButtons.component';
 import { ProjectionButtons } from './buttons/buttonOptionsContainer/projectionButtons.component';
-import { ToolbarButton } from './buttons/toolbarButton.component';
 import { ClipButtons } from './buttons/buttonOptionsContainer/clipButtons.component';
 import { SectionToolbar } from './selectionToolbar/selectionToolbar.component';
 import { HomeButton } from './buttons/homeButton/homeButton.component';
 import { FocusButton } from './buttons/focusButton/focusButton.component';
 import { CoordinatesButton } from './buttons/coordinatesButton/coordinatesButton.component';
+import { BimButton } from './buttons/bimButton/bimButton.component';
 
-export const Toolbar = () => {
-	const hasMetaData = ModelHooksSelectors.selectMetaKeysExist();
-	const showBIMPanel = BimHooksSelectors.selectIsActive();
-
-	const setBIMPanelVisibililty = (visible) => {
-		BimActionsDispatchers.setIsActive(visible);
-		ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.BIM, visible);
-		ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.ACTIVITIES, false);
-
-		if (visible) {
-			MeasurementsActionsDispatchers.setMeasureMode('');
-		}
-	};
-
-	return (
-		<ToolbarContainer>
-			<MainToolbar>
-				<HomeButton />
-				<ProjectionButtons />
-				<NavigationButtons />
-				<FocusButton />
-				<ClipButtons />
-				<CoordinatesButton />
-				<ToolbarButton
-					Icon={InfoIcon}
-					hidden={!hasMetaData}
-					selected={showBIMPanel}
-					onClick={() => setBIMPanelVisibililty(!showBIMPanel)}
-					title={formatMessage({ id: 'viewer.toolbar.icon.attributeData', defaultMessage: 'Attribute Data' })}
-				/>
-			</MainToolbar>
-			<SectionToolbar />
-		</ToolbarContainer>
-	);
-};
+export const Toolbar = () => (
+	<ToolbarContainer>
+		<MainToolbar>
+			<HomeButton />
+			<ProjectionButtons />
+			<NavigationButtons />
+			<FocusButton />
+			<ClipButtons />
+			<CoordinatesButton />
+			<BimButton />
+		</MainToolbar>
+		<SectionToolbar />
+	</ToolbarContainer>
+);
