@@ -16,6 +16,7 @@
  */
 
 const { src } = require('../../../../../helper/path');
+const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../../../../helper/services');
 
 jest.mock('../../../../../../../src/v5/models/projectSettings');
 const ProjectSettings = require(`${src}/models/projectSettings`);
@@ -25,11 +26,8 @@ jest.mock('../../../../../../../src/v5/processors/teamspaces/projects/models/com
 const ModelList = require(`${src}/processors/teamspaces/projects/models/commons/modelList`);
 jest.mock('../../../../../../../src/v5/processors/teamspaces/projects/models/commons/favourites');
 const Favourites = require(`${src}/processors/teamspaces/projects/models/commons/favourites`);
-
 const Drawings = require(`${src}/processors/teamspaces/projects/models/drawings`);
-
-const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../../../../helper/services');
-const { MODEL_TYPES } = require('../../../../../../../src/v5/models/modelSettings.constants');
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
 const testAddDrawing = () => {
 	describe('Add drawing', () => {
@@ -44,7 +42,7 @@ const testAddDrawing = () => {
 			expect(res).toEqual(newDrawingId);
 			expect(ModelList.addModel).toHaveBeenCalledTimes(1);
 			expect(ModelList.addModel).toHaveBeenCalledWith(teamspace, project,
-				{ ...data, modelType: MODEL_TYPES.DRAWING });
+				{ ...data, modelType: modelTypes.DRAWING });
 		});
 
 		test('should return error if addModel fails', async () => {
@@ -58,7 +56,7 @@ const testAddDrawing = () => {
 
 			expect(ModelList.addModel).toHaveBeenCalledTimes(1);
 			expect(ModelList.addModel).toHaveBeenCalledWith(teamspace, project,
-				{ ...data, modelType: MODEL_TYPES.DRAWING });
+				{ ...data, modelType: modelTypes.DRAWING });
 		});
 	});
 };

@@ -15,27 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { MODEL_TYPES } = require('../../../../../../../models/modelSettings.constants');
 const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
+const { modelTypes } = require('../../../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../../../utils/responder');
 const { templates } = require('../../../../../../../utils/responseCodes');
 
 const ModelSettings = {};
 
-ModelSettings.formatModelSettings = (req, res) => {
+ModelSettings.formatModelSettings = (modelType) => (req, res) => {
 	const { defaultView, defaultLegend, ...settings } = req.outputData;
+
 	const formattedSettings = {
 		...settings,
-		timestamp: settings.timestamp ? settings.timestamp.getTime() : undefined,
-		code: settings.properties.code,
-		unit: settings.properties.unit,
-		...(defaultView ? { defaultView: UUIDToString(defaultView) } : {}),
-		...(defaultLegend ? { defaultLegend: UUIDToString(defaultLegend) } : {}),
-		errorReason: settings.errorReason ? {
-			message: settings.errorReason.message,
-			timestamp: settings.errorReason.timestamp ? settings.errorReason.timestamp.getTime() : undefined,
-			errorCode: settings.errorReason.errorCode,
-		} : undefined,
+		...(modelType === modelTypes.DRAWING ? { } : {
+			timestamp: settings.timestamp ? settings.timestamp.getTime() : undefined,
+			code: settings.properties.code,
+			unit: settings.properties.unit,
+			...(defaultView ? { defaultView: UUIDToString(defaultView) } : {}),
+			...(defaultLegend ? { defaultLegend: UUIDToString(defaultLegend) } : {}),
+			errorReason: settings.errorReason ? {
+				message: settings.errorReason.message,
+				timestamp: settings.errorReason.timestamp ? settings.errorReason.timestamp.getTime() : undefined,
+				errorCode: settings.errorReason.errorCode,
+			} : undefined,
+		}),
 	};
 
 	delete formattedSettings.properties;
@@ -46,7 +49,7 @@ ModelSettings.formatModelSettings = (req, res) => {
 ModelSettings.formatModelStats = (modelType) => (req, res) => {
 	const { outputData } = req;
 
-	if (modelType === MODEL_TYPES.FEDERATION) {
+	if (modelType === modelTypes.FEDERATION) {
 		if (outputData.lastUpdated) outputData.lastUpdated = outputData.lastUpdated.getTime();
 	} else {
 		outputData.revisions.lastUpdated = outputData.revisions.lastUpdated

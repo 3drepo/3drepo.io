@@ -22,6 +22,8 @@ const ServiceHelper = require('../../../../../../helper/services');
 const { src, image } = require('../../../../../../helper/path');
 const { serialiseTicketTemplate } = require('../../../../../../../../src/v5/middleware/dataConverter/outputs/common/tickets.templates');
 
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+
 const { basePropertyLabels, propTypes, presetEnumValues, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 const { updateOne, findOne } = require(`${src}/handler/db`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
@@ -42,7 +44,7 @@ const generateBasicData = () => ({
 	teamspace: ServiceHelper.generateRandomString(),
 	project: ServiceHelper.generateRandomProject(),
 	con: ServiceHelper.generateRandomModel(),
-	fed: ServiceHelper.generateRandomModel({ isFederation: true }),
+	fed: ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
 });
 
 const setupBasicData = async (users, teamspace, project, models, templatesToAdd) => {
@@ -590,7 +592,7 @@ const testGetTicketList = () => {
 	describe('Get ticket list', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
 		const conNoTickets = ServiceHelper.generateRandomModel();
-		const fedNoTickets = ServiceHelper.generateRandomModel({ isFederation: true });
+		const fedNoTickets = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
 		const templatesToUse = times(3, () => ServiceHelper.generateTemplate());
 
 		con.tickets = times(10, (n) => ServiceHelper.generateTicket(templatesToUse[n % templatesToUse.length]));
@@ -812,7 +814,7 @@ const testUpdateTicket = () => {
 				['the user does not have a valid session', { ...baseRouteParams, key: null }, false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', { ...baseRouteParams, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
 				['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
-				[`the ${modelType} does not exist`, { ...baseRouteParams, model: ServiceHelper.generateRandomModel({ isFederation: true }) }, false, modelNotFound],
+				[`the ${modelType} does not exist`, { ...baseRouteParams, model: ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }) }, false, modelNotFound],
 				[`the model provided is not a ${modelType}`, { ...baseRouteParams, model: wrongTypeModel }, false, modelNotFound],
 				[`the user does not have access to the ${modelType}`, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 				['the ticketId provided does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, false, templates.ticketNotFound, { title: ServiceHelper.generateRandomString() }],

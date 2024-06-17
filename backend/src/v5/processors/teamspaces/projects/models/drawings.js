@@ -18,12 +18,8 @@
 const { addModel, deleteModel, getModelList } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getDrawingById, getDrawings, updateModelSettings } = require('../../../../models/modelSettings');
-const { getRevisionByIdOrTag, getRevisionFormat, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
-const { MODEL_TYPES } = require('../../../../models/modelSettings.constants');
-const { deleteIfUndefined } = require('../../../../utils/helper/objects');
-const fs = require('fs/promises');
-const { getFileAsStream } = require('../../../../services/filesManager');
 const { getProjectById } = require('../../../../models/projectSettings');
+const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { logger } = require('../../../../utils/logger');
 const { queueModelUpload } = require('../../../../services/modelProcessing');
 const { templates } = require('../../../../utils/responseCodes');
@@ -38,7 +34,7 @@ Drawings.getDrawingList = async (teamspace, project, user) => {
 };
 
 Drawings.addDrawing = (teamspace, project, data) => addModel(teamspace, project,
-	{ ...data, modelType: MODEL_TYPES.DRAWING });
+	{ ...data, modelType: modelTypes.DRAWING });
 
 Drawings.updateSettings = updateModelSettings;
 

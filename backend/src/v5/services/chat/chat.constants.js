@@ -48,6 +48,11 @@ const events = [
 	'federationNewTicketComment',
 	'federationUpdateTicketComment',
 	'federationUpdateTicketGroup',
+
+	// Drawomg events
+	'newDrawing',
+	'drawingRemoved',
+	'drawingSettingsUpdate',
 ];
 
 const errors = [
