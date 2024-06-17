@@ -20,4 +20,5 @@ import CalibrationIconBase from '@assets/icons/filled/calibration-filled.svg';
 
 export const CalibrationIcon = styled(CalibrationIconBase)`
 	color: ${({ theme }) => theme.palette.base.main};
+	min-width: 15px;
 `;
