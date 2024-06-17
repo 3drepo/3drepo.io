@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import HomeIcon from '@assets/icons/viewer/home.svg';
 import CoordinatesIcon from '@assets/icons/viewer/coordinates.svg';
 import FocusIcon from '@assets/icons/viewer/focus.svg';
 import InfoIcon from '@assets/icons/viewer/info.svg';
@@ -28,6 +27,7 @@ import { ProjectionButtons } from './buttons/buttonOptionsContainer/projectionBu
 import { ToolbarButton } from './buttons/toolbarButton.component';
 import { ClipButtons } from './buttons/buttonOptionsContainer/clipButtons.component';
 import { SectionToolbar } from './selectionToolbar/selectionToolbar.component';
+import { HomeButton } from './buttons/homeButton/homeButton.component';
 
 export const Toolbar = () => {
 	const hasMetaData = ModelHooksSelectors.selectMetaKeysExist();
@@ -47,11 +47,7 @@ export const Toolbar = () => {
 	return (
 		<ToolbarContainer>
 			<MainToolbar>
-				<ToolbarButton
-					Icon={HomeIcon}
-					onClick={ViewerGuiActionsDispatchers.goToHomeView}
-					title={formatMessage({ id: 'viewer.toolbar.icon.home', defaultMessage: 'Home' })}
-				/>
+				<HomeButton />
 				<ProjectionButtons />
 				<NavigationButtons />
 				<ToolbarButton
