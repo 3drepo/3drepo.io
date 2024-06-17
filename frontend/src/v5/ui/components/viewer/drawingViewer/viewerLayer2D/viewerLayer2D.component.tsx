@@ -28,12 +28,12 @@ export type ViewBoxType = ReturnType<PanZoomHandler['getOriginalSize']> & Return
 type ViewerLayer2DProps = {
 	viewBox: ViewBoxType,
 	active: boolean,
-	defaultValue?: Arrow2D,
+	value?: Arrow2D,
 	onChange?: (arrow: Arrow2D) => void;
 };
-export const ViewerLayer2D = ({ viewBox, active, defaultValue, onChange }: ViewerLayer2DProps) => {
-	const [offsetStart, setOffsetStart] = useState<Coords2D>(defaultValue?.start || null);
-	const [offsetEnd, setOffsetEnd] = useState<Coords2D>(defaultValue?.end || null);
+export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2DProps) => {
+	const [offsetStart, setOffsetStart] = useState<Coords2D>(value?.start || null);
+	const [offsetEnd, setOffsetEnd] = useState<Coords2D>(value?.end || null);
 	const previousViewBox = useRef<ViewBoxType>(null);
 	const [mousePosition, setMousePosition] = useState<Coords2D>(null);
 	const [drawingId] = useSearchParam('drawingId');

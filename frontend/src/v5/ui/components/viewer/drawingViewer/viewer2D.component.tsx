@@ -89,7 +89,7 @@ export const Viewer2D = () => {
 				<ViewerLayer2D
 					active={isDrawingVector}
 					viewBox={viewBox}
-					defaultValue={arrow2D}
+					value={arrow2D}
 					onChange={setArrow2D}
 				/>
 			</ImageContainer>
