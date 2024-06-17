@@ -91,12 +91,12 @@ export const Viewer2D = () => {
 			{!isCalibrating && <CloseButton variant="secondary" onClick={close2D} />}
 			<ImageContainer ref={imgContainerRef}>
 				<DrawingViewerImage ref={imgRef} onLoad={onImageLoad} />
+				<ViewerLayer2D
+					active={isDrawingVector}
+					viewBox={viewBox}
+					onChange={onDrawArrow}
+				/>
 			</ImageContainer>
-			<ViewerLayer2D
-				active={isDrawingVector}
-				viewBox={viewBox}
-				onChange={onDrawArrow}
-			/>
 			<ToolbarContainer>
 				<MainToolbar>
 					<ToolbarButton
