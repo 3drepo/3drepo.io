@@ -78,7 +78,7 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 	};
 
 	useEffect(() => {
-		if (!offsetEnd) {
+		if (!active && !offsetEnd) {
 			resetArrow();
 		}
 	}, [active]);
