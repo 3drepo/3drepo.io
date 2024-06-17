@@ -17,7 +17,7 @@
 
 const { src, srcV4 } = require('../../helper/path');
 const config = require('../../../../src/v5/utils/config');
-const { generateRandomString, generateRandomNumber } = require('../../helper/services');
+const { determineTestGroup, generateRandomString, generateRandomNumber } = require('../../helper/services');
 
 jest.mock('../../../../src/v4/handler/elastic');
 const { createElasticRecord } = require(`${srcV4}/handler/elastic`);
@@ -77,6 +77,6 @@ const testCreateActivityRecord = () => {
 	});
 };
 
-describe('services/elastic', () => {
+describe(determineTestGroup(__filename), () => {
 	testCreateActivityRecord();
 });
