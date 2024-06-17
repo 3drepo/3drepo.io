@@ -15,28 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { mapValues } from 'lodash';
-import { Circle, Svg } from './svgCircle.styles';
-import { Coords2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
+export type Coords2D = [number, number];
+export type Arrow2D = { start: Coords2D, end: Coords2D };
 
-type SvgCircleProps = { coords: Coords2D, scale: number };
-export const SvgCircle = ({ coords, scale }: SvgCircleProps) => {
-	const measures = mapValues({
-		strokeWidth: 1,
-		radius: 3,
-	}, (val) => val / scale);
-	return (
-		<Svg
-			xmlns="http://www.w3.org/2000/svg"
-			version="1.1"
-			xmlnsXlink="http://www.w3.org/1999/xlink"
-		>
-			<Circle
-				cx={coords[0] + measures.strokeWidth / 2}
-				cy={coords[1] + measures.strokeWidth / 2}
-				r={measures.radius}
-				strokeWidth={measures.strokeWidth}
-			/>
-		</Svg>
-	);
-};

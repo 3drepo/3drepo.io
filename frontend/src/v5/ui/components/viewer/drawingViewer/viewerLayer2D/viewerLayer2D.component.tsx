@@ -19,21 +19,23 @@ import { CSSProperties, useEffect, useRef, useState } from 'react';
 import { Container, LayerLevel } from './viewerLayer2D.styles';
 import { PanZoomHandler } from '../panzoom/centredPanZoom';
 import { isEqual } from 'lodash';
-import { Offset, SvgArrow } from './svgArrow/svgArrow.component';
+import { SvgArrow } from './svgArrow/svgArrow.component';
 import { SvgCircle } from './svgCircle/svgCircle.component';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { Arrow2D, Coords2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 
 export type ViewBoxType = ReturnType<PanZoomHandler['getOriginalSize']> & ReturnType<PanZoomHandler['getTransform']>;
 type ViewerLayer2DProps = {
 	viewBox: ViewBoxType,
 	active: boolean,
-	onChange?: (arrow: { start: Offset, end: Offset }) => void;
+	defaultValue?: Arrow2D,
+	onChange?: (arrow: Arrow2D) => void;
 };
-export const ViewerLayer2D = ({ viewBox, active, onChange }: ViewerLayer2DProps) => {
-	const [offsetStart, setOffsetStart] = useState<Offset>(null);
-	const [offsetEnd, setOffsetEnd] = useState<Offset>(null);
+export const ViewerLayer2D = ({ viewBox, active, defaultValue, onChange }: ViewerLayer2DProps) => {
+	const [offsetStart, setOffsetStart] = useState<Coords2D>(defaultValue?.start || null);
+	const [offsetEnd, setOffsetEnd] = useState<Coords2D>(defaultValue?.end || null);
 	const previousViewBox = useRef<ViewBoxType>(null);
-	const [mousePosition, setMousePosition] = useState<Offset>(null);
+	const [mousePosition, setMousePosition] = useState<Coords2D>(null);
 	const [drawingId] = useSearchParam('drawingId');
 
 	const containerStyle: CSSProperties = {
@@ -48,7 +50,7 @@ export const ViewerLayer2D = ({ viewBox, active, onChange }: ViewerLayer2DProps)
 		const rect = e.target.getBoundingClientRect();
 		const offsetX = e.clientX - rect.left;
 		const offsetY = e.clientY - rect.top;
-		return [offsetX, offsetY].map((point) => point / viewBox.scale) as Offset;
+		return [offsetX, offsetY].map((point) => point / viewBox.scale) as Coords2D;
 	};
 
 	const handleMouseDown = () => previousViewBox.current = viewBox;

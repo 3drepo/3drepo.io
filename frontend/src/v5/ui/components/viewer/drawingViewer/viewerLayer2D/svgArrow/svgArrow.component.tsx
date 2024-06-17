@@ -17,9 +17,9 @@
 
 import { mapValues } from 'lodash';
 import { Svg, CrossLine } from './svgArrow.styles';
+import { Arrow2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 
-export type Offset = [number, number];
-type SvgArrowProps = { start: Offset, end: Offset, scale: number };
+type SvgArrowProps = Arrow2D & { scale: number };
 export const SvgArrow = ({ start, end, scale }: SvgArrowProps) => {
 	const [x1, y1] = start;
 	const [x2, y2] = end;
