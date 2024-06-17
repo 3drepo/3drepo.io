@@ -32,7 +32,7 @@ export const Container = styled.div`
 
 export const Box = styled.div`
 	min-height: 68px;
-	min-width: 424px;
+	width: min(424px, 100%);
 	max-width: 600px;
 	margin: auto;
 	box-sizing: border-box;
