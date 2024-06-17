@@ -81,10 +81,14 @@ const testGetModelList = () => {
 			return {
 				...ServiceHelper.generateRandomModel({ modelType }),
 				isFavourite: n % 5 === 0,
+				modelType,
 			};
 		})];
 
-		models.push(con, fed, draw);
+		models.push(
+			{ ...con, modelType: modelTypes.CONTAINER },
+			{ ...fed, modelType: modelTypes.FEDERATION },
+			{ ...draw, modelType: modelTypes.DRAWING });
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, models);
@@ -102,13 +106,8 @@ const testGetModelList = () => {
 				key = users.tsAdmin.apiKey,
 			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s${key ? `?key=${key}` : ''}`;
 
-			const modelList = models.flatMap(({ _id, isFavourite, name, properties }) => {
-				const shouldInclude = (modelType === modelTypes.FEDERATION && properties?.federate)
-					|| (modelType === modelTypes.DRAWING && properties?.modelType === modelTypes.DRAWING)
-					|| (modelType === modelTypes.CONTAINER
-							&& (properties?.modelType !== modelTypes.DRAWING && !properties.federate));
-				return shouldInclude ? { _id, isFavourite: !!isFavourite, name, role: 'admin' } : [];
-			});
+			const modelList = models.flatMap(({ _id, isFavourite, name, modelType: type }) => (type === modelType ? { _id, isFavourite: !!isFavourite, name, role: 'admin' } : []));
+
 			return [
 				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],

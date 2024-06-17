@@ -31,10 +31,10 @@ const { validateAddModelData, validateUpdateSettingsData } = require('../../../.
 const Containers = require('../../../../../processors/teamspaces/projects/models/containers');
 const Drawings = require('../../../../../processors/teamspaces/projects/models/drawings');
 const Federations = require('../../../../../processors/teamspaces/projects/models/federations');
-const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { Router } = require('express');
 const { canDeleteContainer } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { getUserFromSession } = require('../../../../../utils/sessions');
+const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../utils/responder');
 
 const addModel = (modelType) => async (req, res) => {

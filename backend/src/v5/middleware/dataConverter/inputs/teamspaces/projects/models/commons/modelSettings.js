@@ -16,13 +16,14 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
-const { modelTypes } = require('../../../../../../../models/modelSettings.constants');
 const Yup = require('yup');
+
 const { checkLegendExists } = require('../../../../../../../models/legends');
 const { escapeRegexChrs } = require('../../../../../../../utils/helper/strings');
 const { getModelByQuery } = require('../../../../../../../models/modelSettings');
 const { getProjectById } = require('../../../../../../../models/projectSettings');
 const { getViewById } = require('../../../../../../../models/views');
+const { modelTypes } = require('../../../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../../../utils/responder');
 const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { types } = require('../../../../../../../utils/helper/yup');
