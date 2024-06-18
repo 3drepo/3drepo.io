@@ -19,10 +19,10 @@ import { BimButton } from '@/v5/ui/routes/viewer/toolbar/buttons/bimButton/bimBu
 import { ClipButtons } from '@/v5/ui/routes/viewer/toolbar/buttons/buttonOptionsContainer/clipButtons.component';
 import { NavigationButtons } from '@/v5/ui/routes/viewer/toolbar/buttons/buttonOptionsContainer/navigationButtons.component';
 import { ProjectionButtons } from '@/v5/ui/routes/viewer/toolbar/buttons/buttonOptionsContainer/projectionButtons.component';
-import { CalibrationButton } from '@/v5/ui/routes/viewer/toolbar/buttons/calibrationButton/calibrationButton.component';
 import { HomeButton } from '@/v5/ui/routes/viewer/toolbar/buttons/homeButton/homeButton.component';
-import { SectionToolbar } from '@/v5/ui/routes/viewer/toolbar/selectionToolbar/selectionToolbar.component';
+import { CalibrationButton } from './calibrationSectionToolbar/calibrationButton/calibrationButton.component';
 import { MainToolbar, ToolbarContainer } from '@/v5/ui/routes/viewer/toolbar/toolbar.styles';
+import { CalibrationSectionToolbar } from './calibrationSectionToolbar/calibrationSectionToolbar.component';
 
 export const calibrationToolbar = () => (
 	<ToolbarContainer>
@@ -34,6 +34,6 @@ export const calibrationToolbar = () => (
 			<BimButton />
 			<CalibrationButton />
 		</MainToolbar>
-		<SectionToolbar />
+		<CalibrationSectionToolbar />
 	</ToolbarContainer>
 );
