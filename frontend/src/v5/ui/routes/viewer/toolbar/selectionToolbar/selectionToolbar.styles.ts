@@ -27,6 +27,7 @@ export const Container = styled.div`
 	width: fit-content;
 	padding-left: 31px;
 	margin-left: -45px;
+	cursor: default;
 
 	&:has(> ${/* sc-selector */Section}:not([hidden])) {
 		padding-left: 45px;
