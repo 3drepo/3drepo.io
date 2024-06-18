@@ -15,12 +15,44 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import HomeIcon from '@assets/icons/viewer/home.svg';
+import FocusIcon from '@assets/icons/viewer/focus.svg';
+import CoordinatesIcon from '@assets/icons/viewer/coordinates.svg';
 import InfoIcon from '@assets/icons/viewer/info.svg';
-import { formatMessage } from '@/v5/services/intl';
 import { BimActionsDispatchers, MeasurementsActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { BimHooksSelectors, ModelHooksSelectors } from '@/v5/services/selectorsHooks';
+import { BimHooksSelectors, ModelHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
+import { formatMessage } from '@/v5/services/intl';
+import { ToolbarButton } from './toolbarButton.component';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
-import { ToolbarButton } from '../toolbarButton.component';
+
+export const HomeButton = () => (
+	<ToolbarButton
+		Icon={HomeIcon}
+		onClick={ViewerGuiActionsDispatchers.goToHomeView}
+		title={formatMessage({ id: 'viewer.toolbar.icon.home', defaultMessage: 'Home' })}
+	/>
+);
+
+export const FocusButton = () => (
+	<ToolbarButton
+		Icon={FocusIcon}
+		onClick={() => ViewerGuiActionsDispatchers.setIsFocusMode(true)}
+		title={formatMessage({ id: 'viewer.toolbar.icon.focus', defaultMessage: 'Focus' })}
+	/>
+);
+
+export const CoordinatesButton = () => {
+	const showCoords = ViewerGuiHooksSelectors.selectIsCoordViewActive();
+
+	return (
+		<ToolbarButton
+			Icon={CoordinatesIcon}
+			selected={showCoords}
+			onClick={() => ViewerGuiActionsDispatchers.setCoordView(!showCoords)}
+			title={formatMessage({ id: 'viewer.toolbar.icon.coordinates', defaultMessage: 'Show Coordinates' })}
+		/>
+	);
+};
 
 export const BimButton = () => {
 	const hasMetaData = ModelHooksSelectors.selectMetaKeysExist();
@@ -46,3 +78,4 @@ export const BimButton = () => {
 		/>
 	);
 };
+

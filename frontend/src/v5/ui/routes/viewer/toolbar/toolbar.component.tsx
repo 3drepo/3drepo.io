@@ -21,9 +21,7 @@ import { ProjectionButtons } from './buttons/buttonOptionsContainer/projectionBu
 import { ClipButtons } from './buttons/buttonOptionsContainer/clipButtons.component';
 import { SectionToolbar } from './selectionToolbar/selectionToolbar.component';
 import { HomeButton } from './buttons/homeButton/homeButton.component';
-import { FocusButton } from './buttons/focusButton/focusButton.component';
-import { CoordinatesButton } from './buttons/coordinatesButton/coordinatesButton.component';
-import { BimButton } from './buttons/bimButton/bimButton.component';
+import { FocusButton, CoordinatesButton, BimButton } from './buttons/toolbarButtons.component';
 
 export const Toolbar = () => (
 	<ToolbarContainer>
