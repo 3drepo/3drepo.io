@@ -20,10 +20,10 @@ import { DRAWINGS_ROUTE } from '../../../routes.constants';
 import { generatePath, useParams } from 'react-router-dom';
 import { Transformers, useSearchParam } from '../../../useSearchParam';
 
-type Coord3D = [number, number, number];
-type Points3D = {
-	start: Coord3D,
-	end: Coord3D,
+type Coords3D = [number, number, number];
+type Arrow3D = {
+	start: Coords3D,
+	end: Coords3D,
 };
 export interface CalibrationContextType {
 	step: number;
@@ -35,9 +35,8 @@ export interface CalibrationContextType {
 	setOrigin: (origin: string) => void;
 	isCalibrating3D: boolean,
 	setIsCalibrating3D: (isCalibrating3D: boolean) => void;
-	points3D: Points3D,
-	setPoint3DStart: (start: Coord3D) => void,
-	setPoint3DEnd: (end: Coord3D) => void,
+	arrow3D: Arrow3D,
+	setArrow3D: (arrow: Arrow3D) => void;
 }
 
 const defaultValue: CalibrationContextType = {
@@ -50,9 +49,8 @@ const defaultValue: CalibrationContextType = {
 	setOrigin: () => {},
 	isCalibrating3D: false,
 	setIsCalibrating3D: () => {},
-	points3D: { start: null, end: null },
-	setPoint3DStart: () => {},
-	setPoint3DEnd: () => {},
+	arrow3D: { start: null, end: null },
+	setArrow3D: () => {},
 };
 export const CalibrationContext = createContext(defaultValue);
 CalibrationContext.displayName = 'CalibrationContext';
@@ -65,7 +63,7 @@ export const CalibrationContextComponent = ({ children }) => {
 	const [isCalibrating] = useSearchParam('isCalibrating', Transformers.BOOLEAN);
 
 	const [isCalibrating3D, setIsCalibrating3D] = useState(false);
-	const [points3D, setPoints3D] = useState<{ start, end }>({ start: null, end: null });
+	const [arrow3D, setArrow3D] = useState<{ start, end }>({ start: null, end: null });
 
 	useEffect(() => {
 		setStep(0);
@@ -83,9 +81,8 @@ export const CalibrationContextComponent = ({ children }) => {
 			setOrigin,
 			isCalibrating3D,
 			setIsCalibrating3D,
-			points3D,
-			setPoint3DStart: (start) => setPoints3D({ ...points3D, start }),
-			setPoint3DEnd: (end) => setPoints3D({ ...points3D, end }),
+			arrow3D,
+			setArrow3D,
 		}}>
 			{children}
 		</CalibrationContext.Provider>
