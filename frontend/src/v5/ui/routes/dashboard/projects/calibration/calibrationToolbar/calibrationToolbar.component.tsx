@@ -24,7 +24,7 @@ import { CalibrationButton } from './calibrationSectionToolbar/calibrationButton
 import { MainToolbar, ToolbarContainer } from '@/v5/ui/routes/viewer/toolbar/toolbar.styles';
 import { CalibrationSectionToolbar } from './calibrationSectionToolbar/calibrationSectionToolbar.component';
 
-export const calibrationToolbar = () => (
+export const CalibrationToolbar = () => (
 	<ToolbarContainer>
 		<MainToolbar>
 			<HomeButton />
