@@ -29,8 +29,13 @@ const STEPS = [
 ];
 
 export const CalibrationHeader = () => {
-	const { step, setStep, isStepValid, origin } = useContext(CalibrationContext);
+	const { step, setStep, isStepValid, origin, arrow3D } = useContext(CalibrationContext);
 	const isLastStep = step === 2;
+
+	const getIsStepValid = () => {
+		if (step === 0) return arrow3D.start && arrow3D.end;
+		return isStepValid;
+	};
 
 	return (
 		<Container>
@@ -51,13 +56,13 @@ export const CalibrationHeader = () => {
 					</Link>
 				</ContrastButton>
 				{isLastStep ? (
-					<PrimaryButton disabled={!isStepValid}>
+					<PrimaryButton disabled={!getIsStepValid()}>
 						<Link to={origin}>
 							<FormattedMessage defaultMessage="Confirm" id="calinration.button.confirm" />
 						</Link>
 					</PrimaryButton>
 				) : (
-					<PrimaryButton onClick={() => setStep(step + 1)} disabled={!isStepValid}>
+					<PrimaryButton onClick={() => setStep(step + 1)} disabled={!getIsStepValid()}>
 						<FormattedMessage defaultMessage="Continue" id="calinration.button.continue" />
 					</PrimaryButton>
 				)}

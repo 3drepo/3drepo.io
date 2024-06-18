@@ -17,7 +17,6 @@
 
 import { useContext, useEffect } from 'react';
 import { CalibrationContext } from '../calibrationContext';
-import { Calibration3DStep } from './calibration3DStep/calibration3DStep.component';
 import { Calibration2DStep } from './calibration2DStep/calibration2DStep.component';
 import { VerticalSpatialBoundariesStep } from './verticalSpatialBoundariesStep/verticalSpatialBoundariesStep.component';
 import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
@@ -32,7 +31,7 @@ export const CalibrationStep = () => {
 	}, [show2DViewer]);
 
 	switch (step) {
-		case 0: return <Calibration3DStep />;
+		case 0: return null;
 		case 1: return <Calibration2DStep />;
 		default: return <VerticalSpatialBoundariesStep />;
 	}
