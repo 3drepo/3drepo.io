@@ -41,12 +41,10 @@ export const ClearIcon = styled(PlusIcon)`
 	transform: rotate(45deg);
 `;
 
-export const ClearButton = styled.div`
+export const BaseClearButton = styled.div`
 	cursor: pointer;
 	height: 30px;
 	border-radius: 19px;
-	color: ${({ theme }) => theme.palette.primary.lightest};
-	background-color: ${({ theme }) => theme.palette.secondary.light};
 	align-self: center;
 	overflow: hidden;
 	display: flex;
@@ -61,11 +59,18 @@ export const ClearButton = styled.div`
 	&[hidden] {
 		width: 0;
 		padding: 0;
+		margin: 0;
+		border: 0;
 	}
 
 	&:not([hidden]) {
 		width: fit-content;
 	}
+`;
+
+export const ClearButton = styled(BaseClearButton)`
+	color: ${({ theme }) => theme.palette.primary.lightest};
+	background-color: ${({ theme }) => theme.palette.secondary.light};
 
 	&:hover {
 		color: ${({ theme }) => theme.palette.primary.main};
