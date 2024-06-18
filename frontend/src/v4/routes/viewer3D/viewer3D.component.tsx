@@ -19,6 +19,8 @@ import { difference, differenceBy, isEqual } from 'lodash';
 import { dispatch } from '@/v4/modules/store';
 import { DialogActions } from '@/v4/modules/dialog';
 import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
+import { CalibrationToolbar } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationToolbar/calibrationToolbar.component';
 import {queuableFunction} from '../../helpers/async';
 
 import { ROUTES } from '../../constants/routes';
@@ -254,15 +256,15 @@ export class Viewer3D extends PureComponent<IProps, any> {
 	public render() {
 		return (
 			<>
-				<ViewerContainer
-					visible={this.shouldBeVisible}
-				>
+				<ViewerContainer visible={this.shouldBeVisible}>
 					<div
 						ref={this.containerRef}
 						className={this.props.className}
 					/>
-					<Toolbar />
-				</ ViewerContainer>
+					<CalibrationContext.Consumer>
+						{({ isCalibrating }) => isCalibrating ? <CalibrationToolbar /> : <Toolbar />}
+					</CalibrationContext.Consumer>
+				</ViewerContainer>
 				<Border
 					presentationMode={this.props.presentationMode}
 					isPresentationPaused={this.props.isPresentationPaused}
