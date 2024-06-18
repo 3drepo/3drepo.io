@@ -32,7 +32,7 @@ import { CalibrationContext } from '../../calibrationContext';
 import { ClearCalibrationButton } from './calibrationSectionToolbar.styles';
 
 export const CalibrationSectionToolbar = () => {
-	const { arrow3D, setArrow3D } = useContext(CalibrationContext);
+	const { arrow3D, setArrow3D, isCalibrating3D } = useContext(CalibrationContext);
 	const [alignActive, setAlignActive] = useState(false);
 
 	const clippingMode = ViewerGuiHooksSelectors.selectClippingMode();
@@ -80,24 +80,26 @@ export const CalibrationSectionToolbar = () => {
 					title={formatMessage({ id: 'viewer.toolbar.icon.deleteClip', defaultMessage: 'Delete' })}
 				/>
 			</Section>
-			<Section hidden={!arrow3D.start}>
-				<ClearCalibrationButton
-					hidden={!arrow3D.start}
-					disabled={!arrow3D.start}
-					onClick={() => setArrow3D({ start: null, end: null })}
-				>
-					<ClearIcon />
-					<FormattedMessage id="viewer.toolbar.icon.clearCalibration.start" defaultMessage="Clear Start" />
-				</ClearCalibrationButton>
-				<ClearCalibrationButton
-					hidden={!arrow3D.end}
-					disabled={!arrow3D.end}
-					onClick={() => setArrow3D({ ...arrow3D, end: null })}
-				>
-					<ClearIcon />
-					<FormattedMessage id="viewer.toolbar.icon.clearCalibration.end" defaultMessage="Clear End" />
-				</ClearCalibrationButton>
-			</Section>
+			{isCalibrating3D && (
+				<Section hidden={!arrow3D.start}>
+					<ClearCalibrationButton
+						hidden={!arrow3D.start}
+						disabled={!arrow3D.start}
+						onClick={() => setArrow3D({ start: null, end: null })}
+					>
+						<ClearIcon />
+						<FormattedMessage id="viewer.toolbar.icon.clearCalibration.start" defaultMessage="Clear Start" />
+					</ClearCalibrationButton>
+					<ClearCalibrationButton
+						hidden={!arrow3D.end}
+						disabled={!arrow3D.end}
+						onClick={() => setArrow3D({ ...arrow3D, end: null })}
+					>
+						<ClearIcon />
+						<FormattedMessage id="viewer.toolbar.icon.clearCalibration.end" defaultMessage="Clear End" />
+					</ClearCalibrationButton>
+				</Section>
+			)}
 		</Container>
 	);
 };

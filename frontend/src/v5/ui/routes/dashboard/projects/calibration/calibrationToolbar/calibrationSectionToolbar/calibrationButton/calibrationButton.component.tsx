@@ -16,21 +16,21 @@
  */
 
 import CalibrationIcon from '@assets/icons/filled/calibration-filled.svg';
-import { useState } from 'react';
+import { useContext } from 'react';
 import { ToolbarButton } from '@/v5/ui/routes/viewer/toolbar/buttons/toolbarButton.component';
 import { formatMessage } from '@/v5/services/intl';
+import { CalibrationContext } from '../../../calibrationContext';
 
 export const CalibrationButton = () => {
-	const [active, setActive] = useState(false);
+	const { step, isCalibrating3D, setIsCalibrating3D } = useContext(CalibrationContext);
 
-	const handleClick = () => {
-		setActive(!active);
-	};
+	const handleClick = () => setIsCalibrating3D(!isCalibrating3D);
 
 	return (
 		<ToolbarButton
 			Icon={CalibrationIcon}
-			selected={active}
+			hidden={step !== 0}
+			selected={isCalibrating3D}
 			onClick={handleClick}
 			title={formatMessage({ id: 'viewer.toolbar.icon.calibrate', defaultMessage: 'Calibrate' })}
 		/>
