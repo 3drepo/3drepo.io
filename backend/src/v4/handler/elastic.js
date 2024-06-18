@@ -19,6 +19,7 @@
 const { Client } = require("@elastic/elasticsearch");
 const logger = require("../logger");
 const systemLogger = logger.systemLogger;
+const { host } = require("../config");
 const elasticConfig = require("../config").elastic;
 const repoLicense = require("../config").repoLicense;
 const { v5Path } = require("../../interop");
@@ -49,10 +50,28 @@ const loginRecordMapping = {
 	"licenseKey": { "type": "keyword" }
 };
 
+const activityRecordIndex = "io-activity";
+const activityRecordMapping = {
+	"status" : { "type": "long" },
+	"code" : { "type": "text" },
+	"latency" : { "type": "ip" },
+	"contentLength" : { "type": "long" },
+	"user" : { "type": "text" },
+	"method" : { "type": "text" },
+	"originalUrl": { "type": "text" },
+	"timestamp": { "type": "date" },
+	"namespace": { "type": "text" },
+	"host": { "type": "text" }
+};
+
 const indicesMappings = [
 	{
 		index: loginRecordIndex,
 		mapping: loginRecordMapping
+	},
+	{
+		index: activityRecordIndex,
+		mapping: activityRecordMapping
 	}
 ];
 
@@ -102,6 +121,9 @@ Elastic.createElasticRecord = async (index, body, id) => {
 			if (namespace) {
 				body.namespace = namespace;
 			}
+			if (host) {
+				body.host = host;
+			}
 			await elasticClient.create({
 				index,
 				id,
@@ -143,5 +165,7 @@ Elastic.subscribeToV5Events = () => {
 		await Elastic.createLoginRecord(username, loginRecord);
 	});
 };
+
+Elastic.activityRecordIndex = activityRecordIndex;
 
 module.exports = Elastic;

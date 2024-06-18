@@ -19,11 +19,9 @@ const { host } = require('../utils/config');
 
 const { v4Path } = require('../../interop');
 // eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
-const { createElasticRecord } = require(`${v4Path}/handler/elastic`);
+const { activityRecordIndex, createElasticRecord } = require(`${v4Path}/handler/elastic`);
 
 const Elastic = {};
-
-const activityRecordIndex = 'io-activity';
 
 Elastic.createActivityRecord = (status, code, latency, contentLength, user, method, originalUrl) => {
 	const timestamp = new Date();
@@ -37,7 +35,6 @@ Elastic.createActivityRecord = (status, code, latency, contentLength, user, meth
 		method,
 		originalUrl,
 		timestamp,
-		host,
 	};
 
 	createElasticRecord(activityRecordIndex, elasticBody, id);
