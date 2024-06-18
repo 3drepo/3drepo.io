@@ -53,7 +53,6 @@ const testCreateActivityRecord = () => {
 				method,
 				originalUrl,
 				timestamp,
-				host,
 			};
 
 			Elastic.createActivityRecord(

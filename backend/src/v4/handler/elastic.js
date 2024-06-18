@@ -47,7 +47,9 @@ const loginRecordMapping = {
 	"OS.Name": { "type": "text" },
 	"OS.Version": { "type": "text" },
 	"Device": { "type": "text" },
-	"licenseKey": { "type": "keyword" }
+	"licenseKey": { "type": "keyword" },
+	"namespace": { "type": "text" },
+	"host": { "type": "text" }
 };
 
 const activityRecordIndex = "io-activity";
