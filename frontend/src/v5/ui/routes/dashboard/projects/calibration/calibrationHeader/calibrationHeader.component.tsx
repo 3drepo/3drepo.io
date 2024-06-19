@@ -29,11 +29,11 @@ const STEPS = [
 ];
 
 export const CalibrationHeader = () => {
-	const { step, setStep, isStepValid, origin, arrow3D } = useContext(CalibrationContext);
+	const { step, setStep, isStepValid, origin, vector3D } = useContext(CalibrationContext);
 	const isLastStep = step === 2;
 
 	const getIsStepValid = () => {
-		if (step === 0) return arrow3D.start && arrow3D.end;
+		if (step === 0) return vector3D.start && vector3D.end;
 		return isStepValid;
 	};
 

@@ -33,8 +33,8 @@ export interface CalibrationContextType {
 	setOrigin: (origin: string) => void;
 	isCalibrating3D: boolean,
 	setIsCalibrating3D: (isCalibrating3D: boolean) => void;
-	arrow3D: Vector3D,
-	setArrow3D: (arrow: Partial<Vector3D>) => void;
+	vector3D: Vector3D,
+	setVector3D: (vector: Partial<Vector3D>) => void;
 }
 
 const defaultValue: CalibrationContextType = {
@@ -47,8 +47,8 @@ const defaultValue: CalibrationContextType = {
 	setOrigin: () => {},
 	isCalibrating3D: false,
 	setIsCalibrating3D: () => {},
-	arrow3D: { start: null, end: null },
-	setArrow3D: () => {},
+	vector3D: { start: null, end: null },
+	setVector3D: () => {},
 };
 export const CalibrationContext = createContext(defaultValue);
 CalibrationContext.displayName = 'CalibrationContext';
@@ -61,10 +61,10 @@ export const CalibrationContextComponent = ({ children }) => {
 	const [isCalibrating] = useSearchParam('isCalibrating', Transformers.BOOLEAN);
 
 	const [isCalibrating3D, setIsCalibrating3D] = useState(false);
-	const [arrow3D, setArrow3D] = useState<{ start, end }>({ start: null, end: null });
+	const [vector3D, setVector3D] = useState<{ start, end }>({ start: null, end: null });
 
-	const handleSetArrow3D = ({ start = arrow3D.start, end = arrow3D.end }: Vector3D) => {
-		setArrow3D({ start, end });
+	const handleSetVector3D = ({ start = vector3D.start, end = vector3D.end }: Vector3D) => {
+		setVector3D({ start, end });
 		UnityUtil.setCalibrationToolVector(start, end);
 	};
 
@@ -96,8 +96,8 @@ export const CalibrationContextComponent = ({ children }) => {
 			setOrigin,
 			isCalibrating3D,
 			setIsCalibrating3D: handleIsCalibrating3D,
-			arrow3D,
-			setArrow3D: handleSetArrow3D,
+			vector3D,
+			setVector3D: handleSetVector3D,
 		}}>
 			{children}
 		</CalibrationContext.Provider>
