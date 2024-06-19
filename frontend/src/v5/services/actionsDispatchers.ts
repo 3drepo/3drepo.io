@@ -57,6 +57,8 @@ interface ITreeActionCreators {
 	showAllNodes: () => Action;
 	hideSelectedNodes: () => Action;
 	isolateSelectedNodes: (containerOrFederation: string) => Action;
+	stopListenOnSelections: () => Action;
+	startListenOnSelections: () => Action;
 }
 interface IGroupsActionCreators {
 	setColorOverrides: (groupIds: string[], on: boolean) => Action;

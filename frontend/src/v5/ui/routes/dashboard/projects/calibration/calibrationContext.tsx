@@ -19,6 +19,8 @@ import { createContext, useEffect, useState } from 'react';
 import { DRAWINGS_ROUTE } from '../../../routes.constants';
 import { generatePath, useParams } from 'react-router-dom';
 import { Transformers, useSearchParam } from '../../../useSearchParam';
+import { UnityUtil } from '@/globals/unity-util';
+import { TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 type Coords3D = [number, number, number];
 type Arrow3D = {
@@ -36,7 +38,7 @@ export interface CalibrationContextType {
 	isCalibrating3D: boolean,
 	setIsCalibrating3D: (isCalibrating3D: boolean) => void;
 	arrow3D: Arrow3D,
-	setArrow3D: (arrow: Arrow3D) => void;
+	setArrow3D: (arrow: Partial<Arrow3D>) => void;
 }
 
 const defaultValue: CalibrationContextType = {
@@ -65,6 +67,15 @@ export const CalibrationContextComponent = ({ children }) => {
 	const [isCalibrating3D, setIsCalibrating3D] = useState(false);
 	const [arrow3D, setArrow3D] = useState<{ start, end }>({ start: null, end: null });
 
+	const handleIsCalibrating3D = (newIsCalibrating3D) => {
+		if (newIsCalibrating3D) {
+			TreeActionsDispatchers.stopListenOnSelections();
+		} else {
+			TreeActionsDispatchers.startListenOnSelections();
+		}
+		setIsCalibrating3D(newIsCalibrating3D);
+	};
+
 	useEffect(() => {
 		setStep(0);
 		setIsStepValid(false);
@@ -80,7 +91,7 @@ export const CalibrationContextComponent = ({ children }) => {
 			origin,
 			setOrigin,
 			isCalibrating3D,
-			setIsCalibrating3D,
+			setIsCalibrating3D: handleIsCalibrating3D,
 			arrow3D,
 			setArrow3D,
 		}}>
