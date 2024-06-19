@@ -43,12 +43,16 @@ export interface MinimumDrawing {
 	drawingNumber: string;
 }
 
+type Coord3D = [number, number, number];
+export type Vector3D = { start: Coord3D | null, end: Coord3D | null };
+
 // TODO: Unfinished interface
 export interface IDrawing extends MinimumDrawing {
 	desc?: string;
 	lastUpdated?: Date;
 	latestRevision?: string;
 	calibration?: CalibrationState;
+	vector3D?: Vector3D;
 	status: DrawingUploadStatus;
 	revisionsCount: number;
 	role: any;

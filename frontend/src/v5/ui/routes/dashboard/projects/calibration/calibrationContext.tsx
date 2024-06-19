@@ -21,12 +21,8 @@ import { generatePath, useParams } from 'react-router-dom';
 import { Transformers, useSearchParam } from '../../../useSearchParam';
 import { UnityUtil } from '@/globals/unity-util';
 import { TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { Vector3D } from '@/v5/store/drawings/drawings.types';
 
-type Coords3D = [number, number, number];
-type Arrow3D = {
-	start: Coords3D,
-	end: Coords3D,
-};
 export interface CalibrationContextType {
 	step: number;
 	setStep: (step: number) => void;
@@ -37,8 +33,8 @@ export interface CalibrationContextType {
 	setOrigin: (origin: string) => void;
 	isCalibrating3D: boolean,
 	setIsCalibrating3D: (isCalibrating3D: boolean) => void;
-	arrow3D: Arrow3D,
-	setArrow3D: (arrow: Partial<Arrow3D>) => void;
+	arrow3D: Vector3D,
+	setArrow3D: (arrow: Partial<Vector3D>) => void;
 }
 
 const defaultValue: CalibrationContextType = {
@@ -67,7 +63,7 @@ export const CalibrationContextComponent = ({ children }) => {
 	const [isCalibrating3D, setIsCalibrating3D] = useState(false);
 	const [arrow3D, setArrow3D] = useState<{ start, end }>({ start: null, end: null });
 
-	const handleSetArrow3D = ({ start = arrow3D.start, end = arrow3D.end }: Arrow3D) => {
+	const handleSetArrow3D = ({ start = arrow3D.start, end = arrow3D.end }: Vector3D) => {
 		setArrow3D({ start, end });
 		UnityUtil.setCalibrationToolVector(start, end);
 	};
