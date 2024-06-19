@@ -39,6 +39,7 @@ export interface CalibrationContextType {
 	setIsCalibrating3D: (isCalibrating3D: boolean) => void;
 	vector3D: Vector3D,
 	setVector3D: (vector: Partial<Vector3D>) => void;
+	drawingId: string;
 }
 
 const defaultValue: CalibrationContextType = {
@@ -53,6 +54,7 @@ const defaultValue: CalibrationContextType = {
 	setIsCalibrating3D: () => {},
 	vector3D: EMPTY_VECTOR,
 	setVector3D: () => {},
+	drawingId: '',
 };
 export const CalibrationContext = createContext(defaultValue);
 CalibrationContext.displayName = 'CalibrationContext';
@@ -131,6 +133,7 @@ export const CalibrationContextComponent = ({ children }) => {
 			setIsCalibrating3D,
 			vector3D,
 			setVector3D,
+			drawingId,
 		}}>
 			{children}
 		</CalibrationContext.Provider>
