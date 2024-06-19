@@ -23,6 +23,7 @@ import { UnityUtil } from '@/globals/unity-util';
 import { TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Vector3D } from '@/v5/store/drawings/drawings.types';
 
+const EMPTY_VECTOR = { start: null, end: null };
 export interface CalibrationContextType {
 	step: number;
 	setStep: (step: number) => void;
@@ -47,7 +48,7 @@ const defaultValue: CalibrationContextType = {
 	setOrigin: () => {},
 	isCalibrating3D: false,
 	setIsCalibrating3D: () => {},
-	vector3D: { start: null, end: null },
+	vector3D: EMPTY_VECTOR,
 	setVector3D: () => {},
 };
 export const CalibrationContext = createContext(defaultValue);
@@ -61,7 +62,7 @@ export const CalibrationContextComponent = ({ children }) => {
 	const [isCalibrating] = useSearchParam('isCalibrating', Transformers.BOOLEAN);
 
 	const [isCalibrating3D, setIsCalibrating3D] = useState(false);
-	const [vector3D, setVector3D] = useState<{ start, end }>({ start: null, end: null });
+	const [vector3D, setVector3D] = useState<{ start, end }>(EMPTY_VECTOR);
 
 	const handleSetVector3D = ({ start = vector3D.start, end = vector3D.end }: Vector3D) => {
 		setVector3D({ start, end });
@@ -71,11 +72,15 @@ export const CalibrationContextComponent = ({ children }) => {
 	const handleIsCalibrating3D = (newIsCalibrating3D) => {
 		if (newIsCalibrating3D) {
 			TreeActionsDispatchers.stopListenOnSelections();
-			UnityUtil.setCalibrationToolMode('None');
-		} else {
-			TreeActionsDispatchers.startListenOnSelections();
 			UnityUtil.enableSnapping();
 			UnityUtil.setCalibrationToolMode('Vector');
+		} else {
+			TreeActionsDispatchers.startListenOnSelections();
+			UnityUtil.setCalibrationToolMode('None');
+
+			if (vector3D.start && !vector3D.end) {
+				setVector3D(EMPTY_VECTOR);
+			}
 		}
 		setIsCalibrating3D(newIsCalibrating3D);
 	};
