@@ -144,9 +144,9 @@ export function* fetchFrame({ date }) {
 			// This is to avoid fetching the groups twice.
 			// When showViewpoint is called in showFrameViewpoint it fetches the groups
 			if (dateIsSelectedDate) {
-				yield dispatch(ViewpointsActions.fetchViewpointGroups(teamspace, model, { viewpoint }));
-				yield dispatch(SequencesActions.setLastSelectedDateSuccess(date));
-				yield dispatch(SequencesActions.setFramePending(false));
+				yield put(SequencesActions.setLastSelectedDateSuccess(date));
+				yield put(ViewpointsActions.fetchViewpointGroups(teamspace, model, { viewpoint }));
+				yield put(SequencesActions.setFramePending(false));
 			}
 		}
 	} catch (error) {
@@ -165,7 +165,7 @@ function * showFrameViewpoint() {
 
 function * prefetchFrames() {
 	const keyframes = yield select(selectNextKeyFramesDates);
-	yield all(keyframes.map((d) => put(SequencesActions.fetchFrame(d))));
+	yield all(keyframes.map((date) => call(fetchFrame, { date })));
 }
 
 export function* setSelectedDate({ date }) {
@@ -195,7 +195,7 @@ export function* setSelectedDate({ date }) {
 				}
 			}
 			yield put(SequencesActions.setSelectedDateSuccess(dateToSelect));
-			yield call(prefetchFrames);
+			yield put(SequencesActions.prefetchFrames());
 			yield take(SequencesTypes.SET_FRAME_PENDING)
 			yield showFrameViewpoint();
 		}
