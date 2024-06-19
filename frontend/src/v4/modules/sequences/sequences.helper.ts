@@ -188,7 +188,7 @@ export const resetMovedMeshes = (sharedIds: any[]) => {
 // State def colour is given as a normalised rgba. e.g. [1, 0, 0] is red
 const getOverrideHex = (color) => rgbaToHex(color.map((val) => val * 255).join());
 
-export const convertStateDefToViewpoint = ({ color = [], transparency: hiddenAndTransparent = [], transformation = [] }: Partial<IStateDefinitions>) => {
+export const convertStateDefToViewpoint = ({ color = [], transparency: hiddenAndTransparent = [], transformation = [] }: IStateDefinitions) => {
 	const [hidden, transparency] = partition(hiddenAndTransparent, ({ value }) => value === 0);
 	const hidden_group = { objects: [{ shared_ids: hidden[0]?.shared_ids || [] }] };
 
