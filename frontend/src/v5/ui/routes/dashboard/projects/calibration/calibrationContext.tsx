@@ -67,6 +67,11 @@ export const CalibrationContextComponent = ({ children }) => {
 	const [isCalibrating3D, setIsCalibrating3D] = useState(false);
 	const [arrow3D, setArrow3D] = useState<{ start, end }>({ start: null, end: null });
 
+	const handleSetArrow3D = ({ start = arrow3D.start, end = arrow3D.end }: Arrow3D) => {
+		setArrow3D({ start, end });
+		UnityUtil.setCalibrationToolVector(start, end);
+	};
+
 	const handleIsCalibrating3D = (newIsCalibrating3D) => {
 		if (newIsCalibrating3D) {
 			TreeActionsDispatchers.stopListenOnSelections();
@@ -93,7 +98,7 @@ export const CalibrationContextComponent = ({ children }) => {
 			isCalibrating3D,
 			setIsCalibrating3D: handleIsCalibrating3D,
 			arrow3D,
-			setArrow3D,
+			setArrow3D: handleSetArrow3D,
 		}}>
 			{children}
 		</CalibrationContext.Provider>
