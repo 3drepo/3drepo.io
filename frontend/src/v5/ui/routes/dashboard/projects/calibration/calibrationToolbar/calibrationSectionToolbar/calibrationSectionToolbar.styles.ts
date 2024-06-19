@@ -17,16 +17,53 @@
 
 import { BaseClearButton } from '@/v5/ui/routes/viewer/toolbar/selectionToolbar/selectionToolbar.styles';
 import styled, { css } from 'styled-components';
+import PlusIcon from '@assets/icons/viewer/plus.svg';
 
-export const ClearCalibrationButton = styled(BaseClearButton)<{ disabled }>`
+export const Section = styled.div`
+	display: inherit;
+`;
+
+export const ClearIcon = styled(PlusIcon)`
+	transform: rotate(45deg);
+`;
+
+export const ClearButton = styled.div`
+	cursor: pointer;
+	height: 30px;
+	border-radius: 19px;
+	align-self: center;
+	overflow: hidden;
+	display: flex;
+	flex-direction: row;
+	place-items: center;
+	gap: 6px;
+	padding: 11px;
+	box-sizing: border-box;
+	white-space: nowrap;
+	transition: all .3s;
+	color: ${({ theme }) => theme.palette.primary.lightest};
+	background-color: ${({ theme }) => theme.palette.secondary.light};
+
+	&[hidden] {
+		width: 0;
+		padding: 0;
+		margin: 0;
+		border: 0;
+	}
+
+	&:not([hidden]) {
+		width: fit-content;
+	}
+
+	&:hover {
+		color: ${({ theme }) => theme.palette.primary.main};
+	}
+`;
+
+export const ClearCalibrationButton = styled(ClearButton)<{ disabled }>`
 	background-color: transparent;
 	border: solid 1px currentColor;
 	margin-left: 11px;
-
-	&:hover {
-		border: none;
-		color: ${({ theme }) => theme.palette.primary.main};
-	}
 
 	${({ disabled }) => disabled ? css`
 		color: ${({ theme }) => theme.palette.base.main};
