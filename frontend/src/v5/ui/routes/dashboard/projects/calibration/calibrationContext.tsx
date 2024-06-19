@@ -75,8 +75,11 @@ export const CalibrationContextComponent = ({ children }) => {
 	const handleIsCalibrating3D = (newIsCalibrating3D) => {
 		if (newIsCalibrating3D) {
 			TreeActionsDispatchers.stopListenOnSelections();
+			UnityUtil.setCalibrationToolMode('None');
 		} else {
 			TreeActionsDispatchers.startListenOnSelections();
+			UnityUtil.enableSnapping();
+			UnityUtil.setCalibrationToolMode('Vector');
 		}
 		setIsCalibrating3D(newIsCalibrating3D);
 	};

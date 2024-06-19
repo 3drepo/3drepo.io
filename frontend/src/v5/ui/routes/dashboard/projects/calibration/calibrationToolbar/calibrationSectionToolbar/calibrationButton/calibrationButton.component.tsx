@@ -24,14 +24,12 @@ import { CalibrationContext } from '../../../calibrationContext';
 export const CalibrationButton = () => {
 	const { step, isCalibrating3D, setIsCalibrating3D } = useContext(CalibrationContext);
 
-	const handleClick = () => setIsCalibrating3D(!isCalibrating3D);
-
 	return (
 		<ToolbarButton
 			Icon={CalibrationIcon}
 			hidden={step !== 0}
 			selected={isCalibrating3D}
-			onClick={handleClick}
+			onClick={() => setIsCalibrating3D(!isCalibrating3D)}
 			title={formatMessage({ id: 'viewer.toolbar.icon.calibrate', defaultMessage: 'Calibrate' })}
 		/>
 	);
