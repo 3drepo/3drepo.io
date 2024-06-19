@@ -21,7 +21,8 @@ import { generatePath, useParams } from 'react-router-dom';
 import { Transformers, useSearchParam } from '../../../useSearchParam';
 import { UnityUtil } from '@/globals/unity-util';
 import { TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { Vector3D } from '@/v5/store/drawings/drawings.types';
+import { CalibrationState, Vector3D } from '@/v5/store/drawings/drawings.types';
+import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 const EMPTY_VECTOR = { start: null, end: null };
 export interface CalibrationContextType {
@@ -60,9 +61,10 @@ export const CalibrationContextComponent = ({ children }) => {
 	const [isStepValid, setIsStepValid] = useState(false);
 	const [origin, setOrigin] = useState(generatePath(DRAWINGS_ROUTE, { teamspace, project }));
 	const [isCalibrating] = useSearchParam('isCalibrating', Transformers.BOOLEAN);
-
 	const [isCalibrating3D, setIsCalibrating3D] = useState(false);
 	const [vector3D, setVector3D] = useState<{ start, end }>(EMPTY_VECTOR);
+	const [drawingId] = useSearchParam('drawingId');
+	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
 
 	const handleSetVector3D = ({ start = vector3D.start, end = vector3D.end }: Vector3D) => {
 		setVector3D({ start, end });
@@ -89,6 +91,10 @@ export const CalibrationContextComponent = ({ children }) => {
 		setStep(0);
 		setIsStepValid(false);
 	}, [containerOrFederation, revision, isCalibrating]);
+
+	useEffect(() => {
+		handleSetVector3D(drawing?.vector3D || EMPTY_VECTOR);
+	}, [drawing]);
 
 	return (
 		<CalibrationContext.Provider value={{
