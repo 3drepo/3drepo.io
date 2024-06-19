@@ -43,6 +43,7 @@ export const ClearButton = styled.div`
 	transition: all .3s;
 	color: ${({ theme }) => theme.palette.primary.lightest};
 	background-color: ${({ theme }) => theme.palette.secondary.light};
+	border: solid 1px ${({ theme }) => theme.palette.secondary.light};
 
 	&[hidden] {
 		width: 0;
@@ -61,21 +62,13 @@ export const ClearButton = styled.div`
 `;
 
 export const ClearCalibrationButton = styled(ClearButton)<{ disabled }>`
-	background-color: transparent;
-	border: solid 1px currentColor;
 	margin-left: 11px;
 
-	${({ disabled }) => disabled ? css`
+	${({ disabled }) => disabled && css`
 		color: ${({ theme }) => theme.palette.base.main};
 		pointer-events: none;
 		cursor: default;
-	` : css`
-		color: ${({ theme }) => theme.palette.primary.contrast};
-
-		&:hover {
-			border: none;
-			color: ${({ theme }) => theme.palette.secondary.main};
-			background-color: ${({ theme }) => theme.palette.primary.contrast};
-		}
+		background-color: transparent;
+		border-color: currentColor;
 	`}
 `;
