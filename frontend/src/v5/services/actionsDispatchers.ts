@@ -98,6 +98,8 @@ interface IViewerGuiActionCreators {
 	clearColorOverrides: () => Action;
 	clearTransformations: () => Action;
 	resetPanels: () => Action;
+	stopListenOnClickPin: () => Action;
+	startListenOnClickPin: () => Action;
 }
 
 export const AuthActionsDispatchers = createActionsDispatchers<IAuthActionCreators>(AuthActions);

@@ -20,7 +20,7 @@ import { DRAWINGS_ROUTE } from '../../../routes.constants';
 import { generatePath, useParams } from 'react-router-dom';
 import { Transformers, useSearchParam } from '../../../useSearchParam';
 import { UnityUtil } from '@/globals/unity-util';
-import { TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TreeActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Vector3D } from '@/v5/store/drawings/drawings.types';
 import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Viewer } from '@/v4/services/viewer/viewer';
@@ -83,41 +83,38 @@ export const CalibrationContextComponent = ({ children }) => {
 	};
 
 	const setIsCalibrating3D = (newIsCalibrating3D) => {
-		if (newIsCalibrating3D) {
-			TreeActionsDispatchers.stopListenOnSelections();
-			UnityUtil.enableSnapping();
-			UnityUtil.setCalibrationToolMode('Vector');
-		} else {
-			TreeActionsDispatchers.startListenOnSelections();
-			UnityUtil.setCalibrationToolMode('None');
+		if (!newIsCalibrating3D && vector3D.start && !vector3D.end) {
+			setVector3D(EMPTY_VECTOR);
 		}
 		setIsCalibrating3DState(newIsCalibrating3D);
 	};
-
 	useEffect(() => {
 		setStep(0);
 		setIsStepValid(false);
 	}, [containerOrFederation, revision, isCalibrating]);
 
 	useEffect(() => {
-		setVector3D(drawing?.vector3D || EMPTY_VECTOR);
-	}, [drawing]);
-
-	useEffect(() => {
-		if (!isCalibrating && vector3D.start && !vector3D.end) {
-			setVector3D(EMPTY_VECTOR);
-		}
 		if (isCalibrating) {
+			setVector3D(drawing?.vector3D || EMPTY_VECTOR);
+			ViewerGuiActionsDispatchers.stopListenOnClickPin();
+			TreeActionsDispatchers.stopListenOnSelections();
+			UnityUtil.enableSnapping();
+			UnityUtil.setCalibrationToolMode('Vector');
+			UnityUtil.setCalibrationToolVector(vector3D.start, vector3D.end);
 			Viewer.on(VIEWER_EVENTS.CALIBRATION_VECTOR_CHANGED, setVector3D);
 		} else {
+			setIsCalibrating3D(false);
+			setVector3D(EMPTY_VECTOR);
+			ViewerGuiActionsDispatchers.startListenOnClickPin();
+			TreeActionsDispatchers.startListenOnSelections();
+			UnityUtil.setCalibrationToolMode('None');
+			UnityUtil.setCalibrationToolVector(null, null);
 			Viewer.off(VIEWER_EVENTS.CALIBRATION_VECTOR_CHANGED, setVector3D);
 		}
 	}, [isCalibrating]);
 
 	useEffect(() => {
-		if (isCalibrating && step !== 0) {
-			setIsCalibrating3D(false);
-		}
+		setIsCalibrating3D(false);
 	}, [step]);
 
 	return (
