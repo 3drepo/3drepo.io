@@ -18,11 +18,11 @@
 const { codeExists, createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const { getContainers, getModelById } = require('../../../../../../../models/modelSettings');
 const Path = require('path');
-const { STATUSES, MODEL_TYPES } = require('../../../../../../../models/modelSettings.constants');
+const { STATUSES, modelTypes } = require('../../../../../../../models/modelSettings.constants');
 const Yup = require('yup');
 const YupHelper = require('../../../../../../../utils/helper/yup');
 const { isString } = require('../../../../../../../utils/helper/typeCheck');
-const { isTagUnique } = require('../../../../../../../models/revisions');
+const { isRevAndStatusCodeUnique, isTagUnique } = require('../../../../../../../models/revisions');
 const { modelsExistInProject } = require('../../../../../../../models/projectSettings');
 const { respond } = require('../../../../../../../utils/responder');
 const { singleFileUpload } = require('../../../../../multer');
@@ -32,7 +32,7 @@ const { validateMany } = require('../../../../../../common');
 
 const Revisions = {};
 
-const ACCEPTED_MODEL_EXT = [
+const ACCEPTED_CONTAINER_EXT = [
 	'.x', '.obj', '.3ds', '.md3', '.md2', '.ply',
 	'.mdl', '.ase', '.hmp', '.smd', '.mdc', '.md5',
 	'.stl', '.lxo', '.nff', '.raw', '.off', '.ac',
@@ -44,6 +44,7 @@ const ACCEPTED_MODEL_EXT = [
 ];
 
 const ACCEPTED_DRAWING_EXT = ['.dwg', '.pdf'];
+const DRAWING_MAX_FILE_SIZE = 500000000;
 
 Revisions.validateUpdateRevisionData = async (req, res, next) => {
 	const schema = Yup.object().strict(true).noUnknown().shape({
@@ -112,14 +113,23 @@ const validateDrawingRevisionUpload = async (req, res, next) => {
 	const schemaBase = {
 		statusCode: YupHelper.validators.alphanumeric(
 			Yup.string().min(1).max(2).strict(true),
-		),
+		).required(),
 		revCode: Yup.string().min(1).max(10).matches(/^[\w|_|-|.]*$/,
 			// eslint-disable-next-line no-template-curly-in-string
-			'${path} can only contain alpha-numeric characters, full stops, hyphens or underscores'),
+			'${path} can only contain alpha-numeric characters, full stops, hyphens or underscores')
+			.required(),
 		desc: YupHelper.types.strings.shortDescription,
 	};
 
-	const schema = Yup.object().noUnknown().required().shape(schemaBase);
+	const schema = Yup.object().noUnknown().required().shape(schemaBase)
+		.test('check-status-rev-code-uniqueness', 'The combination of statusCode and revCode needs to be unique', ({ revCode, statusCode }) => {
+			if (revCode && statusCode) {
+				const { teamspace, drawing } = req.params;
+				return isRevAndStatusCodeUnique(teamspace, drawing, modelTypes.DRAWING, revCode, statusCode);
+			}
+
+			return true;
+		});
 
 	try {
 		req.body = await schema.validate(req.body);
@@ -131,7 +141,7 @@ const validateDrawingRevisionUpload = async (req, res, next) => {
 	}
 };
 
-const validateFederationRevisionUpload = async (req, res, next) => {
+Revisions.validateNewFederationRevisionData = async (req, res, next) => {
 	const containerEntry = Yup.object({
 		_id: YupHelper.types.id.required(),
 		group: YupHelper.types.strings.title,
@@ -168,16 +178,8 @@ const validateFederationRevisionUpload = async (req, res, next) => {
 	}
 };
 
-Revisions.validateNewRevisionData = (modelType) => {
-	if (modelType === MODEL_TYPES.container) {
-		return validateMany([singleFileUpload('file', fileFilter(ACCEPTED_MODEL_EXT)), validateContainerRevisionUpload]);
-	}
+Revisions.validateNewContainerRevisionData = validateMany([singleFileUpload('file', fileFilter(ACCEPTED_CONTAINER_EXT)), validateContainerRevisionUpload]);
 
-	if (modelType === MODEL_TYPES.drawing) {
-		return validateMany([singleFileUpload('file', fileFilter(ACCEPTED_DRAWING_EXT)), validateDrawingRevisionUpload]);
-	}
-
-	return validateFederationRevisionUpload;
-};
+Revisions.validateNewDrawingRevisionData = validateMany([singleFileUpload('file', fileFilter(ACCEPTED_DRAWING_EXT), DRAWING_MAX_FILE_SIZE, true), validateDrawingRevisionUpload]);
 
 module.exports = Revisions;

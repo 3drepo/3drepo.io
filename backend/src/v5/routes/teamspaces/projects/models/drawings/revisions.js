@@ -17,25 +17,25 @@
 
 const { hasReadAccessToDrawing, hasWriteAccessToDrawing } = require('../../../../../middleware/permissions/permissions');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
+const { validateNewDrawingRevisionData, validateUpdateRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 const Drawings = require('../../../../../processors/teamspaces/projects/models/drawings');
 const { Router } = require('express');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { serialiseRevisionArray } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions');
 const { templates } = require('../../../../../utils/responseCodes');
-const { validateNewRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/drawings');
-const { validateUpdateRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 
-const getRevisions = (req, res, next) => {
+const getRevisions = async (req, res, next) => {
 	const { teamspace, drawing } = req.params;
 	const showVoid = req.query.showVoid === 'true';
 
-	Drawings.getRevisions(teamspace, drawing, showVoid).then((revs) => {
-		req.outputData = revs;
+	try {
+		const revisions = await Drawings.getRevisions(teamspace, drawing, showVoid);
+		req.outputData = revisions;
 		next();
-	}).catch(
-		/* istanbul ignore next */
-		(err) => respond(req, res, err),
-	);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
 };
 
 const updateRevisionStatus = (req, res) => {
@@ -47,17 +47,17 @@ const updateRevisionStatus = (req, res) => {
 	}).catch((err) => respond(req, res, err));
 };
 
-const createNewDrawingRevision = (req, res) => {
-	const { file } = req;
-	const revInfo = req.body;
-	const { teamspace, drawing } = req.params;
-	const owner = getUserFromSession(req.session);
-	Drawings.newRevision(teamspace, drawing, { ...revInfo, owner }, file).then(() => {
+const createNewDrawingRevision = async (req, res) => {
+	try {
+		const { file } = req;
+		const { teamspace, project, drawing } = req.params;
+		const author = getUserFromSession(req.session);
+		await Drawings.newRevision(teamspace, project, drawing, { ...req.body, author }, file);
 		respond(req, res, templates.ok);
-	}).catch(
-		/* istanbul ignore next */
-		(err) => respond(req, res, err),
-	);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
 };
 
 const downloadRevisionFiles = async (req, res) => {
@@ -208,7 +208,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: creates a new revision
 	 */
-	router.post('', hasWriteAccessToDrawing, validateNewRevisionData, createNewDrawingRevision);
+	router.post('', hasWriteAccessToDrawing, validateNewDrawingRevisionData, createNewDrawingRevision);
 
 	/**
 	 * @openapi
@@ -307,7 +307,7 @@ const establishRoutes = () => {
 	 *               type: string
 	 *               format: binary
 	 */
-	router.get('/:revision/files', hasWriteAccessToDrawing, downloadRevisionFiles);
+	router.get('/:revision/files/original', hasWriteAccessToDrawing, downloadRevisionFiles);
 
 	return router;
 };

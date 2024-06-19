@@ -18,7 +18,6 @@
 const { createResponseCode, templates } = require('../../../../../../utils/responseCodes');
 const { getModelByQuery } = require('../../../../../../models/modelSettings');
 const { respond } = require('../../../../../../utils/responder');
-const { validateNewRevisionData } = require('./commons/revisions');
 
 const Containers = {};
 
@@ -40,7 +39,5 @@ Containers.canDeleteContainer = async (req, res, next) => {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };
-
-Containers.validateNewRevisionData = validateNewRevisionData(MODEL_TYPES.container);
 
 module.exports = Containers;

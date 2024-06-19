@@ -22,8 +22,7 @@ const { Router } = require('express');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { serialiseRevisionArray } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions');
 const { templates } = require('../../../../../utils/responseCodes');
-const { validateNewRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
-const { validateUpdateRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
+const { validateUpdateRevisionData, validateNewContainerRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 
 const getRevisions = (req, res, next) => {
 	const { teamspace, container } = req.params;
@@ -208,7 +207,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: creates a new revision
 	 */
-	router.post('', hasWriteAccessToContainer, validateNewRevisionData, createNewContainerRevision);
+	router.post('', hasWriteAccessToContainer, validateNewContainerRevisionData, createNewContainerRevision);
 
 	/**
 	 * @openapi

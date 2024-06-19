@@ -18,14 +18,13 @@
 const RoutesManager = {};
 const AadRoutes = require('./sso/aad');
 const ContainerRevisionRoutes = require('./teamspaces/projects/models/containers/revisions');
-const DrawingRevisionRoutes = require('./teamspaces/projects/models/drawings/revisions');
-const FederationRevisionRoutes = require('./teamspaces/projects/models/federations/revisions');
 const CreateGroupRoutes = require('./teamspaces/projects/models/common/groups');
 const CreateModelGeneralRoutes = require('./teamspaces/projects/models/common/general');
 const CreateTicketCommentsRoutes = require('./teamspaces/projects/models/common/tickets.comments');
 const CreateTicketGroupsRoutes = require('./teamspaces/projects/models/common/tickets.groups');
 const CreateTicketRoutes = require('./teamspaces/projects/models/common/tickets');
 const CreateViewRoutes = require('./teamspaces/projects/models/common/views');
+const DrawingRevisionRoutes = require('./teamspaces/projects/models/drawings/revisions');
 const FederationRevisionRoutes = require('./teamspaces/projects/models/federations/revisions');
 const MetadataRoutes = require('./teamspaces/projects/models/containers/metadata');
 const ProjectRoutes = require('./teamspaces/projects/projects');
@@ -71,7 +70,6 @@ RoutesManager.init = (app) => {
 	// Drawings
 	app.use('/v5/teamspaces/:teamspace/projects/:project/drawings', CreateModelGeneralRoutes(modelTypes.DRAWING));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/drawings/:drawing/revisions', DrawingRevisionRoutes);
-
 };
 
 module.exports = RoutesManager;
