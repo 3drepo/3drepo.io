@@ -18,6 +18,8 @@
 import { GroupRulesForm } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketGroups/groups/groupRulesForm/groupRulesForm.component';
 import { useEffect, useState } from 'react';
 import _, { uniqueId } from 'lodash';
+import { useParams } from 'react-router-dom';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { Container } from './newCriterionForm.styles';
 
 interface IProps {
@@ -30,6 +32,7 @@ interface IProps {
 export const NewCriterionForm = ({ criterion, onSubmit, alreadySelectedFilters = [] }: IProps) => {
 	// used to clear the form after saving
 	const [key, setKey] = useState(uniqueId());
+	const { containerOrFederation } = useParams<ViewerParams>()
 
 	const handleSubmit = (data) => {
 		setKey(uniqueId());
@@ -44,6 +47,7 @@ export const NewCriterionForm = ({ criterion, onSubmit, alreadySelectedFilters =
 		<Container>
 			<GroupRulesForm
 				key={key}
+				containerOrFederation={containerOrFederation}
 				rule={criterion}
 				existingRules={alreadySelectedFilters}
 				onSave={handleSubmit}

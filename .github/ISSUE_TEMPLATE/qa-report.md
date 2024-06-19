@@ -3,7 +3,7 @@ name: QA Report
 about: Report your release candidate QA test results, or you wish to report multiple
   bugs within the same feature
 title: ''
-labels: 'bug, Triage: Awaiting'
+labels: bug
 assignees: ''
 
 ---
