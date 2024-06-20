@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { STATUSES, statusCodes } = require('../../../../../../../models/modelSettings.constants');
 const { codeExists, createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const { getContainers, getModelById } = require('../../../../../../../models/modelSettings');
+const { isRevAndStatusCodeUnique, isTagUnique } = require('../../../../../../../models/revisions');
 const Path = require('path');
-const { STATUSES, modelTypes } = require('../../../../../../../models/modelSettings.constants');
 const Yup = require('yup');
 const YupHelper = require('../../../../../../../utils/helper/yup');
 const { isString } = require('../../../../../../../utils/helper/typeCheck');
-const { isRevAndStatusCodeUnique, isTagUnique } = require('../../../../../../../models/revisions');
 const { modelsExistInProject } = require('../../../../../../../models/projectSettings');
 const { respond } = require('../../../../../../../utils/responder');
 const { singleFileUpload } = require('../../../../../multer');
@@ -112,7 +112,7 @@ const validateContainerRevisionUpload = async (req, res, next) => {
 const validateDrawingRevisionUpload = async (req, res, next) => {
 	const schemaBase = {
 		statusCode: YupHelper.validators.alphanumeric(
-			Yup.string().min(1).max(2).strict(true),
+			Yup.string().oneOf(statusCodes.map(({ code }) => code)).required(),
 		).required(),
 		revCode: Yup.string().min(1).max(10).matches(/^[\w|_|-|.]*$/,
 			// eslint-disable-next-line no-template-curly-in-string
@@ -125,7 +125,7 @@ const validateDrawingRevisionUpload = async (req, res, next) => {
 		.test('check-status-rev-code-uniqueness', 'The combination of statusCode and revCode needs to be unique', ({ revCode, statusCode }) => {
 			if (revCode && statusCode) {
 				const { teamspace, drawing } = req.params;
-				return isRevAndStatusCodeUnique(teamspace, drawing, modelTypes.DRAWING, revCode, statusCode);
+				return isRevAndStatusCodeUnique(teamspace, drawing, revCode, statusCode);
 			}
 
 			return true;
