@@ -102,6 +102,10 @@ export const ButtonsContainer = styled.div`
 	display: grid;
 	place-content: center;
 	grid-auto-flow: column;
+
+	button {
+		margin-left: 0;
+	}
 `;
 
 export const ContrastButton = styled(Button).attrs({
