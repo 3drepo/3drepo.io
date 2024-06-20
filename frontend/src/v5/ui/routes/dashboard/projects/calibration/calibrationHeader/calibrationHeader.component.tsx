@@ -42,9 +42,11 @@ export const CalibrationHeader = () => {
 				))}
 			</Stepper>
 			<ButtonsContainer>
-				<ContrastButton onClick={() => setStep(step - 1)} disabled={step === 0}>
-					<FormattedMessage defaultMessage="Back" id="calibration.button.back" />
-				</ContrastButton>
+				{step > 0 && (
+					<ContrastButton onClick={() => setStep(step - 1)}>
+						<FormattedMessage defaultMessage="Back" id="calibration.button.back" />
+					</ContrastButton>
+				)}
 				<ContrastButton>
 					<Link to={origin}>
 						<FormattedMessage defaultMessage="Cancel" id="calibration.button.cancel" />

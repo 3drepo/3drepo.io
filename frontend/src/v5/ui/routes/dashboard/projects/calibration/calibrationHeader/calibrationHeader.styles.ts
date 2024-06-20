@@ -92,10 +92,10 @@ export const Container = styled.div`
 	height: 58px;
 `;
 
-export const ButtonsContainer = styled.div`
+export const ButtonsContainer = styled.div<{ step: number }>`
 	display: grid;
 	place-content: center;
-	grid-template-columns: repeat(3, 1fr);
+	grid-auto-flow: column;
 `;
 
 export const ContrastButton = styled(Button).attrs({
