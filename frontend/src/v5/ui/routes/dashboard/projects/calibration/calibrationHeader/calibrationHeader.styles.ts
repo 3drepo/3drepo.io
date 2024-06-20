@@ -30,7 +30,7 @@ export const Stepper = styled(StepperBase)`
 
 		.MuiStepLabel-label {
 			margin-top: 4px;
-			font-weight: 400;
+			${({ theme }) => theme.typography.label}
 
 			&, &.Mui-active, &.Mui-completed, &.Mui-disabled {
 				color: ${({ theme }) => theme.palette.primary.contrast};
