@@ -16,7 +16,7 @@
  */
 
 import { useContext } from 'react';
-import { Stepper, Container, ButtonsContainer, ContrastButton, Connector, PrimaryButton, Link } from './calibrationHeader.styles';
+import { Stepper, Container, ButtonsContainer, ContrastButton, Connector, PrimaryButton, Link, StepperWrapper } from './calibrationHeader.styles';
 import { Step, StepLabel } from '@mui/material';
 import { CalibrationContext } from '../calibrationContext';
 import { formatMessage } from '@/v5/services/intl';
@@ -34,13 +34,15 @@ export const CalibrationHeader = () => {
 
 	return (
 		<Container>
-			<Stepper activeStep={step} alternativeLabel connector={<Connector />} >
-				{STEPS.map((label) => (
-					<Step key={label}>
-						<StepLabel StepIconComponent={({ icon }) => icon}>{label}</StepLabel>
-					</Step>
-				))}
-			</Stepper>
+			<StepperWrapper>
+				<Stepper activeStep={step} alternativeLabel connector={<Connector />} >
+					{STEPS.map((label) => (
+						<Step key={label}>
+							<StepLabel StepIconComponent={({ icon }) => icon}>{label}</StepLabel>
+						</Step>
+					))}
+				</Stepper>
+			</StepperWrapper>
 			<ButtonsContainer>
 				{step > 0 && (
 					<ContrastButton onClick={() => setStep(step - 1)}>

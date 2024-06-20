@@ -20,16 +20,22 @@ import { Button } from '@controls/button';
 import styled from 'styled-components';
 import { Link as LinkBase } from 'react-router-dom';
 
+export const StepperWrapper = styled.div`
+	width: calc(100% - 295px);
+`;
+
 export const Stepper = styled(StepperBase)`
 	border-radius: 0;
 	box-shadow: none;
-	width: calc(100% - 295px);
+	width: 130%;
+	margin-left: -15%;
 
 	.MuiStep-root {
 		border-bottom: none;
 
 		.MuiStepLabel-label {
-			margin-top: 4px;
+			margin: 4px auto 0;
+			max-width: 63%;
 			${({ theme }) => theme.typography.label}
 
 			&, &.Mui-active, &.Mui-completed, &.Mui-disabled {
@@ -53,8 +59,8 @@ export const Stepper = styled(StepperBase)`
 			}
 			&.Mui-active {
 				background-color: ${({ theme }) => theme.palette.primary.lightest};
-				color: ${({ theme }) => theme.palette.secondary.main};
-				border: solid 2px ${({ theme }) => theme.palette.primary.main};
+				color: ${({ theme }) => theme.palette.primary.main};
+				border: solid 2px currentColor;
 				box-sizing: border-box;
 			}
 			&.Mui-disabled {
@@ -92,7 +98,7 @@ export const Container = styled.div`
 	height: 58px;
 `;
 
-export const ButtonsContainer = styled.div<{ step: number }>`
+export const ButtonsContainer = styled.div`
 	display: grid;
 	place-content: center;
 	grid-auto-flow: column;
