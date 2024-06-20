@@ -108,6 +108,7 @@ export const CalibrationContextComponent = ({ children }) => {
 
 	useEffect(() => {
 		if (isCalibrating) {
+			ViewpointsActionsDispatchers.reset();
 			setVector3D(drawing?.vector3D || EMPTY_VECTOR);
 		} else {
 			setIsCalibrating3D(false);
