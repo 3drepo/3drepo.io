@@ -19,11 +19,14 @@ import HomeIcon from '@assets/icons/viewer/home.svg';
 import FocusIcon from '@assets/icons/viewer/focus.svg';
 import CoordinatesIcon from '@assets/icons/viewer/coordinates.svg';
 import InfoIcon from '@assets/icons/viewer/info.svg';
+import CalibrationIcon from '@assets/icons/filled/calibration-filled.svg';
 import { BimActionsDispatchers, MeasurementsActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { BimHooksSelectors, ModelHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatMessage } from '@/v5/services/intl';
 import { ToolbarButton } from './toolbarButton.component';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
+import { useContext } from 'react';
+import { CalibrationContext } from '../../../dashboard/projects/calibration/calibrationContext';
 
 export const HomeButton = () => (
 	<ToolbarButton
@@ -76,6 +79,18 @@ export const BimButton = () => {
 			onClick={() => setBIMPanelVisibililty(!showBIMPanel)}
 			title={formatMessage({ id: 'viewer.toolbar.icon.attributeData', defaultMessage: 'Attribute Data' })}
 		/>
+	);
+};
+export const CalibrationButton = () => {
+	const { step, isCalibrating3D, setIsCalibrating3D } = useContext(CalibrationContext);
+
+	return (
+		<ToolbarButton
+			Icon={CalibrationIcon}
+			hidden={step !== 0}
+			selected={isCalibrating3D}
+			onClick={() => setIsCalibrating3D(!isCalibrating3D)}
+			title={formatMessage({ id: 'viewer.toolbar.icon.calibrate', defaultMessage: 'Calibrate' })} />
 	);
 };
 

@@ -15,11 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BimButton, HomeButton } from '@/v5/ui/routes/viewer/toolbar/buttons/toolbarButtons.component';
+import { BimButton, HomeButton, CalibrationButton } from '@/v5/ui/routes/viewer/toolbar/buttons/toolbarButtons.component';
 import { ClipButtons } from '@/v5/ui/routes/viewer/toolbar/buttons/buttonOptionsContainer/clipButtons.component';
 import { NavigationButtons } from '@/v5/ui/routes/viewer/toolbar/buttons/buttonOptionsContainer/navigationButtons.component';
 import { ProjectionButtons } from '@/v5/ui/routes/viewer/toolbar/buttons/buttonOptionsContainer/projectionButtons.component';
-import { CalibrationButton } from './calibrationSectionToolbar/calibrationButton/calibrationButton.component';
 import { MainToolbar, ToolbarContainer } from '@/v5/ui/routes/viewer/toolbar/toolbar.styles';
 import { SectionToolbar } from '@/v5/ui/routes/viewer/toolbar/selectionToolbar/selectionToolbar.component';
 
