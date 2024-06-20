@@ -73,6 +73,8 @@ ModelSettingConstants.STATUSES = {
 
 ModelSettingConstants.getInfoFromCode = (code) => importErrorMapping[code] || systemFailureMsg;
 
+ModelSettingConstants.DRAWINGS_HISTORY_COL = 'drawings.history.ref';
+
 ModelSettingConstants.modelTypes = {
 	CONTAINER: 'container',
 	FEDERATION: 'federation',

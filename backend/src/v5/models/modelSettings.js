@@ -226,7 +226,7 @@ Models.newRevisionProcessed = async (teamspace, project, model, corId, retVal, u
 				project,
 				model,
 				revision: corId,
-				isFederation: !!containers });
+				modelType: containers ? modelTypes.FEDERATION : modelTypes.CONTAINER });
 		}
 	}
 };

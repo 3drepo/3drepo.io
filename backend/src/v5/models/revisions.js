@@ -41,15 +41,15 @@ const findOneRevisionByQuery = async (teamspace, model, modelType, query, projec
 	return rev;
 };
 
-Revisions.getLatestRevision = (teamspace, model, modelType, projection = {}) => {
+Revisions.getLatestRevision = (teamspace, model, projection = {}) => {
 	const query = { ...excludeVoids, ...excludeIncomplete };
 	const sort = { timestamp: -1 };
-	return findOneRevisionByQuery(teamspace, model, modelType, query, projection, sort);
+	return findOneRevisionByQuery(teamspace, model, undefined, query, projection, sort);
 };
 
-Revisions.getRevisionCount = (teamspace, model, modelType) => {
+Revisions.getRevisionCount = (teamspace, model) => {
 	const query = { ...excludeVoids, ...excludeIncomplete };
-	return db.count(teamspace, collectionName(modelType, model), query);
+	return db.count(teamspace, collectionName(undefined, model), query);
 };
 
 Revisions.getRevisions = (teamspace, model, modelType, showVoid, projection = {}) => {
@@ -76,8 +76,13 @@ Revisions.addRevision = async (teamspace, project, model, modelType, data) => {
 
 	await db.insertOne(teamspace, collectionName(modelType, model), newRevision);
 
+	publish(events.NEW_REVISION, { teamspace, project, model, modelType, revision: newRevision._id });
+
 	return newRevision._id;
 };
+
+Revisions.deleteRevisions = (teamspace, project, model, modelType) => db.deleteMany(
+	teamspace, collectionName(modelType), { project, model });
 
 Revisions.updateRevisionStatus = async (teamspace, project, model, modelType, revision, status) => {
 	const res = await db.findOneAndUpdate(teamspace, collectionName(modelType, model),
@@ -89,21 +94,25 @@ Revisions.updateRevisionStatus = async (teamspace, project, model, modelType, re
 		throw templates.revisionNotFound;
 	}
 
-	publish(events.REVISION_UPDATED, { teamspace, project, model, data: { _id: res._id, void: status } });
+	publish(events.REVISION_UPDATED, { teamspace,
+		project,
+		model,
+		modelType,
+		data: { _id: res._id, void: status } });
 };
 
-Revisions.isTagUnique = async (teamspace, model, modelType, tag) => {
+Revisions.isTagUnique = async (teamspace, model, tag) => {
 	try {
-		await findOneRevisionByQuery(teamspace, model, modelType, { tag });
+		await findOneRevisionByQuery(teamspace, model, undefined, { tag });
 		return false;
 	} catch {
 		return true;
 	}
 };
 
-Revisions.isRevAndStatusCodeUnique = async (teamspace, model, modelType, revCode, statusCode) => {
+Revisions.isRevAndStatusCodeUnique = async (teamspace, model, revCode, statusCode) => {
 	try {
-		await findOneRevisionByQuery(teamspace, model, modelType, { revCode, statusCode });
+		await findOneRevisionByQuery(teamspace, model, modelTypes.DRAWING, { revCode, statusCode });
 		return false;
 	} catch {
 		return true;

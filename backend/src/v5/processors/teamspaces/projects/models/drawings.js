@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addModel, deleteModel, getModelList } = require('./commons/modelList');
+const { DRAWINGS_HISTORY_COL, modelTypes } = require('../../../../models/modelSettings.constants');
+const { addModel, getModelList } = require('./commons/modelList');
+const { addRevision, deleteRevisions, getRevisionByIdOrTag, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
-const { getDrawingById, getDrawings, updateModelSettings } = require('../../../../models/modelSettings');
-const { addRevision, getRevisionByIdOrTag, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
-const { getFileAsStream, storeFile } = require('../../../../services/filesManager');
-const { getProjectById } = require('../../../../models/projectSettings');
-const { modelTypes } = require('../../../../models/modelSettings.constants');
-const { templates } = require('../../../../utils/responseCodes');
+const { deleteModel, getDrawingById, getDrawings, updateModelSettings } = require('../../../../models/modelSettings');
+const { getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../../services/filesManager');
+const { getProjectById, removeModelFromProject } = require('../../../../models/projectSettings');
 const { generateUUID } = require('../../../../utils/helper/uuids');
+const { templates } = require('../../../../utils/responseCodes');
 
 const Drawings = { };
 
@@ -39,7 +39,15 @@ Drawings.addDrawing = (teamspace, project, data) => addModel(teamspace, project,
 
 Drawings.updateSettings = updateModelSettings;
 
-Drawings.deleteDrawing = deleteModel;
+Drawings.deleteDrawing = async (teamspace, project, drawing) => {
+	await removeFilesWithMeta(teamspace, DRAWINGS_HISTORY_COL, { model: drawing });
+
+	await Promise.all([
+		deleteRevisions(teamspace, project, drawing, modelTypes.DRAWING),
+		deleteModel(teamspace, project, drawing),
+		removeModelFromProject(teamspace, project, drawing),
+	]);
+};
 
 Drawings.getRevisions = async (teamspace, drawing, showVoid) => {
 	const revisions = await getRevisions(teamspace, drawing, modelTypes.DRAWING, showVoid,
@@ -56,7 +64,7 @@ Drawings.newRevision = async (teamspace, project, drawing, data, file) => {
 		{ ...data, format, rFile: [fileId] });
 
 	const fileMeta = { name: file.originalname, rid: revId, project, model: drawing };
-	await storeFile(teamspace, 'drawings.history.ref', fileId, file.buffer, fileMeta);
+	await storeFile(teamspace, DRAWINGS_HISTORY_COL, fileId, file.buffer, fileMeta);
 };
 
 Drawings.updateRevisionStatus = (teamspace, project, drawing, revision, status) => updateRevisionStatus(
@@ -69,7 +77,7 @@ Drawings.downloadRevisionFiles = async (teamspace, drawing, revision) => {
 		throw templates.fileNotFound;
 	}
 
-	const file = await getFileAsStream(teamspace, 'drawings.history.ref', rev.rFile[0]);
+	const file = await getFileAsStream(teamspace, DRAWINGS_HISTORY_COL, rev.rFile[0]);
 	return file;
 };
 
