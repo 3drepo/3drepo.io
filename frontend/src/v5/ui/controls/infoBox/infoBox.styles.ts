@@ -20,7 +20,7 @@ import InfoIconBase from '@assets/icons/viewer/info.svg';
 
 export const Container = styled.div`
 	position: absolute;
-	z-index: 2;
+	z-index: 1;
 	width: 100%;
 	margin-top: 20px;
 	pointer-events: none;
