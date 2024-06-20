@@ -16,7 +16,7 @@
  */
 import { isEqual, partition } from 'lodash';
 import { formatMessage } from '@/v5/services/intl';
-import { rgbaToHex } from '@/v4/helpers/colors';
+import { GLToHexColor } from '@/v4/helpers/colors';
 import { hexToOpacity } from '@/v5/ui/themes/theme';
 import { STEP_SCALE } from '../../constants/sequences';
 import { Viewer } from '../../services/viewer/viewer';
@@ -185,22 +185,19 @@ export const resetMovedMeshes = (sharedIds: any[]) => {
 
 };
 
-// State def colour is given as a normalised rgba. e.g. [1, 0, 0] is red
-const getOverrideHex = (color) => rgbaToHex(color.map((val) => val * 255).join());
-
 export const convertStateDefToViewpoint = ({ color = [], transparency: hiddenAndTransparent = [], transformation = [] }: IStateDefinitions) => {
 	const [hidden, transparency] = partition(hiddenAndTransparent, ({ value }) => value === 0);
 	const hidden_group = { objects: [{ shared_ids: hidden[0]?.shared_ids || [] }] };
 
 	const colorOverrides = color.map(({ shared_ids = [], value }) => ({
-		color: getOverrideHex(value),
+		color: GLToHexColor(value),
 		objects: [{ shared_ids }],
 	}));
 	const override_groups = transparency.reduce((acc, { value: transparencyValue, shared_ids: transparencyIds = [] }) => {
 		transparencyIds.forEach((transparencyId) => { // Find the associated colour of the transparent object
 			color.forEach(({ value: colorValue, shared_ids: colorIds = []}) => {
 				if (colorIds.includes(transparencyId)) {
-					const hexNoTransparency = getOverrideHex(colorValue);
+					const hexNoTransparency = GLToHexColor(colorValue);
 					const hex = hexToOpacity(hexNoTransparency, transparencyValue * 100);
 
 					const overrideGroup = acc.find(({ color: c }) => c === hex);

@@ -63,7 +63,7 @@ export const componentToHex = memoize((c) => {
 		return '';
 	}
 
-	const hex = parseInt(c).toString(16).toUpperCase();
+	const hex = c.toString(16).toUpperCase();
 	return hex.length === 1 ? '0' + hex : hex;
 });
 
