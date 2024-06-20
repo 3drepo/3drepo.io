@@ -56,14 +56,15 @@ Models.addModel = async (teamspace, project, data) => {
 	await insertOneModel(teamspace, { ...data, _id });
 
 	const modelType = getModelType(data);
-	const eventData = { ...deleteIfUndefined({
+
+	const eventData = deleteIfUndefined({
 		name: data.name,
-		number: modelType === modelTypes.DRAWING ? data.number : undefined,
-		unit: modelType === modelTypes.DRAWING ? undefined : data.properties?.unit,
-		code: modelType === modelTypes.DRAWING ? undefined : data.properties?.code,
-		desc: modelType === modelTypes.FEDERATION ? data.desc : undefined,
-		type: modelType === modelTypes.FEDERATION ? undefined : data.type,
-	}) };
+		number: data.number,
+		unit: data.properties?.unit,
+		code: data.properties?.code,
+		desc: data.desc,
+		type: data.type,
+	});
 
 	publish(events.NEW_MODEL, { teamspace,
 		project,

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { deleteIfUndefined } = require('../../../../../../../../../../src/v5/utils/helper/objects');
 const { src } = require('../../../../../../../../helper/path');
 const { determineTestGroup, generateRandomModelProperties, generateUUID } = require('../../../../../../../../helper/services');
 
@@ -67,28 +68,28 @@ const testFormatModelSettings = () => {
 		[withErrorReasonNoTimestamp, 'with errorReason without timestamp'],
 		[withUuidDefaultView, 'with defaultView that is UUID'],
 		[withUuidDefaultLegend, 'with defaultLegend that is UUID'],
-		[drawingProperties, 'when model is a drawing', modelTypes.DRAWING],
-	])('Format model settings data', (data, desc, modelType = modelTypes.CONTAINER) => {
+		[drawingProperties, 'with drawing properties'],
+	])('Format model settings data', (data, desc) => {
 		test(`should format correctly ${desc}`,
 			() => {
 				const req = { outputData: cloneDeep(data) };
 				const res = {};
-				ModelSettingsOutputMiddlewares.formatModelSettings(modelType)(req, res, () => {});
-				const formattedSettings = {
+				ModelSettingsOutputMiddlewares.formatModelSettings(req, res, () => {});
+
+				const formattedSettings = deleteIfUndefined({
 					...data,
-					...(modelType === modelTypes.DRAWING ? {} : {
-						defaultView: UUIDToString(data.defaultView),
-						defaultLegend: UUIDToString(data.defaultLegend),
-						timestamp: data.timestamp ? data.timestamp.getTime() : undefined,
-						code: data.properties.code,
-						unit: data.properties.unit,
-						errorReason: data.errorReason ? {
-							message: data.errorReason.message,
-							errorCode: data.errorReason.errorCode,
-							timestamp: data.errorReason.timestamp ? data.errorReason.timestamp.getTime() : undefined,
-						} : undefined,
-					}),
-				};
+					defaultView: UUIDToString(data.defaultView),
+					defaultLegend: UUIDToString(data.defaultLegend),
+					timestamp: data.timestamp ? data.timestamp.getTime() : undefined,
+					code: data.properties?.code,
+					unit: data.properties?.unit,
+					errorReason: data.errorReason ? {
+						message: data.errorReason.message,
+						errorCode: data.errorReason.errorCode,
+						timestamp: data.errorReason.timestamp ? data.errorReason.timestamp.getTime() : undefined,
+					} : undefined,
+				});
+
 				delete formattedSettings.properties;
 
 				expect(respondFn).toHaveBeenCalledTimes(1);

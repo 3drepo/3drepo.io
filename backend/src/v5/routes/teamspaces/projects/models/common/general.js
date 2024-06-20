@@ -451,6 +451,19 @@ const establishRoutes = (modelType) => {
 	 *                 items:
 	 *                   type: string
 	 *                   format: uuid
+	 *           examples:
+     *             containers:
+	 *               summary: containers
+     *               value:
+	 *                 containers: [3549ddf6-885d-4977-87f1-eeac43a0e818, a54e8776-da7c-11ec-9d64-0242ac120002]
+     *             federations:
+	 *               summary: federations
+     *               value:
+	 *                 federations: [3549ddf6-885d-4977-87f1-eeac43a0e818, a54e8776-da7c-11ec-9d64-0242ac120002]
+     *             drawings:
+	 *               summary: drawings
+     *               value:
+     *                 drawings: [3549ddf6-885d-4977-87f1-eeac43a0e818, a54e8776-da7c-11ec-9d64-0242ac120002]
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -853,7 +866,7 @@ const establishRoutes = (modelType) => {
 	 *                   type: Structural
 	 *                   desc: The Drawing of the Lego House
 	 */
-	router.get('/:model', hasReadAccessToModel[modelType], getModelSettings(modelType), formatModelSettings(modelType));
+	router.get('/:model', hasReadAccessToModel[modelType], getModelSettings(modelType), formatModelSettings);
 	return router;
 };
 
