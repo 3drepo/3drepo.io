@@ -21,7 +21,7 @@ import { NavigationButtons } from '@/v5/ui/routes/viewer/toolbar/buttons/buttonO
 import { ProjectionButtons } from '@/v5/ui/routes/viewer/toolbar/buttons/buttonOptionsContainer/projectionButtons.component';
 import { CalibrationButton } from './calibrationSectionToolbar/calibrationButton/calibrationButton.component';
 import { MainToolbar, ToolbarContainer } from '@/v5/ui/routes/viewer/toolbar/toolbar.styles';
-import { CalibrationSectionToolbar } from './calibrationSectionToolbar/calibrationSectionToolbar.component';
+import { SectionToolbar } from '@/v5/ui/routes/viewer/toolbar/selectionToolbar/selectionToolbar.component';
 
 export const CalibrationToolbar = () => (
 	<ToolbarContainer>
@@ -33,6 +33,6 @@ export const CalibrationToolbar = () => (
 			<BimButton />
 			<CalibrationButton />
 		</MainToolbar>
-		<CalibrationSectionToolbar />
+		<SectionToolbar />
 	</ToolbarContainer>
 );
