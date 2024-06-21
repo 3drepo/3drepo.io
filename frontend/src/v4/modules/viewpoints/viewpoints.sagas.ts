@@ -211,20 +211,6 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 	}
 }
 
-export function* deselectViewsAndLeaveClipping() {
-	const selectedViewpoint = yield select(selectSelectedViewpoint);
-	yield put(ViewpointsActions.setActiveViewpoint(null));
-
-	if (selectedViewpoint) {
-		const { clippingPlanes } = selectedViewpoint;
-		yield take(ViewpointsTypes.SHOW_VIEWPOINT);
-		if (clippingPlanes) {
-			const viewpoint = { viewpoint: { clippingPlanes } };
-			yield put(ViewpointsActions.showViewpoint(null, null, viewpoint));
-		}
-	}
-}
-
 export function* fetchViewpointGroups({teamspace, modelId, view}) {
 	try  {
 		if (!view.viewpoint) {
@@ -365,7 +351,6 @@ export default function* ViewpointsSaga() {
 	yield takeEvery(ViewpointsTypes.SHARE_VIEWPOINT_LINK, shareViewpointLink);
 	yield takeEvery(ViewpointsTypes.SET_DEFAULT_VIEWPOINT, setDefaultViewpoint);
 	yield takeEvery(ViewpointsTypes.CLEAR_DEFAULT_VIEWPOINT, clearDefaultViewpoint);
-	yield takeEvery(ViewpointsTypes.DESELECT_VIEWS_AND_LEAVE_CLIPPING, deselectViewsAndLeaveClipping);
 	yield takeEvery(ViewpointsTypes.CACHE_GROUPS_FROM_VIEWPOINT, cacheGroupsFromViewpoint);
 	yield takeEvery(ViewpointsTypes.SHOW_PRESET, showPreset);
 	yield takeEvery(ViewpointsTypes.FETCH_VIEWPOINT_GROUPS, fetchViewpointGroups);

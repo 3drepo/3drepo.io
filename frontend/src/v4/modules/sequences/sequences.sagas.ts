@@ -23,7 +23,7 @@ import { VIEWER_PANELS } from '../../constants/viewerGui';
 import * as API from '../../services/api';
 import { DataCache, STORE_NAME } from '../../services/dataCache';
 import { DialogActions } from '../dialog';
-import { selectCurrentModel, selectCurrentModelTeamspace, selectCurrentRevisionId, selectIsFederation } from '../model';
+import { selectCurrentModel, selectCurrentModelTeamspace, selectCurrentRevisionId } from '../model';
 import { dispatch } from '../store';
 import { TreeActions } from '../tree';
 
@@ -71,8 +71,6 @@ export function* fetchSequenceList() {
 export function* updateSequence({ sequenceId, newName }) {
 	try {
 		const teamspace = yield select(selectCurrentModelTeamspace);
-		const isFederation = yield select(selectIsFederation);
-		const revision = isFederation ? null : yield select(selectCurrentRevisionId);
 		const model = yield select(selectSequenceModel);
 
 		if (sequenceId) {
@@ -130,7 +128,6 @@ export function* fetchFrame({ date }) {
 					dispatch(SequencesActions.updateFrameWithViewpoint(sequenceId, stateId, viewpointFromState));
 					if (dateIsSelectedDate) {
 						put(ViewpointsActions.fetchViewpointGroups(teamspace, model, viewpointFromState));
-						dispatch(SequencesActions.setLastSelectedDateSuccess(date));
 						dispatch(SequencesActions.setFramePending(false));
 					}
 					if (cacheEnabled && !cachedData) {
@@ -144,7 +141,6 @@ export function* fetchFrame({ date }) {
 			// This is to avoid fetching the groups twice.
 			// When showViewpoint is called in showFrameViewpoint it fetches the groups
 			if (dateIsSelectedDate) {
-				yield put(SequencesActions.setLastSelectedDateSuccess(date));
 				yield put(ViewpointsActions.fetchViewpointGroups(teamspace, model, { viewpoint }));
 				yield put(SequencesActions.setFramePending(false));
 			}
@@ -219,7 +215,6 @@ export function* setSelectedSequence({ sequenceId }) {
 		const selectedSequence = yield select(selectSelectedSequence);
 		if (selectedSequence) {
 			yield put(SequencesActions.setSelectedDateSuccess(null));
-			yield put(SequencesActions.setLastSelectedDateSuccess(null));
 			yield put(SequencesActions.restoreModelDefaultVisibility());
 		}
 		yield put(SequencesActions.setSelectedSequenceSuccess(sequenceId));
@@ -249,14 +244,6 @@ export function* showSequenceDate({ date }) {
 	}
 }
 
-function* handleTransparenciesVisibility({ transparencies }) {
-	const selectedSequence = yield select(selectSelectedSequenceId);
-
-	if (selectedSequence) {
-		yield put(TreeActions.handleTransparenciesVisibility(transparencies));
-	}
-}
-
 export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.FETCH_SEQUENCE, fetchSequence);
 	yield takeLatest(SequencesTypes.FETCH_SEQUENCE_LIST, fetchSequenceList);
@@ -268,5 +255,4 @@ export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.SET_SELECTED_SEQUENCE, setSelectedSequence);
 	yield takeLatest(SequencesTypes.PREFETCH_FRAMES, prefetchFrames);
 	yield takeLatest(SequencesTypes.SHOW_SEQUENCE_DATE, showSequenceDate);
-	yield takeLatest(SequencesTypes.HANDLE_TRANSPARENCIES_VISIBILITY, handleTransparenciesVisibility);
 }

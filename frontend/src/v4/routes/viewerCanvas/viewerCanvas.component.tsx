@@ -54,7 +54,6 @@ interface IProps {
 	viewerManipulationEnabled: boolean;
 	presentationMode: PresentationMode;
 	isPresentationPaused: boolean;
-	handleTransparenciesVisibility: any;
 	issuesShapes: any[];
 	risksShapes: any[];
 	issuesHighlightedShapes: any[];

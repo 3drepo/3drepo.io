@@ -31,7 +31,6 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	setSelectedSequenceSuccess: ['sequenceId'],
 	setSelectedDate: ['date'],
 	setSelectedDateSuccess: ['date'],
-	setLastSelectedDateSuccess: ['date'],
 	setOpenOnTodaySuccess: ['openOnToday'],
 	fetchFrame: ['date'],
 	prefetchFrames: [],
@@ -43,7 +42,6 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	setActivitiesPending: ['isPending'],
 	setFramePending: ['isPending'],
 	showSequenceDate: ['date'],
-	handleTransparenciesVisibility: ['transparencies'],
 	restoreModelDefaultVisibility: [],
 	reset: []
 }, { prefix: 'SEQUENCES/' });
@@ -77,7 +75,6 @@ export interface ISequencesState {
 	selectedSequence: null | string;
 	lastSelectedSequence: null | string;
 	selectedDate: null | Date;
-	lastSelectedDate: null | Date;
 	framePending: boolean;
 	stepInterval: number;
 	stepScale: STEP_SCALE;
@@ -92,7 +89,6 @@ export const INITIAL_STATE: ISequencesState = {
 	selectedSequence: null,
 	lastSelectedSequence: null,
 	selectedDate: null,
-	lastSelectedDate: null,
 	framePending: true,
 	stepInterval: 1,
 	stepScale: STEP_SCALE.DAY,
@@ -169,10 +165,6 @@ export const setSelectedDateSuccess =  (state = INITIAL_STATE, { date }) => {
 	return {...state, selectedDate: date };
 };
 
-export const setLastSelectedDateSuccess =  (state = INITIAL_STATE, { date }) => {
-	return {...state, lastSelectedDate: date};
-};
-
 export const updateFrameWithViewpoint = (state = INITIAL_STATE, { sequenceId, stateId, viewpoint }) => {
 	if (isEmpty(viewpoint)) {
 		return state;
@@ -211,7 +203,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.SET_FRAME_PENDING]: setFramePending,
 	[SequencesTypes.SET_OPEN_ON_TODAY_SUCCESS]: setOpenOnTodaySuccess,
 	[SequencesTypes.SET_SELECTED_DATE_SUCCESS]: setSelectedDateSuccess,
-	[SequencesTypes.SET_LAST_SELECTED_DATE_SUCCESS]: setLastSelectedDateSuccess,
 	[SequencesTypes.UPDATE_FRAME_WITH_VIEWPOINT]: updateFrameWithViewpoint,
 	[SequencesTypes.SET_SELECTED_SEQUENCE_SUCCESS]: setSelectedSequenceSuccess,
 	[SequencesTypes.SET_STEP_INTERVAL]: setStepInterval,

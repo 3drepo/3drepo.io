@@ -173,12 +173,6 @@ export const selectSelectedEndingDate = createSelector(
 		}
 );
 
-export const selectLastSelectedFrame = createSelector(
-	selectFrames, selectSequencesDomain, (frames, state) => {
-		return state.lastSelectedDate ? getSelectedFrame(frames, state.lastSelectedDate) : undefined;
-	}
-);
-
 export const selectSelectedFrame = createSelector(
 	selectFrames, selectSelectedStartingDate, getSelectedFrame
 );

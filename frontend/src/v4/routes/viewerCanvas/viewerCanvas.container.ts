@@ -29,7 +29,6 @@ import { selectGISCoordinates, selectHasGISCoordinates } from '../../modules/mod
 import { selectIsPaused, selectIsViewerManipulationEnabled, selectPresentationMode } from '../../modules/presentation';
 import { selectHighlightedShapes as selectRisksHighlightedShapes,
 	selectPins as selectRiskPins, selectShapes as selectRisksShapes  } from '../../modules/risks';
-import { selectSelectedSequenceId, SequencesActions } from '../../modules/sequences';
 import { TreeActions } from '../../modules/tree';
 import { selectAllTransparencyOverrides, selectColorOverrides } from '../../modules/viewerGui';
 import { withViewer } from '../../services/viewer/viewer';
@@ -48,7 +47,6 @@ const mapStateToProps = createStructuredSelector({
 	presentationMode: selectPresentationMode,
 	isPresentationPaused: selectIsPaused,
 	transformations: selectTransformations,
-	selectedSequenceId: selectSelectedSequenceId,
 	issuesShapes: selectIssuesShapes,
 	issuesHighlightedShapes: selectIssuesHighlightedShapes,
 	risksShapes: selectRisksShapes,
@@ -58,7 +56,6 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	handleTransparencyOverridesChange: TreeActions.handleTransparencyOverridesChange,
-	handleTransparenciesVisibility: SequencesActions.handleTransparenciesVisibility
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(ViewerCanvas));
