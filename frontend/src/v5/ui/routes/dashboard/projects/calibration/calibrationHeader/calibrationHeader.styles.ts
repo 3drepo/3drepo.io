@@ -94,8 +94,8 @@ export const Container = styled.div`
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
-	background-color: ${({ theme }) => theme.palette.secondary.main};
 	height: 58px;
+	background-image: ${({ theme }) => theme.palette.gradient.secondary};
 `;
 
 export const ButtonsContainer = styled.div`
