@@ -93,6 +93,7 @@ interface IJobsActionCreators {
 interface IMeasurementsActionCreators {
 	setMeasureMode: (mode: MeasureMode | '') => Action;
 	setShowPins: (showPins: boolean) => Action;
+	addMeasurement: (measurement) => Action;
 }
 
 interface IViewerGuiActionCreators {

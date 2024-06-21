@@ -22,6 +22,8 @@ import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { CalibrationToolbar } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationToolbar/calibrationToolbar.component';
 import { IssuesActionsDispatchers, MeasurementsActionsDispatchers, RisksActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { UnityUtil } from '@/globals/unity-util';
+import { MeasurementsHooksSelectors } from '@/v5/services/selectorsHooks';
 import {queuableFunction} from '../../helpers/async';
 
 import { ROUTES } from '../../constants/routes';
@@ -276,12 +278,21 @@ class Viewer3DBase extends PureComponent<IProps, any> {
 
 export const Viewer3D = (props: Omit<IProps, 'isCalibrating'>) => {
 	const { isCalibrating } = useContext(CalibrationContext);
+	const measurements = [
+		...MeasurementsHooksSelectors.selectAreaMeasurements(),
+		...MeasurementsHooksSelectors.selectLengthMeasurements(),
+		...MeasurementsHooksSelectors.selectPointMeasurements(),
+		...MeasurementsHooksSelectors.selectAngleMeasurements(),
+	];
 
 	useEffect(() => {
 		if (isCalibrating) {
 			TicketsCardActionsDispatchers.resetState();
 			IssuesActionsDispatchers.setActiveIssue(null);
 			RisksActionsDispatchers.setActiveRisk(null);
+			UnityUtil.clearAllMeasurements();
+		} else {
+			props.viewer.addMeasurements(measurements, true);
 		}
 
 		IssuesActionsDispatchers.toggleShowPins(!isCalibrating);
