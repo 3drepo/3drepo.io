@@ -692,51 +692,14 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Called by the Calibration Tool when a user action changes the state of the Vector.
-	 * The line is given as a start position and end position in Project coordinates.
-	 */
-	/** @hidden */
-	public static calibrationVectorChanged(lineJson: string) {
-		const line = JSON.parse(lineJson);
-
-		// eslint-disable-next-line no-console
-		console.log(line);
-
-		if (line.end && line.end.length > 0) {
-			this.calibrationVectorPoints.push(line.start);
-			this.calibrationVectorPoints.push(line.end);
-		}
-	}
-
-	public static calibrationVectorPoints = [];
-
-	public static calibrationVectorTestReset() {
-		this.calibrationVectorPoints = [];
-	}
-
-	public static calibrationVectorTestGetCoords() {
-		// Vertical/Preview mode expects three 2d coordinates. Assuming the user places a vector
-		// along where they want the bottom edge, then the left edge (starting from the bottom left)
-		// we extract the coordinates for UnityUtil.setCalibrationToolDrawing as follows...
-
-		return [
-			this.calibrationVectorPoints[0][0], // vector one start x
-			this.calibrationVectorPoints[0][2], // vector one start z
-			this.calibrationVectorPoints[1][0], // vector one end x
-			this.calibrationVectorPoints[1][2], // vector one end z
-			this.calibrationVectorPoints[3][0], // vector two end x
-			this.calibrationVectorPoints[3][2], // vector two end z
-		];
-	}
-
-	/**
 	 * Called by the Calibration Tool when a user action changes the heights of the vertical planes.
 	 * Heights are given in Project coordinates from the origin.
 	 */
 	/** @hidden */
-	public static calibrationPlanesChanged(planes) {
+	public static calibrationPlanesChanged(planesJson) {
+		const planes = JSON.parse(planesJson);
 		// eslint-disable-next-line no-console
-		console.log(JSON.parse(planes));
+		console.log(planes); //todo 4857 - remove this line when the viewer events are hooked up
 	}
 
 	/*
