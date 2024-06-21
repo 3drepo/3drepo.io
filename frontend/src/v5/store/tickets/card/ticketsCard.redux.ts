@@ -40,6 +40,7 @@ export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createA
 	setUnsavedTicket: ['ticket'],
 	setTransformations: ['transformations'],
 	setEditingGroups: ['isEditing'],
+	setShowPins: ['showPins'],
 }, { prefix: 'TICKETS_CARD/' }) as { Types: Constants<ITicketsCardActionCreators>; Creators: ITicketsCardActionCreators };
 
 export interface ITicketsCardState {
@@ -54,6 +55,7 @@ export interface ITicketsCardState {
 	unsavedTicket: EditableTicket | null,
 	transformations: any,
 	isEditingGroups: boolean;
+	showPins: boolean,
 }
 
 export const INITIAL_STATE: ITicketsCardState = {
@@ -72,6 +74,7 @@ export const INITIAL_STATE: ITicketsCardState = {
 	readOnly: false,
 	unsavedTicket: null,
 	isEditingGroups: false,
+	showPins: true,
 };
 
 export const setSelectedTicket = (state: ITicketsCardState, { ticketId }: SetSelectedTicketAction) => {
@@ -129,6 +132,10 @@ export const setEditingGroups = (state: ITicketsCardState, { isEditing }: SetEdi
 	state.isEditingGroups = isEditing;
 };
 
+export const setShowPins =  (state: ITicketsCardState, { showPins }: SetShowPinsAction) => {
+	state.showPins = showPins;
+};
+
 export const ticketsCardReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsCardTypes.SET_SELECTED_TICKET]: setSelectedTicket,
 	[TicketsCardTypes.SET_SELECTED_TEMPLATE]: setSelectedTemplate,
@@ -143,6 +150,7 @@ export const ticketsCardReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsCardTypes.SET_OVERRIDES]: setOverrides,
 	[TicketsCardTypes.SET_UNSAVED_TICKET]: setUnsavedTicket,
 	[TicketsCardTypes.SET_EDITING_GROUPS]: setEditingGroups,
+	[TicketsCardTypes.SET_SHOW_PINS]: setShowPins,
 }));
 
 export type SetSelectedTicketAction = Action<'SET_SELECTED_TICKET'> & { ticketId: string };
@@ -160,7 +168,7 @@ export type ResetStateAction = Action<'RESET_STATE'>;
 export type SetOverridesAction = Action<'SET_OVERRIDES'> & { overrides: OverridesDicts | null };
 export type SetUnsavedTicketAction = Action<'SET_UNSAVED_TICKET'> & { ticket: EditableTicket };
 export type SetEditingGroupsAction = Action<'SET_EDITING_GROUPS'> & { isEditing: boolean } ;
-
+export type SetShowPinsAction = Action<'SET_SHOW_PINS'> & { showPins: boolean };
 
 export interface ITicketsCardActionCreators {
 	setSelectedTicket: (ticketId: string) => SetSelectedTicketAction,
@@ -183,4 +191,5 @@ export interface ITicketsCardActionCreators {
 	setOverrides: (overrides: OverridesDicts) => SetOverridesAction,
 	setUnsavedTicket: (ticket: EditableTicket) => SetUnsavedTicketAction,
 	setEditingGroups: (isEditing:boolean) => SetEditingGroupsAction,
+	setShowPins: (showPins: boolean ) => SetShowPinsAction,
 }

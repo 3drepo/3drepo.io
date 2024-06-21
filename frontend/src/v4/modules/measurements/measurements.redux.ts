@@ -39,6 +39,7 @@ export const { Types: MeasurementsTypes, Creators: MeasurementsActions } = creat
 	setMeasureXyzDisplaySuccess: ['xyzDisplay'],
 	setMeasurementName: ['uuid', 'name', 'measureType'],
 	setMeasurementNameSuccess: ['uuid', 'name', 'measureType'],
+	setShowPins: ['showPins'],
 	resetMeasurementTool: [],
 	resetMeasurementToolSuccess: [],
 }, { prefix: 'MEASUREMENTS/' });
@@ -53,6 +54,7 @@ export interface IMeasurementState {
 	angleMeasurements: any[];
 	edgeSnapping: boolean;
 	xyzDisplay: boolean;
+	showPins: boolean;
 }
 
 export const INITIAL_STATE: IMeasurementState = {
@@ -65,6 +67,7 @@ export const INITIAL_STATE: IMeasurementState = {
 	angleMeasurements: [],
 	edgeSnapping: true,
 	xyzDisplay: false,
+	showPins: true,
 };
 
 export const setMeasureModeSuccess = (state = INITIAL_STATE, { mode }) => ({ ...state, mode });
@@ -154,6 +157,8 @@ export const resetMeasurementColorsSuccess = (state = INITIAL_STATE, {}) => {
 	});
 };
 
+export const setShowPins = (state = INITIAL_STATE, { showPins }) => ({ ...state, showPins });
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[MeasurementsTypes.SET_MEASURE_MODE_SUCCESS]: setMeasureModeSuccess,
 	[MeasurementsTypes.SET_MEASURE_UNITS_SUCCESS]: setMeasureUnitsSuccess,
@@ -166,4 +171,5 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[MeasurementsTypes.SET_MEASURE_XYZ_DISPLAY_SUCCESS]: setMeasureXyzDisplaySuccess,
 	[MeasurementsTypes.SET_MEASUREMENT_NAME_SUCCESS]: setMeasurementNameSuccess,
 	[MeasurementsTypes.RESET_MEASUREMENT_TOOL_SUCCESS]: resetMeasurementToolSuccess,
+	[MeasurementsTypes.SET_SHOW_PINS]: setShowPins,
 });

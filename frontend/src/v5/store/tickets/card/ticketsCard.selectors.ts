@@ -152,6 +152,11 @@ export const selectTicketsWithAllFiltersApplied = createSelector(
 	},
 );
 
+export const selectShowPins = createSelector(
+	selectTicketsCardDomain,
+	(state) => state.showPins,
+);
+
 export const selectTicketPins = createSelector(
 	selectTicketsWithAllFiltersApplied,
 	selectCurrentTemplates,
@@ -159,8 +164,9 @@ export const selectTicketPins = createSelector(
 	selectSelectedTicketPinId,
 	selectSelectedTicket,
 	selectSelectedDate,
-	(tickets, templates, view, selectedTicketPinId, selectedTicket, selectedSequenceDate): IPin[] => {
-		if (view === TicketsCardViews.New || !tickets.length) return [];
+	selectShowPins,
+	(tickets, templates, view, selectedTicketPinId, selectedTicket, selectedSequenceDate, showPins): IPin[] => {
+		if (!showPins || view === TicketsCardViews.New || !tickets.length) return [];
 		if (view === TicketsCardViews.Details) {
 			const pinArray = [];
 			const selectedTemplate = templates.find(({ _id }) => _id === selectedTicket.type);

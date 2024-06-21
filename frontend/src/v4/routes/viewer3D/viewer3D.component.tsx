@@ -14,13 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PureComponent, createRef } from 'react';
+import { PureComponent, createRef, useContext, useEffect } from 'react';
 import { difference, differenceBy, isEqual } from 'lodash';
 import { dispatch } from '@/v4/modules/store';
 import { DialogActions } from '@/v4/modules/dialog';
 import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { CalibrationToolbar } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationToolbar/calibrationToolbar.component';
+import { IssuesActionsDispatchers, MeasurementsActionsDispatchers, RisksActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import {queuableFunction} from '../../helpers/async';
 
 import { ROUTES } from '../../constants/routes';
@@ -63,9 +64,10 @@ interface IProps {
 	issuesHighlightedShapes: any[];
 	risksHighlightedShapes: any[];
 	ticketPins: any;
+	isCalibrating: boolean;
 }
 
-export class Viewer3D extends PureComponent<IProps, any> {
+class Viewer3DBase extends PureComponent<IProps, any> {
 	private containerRef = createRef<HTMLDivElement>();
 
 	private handleUnityError = (message: string, reload: boolean, isUnity: boolean) => {
@@ -261,9 +263,7 @@ export class Viewer3D extends PureComponent<IProps, any> {
 						ref={this.containerRef}
 						className={this.props.className}
 					/>
-					<CalibrationContext.Consumer>
-						{({ isCalibrating }) => isCalibrating ? <CalibrationToolbar /> : <Toolbar />}
-					</CalibrationContext.Consumer>
+					{this.props.isCalibrating ? <CalibrationToolbar /> : <Toolbar />}
 				</ViewerContainer>
 				<Border
 					presentationMode={this.props.presentationMode}
@@ -273,3 +273,22 @@ export class Viewer3D extends PureComponent<IProps, any> {
 		);
 	}
 }
+
+export const Viewer3D = (props: Omit<IProps, 'isCalibrating'>) => {
+	const { isCalibrating } = useContext(CalibrationContext);
+
+	useEffect(() => {
+		if (isCalibrating) {
+			TicketsCardActionsDispatchers.resetState();
+			IssuesActionsDispatchers.setActiveIssue(null);
+			RisksActionsDispatchers.setActiveRisk(null);
+		}
+
+		IssuesActionsDispatchers.toggleShowPins(!isCalibrating);
+		RisksActionsDispatchers.toggleShowPins(!isCalibrating);
+		TicketsCardActionsDispatchers.setShowPins(!isCalibrating);
+		MeasurementsActionsDispatchers.setShowPins(!isCalibrating);
+	}, [isCalibrating]);
+
+	return <Viewer3DBase {...props} isCalibrating={isCalibrating} />;
+};
