@@ -19,14 +19,10 @@ import { createContext, useEffect, useState } from 'react';
 import { DRAWINGS_ROUTE } from '../../../routes.constants';
 import { generatePath, useParams } from 'react-router-dom';
 import { Transformers, useSearchParam } from '../../../useSearchParam';
-import { UnityUtil } from '@/globals/unity-util';
-import { TreeActionsDispatchers, ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Vector3D } from '@/v5/store/drawings/drawings.types';
-import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { Viewer } from '@/v4/services/viewer/viewer';
-import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 
-const EMPTY_VECTOR = { start: null, end: null };
+export const EMPTY_VECTOR = { start: null, end: null };
 export interface CalibrationContextType {
 	step: number;
 	setStep: (step: number) => void;
@@ -38,7 +34,7 @@ export interface CalibrationContextType {
 	isCalibrating3D: boolean,
 	setIsCalibrating3D: (isCalibrating3D: boolean) => void;
 	vector3D: Vector3D,
-	setVector3D: (vector: Partial<Vector3D>) => void;
+	setVector3D: React.Dispatch<React.SetStateAction<Vector3D>>;
 	drawingId: string;
 }
 
@@ -65,42 +61,10 @@ export const CalibrationContextComponent = ({ children }) => {
 	const [isStepValid, setIsStepValid] = useState(false);
 	const [origin, setOrigin] = useState(generatePath(DRAWINGS_ROUTE, { teamspace, project }));
 	const [isCalibrating] = useSearchParam('isCalibrating', Transformers.BOOLEAN);
-	const [isCalibrating3D, setIsCalibrating3DState] = useState(false);
-	const [vector3D, setVector3DState] = useState<{ start, end }>(EMPTY_VECTOR);
+	const [isCalibrating3D, setIsCalibrating3D] = useState(false);
+	const [vector3D, setVector3D] = useState<Vector3D>(EMPTY_VECTOR);
 	const [drawingId] = useSearchParam('drawingId');
-	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
 
-	const setVector3D = (vector: Vector3D) => {
-		let { start = vector3D.start, end = vector3D.end } = vector;
-		if (!start?.length) {
-			start = null;
-		}
-		if (!end?.length) {
-			end = null;
-		}
-		setVector3DState({ start, end });
-		UnityUtil.setCalibrationToolVector(start, end);
-	};
-
-	const setIsCalibrating3D = (newIsCalibrating3D) => {
-		if (newIsCalibrating3D) {
-			TreeActionsDispatchers.stopListenOnSelections();
-			UnityUtil.enableSnapping();
-			UnityUtil.setCalibrationToolMode('Vector');
-			UnityUtil.setCalibrationToolVector(vector3D.start, vector3D.end);
-			Viewer.on(VIEWER_EVENTS.CALIBRATION_VECTOR_CHANGED, setVector3D);
-		} else {
-			TreeActionsDispatchers.startListenOnSelections();
-			UnityUtil.disableSnapping();
-			UnityUtil.setCalibrationToolMode('None');
-			UnityUtil.setCalibrationToolVector(null, null);
-			Viewer.off(VIEWER_EVENTS.CALIBRATION_VECTOR_CHANGED, setVector3D);
-			if (!vector3D.start || !vector3D.end) {
-				setVector3D(EMPTY_VECTOR);
-			}
-		}
-		setIsCalibrating3DState(newIsCalibrating3D);
-	};
 	useEffect(() => {
 		setStep(0);
 		setIsStepValid(false);
@@ -109,15 +73,8 @@ export const CalibrationContextComponent = ({ children }) => {
 	useEffect(() => {
 		if (isCalibrating) {
 			ViewpointsActionsDispatchers.reset();
-			setVector3D(drawing?.vector3D || EMPTY_VECTOR);
-		} else {
-			setIsCalibrating3D(false);
 		}
 	}, [isCalibrating]);
-
-	useEffect(() => {
-		setIsCalibrating3D(false);
-	}, [step]);
 
 	return (
 		<CalibrationContext.Provider value={{
