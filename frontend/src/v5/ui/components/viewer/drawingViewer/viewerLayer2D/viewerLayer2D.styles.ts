@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2020 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -17,15 +17,18 @@
 
 import styled from 'styled-components';
 
-import IconComponent from '@mui/material/SvgIcon';
+export const Container = styled.div`
+	position: absolute;
+	top: 0;
+`;
 
-export const Icon = styled(IconComponent)`
-	&& {
-		justify-content: center;
-		align-items: center;
+export const LayerLevel = styled.div`
+	position: absolute;
+	height: 100%;
+	width: 100%;
 
-		svg path {
-			stroke: currentColor;
-		}
+	& > * {
+		position: absolute;
+		top: 0;
 	}
 `;

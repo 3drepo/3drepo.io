@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CompareIcon from '@mui/icons-material/Compare';
-import TreeIcon from '@mui/icons-material/DeviceHub';
-import GroupsIcon from '@mui/icons-material/GroupWork';
-import GisIcon from '@mui/icons-material/Layers';
-import ViewsIcon from '@mui/icons-material/PhotoCamera';
-import IssuesIcon from '@mui/icons-material/Place';
-import RisksIcon from '@mui/icons-material/Warning';
+import CompareIcon from '@assets/icons/outlined/compare-outlined.svg';
+import TreeIcon from '@assets/icons/outlined/tree-outlined.svg';
+import GroupsIcon from '@assets/icons/outlined/groups-outlined.svg';
+import GisIcon from '@assets/icons/outlined/layers-outlined.svg';
+import ViewsIcon from '@assets/icons/outlined/view-outlined.svg';
+import IssuesIcon from '@assets/icons/outlined/issue-outlined.svg';
+import RisksIcon from '@assets/icons/outlined/safetibase-outlined.svg'
 import { PureComponent } from 'react';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { Container } from './panelsMenu.styles';
@@ -65,7 +65,7 @@ export class PanelsMenu extends PureComponent<any, IState> {
 		);
 	}
 
-	private renderButtons = () => this.toolbarList.map((buttonProps, index) => (
+	private renderButtons = () => this.toolbarList.map((buttonProps: any, index) => (
 		<TooltipButton
 			{...buttonProps}
 			key={index}

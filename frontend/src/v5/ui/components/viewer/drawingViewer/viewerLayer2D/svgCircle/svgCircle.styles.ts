@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,36 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Place from '@assets/icons/outlined/issue-outlined.svg';
 import styled from 'styled-components';
 
-import { COLOR } from '../../../../styles';
-
-export const PinIcon = styled(Place).attrs({
-	classes: {
-		colorSecondary: 'secondary',
-		colorPrimary: 'primary',
-		colorDisabled: 'disabled'
-	}
-})`
-	&& {
-		&.secondary {
-			color: ${COLOR.SUNGLOW};
-		}
-
-		&.primary {
-			color: ${COLOR.BLACK_54};
-		}
-
-		&.disabled {
-			color: ${COLOR.BLACK_12};
-		}
-	}
+export const Svg = styled.svg`
+	height: 100%;
+	width: 100%;
 `;
 
-export const Container = styled.span`
-	display: flex;
-	align-items: center;
-	height: 100%;
-	min-height: 40px;
+export const Circle = styled.circle`
+	stroke: ${({ theme }) => theme.palette.base.dark};
+	fill: ${({ theme }) => theme.palette.tertiary.light};
 `;
