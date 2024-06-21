@@ -449,10 +449,6 @@ export class ViewerService {
 		this.emit(VIEWER_EVENTS.ALL_MEASUREMENTS_REMOVED);
 	}
 
-	public calibrationVectorChanged(vector) {
-		this.emit(VIEWER_EVENTS.CALIBRATION_VECTOR_CHANGED, vector);
-	}
-
 	public measurementModeChanged(mode) {
 		this.emit(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, mode);
 	}
