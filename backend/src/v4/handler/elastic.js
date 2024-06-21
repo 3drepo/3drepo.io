@@ -78,7 +78,6 @@ const indicesMappings = [
 ];
 
 const createElasticClient = async () => {
-	systemLogger.logInfo(elasticConfig);
 	if(!elasticConfig) {
 		return;
 	}
@@ -117,12 +116,12 @@ const establishIndices = async (client)=>{
 const elasticClientPromise = createElasticClient();
 
 Elastic.createElasticRecord = async (index, body, id) => {
-	systemLogger.logInfo(elasticConfig);
 	try {
 		const elasticClient = await elasticClientPromise;
 		if (elasticClient && body) {
 			const { namespace } = elasticConfig;
-			systemLogger.logInfo(namespace);
+			systemLogger.logInfo(`namespace: ${namespace}`);
+			systemLogger.logInfo(`host: ${host}`);
 			if (namespace) {
 				body.namespace = namespace;
 			}
