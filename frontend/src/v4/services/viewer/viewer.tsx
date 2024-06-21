@@ -1327,6 +1327,33 @@ export class ViewerService {
 		})
 
 	}
+
+	/**
+	 * Drawings Calibration
+	 */
+	public setCalibrationToolMode(mode: string) {
+		UnityUtil.setCalibrationToolMode(mode);
+	}
+
+	public setCalibrationToolVerticalPlanes(min: number, max: number) {
+		UnityUtil.setCalibrationToolVerticalPlanes(min, max);
+	}
+
+	public selectCalibrationToolUpperPlane() {
+		UnityUtil.selectCalibrationToolUpperPlane();
+	}
+
+	public selectCalibrationToolLowerPlane() {
+		UnityUtil.selectCalibrationToolLowerPlane();
+	}
+
+	public setCalibrationToolDrawing(image: any, rect: number[]) {
+		UnityUtil.setCalibrationToolDrawing(image, rect);
+	}
+
+	public calibrationPlanesChanged(planes) {
+		this.emit(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, planes);
+	}
 }
 
 export const Viewer = new ViewerService({});

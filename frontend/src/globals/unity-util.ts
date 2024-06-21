@@ -737,8 +737,7 @@ export class UnityUtil {
 	/** @hidden */
 	public static calibrationPlanesChanged(planesJson) {
 		const planes = JSON.parse(planesJson);
-		// eslint-disable-next-line no-console
-		console.log(planes); //todo 4857 - remove this line when the viewer events are hooked up
+		UnityUtil.viewer.calibrationPlanesChanged(planes);
 	}
 
 	/*
