@@ -120,8 +120,6 @@ Elastic.createElasticRecord = async (index, body, id) => {
 		const elasticClient = await elasticClientPromise;
 		if (elasticClient && body) {
 			const { namespace } = elasticConfig;
-			systemLogger.logInfo(`namespace: ${namespace}`);
-			systemLogger.logInfo(`host: ${host}`);
 			if (namespace) {
 				body.namespace = namespace;
 			}
