@@ -20,6 +20,7 @@ import { CalibrationContext } from '../calibrationContext';
 import { Calibration2DStep } from './calibration2DStep/calibration2DStep.component';
 import { VerticalSpatialBoundariesStep } from './verticalSpatialBoundariesStep/verticalSpatialBoundariesStep.component';
 import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
+import { Calibration3DHandler } from './calibration3DHandler/calibration3DHandler.component';
 
 export const CalibrationStep = () => {
 	const { step } = useContext(CalibrationContext);
@@ -30,9 +31,11 @@ export const CalibrationStep = () => {
 		setLeftPanelRatio(show2DViewer ? .5 : 1);
 	}, [show2DViewer]);
 
-	switch (step) {
-		case 0: return null;
-		case 1: return <Calibration2DStep />;
-		default: return <VerticalSpatialBoundariesStep />;
-	}
+	return (
+		<>
+			<Calibration3DHandler />
+			{step === 1 && <Calibration2DStep />}
+			{step === 2 && <VerticalSpatialBoundariesStep />}
+		</>
+	);
 };
