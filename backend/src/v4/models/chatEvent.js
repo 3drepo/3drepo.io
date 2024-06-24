@@ -202,8 +202,26 @@ const subscribeToV5Events = () => {
 		}
 	});
 
-	EventsManager.subscribe(EventsV5.MODEL_IMPORT_FINISHED, async ({ teamspace, model, corId, user, userErr, errCode, message }) => {
+	EventsManager.subscribe(EventsV5.MODEL_IMPORT_FINISHED, async ({ teamspace, model, corId, success, user, userErr, errCode, message }) => {
+		const { revisionCount, findLatest } = require("./history");
 		const notifications = require("./notification");
+		const { findModelSettingById, prepareDefaultView } = require("./modelSetting");
+		const rawSettings =  await findModelSettingById(teamspace, model);
+		const [nRevisions, setting]  = await Promise.all([
+			revisionCount(teamspace, model),
+			prepareDefaultView(teamspace, model, rawSettings)
+		]);
+
+		const data = { user, nRevisions, ...setting };
+		modelStatusChanged(null, teamspace, model, data);
+
+		if(success) {
+			const rev = await findLatest(teamspace, model, {tag: 1});
+			if(rev) {
+				const notes = await notifications.upsertModelUpdatedNotifications(teamspace, model, rev.tag || corId);
+				notes.forEach((note) => upsertedNotification(null, note));
+			}
+		}
 
 		if (message) {
 			const notes = await notifications.insertModelUpdatedFailedNotifications(teamspace, model, user, message);
