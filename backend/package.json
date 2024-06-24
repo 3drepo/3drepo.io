@@ -32,7 +32,7 @@
     "app-config": "1.0.1",
     "archiver": "6.0.2",
     "async": "3.2.5",
-    "axios": "0.28.0",
+    "axios": "1.7.2",
     "body-parser": "1.20.2",
     "combined-stream": "1.0.8",
     "compression": "1.7.3",
