@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, call, put, select, take, takeLatest } from 'redux-saga/effects';
+import { all, call, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 import { VIEWER_PANELS } from '../../constants/viewerGui';
@@ -115,28 +115,24 @@ export function* fetchFrame({ date }) {
 
 		if (stateId) {
 			const cacheEnabled = yield select(selectCacheSetting);
-			const iDBKey = `${teamspace}.${model}.${stateId}.3DRepo`;
+			const iDBKey = `${teamspace}.${model}.${stateId}.Asite3DRepo`;
 
-			const cachedDataPromise = cacheEnabled ? DataCache.getValue(STORE_NAME.FRAMES, iDBKey) : Promise.resolve();
-			// Using directly the promise and 'then' to dispatch the rest of the actions
-			// because with yield it would sometimes stop there forever even though the promise resolved
-			cachedDataPromise.then((cachedData) => {
-				const fetchPromise = cachedData ? Promise.resolve({ data: cachedData })
-					: API.getSequenceState(teamspace, model, sequenceId, stateId);
-				fetchPromise.then((response) => {
-					const viewpointFromState = convertStateDefToViewpoint(response.data);
-					dispatch(SequencesActions.updateFrameWithViewpoint(sequenceId, stateId, viewpointFromState));
-					if (dateIsSelectedDate) {
-						put(ViewpointsActions.fetchViewpointGroups(teamspace, model, viewpointFromState));
-						dispatch(SequencesActions.setFramePending(false));
-					}
-					if (cacheEnabled && !cachedData) {
-						DataCache.putValue(STORE_NAME.FRAMES, iDBKey, response.data);
-					}
-				});
-			}).catch(() => {
-				dispatch(SequencesActions.updateFrameWithViewpoint(sequenceId, stateId, {}));
-			});
+			const cachedViewpoint = cacheEnabled ? yield DataCache.getValue(STORE_NAME.FRAMES, iDBKey) : null;
+			if (cachedViewpoint) {
+				yield put(SequencesActions.updateFrameWithViewpoint(sequenceId, stateId, cachedViewpoint));
+			} else {
+				const frameState = (yield API.getSequenceState(teamspace, model, sequenceId, stateId))?.data;
+				const viewpointFromState = yield convertStateDefToViewpoint(frameState);
+				yield put(SequencesActions.updateFrameWithViewpoint(sequenceId, stateId, viewpointFromState));
+
+				if (cacheEnabled) {
+					yield DataCache.putValue(STORE_NAME.FRAMES, iDBKey, viewpointFromState);
+				}
+			}
+
+			if (dateIsSelectedDate) {
+				yield put(SequencesActions.setFramePending(false));
+			}
 		} else {
 			// This is to avoid fetching the groups twice.
 			// When showViewpoint is called in showFrameViewpoint it fetches the groups
@@ -161,7 +157,7 @@ function * showFrameViewpoint() {
 
 function * prefetchFrames() {
 	const keyframes = yield select(selectNextKeyFramesDates);
-	yield all(keyframes.map((date) => call(fetchFrame, { date })));
+	yield all(keyframes.map((date) => put(SequencesActions.fetchFrame(date))));
 }
 
 export function* setSelectedDate({ date }) {
@@ -249,7 +245,7 @@ export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.FETCH_SEQUENCE_LIST, fetchSequenceList);
 	yield takeLatest(SequencesTypes.UPDATE_SEQUENCE, updateSequence);
 	yield takeLatest(SequencesTypes.SET_SELECTED_DATE, setSelectedDate);
-	yield takeLatest(SequencesTypes.FETCH_FRAME, fetchFrame);
+	yield takeEvery(SequencesTypes.FETCH_FRAME, fetchFrame);
 	yield takeLatest(SequencesTypes.RESTORE_MODEL_DEFAULT_VISIBILITY, restoreModelDefaultVisibility);
 	yield takeLatest(SequencesTypes.FETCH_ACTIVITIES_DEFINITIONS, fetchActivitiesDefinitions);
 	yield takeLatest(SequencesTypes.SET_SELECTED_SEQUENCE, setSelectedSequence);
