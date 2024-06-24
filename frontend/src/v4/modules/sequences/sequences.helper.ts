@@ -185,43 +185,26 @@ export const resetMovedMeshes = (sharedIds: any[]) => {
 
 };
 
+type IOverrideGroup = {
+	objects: Array<{ shared_ids: string[] }>;
+	color?: string;
+	opacity?: number;
+}
+
 export const convertStateDefToViewpoint = ({ color = [], transparency: hiddenAndTransparent = [], transformation = [] }: IStateDefinitions) => {
 	const [hidden, transparency] = partition(hiddenAndTransparent, ({ value }) => value === 0);
-	const hidden_group = { objects: [{ shared_ids: hidden[0]?.shared_ids || [] }] };
+	const hidden_group: IOverrideGroup = { objects: [{ shared_ids: hidden[0]?.shared_ids || [] }] };
 
-	const colorOverrides = color.map(({ shared_ids = [], value }) => ({
+	const override_groups: IOverrideGroup[] = color.map(({ shared_ids = [], value }) => ({
 		color: GLToHexColor(value),
 		objects: [{ shared_ids }],
 	}));
-	const override_groups = transparency.reduce((acc, { value: transparencyValue, shared_ids: transparencyIds = [] }) => {
-		transparencyIds.forEach((transparencyId) => { // Find the associated colour of the transparent object
-			color.forEach(({ value: colorValue, shared_ids: colorIds = []}) => {
-				if (colorIds.includes(transparencyId)) {
-					const hexNoTransparency = GLToHexColor(colorValue);
-					const hex = hexToOpacity(hexNoTransparency, transparencyValue * 100);
 
-					const overrideGroup = acc.find(({ color: c }) => c === hex);
-					if (!!overrideGroup) { // If a group for this colour and opacity exists add it to that group
-						overrideGroup.objects[0].shared_ids.push(transparencyId);
-					} else { // Otherwise add a new group to the color_overrides
-						acc.push({
-							color: hex,
-							objects: [{ shared_ids: [transparencyId] }],
-						})
-					}
+	transparency.forEach(({ shared_ids = [], value } ) => {
+		override_groups.push({ opacity: value, objects: [{ shared_ids }] })
+	})
 
-					// Remove the duplicate object id (which doesn't have opacity in its hex) from the color_overrides
-					const existingColorOverride = acc.find(({ color: overrideColor }) => overrideColor === hexNoTransparency).objects[0].shared_ids;
-					const indexToRemove = existingColorOverride.indexOf(transparencyId);
-					existingColorOverride.splice(indexToRemove, 1);
-					return acc;
-				}
-			})
-		})
-		return acc;
-	}, colorOverrides);
-
-	const transformation_groups = transformation.map(({ shared_ids = [], value }) => ({
+	const transformation_groups: IOverrideGroup[] = transformation.map(({ shared_ids = [], value }) => ({
 		transformation: value,
 		objects: [{ shared_ids }],
 	}));
