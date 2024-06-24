@@ -2146,17 +2146,17 @@ async-value@^1.2.2:
   resolved "https://registry.yarnpkg.com/async-value/-/async-value-1.2.2.tgz#84517a1e7cb6b1a5b5e181fa31be10437b7fb125"
   integrity sha512-8rwtYe32OAS1W9CTwvknoyts+mc3ta8N7Pi0h7AjkMaKvsFbr39K+gEfZ7Z81aPXQ1sK5M23lgLy1QfZpcpadQ==
 
-async@2.6.4, async@^2.1.1:
+async@3.2.5, async@^3.2.3, async@^3.2.4:
+  version "3.2.5"
+  resolved "https://registry.yarnpkg.com/async/-/async-3.2.5.tgz#ebd52a8fdaf7a2289a24df399f8d8485c8a46b66"
+  integrity sha512-baNZyqaaLhyLVKm/DlvdW051MSgO6b8eVfIezl9E5PqWxFgzLm/wQntEW4zOytVburDEr0JlALEpdOFwvErLsg==
+
+async@^2.1.1:
   version "2.6.4"
   resolved "https://registry.yarnpkg.com/async/-/async-2.6.4.tgz#706b7ff6084664cd7eae713f6f965433b5504221"
   integrity sha512-mzo5dfJYwAn29PeiJ0zvwTo04zj8HDJj0Mn8TD7sno7q12prdbnasKJHhkm2c1LgrhlJ0teaea8860oxi51mGA==
   dependencies:
     lodash "^4.17.14"
-
-async@^3.2.3, async@^3.2.4:
-  version "3.2.5"
-  resolved "https://registry.yarnpkg.com/async/-/async-3.2.5.tgz#ebd52a8fdaf7a2289a24df399f8d8485c8a46b66"
-  integrity sha512-baNZyqaaLhyLVKm/DlvdW051MSgO6b8eVfIezl9E5PqWxFgzLm/wQntEW4zOytVburDEr0JlALEpdOFwvErLsg==
 
 asynckit@^0.4.0:
   version "0.4.0"
