@@ -15,16 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { addModel, getModelList } = require('./commons/modelList');
-const { addRevision, deleteRevisions, getRevisionByIdOrTag, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
+const { addRevision, deleteModelRevisions, getRevisionByIdOrTag, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { deleteModel, getDrawingById, getDrawings, updateModelSettings } = require('../../../../models/modelSettings');
 const { getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../../services/filesManager');
 const { getProjectById, removeModelFromProject } = require('../../../../models/projectSettings');
-const { generateUUID } = require('../../../../utils/helper/uuids');
-const { templates } = require('../../../../utils/responseCodes');
 const { DRAWINGS_HISTORY_REF_COL } = require('../../../../models/revisions.constants');
+const { generateUUID } = require('../../../../utils/helper/uuids');
+const { modelTypes } = require('../../../../models/modelSettings.constants');
+const { templates } = require('../../../../utils/responseCodes');
 
 const Drawings = { };
 
@@ -44,7 +44,7 @@ Drawings.deleteDrawing = async (teamspace, project, drawing) => {
 	await removeFilesWithMeta(teamspace, DRAWINGS_HISTORY_REF_COL, { model: drawing });
 
 	await Promise.all([
-		deleteRevisions(teamspace, project, drawing, modelTypes.DRAWING),
+		deleteModelRevisions(teamspace, project, drawing, modelTypes.DRAWING),
 		deleteModel(teamspace, project, drawing),
 		removeModelFromProject(teamspace, project, drawing),
 	]);
@@ -78,8 +78,7 @@ Drawings.downloadRevisionFiles = async (teamspace, drawing, revision) => {
 		throw templates.fileNotFound;
 	}
 
-	const file = await getFileAsStream(teamspace, DRAWINGS_HISTORY_REF_COL, rev.rFile[0]);
-	return file;
+	return getFileAsStream(teamspace, DRAWINGS_HISTORY_REF_COL, rev.rFile[0]);
 };
 
 Drawings.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {

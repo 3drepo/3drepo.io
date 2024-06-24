@@ -450,6 +450,23 @@ const testGetSettings = () => {
 	});
 };
 
+const testUpdateRevisionStatus = () => {
+	describe('Update revision status', () => {
+		test('should update the status of a revision', async () => {
+			const teamspace = ServiceHelper.generateRandomString();
+			const container = ServiceHelper.generateRandomString();
+			const revision = ServiceHelper.generateRandomString();
+			const status = ServiceHelper.generateRandomString();
+
+			await Containers.updateRevisionStatus(teamspace, project._id, container, revision, status);
+
+			expect(Revisions.updateRevisionStatus).toHaveBeenCalledTimes(1);
+			expect(Revisions.updateRevisionStatus).toHaveBeenCalledWith(teamspace, project._id, container,
+				modelTypes.CONTAINER, revision, status);
+		});
+	});
+};
+
 const formatFilename = (name) => name.substr(36).replace(/_([^_]*)$/, '.$1');
 
 const testDownloadRevisionFiles = () => {
@@ -498,5 +515,6 @@ describe('processors/teamspaces/projects/containers', () => {
 	testGetRevisions();
 	testNewRevision();
 	testGetSettings();
+	testUpdateRevisionStatus();
 	testDownloadRevisionFiles();
 });
