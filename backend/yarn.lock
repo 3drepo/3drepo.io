@@ -1992,10 +1992,10 @@ apidoc@0.29.0:
     nodemon "^2.0.4"
     winston "^3.3.3"
 
-app-config@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/app-config/-/app-config-1.0.0.tgz#c5179ceb7a561305bd406c74835e0b5e0072b135"
-  integrity sha512-0nGnIsxXnNgY5stidpa5NeCnZ0xiFW5VwT7SBJZ8/DmajX5IrhPmDXyhJg0xutosx3obf255Ugj6chXQ+2dNuQ==
+app-config@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/app-config/-/app-config-1.0.1.tgz#83689c121efebe8cddf7dc1ee81b00ebd110aba8"
+  integrity sha512-yebFgkE5wBc43ofipEeeLswH/xvjZSvH7ghU774vywVpctqdB9U4Nq2XOlqRo0rIb1/gjAFegoCVx01cNmkrXQ==
 
 append-field@^1.0.0:
   version "1.0.0"
