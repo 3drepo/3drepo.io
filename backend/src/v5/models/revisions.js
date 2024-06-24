@@ -112,7 +112,7 @@ Revisions.isTagUnique = async (teamspace, model, tag) => {
 
 Revisions.isRevAndStatusCodeUnique = async (teamspace, model, revCode, statusCode) => {
 	try {
-		await findOneRevisionByQuery(teamspace, model, modelTypes.DRAWING, { revCode, statusCode });
+		await findOneRevisionByQuery(teamspace, undefined, modelTypes.DRAWING, { revCode, statusCode });
 		return false;
 	} catch {
 		return true;

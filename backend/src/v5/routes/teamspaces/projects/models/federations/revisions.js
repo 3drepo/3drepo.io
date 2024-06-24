@@ -21,7 +21,7 @@ const { getUserFromSession } = require('../../../../../utils/sessions');
 const { hasWriteAccessToFederation } = require('../../../../../middleware/permissions/permissions');
 const { respond } = require('../../../../../utils/responder');
 const { templates } = require('../../../../../utils/responseCodes');
-const { validateNewFederationRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
+const { validateNewRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/federations');
 
 const createNewFederationRevision = async (req, res) => {
 	const revInfo = req.body;
@@ -96,7 +96,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: The request is sent successfully.
 	 */
-	router.post('', hasWriteAccessToFederation, validateNewFederationRevisionData, createNewFederationRevision);
+	router.post('', hasWriteAccessToFederation, validateNewRevisionData, createNewFederationRevision);
 	return router;
 };
 

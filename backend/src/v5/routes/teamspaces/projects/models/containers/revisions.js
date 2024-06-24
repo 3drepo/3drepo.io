@@ -19,10 +19,12 @@ const { hasReadAccessToContainer, hasWriteAccessToContainer } = require('../../.
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
 const Containers = require('../../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
+
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { serialiseRevisionArray } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions');
 const { templates } = require('../../../../../utils/responseCodes');
-const { validateUpdateRevisionData, validateNewContainerRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
+const { validateNewRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
+const { validateUpdateRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 
 const getRevisions = (req, res, next) => {
 	const { teamspace, container } = req.params;
@@ -207,7 +209,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: creates a new revision
 	 */
-	router.post('', hasWriteAccessToContainer, validateNewContainerRevisionData, createNewContainerRevision);
+	router.post('', hasWriteAccessToContainer, validateNewRevisionData, createNewContainerRevision);
 
 	/**
 	 * @openapi

@@ -32,7 +32,8 @@ const JSONAssets = require("../models/jsonAssets");
 const Upload = require("../models/upload");
 const config = require("../config");
 const {v5Path} = require("../../interop");
-const { validateNewContainerRevisionData, validateNewFederationRevisionData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions`);
+const { validateNewRevisionData : validateNewModelRevisionData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/containers`);
+const { validateNewRevisionData : validateNewFedRevisionData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/federations`);
 const ContainersV5 = require(`${v5Path}/processors/teamspaces/projects/models/containers`);
 const FederationsV5 = require(`${v5Path}/processors/teamspaces/projects/models/federations`);
 const ResponderV5 = require(`${v5Path}/utils/responder`);
@@ -786,7 +787,7 @@ router.get("/:model/revision/master/head/srcAssets.json", middlewares.hasReadAcc
  *
  */
 
-router.put("/:model", middlewares.hasEditAccessToFedModel, middlewares.formatV5NewFedRevisionsData, validateNewFederationRevisionData, updateModel);
+router.put("/:model", middlewares.hasEditAccessToFedModel, middlewares.formatV5NewFedRevisionsData, validateNewFedRevisionData, updateModel);
 
 /**
  * @api {post} /:teamspace/models/permissions Update multiple models permissions
@@ -1891,7 +1892,7 @@ router.patch("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToM
  * ------WebKitFormBoundarySos0xligf1T8Sy8I-- *
  *
  */
-router.post("/:model/upload",  middlewares.hasUploadAccessToModel, middlewares.formatV5NewModelRevisionsData, validateNewContainerRevisionData, uploadModel);
+router.post("/:model/upload",  middlewares.hasUploadAccessToModel, middlewares.formatV5NewModelRevisionsData, validateNewModelRevisionData, uploadModel);
 /**
  * @api {get} /:teamspace/:model/download/latest Download model
  * @apiName downloadModel

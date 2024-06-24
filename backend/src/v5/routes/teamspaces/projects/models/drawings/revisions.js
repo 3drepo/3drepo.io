@@ -17,12 +17,13 @@
 
 const { hasReadAccessToDrawing, hasWriteAccessToDrawing } = require('../../../../../middleware/permissions/permissions');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
-const { validateNewDrawingRevisionData, validateUpdateRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
+const { validateUpdateRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 const Drawings = require('../../../../../processors/teamspaces/projects/models/drawings');
 const { Router } = require('express');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { serialiseRevisionArray } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions');
 const { templates } = require('../../../../../utils/responseCodes');
+const { validateNewRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/drawings');
 
 const getRevisions = async (req, res, next) => {
 	const { teamspace, drawing } = req.params;
@@ -208,7 +209,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: creates a new revision
 	 */
-	router.post('', hasWriteAccessToDrawing, validateNewDrawingRevisionData, createNewDrawingRevision);
+	router.post('', hasWriteAccessToDrawing, validateNewRevisionData, createNewDrawingRevision);
 
 	/**
 	 * @openapi

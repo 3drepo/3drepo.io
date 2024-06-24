@@ -26,6 +26,12 @@ jest.mock('../../../../../../../src/v5/processors/teamspaces/projects/models/com
 const ModelList = require(`${src}/processors/teamspaces/projects/models/commons/modelList`);
 jest.mock('../../../../../../../src/v5/processors/teamspaces/projects/models/commons/favourites');
 const Favourites = require(`${src}/processors/teamspaces/projects/models/commons/favourites`);
+jest.mock('../../../../../../../src/v5/services/filesManager');
+const FilesManager = require(`${src}/services/filesManager`);
+jest.mock('../../../../../../../src/v5/models/revisions');
+const Revisions = require(`${src}/models/revisions`);
+const { DRAWINGS_HISTORY_REF_COL } = require(`${src}/models/revisions.constants`);
+
 const Drawings = require(`${src}/processors/teamspaces/projects/models/drawings`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
@@ -92,27 +98,22 @@ const testUpdateSettings = () => {
 
 const testDeleteDrawing = () => {
 	describe('Delete drawing', () => {
-		test('should call updateModelSettings', async () => {
+		test('should delete drawing', async () => {
 			const teamspace = generateRandomString();
 			const model = generateRandomString();
 			const project = generateRandomString();
 
 			await Drawings.deleteDrawing(teamspace, project, model);
-			expect(ModelList.deleteModel).toHaveBeenCalledTimes(1);
-			expect(ModelList.deleteModel).toHaveBeenCalledWith(teamspace, project, model);
-		});
 
-		test('should return error if deleteModel fails', async () => {
-			const teamspace = generateRandomString();
-			const project = generateRandomString();
-			const model = generateRandomString();
-			const err = new Error(generateRandomString());
-			ModelList.deleteModel.mockRejectedValueOnce(err);
-
-			await expect(Drawings.deleteDrawing(teamspace, project, model)).rejects.toEqual(err);
-
-			expect(ModelList.deleteModel).toHaveBeenCalledTimes(1);
-			expect(ModelList.deleteModel).toHaveBeenCalledWith(teamspace, project, model);
+			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledTimes(1);
+			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_REF_COL,
+				{ model });
+			expect(ModelSettings.deleteModel).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.deleteModel).toHaveBeenCalledWith(teamspace, project, model);
+			expect(Revisions.deleteRevisions).toHaveBeenCalledTimes(1);
+			expect(Revisions.deleteRevisions).toHaveBeenCalledWith(teamspace, project, model, modelTypes.DRAWING);
+			expect(ProjectSettings.removeModelFromProject).toHaveBeenCalledTimes(1);
+			expect(ProjectSettings.removeModelFromProject).toHaveBeenCalledWith(teamspace, project, model);
 		});
 	});
 };

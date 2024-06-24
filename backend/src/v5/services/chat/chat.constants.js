@@ -53,6 +53,8 @@ const events = [
 	'newDrawing',
 	'drawingRemoved',
 	'drawingSettingsUpdate',
+	'drawingNewRevision',
+	'drawingRevisionUpdate',
 ];
 
 const errors = [

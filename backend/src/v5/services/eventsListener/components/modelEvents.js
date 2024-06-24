@@ -78,9 +78,9 @@ const revisionUpdated = async ({ teamspace, project, model, data, sender, modelT
 
 const revisionAdded = async ({ teamspace, project, model, revision, modelType }) => {
 	try {
-		const { tag, author, timestamp, desc, rFile } = await getRevisionByIdOrTag(teamspace,
+		const { tag, author, timestamp, desc, rFile, format } = await getRevisionByIdOrTag(teamspace,
 			model, modelType, stringToUUID(revision),
-			{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1 });
+			{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1 });
 
 		const modelEvents = {
 			[modelTypes.CONTAINER]: chatEvents.CONTAINER_NEW_REVISION,
@@ -88,14 +88,12 @@ const revisionAdded = async ({ teamspace, project, model, revision, modelType })
 			[modelTypes.DRAWING]: chatEvents.DRAWING_NEW_REVISION,
 		};
 
-		const format = getRevisionFormat(rFile);
-
 		await createModelMessage(modelEvents[modelType], { _id: revision,
 			tag,
 			author,
 			timestamp: timestamp.getTime(),
 			desc,
-			...deleteIfUndefined({ format }),
+			...deleteIfUndefined({ format: format ?? getRevisionFormat(rFile) }),
 		}, teamspace, project, model);
 	} catch (err) {
 		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
