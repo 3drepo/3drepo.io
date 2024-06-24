@@ -30,7 +30,7 @@
     "amqplib": "0.8.0",
     "apidoc": "0.29.0",
     "app-config": "1.0.1",
-    "archiver": "5.3.1",
+    "archiver": "7.0.1",
     "async": "2.6.4",
     "axios": "0.28.0",
     "body-parser": "1.20.2",
