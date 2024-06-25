@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, call, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
+import { all, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 import { VIEWER_PANELS } from '../../constants/viewerGui';
@@ -24,15 +24,13 @@ import * as API from '../../services/api';
 import { DataCache, STORE_NAME } from '../../services/dataCache';
 import { DialogActions } from '../dialog';
 import { selectCurrentModel, selectCurrentModelTeamspace, selectCurrentRevisionId } from '../model';
-import { dispatch } from '../store';
 import { TreeActions } from '../tree';
 
 import { selectCacheSetting } from '../viewer';
 import { selectLeftPanels, ViewerGuiActions } from '../viewerGui';
-import { ViewpointsActions } from '../viewpoints';
 import { convertStateDefToViewpoint, getDateWithinBoundaries, getSelectedFrame, MODAL_DATE_NOT_AVAILABLE_BODY, MODAL_TODAY_NOT_AVAILABLE_BODY } from './sequences.helper';
 import {
-	selectActivitiesDefinitions, selectFrames, selectNextKeyFramesDates, selectSelectedDate, selectSelectedFrameViewpoint,
+	selectActivitiesDefinitions, selectFrames, selectNextKeyFramesDates,
 	selectSelectedSequence, selectSequences, selectSequenceModel, selectOpenOnToday,
 } from './sequences.selectors';
 import { selectSelectedSequenceId, SequencesActions, SequencesTypes } from '.';
@@ -109,9 +107,7 @@ export function* fetchFrame({ date }) {
 		const model = yield select(selectSequenceModel);
 		const sequenceId =  yield select(selectSelectedSequenceId);
 		const frames = yield select(selectFrames);
-		const selectedDate = yield select(selectSelectedDate);
-		const dateIsSelectedDate = selectedDate.valueOf() === date.valueOf()
-		const { state: stateId, viewpoint } = getSelectedFrame(frames, date);
+		const { state: stateId } = getSelectedFrame(frames, date);
 
 		if (stateId) {
 			const cacheEnabled = yield select(selectCacheSetting);
@@ -129,31 +125,11 @@ export function* fetchFrame({ date }) {
 					yield DataCache.putValue(STORE_NAME.FRAMES, iDBKey, viewpointFromState);
 				}
 			}
-
-			if (dateIsSelectedDate) {
-				yield put(SequencesActions.setFramePending(false));
-			}
-		} else {
-			// This is to avoid fetching the groups twice.
-			// When showViewpoint is called in showFrameViewpoint it fetches the groups
-			if (dateIsSelectedDate) {
-				yield put(ViewpointsActions.fetchViewpointGroups(teamspace, model, { viewpoint }));
-				yield put(SequencesActions.setFramePending(false));
-			}
 		}
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('fetch frame', 'sequences', error));
 	}
 }
-
-// function * showFrameViewpoint() {
-// 	const teamspace = yield select(selectCurrentModelTeamspace);
-// 	const model = yield select(selectSequenceModel);
-// 	const viewpoint = yield select(selectSelectedFrameViewpoint);
-// 	if (viewpoint) {
-// 		yield put(ViewpointsActions.showViewpoint(teamspace, model, { viewpoint }));
-// 	}
-// }
 
 function * prefetchFrames() {
 	const keyframes = yield select(selectNextKeyFramesDates);
@@ -164,7 +140,6 @@ export function* setSelectedDate({ date }) {
 	try {
 		const selectedSequence = yield select(selectSelectedSequence);
 		const openOnToday = yield select(selectOpenOnToday);
-		yield put(SequencesActions.setFramePending(true));
 
 		if (selectedSequence) {
 			// bound date by sequence start/end date
@@ -187,9 +162,6 @@ export function* setSelectedDate({ date }) {
 				}
 			}
 			yield put(SequencesActions.setSelectedDateSuccess(dateToSelect));
-			// yield put(SequencesActions.prefetchFrames());
-			// yield take(SequencesTypes.SET_FRAME_PENDING)
-			// yield showFrameViewpoint();
 		}
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('select frame', 'sequences', error));

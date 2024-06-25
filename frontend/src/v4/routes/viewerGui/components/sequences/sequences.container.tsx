@@ -29,7 +29,6 @@ import {
 	selectSelectedSequence, selectSelectedStartingDate, selectSequences,
 	selectStartDate, selectStepInterval, selectStepScale, SequencesActions,
 	selectSelectedFrameViewpoint,
-	selectSelectedFrame,
 } from '../../../../modules/sequences';
 import { selectDraggablePanels, selectRightPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
 import { Sequences } from './sequences.component';
@@ -51,7 +50,6 @@ const mapStateToProps = createStructuredSelector({
 	draggablePanels: selectDraggablePanels,
 	isActivitiesPending: selectActivitiesPending,
 	viewpoint: selectSelectedFrameViewpoint,
-	frame: selectSelectedFrame,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

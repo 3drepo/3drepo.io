@@ -63,7 +63,7 @@ interface IProps {
 const SequenceDetails = ({
 	startDate, endDate, selectedDate, selectedStartDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
 	setStepScale, currentTasks, loadingFrame, rightPanels, toggleActivitiesPanel,
-	fetchActivityDetails, frames, isActivitiesPending, toggleLegend, draggablePanels, viewpoint, frame
+	fetchActivityDetails, frames, isActivitiesPending, toggleLegend, draggablePanels, viewpoint,
 }) => (
 	<>
 		<SequenceForm />
@@ -85,7 +85,6 @@ const SequenceDetails = ({
 			toggleLegend={toggleLegend}
 			draggablePanels={draggablePanels}
 			viewpoint={viewpoint}
-			frame={frame}
 		/>
 		<TasksList
 			tasks={currentTasks}

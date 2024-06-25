@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { findIndex, isEmpty, partition } from 'lodash';
+import { findIndex, isEmpty } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
+import { produceAll } from '@/v5/helpers/reducers.helper';
 import { STEP_SCALE } from '../../constants/sequences';
 import { sortByField } from '../../helpers/sorting';
 
@@ -40,13 +41,12 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	fetchActivitiesDefinitions: ['sequenceId'],
 	fetchActivitiesDefinitionsSuccess: ['sequenceId', 'activities'],
 	setActivitiesPending: ['isPending'],
-	setFramePending: ['isPending'],
 	showSequenceDate: ['date'],
 	restoreModelDefaultVisibility: [],
 	reset: []
 }, { prefix: 'SEQUENCES/' });
 
-export interface ISequance {
+interface ISequence {
 	_id: string;
 	rev_id: string;
 	name: string;
@@ -71,11 +71,10 @@ export type IStateDefinitions = {
 };
 
 export interface ISequencesState {
-	sequences: null | ISequance[];
+	sequences: null | ISequence[];
 	selectedSequence: null | string;
 	lastSelectedSequence: null | string;
 	selectedDate: null | Date;
-	framePending: boolean;
 	stepInterval: number;
 	stepScale: STEP_SCALE;
 	hiddenGeometryVisible: boolean;
@@ -89,7 +88,6 @@ export const INITIAL_STATE: ISequencesState = {
 	selectedSequence: null,
 	lastSelectedSequence: null,
 	selectedDate: null,
-	framePending: true,
 	stepInterval: 1,
 	stepScale: STEP_SCALE.DAY,
 	hiddenGeometryVisible: true,
@@ -110,7 +108,7 @@ export const fetchSequenceSuccess = (state = INITIAL_STATE, { sequence }) => {
 		sequences = [sequence];
 	}
 
-	return { ...state, sequences };
+	state.sequences = sequences;
 };
 
 export const fetchSequenceListSuccess = (state = INITIAL_STATE, { sequences }) => {
@@ -123,46 +121,37 @@ export const updateSequenceSuccess = (state = INITIAL_STATE, { sequenceId, newNa
 	const index = findIndex(state.sequences, (sequence) => sequence._id === sequenceId);
 	sequencesList[index].name = newName;
 
-	return {
-		...state,
-		sequences: sequencesList
-	};
+	state.sequences = sequencesList;
 };
 
 export const fetchActivitiesDefinitionsSuccess = (state = INITIAL_STATE, { sequenceId, activities }) => {
-	return { ...state, activities: {...state.activities, [sequenceId]: activities } };
+	state.activities =  {...state.activities, [sequenceId]: activities }
 };
 
 export const setActivitiesPending = (state = INITIAL_STATE, { isPending }) => {
-	return {...state, activitiesPending: isPending };
-};
-
-export const setFramePending = (state = INITIAL_STATE, { isPending }) => {
-	return {...state, framePending: isPending };
+	state.activitiesPending = isPending;
 };
 
 export const setSelectedSequenceSuccess = (state = INITIAL_STATE, { sequenceId }) => {
 	let lastSelectedSequence = state.lastSelectedSequence;
 
 	if (sequenceId !== null && state.lastSelectedSequence !== sequenceId) {
-		state = {...state,
-			selectedDate: null,
-			stepInterval: INITIAL_STATE.stepInterval,
-			stepScale: INITIAL_STATE.stepScale
-		};
-
+		state.selectedDate = null;
+		state.stepInterval = INITIAL_STATE.stepInterval;
+		state.stepScale = INITIAL_STATE.stepScale;
 		lastSelectedSequence = sequenceId;
 	}
 
-	return {...state, selectedSequence: sequenceId, lastSelectedSequence };
+	state.selectedSequence =  sequenceId;
+	state.lastSelectedSequence =  lastSelectedSequence;
 };
 
 export const setOpenOnTodaySuccess =  (state = INITIAL_STATE, { openOnToday }) => {
-	return {...state, openOnToday };
+	state.openOnToday = openOnToday;
 };
 
 export const setSelectedDateSuccess =  (state = INITIAL_STATE, { date }) => {
-	return {...state, selectedDate: date };
+	state.selectedDate = date;
 };
 
 export const updateFrameWithViewpoint = (state = INITIAL_STATE, { sequenceId, stateId, viewpoint }) => {
@@ -171,42 +160,33 @@ export const updateFrameWithViewpoint = (state = INITIAL_STATE, { sequenceId, st
 	}
 	const sequenceToUpdate = state.sequences.find(({ _id }) => _id === sequenceId);
 	const frameToUpdate = sequenceToUpdate.frames.find(({ state: s }) => s === stateId);
-	// const [sequenceToUpdate, otherSequences] = partition(state.sequences, (({ _id }) => _id === sequenceId));
-	// const [frameToUpdate, otherFrames] = partition(sequenceToUpdate.frames, (({ state: s }) => s === stateId));
 
 	if (!frameToUpdate) {
 		// If two successive dates correspond to the same frame updateFrameViewpoint can get called for a frame that has already been converted
 		return state;
 	}
-	// console.log({ sequenceToUpdate, frameToUpdate, otherFrames})
-	// sequenceToUpdate.frames = [...otherFrames, { dateTime: frameToUpdate[0].dateTime, viewpoint}]
 	Object.assign(frameToUpdate, viewpoint);
-	// frameToUpdate.viewpoint = viewpoint;
 	delete frameToUpdate.state;
-
-	return state;
-	// return {...state, sequences: [...otherSequences, {...sequenceToUpdate[0], frames: [...otherFrames, { dateTime: frameToUpdate[0].dateTime, state: stateId, viewpoint}]}]};
 };
 
 export const setStepInterval = (state = INITIAL_STATE, { stepInterval }) => {
-	return {...state, stepInterval};
+	state.stepInterval = stepInterval;
 };
 
 export const setStepScale = (state = INITIAL_STATE, { stepScale }) => {
-	return {...state, stepScale};
+	state.stepScale = stepScale;
 };
 
-export const reset = () => {
-	return {...INITIAL_STATE};
+export const reset = (state) => {
+	Object.assign(state, INITIAL_STATE);
 };
 
-export const reducer = createReducer(INITIAL_STATE, {
+export const reducer = createReducer(INITIAL_STATE, produceAll({
 	[SequencesTypes.FETCH_SEQUENCE_SUCCESS]: fetchSequenceSuccess,
 	[SequencesTypes.FETCH_SEQUENCE_LIST_SUCCESS]: fetchSequenceListSuccess,
 	[SequencesTypes.UPDATE_SEQUENCE_SUCCESS]: updateSequenceSuccess,
 	[SequencesTypes.FETCH_ACTIVITIES_DEFINITIONS_SUCCESS]: fetchActivitiesDefinitionsSuccess,
 	[SequencesTypes.SET_ACTIVITIES_PENDING]: setActivitiesPending,
-	[SequencesTypes.SET_FRAME_PENDING]: setFramePending,
 	[SequencesTypes.SET_OPEN_ON_TODAY_SUCCESS]: setOpenOnTodaySuccess,
 	[SequencesTypes.SET_SELECTED_DATE_SUCCESS]: setSelectedDateSuccess,
 	[SequencesTypes.UPDATE_FRAME_WITH_VIEWPOINT]: updateFrameWithViewpoint,
@@ -214,4 +194,4 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.SET_STEP_INTERVAL]: setStepInterval,
 	[SequencesTypes.SET_STEP_SCALE]: setStepScale,
 	[SequencesTypes.RESET]: reset
-});
+}));

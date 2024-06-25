@@ -25,8 +25,6 @@ import { IStateDefinitions } from './sequences.redux';
 
 export const getSelectedFrame = (frames, endingDate) => {
 	const index = getSelectedFrameIndex(frames, endingDate);
-	const frame = {...frames[index]};
-	return frame;
 	return frames[index];
 };
 
