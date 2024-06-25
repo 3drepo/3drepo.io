@@ -29,6 +29,7 @@ matrix:
         - sudo apt-get update
         - sudo apt-get install -y mongodb-org mongodb-org-database mongodb-org-server mongodb-org-mongos mongodb-org-tools
         - sudo systemctl daemon-reload && sudo systemctl start mongod && echo $(mongod --version)
+        - sudo systemctl | grep running
         - mkdir -p submodules
         - test_ver=`cat backend/testDBVersion`
         - cd submodules
@@ -36,6 +37,7 @@ matrix:
         - cd tests
         - git checkout $test_ver
         - git status
+        - sudo systemctl | grep running
         - cd backend && mongorestore
         - cd ../../../
         - cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
