@@ -38,7 +38,7 @@ matrix:
         - git checkout $test_ver
         - git status
         - sudo systemctl | grep mongo
-        - journalctl -u mongod.service -b
+        - sudo journalctl -u mongod.service -b
         - cd backend && mongorestore
         - cd ../../../
         - cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
