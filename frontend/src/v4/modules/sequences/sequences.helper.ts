@@ -17,7 +17,6 @@
 import { isEqual, partition } from 'lodash';
 import { formatMessage } from '@/v5/services/intl';
 import { GLToHexColor } from '@/v4/helpers/colors';
-import { hexToOpacity } from '@/v5/ui/themes/theme';
 import { STEP_SCALE } from '../../constants/sequences';
 import { Viewer } from '../../services/viewer/viewer';
 import { getState } from '../store';
@@ -26,6 +25,8 @@ import { IStateDefinitions } from './sequences.redux';
 
 export const getSelectedFrame = (frames, endingDate) => {
 	const index = getSelectedFrameIndex(frames, endingDate);
+	const frame = {...frames[index]};
+	return frame;
 	return frames[index];
 };
 

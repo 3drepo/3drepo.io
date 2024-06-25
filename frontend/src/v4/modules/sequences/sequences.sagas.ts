@@ -146,14 +146,14 @@ export function* fetchFrame({ date }) {
 	}
 }
 
-function * showFrameViewpoint() {
-	const teamspace = yield select(selectCurrentModelTeamspace);
-	const model = yield select(selectSequenceModel);
-	const viewpoint = yield select(selectSelectedFrameViewpoint);
-	if (viewpoint) {
-		yield put(ViewpointsActions.showViewpoint(teamspace, model, { viewpoint }));
-	}
-}
+// function * showFrameViewpoint() {
+// 	const teamspace = yield select(selectCurrentModelTeamspace);
+// 	const model = yield select(selectSequenceModel);
+// 	const viewpoint = yield select(selectSelectedFrameViewpoint);
+// 	if (viewpoint) {
+// 		yield put(ViewpointsActions.showViewpoint(teamspace, model, { viewpoint }));
+// 	}
+// }
 
 function * prefetchFrames() {
 	const keyframes = yield select(selectNextKeyFramesDates);
@@ -187,9 +187,9 @@ export function* setSelectedDate({ date }) {
 				}
 			}
 			yield put(SequencesActions.setSelectedDateSuccess(dateToSelect));
-			yield put(SequencesActions.prefetchFrames());
-			yield take(SequencesTypes.SET_FRAME_PENDING)
-			yield showFrameViewpoint();
+			// yield put(SequencesActions.prefetchFrames());
+			// yield take(SequencesTypes.SET_FRAME_PENDING)
+			// yield showFrameViewpoint();
 		}
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('select frame', 'sequences', error));

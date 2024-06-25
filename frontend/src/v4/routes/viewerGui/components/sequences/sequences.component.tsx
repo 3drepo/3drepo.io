@@ -57,12 +57,13 @@ interface IProps {
 	toggleLegend: () => void;
 	resetLegendPanel: () => void;
 	clearTransformations: () => void;
+	viewpoint: any;
 }
 
 const SequenceDetails = ({
 	startDate, endDate, selectedDate, selectedStartDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
 	setStepScale, currentTasks, loadingFrame, rightPanels, toggleActivitiesPanel,
-	fetchActivityDetails, frames, isActivitiesPending, toggleLegend, draggablePanels,
+	fetchActivityDetails, frames, isActivitiesPending, toggleLegend, draggablePanels, viewpoint, frame
 }) => (
 	<>
 		<SequenceForm />
@@ -83,6 +84,8 @@ const SequenceDetails = ({
 			isActivitiesPending={isActivitiesPending}
 			toggleLegend={toggleLegend}
 			draggablePanels={draggablePanels}
+			viewpoint={viewpoint}
+			frame={frame}
 		/>
 		<TasksList
 			tasks={currentTasks}

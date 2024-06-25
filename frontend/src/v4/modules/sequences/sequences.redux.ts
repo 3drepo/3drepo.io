@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { findIndex, isEmpty } from 'lodash';
+import { findIndex, isEmpty, partition } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import { STEP_SCALE } from '../../constants/sequences';
 import { sortByField } from '../../helpers/sorting';
@@ -171,15 +171,21 @@ export const updateFrameWithViewpoint = (state = INITIAL_STATE, { sequenceId, st
 	}
 	const sequenceToUpdate = state.sequences.find(({ _id }) => _id === sequenceId);
 	const frameToUpdate = sequenceToUpdate.frames.find(({ state: s }) => s === stateId);
+	// const [sequenceToUpdate, otherSequences] = partition(state.sequences, (({ _id }) => _id === sequenceId));
+	// const [frameToUpdate, otherFrames] = partition(sequenceToUpdate.frames, (({ state: s }) => s === stateId));
 
 	if (!frameToUpdate) {
 		// If two successive dates correspond to the same frame updateFrameViewpoint can get called for a frame that has already been converted
 		return state;
 	}
+	// console.log({ sequenceToUpdate, frameToUpdate, otherFrames})
+	// sequenceToUpdate.frames = [...otherFrames, { dateTime: frameToUpdate[0].dateTime, viewpoint}]
 	Object.assign(frameToUpdate, viewpoint);
+	// frameToUpdate.viewpoint = viewpoint;
 	delete frameToUpdate.state;
 
 	return state;
+	// return {...state, sequences: [...otherSequences, {...sequenceToUpdate[0], frames: [...otherFrames, { dateTime: frameToUpdate[0].dateTime, state: stateId, viewpoint}]}]};
 };
 
 export const setStepInterval = (state = INITIAL_STATE, { stepInterval }) => {

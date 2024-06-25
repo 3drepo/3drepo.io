@@ -25,7 +25,7 @@ import Replay from '@mui/icons-material/Replay';
 import Stop from '@mui/icons-material/Stop';
 import { debounce, noop } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DialogsActionsDispatchers, SequencesActionsDispatchers, ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 import { STEP_SCALE } from '../../../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
@@ -71,6 +71,8 @@ interface IProps {
 	isActivitiesPending: boolean;
 	draggablePanels: string[];
 	toggleLegend: () => void;
+	viewpoint: any;
+	frame: any,
 }
 
 interface IState {
@@ -151,6 +153,9 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 	public componentDidUpdate(prevProps: IProps) {
 		if (prevProps.value !== this.props.value) {
 			this.setState({value: this.props.value});
+
+			SequencesActionsDispatchers.prefetchFrames();
+			console.log('@@ PREFETCH')
 		}
 
 		if (prevProps.stepScale !== this.props.stepScale) {
@@ -168,6 +173,17 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 				this.play();
 			}, this.playInterval);
 		}
+
+		if ((prevProps.viewpoint !== this.props.viewpoint)) {
+			console.log('@@ VIEWPOINT CHANGE!', this.props.viewpoint);
+
+		}
+		if ((prevProps.frame.viewpoint !== this.props.frame.viewpoint)) {
+			console.log('@@ FRAME CHANGE!', this.props.frame)
+
+		}
+		console.log('@@ sequencePlayer update viewpoint', this.props.viewpoint)
+		console.log('@@ sequencePlayer update frame', this.props.frame)
 	}
 
 	public onClickPlayStop = () => {

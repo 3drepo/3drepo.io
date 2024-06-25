@@ -68,6 +68,7 @@ interface IGroupsActionCreators {
 interface ISequencesActionCreators {
 	showSequenceDate: (date: Date | null) => Action;
 	setSelectedDate: (date: Date | null) => Action;
+	prefetchFrames: () => Action,
 }
 
 interface IJobsActionCreators {

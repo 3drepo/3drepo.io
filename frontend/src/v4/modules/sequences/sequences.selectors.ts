@@ -177,12 +177,11 @@ export const selectSelectedFrame = createSelector(
 	selectFrames, selectSelectedStartingDate, getSelectedFrame
 );
 
-export const selectSelectedStateId = createSelector(
-	selectSelectedFrame, (frame) =>  (frame || {}).state
-);
-
 export const selectSelectedFrameViewpoint = createSelector(
-	selectSelectedFrame,  (frame) =>  (frame || {}).viewpoint
+	selectSelectedFrame, (frame) => {
+		console.log('@@ frame', frame)
+		return frame?.viewpoint
+	}
 );
 
 // Filters the activities by range as well as it's subActivities
