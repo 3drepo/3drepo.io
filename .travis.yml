@@ -31,7 +31,6 @@ matrix:
         - sudo mkdir /var/lib/mongodb
         - sudo chmod 777 /var/lib/mongodb
         - sudo systemctl daemon-reload && sudo systemctl start mongod && echo $(mongod --version)
-        - sudo systemctl | grep mongo
         - mkdir -p submodules
         - test_ver=`cat backend/testDBVersion`
         - cd submodules
@@ -39,9 +38,6 @@ matrix:
         - cd tests
         - git checkout $test_ver
         - git status
-        - sudo systemctl | grep mongo
-        - sudo journalctl -u mongod.service -b
-        - sudo cat /var/log/mongodb/mongod.log
         - cd backend && mongorestore
         - cd ../../../
         - cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
