@@ -37,7 +37,7 @@ export const CalibrationHeader = () => {
 	const isLastStep = step === 2;
 
 	const getIsStepValid = () => {
-		if (step === 0) return vector3D.start && vector3D.end;
+		if (step === 0) return !!(vector3D.start && vector3D.end);
 		return isStepValid;
 	};
 
