@@ -18,8 +18,8 @@
 const { convertAllUUIDs, getModelIdFromParam } = require('../dataConverter/pathParams');
 const {
 	hasAdminAccessToContainer, hasAdminAccessToDrawing, hasAdminAccessToFederation, hasCommenterAccessToContainer,
-	hasCommenterAccessToFederation, hasReadAccessToContainer, hasReadAccessToFederation,
-	hasWriteAccessToContainer, hasWriteAccessToFederation, hasReadAccessToDrawing, hasWriteAccessToDrawing
+	hasCommenterAccessToFederation, hasReadAccessToContainer, hasReadAccessToDrawing,
+	hasReadAccessToFederation, hasWriteAccessToContainer, hasWriteAccessToDrawing, hasWriteAccessToFederation,
 } = require('./components/models');
 const { isTeamspaceAdmin, isTeamspaceMember } = require('./components/teamspaces');
 const { isProjectAdmin } = require('./components/projects');

@@ -530,9 +530,9 @@ const establishRoutes = () => {
 	*                         type: string
 	*                         description: Suitable for coordinationn
 	*                         example: S1
-	*                 example: [ { code: "S0", description: "Initial status" }, { code: "S1", description: "Suitable for coordination" }]
+	*             example: [ { code: "S0", description: "Initial status" }, { code: "S1", description: "Suitable for coordination" }]
 	*/
-	router.get('/:project/settings/statusCodes', getStatusCodes);
+	router.get('/:project/settings/statusCodes', hasAccessToTeamspace, projectExists, getStatusCodes);
 
 	return router;
 };

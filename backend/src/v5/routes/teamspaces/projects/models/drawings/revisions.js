@@ -17,13 +17,13 @@
 
 const { hasReadAccessToDrawing, hasWriteAccessToDrawing } = require('../../../../../middleware/permissions/permissions');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
-const { validateUpdateRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 const Drawings = require('../../../../../processors/teamspaces/projects/models/drawings');
 const { Router } = require('express');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { serialiseRevisionArray } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions');
 const { templates } = require('../../../../../utils/responseCodes');
 const { validateNewRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/drawings');
+const { validateUpdateRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 
 const getRevisions = async (req, res, next) => {
 	const { teamspace, drawing } = req.params;
@@ -48,7 +48,7 @@ const updateRevisionStatus = (req, res) => {
 	}).catch((err) => respond(req, res, err));
 };
 
-const createNewDrawingRevision = async (req, res) => {
+const createNewRevision = async (req, res) => {
 	try {
 		const { file } = req;
 		const { teamspace, project, drawing } = req.params;
@@ -150,7 +150,7 @@ const establishRoutes = () => {
 	 *   post:
 	 *     description: Create a new revision.
 	 *     tags: [Revisions]
-	 *     operationId: createNewDrawingRevision
+	 *     operationId: createNewRevision
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -209,7 +209,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: creates a new revision
 	 */
-	router.post('', hasWriteAccessToDrawing, validateNewRevisionData, createNewDrawingRevision);
+	router.post('', hasWriteAccessToDrawing, validateNewRevisionData, createNewRevision);
 
 	/**
 	 * @openapi

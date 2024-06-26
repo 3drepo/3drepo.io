@@ -17,10 +17,10 @@
 
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
-const { publish } = require('../services/eventsManager/eventsManager');
-const { templates } = require('../utils/responseCodes');
 const { generateUUID } = require('../utils/helper/uuids');
 const { modelTypes } = require('./modelSettings.constants');
+const { publish } = require('../services/eventsManager/eventsManager');
+const { templates } = require('../utils/responseCodes');
 
 const Revisions = {};
 

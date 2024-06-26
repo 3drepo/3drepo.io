@@ -30,6 +30,7 @@ const { io: ioClient } = require('socket.io-client');
 const { providers } = require(`${src}/services/sso/sso.constants`);
 
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
+const { DRAWINGS_HISTORY_REF_COL, DRAWINGS_HISTORY_COL } = require(`${src}/models/revisions.constants`);
 const DbHandler = require(`${src}/handler/db`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { INTERNAL_DB } = require(`${src}/handler/db.constants`);
@@ -44,7 +45,7 @@ const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constant
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { isArray } = require(`${src}/utils/helper/typeCheck`);
 const FilesManager = require('../../../src/v5/services/filesManager');
-const { modelTypes } = require('../../../src/v5/models/modelSettings.constants');
+const { modelTypes, statusCodes } = require('../../../src/v5/models/modelSettings.constants');
 
 const { statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
 const { generateFullSchema } = require(`${src}/schemas/tickets/templates`);
@@ -148,14 +149,14 @@ db.createModel = (teamspace, _id, name, props) => {
 	return DbHandler.insertOne(teamspace, 'settings', settings);
 };
 
-db.createRevision = async (teamspace, modelId, revision) => {
+db.createRevision = async (teamspace, modelId, revision, isDrawing) => {
 	if (revision.rFile) {
 		const refId = revision.rFile[0];
-		await FilesManager.storeFile(teamspace, `${modelId}.history.ref`, refId, revision.refData);
+		await FilesManager.storeFile(teamspace, isDrawing ? DRAWINGS_HISTORY_REF_COL : `${modelId}.history.ref`, refId, revision.refData);
 	}
 	const formattedRevision = { ...revision, _id: stringToUUID(revision._id) };
 	delete formattedRevision.refData;
-	await DbHandler.insertOne(teamspace, `${modelId}.history`, formattedRevision);
+	await DbHandler.insertOne(teamspace, isDrawing ? DRAWINGS_HISTORY_COL : `${modelId}.history`, formattedRevision);
 };
 
 db.createSequence = async (teamspace, model, { sequence, states, activities, activityTree }) => {
@@ -425,19 +426,22 @@ ServiceHelper.generateRandomModel = ({ modelType = modelTypes.CONTAINER, viewers
 	};
 };
 
-ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true) => {
+ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, isDrawing) => {
 	const _id = ServiceHelper.generateUUIDString();
-	const entry = {
+	const entry = deleteIfUndefined({
 		_id,
-		tag: ServiceHelper.generateRandomString(),
+		tag: isDrawing ? undefined : ServiceHelper.generateRandomString(),
+		statusCode: isDrawing ? statusCodes[0].code : undefined,
+		revCode: isDrawing ? ServiceHelper.generateRandomString(10) : undefined,
+		format: isDrawing ? '.pdf' : undefined,
 		author: ServiceHelper.generateRandomString(),
 		timestamp: ServiceHelper.generateRandomDate(),
 		desc: ServiceHelper.generateRandomString(),
 		void: !!isVoid,
-	};
+	});
 
 	if (hasFile) {
-		entry.rFile = [`${_id}_${ServiceHelper.generateRandomString()}_ifc`];
+		entry.rFile = isDrawing ? ServiceHelper.generateUUIDString() : [`${_id}_${ServiceHelper.generateRandomString()}_ifc`];
 		entry.refData = ServiceHelper.generateRandomString();
 	}
 
