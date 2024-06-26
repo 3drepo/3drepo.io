@@ -26,6 +26,7 @@ const { getLatestRevision, getRevisionByIdOrTag } = require('../../../../../mode
 const { getMetadataByRules, getMetadataWithMatchingData } = require('../../../../../models/metadata');
 const { idTypes, idTypesToKeys } = require('../../../../../models/metadata.constants');
 const { getNodesByIds } = require('../../../../../models/scenes');
+const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { stringToUUID } = require('../../../../../utils/helper/uuids');
 
 const TicketGroups = {};
@@ -34,7 +35,7 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 	let revision = revId;
 
 	if (revision) {
-		const rev = await getRevisionByIdOrTag(teamspace, model, revision, { _id: 1 });
+		const rev = await getRevisionByIdOrTag(teamspace, model, modelTypes.CONTAINER, revision, { _id: 1 });
 		revision = rev._id;
 	} else {
 		try {
@@ -123,7 +124,7 @@ const convertToMeshIds = async (teamspace, project, revId, containerEntry) => {
 
 	let revision = revId;
 	if (revision) {
-		const rev = await getRevisionByIdOrTag(teamspace, container, revision, { _id: 1 });
+		const rev = await getRevisionByIdOrTag(teamspace, container, modelTypes.CONTAINER, revision, { _id: 1 });
 		revision = rev._id;
 	} else {
 		try {

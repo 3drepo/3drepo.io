@@ -38,6 +38,8 @@ const { stringToUUID, UUIDToString, generateUUID } = require(`${src}/utils/helpe
 const { count, findOne, insertMany } = require(`${src}/handler/db`);
 const Path = require('path');
 
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+
 const RemoveIncompleteRevisions = require(`${utilScripts}/scene/removeIncompleteRevisions`);
 
 const findRefs = async (teamspace, collection, ids) => {
@@ -155,7 +157,8 @@ const checkFileExists = (filePaths, shouldExist) => {
 
 const checkRevisionsExist = async (revisions, shouldExist) => {
 	const checkRevision = async ({ teamspace, model, revision: { rev, links }, stash, sequence }) => {
-		const revFound = await getRevisionByIdOrTag(teamspace, model, rev._id, { _id: 1 }).catch(() => false);
+		const revFound = await getRevisionByIdOrTag(teamspace, model, modelTypes.CONTAINER,
+			rev._id, { _id: 1 }).catch(() => false);
 		expect(!!revFound).toEqual(shouldExist);
 		if (links.length) checkFileExists(links, shouldExist);
 

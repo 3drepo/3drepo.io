@@ -16,7 +16,7 @@
  */
 
 const { src } = require('../../../../../helper/path');
-const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../../../../helper/services');
+const { determineTestGroup, generateRandomString, generateRandomObject, generateUUIDString } = require('../../../../../helper/services');
 
 jest.mock('../../../../../../../src/v5/models/projectSettings');
 const ProjectSettings = require(`${src}/models/projectSettings`);
@@ -26,8 +26,15 @@ jest.mock('../../../../../../../src/v5/processors/teamspaces/projects/models/com
 const ModelList = require(`${src}/processors/teamspaces/projects/models/commons/modelList`);
 jest.mock('../../../../../../../src/v5/processors/teamspaces/projects/models/commons/favourites');
 const Favourites = require(`${src}/processors/teamspaces/projects/models/commons/favourites`);
+jest.mock('../../../../../../../src/v5/services/filesManager');
+const FilesManager = require(`${src}/services/filesManager`);
+jest.mock('../../../../../../../src/v5/models/revisions');
+const Revisions = require(`${src}/models/revisions`);
+const { DRAWINGS_HISTORY_REF_COL } = require(`${src}/models/revisions.constants`);
+
 const Drawings = require(`${src}/processors/teamspaces/projects/models/drawings`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+const { templates } = require(`${src}/utils/responseCodes`);
 
 const testAddDrawing = () => {
 	describe('Add drawing', () => {
@@ -92,27 +99,124 @@ const testUpdateSettings = () => {
 
 const testDeleteDrawing = () => {
 	describe('Delete drawing', () => {
-		test('should call updateModelSettings', async () => {
+		test('should delete drawing', async () => {
 			const teamspace = generateRandomString();
 			const model = generateRandomString();
 			const project = generateRandomString();
 
 			await Drawings.deleteDrawing(teamspace, project, model);
-			expect(ModelList.deleteModel).toHaveBeenCalledTimes(1);
-			expect(ModelList.deleteModel).toHaveBeenCalledWith(teamspace, project, model);
-		});
 
-		test('should return error if deleteModel fails', async () => {
+			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledTimes(1);
+			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_REF_COL,
+				{ model });
+			expect(ModelSettings.deleteModel).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.deleteModel).toHaveBeenCalledWith(teamspace, project, model);
+			expect(Revisions.deleteModelRevisions).toHaveBeenCalledTimes(1);
+			expect(Revisions.deleteModelRevisions).toHaveBeenCalledWith(teamspace, project, model, modelTypes.DRAWING);
+			expect(ProjectSettings.removeModelFromProject).toHaveBeenCalledTimes(1);
+			expect(ProjectSettings.removeModelFromProject).toHaveBeenCalledWith(teamspace, project, model);
+		});
+	});
+};
+
+const testGetRevisions = () => {
+	describe('Get drawing revisions', () => {
+		test('should return the drawing revisions', async () => {
+			const teamspace = generateRandomString();
+			const drawing = generateRandomString();
+			const showVoid = true;
+			const revisions = [generateRandomObject(), generateRandomObject()];
+
+			const getRevisionsMock = Revisions.getRevisions.mockResolvedValueOnce(revisions);
+
+			const res = await Drawings.getRevisions(teamspace, drawing, showVoid);
+			expect(res).toEqual(revisions);
+			expect(getRevisionsMock).toHaveBeenCalledTimes(1);
+			expect(getRevisionsMock).toHaveBeenCalledWith(teamspace, drawing, modelTypes.DRAWING, showVoid,
+				{ _id: 1, author: 1, format: 1, timestamp: 1, statusCode: 1, revCode: 1, void: 1, desc: 1 },
+			);
+		});
+	});
+};
+
+const testNewRevision = () => {
+	describe('Add new revision', () => {
+		test('should add a new drawing revision', async () => {
+			const teamspace = generateRandomString();
+			const drawing = generateRandomString();
+			const project = generateRandomString();
+			const format = generateRandomString(3);
+			const file = { originalname: `${generateRandomString()}.${format}`, buffer: generateRandomString() };
+			const data = { prop: generateRandomString() };
+			const revId = generateRandomString();
+
+			const addRevisionMock = Revisions.addRevision.mockResolvedValueOnce(revId);
+
+			await Drawings.newRevision(teamspace, project, drawing, data, file);
+
+			expect(addRevisionMock).toHaveBeenCalledTimes(1);
+			expect(addRevisionMock.mock.calls[0][0]).toEqual(teamspace);
+			expect(addRevisionMock.mock.calls[0][1]).toEqual(project);
+			expect(addRevisionMock.mock.calls[0][2]).toEqual(drawing);
+			expect(addRevisionMock.mock.calls[0][3]).toEqual(modelTypes.DRAWING);
+			expect(addRevisionMock.mock.calls[0][4].prop).toEqual(data.prop);
+			expect(addRevisionMock.mock.calls[0][4].format).toEqual(`.${format}`);
+			expect(addRevisionMock.mock.calls[0][4]).toHaveProperty('rFile');
+			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_REF_COL,
+				addRevisionMock.mock.calls[0][4].rFile[0], file.buffer,
+				{ name: file.originalname, rid: revId, project, model: drawing });
+		});
+	});
+};
+
+const testUpdateRevisionStatus = () => {
+	describe('Update revision status', () => {
+		test('should update the status of a revision', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
-			const model = generateRandomString();
-			const err = new Error(generateRandomString());
-			ModelList.deleteModel.mockRejectedValueOnce(err);
+			const drawing = generateRandomString();
+			const revision = generateRandomString();
+			const status = generateRandomString();
 
-			await expect(Drawings.deleteDrawing(teamspace, project, model)).rejects.toEqual(err);
+			await Drawings.updateRevisionStatus(teamspace, project, drawing, revision, status);
 
-			expect(ModelList.deleteModel).toHaveBeenCalledTimes(1);
-			expect(ModelList.deleteModel).toHaveBeenCalledWith(teamspace, project, model);
+			expect(Revisions.updateRevisionStatus).toHaveBeenCalledTimes(1);
+			expect(Revisions.updateRevisionStatus).toHaveBeenCalledWith(teamspace, project, drawing,
+				modelTypes.DRAWING, revision, status);
+		});
+	});
+};
+
+const testDownloadRevisionFiles = () => {
+	describe('Download revision files', () => {
+		test('should throw error if revision has no file', async () => {
+			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ rFile: [] });
+
+			await expect(Drawings.downloadRevisionFiles(generateUUIDString(), generateUUIDString(),
+				generateUUIDString())).rejects.toEqual(templates.fileNotFound);
+
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(0);
+		});
+
+		test('should download files if revision has file', async () => {
+			const teamspace = generateRandomString();
+			const drawing = generateRandomString();
+			const fileName = generateRandomString();
+			const revision = generateRandomString();
+			const output = generateRandomObject();
+
+			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ rFile: [fileName] });
+			FilesManager.getFileAsStream.mockResolvedValueOnce(output);
+
+			await expect(Drawings.downloadRevisionFiles(teamspace, drawing, revision)).resolves.toEqual(output);
+
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(teamspace, drawing, modelTypes.DRAWING,
+				revision, { rFile: 1 });
+
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_REF_COL, fileName);
 		});
 	});
 };
@@ -120,9 +224,9 @@ const testDeleteDrawing = () => {
 const testGetSettings = () => {
 	describe('Get drawing settings', () => {
 		test('should return the drawing settings', async () => {
-			const drawingSettings = generateRandomObject();
-			const teamspace = generateRandomObject();
-			const drawing = generateRandomObject();
+			const drawingSettings = generateRandomString();
+			const teamspace = generateRandomString();
+			const drawing = generateRandomString();
 			const projection = { name: 1, number: 1, type: 1, desc: 1 };
 			const getDrawingByIdMock = ModelSettings.getDrawingById.mockResolvedValueOnce(drawingSettings);
 
@@ -298,6 +402,10 @@ describe(determineTestGroup(__filename), () => {
 	testAddDrawing();
 	testUpdateSettings();
 	testDeleteDrawing();
+	testGetRevisions();
+	testNewRevision();
+	testUpdateRevisionStatus();
+	testDownloadRevisionFiles();
 	testGetSettings();
 	testAppendFavourites();
 	testDeleteFavourites();

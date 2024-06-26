@@ -258,6 +258,7 @@ const testModelEventsListener = () => {
 				model: generateRandomString(),
 				project: generateRandomString(),
 				data: { _id: generateUUID() },
+				modelType: modelTypes.CONTAINER,
 			};
 			EventsManager.publish(events.REVISION_UPDATED, data);
 
@@ -265,6 +266,29 @@ const testModelEventsListener = () => {
 			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
 			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
 				chatEvents.CONTAINER_REVISION_UPDATE,
+				{ ...data.data, _id: UUIDToString(data.data._id) },
+				data.teamspace,
+				data.project,
+				data.model,
+				undefined,
+			);
+		});
+
+		test(`Should create a ${chatEvents.DRAWING_REVISION_UPDATE} chat event if there is a ${events.REVISION_UPDATED} and model type is drawing`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.REVISION_UPDATED);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				project: generateRandomString(),
+				data: { _id: generateUUID() },
+				modelType: modelTypes.DRAWING,
+			};
+			EventsManager.publish(events.REVISION_UPDATED, data);
+
+			await waitOnEvent;
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+				chatEvents.DRAWING_REVISION_UPDATE,
 				{ ...data.data, _id: UUIDToString(data.data._id) },
 				data.teamspace,
 				data.project,
@@ -376,19 +400,55 @@ const testModelEventsListener = () => {
 				project: generateRandomString(),
 				model: generateRandomString(),
 				revision: generateRandomString(),
-				isFederation: false,
+				modelType: modelTypes.CONTAINER,
 			};
 			EventsManager.publish(events.NEW_REVISION, data);
 
 			await waitOnEvent;
 
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
-			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, data.revision,
-				{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1 });
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model,
+				modelTypes.CONTAINER, data.revision,
+				{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1 });
 			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
 			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
 				chatEvents.CONTAINER_NEW_REVISION,
 				{ _id: data.revision, tag, author, timestamp: timestamp.getTime(), desc, format: `.${format}` },
+				data.teamspace,
+				data.project,
+				data.model,
+			);
+		});
+
+		test(`Should create a ${chatEvents.DRAWING_NEW_REVISION} chat event if there is a ${events.NEW_REVISION} (drawing)`, async () => {
+			const tag = generateRandomString();
+			const author = generateRandomString();
+			const desc = generateRandomString();
+			const format = generateRandomString();
+			const rFile = [generateRandomString()];
+			const timestamp = generateRandomDate();
+			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp, rFile, desc, format });
+
+			const waitOnEvent = eventTriggeredPromise(events.NEW_REVISION);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				revision: generateRandomString(),
+				modelType: modelTypes.DRAWING,
+			};
+			EventsManager.publish(events.NEW_REVISION, data);
+
+			await waitOnEvent;
+
+			expect(Revisions.getRevisionFormat).not.toHaveBeenCalled();
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, modelTypes.DRAWING,
+				data.revision, { _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1 });
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+				chatEvents.DRAWING_NEW_REVISION,
+				{ _id: data.revision, tag, author, timestamp: timestamp.getTime(), desc, format },
 				data.teamspace,
 				data.project,
 				data.model,
@@ -407,14 +467,15 @@ const testModelEventsListener = () => {
 				project: generateRandomString(),
 				model: generateRandomString(),
 				revision: generateRandomString(),
-				isFederation: true,
+				modelType: modelTypes.FEDERATION,
 			};
 			EventsManager.publish(events.NEW_REVISION, data);
 
 			await waitOnEvent;
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
-			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, data.revision,
-				{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1 });
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model,
+				modelTypes.FEDERATION, data.revision,
+				{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1 });
 			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
 			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
 				chatEvents.FEDERATION_NEW_REVISION,
@@ -433,7 +494,7 @@ const testModelEventsListener = () => {
 				project: generateRandomString(),
 				model: generateRandomString(),
 				revision: generateRandomString(),
-				isFederation: false,
+				modelType: modelTypes.CONTAINER,
 			};
 
 			Revisions.getRevisionByIdOrTag.mockRejectedValueOnce(templates.revisionNotFound);
@@ -441,8 +502,9 @@ const testModelEventsListener = () => {
 
 			await waitOnEvent;
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
-			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, data.revision,
-				{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1 });
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model,
+				modelTypes.CONTAINER, data.revision,
+				{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1 });
 			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(0);
 		});
 
@@ -454,7 +516,7 @@ const testModelEventsListener = () => {
 				project: generateRandomString(),
 				model: generateRandomString(),
 				revision: generateRandomString(),
-				isFederation: false,
+				modelType: modelTypes.CONTAINER,
 			};
 
 			Revisions.getRevisionByIdOrTag.mockRejectedValueOnce(new Error(generateRandomString()));
@@ -462,8 +524,9 @@ const testModelEventsListener = () => {
 
 			await waitOnEvent;
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
-			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, data.revision,
-				{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1 });
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model,
+				modelTypes.CONTAINER, data.revision,
+				{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1 });
 			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(0);
 		});
 
