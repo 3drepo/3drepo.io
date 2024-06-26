@@ -40,6 +40,7 @@ export const { Types: CompareTypes, Creators: CompareActions } = createActions({
 	setTargetRevision: ['modelId', 'targetRevision', 'isDiff'],
 	resetComponentState: [],
 	resetComponentStateSuccess: [],
+	stopCompare: [],
 }, { prefix: 'COMPARE/' });
 
 export interface ICompareComponentState {

@@ -45,6 +45,7 @@ import { DrawingRevisionsActions, IDrawingRevisionsActionCreators } from '../sto
 import { ViewpointsActions } from '@/v4/modules/viewpoints';
 import { RisksActions } from '@/v4/modules/risks';
 import { IssuesActions } from '@/v4/modules/issues';
+import { CompareActions } from '@/v4/modules/compare';
 
 interface IBimActionCreators {
 	setIsActive: (active: boolean) => Action;
@@ -54,6 +55,11 @@ interface ICanvasHistoryActionCreators {
 	update: (elementName: string, properties: Record<string, number>) => Action;
 	undo: () => Action;
 	redo: () => Action;
+}
+
+
+interface ICompareActionCreators {
+	stopCompare: () => Action;
 }
 
 interface ITreeActionCreators {
@@ -124,6 +130,7 @@ interface IViewpointsActionCreators {
 export const AuthActionsDispatchers = createActionsDispatchers<IAuthActionCreators>(AuthActions);
 export const BimActionsDispatchers = createActionsDispatchers<IBimActionCreators>(BimActions);
 export const CanvasHistoryActionsDispatchers = createActionsDispatchers<ICanvasHistoryActionCreators>(CanvasHistoryActions);
+export const CompareActionsDispatchers = createActionsDispatchers<ICompareActionCreators>(CompareActions);
 export const ContainersActionsDispatchers = createActionsDispatchers<IContainersActionCreators>(ContainersActions);
 export const ContainerRevisionsActionsDispatchers = createActionsDispatchers<IContainerRevisionsActionCreators>(ContainerRevisionsActions);
 export const CurrentUserActionsDispatchers = createActionsDispatchers<ICurrentUserActionCreators>(CurrentUserActions);
