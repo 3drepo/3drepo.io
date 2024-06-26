@@ -22,6 +22,8 @@ const SuperTest = require('supertest');
 const { generateComment, generateTicket, generateRandomString } = require('../../../../helper/services');
 const { basePropertyLabels, propTypes } = require('../../../../../../src/v5/schemas/tickets/templates.constants');
 
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+
 const { EVENTS } = require(`${src}/services/chat/chat.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -33,7 +35,7 @@ const generateBasicData = () => {
 		teamspace: ServiceHelper.generateRandomString(),
 		project: ServiceHelper.generateRandomProject(),
 		container: ServiceHelper.generateRandomModel(),
-		federation: ServiceHelper.generateRandomModel({ isFederation: true }),
+		federation: ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
 		template: ServiceHelper.generateTemplate(),
 		templateWithComments: ServiceHelper.generateTemplate(false, false, { comments: true }),
 	};

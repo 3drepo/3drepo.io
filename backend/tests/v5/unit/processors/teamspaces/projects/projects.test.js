@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { MODEL_CATEGORIES } = require('../../../../../../src/v5/models/modelSettings.constants');
 const { COL_NAME } = require('../../../../../../src/v5/models/projectSettings.constants');
 const { src } = require('../../../../helper/path');
 const { generateRandomString } = require('../../../../helper/services');
@@ -263,6 +264,14 @@ const testDeleteImage = () => {
 	});
 };
 
+const testGetDrawingCategories = () => {
+	describe('Get drawing categories', () => {
+		test('should get drawing categories', async () => {
+			await expect(Projects.getDrawingCategories()).toEqual(MODEL_CATEGORIES);
+		});
+	});
+};
+
 describe('processors/teamspaces/projects', () => {
 	testGetProjectList();
 	testDeleteProject();
@@ -272,4 +281,5 @@ describe('processors/teamspaces/projects', () => {
 	testGetImage();
 	testUpdateImage();
 	testDeleteImage();
+	testGetDrawingCategories();
 });

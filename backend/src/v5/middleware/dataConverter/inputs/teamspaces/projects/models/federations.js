@@ -15,13 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { validateAddModelData, validateUpdateSettingsData } = require('./commons/modelSettings');
 const { validateNewRevisionData } = require('./commons/revisions');
 
 const Federations = {};
 
-Federations.validateAddModelData = validateAddModelData(true);
-Federations.validateUpdateSettingsData = validateUpdateSettingsData(true);
 Federations.validateNewRevisionData = validateNewRevisionData(true);
 
 module.exports = Federations;

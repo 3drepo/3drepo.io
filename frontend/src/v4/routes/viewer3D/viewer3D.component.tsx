@@ -24,6 +24,7 @@ import { CalibrationToolbar } from '@/v5/ui/routes/dashboard/projects/calibratio
 import { CompareActionsDispatchers, IssuesActionsDispatchers, MeasurementsActionsDispatchers, RisksActionsDispatchers, TicketsCardActionsDispatchers, ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { UnityUtil } from '@/globals/unity-util';
 import { MeasurementsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { LifoQueue } from '@/v5/helpers/functions.helpers';
 import {queuableFunction} from '../../helpers/async';
 
 import { ROUTES } from '../../constants/routes';
@@ -71,6 +72,7 @@ interface IProps {
 
 class Viewer3DBase extends PureComponent<IProps, any> {
 	private containerRef = createRef<HTMLDivElement>();
+	public state = { updatesQueue: new LifoQueue((prevProps, currProps) => this.onComponentDidUpdate(prevProps, currProps), 1, false) };
 
 	private handleUnityError = (message: string, reload: boolean, isUnity: boolean) => {
 		let errorType = '3D Repo Error';
@@ -124,10 +126,11 @@ class Viewer3DBase extends PureComponent<IProps, any> {
 			const toRemove = pinsRemoved(prev, curr);
 			const toChangeSelection = pinsSelectionChanged(curr, prev);
 
-			await Promise.all(toRemove.map(viewer.removePin.bind(viewer)));
-			await Promise.all(toShow.map(viewer.showPin.bind(viewer)));
-
-			toChangeSelection.forEach(viewer.setSelectionPin.bind(viewer));
+			await Promise.all([
+				...toRemove.map(viewer.removePin.bind(viewer)),
+				...toChangeSelection.map(viewer.setSelectionPin.bind(viewer)),
+				...toShow.map(viewer.showPin.bind(viewer)),
+			]);
 		}
 	}
 
@@ -185,15 +188,19 @@ class Viewer3DBase extends PureComponent<IProps, any> {
 	}
 
 	public async componentDidUpdate(prevProps: IProps) {
+		this.state.updatesQueue.enqueue(prevProps, this.props);
+	}
+
+	public async onComponentDidUpdate(prevProps, currProps) {
 		const { colorOverrides, issuePins, riskPins, measurementPins, hasGisCoordinates,
 			gisCoordinates, gisLayers, transparencies, transformations,
 			sequenceHiddenNodes, viewerManipulationEnabled, viewer,
 			issuesShapes, issuesHighlightedShapes, risksShapes, risksHighlightedShapes,
 			ticketPins
-		} = this.props;
+		} = currProps;
 
 		if (sequenceHiddenNodes && !isEqual(prevProps.sequenceHiddenNodes, sequenceHiddenNodes)) {
-			this.props.handleTransparenciesVisibility(sequenceHiddenNodes);
+			currProps.handleTransparenciesVisibility(sequenceHiddenNodes);
 		}
 
 		if (colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
@@ -201,7 +208,7 @@ class Viewer3DBase extends PureComponent<IProps, any> {
 		}
 
 		if (transparencies && !isEqual(transparencies, prevProps.transparencies)) {
-			this.props.handleTransparencyOverridesChange(transparencies, prevProps.transparencies);
+			currProps.handleTransparencyOverridesChange(transparencies, prevProps.transparencies);
 		}
 
 		if (transformations && !isEqual(transformations, prevProps.transformations)) {
@@ -221,7 +228,7 @@ class Viewer3DBase extends PureComponent<IProps, any> {
 		}
 
 		if (!isEqual(ticketPins, prevProps.ticketPins)) {
-			this.renderPins(prevProps.ticketPins, ticketPins);
+			await this.renderPins(prevProps.ticketPins, ticketPins);
 		}
 
 		if (hasGisCoordinates && !isEqual(prevProps.gisCoordinates, gisCoordinates)) {

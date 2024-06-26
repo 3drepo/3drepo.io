@@ -22,6 +22,8 @@
 	const config = require("./config");
 	const { systemLogger, logLabels} = require("./logger.js");
 	const utils = require("./utils");
+	const { v5Path } = require("../interop");
+	const { createActivityRecord } = require(`${v5Path}/services/elastic`);
 
 	/**
 	 * List of response and error codes
@@ -397,6 +399,9 @@
 		const user = session && session.user ? session.user.username : "unknown";
 		const currentTime = Date.now();
 		const latency = startTime ? `${currentTime - startTime}` : "???";
+
+		createActivityRecord(status, code, latency, contentLength, user, method, originalUrl);
+
 		return systemLogger.formatResponseMsg({status,code,latency,contentLength,user,method, originalUrl});
 	};
 
