@@ -140,6 +140,22 @@ const establishRoutes = () => {
 	 *                         type: string
 	 *                         description: File format
 	 *                         example: .rvt
+	 *                       statusCode:
+	 *                         type: string
+	 *                         description: Revision status code
+	 *                         example: S0
+	 *                       revCode:
+	 *                         type: string
+	 *                         description: Revision code
+	 *                         example: P01
+	 *                       description:
+	 *                         type: string
+	 *                         description: Revision description
+	 *                         example: Level 2 floor plan
+	 *                       void:
+	 *                         type: boolean
+	 *                         description: Whether revision is void or not
+	 *                         example: false
 	 *
 	 */
 	router.get('', hasReadAccessToDrawing, getRevisions, serialiseRevisionArray);
@@ -176,30 +192,24 @@ const establishRoutes = () => {
 	 *           schema:
 	 *             type: object
 	 *             properties:
-	 *               tag:
-	 *                 description: Unique revision name
-     *                 type: string
-	 *                 example: rev01
+	 *               statusCode:
+	 *                 type: string
+	 *                 description: Revision status code
+	 *                 example: S0
+	 *               revCode:
+	 *                 type: string
+	 *                 description: Revision code
+	 *                 example: P01
 	 *               desc:
 	 *                 description: Description of the revision
 	 *                 type: string
 	 *                 example: Initial design
-	 *               importAnimations:
-	 *                 type: boolean
-	 *                 description: Whether animations should be imported (Only relevant for .SPM uploads)
-	 *               timezone:
-	 *                 description: Timezone of the revision
-	 *                 type: string
-	 *                 example: Europe/Berlin
-	 *               lod:
-	 *                 description: Level of Detail (0 - 6)
-	 *                 type: integer
-	 *                 example: 0
 	 *               file:
 	 *                 type: string
 	 *                 format: binary
 	 *             required:
-	 *               - tag
+	 *               - statusCode
+	 *               - revCode
 	 *               - file
 	 *     responses:
 	 *       401:
@@ -238,7 +248,7 @@ const establishRoutes = () => {
 	 *         schema:
 	 *           type: string
 	 *       - name: revision
-	 *         description: Revision ID or Revision tag
+	 *         description: Revision ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -252,7 +262,7 @@ const establishRoutes = () => {
 	 *                 description: The new status value
 	 *                 type: boolean
 	 *             required:
-	 *               - status
+	 *               - void
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -290,7 +300,7 @@ const establishRoutes = () => {
 	 *         schema:
 	 *           type: string
 	 *       - name: revision
-	 *         description: Revision ID or Revision tag
+	 *         description: Revision ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
