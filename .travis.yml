@@ -39,6 +39,7 @@ matrix:
         - git status
         - sudo systemctl | grep mongo
         - sudo journalctl -u mongod.service -b
+        - sudo cat /etc/mongod.conf
         - sudo cat /var/log/mongod.log
         - cd backend && mongorestore
         - cd ../../../
