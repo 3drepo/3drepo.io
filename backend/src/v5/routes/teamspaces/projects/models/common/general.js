@@ -20,24 +20,33 @@ const { formatModelSettings, formatModelStats } = require('../../../../../middle
 const {
 	hasAccessToTeamspace,
 	hasAdminAccessToContainer,
+	hasAdminAccessToDrawing,
 	hasAdminAccessToFederation,
 	hasReadAccessToContainer,
+	hasReadAccessToDrawing,
 	hasReadAccessToFederation,
 	isAdminToProject,
 } = require('../../../../../middleware/permissions/permissions');
 const { validateAddModelData, validateUpdateSettingsData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings');
 const Containers = require('../../../../../processors/teamspaces/projects/models/containers');
+const Drawings = require('../../../../../processors/teamspaces/projects/models/drawings');
 const Federations = require('../../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
 const { canDeleteContainer } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { getUserFromSession } = require('../../../../../utils/sessions');
+const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../utils/responder');
 
-const addModel = (isFed) => async (req, res) => {
+const addModel = (modelType) => async (req, res) => {
 	const { teamspace, project } = req.params;
 	try {
-		const fn = isFed ? Federations.addFederation : Containers.addContainer;
-		const modelId = await fn(teamspace, project, req.body);
+		const fn = {
+			[modelTypes.CONTAINER]: Containers.addContainer,
+			[modelTypes.FEDERATION]: Federations.addFederation,
+			[modelTypes.DRAWING]: Drawings.addDrawing,
+		};
+
+		const modelId = await fn[modelType](teamspace, project, req.body);
 		respond(req, res, templates.ok, { _id: modelId });
 	} catch (err) {
 		// istanbul ignore next
@@ -45,11 +54,16 @@ const addModel = (isFed) => async (req, res) => {
 	}
 };
 
-const deleteModel = (isFed) => async (req, res) => {
+const deleteModel = (modelType) => async (req, res) => {
 	const { teamspace, project, model } = req.params;
 	try {
-		const fn = isFed ? Federations.deleteFederation : Containers.deleteContainer;
-		await fn(teamspace, project, model);
+		const fn = {
+			[modelTypes.CONTAINER]: Containers.deleteContainer,
+			[modelTypes.FEDERATION]: Federations.deleteFederation,
+			[modelTypes.DRAWING]: Drawings.deleteDrawing,
+		};
+
+		await fn[modelType](teamspace, project, model);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
@@ -57,42 +71,56 @@ const deleteModel = (isFed) => async (req, res) => {
 	}
 };
 
-const getModelList = (isFed) => async (req, res) => {
+const getModelList = (modelType) => async (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
 
+	const fn = {
+		[modelTypes.CONTAINER]: Containers.getContainerList,
+		[modelTypes.FEDERATION]: Federations.getFederationList,
+		[modelTypes.DRAWING]: Drawings.getDrawingList,
+	};
+
 	try {
-		const fn = isFed ? Federations.getFederationList : Containers.getContainerList;
-		const models = await fn(teamspace, project, user);
-		respond(req, res, templates.ok, { [`${isFed ? 'federations' : 'containers'}`]: models });
+		const models = await fn[modelType](teamspace, project, user);
+		respond(req, res, templates.ok, { [`${modelType}s`]: models });
 	} catch (err) {
 		respond(req, res, err);
 	}
 };
 
-const appendFavourites = (isFed) => async (req, res) => {
+const appendFavourites = (modelType) => async (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
-	const favouritesToAdd = req.body[isFed ? 'federations' : 'containers'];
+	const favouritesToAdd = req.body[`${modelType}s`];
+	const fn = {
+		[modelTypes.CONTAINER]: Containers.appendFavourites,
+		[modelTypes.FEDERATION]: Federations.appendFavourites,
+		[modelTypes.DRAWING]: Drawings.appendFavourites,
+	};
 
 	try {
-		const { appendFavourites: fn } = isFed ? Federations : Containers;
-		await fn(user, teamspace, project, favouritesToAdd);
+		await fn[modelType](user, teamspace, project, favouritesToAdd);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		respond(req, res, err);
 	}
 };
 
-const deleteFavourites = (isFed) => async (req, res) => {
+const deleteFavourites = (modelType) => async (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
+	const fn = {
+		[modelTypes.CONTAINER]: Containers.deleteFavourites,
+		[modelTypes.FEDERATION]: Federations.deleteFavourites,
+		[modelTypes.DRAWING]: Drawings.deleteFavourites,
+	};
+
 	try {
-		const { deleteFavourites: fn } = isFed ? Federations : Containers;
 		if (req.query.ids?.length) {
 			const favouritesToRemove = req.query.ids.split(',');
 
-			await fn(user, teamspace, project, favouritesToRemove);
+			await fn[modelType](user, teamspace, project, favouritesToRemove);
 			respond(req, res, templates.ok);
 		} else {
 			respond(req, res, createResponseCode(templates.invalidArguments, 'ids must be provided as part fo the query string'));
@@ -102,11 +130,15 @@ const deleteFavourites = (isFed) => async (req, res) => {
 	}
 };
 
-const getModelStats = (isFed) => async (req, res, next) => {
+const getModelStats = (modelType) => async (req, res, next) => {
 	const { teamspace, model } = req.params;
+	const fn = {
+		[modelTypes.CONTAINER]: Containers.getContainerStats,
+		[modelTypes.FEDERATION]: Federations.getFederationStats,
+	};
+
 	try {
-		const fn = isFed ? Federations.getFederationStats : Containers.getContainerStats;
-		const stats = await fn(teamspace, model);
+		const stats = await fn[modelType](teamspace, model);
 		req.outputData = stats;
 		await next();
 	} catch (err) {
@@ -115,11 +147,15 @@ const getModelStats = (isFed) => async (req, res, next) => {
 	}
 };
 
-const updateModelSettings = (isFed) => async (req, res) => {
+const updateModelSettings = (modelType) => async (req, res) => {
 	const { teamspace, project, model } = req.params;
+	const fn = {
+		[modelTypes.CONTAINER]: Containers.updateSettings,
+		[modelTypes.FEDERATION]: Federations.updateSettings,
+		[modelTypes.DRAWING]: Drawings.updateSettings,
+	};
 	try {
-		const { updateSettings: fn } = isFed ? Federations : Containers;
-		await fn(teamspace, project, model, req.body);
+		await fn[modelType](teamspace, project, model, req.body);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
@@ -127,11 +163,16 @@ const updateModelSettings = (isFed) => async (req, res) => {
 	}
 };
 
-const getModelSettings = (isFed) => async (req, res, next) => {
+const getModelSettings = (modelType) => async (req, res, next) => {
 	const { teamspace, model } = req.params;
+	const fn = {
+		[modelTypes.CONTAINER]: Containers.getSettings,
+		[modelTypes.FEDERATION]: Federations.getSettings,
+		[modelTypes.DRAWING]: Drawings.getSettings,
+	};
 	try {
-		const { getSettings: fn } = isFed ? Federations : Containers;
-		const settings = await fn(teamspace, model);
+		const settings = await fn[modelType](teamspace, model);
+
 		req.outputData = settings;
 		await next();
 	} catch (err) {
@@ -140,11 +181,27 @@ const getModelSettings = (isFed) => async (req, res, next) => {
 	}
 };
 
-const establishRoutes = (isFed) => {
+const establishRoutes = (modelType) => {
 	const router = Router({ mergeParams: true });
-	const hasAdminAccessToModel = isFed ? hasAdminAccessToFederation : hasAdminAccessToContainer;
-	const hasReadAccessToModel = isFed ? hasReadAccessToFederation : hasReadAccessToContainer;
-	const canDeleteModel = isFed ? async (req, res, next) => { await next(); } : canDeleteContainer;
+
+	const hasAdminAccessToModel = {
+		[modelTypes.CONTAINER]: hasAdminAccessToContainer,
+		[modelTypes.FEDERATION]: hasAdminAccessToFederation,
+		[modelTypes.DRAWING]: hasAdminAccessToDrawing,
+	};
+
+	const hasReadAccessToModel = {
+		[modelTypes.CONTAINER]: hasReadAccessToContainer,
+		[modelTypes.FEDERATION]: hasReadAccessToFederation,
+		[modelTypes.DRAWING]: hasReadAccessToDrawing,
+	};
+
+	const canDeleteModel = {
+		[modelTypes.CONTAINER]: canDeleteContainer,
+		[modelTypes.FEDERATION]: async (req, res, next) => { await next(); },
+		[modelTypes.DRAWING]: async (req, res, next) => { await next(); },
+	};
+
 	/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}:
@@ -171,7 +228,7 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *           enum: [containers, federations]
+	 *           enum: [containers, federations, drawings]
 	 *     requestBody:
 	 *       content:
    	 *         application/json:
@@ -181,6 +238,7 @@ const establishRoutes = (isFed) => {
 	 *               - name
 	 *               - unit
 	 *               - type
+	 *               - number
 	 *             properties:
 	 *               name:
 	 *                 type: string
@@ -201,6 +259,10 @@ const establishRoutes = (isFed) => {
 	 *                 type: string
 	 *                 example: LEGO_ARCHIT_001
 	 *                 description: Model reference code
+	 *               number:
+	 *                 type: string
+	 *                 example: SC1-SFT-V1-01-M3-ST-30_10_30-0001
+	 *                 description: Unique identifier of a drawing (Drawings only)
 	 *               type:
 	 *                 type: string
 	 *                 example: Architecture
@@ -231,6 +293,33 @@ const establishRoutes = (isFed) => {
 	 *                 type: integer
 	 *                 example: 100
 	 *                 description: Angle from North in degrees
+	 *           examples:
+     *             container:
+	 *               summary: container
+     *               value:
+     *                 name: Lego House Architecture
+     *                 unit: mm
+	 *                 desc: The Architecture model of the Lego House
+	 *                 code: LEGO_ARCHIT_001
+	 *                 type: Architecture
+	 *                 angleFromNorth: 100
+	 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
+     *             federation:
+	 *               summary: federation
+     *               value:
+     *                 name: Lego House Federation
+     *                 unit: m
+	 *                 desc: The Structural model of the Lego House
+	 *                 code: LEGO_ARCHIT_002
+	 *                 angleFromNorth: 150
+ 	 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
+	 *             drawing:
+	 *               summary: drawing
+     *               value:
+     *                 name: Lego House Drawing
+     *                 number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
+	 *                 desc: The Drawing of the Lego House
+	 *                 type: Structural
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -249,7 +338,7 @@ const establishRoutes = (isFed) => {
 	 *                   description: Model ID
 	 *                   example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 */
-	router.post('/', isAdminToProject, validateAddModelData(isFed), addModel(isFed));
+	router.post('/', isAdminToProject, validateAddModelData(modelType), addModel(modelType));
 
 	/**
 	 * @openapi
@@ -277,7 +366,7 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *           enum: [containers, federations]
+	 *           enum: [containers, federations, drawings]
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -308,10 +397,21 @@ const establishRoutes = (isFed) => {
 	 *                       isFavourite:
 	 *                         type: boolean
 	 *                         description: whether the model is a favourited item for the user
-	 *
-	 *
+	 *             examples:
+     *               containers:
+	 *                 summary: containers
+     *                 value:
+	 *                   containers: [{ _id: 3549ddf6-885d-4977-87f1-eeac43a0e818, name: Lego House Container, role: admin, isFavourite: true }]
+     *               federations:
+	 *                 summary: federations
+     *                 value:
+     *                   federations: [{ _id: 3549ddf6-885d-4977-87f1-eeac43a0e818, name: Lego House Federation, role: admin, isFavourite: true }]
+     *               drawings:
+	 *                 summary: drawings
+     *                 value:
+     *                   drawings: [{ _id: 3549ddf6-885d-4977-87f1-eeac43a0e818, name: Lego House Drawing, role: admin, isFavourite: true }]
 	 */
-	router.get('/', hasAccessToTeamspace, getModelList(isFed));
+	router.get('/', hasAccessToTeamspace, getModelList(modelType));
 
 	/**
 	 * @openapi
@@ -339,7 +439,7 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *           enum: [containers, federations]
+	 *           enum: [containers, federations, drawings]
 	 *     requestBody:
 	 *       content:
 	 *         application/json:
@@ -351,6 +451,19 @@ const establishRoutes = (isFed) => {
 	 *                 items:
 	 *                   type: string
 	 *                   format: uuid
+	 *           examples:
+     *             containers:
+	 *               summary: containers
+     *               value:
+	 *                 containers: [3549ddf6-885d-4977-87f1-eeac43a0e818, a54e8776-da7c-11ec-9d64-0242ac120002]
+     *             federations:
+	 *               summary: federations
+     *               value:
+	 *                 federations: [3549ddf6-885d-4977-87f1-eeac43a0e818, a54e8776-da7c-11ec-9d64-0242ac120002]
+     *             drawings:
+	 *               summary: drawings
+     *               value:
+     *                 drawings: [3549ddf6-885d-4977-87f1-eeac43a0e818, a54e8776-da7c-11ec-9d64-0242ac120002]
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -359,7 +472,7 @@ const establishRoutes = (isFed) => {
 	 *       200:
 	 *         description: adds the models found in the request body to the user's favourites list
 	 */
-	router.patch('/favourites', hasAccessToTeamspace, appendFavourites(isFed));
+	router.patch('/favourites', hasAccessToTeamspace, appendFavourites(modelType));
 
 	/**
 	 * @openapi
@@ -387,7 +500,7 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *           enum: [containers, federations]
+	 *           enum: [containers, federations, drawings]
 	 *       - name: ids
 	 *         description: list of model ids to remove (comma separated)
 	 *         in: query
@@ -402,7 +515,7 @@ const establishRoutes = (isFed) => {
 	 *       200:
 	 *         description: removes the models found in the request body from the user's favourites list
 	 */
-	router.delete('/favourites', hasAccessToTeamspace, deleteFavourites(isFed));
+	router.delete('/favourites', hasAccessToTeamspace, deleteFavourites(modelType));
 
 	/**
 	 * @openapi
@@ -488,8 +601,26 @@ const establishRoutes = (isFed) => {
 	 *                   type: integer
 	 *                   description: Timestamp(ms) of when any of the submodels was updated
 	 *                   example: 1630598072000
+	 *             examples:
+	 *               container:
+	 *                 summary: container
+     *                 value:
+     *                   code: STR-01
+     *                   status: ok
+	 *                   desc: Floor 1 MEP with Facade
+	 *                   lastUpdated: 1630598072000
+	 *                   tickets: { issues: 10, risks: 5 }
+	 *               federation:
+	 *                 summary: federation
+     *                 value:
+     *                   code: STR-01
+     *                   status: ok
+	 *                   desc: Floor 1 MEP with Facade
+	 *                   lastUpdated: 1630598072000
+	 *                   tickets: { issues: 10, risks: 5 }
+	 *                   containers: [{ group: Architectural, _id: 374bb150-065f-11ec-8edf-ab0f7cc84da8 }]
 	 */
-	router.get('/:model/stats', hasReadAccessToModel, getModelStats(isFed), formatModelStats(isFed));
+	router.get('/:model/stats', hasReadAccessToModel[modelType], getModelStats(modelType), formatModelStats(modelType));
 
 	/**
 	 * @openapi
@@ -517,7 +648,7 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *           enum: [containers, federations]
+	 *           enum: [containers, federations, drawings]
    	 *       - name: model
 	 *         description: Model ID
 	 *         in: path
@@ -532,7 +663,7 @@ const establishRoutes = (isFed) => {
 	 *       200:
 	 *         description: Model removed.
 	 */
-	router.delete('/:model', hasAdminAccessToModel, canDeleteModel, deleteModel(isFed));
+	router.delete('/:model', hasAdminAccessToModel[modelType], canDeleteModel[modelType], deleteModel(modelType));
 
 	/**
 	 * @openapi
@@ -560,7 +691,7 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *           enum: [containers, federations]
+	 *           enum: [containers, federations, drawings]
 	 *       - name: model
 	 *         description: ID of model
 	 *         in: path
@@ -579,6 +710,10 @@ const establishRoutes = (isFed) => {
 	 *               desc:
 	 *                 type: string
 	 *                 example: description1
+	 *               number:
+	 *                 type: string
+	 *                 example: SC1-SFT-V1-01-M3-ST-30_10_30-0001
+	 *                 description: Unique identifier of a drawing (drawings only)
 	 *               surveyPoints:
 	 *                 type: array
 	 *                 items:
@@ -609,6 +744,33 @@ const establishRoutes = (isFed) => {
 	 *                 type: string
 	 *                 format: uuid
 	 *                 example: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+	 *           examples:
+     *             container:
+	 *               summary: container
+     *               value:
+     *                 name: Lego House Container
+     *                 unit: mm
+	 *                 desc: The Container model of the Lego House
+	 *                 defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+	 *                 defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+	 *                 angleFromNorth: 100
+	 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
+     *             federation:
+	 *               summary: federation
+     *               value:
+     *                 name: Lego House Federation
+     *                 unit: m
+	 *                 desc: The Federation model of the Lego House
+	 *                 defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+	 *                 defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+	 *                 angleFromNorth: 120
+	 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
+	 *             drawing:
+	 *               summary: drawing
+     *               value:
+     *                 name: Lego House Drawing
+     *                 number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
+	 *                 desc: The Drawing of the Lego House
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -617,7 +779,7 @@ const establishRoutes = (isFed) => {
 	 *       200:
 	 *         description: updates the settings of the model
 	 */
-	router.patch('/:model', hasAdminAccessToModel, validateUpdateSettingsData(isFed), updateModelSettings(isFed));
+	router.patch('/:model', hasAdminAccessToModel[modelType], validateUpdateSettingsData(modelType), updateModelSettings(modelType));
 
 	/**
 	 * @openapi
@@ -645,7 +807,7 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *           enum: [containers, federations]
+	 *           enum: [containers, federations, drawings]
 	 *       - name: model
 	 *         description: Model ID
 	 *         in: path
@@ -663,8 +825,48 @@ const establishRoutes = (isFed) => {
 	 *           application/json:
 	 *             schema:
 	 *               $ref: "#/components/schemas/modelSettings"
+	 *             examples:
+     *               container:
+	 *                 summary: container
+     *                 value:
+	 *                   _id: 3549ddf6-885d-4977-87f1-eeac43a0e818
+     *                   name: Lego House Container
+     *                   unit: mm
+	 *                   code: MOD1
+	 *                   type: Structural
+	 *                   desc: The Container model of the Lego House
+	 *                   timestamp: 1629976656315
+	 *                   status: ok
+	 *                   errorReason: { message: System error occured. Please contact support., timestamp: 1629976656315, errorCode: 14 }
+	 *                   defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+	 *                   defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+	 *                   angleFromNorth: 100
+	 *                   surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
+     *               federation:
+	 *                 summary: federation
+     *                 value:
+	 *                   _id: 3549ddf6-885d-4977-87f1-eeac43a0e818
+     *                   name: Lego House Federation
+     *                   unit: mm
+	 *                   code: MOD1
+	 *                   desc: The Federation model of the Lego House
+	 *                   timestamp: 1629976656315
+	 *                   status: ok
+	 *                   errorReason: { message: System error occured. Please contact support., timestamp: 1629976656315, errorCode: 14 }
+	 *                   defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+	 *                   defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+	 *                   angleFromNorth: 100
+	 *                   surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
+	 *               drawing:
+	 *                 summary: drawing
+     *                 value:
+	 *                   _id: 3549ddf6-885d-4977-87f1-eeac43a0e818
+     *                   name: Lego House Drawing
+     *                   number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
+	 *                   type: Structural
+	 *                   desc: The Drawing of the Lego House
 	 */
-	router.get('/:model', hasReadAccessToModel, getModelSettings(isFed), formatModelSettings);
+	router.get('/:model', hasReadAccessToModel[modelType], getModelSettings(modelType), formatModelSettings);
 	return router;
 };
 

@@ -21,6 +21,8 @@ const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
 const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate } = require('../../../helper/services');
 
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+
 jest.mock('../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
 
@@ -210,7 +212,7 @@ const testModelEventsListener = () => {
 				model: generateRandomString(),
 				project: generateRandomString(),
 				data: { [generateRandomString()]: generateRandomString() },
-				isFederation: true,
+				modelType: modelTypes.FEDERATION,
 			};
 			EventsManager.publish(events.MODEL_SETTINGS_UPDATE, data);
 
@@ -233,7 +235,7 @@ const testModelEventsListener = () => {
 				model: generateRandomString(),
 				project: generateRandomString(),
 				data: { [generateRandomString()]: generateRandomString() },
-				isFederation: false,
+				modelType: modelTypes.CONTAINER,
 			};
 			EventsManager.publish(events.MODEL_SETTINGS_UPDATE, data);
 
@@ -277,7 +279,7 @@ const testModelEventsListener = () => {
 				project: generateRandomString(),
 				model: generateRandomString(),
 				data: { [generateRandomString()]: generateRandomString() },
-				isFederation: true,
+				modelType: modelTypes.FEDERATION,
 			};
 			const waitOnEvent = eventTriggeredPromise(events.NEW_MODEL);
 			await EventsManager.publish(events.NEW_MODEL, data);
@@ -298,7 +300,7 @@ const testModelEventsListener = () => {
 				project: generateRandomString(),
 				model: generateRandomString(),
 				data: { [generateRandomString()]: generateRandomString() },
-				isFederation: false,
+				modelType: modelTypes.CONTAINER,
 				undefined,
 			};
 			const waitOnEvent = eventTriggeredPromise(events.NEW_MODEL);
@@ -320,7 +322,7 @@ const testModelEventsListener = () => {
 				teamspace: generateRandomString(),
 				model: generateRandomString(),
 				project: generateRandomString(),
-				isFederation: true,
+				modelType: modelTypes.FEDERATION,
 			};
 			EventsManager.publish(events.DELETE_MODEL, data);
 
@@ -342,7 +344,7 @@ const testModelEventsListener = () => {
 				teamspace: generateRandomString(),
 				model: generateRandomString(),
 				project: generateRandomString(),
-				isFederation: false,
+				modelType: modelTypes.CONTAINER,
 			};
 			EventsManager.publish(events.DELETE_MODEL, data);
 
