@@ -21,7 +21,7 @@ import { DialogActions } from '@/v4/modules/dialog';
 import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { CalibrationToolbar } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationToolbar/calibrationToolbar.component';
-import { CompareActionsDispatchers, IssuesActionsDispatchers, MeasurementsActionsDispatchers, RisksActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { CompareActionsDispatchers, IssuesActionsDispatchers, MeasurementsActionsDispatchers, RisksActionsDispatchers, TicketsCardActionsDispatchers, ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { UnityUtil } from '@/globals/unity-util';
 import { MeasurementsHooksSelectors } from '@/v5/services/selectorsHooks';
 import {queuableFunction} from '../../helpers/async';
@@ -287,6 +287,7 @@ export const Viewer3D = (props: Omit<IProps, 'isCalibrating'>) => {
 
 	useEffect(() => {
 		if (isCalibrating) {
+			ViewpointsActionsDispatchers.reset();
 			TicketsCardActionsDispatchers.resetState();
 			IssuesActionsDispatchers.setActiveIssue(null);
 			RisksActionsDispatchers.setActiveRisk(null);

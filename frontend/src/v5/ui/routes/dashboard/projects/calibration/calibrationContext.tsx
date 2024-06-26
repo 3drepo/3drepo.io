@@ -70,12 +70,6 @@ export const CalibrationContextComponent = ({ children }) => {
 		setIsStepValid(false);
 	}, [containerOrFederation, revision, isCalibrating]);
 
-	useEffect(() => {
-		if (isCalibrating) {
-			ViewpointsActionsDispatchers.reset();
-		}
-	}, [isCalibrating]);
-
 	return (
 		<CalibrationContext.Provider value={{
 			step,
