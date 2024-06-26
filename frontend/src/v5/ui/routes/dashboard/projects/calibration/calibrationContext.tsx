@@ -37,9 +37,9 @@ export interface CalibrationContextType {
 	vector3D: Vector3D,
 	setVector3D: React.Dispatch<React.SetStateAction<Vector3D>>;
 	resetVector3D: () => void;
-	drawingId: string;
 	arrow2D: Arrow2D,
 	setArrow2D: (points: Arrow2D) => void,
+	drawingId: string;
 }
 
 const defaultValue: CalibrationContextType = {
@@ -55,9 +55,9 @@ const defaultValue: CalibrationContextType = {
 	vector3D: EMPTY_VECTOR,
 	setVector3D: () => {},
 	resetVector3D: () => {},
-	drawingId: '',
-	arrow2D: { start: null, end: null },
+	arrow2D: EMPTY_VECTOR,
 	setArrow2D: () => {},
+	drawingId: '',
 };
 export const CalibrationContext = createContext(defaultValue);
 CalibrationContext.displayName = 'CalibrationContext';
@@ -70,7 +70,7 @@ export const CalibrationContextComponent = ({ children }) => {
 	const [isCalibrating] = useSearchParam('isCalibrating', Transformers.BOOLEAN);
 	const [isCalibrating3D, setIsCalibrating3D] = useState(false);
 	const [vector3D, setVector3D] = useState<Vector3D>(EMPTY_VECTOR);
-	const [arrow2D, setArrow2D] = useState({ start: null, end: null });
+	const [arrow2D, setArrow2D] = useState(EMPTY_VECTOR);
 	const [drawingId] = useSearchParam('drawingId');
 	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
 
@@ -95,9 +95,9 @@ export const CalibrationContextComponent = ({ children }) => {
 			vector3D,
 			setVector3D,
 			resetVector3D,
-			drawingId,
 			arrow2D,
 			setArrow2D,
+			drawingId,
 		}}>
 			{children}
 		</CalibrationContext.Provider>
