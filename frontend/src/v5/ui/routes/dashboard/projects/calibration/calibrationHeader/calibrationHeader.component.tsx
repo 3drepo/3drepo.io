@@ -16,15 +16,16 @@
  */
 
 import { useContext } from 'react';
-import { Stepper, Container, ButtonsContainer, Button } from './calibrationHeader.styles';
+import { Stepper, Container, ButtonsContainer, ContrastButton, Connector, PrimaryButton, Link } from './calibrationHeader.styles';
 import { Step, StepLabel } from '@mui/material';
-import { Link } from 'react-router-dom';
 import { CalibrationContext } from '../calibrationContext';
+import { formatMessage } from '@/v5/services/intl';
+import { FormattedMessage } from 'react-intl';
 
 const STEPS = [
-	'3D Calibration Points',
-	'2D Calibration Points',
-	'Vertical Spatial Boundaries',
+	formatMessage({ defaultMessage: '3D Calibration Points', id: 'calibration.step.3dCalibration' }),
+	formatMessage({ defaultMessage: '2D Calibration Points', id: 'calibration.step.2dCalibration' }),
+	formatMessage({ defaultMessage: 'Vertical Spatial Boundaries', id: 'calibration.step.verticalSpatialBoundaries' }),
 ];
 
 export const CalibrationHeader = () => {
@@ -33,32 +34,32 @@ export const CalibrationHeader = () => {
 
 	return (
 		<Container>
-			<Stepper activeStep={step} alternativeLabel>
+			<Stepper activeStep={step} alternativeLabel connector={<Connector />} >
 				{STEPS.map((label) => (
 					<Step key={label}>
-						<StepLabel>{label}</StepLabel>
+						<StepLabel StepIconComponent={({ icon }) => icon}>{label}</StepLabel>
 					</Step>
 				))}
 			</Stepper>
 			<ButtonsContainer>
-				<Button onClick={() => setStep(step - 1)} disabled={step === 0}>
-					Back
-				</Button>
-				<Button>
+				<ContrastButton onClick={() => setStep(step - 1)} disabled={step === 0}>
+					<FormattedMessage defaultMessage="Back" id="calinration.button.back" />
+				</ContrastButton>
+				<ContrastButton>
 					<Link to={origin}>
-						Cancel
+						<FormattedMessage defaultMessage="Cancel" id="calinration.button.cancel" />
 					</Link>
-				</Button>
+				</ContrastButton>
 				{isLastStep ? (
-					<Button disabled={!isStepValid}>
+					<PrimaryButton disabled={!isStepValid}>
 						<Link to={origin}>
-							Confirm
+							<FormattedMessage defaultMessage="Confirm" id="calinration.button.confirm" />
 						</Link>
-					</Button>
+					</PrimaryButton>
 				) : (
-					<Button onClick={() => setStep(step + 1)} disabled={!isStepValid}>
-						Continue
-					</Button>
+					<PrimaryButton onClick={() => setStep(step + 1)} disabled={!isStepValid}>
+						<FormattedMessage defaultMessage="Continue" id="calinration.button.continue" />
+					</PrimaryButton>
 				)}
 			</ButtonsContainer>
 		</Container>
