@@ -19,10 +19,10 @@ import { createContext, useEffect, useState } from 'react';
 import { DRAWINGS_ROUTE } from '../../../routes.constants';
 import { generatePath, useParams } from 'react-router-dom';
 import { Transformers, useSearchParam } from '../../../useSearchParam';
-import { ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Vector3D } from '@/v5/store/drawings/drawings.types';
+import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 
-export const EMPTY_VECTOR = { start: null, end: null };
+const EMPTY_VECTOR = { start: null, end: null };
 export interface CalibrationContextType {
 	step: number;
 	setStep: (step: number) => void;
@@ -35,6 +35,7 @@ export interface CalibrationContextType {
 	setIsCalibrating3D: (isCalibrating3D: boolean) => void;
 	vector3D: Vector3D,
 	setVector3D: React.Dispatch<React.SetStateAction<Vector3D>>;
+	resetVector3D: () => void;
 	drawingId: string;
 }
 
@@ -50,6 +51,7 @@ const defaultValue: CalibrationContextType = {
 	setIsCalibrating3D: () => {},
 	vector3D: EMPTY_VECTOR,
 	setVector3D: () => {},
+	resetVector3D: () => {},
 	drawingId: '',
 };
 export const CalibrationContext = createContext(defaultValue);
@@ -64,6 +66,9 @@ export const CalibrationContextComponent = ({ children }) => {
 	const [isCalibrating3D, setIsCalibrating3D] = useState(false);
 	const [vector3D, setVector3D] = useState<Vector3D>(EMPTY_VECTOR);
 	const [drawingId] = useSearchParam('drawingId');
+	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
+
+	const resetVector3D = () => setVector3D(drawing?.vector3D || EMPTY_VECTOR);
 
 	useEffect(() => {
 		setStep(0);
@@ -83,6 +88,7 @@ export const CalibrationContextComponent = ({ children }) => {
 			setIsCalibrating3D,
 			vector3D,
 			setVector3D,
+			resetVector3D,
 			drawingId,
 		}}>
 			{children}

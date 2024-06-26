@@ -20,14 +20,12 @@ import { Viewer } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { UnityUtil } from '@/globals/unity-util';
 import { TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { CalibrationContext, EMPTY_VECTOR } from '../../calibrationContext';
+import { CalibrationContext } from '../../calibrationContext';
 import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 export const Calibration3DHandler = () => {
-	const { step, drawingId, isCalibrating3D, setIsCalibrating3D, vector3D, setVector3D } = useContext(CalibrationContext);
+	const { step, drawingId, isCalibrating3D, setIsCalibrating3D, vector3D, setVector3D, resetVector3D } = useContext(CalibrationContext);
 	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
-
-	const reset3DVector = () => setVector3D(drawing?.vector3D || EMPTY_VECTOR);
 
 	const onPickPoint = ({ position }) => setVector3D(({ start, end }) => (start && !end)
 		? { start, end: position }
@@ -50,7 +48,7 @@ export const Calibration3DHandler = () => {
 				Viewer.off(VIEWER_EVENTS.PICK_POINT, onPickPoint);
 			};
 		} else if (!vector3D.end) {
-			reset3DVector();
+			resetVector3D();
 		}
 	}, [isCalibrating3D]);
 
@@ -68,7 +66,7 @@ export const Calibration3DHandler = () => {
 		}
 	}, [step]);
 
-	useEffect(() => { reset3DVector(); }, [drawing]);
+	useEffect(() => { resetVector3D(); }, [drawing]);
 
 	return null;
 };
