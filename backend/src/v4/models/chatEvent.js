@@ -21,6 +21,7 @@ const fs = require("fs");
 const { v5Path } = require("../../interop");
 const EventsManager = require(`${v5Path}/services/eventsManager/eventsManager`);
 const EventsV5 = require(`${v5Path}/services/eventsManager/eventsManager.constants`).events;
+const { findModelSettingById, prepareDefaultView } = require("./modelSetting");
 const path = require("path");
 const sharedSpacePath = require("../config").cn_queue.shared_storage;
 const utils = require("../utils");
@@ -205,7 +206,6 @@ const subscribeToV5Events = () => {
 	EventsManager.subscribe(EventsV5.MODEL_IMPORT_FINISHED, async ({ teamspace, model, corId, success, user, userErr, errCode, message }) => {
 		const { revisionCount, findLatest } = require("./history");
 		const notifications = require("./notification");
-		const { findModelSettingById, prepareDefaultView } = require("./modelSetting");
 		const rawSettings =  await findModelSettingById(teamspace, model);
 		const [nRevisions, setting]  = await Promise.all([
 			revisionCount(teamspace, model),
