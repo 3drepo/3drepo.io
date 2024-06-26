@@ -181,11 +181,11 @@ function* handlePinClick({ id }) {
 	}
 }
 
-const onPinClick = ({ id }) => dispatch(ViewerGuiActions.handlePinClick(id));
-
 function* startListenOnClickPin() {
 	try {
-		Viewer.on(VIEWER_EVENTS.CLICK_PIN, onPinClick);
+		Viewer.on(VIEWER_EVENTS.CLICK_PIN, ({ id }) => {
+			dispatch(ViewerGuiActions.handlePinClick(id));
+		});
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('start listen on', 'model loaded', error));
 	}
@@ -193,7 +193,7 @@ function* startListenOnClickPin() {
 
 function* stopListenOnClickPin() {
 	try {
-		Viewer.off(VIEWER_EVENTS.CLICK_PIN, onPinClick);
+		Viewer.off(VIEWER_EVENTS.MODEL_LOADED, setIsModelLoaded);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('stop listen on', 'click pin', error));
 	}
