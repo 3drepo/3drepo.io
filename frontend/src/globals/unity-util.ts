@@ -25,6 +25,8 @@ import { ExternalWebRequestHandler } from './unity-externalwebrequesthandler';
 declare let SendMessage;
 declare let createUnityInstance;
 
+type DrawingImageSource = ImageBitmap | ImageData | HTMLImageElement | HTMLCanvasElement | OffscreenCanvas;
+
 export class UnityUtil {
 	/** @hidden */
 	private static errorCallback: any;
@@ -134,6 +136,21 @@ export class UnityUtil {
 	 * failures during the preamble, then this will be set to false.
 	 */
 	private static indexedDBAvailable = true;
+
+	/**
+	 * Temporarily holds references to DOM objects that can be bound to a WebGL texture by id (a number).
+	 * Use the corresponding counter to ensure numbers are unique. References will be removed automatically
+	 * by bindWebGLTexture. DrawingImageSource is a subset of types defined for TexImageSource, but not
+	 * including video types.
+	 */
+	/** @hidden */
+	private static domTextureReferences: { [id: number] : DrawingImageSource } = {};
+
+	/**
+	 * Convenience member to provide ids for domTextureReferences.
+	 */
+	/** @hidden */
+	private static domTextureReferenceCounter = 0;
 
 	/**
 	 * Contains a list of calls to make during the Unity Update method. One
@@ -520,13 +537,20 @@ export class UnityUtil {
 	 * @param clipInfo an object containing an array of clipping plane information
 	 */
 	public static clipBroadcast(clipInfo: string) {
+		const data = JSON.parse(clipInfo);
+		if(UnityUtil.verbose) {
+			console.debug("[FROM UNITY] clipBroadcast", data);
+		}
 		if (UnityUtil.viewer && UnityUtil.viewer.clipBroadcast) {
-			UnityUtil.viewer.clipBroadcast(JSON.parse(clipInfo));
+			UnityUtil.viewer.clipBroadcast(JSON.parse(data));
 		}
 	}
 
 	/** @hidden */
 	public static clipUpdated() {
+		if(UnityUtil.verbose) {
+			console.debug("[FROM UNITY] clipUpdated");
+		}
 		if (UnityUtil.viewer && UnityUtil.viewer.clipUpdated) {
 			UnityUtil.viewer.clipUpdated();
 		}
@@ -535,6 +559,9 @@ export class UnityUtil {
 	/** @hidden */
 	public static currentPointInfo(pointInfo) {
 		const point = JSON.parse(pointInfo);
+		if(UnityUtil.verbose) {
+			console.debug("[FROM UNITY] currentPointInfo", point);
+		}
 		if (UnityUtil.viewer && UnityUtil.viewer.objectSelected) {
 			UnityUtil.viewer.objectSelected(point);
 		}
@@ -572,6 +599,9 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static navMethodChanged(newNavMode) {
+		if(UnityUtil.verbose) {
+			console.debug("[FROM UNITY] navMethodChanged", newNavMode);
+		}
 		if (UnityUtil.viewer && UnityUtil.viewer.navMethodChanged) {
 			UnityUtil.viewer.navMethodChanged(newNavMode);
 		}
@@ -579,14 +609,21 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static objectsSelectedAlert(nodeInfo) {
+		if(UnityUtil.verbose) {
+			console.debug("[FROM UNITY] objectsSelectedAlert", JSON.parse(nodeInfo));
+		}
 		UnityUtil.viewer.objectsSelected(JSON.parse(nodeInfo).nodes);
 	}
 
 	/** @hidden */
 	public static objectStatusBroadcast(nodeInfo) {
 		try {
+			const data = JSON.parse(nodeInfo);
+			if(UnityUtil.verbose) {
+				console.debug("[FROM UNITY] objectStatusBroadcast", data);
+			}
 			UnityUtil.objectStatusPromises.forEach((promise) => {
-				promise.resolve(JSON.parse(nodeInfo));
+				promise.resolve(data);
 			});
 		} catch (error) {
 			UnityUtil.objectStatusPromises.forEach((promise) => {
@@ -608,6 +645,9 @@ export class UnityUtil {
 	/** @hidden */
 	public static pickPointAlert(pointInfo) {
 		const point = JSON.parse(pointInfo);
+		if(UnityUtil.verbose) {
+			console.debug("[FROM UNITY] pickPointAlert", point);
+		}
 		if (UnityUtil.viewer && UnityUtil.viewer.pickPointEvent) {
 			UnityUtil.viewer.pickPointEvent(point);
 		}
@@ -617,6 +657,10 @@ export class UnityUtil {
 	public static screenshotReady(screenshot) {
 		try {
 			const ssJSON = JSON.parse(screenshot);
+
+			if(UnityUtil.verbose) {
+				console.debug("[FROM UNITY] screenshotReady", ssJSON);
+			}
 
 			UnityUtil.screenshotPromises.forEach((promise) => {
 				promise.resolve(ssJSON.ssBytes);
@@ -634,6 +678,9 @@ export class UnityUtil {
 	public static viewpointReturned(vpInfo) {
 		try {
 			const viewpoint = JSON.parse(vpInfo);
+			if(UnityUtil.verbose) {
+				console.debug("[FROM UNITY] viewpointReturned", viewpoint);
+			}
 
 			UnityUtil.viewpointsPromises.forEach((promise) => {
 				promise.resolve(viewpoint);
@@ -652,6 +699,9 @@ export class UnityUtil {
 	public static measurementAlert(strMeasurement) {
 		try {
 			const measurement = JSON.parse(strMeasurement);
+			if(UnityUtil.verbose) {
+				console.debug("[FROM UNITY] measurementAlert", measurement);
+			}
 			if (UnityUtil.viewer && UnityUtil.viewer.measurementAlertEvent) {
 				UnityUtil.viewer.measurementAlertEvent(measurement);
 			}
@@ -661,17 +711,34 @@ export class UnityUtil {
 	}
 
 	/** @hidden */
-	public static measurementRemoved(measurmentId) {
+	public static measurementRemoved(measurementId) {
+		if(UnityUtil.verbose) {
+			console.debug("[FROM UNITY] measurementRemoved", measurementId);
+		}
 		if (UnityUtil.viewer && UnityUtil.viewer.measurementRemoved) {
-			UnityUtil.viewer.measurementRemoved(measurmentId);
+			UnityUtil.viewer.measurementRemoved(measurementId);
 		}
 	}
 
 	/** @hidden */
 	public static measurementsCleared() {
+		if(UnityUtil.verbose) {
+			console.debug("[FROM UNITY] measurementCleared");
+		}
 		if (UnityUtil.viewer && UnityUtil.viewer.measurementsCleared) {
 			UnityUtil.viewer.measurementsCleared();
 		}
+	}
+
+	/**
+	 * Called by the Calibration Tool when a user action changes the heights of the vertical planes.
+	 * Heights are given in Project coordinates from the origin.
+	 */
+	/** @hidden */
+	public static calibrationPlanesChanged(planesJson) {
+		const planes = JSON.parse(planesJson);
+		// eslint-disable-next-line no-console
+		console.log(planes); //todo 4857 - remove this line when the viewer events are hooked up
 	}
 
 	/*
@@ -721,11 +788,23 @@ export class UnityUtil {
 	 * @category Navigations
 	 * @param meshIDs - array of json objects each recording { model: <account.modelID>, meshID: [array of mesh IDs] }
 	 */
-	public static centreToPoint(meshIDs: [object]) {
-		const params = {
-			groups: meshIDs,
-		};
-		UnityUtil.toUnity('CentreToObject', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
+	public static centreToPoint(meshIDs: Array<{ model: string, meshID: string[] }>) {
+		meshIDs.forEach((entry) => {
+			UnityUtil.multipleCallInChunks(entry.meshID.length, (start, end) => {
+				const ids = entry.meshID.slice(start, end);
+				const params: any = {
+					teamspace: '', // Empty string for compatability with zoomToObjects
+					modelId: entry.model,
+					meshes: ids,
+				};
+				UnityUtil.toUnity('ZoomToObjectsAppend', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+			});
+		});
+
+		this.unityOnUpdateActions.push(() => {
+			UnityUtil.toUnity('ZoomToObjectsEnd', UnityUtil.LoadingState.MODEL_LOADED);
+
+		});
 	}
 
 	/**
@@ -2184,12 +2263,7 @@ export class UnityUtil {
 			UnityUtil.viewer.stopClipEdit();
 			UnityUtil.viewer.setClipMode(null);
 		}
-		if (clipPlane?.length === 1) {
-			//UnityUtil.viewer.setClipMode('SINGLE');
-		}
-		if (clipPlane?.length === 6) {
-			//UnityUtil.viewer.setClipMode('BOX');
-		}
+
 		param.requiresBroadcast = requireBroadcast;
 		UnityUtil.toUnity('UpdateClip', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 	}
@@ -2216,8 +2290,22 @@ export class UnityUtil {
 	 * Zoom to a set of objects specified by their Ids
 	 * @category Configurations
 	 */
-	public static zoomToObjects(meshEntries: object[]) {
-		UnityUtil.toUnity('ZoomToObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(meshEntries));
+	public static zoomToObjects(meshEntries: { entries: Array<{ modelId: string, teamspace: string, meshes: string[] }> }) {
+		meshEntries.entries.forEach((entry) => {
+			UnityUtil.multipleCallInChunks(entry.meshes.length, (start, end) => {
+				const ids = entry.meshes.slice(start, end);
+				const params: any = {
+					teamspace: entry.teamspace,
+					modelId: entry.modelId,
+					meshes: ids,
+				};
+				UnityUtil.toUnity('ZoomToObjectsAppend', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+			});
+		});
+
+		this.unityOnUpdateActions.push(() => {
+			UnityUtil.toUnity('ZoomToObjectsEnd', UnityUtil.LoadingState.MODEL_LOADED);
+		});
 	}
 
 	/**
@@ -2374,6 +2462,111 @@ export class UnityUtil {
 		});
 	}
 
+	/**
+	 * Sets and enables the active Calibration Mode. There is no need to explicitly enable or disable the Calibration Tool.
+	 * Enabling Vertical Mode will store the current clip planes, and disabling it will restore them - the frontend must
+	 * disable the Clip Tool itself however.
+	 * @category Calibration
+	 * @param mode A string, ["Vector", "Vertical", "None"].
+	 */
+	public static setCalibrationToolMode(mode: string) {
+		UnityUtil.toUnity('SetCalibrationToolMode', UnityUtil.LoadingState.VIEWER_READY, mode);
+	}
+
+	/**
+	 * Highlights the Lower Floor Plane in Vertical mode, and makes it interactive.
+	 * @category Calibration
+	 */
+	public static selectCalibrationToolLowerPlane() {
+		UnityUtil.toUnity('SelectCalibrationToolLowerPlane', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
+	 * Highlights the Upper Floor Plane in Vertical mode, and makes it interactive.
+	 * @category Calibration
+	 */
+	public static selectCalibrationToolUpperPlane() {
+		UnityUtil.toUnity('SelectCalibrationToolUpperPlane', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
+	 * Sets the lower and upper range of the vertical planes (the floor) in Project coordinates.
+	 * This does not change the default floor height even if the magnitude of the range is different.
+	 * @category Calibration
+	 */
+	public static setCalibrationToolVerticalPlanes(min: number, max: number) {
+		var range = {
+			min,
+			max,
+		};
+		UnityUtil.toUnity('SetCalibrationToolVerticalPlanes', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(range));
+	}
+
+	/**
+	 * Aligns the Lower floor plane to the top of the specified mesh, and the Upper floor plane to the default floor height above this.
+	 * The interactive state of the planes is unchanged.
+	 * @category Calibration
+	 */
+	public static setCalibrationToolFloorToObject(teamspace: string, modelid: string, meshid: string) {
+		var parms = {
+			teamspace: teamspace,
+			modelId: modelid,
+			meshes: [ meshid ],
+		};
+		UnityUtil.toUnity('SetCalibrationToolFloorToObject', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(parms));
+	}
+
+	/**
+	 * Sets or removes the Start and End of the Calibration Vector. If Start or End are set to null, the tool
+	 * will immediately allow the user to place them again. Vector Mode must be explicitly enabled - calling
+	 * this will not automatically enable the tool.
+	 * @category Calibration
+	 */
+	public static setCalibrationToolVector(start: number[] | null, end: number[] | null) {
+		UnityUtil.toUnity('SetCalibrationToolVector', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({ start, end }));
+	}
+
+	/**
+	 * Shows the DrawingImageSource for the Lower and Upper vertical planes at the horizontal location specified by rect.
+	 * rect should be the size and location of the image, given as the location of three corners (bottomLeft, bottomRight,
+	 * topLeft) in Project coordinates. The height will be taken from the current state of the Vertical Planes. If image is
+	 * null, the location of the existing image is updated. If no image has ever been loaded, a white rectangle is shown in
+	 * its place.
+	 * @category Calibration
+	 */
+	public static setCalibrationToolDrawing(image: DrawingImageSource, rect: number[]) {
+		let index = -1;
+		let dimensions = [0, 0];
+
+		if (image !== null) {
+			index = this.domTextureReferenceCounter++;
+			this.domTextureReferences[index] = image; // Store a reference to the image, as the viewer will request it momentarily
+			dimensions = [image.width, image.height];
+		}
+
+		var parms = {
+			worldRect: rect, //[bottomLeftX, bottomLeftY, bottomRightX, bottomRightY, topLeftX, topLeftY]
+			domId: index,
+			dimensions,
+		};
+		UnityUtil.toUnity('SetCalibrationToolDrawing', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(parms));
+	}
+
+	/**
+	 * Populates the provided WebGLTexture texture with the contents of the DrawingImageSource indexed by id.
+	 * (This method could be moved entirely inside Unity if desired in the future.)
+	 * @param ctx The rendering context used by Module
+	 * @param id The index of the DrawingImageSource in domTextureReferences. This will be removed from domTextureReferences.
+	 * @param texture The WebGLTexture created by Unity
+	 */
+	/** @hidden */
+	public static copyToWebGLTexture(ctx: WebGL2RenderingContext, index: number, texture: WebGLTexture) {
+		ctx.bindTexture(ctx.TEXTURE_2D, texture);
+		const image = this.domTextureReferences[index];
+		ctx.texSubImage2D(ctx.TEXTURE_2D, 0, 0, 0, image.width, image.height, ctx.RGBA, ctx.UNSIGNED_BYTE, image);
+		delete this.domTextureReferences[index];
+	}
+	
 	/**
 	 * Sets the maximum number of responses WebRequestManager2 should attempt to
 	 * handle at any one time. The higher this is the faster models will load but
