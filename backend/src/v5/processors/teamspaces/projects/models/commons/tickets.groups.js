@@ -39,7 +39,7 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 		revision = rev._id;
 	} else {
 		try {
-			const rev = await getLatestRevision(teamspace, model, { _id: 1 });
+			const rev = await getLatestRevision(teamspace, model, modelTypes.CONTAINER, { _id: 1 });
 			revision = rev._id;
 		} catch (err) {
 			return { container: model, _ids: [] };
@@ -128,7 +128,7 @@ const convertToMeshIds = async (teamspace, project, revId, containerEntry) => {
 		revision = rev._id;
 	} else {
 		try {
-			const rev = await getLatestRevision(teamspace, container, { _id: 1 });
+			const rev = await getLatestRevision(teamspace, container, modelTypes.CONTAINER, { _id: 1 });
 			revision = rev._id;
 		} catch (err) {
 			return undefined;

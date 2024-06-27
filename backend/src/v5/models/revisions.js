@@ -41,15 +41,15 @@ const findOneRevisionByQuery = async (teamspace, model, modelType, query, projec
 	return rev;
 };
 
-Revisions.getLatestRevision = (teamspace, model, projection = {}) => {
+Revisions.getLatestRevision = (teamspace, model, modelType, projection = {}) => {
 	const query = { ...excludeVoids, ...excludeIncomplete };
 	const sort = { timestamp: -1 };
-	return findOneRevisionByQuery(teamspace, model, undefined, query, projection, sort);
+	return findOneRevisionByQuery(teamspace, model, modelType, query, projection, sort);
 };
 
-Revisions.getRevisionCount = (teamspace, model) => {
+Revisions.getRevisionCount = (teamspace, model, modelType) => {
 	const query = { ...excludeVoids, ...excludeIncomplete };
-	return db.count(teamspace, collectionName(undefined, model), query);
+	return db.count(teamspace, collectionName(modelType, model), query);
 };
 
 Revisions.getRevisions = (teamspace, model, modelType, showVoid, projection = {}) => {

@@ -16,7 +16,7 @@
  */
 
 const { addModel, getModelList } = require('./commons/modelList');
-const { addRevision, deleteModelRevisions, getRevisionByIdOrTag, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
+const { addRevision, deleteModelRevisions, getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { deleteModel, getDrawingById, getDrawings, updateModelSettings } = require('../../../../models/modelSettings');
 const { getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../../services/filesManager');
@@ -33,6 +33,34 @@ Drawings.getDrawingList = async (teamspace, project, user) => {
 	const modelSettings = await getDrawings(teamspace, models, { _id: 1, name: 1, permissions: 1 });
 
 	return getModelList(teamspace, project, user, modelSettings);
+};
+
+Drawings.getDrawingStats = async (teamspace, drawing) => {
+	let latestRev = {};
+	const [settings, revCount] = await Promise.all([
+		getDrawingById(teamspace, drawing, { number: 1, status: 1, type: 1, desc: 1, calibration: 1 }),
+		getRevisionCount(teamspace, drawing, modelTypes.DRAWING),
+	]);
+
+	try {
+		latestRev = await getLatestRevision(teamspace, drawing, modelTypes.DRAWING,
+			{ statusCode: 1, revCode: 1, timestamp: 1 });
+	} catch {
+		// do nothing. A drawing can have 0 revision.
+	}
+
+	return {
+		number: settings.number,
+		status: settings.status,
+		type: settings.type,
+		desc: settings.desc,
+		revisions: {
+			total: revCount,
+			lastUpdated: latestRev?.timestamp,
+			latestRevision: latestRev ? `${latestRev.statusCode}-${latestRev.revCode}` : undefined,
+		},
+		calibration: settings.calibration ?? 'uncalibrated',
+	};
 };
 
 Drawings.addDrawing = (teamspace, project, data) => addModel(teamspace, project,
