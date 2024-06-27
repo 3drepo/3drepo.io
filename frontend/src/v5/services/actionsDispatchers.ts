@@ -42,6 +42,10 @@ import { CanvasHistoryActions } from '@/v4/modules/canvasHistory';
 
 import { ClipMode, GizmoMode, MeasureMode, NavigationMode, ProjectionMode } from '../ui/routes/viewer/toolbar/toolbar.types';
 import { DrawingRevisionsActions, IDrawingRevisionsActionCreators } from '../store/drawings/revisions/drawingRevisions.redux';
+import { ViewpointsActions } from '@/v4/modules/viewpoints';
+import { RisksActions } from '@/v4/modules/risks';
+import { IssuesActions } from '@/v4/modules/issues';
+import { CompareActions } from '@/v4/modules/compare';
 
 interface IBimActionCreators {
 	setIsActive: (active: boolean) => Action;
@@ -53,10 +57,17 @@ interface ICanvasHistoryActionCreators {
 	redo: () => Action;
 }
 
+
+interface ICompareActionCreators {
+	stopCompare: () => Action;
+}
+
 interface ITreeActionCreators {
 	showAllNodes: () => Action;
 	hideSelectedNodes: () => Action;
 	isolateSelectedNodes: (containerOrFederation: string) => Action;
+	stopListenOnSelections: () => Action;
+	startListenOnSelections: () => Action;
 }
 interface IGroupsActionCreators {
 	setColorOverrides: (groupIds: string[], on: boolean) => Action;
@@ -71,12 +82,24 @@ interface ISequencesActionCreators {
 	setSelectedDate: (date: Date | null) => Action;
 }
 
+interface IIssuesActionCreators {
+	toggleShowPins: (showPins: boolean) => Action;
+	setActiveIssue: (issue) => Action;
+}
+
+interface IRisksActionCreators {
+	toggleShowPins: (showPins: boolean) => Action;
+	setActiveRisk: (risk) => Action;
+}
+
 interface IJobsActionCreators {
 	fetchJobs: (teamspace: string) => Action;
 }
 
 interface IMeasurementsActionCreators {
 	setMeasureMode: (mode: MeasureMode | '') => Action;
+	setShowPins: (showPins: boolean) => Action;
+	addMeasurement: (measurement) => Action;
 }
 
 interface IViewerGuiActionCreators {
@@ -96,11 +119,18 @@ interface IViewerGuiActionCreators {
 	clearColorOverrides: () => Action;
 	clearTransformations: () => Action;
 	resetPanels: () => Action;
+	stopListenOnClickPin: () => Action;
+	startListenOnClickPin: () => Action;
+}
+
+interface IViewpointsActionCreators {
+	reset: () => Action;
 }
 
 export const AuthActionsDispatchers = createActionsDispatchers<IAuthActionCreators>(AuthActions);
 export const BimActionsDispatchers = createActionsDispatchers<IBimActionCreators>(BimActions);
 export const CanvasHistoryActionsDispatchers = createActionsDispatchers<ICanvasHistoryActionCreators>(CanvasHistoryActions);
+export const CompareActionsDispatchers = createActionsDispatchers<ICompareActionCreators>(CompareActions);
 export const ContainersActionsDispatchers = createActionsDispatchers<IContainersActionCreators>(ContainersActions);
 export const ContainerRevisionsActionsDispatchers = createActionsDispatchers<IContainerRevisionsActionCreators>(ContainerRevisionsActions);
 export const CurrentUserActionsDispatchers = createActionsDispatchers<ICurrentUserActionCreators>(CurrentUserActions);
@@ -109,9 +139,11 @@ export const DrawingsActionsDispatchers =  createActionsDispatchers<IDrawingsAct
 export const DrawingRevisionsActionsDispatchers =  createActionsDispatchers<IDrawingRevisionsActionCreators>(DrawingRevisionsActions);
 export const FederationsActionsDispatchers = createActionsDispatchers<IFederationsActionCreators>(FederationsActions);
 export const GroupsActionsDispatchers = createActionsDispatchers<IGroupsActionCreators>(GroupsActions);
+export const IssuesActionsDispatchers = createActionsDispatchers<IIssuesActionCreators>(IssuesActions);
 export const JobsActionsDispatchers = createActionsDispatchers<IJobsActionCreators>(JobsActions);
 export const MeasurementsActionsDispatchers = createActionsDispatchers<IMeasurementsActionCreators>(MeasurementsActions);
 export const ProjectsActionsDispatchers = createActionsDispatchers<IProjectsActionCreators>(ProjectsActions);
+export const RisksActionsDispatchers = createActionsDispatchers<IRisksActionCreators>(RisksActions);
 export const SequencesActionsDispatchers = createActionsDispatchers<ISequencesActionCreators>(SequencesActions);
 export const TeamspacesActionsDispatchers = createActionsDispatchers<ITeamspacesActionCreators>(TeamspacesActions);
 export const TicketsActionsDispatchers = createActionsDispatchers<ITicketsActionCreators>(TicketsActions);
@@ -121,3 +153,4 @@ export const TreeActionsDispatchers = createActionsDispatchers<ITreeActionCreato
 export const UsersActionsDispatchers = createActionsDispatchers<IUsersActions>(UsersActions);
 export const ViewerActionsDispatchers = createActionsDispatchers<ViewerActionsCreators>(ViewerActions);
 export const ViewerGuiActionsDispatchers = createActionsDispatchers<IViewerGuiActionCreators>(ViewerGuiActions);
+export const ViewpointsActionsDispatchers = createActionsDispatchers<IViewpointsActionCreators>(ViewpointsActions);

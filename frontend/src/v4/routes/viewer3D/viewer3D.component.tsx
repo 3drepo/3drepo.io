@@ -14,11 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PureComponent, createRef } from 'react';
-import { difference, differenceBy, isEqual, omit } from 'lodash';
+import { PureComponent, createRef, useContext, useEffect } from 'react';
+import { difference, differenceBy, isEqual } from 'lodash';
 import { dispatch } from '@/v4/modules/store';
 import { DialogActions } from '@/v4/modules/dialog';
 import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
+import { CalibrationToolbar } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationToolbar/calibrationToolbar.component';
+import { CompareActionsDispatchers, IssuesActionsDispatchers, MeasurementsActionsDispatchers, RisksActionsDispatchers, TicketsCardActionsDispatchers, ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { UnityUtil } from '@/globals/unity-util';
+import { MeasurementsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { LifoQueue } from '@/v5/helpers/functions.helpers';
 import {queuableFunction} from '../../helpers/async';
 
@@ -62,9 +67,10 @@ interface IProps {
 	issuesHighlightedShapes: any[];
 	risksHighlightedShapes: any[];
 	ticketPins: any;
+	isCalibrating: boolean;
 }
 
-export class Viewer3D extends PureComponent<IProps, any> {
+class Viewer3DBase extends PureComponent<IProps, any> {
 	private containerRef = createRef<HTMLDivElement>();
 	public state = { updatesQueue: new LifoQueue((prevProps, currProps) => this.onComponentDidUpdate(prevProps, currProps), 1, false) };
 
@@ -261,15 +267,13 @@ export class Viewer3D extends PureComponent<IProps, any> {
 	public render() {
 		return (
 			<>
-				<ViewerContainer
-					visible={this.shouldBeVisible}
-				>
+				<ViewerContainer visible={this.shouldBeVisible}>
 					<div
 						ref={this.containerRef}
 						className={this.props.className}
 					/>
-					<Toolbar />
-				</ ViewerContainer>
+					{this.props.isCalibrating ? <CalibrationToolbar /> : <Toolbar />}
+				</ViewerContainer>
 				<Border
 					presentationMode={this.props.presentationMode}
 					isPresentationPaused={this.props.isPresentationPaused}
@@ -278,3 +282,33 @@ export class Viewer3D extends PureComponent<IProps, any> {
 		);
 	}
 }
+
+export const Viewer3D = (props: Omit<IProps, 'isCalibrating'>) => {
+	const { isCalibrating } = useContext(CalibrationContext);
+	const measurements = [
+		...MeasurementsHooksSelectors.selectAreaMeasurements(),
+		...MeasurementsHooksSelectors.selectLengthMeasurements(),
+		...MeasurementsHooksSelectors.selectPointMeasurements(),
+		...MeasurementsHooksSelectors.selectAngleMeasurements(),
+	];
+
+	useEffect(() => {
+		if (isCalibrating) {
+			ViewpointsActionsDispatchers.reset();
+			TicketsCardActionsDispatchers.resetState();
+			IssuesActionsDispatchers.setActiveIssue(null);
+			RisksActionsDispatchers.setActiveRisk(null);
+			CompareActionsDispatchers.stopCompare();
+			UnityUtil.clearAllMeasurements();
+		} else {
+			props.viewer.addMeasurements(measurements, true);
+		}
+
+		IssuesActionsDispatchers.toggleShowPins(!isCalibrating);
+		RisksActionsDispatchers.toggleShowPins(!isCalibrating);
+		TicketsCardActionsDispatchers.setShowPins(!isCalibrating);
+		MeasurementsActionsDispatchers.setShowPins(!isCalibrating);
+	}, [isCalibrating]);
+
+	return <Viewer3DBase {...props} isCalibrating={isCalibrating} />;
+};

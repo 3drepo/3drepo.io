@@ -51,9 +51,14 @@ export const selectAngleMeasurements = createSelector(
 	selectMeasurementsDomain, (state) => state.angleMeasurements
 );
 
+export const selectShowPins = createSelector(
+	selectMeasurementsDomain, (state) => state.showPins
+);
+
 export const selectPins = createSelector(
-	selectPointMeasurements, (state) =>
-		state.map(({ customColor, ...measure }) => {
+	selectPointMeasurements, selectShowPins,
+	(state, showPins) =>
+		!showPins ? [] : state.map(({ customColor, ...measure }) => {
 			const colour = customColor || measure.color;
 			return ({
 				id: measure.uuid,

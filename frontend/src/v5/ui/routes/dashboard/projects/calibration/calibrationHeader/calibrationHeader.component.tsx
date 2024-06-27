@@ -16,11 +16,14 @@
  */
 
 import { useContext } from 'react';
+import { useParams } from 'react-router-dom';
 import { Stepper, Container, ButtonsContainer, ContrastButton, Connector, PrimaryButton, Link } from './calibrationHeader.styles';
 import { Step, StepLabel } from '@mui/material';
 import { CalibrationContext } from '../calibrationContext';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
+import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { CalibrationState } from '@/v5/store/drawings/drawings.types';
 
 const STEPS = [
 	formatMessage({ defaultMessage: '3D Calibration Points', id: 'calibration.step.3dCalibration' }),
@@ -29,8 +32,19 @@ const STEPS = [
 ];
 
 export const CalibrationHeader = () => {
-	const { step, setStep, isStepValid, origin } = useContext(CalibrationContext);
+	const { teamspace, project } = useParams();
+	const { step, setStep, isStepValid, origin, vector3D, drawingId } = useContext(CalibrationContext);
 	const isLastStep = step === 2;
+
+	const getIsStepValid = () => {
+		if (step === 0) return !!(vector3D.start && vector3D.end);
+		return isStepValid;
+	};
+
+	const handleConfirm = () => DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawingId, {
+		calibration: CalibrationState.CALIBRATED,
+		vector3D,
+	});
 
 	return (
 		<Container>
@@ -51,13 +65,13 @@ export const CalibrationHeader = () => {
 					</Link>
 				</ContrastButton>
 				{isLastStep ? (
-					<PrimaryButton disabled={!isStepValid}>
+					<PrimaryButton disabled={!getIsStepValid()} onClick={handleConfirm}>
 						<Link to={origin}>
 							<FormattedMessage defaultMessage="Confirm" id="calinration.button.confirm" />
 						</Link>
 					</PrimaryButton>
 				) : (
-					<PrimaryButton onClick={() => setStep(step + 1)} disabled={!isStepValid}>
+					<PrimaryButton onClick={() => setStep(step + 1)} disabled={!getIsStepValid()}>
 						<FormattedMessage defaultMessage="Continue" id="calinration.button.continue" />
 					</PrimaryButton>
 				)}

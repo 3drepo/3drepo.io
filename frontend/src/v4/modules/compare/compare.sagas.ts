@@ -416,6 +416,7 @@ function* setTargetRevision({ modelId, targetRevision, isDiff }) {
 export default function* CompareSaga() {
 	yield takeLatest(CompareTypes.GET_COMPARE_MODELS, getCompareModels);
 	yield takeLatest(CompareTypes.TOGGLE_COMPARE, toggleCompare);
+	yield takeLatest(CompareTypes.STOP_COMPARE, stopCompare);
 	yield takeLatest(CompareTypes.ON_RENDERING_TYPE_CHANGE, onRenderingTypeChange);
 	yield takeLatest(CompareTypes.GET_COMPARE_MODEL_DATA, getCompareModelData);
 	yield takeLatest(CompareTypes.SET_SORT_TYPE, setSortType);
