@@ -23,6 +23,7 @@ const {
 	isTeamspaceAdmin,
 } = require('../../../utils/permissions/permissions');
 const { COL_NAME } = require('../../../models/projectSettings.constants');
+const { MODEL_CATEGORIES } = require('../../../models/modelSettings.constants');
 const { getAllTemplates } = require('../../../models/tickets.templates');
 const { removeModelData } = require('../../../utils/helper/models');
 
@@ -70,5 +71,7 @@ Projects.getImage = (teamspace, project) => getFile(teamspace, COL_NAME, project
 Projects.updateImage = (teamspace, project, imageBuffer) => storeFile(teamspace, COL_NAME, project, imageBuffer);
 
 Projects.deleteImage = (teamspace, project) => removeFile(teamspace, COL_NAME, project);
+
+Projects.getDrawingCategories = () => MODEL_CATEGORIES;
 
 module.exports = Projects;

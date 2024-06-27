@@ -26,6 +26,7 @@ const { findProjectByModelId } = require('../../../models/projectSettings');
 const { generateFullSchema } = require('../../../schemas/tickets/templates');
 const { getTemplateById } = require('../../../models/tickets.templates');
 const { logger } = require('../../../utils/logger');
+const { modelTypes } = require('../../../models/modelSettings.constants');
 const { serialiseComment } = require('../../../schemas/tickets/tickets.comments');
 const { serialiseGroup } = require('../../../schemas/tickets/tickets.groups');
 const { serialiseTicket } = require('../../../schemas/tickets');
@@ -55,9 +56,14 @@ const queueTasksCompleted = async ({ teamspace, model, value, corId, user, conta
 	}
 };
 
-const modelSettingsUpdated = async ({ teamspace, project, model, data, sender, isFederation }) => {
-	const event = isFederation ? chatEvents.FEDERATION_SETTINGS_UPDATE : chatEvents.CONTAINER_SETTINGS_UPDATE;
-	await createModelMessage(event, data, teamspace, project, model, sender);
+const modelSettingsUpdated = async ({ teamspace, project, model, data, sender, modelType }) => {
+	const modelEvents = {
+		[modelTypes.CONTAINER]: chatEvents.CONTAINER_SETTINGS_UPDATE,
+		[modelTypes.FEDERATION]: chatEvents.FEDERATION_SETTINGS_UPDATE,
+		[modelTypes.DRAWING]: chatEvents.DRAWING_SETTINGS_UPDATE,
+	};
+
+	await createModelMessage(modelEvents[modelType], data, teamspace, project, model, sender);
 };
 
 const revisionUpdated = async ({ teamspace, project, model, data, sender }) => {
@@ -87,14 +93,24 @@ const revisionAdded = async ({ teamspace, project, model, revision, isFederation
 	}
 };
 
-const modelAdded = async ({ teamspace, project, model, data, sender, isFederation }) => {
-	const event = isFederation ? chatEvents.NEW_FEDERATION : chatEvents.NEW_CONTAINER;
-	await createProjectMessage(event, { ...data, _id: model }, teamspace, project, sender);
+const modelAdded = async ({ teamspace, project, model, data, sender, modelType }) => {
+	const modelEvents = {
+		[modelTypes.CONTAINER]: chatEvents.NEW_CONTAINER,
+		[modelTypes.FEDERATION]: chatEvents.NEW_FEDERATION,
+		[modelTypes.DRAWING]: chatEvents.NEW_DRAWING,
+	};
+
+	await createProjectMessage(modelEvents[modelType], { ...data, _id: model }, teamspace, project, sender);
 };
 
-const modelDeleted = async ({ teamspace, project, model, sender, isFederation }) => {
-	const event = isFederation ? chatEvents.FEDERATION_REMOVED : chatEvents.CONTAINER_REMOVED;
-	await createModelMessage(event, {}, teamspace, project, model, sender);
+const modelDeleted = async ({ teamspace, project, model, sender, modelType }) => {
+	const modelEvents = {
+		[modelTypes.CONTAINER]: chatEvents.CONTAINER_REMOVED,
+		[modelTypes.FEDERATION]: chatEvents.FEDERATION_REMOVED,
+		[modelTypes.DRAWING]: chatEvents.DRAWING_REMOVED,
+	};
+
+	await createModelMessage(modelEvents[modelType], {}, teamspace, project, model, sender);
 };
 
 const ticketAdded = async ({ teamspace, project, model, ticket }) => {

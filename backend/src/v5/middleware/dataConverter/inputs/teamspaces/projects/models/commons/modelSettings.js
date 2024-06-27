@@ -17,11 +17,13 @@
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const Yup = require('yup');
+
 const { checkLegendExists } = require('../../../../../../../models/legends');
 const { escapeRegexChrs } = require('../../../../../../../utils/helper/strings');
 const { getModelByQuery } = require('../../../../../../../models/modelSettings');
 const { getProjectById } = require('../../../../../../../models/projectSettings');
 const { getViewById } = require('../../../../../../../models/views');
+const { modelTypes } = require('../../../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../../../utils/responder');
 const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { types } = require('../../../../../../../utils/helper/yup');
@@ -56,38 +58,56 @@ const defaultLegendType = (teamspace, model) => types.id.nullable().test('check-
 	return true;
 });
 
-const modelNameType = (teamspace, project, model) => types.strings.title.test('name-already-used', 'Name is already used within the project', async (value) => {
+const isPropUnique = async (teamspace, project, model, modelType, propName, propValue) => {
 	try {
 		let { models } = await getProjectById(teamspace, project, { models: 1 });
 		if (model) {
 			models = models.flatMap((modelId) => (modelId === model ? [] : modelId));
 		}
+		const query = { _id: { $in: models },
+			...(modelType ? { modelType } : {}),
+			// eslint-disable-next-line security/detect-non-literal-regexp
+			[propName]: new RegExp(`^${escapeRegexChrs(propValue)}$`, 'i') };
 
-		// eslint-disable-next-line security/detect-non-literal-regexp
-		const query = { _id: { $in: models }, name: new RegExp(`^${escapeRegexChrs(value)}$`, 'i') };
 		await getModelByQuery(teamspace, query, { _id: 1 });
 		return false;
 	} catch (err) {
 		// We want this to error out. This means there's no model with the same name
 		return true;
 	}
-});
+};
 
-const generateSchema = (newEntry, isFed, teamspace, project, modelId) => {
+const modelNameType = (teamspace, project, model) => types.strings.title.test('name-already-used', 'Name is already used within the project',
+	(value) => isPropUnique(teamspace, project, model, undefined, 'name', value));
+
+const modelNumberType = (teamspace, project, model) => types.strings.title.test('number-already-used', 'Number is already used within the project',
+	(value) => isPropUnique(teamspace, project, model, modelTypes.DRAWING, 'number', value));
+
+const generateSchema = (newEntry, modelType, teamspace, project, modelId) => {
 	const name = modelNameType(teamspace, project, modelId);
-	const schema = {
+	const number = modelNumberType(teamspace, project, modelId);
+
+	const commonProps = {
 		name: newEntry ? name.required() : name,
-		unit: newEntry ? types.strings.unit.required() : types.strings.unit,
 		desc: types.strings.shortDescription,
-		code: types.strings.code,
-		surveyPoints: types.surveyPoints,
-		angleFromNorth: types.degrees,
-		...(isFed ? {} : { type: newEntry ? Yup.string().required() : Yup.string() }),
-		...(newEntry
-			? {}
+		...(modelType === modelTypes.FEDERATION ? {} : { type: newEntry ? Yup.string().required() : Yup.string() }),
+	};
+
+	const schema = {
+		...commonProps,
+		...(modelType === modelTypes.DRAWING
+			? { number: newEntry ? number.required() : number }
 			: {
-				defaultView: defaultViewType(teamspace, modelId),
-				defaultLegend: defaultLegendType(teamspace, modelId),
+				unit: newEntry ? types.strings.unit.required() : types.strings.unit,
+				code: types.strings.code,
+				surveyPoints: types.surveyPoints,
+				angleFromNorth: types.degrees,
+				...(newEntry
+					? {}
+					: {
+						defaultView: defaultViewType(teamspace, modelId),
+						defaultLegend: defaultLegendType(teamspace, modelId),
+					}),
 			}),
 	};
 
@@ -102,14 +122,16 @@ const generateSchema = (newEntry, isFed, teamspace, project, modelId) => {
 		);
 };
 
-ModelSettings.validateAddModelData = (isFed) => async (req, res, next) => {
+ModelSettings.validateAddModelData = (modelType) => async (req, res, next) => {
 	try {
 		const { teamspace, project } = req.params;
-		const schema = generateSchema(true, isFed, teamspace, project);
+		const schema = generateSchema(true, modelType, teamspace, project);
 		await schema.validate(req.body);
 
-		req.body.properties = { unit: req.body.unit.toLowerCase() };
-		delete req.body.unit;
+		if (req.body.unit) {
+			req.body.properties = { unit: req.body.unit.toLowerCase() };
+			delete req.body.unit;
+		}
 
 		if (req.body.code) {
 			req.body.properties.code = req.body.code;
@@ -122,11 +144,11 @@ ModelSettings.validateAddModelData = (isFed) => async (req, res, next) => {
 	}
 };
 
-ModelSettings.validateUpdateSettingsData = (isFed) => async (req, res, next) => {
+ModelSettings.validateUpdateSettingsData = (modelType) => async (req, res, next) => {
 	try {
-		const { teamspace, project } = req.params;
-		const model = isFed ? req.params.federation : req.params.container;
-		const schema = generateSchema(false, isFed, teamspace, project, model);
+		const { teamspace, project, model } = req.params;
+
+		const schema = generateSchema(false, modelType, teamspace, project, model);
 		req.body = await schema.validate(req.body);
 		convertBodyUUIDs(req);
 		next();

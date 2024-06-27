@@ -73,4 +73,24 @@ ModelSettingConstants.STATUSES = {
 
 ModelSettingConstants.getInfoFromCode = (code) => importErrorMapping[code] || systemFailureMsg;
 
+ModelSettingConstants.modelTypes = {
+	CONTAINER: 'container',
+	FEDERATION: 'federation',
+	DRAWING: 'drawing',
+};
+
+ModelSettingConstants.MODEL_CATEGORIES = [
+	'Architectural',
+	'Existing',
+	'GIS',
+	'Infrastructure',
+	'Interior',
+	'Landscape',
+	'MEP',
+	'Mechanical',
+	'Structural',
+	'Survey',
+	'Other',
+];
+
 module.exports = ModelSettingConstants;
