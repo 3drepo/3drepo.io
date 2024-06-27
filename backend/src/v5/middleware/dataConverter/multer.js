@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createResponseCode, templates } = require('../../utils/responseCodes');
+const { codeExists, createResponseCode, templates } = require('../../utils/responseCodes');
 const Multer = require('multer');
 const { fileExtensionFromBuffer } = require('../../utils/helper/typeCheck');
 const { respond } = require('../../utils/responder');
@@ -85,6 +85,8 @@ MulterHelper.singleFileUpload = (fileName = 'file', fileFilter, maxSize = upload
 			response = createResponseCode(templates.maxSizeExceeded, `File cannot be bigger than ${maxSize} bytes.`);
 		} else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
 			response = createResponseCode(templates.invalidArguments, `${fileName} is a required field`);
+		} else if (!codeExists(err.code)) {
+			response = createResponseCode(templates.invalidArguments, err?.message);
 		}
 
 		respond(req, res, response);
