@@ -59,8 +59,8 @@ export const Stepper = styled(StepperBase)`
 			}
 			&.Mui-active {
 				background-color: ${({ theme }) => theme.palette.primary.lightest};
-				color: ${({ theme }) => theme.palette.primary.main};
-				border: solid 2px currentColor;
+				color: ${({ theme }) => theme.palette.secondary.main};
+				border: solid 2px ${({ theme }) => theme.palette.primary.main};
 				box-sizing: border-box;
 			}
 			&.Mui-disabled {
