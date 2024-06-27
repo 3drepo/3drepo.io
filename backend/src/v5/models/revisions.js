@@ -16,6 +16,7 @@
  */
 
 const db = require('../handler/db');
+const { deleteIfUndefined } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUID } = require('../utils/helper/uuids');
 const { modelTypes } = require('./modelSettings.constants');
@@ -42,13 +43,23 @@ const findOneRevisionByQuery = async (teamspace, model, modelType, query, projec
 };
 
 Revisions.getLatestRevision = (teamspace, model, modelType, projection = {}) => {
-	const query = { ...excludeVoids, ...excludeIncomplete };
+	const query = deleteIfUndefined({
+		...excludeVoids,
+		...excludeIncomplete,
+		model: modelType === modelTypes.DRAWING ? model : undefined,
+	});
+
 	const sort = { timestamp: -1 };
 	return findOneRevisionByQuery(teamspace, model, modelType, query, projection, sort);
 };
 
 Revisions.getRevisionCount = (teamspace, model, modelType) => {
-	const query = { ...excludeVoids, ...excludeIncomplete };
+	const query = deleteIfUndefined({
+		...excludeVoids,
+		...excludeIncomplete,
+		model: modelType === modelTypes.DRAWING ? model : undefined,
+	});
+
 	return db.count(teamspace, collectionName(modelType, model), query);
 };
 

@@ -22,6 +22,8 @@ const { determineTestGroup, generateRandomString, generateRandomObject, generate
 const { stringToUUID } = require('../../../../../../../../src/v5/utils/helper/uuids');
 const { idTypesToKeys, idTypes } = require('../../../../../../../../src/v5/models/metadata.constants');
 
+const { modelTypes } = require(`${src}/modelSettings.constants`);
+
 const Groups = require(`${src}/processors/teamspaces/projects/models/commons/tickets.groups`);
 
 jest.mock('../../../../../../../../src/v5/models/tickets.groups');
@@ -144,7 +146,8 @@ const getSmartTicketGroupById = () => {
 
 			if (options.containers) {
 				expect(RevsModel.getLatestRevision).toHaveBeenCalledTimes(1);
-				expect(RevsModel.getLatestRevision).toHaveBeenCalledWith(teamspace, container, { _id: 1 });
+				expect(RevsModel.getLatestRevision).toHaveBeenCalledWith(teamspace, container, modelTypes.CONTAINER,
+					{ _id: 1 });
 			}
 
 			if (!options.latestRevisionFail) {
@@ -227,7 +230,7 @@ const getNormalTicketGroupById = () => {
 				if (containers) {
 					expect(RevsModel.getLatestRevision).toHaveBeenCalledTimes(1);
 					expect(RevsModel.getLatestRevision).toHaveBeenCalledWith(teamspace,
-						group.objects[0].container, { _id: 1 });
+						group.objects[0].container, modelTypes.CONTAINER, { _id: 1 });
 				}
 
 				if (!latestRevisionFail && group !== normalGroup) {

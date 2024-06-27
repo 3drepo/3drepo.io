@@ -36,7 +36,7 @@ Drawings.getDrawingList = async (teamspace, project, user) => {
 };
 
 Drawings.getDrawingStats = async (teamspace, drawing) => {
-	let latestRev = {};
+	let latestRev;
 	const [settings, revCount] = await Promise.all([
 		getDrawingById(teamspace, drawing, { number: 1, status: 1, type: 1, desc: 1, calibration: 1 }),
 		getRevisionCount(teamspace, drawing, modelTypes.DRAWING),

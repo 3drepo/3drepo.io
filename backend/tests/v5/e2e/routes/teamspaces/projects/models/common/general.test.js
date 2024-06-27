@@ -181,7 +181,7 @@ const addRevision = async (teamspace, model) => {
 
 const testGetModelStats = () => {
 	describe('Get model stats', () => {
-		const { users, teamspace, project, con, fed } = generateBasicData();
+		const { users, teamspace, project, con, fed, draw } = generateBasicData();
 		const [fedWithNoSubModel, fedWithNoRevInSubModel] = times(
 			2, () => ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
 		);
@@ -213,7 +213,7 @@ const testGetModelStats = () => {
 
 		beforeAll(async () => {
 			const models = [
-				fed, con, fedWithNoSubModel, fedWithNoRevInSubModel,
+				fed, con, draw, fedWithNoSubModel, fedWithNoRevInSubModel,
 				conNoRev, conFailedProcessing1, conFailedProcessing2,
 			];
 			await setupBasicData(users, teamspace, project, models);
