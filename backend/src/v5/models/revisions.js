@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { DRAWINGS_HISTORY_COL } = require('./revisions.constants');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUID } = require('../utils/helper/uuids');
@@ -27,7 +28,7 @@ const Revisions = {};
 const excludeVoids = { void: { $ne: true } };
 const excludeIncomplete = { incomplete: { $exists: false } };
 
-const collectionName = (modelType, model) => (modelType === modelTypes.DRAWING ? `${modelType}s.history` : `${model}.history`);
+const collectionName = (modelType, model) => (modelType === modelTypes.DRAWING ? DRAWINGS_HISTORY_COL : `${model}.history`);
 
 const findRevisionsByQuery = (teamspace, model, modelType, query, projection, sort) => db.find(teamspace,
 	collectionName(modelType, model), query, projection, sort);
@@ -84,15 +85,21 @@ Revisions.addRevision = async (teamspace, project, model, modelType, data) => {
 Revisions.deleteModelRevisions = (teamspace, project, model, modelType) => db.deleteMany(
 	teamspace, collectionName(modelType, model), { project, model });
 
-Revisions.updateRevisionStatus = async (teamspace, project, model, modelType, revision, status) => {
+Revisions.updateRevision = async (teamspace, model, modelType, revision, updateData) => {
 	const res = await db.findOneAndUpdate(teamspace, collectionName(modelType, model),
 		{ $or: [{ _id: revision }, { tag: revision }] },
-		{ $set: { void: status } },
+		{ $set: updateData },
 		{ projection: { _id: 1 } });
 
 	if (!res) {
 		throw templates.revisionNotFound;
 	}
+
+	return res;
+};
+
+Revisions.updateRevisionStatus = async (teamspace, project, model, modelType, revision, status) => {
+	const res = await Revisions.updateRevision(teamspace, model, modelType, revision, { void: status });
 
 	publish(events.REVISION_UPDATED, { teamspace,
 		project,

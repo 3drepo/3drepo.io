@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { STATUSES, modelTypes } = require('../../../../models/modelSettings.constants');
 const { addModel, getModelList } = require('./commons/modelList');
-const { addRevision, deleteModelRevisions, getRevisionByIdOrTag, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
+const { addRevision, deleteModelRevisions, getRevisionByIdOrTag, getRevisions, updateRevision, updateRevisionStatus } = require('../../../../models/revisions');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { deleteModel, getDrawingById, getDrawings, updateModelSettings } = require('../../../../models/modelSettings');
 const { getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../../services/filesManager');
 const { getProjectById, removeModelFromProject } = require('../../../../models/projectSettings');
 const { DRAWINGS_HISTORY_REF_COL } = require('../../../../models/revisions.constants');
 const { generateUUID } = require('../../../../utils/helper/uuids');
-const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { templates } = require('../../../../utils/responseCodes');
 
 const Drawings = { };
@@ -62,10 +62,12 @@ Drawings.newRevision = async (teamspace, project, drawing, data, file) => {
 
 	const fileId = generateUUID();
 	const revId = await addRevision(teamspace, project, drawing, modelTypes.DRAWING,
-		{ ...data, format, rFile: [fileId] });
+		{ ...data, format, rFile: [fileId], status: STATUSES.PROCESSING });
 
 	const fileMeta = { name: file.originalname, rid: revId, project, model: drawing };
 	await storeFile(teamspace, DRAWINGS_HISTORY_REF_COL, fileId, file.buffer, fileMeta);
+
+	await updateRevision(teamspace, drawing, modelTypes.DRAWING, revId, { status: STATUSES.OK });
 };
 
 Drawings.updateRevisionStatus = (teamspace, project, drawing, revision, status) => updateRevisionStatus(
