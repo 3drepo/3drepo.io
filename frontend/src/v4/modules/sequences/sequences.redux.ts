@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { findIndex, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { STEP_SCALE } from '../../constants/sequences';
@@ -96,7 +96,7 @@ export const INITIAL_STATE: ISequencesState = {
 	openOnToday: true,
 };
 
-export const fetchSequenceSuccess = (state = INITIAL_STATE, { sequence }) => {
+export const fetchSequenceSuccess = (state, { sequence }) => {
 	let sequences = state.sequences;
 	if (sequences && sequences.length > 0) {
 		const sequenceIndex = sequences.findIndex((s) => s._id === sequence._id);
@@ -111,34 +111,30 @@ export const fetchSequenceSuccess = (state = INITIAL_STATE, { sequence }) => {
 	state.sequences = sequences;
 };
 
-export const fetchSequenceListSuccess = (state = INITIAL_STATE, { sequences }) => {
-	sequences = sortByField([...sequences], { order: 'asc', config: { field: '_id' } });
-	return { ...state, sequences };
+export const fetchSequenceListSuccess = (state, { sequences }) => {
+	state.sequences = sortByField([...sequences], { order: 'asc', config: { field: '_id' } });
 };
 
-export const updateSequenceSuccess = (state = INITIAL_STATE, { sequenceId, newName }) => {
-	const sequencesList = [...state.sequences];
-	const index = findIndex(state.sequences, (sequence) => sequence._id === sequenceId);
-	sequencesList[index].name = newName;
-
-	state.sequences = sequencesList;
+export const updateSequenceSuccess = (state, { sequenceId, newName }) => {
+	const sequenceToUpdate = state.sequences.find((sequence) => sequence._id === sequenceId);
+	sequenceToUpdate.name = newName;
 };
 
-export const fetchActivitiesDefinitionsSuccess = (state = INITIAL_STATE, { sequenceId, activities }) => {
-	state.activities =  {...state.activities, [sequenceId]: activities }
+export const fetchActivitiesDefinitionsSuccess = (state, { sequenceId, activities }) => {
+	state.activities[sequenceId] = activities;
 };
 
-export const setActivitiesPending = (state = INITIAL_STATE, { isPending }) => {
+export const setActivitiesPending = (state, { isPending }) => {
 	state.activitiesPending = isPending;
 };
 
-export const setSelectedSequenceSuccess = (state = INITIAL_STATE, { sequenceId }) => {
+export const setSelectedSequenceSuccess = (state, { sequenceId }) => {
 	let lastSelectedSequence = state.lastSelectedSequence;
 
 	if (sequenceId !== null && state.lastSelectedSequence !== sequenceId) {
 		state.selectedDate = null;
-		state.stepInterval = INITIAL_STATE.stepInterval;
-		state.stepScale = INITIAL_STATE.stepScale;
+		state.stepInterval = 1;
+		state.stepScale = STEP_SCALE.DAY;
 		lastSelectedSequence = sequenceId;
 	}
 
@@ -146,40 +142,38 @@ export const setSelectedSequenceSuccess = (state = INITIAL_STATE, { sequenceId }
 	state.lastSelectedSequence =  lastSelectedSequence;
 };
 
-export const setOpenOnTodaySuccess =  (state = INITIAL_STATE, { openOnToday }) => {
+export const setOpenOnTodaySuccess =  (state, { openOnToday }) => {
 	state.openOnToday = openOnToday;
 };
 
-export const setSelectedDateSuccess =  (state = INITIAL_STATE, { date }) => {
+export const setSelectedDateSuccess =  (state, { date }) => {
 	state.selectedDate = date;
 };
 
-export const updateFrameWithViewpoint = (state = INITIAL_STATE, { sequenceId, stateId, viewpoint }) => {
+export const updateFrameWithViewpoint = (state, { sequenceId, stateId, viewpoint }) => {
 	if (isEmpty(viewpoint)) {
-		return state;
+		return;
 	}
 	const sequenceToUpdate = state.sequences.find(({ _id }) => _id === sequenceId);
 	const frameToUpdate = sequenceToUpdate.frames.find(({ state: s }) => s === stateId);
 
 	if (!frameToUpdate) {
 		// If two successive dates correspond to the same frame updateFrameViewpoint can get called for a frame that has already been converted
-		return state;
+		return;
 	}
 	Object.assign(frameToUpdate, viewpoint);
 	delete frameToUpdate.state;
 };
 
-export const setStepInterval = (state = INITIAL_STATE, { stepInterval }) => {
+export const setStepInterval = (state, { stepInterval }) => {
 	state.stepInterval = stepInterval;
 };
 
-export const setStepScale = (state = INITIAL_STATE, { stepScale }) => {
+export const setStepScale = (state, { stepScale }) => {
 	state.stepScale = stepScale;
 };
 
-export const reset = (state) => {
-	Object.assign(state, INITIAL_STATE);
-};
+export const reset = () => ({...INITIAL_STATE});
 
 export const reducer = createReducer(INITIAL_STATE, produceAll({
 	[SequencesTypes.FETCH_SEQUENCE_SUCCESS]: fetchSequenceSuccess,
