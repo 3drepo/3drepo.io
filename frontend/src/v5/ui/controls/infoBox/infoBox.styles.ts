@@ -66,8 +66,5 @@ export const CloseIconContainer = styled.div`
 
 export const Description = styled.div`
 	${({ theme }) => theme.typography.body1};
-	display: flex;
-	align-items: center;
-	gap: 5px;
 	width: 100%;
 `;
