@@ -33,6 +33,7 @@ import { Content } from './projectContent.styles';
 import { ProjectSettings } from '../projectSettings/projectSettings.component';
 import { Board } from '../board/board.component';
 import { TicketsContent } from '../tickets/ticketsContent.component';
+import { Drawings } from '../drawings/drawings.component';
 
 export const ProjectContent = () => {
 	const { teamspace } = useParams<DashboardParams>();
@@ -53,6 +54,9 @@ export const ProjectContent = () => {
 					</Route>
 					<Route title={formatMessage({ id: 'pageTitle.containers', defaultMessage: ':project - Containers' })} exact path={`${path}/t/containers`}>
 						<Containers />
+					</Route>
+					<Route title={formatMessage({ id: 'pageTitle.drawings', defaultMessage: ':project - Drawings' })} exact path={`${path}/t/drawings`}>
+						<Drawings />
 					</Route>
 					<Route title={formatMessage({ id: 'pageTitle.issuesAndRisks', defaultMessage: ':project - Issues and risks' })} exact path={`${path}/t/board/:type/:containerOrFederation?`}>
 						<Board />

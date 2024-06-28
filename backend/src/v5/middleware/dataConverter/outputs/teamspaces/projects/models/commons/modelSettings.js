@@ -16,30 +16,29 @@
  */
 
 const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
+const { deleteIfUndefined } = require('../../../../../../../utils/helper/objects');
 const { modelTypes } = require('../../../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../../../utils/responder');
 const { templates } = require('../../../../../../../utils/responseCodes');
 
 const ModelSettings = {};
 
-ModelSettings.formatModelSettings = (modelType) => (req, res) => {
+ModelSettings.formatModelSettings = (req, res) => {
 	const { defaultView, defaultLegend, ...settings } = req.outputData;
 
-	const formattedSettings = {
+	const formattedSettings = deleteIfUndefined({
 		...settings,
-		...(modelType === modelTypes.DRAWING ? { } : {
-			timestamp: settings.timestamp ? settings.timestamp.getTime() : undefined,
-			code: settings.properties.code,
-			unit: settings.properties.unit,
-			...(defaultView ? { defaultView: UUIDToString(defaultView) } : {}),
-			...(defaultLegend ? { defaultLegend: UUIDToString(defaultLegend) } : {}),
-			errorReason: settings.errorReason ? {
-				message: settings.errorReason.message,
-				timestamp: settings.errorReason.timestamp ? settings.errorReason.timestamp.getTime() : undefined,
-				errorCode: settings.errorReason.errorCode,
-			} : undefined,
-		}),
-	};
+		timestamp: settings.timestamp ? settings.timestamp.getTime() : undefined,
+		code: settings.properties?.code,
+		unit: settings.properties?.unit,
+		...(defaultView ? { defaultView: UUIDToString(defaultView) } : {}),
+		...(defaultLegend ? { defaultLegend: UUIDToString(defaultLegend) } : {}),
+		errorReason: settings.errorReason ? {
+			message: settings.errorReason.message,
+			timestamp: settings.errorReason.timestamp ? settings.errorReason.timestamp.getTime() : undefined,
+			errorCode: settings.errorReason.errorCode,
+		} : undefined,
+	});
 
 	delete formattedSettings.properties;
 

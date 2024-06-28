@@ -28,6 +28,7 @@ export const CircledNumber = styled.span<{ disabled?: boolean }>`
 	border-radius: 12px;
 	font-size: 11px;
 	box-sizing: border-box;
+	margin-left: 5px;
 
 	${({ disabled, theme }) => disabled && css`
 		background-color: transparent;

@@ -49,7 +49,7 @@ const events = [
 	'federationUpdateTicketComment',
 	'federationUpdateTicketGroup',
 
-	// Drawomg events
+	// Drawing events
 	'newDrawing',
 	'drawingRemoved',
 	'drawingSettingsUpdate',
