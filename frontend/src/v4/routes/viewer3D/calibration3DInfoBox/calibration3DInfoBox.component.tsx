@@ -18,7 +18,8 @@
 import { formatMessage } from '@/v5/services/intl';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext'
 import { CalibrationInfoBox } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationInfoBox/calibrationInfoBox.component';
-import { useContext } from 'react'
+import { useContext } from 'react';
+import CalibrationIcon from '@assets/icons/filled/calibration-filled.svg';
 
 export const Calibration3DInfoBox = () => {
 	const { step } = useContext(CalibrationContext);
@@ -26,8 +27,14 @@ export const Calibration3DInfoBox = () => {
 	if (step === 0) {
 		return (
 			<CalibrationInfoBox
-				title={formatMessage({ defaultMessage: '3D Calibration Points', id: 'infoBox.title.firstStep' })}
-				description={formatMessage({ defaultMessage: 'Select base and target point in the 3D Model to calibrate.', id: 'infoBox.description.secondStep' })}
+				title={formatMessage({ defaultMessage: '3D Alignment', id: 'infoBox.3dAlignment.title' })}
+				description={formatMessage({
+					id: 'infoBox.3dAlignment.description',
+					defaultMessage: `
+						This wizard helps you to align 2D to 3D by selecting two points in 3D and the same points in 2D, click on the {icon}
+						on your navigation bar and then please select your two points in the 3D Viewer.
+					`,
+				}, { icon: <CalibrationIcon /> })}
 			/>
 		);
 	};
@@ -35,12 +42,14 @@ export const Calibration3DInfoBox = () => {
 	if (step === 2) {
 		return (
 			<CalibrationInfoBox
-				title={formatMessage({ defaultMessage: '2D Calibration', id: 'infoBox.title.thirdStep' })}
+				title={formatMessage({ defaultMessage: '2D Vertical Extents', id: 'infoBox.verticalExtents.title' })}
 				description={formatMessage({
-					defaultMessage: 'Select the floor from the model tree or select an object from the model (the system will automatically set the drawing to central depth of selected object)',
-					id: 'infoBox.description.thirdStep',
+					id: 'infoBox.verticalExtents.description',
+					defaultMessage: `
+						This step filters features from 3D to make them visible in 2D (i.e. Custom Tickets).
+						Place the bottom and top planes to define the vertical extents of your drawing.
+					`,
 				})}
-				hideDescriptionIcon
 			/>
 		);
 	};

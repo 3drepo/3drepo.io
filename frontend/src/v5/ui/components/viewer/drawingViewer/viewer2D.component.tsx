@@ -86,8 +86,14 @@ export const Viewer2D = () => {
 		<ViewerContainer visible>
 			{step === 1 && (
 				<CalibrationInfoBox
-					title={formatMessage({ defaultMessage: '2D Calibration Points', id: 'infoBox.title.secondStep' })}
-					description={formatMessage({ defaultMessage: 'Select base and target point in the 2D Model to calibrate.', id: 'infoBox.description.secondStep' })}
+					title={formatMessage({ defaultMessage: '2D Alignment', id: 'infoBox.2dAlignment.title' })}
+					description={formatMessage({
+						id: 'infoBox.2dAlignment.description',
+						defaultMessage: `
+							Click on the {icon} on your navigation bar and then please select your two points in the
+							2D Viewer that are the same points in your 3D Viewer.
+						`,
+					}, { icon: <CalibrationIcon /> })}
 				/>
 			)}
 			{!isCalibrating && <CloseButton variant="secondary" onClick={close2D} />}

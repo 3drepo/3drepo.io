@@ -23,9 +23,9 @@ import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 
 const STEPS = [
-	formatMessage({ defaultMessage: '3D Calibration Points', id: 'calibration.step.3dCalibration' }),
-	formatMessage({ defaultMessage: '2D Calibration Points', id: 'calibration.step.2dCalibration' }),
-	formatMessage({ defaultMessage: 'Vertical Spatial Boundaries', id: 'calibration.step.verticalSpatialBoundaries' }),
+	formatMessage({ defaultMessage: '3D Alignment', id: 'calibration.step.3dCalibration' }),
+	formatMessage({ defaultMessage: '2D Alignment', id: 'calibration.step.2dCalibration' }),
+	formatMessage({ defaultMessage: '2D Vertical Extents', id: 'calibration.step.verticalExtents' }),
 ];
 
 export const CalibrationHeader = () => {
