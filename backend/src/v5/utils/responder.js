@@ -16,6 +16,7 @@
  */
 
 const { isBuffer, isString } = require('./helper/typeCheck');
+const { createActivityRecord } = require('../services/elastic');
 const { createResponseCode } = require('./responseCodes');
 const networkLabel = require('./logger').labels.network;
 const logger = require('./logger').logWithLabel(networkLabel);
@@ -32,6 +33,9 @@ const genResponseLogging = ({ status, code }, contentLength, { session, startTim
 	const user = session?.user ? session.user.username : 'unknown';
 	const currentTime = Date.now();
 	const latency = startTime ? `${currentTime - startTime}` : '???';
+
+	createActivityRecord(status, code, latency, contentLength, user, method, originalUrl);
+
 	return logger.formatResponseMsg({ status, code, latency, contentLength, user, method, originalUrl });
 };
 

@@ -25,6 +25,7 @@ const SystemLogger = {};
 const stringFormat = ({ level, message, label, timestamp, stack }) => `${timestamp} [${level}] [${label || "APP"}] ${message}${stack ? ` - ${stack}` : ""}`;
 
 const logger = createLogger();
+
 SystemLogger.formatResponseMsg = (
 	resData
 ) => {
@@ -43,6 +44,7 @@ SystemLogger.formatResponseMsg = (
 		return `[OUT] ${status}\t${code}\t${latency}\t${contentLength}\t${user}\t${method}\t${originalUrl}`;
 	}
 };
+
 function createLogger() {
 	const transporters = [];
 
@@ -172,4 +174,3 @@ module.exports.systemLogger = SystemLogger;
 module.exports.logLabels = {
 	network: "NET"
 };
-
