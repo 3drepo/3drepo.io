@@ -17,28 +17,15 @@
 
 import { useContext, useState } from 'react';
 import { CalibrationContext } from '../calibrationContext';
-import { CalibrationIcon } from './calibrationInfoBox.styles';
-import { InfoBox, InfoBoxProps } from '@controls/infoBox/infoBox.component';
+import { InfoBoxProps } from '@controls/infoBox/infoBox.component';
+import { InfoBox } from './calibrationInfoBox.styles';
 
-type CalibrationInfoBoxProps = Omit<InfoBoxProps, 'onClickClose'> & {
-	hideDescriptionIcon?: boolean;
-};
-export const CalibrationInfoBox = ({ description, hideDescriptionIcon = false, ...props }: CalibrationInfoBoxProps) => {
+type CalibrationInfoBoxProps = Omit<InfoBoxProps, 'onClickClose'>;
+export const CalibrationInfoBox = (props: CalibrationInfoBoxProps) => {
 	const [open, setOpen] = useState(true);
 	const { isCalibrating } = useContext(CalibrationContext);
 
 	if (!isCalibrating || !open) return null;
 
-	return (
-		<InfoBox
-			{...props}
-			onClickClose={() => setOpen(false)}
-			description={(
-				<>
-					{!hideDescriptionIcon && <CalibrationIcon />}
-					{description}
-				</>
-			)}
-		/>
-	);
+	return (<InfoBox {...props} onClickClose={() => setOpen(false)} />);
 };

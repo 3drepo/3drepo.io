@@ -15,10 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { InfoBox as InfoBoxBase } from '@controls/infoBox/infoBox.component';
 import styled from 'styled-components';
-import CalibrationIconBase from '@assets/icons/filled/calibration-filled.svg';
 
-export const CalibrationIcon = styled(CalibrationIconBase)`
-	color: ${({ theme }) => theme.palette.base.main};
-	min-width: 15px;
+export const InfoBox = styled(InfoBoxBase)`
+	svg {
+		vertical-align: middle;
+		display: inline-block;
+	}
 `;
