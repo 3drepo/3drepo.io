@@ -234,7 +234,6 @@ const testDeleteModelRevisions = () => {
 
 const testUpdateRevision = () => {
 	const teamspace = generateRandomString();
-	const project = generateRandomString();
 	const model = generateRandomString();
 	const revision = { _id: 1, author: 'someUser', timestamp: new Date(), void: true };
 	const updateData = generateRandomObject();
@@ -251,22 +250,22 @@ const testUpdateRevision = () => {
 		test('Should update a revision', async () => {
 			const modelType = modelTypes.CONTAINER;
 			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementationOnce(() => ({ _id: revision._id }));
-			await Revisions.updateRevision(teamspace, project, model, modelType,
+			await Revisions.updateRevision(teamspace, model, modelType,
 				revision._id, updateData);
 			checkResults(fn, false, updateData);
 		});
 
-		test('Should update the void status of a revision (drawing)', async () => {
+		test('Should update a revision (drawing)', async () => {
 			const modelType = modelTypes.DRAWING;
 			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementationOnce(() => ({ _id: revision._id }));
-			await Revisions.updateRevision(teamspace, project, model, modelType,
+			await Revisions.updateRevision(teamspace, model, modelType,
 				revision._id, updateData);
 			checkResults(fn, true, updateData);
 		});
 
 		test('Should throw REVISION_NOT_FOUND if it cannot find the revision in the revisions table', async () => {
 			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementationOnce(() => undefined);
-			await expect(Revisions.updateRevision(teamspace, project, model,
+			await expect(Revisions.updateRevision(teamspace, model,
 				modelTypes.CONTAINER, revision._id, updateData)).rejects.toEqual(templates.revisionNotFound);
 			checkResults(fn, false, updateData);
 		});
