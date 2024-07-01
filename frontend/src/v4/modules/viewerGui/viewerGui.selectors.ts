@@ -22,11 +22,8 @@ import * as Bim from '../bim';
 import { selectOverrides as selectGroupsOverrides,
 	selectTransparencies as selectGroupsTransparencies } from '../groups/groups.selectors';
 import { selectIsPresentationActive } from '../presentation';
-import { selectSelectedFrameColors, selectSelectedFrameTransformations,
-	selectSelectedFrameTransparencies } from '../sequences';
 import { selectIsTreeProcessed } from '../tree';
 import { selectOverrides as selectViewsOverrides,
-		selectTransformations as selectViewsTransformations,
 		selectTransparencies as selectViewsTransparencies } from '../viewpoints';
 
 export const selectViewerGuiDomain = (state) => ({...state.viewerGui});
@@ -90,22 +87,16 @@ export const selectIsClipEdit = createSelector(
 );
 
 export const selectColorOverrides = createSelector(
-	selectViewsOverrides, selectGroupsOverrides, selectTicketOverrides, selectSelectedFrameColors,
-		(viewsOverrides, groupsOverrides, ticketsOverrides, sequenceFrameOverrides ) =>
-		({...viewsOverrides,  ...groupsOverrides, ...ticketsOverrides, ...sequenceFrameOverrides})
+	selectViewsOverrides, selectGroupsOverrides, selectTicketOverrides,
+		(viewsOverrides, groupsOverrides, ticketsOverrides) =>
+			({...viewsOverrides,  ...groupsOverrides, ...ticketsOverrides })
 );
 
 
 export const selectAllTransparencyOverrides = createSelector(
-	selectViewsTransparencies, selectGroupsTransparencies, selectTicketTransparencies, selectSelectedFrameTransparencies,
-		(viewsTransparencies, groupsTransparencies, ticketsTransparencies, sequenceTransparencies) =>
-		({...viewsTransparencies, ...groupsTransparencies, ...ticketsTransparencies, ...sequenceTransparencies})
-);
-
-export const selectTransformations = createSelector(
-	selectViewsTransformations, selectSelectedFrameTransformations,
-	(viewsTransformations, sequenceTransformations) =>
-			({...sequenceTransformations, ...viewsTransformations})
+	selectViewsTransparencies, selectGroupsTransparencies, selectTicketTransparencies,
+		(viewsTransparencies, groupsTransparencies, ticketsTransparencies) =>
+			({...viewsTransparencies, ...groupsTransparencies, ...ticketsTransparencies })
 );
 
 export const selectDisabledPanelButtons = createSelector(

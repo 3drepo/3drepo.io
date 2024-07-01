@@ -48,14 +48,12 @@ interface IProps {
 	measurementPins: any[];
 	transformations: any[];
 	gisLayers: string[];
-	sequenceHiddenNodes: string[];
 	hasGisCoordinates: boolean;
 	gisCoordinates: any;
 	handleTransparencyOverridesChange: any;
 	viewerManipulationEnabled: boolean;
 	presentationMode: PresentationMode;
 	isPresentationPaused: boolean;
-	handleTransparenciesVisibility: any;
 	issuesShapes: any[];
 	risksShapes: any[];
 	issuesHighlightedShapes: any[];
@@ -187,14 +185,10 @@ export class ViewerCanvas extends PureComponent<IProps, { updatesQueue }> {
 	public async onComponentDidUpdate(prevProps, currProps) {
 		const { colorOverrides, issuePins, riskPins, measurementPins, hasGisCoordinates,
 			gisCoordinates, gisLayers, transparencies, transformations,
-			sequenceHiddenNodes, viewerManipulationEnabled, viewer,
-			issuesShapes, issuesHighlightedShapes, risksShapes, risksHighlightedShapes,
+			viewerManipulationEnabled, viewer, issuesShapes, issuesHighlightedShapes,
+			risksShapes, risksHighlightedShapes,
 			ticketPins
 		} = currProps;
-
-		if (sequenceHiddenNodes && !isEqual(prevProps.sequenceHiddenNodes, sequenceHiddenNodes)) {
-			currProps.handleTransparenciesVisibility(sequenceHiddenNodes);
-		}
 
 		if (colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
 			this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);

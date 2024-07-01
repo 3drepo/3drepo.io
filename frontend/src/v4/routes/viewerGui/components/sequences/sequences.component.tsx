@@ -42,12 +42,10 @@ interface IProps {
 	selectedDate: Date;
 	selectedStartDate: Date;
 	selectedEndingDate: Date;
-	colorOverrides: any;
 	stepInterval: number;
 	stepScale: STEP_SCALE;
 	currentTasks: any[];
-	loadingFrameState: boolean;
-	loadingViewpoint: boolean;
+	loadingFrame: boolean;
 	selectedSequence: any;
 	rightPanels: string[];
 	setPanelVisibility: (panelName, visibility) => void;
@@ -59,14 +57,13 @@ interface IProps {
 	toggleLegend: () => void;
 	resetLegendPanel: () => void;
 	clearTransformations: () => void;
+	viewpoint: any;
 }
-
-const da =  new Date();
 
 const SequenceDetails = ({
 	startDate, endDate, selectedDate, selectedStartDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
-	setStepScale, currentTasks, loadingFrameState, loadingViewpoint, rightPanels, toggleActivitiesPanel,
-	fetchActivityDetails, frames, isActivitiesPending, toggleLegend, draggablePanels,
+	setStepScale, currentTasks, loadingFrame, rightPanels, toggleActivitiesPanel,
+	fetchActivityDetails, frames, isActivitiesPending, toggleLegend, draggablePanels, viewpoint,
 }) => (
 	<>
 		<SequenceForm />
@@ -80,13 +77,14 @@ const SequenceDetails = ({
 			onChange={setSelectedDate}
 			onChangeStepScale={setStepScale}
 			onChangeStepInterval={setStepInterval}
-			loadingFrame={loadingFrameState || loadingViewpoint}
+			loadingFrame={loadingFrame}
 			rightPanels={rightPanels}
 			toggleActivitiesPanel={toggleActivitiesPanel}
 			frames={frames}
 			isActivitiesPending={isActivitiesPending}
 			toggleLegend={toggleLegend}
 			draggablePanels={draggablePanels}
+			viewpoint={viewpoint}
 		/>
 		<TasksList
 			tasks={currentTasks}
