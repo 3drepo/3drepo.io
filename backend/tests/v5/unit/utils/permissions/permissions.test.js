@@ -332,6 +332,60 @@ const testHasReadAccessToDrawing = () => {
 	});
 };
 
+const testHasWriteAccessToDrawing = () => {
+	describe.each([
+		['a', false, false],
+		['b', false, true],
+		['c', false, false],
+		['projAdmin', false, false],
+		['projAdmin', true, true],
+		['tsAdmin', false, false],
+		['tsAdmin', true, true],
+		['tsAdmin', undefined, true],
+		['nobody', false, false],
+		['nobody', true, false],
+	])('Has write access to drawing', (user, adminCheck, result) => {
+		test(`${user} ${result ? 'have' : 'does not have'} write access (adminCheck: ${adminCheck})`, async () => {
+			Projects.modelsExistInProject.mockImplementation(() => true);
+			expect(await Permissions.hasWriteAccessToDrawing('teamspace', 'project', 'model', user, adminCheck)).toBe(result);
+		});
+	});
+
+	describe('Has write access to drawing (2)', () => {
+		test('should return false if the drawing does not belong to the project', async () => {
+			Projects.modelsExistInProject.mockImplementation(() => false);
+			expect(await Permissions.hasWriteAccessToDrawing('teamspace', 'project', 'model', 'a', true)).toBe(false);
+		});
+	});
+};
+
+const testHasCommenterAccessToDrawing = () => {
+	describe.each([
+		['a', false, false],
+		['b', false, true],
+		['c', false, true],
+		['projAdmin', false, false],
+		['projAdmin', true, true],
+		['tsAdmin', false, false],
+		['tsAdmin', true, true],
+		['tsAdmin', undefined, true],
+		['nobody', false, false],
+		['nobody', true, false],
+	])('Has commenter access to drawing', (user, adminCheck, result) => {
+		test(`${user} ${result ? 'have' : 'does not have'} write access (adminCheck: ${adminCheck})`, async () => {
+			Projects.modelsExistInProject.mockImplementation(() => true);
+			expect(await Permissions.hasCommenterAccessToDrawing('teamspace', 'project', 'model', user, adminCheck)).toBe(result);
+		});
+	});
+
+	describe('Has write access to drawing (2)', () => {
+		test('should return false if the model does not belong to the project', async () => {
+			Projects.modelsExistInProject.mockImplementation(() => false);
+			expect(await Permissions.hasCommenterAccessToDrawing('teamspace', 'project', 'model', 'a', true)).toBe(false);
+		});
+	});
+};
+
 const testHasAdminAccessToDrawing = () => {
 	describe.each([
 		['a', false],
@@ -474,6 +528,8 @@ describe('utils/permissions', () => {
 	testHasAdminAccessToContainer();
 
 	testHasReadAccessToDrawing();
+	testHasWriteAccessToDrawing();
+	testHasCommenterAccessToDrawing();
 	testHasAdminAccessToDrawing();
 
 	testHasReadAccessToFederation();

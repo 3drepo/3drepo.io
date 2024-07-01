@@ -15,57 +15,57 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { hasReadAccessToContainer, hasWriteAccessToContainer } = require('../../../../../middleware/permissions/permissions');
+const { hasReadAccessToDrawing, hasWriteAccessToDrawing } = require('../../../../../middleware/permissions/permissions');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
-const Containers = require('../../../../../processors/teamspaces/projects/models/containers');
+const Drawings = require('../../../../../processors/teamspaces/projects/models/drawings');
 const { Router } = require('express');
-
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { serialiseRevisionArray } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions');
 const { templates } = require('../../../../../utils/responseCodes');
-const { validateNewRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
+const { validateNewRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/drawings');
 const { validateUpdateRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 
-const getRevisions = (req, res, next) => {
-	const { teamspace, container } = req.params;
+const getRevisions = async (req, res, next) => {
+	const { teamspace, drawing } = req.params;
 	const showVoid = req.query.showVoid === 'true';
 
-	Containers.getRevisions(teamspace, container, showVoid).then((revs) => {
-		req.outputData = revs;
+	try {
+		const revisions = await Drawings.getRevisions(teamspace, drawing, showVoid);
+		req.outputData = revisions;
 		next();
-	}).catch(
-		/* istanbul ignore next */
-		(err) => respond(req, res, err),
-	);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
 };
 
 const updateRevisionStatus = (req, res) => {
-	const { teamspace, project, container, revision } = req.params;
+	const { teamspace, project, drawing, revision } = req.params;
 	const status = req.body.void;
 
-	Containers.updateRevisionStatus(teamspace, project, container, revision, status).then(() => {
+	Drawings.updateRevisionStatus(teamspace, project, drawing, revision, status).then(() => {
 		respond(req, res, templates.ok);
 	}).catch((err) => respond(req, res, err));
 };
 
-const createNewContainerRevision = (req, res) => {
-	const { file } = req;
-	const revInfo = req.body;
-	const { teamspace, container } = req.params;
-	const owner = getUserFromSession(req.session);
-	Containers.newRevision(teamspace, container, { ...revInfo, owner }, file).then(() => {
+const createNewRevision = async (req, res) => {
+	try {
+		const { file } = req;
+		const { teamspace, project, drawing } = req.params;
+		const author = getUserFromSession(req.session);
+		await Drawings.newRevision(teamspace, project, drawing, { ...req.body, author }, file);
 		respond(req, res, templates.ok);
-	}).catch(
-		/* istanbul ignore next */
-		(err) => respond(req, res, err),
-	);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
 };
 
 const downloadRevisionFiles = async (req, res) => {
-	const { teamspace, container, revision } = req.params;
+	const { teamspace, drawing, revision } = req.params;
 
 	try {
-		const file = await Containers.downloadRevisionFiles(teamspace, container, revision);
+		const file = await Drawings.downloadRevisionFiles(teamspace, drawing, revision);
 
 		writeStreamRespond(req, res, templates.ok, file.readStream, file.filename, file.size);
 	} catch (err) {
@@ -77,11 +77,11 @@ const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions:
+	 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/revisions:
 	 *   get:
-	 *     description: Get a list of revisions of a container
+	 *     description: Get a list of revisions of a drawing
 	 *     tags: [Revisions]
-	 *     operationId: getContainerRevisions
+	 *     operationId: getDrawingRevisions
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -95,8 +95,8 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - name: container
-	 *         description: Container ID
+	 *       - name: drawing
+	 *         description: Drawing ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -140,17 +140,33 @@ const establishRoutes = () => {
 	 *                         type: string
 	 *                         description: File format
 	 *                         example: .rvt
+	 *                       statusCode:
+	 *                         type: string
+	 *                         description: Revision status code
+	 *                         example: S0
+	 *                       revCode:
+	 *                         type: string
+	 *                         description: Revision code
+	 *                         example: P01
+	 *                       description:
+	 *                         type: string
+	 *                         description: Revision description
+	 *                         example: Level 2 floor plan
+	 *                       void:
+	 *                         type: boolean
+	 *                         description: Whether revision is void or not
+	 *                         example: false
 	 *
 	 */
-	router.get('', hasReadAccessToContainer, getRevisions, serialiseRevisionArray);
+	router.get('', hasReadAccessToDrawing, getRevisions, serialiseRevisionArray);
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions:
+	 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/revisions:
 	 *   post:
 	 *     description: Create a new revision.
 	 *     tags: [Revisions]
-	 *     operationId: createNewContainerRevision
+	 *     operationId: createNewRevision
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -164,8 +180,8 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - name: container
-	 *         description: Container ID
+	 *       - name: drawing
+	 *         description: Drawing ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -176,30 +192,24 @@ const establishRoutes = () => {
 	 *           schema:
 	 *             type: object
 	 *             properties:
-	 *               tag:
-	 *                 description: Unique revision name
-     *                 type: string
-	 *                 example: rev01
+	 *               statusCode:
+	 *                 type: string
+	 *                 description: Revision status code
+	 *                 example: S0
+	 *               revCode:
+	 *                 type: string
+	 *                 description: Revision code
+	 *                 example: P01
 	 *               desc:
 	 *                 description: Description of the revision
 	 *                 type: string
 	 *                 example: Initial design
-	 *               importAnimations:
-	 *                 type: boolean
-	 *                 description: Whether animations should be imported (Only relevant for .SPM uploads)
-	 *               timezone:
-	 *                 description: Timezone of the revision
-	 *                 type: string
-	 *                 example: Europe/Berlin
-	 *               lod:
-	 *                 description: Level of Detail (0 - 6)
-	 *                 type: integer
-	 *                 example: 0
 	 *               file:
 	 *                 type: string
 	 *                 format: binary
 	 *             required:
-	 *               - tag
+	 *               - statusCode
+	 *               - revCode
 	 *               - file
 	 *     responses:
 	 *       401:
@@ -209,15 +219,15 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: creates a new revision
 	 */
-	router.post('', hasWriteAccessToContainer, validateNewRevisionData, createNewContainerRevision);
+	router.post('', hasWriteAccessToDrawing, validateNewRevisionData, createNewRevision);
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions/{revision}:
+	 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/revisions/{revision}:
 	 *   patch:
 	 *     description: Update a revision. Currently only the void status can be updated.
 	 *     tags: [Revisions]
-	 *     operationId: updateContainerRevisionStatus
+	 *     operationId: updateDrawingRevisionStatus
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -231,14 +241,14 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - name: container
-	 *         description: Container ID
+	 *       - name: drawing
+	 *         description: Drawing ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
 	 *       - name: revision
-	 *         description: Revision ID or Revision tag
+	 *         description: Revision ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -252,7 +262,7 @@ const establishRoutes = () => {
 	 *                 description: The new status value
 	 *                 type: boolean
 	 *             required:
-	 *               - status
+	 *               - void
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -261,15 +271,15 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: updates the status of the revision
 	 */
-	router.patch('/:revision', hasWriteAccessToContainer, validateUpdateRevisionData, updateRevisionStatus);
+	router.patch('/:revision', hasWriteAccessToDrawing, validateUpdateRevisionData, updateRevisionStatus);
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions/{revision}/files:
+	 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/revisions/{revision}/files:
 	 *   get:
 	 *     description: Downloads the model files of the selected revision
 	 *     tags: [Revisions]
-	 *     operationId: downloadContainerRevisionFiles
+	 *     operationId: downloadDrawingRevisionFiles
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -283,14 +293,14 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - name: container
-	 *         description: Container ID
+	 *       - name: drawing
+	 *         description: Drawing ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
 	 *       - name: revision
-	 *         description: Revision ID or Revision tag
+	 *         description: Revision ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -308,7 +318,7 @@ const establishRoutes = () => {
 	 *               type: string
 	 *               format: binary
 	 */
-	router.get('/:revision/files', hasWriteAccessToContainer, downloadRevisionFiles);
+	router.get('/:revision/files/original', hasWriteAccessToDrawing, downloadRevisionFiles);
 
 	return router;
 };

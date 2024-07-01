@@ -66,27 +66,34 @@ const modelSettingsUpdated = async ({ teamspace, project, model, data, sender, m
 	await createModelMessage(modelEvents[modelType], data, teamspace, project, model, sender);
 };
 
-const revisionUpdated = async ({ teamspace, project, model, data, sender }) => {
-	await createModelMessage(chatEvents.CONTAINER_REVISION_UPDATE, { ...data, _id: UUIDToString(data._id) },
+const revisionUpdated = async ({ teamspace, project, model, data, sender, modelType }) => {
+	const modelEvents = {
+		[modelTypes.CONTAINER]: chatEvents.CONTAINER_REVISION_UPDATE,
+		[modelTypes.DRAWING]: chatEvents.DRAWING_REVISION_UPDATE,
+	};
+
+	await createModelMessage(modelEvents[modelType], { ...data, _id: UUIDToString(data._id) },
 		teamspace, project, model, sender);
 };
 
-const revisionAdded = async ({ teamspace, project, model, revision, isFederation }) => {
+const revisionAdded = async ({ teamspace, project, model, revision, modelType }) => {
 	try {
-		const { tag, author, timestamp, desc, rFile } = await getRevisionByIdOrTag(teamspace,
-			model, stringToUUID(revision),
-			{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1 });
+		const { tag, author, timestamp, desc, rFile, format } = await getRevisionByIdOrTag(teamspace,
+			model, modelType, stringToUUID(revision),
+			{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1 });
 
-		const event = isFederation ? chatEvents.FEDERATION_NEW_REVISION : chatEvents.CONTAINER_NEW_REVISION;
+		const modelEvents = {
+			[modelTypes.CONTAINER]: chatEvents.CONTAINER_NEW_REVISION,
+			[modelTypes.FEDERATION]: chatEvents.FEDERATION_NEW_REVISION,
+			[modelTypes.DRAWING]: chatEvents.DRAWING_NEW_REVISION,
+		};
 
-		const format = getRevisionFormat(rFile);
-
-		await createModelMessage(event, { _id: revision,
+		await createModelMessage(modelEvents[modelType], { _id: revision,
 			tag,
 			author,
 			timestamp: timestamp.getTime(),
 			desc,
-			...deleteIfUndefined({ format }),
+			...deleteIfUndefined({ format: format ?? getRevisionFormat(rFile) }),
 		}, teamspace, project, model);
 	} catch (err) {
 		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
