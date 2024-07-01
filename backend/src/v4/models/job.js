@@ -32,7 +32,7 @@ const JOBS_COLLECTION_NAME = "jobs";
 const Job = {};
 
 const isColorValid = (color) => {
-	const hexRegex = /^#[0-F]{2}[0-F]{2}[0-F]{2}$/i;
+	const hexRegex = /^#[0-9A-F]{6}$/i;
 
 	return !!color?.match(hexRegex);
 

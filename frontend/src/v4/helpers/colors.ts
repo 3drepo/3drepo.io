@@ -86,4 +86,4 @@ export const hasTransparency = (color) => Array.isArray(color) ? color.length > 
 
 export const getTransparency = (color) => (Array.isArray(color) ? color[3] : parseInt(color.slice(7), 16) ) / 255;
 
-export const hexColorRE = /^\#[0-F]{2}[0-F]{2}[0-F]{2}$/i;
+export const hexColorRE = /^#[0-9A-F]{6}$/i;
