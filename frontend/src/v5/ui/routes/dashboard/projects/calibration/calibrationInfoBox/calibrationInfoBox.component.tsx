@@ -15,30 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useEffect } from 'react';
+import { useContext, useState } from 'react';
 import { CalibrationContext } from '../calibrationContext';
+import { InfoBoxProps } from '@controls/infoBox/infoBox.component';
+import { InfoBox } from './calibrationInfoBox.styles';
 
-export const BasicStep = ({ text }) => {
-	const { setIsStepValid, step } = useContext(CalibrationContext);
+type CalibrationInfoBoxProps = Omit<InfoBoxProps, 'onClickClose'>;
+export const CalibrationInfoBox = (props: CalibrationInfoBoxProps) => {
+	const [open, setOpen] = useState(true);
+	const { isCalibrating } = useContext(CalibrationContext);
 
-	useEffect(() => {
-		setIsStepValid(false);
-	}, [step]);
+	if (!isCalibrating || !open) return null;
 
-	return (
-		<div style={{
-			borderRadius: 10,
-			width: 'fit-content',
-			padding: '50px 100px',
-			backgroundImage: 'radial-gradient(black, gray)',
-			margin: '100px auto',
-			display: 'grid',
-			placeContent: 'center',
-			// REMINDER - the following property will be needed to be able to click inside the component
-			pointerEvents: 'all',
-		}}>
-			<h2>This is the {text} step</h2>
-			<button type='button' onClick={() => setIsStepValid(true)}>VALIDATE</button>
-		</div>
-	);
+	return (<InfoBox {...props} onClickClose={() => setOpen(false)} />);
 };

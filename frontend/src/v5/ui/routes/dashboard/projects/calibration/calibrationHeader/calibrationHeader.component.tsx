@@ -16,16 +16,16 @@
  */
 
 import { useContext } from 'react';
-import { Stepper, Container, ButtonsContainer, ContrastButton, Connector, PrimaryButton, Link } from './calibrationHeader.styles';
+import { Stepper, Container, ButtonsContainer, ContrastButton, Connector, PrimaryButton, Link, StepperWrapper } from './calibrationHeader.styles';
 import { Step, StepLabel } from '@mui/material';
 import { CalibrationContext } from '../calibrationContext';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 
 const STEPS = [
-	formatMessage({ defaultMessage: '3D Calibration Points', id: 'calibration.step.3dCalibration' }),
-	formatMessage({ defaultMessage: '2D Calibration Points', id: 'calibration.step.2dCalibration' }),
-	formatMessage({ defaultMessage: 'Vertical Spatial Boundaries', id: 'calibration.step.verticalSpatialBoundaries' }),
+	formatMessage({ defaultMessage: '3D Alignment', id: 'calibration.step.3dCalibration' }),
+	formatMessage({ defaultMessage: '2D Alignment', id: 'calibration.step.2dCalibration' }),
+	formatMessage({ defaultMessage: '2D Vertical Extents', id: 'calibration.step.verticalExtents' }),
 ];
 
 export const CalibrationHeader = () => {
@@ -34,31 +34,35 @@ export const CalibrationHeader = () => {
 
 	return (
 		<Container>
-			<Stepper activeStep={step} alternativeLabel connector={<Connector />} >
-				{STEPS.map((label) => (
-					<Step key={label}>
-						<StepLabel StepIconComponent={({ icon }) => icon}>{label}</StepLabel>
-					</Step>
-				))}
-			</Stepper>
+			<StepperWrapper>
+				<Stepper activeStep={step} alternativeLabel connector={<Connector />} >
+					{STEPS.map((label) => (
+						<Step key={label}>
+							<StepLabel StepIconComponent={({ icon }) => icon}>{label}</StepLabel>
+						</Step>
+					))}
+				</Stepper>
+			</StepperWrapper>
 			<ButtonsContainer>
-				<ContrastButton onClick={() => setStep(step - 1)} disabled={step === 0}>
-					<FormattedMessage defaultMessage="Back" id="calinration.button.back" />
-				</ContrastButton>
+				{step > 0 && (
+					<ContrastButton onClick={() => setStep(step - 1)}>
+						<FormattedMessage defaultMessage="Back" id="calibration.button.back" />
+					</ContrastButton>
+				)}
 				<ContrastButton>
 					<Link to={origin}>
-						<FormattedMessage defaultMessage="Cancel" id="calinration.button.cancel" />
+						<FormattedMessage defaultMessage="Cancel" id="calibration.button.cancel" />
 					</Link>
 				</ContrastButton>
 				{isLastStep ? (
 					<PrimaryButton disabled={!isStepValid}>
 						<Link to={origin}>
-							<FormattedMessage defaultMessage="Confirm" id="calinration.button.confirm" />
+							<FormattedMessage defaultMessage="Confirm" id="calibration.button.confirm" />
 						</Link>
 					</PrimaryButton>
 				) : (
 					<PrimaryButton onClick={() => setStep(step + 1)} disabled={!isStepValid}>
-						<FormattedMessage defaultMessage="Continue" id="calinration.button.continue" />
+						<FormattedMessage defaultMessage="Continue" id="calibration.button.continue" />
 					</PrimaryButton>
 				)}
 			</ButtonsContainer>

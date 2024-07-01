@@ -31,6 +31,8 @@ export const CalibrationStep = () => {
 		setLeftPanelRatio(show2DViewer ? .5 : 1);
 	}, [show2DViewer]);
 
+	useEffect(() => () => { setLeftPanelRatio(.5); }, []);
+
 	switch (step) {
 		case 0: return <Calibration3DStep />;
 		case 1: return <Calibration2DStep />;
