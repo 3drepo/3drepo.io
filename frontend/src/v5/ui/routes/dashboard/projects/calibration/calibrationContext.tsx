@@ -35,7 +35,7 @@ export interface CalibrationContextType {
 	isCalibrating3D: boolean,
 	setIsCalibrating3D: (isCalibrating3D: boolean) => void;
 	vector3D: Vector3D,
-	setVector3D: React.Dispatch<React.SetStateAction<Vector3D>>;
+	setVector3D: (vectorState: React.SetStateAction<Vector3D>) => void;
 	resetVector3D: () => void;
 	arrow2D: Arrow2D,
 	setArrow2D: (points: Arrow2D) => void,
