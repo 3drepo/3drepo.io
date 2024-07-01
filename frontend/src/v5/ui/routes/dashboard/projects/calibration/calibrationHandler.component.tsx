@@ -16,30 +16,28 @@
  */
 
 import { useEffect } from 'react';
-import { CalibrationHooksSelectors } from '@/v5/services/selectorsHooks';
-import { CalibrationActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { Transformers, useSearchParam } from '../../../useSearchParam';
+import { CalibrationActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { useParams } from 'react-router-dom';
 
-export const BasicStep = ({ text }) => {
-	const step = CalibrationHooksSelectors.selectStep();
+export const CalibrationHandler = () => {
+	const { revision, containerOrFederation } = useParams();
+	const [isCalibrating] = useSearchParam('isCalibrating', Transformers.BOOLEAN);
+	const [drawingId] = useSearchParam('drawingId');
 
 	useEffect(() => {
+		CalibrationActionsDispatchers.setStep(0);
 		CalibrationActionsDispatchers.setIsStepValid(false);
-	}, [step]);
+	}, [containerOrFederation, revision, isCalibrating]);
 
-	return (
-		<div style={{
-			borderRadius: 10,
-			width: 'fit-content',
-			padding: '50px 100px',
-			backgroundImage: 'radial-gradient(black, gray)',
-			margin: 'auto',
-			display: 'grid',
-			placeContent: 'center',
-			// REMINDER - the following property will be needed to be able to click inside the component
-			pointerEvents: 'all',
-		}}>
-			<h2>This is the {text} step</h2>
-			<button type='button' onClick={() => CalibrationActionsDispatchers.setIsStepValid(true)}>VALIDATE</button>
-		</div>
-	);
+	useEffect(() => {
+		CalibrationActionsDispatchers.setIsCalibrating(isCalibrating);
+		ViewerGuiActionsDispatchers.resetPanels();
+	}, [isCalibrating]);
+
+	useEffect(() => {
+		CalibrationActionsDispatchers.setDrawingId(drawingId);
+	}, [drawingId]);
+	
+	return null;
 };

@@ -19,11 +19,10 @@ import { difference, differenceBy, isEqual } from 'lodash';
 import { dispatch } from '@/v4/modules/store';
 import { DialogActions } from '@/v4/modules/dialog';
 import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
-import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { CalibrationToolbar } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationToolbar/calibrationToolbar.component';
 import { CompareActionsDispatchers, IssuesActionsDispatchers, MeasurementsActionsDispatchers, RisksActionsDispatchers, TicketsCardActionsDispatchers, ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { UnityUtil } from '@/globals/unity-util';
-import { MeasurementsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { CalibrationHooksSelectors, MeasurementsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { LifoQueue } from '@/v5/helpers/functions.helpers';
 import {queuableFunction} from '../../helpers/async';
 
@@ -284,7 +283,8 @@ class Viewer3DBase extends PureComponent<IProps, any> {
 }
 
 export const Viewer3D = (props: Omit<IProps, 'isCalibrating'>) => {
-	const { isCalibrating } = useContext(CalibrationContext);
+	const isCalibrating = CalibrationHooksSelectors.selectIsCalibrating();
+
 	const measurements = [
 		...MeasurementsHooksSelectors.selectAreaMeasurements(),
 		...MeasurementsHooksSelectors.selectLengthMeasurements(),

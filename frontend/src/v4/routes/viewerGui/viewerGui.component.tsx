@@ -17,13 +17,13 @@
 
 import { Tickets } from '@/v5/ui/routes/viewer/tickets/tickets.component';
 import { isEmpty, isEqual } from 'lodash';
-import { PureComponent, useContext } from 'react';
+import { PureComponent } from 'react';
 import { AdditionalProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { DrawingsListCard } from '@/v5/ui/routes/viewer/drawings/drawingsList/drawingsListCard.component';
 import { ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { CalibrationHooksSelectors } from '@/v5/services/selectorsHooks';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { getCalibrationViewerLeftPanels, getViewerLeftPanels, VIEWER_PANELS } from '../../constants/viewerGui';
 import { getWindowHeight, getWindowWidth, renderWhenTrue } from '../../helpers/rendering';
@@ -160,7 +160,7 @@ export class ViewerGuiBase extends PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps: IProps, prevState: IState) {
 		const changes = {} as IState;
-		const { match: { params }, queryParams, leftPanels, isCalibrating } = this.props;
+		const { match: { params }, queryParams, leftPanels } = this.props;
 		const teamspaceChanged = params.teamspace !== prevProps.match.params.teamspace;
 		const modelChanged = params.model !== prevProps.match.params.model;
 		const revisionChanged = params.revision !== prevProps.match.params.revision;
@@ -203,10 +203,6 @@ export class ViewerGuiBase extends PureComponent<IProps, IState> {
 		if (!isEqual(prevView, currView) || this.props.treeNodesList !== prevProps.treeNodesList) {
 			// This is for not refreshing the view when exiting a selected ticket or when the card is closed
 			goToView(currView);
-		}
-
-		if (!isEqual(isCalibrating, prevProps.isCalibrating)) {
-			ViewerGuiActionsDispatchers.resetPanels();
 		}
 	}
 
@@ -338,6 +334,6 @@ export class ViewerGuiBase extends PureComponent<IProps, IState> {
 }
 
 export const ViewerGui = (props) => {
-	const { isCalibrating } = useContext(CalibrationContext);
+	const isCalibrating = CalibrationHooksSelectors.selectIsCalibrating();
 	return <ViewerGuiBase {...props} isCalibrating={isCalibrating} />;
 };

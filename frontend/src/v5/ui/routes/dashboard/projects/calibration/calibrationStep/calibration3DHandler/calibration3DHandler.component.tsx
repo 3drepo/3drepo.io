@@ -15,36 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Viewer } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { UnityUtil } from '@/globals/unity-util';
-import { TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { CalibrationContext } from '../../calibrationContext';
-import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { CalibrationActionsDispatchers, TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { CalibrationHooksSelectors, DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEqual } from 'lodash';
+import { EMPTY_VECTOR } from '@/v5/store/calibration/calibration.constants';
 
 export const Calibration3DHandler = () => {
-	const { step, drawingId, isCalibrating3D, setIsCalibrating3D, vector3D, setVector3D, resetVector3D } = useContext(CalibrationContext);
+	const step = CalibrationHooksSelectors.selectStep();
+	const isCalibrating3D = CalibrationHooksSelectors.selectIsCalibrating3D();
+	const vector3D = CalibrationHooksSelectors.selectVector3D();
+	const drawingId = CalibrationHooksSelectors.selectDrawingId(); 
 	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
+	const [lastPickedPoint, setLastPickedPoint] = useState(null);
 
-	const onPickPoint = ({ position }) => setVector3D(({ start, end }) => {
-		if (!start || (start && end)) {
-			return { start: position, end: null };
-		}
-		if (!isEqual(start, position)) {
-			return { start, end: position };
-		}
-		return { start, end };
-	});
-
-
-	useEffect(() => {
-		UnityUtil.setCalibrationToolVector(vector3D.start, vector3D.end);
-	}, [vector3D]);
+	const resetVector3D = () => CalibrationActionsDispatchers.setVector3D(drawing?.vector3D || EMPTY_VECTOR);
 
 	useEffect(() => {
 		if (isCalibrating3D) {
+			const onPickPoint = ({ position }) => setLastPickedPoint(position);
 			TreeActionsDispatchers.stopListenOnSelections();
 			UnityUtil.enableSnapping();
 			Viewer.on(VIEWER_EVENTS.PICK_POINT, onPickPoint);
@@ -60,20 +52,34 @@ export const Calibration3DHandler = () => {
 	}, [isCalibrating3D]);
 
 	useEffect(() => {
+		const { start, end } = vector3D;
+
+		if (end || !start) {
+			CalibrationActionsDispatchers.setVector3D({ start: lastPickedPoint, end: null });
+		} else if (!isEqual(start, lastPickedPoint)) {
+			CalibrationActionsDispatchers.setVector3D({ start, end: lastPickedPoint });
+		}
+	}, [lastPickedPoint]);
+
+	useEffect(() => {
+		UnityUtil.setCalibrationToolVector(vector3D.start, vector3D.end);
+	}, [vector3D]);
+
+	useEffect(() => {
 		UnityUtil.setCalibrationToolMode('Vector');
 		return () => {
 			UnityUtil.setCalibrationToolMode('None');
-			setIsCalibrating3D(false);
+			CalibrationActionsDispatchers.setIsCalibrating3D(false);
 		};
 	}, []);
 
 	useEffect(() => {
 		if (step !== 0) {
-			setIsCalibrating3D(false);
+			CalibrationActionsDispatchers.setIsCalibrating3D(false);
 		}
 	}, [step]);
 
-	useEffect(() => { resetVector3D(); }, [drawing]);
+	useEffect(() => { resetVector3D(); }, []);
 
 	return null;
 };

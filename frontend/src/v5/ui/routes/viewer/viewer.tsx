@@ -29,7 +29,7 @@ import { SpinnerLoader } from '@controls/spinnerLoader';
 import { CentredContainer } from '@controls/centredContainer';
 import { TicketsCardViews } from './tickets/tickets.constants';
 import { ViewerCanvases } from '../dashboard/viewerCanvases/viewerCanvases.component';
-import { CalibrationContextComponent } from '../dashboard/projects/calibration/calibrationContext';
+import { CalibrationHandler } from '../dashboard/projects/calibration/calibrationHandler.component';
 import { ViewerGui } from '@/v4/routes/viewerGui';
 
 export const Viewer = () => {
@@ -103,11 +103,12 @@ export const Viewer = () => {
 	};
 
 	return (
-		<CalibrationContextComponent>
+		<>
+			<CalibrationHandler />
 			<OpenTicketFromUrl />
 			<CheckLatestRevisionReadiness />
 			<ViewerCanvases />
 			<ViewerGui match={v4Match} key={containerOrFederation} />
-		</CalibrationContextComponent>
+		</>
 	);
 };

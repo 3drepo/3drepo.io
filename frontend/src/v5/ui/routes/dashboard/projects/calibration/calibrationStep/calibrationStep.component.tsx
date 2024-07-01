@@ -16,14 +16,14 @@
  */
 
 import { useContext, useEffect } from 'react';
-import { CalibrationContext } from '../calibrationContext';
 import { Calibration2DStep } from './calibration2DStep/calibration2DStep.component';
 import { VerticalSpatialBoundariesStep } from './verticalSpatialBoundariesStep/verticalSpatialBoundariesStep.component';
 import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 import { Calibration3DHandler } from './calibration3DHandler/calibration3DHandler.component';
+import { CalibrationHooksSelectors } from '@/v5/services/selectorsHooks';
 
 export const CalibrationStep = () => {
-	const { step } = useContext(CalibrationContext);
+	const step = CalibrationHooksSelectors.selectStep();
 	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
 	const show2DViewer = step < 2;
 

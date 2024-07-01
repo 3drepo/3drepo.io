@@ -21,14 +21,14 @@ import { useLocation } from 'react-router-dom';
 import { SplitPane, LeftPane, Container } from './viewerCanvases.styles';
 import { ViewerCanvasesContext } from '../../viewer/viewerCanvases.context';
 import { useContext } from 'react';
-import { CalibrationContext } from '../projects/calibration/calibrationContext';
 import { CalibrationHeader } from '../projects/calibration/calibrationHeader/calibrationHeader.component';
 import { CalibrationStep } from '../projects/calibration/calibrationStep/calibrationStep.component';
+import { CalibrationHooksSelectors } from '@/v5/services/selectorsHooks';
 
 export const ViewerCanvases = () => {
 	const { pathname } = useLocation();
 	const { is2DOpen, leftPanelRatio, setLeftPanelRatio } = useContext(ViewerCanvasesContext);
-	const { isCalibrating } = useContext(CalibrationContext);
+	const isCalibrating = CalibrationHooksSelectors.selectIsCalibrating();
 
 	const dragFinish = (newSize) => setLeftPanelRatio(newSize / window.innerWidth);
 
