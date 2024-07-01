@@ -22,7 +22,7 @@ const { determineTestGroup, generateRandomString, generateRandomObject, generate
 const { stringToUUID } = require('../../../../../../../../src/v5/utils/helper/uuids');
 const { idTypesToKeys, idTypes } = require('../../../../../../../../src/v5/models/metadata.constants');
 
-const { modelTypes } = require(`${src}/modelSettings.constants`);
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
 const Groups = require(`${src}/processors/teamspaces/projects/models/commons/tickets.groups`);
 

@@ -154,7 +154,13 @@ db.createRevision = async (teamspace, modelId, revision, isDrawing) => {
 		const refId = revision.rFile[0];
 		await FilesManager.storeFile(teamspace, isDrawing ? DRAWINGS_HISTORY_REF_COL : `${modelId}.history.ref`, refId, revision.refData);
 	}
-	const formattedRevision = { ...revision, _id: stringToUUID(revision._id) };
+
+	const formattedRevision = {
+		...revision,
+		_id: stringToUUID(revision._id),
+		model: isDrawing ? modelId : undefined,
+	};
+
 	delete formattedRevision.refData;
 	await DbHandler.insertOne(teamspace, isDrawing ? DRAWINGS_HISTORY_COL : `${modelId}.history`, formattedRevision);
 };
