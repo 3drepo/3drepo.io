@@ -22,15 +22,22 @@ import { UnityUtil } from '@/globals/unity-util';
 import { TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CalibrationContext } from '../../calibrationContext';
 import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { isEqual } from 'lodash';
 
 export const Calibration3DHandler = () => {
 	const { step, drawingId, isCalibrating3D, setIsCalibrating3D, vector3D, setVector3D, resetVector3D } = useContext(CalibrationContext);
 	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
 
-	const onPickPoint = ({ position }) => setVector3D(({ start, end }) => (start && !end)
-		? { start, end: position }
-		: { start: position, end: null },
-	);
+	const onPickPoint = ({ position }) => setVector3D(({ start, end }) => {
+		if (!start || (start && end)) {
+			return { start: position, end: null };
+		}
+		if (!isEqual(start, position)) {
+			return { start, end: position };
+		}
+		return { start, end };
+	});
+
 
 	useEffect(() => {
 		UnityUtil.setCalibrationToolVector(vector3D.start, vector3D.end);
