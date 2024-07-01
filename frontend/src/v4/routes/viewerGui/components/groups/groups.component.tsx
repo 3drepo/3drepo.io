@@ -77,9 +77,9 @@ interface IProps {
 	isModelLoaded: boolean;
 	setState: (componentState: any) => void;
 	setNewGroup: () => void;
-	showGroupDetails: (group, revision?) => void;
+	showGroupDetails: (group) => void;
 	closeDetails: () => void;
-	setActiveGroup: (group, revision?) => void;
+	setActiveGroup: (group) => void;
 	saveGroup: (teamspace, model, group) => void;
 	toggleColorOverride: (group) => void;
 	setOverrideAll: (overrideAll) => void;
@@ -344,7 +344,7 @@ export class Groups extends PureComponent<IProps, IState> {
 	}
 
 	public handleNavigationChange = (currentIndex) => {
-		this.props.showGroupDetails(this.state.groups[currentIndex], this.props.revision);
+		this.props.showGroupDetails(this.state.groups[currentIndex]);
 	}
 
 	public renderActions = () => {
@@ -364,14 +364,6 @@ export class Groups extends PureComponent<IProps, IState> {
 				onSearchClose={this.handleCloseSearchMode}
 			/>
 		);
-	}
-
-	public setActiveGroup = (group) => () => {
-		this.props.setActiveGroup(group);
-	}
-
-	public handleShowGroupDetails = (group) => () => {
-		this.props.showGroupDetails(group, this.props.revision);
 	}
 
 	public isHighlighted = (group) => {

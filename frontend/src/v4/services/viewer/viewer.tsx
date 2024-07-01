@@ -542,7 +542,6 @@ export class ViewerService {
 				if (ids) {
 					const uniqueIds = Array.from(new Set(ids));
 					if (uniqueIds.length) {
-						// eslint-disable-next-line @typescript-eslint/await-thenable
 						await UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi, forceReHighlight);
 						this.emit(VIEWER_EVENTS.HIGHLIGHT_OBJECTS, {account, model, uniqueIds });
 						return;
