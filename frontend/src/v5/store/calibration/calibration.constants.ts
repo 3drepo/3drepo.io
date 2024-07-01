@@ -15,6 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export type Coords2D = [number, number];
-export type Arrow2D = { start: Coords2D, end: Coords2D };
-
+export const EMPTY_VECTOR = { start: null, end: null };

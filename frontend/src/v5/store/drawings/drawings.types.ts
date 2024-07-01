@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Vector3D } from '../calibration/calibration.types';
 import { Role } from '../currentUser/currentUser.types';
 
 export enum CalibrationState {
@@ -42,9 +43,6 @@ export interface MinimumDrawing {
 	category: string; // TODO - add category types?
 	drawingNumber: string;
 }
-
-type Coord3D = [number, number, number];
-export type Vector3D = { start: Coord3D | null, end: Coord3D | null };
 
 // TODO: Unfinished interface
 export interface IDrawing extends MinimumDrawing {

@@ -43,8 +43,8 @@ export const selectVector3D = createSelector(
 	selectCalibrationDomain, (state) => state.vector3D,
 );
 
-export const selectIsCalibrating3d = createSelector(
-	selectCalibrationDomain, (state) => state.isCalibrating3d,
+export const selectIsCalibrating3D = createSelector(
+	selectCalibrationDomain, (state) => state.isCalibrating3D,
 );
 
 export const selectDrawingId = createSelector(
