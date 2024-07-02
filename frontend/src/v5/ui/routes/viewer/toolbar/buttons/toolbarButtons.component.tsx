@@ -19,12 +19,14 @@ import HomeIcon from '@assets/icons/viewer/home.svg';
 import FocusIcon from '@assets/icons/viewer/focus.svg';
 import CoordinatesIcon from '@assets/icons/viewer/coordinates.svg';
 import InfoIcon from '@assets/icons/viewer/info.svg';
+import VerticalCalibrationIcon from '@assets/icons/viewer/vertical_calibration.svg';
 import CalibrationIcon from '@assets/icons/filled/calibration-filled.svg';
 import { BimActionsDispatchers, CalibrationActionsDispatchers, MeasurementsActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { BimHooksSelectors, CalibrationHooksSelectors, ModelHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatMessage } from '@/v5/services/intl';
 import { ToolbarButton } from './toolbarButton.component';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
+import { VerticalHeightContainer, VerticalHeightValue } from '../selectionToolbar/selectionToolbar.styles';
 
 export const HomeButton = () => (
 	<ToolbarButton
@@ -93,3 +95,28 @@ export const CalibrationButton = () => {
 	);
 };
 
+export const VerticalCalibrationButton = () => {
+	const step = CalibrationHooksSelectors.selectStep();
+	const isVerticallyCalibrating = CalibrationHooksSelectors.selectIsVerticallyCalibrating();
+	return (
+		<ToolbarButton
+			Icon={VerticalCalibrationIcon}
+			hidden={step !== 2}
+			selected={isVerticallyCalibrating}
+			onClick={() => CalibrationActionsDispatchers.setIsVerticallyCalibrating(!isVerticallyCalibrating)}
+			title={formatMessage({ id: 'viewer.toolbar.icon.verticalCalibration', defaultMessage: 'Vertical Calibration' })}
+		/>
+	);
+};
+
+// TODO hidden logic
+export const PlaneSeparation = ({ hidden }) => {
+	const planesValues = CalibrationHooksSelectors.selectPlanesValues();
+	const planesHeight = (planesValues?.[PlaneType.UPPER] - planesValues?.[PlaneType.LOWER]).toFixed(2);
+	const unit = ModelHooksSelectors.selectUnit();
+	return (
+		<VerticalHeightContainer hidden={hidden} disabled>
+			<VerticalHeightValue>{planesHeight}</VerticalHeightValue>{unit}
+		</VerticalHeightContainer>
+	);
+};

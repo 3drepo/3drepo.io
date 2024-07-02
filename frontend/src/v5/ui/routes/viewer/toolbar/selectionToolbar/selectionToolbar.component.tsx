@@ -28,16 +28,20 @@ import { GroupsActionsDispatchers, TreeActionsDispatchers, ViewerGuiActionsDispa
 import { TreeHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { Section, Container, ClearButton, ClearIcon } from './selectionToolbar.styles';
+import { Section, Container, ClearIcon, LozengeButton } from './selectionToolbar.styles';
 import { ToolbarButton } from '../buttons/toolbarButton.component';
 import { VIEWER_CLIP_MODES, VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { GizmoModeButtons } from '../buttons/buttonOptionsContainer/gizmoModeButtons.component';
 import { Viewer } from '@/v4/services/viewer/viewer';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { CalibrationContext } from '../../../dashboard/projects/calibration/calibrationContext';
+import { PlaneType } from '../../../dashboard/projects/calibration/calibrationContext.types';
+import { PlaneSeparation } from '../buttons/toolbarButtons.component';
 
 export const SectionToolbar = () => {
 	const [alignActive, setAlignActive] = useState(false);
-
+	const { isVerticallyCalibrating, verticalPlane, setVerticalPlane } = useContext(CalibrationContext);
+	
 	const hasOverrides = !isEmpty(ViewerGuiHooksSelectors.selectColorOverrides());
 	const hasHighlightedObjects = !!TreeHooksSelectors.selectSelectedNodes().length;
 	const hasHiddenObjects = TreeHooksSelectors.selectModelHasHiddenNodes();
@@ -61,7 +65,6 @@ export const SectionToolbar = () => {
 			Viewer.off(VIEWER_EVENTS.BACKGROUND_SELECTED, () => setAlignActive(false));
 		};
 	}, [alignActive]);
-	
 
 	return (
 		<Container>
@@ -93,6 +96,23 @@ export const SectionToolbar = () => {
 					onClick={() => ViewerGuiActionsDispatchers.setClippingMode(null)}
 					title={formatMessage({ id: 'viewer.toolbar.icon.deleteClip', defaultMessage: 'Delete' })}
 				/>
+			</Section>
+			<Section hidden={!isVerticallyCalibrating}>
+				<LozengeButton
+					hidden={!isVerticallyCalibrating}
+					onClick={() => { Viewer.selectCalibrationToolLowerPlane(); setVerticalPlane(PlaneType.LOWER); }}
+					selected={verticalPlane === PlaneType.LOWER}
+				>
+					<FormattedMessage id="viewer.toolbar.icon.lowerPlane" defaultMessage="Bottom Plane" />
+				</LozengeButton>
+				<LozengeButton
+					hidden={!isVerticallyCalibrating}
+					onClick={() => { Viewer.selectCalibrationToolUpperPlane(); setVerticalPlane(PlaneType.UPPER);}}
+					selected={verticalPlane === PlaneType.UPPER}
+				>
+					<FormattedMessage id="viewer.toolbar.icon.upperPlane" defaultMessage="Top Plane" />
+				</LozengeButton>
+				<PlaneSeparation hidden={!isVerticallyCalibrating} />
 			</Section>
 			<Section hidden={!hasOverrides}>
 				<ToolbarButton
@@ -129,13 +149,14 @@ export const SectionToolbar = () => {
 					onClick={() => TreeActionsDispatchers.isolateSelectedNodes(undefined)}
 					title={formatMessage({ id: 'viewer.toolbar.icon.isolate', defaultMessage: 'Isolate' })}
 				/>
-				<ClearButton
+				<LozengeButton
+					variant="filled"
 					hidden={!hasHighlightedObjects}
 					onClick={() => GroupsActionsDispatchers.clearSelectionHighlights()}
 				>
 					<ClearIcon />
 					<FormattedMessage id="viewer.toolbar.icon.clearSelection" defaultMessage="Clear Selection" />
-				</ClearButton>
+				</LozengeButton>
 			</Section>
 		</Container>
 	);

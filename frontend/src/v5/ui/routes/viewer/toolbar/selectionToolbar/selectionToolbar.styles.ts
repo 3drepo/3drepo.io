@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import PlusIcon from '@assets/icons/viewer/plus.svg';
+import { hexToOpacity } from '@/v5/ui/themes/theme';
 
 export const Section = styled.div`
 	display: inherit;
@@ -42,22 +43,30 @@ export const ClearIcon = styled(PlusIcon)`
 	transform: rotate(45deg);
 `;
 
-export const ClearButton = styled.div`
-	cursor: pointer;
+export const LozengeButton = styled.div<{ variant?: 'filled' | 'outlined', selected?: boolean; disabled?: boolean }>`
 	height: 30px;
+	padding: 11px;
 	border-radius: 19px;
-	color: ${({ theme }) => theme.palette.primary.lightest};
-	background-color: ${({ theme }) => theme.palette.secondary.light};
+	box-sizing: border-box;
 	align-self: center;
-	overflow: hidden;
+	place-items: center;
 	display: flex;
 	flex-direction: row;
-	place-items: center;
-	gap: 6px;
-	padding: 11px;
-	box-sizing: border-box;
-	white-space: nowrap;
+    overflow: hidden;
+    white-space: nowrap;
 	transition: all .3s;
+	cursor: pointer;
+	gap: 6px;
+	margin: 0 0 0 5px;
+
+	color: ${({ theme }) => hexToOpacity(theme.palette.primary.contrast, 100)};
+	border: 1px solid ${({ theme }) => hexToOpacity(theme.palette.primary.contrast, 100)};
+
+	${({ variant }) => variant === 'filled' && css`
+		color: ${({ theme }) => theme.palette.primary.lightest};
+		background-color: ${({ theme }) => theme.palette.secondary.light};
+		border: none;
+	`}
 
 	&[hidden] {
 		width: 0;
@@ -65,6 +74,15 @@ export const ClearButton = styled.div`
 		margin: 0;
 		border: 0;
 	}
+	${({ disabled }) => disabled && css`
+		cursor: auto;
+		pointer-events: none;
+		opacity: 0.25;
+	`}
+	${({ selected }) => selected && css`
+	color: ${({ theme }) => theme.palette.primary.main};
+	border-color: ${({ theme }) => theme.palette.primary.main};
+	`}
 
 	&:not([hidden]) {
 		width: fit-content;
@@ -72,5 +90,23 @@ export const ClearButton = styled.div`
 
 	&:hover {
 		color: ${({ theme }) => theme.palette.primary.main};
+		border-color: ${({ theme }) => theme.palette.primary.main};
 	}
+`;
+
+export const VerticalHeightContainer = styled(LozengeButton).attrs({ disabled: true })`
+	padding-left: 3px;
+`;
+
+export const VerticalHeightValue = styled.div`
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	color: ${({ theme }) => theme.palette.secondary.mid};
+	border-radius: 12px 3px 3px 12px;
+	width: 70px;
+	height: 22px;
+	padding: 0 10px;
+	text-align: right;
+	align-content: center;
+	font-size: 15px;
+	font-weight: 600;
 `;
