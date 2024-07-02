@@ -19,6 +19,7 @@ const { checkQuotaIsSufficient, fileFilter } = require('./commons/revisions');
 const { createResponseCode, templates } = require('../../../../../../utils/responseCodes');
 const Yup = require('yup');
 const YupHelper = require('../../../../../../utils/helper/yup');
+const { fileUploads } = require('../../../../../../utils/config');
 const { isRevAndStatusCodeUnique } = require('../../../../../../models/revisions');
 const { respond } = require('../../../../../../utils/responder');
 const { singleFileUpload } = require('../../../../multer');
@@ -28,17 +29,11 @@ const { validateMany } = require('../../../../../common');
 const Drawings = {};
 
 const ACCEPTED_DRAWING_EXT = ['.dwg', '.pdf'];
-const DRAWING_MAX_FILE_SIZE = 500000000;
 
 const validateRevisionUpload = async (req, res, next) => {
 	const schemaBase = {
-		statusCode: YupHelper.validators.alphanumeric(
-			Yup.string().oneOf(statusCodes.map(({ code }) => code)).required(),
-		).required(),
-		revCode: Yup.string().min(1).max(10).matches(/^[\w|_|-|.]*$/,
-			// eslint-disable-next-line no-template-curly-in-string
-			'${path} can only contain alpha-numeric characters, full stops, hyphens or underscores')
-			.required(),
+		statusCode: Yup.string().oneOf(statusCodes.map(({ code }) => code)).required(),
+		revCode: YupHelper.validators.alphanumeric(Yup.string().min(1).max(10).strict(true)),
 		desc: YupHelper.types.strings.shortDescription,
 	};
 
@@ -60,6 +55,6 @@ const validateRevisionUpload = async (req, res, next) => {
 	}
 };
 
-Drawings.validateNewRevisionData = validateMany([singleFileUpload('file', fileFilter(ACCEPTED_DRAWING_EXT), DRAWING_MAX_FILE_SIZE, true), checkQuotaIsSufficient, validateRevisionUpload]);
+Drawings.validateNewRevisionData = validateMany([singleFileUpload('file', fileFilter(ACCEPTED_DRAWING_EXT), fileUploads.drawingSizeLimit, true), checkQuotaIsSufficient, validateRevisionUpload]);
 
 module.exports = Drawings;
