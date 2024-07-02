@@ -17,25 +17,24 @@
 
 import { useContext, useEffect } from 'react';
 import { Calibration2DStep } from './calibration2DStep/calibration2DStep.component';
-import { VerticalSpatialBoundariesStep } from './verticalSpatialBoundariesStep/verticalSpatialBoundariesStep.component';
 import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 import { Calibration3DHandler } from './calibration3DHandler/calibration3DHandler.component';
 import { CalibrationHooksSelectors } from '@/v5/services/selectorsHooks';
+import { VerticalSpatialBoundariesHandler } from './verticalSpatialBoundariesHandler/verticalSpatialBoundariesHandler.component';
 
 export const CalibrationStep = () => {
 	const step = CalibrationHooksSelectors.selectStep();
 	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
-	const show2DViewer = step < 2;
 
 	useEffect(() => {
-		setLeftPanelRatio(show2DViewer ? .5 : 1);
-	}, [show2DViewer]);
+		setLeftPanelRatio(.5);
+	}, []);
 
 	return (
 		<>
 			<Calibration3DHandler />
 			{step === 1 && <Calibration2DStep />}
-			{step === 2 && <VerticalSpatialBoundariesStep />}
+			{step === 2 && <VerticalSpatialBoundariesHandler />}
 		</>
 	);
 };
