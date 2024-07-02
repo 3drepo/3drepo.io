@@ -30,7 +30,6 @@ jest.mock('../../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
 jest.mock('../../../../../../../src/v5/models/revisions');
 const Revisions = require(`${src}/models/revisions`);
-const { DRAWINGS_HISTORY_REF_COL } = require(`${src}/models/revisions.constants`);
 
 const Drawings = require(`${src}/processors/teamspaces/projects/models/drawings`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
@@ -107,7 +106,7 @@ const testDeleteDrawing = () => {
 			await Drawings.deleteDrawing(teamspace, project, model);
 
 			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledTimes(1);
-			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_REF_COL,
+			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history.ref`,
 				{ model });
 			expect(ModelSettings.deleteModel).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.deleteModel).toHaveBeenCalledWith(teamspace, project, model);
@@ -163,7 +162,7 @@ const testNewRevision = () => {
 			expect(addRevisionMock.mock.calls[0][4].format).toEqual(`.${format}`);
 			expect(addRevisionMock.mock.calls[0][4]).toHaveProperty('rFile');
 			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
-			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_REF_COL,
+			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history.ref`,
 				addRevisionMock.mock.calls[0][4].rFile[0], file.buffer,
 				{ name: file.originalname, rid: revId, project, model: drawing });
 		});
@@ -216,7 +215,7 @@ const testDownloadRevisionFiles = () => {
 				revision, { rFile: 1 });
 
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
-			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_REF_COL, fileName);
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history.ref`, fileName);
 		});
 	});
 };

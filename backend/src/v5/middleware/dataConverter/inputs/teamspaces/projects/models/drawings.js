@@ -33,11 +33,12 @@ const ACCEPTED_DRAWING_EXT = ['.dwg', '.pdf'];
 const validateRevisionUpload = async (req, res, next) => {
 	const schemaBase = {
 		statusCode: Yup.string().oneOf(statusCodes.map(({ code }) => code)).required(),
-		revCode: YupHelper.validators.alphanumeric(Yup.string().min(1).max(10).strict(true)),
+		revCode: YupHelper.validators.alphanumeric(Yup.string().required().min(1).max(10)
+			.strict(true)),
 		desc: YupHelper.types.strings.shortDescription,
 	};
 
-	const schema = Yup.object().noUnknown().required().shape(schemaBase)
+	const schema = Yup.object(schemaBase).noUnknown().required()
 		.test('check-status-rev-code-uniqueness', 'The combination of statusCode and revCode needs to be unique', ({ revCode, statusCode }) => {
 			if (revCode && statusCode) {
 				const { teamspace, drawing } = req.params;

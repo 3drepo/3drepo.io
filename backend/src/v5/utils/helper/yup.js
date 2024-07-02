@@ -26,7 +26,7 @@ const YupHelper = { validators: {}, types: { strings: {} }, utils: {} };
 
 YupHelper.utils.stripWhen = (schema, cond) => Yup.lazy((value) => (cond(value) ? schema.strip() : schema));
 
-YupHelper.validators.alphanumeric = (yupObj) => yupObj.matches(/^[\w|_|-|.]*$/,
+YupHelper.validators.alphanumeric = (yupObj) => yupObj.matches(/^[\w|_|.|-]*$/,
 	// eslint-disable-next-line no-template-curly-in-string
 	'${path} can only contain alpha-numeric characters, full stops, hyphens or underscores');
 

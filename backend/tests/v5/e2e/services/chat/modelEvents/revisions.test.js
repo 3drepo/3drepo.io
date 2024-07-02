@@ -29,7 +29,7 @@ const project = ServiceHelper.generateRandomProject();
 const container = ServiceHelper.generateRandomModel();
 const drawing = ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING });
 const containerRevision = ServiceHelper.generateRevisionEntry();
-const drawingRevision = ServiceHelper.generateRevisionEntry(false, true, true);
+const drawingRevision = ServiceHelper.generateRevisionEntry(false, true, modelTypes.DRAWING);
 
 let agent;
 const setupData = async () => {
@@ -52,7 +52,8 @@ const setupData = async () => {
 		ServiceHelper.db.createUser(user, [teamspace]),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, drawing._id]),
 		ServiceHelper.db.createRevision(teamspace, container._id, { ...containerRevision, author: user.user }),
-		ServiceHelper.db.createRevision(teamspace, drawing._id, { ...drawingRevision, author: user.user }, true),
+		ServiceHelper.db.createRevision(teamspace, drawing._id, { ...drawingRevision, author: user.user },
+			modelTypes.DRAWING),
 	]);
 };
 

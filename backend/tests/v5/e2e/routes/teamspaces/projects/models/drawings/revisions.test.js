@@ -65,9 +65,9 @@ const generateBasicData = () => {
 	};
 
 	const revisions = {
-		nonVoidRevision: ServiceHelper.generateRevisionEntry(false, true, true),
-		voidRevision: ServiceHelper.generateRevisionEntry(true, true, true),
-		noFileRevision: ServiceHelper.generateRevisionEntry(false, false, true),
+		nonVoidRevision: ServiceHelper.generateRevisionEntry(false, true, modelTypes.DRAWING),
+		voidRevision: ServiceHelper.generateRevisionEntry(true, true, modelTypes.DRAWING),
+		noFileRevision: ServiceHelper.generateRevisionEntry(false, false, modelTypes.DRAWING),
 	};
 
 	return {
@@ -97,7 +97,7 @@ const setupData = async ({ users, teamspace, project, models, revisions }) => {
 		ServiceHelper.db.createProject(teamspace, project.id, project.name,
 			Object.keys(models).map((key) => models[key]._id)),
 		...Object.keys(revisions).map((key) => ServiceHelper.db.createRevision(teamspace,
-			models.modelWithRev._id, revisions[key], true)),
+			models.modelWithRev._id, revisions[key], modelTypes.DRAWING)),
 	]);
 };
 

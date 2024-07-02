@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { DRAWINGS_HISTORY_COL } = require('./revisions.constants');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUID } = require('../utils/helper/uuids');
@@ -28,7 +27,7 @@ const Revisions = {};
 const excludeVoids = { void: { $ne: true } };
 const excludeIncomplete = { incomplete: { $exists: false } };
 
-const collectionName = (modelType, model) => (modelType === modelTypes.DRAWING ? DRAWINGS_HISTORY_COL : `${model}.history`);
+const collectionName = (modelType, model) => (modelType === modelTypes.DRAWING ? `${modelType}s.history` : `${model}.history`);
 
 const findRevisionsByQuery = (teamspace, model, modelType, query, projection, sort) => db.find(teamspace,
 	collectionName(modelType, model), query, projection, sort);
@@ -119,7 +118,7 @@ Revisions.isTagUnique = async (teamspace, model, tag) => {
 
 Revisions.isRevAndStatusCodeUnique = async (teamspace, model, revCode, statusCode) => {
 	try {
-		await findOneRevisionByQuery(teamspace, undefined, modelTypes.DRAWING, { revCode, statusCode });
+		await findOneRevisionByQuery(teamspace, undefined, modelTypes.DRAWING, { revCode, statusCode, model });
 		return false;
 	} catch {
 		return true;

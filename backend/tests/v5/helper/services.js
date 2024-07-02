@@ -30,7 +30,6 @@ const { io: ioClient } = require('socket.io-client');
 const { providers } = require(`${src}/services/sso/sso.constants`);
 
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
-const { DRAWINGS_HISTORY_REF_COL, DRAWINGS_HISTORY_COL } = require(`${src}/models/revisions.constants`);
 const DbHandler = require(`${src}/handler/db`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { INTERNAL_DB } = require(`${src}/handler/db.constants`);
@@ -149,14 +148,14 @@ db.createModel = (teamspace, _id, name, props) => {
 	return DbHandler.insertOne(teamspace, 'settings', settings);
 };
 
-db.createRevision = async (teamspace, modelId, revision, isDrawing) => {
+db.createRevision = async (teamspace, modelId, revision, modelType) => {
 	if (revision.rFile) {
 		const refId = revision.rFile[0];
-		await FilesManager.storeFile(teamspace, isDrawing ? DRAWINGS_HISTORY_REF_COL : `${modelId}.history.ref`, refId, revision.refData);
+		await FilesManager.storeFile(teamspace, modelType === modelTypes.DRAWING ? `${modelType}s.history.ref` : `${modelId}.history.ref`, refId, revision.refData);
 	}
 	const formattedRevision = { ...revision, _id: stringToUUID(revision._id) };
 	delete formattedRevision.refData;
-	await DbHandler.insertOne(teamspace, isDrawing ? DRAWINGS_HISTORY_COL : `${modelId}.history`, formattedRevision);
+	await DbHandler.insertOne(teamspace, modelType === modelTypes.DRAWING ? `${modelType}s.history` : `${modelId}.history`, formattedRevision);
 };
 
 db.createSequence = async (teamspace, model, { sequence, states, activities, activityTree }) => {
@@ -426,14 +425,14 @@ ServiceHelper.generateRandomModel = ({ modelType = modelTypes.CONTAINER, viewers
 	};
 };
 
-ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, isDrawing) => {
+ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, modelType) => {
 	const _id = ServiceHelper.generateUUIDString();
 	const entry = deleteIfUndefined({
 		_id,
-		tag: isDrawing ? undefined : ServiceHelper.generateRandomString(),
-		statusCode: isDrawing ? statusCodes[0].code : undefined,
-		revCode: isDrawing ? ServiceHelper.generateRandomString(10) : undefined,
-		format: isDrawing ? '.pdf' : undefined,
+		tag: modelType === modelTypes.DRAWING ? undefined : ServiceHelper.generateRandomString(),
+		statusCode: modelType === modelTypes.DRAWING ? statusCodes[0].code : undefined,
+		revCode: modelType === modelTypes.DRAWING ? ServiceHelper.generateRandomString(10) : undefined,
+		format: modelType === modelTypes.DRAWING ? '.pdf' : undefined,
 		author: ServiceHelper.generateRandomString(),
 		timestamp: ServiceHelper.generateRandomDate(),
 		desc: ServiceHelper.generateRandomString(),
@@ -441,7 +440,7 @@ ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, isDrawing
 	});
 
 	if (hasFile) {
-		entry.rFile = isDrawing ? ServiceHelper.generateUUIDString() : [`${_id}_${ServiceHelper.generateRandomString()}_ifc`];
+		entry.rFile = modelType === modelTypes.DRAWING ? ServiceHelper.generateUUIDString() : [`${_id}_${ServiceHelper.generateRandomString()}_ifc`];
 		entry.refData = ServiceHelper.generateRandomString();
 	}
 

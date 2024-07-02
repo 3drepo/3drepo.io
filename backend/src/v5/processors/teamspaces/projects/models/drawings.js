@@ -22,7 +22,6 @@ const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { deleteModel, getDrawingById, getDrawings, updateModelSettings } = require('../../../../models/modelSettings');
 const { getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../../services/filesManager');
 const { getProjectById, removeModelFromProject } = require('../../../../models/projectSettings');
-const { DRAWINGS_HISTORY_REF_COL } = require('../../../../models/revisions.constants');
 const { generateUUID } = require('../../../../utils/helper/uuids');
 const { templates } = require('../../../../utils/responseCodes');
 
@@ -41,7 +40,7 @@ Drawings.addDrawing = (teamspace, project, data) => addModel(teamspace, project,
 Drawings.updateSettings = updateModelSettings;
 
 Drawings.deleteDrawing = async (teamspace, project, drawing) => {
-	await removeFilesWithMeta(teamspace, DRAWINGS_HISTORY_REF_COL, { model: drawing });
+	await removeFilesWithMeta(teamspace, `${modelTypes.DRAWING}s.history.ref`, { model: drawing });
 
 	await Promise.all([
 		deleteModelRevisions(teamspace, project, drawing, modelTypes.DRAWING),
@@ -65,7 +64,7 @@ Drawings.newRevision = async (teamspace, project, drawing, data, file) => {
 		{ ...data, format, rFile: [fileId], status: STATUSES.PROCESSING });
 
 	const fileMeta = { name: file.originalname, rid: revId, project, model: drawing };
-	await storeFile(teamspace, DRAWINGS_HISTORY_REF_COL, fileId, file.buffer, fileMeta);
+	await storeFile(teamspace, `${modelTypes.DRAWING}s.history.ref`, fileId, file.buffer, fileMeta);
 
 	await updateRevision(teamspace, drawing, modelTypes.DRAWING, revId, { status: STATUSES.OK });
 };
@@ -80,7 +79,7 @@ Drawings.downloadRevisionFiles = async (teamspace, drawing, revision) => {
 		throw templates.fileNotFound;
 	}
 
-	return getFileAsStream(teamspace, DRAWINGS_HISTORY_REF_COL, rev.rFile[0]);
+	return getFileAsStream(teamspace, `${modelTypes.DRAWING}s.history.ref`, rev.rFile[0]);
 };
 
 Drawings.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {
