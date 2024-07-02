@@ -14,15 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PureComponent, createRef, useContext, useEffect } from 'react';
+import { PureComponent, createRef } from 'react';
 import { difference, differenceBy, isEqual } from 'lodash';
 import { dispatch } from '@/v4/modules/store';
 import { DialogActions } from '@/v4/modules/dialog';
 import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
 import { CalibrationToolbar } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationToolbar/calibrationToolbar.component';
-import { CompareActionsDispatchers, IssuesActionsDispatchers, MeasurementsActionsDispatchers, RisksActionsDispatchers, TicketsCardActionsDispatchers, ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { UnityUtil } from '@/globals/unity-util';
-import { CalibrationHooksSelectors, MeasurementsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { LifoQueue } from '@/v5/helpers/functions.helpers';
 import {queuableFunction} from '../../helpers/async';
 
@@ -51,6 +48,9 @@ interface IProps {
 	issuePins: any[];
 	riskPins: any[];
 	measurementPins: any[];
+	measurementsAngle: any[];
+	measurementsArea: any[];
+	measurementsLength: any[];
 	transformations: any[];
 	gisLayers: string[];
 	sequenceHiddenNodes: string[];
@@ -69,7 +69,7 @@ interface IProps {
 	isCalibrating: boolean;
 }
 
-class Viewer3DBase extends PureComponent<IProps, any> {
+export class Viewer3D extends PureComponent<IProps, any> {
 	private containerRef = createRef<HTMLDivElement>();
 	public state = { updatesQueue: new LifoQueue((prevProps, currProps) => this.onComponentDidUpdate(prevProps, currProps), 1, false) };
 
@@ -195,7 +195,7 @@ class Viewer3DBase extends PureComponent<IProps, any> {
 			gisCoordinates, gisLayers, transparencies, transformations,
 			sequenceHiddenNodes, viewerManipulationEnabled, viewer,
 			issuesShapes, issuesHighlightedShapes, risksShapes, risksHighlightedShapes,
-			ticketPins
+			ticketPins, measurementsAngle, measurementsArea, measurementsLength
 		} = currProps;
 
 		if (sequenceHiddenNodes && !isEqual(prevProps.sequenceHiddenNodes, sequenceHiddenNodes)) {
@@ -254,6 +254,18 @@ class Viewer3DBase extends PureComponent<IProps, any> {
 			await this.renderMeasurementsHighlights(prevProps.risksHighlightedShapes, risksHighlightedShapes);
 		}
 
+		if (!isEqual(prevProps.measurementsAngle, measurementsAngle)) {
+			await this.renderMeasurements(prevProps.measurementsAngle, measurementsAngle);
+		}
+
+		if (!isEqual(prevProps.measurementsLength, measurementsLength)) {
+			await this.renderMeasurements(prevProps.measurementsLength, measurementsLength);
+		}
+
+		if (!isEqual(prevProps.measurementsArea, measurementsArea)) {
+			await this.renderMeasurements(prevProps.measurementsArea, measurementsArea);
+		}
+
 		if (prevProps.viewerManipulationEnabled !== viewerManipulationEnabled) {
 			if (viewerManipulationEnabled) {
 				viewer.setNavigationOn();
@@ -281,34 +293,3 @@ class Viewer3DBase extends PureComponent<IProps, any> {
 		);
 	}
 }
-
-export const Viewer3D = (props: Omit<IProps, 'isCalibrating'>) => {
-	const isCalibrating = CalibrationHooksSelectors.selectIsCalibrating();
-
-	const measurements = [
-		...MeasurementsHooksSelectors.selectAreaMeasurements(),
-		...MeasurementsHooksSelectors.selectLengthMeasurements(),
-		...MeasurementsHooksSelectors.selectPointMeasurements(),
-		...MeasurementsHooksSelectors.selectAngleMeasurements(),
-	];
-
-	useEffect(() => {
-		if (isCalibrating) {
-			ViewpointsActionsDispatchers.reset();
-			TicketsCardActionsDispatchers.resetState();
-			IssuesActionsDispatchers.setActiveIssue(null);
-			RisksActionsDispatchers.setActiveRisk(null);
-			CompareActionsDispatchers.stopCompare();
-			UnityUtil.clearAllMeasurements();
-		} else {
-			props.viewer.addMeasurements(measurements, true);
-		}
-
-		IssuesActionsDispatchers.toggleShowPins(!isCalibrating);
-		RisksActionsDispatchers.toggleShowPins(!isCalibrating);
-		TicketsCardActionsDispatchers.setShowPins(!isCalibrating);
-		MeasurementsActionsDispatchers.setShowPins(!isCalibrating);
-	}, [isCalibrating]);
-
-	return <Viewer3DBase {...props} isCalibrating={isCalibrating} />;
-};

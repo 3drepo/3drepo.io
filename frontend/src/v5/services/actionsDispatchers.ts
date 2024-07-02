@@ -43,7 +43,6 @@ import { CanvasHistoryActions } from '@/v4/modules/canvasHistory';
 
 import { ClipMode, GizmoMode, MeasureMode, NavigationMode, ProjectionMode } from '../ui/routes/viewer/toolbar/toolbar.types';
 import { DrawingRevisionsActions, IDrawingRevisionsActionCreators } from '../store/drawings/revisions/drawingRevisions.redux';
-import { ViewpointsActions } from '@/v4/modules/viewpoints';
 import { RisksActions } from '@/v4/modules/risks';
 import { IssuesActions } from '@/v4/modules/issues';
 import { CompareActions } from '@/v4/modules/compare';
@@ -60,7 +59,7 @@ interface ICanvasHistoryActionCreators {
 
 
 interface ICompareActionCreators {
-	stopCompare: () => Action;
+	resetComponentState: () => Action;
 }
 
 interface ITreeActionCreators {
@@ -83,24 +82,12 @@ interface ISequencesActionCreators {
 	setSelectedDate: (date: Date | null) => Action;
 }
 
-interface IIssuesActionCreators {
-	toggleShowPins: (showPins: boolean) => Action;
-	setActiveIssue: (issue) => Action;
-}
-
-interface IRisksActionCreators {
-	toggleShowPins: (showPins: boolean) => Action;
-	setActiveRisk: (risk) => Action;
-}
-
 interface IJobsActionCreators {
 	fetchJobs: (teamspace: string) => Action;
 }
 
 interface IMeasurementsActionCreators {
 	setMeasureMode: (mode: MeasureMode | '') => Action;
-	setShowPins: (showPins: boolean) => Action;
-	addMeasurement: (measurement) => Action;
 }
 
 interface IViewerGuiActionCreators {
@@ -122,10 +109,6 @@ interface IViewerGuiActionCreators {
 	resetPanels: () => Action;
 	stopListenOnClickPin: () => Action;
 	startListenOnClickPin: () => Action;
-}
-
-interface IViewpointsActionCreators {
-	reset: () => Action;
 }
 
 export const AuthActionsDispatchers = createActionsDispatchers<IAuthActionCreators>(AuthActions);
@@ -155,4 +138,3 @@ export const TreeActionsDispatchers = createActionsDispatchers<ITreeActionCreato
 export const UsersActionsDispatchers = createActionsDispatchers<IUsersActions>(UsersActions);
 export const ViewerActionsDispatchers = createActionsDispatchers<ViewerActionsCreators>(ViewerActions);
 export const ViewerGuiActionsDispatchers = createActionsDispatchers<IViewerGuiActionCreators>(ViewerGuiActions);
-export const ViewpointsActionsDispatchers = createActionsDispatchers<IViewpointsActionCreators>(ViewpointsActions);

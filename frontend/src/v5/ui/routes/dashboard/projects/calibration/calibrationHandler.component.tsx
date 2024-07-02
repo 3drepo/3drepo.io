@@ -17,7 +17,7 @@
 
 import { useEffect } from 'react';
 import { Transformers, useSearchParam } from '../../../useSearchParam';
-import { CalibrationActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { CalibrationActionsDispatchers, CompareActionsDispatchers, TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useParams } from 'react-router-dom';
 
 export const CalibrationHandler = () => {
@@ -32,7 +32,11 @@ export const CalibrationHandler = () => {
 
 	useEffect(() => {
 		CalibrationActionsDispatchers.setIsCalibrating(isCalibrating);
-		ViewerGuiActionsDispatchers.resetPanels();
+		if (isCalibrating) {
+			ViewerGuiActionsDispatchers.resetPanels();
+			TicketsCardActionsDispatchers.resetState();
+			CompareActionsDispatchers.resetComponentState();
+		}
 	}, [isCalibrating]);
 
 	useEffect(() => {

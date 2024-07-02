@@ -18,6 +18,7 @@
 import { values } from 'lodash';
 import { createSelector } from 'reselect';
 
+import { selectIsCalibrating } from '@/v5/store/calibration/calibration.selectors';
 import { ISSUE_DEFAULT_HIDDEN_STATUSES } from '../../constants/issues';
 import { prepareComments, transformCustomsLinksToMarkdown } from '../../helpers/comments';
 import { hasPin, issueToPin } from '../../helpers/pins';
@@ -162,10 +163,15 @@ export const selectPins = createSelector(
 	selectFilteredIssues, selectActiveIssueDetails,
 	selectShowPins, selectShowDetails, selectActiveIssueId,
 	selectSelectedSequence, selectSelectedStartingDate, selectSelectedEndingDate,
+	selectIsCalibrating,
 	(issues: any, detailedIssue, showPins, showDetails, activeIssueId,
-		selectedSequence, sequenceStartDate, sequenceEndDate) => {
+		selectedSequence, sequenceStartDate, sequenceEndDate, isCalibrating) => {
 
 	let pinsToShow = [];
+
+	if (isCalibrating) {
+		return pinsToShow;
+	}
 
 	if (showPins) {
 		pinsToShow =  issues.reduce((pins, issue) => {
