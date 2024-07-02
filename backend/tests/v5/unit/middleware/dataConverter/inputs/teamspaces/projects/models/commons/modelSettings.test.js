@@ -35,7 +35,8 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { generateRandomString } = require('../../../../../../../../helper/services');
-const { deleteIfUndefined } = require('../../../../../../../../../../src/v5/utils/helper/objects');
+
+const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);

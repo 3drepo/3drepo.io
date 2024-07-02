@@ -29,6 +29,7 @@ const fs = require('fs/promises');
 const { getFileAsStream } = require('../../../../services/filesManager');
 const { getProjectById } = require('../../../../models/projectSettings');
 const { logger } = require('../../../../utils/logger');
+const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { queueModelUpload } = require('../../../../services/modelProcessing');
 const { templates } = require('../../../../utils/responseCodes');
 const { timestampToString } = require('../../../../utils/helper/dates');
@@ -82,8 +83,8 @@ Containers.getContainerStats = async (teamspace, container) => {
 };
 
 Containers.getRevisions = async (teamspace, container, showVoid) => {
-	const revisions = await getRevisions(teamspace,
-		container, showVoid, { _id: 1, author: 1, timestamp: 1, tag: 1, void: 1, desc: 1, rFile: 1 });
+	const revisions = await getRevisions(teamspace, container, modelTypes.CONTAINER, showVoid,
+		{ _id: 1, author: 1, timestamp: 1, tag: 1, void: 1, desc: 1, rFile: 1 });
 
 	return revisions.map(({ rFile, ...r }) => {
 		const format = getRevisionFormat(rFile);
@@ -98,10 +99,11 @@ Containers.newRevision = async (teamspace, container, data, file) => {
 	}));
 };
 
-Containers.updateRevisionStatus = updateRevisionStatus;
+Containers.updateRevisionStatus = (teamspace, project, container, revision, status) => updateRevisionStatus(
+	teamspace, project, container, modelTypes.CONTAINER, revision, status);
 
 Containers.downloadRevisionFiles = async (teamspace, container, revision) => {
-	const rev = await getRevisionByIdOrTag(teamspace, container, revision, { rFile: 1 });
+	const rev = await getRevisionByIdOrTag(teamspace, container, modelTypes.CONTAINER, revision, { rFile: 1 });
 
 	if (!rev.rFile?.length) {
 		throw templates.fileNotFound;
