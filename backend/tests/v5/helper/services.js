@@ -148,14 +148,19 @@ db.createModel = (teamspace, _id, name, props) => {
 	return DbHandler.insertOne(teamspace, 'settings', settings);
 };
 
-db.createRevision = async (teamspace, modelId, revision, modelType) => {
+db.createRevision = async (teamspace, model, revision, modelType) => {
 	if (revision.rFile) {
 		const refId = revision.rFile[0];
-		await FilesManager.storeFile(teamspace, modelType === modelTypes.DRAWING ? `${modelType}s.history.ref` : `${modelId}.history.ref`, refId, revision.refData);
+		await FilesManager.storeFile(teamspace, modelType === modelTypes.DRAWING ? `${modelType}s.history.ref` : `${model}.history.ref`, refId, revision.refData);
 	}
-	const formattedRevision = { ...revision, _id: stringToUUID(revision._id) };
+	const formattedRevision = {
+		...revision,
+		_id: stringToUUID(revision._id),
+		...(modelType === modelTypes.DRAWING ? { model } : {}),
+	};
+
 	delete formattedRevision.refData;
-	await DbHandler.insertOne(teamspace, modelType === modelTypes.DRAWING ? `${modelType}s.history` : `${modelId}.history`, formattedRevision);
+	await DbHandler.insertOne(teamspace, modelType === modelTypes.DRAWING ? `${modelType}s.history` : `${model}.history`, formattedRevision);
 };
 
 db.createSequence = async (teamspace, model, { sequence, states, activities, activityTree }) => {

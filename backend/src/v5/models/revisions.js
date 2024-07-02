@@ -30,10 +30,14 @@ const excludeIncomplete = { incomplete: { $exists: false } };
 const collectionName = (modelType, model) => (modelType === modelTypes.DRAWING ? `${modelType}s.history` : `${model}.history`);
 
 const findRevisionsByQuery = (teamspace, model, modelType, query, projection, sort) => db.find(teamspace,
-	collectionName(modelType, model), query, projection, sort);
+	collectionName(modelType, model),
+	{ ...query, ...(modelType === modelTypes.DRAWING ? { model } : {}) }, projection, sort);
 
 const findOneRevisionByQuery = async (teamspace, model, modelType, query, projection, sort) => {
-	const rev = await db.findOne(teamspace, collectionName(modelType, model), query, projection, sort);
+	const rev = await db.findOne(teamspace, collectionName(modelType, model),
+		{ ...query, ...(modelType === modelTypes.DRAWING ? { model } : {}) },
+		projection, sort);
+
 	if (!rev) {
 		throw templates.revisionNotFound;
 	}
@@ -118,7 +122,7 @@ Revisions.isTagUnique = async (teamspace, model, tag) => {
 
 Revisions.isRevAndStatusCodeUnique = async (teamspace, model, revCode, statusCode) => {
 	try {
-		await findOneRevisionByQuery(teamspace, undefined, modelTypes.DRAWING, { revCode, statusCode, model });
+		await findOneRevisionByQuery(teamspace, model, modelTypes.DRAWING, { revCode, statusCode });
 		return false;
 	} catch {
 		return true;

@@ -22,6 +22,7 @@ const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { deleteModel, getDrawingById, getDrawings, updateModelSettings } = require('../../../../models/modelSettings');
 const { getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../../services/filesManager');
 const { getProjectById, removeModelFromProject } = require('../../../../models/projectSettings');
+const Path = require('path');
 const { generateUUID } = require('../../../../utils/helper/uuids');
 const { templates } = require('../../../../utils/responseCodes');
 
@@ -49,24 +50,21 @@ Drawings.deleteDrawing = async (teamspace, project, drawing) => {
 	]);
 };
 
-Drawings.getRevisions = async (teamspace, drawing, showVoid) => {
-	const revisions = await getRevisions(teamspace, drawing, modelTypes.DRAWING, showVoid,
-		{ _id: 1, author: 1, format: 1, timestamp: 1, statusCode: 1, revCode: 1, void: 1, desc: 1 });
-
-	return revisions;
-};
+Drawings.getRevisions = (teamspace, drawing, showVoid) => getRevisions(teamspace, drawing,
+	modelTypes.DRAWING, showVoid,
+	{ _id: 1, author: 1, format: 1, timestamp: 1, statusCode: 1, revCode: 1, void: 1, desc: 1 });
 
 Drawings.newRevision = async (teamspace, project, drawing, data, file) => {
-	const format = `.${file.originalname.split('.').splice(-1)[0].toLowerCase()}`;
+	const format = Path.extname(file.originalname).toLowerCase();
 
 	const fileId = generateUUID();
-	const revId = await addRevision(teamspace, project, drawing, modelTypes.DRAWING,
+	const rev_id = await addRevision(teamspace, project, drawing, modelTypes.DRAWING,
 		{ ...data, format, rFile: [fileId], status: STATUSES.PROCESSING });
 
-	const fileMeta = { name: file.originalname, rid: revId, project, model: drawing };
+	const fileMeta = { name: file.originalname, rev_id, project, model: drawing };
 	await storeFile(teamspace, `${modelTypes.DRAWING}s.history.ref`, fileId, file.buffer, fileMeta);
 
-	await updateRevision(teamspace, drawing, modelTypes.DRAWING, revId, { status: STATUSES.OK });
+	await updateRevision(teamspace, drawing, modelTypes.DRAWING, rev_id, { status: STATUSES.OK });
 };
 
 Drawings.updateRevisionStatus = (teamspace, project, drawing, revision, status) => updateRevisionStatus(

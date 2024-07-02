@@ -19,8 +19,7 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src, objModelDwg, objModelUppercaseExtDwg, objModel } = require('../../../../../../helper/path');
 
-const { statusCodes } = require(`${src}/models/modelSettings.constants`);
-const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+const { modelTypes, statusCodes } = require(`${src}/models/modelSettings.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 let server;
@@ -50,7 +49,7 @@ const generateBasicData = () => {
 		modelWithNoRev: {
 			_id: ServiceHelper.generateUUIDString(),
 			name: ServiceHelper.generateRandomString(),
-			properties: ServiceHelper.generateRandomModelProperties(),
+			properties: ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
 		},
 		federation: {
 			_id: ServiceHelper.generateUUIDString(),
