@@ -26,7 +26,7 @@ import { Calibration3DHandler } from './calibrationStep/calibration3DHandler/cal
 import { Calibration2DStep } from './calibrationStep/calibration2DStep/calibration2DStep.component';
 import { VerticalSpatialBoundariesStep } from './calibrationStep/verticalSpatialBoundariesStep/verticalSpatialBoundariesStep.component';
 import { ViewerCanvasesContext } from '../../../viewer/viewerCanvases.context';
-import { getUnitsConvertionFactor } from '@/v5/store/calibration/calibration.helpers';
+import { convertVectorUnits, getUnitsConvertionFactor } from '@/v5/store/calibration/calibration.helpers';
 
 export const CalibrationHandler = () => {
 	const { revision, containerOrFederation } = useParams();
@@ -38,8 +38,6 @@ export const CalibrationHandler = () => {
 
 	const selectedModel = FederationsHooksSelectors.selectFederationById(containerOrFederation)
 		|| ContainersHooksSelectors.selectContainerById(containerOrFederation);
-	const modelUnits = selectedModel.unit;
-	const drawingUnits = drawing?.calibration.units;
 
 	useEffect(() => {
 		CalibrationActionsDispatchers.setIsStepValid(false);
@@ -61,13 +59,14 @@ export const CalibrationHandler = () => {
 	}, [isCalibrating]);
 
 	useEffect(() => {
-		CalibrationActionsDispatchers.setUnitsConvertionFactor(getUnitsConvertionFactor(drawingUnits, modelUnits));
-	}, [drawingUnits, modelUnits]);
+		if (!drawing || !selectedModel) return;
+		const convertionFactor = getUnitsConvertionFactor(drawing?.calibration.units, selectedModel.unit);
+		const horizontalCalibration = drawing?.calibration?.horizontal || EMPTY_CALIBRATION.horizontal;
+		CalibrationActionsDispatchers.setModelCalibration(convertVectorUnits(horizontalCalibration.model, convertionFactor));
+		CalibrationActionsDispatchers.setDrawingCalibration(convertVectorUnits(horizontalCalibration.drawing, convertionFactor));
+	}, [drawing, selectedModel]);
 
 	useEffect(() => {
-		const horizontalCalibration = drawing?.calibration?.horizontal || EMPTY_CALIBRATION.horizontal;
-		CalibrationActionsDispatchers.setModelCalibration(horizontalCalibration.model);
-		CalibrationActionsDispatchers.setDrawingCalibration(horizontalCalibration.drawing);
 		CalibrationActionsDispatchers.setDrawingId(drawingId);
 	}, [drawing]);
 
