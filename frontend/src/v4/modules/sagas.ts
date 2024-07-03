@@ -30,7 +30,6 @@ import viewer2Saga from '@/v5/store/viewer/viewer.sagas';
 import ticketsCardSaga from '@/v5/store/tickets/card/ticketsCard.sagas';
 import activitiesSaga from './activities/activities.sagas';
 import authSaga from './auth/auth.sagas';
-import billingSaga from './billing/billing.sagas';
 import bimSaga from './bim/bim.sagas';
 import boardSaga from './board/board.sagas';
 import chatSaga from './chat/chat.sagas';
@@ -45,7 +44,6 @@ import legendSaga from './legend/legend.sagas';
 import measurementsSaga from './measurements/measurements.sagas';
 import modelSaga from './model/model.sagas';
 import notificationsSaga from './notifications/notifications.sagas';
-import presentationSaga from './presentation/presentation.sagas';
 import risksSaga from './risks/risks.sagas';
 import sequencesSaga from './sequences/sequences.sagas';
 import starredSaga from './starred/starred.sagas';
@@ -63,7 +61,6 @@ export default function* rootSaga() {
 	yield all([
 		fork(activitiesSaga),
 		fork(authSaga),
-		fork(billingSaga),
 		fork(bimSaga),
 		fork(boardSaga),
 		fork(chatSaga),
@@ -78,7 +75,6 @@ export default function* rootSaga() {
 		fork(measurementsSaga),
 		fork(modelSaga),
 		fork(notificationsSaga),
-		fork(presentationSaga),
 		fork(risksSaga),
 		fork(sequencesSaga),
 		fork(starredSaga),

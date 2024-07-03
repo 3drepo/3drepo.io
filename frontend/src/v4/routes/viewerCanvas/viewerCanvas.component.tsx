@@ -24,11 +24,10 @@ import {queuableFunction} from '../../helpers/async';
 import { ROUTES } from '../../constants/routes';
 import { addColorOverrides, overridesColorDiff, removeColorOverrides } from '../../helpers/colorOverrides';
 import { pinsDiff, pinsRemoved, pinsSelectionChanged } from '../../helpers/pins';
-import { PresentationMode } from '../../modules/presentation/presentation.constants';
 import { moveMeshes, resetMovedMeshes, transformationDiffChanges,
 transformationDiffRemoves } from '../../modules/sequences/sequences.helper';
 import { ViewerService } from '../../services/viewer/viewer';
-import { Border, Container } from './viewerCanvas.styles';
+import { Container } from './viewerCanvas.styles';
 
 interface IProps {
 	location: any;
@@ -52,7 +51,6 @@ interface IProps {
 	gisCoordinates: any;
 	handleTransparencyOverridesChange: any;
 	viewerManipulationEnabled: boolean;
-	presentationMode: PresentationMode;
 	isPresentationPaused: boolean;
 	issuesShapes: any[];
 	risksShapes: any[];
@@ -253,18 +251,12 @@ export class ViewerCanvas extends PureComponent<IProps, { updatesQueue }> {
 
 	public render() {
 		return (
-			<>
-				<Container
-					visible={this.shouldBeVisible}
-					id="viewer"
-					ref={this.containerRef}
-					className={this.props.className}
-				/>
-				<Border
-					presentationMode={this.props.presentationMode}
-					isPresentationPaused={this.props.isPresentationPaused}
-				/>
-			</>
+			<Container
+				visible={this.shouldBeVisible}
+				id="viewer"
+				ref={this.containerRef}
+				className={this.props.className}
+			/>
 		);
 	}
 }

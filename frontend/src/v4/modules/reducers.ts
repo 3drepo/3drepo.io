@@ -25,7 +25,6 @@ import { batchGroupBy } from './canvasHistory/canvasHistory.helpers';
 
 import { reducer as activitiesReducer } from './activities/activities.redux';
 import { reducer as authReducer } from './auth/auth.redux';
-import { reducer as billingReducer } from './billing/billing.redux';
 import { reducer as bimReducer } from './bim/bim.redux';
 import { reducer as boardReducer } from './board/board.redux';
 import { reducer as canvasHistoryReducer } from './canvasHistory/canvasHistory.redux';
@@ -42,7 +41,6 @@ import { reducer as legendReducer } from './legend/legend.redux';
 import { reducer as measurementsReducer } from './measurements/measurements.redux';
 import { reducer as modelReducer } from './model/model.redux';
 import { reducer as notificationsReducer } from './notifications/notifications.redux';
-import { reducer as presentationReducer } from './presentation/presentation.redux';
 import { reducer as risksReducer } from './risks/risks.redux';
 import { reducer as sequencesReducer } from './sequences/sequences.redux';
 import { reducer as snackbarReducer } from './snackbar/snackbar.redux';
@@ -68,7 +66,6 @@ export default function createReducer(history) {
 		}),
 		activities: activitiesReducer,
 		auth: authReducer,
-		billing: billingReducer,
 		bim: bimReducer,
 		board: boardReducer,
 		chat: chatReducer,
@@ -84,7 +81,6 @@ export default function createReducer(history) {
 		measurements: measurementsReducer,
 		model: modelReducer,
 		notifications: notificationsReducer,
-		presentation: presentationReducer,
 		risks: risksReducer,
 		sequences: sequencesReducer,
 		snackbar: snackbarReducer,
