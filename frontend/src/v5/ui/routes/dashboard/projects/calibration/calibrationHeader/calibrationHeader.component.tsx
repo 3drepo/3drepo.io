@@ -22,7 +22,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { CalibrationActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CalibrationState } from '@/v5/store/drawings/drawings.types';
-import { CalibrationHooksSelectors } from '@/v5/services/selectorsHooks';
+import { CalibrationHooksSelectors, ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DRAWINGS_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { EMPTY_VECTOR } from '@/v5/store/calibration/calibration.constants';
 
@@ -33,13 +33,14 @@ const STEPS = [
 ];
 
 export const CalibrationHeader = () => {
-	const { teamspace, project } = useParams();
+	const { teamspace, project, containerOrFederation } = useParams();
 	const step = CalibrationHooksSelectors.selectStep();
 	const isStepValid = CalibrationHooksSelectors.selectIsStepValid();
 	const origin = CalibrationHooksSelectors.selectOrigin() || generatePath(DRAWINGS_ROUTE, { teamspace, project });
 	const modelCalibration = CalibrationHooksSelectors.selectModelCalibration();
 	const drawingId = CalibrationHooksSelectors.selectDrawingId();
-
+	const selectedModel = FederationsHooksSelectors.selectFederationById(containerOrFederation)
+		|| ContainersHooksSelectors.selectContainerById(containerOrFederation);
 	const isLastStep = step === 2;
 
 	const getIsStepValid = () => {
@@ -50,6 +51,7 @@ export const CalibrationHeader = () => {
 	const handleConfirm = () => DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawingId, {
 		calibration: {
 			state: CalibrationState.CALIBRATED,
+			units: selectedModel.unit,
 			horizontal: {
 				model: modelCalibration,
 				drawing: EMPTY_VECTOR,
