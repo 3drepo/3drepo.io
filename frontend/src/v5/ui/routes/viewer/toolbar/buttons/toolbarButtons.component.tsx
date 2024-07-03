@@ -27,6 +27,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { ToolbarButton } from './toolbarButton.component';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { VerticalHeightContainer, VerticalHeightValue } from '../selectionToolbar/selectionToolbar.styles';
+import { PlaneType } from '@/v5/store/calibration/calibration.types';
 
 export const HomeButton = () => (
 	<ToolbarButton
@@ -97,13 +98,13 @@ export const CalibrationButton = () => {
 
 export const VerticalCalibrationButton = () => {
 	const step = CalibrationHooksSelectors.selectStep();
-	const isVerticallyCalibrating = CalibrationHooksSelectors.selectIsVerticallyCalibrating();
+	const isCalibratingPlanes = CalibrationHooksSelectors.selectIsCalibratingPlanes();
 	return (
 		<ToolbarButton
 			Icon={VerticalCalibrationIcon}
 			hidden={step !== 2}
-			selected={isVerticallyCalibrating}
-			onClick={() => CalibrationActionsDispatchers.setIsVerticallyCalibrating(!isVerticallyCalibrating)}
+			selected={isCalibratingPlanes}
+			onClick={() => CalibrationActionsDispatchers.setIsCalibratingPlanes(!isCalibratingPlanes)}
 			title={formatMessage({ id: 'viewer.toolbar.icon.verticalCalibration', defaultMessage: 'Vertical Calibration' })}
 		/>
 	);

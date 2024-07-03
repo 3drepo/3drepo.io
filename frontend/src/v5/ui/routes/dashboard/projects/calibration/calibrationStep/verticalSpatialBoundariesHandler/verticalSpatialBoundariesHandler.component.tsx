@@ -20,13 +20,16 @@ import { Viewer, Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
-import { CalibrationContext } from '../../calibrationContext';
 import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 import { isNull } from 'lodash';
+import { CalibrationHooksSelectors } from '@/v5/services/selectorsHooks';
+import { CalibrationActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 export const VerticalSpatialBoundariesHandler = () => {
 	const [drawingId] = useSearchParam('drawingId');
-	const { step, isVerticallyCalibrating, setPlanesValues, planesValues, setIsStepValid } = useContext(CalibrationContext);
+	const step = CalibrationHooksSelectors.selectStep();
+	const isVerticallyCalibrating = CalibrationHooksSelectors.selectIsCalibratingPlanes();
+	const planesValues = CalibrationHooksSelectors.selectPlanesValues();
 	const { open2D, close2D } = useContext(ViewerCanvasesContext);
 	const isValid = !isNull(planesValues.lower) && !isNull(planesValues.upper);
 
@@ -41,17 +44,17 @@ export const VerticalSpatialBoundariesHandler = () => {
 		Viewer.setCalibrationToolMode(isVerticallyCalibrating ? 'Vertical' : 'None');
 		Viewer.setCalibrationToolDrawing(i, [0, 0, u, 0, 0, -u]);
 		close2D();
-		Viewer.on(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setPlanesValues);
+		Viewer.on(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, CalibrationActionsDispatchers.setPlanesValues);
 		return () => {
 			Viewer.setCalibrationToolMode('None');
 			Viewer.setCalibrationToolDrawing(null, [0, 0, 0, 0, 0, 0]);
 			open2D(drawingId);
-			Viewer.off(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setPlanesValues);
+			Viewer.off(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, CalibrationActionsDispatchers.setPlanesValues);
 		};
 	}, [isVerticallyCalibrating]);
 
 	useEffect(() => {
-		setIsStepValid(isValid);
+		CalibrationActionsDispatchers.setIsStepValid(true);
 	}, [isValid]);
 	
 	useEffect(() => {

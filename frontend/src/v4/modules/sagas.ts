@@ -16,6 +16,7 @@
  */
 
 import { all, fork } from 'redux-saga/effects';
+import calibrationSaga from '@/v5/store/calibration/calibration.sagas';
 import containersSaga from '@/v5/store/containers/containers.sagas';
 import federationsSaga from '@/v5/store/federations/federations.sagas';
 import projectsSaga from '@/v5/store/projects/projects.sagas';
@@ -93,6 +94,7 @@ export default function* rootSaga() {
 		fork(viewpointsSaga),
 
 		fork(auth2Saga),
+		fork(calibrationSaga),
 		fork(containersSaga),
 		fork(containerRevisionsSaga),
 		fork(currentUser2Saga),

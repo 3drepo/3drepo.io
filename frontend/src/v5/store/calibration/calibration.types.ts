@@ -22,3 +22,9 @@ type Vector<CoordType> = { start: CoordType | null, end: CoordType | null };
 
 export type Vector2D = Vector<Coord2D>;
 export type Vector3D = Vector<Coord3D>;
+
+export enum PlaneType {
+	UPPER = 'upper',
+	LOWER = 'lower',
+}
+export type PlanesValues = { [PlaneType.UPPER]: number, [PlaneType.LOWER]: number };

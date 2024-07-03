@@ -15,8 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export enum PlaneType {
-	UPPER = 'upper',
-	LOWER = 'lower',
+import { put, takeLatest } from 'redux-saga/effects';
+import { CalibrationActions, CalibrationTypes, SetSelectedPlaneAction } from './calibration.redux';
+import { PlaneType } from './calibration.types';
+import { Viewer } from '@/v4/services/viewer/viewer';
+
+export function* setSelectedPlane({ selectedPlane }: SetSelectedPlaneAction) {
+	try {
+		if (selectedPlane === PlaneType.UPPER) {
+			Viewer.selectCalibrationToolUpperPlane();
+		} else {
+			Viewer.selectCalibrationToolLowerPlane();
+		}
+		yield put(CalibrationActions.setSelectedPlaneSuccess(selectedPlane));
+	} catch (error) {
+	}
 }
-export type PlanesValues = { [PlaneType.UPPER]: number, [PlaneType.LOWER]: number };
+
+export default function* calibrationSaga() {
+	yield takeLatest(CalibrationTypes.SET_SELECTED_PLANE, setSelectedPlane);
+}
