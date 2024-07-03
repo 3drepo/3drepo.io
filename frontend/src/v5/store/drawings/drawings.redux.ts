@@ -24,6 +24,7 @@ import { produceAll } from '@/v5/helpers/reducers.helper';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import { IDrawingRevision } from './revisions/drawingRevisions.types';
 import { prepareSingleDrawingData } from './drawings.helpers';
+import { merge } from 'lodash';
 
 export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions({
 	addFavourite: ['teamspace', 'projectId', 'drawingId'],
@@ -74,14 +75,16 @@ export const createDrawingSuccess = (state: DrawingsState, { projectId, drawing 
 	state.drawingsByProject[projectId] = (state.drawingsByProject[projectId] || []).concat([{
 		...drawing,
 		revisionsCount: 0,
-		calibration: CalibrationState.EMPTY,
+		calibration: {
+			state: CalibrationState.EMPTY,
+		},
 		status: DrawingUploadStatus.OK,
 	}]);
 };
 
 export const updateDrawingSuccess = (state: DrawingsState, { projectId, drawingId, drawing }:UpdateDrawingSuccessAction ) => {
 	const oldDrawing = getDrawingFromState(state, projectId, drawingId);
-	Object.assign(oldDrawing,  drawing);
+	merge(oldDrawing, drawing);
 };
 
 export const setDrawingStatus = (state, {

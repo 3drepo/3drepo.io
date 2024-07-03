@@ -119,7 +119,7 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 					</Property>
 				</BreakingLine>
 				<CalibrationButton
-					calibration={calibration}
+					calibrationState={calibration?.state}
 					drawingId={drawingId}
 					onCalibrateClick={onCalibrateClick}
 				/>

@@ -35,16 +35,20 @@ export const selectIsStepValid = createSelector(
 	selectCalibrationDomain, (state) => state.isStepValid,
 );
 
-export const selectVector2D = createSelector(
-	selectCalibrationDomain, (state) => state.vector2D,
+const selectHorizontalCalibration = createSelector(
+	selectCalibrationDomain, (state) => state.horizontal,
 );
 
-export const selectVector3D = createSelector(
-	selectCalibrationDomain, (state) => state.vector3D,
+export const selectDrawingCalibration = createSelector(
+	selectHorizontalCalibration, (calibration) => calibration.drawing,
 );
 
-export const selectIsCalibrating3D = createSelector(
-	selectCalibrationDomain, (state) => state.isCalibrating3D,
+export const selectModelCalibration = createSelector(
+	selectHorizontalCalibration, (calibration) => calibration.model,
+);
+
+export const selectIsCalibratingModel = createSelector(
+	selectCalibrationDomain, (state) => state.isCalibratingModel,
 );
 
 export const selectDrawingId = createSelector(

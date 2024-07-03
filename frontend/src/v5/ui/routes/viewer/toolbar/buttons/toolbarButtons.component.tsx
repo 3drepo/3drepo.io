@@ -80,15 +80,15 @@ export const BimButton = () => {
 	);
 };
 export const CalibrationButton = () => {
-	const isCalibrating3D = CalibrationHooksSelectors.selectIsCalibrating3D();
+	const isCalibratingModel = CalibrationHooksSelectors.selectIsCalibratingModel();
 	const step = CalibrationHooksSelectors.selectStep();
 
 	return (
 		<ToolbarButton
 			Icon={CalibrationIcon}
 			hidden={step !== 0}
-			selected={isCalibrating3D}
-			onClick={() => CalibrationActionsDispatchers.setIsCalibrating3D(!isCalibrating3D)}
+			selected={isCalibratingModel}
+			onClick={() => CalibrationActionsDispatchers.setIsCalibratingModel(!isCalibratingModel)}
 			title={formatMessage({ id: 'viewer.toolbar.icon.calibrate', defaultMessage: 'Calibrate' })} />
 	);
 };

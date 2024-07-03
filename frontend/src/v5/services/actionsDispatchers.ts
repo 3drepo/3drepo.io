@@ -43,8 +43,6 @@ import { CanvasHistoryActions } from '@/v4/modules/canvasHistory';
 
 import { ClipMode, GizmoMode, MeasureMode, NavigationMode, ProjectionMode } from '../ui/routes/viewer/toolbar/toolbar.types';
 import { DrawingRevisionsActions, IDrawingRevisionsActionCreators } from '../store/drawings/revisions/drawingRevisions.redux';
-import { RisksActions } from '@/v4/modules/risks';
-import { IssuesActions } from '@/v4/modules/issues';
 import { CompareActions } from '@/v4/modules/compare';
 
 interface IBimActionCreators {
@@ -124,11 +122,9 @@ export const DrawingsActionsDispatchers =  createActionsDispatchers<IDrawingsAct
 export const DrawingRevisionsActionsDispatchers =  createActionsDispatchers<IDrawingRevisionsActionCreators>(DrawingRevisionsActions);
 export const FederationsActionsDispatchers = createActionsDispatchers<IFederationsActionCreators>(FederationsActions);
 export const GroupsActionsDispatchers = createActionsDispatchers<IGroupsActionCreators>(GroupsActions);
-export const IssuesActionsDispatchers = createActionsDispatchers<IIssuesActionCreators>(IssuesActions);
 export const JobsActionsDispatchers = createActionsDispatchers<IJobsActionCreators>(JobsActions);
 export const MeasurementsActionsDispatchers = createActionsDispatchers<IMeasurementsActionCreators>(MeasurementsActions);
 export const ProjectsActionsDispatchers = createActionsDispatchers<IProjectsActionCreators>(ProjectsActions);
-export const RisksActionsDispatchers = createActionsDispatchers<IRisksActionCreators>(RisksActions);
 export const SequencesActionsDispatchers = createActionsDispatchers<ISequencesActionCreators>(SequencesActions);
 export const TeamspacesActionsDispatchers = createActionsDispatchers<ITeamspacesActionCreators>(TeamspacesActions);
 export const TicketsActionsDispatchers = createActionsDispatchers<ITicketsActionCreators>(TicketsActions);

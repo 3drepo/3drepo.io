@@ -39,7 +39,7 @@ const DEFAULT_VIEWBOX = { scale: 1, x: 0, y: 0, width: 0, height: 0 };
 export const Viewer2D = () => {
 	const { close2D } = useContext(ViewerCanvasesContext);
 	const isCalibrating = CalibrationHooksSelectors.selectIsCalibrating();
-	const vector2D = CalibrationHooksSelectors.selectVector2D();
+	const drawingCalibration = CalibrationHooksSelectors.selectDrawingCalibration();
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
 	const [viewBox, setViewBox] = useState<ViewBoxType>(DEFAULT_VIEWBOX);
 	const [isMinZoom, setIsMinZoom] = useState(false);
@@ -91,8 +91,8 @@ export const Viewer2D = () => {
 				<ViewerLayer2D
 					active={isDrawingVector}
 					viewBox={viewBox}
-					value={vector2D}
-					onChange={CalibrationActionsDispatchers.setVector2D}
+					value={drawingCalibration}
+					onChange={CalibrationActionsDispatchers.setDrawingCalibration}
 				/>
 			</ImageContainer>
 			<ToolbarContainer>

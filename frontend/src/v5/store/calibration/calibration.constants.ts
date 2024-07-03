@@ -16,3 +16,11 @@
  */
 
 export const EMPTY_VECTOR = { start: null, end: null };
+
+export const EMPTY_CALIBRATION = {
+	horizontal: {
+		model: EMPTY_VECTOR,
+		drawing: EMPTY_VECTOR,
+	}, 
+	verticalRange: null,
+};

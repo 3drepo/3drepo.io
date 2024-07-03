@@ -55,7 +55,9 @@ const drawingsWithFixedDrawingURL = drawingFilesName.map((name, index) => ({
 	role: mockRole(index),
 	category: categories[index % 3],
 	status: DrawingUploadStatus.OK,
-	calibration: CalibrationState.CALIBRATED,
+	calibration: {
+		state: CalibrationState.CALIBRATED,
+	},
 	revisionsCount: 1,
 	latestRevision: null,
 	lastUpdated: null,
@@ -74,7 +76,9 @@ const drawings: IDrawing[] = drawingsWithFixedDrawingURL.concat(arr.map((_, i) =
 		role: mockRole(index),
 		category: categories[Math.round(Math.random() * (categories.length - 1))],
 		status: DrawingUploadStatus.OK,
-		calibration: randCal(revisionsCount),
+		calibration: {
+			state: randCal(revisionsCount),
+		},
 		revisionsCount,
 		latestRevision: null,
 		lastUpdated: null,

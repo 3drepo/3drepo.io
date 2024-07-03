@@ -17,10 +17,10 @@
 
 import { mapValues } from 'lodash';
 import { Circle, Svg } from './svgCircle.styles';
-import { Coords2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
+import { Coord2D } from '@/v5/store/calibration/calibration.types';
 
-type SvgCircleProps = { coords: Coords2D, scale: number };
-export const SvgCircle = ({ coords, scale }: SvgCircleProps) => {
+type SvgCircleProps = { coord: Coord2D, scale: number };
+export const SvgCircle = ({ coord, scale }: SvgCircleProps) => {
 	const measures = mapValues({
 		strokeWidth: 1,
 		radius: 3,
@@ -32,8 +32,8 @@ export const SvgCircle = ({ coords, scale }: SvgCircleProps) => {
 			xmlnsXlink="http://www.w3.org/1999/xlink"
 		>
 			<Circle
-				cx={coords[0] + measures.strokeWidth / 2}
-				cy={coords[1] + measures.strokeWidth / 2}
+				cx={coord[0] + measures.strokeWidth / 2}
+				cy={coord[1] + measures.strokeWidth / 2}
 				r={measures.radius}
 				strokeWidth={measures.strokeWidth}
 			/>

@@ -27,22 +27,26 @@ import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import { formatMessage } from '@/v5/services/intl';
 
 type DrawingsCalibrationMenuProps = DashboardListItemButtonProps & {
-	calibration: CalibrationState;
+	calibrationState: CalibrationState;
 	onCalibrateClick: () => void;
 	drawingId: string;
 };
-export const DrawingsCalibrationMenu = ({ calibration, onCalibrateClick, drawingId, disabled, ...props }: DrawingsCalibrationMenuProps) => {
+export const DrawingsCalibrationMenu = ({ calibrationState, onCalibrateClick, drawingId, disabled, ...props }: DrawingsCalibrationMenuProps) => {
 	const { teamspace, project } = useParams();
-	const disableButton = disabled || calibration === CalibrationState.EMPTY;
+	const disableButton = disabled || calibrationState === CalibrationState.EMPTY;
 
-	const approveCalibration = () => DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawingId, { calibration: CalibrationState.CALIBRATED });
+	const approveCalibration = () => DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawingId, {
+		calibration: {
+			state: CalibrationState.CALIBRATED,
+		},
+	});
 
 	return (
 		<ActionMenu
 			disabled={disableButton}
 			TriggerButton={(
 				<DrawingsCalibrationButton
-					calibration={calibration}
+					calibrationState={calibrationState}
 					disabled={disableButton}
 					tooltipTitle={!disableButton && <FormattedMessage id="calibration.menu.tooltip" defaultMessage="Calibrate" />}
 					{...props}
@@ -50,19 +54,19 @@ export const DrawingsCalibrationMenu = ({ calibration, onCalibrateClick, drawing
 			)}
 		>
 			<MenuList>
-				{calibration === CalibrationState.OUT_OF_SYNC && (
+				{calibrationState === CalibrationState.OUT_OF_SYNC && (
 					<EllipsisMenuItem
 						onClick={approveCalibration}
 						title={formatMessage({ defaultMessage: 'Approve Calibration', id: 'calibration.menu.approveCalibration' })}
 					/>
 				)}
-				{[CalibrationState.CALIBRATED, CalibrationState.OUT_OF_SYNC].includes(calibration) && (
+				{[CalibrationState.CALIBRATED, CalibrationState.OUT_OF_SYNC].includes(calibrationState) && (
 					<EllipsisMenuItem
 						onClick={onCalibrateClick}
 						title={formatMessage({ defaultMessage: 'Recalibrate', id: 'calibration.menu.recalibrate' })}
 					/>
 				)}
-				{calibration === CalibrationState.UNCALIBRATED && (
+				{calibrationState === CalibrationState.UNCALIBRATED && (
 					<EllipsisMenuItem
 						onClick={onCalibrateClick}
 						title={formatMessage({ defaultMessage: 'Calibrate', id: 'calibration.menu.calibrate' })}

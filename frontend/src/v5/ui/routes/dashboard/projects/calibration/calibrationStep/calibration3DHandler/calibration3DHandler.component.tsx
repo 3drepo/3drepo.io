@@ -26,16 +26,16 @@ import { EMPTY_VECTOR } from '@/v5/store/calibration/calibration.constants';
 
 export const Calibration3DHandler = () => {
 	const step = CalibrationHooksSelectors.selectStep();
-	const isCalibrating3D = CalibrationHooksSelectors.selectIsCalibrating3D();
-	const vector3D = CalibrationHooksSelectors.selectVector3D();
+	const isCalibratingModel = CalibrationHooksSelectors.selectIsCalibratingModel();
+	const modelCalibration = CalibrationHooksSelectors.selectModelCalibration();
 	const drawingId = CalibrationHooksSelectors.selectDrawingId(); 
 	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
 	const [lastPickedPoint, setLastPickedPoint] = useState(null);
 
-	const resetVector3D = () => CalibrationActionsDispatchers.setVector3D(drawing?.vector3D || EMPTY_VECTOR);
+	const resetVector3D = () => CalibrationActionsDispatchers.setModelCalibration(drawing?.calibration?.horizontal.model || EMPTY_VECTOR);
 
 	useEffect(() => {
-		if (isCalibrating3D) {
+		if (isCalibratingModel) {
 			const onPickPoint = ({ position }) => setLastPickedPoint(position);
 			TreeActionsDispatchers.stopListenOnSelections();
 			UnityUtil.enableSnapping();
@@ -46,36 +46,36 @@ export const Calibration3DHandler = () => {
 				UnityUtil.disableSnapping();
 				Viewer.off(VIEWER_EVENTS.PICK_POINT, onPickPoint);
 			};
-		} else if (!vector3D.end) {
+		} else if (!modelCalibration.end) {
 			resetVector3D();
 		}
-	}, [isCalibrating3D]);
+	}, [isCalibratingModel]);
 
 	useEffect(() => {
-		const { start, end } = vector3D;
+		const { start, end } = modelCalibration;
 
 		if (end || !start) {
-			CalibrationActionsDispatchers.setVector3D({ start: lastPickedPoint, end: null });
+			CalibrationActionsDispatchers.setModelCalibration({ start: lastPickedPoint, end: null });
 		} else if (!isEqual(start, lastPickedPoint)) {
-			CalibrationActionsDispatchers.setVector3D({ start, end: lastPickedPoint });
+			CalibrationActionsDispatchers.setModelCalibration({ start, end: lastPickedPoint });
 		}
 	}, [lastPickedPoint]);
 
 	useEffect(() => {
-		UnityUtil.setCalibrationToolVector(vector3D.start, vector3D.end);
-	}, [vector3D]);
+		UnityUtil.setCalibrationToolVector(modelCalibration.start, modelCalibration.end);
+	}, [modelCalibration]);
 
 	useEffect(() => {
 		UnityUtil.setCalibrationToolMode('Vector');
 		return () => {
 			UnityUtil.setCalibrationToolMode('None');
-			CalibrationActionsDispatchers.setIsCalibrating3D(false);
+			CalibrationActionsDispatchers.setIsCalibratingModel(false);
 		};
 	}, []);
 
 	useEffect(() => {
 		if (step !== 0) {
-			CalibrationActionsDispatchers.setIsCalibrating3D(false);
+			CalibrationActionsDispatchers.setIsCalibratingModel(false);
 		}
 	}, [step]);
 

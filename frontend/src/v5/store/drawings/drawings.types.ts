@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Vector3D } from '../calibration/calibration.types';
+import { Coord2D, Vector2D, Vector3D } from '../calibration/calibration.types';
 import { Role } from '../currentUser/currentUser.types';
 
 export enum CalibrationState {
@@ -44,13 +44,22 @@ export interface MinimumDrawing {
 	drawingNumber: string;
 }
 
+export interface ICalibration {
+	state: CalibrationState;
+	verticalRange: Coord2D;
+	horizontal: {
+		model: Vector3D,
+		drawing: Vector2D,
+	}
+	units: string,
+}
+
 // TODO: Unfinished interface
 export interface IDrawing extends MinimumDrawing {
 	desc?: string;
 	lastUpdated?: Date;
 	latestRevision?: string;
-	calibration?: CalibrationState;
-	vector3D?: Vector3D;
+	calibration?: Partial<ICalibration>,
 	status: DrawingUploadStatus;
 	revisionsCount: number;
 	role: any;

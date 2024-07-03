@@ -31,7 +31,7 @@ export const selectDrawings = createSelector(
 
 export const selectCalibratedDrawings = createSelector(
 	selectDrawings,
-	(drawings) => (drawings.filter((d) => [CalibrationState.CALIBRATED, CalibrationState.OUT_OF_SYNC].includes(d.calibration))),
+	(drawings) => (drawings.filter((d) => [CalibrationState.CALIBRATED, CalibrationState.OUT_OF_SYNC].includes(d.calibration?.state))),
 );
 
 export const selectFavouriteDrawings = createSelector(
@@ -43,6 +43,11 @@ export const selectDrawingById = createSelector(
 	selectDrawings,
 	(_, _id) => _id,
 	(drawings, _id) => drawings.find((d) => d._id === _id),
+);
+
+export const selectDrawingCalibration = createSelector(
+	selectDrawingById,
+	(drawing) => drawing.calibration ?? {},
 );
 
 export const selectIsListPending = createSelector(

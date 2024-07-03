@@ -49,17 +49,17 @@ export const CALIBRATION_STYLE = {
 	[CalibrationState.UNCALIBRATED]: uncalibratedStyles,
 	[CalibrationState.EMPTY]: emptyStyles,
 };
-export const DrawingsCalibrationButton = styled(DashboardListItemButton).attrs<{ calibration: CalibrationState }>(({ calibration, disabled }) => ({
-	children: CALIBRATION_MAP[calibration]?.label,
-	startIcon: CALIBRATION_MAP[calibration]?.icon,
+export const DrawingsCalibrationButton = styled(DashboardListItemButton).attrs<{ calibrationState: CalibrationState }>(({ calibrationState, disabled }) => ({
+	children: CALIBRATION_MAP[calibrationState]?.label,
+	startIcon: CALIBRATION_MAP[calibrationState]?.icon,
 	endIcon: disabled ? null : <ChevronIcon />,
-}))<{ calibration: string }>`
+}))<{ calibrationState: string }>`
 	.MuiButtonBase-root {
-		${({ calibration }) => CALIBRATION_STYLE[calibration]}
-		border: solid 1px ${({ calibration, theme }) => {
-		if (calibration === CalibrationState.CALIBRATED) return theme.palette.success.light;
-		if (calibration === CalibrationState.OUT_OF_SYNC) return theme.palette.warning.light;
-		if (calibration === CalibrationState.UNCALIBRATED) return theme.palette.primary.light;
+		${({ calibrationState }) => CALIBRATION_STYLE[calibrationState]}
+		border: solid 1px ${({ calibrationState, theme }) => {
+		if (calibrationState === CalibrationState.CALIBRATED) return theme.palette.success.light;
+		if (calibrationState === CalibrationState.OUT_OF_SYNC) return theme.palette.warning.light;
+		if (calibrationState === CalibrationState.UNCALIBRATED) return theme.palette.primary.light;
 		return theme.palette.base.light;
 	}};
 	}

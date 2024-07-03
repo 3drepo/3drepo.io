@@ -24,6 +24,7 @@ import { CalibrationActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/
 import { CalibrationState } from '@/v5/store/drawings/drawings.types';
 import { CalibrationHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DRAWINGS_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { EMPTY_VECTOR } from '@/v5/store/calibration/calibration.constants';
 
 const STEPS = [
 	formatMessage({ defaultMessage: '3D Calibration Points', id: 'calibration.step.3dCalibration' }),
@@ -36,19 +37,24 @@ export const CalibrationHeader = () => {
 	const step = CalibrationHooksSelectors.selectStep();
 	const isStepValid = CalibrationHooksSelectors.selectIsStepValid();
 	const origin = CalibrationHooksSelectors.selectOrigin() || generatePath(DRAWINGS_ROUTE, { teamspace, project });
-	const vector3D = CalibrationHooksSelectors.selectVector3D();
+	const modelCalibration = CalibrationHooksSelectors.selectModelCalibration();
 	const drawingId = CalibrationHooksSelectors.selectDrawingId();
 
 	const isLastStep = step === 2;
 
 	const getIsStepValid = () => {
-		if (step === 0) return !!(vector3D.start && vector3D.end);
+		if (step === 0) return !!(modelCalibration.start && modelCalibration.end);
 		return isStepValid;
 	};
 
 	const handleConfirm = () => DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawingId, {
-		calibration: CalibrationState.CALIBRATED,
-		vector3D,
+		calibration: {
+			state: CalibrationState.CALIBRATED,
+			horizontal: {
+				model: modelCalibration,
+				drawing: EMPTY_VECTOR,
+			},
+		},
 	});
 
 	return (

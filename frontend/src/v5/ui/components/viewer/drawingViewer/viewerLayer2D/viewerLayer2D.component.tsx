@@ -88,7 +88,7 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 	return (
 		<Container style={containerStyle}>
 			<LayerLevel>
-				{mousePosition && active && <SvgCircle coords={mousePosition} scale={viewBox.scale} />}
+				{mousePosition && active && <SvgCircle coord={mousePosition} scale={viewBox.scale} />}
 				{offsetStart && <SvgArrow start={offsetStart} end={offsetEnd ?? mousePosition} scale={viewBox.scale} />}
 			</LayerLevel>
 			{active && (
