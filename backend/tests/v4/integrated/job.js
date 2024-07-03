@@ -33,8 +33,8 @@ describe("Job", function () {
 	let agent;
 	const username = "job";
 	const password = "job";
-	const job = { _id: "job1", color: "000000"};
-	const job2 = { _id: "job2", color: "000000"};
+	const job = { _id: "job1", color: "#000000"};
+	const job2 = { _id: "job2", color: "#000000"};
 
 	before(function(done) {
 		server = app.listen(8080, function () {
