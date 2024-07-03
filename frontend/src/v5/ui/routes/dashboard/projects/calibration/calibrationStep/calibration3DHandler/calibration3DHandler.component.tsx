@@ -46,17 +46,17 @@ export const Calibration3DHandler = () => {
 	useEffect(() => {
 		if (!lastPickedPoint) return;
 
-		const { start, end } = modelCalibration;
+		const [start, end] = modelCalibration;
 
 		if (end || !start) {
-			CalibrationActionsDispatchers.setModelCalibration({ start: lastPickedPoint, end: null });
+			CalibrationActionsDispatchers.setModelCalibration([lastPickedPoint, null]);
 		} else if (!isEqual(start, lastPickedPoint)) {
-			CalibrationActionsDispatchers.setModelCalibration({ start, end: lastPickedPoint });
+			CalibrationActionsDispatchers.setModelCalibration([start, lastPickedPoint]);
 		}
 	}, [lastPickedPoint]);
 
 	useEffect(() => {
-		UnityUtil.setCalibrationToolVector(modelCalibration.start, modelCalibration.end);
+		UnityUtil.setCalibrationToolVector(...modelCalibration);
 	}, [modelCalibration]);
 
 	useEffect(() => () => {

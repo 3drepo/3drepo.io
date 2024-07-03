@@ -16,6 +16,8 @@
  */
 import { createSelector } from 'reselect';
 import { ICalibrationState } from './calibration.redux';
+import { convertVectorUnits } from './calibration.helpers';
+import { Vector2D, Vector3D } from './calibration.types';
 
 const selectCalibrationDomain = (state): ICalibrationState => state.calibration;
 
@@ -39,12 +41,20 @@ const selectHorizontalCalibration = createSelector(
 	selectCalibrationDomain, (state) => state.horizontal,
 );
 
+const selectUnitsConvertionFactor = createSelector(
+	selectCalibrationDomain, (state) => state.unitsConvertionFactor || 1,
+);
+
 export const selectDrawingCalibration = createSelector(
-	selectHorizontalCalibration, (calibration) => calibration.drawing,
+	selectHorizontalCalibration,
+	selectUnitsConvertionFactor,
+	(calibration, convertionFactor) => convertVectorUnits(calibration.drawing, convertionFactor) as Vector2D,
 );
 
 export const selectModelCalibration = createSelector(
-	selectHorizontalCalibration, (calibration) => calibration.model,
+	selectHorizontalCalibration,
+	selectUnitsConvertionFactor,
+	(calibration, convertionFactor) => convertVectorUnits(calibration.model, convertionFactor) as Vector3D,
 );
 
 export const selectIsCalibratingModel = createSelector(

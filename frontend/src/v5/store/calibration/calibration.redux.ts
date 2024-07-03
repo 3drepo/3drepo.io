@@ -30,6 +30,7 @@ export const { Types: CalibrationTypes, Creators: CalibrationActions } = createA
 	setIsStepValid: ['isStepValid'],
 	setModelCalibration: ['model'],
 	setDrawingCalibration: ['drawing'],
+	setUnitsConvertionFactor: ['unitsConvertionFactor'],
 	setIsCalibratingModel: ['isCalibratingModel'],
 	setDrawingId: ['drawingId'],
 }, { prefix: 'CALIBRATION/' }) as { Types: Constants<ICalibrationActionCreators>; Creators: ICalibrationActionCreators };
@@ -39,10 +40,11 @@ export const INITIAL_STATE: ICalibrationState = {
 	origin: '',
 	step: 0,
 	isStepValid: false,
+	unitsConvertionFactor: 1,
 	horizontal: {
 		model: EMPTY_VECTOR,
 		drawing: EMPTY_VECTOR,
-	}, 
+	},
 	verticalRange: null,
 	isCalibratingModel: false,
 	drawingId: '',
@@ -72,6 +74,10 @@ export const setDrawingCalibration = (state, { drawing }: SetDrawingCalibrationA
 	state.horizontal.drawing = drawing;
 };
 
+export const setUnitsConvertionFactor = (state, { unitsConvertionFactor }: SetUnitsConvertionFactorAction) => {
+	state.horizontal.unitsConvertionFactor = unitsConvertionFactor;
+};
+
 export const setIsCalibratingModel = (state, { isCalibratingModel }: SetIsCalibratingModelAction) => {
 	state.isCalibratingModel = isCalibratingModel;
 };
@@ -87,6 +93,7 @@ export const calibrationReducer = createReducer(INITIAL_STATE, produceAll({
 	[CalibrationTypes.SET_IS_STEP_VALID]: setIsStepValid,
 	[CalibrationTypes.SET_MODEL_CALIBRATION]: setModelCalibration,
 	[CalibrationTypes.SET_DRAWING_CALIBRATION]: setDrawingCalibration,
+	[CalibrationTypes.SET_UNITS_CONVERTION_FACTOR]: setUnitsConvertionFactor,
 	[CalibrationTypes.SET_IS_CALIBRATING_MODEL]: setIsCalibratingModel,
 	[CalibrationTypes.SET_DRAWING_ID]: setDrawingId,
 }));
@@ -95,14 +102,13 @@ export const calibrationReducer = createReducer(INITIAL_STATE, produceAll({
  * Types
 */
 
-export interface ICalibrationState {
+export interface ICalibrationState extends Omit<ICalibration, 'state' | 'units'> {
 	isCalibrating: boolean;
 	origin: string;
 	step: number;
 	// TODO - remove after logic for 2d vector and vertical plan is implemented
 	isStepValid: boolean;
-	horizontal: ICalibration['horizontal'];
-	verticalRange: ICalibration['verticalRange'];
+	unitsConvertionFactor: number;
 	isCalibratingModel: boolean;
 	drawingId: string;
 }
@@ -113,6 +119,7 @@ export type SetStepAction = Action<'SET_STEP_ACTION'> & { step: number };
 export type SetIsStepValidAction = Action<'SET_IS_STEP_VALID_ACTION'> & { isStepValid: boolean };
 export type SetModelCalibrationAction = Action<'SET_MODEL_CALIBRATION_ACTION'> & { model: Vector3D };
 export type SetDrawingCalibrationAction = Action<'SET_DRAWING_CALIBRATION_ACTION'> & { drawing: Vector2D };
+export type SetUnitsConvertionFactorAction = Action<'SET_UNITS_CONVERTION_FACTOR_ACTION'> & { unitsConvertionFactor: number };
 export type SetIsCalibratingModelAction = Action<'SET_IS_CALIBRATING_MODEL_ACTION'> & { isCalibratingModel: boolean };
 export type SetDrawingIdAction = Action<'SET_DRAWING_ID_ACTION'> & { drawingId: string };
 
@@ -123,6 +130,7 @@ export interface ICalibrationActionCreators {
 	setIsStepValid: (isStepValid: boolean) => SetIsStepValidAction;
 	setModelCalibration: (model: Vector3D) => SetModelCalibrationAction;
 	setDrawingCalibration: (drawing: Vector2D) => SetDrawingCalibrationAction;
+	setUnitsConvertionFactor: (unitsConvertionFactor: number) => SetUnitsConvertionFactorAction;
 	setIsCalibratingModel: (isCalibratingModel: boolean) => SetIsCalibratingModelAction;
 	setDrawingId: (drawingId: string) => SetDrawingIdAction;
 }

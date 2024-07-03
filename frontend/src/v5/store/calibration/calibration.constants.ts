@@ -15,7 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const EMPTY_VECTOR = { start: null, end: null };
+import { Vector } from './calibration.types';
+
+export const EMPTY_VECTOR = [null, null] as Vector<any>;
 
 export const EMPTY_CALIBRATION = {
 	horizontal: {

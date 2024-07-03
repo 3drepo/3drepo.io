@@ -19,13 +19,14 @@ import { useContext, useEffect } from 'react';
 import { Transformers, useSearchParam } from '../../../useSearchParam';
 import { CalibrationActionsDispatchers, CompareActionsDispatchers, TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useParams } from 'react-router-dom';
-import { CalibrationHooksSelectors, DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { CalibrationHooksSelectors, ContainersHooksSelectors, DrawingsHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { UnityUtil } from '@/globals/unity-util';
 import { EMPTY_CALIBRATION } from '@/v5/store/calibration/calibration.constants';
 import { Calibration3DHandler } from './calibrationStep/calibration3DHandler/calibration3DHandler.component';
 import { Calibration2DStep } from './calibrationStep/calibration2DStep/calibration2DStep.component';
 import { VerticalSpatialBoundariesStep } from './calibrationStep/verticalSpatialBoundariesStep/verticalSpatialBoundariesStep.component';
 import { ViewerCanvasesContext } from '../../../viewer/viewerCanvases.context';
+import { getUnitsConvertionFactor } from '@/v5/store/calibration/calibration.helpers';
 
 export const CalibrationHandler = () => {
 	const { revision, containerOrFederation } = useParams();
@@ -34,6 +35,11 @@ export const CalibrationHandler = () => {
 	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
 	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
 	const step = CalibrationHooksSelectors.selectStep();
+
+	const selectedModel = FederationsHooksSelectors.selectFederationById(containerOrFederation)
+		|| ContainersHooksSelectors.selectContainerById(containerOrFederation);
+	const modelUnits = selectedModel.unit;
+	const drawingUnits = drawing?.calibration.units;
 
 	useEffect(() => {
 		CalibrationActionsDispatchers.setIsStepValid(false);
@@ -53,6 +59,10 @@ export const CalibrationHandler = () => {
 			UnityUtil.setCalibrationToolVector(null, null);
 		}
 	}, [isCalibrating]);
+
+	useEffect(() => {
+		CalibrationActionsDispatchers.setUnitsConvertionFactor(getUnitsConvertionFactor(drawingUnits, modelUnits));
+	}, [drawingUnits, modelUnits]);
 
 	useEffect(() => {
 		const horizontalCalibration = drawing?.calibration?.horizontal || EMPTY_CALIBRATION.horizontal;

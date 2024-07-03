@@ -43,7 +43,7 @@ export const CalibrationHeader = () => {
 	const isLastStep = step === 2;
 
 	const getIsStepValid = () => {
-		if (step === 0) return !!(modelCalibration.start && modelCalibration.end);
+		if (step === 0) return !!(modelCalibration[0] && modelCalibration[1]);
 		return isStepValid;
 	};
 

@@ -32,8 +32,8 @@ type ViewerLayer2DProps = {
 	onChange?: (arrow: Vector2D) => void;
 };
 export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2DProps) => {
-	const [offsetStart, setOffsetStart] = useState<Coord2D>(value?.start || null);
-	const [offsetEnd, setOffsetEnd] = useState<Coord2D>(value?.end || null);
+	const [offsetStart, setOffsetStart] = useState<Coord2D>(value?.[0] || null);
+	const [offsetEnd, setOffsetEnd] = useState<Coord2D>(value?.[1] || null);
 	const previousViewBox = useRef<ViewBoxType>(null);
 	const [mousePosition, setMousePosition] = useState<Coord2D>(null);
 	const [drawingId] = useSearchParam('drawingId');
@@ -64,7 +64,7 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 			setOffsetStart(mousePosition);
 		} else {
 			setOffsetEnd(mousePosition);
-			onChange?.({ start: offsetStart, end: mousePosition });
+			onChange?.([offsetStart, mousePosition]);
 		}
 	};
 

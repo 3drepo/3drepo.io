@@ -15,10 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export type Coord2D = [number, number];
-type Coord3D = [number, number, number];
+const UNITS_CONVERTION_FACTORS_TO_METRES = {
+	'm': 1,
+	'dm': 10,
+	'cm': 100,
+	'mm': 1000,
+	'ft': 3.28084,
+} as const;
 
-export type Vector<CoordType> = [CoordType | null, CoordType | null];
+export const getUnitsConvertionFactor = (drawingUnits, modelUnits) => {
+	if (!drawingUnits) return 1;
+	return UNITS_CONVERTION_FACTORS_TO_METRES[drawingUnits] / UNITS_CONVERTION_FACTORS_TO_METRES[modelUnits];
+};
 
-export type Vector2D = Vector<Coord2D>;
-export type Vector3D = Vector<Coord3D>;
+export const convertCoordUnits = (coord, convertionFactor: number) => coord?.map((point) => point * convertionFactor) || null;
+export const convertVectorUnits = (vector, convertionFactor: number) => vector.map((coord) => convertCoordUnits(coord, convertionFactor));
