@@ -273,7 +273,7 @@ config.cn_queue = { maxRetries: 3, ...config.cn_queue};
 // upload size limit
 config.uploadSizeLimit = coalesce(config.uploadSizeLimit, 209715200);
 config.resourceUploadSizeLimit =  config.resourceUploadSizeLimit || 104857600;
-config.drawingSizeLimit = coalesce(config.drawingSizeLimit, 500000000);
+config.drawingSizeLimit = coalesce(config.drawingSizeLimit, 524288000);
 
 // upload configurations (v5)
 config.fileUploads = {
