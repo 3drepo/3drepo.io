@@ -15,18 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { Transformers, useSearchParam } from '../../../useSearchParam';
 import { CalibrationActionsDispatchers, CompareActionsDispatchers, TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useParams } from 'react-router-dom';
 import { CalibrationHooksSelectors, DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { UnityUtil } from '@/globals/unity-util';
 import { EMPTY_CALIBRATION } from '@/v5/store/calibration/calibration.constants';
+import { Calibration3DHandler } from './calibrationStep/calibration3DHandler/calibration3DHandler.component';
+import { Calibration2DStep } from './calibrationStep/calibration2DStep/calibration2DStep.component';
+import { VerticalSpatialBoundariesStep } from './calibrationStep/verticalSpatialBoundariesStep/verticalSpatialBoundariesStep.component';
+import { ViewerCanvasesContext } from '../../../viewer/viewerCanvases.context';
 
 export const CalibrationHandler = () => {
 	const { revision, containerOrFederation } = useParams();
 	const [isCalibrating] = useSearchParam('isCalibrating', Transformers.BOOLEAN);
 	const [drawingId] = useSearchParam('drawingId');
+	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
 	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
 	const step = CalibrationHooksSelectors.selectStep();
 
@@ -59,10 +64,18 @@ export const CalibrationHandler = () => {
 	useEffect(() => {
 		if (step < 2) {
 			UnityUtil.setCalibrationToolMode('Vector');
+			setLeftPanelRatio(.5);
 		} else {
 			UnityUtil.setCalibrationToolMode('None');
+			setLeftPanelRatio(1);
 		}
 	}, [step]);
 
-	return null;
+	return (
+		<>
+			{step === 0 && <Calibration3DHandler />}
+			{step === 1 && <Calibration2DStep />}
+			{step === 2 && <VerticalSpatialBoundariesStep />}
+		</>
+	);
 };

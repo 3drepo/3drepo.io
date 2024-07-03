@@ -37,6 +37,10 @@ export const BasicStep = ({ text }) => {
 			placeContent: 'center',
 			// REMINDER - the following property will be needed to be able to click inside the component
 			pointerEvents: 'all',
+			position: 'absolute',
+			zIndex: 3,
+			top: '200px',
+			left: '100px',
 		}}>
 			<h2>This is the {text} step</h2>
 			<button type='button' onClick={() => CalibrationActionsDispatchers.setIsStepValid(true)}>VALIDATE</button>
