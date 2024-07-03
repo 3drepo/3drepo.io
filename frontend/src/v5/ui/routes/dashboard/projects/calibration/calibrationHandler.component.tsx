@@ -19,15 +19,22 @@ import { useEffect } from 'react';
 import { Transformers, useSearchParam } from '../../../useSearchParam';
 import { CalibrationActionsDispatchers, CompareActionsDispatchers, TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useParams } from 'react-router-dom';
+import { CalibrationHooksSelectors, DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { UnityUtil } from '@/globals/unity-util';
+import { EMPTY_CALIBRATION } from '@/v5/store/calibration/calibration.constants';
 
 export const CalibrationHandler = () => {
 	const { revision, containerOrFederation } = useParams();
 	const [isCalibrating] = useSearchParam('isCalibrating', Transformers.BOOLEAN);
 	const [drawingId] = useSearchParam('drawingId');
+	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
+	const step = CalibrationHooksSelectors.selectStep();
 
 	useEffect(() => {
-		CalibrationActionsDispatchers.setStep(0);
 		CalibrationActionsDispatchers.setIsStepValid(false);
+		CalibrationActionsDispatchers.setStep(0);
+		CalibrationActionsDispatchers.setIsCalibratingModel(false);
+		UnityUtil.setCalibrationToolMode('Vector');
 	}, [containerOrFederation, revision, isCalibrating]);
 
 	useEffect(() => {
@@ -36,12 +43,26 @@ export const CalibrationHandler = () => {
 			ViewerGuiActionsDispatchers.resetPanels();
 			TicketsCardActionsDispatchers.resetState();
 			CompareActionsDispatchers.resetComponentState();
+		} else {
+			UnityUtil.setCalibrationToolMode('None');
+			UnityUtil.setCalibrationToolVector(null, null);
 		}
 	}, [isCalibrating]);
 
 	useEffect(() => {
+		const horizontalCalibration = drawing?.calibration?.horizontal || EMPTY_CALIBRATION.horizontal;
+		CalibrationActionsDispatchers.setModelCalibration(horizontalCalibration.model);
+		CalibrationActionsDispatchers.setDrawingCalibration(horizontalCalibration.drawing);
 		CalibrationActionsDispatchers.setDrawingId(drawingId);
-	}, [drawingId]);
-	
+	}, [drawing]);
+
+	useEffect(() => {
+		if (step < 2) {
+			UnityUtil.setCalibrationToolMode('Vector');
+		} else {
+			UnityUtil.setCalibrationToolMode('None');
+		}
+	}, [step]);
+
 	return null;
 };

@@ -20,19 +20,13 @@ import { Viewer } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { UnityUtil } from '@/globals/unity-util';
 import { CalibrationActionsDispatchers, TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { CalibrationHooksSelectors, DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { CalibrationHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEqual } from 'lodash';
-import { EMPTY_VECTOR } from '@/v5/store/calibration/calibration.constants';
 
 export const Calibration3DHandler = () => {
-	const step = CalibrationHooksSelectors.selectStep();
 	const isCalibratingModel = CalibrationHooksSelectors.selectIsCalibratingModel();
 	const modelCalibration = CalibrationHooksSelectors.selectModelCalibration();
-	const drawingId = CalibrationHooksSelectors.selectDrawingId(); 
-	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
 	const [lastPickedPoint, setLastPickedPoint] = useState(null);
-
-	const resetVector3D = () => CalibrationActionsDispatchers.setModelCalibration(drawing?.calibration?.horizontal.model || EMPTY_VECTOR);
 
 	useEffect(() => {
 		if (isCalibratingModel) {
@@ -46,12 +40,12 @@ export const Calibration3DHandler = () => {
 				UnityUtil.disableSnapping();
 				Viewer.off(VIEWER_EVENTS.PICK_POINT, onPickPoint);
 			};
-		} else if (!modelCalibration.end) {
-			resetVector3D();
 		}
 	}, [isCalibratingModel]);
 
 	useEffect(() => {
+		if (!lastPickedPoint) return;
+
 		const { start, end } = modelCalibration;
 
 		if (end || !start) {
@@ -65,21 +59,9 @@ export const Calibration3DHandler = () => {
 		UnityUtil.setCalibrationToolVector(modelCalibration.start, modelCalibration.end);
 	}, [modelCalibration]);
 
-	useEffect(() => {
-		UnityUtil.setCalibrationToolMode('Vector');
-		return () => {
-			UnityUtil.setCalibrationToolMode('None');
-			CalibrationActionsDispatchers.setIsCalibratingModel(false);
-		};
+	useEffect(() => () => {
+		CalibrationActionsDispatchers.setIsCalibratingModel(false);
 	}, []);
-
-	useEffect(() => {
-		if (step !== 0) {
-			CalibrationActionsDispatchers.setIsCalibratingModel(false);
-		}
-	}, [step]);
-
-	useEffect(() => { resetVector3D(); }, []);
 
 	return null;
 };

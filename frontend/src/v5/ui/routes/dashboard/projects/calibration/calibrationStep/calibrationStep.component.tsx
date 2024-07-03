@@ -33,7 +33,7 @@ export const CalibrationStep = () => {
 
 	return (
 		<>
-			<Calibration3DHandler />
+			{step === 0 && <Calibration3DHandler />}
 			{step === 1 && <Calibration2DStep />}
 			{step === 2 && <VerticalSpatialBoundariesStep />}
 		</>
