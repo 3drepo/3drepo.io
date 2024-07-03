@@ -141,6 +141,7 @@ const establishRoutes = (modelType) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *           format: uuid
 	 *       - name: type
  	 *         description: Model type
 	 *         in: path
@@ -154,6 +155,7 @@ const establishRoutes = (modelType) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *           format: uuid
 	 *       - name: showVoid
 	 *         description: Include void revisions or not
 	 *         in: query
@@ -245,6 +247,7 @@ const establishRoutes = (modelType) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *           format: uuid
 	 *       - name: type
  	 *         description: Model type
 	 *         in: path
@@ -258,6 +261,7 @@ const establishRoutes = (modelType) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *           format: uuid
 	 *     requestBody:
 	 *       content:
 	 *         multipart/form-data:
@@ -329,6 +333,7 @@ const establishRoutes = (modelType) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *           format: uuid
 	 *       - name: type
  	 *         description: Model type
 	 *         in: path
@@ -342,6 +347,7 @@ const establishRoutes = (modelType) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *           format: uuid
 	 *       - name: revision
 	 *         description: Revision ID or Revision tag
 	 *         in: path
@@ -370,11 +376,11 @@ const establishRoutes = (modelType) => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/revisions/{revision}/files:
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions/{revision}/files:
 	 *   get:
-	 *     description: Downloads the model files of the selected revision
+	 *     description: Downloads the container files of the selected revision
 	 *     tags: [Revisions]
-	 *     operationId: downloadModelRevisionFiles
+	 *     operationId: downloadContainerRevisionFiles
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -388,19 +394,14 @@ const establishRoutes = (modelType) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - name: type
- 	 *         description: Model type
+	 *           format: uuid
+	 *       - name: container
+	 *         description: Container ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *           enum: [containers, drawings]
-	 *       - name: model
-	 *         description: Model ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
+	 *           format: uuid
 	 *       - name: revision
 	 *         description: Revision ID or Revision tag
 	 *         in: path
@@ -420,7 +421,57 @@ const establishRoutes = (modelType) => {
 	 *               type: string
 	 *               format: binary
 	 */
-	router.get('/:revision/files', hasWriteAccessToModel[modelType], downloadRevisionFiles(modelType));
+	router.get('/:revision/files', hasWriteAccessToContainer, downloadRevisionFiles(modelTypes.CONTAINER));
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/revisions/{revision}/files/original:
+	 *   get:
+	 *     description: Downloads the drawing files of the selected revision
+	 *     tags: [Revisions]
+	 *     operationId: downloadDrawingRevisionFiles
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: drawing
+	 *         description: Drawing ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: revision
+	 *         description: Revision ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: downloads the revision files
+	 *         content:
+	 *           application/octet-stream:
+	 *             schema:
+	 *               type: string
+	 *               format: binary
+	 */
+	router.get('/:revision/files/original', hasWriteAccessToDrawing, downloadRevisionFiles(modelTypes.DRAWING));
 
 	return router;
 };
