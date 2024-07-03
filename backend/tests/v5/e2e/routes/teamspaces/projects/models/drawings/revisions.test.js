@@ -308,7 +308,7 @@ const testDownloadRevisionFiles = () => {
 	];
 
 	const runTest = (desc, { ts, projectId, drawingId, revisionId, key }, success, error) => {
-		const route = () => `/v5/teamspaces/${ts}/projects/${projectId}/drawings/${drawingId}/revisions/${revisionId}/files/original?key=${key}`;
+		const route = () => `/v5/teamspaces/${ts}/projects/${projectId}/drawings/${drawingId}/revisions/${revisionId}/files?key=${key}`;
 
 		test(`should ${success ? 'succeed' : `fail with ${error.code}`} if ${desc}`, async () => {
 			const expectedStatus = success ? templates.ok.status : error.status;
