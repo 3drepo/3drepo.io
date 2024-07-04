@@ -15,17 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Viewer } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { UnityUtil } from '@/globals/unity-util';
 import { CalibrationActionsDispatchers, TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CalibrationHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEqual } from 'lodash';
+import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 
 export const Calibration3DHandler = () => {
 	const isCalibratingModel = CalibrationHooksSelectors.selectIsCalibratingModel();
 	const modelCalibration = CalibrationHooksSelectors.selectModelCalibration();
+	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
 	const [lastPickedPoint, setLastPickedPoint] = useState(null);
 
 	useEffect(() => {
@@ -59,8 +61,13 @@ export const Calibration3DHandler = () => {
 		UnityUtil.setCalibrationToolVector(...modelCalibration);
 	}, [modelCalibration]);
 
-	useEffect(() => () => {
-		CalibrationActionsDispatchers.setIsCalibratingModel(false);
+	useEffect(() => {
+		UnityUtil.setCalibrationToolMode('Vector');
+		setLeftPanelRatio(.5);
+
+		return () => {
+			CalibrationActionsDispatchers.setIsCalibratingModel(false);
+		};
 	}, []);
 
 	return null;

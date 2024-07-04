@@ -66,16 +66,6 @@ export const CalibrationHandler = () => {
 		CalibrationActionsDispatchers.setDrawingCalibration(convertVectorUnits(horizontalCalibration.drawing, convertionFactor));
 	}, [drawing, selectedModel]);
 
-	useEffect(() => {
-		if (step === 0 || step === 1) {
-			setLeftPanelRatio(.5);
-			UnityUtil.setCalibrationToolMode('Vector');
-		} else {
-			setLeftPanelRatio(1);
-			UnityUtil.setCalibrationToolMode('None');
-		}
-	}, [step]);
-
 	return (
 		<>
 			{step === 0 && <Calibration3DHandler />}
