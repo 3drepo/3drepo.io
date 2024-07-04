@@ -75,6 +75,7 @@ interface IProps {
 	treeNodesList: any;
 	ticketsCardView: TicketsCardViews;
 	isEditingGroups: boolean;
+	isCalibrating: boolean;
 	stopListenOnSelections: () => void;
 	stopListenOnModelLoaded: () => void;
 	stopListenOnClickPin: () => void;
