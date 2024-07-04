@@ -23,7 +23,6 @@ import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { DrawingsListCard } from '@/v5/ui/routes/viewer/drawings/drawingsList/drawingsListCard.component';
 import { ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { CalibrationHooksSelectors } from '@/v5/services/selectorsHooks';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { getCalibrationViewerLeftPanels, getViewerLeftPanels, VIEWER_PANELS } from '../../constants/viewerGui';
 import { getWindowHeight, getWindowWidth, renderWhenTrue } from '../../helpers/rendering';
@@ -76,7 +75,6 @@ interface IProps {
 	treeNodesList: any;
 	ticketsCardView: TicketsCardViews;
 	isEditingGroups: boolean;
-	isCalibrating: boolean;
 	stopListenOnSelections: () => void;
 	stopListenOnModelLoaded: () => void;
 	stopListenOnClickPin: () => void;
@@ -104,7 +102,7 @@ interface IState {
 	loaderProgress: number;
 }
 
-export class ViewerGuiBase extends PureComponent<IProps, IState> {
+export class ViewerGui extends PureComponent<IProps, IState> {
 
 	private get urlParams() {
 		return this.props.match.params;
@@ -332,8 +330,3 @@ export class ViewerGuiBase extends PureComponent<IProps, IState> {
 		</DraggablePanels>
 	)
 }
-
-export const ViewerGui = (props) => {
-	const isCalibrating = CalibrationHooksSelectors.selectIsCalibrating();
-	return <ViewerGuiBase {...props} isCalibrating={isCalibrating} />;
-};
