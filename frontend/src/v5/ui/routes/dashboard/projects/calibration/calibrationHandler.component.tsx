@@ -17,7 +17,7 @@
 
 import { useContext, useEffect } from 'react';
 import { useSearchParam } from '../../../useSearchParam';
-import { CalibrationActionsDispatchers, CompareActionsDispatchers, TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { CalibrationActionsDispatchers, CompareActionsDispatchers, ContainersActionsDispatchers, FederationsActionsDispatchers, TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useParams } from 'react-router-dom';
 import { CalibrationHooksSelectors, ContainersHooksSelectors, DrawingsHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { UnityUtil } from '@/globals/unity-util';
@@ -27,16 +27,19 @@ import { Calibration2DStep } from './calibrationStep/calibration2DStep/calibrati
 import { VerticalSpatialBoundariesStep } from './calibrationStep/verticalSpatialBoundariesStep/verticalSpatialBoundariesStep.component';
 import { ViewerCanvasesContext } from '../../../viewer/viewerCanvases.context';
 import { convertVectorUnits, getUnitsConvertionFactor } from '@/v5/store/calibration/calibration.helpers';
+import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 
 export const CalibrationHandler = () => {
-	const { revision, containerOrFederation } = useParams();
+	const { teamspace, project, revision, containerOrFederation } = useParams();
 	const [drawingId] = useSearchParam('drawingId');
 	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
 	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
 	const step = CalibrationHooksSelectors.selectStep();
 
-	const selectedModel = FederationsHooksSelectors.selectFederationById(containerOrFederation)
-		|| ContainersHooksSelectors.selectContainerById(containerOrFederation);
+	const isFed = modelIsFederation(containerOrFederation);
+	const selectedModel = isFed
+		? FederationsHooksSelectors.selectFederationById(containerOrFederation)
+		: ContainersHooksSelectors.selectContainerById(containerOrFederation);
 
 	useEffect(() => {
 		CalibrationActionsDispatchers.setStep(0);
@@ -65,6 +68,14 @@ export const CalibrationHandler = () => {
 		CalibrationActionsDispatchers.setModelCalibration(convertVectorUnits(horizontalCalibration.model, convertionFactor));
 		CalibrationActionsDispatchers.setDrawingCalibration(convertVectorUnits(horizontalCalibration.drawing, convertionFactor));
 	}, [drawing, selectedModel]);
+
+	useEffect(() => {
+		if (isFed) {
+			FederationsActionsDispatchers.fetchFederationSettings(teamspace, project, containerOrFederation);
+		} else {
+			ContainersActionsDispatchers.fetchContainerSettings(teamspace, project, containerOrFederation);
+		}
+	}, [drawingId]);
 
 	return (
 		<>
