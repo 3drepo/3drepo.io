@@ -30,12 +30,13 @@ jest.mock('../../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
 jest.mock('../../../../../../../src/v5/models/revisions');
 const Revisions = require(`${src}/models/revisions`);
+jest.mock('../../../../../../../src/v5/services/eventsManager/eventsManager');
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 
 const { STATUSES } = require(`${src}/models/modelSettings.constants`);
 const Drawings = require(`${src}/processors/teamspaces/projects/models/drawings`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 
 const testAddDrawing = () => {

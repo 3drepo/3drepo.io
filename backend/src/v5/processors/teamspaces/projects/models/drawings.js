@@ -16,6 +16,7 @@
  */
 
 const { STATUSES, modelTypes } = require('../../../../models/modelSettings.constants');
+const { UUIDToString, generateUUID } = require('../../../../utils/helper/uuids');
 const { addModel, getModelList } = require('./commons/modelList');
 const { addRevision, deleteModelRevisions, getRevisionByIdOrTag, getRevisions, updateRevision, updateRevisionStatus } = require('../../../../models/revisions');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
@@ -24,7 +25,6 @@ const { getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../..
 const { getProjectById, removeModelFromProject } = require('../../../../models/projectSettings');
 const Path = require('path');
 const { events } = require('../../../../services/eventsManager/eventsManager.constants');
-const { UUIDToString, generateUUID } = require('../../../../utils/helper/uuids');
 const { publish } = require('../../../../services/eventsManager/eventsManager');
 const { templates } = require('../../../../utils/responseCodes');
 
