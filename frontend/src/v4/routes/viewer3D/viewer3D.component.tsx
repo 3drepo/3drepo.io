@@ -31,6 +31,7 @@ import { moveMeshes, resetMovedMeshes, transformationDiffChanges,
 transformationDiffRemoves } from '../../modules/sequences/sequences.helper';
 import { ViewerService } from '../../services/viewer/viewer';
 import { Border, ViewerContainer } from './viewer3D.styles';
+import { Calibration3DInfoBox } from './calibration3DInfoBox/calibration3DInfoBox.component';
 
 interface IProps {
 	location: any;
@@ -279,6 +280,7 @@ export class Viewer3D extends PureComponent<IProps, any> {
 		return (
 			<>
 				<ViewerContainer visible={this.shouldBeVisible}>
+					<Calibration3DInfoBox />
 					<div
 						ref={this.containerRef}
 						className={this.props.className}

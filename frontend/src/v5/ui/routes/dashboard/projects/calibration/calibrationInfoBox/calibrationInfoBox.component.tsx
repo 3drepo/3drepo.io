@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,20 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const axios = require('axios');
+import { useContext, useState } from 'react';
+import { CalibrationContext } from '../calibrationContext';
+import { InfoBoxProps } from '@controls/infoBox/infoBox.component';
+import { InfoBox } from './calibrationInfoBox.styles';
 
-const WebRequests = {};
+type CalibrationInfoBoxProps = Omit<InfoBoxProps, 'onClickClose'>;
+export const CalibrationInfoBox = (props: CalibrationInfoBoxProps) => {
+	const [open, setOpen] = useState(true);
+	const { isCalibrating } = useContext(CalibrationContext);
 
-WebRequests.get = (uri, headers) => {
-	const options = {};
+	if (!isCalibrating || !open) return null;
 
-	if (headers) {
-		options.headers = headers;
-	}
-
-	return axios.get(uri, options);
+	return (<InfoBox {...props} onClickClose={() => setOpen(false)} />);
 };
-
-WebRequests.post = (uri, data, config) => axios.post(uri, data, config);
-
-module.exports = WebRequests;

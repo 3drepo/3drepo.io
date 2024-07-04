@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,20 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const axios = require('axios');
 
-const WebRequests = {};
+import { Box, InfoIcon, TitleBar, Description, CloseIconContainer, Container } from './infoBox.styles';
+import CloseIcon from '@assets/icons/outlined/cross-outlined.svg';
 
-WebRequests.get = (uri, headers) => {
-	const options = {};
-
-	if (headers) {
-		options.headers = headers;
-	}
-
-	return axios.get(uri, options);
+export type InfoBoxProps = {
+	title: any,
+	description: any,
+	onClickClose: () => void,
+	className?: string,
 };
-
-WebRequests.post = (uri, data, config) => axios.post(uri, data, config);
-
-module.exports = WebRequests;
+export const InfoBox = ({ title, description, onClickClose, className }: InfoBoxProps) => (
+	<Container className={className}>
+		<Box>
+			<InfoIcon />
+			<TitleBar>
+				<div>{title}</div>
+				<CloseIconContainer onClick={onClickClose}>
+					<CloseIcon />
+				</CloseIconContainer>
+			</TitleBar>
+			<span />
+			<Description>{description}</Description>
+		</Box>
+	</Container>
+);

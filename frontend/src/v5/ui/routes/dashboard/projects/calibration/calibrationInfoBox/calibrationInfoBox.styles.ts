@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,20 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const axios = require('axios');
+import { InfoBox as InfoBoxBase } from '@controls/infoBox/infoBox.component';
+import styled from 'styled-components';
 
-const WebRequests = {};
-
-WebRequests.get = (uri, headers) => {
-	const options = {};
-
-	if (headers) {
-		options.headers = headers;
+export const InfoBox = styled(InfoBoxBase)`
+	svg {
+		vertical-align: middle;
+		display: inline-block;
 	}
-
-	return axios.get(uri, options);
-};
-
-WebRequests.post = (uri, data, config) => axios.post(uri, data, config);
-
-module.exports = WebRequests;
+`;

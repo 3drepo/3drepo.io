@@ -30,6 +30,7 @@ import { DrawingViewerImage } from './drawingViewerImage/drawingViewerImage.comp
 import { CloseButton } from '@controls/button/closeButton/closeButton.component';
 import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 import { DrawingViewerService } from './drawingViewer.service';
+import { CalibrationInfoBox } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationInfoBox/calibrationInfoBox.component';
 import CalibrationIcon from '@assets/icons/filled/calibration-filled.svg';
 import { ViewBoxType, ViewerLayer2D } from './viewerLayer2D/viewerLayer2D.component';
 import { CalibrationHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -40,6 +41,7 @@ export const Viewer2D = () => {
 	const { close2D } = useContext(ViewerCanvasesContext);
 	const isCalibrating = CalibrationHooksSelectors.selectIsCalibrating();
 	const drawingCalibration = CalibrationHooksSelectors.selectDrawingCalibration();
+	const step = CalibrationHooksSelectors.selectStep();
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
 	const [viewBox, setViewBox] = useState<ViewBoxType>(DEFAULT_VIEWBOX);
 	const [isMinZoom, setIsMinZoom] = useState(false);
@@ -85,6 +87,18 @@ export const Viewer2D = () => {
 
 	return (
 		<ViewerContainer visible>
+			{step === 1 && (
+				<CalibrationInfoBox
+					title={formatMessage({ defaultMessage: '2D Alignment', id: 'infoBox.2dAlignment.title' })}
+					description={formatMessage({
+						id: 'infoBox.2dAlignment.description',
+						defaultMessage: `
+							Click on the {icon} on your navigation bar and then please select your two points in the
+							2D Viewer that are the same points in your 3D Viewer.
+						`,
+					}, { icon: <CalibrationIcon /> })}
+				/>
+			)}
 			{!isCalibrating && <CloseButton variant="secondary" onClick={close2D} />}
 			<ImageContainer ref={imgContainerRef}>
 				<DrawingViewerImage ref={imgRef} onLoad={onImageLoad} />

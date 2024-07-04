@@ -231,10 +231,10 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 	private handleMeasureRemoved = (measurementId) => this.props.removeMeasurement(measurementId);
 
 	public render() {
-		const { leftPanels, rightPanels, draggablePanels, isFocusMode, viewer } = this.props;
+		const { leftPanels, rightPanels, draggablePanels, isFocusMode, viewer, isCalibrating } = this.props;
 
 		return (
-			<GuiContainer>
+			<GuiContainer $isCalibrating={isCalibrating}>
 				<CloseFocusModeButton isFocusMode={isFocusMode} />
 				<Container id="gui-container" className={this.props.className} hidden={isFocusMode}>
 					<RevisionsSwitch />
