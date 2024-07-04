@@ -80,8 +80,6 @@ Revisions.addRevision = async (teamspace, project, model, modelType, data) => {
 
 	await db.insertOne(teamspace, collectionName(modelType, model), newRevision);
 
-	publish(events.NEW_REVISION, { teamspace, project, model, modelType, revision: newRevision._id });
-
 	return newRevision._id;
 };
 

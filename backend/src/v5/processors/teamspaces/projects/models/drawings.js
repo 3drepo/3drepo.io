@@ -23,7 +23,9 @@ const { deleteModel, getDrawingById, getDrawings, updateModelSettings } = requir
 const { getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../../services/filesManager');
 const { getProjectById, removeModelFromProject } = require('../../../../models/projectSettings');
 const Path = require('path');
+const { events } = require('../../../../services/eventsManager/eventsManager.constants');
 const { generateUUID } = require('../../../../utils/helper/uuids');
+const { publish } = require('../../../../services/eventsManager/eventsManager');
 const { templates } = require('../../../../utils/responseCodes');
 
 const Drawings = { };
@@ -54,17 +56,24 @@ Drawings.getRevisions = (teamspace, drawing, showVoid) => getRevisions(teamspace
 	modelTypes.DRAWING, showVoid,
 	{ _id: 1, author: 1, format: 1, timestamp: 1, statusCode: 1, revCode: 1, void: 1, desc: 1 });
 
-Drawings.newRevision = async (teamspace, project, drawing, data, file) => {
+Drawings.newRevision = async (teamspace, project, model, data, file) => {
+	let rev_id;
 	const format = Path.extname(file.originalname).toLowerCase();
-
 	const fileId = generateUUID();
-	const rev_id = await addRevision(teamspace, project, drawing, modelTypes.DRAWING,
-		{ ...data, format, rFile: [fileId], status: STATUSES.PROCESSING });
 
-	const fileMeta = { name: file.originalname, rev_id, project, model: drawing };
-	await storeFile(teamspace, `${modelTypes.DRAWING}s.history.ref`, fileId, file.buffer, fileMeta);
+	try {
+		rev_id = await addRevision(teamspace, project, model, modelTypes.DRAWING,
+			{ ...data, format, rFile: [fileId], status: STATUSES.PROCESSING });
+		publish(events.QUEUED_TASK_UPDATE, { teamspace, model, corId: rev_id, status: STATUSES.PROCESSING });
 
-	await updateRevision(teamspace, drawing, modelTypes.DRAWING, rev_id, { status: STATUSES.OK });
+		const fileMeta = { name: file.originalname, rev_id, project, model };
+		await storeFile(teamspace, `${modelTypes.DRAWING}s.history.ref`, fileId, file.buffer, fileMeta);
+	} catch (err) {
+		// TODO
+	}
+
+	await updateRevision(teamspace, model, modelTypes.DRAWING, rev_id, { status: STATUSES.OK });
+	publish(events.NEW_REVISION, { teamspace, project, model, revision: rev_id, modelType: modelTypes.DRAWING });
 };
 
 Drawings.updateRevisionStatus = (teamspace, project, drawing, revision, status) => updateRevisionStatus(

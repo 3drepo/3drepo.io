@@ -45,6 +45,8 @@ const validateRevisionUpload = async (req, res, next) => {
 				return isRevAndStatusCodeUnique(teamspace, drawing, revCode, statusCode);
 			}
 
+			// If either prop is missing we dont want to throw the test error message
+			// thus we are returning true and let it be caught by required()
 			return true;
 		});
 
