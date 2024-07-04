@@ -16,7 +16,7 @@
  */
 
 import { useContext, useEffect } from 'react';
-import { Transformers, useSearchParam } from '../../../useSearchParam';
+import { useSearchParam } from '../../../useSearchParam';
 import { CalibrationActionsDispatchers, CompareActionsDispatchers, TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useParams } from 'react-router-dom';
 import { CalibrationHooksSelectors, ContainersHooksSelectors, DrawingsHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -30,7 +30,6 @@ import { convertVectorUnits, getUnitsConvertionFactor } from '@/v5/store/calibra
 
 export const CalibrationHandler = () => {
 	const { revision, containerOrFederation } = useParams();
-	const [isCalibrating] = useSearchParam('isCalibrating', Transformers.BOOLEAN);
 	const [drawingId] = useSearchParam('drawingId');
 	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
 	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
@@ -40,23 +39,24 @@ export const CalibrationHandler = () => {
 		|| ContainersHooksSelectors.selectContainerById(containerOrFederation);
 
 	useEffect(() => {
-		CalibrationActionsDispatchers.setIsStepValid(false);
 		CalibrationActionsDispatchers.setStep(0);
 		CalibrationActionsDispatchers.setIsCalibratingModel(false);
-		UnityUtil.setCalibrationToolMode('Vector');
-	}, [containerOrFederation, revision, isCalibrating]);
+	}, [containerOrFederation, revision]);
 
 	useEffect(() => {
-		CalibrationActionsDispatchers.setIsCalibrating(isCalibrating);
-		if (isCalibrating) {
-			ViewerGuiActionsDispatchers.resetPanels();
-			TicketsCardActionsDispatchers.resetState();
-			CompareActionsDispatchers.resetComponentState();
-		} else {
-			UnityUtil.setCalibrationToolMode('None');
+		CalibrationActionsDispatchers.setStep(0);
+		CalibrationActionsDispatchers.setIsCalibrating(true);
+		ViewerGuiActionsDispatchers.resetPanels();
+		TicketsCardActionsDispatchers.resetState();
+		CompareActionsDispatchers.resetComponentState();
+
+		return () => {
+			CalibrationActionsDispatchers.setIsCalibrating(false);
 			UnityUtil.setCalibrationToolVector(null, null);
-		}
-	}, [isCalibrating]);
+			UnityUtil.setCalibrationToolMode('None');
+			setLeftPanelRatio(0.5);
+		};
+	}, []);
 
 	useEffect(() => {
 		if (!drawing || !selectedModel) return;
@@ -67,16 +67,11 @@ export const CalibrationHandler = () => {
 	}, [drawing, selectedModel]);
 
 	useEffect(() => {
-		CalibrationActionsDispatchers.setDrawingId(drawingId);
-	}, [drawing]);
-
-	useEffect(() => {
-		if (step < 2) {
+		if (step === 0 || step === 1) {
 			UnityUtil.setCalibrationToolMode('Vector');
-			setLeftPanelRatio(.5);
 		} else {
-			UnityUtil.setCalibrationToolMode('None');
 			setLeftPanelRatio(1);
+			UnityUtil.setCalibrationToolMode('None');
 		}
 	}, [step]);
 

@@ -31,9 +31,11 @@ import { TicketsCardViews } from './tickets/tickets.constants';
 import { ViewerCanvases } from '../dashboard/viewerCanvases/viewerCanvases.component';
 import { CalibrationHandler } from '../dashboard/projects/calibration/calibrationHandler.component';
 import { ViewerGui } from '@/v4/routes/viewerGui';
+import { Transformers, useSearchParam } from '../useSearchParam';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
+	const [isCalibrating] = useSearchParam('isCalibrating', Transformers.BOOLEAN);
 
 	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
 
@@ -104,7 +106,7 @@ export const Viewer = () => {
 
 	return (
 		<>
-			<CalibrationHandler />
+			{isCalibrating && <CalibrationHandler />}
 			<OpenTicketFromUrl />
 			<CheckLatestRevisionReadiness />
 			<ViewerCanvases />
