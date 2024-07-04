@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useState } from 'react';
-import { CalibrationContext } from '../calibrationContext';
+import { useState } from 'react';
 import { InfoBoxProps } from '@controls/infoBox/infoBox.component';
 import { InfoBox } from './calibrationInfoBox.styles';
+import { CalibrationHooksSelectors } from '@/v5/services/selectorsHooks';
 
 type CalibrationInfoBoxProps = Omit<InfoBoxProps, 'onClickClose'>;
 export const CalibrationInfoBox = (props: CalibrationInfoBoxProps) => {
 	const [open, setOpen] = useState(true);
-	const { isCalibrating } = useContext(CalibrationContext);
+	const isCalibrating = CalibrationHooksSelectors.selectIsCalibrating();
 
 	if (!isCalibrating || !open) return null;
 
