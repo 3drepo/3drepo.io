@@ -169,11 +169,9 @@ const testNewRevision = () => {
 			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history.ref`,
 				addRevisionMock.mock.calls[0][4].rFile[0], file.buffer,
 				{ name: file.originalname, rev_id, project, model: drawing });
-			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledTimes(2);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE,
 				{ teamspace, model: drawing, corId: rev_id, status: STATUSES.PROCESSING });
-
-			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_REVISION,
 				{ teamspace, project, model: drawing, revision: rev_id, modelType: modelTypes.DRAWING });
 		});
