@@ -18,8 +18,8 @@
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src, dwgModel, dwgModelUppercaseExt, image } = require('../../../../../../helper/path');
-const { deleteIfUndefined } = require('../../../../../../../../src/v5/utils/helper/objects');
 
+const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { modelTypes, statusCodes } = require(`${src}/models/modelSettings.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 

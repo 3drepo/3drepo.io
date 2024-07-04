@@ -24,7 +24,7 @@ const { getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../..
 const { getProjectById, removeModelFromProject } = require('../../../../models/projectSettings');
 const Path = require('path');
 const { events } = require('../../../../services/eventsManager/eventsManager.constants');
-const { generateUUID } = require('../../../../utils/helper/uuids');
+const { UUIDToString, generateUUID } = require('../../../../utils/helper/uuids');
 const { publish } = require('../../../../services/eventsManager/eventsManager');
 const { templates } = require('../../../../utils/responseCodes');
 
@@ -64,7 +64,11 @@ Drawings.newRevision = async (teamspace, project, model, data, file) => {
 	try {
 		rev_id = await addRevision(teamspace, project, model, modelTypes.DRAWING,
 			{ ...data, format, rFile: [fileId], status: STATUSES.PROCESSING });
-		publish(events.QUEUED_TASK_UPDATE, { teamspace, model, corId: rev_id, status: STATUSES.PROCESSING });
+
+		publish(events.QUEUED_TASK_UPDATE, { teamspace,
+			model,
+			corId: UUIDToString(rev_id),
+			status: STATUSES.PROCESSING });
 
 		const fileMeta = { name: file.originalname, rev_id, project, model };
 		await storeFile(teamspace, `${modelTypes.DRAWING}s.history.ref`, fileId, file.buffer, fileMeta);
@@ -73,7 +77,12 @@ Drawings.newRevision = async (teamspace, project, model, data, file) => {
 	}
 
 	await updateRevision(teamspace, model, modelTypes.DRAWING, rev_id, { status: STATUSES.OK });
-	publish(events.NEW_REVISION, { teamspace, project, model, revision: rev_id, modelType: modelTypes.DRAWING });
+
+	publish(events.NEW_REVISION, { teamspace,
+		project,
+		model,
+		revision: UUIDToString(rev_id),
+		modelType: modelTypes.DRAWING });
 };
 
 Drawings.updateRevisionStatus = (teamspace, project, drawing, revision, status) => updateRevisionStatus(
