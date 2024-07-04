@@ -29,7 +29,8 @@ export const centredPanZoom = (target: ZoomableImage, paddingW: number, paddingH
 	const targetContainer = target.getEventsEmitter();
 
 	const options = {
-		maxZoom: 3,
+		maxZoom: 100,
+		minZoom: 0.01,
 	};
 	
 	const pz = panzoom(target, options);
