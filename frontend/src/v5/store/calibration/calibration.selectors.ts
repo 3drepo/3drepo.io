@@ -50,7 +50,3 @@ export const selectModelCalibration = createSelector(
 export const selectIsCalibratingModel = createSelector(
 	selectCalibrationDomain, (state) => state.isCalibratingModel,
 );
-
-export const selectDrawingId = createSelector(
-	selectCalibrationDomain, (state) => state.drawingId,
-);

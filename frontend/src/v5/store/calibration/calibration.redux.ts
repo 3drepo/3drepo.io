@@ -31,7 +31,6 @@ export const { Types: CalibrationTypes, Creators: CalibrationActions } = createA
 	setModelCalibration: ['model'],
 	setDrawingCalibration: ['drawing'],
 	setIsCalibratingModel: ['isCalibratingModel'],
-	setDrawingId: ['drawingId'],
 }, { prefix: 'CALIBRATION/' }) as { Types: Constants<ICalibrationActionCreators>; Creators: ICalibrationActionCreators };
 
 export const INITIAL_STATE: ICalibrationState = {
@@ -45,7 +44,6 @@ export const INITIAL_STATE: ICalibrationState = {
 	},
 	verticalRange: null,
 	isCalibratingModel: false,
-	drawingId: '',
 };
 
 export const setIsCalibrating = (state, { isCalibrating }: SetIsCalibratingAction) => {
@@ -76,10 +74,6 @@ export const setIsCalibratingModel = (state, { isCalibratingModel }: SetIsCalibr
 	state.isCalibratingModel = isCalibratingModel;
 };
 
-export const setDrawingId = (state, { drawingId }: SetDrawingIdAction) => {
-	state.drawingId = drawingId;
-};
-
 export const calibrationReducer = createReducer(INITIAL_STATE, produceAll({
 	[CalibrationTypes.SET_IS_CALIBRATING]: setIsCalibrating,
 	[CalibrationTypes.SET_ORIGIN]: setOrigin,
@@ -88,7 +82,6 @@ export const calibrationReducer = createReducer(INITIAL_STATE, produceAll({
 	[CalibrationTypes.SET_MODEL_CALIBRATION]: setModelCalibration,
 	[CalibrationTypes.SET_DRAWING_CALIBRATION]: setDrawingCalibration,
 	[CalibrationTypes.SET_IS_CALIBRATING_MODEL]: setIsCalibratingModel,
-	[CalibrationTypes.SET_DRAWING_ID]: setDrawingId,
 }));
 
 /**
@@ -102,7 +95,6 @@ export interface ICalibrationState extends Omit<ICalibration, 'state' | 'units'>
 	// TODO - remove after logic for 2d vector and vertical plan is implemented
 	isStepValid: boolean;
 	isCalibratingModel: boolean;
-	drawingId: string;
 }
 
 export type SetIsCalibratingAction = Action<'SET_IS_CALIBRATING_ACTION'> & { isCalibrating: boolean };
@@ -112,7 +104,6 @@ export type SetIsStepValidAction = Action<'SET_IS_STEP_VALID_ACTION'> & { isStep
 export type SetModelCalibrationAction = Action<'SET_MODEL_CALIBRATION_ACTION'> & { model: Vector3D };
 export type SetDrawingCalibrationAction = Action<'SET_DRAWING_CALIBRATION_ACTION'> & { drawing: Vector2D };
 export type SetIsCalibratingModelAction = Action<'SET_IS_CALIBRATING_MODEL_ACTION'> & { isCalibratingModel: boolean };
-export type SetDrawingIdAction = Action<'SET_DRAWING_ID_ACTION'> & { drawingId: string };
 
 export interface ICalibrationActionCreators {
 	setIsCalibrating: (isCalibrating: boolean) => SetIsCalibratingAction;
@@ -122,5 +113,4 @@ export interface ICalibrationActionCreators {
 	setModelCalibration: (model: Vector3D) => SetModelCalibrationAction;
 	setDrawingCalibration: (drawing: Vector2D) => SetDrawingCalibrationAction;
 	setIsCalibratingModel: (isCalibratingModel: boolean) => SetIsCalibratingModelAction;
-	setDrawingId: (drawingId: string) => SetDrawingIdAction;
 }

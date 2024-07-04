@@ -25,6 +25,7 @@ import { CalibrationState } from '@/v5/store/drawings/drawings.types';
 import { CalibrationHooksSelectors, ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DRAWINGS_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { EMPTY_VECTOR } from '@/v5/store/calibration/calibration.constants';
+import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
 const STEPS = [
 	formatMessage({ defaultMessage: '3D Calibration Points', id: 'calibration.step.3dCalibration' }),
@@ -34,11 +35,11 @@ const STEPS = [
 
 export const CalibrationHeader = () => {
 	const { teamspace, project, containerOrFederation } = useParams();
+	const [drawingId] = useSearchParam('drawingId');
 	const step = CalibrationHooksSelectors.selectStep();
 	const isStepValid = CalibrationHooksSelectors.selectIsStepValid();
 	const origin = CalibrationHooksSelectors.selectOrigin() || generatePath(DRAWINGS_ROUTE, { teamspace, project });
 	const modelCalibration = CalibrationHooksSelectors.selectModelCalibration();
-	const drawingId = CalibrationHooksSelectors.selectDrawingId();
 	const selectedModel = FederationsHooksSelectors.selectFederationById(containerOrFederation)
 		|| ContainersHooksSelectors.selectContainerById(containerOrFederation);
 	const isLastStep = step === 2;
