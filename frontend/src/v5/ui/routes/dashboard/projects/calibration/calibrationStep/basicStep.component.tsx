@@ -33,7 +33,7 @@ export const BasicStep = ({ text }) => {
 			padding: '50px 100px',
 			backgroundImage: 'gray',
 			border: 'solid 2px black',
-			margin: 'auto',
+			margin: '100px auto',
 			display: 'grid',
 			placeContent: 'center',
 			// REMINDER - the following property will be needed to be able to click inside the component
