@@ -57,12 +57,11 @@ Drawings.getRevisions = (teamspace, drawing, showVoid) => getRevisions(teamspace
 	{ _id: 1, author: 1, format: 1, timestamp: 1, statusCode: 1, revCode: 1, void: 1, desc: 1 });
 
 Drawings.newRevision = async (teamspace, project, model, data, file) => {
-	let rev_id;
-	const format = Path.extname(file.originalname).toLowerCase();
-	const fileId = generateUUID();
-
 	try {
-		rev_id = await addRevision(teamspace, project, model, modelTypes.DRAWING,
+		const format = Path.extname(file.originalname).toLowerCase();
+		const fileId = generateUUID();
+
+		const rev_id = await addRevision(teamspace, project, model, modelTypes.DRAWING,
 			{ ...data, format, rFile: [fileId], status: STATUSES.PROCESSING });
 
 		publish(events.QUEUED_TASK_UPDATE, { teamspace,
@@ -72,17 +71,16 @@ Drawings.newRevision = async (teamspace, project, model, data, file) => {
 
 		const fileMeta = { name: file.originalname, rev_id, project, model };
 		await storeFile(teamspace, `${modelTypes.DRAWING}s.history.ref`, fileId, file.buffer, fileMeta);
+		await updateRevision(teamspace, model, modelTypes.DRAWING, rev_id, { status: STATUSES.OK });
+
+		publish(events.NEW_REVISION, { teamspace,
+			project,
+			model,
+			revision: UUIDToString(rev_id),
+			modelType: modelTypes.DRAWING });
 	} catch (err) {
 		// TODO
 	}
-
-	await updateRevision(teamspace, model, modelTypes.DRAWING, rev_id, { status: STATUSES.OK });
-
-	publish(events.NEW_REVISION, { teamspace,
-		project,
-		model,
-		revision: UUIDToString(rev_id),
-		modelType: modelTypes.DRAWING });
 };
 
 Drawings.updateRevisionStatus = (teamspace, project, drawing, revision, status) => updateRevisionStatus(

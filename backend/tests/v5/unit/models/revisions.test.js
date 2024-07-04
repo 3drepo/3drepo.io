@@ -65,7 +65,7 @@ const testGetRevisions = () => {
 	const model = generateRandomString();
 
 	const checkResults = (fn, showVoid, modelType) => {
-		const query = { incomplete: { $exists: false } };
+		const query = { incomplete: { $exists: false }, ...(modelType === modelTypes.DRAWING ? { model } : {}) };
 
 		if (!showVoid) {
 			query.void = { $ne: true };
@@ -135,7 +135,7 @@ const testGetRevisionByIdOrTag = () => {
 			expect(res).toEqual(revision);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`,
-				{ $or: [{ _id: revision._id }, { tag: revision._id }] }, {}, undefined);
+				{ $or: [{ _id: revision._id }, { tag: revision._id }], model }, {}, undefined);
 		});
 
 		test('Should throw REVISION_NOT_FOUND if it cannot find the revision in the revisions table', async () => {
@@ -169,14 +169,6 @@ const testAddRevision = () => {
 			expect(isUUIDString(fn.mock.calls[0][2]._id));
 			expect(fn.mock.calls[0][2]).toHaveProperty('timestamp');
 			expect(res).toEqual(fn.mock.calls[0][2]._id);
-
-			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_REVISION,
-				{ teamspace,
-					project,
-					model,
-					modelType,
-					revision: fn.mock.calls[0][2]._id });
 		});
 
 		test('Should add a new revision (drawing)', async () => {
@@ -192,14 +184,6 @@ const testAddRevision = () => {
 			expect(isUUIDString(fn.mock.calls[0][2]._id));
 			expect(fn.mock.calls[0][2]).toHaveProperty('timestamp');
 			expect(res).toEqual(fn.mock.calls[0][2]._id);
-
-			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_REVISION,
-				{ teamspace,
-					project,
-					model,
-					modelType,
-					revision: fn.mock.calls[0][2]._id });
 		});
 	});
 };
