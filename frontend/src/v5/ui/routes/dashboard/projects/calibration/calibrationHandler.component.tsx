@@ -68,6 +68,7 @@ export const CalibrationHandler = () => {
 
 	useEffect(() => {
 		if (step === 0 || step === 1) {
+			setLeftPanelRatio(.5);
 			UnityUtil.setCalibrationToolMode('Vector');
 		} else {
 			setLeftPanelRatio(1);

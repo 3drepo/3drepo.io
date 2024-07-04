@@ -15,17 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useEffect } from 'react';
 import { BasicStep } from '../basicStep.component';
-import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 
 export const VerticalSpatialBoundariesStep = () => {
-	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
-
-	useEffect(() => {
-		setLeftPanelRatio(1);
-		return () => setLeftPanelRatio(.5);
-	}, []);
-
 	return (<BasicStep text="Vertical spatial boundaries" />);
 };
