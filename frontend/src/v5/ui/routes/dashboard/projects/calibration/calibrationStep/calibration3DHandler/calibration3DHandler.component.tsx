@@ -58,7 +58,7 @@ export const Calibration3DHandler = () => {
 	}, [lastPickedPoint]);
 
 	useEffect(() => {
-		UnityUtil.setCalibrationToolVector(...modelCalibration);
+		Viewer.isModelReady().then(() => UnityUtil.setCalibrationToolVector(...modelCalibration));
 	}, [modelCalibration]);
 
 	useEffect(() => {
