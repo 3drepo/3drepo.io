@@ -19,7 +19,7 @@ import { useContext, useEffect } from 'react';
 import { CalibrationContext } from '../calibrationContext';
 
 export const BasicStep = ({ text }) => {
-	const { step, setIsStepValid } = useContext(CalibrationContext);
+	const { setIsStepValid, step } = useContext(CalibrationContext);
 
 	useEffect(() => {
 		setIsStepValid(false);

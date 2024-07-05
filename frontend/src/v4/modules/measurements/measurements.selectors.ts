@@ -36,35 +36,31 @@ export const selectXyzDisplay = createSelector(
 );
 
 export const selectAreaMeasurements = createSelector(
-	selectMeasurementsDomain,
-	(state) => state.areaMeasurements
+	selectMeasurementsDomain, (state) => state.areaMeasurements
 );
 
 export const selectLengthMeasurements = createSelector(
-	selectMeasurementsDomain,
-	(state) => state.lengthMeasurements
+	selectMeasurementsDomain, (state) => state.lengthMeasurements
 );
 
 export const selectPointMeasurements = createSelector(
-	selectMeasurementsDomain,
-	(state) => state.pointMeasurements
+	selectMeasurementsDomain, (state) => state.pointMeasurements
 );
 
 export const selectAngleMeasurements = createSelector(
-	selectMeasurementsDomain,
-	(state) => state.angleMeasurements
+	selectMeasurementsDomain, (state) => state.angleMeasurements
 );
 
 export const selectPins = createSelector(
-	selectPointMeasurements,
-	(state) => state.map(({ customColor, ...measure }) => {
-		const colour = customColor || measure.color;
-		return ({
-			id: measure.uuid,
-			type: 'point',
-			isSelected: false,
-			position: measure.position,
-			colour,
-		});
-	})
+	selectPointMeasurements, (state) =>
+		state.map(({ customColor, ...measure }) => {
+			const colour = customColor || measure.color;
+			return ({
+				id: measure.uuid,
+				type: 'point',
+				isSelected: false,
+				position: measure.position,
+				colour,
+			});
+		})
 );

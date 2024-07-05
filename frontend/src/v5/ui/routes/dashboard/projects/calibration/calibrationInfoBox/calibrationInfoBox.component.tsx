@@ -16,9 +16,9 @@
  */
 
 import { useContext, useState } from 'react';
+import { CalibrationContext } from '../calibrationContext';
 import { InfoBoxProps } from '@controls/infoBox/infoBox.component';
 import { InfoBox } from './calibrationInfoBox.styles';
-import { CalibrationContext } from '../calibrationContext';
 
 type CalibrationInfoBoxProps = Omit<InfoBoxProps, 'onClickClose'>;
 export const CalibrationInfoBox = (props: CalibrationInfoBoxProps) => {

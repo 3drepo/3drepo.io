@@ -36,9 +36,9 @@ import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
-import { viewerRoute } from '@/v5/services/routing/routing';
 import { useContext } from 'react';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
+import { viewerRoute } from '@/v5/services/routing/routing';
 
 const STATUS_CODE_TEXT = formatMessage({ id: 'drawings.list.item.statusCode', defaultMessage: 'Status code' });
 const REVISION_CODE_TEXT = formatMessage({ id: 'drawings.list.item.revisionCode', defaultMessage: 'Revision code' });
@@ -49,8 +49,8 @@ type DrawingItemProps = {
 };
 export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	const { teamspace, project, containerOrFederation, revision } = useParams();
-	const { pathname, search } = useLocation();
 	const history = useHistory();
+	const { pathname, search } = useLocation();
 	const { setOrigin } = useContext(CalibrationContext);
 	const { calibration, name, drawingNumber, lastUpdated, desc, _id: drawingId } = drawing;
 	const [latestRevision] = DrawingRevisionsHooksSelectors.selectRevisions(drawingId);

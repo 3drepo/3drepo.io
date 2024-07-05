@@ -16,10 +16,10 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { CalibrationInfoBox } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationInfoBox/calibrationInfoBox.component';
-import CalibrationIcon from '@assets/icons/filled/calibration-filled.svg';
-import { useContext } from 'react';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
+import { CalibrationInfoBox } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationInfoBox/calibrationInfoBox.component';
+import { useContext } from 'react';
+import CalibrationIcon from '@assets/icons/filled/calibration-filled.svg';
 
 export const Calibration3DInfoBox = () => {
 	const { step } = useContext(CalibrationContext);
