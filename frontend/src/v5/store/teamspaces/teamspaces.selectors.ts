@@ -54,7 +54,7 @@ export const selectIsTeamspaceAdmin = createSelector(
 );
 
 export const selectAddons = createSelector(
-	selectTeamspacesDomain, selectCurrentTeamspace, (state, teamspace) => state.addOns[teamspace],
+	selectTeamspacesDomain, selectCurrentTeamspace, (state, teamspace) => state.addOns[teamspace] || [],
 );
 
 export const selectRisksEnabled = createSelector(
