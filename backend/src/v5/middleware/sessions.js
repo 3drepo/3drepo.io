@@ -15,9 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { CSRF_COOKIE } = require('../utils/sessions.constants');
 const { SOCKET_HEADER } = require('../services/chat/chat.constants');
 const config = require('../utils/config');
 const { events } = require('../services/eventsManager/eventsManager.constants');
+const { generateUUIDString } = require('../utils/helper/uuids');
 const { getURLDomain } = require('../utils/helper/strings');
 const { session: initSession } = require('../services/sessions');
 const { isFromWebBrowser } = require('../utils/helper/userAgent');
@@ -25,6 +27,7 @@ const { logger } = require('../utils/logger');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { respond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');
+const { validateMany } = require('./common');
 
 const Sessions = {};
 
@@ -79,12 +82,18 @@ const updateSessionDetails = (req) => {
 	return session;
 };
 
-Sessions.updateSession = async (req, res, next) => {
+const appendCSRFToken = async (req, res, next) => {
+	const { domain, maxAge } = config.cookie;
+	res.cookie(CSRF_COOKIE, generateUUIDString(), { httpOnly: false, secure: true, sameSite: 'Strict', maxAge, domain });
+	await next();
+};
+
+const updateSession = async (req, res, next) => {
 	updateSessionDetails(req);
 	await next();
 };
 
-Sessions.createSession = (req, res) => {
+const createSession = (req, res) => {
 	req.session.regenerate((err) => {
 		if (err) {
 			logger.logError(`Failed to regenerate session: ${err.message}`);
@@ -96,7 +105,13 @@ Sessions.createSession = (req, res) => {
 	});
 };
 
-Sessions.destroySession = (req, res) => {
+const removeCSRFToken = async (req, res, next) => {
+	const { domain } = config.cookie;
+	res.clearCookie(CSRF_COOKIE, { domain });
+	await next();
+};
+
+const destroySession = (req, res) => {
 	const username = req.session?.user?.username;
 	try {
 		req.session.destroy(() => {
@@ -115,5 +130,9 @@ Sessions.destroySession = (req, res) => {
 		respond(req, res, err);
 	}
 };
+
+Sessions.updateSession = validateMany([appendCSRFToken, updateSession]);
+Sessions.createSession = validateMany([appendCSRFToken, createSession]);
+Sessions.destroySession = validateMany([removeCSRFToken, destroySession]);
 
 module.exports = Sessions;

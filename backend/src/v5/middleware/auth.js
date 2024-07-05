@@ -26,7 +26,7 @@ const AuthMiddleware = {};
 
 AuthMiddleware.validSession = async (req, res, next) => {
 	const { headers, session } = req;
-	if (isSessionValid(session, headers.referer)) {
+	if (isSessionValid(session, req.cookies, headers)) {
 		await next();
 	} else {
 		respond(req, res, templates.notLoggedIn);
@@ -35,7 +35,7 @@ AuthMiddleware.validSession = async (req, res, next) => {
 
 AuthMiddleware.isLoggedIn = async (req, res, next) => {
 	const { headers, session } = req;
-	if (isSessionValid(session, headers.referer, true)) {
+	if (isSessionValid(session, req.cookies, headers, true)) {
 		await next();
 	} else {
 		respond(req, res, templates.notLoggedIn);
@@ -44,7 +44,7 @@ AuthMiddleware.isLoggedIn = async (req, res, next) => {
 
 AuthMiddleware.notLoggedIn = async (req, res, next) => {
 	const { headers, session } = req;
-	if (isSessionValid(session, headers.referer, true)) {
+	if (isSessionValid(session, req.cookies, headers, true)) {
 		respond(req, res, templates.alreadyLoggedIn);
 	} else {
 		await next();
