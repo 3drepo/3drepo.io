@@ -18,10 +18,11 @@
 import { formatMessage } from '@/v5/services/intl';
 import { CalibrationInfoBox } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationInfoBox/calibrationInfoBox.component';
 import CalibrationIcon from '@assets/icons/filled/calibration-filled.svg';
-import { CalibrationHooksSelectors } from '@/v5/services/selectorsHooks';
+import { useContext } from 'react';
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 
 export const Calibration3DInfoBox = () => {
-	const step = CalibrationHooksSelectors.selectStep();
+	const { step } = useContext(CalibrationContext);
 
 	if (step === 0) {
 		return (

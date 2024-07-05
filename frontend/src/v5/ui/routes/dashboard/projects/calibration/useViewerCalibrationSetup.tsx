@@ -15,28 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { mapValues } from 'lodash';
-import { Circle, Svg } from './svgCircle.styles';
-import { Coord2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
+import { useContext, useEffect } from 'react';
+import { CalibrationContext } from './calibrationContext';
+import { CompareActionsDispatchers, TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
-type SvgCircleProps = { coord: Coord2D, scale: number };
-export const SvgCircle = ({ coord, scale }: SvgCircleProps) => {
-	const measures = mapValues({
-		strokeWidth: 1,
-		radius: 3,
-	}, (val) => val / scale);
-	return (
-		<Svg
-			xmlns="http://www.w3.org/2000/svg"
-			version="1.1"
-			xmlnsXlink="http://www.w3.org/1999/xlink"
-		>
-			<Circle
-				cx={coord[0] + measures.strokeWidth / 2}
-				cy={coord[1] + measures.strokeWidth / 2}
-				r={measures.radius}
-				strokeWidth={measures.strokeWidth}
-			/>
-		</Svg>
-	);
+export const useViewerCalibrationSetup = () => {
+	const { isCalibrating } = useContext(CalibrationContext);
+
+	useEffect(() => {
+		if (!isCalibrating) return;
+		ViewerGuiActionsDispatchers.resetPanels();
+		TicketsCardActionsDispatchers.resetState();
+		CompareActionsDispatchers.resetComponentState();
+	}, [isCalibrating]);
 };

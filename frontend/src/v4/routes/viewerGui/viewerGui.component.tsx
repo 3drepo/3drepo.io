@@ -17,12 +17,13 @@
 
 import { Tickets } from '@/v5/ui/routes/viewer/tickets/tickets.component';
 import { isEmpty, isEqual } from 'lodash';
-import { PureComponent } from 'react';
+import { PureComponent, useContext } from 'react';
 import { AdditionalProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { DrawingsListCard } from '@/v5/ui/routes/viewer/drawings/drawingsList/drawingsListCard.component';
 import { ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { getCalibrationViewerLeftPanels, getViewerLeftPanels, VIEWER_PANELS } from '../../constants/viewerGui';
 import { getWindowHeight, getWindowWidth, renderWhenTrue } from '../../helpers/rendering';
@@ -103,7 +104,7 @@ interface IState {
 	loaderProgress: number;
 }
 
-export class ViewerGui extends PureComponent<IProps, IState> {
+class ViewerGuiBase extends PureComponent<IProps, IState> {
 
 	private get urlParams() {
 		return this.props.match.params;
@@ -331,3 +332,8 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 		</DraggablePanels>
 	)
 }
+
+export const ViewerGui = (props: Omit<IProps, 'isCalibrating'>) => {
+	const { isCalibrating } = useContext(CalibrationContext);
+	return <ViewerGuiBase {...props} isCalibrating={isCalibrating} />
+};

@@ -18,7 +18,6 @@
 import { create, values } from 'lodash';
 import { createSelector } from 'reselect';
 
-import { selectIsCalibrating } from '@/v5/store/calibration/calibration.selectors';
 import { RISK_DEFAULT_HIDDEN_LEVELS } from '../../constants/risks';
 import { prepareComments, transformCustomsLinksToMarkdown } from '../../helpers/comments';
 import { hasPin, riskToPin } from '../../helpers/pins';
@@ -168,15 +167,10 @@ export const selectPins = createSelector(
 	selectFilteredRisks, selectActiveRiskDetails,
 	selectShowPins, selectShowDetails, selectActiveRiskId,
 	selectSelectedSequence, selectSelectedStartingDate, selectSelectedEndingDate,
-	selectIsCalibrating,
 	(risks: any, detailedRisk, showPins, showDetails, activeRiskId,
-		selectedSequence, sequenceStartDate, sequenceEndDate, isCalibrating) => {
+		selectedSequence, sequenceStartDate, sequenceEndDate) => {
 
 		let pinsToShow = [];
-
-		if (isCalibrating) {
-			return pinsToShow;
-		}
 
 		if (showPins) {
 			pinsToShow = risks.reduce((pins, risk) => {

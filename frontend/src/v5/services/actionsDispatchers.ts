@@ -18,7 +18,6 @@
 import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
 import { AuthActions, IAuthActionCreators } from '@/v5/store/auth/auth.redux';
 import { BimActions } from '@/v4/modules/bim';
-import { CalibrationActions, ICalibrationActionCreators } from '@/v5/store/calibration/calibration.redux';
 import { ContainersActions, IContainersActionCreators } from '@/v5/store/containers/containers.redux';
 import { CurrentUserActions, ICurrentUserActionCreators } from '@/v5/store/currentUser/currentUser.redux';
 import { DialogsActions, IDialogsActionCreators } from '@/v5/store/dialogs/dialogs.redux';
@@ -109,7 +108,6 @@ interface IViewerGuiActionCreators {
 
 export const AuthActionsDispatchers = createActionsDispatchers<IAuthActionCreators>(AuthActions);
 export const BimActionsDispatchers = createActionsDispatchers<IBimActionCreators>(BimActions);
-export const CalibrationActionsDispatchers = createActionsDispatchers<ICalibrationActionCreators>(CalibrationActions);
 export const CanvasHistoryActionsDispatchers = createActionsDispatchers<ICanvasHistoryActionCreators>(CanvasHistoryActions);
 export const CompareActionsDispatchers = createActionsDispatchers<ICompareActionCreators>(CompareActions);
 export const ContainersActionsDispatchers = createActionsDispatchers<IContainersActionCreators>(ContainersActions);

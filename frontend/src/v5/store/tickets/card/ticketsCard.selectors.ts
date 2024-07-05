@@ -25,7 +25,6 @@ import { compact, get } from 'lodash';
 import { IPin } from '@/v4/services/viewer/viewer';
 import { selectSelectedDate } from '@/v4/modules/sequences';
 import { ticketIsCompleted } from '@controls/chip/statusChip/statusChip.helpers';
-import { selectIsCalibrating } from '../../calibration/calibration.selectors';
 
 const selectTicketsCardDomain = (state): ITicketsCardState => state.ticketsCard || {};
 
@@ -160,9 +159,8 @@ export const selectTicketPins = createSelector(
 	selectSelectedTicketPinId,
 	selectSelectedTicket,
 	selectSelectedDate,
-	selectIsCalibrating,
-	(tickets, templates, view, selectedTicketPinId, selectedTicket, selectedSequenceDate, isCalibrating): IPin[] => {
-		if (isCalibrating || view === TicketsCardViews.New || !tickets.length) return [];
+	(tickets, templates, view, selectedTicketPinId, selectedTicket, selectedSequenceDate): IPin[] => {
+		if (view === TicketsCardViews.New || !tickets.length) return [];
 		if (view === TicketsCardViews.Details) {
 			const pinArray = [];
 			const selectedTemplate = templates.find(({ _id }) => _id === selectedTicket.type);

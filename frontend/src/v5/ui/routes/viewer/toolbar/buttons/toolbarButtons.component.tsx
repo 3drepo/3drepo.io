@@ -20,11 +20,13 @@ import FocusIcon from '@assets/icons/viewer/focus.svg';
 import CoordinatesIcon from '@assets/icons/viewer/coordinates.svg';
 import InfoIcon from '@assets/icons/viewer/info.svg';
 import CalibrationIcon from '@assets/icons/filled/calibration-filled.svg';
-import { BimActionsDispatchers, CalibrationActionsDispatchers, MeasurementsActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { BimHooksSelectors, CalibrationHooksSelectors, ModelHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
+import { BimActionsDispatchers, MeasurementsActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { BimHooksSelectors, ModelHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatMessage } from '@/v5/services/intl';
 import { ToolbarButton } from './toolbarButton.component';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
+import { useContext } from 'react';
+import { CalibrationContext } from '../../../dashboard/projects/calibration/calibrationContext';
 
 export const HomeButton = () => (
 	<ToolbarButton
@@ -80,15 +82,14 @@ export const BimButton = () => {
 	);
 };
 export const CalibrationButton = () => {
-	const isCalibratingModel = CalibrationHooksSelectors.selectIsCalibratingModel();
-	const step = CalibrationHooksSelectors.selectStep();
+	const { isCalibratingModel, setIsCalibratingModel, step } = useContext(CalibrationContext);
 
 	return (
 		<ToolbarButton
 			Icon={CalibrationIcon}
 			hidden={step !== 0}
 			selected={isCalibratingModel}
-			onClick={() => CalibrationActionsDispatchers.setIsCalibratingModel(!isCalibratingModel)}
+			onClick={() => setIsCalibratingModel(!isCalibratingModel)}
 			title={formatMessage({ id: 'viewer.toolbar.icon.calibrate', defaultMessage: 'Calibrate' })} />
 	);
 };

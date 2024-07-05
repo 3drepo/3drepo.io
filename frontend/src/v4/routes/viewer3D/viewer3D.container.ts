@@ -20,7 +20,6 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { selectIsCalibrating } from '@/v5/store/calibration/calibration.selectors';
 import { selectGisLayers } from '../../modules/gis';
 import { selectHighlightedShapes as selectIssuesHighlightedShapes,
 	selectPins as selectIssuePins, selectShapes as selectIssuesShapes } from '../../modules/issues';
@@ -37,7 +36,6 @@ import { withViewer } from '../../services/viewer/viewer';
 import { Viewer3D } from './viewer3D.component';
 
 const mapStateToProps = createStructuredSelector({
-	isCalibrating: selectIsCalibrating,
 	colorOverrides: selectColorOverrides,
 	transparencies: selectAllTransparencyOverrides,
 	issuePins: selectIssuePins,

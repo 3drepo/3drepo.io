@@ -18,7 +18,6 @@
 import { createHooksSelectors } from '@/v5/helpers/selectorsHooks.helper';
 import * as AuthSelectors from '@/v5/store/auth/auth.selectors';
 import * as BimSelectors from '@/v4/modules/bim/bim.selectors';
-import * as CalibrationSelectors from '@/v5/store/calibration/calibration.selectors';
 import * as CanvasHistorySelectors from '@/v4/modules/canvasHistory/canvasHistory.selectors';
 import * as ContainersSelectors from '@/v5/store/containers/containers.selectors';
 import * as ContainerRevisionsSelectors from '@/v5/store/containers/revisions/containerRevisions.selectors';
@@ -44,7 +43,6 @@ import * as ViewerGuiSelectors from '@/v4/modules/viewerGui/viewerGui.selectors'
 
 export const AuthHooksSelectors = createHooksSelectors(AuthSelectors);
 export const BimHooksSelectors = createHooksSelectors(BimSelectors);
-export const CalibrationHooksSelectors = createHooksSelectors(CalibrationSelectors);
 export const ContainersHooksSelectors = createHooksSelectors(ContainersSelectors);
 export const CanvasHistoryHooksSelectors = createHooksSelectors(CanvasHistorySelectors);
 export const CurrentUserHooksSelectors = createHooksSelectors(CurrentUserSelectors);

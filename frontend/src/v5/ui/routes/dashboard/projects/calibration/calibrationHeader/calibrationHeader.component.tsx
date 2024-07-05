@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useParams, generatePath } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Stepper, Container, ButtonsContainer, ContrastButton, Connector, PrimaryButton, Link, StepperWrapper } from './calibrationHeader.styles';
 import { Step, StepLabel } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
-import { CalibrationActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CalibrationState } from '@/v5/store/drawings/drawings.types';
-import { CalibrationHooksSelectors, ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { DRAWINGS_ROUTE } from '@/v5/ui/routes/routes.constants';
-import { EMPTY_VECTOR } from '@/v5/store/calibration/calibration.constants';
-import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
+import { useContext } from 'react';
+import { CalibrationContext } from '../calibrationContext';
 
 const STEPS = [
 	formatMessage({ defaultMessage: '3D Alignment', id: 'calibration.step.3dCalibration' }),
@@ -35,11 +35,7 @@ const STEPS = [
 
 export const CalibrationHeader = () => {
 	const { teamspace, project, containerOrFederation } = useParams();
-	const [drawingId] = useSearchParam('drawingId');
-	const step = CalibrationHooksSelectors.selectStep();
-	const isStepValid = CalibrationHooksSelectors.selectIsStepValid();
-	const origin = CalibrationHooksSelectors.selectOrigin() || generatePath(DRAWINGS_ROUTE, { teamspace, project });
-	const modelCalibration = CalibrationHooksSelectors.selectModelCalibration();
+	const { step, setStep, isStepValid, origin, modelCalibration, drawingId } = useContext(CalibrationContext);
 	const selectedModel = FederationsHooksSelectors.selectFederationById(containerOrFederation)
 		|| ContainersHooksSelectors.selectContainerById(containerOrFederation);
 	const isLastStep = step === 2;
@@ -73,7 +69,7 @@ export const CalibrationHeader = () => {
 			</StepperWrapper>
 			<ButtonsContainer>
 				{step > 0 && (
-					<ContrastButton  onClick={() => CalibrationActionsDispatchers.setStep(step - 1)}>
+					<ContrastButton  onClick={() => setStep(step - 1)}>
 						<FormattedMessage defaultMessage="Back" id="calibration.button.back" />
 					</ContrastButton>
 				)}
@@ -89,7 +85,7 @@ export const CalibrationHeader = () => {
 						</Link>
 					</PrimaryButton>
 				) : (
-					<PrimaryButton onClick={() => CalibrationActionsDispatchers.setStep(step + 1)} disabled={!getIsStepValid()}>
+					<PrimaryButton onClick={() => setStep(step + 1)} disabled={!getIsStepValid()}>
 						<FormattedMessage defaultMessage="Continue" id="calibration.button.continue" />
 					</PrimaryButton>
 				)}

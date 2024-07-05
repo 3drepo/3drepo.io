@@ -19,14 +19,13 @@ import { useContext, useEffect, useState } from 'react';
 import { Viewer } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { UnityUtil } from '@/globals/unity-util';
-import { CalibrationActionsDispatchers, TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { CalibrationHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { isEqual } from 'lodash';
 import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
+import { CalibrationContext } from '../../calibrationContext';
 
 export const Calibration3DHandler = () => {
-	const isCalibratingModel = CalibrationHooksSelectors.selectIsCalibratingModel();
-	const modelCalibration = CalibrationHooksSelectors.selectModelCalibration();
+	const { isCalibratingModel, setIsCalibratingModel,  modelCalibration, setModelCalibration } = useContext(CalibrationContext);
 	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
 	const [lastPickedPoint, setLastPickedPoint] = useState(null);
 
@@ -51,9 +50,9 @@ export const Calibration3DHandler = () => {
 		const [start, end] = modelCalibration;
 
 		if (end || !start) {
-			CalibrationActionsDispatchers.setModelCalibration([lastPickedPoint, null]);
+			setModelCalibration([lastPickedPoint, null]);
 		} else if (!isEqual(start, lastPickedPoint)) {
-			CalibrationActionsDispatchers.setModelCalibration([start, lastPickedPoint]);
+			setModelCalibration([start, lastPickedPoint]);
 		}
 	}, [lastPickedPoint]);
 
@@ -66,7 +65,7 @@ export const Calibration3DHandler = () => {
 		setLeftPanelRatio(.5);
 
 		return () => {
-			CalibrationActionsDispatchers.setIsCalibratingModel(false);
+			setIsCalibratingModel(false);
 		};
 	}, []);
 

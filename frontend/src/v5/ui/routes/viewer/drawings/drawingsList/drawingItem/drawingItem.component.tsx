@@ -37,7 +37,8 @@ import { formatMessage } from '@/v5/services/intl';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { viewerRoute } from '@/v5/services/routing/routing';
-import { CalibrationActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { useContext } from 'react';
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 
 const STATUS_CODE_TEXT = formatMessage({ id: 'drawings.list.item.statusCode', defaultMessage: 'Status code' });
 const REVISION_CODE_TEXT = formatMessage({ id: 'drawings.list.item.revisionCode', defaultMessage: 'Revision code' });
@@ -48,8 +49,9 @@ type DrawingItemProps = {
 };
 export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	const { teamspace, project, containerOrFederation, revision } = useParams();
-	const history = useHistory();
 	const { pathname, search } = useLocation();
+	const history = useHistory();
+	const { setOrigin } = useContext(CalibrationContext);
 	const { calibration, name, drawingNumber, lastUpdated, desc, _id: drawingId } = drawing;
 	const [latestRevision] = DrawingRevisionsHooksSelectors.selectRevisions(drawingId);
 	const { statusCode, revisionCode } = latestRevision || {};
@@ -59,7 +61,7 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	const onCalibrateClick = () => {
 		const path = viewerRoute(teamspace, project, containerOrFederation, revision, { drawingId, isCalibrating: true }, false);
 		history.push(path);
-		CalibrationActionsDispatchers.setOrigin(pathname + search);
+		setOrigin(pathname + search);
 	};
 
 	const LoadingCodes = () => (

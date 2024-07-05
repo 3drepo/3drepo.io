@@ -22,12 +22,12 @@ import { SplitPane, LeftPane } from './viewerCanvases.styles';
 import { ViewerCanvasesContext } from '../../viewer/viewerCanvases.context';
 import { useContext } from 'react';
 import { CalibrationHeader } from '../projects/calibration/calibrationHeader/calibrationHeader.component';
-import { CalibrationHooksSelectors } from '@/v5/services/selectorsHooks';
+import { CalibrationContext } from '../projects/calibration/calibrationContext';
 
 export const ViewerCanvases = () => {
 	const { pathname } = useLocation();
 	const { is2DOpen, leftPanelRatio, setLeftPanelRatio } = useContext(ViewerCanvasesContext);
-	const isCalibrating = CalibrationHooksSelectors.selectIsCalibrating();
+	const { isCalibrating } = useContext(CalibrationContext);
 
 	const dragFinish = (newSize) => setLeftPanelRatio(newSize / window.innerWidth);
 

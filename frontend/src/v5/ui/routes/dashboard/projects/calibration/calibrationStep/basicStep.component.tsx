@@ -15,15 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect } from 'react';
-import { CalibrationHooksSelectors } from '@/v5/services/selectorsHooks';
-import { CalibrationActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { useContext, useEffect } from 'react';
+import { CalibrationContext } from '../calibrationContext';
 
 export const BasicStep = ({ text }) => {
-	const step = CalibrationHooksSelectors.selectStep();
+	const { step, setIsStepValid } = useContext(CalibrationContext);
 
 	useEffect(() => {
-		CalibrationActionsDispatchers.setIsStepValid(false);
+		setIsStepValid(false);
 	}, [step]);
 
 	return (
@@ -44,7 +43,7 @@ export const BasicStep = ({ text }) => {
 			left: '100px',
 		}}>
 			<h2>This is the {text} step</h2>
-			<button type='button' onClick={() => CalibrationActionsDispatchers.setIsStepValid(true)}>VALIDATE</button>
+			<button type='button' onClick={() => setIsStepValid(true)}>VALIDATE</button>
 		</div>
 	);
 };

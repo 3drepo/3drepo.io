@@ -31,11 +31,10 @@ import { TicketsCardViews } from './tickets/tickets.constants';
 import { ViewerCanvases } from '../dashboard/viewerCanvases/viewerCanvases.component';
 import { CalibrationHandler } from '../dashboard/projects/calibration/calibrationHandler.component';
 import { ViewerGui } from '@/v4/routes/viewerGui';
-import { Transformers, useSearchParam } from '../useSearchParam';
+import { CalibrationContext, CalibrationContextComponent } from '../dashboard/projects/calibration/calibrationContext';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
-	const [isCalibrating] = useSearchParam('isCalibrating', Transformers.BOOLEAN);
 
 	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
 
@@ -105,12 +104,14 @@ export const Viewer = () => {
 	};
 
 	return (
-		<>
-			{isCalibrating && <CalibrationHandler />}
+		<CalibrationContextComponent>
+			<CalibrationContext.Consumer>
+				{({ isCalibrating }) => isCalibrating && <CalibrationHandler />}
+			</CalibrationContext.Consumer>
 			<OpenTicketFromUrl />
 			<CheckLatestRevisionReadiness />
 			<ViewerCanvases />
 			<ViewerGui match={v4Match} key={containerOrFederation} />
-		</>
+		</CalibrationContextComponent>
 	);
 };

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Coord2D, Vector2D, Vector3D } from '../calibration/calibration.types';
+import { Coord2D, Vector2D, Vector3D } from '../../ui/routes/dashboard/projects/calibration/calibration.types';
 import { Role } from '../currentUser/currentUser.types';
 
 export enum CalibrationState {

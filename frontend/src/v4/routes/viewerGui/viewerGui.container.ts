@@ -20,7 +20,6 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { selectIsEditingGroups, selectSelectedTicket, selectView } from '@/v5/store/tickets/card/ticketsCard.selectors';
-import { selectIsCalibrating } from '@/v5/store/calibration/calibration.selectors';
 import { CompareActions } from '../../modules/compare';
 
 import { selectCurrentTeamspace, selectCurrentUser } from '../../modules/currentUser';
@@ -40,7 +39,6 @@ import { withViewer } from '../../services/viewer/viewer';
 import { ViewerGui } from './viewerGui.component';
 
 const mapStateToProps = createStructuredSelector({
-	isCalibrating: selectIsCalibrating,
 	currentTeamspace: selectCurrentTeamspace,
 	queryParams: selectQueryParams,
 	currentUser: selectCurrentUser,
