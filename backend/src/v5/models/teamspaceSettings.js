@@ -111,6 +111,7 @@ const possibleAddOns = {
 	[`addOns.${ADD_ONS.HERE}`]: 1,
 	[`addOns.${ADD_ONS.SRC}`]: 1,
 	[`addOns.${ADD_ONS.POWERBI}`]: 1,
+	'addOns.modules': 1,
 };
 
 TeamspaceSetting.getAddOns = async (teamspace) => {
