@@ -18,7 +18,6 @@
 import { StepConnector, Stepper as StepperBase } from '@mui/material';
 import { Button } from '@controls/button';
 import styled from 'styled-components';
-import { Link as LinkBase } from 'react-router-dom';
 
 export const StepperWrapper = styled.div`
 	width: calc(100% - 295px);
@@ -131,7 +130,3 @@ export const PrimaryButton = styled(Button).attrs({
 	variant: 'contained',
 	color: 'primary',
 })``;
-
-export const Link = styled(LinkBase)`
-	text-decoration: none;
-`;

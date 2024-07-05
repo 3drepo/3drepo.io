@@ -32,7 +32,7 @@ import { CalibrationContext } from './calibrationContext';
 export const CalibrationHandler = () => {
 	const { teamspace, project, revision, containerOrFederation } = useParams();
 	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
-	const { step, drawingId, setStep, setIsCalibratingModel, setIsCalibrating, setModelCalibration, setDrawingCalibration } = useContext(CalibrationContext);
+	const { step, drawingId, setStep, setIsCalibratingModel, setModelCalibration, setDrawingCalibration } = useContext(CalibrationContext);
 	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
 
 	const isFed = modelIsFederation(containerOrFederation);
@@ -54,7 +54,6 @@ export const CalibrationHandler = () => {
 		}
 
 		return () => {
-			setIsCalibrating(false);
 			UnityUtil.setCalibrationToolVector(null, null);
 			UnityUtil.setCalibrationToolMode('None');
 			setLeftPanelRatio(0.5);

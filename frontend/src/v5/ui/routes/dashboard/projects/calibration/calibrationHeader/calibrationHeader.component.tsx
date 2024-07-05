@@ -16,7 +16,7 @@
  */
 
 import { useParams } from 'react-router-dom';
-import { Stepper, Container, ButtonsContainer, ContrastButton, Connector, PrimaryButton, Link, StepperWrapper } from './calibrationHeader.styles';
+import { Stepper, Container, ButtonsContainer, ContrastButton, Connector, PrimaryButton, StepperWrapper } from './calibrationHeader.styles';
 import { Step, StepLabel } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
@@ -35,7 +35,7 @@ const STEPS = [
 
 export const CalibrationHeader = () => {
 	const { teamspace, project, containerOrFederation } = useParams();
-	const { step, setStep, isStepValid, origin, modelCalibration, drawingId } = useContext(CalibrationContext);
+	const { step, setStep, isStepValid, endCalibration, modelCalibration, drawingId } = useContext(CalibrationContext);
 	const selectedModel = FederationsHooksSelectors.selectFederationById(containerOrFederation)
 		|| ContainersHooksSelectors.selectContainerById(containerOrFederation);
 	const isLastStep = step === 2;
@@ -45,16 +45,19 @@ export const CalibrationHeader = () => {
 		return isStepValid;
 	};
 
-	const handleConfirm = () => DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawingId, {
-		calibration: {
-			state: CalibrationState.CALIBRATED,
-			units: selectedModel.unit,
-			horizontal: {
-				model: modelCalibration,
-				drawing: EMPTY_VECTOR,
+	const handleConfirm = () => {
+		endCalibration();
+		DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawingId, {
+			calibration: {
+				state: CalibrationState.CALIBRATED,
+				units: selectedModel.unit,
+				horizontal: {
+					model: modelCalibration,
+					drawing: EMPTY_VECTOR,
+				},
 			},
-		},
-	});
+		});
+	};
 
 	return (
 		<Container>
@@ -73,16 +76,12 @@ export const CalibrationHeader = () => {
 						<FormattedMessage defaultMessage="Back" id="calibration.button.back" />
 					</ContrastButton>
 				)}
-				<ContrastButton>
-					<Link to={origin}>
-						<FormattedMessage defaultMessage="Cancel" id="calibration.button.cancel" />
-					</Link>
+				<ContrastButton onClick={endCalibration}>
+					<FormattedMessage defaultMessage="Cancel" id="calibration.button.cancel" />
 				</ContrastButton>
 				{isLastStep ? (
 					<PrimaryButton disabled={!getIsStepValid()} onClick={handleConfirm}>
-						<Link to={origin}>
-							<FormattedMessage defaultMessage="Confirm" id="calibration.button.confirm" />
-						</Link>
+						<FormattedMessage defaultMessage="Confirm" id="calibration.button.confirm" />
 					</PrimaryButton>
 				) : (
 					<PrimaryButton onClick={() => setStep(step + 1)} disabled={!getIsStepValid()}>
