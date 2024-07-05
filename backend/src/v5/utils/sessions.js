@@ -32,7 +32,7 @@ const SessionUtils = {};
 
 const validateCookie = (session, cookies, headers) => {
 	const referrerMatched = !headers.referer || referrerMatch(session.user.referer, headers.referer);
-	const csrfMatched = headers[CSRF_HEADER] === cookies[CSRF_COOKIE];
+	const csrfMatched = !!cookies[CSRF_COOKIE] && (headers[CSRF_HEADER] === cookies[CSRF_COOKIE]);
 
 	return csrfMatched && referrerMatched;
 };

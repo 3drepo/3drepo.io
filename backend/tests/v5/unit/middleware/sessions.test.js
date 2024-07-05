@@ -31,6 +31,7 @@ const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager.constants');
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const { SOCKET_HEADER } = require(`${src}/services/chat/chat.constants`);
+const { CSRF_COOKIE } = require(`${src}/utils/sessions.constants`);
 
 // Need to mock these 2 to ensure we are not trying to create a real session configuration
 jest.mock('express-session', () => () => { });
@@ -99,30 +100,39 @@ const testCreateSession = () => {
 			['the session cannot be regenerated', false, { ...req, session: { regenerate: (callback) => { callback(1); } } }, 1],
 		])('Regenerate Session', (desc, success, request, error) => {
 			test(`should ${success ? 'succeed if' : `fail with ${error}`} if ${desc}`, async () => {
-				await Sessions.createSession(request, {});
+				const res = { cookie: jest.fn() };
+				await Sessions.createSession(request, res);
 				if (success) {
 					checkResults(request);
 				} else {
 					expect(Responder.respond).toHaveBeenCalledTimes(1);
-					expect(Responder.respond).toHaveBeenCalledWith(request, {}, 1);
+					expect(Responder.respond).toHaveBeenCalledWith(request, res, 1);
 				}
+				expect(res.cookie).toHaveBeenCalledTimes(1);
+				expect(res.cookie).toHaveBeenCalledWith(CSRF_COOKIE, expect.any(String), expect.any(Object));
 			});
 		});
 
 		test('Should regenerate session with cookie.maxAge', async () => {
 			const initialMaxAge = config.cookie.maxAge;
 			config.cookie.maxAge = 100;
-			await Sessions.createSession(req, {});
+			const res = { cookie: jest.fn() };
+			await Sessions.createSession(req, res);
 			checkResults(req);
 			config.cookie.maxAge = initialMaxAge;
+			expect(res.cookie).toHaveBeenCalledTimes(1);
+			expect(res.cookie).toHaveBeenCalledWith(CSRF_COOKIE, expect.any(String), expect.any(Object));
 		});
 
 		test('Should regenerate session without cookie.maxAge', async () => {
 			const initialMaxAge = config.cookie.maxAge;
 			config.cookie.maxAge = undefined;
-			await Sessions.createSession(req, {});
+			const res = { cookie: jest.fn() };
+			await Sessions.createSession(req, res);
 			checkResults(req);
 			config.cookie.maxAge = initialMaxAge;
+			expect(res.cookie).toHaveBeenCalledTimes(1);
+			expect(res.cookie).toHaveBeenCalledWith(CSRF_COOKIE, expect.any(String), expect.any(Object));
 		});
 	});
 };
@@ -221,27 +231,36 @@ const testUpdateSession = () => {
 	])('Update Session', (desc, request, userAgent) => {
 		test(`should update session if ${desc}`, async () => {
 			const mockCB = jest.fn();
-			await Sessions.updateSession(request, {}, mockCB);
+			const mockCookie = jest.fn();
+			await Sessions.updateSession(request, { cookie: mockCookie }, mockCB);
 			checkResults(request, userAgent, mockCB);
+			expect(mockCookie).toHaveBeenCalledTimes(1);
+			expect(mockCookie).toHaveBeenCalledWith(CSRF_COOKIE, expect.any(String), expect.any(Object));
 		});
 	});
 
 	test('Should update session with cookie.maxAge', async () => {
 		const mockCB = jest.fn();
+		const mockCookie = jest.fn();
 		const initialMaxAge = config.cookie.maxAge;
 		config.cookie.maxAge = 100;
-		await Sessions.updateSession(req, {}, mockCB);
+		await Sessions.updateSession(req, { cookie: mockCookie }, mockCB);
 		checkResults(req, undefined, mockCB);
 		config.cookie.maxAge = initialMaxAge;
+		expect(mockCookie).toHaveBeenCalledTimes(1);
+		expect(mockCookie).toHaveBeenCalledWith(CSRF_COOKIE, expect.any(String), expect.any(Object));
 	});
 
 	test('Should update session without cookie.maxAge', async () => {
 		const mockCB = jest.fn();
+		const mockCookie = jest.fn();
 		const initialMaxAge = config.cookie.maxAge;
 		config.cookie.maxAge = undefined;
-		await Sessions.updateSession(req, {}, mockCB);
+		await Sessions.updateSession(req, { cookie: mockCookie }, mockCB);
 		checkResults(req, undefined, mockCB);
 		config.cookie.maxAge = initialMaxAge;
+		expect(mockCookie).toHaveBeenCalledTimes(1);
+		expect(mockCookie).toHaveBeenCalledWith(CSRF_COOKIE, expect.any(String), expect.any(Object));
 	});
 };
 
