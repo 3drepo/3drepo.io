@@ -15,10 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { values } from 'lodash';
+import { create, values } from 'lodash';
 import { createSelector } from 'reselect';
 
-import { selectRisksEnabled } from '@/v5/store/teamspaces/teamspaces.selectors';
 import { RISK_DEFAULT_HIDDEN_LEVELS } from '../../constants/risks';
 import { prepareComments, transformCustomsLinksToMarkdown } from '../../helpers/comments';
 import { hasPin, riskToPin } from '../../helpers/pins';
@@ -217,7 +216,3 @@ export const selectHighlightedShapes =  createSelector(
 	selectActiveRiskDetails, selectSelectedSequence, selectShapes, selectShowDetails,
 	getHighlightedTicketShapes
 );
-function selectIRisksEnabled(state: any): unknown {
-	throw new Error('Function not implemented.');
-}
-
