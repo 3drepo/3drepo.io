@@ -86,10 +86,10 @@ Revisions.addRevision = async (teamspace, project, model, modelType, data) => {
 Revisions.deleteModelRevisions = (teamspace, project, model, modelType) => db.deleteMany(
 	teamspace, collectionName(modelType, model), { project, model });
 
-Revisions.updateRevision = async (teamspace, model, modelType, revision, updateData) => {
+Revisions.updateRevision = async (teamspace, model, modelType, revision, setUpdate, unsetUpdate) => {
 	const res = await db.findOneAndUpdate(teamspace, collectionName(modelType, model),
 		{ $or: [{ _id: revision }, { tag: revision }] },
-		{ $set: updateData },
+		{ $set: setUpdate, $unset: unsetUpdate },
 		{ projection: { _id: 1 } });
 
 	if (!res) {

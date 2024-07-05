@@ -445,7 +445,7 @@ ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, modelType
 	});
 
 	if (hasFile) {
-		entry.rFile = modelType === modelTypes.DRAWING ? ServiceHelper.generateUUIDString() : [`${_id}_${ServiceHelper.generateRandomString()}_ifc`];
+		entry.rFile = modelType === modelTypes.DRAWING ? [ServiceHelper.generateUUIDString()] : [`${_id}_${ServiceHelper.generateRandomString()}_ifc`];
 		entry.refData = ServiceHelper.generateRandomString();
 	}
 

@@ -62,7 +62,7 @@ Drawings.newRevision = async (teamspace, project, model, data, file) => {
 		const fileId = generateUUID();
 
 		const rev_id = await addRevision(teamspace, project, model, modelTypes.DRAWING,
-			{ ...data, format, rFile: [fileId], status: STATUSES.PROCESSING });
+			{ ...data, format, rFile: [fileId], status: STATUSES.PROCESSING, incomplete: true });
 
 		publish(events.QUEUED_TASK_UPDATE, { teamspace,
 			model,
@@ -71,7 +71,7 @@ Drawings.newRevision = async (teamspace, project, model, data, file) => {
 
 		const fileMeta = { name: file.originalname, rev_id, project, model };
 		await storeFile(teamspace, `${modelTypes.DRAWING}s.history.ref`, fileId, file.buffer, fileMeta);
-		await updateRevision(teamspace, model, modelTypes.DRAWING, rev_id, { status: STATUSES.OK });
+		await updateRevision(teamspace, model, modelTypes.DRAWING, rev_id, { status: STATUSES.OK }, { incomplete: 1 });
 
 		publish(events.NEW_REVISION, { teamspace,
 			project,

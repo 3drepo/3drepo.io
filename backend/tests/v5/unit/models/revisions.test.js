@@ -218,12 +218,13 @@ const testUpdateRevision = () => {
 	const teamspace = generateRandomString();
 	const model = generateRandomString();
 	const revision = { _id: 1, author: 'someUser', timestamp: new Date(), void: true };
-	const updateData = generateRandomObject();
+	const setUpdate = generateRandomObject();
+	const unsetUpdate = generateRandomObject();
 
-	const checkResults = (fn, modelType, data) => {
+	const checkResults = (fn, modelType, setData, unsetData) => {
 		expect(fn).toHaveBeenCalledTimes(1);
 		expect(fn).toHaveBeenCalledWith(teamspace, modelType === modelTypes.DRAWING ? `${modelType}s.history` : `${model}.history`,
-			{ $or: [{ _id: revision._id }, { tag: revision._id }] }, { $set: data },
+			{ $or: [{ _id: revision._id }, { tag: revision._id }] }, { $set: setData, $unset: unsetData },
 			{ projection: { _id: 1 } },
 		);
 	};
@@ -233,24 +234,24 @@ const testUpdateRevision = () => {
 			const modelType = modelTypes.CONTAINER;
 			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementationOnce(() => ({ _id: revision._id }));
 			await Revisions.updateRevision(teamspace, model, modelType,
-				revision._id, updateData);
-			checkResults(fn, modelType, updateData);
+				revision._id, setUpdate, unsetUpdate);
+			checkResults(fn, modelType, setUpdate, unsetUpdate);
 		});
 
 		test('Should update a revision (drawing)', async () => {
 			const modelType = modelTypes.DRAWING;
 			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementationOnce(() => ({ _id: revision._id }));
 			await Revisions.updateRevision(teamspace, model, modelType,
-				revision._id, updateData);
-			checkResults(fn, modelType, updateData);
+				revision._id, setUpdate, unsetUpdate);
+			checkResults(fn, modelType, setUpdate, unsetUpdate);
 		});
 
 		test('Should throw REVISION_NOT_FOUND if it cannot find the revision in the revisions table', async () => {
 			const modelType = modelTypes.CONTAINER;
 			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementationOnce(() => undefined);
 			await expect(Revisions.updateRevision(teamspace, model,
-				modelType, revision._id, updateData)).rejects.toEqual(templates.revisionNotFound);
-			checkResults(fn, modelType, updateData);
+				modelType, revision._id, setUpdate, unsetUpdate)).rejects.toEqual(templates.revisionNotFound);
+			checkResults(fn, modelType, setUpdate, unsetUpdate);
 		});
 	});
 };
