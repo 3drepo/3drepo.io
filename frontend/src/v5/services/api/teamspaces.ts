@@ -24,7 +24,7 @@ export const fetchQuota = (teamspace: string): Promise<any> => api.get(`teamspac
 
 export const fetchAddons = async (teamspace: string): Promise<AddOn[]> => {
 	await new Promise((r) =>setTimeout(r, 1000));
-	return ['issues', 'risks'];
+	return ['risks'];
 	const { data } = await api.get(`teamspaces/${teamspace}/addOns`);
 	return data.modules;
 };

@@ -53,6 +53,10 @@ export const selectIsTeamspaceAdmin = createSelector(
 	(teamspace): boolean => !!teamspace?.isAdmin,
 );
 
+export const selectIsFetchingAddons = createSelector(
+	selectTeamspacesDomain, selectCurrentTeamspace, (state, teamspace) => !state.addOns[teamspace],
+);
+
 export const selectAddons = createSelector(
 	selectTeamspacesDomain, selectCurrentTeamspace, (state, teamspace) => state.addOns[teamspace] || [],
 );

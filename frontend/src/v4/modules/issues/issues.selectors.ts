@@ -18,7 +18,6 @@
 import { values } from 'lodash';
 import { createSelector } from 'reselect';
 
-import { selectIssuesEnabled } from '@/v5/store/teamspaces/teamspaces.selectors';
 import { ISSUE_DEFAULT_HIDDEN_STATUSES } from '../../constants/issues';
 import { prepareComments, transformCustomsLinksToMarkdown } from '../../helpers/comments';
 import { hasPin, issueToPin } from '../../helpers/pins';
@@ -136,7 +135,7 @@ export const selectFilteredIssues = createSelector(
 );
 
 export const selectShowPins = createSelector(
-	selectComponentState, selectIssuesEnabled, (state, enabled) => state.showPins && enabled
+	selectComponentState, (state) => state.showPins
 );
 
 export const selectFetchingDetailsIsPending = createSelector(
@@ -197,7 +196,6 @@ export const selectMeasureMode = createSelector(
 export const selectShapes = createSelector(
 	selectFilteredIssues, selectActiveIssueDetails, selectShowDetails,
 	selectSelectedSequence, selectSelectedStartingDate, selectSelectedEndingDate,
-	selectIssuesEnabled,
 	getTicketsShapes
 );
 

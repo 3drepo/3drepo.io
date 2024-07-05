@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, takeLatest } from 'redux-saga/effects';
+import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
@@ -23,6 +23,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { TeamspacesActions, TeamspacesTypes, ITeamspace } from './teamspaces.redux';
 import { RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
 import { AddOn } from '../store.types';
+import { selectIsFetchingAddons } from './teamspaces.selectors';
 
 export function* fetch() {
 	yield put(TeamspacesActions.setTeamspacesArePending(true));
@@ -63,6 +64,14 @@ export function* fetchQuota({ teamspace }) {
 			error,
 			details: RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE,
 		}));
+	}
+}
+
+export  function* waitForAddons() {
+	const isFetchingAddons = yield select(selectIsFetchingAddons);
+
+	if (isFetchingAddons) {
+		yield take(TeamspacesTypes.FETCH_ADD_ONS_SUCCESS);
 	}
 }
 

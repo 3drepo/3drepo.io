@@ -42,11 +42,7 @@ export const chopShapesUuids = ({shapes, ...ticket}) => {
 export const setShapesUuids = (shapes) => shapes.map(({uuid, _id, ...rest}) => ({ uuid: _id || uuid, ...rest }));
 
 export const getTicketsShapes =
-	(tickets, activeTicket: any, showDetails, selectedSequence, sequenceStartDate, sequenceEndDate, enabled) => {
-
-	if (!enabled) {
-		return [];
-	}
+	(tickets, activeTicket: any, showDetails, selectedSequence, sequenceStartDate, sequenceEndDate) => {
 
 	if (!selectedSequence) {
 		return (activeTicket.shapes || []);

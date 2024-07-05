@@ -17,12 +17,14 @@
 
 import { push } from 'connected-react-router';
 import filesize from 'filesize';
-import { isEmpty, isEqual, map, omit, take } from 'lodash';
-import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
+import { isEmpty, isEqual, map, omit} from 'lodash';
+import { all, put, select, takeEvery, takeLatest, take  } from 'redux-saga/effects';
 
 import * as queryString from 'query-string';
 import { generatePath } from 'react-router';
 import { generateViewpoint } from '@/v4/helpers/viewpoints';
+import { waitForAddons } from '@/v5/store/teamspaces/teamspaces.sagas';
+import { selectIssuesEnabled } from '@/v5/store/teamspaces/teamspaces.selectors';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { DEFAULT_PROPERTIES, ISSUE_DEFAULT_HIDDEN_STATUSES, PRIORITIES, STATUSES } from '../../constants/issues';
 import { EXTENSION_RE } from '../../constants/resources';
@@ -65,7 +67,15 @@ import {
 
 
 function* fetchIssues({teamspace, modelId, revision}) {
+	yield waitForAddons();
+	const issuesEnabled = yield select(selectIssuesEnabled);
+
+	if (!issuesEnabled) {
+		return;
+	}
+
 	yield put(IssuesActions.togglePendingState(true));
+
 	try {
 		const { data } = yield API.getIssues(teamspace, modelId, revision);
 		const jobs = yield select(selectJobsList);
@@ -80,6 +90,14 @@ function* fetchIssues({teamspace, modelId, revision}) {
 }
 
 function* fetchIssue({teamspace, modelId, issueId}) {
+	yield waitForAddons();
+	const issuesEnabled = yield select(selectIssuesEnabled);
+
+	if (!issuesEnabled) {
+		return;
+	}
+
+
 	yield put(IssuesActions.toggleDetailsPendingState(true));
 
 	try {
@@ -647,6 +665,7 @@ const sanitiseURL = (link: string) => {
 		return `http://${link}`;
 	}
 };
+
 
 export function* attachLinkResources({ links }) {
 	try {

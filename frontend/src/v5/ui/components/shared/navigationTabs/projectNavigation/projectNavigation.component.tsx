@@ -19,17 +19,19 @@ import { FormattedMessage } from 'react-intl';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { discardSlash, discardUrlComponent } from '@/v5/helpers/url.helper';
 import { Container, Link } from '../navigationTabs.styles';
+import { useKanbanNavigationData } from '@/v5/helpers/kaban.hooks';
 
 export const ProjectNavigation = (): JSX.Element => {
 	let { url } = useRouteMatch();
 	url = discardSlash(url);
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
+	const { linkLabel, shouldRenderLink } = useKanbanNavigationData();
 
 	return (
 		<Container>
 			<Link to={`${url}/t/federations`}><FormattedMessage id="projectNavigation.federations" defaultMessage="Federations" /></Link>
 			<Link to={`${url}/t/containers`}><FormattedMessage id="projectNavigation.containers" defaultMessage="Containers" /></Link>
-			<Link to={`${url}/t/board`}><FormattedMessage id="projectNavigation.issuesAndRisks" defaultMessage="Issues and risks" /></Link>
+			{shouldRenderLink &&  <Link to={`${url}/t/board`}>{linkLabel}</Link> }
 			<Link to={`${url}/t/tickets`}><FormattedMessage id="projectNavigation.tickets" defaultMessage="Tickets" /></Link>
 			<Link to={`${discardUrlComponent(url, 'settings')}/t/project_settings`}><FormattedMessage id="projectNavigation.settings" defaultMessage="Project settings" /></Link>
 			{ isProjectAdmin && <Link to={`${url}/t/project_permissions`}><FormattedMessage id="projectNavigation.projectPermissions" defaultMessage="Project permissions" /></Link> }

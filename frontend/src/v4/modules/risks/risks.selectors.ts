@@ -145,7 +145,7 @@ export const selectFilteredRisks = createSelector(
 );
 
 export const selectShowPins = createSelector(
-	selectComponentState, selectRisksEnabled, (state, enabled) => state.showPins && enabled
+	selectComponentState, (state) => state.showPins
 );
 
 export const selectFetchingDetailsIsPending = createSelector(
@@ -210,7 +210,6 @@ export const selectMeasureMode = createSelector(
 export const selectShapes = createSelector(
 	selectFilteredRisks, selectActiveRiskDetails, selectShowDetails,
 	selectSelectedSequence, selectSelectedStartingDate, selectSelectedEndingDate,
-	selectRisksEnabled,
 	getTicketsShapes
 );
 
