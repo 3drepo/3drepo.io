@@ -148,7 +148,8 @@ const testTSAdmin = () => {
 	describe('User with access', () => {
 		let cookie;
 		beforeAll(async () => {
-			cookie = await ServiceHelper.loginAndGetCookie(agent, tsAdmin.user, tsAdmin.password);
+			const cookieInfo = await ServiceHelper.loginAndGetCookie(agent, tsAdmin.user, tsAdmin.password);
+			cookie = cookieInfo.session;
 		});
 		test('should be able to connect to the chat service', async () => {
 			const socket = await ServiceHelper.socket.connectToSocket(cookie);
@@ -206,7 +207,8 @@ const testNobody = () => {
 	describe('User without a license', () => {
 		let cookie;
 		beforeAll(async () => {
-			cookie = await ServiceHelper.loginAndGetCookie(agent, nobody.user, nobody.password);
+			const cookieInfo = await ServiceHelper.loginAndGetCookie(agent, nobody.user, nobody.password);
+			cookie = cookieInfo.session;
 		});
 		test('should be able to connect to the chat service', async () => {
 			const socket = await ServiceHelper.socket.connectToSocket(cookie);
