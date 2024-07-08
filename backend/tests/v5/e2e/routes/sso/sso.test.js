@@ -17,6 +17,7 @@
 
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../helper/services');
+const SessionTracker = require('../../../helper/sessionTracker');
 const { src } = require('../../../helper/path');
 const { generateRandomString, generateRandomURL } = require('../../../helper/services');
 
@@ -24,10 +25,6 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 let server;
 let agent;
-
-const session = require('supertest-session');
-
-let testSession;
 
 const testUnlink = () => {
 	const testUser = ServiceHelper.generateUserCredentials();
@@ -54,20 +51,18 @@ const testUnlink = () => {
 		});
 
 		test('should fail if user is not SSO', async () => {
-			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
+			const testSession = SessionTracker(agent);
+			await testSession.login(testUser.user, testUser.password);
 			await testSession.post('/v5/sso/unlink')
 				.expect(templates.invalidArguments.status);
-			await testSession.post('/v5/logout/');
 		});
 
 		describe('With valid authentication', () => {
+			let testSession;
 			beforeAll(async () => {
-				await testSession.post('/v5/login/').send({ user: testUserSso.user, password: testUserSso.password });
+				testSession = SessionTracker(agent);
+				await testSession.login(testUserSso.user, testUserSso.password);
 				await ServiceHelper.db.addSSO(testUserSso.user);
-			});
-
-			afterAll(async () => {
-				await testSession.post('/v5/logout/');
 			});
 
 			test('should fail if a new password is not provided', async () => {
@@ -96,7 +91,6 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);
-		testSession = session(server);
 	});
 
 	afterAll(() => ServiceHelper.closeApp(server));

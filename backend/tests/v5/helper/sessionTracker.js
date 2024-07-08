@@ -31,9 +31,12 @@ class SessionTracker {
 			.send({ user, password })
 			.expect(templates.ok.status);
 
-		this.cookies = parseSetCookie(resp.headers['set-cookie']);
-
+		this.extractSessionFromResponse(resp);
 		return resp;
+	}
+
+	extractSessionFromResponse(resp) {
+		this.cookies = parseSetCookie(resp.headers['set-cookie']);
 	}
 
 	setAuthHeaders(action) {
