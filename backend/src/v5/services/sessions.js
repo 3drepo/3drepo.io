@@ -24,7 +24,7 @@ const expressSession = require('express-session');
 const { generateUUID } = require('../utils/helper/uuids');
 const { publish } = require('./eventsManager/eventsManager');
 
-const Sessions = { SESSION_HEADER: 'connect.sid' };
+const Sessions = { };
 const initialiseSession = async () => {
 	const store = await db.getSessionStore(expressSession);
 	const secure = config.public_protocol === 'https';

@@ -19,5 +19,6 @@ const SessionConst = {};
 
 SessionConst.CSRF_HEADER = 'X-CSRF-TOKEN';
 SessionConst.CSRF_COOKIE = 'csrf_token';
+SessionConst.SESSION_HEADER = 'connect.sid';
 
 module.exports = SessionConst;

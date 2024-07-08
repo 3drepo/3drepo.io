@@ -29,8 +29,7 @@ const { io: ioClient } = require('socket.io-client');
 
 const { providers } = require(`${src}/services/sso/sso.constants`);
 
-const { CSRF_COOKIE } = require(`${src}/utils/sessions.constants`);
-const { SESSION_HEADER } = require(`${src}/services/sessions`);
+const { CSRF_COOKIE, SESSION_HEADER } = require(`${src}/utils/sessions.constants`);
 
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
