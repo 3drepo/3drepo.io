@@ -28,10 +28,7 @@ const utils = require("../utils");
 const systemLogger = require("../logger.js").systemLogger;
 const User = require("../models/user");
 const UsersV5 = require(`${v5Path}/processors/users`);
-const { createSession, destroySession } = require(`${v5Path}/middleware/sessions`);
-const { canLogin } = require(`${v5Path}/middleware/auth`);
 const { fileExtensionFromBuffer } = require(`${v5Path}/utils/helper/typeCheck`);
-const { validateLoginData } = require(`${v5Path}/middleware/dataConverter/inputs/users`);
 
 const { respond: respondV5 } = require(`${v5Path}/utils/responder`);
 
@@ -43,107 +40,6 @@ const FileType = require("file-type");
 const multer = require("multer");
 const { fileExists } = require("../models/fileRef");
 const { getUserByUsernameOrEmail, isSsoUser } = require("../../v5/models/users");
-
-/**
- * @api {post} /login Login
- * @apiName login
- * @apiGroup Authentication
- * @apiDescription 3D Repo account login.
- * Logging in generates a token that can be used for cookie-based authentication.
- * To authentication subsequent API calls using cookie-based authentication,
- * simply put the following into the HTTP header:
- * `Cookie: connect.sid=:sessionId`
- *
- * NOTE: If you use a modern browser’s XMLHttpRequest object to make API calls,
- * you don’t need to take care of the authentication process after calling /login.
- *
- * @apiParam (Request body) {String} username Account username
- * @apiParam (Request body) {String} password Account password
- * @apiSuccess (200) {String} username Account username
- *
- * @apiExample {post} Example usage:
- * POST /login HTTP/1.1
- * {
- * 	"username": "alice",
- * 	"password": "AW96B6"
- * }
- *
- * @apiSuccessExample {json} Success-Response
- * HTTP/1.1 200 OK
- * set-cookie:connect.sid=12345678901234567890;
- * {
- * 	"username": "alice"
- * }
- */
-router.post("/login", middlewares.formatV5LogInData, validateLoginData, canLogin, login, middlewares.flagAsV4Request, createSession);
-
-/**
- * @api {post} /logout Logout
- * @apiName logout
- * @apiGroup Authentication
- * @apiDescription Invalidate the authenticated session.
- *
- * @apiSuccess (200) {String} username Account username
- *
- * @apiExample {post} Example usage:
- * POST /logout HTTP/1.1
- * {}
- *
- * @apiSuccessExample {json} Success-Response
- * HTTP/1.1 200 OK
- * {
- *	"username": "alice"
- * }
- *
- */
-router.post("/logout", middlewares.loggedIn, middlewares.flagAsV4Request, destroySession);
-
-/**
- * @api {get} /login Get current username
- * @apiName checkLogin
- * @apiGroup Authentication
- * @apiDescription Get the username of the logged in user.
- *
- * @apiSuccess (200) {String} username Account username
- *
- * @apiExample {get} Example usage:
- * GET /login HTTP/1.1
- * {}
- *
- * @apiSuccessExample {json} Success-Response
- * HTTP/1.1 200 OK
- * {
- *	"username": "alice"
- * }
- */
-router.get("/login", middlewares.loggedIn, checkLogin);
-
-/**
- * @api {post} /forgot-password Forgot password
- * @apiName forgotPassword
- * @apiGroup Account
- * @apiDescription Send a password reset link to account's e-mail.
- *
- * @apiParam {String} username Account username
- * @apiParam {String} email E-mail address registered with account
- *
- * @apiExample {get} Example usage (with username):
- * POST /forgot-password HTTP/1.1
- * {
- * 	"username: "alice"
- * }
- *
- * @apiExample {get} Example usage (with e-mail):
- * POST /forgot-password HTTP/1.1
- * {
- * 	"email: "alice@acme.co.uk"
- * }
- *
- * @apiSuccessExample {json} Success-Response
- * HTTP/1.1 200 OK
- * {}
- */
-router.post("/forgot-password", forgotPassword);
 
 /**
  * @api {get} /version Application version
