@@ -17,17 +17,29 @@
 
 import { put, select, takeLatest } from 'redux-saga/effects';
 
+import { hexColorRE } from '@/v4/helpers/colors';
+import { IJob } from '@/v5/store/jobs/jobs.types';
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
 import { selectCurrentTeamspace } from '../userManagement';
 import { JobsActions, JobsTypes } from './jobs.redux';
 
+const sanitizeJob =  (job: IJob) => {
+	if (!hexColorRE.test(job.color)) {
+		delete job.color;
+	}
+
+	return job;
+}
+
 export function* fetchJobs({ teamspace }) {
 	try {
 		yield put(JobsActions.setJobsPending(true));
-		const response = yield API.getJobs(teamspace);
-		yield put(JobsActions.fetchJobsSuccess(response.data));
+		const {data}: {data: IJob[]} = yield API.getJobs(teamspace);
+		const jobs = data.map(sanitizeJob);
+
+		yield put(JobsActions.fetchJobsSuccess(jobs));
 		yield put(JobsActions.setJobsPending(false));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'jobs', error));
@@ -45,8 +57,13 @@ export function* fetchJobsAndColors() {
 }
 
 export function* updateJobColor({ job }) {
+	if (!hexColorRE.test(job.color)) {
+		return;
+	}
+
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
+
 		yield API.updateJob(teamspace, job);
 
 		yield put(JobsActions.updateJobSuccess(job));
@@ -57,6 +74,10 @@ export function* updateJobColor({ job }) {
 }
 
 export function* createJob({ job }) {
+	if (!hexColorRE.test(job.color)) {
+		return;
+	}
+
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
 		yield API.createJob(teamspace, job);
@@ -82,8 +103,10 @@ export function* removeJob({ jobId }) {
 
 export function* getMyJob({ teamspace }) {
 	try {
-		const response = yield API.getMyJob(teamspace);
-		yield put(JobsActions.getMyJobSuccess(response.data));
+		const { data } = yield API.getMyJob(teamspace);
+
+		const job = sanitizeJob(data);
+		yield put(JobsActions.getMyJobSuccess(job));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('get', 'my job', error));
 	}
