@@ -128,7 +128,7 @@ TeamspaceSetting.updateAddOns = async (teamspace, addOns) => {
 		if (addOnTypes.has(key)) {
 			const path = `addOns.${key}`;
 			if (addOns[key]) {
-				set[path] = true;
+				set[path] = addOns[key];
 			} else {
 				unset[path] = 1;
 			}
