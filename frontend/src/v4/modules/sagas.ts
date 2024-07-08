@@ -29,7 +29,6 @@ import ticketCommentsSaga from '@/v5/store/tickets/comments/ticketComments.sagas
 import viewer2Saga from '@/v5/store/viewer/viewer.sagas';
 import ticketsCardSaga from '@/v5/store/tickets/card/ticketsCard.sagas';
 import activitiesSaga from './activities/activities.sagas';
-import authSaga from './auth/auth.sagas';
 import bimSaga from './bim/bim.sagas';
 import boardSaga from './board/board.sagas';
 import chatSaga from './chat/chat.sagas';
@@ -60,7 +59,6 @@ import viewpointsSaga from './viewpoints/viewpoints.sagas';
 export default function* rootSaga() {
 	yield all([
 		fork(activitiesSaga),
-		fork(authSaga),
 		fork(bimSaga),
 		fork(boardSaga),
 		fork(chatSaga),

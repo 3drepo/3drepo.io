@@ -24,7 +24,6 @@ import { CanvasHistoryTypes } from './canvasHistory';
 import { batchGroupBy } from './canvasHistory/canvasHistory.helpers';
 
 import { reducer as activitiesReducer } from './activities/activities.redux';
-import { reducer as authReducer } from './auth/auth.redux';
 import { reducer as bimReducer } from './bim/bim.redux';
 import { reducer as boardReducer } from './board/board.redux';
 import { reducer as canvasHistoryReducer } from './canvasHistory/canvasHistory.redux';
@@ -65,7 +64,6 @@ export default function createReducer(history) {
 			ignoreInitialState: true
 		}),
 		activities: activitiesReducer,
-		auth: authReducer,
 		bim: bimReducer,
 		board: boardReducer,
 		chat: chatReducer,
