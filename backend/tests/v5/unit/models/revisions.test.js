@@ -224,18 +224,25 @@ const testUpdateRevision = () => {
 	const checkResults = (fn, modelType, setData, unsetData) => {
 		expect(fn).toHaveBeenCalledTimes(1);
 		expect(fn).toHaveBeenCalledWith(teamspace, modelType === modelTypes.DRAWING ? `${modelType}s.history` : `${model}.history`,
-			{ $or: [{ _id: revision._id }, { tag: revision._id }] }, { $set: setData, $unset: unsetData },
+			{ $or: [{ _id: revision._id }, { tag: revision._id }] },
+			{ ...(setData ? { $set: setData } : {}), ...(unsetData ? { $unset: unsetData } : {}) },
 			{ projection: { _id: 1 } },
 		);
 	};
 
 	describe('UpdateRevision', () => {
-		test('Should update a revision', async () => {
+		test('Should update a revision and set data', async () => {
 			const modelType = modelTypes.CONTAINER;
 			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementationOnce(() => ({ _id: revision._id }));
-			await Revisions.updateRevision(teamspace, model, modelType,
-				revision._id, setUpdate, unsetUpdate);
-			checkResults(fn, modelType, setUpdate, unsetUpdate);
+			await Revisions.updateRevision(teamspace, model, modelType, revision._id, setUpdate);
+			checkResults(fn, modelType, setUpdate);
+		});
+
+		test('Should update a revision and unset data', async () => {
+			const modelType = modelTypes.CONTAINER;
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementationOnce(() => ({ _id: revision._id }));
+			await Revisions.updateRevision(teamspace, model, modelType, revision._id, undefined, unsetUpdate);
+			checkResults(fn, modelType, undefined, unsetUpdate);
 		});
 
 		test('Should update a revision (drawing)', async () => {

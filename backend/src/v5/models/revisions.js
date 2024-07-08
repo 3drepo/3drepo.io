@@ -87,9 +87,19 @@ Revisions.deleteModelRevisions = (teamspace, project, model, modelType) => db.de
 	teamspace, collectionName(modelType, model), { project, model });
 
 Revisions.updateRevision = async (teamspace, model, modelType, revision, setUpdate = {}, unsetUpdate = {}) => {
+	const update = {};
+
+	if (Object.keys(setUpdate).length) {
+		update.$set = setUpdate;
+	}
+
+	if (Object.keys(unsetUpdate).length) {
+		update.$unset = unsetUpdate;
+	}
+
 	const res = await db.findOneAndUpdate(teamspace, collectionName(modelType, model),
 		{ $or: [{ _id: revision }, { tag: revision }] },
-		{ $set: setUpdate, $unset: unsetUpdate },
+		update,
 		{ projection: { _id: 1 } });
 
 	if (!res) {
