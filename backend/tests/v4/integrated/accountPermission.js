@@ -19,6 +19,8 @@
 
 const request = require("supertest");
 const expect = require("chai").expect;
+
+const SessionTracker = require("../../v5/helper/sessionTracker");
 const app = require("../../../src/v4/services/api.js").createApp();
 const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
@@ -31,24 +33,20 @@ describe("Account permission::", function () {
 
 	let server;
 	let agent;
-	let agentAdmin;
 	const username = "accountPerm";
 	const password = "accountPerm";
 	const project = 'Sample_Project';
 	const model = '76a1ddb0-b048-45d5-9477-973cfd61b9e2';
+	let testSession;
 
 	before(function(done) {
 		server = app.listen(8080, function () {
 			console.log("API test server is listening on port 8080!");
 
-			agent = request.agent(server);
-			agent.post("/login")
-				.send({ username, password })
-				.expect(200, function(err, res) {
-					expect(res.body.username).to.equal(username);
-					done(err);
-				});
+			agent = request(server);
 
+			testSession = SessionTracker(agent);
+			testSession.login(username, password).then(()=> {done()});
 		});
 	});
 
@@ -60,7 +58,7 @@ describe("Account permission::", function () {
 	});
 
 	it("should fail to assign permissions to a user that doesnt exist", function(done) {
-		agent.post(`/${username}/permissions`)
+		testSession.post(`/${username}/permissions`)
 			.send({ user: "nonsense", permissions: ["create_project"]})
 			.expect(404, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
@@ -69,7 +67,7 @@ describe("Account permission::", function () {
 	});
 
 	it("should fail to assign non team space permissions to a user", function(done) {
-		agent.post(`/${username}/permissions`)
+		testSession.post(`/${username}/permissions`)
 			.send({ user: "issue_username", permissions: ["create_project"]})
 			.expect(400, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
@@ -78,7 +76,7 @@ describe("Account permission::", function () {
 	});
 
 	it("should fail to assign invalid permissions to a user", async function() {
-		const { body } = await agent.post(`/${username}/permissions`)
+		const { body } = await testSession.post(`/${username}/permissions`)
 			.send({ user: "user1", permissions: ["view_issue"]});
 
 		expect(body.value).to.equal(responseCodes.INVALID_PERM.value);
@@ -88,11 +86,11 @@ describe("Account permission::", function () {
 
 		const permission = { user: "testing", permissions: ["create_project"]};
 
-		await agent.post(`/${username}/permissions`)
+		await testSession.post(`/${username}/permissions`)
 					.send(permission)
 					.expect(200);
 
-		const {body} = await agent.get(`/${username}/permissions`)
+		const {body} = await testSession.get(`/${username}/permissions`)
 					.expect(200);
 
 		expect(body.find(perm => perm.user === permission.user)).to.deep.equal(permission);
@@ -101,19 +99,19 @@ describe("Account permission::", function () {
 	it("should remove model and project permissions if a user becomes teamspace admin", async function() {
 		const permission = { user: "testing", permissions: ["teamspace_admin"]};
 
-		await agent.post(`/${username}/permissions`)
+		await testSession.post(`/${username}/permissions`)
 					.send(permission)
 					.expect(200);
 
-		const {body} = await agent.get(`/${username}/permissions`)
+		const {body} = await testSession.get(`/${username}/permissions`)
 					.expect(200);
 
 		expect(body.find(perm => perm.user === permission.user)).to.deep.equal(permission);
 
-		const newProjectPermissions = await findProjectPermsByUser(username, project, "testing");	
+		const newProjectPermissions = await findProjectPermsByUser(username, project, "testing");
 		expect(newProjectPermissions).to.deep.equal(undefined);
 
-		const newModelPermissions = await findModelSettingById(username, model, { 'permissions': 1 });						
+		const newModelPermissions = await findModelSettingById(username, model, { 'permissions': 1 });
 		expect(newModelPermissions.permissions.find(p => p.user === "testing")).to.deep.equal(undefined);
 	});
 
@@ -121,7 +119,7 @@ describe("Account permission::", function () {
 
 		const permission = { permissions: ["create_project"]};
 
-		agent.put(`/${username}/permissions/${username}`)
+		testSession.put(`/${username}/permissions/${username}`)
 			.send(permission)
 			.expect(400, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.OWNER_MUST_BE_ADMIN.value);
@@ -133,7 +131,7 @@ describe("Account permission::", function () {
 
 		const permission = { user: username, permissions: ["create_project"]};
 
-		agent.post(`/${username}/permissions`)
+		testSession.post(`/${username}/permissions`)
 			.send(permission)
 			.expect(400, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.OWNER_MUST_BE_ADMIN.value);
@@ -147,7 +145,7 @@ describe("Account permission::", function () {
 
 		async.series([
 			callback => {
-				agent.post(`/${username}/permissions`)
+				testSession.post(`/${username}/permissions`)
 					.send(permission)
 					.expect(400, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -164,7 +162,7 @@ describe("Account permission::", function () {
 
 		async.series([
 			callback => {
-				agent.post(`/${username}/permissions`)
+				testSession.post(`/${username}/permissions`)
 					.send(permission)
 					.expect(400, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -179,7 +177,7 @@ describe("Account permission::", function () {
 
 		async.series([
 			callback => {
-				agent.put(`/${username}/permissions/user2`)
+				testSession.put(`/${username}/permissions/user2`)
 					.send({ })
 					.expect(400, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -194,7 +192,7 @@ describe("Account permission::", function () {
 	it("should be able to update users permissions", function(done) {
 		async.series([
 			callback => {
-				agent.put(`/${username}/permissions/user2`)
+				testSession.put(`/${username}/permissions/user2`)
 					.send({ "permissions": []})
 					.expect(200, function(err, res) {
 						callback(err);
@@ -202,7 +200,7 @@ describe("Account permission::", function () {
 			},
 
 			callback => {
-				agent.get(`/${username}/permissions`)
+				testSession.get(`/${username}/permissions`)
 					.expect(200, function(err, res) {
 						expect(res.body.find(perm => perm.user === "user2")).to.deep.equal({user: "user2", permissions:[]});
 						callback(err);
@@ -214,11 +212,11 @@ describe("Account permission::", function () {
 	});
 
 	it("should not be able to update user's permissions after it has been removed", async function() {
-		await agent.put(`/${username}/permissions/user2`)
+		await testSession.put(`/${username}/permissions/user2`)
 					.send({ permissions: ["create_project"]})
 					.expect(404);
 
-		const {body} = await agent.get(`/${username}/permissions`)
+		const {body} = await testSession.get(`/${username}/permissions`)
 					.expect(200);
 
 		expect(body.find(perm => perm.user === "user2")).to.deep.equal({user: "user2", permissions:[]});
@@ -230,7 +228,7 @@ describe("Account permission::", function () {
 
 		async.series([
 			callback => {
-				agent.post(`/${username}/permissions`)
+				testSession.post(`/${username}/permissions`)
 					.send(permission)
 					.expect(200, function(err, res) {
 						callback(err);
@@ -238,7 +236,7 @@ describe("Account permission::", function () {
 			},
 
 			callback => {
-				agent.get(`/${username}/permissions`)
+				testSession.get(`/${username}/permissions`)
 					.expect(200, function(err, res) {
 
 						expect(res.body.find(perm => perm.user === permission.user)).to.deep.equal(permission);
@@ -250,7 +248,7 @@ describe("Account permission::", function () {
 	});
 
 	it("should fail to update non team space permissions", function(done) {
-		agent.put(`/${username}/permissions/user2`)
+		testSession.put(`/${username}/permissions/user2`)
 			.send({ permissions: ["view_issue"]})
 			.expect(400, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.INVALID_PERM.value);
@@ -262,14 +260,14 @@ describe("Account permission::", function () {
 
 		async.series([
 			function(done) {
-				agent.post(`/${username}/permissions`)
+				testSession.post(`/${username}/permissions`)
 					.send({ user: "user3", permissions: ["teamspace_admin", "create_project"]})
 					.expect(200, function(err, res) {
 						done(err);
 					});
 			},
 			function(done) {
-				agent.get(`/${username}/permissions`)
+				testSession.get(`/${username}/permissions`)
 					.expect(200, function(err, res) {
 						const permissions = res.body.filter(p => p.user === "user3");
 						expect(permissions.length).to.equal(1);
@@ -282,7 +280,7 @@ describe("Account permission::", function () {
 	});
 
 	it("should fail to update permission for an non existing record", function(done) {
-		agent.put(`/${username}/permissions/user4`)
+		testSession.put(`/${username}/permissions/user4`)
 			.send({ permissions: ["create_project"]})
 			.expect(404, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.ACCOUNT_PERM_NOT_FOUND.value);
@@ -291,7 +289,7 @@ describe("Account permission::", function () {
 	});
 
 	it("should fail to remove permission for an non existing record", function(done) {
-		agent.delete(`/${username}/permissions/user4`)
+		testSession.delete(`/${username}/permissions/user4`)
 			.expect(404, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.ACCOUNT_PERM_NOT_FOUND.value);
 				done(err);
@@ -302,14 +300,14 @@ describe("Account permission::", function () {
 
 		async.series([
 			callback => {
-				agent.delete(`/${username}/permissions/user3`)
+				testSession.delete(`/${username}/permissions/user3`)
 					.expect(200, function(err, res) {
 						callback(err);
 					});
 			},
 
 			callback => {
-				agent.get(`/${username}/permissions`)
+				testSession.get(`/${username}/permissions`)
 					.expect(200, function(err, res) {
 						expect(res.body.find(perm => perm.user === "user3").permissions.length).to.equal(0);
 						callback(err);
@@ -325,7 +323,7 @@ describe("Account permission::", function () {
 
 		const teamspace = "testing";
 
-		agent.post(`/${teamspace}/projects`)
+		testSession.post(`/${teamspace}/projects`)
 			.send({ name: projectName })
 			.expect(200, done);
 	});
@@ -334,24 +332,20 @@ describe("Account permission::", function () {
 
 		const teamspace = "testing";
 
-		agent.get(`/${teamspace}/projects/${projectName}`)
+		testSession.get(`/${teamspace}/projects/${projectName}`)
 			.expect(200, done);
 	});
 
 	it("non teamspace admin users will have permissions revoked on any projects including the one created by themselves if parent teamspace level permissions has been revoked", async function() {
 		const teamspace = "testing";
 
-		agentAdmin = request.agent(server);
-		const {body} =  await agentAdmin.post("/login")
-			.send({ username: "testing", password: "testing" })
+		const adminSession = SessionTracker(agent);
+		await adminSession.login("testing","testing");
+
+		await adminSession.delete(`/${teamspace}/permissions/${username}`)
 			.expect(200);
 
-		expect(body.username).to.equal("testing")
-
-		await agentAdmin.delete(`/${teamspace}/permissions/${username}`)
-			.expect(200);
-
-		await agent.get(`/${teamspace}/projects/${projectName}`)
+		await testSession.get(`/${teamspace}/projects/${projectName}`)
 			.expect(401);
 	});
 
