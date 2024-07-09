@@ -62,7 +62,7 @@ export const UploadList = ({
 				<Label width={160} required>
 					<FormattedMessage id="drawing.uploads.list.header.statusCode" defaultMessage="Status Code" />
 				</Label>
-				<Label width={isUploading ? 160 : 209} required>
+				<Label width={isUploading ? 154 : 203} required>
 					<FormattedMessage id="drawing.uploads.list.header.revisionName" defaultMessage="Revision Code" />
 				</Label>
 				<Label width={297} hidden={!isUploading}>
