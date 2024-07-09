@@ -32,6 +32,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { DrawingUploadStatus, IDrawing } from '@/v5/store/drawings/drawings.types';
 import { useParams } from 'react-router-dom';
 import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { UploadListItemStatusCode } from './components/uploadListItemStatusCode/uploadListItemStatusCode.component';
 
 const UNEXPETED_STATUS_ERROR = undefined;
 const STATUS_TEXT_BY_UPLOAD = {
@@ -98,7 +99,9 @@ export const UploadListItem = ({
 	}, [drawingId, statusCode, selectedDrawingRevisions.length]);
 
 	useEffect(() => {
-		trigger(`${revisionPrefix}.statusCode`);
+		if (statusCode) {
+			trigger(`${revisionPrefix}.statusCode`);
+		}
 	}, [drawingId, revisionCode, selectedDrawingRevisions.length]);
 
 	useEffect(() => {
@@ -129,7 +132,8 @@ export const UploadListItem = ({
 				disabled={isUploading}
 				onSelectNewDestination={onClickEdit}
 			/>
-			<UploadListItemCode
+			<InputController
+				Input={UploadListItemStatusCode}
 				key={`${uploadId}.statusCode`}
 				name={`${revisionPrefix}.statusCode`}
 				disabled={isUploading}
