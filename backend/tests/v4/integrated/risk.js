@@ -17,6 +17,7 @@
 "use strict";
 
 const request = require("supertest");
+const SessionTracker = require("../../v5/helper/sessionTracker")
 const { should, assert, expect, Assertion } = require("chai");
 const app = require("../../../src/v4/services/api.js").createApp();
 const responseCodes = require("../../../src/v4/response_codes.js");
@@ -30,10 +31,14 @@ const { deleteNotifications, fetchNotification } = require("../helpers/notificat
 describe("Risks", function () {
 	let server;
 	let agent;
+	let agent2;
+	let altUserAgent;
+	let teamspace = "teamSpace1";
 
 	const username = "issue_username";
 	const username2 = "issue_username2";
 	const password = "password";
+	const altUser = "commenterTeamspace1Model1JobA";
 
 	const projectAdminUser = "imProjectAdmin";
 
@@ -75,18 +80,24 @@ describe("Risks", function () {
 		return `${username}::${model}::${riskId}`;
 	}
 
-	before(function (done) {
-		server = app.listen(8080, function () {
-			console.log("API test server is listening on port 8080!");
+	before(async function() {
+		await new Promise((resolve) => {
+			server = app.listen(8080, () => {
+				console.log("API test server is listening on port 8080!");
+				resolve();
+			});
 
-			agent = request.agent(server);
-			agent.post("/login")
-				.send({ username, password })
-				.expect(200, function (err, res) {
-					expect(res.body.username).to.equal(username);
-					done(err);
-				});
 		});
+
+		agent = SessionTracker(request(server));
+		await agent.login(username, password);
+
+		agent2 = SessionTracker(request(server));
+		await agent2.login("teamSpace1", password);
+
+		altUserAgent = SessionTracker(request(server));
+		await altUserAgent.login(altUser, password);
+
 	});
 
 	after(function (done) {
@@ -307,7 +318,6 @@ describe("Risks", function () {
 		it("with an existing group associated should succeed", function (done) {
 			const username3 = 'teamSpace1';
 			const model2 = '5bfc11fa-50ac-b7e7-4328-83aa11fa50ac';
-			let agent2 = null;
 
 			const groupData = {
 				"color": [98, 126, 184],
@@ -326,12 +336,6 @@ describe("Risks", function () {
 			let groupId;
 
 			async.series([
-				function (done) {
-					agent2 = request.agent(server);
-					agent2.post("/login")
-						.send({ username: 'teamSpace1', password })
-						.expect(200, done);
-				},
 				function (done) {
 					agent2.post(`/${username3}/${model2}/revision/master/head/groups/`)
 						.send(groupData)
@@ -391,12 +395,6 @@ describe("Risks", function () {
 
 
 			async.series([
-				function (done) {
-					agent2 = request.agent(server);
-					agent2.post("/login")
-						.send({ username: 'teamSpace1', password })
-						.expect(200, done);
-				},
 				function (done) {
 					agent2.post(`/${username3}/${model2}/risks`)
 						.send(risk)
@@ -2057,7 +2055,7 @@ describe("Risks", function () {
 				function (done) {
 					agent.post(`/${username}/mitigations`)
 						.expect(200, function (err, res) {
-							const mitigation = res.body.find((m) => m.mitigation_desc === "1");	
+							const mitigation = res.body.find((m) => m.mitigation_desc === "1");
 							const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
 							expect(!!reference).to.equal(true);
 							done(err);
@@ -2229,7 +2227,7 @@ describe("Risks", function () {
 						});
 				}
 			], done);
-		});	
+		});
 
 		it("with unresolving a risk should remove mitigation", function (done) {
 			const risk = Object.assign({}, baseRisk, { "name": "Risk test8", "mitigation_desc": "4", "mitigation_status": "agreed_partial" });
@@ -2257,7 +2255,7 @@ describe("Risks", function () {
 						});
 				}
 			], done);
-		});	
+		});
 
 		describe("and then commenting", function () {
 			let riskId;
@@ -2343,51 +2341,23 @@ describe("Risks", function () {
 				agent.patch(`/${username}/${model}/risks/${invalidId}`)
 					.send(comment)
 					.expect(404, done);
-			});				
+			});
 		});
 
 		describe("Tagging a user in a comment", function () {
-			const teamspace = "teamSpace1";
-			const altUser = "commenterTeamspace1Model1JobA";
-			const password = "password";
 			const model = "5bfc11fa-50ac-b7e7-4328-83aa11fa50ac";
 			const riskId = "06f25e30-d011-11ea-82b5-01d0c3871ca6";
-
-			before(function (done) {
-				async.series([
-					function (done) {
-						agent.post("/logout")
-							.send({})
-							.expect(200, done);
-					},
-					function (done) {
-						agent.post("/login")
-							.send({ username: teamspace, password })
-							.expect(200, done);
-					}
-				], done);
-			});
 
 			it("should create a notification on the tagged user's messages", function (done) {
 				const comment = { comment: `@${altUser}` };
 				async.series([
 					function (done) {
-						agent.post(`/${teamspace}/${model}/risks/${riskId}/comments`)
+						agent2.post(`/${teamspace}/${model}/risks/${riskId}/comments`)
 							.send(comment)
 							.expect(200, done);
 					},
 					function (done) {
-						agent.post("/logout")
-							.send({})
-							.expect(200, done);
-					},
-					function (done) {
-						agent.post("/login")
-							.send({ username: altUser, password })
-							.expect(200, done);
-					},
-					function (done) {
-						agent.get("/notifications")
+						altUserAgent.get("/notifications")
 							.expect(200, function (err, res) {
 								const notification = res.body.find(item => item.type === "USER_REFERENCED" && item.riskId === riskId);
 								assert(notification);
@@ -2403,7 +2373,7 @@ describe("Risks", function () {
 
 			it("should create comment successful if the user tagged a user that doesn't not exist", function (done) {
 				const comment = { comment: `@doesntExist1234` };
-				agent.post(`/${teamspace}/${model}/risks/${riskId}/comments`)
+				altUserAgent.post(`/${teamspace}/${model}/risks/${riskId}/comments`)
 					.send(comment)
 					.expect(200, done);
 			});
@@ -2411,20 +2381,9 @@ describe("Risks", function () {
 			it("should NOT create a notification if the user does not belong in the teamspace", function (done) {
 				const comment = { comment: `@${username}` };
 				async.series([
-					login(agent, altUser, password),
 					function (done) {
-						agent.post(`/${teamspace}/${model}/risks/${riskId}/comments`)
+						altUserAgent.post(`/${teamspace}/${model}/risks/${riskId}/comments`)
 							.send(comment)
-							.expect(200, done);
-					},
-					function (done) {
-						agent.post("/logout")
-							.send({})
-							.expect(200, done);
-					},
-					function (done) {
-						agent.post("/login")
-							.send({ username, password })
 							.expect(200, done);
 					},
 					function (done) {
@@ -2444,16 +2403,13 @@ describe("Risks", function () {
 			@${altUser}`
 				};
 				async.waterfall([
-					login(agent, altUser, password),
-					deleteNotifications(agent),
-					login(agent, teamspace, password),
+					deleteNotifications(altUserAgent),
 					function (args, next) {
-						agent.post(`/${teamspace}/${model}/risks/${riskId}/comments`)
+						agent2.post(`/${teamspace}/${model}/risks/${riskId}/comments`)
 							.send(comment)
 							.expect(200, next);
 					},
-					login(agent, altUser, password),
-					fetchNotification(agent),
+					fetchNotification(altUserAgent),
 					(notifications, next) => {
 						expect(notifications, 'There should not be any notifications').to.be.an("array").and.to.have.length(0);
 						next();
@@ -2471,17 +2427,16 @@ describe("Risks", function () {
 
 			before(function (done) {
 				async.series([
-					login(agent, teamspace, password),
 					(next) => {
-						createModel(agent, teamspace, 'Query risks').then((res) => {
+						createModel(agent2, teamspace, 'Query risks').then((res) => {
 							model = res.body.model;
 							let createRiskTeamspace1 = createRisk(teamspace, model);
 
 							async.series([
-								createRiskTeamspace1(agent, { likelihood: 1, consequence: 1, residual_likelihood: 1, residual_consequence: 2, category: "Environmental Issue", number: 0, mitigation_status: "agreed_partial" }),
-								createRiskTeamspace1(agent, { likelihood: 0, consequence: 2, residual_likelihood: 2, residual_consequence: 1, category: "Commercial Issue", number: 1, mitigation_status: "rejected" }),
-								createRiskTeamspace1(agent, { likelihood: 1, consequence: 2, residual_likelihood: 2, residual_consequence: 3, category: "Social Issue", number: 2, mitigation_status: "proposed" }),
-								createRiskTeamspace1(agent, { likelihood: 2, consequence: -1, residual_likelihood: 3, residual_consequence: 4, number: 3, mitigation_status: "" })
+								createRiskTeamspace1(agent2, { likelihood: 1, consequence: 1, residual_likelihood: 1, residual_consequence: 2, category: "Environmental Issue", number: 0, mitigation_status: "agreed_partial" }),
+								createRiskTeamspace1(agent2, { likelihood: 0, consequence: 2, residual_likelihood: 2, residual_consequence: 1, category: "Commercial Issue", number: 1, mitigation_status: "rejected" }),
+								createRiskTeamspace1(agent2, { likelihood: 1, consequence: 2, residual_likelihood: 2, residual_consequence: 3, category: "Social Issue", number: 2, mitigation_status: "proposed" }),
+								createRiskTeamspace1(agent2, { likelihood: 2, consequence: -1, residual_likelihood: 3, residual_consequence: 4, number: 3, mitigation_status: "" })
 							], next);
 						})
 					},

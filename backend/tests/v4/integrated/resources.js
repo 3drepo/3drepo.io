@@ -18,6 +18,7 @@
  */
 
 const expect = require("chai").expect;
+const SessionTracker = require("../../v5/helper/sessionTracker")
 const app = require("../../../src/v4/services/api.js").createApp();
 const request = require("supertest");
 const IssueHelper =  require("../helpers/issues.js");
@@ -46,19 +47,12 @@ describe("Resources ", function () {
 	const detachResource = IssueHelper.detachResourceFromIssue(account, model);
 
 	let server;
-	before(function(done) {
-		server = app.listen(8080, function () {
-			async.parallel(
-				usernames.map(username => next => {
-					const agent = request.agent(server);
-					agent.post("/login")
-						.send({ username, password})
-						.expect(200, function(err, res) {
-							next(err);
-						});
-
-					agents[username] = agent;
-				}),done);
+	before(async function() {
+		await new Promise((resolve) => {
+			server = app.listen(8080, () => {
+				console.log("API test server is listening on port 8080!");
+				resolve();
+			});
 		});
 	});
 
