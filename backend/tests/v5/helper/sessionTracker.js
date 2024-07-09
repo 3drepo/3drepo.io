@@ -56,6 +56,10 @@ class SessionTracker {
 		return this.setAuthHeaders(this.agent.put(url));
 	}
 
+	patch(url) {
+		return this.setAuthHeaders(this.agent.patch(url));
+	}
+
 	delete(url) {
 		return this.setAuthHeaders(this.agent.delete(url));
 	}
