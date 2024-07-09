@@ -17,7 +17,7 @@
 
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { useFormContext, useFormState } from 'react-hook-form';
-import { RevisionCodeField } from './uploadListItemCode.styles';
+import { CodeTextField } from '../../uploadListItem.styles';
 import { get } from 'lodash';
 
 type IUploadListItemCode = {
@@ -41,7 +41,7 @@ export const UploadListItemCode = ({ disabled = false, name, ...props }: IUpload
 	} : {};
 
 	return (
-		<RevisionCodeField
+		<CodeTextField
 			disabled={disabled}
 			formError={errorMessage}
 			{...errorAdornment}

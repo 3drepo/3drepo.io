@@ -18,7 +18,7 @@
 import styled, { css } from 'styled-components';
 import { Container as ItemRowContainer } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemRow/dashboardListItemRow.styles';
 import { DashboardListHeaderLabel, DashboardListItem } from '@components/dashboard/dashboardList';
-import { RevisionCodeField } from './uploadListItem/components/uploadListItemCode/uploadListItemCode.styles';
+import { CodeTextField } from './uploadListItem/uploadListItem.styles';
 import { DestinationAutocomplete } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/uploadListItemDestination.styles';
 
 export const Label = styled(DashboardListHeaderLabel)<{ required?: boolean }>`
@@ -44,7 +44,7 @@ export const UploadListItemRowWrapper = styled(DashboardListItem)<{ selected: bo
 			height: 35px;
 		}
 
-		${RevisionCodeField} {
+		${CodeTextField} {
 			width: 146px;
 			height: 35px;
 
