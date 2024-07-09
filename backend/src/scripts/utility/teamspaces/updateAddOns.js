@@ -38,8 +38,8 @@ const run = async (teamspace, vrEnabled, srcEnabled, hereEnabled, powerBIEnabled
 		} else if (modulesString) {
 			modules = modulesString?.split(',');
 
-			if (!modules.every((m) => ADD_ONS_MODULES.includes(m))) {
-				throw new Error(`Modules must be one of the following: ${ADD_ONS_MODULES}`);
+			if (!modules.every((m) => Object.values(ADD_ONS_MODULES).includes(m))) {
+				throw new Error(`Modules must be one of the following: ${Object.values(ADD_ONS_MODULES)}`);
 			}
 		}
 

@@ -31,9 +31,9 @@
 	};
 
 	module.exports = {
-		canView: validateMany([setTeamspaceParam, isModuleEnabled(ADD_ONS_MODULES.ISSUES), checkPermissions([C.PERM_VIEW_ISSUE])]),
-		canCreate: validateMany([setTeamspaceParam, isModuleEnabled(ADD_ONS_MODULES.ISSUES), checkPermissions([C.PERM_CREATE_ISSUE])]),
-		canComment: validateMany([setTeamspaceParam, isModuleEnabled(ADD_ONS_MODULES.ISSUES), checkPermissions([C.PERM_COMMENT_ISSUE])])
+		canView: validateMany([setTeamspaceParam, isModuleEnabled(ADD_ONS_MODULES.RISKS), checkPermissions([C.PERM_VIEW_ISSUE])]),
+		canCreate: validateMany([setTeamspaceParam, isModuleEnabled(ADD_ONS_MODULES.RISKS), checkPermissions([C.PERM_CREATE_ISSUE])]),
+		canComment: validateMany([setTeamspaceParam, isModuleEnabled(ADD_ONS_MODULES.RISKS), checkPermissions([C.PERM_COMMENT_ISSUE])])
 	};
 
 })();

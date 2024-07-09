@@ -193,6 +193,7 @@ const middlewares = {
 	project: require("./project"),
 	job: require("./job"),
 	issue: require("./issue"),
+	risk: require("./risk"),
 	notification: require("./notification"),
 	chat: require("./chat"),
 

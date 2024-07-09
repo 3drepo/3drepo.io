@@ -38,7 +38,10 @@ TeamspaceConstants.ADD_ONS = {
 	MODULES: 'modules',
 };
 
-TeamspaceConstants.ADD_ONS_MODULES = ['issues', 'risks'];
+TeamspaceConstants.ADD_ONS_MODULES = {
+	ISSUES: 'issues',
+	RISKS: 'risks',
+};
 
 TeamspaceConstants.DEFAULT_RISK_CATEGORIES = [
 	'Commercial Issue',
