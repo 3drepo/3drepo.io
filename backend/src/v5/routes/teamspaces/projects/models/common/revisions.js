@@ -188,9 +188,9 @@ const establishRoutes = (modelType) => {
 	 *                         description: name of the creator of the revision
 	 *                         example: someUser
 	 *                       timestamp:
-	 *                         type: string
+	 *                         type: number
 	 *                         description: Revision creation date
-	 *                         example: 2018-06-28T11:15:47.000Z
+	 *                         example: 1644925152000
 	 *                       format:
 	 *                         type: string
 	 *                         description: File format
@@ -219,11 +219,11 @@ const establishRoutes = (modelType) => {
      *               containers:
 	 *                 summary: containers
      *                 value:
-	 *                   revisions: [{ _id: ef0855b6-4cc7-4be1-b2d6-c032dce7806a, author: someUser, timestamp: 2018-06-28T11:15:47.000Z, format: .rvt, tag: rev01, desc: The Architecture model of the Lego House, void: true }]
+	 *                   revisions: [{ _id: ef0855b6-4cc7-4be1-b2d6-c032dce7806a, author: someUser, timestamp: 1644925152000, format: .rvt, tag: rev01, desc: The Architecture model of the Lego House, void: true }]
 	 *               drawings:
 	 *                 summary: drawings
      *                 value:
-	 *                   revisions: [{ _id: ef0855b6-4cc7-4be1-b2d6-c032dce7806a, author: someUser, timestamp: 2018-06-28T11:15:47.000Z, format: .rvt, statusCode: S0, revCode: P01, desc: The Architecture model of the Lego House, void: true }]
+	 *                   revisions: [{ _id: ef0855b6-4cc7-4be1-b2d6-c032dce7806a, author: someUser, timestamp: 1644925152000, format: .rvt, statusCode: S0, revCode: P01, desc: The Architecture model of the Lego House, void: true }]
 	 */
 	router.get('', hasReadAccessToModel[modelType], getRevisions(modelType), serialiseRevisionArray);
 
