@@ -23,8 +23,6 @@ export const fetchTeamspaces = (): Promise<any> => api.get('teamspaces');
 export const fetchQuota = (teamspace: string): Promise<any> => api.get(`teamspaces/${teamspace}/quota`);
 
 export const fetchAddons = async (teamspace: string): Promise<AddOn[]> => {
-	await new Promise((r) =>setTimeout(r, 1000));
-	return ['risks'] as AddOn[];
 	const { data } = await api.get(`teamspaces/${teamspace}/addOns`);
 	return data.modules;
 };
