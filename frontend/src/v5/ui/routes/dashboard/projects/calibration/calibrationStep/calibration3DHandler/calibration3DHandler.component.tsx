@@ -25,12 +25,12 @@ import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.cont
 import { CalibrationContext } from '../../calibrationContext';
 
 export const Calibration3DHandler = () => {
-	const { isCalibratingModel, setIsCalibratingModel,  modelCalibration, setModelCalibration } = useContext(CalibrationContext);
+	const { isCalibrating3D, setIsCalibrating3D, vector3D, setVector3D } = useContext(CalibrationContext);
 	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
 	const [lastPickedPoint, setLastPickedPoint] = useState(null);
 
 	useEffect(() => {
-		if (isCalibratingModel) {
+		if (isCalibrating3D) {
 			const onPickPoint = ({ position }) => setLastPickedPoint(position);
 			TreeActionsDispatchers.stopListenOnSelections();
 			UnityUtil.enableSnapping();
@@ -42,30 +42,30 @@ export const Calibration3DHandler = () => {
 				Viewer.off(VIEWER_EVENTS.PICK_POINT, onPickPoint);
 			};
 		}
-	}, [isCalibratingModel]);
+	}, [isCalibrating3D]);
 
 	useEffect(() => {
 		if (!lastPickedPoint) return;
 
-		const [start, end] = modelCalibration;
+		const [start, end] = vector3D;
 
 		if (end || !start) {
-			setModelCalibration([lastPickedPoint, null]);
+			setVector3D([lastPickedPoint, null]);
 		} else if (!isEqual(start, lastPickedPoint)) {
-			setModelCalibration([start, lastPickedPoint]);
+			setVector3D([start, lastPickedPoint]);
 		}
 	}, [lastPickedPoint]);
 
 	useEffect(() => {
-		Viewer.isModelReady().then(() => UnityUtil.setCalibrationToolVector(...modelCalibration));
-	}, [modelCalibration]);
+		Viewer.isModelReady().then(() => UnityUtil.setCalibrationToolVector(...vector3D));
+	}, [vector3D]);
 
 	useEffect(() => {
 		UnityUtil.setCalibrationToolMode('Vector');
 		setLeftPanelRatio(.5);
 
 		return () => {
-			setIsCalibratingModel(false);
+			setIsCalibrating3D(false);
 		};
 	}, []);
 

@@ -82,14 +82,14 @@ export const BimButton = () => {
 	);
 };
 export const CalibrationButton = () => {
-	const { isCalibratingModel, setIsCalibratingModel, step } = useContext(CalibrationContext);
+	const { isCalibrating3D, setIsCalibrating3D, step } = useContext(CalibrationContext);
 
 	return (
 		<ToolbarButton
 			Icon={CalibrationIcon}
 			hidden={step !== 0}
-			selected={isCalibratingModel}
-			onClick={() => setIsCalibratingModel(!isCalibratingModel)}
+			selected={isCalibrating3D}
+			onClick={() => setIsCalibrating3D(!isCalibrating3D)}
 			title={formatMessage({ id: 'viewer.toolbar.icon.calibrate', defaultMessage: 'Calibrate' })} />
 	);
 };

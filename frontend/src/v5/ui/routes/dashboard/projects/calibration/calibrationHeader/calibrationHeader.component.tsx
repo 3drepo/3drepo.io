@@ -35,13 +35,13 @@ const STEPS = [
 
 export const CalibrationHeader = () => {
 	const { teamspace, project, containerOrFederation } = useParams();
-	const { step, setStep, isStepValid, endCalibration, modelCalibration, drawingId } = useContext(CalibrationContext);
+	const { step, setStep, isStepValid, endCalibration, vector3D, drawingId } = useContext(CalibrationContext);
 	const selectedModel = FederationsHooksSelectors.selectFederationById(containerOrFederation)
 		|| ContainersHooksSelectors.selectContainerById(containerOrFederation);
 	const isLastStep = step === 2;
 
 	const getIsStepValid = () => {
-		if (step === 0) return !!(modelCalibration[0] && modelCalibration[1]);
+		if (step === 0) return !!(vector3D[0] && vector3D[1]);
 		return isStepValid;
 	};
 
@@ -52,7 +52,7 @@ export const CalibrationHeader = () => {
 				state: CalibrationState.CALIBRATED,
 				units: selectedModel.unit,
 				horizontal: {
-					model: modelCalibration,
+					model: vector3D,
 					drawing: EMPTY_VECTOR,
 				},
 			},

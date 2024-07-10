@@ -31,12 +31,12 @@ export interface CalibrationContextType {
 	endCalibration: () => void,
 	origin: string;
 	setOrigin: (origin: string) => void;
-	isCalibratingModel: boolean,
-	setIsCalibratingModel: (isCalibratingModel: boolean) => void;
-	modelCalibration: Vector3D,
-	setModelCalibration: (vectorState: React.SetStateAction<Vector3D>) => void;
-	drawingCalibration: Vector2D,
-	setDrawingCalibration: (points: Vector2D) => void,
+	isCalibrating3D: boolean,
+	setIsCalibrating3D: (isCalibrating3D: boolean) => void;
+	vector3D: Vector3D,
+	setVector3D: (vectorState: React.SetStateAction<Vector3D>) => void;
+	vector2D: Vector2D,
+	setVector2D: (points: Vector2D) => void,
 	drawingId: string;
 }
 
@@ -49,12 +49,12 @@ const defaultValue: CalibrationContextType = {
 	endCalibration: () => {},
 	origin: '',
 	setOrigin: () => {},
-	isCalibratingModel: false,
-	setIsCalibratingModel: () => {},
-	modelCalibration: EMPTY_VECTOR,
-	setModelCalibration: () => {},
-	drawingCalibration: EMPTY_VECTOR,
-	setDrawingCalibration: () => {},
+	isCalibrating3D: false,
+	setIsCalibrating3D: () => {},
+	vector3D: EMPTY_VECTOR,
+	setVector3D: () => {},
+	vector2D: EMPTY_VECTOR,
+	setVector2D: () => {},
 	drawingId: '',
 };
 export const CalibrationContext = createContext(defaultValue);
@@ -67,9 +67,9 @@ export const CalibrationContextComponent = ({ children }) => {
 	const [isStepValid, setIsStepValid] = useState(false);
 	const [origin, setOrigin] = useState('');
 	const [isCalibrating] = useSearchParam('isCalibrating', Transformers.BOOLEAN);
-	const [isCalibratingModel, setIsCalibratingModel] = useState(false);
-	const [modelCalibration, setModelCalibration] = useState<Vector3D>(EMPTY_VECTOR);
-	const [drawingCalibration, setDrawingCalibration] = useState(EMPTY_VECTOR);
+	const [isCalibrating3D, setIsCalibrating3D] = useState(false);
+	const [vector3D, setVector3D] = useState<Vector3D>(EMPTY_VECTOR);
+	const [vector2D, setVector2D] = useState<Vector2D>(EMPTY_VECTOR);
 	const [drawingId] = useSearchParam('drawingId');
 
 	useEffect(() => {
@@ -93,12 +93,12 @@ export const CalibrationContextComponent = ({ children }) => {
 			endCalibration: () => history.push(origin),
 			origin,
 			setOrigin,
-			isCalibratingModel,
-			setIsCalibratingModel,
-			modelCalibration,
-			setModelCalibration,
-			drawingCalibration,
-			setDrawingCalibration,
+			isCalibrating3D,
+			setIsCalibrating3D,
+			vector2D,
+			setVector2D,
+			vector3D,
+			setVector3D,
 			drawingId,
 		}}>
 			{children}

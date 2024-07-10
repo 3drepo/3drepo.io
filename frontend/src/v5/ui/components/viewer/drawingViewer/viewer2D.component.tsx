@@ -38,7 +38,7 @@ import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibratio
 const DEFAULT_VIEWBOX = { scale: 1, x: 0, y: 0, width: 0, height: 0 };
 export const Viewer2D = () => {
 	const { close2D } = useContext(ViewerCanvasesContext);
-	const { isCalibrating, step, drawingCalibration, setDrawingCalibration } = useContext(CalibrationContext);
+	const { isCalibrating, step, vector2D, setVector2D } = useContext(CalibrationContext);
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
 	const [viewBox, setViewBox] = useState<ViewBoxType>(DEFAULT_VIEWBOX);
 	const [isMinZoom, setIsMinZoom] = useState(false);
@@ -102,8 +102,8 @@ export const Viewer2D = () => {
 				<ViewerLayer2D
 					active={isDrawingVector}
 					viewBox={viewBox}
-					value={drawingCalibration}
-					onChange={setDrawingCalibration}
+					value={vector2D}
+					onChange={setVector2D}
 				/>
 			</ImageContainer>
 			<ToolbarContainer>
