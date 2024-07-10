@@ -19,7 +19,7 @@ import { FormattedMessage } from 'react-intl';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { discardSlash, discardUrlComponent } from '@/v5/helpers/url.helper';
 import { Container, Link } from '../navigationTabs.styles';
-import { useKanbanNavigationData } from '@/v5/helpers/kaban.hooks';
+import { useKanbanNavigationData } from '@/v5/helpers/kanban.hooks';
 
 export const ProjectNavigation = (): JSX.Element => {
 	let { url } = useRouteMatch();

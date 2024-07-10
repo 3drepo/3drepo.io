@@ -33,7 +33,7 @@ import { Content } from './projectContent.styles';
 import { ProjectSettings } from '../projectSettings/projectSettings.component';
 import { Board } from '../board/board.component';
 import { TicketsContent } from '../tickets/ticketsContent.component';
-import { useKanbanNavigationData } from '@/v5/helpers/kaban.hooks';
+import { useKanbanNavigationData } from '@/v5/helpers/kanban.hooks';
 
 export const ProjectContent = () => {
 	const { teamspace } = useParams<DashboardParams>();
