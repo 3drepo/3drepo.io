@@ -15,9 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useEffect, useState } from 'react';
-import { DRAWINGS_ROUTE } from '../../../routes.constants';
-import { generatePath, useParams, useHistory } from 'react-router-dom';
+import { createContext, useState } from 'react';
 import { Transformers, useSearchParam } from '../../../useSearchParam';
 import { Vector2D, Vector3D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
@@ -28,7 +26,6 @@ export interface CalibrationContextType {
 	isStepValid: boolean;
 	setIsStepValid: (isValid: boolean) => void;
 	isCalibrating: boolean;
-	endCalibration: () => void,
 	origin: string;
 	setOrigin: (origin: string) => void;
 	isCalibrating3D: boolean,
@@ -46,7 +43,6 @@ const defaultValue: CalibrationContextType = {
 	isStepValid: false,
 	setIsStepValid: () => {},
 	isCalibrating: false,
-	endCalibration: () => {},
 	origin: '',
 	setOrigin: () => {},
 	isCalibrating3D: false,
@@ -61,8 +57,6 @@ export const CalibrationContext = createContext(defaultValue);
 CalibrationContext.displayName = 'CalibrationContext';
 
 export const CalibrationContextComponent = ({ children }) => {
-	const history = useHistory();
-	const { teamspace, project, revision, containerOrFederation } = useParams();
 	const [step, setStep] = useState(0);
 	const [isStepValid, setIsStepValid] = useState(false);
 	const [origin, setOrigin] = useState('');
@@ -72,17 +66,6 @@ export const CalibrationContextComponent = ({ children }) => {
 	const [vector2D, setVector2D] = useState<Vector2D>(EMPTY_VECTOR);
 	const [drawingId] = useSearchParam('drawingId');
 
-	useEffect(() => {
-		setStep(0);
-		setIsStepValid(false);
-	}, [containerOrFederation, revision, isCalibrating]);
-
-	useEffect(() => {
-		if (!isCalibrating || !origin) {
-			setOrigin(generatePath(DRAWINGS_ROUTE, { teamspace, project }));
-		}
-	}, [isCalibrating]);
-
 	return (
 		<CalibrationContext.Provider value={{
 			step,
@@ -90,7 +73,6 @@ export const CalibrationContextComponent = ({ children }) => {
 			isStepValid,
 			setIsStepValid,
 			isCalibrating,
-			endCalibration: () => history.push(origin),
 			origin,
 			setOrigin,
 			isCalibrating3D,

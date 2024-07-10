@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { Stepper, Container, ButtonsContainer, ContrastButton, Connector, PrimaryButton, StepperWrapper } from './calibrationHeader.styles';
 import { Step, StepLabel } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
@@ -34,8 +34,9 @@ const STEPS = [
 ];
 
 export const CalibrationHeader = () => {
+	const history = useHistory();
 	const { teamspace, project, containerOrFederation } = useParams();
-	const { step, setStep, isStepValid, endCalibration, vector3D, drawingId } = useContext(CalibrationContext);
+	const { step, setStep, isStepValid, vector3D, drawingId, origin } = useContext(CalibrationContext);
 	const selectedModel = FederationsHooksSelectors.selectFederationById(containerOrFederation)
 		|| ContainersHooksSelectors.selectContainerById(containerOrFederation);
 	const isLastStep = step === 2;
@@ -45,8 +46,10 @@ export const CalibrationHeader = () => {
 		return isStepValid;
 	};
 
+	const handleEndCalibration = () => history.push(origin);
+
 	const handleConfirm = () => {
-		endCalibration();
+		handleEndCalibration();
 		DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawingId, {
 			calibration: {
 				state: CalibrationState.CALIBRATED,
@@ -76,7 +79,7 @@ export const CalibrationHeader = () => {
 						<FormattedMessage defaultMessage="Back" id="calibration.button.back" />
 					</ContrastButton>
 				)}
-				<ContrastButton onClick={endCalibration}>
+				<ContrastButton onClick={handleEndCalibration}>
 					<FormattedMessage defaultMessage="Cancel" id="calibration.button.cancel" />
 				</ContrastButton>
 				{isLastStep ? (

@@ -17,7 +17,7 @@
 
 import { useContext, useEffect } from 'react';
 import { CompareActionsDispatchers, ContainersActionsDispatchers, FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { useParams } from 'react-router-dom';
+import { useParams, generatePath } from 'react-router-dom';
 import { ContainersHooksSelectors, DrawingsHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { UnityUtil } from '@/globals/unity-util';
 import { Calibration3DHandler } from './calibrationStep/calibration3DHandler/calibration3DHandler.component';
@@ -26,11 +26,12 @@ import { VerticalSpatialBoundariesStep } from './calibrationStep/verticalSpatial
 import { ViewerCanvasesContext } from '../../../viewer/viewerCanvases.context';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { CalibrationContext } from './calibrationContext';
+import { DRAWINGS_ROUTE } from '../../../routes.constants';
 
 export const CalibrationHandler = () => {
 	const { teamspace, project, revision, containerOrFederation } = useParams();
 	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
-	const { step, drawingId, setStep, setIsCalibrating3D, setVector3D, setVector2D } = useContext(CalibrationContext);
+	const { step, drawingId, setStep, setIsCalibrating3D, setVector3D, setVector2D, setIsStepValid, setOrigin } = useContext(CalibrationContext);
 	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
 	const horizontalCalibration = DrawingsHooksSelectors.selectHorizontalCalibration(drawingId, containerOrFederation);
 
@@ -42,9 +43,14 @@ export const CalibrationHandler = () => {
 	useEffect(() => {
 		setStep(0);
 		setIsCalibrating3D(false);
+		setIsStepValid(false);
 	}, [containerOrFederation, revision]);
 
 	useEffect(() => {
+		if (!origin) {
+			setOrigin(generatePath(DRAWINGS_ROUTE, { teamspace, project }));
+		}
+	
 		CompareActionsDispatchers.resetComponentState();
 		if (isFed) {
 			FederationsActionsDispatchers.fetchFederationSettings(teamspace, project, containerOrFederation);
@@ -56,6 +62,7 @@ export const CalibrationHandler = () => {
 			UnityUtil.setCalibrationToolVector(null, null);
 			UnityUtil.setCalibrationToolMode('None');
 			setLeftPanelRatio(0.5);
+			setOrigin('');
 		};
 	}, []);
 
