@@ -99,7 +99,7 @@ export const selectIsCategoriesPending = createSelector(
 
 const selectCalibration = createSelector(
 	selectDrawingById,
-	(drawing) => drawing.calibration || {},
+	(drawing) => drawing?.calibration || {},
 );
 
 export const selectHorizontalCalibration = createSelector(
