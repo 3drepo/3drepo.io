@@ -26,7 +26,6 @@ import { selectHighlightedShapes as selectIssuesHighlightedShapes,
 	selectPins as selectIssuePins, selectShapes as selectIssuesShapes } from '../../modules/issues';
 import { selectPins as selectMeasurementPins } from '../../modules/measurements';
 import { selectGISCoordinates, selectHasGISCoordinates } from '../../modules/model';
-import { selectIsPaused, selectIsViewerManipulationEnabled, selectPresentationMode } from '../../modules/presentation';
 import { selectHighlightedShapes as selectRisksHighlightedShapes,
 	selectPins as selectRiskPins, selectShapes as selectRisksShapes  } from '../../modules/risks';
 import { TreeActions } from '../../modules/tree';
@@ -43,9 +42,6 @@ const mapStateToProps = createStructuredSelector({
 	gisCoordinates: selectGISCoordinates,
 	hasGisCoordinates: selectHasGISCoordinates,
 	gisLayers: selectGisLayers,
-	viewerManipulationEnabled: selectIsViewerManipulationEnabled,
-	presentationMode: selectPresentationMode,
-	isPresentationPaused: selectIsPaused,
 	transformations: selectTransformations,
 	issuesShapes: selectIssuesShapes,
 	issuesHighlightedShapes: selectIssuesHighlightedShapes,

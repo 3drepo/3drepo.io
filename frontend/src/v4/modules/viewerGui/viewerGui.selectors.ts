@@ -21,7 +21,6 @@ import { VIEWER_PANELS } from '../../constants/viewerGui';
 import * as Bim from '../bim';
 import { selectOverrides as selectGroupsOverrides,
 	selectTransparencies as selectGroupsTransparencies } from '../groups/groups.selectors';
-import { selectIsPresentationActive } from '../presentation';
 import { selectIsTreeProcessed } from '../tree';
 import { selectOverrides as selectViewsOverrides,
 		selectTransparencies as selectViewsTransparencies } from '../viewpoints';
@@ -97,16 +96,4 @@ export const selectAllTransparencyOverrides = createSelector(
 	selectViewsTransparencies, selectGroupsTransparencies, selectTicketTransparencies,
 		(viewsTransparencies, groupsTransparencies, ticketsTransparencies) =>
 			({...viewsTransparencies, ...groupsTransparencies, ...ticketsTransparencies })
-);
-
-export const selectDisabledPanelButtons = createSelector(
-	selectIsPresentationActive, (isPresentationActive) => {
-		const disabledPanelButtons = new Set();
-
-		if (isPresentationActive) {
-			disabledPanelButtons.add(VIEWER_PANELS.COMPARE);
-		}
-
-		return disabledPanelButtons;
-	}
 );

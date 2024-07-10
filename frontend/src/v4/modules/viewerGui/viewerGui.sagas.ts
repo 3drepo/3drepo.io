@@ -37,7 +37,6 @@ import { selectIssuesMap, IssuesActions } from '../issues';
 import { JobsActions } from '../jobs';
 import { MeasurementsActions } from '../measurements';
 import { selectCurrentRevisionId, selectSettings, ModelActions, ModelTypes, selectDefaultView } from '../model';
-import { PresentationActions } from '../presentation';
 import { selectRisksMap, RisksActions } from '../risks';
 import { selectUrlParams } from '../router/router.selectors';
 import { SequencesActions } from '../sequences';
@@ -121,7 +120,6 @@ function* resetPanelsStates() {
 			put(SequencesActions.reset()),
 			put(GisActions.resetLayers()),
 			put(MeasurementsActions.resetMeasurementTool()),
-			put(PresentationActions.reset())
 		]);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('reset', 'panels data', error));
