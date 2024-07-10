@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,12 +14,33 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { AuthImg } from '@components/authenticatedImage/authImg.component';
-import styled from 'styled-components';
 
-export const Image = styled(AuthImg)`
-	width: 100%;
-	height: 175px;
-	margin: 0;
-	object-fit: cover;
-`;
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+
+// It uses axios config to pass the token so images are returned safetly
+export const useAuthenticatedImg = (src: string, onError?) => {
+	const [base64Src, setbase64Src] = useState<string>(undefined);
+
+	useEffect(() => {
+		if (!src) return;
+
+		(async () => {
+			try {
+				const response = await axios.request({
+					responseType: 'blob',
+					method:'GET',
+					url: src,
+				});
+				
+				const objectUrl = URL.createObjectURL(response.data);
+				setbase64Src(objectUrl);
+			} catch (e) {
+				onError?.(e);
+			}
+		})();
+
+	}, [src]);
+
+	return base64Src;
+};
