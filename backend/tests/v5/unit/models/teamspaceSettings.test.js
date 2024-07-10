@@ -27,7 +27,8 @@ const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
-const { TEAM_MEMBER } = require('../../../../src/v5/models/roles.constants');
+const { TEAM_MEMBER } = require(`${src}/models/roles.constants`);
+const { ADD_ONS_MODULES } = require(`${src}/models/teamspaces.constants`);
 
 const USER_COL = 'system.users';
 const TEAMSPACE_SETTINGS_COL = 'teamspace';
@@ -318,6 +319,7 @@ const testRemoveAddOns = () => {
 				[`addOns.${ADD_ONS.SRC}`]: 1,
 				[`addOns.${ADD_ONS.HERE}`]: 1,
 				[`addOns.${ADD_ONS.POWERBI}`]: 1,
+				[`addOns.${ADD_ONS.MODULES}`]: 1,
 			};
 
 			await expect(Teamspace.removeAddOns(teamspace)).resolves.toBeUndefined();
@@ -337,6 +339,7 @@ const testGetAddOns = () => {
 					[ADD_ONS.SRC]: true,
 					[ADD_ONS.HERE]: true,
 					[ADD_ONS.POWERBI]: true,
+					[ADD_ONS.MODULES]: [ADD_ONS_MODULES.ISSUES],
 				} });
 
 			const teamspace = generateRandomString();
@@ -346,13 +349,16 @@ const testGetAddOns = () => {
 				[ADD_ONS.SRC]: true,
 				[ADD_ONS.HERE]: true,
 				[ADD_ONS.POWERBI]: true,
+				[ADD_ONS.MODULES]: [ADD_ONS_MODULES.ISSUES],
 			});
+
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace }, {
 				[`addOns.${ADD_ONS.VR}`]: 1,
 				[`addOns.${ADD_ONS.SRC}`]: 1,
 				[`addOns.${ADD_ONS.HERE}`]: 1,
 				[`addOns.${ADD_ONS.POWERBI}`]: 1,
+				[`addOns.${ADD_ONS.MODULES}`]: 1,
 			}, undefined);
 		});
 
@@ -368,6 +374,7 @@ const testGetAddOns = () => {
 				[`addOns.${ADD_ONS.SRC}`]: 1,
 				[`addOns.${ADD_ONS.HERE}`]: 1,
 				[`addOns.${ADD_ONS.POWERBI}`]: 1,
+				[`addOns.${ADD_ONS.MODULES}`]: 1,
 			}, undefined);
 		});
 	});

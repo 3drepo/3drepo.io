@@ -59,11 +59,8 @@ TeamspacePerms.isTeamspaceMember = async (req, res, next) => {
 };
 
 TeamspacePerms.isModuleEnabled = (moduleName) => async (req, res, next) => {
-	const { params } = req;
-	const { teamspace } = params;
-
 	try {
-		const addOns = await getAddOns(teamspace);
+		const addOns = await getAddOns(req.params.teamspace);
 		if (addOns.modules && addOns.modules.includes(moduleName)) {
 			await next();
 		} else {
