@@ -24,12 +24,20 @@ import { VerticalSpatialBoundariesHandler } from './verticalSpatialBoundariesHan
 
 export const CalibrationStep = () => {
 	const step = CalibrationHooksSelectors.selectStep();
-	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
+	const { setLeftPanelRatio, open2D, close2D } = useContext(ViewerCanvasesContext);
+	const drawingId = CalibrationHooksSelectors.selectDrawingId(); 
 
 	useEffect(() => {
 		setLeftPanelRatio(.5);
 	}, []);
 
+	useEffect(() => {
+		if (step < 2) {
+			open2D(drawingId || 'dc1844d3-draw-4727-8187-6baef0e70957');
+		} else {
+			close2D();
+		}
+	}, [step]);
 	return (
 		<>
 			<Calibration3DHandler />

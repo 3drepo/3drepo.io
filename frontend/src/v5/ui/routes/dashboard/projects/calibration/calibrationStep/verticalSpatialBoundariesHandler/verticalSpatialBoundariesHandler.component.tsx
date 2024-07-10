@@ -24,6 +24,7 @@ import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.cont
 import { isNull } from 'lodash';
 import { CalibrationHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CalibrationActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { addVectors, getTransformationMatrix, subtractVectors, transformAndTranslate } from '../../calibrationHelpers';
 
 export const VerticalSpatialBoundariesHandler = () => {
 	const [drawingId] = useSearchParam('drawingId');
@@ -33,22 +34,27 @@ export const VerticalSpatialBoundariesHandler = () => {
 	const { open2D, close2D } = useContext(ViewerCanvasesContext);
 	const isValid = !isNull(planesValues.lower) && !isNull(planesValues.upper);
 
-	const u = 8000;
-
 	const i = new Image();
 	i.crossOrigin = 'anonymous';
-	i.src = getDrawingImageSrc(drawingId);
+	i.src = getDrawingImageSrc(drawingId || 'dc1844d3-draw-4727-8187-6baef0e70957');
 
+	const imageHeight = i.naturalHeight;
+	const imageWidth = i.naturalWidth;
+
+	const vector3DRaw = CalibrationHooksSelectors.selectModelCalibration();
+	const vector3D = { start: [vector3DRaw.start[0], -vector3DRaw.start[2]],  end: [vector3DRaw.end[0], -vector3DRaw.end[2]] }; // TODO why is y flipped? 
+	const vector2DRaw = CalibrationHooksSelectors.selectDrawingCalibration();
+	const vector2D = { start: [vector2DRaw.start[0] - imageWidth / 2, imageHeight / 2 - vector2DRaw.start[1]],
+		end: [vector2DRaw.end[0] - imageWidth / 2, imageHeight / 2 - vector2DRaw.end[1]] }; // !working
+	const tMatrix = getTransformationMatrix(vector2D, vector3D);
+	
 	useEffect(() => {
 		if (!isVerticallyCalibrating) return;
 		Viewer.setCalibrationToolMode(isVerticallyCalibrating ? 'Vertical' : 'None');
-		Viewer.setCalibrationToolDrawing(i, [0, 0, u, 0, 0, -u]);
-		close2D();
 		Viewer.on(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, CalibrationActionsDispatchers.setPlanesValues);
 		return () => {
 			Viewer.setCalibrationToolMode('None');
 			Viewer.setCalibrationToolDrawing(null, [0, 0, 0, 0, 0, 0]);
-			open2D(drawingId);
 			Viewer.off(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, CalibrationActionsDispatchers.setPlanesValues);
 		};
 	}, [isVerticallyCalibrating]);
@@ -56,10 +62,24 @@ export const VerticalSpatialBoundariesHandler = () => {
 	useEffect(() => {
 		CalibrationActionsDispatchers.setIsStepValid(true);
 	}, [isValid]);
+
+	useEffect(() => {
+		if (!imageHeight || !imageWidth) return;
+	
+		const [xmin, ymin] = subtractVectors(vector2D.start, [-imageWidth / 2, -imageHeight / 2]); // !working
+		const [xmax, ymax] = addVectors([xmin, ymin], [imageWidth, imageHeight]);
+
+		// transform corners of drawing. Adding offset of model vector
+		const bottomRight = transformAndTranslate([xmax, -ymin], tMatrix, vector3D.start); // TODO why minuses?
+		const topLeft = transformAndTranslate([xmin, -ymax], tMatrix, vector3D.start);
+		const bottomLeft = transformAndTranslate([xmin, -ymin], tMatrix, vector3D.start);
+
+		const imageDimensions = [ ...bottomLeft, ...bottomRight, ...topLeft];
+		Viewer.setCalibrationToolDrawing(i, imageDimensions);
+	}, [imageHeight + imageWidth, tMatrix]);
 	
 	useEffect(() => {
 		if (step !== 2) return;
-		close2D();
 		ViewerService.setCalibrationToolMode('Vertical');
 		return () => open2D(drawingId);
 	}, [step]);
