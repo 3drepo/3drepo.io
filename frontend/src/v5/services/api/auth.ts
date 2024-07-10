@@ -15,16 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import axios, { AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
 import api from './default';
-import { cookies } from '@/v5/helpers/cookie.helper';
 
-
-const CSRF_TOKEN = 'csrf_token';
-const TOKEN_HEADER = 'X-CSRF-TOKEN';
 
 export const authenticate = async (): Promise<string> => {
-	axios.defaults.headers[TOKEN_HEADER] = cookies(CSRF_TOKEN);
 	const { data } = await api.get('login');
 	return data.username;
 };
