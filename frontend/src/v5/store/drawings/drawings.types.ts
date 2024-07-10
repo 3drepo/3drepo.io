@@ -44,7 +44,7 @@ export interface MinimumDrawing {
 	drawingNumber: string;
 }
 
-export interface ICalibration {
+export interface Calibration {
 	state: CalibrationState;
 	verticalRange: Coord2D;
 	horizontal: {
@@ -59,7 +59,7 @@ export interface IDrawing extends MinimumDrawing {
 	desc?: string;
 	lastUpdated?: Date;
 	latestRevision?: string;
-	calibration?: Partial<ICalibration>,
+	calibration?: Partial<Calibration>,
 	status: DrawingUploadStatus;
 	revisionsCount: number;
 	role: any;
