@@ -18,7 +18,7 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
-// It uses axios config to pass the token so images are returned safetly
+// It uses axios config to pass the token so images are returned safely
 export const useAuthenticatedImg = (src: string, onError?) => {
 	const [base64Src, setbase64Src] = useState<string>(undefined);
 

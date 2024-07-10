@@ -17,6 +17,7 @@
 
 import styled, { css, keyframes } from 'styled-components';
 
+import { AuthImg } from '@components/authenticatedImage/authImg.component';
 import { COLOR } from '../../../styles';
 
 const previewStateStyles = css`
@@ -46,7 +47,7 @@ const imageLoadingStyles = css`
 	top: 0;
 `;
 
-export const StyledImage = styled.img<{ loading? }>`
+export const StyledImage = styled(AuthImg)<{ loading? }>`
 	width: 100%;
 	object-fit: cover;
 	${({ loading }) => loading && imageLoadingStyles};

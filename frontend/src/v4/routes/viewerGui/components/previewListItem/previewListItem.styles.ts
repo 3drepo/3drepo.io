@@ -21,6 +21,7 @@ import Typography from '@mui/material/Typography';
 import ArrowIcon from '@mui/icons-material/ArrowForward';
 import styled, { css } from 'styled-components';
 
+import { AuthImg } from '@components/authenticatedImage/authImg.component';
 import { COLOR } from '../../../../styles/colors';
 import OpenInViewerButtonComponent from '../../../components/openInViewerButton/openInViewerButton.container';
 
@@ -137,7 +138,7 @@ const ThumbnailStyles = css`
 	max-width: 100%;
 `;
 
-export const Thumbnail = styled.img`
+export const Thumbnail = styled(AuthImg)`
 	${ThumbnailStyles};
 `;
 
