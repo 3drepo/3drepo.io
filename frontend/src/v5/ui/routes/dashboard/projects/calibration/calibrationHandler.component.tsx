@@ -20,12 +20,10 @@ import { CompareActionsDispatchers, ContainersActionsDispatchers, FederationsAct
 import { useParams } from 'react-router-dom';
 import { ContainersHooksSelectors, DrawingsHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { UnityUtil } from '@/globals/unity-util';
-import { EMPTY_CALIBRATION } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 import { Calibration3DHandler } from './calibrationStep/calibration3DHandler/calibration3DHandler.component';
 import { Calibration2DStep } from './calibrationStep/calibration2DStep/calibration2DStep.component';
 import { VerticalSpatialBoundariesStep } from './calibrationStep/verticalSpatialBoundariesStep/verticalSpatialBoundariesStep.component';
 import { ViewerCanvasesContext } from '../../../viewer/viewerCanvases.context';
-import { convertVectorUnits, getUnitsConvertionFactor } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { CalibrationContext } from './calibrationContext';
 
@@ -34,6 +32,7 @@ export const CalibrationHandler = () => {
 	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
 	const { step, drawingId, setStep, setIsCalibratingModel, setModelCalibration, setDrawingCalibration } = useContext(CalibrationContext);
 	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
+	const horizontalCalibration = DrawingsHooksSelectors.selectHorizontalCalibration(drawingId, containerOrFederation);
 
 	const isFed = modelIsFederation(containerOrFederation);
 	const selectedModel = isFed
@@ -62,10 +61,8 @@ export const CalibrationHandler = () => {
 
 	useEffect(() => {
 		if (!drawing || !selectedModel) return;
-		const convertionFactor = getUnitsConvertionFactor(drawing?.calibration.units, selectedModel.unit);
-		const horizontalCalibration = drawing?.calibration?.horizontal || EMPTY_CALIBRATION.horizontal;
-		setModelCalibration(convertVectorUnits(horizontalCalibration.model, convertionFactor));
-		setDrawingCalibration(convertVectorUnits(horizontalCalibration.drawing, convertionFactor));
+		setModelCalibration(horizontalCalibration.model);
+		setDrawingCalibration(horizontalCalibration.drawing);
 	}, [drawing, selectedModel]);
 
 	return (
