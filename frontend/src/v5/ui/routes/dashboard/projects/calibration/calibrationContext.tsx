@@ -19,6 +19,7 @@ import { createContext, useState } from 'react';
 import { Transformers, useSearchParam } from '../../../useSearchParam';
 import { Vector2D, Vector3D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
+import { CalibrationHandler } from './calibrationHandler.component';
 
 export interface CalibrationContextType {
 	step: number;
@@ -83,6 +84,7 @@ export const CalibrationContextComponent = ({ children }) => {
 			setVector3D,
 			drawingId,
 		}}>
+			{isCalibrating && <CalibrationHandler />}
 			{children}
 		</CalibrationContext.Provider>
 	);
