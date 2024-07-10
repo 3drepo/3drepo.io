@@ -31,7 +31,7 @@ import { DRAWINGS_ROUTE } from '../../../routes.constants';
 export const CalibrationHandler = () => {
 	const { teamspace, project, revision, containerOrFederation } = useParams();
 	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
-	const { step, drawingId, setStep, setIsCalibrating3D, setVector3D, setVector2D, setIsStepValid, setOrigin } = useContext(CalibrationContext);
+	const { step, drawingId, setVector3D, setVector2D, setOrigin, setStep, setIsCalibrating3D, origin } = useContext(CalibrationContext);
 	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
 	const horizontalCalibration = DrawingsHooksSelectors.selectHorizontalCalibration(drawingId, containerOrFederation);
 
@@ -43,19 +43,23 @@ export const CalibrationHandler = () => {
 	useEffect(() => {
 		setStep(0);
 		setIsCalibrating3D(false);
-		setIsStepValid(false);
-	}, [containerOrFederation, revision]);
+	}, [selectedModel, revision, drawing]);
 
 	useEffect(() => {
-		if (!origin) {
-			setOrigin(generatePath(DRAWINGS_ROUTE, { teamspace, project }));
-		}
-	
+		setVector3D(horizontalCalibration.model);
+		setVector2D(horizontalCalibration.drawing);
+	}, [horizontalCalibration]);
+
+	useEffect(() => {
 		CompareActionsDispatchers.resetComponentState();
 		if (isFed) {
 			FederationsActionsDispatchers.fetchFederationSettings(teamspace, project, containerOrFederation);
 		} else {
 			ContainersActionsDispatchers.fetchContainerSettings(teamspace, project, containerOrFederation);
+		}
+
+		if (!origin) {
+			setOrigin(generatePath(DRAWINGS_ROUTE, { teamspace, project }));
 		}
 
 		return () => {
@@ -65,12 +69,6 @@ export const CalibrationHandler = () => {
 			setOrigin('');
 		};
 	}, []);
-
-	useEffect(() => {
-		if (!drawing || !selectedModel) return;
-		setVector3D(horizontalCalibration.model);
-		setVector2D(horizontalCalibration.drawing);
-	}, [drawing, selectedModel]);
 
 	return (
 		<>
