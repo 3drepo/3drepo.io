@@ -33,12 +33,15 @@ describe("Issues", function () {
 	let agent;
 	let teamspace1Agent;
 	let collabAgent;
+	let commenterAgent;
 	let projectAdminAgent;
 
 	const timeout = 30000;
 	const username = "issue_username";
 	const username2 = "issue_username2";
 	const password = "password";
+
+	const commenterUser = "commenterTeamspace1Model1JobA";
 
 	const projectAdminUser = "imProjectAdmin";
 
@@ -100,6 +103,9 @@ describe("Issues", function () {
 
 		projectAdminAgent = SessionTracker(request(server));
 		await projectAdminAgent.login(projectAdminUser, projectAdminUser);
+
+		commenterAgent = SessionTracker(request(server));
+		await commenterAgent.login(commenterUser, password);
 	});
 
 	after(function(done) {
@@ -2666,15 +2672,13 @@ describe("Issues", function () {
 
 	describe("Tagging a user in a comment", function() {
 		const teamspace = "teamSpace1";
-		const altUser = "commenterTeamspace1Model1JobA";
 		const password = "password";
 		const model = "5bfc11fa-50ac-b7e7-4328-83aa11fa50ac";
 		const issueId = "2eb8f760-7ac5-11e8-9567-6b401a084a90";
-		let altUserAgent;
 
 
 		it("should create a notification on the tagged user's messages", function(done) {
-			const comment = {comment : `@${altUser}`};
+			const comment = {comment : `@${commenterUser}`};
 			async.series([
 				function(done) {
 					teamspace1Agent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
@@ -2682,12 +2686,7 @@ describe("Issues", function () {
 						.expect(200, done);
 				},
 				function(done) {
-					altUserAgent = SessionTracker(request(server));
-					altUserAgent.login(altUser, password).then(()=>{done()});
-
-				},
-				function(done) {
-					altUserAgent.get("/notifications")
+					commenterAgent.get("/notifications")
 						.expect(200, function(err, res) {
 							const notification = res.body.find(item => item.type === "USER_REFERENCED" && item.issueId === issueId);
 							assert(notification);
@@ -2703,7 +2702,7 @@ describe("Issues", function () {
 
 		it("should create comment successful if the user tagged a user that doesn't not exist", function(done) {
 			const comment = {comment : "@doesntExist1234"};
-			altUserAgent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
+			commenterAgent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
 				.send(comment)
 				.expect(200, done);
 		});
@@ -2712,7 +2711,7 @@ describe("Issues", function () {
 			const comment = {comment : `@${username}`};
 			async.series([
 				function(done) {
-					altUserAgent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
+					commenterAgent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
 						.send(comment)
 						.expect(200, done);
 				},
@@ -2729,15 +2728,15 @@ describe("Issues", function () {
 
 		it("should NOT create a notification if the user is tagged in a quote", function(done) {
 			const comment = {comment : `>
-			@${altUser}`};
+			@${commenterUser}`};
 			async.waterfall([
-				deleteNotifications(altUserAgent),
-				function(args, next) {
-					agent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
+				deleteNotifications(commenterAgent),
+				function(next) {
+					teamspace1Agent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
 						.send(comment)
 						.expect(200, next);
 				},
-				fetchNotification(altUserAgent),
+				fetchNotification(commenterAgent),
 				(notifications, next) => {
 					expect(notifications, "There should not be any notifications").to.be.an("array").and.to.have.length(0);
 					next();
@@ -2759,7 +2758,7 @@ describe("Issues", function () {
 
 		const createAndPushIssue = (done) => {
 			async.waterfall([
-				createIssueTeamspace1(agent),
+				createIssueTeamspace1(teamspace1Agent),
 				(issue, next) => {
 					issues.push(issue);
 					next();
@@ -2780,7 +2779,7 @@ describe("Issues", function () {
 		});
 
 		const testForNoComment = (id, done) => {
-			agent.get(`/${teamspace}/${model}/issues/${id}`).expect(200, function(err , res) {
+			teamspace1Agent.get(`/${teamspace}/${model}/issues/${id}`).expect(200, function(err , res) {
 				const comments = res.body.comments;
 				expect(comments, "There should not be a comment").to.be.an("array").and.to.have.length(0);
 				return done(err);
@@ -2788,7 +2787,7 @@ describe("Issues", function () {
 		};
 
 		const testForReference = (referencedIssueId, otherIssueNumber, done) =>  {
-			agent.get(`/${teamspace}/${model}/issues/${referencedIssueId}`).expect(200, function(err , res) {
+			teamspace1Agent.get(`/${teamspace}/${model}/issues/${referencedIssueId}`).expect(200, function(err , res) {
 				const comments = res.body.comments;
 
 				expect(comments, "There should be one system comment").to.be.an("array").and.to.have.length(1);
@@ -2804,13 +2803,16 @@ describe("Issues", function () {
 		it("should create a system message when the issue has been referenced", function(done) {
 			const comment = {comment : `look at issue  #${issues[0].number} and #${issues[1].number} `};
 
+			console.log("hi?!");
 			async.series([
 				function(done) {
-					agent.post(`/${teamspace}/${model}/issues/${issues[2]._id}/comments`)
+					console.log("posting");
+					teamspace1Agent.post(`/${teamspace}/${model}/issues/${issues[2]._id}/comments`)
 						.send(comment)
 						.expect(200, done);
 				},
 				function(done) {
+					console.log("test for reference");
 					testForReference(issues[0]._id, issues[2].number, done);
 				},
 				function(done) {
@@ -2827,17 +2829,18 @@ describe("Issues", function () {
 		});
 
 		it("should have multiple system messages when the issue has been referenced several times", function(done) {
+
 			const comment = {comment : `#${issues[0].number} is interesting`};
 
 			async.series([
 				function(done) {
-					agent.post(`/${teamspace}/${model}/issues/${issues[1]._id}/comments`)
+					teamspace1Agent.post(`/${teamspace}/${model}/issues/${issues[1]._id}/comments`)
 						.send(comment)
 						.expect(200, done);
 				},
 
 				function(done) {
-					agent.get(`/${teamspace}/${model}/issues/${issues[0]._id}`).expect(200, function(err , res) {
+					teamspace1Agent.get(`/${teamspace}/${model}/issues/${issues[0]._id}`).expect(200, function(err , res) {
 						let comments = res.body.comments;
 						const [otherIssueNumber1, otherIssueNumber2] =  [issues[2].number.toString(), issues[1].number.toString()]
 							.sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
@@ -2870,7 +2873,7 @@ describe("Issues", function () {
 
 			async.series([
 				function(done) {
-					agent.post(`/${teamspace}/${model}/issues/${issues[7]._id}/comments`)
+					teamspace1Agent.post(`/${teamspace}/${model}/issues/${issues[7]._id}/comments`)
 						.send(comment)
 						.expect(200, done);
 				},
