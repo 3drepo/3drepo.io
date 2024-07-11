@@ -20,7 +20,7 @@ import { useEffect, useState } from 'react';
 
 // It uses axios config to pass the token so images are returned safely
 export const useAuthenticatedResource = (url: string, onError?) => {
-	const [blobUrl, setbaseBlobSrc] = useState<string>(undefined);
+	const [blobUrl, setbaseBlobUrl] = useState<string>(undefined);
 
 	useEffect(() => {
 		if (!url) return;
@@ -28,11 +28,11 @@ export const useAuthenticatedResource = (url: string, onError?) => {
 
 		(async () => {
 			try {
-				const response = await axios.get( url, { responseType: 'blob' });
+				const response = await axios.get(url, { responseType: 'blob' });
 				const objectUrl = URL.createObjectURL(response.data);
 				
 				if (!mounted) return;  // to avoid changing the state in unmounted components
-				setbaseBlobSrc(objectUrl);
+				setbaseBlobUrl(objectUrl);
 			} catch (e) {
 				onError?.(e);
 			}
