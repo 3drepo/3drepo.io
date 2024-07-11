@@ -16,7 +16,6 @@
  */
 
 import { federationsReducer } from '@/v5/store/federations/federations.redux';
-import { calibrationReducer } from '@/v5/store/calibration/calibration.redux';
 import { containersReducer } from '@/v5/store/containers/containers.redux';
 import { drawingsReducer } from '@/v5/store/drawings/drawings.redux';
 import { drawingRevisionsReducer } from '@/v5/store/drawings/revisions/drawingRevisions.redux';
@@ -36,7 +35,6 @@ import { viewerReducer } from '@/v5/store/viewer/viewer.redux';
 
 export default {
 	auth2: authReducer,
-	calibration: calibrationReducer,
 	containers: containersReducer,
 	containerRevisions: containerRevisionsReducer,
 	currentUser2: currentUserReducer,

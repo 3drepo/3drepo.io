@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { selectIsCalibrating } from '@/v5/store/calibration/calibration.selectors';
 import { createSelector } from 'reselect';
 
 export const selectMeasurementsDomain = (state) => state.measurements;
@@ -37,33 +36,24 @@ export const selectXyzDisplay = createSelector(
 );
 
 export const selectAreaMeasurements = createSelector(
-	selectMeasurementsDomain,
-	selectIsCalibrating,
-	(state, isCalibrating) => isCalibrating ? [] : state.areaMeasurements
+	selectMeasurementsDomain, (state) => state.areaMeasurements
 );
 
 export const selectLengthMeasurements = createSelector(
-	selectMeasurementsDomain,
-	selectIsCalibrating,
-	(state, isCalibrating) => isCalibrating ? [] : state.lengthMeasurements
+	selectMeasurementsDomain, (state) => state.lengthMeasurements
 );
 
 export const selectPointMeasurements = createSelector(
-	selectMeasurementsDomain,
-	selectIsCalibrating,
-	(state, isCalibrating) => isCalibrating ? [] : state.pointMeasurements
+	selectMeasurementsDomain, (state) => state.pointMeasurements
 );
 
 export const selectAngleMeasurements = createSelector(
-	selectMeasurementsDomain,
-	selectIsCalibrating,
-	(state, isCalibrating) => isCalibrating ? [] : state.angleMeasurements
+	selectMeasurementsDomain, (state) => state.angleMeasurements
 );
 
 export const selectPins = createSelector(
-	selectPointMeasurements, selectIsCalibrating,
-	(state, isCalibrating) =>
-		isCalibrating ? [] : state.map(({ customColor, ...measure }) => {
+	selectPointMeasurements, (state) =>
+		state.map(({ customColor, ...measure }) => {
 			const colour = customColor || measure.color;
 			return ({
 				id: measure.uuid,

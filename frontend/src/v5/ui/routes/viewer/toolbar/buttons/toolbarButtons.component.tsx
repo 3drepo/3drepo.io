@@ -21,13 +21,15 @@ import CoordinatesIcon from '@assets/icons/viewer/coordinates.svg';
 import InfoIcon from '@assets/icons/viewer/info.svg';
 import VerticalCalibrationIcon from '@assets/icons/viewer/vertical_calibration.svg';
 import CalibrationIcon from '@assets/icons/filled/calibration-filled.svg';
-import { BimActionsDispatchers, CalibrationActionsDispatchers, MeasurementsActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { BimHooksSelectors, CalibrationHooksSelectors, ModelHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
+import { BimActionsDispatchers, MeasurementsActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { BimHooksSelectors, ModelHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatMessage } from '@/v5/services/intl';
 import { ToolbarButton } from './toolbarButton.component';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { VerticalHeightContainer, VerticalHeightValue } from '../selectionToolbar/selectionToolbar.styles';
 import { PlaneType } from '@/v5/store/calibration/calibration.types';
+import { useContext } from 'react';
+import { CalibrationContext } from '../../../dashboard/projects/calibration/calibrationContext';
 
 export const HomeButton = () => (
 	<ToolbarButton
@@ -83,15 +85,14 @@ export const BimButton = () => {
 	);
 };
 export const CalibrationButton = () => {
-	const isCalibratingModel = CalibrationHooksSelectors.selectIsCalibratingModel();
-	const step = CalibrationHooksSelectors.selectStep();
+	const { isCalibrating3D, setIsCalibrating3D, step } = useContext(CalibrationContext);
 
 	return (
 		<ToolbarButton
 			Icon={CalibrationIcon}
 			hidden={step !== 0}
-			selected={isCalibratingModel}
-			onClick={() => CalibrationActionsDispatchers.setIsCalibratingModel(!isCalibratingModel)}
+			selected={isCalibrating3D}
+			onClick={() => setIsCalibrating3D(!isCalibrating3D)}
 			title={formatMessage({ id: 'viewer.toolbar.icon.calibrate', defaultMessage: 'Calibrate' })} />
 	);
 };

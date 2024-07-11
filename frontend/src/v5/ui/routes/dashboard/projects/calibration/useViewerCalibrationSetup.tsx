@@ -15,16 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export type Coord2D = [number, number];
-type Coord3D = [number, number, number];
+import { useContext, useEffect } from 'react';
+import { CalibrationContext } from './calibrationContext';
+import { CompareActionsDispatchers, TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
-type Vector<CoordType> = { start: CoordType | null, end: CoordType | null };
+export const useViewerCalibrationSetup = () => {
+	const { isCalibrating } = useContext(CalibrationContext);
 
-export type Vector2D = Vector<Coord2D>;
-export type Vector3D = Vector<Coord3D>;
-
-export enum PlaneType {
-	UPPER = 'upper',
-	LOWER = 'lower',
-}
-export type PlanesValues = { [PlaneType.UPPER]: number, [PlaneType.LOWER]: number };
+	useEffect(() => {
+		if (!isCalibrating) return;
+		ViewerGuiActionsDispatchers.resetPanels();
+		TicketsCardActionsDispatchers.resetState();
+		CompareActionsDispatchers.resetComponentState();
+	}, [isCalibrating]);
+};

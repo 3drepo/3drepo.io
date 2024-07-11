@@ -15,23 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
-import { CalibrationActions, CalibrationTypes, SetSelectedPlaneAction } from './calibration.redux';
-import { PlaneType } from './calibration.types';
-import { Viewer } from '@/v4/services/viewer/viewer';
 
-export function* setSelectedPlane({ selectedPlane }: SetSelectedPlaneAction) {
-	try {
-		if (selectedPlane === PlaneType.UPPER) {
-			Viewer.selectCalibrationToolUpperPlane();
-		} else {
-			Viewer.selectCalibrationToolLowerPlane();
-		}
-		yield put(CalibrationActions.setSelectedPlaneSuccess(selectedPlane));
-	} catch (error) {
-	}
-}
+import { Box, InfoIcon, TitleBar, Description, CloseIconContainer, Container } from './infoBox.styles';
+import CloseIcon from '@assets/icons/outlined/cross-outlined.svg';
 
-export default function* calibrationSaga() {
-	yield takeLatest(CalibrationTypes.SET_SELECTED_PLANE, setSelectedPlane);
-}
+export type InfoBoxProps = {
+	title: any,
+	description: any,
+	onClickClose: () => void,
+	className?: string,
+};
+export const InfoBox = ({ title, description, onClickClose, className }: InfoBoxProps) => (
+	<Container className={className}>
+		<Box>
+			<InfoIcon />
+			<TitleBar>
+				<div>{title}</div>
+				<CloseIconContainer onClick={onClickClose}>
+					<CloseIcon />
+				</CloseIconContainer>
+			</TitleBar>
+			<span />
+			<Description>{description}</Description>
+		</Box>
+	</Container>
+);

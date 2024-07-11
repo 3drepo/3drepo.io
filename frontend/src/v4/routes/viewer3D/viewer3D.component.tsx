@@ -14,13 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PureComponent, createRef } from 'react';
+import { PureComponent, createRef, useContext } from 'react';
 import { difference, differenceBy, isEqual } from 'lodash';
 import { dispatch } from '@/v4/modules/store';
 import { DialogActions } from '@/v4/modules/dialog';
 import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
 import { CalibrationToolbar } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationToolbar/calibrationToolbar.component';
 import { LifoQueue } from '@/v5/helpers/functions.helpers';
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
+import { useViewerCalibrationSetup } from '@/v5/ui/routes/dashboard/projects/calibration/useViewerCalibrationSetup';
 import {queuableFunction} from '../../helpers/async';
 
 import { ROUTES } from '../../constants/routes';
@@ -31,6 +33,7 @@ import { moveMeshes, resetMovedMeshes, transformationDiffChanges,
 transformationDiffRemoves } from '../../modules/sequences/sequences.helper';
 import { ViewerService } from '../../services/viewer/viewer';
 import { Border, ViewerContainer } from './viewer3D.styles';
+import { Calibration3DInfoBox } from './calibration3DInfoBox/calibration3DInfoBox.component';
 
 interface IProps {
 	location: any;
@@ -69,7 +72,7 @@ interface IProps {
 	isCalibrating: boolean;
 }
 
-export class Viewer3D extends PureComponent<IProps, any> {
+export class Viewer3DBase extends PureComponent<IProps, any> {
 	private containerRef = createRef<HTMLDivElement>();
 	public state = { updatesQueue: new LifoQueue((prevProps, currProps) => this.onComponentDidUpdate(prevProps, currProps), 1, false) };
 
@@ -279,6 +282,7 @@ export class Viewer3D extends PureComponent<IProps, any> {
 		return (
 			<>
 				<ViewerContainer visible={this.shouldBeVisible}>
+					<Calibration3DInfoBox />
 					<div
 						ref={this.containerRef}
 						className={this.props.className}
@@ -292,4 +296,21 @@ export class Viewer3D extends PureComponent<IProps, any> {
 			</>
 		);
 	}
+}
+
+const getCalibrationProps = (props) => ({
+	...props,
+	issuePins: [],
+	riskPins: [],
+	measurementPins: [],
+	ticketPins: [],
+	measurementsArea: [],
+	measurementsLength: [],
+	measurementsAngle: [],
+});
+
+export const Viewer3D = (props: Omit<IProps, 'isCalibrating'>) => {
+	const { isCalibrating } = useContext(CalibrationContext);
+	useViewerCalibrationSetup();
+	return (<Viewer3DBase {...(isCalibrating ? getCalibrationProps(props) : props)} isCalibrating={isCalibrating} />)
 }

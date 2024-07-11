@@ -15,27 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Viewer } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { UnityUtil } from '@/globals/unity-util';
-import { CalibrationActionsDispatchers, TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { CalibrationHooksSelectors, DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { isEqual } from 'lodash';
-import { EMPTY_VECTOR } from '@/v5/store/calibration/calibration.constants';
+import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
+import { CalibrationContext } from '../../calibrationContext';
 
 export const Calibration3DHandler = () => {
-	const step = CalibrationHooksSelectors.selectStep();
-	const isCalibratingModel = CalibrationHooksSelectors.selectIsCalibratingModel();
-	const modelCalibration = CalibrationHooksSelectors.selectModelCalibration();
-	const drawingId = CalibrationHooksSelectors.selectDrawingId(); 
-	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
+	const { isCalibrating3D, setIsCalibrating3D, vector3D, setVector3D } = useContext(CalibrationContext);
+	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
 	const [lastPickedPoint, setLastPickedPoint] = useState(null);
 
-	const resetVector3D = () => CalibrationActionsDispatchers.setModelCalibration(drawing?.calibration?.horizontal.model || EMPTY_VECTOR);
-
 	useEffect(() => {
-		if (isCalibratingModel) {
+		if (isCalibrating3D) {
 			const onPickPoint = ({ position }) => setLastPickedPoint(position);
 			TreeActionsDispatchers.stopListenOnSelections();
 			UnityUtil.enableSnapping();
@@ -46,40 +41,33 @@ export const Calibration3DHandler = () => {
 				UnityUtil.disableSnapping();
 				Viewer.off(VIEWER_EVENTS.PICK_POINT, onPickPoint);
 			};
-		} else if (!modelCalibration.end) {
-			resetVector3D();
 		}
-	}, [isCalibratingModel]);
+	}, [isCalibrating3D]);
 
 	useEffect(() => {
-		const { start, end } = modelCalibration;
+		if (!lastPickedPoint) return;
+
+		const [start, end] = vector3D;
 
 		if (end || !start) {
-			CalibrationActionsDispatchers.setModelCalibration({ start: lastPickedPoint, end: null });
+			setVector3D([lastPickedPoint, null]);
 		} else if (!isEqual(start, lastPickedPoint)) {
-			CalibrationActionsDispatchers.setModelCalibration({ start, end: lastPickedPoint });
+			setVector3D([start, lastPickedPoint]);
 		}
 	}, [lastPickedPoint]);
 
 	useEffect(() => {
-		UnityUtil.setCalibrationToolVector(modelCalibration.start, modelCalibration.end);
-	}, [modelCalibration]);
+		Viewer.isModelReady().then(() => UnityUtil.setCalibrationToolVector(...vector3D));
+	}, [vector3D]);
 
 	useEffect(() => {
 		UnityUtil.setCalibrationToolMode('Vector');
+		setLeftPanelRatio(.5);
+
 		return () => {
-			UnityUtil.setCalibrationToolMode('None');
-			CalibrationActionsDispatchers.setIsCalibratingModel(false);
+			setIsCalibrating3D(false);
 		};
 	}, []);
-
-	useEffect(() => {
-		if (step !== 0) {
-			CalibrationActionsDispatchers.setIsCalibratingModel(false);
-		}
-	}, [step]);
-
-	useEffect(() => { resetVector3D(); }, []);
 
 	return null;
 };

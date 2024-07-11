@@ -18,17 +18,16 @@
 import { Viewer3D } from '@/v4/routes/viewer3D';
 import { Viewer2D } from '@components/viewer/drawingViewer/viewer2D.component';
 import { useLocation } from 'react-router-dom';
-import { SplitPane, LeftPane, Container } from './viewerCanvases.styles';
+import { SplitPane, LeftPane } from './viewerCanvases.styles';
 import { ViewerCanvasesContext } from '../../viewer/viewerCanvases.context';
 import { useContext } from 'react';
 import { CalibrationHeader } from '../projects/calibration/calibrationHeader/calibrationHeader.component';
-import { CalibrationStep } from '../projects/calibration/calibrationStep/calibrationStep.component';
-import { CalibrationHooksSelectors } from '@/v5/services/selectorsHooks';
+import { CalibrationContext } from '../projects/calibration/calibrationContext';
 
 export const ViewerCanvases = () => {
 	const { pathname } = useLocation();
 	const { is2DOpen, leftPanelRatio, setLeftPanelRatio } = useContext(ViewerCanvasesContext);
-	const isCalibrating = CalibrationHooksSelectors.selectIsCalibrating();
+	const { isCalibrating } = useContext(CalibrationContext);
 
 	const dragFinish = (newSize) => setLeftPanelRatio(newSize / window.innerWidth);
 
@@ -43,11 +42,6 @@ export const ViewerCanvases = () => {
 			>
 				<LeftPane>
 					<Viewer3D location={{ pathname }} />
-					{isCalibrating && (
-						<Container>
-							<CalibrationStep />
-						</Container>
-					)}
 				</LeftPane>
 				{is2DOpen && <Viewer2D />}
 			</SplitPane>

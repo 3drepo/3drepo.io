@@ -17,13 +17,13 @@
 
 import { Tickets } from '@/v5/ui/routes/viewer/tickets/tickets.component';
 import { isEmpty, isEqual } from 'lodash';
-import { PureComponent } from 'react';
+import { PureComponent, useContext } from 'react';
 import { AdditionalProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { DrawingsListCard } from '@/v5/ui/routes/viewer/drawings/drawingsList/drawingsListCard.component';
 import { ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { CalibrationHooksSelectors } from '@/v5/services/selectorsHooks';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { getCalibrationViewerLeftPanels, getViewerLeftPanels, VIEWER_PANELS } from '../../constants/viewerGui';
 import { getWindowHeight, getWindowWidth, renderWhenTrue } from '../../helpers/rendering';
@@ -104,7 +104,7 @@ interface IState {
 	loaderProgress: number;
 }
 
-export class ViewerGuiBase extends PureComponent<IProps, IState> {
+class ViewerGuiBase extends PureComponent<IProps, IState> {
 
 	private get urlParams() {
 		return this.props.match.params;
@@ -233,10 +233,10 @@ export class ViewerGuiBase extends PureComponent<IProps, IState> {
 	private handleMeasureRemoved = (measurementId) => this.props.removeMeasurement(measurementId);
 
 	public render() {
-		const { leftPanels, rightPanels, draggablePanels, isFocusMode, viewer } = this.props;
+		const { leftPanels, rightPanels, draggablePanels, isFocusMode, viewer, isCalibrating } = this.props;
 
 		return (
-			<GuiContainer>
+			<GuiContainer $isCalibrating={isCalibrating}>
 				<CloseFocusModeButton isFocusMode={isFocusMode} />
 				<Container id="gui-container" className={this.props.className} hidden={isFocusMode}>
 					<RevisionsSwitch />
@@ -333,7 +333,7 @@ export class ViewerGuiBase extends PureComponent<IProps, IState> {
 	)
 }
 
-export const ViewerGui = (props) => {
-	const isCalibrating = CalibrationHooksSelectors.selectIsCalibrating();
-	return <ViewerGuiBase {...props} isCalibrating={isCalibrating} />;
+export const ViewerGui = (props: Omit<IProps, 'isCalibrating'>) => {
+	const { isCalibrating } = useContext(CalibrationContext);
+	return <ViewerGuiBase {...props} isCalibrating={isCalibrating} />
 };

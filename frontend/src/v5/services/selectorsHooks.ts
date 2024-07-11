@@ -18,7 +18,6 @@
 import { createHooksSelectors } from '@/v5/helpers/selectorsHooks.helper';
 import * as AuthSelectors from '@/v5/store/auth/auth.selectors';
 import * as BimSelectors from '@/v4/modules/bim/bim.selectors';
-import * as CalibrationSelectors from '@/v5/store/calibration/calibration.selectors';
 import * as CanvasHistorySelectors from '@/v4/modules/canvasHistory/canvasHistory.selectors';
 import * as ContainersSelectors from '@/v5/store/containers/containers.selectors';
 import * as ContainerRevisionsSelectors from '@/v5/store/containers/revisions/containerRevisions.selectors';
@@ -29,7 +28,6 @@ import * as DialogsSelectors from '@/v5/store/dialogs/dialogs.selectors';
 import * as ProjectsSelectors from '@/v5/store/projects/projects.selectors';
 import * as FederationsSelectors from '@/v5/store/federations/federations.selectors';
 import * as GroupsSelectors from '@/v4/modules/groups/groups.selectors';
-import * as MeasurementsSelectors from '@/v4/modules/measurements/measurements.selectors';
 import * as ModelSelectors from '@/v4/modules/model/model.selectors';
 import * as RouterSelectors from '@/v4/modules/router/router.selectors';
 import * as SequencesSelctors from '@/v4/modules/sequences/sequences.selectors';
@@ -42,9 +40,9 @@ import * as UsersSelectors from '@/v5/store/users/users.selectors';
 import * as ViewerSelectors from '@/v5/store/viewer/viewer.selectors';
 import * as ViewerGuiSelectors from '@/v4/modules/viewerGui/viewerGui.selectors';
 
+
 export const AuthHooksSelectors = createHooksSelectors(AuthSelectors);
 export const BimHooksSelectors = createHooksSelectors(BimSelectors);
-export const CalibrationHooksSelectors = createHooksSelectors(CalibrationSelectors);
 export const ContainersHooksSelectors = createHooksSelectors(ContainersSelectors);
 export const CanvasHistoryHooksSelectors = createHooksSelectors(CanvasHistorySelectors);
 export const CurrentUserHooksSelectors = createHooksSelectors(CurrentUserSelectors);
@@ -53,7 +51,6 @@ export const DrawingRevisionsHooksSelectors = createHooksSelectors(DrawingRevisi
 export const DialogsHooksSelectors = createHooksSelectors(DialogsSelectors);
 export const FederationsHooksSelectors = createHooksSelectors(FederationsSelectors);
 export const GroupsHooksSelectors = createHooksSelectors(GroupsSelectors);
-export const MeasurementsHooksSelectors = createHooksSelectors(MeasurementsSelectors);
 export const ModelHooksSelectors = createHooksSelectors(ModelSelectors);
 export const ProjectsHooksSelectors = createHooksSelectors(ProjectsSelectors);
 export const RouterHooksSelectors = createHooksSelectors(RouterSelectors);

@@ -18,17 +18,25 @@
 import { StepConnector, Stepper as StepperBase } from '@mui/material';
 import { Button } from '@controls/button';
 import styled from 'styled-components';
-import { Link as LinkBase } from 'react-router-dom';
+
+export const StepperWrapper = styled.div`
+	width: calc(100% - 295px);
+`;
 
 export const Stepper = styled(StepperBase)`
 	border-radius: 0;
 	box-shadow: none;
+	width: 130%;
+	margin-left: -15%;
 
 	.MuiStep-root {
-		width: 200px;
 		border-bottom: none;
 
 		.MuiStepLabel-label {
+			margin: 4px auto 0;
+			max-width: 63%;
+			${({ theme }) => theme.typography.label}
+
 			&, &.Mui-active, &.Mui-completed, &.Mui-disabled {
 				color: ${({ theme }) => theme.palette.primary.contrast};
 			}
@@ -41,7 +49,6 @@ export const Stepper = styled(StepperBase)`
 			display: flex;
 			justify-content: center;
 			align-items: center;
-			font-weight: 700;
 			position: relative;
 			z-index: 1;
 
@@ -86,13 +93,18 @@ export const Container = styled.div`
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
-	background-color: ${({ theme }) => theme.palette.secondary.main};
+	height: 58px;
+	background-image: ${({ theme }) => theme.palette.gradient.secondary};
 `;
 
 export const ButtonsContainer = styled.div`
 	display: grid;
 	place-content: center;
-	grid-template-columns: repeat(3, 1fr);
+	grid-auto-flow: column;
+
+	button {
+		margin-left: 0;
+	}
 `;
 
 export const ContrastButton = styled(Button).attrs({
@@ -118,7 +130,3 @@ export const PrimaryButton = styled(Button).attrs({
 	variant: 'contained',
 	color: 'primary',
 })``;
-
-export const Link = styled(LinkBase)`
-	text-decoration: none;
-`;

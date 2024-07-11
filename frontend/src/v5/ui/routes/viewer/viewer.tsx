@@ -29,8 +29,8 @@ import { SpinnerLoader } from '@controls/spinnerLoader';
 import { CentredContainer } from '@controls/centredContainer';
 import { TicketsCardViews } from './tickets/tickets.constants';
 import { ViewerCanvases } from '../dashboard/viewerCanvases/viewerCanvases.component';
-import { CalibrationHandler } from '../dashboard/projects/calibration/calibrationHandler.component';
 import { ViewerGui } from '@/v4/routes/viewerGui';
+import { CalibrationContextComponent } from '../dashboard/projects/calibration/calibrationContext';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
@@ -103,12 +103,11 @@ export const Viewer = () => {
 	};
 
 	return (
-		<>
-			<CalibrationHandler />
+		<CalibrationContextComponent>
 			<OpenTicketFromUrl />
 			<CheckLatestRevisionReadiness />
 			<ViewerCanvases />
 			<ViewerGui match={v4Match} key={containerOrFederation} />
-		</>
+		</CalibrationContextComponent>
 	);
 };

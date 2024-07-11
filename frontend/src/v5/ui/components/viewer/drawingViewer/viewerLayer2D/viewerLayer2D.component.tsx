@@ -22,7 +22,7 @@ import { isEqual } from 'lodash';
 import { SvgArrow } from './svgArrow/svgArrow.component';
 import { SvgCircle } from './svgCircle/svgCircle.component';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
-import { Coord2D, Vector2D } from '@/v5/store/calibration/calibration.types';
+import { Coord2D, Vector2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 
 export type ViewBoxType = ReturnType<PanZoomHandler['getOriginalSize']> & ReturnType<PanZoomHandler['getTransform']>;
 type ViewerLayer2DProps = {
@@ -32,8 +32,8 @@ type ViewerLayer2DProps = {
 	onChange?: (arrow: Vector2D) => void;
 };
 export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2DProps) => {
-	const [offsetStart, setOffsetStart] = useState<Coord2D>(value?.start || null);
-	const [offsetEnd, setOffsetEnd] = useState<Coord2D>(value?.end || null);
+	const [offsetStart, setOffsetStart] = useState<Coord2D>(value?.[0] || null);
+	const [offsetEnd, setOffsetEnd] = useState<Coord2D>(value?.[1] || null);
 	const previousViewBox = useRef<ViewBoxType>(null);
 	const [mousePosition, setMousePosition] = useState<Coord2D>(null);
 	const [drawingId] = useSearchParam('drawingId');
@@ -64,7 +64,7 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 			setOffsetStart(mousePosition);
 		} else {
 			setOffsetEnd(mousePosition);
-			onChange?.({ start: offsetStart, end: mousePosition });
+			onChange?.([offsetStart, mousePosition]);
 		}
 	};
 

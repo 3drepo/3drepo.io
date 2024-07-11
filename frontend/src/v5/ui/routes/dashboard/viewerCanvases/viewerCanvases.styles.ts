@@ -23,7 +23,7 @@ import { ComponentToString } from '@/v5/helpers/react.helper';
 import { OverlappingContainer } from '@controls/overlappingContainer/overlappingContainer.styles';
 
 export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps> & { $isCalibrating: boolean }>`
-	height: calc(100vh - ${({ $isCalibrating }) => $isCalibrating ? 142 : 62}px) !important;
+	height: calc(100vh - ${({ $isCalibrating }) => $isCalibrating ? 120 : 62}px) !important;
 	.Resizer {
 		box-sizing: border-box;
 		background-clip: padding-box;
@@ -84,8 +84,4 @@ export const LeftPane = styled(OverlappingContainer)`
 	width: 100%;
 	height: 100%;
 	pointer-events: none;
-`;
-
-export const Container = styled.div`
-	margin: auto;
 `;

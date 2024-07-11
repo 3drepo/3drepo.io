@@ -15,12 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const EMPTY_VECTOR = { start: null, end: null };
+const UNITS_CONVERTION_FACTORS_TO_METRES = {
+	'm': 1,
+	'dm': 10,
+	'cm': 100,
+	'mm': 1000,
+	'ft': 3.28084,
+} as const;
 
-export const EMPTY_CALIBRATION = {
-	horizontal: {
-		model: EMPTY_VECTOR,
-		drawing: EMPTY_VECTOR,
-	}, 
-	verticalRange: null,
+export const getUnitsConvertionFactor = (drawingUnits, modelUnits) => {
+	if (!drawingUnits) return 1;
+	return UNITS_CONVERTION_FACTORS_TO_METRES[drawingUnits] / UNITS_CONVERTION_FACTORS_TO_METRES[modelUnits];
 };
+
+export const convertCoordUnits = (coord, convertionFactor: number) => coord?.map((point) => point * convertionFactor) || null;
+export const convertVectorUnits = (vector, convertionFactor: number) => vector.map((coord) => convertCoordUnits(coord, convertionFactor));

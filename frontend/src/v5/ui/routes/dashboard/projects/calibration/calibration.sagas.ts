@@ -15,18 +15,38 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { put, takeLatest } from 'redux-saga/effects';
+import { CalibrationActions, CalibrationTypes, SetSelectedPlaneAction } from './calibration.redux';
+import { PlaneType } from './calibration.types';
+import { Viewer } from '@/v4/services/viewer/viewer';
 import { useContext, useEffect } from 'react';
 import { BasicStep } from '../basicStep.component';
-import { UnityUtil } from '@/globals/unity-util';
 import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
+import { UnityUtil } from '@/globals/unity-util';
 
-export const Calibration2DStep = () => {
+export const VerticalSpatialBoundariesStep = () => {
 	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
 
 	useEffect(() => {
-		UnityUtil.setCalibrationToolMode('Vector');
-		setLeftPanelRatio(.5);
+		setLeftPanelRatio(1);
+		UnityUtil.setCalibrationToolMode('Vertical');
 	}, []);
 
-	return (<BasicStep text="2d calibration" />);
+	return (<BasicStep text="Vertical spatial boundaries" />);
 };
+
+export function* setSelectedPlane({ selectedPlane }: SetSelectedPlaneAction) {
+	try {
+		if (selectedPlane === PlaneType.UPPER) {
+			Viewer.selectCalibrationToolUpperPlane();
+		} else {
+			Viewer.selectCalibrationToolLowerPlane();
+		}
+		yield put(CalibrationActions.setSelectedPlaneSuccess(selectedPlane));
+	} catch (error) {
+	}
+}
+
+export default function* calibrationSaga() {
+	yield takeLatest(CalibrationTypes.SET_SELECTED_PLANE, setSelectedPlane);
+}

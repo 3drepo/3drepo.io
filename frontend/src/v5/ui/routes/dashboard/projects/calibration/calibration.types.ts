@@ -15,28 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { mapValues } from 'lodash';
-import { Circle, Svg } from './svgCircle.styles';
-import { Coord2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
+export type Coord2D = [number, number];
+type Coord3D = [number, number, number];
 
-type SvgCircleProps = { coord: Coord2D, scale: number };
-export const SvgCircle = ({ coord, scale }: SvgCircleProps) => {
-	const measures = mapValues({
-		strokeWidth: 1,
-		radius: 3,
-	}, (val) => val / scale);
-	return (
-		<Svg
-			xmlns="http://www.w3.org/2000/svg"
-			version="1.1"
-			xmlnsXlink="http://www.w3.org/1999/xlink"
-		>
-			<Circle
-				cx={coord[0] + measures.strokeWidth / 2}
-				cy={coord[1] + measures.strokeWidth / 2}
-				r={measures.radius}
-				strokeWidth={measures.strokeWidth}
-			/>
-		</Svg>
-	);
-};
+export type Vector<CoordType> = [CoordType | null, CoordType | null];
+
+export type Vector2D = Vector<Coord2D>;
+export type Vector3D = Vector<Coord3D>;
+
+export enum PlaneType {
+	UPPER = 'upper',
+	LOWER = 'lower',
+}
+export type PlanesValues = { [PlaneType.UPPER]: number, [PlaneType.LOWER]: number };

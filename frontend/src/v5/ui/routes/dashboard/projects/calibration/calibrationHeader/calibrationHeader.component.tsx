@@ -15,75 +15,80 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useParams, generatePath } from 'react-router-dom';
-import { Stepper, Container, ButtonsContainer, ContrastButton, Connector, PrimaryButton, Link } from './calibrationHeader.styles';
+import { useParams, useHistory } from 'react-router-dom';
+import { Stepper, Container, ButtonsContainer, ContrastButton, Connector, PrimaryButton, StepperWrapper } from './calibrationHeader.styles';
 import { Step, StepLabel } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
-import { CalibrationActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CalibrationState } from '@/v5/store/drawings/drawings.types';
-import { CalibrationHooksSelectors } from '@/v5/services/selectorsHooks';
-import { DRAWINGS_ROUTE } from '@/v5/ui/routes/routes.constants';
-import { EMPTY_VECTOR } from '@/v5/store/calibration/calibration.constants';
+import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
+import { useContext } from 'react';
+import { CalibrationContext } from '../calibrationContext';
 
 const STEPS = [
-	formatMessage({ defaultMessage: '3D Calibration Points', id: 'calibration.step.3dCalibration' }),
-	formatMessage({ defaultMessage: '2D Calibration Points', id: 'calibration.step.2dCalibration' }),
-	formatMessage({ defaultMessage: 'Vertical Spatial Boundaries', id: 'calibration.step.verticalSpatialBoundaries' }),
+	formatMessage({ defaultMessage: '3D Alignment', id: 'calibration.step.3dCalibration' }),
+	formatMessage({ defaultMessage: '2D Alignment', id: 'calibration.step.2dCalibration' }),
+	formatMessage({ defaultMessage: '2D Vertical Extents', id: 'calibration.step.verticalExtents' }),
 ];
 
 export const CalibrationHeader = () => {
-	const { teamspace, project } = useParams();
-	const step = CalibrationHooksSelectors.selectStep();
-	const isStepValid = CalibrationHooksSelectors.selectIsStepValid();
-	const origin = CalibrationHooksSelectors.selectOrigin() || generatePath(DRAWINGS_ROUTE, { teamspace, project });
-	const modelCalibration = CalibrationHooksSelectors.selectModelCalibration();
-	const drawingId = CalibrationHooksSelectors.selectDrawingId();
-
+	const history = useHistory();
+	const { teamspace, project, containerOrFederation } = useParams();
+	const { step, setStep, isStepValid, vector3D, drawingId, origin } = useContext(CalibrationContext);
+	const selectedModel = FederationsHooksSelectors.selectFederationById(containerOrFederation)
+		|| ContainersHooksSelectors.selectContainerById(containerOrFederation);
 	const isLastStep = step === 2;
 
 	const getIsStepValid = () => {
-		if (step === 0) return !!(modelCalibration.start && modelCalibration.end);
+		if (step === 0) return !!(vector3D[0] && vector3D[1]);
 		return isStepValid;
 	};
 
-	const handleConfirm = () => DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawingId, {
-		calibration: {
-			state: CalibrationState.CALIBRATED,
-			horizontal: {
-				model: modelCalibration,
-				drawing: EMPTY_VECTOR,
+	const handleEndCalibration = () => history.push(origin);
+
+	const handleConfirm = () => {
+		handleEndCalibration();
+		DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawingId, {
+			calibration: {
+				state: CalibrationState.CALIBRATED,
+				units: selectedModel.unit,
+				horizontal: {
+					model: vector3D,
+					drawing: EMPTY_VECTOR,
+				},
 			},
-		},
-	});
+		});
+	};
 
 	return (
 		<Container>
-			<Stepper activeStep={step} alternativeLabel connector={<Connector />} >
-				{STEPS.map((label) => (
-					<Step key={label}>
-						<StepLabel StepIconComponent={({ icon }) => icon}>{label}</StepLabel>
-					</Step>
-				))}
-			</Stepper>
+			<StepperWrapper>
+				<Stepper activeStep={step} alternativeLabel connector={<Connector />} >
+					{STEPS.map((label) => (
+						<Step key={label}>
+							<StepLabel StepIconComponent={({ icon }) => icon}>{label}</StepLabel>
+						</Step>
+					))}
+				</Stepper>
+			</StepperWrapper>
 			<ButtonsContainer>
-				<ContrastButton onClick={() => CalibrationActionsDispatchers.setStep(step - 1)} disabled={step === 0}>
-					<FormattedMessage defaultMessage="Back" id="calinration.button.back" />
-				</ContrastButton>
-				<ContrastButton>
-					<Link to={origin}>
-						<FormattedMessage defaultMessage="Cancel" id="calinration.button.cancel" />
-					</Link>
+				{step > 0 && (
+					<ContrastButton onClick={() => setStep(step - 1)}>
+						<FormattedMessage defaultMessage="Back" id="calibration.button.back" />
+					</ContrastButton>
+				)}
+				<ContrastButton onClick={handleEndCalibration}>
+					<FormattedMessage defaultMessage="Cancel" id="calibration.button.cancel" />
 				</ContrastButton>
 				{isLastStep ? (
 					<PrimaryButton disabled={!getIsStepValid()} onClick={handleConfirm}>
-						<Link to={origin}>
-							<FormattedMessage defaultMessage="Confirm" id="calinration.button.confirm" />
-						</Link>
+						<FormattedMessage defaultMessage="Confirm" id="calibration.button.confirm" />
 					</PrimaryButton>
 				) : (
-					<PrimaryButton onClick={() => CalibrationActionsDispatchers.setStep(step + 1)} disabled={!getIsStepValid()}>
-						<FormattedMessage defaultMessage="Continue" id="calinration.button.continue" />
+					<PrimaryButton onClick={() => setStep(step + 1)} disabled={!getIsStepValid()}>
+						<FormattedMessage defaultMessage="Continue" id="calibration.button.continue" />
 					</PrimaryButton>
 				)}
 			</ButtonsContainer>

@@ -15,33 +15,66 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect } from 'react';
-import { Transformers, useSearchParam } from '../../../useSearchParam';
-import { CalibrationActionsDispatchers, CompareActionsDispatchers, TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { useParams } from 'react-router-dom';
+import { useContext, useEffect } from 'react';
+import { CompareActionsDispatchers, ContainersActionsDispatchers, FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { useParams, generatePath } from 'react-router-dom';
+import { ContainersHooksSelectors, DrawingsHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { UnityUtil } from '@/globals/unity-util';
+import { Calibration3DHandler } from './calibrationStep/calibration3DHandler/calibration3DHandler.component';
+import { Calibration2DStep } from './calibrationStep/calibration2DStep/calibration2DStep.component';
+import { VerticalSpatialBoundariesStep } from './calibrationStep/verticalSpatialBoundariesStep/verticalSpatialBoundariesStep.component';
+import { ViewerCanvasesContext } from '../../../viewer/viewerCanvases.context';
+import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { CalibrationContext } from './calibrationContext';
+import { DRAWINGS_ROUTE } from '../../../routes.constants';
 
 export const CalibrationHandler = () => {
-	const { revision, containerOrFederation } = useParams();
-	const [isCalibrating] = useSearchParam('isCalibrating', Transformers.BOOLEAN);
-	const [drawingId] = useSearchParam('drawingId');
+	const { teamspace, project, revision, containerOrFederation } = useParams();
+	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
+	const { step, drawingId, setVector3D, setVector2D, setOrigin, setStep, setIsCalibrating3D, origin } = useContext(CalibrationContext);
+	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
+	const horizontalCalibration = DrawingsHooksSelectors.selectHorizontalCalibration(drawingId, containerOrFederation);
+
+	const isFed = modelIsFederation(containerOrFederation);
+	const selectedModel = isFed
+		? FederationsHooksSelectors.selectFederationById(containerOrFederation)
+		: ContainersHooksSelectors.selectContainerById(containerOrFederation);
 
 	useEffect(() => {
-		CalibrationActionsDispatchers.setStep(0);
-		CalibrationActionsDispatchers.setIsStepValid(false);
-	}, [containerOrFederation, revision, isCalibrating]);
+		setStep(0);
+		setIsCalibrating3D(false);
+	}, [selectedModel, revision, drawing]);
 
 	useEffect(() => {
-		CalibrationActionsDispatchers.setIsCalibrating(isCalibrating);
-		if (isCalibrating) {
-			ViewerGuiActionsDispatchers.resetPanels();
-			TicketsCardActionsDispatchers.resetState();
-			CompareActionsDispatchers.resetComponentState();
+		setVector3D(horizontalCalibration.model);
+		setVector2D(horizontalCalibration.drawing);
+	}, [horizontalCalibration]);
+
+	useEffect(() => {
+		CompareActionsDispatchers.resetComponentState();
+		if (isFed) {
+			FederationsActionsDispatchers.fetchFederationSettings(teamspace, project, containerOrFederation);
+		} else {
+			ContainersActionsDispatchers.fetchContainerSettings(teamspace, project, containerOrFederation);
 		}
-	}, [isCalibrating]);
 
-	useEffect(() => {
-		CalibrationActionsDispatchers.setDrawingId(drawingId);
-	}, [drawingId]);
-	
-	return null;
+		if (!origin) {
+			setOrigin(generatePath(DRAWINGS_ROUTE, { teamspace, project }));
+		}
+
+		return () => {
+			UnityUtil.setCalibrationToolVector(null, null);
+			UnityUtil.setCalibrationToolMode('None');
+			setLeftPanelRatio(0.5);
+			setOrigin('');
+		};
+	}, []);
+
+	return (
+		<>
+			{step === 0 && <Calibration3DHandler />}
+			{step === 1 && <Calibration2DStep />}
+			{step === 2 && <VerticalSpatialBoundariesStep />}
+		</>
+	);
 };
