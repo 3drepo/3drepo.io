@@ -20,6 +20,6 @@ import { useAuthenticatedImg } from './authenticatedImage.hooks';
 
 export const AuthAvatarMui = (props) => {
 	const authSrc = useAuthenticatedImg(props.src, props.onError);
-	return (<Avatar src={authSrc} {...props} />);
+	return (<Avatar {...props}  src={authSrc} />);
 };
 

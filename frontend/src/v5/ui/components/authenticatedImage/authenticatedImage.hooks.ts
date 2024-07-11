@@ -20,10 +20,11 @@ import { useEffect, useState } from 'react';
 
 // It uses axios config to pass the token so images are returned safely
 export const useAuthenticatedImg = (src: string, onError?) => {
-	const [base64Src, setbase64Src] = useState<string>(undefined);
+	const [blobSrc, setbaseBlobSrc] = useState<string>(undefined);
 
 	useEffect(() => {
 		if (!src) return;
+		let mounted = true;
 
 		(async () => {
 			try {
@@ -34,13 +35,15 @@ export const useAuthenticatedImg = (src: string, onError?) => {
 				});
 				
 				const objectUrl = URL.createObjectURL(response.data);
-				setbase64Src(objectUrl);
+				if (!mounted) return;  // to avoid changing the state in unmounted components
+				setbaseBlobSrc(objectUrl);
 			} catch (e) {
 				onError?.(e);
 			}
 		})();
 
+		return () => { mounted = false;};
 	}, [src]);
 
-	return base64Src;
+	return blobSrc;
 };
