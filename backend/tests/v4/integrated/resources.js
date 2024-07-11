@@ -49,21 +49,13 @@ describe("Resources ", function () {
 
 	let server;
 	before(async function() {
-		await new Promise((resolve) => {
-			server = app.listen(8080, () => {
-				console.log("API test server is listening on port 8080!");
-				resolve();
-			});
-		});
-
 		agents = await loginUsers(usernames, password);
+		server = agents.server
+
 	});
 
-	after(function(done) {
-		server.close(function() {
-			console.log("API test server is closed");
-			done();
-		});
+	after(async function() {
+		await agents.done()
 	});
 
 	it("of file type should be able to be attached to an issue", function(done) {

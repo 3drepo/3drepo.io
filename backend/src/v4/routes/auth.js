@@ -30,8 +30,6 @@ const User = require("../models/user");
 const UsersV5 = require(`${v5Path}/processors/users`);
 const { fileExtensionFromBuffer } = require(`${v5Path}/utils/helper/typeCheck`);
 
-const { respond: respondV5 } = require(`${v5Path}/utils/responder`);
-
 const Mailer = require("../mailer/mailer");
 const httpsPost = require("../libs/httpsReq").post;
 
@@ -39,7 +37,7 @@ const FileType = require("file-type");
 
 const multer = require("multer");
 const { fileExists } = require("../models/fileRef");
-const { getUserByUsernameOrEmail, isSsoUser } = require("../../v5/models/users");
+const { isSsoUser } = require("../../v5/models/users");
 
 /**
  * @api {get} /version Application version
@@ -451,24 +449,6 @@ router.put("/:account", middlewares.isAccountAdmin, updateUser);
  */
 router.put("/:account/password", resetPassword);
 
-function login(req, res, next) {
-	if (req?.session?.user?.username) {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.ALREADY_LOGGED_IN, responseCodes.ALREADY_LOGGED_IN);
-	}
-
-	const { user, password } = req.body;
-	UsersV5.login(user, password).then(() => {
-		req.loginData = {username: user};
-		next();
-	}).catch((err) =>{
-		respondV5(req, res, err);
-	});
-}
-
-function checkLogin(req, res, next) {
-	responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, { username: req.session.user.username });
-}
-
 async function updateUser(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 
@@ -592,41 +572,6 @@ function verify(req, res, next) {
 	}).catch(err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? err.resCode : err);
 	});
-}
-
-function forgotPassword(req, res, next) {
-	const responsePlace = utils.APIInfo(req);
-
-	getUserByUsernameOrEmail(req.body.userNameOrEmail, { "customData.sso": 1 }).then(({ customData: { sso } }) => {
-		if (sso) {
-			return responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
-		}
-
-		if (Object.prototype.toString.call(req.body.userNameOrEmail) === "[object String]") {
-			User.getForgotPasswordToken(req.body.userNameOrEmail).then(data => {
-				if (data.email && data.token && data.username) {
-					// send forgot password email
-					return Mailer.sendResetPasswordEmail(data.email, {
-						token: data.token,
-						email: data.email,
-						username: data.username,
-						firstName: data.firstName
-					}).catch(err => {
-						// catch email error instead of returning to client
-						systemLogger.logDebug(`Email error - ${err.message}`);
-						return Promise.reject(responseCodes.PROCESS_ERROR("Internal Email Error"));
-					});
-				}
-			}).then(emailRes => {
-				systemLogger.logInfo("Email info - " + JSON.stringify(emailRes));
-				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
-			}).catch(err => {
-				responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? err.resCode : err);
-			});
-		} else {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
-		}
-	}).catch(responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {}));
 }
 
 function getAvatar(req, res, next) {
