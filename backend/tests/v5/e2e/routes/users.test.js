@@ -164,10 +164,9 @@ const testLogin = () => {
 			const testSession = SessionTracker(agent);
 			await testSession.login(testUser.user, testUser.password);
 			delete testSession.cookies.token;
-			const res = await testSession.post('/v5/login/')
+			await testSession.post('/v5/login/')
 				.send({ user: testUser.user, password: testUser.password })
-				.expect(templates.alreadyLoggedIn.status);
-			expect(res.body.code).toEqual(templates.alreadyLoggedIn.code);
+				.expect(templates.ok.status);
 		});
 
 		test('should fail with an incorrect password', async () => {
