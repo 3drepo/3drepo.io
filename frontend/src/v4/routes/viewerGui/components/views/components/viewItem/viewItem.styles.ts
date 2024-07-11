@@ -24,7 +24,7 @@ import ShareIcon from '@mui/icons-material/Share';
 import { Form } from 'formik';
 import styled, { css } from 'styled-components';
 
-import { AuthImg } from '@components/authenticatedImage/authImg.component';
+import { AuthImg } from '@components/authenticatedResource/authImg.component';
 import { FONT_WEIGHT } from '../../../../../../styles';
 import { COLOR } from '../../../../../../styles';
 

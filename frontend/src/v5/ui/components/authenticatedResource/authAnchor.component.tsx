@@ -14,12 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Avatar } from '@mui/material';
-import { useAuthenticatedImg } from './authenticatedImage.hooks';
+
+import { useAuthenticatedResource } from './authenticatedResource.hooks';
 
 
-export const AuthAvatarMui = (props) => {
-	const authSrc = useAuthenticatedImg(props.src, props.onError);
-	return (<Avatar {...props}  src={authSrc} />);
+export const AuthAnchor = (props: React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>) => {
+	const authHref = useAuthenticatedResource(props.href, props.onError);
+	return (<a {...props} href={authHref}  />);
 };
 

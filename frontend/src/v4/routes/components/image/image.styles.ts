@@ -17,7 +17,7 @@
 
 import styled, { css, keyframes } from 'styled-components';
 
-import { AuthImg } from '@components/authenticatedImage/authImg.component';
+import { AuthImg } from '@components/authenticatedResource/authImg.component';
 import { COLOR } from '../../../styles';
 
 const previewStateStyles = css`
