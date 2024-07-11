@@ -25,13 +25,9 @@ const C = require("../constants");
 const middlewares = require("../middlewares/middlewares");
 const config = require("../config");
 const utils = require("../utils");
-const systemLogger = require("../logger.js").systemLogger;
 const User = require("../models/user");
 const UsersV5 = require(`${v5Path}/processors/users`);
 const { fileExtensionFromBuffer } = require(`${v5Path}/utils/helper/typeCheck`);
-
-const Mailer = require("../mailer/mailer");
-const httpsPost = require("../libs/httpsReq").post;
 
 const FileType = require("file-type");
 
@@ -291,91 +287,6 @@ router.get("/:account/avatar", middlewares.loggedIn, getAvatar);
 router.post("/:account/avatar", middlewares.isAccountAdmin, uploadAvatar);
 
 /**
- * @api {post} /:user Sign up
- * @apiName signUp
- * @apiGroup Account
- * @apiDescription Sign up for a new user account.
- *
- * @apiParam {String} user New account username to register
- * @apiParam (Request body) {String} password Password
- * @apiParam (Request body) {String} email Valid e-mail address
- * @apiParam (Request body) {String} firstName First name
- * @apiParam (Request body) {String} lastName Surname
- * @apiParam (Request body) {String} company Company
- * @apiParam (Request body) {String} jobTitle Job title
- * @apiParam (Request body) {String} countryCode ISO 3166-1 alpha-2
- * @apiParam (Request body) {String} captcha Google reCAPTCHA response token
- * @apiSuccess (200) account New Account username
- * @apiError SIGN_UP_PASSWORD_MISSING Password is missing
- *
- * @apiExample {post} Example usage:
- * POST /alice HTTP/1.1
- * {
- * 	"email":"alice@acme.co.uk",
- * 	"password":"AW96B6",
- * 	"firstName":"Alice",
- * 	"lastName":"Allen",
- * 	"company":"Acme Corporation",
- * 	"countryCode":"GB",
- * 	"jobTitle":"CEO",
- * 	"captcha":"1234567890qwertyuiop"
- * }
- *
- * @apiSuccessExample {json} Success-Response
- * HTTP/1.1 200 OK
- * {
- *	"account":"alice"
- * }
- *
- * @apiErrorExample {json} Error-Response
- *
- * HTTP/1.1 400 Bad Request
- * {
- * 	"message": "Password is missing",
- * 	"status": 400,
- * 	"code": "SIGN_UP_PASSWORD_MISSING",
- * 	"value": 57,
- * 	"place": "POST /nabile"
- * }
- */
-router.post("/:account", signUp);
-
-/**
- * @api {post} /:user/verify Verify
- * @apiName verify
- * @apiGroup Account
- * @apiDescription Verify an account after signing up.
- *
- * @apiParam {String} user Account username
- * @apiParam (Request body) {String} token Account verification token
- * @apiSuccess (200) account Account username
- * @apiError ALREADY_VERIFIED User already verified
- *
- * @apiExample {post} Example usage:
- * POST /alice/verify HTTP/1.1
- * {
- * 	"token":"1234567890"
- * }
- *
- * @apiSuccessExample {json} Success-Response
- * HTTP/1.1 200 OK
- * {
- *	"account":"alice"
- * }
- *
- * @apiErrorExample {json} Error-Response
- * HTTP/1.1 400 Bad Request
- * {
- * 	"message": "Already verified",
- * 	"status": 400,
- * 	"code": "ALREADY_VERIFIED",
- * 	"value": 60,
- * 	"place": "POST /alice/verify"
- * }
- */
-router.post("/:account/verify", verify);
-
-/**
  * @api {put} /:user Update user account
  * @apiName updateUser
  * @apiGroup Account
@@ -478,100 +389,6 @@ async function updateUser(req, res, next) {
 		});
 	}
 
-}
-
-function signUp(req, res, next) {
-
-	const responsePlace = utils.APIInfo(req);
-
-	if (!config.auth.register) {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.REGISTER_DISABLE, responseCodes.REGISTER_DISABLE);
-	}
-
-	if (!req.body.password) {
-		const err = responseCodes.SIGN_UP_PASSWORD_MISSING;
-		return responseCodes.respond(responsePlace, req, res, next, err, err);
-	}
-
-	if (utils.isString(req.body.email)
-		&& utils.isString(req.body.password)
-		&& utils.isString(req.body.firstName)
-		&& utils.isString(req.body.lastName)
-		&& utils.isString(req.body.countryCode)
-		&& (!req.body.company || utils.isString(req.body.company))
-		&& utils.isBoolean(req.body.mailListAgreed)
-		// && utils.isString(req.body.jobTitle)
-		// && utils.isString(req.body.industry)
-		// && utils.isString(req.body.howDidYouFindUs)
-		// && (!req.body.phoneNumber || utils.isString(req.body.phoneNumber))
-	) {
-
-		// check if captcha is enabled
-		const checkCaptcha = config.auth.captcha ? httpsPost(config.captcha.validateUrl, {
-			secret: config.captcha.secretKey,
-			response: req.body.captcha
-
-		}) : Promise.resolve({
-			success: true
-		});
-
-		checkCaptcha.then(resBody => {
-
-			if (resBody.success) {
-				return User.createUser(req.params.account, req.body.password, {
-
-					email: req.body.email,
-					firstName: req.body.firstName,
-					lastName: req.body.lastName,
-					countryCode: req.body.countryCode,
-					company: req.body.company,
-					mailListOptOut: !req.body.mailListAgreed
-					// industry: req.body.industry,
-					// jobTitle: req.body.jobTitle,
-					// howDidYouFindUs: req.body.howDidYouFindUs,
-					// phoneNumber: req.body.phoneNumber
-				}, config.tokenExpiry.emailVerify);
-			} else {
-				return Promise.reject({ resCode: responseCodes.INVALID_CAPTCHA_RES });
-			}
-
-		}).then(data => {
-			// send verification email
-			return Mailer.sendVerifyUserEmail(req.body.email, {
-				token: data.token,
-				email: req.body.email,
-				firstName: utils.ucFirst(req.body.firstName),
-				username: req.params.account,
-				pay: req.body.pay
-			}).catch(err => {
-				// catch email error instead of returning to client
-				systemLogger.logError(`Email error - ${err.message}`);
-				return Promise.resolve(err);
-			});
-
-		}).then(emailRes => {
-
-			systemLogger.logInfo("Email info - " + JSON.stringify(emailRes));
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
-		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
-		});
-
-	} else {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
-	}
-
-}
-
-function verify(req, res, next) {
-
-	const responsePlace = utils.APIInfo(req);
-
-	User.verify(req.params[C.REPO_REST_API_ACCOUNT], req.body.token).then(() => {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
-	}).catch(err => {
-		responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? err.resCode : err);
-	});
 }
 
 function getAvatar(req, res, next) {
