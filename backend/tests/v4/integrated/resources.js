@@ -22,6 +22,7 @@ const SessionTracker = require("../../v5/helper/sessionTracker")
 const app = require("../../../src/v4/services/api.js").createApp();
 const request = require("supertest");
 const IssueHelper =  require("../helpers/issues.js");
+const { loginUsers } =  require("../helpers/users.js");
 const async = require("async");
 const orderBy = require("lodash").orderBy;
 
@@ -38,7 +39,7 @@ describe("Resources ", function () {
 	const password = "password";
 	const account = "teamSpace1";
 	const model = "5bfc11fa-50ac-b7e7-4328-83aa11fa50ac";
-	const agents = {};
+	let agents;
 
 	const createIssue = IssueHelper.createIssue(account, model);
 	const attachDocs = IssueHelper.attachDocument(account, model);
@@ -54,6 +55,8 @@ describe("Resources ", function () {
 				resolve();
 			});
 		});
+
+		agents = await loginUsers(usernames, password);
 	});
 
 	after(function(done) {

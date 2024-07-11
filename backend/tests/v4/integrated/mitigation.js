@@ -277,11 +277,6 @@ describe("Mitigations", function () {
 				});
 		});
 
-		after(function(done) {
-			this.timeout(timeout);
-			agent.post("/logout")
-				.expect(200, done);
-		});
 	});
 
 	describe("Find mitigation suggestions", function(done) {
@@ -389,10 +384,5 @@ describe("Mitigations", function () {
 				});
 		});
 
-		after(function(done) {
-			this.timeout(timeout);
-			agent.post("/logout")
-				.expect(200, done);
-		});
 	});
 });
