@@ -40,8 +40,11 @@ class SessionTracker {
 	}
 
 	setAuthHeaders(action) {
-		return action.set(CSRF_HEADER, this.cookies.token)
-			.set('Cookie', generateCookieArray(this.cookies));
+		if (this.cookies.token) {
+			return action.set(CSRF_HEADER, this.cookies.token)
+				.set('Cookie', generateCookieArray(this.cookies));
+		}
+		return action.set('Cookie', generateCookieArray(this.cookies));
 	}
 
 	post(url) {

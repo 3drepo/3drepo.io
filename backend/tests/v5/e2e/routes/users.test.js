@@ -160,6 +160,16 @@ const testLogin = () => {
 			expect(res.body.code).toEqual(templates.alreadyLoggedIn.code);
 		});
 
+		test('should succeed if the user has logged in but CSRF is not provided', async () => {
+			const testSession = SessionTracker(agent);
+			await testSession.login(testUser.user, testUser.password);
+			delete testSession.cookies.token;
+			const res = await testSession.post('/v5/login/')
+				.send({ user: testUser.user, password: testUser.password })
+				.expect(templates.alreadyLoggedIn.status);
+			expect(res.body.code).toEqual(templates.alreadyLoggedIn.code);
+		});
+
 		test('should fail with an incorrect password', async () => {
 			const res = await agent.post('/v5/login/')
 				.send({ user: testUser.user, password: 'wrongPassword' })

@@ -45,12 +45,8 @@ const addV4Routes = (app) => {
 
 	// subscriptions handler
 	app.use("/:account", require("../routes/subscriptions"));
-	// invoices handler
-	app.use("/:account", require("../routes/invoice"));
 	// maps handler
 	app.use("/:account", require("../routes/maps"));
-	// payment api header
-	app.use("/payment", require("../routes/payment"));
 
 	app.use("/:account", require("../routes/teamspace"));
 	app.use("/:account", require("../routes/permissionTemplate"));
