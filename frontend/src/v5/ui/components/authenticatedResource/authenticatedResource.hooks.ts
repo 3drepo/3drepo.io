@@ -14,10 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { clientConfigService } from '@/v4/services/clientConfig';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+
+export const downloadResourceLink = async (url) => {
+	const response = await axios.get(url, { responseType: 'blob' });
+	return URL.createObjectURL(response.data);
+};
 
 // It uses axios config to pass the token so images are returned safely
 export const useAuthenticatedResource = (url: string, onError?) => {
@@ -25,20 +28,11 @@ export const useAuthenticatedResource = (url: string, onError?) => {
 
 	useEffect(() => {
 		if (!url) return;
-		const apiUrl = clientConfigService.apiUrl('all', '');
-		// if its not an api url return the plain url
-		if (!url.includes(apiUrl)) {
-			setbaseBlobUrl(url);
-			return;
-		}
-
 		let mounted = true;
 
 		(async () => {
 			try {
-				const response = await axios.get(url, { responseType: 'blob' });
-				const objectUrl = URL.createObjectURL(response.data);
-				
+				const objectUrl = await downloadResourceLink(url);
 				if (!mounted) return;  // to avoid changing the state in unmounted components
 				setbaseBlobUrl(objectUrl);
 			} catch (e) {

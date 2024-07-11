@@ -15,11 +15,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useAuthenticatedResource } from './authenticatedResource.hooks';
+import { clientConfigService } from '@/v4/services/clientConfig';
+import { downloadResourceLink } from './authenticatedResource.hooks';
+
+const isApiRequest = (url) => {
+	const apiUrl = clientConfigService.apiUrl('all', '');
+	return url.includes(apiUrl);
+};
 
 
 export const AuthAnchor = (props: React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>) => {
-	const authHref = useAuthenticatedResource(props.href, props.onError);
-	return (<a {...props} href={authHref}  />);
+	const a = document.createElement('a');
+	a.download = props.download;
+	
+	const onClick = async (e) => {
+		if (!isApiRequest(props.href)) return;
+		e.preventDefault();
+
+		if (!a.href) {
+			a.href = await downloadResourceLink(props.href);
+		}
+
+		a.click();
+	};
+
+	return (
+		<a {...props} onClick={onClick} /> 
+	);
 };
 
