@@ -19,20 +19,17 @@ import { useContext, useEffect } from 'react';
 import { Viewer, Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
-import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 import { isNull } from 'lodash';
-import { CalibrationHooksSelectors } from '@/v5/services/selectorsHooks';
-import { CalibrationActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { addVectors, getTransformationMatrix, subtractVectors, transformAndTranslate } from '../../calibrationHelpers';
+import { CalibrationContext } from '../../calibrationContext';
+import { Vector2D } from '../../calibration.types';
 
 export const VerticalSpatialBoundariesHandler = () => {
-	const [drawingId] = useSearchParam('drawingId');
-	const step = CalibrationHooksSelectors.selectStep();
-	const isVerticallyCalibrating = CalibrationHooksSelectors.selectIsCalibratingPlanes();
-	const planesValues = CalibrationHooksSelectors.selectPlanesValues();
-	const { open2D, close2D } = useContext(ViewerCanvasesContext);
-	const isValid = !isNull(planesValues.lower) && !isNull(planesValues.upper);
+	const { step, setIsStepValid, setVerticalPlanes, vector3D: vector3DRaw, vector2D: vector2DRaw,
+		isCalibratingPlanes, verticalPlanes, drawingId } = useContext(CalibrationContext);
+	const { open2D } = useContext(ViewerCanvasesContext);
+	const isValid = !isNull(verticalPlanes.lower) && !isNull(verticalPlanes.upper);
 
 	const i = new Image();
 	i.crossOrigin = 'anonymous';
@@ -41,38 +38,36 @@ export const VerticalSpatialBoundariesHandler = () => {
 	const imageHeight = i.naturalHeight;
 	const imageWidth = i.naturalWidth;
 
-	const vector3DRaw = CalibrationHooksSelectors.selectModelCalibration();
-	const vector3D = { start: [vector3DRaw.start[0], -vector3DRaw.start[2]],  end: [vector3DRaw.end[0], -vector3DRaw.end[2]] }; // TODO why is y flipped? 
-	const vector2DRaw = CalibrationHooksSelectors.selectDrawingCalibration();
-	const vector2D = { start: [vector2DRaw.start[0] - imageWidth / 2, imageHeight / 2 - vector2DRaw.start[1]],
-		end: [vector2DRaw.end[0] - imageWidth / 2, imageHeight / 2 - vector2DRaw.end[1]] }; // !working
+	const vector3D: Vector2D = [[vector3DRaw[0][0], -vector3DRaw[0][2]], [vector3DRaw[1][0], -vector3DRaw[1][2]]]; // TODO why is y flipped? 
+	const vector2D: Vector2D = [[vector2DRaw[0][0] - imageWidth / 2, imageHeight / 2 - vector2DRaw[0][1]],
+		[vector2DRaw[1][0] - imageWidth / 2, imageHeight / 2 - vector2DRaw[1][1]]]; // !working
 	const tMatrix = getTransformationMatrix(vector2D, vector3D);
 	
 	useEffect(() => {
-		if (!isVerticallyCalibrating) return;
-		Viewer.setCalibrationToolMode(isVerticallyCalibrating ? 'Vertical' : 'None');
-		Viewer.on(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, CalibrationActionsDispatchers.setPlanesValues);
+		if (!isCalibratingPlanes) return;
+		Viewer.setCalibrationToolMode(isCalibratingPlanes ? 'Vertical' : 'None');
+		Viewer.on(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
 		return () => {
 			Viewer.setCalibrationToolMode('None');
 			Viewer.setCalibrationToolDrawing(null, [0, 0, 0, 0, 0, 0]);
-			Viewer.off(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, CalibrationActionsDispatchers.setPlanesValues);
+			Viewer.off(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
 		};
-	}, [isVerticallyCalibrating]);
+	}, [isCalibratingPlanes]);
 
 	useEffect(() => {
-		CalibrationActionsDispatchers.setIsStepValid(true);
+		setIsStepValid(true);
 	}, [isValid]);
 
 	useEffect(() => {
 		if (!imageHeight || !imageWidth) return;
 	
-		const [xmin, ymin] = subtractVectors(vector2D.start, [-imageWidth / 2, -imageHeight / 2]); // !working
+		const [xmin, ymin] = subtractVectors(vector2D[0], [-imageWidth / 2, -imageHeight / 2]); // !working
 		const [xmax, ymax] = addVectors([xmin, ymin], [imageWidth, imageHeight]);
 
 		// transform corners of drawing. Adding offset of model vector
-		const bottomRight = transformAndTranslate([xmax, -ymin], tMatrix, vector3D.start); // TODO why minuses?
-		const topLeft = transformAndTranslate([xmin, -ymax], tMatrix, vector3D.start);
-		const bottomLeft = transformAndTranslate([xmin, -ymin], tMatrix, vector3D.start);
+		const bottomRight = transformAndTranslate([xmax, -ymin], tMatrix, vector3D[0]); // TODO why minuses?
+		const topLeft = transformAndTranslate([xmin, -ymax], tMatrix, vector3D[0]);
+		const bottomLeft = transformAndTranslate([xmin, -ymin], tMatrix, vector3D[0]);
 
 		const imageDimensions = [ ...bottomLeft, ...bottomRight, ...topLeft];
 		Viewer.setCalibrationToolDrawing(i, imageDimensions);

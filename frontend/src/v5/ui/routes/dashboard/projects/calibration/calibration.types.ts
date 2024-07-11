@@ -27,4 +27,4 @@ export enum PlaneType {
 	UPPER = 'upper',
 	LOWER = 'lower',
 }
-export type PlanesValues = { [PlaneType.UPPER]: number, [PlaneType.LOWER]: number };
+export type VerticalPlanes = { [PlaneType.UPPER]: number, [PlaneType.LOWER]: number };

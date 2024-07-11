@@ -24,8 +24,8 @@ import EyeShowIcon from '@assets/icons/viewer/eye_show.svg';
 import EyeIsolateIcon from '@assets/icons/viewer/eye_isolate.svg';
 import ResetTransformationsIcons from '@assets/icons/viewer/reset_transformations.svg';
 import { formatMessage } from '@/v5/services/intl';
-import { CalibrationActionsDispatchers, GroupsActionsDispatchers, TreeActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { CalibrationHooksSelectors, TreeHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
+import { GroupsActionsDispatchers, TreeActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TreeHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Section, Container, ClearIcon, LozengeButton } from './selectionToolbar.styles';
@@ -33,14 +33,14 @@ import { ToolbarButton } from '../buttons/toolbarButton.component';
 import { VIEWER_CLIP_MODES, VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { GizmoModeButtons } from '../buttons/buttonOptionsContainer/gizmoModeButtons.component';
 import { Viewer } from '@/v4/services/viewer/viewer';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { PlaneSeparation } from '../buttons/toolbarButtons.component';
-import { PlaneType } from '@/v5/store/calibration/calibration.types';
+import { CalibrationContext } from '../../../dashboard/projects/calibration/calibrationContext';
+import { PlaneType } from '../../../dashboard/projects/calibration/calibration.types';
 
 export const SectionToolbar = () => {
+	const { isCalibratingPlanes, selectedPlane, setSelectedPlane } = useContext(CalibrationContext);
 	const [alignActive, setAlignActive] = useState(false);
-	const isCalibratingPlanes = CalibrationHooksSelectors.selectIsCalibratingPlanes();
-	const selectedPlane = CalibrationHooksSelectors.selectSelectedPlane();
 	
 	const hasOverrides = !isEmpty(ViewerGuiHooksSelectors.selectColorOverrides());
 	const hasHighlightedObjects = !!TreeHooksSelectors.selectSelectedNodes().length;
@@ -100,14 +100,14 @@ export const SectionToolbar = () => {
 			<Section hidden={!isCalibratingPlanes}>
 				<LozengeButton
 					hidden={!isCalibratingPlanes}
-					onClick={() => CalibrationActionsDispatchers.setSelectedPlane(PlaneType.LOWER) }
+					onClick={() => setSelectedPlane(PlaneType.LOWER) }
 					selected={selectedPlane === PlaneType.LOWER}
 				>
 					<FormattedMessage id="viewer.toolbar.icon.lowerPlane" defaultMessage="Bottom Plane" />
 				</LozengeButton>
 				<LozengeButton
 					hidden={!isCalibratingPlanes}
-					onClick={() => CalibrationActionsDispatchers.setSelectedPlane(PlaneType.UPPER) }
+					onClick={() => setSelectedPlane(PlaneType.UPPER) }
 					selected={selectedPlane === PlaneType.UPPER}
 				>
 					<FormattedMessage id="viewer.toolbar.icon.upperPlane" defaultMessage="Top Plane" />

@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import { Transformers, useSearchParam } from '../../../useSearchParam';
-import { Vector2D, Vector3D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
+import { PlaneType, Vector2D, Vector3D, VerticalPlanes } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 import { CalibrationHandler } from './calibrationHandler.component';
+import { Viewer } from '@/v4/services/viewer/viewer';
 
 export interface CalibrationContextType {
 	step: number;
@@ -36,6 +37,12 @@ export interface CalibrationContextType {
 	vector2D: Vector2D,
 	setVector2D: (points: Vector2D) => void,
 	drawingId: string;
+	verticalPlanes: VerticalPlanes,
+	setVerticalPlanes: (planes: VerticalPlanes) => void,
+	isCalibratingPlanes: boolean,
+	setIsCalibratingPlanes: (isCalibratingPlanes: boolean) => void,
+	selectedPlane: PlaneType,
+	setSelectedPlane: (plane: PlaneType) => void,
 }
 
 const defaultValue: CalibrationContextType = {
@@ -53,6 +60,12 @@ const defaultValue: CalibrationContextType = {
 	vector2D: EMPTY_VECTOR,
 	setVector2D: () => {},
 	drawingId: '',
+	verticalPlanes: { [PlaneType.UPPER]: null, [PlaneType.LOWER]: null },
+	setVerticalPlanes: () => {},
+	isCalibratingPlanes: false,
+	setIsCalibratingPlanes: () => {},
+	selectedPlane: null,
+	setSelectedPlane: () => {},
 };
 export const CalibrationContext = createContext(defaultValue);
 CalibrationContext.displayName = 'CalibrationContext';
@@ -63,9 +76,20 @@ export const CalibrationContextComponent = ({ children }) => {
 	const [origin, setOrigin] = useState('');
 	const [isCalibrating] = useSearchParam('isCalibrating', Transformers.BOOLEAN);
 	const [isCalibrating3D, setIsCalibrating3D] = useState(false);
+	const [isCalibratingPlanes, setIsCalibratingPlanes] = useState(false);
 	const [vector3D, setVector3D] = useState<Vector3D>(EMPTY_VECTOR);
 	const [vector2D, setVector2D] = useState<Vector2D>(EMPTY_VECTOR);
+	const [verticalPlanes, setVerticalPlanes] = useState<VerticalPlanes>({ [PlaneType.UPPER]: null, [PlaneType.LOWER]: null });
+	const [selectedPlane, setSelectedPlane] = useState<PlaneType>(null);
 	const [drawingId] = useSearchParam('drawingId');
+
+	useEffect(() => {
+		if (selectedPlane === PlaneType.LOWER) {
+			Viewer.selectCalibrationToolLowerPlane();
+		} else {
+			Viewer.selectCalibrationToolUpperPlane();
+		}
+	}, [selectedPlane]);
 
 	return (
 		<CalibrationContext.Provider value={{
@@ -83,6 +107,12 @@ export const CalibrationContextComponent = ({ children }) => {
 			vector3D,
 			setVector3D,
 			drawingId,
+			verticalPlanes,
+			setVerticalPlanes,
+			isCalibratingPlanes,
+			setIsCalibratingPlanes,
+			selectedPlane,
+			setSelectedPlane,
 		}}>
 			{isCalibrating && <CalibrationHandler />}
 			{children}

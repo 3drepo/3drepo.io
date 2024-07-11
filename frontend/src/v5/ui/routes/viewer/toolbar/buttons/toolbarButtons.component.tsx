@@ -27,9 +27,9 @@ import { formatMessage } from '@/v5/services/intl';
 import { ToolbarButton } from './toolbarButton.component';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { VerticalHeightContainer, VerticalHeightValue } from '../selectionToolbar/selectionToolbar.styles';
-import { PlaneType } from '@/v5/store/calibration/calibration.types';
 import { useContext } from 'react';
 import { CalibrationContext } from '../../../dashboard/projects/calibration/calibrationContext';
+import { PlaneType } from '../../../dashboard/projects/calibration/calibration.types';
 
 export const HomeButton = () => (
 	<ToolbarButton
@@ -98,23 +98,22 @@ export const CalibrationButton = () => {
 };
 
 export const VerticalCalibrationButton = () => {
-	const step = CalibrationHooksSelectors.selectStep();
-	const isCalibratingPlanes = CalibrationHooksSelectors.selectIsCalibratingPlanes();
+	const { isCalibratingPlanes, setIsCalibratingPlanes, step } = useContext(CalibrationContext);
 	return (
 		<ToolbarButton
 			Icon={VerticalCalibrationIcon}
 			hidden={step !== 2}
 			selected={isCalibratingPlanes}
-			onClick={() => CalibrationActionsDispatchers.setIsCalibratingPlanes(!isCalibratingPlanes)}
+			onClick={() => setIsCalibratingPlanes(!isCalibratingPlanes)}
 			title={formatMessage({ id: 'viewer.toolbar.icon.verticalCalibration', defaultMessage: 'Vertical Calibration' })}
 		/>
 	);
 };
 
-// TODO hidden logic
+// TODO #4911 hidden logic
 export const PlaneSeparation = ({ hidden }) => {
-	const planesValues = CalibrationHooksSelectors.selectPlanesValues();
-	const planesHeight = (planesValues?.[PlaneType.UPPER] - planesValues?.[PlaneType.LOWER]).toFixed(2);
+	const { verticalPlanes } = useContext(CalibrationContext);
+	const planesHeight = (verticalPlanes?.[PlaneType.UPPER] - verticalPlanes?.[PlaneType.LOWER]).toFixed(2);
 	const unit = ModelHooksSelectors.selectUnit();
 	return (
 		<VerticalHeightContainer hidden={hidden} disabled>

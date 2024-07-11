@@ -54,8 +54,8 @@ const dotProduct = (vectorA, vectorB) => vectorA.reduce((acc, _, i) => acc + vec
 const getVectorMagnitude = (vector) => Math.sqrt(dotProduct(vector, vector));
 
 export const getTransformationMatrix = (vectorA, vectorB) => {
-	const diffA = subtractVectors(vectorA.end, vectorA.start);
-	const diffB = subtractVectors(vectorB.end, vectorB.start);
+	const diffA = subtractVectors(vectorA[1], vectorA[0]);
+	const diffB = subtractVectors(vectorB[1], vectorB[0]);
 	const magnitudeA = getVectorMagnitude(diffA);
 	const magnitudeB = getVectorMagnitude(diffB);
 	const scaleFactor = magnitudeB / magnitudeA;
