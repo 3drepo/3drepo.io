@@ -366,7 +366,6 @@ describe("Risks", function () {
 		it("with a embeded group should succeed", function (done) {
 			const username3 = 'teamSpace1';
 			const model2 = '5bfc11fa-50ac-b7e7-4328-83aa11fa50ac';
-			let agent2 = null;
 
 			const highlighted_group = {
 				objects: [{
@@ -2404,7 +2403,7 @@ describe("Risks", function () {
 				};
 				async.waterfall([
 					deleteNotifications(altUserAgent),
-					function (args, next) {
+					function (next) {
 						agent2.post(`/${teamspace}/${model}/risks/${riskId}/comments`)
 							.send(comment)
 							.expect(200, next);
@@ -2446,12 +2445,12 @@ describe("Risks", function () {
 			it(" by id", function (done) {
 				let ids = [];
 
-				agent.get(`/${teamspace}/${model}/risks`)
+				agent2.get(`/${teamspace}/${model}/risks`)
 					.expect(200, function (err, res) {
 						ids = res.body.map(risk => risk._id);
 						ids = [ids[0], ids[2]].sort();
 
-						agent.get(`/${teamspace}/${model}/risks?ids=${ids.join(',')}`)
+						agent2.get(`/${teamspace}/${model}/risks?ids=${ids.join(',')}`)
 							.expect(200, function (err, res) {
 								expect(res.body.map((risk => risk._id)).sort()).to.eql(ids)
 								done(err);
@@ -2462,7 +2461,7 @@ describe("Risks", function () {
 
 
 			it(" by likelihood", function (done) {
-				agent.get(`/${teamspace}/${model}/risks?likelihoods=0,2`)
+				agent2.get(`/${teamspace}/${model}/risks?likelihoods=0,2`)
 					.expect(200, function (err, res) {
 						expect(res.body.map((risk => risk.likelihood)).sort()).to.eql([0, 2].sort())
 						done(err);
@@ -2470,7 +2469,7 @@ describe("Risks", function () {
 			});
 
 			it(" by consequence", function (done) {
-				agent.get(`/${teamspace}/${model}/risks?consequences=3,2`)
+				agent2.get(`/${teamspace}/${model}/risks?consequences=3,2`)
 					.expect(200, function (err, res) {
 						expect(res.body.map((risk => risk.consequence)).sort()).to.eql([2, 2].sort())
 						done(err);
@@ -2478,7 +2477,7 @@ describe("Risks", function () {
 			});
 
 			it(" by level of risk", function (done) {
-				agent.get(`/${teamspace}/${model}/risks?levelOfRisks=1,-1`)
+				agent2.get(`/${teamspace}/${model}/risks?levelOfRisks=1,-1`)
 					.expect(200, function (err, res) {
 						expect(res.body.map((risk => risk.level_of_risk)).sort()).to.eql([1, 1, -1].sort())
 						done(err);
@@ -2486,7 +2485,7 @@ describe("Risks", function () {
 			});
 
 			it(" by residual likelihood", function (done) {
-				agent.get(`/${teamspace}/${model}/risks?residualLikelihoods=1,2`)
+				agent2.get(`/${teamspace}/${model}/risks?residualLikelihoods=1,2`)
 					.expect(200, function (err, res) {
 						expect(res.body.map((risk => risk.residual_likelihood)).sort()).to.eql([1, 2, 2].sort())
 						done(err);
@@ -2494,7 +2493,7 @@ describe("Risks", function () {
 			});
 
 			it(" by residual consequence", function (done) {
-				agent.get(`/${teamspace}/${model}/risks?residualConsequences=3`)
+				agent2.get(`/${teamspace}/${model}/risks?residualConsequences=3`)
 					.expect(200, function (err, res) {
 						expect(res.body.map((risk => risk.residual_consequence)).sort()).to.eql([3].sort())
 						done(err);
@@ -2502,7 +2501,7 @@ describe("Risks", function () {
 			});
 
 			it(" by residual level of risk", function (done) {
-				agent.get(`/${teamspace}/${model}/risks?residualLevelOfRisks=2,4`)
+				agent2.get(`/${teamspace}/${model}/risks?residualLevelOfRisks=2,4`)
 					.expect(200, function (err, res) {
 						expect(res.body.map((risk => risk.residual_level_of_risk)).sort()).to.eql([2, 2, 2, 4].sort())
 						done(err);
@@ -2510,7 +2509,7 @@ describe("Risks", function () {
 			});
 
 			it(" by category", function (done) {
-				agent.get(`/${teamspace}/${model}/risks?categories=Environmental%20Issue,Social%20Issue`)
+				agent2.get(`/${teamspace}/${model}/risks?categories=Environmental%20Issue,Social%20Issue`)
 					.expect(200, function (err, res) {
 						expect(res.body.map((risk => risk.category)).sort()).to.eql(["Environmental Issue", "Social Issue"].sort())
 						done(err);
@@ -2518,7 +2517,7 @@ describe("Risks", function () {
 			});
 
 			it(" by number", function (done) {
-				agent.get(`/${teamspace}/${model}/risks?numbers=1,2`)
+				agent2.get(`/${teamspace}/${model}/risks?numbers=1,2`)
 					.expect(200, function (err, res) {
 						expect(res.body.map((risk => risk.number)).sort()).to.eql([1, 2].sort())
 						done(err);
@@ -2526,7 +2525,7 @@ describe("Risks", function () {
 			});
 
 			it(" by mitigation status", function (done) {
-				agent.get(`/${teamspace}/${model}/risks?mitigationStatus=rejected,proposed`)
+				agent2.get(`/${teamspace}/${model}/risks?mitigationStatus=rejected,proposed`)
 					.expect(200, function (err, res) {
 						expect(res.body.map((risk => risk.mitigation_status)).sort()).to.eql(["rejected", "proposed"].sort())
 						done(err);
