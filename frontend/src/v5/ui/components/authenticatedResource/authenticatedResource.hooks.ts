@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { clientConfigService } from '@/v4/services/clientConfig';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
@@ -24,6 +25,13 @@ export const useAuthenticatedResource = (url: string, onError?) => {
 
 	useEffect(() => {
 		if (!url) return;
+		const apiUrl = clientConfigService.apiUrl('all', '');
+		// if its not an api url return the plain url
+		if (!url.includes(apiUrl)) {
+			setbaseBlobUrl(url);
+			return;
+		}
+
 		let mounted = true;
 
 		(async () => {
