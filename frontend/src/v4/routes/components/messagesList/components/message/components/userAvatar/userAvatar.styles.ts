@@ -17,7 +17,7 @@
 
 import styled, { css } from 'styled-components';
 
-import { AuthAvatarMui } from '@components/authenticatedImage/authAvatarMui.component';
+import { AuthAvatarMui } from '@components/authenticatedResource/authAvatarMui.component';
 import { COLOR } from '../../../../../../../styles';
 
 const jobBorderStyles = (color) => css`

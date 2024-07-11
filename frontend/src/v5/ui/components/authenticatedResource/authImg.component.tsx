@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useAuthenticatedImg } from './authenticatedImage.hooks';
+import { useAuthenticatedResource } from './authenticatedResource.hooks';
 
 
 export const AuthImg = (props: React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>) => {
-	const authSrc = useAuthenticatedImg(props.src, props.onError);
+	const authSrc = useAuthenticatedResource(props.src, props.onError);
 	return (<img {...props} src={authSrc}  />);
 };
+
