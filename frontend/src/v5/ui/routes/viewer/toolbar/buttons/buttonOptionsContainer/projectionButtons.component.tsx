@@ -34,6 +34,7 @@ export const ProjectionButtons = () => {
 
 	const setMode = (mode: ProjectionMode) => {
 		setExpanded(false);
+		ViewerGuiActionsDispatchers.goToHomeView();
 		ViewerGuiActionsDispatchers.setProjectionMode(mode);
 	};
 
