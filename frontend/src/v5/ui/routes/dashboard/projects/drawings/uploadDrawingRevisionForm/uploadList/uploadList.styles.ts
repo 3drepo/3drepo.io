@@ -18,7 +18,7 @@
 import styled, { css } from 'styled-components';
 import { Container as ItemRowContainer } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemRow/dashboardListItemRow.styles';
 import { DashboardListHeaderLabel, DashboardListItem } from '@components/dashboard/dashboardList';
-import { CodeTextField } from './uploadListItem/uploadListItem.styles';
+import { RevisionCodeTextField } from './uploadListItem/components/uploadListItemRevisionCode/uploadListItemRevisionCode.styles';
 import { DestinationAutocomplete } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/uploadListItemDestination.styles';
 
 export const Label = styled(DashboardListHeaderLabel)<{ required?: boolean }>`
@@ -44,25 +44,18 @@ export const UploadListItemRowWrapper = styled(DashboardListItem)<{ selected: bo
 			height: 35px;
 		}
 
-		${CodeTextField} {
-			width: 146px;
-			height: 35px;
+		${({ selected, theme }) => selected && css`
+			${RevisionCodeTextField} > .MuiOutlinedInput-root:not(.Mui-error) {
+				background-color: ${theme.palette.secondary.light};
 
-			&:not(:last-of-type) {
-				margin-right: 0;
-			}
-
-			${({ selected, theme }) => selected && css`
-				>.MuiOutlinedInput-root:not(.Mui-error) {
-					background-color: ${theme.palette.secondary.light};
-					input {
-						color: ${theme.palette.primary.contrast};
-					}
-					&:not(.Mui-focused) fieldset {
-						border: unset;
-					}
+				input {
+					color: ${theme.palette.primary.contrast};
 				}
-			`}
-		}
+
+				&:not(.Mui-focused) fieldset {
+					border: unset;
+				}
+			}
+		`}
 	}
 `;

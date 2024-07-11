@@ -16,11 +16,11 @@
  */
 
 import styled from 'styled-components';
-import { TextField } from '../inputs';
+import { TextField } from '../../../inputs';
 
-export const CodeTextField = styled(TextField)`
-	margin: 0 0 0 12px;
-	width: 100px;
+export const RevisionCodeTextField = styled(TextField)`
+	margin: 0 12px;
+	width: 146px;
 
 	.MuiFormHelperText-root {
 		display: none;

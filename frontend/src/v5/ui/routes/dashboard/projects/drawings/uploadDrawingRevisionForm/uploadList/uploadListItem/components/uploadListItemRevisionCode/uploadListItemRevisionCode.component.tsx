@@ -17,16 +17,16 @@
 
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { useFormContext, useFormState } from 'react-hook-form';
-import { CodeTextField } from '../../uploadListItem.styles';
+import { RevisionCodeTextField } from './uploadListItemRevisionCode.styles';
 import { get } from 'lodash';
 
-type IUploadListItemCode = {
+type UploadListItemRevisionCodeProps = {
 	name: string;
 	isSelected?: boolean;
 	disabled?: boolean;
 };
 
-export const UploadListItemCode = ({ disabled = false, name, ...props }: IUploadListItemCode ): JSX.Element => {
+export const UploadListItemRevisionCode = ({ disabled = false, name, ...props }: UploadListItemRevisionCodeProps ): JSX.Element => {
 	const { register } = useFormContext();
 	const { errors } = useFormState();
 	const errorMessage = get(errors, name)?.message;
@@ -41,7 +41,7 @@ export const UploadListItemCode = ({ disabled = false, name, ...props }: IUpload
 	} : {};
 
 	return (
-		<CodeTextField
+		<RevisionCodeTextField
 			disabled={disabled}
 			formError={errorMessage}
 			{...errorAdornment}

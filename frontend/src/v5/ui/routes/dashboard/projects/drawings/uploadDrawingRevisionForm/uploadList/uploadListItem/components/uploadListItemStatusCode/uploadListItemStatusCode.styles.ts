@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { AutocompleteInput } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/uploadListItemDestination.styles';
 import styled from 'styled-components';
 
 export const OptionContainer = styled.li`
@@ -39,4 +40,16 @@ export const Description = styled.span`
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+`;
+
+export const StatusCodeInput = styled(AutocompleteInput)`
+	margin-left: 12px;
+	
+	.MuiAutocomplete-inputRoot {
+		width: 146px;
+	}
+
+	.Mui-disabled fieldset {
+		border: none;
+	}
 `;

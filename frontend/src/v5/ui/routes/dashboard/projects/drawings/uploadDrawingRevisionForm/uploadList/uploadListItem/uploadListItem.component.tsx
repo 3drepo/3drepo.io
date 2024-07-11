@@ -21,7 +21,7 @@ import { DrawingsHooksSelectors, DrawingRevisionsHooksSelectors } from '@/v5/ser
 import { InputController } from '@controls/inputs/inputController.component';
 import { DashboardListItemRow as UploadListItemRow } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { UploadListItemDestination } from './components/uploadListItemDestination/uploadListItemDestination.component';
-import { UploadListItemCode } from './components/uploadListItemCode/uploadListItemCode.component';
+import { UploadListItemRevisionCode } from './components/uploadListItemRevisionCode/uploadListItemRevisionCode.component';
 import { UploadListItemButton } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItem.styles';
 import { useFormContext } from 'react-hook-form';
 import { useEffect } from 'react';
@@ -138,7 +138,7 @@ export const UploadListItem = ({
 				name={`${revisionPrefix}.statusCode`}
 				disabled={isUploading}
 			/>
-			<UploadListItemCode
+			<UploadListItemRevisionCode
 				key={`${uploadId}.revisionCode`}
 				name={`${revisionPrefix}.revisionCode`}
 				disabled={isUploading}

@@ -15,14 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { useFormState } from 'react-hook-form';
-import { Description, OptionContainer, Value } from './uploadListItemStatusCode.styles';
+import { Description, OptionContainer, StatusCodeInput, Value } from './uploadListItemStatusCode.styles';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { get } from 'lodash';
 import { OptionsBox } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/uploadListItemDestination.styles';
 import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { StatusCode } from '@/v5/store/drawings/revisions/drawingRevisions.types';
 import { Autocomplete } from '@mui/material';
-import { CodeTextField } from '../../uploadListItem.styles';
 
 interface IUploadListItemStatusCode {
 	value?: string;
@@ -53,14 +52,14 @@ export const UploadListItemStatusCode = ({ value, inputRef, onChange, ...props }
 				</OptionContainer>
 			)}
 			renderInput={({ InputProps, ...params }) => (
-				<CodeTextField
+				<StatusCodeInput
 					{...params}
 					InputProps={{
 						...InputProps,
 						startAdornment: !!error && (<ErrorTooltip>{error}</ErrorTooltip>),
 					}}
 					inputRef={inputRef}
-					formError={error}
+					error={!!error}
 				/>
 			)}
 			ListboxComponent={OptionsBox}
