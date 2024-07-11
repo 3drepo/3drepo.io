@@ -55,7 +55,7 @@ Containers.getContainerStats = async (teamspace, container) => {
 	]);
 
 	try {
-		latestRev = await getLatestRevision(teamspace, container, { tag: 1, timestamp: 1 });
+		latestRev = await getLatestRevision(teamspace, container, modelTypes.CONTAINER, { tag: 1, timestamp: 1 });
 	} catch {
 		// do nothing. A container can have 0 revision.
 	}
