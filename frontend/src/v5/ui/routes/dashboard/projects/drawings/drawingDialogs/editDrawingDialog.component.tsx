@@ -30,6 +30,7 @@ import { ShareTextField } from '@controls/shareTextField';
 import { FormattedMessage } from 'react-intl';
 import { SectionTitle } from '../../settingsModal/settingsModal.styles';
 import { dirtyValuesChanged } from '@/v5/helpers/form.helper';
+import { pick } from 'lodash';
 
 interface Props { 
 	open: boolean; 
@@ -54,8 +55,10 @@ export const EditDrawingDialog = ({ open, onClickClose, drawing }:Props) => {
 
 	const onSubmit: SubmitHandler<IFormInput> = async (body) => {
 		try {
-			await new Promise<void>((accept, reject ) => 
-				DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawing._id, body as any, accept, reject));
+			await new Promise<void>((accept, reject) => {
+				const updatedDrawingData = pick(body, ['name', 'number', 'type', 'desc']);
+				DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawing._id, updatedDrawingData, accept, reject);
+			});
 			onClickClose();
 		} catch (err) {
 			onSubmitError(err);
