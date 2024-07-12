@@ -28,8 +28,6 @@ const { generateRandomString, generateRandomObject, generateRandomNumber } = req
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 
-const { DRAWINGS_HISTORY_COL } = require(`${src}/models/revisions.constants`);
-
 const excludeVoids = { void: { $ne: true } };
 const excludeIncomplete = { incomplete: { $exists: false } };
 
@@ -54,7 +52,7 @@ const testGetRevisionCount = () => {
 
 			expect(res).toEqual(expectedData);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL,
+			expect(fn).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`,
 				{ ...excludeIncomplete, ...excludeVoids, model });
 		});
 	});
@@ -81,7 +79,7 @@ const testGetLatestRevision = () => {
 
 			expect(res).toEqual(expectedData);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL,
+			expect(fn).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`,
 				{ ...excludeIncomplete, ...excludeVoids, model }, {}, { timestamp: -1 });
 		});
 
@@ -100,15 +98,15 @@ const testGetRevisions = () => {
 	const teamspace = generateRandomString();
 	const model = generateRandomString();
 
-	const checkResults = (fn, showVoid, isDrawing) => {
-		const query = { incomplete: { $exists: false } };
+	const checkResults = (fn, showVoid, modelType) => {
+		const query = { incomplete: { $exists: false }, ...(modelType === modelTypes.DRAWING ? { model } : {}) };
 
 		if (!showVoid) {
 			query.void = { $ne: true };
 		}
 
 		expect(fn).toHaveBeenCalledTimes(1);
-		expect(fn).toHaveBeenCalledWith(teamspace, isDrawing ? DRAWINGS_HISTORY_COL : `${model}.history`,
+		expect(fn).toHaveBeenCalledWith(teamspace, modelType === modelTypes.DRAWING ? `${modelType}s.history` : `${model}.history`,
 			query, {}, { timestamp: -1 });
 	};
 
@@ -145,7 +143,7 @@ const testGetRevisions = () => {
 			const fn = jest.spyOn(db, 'find').mockResolvedValue(expectedData);
 			const res = await Revisions.getRevisions(teamspace, model, modelTypes.DRAWING, true);
 			expect(res).toEqual(expectedData);
-			checkResults(fn, true, true);
+			checkResults(fn, true, modelTypes.DRAWING);
 		});
 	});
 };
@@ -170,8 +168,8 @@ const testGetRevisionByIdOrTag = () => {
 			const res = await Revisions.getRevisionByIdOrTag(teamspace, model, modelTypes.DRAWING, revision._id);
 			expect(res).toEqual(revision);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL,
-				{ $or: [{ _id: revision._id }, { tag: revision._id }] }, {}, undefined);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`,
+				{ $or: [{ _id: revision._id }, { tag: revision._id }], model }, {}, undefined);
 		});
 
 		test('Should throw REVISION_NOT_FOUND if it cannot find the revision in the revisions table', async () => {
@@ -205,14 +203,6 @@ const testAddRevision = () => {
 			expect(isUUIDString(fn.mock.calls[0][2]._id));
 			expect(fn.mock.calls[0][2]).toHaveProperty('timestamp');
 			expect(res).toEqual(fn.mock.calls[0][2]._id);
-
-			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_REVISION,
-				{ teamspace,
-					project,
-					model,
-					modelType,
-					revision: fn.mock.calls[0][2]._id });
 		});
 
 		test('Should add a new revision (drawing)', async () => {
@@ -222,20 +212,12 @@ const testAddRevision = () => {
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn.mock.calls[0][0]).toEqual(teamspace);
-			expect(fn.mock.calls[0][1]).toEqual(DRAWINGS_HISTORY_COL);
+			expect(fn.mock.calls[0][1]).toEqual(`${modelType}s.history`);
 			expect(fn.mock.calls[0][2].prop).toEqual(data.prop);
 			expect(fn.mock.calls[0][2]).toHaveProperty('_id');
 			expect(isUUIDString(fn.mock.calls[0][2]._id));
 			expect(fn.mock.calls[0][2]).toHaveProperty('timestamp');
 			expect(res).toEqual(fn.mock.calls[0][2]._id);
-
-			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_REVISION,
-				{ teamspace,
-					project,
-					model,
-					modelType,
-					revision: fn.mock.calls[0][2]._id });
 		});
 	});
 };
@@ -261,7 +243,56 @@ const testDeleteModelRevisions = () => {
 			await Revisions.deleteModelRevisions(teamspace, project, model, modelType);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL, { project, model });
+			expect(fn).toHaveBeenCalledWith(teamspace, `${modelType}s.history`, { project, model });
+		});
+	});
+};
+
+const testUpdateRevision = () => {
+	const teamspace = generateRandomString();
+	const model = generateRandomString();
+	const revision = { _id: 1, author: 'someUser', timestamp: new Date(), void: true };
+	const setUpdate = generateRandomObject();
+	const unsetUpdate = generateRandomObject();
+
+	const checkResults = (fn, modelType, setData, unsetData) => {
+		expect(fn).toHaveBeenCalledTimes(1);
+		expect(fn).toHaveBeenCalledWith(teamspace, modelType === modelTypes.DRAWING ? `${modelType}s.history` : `${model}.history`,
+			{ $or: [{ _id: revision._id }, { tag: revision._id }] },
+			{ ...(setData ? { $set: setData } : {}), ...(unsetData ? { $unset: unsetData } : {}) },
+			{ projection: { _id: 1 } },
+		);
+	};
+
+	describe('UpdateRevision', () => {
+		test('Should update a revision and set data', async () => {
+			const modelType = modelTypes.CONTAINER;
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementationOnce(() => ({ _id: revision._id }));
+			await Revisions.updateRevision(teamspace, model, modelType, revision._id, setUpdate);
+			checkResults(fn, modelType, setUpdate);
+		});
+
+		test('Should update a revision and unset data', async () => {
+			const modelType = modelTypes.CONTAINER;
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementationOnce(() => ({ _id: revision._id }));
+			await Revisions.updateRevision(teamspace, model, modelType, revision._id, undefined, unsetUpdate);
+			checkResults(fn, modelType, undefined, unsetUpdate);
+		});
+
+		test('Should update a revision (drawing)', async () => {
+			const modelType = modelTypes.DRAWING;
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementationOnce(() => ({ _id: revision._id }));
+			await Revisions.updateRevision(teamspace, model, modelType,
+				revision._id, setUpdate, unsetUpdate);
+			checkResults(fn, modelType, setUpdate, unsetUpdate);
+		});
+
+		test('Should throw REVISION_NOT_FOUND if it cannot find the revision in the revisions table', async () => {
+			const modelType = modelTypes.CONTAINER;
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementationOnce(() => undefined);
+			await expect(Revisions.updateRevision(teamspace, model,
+				modelType, revision._id, setUpdate, unsetUpdate)).rejects.toEqual(templates.revisionNotFound);
+			checkResults(fn, modelType, setUpdate, unsetUpdate);
 		});
 	});
 };
@@ -273,9 +304,9 @@ const testUpdateRevisionStatus = () => {
 	const revision = { _id: 1, author: 'someUser', timestamp: new Date(), void: true };
 	const newStatus = false;
 
-	const checkResults = (fn, isDrawing, voidStatus) => {
+	const checkResults = (fn, modelType, voidStatus) => {
 		expect(fn).toHaveBeenCalledTimes(1);
-		expect(fn).toHaveBeenCalledWith(teamspace, isDrawing ? DRAWINGS_HISTORY_COL : `${model}.history`,
+		expect(fn).toHaveBeenCalledWith(teamspace, modelType === modelTypes.DRAWING ? `${modelType}s.history` : `${model}.history`,
 			{ $or: [{ _id: revision._id }, { tag: revision._id }] }, { $set: { void: voidStatus } },
 			{ projection: { _id: 1 } },
 		);
@@ -287,7 +318,7 @@ const testUpdateRevisionStatus = () => {
 			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementationOnce(() => ({ _id: revision._id }));
 			await Revisions.updateRevisionStatus(teamspace, project, model, modelType,
 				revision._id, newStatus);
-			checkResults(fn, false, newStatus);
+			checkResults(fn, modelType, newStatus);
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.REVISION_UPDATED,
 				{ teamspace, project, model, modelType, data: { _id: revision._id, void: newStatus } });
@@ -298,17 +329,18 @@ const testUpdateRevisionStatus = () => {
 			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementationOnce(() => ({ _id: revision._id }));
 			await Revisions.updateRevisionStatus(teamspace, project, model, modelType,
 				revision._id, newStatus);
-			checkResults(fn, true, newStatus);
+			checkResults(fn, modelType, newStatus);
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.REVISION_UPDATED,
 				{ teamspace, project, model, modelType, data: { _id: revision._id, void: newStatus } });
 		});
 
 		test('Should throw REVISION_NOT_FOUND if it cannot find the revision in the revisions table', async () => {
+			const modelType = modelTypes.CONTAINER;
 			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementationOnce(() => undefined);
 			await expect(Revisions.updateRevisionStatus(teamspace, project, model,
-				modelTypes.CONTAINER, revision._id, newStatus)).rejects.toEqual(templates.revisionNotFound);
-			checkResults(fn, false, newStatus);
+				modelType, revision._id, newStatus)).rejects.toEqual(templates.revisionNotFound);
+			checkResults(fn, modelType, newStatus);
 			expect(EventsManager.publish).toHaveBeenCalledTimes(0);
 		});
 	});
@@ -344,7 +376,7 @@ const testIsRevAndStatusCodeUnique = () => {
 			const res = await Revisions.isRevAndStatusCodeUnique(teamspace, model, revCode, statusCode);
 			expect(res).toEqual(false);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL, { revCode, statusCode },
+			expect(fn).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`, { revCode, statusCode, model },
 				undefined, undefined,
 			);
 		});
@@ -354,7 +386,7 @@ const testIsRevAndStatusCodeUnique = () => {
 			const res = await Revisions.isRevAndStatusCodeUnique(teamspace, model, revCode, statusCode);
 			expect(res).toEqual(true);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL, { revCode, statusCode },
+			expect(fn).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`, { revCode, statusCode, model },
 				undefined, undefined,
 			);
 		});
@@ -383,6 +415,7 @@ describe('models/revisions', () => {
 	testGetRevisions();
 	testAddRevision();
 	testDeleteModelRevisions();
+	testUpdateRevision();
 	testUpdateRevisionStatus();
 	testIsTagUnique();
 	testIsRevAndStatusCodeUnique();

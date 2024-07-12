@@ -31,10 +31,14 @@ const excludeIncomplete = { incomplete: { $exists: false } };
 const collectionName = (modelType, model) => (modelType === modelTypes.DRAWING ? `${modelType}s.history` : `${model}.history`);
 
 const findRevisionsByQuery = (teamspace, model, modelType, query, projection, sort) => db.find(teamspace,
-	collectionName(modelType, model), query, projection, sort);
+	collectionName(modelType, model),
+	{ ...query, ...(modelType === modelTypes.DRAWING ? { model } : {}) }, projection, sort);
 
 const findOneRevisionByQuery = async (teamspace, model, modelType, query, projection, sort) => {
-	const rev = await db.findOne(teamspace, collectionName(modelType, model), query, projection, sort);
+	const rev = await db.findOne(teamspace, collectionName(modelType, model),
+		{ ...query, ...(modelType === modelTypes.DRAWING ? { model } : {}) },
+		projection, sort);
+
 	if (!rev) {
 		throw templates.revisionNotFound;
 	}
@@ -87,23 +91,37 @@ Revisions.addRevision = async (teamspace, project, model, modelType, data) => {
 
 	await db.insertOne(teamspace, collectionName(modelType, model), newRevision);
 
-	publish(events.NEW_REVISION, { teamspace, project, model, modelType, revision: newRevision._id });
-
 	return newRevision._id;
 };
 
 Revisions.deleteModelRevisions = (teamspace, project, model, modelType) => db.deleteMany(
 	teamspace, collectionName(modelType, model), { project, model });
 
-Revisions.updateRevisionStatus = async (teamspace, project, model, modelType, revision, status) => {
+Revisions.updateRevision = async (teamspace, model, modelType, revision, setUpdate = {}, unsetUpdate = {}) => {
+	const update = {};
+
+	if (Object.keys(setUpdate).length) {
+		update.$set = setUpdate;
+	}
+
+	if (Object.keys(unsetUpdate).length) {
+		update.$unset = unsetUpdate;
+	}
+
 	const res = await db.findOneAndUpdate(teamspace, collectionName(modelType, model),
 		{ $or: [{ _id: revision }, { tag: revision }] },
-		{ $set: { void: status } },
+		update,
 		{ projection: { _id: 1 } });
 
 	if (!res) {
 		throw templates.revisionNotFound;
 	}
+
+	return res;
+};
+
+Revisions.updateRevisionStatus = async (teamspace, project, model, modelType, revision, status) => {
+	const res = await Revisions.updateRevision(teamspace, model, modelType, revision, { void: status });
 
 	publish(events.REVISION_UPDATED, { teamspace,
 		project,
@@ -123,7 +141,7 @@ Revisions.isTagUnique = async (teamspace, model, tag) => {
 
 Revisions.isRevAndStatusCodeUnique = async (teamspace, model, revCode, statusCode) => {
 	try {
-		await findOneRevisionByQuery(teamspace, undefined, modelTypes.DRAWING, { revCode, statusCode });
+		await findOneRevisionByQuery(teamspace, model, modelTypes.DRAWING, { revCode, statusCode });
 		return false;
 	} catch {
 		return true;

@@ -38,10 +38,10 @@ Revisions.validateUpdateRevisionData = async (req, res, next) => {
 	}
 };
 
-Revisions.fileFilter = (acceptedExtentions) => (req, file, cb) => {
+Revisions.fileFilter = (acceptedExtensions) => (req, file, cb) => {
 	const { originalname } = file;
 	const fileExt = Path.extname(originalname).toLowerCase();
-	if (!acceptedExtentions.includes(fileExt)) {
+	if (!acceptedExtensions.includes(fileExt)) {
 		const err = createResponseCode(templates.unsupportedFileFormat, `${fileExt} is not a supported model format`);
 		cb(err, false);
 	} else {

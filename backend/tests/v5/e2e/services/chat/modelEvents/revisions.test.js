@@ -16,9 +16,10 @@
  */
 
 const ServiceHelper = require('../../../../helper/services');
-const { src } = require('../../../../helper/path');
+const { src, dwgModel } = require('../../../../helper/path');
 const SuperTest = require('supertest');
-const { modelTypes } = require('../../../../../../src/v5/models/modelSettings.constants');
+
+const { modelTypes, statusCodes } = require(`${src}/models/modelSettings.constants`);
 
 const { EVENTS } = require(`${src}/services/chat/chat.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -29,7 +30,7 @@ const project = ServiceHelper.generateRandomProject();
 const container = ServiceHelper.generateRandomModel();
 const drawing = ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING });
 const containerRevision = ServiceHelper.generateRevisionEntry();
-const drawingRevision = ServiceHelper.generateRevisionEntry(false, true, true);
+const drawingRevision = ServiceHelper.generateRevisionEntry(false, true, modelTypes.DRAWING);
 
 let agent;
 const setupData = async () => {
@@ -52,8 +53,48 @@ const setupData = async () => {
 		ServiceHelper.db.createUser(user, [teamspace]),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, drawing._id]),
 		ServiceHelper.db.createRevision(teamspace, container._id, { ...containerRevision, author: user.user }),
-		ServiceHelper.db.createRevision(teamspace, drawing._id, { ...drawingRevision, author: user.user }, true),
+		ServiceHelper.db.createRevision(teamspace, drawing._id, { ...drawingRevision, author: user.user },
+			modelTypes.DRAWING),
 	]);
+};
+
+const revisionAddTest = () => {
+	describe('On adding a revision', () => {
+		test(`should trigger a ${EVENTS.DRAWING_NEW_REVISION} event when a drawing revision has been added`, async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+
+			const data = { teamspace, project: project.id, model: drawing._id };
+			await ServiceHelper.socket.joinRoom(socket, data);
+
+			const socketPromise = new Promise((resolve, reject) => {
+				socket.on(EVENTS.DRAWING_NEW_REVISION, resolve);
+				setTimeout(reject, 1000);
+			});
+
+			await agent.post(`/v5/teamspaces/${teamspace}/projects/${project.id}/drawings/${drawing._id}/revisions?key=${user.apiKey}`)
+				.set('Content-Type', 'multipart/form-data')
+				.field('revCode', ServiceHelper.generateRandomString(10))
+				.field('statusCode', statusCodes[0].code)
+				.field('desc', ServiceHelper.generateRandomString())
+				.attach('file', dwgModel)
+				.expect(templates.ok.status);
+
+			const revsReq = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/drawings/${drawing._id}/revisions?key=${user.apiKey}`);
+
+			const { _id, author, timestamp, desc, format } = revsReq.body.revisions[0];
+			await expect(socketPromise).resolves.toEqual({
+				...data,
+				data: {
+					_id,
+					author,
+					timestamp,
+					desc,
+					format,
+				} });
+
+			socket.close();
+		});
+	});
 };
 
 const revisionUpdateTest = () => {
@@ -151,5 +192,6 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		ServiceHelper.closeApp(server),
 		chatApp.close()]));
 
+	revisionAddTest();
 	revisionUpdateTest();
 });
