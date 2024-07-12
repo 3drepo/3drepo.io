@@ -43,6 +43,7 @@ export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions
 	updateDrawingSuccess: ['projectId', 'drawingId', 'drawing'],
 	setDrawingStatus: ['projectId', 'drawingId', 'status'],
 	drawingProcessingSuccess: ['projectId', 'drawingId', 'revision'],
+	resetDrawingStatsQueue: [],
 }, { prefix: 'DRAWINGS/' }) as { Types: Constants<IDrawingsActionCreators>; Creators: IDrawingsActionCreators };
 
 const getDrawingFromState = (state: DrawingsState, projectId, drawingId) => (
@@ -155,6 +156,7 @@ export type UpdateDrawingAction = Action<'UPDATE_DRAWING'> & TeamspaceProjectAnd
 export type UpdateDrawingSuccessAction = Action<'UPDATE_DRAWING_SUCCESS'> &  TeamspaceProjectAndDrawingId & { drawing: Partial<MinimumDrawing> };
 export type SetDrawingStatusAction = Action<'SET_DRAWING_STATUS'> & ProjectAndDrawingId & { status: DrawingUploadStatus };
 export type DrawingProcessingSuccessAction = Action<'DRAWING_PROCESSING_SUCCESS'> & ProjectAndDrawingId & { revision: IDrawingRevision };
+export type ResetDrawingStatsQueueAction = Action<'RESET_CONTAINER_STATS_QUEUE'>;
 
 export interface IDrawingsActionCreators {
 	addFavourite: (teamspace: string, projectId: string, drawingId: string) => AddFavouriteAction;
@@ -190,4 +192,5 @@ export interface IDrawingsActionCreators {
 		drawingId: string,
 		revision: IDrawingRevision
 	) => DrawingProcessingSuccessAction;
+	resetDrawingStatsQueue: () => ResetDrawingStatsQueueAction;
 }

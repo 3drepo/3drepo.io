@@ -45,6 +45,7 @@ export const Drawings = () => {
 	}, [project]);
 
 	const onClickCreate = () => DialogsActionsDispatchers.open(CreateDrawingDialog);
+	useEffect(() => () => { DrawingsActionsDispatchers.resetDrawingStatsQueue(); }, []);
 
 	if (isListPending) return (<DashboardSkeletonList itemComponent={<SkeletonListItem />} />);
 

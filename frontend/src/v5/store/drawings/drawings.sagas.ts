@@ -57,8 +57,6 @@ export function* removeFavourites({ teamspace, projectId, drawingId }: RemoveFav
 
 export function* fetchDrawings({ teamspace, projectId }: FetchDrawingsAction) {
 	try {
-		statsQueue.resetQueue();
-
 		const { drawings } = yield API.Drawings.fetchDrawings(teamspace, projectId);
 		const drawingsWithoutStats = prepareDrawingsData(drawings);
 		const storedDrawings = yield select(selectDrawings);
@@ -142,6 +140,10 @@ export function* updateDrawing({ teamspace, projectId, drawingId, drawing, onSuc
 	}
 }
 
+export function* resetDrawingStatsQueue() {
+	statsQueue.resetQueue();
+}
+
 export default function* DrawingsSaga() {
 	yield takeLatest(DrawingsTypes.ADD_FAVOURITE, addFavourites);
 	yield takeLatest(DrawingsTypes.REMOVE_FAVOURITE, removeFavourites);
@@ -151,4 +153,5 @@ export default function* DrawingsSaga() {
 	yield takeLatest(DrawingsTypes.FETCH_TYPES, fetchTypes);
 	yield takeEvery(DrawingsTypes.CREATE_DRAWING, createDrawing);
 	yield takeEvery(DrawingsTypes.UPDATE_DRAWING, updateDrawing);
+	yield takeEvery(DrawingsTypes.RESET_DRAWING_STATS_QUEUE, resetDrawingStatsQueue);
 }
