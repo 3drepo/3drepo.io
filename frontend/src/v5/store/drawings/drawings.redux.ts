@@ -149,7 +149,7 @@ export type DeleteDrawingAction = Action<'DELETE'> & TeamspaceProjectAndDrawingI
 export type DeleteDrawingSuccessAction = Action<'DELETE_SUCCESS'> & ProjectAndDrawingId;
 export type FetchTypesAction = Action<'FETCH_DRAWINGS_TYPES'> & TeamspaceAndProjectId;
 export type FetchTypesSuccessAction = Action<'FETCH_DRAWINGS_TYPES_SUCCESS'> & ProjectId & { types: string[] };
-export type CreateDrawingAction = Action<'CREATE_DRAWING'> & TeamspaceAndProjectId & SuccessAndErrorCallbacks & { drawing: IDrawing };
+export type CreateDrawingAction = Action<'CREATE_DRAWING'> & TeamspaceAndProjectId & SuccessAndErrorCallbacks & { drawing: Omit<NewDrawing, '_id'> };
 export type CreateDrawingSuccessAction = Action<'CREATE_DRAWING_SUCCESS'> &  ProjectId & { drawing: IDrawing };
 export type UpdateDrawingAction = Action<'UPDATE_DRAWING'> & TeamspaceProjectAndDrawingId & SuccessAndErrorCallbacks & { drawing: Partial<MinimumDrawing> };
 export type UpdateDrawingSuccessAction = Action<'UPDATE_DRAWING_SUCCESS'> &  TeamspaceProjectAndDrawingId & { drawing: Partial<MinimumDrawing> };
@@ -173,7 +173,7 @@ export interface IDrawingsActionCreators {
 	deleteDrawingSuccess: (projectId: string, drawingId: string) => DeleteDrawingSuccessAction;
 	fetchTypes: (teamspace: string, projectId: string) => FetchTypesAction;
 	fetchTypesSuccess: (projectId: string, types: string[]) => FetchTypesSuccessAction;
-	createDrawing: (teamspace: string, projectId: string, drawing: IDrawing, onSuccess: () => void, onError: (e:Error) => void) => CreateDrawingAction;
+	createDrawing: (teamspace: string, projectId: string, drawing: Omit<NewDrawing, '_id'>, onSuccess: () => void, onError: (e:Error) => void) => CreateDrawingAction;
 	createDrawingSuccess: (projecId: string, drawing: NewDrawing) => CreateDrawingSuccessAction;
 	setDrawingStatus: (projectId: string, drawingId: string, status: DrawingUploadStatus) => SetDrawingStatusAction;
 	updateDrawing: (

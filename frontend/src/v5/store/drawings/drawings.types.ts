@@ -40,26 +40,6 @@ export interface MinimumDrawing {
 	role: Role;
 	isFavourite: boolean;
 }
-
-// TODO: Unfinished interface
-export interface IDrawing extends MinimumDrawing {
-	desc?: string;
-	lastUpdated?: Date;
-	latestRevision?: string;
-	calibration?: CalibrationStates;
-	status: DrawingUploadStatus;
-	revisionsCount: number;
-	role: any;
-	isFavourite: boolean;
-	hasStatsPending?: boolean;
-	errorReason?: {
-		message: string;
-		timestamp: Date | null;
-	};
-	type: string; // TODO - add type types?
-	number: string;
-}
-
 // TODO: Unfinished interface
 export interface DrawingStats {
 	_id: string;
@@ -75,11 +55,19 @@ export interface DrawingStats {
 	status?: DrawingUploadStatus,
 	errorReason?: {
 		message: string;
-		timestamp: number;
+		timestamp: Date | number;
 	};
+}
+// TODO: Unfinished interface
+export interface IDrawing extends MinimumDrawing, Omit<DrawingStats, 'revisions'> {
+	lastUpdated?: Date;
+	latestRevision?: string;
+	revisionsCount: number;
+	hasStatsPending?: boolean;
 }
 
 export type NewDrawing = {
+	_id: string;
 	name: string;
 	type: string;
 	number: string;
