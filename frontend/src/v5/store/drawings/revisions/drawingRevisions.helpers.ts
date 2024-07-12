@@ -30,7 +30,7 @@ export const prepareRevisionData = (revision): IDrawingRevision => ({
 
 export const createDrawingFromRevisionBody = (body: CreateDrawingRevisionBody): NewDrawing => ({
 	name: body.drawingName,
-	drawingNumber: body.drawingNumber,
+	number: body.drawingNumber,
 	category: body.drawingCategory,
 	desc: body.drawingDesc,
 });

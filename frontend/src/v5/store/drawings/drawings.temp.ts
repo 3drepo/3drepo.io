@@ -58,7 +58,7 @@ const mockDrawingForV4 = (_id, index) => {
 		name: 'A drawing ' + index + ' - ' + role,
 		isFavourite: (Math.random() > 0.5),
 		role,
-		drawingNumber: uuid(), 
+		number: uuid(), 
 	};
 };
 

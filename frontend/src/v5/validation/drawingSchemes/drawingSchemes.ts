@@ -22,26 +22,26 @@ import { formatMessage } from '@/v5/services/intl';
 import { selectRevisions } from '@/v5/store/drawings/revisions/drawingRevisions.selectors';
 import { getState } from '@/v4/modules/store';
 
-const drawingNumber = Yup.string()
+const number = Yup.string()
 	.matches(alphaNumericHyphens,
 		formatMessage({
-			id: 'validation.drawing.drawingNumber.error.characters',
+			id: 'validation.drawing.number.error.characters',
 			defaultMessage: 'Drawing Number can only consist of letters, numbers, hyphens or underscores',
 		}))
 	.max(50,
 		formatMessage({
-			id: 'validation.drawing.drawingNumber.error.max',
+			id: 'validation.drawing.number.error.max',
 			defaultMessage: 'Drawing Number is limited to 50 characters',
 		}))
 	.required(
 		formatMessage({
-			id: 'validation.drawing.drawingNumber.error.required',
+			id: 'validation.drawing.number.error.required',
 			defaultMessage: 'Drawing Number is a required field',
 		}),
 	).test(
 		'alreadyExistingNumbers',
 		formatMessage({
-			id: 'validation.drawing.drawingNumber.error.alreadyExisting',
+			id: 'validation.drawing.number.error.alreadyExisting',
 			defaultMessage: 'Your Drawing Number is already in use, please use a unique Drawing Number',
 		}),
 		(value, testContext) => {
@@ -52,7 +52,7 @@ const drawingNumber = Yup.string()
 
 export const DrawingFormSchema =  Yup.object().shape({
 	name,
-	drawingNumber,
+	number,
 	desc,
 });
 
@@ -99,7 +99,7 @@ export const ListItemSchema = Yup.object().shape({
 
 export const SidebarSchema = Yup.object().shape({
 	drawingName: name,
-	drawingNumber,
+	drawingNumber: number,
 	drawingCategory: Yup.string().required(
 		formatMessage({
 			id: 'validation.drawing.drawingCategory.error.required',

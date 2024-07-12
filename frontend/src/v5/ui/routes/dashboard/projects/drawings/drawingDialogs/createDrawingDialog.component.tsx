@@ -69,9 +69,9 @@ export const CreateDrawingDialog = ({ open, onClickClose }) => {
 
 			<FormTextField
 				control={control}
-				name="drawingNumber"
-				label={formatMessage({ id: 'drawings.creation.form.drawingNumber', defaultMessage: 'Drawing Number' })}
-				formError={errors.drawingNumber}
+				name="number"
+				label={formatMessage({ id: 'drawings.creation.form.number', defaultMessage: 'Number' })}
+				formError={errors.number}
 				required
 			/>
 			<FormSelect

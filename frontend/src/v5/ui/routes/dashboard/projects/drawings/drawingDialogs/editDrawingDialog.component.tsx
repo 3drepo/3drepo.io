@@ -94,9 +94,9 @@ export const EditDrawingDialog = ({ open, onClickClose, drawing }:Props) => {
 
 			<FormTextField
 				control={control}
-				name="drawingNumber"
-				label={formatMessage({ id: 'drawings.creation.form.drawingNumber', defaultMessage: 'Drawing Number' })}
-				formError={errors.drawingNumber}
+				name="number"
+				label={formatMessage({ id: 'drawings.creation.form.number', defaultMessage: 'Drawing Number' })}
+				formError={errors.number}
 				disabled={!isProjectAdmin}
 				required
 			/>

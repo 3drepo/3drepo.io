@@ -49,7 +49,7 @@ const EMPTY_OPTION = prepareSingleDrawingData({
 	role: Role.NONE,
 	isFavourite: false,
 	category: '',
-	drawingNumber: '',
+	number: '',
 });
 
 const NEW_ID = 'new';

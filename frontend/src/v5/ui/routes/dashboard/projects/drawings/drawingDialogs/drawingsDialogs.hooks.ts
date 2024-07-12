@@ -26,7 +26,7 @@ import { useForm } from 'react-hook-form';
 
 export interface IFormInput {
 	name: string;
-	drawingNumber: string;
+	number: string;
 	category: string;
 	desc: string
 }
@@ -44,7 +44,7 @@ export const useDrawingForm = (defaultValues?: IDrawing) => {
 	DrawingsHooksSelectors.selectDrawings().forEach((d) => {
 		if (d._id === defaultValues?._id) return;
 		drawingsNames.push(d.name);
-		drawingNumbers.push(d.drawingNumber);
+		drawingNumbers.push(d.number);
 	});
 
 	const [alreadyExistingNames, setAlreadyExistingNames] = useState(drawingsNames);
@@ -65,8 +65,8 @@ export const useDrawingForm = (defaultValues?: IDrawing) => {
 		}
 
 		if (numberAlreadyExists(err)) {
-			setAlreadyExistingNumbers([getValues('drawingNumber'), ...alreadyExistingNumbers]);
-			trigger('drawingNumber');
+			setAlreadyExistingNumbers([getValues('number'), ...alreadyExistingNumbers]);
+			trigger('number');
 		}
 	};
 	

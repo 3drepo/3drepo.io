@@ -147,7 +147,7 @@ export const UploadDrawingRevisionForm = ({
 				revisionDesc: '',
 				drawingId: drawing?._id || '',
 				drawingName: drawing?.name?.trim() || '',
-				drawingNumber: drawing?.drawingNumber || '',
+				drawingNumber: drawing?.number || '',
 				drawingDesc: drawing?.desc || '',
 				drawingCategory: drawing?.category || '',
 			});

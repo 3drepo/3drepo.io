@@ -86,7 +86,7 @@ export const UploadListItem = ({
 	const uploadStatus = getUploadStatus(progress, uploadErrorMessage);
 
 	const sanitiseDrawing = (drawing: IDrawing) => ({
-		drawingNumber: drawing?.drawingNumber || '',
+		drawingNumber: drawing?.number || '',
 		drawingDesc: drawing?.desc || '',
 		drawingCategory: drawing?.category || '',
 	});

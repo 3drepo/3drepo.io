@@ -103,8 +103,8 @@ export const DrawingsList = ({
 					<DashboardListHeaderLabel name="calibration" {...DRAWING_LIST_COLUMN_WIDTHS.calibration}>
 						<FormattedMessage id="drawings.list.header.calibration" defaultMessage="2D/3D Calibration" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="drawingNumber" {...DRAWING_LIST_COLUMN_WIDTHS.drawingNumber}>
-						<FormattedMessage id="drawings.list.header.drawingNumber" defaultMessage="Drawing Number" />
+					<DashboardListHeaderLabel name="number" {...DRAWING_LIST_COLUMN_WIDTHS.number}>
+						<FormattedMessage id="drawings.list.header.number" defaultMessage="Drawing Number" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="category" {...DRAWING_LIST_COLUMN_WIDTHS.category}>
 						<FormattedMessage id="drawings.list.header.category" defaultMessage="Category" />
