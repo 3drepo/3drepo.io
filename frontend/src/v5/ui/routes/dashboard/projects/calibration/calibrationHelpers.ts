@@ -15,9 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Vector2D, Vector3D, Coord2D, Transformation2D } from './calibration.types';
+
 // TODO figure out actual location/name for this file
 
-export const addVectors = (vectorA, vectorB) => {
+export const flipYAxis = (vector: Coord2D) => [vector[0], -vector[1]] as Coord2D;
+
+export const getXYPlane = (vector: Vector3D) => vector.map((val) => [val[0], val[2]]) as Vector2D;
+
+export const addVectors = (vectorA: number[], vectorB: number[]) => {
 	const sumVector = [];
 	for (let i = 0; i < vectorA.length; i++) {
 		sumVector[i] = vectorB[i] + vectorA[i];
@@ -25,7 +31,7 @@ export const addVectors = (vectorA, vectorB) => {
 	return sumVector;
 };
 
-export const subtractVectors = (vectorA, vectorB) => {
+export const subtractVectors = (vectorA: number[], vectorB: number[]) => {
 	const diffVector = [];
 	for (let i = 0; i < vectorA.length; i++) {
 		diffVector[i] = vectorB[i] - vectorA[i];
@@ -33,7 +39,7 @@ export const subtractVectors = (vectorA, vectorB) => {
 	return diffVector;
 };
 
-const crossProduct = (matrixA, matrixB) => {
+const crossProduct = (matrixA: number[][], matrixB: number[][]) => {
 	const aNumRows = matrixA.length, aNumCols = matrixA[0].length,
 		bNumCols = matrixB[0].length,
 		result = new Array(aNumRows);
@@ -49,9 +55,9 @@ const crossProduct = (matrixA, matrixB) => {
 	return result;
 };
 
-const dotProduct = (vectorA, vectorB) => vectorA.reduce((acc, _, i) => acc + vectorA[i] * vectorB[i], 0);
+const dotProduct = (vectorA: number[], vectorB: number[]) => vectorA.reduce((acc, _, i) => acc + vectorA[i] * vectorB[i], 0);
 
-const getVectorMagnitude = (vector) => Math.sqrt(dotProduct(vector, vector));
+const getVectorMagnitude = (vector: number[]) => Math.sqrt(dotProduct(vector, vector));
 
 export const getTransformationMatrix = (vectorA, vectorB) => {
 	const diffA = subtractVectors(vectorA[1], vectorA[0]);
@@ -66,14 +72,15 @@ export const getTransformationMatrix = (vectorA, vectorB) => {
 	const angle = Math.acos(dotProduct(diffA, diffB) / (magnitudeA * magnitudeB)) * directionFactor; // angle between vectors in radians
 
 	const scaleMatrix = [[ scaleFactor, 0], [0, scaleFactor]];
-	const rotationMatrix = [ // rotates matrix clockwise by 'angle'
+	const rotationMatrix = [ // rotates 2D vector clockwise around origin by 'angle'
 		[Math.cos(angle), Math.sin(angle)],
 		[-Math.sin(angle), Math.cos(angle)],
 	];
-	return crossProduct(rotationMatrix, scaleMatrix);
+	const transformationMatrix = crossProduct(rotationMatrix, scaleMatrix) as Transformation2D; 
+	return transformationMatrix;
 };
 
-const transformVector = (v, t) => {
+const transformVector = (v: number[], t: number[][]) => {
 	const newVector = [];
 	for (let row = 0; row < t.length; row++) {
 		let sum = 0;
@@ -85,9 +92,7 @@ const transformVector = (v, t) => {
 	return newVector;
 };
 
-export const transformAndTranslate = (v, t, offset) => {
+export const transformAndTranslate = (v: Coord2D, t: Transformation2D, offset: Coord2D) => {
 	const transformed = transformVector(v, t);
-	// return addVectors(transformed, offset);
-	const offsetFlipped = [offset[0], -offset[1]]; // TODO Why flipped?
-	return addVectors(offsetFlipped, transformed);
+	return addVectors(flipYAxis(offset), transformed);
 };

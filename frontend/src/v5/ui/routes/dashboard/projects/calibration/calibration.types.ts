@@ -23,6 +23,8 @@ export type Vector<CoordType> = [CoordType | null, CoordType | null];
 export type Vector2D = Vector<Coord2D>;
 export type Vector3D = Vector<Coord3D>;
 
+export type Transformation2D = Vector2D;
+
 export enum PlaneType {
 	UPPER = 'upper',
 	LOWER = 'lower',
