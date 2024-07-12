@@ -88,7 +88,7 @@ export const UploadListItem = ({
 	const sanitiseDrawing = (drawing: IDrawing) => ({
 		drawingNumber: drawing?.number || '',
 		drawingDesc: drawing?.desc || '',
-		drawingCategory: drawing?.category || '',
+		drawingType: drawing?.type || '',
 	});
 
 	useEffect(() => {

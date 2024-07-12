@@ -48,7 +48,7 @@ const EMPTY_OPTION = prepareSingleDrawingData({
 	name: '',
 	role: Role.NONE,
 	isFavourite: false,
-	category: '',
+	type: '',
 	number: '',
 });
 

@@ -106,8 +106,8 @@ export const DrawingsList = ({
 					<DashboardListHeaderLabel name="number" {...DRAWING_LIST_COLUMN_WIDTHS.number}>
 						<FormattedMessage id="drawings.list.header.number" defaultMessage="Drawing Number" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="category" {...DRAWING_LIST_COLUMN_WIDTHS.category}>
-						<FormattedMessage id="drawings.list.header.category" defaultMessage="Category" />
+					<DashboardListHeaderLabel name="type" {...DRAWING_LIST_COLUMN_WIDTHS.type}>
+						<FormattedMessage id="drawings.list.header.type" defaultMessage="Category" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="lastUpdated" {...DRAWING_LIST_COLUMN_WIDTHS.lastUpdated}>
 						<FormattedMessage id="drawings.list.header.lastUpdated" defaultMessage="Last Updated" />

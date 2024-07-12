@@ -39,8 +39,6 @@ export interface MinimumDrawing {
 	name: string;
 	role: Role;
 	isFavourite: boolean;
-	category: string; // TODO - add category types?
-	number: string;
 }
 
 // TODO: Unfinished interface
@@ -58,11 +56,14 @@ export interface IDrawing extends MinimumDrawing {
 		message: string;
 		timestamp: Date | null;
 	};
+	type: string; // TODO - add type types?
+	number: string;
 }
 
 // TODO: Unfinished interface
 export interface DrawingStats {
 	_id: string;
+	desc?: string;
 	revisions : {
 		total: number;
 		lastUpdated?: number;
@@ -70,7 +71,7 @@ export interface DrawingStats {
 	};
 	number: string,
 	calibration?: CalibrationStates,
-	category?: string, // TODO - add category types
+	type?: string, // TODO - add type types
 	status?: DrawingUploadStatus,
 	errorReason?: {
 		message: string;
@@ -79,9 +80,8 @@ export interface DrawingStats {
 }
 
 export type NewDrawing = {
-	_id?: string;
 	name: string;
-	category: string;
+	type: string;
 	number: string;
 	desc?: string;
 };

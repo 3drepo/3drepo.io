@@ -39,7 +39,7 @@ export const DRAWING_LIST_COLUMN_WIDTHS = {
 	number: {
 		width: 260,
 	},
-	category: {
+	type: {
 		width: 120,
 		hideWhenSmallerThan: Display.Desktop,
 	},
@@ -51,7 +51,7 @@ export const DRAWING_LIST_COLUMN_WIDTHS = {
 	},
 };
 
-export const DRAWINGS_SEARCH_FIELDS = ['name', 'latestRevision', 'category', 'number', 'status'];
+export const DRAWINGS_SEARCH_FIELDS = ['name', 'latestRevision', 'type', 'number', 'status'];
 
 export const CALIBRATION_MAP = {
 	[CalibrationStates.CALIBRATED]: {
@@ -89,8 +89,8 @@ export const prepareSingleDrawingData = (
 	revisionsCount: stats?.revisions?.total ?? 0,
 	lastUpdated: getNullableDate(stats?.revisions.lastUpdated),
 	latestRevision: stats?.revisions.latestRevision ?? '',
-	category: stats?.category ?? '',
 	number: stats?.number ?? '',
+	type: stats?.type ?? '',
 	calibration: stats?.calibration ?? CalibrationStates.UNCALIBRATED,
 	status: stats?.status ?? DrawingUploadStatus.OK,
 	hasStatsPending: !stats,

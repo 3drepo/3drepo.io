@@ -40,7 +40,7 @@ interface Props {
 export const EditDrawingDialog = ({ open, onClickClose, drawing }:Props) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
-	const categories = DrawingsHooksSelectors.selectCategories();
+	const types = DrawingsHooksSelectors.selectTypes();
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 
 	const { onSubmitError, formData } = useDrawingForm(drawing);
@@ -102,13 +102,13 @@ export const EditDrawingDialog = ({ open, onClickClose, drawing }:Props) => {
 			/>
 			<FormSelect
 				control={control}
-				name="category"
-				label={formatMessage({ id: 'drawings.creation.form.category', defaultMessage: 'Category' })}
+				name="type"
+				label={formatMessage({ id: 'drawings.creation.form.type', defaultMessage: 'Category' })}
 				disabled={!isProjectAdmin}
 				required
 			>
-				{categories.map((category) => (
-					<MenuItem key={category} value={category}> {category}</MenuItem>
+				{types.map((type) => (
+					<MenuItem key={type} value={type}> {type}</MenuItem>
 				))}
 			</FormSelect>
 			<FormTextField

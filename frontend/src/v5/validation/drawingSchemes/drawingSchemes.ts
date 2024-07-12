@@ -100,9 +100,9 @@ export const ListItemSchema = Yup.object().shape({
 export const SidebarSchema = Yup.object().shape({
 	drawingName: name,
 	drawingNumber: number,
-	drawingCategory: Yup.string().required(
+	drawingType: Yup.string().required(
 		formatMessage({
-			id: 'validation.drawing.drawingCategory.error.required',
+			id: 'validation.drawing.drawingType.error.required',
 			defaultMessage: 'Category is a required field',
 		}),
 	),

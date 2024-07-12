@@ -43,7 +43,7 @@ export type CreateDrawingRevisionBody = {
 	drawingId?: string;
 	drawingName: string;
 	drawingNumber: string;
-	drawingCategory: string;
+	drawingType: string;
 	drawingDesc?: string;
 };
 

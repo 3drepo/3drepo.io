@@ -16,7 +16,7 @@
  */
 
 import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
-import { AddFavouriteAction, DeleteDrawingAction, RemoveFavouriteAction, CreateDrawingAction, DrawingsActions, DrawingsTypes, FetchCategoriesAction, FetchDrawingStatsAction, FetchDrawingsAction, UpdateDrawingAction } from './drawings.redux';
+import { AddFavouriteAction, DeleteDrawingAction, RemoveFavouriteAction, CreateDrawingAction, DrawingsActions, DrawingsTypes, FetchTypesAction, FetchDrawingStatsAction, FetchDrawingsAction, UpdateDrawingAction } from './drawings.redux';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActions } from '../dialogs/dialogs.redux';
@@ -59,7 +59,7 @@ export function* fetchDrawings({ teamspace, projectId }: FetchDrawingsAction) {
 	try {
 		statsQueue.resetQueue();
 
-		const drawings = yield API.Drawings.fetchDrawings(teamspace, projectId);
+		const { drawings } = yield API.Drawings.fetchDrawings(teamspace, projectId);
 		const drawingsWithoutStats = prepareDrawingsData(drawings);
 		const storedDrawings = yield select(selectDrawings);
 		const isPending = yield select(selectIsListPending);
@@ -107,14 +107,14 @@ export function* deleteDrawing({ teamspace, projectId, drawingId, onSuccess, onE
 	}
 }
 
-export function* fetchCategories({ teamspace, projectId }: FetchCategoriesAction) {
+export function* fetchTypes({ teamspace, projectId }: FetchTypesAction) {
 	try {
-		const categories = yield API.Drawings.fetchCategories(teamspace, projectId);
-		yield put(DrawingsActions.fetchCategoriesSuccess(projectId, categories));
+		const { drawingCategories } = yield API.Drawings.fetchTypes(teamspace, projectId);
+		yield put(DrawingsActions.fetchTypesSuccess(projectId, drawingCategories));
 
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'drawings.fetchCategories.error', defaultMessage: 'trying to fetch drawing categories' }),
+			currentActions: formatMessage({ id: 'drawings.fetchTypes.error', defaultMessage: 'trying to fetch drawing categories' }),
 			error,
 		}));
 	}
@@ -148,7 +148,7 @@ export default function* DrawingsSaga() {
 	yield takeEvery(DrawingsTypes.FETCH_DRAWINGS, fetchDrawings);
 	yield takeEvery(DrawingsTypes.FETCH_DRAWING_STATS, fetchDrawingStats);
 	yield takeLatest(DrawingsTypes.DELETE_DRAWING, deleteDrawing);
-	yield takeLatest(DrawingsTypes.FETCH_CATEGORIES, fetchCategories);
+	yield takeLatest(DrawingsTypes.FETCH_TYPES, fetchTypes);
 	yield takeEvery(DrawingsTypes.CREATE_DRAWING, createDrawing);
 	yield takeEvery(DrawingsTypes.UPDATE_DRAWING, updateDrawing);
 }

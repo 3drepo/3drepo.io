@@ -149,7 +149,7 @@ export const UploadDrawingRevisionForm = ({
 				drawingName: drawing?.name?.trim() || '',
 				drawingNumber: drawing?.number || '',
 				drawingDesc: drawing?.desc || '',
-				drawingCategory: drawing?.category || '',
+				drawingType: drawing?.type || '',
 			});
 		}
 		append(filesToAppend);
@@ -181,7 +181,7 @@ export const UploadDrawingRevisionForm = ({
 		if (presetFile) {
 			addFilesToList([presetFile], presetDrawing);
 		}
-		DrawingsActionsDispatchers.fetchCategories(teamspace, project);
+		DrawingsActionsDispatchers.fetchTypes(teamspace, project);
 	}, []);
 
 	return (

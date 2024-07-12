@@ -104,8 +104,8 @@ export const DrawingsListItem = memo(({
 				<DashboardListItemText selected={isSelected} {...DRAWING_LIST_COLUMN_WIDTHS.number}>
 					{drawing.number}
 				</DashboardListItemText>
-				<DashboardListItemText selected={isSelected} {...DRAWING_LIST_COLUMN_WIDTHS.category}>
-					{drawing.category}
+				<DashboardListItemText selected={isSelected} {...DRAWING_LIST_COLUMN_WIDTHS.type}>
+					{drawing.type}
 				</DashboardListItemText>
 				<DashboardListItemText
 					selected={isSelected}
