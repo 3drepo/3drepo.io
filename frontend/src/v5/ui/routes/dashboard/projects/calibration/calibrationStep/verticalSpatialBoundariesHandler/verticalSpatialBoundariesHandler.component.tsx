@@ -23,17 +23,17 @@ import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.cont
 import { isNull } from 'lodash';
 import { addVectors, getTransformationMatrix, subtractVectors, transformAndTranslate } from '../../calibrationHelpers';
 import { CalibrationContext } from '../../calibrationContext';
-import { Vector2D } from '../../calibration.types';
+import { PlaneType, Vector2D } from '../../calibration.types';
 
 export const VerticalSpatialBoundariesHandler = () => {
-	const { step, setIsStepValid, setVerticalPlanes, vector3D: vector3DRaw, vector2D: vector2DRaw,
-		isCalibratingPlanes, verticalPlanes, drawingId } = useContext(CalibrationContext);
+	const { setIsStepValid, setVerticalPlanes, vector3D: vector3DRaw, vector2D: vector2DRaw,
+		isCalibratingPlanes, setIsCalibratingPlanes, verticalPlanes, drawingId, selectedPlane } = useContext(CalibrationContext);
 	const { open2D } = useContext(ViewerCanvasesContext);
 	const isValid = !isNull(verticalPlanes.lower) && !isNull(verticalPlanes.upper);
 
 	const i = new Image();
 	i.crossOrigin = 'anonymous';
-	i.src = getDrawingImageSrc(drawingId || 'dc1844d3-draw-4727-8187-6baef0e70957');
+	i.src = getDrawingImageSrc(drawingId);
 
 	const imageHeight = i.naturalHeight;
 	const imageWidth = i.naturalWidth;
@@ -72,9 +72,16 @@ export const VerticalSpatialBoundariesHandler = () => {
 		const imageDimensions = [ ...bottomLeft, ...bottomRight, ...topLeft];
 		Viewer.setCalibrationToolDrawing(i, imageDimensions);
 	}, [imageHeight + imageWidth, tMatrix]);
+
+	useEffect(() => {
+		if (selectedPlane === PlaneType.LOWER) {
+			Viewer.selectCalibrationToolLowerPlane();
+		} else {
+			Viewer.selectCalibrationToolUpperPlane();
+		}
+	}, [selectedPlane]);
 	
 	useEffect(() => {
-		if (step !== 2) return;
 		ViewerService.setCalibrationToolMode('Vertical');
 		return () => open2D(drawingId);
 	}, [step]);

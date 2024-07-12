@@ -83,14 +83,6 @@ export const CalibrationContextComponent = ({ children }) => {
 	const [selectedPlane, setSelectedPlane] = useState<PlaneType>(null);
 	const [drawingId] = useSearchParam('drawingId');
 
-	useEffect(() => {
-		if (selectedPlane === PlaneType.LOWER) {
-			Viewer.selectCalibrationToolLowerPlane();
-		} else {
-			Viewer.selectCalibrationToolUpperPlane();
-		}
-	}, [selectedPlane]);
-
 	return (
 		<CalibrationContext.Provider value={{
 			step,
