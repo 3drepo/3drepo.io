@@ -157,7 +157,7 @@ db.createRevision = async (teamspace, model, revision, modelType) => {
 	const formattedRevision = {
 		...revision,
 		_id: stringToUUID(revision._id),
-		model: isDrawing ? modelId : undefined,
+		...(modelType === modelTypes.DRAWING ? { model } : {}),
 	};
 
 	delete formattedRevision.refData;
