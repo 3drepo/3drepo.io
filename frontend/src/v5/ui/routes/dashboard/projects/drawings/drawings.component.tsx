@@ -31,6 +31,7 @@ import { DialogsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/serv
 import { CreateDrawingDialog } from './drawingDialogs/createDrawingDialog.component';
 import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList/dashboardSkeletonList.component';
 import { SkeletonListItem } from '../containers/containersList/skeletonListItem/skeletonListItem.component';
+import { enableRealtimeNewDrawing } from '@/v5/services/realtime/drawings.events';
 
 export const Drawings = () => {
 	const { teamspace, project } = useParams<DashboardParams>();
@@ -45,6 +46,8 @@ export const Drawings = () => {
 	}, [project]);
 
 	const onClickCreate = () => DialogsActionsDispatchers.open(CreateDrawingDialog);
+
+	useEffect(() => enableRealtimeNewDrawing(teamspace, project), [project]);
 	useEffect(() => () => { DrawingsActionsDispatchers.resetDrawingStatsQueue(); }, []);
 
 	if (isListPending) return (<DashboardSkeletonList itemComponent={<SkeletonListItem />} />);

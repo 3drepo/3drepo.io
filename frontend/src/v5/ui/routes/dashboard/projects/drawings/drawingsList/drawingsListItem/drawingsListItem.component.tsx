@@ -37,6 +37,8 @@ import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingRevisionDetails } from '@components/shared/drawingRevisionDetails/drawingRevisionDetails.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
+import { enableRealtimeDrawingRemoved, enableRealtimeDrawingUpdate } from '@/v5/services/realtime/drawings.events';
 
 interface IDrawingsListItem {
 	isSelected: boolean;
@@ -63,7 +65,10 @@ export const DrawingsListItem = memo(({
 
 	useEffect(() => {
 		if (isMainList) {
-			// TODO - add realtime events
+			return combineSubscriptions(
+				enableRealtimeDrawingRemoved(teamspace, project, drawing._id),
+				enableRealtimeDrawingUpdate(teamspace, project, drawing._id),
+			);
 		}
 		return null;
 	}, [drawing._id]);
