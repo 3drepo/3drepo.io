@@ -15,18 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useState } from 'react';
 import { Transformers, useSearchParam } from '../../../useSearchParam';
 import { PlaneType, Vector2D, Vector3D, VerticalPlanes } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 import { CalibrationHandler } from './calibrationHandler.component';
-import { Viewer } from '@/v4/services/viewer/viewer';
 
 export interface CalibrationContextType {
 	step: number;
 	setStep: (step: number) => void;
-	isStepValid: boolean;
-	setIsStepValid: (isValid: boolean) => void;
 	isCalibrating: boolean;
 	origin: string;
 	setOrigin: (origin: string) => void;
@@ -48,8 +45,6 @@ export interface CalibrationContextType {
 const defaultValue: CalibrationContextType = {
 	step: 0,
 	setStep: () => {},
-	isStepValid: false,
-	setIsStepValid: () => {},
 	isCalibrating: false,
 	origin: '',
 	setOrigin: () => {},
@@ -72,7 +67,6 @@ CalibrationContext.displayName = 'CalibrationContext';
 
 export const CalibrationContextComponent = ({ children }) => {
 	const [step, setStep] = useState(0);
-	const [isStepValid, setIsStepValid] = useState(false);
 	const [origin, setOrigin] = useState('');
 	const [isCalibrating] = useSearchParam('isCalibrating', Transformers.BOOLEAN);
 	const [isCalibrating3D, setIsCalibrating3D] = useState(false);
@@ -87,8 +81,6 @@ export const CalibrationContextComponent = ({ children }) => {
 		<CalibrationContext.Provider value={{
 			step,
 			setStep,
-			isStepValid,
-			setIsStepValid,
 			isCalibrating,
 			origin,
 			setOrigin,

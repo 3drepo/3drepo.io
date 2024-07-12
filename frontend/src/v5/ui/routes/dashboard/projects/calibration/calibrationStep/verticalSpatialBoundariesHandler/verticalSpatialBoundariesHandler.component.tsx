@@ -19,15 +19,13 @@ import { useContext, useEffect } from 'react';
 import { Viewer } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
-import { isNull } from 'lodash';
 import { addVectors, getTransformationMatrix, subtractVectors, transformAndTranslate } from '../../calibrationHelpers';
 import { CalibrationContext } from '../../calibrationContext';
 import { PlaneType, Vector2D } from '../../calibration.types';
 
 export const VerticalSpatialBoundariesHandler = () => {
-	const { setIsStepValid, setVerticalPlanes, vector3D: vector3DRaw, vector2D: vector2DRaw,
-		isCalibratingPlanes, setIsCalibratingPlanes, verticalPlanes, drawingId, selectedPlane } = useContext(CalibrationContext);
-	const isValid = !isNull(verticalPlanes.lower) && !isNull(verticalPlanes.upper);
+	const { setVerticalPlanes, vector3D: vector3DRaw, vector2D: vector2DRaw,
+		isCalibratingPlanes, setIsCalibratingPlanes, drawingId, selectedPlane } = useContext(CalibrationContext);
 
 	const i = new Image();
 	i.crossOrigin = 'anonymous';
@@ -45,14 +43,8 @@ export const VerticalSpatialBoundariesHandler = () => {
 		Viewer.setCalibrationToolMode(isCalibratingPlanes ? 'Vertical' : 'None');
 		if (!isCalibratingPlanes) return;
 		Viewer.on(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
-		return () => {
-			Viewer.off(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
-		};
+		return () => Viewer.off(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
 	}, [isCalibratingPlanes]);
-
-	useEffect(() => {
-		setIsStepValid(true);
-	}, [isValid]);
 
 	useEffect(() => {
 		if (!imageHeight || !imageWidth) return;

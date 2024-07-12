@@ -26,6 +26,7 @@ import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/servic
 import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 import { useContext } from 'react';
 import { CalibrationContext } from '../calibrationContext';
+import { isNull } from 'lodash';
 
 const STEPS = [
 	formatMessage({ defaultMessage: '3D Alignment', id: 'calibration.step.3dCalibration' }),
@@ -36,14 +37,16 @@ const STEPS = [
 export const CalibrationHeader = () => {
 	const history = useHistory();
 	const { teamspace, project, containerOrFederation } = useParams();
-	const { step, setStep, isStepValid, vector3D, drawingId, origin } = useContext(CalibrationContext);
+	const { step, setStep, vector2D, vector3D, drawingId, origin, verticalPlanes } = useContext(CalibrationContext);
 	const selectedModel = FederationsHooksSelectors.selectFederationById(containerOrFederation)
 		|| ContainersHooksSelectors.selectContainerById(containerOrFederation);
 	const isLastStep = step === 2;
 
 	const getIsStepValid = () => {
 		if (step === 0) return !!(vector3D[0] && vector3D[1]);
-		return isStepValid;
+		if (step === 1) return !!(vector2D[0] && vector2D[1]); // TODO ensure start !== end
+		if (step === 2) return !isNull(verticalPlanes.lower) && !isNull(verticalPlanes.upper);
+		return false;
 	};
 
 	const handleEndCalibration = () => history.push(origin);

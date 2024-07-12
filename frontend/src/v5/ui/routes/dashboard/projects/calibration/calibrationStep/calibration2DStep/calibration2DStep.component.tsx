@@ -16,7 +16,6 @@
  */
 
 import { useContext, useEffect } from 'react';
-import { BasicStep } from '../basicStep.component';
 import { UnityUtil } from '@/globals/unity-util';
 import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 
@@ -27,6 +26,5 @@ export const Calibration2DStep = () => {
 		UnityUtil.setCalibrationToolMode('Vector');
 		setLeftPanelRatio(.5);
 	}, []);
-
-	return (<BasicStep text="2d calibration" />);
+	return null;
 };
