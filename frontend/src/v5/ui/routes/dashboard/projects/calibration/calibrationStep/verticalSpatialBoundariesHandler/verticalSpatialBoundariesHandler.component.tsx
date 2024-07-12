@@ -16,10 +16,9 @@
  */
 
 import { useContext, useEffect } from 'react';
-import { Viewer, Viewer as ViewerService } from '@/v4/services/viewer/viewer';
+import { Viewer } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
-import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 import { isNull } from 'lodash';
 import { addVectors, getTransformationMatrix, subtractVectors, transformAndTranslate } from '../../calibrationHelpers';
 import { CalibrationContext } from '../../calibrationContext';
@@ -28,7 +27,6 @@ import { PlaneType, Vector2D } from '../../calibration.types';
 export const VerticalSpatialBoundariesHandler = () => {
 	const { setIsStepValid, setVerticalPlanes, vector3D: vector3DRaw, vector2D: vector2DRaw,
 		isCalibratingPlanes, setIsCalibratingPlanes, verticalPlanes, drawingId, selectedPlane } = useContext(CalibrationContext);
-	const { open2D } = useContext(ViewerCanvasesContext);
 	const isValid = !isNull(verticalPlanes.lower) && !isNull(verticalPlanes.upper);
 
 	const i = new Image();
@@ -44,12 +42,10 @@ export const VerticalSpatialBoundariesHandler = () => {
 	const tMatrix = getTransformationMatrix(vector2D, vector3D);
 	
 	useEffect(() => {
-		if (!isCalibratingPlanes) return;
 		Viewer.setCalibrationToolMode(isCalibratingPlanes ? 'Vertical' : 'None');
+		if (!isCalibratingPlanes) return;
 		Viewer.on(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
 		return () => {
-			Viewer.setCalibrationToolMode('None');
-			Viewer.setCalibrationToolDrawing(null, [0, 0, 0, 0, 0, 0]);
 			Viewer.off(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
 		};
 	}, [isCalibratingPlanes]);
@@ -71,7 +67,8 @@ export const VerticalSpatialBoundariesHandler = () => {
 
 		const imageDimensions = [ ...bottomLeft, ...bottomRight, ...topLeft];
 		Viewer.setCalibrationToolDrawing(i, imageDimensions);
-	}, [imageHeight + imageWidth, tMatrix]);
+		return () => Viewer.setCalibrationToolDrawing(null, imageDimensions);
+	}, [imageHeight, imageWidth]);
 
 	useEffect(() => {
 		if (selectedPlane === PlaneType.LOWER) {
@@ -82,9 +79,9 @@ export const VerticalSpatialBoundariesHandler = () => {
 	}, [selectedPlane]);
 	
 	useEffect(() => {
-		ViewerService.setCalibrationToolMode('Vertical');
-		return () => open2D(drawingId);
-	}, [step]);
+		setIsCalibratingPlanes(true);
+		return () => setIsCalibratingPlanes(false);
+	}, []);
 
 	return null;
 };
