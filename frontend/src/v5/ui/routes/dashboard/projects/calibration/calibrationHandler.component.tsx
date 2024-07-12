@@ -33,7 +33,7 @@ export const CalibrationHandler = () => {
 	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
 	const { step, drawingId, setVector3D, setVector2D, setOrigin, setStep, setIsCalibrating3D, origin } = useContext(CalibrationContext);
 	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
-	const horizontalCalibration = DrawingsHooksSelectors.selectHorizontalCalibration(drawingId, containerOrFederation);
+	const { horizontal } = DrawingsHooksSelectors.selectCalibration(drawingId, containerOrFederation);
 
 	const isFed = modelIsFederation(containerOrFederation);
 	const selectedModel = isFed
@@ -46,9 +46,9 @@ export const CalibrationHandler = () => {
 	}, [selectedModel, revision, drawing]);
 
 	useEffect(() => {
-		setVector3D(horizontalCalibration.model);
-		setVector2D(horizontalCalibration.drawing);
-	}, [horizontalCalibration]);
+		setVector3D(horizontal.model);
+		setVector2D(horizontal.drawing);
+	}, [horizontal]);
 
 	useEffect(() => {
 		CompareActionsDispatchers.resetComponentState();
