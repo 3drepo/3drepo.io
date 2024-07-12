@@ -17,31 +17,31 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
-export const downloadResourceLink = async (url) => {
+export const downloadUrl = async (url) => {
 	const response = await axios.get(url, { responseType: 'blob' });
 	return URL.createObjectURL(response.data);
 };
 
 // It uses axios config to pass the token so images are returned safely
-export const useAuthenticatedResource = (url: string, onError?) => {
-	const [blobUrl, setbaseBlobUrl] = useState<string>(undefined);
+export const useAuthenticatedImage = (src: string, onError?) => {
+	const [blobSrc, setbaseBlobSrc] = useState<string>(undefined);
 
 	useEffect(() => {
-		if (!url) return;
+		if (!src) return;
 		let mounted = true;
 
 		(async () => {
 			try {
-				const objectUrl = await downloadResourceLink(url);
+				const blobtUrl = await downloadUrl(src);
 				if (!mounted) return;  // to avoid changing the state in unmounted components
-				setbaseBlobUrl(objectUrl);
+				setbaseBlobSrc(blobtUrl);
 			} catch (e) {
 				onError?.(e);
 			}
 		})();
 
 		return () => { mounted = false;};
-	}, [url]);
+	}, [src]);
 
-	return blobUrl;
+	return blobSrc;
 };

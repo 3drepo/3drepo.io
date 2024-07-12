@@ -16,7 +16,7 @@
  */
 
 import { clientConfigService } from '@/v4/services/clientConfig';
-import { downloadResourceLink } from './authenticatedResource.hooks';
+import { downloadUrl } from './authenticatedResource.hooks';
 
 const isApiRequest = (url) => {
 	const apiUrl = clientConfigService.apiUrl('all', '');
@@ -33,7 +33,7 @@ export const AuthAnchor = (props: React.DetailedHTMLProps<React.AnchorHTMLAttrib
 		e.preventDefault();
 
 		if (!a.href) {
-			a.href = await downloadResourceLink(props.href);
+			a.href = await downloadUrl(props.href);
 		}
 
 		a.click();

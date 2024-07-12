@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { Avatar } from '@mui/material';
-import { useAuthenticatedResource } from './authenticatedResource.hooks';
+import { useAuthenticatedImage } from './authenticatedResource.hooks';
 
 
 export const AuthAvatarMui = (props) => {
-	const authSrc = useAuthenticatedResource(props.src, props.onError);
+	const authSrc = useAuthenticatedImage(props.src, props.onError);
 	return (<Avatar {...props}  src={authSrc} />);
 };
 
