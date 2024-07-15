@@ -39,7 +39,7 @@ import { CalibrationContext } from '../../../dashboard/projects/calibration/cali
 import { PlaneType } from '../../../dashboard/projects/calibration/calibration.types';
 
 export const SectionToolbar = () => {
-	const { isCalibratingPlanes, selectedPlane, setSelectedPlane } = useContext(CalibrationContext);
+	const { isCalibratingPlanes, selectedPlane, setSelectedPlane, isAlignPlaneActive, setIsAlignPlaneActive } = useContext(CalibrationContext);
 	const [alignActive, setAlignActive] = useState(false);
 	
 	const hasOverrides = !isEmpty(ViewerGuiHooksSelectors.selectColorOverrides());
@@ -81,7 +81,7 @@ export const SectionToolbar = () => {
 					hidden={!clippingSectionOpen}
 					onClick={onClickAlign}
 					selected={alignActive}
-					title={formatMessage({ id: 'viewer.toolbar.icon.alignToSurface', defaultMessage: 'Align To Surface' })}
+					title={formatMessage({ id: 'viewer.toolbar.icon.alignClippingToSurface', defaultMessage: 'Align To Surface' })}
 				/>
 				<ToolbarButton
 					Icon={ClipSelectionIcon}
@@ -113,6 +113,13 @@ export const SectionToolbar = () => {
 					<FormattedMessage id="viewer.toolbar.icon.upperPlane" defaultMessage="Top Plane" />
 				</LozengeButton>
 				<PlaneSeparation hidden={!isCalibratingPlanes} />
+				<ToolbarButton
+					Icon={AlignIcon}
+					hidden={!isCalibratingPlanes}
+					onClick={() => setIsAlignPlaneActive(!isAlignPlaneActive)}
+					selected={isAlignPlaneActive}
+					title={formatMessage({ id: 'viewer.toolbar.icon.alignPlaneToSurface', defaultMessage: 'Align To Surface' })}
+				/>
 			</Section>
 			<Section hidden={!hasOverrides}>
 				<ToolbarButton

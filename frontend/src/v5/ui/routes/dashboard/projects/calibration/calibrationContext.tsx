@@ -40,6 +40,8 @@ export interface CalibrationContextType {
 	setIsCalibratingPlanes: (isCalibratingPlanes: boolean) => void,
 	selectedPlane: PlaneType,
 	setSelectedPlane: (plane: PlaneType) => void,
+	isAlignPlaneActive: boolean,
+	setIsAlignPlaneActive: (isActive: boolean) => void,
 }
 
 const defaultValue: CalibrationContextType = {
@@ -61,6 +63,8 @@ const defaultValue: CalibrationContextType = {
 	setIsCalibratingPlanes: () => {},
 	selectedPlane: null,
 	setSelectedPlane: () => {},
+	isAlignPlaneActive: false,
+	setIsAlignPlaneActive: () => {},
 };
 export const CalibrationContext = createContext(defaultValue);
 CalibrationContext.displayName = 'CalibrationContext';
@@ -75,6 +79,7 @@ export const CalibrationContextComponent = ({ children }) => {
 	const [vector2D, setVector2D] = useState<Vector2D>(EMPTY_VECTOR);
 	const [verticalPlanes, setVerticalPlanes] = useState<VerticalPlanes>({ [PlaneType.UPPER]: null, [PlaneType.LOWER]: null });
 	const [selectedPlane, setSelectedPlane] = useState<PlaneType>(null);
+	const [isAlignPlaneActive, setIsAlignPlaneActive] = useState(false);
 	const [drawingId] = useSearchParam('drawingId');
 
 	return (
@@ -97,6 +102,8 @@ export const CalibrationContextComponent = ({ children }) => {
 			setIsCalibratingPlanes,
 			selectedPlane,
 			setSelectedPlane,
+			isAlignPlaneActive,
+			setIsAlignPlaneActive,
 		}}>
 			{isCalibrating && <CalibrationHandler />}
 			{children}

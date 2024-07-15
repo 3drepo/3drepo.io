@@ -27,7 +27,7 @@ import { isNull } from 'lodash';
 
 export const VerticalSpatialBoundariesHandler = () => {
 	const { verticalPlanes, setVerticalPlanes, vector3D, vector2D, isCalibratingPlanes, setIsCalibratingPlanes, drawingId,
-		setSelectedPlane, selectedPlane } = useContext(CalibrationContext);
+		setSelectedPlane, selectedPlane, isAlignPlaneActive, setIsAlignPlaneActive } = useContext(CalibrationContext);
 
 	// create pseudo-element of the drawing to be passed to unity
 	const i = new Image();
@@ -44,52 +44,57 @@ export const VerticalSpatialBoundariesHandler = () => {
 		if (isCalibratingPlanes) {
 			Viewer.setCalibrationToolMode(isCalibratingPlanes ? 'Vertical' : 'None');
 			Viewer.on(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
+			return () => {
+				Viewer.setCalibrationToolMode('None');
+				Viewer.off(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
+			};
 		}
-		return () => {
-			Viewer.setCalibrationToolMode('None');
-			Viewer.off(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
-		};
 	}, [isCalibratingPlanes]);
 
 	useEffect(() => {
-		const onPickPoint = ({ position }) => {
-			const zIndex = position[1];
-			if (selectedPlane === PlaneType.LOWER) {
-				if (zIndex > verticalPlanes[PlaneType.UPPER]) return;
-				if (isNull(verticalPlanes[PlaneType.LOWER])) setSelectedPlane(PlaneType.UPPER);
-			}
-			if (selectedPlane === PlaneType.UPPER) {
-				if (zIndex < verticalPlanes[PlaneType.LOWER]) return;
-				if (isNull(verticalPlanes[PlaneType.UPPER])) setSelectedPlane(null);
-			}
-			const newValues = { ...verticalPlanes, [selectedPlane]: zIndex };
-			Viewer.setCalibrationToolVerticalPlanes(newValues);
-			setVerticalPlanes(newValues);
-		};
-		TreeActionsDispatchers.stopListenOnSelections();
-		Viewer.enableEdgeSnapping();
-		Viewer.on(VIEWER_EVENTS.PICK_POINT, onPickPoint);
-		return () => {
-			TreeActionsDispatchers.startListenOnSelections();
-			Viewer.disableEdgeSnapping();
-			Viewer.off(VIEWER_EVENTS.PICK_POINT, onPickPoint);
-		};
-	}, [isCalibratingPlanes, selectedPlane, verticalPlanes]);
+		if (isAlignPlaneActive) {
+			const onPickPoint = ({ position }) => {
+				const zIndex = position[1];
+				if (selectedPlane === PlaneType.LOWER) {
+					if (zIndex > verticalPlanes[PlaneType.UPPER]) return;
+					if (isNull(verticalPlanes[PlaneType.LOWER])) setSelectedPlane(PlaneType.UPPER);
+				}
+				if (selectedPlane === PlaneType.UPPER) {
+					if (zIndex < verticalPlanes[PlaneType.LOWER]) return;
+					if (isNull(verticalPlanes[PlaneType.UPPER])) {
+						setSelectedPlane(null);
+						setIsAlignPlaneActive(false);
+					}
+				}
+				const newValues = { ...verticalPlanes, [selectedPlane]: zIndex };
+				Viewer.setCalibrationToolVerticalPlanes(newValues);
+				setVerticalPlanes(newValues);
+			};
+			TreeActionsDispatchers.stopListenOnSelections();
+			Viewer.enableEdgeSnapping();
+			Viewer.on(VIEWER_EVENTS.PICK_POINT, onPickPoint);
+			return () => {
+				TreeActionsDispatchers.startListenOnSelections();
+				Viewer.disableEdgeSnapping();
+				Viewer.off(VIEWER_EVENTS.PICK_POINT, onPickPoint);
+			};
+		}
+	}, [isAlignPlaneActive, selectedPlane, verticalPlanes]);
 
 	useEffect(() => {
-		if (!imageHeight || !imageWidth) return;
+		if (imageHeight && imageWidth) {
+			const [xmin, ymin] = subtractVectors([0, 0], vector2D[0]);
+			const [xmax, ymax] = addVectors([xmin, ymin], [imageWidth, imageHeight]);
 	
-		const [xmin, ymin] = subtractVectors([0, 0], vector2D[0]);
-		const [xmax, ymax] = addVectors([xmin, ymin], [imageWidth, imageHeight]);
-
-		// transform corners of drawing. Adding offset of model vector
-		const bottomRight = transformAndTranslate([xmax, ymax], tMatrix, vector3DPlane[0]);
-		const topLeft = transformAndTranslate([xmin, ymin], tMatrix, vector3DPlane[0]);
-		const bottomLeft = transformAndTranslate([xmin, ymax], tMatrix, vector3DPlane[0]);
-
-		const imageDimensions = [ ...bottomLeft, ...bottomRight, ...topLeft];
-		Viewer.setCalibrationToolDrawing(i, imageDimensions);
-		return () => Viewer.setCalibrationToolDrawing(null, imageDimensions);
+			// transform corners of drawing. Adding offset of model vector
+			const bottomRight = transformAndTranslate([xmax, ymax], tMatrix, vector3DPlane[0]);
+			const topLeft = transformAndTranslate([xmin, ymin], tMatrix, vector3DPlane[0]);
+			const bottomLeft = transformAndTranslate([xmin, ymax], tMatrix, vector3DPlane[0]);
+	
+			const imageDimensions = [ ...bottomLeft, ...bottomRight, ...topLeft];
+			Viewer.setCalibrationToolDrawing(i, imageDimensions);
+			return () => Viewer.setCalibrationToolDrawing(null, imageDimensions);
+		}
 	}, [imageHeight, imageWidth]);
 
 	useEffect(() => {
@@ -103,6 +108,7 @@ export const VerticalSpatialBoundariesHandler = () => {
 	useEffect(() => {
 		setSelectedPlane(PlaneType.LOWER);
 		setIsCalibratingPlanes(true);
+		setIsAlignPlaneActive(true);
 		return () => setIsCalibratingPlanes(false);
 	}, []);
 
