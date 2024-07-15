@@ -18,8 +18,8 @@
 import { useAuthenticatedImage } from './authenticatedResource.hooks';
 
 
-export const AuthImg = (props: React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>) => {
-	const authSrc = useAuthenticatedImage(props.src, props.onError);
+export const AuthImg = ({ src, ...props }: React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>) => {
+	const authSrc = useAuthenticatedImage(src, props.onError);
 	return (<img {...props} src={authSrc}  />);
 };
 
