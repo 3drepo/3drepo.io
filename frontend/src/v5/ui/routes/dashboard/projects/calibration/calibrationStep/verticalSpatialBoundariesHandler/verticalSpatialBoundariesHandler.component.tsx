@@ -22,11 +22,14 @@ import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
 import { addVectors, flipYAxis, getTransformationMatrix, getXYPlane, subtractVectors, transformAndTranslate } from '../../calibrationHelpers';
 import { CalibrationContext } from '../../calibrationContext';
 import { PlaneType } from '../../calibration.types';
+import { TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { isNull } from 'lodash';
 
 export const VerticalSpatialBoundariesHandler = () => {
-	const { setVerticalPlanes, vector3D, vector2D,
-		isCalibratingPlanes, setIsCalibratingPlanes, drawingId, selectedPlane } = useContext(CalibrationContext);
+	const { verticalPlanes, setVerticalPlanes, vector3D, vector2D, isCalibratingPlanes, setIsCalibratingPlanes, drawingId,
+		setSelectedPlane, selectedPlane } = useContext(CalibrationContext);
 
+	// create pseudo-element of the drawing to be passed to unity
 	const i = new Image();
 	i.crossOrigin = 'anonymous';
 	i.src = getDrawingImageSrc(drawingId);
@@ -39,11 +42,40 @@ export const VerticalSpatialBoundariesHandler = () => {
 	const tMatrix = getTransformationMatrix(drawingVector, modelVector);
 	
 	useEffect(() => {
-		Viewer.setCalibrationToolMode(isCalibratingPlanes ? 'Vertical' : 'None');
-		if (!isCalibratingPlanes) return;
-		Viewer.on(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
-		return () => Viewer.off(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
+		if (isCalibratingPlanes) {
+			Viewer.setCalibrationToolMode(isCalibratingPlanes ? 'Vertical' : 'None');
+			Viewer.on(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
+		}
+		return () => {
+			Viewer.setCalibrationToolMode('None');
+			Viewer.off(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
+		};
 	}, [isCalibratingPlanes]);
+
+	useEffect(() => {
+		const onPickPoint = ({ position }) => {
+			const zIndex = position[1];
+			if (selectedPlane === PlaneType.LOWER) {
+				if (zIndex > verticalPlanes[PlaneType.UPPER]) return;
+				if (isNull(verticalPlanes[PlaneType.LOWER])) setSelectedPlane(PlaneType.UPPER);
+			}
+			if (selectedPlane === PlaneType.UPPER) {
+				if (zIndex < verticalPlanes[PlaneType.LOWER]) return;
+				if (isNull(verticalPlanes[PlaneType.UPPER])) setSelectedPlane(null);
+			}
+			const newValues = { ...verticalPlanes, [selectedPlane]: zIndex };
+			Viewer.setCalibrationToolVerticalPlanes(newValues);
+			setVerticalPlanes(newValues);
+		};
+		TreeActionsDispatchers.stopListenOnSelections();
+		Viewer.enableEdgeSnapping();
+		Viewer.on(VIEWER_EVENTS.PICK_POINT, onPickPoint);
+		return () => {
+			TreeActionsDispatchers.startListenOnSelections();
+			Viewer.disableEdgeSnapping();
+			Viewer.off(VIEWER_EVENTS.PICK_POINT, onPickPoint);
+		};
+	}, [isCalibratingPlanes, selectedPlane, verticalPlanes]);
 
 	useEffect(() => {
 		if (!imageHeight || !imageWidth) return;
@@ -62,14 +94,15 @@ export const VerticalSpatialBoundariesHandler = () => {
 	}, [imageHeight, imageWidth]);
 
 	useEffect(() => {
-		if (selectedPlane === PlaneType.LOWER) {
+		if (selectedPlane === PlaneType.LOWER && verticalPlanes[PlaneType.LOWER]) {
 			Viewer.selectCalibrationToolLowerPlane();
-		} else {
+		} else if (selectedPlane === PlaneType.UPPER && verticalPlanes[PlaneType.UPPER]) {
 			Viewer.selectCalibrationToolUpperPlane();
 		}
 	}, [selectedPlane]);
-	
+
 	useEffect(() => {
+		setSelectedPlane(PlaneType.LOWER);
 		setIsCalibratingPlanes(true);
 		return () => setIsCalibratingPlanes(false);
 	}, []);
