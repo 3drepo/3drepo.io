@@ -20,6 +20,7 @@
 const express = require("express");
 const router = express.Router({mergeParams: true});
 const middlewares = require("../middlewares/middlewares");
+const risksMiddleware = require("../middlewares/risk");
 
 const C = require("../constants");
 const responseCodes = require("../response_codes.js");
@@ -139,7 +140,7 @@ const multer = require("multer");
  * 	}
  * }
  */
-router.get("/risks/:riskId", middlewares.risk.canView, findRiskById);
+router.get("/risks/:riskId", risksMiddleware.canView, findRiskById);
 
 /**
  * @api {get} /:teamspace/:model/risks/:riskId/thumbnail.png Get risk thumbnail
@@ -159,7 +160,7 @@ router.get("/risks/:riskId", middlewares.risk.canView, findRiskById);
  * HTTP/1.1 200 OK
  * <binary image>
  */
-router.get("/risks/:riskId/thumbnail.png", middlewares.risk.canView, getThumbnail);
+router.get("/risks/:riskId/thumbnail.png", risksMiddleware.canView, getThumbnail);
 
 /**
  * @api {get} /:teamspace/:model[/revision/:revId]/risks List all risks
@@ -249,7 +250,7 @@ router.get("/risks/:riskId/thumbnail.png", middlewares.risk.canView, getThumbnai
  * 	}
  * ]
  */
-router.get("/risks", middlewares.risk.canView, listRisks);
+router.get("/risks", risksMiddleware.canView, listRisks);
 
 /**
  * @api {get} /:teamspace/:model/risks/:riskId/screenshot.png Get risk screenshot
@@ -269,7 +270,7 @@ router.get("/risks", middlewares.risk.canView, listRisks);
  * HTTP/1.1 200 OK
  * <binary image>
  */
-router.get("/risks/:riskId/viewpoints/:vid/screenshot.png", middlewares.risk.canView, getScreenshot);
+router.get("/risks/:riskId/viewpoints/:vid/screenshot.png", risksMiddleware.canView, getScreenshot);
 
 /**
  * @api {get} /:teamspace/:model/risks/:riskId/screenshotSmall.png Get low-res screenshot
@@ -289,9 +290,9 @@ router.get("/risks/:riskId/viewpoints/:vid/screenshot.png", middlewares.risk.can
  * HTTP/1.1 200 OK
  * <binary image>
  */
-router.get("/risks/:riskId/viewpoints/:vid/screenshotSmall.png", middlewares.risk.canView, getScreenshotSmall);
+router.get("/risks/:riskId/viewpoints/:vid/screenshotSmall.png", risksMiddleware.canView, getScreenshotSmall);
 
-router.get("/revision/:rid/risks", middlewares.risk.canView, listRisks);
+router.get("/revision/:rid/risks", risksMiddleware.canView, listRisks);
 
 /**
  * @api {get} /:teamspace/:model[/revision/:revId]/risks.html Render risks as HTML
@@ -315,9 +316,9 @@ router.get("/revision/:rid/risks", middlewares.risk.canView, listRisks);
  * HTTP/1.1 200 OK
  * <html page>
  */
-router.get("/risks.html", middlewares.risk.canView, renderRisksHTML);
+router.get("/risks.html", risksMiddleware.canView, renderRisksHTML);
 
-router.get("/revision/:rid/risks.html", middlewares.risk.canView, renderRisksHTML);
+router.get("/revision/:rid/risks.html", risksMiddleware.canView, renderRisksHTML);
 
 /**
  * @api {post} /:teamspace/:model[/revision/:revId]/risks Create a risk
@@ -483,7 +484,7 @@ router.get("/revision/:rid/risks.html", middlewares.risk.canView, renderRisksHTM
  * 	}
  * }
  */
-router.post("/risks", middlewares.risk.canCreate, storeRisk);
+router.post("/risks", risksMiddleware.canCreate, storeRisk);
 
 /**
  * @api {patch} /:teamspace/:model[/revision/:revId]/risks/:riskId Update risk
@@ -566,11 +567,11 @@ router.post("/risks", middlewares.risk.canCreate, storeRisk);
  * 	}
  * }
  */
-router.patch("/risks/:riskId", middlewares.risk.canComment, updateRisk,  middlewares.chat.onUpdateRisk,responseCodes.onSuccessfulOperation);
+router.patch("/risks/:riskId", risksMiddleware.canComment, updateRisk,  middlewares.chat.onUpdateRisk,responseCodes.onSuccessfulOperation);
 
-router.post("/revision/:rid/risks", middlewares.risk.canCreate, storeRisk);
+router.post("/revision/:rid/risks", risksMiddleware.canCreate, storeRisk);
 
-router.patch("/revision/:rid/risks/:riskId", middlewares.risk.canComment, updateRisk, responseCodes.onSuccessfulOperation);
+router.patch("/revision/:rid/risks/:riskId", risksMiddleware.canComment, updateRisk, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {post} /:teamspace/:model/risks/:riskId/comments Add a comment
@@ -638,7 +639,7 @@ router.patch("/revision/:rid/risks/:riskId", middlewares.risk.canComment, update
  * 	}
  * }
  **/
-router.post("/risks/:riskId/comments", middlewares.risk.canComment, addComment, middlewares.notification.onNewComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
+router.post("/risks/:riskId/comments", risksMiddleware.canComment, addComment, middlewares.notification.onNewComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {delete} /:teamspace/:model/risks/:riskId/comments Delete a comment
@@ -663,7 +664,7 @@ router.post("/risks/:riskId/comments", middlewares.risk.canComment, addComment, 
  * 	"guid":"00000000-0000-0000-0000-000000000007",
  * }
  **/
-router.delete("/risks/:riskId/comments", middlewares.risk.canComment, deleteComment, middlewares.chat.onCommentDeleted, responseCodes.onSuccessfulOperation);
+router.delete("/risks/:riskId/comments", risksMiddleware.canComment, deleteComment, middlewares.chat.onCommentDeleted, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {post} /:teamspace/:model/risks/:riskId/resources Attach resources to a risk
@@ -711,7 +712,7 @@ router.delete("/risks/:riskId/comments", middlewares.risk.canComment, deleteComm
  *    }
  * ]
  */
-router.post("/risks/:riskId/resources",middlewares.risk.canComment, attachResourcesToRisk, middlewares.chat.onResourcesCreated, responseCodes.onSuccessfulOperation);
+router.post("/risks/:riskId/resources",risksMiddleware.canComment, attachResourcesToRisk, middlewares.chat.onResourcesCreated, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {delete} /:teamspace/:model/risks/:riskId/resources Detach a resource from a risk
@@ -741,7 +742,7 @@ router.post("/risks/:riskId/resources",middlewares.risk.canComment, attachResour
  * }
  *
  */
-router.delete("/risks/:riskId/resources", middlewares.risk.canComment, detachResourcefromRisk, middlewares.chat.onResourceDeleted, responseCodes.onSuccessfulOperation);
+router.delete("/risks/:riskId/resources", risksMiddleware.canComment, detachResourcefromRisk, middlewares.chat.onResourceDeleted, responseCodes.onSuccessfulOperation);
 
 function storeRisk(req, res, next) {
 	const place = utils.APIInfo(req);

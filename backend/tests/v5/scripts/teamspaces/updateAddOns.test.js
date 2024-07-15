@@ -63,7 +63,7 @@ const runTest = (data) => {
 				[ADD_ONS.VR]: true,
 				[ADD_ONS.MODULES]: `${generateRandomString()}, ${ADD_ONS_MODULES.ISSUES}`,
 			}],
-		['there request includes invalid modules', false,
+		['the request includes invalid modules', false,
 			new Error('Must specify at least 1 add on'), data.noAddOn, { }],
 		['the request enables all add ons', true, undefined, data.noAddOn, {
 			[ADD_ONS.VR]: true,

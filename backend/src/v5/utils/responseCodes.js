@@ -46,6 +46,7 @@ ResponseCodes.templates = {
 	teamspaceNotFound: { message: 'Teamspace not found.', status: 404 },
 	ssoRestricted: { message: 'This teamspace only accepts Single Signed On users. Please link your account with an authority.', status: 401 },
 	domainRestricted: { message: 'Your email does not belong in a domain that is accepted by this teamspace. Please contact your teamspace administrator.', status: 401 },
+	addOnModuleNotEnabled: { message: 'This add on module is not enabled in this teamspace.', status: 400 },
 
 	// Project related error
 	projectNotFound: { message: 'Project not found.', status: 404 },

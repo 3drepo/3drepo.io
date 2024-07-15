@@ -20,6 +20,7 @@
 const express = require("express");
 const router = express.Router({mergeParams: true});
 const middlewares = require("../middlewares/middlewares");
+const issuesMiddleware = require("../middlewares/issue");
 
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
@@ -156,7 +157,7 @@ const SequenceActivities = require("../models/sequenceActivities");
  * 		}
  * 	]
  */
-router.get("/sequences/:sequenceId/state/:stateId", middlewares.issue.canView, getSequenceState);
+router.get("/sequences/:sequenceId/state/:stateId", issuesMiddleware.canView, getSequenceState);
 
 /**
  * @api {get} /:teamspace/:model/sequences/:sequenceID Get sequence
@@ -189,7 +190,7 @@ router.get("/sequences/:sequenceId/state/:stateId", middlewares.issue.canView, g
  * 	"_id":"00000000-0000-0000-0000-000000000002"
  * }
  */
-router.get("/sequences/:sequenceId", middlewares.issue.canView, getSequence);
+router.get("/sequences/:sequenceId", issuesMiddleware.canView, getSequence);
 
 /**
  * @api {patch} /:teamspace/:model/sequences/:sequenceID Update a sequence
@@ -256,7 +257,7 @@ router.put("/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, 
  * 	  "Temporary works": "#ffffff66"
  * }
  */
-router.get("/sequences/:sequenceId/legend", middlewares.issue.canView, getLegend);
+router.get("/sequences/:sequenceId/legend", issuesMiddleware.canView, getLegend);
 
 /**
  * @api {delete} /:teamspace/:model/sequences/:sequenceID/legend Delete legend
@@ -290,7 +291,7 @@ router.delete("/sequences/:sequenceId/legend", middlewares.hasUploadAccessToMode
  * HTTP/1.1 200 OK
  * {}
  */
-router.delete("/sequences/:sequenceId", middlewares.issue.canCreate, deleteSequence);
+router.delete("/sequences/:sequenceId", issuesMiddleware.canCreate, deleteSequence);
 
 /**
  * @api {post} /:teamspace/:model/sequences Create custom sequence
@@ -413,7 +414,7 @@ router.delete("/sequences/:sequenceId", middlewares.issue.canCreate, deleteSeque
  * 	"_id":"00000000-0000-0000-0000-000000000002"
  * }
  */
-router.post("/sequences", middlewares.issue.canCreate, createSequence);
+router.post("/sequences", issuesMiddleware.canCreate, createSequence);
 
 /**
  * @api {get} /:teamspace/:model/sequences List all sequences
@@ -453,7 +454,7 @@ router.post("/sequences", middlewares.issue.canCreate, createSequence);
  * 	}
  * ]
  */
-router.get("/sequences", middlewares.issue.canView, listSequences);
+router.get("/sequences", issuesMiddleware.canView, listSequences);
 
 function createSequence(req, res, next) {
 	const place = utils.APIInfo(req);

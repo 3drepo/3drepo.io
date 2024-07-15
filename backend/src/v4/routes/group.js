@@ -19,7 +19,7 @@
 
 const express = require("express");
 const router = express.Router({ mergeParams: true });
-const middlewares = require("../middlewares/middlewares");
+const issuesMiddleware = require("../middlewares/issue.js");
 const responseCodes = require("../response_codes.js");
 const Group = require("../models/group");
 const C = require("../constants");
@@ -147,9 +147,9 @@ const systemLogger = require("../logger.js").systemLogger;
  * 	}
  * ]
  */
-router.get("/revision/master/head/groups", middlewares.issue.canView, listGroups);
+router.get("/revision/master/head/groups", issuesMiddleware.canView, listGroups);
 
-router.get("/revision/:rid/groups", middlewares.issue.canView, listGroups);
+router.get("/revision/:rid/groups", issuesMiddleware.canView, listGroups);
 
 /**
  * @api {get} /:teamspace/:model/revision(/master/head|/:revId)/groups/:groupId?[query] Find group
@@ -252,9 +252,9 @@ router.get("/revision/:rid/groups", middlewares.issue.canView, listGroups);
  * 	"_id":"00000000-0000-0000-0000-000000000004"
  * }
  */
-router.get("/revision/master/head/groups/:uid", middlewares.issue.canView, findGroup);
+router.get("/revision/master/head/groups/:uid", issuesMiddleware.canView, findGroup);
 
-router.get("/revision/:rid/groups/:uid", middlewares.issue.canView, findGroup);
+router.get("/revision/:rid/groups/:uid", issuesMiddleware.canView, findGroup);
 
 /**
  * @api {put} /:teamspace/:model/revision(/master/head|/:revId)/groups/:groupId/ Update group
@@ -301,9 +301,9 @@ router.get("/revision/:rid/groups/:uid", middlewares.issue.canView, findGroup);
  * 	"_id":"00000000-0000-0000-0000-000000000002"
  * }
  */
-router.put("/revision/master/head/groups/:uid", middlewares.issue.canCreate, updateGroup);
+router.put("/revision/master/head/groups/:uid", issuesMiddleware.canCreate, updateGroup);
 
-router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, updateGroup);
+router.put("/revision/:rid/groups/:uid", issuesMiddleware.canCreate, updateGroup);
 
 /**
  * @api {post} /:teamspace/:model/revision(/master/head|/:revId)/groups Create group
@@ -462,9 +462,9 @@ router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, updateGrou
  * 	]
  * }
  */
-router.post("/revision/master/head/groups/", middlewares.issue.canCreate, createGroup);
+router.post("/revision/master/head/groups/", issuesMiddleware.canCreate, createGroup);
 
-router.post("/revision/:rid/groups/", middlewares.issue.canCreate, createGroup);
+router.post("/revision/:rid/groups/", issuesMiddleware.canCreate, createGroup);
 
 /**
  * @api {delete} /:teamspace/:model/groups?ids=[GROUPS] Delete groups
@@ -486,7 +486,7 @@ router.post("/revision/:rid/groups/", middlewares.issue.canCreate, createGroup);
  * 	"status":"success"
  * }
  */
-router.delete("/groups/", middlewares.issue.canCreate, deleteGroups);
+router.delete("/groups/", issuesMiddleware.canCreate, deleteGroups);
 
 /**
  * @api {post} /:teamspace/:model/groups/export Export Groups
@@ -494,7 +494,7 @@ router.delete("/groups/", middlewares.issue.canCreate, deleteGroups);
  * @apiGroup Groups
  * @apiDescription This is a back-ported endpoint from V5. For details please see V5 documentation /docs/#/Federations/ExportFederationGroups
  */
-router.post("/groups/export", middlewares.issue.canView, validateGroupsExportData, exportGroups, serialiseGroupArray);
+router.post("/groups/export", issuesMiddleware.canView, validateGroupsExportData, exportGroups, serialiseGroupArray);
 
 /**
  * @api {post} /:teamspace/:model/groups/import Import Groups
@@ -502,7 +502,7 @@ router.post("/groups/export", middlewares.issue.canView, validateGroupsExportDat
  * @apiGroup Groups
  * @apiDescription This is a back-ported endpoint from V5. For details please see V5 documentation /docs/#/Federations/ImportFederationGroups
  */
-router.post("/groups/import", middlewares.issue.canView, validateGroupsImportData, importGroups);
+router.post("/groups/import", issuesMiddleware.canView, validateGroupsImportData, importGroups);
 
 function exportGroups(req, res, next) {
 	const place = utils.APIInfo(req);

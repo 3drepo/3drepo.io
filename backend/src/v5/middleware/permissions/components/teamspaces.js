@@ -17,8 +17,8 @@
 
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
 const { hasAccessToTeamspace, isTeamspaceAdmin } = require('../../../utils/permissions/permissions');
-const { getAddOns } = require('../../../models/teamspaceSettings');
 const { getUserFromSession } = require('../../../utils/sessions');
+const { isAddOnModuleEnabled } = require('../../../models/teamspaceSettings');
 const { respond } = require('../../../utils/responder');
 
 const TeamspacePerms = {};
@@ -58,13 +58,13 @@ TeamspacePerms.isTeamspaceMember = async (req, res, next) => {
 	}
 };
 
-TeamspacePerms.isModuleEnabled = (moduleName) => async (req, res, next) => {
+TeamspacePerms.isAddOnModuleEnabled = (moduleName) => async (req, res, next) => {
 	try {
-		const addOns = await getAddOns(req.params.teamspace);
-		if (addOns.modules && addOns.modules.includes(moduleName)) {
+		const addOnModuleEnabled = await isAddOnModuleEnabled(req.params.teamspace, moduleName);
+		if (addOnModuleEnabled) {
 			await next();
 		} else {
-			respond(req, res, createResponseCode(templates.notAuthorized, `${moduleName} module is not enabled in this teamspace`));
+			respond(req, res, createResponseCode(templates.addOnModuleNotEnabled, `${moduleName} module is not enabled in this teamspace`));
 		}
 	} catch (err) {
 		respond(req, res, err);

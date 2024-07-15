@@ -16,6 +16,7 @@
  */
 
 const { v5Path } = require('../../../interop');
+const { ADD_ONS } = require('../../../v5/models/teamspaces.constants');
 
 const { getTeamspaceList } = require('../../utils');
 
@@ -26,7 +27,7 @@ const { ADD_ONS_MODULES } = require(`${v5Path}/models/teamspaces.constants`);
 const processTeamspace = async (teamspace) => {
 	const addOns = getAddOns(teamspace);
 
-	if (!addOns.modules) {
+	if (!addOns[ADD_ONS.MODULES]) {
 		const update = { modules: Object.values(ADD_ONS_MODULES) };
 		await updateAddOns(teamspace, update);
 	}

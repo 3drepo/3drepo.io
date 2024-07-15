@@ -22,18 +22,14 @@
 	const C	= require("../constants");
 	const { v5Path } = require("../../interop");
 	const { validateMany } = require(`${v5Path}/middleware/common`);
-	const { isModuleEnabled } = require(`${v5Path}/middleware/permissions/components/teamspaces`);
+	const { isAddOnModuleEnabled } = require(`${v5Path}/middleware/permissions/components/teamspaces`);
 	const { ADD_ONS_MODULES } = require(`${v5Path}/models/teamspaces.constants`);
-
-	const setTeamspaceParam = (req, res, next) => {
-		req.params.teamspace = req.params.account;
-		next();
-	};
+	const { formatV5NewModelRevisionsData } = require("./middlewares");
 
 	module.exports = {
-		canView: validateMany([setTeamspaceParam, isModuleEnabled(ADD_ONS_MODULES.ISSUES), checkPermissions([C.PERM_VIEW_ISSUE])]),
-		canCreate: validateMany([setTeamspaceParam, isModuleEnabled(ADD_ONS_MODULES.ISSUES), checkPermissions([C.PERM_CREATE_ISSUE])]),
-		canComment: validateMany([setTeamspaceParam, isModuleEnabled(ADD_ONS_MODULES.ISSUES), checkPermissions([C.PERM_COMMENT_ISSUE])])
+		canView: validateMany([formatV5NewModelRevisionsData, isAddOnModuleEnabled(ADD_ONS_MODULES.ISSUES), checkPermissions([C.PERM_VIEW_ISSUE])]),
+		canCreate: validateMany([formatV5NewModelRevisionsData, isAddOnModuleEnabled(ADD_ONS_MODULES.ISSUES), checkPermissions([C.PERM_CREATE_ISSUE])]),
+		canComment: validateMany([formatV5NewModelRevisionsData, isAddOnModuleEnabled(ADD_ONS_MODULES.ISSUES), checkPermissions([C.PERM_COMMENT_ISSUE])])
 	};
 
 })();
