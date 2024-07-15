@@ -14,12 +14,22 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { isApiUrl } from '@/v5/services/api/default';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
-export const downloadUrl = async (url) => {
-	const response = await axios.get(url, { responseType: 'blob' });
-	return URL.createObjectURL(response.data);
+const CachedURL: Record<string, string>  = {};
+
+
+export const downloadAuthUrl = async (url) => {
+	if ( !isApiUrl(url) ) return url;
+
+	if (!CachedURL[url]) {
+		const response = await axios.get(url, { responseType: 'blob' });
+		CachedURL[url] = URL.createObjectURL(response.data);
+	}
+
+	return CachedURL[url];
 };
 
 // It uses axios config to pass the token so images are returned safely
@@ -32,7 +42,7 @@ export const useAuthenticatedImage = (src: string, onError?) => {
 
 		(async () => {
 			try {
-				const blobtUrl = await downloadUrl(src);
+				const blobtUrl = await downloadAuthUrl(src);
 				if (!mounted) return;  // to avoid changing the state in unmounted components
 				setbaseBlobSrc(blobtUrl);
 			} catch (e) {

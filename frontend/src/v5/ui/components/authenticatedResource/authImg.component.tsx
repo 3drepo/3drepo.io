@@ -15,11 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { ForwardedRef, forwardRef } from 'react';
 import { useAuthenticatedImage } from './authenticatedResource.hooks';
 
+type HTMLImageElementProps = React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>;
 
-export const AuthImg = ({ src, ...props }: React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>) => {
+export const AuthImg = forwardRef(({ src, ...props }: HTMLImageElementProps, ref: ForwardedRef<HTMLImageElement>) => {
 	const authSrc = useAuthenticatedImage(src, props.onError);
-	return (<img {...props} src={authSrc}  />);
-};
+	return (<img {...props} src={authSrc}  ref={ref}/>);
+});
 
