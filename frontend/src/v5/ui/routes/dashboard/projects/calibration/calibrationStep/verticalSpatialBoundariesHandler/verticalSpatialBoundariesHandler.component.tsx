@@ -95,7 +95,7 @@ export const VerticalSpatialBoundariesHandler = () => {
 			Viewer.setCalibrationToolDrawing(i, imageDimensions);
 			return () => Viewer.setCalibrationToolDrawing(null, imageDimensions);
 		}
-	}, [imageHeight, imageWidth]);
+	}, [imageHeight, imageWidth, tMatrix]);
 
 	useEffect(() => {
 		if (selectedPlane === PlaneType.LOWER && verticalPlanes[PlaneType.LOWER]) {
