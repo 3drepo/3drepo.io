@@ -19,8 +19,6 @@ import { Vector2D, Vector3D, Coord2D, Transformation2D } from './calibration.typ
 
 // TODO figure out actual location/name for this file
 
-export const flipYAxis = (vector: Coord2D) => [vector[0], -vector[1]] as Coord2D;
-
 export const getXYPlane = (vector: Vector3D) => vector.map((val) => [val[0], val[2]]) as Vector2D;
 
 export const addVectors = (vectorA: number[], vectorB: number[]) => {
@@ -34,7 +32,7 @@ export const addVectors = (vectorA: number[], vectorB: number[]) => {
 export const subtractVectors = (vectorA: number[], vectorB: number[]) => {
 	const diffVector = [];
 	for (let i = 0; i < vectorA.length; i++) {
-		diffVector[i] = vectorB[i] - vectorA[i];
+		diffVector[i] = vectorA[i] - vectorB[i];
 	}
 	return diffVector;
 };
@@ -68,7 +66,7 @@ export const getTransformationMatrix = (vectorA, vectorB) => {
 
 	// in order to know if angle is clockwise or anti-clockwise we find the cross product of both vectors and take the sign of the z-component
 	const crossProductZ = (diffA[0] * diffB[1]) - (diffA[1] * diffB[0]);
-	const directionFactor = crossProductZ > 0 ? 1 : -1;
+	const directionFactor = crossProductZ < 0 ? 1 : -1;
 	const angle = Math.acos(dotProduct(diffA, diffB) / (magnitudeA * magnitudeB)) * directionFactor; // angle between vectors in radians
 
 	const scaleMatrix = [[ scaleFactor, 0], [0, scaleFactor]];
@@ -94,5 +92,5 @@ const transformVector = (v: number[], t: number[][]) => {
 
 export const transformAndTranslate = (v: Coord2D, t: Transformation2D, offset: Coord2D) => {
 	const transformed = transformVector(v, t);
-	return addVectors(flipYAxis(offset), transformed);
+	return addVectors(offset, transformed);
 };

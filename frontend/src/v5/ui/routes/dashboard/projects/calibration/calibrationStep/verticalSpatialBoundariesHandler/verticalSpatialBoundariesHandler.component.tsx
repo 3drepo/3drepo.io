@@ -19,7 +19,7 @@ import { useContext, useEffect } from 'react';
 import { Viewer } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
-import { addVectors, flipYAxis, getTransformationMatrix, getXYPlane, subtractVectors, transformAndTranslate } from '../../calibrationHelpers';
+import { addVectors, getTransformationMatrix, getXYPlane, subtractVectors, transformAndTranslate } from '../../calibrationHelpers';
 import { CalibrationContext } from '../../calibrationContext';
 import { PlaneType } from '../../calibration.types';
 import { TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
@@ -37,9 +37,8 @@ export const VerticalSpatialBoundariesHandler = () => {
 	const imageHeight = i.naturalHeight;
 	const imageWidth = i.naturalWidth;
 
-	const modelVector = getXYPlane(vector3D).map(flipYAxis); // TODO why is y flipped? 
-	const drawingVector = vector2D.map(flipYAxis);
-	const tMatrix = getTransformationMatrix(drawingVector, modelVector);
+	const vector3DPlane = getXYPlane(vector3D);
+	const tMatrix = getTransformationMatrix(vector2D, vector3DPlane);
 	
 	useEffect(() => {
 		if (isCalibratingPlanes) {
@@ -80,13 +79,13 @@ export const VerticalSpatialBoundariesHandler = () => {
 	useEffect(() => {
 		if (!imageHeight || !imageWidth) return;
 	
-		const [xmin, ymin] = subtractVectors(drawingVector[0], [0, -imageHeight]); // !working
+		const [xmin, ymin] = subtractVectors([0, 0], vector2D[0]);
 		const [xmax, ymax] = addVectors([xmin, ymin], [imageWidth, imageHeight]);
 
 		// transform corners of drawing. Adding offset of model vector
-		const bottomRight = transformAndTranslate([xmax, -ymin], tMatrix, modelVector[0]); // TODO why minuses?
-		const topLeft = transformAndTranslate([xmin, -ymax], tMatrix, modelVector[0]);
-		const bottomLeft = transformAndTranslate([xmin, -ymin], tMatrix, modelVector[0]);
+		const bottomRight = transformAndTranslate([xmax, ymax], tMatrix, vector3DPlane[0]);
+		const topLeft = transformAndTranslate([xmin, ymin], tMatrix, vector3DPlane[0]);
+		const bottomLeft = transformAndTranslate([xmin, ymax], tMatrix, vector3DPlane[0]);
 
 		const imageDimensions = [ ...bottomLeft, ...bottomRight, ...topLeft];
 		Viewer.setCalibrationToolDrawing(i, imageDimensions);
