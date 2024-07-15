@@ -36,6 +36,8 @@ export const CONTAINERS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/containers`;
 export const FEDERATIONS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/federations`;
 export const BOARD_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/board/:type?/:containerOrFederation?`;
 export const TICKETS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/tickets/:template/:ticketId?`;
+export const TICKETS_SELECTION_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/tickets`;
+
 
 export const PRIVACY_ROUTE = 'https://www.asite.com/privacy-policy';
 export const COOKIES_ROUTE = '/v5/cookies';
