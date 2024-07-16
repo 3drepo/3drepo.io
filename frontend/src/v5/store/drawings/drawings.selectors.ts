@@ -20,7 +20,7 @@ import { selectCurrentProject, selectIsProjectAdmin } from '../projects/projects
 import { DrawingsState } from './drawings.redux';
 import { isCollaboratorRole, isCommenterRole, isViewerRole } from '../store.helpers';
 import { Role } from '../currentUser/currentUser.types';
-import { CalibrationState } from './drawings.types';
+import { Calibration, CalibrationState } from './drawings.types';
 import { selectContainerById } from '../containers/containers.selectors';
 import { selectFederationById } from '../federations/federations.selectors';
 import { convertVectorUnits, getUnitsConversionFactor } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
@@ -97,30 +97,20 @@ export const selectIsCategoriesPending = createSelector(
 	(state, currentProject) => !state.categoriesByProject[currentProject],
 );
 
-const selectCalibration = createSelector(
+export const selectCalibration = createSelector(
 	selectDrawingById,
-	(drawing) => drawing?.calibration || {},
-);
-
-export const selectHorizontalCalibration = createSelector(
-	selectCalibration,
 	(state, drawingId, modelId) => selectContainerById(state, modelId) || selectFederationById(state, modelId),
-	(calibration, model) => {
-		const conversionFactor = getUnitsConversionFactor(calibration.units, model.unit);
+	(drawing, model) => {
+		const calibration = drawing?.calibration || EMPTY_CALIBRATION as Partial<Calibration>;
+		const conversionFactor = getUnitsConversionFactor(calibration?.units, model.unit);
 		const horizontalCalibration = calibration.horizontal || EMPTY_CALIBRATION.horizontal;
 		return {
-			model: convertVectorUnits(horizontalCalibration.model, conversionFactor),
-			drawing: convertVectorUnits(horizontalCalibration.drawing, conversionFactor),
+			horizontal: {
+				model: convertVectorUnits(horizontalCalibration.model, conversionFactor),
+				drawing: convertVectorUnits(horizontalCalibration.drawing, conversionFactor),
+			},
+			verticalRange: convertVectorUnits(calibration.verticalRange || EMPTY_CALIBRATION.verticalRange, conversionFactor),
 		};
-	},
-);
-
-export const selectVerticalRange = createSelector(
-	selectCalibration,
-	(state, drawingId, modelId) => selectContainerById(state, modelId) || selectFederationById(state, modelId),
-	(calibration, model) => {
-		const conversionFactor = getUnitsConversionFactor(calibration.units, model.unit);
-		return convertVectorUnits(calibration.verticalRange || EMPTY_CALIBRATION.verticalRange, conversionFactor);
 	},
 );
 
