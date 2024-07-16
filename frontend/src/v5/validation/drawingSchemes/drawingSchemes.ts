@@ -64,15 +64,15 @@ const testCombinationIsUnique = (val, testContext) => {
 };
 const statusCodeAndRevisionCodeMustBeUniqueMessage = formatMessage({
 	id: 'validation.drawing.statusCode.error.characters',
-	defaultMessage: 'Status Code can only consist of letters, numbers, hyphens or underscores',
+	defaultMessage: 'The conmbination of Status Code and Revision Code must be unique',
 });
 export const ListItemSchema = Yup.object().shape({
 	file: uploadFile,
 	revisionName,
-	statusCode: trimmedString.matches(alphaNumericHyphens,
+	statusCode: Yup.string().required(
 		formatMessage({
-			id: 'validation.drawing.statusCode.error.characters',
-			defaultMessage: 'Status Code can only consist of letters, numbers, hyphens or underscores',
+			id: 'validation.drawing.statusCode.error.required',
+			defaultMessage: 'Status Code is a required field',
 		}),
 	).test(
 		'statusCodeAndRevisionCodeAreUnique',

@@ -21,7 +21,7 @@ import { DrawingsHooksSelectors, DrawingRevisionsHooksSelectors } from '@/v5/ser
 import { InputController } from '@controls/inputs/inputController.component';
 import { DashboardListItemRow as UploadListItemRow } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { UploadListItemDestination } from './components/uploadListItemDestination/uploadListItemDestination.component';
-import { UploadListItemCode } from './components/uploadListItemCode/uploadListItemCode.component';
+import { UploadListItemRevisionCode } from './components/uploadListItemRevisionCode/uploadListItemRevisionCode.component';
 import { UploadListItemButton } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItem.styles';
 import { useFormContext } from 'react-hook-form';
 import { useEffect } from 'react';
@@ -32,6 +32,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { DrawingUploadStatus, IDrawing } from '@/v5/store/drawings/drawings.types';
 import { useParams } from 'react-router-dom';
 import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { UploadListItemStatusCode } from './components/uploadListItemStatusCode/uploadListItemStatusCode.component';
 
 const UNEXPETED_STATUS_ERROR = undefined;
 const STATUS_TEXT_BY_UPLOAD = {
@@ -98,7 +99,9 @@ export const UploadListItem = ({
 	}, [drawingId, statusCode, selectedDrawingRevisions.length]);
 
 	useEffect(() => {
-		trigger(`${revisionPrefix}.statusCode`);
+		if (statusCode) {
+			trigger(`${revisionPrefix}.statusCode`);
+		}
 	}, [drawingId, revisionCode, selectedDrawingRevisions.length]);
 
 	useEffect(() => {
@@ -129,12 +132,13 @@ export const UploadListItem = ({
 				disabled={isUploading}
 				onSelectNewDestination={onClickEdit}
 			/>
-			<UploadListItemCode
+			<InputController
+				Input={UploadListItemStatusCode}
 				key={`${uploadId}.statusCode`}
 				name={`${revisionPrefix}.statusCode`}
 				disabled={isUploading}
 			/>
-			<UploadListItemCode
+			<UploadListItemRevisionCode
 				key={`${uploadId}.revisionCode`}
 				name={`${revisionPrefix}.revisionCode`}
 				disabled={isUploading}

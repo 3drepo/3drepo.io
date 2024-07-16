@@ -15,6 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+export interface StatusCode {
+	code: string,
+	description: string,
+}
+
 export interface IDrawingRevision {
 	_id: string;
 	name: string;

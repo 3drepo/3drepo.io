@@ -18,9 +18,9 @@
 import styled from 'styled-components';
 import { TextField } from '../../../inputs';
 
-export const RevisionCodeField = styled(TextField)`
+export const RevisionCodeTextField = styled(TextField)`
 	margin: 0 12px;
-	width: 100px;
+	width: 146px;
 
 	.MuiFormHelperText-root {
 		display: none;

@@ -182,6 +182,7 @@ export const UploadDrawingRevisionForm = ({
 			addFilesToList([presetFile], presetDrawing);
 		}
 		DrawingsActionsDispatchers.fetchTypes(teamspace, project);
+		DrawingRevisionsActionsDispatchers.fetchStatusCodes(teamspace, project);
 	}, []);
 
 	return (

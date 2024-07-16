@@ -81,3 +81,13 @@ export const appendDrawingsToAxiosResponse = async (resp: Promise<AxiosResponse<
 	response.data.models = [...response.data.models, ...drawingIds];
 	return response;
 };
+
+export const statusCodes = [
+	{ code: 'S0', description: 'Initial status' },
+	{ code: 'S1', description: 'Suitable for coordination' },
+	{ code: 'S2', description: 'Suitable for information' },
+	{ code: 'S3', description: 'Suitable for review and comment' },
+	{ code: 'S4', description: 'Suitable for stage approval' },
+	{ code: 'S6', description: 'Suitable for PIM authorization' },
+	{ code: 'S7', description: 'Suitable for AIM authorization' },
+];
