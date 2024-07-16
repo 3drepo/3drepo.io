@@ -106,7 +106,7 @@ export const ContainerRevisionDetails = ({ containerId, revisionsCount, status }
 			<RevisionsListHeaderContainer>
 				<RevisionsListHeaderLabel width={140} tabletWidth={94}><FormattedMessage id="containerRevisionDetails.addedOn" defaultMessage="Added on" /></RevisionsListHeaderLabel>
 				<RevisionsListHeaderLabel width={170} tabletWidth={155}><FormattedMessage id="containerRevisionDetails.addedBy" defaultMessage="Added by" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel width={150} tabletWidth={300}><FormattedMessage id="containerRevisionDetails.revisionCode" defaultMessage="Revision name" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={150} tabletWidth={300}><FormattedMessage id="containerRevisionDetails.revisionName" defaultMessage="Revision name" /></RevisionsListHeaderLabel>
 				<RevisionsListHeaderLabel hideWhenSmallerThan={1140}><FormattedMessage id="containerRevisionDetails.description" defaultMessage="Description" /></RevisionsListHeaderLabel>
 				<RevisionsListHeaderLabel width={90} tabletWidth={45} hideWhenSmallerThan={800}><FormattedMessage id="containerRevisionDetails.format" defaultMessage="Format" /></RevisionsListHeaderLabel>
 			</RevisionsListHeaderContainer>

@@ -20,7 +20,7 @@ import { alphaNumericHyphens } from '../shared/validators';
 import { selectRevisions } from '@/v5/store/drawings/revisions/drawingRevisions.selectors';
 import { getState } from '@/v4/modules/store';
 
-export const revisionName = Yup.string()
+export const revName = Yup.string()
 	.max(50,
 		formatMessage({
 			id: 'validation.revisions.name.error.error.max',

@@ -112,10 +112,10 @@ export const UploadDrawingRevisionForm = ({
 		keyName: 'uploadId',
 	});
 
-	const revisionNameMaxLength = useMemo(() => {
-		const schemaDescription =  Yup.reach(UploadsSchema, 'uploads.revisionName').describe();
-		const revisionNameMax = schemaDescription.tests.find((t) => t.name === 'max');
-		return revisionNameMax.params.max;
+	const revNameMaxLength = useMemo(() => {
+		const schemaDescription =  Yup.reach(UploadsSchema, 'uploads.revName').describe();
+		const revNameMax = schemaDescription.tests.find((t) => t.name === 'max');
+		return revNameMax.params.max;
 	}, []);
 
 	const addFilesToList = async (files: File[], drawing?: IDrawing) => {
@@ -141,9 +141,9 @@ export const UploadDrawingRevisionForm = ({
 				...fileData,
 				progress: 0,
 				extension: fileName.split('.').slice(-1)[0].toLocaleLowerCase(),
-				revisionName: parseFileName(fileName, revisionNameMaxLength),
+				revName: parseFileName(fileName, revNameMaxLength),
 				statusCode: '',
-				revisionCode: '',
+				revCode: '',
 				revisionDesc: '',
 				drawingId: drawing?._id || '',
 				drawingName: drawing?.name?.trim() || '',

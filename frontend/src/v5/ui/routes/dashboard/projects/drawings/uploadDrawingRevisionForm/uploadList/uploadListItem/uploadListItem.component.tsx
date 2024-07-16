@@ -80,7 +80,7 @@ export const UploadListItem = ({
 	const { watch, trigger, setValue } = useFormContext();
 	const drawingId = watch(`${revisionPrefix}.drawingId`);
 	const statusCode = watch(`${revisionPrefix}.statusCode`);
-	const revisionCode = watch(`${revisionPrefix}.revisionCode`);
+	const revCode = watch(`${revisionPrefix}.revCode`);
 	const selectedDrawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
 	const selectedDrawingRevisions = DrawingRevisionsHooksSelectors.selectRevisions(selectedDrawing?._id);
 	const progress = DrawingRevisionsHooksSelectors.selectUploadProgress(uploadId);
@@ -93,8 +93,8 @@ export const UploadListItem = ({
 	});
 
 	useEffect(() => {
-		if (revisionCode) {
-			trigger(`${revisionPrefix}.revisionCode`);
+		if (revCode) {
+			trigger(`${revisionPrefix}.revCode`);
 		}
 	}, [drawingId, statusCode, selectedDrawingRevisions.length]);
 
@@ -102,7 +102,7 @@ export const UploadListItem = ({
 		if (statusCode) {
 			trigger(`${revisionPrefix}.statusCode`);
 		}
-	}, [drawingId, revisionCode, selectedDrawingRevisions.length]);
+	}, [drawingId, revCode, selectedDrawingRevisions.length]);
 
 	useEffect(() => {
 		for (const [key, val] of Object.entries(sanitiseDrawing(selectedDrawing))) {
@@ -139,8 +139,8 @@ export const UploadListItem = ({
 				disabled={isUploading}
 			/>
 			<UploadListItemRevisionCode
-				key={`${uploadId}.revisionCode`}
-				name={`${revisionPrefix}.revisionCode`}
+				key={`${uploadId}.revCode`}
+				name={`${revisionPrefix}.revCode`}
 				disabled={isUploading}
 			/>
 			{isUploading

@@ -17,7 +17,7 @@
 import * as Yup from 'yup';
 import { revisionDesc } from '../containerAndFederationSchemes/validators';
 import { desc, name, alphaNumericHyphens, uploadFile, trimmedString } from '../shared/validators';
-import { revisionName } from './validators';
+import { revName } from './validators';
 import { formatMessage } from '@/v5/services/intl';
 import { selectRevisions } from '@/v5/store/drawings/revisions/drawingRevisions.selectors';
 import { getState } from '@/v4/modules/store';
@@ -60,7 +60,7 @@ const isSameCode = (codeA = '', codeB = '') => codeA.toLocaleLowerCase().trim() 
 const testCombinationIsUnique = (val, testContext) => {
 	if (!testContext.options?.context || !testContext.parent?.drawingId) return true;
 	const revisions = selectRevisions(getState(), testContext.parent.drawingId);
-	return !revisions.some((rev) => isSameCode(rev.statusCode, testContext.parent.statusCode) && isSameCode(rev.revisionCode, testContext.parent.revisionCode));
+	return !revisions.some((rev) => isSameCode(rev.statusCode, testContext.parent.statusCode) && isSameCode(rev.revCode, testContext.parent.revCode));
 };
 const statusCodeAndRevisionCodeMustBeUniqueMessage = formatMessage({
 	id: 'validation.drawing.statusCode.error.characters',
@@ -68,7 +68,7 @@ const statusCodeAndRevisionCodeMustBeUniqueMessage = formatMessage({
 });
 export const ListItemSchema = Yup.object().shape({
 	file: uploadFile,
-	revisionName,
+	revName,
 	statusCode: Yup.string().required(
 		formatMessage({
 			id: 'validation.drawing.statusCode.error.required',
@@ -79,14 +79,14 @@ export const ListItemSchema = Yup.object().shape({
 		statusCodeAndRevisionCodeMustBeUniqueMessage,
 		testCombinationIsUnique,
 	),
-	revisionCode: trimmedString.matches(alphaNumericHyphens,
+	revCode: trimmedString.matches(alphaNumericHyphens,
 		formatMessage({
-			id: 'validation.drawing.revisionCode.error.characters',
+			id: 'validation.drawing.revCode.error.characters',
 			defaultMessage: 'Revision Code can only consist of letters, numbers, hyphens or underscores',
 		}),
 	).required(
 		formatMessage({
-			id: 'validation.drawing.revisionCode.error.required',
+			id: 'validation.drawing.revCode.error.required',
 			defaultMessage: 'Revision Code is a required field',
 		}),
 	).test(

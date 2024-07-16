@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, select, takeEvery, delay, takeLatest } from 'redux-saga/effects';
+import { put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
@@ -34,19 +34,13 @@ import { createDrawingFromRevisionBody, createFormDataFromRevisionBody } from '.
 import { selectIsPending, selectRevisions, selectStatusCodes } from './drawingRevisions.selectors';
 import { uuid } from '@/v4/helpers/uuid';
 import { selectUsername } from '../../currentUser/currentUser.selectors';
-import { selectDrawingById } from '../drawings.selectors';
 
 export function* fetch({ teamspace, projectId, drawingId, onSuccess }: FetchAction) {
 	if (yield select(selectIsPending, drawingId)) return;
 
-	// TODO - remove next line after backend is wired in
-	if ((yield select(selectRevisions, drawingId)).length) return;
-
 	yield put(DrawingRevisionsActions.setIsPending(drawingId, true));
 	try {
-		// TODO - delete next line and remove last param of API.DrawingRevisions.fetchRevisions, it's for demo
-		const drawing = yield select(selectDrawingById, drawingId);
-		const { data: { revisions } } = yield API.DrawingRevisions.fetchRevisions(teamspace, projectId, drawingId, drawing.revisionsCount);
+		const { data: { revisions } } = yield API.DrawingRevisions.fetchRevisions(teamspace, projectId, drawingId);
 		onSuccess?.();
 		yield put(DrawingRevisionsActions.fetchSuccess(drawingId, revisions));
 	} catch (error) {
@@ -110,8 +104,6 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 		);
 		yield put(DrawingsActions.setDrawingStatus(projectId, drawingId, DrawingUploadStatus.QUEUED));
 		yield put(DrawingRevisionsActions.setUploadComplete(uploadId, true));
-		// TODO - remove until catch bock after backend is wired in
-		yield delay(Math.random() * 1000);
 		yield put(DrawingsActions.setDrawingStatus(projectId, drawingId, DrawingUploadStatus.OK));
 		const revisions = yield select(selectRevisions, drawingId);
 		const author = yield select(selectUsername);
@@ -123,11 +115,11 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 			author,
 			format: body.file.name.split('.').slice(-1)[0],
 			statusCode: body.statusCode,
-			revisionCode: body.revisionCode,
+			revCode: body.revCode,
 			void: false,
 		}];
 		yield put(DrawingRevisionsActions.fetchSuccess(drawingId, newRevisions));
-		yield put(DrawingsActions.updateDrawingSuccess(projectId, drawingId, { latestRevision: body.revisionCode, revisionsCount: newRevisions.length }));
+		yield put(DrawingsActions.updateDrawingSuccess(projectId, drawingId, { latestRevision: body.revCode, revisionsCount: newRevisions.length }));
 	} catch (error) {
 		let errorMessage = error.message;
 		if (error.response) {

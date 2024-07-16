@@ -130,7 +130,7 @@ export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: ID
 								<RevisionsListItemText width={140} tabletWidth={94}> {formatShortDateTime(revision.timestamp)} </RevisionsListItemText>
 								<RevisionsListItemAuthor width={170} tabletWidth={155} authorName={revision.author} />
 								<RevisionsListItemTag width={150} tabletWidth={300}> {revision.statusCode || ''} </RevisionsListItemTag>
-								<RevisionsListItemTag width={150} tabletWidth={300}> {revision.revisionCode} </RevisionsListItemTag>
+								<RevisionsListItemTag width={150} tabletWidth={300}> {revision.revCode} </RevisionsListItemTag>
 								<RevisionsListItemText hideWhenSmallerThan={1140}> {revision.desc || ''} </RevisionsListItemText>
 								<RevisionsListItemText width={90} tabletWidth={45} hideWhenSmallerThan={800}> {(revision.format || '').toLowerCase()} </RevisionsListItemText>
 							</RevisionsListItem>
