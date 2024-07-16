@@ -737,7 +737,7 @@ export class UnityUtil {
 	/** @hidden */
 	public static calibrationPlanesChanged(planesJson) {
 		const planes = JSON.parse(planesJson);
-		UnityUtil.viewer.calibrationPlanesChanged(planes);
+		UnityUtil.viewer.calibrationPlanesChanged([planes.lower, planes.upper]);
 	}
 
 	/*

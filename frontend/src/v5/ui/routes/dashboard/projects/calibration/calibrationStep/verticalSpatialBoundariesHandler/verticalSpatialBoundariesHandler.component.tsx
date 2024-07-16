@@ -20,7 +20,7 @@ import { Viewer } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
 import { CalibrationContext } from '../../calibrationContext';
-import { PlaneType } from '../../calibration.types';
+import { PlaneType, Vector1D } from '../../calibration.types';
 import { TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { isNull, some } from 'lodash';
 import { ModelHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -54,31 +54,35 @@ export const VerticalSpatialBoundariesHandler = () => {
 	}, [isCalibratingPlanes, verticalPlanes]);
 
 	useEffect(() => {
-		Viewer.setCalibrationToolVerticalPlanes(verticalPlanes);
+		Viewer.setCalibrationToolVerticalPlanes(verticalPlanes[0], verticalPlanes[1]);
 	}, [verticalPlanes]);
 
 	useEffect(() => {
 		if (isAlignPlaneActive) {
 			const onPickPoint = ({ position }) => {
 				const initialRange = UNITS_CONVERTION_FACTORS_TO_METRES[modelUnit] * 2.5;
-				const zIndex = position[1];
+				const zCoord = position[1];
 				if (selectedPlane === PlaneType.LOWER) {
-					if (zIndex > verticalPlanes[PlaneType.UPPER]) return;
-					if (isNull(verticalPlanes[PlaneType.UPPER])) {
-						setVerticalPlanes({ [PlaneType.LOWER]: zIndex, [PlaneType.UPPER]: zIndex + initialRange });
+					if (zCoord > verticalPlanes[1]) return;
+					if (isNull(verticalPlanes[1])) {
+						setVerticalPlanes([ zCoord, zCoord + initialRange ]);
 						setSelectedPlane(PlaneType.UPPER);
 						return;
 					}
 				}
 				if (selectedPlane === PlaneType.UPPER) {
-					if (verticalPlanes[PlaneType.LOWER] && zIndex < verticalPlanes[PlaneType.LOWER]) return;
-					if (isNull(verticalPlanes[PlaneType.LOWER])) {
-						setVerticalPlanes({ [PlaneType.LOWER]: zIndex - initialRange, [PlaneType.UPPER]: zIndex });
+					if (verticalPlanes[0] && zCoord < verticalPlanes[0]) return;
+					if (isNull(verticalPlanes[0])) {
+						setVerticalPlanes([ zCoord - initialRange, zCoord ]);
 						setSelectedPlane(PlaneType.LOWER);
 						return;
 					}
 				}
-				const newValues = { ...verticalPlanes, [selectedPlane]: zIndex };
+				const newValues = verticalPlanes.map((oldValue, idx) => {
+					if (selectedPlane === PlaneType.LOWER && idx === 0) return zCoord;
+					if (selectedPlane === PlaneType.UPPER && idx === 1) return zCoord;
+					return oldValue;
+				}) as Vector1D;
 				setVerticalPlanes(newValues);
 			};
 			TreeActionsDispatchers.stopListenOnSelections();
@@ -109,9 +113,9 @@ export const VerticalSpatialBoundariesHandler = () => {
 	}, [imageHeight, imageWidth, tMatrix]);
 
 	useEffect(() => {
-		if (selectedPlane === PlaneType.LOWER && verticalPlanes[PlaneType.LOWER]) {
+		if (selectedPlane === PlaneType.LOWER && verticalPlanes[0]) {
 			Viewer.selectCalibrationToolLowerPlane();
-		} else if (selectedPlane === PlaneType.UPPER && verticalPlanes[PlaneType.UPPER]) {
+		} else if (selectedPlane === PlaneType.UPPER && verticalPlanes[1]) {
 			Viewer.selectCalibrationToolUpperPlane();
 		}
 	}, [selectedPlane]);

@@ -29,7 +29,6 @@ import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { VerticalHeightContainer, VerticalHeightValue } from '../selectionToolbar/selectionToolbar.styles';
 import { useContext } from 'react';
 import { CalibrationContext } from '../../../dashboard/projects/calibration/calibrationContext';
-import { PlaneType } from '../../../dashboard/projects/calibration/calibration.types';
 
 export const HomeButton = () => (
 	<ToolbarButton
@@ -113,7 +112,7 @@ export const VerticalCalibrationButton = () => {
 // TODO #4911 hidden logic
 export const PlaneSeparation = ({ hidden }) => {
 	const { verticalPlanes } = useContext(CalibrationContext);
-	const planesHeight = (verticalPlanes?.[PlaneType.UPPER] - verticalPlanes?.[PlaneType.LOWER]).toFixed(2);
+	const planesHeight = (verticalPlanes?.[1] - verticalPlanes?.[0]).toFixed(2);
 	const unit = ModelHooksSelectors.selectUnit();
 	return (
 		<VerticalHeightContainer hidden={hidden} disabled>

@@ -1335,7 +1335,7 @@ export class ViewerService {
 		UnityUtil.setCalibrationToolMode(mode);
 	}
 
-	public setCalibrationToolVerticalPlanes({ lower, upper }) {
+	public setCalibrationToolVerticalPlanes(lower, upper) {
 		UnityUtil.setCalibrationToolVerticalPlanes(lower, upper);
 	}
 

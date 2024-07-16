@@ -23,10 +23,8 @@ import { FormattedMessage } from 'react-intl';
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CalibrationState } from '@/v5/store/drawings/drawings.types';
 import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 import { useContext } from 'react';
 import { CalibrationContext } from '../calibrationContext';
-import { isNull } from 'lodash';
 
 const STEPS = [
 	formatMessage({ defaultMessage: '3D Alignment', id: 'calibration.step.3dCalibration' }),
@@ -45,7 +43,7 @@ export const CalibrationHeader = () => {
 	const getIsStepValid = () => {
 		if (step === 0) return !!(vector3D[0] && vector3D[1]);
 		if (step === 1) return !!(vector2D[0] && vector2D[1]); // TODO ensure start !== end
-		if (step === 2) return !isNull(verticalPlanes.lower) && !isNull(verticalPlanes.upper);
+		if (step === 2) return !!(verticalPlanes[0] && verticalPlanes[1]);
 		return false;
 	};
 
@@ -59,8 +57,9 @@ export const CalibrationHeader = () => {
 				units: selectedModel.unit,
 				horizontal: {
 					model: vector3D,
-					drawing: EMPTY_VECTOR,
+					drawing: vector2D,
 				},
+				verticalRange: verticalPlanes,
 			},
 		});
 	};
