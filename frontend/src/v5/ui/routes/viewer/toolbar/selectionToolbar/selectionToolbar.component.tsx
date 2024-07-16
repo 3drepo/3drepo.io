@@ -34,7 +34,7 @@ import { VIEWER_CLIP_MODES, VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { GizmoModeButtons } from '../buttons/buttonOptionsContainer/gizmoModeButtons.component';
 import { Viewer } from '@/v4/services/viewer/viewer';
 import { useContext, useEffect, useState } from 'react';
-import { PlaneSeparation } from '../buttons/toolbarButtons.component';
+import { VerticalRange } from '../buttons/toolbarButtons.component';
 import { CalibrationContext } from '../../../dashboard/projects/calibration/calibrationContext';
 import { PlaneType } from '../../../dashboard/projects/calibration/calibration.types';
 
@@ -112,7 +112,7 @@ export const SectionToolbar = () => {
 				>
 					<FormattedMessage id="viewer.toolbar.icon.upperPlane" defaultMessage="Top Plane" />
 				</LozengeButton>
-				<PlaneSeparation hidden={!isCalibratingPlanes} />
+				<VerticalRange />
 				<ToolbarButton
 					Icon={AlignIcon}
 					hidden={!isCalibratingPlanes}

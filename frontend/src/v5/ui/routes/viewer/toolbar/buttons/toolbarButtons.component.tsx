@@ -26,7 +26,7 @@ import { BimHooksSelectors, ModelHooksSelectors, ViewerGuiHooksSelectors } from 
 import { formatMessage } from '@/v5/services/intl';
 import { ToolbarButton } from './toolbarButton.component';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
-import { VerticalHeightContainer, VerticalHeightValue } from '../selectionToolbar/selectionToolbar.styles';
+import { VerticalRangeContainer, VerticalRangeValue } from '../selectionToolbar/selectionToolbar.styles';
 import { useContext } from 'react';
 import { CalibrationContext } from '../../../dashboard/projects/calibration/calibrationContext';
 
@@ -109,14 +109,13 @@ export const VerticalCalibrationButton = () => {
 	);
 };
 
-// TODO #4911 hidden logic
-export const PlaneSeparation = ({ hidden }) => {
-	const { verticalPlanes } = useContext(CalibrationContext);
+export const VerticalRange = () => {
+	const { verticalPlanes, isCalibratingPlanes } = useContext(CalibrationContext);
 	const planesHeight = (verticalPlanes?.[1] - verticalPlanes?.[0]).toFixed(2);
 	const unit = ModelHooksSelectors.selectUnit();
 	return (
-		<VerticalHeightContainer hidden={hidden} disabled>
-			<VerticalHeightValue>{planesHeight}</VerticalHeightValue>{unit}
-		</VerticalHeightContainer>
+		<VerticalRangeContainer hidden={!isCalibratingPlanes} disabled>
+			<VerticalRangeValue>{planesHeight}</VerticalRangeValue>{unit}
+		</VerticalRangeContainer>
 	);
 };

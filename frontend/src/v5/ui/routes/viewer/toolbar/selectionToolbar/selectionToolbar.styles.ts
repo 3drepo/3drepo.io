@@ -94,11 +94,11 @@ export const LozengeButton = styled.div<{ variant?: 'filled' | 'outlined', selec
 	}
 `;
 
-export const VerticalHeightContainer = styled(LozengeButton).attrs({ disabled: true })`
+export const VerticalRangeContainer = styled(LozengeButton).attrs({ disabled: true })`
 	padding-left: 3px;
 `;
 
-export const VerticalHeightValue = styled.div`
+export const VerticalRangeValue = styled.div`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	color: ${({ theme }) => theme.palette.secondary.mid};
 	border-radius: 12px 3px 3px 12px;
