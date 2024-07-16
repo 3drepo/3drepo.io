@@ -29,6 +29,7 @@ import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { VerticalRangeContainer, VerticalRangeValue } from '../selectionToolbar/selectionToolbar.styles';
 import { useContext } from 'react';
 import { CalibrationContext } from '../../../dashboard/projects/calibration/calibrationContext';
+import { UNITS_CONVERSION_FACTORS_TO_METRES } from '../../../dashboard/projects/calibration/calibration.helpers';
 
 export const HomeButton = () => (
 	<ToolbarButton
@@ -111,11 +112,19 @@ export const VerticalCalibrationButton = () => {
 
 export const VerticalRange = () => {
 	const { verticalPlanes, isCalibratingPlanes } = useContext(CalibrationContext);
-	const planesHeight = (verticalPlanes?.[1] - verticalPlanes?.[0]).toFixed(2);
 	const unit = ModelHooksSelectors.selectUnit();
+	const conversionFactor = unit === 'ft' ? 1 : UNITS_CONVERSION_FACTORS_TO_METRES[unit];
+	const rangeValue = ((verticalPlanes?.[1] - verticalPlanes?.[0]) / conversionFactor).toFixed(2);
+	const unitLabel = unit === 'ft' ? formatMessage({
+		id: 'viewer.toolbar.icon.verticalRange.imperial',
+		defaultMessage: 'ft',
+	}) : formatMessage({
+		id: 'viewer.toolbar.icon.verticalRange.metric',
+		defaultMessage: 'm',
+	});
 	return (
 		<VerticalRangeContainer hidden={!isCalibratingPlanes} disabled>
-			<VerticalRangeValue>{planesHeight}</VerticalRangeValue>{unit}
+			<VerticalRangeValue>{rangeValue}</VerticalRangeValue>{unitLabel}
 		</VerticalRangeContainer>
 	);
 };

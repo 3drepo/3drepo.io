@@ -63,7 +63,7 @@ export const VerticalSpatialBoundariesHandler = () => {
 				const initialRange = UNITS_CONVERSION_FACTORS_TO_METRES[modelUnit] * 2.5;
 				const zCoord = position[1];
 				if (selectedPlane === PlaneType.LOWER) {
-					if (zCoord > verticalPlanes[1]) return;
+					if (verticalPlanes[1] && zCoord > verticalPlanes[1]) return;
 					if (isNull(verticalPlanes[1])) {
 						setVerticalPlanes([ zCoord, zCoord + initialRange ]);
 						setSelectedPlane(PlaneType.UPPER);

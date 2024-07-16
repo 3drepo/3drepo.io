@@ -52,12 +52,13 @@ export const LozengeButton = styled.div<{ variant?: 'filled' | 'outlined', selec
 	place-items: center;
 	display: flex;
 	flex-direction: row;
-    overflow: hidden;
-    white-space: nowrap;
+	overflow: hidden;
+	white-space: nowrap;
 	transition: all .3s;
 	cursor: pointer;
 	gap: 6px;
 	margin: 0 0 0 5px;
+	user-select: none;
 
 	color: ${({ theme }) => hexToOpacity(theme.palette.primary.contrast, 100)};
 	border: 1px solid ${({ theme }) => hexToOpacity(theme.palette.primary.contrast, 100)};
