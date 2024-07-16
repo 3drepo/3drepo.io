@@ -55,11 +55,11 @@ const crossProduct = (matrixA: number[][], matrixB: number[][]) => {
 	const aNumRows = matrixA.length, aNumCols = matrixA[0].length,
 		bNumCols = matrixB[0].length,
 		result = new Array(aNumRows);
-	for (var r = 0; r < aNumRows; ++r) {
+	for (let r = 0; r < aNumRows; ++r) {
 		result[r] = new Array(bNumCols);
-		for (var c = 0; c < bNumCols; ++c) {
+		for (let c = 0; c < bNumCols; ++c) {
 			result[r][c] = 0;
-			for (var i = 0; i < aNumCols; ++i) {
+			for (let i = 0; i < aNumCols; ++i) {
 				result[r][c] += matrixA[r][i] * matrixB[i][c];
 			}
 		}
@@ -92,17 +92,7 @@ export const getTransformationMatrix = (vectorA, vectorB) => {
 	return transformationMatrix;
 };
 
-const transformVector = (v: number[], t: number[][]) => {
-	const newVector = [];
-	for (let row = 0; row < t.length; row++) {
-		let sum = 0;
-		for (let col = 0; col < t.length; col++) {
-			sum = sum + t[row][col] * v[col];
-		}
-		newVector.push(sum);
-	}
-	return newVector;
-};
+const transformVector = (v: number[], t: number[][]) => crossProduct(v.map((val) => [val]), t);
 
 export const transformAndTranslate = (v: Coord2D, t: Transformation2D, offset: Coord2D) => {
 	const transformed = transformVector(v, t);
