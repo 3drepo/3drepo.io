@@ -16,8 +16,8 @@
  */
 
 import styled, { css } from 'styled-components';
-import { TextField } from '@controls/inputs/textField/textField.component';
 import AutocompleteBase from '@mui/material/Autocomplete';
+import { TextField } from '@controls/inputs/textField/textField.component';
 
 export const DestinationAutocomplete = styled(AutocompleteBase)`
 	.MuiFormHelperText-root {
@@ -27,12 +27,11 @@ export const DestinationAutocomplete = styled(AutocompleteBase)`
 	pointer-events: ${(props: any) => props.disabled ? 'none' : 'all'};
 `;
 
-export type NewOrExisting = '' | 'new' | 'existing';
-export const DestinationInput = styled(TextField)<{ neworexisting: NewOrExisting }>`
+export const AutocompleteInput = styled(TextField)`
 	margin: 0;
 	border: none;
 	border-radius: 8px;
-	
+
 	& > .MuiInputBase-root {
 		&, &.Mui-focused, &.Mui-error, &.Mui-focused.Mui-error {
 			& > .MuiInputBase-input {
@@ -47,6 +46,12 @@ export const DestinationInput = styled(TextField)<{ neworexisting: NewOrExisting
 				height: 36px;
 			}
 		}
+	}
+`;
+
+export type NewOrExisting = '' | 'new' | 'existing';
+export const DestinationInput = styled(AutocompleteInput)<{ neworexisting: NewOrExisting }>`
+	& > .MuiInputBase-root {
 		${({ neworexisting, theme }) => neworexisting === 'new' && css`
 			color: ${theme.palette.primary.main};
 			background-color: ${theme.palette.primary.lightest};
