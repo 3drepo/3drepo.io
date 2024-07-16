@@ -111,7 +111,7 @@ function checkPermissions(permsRequest) {
 }
 
 function checkMultiplePermissions(permsRequest) {
-	return function (req, res, next) {
+	return async function(req, res, next) {
 		const models = [];
 
 		// POST request
@@ -124,22 +124,29 @@ function checkMultiplePermissions(permsRequest) {
 			models.push(...req.query.models.split(","));
 		}
 
-		validateUserSession(req, res).then(() => {
+		// PATCH Request
+		if(!models.length && req.body.length) {
+			models.push(...req.body.flatMap((entry)=> entry?.model || []));
+		}
+		try {
+			await validateUserSession(req, res);
+
 			const username = req.session.user.username;
 			const account = req.params.account;
 
-			const promises = [];
+			if(!models.length) {
+				throw responseCodes.INVALID_ARGUMENTS;
+			}
 
-			models.forEach((model) => {
-				const permissionCheckPromise = checkPermissionsHelper(username, account, null, model, permsRequest, getPermissionsAdapter);
-				promises.push(permissionCheckPromise);
-			});
+			const permRes = await Promise.all(models.map((model) => {
+				return checkPermissionsHelper(username, account, null, model, permsRequest, getPermissionsAdapter);
+			}));
 
-			return Promise.all(promises);
-		}).then(validatePermissions.bind(null, next))
-			.catch(err => {
-				next(err);
-			});
+			await validatePermissions(next, permRes);
+
+		} catch (err) {
+			next(err);
+		}
 	};
 }
 

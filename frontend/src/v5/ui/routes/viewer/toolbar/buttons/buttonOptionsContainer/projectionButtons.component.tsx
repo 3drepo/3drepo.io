@@ -25,6 +25,7 @@ import { ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ButtonOptionsContainer, FloatingButtonsContainer, FloatingButton } from './multioptionIcons.styles';
 import { ProjectionMode } from '../../toolbar.types';
 import { ToolbarButton } from '../toolbarButton.component';
+import { Viewer } from '@/v4/services/viewer/viewer';
 
 const orthographicTooltipText = formatMessage({ id: 'viewer.toolbar.icon.projection.orthographic', defaultMessage: 'Orthographic View' });
 const perspectiveTooltipText = formatMessage({ id: 'viewer.toolbar.icon.projection.perspective', defaultMessage: 'Perspective View' });
@@ -35,6 +36,7 @@ export const ProjectionButtons = () => {
 	const setMode = (mode: ProjectionMode) => {
 		setExpanded(false);
 		ViewerGuiActionsDispatchers.setProjectionMode(mode);
+		Viewer.goToExtent();
 	};
 
 	if (projectionMode === 'orthographic') {

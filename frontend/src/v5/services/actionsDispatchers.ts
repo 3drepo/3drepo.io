@@ -42,6 +42,7 @@ import { CanvasHistoryActions } from '@/v4/modules/canvasHistory';
 
 import { ClipMode, GizmoMode, MeasureMode, NavigationMode, ProjectionMode } from '../ui/routes/viewer/toolbar/toolbar.types';
 import { DrawingRevisionsActions, IDrawingRevisionsActionCreators } from '../store/drawings/revisions/drawingRevisions.redux';
+import { ViewpointsActions } from '@/v4/modules/viewpoints';
 
 interface IBimActionCreators {
 	setIsActive: (active: boolean) => Action;
@@ -69,6 +70,7 @@ interface IGroupsActionCreators {
 interface ISequencesActionCreators {
 	showSequenceDate: (date: Date | null) => Action;
 	setSelectedDate: (date: Date | null) => Action;
+	prefetchFrames: () => Action,
 }
 
 interface IJobsActionCreators {
@@ -97,6 +99,12 @@ interface IViewerGuiActionCreators {
 	clearTransformations: () => Action;
 }
 
+interface IViewpointsActionCreators {
+	showViewpoint: (teamspace: string, modelId: string, view: any, ignoreCamera?: boolean) => Action,
+	clearColorOverrides: () => Action,
+	clearTransformations: () => Action,
+}
+
 export const AuthActionsDispatchers = createActionsDispatchers<IAuthActionCreators>(AuthActions);
 export const BimActionsDispatchers = createActionsDispatchers<IBimActionCreators>(BimActions);
 export const CanvasHistoryActionsDispatchers = createActionsDispatchers<ICanvasHistoryActionCreators>(CanvasHistoryActions);
@@ -120,3 +128,4 @@ export const TreeActionsDispatchers = createActionsDispatchers<ITreeActionCreato
 export const UsersActionsDispatchers = createActionsDispatchers<IUsersActions>(UsersActions);
 export const ViewerActionsDispatchers = createActionsDispatchers<ViewerActionsCreators>(ViewerActions);
 export const ViewerGuiActionsDispatchers = createActionsDispatchers<IViewerGuiActionCreators>(ViewerGuiActions);
+export const ViewpointsActionsDispatchers = createActionsDispatchers<IViewpointsActionCreators>(ViewpointsActions);
