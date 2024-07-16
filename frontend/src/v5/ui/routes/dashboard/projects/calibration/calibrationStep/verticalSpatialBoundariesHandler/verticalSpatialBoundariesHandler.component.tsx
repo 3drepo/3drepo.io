@@ -23,25 +23,28 @@ import { addVectors, getTransformationMatrix, getXYPlane, subtractVectors, trans
 import { CalibrationContext } from '../../calibrationContext';
 import { PlaneType } from '../../calibration.types';
 import { TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { isNull } from 'lodash';
+import { isNull, some } from 'lodash';
+import { ModelHooksSelectors } from '@/v5/services/selectorsHooks';
+import { UNITS_CONVERTION_FACTORS_TO_METRES } from '../../calibration.helpers';
 
 export const VerticalSpatialBoundariesHandler = () => {
 	const { verticalPlanes, setVerticalPlanes, vector3D, vector2D, isCalibratingPlanes, setIsCalibratingPlanes, drawingId,
 		setSelectedPlane, selectedPlane, isAlignPlaneActive, setIsAlignPlaneActive } = useContext(CalibrationContext);
 
-	// create pseudo-element of the drawing to be passed to unity
+	// create element of the drawing to be passed to unity
 	const i = new Image();
 	i.crossOrigin = 'anonymous';
 	i.src = getDrawingImageSrc(drawingId);
 
 	const imageHeight = i.naturalHeight;
 	const imageWidth = i.naturalWidth;
-
+	
 	const vector3DPlane = getXYPlane(vector3D);
 	const tMatrix = getTransformationMatrix(vector2D, vector3DPlane);
+	const modelUnit = ModelHooksSelectors.selectUnit();
 	
 	useEffect(() => {
-		if (isCalibratingPlanes) {
+		if (isCalibratingPlanes && !some(verticalPlanes, isNull)) {
 			Viewer.setCalibrationToolMode(isCalibratingPlanes ? 'Vertical' : 'None');
 			Viewer.on(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
 			return () => {
@@ -49,25 +52,34 @@ export const VerticalSpatialBoundariesHandler = () => {
 				Viewer.off(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
 			};
 		}
-	}, [isCalibratingPlanes]);
+	}, [isCalibratingPlanes, verticalPlanes]);
+
+	useEffect(() => {
+		Viewer.setCalibrationToolVerticalPlanes(verticalPlanes);
+	}, [verticalPlanes]);
 
 	useEffect(() => {
 		if (isAlignPlaneActive) {
 			const onPickPoint = ({ position }) => {
+				const initialRange = UNITS_CONVERTION_FACTORS_TO_METRES[modelUnit] * 2.5;
 				const zIndex = position[1];
 				if (selectedPlane === PlaneType.LOWER) {
 					if (zIndex > verticalPlanes[PlaneType.UPPER]) return;
-					if (isNull(verticalPlanes[PlaneType.LOWER])) setSelectedPlane(PlaneType.UPPER);
+					if (isNull(verticalPlanes[PlaneType.UPPER])) {
+						setVerticalPlanes({ [PlaneType.LOWER]: zIndex, [PlaneType.UPPER]: zIndex + initialRange });
+						setSelectedPlane(PlaneType.UPPER);
+						return;
+					}
 				}
 				if (selectedPlane === PlaneType.UPPER) {
-					if (zIndex < verticalPlanes[PlaneType.LOWER]) return;
-					if (isNull(verticalPlanes[PlaneType.UPPER])) {
-						setSelectedPlane(null);
-						setIsAlignPlaneActive(false);
+					if (verticalPlanes[PlaneType.LOWER] && zIndex < verticalPlanes[PlaneType.LOWER]) return;
+					if (isNull(verticalPlanes[PlaneType.LOWER])) {
+						setVerticalPlanes({ [PlaneType.LOWER]: zIndex - initialRange, [PlaneType.UPPER]: zIndex });
+						setSelectedPlane(PlaneType.LOWER);
+						return;
 					}
 				}
 				const newValues = { ...verticalPlanes, [selectedPlane]: zIndex };
-				Viewer.setCalibrationToolVerticalPlanes(newValues);
 				setVerticalPlanes(newValues);
 			};
 			TreeActionsDispatchers.stopListenOnSelections();

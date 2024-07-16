@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const UNITS_CONVERTION_FACTORS_TO_METRES = {
+export const UNITS_CONVERTION_FACTORS_TO_METRES = {
 	'm': 1,
 	'dm': 10,
 	'cm': 100,
