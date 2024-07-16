@@ -31,7 +31,7 @@ export const Title = styled(Button)<{ selected?: boolean }>`
 		color: ${theme.palette.primary.contrast};
 	`}
 
-	a {
+	* {
 		${({ theme }) => theme.typography.h5};
 		text-overflow: ellipsis;
 		overflow: hidden;
