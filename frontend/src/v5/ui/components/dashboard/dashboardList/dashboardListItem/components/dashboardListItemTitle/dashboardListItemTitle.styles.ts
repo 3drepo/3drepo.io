@@ -30,7 +30,6 @@ export const Title = styled(Button)<{ selected?: boolean }>`
 	${({ theme, selected }) => selected && css`
 		color: ${theme.palette.primary.contrast};
 	`}
-
 	* {
 		${({ theme }) => theme.typography.h5};
 		text-overflow: ellipsis;
