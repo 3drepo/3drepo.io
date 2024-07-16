@@ -24,7 +24,6 @@ export enum CalibrationStates {
 	EMPTY = 'empty',
 }
 
-// TODO - fix once they are sure
 export enum DrawingUploadStatus {
 	OK = 'ok',
 	FAILED = 'failed',
@@ -40,7 +39,7 @@ export interface MinimumDrawing {
 	role: Role;
 	isFavourite: boolean;
 }
-// TODO: Unfinished interface
+
 export interface DrawingStats {
 	_id: string;
 	desc?: string;
@@ -51,14 +50,14 @@ export interface DrawingStats {
 	};
 	number: string,
 	calibration?: CalibrationStates,
-	type?: string, // TODO - add type types
+	type?: string,
 	status?: DrawingUploadStatus,
 	errorReason?: {
 		message: string;
 		timestamp: Date | number;
 	};
 }
-// TODO: Unfinished interface
+
 export interface IDrawing extends MinimumDrawing, Omit<DrawingStats, 'revisions'> {
 	lastUpdated?: Date;
 	latestRevision?: string;
