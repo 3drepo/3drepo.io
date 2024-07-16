@@ -24,6 +24,7 @@ import { produceAll } from '@/v5/helpers/reducers.helper';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import { IDrawingRevision } from './revisions/drawingRevisions.types';
 import { prepareSingleDrawingData } from './drawings.helpers';
+import { Role } from '../currentUser/currentUser.types';
 
 export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions({
 	addFavourite: ['teamspace', 'projectId', 'drawingId'],
@@ -80,6 +81,8 @@ export const createDrawingSuccess = (state: DrawingsState, { projectId, drawing 
 		revisionsCount: 0,
 		calibration: CalibrationStates.EMPTY,
 		status: DrawingUploadStatus.OK,
+		isFavourite: false,
+		role: Role.ADMIN,
 	}]);
 };
 
@@ -153,8 +156,8 @@ export type DeleteDrawingAction = Action<'DELETE'> & TeamspaceProjectAndDrawingI
 export type DeleteDrawingSuccessAction = Action<'DELETE_SUCCESS'> & ProjectAndDrawingId;
 export type FetchTypesAction = Action<'FETCH_DRAWINGS_TYPES'> & TeamspaceAndProjectId;
 export type FetchTypesSuccessAction = Action<'FETCH_DRAWINGS_TYPES_SUCCESS'> & ProjectId & { types: string[] };
-export type CreateDrawingAction = Action<'CREATE_DRAWING'> & TeamspaceAndProjectId & SuccessAndErrorCallbacks & { drawing: Omit<NewDrawing, '_id'> };
-export type CreateDrawingSuccessAction = Action<'CREATE_DRAWING_SUCCESS'> &  ProjectId & { drawing: IDrawing };
+export type CreateDrawingAction = Action<'CREATE_DRAWING'> & TeamspaceAndProjectId & SuccessAndErrorCallbacks & { drawing: NewDrawing };
+export type CreateDrawingSuccessAction = Action<'CREATE_DRAWING_SUCCESS'> &  ProjectId & { drawing: NewDrawing };
 export type UpdateDrawingAction = Action<'UPDATE_DRAWING'> & TeamspaceProjectAndDrawingId & SuccessAndErrorCallbacks & { drawing: Partial<MinimumDrawing> };
 export type UpdateDrawingSuccessAction = Action<'UPDATE_DRAWING_SUCCESS'> &  TeamspaceProjectAndDrawingId & { drawing: Partial<MinimumDrawing> };
 export type SetDrawingStatusAction = Action<'SET_DRAWING_STATUS'> & ProjectAndDrawingId & { status: DrawingUploadStatus };
@@ -178,7 +181,7 @@ export interface IDrawingsActionCreators {
 	deleteDrawingSuccess: (projectId: string, drawingId: string) => DeleteDrawingSuccessAction;
 	fetchTypes: (teamspace: string, projectId: string) => FetchTypesAction;
 	fetchTypesSuccess: (projectId: string, types: string[]) => FetchTypesSuccessAction;
-	createDrawing: (teamspace: string, projectId: string, drawing: Omit<NewDrawing, '_id'>, onSuccess: () => void, onError: (e:Error) => void) => CreateDrawingAction;
+	createDrawing: (teamspace: string, projectId: string, drawing: NewDrawing, onSuccess: () => void, onError: (e:Error) => void) => CreateDrawingAction;
 	createDrawingSuccess: (projecId: string, drawing: NewDrawing) => CreateDrawingSuccessAction;
 	setDrawingStatus: (projectId: string, drawingId: string, status: DrawingUploadStatus) => SetDrawingStatusAction;
 	updateDrawing: (

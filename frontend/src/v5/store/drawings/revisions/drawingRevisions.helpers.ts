@@ -28,7 +28,7 @@ export const prepareRevisionData = (revision): IDrawingRevision => ({
 	void: revision?.void || false,
 });
 
-export const createDrawingFromRevisionBody = (body: CreateDrawingRevisionBody): NewDrawing => ({
+export const createDrawingFromRevisionBody = (body: CreateDrawingRevisionBody): Omit<NewDrawing, '_id'> => ({
 	name: body.drawingName,
 	number: body.drawingNumber,
 	type: body.drawingType,

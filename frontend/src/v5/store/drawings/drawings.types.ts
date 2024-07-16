@@ -41,8 +41,6 @@ export interface MinimumDrawing {
 }
 
 export interface DrawingStats {
-	_id: string;
-	desc?: string;
 	revisions : {
 		total: number;
 		lastUpdated?: number;
@@ -50,8 +48,8 @@ export interface DrawingStats {
 	};
 	number: string,
 	calibration?: CalibrationStates,
-	type?: string,
-	status?: DrawingUploadStatus,
+	type: string,
+	status: DrawingUploadStatus,
 	errorReason?: {
 		message: string;
 		timestamp: Date | number;
