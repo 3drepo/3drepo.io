@@ -19,13 +19,12 @@ import { useContext, useEffect } from 'react';
 import { Viewer } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
-import { addVectors, getTransformationMatrix, getXYPlane, subtractVectors, transformAndTranslate } from '../../calibrationHelpers';
 import { CalibrationContext } from '../../calibrationContext';
 import { PlaneType } from '../../calibration.types';
 import { TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { isNull, some } from 'lodash';
 import { ModelHooksSelectors } from '@/v5/services/selectorsHooks';
-import { UNITS_CONVERTION_FACTORS_TO_METRES } from '../../calibration.helpers';
+import { UNITS_CONVERTION_FACTORS_TO_METRES, addVectors, getTransformationMatrix, getXYPlane, subtractVectors, transformAndTranslate } from '../../calibration.helpers';
 
 export const VerticalSpatialBoundariesHandler = () => {
 	const { verticalPlanes, setVerticalPlanes, vector3D, vector2D, isCalibratingPlanes, setIsCalibratingPlanes, drawingId,
