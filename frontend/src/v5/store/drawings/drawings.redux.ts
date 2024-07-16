@@ -72,6 +72,9 @@ export const fetchTypesSuccess = (state: DrawingsState, { projectId, types }:Fet
 };
 
 export const createDrawingSuccess = (state: DrawingsState, { projectId, drawing }:CreateDrawingSuccessAction ) => {
+	// a drawing with that id already exists in the store
+	if (getDrawingFromState(state, projectId, drawing._id)) return;
+
 	state.drawingsByProject[projectId] = (state.drawingsByProject[projectId] || []).concat([{
 		...drawing,
 		revisionsCount: 0,
