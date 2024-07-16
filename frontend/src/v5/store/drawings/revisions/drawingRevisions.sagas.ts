@@ -143,7 +143,7 @@ export function* fetchStatusCodes({ teamspace, projectId }: FetchStatusCodesActi
 		const existingStatusCodes = yield select(selectStatusCodes);
 		if (existingStatusCodes.length) return;
 		const { data: { statusCodes } } = yield API.DrawingRevisions.fetchStatusCodes(teamspace, projectId);
-		yield put(DrawingRevisionsActions.setStatusCodes(statusCodes));
+		yield put(DrawingRevisionsActions.fetchStatusCodesSuccess(statusCodes));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'drawingRevisions.fetchStatusCodes.error', defaultMessage: 'trying to fetch revision status codes' }),

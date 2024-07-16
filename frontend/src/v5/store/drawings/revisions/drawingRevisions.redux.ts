@@ -34,7 +34,7 @@ export const { Types: DrawingRevisionsTypes, Creators: DrawingRevisionsActions }
 	updateRevisionSuccess: ['drawingId', 'data'],
 	revisionProcessingSuccess: ['drawingId', 'revision'],
 	fetchStatusCodes: ['teamspace', 'projectId'],
-	setStatusCodes: ['statusCodes'],
+	fetchStatusCodesSuccess: ['statusCodes'],
 }, { prefix: 'DRAWING_REVISIONS/' }) as { Types: Constants<IDrawingRevisionsActionCreators>; Creators: IDrawingRevisionsActionCreators };
 
 export interface IDrawingRevisionsState {
@@ -104,7 +104,7 @@ export const revisionProcessingSuccess = (state, {
 	revisions[drawingId].push(revision);
 };
 
-export const setStatusCodes = (state, { statusCodes }) => {
+export const fetchStatusCodesSuccess = (state, { statusCodes }) => {
 	state.statusCodes = statusCodes;
 };
 
@@ -116,7 +116,7 @@ export const drawingRevisionsReducer = createReducer<IDrawingRevisionsState>(INI
 	[DrawingRevisionsTypes.SET_UPLOAD_PROGRESS]: setUploadProgress,
 	[DrawingRevisionsTypes.UPDATE_REVISION_SUCCESS]: updateRevisionSuccess,
 	[DrawingRevisionsTypes.REVISION_PROCESSING_SUCCESS]: revisionProcessingSuccess,
-	[DrawingRevisionsTypes.SET_STATUS_CODES]: setStatusCodes,
+	[DrawingRevisionsTypes.FETCH_STATUS_CODES_SUCCESS]: fetchStatusCodesSuccess,
 }));
 
 type VoidParams = TeamspaceProjectAndDrawingId & { revisionId: string, isVoid: boolean };
@@ -132,7 +132,7 @@ export type SetUploadProgressAction = Action<'SET_UPLOAD_PROGRESS'> & { uploadId
 export type UpdateRevisionSuccessAction = Action<'FETCH_REVISION_STATS_SUCCESS'> & DrawingId & { data: IRevisionUpdate };
 export type RevisionProcessingSuccessAction = Action<'REVISION_PROCESSING_SUCCESS'> & DrawingId & { revision: IDrawingRevision };
 export type FetchStatusCodesAction = Action<'FETCH_STATUS_CODES'> & TeamspaceAndProjectId;
-export type SetStatusCodesAction = Action<'SET_STATUS_CODES'> & { statusCodes: StatusCode[] };
+export type FetchStatusCodesSuccessAction = Action<'FETCH_STATUS_CODES_SUCCESS'> & { statusCodes: StatusCode[] };
 
 export interface IDrawingRevisionsActionCreators {
 	setVoidStatus: (teamspace: string, projectId: string, drawingId: string, revisionId: string, isVoid: boolean) =>
@@ -152,5 +152,5 @@ export interface IDrawingRevisionsActionCreators {
 	updateRevisionSuccess: (drawingId: string, data: IRevisionUpdate) => UpdateRevisionSuccessAction;
 	revisionProcessingSuccess: (drawingId: string, revision: IDrawingRevision) => RevisionProcessingSuccessAction;
 	fetchStatusCodes: (teamspace: string, projectId: string) => FetchStatusCodesAction;
-	setStatusCodes: (statusCodes: StatusCode[]) => SetStatusCodesAction;
+	fetchStatusCodesSuccess: (statusCodes: StatusCode[]) => FetchStatusCodesSuccessAction;
 }
