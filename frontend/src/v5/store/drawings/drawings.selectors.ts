@@ -23,7 +23,7 @@ import { Role } from '../currentUser/currentUser.types';
 import { CalibrationState } from './drawings.types';
 import { selectContainerById } from '../containers/containers.selectors';
 import { selectFederationById } from '../federations/federations.selectors';
-import { convertVectorUnits, getUnitsConvertionFactor } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
+import { convertVectorUnits, getUnitsConversionFactor } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
 import { EMPTY_CALIBRATION } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 
 const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
@@ -106,12 +106,21 @@ export const selectHorizontalCalibration = createSelector(
 	selectCalibration,
 	(state, drawingId, modelId) => selectContainerById(state, modelId) || selectFederationById(state, modelId),
 	(calibration, model) => {
-		const convertionFactor = getUnitsConvertionFactor(calibration.units, model.unit);
+		const conversionFactor = getUnitsConversionFactor(calibration.units, model.unit);
 		const horizontalCalibration = calibration.horizontal || EMPTY_CALIBRATION.horizontal;
 		return {
-			model: convertVectorUnits(horizontalCalibration.model, convertionFactor),
-			drawing: convertVectorUnits(horizontalCalibration.drawing, convertionFactor),
+			model: convertVectorUnits(horizontalCalibration.model, conversionFactor),
+			drawing: convertVectorUnits(horizontalCalibration.drawing, conversionFactor),
 		};
+	},
+);
+
+export const selectVerticalRange = createSelector(
+	selectCalibration,
+	(state, drawingId, modelId) => selectContainerById(state, modelId) || selectFederationById(state, modelId),
+	(calibration, model) => {
+		const conversionFactor = getUnitsConversionFactor(calibration.units, model.unit);
+		return convertVectorUnits(calibration.verticalRange || EMPTY_CALIBRATION.verticalRange, conversionFactor);
 	},
 );
 

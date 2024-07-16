@@ -24,7 +24,7 @@ import { PlaneType, Vector1D } from '../../calibration.types';
 import { TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { isNull, some } from 'lodash';
 import { ModelHooksSelectors } from '@/v5/services/selectorsHooks';
-import { UNITS_CONVERTION_FACTORS_TO_METRES, addVectors, getTransformationMatrix, getXYPlane, subtractVectors, transformAndTranslate } from '../../calibration.helpers';
+import { UNITS_CONVERSION_FACTORS_TO_METRES, addVectors, getTransformationMatrix, getXYPlane, subtractVectors, transformAndTranslate } from '../../calibration.helpers';
 
 export const VerticalSpatialBoundariesHandler = () => {
 	const { verticalPlanes, setVerticalPlanes, vector3D, vector2D, isCalibratingPlanes, setIsCalibratingPlanes, drawingId,
@@ -60,7 +60,7 @@ export const VerticalSpatialBoundariesHandler = () => {
 	useEffect(() => {
 		if (isAlignPlaneActive) {
 			const onPickPoint = ({ position }) => {
-				const initialRange = UNITS_CONVERTION_FACTORS_TO_METRES[modelUnit] * 2.5;
+				const initialRange = UNITS_CONVERSION_FACTORS_TO_METRES[modelUnit] * 2.5;
 				const zCoord = position[1];
 				if (selectedPlane === PlaneType.LOWER) {
 					if (zCoord > verticalPlanes[1]) return;

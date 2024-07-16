@@ -17,7 +17,7 @@
 
 import { Coord2D, Transformation2D, Vector2D, Vector3D } from './calibration.types';
 
-export const UNITS_CONVERTION_FACTORS_TO_METRES = {
+export const UNITS_CONVERSION_FACTORS_TO_METRES = {
 	'm': 1,
 	'dm': 10,
 	'cm': 100,
@@ -25,13 +25,13 @@ export const UNITS_CONVERTION_FACTORS_TO_METRES = {
 	'ft': 3.28084,
 } as const;
 
-export const getUnitsConvertionFactor = (drawingUnits, modelUnits) => {
+export const getUnitsConversionFactor = (drawingUnits, modelUnits) => {
 	if (!drawingUnits) return 1;
-	return UNITS_CONVERTION_FACTORS_TO_METRES[drawingUnits] / UNITS_CONVERTION_FACTORS_TO_METRES[modelUnits];
+	return UNITS_CONVERSION_FACTORS_TO_METRES[drawingUnits] / UNITS_CONVERSION_FACTORS_TO_METRES[modelUnits];
 };
 
-export const convertCoordUnits = (coord, convertionFactor: number) => coord?.map((point) => point * convertionFactor) || null;
-export const convertVectorUnits = (vector, convertionFactor: number) => vector.map((coord) => convertCoordUnits(coord, convertionFactor));
+export const convertCoordUnits = (coord, conversionFactor: number) => coord?.map((point) => point * conversionFactor) || null;
+export const convertVectorUnits = (vector, conversionFactor: number) => vector.map((coord) => convertCoordUnits(coord, conversionFactor));
 
 export const getXYPlane = (vector: Vector3D) => vector.map((val) => [val[0], val[2]]) as Vector2D;
 
