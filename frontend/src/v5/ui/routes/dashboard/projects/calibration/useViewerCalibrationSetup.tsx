@@ -14,8 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { BasicStep } from '../basicStep.component';
 
-export const Calibration3DStep = () => {
-	return <BasicStep text="3d calibration" />;
+import { useContext, useEffect } from 'react';
+import { CalibrationContext } from './calibrationContext';
+import { CompareActionsDispatchers, TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
+
+export const useViewerCalibrationSetup = () => {
+	const { isCalibrating } = useContext(CalibrationContext);
+
+	useEffect(() => {
+		if (!isCalibrating) return;
+		ViewerGuiActionsDispatchers.resetPanels();
+		TicketsCardActionsDispatchers.resetState();
+		CompareActionsDispatchers.resetComponentState();
+	}, [isCalibrating]);
 };

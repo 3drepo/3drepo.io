@@ -104,7 +104,7 @@ interface IState {
 	loaderProgress: number;
 }
 
-export class ViewerGuiBase extends PureComponent<IProps, IState> {
+class ViewerGuiBase extends PureComponent<IProps, IState> {
 
 	private get urlParams() {
 		return this.props.match.params;
@@ -160,7 +160,7 @@ export class ViewerGuiBase extends PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps: IProps, prevState: IState) {
 		const changes = {} as IState;
-		const { match: { params }, queryParams, leftPanels, isCalibrating } = this.props;
+		const { match: { params }, queryParams, leftPanels } = this.props;
 		const teamspaceChanged = params.teamspace !== prevProps.match.params.teamspace;
 		const modelChanged = params.model !== prevProps.match.params.model;
 		const revisionChanged = params.revision !== prevProps.match.params.revision;
@@ -203,10 +203,6 @@ export class ViewerGuiBase extends PureComponent<IProps, IState> {
 		if (!isEqual(prevView, currView) || this.props.treeNodesList !== prevProps.treeNodesList) {
 			// This is for not refreshing the view when exiting a selected ticket or when the card is closed
 			goToView(currView);
-		}
-
-		if (!isEqual(isCalibrating, prevProps.isCalibrating)) {
-			ViewerGuiActionsDispatchers.resetPanels();
 		}
 	}
 
@@ -337,7 +333,7 @@ export class ViewerGuiBase extends PureComponent<IProps, IState> {
 	)
 }
 
-export const ViewerGui = (props) => {
+export const ViewerGui = (props: Omit<IProps, 'isCalibrating'>) => {
 	const { isCalibrating } = useContext(CalibrationContext);
-	return <ViewerGuiBase {...props} isCalibrating={isCalibrating} />;
+	return <ViewerGuiBase {...props} isCalibrating={isCalibrating} />
 };

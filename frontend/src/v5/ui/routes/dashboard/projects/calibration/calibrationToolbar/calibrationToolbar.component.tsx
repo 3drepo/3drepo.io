@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,23 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { MainToolbar, ToolbarContainer } from './toolbar.styles';
-import { NavigationButtons } from './buttons/buttonOptionsContainer/navigationButtons.component';
-import { ProjectionButtons } from './buttons/buttonOptionsContainer/projectionButtons.component';
-import { ClipButtons } from './buttons/buttonOptionsContainer/clipButtons.component';
-import { SectionToolbar } from './selectionToolbar/selectionToolbar.component';
-import { HomeButton, FocusButton, CoordinatesButton, BimButton } from './buttons/toolbarButtons.component';
+import { BimButton, HomeButton, CalibrationButton } from '@/v5/ui/routes/viewer/toolbar/buttons/toolbarButtons.component';
+import { ClipButtons } from '@/v5/ui/routes/viewer/toolbar/buttons/buttonOptionsContainer/clipButtons.component';
+import { NavigationButtons } from '@/v5/ui/routes/viewer/toolbar/buttons/buttonOptionsContainer/navigationButtons.component';
+import { ProjectionButtons } from '@/v5/ui/routes/viewer/toolbar/buttons/buttonOptionsContainer/projectionButtons.component';
+import { MainToolbar, ToolbarContainer } from '@/v5/ui/routes/viewer/toolbar/toolbar.styles';
+import { SectionToolbar } from '@/v5/ui/routes/viewer/toolbar/selectionToolbar/selectionToolbar.component';
 
-export const Toolbar = () => (
+export const CalibrationToolbar = () => (
 	<ToolbarContainer>
 		<MainToolbar>
 			<HomeButton />
 			<ProjectionButtons />
 			<NavigationButtons />
-			<FocusButton />
 			<ClipButtons />
-			<CoordinatesButton />
 			<BimButton />
+			<CalibrationButton />
 		</MainToolbar>
 		<SectionToolbar />
 	</ToolbarContainer>

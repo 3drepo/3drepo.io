@@ -15,6 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export type Coords2D = [number, number];
-export type Arrow2D = { start: Coords2D, end: Coords2D };
+export type Coord2D = [number, number];
+type Coord3D = [number, number, number];
 
+export type Vector<CoordType> = [CoordType | null, CoordType | null];
+
+export type Vector2D = Vector<Coord2D>;
+export type Vector3D = Vector<Coord3D>;

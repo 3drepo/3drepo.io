@@ -27,6 +27,7 @@ export const Container = styled.div`
 	width: fit-content;
 	padding-left: 31px;
 	margin-left: -45px;
+	cursor: default;
 
 	&:has(> ${/* sc-selector */Section}:not([hidden])) {
 		padding-left: 45px;
@@ -61,6 +62,8 @@ export const ClearButton = styled.div`
 	&[hidden] {
 		width: 0;
 		padding: 0;
+		margin: 0;
+		border: 0;
 	}
 
 	&:not([hidden]) {

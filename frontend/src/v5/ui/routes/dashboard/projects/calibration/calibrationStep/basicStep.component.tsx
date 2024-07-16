@@ -30,12 +30,17 @@ export const BasicStep = ({ text }) => {
 			borderRadius: 10,
 			width: 'fit-content',
 			padding: '50px 100px',
-			backgroundImage: 'radial-gradient(black, gray)',
+			backgroundImage: 'gray',
+			border: 'solid 2px black',
 			margin: '100px auto',
 			display: 'grid',
 			placeContent: 'center',
 			// REMINDER - the following property will be needed to be able to click inside the component
 			pointerEvents: 'all',
+			position: 'absolute',
+			zIndex: 3,
+			top: '200px',
+			left: '100px',
 		}}>
 			<h2>This is the {text} step</h2>
 			<button type='button' onClick={() => setIsStepValid(true)}>VALIDATE</button>

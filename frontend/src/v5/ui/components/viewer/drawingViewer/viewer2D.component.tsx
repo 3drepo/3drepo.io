@@ -30,15 +30,15 @@ import { DrawingViewerImage } from './drawingViewerImage/drawingViewerImage.comp
 import { CloseButton } from '@controls/button/closeButton/closeButton.component';
 import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 import { DrawingViewerService } from './drawingViewer.service';
-import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { CalibrationInfoBox } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationInfoBox/calibrationInfoBox.component';
 import CalibrationIcon from '@assets/icons/filled/calibration-filled.svg';
 import { ViewBoxType, ViewerLayer2D } from './viewerLayer2D/viewerLayer2D.component';
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 
 const DEFAULT_VIEWBOX = { scale: 1, x: 0, y: 0, width: 0, height: 0 };
 export const Viewer2D = () => {
 	const { close2D } = useContext(ViewerCanvasesContext);
-	const { isCalibrating, step, arrow2D, setArrow2D } = useContext(CalibrationContext);
+	const { isCalibrating, step, vector2D, setVector2D } = useContext(CalibrationContext);
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
 	const [viewBox, setViewBox] = useState<ViewBoxType>(DEFAULT_VIEWBOX);
 	const [isMinZoom, setIsMinZoom] = useState(false);
@@ -102,8 +102,8 @@ export const Viewer2D = () => {
 				<ViewerLayer2D
 					active={isDrawingVector}
 					viewBox={viewBox}
-					value={arrow2D}
-					onChange={setArrow2D}
+					value={vector2D}
+					onChange={setVector2D}
 				/>
 			</ImageContainer>
 			<ToolbarContainer>

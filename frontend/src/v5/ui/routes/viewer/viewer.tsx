@@ -29,8 +29,8 @@ import { SpinnerLoader } from '@controls/spinnerLoader';
 import { CentredContainer } from '@controls/centredContainer';
 import { TicketsCardViews } from './tickets/tickets.constants';
 import { ViewerCanvases } from '../dashboard/viewerCanvases/viewerCanvases.component';
-import { CalibrationContextComponent } from '../dashboard/projects/calibration/calibrationContext';
 import { ViewerGui } from '@/v4/routes/viewerGui';
+import { CalibrationContextComponent } from '../dashboard/projects/calibration/calibrationContext';
 import { OpenDrawingFromUrl } from './openDrawingFromUrl/openDrawingFromUrl.component';
 
 export const Viewer = () => {

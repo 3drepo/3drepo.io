@@ -42,6 +42,7 @@ import { CanvasHistoryActions } from '@/v4/modules/canvasHistory';
 
 import { ClipMode, GizmoMode, MeasureMode, NavigationMode, ProjectionMode } from '../ui/routes/viewer/toolbar/toolbar.types';
 import { DrawingRevisionsActions, IDrawingRevisionsActionCreators } from '../store/drawings/revisions/drawingRevisions.redux';
+import { CompareActions } from '@/v4/modules/compare';
 
 interface IBimActionCreators {
 	setIsActive: (active: boolean) => Action;
@@ -53,10 +54,17 @@ interface ICanvasHistoryActionCreators {
 	redo: () => Action;
 }
 
+
+interface ICompareActionCreators {
+	resetComponentState: () => Action;
+}
+
 interface ITreeActionCreators {
 	showAllNodes: () => Action;
 	hideSelectedNodes: () => Action;
 	isolateSelectedNodes: (containerOrFederation: string) => Action;
+	stopListenOnSelections: () => Action;
+	startListenOnSelections: () => Action;
 }
 interface IGroupsActionCreators {
 	setColorOverrides: (groupIds: string[], on: boolean) => Action;
@@ -101,6 +109,7 @@ interface IViewerGuiActionCreators {
 export const AuthActionsDispatchers = createActionsDispatchers<IAuthActionCreators>(AuthActions);
 export const BimActionsDispatchers = createActionsDispatchers<IBimActionCreators>(BimActions);
 export const CanvasHistoryActionsDispatchers = createActionsDispatchers<ICanvasHistoryActionCreators>(CanvasHistoryActions);
+export const CompareActionsDispatchers = createActionsDispatchers<ICompareActionCreators>(CompareActions);
 export const ContainersActionsDispatchers = createActionsDispatchers<IContainersActionCreators>(ContainersActions);
 export const ContainerRevisionsActionsDispatchers = createActionsDispatchers<IContainerRevisionsActionCreators>(ContainerRevisionsActions);
 export const CurrentUserActionsDispatchers = createActionsDispatchers<ICurrentUserActionCreators>(CurrentUserActions);

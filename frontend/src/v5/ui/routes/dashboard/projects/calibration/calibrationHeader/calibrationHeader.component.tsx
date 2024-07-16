@@ -15,12 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext } from 'react';
-import { Stepper, Container, ButtonsContainer, ContrastButton, Connector, PrimaryButton, Link, StepperWrapper } from './calibrationHeader.styles';
+import { useParams, useHistory } from 'react-router-dom';
+import { Stepper, Container, ButtonsContainer, ContrastButton, Connector, PrimaryButton, StepperWrapper } from './calibrationHeader.styles';
 import { Step, StepLabel } from '@mui/material';
-import { CalibrationContext } from '../calibrationContext';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
+import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { CalibrationState } from '@/v5/store/drawings/drawings.types';
+import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
+import { useContext } from 'react';
+import { CalibrationContext } from '../calibrationContext';
 
 const STEPS = [
 	formatMessage({ defaultMessage: '3D Alignment', id: 'calibration.step.3dCalibration' }),
@@ -29,8 +34,33 @@ const STEPS = [
 ];
 
 export const CalibrationHeader = () => {
-	const { step, setStep, isStepValid, origin } = useContext(CalibrationContext);
+	const history = useHistory();
+	const { teamspace, project, containerOrFederation } = useParams();
+	const { step, setStep, isStepValid, vector3D, drawingId, origin } = useContext(CalibrationContext);
+	const selectedModel = FederationsHooksSelectors.selectFederationById(containerOrFederation)
+		|| ContainersHooksSelectors.selectContainerById(containerOrFederation);
 	const isLastStep = step === 2;
+
+	const getIsStepValid = () => {
+		if (step === 0) return !!(vector3D[0] && vector3D[1]);
+		return isStepValid;
+	};
+
+	const handleEndCalibration = () => history.push(origin);
+
+	const handleConfirm = () => {
+		handleEndCalibration();
+		DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawingId, {
+			calibration: {
+				state: CalibrationState.CALIBRATED,
+				units: selectedModel.unit,
+				horizontal: {
+					model: vector3D,
+					drawing: EMPTY_VECTOR,
+				},
+			},
+		});
+	};
 
 	return (
 		<Container>
@@ -49,19 +79,15 @@ export const CalibrationHeader = () => {
 						<FormattedMessage defaultMessage="Back" id="calibration.button.back" />
 					</ContrastButton>
 				)}
-				<ContrastButton>
-					<Link to={origin}>
-						<FormattedMessage defaultMessage="Cancel" id="calibration.button.cancel" />
-					</Link>
+				<ContrastButton onClick={handleEndCalibration}>
+					<FormattedMessage defaultMessage="Cancel" id="calibration.button.cancel" />
 				</ContrastButton>
 				{isLastStep ? (
-					<PrimaryButton disabled={!isStepValid}>
-						<Link to={origin}>
-							<FormattedMessage defaultMessage="Confirm" id="calibration.button.confirm" />
-						</Link>
+					<PrimaryButton disabled={!getIsStepValid()} onClick={handleConfirm}>
+						<FormattedMessage defaultMessage="Confirm" id="calibration.button.confirm" />
 					</PrimaryButton>
 				) : (
-					<PrimaryButton onClick={() => setStep(step + 1)} disabled={!isStepValid}>
+					<PrimaryButton onClick={() => setStep(step + 1)} disabled={!getIsStepValid()}>
 						<FormattedMessage defaultMessage="Continue" id="calibration.button.continue" />
 					</PrimaryButton>
 				)}

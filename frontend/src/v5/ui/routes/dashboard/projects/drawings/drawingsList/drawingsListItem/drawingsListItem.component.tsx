@@ -92,7 +92,7 @@ export const DrawingsListItem = memo(({
 					/>
 				</DashboardListItemButton>
 				<DrawingsCalibrationMenu
-					calibration={drawing.calibration}
+					calibrationState={drawing.calibration?.state}
 					onCalibrateClick={() => DialogsActionsDispatchers.open(SelectModelForCalibration, { drawingId })}
 					disabled={!isProjectAdmin}
 					drawingId={drawingId}

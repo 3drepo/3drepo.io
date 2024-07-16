@@ -15,8 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useContext, useEffect } from 'react';
 import { BasicStep } from '../basicStep.component';
+import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
+import { UnityUtil } from '@/globals/unity-util';
 
 export const VerticalSpatialBoundariesStep = () => {
+	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
+
+	useEffect(() => {
+		setLeftPanelRatio(1);
+		UnityUtil.setCalibrationToolMode('Vertical');
+	}, []);
+
 	return (<BasicStep text="Vertical spatial boundaries" />);
 };

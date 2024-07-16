@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useEffect, useState } from 'react';
-import { DRAWINGS_ROUTE } from '../../../routes.constants';
-import { generatePath, useParams } from 'react-router-dom';
+import { createContext, useState } from 'react';
 import { Transformers, useSearchParam } from '../../../useSearchParam';
-import { Arrow2D } from './calibration.types';
+import { Vector2D, Vector3D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
+import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
+import { CalibrationHandler } from './calibrationHandler.component';
 
 export interface CalibrationContextType {
 	step: number;
@@ -29,8 +29,13 @@ export interface CalibrationContextType {
 	isCalibrating: boolean;
 	origin: string;
 	setOrigin: (origin: string) => void;
-	arrow2D: Arrow2D,
-	setArrow2D: (points: Arrow2D) => void,
+	isCalibrating3D: boolean,
+	setIsCalibrating3D: (isCalibrating3D: boolean) => void;
+	vector3D: Vector3D,
+	setVector3D: (vectorState: React.SetStateAction<Vector3D>) => void;
+	vector2D: Vector2D,
+	setVector2D: (points: Vector2D) => void,
+	drawingId: string;
 }
 
 const defaultValue: CalibrationContextType = {
@@ -41,24 +46,26 @@ const defaultValue: CalibrationContextType = {
 	isCalibrating: false,
 	origin: '',
 	setOrigin: () => {},
-	arrow2D: { start: null, end: null },
-	setArrow2D: () => {},
+	isCalibrating3D: false,
+	setIsCalibrating3D: () => {},
+	vector3D: EMPTY_VECTOR,
+	setVector3D: () => {},
+	vector2D: EMPTY_VECTOR,
+	setVector2D: () => {},
+	drawingId: '',
 };
 export const CalibrationContext = createContext(defaultValue);
 CalibrationContext.displayName = 'CalibrationContext';
 
 export const CalibrationContextComponent = ({ children }) => {
-	const { teamspace, project, revision, containerOrFederation } = useParams();
-	const [step, setStep] = useState(2);
+	const [step, setStep] = useState(0);
 	const [isStepValid, setIsStepValid] = useState(false);
-	const [origin, setOrigin] = useState(generatePath(DRAWINGS_ROUTE, { teamspace, project }));
+	const [origin, setOrigin] = useState('');
 	const [isCalibrating] = useSearchParam('isCalibrating', Transformers.BOOLEAN);
-	const [arrow2D, setArrow2D] = useState({ start: null, end: null });
-
-	useEffect(() => {
-		setStep(0);
-		setIsStepValid(false);
-	}, [containerOrFederation, revision, isCalibrating]);
+	const [isCalibrating3D, setIsCalibrating3D] = useState(false);
+	const [vector3D, setVector3D] = useState<Vector3D>(EMPTY_VECTOR);
+	const [vector2D, setVector2D] = useState<Vector2D>(EMPTY_VECTOR);
+	const [drawingId] = useSearchParam('drawingId');
 
 	return (
 		<CalibrationContext.Provider value={{
@@ -69,9 +76,15 @@ export const CalibrationContextComponent = ({ children }) => {
 			isCalibrating,
 			origin,
 			setOrigin,
-			arrow2D,
-			setArrow2D,
+			isCalibrating3D,
+			setIsCalibrating3D,
+			vector2D,
+			setVector2D,
+			vector3D,
+			setVector3D,
+			drawingId,
 		}}>
+			{isCalibrating && <CalibrationHandler />}
 			{children}
 		</CalibrationContext.Provider>
 	);

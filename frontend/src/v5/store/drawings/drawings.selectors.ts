@@ -20,7 +20,11 @@ import { selectCurrentProject, selectIsProjectAdmin } from '../projects/projects
 import { DrawingsState } from './drawings.redux';
 import { isCollaboratorRole, isCommenterRole, isViewerRole } from '../store.helpers';
 import { Role } from '../currentUser/currentUser.types';
-import { CalibrationState } from './drawings.types';
+import { Calibration, CalibrationState } from './drawings.types';
+import { selectContainerById } from '../containers/containers.selectors';
+import { selectFederationById } from '../federations/federations.selectors';
+import { convertVectorUnits, getUnitsConvertionFactor } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
+import { EMPTY_CALIBRATION } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 
 const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
 
@@ -31,7 +35,7 @@ export const selectDrawings = createSelector(
 
 export const selectCalibratedDrawings = createSelector(
 	selectDrawings,
-	(drawings) => (drawings.filter((d) => [CalibrationState.CALIBRATED, CalibrationState.OUT_OF_SYNC].includes(d.calibration))),
+	(drawings) => (drawings.filter((d) => [CalibrationState.CALIBRATED, CalibrationState.OUT_OF_SYNC].includes(d.calibration?.state))),
 );
 
 export const selectFavouriteDrawings = createSelector(
@@ -43,6 +47,11 @@ export const selectDrawingById = createSelector(
 	selectDrawings,
 	(_, _id) => _id,
 	(drawings, _id) => drawings.find((d) => d._id === _id),
+);
+
+export const selectDrawingCalibration = createSelector(
+	selectDrawingById,
+	(drawing) => drawing.calibration ?? {},
 );
 
 export const selectIsListPending = createSelector(
@@ -88,6 +97,21 @@ export const selectIsCategoriesPending = createSelector(
 	(state, currentProject) => !state.categoriesByProject[currentProject],
 );
 
+export const selectCalibration = createSelector(
+	selectDrawingById,
+	(state, drawingId, modelId) => selectContainerById(state, modelId) || selectFederationById(state, modelId),
+	(drawing, model) => {
+		const calibration = drawing?.calibration || EMPTY_CALIBRATION as Partial<Calibration>;
+		const convertionFactor = getUnitsConvertionFactor(calibration?.units, model.unit);
+		const horizontalCalibration = calibration.horizontal || EMPTY_CALIBRATION.horizontal;
+		return {
+			horizontal: {
+				model: convertVectorUnits(horizontalCalibration.model, convertionFactor),
+				drawing: convertVectorUnits(horizontalCalibration.drawing, convertionFactor),
+			},
+		};
+	},
+);
 
 export const selectHasCommenterAccess = createSelector(
 	selectDrawingRole,

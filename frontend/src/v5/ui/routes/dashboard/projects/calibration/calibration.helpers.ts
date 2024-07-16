@@ -15,28 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { mapValues } from 'lodash';
-import { Circle, Svg } from './svgCircle.styles';
-import { Coord2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
+const UNITS_CONVERTION_FACTORS_TO_METRES = {
+	'm': 1,
+	'dm': 10,
+	'cm': 100,
+	'mm': 1000,
+	'ft': 3.28084,
+} as const;
 
-type SvgCircleProps = { coord: Coord2D, scale: number };
-export const SvgCircle = ({ coord, scale }: SvgCircleProps) => {
-	const measures = mapValues({
-		strokeWidth: 1,
-		radius: 3,
-	}, (val) => val / scale);
-	return (
-		<Svg
-			xmlns="http://www.w3.org/2000/svg"
-			version="1.1"
-			xmlnsXlink="http://www.w3.org/1999/xlink"
-		>
-			<Circle
-				cx={coord[0] + measures.strokeWidth / 2}
-				cy={coord[1] + measures.strokeWidth / 2}
-				r={measures.radius}
-				strokeWidth={measures.strokeWidth}
-			/>
-		</Svg>
-	);
+export const getUnitsConvertionFactor = (drawingUnits, modelUnits) => {
+	if (!drawingUnits) return 1;
+	return UNITS_CONVERTION_FACTORS_TO_METRES[drawingUnits] / UNITS_CONVERTION_FACTORS_TO_METRES[modelUnits];
 };
+
+export const convertCoordUnits = (coord, convertionFactor: number) => coord?.map((point) => point * convertionFactor) || null;
+export const convertVectorUnits = (vector, convertionFactor: number) => vector.map((coord) => convertCoordUnits(coord, convertionFactor));

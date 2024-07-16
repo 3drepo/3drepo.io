@@ -20,6 +20,7 @@ import { delay } from '@/v4/helpers/async';
 import { drawingFilesName, drawingIds, mockRole } from '@/v5/store/drawings/drawings.temp';
 import { DrawingStats, DrawingUploadStatus, CalibrationState, MinimumDrawing, IDrawing } from '@/v5/store/drawings/drawings.types';
 import { AxiosResponse } from 'axios';
+import { sample } from 'lodash';
 import uuid from 'uuidv4';
 
 export const addFavourite = (teamspace, projectId, drawingId): Promise<AxiosResponse<void>> => {
@@ -46,16 +47,20 @@ const randCal = (revisionsCount) => {
 			return CalibrationState.CALIBRATED;
 	}
 };
+const units = ['m', 'dm', 'cm', 'mm', 'ft'];
 
 const drawingsWithFixedDrawingURL = drawingFilesName.map((name, index) => ({
 	_id: drawingIds[index] ?? uuid(),
-	name: name.split('.').join(' as '),
+	name: name.split('.').join(' as ') + ` - UNIT: ${units[index % units.length]}`,
 	drawingNumber: index,
 	isFavourite: true,
 	role: mockRole(index),
 	category: categories[index % 3],
 	status: DrawingUploadStatus.OK,
-	calibration: CalibrationState.CALIBRATED,
+	calibration: {
+		state: CalibrationState.CALIBRATED,
+		units: units[index % units.length],
+	},
 	revisionsCount: 1,
 	latestRevision: null,
 	lastUpdated: null,
@@ -66,15 +71,19 @@ const drawingsWithFixedDrawingURL = drawingFilesName.map((name, index) => ({
 const drawings: IDrawing[] = drawingsWithFixedDrawingURL.concat(arr.map((_, i) => {
 	const index = i + drawingFilesName.length;
 	const revisionsCount = Math.round(Math.random() * 3);
+	const unit = sample(units);
 	return {
 		_id: drawingIds[index] ?? uuid(),
-		name: 'A drawing ' + index + ' - ' + mockRole(index),
+		name: 'A drawing ' + index + ' - ' + mockRole(index) + ` - UNIT: ${unit}`,
 		drawingNumber: uuid(),
 		isFavourite: (Math.random() > 0.5),
 		role: mockRole(index),
 		category: categories[Math.round(Math.random() * (categories.length - 1))],
 		status: DrawingUploadStatus.OK,
-		calibration: randCal(revisionsCount),
+		calibration: {
+			state: randCal(revisionsCount),
+			units: unit,
+		},
 		revisionsCount,
 		latestRevision: null,
 		lastUpdated: null,
