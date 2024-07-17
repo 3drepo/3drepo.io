@@ -132,9 +132,9 @@ const establishRoutes = () => {
 	 *                         description: name of the creator of the revision
 	 *                         example: someUser
 	 *                       timestamp:
-	 *                         type: string
+	 *                         type: number
 	 *                         description: Revision creation date
-	 *                         example: 2018-06-28T11:15:47.000Z
+	 *                         example: 1644925152000
 	 *                       format:
 	 *                         type: string
 	 *                         description: File format

@@ -39,7 +39,7 @@ import { hexToArray } from '@/v4/helpers/colors';
 import { getMeshIDsByQuery } from '@/v4/services/api';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
-import { GroupsCollectionSelect } from '../../addOrEditGroup/groupSettingsForm.component.tsx/groupsCollectionSelect/groupsCollectionSelect.component';
+import { GroupsCollectionSelect } from '../../addOrEditGroup/groupSettingsForm/groupsCollectionSelect/groupsCollectionSelect.component';
 import {
 	Buttons,
 	LabelAndColor,
@@ -356,6 +356,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 								}}
 							>
 								<GroupRulesForm
+									containerOrFederation={containerOrFederation}
 									rule={selectedRule?.value}
 									onSave={selectedRule ? (val) => update(selectedRule.index, val) : append}
 									onClose={resetFilterMenu}

@@ -67,3 +67,8 @@ export const selectUploadProgress = createSelector(
 	selectDrawingIdParam,
 	(uploadStates, drawingId) => uploadStates[drawingId]?.progress || 0,
 );
+
+export const selectStatusCodes = createSelector(
+	selectRevisionsDomain,
+	(state) => state.statusCodes || [],
+);

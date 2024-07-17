@@ -12,13 +12,13 @@ Note: This is currently a work in progress, new events will be added as they are
   * [Room types](#room-types)
     + [User Notifications](#user-notifications)
     + [Project notifications](#project-notifications)
-    + [Container/Federation notifications](#containerfederation-notifications)
+    + [Container/Federation/Drawing notifications](#containerfederationdrawing-notifications)
 - [Events](#events)
   * [General Events](#general-events)
     + [message event](#message-event)
     + [error event](#error-event)
     + [logged out event](#logged-out-event)
-  * [Container/Federation events](#containerfederation-events)
+  * [Container/Federation/Drawing events](#containerfederationdrawing-events)
     + [Container Settings Update](#container-settings-update)
     + [Container New Revision](#container-new-revision)
     + [Container Revision Update](#container-revision-update)
@@ -36,9 +36,12 @@ Note: This is currently a work in progress, new events will be added as they are
     + [Federation New Ticket Comment](#federation-new-ticket-comment)
     + [Federation Update Ticket Comment](#federation-update-ticket-comment)
     + [Federation Update Ticket Group](#federation-update-ticket-group)
+    + [Drawing Settings Update](#drawing-settings-update)
+    + [Drawing Removed](#drawing-removed)
   * [Project events](#project-events)
     + [New Container](#new-container)
     + [New Federation](#new-federation)
+    + [New Drawing](#new-drawing)
 
 ## Connecting to the service
 You will need to use utilise a [Socket.io client library](https://socket.io/docs/v4/client-installation/) to connect to this service. Please check our [package.json](../../../../package.json) to see which version of Socket.io we are currently using.
@@ -148,7 +151,7 @@ The following events are emitted without requiring the client to join a room
   - Description: Used to notify the user if they have been logged out of the session
 
 ### Container/Federation events
-The following events will be emitted if the user has subscribed to [Container/Federation notifications](#containerfederation-notifications).
+The following events will be emitted if the user has subscribed to [Container/Federation notifications](#containerfederationdrawing-notifications).
 
 #### Container Settings Update
   - Event name: `containerSettingsUpdate`
@@ -235,6 +238,16 @@ The following events will be emitted if the user has subscribed to [Container/Fe
   - Data format: `{ teamspace: "teamspace name", project: "project id", model: "federation id", data: { ticket: "ticket id" , _id: "group id",/* fields that has been updated */ }}`
   - Description: Used to notify the user of a group update in a federation ticket.
 
+#### Drawing Settings Update
+  - Event name: `drawingSettingsUpdate`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "drawing id", data: { /* Changes on drawing settings */}}`
+  - Description: Used to notify the user of any changes on the drawing settings. This will be triggered if there is a PATCH request, or any changes on the model status (i.e. updates from processing a new revision)
+
+#### Drawing Removed
+  - Event name: `drawingRemoved`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "drawing id", data: { }}`
+  - Description: Used to notify the user of a drawing deletion. This will be triggered when a drawing has been removed from a project
+
 ### Project events
 The following events will be emitted if the user has subscribed to [Project notifications](#project-notifications).
 
@@ -247,3 +260,8 @@ The following events will be emitted if the user has subscribed to [Project noti
   - Event name: `newFederation`
   - Data format: `{ teamspace: "teamspace name", project: "project id", data: { _id: "federation id", name: "federation name", code: "federation code", desc: "federation description" }}`
   - Description: Used to notify the user of a federation creation. This will be triggered when a federation has been added from a project
+
+#### New Drawing
+  - Event name: `newDrawing`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", data: { _id: "drawing id", name: "drawing name", number: "drawing number", type: "drawing type" }}`
+  - Description: Used to notify the user of a drawing creation. This will be triggered when a drawing has been added from a project

@@ -69,7 +69,6 @@ interface IProps {
 	leftPanels: string[];
 	rightPanels: string[];
 	draggablePanels: string[];
-	disabledPanelButtons: Set<string>;
 	selectedTicket: ITicket | undefined;
 	treeNodesList: any;
 	ticketsCardView: TicketsCardViews;
@@ -261,7 +260,6 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 					type={type}
 					id={type + '-panel-button'}
 					active={this.props.leftPanels.includes(type)}
-					disabled={this.props.disabledPanelButtons.has(type)}
 				/>
 			))}
 		</LeftPanelsButtons>
