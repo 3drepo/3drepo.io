@@ -25,11 +25,10 @@ import {queuableFunction} from '../../helpers/async';
 import { ROUTES } from '../../constants/routes';
 import { addColorOverrides, overridesColorDiff, removeColorOverrides } from '../../helpers/colorOverrides';
 import { pinsDiff, pinsRemoved, pinsSelectionChanged } from '../../helpers/pins';
-import { PresentationMode } from '../../modules/presentation/presentation.constants';
 import { moveMeshes, resetMovedMeshes, transformationDiffChanges,
 transformationDiffRemoves } from '../../modules/sequences/sequences.helper';
 import { ViewerService } from '../../services/viewer/viewer';
-import { Border, ViewerContainer } from './viewer3D.styles';
+import { ViewerContainer } from './viewer3D.styles';
 
 interface IProps {
 	location: any;
@@ -49,14 +48,11 @@ interface IProps {
 	measurementPins: any[];
 	transformations: any[];
 	gisLayers: string[];
-	sequenceHiddenNodes: string[];
 	hasGisCoordinates: boolean;
 	gisCoordinates: any;
 	handleTransparencyOverridesChange: any;
 	viewerManipulationEnabled: boolean;
-	presentationMode: PresentationMode;
 	isPresentationPaused: boolean;
-	handleTransparenciesVisibility: any;
 	issuesShapes: any[];
 	risksShapes: any[];
 	issuesHighlightedShapes: any[];
@@ -188,14 +184,10 @@ export class Viewer3D extends PureComponent<IProps, any> {
 	public async onComponentDidUpdate(prevProps, currProps) {
 		const { colorOverrides, issuePins, riskPins, measurementPins, hasGisCoordinates,
 			gisCoordinates, gisLayers, transparencies, transformations,
-			sequenceHiddenNodes, viewerManipulationEnabled, viewer,
-			issuesShapes, issuesHighlightedShapes, risksShapes, risksHighlightedShapes,
+			viewerManipulationEnabled, viewer, issuesShapes, issuesHighlightedShapes,
+			risksShapes, risksHighlightedShapes,
 			ticketPins
 		} = currProps;
-
-		if (sequenceHiddenNodes && !isEqual(prevProps.sequenceHiddenNodes, sequenceHiddenNodes)) {
-			currProps.handleTransparenciesVisibility(sequenceHiddenNodes);
-		}
 
 		if (colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
 			this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
@@ -260,21 +252,12 @@ export class Viewer3D extends PureComponent<IProps, any> {
 
 	public render() {
 		return (
-			<>
-				<ViewerContainer
-					visible={this.shouldBeVisible}
-				>
-					<div
-						ref={this.containerRef}
-						className={this.props.className}
-					/>
-					<Toolbar />
-				</ ViewerContainer>
-				<Border
-					presentationMode={this.props.presentationMode}
-					isPresentationPaused={this.props.isPresentationPaused}
-				/>
-			</>
+			<ViewerContainer
+				visible={this.shouldBeVisible}
+				id="viewer"
+				ref={this.containerRef}
+				className={this.props.className}
+			/>
 		);
 	}
 }

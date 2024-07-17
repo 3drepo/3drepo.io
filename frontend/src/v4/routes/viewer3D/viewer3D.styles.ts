@@ -17,27 +17,11 @@
 
 import styled, { css } from 'styled-components';
 
-import { PresentationMode } from '../../modules/presentation/presentation.constants';
-import { COLOR } from '../../styles';
 
 interface IContainer {
 	visibility?: boolean;
-	presentationMode?: PresentationMode;
-	isPresentationPaused?: boolean;
 }
 
-const PRESENTATION_OUTLINE_COLORS = {
-	[PresentationMode.PRESENTER]: COLOR.DUSTY_RED,
-	[PresentationMode.PARTICIPANT]: COLOR.SOFT_BLUE,
-};
-
-const getAdditionalStyles = ({ presentationMode, isPresentationPaused }) => {
-	if (!isPresentationPaused && PRESENTATION_OUTLINE_COLORS[presentationMode]) {
-		return css`
-			border: 2px solid ${PRESENTATION_OUTLINE_COLORS[presentationMode]};
-		`;
-	}
-};
 
 export const ViewerContainer = styled.div<{ visible?: boolean }>`
 	visibility: ${({ visible }) => visible ? 'visible' : 'hidden'};
@@ -46,13 +30,4 @@ export const ViewerContainer = styled.div<{ visible?: boolean }>`
 	position: relative;
 	box-sizing: border-box;
 	overflow: hidden;
-`;
-
-export const Border = styled.div<IContainer>`
-	pointer-events: none;
-	box-sizing: border-box;
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	${({ presentationMode, isPresentationPaused }) => getAdditionalStyles({ presentationMode, isPresentationPaused })};
 `;

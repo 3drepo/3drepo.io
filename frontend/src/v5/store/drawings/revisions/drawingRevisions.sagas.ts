@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, select, takeEvery, delay } from 'redux-saga/effects';
+import { put, select, takeEvery, delay, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
@@ -26,11 +26,12 @@ import { CreateRevisionAction,
 	DrawingRevisionsActions,
 	DrawingRevisionsTypes,
 	SetRevisionVoidStatusAction,
+	FetchStatusCodesAction,
 } from './drawingRevisions.redux';
 import { DrawingsActions } from '../drawings.redux';
 import { DrawingUploadStatus } from '../drawings.types';
 import { createDrawingFromRevisionBody, createFormDataFromRevisionBody } from './drawingRevisions.helpers';
-import { selectIsPending, selectRevisions } from './drawingRevisions.selectors';
+import { selectIsPending, selectRevisions, selectStatusCodes } from './drawingRevisions.selectors';
 import { uuid } from '@/v4/helpers/uuid';
 import { selectUsername } from '../../currentUser/currentUser.selectors';
 import { selectDrawingById } from '../drawings.selectors';
@@ -137,8 +138,23 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 	}
 }
 
+export function* fetchStatusCodes({ teamspace, projectId }: FetchStatusCodesAction) {
+	try {
+		const existingStatusCodes = yield select(selectStatusCodes);
+		if (existingStatusCodes.length) return;
+		const { data: { statusCodes } } = yield API.DrawingRevisions.fetchStatusCodes(teamspace, projectId);
+		yield put(DrawingRevisionsActions.fetchStatusCodesSuccess(statusCodes));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'drawingRevisions.fetchStatusCodes.error', defaultMessage: 'trying to fetch revision status codes' }),
+			error,
+		}));
+	}
+}
+
 export default function* RevisionsSaga() {
 	yield takeEvery(DrawingRevisionsTypes.FETCH, fetch);
 	yield takeEvery(DrawingRevisionsTypes.SET_VOID_STATUS, setVoidStatus);
 	yield takeEvery(DrawingRevisionsTypes.CREATE_REVISION, createRevision);
+	yield takeLatest(DrawingRevisionsTypes.FETCH_STATUS_CODES, fetchStatusCodes);
 }
