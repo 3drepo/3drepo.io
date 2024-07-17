@@ -82,17 +82,6 @@ const updateSessionDetails = (req) => {
 	return session;
 };
 
-const appendCSRFToken = async (req, res, next) => {
-	const { domain, maxAge } = config.cookie;
-	res.cookie(CSRF_COOKIE, generateUUIDString(), { httpOnly: false, secure: true, sameSite: 'Strict', maxAge, domain });
-	await next();
-};
-
-const updateSession = async (req, res, next) => {
-	updateSessionDetails(req);
-	await next();
-};
-
 const createSession = (req, res) => {
 	req.session.regenerate((err) => {
 		if (err) {
@@ -131,8 +120,18 @@ const destroySession = (req, res) => {
 	}
 };
 
-Sessions.updateSession = validateMany([appendCSRFToken, updateSession]);
-Sessions.createSession = validateMany([appendCSRFToken, createSession]);
+Sessions.appendCSRFToken = async (req, res, next) => {
+	const { domain, maxAge } = config.cookie;
+	res.cookie(CSRF_COOKIE, generateUUIDString(), { httpOnly: false, secure: true, sameSite: 'Strict', maxAge, domain });
+	await next();
+};
+
+Sessions.updateSession = async (req, res, next) => {
+	updateSessionDetails(req);
+	await next();
+};
+
+Sessions.createSession = validateMany([Sessions.appendCSRFToken, createSession]);
 Sessions.destroySession = validateMany([removeCSRFToken, destroySession]);
 
 module.exports = Sessions;
