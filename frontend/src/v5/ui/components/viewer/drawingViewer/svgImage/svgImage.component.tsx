@@ -431,8 +431,8 @@ export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ on
 		setSize: ({ width, height }: Size ) => {},
 	};
 
-	const width = 500;
-	const height = 500;
+	const width = 1000;
+	const height = 1000;
 
 	return (<div ref={containerRef as any} style={{ border:'3px solid #008bd180', width, height, overflow:'hidden' }} />);
 });

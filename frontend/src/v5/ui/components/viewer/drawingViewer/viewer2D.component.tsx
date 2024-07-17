@@ -33,12 +33,12 @@ import { DrawingViewerService } from './drawingViewer.service';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
 import { SVGImage } from './svgImage/svgImage.component';
-// import { SVGImage } from './svgImage/svgImage.component';
+import { SVGSnap } from './snapping/svg/svgSnap';
 
 export const Viewer2D = () => {
 	const [drawingId] = useSearchParam('drawingId');
 	const src = getDrawingImageSrc(drawingId);
-	
+
 	const { close2D } = useContext(ViewerCanvasesContext);
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
 	const [isMinZoom, setIsMinZoom] = useState(false);
@@ -46,6 +46,8 @@ export const Viewer2D = () => {
 
 	const imgRef = useRef<ZoomableImage>();
 	const imgContainerRef = useRef();
+
+
 
 	const onClickZoomIn = () => {
 		zoomHandler.zoomIn();
@@ -70,6 +72,17 @@ export const Viewer2D = () => {
 			setIsMinZoom(cantZoomOut);
 			setIsMaxZoom(cantZoomIn);
 		});
+
+		const snapHandler = new SVGSnap();
+		snapHandler.load(src);
+
+		imgRef.current.getEventsEmitter().addEventListener('mousedown', (ev)=>{
+			// Convert here into svg coordinates
+
+			// Then invoke the snap
+			snapHandler.snap(ev);
+		});
+
 	};
 
 	return (
