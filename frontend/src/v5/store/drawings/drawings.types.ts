@@ -54,6 +54,7 @@ export interface DrawingStats {
 		message: string;
 		timestamp: Date | number;
 	};
+	desc?: string;
 }
 
 export interface IDrawing extends MinimumDrawing, Omit<DrawingStats, 'revisions'> {
