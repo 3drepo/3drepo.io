@@ -92,7 +92,17 @@ export const getTransformationMatrix = (vectorA, vectorB) => {
 	return transformationMatrix;
 };
 
-const transformVector = (v: number[], t: number[][]) => crossProduct(v.map((val) => [val]), t);
+const transformVector = (v: number[], t: number[][]) => {
+	const newVector = [];
+	for (let row = 0; row < t.length; row++) {
+		let sum = 0;
+		for (let col = 0; col < t.length; col++) {
+			sum = sum + t[row][col] * v[col];
+		}
+		newVector.push(sum);
+	}
+	return newVector;
+};
 
 export const transformAndTranslate = (v: Coord2D, t: Transformation2D, offset: Coord2D) => {
 	const transformed = transformVector(v, t);
