@@ -43,7 +43,6 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	setDefaultViewpoint: ['teamspace', 'modelId', 'view'],
 	clearDefaultViewpoint: ['teamspace', 'modelId'],
 	setSelectedViewpoint: ['selectedViewpoint'],
-	deselectViewsAndLeaveClipping: [],
 	showViewpoint: ['teamspace', 'modelId', 'view', 'ignoreCamera'],
 	fetchGroupSuccess: ['group'],
 	cacheGroupsFromViewpoint: ['viewpoint', 'groupsData'],

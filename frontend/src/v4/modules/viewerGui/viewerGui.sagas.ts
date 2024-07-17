@@ -37,7 +37,6 @@ import { selectIssuesMap, IssuesActions } from '../issues';
 import { JobsActions } from '../jobs';
 import { MeasurementsActions } from '../measurements';
 import { selectCurrentRevisionId, selectSettings, ModelActions, ModelTypes, selectDefaultView } from '../model';
-import { PresentationActions } from '../presentation';
 import { selectRisksMap, RisksActions } from '../risks';
 import { selectUrlParams } from '../router/router.selectors';
 import { SequencesActions } from '../sequences';
@@ -121,7 +120,6 @@ function* resetPanelsStates() {
 			put(SequencesActions.reset()),
 			put(GisActions.resetLayers()),
 			put(MeasurementsActions.resetMeasurementTool()),
-			put(PresentationActions.reset())
 		]);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('reset', 'panels data', error));
@@ -404,12 +402,6 @@ export function * clearColorOverrides() {
 	yield put(GroupsActions.clearColorOverridesSuccess());
 	yield put(ViewpointsActions.clearColorOverrides());
 	yield put(TicketsCardActions.setOverrides(null));
-	yield put(SequencesActions.clearColorOverrides());
-}
-
-export function* clearTransformations() {
-	yield put(SequencesActions.clearTransformations());
-	yield put(ViewpointsActions.clearTransformations());
 }
 
 export default function* ViewerGuiSaga() {
@@ -436,5 +428,4 @@ export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.LOAD_MODEL, loadModel);
 	yield takeLatest(ViewerGuiTypes.SET_IS_PIN_DROP_MODE, setIsPinDropMode);
 	yield takeLatest(ViewerGuiTypes.CLEAR_COLOR_OVERRIDES, clearColorOverrides);
-	yield takeLatest(ViewerGuiTypes.CLEAR_TRANSFORMATIONS, clearTransformations);
 }
