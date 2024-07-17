@@ -16,7 +16,6 @@
  */
 
 import { useRef, useEffect, forwardRef } from 'react';
-import { Size } from 'react-virtualized-auto-sizer';
 import { ZoomableImage, DrawingViewerImageProps } from '../drawingViewerImage/drawingViewerImage.component';
 
 type Transform = { x:number, y:number, scale:number };
@@ -405,8 +404,6 @@ export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ on
 
 	(ref as React.MutableRefObject<ZoomableImage>).current = {
 		setTransform: (t) => {
-			console.log('set transform' + JSON.stringify(t));
-
 			if (!pannableImage.current) return;
 			pannableImage.current.transform = t;
 		},
@@ -428,11 +425,8 @@ export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ on
 			return { width: pannableImage.current.naturalWidth, height: pannableImage.current.naturalHeight };
 		},
 
-		setSize: ({ width, height }: Size ) => {},
+		setSize: () => {},
 	};
 
-	const width = 500;
-	const height = 500;
-
-	return (<div ref={containerRef as any} style={{ border:'3px solid #008bd180', width, height, overflow:'hidden' }} />);
+	return (<div ref={containerRef as any} style={{ overflow:'hidden' }} />);
 });
