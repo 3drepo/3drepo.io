@@ -252,12 +252,10 @@ export class Viewer3D extends PureComponent<IProps, any> {
 
 	public render() {
 		return (
-			<ViewerContainer
-				visible={this.shouldBeVisible}
-				id="viewer"
-				ref={this.containerRef}
-				className={this.props.className}
-			/>
+			<ViewerContainer visible={this.shouldBeVisible} >
+				<div ref={this.containerRef} className={this.props.className} />
+				<Toolbar />
+			</ ViewerContainer>
 		);
 	}
 }
