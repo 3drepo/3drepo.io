@@ -18,7 +18,7 @@
 const { STATUSES, modelTypes } = require('../../../../models/modelSettings.constants');
 const { UUIDToString, generateUUID } = require('../../../../utils/helper/uuids');
 const { addModel, getModelList } = require('./commons/modelList');
-const { addRevision, deleteModelRevisions, getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
+const { addRevision, deleteModelRevisions, getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisions, updateRevision, updateRevisionStatus } = require('../../../../models/revisions');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { deleteModel, getDrawingById, getDrawings, updateModelSettings } = require('../../../../models/modelSettings');
 const { getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../../services/filesManager');

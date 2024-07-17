@@ -28,8 +28,6 @@ const { generateRandomString, generateRandomObject, generateRandomNumber } = req
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 
-const { DRAWINGS_HISTORY_COL } = require(`${src}/models/revisions.constants`);
-
 const excludeVoids = { void: { $ne: true } };
 const excludeIncomplete = { incomplete: { $exists: false } };
 
@@ -54,7 +52,7 @@ const testGetRevisionCount = () => {
 
 			expect(res).toEqual(expectedData);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL,
+			expect(fn).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`,
 				{ ...excludeIncomplete, ...excludeVoids, model });
 		});
 	});
@@ -81,7 +79,7 @@ const testGetLatestRevision = () => {
 
 			expect(res).toEqual(expectedData);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL,
+			expect(fn).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`,
 				{ ...excludeIncomplete, ...excludeVoids, model }, {}, { timestamp: -1 });
 		});
 
