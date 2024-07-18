@@ -112,53 +112,42 @@ const testIsTeamspaceAdmin = () => {
 	});
 };
 
-const testIsModuleEnabled = () => {
-	describe('isModuleEnabled', () => {
+const testIsAddOnModuleEnabled = () => {
+	describe('isAddOnModuleEnabled', () => {
 		const moduleName = generateRandomString();
 		const teamspace = generateRandomString();
 		const mockCB = jest.fn(() => {});
 
 		test('next() should be called if module is enabled', async () => {
-			TeamspaceSettings.getAddOns.mockResolvedValueOnce({ modules: [moduleName] });
-			await TSMiddlewares.isModuleEnabled(moduleName)({ params: { teamspace } }, {}, mockCB);
+			TeamspaceSettings.isAddOnModuleEnabled.mockResolvedValueOnce(true);
+			await TSMiddlewares.isAddOnModuleEnabled(moduleName)({ params: { teamspace } }, {}, mockCB);
 
 			expect(mockCB).toHaveBeenCalledTimes(1);
-			expect(TeamspaceSettings.getAddOns).toHaveBeenCalledTimes(1);
-			expect(TeamspaceSettings.getAddOns).toHaveBeenCalledWith(teamspace);
+			expect(TeamspaceSettings.isAddOnModuleEnabled).toHaveBeenCalledTimes(1);
+			expect(TeamspaceSettings.isAddOnModuleEnabled).toHaveBeenCalledWith(teamspace, moduleName);
 		});
 
-		test('should respond with not authorized if the module is not enabled', async () => {
-			TeamspaceSettings.getAddOns.mockResolvedValueOnce({ modules: [generateRandomString()] });
-			await TSMiddlewares.isModuleEnabled(moduleName)({ params: { teamspace } }, {}, mockCB);
+		test('should respond with moduleUnavailable if the module is not enabled', async () => {
+			TeamspaceSettings.isAddOnModuleEnabled.mockResolvedValueOnce(false);
+			await TSMiddlewares.isAddOnModuleEnabled(moduleName)({ params: { teamspace } }, {}, mockCB);
 
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.notAuthorized.code);
-			expect(TeamspaceSettings.getAddOns).toHaveBeenCalledTimes(1);
-			expect(TeamspaceSettings.getAddOns).toHaveBeenCalledWith(teamspace);
+			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.moduleUnavailable.code);
+			expect(TeamspaceSettings.isAddOnModuleEnabled).toHaveBeenCalledTimes(1);
+			expect(TeamspaceSettings.isAddOnModuleEnabled).toHaveBeenCalledWith(teamspace, moduleName);
 		});
 
-		test('should respond with not authorized if the teamspace has no modules', async () => {
-			TeamspaceSettings.getAddOns.mockResolvedValueOnce({ });
-			await TSMiddlewares.isModuleEnabled(moduleName)({ params: { teamspace } }, {}, mockCB);
-
-			expect(mockCB).not.toHaveBeenCalled();
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.notAuthorized.code);
-			expect(TeamspaceSettings.getAddOns).toHaveBeenCalledTimes(1);
-			expect(TeamspaceSettings.getAddOns).toHaveBeenCalledWith(teamspace);
-		});
-
-		test('should respond with error if the getAddOns throws error', async () => {
+		test('should respond with error if the isAddOnModuleEnabled throws error', async () => {
 			const error = new Error();
-			TeamspaceSettings.getAddOns.mockRejectedValueOnce(error);
-			await TSMiddlewares.isModuleEnabled(moduleName)({ params: { teamspace } }, {}, mockCB);
+			TeamspaceSettings.isAddOnModuleEnabled.mockRejectedValueOnce(error);
+			await TSMiddlewares.isAddOnModuleEnabled(moduleName)({ params: { teamspace } }, {}, mockCB);
 
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond.mock.results[0].value.code).toEqual(error.code);
-			expect(TeamspaceSettings.getAddOns).toHaveBeenCalledTimes(1);
-			expect(TeamspaceSettings.getAddOns).toHaveBeenCalledWith(teamspace);
+			expect(TeamspaceSettings.isAddOnModuleEnabled).toHaveBeenCalledTimes(1);
+			expect(TeamspaceSettings.isAddOnModuleEnabled).toHaveBeenCalledWith(teamspace, moduleName);
 		});
 	});
 };
@@ -166,5 +155,5 @@ const testIsModuleEnabled = () => {
 describe('middleware/permissions/components/teamspaces', () => {
 	testIsTeamspaceMember();
 	testIsTeamspaceAdmin();
-	testIsModuleEnabled();
+	testIsAddOnModuleEnabled();
 });

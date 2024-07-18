@@ -19,7 +19,7 @@
 
 const express = require("express");
 const router = express.Router({mergeParams: true});
-const middlewares = require("../middlewares/middlewares");
+const issuesMiddleware = require("../middlewares/issue");
 const C = require("../constants");
 const responseCodes = require("../response_codes.js");
 const View = new (require("../models/view"))();
@@ -175,7 +175,7 @@ const config = require("../config");
  * 	}
  * ]
  */
-router.get("/viewpoints/", middlewares.issue.canView, listViews);
+router.get("/viewpoints/", issuesMiddleware.canView, listViews);
 
 /**
  * @api {get} /:teamspace/:model/viewpoints/:viewId Get view
@@ -218,7 +218,7 @@ router.get("/viewpoints/", middlewares.issue.canView, listViews);
  * 	"name":"View1"
  * }
  */
-router.get("/viewpoints/:uid", middlewares.issue.canView, findView);
+router.get("/viewpoints/:uid", issuesMiddleware.canView, findView);
 
 /**
  * @api {put} /:teamspace/:model/viewpoints/:viewId Update view
@@ -243,7 +243,7 @@ router.get("/viewpoints/:uid", middlewares.issue.canView, findView);
  * 	"_id":"00000000-0000-0000-0000-000000000001"
  * }
  */
-router.put("/viewpoints/:uid", middlewares.issue.canCreate, updateView);
+router.put("/viewpoints/:uid", issuesMiddleware.canCreate, updateView);
 
 /**
  * @api {post} /:teamspace/:model/viewpoints/ Create view
@@ -287,7 +287,7 @@ router.put("/viewpoints/:uid", middlewares.issue.canCreate, updateView);
  * 	"_id":"00000000-0000-0000-0000-000000000001"
  * }
  */
-router.post("/viewpoints/", middlewares.issue.canCreate, createView);
+router.post("/viewpoints/", issuesMiddleware.canCreate, createView);
 
 /**
  * @api {delete} /:teamspace/:model/viewpoints/:viewId Delete view
@@ -308,7 +308,7 @@ router.post("/viewpoints/", middlewares.issue.canCreate, createView);
  * 	"status":"success"
  * }
  */
-router.delete("/viewpoints/:uid", middlewares.issue.canCreate, deleteView);
+router.delete("/viewpoints/:uid", issuesMiddleware.canCreate, deleteView);
 
 /**
  * @api {get} /:teamspace/:model/viewpoints/:viewId/thumbnail.png Get view thumbnail
@@ -327,7 +327,7 @@ router.delete("/viewpoints/:uid", middlewares.issue.canCreate, deleteView);
  * HTTP/1.1 200 OK
  * <binary image>
  */
-router.get("/viewpoints/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail);
+router.get("/viewpoints/:uid/thumbnail.png", issuesMiddleware.canView, getThumbnail);
 
 function listViews(req, res, next) {
 	const place = utils.APIInfo(req);

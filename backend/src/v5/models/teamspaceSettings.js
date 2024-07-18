@@ -111,12 +111,17 @@ const possibleAddOns = {
 	[`addOns.${ADD_ONS.HERE}`]: 1,
 	[`addOns.${ADD_ONS.SRC}`]: 1,
 	[`addOns.${ADD_ONS.POWERBI}`]: 1,
-	'addOns.modules': 1,
+	[`addOns.${ADD_ONS.MODULES}`]: 1,
 };
 
 TeamspaceSetting.getAddOns = async (teamspace) => {
 	const { addOns } = await TeamspaceSetting.getTeamspaceSetting(teamspace, possibleAddOns);
 	return addOns || {};
+};
+
+TeamspaceSetting.isAddOnModuleEnabled = async (teamspace, moduleName) => {
+	const addOns = await TeamspaceSetting.getAddOns(teamspace, moduleName);
+	return !!addOns[ADD_ONS.MODULES]?.includes(moduleName);
 };
 
 TeamspaceSetting.updateAddOns = async (teamspace, addOns) => {

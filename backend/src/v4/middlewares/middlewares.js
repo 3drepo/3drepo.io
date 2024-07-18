@@ -162,6 +162,13 @@ function formatV5LogInData(req, res, next) {
 	next();
 }
 
+function formatV5NewModelParams(req, res, next) {
+	req.params.teamspace = req.params.account;
+	req.params.container = req.params.model;
+	req.params.federation = req.params.model;
+	next();
+}
+
 function formatV5NewModelRevisionsData(req, res, next) {
 	req.params.teamspace = req.params.account;
 	req.params.container = req.params.model;
@@ -192,8 +199,6 @@ const middlewares = {
 
 	project: require("./project"),
 	job: require("./job"),
-	issue: require("./issue"),
-	risk: require("./risk"),
 	notification: require("./notification"),
 	chat: require("./chat"),
 
@@ -226,6 +231,7 @@ const middlewares = {
 
 	// v5 converters
 	formatV5LogInData,
+	formatV5NewModelParams,
 	formatV5NewModelRevisionsData,
 	formatV5NewFedRevisionsData,
 	flagAsV4Request
@@ -233,4 +239,3 @@ const middlewares = {
 };
 
 module.exports = middlewares;
-
