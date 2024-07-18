@@ -19,8 +19,7 @@
 
 const express = require("express");
 const router = express.Router({mergeParams: true});
-const middlewares = require("../middlewares/middlewares");
-const issuesMiddleware = require("../middlewares/issue");
+const Middleware = require("../middlewares/middlewares");
 
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
@@ -157,7 +156,7 @@ const SequenceActivities = require("../models/sequenceActivities");
  * 		}
  * 	]
  */
-router.get("/sequences/:sequenceId/state/:stateId", issuesMiddleware.canView, getSequenceState);
+router.get("/sequences/:sequenceId/state/:stateId", Middleware.hasReadAccessToModel, getSequenceState);
 
 /**
  * @api {get} /:teamspace/:model/sequences/:sequenceID Get sequence
@@ -190,7 +189,7 @@ router.get("/sequences/:sequenceId/state/:stateId", issuesMiddleware.canView, ge
  * 	"_id":"00000000-0000-0000-0000-000000000002"
  * }
  */
-router.get("/sequences/:sequenceId", issuesMiddleware.canView, getSequence);
+router.get("/sequences/:sequenceId", Middleware.hasReadAccessToModel, getSequence);
 
 /**
  * @api {patch} /:teamspace/:model/sequences/:sequenceID Update a sequence
@@ -214,7 +213,7 @@ router.get("/sequences/:sequenceId", issuesMiddleware.canView, getSequence);
  * HTTP/1.1 200 OK
  * {}
  */
-router.patch("/sequences/:sequenceId", middlewares.hasUploadAccessToModel, updateSequence);
+router.patch("/sequences/:sequenceId", Middleware.hasUploadAccessToModel, updateSequence);
 
 /**
  * @api {put} /:teamspace/:model/sequences/:sequenceID/legend Add/Update legend
@@ -237,7 +236,7 @@ router.patch("/sequences/:sequenceId", middlewares.hasUploadAccessToModel, updat
  * HTTP/1.1 200 OK
  * {}
  */
-router.put("/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, updateLegend);
+router.put("/sequences/:sequenceId/legend", Middleware.hasUploadAccessToModel, updateLegend);
 
 /**
  * @api {get} /:teamspace/:model/sequences/:sequenceID/legend get the legend
@@ -257,7 +256,7 @@ router.put("/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, 
  * 	  "Temporary works": "#ffffff66"
  * }
  */
-router.get("/sequences/:sequenceId/legend", issuesMiddleware.canView, getLegend);
+router.get("/sequences/:sequenceId/legend", Middleware.hasReadAccessToModel, getLegend);
 
 /**
  * @api {delete} /:teamspace/:model/sequences/:sequenceID/legend Delete legend
@@ -274,7 +273,7 @@ router.get("/sequences/:sequenceId/legend", issuesMiddleware.canView, getLegend)
  * HTTP/1.1 200 OK
  * {}
  */
-router.delete("/sequences/:sequenceId/legend", middlewares.hasUploadAccessToModel, deleteLegend);
+router.delete("/sequences/:sequenceId/legend", Middleware.hasUploadAccessToModel, deleteLegend);
 
 /**
  * @api {delete} /:teamspace/:model/sequences/:sequenceID Delete sequence
@@ -291,7 +290,7 @@ router.delete("/sequences/:sequenceId/legend", middlewares.hasUploadAccessToMode
  * HTTP/1.1 200 OK
  * {}
  */
-router.delete("/sequences/:sequenceId", issuesMiddleware.canCreate, deleteSequence);
+router.delete("/sequences/:sequenceId", Middleware.hasCommenterAccessToModel, deleteSequence);
 
 /**
  * @api {post} /:teamspace/:model/sequences Create custom sequence
@@ -414,7 +413,7 @@ router.delete("/sequences/:sequenceId", issuesMiddleware.canCreate, deleteSequen
  * 	"_id":"00000000-0000-0000-0000-000000000002"
  * }
  */
-router.post("/sequences", issuesMiddleware.canCreate, createSequence);
+router.post("/sequences", Middleware.hasCommenterAccessToModel, createSequence);
 
 /**
  * @api {get} /:teamspace/:model/sequences List all sequences
@@ -454,7 +453,7 @@ router.post("/sequences", issuesMiddleware.canCreate, createSequence);
  * 	}
  * ]
  */
-router.get("/sequences", issuesMiddleware.canView, listSequences);
+router.get("/sequences", Middleware.hasReadAccessToModel, listSequences);
 
 function createSequence(req, res, next) {
 	const place = utils.APIInfo(req);
@@ -532,7 +531,7 @@ function getSequence(req, res, next) {
  *  ]
  * }
  */
-router.get("/sequences/:sequenceId/activities/:activityId", middlewares.hasReadAccessToModel, getSequenceActivityDetail);
+router.get("/sequences/:sequenceId/activities/:activityId", Middleware.hasReadAccessToModel, getSequenceActivityDetail);
 
 /**
  * @api {get} /:teamspace/:model/sequences/:sequenceId/activities Get all activities
@@ -608,7 +607,7 @@ router.get("/sequences/:sequenceId/activities/:activityId", middlewares.hasReadA
  * 	]
  * }
  */
-router.get("/sequences/:sequenceId/activities", middlewares.hasReadAccessToModel, getSequenceActivities);
+router.get("/sequences/:sequenceId/activities", Middleware.hasReadAccessToModel, getSequenceActivities);
 
 /**
  * @api {post} /:teamspace/:model/sequences/:sequenceId/activities Create one or more activities
@@ -677,7 +676,7 @@ router.get("/sequences/:sequenceId/activities", middlewares.hasReadAccessToModel
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
  **/
-router.post("/sequences/:sequenceId/activities", middlewares.hasUploadAccessToModel, createActivities);
+router.post("/sequences/:sequenceId/activities", Middleware.hasUploadAccessToModel, createActivities);
 
 /**
  * @api {put} /:teamspace/:model/sequences/:sequenceId/activities/:activityId Edit an activity
@@ -703,7 +702,7 @@ router.post("/sequences/:sequenceId/activities", middlewares.hasUploadAccessToMo
  * HTTP/1.1 200 OK
  *
  * */
-router.patch("/sequences/:sequenceId/activities/:activityId",middlewares.hasUploadAccessToModel, editActivity);
+router.patch("/sequences/:sequenceId/activities/:activityId",Middleware.hasUploadAccessToModel, editActivity);
 
 /**
  * @api {delete} /:teamspace/:model/sequences/:sequenceId/activities/:activityId Edit an activity
@@ -723,7 +722,7 @@ router.patch("/sequences/:sequenceId/activities/:activityId",middlewares.hasUplo
  * HTTP/1.1 200 OK
  *
  * */
-router.delete("/sequences/:sequenceId/activities/:activityId", middlewares.hasUploadAccessToModel, removeActivity);
+router.delete("/sequences/:sequenceId/activities/:activityId", Middleware.hasUploadAccessToModel, removeActivity);
 
 function getSequenceState(req, res, next) {
 	const place = utils.APIInfo(req);
