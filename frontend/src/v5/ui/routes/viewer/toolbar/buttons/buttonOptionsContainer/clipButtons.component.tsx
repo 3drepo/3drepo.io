@@ -19,7 +19,7 @@ import ClipPlaneIcon from '@assets/icons/viewer/clipping_plane.svg';
 import ClipBoxIcon from '@assets/icons/viewer/clipping_box.svg';
 import { ClickAwayListener } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Viewer } from '@/v4/services/viewer/viewer';
@@ -27,12 +27,16 @@ import { VIEWER_CLIP_MODES, VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { ButtonOptionsContainer, FloatingButtonsContainer, FloatingButton } from './multioptionIcons.styles';
 import { ClipMode } from '../../toolbar.types';
 import { ToolbarButton } from '../toolbarButton.component';
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 
 const clipTooltipText = formatMessage({ id: 'viewer.toolbar.icon.sectioning', defaultMessage: 'Sectioning' });
 const startBoxClipTooltipText = formatMessage({ id: 'viewer.toolbar.icon.sectioning.boxSection', defaultMessage: 'Section By Box' });
 const startSingleClipTooltipText = formatMessage({ id: 'viewer.toolbar.icon.sectioning.planeSection', defaultMessage: 'Section By Plane' });
 
 export const ClipButtons = () => {
+	const { step, isCalibrating } = useContext(CalibrationContext);
+	if (isCalibrating && step === 2) return null;
+
 	const [expanded, setExpanded] = useState(false);
 	const clipMode: ClipMode = ViewerGuiHooksSelectors.selectClippingMode();
 	const isClipEdit = ViewerGuiHooksSelectors.selectIsClipEdit();
