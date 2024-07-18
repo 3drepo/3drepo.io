@@ -121,7 +121,7 @@ TeamspaceSetting.getAddOns = async (teamspace) => {
 
 TeamspaceSetting.isAddOnModuleEnabled = async (teamspace, moduleName) => {
 	const addOns = await TeamspaceSetting.getAddOns(teamspace, moduleName);
-	return !!addOns[ADD_ONS.MODULES] && addOns[ADD_ONS.MODULES].includes(moduleName);
+	return !!addOns[ADD_ONS.MODULES]?.includes(moduleName);
 };
 
 TeamspaceSetting.updateAddOns = async (teamspace, addOns) => {

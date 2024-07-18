@@ -64,7 +64,7 @@ TeamspacePerms.isAddOnModuleEnabled = (moduleName) => async (req, res, next) => 
 		if (addOnModuleEnabled) {
 			await next();
 		} else {
-			respond(req, res, createResponseCode(templates.addOnModuleNotEnabled, `${moduleName} module is not enabled in this teamspace`));
+			respond(req, res, createResponseCode(templates.moduleUnavailable, `${moduleName} module is not enabled in this teamspace`));
 		}
 	} catch (err) {
 		respond(req, res, err);

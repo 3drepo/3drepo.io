@@ -127,13 +127,13 @@ const testIsAddOnModuleEnabled = () => {
 			expect(TeamspaceSettings.isAddOnModuleEnabled).toHaveBeenCalledWith(teamspace, moduleName);
 		});
 
-		test('should respond with addOnModuleNotEnabled if the module is not enabled', async () => {
+		test('should respond with moduleUnavailable if the module is not enabled', async () => {
 			TeamspaceSettings.isAddOnModuleEnabled.mockResolvedValueOnce(false);
 			await TSMiddlewares.isAddOnModuleEnabled(moduleName)({ params: { teamspace } }, {}, mockCB);
 
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.addOnModuleNotEnabled.code);
+			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.moduleUnavailable.code);
 			expect(TeamspaceSettings.isAddOnModuleEnabled).toHaveBeenCalledTimes(1);
 			expect(TeamspaceSettings.isAddOnModuleEnabled).toHaveBeenCalledWith(teamspace, moduleName);
 		});
