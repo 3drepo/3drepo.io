@@ -59,4 +59,4 @@ matrix:
 notifications:
     email:
         recipients:
-            - devOps@3drepo.org
+            - 3drepo-devops@asite.com
