@@ -86,6 +86,26 @@ const testValidSession = () => {
 			expect(Responder.respond.mock.calls.length).toBe(1);
 			expect(Responder.respond.mock.results[0].value).toEqual(templates.notLoggedIn);
 		});
+
+		test('next should be called if csrf token is provided in upper case', () => {
+			const mockCB = jest.fn(() => {});
+			AuthMiddlewares.validSession(
+				{ headers: { ...headers, [CSRF_HEADER.toUpperCase()]: token }, session, cookies },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(1);
+		});
+
+		test('next should be called if csrf token is provided in lower case', () => {
+			const mockCB = jest.fn(() => {});
+			AuthMiddlewares.validSession(
+				{ headers: { ...headers, [CSRF_HEADER.toLowerCase()]: token }, session, cookies },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(1);
+		});
 	});
 };
 

@@ -138,16 +138,7 @@ describe("Projects", function () {
 				resolve();
 			});
 
-
-
-
-
-
-
-
-
 		});
-
 
 		agent = SessionTracker(request(server));
 		await agent.login(username, password);

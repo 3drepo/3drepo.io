@@ -63,6 +63,13 @@ const webBrowserUserAgent = generateRandomString();
 
 UserAgentHelper.isFromWebBrowser.mockImplementation((userAgent) => userAgent === webBrowserUserAgent);
 
+const checkCSRFCookieCreated = (cookieFn) => {
+	const { maxAge, domain } = config.cookie;
+	expect(cookieFn).toHaveBeenCalledWith(CSRF_COOKIE, expect.any(String),
+		{ httpOnly: false, secure: true, sameSite: 'Strict', maxAge, domain },
+	);
+};
+
 const testCreateSession = () => {
 	const checkResults = (request) => {
 		expect(Responder.respond).toHaveBeenCalledTimes(1);
@@ -109,7 +116,7 @@ const testCreateSession = () => {
 					expect(Responder.respond).toHaveBeenCalledWith(request, res, 1);
 				}
 				expect(res.cookie).toHaveBeenCalledTimes(1);
-				expect(res.cookie).toHaveBeenCalledWith(CSRF_COOKIE, expect.any(String), expect.any(Object));
+				checkCSRFCookieCreated(res.cookie);
 			});
 		});
 
@@ -119,9 +126,9 @@ const testCreateSession = () => {
 			const res = { cookie: jest.fn() };
 			await Sessions.createSession(req, res);
 			checkResults(req);
-			config.cookie.maxAge = initialMaxAge;
 			expect(res.cookie).toHaveBeenCalledTimes(1);
-			expect(res.cookie).toHaveBeenCalledWith(CSRF_COOKIE, expect.any(String), expect.any(Object));
+			checkCSRFCookieCreated(res.cookie);
+			config.cookie.maxAge = initialMaxAge;
 		});
 
 		test('Should regenerate session without cookie.maxAge', async () => {
@@ -130,9 +137,9 @@ const testCreateSession = () => {
 			const res = { cookie: jest.fn() };
 			await Sessions.createSession(req, res);
 			checkResults(req);
-			config.cookie.maxAge = initialMaxAge;
 			expect(res.cookie).toHaveBeenCalledTimes(1);
-			expect(res.cookie).toHaveBeenCalledWith(CSRF_COOKIE, expect.any(String), expect.any(Object));
+			checkCSRFCookieCreated(res.cookie);
+			config.cookie.maxAge = initialMaxAge;
 		});
 	});
 };
@@ -231,36 +238,27 @@ const testUpdateSession = () => {
 	])('Update Session', (desc, request, userAgent) => {
 		test(`should update session if ${desc}`, async () => {
 			const mockCB = jest.fn();
-			const mockCookie = jest.fn();
-			await Sessions.updateSession(request, { cookie: mockCookie }, mockCB);
+			await Sessions.updateSession(request, {}, mockCB);
 			checkResults(request, userAgent, mockCB);
-			expect(mockCookie).toHaveBeenCalledTimes(1);
-			expect(mockCookie).toHaveBeenCalledWith(CSRF_COOKIE, expect.any(String), expect.any(Object));
 		});
 	});
 
 	test('Should update session with cookie.maxAge', async () => {
 		const mockCB = jest.fn();
-		const mockCookie = jest.fn();
 		const initialMaxAge = config.cookie.maxAge;
 		config.cookie.maxAge = 100;
-		await Sessions.updateSession(req, { cookie: mockCookie }, mockCB);
+		await Sessions.updateSession(req, {}, mockCB);
 		checkResults(req, undefined, mockCB);
 		config.cookie.maxAge = initialMaxAge;
-		expect(mockCookie).toHaveBeenCalledTimes(1);
-		expect(mockCookie).toHaveBeenCalledWith(CSRF_COOKIE, expect.any(String), expect.any(Object));
 	});
 
 	test('Should update session without cookie.maxAge', async () => {
 		const mockCB = jest.fn();
-		const mockCookie = jest.fn();
 		const initialMaxAge = config.cookie.maxAge;
 		config.cookie.maxAge = undefined;
-		await Sessions.updateSession(req, { cookie: mockCookie }, mockCB);
+		await Sessions.updateSession(req, {}, mockCB);
 		checkResults(req, undefined, mockCB);
 		config.cookie.maxAge = initialMaxAge;
-		expect(mockCookie).toHaveBeenCalledTimes(1);
-		expect(mockCookie).toHaveBeenCalledWith(CSRF_COOKIE, expect.any(String), expect.any(Object));
 	});
 };
 

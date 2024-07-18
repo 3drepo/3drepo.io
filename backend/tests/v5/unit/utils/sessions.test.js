@@ -32,6 +32,8 @@ const testIsSessionValid = () => {
 	const headers = { referer: 'http://abc.com', [CSRF_HEADER]: token };
 	describe.each([
 		['a valid session', session, cookies, headers, true],
+		['a valid session but the CRSF token is in lower case', session, cookies, { ...headers, [CSRF_HEADER.toLowerCase()]: token }, true],
+		['a valid session but the CRSF token is in upper case', session, cookies, { ...headers, [CSRF_HEADER.toUpperCase()]: token }, true],
 		['a valid session but with mismatched CRSF token', session, cookies, { ...headers, [CSRF_HEADER]: generateRandomString() }, false],
 		['a valid session but no csrf cookie', session, {}, headers, false],
 		['a valid session with a matching domain in the referer', session, cookies, { ...headers, referer: 'http://abc.com/xyz' }, true],
@@ -41,7 +43,7 @@ const testIsSessionValid = () => {
 		['an invalid session', { user: {} }, cookies, { ...headers, referer: 'https://abc.com' }, false],
 		['an API key session with a referer', { user: { isAPIKey: true } }, cookies, headers, true],
 		['an API Key session without a referer', { user: { isAPIKey: true } }, {}, {}, true],
-		['all parameters undefine', undefined, undefined, undefined, false],
+		['all parameters undefined', undefined, undefined, undefined, false],
 		['session as an empty object', {}, cookies, headers, false],
 		['session with no referrer with a request that also has no referer', { user: {} }, cookies, { ...headers, referer: undefined }, true],
 	])('Is session valid', (desc, _session, _cookies, _headers, res) => {

@@ -89,7 +89,7 @@ describe("Sharing/Unsharing a model", function () {
 
 	describe("for view only", function() {
 
-		it("!!!should succeed and the viewer is able to see the model (with invalid permission present on the model)", function(done) {
+		it("should succeed and the viewer is able to see the model (with invalid permission present on the model)", function(done) {
 			const permissions = [
 				{ user: username_viewer, permission: "viewer"}
 			];
