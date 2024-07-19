@@ -32,6 +32,8 @@ export const downloadAuthUrl = async (url):Promise<string> => {
 	return CachedURL[url];
 };
 
+export const deleteAuthUrlFromCache = (url) => delete CachedURL[url];
+
 // It uses axios config to pass the token so images are returned safely
 export const useAuthenticatedImage = (src: string, onError?) => {
 	const [blobSrc, setbaseBlobSrc] = useState<string>(undefined);
