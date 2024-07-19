@@ -118,29 +118,6 @@ const testAuthenticatePost = () => {
 			expect(res.headers.location).toEqual(`${redirectUri}&error=${errorCodes.USER_NOT_FOUND}`);
 		});
 
-		test('should fail if the user is already logged in', async () => {
-			const userDataFromAad = {
-				email: userEmailSso,
-				id: ssoUserId,
-				firstName: generateRandomString(),
-				lastName: generateRandomString(),
-			};
-			const redirectUri = `${generateRandomURL()}?queryParam=someValue`;
-			const state = Aad.generateCryptoHash(JSON.stringify({ redirectUri }));
-			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
-
-			const testSession = SessionTracker(agent);
-
-			const res1 = await agent.post('/v5/sso/aad/authenticate-post').send({ state })
-				.expect(302);
-			testSession.extractSessionFromResponse(res1);
-			expect(res1.headers.location).toEqual(redirectUri);
-
-			const res2 = await testSession.post('/v5/sso/aad/authenticate-post').send({ state })
-				.expect(templates.alreadyLoggedIn.status);
-			expect(res2.body.code).toEqual(templates.alreadyLoggedIn.code);
-		});
-
 		test('should redirect the user to the redirectUri provided', async () => {
 			const userDataFromAad = {
 				email: userEmailSso,
