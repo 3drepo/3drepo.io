@@ -118,7 +118,7 @@ const testAuthenticatePost = () => {
 			expect(res.headers.location).toEqual(`${redirectUri}&error=${errorCodes.USER_NOT_FOUND}`);
 		});
 
-		test('!!!should fail if the user is already logged in', async () => {
+		test('should fail if the user is already logged in', async () => {
 			const userDataFromAad = {
 				email: userEmailSso,
 				id: ssoUserId,
