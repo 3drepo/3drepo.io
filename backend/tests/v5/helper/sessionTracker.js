@@ -20,6 +20,7 @@ const { parseSetCookie, generateCookieArray } = require('./services');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { CSRF_HEADER } = require(`${src}/utils/sessions.constants`);
+const { generateUUIDString } = require(`${src}/utils/helper/uuids`);
 
 class SessionTracker {
 	constructor(agent) {
@@ -35,8 +36,11 @@ class SessionTracker {
 		return resp;
 	}
 
-	extractSessionFromResponse(resp) {
+	extractSessionFromResponse(resp, fabricateCSRF) {
 		this.cookies = parseSetCookie(resp.headers['set-cookie']);
+		if (fabricateCSRF) {
+			this.cookies.token = this.cookies.token ?? generateUUIDString();
+		}
 	}
 
 	setAuthHeaders(action) {

@@ -118,7 +118,7 @@ const testAuthenticatePost = () => {
 			expect(res.headers.location).toEqual(`${redirectUri}&error=${errorCodes.USER_NOT_FOUND}`);
 		});
 
-		test('should fail if the user is already logged in', async () => {
+		test('!!!should fail if the user is already logged in', async () => {
 			const userDataFromAad = {
 				email: userEmailSso,
 				id: ssoUserId,
@@ -133,7 +133,7 @@ const testAuthenticatePost = () => {
 
 			const res1 = await agent.post('/v5/sso/aad/authenticate-post').send({ state })
 				.expect(302);
-			testSession.extractSessionFromResponse(res1);
+			testSession.extractSessionFromResponse(res1, true);
 			expect(res1.headers.location).toEqual(redirectUri);
 
 			const res2 = await testSession.post('/v5/sso/aad/authenticate-post').send({ state })
