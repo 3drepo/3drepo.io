@@ -21,7 +21,7 @@ import { useEffect, useState } from 'react';
 const CachedURL: Record<string, string>  = {};
 
 
-export const downloadAuthUrl = async (url) => {
+export const downloadAuthUrl = async (url):Promise<string> => {
 	if ( !isApiUrl(url) ) return url;
 
 	if (!CachedURL[url]) {
@@ -42,9 +42,9 @@ export const useAuthenticatedImage = (src: string, onError?) => {
 
 		(async () => {
 			try {
-				const blobtUrl = await downloadAuthUrl(src);
+				const blobUrl = await downloadAuthUrl(src);
 				if (!mounted) return;  // to avoid changing the state in unmounted components
-				setbaseBlobSrc(blobtUrl);
+				setbaseBlobSrc(blobUrl);
 			} catch (e) {
 				onError?.(e);
 			}
