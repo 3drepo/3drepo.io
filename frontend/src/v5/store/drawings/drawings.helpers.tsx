@@ -91,6 +91,7 @@ export const prepareSingleDrawingData = (
 	latestRevision: stats?.revisions.latestRevision ?? '',
 	number: stats?.number ?? '',
 	type: stats?.type ?? '',
+	desc: stats?.desc ?? '',
 	calibration: stats?.calibration ?? CalibrationStates.UNCALIBRATED,
 	status: stats?.status ?? DrawingUploadStatus.OK,
 	hasStatsPending: !stats,
