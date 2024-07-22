@@ -31,6 +31,13 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 	let drawing = false;
 	let onLoad: any;
 
+
+	const img = new Image();
+	img.src = src;
+
+
+
+
 	// The overdraw for the Canvas, as a scalar. Overdraw means to create a
 	// larger canvas than is displayed in the containing element. This allows
 	// the user to pan without seeing missing parts of the image as they are
@@ -60,6 +67,10 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 	// The canvas is the actual element in the DOM that will show the image
 
 	container.appendChild(canvas);
+
+	const onResize = () => {
+		console.log('container resized' + JSON.stringify(container.getBoundingClientRect()));
+	};
 
 	/**
 	 * Given an image, work out what the initial transform (projection) should be
@@ -183,6 +194,7 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		return `translate(${t.x}px, ${t.y}px) scale(${t.scale}, ${t.scale})`;
 	};
 
+	
 	/**
 	 * Update the Canvas transform to manifest the difference between Projection
 	 * and D, and apply it as a CSS style attribute. This method will also apply
@@ -292,8 +304,6 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 	// be a bitmap to our code, though behind the scenes the browser will
 	// rasterise it based on the canvas size.
 
-	const img = new Image();
-	img.src = src;
 	img.onload = () => {
 
 		// In this version of the viewer, we store the origin and apply user transforms
@@ -316,6 +326,10 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 			onLoad = callback;
 		}
 	};
+
+
+	const resizeObserver = new ResizeObserver(onResize);
+	resizeObserver.observe(container);
 
 	return {
 		set transform(t: Transform) {
@@ -382,6 +396,10 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		get naturalHeight() : number {
 			return vh;
 		},
+
+		dispose: () => {
+			resizeObserver.disconnect();
+		},
 	};
 };
 
@@ -428,5 +446,5 @@ export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ on
 		setSize: () => {},
 	};
 
-	return (<div ref={containerRef as any} style={{ overflow:'hidden' }} />);
+	return (<div ref={containerRef as any} style={{ overflow:'hidden', width:'100%', height:'100%'}} />);
 });
