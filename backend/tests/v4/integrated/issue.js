@@ -3371,7 +3371,7 @@ describe("Issues", function () {
 				const res = await agent.post(`/${fakeTeamspace}/${viewerModel}/issues.bcfzip`)
 					.expect(404);
 
-				expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+				expect(res.body.code).to.equal(responseCodesV5.teamspaceNotFound.code);
 			});
 
 			it("if file is not BCF file should fail", function(done) {
@@ -3451,7 +3451,7 @@ describe("Issues", function () {
 			it("if teamspace does not exist should fail", function(done) {
 				agent.get(`/${fakeTeamspace}/${viewerModel}/issues.bcfzip`)
 					.expect(404, function(err, res) {
-						expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+						expect(res.body.code).to.equal(responseCodesV5.teamspaceNotFound.code);
 						done(err);
 					});
 			});

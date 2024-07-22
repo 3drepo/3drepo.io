@@ -156,7 +156,7 @@ const SequenceActivities = require("../models/sequenceActivities");
  * 		}
  * 	]
  */
-router.get("/sequences/:sequenceId/state/:stateId", Middleware.hasReadAccessToModel, getSequenceState);
+router.get("/sequences/:sequenceId/state/:stateId", Middleware.hasViewIssueAccessToModel, getSequenceState);
 
 /**
  * @api {get} /:teamspace/:model/sequences/:sequenceID Get sequence
@@ -189,7 +189,7 @@ router.get("/sequences/:sequenceId/state/:stateId", Middleware.hasReadAccessToMo
  * 	"_id":"00000000-0000-0000-0000-000000000002"
  * }
  */
-router.get("/sequences/:sequenceId", Middleware.hasReadAccessToModel, getSequence);
+router.get("/sequences/:sequenceId", Middleware.hasViewIssueAccessToModel, getSequence);
 
 /**
  * @api {patch} /:teamspace/:model/sequences/:sequenceID Update a sequence
@@ -256,7 +256,7 @@ router.put("/sequences/:sequenceId/legend", Middleware.hasUploadAccessToModel, u
  * 	  "Temporary works": "#ffffff66"
  * }
  */
-router.get("/sequences/:sequenceId/legend", Middleware.hasReadAccessToModel, getLegend);
+router.get("/sequences/:sequenceId/legend", Middleware.hasViewIssueAccessToModel, getLegend);
 
 /**
  * @api {delete} /:teamspace/:model/sequences/:sequenceID/legend Delete legend
@@ -453,7 +453,7 @@ router.post("/sequences", Middleware.hasCommenterAccessToModel, createSequence);
  * 	}
  * ]
  */
-router.get("/sequences", Middleware.hasReadAccessToModel, listSequences);
+router.get("/sequences", Middleware.hasViewIssueAccessToModel, listSequences);
 
 function createSequence(req, res, next) {
 	const place = utils.APIInfo(req);
@@ -531,7 +531,7 @@ function getSequence(req, res, next) {
  *  ]
  * }
  */
-router.get("/sequences/:sequenceId/activities/:activityId", Middleware.hasReadAccessToModel, getSequenceActivityDetail);
+router.get("/sequences/:sequenceId/activities/:activityId", Middleware.hasViewIssueAccessToModel, getSequenceActivityDetail);
 
 /**
  * @api {get} /:teamspace/:model/sequences/:sequenceId/activities Get all activities
@@ -607,7 +607,7 @@ router.get("/sequences/:sequenceId/activities/:activityId", Middleware.hasReadAc
  * 	]
  * }
  */
-router.get("/sequences/:sequenceId/activities", Middleware.hasReadAccessToModel, getSequenceActivities);
+router.get("/sequences/:sequenceId/activities", Middleware.hasViewIssueAccessToModel, getSequenceActivities);
 
 /**
  * @api {post} /:teamspace/:model/sequences/:sequenceId/activities Create one or more activities

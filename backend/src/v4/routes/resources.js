@@ -37,7 +37,7 @@ const mimeTypes = require("mime-types");
  * @apiParam {String} resourceId The Id of the resource
  *
  */
-router.get("/resources/:resourceId", Middleware.hasReadAccessToModel,  downloadResource);
+router.get("/resources/:resourceId", Middleware.hasViewIssueAccessToModel,  downloadResource);
 
 function downloadResource(req, res, next) {
 	const {account, model, resourceId } = req.params;

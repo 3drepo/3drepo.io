@@ -175,7 +175,7 @@ const config = require("../config");
  * 	}
  * ]
  */
-router.get("/viewpoints/", Middleware.hasReadAccessToModel, listViews);
+router.get("/viewpoints/", Middleware.hasViewIssueAccessToModel, listViews);
 
 /**
  * @api {get} /:teamspace/:model/viewpoints/:viewId Get view
@@ -218,7 +218,7 @@ router.get("/viewpoints/", Middleware.hasReadAccessToModel, listViews);
  * 	"name":"View1"
  * }
  */
-router.get("/viewpoints/:uid", Middleware.hasReadAccessToModel, findView);
+router.get("/viewpoints/:uid", Middleware.hasViewIssueAccessToModel, findView);
 
 /**
  * @api {put} /:teamspace/:model/viewpoints/:viewId Update view
@@ -327,7 +327,7 @@ router.delete("/viewpoints/:uid", Middleware.hasCommenterAccessToModel, deleteVi
  * HTTP/1.1 200 OK
  * <binary image>
  */
-router.get("/viewpoints/:uid/thumbnail.png", Middleware.hasReadAccessToModel, getThumbnail);
+router.get("/viewpoints/:uid/thumbnail.png", Middleware.hasViewIssueAccessToModel, getThumbnail);
 
 function listViews(req, res, next) {
 	const place = utils.APIInfo(req);

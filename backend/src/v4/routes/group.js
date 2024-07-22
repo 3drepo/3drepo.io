@@ -147,9 +147,9 @@ const systemLogger = require("../logger.js").systemLogger;
  * 	}
  * ]
  */
-router.get("/revision/master/head/groups", Middleware.hasReadAccessToModel, listGroups);
+router.get("/revision/master/head/groups", Middleware.hasViewIssueAccessToModel, listGroups);
 
-router.get("/revision/:rid/groups", Middleware.hasReadAccessToModel, listGroups);
+router.get("/revision/:rid/groups", Middleware.hasViewIssueAccessToModel, listGroups);
 
 /**
  * @api {get} /:teamspace/:model/revision(/master/head|/:revId)/groups/:groupId?[query] Find group
@@ -252,9 +252,9 @@ router.get("/revision/:rid/groups", Middleware.hasReadAccessToModel, listGroups)
  * 	"_id":"00000000-0000-0000-0000-000000000004"
  * }
  */
-router.get("/revision/master/head/groups/:uid", Middleware.hasReadAccessToModel, findGroup);
+router.get("/revision/master/head/groups/:uid", Middleware.hasViewIssueAccessToModel, findGroup);
 
-router.get("/revision/:rid/groups/:uid", Middleware.hasReadAccessToModel, findGroup);
+router.get("/revision/:rid/groups/:uid", Middleware.hasViewIssueAccessToModel, findGroup);
 
 /**
  * @api {put} /:teamspace/:model/revision(/master/head|/:revId)/groups/:groupId/ Update group
@@ -494,7 +494,7 @@ router.delete("/groups/", Middleware.hasCommenterAccessToModel, deleteGroups);
  * @apiGroup Groups
  * @apiDescription This is a back-ported endpoint from V5. For details please see V5 documentation /docs/#/Federations/ExportFederationGroups
  */
-router.post("/groups/export", Middleware.hasReadAccessToModel, validateGroupsExportData, exportGroups, serialiseGroupArray);
+router.post("/groups/export", Middleware.hasViewIssueAccessToModel, validateGroupsExportData, exportGroups, serialiseGroupArray);
 
 /**
  * @api {post} /:teamspace/:model/groups/import Import Groups
@@ -502,7 +502,7 @@ router.post("/groups/export", Middleware.hasReadAccessToModel, validateGroupsExp
  * @apiGroup Groups
  * @apiDescription This is a back-ported endpoint from V5. For details please see V5 documentation /docs/#/Federations/ImportFederationGroups
  */
-router.post("/groups/import", Middleware.hasReadAccessToModel, validateGroupsImportData, importGroups);
+router.post("/groups/import", Middleware.hasViewIssueAccessToModel, validateGroupsImportData, importGroups);
 
 function exportGroups(req, res, next) {
 	const place = utils.APIInfo(req);

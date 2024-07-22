@@ -208,6 +208,7 @@ const middlewares = {
 	canCreateModel: canCreateModel,
 	hasReadAccessToModel: checkPermissions(readAccessToModel),
 	hasCommenterAccessToModel: checkPermissions([C.PERM_CREATE_ISSUE]),
+	hasViewIssueAccessToModel: checkPermissions([C.PERM_VIEW_ISSUE]),
 	hasUploadAccessToModel: checkPermissions([C.PERM_UPLOAD_FILES]),
 	hasWriteAccessToModelSettings: checkPermissions([C.PERM_CHANGE_MODEL_SETTINGS]),
 	hasDeleteAccessToModel: checkPermissions([C.PERM_DELETE_MODEL]),
