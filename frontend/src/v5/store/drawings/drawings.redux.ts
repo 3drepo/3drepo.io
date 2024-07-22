@@ -108,7 +108,7 @@ export const drawingProcessingSuccess = (state, {
 	const newRevisionProperties = {
 		revisionsCount: drawing.revisionsCount + 1,
 		lastUpdated: getNullableDate(revision.timestamp),
-		latestRevision: revision.tag,
+		latestRevision: revision.name,
 	};
 	Object.assign(drawing, newRevisionProperties);
 };
