@@ -19,7 +19,7 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 import api, { generateV5ApiUrl } from './default';
 
 export const fetchRevisions = (teamspace: string, projectId: string, drawingId: string, showVoid = true): Promise<any> => (
-	api.get(`teamspaces/${teamspace}/projects/${projectId}/drawings/${drawingId}/revisions/${showVoid ? '?showVoid=true' : ''}`)
+	api.get(`teamspaces/${teamspace}/projects/${projectId}/drawings/${drawingId}/revisions${showVoid ? '?showVoid=true' : ''}`)
 );
 
 export const setRevisionVoidStatus = (teamspace: string, projectId: string, drawingId: string, revision: string, isVoid = true) => api.patch(`teamspaces/${teamspace}/projects/${projectId}/drawings/${drawingId}/revisions/${revision}`, {
