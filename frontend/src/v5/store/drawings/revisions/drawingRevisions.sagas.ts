@@ -59,7 +59,7 @@ export function* setVoidStatus({ teamspace, projectId, drawingId, revisionId, is
 		const revisions = yield select(selectRevisions, drawingId);
 		const activeRevisions = revisions.filter((rev) => !rev.void);
 		const revisionsCount = activeRevisions.length;
-		const latestRevision = revisionsCount ? orderBy(activeRevisions, 'timestamp')[0].tag : null;
+		const latestRevision = revisionsCount ? orderBy(activeRevisions, 'timestamp')[0].name : null;
 		const updates = {
 			revisionsCount,
 			lastUpdated: new Date(),
