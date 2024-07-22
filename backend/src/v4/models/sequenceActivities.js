@@ -245,7 +245,8 @@ SequenceActivities.get = async (account, model, sequenceId) => {
 		activities = await FileRef.getSequenceActivitiesFile(account, model, utils.uuidToString(sequenceId));
 	} catch(e) {
 		activities = await createActivitiesTree(account, model, sequenceId);
-		await FileRef.storeFile(account, activityCol(model) + ".ref", account, utils.generateUUID({string: true}), JSON.stringify(activities),  {"_id": sequenceId});
+		// not critical if we couldn't cache the file. Do not return an error for the user.
+		await FileRef.storeFile(account, activityCol(model) + ".ref", account, utils.generateUUID({string: true}), JSON.stringify(activities),  {"_id": sequenceId}).catch(() => {});
 	}
 
 	return activities;
