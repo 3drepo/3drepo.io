@@ -17,7 +17,7 @@
 
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
-import { DrawingsHooksSelectors, DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingsHooksSelectors, DrawingRevisionsHooksSelectors, TeamspacesHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { InputController } from '@controls/inputs/inputController.component';
 import { DashboardListItemRow as UploadListItemRow } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { UploadListItemDestination } from './components/uploadListItemDestination/uploadListItemDestination.component';
@@ -30,7 +30,6 @@ import { UploadListItemTitle } from '@components/shared/uploadFiles/uploadList/u
 import { UploadProgress } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadProgress/uploadProgress.component';
 import { formatMessage } from '@/v5/services/intl';
 import { DrawingUploadStatus, IDrawing } from '@/v5/store/drawings/drawings.types';
-import { useParams } from 'react-router-dom';
 import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { UploadListItemStatusCode } from './components/uploadListItemStatusCode/uploadListItemStatusCode.component';
 
@@ -75,7 +74,8 @@ export const UploadListItem = ({
 	isUploading,
 }: IUploadListItem): JSX.Element => {
 	const revisionPrefix = `uploads.${index}`;
-	const { teamspace, project } = useParams();
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const projectId = ProjectsHooksSelectors.selectCurrentProject();
 	const uploadErrorMessage: string = DrawingRevisionsHooksSelectors.selectUploadError(uploadId);
 	const { watch, trigger, setValue } = useFormContext();
 	const drawingId = watch(`${revisionPrefix}.drawingId`);
@@ -109,7 +109,7 @@ export const UploadListItem = ({
 			setValue(`${revisionPrefix}.${key}`, val);
 		}
 		if (selectedDrawing?._id) {
-			DrawingRevisionsActionsDispatchers.fetch(teamspace, project, selectedDrawing._id);
+			DrawingRevisionsActionsDispatchers.fetch(teamspace, projectId, selectedDrawing._id);
 		}
 	}, [JSON.stringify(selectedDrawing)]);
 
