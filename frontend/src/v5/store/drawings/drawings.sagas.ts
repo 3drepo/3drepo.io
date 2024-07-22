@@ -66,9 +66,6 @@ export function* fetchDrawings({ teamspace, projectId }: FetchDrawingsAction) {
 		if (isPending || !isEqualWith(storedDrawings, drawingsWithoutStats, compByColum(['_id', 'name', 'role', 'isFavourite']))) {
 			yield put(DrawingsActions.fetchDrawingsSuccess(projectId, drawingsWithoutStats));
 		}
-		
-		yield put(DrawingsActions.fetchDrawingsSuccess(projectId, drawingsWithoutStats));
-
 		yield all(
 			drawingsWithoutStats.map(
 				(drawing) => put(DrawingsActions.fetchDrawingStats(teamspace, projectId, drawing._id)),
