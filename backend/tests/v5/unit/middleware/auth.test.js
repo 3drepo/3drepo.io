@@ -37,7 +37,7 @@ const AuthMiddlewares = require(`${src}/middleware/auth`);
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
 const token = generateRandomString();
-const session = { user: { referer: 'http://abc.com' } };
+const session = { user: { referer: 'http://abc.com' }, token };
 const cookies = { [CSRF_COOKIE]: token };
 const headers = { referer: 'http://abc.com/', [CSRF_HEADER]: token };
 

@@ -27,7 +27,7 @@ const apiUrls = require(`${v4Path}/config`).apiUrls.all;
 
 const testIsSessionValid = () => {
 	const token = generateRandomString();
-	const session = { user: { referer: 'http://abc.com' } };
+	const session = { user: { referer: 'http://abc.com' }, token };
 	const cookies = { [CSRF_COOKIE]: token };
 	const headers = { referer: 'http://abc.com', [CSRF_HEADER]: token };
 	describe.each([
@@ -35,7 +35,7 @@ const testIsSessionValid = () => {
 		['a valid session but the CRSF token is in lower case', session, cookies, { ...headers, [CSRF_HEADER.toLowerCase()]: token }, true],
 		['a valid session but the CRSF token is in upper case', session, cookies, { ...headers, [CSRF_HEADER.toUpperCase()]: token }, true],
 		['a valid session but with mismatched CRSF token', session, cookies, { ...headers, [CSRF_HEADER]: generateRandomString() }, false],
-		['a valid session but no csrf cookie', session, {}, headers, false],
+		['a valid session but no csrf cookie', { user: session.user }, {}, headers, false],
 		['a valid session with a matching domain in the referer', session, cookies, { ...headers, referer: 'http://abc.com/xyz' }, true],
 		['a valid session with a mismatched referer', session, cookies, { ...headers, referer: 'http://xyz.com' }, false],
 		['a valid session with no referer in the request', session, cookies, { ...headers, referer: undefined }, true],
@@ -45,7 +45,7 @@ const testIsSessionValid = () => {
 		['an API Key session without a referer', { user: { isAPIKey: true } }, {}, {}, true],
 		['all parameters undefined', undefined, undefined, undefined, false],
 		['session as an empty object', {}, cookies, headers, false],
-		['session with no referrer with a request that also has no referer', { user: {} }, cookies, { ...headers, referer: undefined }, true],
+		['session with no referrer with a request that also has no referer', { user: {}, token }, cookies, { ...headers, referer: undefined }, true],
 	])('Is session valid', (desc, _session, _cookies, _headers, res) => {
 		test(`${desc} should return ${res}`, () => {
 			expect(SessionUtils.isSessionValid(_session, _cookies, _headers)).toBe(res);
