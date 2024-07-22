@@ -96,7 +96,7 @@ export const prepareSingleDrawingData = (
 	hasStatsPending: !stats,
 	errorReason: stats?.errorReason && {
 		message: stats.errorReason.message,
-		timestamp: getNullableDate(stats?.errorReason.timestamp),
+		timestamp: getNullableDate(+stats?.errorReason.timestamp),
 	},
 });
 

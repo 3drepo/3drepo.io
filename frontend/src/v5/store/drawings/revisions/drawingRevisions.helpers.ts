@@ -22,9 +22,10 @@ import { NewDrawing } from '../drawings.types';
 export const prepareRevisionData = (revision): IDrawingRevision => ({
 	...revision,
 	timestamp: getNullableDate(revision.timestamp),
-	tag: revision?.tag || '',
+	name: revision?.name || '',
 	author: revision?.author || '',
 	desc: revision?.desc || '',
+	revCode: revision?.revCode || '',
 	void: revision?.void || false,
 });
 

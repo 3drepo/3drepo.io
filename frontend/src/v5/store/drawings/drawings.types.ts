@@ -41,7 +41,7 @@ export interface MinimumDrawing {
 }
 
 export interface DrawingStats {
-	revisions : {
+	revisions: {
 		total: number;
 		lastUpdated?: number;
 		latestRevision?: string,
@@ -57,7 +57,7 @@ export interface DrawingStats {
 	desc?: string;
 }
 
-export interface IDrawing extends MinimumDrawing, Omit<DrawingStats, 'revisions'> {
+export interface IDrawing extends MinimumDrawing, Partial<Omit<DrawingStats, 'revisions'>> {
 	lastUpdated?: Date;
 	latestRevision?: string;
 	revisionsCount: number;
