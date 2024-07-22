@@ -214,7 +214,7 @@ describe("Model", function () {
 		it("with non-existent model should fail", function(done) {
 			agent.get(`/${username}/invalidModel/revision/master/head/searchtree.json`)
 				.expect(404, function(err, res) {
-					expect(res.body.code).to.equal(responseCodesV5.modelNotFound.code);
+					expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
 					done(err);
 				});
 		});
@@ -516,7 +516,7 @@ describe("Model", function () {
 
 		it("should fail if delete again", function(done) {
 			agent.delete(`/${username}/${model}`).expect(404, function(err, res) {
-				expect(res.body.code).to.equal(responseCodesV5.modelNotFound.code);
+				expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
 				done(err);
 			});
 		});

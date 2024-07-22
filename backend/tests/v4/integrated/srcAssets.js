@@ -93,7 +93,7 @@ describe("ModelAssets", function () {
 		it("from invalid model should fail", function(done) {
 			agent.get(`/${username}/dfsfdsg/revision/master/head/srcAssets.json`)
 				.expect(404, (err, res) => {
-					expect(res.body.code).eq(responseCodesV5.modelNotFound.code);
+					expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
 					done(err);
 				});
 
@@ -202,7 +202,7 @@ describe("ModelAssets", function () {
 		it("from invalid model should fail", function(done) {
 			agent.get(`/${username}/dfsfdsg/c4e6d66f-33ab-4dc5-97b6-e3d9a644cde4.src.mpc`)
 				.expect(404, (err, res) => {
-					expect(res.body.code).eq(responseCodesV5.modelNotFound.code);
+					expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
 					done(err);
 				});
 

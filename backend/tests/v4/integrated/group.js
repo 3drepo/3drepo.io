@@ -137,7 +137,7 @@ describe("Groups", function () {
 		it("with some other teamspace should fail", function(done){
 			agent.get(`/${noAccessUser}/${model}/revision/f640aa3dec2/groups/${groupID}`)
 				.expect(404 , function(err, res) {
-					expect(res.body.code).to.equal(responseCodesV5.modelNotFound.code);
+					expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
 					done(err);
 				});
 		});
@@ -510,7 +510,7 @@ describe("Groups", function () {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 			});
-		});	
+		});
 
 		it("with rules and objects should fail", function(done) {
 			const newGroup = Object.assign({}, data);
@@ -526,7 +526,7 @@ describe("Groups", function () {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 			});
-		});		
+		});
 
 		it("with insufficient rule args (min. 1) should fail", function(done) {
 			const newGroup = Object.assign({}, data);
@@ -676,7 +676,7 @@ describe("Groups", function () {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
-		});		
+		});
 
 		it("no values for a rule that requires them should fail", function(done) {
 			const newGroup = Object.assign({}, data);
@@ -945,7 +945,7 @@ describe("Groups", function () {
 				}
 			], done);
 		});
-		
+
 		it("non string value for a string rule should succeed", function(done) {
 			let groupId;
 
@@ -974,7 +974,7 @@ describe("Groups", function () {
 							done(err);
 						});
 				}
-			], done);			
+			], done);
 		});
 
 		it("non string value for a string rule in field should succeed", function(done) {
@@ -990,7 +990,7 @@ describe("Groups", function () {
 						operator: "IS_NOT_EMPTY",
 						values: []
 					}];
-		
+
 					agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
@@ -1183,7 +1183,7 @@ describe("Groups", function () {
 					delete newGroup.objects;
 					newGroup.rules = [{
 						name: "rule name",
-						field: { operator: "IS", values: ["Reference"] },						
+						field: { operator: "IS", values: ["Reference"] },
 						operator: "CONTAINS",
 						values: ["Flue", "Panel"]
 					}];
@@ -1312,7 +1312,7 @@ describe("Groups", function () {
 						});
 				}
 			], done);
-		});		
+		});
 
 		it("with EQUALS rule should succeed", function(done) {
 			let groupId;
@@ -2019,7 +2019,7 @@ describe("Groups", function () {
 
 		it("with multi value IS rule in field should succeed", function(done) {
 			let groupId;
-	
+
 			async.series([
 				function(done) {
 					const newGroup = Object.assign({}, data);
@@ -2263,7 +2263,7 @@ describe("Groups", function () {
 						});
 				}
 			], done);
-		});		
+		});
 });
 
 	describe("Updating a group ", function() {
@@ -2471,7 +2471,7 @@ describe("Groups", function () {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
-		});		
+		});
 
 		it("updating invalid group ID should fail", function(done) {
 			agent.put(`/${username}/${model}/revision/master/head/groups/invalidID`)

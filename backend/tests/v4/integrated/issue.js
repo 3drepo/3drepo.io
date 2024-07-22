@@ -3362,7 +3362,7 @@ describe("Issues", function () {
 				agent.post(`/${altTeamspace}/${fakeModel}/issues.bcfzip`)
 					.attach("file", __dirname + bcf.path)
 					.expect(404, function(err, res) {
-						expect(res.body.code).to.equal(responseCodesV5.modelNotFound.code);
+						expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
 						done(err);
 					});
 			});
@@ -3443,7 +3443,7 @@ describe("Issues", function () {
 			it("if model does not exist should fail", function(done) {
 				agent.get(`/${altTeamspace}/${fakeModel}/issues.bcfzip`)
 					.expect(404, function(err, res) {
-						expect(res.body.code).to.equal(responseCodesV5.modelNotFound.code);
+						expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
 						done(err);
 					});
 			});
