@@ -252,7 +252,7 @@ const testLink = () => {
 
 		describe('With valid authentication', () => {
 			let testSession;
-			beforeAll(async () => {
+			beforeEach(async () => {
 				testSession = SessionTracker(agent);
 				await testSession.login(testUser.user, testUser.password);
 			});
