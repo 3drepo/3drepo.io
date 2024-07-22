@@ -64,6 +64,10 @@ const updateSessionDetails = (req) => {
 		updatedUser.webSession = isFromWebBrowser(userAgent);
 	}
 
+	if (req.token) {
+		session.token = req.token;
+	}
+
 	session.user = updatedUser;
 	session.cookie.domain = config.cookie_domain;
 
@@ -122,7 +126,9 @@ const destroySession = (req, res) => {
 
 Sessions.appendCSRFToken = async (req, res, next) => {
 	const { domain, maxAge } = config.cookie;
-	res.cookie(CSRF_COOKIE, generateUUIDString(), { httpOnly: false, secure: true, sameSite: 'Strict', maxAge, domain });
+	const token = generateUUIDString();
+	res.cookie(CSRF_COOKIE, token, { httpOnly: false, secure: true, sameSite: 'Strict', maxAge, domain });
+	req.token = token;
 	await next();
 };
 

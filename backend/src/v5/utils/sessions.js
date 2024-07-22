@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { CSRF_COOKIE, CSRF_HEADER } = require('./sessions.constants');
+const { CSRF_HEADER } = require('./sessions.constants');
 const { v4Path } = require('../../interop');
 // FIXME: can remove the disable once we migrated config
 // eslint-disable-next-line
@@ -35,7 +35,7 @@ const validateCookie = (session, cookies, headers) => {
 
 	const headerToken = headers[CSRF_HEADER] || headers[CSRF_HEADER.toLowerCase()];
 
-	const csrfMatched = !!cookies[CSRF_COOKIE] && (headerToken === cookies[CSRF_COOKIE]);
+	const csrfMatched = !!session.token && (headerToken === session.token);
 
 	return csrfMatched && referrerMatched;
 };
