@@ -39,6 +39,7 @@ import { DrawingRevisionDetails } from '@components/shared/drawingRevisionDetail
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { enableRealtimeDrawingRemoved, enableRealtimeDrawingUpdate } from '@/v5/services/realtime/drawings.events';
+import { enableRealtimeDrawingRevisionUpdate, enableRealtimeNewDrawingRevisionUpdate } from '@/v5/services/realtime/drawingRevision.events';
 
 interface IDrawingsListItem {
 	isSelected: boolean;
@@ -68,6 +69,8 @@ export const DrawingsListItem = memo(({
 			return combineSubscriptions(
 				enableRealtimeDrawingRemoved(teamspace, project, drawing._id),
 				enableRealtimeDrawingUpdate(teamspace, project, drawing._id),
+				enableRealtimeDrawingRevisionUpdate(teamspace, project, drawing._id),
+				enableRealtimeNewDrawingRevisionUpdate(teamspace, project, drawing._id),
 			);
 		}
 		return null;
