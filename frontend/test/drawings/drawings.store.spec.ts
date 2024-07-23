@@ -63,7 +63,7 @@ describe('Drawings: store', () => {
 			const favouriteDrawings = selectFavouriteDrawings(getState());
 			const drawingIsIncluded = listContainsElementWithId(favouriteDrawings, newDrawing);
 
-			expect(drawingIsIncluded).not.toBeTruthy();
+			expect(drawingIsIncluded).toBeFalsy();
 		});
 
 		it('should update drawing stats', () => {
