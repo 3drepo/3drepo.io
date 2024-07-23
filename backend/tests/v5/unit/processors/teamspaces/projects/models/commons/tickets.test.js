@@ -1201,6 +1201,7 @@ const testGetOpenTicketsCount = () => {
 
 		test('should return 0 if getAllTickets returns no tickets', async () => {
 			TicketsModel.getAllTickets.mockResolvedValueOnce([]);
+			TemplatesModel.getAllTemplates.mockResolvedValueOnce([]);
 
 			await expect(Tickets.getOpenTicketsCount(teamspace, project, model))
 				.resolves.toEqual(0);
@@ -1208,7 +1209,8 @@ const testGetOpenTicketsCount = () => {
 			expect(TicketsModel.getAllTickets).toHaveBeenCalledTimes(1);
 			expect(TicketsModel.getAllTickets).toHaveBeenCalledWith(teamspace, project, model,
 				{ projection: { type: 1, [`properties.${basePropertyLabels.STATUS}`]: 1 } });
-			expect(TemplatesModel.getTemplateById).not.toHaveBeenCalled();
+			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledTimes(1);
+			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledWith(teamspace, true, { _id: 1, config: 1 });
 		});
 
 		test('should return the number of open tickets with no custom status', async () => {
@@ -1220,18 +1222,18 @@ const testGetOpenTicketsCount = () => {
 			});
 
 			TicketsModel.getAllTickets.mockResolvedValueOnce(tickets);
-			TemplatesModel.getTemplateById.mockResolvedValueOnce(template);
+			TemplatesModel.getAllTemplates.mockResolvedValueOnce([template]);
 
 			await expect(Tickets.getOpenTicketsCount(teamspace, project, model)).resolves.toEqual(3);
 
 			expect(TicketsModel.getAllTickets).toHaveBeenCalledTimes(1);
 			expect(TicketsModel.getAllTickets).toHaveBeenCalledWith(teamspace, project, model,
 				{ projection: { type: 1, [`properties.${basePropertyLabels.STATUS}`]: 1 } });
-			expect(TemplatesModel.getTemplateById).toHaveBeenCalledTimes(1);
-			expect(TemplatesModel.getTemplateById).toHaveBeenCalledWith(teamspace, template._id, { config: 1 });
+			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledTimes(1);
+			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledWith(teamspace, true, { _id: 1, config: 1 });
 		});
 
-		test('should return the number of open tickets with no custom status', async () => {
+		test('should return the number of open tickets with custom status', async () => {
 			const customStatuses = [
 				{ name: generateRandomString(), type: statusTypes.OPEN },
 				{ name: generateRandomString(), type: statusTypes.ACTIVE },
@@ -1253,15 +1255,15 @@ const testGetOpenTicketsCount = () => {
 			});
 
 			TicketsModel.getAllTickets.mockResolvedValueOnce(tickets);
-			TemplatesModel.getTemplateById.mockResolvedValueOnce(template);
+			TemplatesModel.getAllTemplates.mockResolvedValueOnce([template]);
 
 			await expect(Tickets.getOpenTicketsCount(teamspace, project, model)).resolves.toEqual(2);
 
 			expect(TicketsModel.getAllTickets).toHaveBeenCalledTimes(1);
 			expect(TicketsModel.getAllTickets).toHaveBeenCalledWith(teamspace, project, model,
 				{ projection: { type: 1, [`properties.${basePropertyLabels.STATUS}`]: 1 } });
-			expect(TemplatesModel.getTemplateById).toHaveBeenCalledTimes(1);
-			expect(TemplatesModel.getTemplateById).toHaveBeenCalledWith(teamspace, template._id, { config: 1 });
+			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledTimes(1);
+			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledWith(teamspace, true, { _id: 1, config: 1 });
 		});
 	});
 };
