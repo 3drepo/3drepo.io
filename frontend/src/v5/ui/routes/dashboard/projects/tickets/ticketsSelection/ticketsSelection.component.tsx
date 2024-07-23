@@ -39,7 +39,7 @@ export const TicketsSelection = () => {
 
 	const formData = useForm<FormType>({
 		defaultValues: {
-			containersAndFederations: models || [],
+			containersAndFederations: models,
 			template: '',
 		},
 	});

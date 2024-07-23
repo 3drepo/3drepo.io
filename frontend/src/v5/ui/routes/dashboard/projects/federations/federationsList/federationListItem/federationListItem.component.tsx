@@ -82,7 +82,7 @@ export const FederationListItem = memo(({
 						onClick={() => openTicketsPage()}
 						width={165}
 						tooltipTitle={
-							<FormattedMessage id="federations.list.item.risks.tooltip" defaultMessage="View tickets" />
+							<FormattedMessage id="federations.list.item.tickets.tooltip" defaultMessage="View tickets" />
 						}
 					>
 						<FormattedMessage
