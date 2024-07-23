@@ -48,8 +48,6 @@ const EMPTY_OPTION = prepareSingleDrawingData({
 	name: '',
 	role: Role.NONE,
 	isFavourite: false,
-	type: '',
-	number: '',
 });
 
 const NEW_ID = 'new';
