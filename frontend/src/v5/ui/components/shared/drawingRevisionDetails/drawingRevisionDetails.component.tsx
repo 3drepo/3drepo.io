@@ -45,6 +45,7 @@ import { RevisionsListItemText } from '../revisionDetails/components/revisionsLi
 import { RevisionsListItemAuthor } from '../revisionDetails/components/revisionsListItem/revisionsListItemAuthor/revisionsListItemAuthor.component';
 import { RevisionsListItemTag } from '../revisionDetails/components/revisionsListItem/revisionsListItem.styles';
 import { formatShortDateTime } from '@/v5/helpers/intl.helper';
+import { IDrawingRevision } from '@/v5/store/drawings/revisions/drawingRevisions.types';
 
 interface IDrawingRevisionDetails {
 	drawingId: string;
@@ -59,8 +60,11 @@ export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: ID
 		.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 	const selected = revisions.findIndex((r) => !r.void);
 
-	const handleDownloadRevision = (revisionId) => {
-		window.location.href = getRevisionFileUrl(teamspace, project, drawingId, revisionId);
+	const handleDownloadRevision = async (revision: IDrawingRevision) => {
+		const anchor = document.createElement('a');
+		anchor.href = await getRevisionFileUrl(teamspace, project, drawingId, revision._id);
+		anchor.download = `${revision.revCode}-${revision.statusCode}`;
+		anchor.click();
 	};
 
 	useEffect(() => {
@@ -124,7 +128,7 @@ export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: ID
 									DrawingRevisionsActionsDispatchers.setVoidStatus(teamspace, project, drawingId, revision._id, voidStatus)
 								)}
 								voidStatus={revision.void}
-								onDownloadRevision={() => handleDownloadRevision(revision._id)}
+								onDownloadRevision={() => handleDownloadRevision(revision)}
 								hasPermission={selectHasCollaboratorAccess(getState(), drawingId)}
 							>
 								<RevisionsListItemText width={140} tabletWidth={94}> {formatShortDateTime(revision.timestamp)} </RevisionsListItemText>
