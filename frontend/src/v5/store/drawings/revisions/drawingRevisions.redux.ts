@@ -20,7 +20,7 @@ import { Action } from 'redux';
 import { Constants } from '@/v5/helpers/actions.helper';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { TeamspaceProjectAndDrawingId, DrawingId, OnSuccess, TeamspaceAndProjectId } from '../../store.types';
-import { CreateDrawingRevisionBody, CreateDrawingRevisionPayload, IDrawingRevision, IRevisionUpdate, IDrawingRevisionUploadStatus, StatusCode } from './drawingRevisions.types';
+import { CreateDrawingRevisionBody, CreateDrawingRevisionPayload, IDrawingRevision, IDrawingRevisionUpdate, IDrawingRevisionUploadStatus, StatusCode } from './drawingRevisions.types';
 
 export const { Types: DrawingRevisionsTypes, Creators: DrawingRevisionsActions } = createActions({
 	setVoidStatus: ['teamspace', 'projectId', 'drawingId', 'revisionId', 'isVoid'],
@@ -129,7 +129,7 @@ export type SetIsPendingAction = Action<'SET_IS_PENDING'> & DrawingId & { isPend
 export type CreateRevisionAction = Action<'CREATE_REVISION'> & CreateDrawingRevisionPayload;
 export type SetUploadCompleteAction = Action<'SET_UPLOAD_COMPLETE'> & { uploadId: string, isComplete: boolean, errorMessage?: string };
 export type SetUploadProgressAction = Action<'SET_UPLOAD_PROGRESS'> & { uploadId: string, progress: number };
-export type UpdateRevisionSuccessAction = Action<'FETCH_REVISION_STATS_SUCCESS'> & DrawingId & { data: IRevisionUpdate };
+export type UpdateRevisionSuccessAction = Action<'FETCH_REVISION_STATS_SUCCESS'> & DrawingId & { data: IDrawingRevisionUpdate };
 export type RevisionProcessingSuccessAction = Action<'REVISION_PROCESSING_SUCCESS'> & DrawingId & { revision: IDrawingRevision };
 export type FetchStatusCodesAction = Action<'FETCH_STATUS_CODES'> & TeamspaceAndProjectId;
 export type FetchStatusCodesSuccessAction = Action<'FETCH_STATUS_CODES_SUCCESS'> & { statusCodes: StatusCode[] };
@@ -149,7 +149,7 @@ export interface IDrawingRevisionsActionCreators {
 	) => CreateRevisionAction;
 	setUploadComplete: (uploadId: string, isComplete: boolean, errorMessage?: string) => SetUploadCompleteAction;
 	setUploadProgress: (uploadId: string, progress: number) => SetUploadProgressAction;
-	updateRevisionSuccess: (drawingId: string, data: IRevisionUpdate) => UpdateRevisionSuccessAction;
+	updateRevisionSuccess: (drawingId: string, data: IDrawingRevisionUpdate) => UpdateRevisionSuccessAction;
 	revisionProcessingSuccess: (drawingId: string, revision: IDrawingRevision) => RevisionProcessingSuccessAction;
 	fetchStatusCodes: (teamspace: string, projectId: string) => FetchStatusCodesAction;
 	fetchStatusCodesSuccess: (statusCodes: StatusCode[]) => FetchStatusCodesSuccessAction;
