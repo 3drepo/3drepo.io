@@ -29,17 +29,24 @@ export type Size = {
 	height: number;
 };
 
+export type Position = {
+	x: number;
+	y: number;
+};
+
 export type ZoomableImage = {
 	setTransform: (transform: Transform) => void;
 	getEventsEmitter: () => HTMLElement;
 	getBoundingClientRect: () => DOMRect;
 	getNaturalSize: () => Size;
 	setSize: (size: Size) => void;
+	copyRegion: (ctx: CanvasRenderingContext2D, sx: number, sy: number, w: number, h: number) => void;
+	getImagePosition: (contentPosition: Position) => Position;
 };
 
-export type DrawingViewerImageProps = { 
-	onLoad?: (...args) => void, 
-	src: string 
+export type DrawingViewerImageProps = {
+	onLoad?: (...args) => void,
+	src: string
 };
 export const DrawingViewerImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ onLoad, src }, ref ) => {
 	const [isLoading, setIsLoading] = useState(true);
@@ -66,7 +73,7 @@ export const DrawingViewerImage = forwardRef<ZoomableImage, DrawingViewerImagePr
 		getBoundingClientRect: () => {
 			return imgRef.current.getBoundingClientRect();
 		},
-		
+
 		getNaturalSize: () =>  {
 			const img = imgRef.current;
 			return { width: img.naturalWidth, height: img.naturalHeight };
@@ -82,7 +89,7 @@ export const DrawingViewerImage = forwardRef<ZoomableImage, DrawingViewerImagePr
 	return (
 		<>
 			{
-				isLoading && 
+				isLoading &&
 				<CentredContainer>
 					<Loader />
 				</CentredContainer>

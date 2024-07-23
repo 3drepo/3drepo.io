@@ -34,6 +34,7 @@ import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
 import { SVGImage } from './svgImage/svgImage.component';
 import { SVGSnap } from './snapping/svg/svgSnap';
+import { CanvasSnap } from './snapping/canvas/canvasSnap';
 
 export const Viewer2D = () => {
 	const [drawingId] = useSearchParam('drawingId');
@@ -76,13 +77,36 @@ export const Viewer2D = () => {
 		const snapHandler = new SVGSnap();
 		snapHandler.load(src);
 
+		snapHandler.showDebugCanvas(document.querySelector('#app'));
+
+
+		const getComputedStyleAsFloat = (element, style) => {
+			return parseFloat(window.getComputedStyle(element).getPropertyValue(style)) || 0;
+		};
+
+		const getElementContentOffset = (element) => {
+			return {
+				x: getComputedStyleAsFloat(element, 'margin-left-width') + getComputedStyleAsFloat(element, 'border-left-width'),
+				y: getComputedStyleAsFloat(element, 'margin-top-width') + getComputedStyleAsFloat(element, 'border-top-width'),
+			};
+		};
+
 		imgRef.current.getEventsEmitter().addEventListener('mousedown', (ev)=>{
-			// Convert here into svg coordinates
+
+			// Make the event coordinates relative to the Content rect of the
+			// event emitter regardless of any child transforms, borders and
+			// margins.
+
+			const currentTargetRect = ev.currentTarget.getBoundingClientRect();
+			const content = getElementContentOffset(ev.currentTarget);
+			const coord = {
+				x: ev.pageX - currentTargetRect.left - content.x,
+				y: ev.pageY - currentTargetRect.top - content.y - window.pageYOffset,
+			 };
 
 			// Then invoke the snap
-			snapHandler.snap(ev);
+			snapHandler.snap(coord, imgRef.current);
 		});
-
 	};
 
 	return (

@@ -24,6 +24,18 @@ type Vector2 = { x:number, y:number };
 
 export const pannableSVG = (container: HTMLElement, src: string) => {
 
+	// The pannableSVG tries to provide a smooth user experience by showing
+	// an image that is a combination of a (fast) DOM transform and (slow)
+	// repaint of a canvas.
+	//   transform is the users transform, from the top left of the viewport.
+	//   origin is the initial transform of the svg relative to the canvas.
+	//   D is the desired transform of the svg relative to the canvas.
+	//   projection is the current transform of the svg as painted relative to
+	//   the canvas.
+	// Most of the compuations are done in canvas space, though transform is
+	// treated specially such that it behaves as if the origin is in the
+	// top-left of the viewport.
+
 	let transform: Transform = { x: 0, y: 0, scale: 1 };
 	let origin: Transform;
 	let D : Transform;
@@ -185,20 +197,28 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 	};
 
 	/**
-	 * Update the Canvas transform to manifest the difference between Projection
-	 * and D, and apply it as a CSS style attribute. This method will also apply
-	 * the centering for the overdraw, which should not be part of D.
+	 * Gets the transform that manifests the difference between Projection and
+	 * D, as a Transform. This method returns the exact transform that should
+	 * be applied to the Canvas object given the current Projection, including
+	 * the overdraw.
 	 */
-	const updateCanvasTransform = () => {
-		let dt = difference(projection, D);
-
+	const getCanvasTransform = () => {
+		const dt = difference(projection, D);
 		const overdrawOffset = {
 			x: -(canvas.width - vw) * 0.5,
 			y: -(canvas.height - vh) * 0.5,
 			scale: 1,
 		};
-		dt = compose(dt, overdrawOffset);
+		return compose(dt, overdrawOffset);
+	};
 
+	/**
+	 * Update the Canvas transform to manifest the difference between Projection
+	 * and D, and apply it as a CSS style attribute. This method will also apply
+	 * the centering for the overdraw, which should not be part of D.
+	 */
+	const updateCanvasTransform = () => {
+		const dt = getCanvasTransform();
 		canvas.setAttribute('style', `transform: ${getCSStransform(dt)}; transform-origin: top left; user-select:none`);
 	};
 
@@ -262,8 +282,6 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		}
 		*/
 	};
-
-
 
 	const onAnimationFrame = async () => {
 
@@ -333,10 +351,11 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 			// of the origin projection (i.e. as if the image starts with an
 			// identity transform)
 
-			// Note that in this case we do not want to compose the transforms,
-			// because a proper composition will scale the local offset of the
-			// origin as well. Instead we append them in such a way that the
-			// transform-origin appears at the top left of the viewport.
+			// Additionally, we do not compose the transforms, because a proper
+			// composition will scale the local offset of the origin as well.
+			// Instead they are combined in a way that makes the transform-origin
+			// appear at the top left of the viewport to the caller, as they
+			// should not be aware of the overdraw.
 
 			// This is done by applying an additional offset based on scaling
 			// the 'whitespace' between the (overdrawn) canvas edge, and the
@@ -383,6 +402,37 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		get naturalHeight() : number {
 			return vh;
 		},
+
+		copyRegion(dctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number ) {
+			// Convert from the parent coordinates to canvas coordinates.
+			const t = invert(getCanvasTransform());
+			const sourceCoords = multiply(t, { x, y });
+
+			// Use drawImage to extract a region
+			dctx.drawImage(canvas,
+				sourceCoords.x,
+				sourceCoords.y,
+				w,
+				h,
+				0,
+				0,
+				w,
+				h,
+			);
+		},
+
+		// Given a coordinate relative to the content rect, get the coordinate
+		// relative to the viewbox of the svg. This is straightforward in
+		// principle, but internally most of the computations are done in canvas
+		// space, so we get the position in canvas space, then transform into
+		// SVG space through the inverse of D (which is SVG -> Canvas).
+
+		localToSvg(p: Vector2): Vector2 {
+			const contentToCanvas = invert(getCanvasTransform());
+			const canvasToSvg = invert(D);
+			const t = compose(contentToCanvas, canvasToSvg);
+			return multiply(t, p);
+		},
 	};
 };
 
@@ -405,8 +455,6 @@ export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ on
 
 	(ref as React.MutableRefObject<ZoomableImage>).current = {
 		setTransform: (t) => {
-			console.log('set transform' + JSON.stringify(t));
-
 			if (!pannableImage.current) return;
 			pannableImage.current.transform = t;
 		},
@@ -429,6 +477,18 @@ export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ on
 		},
 
 		setSize: ({ width, height }: Size ) => {},
+
+		// Draws a region of the image into the provided context, given sx & sy
+		// relative to the ZoomableImage's content rect.
+		copyRegion: (ctx: CanvasRenderingContext2D, sx: number, sy: number, w: number, h: number) => {
+			pannableImage.current.copyRegion(ctx, sx, sy, w, h);
+		},
+
+		// Given a coordinate in the content rect of the container, get the
+		// position in the local coordinate frame of the SVG viewbox.
+		getImagePosition(contentPosition: Vector2) {
+			return pannableImage.current.localToSvg(contentPosition);
+		},
 	};
 
 	const width = 1000;
