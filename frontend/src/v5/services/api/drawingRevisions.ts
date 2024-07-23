@@ -43,7 +43,7 @@ export const createRevision = async (
 
 export const getRevisionFileUrl = (teamspace: string, projectId: string, drawingId: string, revision: string) => (
 	generateV5ApiUrl(
-		`teamspaces/${teamspace}/projects/${projectId}/drawings/${drawingId}/revisions/${revision}/files`,
+		`teamspaces/${teamspace}/projects/${projectId}/drawings/${drawingId}/revisions/${revision}/files/original`,
 		clientConfigService.GET_API,
 	)
 );
