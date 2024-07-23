@@ -109,7 +109,6 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 		const author = yield select(selectUsername);
 		const newRevisions = [...revisions, {
 			_id: uuid(),
-			name: body.drawingName,
 			timestamp: new Date(),
 			desc: body.drawingDesc,
 			author,
