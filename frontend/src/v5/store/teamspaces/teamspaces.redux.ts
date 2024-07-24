@@ -120,5 +120,5 @@ export interface ITeamspacesActionCreators {
 	fetchQuota: (teamspace: string) => FetchQuotaAction;
 	fetchQuotaSuccess: (teamspace: string, quota: Quota) => FetchQuotaSuccessAction;
 	setUsedQuotaSeats: (teamspace: string, seats: number) => SetUsedQuotaSeatsAction;
-	fetchAddOnsSuccess: (teamspace: string, addOns: AddOn[]) => FetchQuotaSuccessAction;
+	fetchAddOnsSuccess: (teamspace: string, addOns: AddOn[]) => FetchAddOnsSuccessAction;
 }
