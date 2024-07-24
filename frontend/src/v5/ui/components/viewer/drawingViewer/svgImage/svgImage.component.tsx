@@ -17,7 +17,6 @@
 
 import { useRef, useEffect, forwardRef } from 'react';
 import { ZoomableImage, DrawingViewerImageProps } from '../drawingViewerImage/drawingViewerImage.component';
-import { TransformOutlined } from '@mui/icons-material';
 
 type Transform = { x:number, y:number, scale:number };
 type Vector2 = { x:number, y:number };
@@ -25,17 +24,32 @@ type Size = { width: number, height: number };
 
 export const pannableSVG = (container: HTMLElement, src: string) => {
 
-	// The pannableSVG tries to provide a smooth user experience by showing
-	// an image that is a combination of a (fast) DOM transform and (slow)
-	// repaint of a canvas.
-	//   transform is the users transform, from the top left of the viewport.
-	//   origin is the initial transform of the svg relative to the canvas.
-	//   D is the desired transform of the svg relative to the canvas.
-	//   projection is the current transform of the svg as painted relative to
-	//   the canvas.
-	// Most of the compuations are done in canvas space, though transform is
-	// treated specially such that it behaves as if the origin is in the
-	// top-left of the viewport.
+	// The pannableSVG attemps to provide quick feedback by drawing a larger
+	// region of the image than the user actually sees, and using the (fast)
+	// DOM transform to immediately respond to transform changes, while the
+	// (slow) repaint of the canvas takes place in the background.
+
+	// transform is the users transform. This is combined with origin to make
+	// the transform-origin appear at the top-left of the viewport.
+
+	// origin is the initial transform that places the top-left of the image
+	// at the top-left of the viewport, by adding a band of whitespace around
+	// the canvas.
+
+	// D is the desired transform of the svg relative to the canvas, when the
+	// canvas is centered in the viewport.
+
+	// projection is the current transform of the svg as painted, relative to
+	// the canvas. When this doesn't mach D exactly, the difference is applied
+	// to the canvas transform via the DOM, so they appear identical to the
+	// user.
+
+	// While origin, D and projection are defined in canvas space, it is easier
+	// to think of the canvas as a 'viewport' into the svg. When repainting, the
+	// whole canvas is used as the destination rect, and the inverse of D defines
+	// the source rect (see drawImage). For example, the origin offset appears
+	// to createImageBitmap as a negative source position, which is why the top
+	// left of the canvas appears blank after painting.
 
 	let transform: Transform = { x: 0, y: 0, scale: 1 };
 	let origin: Transform;
@@ -51,17 +65,11 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 	// larger canvas than is displayed in the containing element. This allows
 	// the user to pan without seeing missing parts of the image as they are
 	// already rendered offscreen.
-	// Larger overdraw allows the user to pan more without missing anything,
+	// Larger overdraw allows the user to pan farther without missing anything,
 	// but requires a larger canvas, and so more memory and more time to
 	// repaint.
 
 	const overdraw = 2;
-
-	// vw & vh describe the viewport into the Canvas. These should be the same
-	// dimensions as the container element.
-
-	let vw: number;
-	let vh: number;
 
 	// The canvas will show the drawing. The canvas can move inside its parent
 	// element to enable fast panning and zooming, but afterwards a re-paint
@@ -100,41 +108,21 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 	container.appendChild(canvas);
 
 	/**
-	 * Given an image, work out what the initial transform (projection) should be
-	 * such that the image sits in the center of the overdrawn canvas and takes up
-	 * the entire container element, while maintaining its aspect ratio.
+	 * Work out the origin transform that ensures that when the svg is painted
+	 * it appears at the top-left of the viewport.
 	 */
-	const calculateProjection = (i: HTMLImageElement, view: Size, cnvs: Size ) : Transform => {
-		// The natural size is in the units of the projection transform
-		const w = i.naturalWidth;
-		const h = i.naturalHeight;
+	const calculateProjection = (view: Size, cnvs: Size ) : Transform => {
+		// The image starts at its native scale
+		const scale = 1;
 
-		// The scale in either axis needed to fill the viewport
-		const sx = w / view.width;
-		const sy = h / view.height;
+		// The overdrawn canvas is always centered on the viewport,
+		// so subtract the viewport from the canvas size to get the
+		// whitespace offset of the initial projection
+		const x = (cnvs.width - view.width) * 0.5;
+		const y = (cnvs.height - view.height) * 0.5;
 
-		let scale = Math.max(sx, sy);
-
-		// Scale should go down with multiplication, to match matrix conventions
-		scale = 1 / scale;
-
-		// Apply this scale to the image
-		let proj: Transform = { x: 0, y: 0, scale };
-
-		// Finally get the offsets.
-		// sw & sh are the size of the scaled image. dx & dy are the sizes of
-		// the total 'whitespace' after the image is scaled during projection,
-		// and are used to center it. Note here that we use the actual canvas
-		// size, whereas when working out the scale we used the viewport size.
-
-		const sw = w * scale;
-		const sh = h * scale;
-
-		const dx = cnvs.width - sw;
-		const dy = cnvs.height - sh;
-
-		proj.x = dx * 0.5;
-		proj.y = dy * 0.5;
+		// Create a new projection transform with unit scale
+		let proj: Transform = { x, y, scale };
 
 		return proj;
 	};
@@ -229,10 +217,9 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 	 */
 	const getCanvasTransform = () => {
 		const dt = difference(projection, D);
-		const ns = getViewSize();
 		const overdrawOffset = {
-			x: -(canvas.width - ns.width) * 0.5,
-			y: -(canvas.height - ns.height) * 0.5,
+			x: -origin.x,
+			y: -origin.y,
 			scale: 1,
 		};
 		return compose(dt, overdrawOffset);
@@ -343,7 +330,7 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		const canvasSize = getCanvasSize();
 
 		// Compute a new origin for the user transforms to be applied on top of
-		const intialProjection = calculateProjection(img, viewSize, canvasSize);
+		const intialProjection = calculateProjection(viewSize, canvasSize);
 
 		// Create the canvas and context
 		const newCanvas = document.createElement('canvas');
@@ -365,8 +352,6 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 			origin = intialProjection;
 			projection = intialProjection;
 			D = intialProjection;
-			vw = viewSize.width;
-			vh = viewSize.height;
 
 			// Replace the canvas for the component and DOM
 			if (canvas) {
@@ -421,61 +406,17 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		transform.y = t.y;
 		transform.scale = t.scale;
 
-		// In this version of the code, the user transform is applied on top
-		// of the origin projection (i.e. as if the image starts with an
-		// identity transform)
+		// The user transform should behave as if it's origin is the top left
+		// of the image when initially loaded.
 
-		// How the transforms are composed depends on the transform-origin.
-		// This determines the pivot at which the users scale transform is
-		// applied. The user can scale the image from the top left, or the
-		// center.
+		// As the origin always has a unit scale, this is a straightforward
+		// offset.
 
-		let transformorigin = 'top left';
-
-		// Additionally, we do not compose the transforms, because a proper
-		// composition will scale the local offset of the origin as well.
-		// Instead they are combined in a way that makes the transform-origin
-		// appear at the top left of the viewport to the caller, as they
-		// should not be aware of the overdraw.
-
-		// This is done by applying an additional offset based on scaling
-		// the 'whitespace' between the (overdrawn) canvas edge, and the
-		// location of the actual image.
-
-		const vs = getViewSize();
-
-		console.log(transform);
-
-		if (transformorigin == 'top left') {
-
-			// This case combines the user transform such that it appears as if
-			// it is applied to the top-left of the *viewport*.
-			// To do this, the method scales the whitespace/overdraw of the
-			// initial projection.
-
-			D = {
-				x: origin.x + transform.x - (origin.x - (canvas.width - vs.width) * 0.5) * (1 - transform.scale),
-				y: origin.y + transform.y - (origin.y - (canvas.height - vs.height) * 0.5) * (1 - transform.scale),
-				scale: origin.scale * transform.scale,
-			};
-		}
-
-		if (transformorigin == 'center') {
-
-			// This case combines the user transform such that it appears as if
-			// it is applied at the center of the viewport.
-			// To do this, the method offsets the canvas by the change in its own
-			// size due to the transform.
-
-			const x = -canvas.width * 0.5 * (transform.scale - 1) + transform.x;
-			const y = -canvas.height * 0.5 * (transform.scale - 1) + transform.y;
-
-			D = {
-				x: origin.x * transform.scale + x,
-				y: origin.y * transform.scale + y,
-				scale: origin.scale * transform.scale,
-			};
-		}
+		D = {
+			x: origin.x + transform.x,
+			y: origin.y + transform.y,
+			scale: transform.scale,
+		};
 
 		// To show the desired transform to the user, get the remaining
 		// difference between the current projection and it, and apply
@@ -506,10 +447,6 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		//createCanvas();
 	};
 
-	const vs = getViewSize();
-	vw = vs.width;
-	vh = vs.height;
-
 	const resizeObserver = new ResizeObserver(onResize);
 	resizeObserver.observe(container);
 
@@ -534,11 +471,11 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		// transform-origin at the top left.
 
 		get naturalWidth() : number {
-			return vw;
+			return img.naturalWidth;
 		},
 
 		get naturalHeight() : number {
-			return vh;
+			return img.naturalHeight;
 		},
 
 		copyRegion(dctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number ) {
@@ -629,5 +566,5 @@ export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ on
 		},
 	};
 
-	return (<div ref={containerRef as any} style={{ border:'3px solid #008bd180', height:'100%', overflow:'hidden' }} />);
+	return (<div ref={containerRef as any} style={{ height:'100%', overflow:'hidden' }} />);
 });
