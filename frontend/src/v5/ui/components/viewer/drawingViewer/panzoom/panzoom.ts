@@ -128,7 +128,6 @@ export const panzoom = (target: ZoomableImage, options) => {
 	const onMouseMove = (ev: MouseEvent) => {
 		speed.x = clamp(ev.movementX * 10, -maxSpeed, maxSpeed);
 		speed.y = clamp(ev.movementY * 10, -maxSpeed, maxSpeed);
-
 		moveTo(transform.x + ev.movementX, transform.y + ev.movementY);
 	};
 
