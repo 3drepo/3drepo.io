@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { forwardRef, useEffect, useRef, useState } from 'react';
-import { Loader } from '@/v4/routes/components/loader/loader.component';
-import { CentredContainer } from '@controls/centredContainer';
+import { forwardRef, useRef } from 'react';
 
 type Transform = {
 	x: number;
@@ -42,17 +40,7 @@ export type DrawingViewerImageProps = {
 	src: string 
 };
 export const DrawingViewerImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ onLoad, src }, ref ) => {
-	const [isLoading, setIsLoading] = useState(true);
 	const imgRef = useRef<HTMLImageElement>();
-
-	useEffect(() => {
-		setIsLoading(true);
-	}, [src]);
-
-	const onInternalLoad = (ev) => {
-		setIsLoading(false);
-		onLoad(ev);
-	};
 
 	(ref as any).current = {
 		setTransform: ({ scale, x, y }) => {
@@ -80,14 +68,6 @@ export const DrawingViewerImage = forwardRef<ZoomableImage, DrawingViewerImagePr
 	};
 
 	return (
-		<>
-			{
-				isLoading && 
-				<CentredContainer>
-					<Loader />
-				</CentredContainer>
-			}
-			<img src={src} onLoad={onInternalLoad} ref={imgRef} style={{ transformOrigin: '0 0', userSelect: 'none' }} draggable={false} />
-		</>
+		<img src={src} onLoad={onLoad} ref={imgRef} style={{ transformOrigin: '0 0', userSelect: 'none' }} draggable={false} />
 	);
 });

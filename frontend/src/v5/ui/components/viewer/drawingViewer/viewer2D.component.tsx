@@ -18,7 +18,7 @@
 import { formatMessage } from '@/v5/services/intl';
 import { ToolbarButton } from '@/v5/ui/routes/viewer/toolbar/buttons/toolbarButton.component';
 import { ToolbarContainer, MainToolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.styles';
-import { useContext, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import ZoomOutIcon from '@assets/icons/viewer/zoom_out.svg';
 import ZoomInIcon from '@assets/icons/viewer/zoom_in.svg';
 
@@ -33,6 +33,9 @@ import { DrawingViewerService } from './drawingViewer.service';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
 import { SVGImage } from './svgImage/svgImage.component';
+import { CentredContainer } from '@controls/centredContainer/centredContainer.component';
+import { Loader } from '@/v4/routes/components/loader/loader.component';
+import { isFirefox } from '@/v5/helpers/browser.helper';
 // import { SVGImage } from './svgImage/svgImage.component';
 
 export const Viewer2D = () => {
@@ -43,6 +46,8 @@ export const Viewer2D = () => {
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
+
 
 	const imgRef = useRef<ZoomableImage>();
 	const imgContainerRef = useRef();
@@ -56,6 +61,8 @@ export const Viewer2D = () => {
 	};
 
 	const onImageLoad = () => {
+		setIsLoading(false);
+
 		if (zoomHandler) {
 			zoomHandler.dispose();
 		}
@@ -72,12 +79,24 @@ export const Viewer2D = () => {
 		});
 	};
 
+	useEffect(() => {
+		setIsLoading(true);
+	}, [drawingId]);
+
+	const showSVGImage = !isFirefox() && src.toLowerCase().endsWith('.svg');
+
 	return (
 		<ViewerContainer visible>
 			<CloseButton variant="secondary" onClick={close2D} />
 			<ImageContainer ref={imgContainerRef}>
-				<SVGImage ref={imgRef} src={src} onLoad={onImageLoad} />
-				{/* <DrawingViewerImage ref={imgRef} src={src} onLoad={onImageLoad} /> */}
+				{
+					isLoading && 
+					<CentredContainer>
+						<Loader />
+					</CentredContainer>
+				}
+				{showSVGImage && <SVGImage ref={imgRef} src={src} onLoad={onImageLoad} />}
+				{!showSVGImage && <DrawingViewerImage ref={imgRef} src={src} onLoad={onImageLoad} />}
 			</ImageContainer>
 			<ToolbarContainer>
 				<MainToolbar>

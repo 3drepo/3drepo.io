@@ -375,16 +375,13 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 	let hasLoaded = false;
 
 	img.src = src;
-	img.onload = () => {
+	img.onload = (ev) => {
 
 		hasLoaded = true;
 
 		// Create a new canvas for the newly loaded image
 		createCanvas();
-
-		if (onLoad) {
-			onLoad();
-		}
+		onLoad?.(ev);
 	};
 
 	const addEventListener = (method : string, callback) => {
