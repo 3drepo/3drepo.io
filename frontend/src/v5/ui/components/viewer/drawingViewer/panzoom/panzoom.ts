@@ -18,8 +18,8 @@
 import { animate } from './animate';
 import EventEmitter from 'eventemitter3';
 import BezierEasing from 'bezier-easing';
-import { ZoomableImage } from '../drawingViewerImage/drawingViewerImage.component';
 import { clamp } from 'lodash';
+import { ZoomableImage } from '../zoomableImage.types';
 
 const inertiaFunction = BezierEasing(0, 0.33, 0.66, 1);
 const zoomEasing = BezierEasing(0, 1.02, 0.65, 1);

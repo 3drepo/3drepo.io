@@ -516,8 +516,6 @@ export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ on
 		getNaturalSize: () =>  {
 			return { width: pannableImage.current.naturalWidth, height: pannableImage.current.naturalHeight };
 		},
-
-		setSize: () => {},
 	};
 
 	return (<div ref={containerRef as any} style={{ height:'100%', overflow:'hidden' }} />);

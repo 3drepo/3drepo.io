@@ -26,7 +26,7 @@ import { PanZoomHandler, centredPanZoom } from './panzoom/centredPanZoom';
 import { ViewerContainer } from '@/v4/routes/viewer3D/viewer3D.styles';
 import { ImageContainer } from './viewer2D.styles';
 import { Events } from './panzoom/panzoom';
-import { DrawingViewerImage, ZoomableImage } from './drawingViewerImage/drawingViewerImage.component';
+import { DrawingViewerImage } from './drawingViewerImage/drawingViewerImage.component';
 import { CloseButton } from '@controls/button/closeButton/closeButton.component';
 import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 import { DrawingViewerService } from './drawingViewer.service';
@@ -36,6 +36,7 @@ import { SVGImage } from './svgImage/svgImage.component';
 import { CentredContainer } from '@controls/centredContainer/centredContainer.component';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { isFirefox } from '@/v5/helpers/browser.helper';
+import { ZoomableImage } from './zoomableImage.types';
 
 export const Viewer2D = () => {
 	const [drawingId] = useSearchParam('drawingId');

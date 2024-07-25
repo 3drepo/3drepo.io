@@ -17,8 +17,8 @@
 
 import { aspectRatio } from '@/v4/helpers/aspectRatio';
 import { Events, PanZoom, panzoom } from './panzoom';
-import { ZoomableImage } from '../drawingViewerImage/drawingViewerImage.component';
 import { clamp } from 'lodash';
+import { ZoomableImage } from '../zoomableImage.types';
 
 export type PanZoomHandler = PanZoom & { zoomIn : () => void, zoomOut: () => void };
 

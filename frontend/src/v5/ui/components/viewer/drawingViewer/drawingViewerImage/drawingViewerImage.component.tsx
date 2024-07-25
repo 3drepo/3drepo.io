@@ -15,30 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { forwardRef, useRef } from 'react';
-
-type Transform = {
-	x: number;
-	y: number;
-	scale: number;
-};
-
-export type Size = {
-	width: number;
-	height: number;
-};
-
-export type ZoomableImage = {
-	setTransform: (transform: Transform) => void;
-	getEventsEmitter: () => HTMLElement;
-	getBoundingClientRect: () => DOMRect;
-	getNaturalSize: () => Size;
-	setSize: (size: Size) => void;
-};
+import { ZoomableImage } from '../zoomableImage.types';
 
 export type DrawingViewerImageProps = { 
 	onLoad?: (...args) => void, 
 	src: string 
 };
+
 export const DrawingViewerImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ onLoad, src }, ref ) => {
 	const imgRef = useRef<HTMLImageElement>();
 
@@ -60,11 +43,6 @@ export const DrawingViewerImage = forwardRef<ZoomableImage, DrawingViewerImagePr
 			return { width: img.naturalWidth, height: img.naturalHeight };
 		},
 
-		setSize: ({ width, height }: Size ) => {
-			const img = imgRef.current;
-			img.setAttribute('width', width + 'px');
-			img.setAttribute('height', height + 'px');
-		},
 	};
 
 	return (
