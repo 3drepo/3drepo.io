@@ -24,7 +24,8 @@ import { PlaneType, Vector1D } from '../../calibration.types';
 import { TreeActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { isNull, some } from 'lodash';
 import { ModelHooksSelectors } from '@/v5/services/selectorsHooks';
-import { UNITS_CONVERSION_FACTORS_TO_METRES, addVectors, getTransformationMatrix, getXYPlane, subtractVectors, transformAndTranslate } from '../../calibration.helpers';
+import { UNITS_CONVERSION_FACTORS_TO_METRES, getTransformationMatrix, removeZ } from '../../calibration.helpers';
+import { Vector2 } from 'three';
 
 export const VerticalSpatialBoundariesHandler = () => {
 	const { verticalPlanes, setVerticalPlanes, vector3D, vector2D, isCalibratingPlanes, setIsCalibratingPlanes, drawingId,
@@ -38,9 +39,16 @@ export const VerticalSpatialBoundariesHandler = () => {
 	const imageHeight = i.naturalHeight;
 	const imageWidth = i.naturalWidth;
 	
-	const vector3DPlane = getXYPlane(vector3D);
-	const tMatrix = getTransformationMatrix(vector2D, vector3DPlane);
 	const modelUnit = ModelHooksSelectors.selectUnit();
+
+	const drawVecStart = new Vector2(...vector2D[0]);
+	const drawVecEnd = new Vector2(...vector2D[1]);
+	const modelVecStart = new Vector2(...removeZ(vector3D[0]));
+	const modelVecEnd = new Vector2(...removeZ(vector3D[1]));
+	const diff2D = new Vector2().subVectors(drawVecEnd, drawVecStart);
+	const diff3D = new Vector2().subVectors(modelVecEnd, modelVecStart);
+
+	const tMatrix = getTransformationMatrix(diff2D, diff3D);
 	
 	useEffect(() => {
 		if (isCalibratingPlanes && !some(verticalPlanes, isNull)) {
@@ -98,19 +106,16 @@ export const VerticalSpatialBoundariesHandler = () => {
 
 	useEffect(() => {
 		if (imageHeight && imageWidth) {
-			const [xmin, ymin] = subtractVectors([0, 0], vector2D[0]);
-			const [xmax, ymax] = addVectors([xmin, ymin], [imageWidth, imageHeight]);
-	
-			// transform corners of drawing. Adding offset of model vector
-			const bottomRight = transformAndTranslate([xmax, ymax], tMatrix, vector3DPlane[0]);
-			const topLeft = transformAndTranslate([xmin, ymin], tMatrix, vector3DPlane[0]);
-			const bottomLeft = transformAndTranslate([xmin, ymax], tMatrix, vector3DPlane[0]);
-	
-			const imageDimensions = [ ...bottomLeft, ...bottomRight, ...topLeft];
-			Viewer.setCalibrationToolDrawing(i, imageDimensions);
-			return () => Viewer.setCalibrationToolDrawing(null, imageDimensions);
+			const topLeft = drawVecStart.clone().negate(); // This applies the drawing vector offset
+			const bottomRight = new Vector2(imageWidth, imageHeight).add(topLeft); // coord origin for drawing is at the top left
+			const bottomLeft = new Vector2(topLeft.x, bottomRight.y);
+			// transform points with transformation matrix, and then apply the model vector's offset
+			[bottomLeft, bottomRight, topLeft].map((corner) => corner.applyMatrix3(tMatrix).add(modelVecStart));
+
+			Viewer.setCalibrationToolDrawing(i, [...bottomLeft, ...bottomRight, ...topLeft]);
+			return () => Viewer.setCalibrationToolDrawing(null, [...bottomLeft, ...bottomRight, ...topLeft]);
 		}
-	}, [imageHeight, imageWidth, tMatrix]);
+	}, [imageHeight, imageWidth, tMatrix, drawVecStart]);
 
 	useEffect(() => {
 		if (selectedPlane === PlaneType.LOWER && verticalPlanes[0]) {
