@@ -27,6 +27,8 @@ import { ModelHooksSelectors } from '@/v5/services/selectorsHooks';
 import { UNITS_CONVERSION_FACTORS_TO_METRES, getTransformationMatrix, removeZ } from '../../calibration.helpers';
 import { Vector2 } from 'three';
 
+const DEFAULT_RANGE = 2.5; // metres
+
 export const VerticalSpatialBoundariesHandler = () => {
 	const { verticalPlanes, setVerticalPlanes, vector3D, vector2D, isCalibratingPlanes, setIsCalibratingPlanes, drawingId,
 		setSelectedPlane, selectedPlane, isAlignPlaneActive, setIsAlignPlaneActive } = useContext(CalibrationContext);
@@ -68,12 +70,12 @@ export const VerticalSpatialBoundariesHandler = () => {
 	useEffect(() => {
 		if (isAlignPlaneActive) {
 			const onPickPoint = ({ position }) => {
-				const initialRange = UNITS_CONVERSION_FACTORS_TO_METRES[modelUnit] * 2.5;
+				const defaultRangeInUnits = UNITS_CONVERSION_FACTORS_TO_METRES[modelUnit] * DEFAULT_RANGE;
 				const zCoord = position[1];
 				if (selectedPlane === PlaneType.LOWER) {
 					if (verticalPlanes[1] && zCoord > verticalPlanes[1]) return;
 					if (isNull(verticalPlanes[1])) {
-						setVerticalPlanes([ zCoord, zCoord + initialRange ]);
+						setVerticalPlanes([ zCoord, zCoord + defaultRangeInUnits ]);
 						setSelectedPlane(PlaneType.UPPER);
 						return;
 					}
@@ -81,7 +83,7 @@ export const VerticalSpatialBoundariesHandler = () => {
 				if (selectedPlane === PlaneType.UPPER) {
 					if (verticalPlanes[0] && zCoord < verticalPlanes[0]) return;
 					if (isNull(verticalPlanes[0])) {
-						setVerticalPlanes([ zCoord - initialRange, zCoord ]);
+						setVerticalPlanes([ zCoord - defaultRangeInUnits, zCoord ]);
 						setSelectedPlane(PlaneType.LOWER);
 						return;
 					}
