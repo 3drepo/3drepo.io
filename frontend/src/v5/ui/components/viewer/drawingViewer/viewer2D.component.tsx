@@ -36,7 +36,6 @@ import { SVGImage } from './svgImage/svgImage.component';
 import { CentredContainer } from '@controls/centredContainer/centredContainer.component';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { isFirefox } from '@/v5/helpers/browser.helper';
-// import { SVGImage } from './svgImage/svgImage.component';
 
 export const Viewer2D = () => {
 	const [drawingId] = useSearchParam('drawingId');

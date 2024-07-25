@@ -171,37 +171,6 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		};
 	};
 
-	// Do some checks, these should be put in unit tests going forward...
-	// --
-
-	let a: Transform = { x: 1, y: 1, scale: 2 };
-	let b: Transform = { x: 5, y: 5, scale: 3 };
-	const v1: Vector2 = { x: 1, y: 1 };
-
-	const A = compose(invert(a), a);
-	const B = compose(a, invert(a));
-
-	// both A & B should be identity, because a transform composed with its inverse is identity
-
-	const c1 = multiply(a, v1);
-	const c2 = multiply(b, c1);
-	const c3 = multiply(compose(a, b), v1);
-
-	// c2 should equal c3, because v1 multiplied by a, then b, should be the same as it multiplied by the composition of a and b
-
-	const c4 = multiply(invert(b), c3);
-
-	// and c4 should equal c1, because c3 is a composition of a and b, so removing b should return it to v1 multiplied by a
-
-	const c5 = multiply(b, v1);
-	const c6 = difference(a, b);
-	const c7 = multiply(compose(a, c6), v1);
-
-	// c7 should equal c5, because difference gets the transform between a and b, so multipling c1 with the composition of a and this, is the same
-	// as multiplying it with b.
-
-	// --
-
 	/**
 	* Gets a transform in a form that can be applied as a style attribute
 	*/
@@ -548,19 +517,7 @@ export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ on
 			return { width: pannableImage.current.naturalWidth, height: pannableImage.current.naturalHeight };
 		},
 
-		setSize: ({ width, height }: Size ) => {},
-
-		// Draws a region of the image into the provided context, given sx & sy
-		// relative to the ZoomableImage's content rect.
-		copyRegion: (ctx: CanvasRenderingContext2D, sx: number, sy: number, w: number, h: number) => {
-			pannableImage.current.copyRegion(ctx, sx, sy, w, h);
-		},
-
-		// Given a coordinate in the content rect of the container, get the
-		// position in the local coordinate frame of the SVG viewbox.
-		getImagePosition(contentPosition: Vector2) {
-			return pannableImage.current.localToSvg(contentPosition);
-		},
+		setSize: () => {},
 	};
 
 	return (<div ref={containerRef as any} style={{ height:'100%', overflow:'hidden' }} />);
