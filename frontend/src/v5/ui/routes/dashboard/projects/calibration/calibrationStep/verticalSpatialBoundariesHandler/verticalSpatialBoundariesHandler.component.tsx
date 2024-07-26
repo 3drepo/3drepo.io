@@ -25,6 +25,7 @@ import { TreeActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/servic
 import { getTransformationMatrix, removeZ } from '../../calibration.helpers';
 import { Vector2 } from 'three';
 import { isNull } from 'lodash';
+import { COLOR, hexToOpacity } from '@/v5/ui/themes/theme';
 
 export const VerticalSpatialBoundariesHandler = () => {
 	const { verticalPlanes, setVerticalPlanes, vector3D, vector2D, isCalibratingPlanes, setIsCalibratingPlanes, drawingId,
@@ -84,6 +85,9 @@ export const VerticalSpatialBoundariesHandler = () => {
 			[bottomLeft, bottomRight, topLeft].map((corner) => corner.applyMatrix3(tMatrix).add(modelVecStart));
 
 			Viewer.setCalibrationToolDrawing(i, [...bottomLeft, ...bottomRight, ...topLeft]);
+			Viewer.setCalibrationToolSelectedColors(hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 40), COLOR.PRIMARY_MAIN);
+			Viewer.setCalibrationToolUnselectedColors(hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 20), COLOR.PRIMARY_MAIN_CONTRAST);
+			Viewer.SetCalibrationToolOcclusionOpacity(0.5);
 			return () => Viewer.setCalibrationToolDrawing(null, [...bottomLeft, ...bottomRight, ...topLeft]);
 		}
 	}, [imageHeight, imageWidth, tMatrix, JSON.stringify(drawVecStart)]);
