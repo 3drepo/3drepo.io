@@ -17,6 +17,8 @@
 
 import 'path-data-polyfill';
 import { ZoomableImage } from '../../drawingViewerImage/drawingViewerImage.component';
+import { Vector2, Line, Size } from './types';
+import { QuadTree, QuadTreeBuilder } from './quadTree';
 
 export class SVGSnapDiagnosticsHelper {
 
@@ -33,11 +35,11 @@ export class SVGSnapDiagnosticsHelper {
 	constructor(parent: Element) {
 		this.container = document.createElement('div');
 		parent.appendChild(this.container);
-		this.container.setAttribute('style', 'position: absolute; left: 0; top: 0; display: block; z-index: 1; width: 600px; height: 600px;');
+		this.container.setAttribute('style', 'position: absolute; left: 100px; top: 100px; display: block; z-index: 1; width: 600px; height: 600px; overflow: hidden');
 		this.canvas = document.createElement('canvas');
 		this.context = this.canvas.getContext('2d');
 		this.container.appendChild(this.canvas);
-		this.canvas.setAttribute('style', 'transform-origin: top left; transform: translateX(100px) translateY(100px) scale(0.6); ');
+		this.canvas.setAttribute('style', 'transform-origin: top left; transform: translateX(0px) translateY(0px) scale(0.6); ');
 	}
 
 	setSvg(svg: SVGSVGElement) {
@@ -76,55 +78,19 @@ export class SVGSnapDiagnosticsHelper {
 		this.context.arc(p.x, p.y, 1, 0, 2 * Math.PI);
 		this.context.fill();
 	}
-}
 
-class Vector2 {
-
-	x: number;
-
-	y: number;
-
-	constructor(x: number, y: number) {
-		this.x = x;
-		this.y = y;
+	renderRadius(p: Vector2, r: number) {
+		this.context.strokeStyle = 'white';
+		this.context.beginPath();
+		this.context.arc(p.x, p.y, r, 0, 2 * Math.PI);
+		this.context.stroke();
 	}
 
-	get norm() {
-		return Math.sqrt((this.x * this.x) + (this.y * this.y));
-	}
-
-	get inverse() {
-		return new Vector2(-this.x, -this.y);
-	}
-
-	add(b: Vector2) {
-		this.x += b.x;
-		this.y += b.y;
-	}
-
-	static subtract(a: Vector2, b: Vector2): Vector2 {
-		return new Vector2(b.x - a.x, b.y - a.y);
-	}
-
-	static norm(a: Vector2, b: Vector2): number {
-		const d = Vector2.subtract(a, b);
-		return d.norm;
-	}
-}
-
-class Line {
-
-	start: Vector2;
-
-	end: Vector2;
-
-	constructor(start: Vector2, end: Vector2) {
-		this.start = start;
-		this.end = end;
-	}
-
-	get length() {
-		return Vector2.norm(this.start, this.end);
+	renderLine(start: Vector2, end: Vector2) {
+		this.context.beginPath();
+		this.context.moveTo(start.x, start.y);
+		this.context.lineTo(end.x, end.y);
+		this.context.stroke();
 	}
 }
 
@@ -200,11 +166,15 @@ export class SVGSnap {
 
 	svg: SVGSVGElement;
 
+	quadtree: QuadTree;
+
 	debugHelper: SVGSnapDiagnosticsHelper;
+
+	snapRadius: number; // In content rect pixels
 
 	constructor() {
 		this.container = document.createElement('div');
-		console.log('creating snap handler');
+		this.snapRadius = 10;
 	}
 
 	async load(src: string) {
@@ -222,6 +192,7 @@ export class SVGSnap {
 		this.svg = this.container.querySelector('svg') as SVGSVGElement;
 
 		const viewBoxOffset = new Vector2(this.svg.viewBox.baseVal.x, this.svg.viewBox.baseVal.y);
+		const viewBoxSize = new Size(this.svg.viewBox.baseVal.width, this.svg.viewBox.baseVal.height);
 
 		if (viewBoxOffset.norm != 0) {
 			console.error('SVG has a non-zero viewBox offset. SVGSnap will attempt to counteract the offset to match createImageBitamp, but this is not supported and the behaviour is not guaranteed.');
@@ -265,15 +236,45 @@ export class SVGSnap {
 
 		// debug draw all the lines
 
-		console.log(collector.lines.length);
-
 		this.debugHelper.renderPrimitives(collector);
 
+		// create quadtree
+		const builder = new QuadTreeBuilder({
+			lines: collector.lines,
+			maxDepth: 14,
+			bounds: viewBoxSize,
+		});
+		this.quadtree = builder.build();
+
+		console.log(builder.report);
 	}
 
 	snap(coord: { x: number, y: number }, image: ZoomableImage) {
-		const p = image.getImagePosition(coord);
-		this.debugHelper.renderPoint(new Vector2(p.x, p.y));
+		let p = image.getImagePosition(coord);
+		p = new Vector2(p.x, p.y);
+
+		// Get the radius in SVG units by getting another point in image space,
+		// offset by the pixel radius, and taking the distance beteen them
+
+		let p1 = image.getImagePosition({
+			x: coord.x + this.snapRadius,
+			y: coord.y + this.snapRadius,
+		});
+		p1 = new Vector2(p1.x, p1.y);
+
+		const r = Vector2.subtract(p, p1).norm;
+
+		this.debugHelper.renderRadius(p, r);
+
+		const result = this.quadtree.doIntersectionTest(new Vector2(p.x, p.y), r);
+
+		console.log(result);
+
+		if (result.closestEdge != null) {
+			this.debugHelper.renderLine(p, result.closestEdge);
+		}
+
+		return result.closestEdge;
 	}
 }
 

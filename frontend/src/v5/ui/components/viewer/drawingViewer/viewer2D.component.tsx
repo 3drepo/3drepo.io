@@ -76,9 +76,12 @@ export const Viewer2D = () => {
 
 		const snapHandler = new SVGSnap();
 		snapHandler.load(src);
-
 		snapHandler.showDebugCanvas(document.querySelector('#app'));
 
+		// temporary cursor to show snap location
+		const cursor = document.createElement('div');
+		cursor.setAttribute('style', 'position: absolute; width: 20px; height: 20px; background-color: #bbb; border-radius: 50%; display: block; z-index: 1;');
+		imgRef.current.getEventsEmitter().appendChild(cursor);
 
 		const getComputedStyleAsFloat = (element, style) => {
 			return parseFloat(window.getComputedStyle(element).getPropertyValue(style)) || 0;
@@ -105,7 +108,14 @@ export const Viewer2D = () => {
 			 };
 
 			// Then invoke the snap
-			snapHandler.snap(coord, imgRef.current);
+			const r = snapHandler.snap(coord, imgRef.current);
+
+
+			if (r != null) {
+				const r2 = imgRef.current.getClientPosition(r);
+				cursor.style.setProperty('left', (r2.x - 10) + 'px', '');
+				cursor.style.setProperty('top', (r2.y - 10) + 'px', '');
+			}
 		});
 	};
 

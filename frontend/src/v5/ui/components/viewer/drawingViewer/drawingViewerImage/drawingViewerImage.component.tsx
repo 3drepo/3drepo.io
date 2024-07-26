@@ -41,7 +41,8 @@ export type ZoomableImage = {
 	getNaturalSize: () => Size;
 	setSize: (size: Size) => void;
 	copyRegion: (ctx: CanvasRenderingContext2D, sx: number, sy: number, w: number, h: number) => void;
-	getImagePosition: (contentPosition: Position) => Position;
+	getImagePosition: (clientPosition: Position) => Position;
+	getClientPosition: (imagePosition: Position) => Position;
 };
 
 export type DrawingViewerImageProps = {
