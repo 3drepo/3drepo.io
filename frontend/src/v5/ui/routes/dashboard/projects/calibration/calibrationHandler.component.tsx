@@ -30,7 +30,7 @@ import { VerticalSpatialBoundariesHandler } from './calibrationStep/verticalSpat
 
 export const CalibrationHandler = () => {
 	const { teamspace, project, revision, containerOrFederation } = useParams();
-	const { setLeftPanelRatio, open2D } = useContext(ViewerCanvasesContext);
+	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
 	const { step, drawingId, setVector3D, setVector2D, setOrigin, setStep, setIsCalibrating3D, origin, setVerticalPlanes } = useContext(CalibrationContext);
 	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
 	const { horizontal, verticalRange } = DrawingsHooksSelectors.selectCalibration(drawingId, containerOrFederation);
@@ -72,10 +72,9 @@ export const CalibrationHandler = () => {
 	}, []);
 
 	useEffect(() => {
-		if (step < 2) {
-			open2D(drawingId);
-		} else {
+		if (step === 2) {
 			setLeftPanelRatio(1);
+			return () => setLeftPanelRatio(.5);
 		}
 	}, [step, drawingId]);
 
