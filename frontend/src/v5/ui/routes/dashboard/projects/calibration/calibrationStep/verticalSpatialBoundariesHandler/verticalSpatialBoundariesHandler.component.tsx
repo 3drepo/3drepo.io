@@ -20,14 +20,11 @@ import { Viewer } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
 import { CalibrationContext } from '../../calibrationContext';
-import { PlaneType, Vector1D } from '../../calibration.types';
+import { PlaneType } from '../../calibration.types';
 import { TreeActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { isNull, some } from 'lodash';
-import { ModelHooksSelectors } from '@/v5/services/selectorsHooks';
-import { UNITS_CONVERSION_FACTORS_TO_METRES, getTransformationMatrix, removeZ } from '../../calibration.helpers';
+import { getTransformationMatrix, removeZ } from '../../calibration.helpers';
 import { Vector2 } from 'three';
-
-const DEFAULT_RANGE = 2.5; // metres
+import { isNull } from 'lodash';
 
 export const VerticalSpatialBoundariesHandler = () => {
 	const { verticalPlanes, setVerticalPlanes, vector3D, vector2D, isCalibratingPlanes, setIsCalibratingPlanes, drawingId,
@@ -41,8 +38,6 @@ export const VerticalSpatialBoundariesHandler = () => {
 	const imageHeight = i.naturalHeight;
 	const imageWidth = i.naturalWidth;
 	
-	const modelUnit = ModelHooksSelectors.selectUnit();
-
 	const drawVecStart = new Vector2(...vector2D[0]);
 	const drawVecEnd = new Vector2(...vector2D[1]);
 	const modelVecStart = new Vector2(...removeZ(vector3D[0]));
@@ -53,8 +48,8 @@ export const VerticalSpatialBoundariesHandler = () => {
 	const tMatrix = getTransformationMatrix(diff2D, diff3D);
 	
 	useEffect(() => {
-		if (isCalibratingPlanes && !some(verticalPlanes, isNull)) {
-			Viewer.setCalibrationToolMode(isCalibratingPlanes ? 'Vertical' : 'None');
+		if (isCalibratingPlanes) {
+			Viewer.setCalibrationToolMode('Vertical');
 			Viewer.on(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
 			return () => {
 				Viewer.setCalibrationToolMode('None');
@@ -64,44 +59,18 @@ export const VerticalSpatialBoundariesHandler = () => {
 	}, [isCalibratingPlanes, verticalPlanes]);
 
 	useEffect(() => {
-		Viewer.setCalibrationToolVerticalPlanes(verticalPlanes[0], verticalPlanes[1]);
-	}, [verticalPlanes]);
-
-	useEffect(() => {
 		if (isAlignPlaneActive) {
-			const onPickPoint = ({ position }) => {
-				const defaultRangeInUnits = UNITS_CONVERSION_FACTORS_TO_METRES[modelUnit] * DEFAULT_RANGE;
-				const zCoord = position[1];
-				if (selectedPlane === PlaneType.LOWER) {
-					if (verticalPlanes[1] && zCoord > verticalPlanes[1]) return;
-					if (isNull(verticalPlanes[1])) {
-						setVerticalPlanes([ zCoord, zCoord + defaultRangeInUnits ]);
-						setSelectedPlane(PlaneType.UPPER);
-						return;
-					}
-				}
-				if (selectedPlane === PlaneType.UPPER) {
-					if (verticalPlanes[0] && zCoord < verticalPlanes[0]) return;
-					if (isNull(verticalPlanes[0])) {
-						setVerticalPlanes([ zCoord - defaultRangeInUnits, zCoord ]);
-						setSelectedPlane(PlaneType.LOWER);
-						return;
-					}
-				}
-				const newValues = verticalPlanes.map((oldValue, idx) => {
-					if (selectedPlane === PlaneType.LOWER && idx === 0) return zCoord;
-					if (selectedPlane === PlaneType.UPPER && idx === 1) return zCoord;
-					return oldValue;
-				}) as Vector1D;
-				setVerticalPlanes(newValues);
+			const onPickPoint = (rest) => {
+				Viewer.setCalibrationToolFloorToObject(rest.account, rest.model, rest.id);
+				setSelectedPlane(PlaneType.UPPER);
+				setIsAlignPlaneActive(false);
 			};
 			TreeActionsDispatchers.stopListenOnSelections();
-			Viewer.enableEdgeSnapping();
-			Viewer.on(VIEWER_EVENTS.PICK_POINT, onPickPoint);
+			Viewer.on(VIEWER_EVENTS.OBJECT_SELECTED, onPickPoint);
 			return () => {
 				TreeActionsDispatchers.startListenOnSelections();
 				Viewer.disableEdgeSnapping();
-				Viewer.off(VIEWER_EVENTS.PICK_POINT, onPickPoint);
+				Viewer.off(VIEWER_EVENTS.OBJECT_SELECTED, onPickPoint);
 			};
 		}
 	}, [isAlignPlaneActive, selectedPlane, verticalPlanes]);
@@ -120,18 +89,20 @@ export const VerticalSpatialBoundariesHandler = () => {
 	}, [imageHeight, imageWidth, tMatrix, drawVecStart]);
 
 	useEffect(() => {
-		if (selectedPlane === PlaneType.LOWER && verticalPlanes[0]) {
+		if (selectedPlane === PlaneType.LOWER) {
 			Viewer.selectCalibrationToolLowerPlane();
-		} else if (selectedPlane === PlaneType.UPPER && verticalPlanes[1]) {
+		} else if (selectedPlane === PlaneType.UPPER) {
 			Viewer.selectCalibrationToolUpperPlane();
 		}
 	}, [selectedPlane]);
 
 	useEffect(() => {
-		setSelectedPlane(PlaneType.LOWER);
 		setIsCalibratingPlanes(true);
 		setIsAlignPlaneActive(true);
 		ViewerGuiActionsDispatchers.setClippingMode(null);
+
+		if (!verticalPlanes.some(isNull)) Viewer.setCalibrationToolVerticalPlanes(...verticalPlanes);
+
 		return () => setIsCalibratingPlanes(false);
 	}, []);
 

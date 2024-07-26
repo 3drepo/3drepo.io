@@ -1354,6 +1354,10 @@ export class ViewerService {
 	public calibrationPlanesChanged(planes) {
 		this.emit(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, planes);
 	}
+
+	public setCalibrationToolFloorToObject(teamspace, modelId, meshId) {
+		UnityUtil.setCalibrationToolFloorToObject(teamspace, modelId, meshId);
+	}
 }
 
 export const Viewer = new ViewerService({});
