@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useMemo } from 'react';
 import { Viewer } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
@@ -45,7 +45,7 @@ export const VerticalSpatialBoundariesHandler = () => {
 	const diff2D = new Vector2().subVectors(drawVecEnd, drawVecStart);
 	const diff3D = new Vector2().subVectors(modelVecEnd, modelVecStart);
 
-	const tMatrix = getTransformationMatrix(diff2D, diff3D);
+	const tMatrix = useMemo(() => getTransformationMatrix(diff2D, diff3D), [JSON.stringify({ diff2D, diff3D })]);
 	
 	useEffect(() => {
 		if (isCalibratingPlanes) {
@@ -56,7 +56,7 @@ export const VerticalSpatialBoundariesHandler = () => {
 				Viewer.off(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
 			};
 		}
-	}, [isCalibratingPlanes, verticalPlanes]);
+	}, [isCalibratingPlanes]);
 
 	useEffect(() => {
 		if (isAlignPlaneActive) {
@@ -73,7 +73,7 @@ export const VerticalSpatialBoundariesHandler = () => {
 				Viewer.off(VIEWER_EVENTS.OBJECT_SELECTED, onPickPoint);
 			};
 		}
-	}, [isAlignPlaneActive, selectedPlane, verticalPlanes]);
+	}, [isAlignPlaneActive]);
 
 	useEffect(() => {
 		if (imageHeight && imageWidth) {
@@ -86,7 +86,7 @@ export const VerticalSpatialBoundariesHandler = () => {
 			Viewer.setCalibrationToolDrawing(i, [...bottomLeft, ...bottomRight, ...topLeft]);
 			return () => Viewer.setCalibrationToolDrawing(null, [...bottomLeft, ...bottomRight, ...topLeft]);
 		}
-	}, [imageHeight, imageWidth, tMatrix, drawVecStart]);
+	}, [imageHeight, imageWidth, tMatrix, JSON.stringify(drawVecStart)]);
 
 	useEffect(() => {
 		if (selectedPlane === PlaneType.LOWER) {
