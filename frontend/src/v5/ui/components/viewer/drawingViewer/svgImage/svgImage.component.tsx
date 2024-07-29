@@ -16,7 +16,8 @@
  */
 
 import { useRef, useEffect, forwardRef } from 'react';
-import { ZoomableImage, DrawingViewerImageProps } from '../drawingViewerImage/drawingViewerImage.component';
+import { DrawingViewerImageProps } from '../drawingViewerImage/drawingViewerImage.component';
+import { ZoomableImage } from '../zoomableImage.types';
 
 type Transform = { x:number, y:number, scale:number };
 type Vector2 = { x:number, y:number };
