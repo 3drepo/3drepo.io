@@ -450,18 +450,6 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 	const resizeObserver = new ResizeObserver(onResize);
 	resizeObserver.observe(container);
 
-	// Get a transform that converts between a position in the content rect,
-	// and the SVG's native coordinate system. This is straightforward in
-	// principle, but internally most of the computations are done in canvas
-	// space, so we get the position in canvas space, then transform into
-	// SVG space through the inverse of D (which is SVG -> Canvas).
-
-	const getContentToSvgTransform = () => {
-		const contentToCanvas = invert(getCanvasTransform());
-		const canvasToSvg = invert(D);
-		return compose(contentToCanvas, canvasToSvg);
-	};
-
 	return {
 		set transform(t: Transform) {
 			setTransform(t);
@@ -509,17 +497,16 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		},
 
 		// Given a coordinate relative to the content rect, get the coordinate
-		// relative to the viewbox of the svg. This is straightforward in
-		// principle, but internally most of the computations are done in canvas
-		// space, so we get the position in canvas space, then transform into
-		// SVG space through the inverse of D (which is SVG -> Canvas).
+		// relative to the viewbox of the svg. Since most internal computations
+		// are done in canvas-space, here we make p relative to the canvas
+		// and then we can simply invert D (the SVG -> Canvas transform).
 
 		localToSvg(p: Vector2): Vector2 {
-			return multiply(getContentToSvgTransform(), p);
+			return multiply(compose(origin, invert(D)), p);
 		},
 
 		svgToLocal(p: Vector2): Vector2 {
-			return multiply(invert(getContentToSvgTransform()), p);
+			return multiply(compose(D, invert(origin)), p);
 		},
 	};
 };
