@@ -157,6 +157,23 @@ class PathCollector {
 	}
 }
 
+class PolyCollector {
+	collector: PrimitiveCollector;
+
+	constructor(collector: PrimitiveCollector) {
+		this.collector = collector;
+	}
+
+	addLine(start: DOMPoint, end: DOMPoint) {
+		this.collector.addLine(
+			new Line(
+				new Vector2(start.x, start.y),
+				new Vector2(end.x, end.y),
+			),
+		);
+	}
+}
+
 /**
  * Allows snapping to an SVG based on path primitives
  */
@@ -234,6 +251,16 @@ export class SVGSnap {
 			}
 		}
 
+		const polylines = this.svg.querySelectorAll<SVGPolylineElement>('polyline');
+		for (let i = 0; i < polylines.length; i++) {
+			const p = polylines[i];
+			const points = p.points;
+			const polyCollector = new PolyCollector(collector);
+			for (let j = 0; j < points.length - 1; j++) {
+				polyCollector.addLine(points[j], points[j + 1]);
+			}
+		}
+
 		// debug draw all the lines
 
 		this.debugHelper.renderPrimitives(collector);
@@ -241,7 +268,7 @@ export class SVGSnap {
 		// create quadtree
 		const builder = new QuadTreeBuilder({
 			lines: collector.lines,
-			maxDepth: 14,
+			maxDepth: 12,
 			bounds: viewBoxSize,
 		});
 		this.quadtree = builder.build();
