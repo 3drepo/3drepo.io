@@ -27,6 +27,7 @@ const { getIssuesCount } = require('../../../../models/issues');
 const { getLatestRevision } = require('../../../../models/revisions');
 const { getProjectById } = require('../../../../models/projectSettings');
 const { getRisksCount } = require('../../../../models/risks');
+const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { queueFederationUpdate } = require('../../../../services/modelProcessing');
 
 const Federations = { ...Groups, ...Views, ...Tickets, ...Comments, ...TicketGroups };
@@ -67,7 +68,7 @@ const getLastUpdatesFromModels = async (teamspace, models) => {
 	if (models) {
 		await Promise.all(models.map(async (m) => {
 			try {
-				lastUpdates.push(await getLatestRevision(teamspace, m, { timestamp: 1 }));
+				lastUpdates.push(await getLatestRevision(teamspace, m, modelTypes.FEDERATION, { timestamp: 1 }));
 			} catch {
 				// do nothing. A container can have 0 revision.
 			}

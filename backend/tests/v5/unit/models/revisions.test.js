@@ -23,39 +23,73 @@ const { events } = require(`${src}/services/eventsManager/eventsManager.constant
 const Revisions = require(`${src}/models/revisions`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { generateRandomString, generateRandomObject } = require('../../helper/services');
+const { generateRandomString, generateRandomObject, generateRandomNumber } = require('../../helper/services');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 
+const excludeVoids = { void: { $ne: true } };
+const excludeIncomplete = { incomplete: { $exists: false } };
+
 const testGetRevisionCount = () => {
 	describe('GetRevisionCount', () => {
-		test('should return the number of revision as per from the database query', async () => {
-			const expectedData = 10;
-			jest.spyOn(db, 'count').mockResolvedValue(expectedData);
+		const expectedData = generateRandomNumber();
+		const teamspace = generateRandomString();
+		const model = generateRandomString();
 
-			const res = await Revisions.getRevisionCount('someTS', 'someModel');
+		test('should return the number of revision as per from the database query', async () => {
+			const fn = jest.spyOn(db, 'count').mockResolvedValueOnce(expectedData);
+			const res = await Revisions.getRevisionCount(teamspace, model, modelTypes.CONTAINER);
+
 			expect(res).toEqual(expectedData);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, { ...excludeIncomplete, ...excludeVoids });
+		});
+
+		test('should return the number of revision as per from the database query (drawing)', async () => {
+			const fn = jest.spyOn(db, 'count').mockResolvedValueOnce(expectedData);
+			const res = await Revisions.getRevisionCount(teamspace, model, modelTypes.DRAWING);
+
+			expect(res).toEqual(expectedData);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`,
+				{ ...excludeIncomplete, ...excludeVoids, model });
 		});
 	});
 };
 
 const testGetLatestRevision = () => {
 	describe('GetLatestRevision', () => {
-		test('Should return the latest revision if there is one', async () => {
-			const expectedData = {
-				_id: 1,
-				tag: 'rev1',
-			};
-			jest.spyOn(db, 'findOne').mockResolvedValue(expectedData);
+		const expectedData = generateRandomObject();
+		const teamspace = generateRandomString();
+		const model = generateRandomString();
 
-			const res = await Revisions.getLatestRevision('someTS', 'someModel');
+		test('Should return the latest revision if there is one', async () => {
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(expectedData);
+			const res = await Revisions.getLatestRevision(teamspace, model, modelTypes.CONTAINER);
+
 			expect(res).toEqual(expectedData);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, { ...excludeIncomplete, ...excludeVoids }, {}, { timestamp: -1 });
+		});
+
+		test('Should return the latest revision if there is one (drawing)', async () => {
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(expectedData);
+			const res = await Revisions.getLatestRevision(teamspace, model, modelTypes.DRAWING);
+
+			expect(res).toEqual(expectedData);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`,
+				{ ...excludeIncomplete, ...excludeVoids, model }, {}, { timestamp: -1 });
 		});
 
 		test('Should throw REVISION_NOT_FOUND if there is no revision', async () => {
-			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
-			await expect(Revisions.getLatestRevision('someTS', 'someModel')).rejects.toEqual(templates.revisionNotFound);
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+			await expect(Revisions.getLatestRevision(teamspace, model, modelTypes.CONTAINER))
+				.rejects.toEqual(templates.revisionNotFound);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, { ...excludeIncomplete, ...excludeVoids }, {}, { timestamp: -1 });
 		});
 	});
 };
