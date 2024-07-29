@@ -16,6 +16,7 @@
  */
 
 import { Vector2, Line, Size } from './types';
+import { closestPointOnLine } from './lineFunctions';
 
 class QuadTreeNode {
 
@@ -79,75 +80,6 @@ export class IntersectionTestResults {
 	}
 }
 
-function clipLine(x0, y0, x1, y1, xmin, xmax, ymin, ymax, result: number[]) {
-	// Implements the Liang–Barsky algorithm.
-	// Uses for loop idea noted by Daniel White. https://www.skytopia.com/project/articles/compsci/clipping.html
-	// JsFiddle: https://jsfiddle.net/sebjf/yscuz7rj/107/
-
-	let t0 = 0;
-	let t1 = 1;
-	const dx = x1 - x0;
-	const dy = y1 - y0;
-	let p, q;
-
-	for (let edge = 0; edge < 4; edge++) {
-	  if (edge === 0) { p = -dx; q = -(xmin - x0); }
-	  if (edge === 1) { p =  dx; q =  (xmax - x0); }
-	  if (edge === 2) { p = -dy; q = -(ymin - y0); }
-	  if (edge === 3) { p =  dy; q =  (ymax - y0); }
-
-	  let r = q / p;
-
-	  if (p === 0 && q < 0) {
-		  return false;
-	  }
-
-	  if (p < 0) {
-			if (r > t1) {
-				return false;
-			} else if (r > t0) {
-				t0 = r;
-			}
-	  } else if (p > 0) {
-			if (r < t0) {
-				return false;
-			} else if (r < t1) {
-				t1 = r;
-			}
-	  }
-	}
-
-	if (result != null) {
-		result[0] = x0 + t0 * dx;
-		result[1] = y0 + t0 * dy;
-		result[2] = x0 + t1 * dx;
-		result[3] = y0 + t1 * dy;
-	}
-
-	return true;
-}
-
-
-function closestPointOnLine(x0, y0, x1, y1, x, y) {
-	const dx = x - x0;
-	const dy = y - y0;
-	const a = x1 - x0;
-	const b = y1 - y0;
-	const n = Math.sqrt((a * a) + (b * b));
-	const nx = a / n;
-	const ny = b / n;
-	let t = (dx * nx) + (dy * ny);
-
-	if (t < 0) {
-  	    t = 0;
-	}
-	if (t > n) {
-  	    t = n;
-	}
-
-	return new Vector2(x0 + t * nx, y0 + t * ny);
-}
-
 class TraversalContext {
 	position: Vector2;
 
@@ -170,10 +102,16 @@ export class QuadTree {
 	root: QuadTreeNode;
 
 	doIntersectionTest(p: Vector2, r: number): IntersectionTestResults {
+
+		const start = performance.now();
+
 		const ctx = new TraversalContext(p, r);
 		this.traverseNode(this.root, ctx);
 		const results = new IntersectionTestResults();
 		results.closestEdge = ctx.closestPoint;
+
+		console.log('Intersection test in: ' + (performance.now() - start));
+
 		return results;
 	}
 

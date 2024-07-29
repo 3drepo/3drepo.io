@@ -19,6 +19,7 @@ import 'path-data-polyfill';
 import { ZoomableImage } from '../../drawingViewerImage/drawingViewerImage.component';
 import { Vector2, Line, Size } from './types';
 import { QuadTree, QuadTreeBuilder } from './quadTree';
+import { RTree, RTreeBuilder } from './rTree';
 
 export class SVGSnapDiagnosticsHelper {
 
@@ -91,6 +92,19 @@ export class SVGSnapDiagnosticsHelper {
 		this.context.moveTo(start.x, start.y);
 		this.context.lineTo(end.x, end.y);
 		this.context.stroke();
+	}
+
+	renderRTree(tree: RTree) {
+		this.renderRTreeNode(tree.root);
+	}
+
+	renderRTreeNode(node: RTreeNode) {
+		this.context.strokeRect(node.xmin, node.ymin, node.width, node.height);
+		if ( node.children != null ) {
+			for (const child of node.children) {
+				this.renderRTreeNode(child);
+			}
+		}
 	}
 }
 
@@ -185,6 +199,8 @@ export class SVGSnap {
 
 	quadtree: QuadTree;
 
+	rtree: RTree;
+
 	debugHelper: SVGSnapDiagnosticsHelper;
 
 	snapRadius: number; // In content rect pixels
@@ -265,13 +281,27 @@ export class SVGSnap {
 
 		this.debugHelper.renderPrimitives(collector);
 
+		const start = performance.now();
+
 		// create quadtree
+		/*
 		const builder = new QuadTreeBuilder({
 			lines: collector.lines,
 			maxDepth: 12,
 			bounds: viewBoxSize,
 		});
 		this.quadtree = builder.build();
+		*/
+
+		const builder = new RTreeBuilder({
+			lines: collector.lines,
+			n: 10,
+		});
+		this.rtree = builder.build();
+
+		this.debugHelper.renderRTree(this.rtree);
+
+		console.log('Build acceleration structure in: ' + (performance.now() - start));
 
 		console.log(builder.report);
 	}
@@ -293,9 +323,7 @@ export class SVGSnap {
 
 		this.debugHelper.renderRadius(p, r);
 
-		const result = this.quadtree.doIntersectionTest(new Vector2(p.x, p.y), r);
-
-		console.log(result);
+		const result = this.rtree.doIntersectionTest(new Vector2(p.x, p.y), r);
 
 		if (result.closestEdge != null) {
 			this.debugHelper.renderLine(p, result.closestEdge);
