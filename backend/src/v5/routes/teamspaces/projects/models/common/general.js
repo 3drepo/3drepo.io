@@ -611,8 +611,7 @@ const establishRoutes = (modelType) => {
      *                   status: ok
 	 *                   unit: mm
 	 *                   desc: Floor 1 MEP with Facade
-	 *                   revisions: { total: 2, lastUpdated: 1715354970000, latestRevision: AAGC-C0149-CIV-STN-SSR-M3D-000003 }
-	 *                   errorReason: { message: System error occured. Please contact support., timestamp: 1629976656315, errorCode: 14 }
+	 *                   revisions: { total: 2, lastUpdated: 1715354970000, latestRevision: rev1 }
 	 *               federation:
 	 *                 summary: federation
      *                 value:
@@ -629,7 +628,7 @@ const establishRoutes = (modelType) => {
      *                   status: ok
 	 *                   type: Architectural
 	 *                   desc: Floor 1 MEP with Facade
-	 *                   revisions: { total: 2, lastUpdated: 1715354970000, latestRevision: AAGC-C0149-CIV-STN-SSR-M3D-000003 }
+	 *                   revisions: { total: 2, lastUpdated: 1715354970000, latestRevision: S1-rev1 }
 	 *                   calibration: uncalibrated
 	 */
 	router.get('/:model/stats', hasReadAccessToModel[modelType], getModelStats(modelType), formatModelStats(modelType));
