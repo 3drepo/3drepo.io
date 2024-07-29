@@ -79,8 +79,9 @@ export const Viewer2D = () => {
 		snapHandler.showDebugCanvas(document.querySelector('#app'));
 
 		// temporary cursor to show snap location
-		const cursor = document.createElement('div');
-		cursor.setAttribute('style', 'position: absolute; width: 20px; height: 20px; background-color: #bbb; border-radius: 50%; display: block; z-index: 1;');
+		const cursor = document.createElement('img');
+		cursor.setAttribute('style', 'position: absolute; width: 20px; height: 20px; border-radius: 50%; display: block; z-index: 1;');
+		cursor.src = '/assets/drawings/snap.svg';
 		imgRef.current.getEventsEmitter().appendChild(cursor);
 
 		const getComputedStyleAsFloat = (element, style) => {
@@ -94,7 +95,7 @@ export const Viewer2D = () => {
 			};
 		};
 
-		imgRef.current.getEventsEmitter().addEventListener('mousedown', (ev)=>{
+		imgRef.current.getEventsEmitter().addEventListener('mousemove', (ev)=>{
 
 			// Make the event coordinates relative to the Content rect of the
 			// event emitter regardless of any child transforms, borders and
@@ -110,9 +111,9 @@ export const Viewer2D = () => {
 			// Then invoke the snap
 			const r = snapHandler.snap(coord, imgRef.current);
 
-
 			if (r != null) {
 				const r2 = imgRef.current.getClientPosition(r);
+
 				cursor.style.setProperty('left', (r2.x - 10) + 'px', '');
 				cursor.style.setProperty('top', (r2.y - 10) + 'px', '');
 			}

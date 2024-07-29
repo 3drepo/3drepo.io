@@ -283,16 +283,6 @@ export class SVGSnap {
 
 		const start = performance.now();
 
-		// create quadtree
-		/*
-		const builder = new QuadTreeBuilder({
-			lines: collector.lines,
-			maxDepth: 12,
-			bounds: viewBoxSize,
-		});
-		this.quadtree = builder.build();
-		*/
-
 		const builder = new RTreeBuilder({
 			lines: collector.lines,
 			n: 10,
