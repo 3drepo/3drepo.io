@@ -217,10 +217,16 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		// These drawing methods take integers only, so round here explicitly
 		// so we can be sure of the rounding behaviour.
 
-		const sx = Math.round(-t.x / t.scale);
-		const sy = Math.round(-t.y / t.scale);
-		const sw = Math.round(ctx.canvas.width / t.scale);
-		const sh = Math.round(ctx.canvas.height / t.scale);
+		let scale = t.scale;
+
+		if (scale < 1) {
+			scale = 1;
+		}
+
+		const sx = Math.round(-t.x / scale);
+		const sy = Math.round(-t.y / scale);
+		const sw = Math.round(ctx.canvas.width / scale);
+		const sh = Math.round(ctx.canvas.height / scale);
 
 		// Render asynchronously using createImageBitmap (does not work in Firefox)
 
@@ -293,7 +299,7 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 
 	let currentCanvasRequest = 0;
 
-	const createCanvas = () => {
+	const createCanvas = (completed) => {
 		// Get the new canvas size based on the container size
 		const viewSize = getViewSize();
 		const canvasSize = getCanvasSize();
@@ -333,6 +339,8 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 			// Once projection, D & the canvas itself are replaced, we can use
 			// this regular call to update the DOM transform
 			updateCanvasTransform();
+
+			completed?.();
 		});
 	};
 
@@ -349,8 +357,9 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		hasLoaded = true;
 
 		// Create a new canvas for the newly loaded image
-		createCanvas();
-		onLoad?.(ev);
+		createCanvas(() => {
+			onLoad?.(ev);
+		});
 	};
 
 	const addEventListener = (method : string, callback) => {
