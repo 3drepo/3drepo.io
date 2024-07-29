@@ -14,11 +14,30 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import CameraIcon from '@assets/icons/viewer/camera.svg';
-
+import { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 
 export const Camera = ({ scale }) => {
 	// console.log(1 / scale);
+	const [drawingId] = useSearchParam('drawingId');
+	const {containerOrFederation } = useParams();
+	// const u
+	const transform = DrawingsHooksSelectors.selectTransform2Dto3D(drawingId, containerOrFederation);
+
+	useEffect(() => {
+		getCurrentViewpointInfo
+	})
+
+
+
+	if (!transform) {
+		return null;
+	}
+
 
 	return (<CameraIcon style={{ transform: `scale(${1 / scale})`, overflow:'unset', transformOrigin: '0 0' }}/>);
 };

@@ -23,8 +23,9 @@ import { Role } from '../currentUser/currentUser.types';
 import { Calibration, CalibrationState } from './drawings.types';
 import { selectContainerById } from '../containers/containers.selectors';
 import { selectFederationById } from '../federations/federations.selectors';
-import { convertVectorUnits, getUnitsConversionFactor } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
-import { EMPTY_CALIBRATION } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
+import { convertVectorUnits, getTransformationMatrix, getUnitsConversionFactor, getXYPlane } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
+import { EMPTY_CALIBRATION, EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
+import { isEqual } from 'lodash';
 
 const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
 
@@ -111,6 +112,25 @@ export const selectCalibration = createSelector(
 			},
 			verticalRange: convertVectorUnits(calibration.verticalRange || EMPTY_CALIBRATION.verticalRange, conversionFactor),
 		};
+	},
+);
+
+
+export const selectTransform2Dto3D = createSelector(
+	selectCalibration,
+	(calibration) => {
+		if (isEqual(calibration.horizontal.drawing, EMPTY_VECTOR) || isEqual(calibration.horizontal.model, EMPTY_VECTOR)) return null;
+		const vector3DPlane = getXYPlane(calibration.horizontal.model);
+		return getTransformationMatrix(calibration.horizontal.drawing, vector3DPlane);
+	},
+);
+
+export const selectTransform3Dto2D = createSelector(
+	selectCalibration,
+	(calibration) => {
+		if (isEqual(calibration.horizontal.drawing, EMPTY_VECTOR) || isEqual(calibration.horizontal.model, EMPTY_VECTOR)) return null;
+		const vector3DPlane = getXYPlane(calibration.horizontal.model);
+		return getTransformationMatrix(vector3DPlane, calibration.horizontal.drawing);
 	},
 );
 
