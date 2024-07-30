@@ -27,6 +27,7 @@ const Path = require('path');
 const { events } = require('../../../../services/eventsManager/eventsManager.constants');
 const { publish } = require('../../../../services/eventsManager/eventsManager');
 const { templates } = require('../../../../utils/responseCodes');
+const { getDrawingCalibrationStatus } = require('../../../../models/calibrations');
 
 const Drawings = { };
 
@@ -46,10 +47,12 @@ Drawings.getDrawingStats = async (teamspace, drawing) => {
 
 	try {
 		latestRev = await getLatestRevision(teamspace, drawing, modelTypes.DRAWING,
-			{ statusCode: 1, revCode: 1, timestamp: 1 });
+			{ _id: 1, statusCode: 1, revCode: 1, timestamp: 1 });
 	} catch {
 		// do nothing. A drawing can have 0 revision.
 	}
+
+	const calibration = await getDrawingCalibrationStatus(teamspace, drawing, latestRev?._id);
 
 	return {
 		number: settings.number,
@@ -61,7 +64,7 @@ Drawings.getDrawingStats = async (teamspace, drawing) => {
 			lastUpdated: latestRev?.timestamp,
 			latestRevision: latestRev ? `${latestRev.statusCode}-${latestRev.revCode}` : undefined,
 		},
-		calibration: settings.calibration ?? 'uncalibrated',
+		calibration,
 	};
 };
 
