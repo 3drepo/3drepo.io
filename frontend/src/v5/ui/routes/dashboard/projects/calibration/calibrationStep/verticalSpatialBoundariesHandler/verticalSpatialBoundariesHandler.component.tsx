@@ -31,18 +31,16 @@ export const VerticalSpatialBoundariesHandler = () => {
 	const { verticalPlanes, setVerticalPlanes, vector3D, vector2D, isCalibratingPlanes, setIsCalibratingPlanes, drawingId,
 		setSelectedPlane, selectedPlane, isAlignPlaneActive, setIsAlignPlaneActive } = useContext(CalibrationContext);
 	const [imageApplied, setImageApplied] = useState(false);
-
-	const drawVecStart = new Vector2(...vector2D[0]);
-	const drawVecEnd = new Vector2(...vector2D[1]);
-	const modelVecStart = new Vector2(...removeZ(vector3D[0]));
-	const modelVecEnd = new Vector2(...removeZ(vector3D[1]));
-	const diff2D = new Vector2().subVectors(drawVecEnd, drawVecStart);
-	const diff3D = new Vector2().subVectors(modelVecEnd, modelVecStart);
-
 	const planesAreSet = !verticalPlanes.some(isNull);
 	
 	const applyImageToPlane = () => {
 		if (imageApplied) return;
+		const drawVecStart = new Vector2(...vector2D[0]);
+		const drawVecEnd = new Vector2(...vector2D[1]);
+		const modelVecStart = new Vector2(...removeZ(vector3D[0]));
+		const modelVecEnd = new Vector2(...removeZ(vector3D[1]));
+		const diff2D = new Vector2().subVectors(drawVecEnd, drawVecStart);
+		const diff3D = new Vector2().subVectors(modelVecEnd, modelVecStart);
 		const i = new Image();
 		i.crossOrigin = 'anonymous';
 		i.src = getDrawingImageSrc(drawingId);
