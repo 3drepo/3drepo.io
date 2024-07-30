@@ -76,7 +76,7 @@ export const CalibrationHandler = () => {
 			setLeftPanelRatio(1);
 			return () => setLeftPanelRatio(.5);
 		}
-	}, [step, drawingId]);
+	}, [step]);
 
 	return (
 		<>

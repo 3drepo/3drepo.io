@@ -35,8 +35,7 @@ const startSingleClipTooltipText = formatMessage({ id: 'viewer.toolbar.icon.sect
 
 export const ClipButtons = () => {
 	const { step, isCalibrating } = useContext(CalibrationContext);
-	if (isCalibrating && step === 2) return null;
-
+	
 	const [expanded, setExpanded] = useState(false);
 	const clipMode: ClipMode = ViewerGuiHooksSelectors.selectClippingMode();
 	const isClipEdit = ViewerGuiHooksSelectors.selectIsClipEdit();
@@ -55,6 +54,8 @@ export const ClipButtons = () => {
 			Viewer.off(VIEWER_EVENTS.UPDATE_CLIP_MODE, () => ViewerGuiActionsDispatchers.setClippingMode(null));
 		};
 	}, []);
+
+	if (isCalibrating && step === 2) return null;
 
 	if (clipMode === null) {
 		return (

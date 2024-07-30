@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useEffect, useMemo } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Viewer } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
@@ -30,15 +30,8 @@ import { COLOR, hexToOpacity } from '@/v5/ui/themes/theme';
 export const VerticalSpatialBoundariesHandler = () => {
 	const { verticalPlanes, setVerticalPlanes, vector3D, vector2D, isCalibratingPlanes, setIsCalibratingPlanes, drawingId,
 		setSelectedPlane, selectedPlane, isAlignPlaneActive, setIsAlignPlaneActive } = useContext(CalibrationContext);
+	const [imageApplied, setImageApplied] = useState(false);
 
-	// create element of the drawing to be passed to unity
-	const i = new Image();
-	i.crossOrigin = 'anonymous';
-	i.src = getDrawingImageSrc(drawingId);
-
-	const imageHeight = i.naturalHeight;
-	const imageWidth = i.naturalWidth;
-	
 	const drawVecStart = new Vector2(...vector2D[0]);
 	const drawVecEnd = new Vector2(...vector2D[1]);
 	const modelVecStart = new Vector2(...removeZ(vector3D[0]));
@@ -46,23 +39,46 @@ export const VerticalSpatialBoundariesHandler = () => {
 	const diff2D = new Vector2().subVectors(drawVecEnd, drawVecStart);
 	const diff3D = new Vector2().subVectors(modelVecEnd, modelVecStart);
 
-	const tMatrix = useMemo(() => getTransformationMatrix(diff2D, diff3D), [JSON.stringify({ diff2D, diff3D })]);
+	const planesAreSet = !verticalPlanes.some(isNull);
+	
+	const applyImageToPlane = () => {
+		if (imageApplied) return;
+		const i = new Image();
+		i.crossOrigin = 'anonymous';
+		i.src = getDrawingImageSrc(drawingId);
+		const tMatrix = getTransformationMatrix(diff2D, diff3D);
+		i.onload = () => {
+			const topLeft = drawVecStart.clone().negate(); // This applies the drawing vector offset
+			const bottomRight = new Vector2(i.naturalWidth, i.naturalHeight).add(topLeft); // coord origin for drawing is at the top left
+			const bottomLeft = new Vector2(topLeft.x, bottomRight.y);
+			// transform points with transformation matrix, and then apply the model vector's offset
+			[bottomLeft, bottomRight, topLeft].map((corner) => corner.applyMatrix3(tMatrix).add(modelVecStart));
+	
+			Viewer.setCalibrationToolDrawing(i, [...bottomLeft, ...bottomRight, ...topLeft]);
+			Viewer.setCalibrationToolSelectedColors(hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 40), COLOR.PRIMARY_MAIN);
+			Viewer.setCalibrationToolUnselectedColors(hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 20), COLOR.PRIMARY_MAIN_CONTRAST);
+			Viewer.SetCalibrationToolOcclusionOpacity(0.5);
+			setImageApplied(true);
+		};
+	};
 	
 	useEffect(() => {
 		if (isCalibratingPlanes) {
-			Viewer.setCalibrationToolMode('Vertical');
+			Viewer.setCalibrationToolMode(planesAreSet ? 'Vertical' : 'None');
 			Viewer.on(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
+			if (planesAreSet) applyImageToPlane();
 			return () => {
 				Viewer.setCalibrationToolMode('None');
-				Viewer.off(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
+				Viewer.off(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, () => { });
+				Viewer.clipToolDelete();
 			};
 		}
-	}, [isCalibratingPlanes]);
+	}, [isCalibratingPlanes, planesAreSet]);
 
 	useEffect(() => {
 		if (isAlignPlaneActive) {
-			const onPickPoint = (rest) => {
-				Viewer.setCalibrationToolFloorToObject(rest.account, rest.model, rest.id);
+			const onPickPoint = ({ account, model, id }) => {
+				Viewer.setCalibrationToolFloorToObject(account, model, id);
 				setSelectedPlane(PlaneType.UPPER);
 				setIsAlignPlaneActive(false);
 			};
@@ -70,27 +86,10 @@ export const VerticalSpatialBoundariesHandler = () => {
 			Viewer.on(VIEWER_EVENTS.OBJECT_SELECTED, onPickPoint);
 			return () => {
 				TreeActionsDispatchers.startListenOnSelections();
-				Viewer.disableEdgeSnapping();
-				Viewer.off(VIEWER_EVENTS.OBJECT_SELECTED, onPickPoint);
+				Viewer.off(VIEWER_EVENTS.OBJECT_SELECTED, () => { });
 			};
 		}
 	}, [isAlignPlaneActive]);
-
-	useEffect(() => {
-		if (imageHeight && imageWidth) {
-			const topLeft = drawVecStart.clone().negate(); // This applies the drawing vector offset
-			const bottomRight = new Vector2(imageWidth, imageHeight).add(topLeft); // coord origin for drawing is at the top left
-			const bottomLeft = new Vector2(topLeft.x, bottomRight.y);
-			// transform points with transformation matrix, and then apply the model vector's offset
-			[bottomLeft, bottomRight, topLeft].map((corner) => corner.applyMatrix3(tMatrix).add(modelVecStart));
-
-			Viewer.setCalibrationToolDrawing(i, [...bottomLeft, ...bottomRight, ...topLeft]);
-			Viewer.setCalibrationToolSelectedColors(hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 40), COLOR.PRIMARY_MAIN);
-			Viewer.setCalibrationToolUnselectedColors(hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 20), COLOR.PRIMARY_MAIN_CONTRAST);
-			Viewer.SetCalibrationToolOcclusionOpacity(0.5);
-			return () => Viewer.setCalibrationToolDrawing(null, [...bottomLeft, ...bottomRight, ...topLeft]);
-		}
-	}, [imageHeight, imageWidth, tMatrix, JSON.stringify(drawVecStart)]);
 
 	useEffect(() => {
 		if (selectedPlane === PlaneType.LOWER) {
@@ -99,15 +98,17 @@ export const VerticalSpatialBoundariesHandler = () => {
 			Viewer.selectCalibrationToolUpperPlane();
 		}
 	}, [selectedPlane]);
-
+	
 	useEffect(() => {
 		setIsCalibratingPlanes(true);
 		setIsAlignPlaneActive(true);
 		ViewerGuiActionsDispatchers.setClippingMode(null);
+		Viewer.setCalibrationToolVerticalPlanes(...verticalPlanes);
 
-		if (!verticalPlanes.some(isNull)) Viewer.setCalibrationToolVerticalPlanes(...verticalPlanes);
-
-		return () => setIsCalibratingPlanes(false);
+		return () => {
+			setIsCalibratingPlanes(false);
+			Viewer.setCalibrationToolDrawing(null, [0, 0, 1, 0, 0, 1]);
+		};
 	}, []);
 
 	return null;
