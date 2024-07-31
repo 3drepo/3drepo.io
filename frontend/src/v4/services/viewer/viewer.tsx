@@ -638,6 +638,7 @@ export class ViewerService {
 
 	public async overrideMeshOpacity(account, model, meshIDs, opacity) {
 		await this.isViewerReady();
+		console.log('Mesh opacity', meshIDs.length, opacity)
 		UnityUtil.overrideMeshOpacity(account, model, meshIDs, opacity);
 	}
 
@@ -819,10 +820,12 @@ export class ViewerService {
 	 */
 
 	public overrideMeshColor(account, model, meshIDs, color) {
+		console.log('override mesh color', meshIDs.length, color)
 		UnityUtil.overrideMeshColor(account, model, meshIDs, color);
 	}
 
 	public resetMeshColor(account, model, meshIDs) {
+		console.log('Resetting mesh ids', meshIDs.length)
 		UnityUtil.resetMeshColor(account, model, meshIDs);
 	}
 
