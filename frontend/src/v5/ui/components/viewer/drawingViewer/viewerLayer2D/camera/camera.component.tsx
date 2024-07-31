@@ -17,27 +17,68 @@
 import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import CameraIcon from '@assets/icons/viewer/camera.svg';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
+import { transformAndTranslate } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
+import { DrawingViewerService } from '../../drawingViewer.service';
 
 export const Camera = ({ scale }) => {
 	// console.log(1 / scale);
+	const [animationFrame, setAnimationFrame] = useState<number>(0);
 	const [drawingId] = useSearchParam('drawingId');
-	const {containerOrFederation } = useParams();
-	// const u
-	const transform = DrawingsHooksSelectors.selectTransform2Dto3D(drawingId, containerOrFederation);
+	const { containerOrFederation } = useParams();
+	const [position, setPosition] = useState({ x:0, y:0 });
+	const transform2DTo3D = DrawingsHooksSelectors.selectTransform2Dto3D(drawingId, containerOrFederation);
+	const transform3DTo2D = DrawingsHooksSelectors.selectTransform3Dto2D(drawingId, containerOrFederation);
+
+
+	const onEnterFrame = async () => {
+		const v = await ViewerService.getCurrentViewpointInfo();
+
+		console.log(JSON.stringify({ v }, null, '\t'));
+		
+		const p =  transform3DTo2D([v.position[0], v.position[2]]);
+		setPosition({ x: p[0], y: p[1] });
+
+		// transformAndTranslate([xmax, ymax], tMatrix, vector3DPlane[0]);
+		setAnimationFrame(requestAnimationFrame(onEnterFrame));
+	};
+
 
 	useEffect(() => {
-		getCurrentViewpointInfo
-	})
+		if (!transform2DTo3D) return;
 
 
+		setAnimationFrame(requestAnimationFrame(onEnterFrame));
 
-	if (!transform) {
+		//;
+
+		return () => {
+			cancelAnimationFrame(animationFrame);
+			console.log('[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]');
+			console.log('unlistening camera' + animationFrame);
+			console.log('[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]');
+		};
+	}, transform2DTo3D);
+	const onClick = (pos) => {
+		console.log(pos);
+		
+		//transform3DTo2D
+	};
+
+
+	useEffect(() => {
+		DrawingViewerService.on('click', onClick);
+
+		return () => DrawingViewerService.off('click', onClick);
+	}, []);
+
+
+	if (!transform2DTo3D) {
 		return null;
 	}
 
 
-	return (<CameraIcon style={{ transform: `scale(${1 / scale})`, overflow:'unset', transformOrigin: '0 0' }}/>);
+	return (<CameraIcon style={{ transform: `translate(${position.x}px, ${position.y}px) scale(${1 / scale})`, overflow:'unset', transformOrigin: '0 0' }}/>);
 };

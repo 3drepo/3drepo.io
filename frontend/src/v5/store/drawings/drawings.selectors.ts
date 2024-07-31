@@ -20,10 +20,10 @@ import { selectCurrentProject, selectIsProjectAdmin } from '../projects/projects
 import { DrawingsState } from './drawings.redux';
 import { isCollaboratorRole, isCommenterRole, isViewerRole } from '../store.helpers';
 import { Role } from '../currentUser/currentUser.types';
-import { Calibration, CalibrationState } from './drawings.types';
+import { CalibrationState } from './drawings.types';
 import { selectContainerById } from '../containers/containers.selectors';
 import { selectFederationById } from '../federations/federations.selectors';
-import { convertVectorUnits, getTransformationMatrix, getUnitsConversionFactor, getXYPlane } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
+import { convertCoordUnits, convertVectorUnits, getTransformationMatrix, getUnitsConversionFactor, getXYPlane, transformAndTranslate, transformVector } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
 import { EMPTY_CALIBRATION, EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 import { isEqual } from 'lodash';
 
@@ -102,7 +102,43 @@ export const selectCalibration = createSelector(
 	selectDrawingById,
 	(state, drawingId, modelId) => selectContainerById(state, modelId) || selectFederationById(state, modelId),
 	(drawing, model) => {
-		const calibration = drawing?.calibration || EMPTY_CALIBRATION as Partial<Calibration>;
+
+		console.log(JSON.stringify({ calibration: drawing?.calibration }, null, '\t'));
+
+		const  calibration = {
+			'state': 'calibrated',
+			'units': 'mm',
+			'horizontal': {
+				'model': [
+					[
+						-215618.8125,
+						1.1275354781792313e-11,
+						-213248.734375,
+					],
+					[
+						-220090.546875,
+						-200,
+						149723.625,
+					],
+				],
+				'drawing': [
+					[
+						1.5660571407004833,
+						1248.6376811594205,
+					],
+					[
+						999.2520474788648,
+						1251.6980676328503,
+					],
+				],
+			},
+			'verticalRange': [
+				20422.34375,
+				37665.8515625,
+			],
+		};
+
+		// const calibration = drawing?.calibration || EMPTY_CALIBRATION as Partial<Calibration>;
 		const conversionFactor = getUnitsConversionFactor(calibration?.units, model.unit);
 		const horizontalCalibration = calibration.horizontal || EMPTY_CALIBRATION.horizontal;
 		return {
@@ -110,7 +146,7 @@ export const selectCalibration = createSelector(
 				model: convertVectorUnits(horizontalCalibration.model, conversionFactor),
 				drawing: convertVectorUnits(horizontalCalibration.drawing, conversionFactor),
 			},
-			verticalRange: convertVectorUnits(calibration.verticalRange || EMPTY_CALIBRATION.verticalRange, conversionFactor),
+			verticalRange: convertCoordUnits(calibration.verticalRange || EMPTY_CALIBRATION.verticalRange, conversionFactor),
 		};
 	},
 );
@@ -121,7 +157,8 @@ export const selectTransform2Dto3D = createSelector(
 	(calibration) => {
 		if (isEqual(calibration.horizontal.drawing, EMPTY_VECTOR) || isEqual(calibration.horizontal.model, EMPTY_VECTOR)) return null;
 		const vector3DPlane = getXYPlane(calibration.horizontal.model);
-		return getTransformationMatrix(calibration.horizontal.drawing, vector3DPlane);
+		const transform  = getTransformationMatrix(calibration.horizontal.drawing, vector3DPlane);
+		return  ( vector ) => transformVector(vector, transform);
 	},
 );
 
@@ -130,7 +167,8 @@ export const selectTransform3Dto2D = createSelector(
 	(calibration) => {
 		if (isEqual(calibration.horizontal.drawing, EMPTY_VECTOR) || isEqual(calibration.horizontal.model, EMPTY_VECTOR)) return null;
 		const vector3DPlane = getXYPlane(calibration.horizontal.model);
-		return getTransformationMatrix(vector3DPlane, calibration.horizontal.drawing);
+		const transform = getTransformationMatrix(vector3DPlane, calibration.horizontal.drawing);
+		return ( vector ) => transformVector(vector, transform);
 	},
 );
 
