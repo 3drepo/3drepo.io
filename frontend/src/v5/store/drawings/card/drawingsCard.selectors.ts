@@ -18,7 +18,7 @@
 import { createSelector } from 'reselect';
 import { selectCalibratedDrawings } from '../drawings.selectors';
 import { IDrawingsCardState } from './drawingsCard.redux';
-import { pick } from 'lodash';
+import { selectRevisions } from '../revisions/drawingRevisions.selectors';
 
 const selectDrawingsCardDomain = (state): IDrawingsCardState => state.drawingsCard || {};
 
@@ -30,10 +30,18 @@ export const selectQueries = createSelector(
 export const selectDrawingsFilteredByQueries = createSelector(
 	selectCalibratedDrawings,
 	selectQueries,
-	(drawings, queries) => drawings.filter((drawing) => {
+	(state) => (drawingId) => selectRevisions(state, drawingId),
+	(drawings, queries, selectDrawingRevisions) => drawings.filter((drawing) => {
 		if (!queries.length) return true;
+		const [latestRevision] = selectDrawingRevisions(drawing._id);
 
-		const fields = Object.values(pick(drawing, ['desc', 'drawingNumber', 'name', 'latestRevision.statusCode', 'latestRevision.revisionCode']));
+		const fields = [
+			drawing.desc,
+			drawing.drawingNumber,
+			drawing.name,
+			latestRevision?.statusCode,
+			latestRevision?.revisionCode,
+		].filter(Boolean);
 
 		const drawingMatchesQuery = (query) => fields.some((str) => str.toLowerCase().includes(query.toLowerCase()));
 		return queries.some(drawingMatchesQuery);

@@ -36,10 +36,11 @@ import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { viewerRoute } from '@/v5/services/routing/routing';
 import { Highlight } from '@controls/highlight';
+import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 const STATUS_CODE_TEXT = formatMessage({ id: 'drawings.list.item.statusCode', defaultMessage: 'Status code' });
 const REVISION_CODE_TEXT = formatMessage({ id: 'drawings.list.item.revisionCode', defaultMessage: 'Revision code' });
@@ -65,6 +66,12 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 		history.push(path);
 		setOrigin(pathname + search);
 	};
+
+	useEffect(() => {
+		if (!latestRevision) {
+			DrawingRevisionsActionsDispatchers.fetch(teamspace, project, drawing._id);
+		}
+	}, [latestRevision]);
 
 	const LoadingCodes = () => (
 		<>
