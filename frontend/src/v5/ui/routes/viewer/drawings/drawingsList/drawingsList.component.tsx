@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingsCardHooksSelectors, DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DrawingItem } from './drawingItem/drawingItem.component';
 import { CentredContainer } from '@controls/centredContainer';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
@@ -23,15 +23,36 @@ import { VirtualisedList, TableRow } from './drawingsList.styles';
 import { CardContent, CardList } from '@components/viewer/cards/card.styles';
 import { forwardRef, useContext } from 'react';
 import { ViewerCanvasesContext } from '../../viewerCanvases.context';
+import { AutocompleteSearchInput } from '@controls/search/autocompleteSearchInput/autocompleteSearchInput.component';
+import { DrawingsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
+import { FormattedMessage } from 'react-intl';
 
-const Table = forwardRef(({ children, ...props }, ref: any) => (
-	<table ref={ref} {...props}>
-		<CardContent>{children}</CardContent>
-	</table>
+const Table = forwardRef(({ children, ...props }, ref: any) => {
+	const queries = DrawingsCardHooksSelectors.selectQueries();
+	return (
+		<table ref={ref} {...props}>
+			<CardContent>
+				<AutocompleteSearchInput
+					value={queries}
+					onChange={DrawingsCardActionsDispatchers.setQueries}
+				/>
+				{children}
+			</CardContent>
+		</table>
+	);
+});
+
+const EmptyPlaceholder = forwardRef((props, ref: any) => (
+	<div ref={ref} {...props}>
+		<EmptyListMessage>
+			<FormattedMessage id="viewer.cards.drawings.noResults" defaultMessage="No drawings found. Please try another search." />
+		</EmptyListMessage>
+	</div>
 ));
 
 export const DrawingsList = () => {
-	const drawings = DrawingsHooksSelectors.selectCalibratedDrawings();
+	const drawings = DrawingsCardHooksSelectors.selectDrawingsFilteredByQueries();
 	const isLoading = DrawingsHooksSelectors.selectCalibratedDrawingsHaveStatsPending();
 	const { open2D } = useContext(ViewerCanvasesContext);
 
@@ -50,6 +71,7 @@ export const DrawingsList = () => {
 				Table,
 				TableBody: CardList,
 				TableRow,
+				EmptyPlaceholder,
 			}}
 			itemContent={(index, drawing: IDrawing) => (
 				<DrawingItem
