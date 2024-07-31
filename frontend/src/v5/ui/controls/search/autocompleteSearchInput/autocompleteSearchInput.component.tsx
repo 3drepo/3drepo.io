@@ -22,7 +22,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { TextField, StartAdornment, SearchChip } from '../searchInput/searchInput.styles';
 import { Autocomplete } from './autocompleteSearchInput.styles';
 
-type AutocompleteSearchInputProps = Omit<Partial<AutocompleteProps<TextFieldProps, boolean, undefined, undefined, typeof SearchChip>>, 'onChange'> & {
+type AutocompleteSearchInputProps = Omit<Partial<AutocompleteProps<TextFieldProps, boolean, undefined, undefined, typeof SearchChip>>, 'onChange' | 'value'> & {
 	variant?: 'filled' | 'outlined',
 	placeholder?: string,
 	onChange: (value: string[]) => void;
