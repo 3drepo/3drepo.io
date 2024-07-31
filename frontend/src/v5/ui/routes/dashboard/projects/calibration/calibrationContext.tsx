@@ -18,7 +18,7 @@
 import { createContext, useState } from 'react';
 import { Transformers, useSearchParam } from '../../../useSearchParam';
 import { PlaneType, Vector1D, Vector2D, Vector3D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
-import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
+import { EMPTY_COORD, EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 import { CalibrationHandler } from './calibrationHandler.component';
 
 export interface CalibrationContextType {
@@ -57,7 +57,7 @@ const defaultValue: CalibrationContextType = {
 	vector2D: EMPTY_VECTOR,
 	setVector2D: () => {},
 	drawingId: '',
-	verticalPlanes: EMPTY_VECTOR,
+	verticalPlanes: EMPTY_COORD,
 	setVerticalPlanes: () => {},
 	isCalibratingPlanes: false,
 	setIsCalibratingPlanes: () => {},

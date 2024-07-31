@@ -15,14 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Vector } from './calibration.types';
+import { Coord2D, Vector } from './calibration.types';
 
 export const EMPTY_VECTOR = [null, null] as Vector<any>;
+export const EMPTY_COORD = [null, null] as Coord2D;
 
 export const EMPTY_CALIBRATION = {
 	horizontal: {
 		model: EMPTY_VECTOR,
 		drawing: EMPTY_VECTOR,
 	}, 
-	verticalRange: EMPTY_VECTOR,
+	verticalRange: EMPTY_COORD,
 };
