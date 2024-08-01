@@ -22,7 +22,7 @@ import { Button } from '@controls/button';
 import { useHistory, useParams, generatePath } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { Heading, OverlayContainer, Subheading } from './invalidViewerOverlay.styles';
-import { CONTAINERS_ROUTE } from '../../routes.constants';
+import { CONTAINERS_ROUTE, DashboardParams } from '../../routes.constants';
 
 type IInvalidContainer = {
 	status: UploadStatuses;
@@ -30,7 +30,7 @@ type IInvalidContainer = {
 
 export const InvalidContainerOverlay = ({ status }: IInvalidContainer) => {
 	const history = useHistory();
-	const params = useParams();
+	const params = useParams<DashboardParams>();
 	const containersListRoute = generatePath(CONTAINERS_ROUTE, params);
 
 	const message = canUploadToBackend(status) ? (

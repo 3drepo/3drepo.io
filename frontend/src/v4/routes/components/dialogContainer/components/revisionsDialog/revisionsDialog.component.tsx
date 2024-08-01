@@ -18,6 +18,7 @@ import { PureComponent } from 'react';
 import Button from '@mui/material/Button';
 import DialogActions from '@mui/material/DialogActions';
 
+import { RouteComponentProps } from 'react-router';
 import { ROUTES } from '../../../../../constants/routes';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { Loader } from '../../../loader/loader.component';
@@ -29,14 +30,13 @@ import {
 	StyledList
 } from './revisionsDialog.styles';
 
-interface IProps {
+interface IProps extends RouteComponentProps<any> {
 	currentRevisionId: string;
 	currentModelName: string;
 	revisions: any[];
 	teamspace: string;
 	modelId: string;
 	type: string;
-	history: any;
 	isPending: boolean;
 	pendingRevision: string;
 	resetModelRevisions: () => void;

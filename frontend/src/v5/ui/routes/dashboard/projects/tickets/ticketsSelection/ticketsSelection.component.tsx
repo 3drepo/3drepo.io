@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TICKETS_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { DashboardParams, TICKETS_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { generatePath, useParams, useHistory } from 'react-router-dom';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -31,7 +31,7 @@ type FormType = {
 	template: string,
 };
 export const TicketsSelection = () => {
-	const { teamspace, project } = useParams();
+	const { teamspace, project } = useParams<DashboardParams>();
 	const history = useHistory();
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 

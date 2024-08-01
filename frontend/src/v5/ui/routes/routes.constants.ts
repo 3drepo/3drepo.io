@@ -48,21 +48,25 @@ export const matchesPath = (path) => Boolean(matchPath(location.pathname, { path
 // eslint-disable-next-line no-restricted-globals
 export const matchesSubPath = (path) => Boolean(matchPath(location.pathname, { path }));
 
-export interface TeamspaceParams {
-	teamspace?: string;
+export interface TeamspaceParams extends Record<string, string> {
+	teamspace: string;
 }
 
-export interface DashboardParams {
-	teamspace?: string;
-	project?: string;
+export interface DashboardParams extends TeamspaceParams {
+	project: string;
 }
 
 export interface DashboardTicketsParams extends DashboardParams {
 	groupBy?: string;
 	template?: string;
+	ticketId?: string;
 }
 
 export interface ViewerParams extends DashboardParams {
-	containerOrFederation?: string;
+	containerOrFederation: string;
 	revision?: string;
+}
+
+export interface LegalPageParams {
+	legalPage: string;
 }
