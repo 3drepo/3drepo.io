@@ -23,7 +23,7 @@ import { Role } from '../currentUser/currentUser.types';
 import { Calibration, CalibrationState } from './drawings.types';
 import { selectContainerById } from '../containers/containers.selectors';
 import { selectFederationById } from '../federations/federations.selectors';
-import { convertVectorUnits, getUnitsConversionFactor } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
+import { convertCoordUnits, convertVectorUnits, getUnitsConversionFactor } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
 import { EMPTY_CALIBRATION } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 
 const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
@@ -109,7 +109,7 @@ export const selectCalibration = createSelector(
 				model: convertVectorUnits(horizontalCalibration.model, conversionFactor),
 				drawing: convertVectorUnits(horizontalCalibration.drawing, conversionFactor),
 			},
-			verticalRange: convertVectorUnits(calibration.verticalRange || EMPTY_CALIBRATION.verticalRange, conversionFactor),
+			verticalRange: convertCoordUnits(calibration.verticalRange || EMPTY_CALIBRATION.verticalRange, conversionFactor),
 		};
 	},
 );

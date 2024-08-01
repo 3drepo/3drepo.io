@@ -31,7 +31,7 @@ export const getUnitsConversionFactor = (drawingUnits, modelUnits) => {
 	return UNITS_CONVERSION_FACTORS_TO_METRES[drawingUnits] / UNITS_CONVERSION_FACTORS_TO_METRES[modelUnits];
 };
 
-export const convertCoordUnits = (coord, conversionFactor: number) => coord?.map((point) => point * conversionFactor) || null;
+export const convertCoordUnits = (coords: number[], conversionFactor: number) => coords?.map((coord) => coord * conversionFactor) || null;
 export const convertVectorUnits = (vector, conversionFactor: number) => vector.map((coord) => convertCoordUnits(coord, conversionFactor));
 
 const removeZ = (vector) => [vector[0], vector[2]] as Coord2D;
