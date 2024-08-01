@@ -20,7 +20,6 @@ import CameraIcon from '@assets/icons/viewer/camera.svg';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
-import { transformAndTranslate } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
 import { DrawingViewerService } from '../../drawingViewer.service';
 
 export const Camera = ({ scale }) => {
@@ -29,6 +28,7 @@ export const Camera = ({ scale }) => {
 	const [drawingId] = useSearchParam('drawingId');
 	const { containerOrFederation } = useParams();
 	const [position, setPosition] = useState({ x:0, y:0 });
+	const [angle, setAngle] = useState(0);
 	const transform2DTo3D = DrawingsHooksSelectors.selectTransform2Dto3D(drawingId, containerOrFederation);
 	const transform3DTo2D = DrawingsHooksSelectors.selectTransform3Dto2D(drawingId, containerOrFederation);
 
@@ -39,7 +39,14 @@ export const Camera = ({ scale }) => {
 		console.log(JSON.stringify({ v }, null, '\t'));
 		
 		const p =  transform3DTo2D([v.position[0], v.position[2]]);
-		setPosition({ x: p[0], y: p[1] });
+		setPosition(p);
+
+		const lookat = transform3DTo2D([v.look_at[0], v.look_at[2]]);
+		lookat.sub(p);
+		setAngle(lookat.angle());
+
+
+
 
 		// transformAndTranslate([xmax, ymax], tMatrix, vector3DPlane[0]);
 		setAnimationFrame(requestAnimationFrame(onEnterFrame));
@@ -67,7 +74,6 @@ export const Camera = ({ scale }) => {
 		//transform3DTo2D
 	};
 
-
 	useEffect(() => {
 		DrawingViewerService.on('click', onClick);
 
@@ -80,5 +86,5 @@ export const Camera = ({ scale }) => {
 	}
 
 
-	return (<CameraIcon style={{ transform: `translate(${position.x}px, ${position.y}px) scale(${1 / scale})`, overflow:'unset', transformOrigin: '0 0' }}/>);
+	return (<CameraIcon style={{ transform: `translate(${position.x}px, ${position.y}px) scale(${1 / scale}) rotate(${angle}rad)`, overflow:'unset', transformOrigin: '0 0' }}/>);
 };

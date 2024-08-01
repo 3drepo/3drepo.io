@@ -22,7 +22,7 @@ import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
 import { CalibrationContext } from '../../calibrationContext';
 import { PlaneType } from '../../calibration.types';
 import { TreeActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { getTransformationMatrix, removeZ } from '../../calibration.helpers';
+import { getTransformationMatrix } from '../../calibration.helpers';
 import { Vector2 } from 'three';
 import { isNull } from 'lodash';
 import { COLOR, hexToOpacity } from '@/v5/ui/themes/theme';
@@ -35,22 +35,17 @@ export const VerticalSpatialBoundariesHandler = () => {
 	
 	const applyImageToPlane = () => {
 		if (imageApplied) return;
-		const drawVecStart = new Vector2(...vector2D[0]);
-		const drawVecEnd = new Vector2(...vector2D[1]);
-		const modelVecStart = new Vector2(...removeZ(vector3D[0]));
-		const modelVecEnd = new Vector2(...removeZ(vector3D[1]));
-		const diff2D = new Vector2().subVectors(drawVecEnd, drawVecStart);
-		const diff3D = new Vector2().subVectors(modelVecEnd, modelVecStart);
+
 		const i = new Image();
 		i.crossOrigin = 'anonymous';
 		i.src = getDrawingImageSrc(drawingId);
-		const tMatrix = getTransformationMatrix(diff2D, diff3D);
+		const tMatrix = getTransformationMatrix(vector2D, vector3D);
 		i.onload = () => {
-			const topLeft = drawVecStart.clone().negate(); // This applies the drawing vector offset
-			const bottomRight = new Vector2(i.naturalWidth, i.naturalHeight).add(topLeft); // coord origin for drawing is at the top left
-			const bottomLeft = new Vector2(topLeft.x, bottomRight.y);
+			const topLeft =  new Vector2(0, 0); 
+			const bottomRight = new Vector2(i.naturalWidth, i.naturalHeight);
+			const bottomLeft = new Vector2(0, bottomRight.y);
 			// transform points with transformation matrix, and then apply the model vector's offset
-			[bottomLeft, bottomRight, topLeft].map((corner) => corner.applyMatrix3(tMatrix).add(modelVecStart));
+			[bottomLeft, bottomRight, topLeft].map((corner) => corner.applyMatrix3(tMatrix));
 	
 			Viewer.setCalibrationToolDrawing(i, [...bottomLeft, ...bottomRight, ...topLeft]);
 			Viewer.setCalibrationToolSelectedColors(hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 40), COLOR.PRIMARY_MAIN);

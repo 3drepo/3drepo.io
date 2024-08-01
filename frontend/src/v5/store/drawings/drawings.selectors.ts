@@ -23,9 +23,10 @@ import { Role } from '../currentUser/currentUser.types';
 import { CalibrationState } from './drawings.types';
 import { selectContainerById } from '../containers/containers.selectors';
 import { selectFederationById } from '../federations/federations.selectors';
-import { convertCoordUnits, convertVectorUnits, getTransformationMatrix, getUnitsConversionFactor, getXYPlane, transformAndTranslate, transformVector } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
+import { convertCoordUnits, convertVectorUnits, getTransformationMatrix, getUnitsConversionFactor } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
 import { EMPTY_CALIBRATION, EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 import { isEqual } from 'lodash';
+import { Vector2 } from 'three';
 
 const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
 
@@ -103,7 +104,7 @@ export const selectCalibration = createSelector(
 	(state, drawingId, modelId) => selectContainerById(state, modelId) || selectFederationById(state, modelId),
 	(drawing, model) => {
 
-		console.log(JSON.stringify({ calibration: drawing?.calibration }, null, '\t'));
+		// console.log(JSON.stringify({ calibration: drawing?.calibration }, null, '\t'));
 
 		const  calibration = {
 			'state': 'calibrated',
@@ -152,23 +153,29 @@ export const selectCalibration = createSelector(
 );
 
 
-export const selectTransform2Dto3D = createSelector(
+export const selectTransformMatrix = createSelector(
 	selectCalibration,
 	(calibration) => {
 		if (isEqual(calibration.horizontal.drawing, EMPTY_VECTOR) || isEqual(calibration.horizontal.model, EMPTY_VECTOR)) return null;
-		const vector3DPlane = getXYPlane(calibration.horizontal.model);
-		const transform  = getTransformationMatrix(calibration.horizontal.drawing, vector3DPlane);
-		return  ( vector ) => transformVector(vector, transform);
+		return getTransformationMatrix(calibration.horizontal.drawing, calibration.horizontal.model);
+	},
+);
+
+export const selectTransform2Dto3D = createSelector(
+	selectTransformMatrix,
+	(matrix) => {
+		if (!matrix) return null;
+		return (vector) => new Vector2(...vector).applyMatrix3(matrix) ;
 	},
 );
 
 export const selectTransform3Dto2D = createSelector(
-	selectCalibration,
-	(calibration) => {
-		if (isEqual(calibration.horizontal.drawing, EMPTY_VECTOR) || isEqual(calibration.horizontal.model, EMPTY_VECTOR)) return null;
-		const vector3DPlane = getXYPlane(calibration.horizontal.model);
-		const transform = getTransformationMatrix(vector3DPlane, calibration.horizontal.drawing);
-		return ( vector ) => transformVector(vector, transform);
+	selectTransformMatrix,
+	(matrix) => {
+		if (!matrix) return null;
+		const inverseMat = matrix.clone().invert();
+
+		return (vector) => new Vector2(...vector).applyMatrix3(inverseMat) ;
 	},
 );
 
