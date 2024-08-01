@@ -69,7 +69,7 @@
     "serve-favicon": "2.5.0",
     "sharp": "0.32.6",
     "slash": "3.0.0",
-    "socket.io": "4.6.1",
+    "socket.io": "4.6.2",
     "string-to-stream": "3.0.1",
     "supertest-session": "4.1.0",
     "swagger-jsdoc": "6.1.0",
