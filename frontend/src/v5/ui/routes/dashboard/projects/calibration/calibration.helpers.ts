@@ -16,7 +16,7 @@
  */
 
 import { Matrix3, Vector2 } from 'three';
-import { Coord2D } from './calibration.types';
+import { Coord2D, Vector2D, Vector3D } from './calibration.types';
 
 export const UNITS_CONVERSION_FACTORS_TO_METRES = {
 	'm': 1,
@@ -34,20 +34,30 @@ export const getUnitsConversionFactor = (drawingUnits, modelUnits) => {
 export const convertCoordUnits = (coord, conversionFactor: number) => coord?.map((point) => point * conversionFactor) || null;
 export const convertVectorUnits = (vector, conversionFactor: number) => vector.map((coord) => convertCoordUnits(coord, conversionFactor));
 
-export const removeZ = (vector) => [vector[0], vector[2]] as Coord2D;
+const removeZ = (vector) => [vector[0], vector[2]] as Coord2D;
 
-export const getTransformationMatrix = (vectorA: Vector2, vectorB: Vector2) => {
-	const magnitudeA = vectorA.length();
-	const magnitudeB = vectorB.length();
+export const getTransformationMatrix = (vector2D: Vector2D, vector3D: Vector3D) => {
+	const drawVecStart = new Vector2(...vector2D[0]);
+	const drawVecEnd = new Vector2(...vector2D[1]);
+	const modelVecStart = new Vector2(...removeZ(vector3D[0]));
+	const modelVecEnd = new Vector2(...removeZ(vector3D[1]));
+	const diff2D = new Vector2().subVectors(drawVecEnd, drawVecStart);
+	const diff3D = new Vector2().subVectors(modelVecEnd, modelVecStart);
+
+	const magnitudeA = diff2D.length();
+	const magnitudeB = diff3D.length();
 	const scaleFactor = magnitudeB / magnitudeA;
 
 	// in order to know if angle is clockwise or anti-clockwise we find the cross product of both vectors and take the sign of the z-component
-	const crossProductZ = vectorA.cross(vectorB);
+	const crossProductZ = diff2D.cross(diff3D);
 	const directionFactor = crossProductZ > 0 ? 1 : -1;
-	const angle = vectorB.angleTo(vectorA);
+	const angle = diff3D.angleTo(diff2D);
 
 	const scaleMatrix = new Matrix3().makeScale(scaleFactor, scaleFactor);
 	const rotationMatrix = new Matrix3().makeRotation(directionFactor * angle);
-	const transformationMatrix = rotationMatrix.multiply(scaleMatrix); 
+	drawVecStart.applyMatrix3(scaleMatrix.clone().multiply(rotationMatrix));
+    
+	const translationMatrix = new Matrix3().makeTranslation(new Vector2().subVectors(modelVecStart, drawVecStart));
+	const transformationMatrix = translationMatrix.multiply(scaleMatrix).multiply(rotationMatrix); 
 	return transformationMatrix;
 };
