@@ -277,7 +277,6 @@ const addSuperMeshMappingsToStream = async (account, model, revId, jsonFiles, ou
 			cacheStream.emit("error", err);
 		});
 
-
 		await generateSuperMeshMappings(account, model, jsonFiles, passThruStr);
 		await cacheWriteProm;
 
