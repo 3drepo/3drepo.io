@@ -40,11 +40,11 @@ export const VerticalSpatialBoundariesHandler = () => {
 		i.src = getDrawingImageSrc(drawingId);
 		const tMatrix = getTransformationMatrix(vector2D, vector3D);
 		i.onload = () => {
-			const topLeft = new Vector2(0, 0); //drawVecStart.clone().negate(); // This applies the drawing vector offset
+			const topLeft = new Vector2(0, 0);
 			const bottomRight = new Vector2(i.naturalWidth, i.naturalHeight); // coord origin for drawing is at the top left
 			const bottomLeft = new Vector2(0, bottomRight.y);
-			// transform points with transformation matrix, and then apply the model vector's offset
-			[bottomLeft, bottomRight, topLeft].map((corner) => corner.applyMatrix3(tMatrix));//.add(modelVecStart));
+			// transform points with transformation matrix
+			[bottomLeft, bottomRight, topLeft].map((corner) => corner.applyMatrix3(tMatrix));
 	
 			Viewer.setCalibrationToolDrawing(i, [...bottomLeft, ...bottomRight, ...topLeft]);
 			Viewer.setCalibrationToolSelectedColors(hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 40), COLOR.PRIMARY_MAIN);
