@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Vector, Vector1D } from './calibration.types';
+import { CalibrationVectors, Vector, Vector1D } from './calibration.types';
 
 export const EMPTY_VECTOR = [null, null] as Vector<any>;
 export const EMPTY_VECTOR_1D = [null, null] as Vector1D;
@@ -26,4 +26,4 @@ export const EMPTY_CALIBRATION = {
 		drawing: EMPTY_VECTOR,
 	}, 
 	verticalRange: EMPTY_VECTOR_1D,
-};
+} as CalibrationVectors;

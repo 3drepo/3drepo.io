@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Calibration } from '@/v5/store/drawings/drawings.types';
+
 export type Coord2D = [number, number];
 type Coord3D = [number, number, number];
 
@@ -28,3 +30,5 @@ export enum PlaneType {
 	UPPER = 'upper',
 	LOWER = 'lower',
 }
+
+export type CalibrationVectors = Pick<Calibration, 'horizontal' | 'verticalRange'>;
