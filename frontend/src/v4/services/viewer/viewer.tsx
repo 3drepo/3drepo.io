@@ -1360,21 +1360,15 @@ export class ViewerService {
 	}
 
 	public setCalibrationToolSelectedColors(fill, border) {
-		UnityUtil.unityInstance.SendMessage('WebGLInterface', 'SetCalibrationToolSelectedColours', JSON.stringify({
-			fill,
-			border,
-		}));
+		UnityUtil.setCalibrationToolSelectedColors(fill, border);
 	}
 
 	public setCalibrationToolUnselectedColors(fill, border) {
-		UnityUtil.unityInstance.SendMessage('WebGLInterface', 'SetCalibrationToolUnselectedColours', JSON.stringify({
-			fill,
-			border,
-		}));
+		UnityUtil.setCalibrationToolUnselectedColors(fill, border);
 	}
 
 	public SetCalibrationToolOcclusionOpacity(opacity) {
-		UnityUtil.unityInstance.SendMessage('WebGLInterface', 'SetCalibrationToolOcclusionOpacity', opacity);
+		UnityUtil.setCalibrationToolOcclusionOpacity(opacity);
 	}
 }
 

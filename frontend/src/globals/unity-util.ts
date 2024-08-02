@@ -2516,6 +2516,14 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Sets the default height of the floor used when calling setCalibrationToolFloorToObject, in meters.
+	 * @category Calibration
+	 */
+	public static setCalibrationToolFloorHeight(height: number) {
+		UnityUtil.toUnity('SetCalibrationToolFloorHeight', UnityUtil.LoadingState.VIEWER_READY, height);
+	}
+
+	/**
 	 * Sets or removes the Start and End of the Calibration Vector. If Start or End are set to null, the tool
 	 * will immediately allow the user to place them again. Vector Mode must be explicitly enabled - calling
 	 * this will not automatically enable the tool.
@@ -2523,6 +2531,34 @@ export class UnityUtil {
 	 */
 	public static setCalibrationToolVector(start: number[] | null, end: number[] | null) {
 		UnityUtil.toUnity('SetCalibrationToolVector', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({ start, end }));
+	}
+
+	/**
+	 * Sets tint and border colours of the image in the image preview, for the level that is selected.
+	 * Both properties must be provided, and as HTML colour strings.
+	 * @category Calibration
+	 */
+	public static setCalibrationToolSelectedColors(fill: string, border: string) {
+		UnityUtil.toUnity('SetCalibrationToolSelectedColours', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({fill, border}));
+	}
+
+	/**
+	 * Sets tint and border colours of the image in the image preview, for the level that is not selected.
+	 * Both properties must be provided, and as HTML colour strings.
+	 * @category Calibration
+	 */
+	public static setCalibrationToolUnselectedColors(fill: string, border: string) {
+		UnityUtil.toUnity('SetCalibrationToolUnselectedColours', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({fill, border}));
+	}
+
+	/**
+	 * Sets the additional transparency that is applied, as a multiplier, to the image tint colour set by
+	 * setCalibrationToolSelectedColors or setCalibrationToolUnselectedColors when part of the preview
+	 * plane is obscured by model geometry. This should be between 0 and 1.
+	 * @category Calibration
+	 */
+	public static setCalibrationToolOcclusionOpacity(opacity: number) {
+		UnityUtil.toUnity('SetCalibrationToolOcclusionOpacity', UnityUtil.LoadingState.VIEWER_READY, opacity);
 	}
 
 	/**
@@ -2565,7 +2601,7 @@ export class UnityUtil {
 		ctx.texSubImage2D(ctx.TEXTURE_2D, 0, 0, 0, image.width, image.height, ctx.RGBA, ctx.UNSIGNED_BYTE, image);
 		delete this.domTextureReferences[index];
 	}
-	
+
 	/**
 	 * Sets the maximum number of responses WebRequestManager2 should attempt to
 	 * handle at any one time. The higher this is the faster models will load but
