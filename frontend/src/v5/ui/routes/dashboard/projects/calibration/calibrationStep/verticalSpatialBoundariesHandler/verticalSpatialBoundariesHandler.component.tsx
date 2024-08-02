@@ -49,7 +49,7 @@ export const VerticalSpatialBoundariesHandler = () => {
 			Viewer.setCalibrationToolDrawing(i, [...bottomLeft, ...bottomRight, ...topLeft]);
 			Viewer.setCalibrationToolSelectedColors(hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 40), COLOR.PRIMARY_MAIN);
 			Viewer.setCalibrationToolUnselectedColors(hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 20), COLOR.PRIMARY_MAIN_CONTRAST);
-			Viewer.SetCalibrationToolOcclusionOpacity(0.5);
+			Viewer.setCalibrationToolOcclusionOpacity(0.5);
 			setImageApplied(true);
 		};
 	};
