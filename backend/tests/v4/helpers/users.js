@@ -17,6 +17,7 @@
 "use strict";
 
 const app = require("../../../src/v4/services/api.js").createApp();
+const SessionTracker = require("../../v5/helper/sessionTracker")
 const request = require("supertest");
 const async = require("async");
 const { expect } = require("chai");
@@ -38,25 +39,12 @@ const loginUsers = async (usernames, passwords) => {
 		});
 	 });
 
-	await Promise.all(usernames.map((username, index) => {
-		return new Promise((resolveLogin, rejectLogin) => {
-			const agent = request.agent(server);
-
-			// In the cases passwords is an array or passwords is the same password for every user
-			const password = Array.isArray(passwords)? passwords[index] : passwords;
-
-			agent.post("/login")
-				.send({ username, password})
-				.expect(200, function(err, res) {
-					if (err)
-						rejectLogin(err);
-					else {
-						resolveLogin(agent);
-					}
-				});
-
-			agents[username] = agent;
-		});
+	await Promise.all(usernames.map(async(username, index) => {
+		// In the cases passwords is an array or passwords is the same password for every user
+		const password = Array.isArray(passwords)? passwords[index] : passwords;
+		const agent = SessionTracker(request(server));
+		await agent.login(username, password);
+		agents[username] = agent;
 	}))
 
 	return agents;
@@ -64,23 +52,5 @@ const loginUsers = async (usernames, passwords) => {
 
 
 module.exports = {
-	loginUsers,
-	login: (agent, username, password) => (...args) => {
-		const next = args.pop();
-
-		async.series([
-			function(_done) {
-				agent.post("/logout")
-					.send({})
-					.expect(200, _done);
-			},
-			function(_done) {
-				agent.post("/login")
-					.send({username, password})
-					.expect(200,  (err, res) => {
-						expect(res.status, 'Status should be 200 (ok)').to.be.equal(200);
-						_done();
-					});
-			}], next);
-	}
+	loginUsers
 };

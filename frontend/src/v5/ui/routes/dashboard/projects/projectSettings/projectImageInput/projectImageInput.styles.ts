@@ -19,6 +19,7 @@ import { Typography } from '@controls/typography';
 import styled from 'styled-components';
 import { FlatButton } from '@controls/button/flatButton.component'; 
 import { ErrorMessage as ErrorMessageBase } from '@controls/errorMessage/errorMessage.component';
+import { AuthImg } from '@components/authenticatedResource/authImg.component';
 
 export const GrayBodyText = styled(Typography).attrs({
 	variant: 'body1',
@@ -40,7 +41,7 @@ export const ImageContainer = styled.div`
 	gap: 9px;
 `;
 
-export const Image = styled.img`
+export const Image = styled(AuthImg)`
 	width: 100%;
 	height: 132px;
 	object-fit: cover;

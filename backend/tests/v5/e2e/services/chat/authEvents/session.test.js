@@ -36,7 +36,7 @@ const runSessionsRemovedTests = () => {
 		const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36';
 		test('Should log user out if they are logged in else where (login before socket connection)', async () => {
 			const headers = { referer: referrer, 'user-agent': userAgent };
-			const cookie = await ServiceHelper.loginAndGetCookie(agent, user.user, user.password, headers);
+			const { session: cookie } = await ServiceHelper.loginAndGetCookie(agent, user.user, user.password, headers);
 			const socket = await ServiceHelper.socket.connectToSocket(cookie);
 			const onLogOutMessage = new Promise((resolve) => {
 				socket.on(EVENTS.LOGGED_OUT, resolve);
@@ -63,7 +63,7 @@ const runSessionsRemovedTests = () => {
 
 		test('Should not log the user out if the referrer is different', async () => {
 			const headers = { referer: referrer, 'user-agent': userAgent };
-			const cookie = await ServiceHelper.loginAndGetCookie(agent, user.user, user.password, headers);
+			const { session: cookie } = await ServiceHelper.loginAndGetCookie(agent, user.user, user.password, headers);
 			const socket = await ServiceHelper.socket.connectToSocket(cookie);
 			const fn = jest.fn();
 			const onLogOutMessage = new Promise((resolve, reject) => {
@@ -80,7 +80,7 @@ const runSessionsRemovedTests = () => {
 
 		test('Should not affect a different user', async () => {
 			const headers = { referer: referrer, 'user-agent': userAgent };
-			const cookie = await ServiceHelper.loginAndGetCookie(agent, user.user, user.password, headers);
+			const { session: cookie } = await ServiceHelper.loginAndGetCookie(agent, user.user, user.password, headers);
 			const socket = await ServiceHelper.socket.connectToSocket(cookie);
 			const fn = jest.fn();
 			const onLogOutMessage = new Promise((resolve, reject) => {
