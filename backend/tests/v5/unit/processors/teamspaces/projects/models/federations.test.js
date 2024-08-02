@@ -16,16 +16,12 @@
  */
 
 const { src } = require('../../../../../helper/path');
-const { generateRandomString, generateRandomObject } = require('../../../../../helper/services');
+const { generateRandomString, generateRandomObject, determineTestGroup, generateRandomNumber } = require('../../../../../helper/services');
 
 jest.mock('../../../../../../../src/v5/models/projectSettings');
 const ProjectSettings = require(`${src}/models/projectSettings`);
 jest.mock('../../../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
-jest.mock('../../../../../../../src/v5/models/issues');
-const Issues = require(`${src}/models/issues`);
-jest.mock('../../../../../../../src/v5/models/risks');
-const Risks = require(`${src}/models/risks`);
 jest.mock('../../../../../../../src/v5/models/users');
 const Users = require(`${src}/models/users`);
 jest.mock('../../../../../../../src/v5/models/revisions');
@@ -34,6 +30,8 @@ const TicketGroup = require(`${src}/processors/teamspaces/projects/models/common
 const Federations = require(`${src}/processors/teamspaces/projects/models/federations`);
 const Views = require(`${src}/models/views`);
 jest.mock('../../../../../../../src/v5/models/views');
+const Tickets = require(`${src}/processors/teamspaces/projects/models/commons/tickets`);
+jest.mock('../../../../../../../src/v5/processors/teamspaces/projects/models/commons/tickets');
 const Legends = require(`${src}/models/legends`);
 jest.mock('../../../../../../../src/v5/models/legends');
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -112,17 +110,6 @@ ProjectSettings.getProjectById.mockImplementation(() => project);
 ModelSettings.getFederations.mockImplementation(() => federationList);
 const getFederationByIdMock = ModelSettings.getFederationById.mockImplementation((teamspace,
 	federation) => federationSettings[federation]);
-Issues.getIssuesCount.mockImplementation((teamspace, federation) => {
-	if (federation === 'federation1') return 1;
-	if (federation === 'federation2') return 2;
-	return 0;
-});
-
-Risks.getRisksCount.mockImplementation((teamspace, federation) => {
-	if (federation === 'federation1') return 1;
-	if (federation === 'federation2') return 2;
-	return 0;
-});
 
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
 Views.getViewById.mockImplementation((teamspace, model, view) => {
@@ -247,31 +234,32 @@ const testDeleteFavourites = () => {
 	});
 };
 
-const formatToStats = (settings, issueCount, riskCount, lastUpdated) => ({
+const formatToStats = (settings, ticketsCount, lastUpdated) => ({
 	...(settings.desc ? { desc: settings.desc } : {}),
 	...(settings.subModels ? { containers: settings.subModels } : {}),
 	code: settings.properties.code,
 	unit: settings.properties.unit,
 	status: settings.status,
 	lastUpdated,
-	tickets: {
-		issues: issueCount ?? 0,
-		risks: riskCount ?? 0,
-	},
+	tickets: ticketsCount,
 });
 
 const testGetFederationStats = () => {
 	describe('Get federation stats', () => {
 		test('should return the stats if the federation exists and has subModels with revisions', async () => {
-			const res = await Federations.getFederationStats('teamspace', 'federation1');
-			expect(res).toEqual(formatToStats(federationSettings.federation1, 1, 1, 5678));
+			const ticketsCount = generateRandomNumber();
+			Tickets.getOpenTicketsCount.mockResolvedValueOnce(ticketsCount);
+			const res = await Federations.getFederationStats('teamspace', 'project', 'federation1');
+			expect(res).toEqual(formatToStats(federationSettings.federation1, ticketsCount, 5678));
 		});
 		test('should return the stats if the federation exists and has subModels with no revisions', async () => {
-			const res = await Federations.getFederationStats('teamspace', 'federation2');
-			expect(res).toEqual(formatToStats(federationSettings.federation2, 2, 2));
+			const ticketsCount = generateRandomNumber();
+			Tickets.getOpenTicketsCount.mockResolvedValueOnce(ticketsCount);
+			const res = await Federations.getFederationStats('teamspace', 'project', 'federation2');
+			expect(res).toEqual(formatToStats(federationSettings.federation2, ticketsCount));
 		});
 		test('should return the stats if the federation exists and has no subModels', async () => {
-			const res = await Federations.getFederationStats('teamspace', 'federation3');
+			const res = await Federations.getFederationStats('teamspace', 'project', 'federation3');
 			expect(res).toEqual(formatToStats(federationSettings.federation3));
 		});
 	});
@@ -371,7 +359,7 @@ const testGetTicketGroupById = () => {
 	});
 };
 
-describe('processors/teamspaces/projects/federations', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetFederationList();
 	testAppendFavourites();
 	testDeleteFavourites();
