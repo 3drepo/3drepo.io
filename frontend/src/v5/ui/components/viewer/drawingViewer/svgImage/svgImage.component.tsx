@@ -57,8 +57,7 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 	let D : Transform;
 	let projection: Transform;
 	let tframe = 0;
-	let drawing = false;
-	let resizing = false; // Resizing is a different operation because it will re-create the whole canvas
+	let drawing = false; // Same flag should act as a mutex for both drawing and resizing redraws
 	let resizeEvent = 0;
 	let resizeFrameEvent = 0;
 	let resizeFrameCount = 0;
@@ -320,6 +319,8 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 			scale: transform.scale,
 		};
 
+		console.log(`resizing for ${JSON.stringify(viewSize)}`);
+
 		// Create the canvas and context
 		const newCanvas = document.createElement('canvas');
 		newCanvas.width = canvasSize.width;
@@ -336,11 +337,6 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 				return; // Some other callback will handle this...
 			}
 
-			// Replace the canvas and update the transforms for the outer context
-			origin = newOrigin;
-			D = newD;
-			projection = np;
-
 			// Replace the canvas for the component and DOM
 			if (canvas) {
 				container.removeChild(canvas);
@@ -348,6 +344,11 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 			canvas = newCanvas;
 			container.appendChild(canvas);
 			context = newCtx;
+
+			// Replace the canvas and update the transforms for the outer context
+			origin = newOrigin;
+			D = newD;
+			projection = np;
 
 			// Once projection, D & the canvas itself are replaced, we can use
 			// this regular call to update the DOM transform
@@ -415,6 +416,7 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		tframe++;
 
 		if (!drawing) {
+			drawing = true;
 			requestAnimationFrame(onAnimationFrame);
 		}
 	};
@@ -432,7 +434,7 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 				if (resizeFrameEvent != resizeEvent) {
 					requestAnimationFrame(onResizeFrame);
 				} else {
-					resizing = false;
+					drawing = false;
 				}
 			});
 		} else {
@@ -456,8 +458,8 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 
 		resizeEvent++;
 
-		if (!resizing) {
-			resizing = true;
+		if (!drawing) {
+			drawing = true;
 			requestAnimationFrame(onResizeFrame);
 		}
 	};
