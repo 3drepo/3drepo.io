@@ -18,6 +18,7 @@
  */
 
 const request = require("supertest");
+const SessionTracker = require("../../v5/helper/sessionTracker")
 const expect = require("chai").expect;
 const app = require("../../../src/v4/services/api.js").createApp();
 const logger = require("../../../src/v4/logger.js");
@@ -30,26 +31,30 @@ describe("Permission templates", function () {
 
 	let server;
 	let agent;
+	let agent2;
 	const username = "permissionTemplate";
 	const password = "permissionTemplate";
 	const permission = { _id: "customA", permissions: ["view_issue", "view_model"]};
 	const permission1 = { _id: "customB", permissions: ["view_issue", "view_model", "comment_issue", "create_issue"]};
 	const model = "model1";
 
-	before(function(done) {
-		server = app.listen(8080, function () {
-			console.log("API test server is listening on port 8080!");
+	before(async function() {
+		await new Promise((resolve) => {
+			server = app.listen(8080, () => {
+				console.log("API test server is listening on port 8080!");
+				resolve();
+			});
 
-			agent = request.agent(server);
-			agent.post("/login")
-				.send({ username, password })
-				.expect(200, function(err, res) {
-					expect(res.body.username).to.equal(username);
-					done(err);
-				});
 
 		});
+
+
+		agent = SessionTracker(request(server));
+		await agent.login(username, password);
+		agent2 = SessionTracker(request(server));
+		await agent2.login("testing", "testing");
 	});
+
 
 	after(function(done) {
 		server.close(function() {
@@ -66,7 +71,8 @@ describe("Permission templates", function () {
 			{ user: "user1", permission: "collaborator"}
 		];
 
-		const agent2 = request.agent(server);
+
+
 
 		async.series([
 			callback => {
@@ -89,9 +95,6 @@ describe("Permission templates", function () {
 
 						callback(err);
 					});
-			},
-			callback => {
-				agent2.post("/login").send({username: "testing", password: "testing"}).expect(200, callback);
 			},
 			callback => {
 				agent2.get("/testing.json")
@@ -123,8 +126,6 @@ describe("Permission templates", function () {
 
 		const permissions = [];
 
-		const agent2 = request.agent(server);
-
 		async.series([
 			callback => {
 
@@ -147,9 +148,6 @@ describe("Permission templates", function () {
 						callback(err);
 					});
 
-			},
-			callback => {
-				agent2.post("/login").send({username: "testing", password: "testing"}).expect(200, callback);
 			},
 			callback => {
 				agent2.get("/testing.json")

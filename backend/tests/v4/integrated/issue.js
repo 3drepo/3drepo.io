@@ -17,12 +17,12 @@
 "use strict";
 
 const request = require("supertest");
+const SessionTracker = require("../../v5/helper/sessionTracker")
 const {should, assert, expect, Assertion } = require("chai");
 const app = require("../../../src/v4/services/api.js").createApp();
 const responseCodes = require("../../../src/v4/response_codes.js");
 const {templates: responseCodesV5} = require("../../../src/v5/utils/responseCodes");
 const async = require("async");
-const { login } = require("../helpers/users.js");
 const { createIssue } = require("../helpers/issues.js");
 const { deleteNotifications, fetchNotification } = require("../helpers/notifications.js");
 const { createModel } = require("../helpers/models.js");
@@ -31,12 +31,17 @@ const { cloneDeep } = require("lodash");
 describe("Issues", function () {
 	let server;
 	let agent;
-	let agent2;
+	let teamspace1Agent;
+	let collabAgent;
+	let commenterAgent;
+	let projectAdminAgent;
 
 	const timeout = 30000;
 	const username = "issue_username";
 	const username2 = "issue_username2";
 	const password = "password";
+
+	const commenterUser = "commenterTeamspace1Model1JobA";
 
 	const projectAdminUser = "imProjectAdmin";
 
@@ -78,19 +83,29 @@ describe("Issues", function () {
 		issue2: "8d46d1b0-8ef1-11e6-8d05-9717c0574272"
 	};
 
-	before(function(done) {
+	before(async function() {
 
-		server = app.listen(8080, function () {
-			console.log("API test server is listening on port 8080!");
-
-			agent = request.agent(server);
-			agent.post("/login")
-				.send({ username, password })
-				.expect(200, function(err, res) {
-					expect(res.body.username).to.equal(username);
-					done(err);
-				});
+		await new Promise((resolve) => {
+			server = app.listen(8080, () => {
+				console.log("API test server is listening on port 8080!");
+				resolve();
+			});
 		});
+
+		agent = SessionTracker(request(server));
+		await agent.login(username, password);
+
+		teamspace1Agent = SessionTracker(request(server));
+		await teamspace1Agent.login("teamSpace1", password);
+
+		collabAgent = SessionTracker(request(server));
+		await collabAgent.login(username2, password);
+
+		projectAdminAgent = SessionTracker(request(server));
+		await projectAdminAgent.login(projectAdminUser, projectAdminUser);
+
+		commenterAgent = SessionTracker(request(server));
+		await commenterAgent.login(commenterUser, password);
 	});
 
 	after(function(done) {
@@ -298,22 +313,17 @@ describe("Issues", function () {
 
 			const issue = {...baseIssue, "name":"Issue group test"};
 
-			agent2 = await request.agent(server);
-			await agent2.post("/login")
-				.send({ username: "teamSpace1", password })
-				.expect(200);
-
-			const groupId = (await agent2.post(`/${username3}/${model2}/revision/master/head/groups/`)
+			const groupId = (await teamspace1Agent.post(`/${username3}/${model2}/revision/master/head/groups/`)
 				.send(groupData)
 				.expect(200)).body._id;
 
 			issue.viewpoint = { ...issue.viewpoint, highlighted_group_id:groupId};
 
-			const issueId = (await agent2.post(`/${username3}/${model2}/issues`)
+			const issueId = (await teamspace1Agent.post(`/${username3}/${model2}/issues`)
 				.send(issue)
 				.expect(200)).body._id;
 
-			const res = await agent2.get(`/${username3}/${model2}/issues/${issueId}`).expect(200);
+			const res = await teamspace1Agent.get(`/${username3}/${model2}/issues/${issueId}`).expect(200);
 			expect(res.body.viewpoint.highlighted_group_id).to.equal(groupId);
 
 		});
@@ -349,13 +359,7 @@ describe("Issues", function () {
 
 			async.series([
 				function(done) {
-					agent2 = request.agent(server);
-					agent2.post("/login")
-						.send({ username: "teamSpace1", password })
-						.expect(200, done);
-				},
-				function(done) {
-					agent2.post(`/${username3}/${model2}/issues`)
+					teamspace1Agent.post(`/${username3}/${model2}/issues`)
 						.send(issue)
 						.expect(200 , function(err, res) {
 							issueId = res.body._id;
@@ -365,7 +369,7 @@ describe("Issues", function () {
 						});
 				},
 				function(done) {
-					agent2.get(`/${username3}/${model2}/revision/master/head/groups/${highlighted_group_id}`)
+					teamspace1Agent.get(`/${username3}/${model2}/revision/master/head/groups/${highlighted_group_id}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.objects).to.deep.equal(highlighted_group.objects);
 							expect(res.body.color).to.deep.equal(highlighted_group.color);
@@ -373,7 +377,7 @@ describe("Issues", function () {
 						});
 				},
 				function(done) {
-					agent2.get(`/${username3}/${model2}/revision/master/head/groups/${hidden_group_id}`)
+					teamspace1Agent.get(`/${username3}/${model2}/revision/master/head/groups/${hidden_group_id}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.objects).to.deep.equal(hidden_group.objects);
 							done(err);
@@ -2021,43 +2025,19 @@ describe("Issues", function () {
 			let issueId;
 
 			before(function(done) {
-				async.series([
-					function(_done) {
-						agent.post("/logout")
-							.send({})
-							.expect(200, _done);
-					},
-					function(_done) {
-						agent.post("/login")
-							.send({username: username, password})
-							.expect(200, _done);
-					},
-					function(_done) {
-						agent.post(`/${username}/${model}/issues`)
-							.send(issue)
-							.expect(200 , function(err, res) {
-								issueId = res.body._id;
-								return _done(err);
-							});
-					},
-					function(_done) {
-						agent.post("/logout")
-							.send({})
-							.expect(200, _done);
-					},
-					function(_done) {
-						agent.post("/login")
-							.send({username: username2, password})
-							.expect(200, _done);
-					}
-				], done);
+				agent.post(`/${username}/${model}/issues`)
+					.send(issue)
+					.expect(200 , function(err, res) {
+						issueId = res.body._id;
+						done();
+					});
 			});
 
 			it("not change priority", function(done) {
 				const updateData = {
 					"priority": "high"
 				};
-				agent.patch(`/${username}/${model}/issues/${issueId}`)
+				collabAgent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateData)
 					.expect(400, function(err, res) {
 						expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
@@ -2072,7 +2052,7 @@ describe("Issues", function () {
 					}
 				};
 
-				agent.patch(`/${username}/${model}/issues/${issueId}`)
+				collabAgent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateData)
 					.expect(200, done);
 			});
@@ -2092,7 +2072,7 @@ describe("Issues", function () {
 					}
 				};
 
-				agent.patch(`/${username}/${model}/issues/${issueId}`)
+				collabAgent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateData)
 					.expect(200, function(err, res) {
 						expect(res.body.viewpoint.up).to.deep.equal(updateData.viewpoint.up);
@@ -2110,7 +2090,7 @@ describe("Issues", function () {
 
 			it("change pin", function(done) {
 				const updateData = { "position":[20,20,100] };
-				agent.patch(`/${username}/${model}/issues/${issueId}`)
+				collabAgent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateData)
 					.expect(200, function(err, res) {
 						expect(res.body.position).to.deep.equal(updateData.position);
@@ -2123,7 +2103,7 @@ describe("Issues", function () {
 				const updateData = {
 					"status": "in progress"
 				};
-				agent.patch(`/${username}/${model}/issues/${issueId}`)
+				collabAgent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateData)
 					.expect(200, function(err, res) {
 						expect(res.body.value);
@@ -2135,7 +2115,7 @@ describe("Issues", function () {
 				const updateData = {
 					"status": "void"
 				};
-				agent.patch(`/${username}/${model}/issues/${issueId}`)
+				collabAgent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateData)
 					.expect(400, function(err, res) {
 						expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
@@ -2147,7 +2127,7 @@ describe("Issues", function () {
 				const updateData = {
 					"status": "closed"
 				};
-				agent.patch(`/${username}/${model}/issues/${issueId}`)
+				collabAgent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateData)
 					.expect(400, function(err, res) {
 						expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
@@ -2159,7 +2139,7 @@ describe("Issues", function () {
 				const updateData = {
 					"topic_type": "For VR"
 				};
-				agent.patch(`/${username}/${model}/issues/${issueId}`)
+				collabAgent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateData)
 					.expect(200, done);
 			});
@@ -2168,7 +2148,7 @@ describe("Issues", function () {
 				const updateData = {
 					"assigned_roles": ["jobA"]
 				};
-				agent.patch(`/${username}/${model}/issues/${issueId}`)
+				collabAgent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateData)
 					.expect(200, done);
 			});
@@ -2180,43 +2160,21 @@ describe("Issues", function () {
 			before(function(done) {
 				const issue = Object.assign(baseIssue, {"name":"Issue test", "assigned_roles": ["jobC"]});
 
-				async.series([
-					function(_done) {
-						agent.post("/logout")
-							.send({})
-							.expect(200, _done);
-					},
-					function(_done) {
-						agent.post("/login")
-							.send({username: username, password})
-							.expect(200, _done);
-					},
-					function(_done) {
-						agent.post(`/${username}/${model}/issues`)
-							.send(issue)
-							.expect(200 , function(err, res) {
-								issueId = res.body._id;
-								return _done(err);
-							});
-					},
-					function(_done) {
-						agent.post("/logout")
-							.send({})
-							.expect(200, _done);
-					},
-					function(_done) {
-						agent.post("/login")
-							.send({username: username2, password})
-							.expect(200, _done);
-					}
-				], done);
+
+				agent.post(`/${username}/${model}/issues`)
+					.send(issue)
+					.expect(200 , function(err, res) {
+						issueId = res.body._id;
+						return done(err);
+					});
+
 			});
 
 			it("not change priority", function(done) {
 				const updateData = {
 					"priority": "high"
 				};
-				agent.patch(`/${username}/${model}/issues/${issueId}`)
+				collabAgent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateData)
 					.expect(400, function(err, res) {
 						expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
@@ -2228,7 +2186,7 @@ describe("Issues", function () {
 				const updateDataProgress = {
 					"status": "in progress"
 				};
-				agent.patch(`/${username}/${model}/issues/${issueId}`)
+				collabAgent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateDataProgress)
 					.expect(400, function(err, res) {
 						expect(res.body.value);
@@ -2240,7 +2198,7 @@ describe("Issues", function () {
 				const updateDataVoid = {
 					"status": "void"
 				};
-				agent.patch(`/${username}/${model}/issues/${issueId}`)
+				collabAgent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateDataVoid)
 					.expect(400, function(err, res) {
 						expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
@@ -2252,7 +2210,7 @@ describe("Issues", function () {
 				const updateDataClosed = {
 					"status": "closed"
 				};
-				agent.patch(`/${username}/${model}/issues/${issueId}`)
+				collabAgent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateDataClosed)
 					.expect(400, function(err, res) {
 						expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
@@ -2266,7 +2224,7 @@ describe("Issues", function () {
 						"screenshot": altBase64
 					}
 				};
-				agent.patch(`/${username}/${model}/issues/${issueId}`)
+				collabAgent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateData)
 					.expect(200, done);
 
@@ -2286,7 +2244,7 @@ describe("Issues", function () {
 						"near":50
 					}
 				};
-				agent.patch(`/${username}/${model}/issues/${issueId}`)
+				collabAgent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateData)
 					.expect(200, function(err, res) {
 						expect(res.body.viewpoint.up).to.deep.equal(updateData.viewpoint.up);
@@ -2305,7 +2263,7 @@ describe("Issues", function () {
 
 			it("change pin", function(done) {
 				const updateData = { "position":[20,20,100] };
-				agent.patch(`/${username}/${model}/issues/${issueId}`)
+				collabAgent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateData)
 					.expect(200, function(err, res) {
 						expect(res.body.position).to.deep.equal(updateData.position);
@@ -2318,7 +2276,7 @@ describe("Issues", function () {
 				const updateData = {
 					"topic_type": "For VR"
 				};
-				agent.patch(`/${username}/${model}/issues/${issueId}`)
+				collabAgent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateData)
 					.expect(200, done);
 			});
@@ -2327,7 +2285,7 @@ describe("Issues", function () {
 				const updateData = {
 					"assigned_roles": ["jobA"]
 				};
-				agent.patch(`/${username}/${model}/issues/${issueId}`)
+				collabAgent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateData)
 					.expect(200, done);
 			});
@@ -2341,44 +2299,13 @@ describe("Issues", function () {
 			const close = { status: "closed"};
 
 			before(function(done) {
-				async.series([
-					function(done) {
-						agent.post("/logout")
-							.send({})
-							.expect(200, done);
-					},
-					function(done) {
-						agent.post("/login")
-							.send({username: username2, password})
-							.expect(200, done);
-					},
-					function(done) {
-						agent.post(`/${username}/${model}/issues`)
-							.send(issue)
-							.expect(200 , function(err, res) {
-								issueId1 = res.body._id;
-								return done(err);
-							});
-					},
-					function(done) {
-						agent.post(`/${username}/${model}/issues`)
-							.send(issue)
-							.expect(200 , function(err, res) {
-								issueId2 = res.body._id;
-								return done(err);
-							});
-					},
-					function(done) {
-						agent.post("/logout")
-							.send({})
-							.expect(200, done);
-					},
-					function(done) {
-						agent.post("/login")
-							.send({username, password})
-							.expect(200, done);
-					}
-				],done);
+				collabAgent.post(`/${username}/${model}/issues`)
+					.send(issue)
+					.expect(200 , function(err, res) {
+						issueId1 = res.body._id;
+						return done(err);
+					});
+
 			});
 
 			it("try to void an issue should succeed", function(done) {
@@ -2411,18 +2338,9 @@ describe("Issues", function () {
 
 			before(function(done) {
 				async.series([
+
 					function(done) {
-						agent.post("/logout")
-							.send({})
-							.expect(200, done);
-					},
-					function(done) {
-						agent.post("/login")
-							.send({username: projectAdminUser, password: projectAdminUser})
-							.expect(200, done);
-					},
-					function(done) {
-						agent.post(`/${username}/${model}/issues`)
+						projectAdminAgent.post(`/${username}/${model}/issues`)
 							.send(issue)
 							.expect(200 , function(err, res) {
 								issueId1 = res.body._id;
@@ -2430,23 +2348,13 @@ describe("Issues", function () {
 							});
 					},
 					function(done) {
-						agent.post(`/${username}/${model}/issues`)
+						projectAdminAgent.post(`/${username}/${model}/issues`)
 							.send(issue)
 							.expect(200 , function(err, res) {
 								issueId2 = res.body._id;
 								return done(err);
 							});
 					},
-					function(done) {
-						agent.post("/logout")
-							.send({})
-							.expect(200, done);
-					},
-					function(done) {
-						agent.post("/login")
-							.send({username, password})
-							.expect(200, done);
-					}
 				],done);
 			});
 
@@ -2495,31 +2403,6 @@ describe("Issues", function () {
 								issueId2 = res.body._id;
 								return done(err);
 							});
-					},
-					function(done) {
-						agent.post("/logout")
-							.send({})
-							.expect(200, done);
-					},
-					function(done) {
-						agent.post("/login")
-							.send({username: username2, password})
-							.expect(200, done);
-					}
-				],done);
-			});
-
-			after(function(done) {
-				async.series([
-					function(done) {
-						agent.post("/logout")
-							.send({})
-							.expect(200, done);
-					},
-					function(done) {
-						agent.post("/login")
-							.send({username, password})
-							.expect(200, done);
 					}
 				],done);
 			});
@@ -2527,7 +2410,7 @@ describe("Issues", function () {
 			it("try to void an issue should fail", function(done) {
 				async.series([
 					function(done) {
-						agent.patch(`/${username}/${model}/issues/${issueId2}`)
+						collabAgent.patch(`/${username}/${model}/issues/${issueId2}`)
 							.send(voidStatus)
 							.expect(400, function(err, res) {
 								expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
@@ -2540,7 +2423,7 @@ describe("Issues", function () {
 			it("try to close an issue should fail", function(done) {
 				async.series([
 					function(done) {
-						agent.patch(`/${username}/${model}/issues/${issueId1}`)
+						collabAgent.patch(`/${username}/${model}/issues/${issueId1}`)
 							.send(close)
 							.expect(400, function(err, res) {
 								expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
@@ -2789,46 +2672,21 @@ describe("Issues", function () {
 
 	describe("Tagging a user in a comment", function() {
 		const teamspace = "teamSpace1";
-		const altUser = "commenterTeamspace1Model1JobA";
 		const password = "password";
 		const model = "5bfc11fa-50ac-b7e7-4328-83aa11fa50ac";
 		const issueId = "2eb8f760-7ac5-11e8-9567-6b401a084a90";
 
-		before(function(done) {
-			async.series([
-				function(done) {
-					agent.post("/logout")
-						.send({})
-						.expect(200, done);
-				},
-				function(done) {
-					agent.post("/login")
-						.send({username: teamspace, password})
-						.expect(200, done);
-				}
-			], done);
-		});
 
 		it("should create a notification on the tagged user's messages", function(done) {
-			const comment = {comment : `@${altUser}`};
+			const comment = {comment : `@${commenterUser}`};
 			async.series([
 				function(done) {
-					agent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
+					teamspace1Agent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
 						.send(comment)
 						.expect(200, done);
 				},
 				function(done) {
-					agent.post("/logout")
-						.send({})
-						.expect(200, done);
-				},
-				function(done) {
-					agent.post("/login")
-						.send({username: altUser, password})
-						.expect(200, done);
-				},
-				function(done) {
-					agent.get("/notifications")
+					commenterAgent.get("/notifications")
 						.expect(200, function(err, res) {
 							const notification = res.body.find(item => item.type === "USER_REFERENCED" && item.issueId === issueId);
 							assert(notification);
@@ -2844,7 +2702,7 @@ describe("Issues", function () {
 
 		it("should create comment successful if the user tagged a user that doesn't not exist", function(done) {
 			const comment = {comment : "@doesntExist1234"};
-			agent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
+			commenterAgent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
 				.send(comment)
 				.expect(200, done);
 		});
@@ -2852,20 +2710,9 @@ describe("Issues", function () {
 		it("should NOT create a notification if the user does not belong in the teamspace", function(done) {
 			const comment = {comment : `@${username}`};
 			async.series([
-				login(agent, altUser, password),
 				function(done) {
-					agent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
+					commenterAgent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
 						.send(comment)
-						.expect(200, done);
-				},
-				function(done) {
-					agent.post("/logout")
-						.send({})
-						.expect(200, done);
-				},
-				function(done) {
-					agent.post("/login")
-						.send({username, password})
 						.expect(200, done);
 				},
 				function(done) {
@@ -2881,18 +2728,15 @@ describe("Issues", function () {
 
 		it("should NOT create a notification if the user is tagged in a quote", function(done) {
 			const comment = {comment : `>
-			@${altUser}`};
+			@${commenterUser}`};
 			async.waterfall([
-				login(agent, altUser, password),
-				deleteNotifications(agent),
-				login(agent, teamspace, password),
-				function(args, next) {
-					agent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
+				deleteNotifications(commenterAgent),
+				function(next) {
+					teamspace1Agent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
 						.send(comment)
 						.expect(200, next);
 				},
-				login(agent, altUser, password),
-				fetchNotification(agent),
+				fetchNotification(commenterAgent),
 				(notifications, next) => {
 					expect(notifications, "There should not be any notifications").to.be.an("array").and.to.have.length(0);
 					next();
@@ -2914,7 +2758,7 @@ describe("Issues", function () {
 
 		const createAndPushIssue = (done) => {
 			async.waterfall([
-				createIssueTeamspace1(agent),
+				createIssueTeamspace1(teamspace1Agent),
 				(issue, next) => {
 					issues.push(issue);
 					next();
@@ -2923,7 +2767,6 @@ describe("Issues", function () {
 
 		before(function(done) {
 			async.series([
-				login(agent, teamspace, password),
 				createAndPushIssue,
 				createAndPushIssue,
 				createAndPushIssue,
@@ -2936,7 +2779,7 @@ describe("Issues", function () {
 		});
 
 		const testForNoComment = (id, done) => {
-			agent.get(`/${teamspace}/${model}/issues/${id}`).expect(200, function(err , res) {
+			teamspace1Agent.get(`/${teamspace}/${model}/issues/${id}`).expect(200, function(err , res) {
 				const comments = res.body.comments;
 				expect(comments, "There should not be a comment").to.be.an("array").and.to.have.length(0);
 				return done(err);
@@ -2944,7 +2787,7 @@ describe("Issues", function () {
 		};
 
 		const testForReference = (referencedIssueId, otherIssueNumber, done) =>  {
-			agent.get(`/${teamspace}/${model}/issues/${referencedIssueId}`).expect(200, function(err , res) {
+			teamspace1Agent.get(`/${teamspace}/${model}/issues/${referencedIssueId}`).expect(200, function(err , res) {
 				const comments = res.body.comments;
 
 				expect(comments, "There should be one system comment").to.be.an("array").and.to.have.length(1);
@@ -2960,13 +2803,16 @@ describe("Issues", function () {
 		it("should create a system message when the issue has been referenced", function(done) {
 			const comment = {comment : `look at issue  #${issues[0].number} and #${issues[1].number} `};
 
+			console.log("hi?!");
 			async.series([
 				function(done) {
-					agent.post(`/${teamspace}/${model}/issues/${issues[2]._id}/comments`)
+					console.log("posting");
+					teamspace1Agent.post(`/${teamspace}/${model}/issues/${issues[2]._id}/comments`)
 						.send(comment)
 						.expect(200, done);
 				},
 				function(done) {
+					console.log("test for reference");
 					testForReference(issues[0]._id, issues[2].number, done);
 				},
 				function(done) {
@@ -2983,17 +2829,18 @@ describe("Issues", function () {
 		});
 
 		it("should have multiple system messages when the issue has been referenced several times", function(done) {
+
 			const comment = {comment : `#${issues[0].number} is interesting`};
 
 			async.series([
 				function(done) {
-					agent.post(`/${teamspace}/${model}/issues/${issues[1]._id}/comments`)
+					teamspace1Agent.post(`/${teamspace}/${model}/issues/${issues[1]._id}/comments`)
 						.send(comment)
 						.expect(200, done);
 				},
 
 				function(done) {
-					agent.get(`/${teamspace}/${model}/issues/${issues[0]._id}`).expect(200, function(err , res) {
+					teamspace1Agent.get(`/${teamspace}/${model}/issues/${issues[0]._id}`).expect(200, function(err , res) {
 						let comments = res.body.comments;
 						const [otherIssueNumber1, otherIssueNumber2] =  [issues[2].number.toString(), issues[1].number.toString()]
 							.sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
@@ -3026,7 +2873,7 @@ describe("Issues", function () {
 
 			async.series([
 				function(done) {
-					agent.post(`/${teamspace}/${model}/issues/${issues[7]._id}/comments`)
+					teamspace1Agent.post(`/${teamspace}/${model}/issues/${issues[7]._id}/comments`)
 						.send(comment)
 						.expect(200, done);
 				},
@@ -3142,31 +2989,23 @@ describe("Issues", function () {
 			"type"
 		];
 
-		before(function(done) {
-			async.series([
-				function(done) {
-					agent.post("/logout")
-						.send({})
-						.expect(200, done);
-				},
-				function(done) {
-					agent.post("/login")
-						.send({ username: bcfusername, password: bcfpassword})
-						.expect(200, done);
-				}
-			], done);
+		let bcfAgent;
+
+		before(async function() {
+			bcfAgent = SessionTracker(request(server));
+			await bcfAgent.login(bcfusername, bcfpassword);
 		});
 
 		describe("Importing a bcf file", function() {
 			it("should succeed", function(done) {
 				async.series([
 					function(done) {
-						agent.post(`/${bcfusername}/${bcfmodel}/issues.bcfzip`)
+						bcfAgent.post(`/${bcfusername}/${bcfmodel}/issues.bcfzip`)
 							.attach("file", __dirname + bcf.path)
 							.expect(200, done);
 					},
 					function(done) {
-						agent.get(`/${bcfusername}/${bcfmodel}/issues`)
+						bcfAgent.get(`/${bcfusername}/${bcfmodel}/issues`)
 							.expect(200, function(err, res) {
 								const issue1 = res.body.find(issue => issue._id === bcf.issue1);
 								const issue2 = res.body.find(issue => issue._id === bcf.issue2);
@@ -3177,7 +3016,7 @@ describe("Issues", function () {
 							});
 					},
 					function(done) {
-						agent.get(`/${bcfusername}/${bcfmodel}/issues/${bcf.issue1}`)
+						bcfAgent.get(`/${bcfusername}/${bcfmodel}/issues/${bcf.issue1}`)
 							.expect(200, function(err, res) {
 								const issue1 = res.body;
 
@@ -3217,12 +3056,12 @@ describe("Issues", function () {
 			it("with groups should succeed", function(done) {
 				async.series([
 					function(done) {
-						agent.post(`/${bcfusername}/${bcfmodel}/issues.bcfzip`)
+						bcfAgent.post(`/${bcfusername}/${bcfmodel}/issues.bcfzip`)
 							.attach("file", __dirname + bcf.withGroupsPath)
 							.expect(200, done);
 					},
 					function(done) {
-						agent.get(`/${bcfusername}/${bcfmodel}/issues`)
+						bcfAgent.get(`/${bcfusername}/${bcfmodel}/issues`)
 							.expect(200, function(err, res) {
 								expect(res.body).to.have.lengthOf(9);
 								done(err);
@@ -3232,7 +3071,7 @@ describe("Issues", function () {
 			});
 
 			it("with empty comments should succeed", function(done) {
-				agent.post(`/${bcfusername}/${bcfmodel}/issues.bcfzip`)
+				bcfAgent.post(`/${bcfusername}/${bcfmodel}/issues.bcfzip`)
 					.attach("file", __dirname + bcf.withEmptyComment)
 					.expect(200, done);
 			});
@@ -3240,12 +3079,12 @@ describe("Issues", function () {
 			it("if user is collaborator should succeed", function(done) {
 				async.series([
 					function(done) {
-						agent.post(`/${altTeamspace}/${collaboratorModel}/issues.bcfzip`)
+						bcfAgent.post(`/${altTeamspace}/${collaboratorModel}/issues.bcfzip`)
 							.attach("file", __dirname + bcf.path)
 							.expect(200, done);
 					},
 					function(done) {
-						agent.get(`/${altTeamspace}/${collaboratorModel}/issues`)
+						bcfAgent.get(`/${altTeamspace}/${collaboratorModel}/issues`)
 							.expect(200, function(err, res) {
 								const issue1 = res.body.find(issue => issue._id === bcf.issue1);
 								const issue2 = res.body.find(issue => issue._id === bcf.issue2);
@@ -3256,7 +3095,7 @@ describe("Issues", function () {
 							});
 					},
 					function(done) {
-						agent.get(`/${altTeamspace}/${collaboratorModel}/issues/${bcf.issue1}`)
+						bcfAgent.get(`/${altTeamspace}/${collaboratorModel}/issues/${bcf.issue1}`)
 							.expect(200, function(err, res) {
 
 								const issue1 = res.body;
@@ -3296,12 +3135,12 @@ describe("Issues", function () {
 			it("if user is commenter should succeed", function(done) {
 				async.series([
 					function(done) {
-						agent.post(`/${altTeamspace}/${commenterModel}/issues.bcfzip`)
+						bcfAgent.post(`/${altTeamspace}/${commenterModel}/issues.bcfzip`)
 							.attach("file", __dirname + bcf.path)
 							.expect(200, done);
 					},
 					function(done) {
-						agent.get(`/${altTeamspace}/${commenterModel}/issues`)
+						bcfAgent.get(`/${altTeamspace}/${commenterModel}/issues`)
 							.expect(200, function(err, res) {
 								const issue1 = res.body.find(issue => issue._id === bcf.issue1);
 								const issue2 = res.body.find(issue => issue._id === bcf.issue2);
@@ -3312,7 +3151,7 @@ describe("Issues", function () {
 							});
 					},
 					function(done) {
-						agent.get(`/${altTeamspace}/${commenterModel}/issues/${bcf.issue1}`)
+						bcfAgent.get(`/${altTeamspace}/${commenterModel}/issues/${bcf.issue1}`)
 							.expect(200, function(err, res) {
 
 								const issue1 = res.body;
@@ -3350,7 +3189,7 @@ describe("Issues", function () {
 			});
 
 			it("if user is viewer should fail", function(done) {
-				agent.post(`/${altTeamspace}/${viewerModel}/issues.bcfzip`)
+				bcfAgent.post(`/${altTeamspace}/${viewerModel}/issues.bcfzip`)
 					.attach("file", __dirname + bcf.path)
 					.expect(401, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.NOT_AUTHORIZED.value);
@@ -3359,7 +3198,7 @@ describe("Issues", function () {
 			});
 
 			it("if model does not exist should fail", function(done) {
-				agent.post(`/${altTeamspace}/${fakeModel}/issues.bcfzip`)
+				bcfAgent.post(`/${altTeamspace}/${fakeModel}/issues.bcfzip`)
 					.attach("file", __dirname + bcf.path)
 					.expect(404, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
@@ -3368,14 +3207,14 @@ describe("Issues", function () {
 			});
 
 			it("if teamspace does not exist should fail", async function() {
-				const res = await agent.post(`/${fakeTeamspace}/${viewerModel}/issues.bcfzip`)
+				const res = await bcfAgent.post(`/${fakeTeamspace}/${viewerModel}/issues.bcfzip`)
 					.expect(404);
 
 				expect(res.body.code).to.equal(responseCodesV5.teamspaceNotFound.code);
 			});
 
 			it("if file is not BCF file should fail", function(done) {
-				agent.post(`/${altTeamspace}/${viewerModel}/issues.bcfzip`)
+				bcfAgent.post(`/${altTeamspace}/${viewerModel}/issues.bcfzip`)
 					.attach("file", __dirname + bcf.invalidFile)
 					.expect(401, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.NOT_AUTHORIZED.value);
@@ -3384,13 +3223,13 @@ describe("Issues", function () {
 			});
 
 			it("if file is from Solibri should succeed", function(done) {
-				agent.post(`/${altTeamspace}/${commenterModel}/issues.bcfzip`)
+				bcfAgent.post(`/${altTeamspace}/${commenterModel}/issues.bcfzip`)
 					.attach("file", __dirname + bcf.solibri)
 					.expect(200, done);
 			});
 
 			it("if file is bad with zero size contents should fail", function(done) {
-				agent.post(`/${altTeamspace}/${commenterModel}/issues.bcfzip`)
+				bcfAgent.post(`/${altTeamspace}/${commenterModel}/issues.bcfzip`)
 					.attach("file", __dirname + bcf.sizeZero)
 					.expect(400, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -3401,7 +3240,7 @@ describe("Issues", function () {
 
 		describe("Exporting a bcf file", function() {
 			it("should succeed", function(done) {
-				agent.get(`/${bcfusername}/${bcfmodel}/issues.bcfzip`)
+				bcfAgent.get(`/${bcfusername}/${bcfmodel}/issues.bcfzip`)
 					.expect(200, function(err, res) {
 						expect(res.text.length).to.be.above(7000);
 						done(err);
@@ -3409,7 +3248,7 @@ describe("Issues", function () {
 			});
 
 			it("for specific issue numbers should succeed", function(done) {
-				agent.get(`/${bcfusername}/${bcfmodel}/issues.bcfzip?numbers=8,9`)
+				bcfAgent.get(`/${bcfusername}/${bcfmodel}/issues.bcfzip?numbers=8,9`)
 					.expect(200, function(err, res) {
 						expect(res.text.length).to.be.above(4000);
 						done(err);
@@ -3417,7 +3256,7 @@ describe("Issues", function () {
 			});
 
 			it("if user is collaborator should succeed", function(done) {
-				agent.get(`/${altTeamspace}/${collaboratorModel}/issues.bcfzip`)
+				bcfAgent.get(`/${altTeamspace}/${collaboratorModel}/issues.bcfzip`)
 					.expect(200, function(err, res) {
 						expect(res.text.length).to.be.above(7000);
 						done(err);
@@ -3425,7 +3264,7 @@ describe("Issues", function () {
 			});
 
 			it("if user is commenter should succeed", function(done) {
-				agent.get(`/${altTeamspace}/${commenterModel}/issues.bcfzip`)
+				bcfAgent.get(`/${altTeamspace}/${commenterModel}/issues.bcfzip`)
 					.expect(200, function(err, res) {
 						expect(res.text.length).to.be.above(9000);
 						done(err);
@@ -3433,7 +3272,7 @@ describe("Issues", function () {
 			});
 
 			it("if user is viewer should succeed", function(done) {
-				agent.get(`/${altTeamspace}/${viewerModel}/issues.bcfzip`)
+				bcfAgent.get(`/${altTeamspace}/${viewerModel}/issues.bcfzip`)
 					.expect(200, function(err, res) {
 						expect(res.text.length).to.be.above(3000);
 						done(err);
@@ -3441,7 +3280,7 @@ describe("Issues", function () {
 			});
 
 			it("if model does not exist should fail", function(done) {
-				agent.get(`/${altTeamspace}/${fakeModel}/issues.bcfzip`)
+				bcfAgent.get(`/${altTeamspace}/${fakeModel}/issues.bcfzip`)
 					.expect(404, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
 						done(err);
@@ -3449,7 +3288,7 @@ describe("Issues", function () {
 			});
 
 			it("if teamspace does not exist should fail", function(done) {
-				agent.get(`/${fakeTeamspace}/${viewerModel}/issues.bcfzip`)
+				bcfAgent.get(`/${fakeTeamspace}/${viewerModel}/issues.bcfzip`)
 					.expect(404, function(err, res) {
 						expect(res.body.code).to.equal(responseCodesV5.teamspaceNotFound.code);
 						done(err);
@@ -3463,38 +3302,43 @@ describe("Issues", function () {
 		const password = "password";
 		let model = "";
 
+		let adminAgent;
+
 		before(function(done) {
-			async.series([
-				login(agent, teamspace, password),
+
+			adminAgent = SessionTracker(request(server));
+			adminAgent.login("adminTeamspace1JobA", password).then(()=>{
+				async.series([
 				(next) => {
-					createModel(agent, teamspace,"Query issues").then((res) => {
+					createModel(teamspace1Agent, teamspace,"Query issues").then((res) => {
 						model = res.body.model;
 
 						const createIssueTeamspace1 = createIssue(teamspace,model);
 
 						async.series([
-							createIssueTeamspace1(agent, {topic_type: "information", number: 0, status: "closed", priority: "none", assigned_roles:[]}),
-							createIssueTeamspace1(agent, {topic_type: "other", number: 1, status: "open", priority: "medium", assigned_roles:["Client"]}),
-							createIssueTeamspace1(agent, {topic_type: "information", number: 2, status: "in progress", priority: "high", assigned_roles:[]}),
-							login(agent,"adminTeamspace1JobA", password),
-							createIssueTeamspace1(agent, {topic_type: "structure", number: 3, status: "open", priority: "none", assigned_roles:[]}),
-							createIssueTeamspace1(agent, {topic_type: "architecture", number: 4, status: "open", priority: "none", assigned_roles:["Client"]}),
-							login(agent, teamspace, password)
+							createIssueTeamspace1(teamspace1Agent, {topic_type: "information", number: 0, status: "closed", priority: "none", assigned_roles:[]}),
+							createIssueTeamspace1(teamspace1Agent, {topic_type: "other", number: 1, status: "open", priority: "medium", assigned_roles:["Client"]}),
+							createIssueTeamspace1(teamspace1Agent, {topic_type: "information", number: 2, status: "in progress", priority: "high", assigned_roles:[]}),
+							createIssueTeamspace1(adminAgent, {topic_type: "structure", number: 3, status: "open", priority: "none", assigned_roles:[]}),
+							createIssueTeamspace1(adminAgent, {topic_type: "architecture", number: 4, status: "open", priority: "none", assigned_roles:["Client"]}),
 						], next);
 					});
 				}
 			], done);
+			});
+
+
 		});
 
 		it(" by id", function(done) {
 			let ids = [];
 
-			agent.get(`/${teamspace}/${model}/issues`)
+			teamspace1Agent.get(`/${teamspace}/${model}/issues`)
 				.expect(200, function(err, res) {
 					ids = res.body.map(issue => issue._id);
 					ids = [ids[0], ids[2], ids[4]].sort();
 
-					agent.get(`/${teamspace}/${model}/issues?ids=${ids.join(",")}`)
+					teamspace1Agent.get(`/${teamspace}/${model}/issues?ids=${ids.join(",")}`)
 						.expect(200, function(err, res) {
 							expect(res.body.map((issue => issue._id)).sort()).to.eql(ids);
 							done(err);
@@ -3504,7 +3348,7 @@ describe("Issues", function () {
 		});
 
 		it(" by topic", function(done) {
-			agent.get(`/${teamspace}/${model}/issues?topicTypes=information,structure`)
+			teamspace1Agent.get(`/${teamspace}/${model}/issues?topicTypes=information,structure`)
 				.expect(200, function(err, res) {
 					expect(res.body.map((issue => issue.topic_type)).sort()).to.eql(["information", "structure", "information"].sort());
 					done(err);
@@ -3512,7 +3356,7 @@ describe("Issues", function () {
 		});
 
 		it(" by status", function(done) {
-			agent.get(`/${teamspace}/${model}/issues?status=closed,in%20progress`)
+			teamspace1Agent.get(`/${teamspace}/${model}/issues?status=closed,in%20progress`)
 				.expect(200, function(err, res) {
 					expect(res.body.map((issue => issue.status)).sort()).to.eql(["closed", "in progress"].sort());
 					done(err);
@@ -3520,7 +3364,7 @@ describe("Issues", function () {
 		});
 
 		it(" by priority", function(done) {
-			agent.get(`/${teamspace}/${model}/issues?priorities=medium,high`)
+			teamspace1Agent.get(`/${teamspace}/${model}/issues?priorities=medium,high`)
 				.expect(200, function(err, res) {
 					expect(res.body.map((issue => issue.priority)).sort()).to.eql(["medium", "high"].sort());
 					done(err);
@@ -3528,7 +3372,7 @@ describe("Issues", function () {
 		});
 
 		it(" by number", function(done) {
-			agent.get(`/${teamspace}/${model}/issues?numbers=1,3,4,39`)
+			teamspace1Agent.get(`/${teamspace}/${model}/issues?numbers=1,3,4,39`)
 				.expect(200, function(err, res) {
 					expect(res.body.map((issue => issue.number)).sort()).to.eql([1, 3, 4].sort());
 					done(err);
@@ -3536,7 +3380,7 @@ describe("Issues", function () {
 		});
 
 		it(" by assigned role", function(done) {
-			agent.get(`/${teamspace}/${model}/issues/?assignedRoles=Client`)
+			teamspace1Agent.get(`/${teamspace}/${model}/issues/?assignedRoles=Client`)
 				.expect(200, function(err, res) {
 					expect(res.body.map((issue => issue.assigned_roles[0])).sort()).to.eql(["Client","Client"].sort());
 					done(err);
@@ -3544,7 +3388,7 @@ describe("Issues", function () {
 		});
 
 		it(" by unassigned role", function(done) {
-			agent.get(`/${teamspace}/${model}/issues/?assignedRoles=Unassigned`)
+			teamspace1Agent.get(`/${teamspace}/${model}/issues/?assignedRoles=Unassigned`)
 				.expect(200, function(err, res) {
 					expect(res.body.map((issue => issue.assigned_roles.length)).sort()).to.eql([0,0,0].sort());
 					done(err);

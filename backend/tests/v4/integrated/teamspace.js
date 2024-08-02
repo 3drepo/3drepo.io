@@ -18,6 +18,7 @@
  */
 
 const async = require("async");
+const SessionTracker = require("../../v5/helper/sessionTracker")
 const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../../src/v4/services/api.js").createApp();
@@ -144,11 +145,10 @@ describe("Teamspace", function() {
 
 	describe("user with no subscription", function(done) {
 		const user = noSubUser;
-		before(function(done) {
+		before(async function() {
 			this.timeout(timeout);
-			agent.post("/login")
-				.send({username: user.user, password: user.password})
-				.expect(200, done);
+			agent = SessionTracker(request(server));
+			await agent.login(user.user, user.password);
 
 		});
 
@@ -160,20 +160,14 @@ describe("Teamspace", function() {
 				});
 		});
 
-		after(function(done) {
-			this.timeout(timeout);
-			agent.post("/logout")
-				.expect(200, done);
-		});
 	});
 
 	describe("user with enterprise subscription", function(done) {
 		const user = enterpriseUser;
-		before(function(done) {
+		before(async function() {
 			this.timeout(timeout);
-			agent.post("/login")
-				.send({username: user.user, password: user.password})
-				.expect(200, done);
+			agent = SessionTracker(request(server));
+			await agent.login(user.user, user.password);
 
 		});
 
@@ -184,21 +178,14 @@ describe("Teamspace", function() {
 					done(err);
 				});
 		});
-
-		after(function(done) {
-			this.timeout(timeout);
-			agent.post("/logout")
-				.expect(200, done);
-		});
 	});
 
 	describe("user with discretionary subscription", function(done) {
 		const user = discretionaryUser;
-		before(function(done) {
+		before(async function() {
 			this.timeout(timeout);
-			agent.post("/login")
-				.send({username: user.user, password: user.password})
-				.expect(200, done);
+			agent = SessionTracker(request(server));
+			await agent.login(user.user, user.password);
 
 		});
 
@@ -209,21 +196,14 @@ describe("Teamspace", function() {
 					done(err);
 				});
 		});
-
-		after(function(done) {
-			this.timeout(timeout);
-			agent.post("/logout")
-				.expect(200, done);
-		});
 	});
 
 	describe("user with mixed subscription",  function() {
 		const user =  mixedUser1;
 		before(async function() {
 			this.timeout(timeout);
-			await agent.post("/login")
-				.send({username: user.user, password: user.password})
-				.expect(200);
+			agent = SessionTracker(request(server));
+			await agent.login(user.user, user.password);
 
 		});
 
@@ -241,23 +221,16 @@ describe("Teamspace", function() {
 			expect(body).to.deep.equal(user.subscriptions);
 		});
 
-		after(async function() {
-			this.timeout(timeout);
-			await agent.post("/logout")
-				.expect(200);
-		});
 	});
 
 	describe("user with mixed subscription with expired subscriptions (1)", function(done) {
 		const user =  mixedUser2;
-		before(function(done) {
+		before(async function() {
 			this.timeout(timeout);
-			agent.post("/login")
-				.send({username: user.user, password: user.password})
-				.expect(200, done);
+			agent = SessionTracker(request(server));
+			await agent.login(user.user, user.password);
 
 		});
-
 		it("should have the correct aggregated quota", function(done) {
 			agent.get(`/${user.user}/quota`)
 				.expect(200, function(err, res) {
@@ -266,20 +239,14 @@ describe("Teamspace", function() {
 				});
 		});
 
-		after(function(done) {
-			this.timeout(timeout);
-			agent.post("/logout")
-				.expect(200, done);
-		});
 	});
 
 	describe("user with mixed subscription with expired subscriptions (2)", function(done) {
 		const user =  mixedUser3;
-		before(function(done) {
+		before(async function() {
 			this.timeout(timeout);
-			agent.post("/login")
-				.send({username: user.user, password: user.password})
-				.expect(200, done);
+			agent = SessionTracker(request(server));
+			await agent.login(user.user, user.password);
 
 		});
 
@@ -289,23 +256,16 @@ describe("Teamspace", function() {
 					expect(res.body).to.deep.equal(user.quota);
 					done(err);
 				});
-		});
-
-		after(function(done) {
-			this.timeout(timeout);
-			agent.post("/logout")
-				.expect(200, done);
 		});
 	});
 
 
 	describe("user with mixed subscription with expired subscriptions (3)", function(done) {
 		const user =  mixedUser4;
-		before(function(done) {
+		before(async function() {
 			this.timeout(timeout);
-			agent.post("/login")
-				.send({username: user.user, password: user.password})
-				.expect(200, done);
+			agent = SessionTracker(request(server));
+			await agent.login(user.user, user.password);
 
 		});
 
@@ -315,12 +275,6 @@ describe("Teamspace", function() {
 					expect(res.body).to.deep.equal(user.quota);
 					done(err);
 				});
-		});
-
-		after(function(done) {
-			this.timeout(timeout);
-			agent.post("/logout")
-				.expect(200, done);
 		});
 	});
 
@@ -361,14 +315,12 @@ describe("Teamspace", function() {
 
 	describe("Member of a teamspace trying to get other members information", function(done) {
 		const user =  mixedUser4;
-		before(function(done) {
+		before(async function() {
 			this.timeout(timeout);
-			agent.post("/login")
-				.send({username: user.user, password: user.password})
-				.expect(200, done);
+			agent = SessionTracker(request(server));
+			await agent.login(user.user, user.password);
 
 		});
-
 
 		it("should pass if the member exists", function(done) {
 			const expectedInfo = {
@@ -438,12 +390,6 @@ describe("Teamspace", function() {
 					done(err);
 				});
 		});
-
-		after(function(done) {
-			this.timeout(timeout);
-			agent.post("/logout")
-				.expect(200, done);
-		});
 	});
 
 	const defaultRiskCategories = [
@@ -476,14 +422,13 @@ describe("Teamspace", function() {
 			"New Type 1",
 			"New Type 2"
 		];
-
-		before(function(done) {
+		before(async function() {
 			this.timeout(timeout);
-			agent.post("/login")
-				.send({username: user.user, password: user.password})
-				.expect(200, done);
+			agent = SessionTracker(request(server));
+			await agent.login(user.user, user.password);
 
 		});
+
 
 		it("set defaults should succeed", function(done) {
 			agent.patch(`/${user.user}/settings`)
@@ -657,21 +602,14 @@ describe("Teamspace", function() {
 				});
 		});
 
-		after(function(done) {
-			this.timeout(timeout);
-			agent.post("/logout")
-				.expect(200, done);
-		});
 	});
 
 	describe("Get teamspace settings", function(done) {
 		const user =  imsharedTeamspace;
-
-		before(function(done) {
+		before(async function() {
 			this.timeout(timeout);
-			agent.post("/login")
-				.send({username: user.user, password: user.password})
-				.expect(200, done);
+			agent = SessionTracker(request(server));
+			await agent.login(user.user, user.password);
 
 		});
 
@@ -723,21 +661,15 @@ describe("Teamspace", function() {
 				});
 		});
 
-		after(function(done) {
-			this.timeout(timeout);
-			agent.post("/logout")
-				.expect(200, done);
-		});
 	});
 
 	describe("Download mitigations file", function(done) {
 		const user =  impliedViewAllModelsTeamspace;
 
-		before(function(done) {
+		before(async function() {
 			this.timeout(timeout);
-			agent.post("/login")
-				.send({username: user.user, password: user.password})
-				.expect(200, done);
+			agent = SessionTracker(request(server));
+			await agent.login(user.user, user.password);
 
 		});
 
@@ -749,21 +681,15 @@ describe("Teamspace", function() {
 				});
 		});
 
-		after(function(done) {
-			this.timeout(timeout);
-			agent.post("/logout")
-				.expect(200, done);
-		});
 	});
 
 	describe("Download mitigations file", function(done) {
 		const user =  metaTestTeamspace;
 
-		before(function(done) {
+		before(async function() {
 			this.timeout(timeout);
-			agent.post("/login")
-				.send({username: user.user, password: user.password})
-				.expect(200, done);
+			agent = SessionTracker(request(server));
+			await agent.login(user.user, user.password);
 
 		});
 
@@ -795,23 +721,16 @@ describe("Teamspace", function() {
 					done(err);
 				});
 		});
-
-		after(function(done) {
-			this.timeout(timeout);
-			agent.post("/logout")
-				.expect(200, done);
-		});
 	});
 
 	describe("Upload mitigations file", function(done) {
 		const user =  imsharedTeamspace;
 		const notMitigationsFile = "/../statics/mitigations/notMitigations.zip";
 
-		before(function(done) {
+		before(async function() {
 			this.timeout(timeout);
-			agent.post("/login")
-				.send({username: user.user, password: user.password})
-				.expect(200, done);
+			agent = SessionTracker(request(server));
+			await agent.login(user.user, user.password);
 
 		});
 
@@ -902,21 +821,15 @@ describe("Teamspace", function() {
 				});
 		});
 
-		after(function(done) {
-			this.timeout(timeout);
-			agent.post("/logout")
-				.expect(200, done);
-		});
 	});
 
 	describe("Upload mitigations file", function(done) {
 		const user = noSubUser;
 
-		before(function(done) {
+		before(async function() {
 			this.timeout(timeout);
-			agent.post("/login")
-				.send({username: user.user, password: user.password})
-				.expect(200, done);
+			agent = SessionTracker(request(server));
+			await agent.login(user.user, user.password);
 
 		});
 
@@ -927,12 +840,6 @@ describe("Teamspace", function() {
 					expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT_PAY.value);
 					done(err);
 				});
-		});
-
-		after(function(done) {
-			this.timeout(timeout);
-			agent.post("/logout")
-				.expect(200, done);
 		});
 	});
 

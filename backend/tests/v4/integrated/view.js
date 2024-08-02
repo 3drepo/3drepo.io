@@ -18,6 +18,7 @@
  */
 
 const request = require("supertest");
+const SessionTracker = require("../../v5/helper/sessionTracker")
 const expect = require("chai").expect;
 const app = require("../../../src/v4/services/api.js").createApp();
 const responseCodes = require("../../../src/v4/response_codes.js");
@@ -138,16 +139,22 @@ describe("Views", function () {
 		}
 	};
 
-	before(function(done) {
-		server = app.listen(8080, function () {
-			agent = request.agent(server);
-			agent.post("/login")
-				.send({ username, password })
-				.expect(200, function(err, res) {
-					expect(res.body.username).to.equal(username);
-					done(err);
-				});
+	before(async function() {
+		await new Promise((resolve) => {
+			server = app.listen(8080, () => {
+				console.log("API test server is listening on port 8080!");
+				resolve();
+			});
+
 		});
+
+		agent = SessionTracker(request(server));
+		await agent.login(username, password);
+
+		agent2 = SessionTracker(request(server));
+		await agent2.login("teamSpace1", password);
+
+
 	});
 
 	after(function(done) {
@@ -158,173 +165,92 @@ describe("Views", function () {
 
 	describe("Retrieving views", function() {
 		it("full list should succeed", function(done) {
-			async.series([
-				function(done) {
-					agent2 = request.agent(server);
-					agent2.post("/login")
-						.send({ username: 'teamSpace1', password })
-						.expect(200, done);
-				},
-				function(done) {
-					agent2.get(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/`)
-						.expect(200, function(err, res) {
-							expect(res.body.length).to.equal(Object.keys(teamSpace1Views).length);
-							return done(err);
-						});
-				}
-			], done);
+
+			agent2.get(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/`)
+				.expect(200, function(err, res) {
+					expect(res.body.length).to.equal(Object.keys(teamSpace1Views).length);
+					return done(err);
+				});
+
 		});
 
 		it("invalid teamspace should fail", function(done) {
-			async.series([
-				function(done) {
-					agent2 = request.agent(server);
-					agent2.post("/login")
-						.send({ username: 'teamSpace1', password })
-						.expect(200, done);
-				},
-				function(done) {
-					agent2.get(`/invalidTeamspace/${teamSpace1Model}/viewpoints/`)
-						.expect(404, function(err, res) {
-							expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
-							return done(err);
-						});
-				}
-			], done);
+
+			agent2.get(`/invalidTeamspace/${teamSpace1Model}/viewpoints/`)
+				.expect(404, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+					return done(err);
+				});
 		});
 
 		it("invalid model ID should fail", function(done) {
-			async.series([
-				function(done) {
-					agent2 = request.agent(server);
-					agent2.post("/login")
-						.send({ username: 'teamSpace1', password })
-						.expect(200, done);
-				},
-				function(done) {
-					agent2.get(`/${teamSpace1Username}/invalidModelID/viewpoints/`)
-						.expect(404, function(err, res) {
-							expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
-							return done(err);
-						});
-				}
-			], done);
+			agent2.get(`/${teamSpace1Username}/invalidModelID/viewpoints/`)
+				.expect(404, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
+					return done(err);
+			});
 		});
 
 		it("by ID should succeed", function(done) {
 			const viewId = Object.keys(teamSpace1Views)[0];
+			agent2.get(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}`)
+				.expect(200, function(err, res) {
+					teamSpace1Views[viewId].viewpoint.near = res.body.viewpoint.near;
+					teamSpace1Views[viewId].viewpoint.far = res.body.viewpoint.far;
+					teamSpace1Views[viewId].viewpoint.fov = res.body.viewpoint.fov;
+					teamSpace1Views[viewId].viewpoint.aspect_ratio = res.body.viewpoint.aspect_ratio;
+					teamSpace1Views[viewId].viewpoint.hideIfc = res.body.viewpoint.hideIfc;
 
-			async.series([
-				function(done) {
-					agent2 = request.agent(server);
-					agent2.post("/login")
-						.send({ username: 'teamSpace1', password })
-						.expect(200, done);
-				},
-				function(done) {
-					agent2.get(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}`)
-						.expect(200, function(err, res) {
-							teamSpace1Views[viewId].viewpoint.near = res.body.viewpoint.near;
-							teamSpace1Views[viewId].viewpoint.far = res.body.viewpoint.far;
-							teamSpace1Views[viewId].viewpoint.fov = res.body.viewpoint.fov;
-							teamSpace1Views[viewId].viewpoint.aspect_ratio = res.body.viewpoint.aspect_ratio;
-							teamSpace1Views[viewId].viewpoint.hideIfc = res.body.viewpoint.hideIfc;
-
-							expect(res.body._id).to.equal(viewId);
-							expect(res.body.name).to.equal(teamSpace1Views[viewId].name);
-							expect(res.body.viewpoint).to.deep.equal(teamSpace1Views[viewId].viewpoint);
-							expect(res.body.thumbnail).to.exist;
-
-							return done(err);
-						});
-				}
-			], done);
+					expect(res.body._id).to.equal(viewId);
+					expect(res.body.name).to.equal(teamSpace1Views[viewId].name);
+					expect(res.body.viewpoint).to.deep.equal(teamSpace1Views[viewId].viewpoint);
+					expect(res.body.thumbnail).to.exist;
+					return done(err);
+				});
 		});
 
 		it("with invalid ID should fail", function(done) {
 			const viewId = "invalidID";
 
-			async.series([
-				function(done) {
-					agent2 = request.agent(server);
-					agent2.post("/login")
-						.send({ username: 'teamSpace1', password })
-						.expect(200, done);
-				},
-				function(done) {
-					agent2.get(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}`)
-						.expect(404, function(err, res) {
-							expect(res.body.value).to.equal(responseCodes.VIEW_NOT_FOUND.value);
+			agent2.get(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}`)
+				.expect(404, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.VIEW_NOT_FOUND.value);
 
-							return done(err);
-						});
-				}
-			], done);
+					return done(err);
+				});
 		});
 
 		it("legacy fields should succeed [deprecated version]", function(done) {
 			const viewId = Object.keys(teamSpace1Views)[0];
 
-			async.series([
-				function(done) {
-					agent2 = request.agent(server);
-					agent2.post("/login")
-						.send({ username: 'teamSpace1', password })
-						.expect(200, done);
-				},
-				function(done) {
-					agent2.get(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}`)
-						.expect(200, function(err, res) {
-							expect(res.body.clippingPlanes).to.deep.equal(teamSpace1Views[viewId].viewpoint.clippingPlanes);
-							expect(res.body.screenshot).to.exist;
-							expect(res.body.screenshot.thumbnail).to.equal(`${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}/thumbnail.png`);
+			agent2.get(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}`)
+				.expect(200, function(err, res) {
+					expect(res.body.clippingPlanes).to.deep.equal(teamSpace1Views[viewId].viewpoint.clippingPlanes);
+					expect(res.body.screenshot).to.exist;
+					expect(res.body.screenshot.thumbnail).to.equal(`${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}/thumbnail.png`);
 
-							return done(err);
-						});
-				}
-			], done);
+					return done(err);
+				});
 		});
 
 		it("view with clipping planes should succeed", function(done) {
 			const viewId = Object.keys(teamSpace1Views)[3];
 
-			async.series([
-				function(done) {
-					agent2 = request.agent(server);
-					agent2.post("/login")
-						.send({ username: 'teamSpace1', password })
-						.expect(200, done);
-				},
-				function(done) {
-					agent2.get(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}`)
-						.expect(200, function(err, res) {
-							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(teamSpace1Views[viewId].viewpoint.clippingPlanes);
-
-							return done(err);
-						});
-				}
-			], done);
+			agent2.get(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}`)
+				.expect(200, function(err, res) {
+					expect(res.body.viewpoint.clippingPlanes).to.deep.equal(teamSpace1Views[viewId].viewpoint.clippingPlanes);
+					return done(err);
+			});
 		});
 
 		it("view with legacy clipping planes should succeed [deprecated version]", function(done) {
 			const viewId = Object.keys(teamSpace1Views)[3];
 
-			async.series([
-				function(done) {
-					agent2 = request.agent(server);
-					agent2.post("/login")
-						.send({ username: 'teamSpace1', password })
-						.expect(200, done);
-				},
-				function(done) {
-					agent2.get(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}`)
-						.expect(200, function(err, res) {
-							expect(res.body.clippingPlanes).to.deep.equal(teamSpace1Views[viewId].viewpoint.clippingPlanes);
-
-							return done(err);
-						});
-				}
-			], done);
+			agent2.get(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}`)
+				.expect(200, function(err, res) {
+					expect(res.body.clippingPlanes).to.deep.equal(teamSpace1Views[viewId].viewpoint.clippingPlanes);
+					return done(err);
+			});
 		});
 	});
 
@@ -334,12 +260,6 @@ describe("Views", function () {
 			const newName = { name: "New view name"};
 
 			async.series([
-				function(done) {
-					agent2 = request.agent(server);
-					agent2.post("/login")
-						.send({ username: 'teamSpace1', password })
-						.expect(200, done);
-				},
 				function(done) {
 					agent2.put(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}/`)
 						.send(newName)
@@ -366,51 +286,24 @@ describe("Views", function () {
 					"right":[0,1,0]
 				}
 			};
-
-			async.series([
-				function(done) {
-					agent2 = request.agent(server);
-					agent2.post("/login")
-						.send({ username: 'teamSpace1', password })
-						.expect(200, done);
-				},
-				function(done) {
-					agent2.put(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}/`)
-						.send(newView)
-						.expect(400, done);
-				}
-			], done);
+			agent2.put(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}/`)
+				.send(newView)
+				.expect(400, done);
 		});
 
 		it("add unexpected field should fail", function(done) {
 			const viewId = Object.keys(teamSpace1Views)[0];
 			const badData = { unexpectedData: 1234 };
 
-			async.series([
-				function(done) {
-					agent2 = request.agent(server);
-					agent2.post("/login")
-						.send({ username: 'teamSpace1', password })
-						.expect(200, done);
-				},
-				function(done) {
-					agent2.put(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}/`)
-						.send(badData)
-						.expect(400, done);
-				}
-			], done);
+			agent2.put(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}/`)
+				.send(badData)
+				.expect(400, done);
 		});
 
 		it("delete view should succeed", function(done) {
 			const viewId = Object.keys(teamSpace1Views)[0];
 
 			async.series([
-				function(done) {
-					agent2 = request.agent(server);
-					agent2.post("/login")
-						.send({ username: 'teamSpace1', password })
-						.expect(200, done);
-				},
 				function(done) {
 					agent2.delete(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}/`)
 						.expect(200, done);
@@ -428,23 +321,12 @@ describe("Views", function () {
 
 		it("delete non-existent view should fail", function(done) {
 			const viewId = "wrongID";
+			agent2.delete(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}/`)
+				.expect(404, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.VIEW_NOT_FOUND.value);
 
-			async.series([
-				function(done) {
-					agent2 = request.agent(server);
-					agent2.post("/login")
-						.send({ username: 'teamSpace1', password })
-						.expect(200, done);
-				},
-				function(done) {
-					agent2.delete(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}/`)
-						.expect(404, function(err, res) {
-							expect(res.body.value).to.equal(responseCodes.VIEW_NOT_FOUND.value);
-
-							return done(err);
-						});
-				}
-			], done);
+					return done(err);
+				});
 		});
 	});
 
@@ -686,11 +568,6 @@ describe("Views", function () {
 			const viewpoint_groups = { highlighted_group, hidden_group, override_groups };
 
 			const view = { "name":"View embeded group  test", viewpoint : {...baseView.viewpoint, ...viewpoint_groups}};
-
-			const agent2 = request.agent(server);
-			await agent2.post("/login")
-						.send({ username: 'teamSpace1', password })
-						.expect(200);
 
 			const { body:{viewpoint:{highlighted_group_id, hidden_group_id, override_group_ids}} } = await agent2.post(`/${username3}/${model2}/viewpoints/`)
 						.send(view)

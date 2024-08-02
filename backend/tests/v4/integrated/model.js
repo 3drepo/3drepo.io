@@ -17,6 +17,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+const SessionTracker = require("../../v5/helper/sessionTracker")
 const { queue: {purgeQueues}} = require("../../v5/helper/services");
 const request = require("supertest");
 const expect = require("chai").expect;
@@ -39,21 +41,19 @@ describe("Model", function () {
 	const unit = "m";
 	const code = "00011";
 
-	before(function(done) {
 
-		server = app.listen(8080, function () {
-			console.log("API test server is listening on port 8080!");
-
-			agent = request.agent(server);
-			agent.post("/login")
-				.send({ username, password })
-				.expect(200, function(err, res) {
-					expect(res.body.username).to.equal(username);
-					done(err);
-				});
+	before(async function() {
+		await new Promise((resolve) => {
+			server = app.listen(8080, () => {
+				console.log("API test server is listening on port 8080!");
+				resolve();
+			});
 
 		});
 
+
+		agent = SessionTracker(request(server));
+		await agent.login(username, password);
 	});
 
 
@@ -385,19 +385,6 @@ describe("Model", function () {
 	});
 
 	describe("Setting a default viewpoint", function() {
-		before(function(done) {
-			async.series([
-				callback => {
-					agent.post("/logout").send({}).expect(200, callback);
-				},
-				callback => {
-					agent.post("/login").send({
-						username, password
-					}).expect(200, callback);
-				}
-			], done);
-		});
-
 		const testModel = "2d4a6208-6847-4a25-9d9e-097a63f2de93";
 		const viewId = "df8fa4a0-c2ba-11ea-8373-eb03ef03362f";
 		it("setting a valid view Id as default viewpoint should succeed", function (done) {
@@ -462,22 +449,15 @@ describe("Model", function () {
 		const username = "testing";
 		const password = "testing";
 		const model = "testproject";
+		let testAgent;
 
-		before(function(done) {
-			async.series([
-				function logout(done) {
-					agent.post("/logout").send({}).expect(200, done);
-				},
-				function login(done) {
-					agent.post("/login").send({
-						username, password
-					}).expect(200, done);
-				}
-			], done);
+		before(async function() {
+			testAgent = SessionTracker(request(server));
+			await testAgent.login(username, password);
 		});
 
 		it("should succeed and get the latest file", function(done) {
-			agent.get(`/${username}/${model}/download/latest`).expect(200, function(err, res) {
+			testAgent.get(`/${username}/${model}/download/latest`).expect(200, function(err, res) {
 
 				expect(res.headers["content-disposition"]).to.equal("attachment;filename=3DrepoBIM.obj");
 
@@ -494,28 +474,19 @@ describe("Model", function () {
 		const model = "sample_project";
 
 		const collaboratorUsername = "testing";
+		let testAgent;
 
-		before(function(done) {
-			async.series([
-				function logout(done) {
-					agent.post("/logout").send({}).expect(200, done);
-				},
-				function login(done) {
-					agent.post("/login").send({
-						username, password
-					}).expect(200, done);
-				}
-
-			], done);
-
+		before(async function() {
+			testAgent = SessionTracker(request(server));
+			await testAgent.login(username, password);
 		});
 
 		it("should succeed", function(done) {
-			agent.delete(`/${username}/${model}`).expect(200, done);
+			testAgent.delete(`/${username}/${model}`).expect(200, done);
 		});
 
 		it("should fail if delete again", function(done) {
-			agent.delete(`/${username}/${model}`).expect(404, function(err, res) {
+			testAgent.delete(`/${username}/${model}`).expect(404, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
 				done(err);
 			});
@@ -523,9 +494,8 @@ describe("Model", function () {
 
 		it("should be removed from collaborator's model listing", async function() {
 
-			const agent2 = request.agent(server);
-
-			await agent2.post("/login").send({ username: "testing", password: "testing" }).expect(200);
+			const agent2 = SessionTracker(request(server));
+			await agent2.login("testing", "testing");
 
 			const {body} =  await agent2.get("/testing.json").expect(200);
 
@@ -536,7 +506,7 @@ describe("Model", function () {
 		});
 
 		it("should be removed from model group", function(done) {
-			agent.get(`/${username}.json`).expect(200, function(err, res) {
+			testAgent.get(`/${username}.json`).expect(200, function(err, res) {
 
 				const account = res.body.accounts.find(account => account.account === username);
 				expect(account).to.exist;

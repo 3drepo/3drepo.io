@@ -18,6 +18,7 @@
  */
 
 const request = require("supertest");
+const SessionTracker = require("../../v5/helper/sessionTracker")
 const expect = require("chai").expect;
 const app = require("../../../src/v4/services/api.js").createApp();
 const logger = require("../../../src/v4/logger.js");
@@ -36,19 +37,17 @@ describe("Job", function () {
 	const job = { _id: "job1", color: "#000000"};
 	const job2 = { _id: "job2", color: "#000000"};
 
-	before(function(done) {
-		server = app.listen(8080, function () {
-			console.log("API test server is listening on port 8080!");
+	before(async function() {
 
-			agent = request.agent(server);
-			agent.post("/login")
-				.send({ username, password })
-				.expect(200, function(err, res) {
-					expect(res.body.username).to.equal(username);
-					done(err);
-				});
-
+		await new Promise((resolve) => {
+			server = app.listen(8080, () => {
+				console.log("API test server is listening on port 8080!");
+				resolve();
+			});
 		});
+
+		agent = SessionTracker(request(server));
+		await agent.login(username, password);
 	});
 
 	after(function(done) {
