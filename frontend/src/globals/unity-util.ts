@@ -155,7 +155,6 @@ export class UnityUtil {
 		UnityUtil.modelLoaderProgressCallback = modelLoaderProgressCallback;
 		UnityUtil.unityBuildSubdirectory = '/unity/Build'; // These directories are determined by webpack.common.config.js
 		UnityUtil.setUnityMemory(0); // This forces the browser to update the viewer with the autodetected memory. If the user has set it explicitly in viewer settings, it will be overridden later when they are processed.
-		//UnityUtil.setLegacyAssetMode(); // This must be called before the initial assets list is loaded, if it is to have any effect, so it is either called here, or not at all.
 	}
 
 	/** @hidden */
@@ -725,14 +724,6 @@ export class UnityUtil {
 	 * =============== TO UNITY ====================
 	 */
 
-	/**
-	 * Tells the viewer to use AssetBundles instead of RepoBundles, even if
-	 * RepoBundles are available.
-	 * @category Configurations
-	 */
-	public static setLegacyAssetMode() {
-		UnityUtil.toUnity('SetLegacyAssetsMode', UnityUtil.LoadingState.VIEWER_READY);
-	}
 
 	/**
 	 * Tells the viewer the maximum amount of memory it can expect to be able

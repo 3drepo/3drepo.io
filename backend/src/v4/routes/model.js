@@ -477,8 +477,6 @@ router.get("/:model/revision/:rev/assetsMeta", middlewares.hasReadAccessToModel,
 // FIXME: write api docs
 router.get("/:model/revision/master/head/supermeshes.json.mpc", middlewares.hasReadAccessToModel, getAllJsonMpcs);
 router.get("/:model/revision/:rev/supermeshes.json.mpc", middlewares.hasReadAccessToModel, getAllJsonMpcs);
-router.get("/:model/revision/master/head/supermeshes_unity.json.mpc", middlewares.hasReadAccessToModel, getAllJsonMpcs);
-router.get("/:model/revision/:rev/supermeshes_unity.json.mpc", middlewares.hasReadAccessToModel, getAllJsonMpcs);
 
 /**
  * @api {get} /:teamspace/:model/:uid.json.mpc Get JSON Mpc
@@ -2360,7 +2358,7 @@ function getAllJsonMpcs(req, res, next) {
 	const username = req.session.user.username;
 	const branch = rev ? undefined : C.MASTER_BRANCH_NAME;
 
-	JSONAssets.getAllSuperMeshMapping(account, model, branch, rev, req.url.includes("_unity"), username).then(({readStream, isFed}) => {
+	JSONAssets.getAllSuperMeshMapping(account, model, branch, rev, username).then(({readStream, isFed}) => {
 		const headers = getHeaders(rev && !isFed);
 		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, readStream, headers);
 	}).catch(err => {
