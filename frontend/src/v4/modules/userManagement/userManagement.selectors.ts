@@ -21,7 +21,6 @@ import { orderBy } from 'lodash';
 import * as queryString from 'query-string';
 import { matchPath } from 'react-router';
 import { createSelector } from 'reselect';
-import { selectDrawings } from '@/v5/store/drawings/drawings.selectors';
 import { RouteParams, ROUTES } from '../../constants/routes';
 import { sortByField } from '../../helpers/sorting';
 import { selectCurrentUser } from '../currentUser';

@@ -25,6 +25,7 @@ const {
 	hasReadAccessToDrawing,
 	hasReadAccessToFederation,
 	hasWriteAccessToContainer,
+	hasWriteAccessToDrawing,
 	hasWriteAccessToFederation,
 } = require('../../../utils/permissions/permissions');
 const { getUserFromSession } = require('../../../utils/sessions');
@@ -55,6 +56,7 @@ ModelPerms.hasCommenterAccessToContainer = permissionsCheckTemplate(hasCommenter
 ModelPerms.hasAdminAccessToContainer = permissionsCheckTemplate(hasAdminAccessToContainer);
 
 ModelPerms.hasReadAccessToDrawing = permissionsCheckTemplate(hasReadAccessToDrawing);
+ModelPerms.hasWriteAccessToDrawing = permissionsCheckTemplate(hasWriteAccessToDrawing);
 ModelPerms.hasAdminAccessToDrawing = permissionsCheckTemplate(hasAdminAccessToDrawing);
 
 ModelPerms.hasReadAccessToFederation = permissionsCheckTemplate(hasReadAccessToFederation);

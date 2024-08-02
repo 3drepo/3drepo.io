@@ -37,6 +37,8 @@ import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingRevisionDetails } from '@components/shared/drawingRevisionDetails/drawingRevisionDetails.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
+import { enableRealtimeDrawingRemoved, enableRealtimeDrawingUpdate } from '@/v5/services/realtime/drawings.events';
 
 interface IDrawingsListItem {
 	isSelected: boolean;
@@ -63,7 +65,10 @@ export const DrawingsListItem = memo(({
 
 	useEffect(() => {
 		if (isMainList) {
-			// TODO - add realtime events
+			return combineSubscriptions(
+				enableRealtimeDrawingRemoved(teamspace, project, drawing._id),
+				enableRealtimeDrawingUpdate(teamspace, project, drawing._id),
+			);
 		}
 		return null;
 	}, [drawing._id]);
@@ -101,11 +106,11 @@ export const DrawingsListItem = memo(({
 					}
 					{...DRAWING_LIST_COLUMN_WIDTHS.calibration}
 				/>
-				<DashboardListItemText selected={isSelected} {...DRAWING_LIST_COLUMN_WIDTHS.drawingNumber}>
-					{drawing.drawingNumber}
+				<DashboardListItemText selected={isSelected} {...DRAWING_LIST_COLUMN_WIDTHS.number}>
+					{drawing.number}
 				</DashboardListItemText>
-				<DashboardListItemText selected={isSelected} {...DRAWING_LIST_COLUMN_WIDTHS.category}>
-					{drawing.category}
+				<DashboardListItemText selected={isSelected} {...DRAWING_LIST_COLUMN_WIDTHS.type}>
+					{drawing.type}
 				</DashboardListItemText>
 				<DashboardListItemText
 					selected={isSelected}

@@ -15,10 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
 
-import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { formatMessage } from '@/v5/services/intl';
 import { UploadsSchema } from '@/v5/validation/drawingSchemes/drawingSchemes';
@@ -37,6 +36,8 @@ import { DrawingRevisionsActionsDispatchers, DrawingsActionsDispatchers } from '
 import { UploadList } from './uploadList/uploadList.component';
 import { parseFileName, reduceFileData, isPdf, getPdfFirstPage, fileToPdf, pdfToFile } from '@components/shared/uploadFiles/uploadFiles.helpers';
 import { UploadItemFields } from '@/v5/store/drawings/revisions/drawingRevisions.types';
+
+const REVISION_NAME_MAX_LENGTH = 50;
 
 type UploadModalLabelTypes = {
 	isUploading: boolean;
@@ -112,12 +113,6 @@ export const UploadDrawingRevisionForm = ({
 		keyName: 'uploadId',
 	});
 
-	const revisionNameMaxLength = useMemo(() => {
-		const schemaDescription =  Yup.reach(UploadsSchema, 'uploads.revisionName').describe();
-		const revisionNameMax = schemaDescription.tests.find((t) => t.name === 'max');
-		return revisionNameMax.params.max;
-	}, []);
-
 	const addFilesToList = async (files: File[], drawing?: IDrawing) => {
 		const filesToAppend = [];
 		for (let fileAsGeneric of files) {
@@ -141,15 +136,15 @@ export const UploadDrawingRevisionForm = ({
 				...fileData,
 				progress: 0,
 				extension: fileName.split('.').slice(-1)[0].toLocaleLowerCase(),
-				revisionName: parseFileName(fileName, revisionNameMaxLength),
+				name: parseFileName(fileName, REVISION_NAME_MAX_LENGTH),
 				statusCode: '',
-				revisionCode: '',
+				revCode: '',
 				revisionDesc: '',
 				drawingId: drawing?._id || '',
 				drawingName: drawing?.name?.trim() || '',
-				drawingNumber: drawing?.drawingNumber || '',
+				drawingNumber: drawing?.number || '',
 				drawingDesc: drawing?.desc || '',
-				drawingCategory: drawing?.category || '',
+				drawingType: drawing?.type || '',
 			});
 		}
 		append(filesToAppend);
@@ -181,7 +176,7 @@ export const UploadDrawingRevisionForm = ({
 		if (presetFile) {
 			addFilesToList([presetFile], presetDrawing);
 		}
-		DrawingsActionsDispatchers.fetchCategories(teamspace, project);
+		DrawingsActionsDispatchers.fetchTypes(teamspace, project);
 		DrawingRevisionsActionsDispatchers.fetchStatusCodes(teamspace, project);
 	}, []);
 

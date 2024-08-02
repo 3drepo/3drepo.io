@@ -18,7 +18,6 @@
 import { normalize } from 'normalizr';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
-import { addDrawingsToObject } from '@/v5/store/drawings/drawings.temp';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import * as API from '../../services/api';
 import { ChatActions } from '../chat';
@@ -37,9 +36,6 @@ export function* fetchTeamspaces({ username }) {
 		yield put(TeamspacesActions.setPendingState(true));
 		const teamspaces = (yield API.fetchTeamspace(username)).data.accounts;
 		const normalizedData = normalize(teamspaces, [teamspacesSchema]);
-
-		// TODO #4789 remove this line. The real drawing ids should be supplied in normalizedData.entities.model already
-		normalizedData.entities.models = addDrawingsToObject(normalizedData.entities.models);
 
 		yield put(TeamspacesActions.fetchTeamspacesSuccess(normalizedData.entities));
 		yield put(TeamspacesActions.subscribeOnChanges());

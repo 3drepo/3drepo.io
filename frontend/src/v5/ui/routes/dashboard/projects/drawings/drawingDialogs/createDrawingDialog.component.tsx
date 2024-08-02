@@ -29,7 +29,7 @@ import { IFormInput, useDrawingForm } from './drawingsDialogs.hooks';
 export const CreateDrawingDialog = ({ open, onClickClose }) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
-	const categories = DrawingsHooksSelectors.selectCategories();
+	const types = DrawingsHooksSelectors.selectTypes();
 
 	const { onSubmitError, formData } = useDrawingForm();
 
@@ -69,19 +69,19 @@ export const CreateDrawingDialog = ({ open, onClickClose }) => {
 
 			<FormTextField
 				control={control}
-				name="drawingNumber"
-				label={formatMessage({ id: 'drawings.creation.form.drawingNumber', defaultMessage: 'Drawing Number' })}
-				formError={errors.drawingNumber}
+				name="number"
+				label={formatMessage({ id: 'drawings.creation.form.number', defaultMessage: 'Number' })}
+				formError={errors.number}
 				required
 			/>
 			<FormSelect
 				required
 				control={control}
-				label={formatMessage({ id: 'drawings.creation.form.category', defaultMessage: 'Category' })}
-				name="category"
+				label={formatMessage({ id: 'drawings.creation.form.type', defaultMessage: 'Category' })}
+				name="type"
 			>
-				{categories.map((category) => (
-					<MenuItem key={category} value={category}> {category}</MenuItem>
+				{types.map((type) => (
+					<MenuItem key={type} value={type}> {type}</MenuItem>
 				))}
 			</FormSelect>
 			<FormTextField

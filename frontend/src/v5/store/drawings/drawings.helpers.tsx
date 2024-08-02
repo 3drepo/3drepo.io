@@ -36,10 +36,10 @@ export const DRAWING_LIST_COLUMN_WIDTHS = {
 		width: 155,
 		hideWhenSmallerThan: Display.Tablet,
 	},
-	drawingNumber: {
+	number: {
 		width: 260,
 	},
-	category: {
+	type: {
 		width: 120,
 		hideWhenSmallerThan: Display.Desktop,
 	},
@@ -51,7 +51,7 @@ export const DRAWING_LIST_COLUMN_WIDTHS = {
 	},
 };
 
-export const DRAWINGS_SEARCH_FIELDS = ['name', 'latestRevision', 'category', 'drawingNumber', 'status'];
+export const DRAWINGS_SEARCH_FIELDS = ['name', 'latestRevision', 'type', 'number', 'status'];
 
 export const CALIBRATION_MAP = {
 	[CalibrationStates.CALIBRATED]: {
@@ -89,14 +89,15 @@ export const prepareSingleDrawingData = (
 	revisionsCount: stats?.revisions?.total ?? 0,
 	lastUpdated: getNullableDate(stats?.revisions.lastUpdated),
 	latestRevision: stats?.revisions.latestRevision ?? '',
-	category: stats?.category ?? '',
-	drawingNumber: stats?.drawingNumber ?? '',
+	number: stats?.number ?? '',
+	type: stats?.type ?? '',
+	desc: stats?.desc ?? '',
 	calibration: stats?.calibration ?? CalibrationStates.UNCALIBRATED,
 	status: stats?.status ?? DrawingUploadStatus.OK,
 	hasStatsPending: !stats,
 	errorReason: stats?.errorReason && {
 		message: stats.errorReason.message,
-		timestamp: getNullableDate(stats?.errorReason.timestamp),
+		timestamp: getNullableDate(+stats?.errorReason.timestamp),
 	},
 });
 

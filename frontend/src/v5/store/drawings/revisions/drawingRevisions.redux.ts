@@ -58,7 +58,7 @@ export const setVoidStatusSuccess = (state, {
 }: SetRevisionVoidStatusSuccessAction) => {
 	const revisions = state.revisionsByDrawing[drawingId];
 	revisions.find(
-		(revision) => [revision.tag, revision._id].includes(revisionId),
+		(revision) => [revision.name, revision._id].includes(revisionId),
 	).void = isVoid;
 };
 

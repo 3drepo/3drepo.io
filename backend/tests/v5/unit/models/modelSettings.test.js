@@ -554,7 +554,7 @@ const testNewRevisionProcessed = () => {
 						project,
 						model,
 						revision: corId,
-						isFederation: false,
+						modelType: modelTypes.CONTAINER,
 					});
 			}
 		});
@@ -620,7 +620,7 @@ const testNewRevisionProcessed = () => {
 						project,
 						model,
 						revision: corId,
-						isFederation: true,
+						modelType: modelTypes.FEDERATION,
 					});
 			});
 
@@ -677,7 +677,7 @@ const testNewRevisionProcessed = () => {
 						project,
 						model,
 						revision: corId,
-						isFederation: true,
+						modelType: modelTypes.FEDERATION,
 					});
 			});
 	});

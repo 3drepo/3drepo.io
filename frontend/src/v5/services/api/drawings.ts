@@ -14,102 +14,39 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { delay } from '@/v4/helpers/async';
-import { drawingIds, mockRole } from '@/v5/store/drawings/drawings.temp';
-import { DrawingStats, DrawingUploadStatus, CalibrationStates, MinimumDrawing } from '@/v5/store/drawings/drawings.types';
+import { DrawingStats, MinimumDrawing } from '@/v5/store/drawings/drawings.types';
 import { AxiosResponse } from 'axios';
-import uuid from 'uuidv4';
+import api from './default';
 
-export const addFavourite = (teamspace, projectId, drawingId): Promise<AxiosResponse<void>> => {
-	return delay(Math.random() * 15 ** 2, null) ;
-};
+export const addFavourite = (teamspace, projectId, drawingId): Promise<AxiosResponse<void>> => (
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/drawings/favourites`, {
+		drawings: [drawingId],
+	})
+);
 
-export const removeFavourite = (teamspace, projectId, drawingId): Promise<AxiosResponse<void>> => {
-	return delay(Math.random() * 15 ** 2, null) ;
-};
+export const removeFavourite = (teamspace, projectId, drawingId): Promise<AxiosResponse<void>> => api.delete(`teamspaces/${teamspace}/projects/${projectId}/drawings/favourites?ids=${drawingId}`);
 
-const categories =  ['A drawing category', 'Another drawing category', 'Yet another one'];
-
-const arr = (new Array(10)).fill(0);
-
-const drawings: MinimumDrawing[] = arr.map((_, index) => ({
-	_id: drawingIds[index] ?? uuid(),
-	name: 'A drawing ' + index + ' - ' + mockRole(index),
-	drawingNumber: uuid(),
-	isFavourite: (Math.random() > 0.5),
-	role: mockRole(index),
-	category: categories[Math.round(Math.random() * (categories.length - 1))],
-	status: DrawingUploadStatus.OK,
-	revisionsCount: 2,
-	latestRevision: null,
-	lastUpdated: null,
-	hasStatsPending: false,
-}));
-
-const randCal = () => {
-	const i = Math.round(Math.random() * 2);
-	switch (i) {
-		case 0:
-			return CalibrationStates.CALIBRATED;
-		case 1:
-			return CalibrationStates.OUT_OF_SYNC;
-		case 2:
-			return CalibrationStates.UNCALIBRATED;
-	}
-};
-
-
-const stats = drawingIds.map((_id) => {
-	const lastUpdated = (Math.random() > 0.5) ? 1709569331628 + Math.round( Math.random() * 31556952000) : null;
-	const total = lastUpdated ?  Math.round(Math.random() * 10) : 0;
-
-	const calibration = total ? randCal() : CalibrationStates.EMPTY;
-	const latestRevision = total ? 'Revision ' + total : undefined;
-	const status = total ? DrawingUploadStatus.OK : undefined;
-
-	return {
-		_id,
-		revisions : {
-			lastUpdated,
-			total,
-			latestRevision,
-		},
-		drawingNumber: uuid(), 
-		calibration,
-		category: categories[Math.round(Math.random() * (categories.length - 1))],
-		status,
-	} as DrawingStats;
-});
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const fetchDrawings = (teamspace, projectId): Promise<MinimumDrawing[]> => {
-	return delay<MinimumDrawing[]>(Math.random() *  300, drawings);
+export const fetchDrawings = async (teamspace, projectId): Promise<AxiosResponse<MinimumDrawing[]>> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/drawings`);
+	return data;
 };
 
 export const fetchDrawingsStats = async (teamspace, projectId, drawingId): Promise<DrawingStats> => {
-	return delay<DrawingStats>(Math.random() * 250, stats.find(((s)=> s._id === drawingId)));
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/drawings/${drawingId}/stats`);
+	return data;
 };
 
-export const fetchCategories = (teamspace, projectId): Promise<string[]> => {
-	return delay<string[]>(1000, categories) ;
+export const fetchTypes = async (teamspace, projectId): Promise<AxiosResponse<string[]>> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/settings/drawingCategories`);
+	return data;
 };
 
-export const createDrawing = (teamspace, projectId, drawing): Promise<string> => {
-	delay(200, null);
-	// throw new Error('name already exists');
-	// throw new Error('Drawing number already exists');
-	return delay<string>(500, uuid()) ;
+export const createDrawing = async (teamspace, projectId, drawing): Promise<string> => {
+	const { data } = await api.post(`teamspaces/${teamspace}/projects/${projectId}/drawings`, drawing);
+	return data._id;
 };
 
-export const updateDrawing = (teamspace, projectId, drawingId, drawing): Promise<string> => {
-	// delay(200, null);
-	// throw new Error('name already exists');
-	// throw new Error('Drawing number already exists');
-	return delay(500, null);
-};
+export const updateDrawing = (teamspace, projectId, drawingId, drawing): Promise<AxiosResponse<void>> => api.patch(`teamspaces/${teamspace}/projects/${projectId}/drawings/${drawingId}`, drawing);
 
-export const deleteDrawing = (teamspace, projectId, drawingId): Promise<AxiosResponse<void>> => {
-	return delay(Math.random() * 15 ** 2, null) ;
-};
+export const deleteDrawing = (teamspace, projectId, drawingId): Promise<AxiosResponse<void>> => api.delete(`teamspaces/${teamspace}/projects/${projectId}/drawings/${drawingId}`);
