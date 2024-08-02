@@ -58,7 +58,13 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 	let projection: Transform;
 	let tframe = 0;
 	let drawing = false;
+	let resizing = false; // Resizing is a different operation because it will re-create the whole canvas
+	let resizeEvent = 0;
+	let resizeFrameEvent = 0;
+	let resizeFrameCount = 0;
 	let onLoad: any;
+
+	const resizeFramesThreshold = 5;
 
 	const img = new Image();
 
@@ -205,10 +211,12 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		canvas.setAttribute('style', `transform: ${getCSStransform(dt)}; transform-origin: top left; user-select:none`);
 	};
 
+	type DrawImageHandler = (projection: Transform) => void;
+
 	/**
 	 * Rasterises the current image into the canvas with the given projection
 	 */
-	const drawImage = (t: Transform, ctx: ImageBitmapRenderingContext, resolve: any) => {
+	const drawImage = (t: Transform, ctx: ImageBitmapRenderingContext, resolve: DrawImageHandler) => {
 
 		// This function uses drawImage to project img into canvas, by working
 		// out the appropriate source rect to draw into the full canvas.
@@ -219,10 +227,6 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		// so we can be sure of the rounding behaviour.
 
 		let scale = t.scale;
-
-		if (scale < 1) {
-			scale = 1;
-		}
 
 		const sx = Math.round(-t.x / scale);
 		const sy = Math.round(-t.y / scale);
@@ -250,14 +254,14 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 			// remains stable.
 
 			const actualScale = ctx.canvas.width / sw;
-			projection = {
+			const p = {
 				x: -sx * actualScale,
 				y: -sy * actualScale,
 				scale: actualScale,
 			};
 
 			if (resolve) {
-				resolve();
+				resolve(p);
 			}
 		});
 
@@ -282,7 +286,8 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		// animation frames.
 		drawing = true;
 
-		drawImage(D, context, () => {
+		drawImage(D, context, (p) => {
+			projection = p;
 			updateCanvasTransform();
 
 			// Check if we've updated the transform since the last render.
@@ -306,7 +311,14 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		const canvasSize = getCanvasSize();
 
 		// Compute a new origin for the user transforms to be applied on top of
-		const intialProjection = calculateProjection(viewSize, canvasSize);
+		const newOrigin = calculateProjection(viewSize, canvasSize);
+
+		// Update D with the existing transform, as is done in setTransform
+		const newD = {
+			x: newOrigin.x + transform.x,
+			y: newOrigin.y + transform.y,
+			scale: transform.scale,
+		};
 
 		// Create the canvas and context
 		const newCanvas = document.createElement('canvas');
@@ -319,15 +331,15 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		const request = ++currentCanvasRequest;
 
 		// Draw the image into the canvas
-		drawImage(intialProjection, newCtx, () => {
+		drawImage(newD, newCtx, (np) => {
 			if (request != currentCanvasRequest) {
 				return; // Some other callback will handle this...
 			}
 
 			// Replace the canvas and update the transforms for the outer context
-			origin = intialProjection;
-			projection = intialProjection;
-			D = intialProjection;
+			origin = newOrigin;
+			D = newD;
+			projection = np;
 
 			// Replace the canvas for the component and DOM
 			if (canvas) {
@@ -407,6 +419,27 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		}
 	};
 
+	const onResizeFrame = async () => {
+		if (resizeFrameEvent != resizeEvent) {
+			resizeFrameEvent = resizeEvent;
+			resizeFrameCount = 0;
+		} else {
+			resizeFrameCount++;
+		}
+
+		if (resizeFrameCount > resizeFramesThreshold) {
+			createCanvas(() => {
+				if (resizeFrameEvent != resizeEvent) {
+					requestAnimationFrame(onResizeFrame);
+				} else {
+					resizing = false;
+				}
+			});
+		} else {
+			requestAnimationFrame(onResizeFrame);
+		}
+	};
+
 	const onResize = () => {
 		// Ignore anything before the image loads, because we won't have an image size to work with
 
@@ -420,7 +453,13 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 
 		// After the container is resized, we need to rebuild the canvas, which
 		// will involve redrawing the image.
-		//createCanvas();
+
+		resizeEvent++;
+
+		if (!resizing) {
+			resizing = true;
+			requestAnimationFrame(onResizeFrame);
+		}
 	};
 
 	const resizeObserver = new ResizeObserver(onResize);
