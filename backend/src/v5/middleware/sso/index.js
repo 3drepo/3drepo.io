@@ -14,14 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 const { createResponseCode, templates } = require('../../utils/responseCodes');
 const { URL } = require('url');
 const Yup = require('yup');
+const { appendCSRFToken } = require('../sessions');
 const { getURLDomain } = require('../../utils/helper/strings');
 const { getUserFromSession } = require('../../utils/sessions');
 const { isSsoUser } = require('../../models/users');
 const { respond } = require('../../utils/responder');
 const { types } = require('../../utils/helper/yup');
+const { validateMany } = require('../common');
 
 const Sso = {};
 
@@ -31,16 +34,19 @@ Sso.redirectWithError = (res, url, errorCode) => {
 	res.redirect(urlRedirect.href);
 };
 
-Sso.setSessionInfo = async (req, res, next) => {
+const setSessionInfo = async (req, res, next) => {
 	const ssoInfo = {
 		userAgent: req.headers['user-agent'],
 		...(req.headers.referer ? { referer: getURLDomain(req.headers.referer) } : { }),
 	};
 
 	req.session.ssoInfo = ssoInfo;
+	req.session.token = req.token;
 
 	await next();
 };
+
+Sso.setSessionInfo = validateMany([appendCSRFToken, setSessionInfo]);
 
 Sso.isSsoUser = async (req, res, next) => {
 	try {

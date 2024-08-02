@@ -28,6 +28,7 @@ import { RevisionsListItemAuthor } from './revisionsListItemAuthor/revisionsList
 import { RevisionsListItemText } from './revisionsListItemText/revisionsListItemText.component';
 import { RevisionsListItemButton } from './revisionsListItemButton/revisionsListItemButton.component';
 import { formatShortDateTime } from '@/v5/helpers/intl.helper';
+import { downloadAuthUrl } from '@components/authenticatedResource/authenticatedResource.hooks';
 
 type IRevisionsListItem = {
 	revision: IRevision;
@@ -46,9 +47,12 @@ export const RevisionsListItem = ({ revision, containerId }: IRevisionsListItem)
 		RevisionsActionsDispatchers.setVoidStatus(teamspace, project, containerId, tag || revision._id, !voidStatus);
 	};
 
-	const downloadRevision = (e: SyntheticEvent) => {
+	const downloadRevision = async (e: SyntheticEvent) => {
 		e.preventDefault();
-		window.location.href = getRevisionFileUrl(teamspace, project, containerId, revision._id);
+		const anchor = document.createElement('a');
+		anchor.href = await downloadAuthUrl(getRevisionFileUrl(teamspace, project, containerId, revision._id)) ;
+		anchor.download = revision.tag + revision.format;
+		anchor.click();
 	};
 	const hasCollaboratorAccess = ContainersHooksSelectors.selectHasCollaboratorAccess(containerId);
 

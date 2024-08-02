@@ -18,6 +18,7 @@
  */
 
 const request = require("supertest");
+const SessionTracker = require("../../v5/helper/sessionTracker")
 const expect = require("chai").expect;
 const app = require("../../../src/v4/services/api.js").createApp();
 const logger = require("../../../src/v4/logger.js");
@@ -71,76 +72,32 @@ describe("Project Permissions::", function () {
 		project: project
 	};
 
-	before(function(done) {
-		server = app.listen(8080, function () {
-
-			console.log("API test server is listening on port 8080!");
-
-			async.parallel([
-
-				done => {
-					agentTeamspaceAdmin = request.agent(server);
-					agentTeamspaceAdmin.post("/login")
-						.send({ username: teamspace, password: teamspace })
-						.expect(200, function(err, res) {
-							expect(res.body.username).to.equal(teamspace);
-							done(err);
-						});
-				},
-
-				done => {
-					agentCanCreateModel = request.agent(server);
-					agentCanCreateModel.post("/login")
-						.send({ username: userCanCreateModel.username, password: userCanCreateModel.password })
-						.expect(200, function(err, res) {
-							expect(res.body.username).to.equal(userCanCreateModel.username);
-							done(err);
-						});
-				},
-
-				done =>{
-					agentCanCreateFed = request.agent(server);
-					agentCanCreateFed.post("/login")
-						.send({ username: userCanCreateFed.username, password: userCanCreateFed.password })
-						.expect(200, function(err, res) {
-							expect(res.body.username).to.equal(userCanCreateFed.username);
-							done(err);
-						});
-				},
-
-				done => {
-					agentCanUpdateProject = request.agent(server);
-					agentCanUpdateProject.post("/login")
-						.send({ username: userCanUpdateProject.username, password: userCanUpdateProject.password })
-						.expect(200, function(err, res) {
-							expect(res.body.username).to.equal(userCanUpdateProject.username);
-							done(err);
-						});
-				},
-
-				done => {
-					agentProjectAdmin = request.agent(server);
-					agentProjectAdmin.post("/login")
-						.send({ username: userProjectAdmin.username, password: userProjectAdmin.password })
-						.expect(200, function(err, res) {
-							expect(res.body.username).to.equal(userProjectAdmin.username);
-							done(err);
-						});
-				},
-
-				done => {
-					agentNoPermission = request.agent(server);
-					agentNoPermission.post("/login")
-						.send({ username: userNoPermission.username, password: userNoPermission.password })
-						.expect(200, function(err, res) {
-							expect(res.body.username).to.equal(userNoPermission.username);
-							done(err);
-						});
-				}
-
-			], done);
-
+	before(async function() {
+		await new Promise((resolve) => {
+			server = app.listen(8080, () => {
+				console.log("API test server is listening on port 8080!");
+				resolve();
+			});
 		});
+
+		agentTeamspaceAdmin = SessionTracker(request(server));
+		await agentTeamspaceAdmin.login(teamspace, teamspace);
+
+		agentCanCreateModel = SessionTracker(request(server));
+		await agentCanCreateModel.login(userCanCreateModel.username, userCanCreateModel.password);
+
+		agentCanCreateFed = SessionTracker(request(server));
+		await agentCanCreateFed.login(userCanCreateFed.username, userCanCreateFed.password);
+
+		agentCanUpdateProject = SessionTracker(request(server));
+		await agentCanUpdateProject.login(userCanUpdateProject.username, userCanUpdateProject.password);
+
+		agentProjectAdmin = SessionTracker(request(server));
+		await agentProjectAdmin.login(userProjectAdmin.username, userProjectAdmin.password);
+
+		agentNoPermission = SessionTracker(request(server));
+		await agentNoPermission.login(userNoPermission.username, userNoPermission.password);
+
 	});
 
 	after(function(done) {

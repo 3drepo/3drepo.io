@@ -16,6 +16,7 @@
  */
 
 import { clientConfigService } from '@/v4/services/clientConfig';
+import { downloadAuthUrl } from '@components/authenticatedResource/authenticatedResource.hooks';
 
 export const stripBase64Prefix = (base64name) => base64name.replace('data:', '').replace(/^.+,/, '');
 export const addBase64Prefix = (value, imageType = 'png') => `data:image/${imageType};base64,${value}`;
@@ -28,9 +29,15 @@ export const convertFileToImageSrc = (file) => new Promise<string>((resolve) => 
 
 export const getSupportedImageExtensions = () => clientConfigService.imageExtensions.map((x) => `.${x}`).join(',');
 
-export const testImageExists = (src: string) => new Promise((resolve, reject) => {
+export const testImageExists = async (src: string) => {
+	const authSrc = await downloadAuthUrl(src);
 	const img = new Image();
-	img.onload = resolve;
-	img.onerror = reject;
-	img.src = src;
-});
+	const imgPromise = new Promise((resolve, reject) => {
+		img.onload = resolve;
+		img.onerror = reject;
+	});
+
+	img.src = authSrc;
+	await imgPromise;
+	return authSrc;
+};

@@ -17,6 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { queue: {purgeQueues}} = require("../../v5/helper/services");
+const SessionTracker = require("../../v5/helper/sessionTracker")
 const request = require("supertest");
 const expect = require("chai").expect;
 const responseCodes = require("../../../src/v4/response_codes.js");
@@ -31,20 +32,17 @@ describe("Meshes", function () {
 	const password = "password";
 	const existingModel = "5bfc11fa-50ac-b7e7-4328-83aa11fa50ac";
 
-	before(function(done) {
-
-		server = app.listen(8080, function () {
-			console.log("API test server is listening on port 8080!");
-
-			agent = request.agent(server);
-			agent.post("/login")
-				.send({ username, password })
-				.expect(200, function(err, res) {
-					expect(res.body.username).to.equal(username);
-					done(err);
-				});
+	before(async function() {
+		await new Promise((resolve) => {
+			server = app.listen(8080, () => {
+				console.log("API test server is listening on port 8080!");
+				resolve();
+			});
 
 		});
+
+		agent = SessionTracker(request(server));
+		await agent.login(username, password);
 
 	});
 
