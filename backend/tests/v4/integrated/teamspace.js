@@ -283,7 +283,11 @@ describe("Teamspace", function() {
 			vrEnabled: true,
 			srcEnabled: true,
 			hereEnabled: true,
-			powerBIEnabled: true
+			powerBIEnabled: true,
+			modules: [
+				"issues",
+				"risks"
+			]
 		}
 		it("as the teamspace owner should succeed", function(done) {
 			agent.get(`/${mixedUser1.user}/addOns?key=${mixedUser1.key}`)

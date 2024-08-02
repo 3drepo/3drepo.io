@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,14 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AddOn } from '@/v5/store/store.types';
-import api from './default';
+const addDefaultAddOnsToTeamspaces = require('./addDefaultAddOnsToTeamspaces');
 
-export const fetchTeamspaces = (): Promise<any> => api.get('teamspaces');
+const scripts = [
+	{ script: addDefaultAddOnsToTeamspaces, desc: 'Add issues and risks add ons to existing teamspaces' },
+];
 
-export const fetchQuota = (teamspace: string): Promise<any> => api.get(`teamspaces/${teamspace}/quota`);
-
-export const fetchAddons = async (teamspace: string): Promise<AddOn[]> => {
-	const { data } = await api.get(`teamspaces/${teamspace}/addOns`);
-	return data.modules;
-};
+module.exports = scripts;

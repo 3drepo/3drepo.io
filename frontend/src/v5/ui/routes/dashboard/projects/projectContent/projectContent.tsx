@@ -33,10 +33,13 @@ import { Content } from './projectContent.styles';
 import { ProjectSettings } from '../projectSettings/projectSettings.component';
 import { Board } from '../board/board.component';
 import { TicketsContent } from '../tickets/ticketsContent.component';
+import { useKanbanNavigationData } from '@/v5/helpers/kanban.hooks';
 
 export const ProjectContent = () => {
 	const { teamspace } = useParams<DashboardParams>();
 	const { pathname } = useLocation();
+	const { title:kanbanTitle,  shouldRenderContent: shouldRenderKanbanContent, issuesOrRisksEnabled, riskEnabled, issuesEnabled } = useKanbanNavigationData();
+
 	let { path } = useRouteMatch();
 	path = discardSlash(path);
 
@@ -54,11 +57,14 @@ export const ProjectContent = () => {
 					<Route title={formatMessage({ id: 'pageTitle.containers', defaultMessage: ':project - Containers' })} exact path={`${path}/t/containers`}>
 						<Containers />
 					</Route>
-					<Route title={formatMessage({ id: 'pageTitle.issuesAndRisks', defaultMessage: ':project - Issues and risks' })} exact path={`${path}/t/board/:type/:containerOrFederation?`}>
-						<Board />
+					{(shouldRenderKanbanContent) && 
+					<Route title={kanbanTitle} exact path={`${path}/t/board/:type/:containerOrFederation?`}>
+						{issuesOrRisksEnabled && <Board />}
 					</Route>
-					<Route title={formatMessage({ id: 'pageTitle.issuesAndRisks', defaultMessage: ':project - Issues and risks' })} exact path={`${path}/t/board`}>
-						<Redirect to={`${discardSlash(pathname)}/issues`} />
+					}
+					<Route title={kanbanTitle} exact path={`${path}/t/board`}>
+						{issuesEnabled && <Redirect to={`${discardSlash(pathname)}/issues`} />}
+						{(!issuesEnabled && riskEnabled) && <Redirect to={`${discardSlash(pathname)}/risks`} />}
 					</Route>
 					<Route title={formatMessage({ id: 'pageTitle.tickets', defaultMessage: ':project - Tickets' })} path={`${path}/t/tickets`}>
 						<TicketsContent />

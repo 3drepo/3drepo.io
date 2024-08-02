@@ -20,6 +20,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { selectIsEditingGroups, selectSelectedTicket, selectView } from '@/v5/store/tickets/card/ticketsCard.selectors';
+import { selectIssuesEnabled, selectRisksEnabled } from '@/v5/store/teamspaces/teamspaces.selectors';
 import { CompareActions } from '../../modules/compare';
 
 import { selectCurrentTeamspace, selectCurrentUser } from '../../modules/currentUser';
@@ -54,6 +55,8 @@ const mapStateToProps = createStructuredSelector({
 	treeNodesList: selectTreeNodesList,
 	ticketsCardView: selectView,
 	isEditingGroups: selectIsEditingGroups,
+	issuesEnabled: selectIssuesEnabled,
+	risksEnabled: selectRisksEnabled,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

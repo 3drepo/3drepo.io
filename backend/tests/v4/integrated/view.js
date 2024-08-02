@@ -186,10 +186,9 @@ describe("Views", function () {
 		it("invalid model ID should fail", function(done) {
 			agent2.get(`/${teamSpace1Username}/invalidModelID/viewpoints/`)
 				.expect(404, function(err, res) {
-					expect(res.body.code).to.equal(responseCodesV5.modelNotFound.code);
+					expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
 					return done(err);
 			});
-
 		});
 
 		it("by ID should succeed", function(done) {
