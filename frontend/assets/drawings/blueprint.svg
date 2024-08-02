@@ -2,8 +2,11 @@
 
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg version="1.1" id="Layer_1" xmlns:serif="http://www.serif.com/"
-	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 1109 1632.9"
-	 style="enable-background:new 0 0 1109 1632.9;" xml:space="preserve">
+	xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" 
+	width="1109"
+	height="1633"
+	viewBox="0 0 1109 1633"
+	style="enable-background:new 0 0 1109 1632.9;" xml:space="preserve">
 <g>
 	<path d="M378.8,16.8c0.5-0.4,1.8-0.1,1.5,0.7c-0.3,0.7,0.4,1.9-0.7,2.1c-0.2,0-0.5-0.1-0.7-0.2C378.5,18.6,378.7,17.7,378.8,16.8z"
 		/>

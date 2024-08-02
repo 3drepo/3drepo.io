@@ -28,6 +28,7 @@ export const SvgContainer = styled.div`
 `;
 
 export const ImageContainer = styled.div`
+	user-select: none;
 	height: 100%;
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 `;
