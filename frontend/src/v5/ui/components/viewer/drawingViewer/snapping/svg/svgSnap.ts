@@ -17,7 +17,7 @@
 
 import 'path-data-polyfill';
 import { ZoomableImage } from '../../drawingViewerImage/drawingViewerImage.component';
-import { Vector2, Line, Size } from './types';
+import { Vector2, Line, Point } from './types';
 import { QuadTree, QuadTreeBuilder } from './quadTree';
 import { RTree, RTreeBuilder } from './rTree';
 
@@ -112,10 +112,13 @@ class PrimitiveCollector {
 
 	lines: Line[];
 
+	points: Point[];
+
 	offset: Vector2;
 
 	constructor(offset: Vector2) {
 		this.lines = [];
+		this.points = [];
 		this.offset = offset;
 	}
 
@@ -222,10 +225,13 @@ export class SVGSnap {
 	}
 
 	initialise() {
+
+		// This method parses the SVG body as an SVG to extract the primitives
+		// in local space.
+
 		this.svg = this.container.querySelector('svg') as SVGSVGElement;
 
 		const viewBoxOffset = new Vector2(this.svg.viewBox.baseVal.x, this.svg.viewBox.baseVal.y);
-		const viewBoxSize = new Size(this.svg.viewBox.baseVal.width, this.svg.viewBox.baseVal.height);
 
 		if (viewBoxOffset.norm != 0) {
 			console.error('SVG has a non-zero viewBox offset. SVGSnap will attempt to counteract the offset to match createImageBitamp, but this is not supported and the behaviour is not guaranteed.');
@@ -318,6 +324,8 @@ export class SVGSnap {
 		if (result.closestEdge != null) {
 			this.debugHelper.renderLine(p, result.closestEdge);
 		}
+
+
 
 		return result.closestEdge;
 	}

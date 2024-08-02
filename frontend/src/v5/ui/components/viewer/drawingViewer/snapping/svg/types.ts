@@ -34,9 +34,8 @@ export class Vector2 {
 		return new Vector2(-this.x, -this.y);
 	}
 
-	add(b: Vector2) {
-		this.x += b.x;
-		this.y += b.y;
+	static add(a: Vector2, b: Vector2) {
+		return new Vector2(a.x + b.x, a.y + b.y);
 	}
 
 	static subtract(a: Vector2, b: Vector2): Vector2 {
@@ -63,6 +62,12 @@ export class Line {
 	get length() {
 		return Vector2.norm(this.start, this.end);
 	}
+}
+
+export class Point {
+	x: number;
+
+	y: number;
 }
 
 export class Size {

@@ -70,7 +70,7 @@ class TraversalContext {
 		this.position = position;
 		this.radius = radius;
 		this.closestPoint = null;
-		this.closestPointDistance = radius * 2;
+		this.closestPointDistance = Number.MAX_VALUE;
 		this.numNodesTraversed = 0;
 		this.numLineTests = 0;
 	}
@@ -260,7 +260,6 @@ export class RTreeBuilder {
 
 		return next;
 	}
-
 
 	build(): RTree {
 

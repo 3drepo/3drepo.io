@@ -97,9 +97,8 @@ export const Viewer2D = () => {
 
 		imgRef.current.getEventsEmitter().addEventListener('mousemove', (ev)=>{
 
-			// Make the event coordinates relative to the Content rect of the
-			// event emitter regardless of any child transforms, borders and
-			// margins.
+			// Make the event coordinates relative to the client rect of the
+			// event emitter regardless of any child transforms and margins.
 
 			const currentTargetRect = ev.currentTarget.getBoundingClientRect();
 			const content = getElementContentOffset(ev.currentTarget);
