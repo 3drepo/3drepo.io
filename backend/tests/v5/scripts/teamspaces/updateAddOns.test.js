@@ -24,10 +24,12 @@ const {
 
 const { src, utilScripts } = require('../../helper/path');
 
+const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
+
 const UpdateAddOns = require(`${utilScripts}/teamspaces/updateAddOns`);
 
 const { getAddOns, updateAddOns } = require(`${src}/models/teamspaceSettings`);
-const { ADD_ONS } = require(`${src}/models/teamspaces.constants`);
+const { ADD_ONS, ADD_ONS_MODULES } = require(`${src}/models/teamspaces.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const { disconnect } = require(`${src}/handler/db`);
@@ -57,21 +59,37 @@ const runTest = (data) => {
 	describe.each([
 		['teamspace does not exist', false, templates.teamspaceNotFound, { name: generateRandomString() }, { [ADD_ONS.VR]: true }],
 		['there is no request to change the addons', false,
+			new Error(`Modules must be one of the following: ${Object.values(ADD_ONS_MODULES)}`), data.noAddOn, {
+				[ADD_ONS.VR]: true,
+				[ADD_ONS.MODULES]: `${generateRandomString()}, ${ADD_ONS_MODULES.ISSUES}`,
+			}],
+		['the request includes invalid modules', false,
 			new Error('Must specify at least 1 add on'), data.noAddOn, { }],
 		['the request enables all add ons', true, undefined, data.noAddOn, {
 			[ADD_ONS.VR]: true,
 			[ADD_ONS.SRC]: true,
 			[ADD_ONS.HERE]: true,
 			[ADD_ONS.POWERBI]: true,
+			[ADD_ONS.MODULES]: Object.values(ADD_ONS_MODULES).join(','),
+		}],
+		['the request enables some add ons', true, undefined, data.noAddOn, {
+			[ADD_ONS.VR]: true,
+			[ADD_ONS.POWERBI]: true,
+			[ADD_ONS.MODULES]: ADD_ONS_MODULES.ISSUES,
 		}],
 		['the request enables all add ons when they are already enabled', true, undefined, data.withAllAddOns, {
 			[ADD_ONS.VR]: true,
 			[ADD_ONS.SRC]: true,
 			[ADD_ONS.HERE]: true,
 			[ADD_ONS.POWERBI]: true,
+			[ADD_ONS.MODULES]: Object.values(ADD_ONS_MODULES).join(','),
 		}],
 		['the request disables all add ons', true, undefined, data.withAllAddOns,
 			{ removeAll: true }],
+		['the request disables some add ons', true, undefined, data.noAddOn, {
+			[ADD_ONS.POWERBI]: false,
+			[ADD_ONS.MODULES]: 'null',
+		}],
 		['the request disables all add ons when they were disabled already', true, undefined, data.noAddOn,
 			{ removeAll: true }],
 		['the request changes the state of some flags', true, undefined, data.withSomeAddOns,
@@ -90,11 +108,18 @@ const runTest = (data) => {
 				params[ADD_ONS.SRC],
 				params[ADD_ONS.HERE],
 				params[ADD_ONS.POWERBI],
+				params[ADD_ONS.MODULES],
 				params.removeAll);
 			if (success) {
+				let expectedModules = teamspace.addOns[ADD_ONS_MODULES];
+				if (params[ADD_ONS.MODULES]) {
+					expectedModules = params[ADD_ONS.MODULES] === 'null' ? undefined : params[ADD_ONS.MODULES].split(',');
+				}
+
 				await exe;
 				await expect(getAddOns(teamspace.name)).resolves
-					.toEqual(determineExpectedResults(teamspace.addOns, params));
+					.toEqual(determineExpectedResults(teamspace.addOns,
+						deleteIfUndefined({ ...params, [ADD_ONS.MODULES]: expectedModules })));
 			} else {
 				await expect(exe).rejects.toEqual(expectedOutput);
 			}
@@ -114,6 +139,7 @@ const createData = () => ({
 			[ADD_ONS.SRC]: true,
 			[ADD_ONS.HERE]: true,
 			[ADD_ONS.POWERBI]: true,
+			[ADD_ONS.MODULES]: Object.values(ADD_ONS_MODULES),
 		},
 	},
 	withSomeAddOns: {

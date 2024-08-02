@@ -22,26 +22,42 @@ const { logger } = require(`${v5Path}/utils/logger`);
 
 const { getAddOns, removeAddOns, updateAddOns } = require(`${v5Path}/models/teamspaceSettings`);
 const { deleteIfUndefined } = require(`${v5Path}/utils/helper/objects`);
+const { ADD_ONS_MODULES } = require(`${v5Path}/models/teamspaces.constants`);
 
-const run = async (teamspace, vrEnabled, srcEnabled, hereEnabled, powerBIEnabled, removeAll) => {
+const run = async (teamspace, vrEnabled, srcEnabled, hereEnabled, powerBIEnabled, modulesString, removeAll) => {
 	const addOns = await getAddOns(teamspace);
 	logger.logInfo(`${teamspace} currently has the following addOns(s): ${JSON.stringify(addOns)}`);
 
 	if (removeAll) {
 		await removeAddOns(teamspace);
 	} else {
+		let modules;
+
+		if (modulesString === 'null') {
+			modules = null;
+		} else if (modulesString) {
+			modules = modulesString?.split(',');
+
+			if (!modules.every((m) => Object.values(ADD_ONS_MODULES).includes(m))) {
+				throw new Error(`Modules must be one of the following: ${Object.values(ADD_ONS_MODULES)}`);
+			}
+		}
+
 		const toUpdate = deleteIfUndefined({
 			vrEnabled,
 			hereEnabled,
 			srcEnabled,
 			powerBIEnabled,
+			modules,
 		});
 
 		if (!Object.keys(toUpdate).length) {
 			throw new Error('Must specify at least 1 add on');
 		}
+
 		await updateAddOns(teamspace, toUpdate);
 	}
+
 	const addOnsUpdated = await getAddOns(teamspace);
 	logger.logInfo(`${teamspace} has been updated. Current subscription(s): ${JSON.stringify(addOnsUpdated)}`);
 };
@@ -65,6 +81,11 @@ const genYargs = /* istanbul ignore next */(yargs) => {
 			describe: 'Enable PowerBI support',
 			type: 'boolean',
 		})
+		.option('modules',
+			{
+				describe: 'Comma seperated string of enabled modules',
+				type: 'string',
+			})
 		.option('teamspace',
 			{
 				describe: 'teamspace to update',
@@ -81,7 +102,7 @@ const genYargs = /* istanbul ignore next */(yargs) => {
 		'Update addOns configurations on a teamspace',
 		argsSpec,
 		(argv) => run(argv.teamspace,
-			argv.vrEnabled, argv.srcEnabled, argv.hereEnabled, argv.powerBIEnabled, argv.removeAll));
+			argv.vrEnabled, argv.srcEnabled, argv.hereEnabled, argv.powerBIEnabled, argv.modules, argv.removeAll));
 };
 
 module.exports = {

@@ -355,6 +355,14 @@ export class UnityUtil {
 
 	/**
 	 * @hidden
+	 * Called by the viewer to retrieve cookies in the application
+	 */
+	public static getCookies() {
+		return document?.cookie;
+	}
+
+	/**
+	 * @hidden
 	 * @category To Unity
 	 * Cancels any model that is currently loading. This will reject any model promises with "cancel" as the message
 	 */

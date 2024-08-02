@@ -131,6 +131,8 @@ interface IProps {
 	openCardDialog: (cardId: string, onChange: (index: number) => void) => void;
 	setSortBy: (field) => void;
 	criteria: any;
+	risksEnabled: boolean,
+	issuesEnabled: boolean,
 }
 
 const PANEL_PROPS = {
@@ -413,22 +415,27 @@ export function Board(props: IProps) {
 	const FILTER_VALUES = isIssuesBoard ? ISSUE_FILTER_VALUES : RISK_FILTER_VALUES;
 
 	const renderFilters = () => {
+		const risksAndIssuesEnabled = props.issuesEnabled && props.risksEnabled;
+
 		return (
 			<>
-				<SelectContainer>
-					<FormControl>
-						<InputLabel disabled={!containerOrFederation} shrink htmlFor="type-select">Show</InputLabel>
-						<CellSelect
-							placeholder="Select type"
-							items={types}
-							value={type}
-							onChange={handleTypeChange}
-							disabled={!types.length || !containerOrFederation}
-							disabledPlaceholder
-							inputId="type-select"
-						/>
-					</FormControl>
-				</SelectContainer>
+				{risksAndIssuesEnabled && (
+					<SelectContainer>
+						<FormControl>
+							<InputLabel disabled={!containerOrFederation} shrink htmlFor="type-select">Show</InputLabel>
+							<CellSelect
+								placeholder="Select type"
+								items={types}
+								value={type}
+								onChange={handleTypeChange}
+								disabled={!types.length || !containerOrFederation}
+								disabledPlaceholder
+								inputId="type-select"
+							/>
+						</FormControl>
+					</SelectContainer>
+				)
+				}
 				<SelectContainer>
 					<FormControl>
 						<InputLabel disabled={!containerOrFederation} shrink htmlFor="group-select">Group by</InputLabel>

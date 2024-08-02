@@ -103,10 +103,13 @@ const deleteFavourites = (isFed) => async (req, res) => {
 };
 
 const getModelStats = (isFed) => async (req, res, next) => {
-	const { teamspace, model } = req.params;
+	const { teamspace, project, model } = req.params;
 	try {
-		const fn = isFed ? Federations.getFederationStats : Containers.getContainerStats;
-		const stats = await fn(teamspace, model);
+		const fn = isFed
+			? () => Federations.getFederationStats(teamspace, project, model)
+			: () => Containers.getContainerStats(teamspace, model);
+
+		const stats = await fn();
 		req.outputData = stats;
 		await next();
 	} catch (err) {
