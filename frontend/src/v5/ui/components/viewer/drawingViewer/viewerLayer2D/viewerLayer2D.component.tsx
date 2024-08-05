@@ -24,7 +24,6 @@ import { SvgCircle } from './svgCircle/svgCircle.component';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { Coord2D, Vector2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { Camera } from './camera/camera.component';
-import { DrawingViewerService } from '../drawingViewer.service';
 
 export type ViewBoxType = ReturnType<PanZoomHandler['getOriginalSize']> & ReturnType<PanZoomHandler['getTransform']>;
 type ViewerLayer2DProps = {

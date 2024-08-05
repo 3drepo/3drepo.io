@@ -23,7 +23,7 @@ import { Role } from '../currentUser/currentUser.types';
 import { CalibrationState } from './drawings.types';
 import { selectContainerById } from '../containers/containers.selectors';
 import { selectFederationById } from '../federations/federations.selectors';
-import { convertCoordUnits, convertVectorUnits, getTransformationMatrix, getUnitsConversionFactor } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
+import { convertCoordUnits, convertVectorUnits, getTransformationMatrix, getUnitsConversionFactor, removeZ } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
 import { EMPTY_CALIBRATION, EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 import { isEqual } from 'lodash';
 import { Vector2 } from 'three';
@@ -175,7 +175,7 @@ export const selectTransform3Dto2D = createSelector(
 		if (!matrix) return null;
 		const inverseMat = matrix.clone().invert();
 
-		return (vector) => new Vector2(...vector).applyMatrix3(inverseMat) ;
+		return (vector) => new Vector2(...removeZ(vector)).applyMatrix3(inverseMat) ;
 	},
 );
 
