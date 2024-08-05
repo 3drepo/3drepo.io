@@ -19,7 +19,6 @@ import { PlaneType } from '@/v5/ui/routes/dashboard/projects/calibration/calibra
 import { LozengeButton, Section } from '../selectionToolbar.styles';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
-import { isNull } from 'lodash';
 import AlignIcon from '@assets/icons/viewer/align.svg';
 import { ToolbarButton } from '../../buttons/toolbarButton.component';
 import { VerticalRange } from '../../buttons/toolbarButtons.component';
@@ -31,20 +30,17 @@ type ISection = {
 };
 
 export const PlanesCalibrationSection = ({ hidden }: ISection) => {
-	const { verticalPlanes, selectedPlane, setSelectedPlane, isAlignPlaneActive, setIsAlignPlaneActive } = useContext(CalibrationContext);
-	const planesAreUnset = verticalPlanes.some(isNull);
-
+	const { selectedPlane, setSelectedPlane, isAlignPlaneActive, setIsAlignPlaneActive } = useContext(CalibrationContext);
+	if (hidden) return null;
 	return (
 		<Section hidden={hidden}>
 			<LozengeButton
-				hidden={hidden || planesAreUnset}
 				onClick={() => setSelectedPlane(PlaneType.LOWER) }
 				selected={selectedPlane === PlaneType.LOWER}
 			>
 				<FormattedMessage id="viewer.toolbar.icon.lowerPlane" defaultMessage="Bottom Plane" />
 			</LozengeButton>
 			<LozengeButton
-				hidden={hidden || planesAreUnset}
 				onClick={() => setSelectedPlane(PlaneType.UPPER) }
 				selected={selectedPlane === PlaneType.UPPER}
 			>
@@ -53,7 +49,6 @@ export const PlanesCalibrationSection = ({ hidden }: ISection) => {
 			<VerticalRange />
 			<ToolbarButton
 				Icon={AlignIcon}
-				hidden={hidden}
 				onClick={() => setIsAlignPlaneActive(!isAlignPlaneActive)}
 				selected={isAlignPlaneActive}
 				title={formatMessage({ id: 'viewer.toolbar.icon.alignFloorToSurface', defaultMessage: 'Align Floor To Surface' })}
