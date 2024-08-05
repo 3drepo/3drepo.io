@@ -15,15 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { STATUSES, modelTypes } = require('../models/modelSettings.constants');
+const { UUIDToString, generateUUID, generateUUIDString } = require('../utils/helper/uuids');
 const { codeExists, templates } = require('../utils/responseCodes');
 const { copyFile, mkdir, rm, stat, writeFile } = require('fs/promises');
 const { listenToQueue, queueMessage } = require('../handler/queue');
+const Path = require('path');
+const { addRevision } = require('../models/revisions');
 const { events } = require('./eventsManager/eventsManager.constants');
-const { generateUUIDString } = require('../utils/helper/uuids');
 const { publish } = require('./eventsManager/eventsManager');
 const { cn_queue: queueConfig } = require('../utils/config');
 const processingLabel = require('../utils/logger').labels.modelProcessing;
 const logger = require('../utils/logger').logWithLabel(processingLabel);
+const { storeFile } = require('./filesManager');
 
 const ModelProcessing = {};
 
@@ -32,6 +36,7 @@ const {
 	callback_queue: callbackq,
 	worker_queue: jobq,
 	model_queue: modelq,
+	drawing_queue: drawingq,
 	shared_storage: sharedDir,
 } = queueConfig;
 
@@ -59,6 +64,45 @@ const onCallbackQMsg = async ({ content, properties }) => {
 	} catch (err) {
 		logger.logError(`[${properties.correlationId}] Failed to process message: ${err?.message}`);
 	}
+};
+
+const queueDrawingUpload = async (teamspace, project, model, revId, data) => {
+	try {
+		const json = {
+			...data,
+			database: teamspace,
+			project: model,
+			revId,
+		};
+
+		const pathToRevFolder = Path.join(sharedDir, revId);
+		await mkdir(pathToRevFolder);
+
+		await writeFile(Path.join(pathToRevFolder, 'importParams.json'), JSON.stringify(json));
+
+		const msg = `processDrawing ${SHARED_SPACE_TAG}/${revId}/importParams.json`;
+
+		await queueMessage(drawingq, revId, msg);
+
+		publish(events.QUEUED_TASK_UPDATE, { teamspace, model, corId: revId, status: STATUSES.QUEUED });
+	} catch {
+		console.log('failed');
+	}
+};
+
+ModelProcessing.processDrawingUpload = async (teamspace, project, model, revInfo, file) => {
+	const format = Path.extname(file.originalname).toLowerCase();
+	const fileId = generateUUID();
+
+	const rev_id = await addRevision(teamspace, project, model, modelTypes.DRAWING,
+		{ ...revInfo, format, rFile: [fileId], incomplete: true });
+
+	const fileMeta = { name: file.originalname, rev_id, project, model };
+	await storeFile(teamspace, `${modelTypes.DRAWING}s.history.ref`, fileId, file.buffer, fileMeta);
+
+	// TODO: for a different issue, but we don't want push through pdfs - should process it in .io
+	const queueMeta = { format, size: file.buffer.length };
+	await queueDrawingUpload(teamspace, project, model, UUIDToString(rev_id), queueMeta);
 };
 
 ModelProcessing.queueModelUpload = async (teamspace, model, data, { originalname, path }) => {

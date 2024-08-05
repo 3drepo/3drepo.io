@@ -102,6 +102,11 @@ Models.isFederation = async (ts, model) => {
 	return federate;
 };
 
+Models.getModelType = async (ts, model) => {
+	const item = await Models.getModelById(ts, model, { _id: 0, federate: 1, modelType: 1 });
+	return getModelType(item);
+};
+
 Models.getContainerById = async (ts, container, projection) => {
 	try {
 		return await Models.getModelByQuery(ts, { _id: container, ...noFederations, ...noDrawings }, projection);

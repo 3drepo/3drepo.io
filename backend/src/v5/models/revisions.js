@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { STATUSES, getInfoFromCode, modelTypes } = require('./modelSettings.constants');
 const db = require('../handler/db');
 const { deleteIfUndefined } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUID } = require('../utils/helper/uuids');
-const { modelTypes } = require('./modelSettings.constants');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
@@ -97,7 +97,7 @@ Revisions.addRevision = async (teamspace, project, model, modelType, data) => {
 Revisions.deleteModelRevisions = (teamspace, project, model, modelType) => db.deleteMany(
 	teamspace, collectionName(modelType, model), { project, model });
 
-Revisions.updateRevision = async (teamspace, model, modelType, revision, setUpdate = {}, unsetUpdate = {}) => {
+const updateRevision = async (teamspace, model, modelType, revision, setUpdate = {}, unsetUpdate = {}) => {
 	const update = {};
 
 	if (Object.keys(setUpdate).length) {
@@ -120,8 +120,47 @@ Revisions.updateRevision = async (teamspace, model, modelType, revision, setUpda
 	return res;
 };
 
+Revisions.onProcessingCompleted = async (teamspace, project, model, revId, retVal, modelType) => {
+	const { success, message /* userErr */ } = getInfoFromCode(retVal);
+	const set = {};
+	const unset = { incomplete: 1 };
+
+	if (success) {
+		unset.status = 1;
+	} else {
+		set.status = STATUSES.FAILED;
+		set.errorReason = { message, timestamp: new Date(), errorCode: retVal };
+	}
+
+	await updateRevision(teamspace, model, modelType, revId, set, unset);
+
+	publish(events.MODEL_SETTINGS_UPDATE, {
+		teamspace,
+		project,
+		model,
+		data: { ...set, status: set.state || STATUSES.OK },
+		modelType,
+	});
+
+	if (success) {
+		publish(events.NEW_REVISION, { teamspace, project, model, revision: revId, modelType });
+	}
+};
+
+Revisions.updateProcessingStatus = async (teamspace, project, model, modelType, revision, status) => {
+	await updateRevision(teamspace, model, modelType, revision, { status });
+
+	// to be inline with 3D, we need to trigger the model settings update
+	publish(events.MODEL_SETTINGS_UPDATE, {
+		teamspace,
+		project,
+		model,
+		modelType,
+		data: { status } });
+};
+
 Revisions.updateRevisionStatus = async (teamspace, project, model, modelType, revision, status) => {
-	const res = await Revisions.updateRevision(teamspace, model, modelType, revision, { void: status });
+	const res = await updateRevision(teamspace, model, modelType, revision, { void: status });
 
 	publish(events.REVISION_UPDATED, { teamspace,
 		project,

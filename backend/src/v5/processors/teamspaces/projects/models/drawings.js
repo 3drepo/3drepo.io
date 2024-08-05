@@ -15,17 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { STATUSES, modelTypes } = require('../../../../models/modelSettings.constants');
-const { UUIDToString, generateUUID } = require('../../../../utils/helper/uuids');
 const { addModel, getModelList } = require('./commons/modelList');
-const { addRevision, deleteModelRevisions, getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisions, updateRevision, updateRevisionStatus } = require('../../../../models/revisions');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { deleteModel, getDrawingById, getDrawings, updateModelSettings } = require('../../../../models/modelSettings');
-const { getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../../services/filesManager');
+const { deleteModelRevisions, getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
+const { getFileAsStream, removeFilesWithMeta } = require('../../../../services/filesManager');
 const { getProjectById, removeModelFromProject } = require('../../../../models/projectSettings');
-const Path = require('path');
-const { events } = require('../../../../services/eventsManager/eventsManager.constants');
-const { publish } = require('../../../../services/eventsManager/eventsManager');
+const { modelTypes } = require('../../../../models/modelSettings.constants');
+const { processDrawingUpload } = require('../../../../services/modelProcessing');
 const { templates } = require('../../../../utils/responseCodes');
 
 const Drawings = { };
@@ -84,32 +81,7 @@ Drawings.getRevisions = (teamspace, drawing, showVoid) => getRevisions(teamspace
 	modelTypes.DRAWING, showVoid,
 	{ _id: 1, author: 1, format: 1, timestamp: 1, statusCode: 1, revCode: 1, void: 1, desc: 1 });
 
-Drawings.newRevision = async (teamspace, project, model, data, file) => {
-	try {
-		const format = Path.extname(file.originalname).toLowerCase();
-		const fileId = generateUUID();
-
-		const rev_id = await addRevision(teamspace, project, model, modelTypes.DRAWING,
-			{ ...data, format, rFile: [fileId], status: STATUSES.PROCESSING, incomplete: true });
-
-		publish(events.QUEUED_TASK_UPDATE, { teamspace,
-			model,
-			corId: UUIDToString(rev_id),
-			status: STATUSES.PROCESSING });
-
-		const fileMeta = { name: file.originalname, rev_id, project, model };
-		await storeFile(teamspace, `${modelTypes.DRAWING}s.history.ref`, fileId, file.buffer, fileMeta);
-		await updateRevision(teamspace, model, modelTypes.DRAWING, rev_id, { status: STATUSES.OK }, { incomplete: 1 });
-
-		publish(events.NEW_REVISION, { teamspace,
-			project,
-			model,
-			revision: UUIDToString(rev_id),
-			modelType: modelTypes.DRAWING });
-	} catch (err) {
-		// TODO
-	}
-};
+Drawings.newRevision = processDrawingUpload;
 
 Drawings.updateRevisionStatus = (teamspace, project, drawing, revision, status) => updateRevisionStatus(
 	teamspace, project, drawing, modelTypes.DRAWING, revision, status);
