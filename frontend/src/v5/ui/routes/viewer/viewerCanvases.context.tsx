@@ -41,7 +41,7 @@ export const ViewerCanvasesContextComponent = ({ children }) => {
 
 	return (
 		<ViewerCanvasesContext.Provider value={{
-			is2DOpen: !!drawingId,
+			is2DOpen: !!drawingId && leftPanelRatio < 1,
 			close2D: () => setDrawingId(''),
 			open2D: setDrawingId,
 			leftPanelRatio,

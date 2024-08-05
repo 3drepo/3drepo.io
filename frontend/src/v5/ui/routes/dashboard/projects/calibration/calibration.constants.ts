@@ -24,5 +24,5 @@ export const EMPTY_CALIBRATION = {
 		model: EMPTY_VECTOR,
 		drawing: EMPTY_VECTOR,
 	}, 
-	verticalRange: null,
+	verticalRange: EMPTY_VECTOR,
 };

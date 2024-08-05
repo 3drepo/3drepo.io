@@ -26,18 +26,22 @@ import ResetTransformationsIcons from '@assets/icons/viewer/reset_transformation
 import { formatMessage } from '@/v5/services/intl';
 import { GroupsActionsDispatchers, TreeActionsDispatchers, ViewerGuiActionsDispatchers, ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TreeHooksSelectors, ViewerGuiHooksSelectors, ViewpointsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { isEmpty } from 'lodash';
+import { isEmpty, isNull } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { Section, Container, ClearButton, ClearIcon } from './selectionToolbar.styles';
+import { Section, Container, ClearIcon, LozengeButton } from './selectionToolbar.styles';
 import { ToolbarButton } from '../buttons/toolbarButton.component';
 import { VIEWER_CLIP_MODES, VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { GizmoModeButtons } from '../buttons/buttonOptionsContainer/gizmoModeButtons.component';
 import { Viewer } from '@/v4/services/viewer/viewer';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { VerticalRange } from '../buttons/toolbarButtons.component';
+import { CalibrationContext } from '../../../dashboard/projects/calibration/calibrationContext';
+import { PlaneType } from '../../../dashboard/projects/calibration/calibration.types';
 
 export const SectionToolbar = () => {
+	const { verticalPlanes, isCalibratingPlanes, selectedPlane, setSelectedPlane, isAlignPlaneActive, setIsAlignPlaneActive } = useContext(CalibrationContext);
 	const [alignActive, setAlignActive] = useState(false);
-
+	
 	const hasOverrides = !isEmpty(ViewerGuiHooksSelectors.selectColorOverrides());
 	const hasHighlightedObjects = !!TreeHooksSelectors.selectSelectedNodes().length;
 	const hasHiddenObjects = TreeHooksSelectors.selectModelHasHiddenNodes();
@@ -45,6 +49,7 @@ export const SectionToolbar = () => {
 	const clippingSectionOpen = ViewerGuiHooksSelectors.selectIsClipEdit();
 	const isBoxClippingMode = clippingMode === VIEWER_CLIP_MODES.BOX;
 	const hasTransformations = !isEmpty(ViewpointsHooksSelectors.selectTransformations());
+	const planesAreUnset = verticalPlanes.some(isNull);
 
 	const onClickAlign = () => {
 		Viewer.clipToolRealign();
@@ -61,7 +66,6 @@ export const SectionToolbar = () => {
 			Viewer.off(VIEWER_EVENTS.BACKGROUND_SELECTED, () => setAlignActive(false));
 		};
 	}, [alignActive]);
-	
 
 	return (
 		<Container>
@@ -78,7 +82,7 @@ export const SectionToolbar = () => {
 					hidden={!clippingSectionOpen}
 					onClick={onClickAlign}
 					selected={alignActive}
-					title={formatMessage({ id: 'viewer.toolbar.icon.alignToSurface', defaultMessage: 'Align To Surface' })}
+					title={formatMessage({ id: 'viewer.toolbar.icon.alignClippingToSurface', defaultMessage: 'Align To Surface' })}
 				/>
 				<ToolbarButton
 					Icon={ClipSelectionIcon}
@@ -92,6 +96,30 @@ export const SectionToolbar = () => {
 					hidden={!clippingSectionOpen}
 					onClick={() => ViewerGuiActionsDispatchers.setClippingMode(null)}
 					title={formatMessage({ id: 'viewer.toolbar.icon.deleteClip', defaultMessage: 'Delete' })}
+				/>
+			</Section>
+			<Section hidden={!isCalibratingPlanes}>
+				<LozengeButton
+					hidden={!isCalibratingPlanes || planesAreUnset}
+					onClick={() => setSelectedPlane(PlaneType.LOWER) }
+					selected={selectedPlane === PlaneType.LOWER}
+				>
+					<FormattedMessage id="viewer.toolbar.icon.lowerPlane" defaultMessage="Bottom Plane" />
+				</LozengeButton>
+				<LozengeButton
+					hidden={!isCalibratingPlanes || planesAreUnset}
+					onClick={() => setSelectedPlane(PlaneType.UPPER) }
+					selected={selectedPlane === PlaneType.UPPER}
+				>
+					<FormattedMessage id="viewer.toolbar.icon.upperPlane" defaultMessage="Top Plane" />
+				</LozengeButton>
+				<VerticalRange />
+				<ToolbarButton
+					Icon={AlignIcon}
+					hidden={!isCalibratingPlanes}
+					onClick={() => setIsAlignPlaneActive(!isAlignPlaneActive)}
+					selected={isAlignPlaneActive}
+					title={formatMessage({ id: 'viewer.toolbar.icon.alignFloorToSurface', defaultMessage: 'Align Floor To Surface' })}
 				/>
 			</Section>
 			<Section hidden={!hasOverrides}>
@@ -129,13 +157,14 @@ export const SectionToolbar = () => {
 					onClick={() => TreeActionsDispatchers.isolateSelectedNodes(undefined)}
 					title={formatMessage({ id: 'viewer.toolbar.icon.isolate', defaultMessage: 'Isolate' })}
 				/>
-				<ClearButton
+				<LozengeButton
+					variant="filled"
 					hidden={!hasHighlightedObjects}
 					onClick={() => GroupsActionsDispatchers.clearSelectionHighlights()}
 				>
 					<ClearIcon />
 					<FormattedMessage id="viewer.toolbar.icon.clearSelection" defaultMessage="Clear Selection" />
-				</ClearButton>
+				</LozengeButton>
 			</Section>
 		</Container>
 	);

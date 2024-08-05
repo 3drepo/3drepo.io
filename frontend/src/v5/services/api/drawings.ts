@@ -17,7 +17,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { delay } from '@/v4/helpers/async';
-import { drawingFilesName, drawingIds, mockRole } from '@/v5/store/drawings/drawings.temp';
+import { calibrations, drawingFilesName, drawingIds, mockRole } from '@/v5/store/drawings/drawings.temp';
 import { DrawingStats, DrawingUploadStatus, CalibrationState, MinimumDrawing, IDrawing } from '@/v5/store/drawings/drawings.types';
 import { AxiosResponse } from 'axios';
 import { sample } from 'lodash';
@@ -57,7 +57,7 @@ const drawingsWithFixedDrawingURL = drawingFilesName.map((name, index) => ({
 	role: mockRole(index),
 	category: categories[index % 3],
 	status: DrawingUploadStatus.OK,
-	calibration: {
+	calibration: calibrations[drawingIds[index]] || {
 		state: CalibrationState.CALIBRATED,
 		units: units[index % units.length],
 	},
@@ -72,6 +72,7 @@ const drawings: IDrawing[] = drawingsWithFixedDrawingURL.concat(arr.map((_, i) =
 	const index = i + drawingFilesName.length;
 	const revisionsCount = Math.round(Math.random() * 3);
 	const unit = sample(units);
+
 	return {
 		_id: drawingIds[index] ?? uuid(),
 		name: 'A drawing ' + index + ' - ' + mockRole(index) + ` - UNIT: ${unit}`,

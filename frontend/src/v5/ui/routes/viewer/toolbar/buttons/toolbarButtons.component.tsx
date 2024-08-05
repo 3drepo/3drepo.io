@@ -19,14 +19,17 @@ import HomeIcon from '@assets/icons/viewer/home.svg';
 import FocusIcon from '@assets/icons/viewer/focus.svg';
 import CoordinatesIcon from '@assets/icons/viewer/coordinates.svg';
 import InfoIcon from '@assets/icons/viewer/info.svg';
+import VerticalCalibrationIcon from '@assets/icons/viewer/vertical_calibration.svg';
 import CalibrationIcon from '@assets/icons/filled/calibration-filled.svg';
 import { BimActionsDispatchers, MeasurementsActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { BimHooksSelectors, ModelHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatMessage } from '@/v5/services/intl';
 import { ToolbarButton } from './toolbarButton.component';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
+import { VerticalRangeContainer, VerticalRangeValue } from '../selectionToolbar/selectionToolbar.styles';
 import { useContext } from 'react';
 import { CalibrationContext } from '../../../dashboard/projects/calibration/calibrationContext';
+import { UNITS_CONVERSION_FACTORS_TO_METRES } from '../../../dashboard/projects/calibration/calibration.helpers';
 
 export const HomeButton = () => (
 	<ToolbarButton
@@ -94,3 +97,34 @@ export const CalibrationButton = () => {
 	);
 };
 
+export const VerticalCalibrationButton = () => {
+	const { isCalibratingPlanes, setIsCalibratingPlanes, step } = useContext(CalibrationContext);
+	return (
+		<ToolbarButton
+			Icon={VerticalCalibrationIcon}
+			hidden={step !== 2}
+			selected={isCalibratingPlanes}
+			onClick={() => setIsCalibratingPlanes(!isCalibratingPlanes)}
+			title={formatMessage({ id: 'viewer.toolbar.icon.verticalCalibration', defaultMessage: 'Vertical Calibration' })}
+		/>
+	);
+};
+
+export const VerticalRange = () => {
+	const { verticalPlanes, isCalibratingPlanes } = useContext(CalibrationContext);
+	const unit = ModelHooksSelectors.selectUnit();
+	const conversionFactor = unit === 'ft' ? 1 : UNITS_CONVERSION_FACTORS_TO_METRES[unit];
+	const rangeValue = ((verticalPlanes?.[1] - verticalPlanes?.[0]) / conversionFactor).toFixed(2);
+	const unitLabel = unit === 'ft' ? formatMessage({
+		id: 'viewer.toolbar.icon.verticalRange.imperial',
+		defaultMessage: 'ft',
+	}) : formatMessage({
+		id: 'viewer.toolbar.icon.verticalRange.metric',
+		defaultMessage: 'm',
+	});
+	return (
+		<VerticalRangeContainer hidden={!isCalibratingPlanes} disabled>
+			<VerticalRangeValue>{rangeValue}</VerticalRangeValue>{unitLabel}
+		</VerticalRangeContainer>
+	);
+};
