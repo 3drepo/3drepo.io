@@ -43,7 +43,7 @@ export const Viewer2D = () => {
 	const [viewBox, setViewBox] = useState<ViewBoxType>(DEFAULT_VIEWBOX);
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
-	const [isDrawingVector, setIsDrawingVector] = useState(true);
+	const [isDrawingVector, setIsDrawingVector] = useState(false);
 
 	const imgRef = useRef<HTMLImageElement>();
 	const imgContainerRef = useRef();
@@ -108,12 +108,12 @@ export const Viewer2D = () => {
 			</ImageContainer>
 			<ToolbarContainer>
 				<MainToolbar>
-					<ToolbarButton
+					{step === 1 && <ToolbarButton
 						Icon={CalibrationIcon}
 						onClick={onCalibrationClick}
 						title={formatMessage({ id: 'drawingViewer.toolbar.calibrate', defaultMessage: 'Calibrate' })}
 						selected={isDrawingVector}
-					/>
+					/>}
 					<ToolbarButton
 						Icon={ZoomOutIcon}
 						onClick={onClickZoomOut}

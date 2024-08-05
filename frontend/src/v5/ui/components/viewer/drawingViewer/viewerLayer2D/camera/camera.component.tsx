@@ -40,9 +40,6 @@ export const Camera = ({ scale }) => {
 
 	const onEnterFrame = async () => {
 		const v = await ViewerService.getCurrentViewpointInfo();
-
-		// console.log(JSON.stringify({ v }, null, '\t'));
-		
 		const p =  transform3DTo2D(v.position);
 		setPosition(p);
 
@@ -50,7 +47,6 @@ export const Camera = ({ scale }) => {
 		lookat.sub(p);
 		setAngle(lookat.angle());
 	
-		// transformAndTranslate([xmax, ymax], tMatrix, vector3DPlane[0]);
 		animationFrame.current = requestAnimationFrame(onEnterFrame);
 	};
 
