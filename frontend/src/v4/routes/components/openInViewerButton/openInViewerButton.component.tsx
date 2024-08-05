@@ -24,13 +24,13 @@ import { ROUTES } from '../../../constants/routes';
 import { TooltipButton } from '../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { ShowModelButtonContainer } from './openInViewerButton.styles';
 
-interface IProps extends RouteComponentProps<any> {
+type IProps = RouteComponentProps<{
 	className?: string;
 	teamspace: string;
 	model: string;
 	query?: string;
 	preview?: boolean;
-}
+}>
 
 export const OpenInViewerButton = memo((props: IProps) => {
 	const handleGoToModel = (event) => {

@@ -24,7 +24,7 @@ import { renderWhenTrue } from '../../../../helpers/rendering';
 import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
 import { Container, DisplayedText, ProgressWrapper, StyledCircularProgress } from './revisionsSwitch.styles';
 
-interface IProps extends RouteComponentProps<any> {
+type IProps = RouteComponentProps<{
 	className?: string;
 	modelSettings?: any;
 	revisions?: any[];
@@ -32,7 +32,7 @@ interface IProps extends RouteComponentProps<any> {
 	showRevisionsDialog: (config) => void;
 	currentRevision: any;
 	getCompareModels: (revisionId) => void;
-}
+}>
 
 export class RevisionsSwitch extends PureComponent<IProps, any> {
 

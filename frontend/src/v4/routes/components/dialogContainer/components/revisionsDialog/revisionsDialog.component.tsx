@@ -30,7 +30,7 @@ import {
 	StyledList
 } from './revisionsDialog.styles';
 
-interface IProps extends RouteComponentProps<any> {
+type IProps = RouteComponentProps<{
 	currentRevisionId: string;
 	currentModelName: string;
 	revisions: any[];
@@ -44,7 +44,7 @@ interface IProps extends RouteComponentProps<any> {
 	setModelRevisionState: (teamspace, modelId, revision, isVoid) => void;
 	handleSetNewRevision: (revision) => void;
 	handleClose: () => void;
-}
+}>
 
 export class RevisionsDialog extends PureComponent<IProps, any> {
 	public componentWillUnmount() {
