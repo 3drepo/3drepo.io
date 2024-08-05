@@ -31,14 +31,16 @@ import {
 	CalibrationButton,
 } from './drawingItem.styles';
 import { FormattedMessage } from 'react-intl';
-import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingRevisionsHooksSelectors, DrawingsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { viewerRoute } from '@/v5/services/routing/routing';
+import { Highlight } from '@controls/highlight';
+import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 const STATUS_CODE_TEXT = formatMessage({ id: 'drawings.list.item.statusCode', defaultMessage: 'Status code' });
 const REVISION_CODE_TEXT = formatMessage({ id: 'drawings.list.item.revisionCode', defaultMessage: 'Revision code' });
@@ -52,6 +54,7 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	const history = useHistory();
 	const { pathname, search } = useLocation();
 	const { setOrigin } = useContext(CalibrationContext);
+	const queries = DrawingsCardHooksSelectors.selectQueries();
 	const { calibration, name, drawingNumber, lastUpdated, desc, _id: drawingId } = drawing;
 	const [latestRevision] = DrawingRevisionsHooksSelectors.selectRevisions(drawingId);
 	const { statusCode, revisionCode } = latestRevision || {};
@@ -63,6 +66,12 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 		history.push(path);
 		setOrigin(pathname + search);
 	};
+
+	useEffect(() => {
+		if (!latestRevision) {
+			DrawingRevisionsActionsDispatchers.fetch(teamspace, project, drawing._id);
+		}
+	}, [latestRevision]);
 
 	const LoadingCodes = () => (
 		<>
@@ -84,13 +93,23 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 			{statusCode && (
 				<BreakingLine>
 					<Property>
-						{STATUS_CODE_TEXT}: <PropertyValue>{statusCode}</PropertyValue>
+						{STATUS_CODE_TEXT}: 
+						<PropertyValue>
+							<Highlight search={queries}>
+								{statusCode}
+							</Highlight>
+						</PropertyValue>
 					</Property>
 				</BreakingLine>
 			)}
 			<BreakingLine>
 				<Property>
-					{REVISION_CODE_TEXT}: <PropertyValue>{revisionCode}</PropertyValue>
+					{REVISION_CODE_TEXT}: 
+					<PropertyValue>
+						<Highlight search={queries}>
+							{revisionCode}
+						</Highlight>
+					</PropertyValue>
 				</Property>
 			</BreakingLine>
 		</>
@@ -104,13 +123,25 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 				</ImageContainer>
 				<InfoContainer>
 					<BreakingLine>
-						<Property>{drawingNumber}</Property>
+						<Property>
+							<Highlight search={queries}>
+								{drawingNumber}
+							</Highlight>
+						</Property>
 					</BreakingLine>
 					<BreakingLine>
-						<Title>{name}</Title>
+						<Title>
+							<Highlight search={queries}>
+								{name}
+							</Highlight>
+						</Title>
 					</BreakingLine>
 					{areStatsPending ? <LoadingCodes /> : <LoadedCodes />}
-					<Description>{desc}</Description>
+					<Description>
+						<Highlight search={queries}>
+							{desc}
+						</Highlight>
+					</Description>
 				</InfoContainer>
 			</MainBody>
 			<BottomLine>

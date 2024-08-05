@@ -19,7 +19,6 @@ import { createContext, useState } from 'react';
 import { Transformers, useSearchParam } from '../../../useSearchParam';
 import { PlaneType, Vector1D, Vector2D, Vector3D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
-import { CalibrationHandler } from './calibrationHandler.component';
 
 export interface CalibrationContextType {
 	step: number;
@@ -105,7 +104,6 @@ export const CalibrationContextComponent = ({ children }) => {
 			isAlignPlaneActive,
 			setIsAlignPlaneActive,
 		}}>
-			{isCalibrating && <CalibrationHandler />}
 			{children}
 		</CalibrationContext.Provider>
 	);

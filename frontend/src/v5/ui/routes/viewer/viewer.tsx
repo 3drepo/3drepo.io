@@ -17,7 +17,7 @@
 
 import { useParams } from 'react-router-dom';
 import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
-import { ProjectsActionsDispatchers, TeamspacesActionsDispatchers, TicketsCardActionsDispatchers, ViewerActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DrawingsCardActionsDispatchers, ProjectsActionsDispatchers, TeamspacesActionsDispatchers, TicketsCardActionsDispatchers, ViewerActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useEffect, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
@@ -30,8 +30,9 @@ import { CentredContainer } from '@controls/centredContainer';
 import { TicketsCardViews } from './tickets/tickets.constants';
 import { ViewerCanvases } from '../dashboard/viewerCanvases/viewerCanvases.component';
 import { ViewerGui } from '@/v4/routes/viewerGui';
-import { CalibrationContextComponent } from '../dashboard/projects/calibration/calibrationContext';
+import { CalibrationContext, CalibrationContextComponent } from '../dashboard/projects/calibration/calibrationContext';
 import { OpenDrawingFromUrl } from './openDrawingFromUrl/openDrawingFromUrl.component';
+import { CalibrationHandler } from '../dashboard/projects/calibration/calibrationHandler.component';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
@@ -82,6 +83,10 @@ export const Viewer = () => {
 		ViewerActionsDispatchers.fetchData(teamspace, project, containerOrFederation);
 	}, [teamspace, project, containerOrFederation]);
 
+	useEffect(() => {
+		DrawingsCardActionsDispatchers.setQueries([]);
+	}, [teamspace, project]);
+
 	useEffect(() => { if (isFetching) setFetchPending(false); }, [isFetching]);
 
 	if (isLoading) return (<CentredContainer horizontal vertical><SpinnerLoader /></CentredContainer>);
@@ -110,6 +115,9 @@ export const Viewer = () => {
 			<CheckLatestRevisionReadiness />
 			<ViewerCanvases />
 			<ViewerGui match={v4Match} key={containerOrFederation} />
+			<CalibrationContext.Consumer>
+				{({ isCalibrating }) => isCalibrating && <CalibrationHandler />}
+			</CalibrationContext.Consumer>
 		</CalibrationContextComponent>
 	);
 };
