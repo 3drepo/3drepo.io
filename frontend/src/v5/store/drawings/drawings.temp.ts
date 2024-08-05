@@ -48,7 +48,7 @@ export const drawingIds = [
 	'97933311-draw-4178-a241-1fe8219fffb6',
 ];
 
-export const drawingFilesName = ['map.svg', 'fly.svg', 'blueprint.svg', 'blueprint2.svg', 'blueprint.png', 'blueprint2.png', 'blueprint3.png', 'blueprint4.png', 'rac_level_1.png', 'rac_level_2.png', 'rac_site.png', 'rac_level_1.svg', 'rac_level_2.svg', 'rac_site.svg'];
+export const drawingFilesName = ['rac_level_1.png', 'rac_level_2.png', 'rac_site.png', 'rac_level_1.svg', 'rac_level_2.svg', 'rac_site.svg', 'map.svg', 'fly.svg', 'blueprint.svg', 'blueprint2.svg', 'blueprint.png', 'blueprint2.png', 'blueprint3.png', 'blueprint4.png'];
 export const mapDrawingIdToName = (id) => {
 	const index = drawingIds.findIndex((d) => d === id);
 	if (index !== -1) {
@@ -101,3 +101,39 @@ export const statusCodes = [
 	{ code: 'S6', description: 'Suitable for PIM authorization' },
 	{ code: 'S7', description: 'Suitable for AIM authorization' },
 ];
+
+
+export const calibrations = {
+	'53da2fd9-draw-4030-a0b5-00de693dd0e5': {
+		'state': 'calibrated',
+		'units': 'mm',
+		'horizontal': {
+			'model': [
+				[
+					-27014.91227810215,
+					-26.73486328125,
+					28586.771226794517,
+				],
+				[
+					195.1892843978494,
+					2000,
+					7919.716539294517,
+				],
+			],
+			'drawing': [
+				[
+					79.96720454365595,
+					284.59643473182854,
+				],
+				[
+					749.7478434244791,
+					281.6018371582031,
+				],
+			],
+		},
+		'verticalRange': [
+			2029.0478515625,
+			9569.68359375,
+		],
+	},
+};

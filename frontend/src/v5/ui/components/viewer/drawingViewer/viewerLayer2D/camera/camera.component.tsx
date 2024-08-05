@@ -59,14 +59,11 @@ export const Camera = ({ scale }) => {
 		if (!transform2DTo3D) return;
 
 		animationFrame.current = requestAnimationFrame(onEnterFrame);
-
-		//;
-
 		return () => {
 			cancelAnimationFrame(animationFrame.current);
-			console.log('[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]');
-			console.log('unlistening camera' + animationFrame);
-			console.log('[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]');
+			// console.log('[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]');
+			// console.log('unlistening camera' + animationFrame);
+			// console.log('[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]');
 		};
 	}, transform2DTo3D);
 
