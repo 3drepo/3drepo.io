@@ -20,18 +20,11 @@ import CameraIcon from '@assets/icons/viewer/camera.svg';
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
-import { Coord2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 
 export const Camera = ({ scale }) => {
-	// console.log(1 / scale);
-
-
-	// const [animationFrame, setAnimationFrame] = useState<number>(0);
-
 	const animationFrame = useRef(0);
 	const viewpoint = useRef(null);
 	const cameraRef = useRef<HTMLElement>();
-
 	
 	const [drawingId] = useSearchParam('drawingId');
 	const { containerOrFederation } = useParams();
@@ -62,9 +55,6 @@ export const Camera = ({ scale }) => {
 		animationFrame.current = requestAnimationFrame(onEnterFrame);
 		return () => {
 			cancelAnimationFrame(animationFrame.current);
-			// console.log('[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]');
-			// console.log('unlistening camera' + animationFrame);
-			// console.log('[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]');
 		};
 	}, [transform2DTo3D]);
 
@@ -83,23 +73,25 @@ export const Camera = ({ scale }) => {
 
 
 		const pp =  transform2DTo3D(point);
-		const {	up,
+		const {
+			up,
+			// eslint-disable-next-line @typescript-eslint/naming-convention
 			view_dir,
-			look_at, position:pos } = viewpoint.current;
+			position:pos, type } = viewpoint.current;
 
 		const cam = {
 			position: [pp.x,  pos[1], pp.y ],
 			view_dir,
 			up,
+			type, 
+			look_at: undefined, 
+			orthographicSize: undefined, 
+			account: undefined, 
+			model: undefined,
 		};
 
 
-		const fromPosition = transform2DTo3D([position.x, position.y]);
-		
-
 		ViewerService.setCamera(cam);
-
-		// console.log(JSON.stringify({ pp, pos,  point, position, fromPosition }));
 	};
 
 	const onMouseUp = (ev: MouseEvent) => {
@@ -115,21 +107,6 @@ export const Camera = ({ scale }) => {
 		ev.currentTarget.parentElement.addEventListener('mousemove', onMouseMove);
 		ev.currentTarget.parentElement.addEventListener('mouseup', onMouseUp);
 	};
-
-	useEffect(() => {
-		// if (!cameraRef.current) return;
-
-		// setTimeout(() => {
-		// 	console.log('hey');
-
-		// 	cameraRef.current.addEventListener('mousedown', (ev) => {
-		// 		console.log('mousedown');
-		// 		ev.stopPropagation();
-		// 	});
-		// }, 3000);
-
-
-	}, []);
 
 	if (!transform2DTo3D) {
 		return null;
