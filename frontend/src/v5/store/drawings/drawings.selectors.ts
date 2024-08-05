@@ -105,7 +105,7 @@ export const selectCalibration = createSelector(
 	(drawing, model) => {
 		const calibration = drawing?.calibration || EMPTY_CALIBRATION as any;
 
-		console.log(JSON.stringify({calibration}, null, '\t'));
+		// console.log(JSON.stringify({calibration}, null, '\t'));
 		
 		
 		const conversionFactor = getUnitsConversionFactor(calibration?.units, model.unit);
@@ -133,7 +133,7 @@ export const selectTransform2Dto3D = createSelector(
 	selectTransformMatrix,
 	(matrix) => {
 		if (!matrix) return null;
-		return (vector) => new Vector2(...vector).applyMatrix3(matrix) ;
+		return (vector): Vector2  => new Vector2(...vector).applyMatrix3(matrix) ;
 	},
 );
 
@@ -143,7 +143,7 @@ export const selectTransform3Dto2D = createSelector(
 		if (!matrix) return null;
 		const inverseMat = matrix.clone().invert();
 
-		return (vector) => new Vector2(...removeZ(vector)).applyMatrix3(inverseMat) ;
+		return (vector): Vector2 => new Vector2(...removeZ(vector)).applyMatrix3(inverseMat) ;
 	},
 );
 

@@ -29,6 +29,7 @@ export const Camera = ({ scale }) => {
 	// const [animationFrame, setAnimationFrame] = useState<number>(0);
 
 	const animationFrame = useRef(0);
+	const viewpoint = useRef(null);
 	const cameraRef = useRef<HTMLElement>();
 
 	
@@ -48,6 +49,8 @@ export const Camera = ({ scale }) => {
 		const lookat = transform3DTo2D(v.look_at);
 		lookat.sub(p);
 		setAngle(lookat.angle());
+
+		viewpoint.current = v;
 	
 		animationFrame.current = requestAnimationFrame(onEnterFrame);
 	};
@@ -67,14 +70,36 @@ export const Camera = ({ scale }) => {
 
 
 	const getCursorOffset = (e) => {
-		const rect = e.target.getBoundingClientRect();
+		const rect = e.currentTarget.getBoundingClientRect();
 		const offsetX = e.clientX - rect.left;
 		const offsetY = e.clientY - rect.top;
-		return [offsetX, offsetY].map((point) => point / scale) as Coord2D;
+		return [ offsetX / scale, offsetY / scale];
 	};
 
-	const onMouseMove = (ev: MouseEvent) => {
-		getCursorOffset(ev);
+	const onMouseMove = async (ev: MouseEvent) => {
+		ev.stopPropagation();
+
+		const point = getCursorOffset(ev);
+
+
+		const pp =  transform2DTo3D(point);
+		const {	up,
+			view_dir,
+			look_at, position:pos } = viewpoint.current;
+
+		const cam = {
+			position: [pp.x,  pos[1], pp.y ],
+			view_dir,
+			up,
+		};
+
+
+		const fromPosition = transform2DTo3D([position.x, position.y]);
+		
+
+		ViewerService.setCamera(cam);
+
+		// console.log(JSON.stringify({ pp, pos,  point, position, fromPosition }));
 	};
 
 	const onMouseUp = (ev: MouseEvent) => {
@@ -83,18 +108,32 @@ export const Camera = ({ scale }) => {
 
 	const onMouseDown: React.MouseEventHandler<SVGSVGElement> = (ev) => {
 		ev.stopPropagation();
+		ev.nativeEvent.stopPropagation();
+		ev.nativeEvent.stopImmediatePropagation();
+
 
 		ev.currentTarget.parentElement.addEventListener('mousemove', onMouseMove);
 		ev.currentTarget.parentElement.addEventListener('mouseup', onMouseUp);
 	};
 
 	useEffect(() => {
+		// if (!cameraRef.current) return;
 
-	});
+		// setTimeout(() => {
+		// 	console.log('hey');
+
+		// 	cameraRef.current.addEventListener('mousedown', (ev) => {
+		// 		console.log('mousedown');
+		// 		ev.stopPropagation();
+		// 	});
+		// }, 3000);
+
+
+	}, []);
 
 	if (!transform2DTo3D) {
 		return null;
 	}
 
-	return (<CameraIcon iconRef={cameraRef as any} onMouseDown={onMouseDown}  style={{ transform: `translate(${position.x}px, ${position.y}px) scale(${1 / scale}) rotate(${angle}rad)`, overflow:'unset', transformOrigin: '0 0' }}/>);
+	return (<CameraIcon iconRef={cameraRef as any} onMouseDown={onMouseDown}  style={{ transform: `translate(${position.x}px, ${position.y}px) scale(${1 / scale}) rotate(${angle}rad)`, overflow:'unset', cursor:'grab', transformOrigin: '0 0' }}/>);
 };
