@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,19 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Risks = {};
-const db = require('../handler/db');
+import { ForwardedRef, forwardRef } from 'react';
+import { useAuthenticatedImage } from './authenticatedResource.hooks';
 
-const collectionName = (model) => `${model}.risks`;
+type HTMLImageElementProps = React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>;
 
-const excludeResolvedRisks = {
-	mitigation_status: { $nin: [
-		'void',
-		'agreed_fully',
-		'rejected',
-	] },
-};
+export const AuthImg = forwardRef(({ src, ...props }: HTMLImageElementProps, ref: ForwardedRef<HTMLImageElement>) => {
+	const authSrc = useAuthenticatedImage(src, props.onError);
+	return (<img {...props} src={authSrc}  ref={ref}/>);
+});
 
-Risks.getRisksCount = (teamspace, model) => db.count(teamspace, collectionName(model), excludeResolvedRisks);
-
-module.exports = Risks;

@@ -25,6 +25,7 @@ import { SubmitButton } from '@controls/submitButton';
 import { ContainersAndFederationsFormSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
 import { TemplateFormSelect } from '../selectMenus/templateFormSelect.component';
 import { Form, Title, Image } from './ticketsSelection.styles';
+import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
 type FormType = {
 	containersAndFederations: string[],
@@ -32,12 +33,13 @@ type FormType = {
 };
 export const TicketsSelection = () => {
 	const { teamspace, project } = useParams<DashboardParams>();
+	const [models] = useSearchParam('models', Transformers.STRING_ARRAY);
 	const history = useHistory();
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 
 	const formData = useForm<FormType>({
 		defaultValues: {
-			containersAndFederations: [],
+			containersAndFederations: models,
 			template: '',
 		},
 	});

@@ -55,8 +55,7 @@ export interface IFederation {
 	code?: string;
 	status: UploadStatuses;
 	containers: GroupedContainer[];
-	issues: number;
-	risks: number;
+	tickets: number;
 	category: string;
 	lastUpdated: Date;
 	hasStatsPending: boolean;
@@ -90,10 +89,7 @@ export type FederationStats = {
 	desc: string;
 	status: UploadStatuses;
 	containers: GroupedContainer[];
-	tickets: {
-		issues: number;
-		risks: number;
-	};
+	tickets: number;
 	category: string;
 	lastUpdated: number;
 };

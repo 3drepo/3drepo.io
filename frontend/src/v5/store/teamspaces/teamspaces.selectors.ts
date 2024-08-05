@@ -16,9 +16,10 @@
  */
 
 import { createSelector } from 'reselect';
-import { ITeamspace, ITeamspacesState } from './teamspaces.redux';
+import { ITeamspace, TeamspacesState } from './teamspaces.redux';
+import { AddOn } from '../store.types';
 
-const selectTeamspacesDomain = (state): ITeamspacesState => state.teamspaces2 || {};
+const selectTeamspacesDomain = (state): TeamspacesState => state.teamspaces2 || {};
 
 export const selectTeamspaces = createSelector(
 	selectTeamspacesDomain, (state) => state.teamspaces,
@@ -50,4 +51,20 @@ export const selectCurrentQuotaSeats = createSelector(
 export const selectIsTeamspaceAdmin = createSelector(
 	selectCurrentTeamspaceDetails,
 	(teamspace): boolean => !!teamspace?.isAdmin,
+);
+
+export const selectIsFetchingAddons = createSelector(
+	selectTeamspacesDomain, selectCurrentTeamspace, (state, teamspace) => !state.addOns[teamspace],
+);
+
+export const selectAddons = createSelector(
+	selectTeamspacesDomain, selectCurrentTeamspace, (state, teamspace) => state.addOns[teamspace] || [],
+);
+
+export const selectRisksEnabled = createSelector(
+	selectAddons, (addOns) => addOns.includes(AddOn.Risks),
+);
+
+export const selectIssuesEnabled = createSelector(
+	selectAddons, (addOns) => addOns.includes(AddOn.Issues),
 );

@@ -91,19 +91,28 @@ const getPanelConfig = (panelType) => ({
 	type: panelType
 });
 
-export const getViewerLeftPanels = () =>  [
-	VIEWER_PANELS.ISSUES,
-	VIEWER_PANELS.RISKS,
-	VIEWER_PANELS.TICKETS,
-	VIEWER_PANELS.GROUPS,
-	VIEWER_PANELS.VIEWS,
-	VIEWER_PANELS.TREE,
-	VIEWER_PANELS.COMPARE,
-	VIEWER_PANELS.GIS,
-	VIEWER_PANELS.SEQUENCES,
-	VIEWER_PANELS.MEASUREMENTS,
-].filter((panel) =>
-(clientConfigService.sequencesEnabled || panel !== VIEWER_PANELS.SEQUENCES)).map(getPanelConfig);
+export const getViewerLeftPanels = (issuesEnabled, risksEnabled) =>  {
+	const leftPanels = [
+		VIEWER_PANELS.TICKETS,
+		VIEWER_PANELS.GROUPS,
+		VIEWER_PANELS.VIEWS,
+		VIEWER_PANELS.TREE,
+		VIEWER_PANELS.COMPARE,
+		VIEWER_PANELS.GIS,
+		VIEWER_PANELS.SEQUENCES,
+		VIEWER_PANELS.MEASUREMENTS,
+	].filter((panel) =>
+	(clientConfigService.sequencesEnabled || panel !== VIEWER_PANELS.SEQUENCES))
+	if (risksEnabled) {
+		leftPanels.unshift(VIEWER_PANELS.RISKS);
+	}
+
+	if (issuesEnabled) {
+		leftPanels.unshift(VIEWER_PANELS.ISSUES);
+	}
+
+	return leftPanels.map(getPanelConfig);
+};
 
 export const VIEWER_DRAGGABLE_PANELS = [
 	VIEWER_PANELS.LEGEND,
