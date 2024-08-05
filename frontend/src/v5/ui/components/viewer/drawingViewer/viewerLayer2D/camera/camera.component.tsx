@@ -20,6 +20,7 @@ import CameraIcon from '@assets/icons/viewer/camera.svg';
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
+import { Coord2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 
 export const Camera = ({ scale }) => {
 	// console.log(1 / scale);
@@ -28,6 +29,7 @@ export const Camera = ({ scale }) => {
 	// const [animationFrame, setAnimationFrame] = useState<number>(0);
 
 	const animationFrame = useRef(0);
+	const cameraRef = useRef<HTMLElement>();
 
 	
 	const [drawingId] = useSearchParam('drawingId');
@@ -61,15 +63,38 @@ export const Camera = ({ scale }) => {
 			// console.log('unlistening camera' + animationFrame);
 			// console.log('[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]');
 		};
-	}, transform2DTo3D);
+	}, [transform2DTo3D]);
 
 
-	// console.log(animationFrame);
+	const getCursorOffset = (e) => {
+		const rect = e.target.getBoundingClientRect();
+		const offsetX = e.clientX - rect.left;
+		const offsetY = e.clientY - rect.top;
+		return [offsetX, offsetY].map((point) => point / scale) as Coord2D;
+	};
+
+	const onMouseMove = (ev: MouseEvent) => {
+		getCursorOffset(ev);
+	};
+
+	const onMouseUp = (ev: MouseEvent) => {
+		ev.currentTarget.removeEventListener('mousemove', onMouseMove);
+	};
+
+	const onMouseDown: React.MouseEventHandler<SVGSVGElement> = (ev) => {
+		ev.stopPropagation();
+
+		ev.currentTarget.parentElement.addEventListener('mousemove', onMouseMove);
+		ev.currentTarget.parentElement.addEventListener('mouseup', onMouseUp);
+	};
+
+	useEffect(() => {
+
+	});
 
 	if (!transform2DTo3D) {
 		return null;
 	}
 
-
-	return (<CameraIcon style={{ transform: `translate(${position.x}px, ${position.y}px) scale(${1 / scale}) rotate(${angle}rad)`, overflow:'unset', transformOrigin: '0 0' }}/>);
+	return (<CameraIcon iconRef={cameraRef as any} onMouseDown={onMouseDown}  style={{ transform: `translate(${position.x}px, ${position.y}px) scale(${1 / scale}) rotate(${angle}rad)`, overflow:'unset', transformOrigin: '0 0' }}/>);
 };
