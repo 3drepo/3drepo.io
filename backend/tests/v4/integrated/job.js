@@ -33,8 +33,8 @@ describe("Job", function () {
 	let agent;
 	const username = "job";
 	const password = "job";
-	const job = { _id: "job1", color: "000000"};
-	const job2 = { _id: "job2", color: "000000"};
+	const job = { _id: "job1", color: "#000000"};
+	const job2 = { _id: "job2", color: "#000000"};
 
 	before(function(done) {
 		server = app.listen(8080, function () {
@@ -91,16 +91,25 @@ describe("Job", function () {
 
 	it("should not able to create job with invalid name", function(done) {
 		agent.post(`/${username}/jobs`)
-			.send({ _id: " ", color: "000000"})
+			.send({ _id: " ", color: "#000000"})
 			.expect(400 , function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.JOB_ID_INVALID.value);
 				done(err);
 			});
 	});
 
+	it("should not able to create job with invalid color", function(done) {
+		agent.post(`/${username}/jobs`)
+			.send({ _id: "abcd", color: "000000"})
+			.expect(400 , function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+				done(err);
+			});
+	});
+
 	it("should not able to create job with no name", function(done) {
 		agent.post(`/${username}/jobs`)
-			.send({ _id: "", color: "000000"})
+			.send({ _id: "", color: "#000000"})
 			.expect(400 , function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.JOB_ID_INVALID.value);
 				done(err);

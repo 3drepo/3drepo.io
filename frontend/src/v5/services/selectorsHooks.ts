@@ -39,6 +39,7 @@ import * as TeamspacesSelectors from '@/v5/store/teamspaces/teamspaces.selectors
 import * as UsersSelectors from '@/v5/store/users/users.selectors';
 import * as ViewerSelectors from '@/v5/store/viewer/viewer.selectors';
 import * as ViewerGuiSelectors from '@/v4/modules/viewerGui/viewerGui.selectors';
+import * as ViewpointsSelectors from '@/v4/modules/viewpoints/viewpoints.selectors';
 
 
 export const AuthHooksSelectors = createHooksSelectors(AuthSelectors);
@@ -64,3 +65,4 @@ export const TreeHooksSelectors = createHooksSelectors(TreeSelectors);
 export const UsersHooksSelectors = createHooksSelectors(UsersSelectors);
 export const ViewerHooksSelectors = createHooksSelectors(ViewerSelectors);
 export const ViewerGuiHooksSelectors = createHooksSelectors(ViewerGuiSelectors);
+export const ViewpointsHooksSelectors = createHooksSelectors(ViewpointsSelectors);

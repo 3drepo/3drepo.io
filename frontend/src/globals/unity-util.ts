@@ -521,8 +521,8 @@ export class UnityUtil {
 	 */
 	public static clipBroadcast(clipInfo: string) {
 		const data = JSON.parse(clipInfo);
-		if(UnityUtil.verbose) {
-			console.debug("[FROM UNITY] clipBroadcast", data);
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] clipBroadcast', data);
 		}
 		if (UnityUtil.viewer && UnityUtil.viewer.clipBroadcast) {
 			UnityUtil.viewer.clipBroadcast(JSON.parse(data));
@@ -531,8 +531,8 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static clipUpdated() {
-		if(UnityUtil.verbose) {
-			console.debug("[FROM UNITY] clipUpdated");
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] clipUpdated');
 		}
 		if (UnityUtil.viewer && UnityUtil.viewer.clipUpdated) {
 			UnityUtil.viewer.clipUpdated();
@@ -542,8 +542,8 @@ export class UnityUtil {
 	/** @hidden */
 	public static currentPointInfo(pointInfo) {
 		const point = JSON.parse(pointInfo);
-		if(UnityUtil.verbose) {
-			console.debug("[FROM UNITY] currentPointInfo", point);
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] currentPointInfo', point);
 		}
 		if (UnityUtil.viewer && UnityUtil.viewer.objectSelected) {
 			UnityUtil.viewer.objectSelected(point);
@@ -582,8 +582,8 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static navMethodChanged(newNavMode) {
-		if(UnityUtil.verbose) {
-			console.debug("[FROM UNITY] navMethodChanged", newNavMode);
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] navMethodChanged', newNavMode);
 		}
 		if (UnityUtil.viewer && UnityUtil.viewer.navMethodChanged) {
 			UnityUtil.viewer.navMethodChanged(newNavMode);
@@ -592,8 +592,8 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static objectsSelectedAlert(nodeInfo) {
-		if(UnityUtil.verbose) {
-			console.debug("[FROM UNITY] objectsSelectedAlert", JSON.parse(nodeInfo));
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] objectsSelectedAlert', JSON.parse(nodeInfo));
 		}
 		UnityUtil.viewer.objectsSelected(JSON.parse(nodeInfo).nodes);
 	}
@@ -602,8 +602,8 @@ export class UnityUtil {
 	public static objectStatusBroadcast(nodeInfo) {
 		try {
 			const data = JSON.parse(nodeInfo);
-			if(UnityUtil.verbose) {
-				console.debug("[FROM UNITY] objectStatusBroadcast", data);
+			if (UnityUtil.verbose) {
+				console.debug('[FROM UNITY] objectStatusBroadcast', data);
 			}
 			UnityUtil.objectStatusPromises.forEach((promise) => {
 				promise.resolve(data);
@@ -628,8 +628,8 @@ export class UnityUtil {
 	/** @hidden */
 	public static pickPointAlert(pointInfo) {
 		const point = JSON.parse(pointInfo);
-		if(UnityUtil.verbose) {
-			console.debug("[FROM UNITY] pickPointAlert", point);
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] pickPointAlert', point);
 		}
 		if (UnityUtil.viewer && UnityUtil.viewer.pickPointEvent) {
 			UnityUtil.viewer.pickPointEvent(point);
@@ -641,8 +641,8 @@ export class UnityUtil {
 		try {
 			const ssJSON = JSON.parse(screenshot);
 
-			if(UnityUtil.verbose) {
-				console.debug("[FROM UNITY] screenshotReady", ssJSON);
+			if (UnityUtil.verbose) {
+				console.debug('[FROM UNITY] screenshotReady', ssJSON);
 			}
 
 			UnityUtil.screenshotPromises.forEach((promise) => {
@@ -661,8 +661,8 @@ export class UnityUtil {
 	public static viewpointReturned(vpInfo) {
 		try {
 			const viewpoint = JSON.parse(vpInfo);
-			if(UnityUtil.verbose) {
-				console.debug("[FROM UNITY] viewpointReturned", viewpoint);
+			if (UnityUtil.verbose) {
+				console.debug('[FROM UNITY] viewpointReturned', viewpoint);
 			}
 
 			UnityUtil.viewpointsPromises.forEach((promise) => {
@@ -682,8 +682,8 @@ export class UnityUtil {
 	public static measurementAlert(strMeasurement) {
 		try {
 			const measurement = JSON.parse(strMeasurement);
-			if(UnityUtil.verbose) {
-				console.debug("[FROM UNITY] measurementAlert", measurement);
+			if (UnityUtil.verbose) {
+				console.debug('[FROM UNITY] measurementAlert', measurement);
 			}
 			if (UnityUtil.viewer && UnityUtil.viewer.measurementAlertEvent) {
 				UnityUtil.viewer.measurementAlertEvent(measurement);
@@ -695,8 +695,8 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static measurementRemoved(measurementId) {
-		if(UnityUtil.verbose) {
-			console.debug("[FROM UNITY] measurementRemoved", measurementId);
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] measurementRemoved', measurementId);
 		}
 		if (UnityUtil.viewer && UnityUtil.viewer.measurementRemoved) {
 			UnityUtil.viewer.measurementRemoved(measurementId);
@@ -705,8 +705,8 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static measurementsCleared() {
-		if(UnityUtil.verbose) {
-			console.debug("[FROM UNITY] measurementCleared");
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] measurementCleared');
 		}
 		if (UnityUtil.viewer && UnityUtil.viewer.measurementsCleared) {
 			UnityUtil.viewer.measurementsCleared();
