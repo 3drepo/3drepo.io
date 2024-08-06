@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Viewer } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
 import { CalibrationContext } from '../../calibrationContext';
-import { PlaneType } from '../../calibration.types';
+import { PlaneType, Vector1D } from '../../calibration.types';
 import { TreeActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { getTransformationMatrix } from '../../calibration.helpers';
 import { Vector2 } from 'three';
@@ -29,8 +29,9 @@ import { COLOR, hexToOpacity } from '@/v5/ui/themes/theme';
 
 export const VerticalSpatialBoundariesHandler = () => {
 	const { verticalPlanes, setVerticalPlanes, vector3D, vector2D, isCalibratingPlanes, setIsCalibratingPlanes, drawingId,
-		setSelectedPlane, selectedPlane, isAlignPlaneActive, setIsAlignPlaneActive } = useContext(CalibrationContext);
+		setSelectedPlane, selectedPlane, isAlignPlaneActive } = useContext(CalibrationContext);
 	const [imageApplied, setImageApplied] = useState(false);
+	const planesRef = useRef(verticalPlanes);
 	const planesAreSet = !verticalPlanes.some(isNull);
 	
 	const applyImageToPlane = () => {
@@ -53,6 +54,10 @@ export const VerticalSpatialBoundariesHandler = () => {
 			setImageApplied(true);
 		};
 	};
+
+	useEffect(() => {
+		planesRef.current = verticalPlanes;
+	}, [verticalPlanes]);
 	
 	useEffect(() => {
 		if (isCalibratingPlanes) {
@@ -61,27 +66,48 @@ export const VerticalSpatialBoundariesHandler = () => {
 			if (planesAreSet) applyImageToPlane();
 			return () => {
 				Viewer.setCalibrationToolMode('None');
-				Viewer.off(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, () => { });
+				Viewer.off(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
 				Viewer.clipToolDelete();
 			};
 		}
 	}, [isCalibratingPlanes, planesAreSet]);
 
 	useEffect(() => {
-		if (isAlignPlaneActive) {
-			const onPickPoint = ({ account, model, id }) => {
+		if (!planesAreSet) {
+			const onClickFloorToObject = ({ account, model, id }) => {
 				Viewer.setCalibrationToolFloorToObject(account, model, id);
 				setSelectedPlane(PlaneType.UPPER);
-				setIsAlignPlaneActive(false);
 			};
 			TreeActionsDispatchers.stopListenOnSelections();
-			Viewer.on(VIEWER_EVENTS.OBJECT_SELECTED, onPickPoint);
+			Viewer.on(VIEWER_EVENTS.OBJECT_SELECTED, onClickFloorToObject);
 			return () => {
 				TreeActionsDispatchers.startListenOnSelections();
-				Viewer.off(VIEWER_EVENTS.OBJECT_SELECTED, () => { });
+				Viewer.off(VIEWER_EVENTS.OBJECT_SELECTED, onClickFloorToObject);
 			};
 		}
-	}, [isAlignPlaneActive]);
+	}, [planesAreSet]);
+
+	useEffect(() => {
+		if (isAlignPlaneActive && planesAreSet) {
+			const onClickPlaneToPoint = ({ position }) => {
+				const zCoord = position[1];
+				const newValues = [...planesRef.current].map((oldValue, idx) => {
+					if ((selectedPlane === PlaneType.LOWER && idx === 0) ||
+						(selectedPlane === PlaneType.UPPER && idx === 1)) return zCoord;
+					return oldValue;
+				}) as Vector1D;
+				if (newValues[0] > newValues[1]) return; // lower plane cannot exceed upper plane
+				Viewer.setCalibrationToolVerticalPlanes(newValues[0], newValues[1]);
+				setVerticalPlanes(newValues);
+			};
+			TreeActionsDispatchers.stopListenOnSelections();
+			Viewer.on(VIEWER_EVENTS.PICK_POINT, onClickPlaneToPoint);
+			return () => {
+				TreeActionsDispatchers.startListenOnSelections();
+				Viewer.off(VIEWER_EVENTS.PICK_POINT, onClickPlaneToPoint);
+			};
+		}
+	}, [isAlignPlaneActive, selectedPlane, planesAreSet, planesRef]);
 
 	useEffect(() => {
 		if (selectedPlane === PlaneType.LOWER) {
@@ -93,13 +119,12 @@ export const VerticalSpatialBoundariesHandler = () => {
 	
 	useEffect(() => {
 		setIsCalibratingPlanes(true);
-		setIsAlignPlaneActive(true);
 		ViewerGuiActionsDispatchers.setClippingMode(null);
 		Viewer.setCalibrationToolVerticalPlanes(...verticalPlanes);
 
 		return () => {
-			setIsCalibratingPlanes(false);
 			Viewer.setCalibrationToolDrawing(null, [0, 0, 1, 0, 0, 1]);
+			setIsCalibratingPlanes(false);
 		};
 	}, []);
 
