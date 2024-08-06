@@ -24,6 +24,16 @@ type IProps = {
 
 export default ({ className, style, iconRef, onMouseDown }: IProps) => (
 	<svg width="100" height="100" viewBox="0 0 100 100" onMouseDown={onMouseDown} ref={iconRef} fill="none" version="1.1" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
+		<circle
+			cx="0"
+			cy="0"
+			r="30"
+			stroke="#7067d100"
+			fill="#7067d100"
+			stroke-opacity="0"
+			stroke-width="0"
+			id="circle7" />
+
 		<path
 			d="M 41.658742,-27.448895 -4.7557776,0.4428216 43.833276,26.507273 Z"
 			fill="url(#paint0_radial_11_9573)"
