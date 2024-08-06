@@ -15,10 +15,33 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addCalibration } = require('../../../../models/calibrations');
+const { addCalibration, getLatestCalibration } = require('../../../../models/calibrations');
+const { modelTypes } = require('../../../../models/modelSettings.constants');
+const { getPreviousRevisions, getRevisionByIdOrTag, getRevisions } = require('../../../../models/revisions');
+const { templates } = require('../../../../utils/responseCodes');
 
 const Calibrations = { };
 
 Calibrations.addCalibration = addCalibration;
+
+Calibrations.getLatestCalibration = async (teamspace, project, drawing, revision) => {
+	let latestCalibration = await getLatestCalibration(teamspace, project, drawing, revision);
+
+	if (latestCalibration) {
+		return latestCalibration;
+	}
+
+	const previousRevisions = await getPreviousRevisions(teamspace, drawing, modelTypes.DRAWING, revision);
+	for (let i = 0; i < previousRevisions.length; i++) {
+		// eslint-disable-next-line no-await-in-loop
+		latestCalibration = await getLatestCalibration(teamspace, project, drawing, previousRevisions[i]._id);
+
+		if (latestCalibration) {
+			return latestCalibration;
+		}
+	}
+
+	return templates.calibrationNotFound;
+};
 
 module.exports = Calibrations;

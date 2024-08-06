@@ -18,10 +18,22 @@
 const Calibrations = require('../../../../../processors/teamspaces/projects/models/calibrations');
 const { Router } = require('express');
 const { getUserFromSession } = require('../../../../../utils/sessions');
-const { hasWriteAccessToDrawing } = require('../../../../../middleware/permissions/permissions');
+const { hasReadAccessToDrawing, hasWriteAccessToDrawing } = require('../../../../../middleware/permissions/permissions');
 const { respond } = require('../../../../../utils/responder');
 const { templates } = require('../../../../../utils/responseCodes');
 const { validateNewCalibrationData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/calibrations');
+
+const getLatestCalibration = async (req, res) => {
+	const { teamspace, project, drawing, revision } = req.params;
+
+	try {
+		const latestCalibration = await Calibrations.getLatestCalibration(teamspace, project, drawing, revision);
+		respond(req, res, templates.ok, latestCalibration);
+	} catch (err) {
+		/* istanbul ignore next */
+		respond(req, res, err);
+	}
+};
 
 const addCalibration = async (req, res) => {
 	const { teamspace, project, drawing, revision } = req.params;
@@ -39,7 +51,10 @@ const addCalibration = async (req, res) => {
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 
-	router.post('', hasWriteAccessToDrawing, validateNewCalibrationData, addCalibration);
+	router.post('/', hasWriteAccessToDrawing, validateNewCalibrationData, addCalibration);
+
+	router.get('/', hasReadAccessToDrawing, getLatestCalibration);
+
 	return router;
 };
 

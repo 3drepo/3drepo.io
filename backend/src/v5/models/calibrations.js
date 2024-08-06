@@ -18,13 +18,11 @@
 const { calibrationStatuses } = require('./calibrations.constants');
 const db = require('../handler/db');
 const { UUIDToString, generateUUID } = require('../utils/helper/uuids');
+const { getRevisions } = require('./revisions');
 
 const CALIBRATIONS_COL = 'drawings.revisions.calibrations';
 
 const Calibrations = {};
-
-const findCalibrations = (teamspace, drawing, projection) => db.find(teamspace, CALIBRATIONS_COL,
-	{ drawing }, projection);
 
 Calibrations.addCalibration = async (teamspace, project, drawing, revision, calibration) => {
 	const formattedData = {
@@ -39,8 +37,12 @@ Calibrations.addCalibration = async (teamspace, project, drawing, revision, cali
 	await db.insertOne(teamspace, CALIBRATIONS_COL, formattedData);
 };
 
+Calibrations.getLatestCalibration = (teamspace, project, drawing, revision) => db.findOne(teamspace, CALIBRATIONS_COL,
+	{ drawing, rev_id: revision, project },
+	{ horizontal: 1, verticalRange: 1, units: 1, createdAt: 1 }, { createdAt: -1 });
+
 Calibrations.getDrawingCalibrationStatus = async (teamspace, drawing, latestRevId) => {
-	const calibrations = await findCalibrations(teamspace, drawing, { rev_id: 1 });
+	const calibrations = await db.find(teamspace, CALIBRATIONS_COL, { drawing }, { rev_id: 1 });
 
 	if (!calibrations.length) {
 		return calibrationStatuses.UNCALIBRATED;
