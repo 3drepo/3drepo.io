@@ -16,13 +16,14 @@
  */
 
 import { CSSProperties, useEffect, useRef, useState } from 'react';
-import { Container, LayerLevel } from './viewerLayer2D.styles';
+import { Container, LayerLevel, TransparentLayerLevel } from './viewerLayer2D.styles';
 import { PanZoomHandler } from '../panzoom/centredPanZoom';
 import { isEqual } from 'lodash';
 import { SvgArrow } from './svgArrow/svgArrow.component';
 import { SvgCircle } from './svgCircle/svgCircle.component';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { Coord2D, Vector2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
+import { PinsLayer } from '../viewerLayer2DPins/viewerLayer2DPins.component';
 
 export type ViewBoxType = ReturnType<PanZoomHandler['getOriginalSize']> & ReturnType<PanZoomHandler['getTransform']>;
 type ViewerLayer2DProps = {
@@ -36,6 +37,7 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 	const [offsetEnd, setOffsetEnd] = useState<Coord2D>(value?.[1] || null);
 	const previousViewBox = useRef<ViewBoxType>(null);
 	const [mousePosition, setMousePosition] = useState<Coord2D>(null);
+	const [mouseIsHovering, setMouseIsHovering] = useState(false);
 	const [drawingId] = useSearchParam('drawingId');
 
 	const containerStyle: CSSProperties = {
@@ -68,9 +70,12 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 		}
 	};
 
-	const handleMouseMove = (e) => {
-		setMousePosition(getCursorOffset(e));
+	const handleMouseMove = (e) => setMousePosition(getCursorOffset(e));
+	const handleMouseEnter = (e) => {
+		handleMouseMove(e);
+		setMouseIsHovering(true);
 	};
+	const handleMouseLeave = () => setMouseIsHovering(false);
 
 	const resetArrow = () => {
 		setOffsetStart(null);
@@ -88,7 +93,7 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 	return (
 		<Container style={containerStyle}>
 			<LayerLevel>
-				{mousePosition && active && <SvgCircle coord={mousePosition} scale={viewBox.scale} />}
+				{mouseIsHovering && active && <SvgCircle coord={mousePosition} scale={viewBox.scale} />}
 				{offsetStart && <SvgArrow start={offsetStart} end={offsetEnd ?? mousePosition} scale={viewBox.scale} />}
 			</LayerLevel>
 			{active && (
@@ -96,8 +101,13 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 					onMouseUp={handleMouseUp}
 					onMouseDown={handleMouseDown}
 					onMouseMove={handleMouseMove}
+					onMouseEnter={handleMouseEnter}
+					onMouseLeave={handleMouseLeave}
 				/>
 			)}
+			<TransparentLayerLevel>
+				<PinsLayer scale={viewBox.scale} height={viewBox.height} width={viewBox.width} />
+			</TransparentLayerLevel>
 		</Container>
 	);
 };

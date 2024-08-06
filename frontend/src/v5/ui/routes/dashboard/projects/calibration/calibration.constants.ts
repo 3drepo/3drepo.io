@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CalibrationVectors, Vector, Vector1D } from './calibration.types';
+import { Vector, Vector1D } from './calibration.types';
+import { CalibrationVectors } from '@/v5/store/drawings/drawings.types';
 
 export const EMPTY_VECTOR = [null, null] as Vector<any>;
 export const EMPTY_VECTOR_1D = [null, null] as Vector1D;
