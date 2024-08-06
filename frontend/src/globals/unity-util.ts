@@ -2588,37 +2588,6 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Sets the colour and opacity for both the fill and border for the drawing in the selected plane during vertical calibration.
-	 * @category Calibration
-	 */
-	public static setCalibrationToolSelectedColors(fill, border) {
-		UnityUtil.unityInstance.SendMessage('WebGLInterface', 'SetCalibrationToolSelectedColours', JSON.stringify({
-			fill,
-			border,
-		}));
-	}
-
-	/**
-	 * Sets the colour and opacity for both the fill and border for the drawing in the unselected plane during vertical calibration.
-	 * @category Calibration
-	 */
-	public static setCalibrationToolUnselectedColors(fill, border) {
-		UnityUtil.unityInstance.SendMessage('WebGLInterface', 'SetCalibrationToolUnselectedColours', JSON.stringify({
-			fill,
-			border,
-		}));
-	}
-
-	/**
-	 * Sets how much more transparent sections of the unselected drawing become when occluded. These are a combination of the base
-	 * opacity set by Unselected Colour and this value.
-	 * @category Calibration
-	 */
-	public static setCalibrationToolOcclusionOpacity(opacity) {
-		UnityUtil.unityInstance.SendMessage('WebGLInterface', 'SetCalibrationToolOcclusionOpacity', opacity);
-	}
-
-	/**
 	 * Populates the provided WebGLTexture texture with the contents of the DrawingImageSource indexed by id.
 	 * (This method could be moved entirely inside Unity if desired in the future.)
 	 * @param ctx The rendering context used by Module
