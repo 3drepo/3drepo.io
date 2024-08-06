@@ -20,7 +20,7 @@ import { selectCurrentProject, selectIsProjectAdmin } from '../projects/projects
 import { DrawingsState } from './drawings.redux';
 import { isCollaboratorRole, isCommenterRole, isViewerRole } from '../store.helpers';
 import { Role } from '../currentUser/currentUser.types';
-import { Calibration, CalibrationState } from './drawings.types';
+import { Calibration, CalibrationState, CalibrationVectors } from './drawings.types';
 import { selectContainerById } from '../containers/containers.selectors';
 import { selectFederationById } from '../federations/federations.selectors';
 import { convertCoordUnits, convertVectorUnits, getTransformationMatrix, getUnitsConversionFactor, removeZ } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
@@ -28,7 +28,6 @@ import { EMPTY_CALIBRATION, EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projec
 import { isEqual } from 'lodash';
 import { Vector2 } from 'three';
 import { Coord2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
-import { CalibrationVectors } from './drawings.types';
 
 const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
 
