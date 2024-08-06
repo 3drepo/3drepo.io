@@ -31,14 +31,12 @@ import { CreateRevisionAction,
 import { DrawingsActions } from '../drawings.redux';
 import { DrawingUploadStatus } from '../drawings.types';
 import { createDrawingFromRevisionBody, createFormDataFromRevisionBody } from './drawingRevisions.helpers';
-import { selectIsPending, selectRevisions, selectStatusCodes } from './drawingRevisions.selectors';
+import { selectRevisions, selectStatusCodes } from './drawingRevisions.selectors';
 import { uuid } from '@/v4/helpers/uuid';
 import { selectUsername } from '../../currentUser/currentUser.selectors';
 import { selectDrawingById } from '../drawings.selectors';
 
 export function* fetch({ teamspace, projectId, drawingId, onSuccess }: FetchAction) {
-	if (yield select(selectIsPending, drawingId)) return;
-
 	// TODO - remove next line after backend is wired in
 	if ((yield select(selectRevisions, drawingId)).length) return;
 

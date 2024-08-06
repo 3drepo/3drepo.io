@@ -21,17 +21,9 @@ import { FormattedMessage } from 'react-intl';
 import DrawingsIcon from '@assets/icons/outlined/drawings-outlined.svg';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { DrawingsList } from './drawingsList.component';
-import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { useParams } from 'react-router-dom';
-import { useEffect } from 'react';
 
 export const DrawingsListCard = () => {
-	const { teamspace, project } = useParams();
 	const drawings = DrawingsHooksSelectors.selectCalibratedDrawings();
-
-	useEffect(() => {
-		drawings.forEach((d) => DrawingRevisionsActionsDispatchers.fetch(teamspace, project, d._id));
-	}, []);
 
 	return (
 		<CardContainer>
