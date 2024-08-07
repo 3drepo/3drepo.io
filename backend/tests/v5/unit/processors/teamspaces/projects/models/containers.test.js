@@ -465,10 +465,10 @@ const testGetSettings = () => {
 const testUpdateRevisionStatus = () => {
 	describe('Update revision status', () => {
 		test('should update the status of a revision', async () => {
-			const teamspace = ServiceHelper.generateRandomString();
-			const container = ServiceHelper.generateRandomString();
-			const revision = ServiceHelper.generateRandomString();
-			const status = ServiceHelper.generateRandomString();
+			const teamspace = generateRandomString();
+			const container = generateRandomString();
+			const revision = generateRandomString();
+			const status = generateRandomString();
 
 			await Containers.updateRevisionStatus(teamspace, project._id, container, revision, status);
 
