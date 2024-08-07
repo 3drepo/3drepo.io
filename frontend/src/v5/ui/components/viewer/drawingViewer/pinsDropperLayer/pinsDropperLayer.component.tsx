@@ -31,10 +31,10 @@ export const PinsDropperLayer = ({ getCursorOffset, viewBox }: PinsDropperLayerP
 	const [drawingId] = useSearchParam('drawingId');
 	const { isCalibrating } = useContext(CalibrationContext);
 	const { containerOrFederation } = useParams();
-	const transform2Dto3D = DrawingsHooksSelectors.selectTransform2Dto3D(drawingId, containerOrFederation);
+	const transform2DTo3D = DrawingsHooksSelectors.selectTransform2DTo3D(drawingId, containerOrFederation);
 	const { verticalRange } = DrawingsHooksSelectors.selectCalibration(drawingId, containerOrFederation);
 
-	if (isCalibrating || !transform2Dto3D) return null;
+	if (isCalibrating || !transform2DTo3D) return null;
 
 	const handleMouseDown = () => previousViewBox.current = viewBox;
 
@@ -43,7 +43,7 @@ export const PinsDropperLayer = ({ getCursorOffset, viewBox }: PinsDropperLayerP
 		if (!isEqual(viewBox, previousViewBox.current)) return;
 
 		e.stopPropagation();
-		const { x, y } = transform2Dto3D(getCursorOffset(e));
+		const { x, y } = transform2DTo3D(getCursorOffset(e));
 		const pin3D = addZ([x, y], verticalRange[1]);
 		DrawingViewerService.emitPickPointEvent(pin3D);
 	};
