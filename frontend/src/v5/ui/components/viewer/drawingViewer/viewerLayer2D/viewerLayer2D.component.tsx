@@ -16,13 +16,14 @@
  */
 
 import { CSSProperties, useEffect, useRef, useState } from 'react';
-import { Container, LayerLevel } from './viewerLayer2D.styles';
+import { Container, LayerLevel, TransparentLayerLevel } from './viewerLayer2D.styles';
 import { PanZoomHandler } from '../panzoom/centredPanZoom';
 import { isEqual } from 'lodash';
 import { SvgArrow } from './svgArrow/svgArrow.component';
 import { SvgCircle } from './svgCircle/svgCircle.component';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { Coord2D, Vector2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
+import { PinsLayer } from '../viewerLayer2DPins/viewerLayer2DPins.component';
 
 export type ViewBoxType = ReturnType<PanZoomHandler['getOriginalSize']> & ReturnType<PanZoomHandler['getTransform']>;
 type ViewerLayer2DProps = {
@@ -98,6 +99,9 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 					onMouseMove={handleMouseMove}
 				/>
 			)}
+			<TransparentLayerLevel>
+				<PinsLayer scale={viewBox.scale} height={viewBox.height} width={viewBox.width} />
+			</TransparentLayerLevel>
 		</Container>
 	);
 };

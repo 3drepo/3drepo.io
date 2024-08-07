@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 export type Coord2D = [number, number];
 type Coord3D = [number, number, number];
 
@@ -23,8 +24,6 @@ export type Vector<CoordType> = [CoordType | null, CoordType | null];
 export type Vector1D = Vector<number>;
 export type Vector2D = Vector<Coord2D>;
 export type Vector3D = Vector<Coord3D>;
-
-export type Transformation2D = Vector2D;
 
 export enum PlaneType {
 	UPPER = 'upper',

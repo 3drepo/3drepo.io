@@ -1354,6 +1354,28 @@ export class ViewerService {
 	public calibrationPlanesChanged(planes) {
 		this.emit(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, planes);
 	}
+
+	public setCalibrationToolFloorToObject(teamspace, modelId, meshId) {
+		UnityUtil.setCalibrationToolFloorToObject(teamspace, modelId, meshId);
+	}
+
+	public setCalibrationToolSelectedColors(fill, border) {
+		UnityUtil.unityInstance.SendMessage('WebGLInterface', 'SetCalibrationToolSelectedColours', JSON.stringify({
+			fill,
+			border,
+		}));
+	}
+
+	public setCalibrationToolUnselectedColors(fill, border) {
+		UnityUtil.unityInstance.SendMessage('WebGLInterface', 'SetCalibrationToolUnselectedColours', JSON.stringify({
+			fill,
+			border,
+		}));
+	}
+
+	public SetCalibrationToolOcclusionOpacity(opacity) {
+		UnityUtil.unityInstance.SendMessage('WebGLInterface', 'SetCalibrationToolOcclusionOpacity', opacity);
+	}
 }
 
 export const Viewer = new ViewerService({});

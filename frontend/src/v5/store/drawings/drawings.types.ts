@@ -44,13 +44,16 @@ export interface MinimumDrawing {
 	drawingNumber: string;
 }
 
-export interface Calibration {
-	state: CalibrationState;
+export type CalibrationVectors = {
 	verticalRange: Coord2D;
 	horizontal: {
 		model: Vector3D,
 		drawing: Vector2D,
 	}
+};
+
+export interface Calibration extends CalibrationVectors {
+	state: CalibrationState;
 	units: string,
 }
 
