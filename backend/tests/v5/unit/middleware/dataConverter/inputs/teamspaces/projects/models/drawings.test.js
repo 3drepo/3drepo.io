@@ -15,11 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src, imagesFolder, modelFolder, image, dwgModel, emptyModel, pdfModel } = require('../../../../../../../helper/path');
+const { src, image, dwgModel, emptyModel, pdfModel } = require('../../../../../../../helper/path');
 const MockExpressRequest = require('mock-express-request');
 const FormData = require('form-data');
 const fs = require('fs');
-const path = require('path');
 const { generateRandomString } = require('../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../src/v5/utils/quota');
