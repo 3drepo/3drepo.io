@@ -28,9 +28,9 @@ export const MenuList = styled(MenuComponent)`
 	}
 `;
 
-export const MenuItem: typeof Link = styled(MenuItemComponent).attrs({
+export const MenuItem = styled(MenuItemComponent).attrs({
 	component: Link,
-})<{ disabled?: boolean }>`
+})<{ disabled?: boolean } & React.ComponentProps<typeof Link>>`
 	&& {
 		margin: 0;
 		height: 46px;

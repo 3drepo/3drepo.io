@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,19 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Risks = {};
-const db = require('../handler/db');
+import { actionChannel, call, take, fork } from 'redux-saga/effects';
 
-const collectionName = (model) => `${model}.risks`;
-
-const excludeResolvedRisks = {
-	mitigation_status: { $nin: [
-		'void',
-		'agreed_fully',
-		'rejected',
-	] },
-};
-
-Risks.getRisksCount = (teamspace, model) => db.count(teamspace, collectionName(model), excludeResolvedRisks);
-
-module.exports = Risks;
+export const takeEveryInOrder = (action: string, fn) => fork(function*() {
+	const channel = yield actionChannel(action);
+	while (true) {
+		const fnParams = yield take(channel);
+		yield call(fn, fnParams);
+	}
+});

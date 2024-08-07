@@ -53,6 +53,11 @@ export const setSocketIdHeader = (socketId) => {
 
 export const getUrl = (path) => generateV5ApiUrl(path, clientConfigService.GET_API);
 
+export const isApiUrl = (url) => {
+	const apiUrl = clientConfigService.apiUrl('all', '');
+	return url.includes(apiUrl);
+};
+
 export default {
 	get: getRequest,
 	post: postRequest,

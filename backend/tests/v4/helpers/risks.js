@@ -32,8 +32,6 @@ const DEFAULT_RISK_DATA = {
 const createRisk = (account, modelId) => (agent, riskData = null) =>  (...args) => {
 	const next = args.pop();
 
-	console.log("Create risks ");
-	console.log(riskData);
 	agent.post(`/${account}/${modelId}/risks`)
 		.send({...DEFAULT_RISK_DATA, ...(riskData || {})})
 		.expect(200 , (err, res) => next(err, res.body));

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TICKETS_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { DashboardParams, TICKETS_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { generatePath, useParams, useHistory } from 'react-router-dom';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -25,19 +25,21 @@ import { SubmitButton } from '@controls/submitButton';
 import { ContainersAndFederationsFormSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
 import { TemplateFormSelect } from '../selectMenus/templateFormSelect.component';
 import { Form, Title, Image } from './ticketsSelection.styles';
+import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
 type FormType = {
 	containersAndFederations: string[],
 	template: string,
 };
 export const TicketsSelection = () => {
-	const { teamspace, project } = useParams();
+	const { teamspace, project } = useParams<DashboardParams>();
+	const [models] = useSearchParam('models', Transformers.STRING_ARRAY);
 	const history = useHistory();
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 
 	const formData = useForm<FormType>({
 		defaultValues: {
-			containersAndFederations: [],
+			containersAndFederations: models,
 			template: '',
 		},
 	});

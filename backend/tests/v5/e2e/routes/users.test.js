@@ -19,7 +19,7 @@ const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../helper/services');
 const { src, image } = require('../../helper/path');
-const session = require('supertest-session');
+const SessionTracker = require('../../helper/sessionTracker');
 const fs = require('fs');
 const User = require('../../../../src/v5/models/users');
 const { providers } = require('../../../../src/v5/services/sso/sso.constants');
@@ -33,7 +33,6 @@ const { loginPolicy } = require(`${src}/utils/config`);
 jest.mock('../../../../src/v5/services/mailer');
 const Mailer = require(`${src}/services/mailer`);
 
-let testSession;
 let server;
 let agent;
 
@@ -153,13 +152,21 @@ const testLogin = () => {
 		});
 
 		test('should fail with a user that has already logged in', async () => {
-			await testSession.post('/v5/login/')
-				.send({ user: testUser.user, password: testUser.password })
-				.expect(templates.ok.status);
+			const testSession = SessionTracker(agent);
+			await testSession.login(testUser.user, testUser.password);
 			const res = await testSession.post('/v5/login/')
 				.send({ user: testUser.user, password: testUser.password })
 				.expect(templates.alreadyLoggedIn.status);
 			expect(res.body.code).toEqual(templates.alreadyLoggedIn.code);
+		});
+
+		test('should succeed if the user has logged in but CSRF is not provided', async () => {
+			const testSession = SessionTracker(agent);
+			await testSession.login(testUser.user, testUser.password);
+			delete testSession.cookies.token;
+			await testSession.post('/v5/login/')
+				.send({ user: testUser.user, password: testUser.password })
+				.expect(templates.ok.status);
 		});
 
 		test('should fail with an incorrect password', async () => {
@@ -198,7 +205,8 @@ const testLogout = () => {
 		});
 
 		test('should log the user out if they are logged in', async () => {
-			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
+			const testSession = SessionTracker(agent);
+			await testSession.login(testUser.user, testUser.password);
 			await testSession.post('/v5/logout/').expect(200);
 		});
 	});
@@ -218,14 +226,9 @@ const testGetUsername = () => {
 		});
 
 		describe('With valid authentication', () => {
-			beforeAll(async () => {
-				await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
-			});
-			afterAll(async () => {
-				await testSession.post('/v5/logout/');
-			});
-
 			test('should return the username if the user is logged in', async () => {
+				const testSession = SessionTracker(agent);
+				await testSession.login(testUser.user, testUser.password);
 				const res = await testSession.get('/v5/login/').expect(200);
 				expect(res.body).toEqual({ username: testUser.user });
 			});
@@ -263,19 +266,14 @@ const testGetProfile = () => {
 		});
 
 		test('should return the user profile (SSO user)', async () => {
-			const res = await testSession.get(`/v5/user?key=${ssoTestUser.apiKey}`).expect(200);
+			const res = await agent.get(`/v5/user?key=${ssoTestUser.apiKey}`).expect(200);
 			expect(res.body).toEqual(formatUserProfile(ssoTestUser, false, providers.AAD));
 		});
 
 		describe('With valid authentication', () => {
-			beforeAll(async () => {
-				await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
-			});
-			afterAll(async () => {
-				await testSession.post('/v5/logout/');
-			});
-
 			test('should return the user profile if the user is logged in', async () => {
+				const testSession = SessionTracker(agent);
+				await testSession.login(testUser.user, testUser.password);
 				const res = await testSession.get('/v5/user/').expect(200);
 				expect(res.body).toEqual(formatUserProfile(testUser));
 			});
@@ -299,11 +297,10 @@ const testUpdateProfile = () => {
 		});
 
 		describe('With valid authentication', () => {
+			let testSession;
 			beforeAll(async () => {
-				await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
-			});
-			afterAll(async () => {
-				await testSession.post('/v5/logout/');
+				testSession = SessionTracker(agent);
+				await testSession.login(testUser.user, testUser.password);
 			});
 
 			test('should fail if the update data have invalid email', async () => {
@@ -382,13 +379,12 @@ const testUpdateProfile = () => {
 
 		describe('With valid authentication (SSO user)', () => {
 			const ssoCred = ServiceHelper.generateUserCredentials();
+			let testSession;
 			beforeAll(async () => {
+				testSession = SessionTracker(agent);
 				await ServiceHelper.db.createUser(ssoCred);
-				await testSession.post('/v5/login/').send({ user: ssoCred.user, password: ssoCred.password });
+				await testSession.login(ssoCred.user, ssoCred.password);
 				await ServiceHelper.db.addSSO(ssoCred.user);
-			});
-			afterAll(async () => {
-				await testSession.post('/v5/logout/');
 			});
 
 			test('should fail if the user tries to update sso fields', async () => {
@@ -428,14 +424,15 @@ const testGetAvatar = () => {
 		});
 
 		test('should get the avatar if the user has an fs avatar and is logged in', async () => {
-			await testSession.post('/v5/login/').send({ user: userWithFsAvatar.user, password: userWithFsAvatar.password });
+			const testSession = SessionTracker(agent);
+			await testSession.login(userWithFsAvatar.user, userWithFsAvatar.password);
 			const res = await testSession.get('/v5/user/avatar').expect(200);
 			expect(res.body).toEqual(Buffer.from(fsAvatarData));
 			await testSession.post('/v5/logout/');
 		});
 
 		test('should fail if the user has no avatar', async () => {
-			const res = await testSession.get(`/v5/user/avatar?key=${testUser.apiKey}`)
+			const res = await agent.get(`/v5/user/avatar?key=${testUser.apiKey}`)
 				.expect(templates.fileNotFound.status);
 			expect(res.body.code).toEqual(templates.fileNotFound.code);
 		});
@@ -457,11 +454,10 @@ const testUploadAvatar = () => {
 		});
 
 		describe('With valid authentication and existing avatar', () => {
+			let testSession;
 			beforeAll(async () => {
-				await testSession.post('/v5/login/').send({ user: userWithGridFsAvatar.user, password: userWithGridFsAvatar.password });
-			});
-			afterAll(async () => {
-				await testSession.post('/v5/logout/');
+				testSession = SessionTracker(agent);
+				await testSession.login(userWithGridFsAvatar.user, userWithGridFsAvatar.password);
 			});
 
 			test('should remove old avatar and upload a new one if the user is logged in', async () => {
@@ -476,14 +472,9 @@ const testUploadAvatar = () => {
 		});
 
 		describe('With valid authentication', () => {
-			beforeAll(async () => {
-				await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
-			});
-			afterAll(async () => {
-				await testSession.post('/v5/logout/');
-			});
-
 			test('should upload a new avatar if the user is logged in', async () => {
+				const testSession = SessionTracker(agent);
+				await testSession.login(testUser.user, testUser.password);
 				await testSession.get('/v5/user/avatar').expect(templates.fileNotFound.status);
 				await testSession.put('/v5/user/avatar').set('Content-Type', 'image/png').attach('file', image)
 					.expect(templates.ok.status);
@@ -511,7 +502,8 @@ const testGenerateApiKey = () => {
 		});
 
 		test('should create and return a new Api key if the user is logged in', async () => {
-			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
+			const testSession = SessionTracker(agent);
+			await testSession.login(testUser.user, testUser.password);
 			const res = await testSession.post('/v5/user/key').expect(200);
 			const userProfileRes = await testSession.get('/v5/user');
 			expect(res.body).toEqual({ apiKey: userProfileRes.body.apiKey });
@@ -538,14 +530,9 @@ const testDeleteApiKey = () => {
 		});
 
 		describe('With valid authentication', () => {
-			beforeAll(async () => {
-				await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
-			});
-			afterAll(async () => {
-				await testSession.post('/v5/logout/');
-			});
-
 			test('should delete the Api key if the user is logged in', async () => {
+				const testSession = SessionTracker(agent);
+				await testSession.login(testUser.user, testUser.password);
 				const userProfileResBeforeDelete = await testSession.get('/v5/user');
 				await testSession.delete('/v5/user/key').expect(200);
 				const userProfileRes = await testSession.get('/v5/user');
@@ -657,7 +644,7 @@ const testResetPassword = () => {
 				.expect(templates.ok.status);
 
 			// trying to log in with the old password should fail
-			await testSession.post('/v5/login/').send({ user: testUserWithToken.user, password: testUserWithToken.password })
+			await agent.post('/v5/login/').send({ user: testUserWithToken.user, password: testUserWithToken.password })
 				.expect(templates.incorrectPassword.status);
 
 			// using the same token should fail
@@ -665,9 +652,8 @@ const testResetPassword = () => {
 				.expect(templates.invalidArguments.status);
 
 			// trying to log in with the new password should succeed
-			await testSession.post('/v5/login/').send({ user: testUserWithToken.user, password: newPassword })
+			await agent.post('/v5/login/').send({ user: testUserWithToken.user, password: newPassword })
 				.expect(templates.ok.status);
-			await testSession.post('/v5/logout/');
 		});
 	});
 };
@@ -747,16 +733,15 @@ const testVerify = () => {
 
 		test('should verify the user', async () => {
 			// trying to log in before verification should fail
-			await testSession.post('/v5/login/').send({ user: nonVerifiedUser.user, password: nonVerifiedUser.password })
+			await agent.post('/v5/login/').send({ user: nonVerifiedUser.user, password: nonVerifiedUser.password })
 				.expect(templates.userNotVerified.status);
 
 			await agent.post('/v5/user/verify').send({ username: nonVerifiedUser.user, token: validEmailToken.token })
 				.expect(templates.ok.status);
 
 			// trying to log in after verification should succeed
-			await testSession.post('/v5/login/').send({ user: nonVerifiedUser.user, password: nonVerifiedUser.password })
+			await agent.post('/v5/login/').send({ user: nonVerifiedUser.user, password: nonVerifiedUser.password })
 				.expect(templates.ok.status);
-			await testSession.post('/v5/logout/');
 
 			// check that a teamspace has not been created (v5.2.1 behaviour)
 			const userTeamspaces = await agent.get(`/v5/teamspaces?key=${nonVerifiedUser.apiKey}`)
@@ -790,8 +775,8 @@ const testVerify = () => {
 				.expect(templates.ok.status);
 
 			// the invitation should be deleted after verification
-			await testSession.post('/v5/login/').send({ user: nonVerifiedUser.user, password: nonVerifiedUser.password })
-				.expect(templates.ok.status);
+			const testSession = SessionTracker(agent);
+			await testSession.login(nonVerifiedUser.user, nonVerifiedUser.password);
 			const invitationsRes = await testSession.get('/invitations');
 			expect(invitationsRes.body).toEqual({});
 
@@ -801,7 +786,6 @@ const testVerify = () => {
 			];
 			expect(teamspacesRes.body.teamspaces.length).toEqual(expectedList.length);
 			expect(teamspacesRes.body.teamspaces).toEqual(expect.arrayContaining(expectedList));
-			await testSession.post('/v5/logout/');
 		});
 	});
 };
@@ -810,7 +794,6 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);
-		testSession = session(server);
 		await setupData();
 	});
 
