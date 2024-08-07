@@ -242,7 +242,7 @@ describe('Uploading a model', () => {
 						tag: 'rev0',
 					})
 					.expect(404, (err, res) => {
-						expect(res.body.code).eq(responseCodesV5.modelNotFound.code);
+						expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
 						done(err);
 					});
 			});
@@ -345,7 +345,7 @@ describe('Uploading a model', () => {
 					.set('x-ms-transfer-mode', 'chunked')
 					.set('x-ms-content-length', 6425218)
 					.expect(404, (err, res) => {
-						expect(res.body.code).to.equal(responseCodesV5.modelNotFound.code);
+						expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
 						done(err);
 					});
 			});

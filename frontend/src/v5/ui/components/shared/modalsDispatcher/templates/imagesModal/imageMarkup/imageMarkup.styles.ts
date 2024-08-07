@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { AuthImg } from '@components/authenticatedResource/authImg.component';
 import styled from 'styled-components';
 
-export const ImageSizesRefContainer = styled.img`
+export const ImageSizesRefContainer = styled(AuthImg)`
 	max-height: calc(100vh - 210px);
 	max-width: calc(100vw - 164px);
 	z-index: -1;

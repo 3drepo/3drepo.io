@@ -36,6 +36,8 @@ export const CONTAINERS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/containers`;
 export const FEDERATIONS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/federations`;
 export const BOARD_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/board/:type?/:containerOrFederation?`;
 export const TICKETS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/tickets/:template/:ticketId?`;
+export const TICKETS_SELECTION_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/tickets`;
+
 
 export const PRIVACY_ROUTE = 'https://www.asite.com/privacy-policy';
 export const COOKIES_ROUTE = '/v5/cookies';
@@ -48,21 +50,25 @@ export const matchesPath = (path) => Boolean(matchPath(location.pathname, { path
 // eslint-disable-next-line no-restricted-globals
 export const matchesSubPath = (path) => Boolean(matchPath(location.pathname, { path }));
 
-export interface TeamspaceParams {
-	teamspace?: string;
+export interface TeamspaceParams extends Record<string, string> {
+	teamspace: string;
 }
 
-export interface DashboardParams {
-	teamspace?: string;
-	project?: string;
+export interface DashboardParams extends TeamspaceParams {
+	project: string;
 }
 
 export interface DashboardTicketsParams extends DashboardParams {
 	groupBy?: string;
 	template?: string;
+	ticketId?: string;
 }
 
 export interface ViewerParams extends DashboardParams {
-	containerOrFederation?: string;
+	containerOrFederation: string;
 	revision?: string;
+}
+
+export interface LegalPageParams {
+	legalPage: string;
 }

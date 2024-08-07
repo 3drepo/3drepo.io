@@ -29,6 +29,8 @@ import {
 	PROJECT_ROUTE,
 	BOARD_ROUTE,
 	TICKETS_ROUTE,
+	ViewerParams,
+	DashboardParams,
 } from '@/v5/ui/routes/routes.constants';
 import { useSelector } from 'react-redux';
 import { selectRevisions } from '@/v4/modules/model/model.selectors';
@@ -39,7 +41,7 @@ import { BreadcrumbItemOrOptions } from '@controls/breadcrumbs/breadcrumbs.compo
 import { sortBreadcrumbOptions } from '@controls/breadcrumbs/breadcrumbs.helpers';
 
 export const BreadcrumbsRouting = () => {
-	const params = useParams();
+	const params = useParams<ViewerParams>();
 	const { teamspace, revision, containerOrFederation: containerOrFederationId } = params;
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
@@ -104,7 +106,7 @@ export const BreadcrumbsRouting = () => {
 			},
 			{
 				title: project?.name,
-				to: generatePath(FEDERATIONS_ROUTE, params),
+				to: generatePath(FEDERATIONS_ROUTE, params as DashboardParams),
 			},
 		];
 

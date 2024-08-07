@@ -25,6 +25,8 @@ const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { updateOne } = require(`${src}/handler/db`);
+const { statuses, statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
 let server;
 let agent;
@@ -137,36 +139,47 @@ const testGetModelList = () => {
 	});
 };
 
-const addIssuesAndRisks = async (teamspace, model) => {
-	const issues = ['open', 'closed', 'in progress', 'void'].map((status) => ({
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
-		status,
-	}));
+const addTickets = async (teamspace, project, model) => {
+	const template = ServiceHelper.generateTemplate();
 
-	const risks = ['unmitigated', 'proposed', 'void', 'agreed_fully', 'agreed_partial'].map((status) => ({
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
-		mitigation_status: status,
-	}));
+	const customStatuses = [
+		{ name: ServiceHelper.generateRandomString(), type: statusTypes.OPEN },
+		{ name: ServiceHelper.generateRandomString(), type: statusTypes.ACTIVE },
+		{ name: ServiceHelper.generateRandomString(), type: statusTypes.VOID },
+		{ name: ServiceHelper.generateRandomString(), type: statusTypes.DONE },
+	];
 
+	const customStatusesTemplate = ServiceHelper.generateTemplate(false, false, {
+		status: {
+			values: customStatuses,
+			default: customStatuses[0].name,
+		},
+	});
+
+	const tickets = Object.values(statuses).map((status) => {
+		const ticket = ServiceHelper.generateTicket(template);
+		ticket.properties.Status = status;
+		return ticket;
+	});
+
+	const customStatusTickets = customStatuses.map((status) => {
+		const ticket = ServiceHelper.generateTicket(customStatusesTemplate);
+		ticket.properties.Status = status.name;
+		return ticket;
+	});
+
+	await ServiceHelper.db.createTemplates(teamspace, [template, customStatusesTemplate]);
 	await Promise.all([
-		...issues.map((issue) => ServiceHelper.db.createIssue(
-			teamspace,
-			model._id,
-			issue,
+		...tickets.map((ticket) => ServiceHelper.db.createTicket(
+			teamspace, project.id, model._id, ticket,
 		)),
-		...risks.map((risk) => ServiceHelper.db.createRisk(
-			teamspace,
-			model._id,
-			risk,
+		...customStatusTickets.map((ticket) => ServiceHelper.db.createTicket(
+			teamspace, project.id, model._id, ticket,
 		)),
 	]);
 
-	/* eslint-disable no-param-reassign */
-	model.issuesCount = 2;
-	model.risksCount = 3;
-	/* eslint-enable no-param-reassign */
+	// eslint-disable-next-line no-param-reassign
+	model.ticketCount = 5;
 };
 
 const addRevision = async (teamspace, model) => {
@@ -218,8 +231,8 @@ const testGetModelStats = () => {
 			];
 			await setupBasicData(users, teamspace, project, models);
 			await Promise.all([
-				addIssuesAndRisks(teamspace, fed),
-				addIssuesAndRisks(teamspace, fedWithNoRevInSubModel),
+				addTickets(teamspace, project, fed),
+				addTickets(teamspace, project, fedWithNoRevInSubModel),
 			]);
 
 			const rev = await addRevision(teamspace, con);
@@ -263,7 +276,8 @@ const testGetModelStats = () => {
 					]),
 			];
 		};
-		const formatToStats = ({ properties, issuesCount = 0, risksCount = 0, revs = [] }) => {
+
+		const formatToStats = ({ properties, ticketCount = 0, revs = [] }) => {
 			const { subModels, status, desc, properties: { code, unit }, federate, errorReason, type } = properties;
 			revs.sort(({ timestamp: t1 }, { timestamp: t2 }) => {
 				if (t1 < t2) return -1;
@@ -285,10 +299,9 @@ const testGetModelStats = () => {
 				if (desc) {
 					res.desc = desc;
 				}
-				res.tickets = {
-					issues: issuesCount,
-					risks: risksCount,
-				};
+
+				res.tickets = ticketCount;
+
 				if (latestRev) {
 					res.lastUpdated = latestRev.timestamp.getTime();
 				}
@@ -323,6 +336,7 @@ const testGetModelStats = () => {
 				}
 			});
 		};
+
 		describe.each(generateTestData(true))('Federations', runTest);
 		describe.each(generateTestData())('Containers', runTest);
 	});

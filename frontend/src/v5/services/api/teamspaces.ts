@@ -15,8 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { AddOn } from '@/v5/store/store.types';
 import api from './default';
 
 export const fetchTeamspaces = (): Promise<any> => api.get('teamspaces');
 
 export const fetchQuota = (teamspace: string): Promise<any> => api.get(`teamspaces/${teamspace}/quota`);
+
+export const fetchAddons = async (teamspace: string): Promise<AddOn[]> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/addOns`);
+	return data.modules;
+};
