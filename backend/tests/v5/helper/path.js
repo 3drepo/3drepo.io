@@ -34,5 +34,7 @@ PathHelper.oversizedImage = Path.join(PathHelper.imagesFolder, 'tooBig.png');
 PathHelper.objModelUppercaseExt = Path.join(PathHelper.modelFolder, 'dummyUppercaseExt.OBJ');
 PathHelper.dwgModelUppercaseExt = Path.join(PathHelper.modelFolder, 'dummyUppercaseExt.DWG');
 PathHelper.exceedQuotaModel = Path.join(PathHelper.modelFolder, 'exceededQuota.dwg');
+PathHelper.pdfModel = Path.join(PathHelper.modelFolder, 'model.pdf');
+PathHelper.emptyModel = Path.join(PathHelper.modelFolder, 'empty.dwg');
 
 module.exports = PathHelper;

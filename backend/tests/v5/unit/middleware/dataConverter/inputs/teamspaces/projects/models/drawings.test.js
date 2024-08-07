@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src, imagesFolder, modelFolder } = require('../../../../../../../helper/path');
+const { src, imagesFolder, modelFolder, image, dwgModel, emptyModel, pdfModel } = require('../../../../../../../helper/path');
 const MockExpressRequest = require('mock-express-request');
 const FormData = require('form-data');
 const fs = require('fs');
@@ -38,15 +38,14 @@ const { statusCodes } = require(`${src}/models/modelSettings.constants`);
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
-const createRequestWithFile = (teamspace, drawing, { statusCode, revCode },
-	unsupportedFile = false, noFile = false, emptyFile = false) => {
+const createRequestWithFile = (teamspace, drawing, { statusCode, revCode }, fileName) => {
 	const form = new FormData();
-	if (!noFile) {
-		const filePath = unsupportedFile ? path.join(imagesFolder, 'valid.png') : path.join(modelFolder, emptyFile ? 'empty.dwg' : 'dummy.dwg');
 
+	if (fileName) {
 		form.append('file',
-			fs.createReadStream(filePath));
+			fs.createReadStream(fileName));
 	}
+
 	if (statusCode) form.append('statusCode', statusCode);
 	if (revCode) form.append('revCode', revCode);
 
@@ -74,23 +73,24 @@ const testValidateNewRevisionData = () => {
 	};
 
 	describe.each([
-		['Request with valid data', teamspace, drawing, standardBody],
-		['Request with unsupported model file', teamspace, drawing, standardBody, true, false, false, templates.unsupportedFileFormat],
-		['Request with insufficient quota', noQuotaTs, drawing, standardBody, false, false, false, templates.quotaLimitExceeded],
-		['Request with no body should fail', teamspace, drawing, {}, false, false, false, templates.invalidArguments],
-		['Request without statusCode should fail', teamspace, drawing, { revCode: generateRandomString(10) }, false, false, false, templates.invalidArguments],
-		['Request with unknown statusCode should fail', teamspace, drawing, { ...standardBody, statusCode: generateRandomString() }, false, false, false, templates.invalidArguments],
-		['Request without revCode should fail', teamspace, drawing, { statusCode: statusCodes[0].code }, false, false, false, templates.invalidArguments],
-		['Request with too large revCode', teamspace, drawing, { ...standardBody, revCode: generateRandomString(11) }, false, false, false, templates.invalidArguments],
-		['Request with no file should fail', teamspace, drawing, standardBody, false, true, false, templates.invalidArguments],
-		['Request with an empty file should fail', teamspace, drawing, standardBody, false, false, true, templates.invalidArguments],
-		['Request with duplicate status and rev codes should fail', teamspace, drawing, { statusCode: duplicateStatusCode, revCode: duplicateRevCode }, false, false, false, templates.invalidArguments],
-	])('Check new revision data', (desc, ts, draw, bodyContent, badFile, noFile, emptyFile, error) => {
+		['Request with valid data (dwg)', teamspace, drawing, standardBody, dwgModel],
+		['Request with valid data (pdf)', teamspace, drawing, standardBody, pdfModel],
+		['Request with unsupported model file', teamspace, drawing, standardBody, image, templates.unsupportedFileFormat],
+		['Request with insufficient quota', noQuotaTs, drawing, standardBody, dwgModel, templates.quotaLimitExceeded],
+		['Request with no body', teamspace, drawing, {}, dwgModel, templates.invalidArguments],
+		['Request without statusCode', teamspace, drawing, { revCode: generateRandomString(10) }, dwgModel, templates.invalidArguments],
+		['Request with unknown statusCode', teamspace, drawing, { ...standardBody, statusCode: generateRandomString() }, dwgModel, templates.invalidArguments],
+		['Request without revCode', teamspace, drawing, { statusCode: statusCodes[0].code }, dwgModel, templates.invalidArguments],
+		['Request with too large revCode', teamspace, drawing, { ...standardBody, revCode: generateRandomString(11) }, dwgModel, templates.invalidArguments],
+		['Request with no file', teamspace, drawing, standardBody, null, templates.invalidArguments],
+		['Request with an empty file', teamspace, drawing, standardBody, emptyModel, templates.invalidArguments],
+		['Request with duplicate status and rev codes', teamspace, drawing, { statusCode: duplicateStatusCode, revCode: duplicateRevCode }, dwgModel, templates.invalidArguments],
+	])('Check new revision data', (desc, ts, draw, bodyContent, fileName, error) => {
 		test(`${desc} should ${error ? `fail with ${error.code}` : ' succeed and next() should be called'}`, async () => {
-			const req = createRequestWithFile(ts, draw, bodyContent, badFile, noFile, emptyFile);
+			const req = createRequestWithFile(ts, draw, bodyContent, fileName);
 			const mockCB = jest.fn(() => {});
 
-			if (!(badFile || emptyFile || noFile)) {
+			if (fileName) {
 				Quota.sufficientQuota.mockImplementationOnce((teamSpace) => (teamSpace === noQuotaTs
 					? Promise.reject(templates.quotaLimitExceeded) : Promise.resolve()));
 
