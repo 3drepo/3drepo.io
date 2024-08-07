@@ -21,7 +21,6 @@ const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
-const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 const { templates } = require(`${src}/utils/responseCodes`);
