@@ -170,9 +170,9 @@ const addIssuesAndRisks = async (teamspace, model) => {
 	/* eslint-enable no-param-reassign */
 };
 
-const addRevision = async (teamspace, model, isDrawing) => {
-	const rev = ServiceHelper.generateRevisionEntry(false, false, isDrawing);
-	await ServiceHelper.db.createRevision(teamspace, model._id, rev, isDrawing);
+const addRevision = async (teamspace, model, modelType) => {
+	const rev = ServiceHelper.generateRevisionEntry(false, false, modelType);
+	await ServiceHelper.db.createRevision(teamspace, model._id, rev, modelType);
 
 	/* eslint-disable-next-line no-param-reassign */
 	model.revs = model.revs || [];
@@ -225,8 +225,8 @@ const testGetModelStats = () => {
 				addIssuesAndRisks(teamspace, fedWithNoRevInSubModel),
 			]);
 
-			await addRevision(teamspace, draw, true);
-			const rev = await addRevision(teamspace, con);
+			await addRevision(teamspace, draw, modelTypes.DRAWING);
+			const rev = await addRevision(teamspace, con, modelTypes.CONTAINER);
 			fed.revs = [rev];
 		});
 

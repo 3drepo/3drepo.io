@@ -110,7 +110,7 @@ const testDeleteDrawing = () => {
 			await Drawings.deleteDrawing(teamspace, project, model);
 
 			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledTimes(1);
-			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history.ref`,
+			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`,
 				{ model });
 			expect(ModelSettings.deleteModel).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.deleteModel).toHaveBeenCalledWith(teamspace, project, model);
