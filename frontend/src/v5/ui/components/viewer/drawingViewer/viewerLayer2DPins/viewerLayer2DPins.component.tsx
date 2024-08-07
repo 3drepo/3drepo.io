@@ -37,7 +37,7 @@ export const PinsLayer = ({ scale, height, width }: PinsLayerProps) => {
 	};
 
 	const isInRange = (val, limit) => val >= 0 && val <= limit; 
-	const pinIsInRange = ({ position }) => isInRange(position[0]to, width) && isInRange(position[1], height);
+	const pinIsInRange = ({ position }) => isInRange(position[0], width) && isInRange(position[1], height);
 
 	const pins2D = pins.map(mapPin3DTo2D).filter(pinIsInRange);
 
