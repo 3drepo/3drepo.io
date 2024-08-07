@@ -20,6 +20,7 @@ import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { IUser } from '@/v5/store/users/users.redux';
 import { getUserInitials } from '@/v5/store/users/users.helpers';
 import { StyledIconButton } from './avatar.styles';
+import { useAuthenticatedImage } from '@components/authenticatedResource/authenticatedResource.hooks';
 
 type AvatarProps = {
 	onClick?: (event: MouseEvent) => void;
@@ -29,14 +30,17 @@ type AvatarProps = {
 	className?: string;
 };
 
-export const Avatar = ({ user, size, isButton, ...props }: AvatarProps) => (
-	<StyledIconButton
-		$isButton={isButton}
-		size={size}
-		{...props}
-	>
-		<AvatarIcon src={user.hasAvatar ? user.avatarUrl : null}>
-			{getUserInitials(user)}
-		</AvatarIcon>
-	</StyledIconButton>
-);
+export const Avatar = ({ user, size, isButton, ...props }: AvatarProps) => {
+	const src = useAuthenticatedImage(user.avatarUrl);
+	return (
+		<StyledIconButton
+			$isButton={isButton}
+			size={size}
+			{...props}
+		>
+			<AvatarIcon src={src}>
+				{getUserInitials(user)}
+			</AvatarIcon>
+		</StyledIconButton>
+	);
+};

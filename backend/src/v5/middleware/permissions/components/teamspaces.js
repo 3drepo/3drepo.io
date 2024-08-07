@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { createResponseCode, templates } = require('../../../utils/responseCodes');
 const { hasAccessToTeamspace, isTeamspaceAdmin } = require('../../../utils/permissions/permissions');
 const { getUserFromSession } = require('../../../utils/sessions');
+const { isAddOnModuleEnabled } = require('../../../models/teamspaceSettings');
 const { respond } = require('../../../utils/responder');
-const { templates } = require('../../../utils/responseCodes');
 
 const TeamspacePerms = {};
 
@@ -51,6 +52,19 @@ TeamspacePerms.isTeamspaceMember = async (req, res, next) => {
 			await next();
 		} else {
 			throw templates.teamspaceNotFound;
+		}
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
+
+TeamspacePerms.isAddOnModuleEnabled = (moduleName) => async (req, res, next) => {
+	try {
+		const addOnModuleEnabled = await isAddOnModuleEnabled(req.params.teamspace, moduleName);
+		if (addOnModuleEnabled) {
+			await next();
+		} else {
+			respond(req, res, createResponseCode(templates.moduleUnavailable, `${moduleName} module is not enabled in this teamspace`));
 		}
 	} catch (err) {
 		respond(req, res, err);

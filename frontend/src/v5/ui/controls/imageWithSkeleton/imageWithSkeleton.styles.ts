@@ -17,8 +17,9 @@
 
 import styled, { css } from 'styled-components';
 import { Skeleton } from '@mui/material';
+import { AuthImg } from '@components/authenticatedResource/authImg.component';
 
-export const Image = styled.img<{ isLoading: boolean }>`
+export const Image = styled(AuthImg)<{ isLoading: boolean }>`
 	${({ isLoading }) => isLoading && css`
 		display: none;
 	`}

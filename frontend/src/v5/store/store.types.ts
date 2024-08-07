@@ -55,3 +55,8 @@ export type View = {
 	name: string;
 	hasThumbnail: boolean;
 };
+
+export enum AddOn {
+	Issues = 'issues',
+	Risks = 'risks',
+}

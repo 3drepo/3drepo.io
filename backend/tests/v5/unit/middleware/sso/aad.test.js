@@ -32,6 +32,9 @@ const UsersModel = require(`${src}/models/users`);
 const Aad = require(`${src}/middleware/sso/aad`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
+const config = require(`${src}/utils/config`);
+const { CSRF_COOKIE } = require(`${src}/utils/sessions.constants`);
+
 jest.mock('../../../../../src/v5/middleware/sso/pkce');
 const Sso = require(`${src}/middleware/sso/pkce`);
 
@@ -39,6 +42,12 @@ Sso.addPkceProtection.mockImplementation((req, res, next) => next());
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
+// Need to mock these 2 to ensure we are not trying to create a real session configuration
+jest.mock('express-session', () => () => { });
+jest.mock('../../../../../src/v5/handler/db', () => ({
+	...jest.requireActual('../../../../../src/v5/handler/db'),
+	getSessionStore: () => { },
+}));
 
 AadServices.decryptCryptoHash.mockImplementation((a) => a);
 AadServices.generateCryptoHash.mockImplementation((a) => a);
@@ -216,10 +225,17 @@ const testEmailNotUsed = () => {
 	});
 };
 
+const checkCSRFCookieCreated = (cookieFn) => {
+	const { maxAge, domain } = config.cookie;
+	expect(cookieFn).toHaveBeenCalledWith(CSRF_COOKIE, expect.any(String),
+		{ httpOnly: false, secure: true, sameSite: 'Strict', maxAge, domain },
+	);
+};
+
 const testAuthenticate = () => {
 	describe('Authenticate', () => {
 		const redirectUri = generateRandomString();
-		const res = { redirect: () => { } };
+		const res = { redirect: () => { }, cookie: jest.fn() };
 
 		test(`should respond with ${templates.invalidArguments.code} if req.query has no redirectUri`, async () => {
 			const req = { query: {}, headers: {} };
@@ -230,6 +246,8 @@ const testAuthenticate = () => {
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, res,
 				createResponseCode(templates.invalidArguments, 'redirectUri(query string) is required'));
+			expect(res.cookie).toHaveBeenCalledTimes(1);
+			checkCSRFCookieCreated(res.cookie);
 		});
 
 		test(`should respond with ${templates.ssoNotAvailable.code} if getAuthenticationCodeUrl throws ${templates.ssoNotAvailable.code}`, async () => {
@@ -242,6 +260,8 @@ const testAuthenticate = () => {
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, res,
 				createResponseCode(templates.ssoNotAvailable));
+			expect(res.cookie).toHaveBeenCalledTimes(1);
+			checkCSRFCookieCreated(res.cookie);
 		});
 
 		test('should set authParams, ssoInfo and respond with a link if req has no body', async () => {
@@ -266,6 +286,8 @@ const testAuthenticate = () => {
 			expect(req.session.ssoInfo).toEqual({
 				userAgent: req.headers['user-agent'],
 			});
+			expect(res.cookie).toHaveBeenCalledTimes(1);
+			checkCSRFCookieCreated(res.cookie);
 		});
 
 		test('should set authParams, ssoInfo and respond with a link if req has body', async () => {
@@ -295,6 +317,8 @@ const testAuthenticate = () => {
 			expect(req.session.ssoInfo).toEqual({
 				userAgent: req.headers['user-agent'],
 			});
+			expect(res.cookie).toHaveBeenCalledTimes(1);
+			checkCSRFCookieCreated(res.cookie);
 		});
 
 		test('should set authParams, ssoInfo with referer and respond with a link if req headers have referer', async () => {
@@ -323,6 +347,8 @@ const testAuthenticate = () => {
 				userAgent: req.headers['user-agent'],
 				referer: req.headers.referer,
 			});
+			expect(res.cookie).toHaveBeenCalledTimes(1);
+			checkCSRFCookieCreated(res.cookie);
 		});
 	});
 };

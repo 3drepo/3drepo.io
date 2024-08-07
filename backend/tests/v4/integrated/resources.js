@@ -18,9 +18,11 @@
  */
 
 const expect = require("chai").expect;
+const SessionTracker = require("../../v5/helper/sessionTracker")
 const app = require("../../../src/v4/services/api.js").createApp();
 const request = require("supertest");
 const IssueHelper =  require("../helpers/issues.js");
+const { loginUsers } =  require("../helpers/users.js");
 const async = require("async");
 const orderBy = require("lodash").orderBy;
 
@@ -37,7 +39,7 @@ describe("Resources ", function () {
 	const password = "password";
 	const account = "teamSpace1";
 	const model = "5bfc11fa-50ac-b7e7-4328-83aa11fa50ac";
-	const agents = {};
+	let agents;
 
 	const createIssue = IssueHelper.createIssue(account, model);
 	const attachDocs = IssueHelper.attachDocument(account, model);
@@ -46,27 +48,14 @@ describe("Resources ", function () {
 	const detachResource = IssueHelper.detachResourceFromIssue(account, model);
 
 	let server;
-	before(function(done) {
-		server = app.listen(8080, function () {
-			async.parallel(
-				usernames.map(username => next => {
-					const agent = request.agent(server);
-					agent.post("/login")
-						.send({ username, password})
-						.expect(200, function(err, res) {
-							next(err);
-						});
+	before(async function() {
+		agents = await loginUsers(usernames, password);
+		server = agents.server
 
-					agents[username] = agent;
-				}),done);
-		});
 	});
 
-	after(function(done) {
-		server.close(function() {
-			console.log("API test server is closed");
-			done();
-		});
+	after(async function() {
+		await agents.done()
 	});
 
 	it("of file type should be able to be attached to an issue", function(done) {
