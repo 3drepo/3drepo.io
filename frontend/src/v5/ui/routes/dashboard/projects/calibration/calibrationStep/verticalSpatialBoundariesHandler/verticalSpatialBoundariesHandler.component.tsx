@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { Viewer } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
@@ -30,12 +30,10 @@ import { COLOR, hexToOpacity } from '@/v5/ui/themes/theme';
 export const VerticalSpatialBoundariesHandler = () => {
 	const { verticalPlanes, setVerticalPlanes, vector3D, vector2D, isCalibratingPlanes, setIsCalibratingPlanes, drawingId,
 		setSelectedPlane, selectedPlane, isAlignPlaneActive } = useContext(CalibrationContext);
-	const [imageApplied, setImageApplied] = useState(false);
-	const planesRef = useRef(verticalPlanes);
+	const planesRef = useRef(verticalPlanes); // ref needed to get plane values in useEffect without causing excessive retriggers
 	const planesAreSet = !verticalPlanes.some(isNull);
 	
 	const applyImageToPlane = () => {
-		if (imageApplied) return;
 		const i = new Image();
 		i.crossOrigin = 'anonymous';
 		i.src = getDrawingImageSrc(drawingId);
@@ -49,9 +47,8 @@ export const VerticalSpatialBoundariesHandler = () => {
 	
 			Viewer.setCalibrationToolDrawing(i, [...bottomLeft, ...bottomRight, ...topLeft]);
 			Viewer.setCalibrationToolSelectedColors(hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 40), COLOR.PRIMARY_MAIN);
-			Viewer.setCalibrationToolUnselectedColors(hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 20), COLOR.PRIMARY_MAIN_CONTRAST);
+			Viewer.setCalibrationToolUnselectedColors(hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 10), COLOR.PRIMARY_MAIN_CONTRAST);
 			Viewer.setCalibrationToolOcclusionOpacity(0.5);
-			setImageApplied(true);
 		};
 	};
 
@@ -63,7 +60,6 @@ export const VerticalSpatialBoundariesHandler = () => {
 		if (isCalibratingPlanes) {
 			Viewer.setCalibrationToolMode(planesAreSet ? 'Vertical' : 'None');
 			Viewer.on(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
-			if (planesAreSet) applyImageToPlane();
 			return () => {
 				Viewer.setCalibrationToolMode('None');
 				Viewer.off(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
@@ -118,6 +114,7 @@ export const VerticalSpatialBoundariesHandler = () => {
 	}, [selectedPlane]);
 	
 	useEffect(() => {
+		applyImageToPlane();
 		setIsCalibratingPlanes(true);
 		ViewerGuiActionsDispatchers.setClippingMode(null);
 		Viewer.setCalibrationToolVerticalPlanes(...verticalPlanes);
