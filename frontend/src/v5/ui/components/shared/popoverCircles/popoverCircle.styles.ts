@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Avatar, AvatarProps } from '@mui/material';
+import { AuthAvatarMui } from '@components/authenticatedResource/authAvatarMui.component';
+import { AvatarProps } from '@mui/material';
 import { contrastColor } from 'contrast-color';
 import styled, { css } from 'styled-components';
 
@@ -31,7 +32,7 @@ export type IPopoverCircle = AvatarProps & {
 	backgroundColor?: string;
 };
 
-export const PopoverCircle = styled(Avatar)<IPopoverCircle>`
+export const PopoverCircle = styled(AuthAvatarMui)<IPopoverCircle>`
 	margin: 0;
 	color: ${({ backgroundColor, theme }) => (isLight(backgroundColor) ? theme.palette.primary.contrast : theme.palette.secondary.main)};
 	background-color: ${({ backgroundColor, theme }) => backgroundColor || theme.palette.primary.contrast};

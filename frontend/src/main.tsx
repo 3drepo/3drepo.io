@@ -67,7 +67,7 @@ subscribeToSocketEvent(SocketEvents.CONNECT, () => setSocketIdHeader(getSocket()
 const render = () => {
 	ReactDOM.render(
 		<Provider store={store as any}>
-			<ConnectedRouter history={history as History}>
+			<ConnectedRouter history={history}>
 				<IntlProvider {...getIntl()}>
 					<LocalizationProvider dateAdapter={AdapterDayjs}>
 						<Switch>

@@ -21,7 +21,7 @@ import { IContainer } from '@/v5/store/containers/containers.types';
 import { Button } from '@controls/button';
 import { FormattedMessage } from 'react-intl';
 import { Heading, OverlayContainer, Subheading } from './invalidViewerOverlay.styles';
-import { FEDERATIONS_ROUTE } from '../../routes.constants';
+import { DashboardParams, FEDERATIONS_ROUTE } from '../../routes.constants';
 
 type IInvalidFederation = {
 	containers: IContainer[];
@@ -29,7 +29,7 @@ type IInvalidFederation = {
 
 export const InvalidFederationOverlay = ({ containers }: IInvalidFederation) => {
 	const history = useHistory();
-	const params = useParams();
+	const params = useParams<DashboardParams>();
 	const containersListRoute = generatePath(FEDERATIONS_ROUTE, params);
 
 	let message = 'Error!';

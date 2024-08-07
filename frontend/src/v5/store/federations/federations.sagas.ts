@@ -117,8 +117,7 @@ export function* fetchFederationStats({ teamspace, projectId, federationId }: Fe
 
 		const federation = yield select(selectFederationById, federationId);
 
-		const sameTickets = stats?.tickets?.issues === federation?.issues
-							&& stats?.tickets?.risks === federation?.risks;
+		const sameTickets = stats?.tickets === federation?.tickets;
 		const defaultStat = { desc: '', code: '', containers: [], status: 'ok' };
 
 		if (!isEqualWith(federation, { ...defaultStat, ...stats }, compByColum(['name', 'code', 'desc', 'containers', 'status'])) || !sameTickets) {
