@@ -37,7 +37,6 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 	const [offsetEnd, setOffsetEnd] = useState<Coord2D>(value?.[1] || null);
 	const previousViewBox = useRef<ViewBoxType>(null);
 	const [mousePosition, setMousePosition] = useState<Coord2D>(null);
-	const [mouseIsHovering, setMouseIsHovering] = useState(false);
 	const [drawingId] = useSearchParam('drawingId');
 
 	const containerStyle: CSSProperties = {
@@ -70,12 +69,9 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 		}
 	};
 
-	const handleMouseMove = (e) => setMousePosition(getCursorOffset(e));
-	const handleMouseEnter = (e) => {
-		handleMouseMove(e);
-		setMouseIsHovering(true);
+	const handleMouseMove = (e) => {
+		setMousePosition(getCursorOffset(e));
 	};
-	const handleMouseLeave = () => setMouseIsHovering(false);
 
 	const resetArrow = () => {
 		setOffsetStart(null);
@@ -93,7 +89,7 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 	return (
 		<Container style={containerStyle}>
 			<LayerLevel>
-				{mouseIsHovering && active && <SvgCircle coord={mousePosition} scale={viewBox.scale} />}
+				{mousePosition && active && <SvgCircle coord={mousePosition} scale={viewBox.scale} />}
 				{offsetStart && <SvgArrow start={offsetStart} end={offsetEnd ?? mousePosition} scale={viewBox.scale} />}
 			</LayerLevel>
 			{active && (
@@ -101,8 +97,6 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 					onMouseUp={handleMouseUp}
 					onMouseDown={handleMouseDown}
 					onMouseMove={handleMouseMove}
-					onMouseEnter={handleMouseEnter}
-					onMouseLeave={handleMouseLeave}
 				/>
 			)}
 			<TransparentLayerLevel>
