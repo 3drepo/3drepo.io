@@ -27,19 +27,19 @@ export const PinsLayer = ({ scale, height, width }: PinsLayerProps) => {
 	const { isCalibrating } = useContext(CalibrationContext);
 	const { containerOrFederation } = useParams();
 	const pins = TicketsCardHooksSelectors.selectTicketPins();
-	const transform3Dto2D = DrawingsHooksSelectors.selectTransform3Dto2D(drawingId, containerOrFederation);
+	const transform3DTo2D = DrawingsHooksSelectors.selectTransform3DTo2D(drawingId, containerOrFederation);
 
-	if (isCalibrating || !transform3Dto2D) return null;
+	if (isCalibrating || !transform3DTo2D) return null;
 
-	const mapPin3Dto2D = (pin) => {
-		const { x, y } = transform3Dto2D(pin.position);
+	const mapPin3DTo2D = (pin) => {
+		const { x, y } = transform3DTo2D(pin.position);
 		return { ...pin, position: [x, y] };
 	};
 
 	const isInRange = (val, limit) => val >= 0 && val <= limit; 
-	const pinIsInRange = ({ position }) => isInRange(position[0], width) && isInRange(position[1], height);
+	const pinIsInRange = ({ position }) => isInRange(position[0]to, width) && isInRange(position[1], height);
 
-	const pins2D = pins.map(mapPin3Dto2D).filter(pinIsInRange);
+	const pins2D = pins.map(mapPin3DTo2D).filter(pinIsInRange);
 
 	return (
 		<>

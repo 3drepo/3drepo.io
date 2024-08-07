@@ -126,7 +126,7 @@ export const selectTransformMatrix = createSelector(
 	},
 );
 
-export const selectTransform2Dto3D = createSelector(
+export const selectTransform2DTo3D = createSelector(
 	selectTransformMatrix,
 	(matrix) => {
 		if (!matrix) return null;
@@ -134,7 +134,7 @@ export const selectTransform2Dto3D = createSelector(
 	},
 );
 
-export const selectTransform3Dto2D = createSelector(
+export const selectTransform3DTo2D = createSelector(
 	selectTransformMatrix,
 	(matrix) => {
 		if (!matrix) return null;
