@@ -32,6 +32,8 @@ import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 import { useContext } from 'react';
 import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 
+export const NEW_TICKET_ID = 'temporaryIdForNewTickets';
+
 export const modelIsFederation = (modelId: string) => !!FederationsHooksSelectors.selectFederationById(modelId);
 
 export const getEditableProperties = (template) => {
@@ -292,3 +294,5 @@ export const fillOverridesIfEmpty = (values: Partial<ITicket>) => {
 		Object.values(values.modules).forEach(fillEmptyOverrides);
 	}
 };
+
+
