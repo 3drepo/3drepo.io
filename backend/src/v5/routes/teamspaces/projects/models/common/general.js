@@ -135,7 +135,7 @@ const getModelStats = (modelType) => async (req, res, next) => {
 	const fn = {
 		[modelTypes.CONTAINER]: () => Containers.getContainerStats(teamspace, model),
 		[modelTypes.DRAWING]: () => Drawings.getContainerStats(teamspace, model),
-		[modelTypes.FEDERATION]: () => Federations.getFederationStats(teamspace, project, model)
+		[modelTypes.FEDERATION]: () => Federations.getFederationStats(teamspace, project, model),
 	};
 
 	try {

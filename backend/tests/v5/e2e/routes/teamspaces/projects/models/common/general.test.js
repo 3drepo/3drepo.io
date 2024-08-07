@@ -327,7 +327,7 @@ const testGetModelStats = () => {
 				status,
 				calibration: modelType === modelTypes.DRAWING ? calibration ?? 'uncalibrated' : undefined,
 				type: modelType === modelTypes.FEDERATION ? undefined : type,
-			};
+			});
 
 			if (federate) {
 				if (subModels) {
