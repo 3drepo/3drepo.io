@@ -29,10 +29,10 @@ import { TicketsSelection } from './ticketsSelection/ticketsSelection.component'
 import { useContainersData } from '../containers/containers.hooks';
 import { useFederationsData } from '../federations/federations.hooks';
 import { EmptyTicketsView } from './emptyTicketsView/emptyTicketsView.styles';
-import { TICKETS_ROUTE } from '../../../routes.constants';
+import { DashboardParams, TICKETS_ROUTE } from '../../../routes.constants';
 
 export const TicketsContent = () => {
-	const { teamspace, project } = useParams();
+	const { teamspace, project } = useParams<DashboardParams>();
 	let { path } = useRouteMatch();
 	path = discardSlash(path);
 

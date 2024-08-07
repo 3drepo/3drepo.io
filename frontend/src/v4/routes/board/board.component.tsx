@@ -25,7 +25,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { get } from 'lodash';
 import { useParams, generatePath } from 'react-router-dom';
 import TrelloBoard from 'react-trello';
-import { BOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { BOARD_ROUTE, ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { formatMessage } from '@/v5/services/intl';
 
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -162,7 +162,7 @@ const IssueBoardCard = ({ metadata, onClick }: any) => (
 export function Board(props: IProps) {
 	const boardRef = useRef(null);
 	const firstUpdate = useRef(true);
-	const { type, teamspace, project: projectId, containerOrFederation } = useParams<RouteParams>();
+	const { type, teamspace, project: projectId, containerOrFederation } = useParams<ViewerParams & RouteParams>();
 	const v5Project = ProjectsHooksSelectors.selectCurrentProjectName();
 	const project = v5Project;
 	const modelId = containerOrFederation;

@@ -31,6 +31,7 @@ import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
 import { SetTicketValue } from '../../ticketsTable.helper';
 import { useParams } from 'react-router-dom';
+import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 
 const SortingTableHeader = ({ name = null, children, hidden = false, ...props }) => {
 	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
@@ -57,7 +58,7 @@ type TicketsTableGroupProps = {
 	onNewTicket: (modelId: string) => void;
 };
 export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
-	const { template: templateId } = useParams();
+	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const [modelsIds] = useSearchParam('models', Transformers.STRING_ARRAY);
 
 	const showModelName = modelsIds.length > 1;
