@@ -538,8 +538,8 @@ export class UnityUtil {
 	 */
 	public static clipBroadcast(clipInfo: string) {
 		const data = JSON.parse(clipInfo);
-		if(UnityUtil.verbose) {
-			console.debug("[FROM UNITY] clipBroadcast", data);
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] clipBroadcast', data);
 		}
 		if (UnityUtil.viewer && UnityUtil.viewer.clipBroadcast) {
 			UnityUtil.viewer.clipBroadcast(JSON.parse(data));
@@ -548,8 +548,8 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static clipUpdated() {
-		if(UnityUtil.verbose) {
-			console.debug("[FROM UNITY] clipUpdated");
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] clipUpdated');
 		}
 		if (UnityUtil.viewer && UnityUtil.viewer.clipUpdated) {
 			UnityUtil.viewer.clipUpdated();
@@ -559,8 +559,8 @@ export class UnityUtil {
 	/** @hidden */
 	public static currentPointInfo(pointInfo) {
 		const point = JSON.parse(pointInfo);
-		if(UnityUtil.verbose) {
-			console.debug("[FROM UNITY] currentPointInfo", point);
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] currentPointInfo', point);
 		}
 		if (UnityUtil.viewer && UnityUtil.viewer.objectSelected) {
 			UnityUtil.viewer.objectSelected(point);
@@ -599,8 +599,8 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static navMethodChanged(newNavMode) {
-		if(UnityUtil.verbose) {
-			console.debug("[FROM UNITY] navMethodChanged", newNavMode);
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] navMethodChanged', newNavMode);
 		}
 		if (UnityUtil.viewer && UnityUtil.viewer.navMethodChanged) {
 			UnityUtil.viewer.navMethodChanged(newNavMode);
@@ -609,8 +609,8 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static objectsSelectedAlert(nodeInfo) {
-		if(UnityUtil.verbose) {
-			console.debug("[FROM UNITY] objectsSelectedAlert", JSON.parse(nodeInfo));
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] objectsSelectedAlert', JSON.parse(nodeInfo));
 		}
 		UnityUtil.viewer.objectsSelected(JSON.parse(nodeInfo).nodes);
 	}
@@ -619,8 +619,8 @@ export class UnityUtil {
 	public static objectStatusBroadcast(nodeInfo) {
 		try {
 			const data = JSON.parse(nodeInfo);
-			if(UnityUtil.verbose) {
-				console.debug("[FROM UNITY] objectStatusBroadcast", data);
+			if (UnityUtil.verbose) {
+				console.debug('[FROM UNITY] objectStatusBroadcast', data);
 			}
 			UnityUtil.objectStatusPromises.forEach((promise) => {
 				promise.resolve(data);
@@ -645,8 +645,8 @@ export class UnityUtil {
 	/** @hidden */
 	public static pickPointAlert(pointInfo) {
 		const point = JSON.parse(pointInfo);
-		if(UnityUtil.verbose) {
-			console.debug("[FROM UNITY] pickPointAlert", point);
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] pickPointAlert', point);
 		}
 		if (UnityUtil.viewer && UnityUtil.viewer.pickPointEvent) {
 			UnityUtil.viewer.pickPointEvent(point);
@@ -658,8 +658,8 @@ export class UnityUtil {
 		try {
 			const ssJSON = JSON.parse(screenshot);
 
-			if(UnityUtil.verbose) {
-				console.debug("[FROM UNITY] screenshotReady", ssJSON);
+			if (UnityUtil.verbose) {
+				console.debug('[FROM UNITY] screenshotReady', ssJSON);
 			}
 
 			UnityUtil.screenshotPromises.forEach((promise) => {
@@ -678,8 +678,8 @@ export class UnityUtil {
 	public static viewpointReturned(vpInfo) {
 		try {
 			const viewpoint = JSON.parse(vpInfo);
-			if(UnityUtil.verbose) {
-				console.debug("[FROM UNITY] viewpointReturned", viewpoint);
+			if (UnityUtil.verbose) {
+				console.debug('[FROM UNITY] viewpointReturned', viewpoint);
 			}
 
 			UnityUtil.viewpointsPromises.forEach((promise) => {
@@ -699,8 +699,8 @@ export class UnityUtil {
 	public static measurementAlert(strMeasurement) {
 		try {
 			const measurement = JSON.parse(strMeasurement);
-			if(UnityUtil.verbose) {
-				console.debug("[FROM UNITY] measurementAlert", measurement);
+			if (UnityUtil.verbose) {
+				console.debug('[FROM UNITY] measurementAlert', measurement);
 			}
 			if (UnityUtil.viewer && UnityUtil.viewer.measurementAlertEvent) {
 				UnityUtil.viewer.measurementAlertEvent(measurement);
@@ -712,8 +712,8 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static measurementRemoved(measurementId) {
-		if(UnityUtil.verbose) {
-			console.debug("[FROM UNITY] measurementRemoved", measurementId);
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] measurementRemoved', measurementId);
 		}
 		if (UnityUtil.viewer && UnityUtil.viewer.measurementRemoved) {
 			UnityUtil.viewer.measurementRemoved(measurementId);
@@ -722,8 +722,8 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static measurementsCleared() {
-		if(UnityUtil.verbose) {
-			console.debug("[FROM UNITY] measurementCleared");
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] measurementCleared');
 		}
 		if (UnityUtil.viewer && UnityUtil.viewer.measurementsCleared) {
 			UnityUtil.viewer.measurementsCleared();
@@ -2104,6 +2104,7 @@ export class UnityUtil {
 	 * @param lookAt - point in space the camera is looking at. (pivot point)
 	 * @param account - name of teamspace
 	 * @param model - name of model
+	 * @param animationTime - how long the camera should spend during the transition from the current viewpoint to this one
 	 */
 	public static setViewpoint(
 		pos: [number],
@@ -2114,6 +2115,7 @@ export class UnityUtil {
 		orthographicSize?: number,
 		account?: string,
 		model?: string,
+		animationTime?: number,
 	) {
 		const param: any = {};
 		if (account && model) {
@@ -2126,6 +2128,12 @@ export class UnityUtil {
 
 		if (orthographicSize) {
 			param.orthographicSize = orthographicSize;
+		}
+
+		if (typeof animationTime === 'number') { // don't check for a truthy value here because 0 is a valid animationTime
+			param.animationTime = animationTime;
+		} else {
+			param.animationTime = 1;
 		}
 
 		param.position = pos;
@@ -2565,7 +2573,7 @@ export class UnityUtil {
 		ctx.texSubImage2D(ctx.TEXTURE_2D, 0, 0, 0, image.width, image.height, ctx.RGBA, ctx.UNSIGNED_BYTE, image);
 		delete this.domTextureReferences[index];
 	}
-	
+
 	/**
 	 * Sets the maximum number of responses WebRequestManager2 should attempt to
 	 * handle at any one time. The higher this is the faster models will load but
