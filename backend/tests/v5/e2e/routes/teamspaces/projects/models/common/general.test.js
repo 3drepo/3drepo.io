@@ -323,7 +323,6 @@ const testGetModelStats = () => {
 				desc: modelType === modelTypes.CONTAINER ? undefined : desc,
 				lastUpdated: modelType === modelTypes.FEDERATION ? latestRev?.timestamp?.getTime() : undefined,
 				containers: modelType === modelTypes.FEDERATION ? subModels : undefined,
-				tickets: modelType === modelTypes.FEDERATION ? { issues: issuesCount, risks: risksCount } : undefined,
 				status,
 				calibration: modelType === modelTypes.DRAWING ? calibration ?? 'uncalibrated' : undefined,
 				type: modelType === modelTypes.FEDERATION ? undefined : type,
@@ -349,8 +348,8 @@ const testGetModelStats = () => {
 					latestRevision: modelType === modelTypes.DRAWING && latestRev
 						? `${latestRev.statusCode}-${latestRev.revCode}`
 						: latestRev?.tag || latestRev?._id,
-				},
-			});
+				};
+			}
 
 			if (status === 'failed') {
 				res.errorReason = {
@@ -374,8 +373,9 @@ const testGetModelStats = () => {
 			});
 		};
 
-		describe.each(generateTestData(true))('Federations', runTest);
-		describe.each(generateTestData())('Containers', runTest);
+		describe.each(generateTestData(modelTypes.FEDERATION))('Federations', runTest);
+		describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
+		describe.each(generateTestData(modelTypes.DRAWING))('Drawings', runTest);
 	});
 };
 
