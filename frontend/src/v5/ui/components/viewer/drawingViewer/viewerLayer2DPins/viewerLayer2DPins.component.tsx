@@ -20,13 +20,14 @@ import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { useContext } from 'react';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { Pin2D } from './pin2D/pin2D.component';
+import { compact } from 'lodash';
 
 type PinsLayerProps = { scale: number, height: number, width: number };
 export const PinsLayer = ({ scale, height, width }: PinsLayerProps) => {
 	const [drawingId] = useSearchParam('drawingId');
 	const { isCalibrating } = useContext(CalibrationContext);
 	const { containerOrFederation } = useParams();
-	const pins = TicketsCardHooksSelectors.selectTicketPins();
+	const pins = compact(TicketsCardHooksSelectors.selectTicketPins().concat(TicketsCardHooksSelectors.selectNewTicketPins()));
 	const transform3DTo2D = DrawingsHooksSelectors.selectTransform3DTo2D(drawingId, containerOrFederation);
 
 	if (isCalibrating || !transform3DTo2D) return null;

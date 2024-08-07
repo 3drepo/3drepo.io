@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { hexToGLColor } from '@/v4/helpers/colors';
-import { get, isArray, isObject } from 'lodash';
+import { compact, get, isArray, isEmpty, isObject } from 'lodash';
 import { IPinColorMapping, IPinSchema, ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
 import { contrastColor } from 'contrast-color';
 import { AdditionalProperties, TicketBaseKeys } from '../../../tickets.constants';
 import { IPin } from '@/v4/services/viewer/viewer';
 import { COLOR } from '@/v5/ui/themes/theme';
 import { rgbToHex } from '@controls/inputs/colorPicker/colorPicker.helpers';
+import { NEW_TICKET_ID } from '@/v5/store/tickets/tickets.helpers';
 
 const DEFAULT_COLOR = COLOR.PRIMARY_MAIN;
 
@@ -79,3 +80,28 @@ export const formatPin = (pinId, position, isSelected: boolean, color: string): 
 	type: 'ticket',
 	colour: hexToGLColor(color),
 });
+
+export const getTicketPins = (templates, ticket, ticketPinId) => {
+	const pinArray = [];
+	const selectedTemplate = templates?.find(({ _id }) => _id === ticket?.type);
+
+	if (isEmpty(ticket) || !selectedTemplate) return [];
+
+	const selectedTicketId = ticket?._id || NEW_TICKET_ID;
+
+	const moduleToPins = (modulePath) => ({ name, type }) => {
+		const pinPath = `${modulePath}.${name}`;
+		if (type !== 'coords' || !get(ticket, pinPath)) return;
+		const pinId = pinPath === DEFAULT_PIN ? selectedTicketId : `${selectedTicketId}.${pinPath}`;
+		const color = getPinColorHex(pinPath, selectedTemplate, ticket);
+		const isSelected = pinId === ticketPinId;
+		return formatPin(pinId, get(ticket, pinPath), isSelected, color);
+	};
+	pinArray.push(...selectedTemplate.properties.map(moduleToPins(TicketBaseKeys.PROPERTIES)));
+	selectedTemplate.modules.forEach((module) => {
+		const moduleName = module.name || module.type;
+		if (!ticket.modules[moduleName]) return;
+		pinArray.push(...module.properties.map(moduleToPins(`${TicketBaseKeys.MODULES}.${moduleName}`)));
+	});
+	return compact(pinArray);
+};
