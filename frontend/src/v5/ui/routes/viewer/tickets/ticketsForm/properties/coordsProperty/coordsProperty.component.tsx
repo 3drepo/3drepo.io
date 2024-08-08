@@ -26,7 +26,7 @@ import { FormHelperText, Tooltip } from '@mui/material';
 import { hexToGLColor } from '@/v4/helpers/colors';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { CoordsAction, CoordsActionLabel, CoordsActions, CoordsInputContainer, Label, FlexRow, SelectPinButton } from './coordsProperty.styles';
-import { DEFAULT_PIN, getLinkedValuePath, getPinColorHex } from './coordsProperty.helpers';
+import { DEFAULT_PIN, getLinkedValuePath, getPinColorHex, NEW_TICKET_ID } from './coordsProperty.helpers';
 import { TicketContext } from '../../../ticket.context';
 import { formatMessage } from '@/v5/services/intl';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -35,8 +35,6 @@ import { PaddedCrossIcon } from '@controls/chip/chip.styles';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { isEqual } from 'lodash';
 import { useFormContext, useWatch } from 'react-hook-form';
-
-const NEW_TICKET_ID = 'temporaryIdForNewTickets';
 
 export const CoordsProperty = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
 	const { isViewer, containerOrFederation } = useContext(TicketContext);
