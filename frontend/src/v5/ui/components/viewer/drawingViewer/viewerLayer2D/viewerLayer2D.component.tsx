@@ -30,9 +30,10 @@ type ViewerLayer2DProps = {
 	viewBox: ViewBoxType,
 	active: boolean,
 	value?: Vector2D,
+	viewport: any,
 	onChange?: (arrow: Vector2D) => void;
 };
-export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2DProps) => {
+export const ViewerLayer2D = ({ viewBox, active, value, viewport, onChange }: ViewerLayer2DProps) => {
 	const [offsetStart, setOffsetStart] = useState<Coord2D>(value?.[0] || null);
 	const [offsetEnd, setOffsetEnd] = useState<Coord2D>(value?.[1] || null);
 	const previousViewBox = useRef<ViewBoxType>(null);
@@ -92,7 +93,7 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 			<LayerLevel>
 				{mousePosition && active && <SvgCircle coord={mousePosition} scale={viewBox.scale} />}
 				{offsetStart && <SvgArrow start={offsetStart} end={offsetEnd ?? mousePosition} scale={viewBox.scale} />}
-				<Camera scale={viewBox.scale} />
+				<Camera scale={viewBox.scale} viewport={viewport} />
 			</LayerLevel>
 			{active && (
 				<LayerLevel

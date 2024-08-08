@@ -20,10 +20,14 @@ import CameraIcon from '@assets/icons/viewer/camera.svg';
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
+import { clamp } from 'lodash';
 
-export const Camera = ({ scale }) => {
+const cameraPadding = 10;
+
+export const Camera = ({ scale, viewport }) => {
 	const animationFrame = useRef(0);
 	const viewpoint = useRef(null);
+	const viewportRef = useRef(viewport);
 	const cameraRef = useRef<HTMLElement>();
 	
 	const [drawingId] = useSearchParam('drawingId');
@@ -37,7 +41,12 @@ export const Camera = ({ scale }) => {
 	const onEnterFrame = async () => {
 		const v = await ViewerService.getCurrentViewpointInfo();
 		const p =  transform3DTo2D(v.position);
-		setPosition(p);
+		const vp = viewportRef.current;
+
+		setPosition({ 
+			x: clamp(p.x, vp.left + cameraPadding, vp.right - cameraPadding), 
+			y: clamp(p.y, vp.top + cameraPadding,  vp.bottom - cameraPadding), 
+		});
 
 		const lookat = transform3DTo2D(v.look_at);
 		lookat.sub(p);
@@ -48,6 +57,7 @@ export const Camera = ({ scale }) => {
 		animationFrame.current = requestAnimationFrame(onEnterFrame);
 	};
 
+	useEffect(() => viewportRef.current = viewport, [viewport]);
 
 	useEffect(() => {
 		if (!transform2DTo3D) return;
