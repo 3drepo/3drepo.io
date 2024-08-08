@@ -44,7 +44,7 @@ export const PinsDropperLayer = ({ getCursorOffset, viewBox }: PinsDropperLayerP
 
 		e.stopPropagation();
 		const { x, y } = transform2DTo3D(getCursorOffset(e));
-		const pin3D = addZ([x, y], verticalRange[1]);
+		const pin3D = addZ([x, y], verticalRange[0]);
 		DrawingViewerService.emitPickPointEvent(pin3D);
 	};
 
