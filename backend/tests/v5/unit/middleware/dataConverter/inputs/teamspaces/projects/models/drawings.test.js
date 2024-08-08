@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src, image, dwgModel, emptyModel, pdfModel } = require('../../../../../../../helper/path');
+const { src, image, dwgModel, pdfModel, emptyPdf } = require('../../../../../../../helper/path');
 const MockExpressRequest = require('mock-express-request');
 const FormData = require('form-data');
 const fs = require('fs');
@@ -82,7 +82,7 @@ const testValidateNewRevisionData = () => {
 		['Request without revCode', teamspace, drawing, { statusCode: statusCodes[0].code }, dwgModel, templates.invalidArguments],
 		['Request with too large revCode', teamspace, drawing, { ...standardBody, revCode: generateRandomString(11) }, dwgModel, templates.invalidArguments],
 		['Request with no file', teamspace, drawing, standardBody, null, templates.invalidArguments],
-		['Request with an empty file', teamspace, drawing, standardBody, emptyModel, templates.invalidArguments],
+		['Request with an empty pdf file', teamspace, drawing, standardBody, emptyPdf, templates.unsupportedFileFormat],
 		['Request with duplicate status and rev codes', teamspace, drawing, { statusCode: duplicateStatusCode, revCode: duplicateRevCode }, dwgModel, templates.invalidArguments],
 	])('Check new revision data', (desc, ts, draw, bodyContent, fileName, error) => {
 		test(`${desc} should ${error ? `fail with ${error.code}` : ' succeed and next() should be called'}`, async () => {

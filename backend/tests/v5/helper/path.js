@@ -35,6 +35,6 @@ PathHelper.objModelUppercaseExt = Path.join(PathHelper.modelFolder, 'dummyUpperc
 PathHelper.dwgModelUppercaseExt = Path.join(PathHelper.modelFolder, 'dummyUppercaseExt.DWG');
 PathHelper.exceedQuotaModel = Path.join(PathHelper.modelFolder, 'exceededQuota.dwg');
 PathHelper.pdfModel = Path.join(PathHelper.modelFolder, 'model.pdf');
-PathHelper.emptyModel = Path.join(PathHelper.modelFolder, 'empty.dwg');
+PathHelper.emptyPdf = Path.join(PathHelper.modelFolder, 'empty.pdf');
 
 module.exports = PathHelper;
