@@ -22,7 +22,7 @@ import { SvgArrow } from './svgArrow/svgArrow.component';
 import { SvgCircle } from './svgCircle/svgCircle.component';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { Coord2D, Vector2D, ViewBoxType } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
-import { PinsLayer } from '../viewerLayer2DPins/viewerLayer2DPins.component';
+import { PinsLayer } from '../pinsLayer/pinsLayer.component';
 import { PinsDropperLayer } from '../pinsDropperLayer/pinsDropperLayer.component';
 
 type ViewerLayer2DProps = {
