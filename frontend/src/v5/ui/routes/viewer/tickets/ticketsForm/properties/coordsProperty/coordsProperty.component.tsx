@@ -126,10 +126,6 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 		ViewerService.setSelectionPin({ id: pinId, isSelected });
 	}, [isSelected]);
 
-	useEffect(() => () => {
-		if (isNewTicket) ViewerService.removePin(pinId);
-	}, []);
-
 	return (
 		<CoordsInputContainer required={required} selected={editMode} error={error} disabled={disabled}>
 			<FlexRow>
