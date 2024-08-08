@@ -91,6 +91,8 @@ export const NewTicketCard = () => {
 		await promiseToResolve;
 	};
 
+	const updateUnsavedTicket = () => TicketsCardActionsDispatchers.setUnsavedTicket(formData.getValues());
+
 	useEffect(() => {
 		if (!templateAlreadyFetched(template)) {
 			TicketsActionsDispatchers.fetchTemplate(
@@ -102,9 +104,9 @@ export const NewTicketCard = () => {
 			);
 		}
 
-		return () => {
-			TicketsCardActionsDispatchers.setUnsavedTicket(formData.getValues());
-		};
+		TicketsCardActionsDispatchers.setUnsavedTicket(defaultTicket);
+
+		return () => { updateUnsavedTicket(); };
 	}, []);
 
 	useEffect(() => {
@@ -159,6 +161,7 @@ export const NewTicketCard = () => {
 									// Im not sure this is still needed here, because we are already depending on react-hook-form to fill the form
 									ticket={defaultTicket}
 									focusOnTitle
+									onPropertyBlur={updateUnsavedTicket}
 								/>
 							)}
 						</>

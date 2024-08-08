@@ -62,7 +62,7 @@ export const PinContainer = styled.div<{ height, width, colour, position, select
 		${({ selected }) => selected && css`
 			overflow: visible;
 			stroke: #000;
-			stroke-width: 1%;
+			stroke-width: 3%;
 		`}
 	}
 `;
