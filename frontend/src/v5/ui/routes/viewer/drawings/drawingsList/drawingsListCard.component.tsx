@@ -24,9 +24,10 @@ import { DrawingsList } from './drawingsList.component';
 import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
+import { DashboardParams } from '../../../routes.constants';
 
 export const DrawingsListCard = () => {
-	const { teamspace, project } = useParams();
+	const { teamspace, project } = useParams<DashboardParams>();
 	const drawings = DrawingsHooksSelectors.selectCalibratedDrawings();
 
 	useEffect(() => {

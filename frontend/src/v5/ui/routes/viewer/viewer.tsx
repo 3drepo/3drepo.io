@@ -32,6 +32,7 @@ import { ViewerCanvases } from '../dashboard/viewerCanvases/viewerCanvases.compo
 import { ViewerGui } from '@/v4/routes/viewerGui';
 import { CalibrationContextComponent } from '../dashboard/projects/calibration/calibrationContext';
 import { OpenDrawingFromUrl } from './openDrawingFromUrl/openDrawingFromUrl.component';
+import { CalibrationHandler } from '../dashboard/projects/calibration/calibrationHandler.component';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
@@ -110,6 +111,7 @@ export const Viewer = () => {
 			<CheckLatestRevisionReadiness />
 			<ViewerCanvases />
 			<ViewerGui match={v4Match} key={containerOrFederation} />
+			{({ isCalibrating }) => isCalibrating && <CalibrationHandler />}
 		</CalibrationContextComponent>
 	);
 };
