@@ -48,6 +48,8 @@ export const Viewer2D = () => {
 	const imgRef = useRef<HTMLImageElement>();
 	const imgContainerRef = useRef();
 
+	const canCalibrate2D = isCalibrating && step === 1;
+
 	const onClickZoomIn = () => {
 		zoomHandler.zoomIn();
 	};
@@ -82,6 +84,10 @@ export const Viewer2D = () => {
 		});
 	}, [zoomHandler]);
 
+	useEffect(() => {
+		setIsDrawingVector(canCalibrate2D);
+	}, [canCalibrate2D]);
+
 	return (
 		<ViewerContainer visible>
 			{step === 1 && (
@@ -108,12 +114,14 @@ export const Viewer2D = () => {
 			</ImageContainer>
 			<ToolbarContainer>
 				<MainToolbar>
-					<ToolbarButton
-						Icon={CalibrationIcon}
-						onClick={onCalibrationClick}
-						title={formatMessage({ id: 'drawingViewer.toolbar.calibrate', defaultMessage: 'Calibrate' })}
-						selected={isDrawingVector}
-					/>
+					{canCalibrate2D && (
+						<ToolbarButton
+							Icon={CalibrationIcon}
+							onClick={onCalibrationClick}
+							title={formatMessage({ id: 'drawingViewer.toolbar.calibrate', defaultMessage: 'Calibrate' })}
+							selected={isDrawingVector}
+						/>
+					)}
 					<ToolbarButton
 						Icon={ZoomOutIcon}
 						onClick={onClickZoomOut}
