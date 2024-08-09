@@ -15,10 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { UUIDToString, generateUUID } = require('../utils/helper/uuids');
 const { calibrationStatuses } = require('./calibrations.constants');
 const db = require('../handler/db');
-const { UUIDToString, generateUUID } = require('../utils/helper/uuids');
-const { getRevisions } = require('./revisions');
 
 const CALIBRATIONS_COL = 'drawings.revisions.calibrations';
 
