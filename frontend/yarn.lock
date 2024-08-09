@@ -4457,7 +4457,7 @@
   resolved "https://registry.yarnpkg.com/@types/stylis/-/stylis-4.2.0.tgz#199a3f473f0c3a6f6e4e1b17cdbc967f274bdc6b"
   integrity sha512-n4sx2bqL0mW1tvDf/loQ+aMX7GQD3lc3fkCMC55VFNDu/vBOabO+LTIeXKM14xK0ppk5TUGcWRjiSpIlUpghKw==
 
-"@types/three@^0.167.1":
+"@types/three@0.167.1":
   version "0.167.1"
   resolved "https://registry.yarnpkg.com/@types/three/-/three-0.167.1.tgz#51edd68d6650c2e25f55ae930146b865921eab01"
   integrity sha512-OCd2Uv/8/4TbmSaIRFawrCOnDMLdpaa+QGJdhlUBmdfbHjLY8k6uFc0tde2/UvcaHQ6NtLl28onj/vJfofV+Tg==
