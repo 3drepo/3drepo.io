@@ -134,10 +134,14 @@ Revisions.getPreviousRevisions = async (teamspace, model, modelType, revisionId)
 	const currentRevision = await Revisions.getRevisionByIdOrTag(teamspace, model, modelType,
 		revisionId, { timestamp: 1 });
 
-	const allRevisions = await Revisions.getRevisions(teamspace, model, modelType, false);
+	const query = deleteIfUndefined({
+		...excludeVoids,
+		...excludeIncomplete,
+		model: modelType === modelTypes.DRAWING ? model : undefined,
+		timestamp: { $lt: currentRevision.timestamp },
+	});
 
-	return allRevisions.filter((r) => r.timestamp < currentRevision.timestamp)
-		.sort((x, y) => y.timestamp - x.timestamp);
+	return findRevisionsByQuery(teamspace, model, modelType, query, {}, { timestamp: -1 });
 };
 
 Revisions.isTagUnique = async (teamspace, model, tag) => {

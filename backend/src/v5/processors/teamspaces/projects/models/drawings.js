@@ -25,9 +25,9 @@ const { getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../..
 const { getProjectById, removeModelFromProject } = require('../../../../models/projectSettings');
 const Path = require('path');
 const { events } = require('../../../../services/eventsManager/eventsManager.constants');
+const { getDrawingCalibrationStatus } = require('../../../../models/calibrations');
 const { publish } = require('../../../../services/eventsManager/eventsManager');
 const { templates } = require('../../../../utils/responseCodes');
-const { getDrawingCalibrationStatus } = require('../../../../models/calibrations');
 
 const Drawings = { };
 

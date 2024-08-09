@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { hasReadAccessToDrawing, hasWriteAccessToDrawing } = require('../../../../../middleware/permissions/permissions');
 const Calibrations = require('../../../../../processors/teamspaces/projects/models/calibrations');
 const { Router } = require('express');
 const { getUserFromSession } = require('../../../../../utils/sessions');
-const { hasReadAccessToDrawing, hasWriteAccessToDrawing } = require('../../../../../middleware/permissions/permissions');
 const { respond } = require('../../../../../utils/responder');
 const { templates } = require('../../../../../utils/responseCodes');
-const { validateNewCalibrationData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/calibrations');
+const { validateNewCalibration } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/calibrations');
 
 const getLatestCalibration = async (req, res) => {
 	const { teamspace, project, drawing, revision } = req.params;
@@ -51,8 +51,206 @@ const addCalibration = async (req, res) => {
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 
-	router.post('/', hasWriteAccessToDrawing, validateNewCalibrationData, addCalibration);
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/revisions/{revision}/calibrations:
+	 *   post:
+	 *     description: Create a new calibration.
+	 *     tags: [Calibrations]
+	 *     operationId: createNewCalibration
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: drawing
+	 *         description: Drawing ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: revision
+	 *         description: Revision ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: usePrevious
+	 *         description: Whether or not to use the data of the last calibration of the last revision
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: boolean
+	 *     requestBody:
+	 *       content:
+	 *         application/json:
+	 *           schema:
+	 *             type: object
+	 *             properties:
+	 *               horizontal:
+	 *                 description: The horizontal array of the calibration
+     *                 type: object
+	 *                 properties:
+	 *                   model:
+	 *                     type: array
+	 *                     items:
+	 *                       type: array
+	 *                       minItems: 3
+	 *                       maxItems: 3
+	 *                       example: [1, 2, 3]
+	 *                       items:
+	 *                         type: number
+	 *                         example: 1
+	 *                     example: [[1, 2, 3], [4, 5, 6]]
+	 *                     minItems: 2
+	 *                     maxItems: 2
+	 *                   drawing:
+	 *                     type: array
+	 *                     items:
+	 *                       type: array
+	 *                       minItems: 2
+	 *                       maxItems: 2
+	 *                       example: [1, 2]
+	 *                       items:
+	 *                         type: number
+	 *                         example: 1
+	 *                     example: [[1, 2], [3, 4]]
+	 *                     minItems: 2
+	 *                     maxItems: 2
+	 *                 example: { model: [[1, 2, 3], [4, 5, 6]], drawing: [[1, 2], [3, 4]] }
+	 *               verticalRange:
+	 *                 description: The vertical range of the calibration
+	 *                 type: array
+	 *                 items:
+	 *                   type: number
+	 *                   example: 0
+	 *                 example: [0, 10]
+	 *                 minItems: 2
+	 *                 maxItems: 2
+	 *               units:
+	 *                 description: The units of the calibration
+	 *                 type: string
+	 *                 enum: [mm, cm, dm, m, ft]
+	 *                 example: mm
+	 *             required:
+	 *               - horizontal
+	 *               - verticalRange
+	 *               - units
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: creates a new calibration
+	 */
+	router.post('/', hasWriteAccessToDrawing, validateNewCalibration, addCalibration);
 
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/revisions/{revision}/calibrations:
+	 *   get:
+	 *     description: Gets the latest available calibration for the revision.
+	 *     tags: [Calibrations]
+	 *     operationId: getCalibration
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: drawing
+	 *         description: Drawing ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: revision
+	 *         description: Revision ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: returns the latest calibration
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *               horizontal:
+	 *                 description: The horizontal array of the calibration
+     *                 type: object
+	 *                 properties:
+	 *                   model:
+	 *                     type: array
+	 *                     items:
+	 *                       type: array
+	 *                       minItems: 3
+	 *                       maxItems: 3
+	 *                       example: [1, 2, 3]
+	 *                       items:
+	 *                         type: number
+	 *                         example: 1
+	 *                     example: [[1, 2, 3], [4, 5, 6]]
+	 *                     minItems: 2
+	 *                     maxItems: 2
+	 *                   drawing:
+	 *                     type: array
+	 *                     items:
+	 *                       type: array
+	 *                       minItems: 2
+	 *                       maxItems: 2
+	 *                       example: [1, 2]
+	 *                       items:
+	 *                         type: number
+	 *                         example: 1
+	 *                     example: [[1, 2], [3, 4]]
+	 *                     minItems: 2
+	 *                     maxItems: 2
+	 *                 example: { model: [[1, 2, 3], [4, 5, 6]], drawing: [[1, 2], [3, 4]] }
+	 *               verticalRange:
+	 *                 description: The vertical range of the calibration
+	 *                 type: array
+	 *                 items:
+	 *                   type: number
+	 *                   example: 0
+	 *                 example: [0, 10]
+	 *                 minItems: 2
+	 *                 maxItems: 2
+	 *               units:
+	 *                 description: The units of the calibration
+	 *                 type: string
+	 *                 enum: [mm, cm, dm, m, ft]
+	 *                 example: mm
+	 *             example: { horizontal: { model: [[1, 2, 3], [4, 5, 6]], drawing: [[1, 2], [3, 4]] }, verticalRange: [0, 10], units: m }
+	 */
 	router.get('/', hasReadAccessToDrawing, getLatestCalibration);
 
 	return router;

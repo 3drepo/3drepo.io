@@ -16,13 +16,32 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../../utils/responseCodes');
+const { UUIDToString } = require('../../../../../../utils/helper/uuids');
 const Yup = require('yup');
 const YupHelper = require('../../../../../../utils/helper/yup');
+const { getLatestCalibration } = require('../../../../../../processors/teamspaces/projects/models/calibrations');
 const { respond } = require('../../../../../../utils/responder');
 
 const Calibrations = {};
 
-Calibrations.validateNewCalibrationData = async (req, res, next) => {
+const validateConfirmCalibration = async (req, res, next) => {
+	try {
+		const { teamspace, project, drawing, revision } = req.params;
+		const latestCalibration = await getLatestCalibration(teamspace, project, drawing, revision, true);
+
+		if (UUIDToString(latestCalibration.rev_id) === UUIDToString(revision)) {
+			throw templates.revisionNotUnconfirmed;
+		}
+
+		req.body = latestCalibration;
+		delete req.body.rev_id;
+		await next();
+	} catch {
+		respond(req, res, templates.revisionNotUnconfirmed);
+	}
+};
+
+const validateNewCalibrationData = async (req, res, next) => {
 	const schema = Yup.object({
 		horizontal: Yup.object({
 			model: Yup.array().of(YupHelper.types.position).length(2),
@@ -34,10 +53,15 @@ Calibrations.validateNewCalibrationData = async (req, res, next) => {
 
 	try {
 		req.body = await schema.validate(req.body);
+
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };
+
+Calibrations.validateNewCalibration = (req, res, next) => (req.query.usePrevious === 'true'
+	? validateConfirmCalibration(req, res, next)
+	: validateNewCalibrationData(req, res, next));
 
 module.exports = Calibrations;

@@ -15,17 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addCalibration, getLatestCalibration } = require('../../../../models/calibrations');
+const { addCalibration, getLatestRevCalibration } = require('../../../../models/calibrations');
+const { deleteIfUndefined } = require('../../../../utils/helper/objects');
+const { getPreviousRevisions } = require('../../../../models/revisions');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
-const { getPreviousRevisions, getRevisionByIdOrTag, getRevisions } = require('../../../../models/revisions');
 const { templates } = require('../../../../utils/responseCodes');
 
 const Calibrations = { };
 
 Calibrations.addCalibration = addCalibration;
 
-Calibrations.getLatestCalibration = async (teamspace, project, drawing, revision) => {
-	let latestCalibration = await getLatestCalibration(teamspace, project, drawing, revision);
+Calibrations.getLatestCalibration = async (teamspace, project, drawing, revision, returnRevId) => {
+	const projection = deleteIfUndefined({
+		_id: 0,
+		horizontal: 1,
+		verticalRange: 1,
+		units: 1,
+		createdAt: 1,
+		rev_id: returnRevId ? 1 : undefined });
+
+	let latestCalibration = await getLatestRevCalibration(teamspace, project, drawing, revision, projection);
 
 	if (latestCalibration) {
 		return latestCalibration;
@@ -34,14 +43,15 @@ Calibrations.getLatestCalibration = async (teamspace, project, drawing, revision
 	const previousRevisions = await getPreviousRevisions(teamspace, drawing, modelTypes.DRAWING, revision);
 	for (let i = 0; i < previousRevisions.length; i++) {
 		// eslint-disable-next-line no-await-in-loop
-		latestCalibration = await getLatestCalibration(teamspace, project, drawing, previousRevisions[i]._id);
+		latestCalibration = await getLatestRevCalibration(teamspace, project, drawing,
+			previousRevisions[i]._id, projection);
 
 		if (latestCalibration) {
 			return latestCalibration;
 		}
 	}
 
-	return templates.calibrationNotFound;
+	throw templates.calibrationNotFound;
 };
 
 module.exports = Calibrations;
