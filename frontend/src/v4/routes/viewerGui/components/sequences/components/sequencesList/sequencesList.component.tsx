@@ -19,6 +19,7 @@ import { Grid, Tooltip } from '@mui/material';
 import { Toggle } from '@controls/inputs/toggle/toggle.component';
 import { FormattedMessage } from 'react-intl';
 
+import { RouteComponentProps } from 'react-router';
 import { formatShortDateTime } from '../../../../../../services/formatting/formatDate';
 import {
 	SequenceDatesContainer,
@@ -30,7 +31,7 @@ import {
 	ViewerPanelContent
 } from '../../sequences.styles';
 
-interface IProps {
+interface IProps extends RouteComponentProps<any> {
 	sequences: any;
 	setSelectedSequence: (id: string) => void;
 	openOnToday: boolean;

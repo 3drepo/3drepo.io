@@ -35,6 +35,7 @@ import { BreakableText, ChevronLeft, ChevronRight, GroupsCardHeader } from './ti
 import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component';
 import { useSearchParam } from '../../../useSearchParam';
 import { TicketContext, TicketDetailsView } from '../ticket.context';
+import { ViewerParams } from '../../../routes.constants';
 
 enum IndexChange {
 	PREV = -1,
@@ -43,7 +44,7 @@ enum IndexChange {
 
 export const TicketDetailsCard = () => {
 	const { detailsView, setDetailViewAndProps, detailsViewProps: viewProps } = useContext(TicketContext);
-	const { teamspace, project, containerOrFederation, revision } = useParams();
+	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
 	const [, setTicketId] = useSearchParam('ticketId');
 
 	const isAlertOpen = DialogsHooksSelectors.selectIsAlertOpen();

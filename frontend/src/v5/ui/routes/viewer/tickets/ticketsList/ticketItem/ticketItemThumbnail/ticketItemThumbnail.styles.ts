@@ -20,6 +20,7 @@ import styled from 'styled-components';
 import ViewpointIconBase from '@assets/icons/outlined/camera_side-outlined.svg';
 import { CentredContainer } from '@controls/centredContainer';
 import ImageIconBase from '@assets/icons/outlined/image_thin-outlined.svg';
+import { AuthImg } from '@components/authenticatedResource/authImg.component';
 
 export const ThumbnailContainer = styled(OverlappingContainer)`
 	height: 50px;
@@ -32,7 +33,7 @@ export const ThumbnailContainer = styled(OverlappingContainer)`
 	margin-bottom: 6px;
 `;
 
-export const Thumbnail = styled.img`
+export const Thumbnail = styled(AuthImg)`
 	object-fit: cover;
 	user-select: none;
 `;

@@ -105,7 +105,16 @@ export class ExternalWebRequestHandler {
 				return Promise.resolve();
 			}
 
-			const response = await fetch(this.getUrl(url));
+			const cookies = document?.cookie;
+			const headers = {};
+			if (cookies) {
+				const tokenMatch = cookies.match(/(^| )csrf_token=([^;]+)/);
+				if (tokenMatch) {
+					headers['X-CSRF-TOKEN'] = tokenMatch[2];
+				}
+			}
+
+			const response = await fetch(this.getUrl(url), { headers });
 
 			// Where the request gets a response outside the OK range, fetch will
 			// not raise an error, but will print to the console. In this case we

@@ -46,6 +46,7 @@ import { RevisionsListItemText } from '../revisionDetails/components/revisionsLi
 import { RevisionsListItemAuthor } from '../revisionDetails/components/revisionsListItem/revisionsListItemAuthor/revisionsListItemAuthor.component';
 import { RevisionsListItemTag } from '../revisionDetails/components/revisionsListItem/revisionsListItem.styles';
 import { viewerRoute } from '@/v5/services/routing/routing';
+import { downloadFile } from '@components/authenticatedResource/authenticatedResource.hooks';
 
 interface IContainerRevisionDetails {
 	containerId: string;
@@ -61,8 +62,8 @@ export const ContainerRevisionDetails = ({ containerId, revisionsCount, status }
 		.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 	const selected = revisions.findIndex((r) => !r.void);
 
-	const handleDownloadRevision = (revisionId) => {
-		window.location.href = getRevisionFileUrl(teamspace, project, containerId, revisionId);
+	const handleDownloadRevision = (revisionId, filename) => {
+		downloadFile(getRevisionFileUrl(teamspace, project, containerId, revisionId), filename);
 	};
 
 	useEffect(() => {
@@ -125,7 +126,7 @@ export const ContainerRevisionDetails = ({ containerId, revisionsCount, status }
 									ContainerRevisionsActionsDispatchers.setVoidStatus(teamspace, project, containerId, revision._id, voidStatus)
 								)}
 								voidStatus={revision.void}
-								onDownloadRevision={() => handleDownloadRevision(revision._id)}
+								onDownloadRevision={() => handleDownloadRevision(revision._id, revision.tag + revision.format)}
 								hasPermission={selectHasCollaboratorAccess(getState(), containerId)}
 								redirectTo={viewerRoute(teamspace, project, containerId, revision)}
 							>

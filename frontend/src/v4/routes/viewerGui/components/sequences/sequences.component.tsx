@@ -17,6 +17,7 @@
 import { PureComponent } from 'react';
 import { IconButton } from '@mui/material';
 import ArrowBack from '@mui/icons-material/ArrowBack';
+import { RouteComponentProps } from 'react-router';
 import { STEP_SCALE } from '../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { EmptyStateInfo } from '../../../components/components.styles';
@@ -30,7 +31,7 @@ import {
 	LoaderContainer, SequencesContainer, SequencesIcon
 } from './sequences.styles';
 
-interface IProps {
+interface IProps extends RouteComponentProps<any> {
 	sequences: any;
 	setSelectedDate: (date: Date) => void;
 	setStepInterval: (interval: number) => void;

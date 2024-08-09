@@ -46,7 +46,7 @@ export const RevisionsListItem = ({
 		onSetVoidStatus(!voidStatus);
 	};
 
-	const downloadRevision = (e: SyntheticEvent) => {
+	const downloadRevision = async (e: SyntheticEvent) => {
 		e.preventDefault();
 		onDownloadRevision();
 	};

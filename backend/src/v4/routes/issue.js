@@ -20,6 +20,7 @@
 const express = require("express");
 const router = express.Router({ mergeParams: true });
 const middlewares = require("../middlewares/middlewares");
+const issuesMiddleware = require("../middlewares/issue");
 
 const C = require("../constants");
 const responseCodes = require("../response_codes.js");
@@ -118,7 +119,7 @@ const Comment = require("../models/comment");
  *	 "message": "Issue not found",
  * }
  */
-router.get("/issues/:issueId", middlewares.issue.canView, findIssue);
+router.get("/issues/:issueId", issuesMiddleware.canView, findIssue);
 
 /**
  * @api {get} /:teamspace/:model/issues/:issueId/thumbnail.png Get issue thumbnail
@@ -131,7 +132,7 @@ router.get("/issues/:issueId", middlewares.issue.canView, findIssue);
  *
  * @apiSuccess (200) {Object} thumbnail Thumbnail image
  */
-router.get("/issues/:issueId/thumbnail.png", middlewares.issue.canView, getThumbnail);
+router.get("/issues/:issueId/thumbnail.png", issuesMiddleware.canView, getThumbnail);
 
 /**
  * @api {get} /:teamspace/:model/issues?[query] List Issues
@@ -190,7 +191,7 @@ router.get("/issues/:issueId/thumbnail.png", middlewares.issue.canView, getThumb
  *	}
  * ]
  */
-router.get("/issues", middlewares.issue.canView, listIssues);
+router.get("/issues", issuesMiddleware.canView, listIssues);
 
 /**
  * @api {get} /:teamspace/:model/issues.bcfzip Download issues BCF file
@@ -200,7 +201,7 @@ router.get("/issues", middlewares.issue.canView, listIssues);
  *
  * @apiUse Issues
  */
-router.get("/issues.bcfzip", middlewares.issue.canView, getIssuesBCF);
+router.get("/issues.bcfzip", issuesMiddleware.canView, getIssuesBCF);
 
 /**
  * @api {post} /:teamspace/:model/issues.bcfzip Import BCF file
@@ -210,7 +211,7 @@ router.get("/issues.bcfzip", middlewares.issue.canView, getIssuesBCF);
  *
  * @apiUse Issues
  */
-router.post("/issues.bcfzip", middlewares.issue.canCreate, importBCF);
+router.post("/issues.bcfzip", issuesMiddleware.canCreate, importBCF);
 
 /**
  * @api {get} /:teamspace/:model/issues/:issueId/viewpoints/:viewpointId/screenshot.png Get issue viewpoint screenshot
@@ -222,7 +223,7 @@ router.post("/issues.bcfzip", middlewares.issue.canCreate, importBCF);
  * @apiUse IssueIdParam
  * @apiUse ViewpointIdParam
  */
-router.get("/issues/:issueId/viewpoints/:vid/screenshot.png", middlewares.issue.canView, getScreenshot);
+router.get("/issues/:issueId/viewpoints/:vid/screenshot.png", issuesMiddleware.canView, getScreenshot);
 
 /**
  * @api {get} /:teamspace/:model/issues/:issueId/viewpoints/:viewpointId/screenshotSmall.png Get smaller version of Issue screenshot
@@ -235,7 +236,7 @@ router.get("/issues/:issueId/viewpoints/:vid/screenshot.png", middlewares.issue.
  *
  * @apiSuccess (200) {Object} Issue Screenshot.
  */
-router.get("/issues/:issueId/viewpoints/:vid/screenshotSmall.png", middlewares.issue.canView, getScreenshot);
+router.get("/issues/:issueId/viewpoints/:vid/screenshotSmall.png", issuesMiddleware.canView, getScreenshot);
 
 /**
  * @api {get} /:teamspace/:model/revision/:revId/issues List Issues by revision ID
@@ -295,7 +296,7 @@ router.get("/issues/:issueId/viewpoints/:vid/screenshotSmall.png", middlewares.i
  *	}
  * ]
  */
-router.get("/revision/:rid/issues", middlewares.issue.canView, listIssues);
+router.get("/revision/:rid/issues", issuesMiddleware.canView, listIssues);
 
 /**
  * @api {get} /:teamspace/:model/revision/:revId/issues.bcfzip Get Issues BCF zip file by revision ID
@@ -308,7 +309,7 @@ router.get("/revision/:rid/issues", middlewares.issue.canView, listIssues);
  * @apiDescription Get Issues BCF export based on revision ID.
  *
  */
-router.get("/revision/:rid/issues.bcfzip", middlewares.issue.canView, getIssuesBCF);
+router.get("/revision/:rid/issues.bcfzip", issuesMiddleware.canView, getIssuesBCF);
 
 /**
  * @api {post} /:teamspace/:model/revision/:revId/issues.bcfzip Post Issues BCF zip file by revision ID
@@ -328,7 +329,7 @@ router.get("/revision/:rid/issues.bcfzip", middlewares.issue.canView, getIssuesB
  * }
  *
  */
-router.post("/revision/:rid/issues.bcfzip", middlewares.issue.canCreate, importBCF);
+router.post("/revision/:rid/issues.bcfzip", issuesMiddleware.canCreate, importBCF);
 
 /**
  * @api {get} /:teamspace/:model/issues.html Issues response into as HTML
@@ -339,7 +340,7 @@ router.post("/revision/:rid/issues.bcfzip", middlewares.issue.canCreate, importB
  *
  * @apiDescription Render all Issues into a HTML webpage, response is rendered HTML.
  */
-router.get("/issues.html", middlewares.issue.canView, renderIssuesHTML);
+router.get("/issues.html", issuesMiddleware.canView, renderIssuesHTML);
 
 /**
  * @api {get} /:teamspace/:model/revision/:revId/issues.html Issues response into as HTML by revision ID
@@ -351,7 +352,7 @@ router.get("/issues.html", middlewares.issue.canView, renderIssuesHTML);
  *
  * @apiDescription Render all Issues into a HTML webpage based on current revision ID.
  */
-router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssuesHTML);
+router.get("/revision/:rid/issues.html", issuesMiddleware.canView, renderIssuesHTML);
 
 /**
  * @api {post} /:teamspace/:model/issues Create issue
@@ -597,7 +598,7 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
  *
  *
  */
-router.post("/issues", middlewares.issue.canCreate, storeIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
+router.post("/issues", issuesMiddleware.canCreate, storeIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {patch} /:teamspace/:model/issues/:issueId Update issue
@@ -732,7 +733,7 @@ router.post("/issues", middlewares.issue.canCreate, storeIssue, middlewares.noti
  * @apiSuccess (200) {Object} Updated Issue Object.
  *
  */
-router.patch("/issues/:issueId", middlewares.issue.canComment, updateIssue, middlewares.chat.onUpdateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
+router.patch("/issues/:issueId", issuesMiddleware.canComment, updateIssue, middlewares.chat.onUpdateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {post} /:teamspace/:model/revision/:revId/issues Create issue on revision
@@ -743,7 +744,7 @@ router.patch("/issues/:issueId", middlewares.issue.canComment, updateIssue, midd
  * @apiUse Issues
  * @apiUse RevIdParam
  */
-router.post("/revision/:rid/issues", middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
+router.post("/revision/:rid/issues", issuesMiddleware.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {patch} /:teamspace/:model/revision/:revId/issues/:issueId Update issue on revision
@@ -755,7 +756,7 @@ router.post("/revision/:rid/issues", middlewares.issue.canCreate, storeIssue, re
  * @apiUse IssueIdParam
  * @apiUse RevIdParam
  */
-router.patch("/revision/:rid/issues/:issueId", middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
+router.patch("/revision/:rid/issues/:issueId", issuesMiddleware.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {post} /:teamspace/:model/issues/:issueId/comments Add comment to issue
@@ -790,7 +791,7 @@ router.patch("/revision/:rid/issues/:issueId", middlewares.issue.canComment, upd
  * @apiError 404 Issue not found
  * @apiError 400 Comment with no text
  * */
-router.post("/issues/:issueId/comments", middlewares.issue.canComment, addComment, middlewares.notification.onNewComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
+router.post("/issues/:issueId/comments", issuesMiddleware.canComment, addComment, middlewares.notification.onNewComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {delete} /:teamspace/:model/issues/:issueId/comments Deletes an comment from an issue
@@ -816,9 +817,9 @@ router.post("/issues/:issueId/comments", middlewares.issue.canComment, addCommen
  * @apiError 400 Issue comment sealed, when the user is trying to delete a comment that is sealed
  * @apiError 400 GUID invalid, when the user sent an invalid guid
  * */
-router.delete("/issues/:issueId/comments", middlewares.issue.canComment, deleteComment, middlewares.chat.onCommentDeleted, responseCodes.onSuccessfulOperation);
+router.delete("/issues/:issueId/comments", issuesMiddleware.canComment, deleteComment, middlewares.chat.onCommentDeleted, responseCodes.onSuccessfulOperation);
 
-router.post("/revision/:rid/issues.json", middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
+router.post("/revision/:rid/issues.json", issuesMiddleware.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {post} /:teamspace/:model/issues/:issueId/resources Attach resources to an issue
@@ -864,7 +865,7 @@ router.post("/revision/:rid/issues.json", middlewares.issue.canCreate, storeIssu
  *    }
  * ]
  */
-router.post("/issues/:issueId/resources",middlewares.issue.canComment, attachResourcesToIssue, middlewares.chat.onResourcesCreated, responseCodes.onSuccessfulOperation);
+router.post("/issues/:issueId/resources",issuesMiddleware.canComment, attachResourcesToIssue, middlewares.chat.onResourcesCreated, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {delete} /:teamspace/:model/issues/:issueId/resources Detach a resource from an issue
@@ -891,7 +892,7 @@ router.post("/issues/:issueId/resources",middlewares.issue.canComment, attachRes
  *    "createdAt":1561973996462
  * }
  */
-router.delete("/issues/:issueId/resources",middlewares.issue.canComment, detachResourcefromIssue, middlewares.chat.onResourceDeleted, responseCodes.onSuccessfulOperation);
+router.delete("/issues/:issueId/resources",issuesMiddleware.canComment, detachResourcefromIssue, middlewares.chat.onResourceDeleted, responseCodes.onSuccessfulOperation);
 
 function storeIssue(req, res, next) {
 	const data = req.body;
