@@ -15,19 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
+import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 import { TeamspacesActions, TeamspacesTypes, ITeamspace } from './teamspaces.redux';
 import { RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
+import { AddOn } from '../store.types';
+import { selectIsFetchingAddons } from './teamspaces.selectors';
 
 export function* fetch() {
 	yield put(TeamspacesActions.setTeamspacesArePending(true));
 	try {
-		const { data: { teamspaces } } = yield API.Teamspaces.fetchTeamspaces();
-		yield put(TeamspacesActions.fetchSuccess(teamspaces as ITeamspace[]));
+		const { data: { teamspaces } }: { data: { teamspaces: ITeamspace[] } } = yield API.Teamspaces.fetchTeamspaces();
+		const teamspacesAddOns: AddOn[][] = yield all(teamspaces.map((teamspace) => API.Teamspaces.fetchAddons(teamspace.name)));
+
+		for (let i = 0; i < teamspaces.length; i++) {
+			const teamspace = teamspaces[i].name;
+			const addOns = teamspacesAddOns[i];
+			yield put(TeamspacesActions.fetchAddOnsSuccess( teamspace, addOns));
+		}
+
+		yield put(TeamspacesActions.fetchSuccess(teamspaces));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({
@@ -54,6 +64,14 @@ export function* fetchQuota({ teamspace }) {
 			error,
 			details: RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE,
 		}));
+	}
+}
+
+export  function* waitForAddons() {
+	const isFetchingAddons = yield select(selectIsFetchingAddons);
+
+	if (isFetchingAddons) {
+		yield take(TeamspacesTypes.FETCH_ADD_ONS_SUCCESS);
 	}
 }
 

@@ -27,6 +27,9 @@ const { templates } = require(`${src}/utils/responseCodes`);
 jest.mock('../../../../../../src/v5/utils/sessions');
 const Sessions = require(`${src}/utils/sessions`);
 
+jest.mock('../../../../../../src/v5/models/teamspaceSettings');
+const TeamspaceSettings = require(`${src}/models/teamspaceSettings`);
+
 const TSMiddlewares = require(`${src}/middleware/permissions/components/teamspaces`);
 
 // Mock respond function to just return the resCode
@@ -109,7 +112,48 @@ const testIsTeamspaceAdmin = () => {
 	});
 };
 
+const testIsAddOnModuleEnabled = () => {
+	describe('isAddOnModuleEnabled', () => {
+		const moduleName = generateRandomString();
+		const teamspace = generateRandomString();
+		const mockCB = jest.fn(() => {});
+
+		test('next() should be called if module is enabled', async () => {
+			TeamspaceSettings.isAddOnModuleEnabled.mockResolvedValueOnce(true);
+			await TSMiddlewares.isAddOnModuleEnabled(moduleName)({ params: { teamspace } }, {}, mockCB);
+
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(TeamspaceSettings.isAddOnModuleEnabled).toHaveBeenCalledTimes(1);
+			expect(TeamspaceSettings.isAddOnModuleEnabled).toHaveBeenCalledWith(teamspace, moduleName);
+		});
+
+		test('should respond with moduleUnavailable if the module is not enabled', async () => {
+			TeamspaceSettings.isAddOnModuleEnabled.mockResolvedValueOnce(false);
+			await TSMiddlewares.isAddOnModuleEnabled(moduleName)({ params: { teamspace } }, {}, mockCB);
+
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.moduleUnavailable.code);
+			expect(TeamspaceSettings.isAddOnModuleEnabled).toHaveBeenCalledTimes(1);
+			expect(TeamspaceSettings.isAddOnModuleEnabled).toHaveBeenCalledWith(teamspace, moduleName);
+		});
+
+		test('should respond with error if the isAddOnModuleEnabled throws error', async () => {
+			const error = new Error();
+			TeamspaceSettings.isAddOnModuleEnabled.mockRejectedValueOnce(error);
+			await TSMiddlewares.isAddOnModuleEnabled(moduleName)({ params: { teamspace } }, {}, mockCB);
+
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond.mock.results[0].value.code).toEqual(error.code);
+			expect(TeamspaceSettings.isAddOnModuleEnabled).toHaveBeenCalledTimes(1);
+			expect(TeamspaceSettings.isAddOnModuleEnabled).toHaveBeenCalledWith(teamspace, moduleName);
+		});
+	});
+};
+
 describe('middleware/permissions/components/teamspaces', () => {
 	testIsTeamspaceMember();
 	testIsTeamspaceAdmin();
+	testIsAddOnModuleEnabled();
 });

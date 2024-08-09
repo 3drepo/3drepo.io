@@ -23,6 +23,8 @@ import { all, put, select, take, takeEvery, takeLatest } from 'redux-saga/effect
 
 import { generatePath } from 'react-router';
 import { generateViewpoint } from '@/v4/helpers/viewpoints';
+import { waitForAddons } from '@/v5/store/teamspaces/teamspaces.sagas';
+import { selectRisksEnabled } from '@/v5/store/teamspaces/teamspaces.selectors';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { RISK_DEFAULT_HIDDEN_LEVELS } from '../../constants/risks';
 import { ROUTES } from '../../constants/routes';
@@ -64,6 +66,13 @@ import {
 } from './risks.selectors';
 
 function* fetchRisks({teamspace, modelId, revision}) {
+	yield waitForAddons();
+	const riskEnabled = yield select(selectRisksEnabled);
+
+	if (!riskEnabled) {
+		return;
+	}
+
 	yield put(RisksActions.togglePendingState(true));
 	try {
 		const {data} = yield API.getRisks(teamspace, modelId, revision);

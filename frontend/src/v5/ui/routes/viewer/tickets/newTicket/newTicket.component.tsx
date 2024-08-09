@@ -101,10 +101,7 @@ export const NewTicketCard = () => {
 				isFederation,
 			);
 		}
-
-		return () => {
-			TicketsCardActionsDispatchers.setUnsavedTicket(formData.getValues());
-		};
+		TicketsCardActionsDispatchers.setUnsavedTicket(defaultTicket);
 	}, []);
 
 	useEffect(() => {
@@ -159,6 +156,7 @@ export const NewTicketCard = () => {
 									// Im not sure this is still needed here, because we are already depending on react-hook-form to fill the form
 									ticket={defaultTicket}
 									focusOnTitle
+									onPropertyBlur={() => TicketsCardActionsDispatchers.setUnsavedTicket(formData.getValues())}
 								/>
 							)}
 						</>

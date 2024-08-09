@@ -96,11 +96,8 @@ export const FederationsList = ({
 					<DashboardListHeaderLabel name="name" minWidth={90}>
 						<FormattedMessage id="federations.list.header.federation" defaultMessage="Federation" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="issues" width={165} hideWhenSmallerThan={1080}>
-						<FormattedMessage id="federations.list.header.issues" defaultMessage="Open issues" />
-					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="risks" width={165} hideWhenSmallerThan={890}>
-						<FormattedMessage id="federations.list.header.risks" defaultMessage="Open risks" />
+						<FormattedMessage id="federations.list.header.tickets" defaultMessage="Open tickets" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="containers" width={165} hideWhenSmallerThan={Display.Tablet}>
 						<FormattedMessage id="federations.list.header.containers" defaultMessage="Containers" />

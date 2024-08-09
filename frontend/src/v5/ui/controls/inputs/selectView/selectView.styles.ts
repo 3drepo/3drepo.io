@@ -18,6 +18,7 @@
 import styled, { css } from 'styled-components';
 import { MenuItem } from '@mui/material';
 import { Select as SelectBase } from '@controls/inputs/select/select.component';
+import { AuthImg } from '@components/authenticatedResource/authImg.component';
 
 const ThumbnailStyles = css`
 	width: 43px;
@@ -27,7 +28,7 @@ const ThumbnailStyles = css`
 	display: inline-block;
 `;
 
-export const Thumbnail = styled.img`
+export const Thumbnail = styled(AuthImg)`
 	${ThumbnailStyles};
 `;
 

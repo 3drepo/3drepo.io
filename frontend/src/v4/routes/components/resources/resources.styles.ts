@@ -23,6 +23,7 @@ import Photo from '@mui/icons-material/Photo';
 import RemoveCircleOutline from '@mui/icons-material/RemoveCircleOutline';
 import styled from 'styled-components';
 
+import { AuthAnchor } from '@components/authenticatedResource/authAnchor.component';
 import { COLOR } from '../../../styles';
 
 export const RemoveIcon = styled(RemoveCircleOutline)`
@@ -85,7 +86,7 @@ export const ResourceItemContainer = styled.div`
 	}
 `;
 
-export const ResourceLink = styled.a`
+export const ResourceLink = styled(AuthAnchor)`
 	flex: 1;
 	min-width: 0;
 	white-space: nowrap;

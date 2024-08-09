@@ -16,7 +16,11 @@
  */
 
 const { src, modelFolder, objModel } = require('../../../../../helper/path');
-const ServiceHelper = require('../../../../../helper/services');
+const {
+	determineTestGroup,
+	generateRandomString,
+	generateUUIDString,
+} = require('../../../../../helper/services');
 
 const fs = require('fs/promises');
 const path = require('path');
@@ -329,9 +333,9 @@ const testDeleteContainer = () => {
 			ModelHelper.removeModelData.mockResolvedValueOnce();
 			ProjectSettings.removeModelFromProject.mockResolvedValueOnce();
 
-			const teamspace = ServiceHelper.generateRandomString();
-			const projectId = ServiceHelper.generateRandomString();
-			const model = ServiceHelper.generateRandomString();
+			const teamspace = generateRandomString();
+			const projectId = generateRandomString();
+			const model = generateRandomString();
 			await Containers.deleteContainer(teamspace, projectId, model);
 
 			expect(ModelHelper.removeModelData).toHaveBeenCalledTimes(1);
@@ -345,21 +349,29 @@ const testDeleteContainer = () => {
 const testGetRevisions = () => {
 	describe('Get container revisions', () => {
 		const revisions = [
-			{ _id: ServiceHelper.generateUUIDString(),
-				author: ServiceHelper.generateRandomString(),
+			{
+				_id: generateUUIDString(),
+				author: generateRandomString(),
 				timestamp: new Date(),
-				rFile: [`${ServiceHelper.generateUUIDString()}_${ServiceHelper.generateUUIDString()}_ifc`] },
-			{ _id: ServiceHelper.generateUUIDString(),
-				author: ServiceHelper.generateRandomString(),
+				rFile: [`${generateUUIDString()}_${generateUUIDString()}_ifc`],
+			},
+			{
+				_id: generateUUIDString(),
+				author: generateRandomString(),
 				timestamp: new Date(),
-				rFile: [`${ServiceHelper.generateUUIDString()}_${ServiceHelper.generateUUIDString()}_obj`] },
-			{ _id: ServiceHelper.generateUUIDString(),
-				author: ServiceHelper.generateRandomString(),
-				timestamp: new Date() },
-			{ _id: ServiceHelper.generateUUIDString(),
-				author: ServiceHelper.generateRandomString(),
+				rFile: [`${generateUUIDString()}_${generateUUIDString()}_obj`],
+			},
+			{
+				_id: generateUUIDString(),
+				author: generateRandomString(),
 				timestamp: new Date(),
-				void: true },
+			},
+			{
+				_id: generateUUIDString(),
+				author: generateRandomString(),
+				timestamp: new Date(),
+				void: true,
+			},
 		];
 
 		const formatRevisions = (revs) => revs.map(({ rFile, ...r }) => {
@@ -373,8 +385,8 @@ const testGetRevisions = () => {
 		Revisions.getRevisionFormat.mockImplementation((rFile) => (rFile ? '.'.concat(rFile[0].split('_').pop()) : undefined));
 
 		test('should return non-void revisions if the container exists', async () => {
-			const teamspace = ServiceHelper.generateRandomString();
-			const container = ServiceHelper.generateRandomString();
+			const teamspace = generateRandomString();
+			const container = generateRandomString();
 
 			Revisions.getRevisions.mockImplementationOnce(() => revisions);
 
@@ -387,8 +399,8 @@ const testGetRevisions = () => {
 		});
 
 		test('should return all revisions if the container exists', async () => {
-			const teamspace = ServiceHelper.generateRandomString();
-			const container = ServiceHelper.generateRandomString();
+			const teamspace = generateRandomString();
+			const container = generateRandomString();
 
 			Revisions.getRevisions.mockImplementationOnce(() => revisions);
 
@@ -456,21 +468,21 @@ const testDownloadRevisionFiles = () => {
 		test('should throw error if revision has no file', async () => {
 			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ rFile: [] });
 
-			await expect(Containers.downloadRevisionFiles('teamspace', 'container', ServiceHelper.generateUUIDString()))
+			await expect(Containers.downloadRevisionFiles('teamspace', 'container', generateUUIDString()))
 				.rejects.toEqual(templates.fileNotFound);
 
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(0);
 		});
 
 		test('should download files if revision has file', async () => {
-			const teamspace = ServiceHelper.generateRandomString();
-			const container = ServiceHelper.generateRandomString();
-			const fileName = `${ServiceHelper.generateUUIDString()}${ServiceHelper.generateUUIDString()}.ifc`;
-			const revision = ServiceHelper.generateRandomString();
+			const teamspace = generateRandomString();
+			const container = generateRandomString();
+			const fileName = `${generateUUIDString()}${generateUUIDString()}.ifc`;
+			const revision = generateRandomString();
 			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ rFile: [fileName] });
 
 			const output = {
-				[ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString(),
+				[generateRandomString()]: generateRandomString(),
 			};
 			FilesManager.getFileAsStream.mockResolvedValueOnce(output);
 
@@ -486,7 +498,7 @@ const testDownloadRevisionFiles = () => {
 	});
 };
 
-describe('processors/teamspaces/projects/containers', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetContainerList();
 	testGetContainerStats();
 	testAddContainer();
