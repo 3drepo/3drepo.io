@@ -23,13 +23,17 @@ import { ViewerCanvasesContext } from '../../viewer/viewerCanvases.context';
 import { useContext } from 'react';
 import { CalibrationHeader } from '../projects/calibration/calibrationHeader/calibrationHeader.component';
 import { CalibrationContext } from '../projects/calibration/calibrationContext';
+import { isNumber } from 'lodash';
 
 export const ViewerCanvases = () => {
 	const { pathname } = useLocation();
 	const { is2DOpen, leftPanelRatio, setLeftPanelRatio } = useContext(ViewerCanvasesContext);
 	const { isCalibrating } = useContext(CalibrationContext);
 
-	const dragFinish = (newSize) => setLeftPanelRatio(newSize / window.innerWidth);
+	const dragFinish = (newSize) => {
+		if (!isNumber(newSize)) return;
+		setLeftPanelRatio(newSize / window.innerWidth);
+	};
 
 	return (
 		<>
