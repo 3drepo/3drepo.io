@@ -204,51 +204,51 @@ const establishRoutes = () => {
 	 *             schema:
 	 *               type: object
 	 *               properties:
-	 *               horizontal:
-	 *                 description: The horizontal array of the calibration
-     *                 type: object
-	 *                 properties:
-	 *                   model:
-	 *                     type: array
-	 *                     items:
+	 *                 horizontal:
+	 *                   description: The horizontal array of the calibration
+     *                   type: object
+	 *                   properties:
+	 *                     model:
 	 *                       type: array
-	 *                       minItems: 3
-	 *                       maxItems: 3
-	 *                       example: [1, 2, 3]
 	 *                       items:
-	 *                         type: number
-	 *                         example: 1
-	 *                     example: [[1, 2, 3], [4, 5, 6]]
-	 *                     minItems: 2
-	 *                     maxItems: 2
-	 *                   drawing:
-	 *                     type: array
-	 *                     items:
-	 *                       type: array
+	 *                         type: array
+	 *                         minItems: 3
+	 *                         maxItems: 3
+	 *                         example: [1, 2, 3]
+	 *                         items:
+	 *                           type: number
+	 *                           example: 1
+	 *                       example: [[1, 2, 3], [4, 5, 6]]
 	 *                       minItems: 2
 	 *                       maxItems: 2
-	 *                       example: [1, 2]
+	 *                     drawing:
+	 *                       type: array
 	 *                       items:
-	 *                         type: number
-	 *                         example: 1
-	 *                     example: [[1, 2], [3, 4]]
-	 *                     minItems: 2
-	 *                     maxItems: 2
-	 *                 example: { model: [[1, 2, 3], [4, 5, 6]], drawing: [[1, 2], [3, 4]] }
-	 *               verticalRange:
-	 *                 description: The vertical range of the calibration
-	 *                 type: array
-	 *                 items:
-	 *                   type: number
-	 *                   example: 0
-	 *                 example: [0, 10]
-	 *                 minItems: 2
-	 *                 maxItems: 2
-	 *               units:
-	 *                 description: The units of the calibration
-	 *                 type: string
-	 *                 enum: [mm, cm, dm, m, ft]
-	 *                 example: mm
+	 *                         type: array
+	 *                         minItems: 2
+	 *                         maxItems: 2
+	 *                         example: [1, 2]
+	 *                         items:
+	 *                           type: number
+	 *                           example: 1
+	 *                       example: [[1, 2], [3, 4]]
+	 *                       minItems: 2
+	 *                       maxItems: 2
+	 *                   example: { model: [[1, 2, 3], [4, 5, 6]], drawing: [[1, 2], [3, 4]] }
+	 *                 verticalRange:
+	 *                   description: The vertical range of the calibration
+	 *                   type: array
+	 *                   items:
+	 *                     type: number
+	 *                     example: 0
+	 *                   example: [0, 10]
+	 *                   minItems: 2
+	 *                   maxItems: 2
+	 *                 units:
+	 *                   description: The units of the calibration
+	 *                   type: string
+	 *                   enum: [mm, cm, dm, m, ft]
+	 *                   example: mm
 	 *             example: { horizontal: { model: [[1, 2, 3], [4, 5, 6]], drawing: [[1, 2], [3, 4]] }, verticalRange: [0, 10], units: m }
 	 */
 	router.get('/', hasReadAccessToDrawing, getLatestCalibration);
