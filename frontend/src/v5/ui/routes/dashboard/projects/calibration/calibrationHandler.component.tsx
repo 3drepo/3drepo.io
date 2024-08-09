@@ -26,10 +26,10 @@ import { VerticalSpatialBoundariesStep } from './calibrationStep/verticalSpatial
 import { ViewerCanvasesContext } from '../../../viewer/viewerCanvases.context';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { CalibrationContext } from './calibrationContext';
-import { DRAWINGS_ROUTE } from '../../../routes.constants';
+import { DRAWINGS_ROUTE, ViewerParams } from '../../../routes.constants';
 
 export const CalibrationHandler = () => {
-	const { teamspace, project, revision, containerOrFederation } = useParams();
+	const { teamspace, project, revision, containerOrFederation } = useParams<ViewerParams>();
 	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
 	const { step, drawingId, setVector3D, setVector2D, setOrigin, setStep, setIsCalibrating3D, origin } = useContext(CalibrationContext);
 	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
