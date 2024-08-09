@@ -25,6 +25,8 @@ const { queueMessage } = require(`${src}/handler/queue`);
 const { cn_queue: queueConfig } = require(`${src}/utils/config`);
 const { mkdirSync, writeFileSync } = require('fs');
 
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+
 const { getRevisionFormat } = require(`${src}/models/revisions`);
 
 const user = ServiceHelper.generateUserCredentials();
@@ -32,7 +34,7 @@ const teamspace = ServiceHelper.generateRandomString();
 const project = ServiceHelper.generateRandomProject();
 const container = ServiceHelper.generateRandomModel();
 const container2 = ServiceHelper.generateRandomModel();
-const federation = ServiceHelper.generateRandomModel({ isFederation: true });
+const federation = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
 const containerRevision = ServiceHelper.generateRevisionEntry();
 const federationRevision = ServiceHelper.generateRevisionEntry();
 

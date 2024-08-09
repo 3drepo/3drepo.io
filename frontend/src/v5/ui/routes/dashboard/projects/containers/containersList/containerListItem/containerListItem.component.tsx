@@ -34,14 +34,14 @@ import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import {
 	enableRealtimeContainerRevisionUpdate,
-	enableRealtimeNewRevisionUpdate,
-} from '@/v5/services/realtime/revision.events';
+	enableRealtimeNewContainerRevisionUpdate,
+} from '@/v5/services/realtime/containerRevision.events';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Display } from '@/v5/ui/themes/media';
 import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { RevisionDetails } from '@components/shared/revisionDetails/revisionDetails.component';
+import { ContainerRevisionDetails } from '@components/shared/containerRevisionDetails/containerRevisionDetails.component';
 import { ContainerEllipsisMenu } from './containerEllipsisMenu/containerEllipsisMenu.component';
 import { IsMainList } from '../../mainList.context';
 
@@ -65,7 +65,7 @@ export const ContainerListItem = memo(({
 				enableRealtimeContainerRemoved(teamspace, project, container._id),
 				enableRealtimeContainerUpdateSettings(teamspace, project, container._id),
 				enableRealtimeContainerRevisionUpdate(teamspace, project, container._id),
-				enableRealtimeNewRevisionUpdate(teamspace, project, container._id),
+				enableRealtimeNewContainerRevisionUpdate(teamspace, project, container._id),
 			);
 		}
 		return null;
@@ -142,7 +142,7 @@ export const ContainerListItem = memo(({
 				</DashboardListItemIcon>
 			</DashboardListItemRow>
 			{isSelected && (
-				<RevisionDetails
+				<ContainerRevisionDetails
 					containerId={container._id}
 					revisionsCount={container.revisionsCount}
 					status={container.status}

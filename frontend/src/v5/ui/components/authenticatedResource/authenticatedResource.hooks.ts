@@ -32,6 +32,16 @@ export const downloadAuthUrl = async (url):Promise<string> => {
 	return CachedURL[url];
 };
 
+export const downloadFile = async (url, name?) => {
+	const urlTokens = url.split('/');
+	const urlFilename = urlTokens[urlTokens.length - 1]; 
+
+	const anchor = document.createElement('a');
+	anchor.href = await downloadAuthUrl(url) ;
+	anchor.download = name || urlFilename;
+	anchor.click();
+};
+
 export const deleteAuthUrlFromCache = (url) => delete CachedURL[url];
 
 // It uses axios config to pass the token so images are returned safely

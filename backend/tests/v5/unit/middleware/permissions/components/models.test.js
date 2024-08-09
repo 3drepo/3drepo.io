@@ -41,6 +41,8 @@ Permissions.hasReadAccessToContainer.mockImplementation(mockImp);
 Permissions.hasWriteAccessToContainer.mockImplementation(mockImp);
 Permissions.hasCommenterAccessToContainer.mockImplementation(mockImp);
 
+Permissions.hasAdminAccessToDrawing.mockImplementation(mockImp);
+
 Permissions.hasReadAccessToFederation.mockImplementation(mockImp);
 Permissions.hasWriteAccessToFederation.mockImplementation(mockImp);
 Permissions.hasCommenterAccessToFederation.mockImplementation(mockImp);
@@ -275,10 +277,50 @@ const testHasCommenterAccessToFederation = () => {
 	});
 };
 
+const testHasAdminAccessToDrawing = () => {
+	describe('hasAdminAccessToDrawing', () => {
+		test('next() should be called if the user has access', async () => {
+			const mockCB = jest.fn(() => {});
+			await ModelMiddleware.hasAdminAccessToDrawing(
+				{ params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(1);
+		});
+
+		test('should respond with not authorised if the user has no access', async () => {
+			const mockCB = jest.fn(() => {});
+			await ModelMiddleware.hasAdminAccessToDrawing(
+				{ params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(0);
+			expect(Responder.respond.mock.calls.length).toBe(1);
+			expect(Responder.respond.mock.results[0].value).toEqual(templates.notAuthorized);
+		});
+
+		test('should respond with projectNotFound error if hasReadAccessToDrawing threw projectNotFound', async () => {
+			const mockCB = jest.fn(() => {});
+			await ModelMiddleware.hasAdminAccessToDrawing(
+				{ params: { teamspace: 'throwProjectError' }, session: { user: { username: 'hi' } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(0);
+			expect(Responder.respond.mock.calls.length).toBe(1);
+			expect(Responder.respond.mock.results[0].value).toEqual(templates.projectNotFound);
+		});
+	});
+};
+
 describe('middleware/permissions/components/models', () => {
 	testHasReadAccessToContainer();
 	testHasWriteAccessToContainer();
 	testHasCommenterAccessToContainer();
+
+	testHasAdminAccessToDrawing();
 
 	testHasReadAccessToFederation();
 	testHasWriteAccessToFederation();

@@ -18,7 +18,7 @@
 import styled, { css } from 'styled-components';
 import { DashboardListEmptyContainer } from '@components/dashboard/dashboardList';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dashboardList.styles';
-import * as RevisionsListHeaderLabelStyles from './components/revisionsListHeaderLabel/revisionsListHeaderLabel.styles';
+import { Container as RevisionListHeaderLabel } from './components/revisionsListHeaderLabel/revisionsListHeaderLabel.styles';
 
 const BORDER_RADIUS = '8px';
 const ITEM_HEIGHT = '49px';
@@ -53,7 +53,7 @@ export const RevisionsListHeaderContainer = styled.header`
 	padding: 13px 186px 10px 94px;
 	margin-top: 17px;
 
-	${RevisionsListHeaderLabelStyles.Container} {
+	${RevisionListHeaderLabel} {
 		&:last-child {
 			margin-right: 70px;
 		}

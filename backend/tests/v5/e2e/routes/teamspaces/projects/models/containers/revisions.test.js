@@ -19,6 +19,8 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src, objModel, objModelUppercaseExt } = require('../../../../../../helper/path');
 
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+
 const { templates } = require(`${src}/utils/responseCodes`);
 
 let server;
@@ -58,7 +60,7 @@ const models = [
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
-		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true },
+		properties: { ...ServiceHelper.generateRandomModelProperties(modelTypes.FEDERATION) },
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),

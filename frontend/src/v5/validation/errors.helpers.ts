@@ -40,6 +40,7 @@ export const nameAlreadyExists = (error: any): boolean => fieldAlreadyExists(err
 export const usernameAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'username');
 export const emailAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'email');
 export const projectAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'project');
+export const numberAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'number');
 
 export const isPathNotFound = (error): boolean => getErrorStatus(error) === 404;
 export const isPathNotAuthorized = (error): boolean => getErrorCode(error).endsWith('NOT_AUTHORIZED');
