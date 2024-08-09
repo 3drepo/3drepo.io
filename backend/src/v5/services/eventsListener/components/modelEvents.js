@@ -79,7 +79,7 @@ const modelProcessingCompleted = async ({ teamspace, project, model, success, me
 	userErr, revId, errCode, user, modelType }) => {
 	try {
 		if (!success && !userErr) {
-			const { zipPath, logPreview: logExcerpt } = (await getLogArchive(UUIDToString(revId))) || {};
+			const { zipPath, logPreview } = (await getLogArchive(UUIDToString(revId))) || {};
 
 			await sendSystemEmail(emailTemplates.MODEL_IMPORT_ERROR.name,
 				{
@@ -93,7 +93,7 @@ const modelProcessingCompleted = async ({ teamspace, project, model, success, me
 					project: UUIDToString(project),
 					revId: UUIDToString(revId),
 					modelType,
-					logExcerpt,
+					logExcerpt: logPreview.replace(/(\r\n|\n|\r)/gm, '<br>'),
 
 				},
 				zipPath ? [{ filename: 'logs.zip', path: zipPath }] : undefined,
