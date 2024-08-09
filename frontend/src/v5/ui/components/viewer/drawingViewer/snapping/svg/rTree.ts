@@ -79,11 +79,11 @@ class TraversalContext {
 export class IntersectionTestResults {
 	closestEdge: Vector2;
 
-	closestPoint: Vector2;
+	queryTime: number;
 
 	constructor() {
 		this.closestEdge = null;
-		this.closestPoint = null;
+		this.queryTime = 0;
 	}
 }
 
@@ -92,17 +92,14 @@ export class RTree {
 	root: RTreeNode;
 
 	doIntersectionTest(p: Vector2, r: number) {
-
 		const start = performance.now();
 
 		const ctx = new TraversalContext(p, r);
 		this.traverseNode(this.root, ctx);
+
 		const results = new IntersectionTestResults();
 		results.closestEdge = ctx.closestPoint;
-
-		console.log('Intersection test in: ' + (performance.now() - start));
-
-		console.log(ctx);
+		results.queryTime = (performance.now() - start);
 
 		return results;
 	}
@@ -162,8 +159,11 @@ export class RTreeBuilderReport {
 
 	numLevels: number;
 
+	buildTime: number;
+
 	constructor() {
 		this.numLevels = 0;
+		this.buildTime = 0;
 	}
 }
 
@@ -262,6 +262,7 @@ export class RTreeBuilder {
 	}
 
 	build(): RTree {
+		const start = performance.now();
 
 		// Turn all primitives into RTreeNodes
 
@@ -273,6 +274,8 @@ export class RTreeBuilder {
 
 		const tree = new RTree();
 		tree.root = this.buildTree(nodes);
+
+		this.report.buildTime = (performance.now() - start);
 
 		return tree;
 	}

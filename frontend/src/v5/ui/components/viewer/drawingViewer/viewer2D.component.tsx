@@ -133,7 +133,8 @@ export const Viewer2D = () => {
 
 
 			// Then invoke the snap
-			const r = snapHandler.snap(p, radius);
+			const results = snapHandler.snap(p, radius);
+			const r = results.closestNode;
 
 			if (r != null) {
 				const r2 = imgRef.current.getClientPosition(r);

@@ -16,10 +16,10 @@
  */
 
 import 'path-data-polyfill';
-import { ZoomableImage } from '../../drawingViewerImage/drawingViewerImage.component';
 import { Vector2, Line, Point } from './types';
-import { QuadTree, QuadTreeBuilder } from './quadTree';
+import { QuadTree } from './quadTree';
 import { RTree, RTreeBuilder } from './rTree';
+import { KDTree, KDTreeBuilder, KDTreeNode } from './kdTree';
 
 export class SVGSnapDiagnosticsHelper {
 
@@ -106,6 +106,26 @@ export class SVGSnapDiagnosticsHelper {
 			}
 		}
 	}
+
+	renderKDTree(node: KDTree) {
+		this.renderKDTreeNode(node.root);
+	}
+
+	renderKDTreeNode(node: KDTreeNode) {
+		if (node.axis != null) {
+			const line = node.axis.line(this.canvas.width, this.canvas.height);
+			this.context.beginPath();
+			this.context.moveTo(line.start.x, line.start.y);
+			this.context.lineTo(line.end.x, line.end.y);
+			this.context.stroke();
+		}
+		if (node.left != null) {
+			this.renderKDTreeNode(node.left);
+		}
+		if (node.right != null) {
+			this.renderKDTreeNode(node.right);
+		}
+	}
 }
 
 class PrimitiveCollector {
@@ -124,6 +144,10 @@ class PrimitiveCollector {
 
 	addLine(line: Line) {
 		this.lines.push(line);
+	}
+
+	addPoint(point: Point) {
+		this.points.push(point);
 	}
 }
 
@@ -146,6 +170,7 @@ class PathCollector {
 	setStartPosition(values: number[]) {
 		this.startPosition = new Vector2(values[0] + this.collector.offset.x, values[1] + this.collector.offset.y);
 		this.currentPosition = new Vector2(this.startPosition.x, this.startPosition.y); // Copy the vector
+		this.collector.addPoint(this.currentPosition);
 	}
 
 	// Adds a line from the current position to the parameters at the offset. The
@@ -158,6 +183,13 @@ class PathCollector {
 		if (line.length != 0) {
 			this.collector.addLine(line);
 		}
+		this.collector.addPoint(this.currentPosition);
+	}
+
+	addCurve(values: number[]) {
+		const end = new Vector2(this.collector.offset.x + values[4], this.collector.offset.y + values[5]);
+		this.currentPosition = end;
+		this.collector.addPoint(this.currentPosition);
 	}
 
 	// Closes the subpath by drawing a straight line from the current position
@@ -188,6 +220,22 @@ class PolyCollector {
 				new Vector2(end.x, end.y),
 			),
 		);
+		this.collector.addPoint(start);
+		this.collector.addPoint(end);
+	}
+}
+
+export class SnapResults {
+	closestEdge: Vector2;
+
+	closestNode: Vector2;
+
+	closestIntersection: Vector2;
+
+	constructor() {
+		this.closestEdge = null;
+		this.closestNode = null;
+		this.closestIntersection = null;
 	}
 }
 
@@ -202,15 +250,16 @@ export class SVGSnap {
 
 	quadtree: QuadTree;
 
-	rtree: RTree;
+	rtree: RTree; //RTree that stores Lines, Curves and similar line-type primitives
+
+	ntree: KDTree; //KDTree that stores the control points of nodes
+
+	itree: KDTree; //KDTree that stores the intersection points between line-type primitives
 
 	debugHelper: SVGSnapDiagnosticsHelper;
 
-	snapRadius: number; // In content rect pixels
-
 	constructor() {
 		this.container = document.createElement('div');
-		this.snapRadius = 10;
 	}
 
 	async load(src: string) {
@@ -227,7 +276,7 @@ export class SVGSnap {
 	initialise() {
 
 		// This method parses the SVG body as an SVG to extract the primitives
-		// in local space.
+		// in local (svg) space.
 
 		this.svg = this.container.querySelector('svg') as SVGSVGElement;
 
@@ -244,7 +293,18 @@ export class SVGSnap {
 		// Extract all the Path elements. The responses here should include
 		// all basic shapes, which derive from Path.
 
-		const paths = this.svg.querySelectorAll<SVGPathElement>('path:not([stroke=\'none\'])');
+		this.getPathElements(this.svg, collector);
+		this.getPolylineElements(this.svg, collector);
+
+		// debug draw all the lines
+
+		this.debugHelper.renderPrimitives(collector);
+
+		this.buildAccelerationStructures(collector);
+	}
+
+	getPathElements(svg: SVGSVGElement, collector: PrimitiveCollector) {
+		const paths = svg.querySelectorAll<SVGPathElement>('path:not([stroke=\'none\'])');
 		for (let i = 0; i < paths.length; i++) {
 			const p = paths[i];
 			const segments = p.getPathData({ normalize: true });
@@ -265,6 +325,7 @@ export class SVGSnap {
 						break;
 					case 'C':
 						// todo: add curve support
+						pathCollector.addCurve(segment.values);
 						break;
 					case 'Z':
 						pathCollector.closePath();
@@ -272,7 +333,9 @@ export class SVGSnap {
 				}
 			}
 		}
+	}
 
+	getPolylineElements(svg: SVGElement, collector: PrimitiveCollector) {
 		const polylines = this.svg.querySelectorAll<SVGPolylineElement>('polyline');
 		for (let i = 0; i < polylines.length; i++) {
 			const p = polylines[i];
@@ -282,52 +345,49 @@ export class SVGSnap {
 				polyCollector.addLine(points[j], points[j + 1]);
 			}
 		}
+	}
 
-		// debug draw all the lines
-
-		this.debugHelper.renderPrimitives(collector);
-
-		const start = performance.now();
-
-		const builder = new RTreeBuilder({
+	buildAccelerationStructures(collector: PrimitiveCollector) {
+		const rbuilder = new RTreeBuilder({
 			lines: collector.lines,
 			n: 10,
 		});
-		this.rtree = builder.build();
+		this.rtree = rbuilder.build();
 
-		this.debugHelper.renderRTree(this.rtree);
+		const nbuilder = new KDTreeBuilder({
+			points: collector.points,
+			n: 10,
+		});
+		this.ntree = nbuilder.build();
 
-		console.log('Build acceleration structure in: ' + (performance.now() - start));
+		//this.debugHelper.renderRTree(this.rtree);
+		//this.debugHelper.renderKDTree(this.ntree);
 
-		console.log(builder.report);
+		console.log(rbuilder.report);
+		console.log(nbuilder.report);
 	}
 
-	snap(coord: { x: number, y: number }, image: ZoomableImage) {
-		let p = image.getImagePosition(coord);
-		p = new Vector2(p.x, p.y);
+	snap(position: Vector2, radius: number): SnapResults {
 
-		// Get the radius in SVG units by getting another point in image space,
-		// offset by the pixel radius, and taking the distance beteen them
+		this.debugHelper.renderRadius(position, radius);
 
-		let p1 = image.getImagePosition({
-			x: coord.x + this.snapRadius,
-			y: coord.y + this.snapRadius,
-		});
-		p1 = new Vector2(p1.x, p1.y);
+		// There are three types of location to snap to: lines/curves, node-points and intersection-points.
+		// Each has its own acceleration structure.
 
-		const r = Vector2.subtract(p, p1).norm;
+		const results = new SnapResults();
 
-		this.debugHelper.renderRadius(p, r);
-
-		const result = this.rtree.doIntersectionTest(new Vector2(p.x, p.y), r);
-
-		if (result.closestEdge != null) {
-			this.debugHelper.renderLine(p, result.closestEdge);
+		const edgeResults = this.rtree.doIntersectionTest(position, radius);
+		if (edgeResults.closestEdge != null) {
+			results.closestEdge = edgeResults.closestEdge;
+			this.debugHelper.renderLine(position, results.closestEdge);
 		}
 
+		const nodeResults = this.ntree.query(position, radius);
+		if (nodeResults.closestPoint != null) {
+			results.closestNode = new Vector2(nodeResults.closestPoint.x, nodeResults.closestPoint.y);
+		}
 
-
-		return result.closestEdge;
+		return results;
 	}
 }
 

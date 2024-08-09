@@ -22,12 +22,30 @@ function distance2(a: Point, b: Point) {
 }
 
 export interface KDTreeAxis {
+	/** Should a given point fall on the left or right hand side of the slice? */
 	lessEquals(p: Point): boolean;
+
+	/** The value of hyperline in the axis (X or Y) */
 	slice: number;
+
+	/** Sort the points in place by the component that this axis will split along */
 	sort(points: Point[]);
+
+	/** Get the next axis that should split (i.e. a KDTreeXAxis instance, will return a KDTreeYAxis instance) */
 	next(): KDTreeAxis;
+
+	/** Checks if the components of the points in this axis are equal */
 	compare(a: Point, b: Point): boolean;
+
+	/** Gets the position of the point in this axis */
 	value(p: Point): number;
+
+	/** Given a width and height, return a line that represents the hyperline described by this axis.
+	 * (This method is used for debugging) */
+	line(w: number, height: number): { start: Point, end: Point };
+
+	/** Gets the minimum distance between this point and the hyperline squared */
+	distance2(p: Point): number;
 }
 
 class KDTreeXAxis implements KDTreeAxis {
@@ -53,6 +71,18 @@ class KDTreeXAxis implements KDTreeAxis {
 	value(p: Point): number {
 		return p.x;
 	}
+
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	line(w: number, h: number) {
+		return {
+			start: new Point(this.slice, 0),
+			end: new Point(this.slice, h),
+		};
+	}
+
+	distance2(p: Point): number {
+		return (p.x - this.slice) * (p.x - this.slice);
+	}
 }
 
 class KDTreeYAxis implements KDTreeAxis {
@@ -77,6 +107,18 @@ class KDTreeYAxis implements KDTreeAxis {
 	value(p: Point): number {
 		return p.y;
 	}
+
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	line(w: number, h: number) {
+		return {
+			start: new Point(0, this.slice),
+			end: new Point(w, this.slice),
+		};
+	}
+
+	distance2(p: Point): number {
+		return (p.y - this.slice) * (p.y - this.slice);
+	}
 }
 
 export class KDTreeNode {
@@ -99,25 +141,33 @@ export class KDTreeNode {
 
 export class KDTreeQueryResults {
 	closestPoint: Point;
+
+	queryTime: number;
+
+	constructor() {
+		this.closestPoint = null;
+		this.queryTime = 0;
+	}
 }
 
 export class TraversalContext {
 
-	position: Point;
+	queryPoint: Point;
 
-	closestPoint: Point;
+	bestPoint: Point;
 
-	closestPointDistance2: number;
+	bestDistance2: number;
 
 	numNodesTraversed;
 
 	numPointTests;
 
-	constructor() {
+	constructor(queryPoint: Point, radius: number) {
+		this.queryPoint = queryPoint;
 		this.numNodesTraversed = 0;
 		this.numPointTests = 0;
-		this.closestPointDistance2 = Number.MAX_VALUE;
-		this.closestPoint = null;
+		this.bestDistance2 = radius * radius;
+		this.bestPoint = null;
 	}
 }
 
@@ -126,22 +176,31 @@ export class KDTree {
 
 	traverseLeaf(node: KDTreeNode, ctx: TraversalContext) {
 		for (const p of node.points) {
-			const d = distance2(p, ctx.closestPoint);
-			if (d < ctx.closestPointDistance2) {
-				ctx.closestPointDistance2 = d;
-				ctx.closestPoint = p;
+			const d = distance2(p, ctx.queryPoint);
+			if (d < ctx.bestDistance2) {
+				ctx.bestDistance2 = d;
+				ctx.bestPoint = p;
 			}
 			ctx.numPointTests++;
 		}
 	}
 
 	traverseBranch(node: KDTreeNode, ctx: TraversalContext) {
-		if (node.axis.lessEquals(ctx.position)) {
-			this.traverseNode(node.left, ctx);
-		} else {
-			this.traverseNode(node.right, ctx);
+		let left = node.left;
+		let right = node.right;
+
+		if (!node.axis.lessEquals(ctx.queryPoint)) {
+			right = node.left;
+			left = node.right;
+		}
+
+		this.traverseNode(left, ctx);
+
+		if (node.axis.distance2(ctx.queryPoint) < ctx.bestDistance2) {
+			this.traverseNode(right, ctx);
 		}
 	}
+
 
 	traverseNode(node: KDTreeNode, ctx: TraversalContext) {
 		if (node.leafNode()) {
@@ -152,10 +211,15 @@ export class KDTree {
 		ctx.numNodesTraversed++;
 	}
 
-	query(p: Point): KDTreeQueryResults {
+	query(qp: Point, radius: number): KDTreeQueryResults {
+		const start = performance.now();
 		const results = new KDTreeQueryResults();
-		const ctx = new TraversalContext();
-		ctx.position = p;
+		const ctx = new TraversalContext(qp, radius);
+		this.traverseNode(this.root, ctx);
+		if (ctx.bestPoint != null) {
+			results.closestPoint = ctx.bestPoint;
+		}
+		results.queryTime = performance.now() - start;
 		return results;
 	}
 }
@@ -166,15 +230,29 @@ export type KDTreeOptions = {
 	n: number, // Max number of points per leaf
 };
 
+export class KDTreeBuilderReport {
+	numLevels: number;
+
+	buildTime: number;
+
+	constructor() {
+		this.numLevels = 0;
+		this.buildTime = 0;
+	}
+}
+
 export class KDTreeBuilder {
 
 	points: Point[];
 
 	n: number;
 
+	report: KDTreeBuilderReport;
+
 	constructor(options: KDTreeOptions) {
 		this.points = options.points;
 		this.n = Math.max(options.n, 3);
+		this.report = new KDTreeBuilderReport();
 	}
 
 	// Splits the node along the provided axis, and if successful assigns
@@ -201,13 +279,13 @@ export class KDTreeBuilder {
 			// Find the first index for which the value changes (in either)
 			// direction.
 
-			if (!node.axis.compare(node.points[splitIndex], node.points[splitIndex + i])) {
+			if (!axis.compare(node.points[splitIndex], node.points[splitIndex + i])) {
 				splitIndex += i;
 				splitIndexFound = true;
 				break;
 			}
 
-			if (!node.axis.compare(node.points[splitIndex], node.points[splitIndex - 1])) {
+			if (!axis.compare(node.points[splitIndex], node.points[splitIndex - 1])) {
 				splitIndex -= i;
 				splitIndex++;
 				splitIndexFound = true;
@@ -229,6 +307,8 @@ export class KDTreeBuilder {
 		node.right = new KDTreeNode(node.points.slice(splitIndex, node.points.length));
 		node.points = null;
 		node.axis = axis;
+
+		this.report.numLevels++;
 
 		return true;
 	}
@@ -260,10 +340,12 @@ export class KDTreeBuilder {
 	}
 
 	build(): KDTree {
+		const start = performance.now();
 		const tree = new KDTree();
 		const node = new KDTreeNode(this.points);
 		tree.root = node;
 		this.subdivide(tree.root, new KDTreeXAxis());
+		this.report.buildTime = performance.now() - start;
 		return tree;
 	}
 }
