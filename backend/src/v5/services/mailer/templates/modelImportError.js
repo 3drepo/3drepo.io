@@ -35,7 +35,8 @@ const dataSchema = Yup.object({
 	modelType: Yup.string().oneOf(Object.values(modelTypes)),
 	user: Yup.string(),
 	revId: Yup.string(),
-	logExcerpt: Yup.string().default('No logs found.'),
+	logExcerpt: Yup.string().default('No logs found.').transform(
+		(val) => val.replaceAll('<', '&lt;').replaceAll('>', '&gt;').replace(/(\r\n|\n|\r)/gm, '<br>')),
 
 }).required(true);
 

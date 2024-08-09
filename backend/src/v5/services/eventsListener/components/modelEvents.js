@@ -93,7 +93,7 @@ const modelProcessingCompleted = async ({ teamspace, project, model, success, me
 					project: UUIDToString(project),
 					revId: UUIDToString(revId),
 					modelType,
-					logExcerpt: logPreview.replace(/(\r\n|\n|\r)/gm, '<br>'),
+					logExcerpt: logPreview,
 
 				},
 				zipPath ? [{ filename: 'logs.zip', path: zipPath }] : undefined,
