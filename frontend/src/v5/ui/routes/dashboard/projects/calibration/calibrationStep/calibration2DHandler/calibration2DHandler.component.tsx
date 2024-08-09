@@ -19,7 +19,7 @@ import { useContext, useEffect } from 'react';
 import { UnityUtil } from '@/globals/unity-util';
 import { CalibrationContext } from '../../calibrationContext';
 
-export const Calibration2DStep = () => {
+export const Calibration2DHandler = () => {
 	const { isCalibrating, step, setIsCalibrating2D } = useContext(CalibrationContext);
 
 	const canCalibrate2D = isCalibrating && step === 1;
