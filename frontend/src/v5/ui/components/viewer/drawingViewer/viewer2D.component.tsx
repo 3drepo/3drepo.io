@@ -38,12 +38,11 @@ import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibratio
 const DEFAULT_VIEWBOX = { scale: 1, x: 0, y: 0, width: 0, height: 0 };
 export const Viewer2D = () => {
 	const { close2D } = useContext(ViewerCanvasesContext);
-	const { isCalibrating, step, vector2D, setVector2D } = useContext(CalibrationContext);
+	const { isCalibrating, step, vector2D, setVector2D, isCalibrating2D, setIsCalibrating2D } = useContext(CalibrationContext);
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
 	const [viewBox, setViewBox] = useState<ViewBoxType>(DEFAULT_VIEWBOX);
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
-	const [isDrawingVector, setIsDrawingVector] = useState(true);
 
 	const imgRef = useRef<HTMLImageElement>();
 	const imgContainerRef = useRef();
@@ -69,7 +68,7 @@ export const Viewer2D = () => {
 		setZoomHandler(pz);
 	};
 
-	const onCalibrationClick = () => setIsDrawingVector(!isDrawingVector);
+	const onCalibrationClick = () => setIsCalibrating2D(!isCalibrating2D);
 
 	useEffect(() => {
 		if (!zoomHandler) return;
@@ -83,10 +82,6 @@ export const Viewer2D = () => {
 			setViewBox({ ...transform, ...zoomHandler.getOriginalSize() });
 		});
 	}, [zoomHandler]);
-
-	useEffect(() => {
-		setIsDrawingVector(canCalibrate2D);
-	}, [canCalibrate2D]);
 
 	return (
 		<ViewerContainer visible>
@@ -106,7 +101,7 @@ export const Viewer2D = () => {
 			<ImageContainer ref={imgContainerRef}>
 				<DrawingViewerImage ref={imgRef} onLoad={onImageLoad} />
 				<ViewerLayer2D
-					active={isDrawingVector}
+					active={isCalibrating2D}
 					viewBox={viewBox}
 					value={vector2D}
 					onChange={setVector2D}
@@ -119,7 +114,7 @@ export const Viewer2D = () => {
 							Icon={CalibrationIcon}
 							onClick={onCalibrationClick}
 							title={formatMessage({ id: 'drawingViewer.toolbar.calibrate', defaultMessage: 'Calibrate' })}
-							selected={isDrawingVector}
+							selected={isCalibrating2D}
 						/>
 					)}
 					<ToolbarButton

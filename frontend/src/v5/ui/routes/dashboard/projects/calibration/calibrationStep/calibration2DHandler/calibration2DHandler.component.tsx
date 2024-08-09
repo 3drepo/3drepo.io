@@ -16,17 +16,21 @@
  */
 
 import { useContext, useEffect } from 'react';
-import { BasicStep } from '../basicStep.component';
 import { UnityUtil } from '@/globals/unity-util';
-import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
+import { CalibrationContext } from '../../calibrationContext';
 
 export const Calibration2DStep = () => {
-	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
+	const { isCalibrating, step, setIsCalibrating2D } = useContext(CalibrationContext);
+
+	const canCalibrate2D = isCalibrating && step === 1;
 
 	useEffect(() => {
 		UnityUtil.setCalibrationToolMode('Vector');
-		setLeftPanelRatio(.5);
 	}, []);
 
-	return (<BasicStep text="2d calibration" />);
+	useEffect(() => {
+		setIsCalibrating2D(canCalibrate2D);
+	}, [canCalibrate2D]);
+
+	return null;
 };
