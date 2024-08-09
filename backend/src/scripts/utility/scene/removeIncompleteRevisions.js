@@ -31,6 +31,7 @@ const readline = require('readline');
 const { deleteMany, find } = require(`${v5Path}/handler/db`);
 const { removeFilesWithMeta } = require(`${v5Path}/services/filesManager`);
 const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
+const { modelTypes } = require(`${v5Path}/models/modelSettings.constants`);
 
 const entriesLimit = 500;
 
@@ -123,11 +124,27 @@ const removeRevisions = async (teamspace, model, revNodes) => {
 	await removeRecords(teamspace, `${model}.scene.ref`, { rev_id: { $in: revIds } });
 };
 
+const removeDrawingRevisions = async (teamspace, revNodes) => {
+	const revIds = revNodes.map(({ _id }) => _id);
+	const rFiles = revNodes.flatMap(({ rFile }) => rFile ?? []);
+
+	logger.logInfo(`\t\t-Drawings - removing ${revIds.length} zombie revisions`);
+	logger.logInfo('\t\t\tRemoving model files');
+	await removeFilesHelper(teamspace, `${modelTypes.DRAWING}s.history.ref`, { _id: { $in: rFiles } });
+};
+
 const cleanUpRevisions = async (teamspace, colName, filter) => {
+	const colSubstring = colName.slice(0, -('.history'.length));
+	const isDrawing = colSubstring === `${modelTypes.DRAWING}s`;
+
 	const badRevisions = await find(teamspace, colName, filter, { rFile: 1 });
+
 	if (badRevisions.length) {
-		const model = colName.slice(0, -('.history'.length));
-		await removeRevisions(teamspace, model, badRevisions);
+		if (isDrawing) {
+			await removeDrawingRevisions(teamspace, badRevisions);
+		} else {
+			await removeRevisions(teamspace, colSubstring, badRevisions);
+		}
 	}
 
 	await removeRecords(teamspace, colName, filter);

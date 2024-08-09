@@ -20,7 +20,7 @@ const FormData = require('form-data');
 const fs = require('fs');
 const path = require('path');
 
-const { src, modelFolder, imagesFolder } = require('../../../helper/path');
+const { src, modelFolder, imagesFolder, pdfModel, dwgModel, emptyPdf } = require('../../../helper/path');
 const config = require('../../../../../src/v5/utils/config');
 
 const MulterHelper = require(`${src}/middleware/dataConverter/multer`);
@@ -102,7 +102,30 @@ const testSingleFileUpload = () => {
 	});
 };
 
+const testEnsureFileIsValid = () => {
+	describe.each([
+		['request does not have a file', {}, false],
+		['request has a pdf file', { file: { originalname: pdfModel, buffer: fs.readFileSync(pdfModel) } }, true],
+		['request has a non pdf file', { file: { originalname: dwgModel, buffer: fs.readFileSync(dwgModel) } }, true],
+		['request has an empty pdf file', { file: { originalname: emptyPdf, buffer: fs.readFileSync(emptyPdf) } }, false],
+	])('Ensure file is valid', (desc, req, success, code = templates.invalidArguments.code) => {
+		test(`${success ? 'next() should be called' : `should fail with ${code}`} if ${desc}`, async () => {
+			const mockCB = jest.fn(() => { });
+			await MulterHelper.ensureFileIsValid(req, {}, mockCB);
+
+			if (success) {
+				expect(mockCB).toHaveBeenCalledTimes(1);
+			} else {
+				expect(mockCB).not.toHaveBeenCalled();
+				expect(Responder.respond).toHaveBeenCalledTimes(1);
+				expect(Responder.respond.mock.calls[0][2].code).toEqual(templates.unsupportedFileFormat.code);
+			}
+		});
+	});
+};
+
 describe('middleware/dataConverter/multer', () => {
 	testSingleImageUpload();
 	testSingleFileUpload();
+	testEnsureFileIsValid();
 });

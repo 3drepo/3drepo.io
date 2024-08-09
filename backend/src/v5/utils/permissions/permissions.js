@@ -155,6 +155,12 @@ Permissions.hasAdminAccessToDrawing = async (teamspace, project, drawingId, user
 	return drawing && adminAccess;
 };
 
+Permissions.hasWriteAccessToDrawing = modelPermCheck(
+	(perm) => MODEL_WRITE_ROLES.includes(perm.permission), modelTypes.DRAWING,
+);
+Permissions.hasCommenterAccessToDrawing = modelPermCheck(
+	(perm) => MODEL_COMMENT_ROLES.includes(perm.permission), modelTypes.DRAWING,
+);
 Permissions.hasReadAccessToDrawing = modelPermCheck(
 	(perm) => MODEL_READ_ROLES.includes(perm.permission), modelTypes.DRAWING,
 );
