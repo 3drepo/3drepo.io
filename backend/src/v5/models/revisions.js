@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { STATUSES, getInfoFromCode, modelTypes } = require('./modelSettings.constants');
+const { STATUSES, modelTypes } = require('./modelSettings.constants');
 const db = require('../handler/db');
 const { deleteIfUndefined } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
@@ -97,7 +97,8 @@ Revisions.addRevision = async (teamspace, project, model, modelType, data) => {
 Revisions.deleteModelRevisions = (teamspace, project, model, modelType) => db.deleteMany(
 	teamspace, collectionName(modelType, model), { project, model });
 
-const updateRevision = async (teamspace, model, modelType, revision, setUpdate = {}, unsetUpdate = {}) => {
+const updateRevision = async (teamspace, model, modelType, revision, setUpdate = {},
+	unsetUpdate = {}, projection = { _id: 1 }) => {
 	const update = {};
 
 	if (Object.keys(setUpdate).length) {
@@ -111,7 +112,7 @@ const updateRevision = async (teamspace, model, modelType, revision, setUpdate =
 	const res = await db.findOneAndUpdate(teamspace, collectionName(modelType, model),
 		{ $or: [{ _id: revision }, { tag: revision }] },
 		update,
-		{ projection: { _id: 1 } });
+		{ projection });
 
 	if (!res) {
 		throw templates.revisionNotFound;
@@ -120,8 +121,8 @@ const updateRevision = async (teamspace, model, modelType, revision, setUpdate =
 	return res;
 };
 
-Revisions.onProcessingCompleted = async (teamspace, project, model, revId, retVal, modelType) => {
-	const { success, message /* userErr */ } = getInfoFromCode(retVal);
+Revisions.onProcessingCompleted = async (teamspace, project, model, revId,
+	{ success, message, retVal, userErr }, modelType) => {
 	const set = {};
 	const unset = { incomplete: 1 };
 
@@ -132,13 +133,29 @@ Revisions.onProcessingCompleted = async (teamspace, project, model, revId, retVa
 		set.errorReason = { message, timestamp: new Date(), errorCode: retVal };
 	}
 
-	await updateRevision(teamspace, model, modelType, revId, set, unset);
+	const { author: user } = await updateRevision(teamspace, model, modelType, revId, set, unset, { author: 1 });
 
+	publish(events.MODEL_IMPORT_FINISHED,
+		{
+			teamspace,
+			project,
+			model,
+			success,
+			message,
+			userErr,
+			revId,
+			errCode: retVal,
+			user,
+			modelType,
+		});
+
+	// We're not updating model settings here, but this is a temporary hack as front end is looking
+	// for this event.
 	publish(events.MODEL_SETTINGS_UPDATE, {
 		teamspace,
 		project,
 		model,
-		data: { ...set, status: set.state || STATUSES.OK },
+		data: { ...set, status: set.status || STATUSES.OK },
 		modelType,
 	});
 

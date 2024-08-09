@@ -21,12 +21,16 @@ const { deleteIfUndefined, setNestedProperty } = require('../../../utils/helper/
 const { getModelType, isFederation: isFederationCheck, newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
 const { getRevisionByIdOrTag, getRevisionFormat, onProcessingCompleted, updateProcessingStatus } = require('../../../models/revisions');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
+const { templates: emailTemplates } = require('../../mailer/mailer.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { findProjectByModelId } = require('../../../models/projectSettings');
 const { generateFullSchema } = require('../../../schemas/tickets/templates');
+const { getInfoFromCode } = require('../../../models/modelSettings.constants');
+const { getLogArchive } = require('../../modelProcessing');
 const { getTemplateById } = require('../../../models/tickets.templates');
 const { logger } = require('../../../utils/logger');
 const { modelTypes } = require('../../../models/modelSettings.constants');
+const { sendSystemEmail } = require('../../mailer');
 const { serialiseComment } = require('../../../schemas/tickets/tickets.comments');
 const { serialiseGroup } = require('../../../schemas/tickets/tickets.groups');
 const { serialiseTicket } = require('../../../schemas/tickets');
@@ -54,15 +58,49 @@ const queueTasksCompleted = async ({ teamspace, model, value, corId, user, conta
 	try {
 		const { _id: projectId } = await findProjectByModelId(teamspace, model, { _id: 1 });
 		const modelType = await getModelType(teamspace, model);
+		const errorInfo = getInfoFromCode(value);
+		errorInfo.retVal = value;
 
 		if (modelType === modelTypes.DRAWING) {
 			// Revision status for drawings is tracked in the revision document - 3D will also move there eventually.
-			await onProcessingCompleted(teamspace, projectId, model, stringToUUID(corId), value, modelType);
+			await onProcessingCompleted(teamspace, projectId, model, stringToUUID(corId), errorInfo, modelType);
 		} else {
-			await newRevisionProcessed(teamspace, projectId, model, corId, value, user, containers);
+			await newRevisionProcessed(teamspace, projectId, model, corId, errorInfo, user, containers);
 		}
 	} catch (err) {
 		logger.logError(`Failed to process a completed revision for ${teamspace}.${model}: ${err.message}`);
+		if (err.stack) {
+			logger.logError(err.stack);
+		}
+	}
+};
+
+const modelProcessingCompleted = async ({ teamspace, project, model, success, message,
+	userErr, revId, errCode, user, modelType }) => {
+	try {
+		if (!success && !userErr) {
+			const { zipPath, logPreview: logExcerpt } = (await getLogArchive(UUIDToString(revId))) || {};
+
+			await sendSystemEmail(emailTemplates.MODEL_IMPORT_ERROR.name,
+				{
+					errInfo: {
+						code: errCode,
+						message,
+					},
+					teamspace,
+					model,
+					user,
+					project: UUIDToString(project),
+					revId: UUIDToString(revId),
+					modelType,
+					logExcerpt,
+
+				},
+				zipPath ? [{ filename: 'logs.zip', path: zipPath }] : undefined,
+			);
+		}
+	} catch (err) {
+		logger.logError('Failed to send email for model import failures');
 		if (err.stack) {
 			logger.logError(err.stack);
 		}
@@ -242,6 +280,7 @@ ModelEventsListener.init = () => {
 	subscribe(events.QUEUED_TASK_UPDATE, queueStatusUpdate);
 	subscribe(events.QUEUED_TASK_COMPLETED, queueTasksCompleted);
 
+	subscribe(events.MODEL_IMPORT_FINISHED, modelProcessingCompleted);
 	subscribe(events.MODEL_SETTINGS_UPDATE, modelSettingsUpdated);
 	subscribe(events.NEW_REVISION, revisionAdded);
 	subscribe(events.REVISION_UPDATED, revisionUpdated);

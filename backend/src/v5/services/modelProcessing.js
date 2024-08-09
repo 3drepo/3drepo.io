@@ -19,10 +19,13 @@ const { STATUSES, modelTypes } = require('../models/modelSettings.constants');
 const { UUIDToString, generateUUID, generateUUIDString } = require('../utils/helper/uuids');
 const { codeExists, templates } = require('../utils/responseCodes');
 const { copyFile, mkdir, rm, stat, writeFile } = require('fs/promises');
+const { createWriteStream, readdirSync } = require('fs');
 const { listenToQueue, queueMessage } = require('../handler/queue');
 const Path = require('path');
 const { addRevision } = require('../models/revisions');
+const archiver = require('archiver');
 const { events } = require('./eventsManager/eventsManager.constants');
+const { exec } = require('child_process');
 const { publish } = require('./eventsManager/eventsManager');
 const { cn_queue: queueConfig } = require('../utils/config');
 const processingLabel = require('../utils/logger').labels.modelProcessing;
@@ -183,6 +186,63 @@ ModelProcessing.queueFederationUpdate = async (teamspace, federation, info) => {
 
 		logger.logError('Failed to queue federate job', err?.message);
 		throw templates.queueInsertionFailed;
+	}
+};
+
+ModelProcessing.getLogArchive = async (corId) => {
+	const filename = 'logs.zip';
+
+	try {
+		const taskDir = Path.join(sharedDir, corId);
+		const zipPath = Path.join(taskDir, filename);
+		const output = createWriteStream(zipPath);
+		const archive = archiver('zip', { zlib: { level: 1 } });
+
+		const archiveReady = new Promise((resolve, reject) => {
+			output.on('close', resolve);
+			output.on('error', reject);
+			archive.on('error', reject);
+		});
+
+		archive.pipe(output);
+
+		const files = readdirSync(taskDir);
+		let logPreviewProm;
+		files.forEach((file) => {
+			if (file.endsWith('.log')) {
+				const logPath = Path.join(taskDir, file);
+				archive.file(logPath, { name: file });
+				if (!logPreviewProm) {
+					// we're trying to get the last n lines of a file here
+					// going native is the most efficient (and painless...)
+
+					logPreviewProm = new Promise((resolve) => {
+						const isWin = process.platform === 'win32';
+						if (isWin) {
+							// eslint-disable-next-line security/detect-child-process
+							exec(`Get-Content ${logPath} -Tail 20`,
+								{ shell: 'powershell.exe' }, (error, stdout) => {
+									resolve(error ? undefined : stdout);
+								});
+						} else {
+							// eslint-disable-next-line security/detect-child-process
+							exec(`tail -n20 ${logPath}`,
+								(error, stdout) => {
+									resolve(error ? undefined : stdout);
+								});
+						}
+					});
+				}
+			}
+		});
+
+		archive.finalize();
+		await archiveReady;
+
+		return { zipPath, logPreview: await logPreviewProm };
+	} catch (err) {
+		logger.logError(`Error while compressing log files for import error email: ${err.message}`);
+		return undefined;
 	}
 };
 
