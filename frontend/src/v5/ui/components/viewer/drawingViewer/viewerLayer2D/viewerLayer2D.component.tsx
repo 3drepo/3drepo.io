@@ -62,7 +62,7 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 		if (offsetEnd || (!offsetEnd && !offsetStart)) {
 			setOffsetEnd(null);
 			setOffsetStart(mousePosition);
-		} else {
+		} else if (!isEqual(offsetStart, mousePosition)) {
 			setOffsetEnd(mousePosition);
 			onChange?.([offsetStart, mousePosition]);
 		}
