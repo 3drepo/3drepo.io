@@ -23,7 +23,6 @@ import { FormattedMessage } from 'react-intl';
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CalibrationState } from '@/v5/store/drawings/drawings.types';
 import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 import { useContext } from 'react';
 import { CalibrationContext } from '../calibrationContext';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
@@ -37,13 +36,14 @@ const STEPS = [
 export const CalibrationHeader = () => {
 	const history = useHistory();
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
-	const { step, setStep, isStepValid, vector3D, drawingId, origin } = useContext(CalibrationContext);
+	const { step, setStep, isStepValid, vector3D, vector2D, drawingId, origin } = useContext(CalibrationContext);
 	const selectedModel = FederationsHooksSelectors.selectFederationById(containerOrFederation)
 		|| ContainersHooksSelectors.selectContainerById(containerOrFederation);
 	const isLastStep = step === 2;
 
 	const getIsStepValid = () => {
 		if (step === 0) return !!(vector3D[0] && vector3D[1]);
+		if (step === 1) return !!(vector2D[0] && vector2D[1]);
 		return isStepValid;
 	};
 
@@ -57,7 +57,7 @@ export const CalibrationHeader = () => {
 				units: selectedModel.unit,
 				horizontal: {
 					model: vector3D,
-					drawing: EMPTY_VECTOR,
+					drawing: vector2D,
 				},
 			},
 		});
