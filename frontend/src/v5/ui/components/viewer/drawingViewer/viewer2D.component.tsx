@@ -109,14 +109,13 @@ export const Viewer2D = () => {
 			</ImageContainer>
 			<ToolbarContainer>
 				<MainToolbar>
-					{canCalibrate2D && (
-						<ToolbarButton
-							Icon={CalibrationIcon}
-							onClick={onCalibrationClick}
-							title={formatMessage({ id: 'drawingViewer.toolbar.calibrate', defaultMessage: 'Calibrate' })}
-							selected={isCalibrating2D}
-						/>
-					)}
+					<ToolbarButton
+						Icon={CalibrationIcon}
+						onClick={onCalibrationClick}
+						title={formatMessage({ id: 'drawingViewer.toolbar.calibrate', defaultMessage: 'Calibrate' })}
+						selected={isCalibrating2D}
+						hidden={!canCalibrate2D}
+					/>
 					<ToolbarButton
 						Icon={ZoomOutIcon}
 						onClick={onClickZoomOut}
