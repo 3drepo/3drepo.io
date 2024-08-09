@@ -17,62 +17,67 @@
 
 import { aspectRatio } from '@/v4/helpers/aspectRatio';
 import { Events, PanZoom, panzoom } from './panzoom';
-import { ZoomableImage } from '../drawingViewerImage/drawingViewerImage.component';
+import { clamp } from 'lodash';
+import { ZoomableImage } from '../zoomableImage.types';
 
 export type PanZoomHandler = PanZoom & { zoomIn : () => void, zoomOut: () => void };
 
 export const centredPanZoom = (target: ZoomableImage, paddingW: number, paddingH: number) => {
-
-	const originalSize = target.getNaturalSize();
-	target.setSize(originalSize);
-
 	const targetContainer = target.getEventsEmitter();
-
+	const naturalSize = target.getNaturalSize();
+	
 	const options = {
 		maxZoom: 100,
 		minZoom: 0.01,
 	};
 	
 	const pz = panzoom(target, options);
-
-	let size = { scaledWidth: 0, scaledHeight:0 };
-
+	
+	
+	let prevRect = targetContainer.getBoundingClientRect();
+	
 	const scaleTarget = () => {
 		const parentRect = targetContainer.getBoundingClientRect();
-		size = aspectRatio(originalSize.width, originalSize.height, parentRect.width - paddingW * 2, parentRect.height - paddingH * 2);
+		const fittedSize = aspectRatio(naturalSize.width, naturalSize.height, parentRect.width - paddingW * 2, parentRect.height - paddingH * 2);
 
-		pz.setMinZoom(Math.min(size.scaledWidth / originalSize.width, size.scaledHeight / originalSize.height ));
+		let scale = Math.min(fittedSize.scaledWidth / naturalSize.width, fittedSize.scaledHeight / naturalSize.height );
+		pz.setMinZoom(scale);
+	
+		scale =  Math.max(scale, pz.getTransform().scale);
+
+		const diffWidth = prevRect.width  - parentRect.width;
+
+		pz.setTransform(pz.getTransform().x - (diffWidth / 2), pz.getTransform().y, scale);
+		prevRect = parentRect;
 	};
 
-	scaleTarget();
 	const resizeObserver = new ResizeObserver(scaleTarget);
 	resizeObserver.observe(targetContainer);
-	// pz.zoom(pz.getMinZoom(), false);
 
-	// pz.on(Events.transform, () => {
-	// 	const parentRect = targetContainer.getBoundingClientRect();
-	// 	const actualPaddingW = (parentRect.width - size.scaledWidth) / 2 ;
-	// 	const actualPaddingH = (parentRect.height - size.scaledHeight ) / 2 ;
-	// 	const targetRect = target.getBoundingClientRect();
-		
-	// 	const paddingScale =  targetRect.width / size.scaledWidth;
-	// 	const maxX =  actualPaddingW * paddingScale;
-	// 	const minX =  parentRect.width - targetRect.width - actualPaddingW * paddingScale;
-		
-	// 	const maxY =  actualPaddingH * paddingScale;
-	// 	const minY =  parentRect.height - targetRect.height - actualPaddingH * paddingScale;
-		
-	// 	const t = pz.getTransform();
-	// 	if (t.x > maxX || t.x < minX || t.y > maxY || t.y < minY) {
-	// 		const x = Math.max(Math.min(t.x, maxX), minX);
-	// 		const y = Math.max(Math.min(t.y, maxY), minY);
-	// 		pz.moveTo(x, y);
-	// 	}
-	// });
+	pz.on(Events.transform, () => {
+		const parentRect = targetContainer.getBoundingClientRect();
+		const t = pz.getTransform();
+	
+		const x = clamp(t.x, paddingW - naturalSize.width * t.scale, parentRect.width - paddingW);
+		const y = clamp(t.y, paddingH - naturalSize.height * t.scale, parentRect.height - paddingH);
+		pz.moveTo(x, y);
+	});
+
+	const centerTarget = () => {
+		const parentRect = targetContainer.getBoundingClientRect();
+		const fittedSize = aspectRatio(naturalSize.width, naturalSize.height, parentRect.width - paddingW * 2, parentRect.height - paddingH * 2);
+		let scale = Math.min(fittedSize.scaledWidth / naturalSize.width, fittedSize.scaledHeight / naturalSize.height );
+		const x = (parentRect.width - fittedSize.scaledWidth) / 2;
+		const y = (parentRect.height - fittedSize.scaledHeight) / 2;
+
+		pz.setTransform(x, y, scale);
+	};
+
+	centerTarget();
 
 	const zoomIn = () => pz.zoom(1.5);
 
 	const zoomOut = () => pz.zoom(1 / 1.5);
 
-	return { ...pz, zoomIn, zoomOut } ;
+	return { ...pz, zoomIn, zoomOut, centerTarget } ;
 };

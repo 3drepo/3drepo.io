@@ -14,21 +14,22 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
 
-export const SvgContainer = styled.div`
-	svg {
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
-		border: 1px solid ${({ theme }) => theme.palette.base.light};
-	}
 
-	width:100%;
-	height:100%;
-	overflow: hidden;
-`;
+type Transform = {
+	x: number;
+	y: number;
+	scale: number;
+};
 
-export const ImageContainer = styled.div`
-	user-select: none;
-	height: 100%;
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-`;
+export type Size = {
+	width: number;
+	height: number;
+};
+
+export type ZoomableImage = {
+	setTransform: (transform: Transform) => void;
+	getEventsEmitter: () => HTMLElement;
+	getBoundingClientRect: () => DOMRect;
+	getNaturalSize: () => Size;
+};

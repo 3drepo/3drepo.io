@@ -18,23 +18,26 @@
 import { formatMessage } from '@/v5/services/intl';
 import { ToolbarButton } from '@/v5/ui/routes/viewer/toolbar/buttons/toolbarButton.component';
 import { ToolbarContainer, MainToolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.styles';
-import { useContext, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import ZoomOutIcon from '@assets/icons/viewer/zoom_out.svg';
 import ZoomInIcon from '@assets/icons/viewer/zoom_in.svg';
-
 import { PanZoomHandler, centredPanZoom } from './panzoom/centredPanZoom';
 import { ViewerContainer } from '@/v4/routes/viewer3D/viewer3D.styles';
 import { ImageContainer } from './viewer2D.styles';
 import { Events } from './panzoom/panzoom';
-import { DrawingViewerImage, ZoomableImage } from './drawingViewerImage/drawingViewerImage.component';
+import { DrawingViewerImage } from './drawingViewerImage/drawingViewerImage.component';
 import { CloseButton } from '@controls/button/closeButton/closeButton.component';
 import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 import { DrawingViewerService } from './drawingViewer.service';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
 import { SVGImage } from './svgImage/svgImage.component';
+import { CentredContainer } from '@controls/centredContainer/centredContainer.component';
+import { Loader } from '@/v4/routes/components/loader/loader.component';
+import { isFirefox } from '@/v5/helpers/browser.helper';
+import { ZoomableImage } from './zoomableImage.types';
 import { SVGSnap } from './snapping/svg/svgSnap';
-import { CanvasSnap } from './snapping/canvas/canvasSnap';
+import { Vector2 } from './snapping/svg/types';
 
 export const Viewer2D = () => {
 	const [drawingId] = useSearchParam('drawingId');
@@ -44,6 +47,8 @@ export const Viewer2D = () => {
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
+
 
 	const imgRef = useRef<ZoomableImage>();
 	const imgContainerRef = useRef();
@@ -59,6 +64,8 @@ export const Viewer2D = () => {
 	};
 
 	const onImageLoad = () => {
+		setIsLoading(false);
+
 		if (zoomHandler) {
 			zoomHandler.dispose();
 		}
@@ -107,8 +114,26 @@ export const Viewer2D = () => {
 				y: ev.pageY - currentTargetRect.top - content.y - window.pageYOffset,
 			 };
 
+			// Get the snap coordinates and radius in image space
+			const imagePosition = imgRef.current.getImagePosition(coord);
+			const p = new Vector2(imagePosition.x, imagePosition.y);
+
+			// Get the radius in SVG units by getting another point in image space,
+			// offset by the pixel radius, and taking the distance beteen them
+
+			const snapRadius = 10;
+
+			const imagePosition1 = imgRef.current.getImagePosition({
+				x: coord.x + snapRadius,
+				y: coord.y + snapRadius,
+			});
+			const p1 = new Vector2(imagePosition1.x, imagePosition1.y);
+
+			const radius = Vector2.subtract(p, p1).norm;
+
+
 			// Then invoke the snap
-			const r = snapHandler.snap(coord, imgRef.current);
+			const r = snapHandler.snap(p, radius);
 
 			if (r != null) {
 				const r2 = imgRef.current.getClientPosition(r);
@@ -119,12 +144,24 @@ export const Viewer2D = () => {
 		});
 	};
 
+	useEffect(() => {
+		setIsLoading(true);
+	}, [drawingId]);
+
+	const showSVGImage = !isFirefox() && src.toLowerCase().endsWith('.svg');
+
 	return (
 		<ViewerContainer visible>
 			<CloseButton variant="secondary" onClick={close2D} />
 			<ImageContainer ref={imgContainerRef}>
-				<SVGImage ref={imgRef} src={src} onLoad={onImageLoad} />
-				{/* <DrawingViewerImage ref={imgRef} src={src} onLoad={onImageLoad} /> */}
+				{
+					isLoading &&
+					<CentredContainer>
+						<Loader />
+					</CentredContainer>
+				}
+				{showSVGImage && <SVGImage ref={imgRef} src={src} onLoad={onImageLoad} />}
+				{!showSVGImage && <DrawingViewerImage ref={imgRef} src={src} onLoad={onImageLoad} />}
 			</ImageContainer>
 			<ToolbarContainer>
 				<MainToolbar>

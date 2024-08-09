@@ -18,7 +18,8 @@
 import { animate } from './animate';
 import EventEmitter from 'eventemitter3';
 import BezierEasing from 'bezier-easing';
-import { ZoomableImage } from '../drawingViewerImage/drawingViewerImage.component';
+import { clamp } from 'lodash';
+import { ZoomableImage } from '../zoomableImage.types';
 
 const inertiaFunction = BezierEasing(0, 0.33, 0.66, 1);
 const zoomEasing = BezierEasing(0, 1.02, 0.65, 1);
@@ -32,6 +33,7 @@ const millisecondsPerSecond = 1000;
 const acc = 9.8;
 const mass = 10;
 const zoomDuration = 300;
+const maxSpeed = 230;
 
 /* eslint-disable @typescript-eslint/no-use-before-define */
 export const panzoom = (target: ZoomableImage, options) => {
@@ -41,26 +43,12 @@ export const panzoom = (target: ZoomableImage, options) => {
 	const container = target.getEventsEmitter();
 	const emitter = new EventEmitter();
 
-	// let prevContainerRect = container.getBoundingClientRect();
-
 	let animation = null;
 
 	const speed = { x:0, y: 0 };
 
 	let minZoom = options.minZoom || 0.5;
 	let maxZoom = options.maxZoom || 10;
-
-	// const keepCenter = () => {
-	// 	const rect =  container.getBoundingClientRect();
-	// 	const diff = { diffX: rect.width - prevContainerRect.width, diffY: rect.height - prevContainerRect.height };
-
-	// 	prevContainerRect = rect;
-	// 	moveTo(transform.x + (diff.diffX / 2), transform.y + (diff.diffY / 2) );
-	// 	emitter.emit(Events.transform);
-	// };
-
-	// const resizeObserver = new ResizeObserver(keepCenter);
-	// resizeObserver.observe(container);
 
 	const stopInertia = () => {
 		speed.x = 0;
@@ -70,17 +58,22 @@ export const panzoom = (target: ZoomableImage, options) => {
 	};
 
 	const applyTransform = () => {
-		// console.log('applytransform:' + JSON.stringify(transform));
 		target.setTransform(transform);
+		emitter.emit(Events.transform);
 	};
 
-	const moveTo = (x: number, y: number) => {
-		if (x === transform.x && transform.y === y ) return;
+	const setTransform = (x: number, y: number, scale: number) => {
+		if (x === transform.x && transform.y === y && transform.scale === scale) return;
 
 		transform.x = x;
 		transform.y = y;
-		
+		transform.scale = scale;
+
 		applyTransform();
+	};
+
+	const moveTo = (x: number, y: number) => {
+		setTransform(x, y, transform.scale);
 	};
 
 	const zoomTo = (x: number, y: number, newScale: number) => {
@@ -92,9 +85,7 @@ export const panzoom = (target: ZoomableImage, options) => {
 		const newPos = { x: transform.x + relativeX * (1 - scaleChange), y: transform.y + relativeY * ( 1 - scaleChange) };
 		transform.scale = scale;
 		moveTo(newPos.x, newPos.y);
-		emitter.emit(Events.transform);
 	};
-
 	
 	const smoothZoom = (x:number, y:number, scaleFactor: number) => {
 		stopInertia();
@@ -135,11 +126,9 @@ export const panzoom = (target: ZoomableImage, options) => {
 	};
 
 	const onMouseMove = (ev: MouseEvent) => {
-		speed.x = ev.movementX * 10;
-		speed.y = ev.movementY * 10;
-		
+		speed.x = clamp(ev.movementX * 10, -maxSpeed, maxSpeed);
+		speed.y = clamp(ev.movementY * 10, -maxSpeed, maxSpeed);
 		moveTo(transform.x + ev.movementX, transform.y + ev.movementY);
-		emitter.emit(Events.transform);
 	};
 
 	const onMouseDown = () => {
@@ -171,7 +160,6 @@ export const panzoom = (target: ZoomableImage, options) => {
 			animation = animate((currentTime) => {
 				const progress = inertiaFunction(currentTime / duration);
 				moveTo(initialPos.x + diffPos.x * progress, initialPos.y + diffPos.y * progress);
-				emitter.emit(Events.transform);
 				return currentTime >= duration;
 			});
 	
@@ -205,6 +193,7 @@ export const panzoom = (target: ZoomableImage, options) => {
 
 	return { 
 		getTransform, 
+		setTransform, 
 		dispose, 
 		on: (event, fn) => {
 			emitter.on(event, fn);

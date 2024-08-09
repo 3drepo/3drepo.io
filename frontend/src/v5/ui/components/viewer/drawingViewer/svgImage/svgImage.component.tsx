@@ -16,7 +16,8 @@
  */
 
 import { useRef, useEffect, forwardRef } from 'react';
-import { ZoomableImage, DrawingViewerImageProps } from '../drawingViewerImage/drawingViewerImage.component';
+import { DrawingViewerImageProps } from '../drawingViewerImage/drawingViewerImage.component';
+import { ZoomableImage } from '../zoomableImage.types';
 
 type Transform = { x:number, y:number, scale:number };
 type Vector2 = { x:number, y:number };
@@ -56,8 +57,13 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 	let D : Transform;
 	let projection: Transform;
 	let tframe = 0;
-	let drawing = false;
+	let drawing = false; // Same flag should act as a mutex for both drawing and resizing redraws
+	let resizeEvent = 0;
+	let resizeFrameEvent = 0;
+	let resizeFrameCount = 0;
 	let onLoad: any;
+
+	const resizeFramesThreshold = 5;
 
 	const img = new Image();
 
@@ -171,37 +177,6 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		};
 	};
 
-	// Do some checks, these should be put in unit tests going forward...
-	// --
-
-	let a: Transform = { x: 1, y: 1, scale: 2 };
-	let b: Transform = { x: 5, y: 5, scale: 3 };
-	const v1: Vector2 = { x: 1, y: 1 };
-
-	const A = compose(invert(a), a);
-	const B = compose(a, invert(a));
-
-	// both A & B should be identity, because a transform composed with its inverse is identity
-
-	const c1 = multiply(a, v1);
-	const c2 = multiply(b, c1);
-	const c3 = multiply(compose(a, b), v1);
-
-	// c2 should equal c3, because v1 multiplied by a, then b, should be the same as it multiplied by the composition of a and b
-
-	const c4 = multiply(invert(b), c3);
-
-	// and c4 should equal c1, because c3 is a composition of a and b, so removing b should return it to v1 multiplied by a
-
-	const c5 = multiply(b, v1);
-	const c6 = difference(a, b);
-	const c7 = multiply(compose(a, c6), v1);
-
-	// c7 should equal c5, because difference gets the transform between a and b, so multipling c1 with the composition of a and this, is the same
-	// as multiplying it with b.
-
-	// --
-
 	/**
 	* Gets a transform in a form that can be applied as a style attribute
 	*/
@@ -235,10 +210,12 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		canvas.setAttribute('style', `transform: ${getCSStransform(dt)}; transform-origin: top left; user-select:none`);
 	};
 
+	type DrawImageHandler = (projection: Transform) => void;
+
 	/**
 	 * Rasterises the current image into the canvas with the given projection
 	 */
-	const drawImage = (t: Transform, ctx: ImageBitmapRenderingContext, resolve: any) => {
+	const drawImage = (t: Transform, ctx: ImageBitmapRenderingContext, resolve: DrawImageHandler) => {
 
 		// This function uses drawImage to project img into canvas, by working
 		// out the appropriate source rect to draw into the full canvas.
@@ -248,10 +225,12 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		// These drawing methods take integers only, so round here explicitly
 		// so we can be sure of the rounding behaviour.
 
-		const sx = Math.round(-t.x / t.scale);
-		const sy = Math.round(-t.y / t.scale);
-		const sw = Math.round(ctx.canvas.width / t.scale);
-		const sh = Math.round(ctx.canvas.height / t.scale);
+		let scale = t.scale;
+
+		const sx = Math.round(-t.x / scale);
+		const sy = Math.round(-t.y / scale);
+		const sw = Math.round(ctx.canvas.width / scale);
+		const sh = Math.round(ctx.canvas.height / scale);
 
 		// Render asynchronously using createImageBitmap (does not work in Firefox)
 
@@ -274,14 +253,14 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 			// remains stable.
 
 			const actualScale = ctx.canvas.width / sw;
-			projection = {
+			const p = {
 				x: -sx * actualScale,
 				y: -sy * actualScale,
 				scale: actualScale,
 			};
 
 			if (resolve) {
-				resolve();
+				resolve(p);
 			}
 		});
 
@@ -306,7 +285,8 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		// animation frames.
 		drawing = true;
 
-		drawImage(D, context, () => {
+		drawImage(D, context, (p) => {
+			projection = p;
 			updateCanvasTransform();
 
 			// Check if we've updated the transform since the last render.
@@ -324,13 +304,22 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 
 	let currentCanvasRequest = 0;
 
-	const createCanvas = () => {
+	const createCanvas = (completed) => {
 		// Get the new canvas size based on the container size
 		const viewSize = getViewSize();
 		const canvasSize = getCanvasSize();
 
 		// Compute a new origin for the user transforms to be applied on top of
-		const intialProjection = calculateProjection(viewSize, canvasSize);
+		const newOrigin = calculateProjection(viewSize, canvasSize);
+
+		// Update D with the existing transform, as is done in setTransform
+		const newD = {
+			x: newOrigin.x + transform.x,
+			y: newOrigin.y + transform.y,
+			scale: transform.scale,
+		};
+
+		console.log(`resizing for ${JSON.stringify(viewSize)}`);
 
 		// Create the canvas and context
 		const newCanvas = document.createElement('canvas');
@@ -343,15 +332,10 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		const request = ++currentCanvasRequest;
 
 		// Draw the image into the canvas
-		drawImage(intialProjection, newCtx, () => {
+		drawImage(newD, newCtx, (np) => {
 			if (request != currentCanvasRequest) {
 				return; // Some other callback will handle this...
 			}
-
-			// Replace the canvas and update the transforms for the outer context
-			origin = intialProjection;
-			projection = intialProjection;
-			D = intialProjection;
 
 			// Replace the canvas for the component and DOM
 			if (canvas) {
@@ -361,9 +345,16 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 			container.appendChild(canvas);
 			context = newCtx;
 
+			// Replace the canvas and update the transforms for the outer context
+			origin = newOrigin;
+			D = newD;
+			projection = np;
+
 			// Once projection, D & the canvas itself are replaced, we can use
 			// this regular call to update the DOM transform
 			updateCanvasTransform();
+
+			completed?.();
 		});
 	};
 
@@ -375,16 +366,14 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 	let hasLoaded = false;
 
 	img.src = src;
-	img.onload = () => {
+	img.onload = (ev) => {
 
 		hasLoaded = true;
 
 		// Create a new canvas for the newly loaded image
-		createCanvas();
-
-		if (onLoad) {
-			onLoad();
-		}
+		createCanvas(() => {
+			onLoad?.(ev);
+		});
 	};
 
 	const addEventListener = (method : string, callback) => {
@@ -427,7 +416,29 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		tframe++;
 
 		if (!drawing) {
+			drawing = true;
 			requestAnimationFrame(onAnimationFrame);
+		}
+	};
+
+	const onResizeFrame = async () => {
+		if (resizeFrameEvent != resizeEvent) {
+			resizeFrameEvent = resizeEvent;
+			resizeFrameCount = 0;
+		} else {
+			resizeFrameCount++;
+		}
+
+		if (resizeFrameCount > resizeFramesThreshold) {
+			createCanvas(() => {
+				if (resizeFrameEvent != resizeEvent) {
+					requestAnimationFrame(onResizeFrame);
+				} else {
+					drawing = false;
+				}
+			});
+		} else {
+			requestAnimationFrame(onResizeFrame);
 		}
 	};
 
@@ -444,7 +455,13 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 
 		// After the container is resized, we need to rebuild the canvas, which
 		// will involve redrawing the image.
-		//createCanvas();
+
+		resizeEvent++;
+
+		if (!drawing) {
+			drawing = true;
+			requestAnimationFrame(onResizeFrame);
+		}
 	};
 
 	const resizeObserver = new ResizeObserver(onResize);
