@@ -82,7 +82,13 @@ export const getRelativeTime = (from: Date | number) => {
 	return getFormattedRelativeTime(daysDifference / 365, TIME_UNIT.year);
 };
 
-export const formatShortDateTime = (date) => formatDate(date, { // DD MM YYYY hh:mm
+export const formatSimpleDate = (date) => formatDate(date, { // DD/MM/YYYY
+	day: 'numeric',
+	month: 'numeric',
+	year: 'numeric',
+});
+
+export const formatDateTime = (date) => formatDate(date, { // DD/MM/YYYY hh:mm
 	hour: 'numeric',
 	minute: 'numeric',
 	day: 'numeric',
@@ -91,11 +97,12 @@ export const formatShortDateTime = (date) => formatDate(date, { // DD MM YYYY hh
 	hour12: false,
 }).replaceAll(',', '');
 
-export const formatLongDateTime = (date) => formatDate(date, { // DD Month YYYY at hh:mm
+export const formatFilenameDate = (date) => formatDate(date, { // DD_MM_YYYY_HH_mm_ss
 	hour: 'numeric',
 	minute: 'numeric',
+	second: 'numeric',
 	day: 'numeric',
-	month: 'long',
+	month: 'numeric',
 	year: 'numeric',
 	hour12: false,
-});
+}).replaceAll(/\W+/g, '_');

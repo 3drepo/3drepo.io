@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { formatLongDateTime, formatShortDateTime, getRelativeTime } from '@/v5/helpers/intl.helper';
+import { formatDateTime, getRelativeTime } from '@/v5/helpers/intl.helper';
 import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { FormattedMessage } from 'react-intl';
@@ -49,11 +49,7 @@ export const CreationInfo = ({
 	);
 	const CreationDate = () => (
 		<NoShrinkValue>
-			<HoverPopover anchor={(props) => <span {...props}>{formatShortDateTime(createdAt)}</span>}>
-				<PopoverContainer>
-					{formatLongDateTime(createdAt)}
-				</PopoverContainer>
-			</HoverPopover>
+			{formatDateTime(createdAt)}
 			{hasUpdateInfo && <FormattedMessage id="creationInfo.fullStop" defaultMessage="." />}
 		</NoShrinkValue>
 	);
@@ -61,7 +57,7 @@ export const CreationInfo = ({
 		<NoShrinkValue>
 			<HoverPopover anchor={(props) => <span {...props}>{getRelativeTime(updatedAt)}</span>}>
 				<PopoverContainer>
-					{formatLongDateTime(updatedAt)}
+					{formatDateTime(updatedAt)}
 				</PopoverContainer>
 			</HoverPopover>
 		</NoShrinkValue>
