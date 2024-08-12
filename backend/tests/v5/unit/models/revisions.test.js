@@ -23,9 +23,9 @@ const { events } = require(`${src}/services/eventsManager/eventsManager.constant
 const Revisions = require(`${src}/models/revisions`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { generateRandomString, generateRandomObject, generateRandomNumber } = require('../../helper/services');
+const { determineTestGroup, generateRandomString, generateRandomObject, generateRandomNumber } = require('../../helper/services');
 
-const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+const { modelTypes, getInfoFromCode, STATUSES } = require(`${src}/models/modelSettings.constants`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 
 const excludeVoids = { void: { $ne: true } };
@@ -290,6 +290,110 @@ const testUpdateProcessingStatus = () => {
 	});
 };
 
+const testOnProcessingCompleted = () => {
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const model = generateRandomString();
+	const revId = generateRandomString();
+	const modelType = modelTypes.DRAWING;
+	const author = generateRandomString();
+
+	describe('On processing completed', () => {
+		test('Should update revision and publish 3 events upon success', async () => {
+			const retInfo = getInfoFromCode(0);
+			retInfo.retVal = 0;
+
+			const { success, message, userErr, retVal: errCode } = retInfo;
+
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValueOnce({ _id: revId, author });
+
+			await Revisions.onProcessingCompleted(teamspace, project, model, revId, retInfo, modelType);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${modelType}s.history`,
+				{ $or: [{ _id: revId }, { tag: revId }] }, { $unset: { status: 1, incomplete: 1 } },
+				{ projection: { author: 1 } },
+			);
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(3);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED, {
+				teamspace,
+				project,
+				model,
+				success,
+				message,
+				userErr,
+				revId,
+				errCode,
+				user: author,
+				modelType,
+			});
+
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
+				{ teamspace, project, model, modelType, data: { status: STATUSES.OK } });
+
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_REVISION,
+				{ teamspace, project, model, modelType, revision: revId });
+		});
+
+		test('Should update revision and publish 2 events upon failure', async () => {
+			const retInfo = getInfoFromCode(1);
+			retInfo.retVal = 1;
+
+			const { success, message, userErr, retVal: errCode } = retInfo;
+
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValueOnce({ _id: revId, author });
+
+			await Revisions.onProcessingCompleted(teamspace, project, model, revId, retInfo, modelType);
+
+			const setObj = { status: STATUSES.FAILED,
+				errorReason: {
+					message, timestamp: expect.anything(), errorCode: errCode } };
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${modelType}s.history`,
+				{ $or: [{ _id: revId }, { tag: revId }] }, { $unset: { incomplete: 1 }, $set: setObj },
+				{ projection: { author: 1 } },
+			);
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(2);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED, {
+				teamspace,
+				project,
+				model,
+				success,
+				message,
+				userErr,
+				revId,
+				errCode,
+				user: author,
+				modelType,
+			});
+
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
+				{ teamspace, project, model, modelType, data: setObj });
+		});
+
+		test('Should not trigger any event if the revision is not found', async () => {
+			const retInfo = getInfoFromCode(0);
+			retInfo.retVal = 0;
+
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValueOnce();
+
+			await expect(Revisions.onProcessingCompleted(teamspace, project, model,
+				revId, retInfo, modelType)).rejects.toEqual(templates.revisionNotFound);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${modelType}s.history`,
+				{ $or: [{ _id: revId }, { tag: revId }] }, { $unset: { status: 1, incomplete: 1 } },
+				{ projection: { author: 1 } },
+			);
+
+			expect(EventsManager.publish).not.toHaveBeenCalled();
+		});
+	});
+};
+
 const testUpdateRevisionStatus = () => {
 	const teamspace = generateRandomString();
 	const project = generateRandomString();
@@ -402,7 +506,7 @@ const testGetRevisionFormat = () => {
 	});
 };
 
-describe('models/revisions', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetRevisionCount();
 	testGetLatestRevision();
 	testGetRevisions();
@@ -414,4 +518,5 @@ describe('models/revisions', () => {
 	testGetRevisionByIdOrTag();
 	testGetRevisionFormat();
 	testUpdateProcessingStatus();
+	testOnProcessingCompleted();
 });
