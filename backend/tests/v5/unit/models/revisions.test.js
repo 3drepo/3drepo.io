@@ -248,51 +248,44 @@ const testDeleteModelRevisions = () => {
 	});
 };
 
-const testUpdateRevision = () => {
-	const teamspace = generateRandomString();
-	const model = generateRandomString();
-	const revision = { _id: 1, author: 'someUser', timestamp: new Date(), void: true };
-	const setUpdate = generateRandomObject();
-	const unsetUpdate = generateRandomObject();
-
-	const checkResults = (fn, modelType, setData, unsetData) => {
-		expect(fn).toHaveBeenCalledTimes(1);
-		expect(fn).toHaveBeenCalledWith(teamspace, modelType === modelTypes.DRAWING ? `${modelType}s.history` : `${model}.history`,
-			{ $or: [{ _id: revision._id }, { tag: revision._id }] },
-			{ ...(setData ? { $set: setData } : {}), ...(unsetData ? { $unset: unsetData } : {}) },
-			{ projection: { _id: 1 } },
-		);
-	};
-
-	describe('UpdateRevision', () => {
-		test('Should update a revision and set data', async () => {
+const testUpdateProcessingStatus = () => {
+	describe('Update processing status', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		const revisionId = generateRandomString();
+		const status = generateRandomString();
+		test('Should update the status and trigger a model settings update', async () => {
 			const modelType = modelTypes.CONTAINER;
-			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementationOnce(() => ({ _id: revision._id }));
-			await Revisions.updateRevision(teamspace, model, modelType, revision._id, setUpdate);
-			checkResults(fn, modelType, setUpdate);
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValueOnce({ _id: revisionId });
+
+			await Revisions.updateProcessingStatus(teamspace, project, model, modelType, revisionId, status);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`,
+				{ $or: [{ _id: revisionId }, { tag: revisionId }] }, { $set: { status } },
+				{ projection: { _id: 1 } },
+			);
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
+				{ teamspace, project, model, modelType, data: { status } });
 		});
 
-		test('Should update a revision and unset data', async () => {
-			const modelType = modelTypes.CONTAINER;
-			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementationOnce(() => ({ _id: revision._id }));
-			await Revisions.updateRevision(teamspace, model, modelType, revision._id, undefined, unsetUpdate);
-			checkResults(fn, modelType, undefined, unsetUpdate);
-		});
-
-		test('Should update a revision (drawing)', async () => {
+		test('Should not trigger a status update if the revision is not found', async () => {
 			const modelType = modelTypes.DRAWING;
-			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementationOnce(() => ({ _id: revision._id }));
-			await Revisions.updateRevision(teamspace, model, modelType,
-				revision._id, setUpdate, unsetUpdate);
-			checkResults(fn, modelType, setUpdate, unsetUpdate);
-		});
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValueOnce();
 
-		test('Should throw REVISION_NOT_FOUND if it cannot find the revision in the revisions table', async () => {
-			const modelType = modelTypes.CONTAINER;
-			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementationOnce(() => undefined);
-			await expect(Revisions.updateRevision(teamspace, model,
-				modelType, revision._id, setUpdate, unsetUpdate)).rejects.toEqual(templates.revisionNotFound);
-			checkResults(fn, modelType, setUpdate, unsetUpdate);
+			await expect(Revisions.updateProcessingStatus(teamspace, project, model, modelType, revisionId,
+				status)).rejects.toEqual(templates.revisionNotFound);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${modelType}s.history`,
+				{ $or: [{ _id: revisionId }, { tag: revisionId }] }, { $set: { status } },
+				{ projection: { _id: 1 } },
+			);
+
+			expect(EventsManager.publish).not.toHaveBeenCalled();
 		});
 	});
 };
@@ -415,10 +408,10 @@ describe('models/revisions', () => {
 	testGetRevisions();
 	testAddRevision();
 	testDeleteModelRevisions();
-	testUpdateRevision();
 	testUpdateRevisionStatus();
 	testIsTagUnique();
 	testIsRevAndStatusCodeUnique();
 	testGetRevisionByIdOrTag();
 	testGetRevisionFormat();
+	testUpdateProcessingStatus();
 });
