@@ -913,6 +913,29 @@ const testIsFederation = () => {
 	});
 };
 
+const testGetModelType = () => {
+	describe.each([
+		['federate is set to true', { federate: true }, modelTypes.FEDERATION],
+		['modelType is set (drawing)', { modelType: modelTypes.DRAWING }, modelTypes.DRAWING],
+		['modelType is set (container)', { modelType: modelTypes.CONTAINER }, modelTypes.CONTAINER],
+		['modelType is set (federation)', { modelType: modelTypes.FEDERATION }, modelTypes.FEDERATION],
+		['unspecified', { modelType: modelTypes.CONTAINER }, modelTypes.CONTAINER],
+	])(
+		'Get model type', (desc, expectedData, expectedRes) => {
+			test(`Should return ${expectedRes} when ${desc}`, async () => {
+				DBHandler.findOne.mockResolvedValueOnce(expectedData);
+				const ts = generateRandomString();
+				const model = generateRandomString();
+				await expect(Model.getModelType(ts, model)).resolves.toEqual(expectedRes);
+
+				expect(DBHandler.findOne).toHaveBeenCalledTimes(1);
+				expect(DBHandler.findOne).toHaveBeenCalledWith(ts, SETTINGS_COL,
+					{ _id: model }, { _id: 0, federate: 1, modelType: 1 });
+			});
+		},
+	);
+};
+
 describe('models/modelSettings', () => {
 	testGetModelById();
 	testGetContainerById();
@@ -929,4 +952,5 @@ describe('models/modelSettings', () => {
 	testUpdateModelSettings();
 	testRemoveUserFromAllModels();
 	testIsFederation();
+	testGetModelType();
 });
