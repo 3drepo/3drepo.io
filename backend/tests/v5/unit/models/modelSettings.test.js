@@ -19,16 +19,15 @@ const { times } = require('lodash');
 const { src } = require('../../helper/path');
 const { generateRandomString, generateUUIDString } = require('../../helper/services');
 
+const { getInfoFromCode, modelTypes } = require(`${src}/models/modelSettings.constants`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const Model = require(`${src}/models/modelSettings`);
-const { getInfoFromCode } = require(`${src}/models/modelSettings.constants`);
 jest.mock('../../../../src/v5/handler/db');
 const DBHandler = require(`${src}/handler/db`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
 const SETTINGS_COL = 'settings';
 
@@ -499,15 +498,17 @@ const testNewRevisionProcessed = () => {
 		const model = generateRandomString();
 		const user = generateRandomString();
 		const corId = generateRandomString();
-		const { success, message, userErr } = getInfoFromCode(retVal);
 
 		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED},
 			a ${events.MODEL_SETTINGS_UPDATE} and a ${events.NEW_REVISION} event`,
 		async () => {
 			DBHandler.updateOne.mockResolvedValueOnce({ matchedCount: 1 });
 			EventsManager.publish.mockClear();
+
+			const resInfo = { ...getInfoFromCode(retVal), retVal };
+			const { success, userErr, message } = resInfo;
 			await expect(Model.newRevisionProcessed(
-				teamspace, project, model, corId, retVal, user,
+				teamspace, project, model, corId, resInfo, user,
 			)).resolves.toBe(undefined);
 
 			expect(DBHandler.updateOne.mock.calls.length).toBe(1);
@@ -529,6 +530,7 @@ const testNewRevisionProcessed = () => {
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
 				{
 					teamspace,
+					project,
 					model,
 					corId,
 					userErr,
@@ -536,6 +538,7 @@ const testNewRevisionProcessed = () => {
 					success,
 					errCode: retVal,
 					user,
+					modelType: modelTypes.CONTAINER,
 				});
 
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
@@ -568,13 +571,15 @@ const testNewRevisionProcessed = () => {
 		const user = generateRandomString();
 		const corId = generateRandomString();
 		const containers = [generateRandomString(), generateRandomString(), generateRandomString()];
-		const { success, message, userErr } = getInfoFromCode(retVal);
+		const modelType = modelTypes.FEDERATION;
 		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED} event and a ${events.MODEL_SETTINGS_UPDATE} event`,
 			async () => {
+				const resInfo = { ...getInfoFromCode(retVal), retVal };
+				const { success, userErr, message } = resInfo;
 				DBHandler.updateOne.mockResolvedValueOnce({ matchedCount: 1 });
 				EventsManager.publish.mockClear();
 				await expect(Model.newRevisionProcessed(
-					teamspace, project, model, corId, retVal, user,
+					teamspace, project, model, corId, resInfo, user,
 					containers.map((containerId) => ({ project: containerId })),
 				)).resolves.toBe(undefined);
 
@@ -590,6 +595,7 @@ const testNewRevisionProcessed = () => {
 				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
 					{
 						teamspace,
+						project,
 						model,
 						corId,
 						userErr,
@@ -597,6 +603,7 @@ const testNewRevisionProcessed = () => {
 						success,
 						errCode: retVal,
 						user,
+						modelType,
 					});
 
 				const expectedData = { ...action.$set };
@@ -611,7 +618,7 @@ const testNewRevisionProcessed = () => {
 						project,
 						model,
 						data: { ...expectedData, status: expectedData.status || 'ok' },
-						modelType: modelTypes.FEDERATION,
+						modelType,
 					});
 
 				expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_REVISION,
@@ -620,19 +627,21 @@ const testNewRevisionProcessed = () => {
 						project,
 						model,
 						revision: corId,
-						modelType: modelTypes.FEDERATION,
+						modelType,
 					});
 			});
 
 		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED} event and a ${events.MODEL_SETTINGS_UPDATE} event (with groups)`,
 			async () => {
+				const resInfo = { ...getInfoFromCode(retVal), retVal };
+				const { success, userErr, message } = resInfo;
 				const containerData = containers.map((containerId) => ({
 					project: containerId, group: generateRandomString() }));
 
 				DBHandler.updateOne.mockResolvedValueOnce({ matchedCount: 1 });
 				EventsManager.publish.mockClear();
 				await expect(Model.newRevisionProcessed(
-					teamspace, project, model, corId, retVal, user, containerData,
+					teamspace, project, model, corId, resInfo, user, containerData,
 				)).resolves.toBe(undefined);
 
 				expect(DBHandler.updateOne.mock.calls.length).toBe(1);
@@ -647,6 +656,7 @@ const testNewRevisionProcessed = () => {
 				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
 					{
 						teamspace,
+						project,
 						model,
 						corId,
 						userErr,
@@ -654,6 +664,7 @@ const testNewRevisionProcessed = () => {
 						success,
 						errCode: retVal,
 						user,
+						modelType,
 					});
 
 				const expectedData = { ...action.$set };
@@ -668,7 +679,7 @@ const testNewRevisionProcessed = () => {
 						project,
 						model,
 						data: { ...expectedData, status: expectedData.status || 'ok' },
-						modelType: modelTypes.FEDERATION,
+						modelType,
 					});
 
 				expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_REVISION,
@@ -677,7 +688,7 @@ const testNewRevisionProcessed = () => {
 						project,
 						model,
 						revision: corId,
-						modelType: modelTypes.FEDERATION,
+						modelType,
 					});
 			});
 	});
@@ -693,8 +704,9 @@ const testNewRevisionProcessed = () => {
 			const user = generateRandomString();
 			const retVal = 0;
 			const corId = generateRandomString();
+			const resInfo = { ...getInfoFromCode(retVal), retVal };
 			await expect(Model.newRevisionProcessed(
-				teamspace, project, model, corId, retVal, user,
+				teamspace, project, model, corId, resInfo, user,
 			)).resolves.toBe(undefined);
 
 			expect(DBHandler.updateOne.mock.calls.length).toBe(1);
