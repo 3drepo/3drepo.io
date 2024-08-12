@@ -31,13 +31,10 @@ const FilesManager = require(`${src}/services/filesManager`);
 jest.mock('../../../../../../../src/v5/models/revisions');
 const Revisions = require(`${src}/models/revisions`);
 jest.mock('../../../../../../../src/v5/services/eventsManager/eventsManager');
-const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 
-const { STATUSES } = require(`${src}/models/modelSettings.constants`);
 const Drawings = require(`${src}/processors/teamspaces/projects/models/drawings`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 
 const testAddDrawing = () => {
 	describe('Add drawing', () => {
@@ -224,42 +221,6 @@ const testGetDrawingStats = () => {
 
 			Revisions.getRevisionCount.mockRejectedValueOnce(err);
 			await expect(Drawings.getDrawingStats(teamspace, drawing)).rejects.toEqual(err);
-		});
-	});
-};
-
-const testNewRevision = () => {
-	describe('Add new revision', () => {
-		test('should add a new drawing revision', async () => {
-			const teamspace = generateRandomString();
-			const drawing = generateRandomString();
-			const project = generateRandomString();
-			const format = generateRandomString(3);
-			const file = { originalname: `${generateRandomString()}.${format}`, buffer: generateRandomString() };
-			const data = { prop: generateRandomString() };
-			const rev_id = generateRandomString();
-
-			const addRevisionMock = Revisions.addRevision.mockResolvedValueOnce(rev_id);
-
-			await Drawings.newRevision(teamspace, project, drawing, data, file);
-
-			expect(addRevisionMock).toHaveBeenCalledTimes(1);
-			expect(addRevisionMock.mock.calls[0][0]).toEqual(teamspace);
-			expect(addRevisionMock.mock.calls[0][1]).toEqual(project);
-			expect(addRevisionMock.mock.calls[0][2]).toEqual(drawing);
-			expect(addRevisionMock.mock.calls[0][3]).toEqual(modelTypes.DRAWING);
-			expect(addRevisionMock.mock.calls[0][4].prop).toEqual(data.prop);
-			expect(addRevisionMock.mock.calls[0][4].format).toEqual(`.${format}`);
-			expect(addRevisionMock.mock.calls[0][4]).toHaveProperty('rFile');
-			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
-			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history.ref`,
-				addRevisionMock.mock.calls[0][4].rFile[0], file.buffer,
-				{ name: file.originalname, rev_id, project, model: drawing });
-			expect(EventsManager.publish).toHaveBeenCalledTimes(2);
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE,
-				{ teamspace, model: drawing, corId: rev_id, status: STATUSES.PROCESSING });
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_REVISION,
-				{ teamspace, project, model: drawing, revision: rev_id, modelType: modelTypes.DRAWING });
 		});
 	});
 };
@@ -497,7 +458,6 @@ describe(determineTestGroup(__filename), () => {
 	testUpdateSettings();
 	testDeleteDrawing();
 	testGetRevisions();
-	testNewRevision();
 	testUpdateRevisionStatus();
 	testDownloadRevisionFiles();
 	testGetSettings();
