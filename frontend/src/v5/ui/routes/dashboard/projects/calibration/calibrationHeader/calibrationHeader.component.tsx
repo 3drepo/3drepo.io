@@ -26,6 +26,7 @@ import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/servic
 import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 import { useContext } from 'react';
 import { CalibrationContext } from '../calibrationContext';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 
 const STEPS = [
 	formatMessage({ defaultMessage: '3D Alignment', id: 'calibration.step.3dCalibration' }),
@@ -35,7 +36,7 @@ const STEPS = [
 
 export const CalibrationHeader = () => {
 	const history = useHistory();
-	const { teamspace, project, containerOrFederation } = useParams();
+	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const { step, setStep, isStepValid, vector3D, drawingId, origin } = useContext(CalibrationContext);
 	const selectedModel = FederationsHooksSelectors.selectFederationById(containerOrFederation)
 		|| ContainersHooksSelectors.selectContainerById(containerOrFederation);
