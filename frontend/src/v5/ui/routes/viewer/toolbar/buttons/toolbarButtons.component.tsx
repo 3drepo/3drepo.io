@@ -111,15 +111,15 @@ export const VerticalCalibrationButton = () => {
 	);
 };
 
-export const VerticalRange = () => {
-	const { verticalPlanes, isCalibratingPlanes } = useContext(CalibrationContext);
+export const VerticalRange = ({ hidden }) => {
+	const { verticalPlanes } = useContext(CalibrationContext);
 	const unit = ModelHooksSelectors.selectUnit();
 	const isMetric = unit !== 'ft';
 	const conversionFactor = isMetric ? UNITS_CONVERSION_FACTORS_TO_METRES[unit] : 1;
 	const rangeValue = ((verticalPlanes?.[1] - verticalPlanes?.[0]) / conversionFactor).toFixed(2);
 	const unitLabel = CONTAINER_UNITS.find(({ value }) => value === (isMetric ? 'm' : 'ft')).abbreviation;
 	return (
-		<VerticalRangeContainer hidden={!isCalibratingPlanes} disabled>
+		<VerticalRangeContainer hidden={hidden}>
 			<VerticalRangeValue>{rangeValue}</VerticalRangeValue>{unitLabel}
 		</VerticalRangeContainer>
 	);

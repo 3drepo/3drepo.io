@@ -42,7 +42,7 @@ export const ClearIcon = styled(PlusIcon)`
 	transform: rotate(45deg);
 `;
 
-export const LozengeButton = styled.div<{ variant?: 'filled' | 'outlined', selected?: boolean; disabled?: boolean }>`
+export const LozengeButton = styled.div<{ variant?: 'filled' | 'outlined', selected?: boolean; }>`
 	height: 30px;
 	padding: 11px;
 	border-radius: 19px;

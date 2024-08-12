@@ -31,27 +31,29 @@ type ISection = {
 
 export const PlanesCalibrationSection = ({ hidden }: ISection) => {
 	const { selectedPlane, setSelectedPlane, isAlignPlaneActive, setIsAlignPlaneActive } = useContext(CalibrationContext);
-	if (hidden) return null;
 	return (
 		<Section hidden={hidden}>
 			<LozengeButton
 				onClick={() => setSelectedPlane(PlaneType.LOWER) }
 				selected={selectedPlane === PlaneType.LOWER}
+				hidden={hidden}
 			>
 				<FormattedMessage id="viewer.toolbar.icon.lowerPlane" defaultMessage="Bottom Plane" />
 			</LozengeButton>
 			<LozengeButton
 				onClick={() => setSelectedPlane(PlaneType.UPPER) }
 				selected={selectedPlane === PlaneType.UPPER}
+				hidden={hidden}
 			>
 				<FormattedMessage id="viewer.toolbar.icon.upperPlane" defaultMessage="Top Plane" />
 			</LozengeButton>
-			<VerticalRange />
+			<VerticalRange hidden={hidden} />
 			<ToolbarButton
 				Icon={AlignIcon}
 				onClick={() => setIsAlignPlaneActive(!isAlignPlaneActive)}
 				selected={isAlignPlaneActive}
 				title={formatMessage({ id: 'viewer.toolbar.icon.alignFloorToSurface', defaultMessage: 'Align Floor To Surface' })}
+				hidden={hidden}
 			/>
 		</Section>
 	);
