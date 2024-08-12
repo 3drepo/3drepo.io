@@ -87,7 +87,7 @@ export const VerticalSpatialBoundariesHandler = () => {
 		if (isAlignPlaneActive && planesAreSet) {
 			const onClickPlaneToPoint = ({ position }) => {
 				const zCoord = position[1];
-				const newValues = [...planesRef.current].map((oldValue, idx) => {
+				const newValues = planesRef.current.map((oldValue, idx) => {
 					if ((selectedPlane === PlaneType.LOWER && idx === 0) ||
 						(selectedPlane === PlaneType.UPPER && idx === 1)) return zCoord;
 					return oldValue;
@@ -103,7 +103,7 @@ export const VerticalSpatialBoundariesHandler = () => {
 				Viewer.off(VIEWER_EVENTS.PICK_POINT, onClickPlaneToPoint);
 			};
 		}
-	}, [isAlignPlaneActive, selectedPlane, planesAreSet, planesRef]);
+	}, [isAlignPlaneActive, selectedPlane, planesAreSet]);
 
 	useEffect(() => {
 		if (selectedPlane === PlaneType.LOWER) {

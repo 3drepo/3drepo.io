@@ -13626,7 +13626,7 @@ textarea-caret@3.0.2:
   resolved "https://registry.yarnpkg.com/textarea-caret/-/textarea-caret-3.0.2.tgz#f360c48699aa1abf718680a43a31a850665c2caf"
   integrity sha512-gRzeti2YS4did7UJnPQ47wrjD+vp+CJIe9zbsu0bJ987d8QVLvLNG9757rqiQTIy4hGIeFauTTJt5Xkn51UkXg==
 
-three@^0.167.1:
+three@0.167.1:
   version "0.167.1"
   resolved "https://registry.yarnpkg.com/three/-/three-0.167.1.tgz#3fe4ba2b0a03fd662afe4977a56803d955b61689"
   integrity sha512-gYTLJA/UQip6J/tJvl91YYqlZF47+D/kxiWrbTon35ZHlXEN0VOo+Qke2walF1/x92v55H6enomymg4Dak52kw==
