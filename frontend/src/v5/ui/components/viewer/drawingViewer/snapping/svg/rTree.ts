@@ -53,14 +53,20 @@ export class RTreeNode {
 	}
 }
 
-class ClosestPointTraversalContext {
+class TraversalContext {
 	position: Vector2;
 
 	radius: number;
 
-	closestPoint: Vector2;
+	closestEdge: Vector2;
 
-	closestPointDistance: number;
+	closestEdgeDistance: number;
+
+	closestNode: Vector2;
+
+	closestNodeDistance2: number;
+
+	nodes: RTreeNode[];
 
 	numNodesTraversed: number;
 
@@ -69,42 +75,92 @@ class ClosestPointTraversalContext {
 	constructor(position: Vector2, radius: number) {
 		this.position = position;
 		this.radius = radius;
-		this.closestPoint = null;
-		this.closestPointDistance = Number.MAX_VALUE;
+		this.closestEdge = null;
+		this.closestEdgeDistance = Number.MAX_VALUE;
+		this.closestNode = null;
+		this.closestNodeDistance2 = Number.MAX_VALUE;
 		this.numNodesTraversed = 0;
 		this.numLineTests = 0;
+		this.nodes = [];
 	}
 }
 
 export class IntersectionTestResults {
 	closestEdge: Vector2;
 
+	closestNode: Vector2;
+
 	queryTime: number;
+
+	numNodes: number;
 
 	constructor() {
 		this.closestEdge = null;
+		this.closestNode = null;
 		this.queryTime = 0;
 	}
+}
+
+class RTreeQueries {
+	// Given a context with a set of overlapping nodes, find the closest edge
+	// on any primitive
+	static findClosestEdge(ctx: TraversalContext) {
+		for (const node of ctx.nodes) {
+
+			// Implement more primitive checks here
+
+			const p = closestPointOnLine(node.line.start.x, node.line.start.y, node.line.end.x, node.line.end.y, ctx.position.x, ctx.position.y);
+			const d = Vector2.subtract(ctx.position, p).norm;
+			if (d < ctx.closestEdgeDistance) {
+				ctx.closestEdgeDistance = d;
+				ctx.closestEdge = p;
+			}
+			ctx.numLineTests++;
+		}
+	}
+
+	static findClosestNode(ctx: TraversalContext) {
+		for (const node of ctx.nodes) {
+			this.testClosestPoint(node.line.start, ctx);
+			this.testClosestPoint(node.line.end, ctx);
+		}
+	}
+
+	static testClosestPoint(p: { x: number, y: number }, ctx: TraversalContext) {
+		const a = ctx.position;
+		const b = p;
+		const d2 = (b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y);
+		if (d2 < ctx.closestNodeDistance2) {
+			ctx.closestNodeDistance2 = d2;
+			ctx.closestNode = new Vector2(p.x, p.y);
+		}
+	}
+
 }
 
 export class RTree {
 
 	root: RTreeNode;
 
-	closestPointQuery(p: Vector2, r: number) {
+	query(p: Vector2, r: number) {
 		const start = performance.now();
 
-		const ctx = new ClosestPointTraversalContext(p, r);
+		const ctx = new TraversalContext(p, r);
 		this.traverseNode(this.root, ctx);
 
+		RTreeQueries.findClosestEdge(ctx);
+		RTreeQueries.findClosestNode(ctx);
+
 		const results = new IntersectionTestResults();
-		results.closestEdge = ctx.closestPoint;
+		results.closestEdge = ctx.closestEdge;
+		results.closestNode = ctx.closestNode;
 		results.queryTime = (performance.now() - start);
+		results.numNodes = ctx.nodes.length;
 
 		return results;
 	}
 
-	intersects(node: RTreeNode, ctx: ClosestPointTraversalContext) {
+	intersects(node: RTreeNode, ctx: TraversalContext) {
 		// The intersection test can be done with a simple point in bounds test
 		// with a Minkowski sum
 
@@ -122,17 +178,11 @@ export class RTree {
 	}
 
 	// Peform tests against each primitive
-	traverseLeaf(node: RTreeNode, ctx: ClosestPointTraversalContext) {
-		const p = closestPointOnLine(node.line.start.x, node.line.start.y, node.line.end.x, node.line.end.y, ctx.position.x, ctx.position.y);
-		const d = Vector2.subtract(ctx.position, p).norm;
-		if (d < ctx.closestPointDistance) {
-			ctx.closestPointDistance = d;
-			ctx.closestPoint = p;
-		}
-		ctx.numLineTests++;
+	traverseLeaf(node: RTreeNode, ctx: TraversalContext) {
+		ctx.nodes.push(node); // Add to the list of overlapping nodes for the geometry tests
 	}
 
-	traverseBranch(node: RTreeNode, ctx: ClosestPointTraversalContext) {
+	traverseBranch(node: RTreeNode, ctx: TraversalContext) {
 		for (const child of node.children) {
 			if (this.intersects(child, ctx)) {
 				this.traverseNode(child, ctx);
@@ -140,7 +190,7 @@ export class RTree {
 		}
 	}
 
-	traverseNode(node: RTreeNode, ctx: ClosestPointTraversalContext) {
+	traverseNode(node: RTreeNode, ctx: TraversalContext) {
 		if (node.leafNode()) {
 			this.traverseLeaf(node, ctx);
 		} else {

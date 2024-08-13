@@ -139,8 +139,14 @@ class SelfIntersectionTraversalContext {
 class IntersectionBuilderReport {
 	buildTime: number;
 
+	maxLevelPairs: number;
+
+	numPairs: number;
+
 	constructor() {
 		this.buildTime = 0;
+		this.maxLevelPairs = 0;
+		this.numPairs = 0;
 	}
 }
 
@@ -168,43 +174,42 @@ class IntersectionBuilder {
 	// context.
 	getIntersectingNodes(nodes: RTreeNode[], ctx: SelfIntersectionTraversalContext) {
 
-		const nodesToCompare = [];
+		const intersectingPairs = [];
+
+		// Find pairs of nodes at this level that may be intersecting
 
 		for (let i = 0; i < nodes.length; i++) {
 			for (let j = i + 1; j < nodes.length; j++) {
 				const a = nodes[i];
 				const b = nodes[j];
 				if (this.intersects(a, b)) {
-					if (a.leafNode() && b.leafNode()) { // We are done with these branches; add the leaf-pair to the context and return
-						ctx.pairs.push({ a, b });
-					} else {
-						this.addNode(nodesToCompare, a);
-						this.addNode(nodesToCompare, b);
-					}
+					intersectingPairs.push({ a, b });
 				}
 			}
 		}
 
-		if (nodesToCompare.length > 0) {
-			this.getIntersectingNodes(nodesToCompare, ctx);
+		this.report.maxLevelPairs = Math.max(this.report.maxLevelPairs, intersectingPairs.length);
+
+		// For each pair, test the children. If both are leaf nodes, then we
+		// are done with the branch and can return, otherwise we need to
+		// descend another level.
+
+		for (const { a, b } of intersectingPairs) {
+			if (a.leafNode() && b.leafNode()) {
+				//ctx.pairs.push({ a, b });
+				this.report.numPairs++;
+			} else if (a.leafNode() && !b.leafNode()) {
+				this.getIntersectingNodes([a, ...b.children], ctx);
+			} else if (!a.leafNode() && b.leafNode()) {
+				this.getIntersectingNodes([b, ...a.children], ctx);
+			} else { // Neither are leaf nodes, so compare all children with eachother
+				this.getIntersectingNodes([...a.children, ...b.children], ctx);
+			}
 		}
 	}
 
 	intersects(a: RTreeNode, b: RTreeNode): boolean {
 		return (a.xmin <= b.xmax && a.xmax >= b.xmin) && (a.ymin <= b.ymax && a.ymax >= b.ymin);
-	}
-
-	// If a is a leaf node, it gets added back again so that it will be compared
-	// with b's children. Otherwise, its children are added so that they will
-	// be compared with eachother and those of b.
-	addNode(nodes: RTreeNode[], a: RTreeNode) {
-		if (a.leafNode()) {
-			nodes.push(a);
-		} else {
-			for (const child of a.children) {
-				nodes.push(child);
-			}
-		}
 	}
 }
 
@@ -434,20 +439,22 @@ export class SVGSnap {
 		});
 		this.rtree = rbuilder.build();
 
+		/*
 		const nbuilder = new KDTreeBuilder({
 			points: collector.points,
 			n: 10,
 		});
 		this.ntree = nbuilder.build();
+		*/
 
-		const intersections = new IntersectionBuilder(this.rtree);
-		intersections.build();
+		//const intersections = new IntersectionBuilder(this.rtree);
+		//intersections.build();
 
 		//this.debugHelper.renderRTree(this.rtree);
 		//this.debugHelper.renderKDTree(this.ntree);
 
 		console.log(rbuilder.report);
-		console.log(nbuilder.report);
+	//	console.log(nbuilder.report);
 	}
 
 	snap(position: Vector2, radius: number): SnapResults {
@@ -459,16 +466,19 @@ export class SVGSnap {
 
 		const results = new SnapResults();
 
-		const edgeResults = this.rtree.closestPointQuery(position, radius);
-		if (edgeResults.closestEdge != null) {
-			results.closestEdge = edgeResults.closestEdge;
-			this.debugHelper.renderLine(position, results.closestEdge);
-		}
+		const queryResults = this.rtree.query(position, radius);
 
+		results.closestEdge = queryResults.closestEdge;
+		results.closestNode = queryResults.closestNode;
+
+		console.log(queryResults);
+
+		/*
 		const nodeResults = this.ntree.query(position, radius);
 		if (nodeResults.closestPoint != null) {
 			results.closestNode = new Vector2(nodeResults.closestPoint.x, nodeResults.closestPoint.y);
 		}
+		*/
 
 		return results;
 	}

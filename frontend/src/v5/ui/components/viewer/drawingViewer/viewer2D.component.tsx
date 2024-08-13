@@ -102,9 +102,16 @@ export const Viewer2D = () => {
 			};
 		};
 
-		imgRef.current.getEventsEmitter().addEventListener('mousemove', (ev)=>{
+		imgRef.current.getEventsEmitter().addEventListener('mousemove', (ev) => {
 
-			// Make the event coordinates relative to the client rect of the
+			// This callback serves as an example of how to implement snapping.
+
+			// Snapping to SVGs is handled by an instance of SVGSnap. A new instance
+			// should be created for each SVG (i.e. do not load a new svg into an
+			// existing instance). The SVGSnap takes the DOM of an SVG.
+
+			// SVGSnap operates in the local coordinate system of the SVG primitives.
+			// First, make the event coordinates relative to the client rect of the
 			// event emitter regardless of any child transforms and margins.
 
 			const currentTargetRect = ev.currentTarget.getBoundingClientRect();
@@ -114,25 +121,27 @@ export const Viewer2D = () => {
 				y: ev.pageY - currentTargetRect.top - content.y - window.pageYOffset,
 			 };
 
-			// Get the snap coordinates and radius in image space
+			// Then get the coordinates and radius in SVG image space using the
+			// SvgImage Component's getImagePosition method.
+
 			const imagePosition = imgRef.current.getImagePosition(coord);
 			const p = new Vector2(imagePosition.x, imagePosition.y);
 
-			// Get the radius in SVG units by getting another point in image space,
-			// offset by the pixel radius, and taking the distance beteen them
+			// (We get the radius in SVG units simply by getting another point in
+			// image space, offset by the pixel radius, and taking the distance
+			// beteen them)
 
 			const snapRadius = 10;
-
 			const imagePosition1 = imgRef.current.getImagePosition({
 				x: coord.x + snapRadius,
 				y: coord.y + snapRadius,
 			});
 			const p1 = new Vector2(imagePosition1.x, imagePosition1.y);
-
 			const radius = Vector2.subtract(p, p1).norm;
 
+			// With the query point and radius in SVG coordinates, we can now
+			// invoke the snap.
 
-			// Then invoke the snap
 			const results = snapHandler.snap(p, radius);
 			const r = results.closestNode;
 
