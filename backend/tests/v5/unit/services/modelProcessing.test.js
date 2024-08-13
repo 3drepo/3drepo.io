@@ -16,7 +16,7 @@
  */
 
 const { src, modelFolder, objModel } = require('../../helper/path');
-const { generateUUIDString, generateRandomString } = require('../../helper/services');
+const { generateUUIDString, generateRandomString, generateRandomObject, generateUUID } = require('../../helper/services');
 
 const { times } = require('lodash');
 
@@ -25,12 +25,21 @@ const Queue = require(`${src}/handler/queue`);
 
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+
+jest.mock('../../../../src/v5/services/filesManager');
+const FilesManager = require(`${src}/services/filesManager`);
+
+jest.mock('../../../../src/v5/models/revisions');
+const Revisions = require(`${src}/models/revisions`);
+const { modelTypes, STATUSES } = require(`${src}/models/modelSettings.constants`);
+
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const config = require(`${src}/utils/config`);
 const fs = require('fs/promises');
 const path = require('path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
 const ModelProcessing = require(`${src}/services/modelProcessing`);
 
@@ -223,8 +232,107 @@ const testCallbackQueueConsumer = () => {
 	});
 };
 
+const testProcessDrawingUpload = () => {
+	describe('Process drawing upload', () => {
+		test('Should store the file and put a message on the queue', async () => {
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const model = generateRandomString();
+			const revInfo = generateRandomObject();
+			const file = { buffer: generateRandomString(), originalname: `${generateRandomString()}.dwg` };
+
+			const revId = generateUUID();
+
+			Revisions.addRevision.mockResolvedValueOnce(revId);
+
+			await ModelProcessing.processDrawingUpload(teamspace, project, model, revInfo, file);
+
+			expect(Revisions.addRevision).toHaveBeenCalledTimes(1);
+			expect(Revisions.addRevision).toHaveBeenCalledWith(teamspace, project, model, modelTypes.DRAWING,
+				expect.objectContaining(revInfo));
+
+			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`, expect.anything(), file.buffer, {
+				name: file.originalname, rev_id: revId, project, model,
+			});
+
+			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
+			expect(Queue.queueMessage).toHaveBeenCalledWith(config.cn_queue.drawing_queue,
+				UUIDToString(revId), `processDrawing $SHARED_SPACE/${UUIDToString(revId)}/importParams.json`);
+
+			expect(publishFn).toBeCalledTimes(1);
+			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_UPDATE, {
+				teamspace, model, corId: UUIDToString(revId), status: STATUSES.QUEUED,
+			});
+		});
+
+		test('Should fail gracefully if we failed to put the task onto the queue', async () => {
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const model = generateRandomString();
+			const revInfo = generateRandomObject();
+			const file = { buffer: generateRandomString(), originalname: `${generateRandomString()}.dwg` };
+
+			const revId = generateUUID();
+
+			Revisions.addRevision.mockResolvedValueOnce(revId);
+			Queue.queueMessage.mockRejectedValueOnce(new Error());
+
+			await ModelProcessing.processDrawingUpload(teamspace, project, model, revInfo, file);
+
+			expect(Revisions.addRevision).toHaveBeenCalledTimes(1);
+			expect(Revisions.addRevision).toHaveBeenCalledWith(teamspace, project, model, modelTypes.DRAWING,
+				expect.objectContaining(revInfo));
+
+			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`, expect.anything(), file.buffer, {
+				name: file.originalname, rev_id: revId, project, model,
+			});
+
+			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
+			expect(Queue.queueMessage).toHaveBeenCalledWith(config.cn_queue.drawing_queue,
+				UUIDToString(revId), `processDrawing $SHARED_SPACE/${UUIDToString(revId)}/importParams.json`);
+
+			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_COMPLETED, {
+				teamspace, model, corId: UUIDToString(revId), value: 4,
+			});
+		});
+	});
+};
+
+const testGetLogArchive = () => {
+	describe('Get log archive', () => {
+		test('Should return undefined if the path is not found', async () => {
+			await expect(ModelProcessing.getLogArchive(generateUUIDString())).resolves.toBeUndefined();
+		});
+		test('Should return with zip file if path is found but no files found', async () => {
+			const corId = generateUUIDString();
+			const taskPath = `${config.cn_queue.shared_storage}/${corId}`;
+			await fs.mkdir(taskPath);
+			await expect(ModelProcessing.getLogArchive(corId)).resolves.toEqual({
+				zipPath: path.join(taskPath, 'logs.zip'),
+				logPreview: undefined,
+			});
+		});
+
+		test('Should return with zip file and log preview if logfiles are found', async () => {
+			const corId = generateUUIDString();
+			const log = generateRandomString(100);
+			const taskPath = `${config.cn_queue.shared_storage}/${corId}`;
+			await fs.mkdir(taskPath);
+			await fs.writeFile(`${taskPath}/${generateRandomString()}.log`,
+				log);
+			await expect(ModelProcessing.getLogArchive(corId)).resolves.toEqual({
+				zipPath: path.join(taskPath, 'logs.zip'),
+				logPreview: expect.stringContaining(log),
+			});
+		});
+	});
+};
 describe('services/modelProcessing', () => {
 	testQueueModelUpload();
 	testQueueFederationUpdate();
 	testCallbackQueueConsumer();
+	testProcessDrawingUpload();
+	testGetLogArchive();
 });

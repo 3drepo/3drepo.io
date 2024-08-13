@@ -88,8 +88,9 @@ const queueDrawingUpload = async (teamspace, project, model, revId, data) => {
 		await queueMessage(drawingq, revId, msg);
 
 		publish(events.QUEUED_TASK_UPDATE, { teamspace, model, corId: revId, status: STATUSES.QUEUED });
-	} catch {
-		console.log('failed');
+	} catch (err) {
+		logger.logError('Failed to queue drawing task', err.message);
+		publish(events.QUEUED_TASK_COMPLETED, { teamspace, model, corId: revId, value: 4 });
 	}
 };
 
@@ -101,7 +102,7 @@ ModelProcessing.processDrawingUpload = async (teamspace, project, model, revInfo
 		{ ...revInfo, format, rFile: [fileId], incomplete: true });
 
 	const fileMeta = { name: file.originalname, rev_id, project, model };
-	await storeFile(teamspace, `${modelTypes.DRAWING}s.history.ref`, fileId, file.buffer, fileMeta);
+	await storeFile(teamspace, `${modelTypes.DRAWING}s.history`, fileId, file.buffer, fileMeta);
 
 	// TODO: for a different issue, but we don't want push through pdfs - should process it in .io
 	const queueMeta = { format, size: file.buffer.length };
@@ -195,18 +196,17 @@ ModelProcessing.getLogArchive = async (corId) => {
 	try {
 		const taskDir = Path.join(sharedDir, corId);
 		const zipPath = Path.join(taskDir, filename);
-		const output = createWriteStream(zipPath);
+		const files = readdirSync(taskDir);
 		const archive = archiver('zip', { zlib: { level: 1 } });
 
 		const archiveReady = new Promise((resolve, reject) => {
+			const output = createWriteStream(zipPath);
 			output.on('close', resolve);
 			output.on('error', reject);
 			archive.on('error', reject);
+			archive.pipe(output);
 		});
 
-		archive.pipe(output);
-
-		const files = readdirSync(taskDir);
 		let logPreviewProm;
 		files.forEach((file) => {
 			if (file.endsWith('.log')) {
