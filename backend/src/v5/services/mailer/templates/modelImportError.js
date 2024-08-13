@@ -26,15 +26,15 @@ const dataSchema = Yup.object({
 	errInfo: Yup.object({
 		code: Yup.number(),
 		message: Yup.string().default('Unknown'),
-	}),
+	}).required(),
 	title: Yup.string().default('Model Import Error'),
 	domain: Yup.string().default(() => config.getBaseURL()),
-	teamspace: Yup.string(),
-	project: Yup.string(),
-	model: Yup.string(),
-	modelType: Yup.string().oneOf(Object.values(modelTypes)),
-	user: Yup.string(),
-	revId: Yup.string(),
+	teamspace: Yup.string().required(),
+	project: Yup.string().required(),
+	model: Yup.string().required(),
+	modelType: Yup.string().oneOf(Object.values(modelTypes)).required(),
+	user: Yup.string().required(),
+	revId: Yup.string().required(),
 	logExcerpt: Yup.string().default('No logs found.').transform(
 		(val) => val.replaceAll('<', '&lt;').replaceAll('>', '&gt;').replace(/(\r\n|\n|\r)/gm, '<br>')),
 
