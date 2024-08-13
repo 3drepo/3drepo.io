@@ -75,7 +75,7 @@ const ResourceAvailable = ({link, type, name, size, onClickRemove, canEdit, onCl
 		<ResourceItemContainer>
 			<ResourceItemLeftColumn>
 				<ResourceIcon type={type} />
-				<ResourceLink href={link} target="_blank" rel="noopener">
+				<ResourceLink href={link} download={name} target="_blank" rel="noopener">
 					{name}
 				</ResourceLink>
 			</ResourceItemLeftColumn>

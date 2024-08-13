@@ -20,18 +20,18 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { selectIsEditingGroups, selectSelectedTicket, selectView } from '@/v5/store/tickets/card/ticketsCard.selectors';
+import { selectIssuesEnabled, selectRisksEnabled } from '@/v5/store/teamspaces/teamspaces.selectors';
 import { CompareActions } from '../../modules/compare';
 
 import { selectCurrentTeamspace, selectCurrentUser } from '../../modules/currentUser';
 import { IssuesActions } from '../../modules/issues';
 import { MeasurementsActions } from '../../modules/measurements';
 import { selectIsPending, selectSettings, ModelActions } from '../../modules/model';
-import { selectIsPresentationActive, PresentationActions } from '../../modules/presentation';
 import { RisksActions } from '../../modules/risks';
 import { selectQueryParams } from '../../modules/router/router.selectors';
 import { TreeActions, selectTreeNodesList } from '../../modules/tree';
 import {
-	selectDisabledPanelButtons, selectDraggablePanels, selectIsFocusMode, selectLeftPanels, selectRightPanels,
+	selectDraggablePanels, selectIsFocusMode, selectLeftPanels, selectRightPanels,
 	ViewerGuiActions,
 } from '../../modules/viewerGui';
 import { withDataCache } from '../../services/dataCache';
@@ -48,12 +48,12 @@ const mapStateToProps = createStructuredSelector({
 	rightPanels: selectRightPanels,
 	draggablePanels: selectDraggablePanels,
 	isFocusMode: selectIsFocusMode,
-	disabledPanelButtons: selectDisabledPanelButtons,
-	isPresentationActive: selectIsPresentationActive,
 	selectedTicket: selectSelectedTicket,
 	treeNodesList: selectTreeNodesList,
 	ticketsCardView: selectView,
 	isEditingGroups: selectIsEditingGroups,
+	issuesEnabled: selectIssuesEnabled,
+	risksEnabled: selectRisksEnabled,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -68,7 +68,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	resetViewerGui: ViewerGuiActions.reset,
 	removeMeasurement: MeasurementsActions.removeMeasurement,
 	resetCompareComponent: CompareActions.resetComponentState,
-	joinPresentation: PresentationActions.joinPresentation,
 	subscribeOnIssueChanges: IssuesActions.subscribeOnIssueChanges,
 	unsubscribeOnIssueChanges: IssuesActions.unsubscribeOnIssueChanges,
 	subscribeOnRiskChanges: RisksActions.subscribeOnRiskChanges,

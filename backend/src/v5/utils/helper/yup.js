@@ -26,9 +26,10 @@ const YupHelper = { validators: {}, types: { strings: {} }, utils: {} };
 
 YupHelper.utils.stripWhen = (schema, cond) => Yup.lazy((value) => (cond(value) ? schema.strip() : schema));
 
-YupHelper.validators.alphanumeric = (yupObj) => yupObj.matches(/^[\w|_|.|-]*$/,
+YupHelper.validators.alphanumeric = (yupObj, allowFullStops) => yupObj.matches(
+	allowFullStops ? /^[\w|_|.|-]*$/ : /^[\w|_|-]*$/,
 	// eslint-disable-next-line no-template-curly-in-string
-	'${path} can only contain alpha-numeric characters, full stops, hyphens or underscores');
+	`\${path} can only contain alpha-numeric characters, ${allowFullStops ? 'full stops, ' : ''}hyphens or underscores`);
 
 YupHelper.types.id = Yup.string().uuid('ids are expected to be of uuid format').transform((val, org) => UUIDToString(org));
 

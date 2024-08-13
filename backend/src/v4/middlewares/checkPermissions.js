@@ -23,6 +23,7 @@ const C	= require("../constants");
 const getPermissionsAdapter = require("./getPermissionsAdapter");
 const { validSession } = require(`${v5Path}/middleware/auth`);
 const responseCodes = require("../response_codes");
+const utils = require("../utils");
 
 // logic to check permissions
 function checkPermissionsHelper(username, account, project, model, requiredPerms, getPermissions) {
@@ -105,13 +106,13 @@ function checkPermissions(permsRequest) {
 			});
 		}).then(validatePermissions.bind(null, next))
 			.catch(err => {
-				next(err);
+				responseCodes.respond(utils.APIInfo(req), req, res, next, err , null, {});
 			});
 	};
 }
 
 function checkMultiplePermissions(permsRequest) {
-	return function (req, res, next) {
+	return async function(req, res, next) {
 		const models = [];
 
 		// POST request
@@ -124,22 +125,29 @@ function checkMultiplePermissions(permsRequest) {
 			models.push(...req.query.models.split(","));
 		}
 
-		validateUserSession(req, res).then(() => {
+		// PATCH Request
+		if(!models.length && req.body.length) {
+			models.push(...req.body.flatMap((entry)=> entry?.model || []));
+		}
+		try {
+			await validateUserSession(req, res);
+
 			const username = req.session.user.username;
 			const account = req.params.account;
 
-			const promises = [];
+			if(!models.length) {
+				throw responseCodes.INVALID_ARGUMENTS;
+			}
 
-			models.forEach((model) => {
-				const permissionCheckPromise = checkPermissionsHelper(username, account, null, model, permsRequest, getPermissionsAdapter);
-				promises.push(permissionCheckPromise);
-			});
+			const permRes = await Promise.all(models.map((model) => {
+				return checkPermissionsHelper(username, account, null, model, permsRequest, getPermissionsAdapter);
+			}));
 
-			return Promise.all(promises);
-		}).then(validatePermissions.bind(null, next))
-			.catch(err => {
-				next(err);
-			});
+			await validatePermissions(next, permRes);
+
+		} catch (err) {
+			next(err);
+		}
 	};
 }
 

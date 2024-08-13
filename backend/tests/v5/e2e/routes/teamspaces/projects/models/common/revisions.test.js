@@ -17,7 +17,7 @@
 
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
-const { src, dwgModel, dwgModelUppercaseExt, image } = require('../../../../../../helper/path');
+const { src, dwgModel, exceedQuotaModel, oversizedDwg, dwgModelUppercaseExt, image } = require('../../../../../../helper/path');
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { modelTypes, statusCodes } = require(`${src}/models/modelSettings.constants`);
@@ -248,6 +248,19 @@ const testCreateNewRevision = () => {
 				revCode: modelType === modelTypes.DRAWING ? ServiceHelper.generateRandomString(10) : undefined,
 			});
 
+			const drawingCases = [
+				['the statusCode is invalid', { ...generateParams(), statusCode: ServiceHelper.generateRandomString() }, false, templates.invalidArguments],
+				['the revCode is invalid', { ...generateParams(), revCode: ServiceHelper.generateRandomString(11) }, false, templates.invalidArguments],
+				['the revCode and statusCode are already used', { ...generateParams(), revCode: drawRevisions.nonVoidRevision.revCode, statusCode: drawRevisions.nonVoidRevision.statusCode }, false, templates.invalidArguments],
+			];
+
+			const containerCases = [
+				['model status is queued', { ...generateParams(), modelId: models.queuedStatusCont._id }, false, templates.invalidArguments],
+				['model status is processing', { ...generateParams(), modelId: models.processingStatusCont._id }, false, templates.invalidArguments],
+				['tag is invalid', { ...generateParams(), tag: ServiceHelper.generateRandomString(51) }, false, templates.invalidArguments],
+				['tag is already used', { ...generateParams(), tag: conRevisions.nonVoidRevision.tag }, false, templates.invalidArguments],
+			];
+
 			return [
 				['the user does not have a valid session', { ...generateParams(), key: null }, false, templates.notLoggedIn],
 				['the teamspace does not exist', { ...generateParams(), ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
@@ -260,19 +273,11 @@ const testCreateNewRevision = () => {
 				['the model is of wrong type', { ...generateParams(), modelId: models.federation._id }, false, modelNotFound],
 				['the file is missing', { ...generateParams(), file: undefined }, false, templates.invalidArguments],
 				['the file has incorrect format', { ...generateParams(), file: image }, false, templates.unsupportedFileFormat],
+				['the file is larger than the allowed file size', { ...generateParams(), file: oversizedDwg }, false, templates.maxSizeExceeded],
+				['the file is larger than the user quota', { ...generateParams(), file: exceedQuotaModel }, false, templates.quotaLimitExceeded],
 				['the file is valid', generateParams(), true],
 				['the file is valid with uppercase extension', { ...generateParams(), file: dwgModelUppercaseExt, modelId: modelWithNoRev._id }, true],
-				...(modelType === modelTypes.DRAWING ? [
-					['the statusCode is invalid', { ...generateParams(), statusCode: ServiceHelper.generateRandomString() }, false, templates.invalidArguments],
-					['the revCode is invalid', { ...generateParams(), revCode: ServiceHelper.generateRandomString(11) }, false, templates.invalidArguments],
-					['the revCode and statusCode are already used', { ...generateParams(), revCode: drawRevisions.nonVoidRevision.revCode, statusCode: drawRevisions.nonVoidRevision.statusCode }, false, templates.invalidArguments],
-				] : [
-					['model status is queued', { ...generateParams(), modelId: models.queuedStatusCont._id }, false, templates.invalidArguments],
-					['model status is processing', { ...generateParams(), modelId: models.processingStatusCont._id }, false, templates.invalidArguments],
-					['tag is invalid', { ...generateParams(), tag: ServiceHelper.generateRandomString(51) }, false, templates.invalidArguments],
-					['tag is already used', { ...generateParams(), tag: conRevisions.nonVoidRevision.tag }, false, templates.invalidArguments],
-				]),
-
+				...(modelType === modelTypes.DRAWING ? drawingCases : containerCases),
 			];
 		};
 

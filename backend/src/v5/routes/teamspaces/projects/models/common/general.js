@@ -131,15 +131,15 @@ const deleteFavourites = (modelType) => async (req, res) => {
 };
 
 const getModelStats = (modelType) => async (req, res, next) => {
-	const { teamspace, model } = req.params;
+	const { teamspace, model, project } = req.params;
 	const fn = {
-		[modelTypes.CONTAINER]: Containers.getContainerStats,
-		[modelTypes.DRAWING]: Drawings.getDrawingStats,
-		[modelTypes.FEDERATION]: Federations.getFederationStats,
+		[modelTypes.CONTAINER]: () => Containers.getContainerStats(teamspace, model),
+		[modelTypes.DRAWING]: () => Drawings.getDrawingStats(teamspace, model),
+		[modelTypes.FEDERATION]: () => Federations.getFederationStats(teamspace, project, model),
 	};
 
 	try {
-		const stats = await fn[modelType](teamspace, model);
+		const stats = await fn[modelType]();
 		req.outputData = stats;
 		await next();
 	} catch (err) {
@@ -611,8 +611,7 @@ const establishRoutes = (modelType) => {
      *                   status: ok
 	 *                   unit: mm
 	 *                   desc: Floor 1 MEP with Facade
-	 *                   revisions: { total: 2, lastUpdated: 1715354970000, latestRevision: AAGC-C0149-CIV-STN-SSR-M3D-000003 }
-	 *                   errorReason: { message: System error occured. Please contact support., timestamp: 1629976656315, errorCode: 14 }
+	 *                   revisions: { total: 2, lastUpdated: 1715354970000, latestRevision: rev1 }
 	 *               federation:
 	 *                 summary: federation
      *                 value:
@@ -629,7 +628,7 @@ const establishRoutes = (modelType) => {
      *                   status: ok
 	 *                   type: Architectural
 	 *                   desc: Floor 1 MEP with Facade
-	 *                   revisions: { total: 2, lastUpdated: 1715354970000, latestRevision: AAGC-C0149-CIV-STN-SSR-M3D-000003 }
+	 *                   revisions: { total: 2, lastUpdated: 1715354970000, latestRevision: S1-rev1 }
 	 *                   calibration: uncalibrated
 	 */
 	router.get('/:model/stats', hasReadAccessToModel[modelType], getModelStats(modelType), formatModelStats(modelType));

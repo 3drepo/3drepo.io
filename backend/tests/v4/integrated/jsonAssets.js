@@ -16,6 +16,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+const SessionTracker = require("../../v5/helper/sessionTracker")
 const { queue: {purgeQueues}} = require("../../v5/helper/services");
 const request = require("supertest");
 const expect = require("chai").expect;
@@ -32,20 +34,16 @@ describe("JSON Assets", function () {
 		const existingModel = "5bfc11fa-50ac-b7e7-4328-83aa11fa50ac";
 		const revId = "b74ba13b-71db-4fcc-9ff8-7f640aa3dec2";
 
-		before(function(done) {
-
-			server = app.listen(8080, function () {
-				console.log("API test server is listening on port 8080!");
-
-				agent = request.agent(server);
-				agent.post("/login")
-					.send({ username, password })
-					.expect(200, function(err, res) {
-						expect(res.body.username).to.equal(username);
-						done(err);
-					});
-
+		before(async function() {
+			await new Promise((resolve) => {
+				server = app.listen(8080, () => {
+					console.log("API test server is listening on port 8080!");
+					resolve();
+				});
 			});
+
+			agent = SessionTracker(request(server));
+			await agent.login(username, password);
 
 		});
 
@@ -126,22 +124,19 @@ describe("JSON Assets", function () {
 		const revId = "f0fd8f0c-06e2-479b-b41a-a8873bc74dc9";
 		const existingFed = "b667ab4c-7e71-4db9-9f85-cb81437aaf43";
 
-		before(function(done) {
-
-			server = app.listen(8080, function () {
-				console.log("API test server is listening on port 8080!");
-
-				agent = request.agent(server);
-				agent.post("/login")
-					.send({ username, password })
-					.expect(200, function(err, res) {
-						expect(res.body.username).to.equal(username);
-						done(err);
-					});
-
+		before(async function() {
+			await new Promise((resolve) => {
+				server = app.listen(8080, () => {
+					console.log("API test server is listening on port 8080!");
+					resolve();
+				});
 			});
 
+			agent = SessionTracker(request(server));
+			await agent.login(username, password);
+
 		});
+
 
 		after(function(done) {
 			purgeQueues().then(() => {
@@ -341,20 +336,16 @@ describe("JSON Assets", function () {
 		const revId = "f0fd8f0c-06e2-479b-b41a-a8873bc74dc9";
 		const existingFed = "b667ab4c-7e71-4db9-9f85-cb81437aaf43";
 
-		before(function(done) {
-
-			server = app.listen(8080, function () {
-				console.log("API test server is listening on port 8080!");
-
-				agent = request.agent(server);
-				agent.post("/login")
-					.send({ username, password })
-					.expect(200, function(err, res) {
-						expect(res.body.username).to.equal(username);
-						done(err);
-					});
-
+		before(async function() {
+			await new Promise((resolve) => {
+				server = app.listen(8080, () => {
+					console.log("API test server is listening on port 8080!");
+					resolve();
+				});
 			});
+
+			agent = SessionTracker(request(server));
+			await agent.login(username, password);
 
 		});
 
@@ -421,20 +412,16 @@ describe("JSON Assets", function () {
 		const password = "project_username";
 		const existingModel = "58de3562-6755-44cf-90f4-860b20bb73b5";
 
-		before(function(done) {
-
-			server = app.listen(8080, function () {
-				console.log("API test server is listening on port 8080!");
-
-				agent = request.agent(server);
-				agent.post("/login")
-					.send({ username, password })
-					.expect(200, function(err, res) {
-						expect(res.body.username).to.equal(username);
-						done(err);
-					});
-
+		before(async function() {
+			await new Promise((resolve) => {
+				server = app.listen(8080, () => {
+					console.log("API test server is listening on port 8080!");
+					resolve();
+				});
 			});
+
+			agent = SessionTracker(request(server));
+			await agent.login(username, password);
 
 		});
 

@@ -23,6 +23,7 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 import { Link } from 'react-router-dom';
 import { LOGIN_PATH } from '@/v5/ui/routes/routes.constants';
 import { Divider as DividerBase } from '@mui/material';
+import { AuthImg } from '@components/authenticatedResource/authImg.component';
 
 const customLogoPath = clientConfigService.getCustomLogoPath();
 export const customBackgroundPath = clientConfigService.getCustomBackgroundImagePath();
@@ -97,7 +98,7 @@ const DefaultLogo = styled(DefaultLogoBase)`
 	width: 100px;
 `;
 
-const CustomLogo = styled.img.attrs({
+const CustomLogo = styled(AuthImg).attrs({
 	src: customLogoPath,
 	alt: '3D Repo',
 })`

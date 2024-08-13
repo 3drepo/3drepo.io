@@ -24,8 +24,8 @@ import EyeShowIcon from '@assets/icons/viewer/eye_show.svg';
 import EyeIsolateIcon from '@assets/icons/viewer/eye_isolate.svg';
 import ResetTransformationsIcons from '@assets/icons/viewer/reset_transformations.svg';
 import { formatMessage } from '@/v5/services/intl';
-import { GroupsActionsDispatchers, TreeActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { TreeHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
+import { GroupsActionsDispatchers, TreeActionsDispatchers, ViewerGuiActionsDispatchers, ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TreeHooksSelectors, ViewerGuiHooksSelectors, ViewpointsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Section, Container, ClearButton, ClearIcon } from './selectionToolbar.styles';
@@ -44,7 +44,7 @@ export const SectionToolbar = () => {
 	const clippingMode = ViewerGuiHooksSelectors.selectClippingMode();
 	const clippingSectionOpen = ViewerGuiHooksSelectors.selectIsClipEdit();
 	const isBoxClippingMode = clippingMode === VIEWER_CLIP_MODES.BOX;
-	const hasTransformations = !isEmpty(ViewerGuiHooksSelectors.selectTransformations());
+	const hasTransformations = !isEmpty(ViewpointsHooksSelectors.selectTransformations());
 
 	const onClickAlign = () => {
 		Viewer.clipToolRealign();
@@ -106,7 +106,7 @@ export const SectionToolbar = () => {
 				<ToolbarButton
 					Icon={ResetTransformationsIcons}
 					hidden={!hasTransformations}
-					onClick={() => ViewerGuiActionsDispatchers.clearTransformations()}
+					onClick={() => ViewpointsActionsDispatchers.clearTransformations()}
 					title={formatMessage({ id: 'viewer.toolbar.icon.resetTransformation', defaultMessage: 'Reset Transformation' })}
 				/>
 			</Section>

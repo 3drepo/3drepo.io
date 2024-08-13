@@ -19,6 +19,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
+import { selectIssuesEnabled, selectRisksEnabled } from '@/v5/store/teamspaces/teamspaces.selectors';
 import {
 	selectBoardType,
 	selectCards,
@@ -64,7 +65,9 @@ const mapStateToProps = createStructuredSelector({
 	modelSettings: selectSettings,
 	criteria: selectMitigationCriteria,
 	sortOrder: selectSortOrder,
-	sortByField: selectSortByField
+	sortByField: selectSortByField,
+	issuesEnabled: selectIssuesEnabled,
+	risksEnabled: selectRisksEnabled,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

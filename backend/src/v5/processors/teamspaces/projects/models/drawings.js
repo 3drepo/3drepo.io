@@ -23,6 +23,7 @@ const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { deleteModel, getDrawingById, getDrawings, updateModelSettings } = require('../../../../models/modelSettings');
 const { getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../../services/filesManager');
 const { getProjectById, removeModelFromProject } = require('../../../../models/projectSettings');
+const { DRAWINGS_HISTORY_COL } = require('../../../../models/revisions.constants');
 const Path = require('path');
 const { calibrationStatuses } = require('../../../../models/calibrations.constants');
 const { events } = require('../../../../services/eventsManager/eventsManager.constants');
@@ -76,7 +77,7 @@ Drawings.addDrawing = (teamspace, project, data) => addModel(teamspace, project,
 Drawings.updateSettings = updateModelSettings;
 
 Drawings.deleteDrawing = async (teamspace, project, drawing) => {
-	await removeFilesWithMeta(teamspace, `${modelTypes.DRAWING}s.history.ref`, { model: drawing });
+	await removeFilesWithMeta(teamspace, DRAWINGS_HISTORY_COL, { model: drawing });
 
 	await Promise.all([
 		deleteModelRevisions(teamspace, project, drawing, modelTypes.DRAWING),
@@ -103,7 +104,7 @@ Drawings.newRevision = async (teamspace, project, model, data, file) => {
 			status: STATUSES.PROCESSING });
 
 		const fileMeta = { name: file.originalname, rev_id, project, model };
-		await storeFile(teamspace, `${modelTypes.DRAWING}s.history.ref`, fileId, file.buffer, fileMeta);
+		await storeFile(teamspace, `${DRAWINGS_HISTORY_COL}.ref`, fileId, file.buffer, fileMeta);
 		await updateRevision(teamspace, model, modelTypes.DRAWING, rev_id, { status: STATUSES.OK }, { incomplete: 1 });
 
 		publish(events.NEW_REVISION, { teamspace,
@@ -126,7 +127,7 @@ Drawings.downloadRevisionFiles = async (teamspace, drawing, revision) => {
 		throw templates.fileNotFound;
 	}
 
-	return getFileAsStream(teamspace, `${modelTypes.DRAWING}s.history.ref`, rev.rFile[0]);
+	return getFileAsStream(teamspace, `${DRAWINGS_HISTORY_COL}.ref`, rev.rFile[0]);
 };
 
 Drawings.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {

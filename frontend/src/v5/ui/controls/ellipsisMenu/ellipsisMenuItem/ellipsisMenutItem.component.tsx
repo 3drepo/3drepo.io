@@ -42,7 +42,7 @@ export const EllipsisMenuItem = ({ to, title, hidden, onClick, ...props }: Ellip
 
 	return (
 		<MenuItem
-			component={to ? Link : null}
+			component={to ? Link : undefined}
 			to={to}
 			onClick={handleClick}
 			{...props}

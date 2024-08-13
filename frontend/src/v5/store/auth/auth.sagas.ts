@@ -21,10 +21,18 @@ import { formatMessage } from '@/v5/services/intl';
 import { AuthActions, AuthTypes, LoginAction } from './auth.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { CurrentUserActions } from '../currentUser/currentUser.redux';
+import { cookies } from '@/v5/helpers/cookie.helper';
+import axios from 'axios';
+
+const CSRF_TOKEN = 'csrf_token';
+const TOKEN_HEADER = 'X-CSRF-TOKEN';
+
 
 function* authenticate() {
 	yield put(AuthActions.setPendingStatus(true));
+
 	try {
+		axios.defaults.headers[TOKEN_HEADER] = cookies(CSRF_TOKEN);
 		yield API.Auth.authenticate();
 		yield put(CurrentUserActions.fetchUser());
 		yield put(AuthActions.setAuthenticationStatus(true));
@@ -42,8 +50,10 @@ function* authenticate() {
 
 function* login({ username, password }: LoginAction) {
 	yield put(AuthActions.setPendingStatus(true));
+
 	try {
 		yield API.Auth.login(username, password);
+		axios.defaults.headers[TOKEN_HEADER] = cookies(CSRF_TOKEN);
 		yield put(CurrentUserActions.fetchUser());
 		yield put(AuthActions.setAuthenticationStatus(true));
 	} catch (error) {

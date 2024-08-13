@@ -22,6 +22,7 @@ import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 import { IDrawingRevision } from '@/v5/store/drawings/revisions/drawingRevisions.types';
 import { uuid } from '@/v4/helpers/uuid';
 import faker from 'faker';
+import { statusCodes } from '@/v5/store/drawings/drawings.temp';
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 const getRevisions = (length) => Array(length ?? Math.round(Math.random() ** 2 * 5)).fill(0).map((_, index) => ({
@@ -77,3 +78,7 @@ export const getRevisionFileUrl = (teamspace: string, projectId: string, drawing
 		clientConfigService.GET_API,
 	)
 );
+
+export const fetchStatusCodes = (teamspace: string, projectId: string) => {
+	return delay(500, { data: { statusCodes } });
+};

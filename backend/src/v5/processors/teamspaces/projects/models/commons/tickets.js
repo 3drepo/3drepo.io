@@ -23,6 +23,8 @@ const {
 	modulePropertyLabels,
 	presetModules,
 	propTypes,
+	statusTypes,
+	statuses,
 	viewGroups,
 } = require('../../../../../schemas/tickets/templates.constants');
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
@@ -32,6 +34,7 @@ const { getNestedProperty, setNestedProperty } = require('../../../../../utils/h
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
 const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
+const { getAllTemplates } = require('../../../../../models/tickets.templates');
 const { getArrayDifference } = require('../../../../../utils/helper/arrays');
 const { importComments } = require('./tickets.comments');
 const { isUUID } = require('../../../../../utils/helper/typeCheck');
@@ -339,6 +342,35 @@ Tickets.getTicketList = (teamspace, project, model,
 	}
 
 	return getAllTickets(teamspace, project, model, deleteIfUndefined({ projection, updatedSince, sort }));
+};
+
+Tickets.getOpenTicketsCount = async (teamspace, project, model) => {
+	const tickets = await getAllTickets(teamspace, project, model, {
+		projection: { type: 1, [`properties.${basePropertyLabels.STATUS}`]: 1 },
+	});
+
+	let openTicketsCount = 0;
+
+	const allTemplates = await getAllTemplates(teamspace, true, { _id: 1, config: 1 });
+
+	const templateToClosedStatuses = allTemplates.reduce((obj, { _id, config }) => {
+		const closedStatuses = config.status
+			? config.status.values
+				.flatMap((s) => (s.type === statusTypes.DONE || s.type === statusTypes.VOID ? s.name : []))
+			: [statuses.CLOSED, statuses.VOID];
+
+		return { ...obj, [UUIDToString(_id)]: closedStatuses };
+	}, {});
+
+	for (let i = 0; i < tickets.length; i++) {
+		const ticket = tickets[i];
+
+		if (!templateToClosedStatuses[UUIDToString(ticket.type)].includes(ticket.properties.Status)) {
+			openTicketsCount++;
+		}
+	}
+
+	return openTicketsCount;
 };
 
 module.exports = Tickets;

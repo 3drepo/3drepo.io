@@ -24,7 +24,7 @@ export const NavLinks = styled.div`
 	color: ${({ theme }) => theme.palette.base.light};
 `;
 
-export const NavLink = styled(Link)<{ selected: boolean }>`
+export const NavLink = styled(Link)<{ selected?: boolean }>`
 	margin: 0 12px;
 	${({ theme }) => theme.typography.h5}
 	cursor: pointer;

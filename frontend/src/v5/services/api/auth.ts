@@ -18,6 +18,7 @@
 import { AxiosResponse } from 'axios';
 import api from './default';
 
+
 export const authenticate = async (): Promise<string> => {
 	const { data } = await api.get('login');
 	return data.username;

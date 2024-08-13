@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { CSRF_HEADER } = require('./sessions.constants');
 const { v4Path } = require('../../interop');
 // FIXME: can remove the disable once we migrated config
 // eslint-disable-next-line
@@ -29,12 +30,22 @@ const referrerMatch = (sessionReferrer, headerReferrer) => {
 
 const SessionUtils = {};
 
-SessionUtils.isSessionValid = (session, referrer, ignoreApiKey = false) => {
+const validateCookie = (session, cookies, headers) => {
+	const referrerMatched = !headers.referer || referrerMatch(session.user.referer, headers.referer);
+
+	const headerToken = headers[CSRF_HEADER] || headers[CSRF_HEADER.toLowerCase()];
+
+	const csrfMatched = !!session.token && (headerToken === session.token);
+
+	return csrfMatched && referrerMatched;
+};
+
+SessionUtils.isSessionValid = (session, cookies, headers, ignoreApiKey = false) => {
 	const user = session?.user;
 
 	if (user) {
 		const validSession = session.user.isAPIKey ? !ignoreApiKey
-			: (!referrer || referrerMatch(session.user.referer, referrer));
+			: validateCookie(session, cookies, headers);
 		return validSession;
 	}
 
