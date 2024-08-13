@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Vector2, Line, Size } from './types';
+import { Vector2, Line } from './types';
 
 import { closestPointOnLine } from './lineFunctions';
 
@@ -53,7 +53,7 @@ export class RTreeNode {
 	}
 }
 
-class TraversalContext {
+class ClosestPointTraversalContext {
 	position: Vector2;
 
 	radius: number;
@@ -91,10 +91,10 @@ export class RTree {
 
 	root: RTreeNode;
 
-	doIntersectionTest(p: Vector2, r: number) {
+	closestPointQuery(p: Vector2, r: number) {
 		const start = performance.now();
 
-		const ctx = new TraversalContext(p, r);
+		const ctx = new ClosestPointTraversalContext(p, r);
 		this.traverseNode(this.root, ctx);
 
 		const results = new IntersectionTestResults();
@@ -104,7 +104,7 @@ export class RTree {
 		return results;
 	}
 
-	intersects(node: RTreeNode, ctx: TraversalContext) {
+	intersects(node: RTreeNode, ctx: ClosestPointTraversalContext) {
 		// The intersection test can be done with a simple point in bounds test
 		// with a Minkowski sum
 
@@ -122,7 +122,7 @@ export class RTree {
 	}
 
 	// Peform tests against each primitive
-	traverseLeaf(node: RTreeNode, ctx: TraversalContext) {
+	traverseLeaf(node: RTreeNode, ctx: ClosestPointTraversalContext) {
 		const p = closestPointOnLine(node.line.start.x, node.line.start.y, node.line.end.x, node.line.end.y, ctx.position.x, ctx.position.y);
 		const d = Vector2.subtract(ctx.position, p).norm;
 		if (d < ctx.closestPointDistance) {
@@ -132,7 +132,7 @@ export class RTree {
 		ctx.numLineTests++;
 	}
 
-	traverseBranch(node: RTreeNode, ctx: TraversalContext) {
+	traverseBranch(node: RTreeNode, ctx: ClosestPointTraversalContext) {
 		for (const child of node.children) {
 			if (this.intersects(child, ctx)) {
 				this.traverseNode(child, ctx);
@@ -140,7 +140,7 @@ export class RTree {
 		}
 	}
 
-	traverseNode(node: RTreeNode, ctx: TraversalContext) {
+	traverseNode(node: RTreeNode, ctx: ClosestPointTraversalContext) {
 		if (node.leafNode()) {
 			this.traverseLeaf(node, ctx);
 		} else {

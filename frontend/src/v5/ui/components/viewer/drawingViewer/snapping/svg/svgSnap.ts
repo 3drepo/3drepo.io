@@ -18,7 +18,7 @@
 import 'path-data-polyfill';
 import { Vector2, Line, Point } from './types';
 import { QuadTree } from './quadTree';
-import { RTree, RTreeBuilder } from './rTree';
+import { RTree, RTreeBuilder, RTreeNode } from './rTree';
 import { KDTree, KDTreeBuilder, KDTreeNode } from './kdTree';
 
 export class SVGSnapDiagnosticsHelper {
@@ -124,6 +124,86 @@ export class SVGSnapDiagnosticsHelper {
 		}
 		if (node.right != null) {
 			this.renderKDTreeNode(node.right);
+		}
+	}
+}
+
+class SelfIntersectionTraversalContext {
+	pairs: { a: RTreeNode, b: RTreeNode }[];
+
+	constructor() {
+		this.pairs = [];
+	}
+}
+
+class IntersectionBuilderReport {
+	buildTime: number;
+
+	constructor() {
+		this.buildTime = 0;
+	}
+}
+
+class IntersectionBuilder {
+
+	rtree: RTree;
+
+	report: IntersectionBuilderReport;
+
+	constructor(rtree: RTree) {
+		this.rtree = rtree;
+		this.report = new IntersectionBuilderReport();
+	}
+
+	build() {
+		const start = performance.now();
+
+		const ctx = new SelfIntersectionTraversalContext();
+		this.getIntersectingNodes(this.rtree.root.children, ctx);
+
+		this.report.buildTime = performance.now() - start;
+	}
+
+	// Finds all leaf-nodes that intersect with eachother and add them to the
+	// context.
+	getIntersectingNodes(nodes: RTreeNode[], ctx: SelfIntersectionTraversalContext) {
+
+		const nodesToCompare = [];
+
+		for (let i = 0; i < nodes.length; i++) {
+			for (let j = i + 1; j < nodes.length; j++) {
+				const a = nodes[i];
+				const b = nodes[j];
+				if (this.intersects(a, b)) {
+					if (a.leafNode() && b.leafNode()) { // We are done with these branches; add the leaf-pair to the context and return
+						ctx.pairs.push({ a, b });
+					} else {
+						this.addNode(nodesToCompare, a);
+						this.addNode(nodesToCompare, b);
+					}
+				}
+			}
+		}
+
+		if (nodesToCompare.length > 0) {
+			this.getIntersectingNodes(nodesToCompare, ctx);
+		}
+	}
+
+	intersects(a: RTreeNode, b: RTreeNode): boolean {
+		return (a.xmin <= b.xmax && a.xmax >= b.xmin) && (a.ymin <= b.ymax && a.ymax >= b.ymin);
+	}
+
+	// If a is a leaf node, it gets added back again so that it will be compared
+	// with b's children. Otherwise, its children are added so that they will
+	// be compared with eachother and those of b.
+	addNode(nodes: RTreeNode[], a: RTreeNode) {
+		if (a.leafNode()) {
+			nodes.push(a);
+		} else {
+			for (const child of a.children) {
+				nodes.push(child);
+			}
 		}
 	}
 }
@@ -360,6 +440,9 @@ export class SVGSnap {
 		});
 		this.ntree = nbuilder.build();
 
+		const intersections = new IntersectionBuilder(this.rtree);
+		intersections.build();
+
 		//this.debugHelper.renderRTree(this.rtree);
 		//this.debugHelper.renderKDTree(this.ntree);
 
@@ -376,7 +459,7 @@ export class SVGSnap {
 
 		const results = new SnapResults();
 
-		const edgeResults = this.rtree.doIntersectionTest(position, radius);
+		const edgeResults = this.rtree.closestPointQuery(position, radius);
 		if (edgeResults.closestEdge != null) {
 			results.closestEdge = edgeResults.closestEdge;
 			this.debugHelper.renderLine(position, results.closestEdge);
