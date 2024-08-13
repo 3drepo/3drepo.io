@@ -24,6 +24,7 @@ import { SvgCircle } from './svgCircle/svgCircle.component';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { Coord2D, Vector2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
+import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 
 export type ViewBoxType = ReturnType<PanZoomHandler['getOriginalSize']> & ReturnType<PanZoomHandler['getTransform']>;
 type ViewerLayer2DProps = {
@@ -58,12 +59,13 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 	const handleMouseDown = () => previousViewBox.current = viewBox;
 
 	const handleMouseUp = () => {
-		// check mouse up was fired after dragging or if it was an actual click
+		// check if mouse up was fired after dragging or if it was an actual click
 		if (!isEqual(viewBox, previousViewBox.current)) return;
 
 		if (offsetEnd || (!offsetEnd && !offsetStart)) {
 			setOffsetEnd(null);
 			setOffsetStart(mousePosition);
+			onChange(EMPTY_VECTOR);
 		} else if (!isEqual(offsetStart, mousePosition)) {
 			setOffsetEnd(mousePosition);
 			onChange?.([offsetStart, mousePosition]);

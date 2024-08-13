@@ -35,7 +35,7 @@ export interface CalibrationContextType {
 	vector3D: Vector3D,
 	setVector3D: (vectorState: React.SetStateAction<Vector3D>) => void;
 	vector2D: Vector2D,
-	setVector2D: (points: Vector2D) => void,
+	setVector2D: (vectorState: React.SetStateAction<Vector2D>) => void,
 	drawingId: string;
 }
 
