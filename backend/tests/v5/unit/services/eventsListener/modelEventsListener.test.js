@@ -269,7 +269,10 @@ const testModelProcessingCompleted = () => {
 	describe(events.MODEL_IMPORT_FINISHED, () => {
 		describe.each([
 			[true, false, false],
-		])('', (sendMail, success, userErr) => {
+			[true, false, false, true],
+			[false, false, true],
+			[true, false, false],
+		])('', (sendMail, success, userErr, noLogArchive) => {
 			test(`Should ${sendMail ? 'not ' : ''} send an email if model import ${success ? 'succeeded' : 'failed'}${!success && userErr ? ' due to an user error' : ''}`, async () => {
 				const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 				const data = {
@@ -287,7 +290,7 @@ const testModelProcessingCompleted = () => {
 				const zipPath = generateRandomString();
 				const logPreview = generateRandomString();
 				if (sendMail) {
-					ModPro.getLogArchive.mockResolvedValueOnce({ zipPath, logPreview });
+					ModPro.getLogArchive.mockResolvedValueOnce(noLogArchive ? undefined : { zipPath, logPreview });
 				}
 
 				EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
@@ -309,12 +312,12 @@ const testModelProcessingCompleted = () => {
 						project: UUIDToString(data.project),
 						revId: UUIDToString(data.revId),
 						modelType: data.modelType,
-						logExcerpt: logPreview,
+						logExcerpt: noLogArchive ? undefined : logPreview,
 
 					};
 
 					expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
-					expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(mailTemplates.MODEL_IMPORT_ERROR.name, mailerData, [{ filename: 'logs.zip', path: zipPath }]);
+					expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(mailTemplates.MODEL_IMPORT_ERROR.name, mailerData, noLogArchive ? undefined : [{ filename: 'logs.zip', path: zipPath }]);
 				} else {
 					expect(ModPro.getLogArchive).not.toHaveBeenCalled();
 					expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();

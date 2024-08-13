@@ -97,7 +97,7 @@ Revisions.addRevision = async (teamspace, project, model, modelType, data) => {
 Revisions.deleteModelRevisions = (teamspace, project, model, modelType) => db.deleteMany(
 	teamspace, collectionName(modelType, model), { project, model });
 
-const updateRevision = async (teamspace, model, modelType, revision, setUpdate = {},
+const updateRevision = async (teamspace, model, modelType, revision, setUpdate,
 	unsetUpdate = {}, projection = { _id: 1 }) => {
 	const update = {};
 

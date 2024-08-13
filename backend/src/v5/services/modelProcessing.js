@@ -216,6 +216,7 @@ ModelProcessing.getLogArchive = async (corId) => {
 					// we're trying to get the last n lines of a file here
 					// going native is the most efficient (and painless...)
 
+					/* istanbul ignore next */
 					logPreviewProm = new Promise((resolve) => {
 						const isWin = process.platform === 'win32';
 						if (isWin) {

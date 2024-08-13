@@ -42,7 +42,7 @@ const testHtml = () => {
 const testSubject = () => {
 	describe.each([
 		['data object is empty', {}],
-		['data object is not empty', { domain: generateRandomString(), modelType: modelTypes.DRAWING, title: generateRandomString() }],
+		['data object is not empty', { domain: generateRandomString(), modelType: modelTypes.DRAWING, title: generateRandomString(), logExcerpt: generateRandomString() }],
 	])('get subject', (desc, data) => {
 		test(`should succeed if ${desc}`, () => {
 			expect(ModelImportError.subject(data).length).not.toEqual(0);
