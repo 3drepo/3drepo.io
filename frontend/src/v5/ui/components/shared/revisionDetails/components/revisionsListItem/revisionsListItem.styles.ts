@@ -22,7 +22,7 @@ import { hexToOpacity } from '@/v5/ui/themes/theme';
 import { Link } from 'react-router-dom';
 import { RevisionsListItemText } from './revisionsListItemText/revisionsListItemText.component';
 
-export const Container = styled(Link) <{ diabled: boolean }>`
+export const Container = styled(Link) <{ disabled: boolean }>`
 	display: flex;
 	align-items: center;
 	height: 100%;

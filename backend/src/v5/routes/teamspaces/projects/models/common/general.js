@@ -131,15 +131,15 @@ const deleteFavourites = (modelType) => async (req, res) => {
 };
 
 const getModelStats = (modelType) => async (req, res, next) => {
-	const { teamspace, model } = req.params;
+	const { teamspace, model, project } = req.params;
 	const fn = {
-		[modelTypes.CONTAINER]: Containers.getContainerStats,
-		[modelTypes.DRAWING]: Drawings.getDrawingStats,
-		[modelTypes.FEDERATION]: Federations.getFederationStats,
+		[modelTypes.DRAWING]: () => Drawings.getDrawingStats(teamspace, model),
+		[modelTypes.CONTAINER]: () => Containers.getContainerStats(teamspace, model),
+		[modelTypes.FEDERATION]: () => Federations.getFederationStats(teamspace, project, model),
 	};
 
 	try {
-		const stats = await fn[modelType](teamspace, model);
+		const stats = await fn[modelType]();
 		req.outputData = stats;
 		await next();
 	} catch (err) {

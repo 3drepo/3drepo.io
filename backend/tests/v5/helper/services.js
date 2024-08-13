@@ -29,6 +29,8 @@ const { io: ioClient } = require('socket.io-client');
 
 const { providers } = require(`${src}/services/sso/sso.constants`);
 
+const { CSRF_COOKIE, SESSION_HEADER } = require(`${src}/utils/sessions.constants`);
+
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
@@ -738,13 +740,35 @@ ServiceHelper.chatApp = () => {
 	return ChatService.createApp(server);
 };
 
+ServiceHelper.parseSetCookie = (arr) => {
+	let token; let session;
+	arr.forEach((instr) => {
+		const matchSession = instr.match(/connect.sid=([^;]*)/);
+		if (matchSession) {
+			[, session] = matchSession;
+		}
+
+		const matchToken = instr.match(/csrf_token=([^;]*)/);
+		if (matchToken) {
+			[, token] = matchToken;
+		}
+	});
+
+	return { token, session };
+};
+
+ServiceHelper.generateCookieArray = ({ token, session }) => [
+	`${CSRF_COOKIE}=${token}`,
+	`${SESSION_HEADER}=${session}`,
+];
+
 ServiceHelper.loginAndGetCookie = async (agent, user, password, headers = {}) => {
 	const res = await agent.post('/v5/login')
 		.set(headers)
 		.send({ user, password })
 		.expect(templates.ok.status);
-	const [, cookie] = res.header['set-cookie'][0].match(/connect.sid=([^;]*)/);
-	return cookie;
+
+	return ServiceHelper.parseSetCookie(res.header['set-cookie']);
 };
 
 ServiceHelper.socket.connectToSocket = (session) => new Promise((resolve, reject) => {
@@ -762,7 +786,7 @@ ServiceHelper.socket.connectToSocket = (session) => new Promise((resolve, reject
 });
 
 ServiceHelper.socket.loginAndGetSocket = async (agent, user, password) => {
-	const cookie = await ServiceHelper.loginAndGetCookie(agent, user, password);
+	const { session: cookie } = await ServiceHelper.loginAndGetCookie(agent, user, password);
 	return ServiceHelper.socket.connectToSocket(cookie);
 };
 

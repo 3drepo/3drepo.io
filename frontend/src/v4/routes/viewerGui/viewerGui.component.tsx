@@ -22,6 +22,7 @@ import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
 import { AdditionalProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { AddOn } from '@/v5/store/store.types';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { getViewerLeftPanels, VIEWER_PANELS } from '../../constants/viewerGui';
 import { getWindowHeight, getWindowWidth, renderWhenTrue } from '../../helpers/rendering';
@@ -73,6 +74,8 @@ interface IProps {
 	treeNodesList: any;
 	ticketsCardView: TicketsCardViews;
 	isEditingGroups: boolean;
+	issuesEnabled: boolean;
+	risksEnabled: boolean;
 	stopListenOnSelections: () => void;
 	stopListenOnModelLoaded: () => void;
 	stopListenOnClickPin: () => void;
@@ -253,7 +256,7 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 
 	private renderLeftPanelsButtons = () => (
 		<LeftPanelsButtons>
-			{getViewerLeftPanels().map(({ name, type }) => (
+			{getViewerLeftPanels(this.props.issuesEnabled, this.props.risksEnabled).map(({ name, type }) => (
 				<PanelButton
 					key={type}
 					onClick={this.handleTogglePanel}
@@ -283,6 +286,9 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 		<LeftPanels>
 			{panels.map((panel) => {
 				const PanelComponent = this.panelsMap[panel];
+				if (panel === AddOn.Issues && !this.props.issuesEnabled || panel === AddOn.Risks && !this.props.risksEnabled) {
+					return null;
+				}
 				return PanelComponent && <PanelComponent key={panel} id={panel + '-card'} {...this.urlParams} />;
 			})}
 		</LeftPanels>

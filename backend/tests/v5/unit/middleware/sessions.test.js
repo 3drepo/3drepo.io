@@ -31,6 +31,7 @@ const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager.constants');
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const { SOCKET_HEADER } = require(`${src}/services/chat/chat.constants`);
+const { CSRF_COOKIE } = require(`${src}/utils/sessions.constants`);
 
 // Need to mock these 2 to ensure we are not trying to create a real session configuration
 jest.mock('express-session', () => () => { });
@@ -61,6 +62,13 @@ const pluginAgent = generateRandomString();
 const webBrowserUserAgent = generateRandomString();
 
 UserAgentHelper.isFromWebBrowser.mockImplementation((userAgent) => userAgent === webBrowserUserAgent);
+
+const checkCSRFCookieCreated = (cookieFn) => {
+	const { maxAge, domain } = config.cookie;
+	expect(cookieFn).toHaveBeenCalledWith(CSRF_COOKIE, expect.any(String),
+		{ httpOnly: false, secure: true, sameSite: 'Strict', maxAge, domain },
+	);
+};
 
 const testCreateSession = () => {
 	const checkResults = (request) => {
@@ -99,29 +107,38 @@ const testCreateSession = () => {
 			['the session cannot be regenerated', false, { ...req, session: { regenerate: (callback) => { callback(1); } } }, 1],
 		])('Regenerate Session', (desc, success, request, error) => {
 			test(`should ${success ? 'succeed if' : `fail with ${error}`} if ${desc}`, async () => {
-				await Sessions.createSession(request, {});
+				const res = { cookie: jest.fn() };
+				await Sessions.createSession(request, res);
 				if (success) {
 					checkResults(request);
 				} else {
 					expect(Responder.respond).toHaveBeenCalledTimes(1);
-					expect(Responder.respond).toHaveBeenCalledWith(request, {}, 1);
+					expect(Responder.respond).toHaveBeenCalledWith(request, res, 1);
 				}
+				expect(res.cookie).toHaveBeenCalledTimes(1);
+				checkCSRFCookieCreated(res.cookie);
 			});
 		});
 
 		test('Should regenerate session with cookie.maxAge', async () => {
 			const initialMaxAge = config.cookie.maxAge;
 			config.cookie.maxAge = 100;
-			await Sessions.createSession(req, {});
+			const res = { cookie: jest.fn() };
+			await Sessions.createSession(req, res);
 			checkResults(req);
+			expect(res.cookie).toHaveBeenCalledTimes(1);
+			checkCSRFCookieCreated(res.cookie);
 			config.cookie.maxAge = initialMaxAge;
 		});
 
 		test('Should regenerate session without cookie.maxAge', async () => {
 			const initialMaxAge = config.cookie.maxAge;
 			config.cookie.maxAge = undefined;
-			await Sessions.createSession(req, {});
+			const res = { cookie: jest.fn() };
+			await Sessions.createSession(req, res);
 			checkResults(req);
+			expect(res.cookie).toHaveBeenCalledTimes(1);
+			checkCSRFCookieCreated(res.cookie);
 			config.cookie.maxAge = initialMaxAge;
 		});
 	});

@@ -16,14 +16,20 @@
  */
 
 "use strict";
+
 (() => {
 	const checkPermissions = require("./checkPermissions").checkPermissions;
 	const C	= require("../constants");
+	const { v5Path } = require("../../interop");
+	const { validateMany } = require(`${v5Path}/middleware/common`);
+	const { isAddOnModuleEnabled } = require(`${v5Path}/middleware/permissions/components/teamspaces`);
+	const { ADD_ONS_MODULES } = require(`${v5Path}/models/teamspaces.constants`);
+	const { formatV5NewModelParams } = require("./middlewares");
 
 	module.exports = {
-		canView: checkPermissions([C.PERM_VIEW_ISSUE]),
-		canCreate: checkPermissions([C.PERM_CREATE_ISSUE]),
-		canComment: checkPermissions([C.PERM_COMMENT_ISSUE])
+		canView: validateMany([formatV5NewModelParams, isAddOnModuleEnabled(ADD_ONS_MODULES.ISSUES), checkPermissions([C.PERM_VIEW_ISSUE])]),
+		canCreate: validateMany([formatV5NewModelParams, isAddOnModuleEnabled(ADD_ONS_MODULES.ISSUES), checkPermissions([C.PERM_CREATE_ISSUE])]),
+		canComment: validateMany([formatV5NewModelParams, isAddOnModuleEnabled(ADD_ONS_MODULES.ISSUES), checkPermissions([C.PERM_COMMENT_ISSUE])])
 	};
 
 })();

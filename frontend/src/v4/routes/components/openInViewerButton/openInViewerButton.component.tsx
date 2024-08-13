@@ -16,7 +16,7 @@
  */
 
 import { VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
-import { generatePath } from 'react-router-dom';
+import { generatePath, RouteComponentProps } from 'react-router-dom';
 import OpenInBrowser from '@mui/icons-material/OpenInBrowser';
 import { memo } from 'react';
 
@@ -24,15 +24,13 @@ import { ROUTES } from '../../../constants/routes';
 import { TooltipButton } from '../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { ShowModelButtonContainer } from './openInViewerButton.styles';
 
-interface IProps {
+interface IProps extends RouteComponentProps<any> {
 	className?: string;
 	teamspace: string;
 	model: string;
 	query?: string;
-	history?: any;
 	preview?: boolean;
-	location?: any;
-}
+};
 
 export const OpenInViewerButton = memo((props: IProps) => {
 	const handleGoToModel = (event) => {

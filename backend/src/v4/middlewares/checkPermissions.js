@@ -23,6 +23,7 @@ const C	= require("../constants");
 const getPermissionsAdapter = require("./getPermissionsAdapter");
 const { validSession } = require(`${v5Path}/middleware/auth`);
 const responseCodes = require("../response_codes");
+const utils = require("../utils");
 
 // logic to check permissions
 function checkPermissionsHelper(username, account, project, model, requiredPerms, getPermissions) {
@@ -105,7 +106,7 @@ function checkPermissions(permsRequest) {
 			});
 		}).then(validatePermissions.bind(null, next))
 			.catch(err => {
-				next(err);
+				responseCodes.respond(utils.APIInfo(req), req, res, next, err , null, {});
 			});
 	};
 }
