@@ -110,22 +110,15 @@ class PrimitiveCollector {
 
 	lines: Line[];
 
-	points: Point[];
-
 	offset: Vector2;
 
 	constructor(offset: Vector2) {
 		this.lines = [];
-		this.points = [];
 		this.offset = offset;
 	}
 
 	addLine(line: Line) {
 		this.lines.push(line);
-	}
-
-	addPoint(point: Point) {
-		this.points.push(point);
 	}
 }
 
@@ -148,7 +141,6 @@ class PathCollector {
 	setStartPosition(values: number[]) {
 		this.startPosition = new Vector2(values[0] + this.collector.offset.x, values[1] + this.collector.offset.y);
 		this.currentPosition = new Vector2(this.startPosition.x, this.startPosition.y); // Copy the vector
-		this.collector.addPoint(this.currentPosition);
 	}
 
 	// Adds a line from the current position to the parameters at the offset. The
@@ -161,13 +153,11 @@ class PathCollector {
 		if (line.length != 0) {
 			this.collector.addLine(line);
 		}
-		this.collector.addPoint(this.currentPosition);
 	}
 
 	addCurve(values: number[]) {
 		const end = new Vector2(this.collector.offset.x + values[4], this.collector.offset.y + values[5]);
 		this.currentPosition = end;
-		this.collector.addPoint(this.currentPosition);
 	}
 
 	// Closes the subpath by drawing a straight line from the current position
@@ -198,8 +188,6 @@ class PolyCollector {
 				new Vector2(end.x, end.y),
 			),
 		);
-		this.collector.addPoint(start);
-		this.collector.addPoint(end);
 	}
 }
 
