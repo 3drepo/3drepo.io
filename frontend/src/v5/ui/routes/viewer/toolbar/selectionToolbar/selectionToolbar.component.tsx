@@ -38,9 +38,8 @@ import { CalibrationContext } from '../../../dashboard/projects/calibration/cali
 import { PlanesCalibrationSection } from './sections/planesCalibrationSection.component';
 
 export const SectionToolbar = () => {
-	const { isCalibratingPlanes } = useContext(CalibrationContext);
+	const { isCalibratingPlanes, verticalPlanes } = useContext(CalibrationContext);
 	const [alignActive, setAlignActive] = useState(false);
-	const { verticalPlanes } = useContext(CalibrationContext);
 	
 	const hasOverrides = !isEmpty(ViewerGuiHooksSelectors.selectColorOverrides());
 	const hasHighlightedObjects = !!TreeHooksSelectors.selectSelectedNodes().length;

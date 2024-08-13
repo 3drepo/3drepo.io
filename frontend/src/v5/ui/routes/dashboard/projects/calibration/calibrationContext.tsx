@@ -18,7 +18,7 @@
 import { createContext, useState } from 'react';
 import { Transformers, useSearchParam } from '../../../useSearchParam';
 import { PlaneType, Vector1D, Vector2D, Vector3D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
-import { EMPTY_VECTOR, EMPTY_VECTOR_1D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
+import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 import { CalibrationHandler } from './calibrationHandler.component';
 
 export interface CalibrationContextType {
@@ -57,7 +57,7 @@ const defaultValue: CalibrationContextType = {
 	vector2D: EMPTY_VECTOR,
 	setVector2D: () => {},
 	drawingId: '',
-	verticalPlanes: EMPTY_VECTOR_1D,
+	verticalPlanes: EMPTY_VECTOR,
 	setVerticalPlanes: () => {},
 	isCalibratingPlanes: false,
 	setIsCalibratingPlanes: () => {},
@@ -77,7 +77,7 @@ export const CalibrationContextComponent = ({ children }) => {
 	const [isCalibratingPlanes, setIsCalibratingPlanes] = useState(false);
 	const [vector3D, setVector3D] = useState<Vector3D>(EMPTY_VECTOR);
 	const [vector2D, setVector2D] = useState<Vector2D>(EMPTY_VECTOR);
-	const [verticalPlanes, setVerticalPlanes] = useState<Vector1D>(EMPTY_VECTOR_1D);
+	const [verticalPlanes, setVerticalPlanes] = useState<Vector1D>(EMPTY_VECTOR);
 	const [selectedPlane, setSelectedPlane] = useState<PlaneType>(null);
 	const [isAlignPlaneActive, setIsAlignPlaneActive] = useState(false);
 	const [drawingId] = useSearchParam('drawingId');
