@@ -16,7 +16,7 @@
  */
 
 const { times } = require('lodash');
-const { UUIDToString } = require('../../../../../src/v5/utils/helper/uuids');
+const { UUIDToString, stringToUUID, generateUUIDString } = require('../../../../../src/v5/utils/helper/uuids');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
 const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate } = require('../../../helper/services');
@@ -44,6 +44,13 @@ const CommentSchemas = require(`${src}/schemas/tickets/tickets.comments`);
 jest.mock('../../../../../src/v5/schemas/tickets/tickets.groups');
 const TicketGroupSchemas = require(`${src}/schemas/tickets/tickets.groups`);
 
+jest.mock('../../../../../src/v5/services/mailer');
+const Mailer = require(`${src}/services/mailer`);
+const { templates: mailTemplates } = require(`${src}/services/mailer/mailer.constants`);
+
+jest.mock('../../../../../src/v5/services/modelProcessing');
+const ModPro = require(`${src}/services/modelProcessing`);
+
 jest.mock('../../../../../src/v5/services/chat');
 const ChatService = require(`${src}/services/chat`);
 const { EVENTS: chatEvents } = require(`${src}/services/chat/chat.constants`);
@@ -58,7 +65,7 @@ const eventTriggeredPromise = (event) => new Promise(
 
 const testQueueTaskUpdate = () => {
 	describe(events.QUEUED_TASK_UPDATE, () => {
-		test(`Should trigger updateModelStatus if there is a ${events.QUEUED_TASK_UPDATE}`, async () => {
+		test(`Should trigger updateModelStatus if there is a ${events.QUEUED_TASK_UPDATE} (${modelTypes.CONTAINER})`, async () => {
 			const project = generateRandomString();
 			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
 			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_UPDATE);
@@ -73,6 +80,26 @@ const testQueueTaskUpdate = () => {
 			expect(ModelSettings.updateModelStatus).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.updateModelStatus).toHaveBeenCalledWith(data.teamspace, project,
 				data.model, data.status, data.corId);
+		});
+
+		test(`Should trigger updateProcessingStatus if there is a ${events.QUEUED_TASK_UPDATE} (${modelTypes.DRAWING})`, async () => {
+			const project = generateRandomString();
+			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
+			ModelSettings.getModelType.mockResolvedValueOnce(modelTypes.DRAWING);
+			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_UPDATE);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				corId: generateUUIDString(),
+				status: generateRandomString(),
+			};
+			await EventsManager.publish(events.QUEUED_TASK_UPDATE, data);
+			await waitOnEvent;
+			expect(Revisions.updateProcessingStatus).toHaveBeenCalledTimes(1);
+			expect(Revisions.updateProcessingStatus).toHaveBeenCalledWith(data.teamspace, project,
+				data.model, modelTypes.DRAWING, stringToUUID(data.corId), data.status);
+
+			expect(ModelSettings.updateModelStatus).not.toHaveBeenCalled();
 		});
 
 		test(`Should fail gracefully on error if there is a ${events.QUEUED_TASK_UPDATE}`, async () => {
@@ -113,9 +140,11 @@ const testQueueTaskUpdate = () => {
 
 const testQueueTaskCompleted = () => {
 	describe(events.QUEUED_TASK_COMPLETED, () => {
-		test(`Should trigger newRevisionProcessed if there is a ${events.QUEUED_TASK_COMPLETED} (container)`, async () => {
+		test(`Should trigger newRevisionProcessed if there is a ${events.QUEUED_TASK_COMPLETED} (${modelTypes.CONTAINER})`, async () => {
 			const project = generateRandomString();
 			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
+
+			ModelSettings.getModelType.mockResolvedValueOnce(modelTypes.CONTAINER);
 			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_COMPLETED);
 			const data = {
 				teamspace: generateRandomString(),
@@ -132,9 +161,42 @@ const testQueueTaskCompleted = () => {
 			await waitOnEvent;
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
+
+			expect(ModelSettings.getModelType).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.getModelType).toHaveBeenCalledWith(data.teamspace, data.model);
+
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledWith(data.teamspace, project, data.model,
 				data.corId, dataInfo, data.user, data.containers);
+		});
+
+		test(`Should trigger onProcessingCompleted if there is a ${events.QUEUED_TASK_COMPLETED} (${modelTypes.DRAWING})`, async () => {
+			const project = generateRandomString();
+			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
+			ModelSettings.getModelType.mockResolvedValueOnce(modelTypes.DRAWING);
+			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_COMPLETED);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				corId: generateRandomString(),
+				value: 0,
+				user: generateRandomString(),
+			};
+			EventsManager.publish(events.QUEUED_TASK_COMPLETED, data);
+			const dataInfo = getInfoFromCode(data.value);
+			dataInfo.retVal = data.value;
+
+			await waitOnEvent;
+			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
+			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
+
+			expect(ModelSettings.getModelType).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.getModelType).toHaveBeenCalledWith(data.teamspace, data.model);
+
+			expect(Revisions.onProcessingCompleted).toHaveBeenCalledTimes(1);
+			expect(Revisions.onProcessingCompleted).toHaveBeenCalledWith(data.teamspace, project, data.model,
+				data.corId, dataInfo, modelTypes.DRAWING);
+			expect(ModelSettings.newRevisionProcessed).not.toHaveBeenCalled();
 		});
 
 		test(`Should fail gracefully on error if there is a ${events.QUEUED_TASK_COMPLETED}`, async () => {
@@ -199,6 +261,107 @@ const testQueueTaskCompleted = () => {
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledWith(data.teamspace, project, data.model,
 				data.corId, dataInfo, data.user, data.containers);
+		});
+	});
+};
+
+const testModelProcessingCompleted = () => {
+	describe(events.MODEL_IMPORT_FINISHED, () => {
+		describe.each([
+			[true, false, false],
+		])('', (sendMail, success, userErr) => {
+			test(`Should ${sendMail ? 'not ' : ''} send an email if model import ${success ? 'succeeded' : 'failed'}${!success && userErr ? ' due to an user error' : ''}`, async () => {
+				const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+				const data = {
+					teamspace: generateRandomString(),
+					model: generateRandomString(),
+					project: generateUUID(),
+					success,
+					message: generateRandomString(),
+					userErr,
+					revId: generateUUID(),
+					user: generateRandomString(),
+					modelType: modelTypes.FEDERATION,
+				};
+
+				const zipPath = generateRandomString();
+				const logPreview = generateRandomString();
+				if (sendMail) {
+					ModPro.getLogArchive.mockResolvedValueOnce({ zipPath, logPreview });
+				}
+
+				EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
+
+				await waitOnEvent;
+
+				if (sendMail) {
+					expect(ModPro.getLogArchive).toHaveBeenCalledTimes(1);
+					expect(ModPro.getLogArchive).toHaveBeenCalledWith(UUIDToString(data.revId));
+
+					const mailerData = {
+						errInfo: {
+							code: data.errCode,
+							message: data.message,
+						},
+						teamspace: data.teamspace,
+						model: data.model,
+						user: data.user,
+						project: UUIDToString(data.project),
+						revId: UUIDToString(data.revId),
+						modelType: data.modelType,
+						logExcerpt: logPreview,
+
+					};
+
+					expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
+					expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(mailTemplates.MODEL_IMPORT_ERROR.name, mailerData, [{ filename: 'logs.zip', path: zipPath }]);
+				} else {
+					expect(ModPro.getLogArchive).not.toHaveBeenCalled();
+					expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+				}
+			});
+		});
+
+		test('Should fail gracefully if an error was thrown', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				project: generateUUID(),
+				success: false,
+				message: generateRandomString(),
+				userErr: false,
+				revId: generateUUID(),
+				user: generateRandomString(),
+				modelType: modelTypes.FEDERATION,
+			};
+
+			ModPro.getLogArchive.mockRejectedValueOnce(generateRandomString());
+
+			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
+
+			await waitOnEvent;
+		});
+
+		test('Should fail gracefully if an error was thrown (error object)', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				project: generateUUID(),
+				success: false,
+				message: generateRandomString(),
+				userErr: false,
+				revId: generateUUID(),
+				user: generateRandomString(),
+				modelType: modelTypes.FEDERATION,
+			};
+
+			ModPro.getLogArchive.mockRejectedValueOnce(new Error());
+
+			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
+
+			await waitOnEvent;
 		});
 	});
 };
@@ -410,7 +573,7 @@ const testNewRevision = () => {
 			const waitOnEvent = eventTriggeredPromise(events.NEW_REVISION);
 			const data = {
 				teamspace: generateRandomString(),
-				project: generateRandomString(),
+				project: generateUUID(),
 				model: generateRandomString(),
 				revision: generateRandomString(),
 				modelType: modelTypes.CONTAINER,
@@ -428,7 +591,7 @@ const testNewRevision = () => {
 				chatEvents.CONTAINER_NEW_REVISION,
 				{ _id: data.revision, tag, author, timestamp: timestamp.getTime(), desc, format: `.${format}` },
 				data.teamspace,
-				data.project,
+				UUIDToString(data.project),
 				data.model,
 			);
 		});
@@ -445,7 +608,7 @@ const testNewRevision = () => {
 			const waitOnEvent = eventTriggeredPromise(events.NEW_REVISION);
 			const data = {
 				teamspace: generateRandomString(),
-				project: generateRandomString(),
+				project: generateUUID(),
 				model: generateRandomString(),
 				revision: generateRandomString(),
 				modelType: modelTypes.DRAWING,
@@ -463,7 +626,7 @@ const testNewRevision = () => {
 				chatEvents.DRAWING_NEW_REVISION,
 				{ _id: data.revision, tag, author, timestamp: timestamp.getTime(), desc, format },
 				data.teamspace,
-				data.project,
+				UUIDToString(data.project),
 				data.model,
 			);
 		});
@@ -477,7 +640,7 @@ const testNewRevision = () => {
 			const waitOnEvent = eventTriggeredPromise(events.NEW_REVISION);
 			const data = {
 				teamspace: generateRandomString(),
-				project: generateRandomString(),
+				project: generateUUID(),
 				model: generateRandomString(),
 				revision: generateRandomString(),
 				modelType: modelTypes.FEDERATION,
@@ -494,7 +657,7 @@ const testNewRevision = () => {
 				chatEvents.FEDERATION_NEW_REVISION,
 				{ _id: data.revision, tag, author, timestamp: timestamp.getTime() },
 				data.teamspace,
-				data.project,
+				UUIDToString(data.project),
 				data.model,
 			);
 		});
@@ -504,7 +667,7 @@ const testNewRevision = () => {
 
 			const data = {
 				teamspace: generateRandomString(),
-				project: generateRandomString(),
+				project: generateUUID(),
 				model: generateRandomString(),
 				revision: generateRandomString(),
 				modelType: modelTypes.CONTAINER,
@@ -526,7 +689,7 @@ const testNewRevision = () => {
 
 			const data = {
 				teamspace: generateRandomString(),
-				project: generateRandomString(),
+				project: generateUUID(),
 				model: generateRandomString(),
 				revision: generateRandomString(),
 				modelType: modelTypes.CONTAINER,
@@ -977,6 +1140,7 @@ describe('services/eventsListener/eventsListener', () => {
 	testQueueTaskUpdate();
 	testQueueTaskCompleted();
 	testModelSettingsUpdate();
+	testModelProcessingCompleted();
 	testRevisionUpdated();
 	testNewModel();
 	testDeleteModel();
