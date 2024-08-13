@@ -121,9 +121,22 @@ export const Viewer2D = () => {
 		cursor.appendChild(intersect);
 		intersect.toggleAttribute('hidden');
 
-		const setCursor = (clientPosition, type) => {
+		// Normally we'd resolve the cursor position from svg space to client
+		// space immediatley. However below we keep it in svg space, so that
+		// if the user pans or zooms the ZoomableImage, we can update the cursor
+		// and verify the precision of the snap.
+
+		let cursorSvgPosition = { x:0, y:0 };
+		const updateCursorPosition = () => {
+			const clientPosition = imgRef.current.getClientPosition(cursorSvgPosition);
 			cursor.style.setProperty('left', (clientPosition.x - 10) + 'px', '');
 			cursor.style.setProperty('top', (clientPosition.y - 10) + 'px', '');
+		};
+		pz.on(Events.transform, updateCursorPosition);
+
+		const setCursor = (clientPosition, type) => {
+			cursorSvgPosition = clientPosition;
+			updateCursorPosition();
 			switch (type) {
 				case 'node':
 					node.toggleAttribute('hidden', false);
@@ -207,12 +220,17 @@ export const Viewer2D = () => {
 			// snippet snaps preferentially to nodes, then intersections, and
 			// finally edges.
 
+			// Note that the positions are in SVG space - these are the coordinates
+			// that should be passed to the calibration system, and will need to be
+			// converted to the client rect in order to find out where to draw the
+			// cursor.
+
 			if (results.closestNode != null) {
-				setCursor(imgRef.current.getClientPosition(results.closestNode), 'node');
+				setCursor(results.closestNode, 'node');
 			} else if (results.closestIntersection != null) {
-				setCursor(imgRef.current.getClientPosition(results.closestIntersection), 'intersect');
+				setCursor(results.closestIntersection, 'intersect');
 			} else if (results.closestEdge != null) {
-				setCursor(imgRef.current.getClientPosition(results.closestEdge), 'edge');
+				setCursor(results.closestEdge, 'edge');
 			} else {
 				setCursor({ x:0, y:0 }, 'none');
 			}
