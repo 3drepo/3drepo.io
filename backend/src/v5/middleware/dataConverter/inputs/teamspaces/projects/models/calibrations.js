@@ -19,7 +19,7 @@ const { createResponseCode, templates } = require('../../../../../../utils/respo
 const { UUIDToString } = require('../../../../../../utils/helper/uuids');
 const Yup = require('yup');
 const YupHelper = require('../../../../../../utils/helper/yup');
-const { getLatestCalibration } = require('../../../../../../processors/teamspaces/projects/models/calibrations');
+const { getLastAvailableCalibration } = require('../../../../../../processors/teamspaces/projects/models/calibrations');
 const { respond } = require('../../../../../../utils/responder');
 
 const Calibrations = {};
@@ -27,8 +27,7 @@ const Calibrations = {};
 const validateConfirmCalibration = async (req, res, next) => {
 	try {
 		const { teamspace, project, drawing, revision } = req.params;
-		const latestCalibration = await getLatestCalibration(teamspace, project, drawing, revision, true);
-
+		const latestCalibration = await getLastAvailableCalibration(teamspace, project, drawing, revision, true);
 		if (UUIDToString(latestCalibration.rev_id) === UUIDToString(revision)) {
 			throw templates.revisionNotUnconfirmed;
 		}
@@ -44,16 +43,16 @@ const validateConfirmCalibration = async (req, res, next) => {
 const validateNewCalibrationData = async (req, res, next) => {
 	const schema = Yup.object({
 		horizontal: Yup.object({
-			model: Yup.array().of(YupHelper.types.position).length(2),
-			drawing: Yup.array().of(YupHelper.types.position2d).length(2),
+			model: Yup.array().of(YupHelper.types.position).length(2).required(),
+			drawing: Yup.array().of(YupHelper.types.position2d).length(2).required(),
 		}).required(),
-		verticalRange: YupHelper.types.position2d.required(),
+		verticalRange: YupHelper.types.position2d.required()
+			.test('valid-verticalRange', 'The second number of the range must be larger than the first', (value) => value[0] < value[1]),
 		units: YupHelper.types.strings.unit.required(),
 	}).required().noUnknown();
 
 	try {
 		req.body = await schema.validate(req.body);
-
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));

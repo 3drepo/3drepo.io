@@ -24,6 +24,7 @@ const { deleteModel, getDrawingById, getDrawings, updateModelSettings } = requir
 const { getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../../services/filesManager');
 const { getProjectById, removeModelFromProject } = require('../../../../models/projectSettings');
 const Path = require('path');
+const { calibrationStatuses } = require('../../../../models/calibrations.constants');
 const { events } = require('../../../../services/eventsManager/eventsManager.constants');
 const { getDrawingCalibrationStatus } = require('../../../../models/calibrations');
 const { publish } = require('../../../../services/eventsManager/eventsManager');
@@ -40,19 +41,20 @@ Drawings.getDrawingList = async (teamspace, project, user) => {
 
 Drawings.getDrawingStats = async (teamspace, drawing) => {
 	let latestRev;
+	let calibration;
+
 	const [settings, revCount] = await Promise.all([
-		getDrawingById(teamspace, drawing, { number: 1, status: 1, type: 1, desc: 1, calibration: 1 }),
+		getDrawingById(teamspace, drawing, { number: 1, status: 1, type: 1, desc: 1 }),
 		getRevisionCount(teamspace, drawing, modelTypes.DRAWING),
 	]);
 
 	try {
 		latestRev = await getLatestRevision(teamspace, drawing, modelTypes.DRAWING,
 			{ _id: 1, statusCode: 1, revCode: 1, timestamp: 1 });
+		calibration = await getDrawingCalibrationStatus(teamspace, drawing, latestRev?._id);
 	} catch {
-		// do nothing. A drawing can have 0 revision.
+		calibration = calibrationStatuses.UNCALIBRATED;
 	}
-
-	const calibration = await getDrawingCalibrationStatus(teamspace, drawing, latestRev?._id);
 
 	return {
 		number: settings.number,

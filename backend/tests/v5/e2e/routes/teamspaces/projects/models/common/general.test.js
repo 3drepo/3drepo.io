@@ -23,6 +23,7 @@ const { src } = require('../../../../../../helper/path');
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { updateOne } = require(`${src}/handler/db`);
@@ -44,6 +45,7 @@ const generateBasicData = () => {
 		con: ServiceHelper.generateRandomModel({ viewers: [viewer.user] }),
 		fed: ServiceHelper.generateRandomModel({ viewers: [viewer.user], modelType: modelTypes.FEDERATION }),
 		draw: ServiceHelper.generateRandomModel({ viewers: [viewer.user], modelType: modelTypes.DRAWING }),
+		calibration: ServiceHelper.generateCalibration(),
 	};
 
 	return data;
@@ -183,12 +185,14 @@ const addRevision = async (teamspace, model, modelType = modelTypes.CONTAINER) =
 
 const testGetModelStats = () => {
 	describe('Get model stats', () => {
-		const { users, teamspace, project, con, fed, draw } = generateBasicData();
+		const { users, teamspace, project, con, fed, draw, calibration } = generateBasicData();
 		const [fedWithNoSubModel, fedWithNoRevInSubModel] = times(
 			2, () => ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
 		);
 
 		const drawNoRev = ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING });
+		drawNoRev.properties.calibrationStatus = calibrationStatuses.UNCALIBRATED;
+
 		const [
 			conNoRev, conFailedProcessing1, conFailedProcessing2,
 		] = times(3, () => ServiceHelper.generateRandomModel());
@@ -225,7 +229,10 @@ const testGetModelStats = () => {
 				addIssuesAndRisks(teamspace, fedWithNoRevInSubModel),
 			]);
 
-			await addRevision(teamspace, draw, modelTypes.DRAWING);
+			const drawRev = await addRevision(teamspace, draw, modelTypes.DRAWING);
+			await ServiceHelper.db.createCalibration(teamspace, project.id, draw._id, drawRev._id, calibration);
+			draw.properties.calibrationStatus = calibrationStatuses.CALIBRATED;
+
 			const rev = await addRevision(teamspace, con);
 			fed.revs = [rev];
 		});
@@ -289,8 +296,8 @@ const testGetModelStats = () => {
 		};
 
 		const formatToStats = ({ properties, issuesCount = 0, risksCount = 0, revs = [] }) => {
-			const { subModels, status, desc, number, properties: props, calibration,
-				federate, errorReason, type } = properties;
+			const { subModels, status, desc, number, properties: props, federate,
+				errorReason, type, calibrationStatus } = properties;
 
 			let { modelType } = properties;
 			if (!modelType) {
@@ -313,7 +320,7 @@ const testGetModelStats = () => {
 				containers: modelType === modelTypes.FEDERATION ? subModels : undefined,
 				tickets: modelType === modelTypes.FEDERATION ? { issues: issuesCount, risks: risksCount } : undefined,
 				status,
-				calibration: modelType === modelTypes.DRAWING ? calibration ?? 'uncalibrated' : undefined,
+				calibration: modelType === modelTypes.DRAWING ? calibrationStatus : undefined,
 				type: modelType === modelTypes.FEDERATION ? undefined : type,
 				revisions: modelType === modelTypes.FEDERATION ? undefined : {
 					total: revs.length,

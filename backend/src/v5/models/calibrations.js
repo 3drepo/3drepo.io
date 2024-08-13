@@ -36,7 +36,7 @@ Calibrations.addCalibration = async (teamspace, project, drawing, revision, cali
 	await db.insertOne(teamspace, CALIBRATIONS_COL, formattedData);
 };
 
-Calibrations.getLatestRevCalibration = (teamspace, project, drawing, revision, projection) => db.findOne(
+Calibrations.getRevisionCalibration = (teamspace, project, drawing, revision, projection) => db.findOne(
 	teamspace, CALIBRATIONS_COL, { drawing, rev_id: revision, project },
 	projection, { createdAt: -1 });
 

@@ -137,7 +137,6 @@ Revisions.getPreviousRevisions = async (teamspace, model, modelType, revisionId)
 	const query = deleteIfUndefined({
 		...excludeVoids,
 		...excludeIncomplete,
-		model: modelType === modelTypes.DRAWING ? model : undefined,
 		timestamp: { $lt: currentRevision.timestamp },
 	});
 

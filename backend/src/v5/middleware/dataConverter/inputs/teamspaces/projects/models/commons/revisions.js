@@ -18,6 +18,7 @@
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const Path = require('path');
 const Yup = require('yup');
+const { getRevisionByIdOrTag } = require('../../../../../../../models/revisions');
 const { respond } = require('../../../../../../../utils/responder');
 const { sufficientQuota } = require('../../../../../../../utils/quota');
 
@@ -54,6 +55,17 @@ Revisions.checkQuotaIsSufficient = async (req, res, next) => {
 	const { teamspace } = req.params;
 	await sufficientQuota(teamspace, req.file.size);
 	await next();
+};
+
+Revisions.revisionExists = (modelType) => async (req, res, next) => {
+	try {
+		const { teamspace, model, revision } = req.params;
+		await getRevisionByIdOrTag(teamspace, model, modelType, revision, { _id: 1 });
+
+		await next();
+	} catch (err) {
+		respond(req, res, err);
+	}
 };
 
 module.exports = Revisions;

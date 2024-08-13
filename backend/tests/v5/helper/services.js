@@ -164,6 +164,18 @@ db.createRevision = async (teamspace, model, revision, modelType) => {
 	await DbHandler.insertOne(teamspace, modelType === modelTypes.DRAWING ? `${modelType}s.history` : `${model}.history`, formattedRevision);
 };
 
+db.createCalibration = async (teamspace, project, drawing, revision, calibration) => {
+	const formattedCalibration = {
+		...calibration,
+		_id: stringToUUID(calibration._id),
+		project: stringToUUID(project),
+		drawing,
+		rev_id: stringToUUID(revision),
+	};
+
+	await DbHandler.insertOne(teamspace, 'drawings.revisions.calibrations', formattedCalibration);
+};
+
 db.createSequence = async (teamspace, model, { sequence, states, activities, activityTree }) => {
 	const seqCol = `${model}.sequences`;
 	const actCol = `${model}.activities`;
@@ -452,6 +464,18 @@ ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, modelType
 
 	return entry;
 };
+
+ServiceHelper.generateCalibration = () => ({
+	_id: ServiceHelper.generateUUIDString(),
+	horizontal: {
+		model: times(2, () => times(3, () => ServiceHelper.generateRandomNumber())),
+		drawing: times(2, () => times(2, () => ServiceHelper.generateRandomNumber())),
+	},
+	verticalRange: [0, 10],
+	units: 'm',
+	createdAt: ServiceHelper.generateRandomDate(),
+	createdBy: ServiceHelper.generateRandomString(),
+});
 
 ServiceHelper.generateRandomModelProperties = (modelType = modelTypes.CONTAINER) => ({
 	desc: ServiceHelper.generateRandomString(),

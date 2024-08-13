@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { calibrationStatuses } = require('../../../../../../../src/v5/models/calibrations.constants');
 const { src } = require('../../../../../helper/path');
 const { determineTestGroup, generateRandomString, generateRandomObject, generateUUIDString, generateRandomNumber } = require('../../../../../helper/services');
 
@@ -30,6 +31,8 @@ jest.mock('../../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
 jest.mock('../../../../../../../src/v5/models/revisions');
 const Revisions = require(`${src}/models/revisions`);
+jest.mock('../../../../../../../src/v5/models/calibrations');
+const Calibrations = require(`${src}/models/calibrations`);
 jest.mock('../../../../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 
@@ -142,7 +145,7 @@ const testGetRevisions = () => {
 	});
 };
 
-const formatToStats = (settings, revCount, latestRev) => ({
+const formatToStats = (settings, revCount, latestRev, calibration) => ({
 	number: settings.number,
 	status: settings.status,
 	type: settings.type,
@@ -152,7 +155,7 @@ const formatToStats = (settings, revCount, latestRev) => ({
 		lastUpdated: latestRev?.timestamp,
 		latestRevision: latestRev ? `${latestRev.statusCode}-${latestRev.revCode}` : undefined,
 	},
-	calibration: settings.calibration ?? 'uncalibrated',
+	calibration,
 });
 
 const testGetDrawingStats = () => {
@@ -165,9 +168,9 @@ const testGetDrawingStats = () => {
 			status: generateRandomString(),
 			type: generateRandomString(),
 			desc: generateRandomString(),
-			calibration: generateRandomString(),
 		};
 		const latestRev = {
+			_id: generateRandomString(),
 			timestamp: generateRandomString(),
 			statusCode: generateRandomString(),
 			revCode: generateRandomString(),
@@ -177,39 +180,41 @@ const testGetDrawingStats = () => {
 			const getDrawingByIdMock = ModelSettings.getDrawingById.mockResolvedValueOnce(settings);
 			const getRevisionCountMock = Revisions.getRevisionCount.mockResolvedValueOnce(revCount);
 			const getLatestRevMock = Revisions.getLatestRevision.mockResolvedValueOnce(latestRev);
+			const getDrawingCalibrationStatusMock = Calibrations.getDrawingCalibrationStatus
+				.mockResolvedValueOnce(calibrationStatuses.CALIBRATED);
 
 			const res = await Drawings.getDrawingStats(teamspace, drawing);
 
-			expect(res).toEqual(formatToStats(settings, revCount, latestRev));
+			expect(res).toEqual(formatToStats(settings, revCount, latestRev, calibrationStatuses.CALIBRATED));
 			expect(getDrawingByIdMock).toHaveBeenCalledTimes(1);
 			expect(getDrawingByIdMock).toHaveBeenCalledWith(teamspace, drawing,
-				{ number: 1, status: 1, type: 1, desc: 1, calibration: 1 });
+				{ number: 1, status: 1, type: 1, desc: 1 });
 			expect(getRevisionCountMock).toHaveBeenCalledTimes(1);
 			expect(getRevisionCountMock).toHaveBeenCalledWith(teamspace, drawing, modelTypes.DRAWING);
 			expect(getLatestRevMock).toHaveBeenCalledTimes(1);
 			expect(getLatestRevMock).toHaveBeenCalledWith(teamspace, drawing, modelTypes.DRAWING,
-				{ statusCode: 1, revCode: 1, timestamp: 1 });
+				{ _id: 1, statusCode: 1, revCode: 1, timestamp: 1 });
+			expect(getDrawingCalibrationStatusMock).toHaveBeenCalledTimes(1);
+			expect(getDrawingCalibrationStatusMock).toHaveBeenCalledWith(teamspace, drawing, latestRev._id);
 		});
 
 		test('should return the drawing stats even if there are no revisions', async () => {
-			const settingsWithNoCalibration = {
-				...settings, calibration: undefined,
-			};
-			const getDrawingByIdMock = ModelSettings.getDrawingById.mockResolvedValueOnce(settingsWithNoCalibration);
+			const getDrawingByIdMock = ModelSettings.getDrawingById.mockResolvedValueOnce(settings);
 			const getRevisionCountMock = Revisions.getRevisionCount.mockResolvedValueOnce(revCount);
 			const getLatestRevMock = Revisions.getLatestRevision.mockRejectedValueOnce(undefined);
 
 			const res = await Drawings.getDrawingStats(teamspace, drawing);
 
-			expect(res).toEqual(formatToStats(settingsWithNoCalibration, revCount));
+			expect(res).toEqual(formatToStats(settings, revCount, undefined, calibrationStatuses.UNCALIBRATED));
 			expect(getDrawingByIdMock).toHaveBeenCalledTimes(1);
 			expect(getDrawingByIdMock).toHaveBeenCalledWith(teamspace, drawing,
-				{ number: 1, status: 1, type: 1, desc: 1, calibration: 1 });
+				{ number: 1, status: 1, type: 1, desc: 1 });
 			expect(getRevisionCountMock).toHaveBeenCalledTimes(1);
 			expect(getRevisionCountMock).toHaveBeenCalledWith(teamspace, drawing, modelTypes.DRAWING);
 			expect(getLatestRevMock).toHaveBeenCalledTimes(1);
 			expect(getLatestRevMock).toHaveBeenCalledWith(teamspace, drawing, modelTypes.DRAWING,
-				{ statusCode: 1, revCode: 1, timestamp: 1 });
+				{ _id: 1, statusCode: 1, revCode: 1, timestamp: 1 });
+			expect(Calibrations.getDrawingCalibrationStatus).not.toHaveBeenCalled();
 		});
 
 		test('should fail if getDrawingById fails', async () => {

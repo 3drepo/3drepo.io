@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addCalibration, getLatestRevCalibration } = require('../../../../models/calibrations');
+const { addCalibration, getRevisionCalibration } = require('../../../../models/calibrations');
 const { deleteIfUndefined } = require('../../../../utils/helper/objects');
 const { getPreviousRevisions } = require('../../../../models/revisions');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
@@ -25,7 +25,7 @@ const Calibrations = { };
 
 Calibrations.addCalibration = addCalibration;
 
-Calibrations.getLatestCalibration = async (teamspace, project, drawing, revision, returnRevId) => {
+Calibrations.getLastAvailableCalibration = async (teamspace, project, drawing, revision, returnRevId) => {
 	const projection = deleteIfUndefined({
 		_id: 0,
 		horizontal: 1,
@@ -34,7 +34,7 @@ Calibrations.getLatestCalibration = async (teamspace, project, drawing, revision
 		createdAt: 1,
 		rev_id: returnRevId ? 1 : undefined });
 
-	let latestCalibration = await getLatestRevCalibration(teamspace, project, drawing, revision, projection);
+	let latestCalibration = await getRevisionCalibration(teamspace, project, drawing, revision, projection);
 
 	if (latestCalibration) {
 		return latestCalibration;
@@ -43,7 +43,7 @@ Calibrations.getLatestCalibration = async (teamspace, project, drawing, revision
 	const previousRevisions = await getPreviousRevisions(teamspace, drawing, modelTypes.DRAWING, revision);
 	for (let i = 0; i < previousRevisions.length; i++) {
 		// eslint-disable-next-line no-await-in-loop
-		latestCalibration = await getLatestRevCalibration(teamspace, project, drawing,
+		latestCalibration = await getRevisionCalibration(teamspace, project, drawing,
 			previousRevisions[i]._id, projection);
 
 		if (latestCalibration) {

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
 const { src } = require('../../helper/path');
 
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
@@ -349,14 +350,14 @@ const testUpdateRevisionStatus = () => {
 const testIsTagUnique = () => {
 	describe('Is Valid Tag', () => {
 		test('Should return false if tag already exists', async () => {
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValue('existingTag');
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce('existingTag');
 			const res = await Revisions.isTagUnique('someTS', 'someModel', 'someTag');
 			expect(res).toEqual(false);
 			expect(fn.mock.calls.length).toBe(1);
 		});
 
 		test('Should return true if tag is unique', async () => {
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
 			const res = await Revisions.isTagUnique('someTS', 'someModel', 'someTag');
 			expect(res).toEqual(true);
 			expect(fn.mock.calls.length).toBe(1);
@@ -372,7 +373,7 @@ const testIsRevAndStatusCodeUnique = () => {
 		const statusCode = generateRandomString();
 
 		test('Should return false if tag already exists', async () => {
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(generateRandomString());
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(generateRandomString());
 			const res = await Revisions.isRevAndStatusCodeUnique(teamspace, model, revCode, statusCode);
 			expect(res).toEqual(false);
 			expect(fn).toHaveBeenCalledTimes(1);
@@ -382,7 +383,7 @@ const testIsRevAndStatusCodeUnique = () => {
 		});
 
 		test('Should return false if tag already exists', async () => {
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
 			const res = await Revisions.isRevAndStatusCodeUnique(teamspace, model, revCode, statusCode);
 			expect(res).toEqual(true);
 			expect(fn).toHaveBeenCalledTimes(1);
@@ -409,6 +410,49 @@ const testGetRevisionFormat = () => {
 	});
 };
 
+const testGetPreviousRevisions = () => {
+	const teamspace = generateRandomString();
+	const model = generateRandomString();
+	const revision = { _id: generateRandomString(), timestamp: generateRandomString() };
+	const previousRevisions = times(5, () => ({ _id: generateRandomString(), timestamp: generateRandomString() }));
+
+	describe('GetPreviousRevisions', () => {
+		test('Should return previous revision (container)', async () => {
+			const fn1 = jest.spyOn(db, 'findOne').mockResolvedValueOnce(revision);
+			const fn2 = jest.spyOn(db, 'find').mockResolvedValueOnce(previousRevisions);
+
+			const res = await Revisions.getPreviousRevisions(teamspace, model, modelTypes.CONTAINER, revision._id);
+
+			expect(res).toEqual(previousRevisions);
+			expect(fn1).toHaveBeenCalledTimes(1);
+			expect(fn1).toHaveBeenCalledWith(teamspace, `${model}.history`,
+				{ $or: [{ _id: revision._id }, { tag: revision._id }] }, { timestamp: 1 }, undefined);
+
+			expect(fn2).toHaveBeenCalledTimes(1);
+			expect(fn2).toHaveBeenCalledWith(teamspace, `${model}.history`,
+				{ ...excludeIncomplete, ...excludeVoids, timestamp: { $lt: revision.timestamp } },
+				{}, { timestamp: -1 });
+		});
+
+		test('Should return previous revision (drawing)', async () => {
+			const fn1 = jest.spyOn(db, 'findOne').mockResolvedValueOnce(revision);
+			const fn2 = jest.spyOn(db, 'find').mockResolvedValueOnce(previousRevisions);
+
+			const res = await Revisions.getPreviousRevisions(teamspace, model, modelTypes.DRAWING, revision._id);
+
+			expect(res).toEqual(previousRevisions);
+			expect(fn1).toHaveBeenCalledTimes(1);
+			expect(fn1).toHaveBeenCalledWith(teamspace, 'drawings.history',
+				{ $or: [{ _id: revision._id }, { tag: revision._id }], model }, { timestamp: 1 }, undefined);
+
+			expect(fn2).toHaveBeenCalledTimes(1);
+			expect(fn2).toHaveBeenCalledWith(teamspace, 'drawings.history',
+				{ ...excludeIncomplete, ...excludeVoids, timestamp: { $lt: revision.timestamp }, model },
+				{}, { timestamp: -1 });
+		});
+	});
+};
+
 describe('models/revisions', () => {
 	testGetRevisionCount();
 	testGetLatestRevision();
@@ -421,4 +465,5 @@ describe('models/revisions', () => {
 	testIsRevAndStatusCodeUnique();
 	testGetRevisionByIdOrTag();
 	testGetRevisionFormat();
+	testGetPreviousRevisions();
 });

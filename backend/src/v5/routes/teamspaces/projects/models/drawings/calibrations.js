@@ -19,7 +19,9 @@ const { hasReadAccessToDrawing, hasWriteAccessToDrawing } = require('../../../..
 const Calibrations = require('../../../../../processors/teamspaces/projects/models/calibrations');
 const { Router } = require('express');
 const { getUserFromSession } = require('../../../../../utils/sessions');
+const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../utils/responder');
+const { revisionExists } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 const { templates } = require('../../../../../utils/responseCodes');
 const { validateNewCalibration } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/calibrations');
 
@@ -27,7 +29,7 @@ const getLatestCalibration = async (req, res) => {
 	const { teamspace, project, drawing, revision } = req.params;
 
 	try {
-		const latestCalibration = await Calibrations.getLatestCalibration(teamspace, project, drawing, revision);
+		const latestCalibration = await Calibrations.getLastAvailableCalibration(teamspace, project, drawing, revision);
 		respond(req, res, templates.ok, latestCalibration);
 	} catch (err) {
 		/* istanbul ignore next */
@@ -155,7 +157,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: creates a new calibration
 	 */
-	router.post('/', hasWriteAccessToDrawing, validateNewCalibration, addCalibration);
+	router.post('/', hasWriteAccessToDrawing, revisionExists(modelTypes.DRAWING), validateNewCalibration, addCalibration);
 
 	/**
 	 * @openapi
@@ -251,7 +253,7 @@ const establishRoutes = () => {
 	 *                   example: mm
 	 *             example: { horizontal: { model: [[1, 2, 3], [4, 5, 6]], drawing: [[1, 2], [3, 4]] }, verticalRange: [0, 10], units: m }
 	 */
-	router.get('/', hasReadAccessToDrawing, getLatestCalibration);
+	router.get('/', hasReadAccessToDrawing, revisionExists(modelTypes.DRAWING), getLatestCalibration);
 
 	return router;
 };
