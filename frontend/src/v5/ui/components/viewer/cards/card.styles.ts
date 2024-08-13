@@ -44,13 +44,15 @@ export const CardContainer = styled.div`
 
 export const CardHeader = styled.div`
 	${({ theme }) => theme.typography.h3}
+	font-size: 17px;
 	background: ${({ theme }) => theme.palette.primary.contrast};
 	display: flex;
 	align-items: center;
 	min-height: 48px;
-	padding: 0 15px;
+	padding: 0 16px;
 	border-bottom: 1px solid  ${({ theme }) => theme.palette.base.lightest};
-	gap: 5px;
+	display: grid;
+    grid-template-columns: 32px auto max-content;
 `;
 
 export const HeaderButtons = styled.span`
