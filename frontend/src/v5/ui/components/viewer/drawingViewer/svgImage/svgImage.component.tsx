@@ -372,6 +372,7 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 
 		// Create a new canvas for the newly loaded image
 		createCanvas(() => {
+			ev.src = img.src; // Add the src property to the event until we have a proper way to hook this up
 			onLoad?.(ev);
 		});
 	};

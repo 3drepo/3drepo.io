@@ -17,9 +17,7 @@
 
 import 'path-data-polyfill';
 import { Vector2, Line, Point } from './types';
-import { QuadTree } from './quadTree';
 import { RTree, RTreeBuilder, RTreeNode } from './rTree';
-import { KDTree, KDTreeBuilder, KDTreeNode } from './kdTree';
 
 export class SVGSnapDiagnosticsHelper {
 
@@ -105,111 +103,6 @@ export class SVGSnapDiagnosticsHelper {
 				this.renderRTreeNode(child);
 			}
 		}
-	}
-
-	renderKDTree(node: KDTree) {
-		this.renderKDTreeNode(node.root);
-	}
-
-	renderKDTreeNode(node: KDTreeNode) {
-		if (node.axis != null) {
-			const line = node.axis.line(this.canvas.width, this.canvas.height);
-			this.context.beginPath();
-			this.context.moveTo(line.start.x, line.start.y);
-			this.context.lineTo(line.end.x, line.end.y);
-			this.context.stroke();
-		}
-		if (node.left != null) {
-			this.renderKDTreeNode(node.left);
-		}
-		if (node.right != null) {
-			this.renderKDTreeNode(node.right);
-		}
-	}
-}
-
-class SelfIntersectionTraversalContext {
-	pairs: { a: RTreeNode, b: RTreeNode }[];
-
-	constructor() {
-		this.pairs = [];
-	}
-}
-
-class IntersectionBuilderReport {
-	buildTime: number;
-
-	maxLevelPairs: number;
-
-	numPairs: number;
-
-	constructor() {
-		this.buildTime = 0;
-		this.maxLevelPairs = 0;
-		this.numPairs = 0;
-	}
-}
-
-class IntersectionBuilder {
-
-	rtree: RTree;
-
-	report: IntersectionBuilderReport;
-
-	constructor(rtree: RTree) {
-		this.rtree = rtree;
-		this.report = new IntersectionBuilderReport();
-	}
-
-	build() {
-		const start = performance.now();
-
-		const ctx = new SelfIntersectionTraversalContext();
-		this.getIntersectingNodes(this.rtree.root.children, ctx);
-
-		this.report.buildTime = performance.now() - start;
-	}
-
-	// Finds all leaf-nodes that intersect with eachother and add them to the
-	// context.
-	getIntersectingNodes(nodes: RTreeNode[], ctx: SelfIntersectionTraversalContext) {
-
-		const intersectingPairs = [];
-
-		// Find pairs of nodes at this level that may be intersecting
-
-		for (let i = 0; i < nodes.length; i++) {
-			for (let j = i + 1; j < nodes.length; j++) {
-				const a = nodes[i];
-				const b = nodes[j];
-				if (this.intersects(a, b)) {
-					intersectingPairs.push({ a, b });
-				}
-			}
-		}
-
-		this.report.maxLevelPairs = Math.max(this.report.maxLevelPairs, intersectingPairs.length);
-
-		// For each pair, test the children. If both are leaf nodes, then we
-		// are done with the branch and can return, otherwise we need to
-		// descend another level.
-
-		for (const { a, b } of intersectingPairs) {
-			if (a.leafNode() && b.leafNode()) {
-				//ctx.pairs.push({ a, b });
-				this.report.numPairs++;
-			} else if (a.leafNode() && !b.leafNode()) {
-				this.getIntersectingNodes([a, ...b.children], ctx);
-			} else if (!a.leafNode() && b.leafNode()) {
-				this.getIntersectingNodes([b, ...a.children], ctx);
-			} else { // Neither are leaf nodes, so compare all children with eachother
-				this.getIntersectingNodes([...a.children, ...b.children], ctx);
-			}
-		}
-	}
-
-	intersects(a: RTreeNode, b: RTreeNode): boolean {
-		return (a.xmin <= b.xmax && a.xmax >= b.xmin) && (a.ymin <= b.ymax && a.ymax >= b.ymin);
 	}
 }
 
@@ -333,13 +226,7 @@ export class SVGSnap {
 
 	svg: SVGSVGElement;
 
-	quadtree: QuadTree;
-
 	rtree: RTree; //RTree that stores Lines, Curves and similar line-type primitives
-
-	ntree: KDTree; //KDTree that stores the control points of nodes
-
-	itree: KDTree; //KDTree that stores the intersection points between line-type primitives
 
 	debugHelper: SVGSnapDiagnosticsHelper;
 
@@ -371,7 +258,7 @@ export class SVGSnap {
 			console.error('SVG has a non-zero viewBox offset. SVGSnap will attempt to counteract the offset to match createImageBitamp, but this is not supported and the behaviour is not guaranteed.');
 		}
 
-		this.debugHelper.setSvg(this.svg);
+		this.debugHelper?.setSvg(this.svg);
 
 		const collector = new PrimitiveCollector(viewBoxOffset.inverse);
 
@@ -383,7 +270,7 @@ export class SVGSnap {
 
 		// debug draw all the lines
 
-		this.debugHelper.renderPrimitives(collector);
+		this.debugHelper?.renderPrimitives(collector);
 
 		this.buildAccelerationStructures(collector);
 	}
@@ -438,47 +325,23 @@ export class SVGSnap {
 			n: 10,
 		});
 		this.rtree = rbuilder.build();
-
-		/*
-		const nbuilder = new KDTreeBuilder({
-			points: collector.points,
-			n: 10,
-		});
-		this.ntree = nbuilder.build();
-		*/
-
-		//const intersections = new IntersectionBuilder(this.rtree);
-		//intersections.build();
-
-		//this.debugHelper.renderRTree(this.rtree);
-		//this.debugHelper.renderKDTree(this.ntree);
-
-		console.log(rbuilder.report);
-	//	console.log(nbuilder.report);
 	}
 
 	snap(position: Vector2, radius: number): SnapResults {
 
-		this.debugHelper.renderRadius(position, radius);
-
-		// There are three types of location to snap to: lines/curves, node-points and intersection-points.
-		// Each has its own acceleration structure.
+		this.debugHelper?.renderRadius(position, radius);
 
 		const results = new SnapResults();
+
+		if (!this.rtree) { // The svg is loaded asynchronously, so if this is called before the tree has been built return an empty response
+			return results;
+		}
 
 		const queryResults = this.rtree.query(position, radius);
 
 		results.closestEdge = queryResults.closestEdge;
 		results.closestNode = queryResults.closestNode;
-
-		console.log(queryResults);
-
-		/*
-		const nodeResults = this.ntree.query(position, radius);
-		if (nodeResults.closestPoint != null) {
-			results.closestNode = new Vector2(nodeResults.closestPoint.x, nodeResults.closestPoint.y);
-		}
-		*/
+		results.closestIntersection = queryResults.closestIntersection;
 
 		return results;
 	}

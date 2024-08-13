@@ -63,7 +63,7 @@ export const Viewer2D = () => {
 		zoomHandler.zoomOut();
 	};
 
-	const onImageLoad = () => {
+	const onImageLoad = ({ src }) => {
 		setIsLoading(false);
 
 		if (zoomHandler) {
@@ -81,14 +81,73 @@ export const Viewer2D = () => {
 			setIsMaxZoom(cantZoomIn);
 		});
 
+		// The svg snap helper should only ever have load called once (create a
+		// new instance for new images). The helper will download the svg and
+		// instantiate it as a DOM element, then parse it for everything it
+		// requires. While downloading is asynchronous, building the structure can
+		// take up to a second for the largest images.
+
+		// NOTE THAT THIS IMPLEMENTATION DOES NOT SUPPORT LOADING NEW IMAGES AT ALL
+		// BECAUSE THE ONMOUSEMOVE HANDLER IS NOT DEREGISTERED ANYWHERE.
+
 		const snapHandler = new SVGSnap();
 		snapHandler.load(src);
-		snapHandler.showDebugCanvas(document.querySelector('#app'));
 
-		// temporary cursor to show snap location
-		const cursor = document.createElement('img');
+		// Sets up a secondary canvas to render things, such as the primitives
+		// into, in order to visualise the behaviour of the snapping algorithms.
+		// The canvas and everything on it is in svg space, making it particularly
+		// useful to diagnose transform issues when going between the client and
+		// the svg coordinate systems.
+
+		// snapHandler.showDebugCanvas(document.querySelector('#app'));
+
+		// Set up a cursor to show the state of the snap.
+
+		const cursor = document.createElement('div');
 		cursor.setAttribute('style', 'position: absolute; width: 20px; height: 20px; border-radius: 50%; display: block; z-index: 1;');
-		cursor.src = '/assets/drawings/snap.svg';
+
+		const node = document.createElement('img');
+		node.src = '/assets/drawings/cursor-node.svg';
+		cursor.appendChild(node);
+		node.toggleAttribute('hidden');
+
+		const edge = document.createElement('img');
+		edge.src = '/assets/drawings/cursor-edge.svg';
+		cursor.appendChild(edge);
+		edge.toggleAttribute('hidden');
+
+		const intersect = document.createElement('img');
+		intersect.src = '/assets/drawings/cursor-intersect.svg';
+		cursor.appendChild(intersect);
+		intersect.toggleAttribute('hidden');
+
+		const setCursor = (clientPosition, type) => {
+			cursor.style.setProperty('left', (clientPosition.x - 10) + 'px', '');
+			cursor.style.setProperty('top', (clientPosition.y - 10) + 'px', '');
+			switch (type) {
+				case 'node':
+					node.toggleAttribute('hidden', false);
+					edge.toggleAttribute('hidden', true);
+					intersect.toggleAttribute('hidden', true);
+					break;
+				case 'edge':
+					node.toggleAttribute('hidden', true);
+					edge.toggleAttribute('hidden', false);
+					intersect.toggleAttribute('hidden', true);
+					break;
+				case 'intersect':
+					node.toggleAttribute('hidden', true);
+					edge.toggleAttribute('hidden', true);
+					intersect.toggleAttribute('hidden', false);
+					break;
+				case 'none':
+					node.toggleAttribute('hidden', true);
+					edge.toggleAttribute('hidden', true);
+					intersect.toggleAttribute('hidden', true);
+					break;
+			}
+		};
+
 		imgRef.current.getEventsEmitter().appendChild(cursor);
 
 		const getComputedStyleAsFloat = (element, style) => {
@@ -143,13 +202,19 @@ export const Viewer2D = () => {
 			// invoke the snap.
 
 			const results = snapHandler.snap(p, radius);
-			const r = results.closestNode;
 
-			if (r != null) {
-				const r2 = imgRef.current.getClientPosition(r);
+			// The snapResults object returns three types of snap point. This
+			// snippet snaps preferentially to nodes, then intersections, and
+			// finally edges.
 
-				cursor.style.setProperty('left', (r2.x - 10) + 'px', '');
-				cursor.style.setProperty('top', (r2.y - 10) + 'px', '');
+			if (results.closestNode != null) {
+				setCursor(imgRef.current.getClientPosition(results.closestNode), 'node');
+			} else if (results.closestIntersection != null) {
+				setCursor(imgRef.current.getClientPosition(results.closestIntersection), 'intersect');
+			} else if (results.closestEdge != null) {
+				setCursor(imgRef.current.getClientPosition(results.closestEdge), 'edge');
+			} else {
+				setCursor({ x:0, y:0 }, 'none');
 			}
 		});
 	};

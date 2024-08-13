@@ -17,7 +17,7 @@
 
 import { Vector2, Line } from './types';
 
-import { closestPointOnLine } from './lineFunctions';
+import { closestPointOnLine, lineLineIntersection } from './lineFunctions';
 
 export class RTreeNode {
 	xmin: number;
@@ -51,6 +51,10 @@ export class RTreeNode {
 	leafNode() {
 		return this.children == null;
 	}
+
+	static intersects(a: RTreeNode, b: RTreeNode): boolean {
+		return (a.xmin <= b.xmax && a.xmax >= b.xmin) && (a.ymin <= b.ymax && a.ymax >= b.ymin);
+	}
 }
 
 class TraversalContext {
@@ -66,22 +70,43 @@ class TraversalContext {
 
 	closestNodeDistance2: number;
 
+	closestIntersection: Vector2;
+
+	closestIntersectionDistance2: number;
+
 	nodes: RTreeNode[];
 
 	numNodesTraversed: number;
 
 	numLineTests: number;
 
+	numIntersectingPairs: number;
+
+	numIntersectionTests: number;
+
+	edgeQueryTime: number;
+
+	nodeQueryTime: number;
+
+	intersectionQueryTime: number;
+
 	constructor(position: Vector2, radius: number) {
 		this.position = position;
 		this.radius = radius;
 		this.closestEdge = null;
-		this.closestEdgeDistance = Number.MAX_VALUE;
+		this.closestEdgeDistance = radius;
 		this.closestNode = null;
-		this.closestNodeDistance2 = Number.MAX_VALUE;
+		this.closestNodeDistance2 = radius * radius;
+		this.closestIntersection = null;
+		this.closestIntersectionDistance2 = radius * radius;
 		this.numNodesTraversed = 0;
 		this.numLineTests = 0;
 		this.nodes = [];
+		this.numIntersectingPairs = 0;
+		this.numIntersectionTests = 0;
+		this.nodeQueryTime = 0;
+		this.edgeQueryTime = 0;
+		this.intersectionQueryTime = 0;
 	}
 }
 
@@ -90,6 +115,8 @@ export class IntersectionTestResults {
 
 	closestNode: Vector2;
 
+	closestIntersection: Vector2;
+
 	queryTime: number;
 
 	numNodes: number;
@@ -97,6 +124,7 @@ export class IntersectionTestResults {
 	constructor() {
 		this.closestEdge = null;
 		this.closestNode = null;
+		this.closestIntersection = null;
 		this.queryTime = 0;
 	}
 }
@@ -126,14 +154,57 @@ class RTreeQueries {
 		}
 	}
 
+	static distance2(a: { x: number, y: number }, b: { x: number, y: number }): number {
+		return (b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y);
+	}
+
 	static testClosestPoint(p: { x: number, y: number }, ctx: TraversalContext) {
 		const a = ctx.position;
 		const b = p;
-		const d2 = (b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y);
+		const d2 = RTreeQueries.distance2(a, b);
 		if (d2 < ctx.closestNodeDistance2) {
 			ctx.closestNodeDistance2 = d2;
 			ctx.closestNode = new Vector2(p.x, p.y);
 		}
+	}
+
+	static findIntersections(ctx: TraversalContext) {
+
+		// If there are over 1000 overlapping nodes, there will be no intelligible
+		// set of points, so just return.
+		if (ctx.nodes.length > 500) {
+			return;
+		}
+
+		const start = performance.now();
+
+		const nodes = ctx.nodes;
+
+		for (let i = 0; i < nodes.length; i++) {
+			for (let j = i + 1; j < nodes.length; j++) {
+				const a = nodes[i];
+				const b = nodes[j];
+				if (RTreeNode.intersects(a, b)) {
+					const p = this.nodeNodeIntersection(a, b);
+					if ( p != null) { // P is an intersection between two primitives
+						const d2 = RTreeQueries.distance2(ctx.position, p);
+						if (d2 < ctx.closestIntersectionDistance2) {
+							ctx.closestIntersectionDistance2 = d2;
+							ctx.closestIntersection = p;
+						}
+						ctx.numIntersectionTests++;
+					}
+					ctx.numIntersectingPairs++;
+				}
+			}
+		}
+
+		ctx.intersectionQueryTime = performance.now() - start;
+	}
+
+	static nodeNodeIntersection(a: RTreeNode, b: RTreeNode): Vector2 {
+		// Add more primitive tests here
+		return lineLineIntersection(a.line.start, a.line.end, b.line.start, b.line.end);
 	}
 
 }
@@ -150,10 +221,12 @@ export class RTree {
 
 		RTreeQueries.findClosestEdge(ctx);
 		RTreeQueries.findClosestNode(ctx);
+		RTreeQueries.findIntersections(ctx);
 
 		const results = new IntersectionTestResults();
 		results.closestEdge = ctx.closestEdge;
 		results.closestNode = ctx.closestNode;
+		results.closestIntersection = ctx.closestIntersection;
 		results.queryTime = (performance.now() - start);
 		results.numNodes = ctx.nodes.length;
 

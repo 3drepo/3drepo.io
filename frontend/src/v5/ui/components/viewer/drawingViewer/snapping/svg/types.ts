@@ -39,12 +39,28 @@ export class Vector2 {
 	}
 
 	static subtract(a: Vector2, b: Vector2): Vector2 {
-		return new Vector2(b.x - a.x, b.y - a.y);
+		return new Vector2(a.x - b.x, a.y - b.y);
 	}
 
 	static norm(a: Vector2, b: Vector2): number {
 		const d = Vector2.subtract(a, b);
 		return d.norm;
+	}
+
+	static cross(a: Vector2, b: Vector2): number {
+		return a.x * b.y - a.y * b.x;
+	}
+
+	static dot(a: Vector2, b: Vector2): number {
+		return a.x * b.x + a.y * b.y;
+	}
+
+	static equals(a: Vector2, b: Vector2): boolean {
+		return (a.x == b.x) && (a.y == b.y);
+	}
+
+	static scale(a: Vector2, b: number): Vector2 {
+		return new Vector2(a.x * b, a.y * b);
 	}
 }
 

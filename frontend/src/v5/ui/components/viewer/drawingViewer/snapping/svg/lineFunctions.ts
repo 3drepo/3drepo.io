@@ -85,3 +85,40 @@ export function closestPointOnLine(x0, y0, x1, y1, x, y) {
 
 	return new Vector2(x0 + t * nx, y0 + t * ny);
 }
+
+
+function equals0(x: number) {
+	return Math.abs(x) <= Number.EPSILON;
+}
+
+/**
+ * Based on the algorithm suggested here https://stackoverflow.com/questions/563198
+ */
+export function lineLineIntersection(p0: Vector2, p1: Vector2, q0: Vector2, q1: Vector2): Vector2 {
+	const p = p0;
+	const r = Vector2.subtract(p1, p0);
+	const q = q0;
+	const s = Vector2.subtract(q1, q0);
+	const qp = Vector2.subtract(q, p);
+	const rs = Vector2.cross(r, s);
+	const qpr = Vector2.cross(qp, r);
+
+	if (equals0(rs) && equals0(qpr)) { // Lines are colinear
+		// For intersection testing, we actaully don't care which it is, because
+		// neither case results in an individual point to snap to.
+		return null;
+	}
+
+	if (equals0(rs) && !equals0(qpr)) { // Parallel (and not intersecting)
+		return null;
+	}
+
+	const t = Vector2.cross(qp, s) / rs;
+	const u = Vector2.cross(qp, r) / rs;
+
+	if (!equals0(rs) && t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+		return Vector2.add(p0, Vector2.scale(r, t));
+	}
+
+	return null;
+}
