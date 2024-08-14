@@ -320,8 +320,8 @@ const testGetLogArchive = () => {
 			const log = generateRandomString(100);
 			const taskPath = `${config.cn_queue.shared_storage}/${corId}`;
 			await fs.mkdir(taskPath);
-			await fs.writeFile(`${taskPath}/${generateRandomString()}.log`, generateRandomString());
-			await fs.writeFile(`${taskPath}/${generateRandomString()}.log`, log);
+			await fs.writeFile(`${taskPath}/1.log`, log);
+			await fs.writeFile(`${taskPath}/2.log`, generateRandomString());
 			await expect(ModelProcessing.getLogArchive(corId)).resolves.toEqual({
 				zipPath: path.join(taskPath, 'logs.zip'),
 				logPreview: expect.stringContaining(log),

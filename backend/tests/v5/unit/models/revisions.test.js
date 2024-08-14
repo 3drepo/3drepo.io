@@ -30,6 +30,7 @@ const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 
 const excludeVoids = { void: { $ne: true } };
 const excludeIncomplete = { incomplete: { $exists: false } };
+const excludeFailed = { status: { $ne: STATUSES.FAILED } };
 
 const testGetRevisionCount = () => {
 	describe('GetRevisionCount', () => {
@@ -43,7 +44,7 @@ const testGetRevisionCount = () => {
 
 			expect(res).toEqual(expectedData);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, { ...excludeIncomplete, ...excludeVoids });
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, { ...excludeIncomplete, ...excludeFailed, ...excludeVoids });
 		});
 
 		test('should return the number of revision as per from the database query (drawing)', async () => {
@@ -53,7 +54,7 @@ const testGetRevisionCount = () => {
 			expect(res).toEqual(expectedData);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`,
-				{ ...excludeIncomplete, ...excludeVoids, model });
+				{ ...excludeIncomplete, ...excludeFailed, ...excludeVoids, model });
 		});
 	});
 };
@@ -70,7 +71,7 @@ const testGetLatestRevision = () => {
 
 			expect(res).toEqual(expectedData);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, { ...excludeIncomplete, ...excludeVoids }, {}, { timestamp: -1 });
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, { ...excludeIncomplete, ...excludeFailed, ...excludeVoids }, {}, { timestamp: -1 });
 		});
 
 		test('Should return the latest revision if there is one (drawing)', async () => {
@@ -80,7 +81,7 @@ const testGetLatestRevision = () => {
 			expect(res).toEqual(expectedData);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`,
-				{ ...excludeIncomplete, ...excludeVoids, model }, {}, { timestamp: -1 });
+				{ ...excludeIncomplete, ...excludeFailed, ...excludeVoids, model }, {}, { timestamp: -1 });
 		});
 
 		test('Should throw REVISION_NOT_FOUND if there is no revision', async () => {
@@ -89,7 +90,7 @@ const testGetLatestRevision = () => {
 				.rejects.toEqual(templates.revisionNotFound);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, { ...excludeIncomplete, ...excludeVoids }, {}, { timestamp: -1 });
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, { ...excludeIncomplete, ...excludeFailed, ...excludeVoids }, {}, { timestamp: -1 });
 		});
 	});
 };
@@ -99,7 +100,9 @@ const testGetRevisions = () => {
 	const model = generateRandomString();
 
 	const checkResults = (fn, showVoid, modelType) => {
-		const query = { incomplete: { $exists: false }, ...(modelType === modelTypes.DRAWING ? { model } : {}) };
+		const query = { ...excludeIncomplete,
+			...excludeFailed,
+			...(modelType === modelTypes.DRAWING ? { model } : {}) };
 
 		if (!showVoid) {
 			query.void = { $ne: true };

@@ -27,6 +27,7 @@ const Revisions = {};
 
 const excludeVoids = { void: { $ne: true } };
 const excludeIncomplete = { incomplete: { $exists: false } };
+const excludeFailed = { status: { $ne: STATUSES.FAILED } };
 
 const collectionName = (modelType, model) => (modelType === modelTypes.DRAWING ? `${modelType}s.history` : `${model}.history`);
 
@@ -50,6 +51,7 @@ Revisions.getLatestRevision = (teamspace, model, modelType, projection = {}) => 
 	const query = deleteIfUndefined({
 		...excludeVoids,
 		...excludeIncomplete,
+		...excludeFailed,
 		model: modelType === modelTypes.DRAWING ? model : undefined,
 	});
 
@@ -61,6 +63,7 @@ Revisions.getRevisionCount = (teamspace, model, modelType) => {
 	const query = deleteIfUndefined({
 		...excludeVoids,
 		...excludeIncomplete,
+		...excludeFailed,
 		model: modelType === modelTypes.DRAWING ? model : undefined,
 	});
 
@@ -68,7 +71,10 @@ Revisions.getRevisionCount = (teamspace, model, modelType) => {
 };
 
 Revisions.getRevisions = (teamspace, model, modelType, showVoid, projection = {}) => {
-	const query = { ...excludeIncomplete };
+	const query = {
+		...excludeIncomplete,
+		...excludeFailed,
+	};
 
 	if (!showVoid) {
 		query.void = excludeVoids.void;
