@@ -21,6 +21,7 @@ import { clamp } from 'lodash';
 import { useRef, useState, useEffect } from 'react';
 import { useParams } from 'react-router';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
+import { Vector2 } from 'three';
 
 interface Props {
 	onCameraSightChanged: (cameraOnSight: boolean) => void;
@@ -29,8 +30,8 @@ interface Props {
 }
 
 
-const cameraPadding = 5;
-const iconSize = 30;
+const cameraPadding = 3;
+const iconSize = 56;
 
 export const CameraOffSight = ({ onCameraSightChanged, viewport, scale }: Props) => {
 	const animationFrame = useRef(0);
@@ -65,10 +66,9 @@ export const CameraOffSight = ({ onCameraSightChanged, viewport, scale }: Props)
 
 
 		const padding = (cameraPadding / scaleRef.current);
-		const isize = (iconSize / scaleRef.current);
 
-		const x = clamp(p.x, vp.left + padding, vp.right - padding - isize);
-		const y = clamp(p.y, vp.top + padding,  vp.bottom - padding - isize); 
+		const x = clamp(p.x, vp.left + padding, vp.right - padding);
+		const y = clamp(p.y, vp.top + padding,  vp.bottom - padding); 
 
 		const cameraInSight = p.x === x && p.y === y;
 
@@ -82,14 +82,20 @@ export const CameraOffSight = ({ onCameraSightChanged, viewport, scale }: Props)
 		if (cameraInSight) 
 			return;
 
+
+
+		const vpWidth = (vp.right - vp.left) * scaleRef.current;
+		const vpHeight = (vp.bottom - vp.top) * scaleRef.current;
+
+		console.log(JSON.stringify({vpWidth,vpHeight}));
+
 		setPosition({
-			x: (x - vp.left) * scaleRef.current,
-			y: (y - vp.top) * scaleRef.current,
+			x: clamp((x - vp.left) * scaleRef.current - iconSize / 2, 0, vpWidth - iconSize),
+			y: clamp((y - vp.top) * scaleRef.current - iconSize / 2, 0, vpHeight - iconSize),
 		});
 
-		const lookat = transform3DTo2D([v.position[0] + v.view_dir[0], v.position[1] + v.view_dir[1], v.position[2] + v.view_dir[2]]);
-		lookat.sub(p);
-		setAngle(lookat.angle());
+		const ang = p.sub(new Vector2(x, y)).angle();
+		setAngle(ang);
 		viewpoint.current = v;
 	};
 
@@ -108,5 +114,5 @@ export const CameraOffSight = ({ onCameraSightChanged, viewport, scale }: Props)
 		return null;
 	}
 
-	return (<CameraOffSightIcon  style={{ transform: `translate(${position.x}px, ${position.y}px) `, transformOrigin: '0 0' }}/>);
+	return (<CameraOffSightIcon  style={{ transform: `translate(${position.x}px, ${position.y}px) `, transformOrigin: '0 0' }} arrowAngle={angle}/>);
 };

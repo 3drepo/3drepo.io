@@ -17,20 +17,73 @@
 type IProps = {
 	className?: any;
 	style?: React.CSSProperties;
+	arrowAngle?: number;
 };
 
-export default ({ className, style }: IProps) => (
-	<svg width="29" height="25" viewBox="0 0 29 25" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style} >
-		<rect x="4.41553" y="0.956787" width="24" height="24" rx="3" fill="#00C1D4"/>
-		<rect x="0.415527" y="12.9568" width="6" height="6" transform="rotate(-45 0.415527 12.9568)" fill="#00C1D4"/>
-		<g clip-path="url(#clip0_511_16090)">
-			<path d="M12.0815 14.1667C11.8097 14.1667 11.5894 14.3871 11.5894 14.6589C11.5894 14.9308 11.8097 15.1511 12.0815 15.1511H14.6792C14.951 15.1511 15.1714 14.9308 15.1714 14.6589C15.1714 14.3871 14.951 14.1667 14.6792 14.1667H12.0815Z" fill="white"/>
-			<path fill-rule="evenodd" clip-rule="evenodd" d="M10.1948 8.58179C10.1948 8.30996 10.4152 8.0896 10.687 8.0896H15.3559C15.4872 8.0896 15.6131 8.14208 15.7055 8.23536L17.3257 9.87047C17.3525 9.89757 17.3756 9.927 17.3949 9.95811H18.5766C18.853 9.95811 19.077 10.1821 19.077 10.4585V11.5466L22.7347 10.1323C23.0626 10.0055 23.4155 10.2474 23.4155 10.599V16.7122C23.4155 17.0634 23.0632 17.3053 22.7355 17.1792L19.077 15.7716V16.8527C19.077 17.129 18.853 17.3531 18.5766 17.3531H9.91592C9.63954 17.3531 9.41553 17.129 9.41553 16.8527V10.4585C9.41553 10.1822 9.63953 9.95811 9.91592 9.95811H10.1948V8.58179ZM15.1507 9.07397L16.0268 9.95811H11.1792V9.07397H15.1507ZM10.3999 10.9425V16.3687H18.0926V15.1206C18.0864 15.0764 18.0863 15.031 18.0926 14.9855V12.334C18.0863 12.2886 18.0864 12.2431 18.0926 12.1989V10.9425H10.3999ZM19.077 12.602V14.7169L22.4312 16.0074V11.305L19.077 12.602Z" fill="white"/>
-		</g>
-		<defs>
-			<clipPath id="clip0_511_16090">
-				<rect width="14" height="14" fill="white" transform="translate(9.41553 5.95679)"/>
-			</clipPath>
+
+const cos45 = Math.cos(Math.PI / 4);
+
+
+const scaleByAngle = (angle) => {
+	const x = Math.abs(Math.cos(angle));
+	const y = Math.abs(Math.sin(angle));
+
+	return Math.min(x, y) / cos45;
+};
+
+
+export default ({ className, style, arrowAngle }: IProps) => (
+	<svg  width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style} >
+		<path
+			d="M 27.5,43.5 -0.50000034,28 27.5,12.5 55.5,28 Z"
+			fill="url(#paint0_linear_2_39)"
+			id="path305" style={{transformOrigin: '50% 50%', rotate: `${arrowAngle}rad`, scale: `${1 + 0.2 * scaleByAngle(arrowAngle) } 1` }}/>
+		<rect
+			y="10"
+			width="36"
+			height="36"
+			rx="5"
+			fill="#00c1d4"
+			id="rect307"
+			x="10" />
+		<path
+			d="m 21.8086,29.7285 c -0.3883,0 -0.7031,0.3148 -0.7031,0.7031 0,0.3884 0.3148,0.7032 0.7031,0.7032 h 3.7109 c 0.3884,0 0.7032,-0.3148 0.7032,-0.7032 0,-0.3883 -0.3148,-0.7031 -0.7032,-0.7031 z"
+			fill="#ffffff"
+			id="path309" />
+		<path
+			fill-rule="evenodd"
+			clip-rule="evenodd"
+			d="m 19.11328,21.75 c 0,-0.3883 0.3148,-0.7031 0.70313,-0.7031 h 6.66979 c 0.1876,0 0.3674,0.0749 0.4995,0.2082 l 2.3145,2.3359 c 0.0384,0.0387 0.0713,0.0807 0.0988,0.1252 h 1.6882 c 0.3948,0 0.7149,0.32 0.7149,0.7148 v 1.5544 L 37.0273,23.965 C 37.4957,23.7839 38,24.1295 38,24.6317 v 8.7332 c 0,0.5017 -0.5033,0.8473 -0.9715,0.6672 l -5.2264,-2.0109 v 1.5444 c 0,0.3947 -0.32,0.7148 -0.7149,0.7148 H 18.71484 C 18.32002,34.2804 18,33.9603 18,33.5656 V 24.431 c 0,-0.3947 0.32,-0.7148 0.71484,-0.7148 h 0.39844 z m 7.07982,0.7031 1.2515,1.2631 h -6.9251 v -1.2631 z m -6.78685,2.6693 v 7.7518 H 30.3958 v -1.783 c -0.0088,-0.0632 -0.009,-0.1281 0,-0.193 v -3.7879 c -0.009,-0.0649 -0.0088,-0.1298 0,-0.193 v -1.7949 z m 12.39585,2.3707 v 3.0214 l 4.7917,1.8436 v -6.7178 z"
+			fill="#ffffff"
+			id="path311" />
+		<defs
+			id="defs322">
+			<linearGradient
+				id="paint0_linear_2_39"
+				x1="17.5"
+				y1="-6.7752597e-07"
+				x2="17.5"
+				y2="56"
+				gradientUnits="userSpaceOnUse"
+				gradientTransform="rotate(90,22.5,33)">
+				<stop
+					stop-color="#00C1D4"
+					id="stop313" />
+				<stop
+					offset="0.5"
+					stop-color="#00C1D4"
+					id="stop315" />
+				<stop
+					offset="0.51"
+					stop-color="#00C1D4"
+					stop-opacity="0"
+					id="stop317" />
+				<stop
+					offset="1"
+					stop-color="#00C1D4"
+					stop-opacity="0"
+					id="stop319" />
+			</linearGradient>
 		</defs>
 	</svg>)
-;
+	;
