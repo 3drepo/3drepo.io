@@ -36,8 +36,8 @@ import { CentredContainer } from '@controls/centredContainer/centredContainer.co
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { isFirefox } from '@/v5/helpers/browser.helper';
 import { ZoomableImage } from './zoomableImage.types';
-import { SVGSnap } from './snapping/svg/svgSnap';
-import { Vector2 } from './snapping/svg/types';
+import { SVGSnapHelper } from './snapping/svgSnap';
+import { Vector2 } from './snapping/types';
 
 export const Viewer2D = () => {
 	const [drawingId] = useSearchParam('drawingId');
@@ -90,7 +90,7 @@ export const Viewer2D = () => {
 		// NOTE THAT THIS IMPLEMENTATION DOES NOT SUPPORT LOADING NEW IMAGES AT ALL
 		// BECAUSE THE ONMOUSEMOVE HANDLER IS NOT DEREGISTERED ANYWHERE.
 
-		const snapHandler = new SVGSnap();
+		const snapHandler = new SVGSnapHelper();
 		snapHandler.load(src);
 
 		// Sets up a secondary canvas to render things, such as the primitives

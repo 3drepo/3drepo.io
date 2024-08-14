@@ -16,7 +16,7 @@
  */
 
 import 'path-data-polyfill';
-import { Vector2, Line, Point } from './types';
+import { Vector2, Line } from './types';
 import { RTree, RTreeBuilder, RTreeNode } from './rTree';
 
 export class SVGSnapDiagnosticsHelper {
@@ -208,7 +208,7 @@ export class SnapResults {
 /**
  * Allows snapping to an SVG based on path primitives
  */
-export class SVGSnap {
+export class SVGSnapHelper {
 
 	container: HTMLElement;
 
