@@ -20,9 +20,11 @@ type IProps = {
 	style?: React.CSSProperties;
 	iconRef?: any;
 	onMouseDown?:  React.MouseEventHandler<SVGSVGElement>;
+	haloVisibility: number
+
 };
 
-export default ({ className, style, iconRef, onMouseDown }: IProps) => (
+export default ({ className, style, iconRef, onMouseDown, haloVisibility }: IProps) => (
 	<svg width="100" height="100" viewBox="0 0 100 100" onMouseDown={onMouseDown} ref={iconRef} fill="none" version="1.1" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
 		<circle
 			cx="0"
@@ -37,7 +39,9 @@ export default ({ className, style, iconRef, onMouseDown }: IProps) => (
 		<path
 			d="M 41.658742,-27.448895 -4.7557776,0.4428216 43.833276,26.507273 Z"
 			fill="url(#paint0_radial_11_9573)"
-			id="path2" />
+			id="path2" 
+			style={{ scale: `${haloVisibility} 1` }}
+		/>
 		<g
 			filter="url(#filter0_d_11_9573)"
 			id="g8"
@@ -132,6 +136,26 @@ export default ({ className, style, iconRef, onMouseDown }: IProps) => (
 					stop-opacity="0"
 					id="stop33" />
 			</radialGradient>
+
+			<clipPath
+				clipPathUnits="userSpaceOnUse"
+				id="clipPath5530">
+				<path
+					d="M 38.178413,29.263395 -10.456162,56.193087 38.13289,82.257537 Z"
+					id="path5532"
+					fill="#0c0c0c"
+					fill-opacity="1"
+				/>
+			</clipPath>
 		</defs>
+		<path
+			id="path5518"
+			stroke="#00c1d4"
+			stroke-width="1.1063"
+			stroke-dasharray="11.063, 5.53153"
+			opacity={1 - haloVisibility}
+			d="M 11.230385,56.162848 A 17.133312,17.197575 0 0 1 -5.9029262,73.360423 17.133312,17.197575 0 0 1 -23.03624,56.162848 17.133312,17.197575 0 0 1 -5.9029262,38.965273 17.133312,17.197575 0 0 1 11.230385,56.162848 Z"
+			clip-path="url(#clipPath5530)"
+			transform="translate(5.7721519,-55.057448)" />
 	</svg>
 );

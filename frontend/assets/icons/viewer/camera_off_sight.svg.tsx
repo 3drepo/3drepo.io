@@ -37,7 +37,7 @@ export default ({ className, style, arrowAngle }: IProps) => (
 		<path
 			d="M 27.5,43.5 -0.50000034,28 27.5,12.5 55.5,28 Z"
 			fill="url(#paint0_linear_2_39)"
-			id="path305" style={{transformOrigin: '50% 50%', rotate: `${arrowAngle}rad`, scale: `${1 + 0.2 * scaleByAngle(arrowAngle) } 1` }}/>
+			id="path305" style={{ transformOrigin: '50% 50%', rotate: `${arrowAngle}rad`, scale: `${1 + 0.2 * scaleByAngle(arrowAngle) } 1` }}/>
 		<rect
 			y="10"
 			width="36"
@@ -86,4 +86,4 @@ export default ({ className, style, arrowAngle }: IProps) => (
 			</linearGradient>
 		</defs>
 	</svg>)
-	;
+;

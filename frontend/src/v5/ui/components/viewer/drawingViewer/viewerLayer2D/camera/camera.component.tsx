@@ -20,6 +20,11 @@ import CameraIcon from '@assets/icons/viewer/camera.svg';
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
+import { Vector3 } from 'three';
+
+
+
+const haloAngleCutoff = Math.PI / 4;
 
 export const Camera = ({ scale, viewport }) => {
 	const animationFrame = useRef(0);
@@ -31,6 +36,7 @@ export const Camera = ({ scale, viewport }) => {
 	const { containerOrFederation } = useParams();
 	const [position, setPosition] = useState({ x:0, y:0 });
 	const [angle, setAngle] = useState(0);
+	const [haloVisibility, setHaloVisibility] = useState(1);
 	const transform2DTo3D = DrawingsHooksSelectors.selectTransform2Dto3D(drawingId, containerOrFederation);
 	const transform3DTo2D = DrawingsHooksSelectors.selectTransform3Dto2D(drawingId, containerOrFederation);
 
@@ -41,8 +47,21 @@ export const Camera = ({ scale, viewport }) => {
 
 		setPosition(p);
 
+		const v3 = new Vector3(...v.view_dir);
+	
+		let angleToYaxis =  (v3.angleTo(new Vector3(0, 1, 0)));
+		
+		if (angleToYaxis > Math.PI / 2) {
+			// Math.PI % angle is to make the halo logic disregard if the user is looking up or down 
+			angleToYaxis = Math.PI  % angleToYaxis;
+		}
+		
+		const halo = angleToYaxis < haloAngleCutoff ? angleToYaxis / haloAngleCutoff : 1;
+		setHaloVisibility(halo);
+
 		const lookat = transform3DTo2D([v.position[0] + v.view_dir[0], v.position[1] + v.view_dir[1], v.position[2] + v.view_dir[2]]);
 		lookat.sub(p);
+
 		setAngle(lookat.angle());
 		viewpoint.current = v;
 	
@@ -112,5 +131,5 @@ export const Camera = ({ scale, viewport }) => {
 		return null;
 	}
 
-	return (<CameraIcon iconRef={cameraRef as any} onMouseDown={onMouseDown}  style={{ transform: `translate(${position.x}px, ${position.y}px) scale(${1 / scale}) rotate(${angle}rad)`, overflow:'unset', cursor:'grab', transformOrigin: '0 0' }}/>);
+	return (<CameraIcon iconRef={cameraRef as any} onMouseDown={onMouseDown} haloVisibility={haloVisibility} style={{ transform: `translate(${position.x}px, ${position.y}px) scale(${1 / scale}) rotate(${angle}rad)`, overflow:'unset', cursor:'grab', transformOrigin: '0 0' }}/>);
 };

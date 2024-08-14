@@ -57,8 +57,6 @@ export const CameraOffSight = ({ onCameraSightChanged, viewport, scale }: Props)
 
 	const onEnterFrame = async () => {
 		animationFrame.current = requestAnimationFrame(onEnterFrame);
-
-		// console.log({ viewBox: scaleRef.current });
 		
 		const v = await ViewerService.getCurrentViewpointInfo();
 		const p = transform3DTo2D(v.position);
@@ -86,8 +84,6 @@ export const CameraOffSight = ({ onCameraSightChanged, viewport, scale }: Props)
 
 		const vpWidth = (vp.right - vp.left) * scaleRef.current;
 		const vpHeight = (vp.bottom - vp.top) * scaleRef.current;
-
-		console.log(JSON.stringify({vpWidth,vpHeight}));
 
 		setPosition({
 			x: clamp((x - vp.left) * scaleRef.current - iconSize / 2, 0, vpWidth - iconSize),
