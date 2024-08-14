@@ -17,12 +17,12 @@
 
 const { checkQuotaIsSufficient, fileFilter } = require('./commons/revisions');
 const { createResponseCode, templates } = require('../../../../../../utils/responseCodes');
-const { STATUSES } = require('../../../../../../models/modelSettings.constants');
 const Yup = require('yup');
 const YupHelper = require('../../../../../../utils/helper/yup');
 const { getModelById } = require('../../../../../../models/modelSettings');
 const { getModelByQuery } = require('../../../../../../models/modelSettings');
 const { isTagUnique } = require('../../../../../../models/revisions');
+const { processStatuses } = require('../../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../../utils/responder');
 const { singleFileUpload } = require('../../../../multer');
 const tz = require('countries-and-timezones');
@@ -78,7 +78,7 @@ const validateRevisionUpload = async (req, res, next) => {
 		.test('check-model-status', 'A revision is already being processed.', async () => {
 			const { teamspace, container } = req.params;
 			const { status } = await getModelById(teamspace, container, { _id: 0, status: 1 });
-			return status === STATUSES.OK || status === STATUSES.FAILED || !status;
+			return status === processStatuses.OK || status === processStatuses.FAILED || !status;
 		});
 
 	try {

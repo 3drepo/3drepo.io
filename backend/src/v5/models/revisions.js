@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { STATUSES, modelTypes } = require('./modelSettings.constants');
+const { modelTypes, processStatuses } = require('./modelSettings.constants');
 const db = require('../handler/db');
 const { deleteIfUndefined } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
@@ -27,7 +27,7 @@ const Revisions = {};
 
 const excludeVoids = { void: { $ne: true } };
 const excludeIncomplete = { incomplete: { $exists: false } };
-const excludeFailed = { status: { $ne: STATUSES.FAILED } };
+const excludeFailed = { status: { $ne: processStatuses.FAILED } };
 
 const collectionName = (modelType, model) => (modelType === modelTypes.DRAWING ? `${modelType}s.history` : `${model}.history`);
 
@@ -135,7 +135,7 @@ Revisions.onProcessingCompleted = async (teamspace, project, model, revId,
 	if (success) {
 		unset.status = 1;
 	} else {
-		set.status = STATUSES.FAILED;
+		set.status = processStatuses.FAILED;
 		set.errorReason = { message, timestamp: new Date(), errorCode: retVal };
 	}
 
@@ -161,7 +161,7 @@ Revisions.onProcessingCompleted = async (teamspace, project, model, revId,
 		teamspace,
 		project,
 		model,
-		data: { ...set, status: set.status || STATUSES.OK },
+		data: { ...set, status: set.status || processStatuses.OK },
 		modelType,
 	});
 

@@ -31,7 +31,7 @@ const FilesManager = require(`${src}/services/filesManager`);
 
 jest.mock('../../../../src/v5/models/revisions');
 const Revisions = require(`${src}/models/revisions`);
-const { modelTypes, STATUSES } = require(`${src}/models/modelSettings.constants`);
+const { modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
 
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const config = require(`${src}/utils/config`);
@@ -262,7 +262,7 @@ const testProcessDrawingUpload = () => {
 
 			expect(publishFn).toBeCalledTimes(1);
 			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_UPDATE, {
-				teamspace, model, corId: UUIDToString(revId), status: STATUSES.QUEUED,
+				teamspace, model, corId: UUIDToString(revId), status: processStatuses.QUEUED,
 			});
 		});
 

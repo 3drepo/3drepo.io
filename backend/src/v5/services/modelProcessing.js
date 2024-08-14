@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { STATUSES, modelTypes } = require('../models/modelSettings.constants');
 const { UUIDToString, generateUUID, generateUUIDString } = require('../utils/helper/uuids');
 const { codeExists, templates } = require('../utils/responseCodes');
 const { copyFile, mkdir, rm, stat, writeFile } = require('fs/promises');
 const { createWriteStream, readdirSync } = require('fs');
 const { listenToQueue, queueMessage } = require('../handler/queue');
+const { modelTypes, processStatuses } = require('../models/modelSettings.constants');
 const Path = require('path');
 const { addRevision } = require('../models/revisions');
 const archiver = require('archiver');
@@ -87,7 +87,7 @@ const queueDrawingUpload = async (teamspace, project, model, revId, data) => {
 
 		await queueMessage(drawingq, revId, msg);
 
-		publish(events.QUEUED_TASK_UPDATE, { teamspace, model, corId: revId, status: STATUSES.QUEUED });
+		publish(events.QUEUED_TASK_UPDATE, { teamspace, model, corId: revId, status: processStatuses.QUEUED });
 	} catch (err) {
 		logger.logError('Failed to queue drawing task', err.message);
 		publish(events.QUEUED_TASK_COMPLETED, { teamspace, model, corId: revId, value: 4 });

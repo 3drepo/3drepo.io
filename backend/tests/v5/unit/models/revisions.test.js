@@ -25,12 +25,12 @@ const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { determineTestGroup, generateRandomString, generateRandomObject, generateRandomNumber } = require('../../helper/services');
 
-const { modelTypes, getInfoFromCode, STATUSES } = require(`${src}/models/modelSettings.constants`);
+const { modelTypes, getInfoFromCode, processStatuses } = require(`${src}/models/modelSettings.constants`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 
 const excludeVoids = { void: { $ne: true } };
 const excludeIncomplete = { incomplete: { $exists: false } };
-const excludeFailed = { status: { $ne: STATUSES.FAILED } };
+const excludeFailed = { status: { $ne: processStatuses.FAILED } };
 
 const testGetRevisionCount = () => {
 	describe('GetRevisionCount', () => {
@@ -333,7 +333,7 @@ const testOnProcessingCompleted = () => {
 			});
 
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
-				{ teamspace, project, model, modelType, data: { status: STATUSES.OK } });
+				{ teamspace, project, model, modelType, data: { status: processStatuses.OK } });
 
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_REVISION,
 				{ teamspace, project, model, modelType, revision: revId });
@@ -349,7 +349,7 @@ const testOnProcessingCompleted = () => {
 
 			await Revisions.onProcessingCompleted(teamspace, project, model, revId, retInfo, modelType);
 
-			const setObj = { status: STATUSES.FAILED,
+			const setObj = { status: processStatuses.FAILED,
 				errorReason: {
 					message, timestamp: expect.anything(), errorCode: errCode } };
 

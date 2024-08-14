@@ -60,7 +60,7 @@ const importErrorMapping = {
 	37: { message: 'The file provided was encrypted or password protected. Please provide a file that can be opened without a password.', userErr: true },
 };
 
-ModelSettingConstants.STATUSES = {
+ModelSettingConstants.processStatuses = {
 	OK: 'ok',
 	FAILED: 'failed',
 	UPLOADING: 'uploading',
