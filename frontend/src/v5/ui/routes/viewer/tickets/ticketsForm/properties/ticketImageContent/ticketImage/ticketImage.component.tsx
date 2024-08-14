@@ -27,8 +27,7 @@ import { ImagesModal } from '@components/shared/modalsDispatcher/templates/image
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useSyncProps } from '@/v5/helpers/syncProps.hooks';
 
-type TicketImageProps = FormInputProps & { onImageClick: () => void; };
-export const TicketImage = ({ value, onChange, onBlur, disabled, label, helperText, onImageClick, ...props }: TicketImageProps) => {
+export const TicketImage = ({ value, onChange, onBlur, disabled, label, helperText, ...props }: FormInputProps) => {
 	const imgSrc = getImgSrc(value);
 	const imgInModal = useRef(imgSrc);
 	const syncProps = useSyncProps({ images: [imgInModal.current] });
