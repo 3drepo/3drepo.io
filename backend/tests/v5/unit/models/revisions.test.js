@@ -318,7 +318,7 @@ const testOnProcessingCompleted = () => {
 				{ projection: { author: 1 } },
 			);
 
-			expect(EventsManager.publish).toHaveBeenCalledTimes(3);
+			expect(EventsManager.publish).toHaveBeenCalledTimes(2);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED, {
 				teamspace,
 				project,
@@ -334,9 +334,6 @@ const testOnProcessingCompleted = () => {
 
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
 				{ teamspace, project, model, modelType, data: { status: processStatuses.OK } });
-
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_REVISION,
-				{ teamspace, project, model, modelType, revision: revId });
 		});
 
 		test('Should update revision and publish 2 events upon failure', async () => {

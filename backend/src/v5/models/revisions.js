@@ -164,10 +164,6 @@ Revisions.onProcessingCompleted = async (teamspace, project, model, revId,
 		data: { ...set, status: set.status || processStatuses.OK },
 		modelType,
 	});
-
-	if (success) {
-		publish(events.NEW_REVISION, { teamspace, project, model, revision: revId, modelType });
-	}
 };
 
 Revisions.updateProcessingStatus = async (teamspace, project, model, modelType, revision, status) => {

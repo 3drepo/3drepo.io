@@ -17,10 +17,10 @@
 
 const Models = {};
 const { SETTINGS_COL, modelTypes } = require('./modelSettings.constants');
+const { UUIDToString, generateUUIDString } = require('../utils/helper/uuids');
 const db = require('../handler/db');
 const { deleteIfUndefined } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
-const { generateUUIDString } = require('../utils/helper/uuids');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
@@ -158,11 +158,11 @@ Models.getDrawings = (ts, ids, projection, sort) => {
 	return findModels(ts, query, projection, sort);
 };
 
-Models.updateModelStatus = async (teamspace, project, model, status, corId) => {
+Models.updateModelStatus = async (teamspace, project, model, status, revId) => {
 	const query = { _id: model };
 	const updateObj = { status };
-	if (corId) {
-		updateObj.corID = corId;
+	if (revId) {
+		updateObj.corID = UUIDToString(revId);
 	}
 
 	const modelData = await findOneAndUpdateModel(teamspace, query, { $set: updateObj }, { federate: 1, modelType: 1 });
@@ -178,7 +178,7 @@ Models.updateModelStatus = async (teamspace, project, model, status, corId) => {
 	}
 };
 
-Models.newRevisionProcessed = async (teamspace, project, model, corId,
+Models.newRevisionProcessed = async (teamspace, project, model, revId,
 	{ retVal, success, message, userErr }, user, containers) => {
 	const query = { _id: model };
 	const set = {};
@@ -212,7 +212,7 @@ Models.newRevisionProcessed = async (teamspace, project, model, corId,
 				success,
 				message,
 				userErr,
-				corId,
+				revId,
 				errCode: retVal,
 				user,
 				modelType });
@@ -228,14 +228,6 @@ Models.newRevisionProcessed = async (teamspace, project, model, corId,
 			model,
 			data,
 			modelType });
-
-		if (success) {
-			publish(events.NEW_REVISION, { teamspace,
-				project,
-				model,
-				revision: corId,
-				modelType });
-		}
 	}
 };
 

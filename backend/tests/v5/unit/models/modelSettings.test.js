@@ -17,7 +17,7 @@
 
 const { times } = require('lodash');
 const { src } = require('../../helper/path');
-const { generateRandomString, generateUUIDString } = require('../../helper/services');
+const { generateRandomString, generateUUIDString, generateUUID } = require('../../helper/services');
 
 const { getInfoFromCode, modelTypes } = require(`${src}/models/modelSettings.constants`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
@@ -494,13 +494,13 @@ const testNewRevisionProcessed = () => {
 		[0], [1], [14], [100],
 	])('Update with new revision', (retVal) => {
 		const teamspace = generateRandomString();
-		const project = generateRandomString();
+		const project = generateUUID();
 		const model = generateRandomString();
 		const user = generateRandomString();
-		const corId = generateRandomString();
+		const corId = generateUUID();
 
-		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED},
-			a ${events.MODEL_SETTINGS_UPDATE} and a ${events.NEW_REVISION} event`,
+		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED}
+			and a ${events.MODEL_SETTINGS_UPDATE} event`,
 		async () => {
 			DBHandler.updateOne.mockResolvedValueOnce({ matchedCount: 1 });
 			EventsManager.publish.mockClear();
@@ -526,7 +526,7 @@ const testNewRevisionProcessed = () => {
 			}
 			expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 
-			expect(EventsManager.publish).toHaveBeenCalledTimes(success ? 3 : 2);
+			expect(EventsManager.publish).toHaveBeenCalledTimes(2);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
 				{
 					teamspace,
@@ -549,17 +549,6 @@ const testNewRevisionProcessed = () => {
 					data: { ...action.$set, status: action.$set.status || 'ok' },
 					modelType: modelTypes.CONTAINER,
 				});
-
-			if (success) {
-				expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_REVISION,
-					{
-						teamspace,
-						project,
-						model,
-						revision: corId,
-						modelType: modelTypes.CONTAINER,
-					});
-			}
 		});
 	});
 
@@ -591,7 +580,7 @@ const testNewRevisionProcessed = () => {
 
 				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 
-				expect(EventsManager.publish).toHaveBeenCalledTimes(3);
+				expect(EventsManager.publish).toHaveBeenCalledTimes(2);
 				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
 					{
 						teamspace,
@@ -618,15 +607,6 @@ const testNewRevisionProcessed = () => {
 						project,
 						model,
 						data: { ...expectedData, status: expectedData.status || 'ok' },
-						modelType,
-					});
-
-				expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_REVISION,
-					{
-						teamspace,
-						project,
-						model,
-						revision: corId,
 						modelType,
 					});
 			});
@@ -652,7 +632,7 @@ const testNewRevisionProcessed = () => {
 
 				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 
-				expect(EventsManager.publish).toHaveBeenCalledTimes(3);
+				expect(EventsManager.publish).toHaveBeenCalledTimes(2);
 				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
 					{
 						teamspace,
@@ -679,15 +659,6 @@ const testNewRevisionProcessed = () => {
 						project,
 						model,
 						data: { ...expectedData, status: expectedData.status || 'ok' },
-						modelType,
-					});
-
-				expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_REVISION,
-					{
-						teamspace,
-						project,
-						model,
-						revision: corId,
 						modelType,
 					});
 			});

@@ -265,6 +265,170 @@ const testQueueTaskCompleted = () => {
 	});
 };
 
+const testNewRevision = () => {
+	test(`Should create a ${chatEvents.CONTAINER_NEW_REVISION} chat event if there is a ${events.MODEL_IMPORT_FINISHED} (container)`, async () => {
+		const tag = generateRandomString();
+		const author = generateRandomString();
+		const desc = generateRandomString();
+		const format = generateRandomString();
+		const rFile = [`${generateRandomString()}_${format}`];
+		const timestamp = generateRandomDate();
+		Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp, rFile, desc });
+		Revisions.getRevisionFormat.mockReturnValueOnce(`.${format}`);
+
+		const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+		const data = {
+			teamspace: generateRandomString(),
+			project: generateUUID(),
+			model: generateRandomString(),
+			success: true,
+			revId: generateUUID(),
+			user: generateRandomString(),
+			modelType: modelTypes.CONTAINER,
+		};
+		EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
+
+		await waitOnEvent;
+
+		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
+		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model,
+			modelTypes.CONTAINER, data.revId,
+			{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1 });
+		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+		expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+			chatEvents.CONTAINER_NEW_REVISION,
+			{ _id: UUIDToString(data.revId), tag, author, timestamp: timestamp.getTime(), desc, format: `.${format}` },
+			data.teamspace,
+			UUIDToString(data.project),
+			data.model,
+		);
+
+		expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+	});
+
+	test(`Should create a ${chatEvents.DRAWING_NEW_REVISION} chat event if there is a ${events.MODEL_IMPORT_FINISHED} (drawing)`, async () => {
+		const tag = generateRandomString();
+		const author = generateRandomString();
+		const desc = generateRandomString();
+		const format = generateRandomString();
+		const rFile = [generateRandomString()];
+		const timestamp = generateRandomDate();
+		Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp, rFile, desc, format });
+
+		const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+		const data = {
+			teamspace: generateRandomString(),
+			project: generateUUID(),
+			model: generateRandomString(),
+			success: true,
+			revId: generateUUID(),
+			user: generateRandomString(),
+			modelType: modelTypes.DRAWING,
+		};
+		EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
+
+		await waitOnEvent;
+
+		expect(Revisions.getRevisionFormat).not.toHaveBeenCalled();
+		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
+		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, modelTypes.DRAWING,
+			data.revId, { _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1 });
+		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+		expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+			chatEvents.DRAWING_NEW_REVISION,
+			{ _id: UUIDToString(data.revId), tag, author, timestamp: timestamp.getTime(), desc, format },
+			data.teamspace,
+			UUIDToString(data.project),
+			data.model,
+		);
+		expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+	});
+
+	test(`Should create a ${chatEvents.FEDERATION_NEW_REVISION} chat event if if there is a ${events.MODEL_IMPORT_FINISHED} (federation)`, async () => {
+		const tag = generateRandomString();
+		const author = generateRandomString();
+		const timestamp = generateRandomDate();
+		Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp });
+
+		const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+		const data = {
+			teamspace: generateRandomString(),
+			project: generateUUID(),
+			model: generateRandomString(),
+			success: true,
+			revId: generateUUID(),
+			user: generateRandomString(),
+			modelType: modelTypes.FEDERATION,
+		};
+		EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
+
+		await waitOnEvent;
+		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
+		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model,
+			modelTypes.FEDERATION, data.revId,
+			{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1 });
+		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+		expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+			chatEvents.FEDERATION_NEW_REVISION,
+			{ _id: UUIDToString(data.revId), tag, author, timestamp: timestamp.getTime() },
+			data.teamspace,
+			UUIDToString(data.project),
+			data.model,
+		);
+		expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+	});
+
+	test(`Should fail gracefully on error if there is a ${events.MODEL_IMPORT_FINISHED} (container)`, async () => {
+		const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+
+		const data = {
+			teamspace: generateRandomString(),
+			project: generateUUID(),
+			model: generateRandomString(),
+			success: true,
+			revId: generateUUID(),
+			user: generateRandomString(),
+			modelType: modelTypes.CONTAINER,
+		};
+
+		Revisions.getRevisionByIdOrTag.mockRejectedValueOnce(templates.revisionNotFound);
+		EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
+
+		await waitOnEvent;
+		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
+		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model,
+			modelTypes.CONTAINER, data.revId,
+			{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1 });
+		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(0);
+		expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+	});
+
+	test(`Should fail gracefully on error if there is a ${events.MODEL_IMPORT_FINISHED} (container)(Rejected with an error object)`, async () => {
+		const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+
+		const data = {
+			teamspace: generateRandomString(),
+			project: generateUUID(),
+			model: generateRandomString(),
+			success: true,
+			revId: generateUUID(),
+			user: generateRandomString(),
+			modelType: modelTypes.CONTAINER,
+		};
+
+		Revisions.getRevisionByIdOrTag.mockRejectedValueOnce(new Error(generateRandomString()));
+		EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
+
+		await waitOnEvent;
+		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
+		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model,
+			modelTypes.CONTAINER, data.revId,
+			{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1 });
+		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(0);
+		expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+	});
+};
+
 const testModelProcessingCompleted = () => {
 	describe(events.MODEL_IMPORT_FINISHED, () => {
 		describe.each([
@@ -273,7 +437,7 @@ const testModelProcessingCompleted = () => {
 			[false, false, true],
 			[true, false, false],
 		])('', (sendMail, success, userErr, noLogArchive) => {
-			test(`Should ${sendMail ? 'not ' : ''} send an email if model import ${success ? 'succeeded' : 'failed'}${!success && userErr ? ' due to an user error' : ''}`, async () => {
+			test(`Should ${sendMail ? 'not ' : ''}send an email if model import ${success ? 'succeeded' : 'failed'}${!success && userErr ? ' due to an user error' : ''}`, async () => {
 				const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 				const data = {
 					teamspace: generateRandomString(),
@@ -366,6 +530,8 @@ const testModelProcessingCompleted = () => {
 
 			await waitOnEvent;
 		});
+
+		testNewRevision();
 	});
 };
 
@@ -561,155 +727,7 @@ const testDeleteModel = () => {
 		});
 	});
 };
-const testNewRevision = () => {
-	describe(events.NEW_REVISION, () => {
-		test(`Should create a ${chatEvents.CONTAINER_NEW_REVISION} chat event if there is a ${events.NEW_REVISION} (container)`, async () => {
-			const tag = generateRandomString();
-			const author = generateRandomString();
-			const desc = generateRandomString();
-			const format = generateRandomString();
-			const rFile = [`${generateRandomString()}_${format}`];
-			const timestamp = generateRandomDate();
-			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp, rFile, desc });
-			Revisions.getRevisionFormat.mockReturnValueOnce(`.${format}`);
 
-			const waitOnEvent = eventTriggeredPromise(events.NEW_REVISION);
-			const data = {
-				teamspace: generateRandomString(),
-				project: generateUUID(),
-				model: generateRandomString(),
-				revision: generateRandomString(),
-				modelType: modelTypes.CONTAINER,
-			};
-			EventsManager.publish(events.NEW_REVISION, data);
-
-			await waitOnEvent;
-
-			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
-			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model,
-				modelTypes.CONTAINER, data.revision,
-				{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1 });
-			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
-			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
-				chatEvents.CONTAINER_NEW_REVISION,
-				{ _id: data.revision, tag, author, timestamp: timestamp.getTime(), desc, format: `.${format}` },
-				data.teamspace,
-				UUIDToString(data.project),
-				data.model,
-			);
-		});
-
-		test(`Should create a ${chatEvents.DRAWING_NEW_REVISION} chat event if there is a ${events.NEW_REVISION} (drawing)`, async () => {
-			const tag = generateRandomString();
-			const author = generateRandomString();
-			const desc = generateRandomString();
-			const format = generateRandomString();
-			const rFile = [generateRandomString()];
-			const timestamp = generateRandomDate();
-			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp, rFile, desc, format });
-
-			const waitOnEvent = eventTriggeredPromise(events.NEW_REVISION);
-			const data = {
-				teamspace: generateRandomString(),
-				project: generateUUID(),
-				model: generateRandomString(),
-				revision: generateRandomString(),
-				modelType: modelTypes.DRAWING,
-			};
-			EventsManager.publish(events.NEW_REVISION, data);
-
-			await waitOnEvent;
-
-			expect(Revisions.getRevisionFormat).not.toHaveBeenCalled();
-			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
-			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, modelTypes.DRAWING,
-				data.revision, { _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1 });
-			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
-			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
-				chatEvents.DRAWING_NEW_REVISION,
-				{ _id: data.revision, tag, author, timestamp: timestamp.getTime(), desc, format },
-				data.teamspace,
-				UUIDToString(data.project),
-				data.model,
-			);
-		});
-
-		test(`Should create a ${chatEvents.FEDERATION_NEW_REVISION} chat event if if there is a ${events.NEW_REVISION} (federation)`, async () => {
-			const tag = generateRandomString();
-			const author = generateRandomString();
-			const timestamp = generateRandomDate();
-			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp });
-
-			const waitOnEvent = eventTriggeredPromise(events.NEW_REVISION);
-			const data = {
-				teamspace: generateRandomString(),
-				project: generateUUID(),
-				model: generateRandomString(),
-				revision: generateRandomString(),
-				modelType: modelTypes.FEDERATION,
-			};
-			EventsManager.publish(events.NEW_REVISION, data);
-
-			await waitOnEvent;
-			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
-			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model,
-				modelTypes.FEDERATION, data.revision,
-				{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1 });
-			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
-			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
-				chatEvents.FEDERATION_NEW_REVISION,
-				{ _id: data.revision, tag, author, timestamp: timestamp.getTime() },
-				data.teamspace,
-				UUIDToString(data.project),
-				data.model,
-			);
-		});
-
-		test(`Should fail gracefully on error if there is a ${events.NEW_REVISION} (container)`, async () => {
-			const waitOnEvent = eventTriggeredPromise(events.NEW_REVISION);
-
-			const data = {
-				teamspace: generateRandomString(),
-				project: generateUUID(),
-				model: generateRandomString(),
-				revision: generateRandomString(),
-				modelType: modelTypes.CONTAINER,
-			};
-
-			Revisions.getRevisionByIdOrTag.mockRejectedValueOnce(templates.revisionNotFound);
-			EventsManager.publish(events.NEW_REVISION, data);
-
-			await waitOnEvent;
-			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
-			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model,
-				modelTypes.CONTAINER, data.revision,
-				{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1 });
-			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(0);
-		});
-
-		test(`Should fail gracefully on error if there is a ${events.NEW_REVISION} (container)(Rejected with an error object)`, async () => {
-			const waitOnEvent = eventTriggeredPromise(events.NEW_REVISION);
-
-			const data = {
-				teamspace: generateRandomString(),
-				project: generateUUID(),
-				model: generateRandomString(),
-				revision: generateRandomString(),
-				modelType: modelTypes.CONTAINER,
-			};
-
-			Revisions.getRevisionByIdOrTag.mockRejectedValueOnce(new Error(generateRandomString()));
-			EventsManager.publish(events.NEW_REVISION, data);
-
-			await waitOnEvent;
-			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
-			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model,
-				modelTypes.CONTAINER, data.revision,
-				{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1 });
-			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(0);
-		});
-	});
-};
 const testUpdateTicket = () => {
 	const updateTicketTest = async (isFederation, changes, expectedData) => {
 		const waitOnEvent = eventTriggeredPromise(events.UPDATE_TICKET);
@@ -1147,7 +1165,6 @@ describe('services/eventsListener/eventsListener', () => {
 	testRevisionUpdated();
 	testNewModel();
 	testDeleteModel();
-	testNewRevision();
 	testUpdateTicket();
 	testNewTicket();
 	testNewComment();

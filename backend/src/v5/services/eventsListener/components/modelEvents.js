@@ -40,11 +40,12 @@ const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
 	try {
 		const { _id: projectId } = await findProjectByModelId(teamspace, model, { _id: 1 });
 		const modelType = await getModelType(teamspace, model);
+		const revId = stringToUUID(corId);
 		if (modelType === modelTypes.DRAWING) {
 			// status are stored in individual revisions on drawings. Eventually this will be the same for others.
-			await updateProcessingStatus(teamspace, projectId, model, modelType, stringToUUID(corId), status);
+			await updateProcessingStatus(teamspace, projectId, model, modelType, revId, status);
 		} else {
-			await updateModelStatus(teamspace, projectId, model, status, corId);
+			await updateModelStatus(teamspace, projectId, model, status, revId);
 		}
 	} catch (err) {
 		logger.logError(`Failed to update model status for ${teamspace}.${model}: ${err.message}`);
@@ -60,12 +61,13 @@ const queueTasksCompleted = async ({ teamspace, model, value, corId, user, conta
 		const modelType = await getModelType(teamspace, model);
 		const errorInfo = getInfoFromCode(value);
 		errorInfo.retVal = value;
+		const revId = stringToUUID(corId);
 
 		if (modelType === modelTypes.DRAWING) {
 			// Revision status for drawings is tracked in the revision document - 3D will also move there eventually.
-			await onProcessingCompleted(teamspace, projectId, model, stringToUUID(corId), errorInfo, modelType);
+			await onProcessingCompleted(teamspace, projectId, model, revId, errorInfo, modelType);
 		} else {
-			await newRevisionProcessed(teamspace, projectId, model, corId, errorInfo, user, containers);
+			await newRevisionProcessed(teamspace, projectId, model, revId, errorInfo, user, containers);
 		}
 	} catch (err) {
 		logger.logError(`Failed to process a completed revision for ${teamspace}.${model}: ${err.message}`);
@@ -75,10 +77,36 @@ const queueTasksCompleted = async ({ teamspace, model, value, corId, user, conta
 	}
 };
 
+const revisionAdded = async ({ teamspace, project, model, revId, modelType }) => {
+	try {
+		const { tag, author, timestamp, desc, rFile, format } = await getRevisionByIdOrTag(teamspace,
+			model, modelType, revId,
+			{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1 });
+
+		const modelEvents = {
+			[modelTypes.CONTAINER]: chatEvents.CONTAINER_NEW_REVISION,
+			[modelTypes.FEDERATION]: chatEvents.FEDERATION_NEW_REVISION,
+			[modelTypes.DRAWING]: chatEvents.DRAWING_NEW_REVISION,
+		};
+
+		await createModelMessage(modelEvents[modelType], { _id: UUIDToString(revId),
+			tag,
+			author,
+			timestamp: timestamp.getTime(),
+			desc,
+			...deleteIfUndefined({ format: format ?? getRevisionFormat(rFile) }),
+		}, teamspace, UUIDToString(project), model);
+	} catch (err) {
+		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
+	}
+};
+
 const modelProcessingCompleted = async ({ teamspace, project, model, success, message,
 	userErr, revId, errCode, user, modelType }) => {
-	try {
-		if (!success && !userErr) {
+	if (success) {
+		revisionAdded({ teamspace, project, model, revId, modelType });
+	} else if (!userErr) {
+		try {
 			const { zipPath, logPreview } = (await getLogArchive(UUIDToString(revId))) || {};
 
 			await sendSystemEmail(emailTemplates.MODEL_IMPORT_ERROR.name,
@@ -98,11 +126,11 @@ const modelProcessingCompleted = async ({ teamspace, project, model, success, me
 				},
 				zipPath ? [{ filename: 'logs.zip', path: zipPath }] : undefined,
 			);
-		}
-	} catch (err) {
-		logger.logError('Failed to send email for model import failures');
-		if (err.stack) {
-			logger.logError(err.stack);
+		} catch (err) {
+			logger.logError('Failed to send email for model import failures');
+			if (err.stack) {
+				logger.logError(err.stack);
+			}
 		}
 	}
 };
@@ -125,30 +153,6 @@ const revisionUpdated = async ({ teamspace, project, model, data, sender, modelT
 
 	await createModelMessage(modelEvents[modelType], { ...data, _id: UUIDToString(data._id) },
 		teamspace, project, model, sender);
-};
-
-const revisionAdded = async ({ teamspace, project, model, revision, modelType }) => {
-	try {
-		const { tag, author, timestamp, desc, rFile, format } = await getRevisionByIdOrTag(teamspace,
-			model, modelType, stringToUUID(revision),
-			{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1 });
-
-		const modelEvents = {
-			[modelTypes.CONTAINER]: chatEvents.CONTAINER_NEW_REVISION,
-			[modelTypes.FEDERATION]: chatEvents.FEDERATION_NEW_REVISION,
-			[modelTypes.DRAWING]: chatEvents.DRAWING_NEW_REVISION,
-		};
-
-		await createModelMessage(modelEvents[modelType], { _id: revision,
-			tag,
-			author,
-			timestamp: timestamp.getTime(),
-			desc,
-			...deleteIfUndefined({ format: format ?? getRevisionFormat(rFile) }),
-		}, teamspace, UUIDToString(project), model);
-	} catch (err) {
-		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
-	}
 };
 
 const modelAdded = async ({ teamspace, project, model, data, sender, modelType }) => {
@@ -282,7 +286,6 @@ ModelEventsListener.init = () => {
 
 	subscribe(events.MODEL_IMPORT_FINISHED, modelProcessingCompleted);
 	subscribe(events.MODEL_SETTINGS_UPDATE, modelSettingsUpdated);
-	subscribe(events.NEW_REVISION, revisionAdded);
 	subscribe(events.REVISION_UPDATED, revisionUpdated);
 	subscribe(events.NEW_MODEL, modelAdded);
 	subscribe(events.DELETE_MODEL, modelDeleted);
