@@ -18,14 +18,13 @@
 type IProps = {
 	className?: any;
 	style?: React.CSSProperties;
-	iconRef?: any;
 	onMouseDown?:  React.MouseEventHandler<SVGSVGElement>;
 	haloVisibility: number
 
 };
 
-export default ({ className, style, iconRef, onMouseDown, haloVisibility }: IProps) => (
-	<svg width="100" height="100" viewBox="0 0 100 100" onMouseDown={onMouseDown} ref={iconRef} fill="none" version="1.1"
+export default ({ className, style, onMouseDown, haloVisibility }: IProps) => (
+	<svg width="100" height="100" viewBox="0 0 100 100" onMouseDown={onMouseDown} fill="none" version="1.1"
 		xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
 		<circle cx="0" cy="0" r="30" stroke="#7067d100" fill="#7067d100" strokeOpacity="0" strokeWidth="0" id="circle7" />
 		<path d="M 41.658742,-27.448895 -4.7557776,0.4428216 43.833276,26.507273 Z" fill="url(#paint0_radial_11_9573)" id="path2" style={{ scale: `${haloVisibility} 1` }} />

@@ -16,25 +16,23 @@
  */
 import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { Vector3 } from 'three';
-import { useModelLoading } from './modelLoading.hooks';
+import { useModelLoading, useViewpointSubscription } from './viewer.hooks';
 import { CameraIcon } from './camera.styles';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 
 
 
 const haloAngleCutoff = Math.PI / 4;
 
-export const Camera = ({ scale, viewport }) => {
-	const animationFrame = useRef(0);
+export const Camera = ({ scale }) => {
 	const viewpoint = useRef(null);
-	const viewportRef = useRef(viewport);
-	const cameraRef = useRef<HTMLElement>();
 	
 	const [drawingId] = useSearchParam('drawingId');
-	const { containerOrFederation } = useParams();
+	const { containerOrFederation } = useParams<ViewerParams>();
 	const [position, setPosition] = useState({ x:0, y:0 });
 	const [angle, setAngle] = useState(0);
 	const [haloVisibility, setHaloVisibility] = useState(1);
@@ -43,11 +41,10 @@ export const Camera = ({ scale, viewport }) => {
 
 	const modelLoading = useModelLoading();
 
+	useViewpointSubscription((v) => {
+		if (!transform3DTo2D) return;
 
-	const onEnterFrame = async () => {
-		const v = await ViewerService.getCurrentViewpointInfo();
 		const p =  transform3DTo2D(v.position);
-
 		setPosition(p);
 
 		const v3 = new Vector3(...v.view_dir);
@@ -67,21 +64,7 @@ export const Camera = ({ scale, viewport }) => {
 
 		setAngle(lookat.angle());
 		viewpoint.current = v;
-	
-		animationFrame.current = requestAnimationFrame(onEnterFrame);
-	};
-
-	useEffect(() => viewportRef.current = viewport, [viewport]);
-
-	useEffect(() => {
-		if (!transform2DTo3D) return;
-
-		animationFrame.current = requestAnimationFrame(onEnterFrame);
-		return () => {
-			cancelAnimationFrame(animationFrame.current);
-		};
-	}, [transform2DTo3D]);
-
+	}, [transform3DTo2D]);
 
 	const getCursorOffset = (e) => {
 		const rect = e.currentTarget.getBoundingClientRect();
@@ -134,5 +117,5 @@ export const Camera = ({ scale, viewport }) => {
 		return null;
 	}
 
-	return (<CameraIcon iconRef={cameraRef as any} onMouseDown={onMouseDown} haloVisibility={haloVisibility} style={{ transform: `translate(${position.x}px, ${position.y}px) scale(${1 / scale}) rotate(${angle}rad)`, overflow:'unset', cursor:'grab', transformOrigin: '0 0' }}/>);
+	return (<CameraIcon onMouseDown={onMouseDown} haloVisibility={haloVisibility} style={{ transform: `translate(${position.x}px, ${position.y}px) scale(${1 / scale}) rotate(${angle}rad)`, overflow:'unset', cursor:'grab', transformOrigin: '0 0' }}/>);
 };

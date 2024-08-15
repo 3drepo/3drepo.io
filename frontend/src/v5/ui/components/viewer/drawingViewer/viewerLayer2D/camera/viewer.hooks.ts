@@ -27,3 +27,42 @@ export const useModelLoading = () => {
 
 	return loading;
 };
+
+
+let viewpoint:any = undefined;
+const onViewpointChangeCallbacks:((viewpoint:any) => void)[] = [];
+let animationFrameID = 0;
+
+const onEnterFrame = async () => {
+	const v = await ViewerService.getCurrentViewpointInfo();
+	animationFrameID = requestAnimationFrame(onEnterFrame);
+
+	viewpoint = v;
+	onViewpointChangeCallbacks.forEach((callback)=> callback(v));
+};
+
+const subscribeToViewpointChange = (callback) => {
+	onViewpointChangeCallbacks.push(callback);
+
+	if (onViewpointChangeCallbacks.length === 1) {
+		animationFrameID = requestAnimationFrame(onEnterFrame);
+	}
+
+	if (viewpoint) callback(viewpoint);
+
+	return () => {
+		const callbackIndex = onViewpointChangeCallbacks.indexOf(callback);
+
+		if (callbackIndex >= 0 ) {
+			onViewpointChangeCallbacks.splice(callbackIndex, 1);
+		}
+
+		if (!onViewpointChangeCallbacks.length) {
+			cancelAnimationFrame(animationFrameID);
+		}
+	};
+};
+
+export const useViewpointSubscription = (onViewpointChange, deps) => {
+	useEffect(() => subscribeToViewpointChange(onViewpointChange), deps);
+};

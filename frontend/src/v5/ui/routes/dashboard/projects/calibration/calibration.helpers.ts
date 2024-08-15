@@ -34,7 +34,9 @@ export const getUnitsConversionFactor = (drawingUnits, modelUnits) => {
 export const convertCoordUnits = (coord, conversionFactor: number) => coord?.map((point) => point * conversionFactor) || null;
 export const convertVectorUnits = (vector, conversionFactor: number) => vector.map((coord) => convertCoordUnits(coord, conversionFactor));
 
-export const removeZ = (vector) => [vector[0], vector[2]] as Coord2D;
+export const removeZ = (vector) => {
+	return [vector[0], vector[2]] as Coord2D;
+};
 
 export const getTransformationMatrix = (vector2D: Vector2, vector3D: Vector2) => {
 	const drawVecStart = new Vector2(...vector2D[0]);

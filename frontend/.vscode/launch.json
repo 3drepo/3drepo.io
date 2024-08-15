@@ -1,0 +1,10 @@
+{
+	"configurations": [
+		{
+			"type": "chrome",
+			"name": "Launch in chrome",
+			"request": "launch",
+			"url": "https://3drepo.lan"
+		}
+	]
+}

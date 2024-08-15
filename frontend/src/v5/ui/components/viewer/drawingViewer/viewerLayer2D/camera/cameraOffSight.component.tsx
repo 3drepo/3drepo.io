@@ -20,10 +20,10 @@ import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { clamp } from 'lodash';
 import { useRef, useState, useEffect } from 'react';
 import { useParams } from 'react-router';
-import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { Vector2 } from 'three';
-import { useModelLoading } from './modelLoading.hooks';
+import { useModelLoading, useViewpointSubscription } from './viewer.hooks';
 import { CameraOffSightIcon } from './camera.styles';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 
 interface Props {
 	onCameraSightChanged: (cameraOnSight: boolean) => void;
@@ -36,30 +36,24 @@ const cameraPadding = 3;
 const iconSize = 56;
 
 export const CameraOffSight = ({ onCameraSightChanged, viewport, scale }: Props) => {
-	const animationFrame = useRef(0);
 	const viewpoint = useRef(null);
 	const viewportRef = useRef(viewport);
 	const camInSight = useRef(false);
 	const scaleRef = useRef(scale);
 
 	const [drawingId] = useSearchParam('drawingId');
-	const { containerOrFederation } = useParams();
+	const { containerOrFederation } = useParams<ViewerParams>();
 	const [position, setPosition] = useState({ x:0, y:0 });
 	const [angle, setAngle] = useState(0);
 	const transform2DTo3D = DrawingsHooksSelectors.selectTransform2Dto3D(drawingId, containerOrFederation);
 	const transform3DTo2D = DrawingsHooksSelectors.selectTransform3Dto2D(drawingId, containerOrFederation);
 	const modelLoading = useModelLoading();
 
+	useEffect(() => viewportRef.current = viewport, [viewport]);
+	useEffect(() => scaleRef.current = scale, [scale]);
 
-	useEffect(() => {
-		scaleRef.current = scale;
-	}, [scale]);
-
-
-	const onEnterFrame = async () => {
-		animationFrame.current = requestAnimationFrame(onEnterFrame);
-		
-		const v = await ViewerService.getCurrentViewpointInfo();
+	useViewpointSubscription((v) => {
+		if (!transform2DTo3D) return;
 		const p = transform3DTo2D(v.position);
 		const vp = viewportRef.current;
 
@@ -92,21 +86,10 @@ export const CameraOffSight = ({ onCameraSightChanged, viewport, scale }: Props)
 		const ang = p.sub(new Vector2(x, y)).angle();
 		setAngle(ang);
 		viewpoint.current = v;
-	};
-
-	useEffect(() => viewportRef.current = viewport, [viewport]);
-
-	useEffect(() => {
-		if (!transform2DTo3D) return;
-
-		animationFrame.current = requestAnimationFrame(onEnterFrame);
-		return () => {
-			cancelAnimationFrame(animationFrame.current);
-		};
-	}, [transform2DTo3D]);
+	}, [transform3DTo2D]); 
 
 
-	if (camInSight.current || modelLoading) {
+	if (!transform3DTo2D || camInSight.current || modelLoading) {
 		return null;
 	}
 
