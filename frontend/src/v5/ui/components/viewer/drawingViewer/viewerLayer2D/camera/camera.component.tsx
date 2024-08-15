@@ -97,7 +97,7 @@ export const Camera = ({ scale }) => {
 			model: undefined,
 		};
 
-		ViewerService.setCamera(cam);
+		ViewerService.setCamera(cam, false);
 	};
 
 	const onMouseUp = (ev: MouseEvent) => {
