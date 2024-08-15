@@ -22,6 +22,7 @@ import { useRef, useState, useEffect } from 'react';
 import { useParams } from 'react-router';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { Vector2 } from 'three';
+import { useModelLoading } from './modelLoading.hooks';
 
 interface Props {
 	onCameraSightChanged: (cameraOnSight: boolean) => void;
@@ -48,6 +49,7 @@ export const CameraOffSight = ({ onCameraSightChanged, viewport, scale }: Props)
 	const [angle, setAngle] = useState(0);
 	const transform2DTo3D = DrawingsHooksSelectors.selectTransform2Dto3D(drawingId, containerOrFederation);
 	const transform3DTo2D = DrawingsHooksSelectors.selectTransform3Dto2D(drawingId, containerOrFederation);
+	const modelLoading = useModelLoading();
 
 
 	useEffect(() => {
@@ -106,7 +108,8 @@ export const CameraOffSight = ({ onCameraSightChanged, viewport, scale }: Props)
 		};
 	}, [transform2DTo3D]);
 
-	if (camInSight.current) {
+
+	if (camInSight.current || modelLoading) {
 		return null;
 	}
 

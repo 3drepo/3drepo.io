@@ -40,6 +40,8 @@ export const Camera = ({ scale, viewport }) => {
 	const transform2DTo3D = DrawingsHooksSelectors.selectTransform2Dto3D(drawingId, containerOrFederation);
 	const transform3DTo2D = DrawingsHooksSelectors.selectTransform3Dto2D(drawingId, containerOrFederation);
 
+	const modelLoading = useModelLoading();
+
 
 	const onEnterFrame = async () => {
 		const v = await ViewerService.getCurrentViewpointInfo();
@@ -127,7 +129,7 @@ export const Camera = ({ scale, viewport }) => {
 		ev.currentTarget.parentElement.addEventListener('mouseup', onMouseUp);
 	};
 
-	if (!transform2DTo3D) {
+	if (!transform2DTo3D || modelLoading) {
 		return null;
 	}
 
