@@ -20,7 +20,7 @@ import { Link } from 'react-router-dom';
 import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
 import { MenuItem } from './ellipsisMenuItem.styles';
 
-type EllipsisMenuItemProps = {
+export type EllipsisMenuItemProps = {
 	title: ReactNode;
 	to?: any;
 	key?: string;

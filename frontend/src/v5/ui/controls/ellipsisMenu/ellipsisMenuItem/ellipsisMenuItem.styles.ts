@@ -38,3 +38,14 @@ export const MenuItem = styled(MenuItemComponent)<typeof Link>`
 		background-color: ${({ theme }) => theme.palette.base.light};
 	}
 `;
+
+export const SwitchContainer = styled.span`
+	svg {
+		height: 15px;
+		width: 15px;
+	}
+`;
+
+export const Title = styled.span`
+	width: 100%;
+`;
