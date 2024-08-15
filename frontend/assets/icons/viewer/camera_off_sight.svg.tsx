@@ -31,59 +31,24 @@ const scaleByAngle = (angle) => {
 	return Math.min(x, y) / cos45;
 };
 
-
 export default ({ className, style, arrowAngle }: IProps) => (
-	<svg  width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style} >
-		<path
-			d="M 27.5,43.5 -0.50000034,28 27.5,12.5 55.5,28 Z"
-			fill="url(#paint0_linear_2_39)"
-			id="path305" style={{ transformOrigin: '50% 50%', rotate: `${arrowAngle}rad`, scale: `${1 + 0.2 * scaleByAngle(arrowAngle) } 1` }}/>
-		<rect
-			y="10"
-			width="36"
-			height="36"
-			rx="5"
-			fill="#00c1d4"
-			id="rect307"
-			x="10" />
+	<svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}
+		style={style}>
+		<path d="M 27.5,43.5 -0.50000034,28 27.5,12.5 55.5,28 Z" fill="url(#paint0_linear_2_39)" id="path305" style={{ transformOrigin: '50% 50%', rotate: `${arrowAngle}rad`, scale: `${1 + 0.2 * scaleByAngle(arrowAngle)} 1` }} />
+		<rect y="10" width="36" height="36" rx="5" fill="#00c1d4" id="rect307" x="10" />
 		<path
 			d="m 21.8086,29.7285 c -0.3883,0 -0.7031,0.3148 -0.7031,0.7031 0,0.3884 0.3148,0.7032 0.7031,0.7032 h 3.7109 c 0.3884,0 0.7032,-0.3148 0.7032,-0.7032 0,-0.3883 -0.3148,-0.7031 -0.7032,-0.7031 z"
-			fill="#ffffff"
-			id="path309" />
-		<path
-			fill-rule="evenodd"
-			clip-rule="evenodd"
+			fill="#ffffff" id="path309" />
+		<path fillRule="evenodd" clipRule="evenodd"
 			d="m 19.11328,21.75 c 0,-0.3883 0.3148,-0.7031 0.70313,-0.7031 h 6.66979 c 0.1876,0 0.3674,0.0749 0.4995,0.2082 l 2.3145,2.3359 c 0.0384,0.0387 0.0713,0.0807 0.0988,0.1252 h 1.6882 c 0.3948,0 0.7149,0.32 0.7149,0.7148 v 1.5544 L 37.0273,23.965 C 37.4957,23.7839 38,24.1295 38,24.6317 v 8.7332 c 0,0.5017 -0.5033,0.8473 -0.9715,0.6672 l -5.2264,-2.0109 v 1.5444 c 0,0.3947 -0.32,0.7148 -0.7149,0.7148 H 18.71484 C 18.32002,34.2804 18,33.9603 18,33.5656 V 24.431 c 0,-0.3947 0.32,-0.7148 0.71484,-0.7148 h 0.39844 z m 7.07982,0.7031 1.2515,1.2631 h -6.9251 v -1.2631 z m -6.78685,2.6693 v 7.7518 H 30.3958 v -1.783 c -0.0088,-0.0632 -0.009,-0.1281 0,-0.193 v -3.7879 c -0.009,-0.0649 -0.0088,-0.1298 0,-0.193 v -1.7949 z m 12.39585,2.3707 v 3.0214 l 4.7917,1.8436 v -6.7178 z"
-			fill="#ffffff"
-			id="path311" />
-		<defs
-			id="defs322">
-			<linearGradient
-				id="paint0_linear_2_39"
-				x1="17.5"
-				y1="-6.7752597e-07"
-				x2="17.5"
-				y2="56"
-				gradientUnits="userSpaceOnUse"
-				gradientTransform="rotate(90,22.5,33)">
-				<stop
-					stop-color="#00C1D4"
-					id="stop313" />
-				<stop
-					offset="0.5"
-					stop-color="#00C1D4"
-					id="stop315" />
-				<stop
-					offset="0.51"
-					stop-color="#00C1D4"
-					stop-opacity="0"
-					id="stop317" />
-				<stop
-					offset="1"
-					stop-color="#00C1D4"
-					stop-opacity="0"
-					id="stop319" />
+			fill="#ffffff" id="path311" />
+		<defs id="defs322">
+			<linearGradient id="paint0_linear_2_39" x1="17.5" y1="-6.7752597e-07" x2="17.5" y2="56"
+				gradientUnits="userSpaceOnUse" gradientTransform="rotate(90,22.5,33)">
+				<stop stopColor="#00C1D4" id="stop313" />
+				<stop stopColor="#00C1D4" offset="0.5" id="stop315" />
+				<stop stopColor="#00C1D4" offset="0.51" stopOpacity="0" id="stop317" />
+				<stop stopColor="#00C1D4" offset="1" stopOpacity="0" id="stop319" />
 			</linearGradient>
 		</defs>
-	</svg>)
-;
+	</svg>);

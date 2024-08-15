@@ -41,8 +41,6 @@ export const CameraOffSight = ({ onCameraSightChanged, viewport, scale }: Props)
 	const camInSight = useRef(false);
 	const scaleRef = useRef(scale);
 
-	// const cameraRef = useRef<HTMLElement>();
-	
 	const [drawingId] = useSearchParam('drawingId');
 	const { containerOrFederation } = useParams();
 	const [position, setPosition] = useState({ x:0, y:0 });
@@ -81,8 +79,6 @@ export const CameraOffSight = ({ onCameraSightChanged, viewport, scale }: Props)
 
 		if (cameraInSight) 
 			return;
-
-
 
 		const vpWidth = (vp.right - vp.left) * scaleRef.current;
 		const vpHeight = (vp.bottom - vp.top) * scaleRef.current;

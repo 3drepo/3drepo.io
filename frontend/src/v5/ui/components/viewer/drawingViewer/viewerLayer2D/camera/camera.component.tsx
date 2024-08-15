@@ -21,6 +21,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { Vector3 } from 'three';
+import { useModelLoading } from './modelLoading.hooks';
 
 
 
