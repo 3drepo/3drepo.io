@@ -16,12 +16,12 @@
  */
 import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
-import CameraIcon from '@assets/icons/viewer/camera.svg';
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { Vector3 } from 'three';
 import { useModelLoading } from './modelLoading.hooks';
+import { CameraIcon } from './camera.styles';
 
 
 

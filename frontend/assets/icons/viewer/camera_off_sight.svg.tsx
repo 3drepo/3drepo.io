@@ -34,8 +34,8 @@ const scaleByAngle = (angle) => {
 export default ({ className, style, arrowAngle }: IProps) => (
 	<svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}
 		style={style}>
-		<path d="M 27.5,43.5 -0.50000034,28 27.5,12.5 55.5,28 Z" fill="url(#paint0_linear_2_39)" id="path305" style={{ transformOrigin: '50% 50%', rotate: `${arrowAngle}rad`, scale: `${1 + 0.2 * scaleByAngle(arrowAngle)} 1` }} />
-		<rect y="10" width="36" height="36" rx="5" fill="#00c1d4" id="rect307" x="10" />
+		<path style={{ transformOrigin: '50% 50%', rotate: `${arrowAngle}rad`, scale: `${1 + 0.2 * scaleByAngle(arrowAngle)} 1` }} d="M 27.5,43.5 -0.50000034,28 27.5,12.5 55.5,28 Z" fill="url(#paint0_linear_2_39)" id="path305" />
+		<rect y="10" width="36" height="36" rx="5" fill="currentColor" id="rect307" x="10" />
 		<path
 			d="m 21.8086,29.7285 c -0.3883,0 -0.7031,0.3148 -0.7031,0.7031 0,0.3884 0.3148,0.7032 0.7031,0.7032 h 3.7109 c 0.3884,0 0.7032,-0.3148 0.7032,-0.7032 0,-0.3883 -0.3148,-0.7031 -0.7032,-0.7031 z"
 			fill="#ffffff" id="path309" />
@@ -45,10 +45,10 @@ export default ({ className, style, arrowAngle }: IProps) => (
 		<defs id="defs322">
 			<linearGradient id="paint0_linear_2_39" x1="17.5" y1="-6.7752597e-07" x2="17.5" y2="56"
 				gradientUnits="userSpaceOnUse" gradientTransform="rotate(90,22.5,33)">
-				<stop stopColor="#00C1D4" id="stop313" />
-				<stop stopColor="#00C1D4" offset="0.5" id="stop315" />
-				<stop stopColor="#00C1D4" offset="0.51" stopOpacity="0" id="stop317" />
-				<stop stopColor="#00C1D4" offset="1" stopOpacity="0" id="stop319" />
+				<stop stopColor="currentColor" id="stop313" />
+				<stop stopColor="currentColor" offset="0.5" id="stop315" />
+				<stop stopColor="currentColor" offset="0.51" stopOpacity="0" id="stop317" />
+				<stop stopColor="currentColor" offset="1" stopOpacity="0" id="stop319" />
 			</linearGradient>
 		</defs>
 	</svg>);

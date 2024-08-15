@@ -16,13 +16,14 @@
  */ 
 import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
-import CameraOffSightIcon from '@assets/icons/viewer/camera_off_sight.svg';
+
 import { clamp } from 'lodash';
 import { useRef, useState, useEffect } from 'react';
 import { useParams } from 'react-router';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { Vector2 } from 'three';
 import { useModelLoading } from './modelLoading.hooks';
+import { CameraOffSightIcon } from './camera.styles';
 
 interface Props {
 	onCameraSightChanged: (cameraOnSight: boolean) => void;
