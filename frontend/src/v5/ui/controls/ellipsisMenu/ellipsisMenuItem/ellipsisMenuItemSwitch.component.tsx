@@ -21,7 +21,7 @@ import { ReactNode } from 'react';
 import { SwitchContainer, Title } from './ellipsisMenuItem.styles';
 
 type EllipsisMenuItemSwitchProps = Omit<EllipsisMenuItemProps, 'to'> & {
-	icon: ReactNode,
+	icon?: ReactNode,
 	active: boolean,
 };
 export const EllipsisMenuItemSwitch = ({ icon, title, active, ...props }: EllipsisMenuItemSwitchProps) => (
@@ -30,7 +30,6 @@ export const EllipsisMenuItemSwitch = ({ icon, title, active, ...props }: Ellips
 			<SwitchContainer>
 				{icon}
 				<Title>{title}</Title>
-				{/* {title} */}
 				{active && <TickIcon />}
 			</SwitchContainer>}
 		{...props}

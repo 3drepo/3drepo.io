@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ReactNode, SyntheticEvent, useContext } from 'react';
-import { Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
 import { MenuItem } from './ellipsisMenuItem.styles';
@@ -47,9 +46,7 @@ export const EllipsisMenuItem = ({ to, title, hidden, onClick, ...props }: Ellip
 			onClick={handleClick}
 			{...props}
 		>
-			<Typography variant="body1" noWrap>
-				{title}
-			</Typography>
+			{title}
 		</MenuItem>
 	);
 };
