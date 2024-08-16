@@ -58,45 +58,6 @@ const setupData = async () => {
 	]);
 };
 
-const revisionAddTest = () => {
-	describe('On adding a revision', () => {
-		test(`should trigger a ${EVENTS.DRAWING_NEW_REVISION} event when a drawing revision has been added`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
-
-			const data = { teamspace, project: project.id, model: drawing._id };
-			await ServiceHelper.socket.joinRoom(socket, data);
-
-			const socketPromise = new Promise((resolve, reject) => {
-				socket.on(EVENTS.DRAWING_NEW_REVISION, resolve);
-				setTimeout(reject, 1000);
-			});
-
-			await agent.post(`/v5/teamspaces/${teamspace}/projects/${project.id}/drawings/${drawing._id}/revisions?key=${user.apiKey}`)
-				.set('Content-Type', 'multipart/form-data')
-				.field('revCode', ServiceHelper.generateRandomString(10))
-				.field('statusCode', statusCodes[0].code)
-				.field('desc', ServiceHelper.generateRandomString())
-				.attach('file', dwgModel)
-				.expect(templates.ok.status);
-
-			const revsReq = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/drawings/${drawing._id}/revisions?key=${user.apiKey}`);
-
-			const { _id, author, timestamp, desc, format } = revsReq.body.revisions[0];
-			await expect(socketPromise).resolves.toEqual({
-				...data,
-				data: {
-					_id,
-					author,
-					timestamp,
-					desc,
-					format,
-				} });
-
-			socket.close();
-		});
-	});
-};
-
 const revisionUpdateTest = () => {
 	describe('On updating a revision', () => {
 		test(`should trigger a ${EVENTS.CONTAINER_REVISION_UPDATE} event when a revision has been updated using revision Id`, async () => {

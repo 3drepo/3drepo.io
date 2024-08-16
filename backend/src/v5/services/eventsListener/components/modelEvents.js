@@ -79,9 +79,10 @@ const queueTasksCompleted = async ({ teamspace, model, value, corId, user, conta
 
 const revisionAdded = async ({ teamspace, project, model, revId, modelType }) => {
 	try {
-		const { tag, author, timestamp, desc, rFile, format } = await getRevisionByIdOrTag(teamspace,
-			model, modelType, revId,
-			{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1 });
+		const {
+			tag, author, timestamp, desc, rFile, format, statusCode, revCode,
+		} = await getRevisionByIdOrTag(teamspace, model, modelType, revId,
+			{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1, statusCode: 1, revCode: 1 });
 
 		const modelEvents = {
 			[modelTypes.CONTAINER]: chatEvents.CONTAINER_NEW_REVISION,
@@ -89,13 +90,15 @@ const revisionAdded = async ({ teamspace, project, model, revId, modelType }) =>
 			[modelTypes.DRAWING]: chatEvents.DRAWING_NEW_REVISION,
 		};
 
-		await createModelMessage(modelEvents[modelType], { _id: UUIDToString(revId),
+		await createModelMessage(modelEvents[modelType], deleteIfUndefined({ _id: UUIDToString(revId),
 			tag,
+			statusCode,
+			revCode,
 			author,
 			timestamp: timestamp.getTime(),
 			desc,
 			...deleteIfUndefined({ format: format ?? getRevisionFormat(rFile) }),
-		}, teamspace, UUIDToString(project), model);
+		}), teamspace, UUIDToString(project), model);
 	} catch (err) {
 		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
 	}

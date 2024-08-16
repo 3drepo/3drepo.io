@@ -161,7 +161,7 @@ Revisions.onProcessingCompleted = async (teamspace, project, model, revId,
 		teamspace,
 		project,
 		model,
-		data: { ...set, status: set.status || processStatuses.OK },
+		data: { ...set, status: set.status || processStatuses.OK, timestamp: new Date() },
 		modelType,
 	});
 };
