@@ -36,8 +36,11 @@ import { CentredContainer } from '@controls/centredContainer/centredContainer.co
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { isFirefox } from '@/v5/helpers/browser.helper';
 import { ZoomableImage } from './zoomableImage.types';
-import { SVGSnapHelper } from './snapping/svgSnap';
+import { SVGSnapHelper } from './snapping/svgSnapHelper';
 import { Vector2 } from './snapping/types';
+import { SVGSnapDiagnosticsHelper } from './snapping/debug';
+import { setupIntersectionTest } from './snapping/bezierFunctions';
+
 
 export const Viewer2D = () => {
 	const [drawingId] = useSearchParam('drawingId');
@@ -100,6 +103,9 @@ export const Viewer2D = () => {
 		// the svg coordinate systems.
 
 		// snapHandler.showDebugCanvas(document.querySelector('#app'));
+
+		const diag = new SVGSnapDiagnosticsHelper(document.querySelector('#app'));
+		setupIntersectionTest(diag);
 
 		// Set up a cursor to show the state of the snap.
 

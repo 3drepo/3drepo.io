@@ -17,94 +17,8 @@
 
 import 'path-data-polyfill';
 import { Vector2, Line } from './types';
-import { RTree, RTreeBuilder, RTreeNode } from './rTree';
-
-export class SVGSnapDiagnosticsHelper {
-
-	container: Element;
-
-	canvas: HTMLCanvasElement;
-
-	context: CanvasRenderingContext2D;
-
-	start: number;
-
-	collector: PrimitiveCollector;
-
-	constructor(parent: Element) {
-		this.container = document.createElement('div');
-		parent.appendChild(this.container);
-		this.container.setAttribute('style', 'position: absolute; left: 100px; top: 100px; display: block; z-index: 1; width: 600px; height: 600px; overflow: hidden');
-		this.canvas = document.createElement('canvas');
-		this.context = this.canvas.getContext('2d');
-		this.container.appendChild(this.canvas);
-		this.canvas.setAttribute('style', 'transform-origin: top left; transform: translateX(0px) translateY(0px) scale(0.6); ');
-	}
-
-	setSvg(svg: SVGSVGElement) {
-		this.canvas.width = svg.viewBox.baseVal.width;
-		this.canvas.height = svg.viewBox.baseVal.height;
-		svg.viewBox.baseVal.x = 0;
-		svg.viewBox.baseVal.y = 0;
-		this.context.fillStyle = 'red';
-		this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-	}
-
-	renderPrimitives(collector: PrimitiveCollector) {
-		this.collector = collector;
-		this.start = 0;
-		requestAnimationFrame(this.renderBatch.bind(this));
-	}
-
-	renderBatch() {
-		const batchSize = 1000;
-		const num = Math.min(this.collector.lines.length - this.start, batchSize);
-		for (const line of this.collector.lines.slice(this.start, this.start + num)) {
-			this.context.beginPath();
-			this.context.moveTo(line.start.x, line.start.y);
-			this.context.lineTo(line.end.x, line.end.y);
-			this.context.stroke();
-		}
-		this.start += num;
-		if (this.start < this.collector.lines.length) {
-			requestAnimationFrame(this.renderBatch.bind(this));
-		}
-	}
-
-	renderPoint(p: Vector2) {
-		this.context.fillStyle = 'white';
-		this.context.beginPath();
-		this.context.arc(p.x, p.y, 1, 0, 2 * Math.PI);
-		this.context.fill();
-	}
-
-	renderRadius(p: Vector2, r: number) {
-		this.context.strokeStyle = 'white';
-		this.context.beginPath();
-		this.context.arc(p.x, p.y, r, 0, 2 * Math.PI);
-		this.context.stroke();
-	}
-
-	renderLine(start: Vector2, end: Vector2) {
-		this.context.beginPath();
-		this.context.moveTo(start.x, start.y);
-		this.context.lineTo(end.x, end.y);
-		this.context.stroke();
-	}
-
-	renderRTree(tree: RTree) {
-		this.renderRTreeNode(tree.root);
-	}
-
-	renderRTreeNode(node: RTreeNode) {
-		this.context.strokeRect(node.xmin, node.ymin, node.width, node.height);
-		if ( node.children != null ) {
-			for (const child of node.children) {
-				this.renderRTreeNode(child);
-			}
-		}
-	}
-}
+import { RTree, RTreeBuilder } from './rTree';
+import { SVGSnapDiagnosticsHelper } from './debug';
 
 class PrimitiveCollector {
 
@@ -156,7 +70,9 @@ class PathCollector {
 	}
 
 	addCurve(values: number[]) {
+		const start = this.currentPosition;
 		const end = new Vector2(this.collector.offset.x + values[4], this.collector.offset.y + values[5]);
+
 		this.currentPosition = end;
 	}
 
@@ -188,6 +104,115 @@ class PolyCollector {
 				new Vector2(end.x, end.y),
 			),
 		);
+	}
+}
+
+/** Parses the SVG and outputs the shapes contained within it into the
+ * provided Collector.
+ */
+class SvgParser {
+
+	collector: PrimitiveCollector;
+
+	constructor(collector: PrimitiveCollector) {
+		this.collector = collector;
+	}
+
+	parseSvg(svg: SVGSVGElement) {
+
+		// The current version of this parser assumes all elements are defined
+		// in world-space - that is, it does not consider groups, instances or
+		// the transform attribute.
+
+		// Currently the svgs we get from ODA do not appear to use these features,
+		// however in the future we may need to from simply listing to performing
+		// a context-aware traversal of the entire DOM.
+
+		this.getRectElements(svg);
+		this.getCircleElements(svg);
+		this.getEllipseElements(svg);
+		this.getLineElements(svg);
+		this.getPolylineElements(svg);
+		this.getPolygonElements(svg);
+		this.getPathElements(svg);
+	}
+
+	getRectElements(svg: SVGElement) {
+		const rects = svg.querySelectorAll<SVGRectElement>('rect');
+		if (rects.length > 0) {
+			console.warn('SVG contains <rect> elements but these are not currently handled.');
+		}
+	}
+
+	getCircleElements(svg: SVGElement) {
+		const circles = svg.querySelectorAll<SVGCircleElement>('circle');
+		if (circles.length > 0) {
+			console.warn('SVG contains <circle> elements but these are not currently handled.');
+		}
+	}
+
+	getEllipseElements(svg: SVGElement) {
+		const ellipses = svg.querySelectorAll<SVGEllipseElement>('ellipse');
+		if (ellipses.length > 0) {
+			console.warn('SVG contains <ellipse> elements but these are not currently handled.');
+		}
+	}
+
+	getLineElements(svg: SVGElement) {
+		const lines = svg.querySelectorAll<SVGLineElement>('line');
+		if (lines.length > 0) {
+			console.warn('SVG contains <line> elements but these are not currently handled.');
+		}
+	}
+
+	getPolylineElements(svg: SVGElement) {
+		const polylines = svg.querySelectorAll<SVGPolylineElement>('polyline');
+		for (let i = 0; i < polylines.length; i++) {
+			const p = polylines[i];
+			const points = p.points;
+			const polyCollector = new PolyCollector(this.collector);
+			for (let j = 0; j < points.length - 1; j++) {
+				polyCollector.addLine(points[j], points[j + 1]);
+			}
+		}
+	}
+
+	getPolygonElements(svg: SVGElement) {
+		const polygons = svg.querySelectorAll<SVGPolygonElement>('polygon');
+		if (polygons.length > 0) {
+			console.warn('SVG contains <polygon> elements but these are not currently handled.');
+		}
+	}
+
+	getPathElements(svg: SVGSVGElement) {
+		const paths = svg.querySelectorAll<SVGPathElement>('path:not([stroke=\'none\'])');
+		for (let i = 0; i < paths.length; i++) {
+			const p = paths[i];
+			const segments = p.getPathData({ normalize: true });
+
+			const pathCollector = new PathCollector(this.collector);
+
+			for (const segment of segments) {
+				// Passing the normalize flag means getPathData will transform
+				// all paths into one of the following absolute types
+				switch (segment.type) {
+					case 'M':
+						pathCollector.setStartPosition(segment.values);
+						break;
+					case 'L':
+						for (let s = 0; s < segment.values.length; s += 2) {
+							pathCollector.addLine(segment.values, s);
+						}
+						break;
+					case 'C':
+						pathCollector.addCurve(segment.values);
+						break;
+					case 'Z':
+						pathCollector.closePath();
+						break;
+				}
+			}
+		}
 	}
 }
 
@@ -240,6 +265,10 @@ export class SVGSnapHelper {
 
 		this.svg = this.container.querySelector('svg') as SVGSVGElement;
 
+		if (!this.svg.width || this.svg.width.baseVal.unitType != 1) {
+			console.error('SVG width is not correctly specified. Width and Height are expected to be given, without units. SVGSnap may not work.');
+		}
+
 		const viewBoxOffset = new Vector2(this.svg.viewBox.baseVal.x, this.svg.viewBox.baseVal.y);
 
 		if (viewBoxOffset.norm != 0) {
@@ -250,61 +279,19 @@ export class SVGSnapHelper {
 
 		const collector = new PrimitiveCollector(viewBoxOffset.inverse);
 
-		// Extract all the Path elements. The responses here should include
-		// all basic shapes, which derive from Path.
+		// Extract all the edge-like elements. The responses here should include
+		// all Basic Shapes, and directly declared Path elements.
+		// While all Basic Shapes can degenerate to Path elements, some tests
+		// can be performed more quickly against the more abstract primitive.
 
-		this.getPathElements(this.svg, collector);
-		this.getPolylineElements(this.svg, collector);
+		const parser = new SvgParser(collector);
+		parser.parseSvg(this.svg);
 
 		// debug draw all the lines
 
-		this.debugHelper?.renderPrimitives(collector);
+		this.debugHelper?.renderLines(collector.lines);
 
 		this.buildAccelerationStructures(collector);
-	}
-
-	getPathElements(svg: SVGSVGElement, collector: PrimitiveCollector) {
-		const paths = svg.querySelectorAll<SVGPathElement>('path:not([stroke=\'none\'])');
-		for (let i = 0; i < paths.length; i++) {
-			const p = paths[i];
-			const segments = p.getPathData({ normalize: true });
-
-			const pathCollector = new PathCollector(collector);
-
-			for (const segment of segments) {
-				// Passing the normalize flag means getPathData will transform
-				// all paths into one of the following absolute types
-				switch (segment.type) {
-					case 'M':
-						pathCollector.setStartPosition(segment.values);
-						break;
-					case 'L':
-						for (let s = 0; s < segment.values.length; s += 2) {
-							pathCollector.addLine(segment.values, s);
-						}
-						break;
-					case 'C':
-						// todo: add curve support
-						pathCollector.addCurve(segment.values);
-						break;
-					case 'Z':
-						pathCollector.closePath();
-						break;
-				}
-			}
-		}
-	}
-
-	getPolylineElements(svg: SVGElement, collector: PrimitiveCollector) {
-		const polylines = this.svg.querySelectorAll<SVGPolylineElement>('polyline');
-		for (let i = 0; i < polylines.length; i++) {
-			const p = polylines[i];
-			const points = p.points;
-			const polyCollector = new PolyCollector(collector);
-			for (let j = 0; j < points.length - 1; j++) {
-				polyCollector.addLine(points[j], points[j + 1]);
-			}
-		}
 	}
 
 	buildAccelerationStructures(collector: PrimitiveCollector) {
