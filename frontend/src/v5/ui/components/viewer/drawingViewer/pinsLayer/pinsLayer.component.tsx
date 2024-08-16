@@ -28,7 +28,7 @@ export const PinsLayer = ({ scale, height, width }: PinsLayerProps) => {
 	const { isCalibrating } = useContext(CalibrationContext);
 	const { containerOrFederation } = useParams();
 	const pins = compact(TicketsCardHooksSelectors.selectTicketPins().concat(TicketsCardHooksSelectors.selectNewTicketPins()));
-	const transform3DTo2D = DrawingsHooksSelectors.selectTransform3DTo2D(drawingId, containerOrFederation);
+	const transform3DTo2D = DrawingsHooksSelectors.selectTransform3Dto2D(drawingId, containerOrFederation);
 
 	if (isCalibrating || !transform3DTo2D) return null;
 

@@ -31,7 +31,7 @@ export const PinsDropperLayer = ({ getCursorOffset, viewBox }: PinsDropperLayerP
 	const [drawingId] = useSearchParam('drawingId');
 	const { isCalibrating } = useContext(CalibrationContext);
 	const { containerOrFederation } = useParams();
-	const transform2DTo3D = DrawingsHooksSelectors.selectTransform2DTo3D(drawingId, containerOrFederation);
+	const transform2DTo3D = DrawingsHooksSelectors.selectTransform2Dto3D(drawingId, containerOrFederation);
 	const { verticalRange } = DrawingsHooksSelectors.selectCalibration(drawingId, containerOrFederation);
 
 	if (isCalibrating || !transform2DTo3D) return null;
