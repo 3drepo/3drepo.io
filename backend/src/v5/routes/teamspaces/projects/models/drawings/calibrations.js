@@ -23,9 +23,9 @@ const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../utils/responder');
 const { revisionExists } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 const { templates } = require('../../../../../utils/responseCodes');
-const { validateNewCalibration } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/calibrations');
+const { validateNewCalibration } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/drawings/calibrations');
 
-const getLatestCalibration = async (req, res) => {
+const getCalibration = async (req, res) => {
 	const { teamspace, project, drawing, revision } = req.params;
 
 	try {
@@ -253,7 +253,7 @@ const establishRoutes = () => {
 	 *                   example: mm
 	 *             example: { horizontal: { model: [[1, 2, 3], [4, 5, 6]], drawing: [[1, 2], [3, 4]] }, verticalRange: [0, 10], units: m }
 	 */
-	router.get('/', hasReadAccessToDrawing, revisionExists(modelTypes.DRAWING), getLatestCalibration);
+	router.get('/', hasReadAccessToDrawing, revisionExists(modelTypes.DRAWING), getCalibration);
 
 	return router;
 };

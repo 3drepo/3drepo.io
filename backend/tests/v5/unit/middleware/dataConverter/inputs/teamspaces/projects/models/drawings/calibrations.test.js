@@ -15,18 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { deleteIfUndefined } = require('../../../../../../../../../src/v5/utils/helper/objects');
-const { src } = require('../../../../../../../helper/path');
+const { deleteIfUndefined } = require('../../../../../../../../../../src/v5/utils/helper/objects');
+const { src } = require('../../../../../../../../helper/path');
 
-const { generateRandomString } = require('../../../../../../../helper/services');
+const { determineTestGroup, generateRandomString } = require('../../../../../../../../helper/services');
 
-jest.mock('../../../../../../../../../src/v5/utils/responder');
+jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
 
-jest.mock('../../../../../../../../../src/v5/processors/teamspaces/projects/models/calibrations');
+jest.mock('../../../../../../../../../../src/v5/processors/teamspaces/projects/models/calibrations');
 const CalibrationProc = require(`${src}/processors/teamspaces/projects/models/calibrations`);
 
-const Calibrations = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/calibrations`);
+const Calibrations = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/drawings/calibrations`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 // Mock respond function to just return the resCode
@@ -82,7 +82,7 @@ const testValidateNewCalibration = () => {
 		['Request with calibrated revision', false, true],
 		['Request with uncalibrated revision', true, false],
 	])('Check confirm calibration', (desc, uncalibratedRev, calibratedRev, sucess) => {
-		test(`${desc} should ${!sucess ? `fail with ${templates.revisionNotUnconfirmed.code}` : ' succeed and next() should be called'}`, async () => {
+		test(`${desc} should ${!sucess ? `fail with ${templates.calibrationNotFound.code}` : ' succeed and next() should be called'}`, async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const drawing = generateRandomString();
@@ -121,12 +121,13 @@ const testValidateNewCalibration = () => {
 			} else {
 				expect(mockCB).not.toHaveBeenCalled();
 				expect(Responder.respond).toHaveBeenCalledTimes(1);
-				expect(Responder.respond.mock.results[0].value.code).toEqual(templates.revisionNotUnconfirmed.code);
+				expect(Responder.respond.mock.results[0].value.code)
+					.toEqual(templates.calibrationNotFound.code);
 			}
 		});
 	});
 };
 
-describe('middleware/dataConverter/inputs/teamspaces/projects/models/calibrations', () => {
+describe(determineTestGroup(__filename), () => {
 	testValidateNewCalibration();
 });

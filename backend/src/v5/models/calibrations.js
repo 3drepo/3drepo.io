@@ -36,11 +36,11 @@ Calibrations.addCalibration = async (teamspace, project, drawing, revision, cali
 	await db.insertOne(teamspace, CALIBRATIONS_COL, formattedData);
 };
 
-Calibrations.getRevisionCalibration = (teamspace, project, drawing, revision, projection) => db.findOne(
+Calibrations.getCalibration = (teamspace, project, drawing, revision, projection) => db.findOne(
 	teamspace, CALIBRATIONS_COL, { drawing, rev_id: revision, project },
 	projection, { createdAt: -1 });
 
-Calibrations.getDrawingCalibrationStatus = async (teamspace, drawing, latestRevId) => {
+Calibrations.getCalibrationStatus = async (teamspace, drawing, latestRevId) => {
 	const calibrations = await db.find(teamspace, CALIBRATIONS_COL, { drawing }, { rev_id: 1 });
 
 	if (!calibrations.length) {

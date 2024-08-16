@@ -180,7 +180,7 @@ const testGetDrawingStats = () => {
 			const getDrawingByIdMock = ModelSettings.getDrawingById.mockResolvedValueOnce(settings);
 			const getRevisionCountMock = Revisions.getRevisionCount.mockResolvedValueOnce(revCount);
 			const getLatestRevMock = Revisions.getLatestRevision.mockResolvedValueOnce(latestRev);
-			const getDrawingCalibrationStatusMock = Calibrations.getDrawingCalibrationStatus
+			const getCalibrationStatusMock = Calibrations.getCalibrationStatus
 				.mockResolvedValueOnce(calibrationStatuses.CALIBRATED);
 
 			const res = await Drawings.getDrawingStats(teamspace, drawing);
@@ -194,8 +194,8 @@ const testGetDrawingStats = () => {
 			expect(getLatestRevMock).toHaveBeenCalledTimes(1);
 			expect(getLatestRevMock).toHaveBeenCalledWith(teamspace, drawing, modelTypes.DRAWING,
 				{ _id: 1, statusCode: 1, revCode: 1, timestamp: 1 });
-			expect(getDrawingCalibrationStatusMock).toHaveBeenCalledTimes(1);
-			expect(getDrawingCalibrationStatusMock).toHaveBeenCalledWith(teamspace, drawing, latestRev._id);
+			expect(getCalibrationStatusMock).toHaveBeenCalledTimes(1);
+			expect(getCalibrationStatusMock).toHaveBeenCalledWith(teamspace, drawing, latestRev._id);
 		});
 
 		test('should return the drawing stats even if there are no revisions', async () => {
@@ -214,7 +214,7 @@ const testGetDrawingStats = () => {
 			expect(getLatestRevMock).toHaveBeenCalledTimes(1);
 			expect(getLatestRevMock).toHaveBeenCalledWith(teamspace, drawing, modelTypes.DRAWING,
 				{ _id: 1, statusCode: 1, revCode: 1, timestamp: 1 });
-			expect(Calibrations.getDrawingCalibrationStatus).not.toHaveBeenCalled();
+			expect(Calibrations.getCalibrationStatus).not.toHaveBeenCalled();
 		});
 
 		test('should fail if getDrawingById fails', async () => {

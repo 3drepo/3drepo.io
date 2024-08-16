@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addCalibration, getRevisionCalibration } = require('../../../../models/calibrations');
+const { addCalibration, getCalibration } = require('../../../../models/calibrations');
 const { deleteIfUndefined } = require('../../../../utils/helper/objects');
 const { getPreviousRevisions } = require('../../../../models/revisions');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
@@ -34,7 +34,7 @@ Calibrations.getLastAvailableCalibration = async (teamspace, project, drawing, r
 		createdAt: 1,
 		rev_id: returnRevId ? 1 : undefined });
 
-	let latestCalibration = await getRevisionCalibration(teamspace, project, drawing, revision, projection);
+	let latestCalibration = await getCalibration(teamspace, project, drawing, revision, projection);
 
 	if (latestCalibration) {
 		return latestCalibration;
@@ -43,7 +43,7 @@ Calibrations.getLastAvailableCalibration = async (teamspace, project, drawing, r
 	const previousRevisions = await getPreviousRevisions(teamspace, drawing, modelTypes.DRAWING, revision);
 	for (let i = 0; i < previousRevisions.length; i++) {
 		// eslint-disable-next-line no-await-in-loop
-		latestCalibration = await getRevisionCalibration(teamspace, project, drawing,
+		latestCalibration = await getCalibration(teamspace, project, drawing,
 			previousRevisions[i]._id, projection);
 
 		if (latestCalibration) {

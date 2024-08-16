@@ -200,8 +200,8 @@ const testAddCalibration = () => {
 			['the revision does not exist', { ...params, revisionId: ServiceHelper.generateRandomString() }, standardPayload, false, templates.revisionNotFound],
 			['the payload is invalid', params, { standardPayload, units: ServiceHelper.generateRandomString() }, false, templates.invalidArguments],
 			['the payload is valid', params, standardPayload, true],
-			['usePrevious is set to true but revision is uncalibrated', { ...params, revisionId: revisions.rev1._id, usePrevious: true }, {}, false, templates.revisionNotUnconfirmed],
-			['usePrevious is set to true but revision is calibrated', { ...params, revisionId: revisions.rev2._id, usePrevious: true }, {}, false, templates.revisionNotUnconfirmed],
+			['usePrevious is set to true but revision is uncalibrated', { ...params, revisionId: revisions.rev1._id, usePrevious: true }, {}, false, templates.calibrationNotFound],
+			['usePrevious is set to true but revision is calibrated', { ...params, revisionId: revisions.rev2._id, usePrevious: true }, {}, false, templates.calibrationNotFound],
 			['usePrevious is set to true and revision is unconfirmed', { ...params, revisionId: revisions.rev3._id, usePrevious: true }, {}, true],
 		])('Add Calibration', (desc, parameters, payload, success, error) => {
 			test(`should ${success ? 'succeed' : `fail with ${error.code}`} if ${desc}`, async () => {

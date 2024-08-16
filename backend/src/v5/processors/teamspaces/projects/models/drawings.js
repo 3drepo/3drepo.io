@@ -27,7 +27,7 @@ const { DRAWINGS_HISTORY_COL } = require('../../../../models/revisions.constants
 const Path = require('path');
 const { calibrationStatuses } = require('../../../../models/calibrations.constants');
 const { events } = require('../../../../services/eventsManager/eventsManager.constants');
-const { getDrawingCalibrationStatus } = require('../../../../models/calibrations');
+const { getCalibrationStatus } = require('../../../../models/calibrations');
 const { publish } = require('../../../../services/eventsManager/eventsManager');
 const { templates } = require('../../../../utils/responseCodes');
 
@@ -52,7 +52,7 @@ Drawings.getDrawingStats = async (teamspace, drawing) => {
 	try {
 		latestRev = await getLatestRevision(teamspace, drawing, modelTypes.DRAWING,
 			{ _id: 1, statusCode: 1, revCode: 1, timestamp: 1 });
-		calibration = await getDrawingCalibrationStatus(teamspace, drawing, latestRev?._id);
+		calibration = await getCalibrationStatus(teamspace, drawing, latestRev?._id);
 	} catch {
 		calibration = calibrationStatuses.UNCALIBRATED;
 	}

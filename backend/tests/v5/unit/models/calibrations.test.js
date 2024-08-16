@@ -50,7 +50,7 @@ const testAddCalibration = () => {
 	});
 };
 
-const testGetRevisionCalibration = () => {
+const testGetCalibration = () => {
 	describe('Get latest calibration of a revision', () => {
 		test('should return the latest calibration of a revision', async () => {
 			const teamspace = generateRandomString();
@@ -62,7 +62,7 @@ const testGetRevisionCalibration = () => {
 
 			const findFn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(result);
 
-			await expect(Calibrations.getRevisionCalibration(teamspace, project, drawing, revision, projection));
+			await expect(Calibrations.getCalibration(teamspace, project, drawing, revision, projection));
 
 			expect(findFn).toHaveBeenCalledTimes(1);
 			expect(findFn).toHaveBeenCalledWith(teamspace, CALIBRATIONS_COL,
@@ -71,7 +71,7 @@ const testGetRevisionCalibration = () => {
 	});
 };
 
-const testGetDrawingCalibrationStatus = () => {
+const testGetCalibrationStatus = () => {
 	describe('Get drawing calibration status', () => {
 		test('should return calibration status of a drawing if it is uncalibrated', async () => {
 			const teamspace = generateRandomString();
@@ -80,7 +80,7 @@ const testGetDrawingCalibrationStatus = () => {
 
 			const findFn = jest.spyOn(db, 'find').mockResolvedValueOnce([]);
 
-			const status = await Calibrations.getDrawingCalibrationStatus(teamspace, drawing, revision);
+			const status = await Calibrations.getCalibrationStatus(teamspace, drawing, revision);
 
 			expect(status).toEqual(calibrationStatuses.UNCALIBRATED);
 			expect(findFn).toHaveBeenCalledTimes(1);
@@ -94,7 +94,7 @@ const testGetDrawingCalibrationStatus = () => {
 
 			const findFn = jest.spyOn(db, 'find').mockResolvedValueOnce([{ rev_id: revision }]);
 
-			const status = await Calibrations.getDrawingCalibrationStatus(teamspace, drawing, revision);
+			const status = await Calibrations.getCalibrationStatus(teamspace, drawing, revision);
 
 			expect(status).toEqual(calibrationStatuses.CALIBRATED);
 			expect(findFn).toHaveBeenCalledTimes(1);
@@ -108,7 +108,7 @@ const testGetDrawingCalibrationStatus = () => {
 
 			const findFn = jest.spyOn(db, 'find').mockResolvedValueOnce([{ rev_id: generateRandomString() }]);
 
-			const status = await Calibrations.getDrawingCalibrationStatus(teamspace, drawing, revision);
+			const status = await Calibrations.getCalibrationStatus(teamspace, drawing, revision);
 
 			expect(status).toEqual(calibrationStatuses.UNCONFIRMED);
 			expect(findFn).toHaveBeenCalledTimes(1);
@@ -119,6 +119,6 @@ const testGetDrawingCalibrationStatus = () => {
 
 describe(determineTestGroup(__filename), () => {
 	testAddCalibration();
-	testGetRevisionCalibration();
-	testGetDrawingCalibrationStatus();
+	testGetCalibration();
+	testGetCalibrationStatus();
 });

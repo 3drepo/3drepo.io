@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createResponseCode, templates } = require('../../../../../../utils/responseCodes');
-const { UUIDToString } = require('../../../../../../utils/helper/uuids');
+const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
+const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
 const Yup = require('yup');
-const YupHelper = require('../../../../../../utils/helper/yup');
-const { getLastAvailableCalibration } = require('../../../../../../processors/teamspaces/projects/models/calibrations');
-const { respond } = require('../../../../../../utils/responder');
+const YupHelper = require('../../../../../../../utils/helper/yup');
+const { getLastAvailableCalibration } = require('../../../../../../../processors/teamspaces/projects/models/calibrations');
+const { respond } = require('../../../../../../../utils/responder');
 
 const Calibrations = {};
 
@@ -29,14 +29,14 @@ const validateConfirmCalibration = async (req, res, next) => {
 		const { teamspace, project, drawing, revision } = req.params;
 		const latestCalibration = await getLastAvailableCalibration(teamspace, project, drawing, revision, true);
 		if (UUIDToString(latestCalibration.rev_id) === UUIDToString(revision)) {
-			throw templates.revisionNotUnconfirmed;
+			throw templates.calibrationNotFound;
 		}
 
 		req.body = latestCalibration;
 		delete req.body.rev_id;
 		await next();
 	} catch {
-		respond(req, res, templates.revisionNotUnconfirmed);
+		respond(req, res, templates.calibrationNotFound);
 	}
 };
 

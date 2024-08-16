@@ -37,7 +37,7 @@ const testGetLastAvailableCalibration = () => {
 		const revisions = times(5, () => ({ _id: generateRandomString(), ...generateRandomObject() }));
 
 		test('should return error if there are no calibrations', async () => {
-			CalibrationsModel.getRevisionCalibration.mockResolvedValueOnce(undefined);
+			CalibrationsModel.getCalibration.mockResolvedValueOnce(undefined);
 			RevisionsModel.getPreviousRevisions.mockResolvedValueOnce(revisions);
 
 			await expect(Calibrations.getLastAvailableCalibration(teamspace, project, drawing, revision))
@@ -46,28 +46,28 @@ const testGetLastAvailableCalibration = () => {
 			expect(RevisionsModel.getPreviousRevisions).toHaveBeenCalledTimes(1);
 			expect(RevisionsModel.getPreviousRevisions).toHaveBeenCalledWith(teamspace, drawing,
 				modelTypes.DRAWING, revision);
-			expect(CalibrationsModel.getRevisionCalibration).toHaveBeenCalledTimes(6);
+			expect(CalibrationsModel.getCalibration).toHaveBeenCalledTimes(6);
 		});
 
 		test('should return the last available calibration if the provided revision has calibrations', async () => {
 			const calibration = generateRandomObject();
-			CalibrationsModel.getRevisionCalibration.mockResolvedValueOnce(calibration);
+			CalibrationsModel.getCalibration.mockResolvedValueOnce(calibration);
 
 			const lastCalibration = await Calibrations.getLastAvailableCalibration(teamspace, project,
 				drawing, revision);
 
 			expect(lastCalibration).toEqual(calibration);
 			expect(RevisionsModel.getPreviousRevisions).not.toHaveBeenCalled();
-			expect(CalibrationsModel.getRevisionCalibration).toHaveBeenCalledTimes(1);
-			expect(CalibrationsModel.getRevisionCalibration).toHaveBeenCalledWith(teamspace, project, drawing, revision,
+			expect(CalibrationsModel.getCalibration).toHaveBeenCalledTimes(1);
+			expect(CalibrationsModel.getCalibration).toHaveBeenCalledWith(teamspace, project, drawing, revision,
 				{ _id: 0, horizontal: 1, verticalRange: 1, units: 1, createdAt: 1 },
 			);
 		});
 
 		test('should return the last available calibration if a previous revision has calibrations', async () => {
 			const calibration = generateRandomObject();
-			CalibrationsModel.getRevisionCalibration.mockResolvedValueOnce(undefined);
-			CalibrationsModel.getRevisionCalibration.mockResolvedValueOnce(calibration);
+			CalibrationsModel.getCalibration.mockResolvedValueOnce(undefined);
+			CalibrationsModel.getCalibration.mockResolvedValueOnce(calibration);
 			RevisionsModel.getPreviousRevisions.mockResolvedValueOnce(revisions);
 
 			const lastCalibration = await Calibrations.getLastAvailableCalibration(teamspace, project,
@@ -77,8 +77,8 @@ const testGetLastAvailableCalibration = () => {
 			expect(RevisionsModel.getPreviousRevisions).toHaveBeenCalledTimes(1);
 			expect(RevisionsModel.getPreviousRevisions).toHaveBeenCalledWith(teamspace, drawing,
 				modelTypes.DRAWING, revision);
-			expect(CalibrationsModel.getRevisionCalibration).toHaveBeenCalledTimes(2);
-			expect(CalibrationsModel.getRevisionCalibration).toHaveBeenCalledWith(teamspace, project, drawing, revision,
+			expect(CalibrationsModel.getCalibration).toHaveBeenCalledTimes(2);
+			expect(CalibrationsModel.getCalibration).toHaveBeenCalledWith(teamspace, project, drawing, revision,
 				{ _id: 0, horizontal: 1, verticalRange: 1, units: 1, createdAt: 1, rev_id: 1 },
 			);
 		});
