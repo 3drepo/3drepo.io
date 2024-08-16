@@ -45,7 +45,7 @@ export const DrawingsListItemTitle = ({
 			subtitle={!drawing.hasStatsPending && hasRevisions && (
 				<Container>
 					<Label>
-						Latest revision:
+						<FormattedMessage id="drawings.list.item.latestRevision.label" defaultMessage="Latest revision:"/>
 					</Label>
 					<RevisionCodeAndStatus>
 						<Highlight search={query}>

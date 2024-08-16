@@ -21,6 +21,7 @@ const { deleteModel, getDrawingById, getDrawings, updateModelSettings } = requir
 const { deleteModelRevisions, getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const { getFileAsStream, removeFilesWithMeta } = require('../../../../services/filesManager');
 const { getProjectById, removeModelFromProject } = require('../../../../models/projectSettings');
+const { DRAWINGS_HISTORY_COL } = require('../../../../models/revisions.constants');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { processDrawingUpload } = require('../../../../services/modelProcessing');
 const { templates } = require('../../../../utils/responseCodes');
@@ -68,7 +69,7 @@ Drawings.addDrawing = (teamspace, project, data) => addModel(teamspace, project,
 Drawings.updateSettings = updateModelSettings;
 
 Drawings.deleteDrawing = async (teamspace, project, drawing) => {
-	await removeFilesWithMeta(teamspace, `${modelTypes.DRAWING}s.history.ref`, { model: drawing });
+	await removeFilesWithMeta(teamspace, DRAWINGS_HISTORY_COL, { model: drawing });
 
 	await Promise.all([
 		deleteModelRevisions(teamspace, project, drawing, modelTypes.DRAWING),
@@ -93,7 +94,7 @@ Drawings.downloadRevisionFiles = async (teamspace, drawing, revision) => {
 		throw templates.fileNotFound;
 	}
 
-	return getFileAsStream(teamspace, `${modelTypes.DRAWING}s.history.ref`, rev.rFile[0]);
+	return getFileAsStream(teamspace, `${DRAWINGS_HISTORY_COL}.ref`, rev.rFile[0]);
 };
 
 Drawings.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {

@@ -31,6 +31,13 @@ const JOBS_COLLECTION_NAME = "jobs";
 
 const Job = {};
 
+const isColorValid = (color) => {
+	const hexRegex = /^#[0-9A-F]{6}$/i;
+
+	return !!color?.match(hexRegex);
+
+};
+
 Job.addDefaultJobs = function(teamspace) {
 	const promises = [];
 
@@ -58,7 +65,11 @@ Job.addJob = async function(teamspace, jobData) {
 	};
 
 	if (jobData.color) {
-		newJobEntry.color = jobData.color;
+		if(isColorValid(jobData.color)) {
+			newJobEntry.color = jobData.color;
+		} else {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
 	}
 
 	return db.insertOne(teamspace, JOBS_COLLECTION_NAME, newJobEntry);
@@ -187,7 +198,13 @@ Job.updateJob = async function(teamspace, jobName, updatedData) {
 	}
 
 	if (updatedData.color) {
-		result = await db.updateOne(teamspace, JOBS_COLLECTION_NAME, {_id: jobName}, {$set: {color: updatedData.color}});
+
+		if(isColorValid(updatedData.color)) {
+			result = await db.updateOne(teamspace, JOBS_COLLECTION_NAME, {_id: jobName}, {$set: {color: updatedData.color}});
+		} else {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
 	}
 
 	return result;

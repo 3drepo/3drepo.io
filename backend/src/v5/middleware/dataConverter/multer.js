@@ -70,6 +70,21 @@ const ensureFileIsImage = async (req, res, next) => {
 	await next();
 };
 
+// Currently only supports pdf
+MulterHelper.ensureFileIsValid = async (req, res, next) => {
+	if (req.file) {
+		const filenameExt = req.file.originalname?.split('.').pop();
+		const ext = await fileExtensionFromBuffer(req.file.buffer);
+
+		if (filenameExt !== 'pdf' || filenameExt === ext) {
+			await next();
+			return;
+		}
+	}
+
+	respond(req, res, templates.unsupportedFileFormat);
+};
+
 MulterHelper.singleFileUpload = (fileName = 'file', fileFilter, maxSize = uploadConfig.uploadSizeLimit,
 	storeInMemory = false) => async (req, res, next) => {
 	try {

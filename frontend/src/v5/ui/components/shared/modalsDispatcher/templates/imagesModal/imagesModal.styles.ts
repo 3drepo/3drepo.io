@@ -20,6 +20,7 @@ import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
 import { Dialog } from '@mui/material';
 import styled, { css } from 'styled-components';
 import { hexToOpacity } from '@/v5/ui/themes/theme';
+import { AuthImg } from '@components/authenticatedResource/authImg.component';
 
 export const Modal = styled(Dialog)`
 	.MuiPaper-root {
@@ -118,7 +119,7 @@ export const CenterBar = styled.div`
 	flex-direction: column;
 `;
 
-export const Image = styled.img.attrs({
+export const Image = styled(AuthImg).attrs({
 	alt: formatMessage({ id: 'modal.image', defaultMessage: 'Enlarged image' }),
 })`
 	max-width: 100%;
@@ -169,7 +170,7 @@ export const PreviousButton = styled(NextButton)`
 	transform: rotate(180deg);
 `;
 
-export const ImageThumbnail = styled.img`
+export const ImageThumbnail = styled(AuthImg)`
 	width: 100%;
 	height: 100%;
 	object-fit: cover;

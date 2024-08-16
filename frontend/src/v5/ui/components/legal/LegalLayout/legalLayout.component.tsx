@@ -19,13 +19,14 @@ import { useRouteMatch } from 'react-router-dom';
 
 import { LegalContent, Container } from './legalLayout.styles';
 import { LegalAppBar } from './legalAppBar/legalAppBar.component';
+import { LegalPageParams } from '@/v5/ui/routes/routes.constants';
 
 type ILegalLayout = {
 	children: any;
 };
 
 export const LegalLayout = ({ children }: ILegalLayout) => {
-	const { params: { legalPage } } = useRouteMatch('/v5/:legalPage');
+	const { params: { legalPage } } = useRouteMatch<LegalPageParams>('/v5/:legalPage');
 	return (
 		<>
 			<LegalAppBar activePage={legalPage} />

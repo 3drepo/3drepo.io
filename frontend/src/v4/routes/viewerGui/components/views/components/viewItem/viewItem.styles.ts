@@ -24,6 +24,7 @@ import ShareIcon from '@mui/icons-material/Share';
 import { Form } from 'formik';
 import styled, { css } from 'styled-components';
 
+import { AuthImg } from '@components/authenticatedResource/authImg.component';
 import { FONT_WEIGHT } from '../../../../../../styles';
 import { COLOR } from '../../../../../../styles';
 
@@ -133,7 +134,7 @@ export const Small = styled.small`
 	color: ${COLOR.BLACK_60};
 `;
 
-export const Image = styled.img`
+export const Image = styled(AuthImg)`
 	width: 79px;
 	height: 79px;
 	object-fit: cover;

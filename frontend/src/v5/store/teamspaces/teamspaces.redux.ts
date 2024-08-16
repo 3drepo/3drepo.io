@@ -19,6 +19,7 @@ import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
+import { AddOn } from '../store.types';
 
 export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createActions({
 	fetch: [],
@@ -28,13 +29,15 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 	setUsedQuotaSeats: ['teamspace', 'seats'],
 	setCurrentTeamspace: ['currentTeamspace'],
 	setTeamspacesArePending: ['teamspacesArePending'],
+	fetchAddOnsSuccess: ['teamspace', 'addOns'],
 }, { prefix: 'TEAMSPACES2/' }) as { Types: Constants<ITeamspacesActionCreators>; Creators: ITeamspacesActionCreators };
 
-export const INITIAL_STATE: ITeamspacesState = {
+export const INITIAL_STATE: TeamspacesState = {
 	teamspaces: [],
 	currentTeamspace: null,
 	quota: {},
 	teamspacesArePending: false,
+	addOns: {},
 };
 
 export const setCurrentTeamspace = (state, { currentTeamspace }: SetCurrentTeamspaceAction) => {
@@ -57,22 +60,28 @@ export const setUsedQuotaSeats = (state, { teamspace, seats }: SetUsedQuotaSeats
 	state.quota[teamspace].seats.used = seats;
 };
 
+export const fetchAddOnsSuccess = (state: TeamspacesState, { teamspace, addOns }: FetchAddOnsSuccessAction) => {
+	state.addOns[teamspace] = addOns;
+};
+
 export const teamspacesReducer = createReducer(INITIAL_STATE, produceAll({
 	[TeamspacesTypes.FETCH_SUCCESS]: fetchSuccess,
 	[TeamspacesTypes.FETCH_QUOTA_SUCCESS]: fetchQuotaSuccess,
 	[TeamspacesTypes.SET_CURRENT_TEAMSPACE]: setCurrentTeamspace,
 	[TeamspacesTypes.SET_TEAMSPACES_ARE_PENDING]: setTeamspacesArePending,
 	[TeamspacesTypes.SET_USED_QUOTA_SEATS]: setUsedQuotaSeats,
+	[TeamspacesTypes.FETCH_ADD_ONS_SUCCESS]: fetchAddOnsSuccess,
 }));
 
 /**
  * Types
  */
-export interface ITeamspacesState {
+export interface TeamspacesState {
 	teamspaces: ITeamspace[];
 	quota: Record<string, Quota>;
 	currentTeamspace: string;
 	teamspacesArePending: boolean;
+	addOns: Record<string, AddOn[]>;
 }
 
 export type QuotaUnit = {
@@ -99,6 +108,10 @@ export type FetchQuotaSuccessAction = Action<'FETCH_QUOTA_SUCCESS'> & { teamspac
 export type SetCurrentTeamspaceAction = Action<'SET_CURRENT_TEAMSPACE'> & { currentTeamspace: string };
 export type SetTeamspacesArePendingAction = Action<'SET_TEAMSPACES_ARE_PENDING'> & { teamspacesArePending: boolean };
 export type SetUsedQuotaSeatsAction = Action<'SET_USED_QUOTA_SEATS'> & { teamspace: string, seats: number };
+
+export type FetchAddOnsAction = Action<'FETCH_ADD_ONS'> & { teamspace: string };
+export type FetchAddOnsSuccessAction = Action<'FETCH_ADD_ONS_SUCCESS'> & { teamspace: string, addOns: AddOn[] };
+
 export interface ITeamspacesActionCreators {
 	fetch: () => FetchAction;
 	fetchSuccess: (teamspaces: ITeamspace[]) => FetchSuccessAction;
@@ -107,4 +120,5 @@ export interface ITeamspacesActionCreators {
 	fetchQuota: (teamspace: string) => FetchQuotaAction;
 	fetchQuotaSuccess: (teamspace: string, quota: Quota) => FetchQuotaSuccessAction;
 	setUsedQuotaSeats: (teamspace: string, seats: number) => SetUsedQuotaSeatsAction;
+	fetchAddOnsSuccess: (teamspace: string, addOns: AddOn[]) => FetchAddOnsSuccessAction;
 }

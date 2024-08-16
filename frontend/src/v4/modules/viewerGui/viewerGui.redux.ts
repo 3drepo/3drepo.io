@@ -61,7 +61,6 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 	resetPanels: [],
 	reset: [],
 	clearColorOverrides: [],
-	clearTransformations: [],
 }, { prefix: 'VIEWER_GUI/' });
 
 export interface IViewerGuiState {
@@ -120,8 +119,7 @@ const updatePanelsList = (panels, lockedPanels, panelName, visibility) => {
 
 export const setPanelVisibility = (state = INITIAL_STATE, { panelName, visibility }) => {
 	const locked = [...state.lockedPanels];
-	const leftPanels = getViewerLeftPanels().map(({type}) => type).includes(panelName) ?
-			updatePanelsList([...state.leftPanels], locked, panelName, visibility) : [...state.leftPanels];
+	const leftPanels = updatePanelsList([...state.leftPanels], locked, panelName, visibility);
 	const rightPanels = VIEWER_RIGHT_PANELS.map(({type}) => type).includes(panelName) ?
 			updatePanelsList([...state.rightPanels], locked, panelName, visibility) : [...state.rightPanels];
 	const lockedPanels = locked.includes(panelName) ? [] : locked;

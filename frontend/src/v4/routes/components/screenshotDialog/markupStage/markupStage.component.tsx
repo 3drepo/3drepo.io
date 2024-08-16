@@ -27,6 +27,8 @@ import { selectPathname } from '@/v4/modules/router/router.selectors';
 import { withViewer } from '@/v4/services/viewer/viewer';
 import { bindActionCreators } from 'redux';
 import { COLOR } from '@/v4/styles';
+import { isApiUrl } from '@/v5/services/api/default';
+import { downloadAuthUrl } from '@components/authenticatedResource/authenticatedResource.hooks';
 import { ROUTES } from '../../../../constants/routes';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { DrawingHandler } from '../components/drawingHandler/drawingHandler.component';
@@ -88,7 +90,7 @@ class BaseMarkupStage extends PureComponent<IProps, any> {
 		return this.props.mode === MODES.BRUSH || this.isErasing;
 	}
 
-	public componentDidMount() {
+	public async componentDidMount() {
 		const imageObj = new Image();
 		imageObj.onload = () => {
 			const image = new Konva.Image({ image: imageObj });
@@ -100,7 +102,8 @@ class BaseMarkupStage extends PureComponent<IProps, any> {
 
 			this.props.markupRef.current = this;
 		};
-		imageObj.src = this.props.sourceImage;
+
+		imageObj.src = await downloadAuthUrl(this.props.sourceImage);
 
 		document.addEventListener('keydown', this.handleKeyDown);
 		if (this.props.pathname.includes(ROUTES.VIEWER)) {

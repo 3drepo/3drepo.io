@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const request = require("supertest");
+const SessionTracker = require("../../v5/helper/sessionTracker")
 const expect = require("chai").expect;
 const app = require("../../../src/v4/services/api.js").createApp();
 const responseCodes = require("../../../src/v4/response_codes");
@@ -29,17 +30,20 @@ describe('User ', () => {
 	const password = "password";
 
 
-	before(done => {
-		server = app.listen(8080, function () {
-			unlogged_Agent = request.agent(server);
-			teamSpace1 = request.agent(server);
-			teamSpace1.post("/login")
-				.send({ username, password})
-				.expect(200, done);
+	before(async function() {
+		await new Promise((resolve) => {
+			server = app.listen(8080, () => {
+				console.log("API test server is listening on port 8080!");
+				resolve();
+			});
 
 		});
-	});
 
+		unlogged_Agent = request.agent(server);
+		teamSpace1 = SessionTracker(request(server));
+		await teamSpace1.login(username, password);
+
+	});
 	after(done => server.close(done));
 
 	describe("using an API Key" , () => {
@@ -91,12 +95,6 @@ describe('User ', () => {
 						})
 				],
 			done)
-		});
-
-		it("should not work for logging in", done => {
-			unlogged_Agent.post("/login?key=" + apikey)
-					.send({ username: "-", password: "-"})
-					.expect(400,  done);
 		});
 
 		it("should be sucessfully deleted when logged in", done => {

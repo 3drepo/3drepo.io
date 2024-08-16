@@ -61,7 +61,7 @@ export const ProjectImageInput = ({ onChange, value, name, error, disabled, help
 
 		if (isString(value)) {
 			testImageExists(value)
-				.then(() => setImgSrc(value))
+				.then((authSrc) => setImgSrc(authSrc))
 				.catch(() => setImgSrc(null));
 			return;
 		}
