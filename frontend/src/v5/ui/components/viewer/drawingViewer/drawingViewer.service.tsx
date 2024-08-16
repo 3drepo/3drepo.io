@@ -26,7 +26,7 @@ export const DRAWING_VIEWER_EVENTS = {
 type GetScreenshot = () => null | Promise<string>;
 const DrawingViewerServiceCreator = () => {
 	let imgContainer = null;
-	const emitter = new EventEmitter();
+	const emitter = new EventEmitter<string>();
 
 	const on = (event, fn, ...args) => emitter.on(event, fn, ...args);
 	const emit = (event, ...args) => emitter.emit(event, ...args);
@@ -44,6 +44,9 @@ const DrawingViewerServiceCreator = () => {
 	};
 
 	return {
+		on: emitter.on.bind(emitter),
+		off: emitter.off.bind(emitter),
+		emit: emitter.emit.bind(emitter), 
 		getScreenshot,
 		setImgContainer,
 		emitPickPointEvent,

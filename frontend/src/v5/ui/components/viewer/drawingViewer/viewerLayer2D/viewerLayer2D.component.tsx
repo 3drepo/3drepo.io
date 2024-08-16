@@ -24,19 +24,23 @@ import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { Coord2D, Vector2D, ViewBoxType } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { PinsLayer } from '../pinsLayer/pinsLayer.component';
 import { PinsDropperLayer } from '../pinsDropperLayer/pinsDropperLayer.component';
+import { Camera } from './camera/camera.component';
+import { CameraOffSight } from './camera/cameraOffSight.component';
 
 type ViewerLayer2DProps = {
 	viewBox: ViewBoxType,
 	active: boolean,
 	value?: Vector2D,
+	viewport: any,
 	onChange?: (arrow: Vector2D) => void;
 };
-export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2DProps) => {
+export const ViewerLayer2D = ({ viewBox, active, value, viewport, onChange }: ViewerLayer2DProps) => {
 	const [offsetStart, setOffsetStart] = useState<Coord2D>(value?.[0] || null);
 	const [offsetEnd, setOffsetEnd] = useState<Coord2D>(value?.[1] || null);
 	const previousViewBox = useRef<ViewBoxType>(null);
 	const [mousePosition, setMousePosition] = useState<Coord2D>(null);
 	const [drawingId] = useSearchParam('drawingId');
+	const [cameraOnSight, setCameraOnSight] = useState(false);
 
 	const containerStyle: CSSProperties = {
 		transformOrigin: '0 0',
@@ -84,24 +88,28 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 	}, [active]);
 
 	useEffect(() => { resetArrow(); }, [drawingId]);
-	
+
 	return (
-		<Container style={containerStyle}>
-			<LayerLevel>
-				{mousePosition && active && <SvgCircle coord={mousePosition} scale={viewBox.scale} />}
-				{offsetStart && <SvgArrow start={offsetStart} end={offsetEnd ?? mousePosition} scale={viewBox.scale} />}
-			</LayerLevel>
-			{active && (
-				<LayerLevel
-					onMouseUp={handleMouseUp}
-					onMouseDown={handleMouseDown}
-					onMouseMove={handleMouseMove}
-				/>
-			)}
-			<TransparentLayerLevel>
-				<PinsDropperLayer getCursorOffset={getCursorOffset} viewBox={viewBox} />
-				<PinsLayer scale={viewBox.scale} height={viewBox.height} width={viewBox.width} />
-			</TransparentLayerLevel>
-		</Container>
+		<div style={{ width: '100%', height: '100%', position: 'absolute', left: 0, top: 0 }}>
+			<CameraOffSight onCameraSightChanged={setCameraOnSight} scale={viewBox.scale} viewport={viewport}/>
+			<Container style={containerStyle}>
+				<LayerLevel>
+					{mousePosition && active && <SvgCircle coord={mousePosition} scale={viewBox.scale} />}
+					{offsetStart && <SvgArrow start={offsetStart} end={offsetEnd ?? mousePosition} scale={viewBox.scale} />}
+					{cameraOnSight && <Camera scale={viewBox.scale} />}
+				</LayerLevel>
+				{active && (
+					<LayerLevel
+						onMouseUp={handleMouseUp}
+						onMouseDown={handleMouseDown}
+						onMouseMove={handleMouseMove}
+					/>
+				)}
+				<TransparentLayerLevel>
+					<PinsDropperLayer getCursorOffset={getCursorOffset} viewBox={viewBox} />
+					<PinsLayer scale={viewBox.scale} height={viewBox.height} width={viewBox.width} />
+				</TransparentLayerLevel>
+			</Container>
+		</div>
 	);
 };

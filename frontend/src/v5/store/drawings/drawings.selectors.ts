@@ -122,24 +122,25 @@ export const selectTransformMatrix = createSelector(
 	selectCalibration,
 	(calibration) => {
 		if (isEqual(calibration.horizontal.drawing, EMPTY_VECTOR) || isEqual(calibration.horizontal.model, EMPTY_VECTOR)) return null;
-		return getTransformationMatrix(calibration.horizontal.drawing as any, calibration.horizontal.model as any);
+		return getTransformationMatrix(calibration.horizontal.drawing, calibration.horizontal.model);
 	},
 );
 
-export const selectTransform2DTo3D = createSelector(
+export const selectTransform2Dto3D = createSelector(
 	selectTransformMatrix,
 	(matrix) => {
 		if (!matrix) return null;
-		return (vector) => new Vector2(...vector).applyMatrix3(matrix);
+		return (vector): Vector2  => new Vector2(...vector).applyMatrix3(matrix) ;
 	},
 );
 
-export const selectTransform3DTo2D = createSelector(
+export const selectTransform3Dto2D = createSelector(
 	selectTransformMatrix,
 	(matrix) => {
 		if (!matrix) return null;
 		const inverseMat = matrix.clone().invert();
-		return (vector) => new Vector2(...removeZ(vector)).applyMatrix3(inverseMat);
+
+		return (vector): Vector2 => new Vector2(...removeZ(vector)).applyMatrix3(inverseMat) ;
 	},
 );
 
