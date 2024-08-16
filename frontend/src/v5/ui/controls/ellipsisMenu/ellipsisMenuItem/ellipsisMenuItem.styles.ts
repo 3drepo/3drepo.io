@@ -44,14 +44,11 @@ export const SwitchContainer = styled.span`
 	width: 100%;
 	height: 32px;
 	align-content: center;
+	text-align: left;
 	display: grid;
 	grid-template-columns: 26px auto 16px;
 	svg {
 		height: 16px;
 		width: 16px;
 	}
-`;
-
-export const Title = styled.span`
-	width: 100%;
 `;

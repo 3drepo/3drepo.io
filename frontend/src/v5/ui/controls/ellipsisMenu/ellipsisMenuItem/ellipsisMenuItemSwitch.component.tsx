@@ -18,7 +18,7 @@
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { EllipsisMenuItem, EllipsisMenuItemProps } from './ellipsisMenutItem.component';
 import { ReactNode } from 'react';
-import { SwitchContainer, Title } from './ellipsisMenuItem.styles';
+import { SwitchContainer } from './ellipsisMenuItem.styles';
 
 type EllipsisMenuItemSwitchProps = Omit<EllipsisMenuItemProps, 'to'> & {
 	icon?: ReactNode,
@@ -29,7 +29,7 @@ export const EllipsisMenuItemSwitch = ({ icon, title, active, ...props }: Ellips
 		title={
 			<SwitchContainer>
 				{icon}
-				<Title>{title}</Title>
+				{title}
 				{active && <TickIcon />}
 			</SwitchContainer>}
 		{...props}
