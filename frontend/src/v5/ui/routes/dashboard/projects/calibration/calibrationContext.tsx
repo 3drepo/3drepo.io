@@ -19,7 +19,6 @@ import { createContext, useState } from 'react';
 import { Transformers, useSearchParam } from '../../../useSearchParam';
 import { Vector2D, Vector3D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
-import { CalibrationHandler } from './calibrationHandler.component';
 
 export interface CalibrationContextType {
 	step: number;
@@ -31,10 +30,12 @@ export interface CalibrationContextType {
 	setOrigin: (origin: string) => void;
 	isCalibrating3D: boolean,
 	setIsCalibrating3D: (isCalibrating3D: boolean) => void;
+	isCalibrating2D: boolean,
+	setIsCalibrating2D: (isCalibrating2D: boolean) => void;
 	vector3D: Vector3D,
 	setVector3D: (vectorState: React.SetStateAction<Vector3D>) => void;
 	vector2D: Vector2D,
-	setVector2D: (points: Vector2D) => void,
+	setVector2D: (vectorState: React.SetStateAction<Vector2D>) => void,
 	drawingId: string;
 }
 
@@ -48,6 +49,8 @@ const defaultValue: CalibrationContextType = {
 	setOrigin: () => {},
 	isCalibrating3D: false,
 	setIsCalibrating3D: () => {},
+	isCalibrating2D: false,
+	setIsCalibrating2D: () => {},
 	vector3D: EMPTY_VECTOR,
 	setVector3D: () => {},
 	vector2D: EMPTY_VECTOR,
@@ -63,6 +66,7 @@ export const CalibrationContextComponent = ({ children }) => {
 	const [origin, setOrigin] = useState('');
 	const [isCalibrating] = useSearchParam('isCalibrating', Transformers.BOOLEAN);
 	const [isCalibrating3D, setIsCalibrating3D] = useState(false);
+	const [isCalibrating2D, setIsCalibrating2D] = useState(false);
 	const [vector3D, setVector3D] = useState<Vector3D>(EMPTY_VECTOR);
 	const [vector2D, setVector2D] = useState<Vector2D>(EMPTY_VECTOR);
 	const [drawingId] = useSearchParam('drawingId');
@@ -78,13 +82,14 @@ export const CalibrationContextComponent = ({ children }) => {
 			setOrigin,
 			isCalibrating3D,
 			setIsCalibrating3D,
+			isCalibrating2D,
+			setIsCalibrating2D,
 			vector2D,
 			setVector2D,
 			vector3D,
 			setVector3D,
 			drawingId,
 		}}>
-			{isCalibrating && <CalibrationHandler />}
 			{children}
 		</CalibrationContext.Provider>
 	);

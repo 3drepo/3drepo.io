@@ -30,8 +30,9 @@ import { CentredContainer } from '@controls/centredContainer';
 import { TicketsCardViews } from './tickets/tickets.constants';
 import { ViewerCanvases } from '../dashboard/viewerCanvases/viewerCanvases.component';
 import { ViewerGui } from '@/v4/routes/viewerGui';
-import { CalibrationContextComponent } from '../dashboard/projects/calibration/calibrationContext';
+import { CalibrationContext, CalibrationContextComponent } from '../dashboard/projects/calibration/calibrationContext';
 import { OpenDrawingFromUrl } from './openDrawingFromUrl/openDrawingFromUrl.component';
+import { CalibrationHandler } from '../dashboard/projects/calibration/calibrationHandler.component';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
@@ -110,6 +111,9 @@ export const Viewer = () => {
 			<CheckLatestRevisionReadiness />
 			<ViewerCanvases />
 			<ViewerGui match={v4Match} key={containerOrFederation} />
+			<CalibrationContext.Consumer>
+				{({ isCalibrating }) => isCalibrating && <CalibrationHandler />}
+			</CalibrationContext.Consumer>
 		</CalibrationContextComponent>
 	);
 };
