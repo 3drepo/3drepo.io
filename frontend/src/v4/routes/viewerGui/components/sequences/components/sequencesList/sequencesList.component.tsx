@@ -20,7 +20,7 @@ import { Toggle } from '@controls/inputs/toggle/toggle.component';
 import { FormattedMessage } from 'react-intl';
 
 import { RouteComponentProps } from 'react-router';
-import { formatShortDateTime } from '../../../../../../services/formatting/formatDate';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
 import {
 	SequenceDatesContainer,
 	SequenceItemContainer,
@@ -49,8 +49,8 @@ const SequenceItem = ({name, modelName, startDate, endDate, onClick}) => (
 				</Tooltip>
 				<Grid item>{modelName}</Grid>
 				<SequenceDatesContainer>
-					<Grid item>Start: {formatShortDateTime(new Date(startDate))} </Grid>
-					<Grid item>End: {formatShortDateTime(new Date(endDate))} </Grid>
+					<Grid item>Start: {formatDateTime(new Date(startDate))} </Grid>
+					<Grid item>End: {formatDateTime(new Date(endDate))} </Grid>
 				</SequenceDatesContainer>
 			</Grid>
 		</Grid>

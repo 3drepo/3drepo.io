@@ -19,10 +19,9 @@ import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import LinkIcon from '@mui/icons-material/Link';
 import PersonIcon from '@mui/icons-material/Person';
 
+import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { CUSTOM_FILE_EXTS_NAMES } from '../../../constants/revisions';
 import { renderWhenTrue } from '../../../helpers/rendering';
-import { LONG_DATE_TIME_FORMAT } from '../../../services/formatting/formatDate';
-import { DateTime } from '../dateTime/dateTime.component';
 import { Loader } from '../loader/loader.component';
 import { SmallIconButton } from '../smallIconButon/smallIconButton.component';
 import {
@@ -93,7 +92,7 @@ export const RevisionsListItem = (props: IProps) => {
 					<Tag>{tag || '(no name)'} {renderGoToRevisionButton(!props.data.void)}</Tag>
 				</PropertyWrapper>
 				<Property>
-					<DateTime value={timestamp} format={LONG_DATE_TIME_FORMAT} />
+					{formatDateTime(timestamp)}
 				</Property>
 			</Row>
 			<Row>
