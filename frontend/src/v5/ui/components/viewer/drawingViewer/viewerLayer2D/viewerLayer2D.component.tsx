@@ -16,7 +16,7 @@
  */
 
 import { CSSProperties, useEffect, useRef, useState } from 'react';
-import { Container, LayerLevel, TransparentLayerLevel } from './viewerLayer2D.styles';
+import { Container, LayerLevel } from './viewerLayer2D.styles';
 import { isEqual } from 'lodash';
 import { SvgArrow } from './svgArrow/svgArrow.component';
 import { SvgCircle } from './svgCircle/svgCircle.component';
@@ -94,9 +94,11 @@ export const ViewerLayer2D = ({ viewBox, active, value, viewport, onChange }: Vi
 			<CameraOffSight onCameraSightChanged={setCameraOnSight} scale={viewBox.scale} viewport={viewport}/>
 			<Container style={containerStyle}>
 				<LayerLevel>
+					<PinsDropperLayer getCursorOffset={getCursorOffset} viewBox={viewBox} />
 					{mousePosition && active && <SvgCircle coord={mousePosition} scale={viewBox.scale} />}
 					{offsetStart && <SvgArrow start={offsetStart} end={offsetEnd ?? mousePosition} scale={viewBox.scale} />}
 					{cameraOnSight && <Camera scale={viewBox.scale} />}
+					<PinsLayer scale={viewBox.scale} height={viewBox.height} width={viewBox.width} />
 				</LayerLevel>
 				{active && (
 					<LayerLevel
@@ -105,10 +107,7 @@ export const ViewerLayer2D = ({ viewBox, active, value, viewport, onChange }: Vi
 						onMouseMove={handleMouseMove}
 					/>
 				)}
-				<TransparentLayerLevel>
-					<PinsDropperLayer getCursorOffset={getCursorOffset} viewBox={viewBox} />
-					<PinsLayer scale={viewBox.scale} height={viewBox.height} width={viewBox.width} />
-				</TransparentLayerLevel>
+
 			</Container>
 		</div>
 	);
