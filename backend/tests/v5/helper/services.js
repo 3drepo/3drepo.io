@@ -175,7 +175,7 @@ db.createCalibration = async (teamspace, project, drawing, revision, calibration
 		rev_id: stringToUUID(revision),
 	};
 
-	await DbHandler.insertOne(teamspace, 'drawings.revisions.calibrations', formattedCalibration);
+	await DbHandler.insertOne(teamspace, 'drawings.calibrations', formattedCalibration);
 };
 
 db.createSequence = async (teamspace, model, { sequence, states, activities, activityTree }) => {

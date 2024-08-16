@@ -413,6 +413,7 @@ const testGetRevisionFormat = () => {
 const testGetPreviousRevisions = () => {
 	const teamspace = generateRandomString();
 	const model = generateRandomString();
+	const project = generateRandomString();
 	const revision = { _id: generateRandomString(), timestamp: generateRandomString() };
 	const previousRevisions = times(5, () => ({ _id: generateRandomString(), timestamp: generateRandomString() }));
 
@@ -421,16 +422,17 @@ const testGetPreviousRevisions = () => {
 			const fn1 = jest.spyOn(db, 'findOne').mockResolvedValueOnce(revision);
 			const fn2 = jest.spyOn(db, 'find').mockResolvedValueOnce(previousRevisions);
 
-			const res = await Revisions.getPreviousRevisions(teamspace, model, modelTypes.CONTAINER, revision._id);
+			const res = await Revisions.getPreviousRevisions(teamspace, project, model,
+				modelTypes.CONTAINER, revision._id);
 
 			expect(res).toEqual(previousRevisions);
 			expect(fn1).toHaveBeenCalledTimes(1);
 			expect(fn1).toHaveBeenCalledWith(teamspace, `${model}.history`,
-				{ $or: [{ _id: revision._id }, { tag: revision._id }] }, { timestamp: 1 }, undefined);
+				{ _id: revision._id, project }, { timestamp: 1 }, undefined);
 
 			expect(fn2).toHaveBeenCalledTimes(1);
 			expect(fn2).toHaveBeenCalledWith(teamspace, `${model}.history`,
-				{ ...excludeIncomplete, ...excludeVoids, timestamp: { $lt: revision.timestamp } },
+				{ ...excludeIncomplete, ...excludeVoids, project, timestamp: { $lt: revision.timestamp } },
 				{}, { timestamp: -1 });
 		});
 
@@ -438,16 +440,17 @@ const testGetPreviousRevisions = () => {
 			const fn1 = jest.spyOn(db, 'findOne').mockResolvedValueOnce(revision);
 			const fn2 = jest.spyOn(db, 'find').mockResolvedValueOnce(previousRevisions);
 
-			const res = await Revisions.getPreviousRevisions(teamspace, model, modelTypes.DRAWING, revision._id);
+			const res = await Revisions.getPreviousRevisions(teamspace, project, model,
+				modelTypes.DRAWING, revision._id);
 
 			expect(res).toEqual(previousRevisions);
 			expect(fn1).toHaveBeenCalledTimes(1);
 			expect(fn1).toHaveBeenCalledWith(teamspace, 'drawings.history',
-				{ $or: [{ _id: revision._id }, { tag: revision._id }], model }, { timestamp: 1 }, undefined);
+				{ _id: revision._id, project, model }, { timestamp: 1 }, undefined);
 
 			expect(fn2).toHaveBeenCalledTimes(1);
 			expect(fn2).toHaveBeenCalledWith(teamspace, 'drawings.history',
-				{ ...excludeIncomplete, ...excludeVoids, timestamp: { $lt: revision.timestamp }, model },
+				{ ...excludeIncomplete, ...excludeVoids, project, timestamp: { $lt: revision.timestamp }, model },
 				{}, { timestamp: -1 });
 		});
 	});

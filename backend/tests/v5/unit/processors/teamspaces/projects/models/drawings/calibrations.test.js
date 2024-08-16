@@ -45,7 +45,7 @@ const testGetLastAvailableCalibration = () => {
 				.rejects.toEqual(templates.calibrationNotFound);
 
 			expect(RevisionsModel.getPreviousRevisions).toHaveBeenCalledTimes(1);
-			expect(RevisionsModel.getPreviousRevisions).toHaveBeenCalledWith(teamspace, drawing,
+			expect(RevisionsModel.getPreviousRevisions).toHaveBeenCalledWith(teamspace, project, drawing,
 				modelTypes.DRAWING, revision);
 			expect(CalibrationsModel.getCalibration).toHaveBeenCalledTimes(6);
 		});
@@ -76,7 +76,7 @@ const testGetLastAvailableCalibration = () => {
 
 			expect(lastCalibration).toEqual(calibration);
 			expect(RevisionsModel.getPreviousRevisions).toHaveBeenCalledTimes(1);
-			expect(RevisionsModel.getPreviousRevisions).toHaveBeenCalledWith(teamspace, drawing,
+			expect(RevisionsModel.getPreviousRevisions).toHaveBeenCalledWith(teamspace, project, drawing,
 				modelTypes.DRAWING, revision);
 			expect(CalibrationsModel.getCalibration).toHaveBeenCalledTimes(2);
 			expect(CalibrationsModel.getCalibration).toHaveBeenCalledWith(teamspace, project, drawing, revision,

@@ -35,8 +35,8 @@ Responder.respond.mockImplementation((req, res, errCode) => errCode);
 const testValidateNewCalibration = () => {
 	const standardBody = {
 		horizontal: {
-			model: [[1, 2, 3], [4, 5, 6]],
-			drawing: [[1, 2], [3, 4]],
+			model: [[1, 1, 1], [1, 1, 2]],
+			drawing: [[1, 2], [1, 3]],
 		},
 		verticalRange: [1, 10],
 		units: 'm',
@@ -46,12 +46,14 @@ const testValidateNewCalibration = () => {
 		['Request without horizontal', { ...standardBody, horizontal: undefined }],
 		['Request without horizontal model', { ...standardBody, horizontal: { ...standardBody.horizontal, model: undefined } }],
 		['Request with longer horizontal model array', { ...standardBody, horizontal: { ...standardBody.horizontal, model: [[1, 2, 3], [4, 5, 6], [7, 8, 9]] } }],
+		['Request with horizontal model array that has identical positions', { ...standardBody, horizontal: { ...standardBody.horizontal, model: [[1, 2, 3], [1, 2, 3]] } }],
 		['Request with horizontal model that has a 2d position', { ...standardBody, horizontal: { ...standardBody.horizontal, model: [[1, 2], [3, 4, 5]] } }],
 		['Request with shorter horizontal model array', { ...standardBody, horizontal: { ...standardBody.horizontal, model: [[3, 4, 5]] } }],
 		['Request without horizontal drawing', { ...standardBody, horizontal: { ...standardBody.horizontal, drawing: undefined } }],
-		['Request with longer horizontal drawing array', { ...standardBody, horizontal: { ...standardBody.horizontal, model: [[1, 2], [4, 5], [7, 8]] } }],
-		['Request with horizontal drawing that has a 3d position', { ...standardBody, horizontal: { ...standardBody.horizontal, model: [[1, 2], [3, 4, 5]] } }],
-		['Request with shorter horizontal drawing array', { ...standardBody, horizontal: { ...standardBody.horizontal, model: [[3, 4]] } }],
+		['Request with longer horizontal drawing array', { ...standardBody, horizontal: { ...standardBody.horizontal, drawing: [[1, 2], [4, 5], [7, 8]] } }],
+		['Request with horizontal drawing that has a 3d position', { ...standardBody, horizontal: { ...standardBody.horizontal, drawing: [[1, 2], [3, 4, 5]] } }],
+		['Request with shorter horizontal drawing array', { ...standardBody, horizontal: { ...standardBody.horizontal, drawing: [[3, 4]] } }],
+		['Request with horizontal drawing array that has identical positions', { ...standardBody, horizontal: { ...standardBody.horizontal, drawing: [[1, 2], [1, 2]] } }],
 		['Request without verticalRange', { ...standardBody, verticalRange: undefined }],
 		['Request with longer verticalRange array', { ...standardBody, verticalRange: [1, 2, 3] }],
 		['Request with shorter verticalRange array', { ...standardBody, verticalRange: [1] }],

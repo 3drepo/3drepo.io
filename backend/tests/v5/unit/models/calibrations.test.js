@@ -22,7 +22,7 @@ const { determineTestGroup, generateRandomString, generateRandomObject } = requi
 
 const Calibrations = require(`${src}/models/calibrations`);
 const db = require(`${src}/handler/db`);
-const CALIBRATIONS_COL = 'drawings.revisions.calibrations';
+const CALIBRATIONS_COL = 'drawings.calibrations';
 
 const testAddCalibration = () => {
 	describe('Add calibration', () => {

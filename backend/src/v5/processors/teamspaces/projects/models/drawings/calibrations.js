@@ -40,7 +40,7 @@ Calibrations.getLastAvailableCalibration = async (teamspace, project, drawing, r
 		return latestCalibration;
 	}
 
-	const previousRevisions = await getPreviousRevisions(teamspace, drawing, modelTypes.DRAWING, revision);
+	const previousRevisions = await getPreviousRevisions(teamspace, project, drawing, modelTypes.DRAWING, revision);
 	for (let i = 0; i < previousRevisions.length; i++) {
 		// eslint-disable-next-line no-await-in-loop
 		latestCalibration = await getCalibration(teamspace, project, drawing,

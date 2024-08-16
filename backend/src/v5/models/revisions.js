@@ -130,13 +130,14 @@ Revisions.updateRevisionStatus = async (teamspace, project, model, modelType, re
 		data: { _id: res._id, void: status } });
 };
 
-Revisions.getPreviousRevisions = async (teamspace, model, modelType, revisionId) => {
-	const currentRevision = await Revisions.getRevisionByIdOrTag(teamspace, model, modelType,
-		revisionId, { timestamp: 1 });
+Revisions.getPreviousRevisions = async (teamspace, project, model, modelType, revisionId) => {
+	const currentRevision = await findOneRevisionByQuery(teamspace, model, modelType,
+		{ project, _id: revisionId }, { timestamp: 1 });
 
 	const query = deleteIfUndefined({
 		...excludeVoids,
 		...excludeIncomplete,
+		project,
 		timestamp: { $lt: currentRevision.timestamp },
 	});
 

@@ -19,7 +19,7 @@ const { UUIDToString, generateUUID } = require('../utils/helper/uuids');
 const { calibrationStatuses } = require('./calibrations.constants');
 const db = require('../handler/db');
 
-const CALIBRATIONS_COL = 'drawings.revisions.calibrations';
+const CALIBRATIONS_COL = 'drawings.calibrations';
 
 const Calibrations = {};
 
