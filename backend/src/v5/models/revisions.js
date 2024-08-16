@@ -166,6 +166,10 @@ Revisions.onProcessingCompleted = async (teamspace, project, model, revId,
 	});
 };
 
+Revisions.addDrawingThumbnailRef = async (teamspace, project, model, revId, ref) => {
+	await updateRevision(teamspace, model, modelTypes.DRAWING, revId, { thumbnail: ref });
+};
+
 Revisions.updateProcessingStatus = async (teamspace, project, model, modelType, revision, status) => {
 	await updateRevision(teamspace, model, modelType, revision, { status });
 

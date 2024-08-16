@@ -15,13 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { addDrawingThumbnailRef, deleteModelRevisions, getLatestRevision,
+	getRevisionByIdOrTag, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const { addModel, getModelList } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { deleteModel, getDrawingById, getDrawings, updateModelSettings } = require('../../../../models/modelSettings');
-const { deleteModelRevisions, getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
-const { getFileAsStream, removeFilesWithMeta } = require('../../../../services/filesManager');
+const { getFile, getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../../services/filesManager');
 const { getProjectById, removeModelFromProject } = require('../../../../models/projectSettings');
 const { DRAWINGS_HISTORY_COL } = require('../../../../models/revisions.constants');
+const { createThumbnail } = require('../../../../utils/helper/images');
+const { generateUUID } = require('../../../../utils/helper/uuids');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { processDrawingUpload } = require('../../../../services/modelProcessing');
 const { templates } = require('../../../../utils/responseCodes');
@@ -94,7 +97,22 @@ Drawings.downloadRevisionFiles = async (teamspace, drawing, revision) => {
 		throw templates.fileNotFound;
 	}
 
-	return getFileAsStream(teamspace, `${DRAWINGS_HISTORY_COL}.ref`, rev.rFile[0]);
+	return getFileAsStream(teamspace, DRAWINGS_HISTORY_COL, rev.rFile[0]);
+};
+
+Drawings.createDrawingThumbnail = async (teamspace, project, model, revision) => {
+	const { image } = await getRevisionByIdOrTag(teamspace, model, modelTypes.DRAWING, revision, { image: 1 });
+
+	const buffer = await getFile(teamspace, DRAWINGS_HISTORY_COL, image);
+	const thumbnail = await createThumbnail(buffer);
+
+	if (thumbnail) {
+		const thumbnailID = generateUUID();
+		await storeFile(teamspace, DRAWINGS_HISTORY_COL, thumbnailID, thumbnail,
+			{ teamspace, project, model, rev_id: revision });
+
+		await addDrawingThumbnailRef(teamspace, project, model, revision, thumbnailID);
+	}
 };
 
 Drawings.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {
