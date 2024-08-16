@@ -16,7 +16,7 @@
  */
 
 const { hasReadAccessToDrawing, hasWriteAccessToDrawing } = require('../../../../../middleware/permissions/permissions');
-const Calibrations = require('../../../../../processors/teamspaces/projects/models/calibrations');
+const Calibrations = require('../../../../../processors/teamspaces/projects/models/drawings/calibrations');
 const { Router } = require('express');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');

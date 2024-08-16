@@ -15,16 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { checkQuotaIsSufficient, fileFilter } = require('./commons/revisions');
-const { createResponseCode, templates } = require('../../../../../../utils/responseCodes');
-const { ensureFileIsValid, singleFileUpload } = require('../../../../multer');
+const { checkQuotaIsSufficient, fileFilter } = require('../commons/revisions');
+const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
+const { ensureFileIsValid, singleFileUpload } = require('../../../../../multer');
 const Yup = require('yup');
-const YupHelper = require('../../../../../../utils/helper/yup');
-const { fileUploads } = require('../../../../../../utils/config');
-const { isRevAndStatusCodeUnique } = require('../../../../../../models/revisions');
-const { respond } = require('../../../../../../utils/responder');
-const { statusCodes } = require('../../../../../../models/modelSettings.constants');
-const { validateMany } = require('../../../../../common');
+const YupHelper = require('../../../../../../../utils/helper/yup');
+const { fileUploads } = require('../../../../../../../utils/config');
+const { isRevAndStatusCodeUnique } = require('../../../../../../../models/revisions');
+const { respond } = require('../../../../../../../utils/responder');
+const { statusCodes } = require('../../../../../../../models/modelSettings.constants');
+const { validateMany } = require('../../../../../../common');
 
 const Drawings = {};
 

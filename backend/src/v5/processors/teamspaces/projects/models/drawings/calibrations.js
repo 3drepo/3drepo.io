@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addCalibration, getCalibration } = require('../../../../models/calibrations');
-const { deleteIfUndefined } = require('../../../../utils/helper/objects');
-const { getPreviousRevisions } = require('../../../../models/revisions');
-const { modelTypes } = require('../../../../models/modelSettings.constants');
-const { templates } = require('../../../../utils/responseCodes');
+const { addCalibration, getCalibration } = require('../../../../../models/calibrations');
+const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
+const { getPreviousRevisions } = require('../../../../../models/revisions');
+const { modelTypes } = require('../../../../../models/modelSettings.constants');
+const { templates } = require('../../../../../utils/responseCodes');
 
 const Calibrations = { };
 

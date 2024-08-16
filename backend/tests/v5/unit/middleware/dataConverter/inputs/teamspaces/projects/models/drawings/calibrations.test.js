@@ -23,8 +23,8 @@ const { determineTestGroup, generateRandomString } = require('../../../../../../
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
 
-jest.mock('../../../../../../../../../../src/v5/processors/teamspaces/projects/models/calibrations');
-const CalibrationProc = require(`${src}/processors/teamspaces/projects/models/calibrations`);
+jest.mock('../../../../../../../../../../src/v5/processors/teamspaces/projects/models/drawings/calibrations');
+const CalibrationProc = require(`${src}/processors/teamspaces/projects/models/drawings/calibrations`);
 
 const Calibrations = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/drawings/calibrations`);
 const { templates } = require(`${src}/utils/responseCodes`);

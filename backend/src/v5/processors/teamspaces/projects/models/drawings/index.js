@@ -15,21 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { STATUSES, modelTypes } = require('../../../../models/modelSettings.constants');
-const { UUIDToString, generateUUID } = require('../../../../utils/helper/uuids');
-const { addModel, getModelList } = require('./commons/modelList');
-const { addRevision, deleteModelRevisions, getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisions, updateRevision, updateRevisionStatus } = require('../../../../models/revisions');
-const { appendFavourites, deleteFavourites } = require('./commons/favourites');
-const { deleteModel, getDrawingById, getDrawings, updateModelSettings } = require('../../../../models/modelSettings');
-const { getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../../services/filesManager');
-const { getProjectById, removeModelFromProject } = require('../../../../models/projectSettings');
-const { DRAWINGS_HISTORY_COL } = require('../../../../models/revisions.constants');
+const { STATUSES, modelTypes } = require('../../../../../models/modelSettings.constants');
+const { UUIDToString, generateUUID } = require('../../../../../utils/helper/uuids');
+const { addModel, getModelList } = require('../commons/modelList');
+const { addRevision, deleteModelRevisions, getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisions, updateRevision, updateRevisionStatus } = require('../../../../../models/revisions');
+const { appendFavourites, deleteFavourites } = require('../commons/favourites');
+const { deleteModel, getDrawingById, getDrawings, updateModelSettings } = require('../../../../../models/modelSettings');
+const { getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../../../services/filesManager');
+const { getProjectById, removeModelFromProject } = require('../../../../../models/projectSettings');
+const { DRAWINGS_HISTORY_COL } = require('../../../../../models/revisions.constants');
 const Path = require('path');
-const { calibrationStatuses } = require('../../../../models/calibrations.constants');
-const { events } = require('../../../../services/eventsManager/eventsManager.constants');
-const { getCalibrationStatus } = require('../../../../models/calibrations');
-const { publish } = require('../../../../services/eventsManager/eventsManager');
-const { templates } = require('../../../../utils/responseCodes');
+const { calibrationStatuses } = require('../../../../../models/calibrations.constants');
+const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
+const { getCalibrationStatus } = require('../../../../../models/calibrations');
+const { publish } = require('../../../../../services/eventsManager/eventsManager');
+const { templates } = require('../../../../../utils/responseCodes');
 
 const Drawings = { };
 

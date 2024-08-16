@@ -16,17 +16,18 @@
  */
 
 const { times } = require('lodash');
-const { src } = require('../../../../../helper/path');
-const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../../../../helper/services');
-const { templates } = require('../../../../../../../src/v5/utils/responseCodes');
-const { modelTypes } = require('../../../../../../../src/v5/models/modelSettings.constants');
+const { src } = require('../../../../../../helper/path');
+const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../../../../../helper/services');
 
-jest.mock('../../../../../../../src/v5/models/calibrations');
+const { templates } = require(`${src}/utils/responseCodes`);
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+
+jest.mock('../../../../../../../../src/v5/models/calibrations');
 const CalibrationsModel = require(`${src}/models/calibrations`);
-jest.mock('../../../../../../../src/v5/models/revisions');
+jest.mock('../../../../../../../../src/v5/models/revisions');
 const RevisionsModel = require(`${src}/models/revisions`);
 
-const Calibrations = require(`${src}/processors/teamspaces/projects/models/calibrations`);
+const Calibrations = require(`${src}/processors/teamspaces/projects/models/drawings/calibrations`);
 
 const testGetLastAvailableCalibration = () => {
 	describe('Get last available calibration', () => {

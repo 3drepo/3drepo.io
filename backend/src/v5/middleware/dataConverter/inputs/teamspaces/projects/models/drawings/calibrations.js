@@ -19,7 +19,7 @@ const { createResponseCode, templates } = require('../../../../../../../utils/re
 const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
 const Yup = require('yup');
 const YupHelper = require('../../../../../../../utils/helper/yup');
-const { getLastAvailableCalibration } = require('../../../../../../../processors/teamspaces/projects/models/calibrations');
+const { getLastAvailableCalibration } = require('../../../../../../../processors/teamspaces/projects/models/drawings/calibrations');
 const { respond } = require('../../../../../../../utils/responder');
 
 const Calibrations = {};

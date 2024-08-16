@@ -15,22 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src, image, dwgModel, pdfModel, emptyPdf } = require('../../../../../../../helper/path');
+const { src, image, dwgModel, pdfModel, emptyPdf } = require('../../../../../../../../helper/path');
 const MockExpressRequest = require('mock-express-request');
 const FormData = require('form-data');
 const fs = require('fs');
-const { generateRandomString } = require('../../../../../../../helper/services');
+const { generateRandomString } = require('../../../../../../../../helper/services');
 
-jest.mock('../../../../../../../../../src/v5/utils/quota');
+jest.mock('../../../../../../../../../../src/v5/utils/quota');
 const Quota = require(`${src}/utils/quota`);
 
-jest.mock('../../../../../../../../../src/v5/utils/responder');
+jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
 
-jest.mock('../../../../../../../../../src/v5/models/revisions');
+jest.mock('../../../../../../../../../../src/v5/models/revisions');
 const RevisionsModel = require(`${src}/models/revisions`);
 
-const Drawings = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/drawings`);
+const Drawings = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/drawings/index`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { statusCodes } = require(`${src}/models/modelSettings.constants`);
 

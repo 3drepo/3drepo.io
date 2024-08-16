@@ -15,29 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { calibrationStatuses } = require('../../../../../../../src/v5/models/calibrations.constants');
-const { src } = require('../../../../../helper/path');
-const { determineTestGroup, generateRandomString, generateRandomObject, generateUUIDString, generateRandomNumber } = require('../../../../../helper/services');
+const { src } = require('../../../../../../helper/path');
+const { determineTestGroup, generateRandomString, generateRandomObject, generateUUIDString, generateRandomNumber } = require('../../../../../../helper/services');
 
-jest.mock('../../../../../../../src/v5/models/projectSettings');
+const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
+
+jest.mock('../../../../../../../../src/v5/models/projectSettings');
 const ProjectSettings = require(`${src}/models/projectSettings`);
-jest.mock('../../../../../../../src/v5/models/modelSettings');
+jest.mock('../../../../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
-jest.mock('../../../../../../../src/v5/processors/teamspaces/projects/models/commons/modelList');
+jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects/models/commons/modelList');
 const ModelList = require(`${src}/processors/teamspaces/projects/models/commons/modelList`);
-jest.mock('../../../../../../../src/v5/processors/teamspaces/projects/models/commons/favourites');
+jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects/models/commons/favourites');
 const Favourites = require(`${src}/processors/teamspaces/projects/models/commons/favourites`);
-jest.mock('../../../../../../../src/v5/services/filesManager');
+jest.mock('../../../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
-jest.mock('../../../../../../../src/v5/models/revisions');
+jest.mock('../../../../../../../../src/v5/models/revisions');
 const Revisions = require(`${src}/models/revisions`);
-jest.mock('../../../../../../../src/v5/models/calibrations');
+jest.mock('../../../../../../../../src/v5/models/calibrations');
 const Calibrations = require(`${src}/models/calibrations`);
-jest.mock('../../../../../../../src/v5/services/eventsManager/eventsManager');
+jest.mock('../../../../../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 
 const { STATUSES } = require(`${src}/models/modelSettings.constants`);
-const Drawings = require(`${src}/processors/teamspaces/projects/models/drawings`);
+const Drawings = require(`${src}/processors/teamspaces/projects/models/drawings/index`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
