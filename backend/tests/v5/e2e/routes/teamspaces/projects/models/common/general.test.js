@@ -171,8 +171,9 @@ const addIssuesAndRisks = async (teamspace, model) => {
 };
 
 const addRevision = async (teamspace, model, isDrawing) => {
-	const rev = ServiceHelper.generateRevisionEntry(false, false, isDrawing);
-	await ServiceHelper.db.createRevision(teamspace, model._id, rev, isDrawing);
+	const modelType = isDrawing ? modelTypes.DRAWING : undefined;
+	const rev = ServiceHelper.generateRevisionEntry(false, false, modelType);
+	await ServiceHelper.db.createRevision(teamspace, model._id, rev, modelType);
 
 	/* eslint-disable-next-line no-param-reassign */
 	model.revs = model.revs || [];

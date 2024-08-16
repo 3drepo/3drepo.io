@@ -233,7 +233,7 @@ const queueUpdateTest = () => {
 			const modelUpdatePromise = waitForEvent(socket, EVENTS.DRAWING_SETTINGS_UPDATE);
 
 			const content = { status: 'processing', database: teamspace, project: drawing._id };
-			await queueMessage(queueConfig.callback_queue, ServiceHelper.generateRandomString(),
+			await queueMessage(queueConfig.callback_queue, drawingRevision._id,
 				JSON.stringify(content));
 			await expect(modelUpdatePromise).resolves.toEqual({ ...data, data: { status: content.status } });
 

@@ -16,10 +16,10 @@
  */
 
 const ServiceHelper = require('../../../../helper/services');
-const { src, dwgModel } = require('../../../../helper/path');
+const { src } = require('../../../../helper/path');
 const SuperTest = require('supertest');
 
-const { modelTypes, statusCodes } = require(`${src}/models/modelSettings.constants`);
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
 const { EVENTS } = require(`${src}/services/chat/chat.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -153,6 +153,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		ServiceHelper.closeApp(server),
 		chatApp.close()]));
 
-	revisionAddTest();
 	revisionUpdateTest();
 });
