@@ -293,7 +293,15 @@ const testNewRevision = () => {
 		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
 		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model,
 			modelTypes.CONTAINER, data.revId,
-			{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1 });
+			{ _id: 0,
+				tag: 1,
+				author: 1,
+				timestamp: 1,
+				desc: 1,
+				rFile: 1,
+				format: 1,
+				statusCode: 1,
+				revCode: 1 });
 		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
 		expect(ChatService.createModelMessage).toHaveBeenCalledWith(
 			chatEvents.CONTAINER_NEW_REVISION,
@@ -332,7 +340,15 @@ const testNewRevision = () => {
 		expect(Revisions.getRevisionFormat).not.toHaveBeenCalled();
 		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
 		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, modelTypes.DRAWING,
-			data.revId, { _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1 });
+			data.revId, { _id: 0,
+				tag: 1,
+				author: 1,
+				timestamp: 1,
+				desc: 1,
+				rFile: 1,
+				format: 1,
+				statusCode: 1,
+				revCode: 1 });
 		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
 		expect(ChatService.createModelMessage).toHaveBeenCalledWith(
 			chatEvents.DRAWING_NEW_REVISION,
@@ -366,7 +382,15 @@ const testNewRevision = () => {
 		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
 		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model,
 			modelTypes.FEDERATION, data.revId,
-			{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1 });
+			{ _id: 0,
+				tag: 1,
+				author: 1,
+				timestamp: 1,
+				desc: 1,
+				rFile: 1,
+				format: 1,
+				statusCode: 1,
+				revCode: 1 });
 		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
 		expect(ChatService.createModelMessage).toHaveBeenCalledWith(
 			chatEvents.FEDERATION_NEW_REVISION,
@@ -398,7 +422,15 @@ const testNewRevision = () => {
 		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
 		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model,
 			modelTypes.CONTAINER, data.revId,
-			{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1 });
+			{ _id: 0,
+				tag: 1,
+				author: 1,
+				timestamp: 1,
+				desc: 1,
+				rFile: 1,
+				format: 1,
+				statusCode: 1,
+				revCode: 1 });
 		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(0);
 		expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
 	});
@@ -423,7 +455,15 @@ const testNewRevision = () => {
 		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
 		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model,
 			modelTypes.CONTAINER, data.revId,
-			{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1 });
+			{ _id: 0,
+				tag: 1,
+				author: 1,
+				timestamp: 1,
+				desc: 1,
+				rFile: 1,
+				format: 1,
+				statusCode: 1,
+				revCode: 1 });
 		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(0);
 		expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
 	});

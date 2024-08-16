@@ -333,10 +333,14 @@ const testOnProcessingCompleted = () => {
 			});
 
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
-				{ teamspace, project, model, modelType, data: { status: processStatuses.OK } });
+				{ teamspace,
+					project,
+					model,
+					modelType,
+					data: { status: processStatuses.OK, timestamp: expect.anything() } });
 		});
 
-		test('Should update revision and publish 2 events upon failure', async () => {
+		test('!!!Should update revision and publish 2 events upon failure', async () => {
 			const retInfo = getInfoFromCode(1);
 			retInfo.retVal = 1;
 
@@ -347,8 +351,8 @@ const testOnProcessingCompleted = () => {
 			await Revisions.onProcessingCompleted(teamspace, project, model, revId, retInfo, modelType);
 
 			const setObj = { status: processStatuses.FAILED,
-				errorReason: {
-					message, timestamp: expect.anything(), errorCode: errCode } };
+				errorReason: expect.objectContaining({
+					message, errorCode: errCode }) };
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, `${modelType}s.history`,
@@ -371,7 +375,7 @@ const testOnProcessingCompleted = () => {
 			});
 
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
-				{ teamspace, project, model, modelType, data: setObj });
+				{ teamspace, project, model, modelType, data: { ...setObj, timestamp: expect.anything() } });
 		});
 
 		test('Should not trigger any event if the revision is not found', async () => {
