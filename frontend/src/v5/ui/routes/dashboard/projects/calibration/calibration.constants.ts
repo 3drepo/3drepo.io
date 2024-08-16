@@ -16,6 +16,7 @@
  */
 
 import { Vector, Vector1D } from './calibration.types';
+import { CalibrationVectors } from '@/v5/store/drawings/drawings.types';
 
 export const EMPTY_VECTOR = [null, null] as Vector<any>;
 export const EMPTY_VECTOR_1D = [null, null] as Vector1D;
@@ -26,4 +27,4 @@ export const EMPTY_CALIBRATION = {
 		drawing: EMPTY_VECTOR,
 	}, 
 	verticalRange: EMPTY_VECTOR_1D,
-};
+} as CalibrationVectors;

@@ -32,8 +32,9 @@ import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.cont
 import { DrawingViewerService } from './drawingViewer.service';
 import { CalibrationInfoBox } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationInfoBox/calibrationInfoBox.component';
 import CalibrationIcon from '@assets/icons/filled/calibration-filled.svg';
-import { ViewBoxType, ViewerLayer2D } from './viewerLayer2D/viewerLayer2D.component';
+import { ViewerLayer2D } from './viewerLayer2D/viewerLayer2D.component';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
+import { ViewBoxType } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 
 const DEFAULT_VIEWBOX = { scale: 1, x: 0, y: 0, width: 0, height: 0 };
 export const Viewer2D = () => {

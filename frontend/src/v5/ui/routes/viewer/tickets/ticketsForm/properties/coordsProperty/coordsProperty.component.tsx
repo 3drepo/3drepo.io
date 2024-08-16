@@ -35,6 +35,7 @@ import { PaddedCrossIcon } from '@controls/chip/chip.styles';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { isEqual } from 'lodash';
 import { useFormContext, useWatch } from 'react-hook-form';
+import { DrawingViewerService } from '@components/viewer/drawingViewer/drawingViewer.service';
 
 export const CoordsProperty = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
 	const { isViewer, containerOrFederation } = useContext(TicketContext);
@@ -70,7 +71,10 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 
 	const onClickEdit = async () => {
 		setEditMode(true);
-		const pin = await ViewerService.getClickPoint();
+		const pin = await Promise.race([
+			ViewerService.getClickPoint(),
+			DrawingViewerService.getClickPoint(),
+		]);
 		setEditMode(false);
 
 		//  If the returned pin is undefined, edit mode has been cancelled

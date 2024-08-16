@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Vector1D, Vector2D, Vector3D } from '../../ui/routes/dashboard/projects/calibration/calibration.types';
+import { Coord2D, Vector2D, Vector3D } from '../../ui/routes/dashboard/projects/calibration/calibration.types';
 import { Role } from '../currentUser/currentUser.types';
 
 export enum CalibrationState {
@@ -44,13 +44,16 @@ export interface MinimumDrawing {
 	drawingNumber: string;
 }
 
-export interface Calibration {
-	state: CalibrationState;
-	verticalRange: Vector1D;
+export type CalibrationVectors = {
+	verticalRange: Coord2D;
 	horizontal: {
 		model: Vector3D,
 		drawing: Vector2D,
 	}
+};
+
+export interface Calibration extends CalibrationVectors {
+	state: CalibrationState;
 	units: string,
 }
 
