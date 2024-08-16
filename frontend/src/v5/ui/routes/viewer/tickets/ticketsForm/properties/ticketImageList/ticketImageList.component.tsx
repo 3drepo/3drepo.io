@@ -61,7 +61,7 @@ const EnlargeImagesOverlay = ({ children, onClick }) => (
 		<EnlargeContainer>
 			<EnlargeImageIcon />
 			<IconText>
-				<FormattedMessage id="viewer.cards.ticketImage.enlarge" defaultMessage="Enlarge" />
+				<FormattedMessage id="viewer.cards.ticketImageList.enlarge" defaultMessage="Enlarge" />
 			</IconText>
 		</EnlargeContainer>
 	</OverlappingContainer>
@@ -116,13 +116,13 @@ export const TicketImageList = ({ value, onChange, onBlur, disabled, label, help
 			DialogsActionsDispatchers.open('warning', {
 				title: formatMessage({
 					defaultMessage: 'Max file size exceeded',
-					id: 'comment.uploadImages.error.imageTooBig.title',
+					id: 'ticketImageList.uploadImages.error.imageTooBig.title',
 				}),
 				message: formatMessage({
 					defaultMessage: `
 						{imagesTooBigCount} {imagesTooBigCount, plural, one {file was} other {files were}} too big and could not be uploaded.
 						The max file size is {maxFileSize}`,
-					id: 'comment.uploadImages.error.imageTooBig.message',
+					id: 'ticketImageList.uploadImages.error.imageTooBig.message',
 				}, { imagesTooBigCount, maxFileSize: clientConfigService.resourceUploadSizeLimit }),
 			});
 		}
@@ -130,11 +130,11 @@ export const TicketImageList = ({ value, onChange, onBlur, disabled, label, help
 			DialogsActionsDispatchers.open('warning', {
 				title: formatMessage({
 					defaultMessage: 'Invalid images',
-					id: 'comment.uploadImages.error.corruptedImage.title',
+					id: 'ticketImageList.uploadImages.error.corruptedImage.title',
 				}),
 				message: formatMessage({
 					defaultMessage: '{corruptedImagesCount} {corruptedImagesCount, plural, one {file was} other {files were}} corrupted and could not be uploaded.',
-					id: 'comment.uploadImages.error.corruptedImage.message',
+					id: 'ticketImageList.uploadImages.error.corruptedImage.message',
 				}, { corruptedImagesCount }),
 			});
 		}
@@ -156,7 +156,7 @@ export const TicketImageList = ({ value, onChange, onBlur, disabled, label, help
 		const displayImageIndex = imgsInModal.length;
 		await uploadImages();
 		openImagesModal(displayImageIndex);
-	}
+	};
 
 	const onTakeScreenshot = async () => {
 		const displayImageIndex = imgsInModal.length;
