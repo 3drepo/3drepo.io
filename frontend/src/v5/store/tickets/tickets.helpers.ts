@@ -31,7 +31,7 @@ import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint } f
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 import { useContext } from 'react';
 import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 
 export const modelIsFederation = (modelId: string) => !!FederationsHooksSelectors.selectFederationById(modelId);
 
@@ -160,17 +160,19 @@ export const isResourceId = (str) => {
 	return regexExp.test(str);
 };
 
-export const getImgSrc = (imgData) => {
-	const { teamspace, project } = useParams<DashboardParams>();
+export const getImgSrcMapFunction = () => {
+	const { teamspace, project } = useParams<ViewerParams>();
 	const { containerOrFederation } = useContext(TicketContext);
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 
-	if (!imgData) return '';
-	if (isResourceId(imgData)) {
-		return getTicketResourceUrl(teamspace, project, containerOrFederation, ticketId, imgData, isFederation);
-	}
-	return addBase64Prefix(imgData);
+	return (imgData) => {
+		if (!imgData) return '';
+		if (isResourceId(imgData)) {
+			return getTicketResourceUrl(teamspace, project, containerOrFederation, ticketId, imgData, isFederation);
+		}
+		return addBase64Prefix(imgData);
+	};
 };
 
 const overrideHasEditedGroup = (override: GroupOverride, oldOverrides: GroupOverride[]) => {

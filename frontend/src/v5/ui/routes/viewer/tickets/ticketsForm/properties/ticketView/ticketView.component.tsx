@@ -22,7 +22,7 @@ import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useContext, useEffect, useRef } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { cloneDeep, isEmpty } from 'lodash';
-import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
+import { getImgSrcMapFunction } from '@/v5/store/tickets/tickets.helpers';
 import { Viewpoint } from '@/v5/store/tickets/tickets.types';
 import { FormHelperText } from '@mui/material';
 import { EllipsisMenu } from '@controls/ellipsisMenu';
@@ -64,6 +64,7 @@ export const TicketView = ({
 }: ITicketView) => {
 	const { setDetailViewAndProps } = useContext(TicketContext);
 	const hasViewpoint = value?.camera;
+	const getImgSrc = getImgSrcMapFunction();
 	const imgSrc = getImgSrc(value?.screenshot);
 	const imgInModal = useRef(imgSrc);
 	const syncProps = useSyncProps({ images: [imgInModal.current] });
