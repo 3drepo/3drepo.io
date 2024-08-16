@@ -25,7 +25,7 @@ const { getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../..
 const { getProjectById, removeModelFromProject } = require('../../../../../models/projectSettings');
 const { DRAWINGS_HISTORY_COL } = require('../../../../../models/revisions.constants');
 const Path = require('path');
-const { calibrationStatuses } = require('../../../../../models/calibrations.constants');
+const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
 const { getCalibrationStatus } = require('../../../../../models/calibrations');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
@@ -54,10 +54,10 @@ Drawings.getDrawingStats = async (teamspace, drawing) => {
 			{ _id: 1, statusCode: 1, revCode: 1, timestamp: 1 });
 		calibration = await getCalibrationStatus(teamspace, drawing, latestRev?._id);
 	} catch {
-		calibration = calibrationStatuses.UNCALIBRATED;
+		// do nothing. A drawing can have 0 revision.
 	}
 
-	return {
+	return deleteIfUndefined({
 		number: settings.number,
 		status: settings.status,
 		type: settings.type,
@@ -68,7 +68,7 @@ Drawings.getDrawingStats = async (teamspace, drawing) => {
 			latestRevision: latestRev ? `${latestRev.statusCode}-${latestRev.revCode}` : undefined,
 		},
 		calibration,
-	};
+	});
 };
 
 Drawings.addDrawing = (teamspace, project, data) => addModel(teamspace, project,

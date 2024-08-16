@@ -43,7 +43,13 @@ const validateConfirmCalibration = async (req, res, next) => {
 const validateNewCalibrationData = async (req, res, next) => {
 	const schema = Yup.object({
 		horizontal: Yup.object({
-			model: Yup.array().of(YupHelper.types.position).length(2).required(),
+			model: Yup.array().of(YupHelper.types.position).length(2)
+				.test('not-identical-positions', 'The positions cannot be identical', (value) => {
+					const one = value[0];
+					const two = value[1];
+					return value[0] !== value[1];
+				})
+				.required(),
 			drawing: Yup.array().of(YupHelper.types.position2d).length(2).required(),
 		}).required(),
 		verticalRange: Yup.array().of(Yup.number()).length(2).required()

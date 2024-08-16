@@ -18,6 +18,7 @@
 const { src } = require('../../../../../../helper/path');
 const { determineTestGroup, generateRandomString, generateRandomObject, generateUUIDString, generateRandomNumber } = require('../../../../../../helper/services');
 
+const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
 
 jest.mock('../../../../../../../../src/v5/models/projectSettings');
@@ -146,7 +147,7 @@ const testGetRevisions = () => {
 	});
 };
 
-const formatToStats = (settings, revCount, latestRev, calibration) => ({
+const formatToStats = (settings, revCount, latestRev, calibration) => (deleteIfUndefined({
 	number: settings.number,
 	status: settings.status,
 	type: settings.type,
@@ -157,7 +158,7 @@ const formatToStats = (settings, revCount, latestRev, calibration) => ({
 		latestRevision: latestRev ? `${latestRev.statusCode}-${latestRev.revCode}` : undefined,
 	},
 	calibration,
-});
+}));
 
 const testGetDrawingStats = () => {
 	describe('Get drawing stats', () => {
@@ -206,7 +207,7 @@ const testGetDrawingStats = () => {
 
 			const res = await Drawings.getDrawingStats(teamspace, drawing);
 
-			expect(res).toEqual(formatToStats(settings, revCount, undefined, calibrationStatuses.UNCALIBRATED));
+			expect(res).toEqual(formatToStats(settings, revCount));
 			expect(getDrawingByIdMock).toHaveBeenCalledTimes(1);
 			expect(getDrawingByIdMock).toHaveBeenCalledWith(teamspace, drawing,
 				{ number: 1, status: 1, type: 1, desc: 1 });
