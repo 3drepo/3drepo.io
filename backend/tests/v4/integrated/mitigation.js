@@ -17,6 +17,7 @@
 
 "use strict";
 
+const SessionTracker = require("../../v5/helper/sessionTracker")
 const request = require("supertest");
 const chai = require("chai");
 const deepEqualInAnyOrder = require("deep-equal-in-any-order");
@@ -234,11 +235,10 @@ describe("Mitigations", function () {
 	});
 
 	describe("Get mitigation criteria", function(done) {
-		before(function(done) {
+		before(async function() {
 			this.timeout(timeout);
-			agent.post("/login")
-				.send({username, password})
-				.expect(200, done);
+			agent = SessionTracker(request(server));
+			await agent.login(username, password);
 
 		});
 
@@ -277,11 +277,6 @@ describe("Mitigations", function () {
 				});
 		});
 
-		after(function(done) {
-			this.timeout(timeout);
-			agent.post("/logout")
-				.expect(200, done);
-		});
 	});
 
 	describe("Find mitigation suggestions", function(done) {
@@ -303,11 +298,10 @@ describe("Mitigations", function () {
 			"invalidFieldName": "randomData"
 		};
 
-		before(function(done) {
+		before(async function() {
 			this.timeout(timeout);
-			agent.post("/login")
-				.send({username, password})
-				.expect(200, done);
+			agent = SessionTracker(request(server));
+			await agent.login(username, password);
 
 		});
 
@@ -390,10 +384,5 @@ describe("Mitigations", function () {
 				});
 		});
 
-		after(function(done) {
-			this.timeout(timeout);
-			agent.post("/logout")
-				.expect(200, done);
-		});
 	});
 });

@@ -20,6 +20,7 @@ const { v5Path } = require("../../interop");
 const express = require("express");
 const compress = require("compression");
 const responseCodes = require("../response_codes");
+const cookieParser = require("cookie-parser");
 const { systemLogger, logLabels } = require("../logger");
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -44,12 +45,8 @@ const addV4Routes = (app) => {
 
 	// subscriptions handler
 	app.use("/:account", require("../routes/subscriptions"));
-	// invoices handler
-	app.use("/:account", require("../routes/invoice"));
 	// maps handler
 	app.use("/:account", require("../routes/maps"));
-	// payment api header
-	app.use("/payment", require("../routes/payment"));
 
 	app.use("/:account", require("../routes/teamspace"));
 	app.use("/:account", require("../routes/permissionTemplate"));
@@ -99,6 +96,7 @@ APIService.createAppAsync = async (config, v5Init = true) => {
 	const { manageSessions } = require(`${v5Path}/middleware/sessions`);
 	// Express app
 	const app = express();
+	app.use(cookieParser());
 
 	if (config && !config.using_ssl && config.public_protocol === "https") {
 		app.set("trust proxy", 1);
@@ -162,6 +160,7 @@ APIService.createApp = (config, v5Init = true) => {
 	const { manageSessions } = require(`${v5Path}/middleware/sessions`);
 	// Express app
 	const app = express();
+	app.use(cookieParser());
 
 	if (config && !config.using_ssl && config.public_protocol === "https") {
 		app.set("trust proxy", 1);

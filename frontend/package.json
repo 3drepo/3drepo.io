@@ -1,6 +1,6 @@
 {
     "name": "3drepo.io-frontend",
-    "version": "5.10.0",
+    "version": "5.11.0",
     "description": "The frontend for 3drepo.io",
     "engines": {
         "node": "18.x.x"
@@ -51,7 +51,7 @@
         "@mui/system": "5.4.1",
         "@mui/x-date-pickers": "5.0.3",
         "@popperjs/core": "2.6.0",
-        "@svgedit/svgcanvas": "7.2.2",
+        "@types/three": "0.167.1",
         "@webscopeio/react-textarea-autocomplete": "4.9.0",
         "axios": "1.6.5",
         "bezier-easing": "2.1.0",
@@ -122,6 +122,7 @@
         "simplebar-react": "2.4.3",
         "socket.io-client": "4.6.1",
         "styled-components": "5.3.9",
+        "three": "^0.167.1",
         "type-fest": "2.3.2",
         "ua-parser-js": "1.0.37",
         "uuidv4": "5.0.1",
@@ -148,6 +149,7 @@
         "@types/node": "8.5.2",
         "@types/react": "17.0.39",
         "@types/react-dom": "17.0.11",
+        "@types/react-router-dom": "5.3.3",
         "@types/styled-components": "5.1.30",
         "@types/webpack-env": "1.18.1",
         "@typescript-eslint/eslint-plugin": "6.10.0",

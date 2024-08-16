@@ -20,11 +20,13 @@ import { mockServer } from '../../internals/testing/mockServer';
 import { quotaMockFactory } from './teamspaces.fixtures';
 import { createTestStore } from '../test.helpers';
 import { selectTeamspaces } from '@/v5/store/teamspaces/teamspaces.selectors';
+import { AddOn } from '@/v5/store/store.types';
 
 describe('Teamspaces: sagas', () => {
 	const teamspaceName = 'teamspaceId';
 	const teamspace = { name: teamspaceName, isAdmin: true };
 	const teamspaces = [teamspace];
+	const addOns: AddOn[] = [AddOn.Risks];
 	let dispatch, getState, waitForActions;
 
 	beforeEach(() => {
@@ -37,10 +39,15 @@ describe('Teamspaces: sagas', () => {
 				.get(`/teamspaces`)
 				.reply(200, { teamspaces });
 
+			mockServer
+				.get(`/teamspaces/${teamspaceName}/addOns`)
+				.reply(200, {modules:addOns});
+
 			await waitForActions(() => {
 				dispatch(TeamspacesActions.fetch());
 			}, [
 				TeamspacesActions.setTeamspacesArePending(true),
+				TeamspacesActions.fetchAddOnsSuccess(teamspaceName, addOns),
 				TeamspacesActions.fetchSuccess(teamspaces),
 				TeamspacesActions.setTeamspacesArePending(false),
 			]);

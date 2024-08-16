@@ -17,7 +17,7 @@
 
 import styled, { css } from 'styled-components';
 
-import { Avatar as AvatarComponent } from '@mui/material';
+import { AuthAvatarMui } from '@components/authenticatedResource/authAvatarMui.component';
 import { COLOR } from '../../../../../../../styles';
 
 const jobBorderStyles = (color) => css`
@@ -33,7 +33,7 @@ const noneJobBorderStyles = css`
 	width: 34px;
 `;
 
-export const Avatar = styled(AvatarComponent)<{ src?: string, color?: string}>`
+export const Avatar = styled(AuthAvatarMui)<{ src?: string, color?: string}>`
 	&& {
 		background-color: ${({ src }) => !src ? COLOR.BLACK_20 : `transparent`};
 		color: ${COLOR.WHITE};

@@ -15,16 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useEffect } from 'react';
+import { useEffect } from 'react';
 import { UnityUtil } from '@/globals/unity-util';
-import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 
 export const Calibration2DStep = () => {
-	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
 
 	useEffect(() => {
 		UnityUtil.setCalibrationToolMode('Vector');
-		setLeftPanelRatio(.5);
 	}, []);
 	return null;
 };

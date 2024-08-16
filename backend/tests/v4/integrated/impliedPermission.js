@@ -1,5 +1,6 @@
 "use strict";
 
+const SessionTracker = require("../../v5/helper/sessionTracker")
 const { queue: {purgeQueues}} = require("../../v5/helper/services");
 
 // test implied permission like admin of teamspace can do everything in their own teamspace and
@@ -84,14 +85,9 @@ describe("Implied permission::", function () {
 		const viewId = "2b328320-e2da-11ea-bcdf-cfbbc3211ae7";
 		const viewToDelete = "22328320-e2da-11ea-bcdf-cfbbc3211111";
 
-		before(function(done) {
-			agent = request.agent(server);
-			agent.post("/login")
-				.send({ username, password })
-				.expect(200, function(err, res) {
-					expect(res.body.username).to.equal(username);
-					done(err);
-				});
+		before(async function() {
+			agent = SessionTracker(request(server));
+			await agent.login(username, password);
 		});
 
 		after(purgeQueues);
@@ -309,14 +305,9 @@ describe("Implied permission::", function () {
 		const viewId = "2b328320-e2da-11ea-bcdf-cfbbc3211ae8";
 		const viewToDelete = "33328320-e2da-11ea-bcdf-cfbbc3222222";
 
-		before(function(done) {
-			agent = request.agent(server);
-			agent.post("/login")
-				.send({ username, password })
-				.expect(200, function(err, res) {
-					expect(res.body.username).to.equal(username);
-					done(err);
-				});
+		before(async function() {
+			agent = SessionTracker(request(server));
+			await agent.login(username, password);
 		});
 
 		after(purgeQueues);
@@ -673,14 +664,9 @@ describe("Implied permission::", function () {
 		const viewId = "2b328320-e2da-11ea-bcdf-cfbbc3211ae7";
 		const viewToDelete = "44448320-e2da-11ea-bcdf-cfbbc3333333";
 
-		before(function(done) {
-			agent = request.agent(server);
-			agent.post("/login")
-				.send({ username, password })
-				.expect(200, function(err, res) {
-					expect(res.body.username).to.equal(username);
-					done(err);
-				});
+		before(async function() {
+			agent = SessionTracker(request(server));
+			await agent.login(username, password);
 		});
 
 		after(purgeQueues);
@@ -994,14 +980,9 @@ describe("Implied permission::", function () {
 		const viewId = "2b328320-e2da-11ea-bcdf-cfbbc3211ae7";
 		const viewToDelete = "55548320-e2da-11ea-bcdf-cfbbc3334444";
 
-		before(function(done) {
-			agent = request.agent(server);
-			agent.post("/login")
-				.send({ username, password })
-				.expect(200, function(err, res) {
-					expect(res.body.username).to.equal(username);
-					done(err);
-				});
+		before(async function() {
+			agent = SessionTracker(request(server));
+			await agent.login(username, password);
 		});
 
 		after(purgeQueues);
@@ -1306,14 +1287,9 @@ describe("Implied permission::", function () {
 		const viewId = "2b328320-e2da-11ea-bcdf-cfbbc3211ae7";
 		const viewToDelete = "66668320-e2da-11ea-bcdf-cfbbc3355555";
 
-		before(function(done) {
-			agent = request.agent(server);
-			agent.post("/login")
-				.send({ username, password })
-				.expect(200, function(err, res) {
-					expect(res.body.username).to.equal(username);
-					done(err);
-				});
+		before(async function() {
+			agent = SessionTracker(request(server));
+			await agent.login(username, password);
 		});
 
 		after(purgeQueues);

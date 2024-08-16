@@ -97,6 +97,18 @@ const removeTeamspaceMember = async (req, res) => {
 	}
 };
 
+const getAddOns = async (req, res) => {
+	const { teamspace } = req.params;
+
+	try {
+		const addOns = await Teamspaces.getAddOns(teamspace);
+		respond(req, res, templates.ok, addOns);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 
@@ -333,6 +345,57 @@ const establishRoutes = () => {
 	*               format: binary
 	*/
 	router.get('/:teamspace/members/:member/avatar', hasAccessToTeamspace, memberExists, getTeamspaceMemberAvatar);
+
+	/**
+	* @openapi
+	* /teamspaces/{teamspace}/addOns:
+	*   get:
+	*     description: Gets information about the addOns supported in a teamspace
+	*     tags: [Teamspaces]
+	*     parameters:
+   	*       - name: teamspace
+	*         description: name of teamspace
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*     operationId: getAddOns
+	*     responses:
+	*       401:
+	*         $ref: "#/components/responses/notLoggedIn"
+	*       200:
+	*         description: Gets the addOns information of the teamspace
+	*         content:
+	*           application/json:
+	*             schema:
+	*               type: object
+	*               properties:
+	*                 vrEnabled:
+	*                   type: boolean
+	*                   description: Whether or not the vr addOn is supported in this teamspace
+	*                   example: true
+    *                 hereEnabled:
+	*                   type: boolean
+	*                   description: Whether or not the here addOn is supported in this teamspace
+	*                   example: true
+	*                 srcEnabled:
+	*                   type: boolean
+	*                   description: Whether or not the src addOn is supported in this teamspace
+	*                   example: true
+	*                 powerBIEnabled:
+	*                   type: boolean
+	*                   description: Whether or not the powerBI addOn is supported in this teamspace
+	*                   example: true
+	*                 modules:
+	*                   type: array
+	*                   description: A list of 3D repo modules supported in this teamspace
+	*                   items:
+	*                     type: string
+	*                     description: The name of the module supported in this teamspace
+	*                     example: issues
+	*                   example: [issues, risks]
+	*/
+	router.get('/:teamspace/addOns', hasAccessToTeamspace, getAddOns);
 
 	return router;
 };

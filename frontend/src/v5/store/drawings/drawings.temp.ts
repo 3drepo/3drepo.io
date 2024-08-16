@@ -48,7 +48,7 @@ export const drawingIds = [
 	'97933311-draw-4178-a241-1fe8219fffb6',
 ];
 
-export const drawingFilesName = ['map.svg', 'fly.svg', 'blueprint.svg', 'blueprint2.svg', 'blueprint.png', 'blueprint2.png', 'blueprint3.png', 'blueprint4.png'];
+export const drawingFilesName = ['map.svg', 'fly.svg', 'blueprint.svg', 'blueprint2.svg', 'blueprint.png', 'blueprint2.png', 'blueprint3.png', 'blueprint4.png', 'rac_level_1.png', 'rac_level_2.png', 'rac_site.png', 'rac_level_1.svg', 'rac_level_2.svg', 'rac_site.svg'];
 export const mapDrawingIdToName = (id) => {
 	const index = drawingIds.findIndex((d) => d === id);
 	if (index !== -1) {

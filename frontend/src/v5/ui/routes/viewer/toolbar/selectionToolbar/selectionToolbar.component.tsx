@@ -26,7 +26,7 @@ import ResetTransformationsIcons from '@assets/icons/viewer/reset_transformation
 import { formatMessage } from '@/v5/services/intl';
 import { GroupsActionsDispatchers, TreeActionsDispatchers, ViewerGuiActionsDispatchers, ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TreeHooksSelectors, ViewerGuiHooksSelectors, ViewpointsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { isEmpty } from 'lodash';
+import { isEmpty, isNull } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Section, Container, ClearIcon, LozengeButton } from './selectionToolbar.styles';
 import { ToolbarButton } from '../buttons/toolbarButton.component';
@@ -34,13 +34,13 @@ import { VIEWER_CLIP_MODES, VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { GizmoModeButtons } from '../buttons/buttonOptionsContainer/gizmoModeButtons.component';
 import { Viewer } from '@/v4/services/viewer/viewer';
 import { useContext, useEffect, useState } from 'react';
-import { VerticalRange } from '../buttons/toolbarButtons.component';
 import { CalibrationContext } from '../../../dashboard/projects/calibration/calibrationContext';
-import { PlaneType } from '../../../dashboard/projects/calibration/calibration.types';
+import { PlanesCalibrationSection } from './sections/planesCalibrationSection.component';
 
 export const SectionToolbar = () => {
-	const { isCalibratingPlanes, selectedPlane, setSelectedPlane, isAlignPlaneActive, setIsAlignPlaneActive } = useContext(CalibrationContext);
+	const { isCalibratingPlanes } = useContext(CalibrationContext);
 	const [alignActive, setAlignActive] = useState(false);
+	const { verticalPlanes } = useContext(CalibrationContext);
 	
 	const hasOverrides = !isEmpty(ViewerGuiHooksSelectors.selectColorOverrides());
 	const hasHighlightedObjects = !!TreeHooksSelectors.selectSelectedNodes().length;
@@ -49,6 +49,7 @@ export const SectionToolbar = () => {
 	const clippingSectionOpen = ViewerGuiHooksSelectors.selectIsClipEdit();
 	const isBoxClippingMode = clippingMode === VIEWER_CLIP_MODES.BOX;
 	const hasTransformations = !isEmpty(ViewpointsHooksSelectors.selectTransformations());
+	const planesAreUnset = verticalPlanes.some(isNull);
 
 	const onClickAlign = () => {
 		Viewer.clipToolRealign();
@@ -97,30 +98,7 @@ export const SectionToolbar = () => {
 					title={formatMessage({ id: 'viewer.toolbar.icon.deleteClip', defaultMessage: 'Delete' })}
 				/>
 			</Section>
-			<Section hidden={!isCalibratingPlanes}>
-				<LozengeButton
-					hidden={!isCalibratingPlanes}
-					onClick={() => setSelectedPlane(PlaneType.LOWER) }
-					selected={selectedPlane === PlaneType.LOWER}
-				>
-					<FormattedMessage id="viewer.toolbar.icon.lowerPlane" defaultMessage="Bottom Plane" />
-				</LozengeButton>
-				<LozengeButton
-					hidden={!isCalibratingPlanes}
-					onClick={() => setSelectedPlane(PlaneType.UPPER) }
-					selected={selectedPlane === PlaneType.UPPER}
-				>
-					<FormattedMessage id="viewer.toolbar.icon.upperPlane" defaultMessage="Top Plane" />
-				</LozengeButton>
-				<VerticalRange />
-				<ToolbarButton
-					Icon={AlignIcon}
-					hidden={!isCalibratingPlanes}
-					onClick={() => setIsAlignPlaneActive(!isAlignPlaneActive)}
-					selected={isAlignPlaneActive}
-					title={formatMessage({ id: 'viewer.toolbar.icon.alignPlaneToSurface', defaultMessage: 'Align To Surface' })}
-				/>
-			</Section>
+			<PlanesCalibrationSection hidden={!isCalibratingPlanes || planesAreUnset} />
 			<Section hidden={!hasOverrides}>
 				<ToolbarButton
 					Icon={ClearOverridesIcon}

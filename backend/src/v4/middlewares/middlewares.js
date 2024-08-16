@@ -162,6 +162,13 @@ function formatV5LogInData(req, res, next) {
 	next();
 }
 
+function formatV5NewModelParams(req, res, next) {
+	req.params.teamspace = req.params.account;
+	req.params.container = req.params.model;
+	req.params.federation = req.params.model;
+	next();
+}
+
 function formatV5NewModelRevisionsData(req, res, next) {
 	req.params.teamspace = req.params.account;
 	req.params.container = req.params.model;
@@ -192,7 +199,6 @@ const middlewares = {
 
 	project: require("./project"),
 	job: require("./job"),
-	issue: require("./issue"),
 	notification: require("./notification"),
 	chat: require("./chat"),
 
@@ -201,6 +207,8 @@ const middlewares = {
 	// models
 	canCreateModel: canCreateModel,
 	hasReadAccessToModel: checkPermissions(readAccessToModel),
+	hasCommenterAccessToModel: checkPermissions([C.PERM_CREATE_ISSUE]),
+	hasViewIssueAccessToModel: checkPermissions([C.PERM_VIEW_ISSUE]),
 	hasUploadAccessToModel: checkPermissions([C.PERM_UPLOAD_FILES]),
 	hasWriteAccessToModelSettings: checkPermissions([C.PERM_CHANGE_MODEL_SETTINGS]),
 	hasDeleteAccessToModel: checkPermissions([C.PERM_DELETE_MODEL]),
@@ -225,6 +233,7 @@ const middlewares = {
 
 	// v5 converters
 	formatV5LogInData,
+	formatV5NewModelParams,
 	formatV5NewModelRevisionsData,
 	formatV5NewFedRevisionsData,
 	flagAsV4Request
@@ -232,4 +241,3 @@ const middlewares = {
 };
 
 module.exports = middlewares;
-
