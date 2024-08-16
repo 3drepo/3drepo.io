@@ -25,7 +25,7 @@ import { ManyOfProperty } from './manyOfProperty.component';
 import { OneOfProperty } from './oneOfProperty.component';
 import { TicketImage } from './ticketImageContent/ticketImage/ticketImage.component';
 import { TicketView } from './ticketView/ticketView.component';
-import { TicketImageList } from './ticketImageListContent/ticketImageList.component';
+import { TicketImageList } from './ticketImageList/ticketImageList.component';
 
 export const TicketProperty = {
 	text: TextField,
