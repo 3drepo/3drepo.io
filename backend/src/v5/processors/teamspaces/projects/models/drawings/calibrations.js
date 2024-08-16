@@ -25,13 +25,14 @@ const Calibrations = { };
 
 Calibrations.addCalibration = addCalibration;
 
-Calibrations.getLastAvailableCalibration = async (teamspace, project, drawing, revision, returnRevId) => {
+Calibrations.getCalibration = async (teamspace, project, drawing, revision, returnRevId) => {
 	const projection = deleteIfUndefined({
 		_id: 0,
 		horizontal: 1,
 		verticalRange: 1,
 		units: 1,
 		createdAt: 1,
+		createdBy: 1,
 		rev_id: returnRevId ? 1 : undefined });
 
 	let latestCalibration = await getCalibration(teamspace, project, drawing, revision, projection);
@@ -40,7 +41,9 @@ Calibrations.getLastAvailableCalibration = async (teamspace, project, drawing, r
 		return latestCalibration;
 	}
 
-	const previousRevisions = await getPreviousRevisions(teamspace, project, drawing, modelTypes.DRAWING, revision);
+	const previousRevisions = await getPreviousRevisions(teamspace, project, drawing, modelTypes.DRAWING,
+		revision, { _id: 1 });
+
 	for (let i = 0; i < previousRevisions.length; i++) {
 		// eslint-disable-next-line no-await-in-loop
 		latestCalibration = await getCalibration(teamspace, project, drawing,

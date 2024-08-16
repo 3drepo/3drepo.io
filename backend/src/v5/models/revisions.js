@@ -130,7 +130,7 @@ Revisions.updateRevisionStatus = async (teamspace, project, model, modelType, re
 		data: { _id: res._id, void: status } });
 };
 
-Revisions.getPreviousRevisions = async (teamspace, project, model, modelType, revisionId) => {
+Revisions.getPreviousRevisions = async (teamspace, project, model, modelType, revisionId, projection) => {
 	const currentRevision = await findOneRevisionByQuery(teamspace, model, modelType,
 		{ project, _id: revisionId }, { timestamp: 1 });
 
@@ -141,7 +141,7 @@ Revisions.getPreviousRevisions = async (teamspace, project, model, modelType, re
 		timestamp: { $lt: currentRevision.timestamp },
 	});
 
-	return findRevisionsByQuery(teamspace, model, modelType, query, {}, { timestamp: -1 });
+	return findRevisionsByQuery(teamspace, model, modelType, query, projection, { timestamp: -1 });
 };
 
 Revisions.isTagUnique = async (teamspace, model, tag) => {

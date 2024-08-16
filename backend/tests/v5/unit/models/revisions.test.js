@@ -414,6 +414,7 @@ const testGetPreviousRevisions = () => {
 	const teamspace = generateRandomString();
 	const model = generateRandomString();
 	const project = generateRandomString();
+	const projection = generateRandomObject();
 	const revision = { _id: generateRandomString(), timestamp: generateRandomString() };
 	const previousRevisions = times(5, () => ({ _id: generateRandomString(), timestamp: generateRandomString() }));
 
@@ -423,7 +424,7 @@ const testGetPreviousRevisions = () => {
 			const fn2 = jest.spyOn(db, 'find').mockResolvedValueOnce(previousRevisions);
 
 			const res = await Revisions.getPreviousRevisions(teamspace, project, model,
-				modelTypes.CONTAINER, revision._id);
+				modelTypes.CONTAINER, revision._id, projection);
 
 			expect(res).toEqual(previousRevisions);
 			expect(fn1).toHaveBeenCalledTimes(1);
@@ -433,7 +434,7 @@ const testGetPreviousRevisions = () => {
 			expect(fn2).toHaveBeenCalledTimes(1);
 			expect(fn2).toHaveBeenCalledWith(teamspace, `${model}.history`,
 				{ ...excludeIncomplete, ...excludeVoids, project, timestamp: { $lt: revision.timestamp } },
-				{}, { timestamp: -1 });
+				projection, { timestamp: -1 });
 		});
 
 		test('Should return previous revision (drawing)', async () => {
@@ -441,7 +442,7 @@ const testGetPreviousRevisions = () => {
 			const fn2 = jest.spyOn(db, 'find').mockResolvedValueOnce(previousRevisions);
 
 			const res = await Revisions.getPreviousRevisions(teamspace, project, model,
-				modelTypes.DRAWING, revision._id);
+				modelTypes.DRAWING, revision._id, projection);
 
 			expect(res).toEqual(previousRevisions);
 			expect(fn1).toHaveBeenCalledTimes(1);
@@ -451,7 +452,7 @@ const testGetPreviousRevisions = () => {
 			expect(fn2).toHaveBeenCalledTimes(1);
 			expect(fn2).toHaveBeenCalledWith(teamspace, 'drawings.history',
 				{ ...excludeIncomplete, ...excludeVoids, project, timestamp: { $lt: revision.timestamp }, model },
-				{}, { timestamp: -1 });
+				projection, { timestamp: -1 });
 		});
 	});
 };

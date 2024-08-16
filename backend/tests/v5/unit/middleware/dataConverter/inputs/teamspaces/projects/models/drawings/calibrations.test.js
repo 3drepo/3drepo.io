@@ -102,7 +102,7 @@ const testValidateNewCalibration = () => {
 
 			const mockCB = jest.fn(() => {});
 
-			CalibrationProc.getLastAvailableCalibration.mockImplementationOnce(() => {
+			CalibrationProc.getCalibration.mockImplementationOnce(() => {
 				if (uncalibratedRev) {
 					throw new Error();
 				}
@@ -112,8 +112,8 @@ const testValidateNewCalibration = () => {
 
 			await Calibrations.validateNewCalibration(req, {}, mockCB);
 
-			expect(CalibrationProc.getLastAvailableCalibration).toHaveBeenCalledTimes(1);
-			expect(CalibrationProc.getLastAvailableCalibration).toHaveBeenCalledWith(teamspace, project, drawing,
+			expect(CalibrationProc.getCalibration).toHaveBeenCalledTimes(1);
+			expect(CalibrationProc.getCalibration).toHaveBeenCalledWith(teamspace, project, drawing,
 				revision, true);
 
 			if (sucess) {
