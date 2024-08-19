@@ -23,7 +23,7 @@ const { events } = require(`${src}/services/eventsManager/eventsManager.constant
 const Revisions = require(`${src}/models/revisions`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { determineTestGroup, generateRandomString, generateRandomObject, generateRandomNumber } = require('../../helper/services');
+const { determineTestGroup, generateUUID, generateRandomString, generateRandomObject, generateRandomNumber } = require('../../helper/services');
 
 const { modelTypes, getInfoFromCode, processStatuses } = require(`${src}/models/modelSettings.constants`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
@@ -340,7 +340,7 @@ const testOnProcessingCompleted = () => {
 					data: { status: processStatuses.OK, timestamp: expect.anything() } });
 		});
 
-		test('!!!Should update revision and publish 2 events upon failure', async () => {
+		test('Should update revision and publish 2 events upon failure', async () => {
 			const retInfo = getInfoFromCode(1);
 			retInfo.retVal = 1;
 
@@ -510,6 +510,39 @@ const testGetRevisionFormat = () => {
 	});
 };
 
+const testAddDrawingThumbnailRef = () => {
+	describe('Add drawing thumbnail reference', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		const thumbnailRef = generateUUID();
+		const revId = generateUUID();
+		test('Should throw REVISION_NOT_FOUND if it cannot find the revision', async () => {
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValueOnce();
+			await expect(Revisions.addDrawingThumbnailRef(teamspace, project, model, revId, thumbnailRef))
+				.rejects.toEqual(templates.revisionNotFound);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`,
+				{ $or: [{ _id: revId }, { tag: revId }] }, { $set: { thumbnail: thumbnailRef } },
+				{ projection: { _id: 1 } },
+			);
+		});
+
+		test('Should add thumbnail reference as requested', async () => {
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValueOnce({ _id: generateRandomString() });
+			await expect(Revisions.addDrawingThumbnailRef(teamspace, project, model, revId, thumbnailRef))
+				.resolves.toBeUndefined();
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`,
+				{ $or: [{ _id: revId }, { tag: revId }] }, { $set: { thumbnail: thumbnailRef } },
+				{ projection: { _id: 1 } },
+			);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetRevisionCount();
 	testGetLatestRevision();
@@ -523,4 +556,5 @@ describe(determineTestGroup(__filename), () => {
 	testGetRevisionFormat();
 	testUpdateProcessingStatus();
 	testOnProcessingCompleted();
+	testAddDrawingThumbnailRef();
 });

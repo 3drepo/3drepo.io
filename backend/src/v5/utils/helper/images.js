@@ -19,13 +19,13 @@ const sharp = require('sharp');
 
 const ImageHelper = {};
 
-ImageHelper.createThumbnail = (buffer, width = 600) => sharp(buffer)
+ImageHelper.createThumbnail = (buffer, width = 600) => (buffer ? sharp(buffer)
 	.flatten({ background: '#ffffff' })
 	.resize(width, undefined, {
 		fit: 'outside',
 	})
 	.toFormat('jpeg')
 
-	.toBuffer();
+	.toBuffer() : Promise.reject(new Error('Image not provided')));
 
 module.exports = ImageHelper;
