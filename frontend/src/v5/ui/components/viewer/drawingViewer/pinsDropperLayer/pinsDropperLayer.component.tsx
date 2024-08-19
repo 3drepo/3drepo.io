@@ -24,13 +24,14 @@ import { addZ } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.
 import { DrawingViewerService } from '../drawingViewer.service';
 import { Container } from './pinsDropperLayer.styles';
 import { isEqual } from 'lodash';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 
 type PinsDropperLayerProps = { getCursorOffset: (e) => Coord2D, viewBox: ViewBoxType };
 export const PinsDropperLayer = ({ getCursorOffset, viewBox }: PinsDropperLayerProps) => {
 	const previousViewBox = useRef<ViewBoxType>(null);
 	const [drawingId] = useSearchParam('drawingId');
 	const { isCalibrating } = useContext(CalibrationContext);
-	const { containerOrFederation } = useParams();
+	const { containerOrFederation } = useParams<ViewerParams>();
 	const transform2DTo3D = DrawingsHooksSelectors.selectTransform2Dto3D(drawingId, containerOrFederation);
 	const { verticalRange } = DrawingsHooksSelectors.selectCalibration(drawingId, containerOrFederation);
 
