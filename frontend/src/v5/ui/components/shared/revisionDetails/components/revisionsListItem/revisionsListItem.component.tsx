@@ -27,8 +27,8 @@ import { Container, DownloadButton, DownloadIcon, RevisionsListItemTag } from '.
 import { RevisionsListItemAuthor } from './revisionsListItemAuthor/revisionsListItemAuthor.component';
 import { RevisionsListItemText } from './revisionsListItemText/revisionsListItemText.component';
 import { RevisionsListItemButton } from './revisionsListItemButton/revisionsListItemButton.component';
-import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { downloadAuthUrl } from '@components/authenticatedResource/authenticatedResource.hooks';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
 
 type IRevisionsListItem = {
 	revision: IRevision;
@@ -58,7 +58,7 @@ export const RevisionsListItem = ({ revision, containerId }: IRevisionsListItem)
 
 	return (
 		<Container to={disabled ? null : viewerRoute(teamspace, project, containerId, revision)} disabled={disabled}>
-			<RevisionsListItemText width={140} tabletWidth={94}> {formatShortDateTime(timestamp)} </RevisionsListItemText>
+			<RevisionsListItemText width={140} tabletWidth={94}> {formatDateTime(timestamp)} </RevisionsListItemText>
 			<RevisionsListItemAuthor width={170} tabletWidth={155} authorName={author} />
 			<RevisionsListItemTag width={150} tabletWidth={300}> {tag} </RevisionsListItemTag>
 			<RevisionsListItemText hideWhenSmallerThan={1140}> {desc} </RevisionsListItemText>
