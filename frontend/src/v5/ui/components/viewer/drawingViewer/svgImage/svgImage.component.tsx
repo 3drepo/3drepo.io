@@ -319,8 +319,6 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 			scale: transform.scale,
 		};
 
-		console.log(`resizing for ${JSON.stringify(viewSize)}`);
-
 		// Create the canvas and context
 		const newCanvas = document.createElement('canvas');
 		newCanvas.width = canvasSize.width;
