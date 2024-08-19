@@ -26,7 +26,6 @@ const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { updateOne } = require(`${src}/handler/db`);
 const { statuses, statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
-const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
 let server;
 let agent;
