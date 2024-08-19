@@ -73,11 +73,14 @@ export const TicketImageList = ({ value, onChange, onBlur, disabled, label, help
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const imgsSrcs = (value || []).map(getImgSrc);
 	const [imgsInModal, setImgsInModal] = useState(imgsSrcs);
-	const syncProps = useSyncProps({ images: [...imgsInModal] });
+	const syncProps = useSyncProps({ images: imgsInModal });
 
-	const handleChange = (images) => onChange(images.map(stripBase64Prefix));
+	const handleClose = () => {
+		const newImages = syncProps.current.props.images;
+		onChange(newImages?.length ? newImages.map(stripBase64Prefix) : null);
+	};
 
-	const onDeleteImages = () => handleChange([]);
+	const onDeleteImages = () => onChange(null);
 	const onDeleteImage = (index) => setImgsInModal((imgs) => {
 		imgs.splice(index, 1);
 		return imgs;
@@ -145,7 +148,7 @@ export const TicketImageList = ({ value, onChange, onBlur, disabled, label, help
 			displayImageIndex,
 			...(disabled ? {} : {
 				onDelete: onDeleteImage,
-				onClose: () => handleChange(syncProps.current.props.images),
+				onClose: handleClose,
 				onAddMarkup: onEditImage,
 				onUpload: uploadImages,
 			}),
