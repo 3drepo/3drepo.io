@@ -3,9 +3,7 @@ const TSLoader = {
 	loader: 'esbuild-loader',
 	exclude: /node_modules/,
 	options: {
-		loader: 'tsx',
-		target: 'es2015',
-		tsconfigRaw: require('../../../tsconfig.json')
+		target: 'es2020',
 	}
 };
 

@@ -88,9 +88,11 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 	}, [active]);
 
 	useEffect(() => { resetArrow(); }, [drawingId]);
+
+	console.log(JSON.stringify(viewBox));
 	
 	return (
-		<Container style={containerStyle}>
+		<Container style={containerStyle} id="viewerLayer2d">
 			{isCalibrating && (
 				<LayerLevel>
 					{mousePosition && active && <SvgCircle coord={mousePosition} scale={viewBox.scale} />}
