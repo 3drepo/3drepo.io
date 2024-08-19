@@ -19,7 +19,8 @@ import { Grid, Tooltip } from '@mui/material';
 import { Toggle } from '@controls/inputs/toggle/toggle.component';
 import { FormattedMessage } from 'react-intl';
 
-import { formatShortDateTime } from '../../../../../../services/formatting/formatDate';
+import { RouteComponentProps } from 'react-router';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
 import {
 	SequenceDatesContainer,
 	SequenceItemContainer,
@@ -30,7 +31,7 @@ import {
 	ViewerPanelContent
 } from '../../sequences.styles';
 
-interface IProps {
+interface IProps extends RouteComponentProps<any> {
 	sequences: any;
 	setSelectedSequence: (id: string) => void;
 	openOnToday: boolean;
@@ -48,8 +49,8 @@ const SequenceItem = ({name, modelName, startDate, endDate, onClick}) => (
 				</Tooltip>
 				<Grid item>{modelName}</Grid>
 				<SequenceDatesContainer>
-					<Grid item>Start: {formatShortDateTime(new Date(startDate))} </Grid>
-					<Grid item>End: {formatShortDateTime(new Date(endDate))} </Grid>
+					<Grid item>Start: {formatDateTime(new Date(startDate))} </Grid>
+					<Grid item>End: {formatDateTime(new Date(endDate))} </Grid>
 				</SequenceDatesContainer>
 			</Grid>
 		</Grid>

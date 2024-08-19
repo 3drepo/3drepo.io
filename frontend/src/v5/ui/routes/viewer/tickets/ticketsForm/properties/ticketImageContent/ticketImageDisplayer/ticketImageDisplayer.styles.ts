@@ -19,6 +19,7 @@ import { Typography } from '@mui/material';
 import styled, { css } from 'styled-components';
 import { CentredContainer } from '@controls/centredContainer';
 import { hexToOpacity } from '@/v5/ui/themes/theme';
+import { AuthImg } from '@components/authenticatedResource/authImg.component';
 
 export const Container = styled.div`
 	border-radius: 5px;
@@ -31,7 +32,7 @@ export const Container = styled.div`
 	}
 `;
 
-export const Image = styled.img`
+export const Image = styled(AuthImg)`
 	object-fit: cover;
 	height: 100%;
 	max-height: calc(100vh - 64px);

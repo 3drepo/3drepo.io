@@ -14,9 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { AuthImg } from '@components/authenticatedResource/authImg.component';
 import styled from 'styled-components';
 
-export const Image = styled.img`
+export const Image = styled(AuthImg)`
 	width: 100%;
 	height: 175px;
 	margin: 0;

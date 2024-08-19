@@ -52,37 +52,34 @@ export const formatInfoUnit = (value: number): string => {
 };
 
 // Time related functions
-const TIME_UNIT = {
-	second: formatMessage({ id: 'timeUnit.second', defaultMessage: 'second' }),
-	minute: formatMessage({ id: 'timeUnit.minute', defaultMessage: 'minute' }),
-	hour: formatMessage({ id: 'timeUnit.hour', defaultMessage: 'hour' }),
-	day: formatMessage({ id: 'timeUnit.day', defaultMessage: 'day' }),
-	month: formatMessage({ id: 'timeUnit.month', defaultMessage: 'month' }),
-	year: formatMessage({ id: 'timeUnit.year', defaultMessage: 'year' }),
-};
-
 const getFormattedRelativeTime = (timeDifference, unit) => formatRelativeTime(-Math.max(Math.floor(timeDifference), 1), unit);
 export const getRelativeTime = (from: Date | number) => {
 	let timeDifference = ((new Date().getTime() - new Date(from).getTime()) / 1000) + 1;
-	if (timeDifference < 60) return getFormattedRelativeTime(timeDifference, TIME_UNIT.second);
+	if (timeDifference < 60) return getFormattedRelativeTime(timeDifference, 'second');
 
 	timeDifference /= 60;
-	if (timeDifference < 60) return getFormattedRelativeTime(timeDifference, TIME_UNIT.minute);
+	if (timeDifference < 60) return getFormattedRelativeTime(timeDifference, 'minute');
 
 	timeDifference /= 60;
-	if (timeDifference < 24) return getFormattedRelativeTime(timeDifference, TIME_UNIT.hour);
+	if (timeDifference < 24) return getFormattedRelativeTime(timeDifference, 'hour');
 
 	timeDifference /= 24;
-	if (timeDifference < 30) return getFormattedRelativeTime(timeDifference, TIME_UNIT.day);
+	if (timeDifference < 30) return getFormattedRelativeTime(timeDifference, 'day');
 	const daysDifference = timeDifference;
 
 	timeDifference /= 30;
-	if (timeDifference < 12) return getFormattedRelativeTime(timeDifference, TIME_UNIT.month);
+	if (timeDifference < 12) return getFormattedRelativeTime(timeDifference, 'month');
 
-	return getFormattedRelativeTime(daysDifference / 365, TIME_UNIT.year);
+	return getFormattedRelativeTime(daysDifference / 365, 'year');
 };
 
-export const formatShortDateTime = (date) => formatDate(date, { // DD MM YYYY hh:mm
+export const formatSimpleDate = (date) => formatDate(date, { // DD/MM/YYYY
+	day: 'numeric',
+	month: 'numeric',
+	year: 'numeric',
+});
+
+export const formatDateTime = (date) => formatDate(date, { // DD/MM/YYYY hh:mm
 	hour: 'numeric',
 	minute: 'numeric',
 	day: 'numeric',
@@ -91,11 +88,12 @@ export const formatShortDateTime = (date) => formatDate(date, { // DD MM YYYY hh
 	hour12: false,
 }).replaceAll(',', '');
 
-export const formatLongDateTime = (date) => formatDate(date, { // DD Month YYYY at hh:mm
+export const formatFilenameDate = (date) => formatDate(date, { // DD_MM_YYYY_HH_mm_ss
 	hour: 'numeric',
 	minute: 'numeric',
+	second: 'numeric',
 	day: 'numeric',
-	month: 'long',
+	month: 'numeric',
 	year: 'numeric',
 	hour12: false,
-});
+}).replaceAll(/\W+/g, '_');

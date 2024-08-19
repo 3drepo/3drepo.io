@@ -19,7 +19,7 @@
 
 const express = require("express");
 const router = express.Router({ mergeParams: true });
-const middlewares = require("../middlewares/middlewares");
+const Middleware = require("../middlewares/middlewares");
 const FileRef = require("../models/fileRef");
 const utils = require("../utils");
 const responseCodes = require("../response_codes");
@@ -37,7 +37,7 @@ const mimeTypes = require("mime-types");
  * @apiParam {String} resourceId The Id of the resource
  *
  */
-router.get("/resources/:resourceId", middlewares.issue.canView,  downloadResource);
+router.get("/resources/:resourceId", Middleware.hasViewIssueAccessToModel,  downloadResource);
 
 function downloadResource(req, res, next) {
 	const {account, model, resourceId } = req.params;

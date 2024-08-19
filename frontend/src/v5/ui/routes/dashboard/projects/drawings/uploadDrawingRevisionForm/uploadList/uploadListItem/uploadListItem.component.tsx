@@ -33,6 +33,7 @@ import { DrawingUploadStatus, IDrawing } from '@/v5/store/drawings/drawings.type
 import { useParams } from 'react-router-dom';
 import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { UploadListItemStatusCode } from './components/uploadListItemStatusCode/uploadListItemStatusCode.component';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 
 const UNEXPETED_STATUS_ERROR = undefined;
 const STATUS_TEXT_BY_UPLOAD = {
@@ -75,7 +76,7 @@ export const UploadListItem = ({
 	isUploading,
 }: IUploadListItem): JSX.Element => {
 	const revisionPrefix = `uploads.${index}`;
-	const { teamspace, project } = useParams();
+	const { teamspace, project } = useParams<DashboardParams>();
 	const uploadErrorMessage: string = DrawingRevisionsHooksSelectors.selectUploadError(uploadId);
 	const { watch, trigger, setValue } = useFormContext();
 	const drawingId = watch(`${revisionPrefix}.drawingId`);

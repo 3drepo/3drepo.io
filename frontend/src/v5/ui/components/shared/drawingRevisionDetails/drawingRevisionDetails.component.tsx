@@ -44,7 +44,8 @@ import { getState } from '@/v4/modules/store';
 import { RevisionsListItemText } from '../revisionDetails/components/revisionsListItem/revisionsListItemText/revisionsListItemText.component';
 import { RevisionsListItemAuthor } from '../revisionDetails/components/revisionsListItem/revisionsListItemAuthor/revisionsListItemAuthor.component';
 import { RevisionsListItemTag } from '../revisionDetails/components/revisionsListItem/revisionsListItem.styles';
-import { formatShortDateTime } from '@/v5/helpers/intl.helper';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
+import { downloadFile } from '@components/authenticatedResource/authenticatedResource.hooks';
 
 interface IDrawingRevisionDetails {
 	drawingId: string;
@@ -59,8 +60,8 @@ export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: ID
 		.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 	const selected = revisions.findIndex((r) => !r.void);
 
-	const handleDownloadRevision = (revisionId) => {
-		window.location.href = getRevisionFileUrl(teamspace, project, drawingId, revisionId);
+	const handleDownloadRevision = (revisionId, filename) => {
+		downloadFile(getRevisionFileUrl(teamspace, project, drawingId, revisionId), filename);
 	};
 
 	useEffect(() => {
@@ -124,10 +125,10 @@ export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: ID
 									DrawingRevisionsActionsDispatchers.setVoidStatus(teamspace, project, drawingId, revision._id, voidStatus)
 								)}
 								voidStatus={revision.void}
-								onDownloadRevision={() => handleDownloadRevision(revision._id)}
+								onDownloadRevision={() => handleDownloadRevision(revision._id, revision.revisionCode + revision.format)}
 								hasPermission={selectHasCollaboratorAccess(getState(), drawingId)}
 							>
-								<RevisionsListItemText width={140} tabletWidth={94}> {formatShortDateTime(revision.timestamp)} </RevisionsListItemText>
+								<RevisionsListItemText width={140} tabletWidth={94}> {formatDateTime(revision.timestamp)} </RevisionsListItemText>
 								<RevisionsListItemAuthor width={170} tabletWidth={155} authorName={revision.author} />
 								<RevisionsListItemTag width={150} tabletWidth={300}> {revision.statusCode || ''} </RevisionsListItemTag>
 								<RevisionsListItemTag width={150} tabletWidth={300}> {revision.revisionCode} </RevisionsListItemTag>

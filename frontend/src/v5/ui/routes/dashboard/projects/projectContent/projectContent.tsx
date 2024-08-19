@@ -34,11 +34,13 @@ import { ProjectSettings } from '../projectSettings/projectSettings.component';
 import { Board } from '../board/board.component';
 import { TicketsContent } from '../tickets/ticketsContent.component';
 import { Drawings } from '../drawings/drawings.component';
-import { SVGImage } from '@components/viewer/drawingViewer/svgImage/svgImage.component';
+import { useKanbanNavigationData } from '@/v5/helpers/kanban.hooks';
 
 export const ProjectContent = () => {
 	const { teamspace } = useParams<DashboardParams>();
 	const { pathname } = useLocation();
+	const { title:kanbanTitle,  shouldRenderContent: shouldRenderKanbanContent, issuesOrRisksEnabled, riskEnabled, issuesEnabled } = useKanbanNavigationData();
+
 	let { path } = useRouteMatch();
 	path = discardSlash(path);
 
@@ -59,11 +61,14 @@ export const ProjectContent = () => {
 					<Route title={formatMessage({ id: 'pageTitle.drawings', defaultMessage: ':project - Drawings' })} exact path={`${path}/t/drawings`}>
 						<Drawings />
 					</Route>
-					<Route title={formatMessage({ id: 'pageTitle.issuesAndRisks', defaultMessage: ':project - Issues and risks' })} exact path={`${path}/t/board/:type/:containerOrFederation?`}>
-						<Board />
-					</Route>
-					<Route title={formatMessage({ id: 'pageTitle.issuesAndRisks', defaultMessage: ':project - Issues and risks' })} exact path={`${path}/t/board`}>
-						<Redirect to={`${discardSlash(pathname)}/issues`} />
+					{(shouldRenderKanbanContent) && 
+						<Route title={kanbanTitle} exact path={`${path}/t/board/:type/:containerOrFederation?`}>
+							{issuesOrRisksEnabled && <Board />}
+						</Route>
+					}
+					<Route title={kanbanTitle} exact path={`${path}/t/board`}>
+						{issuesEnabled && <Redirect to={`${discardSlash(pathname)}/issues`} />}
+						{(!issuesEnabled && riskEnabled) && <Redirect to={`${discardSlash(pathname)}/risks`} />}
 					</Route>
 					<Route title={formatMessage({ id: 'pageTitle.tickets', defaultMessage: ':project - Tickets' })} path={`${path}/t/tickets`}>
 						<TicketsContent />
@@ -76,9 +81,6 @@ export const ProjectContent = () => {
 					</Route>
 					<Route title={formatMessage({ id: 'pageTitle.userPermissions', defaultMessage: ':project - User Permissions' })} exact path={`${path}/t/user_permissions`}>
 						<UserPermissions />
-					</Route>
-					<Route title="2D viewer test" exact path={`${path}/t/2d`}>
-						<SVGImage src="/assets/drawings/fly.svg"  />
 					</Route>
 					<Route path="*">
 						<Redirect to={NOT_FOUND_ROUTE_PATH} />

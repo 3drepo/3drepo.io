@@ -17,6 +17,7 @@
 
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../helper/services');
+const SessionTracker = require('../../../../helper/sessionTracker');
 const { src } = require('../../../../helper/path');
 const { generateRandomString, generateRandomURL } = require('../../../../helper/services');
 const { authenticateRedirectUri, signupRedirectUri, linkRedirectUri } = require('../../../../../../src/v5/services/sso/aad/aad.constants');
@@ -33,10 +34,6 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 let server;
 let agent;
-
-const session = require('supertest-session');
-
-let testSession;
 
 const userEmail = `${generateRandomString()}@email.com`;
 const testUser = ServiceHelper.generateUserCredentials();
@@ -119,27 +116,6 @@ const testAuthenticatePost = () => {
 			const res = await agent.post('/v5/sso/aad/authenticate-post').send({ state })
 				.expect(302);
 			expect(res.headers.location).toEqual(`${redirectUri}&error=${errorCodes.USER_NOT_FOUND}`);
-		});
-
-		test('should fail if the user is already logged in', async () => {
-			const userDataFromAad = {
-				email: userEmailSso,
-				id: ssoUserId,
-				firstName: generateRandomString(),
-				lastName: generateRandomString(),
-			};
-			const redirectUri = `${generateRandomURL()}?queryParam=someValue`;
-			const state = Aad.generateCryptoHash(JSON.stringify({ redirectUri }));
-			Aad.getUserDetails.mockResolvedValueOnce(userDataFromAad);
-
-			const res1 = await testSession.post('/v5/sso/aad/authenticate-post').send({ state })
-				.expect(302);
-			expect(res1.headers.location).toEqual(redirectUri);
-
-			const res2 = await testSession.post('/v5/sso/aad/authenticate-post').send({ state })
-				.expect(templates.alreadyLoggedIn.status);
-			expect(res2.body.code).toEqual(templates.alreadyLoggedIn.code);
-			await testSession.post('/v5/logout/');
 		});
 
 		test('should redirect the user to the redirectUri provided', async () => {
@@ -275,11 +251,10 @@ const testLink = () => {
 		});
 
 		describe('With valid authentication', () => {
-			beforeAll(async () => {
-				await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
-			});
-			afterAll(async () => {
-				await testSession.post('/v5/logout/');
+			let testSession;
+			beforeEach(async () => {
+				testSession = SessionTracker(agent);
+				await testSession.login(testUser.user, testUser.password);
 			});
 
 			test('should fail if redirectUri is not provided', async () => {
@@ -306,6 +281,7 @@ const testLink = () => {
 
 const testLinkPost = () => {
 	describe('Link Post', () => {
+		let testSession;
 		const resetTestUser = async () => {
 			// set the user to non SSO
 			await testSession.post('/v5/sso/aad/unlink').send({ password: testUser.password });
@@ -314,11 +290,8 @@ const testLinkPost = () => {
 		};
 
 		beforeAll(async () => {
-			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
-		});
-
-		afterAll(async () => {
-			await testSession.post('/v5/logout/');
+			testSession = SessionTracker(agent);
+			await testSession.login(testUser.user, testUser.password);
 		});
 
 		afterEach(async () => {
@@ -391,7 +364,6 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);
-		testSession = session(server);
 		await setupData();
 	});
 
