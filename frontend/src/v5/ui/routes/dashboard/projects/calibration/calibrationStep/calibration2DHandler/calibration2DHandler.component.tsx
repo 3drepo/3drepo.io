@@ -15,13 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { UnityUtil } from '@/globals/unity-util';
+import { CalibrationContext } from '../../calibrationContext';
+import { EMPTY_VECTOR } from '../../calibration.constants';
 
-export const Calibration2DStep = () => {
+export const Calibration2DHandler = () => {
+	const { isCalibrating, step, setIsCalibrating2D, setVector2D } = useContext(CalibrationContext);
+
+	const canCalibrate2D = isCalibrating && step === 1;
 
 	useEffect(() => {
 		UnityUtil.setCalibrationToolMode('Vector');
+
+		return () => {
+			setIsCalibrating2D(false);
+			setVector2D((vector) => vector?.[1] ? vector : EMPTY_VECTOR);
+		};
 	}, []);
+
+	useEffect(() => {
+		setIsCalibrating2D(canCalibrate2D);
+	}, [canCalibrate2D]);
+
 	return null;
 };

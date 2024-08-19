@@ -21,7 +21,7 @@ import { useParams, generatePath } from 'react-router-dom';
 import { ContainersHooksSelectors, DrawingsHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { UnityUtil } from '@/globals/unity-util';
 import { Calibration3DHandler } from './calibrationStep/calibration3DHandler/calibration3DHandler.component';
-import { Calibration2DStep } from './calibrationStep/calibration2DStep/calibration2DStep.component';
+import { Calibration2DHandler } from './calibrationStep/calibration2DHandler/calibration2DHandler.component';
 import { ViewerCanvasesContext } from '../../../viewer/viewerCanvases.context';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { CalibrationContext } from './calibrationContext';
@@ -81,7 +81,7 @@ export const CalibrationHandler = () => {
 	return (
 		<>
 			{step === 0 && <Calibration3DHandler />}
-			{step === 1 && <Calibration2DStep />}
+			{step === 1 && <Calibration2DHandler />}
 			{step === 2 && <VerticalSpatialBoundariesHandler />}
 		</>
 	);
