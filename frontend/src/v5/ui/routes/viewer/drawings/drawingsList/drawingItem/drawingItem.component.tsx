@@ -32,7 +32,7 @@ import {
 } from './drawingItem.styles';
 import { FormattedMessage } from 'react-intl';
 import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { formatShortDateTime } from '@/v5/helpers/intl.helper';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
@@ -103,7 +103,7 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 				<BreakingLine>
 					<Property>
 						<FormattedMessage id="drawings.list.item.lastUpdated" defaultMessage="Last updated" />:
-						<PropertyValue>&nbsp;{formatShortDateTime(lastUpdated)}</PropertyValue>
+						<PropertyValue>&nbsp;{formatDateTime(lastUpdated)}</PropertyValue>
 					</Property>
 				</BreakingLine>
 				<DrawingsCalibrationButton
