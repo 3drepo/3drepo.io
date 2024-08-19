@@ -42,23 +42,18 @@ export const CardContainer = styled.div`
 	}
 `;
 
-export const CardHeader = styled.div`
+export const CardHeaderContainer = styled.div`
 	${({ theme }) => theme.typography.h3}
 	font-size: 17px;
 	background: ${({ theme }) => theme.palette.primary.contrast};
-	display: flex;
 	align-items: center;
 	min-height: 48px;
 	padding: 0 16px;
 	border-bottom: 1px solid  ${({ theme }) => theme.palette.base.lightest};
 	display: grid;
-    grid-template-columns: 32px auto max-content;
-`;
-
-export const HeaderButtons = styled.span`
-	display: flex;
-	gap: 5px;
-	margin-left: auto;
+    grid-template-columns: 32px 1fr max-content;
+	width: 100%;
+	box-sizing: border-box;
 `;
 
 export const CardContent = styled.div`
@@ -82,4 +77,14 @@ export const EmptyCardMessage = styled(DashedContainer).attrs({
 	padding: 10px;
 	box-sizing: border-box;
 	width: 100%;
+`;
+
+export const Title = styled.div`
+	display: inline-flex;
+	overflow: hidden;
+`;
+
+export const Actions = styled.div`
+	display: inline-flex;
+	gap: 5px;
 `;

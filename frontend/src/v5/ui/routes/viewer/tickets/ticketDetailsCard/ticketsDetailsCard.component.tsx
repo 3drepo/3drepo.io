@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ArrowBack, CardContainer, CardHeader, HeaderButtons } from '@components/viewer/cards/card.styles';
+import { ArrowBack, CardContainer } from '@components/viewer/cards/card.styles';
 import { useContext, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { DialogsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -31,11 +31,12 @@ import { FormattedMessage } from 'react-intl';
 import { InputController } from '@controls/inputs/inputController.component';
 import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
-import { BreakableText, ChevronLeft, ChevronRight, GroupsCardHeader } from './ticketDetailsCard.styles';
+import { BreakableText, ChevronLeft, ChevronRight } from './ticketDetailsCard.styles';
 import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component';
 import { useSearchParam } from '../../../useSearchParam';
 import { TicketContext, TicketDetailsView } from '../ticket.context';
 import { ViewerParams } from '../../../routes.constants';
+import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 
 enum IndexChange {
 	PREV = -1,
@@ -154,19 +155,18 @@ export const TicketDetailsCard = () => {
 
 	if (!ticket) return null;
 
-
-
 	return (
 		<CardContainer>
 			<FormProvider {...formData}>
 				{detailsView === TicketDetailsView.Groups && (
-				
 					<>
-						<GroupsCardHeader>
-							<ArrowBack onClick={() => setDetailViewAndProps(TicketDetailsView.Form)} />
-							<BreakableText>{ticket.title}</BreakableText>
-							<span>:<FormattedMessage id="ticket.groups.header" defaultMessage="Groups" /></span>
-						</GroupsCardHeader>
+						<CardHeader
+							icon={<ArrowBack onClick={() => setDetailViewAndProps(TicketDetailsView.Form)} />}
+							title={<>
+								<BreakableText>{ticket.title}</BreakableText>
+								<span>:<FormattedMessage id="ticket.groups.header" defaultMessage="Groups" /></span>
+							</>}
+						/>
 						<InputController
 							Input={TicketGroups}
 							name={viewProps.name}
@@ -177,14 +177,14 @@ export const TicketDetailsCard = () => {
 				{detailsView === TicketDetailsView.Form && (
 
 					<>
-						<CardHeader>
-							<ArrowBack onClick={goBack} />
-							{template.code}:{ticket.number}
-							<HeaderButtons>
+						<CardHeader
+							icon={<ArrowBack onClick={goBack} />}
+							title={`${template.code}:${ticket.number}`}
+							actions={<>
 								<CircleButton variant="viewer" onClick={cycleToPrevTicket} disabled={disableCycleButtons}><ChevronLeft /></CircleButton>
 								<CircleButton variant="viewer" onClick={cycleToNextTicket} disabled={disableCycleButtons}><ChevronRight /></CircleButton>
-							</HeaderButtons>
-						</CardHeader>
+							</>}
+						/>
 						<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />
 					</>
 				)}
