@@ -100,6 +100,34 @@ Drawings.downloadRevisionFiles = async (teamspace, drawing, revision) => {
 	return getFileAsStream(teamspace, DRAWINGS_HISTORY_COL, rev.rFile[0]);
 };
 
+Drawings.getLatestThumbnail = async (teamspace, project, drawing) => {
+	try {
+		const rev = await getLatestRevision(teamspace, drawing, modelTypes.DRAWING, { thumbnail: 1 });
+
+		if (!rev?.thumbnail) {
+			throw templates.fileNotFound;
+		}
+
+		return getFileAsStream(teamspace, DRAWINGS_HISTORY_COL, rev.thumbnail);
+	} catch (err) {
+		throw templates.fileNotFound;
+	}
+};
+
+Drawings.getImageByRevision = async (teamspace, project, drawing, revision) => {
+	try {
+		const rev = await getRevisionByIdOrTag(teamspace, drawing, modelTypes.DRAWING, revision, { image: 1 });
+
+		if (!rev?.image) {
+			throw templates.fileNotFound;
+		}
+
+		return getFileAsStream(teamspace, DRAWINGS_HISTORY_COL, rev.image);
+	} catch (err) {
+		throw templates.fileNotFound;
+	}
+};
+
 Drawings.createDrawingThumbnail = async (teamspace, project, model, revision) => {
 	const { image } = await getRevisionByIdOrTag(teamspace, model, modelTypes.DRAWING, revision, { image: 1 });
 

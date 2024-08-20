@@ -28,6 +28,17 @@ const { validateNewRevisionData: validateNewContainerRev } = require('../../../.
 const { validateNewRevisionData: validateNewDrawingRev } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/drawings');
 const { validateUpdateRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 
+const getImage = async (req, res) => {
+	const { teamspace, project, drawing, revision } = req.params;
+	try {
+		const { readStream, filename, size, mimeType } = await Drawings.getImageByRevision(teamspace, project, drawing, revision);
+		writeStreamRespond(req, res, templates.ok, readStream, filename, size, { mimeType });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
 const getRevisions = (modelType) => async (req, res, next) => {
 	const { teamspace, model } = req.params;
 	const showVoid = req.query.showVoid === 'true';
@@ -374,6 +385,7 @@ const establishRoutes = (modelType) => {
 	 */
 	router.patch('/:revision', hasWriteAccessToModel[modelType], validateUpdateRevisionData, updateRevisionStatus(modelType));
 
+	if (modelType === modelTypes.CONTAINER) {
 	/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions/{revision}/files:
@@ -421,8 +433,9 @@ const establishRoutes = (modelType) => {
 	 *               type: string
 	 *               format: binary
 	 */
-	router.get('/:revision/files', hasWriteAccessToContainer, downloadRevisionFiles(modelTypes.CONTAINER));
-
+		router.get('/:revision/files', hasWriteAccessToContainer, downloadRevisionFiles(modelTypes.CONTAINER));
+	}
+	if (modelType === modelTypes.DRAWING) {
 	/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/revisions/{revision}/files/original:
@@ -471,7 +484,51 @@ const establishRoutes = (modelType) => {
 	 *               type: string
 	 *               format: binary
 	 */
-	router.get('/:revision/files/original', hasWriteAccessToDrawing, downloadRevisionFiles(modelTypes.DRAWING));
+		router.get('/:revision/files/original', hasWriteAccessToDrawing, downloadRevisionFiles(modelTypes.DRAWING));
+
+		/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/revisions/{revision}/files/image:
+	 *   get:
+	 *     description: Fetches the image for a drawing.
+	 *     tags: [Revisions]
+	 *     operationId: getThumbnail
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: drawing
+	 *         description: Drawing ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: revision
+	 *         description: Revision ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       200:
+	 *         description: returns svg/raster image of the image
+	 */
+		router.get('/:revision/files/image', hasReadAccessToDrawing, getImage);
+	}
 
 	return router;
 };
