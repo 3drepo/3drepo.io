@@ -37,7 +37,7 @@ export const ImagesContainer = styled.div`
 
 export const ImagesGridContainer = styled.div`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-    border-radius: 9px;
+	border-radius: 9px;
 	padding: 5px;
 	box-sizing: border-box;
 	display: grid;
