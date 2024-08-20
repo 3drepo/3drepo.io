@@ -73,24 +73,14 @@ export const TicketImageList = ({ value, onChange, onBlur, disabled, label, help
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const imgsSrcs = (value || []).map(getImgSrc);
 	const [imgsInModal, setImgsInModal] = useState(imgsSrcs);
-	const syncProps = useSyncProps({ images: imgsInModal });
 
-	const handleClose = () => {
-		const newImages = syncProps.current.props.images;
-		onChange(newImages?.length ? newImages.map(stripBase64Prefix) : null);
-	};
-
+	const onClose = () => onChange(imgsInModal?.length ? imgsInModal.map(stripBase64Prefix) : null);
 	const onDeleteImages = () => onChange(null);
-	const onDeleteImage = (index) => setImgsInModal((imgs) => {
-		imgs.splice(index, 1);
-		return imgs;
-	});
+	const onDeleteImage = (index) => setImgsInModal(imgsInModal.filter((img, i) => index !== i));
 	const onEditImage = (newValue, index) => {
 		if (newValue) {
-			setImgsInModal((imgs) => {
-				imgs[index] = newValue;
-				return imgs;
-			});
+			imgsInModal[index] = newValue;
+			setImgsInModal([...imgsInModal]);
 		}
 	};
 
@@ -113,7 +103,7 @@ export const TicketImageList = ({ value, onChange, onBlur, disabled, label, help
 			}
 		}
 		if (imagesToUpload.length) {
-			setImgsInModal((imgs) => imgs.concat(imagesToUpload));
+			setImgsInModal(imgsInModal.concat(imagesToUpload));
 		}
 		if (imagesTooBigCount) {
 			DialogsActionsDispatchers.open('warning', {
@@ -143,17 +133,17 @@ export const TicketImageList = ({ value, onChange, onBlur, disabled, label, help
 		}
 	};
 
-	const openImagesModal = (displayImageIndex?) => {
-		DialogsActionsDispatchers.open(ImagesModal, {
-			displayImageIndex,
-			...(disabled ? {} : {
-				onDelete: onDeleteImage,
-				onClose: handleClose,
-				onAddMarkup: onEditImage,
-				onUpload: uploadImages,
-			}),
-		}, syncProps);
-	};
+	const syncProps = useSyncProps({
+		images: imgsInModal,
+		...(disabled ? {} : {
+			onDelete: onDeleteImage,
+			onAddMarkup: onEditImage,
+			onUpload: uploadImages,
+			onClose,
+		}),
+	});
+
+	const openImagesModal = (displayImageIndex?) => DialogsActionsDispatchers.open(ImagesModal, { displayImageIndex }, syncProps);
 
 	const onUploadImages = async () => {
 		const displayImageIndex = imgsInModal.length;
@@ -164,7 +154,7 @@ export const TicketImageList = ({ value, onChange, onBlur, disabled, label, help
 	const onTakeScreenshot = async () => {
 		const displayImageIndex = imgsInModal.length;
 		const screenshot = await ViewerService.getScreenshot();
-		setImgsInModal((imgs) => imgs.concat(screenshot));
+		setImgsInModal(imgsInModal.concat(screenshot));
 		openImagesModal(displayImageIndex);
 	};
 
