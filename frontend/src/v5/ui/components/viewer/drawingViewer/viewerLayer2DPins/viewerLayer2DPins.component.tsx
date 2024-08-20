@@ -17,19 +17,17 @@
 import { DrawingsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useParams } from 'react-router-dom';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
-import { useContext } from 'react';
-import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { Pin2D } from './pin2D/pin2D.component';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 
 type PinsLayerProps = { scale: number, height: number, width: number };
 export const PinsLayer = ({ scale, height, width }: PinsLayerProps) => {
 	const [drawingId] = useSearchParam('drawingId');
-	const { isCalibrating } = useContext(CalibrationContext);
-	const { containerOrFederation } = useParams();
+	const { containerOrFederation } = useParams<ViewerParams>();
 	const pins = TicketsCardHooksSelectors.selectTicketPins();
 	const transform3DTo2D = DrawingsHooksSelectors.selectTransform3DTo2D(drawingId, containerOrFederation);
 
-	if (isCalibrating || !transform3DTo2D) return null;
+	if (!transform3DTo2D) return null;
 
 	const mapPin3DTo2D = (pin) => {
 		const { x, y } = transform3DTo2D(pin.position);

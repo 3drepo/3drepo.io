@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CSSProperties, useEffect, useRef, useState } from 'react';
-import { Container, LayerLevel, TransparentLayerLevel } from './viewerLayer2D.styles';
+import { CSSProperties, useContext, useEffect, useRef, useState } from 'react';
+import { Container, LayerLevel } from './viewerLayer2D.styles';
 import { PanZoomHandler } from '../panzoom/centredPanZoom';
 import { isEqual } from 'lodash';
 import { SvgArrow } from './svgArrow/svgArrow.component';
@@ -24,6 +24,7 @@ import { SvgCircle } from './svgCircle/svgCircle.component';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { Coord2D, Vector2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { PinsLayer } from '../viewerLayer2DPins/viewerLayer2DPins.component';
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 
 export type ViewBoxType = ReturnType<PanZoomHandler['getOriginalSize']> & ReturnType<PanZoomHandler['getTransform']>;
 type ViewerLayer2DProps = {
@@ -38,6 +39,7 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 	const previousViewBox = useRef<ViewBoxType>(null);
 	const [mousePosition, setMousePosition] = useState<Coord2D>(null);
 	const [drawingId] = useSearchParam('drawingId');
+	const { isCalibrating } = useContext(CalibrationContext);
 
 	const containerStyle: CSSProperties = {
 		transformOrigin: '0 0',
@@ -91,6 +93,7 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 			<LayerLevel>
 				{mousePosition && active && <SvgCircle coord={mousePosition} scale={viewBox.scale} />}
 				{offsetStart && <SvgArrow start={offsetStart} end={offsetEnd ?? mousePosition} scale={viewBox.scale} />}
+				{!isCalibrating && <PinsLayer scale={viewBox.scale} height={viewBox.height} width={viewBox.width} />}
 			</LayerLevel>
 			{active && (
 				<LayerLevel
@@ -99,9 +102,6 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 					onMouseMove={handleMouseMove}
 				/>
 			)}
-			<TransparentLayerLevel>
-				<PinsLayer scale={viewBox.scale} height={viewBox.height} width={viewBox.width} />
-			</TransparentLayerLevel>
 		</Container>
 	);
 };
