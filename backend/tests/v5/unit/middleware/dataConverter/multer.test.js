@@ -20,7 +20,7 @@ const FormData = require('form-data');
 const fs = require('fs');
 const path = require('path');
 
-const { src, modelFolder, imagesFolder, pdfModel, dwgModel, emptyPdf } = require('../../../helper/path');
+const { src, modelFolder, imagesFolder } = require('../../../helper/path');
 const config = require('../../../../../src/v5/utils/config');
 
 const MulterHelper = require(`${src}/middleware/dataConverter/multer`);
@@ -76,19 +76,24 @@ const testSingleImageUpload = () => {
 };
 
 const testSingleFileUpload = () => {
+	const fileFilter = (a, b, cb) => { cb(null, true); };
 	describe.each([
-		['request does not have a file', createRequestWithFile(null), undefined, (a, b, cb) => { cb(null, true); }, config.uploadSizeLimit, false, false, templates.invalidArguments.code],
-		['request provides the correct parameters and no filter', createRequestWithFile(), undefined, (a, b, cb) => { cb(null, true); }, config.uploadSizeLimit, false, true],
-		['request provides the correct parameters and no filter (2)', createRequestWithFile('a'), 'a', (a, b, cb) => { cb(null, true); }, config.uploadSizeLimit, false, true],
-		['request provides the correct parameters and no filter and store file in memory', createRequestWithFile(), undefined, (a, b, cb) => { cb(null, true); }, config.uploadSizeLimit, true, true],
-		['request provides the incorrect parameters', createRequestWithFile('a'), undefined, (a, b, cb) => { cb(null, true); }, config.uploadSizeLimit, false, false],
+		['request does not have a file', createRequestWithFile(null), undefined, fileFilter, config.uploadSizeLimit, false, false, templates.invalidArguments.code],
+		['request provides the correct parameters and no filter', createRequestWithFile(), undefined, fileFilter, config.uploadSizeLimit, false, true],
+		['request provides the correct parameters and no filter (2)', createRequestWithFile('a'), 'a', fileFilter, config.uploadSizeLimit, false, true],
+		['request provides the correct parameters and no filter and store file in memory', createRequestWithFile(), undefined, fileFilter, config.uploadSizeLimit, true, true],
+		['request provides the incorrect parameters', createRequestWithFile('a'), undefined, fileFilter, config.uploadSizeLimit, false, false],
 		['file filter rejected the file', createRequestWithFile('a'), 'a', (a, b, cb) => { cb(templates.invalidArguments, false); }, config.uploadSizeLimit, false, false],
-		['file exceeded max file limit', createRequestWithFile('file', 'tooBig.ifc'), undefined, (a, b, cb) => { cb(null, true); }, config.uploadSizeLimit, false, false, templates.maxSizeExceeded.code],
-	])('Single file upload', (desc, req, reqParam, fileFilter, maxSize, storeInMemory, success, code = templates.invalidArguments.code) => {
+		['file exceeded max file limit', createRequestWithFile('file', 'tooBig.ifc'), undefined, fileFilter, config.uploadSizeLimit, false, false, templates.maxSizeExceeded.code],
+		['request has a pdf file', createRequestWithFile('file', 'model.pdf'), undefined, fileFilter, config.uploadSizeLimit, true, true],
+		['request has a pdf file with uppercase extension', createRequestWithFile('file', 'modelUppercase.PDF'), undefined, fileFilter, config.uploadSizeLimit, true, true],
+		['request has an empty pdf file', createRequestWithFile('file', 'empty.pdf'), undefined, fileFilter, undefined, true, false, templates.unsupportedFileFormat.code],
+
+	])('Single file upload', (desc, req, reqParam, filter, maxSize, storeInMemory, success, code = templates.invalidArguments.code) => {
 		test(`${success ? 'next() should be called' : `should fail with ${code}`} if ${desc}`, async () => {
 			const mockCB = jest.fn(() => { });
 			const resCallLength = Responder.respond.mock.calls.length;
-			await MulterHelper.singleFileUpload(reqParam, fileFilter, maxSize, storeInMemory)(req, {}, mockCB);
+			await MulterHelper.singleFileUpload(reqParam, filter, maxSize, storeInMemory)(req, {}, mockCB);
 
 			if (success) {
 				expect(mockCB.mock.calls.length).toBe(1);
@@ -102,30 +107,7 @@ const testSingleFileUpload = () => {
 	});
 };
 
-const testEnsureFileIsValid = () => {
-	describe.each([
-		['request does not have a file', {}, false],
-		['request has a pdf file', { file: { originalname: pdfModel, buffer: fs.readFileSync(pdfModel) } }, true],
-		['request has a non pdf file', { file: { originalname: dwgModel, buffer: fs.readFileSync(dwgModel) } }, true],
-		['request has an empty pdf file', { file: { originalname: emptyPdf, buffer: fs.readFileSync(emptyPdf) } }, false],
-	])('Ensure file is valid', (desc, req, success, code = templates.invalidArguments.code) => {
-		test(`${success ? 'next() should be called' : `should fail with ${code}`} if ${desc}`, async () => {
-			const mockCB = jest.fn(() => { });
-			await MulterHelper.ensureFileIsValid(req, {}, mockCB);
-
-			if (success) {
-				expect(mockCB).toHaveBeenCalledTimes(1);
-			} else {
-				expect(mockCB).not.toHaveBeenCalled();
-				expect(Responder.respond).toHaveBeenCalledTimes(1);
-				expect(Responder.respond.mock.calls[0][2].code).toEqual(templates.unsupportedFileFormat.code);
-			}
-		});
-	});
-};
-
 describe('middleware/dataConverter/multer', () => {
 	testSingleImageUpload();
 	testSingleFileUpload();
-	testEnsureFileIsValid();
 });

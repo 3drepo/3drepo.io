@@ -163,6 +163,7 @@ const formatToStats = (settings, revCount, latestRev, calibration) => (deleteIfU
 const testGetDrawingStats = () => {
 	describe('Get drawing stats', () => {
 		const teamspace = generateRandomString();
+		const project = generateRandomString();
 		const drawing = generateRandomString();
 		const revCount = generateRandomNumber();
 		const settings = {
@@ -185,7 +186,7 @@ const testGetDrawingStats = () => {
 			const getCalibrationStatusMock = Calibrations.getCalibrationStatus
 				.mockResolvedValueOnce(calibrationStatuses.CALIBRATED);
 
-			const res = await Drawings.getDrawingStats(teamspace, drawing);
+			const res = await Drawings.getDrawingStats(teamspace, project, drawing);
 
 			expect(res).toEqual(formatToStats(settings, revCount, latestRev, calibrationStatuses.CALIBRATED));
 			expect(getDrawingByIdMock).toHaveBeenCalledTimes(1);
@@ -205,7 +206,7 @@ const testGetDrawingStats = () => {
 			const getRevisionCountMock = Revisions.getRevisionCount.mockResolvedValueOnce(revCount);
 			const getLatestRevMock = Revisions.getLatestRevision.mockRejectedValueOnce(undefined);
 
-			const res = await Drawings.getDrawingStats(teamspace, drawing);
+			const res = await Drawings.getDrawingStats(teamspace, project, drawing);
 
 			expect(res).toEqual(formatToStats(settings, revCount));
 			expect(getDrawingByIdMock).toHaveBeenCalledTimes(1);
@@ -223,14 +224,14 @@ const testGetDrawingStats = () => {
 			const err = new Error(generateRandomString());
 
 			ModelSettings.getDrawingById.mockRejectedValueOnce(err);
-			await expect(Drawings.getDrawingStats(teamspace, drawing)).rejects.toEqual(err);
+			await expect(Drawings.getDrawingStats(teamspace, project, drawing)).rejects.toEqual(err);
 		});
 
 		test('should fail if getRevisionCount fails', async () => {
 			const err = new Error(generateRandomString());
 
 			Revisions.getRevisionCount.mockRejectedValueOnce(err);
-			await expect(Drawings.getDrawingStats(teamspace, drawing)).rejects.toEqual(err);
+			await expect(Drawings.getDrawingStats(teamspace, project, drawing)).rejects.toEqual(err);
 		});
 	});
 };

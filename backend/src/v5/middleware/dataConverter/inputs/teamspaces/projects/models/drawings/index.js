@@ -17,12 +17,12 @@
 
 const { checkQuotaIsSufficient, fileFilter } = require('../commons/revisions');
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
-const { ensureFileIsValid, singleFileUpload } = require('../../../../../multer');
 const Yup = require('yup');
 const YupHelper = require('../../../../../../../utils/helper/yup');
 const { fileUploads } = require('../../../../../../../utils/config');
 const { isRevAndStatusCodeUnique } = require('../../../../../../../models/revisions');
 const { respond } = require('../../../../../../../utils/responder');
+const { singleFileUpload } = require('../../../../../multer');
 const { statusCodes } = require('../../../../../../../models/modelSettings.constants');
 const { validateMany } = require('../../../../../../common');
 
@@ -58,6 +58,6 @@ const validateRevisionUpload = async (req, res, next) => {
 	}
 };
 
-Drawings.validateNewRevisionData = validateMany([singleFileUpload('file', fileFilter(ACCEPTED_DRAWING_EXT), fileUploads.drawingSizeLimit, true), ensureFileIsValid, checkQuotaIsSufficient, validateRevisionUpload]);
+Drawings.validateNewRevisionData = validateMany([singleFileUpload('file', fileFilter(ACCEPTED_DRAWING_EXT), fileUploads.drawingSizeLimit, true), checkQuotaIsSufficient, validateRevisionUpload]);
 
 module.exports = Drawings;

@@ -40,7 +40,7 @@ Drawings.getDrawingList = async (teamspace, project, user) => {
 	return getModelList(teamspace, project, user, modelSettings);
 };
 
-Drawings.getDrawingStats = async (teamspace, drawing) => {
+Drawings.getDrawingStats = async (teamspace, project, drawing) => {
 	let latestRev;
 	let calibration;
 
