@@ -98,7 +98,7 @@ const singleFileUpload = (fileName = 'file', fileFilter, maxSize = uploadConfig.
 	}
 };
 
-MulterHelper.singleFileUpload = (fileName = 'file', fileFilter, maxSize = uploadConfig.uploadSizeLimit, storeInMemory = false) => singleFileUpload(
+MulterHelper.singleFileUpload = (fileName, fileFilter, maxSize, storeInMemory) => singleFileUpload(
 	fileName, fileFilter, maxSize, storeInMemory);
 
 MulterHelper.singleImageUpload = (fileName) => singleFileUpload(
