@@ -18,7 +18,7 @@
 import { formatMessage } from '@/v5/services/intl';
 import { ToolbarButton } from '@/v5/ui/routes/viewer/toolbar/buttons/toolbarButton.component';
 import { ToolbarContainer, MainToolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.styles';
-import { useEffect, useContext, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import ZoomOutIcon from '@assets/icons/viewer/zoom_out.svg';
 import ZoomInIcon from '@assets/icons/viewer/zoom_in.svg';
 
@@ -34,17 +34,29 @@ import { CalibrationInfoBox } from '@/v5/ui/routes/dashboard/projects/calibratio
 import CalibrationIcon from '@assets/icons/filled/calibration-filled.svg';
 import { ViewBoxType, ViewerLayer2D } from './viewerLayer2D/viewerLayer2D.component';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
+import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
+import { SVGImage } from './svgImage/svgImage.component';
+import { CentredContainer } from '@controls/centredContainer/centredContainer.component';
+import { Loader } from '@/v4/routes/components/loader/loader.component';
+import { isFirefox } from '@/v5/helpers/browser.helper';
+import { ZoomableImage } from './zoomableImage.types';
 
 const DEFAULT_VIEWBOX = { scale: 1, x: 0, y: 0, width: 0, height: 0 };
 export const Viewer2D = () => {
+	const [drawingId] = useSearchParam('drawingId');
+	const src = getDrawingImageSrc(drawingId);
+	
 	const { close2D } = useContext(ViewerCanvasesContext);
 	const { isCalibrating, step, vector2D, setVector2D, isCalibrating2D, setIsCalibrating2D } = useContext(CalibrationContext);
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
 	const [viewBox, setViewBox] = useState<ViewBoxType>(DEFAULT_VIEWBOX);
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
 
-	const imgRef = useRef<HTMLImageElement>();
+
+	const imgRef = useRef<ZoomableImage>();
 	const imgContainerRef = useRef();
 
 	const canCalibrate2D = isCalibrating && step === 1;
@@ -58,6 +70,8 @@ export const Viewer2D = () => {
 	};
 
 	const onImageLoad = () => {
+		setIsLoading(false);
+
 		if (zoomHandler) {
 			zoomHandler.dispose();
 		}
@@ -83,6 +97,12 @@ export const Viewer2D = () => {
 		});
 	}, [zoomHandler]);
 
+	useEffect(() => {
+		setIsLoading(true);
+	}, [drawingId]);
+
+	const showSVGImage = !isFirefox() && src.toLowerCase().endsWith('.svg');
+
 	return (
 		<ViewerContainer visible>
 			{step === 1 && (
@@ -99,7 +119,14 @@ export const Viewer2D = () => {
 			)}
 			{!isCalibrating && <CloseButton variant="secondary" onClick={close2D} />}
 			<ImageContainer ref={imgContainerRef}>
-				<DrawingViewerImage ref={imgRef} onLoad={onImageLoad} />
+				{
+					isLoading && 
+					<CentredContainer>
+						<Loader />
+					</CentredContainer>
+				}
+				{showSVGImage && <SVGImage ref={imgRef} src={src} onLoad={onImageLoad} />}
+				{!showSVGImage && <DrawingViewerImage ref={imgRef} src={src} onLoad={onImageLoad} />}
 				<ViewerLayer2D
 					active={isCalibrating2D}
 					viewBox={viewBox}
