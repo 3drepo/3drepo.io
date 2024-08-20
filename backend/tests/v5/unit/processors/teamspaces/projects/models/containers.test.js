@@ -307,7 +307,7 @@ const testGetContainerStats = () => {
 		['the container exists and some previous revision processing have failed', 'container4'],
 	])('Get container stats', (desc, container) => {
 		test(`should return the stats if ${desc}[${container}]`, async () => {
-			const res = await Containers.getContainerStats('teamspace', container);
+			const res = await Containers.getContainerStats('teamspace', 'project', container);
 			expect(res).toEqual(formatToStats(containerSettings[container], container === 'container2' ? 10 : 0, container === 'container2' ? container2Rev : {}));
 		});
 	});
