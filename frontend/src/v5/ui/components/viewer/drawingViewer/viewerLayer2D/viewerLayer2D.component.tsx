@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CSSProperties, useEffect, useRef, useState } from 'react';
-import { Container, LayerLevel, TransparentLayerLevel } from './viewerLayer2D.styles';
+import { CSSProperties, useContext, useEffect, useRef, useState } from 'react';
+import { Container, LayerLevel } from './viewerLayer2D.styles';
 import { isEqual } from 'lodash';
 import { SvgArrow } from './svgArrow/svgArrow.component';
 import { SvgCircle } from './svgCircle/svgCircle.component';
@@ -24,6 +24,7 @@ import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { Coord2D, Vector2D, ViewBoxType } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { PinsLayer } from '../pinsLayer/pinsLayer.component';
 import { PinsDropperLayer } from '../pinsDropperLayer/pinsDropperLayer.component';
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 
 type ViewerLayer2DProps = {
 	viewBox: ViewBoxType,
@@ -37,6 +38,7 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 	const previousViewBox = useRef<ViewBoxType>(null);
 	const [mousePosition, setMousePosition] = useState<Coord2D>(null);
 	const [drawingId] = useSearchParam('drawingId');
+	const { isCalibrating } = useContext(CalibrationContext);
 
 	const containerStyle: CSSProperties = {
 		transformOrigin: '0 0',
@@ -88,6 +90,10 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 	return (
 		<Container style={containerStyle}>
 			<LayerLevel>
+				{!isCalibrating && (<>
+					<PinsDropperLayer getCursorOffset={getCursorOffset} viewBox={viewBox} />
+					<PinsLayer scale={viewBox.scale} height={viewBox.height} width={viewBox.width} />
+				</>)}
 				{mousePosition && active && <SvgCircle coord={mousePosition} scale={viewBox.scale} />}
 				{offsetStart && <SvgArrow start={offsetStart} end={offsetEnd ?? mousePosition} scale={viewBox.scale} />}
 			</LayerLevel>
@@ -98,10 +104,6 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 					onMouseMove={handleMouseMove}
 				/>
 			)}
-			<TransparentLayerLevel>
-				<PinsDropperLayer getCursorOffset={getCursorOffset} viewBox={viewBox} />
-				<PinsLayer scale={viewBox.scale} height={viewBox.height} width={viewBox.width} />
-			</TransparentLayerLevel>
 		</Container>
 	);
 };
