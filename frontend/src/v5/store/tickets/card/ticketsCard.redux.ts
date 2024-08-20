@@ -122,10 +122,11 @@ export const setUnsavedTicket = (state: ITicketsCardState, { ticket }: SetUnsave
 	state.unsavedTicket = ticket;
 };
 
-export const resetState = ({ filters, readOnly }: ITicketsCardState) => ({
+export const resetState = ({ filters, readOnly, isShowingPins }: ITicketsCardState) => ({
 	...INITIAL_STATE,
 	filters,
 	readOnly,
+	isShowingPins,
 });
 
 export const setEditingGroups = (state: ITicketsCardState, { isEditing }: SetEditingGroupsAction) => {

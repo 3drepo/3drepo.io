@@ -56,7 +56,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 
 	useEffect(() => {
 		if (!selectedPinId) return;
-		ViewerService.setSelectionPin({ id: selectedPinId, isSelected: isShowingPins ?? true });
+		ViewerService.setSelectionPin({ id: selectedPinId, isSelected: isShowingPins });
 	}, [selectedPinId, isShowingPins]);
 
 	useEffect(() => {
