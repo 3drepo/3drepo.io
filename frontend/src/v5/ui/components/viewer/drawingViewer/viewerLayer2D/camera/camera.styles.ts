@@ -20,7 +20,11 @@ import styled from 'styled-components';
 
 export const CameraIcon = styled(CameraSVG)`
 	color: ${({ theme }) => theme.palette.primary.main};
+	overflow: unset;
+	transform-origin: 0 0;
+	cursor:grab; 
 `;
 export const CameraOffSightIcon = styled(CameraOffSightSVG)`
 	color: ${({ theme }) => theme.palette.primary.main};
+	transform-origin: 0 0;
 `;

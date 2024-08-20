@@ -104,10 +104,6 @@ export const selectCalibration = createSelector(
 	(state, drawingId, modelId) => selectContainerById(state, modelId) || selectFederationById(state, modelId),
 	(drawing, model) => {
 		const calibration = drawing?.calibration || EMPTY_CALIBRATION as any;
-
-		// console.log(JSON.stringify({calibration}, null, '\t'));
-		
-		
 		const conversionFactor = getUnitsConversionFactor(calibration?.units, model.unit);
 		const horizontalCalibration = calibration.horizontal || EMPTY_CALIBRATION.horizontal;
 		return {

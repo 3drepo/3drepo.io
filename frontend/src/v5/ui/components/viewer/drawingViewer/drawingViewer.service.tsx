@@ -14,8 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import EventEmitter from 'eventemitter3';
 import { domToPng } from 'modern-screenshot';
 
 type GetScreenshot = () => null | Promise<string>;
@@ -25,12 +23,7 @@ const DrawingViewerServiceCreator = () => {
 	const getScreenshot: GetScreenshot = () => imgContainer ? domToPng(imgContainer) : null;
 	const setImgContainer = (newImgContainer) => { imgContainer = newImgContainer; };
 	
-	const emitter:EventEmitter<string> =  new EventEmitter();
-
 	return {
-		on: emitter.on.bind(emitter),
-		off: emitter.off.bind(emitter),
-		emit: emitter.emit.bind(emitter), 
 		getScreenshot,
 		setImgContainer,
 	};

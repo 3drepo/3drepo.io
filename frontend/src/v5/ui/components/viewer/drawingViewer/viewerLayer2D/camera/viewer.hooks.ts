@@ -34,11 +34,10 @@ const onViewpointChangeCallbacks:((viewpoint:any) => void)[] = [];
 let animationFrameID = 0;
 
 const onEnterFrame = async () => {
-	const v = await ViewerService.getCurrentViewpointInfo();
+	viewpoint = await ViewerService.getCurrentViewpointInfo();
 	animationFrameID = requestAnimationFrame(onEnterFrame);
 
-	viewpoint = v;
-	onViewpointChangeCallbacks.forEach((callback)=> callback(v));
+	onViewpointChangeCallbacks.forEach((callback)=> callback(viewpoint));
 };
 
 const subscribeToViewpointChange = (callback) => {

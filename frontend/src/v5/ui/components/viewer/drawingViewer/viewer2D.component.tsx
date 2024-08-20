@@ -123,6 +123,7 @@ export const Viewer2D = () => {
 					value={vector2D}
 					viewport={viewport}
 					onChange={setVector2D}
+					cameraEnabled={!isCalibrating}
 				/>
 			</ImageContainer>
 			<ToolbarContainer>

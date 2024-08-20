@@ -93,5 +93,5 @@ export const CameraOffSight = ({ onCameraSightChanged, viewport, scale }: Props)
 		return null;
 	}
 
-	return (<CameraOffSightIcon  style={{ transform: `translate(${position.x}px, ${position.y}px) `, transformOrigin: '0 0' }} arrowAngle={angle}/>);
+	return (<CameraOffSightIcon  style={{ transform: `translate(${position.x}px, ${position.y}px) ` }} arrowAngle={angle}/>);
 };

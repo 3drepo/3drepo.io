@@ -44,8 +44,8 @@ export const Camera = ({ scale }) => {
 	useViewpointSubscription((v) => {
 		if (!transform3DTo2D) return;
 
-		const p =  transform3DTo2D(v.position);
-		setPosition(p);
+		const newPosition =  transform3DTo2D(v.position);
+		setPosition(newPosition);
 
 		const v3 = new Vector3(...v.view_dir);
 	
@@ -60,7 +60,7 @@ export const Camera = ({ scale }) => {
 		setHaloVisibility(halo);
 
 		const lookat = transform3DTo2D([v.position[0] + v.view_dir[0], v.position[1] + v.view_dir[1], v.position[2] + v.view_dir[2]]);
-		lookat.sub(p);
+		lookat.sub(newPosition);
 
 		setAngle(lookat.angle());
 		viewpoint.current = v;
@@ -79,15 +79,15 @@ export const Camera = ({ scale }) => {
 		const point = getCursorOffset(ev);
 
 
-		const pp =  transform2DTo3D(point);
+		const newPosition =  transform2DTo3D(point);
 		const {
 			up,
 			// eslint-disable-next-line @typescript-eslint/naming-convention
 			view_dir,
-			position:pos, type } = viewpoint.current;
+			position: pos, type } = viewpoint.current;
 
 		const cam = {
-			position: [pp.x,  pos[1], pp.y ],
+			position: [newPosition.x,  pos[1], newPosition.y ],
 			view_dir,
 			up,
 			type, 
@@ -117,5 +117,5 @@ export const Camera = ({ scale }) => {
 		return null;
 	}
 
-	return (<CameraIcon onMouseDown={onMouseDown} haloVisibility={haloVisibility} style={{ transform: `translate(${position.x}px, ${position.y}px) scale(${1 / scale}) rotate(${angle}rad)`, overflow:'unset', cursor:'grab', transformOrigin: '0 0' }}/>);
+	return (<CameraIcon onMouseDown={onMouseDown} haloVisibility={haloVisibility} style={{ transform: `translate(${position.x}px, ${position.y}px) scale(${1 / scale}) rotate(${angle}rad)` }}/>);
 };
