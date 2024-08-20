@@ -143,6 +143,7 @@ Queue.queueMessage = async (queueName, correlationId, msg) => {
 	const dataBuf = Buffer.from(msg);
 	const meta = { correlationId, persistent: true };
 
+	logger.logInfo(`Sending message to ${queueName}: [${correlationId}] ${msg}`);
 	await channel.sendToQueue(queueName, dataBuf, meta);
 	await channel.close();
 };
