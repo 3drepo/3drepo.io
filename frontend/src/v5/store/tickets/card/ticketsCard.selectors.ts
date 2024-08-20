@@ -59,6 +59,10 @@ export const selectIsEditingGroups = createSelector(
 	(ticketCardState) => ticketCardState.isEditingGroups,
 );
 
+export const selectPinToDrop = createSelector(
+	selectTicketsCardDomain,
+	(ticketCardState) => ticketCardState.pinToDrop,
+);
 
 export const selectSelectedTicketId = createSelector(
 	selectTicketsCardDomain,
