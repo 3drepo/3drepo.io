@@ -58,7 +58,7 @@ const imageFilter = (req, file, cb) => {
 	cb(null, true);
 };
 
-const isValidExtention = async (buffer, fileName, isImage) => {
+const isValidExtension = async (buffer, fileName, isImage) => {
 	const ext = await fileExtensionFromBuffer(buffer);
 
 	let extValid;
@@ -78,7 +78,7 @@ const singleFileUpload = (fileName = 'file', fileFilter, maxSize = uploadConfig.
 		await singleFileMulterPromise(req, fileName, fileFilter, maxSize, storeInMemory);
 		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
 
-		if (!await isValidExtention(req.file.buffer, req.file.originalname, isImage)) {
+		if (!await isValidExtension(req.file.buffer, req.file.originalname, isImage)) {
 			throw templates.unsupportedFileFormat;
 		}
 
