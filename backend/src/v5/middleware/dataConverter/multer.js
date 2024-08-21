@@ -58,30 +58,22 @@ const imageFilter = (req, file, cb) => {
 	cb(null, true);
 };
 
-const isValidExtension = async (buffer, fileName, isImage) => {
-	const ext = await fileExtensionFromBuffer(buffer);
+const fileMatchesExt = async (buffer, fileName) => {
+	const fileExt = Path.extname(fileName).toLowerCase().substring(1);
+	const bufferType = await fileExtensionFromBuffer(buffer);
+	const extToCheck = [...uploadConfig.imageExtensions, 'pdf'];
 
-	let extValid;
-
-	if (isImage) {
-		extValid = uploadConfig.imageExtensions.includes(ext);
-	} else {
-		// currently only checks pdf files
-		const filenameExt = Path.extname(fileName).toLowerCase();
-		extValid = filenameExt !== '.pdf' || filenameExt === `.${ext}`;
-	}
-	return extValid;
+	return extToCheck.includes(fileExt) ? fileExt === bufferType : true;
 };
 
-const singleFileUpload = (fileName = 'file', fileFilter, maxSize = uploadConfig.uploadSizeLimit, storeInMemory = false, isImage) => async (req, res, next) => {
+MulterHelper.singleFileUpload = (fileName = 'file', fileFilter, maxSize = uploadConfig.uploadSizeLimit, storeInMemory = false) => async (req, res, next) => {
 	try {
 		await singleFileMulterPromise(req, fileName, fileFilter, maxSize, storeInMemory);
 		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
 
-		if (!await isValidExtension(req.file.buffer, req.file.originalname, isImage)) {
+		if (!await fileMatchesExt(req.file.buffer, req.file.originalname)) {
 			throw templates.unsupportedFileFormat;
 		}
-
 		await next();
 	} catch (err) {
 		let response = err;
@@ -98,10 +90,7 @@ const singleFileUpload = (fileName = 'file', fileFilter, maxSize = uploadConfig.
 	}
 };
 
-MulterHelper.singleFileUpload = (fileName, fileFilter, maxSize, storeInMemory) => singleFileUpload(
-	fileName, fileFilter, maxSize, storeInMemory);
-
-MulterHelper.singleImageUpload = (fileName) => singleFileUpload(
-	fileName, imageFilter, uploadConfig.imageSizeLimit, true, true);
+MulterHelper.singleImageUpload = (fileName) => MulterHelper.singleFileUpload(
+	fileName, imageFilter, uploadConfig.imageSizeLimit, true);
 
 module.exports = MulterHelper;
