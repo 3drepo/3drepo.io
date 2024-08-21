@@ -33,26 +33,46 @@ class CubicPolynomial {
 }
 
 /**
- * RootFinder isolates values of t, where Q is at a local minimum. */
+ * RootFinder isolates values of t, where Q is at a local minimum.
+ *
+ * This implementation is based on:
+ * Fabrice Rouillier & Paul Zimmermann. Efficient isolation of polynomial's real roots. Journal of Computational and Applied Mathematics (2004)
+ * Xiao-Diao Chen, Yin Zhou, Zhenyu Shu, Hua Su & Jean-Claude Paul. Improved Algebraic Algorithm On Point Projection For Bézier Curves. Proceedings of the Second International Multi-Symposiums on Computer and Computational Sciences (2007)
+ * Jingfang Zhou, Evan C. Sherbrooke & Nicholas M. Patrikalakis. Computation of stationary points of distance functions. Engineering with Computers. (1993)
+ *
+ * The basis of the algorithm is to transform the point and curve distance
+ * function into a quintic polynomial. In this form the roots - which should
+ * correspond the local minima of the distance - can be isolated and then
+ * robustly resolved with a simple interative bisection.
+ *
+ * (Note that RootFinder explicitly filters root intervals that do not
+ * contain local minima. While it can be used as a general purpose
+ * root finder for other problems, it will require modifications to stop
+ * it filtering other roots.)
+ *
+ * In slightly more detail, the algorithm takes the approach based on
+ * Vincents Theorem. The polynomial is bisected into intervals, and then
+ * transformed in such a way that Descartes Rule-of-Signs will give the
+ * a bound on the number of roots in that interval (between 0 and 1).
+ * The search works by transforming a polynomial representing an interval
+ * into another, in place - so it is memory constant. The traversal order
+ * is chosen such that transforming between adjacent intervals need only a
+ * couple of operations with mostly known parameters, allowing them to be
+ * implemented using basic arithmetic on the coefficients.
+ * */
 class RootFinder {
 
-	Qp: QuinticPolynomial;
-
 	Q: QuinticPolynomial; // The polynomial we are finding the roots of
+
+	Qp: QuinticPolynomial; // The polynomial Pkc(Q) for qk and qc below
 
 	qk: number; // Current value of k for the polynomial Qp
 
 	qc: number; // Current value of c for the polynomial Qp
 
-	intervals: any[]; // Intervals in the form Ikc
-
-	roots: number[]; // True roots of the polynomial
-
-	T: any[]; // Pairs of kc to examine
+	roots: any[]; // True roots of the polynomial
 
 	findRoots(q: QuinticPolynomial) {
-		this.intervals = [];
-		this.T = [];
 		this.roots = [];
 		this.Q = q; // This is safe to assign as a reference as it should never change
 		this.qk = 0;
@@ -66,7 +86,6 @@ class RootFinder {
 			q.a0,
 		);
 
-		//this.insert(0, 0);
 		this.isolateRoots(0, 0);
 	}
 
@@ -112,7 +131,7 @@ class RootFinder {
 
 	/**
 	 * Apply the transform H(T(P(x),1),h) - this is the equivalent of
-	 * Pkc -> Pkc' where k' = k + 1, and c' = (c + 1)*2^k
+	 * Pkc -> Pkc' where k' = k + 1, and c' = (c + 1)*2^k.
 	 */
 	HTranslate(h: number) {
 
@@ -126,8 +145,6 @@ class RootFinder {
 		const a3 = this.Qp.a3;
 		const a4 = this.Qp.a4;
 		const a5 = this.Qp.a5;
-
-		// Collect some repeated terms so we don't calculate them twice.
 
 		const h5 = Math.pow(2, (5 * h));
 		const h4 = Math.pow(2, (4 * h));
@@ -169,34 +186,39 @@ class RootFinder {
 	}
 
 	isolateRoots(k, c) {
-		//while (this.T.length > 0) {
-
-		// Pop the lowest node k,c from T given the ordering <back.
-
-		//const { k, c } = this.pop();
-
 		// Check if theres an actual change in k or c - there won't be for the
 		// first node, for example.
 
 		if (k != this.qk || c != this.qc) {
 
-			// Update Q through the transformation Pkc -> Pkc'. The traversal
-			// is chosen to ensure only a subset of operations are needed.
+			// Update Qp through the transformation Pkc -> Pkc'. The depth first
+			// traversal means only one of a subset of operations are needed at
+			// each step. k and c always change together, so work out which
+			// transformation we need to apply based on k.
 
 			const dk = k - this.qk;
 
-			// (Note below that the parameters to H & HTranslate are reversed!)
-			if (c == (this.qc + 1) * Math.pow(2, dk)) { // If we've stepped c, we need to use HTranslate, otherwise we use H
-				this.HTranslate(this.qk - k);
-			} else if (c == (this.qc * Math.pow(2, dk))) { // We've stepped k, use H only
-				this.H(k - this.qk);
-			} else { // This is to detect issues in the traversal and should not occur
-				console.error('Depth first traversal has stepped k or c by an invalid amount');
+			// The difference between H & HTranslate is that HTranslate includes
+			// a Taylor Shift of one, before H. This changes how c behaves when
+			// h is applied. For example, because k and c are interrelated, if we
+			// wanted to go from 2,1 to 1,1, HTranslate would be used, not H. This
+			// is because each H(-1) divides c by two, so we actually need
+			// T(1) -> c = c + 1 = 2, k = k + 0 = 2
+			// then,
+			// H(-1) -> c = c * 0.5 = 1, k = k - 1 = 1
+			// in that order, which can be achived with HTranslate.
+
+			if (c == (this.qc + 1) * Math.pow(2, dk)) {
+				this.HTranslate(-dk);
+			} else if (c == (this.qc * Math.pow(2, dk))) {
+				this.H(dk);
+			} else {
+				console.error('Depth first traversal has stepped k or c by an invalid amount'); // This is to detect issues in the traversal and should not occur
 				return;
 			}
 		}
 
-		// We have now updated Pkc, and can use it to count the number of
+		// We have now updated Qp to be Pkc', and can use it to count the number of
 		// roots in this interval.
 
 		const numRoots = this.countRoots();
@@ -224,9 +246,6 @@ class RootFinder {
 
 			this.isolateRoots(k + 1, 2 * c);
 			this.isolateRoots(k + 1, (2 * c) + 1);
-
-			//this.insert(k + 1, 2 * c);
-			//this.insert(k + 1, (2 * c) + 1);
 		}
 
 		// (The case where numRoots is zero, means we have finished this branch)
@@ -241,54 +260,41 @@ class RootFinder {
 		return (c + 1) / Math.pow(2, k);
 	}
 
-	/** Add k,c to T, such that the pair is ordered by <back. */
-	insert(k, c) {
-		const node = {
-			k,
-			c,
-			f: c / Math.pow(2, k),
-		};
-		let i = 0;
-		/*
-		for (; i < this.T.length; i++) {
-			const nodei = this.T[i];
-			if (node.f < nodei.f) {
-				this.T.splice(i, 0, node);
-				return;
-			} else if (node.f == nodei.f) {
-				if (node.k < nodei.k) {
-					this.T.splice(i, 0, node);
-					return;
-				}
-			}
-		}
-		*/
-		this.T.push(node);
-	}
-
-	pop(): { k: number, c: number } {
-		const kc = this.T[0];
-		this.T.splice(0, 1);
-		return kc;
-	}
-
-	exactRoots() {
-		for (const { k, c } of this.intervals) {
-			this.findRoot(k, c);
-		}
-	}
-
 	/** Given a bound as kc, find the actual root of Q within the interval. */
 	findRoot(k, c) {
 		// Based on the observation of Chen et al, we only actually care about
 		// roots that correspond to local minima, which can be identified when
-		// Q is descending. Note that Q is inverted.
-		const a = this.getLowerBound(k, c);
-		const b = this.getUpperBound(k, c);
-		const Qa = this.Q.evaluate(a);
-		const Qb = this.Q.evaluate(b);
+		// Q is descending.
+		let ai = this.getLowerBound(k, c);
+		let bi = this.getUpperBound(k, c);
+		const Qa = this.Q.evaluate(ai);
+		const Qb = this.Q.evaluate(bi);
 		if (Qa > 0 && Qb < 0) {
-			this.intervals.push({ k, c });
+			let ri = 0;
+			let i = 0;
+			for (i = 0; i < 100; i++) { // Maximum limit on iteration, though we'd hope to get to the end before then...
+				if ((bi - ai) < 0.001) {
+					ri = (bi + ai) / 2;
+					break;
+				}
+
+				const mi = (ai + bi) / 2; // interval midpoint
+
+				const Qm = this.Q.evaluate(mi);
+				if (Math.abs(Qm) < Number.EPSILON) {
+					ri = mi;
+					break;
+				} else if (Qm > 0) {
+					ai = mi;
+				} else if (Qm < 0) {
+					bi = mi;
+				}
+			}
+
+			this.roots.push({
+				u: ri,
+				iterations: i,
+			});
 		}
 	}
 }
@@ -412,13 +418,13 @@ class CubicBezier {
 		// coefficients. The coefficients for each power can simply be added
 		// when it comes time to evaluate p-q.q'
 
+		const start = performance.now();
+
 		const b2 = Vector2.dot(p, j);
 		const b1 = Vector2.dot(p, k);
 		const b0 = Vector2.dot(p, m);
 
 		const Q = new QuinticPolynomial(a5, a4, a3, a2 + b2, a1 + b1, a0 + b0);
-
-		//const Q = new QuinticPolynomial(-600000, 1740000, -1399200, 93000, 155640, -17160);
 
 		// We now have coefficients for a univariate polynomial, Q. Find the roots
 		// within the range 0..1 to get potential closest points.
@@ -426,16 +432,32 @@ class CubicBezier {
 		const f = new RootFinder();
 		f.findRoots(Q);
 
+		console.log('Test time ' + (performance.now() - start));
+
 		for (let t = 0; t <= 1; t += (1 / 20)) {
 			qs.push([t, Q.evaluate(t)]);
 			ps.push([t, this.distance(p, t)]);
 		}
 
-		helper.renderText('Num Roots ' + (f.intervals.length + f.roots.length), 100, 500);
+		helper.renderText('Num Roots ' + (f.roots.length), 100, 500);
 
 		// Check all the roots
 
-		return this.evaluate(0);
+		if (f.roots.length == 0) {
+			return this.evaluate(0);
+		} else {
+			let closestPoint = this.evaluate(0);
+			let closestDistance = Vector2.norm(closestPoint, p);
+			for (const root of f.roots) {
+				let q = this.evaluate(root.u);
+				const d = Vector2.norm(q, p);
+				if (d < closestDistance) {
+					closestDistance = d;
+					closestPoint = q;
+				}
+			}
+			return closestPoint;
+		}
 	}
 
 	evaluate(t: number) {
@@ -476,7 +498,7 @@ class CubicBezier {
 
 const C = new CubicBezier(
 	new Vector2(100, 100),
-	new Vector2(100, 60),
+	new Vector2(100, 80),
 	new Vector2(300, 200),
 	new Vector2(300, 320),
 );
