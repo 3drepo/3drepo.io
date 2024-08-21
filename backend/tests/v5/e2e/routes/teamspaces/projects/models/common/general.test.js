@@ -182,8 +182,13 @@ const addTickets = async (teamspace, project, model) => {
 	model.ticketCount = 5;
 };
 
-const addRevision = async (teamspace, model, modelType) => {
-	const rev = ServiceHelper.generateRevisionEntry(false, false, modelType);
+const addRevision = async (teamspace, model, modelType, hasFiles = false) => {
+	const rev = ServiceHelper.generateRevisionEntry(false, hasFiles, modelType);
+	if (hasFiles) {
+		/* eslint-disable-next-line no-param-reassign */
+		model.files = model.files ?? [];
+		model.files.push({ refData: rev.refData, thumbnailData: rev.thumbnailData, imageData: rev.imageData });
+	}
 	await ServiceHelper.db.createRevision(teamspace, model._id, rev, modelType);
 
 	/* eslint-disable-next-line no-param-reassign */
@@ -952,6 +957,57 @@ const testGetSettings = () => {
 	});
 };
 
+const testGetThumbnail = () => {
+	describe('Get drawing thumbnail', () => {
+		const { users, teamspace, project, draw, fed } = generateBasicData();
+		const drawNoRev = ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING });
+
+		beforeAll(async () => {
+			const models = [draw, drawNoRev, fed];
+			await setupBasicData(users, teamspace, project, models);
+			await addRevision(teamspace, draw, modelTypes.DRAWING, true);
+		});
+
+		const generateTestData = () => {
+			const model = draw;
+			const wrongTypeModel = fed;
+			const modelNotFound = templates.drawingNotFound;
+
+			const getRoute = ({
+				projectId = project.id,
+				key = users.tsAdmin.apiKey,
+				modelId = model._id,
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/drawings/${modelId}/thumbnail${key ? `?key=${key}` : ''}`;
+
+			return [
+				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				['the user does not have access to the drawing', getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
+				['the drawing does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
+				['the model is not a drawing', getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
+				['!!! the drawing has a thumbnail and user has access', getRoute(), true, model],
+				['the drawing does not have a thumbnail and user has access', getRoute({ modelId: drawNoRev._id }), false, templates.fileNotFound],
+			];
+		};
+
+		const runTest = (desc, route, success, expectedOutput) => {
+			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+				const res = await agent.get(route).expect(expectedStatus);
+				if (success) {
+					expect(res.body.toString()).toEqual(
+						expectedOutput.files[expectedOutput.files.length - 1].thumbnailData);
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
+
+		describe.each(generateTestData())('Drawings', runTest);
+	});
+};
+
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -966,4 +1022,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	testDeleteModel();
 	testUpdateModelSettings();
 	testGetSettings();
+	testGetThumbnail();
 });
