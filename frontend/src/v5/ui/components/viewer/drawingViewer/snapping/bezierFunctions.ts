@@ -164,8 +164,8 @@ class RootFinder {
 		this.Qp.a1 = h4 * (a1 + 2 * a2 + 3 * a3 + 4 * a4 + 5 * a5);
 		this.Qp.a0 = h5 * (a0 + a1 + a2 + a3 + a4 + a5);
 
-		this.qk = this.qk + -h;
-		this.qc = (this.qc + 1) * Math.pow(2, -h);
+		this.qk = this.qk + h;
+		this.qc = (this.qc + 1) * Math.pow(2, h);
 	}
 
 	/**
@@ -209,7 +209,7 @@ class RootFinder {
 			// in that order, which can be achived with HTranslate.
 
 			if (c == (this.qc + 1) * Math.pow(2, dk)) {
-				this.HTranslate(-dk);
+				this.HTranslate(dk);
 			} else if (c == (this.qc * Math.pow(2, dk))) {
 				this.H(dk);
 			} else {
@@ -496,12 +496,53 @@ class CubicBezier {
 	}
 }
 
+
+const C = new CubicBezier(
+	new Vector2(100, 50),
+	new Vector2(100, 200),
+	new Vector2(100, 50),
+	new Vector2(300, 50),
+);
+
+
+// U Bend
+/*
+const C = new CubicBezier(
+	new Vector2(100, 50),
+	new Vector2(100, 200),
+	new Vector2(300, 300),
+	new Vector2(300, 50),
+);
+*/
+
+// Crossing S curve
+/*
+const C = new CubicBezier(
+	new Vector2(100, 50),
+	new Vector2(100, 200),
+	new Vector2(300, 50),
+	new Vector2(300, 300),
+);
+*/
+
+
+/* Cusp
+const C = new CubicBezier(
+	new Vector2(100, 150),
+	new Vector2(300, 150),
+	new Vector2(150, 300),
+	new Vector2(150, 50),
+);
+*/
+
+/*
 const C = new CubicBezier(
 	new Vector2(100, 100),
-	new Vector2(100, 80),
-	new Vector2(300, 200),
-	new Vector2(300, 320),
+	new Vector2(300, 100),
+	new Vector2(100, 300),
+	new Vector2(100, 100),
 );
+*/
 
 export function setupIntersectionTest(helper: SVGSnapDiagnosticsHelper) {
 
