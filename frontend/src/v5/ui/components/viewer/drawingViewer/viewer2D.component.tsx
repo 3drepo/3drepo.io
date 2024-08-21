@@ -127,12 +127,12 @@ export const Viewer2D = () => {
 				}
 				{showSVGImage && <SVGImage ref={imgRef} src={src} onLoad={onImageLoad} />}
 				{!showSVGImage && <DrawingViewerImage ref={imgRef} src={src} onLoad={onImageLoad} />}
-				<ViewerLayer2D
+				{ !isLoading && (<ViewerLayer2D
 					active={isCalibrating2D}
 					viewBox={viewBox}
 					value={vector2D}
 					onChange={setVector2D}
-				/>
+				/>)}
 			</ImageContainer>
 			<ToolbarContainer>
 				<MainToolbar>
