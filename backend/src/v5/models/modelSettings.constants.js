@@ -93,4 +93,33 @@ ModelSettingConstants.MODEL_CATEGORIES = [
 	'Other',
 ];
 
+ModelSettingConstants.statusCodes = [
+	{ code: 'S0', description: 'Initial status' },
+	{ code: 'S1', description: 'Suitable for coordination' },
+	{ code: 'S2', description: 'Suitable for information' },
+	{ code: 'S3', description: 'Suitable for review and comment' },
+	{ code: 'S4', description: 'Suitable for stage approval' },
+	{ code: 'S6', description: 'Suitable for PIM authorization' },
+	{ code: 'S7', description: 'Suitable for AIM authorization' },
+	{ code: 'A1', description: 'Authorized and accepted' },
+	{ code: 'A2', description: 'Authorized and accepted' },
+	{ code: 'A3', description: 'Authorized and accepted' },
+	{ code: 'A4', description: 'Authorized and accepted' },
+	{ code: 'A5', description: 'Authorized and accepted' },
+	{ code: 'A6', description: 'Authorized and accepted' },
+	{ code: 'A7', description: 'Authorized and accepted' },
+	{ code: 'A8', description: 'Authorized and accepted' },
+	{ code: 'A9', description: 'Authorized and accepted' },
+	{ code: 'B1', description: 'Partial sign-off (with comments)' },
+	{ code: 'B2', description: 'Partial sign-off (with comments)' },
+	{ code: 'B3', description: 'Partial sign-off (with comments)' },
+	{ code: 'B4', description: 'Partial sign-off (with comments)' },
+	{ code: 'B5', description: 'Partial sign-off (with comments)' },
+	{ code: 'B6', description: 'Partial sign-off (with comments)' },
+	{ code: 'B7', description: 'Partial sign-off (with comments)' },
+	{ code: 'B8', description: 'Partial sign-off (with comments)' },
+	{ code: 'B9', description: 'Partial sign-off (with comments)' },
+	{ code: 'CR', description: 'As constructed record document' },
+];
+
 module.exports = ModelSettingConstants;

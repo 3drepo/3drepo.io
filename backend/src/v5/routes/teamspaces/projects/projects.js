@@ -138,6 +138,16 @@ const getDrawingCategories = (req, res) => {
 	}
 };
 
+const getStatusCodes = (req, res) => {
+	try {
+		const statusCodes = Projects.getStatusCodes();
+		respond(req, res, templates.ok, { statusCodes });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 
@@ -442,7 +452,8 @@ const establishRoutes = () => {
 	* /teamspaces/{teamspace}/projects/{project}/settings/drawingCategories:
 	*   get:
 	*     description: Get the list of drawing categories available within the project
-	*     tags: [Teamspaces]
+	*     tags: [Projects]
+	*     operationId: getDrawingCategories
 	*     parameters:
 	*       - name: teamspace
 	*         description: name of teamspace
@@ -450,7 +461,13 @@ const establishRoutes = () => {
 	*         required: true
 	*         schema:
 	*           type: string
-	*     operationId: getDrawingCategories
+	*       - name: project
+	*         description: Id of the project
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*           format: uuid
 	*     responses:
 	*       401:
 	*         $ref: "#/components/responses/notLoggedIn"
@@ -468,6 +485,54 @@ const establishRoutes = () => {
 	*                   example: ["Architectural", "Existing", "GIS"]
 	*/
 	router.get('/:project/settings/drawingCategories', isAdminToProject, getDrawingCategories);
+
+	/**
+	* @openapi
+	* /teamspaces/{teamspace}/projects/{project}/settings/statusCodes:
+	*   get:
+	*     description: Get the list of status codes available within the project
+	*     tags: [Projects]
+	*     operationId: getStatusCodes
+	*     parameters:
+	*       - name: teamspace
+	*         description: name of teamspace
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*       - name: project
+	*         description: Id of the project
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*           format: uuid
+	*     responses:
+	*       401:
+	*         $ref: "#/components/responses/notLoggedIn"
+	*       200:
+	*         description: returns the array of status codes
+	*         content:
+	*           application/json:
+	*             schema:
+	*               type: object
+	*               properties:
+	*                 statusCodes:
+	*                   type: array
+	*                   items:
+	*                     type: object
+	*                     properties:
+	*                       code:
+	*                         type: string
+	*                         description: The status code
+	*                         example: S1
+	*                       description:
+	*                         type: string
+	*                         description: Suitable for coordinationn
+	*                         example: S1
+	*             example: [ { code: "S0", description: "Initial status" }, { code: "S1", description: "Suitable for coordination" }]
+	*/
+	router.get('/:project/settings/statusCodes', hasAccessToTeamspace, projectExists, getStatusCodes);
 
 	return router;
 };

@@ -38,6 +38,8 @@ const { stringToUUID, UUIDToString, generateUUID } = require(`${src}/utils/helpe
 const { count, findOne, insertMany } = require(`${src}/handler/db`);
 const Path = require('path');
 
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+
 const RemoveIncompleteRevisions = require(`${utilScripts}/scene/removeIncompleteRevisions`);
 
 const findRefs = async (teamspace, collection, ids) => {
@@ -83,16 +85,18 @@ const generateStashData = async (teamspace, model, rId) => {
 	return { objCount: allObjs.length, links: await findRefs(teamspace, stashCol, refs) };
 };
 
-const generateRevision = async (teamspace, model, incomplete, timestamp, { noRFile, hasSequence, stash } = { }) => {
-	const rev = { ...generateRevisionEntry(false, !noRFile), timestamp };
+const generateRevision = async (teamspace, model, incomplete, timestamp, modelType,
+	{ noRFile, hasSequence, stash } = { }) => {
+	const rev = { ...generateRevisionEntry(false, !noRFile, modelType), timestamp };
 	const rid = stringToUUID(rev._id);
 
 	if (incomplete) {
 		rev.incomplete = 2;
 	}
-	const retVal = { teamspace, model, revision: { rev: { ...rev, _id: rid } } };
 
-	await createRevision(teamspace, model, rev);
+	const retVal = { teamspace, model, modelType, revision: { rev: { ...rev, _id: rid } } };
+
+	await createRevision(teamspace, model, rev, modelType);
 
 	if (hasSequence) {
 		retVal.sequence = await generateSequence(teamspace, model, rid);
@@ -108,9 +112,12 @@ const generateRevision = async (teamspace, model, incomplete, timestamp, { noRFi
 
 const setupData = async () => {
 	const teamspace = generateRandomString();
-	const model = generateRandomString();
-	const modelNoIncomplete = generateRandomString();
-	const modelNoSpecialCase = generateRandomString();
+	const con = generateRandomString();
+	const conNoIncomplete = generateRandomString();
+	const conNoSpecialCase = generateRandomString();
+	const draw = generateRandomString();
+	const drawNoIncomplete = generateRandomString();
+	const drawNoSpecialCase = generateRandomString();
 
 	const adjustDate = (dateDiff) => {
 		const date = new Date();
@@ -128,22 +135,34 @@ const setupData = async () => {
 	await Promise.all(
 		dateSets.map(async (dateDiff) => {
 			const date = adjustDate(dateDiff);
-			const [badRev1, badRev2, badRev3, ...goodRevs] = await Promise.all([
-				generateRevision(teamspace, model, true, date),
-				generateRevision(teamspace, model, true, date, { noRFile: true, hasSequence: true, stash: true }),
-				generateRevision(teamspace, modelNoSpecialCase, true, date),
-				generateRevision(teamspace, model, false, date),
-				generateRevision(teamspace, modelNoIncomplete, false, date),
+			const [badConRev1, badConRev2, badConRev3, ...goodConRevs] = await Promise.all([
+				generateRevision(teamspace, con, true, date, modelTypes.CONTAINER),
+				generateRevision(teamspace, con, true, date, modelTypes.CONTAINER,
+					{ noRFile: true, hasSequence: true, stash: true }),
+				generateRevision(teamspace, conNoSpecialCase, true, date, modelTypes.CONTAINER),
+				generateRevision(teamspace, con, false, date, modelTypes.CONTAINER),
+				generateRevision(teamspace, conNoIncomplete, false, date, modelTypes.CONTAINER),
 			]);
-			completedRevs.push(...goodRevs);
-			failedRevs[dateDiff].push(badRev1, badRev2, badRev3);
+
+			completedRevs.push(...goodConRevs);
+			failedRevs[dateDiff].push(badConRev1, badConRev2, badConRev3);
+
+			const [badDrawRev1, badDrawRev2, badDrawRev3, ...goodDrawRevs] = await Promise.all([
+				generateRevision(teamspace, draw, true, date, modelTypes.DRAWING),
+				generateRevision(teamspace, draw, true, date, modelTypes.DRAWING, { noRFile: true }),
+				generateRevision(teamspace, drawNoSpecialCase, true, date, modelTypes.DRAWING),
+				generateRevision(teamspace, draw, false, date, modelTypes.DRAWING),
+				generateRevision(teamspace, drawNoIncomplete, false, date, modelTypes.DRAWING),
+			]);
+
+			completedRevs.push(...goodDrawRevs);
+			failedRevs[dateDiff].push(badDrawRev1, badDrawRev2, badDrawRev3);
 		}),
 	);
 
 	return {
 		completedRevs,
 		failedRevs,
-
 	};
 };
 
@@ -154,8 +173,10 @@ const checkFileExists = (filePaths, shouldExist) => {
 };
 
 const checkRevisionsExist = async (revisions, shouldExist) => {
-	const checkRevision = async ({ teamspace, model, revision: { rev, links }, stash, sequence }) => {
-		const revFound = await getRevisionByIdOrTag(teamspace, model, rev._id, { _id: 1 }).catch(() => false);
+	const checkRevision = async ({ teamspace, model, modelType, revision: { rev, links }, stash, sequence }) => {
+		const revFound = await getRevisionByIdOrTag(teamspace, model, modelType,
+			rev._id, { _id: 1 }).catch(() => false);
+
 		expect(!!revFound).toEqual(shouldExist);
 		if (links.length) checkFileExists(links, shouldExist);
 
