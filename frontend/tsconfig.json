@@ -1,10 +1,9 @@
 {
   "compilerOptions": {
-	  "isolatedModules": true,
+	"isolatedModules": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "node",
+    "module": "commonjs",
     "target": "es6",
     "types": [
       "react",
@@ -32,8 +31,7 @@
       "@controls/*": ["./src/v5/ui/controls/*"],
       "@assets/*": ["./assets/*"],
       "@/*": ["./src/*"]
-    },
-    "noEmit": true
+    }
   },
   "exclude": [
     "node_modules",
