@@ -110,7 +110,7 @@ const testDeleteDrawing = () => {
 			await Drawings.deleteDrawing(teamspace, project, model);
 
 			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledTimes(1);
-			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history.ref`,
+			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`,
 				{ model });
 			expect(ModelSettings.deleteModel).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.deleteModel).toHaveBeenCalledWith(teamspace, project, model);
@@ -158,6 +158,7 @@ const formatToStats = (settings, revCount, latestRev) => ({
 const testGetDrawingStats = () => {
 	describe('Get drawing stats', () => {
 		const teamspace = generateRandomString();
+		const project = generateRandomString();
 		const drawing = generateRandomString();
 		const revCount = generateRandomNumber();
 		const settings = {
@@ -178,7 +179,7 @@ const testGetDrawingStats = () => {
 			const getRevisionCountMock = Revisions.getRevisionCount.mockResolvedValueOnce(revCount);
 			const getLatestRevMock = Revisions.getLatestRevision.mockResolvedValueOnce(latestRev);
 
-			const res = await Drawings.getDrawingStats(teamspace, drawing);
+			const res = await Drawings.getDrawingStats(teamspace, project, drawing);
 
 			expect(res).toEqual(formatToStats(settings, revCount, latestRev));
 			expect(getDrawingByIdMock).toHaveBeenCalledTimes(1);
@@ -199,7 +200,7 @@ const testGetDrawingStats = () => {
 			const getRevisionCountMock = Revisions.getRevisionCount.mockResolvedValueOnce(revCount);
 			const getLatestRevMock = Revisions.getLatestRevision.mockRejectedValueOnce(undefined);
 
-			const res = await Drawings.getDrawingStats(teamspace, drawing);
+			const res = await Drawings.getDrawingStats(teamspace, project, drawing);
 
 			expect(res).toEqual(formatToStats(settingsWithNoCalibration, revCount));
 			expect(getDrawingByIdMock).toHaveBeenCalledTimes(1);
@@ -216,14 +217,14 @@ const testGetDrawingStats = () => {
 			const err = new Error(generateRandomString());
 
 			ModelSettings.getDrawingById.mockRejectedValueOnce(err);
-			await expect(Drawings.getDrawingStats(teamspace, drawing)).rejects.toEqual(err);
+			await expect(Drawings.getDrawingStats(teamspace, project, drawing)).rejects.toEqual(err);
 		});
 
 		test('should fail if getRevisionCount fails', async () => {
 			const err = new Error(generateRandomString());
 
 			Revisions.getRevisionCount.mockRejectedValueOnce(err);
-			await expect(Drawings.getDrawingStats(teamspace, drawing)).rejects.toEqual(err);
+			await expect(Drawings.getDrawingStats(teamspace, project, drawing)).rejects.toEqual(err);
 		});
 	});
 };

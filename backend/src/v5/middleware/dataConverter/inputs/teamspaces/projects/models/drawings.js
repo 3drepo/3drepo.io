@@ -34,7 +34,7 @@ const validateRevisionUpload = async (req, res, next) => {
 	const schemaBase = {
 		statusCode: Yup.string().oneOf(statusCodes.map(({ code }) => code)).required(),
 		revCode: YupHelper.validators.alphanumeric(Yup.string().required().min(1).max(10)
-			.strict(true)),
+			.strict(true), true),
 		desc: YupHelper.types.strings.shortDescription,
 	};
 
