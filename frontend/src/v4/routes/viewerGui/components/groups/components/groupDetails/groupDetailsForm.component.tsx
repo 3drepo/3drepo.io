@@ -21,8 +21,8 @@ import { Field, Form, Formik } from 'formik';
 import { PureComponent } from 'react';
 import * as Yup from 'yup';
 
+import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { GROUPS_TYPES_LIST } from '../../../../../../constants/groups';
-import { formatShortDateTime } from '../../../../../../services/formatting/formatDate';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { Description, FieldsRow, LongLabel, StyledFormControl, StyledTextField } from './groupDetails.styles';
 
@@ -92,7 +92,7 @@ export class GroupDetailsForm extends PureComponent<IProps, any> {
 								/>
 								<StyledTextField
 									label="Last updated"
-									value={formatShortDateTime(updatedAt)}
+									value={formatDateTime(updatedAt)}
 									disabled
 								/>
 							</>
