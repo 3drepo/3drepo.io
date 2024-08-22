@@ -29,7 +29,7 @@ const { validateNewRevisionData: validateNewDrawingRev } = require('../../../../
 const { validateUpdateRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 
 const getRevisions = (modelType) => async (req, res, next) => {
-	const { teamspace, model } = req.params;
+	const { teamspace, project, model } = req.params;
 	const showVoid = req.query.showVoid === 'true';
 
 	const fn = {
@@ -38,7 +38,7 @@ const getRevisions = (modelType) => async (req, res, next) => {
 	};
 
 	try {
-		const revisions = await fn[modelType](teamspace, model, showVoid);
+		const revisions = await fn[modelType](teamspace, project, model, showVoid);
 		req.outputData = revisions;
 		next();
 	} catch (err) {

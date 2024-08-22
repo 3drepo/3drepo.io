@@ -42,7 +42,7 @@ const addCalibration = async (req, res) => {
 	const createdBy = getUserFromSession(req.session);
 
 	try {
-		await Calibrations.addCalibration(teamspace, project, drawing, revision, { ...req.body, createdBy });
+		await Calibrations.addCalibration(teamspace, project, drawing, revision, createdBy, req.body);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		/* istanbul ignore next */

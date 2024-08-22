@@ -86,7 +86,7 @@ Drawings.deleteDrawing = async (teamspace, project, drawing) => {
 	]);
 };
 
-Drawings.getRevisions = (teamspace, drawing, showVoid) => getRevisions(teamspace, drawing,
+Drawings.getRevisions = (teamspace, project, drawing, showVoid) => getRevisions(teamspace, project, drawing,
 	modelTypes.DRAWING, showVoid,
 	{ _id: 1, author: 1, format: 1, timestamp: 1, statusCode: 1, revCode: 1, void: 1, desc: 1 });
 

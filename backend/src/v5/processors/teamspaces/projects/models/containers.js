@@ -82,8 +82,8 @@ Containers.getContainerStats = async (teamspace, project, container) => {
 	return stats;
 };
 
-Containers.getRevisions = async (teamspace, container, showVoid) => {
-	const revisions = await getRevisions(teamspace, container, modelTypes.CONTAINER, showVoid,
+Containers.getRevisions = async (teamspace, project, container, showVoid) => {
+	const revisions = await getRevisions(teamspace, project, container, modelTypes.CONTAINER, showVoid,
 		{ _id: 1, author: 1, timestamp: 1, tag: 1, void: 1, desc: 1, rFile: 1 });
 
 	return revisions.map(({ rFile, ...r }) => {

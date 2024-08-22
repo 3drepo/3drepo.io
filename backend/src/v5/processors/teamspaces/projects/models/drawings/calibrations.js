@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addCalibration, getCalibration } = require('../../../../../models/calibrations');
+const { addCalibration, getCalibration, getCalibrationForMultipleRevisions } = require('../../../../../models/calibrations');
+const { getRevisionByIdOrTag, getRevisionsByQuery } = require('../../../../../models/revisions');
+const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
-const { getPreviousRevisions } = require('../../../../../models/revisions');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { templates } = require('../../../../../utils/responseCodes');
 
@@ -27,7 +28,6 @@ Calibrations.addCalibration = addCalibration;
 
 Calibrations.getCalibration = async (teamspace, project, drawing, revision, returnRevId) => {
 	const projection = deleteIfUndefined({
-		_id: 0,
 		horizontal: 1,
 		verticalRange: 1,
 		units: 1,
@@ -35,22 +35,27 @@ Calibrations.getCalibration = async (teamspace, project, drawing, revision, retu
 		createdBy: 1,
 		rev_id: returnRevId ? 1 : undefined });
 
-	let latestCalibration = await getCalibration(teamspace, project, drawing, revision, projection);
+	const latestCalibration = await getCalibration(teamspace, project, drawing, revision, { ...projection, _id: 0 });
 
 	if (latestCalibration) {
 		return latestCalibration;
 	}
 
-	const previousRevisions = await getPreviousRevisions(teamspace, project, drawing, modelTypes.DRAWING,
-		revision, { _id: 1 });
+	const { timestamp } = await getRevisionByIdOrTag(teamspace, drawing,
+		modelTypes.DRAWING, revision, { _id: 0, timestamp: 1 });
+
+	const previousRevisions = await getRevisionsByQuery(teamspace, project, drawing, modelTypes.DRAWING,
+		{ timestamp: { $lt: timestamp } }, { _id: 1, timestamp: 1 });
+
+	const revCalibrations = await getCalibrationForMultipleRevisions(teamspace,
+		previousRevisions.map(({ _id }) => _id), projection);
 
 	for (let i = 0; i < previousRevisions.length; i++) {
-		// eslint-disable-next-line no-await-in-loop
-		latestCalibration = await getCalibration(teamspace, project, drawing,
-			previousRevisions[i]._id, projection);
+		const { _id: revId } = previousRevisions[i];
+		const latestCal = revCalibrations.find(({ _id }) => UUIDToString(_id) === UUIDToString(revId));
 
-		if (latestCalibration) {
-			return latestCalibration;
+		if (latestCal) {
+			return latestCal.latestCalibration;
 		}
 	}
 

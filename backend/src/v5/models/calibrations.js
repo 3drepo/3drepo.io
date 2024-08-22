@@ -23,13 +23,14 @@ const CALIBRATIONS_COL = 'drawings.calibrations';
 
 const Calibrations = {};
 
-Calibrations.addCalibration = async (teamspace, project, drawing, revision, calibration) => {
+Calibrations.addCalibration = async (teamspace, project, drawing, revision, createdBy, calibration) => {
 	const formattedData = {
 		_id: generateUUID(),
 		project,
 		drawing,
 		rev_id: revision,
 		createdAt: new Date(),
+		createdBy,
 		...calibration,
 	};
 
@@ -39,6 +40,15 @@ Calibrations.addCalibration = async (teamspace, project, drawing, revision, cali
 Calibrations.getCalibration = (teamspace, project, drawing, revision, projection) => db.findOne(
 	teamspace, CALIBRATIONS_COL, { drawing, rev_id: revision, project },
 	projection, { createdAt: -1 });
+
+Calibrations.getCalibrationForMultipleRevisions = (teamspace, revIds, projection) => db.aggregate(
+	teamspace, CALIBRATIONS_COL, [
+		{ $match: { rev_id: { $in: revIds } } },
+		{ $sort: { createdAt: -1 } },
+		{ $group: { _id: '$rev_id', latestCalibration: { $first: '$$ROOT' } } },
+		// { $replaceRoot: { newRoot: '$latest_calibration' } },
+		{ $project: { _id: 1, latestCalibration: projection } },
+	]);
 
 Calibrations.getCalibrationStatus = async (teamspace, drawing, latestRevId) => {
 	const calibrations = await db.find(teamspace, CALIBRATIONS_COL, { drawing }, { rev_id: 1 });
