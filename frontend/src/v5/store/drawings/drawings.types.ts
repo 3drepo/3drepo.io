@@ -24,7 +24,6 @@ export enum CalibrationStates {
 	EMPTY = 'empty',
 }
 
-// TODO - fix once they are sure
 export enum DrawingUploadStatus {
 	OK = 'ok',
 	FAILED = 'failed',
@@ -39,49 +38,36 @@ export interface MinimumDrawing {
 	name: string;
 	role: Role;
 	isFavourite: boolean;
-	category: string; // TODO - add category types?
-	drawingNumber: string;
 }
 
-// TODO: Unfinished interface
-export interface IDrawing extends MinimumDrawing {
-	desc?: string;
-	lastUpdated?: Date;
-	latestRevision?: string;
-	calibration?: CalibrationStates;
-	status: DrawingUploadStatus;
-	revisionsCount: number;
-	role: any;
-	isFavourite: boolean;
-	hasStatsPending?: boolean;
-	errorReason?: {
-		message: string;
-		timestamp: Date | null;
-	};
-}
-
-// TODO: Unfinished interface
 export interface DrawingStats {
-	_id: string;
-	revisions : {
+	revisions: {
 		total: number;
 		lastUpdated?: number;
 		latestRevision?: string,
 	};
-	drawingNumber: string,
+	number: string,
 	calibration?: CalibrationStates,
-	category?: string, // TODO - add category types
-	status?: DrawingUploadStatus,
+	type: string,
+	status: DrawingUploadStatus,
 	errorReason?: {
 		message: string;
-		timestamp: number;
+		timestamp: Date | number;
 	};
+	desc?: string;
+}
+
+export interface IDrawing extends MinimumDrawing, Partial<Omit<DrawingStats, 'revisions'>> {
+	lastUpdated?: Date;
+	latestRevision?: string;
+	revisionsCount: number;
+	hasStatsPending?: boolean;
 }
 
 export type NewDrawing = {
-	_id?: string;
+	_id: string;
 	name: string;
-	category: string;
-	drawingNumber: string;
+	type: string;
+	number: string;
 	desc?: string;
 };

@@ -155,7 +155,6 @@ db.createRevision = async (teamspace, model, revision, modelType) => {
 		const refId = revision.rFile[0];
 		await FilesManager.storeFile(teamspace, modelType === modelTypes.DRAWING ? `${modelType}s.history.ref` : `${model}.history.ref`, refId, revision.refData);
 	}
-
 	const formattedRevision = {
 		...revision,
 		_id: stringToUUID(revision._id),

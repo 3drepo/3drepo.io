@@ -28,7 +28,7 @@ export interface IDrawingRevision {
 	desc?: string;
 	format: string;
 	statusCode?: string;
-	revisionCode: string;
+	revCode: string;
 	void?: boolean;
 }
 
@@ -43,12 +43,12 @@ export type CreateDrawingRevisionBody = {
 	description?: string;
 	file: File;
 	statusCode: string;
-	revisionCode: string;
+	revCode: string;
 
 	drawingId?: string;
 	drawingName: string;
 	drawingNumber: string;
-	drawingCategory: string;
+	drawingType: string;
 	drawingDesc?: string;
 };
 

@@ -26,8 +26,8 @@ import { useForm } from 'react-hook-form';
 
 export interface IFormInput {
 	name: string;
-	drawingNumber: string;
-	category: string;
+	number: string;
+	type: string;
 	desc: string
 }
 
@@ -35,8 +35,8 @@ export interface IFormInput {
 export const useDrawingForm = (defaultValues?: IDrawing) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
-	const categories = DrawingsHooksSelectors.selectCategories();
-	const isCategoriesPending = DrawingsHooksSelectors.selectIsCategoriesPending();
+	const types = DrawingsHooksSelectors.selectTypes();
+	const isTypesPending = DrawingsHooksSelectors.selectIsTypesPending();
 	
 	const drawingsNames = [];
 	const drawingNumbers = [];
@@ -44,7 +44,7 @@ export const useDrawingForm = (defaultValues?: IDrawing) => {
 	DrawingsHooksSelectors.selectDrawings().forEach((d) => {
 		if (d._id === defaultValues?._id) return;
 		drawingsNames.push(d.name);
-		drawingNumbers.push(d.drawingNumber);
+		drawingNumbers.push(d.number);
 	});
 
 	const [alreadyExistingNames, setAlreadyExistingNames] = useState(drawingsNames);
@@ -65,21 +65,21 @@ export const useDrawingForm = (defaultValues?: IDrawing) => {
 		}
 
 		if (numberAlreadyExists(err)) {
-			setAlreadyExistingNumbers([getValues('drawingNumber'), ...alreadyExistingNumbers]);
-			trigger('drawingNumber');
+			setAlreadyExistingNumbers([getValues('number'), ...alreadyExistingNumbers]);
+			trigger('number');
 		}
 	};
 	
 	useEffect(() => {
-		if (isCategoriesPending) return;
-		if (!defaultValues?.category) {
-			setValue('category', categories[0]);
+		if (isTypesPending) return;
+		if (!defaultValues?.type) {
+			setValue('type', types[0]);
 		}
-	}, [isCategoriesPending]);
+	}, [isTypesPending]);
 
 	useEffect(() => {
-		if (!isCategoriesPending) return;
-		DrawingsActionsDispatchers.fetchCategories(teamspace, project);
+		if (!isTypesPending) return;
+		DrawingsActionsDispatchers.fetchTypes(teamspace, project);
 	}, []);
 
 
