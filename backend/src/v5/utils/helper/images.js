@@ -19,13 +19,19 @@ const sharp = require('sharp');
 
 const ImageHelper = {};
 
-ImageHelper.createThumbnail = (buffer, width = 600) => (buffer ? sharp(buffer)
-	.flatten({ background: '#ffffff' })
-	.resize(width, undefined, {
-		fit: 'outside',
-	})
-	.toFormat('jpeg')
+ImageHelper.createThumbnail = async (buffer, width = 600, density = 150) => {
+	if (!buffer) throw new Error('Image not provided');
 
-	.toBuffer() : Promise.reject(new Error('Image not provided')));
+	const jpgBuffer = await sharp(buffer, { density })
+		.flatten({ background: '#ffffff' })
+		.toFormat('jpeg')
+		.toBuffer();
 
+	// (As far as I can tell) we have to export the buffer and re-import it for resize,
+	// otherwise it optimises out the density setting and we will miss out detailed lines.
+	return sharp(jpgBuffer)
+		.resize(width, undefined, {
+			fit: 'outside',
+		}).toBuffer();
+};
 module.exports = ImageHelper;
