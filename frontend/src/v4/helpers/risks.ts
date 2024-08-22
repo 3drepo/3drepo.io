@@ -256,9 +256,6 @@ export const getHeaderMenuItems = (props) => {
 		toggleShowPins ,  showPins, sortOrder, setSortBy, sortByField} = props;
 
 	const items = [{
-		...RISKS_ACTIONS_MENU.PRINT,
-		onClick: () => printItems(teamspace, model)
-	}, {
 		...RISKS_ACTIONS_MENU.DOWNLOAD,
 		onClick: () => downloadItems(teamspace, model)
 	}, {
