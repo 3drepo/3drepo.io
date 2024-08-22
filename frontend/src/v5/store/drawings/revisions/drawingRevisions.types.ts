@@ -59,7 +59,7 @@ export type CreateDrawingRevisionPayload = {
 	body: CreateDrawingRevisionBody;
 };
 
-export type IRevisionUpdate = Partial<IDrawingRevision> & {
+export type IDrawingRevisionUpdate = Partial<IDrawingRevision> & {
 	_id: string;
 };
 
