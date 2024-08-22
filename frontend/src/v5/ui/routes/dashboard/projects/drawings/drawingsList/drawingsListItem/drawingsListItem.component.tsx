@@ -26,7 +26,7 @@ import {
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
-import { formatShortDateTime } from '@/v5/helpers/intl.helper';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { DrawingsListItemTitle } from './drawingsListItemTitle/drawingsListItemTitle.component';
 import { DrawingsCalibrationButton } from './drawingsCalibrationButton/drawingsCalibrationButton.styles';
 import { IsMainList } from '../../../containers/mainList.context';
@@ -112,7 +112,7 @@ export const DrawingsListItem = memo(({
 					dontHighlight
 					{...DRAWING_LIST_COLUMN_WIDTHS.lastUpdated}
 				>
-					{drawing.lastUpdated && formatShortDateTime(drawing.lastUpdated)}
+					{drawing.lastUpdated && formatDateTime(drawing.lastUpdated)}
 				</DashboardListItemText>
 				<DashboardListItemIcon>
 					<FavouriteCheckbox

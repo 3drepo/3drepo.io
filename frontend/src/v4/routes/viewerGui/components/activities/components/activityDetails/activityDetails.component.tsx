@@ -18,7 +18,7 @@
 import Grid from '@mui/material/Grid';
 import { isString } from 'lodash';
 
-import { formatShortDateTime } from "../../../../../../services/formatting/formatDate";
+import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { Loader } from '../../../../../components/loader/loader.component';
 import { LoaderContainer } from '../../../viewerPanel/viewerPanel.styles';
 import { TimeIcon } from '../timeIcon/';
@@ -44,7 +44,7 @@ const renderValue = (key, value, setSelectedDate) => {
 	if (found && found.length) {
 		found.forEach((timestamp) => {
 			dateToSelect = Number(timestamp.slice('EPOCH::'.length));
-			processedValue = processedValue.replace(timestamp, formatShortDateTime(dateToSelect));
+			processedValue = processedValue.replace(timestamp, formatDateTime(dateToSelect));
 		});
 	}
 
