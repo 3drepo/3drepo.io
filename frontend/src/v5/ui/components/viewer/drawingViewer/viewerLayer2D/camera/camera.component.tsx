@@ -67,6 +67,7 @@ export const Camera = ({ scale }) => {
 	}, [transform3DTo2D]);
 
 	const getCursorOffset = (e) => {
+
 		const rect = e.currentTarget.getBoundingClientRect();
 		const offsetX = e.clientX - rect.left;
 		const offsetY = e.clientY - rect.top;
@@ -101,7 +102,10 @@ export const Camera = ({ scale }) => {
 	};
 
 	const onMouseUp = (ev: MouseEvent) => {
-		ev.currentTarget.removeEventListener('mousemove', onMouseMove);
+		const target = ev.currentTarget as HTMLElement;
+		target.removeEventListener('mousemove', onMouseMove);
+		target.removeEventListener('mouseup', onMouseUp);
+		target.removeEventListener('mouseleave', onMouseUp);
 	};
 
 	const onMouseDown: React.MouseEventHandler<SVGSVGElement> = (ev) => {
@@ -109,8 +113,11 @@ export const Camera = ({ scale }) => {
 		ev.nativeEvent.stopPropagation();
 		ev.nativeEvent.stopImmediatePropagation();
 
-		ev.currentTarget.parentElement.addEventListener('mousemove', onMouseMove);
-		ev.currentTarget.parentElement.addEventListener('mouseup', onMouseUp);
+		const container = ev.currentTarget.parentElement;
+
+		container.addEventListener('mousemove', onMouseMove);
+		container.addEventListener('mouseup', onMouseUp);
+		container.addEventListener('mouseleave', onMouseUp);
 	};
 
 	if (!transform2DTo3D || modelLoading) {
