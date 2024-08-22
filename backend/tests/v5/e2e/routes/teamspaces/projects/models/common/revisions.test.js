@@ -17,7 +17,8 @@
 
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
-const { src, dwgModel, exceedQuotaModel, oversizedDwg, dwgModelUppercaseExt, image } = require('../../../../../../helper/path');
+const { src, dwgModel, dwgModelUppercaseExt, image } = require('../../../../../../helper/path');
+const { writeFileSync, unlinkSync } = require('fs');
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { modelTypes, statusCodes } = require(`${src}/models/modelSettings.constants`);
@@ -217,8 +218,18 @@ const testCreateNewRevision = () => {
 		const basicData = generateBasicData();
 		const { users, teamspace, project, models, drawRevisions, conRevisions } = basicData;
 
+		const oversizedDwgPath = 'oversized.dwg';
+		const exceedQuotaDwgPath = 'exceedQuota.dwg';
+
 		beforeAll(async () => {
 			await setupData(basicData);
+			writeFileSync(oversizedDwgPath, Buffer.from(ServiceHelper.generateRandomString(20000000)));
+			writeFileSync(exceedQuotaDwgPath, Buffer.from(ServiceHelper.generateRandomString(6000000)));
+		});
+
+		afterAll(() => {
+			unlinkSync(oversizedDwgPath);
+			unlinkSync(exceedQuotaDwgPath);
 		});
 
 		const generateTestData = (modelType) => {
@@ -273,8 +284,8 @@ const testCreateNewRevision = () => {
 				['the model is of wrong type', { ...generateParams(), modelId: models.federation._id }, false, modelNotFound],
 				['the file is missing', { ...generateParams(), file: undefined }, false, templates.invalidArguments],
 				['the file has incorrect format', { ...generateParams(), file: image }, false, templates.unsupportedFileFormat],
-				['the file is larger than the allowed file size', { ...generateParams(), file: oversizedDwg }, false, templates.maxSizeExceeded],
-				['the file is larger than the user quota', { ...generateParams(), file: exceedQuotaModel }, false, templates.quotaLimitExceeded],
+				['the file is larger than the allowed file size', { ...generateParams(), file: oversizedDwgPath }, false, templates.maxSizeExceeded],
+				['the file is larger than the user quota', { ...generateParams(), file: exceedQuotaDwgPath }, false, templates.quotaLimitExceeded],
 				['the file is valid', generateParams(), true],
 				['the file is valid with uppercase extension', { ...generateParams(), file: dwgModelUppercaseExt, modelId: modelWithNoRev._id }, true],
 				...(modelType === modelTypes.DRAWING ? drawingCases : containerCases),

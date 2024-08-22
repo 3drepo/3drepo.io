@@ -47,7 +47,7 @@ Containers.getContainerList = async (teamspace, project, user) => {
 	return getModelList(teamspace, project, user, modelSettings);
 };
 
-Containers.getContainerStats = async (teamspace, container) => {
+Containers.getContainerStats = async (teamspace, project, container) => {
 	let latestRev = {};
 	const [settings, revCount] = await Promise.all([
 		getContainerById(teamspace, container, { name: 1, type: 1, properties: 1, status: 1, errorReason: 1 }),
