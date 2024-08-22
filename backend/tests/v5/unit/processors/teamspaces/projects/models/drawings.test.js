@@ -551,7 +551,7 @@ const testCreateDrawingThumbnail = () => {
 	const revision = generateRandomString();
 
 	describe('Create drawing thumbnail', () => {
-		test('Should store the thumbnail it has been successfully generated', async () => {
+		test('Should store the thumbnail if it has been successfully generated', async () => {
 			const imageRef = generateUUID();
 			const imageBuffer = generateRandomString();
 			const thumbnailBuffer = generateRandomString();

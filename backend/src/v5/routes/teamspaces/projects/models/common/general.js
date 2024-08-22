@@ -926,7 +926,7 @@ const establishRoutes = (modelType) => {
 	 *       200:
 	 *         description: returns a raster image of the thumbnail
 	 */
-		router.get('/:model/thumbnail', hasReadAccessToModel[modelTypes.DRAWING], getThumbnail);
+		router.get('/:model/thumbnail', hasReadAccessToDrawing, getThumbnail);
 	}
 
 	return router;
