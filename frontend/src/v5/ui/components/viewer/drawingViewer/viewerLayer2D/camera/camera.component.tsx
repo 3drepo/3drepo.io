@@ -16,7 +16,7 @@
  */
 import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { Vector3 } from 'three';
@@ -30,6 +30,7 @@ const haloAngleCutoff = Math.PI / 4;
 
 export const Camera = ({ scale }) => {
 	const viewpoint = useRef(null);
+	const scaleRef = useRef(scale);
 	
 	const [drawingId] = useSearchParam('drawingId');
 	const { containerOrFederation } = useParams<ViewerParams>();
@@ -40,6 +41,8 @@ export const Camera = ({ scale }) => {
 	const transform3DTo2D = DrawingsHooksSelectors.selectTransform3Dto2D(drawingId, containerOrFederation);
 
 	const modelLoading = useModelLoading();
+
+	useEffect(() => scaleRef.current = scale, [scale]);
 
 	useViewpointSubscription((v) => {
 		if (!transform3DTo2D) return;
@@ -67,11 +70,10 @@ export const Camera = ({ scale }) => {
 	}, [transform3DTo2D]);
 
 	const getCursorOffset = (e) => {
-
 		const rect = e.currentTarget.getBoundingClientRect();
 		const offsetX = e.clientX - rect.left;
 		const offsetY = e.clientY - rect.top;
-		return [ offsetX / scale, offsetY / scale];
+		return [ offsetX / scaleRef.current, offsetY / scaleRef.current];
 	};
 
 	const onMouseMove = async (ev: MouseEvent) => {
