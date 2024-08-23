@@ -21,6 +21,7 @@ const { copyFile, mkdir, rm, stat, writeFile } = require('fs/promises');
 const { createWriteStream, readdirSync } = require('fs');
 const { listenToQueue, queueMessage } = require('../handler/queue');
 const { modelTypes, processStatuses } = require('../models/modelSettings.constants');
+const { DRAWINGS_HISTORY_COL } = require('../models/revisions.constants');
 const Path = require('path');
 const { addRevision } = require('../models/revisions');
 const archiver = require('archiver');
@@ -102,7 +103,7 @@ ModelProcessing.processDrawingUpload = async (teamspace, project, model, revInfo
 		{ ...revInfo, format, rFile: [fileId], incomplete: true });
 
 	const fileMeta = { name: file.originalname, rev_id, project, model };
-	await storeFile(teamspace, `${modelTypes.DRAWING}s.history`, fileId, file.buffer, fileMeta);
+	await storeFile(teamspace, DRAWINGS_HISTORY_COL, fileId, file.buffer, fileMeta);
 
 	// TODO: for a different issue, but we don't want push through pdfs - should process it in .io
 	const queueMeta = { format, size: file.buffer.length };
@@ -137,7 +138,7 @@ ModelProcessing.queueModelUpload = async (teamspace, model, data, { originalname
 
 		await queueMessage(modelq, revId, msg);
 
-		publish(events.QUEUED_TASK_UPDATE, { teamspace, model, corId: revId, status: 'queued' });
+		publish(events.QUEUED_TASK_UPDATE, { teamspace, model, corId: revId, status: processStatuses.QUEUED });
 	} catch (err) {
 		// Clean up files we created
 		Promise.all([
@@ -174,7 +175,10 @@ ModelProcessing.queueFederationUpdate = async (teamspace, federation, info) => {
 		await writeFile(`${sharedDir}/${revId}/obj.json`, JSON.stringify(data));
 
 		await queueMessage(jobq, revId, `genFed ${filePath} ${teamspace}`);
-		publish(events.QUEUED_TASK_UPDATE, { teamspace, model: federation, corId: revId, status: 'queued' });
+		publish(events.QUEUED_TASK_UPDATE, { teamspace,
+			model: federation,
+			corId: revId,
+			status: processStatuses.QUEUED });
 	} catch (err) {
 		// Clean up files we created
 		rm(`${sharedDir}/${revId}/obj.json`).catch((cleanUpErr) => {
