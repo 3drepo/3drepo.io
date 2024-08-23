@@ -116,7 +116,6 @@ export const VerticalSpatialBoundariesHandler = () => {
 	useEffect(() => {
 		applyImageToPlane();
 		setIsCalibratingPlanes(true);
-		ViewerGuiActionsDispatchers.setClippingMode(null);
 		Viewer.setCalibrationToolVerticalPlanes(...verticalPlanes);
 
 		return () => {
