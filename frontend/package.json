@@ -52,7 +52,7 @@
 		"@mui/x-date-pickers": "5.0.3",
 		"@popperjs/core": "2.6.0",
 		"@webscopeio/react-textarea-autocomplete": "4.9.0",
-		"axios": "1.6.5",
+		"axios": "1.7.4",
 		"byte-size": "8.1.0",
 		"connected-react-router": "6.9.1",
 		"contrast-color": "1.0.1",
