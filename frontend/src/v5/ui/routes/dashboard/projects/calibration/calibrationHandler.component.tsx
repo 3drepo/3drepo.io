@@ -31,7 +31,7 @@ import { DRAWINGS_ROUTE, ViewerParams } from '../../../routes.constants';
 export const CalibrationHandler = () => {
 	const { teamspace, project, revision, containerOrFederation } = useParams<ViewerParams>();
 	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
-	const { step, drawingId, setVector3D, setVector2D, setOrigin, setStep, setIsCalibrating3D, origin, setVerticalPlanes } = useContext(CalibrationContext);
+	const { step, drawingId, setVector3D, setVector2D, setOrigin, setStep, origin, setVerticalPlanes } = useContext(CalibrationContext);
 	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
 	const { horizontal, verticalRange } = DrawingsHooksSelectors.selectCalibration(drawingId, containerOrFederation);
 
@@ -42,7 +42,6 @@ export const CalibrationHandler = () => {
 
 	useEffect(() => {
 		setStep(0);
-		setIsCalibrating3D(false);
 	}, [selectedModel, revision, drawing]);
 
 	useEffect(() => {
