@@ -187,10 +187,6 @@ export const ACTIONS_TYPES = {
 };
 
 export const ISSUES_ACTIONS_MENU = {
-	PRINT: {
-		label: 'Create Report',
-		Icon: Print
-	},
 	IMPORT_BCF: {
 		label: 'Import BCF',
 		Icon: Upload

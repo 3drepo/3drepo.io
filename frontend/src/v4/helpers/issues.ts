@@ -198,9 +198,6 @@ export const getHeaderMenuItems = (props) => {
 
 	const items = [
 		{
-			...ISSUES_ACTIONS_MENU.PRINT,
-			onClick: () => printItems(teamspace, model)
-		}, {
 			...ISSUES_ACTIONS_MENU.IMPORT_BCF,
 			onClick: () => {
 				fileDialog({ accept: '.zip,.bcfzip,.bcf' }, (files) => {
