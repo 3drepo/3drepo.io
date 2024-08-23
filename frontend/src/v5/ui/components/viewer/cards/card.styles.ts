@@ -51,7 +51,7 @@ export const CardHeaderContainer = styled.div`
 	padding: 0 16px;
 	border-bottom: 1px solid  ${({ theme }) => theme.palette.base.lightest};
 	display: grid;
-    grid-template-columns: 32px 1fr max-content;
+	grid-template-columns: 32px 1fr max-content;
 	width: 100%;
 	box-sizing: border-box;
 `;
