@@ -26,7 +26,10 @@ const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ dra
 
 export const selectDrawings = createSelector(
 	selectDrawingsDomain, selectCurrentProject,
-	(state, currentProject) => (state.drawingsByProject[currentProject] ?? []),
+	(state, currentProject) => (state.drawingsByProject[currentProject] ?? []).map(({ calibration, ...drawing }) => ({
+		...drawing,
+		calibration: drawing.revisionsCount ? calibration : CalibrationStates.EMPTY,
+	})),
 );
 
 export const selectCalibratedDrawings = createSelector(
@@ -77,15 +80,15 @@ export const selectCanUploadToProject = createSelector(
 	(drawings, isAdmin): boolean => isAdmin || drawings.some(({ role }) => isCollaboratorRole(role)),
 );
 
-export const selectCategories = createSelector(
+export const selectTypes = createSelector(
 	selectDrawingsDomain, selectCurrentProject,
-	(state, currentProject) => (state.categoriesByProject[currentProject] ?? []),
+	(state, currentProject) => state.typesByProject[currentProject] ?? [],
 );
 
-export const selectIsCategoriesPending = createSelector(
+export const selectIsTypesPending = createSelector(
 	selectDrawingsDomain, selectCurrentProject,
-	// Checks if the categories for the project have been fetched
-	(state, currentProject) => !state.categoriesByProject[currentProject],
+	// Checks if the types for the project have been fetched
+	(state, currentProject) => !state.typesByProject[currentProject],
 );
 
 

@@ -133,12 +133,13 @@ const deleteFavourites = (modelType) => async (req, res) => {
 const getModelStats = (modelType) => async (req, res, next) => {
 	const { teamspace, model, project } = req.params;
 	const fn = {
-		[modelTypes.CONTAINER]: () => Containers.getContainerStats(teamspace, model),
-		[modelTypes.FEDERATION]: () => Federations.getFederationStats(teamspace, project, model),
+		[modelTypes.CONTAINER]: Containers.getContainerStats,
+		[modelTypes.DRAWING]: Drawings.getDrawingStats,
+		[modelTypes.FEDERATION]: Federations.getFederationStats,
 	};
 
 	try {
-		const stats = await fn[modelType]();
+		const stats = await fn[modelType](teamspace, project, model);
 		req.outputData = stats;
 		await next();
 	} catch (err) {
@@ -543,7 +544,7 @@ const establishRoutes = (modelType) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *           enum: [containers, federations]
+	 *           enum: [containers, federations,drawings]
    	 *       - name: model
 	 *         description: Model ID
 	 *         in: path
@@ -605,11 +606,12 @@ const establishRoutes = (modelType) => {
 	 *               container:
 	 *                 summary: container
      *                 value:
+	 *                   type: Architectural
      *                   code: STR-01
      *                   status: ok
+	 *                   unit: mm
 	 *                   desc: Floor 1 MEP with Facade
-	 *                   lastUpdated: 1630598072000
-	 *                   tickets: { issues: 10, risks: 5 }
+	 *                   revisions: { total: 2, lastUpdated: 1715354970000, latestRevision: rev1 }
 	 *               federation:
 	 *                 summary: federation
      *                 value:
@@ -619,6 +621,15 @@ const establishRoutes = (modelType) => {
 	 *                   lastUpdated: 1630598072000
 	 *                   tickets: { issues: 10, risks: 5 }
 	 *                   containers: [{ group: Architectural, _id: 374bb150-065f-11ec-8edf-ab0f7cc84da8 }]
+	 *               drawing:
+	 *                 summary: drawing
+     *                 value:
+     *                   number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
+     *                   status: ok
+	 *                   type: Architectural
+	 *                   desc: Floor 1 MEP with Facade
+	 *                   revisions: { total: 2, lastUpdated: 1715354970000, latestRevision: S1-rev1 }
+	 *                   calibration: uncalibrated
 	 */
 	router.get('/:model/stats', hasReadAccessToModel[modelType], getModelStats(modelType), formatModelStats(modelType));
 

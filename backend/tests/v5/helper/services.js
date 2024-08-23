@@ -46,7 +46,7 @@ const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constant
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { isArray } = require(`${src}/utils/helper/typeCheck`);
 const FilesManager = require('../../../src/v5/services/filesManager');
-const { modelTypes } = require('../../../src/v5/models/modelSettings.constants');
+const { modelTypes, statusCodes } = require('../../../src/v5/models/modelSettings.constants');
 
 const { statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
 const { generateFullSchema } = require(`${src}/schemas/tickets/templates`);
@@ -150,14 +150,19 @@ db.createModel = (teamspace, _id, name, props) => {
 	return DbHandler.insertOne(teamspace, 'settings', settings);
 };
 
-db.createRevision = async (teamspace, modelId, revision) => {
+db.createRevision = async (teamspace, model, revision, modelType) => {
 	if (revision.rFile) {
 		const refId = revision.rFile[0];
-		await FilesManager.storeFile(teamspace, `${modelId}.history.ref`, refId, revision.refData);
+		await FilesManager.storeFile(teamspace, modelType === modelTypes.DRAWING ? `${modelType}s.history.ref` : `${model}.history.ref`, refId, revision.refData);
 	}
-	const formattedRevision = { ...revision, _id: stringToUUID(revision._id) };
+	const formattedRevision = {
+		...revision,
+		_id: stringToUUID(revision._id),
+		...(modelType === modelTypes.DRAWING ? { model } : {}),
+	};
+
 	delete formattedRevision.refData;
-	await DbHandler.insertOne(teamspace, `${modelId}.history`, formattedRevision);
+	await DbHandler.insertOne(teamspace, modelType === modelTypes.DRAWING ? `${modelType}s.history` : `${model}.history`, formattedRevision);
 };
 
 db.createSequence = async (teamspace, model, { sequence, states, activities, activityTree }) => {
@@ -427,19 +432,22 @@ ServiceHelper.generateRandomModel = ({ modelType = modelTypes.CONTAINER, viewers
 	};
 };
 
-ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true) => {
+ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, modelType) => {
 	const _id = ServiceHelper.generateUUIDString();
-	const entry = {
+	const entry = deleteIfUndefined({
 		_id,
-		tag: ServiceHelper.generateRandomString(),
+		tag: modelType === modelTypes.DRAWING ? undefined : ServiceHelper.generateRandomString(),
+		statusCode: modelType === modelTypes.DRAWING ? statusCodes[0].code : undefined,
+		revCode: modelType === modelTypes.DRAWING ? ServiceHelper.generateRandomString(10) : undefined,
+		format: modelType === modelTypes.DRAWING ? '.pdf' : undefined,
 		author: ServiceHelper.generateRandomString(),
 		timestamp: ServiceHelper.generateRandomDate(),
 		desc: ServiceHelper.generateRandomString(),
 		void: !!isVoid,
-	};
+	});
 
 	if (hasFile) {
-		entry.rFile = [`${_id}_${ServiceHelper.generateRandomString()}_ifc`];
+		entry.rFile = modelType === modelTypes.DRAWING ? [ServiceHelper.generateUUIDString()] : [`${_id}_${ServiceHelper.generateRandomString()}_ifc`];
 		entry.refData = ServiceHelper.generateRandomString();
 	}
 

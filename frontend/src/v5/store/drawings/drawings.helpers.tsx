@@ -22,7 +22,6 @@ import NotCalibrated from '@assets/icons/filled/no_calibration-filled.svg';
 import { Display } from '@/v5/ui/themes/media';
 import { CalibrationStates, DrawingStats, DrawingUploadStatus, IDrawing, MinimumDrawing } from './drawings.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
-import { mapDrawingIdToName } from './drawings.temp';
 
 export const DRAWING_LIST_COLUMN_WIDTHS = {
 	name: {
@@ -37,10 +36,10 @@ export const DRAWING_LIST_COLUMN_WIDTHS = {
 		width: 155,
 		hideWhenSmallerThan: Display.Tablet,
 	},
-	drawingNumber: {
+	number: {
 		width: 260,
 	},
-	category: {
+	type: {
 		width: 120,
 		hideWhenSmallerThan: Display.Desktop,
 	},
@@ -52,7 +51,7 @@ export const DRAWING_LIST_COLUMN_WIDTHS = {
 	},
 };
 
-export const DRAWINGS_SEARCH_FIELDS = ['name', 'latestRevision', 'category', 'drawingNumber', 'status'];
+export const DRAWINGS_SEARCH_FIELDS = ['name', 'latestRevision', 'type', 'number', 'status'];
 
 export const CALIBRATION_MAP = {
 	[CalibrationStates.CALIBRATED]: {
@@ -90,15 +89,18 @@ export const prepareSingleDrawingData = (
 	revisionsCount: stats?.revisions?.total ?? 0,
 	lastUpdated: getNullableDate(stats?.revisions.lastUpdated),
 	latestRevision: stats?.revisions.latestRevision ?? '',
-	drawingNumber: stats?.drawingNumber ?? '',
+	number: stats?.number ?? '',
+	type: stats?.type ?? '',
+	desc: stats?.desc ?? '',
+	calibration: stats?.calibration ?? CalibrationStates.UNCALIBRATED,
 	status: stats?.status ?? DrawingUploadStatus.OK,
 	hasStatsPending: !stats,
 	errorReason: stats?.errorReason && {
 		message: stats.errorReason.message,
-		timestamp: getNullableDate(stats?.errorReason.timestamp),
+		timestamp: getNullableDate(+stats?.errorReason.timestamp),
 	},
 });
 
 export const prepareDrawingsData = (drawings: Array<MinimumDrawing>) => drawings.map<IDrawing>((d) => prepareSingleDrawingData(d, null));
 
-export const getDrawingImageSrc = (drawingId: string) => `/assets/drawings/${mapDrawingIdToName(drawingId)}`;
+export const getDrawingImageSrc = (drawingId: string) => `/assets/drawings/${drawingId}`;

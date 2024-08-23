@@ -45,9 +45,9 @@ type DrawingItemProps = {
 };
 export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	const [latestRevision] = DrawingRevisionsHooksSelectors.selectRevisions(drawing._id);
-	const { calibration, name, drawingNumber, lastUpdated, desc } = drawing;
-	const { statusCode, revisionCode } = latestRevision || {};
-	const areStatsPending = !revisionCode;
+	const { calibration, name, number, lastUpdated, desc } = drawing;
+	const { statusCode, revCode } = latestRevision || {};
+	const areStatsPending = !revCode;
 	const [selectedDrawingId] = useSearchParam('drawingId');
 
 	const LoadingCodes = () => (
@@ -76,7 +76,7 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 			)}
 			<BreakingLine>
 				<Property>
-					{REVISION_CODE_TEXT}: <PropertyValue>{revisionCode}</PropertyValue>
+					{REVISION_CODE_TEXT}: <PropertyValue>{revCode}</PropertyValue>
 				</Property>
 			</BreakingLine>
 		</>
@@ -90,7 +90,7 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 				</ImageContainer>
 				<InfoContainer>
 					<BreakingLine>
-						<Property>{drawingNumber}</Property>
+						<Property>{number}</Property>
 					</BreakingLine>
 					<BreakingLine>
 						<Title>{name}</Title>

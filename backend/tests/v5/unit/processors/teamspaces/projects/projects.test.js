@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { MODEL_CATEGORIES } = require('../../../../../../src/v5/models/modelSettings.constants');
 const { COL_NAME } = require('../../../../../../src/v5/models/projectSettings.constants');
 const { src } = require('../../../../helper/path');
 const { generateRandomString } = require('../../../../helper/services');
@@ -34,6 +33,8 @@ const ModelHelper = require(`${src}/utils/helper/models`);
 
 const Projects = require(`${src}/processors/teamspaces/projects`);
 const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
+
+const { MODEL_CATEGORIES, statusCodes } = require(`${src}/models/modelSettings.constants`);
 
 const projectList = [
 	{ _id: '1', name: 'project1', permissions: [{ user: 'projAdmin', permissions: [PROJECT_ADMIN] }], models: ['modelA'] },
@@ -272,6 +273,14 @@ const testGetDrawingCategories = () => {
 	});
 };
 
+const testGetStatusCodes = () => {
+	describe('Get status codes', () => {
+		test('should get status codes', async () => {
+			await expect(Projects.getStatusCodes()).toEqual(statusCodes);
+		});
+	});
+};
+
 describe('processors/teamspaces/projects', () => {
 	testGetProjectList();
 	testDeleteProject();
@@ -282,4 +291,5 @@ describe('processors/teamspaces/projects', () => {
 	testUpdateImage();
 	testDeleteImage();
 	testGetDrawingCategories();
+	testGetStatusCodes();
 });
