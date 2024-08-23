@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 const { UUIDToString, stringToUUID } = require('../../../utils/helper/uuids');
 const { addGroupUpdateLog, addImportedLogs, addTicketLog } = require('../../../models/tickets.logs');
 const { createModelMessage, createProjectMessage } = require('../../chat');
@@ -21,6 +22,7 @@ const { deleteIfUndefined, setNestedProperty } = require('../../../utils/helper/
 const { getModelType, isFederation: isFederationCheck, newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
 const { getRevisionByIdOrTag, getRevisionFormat, onProcessingCompleted, updateProcessingStatus } = require('../../../models/revisions');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
+const { createDrawingThumbnail } = require('../../../processors/teamspaces/projects/models/drawings');
 const { templates: emailTemplates } = require('../../mailer/mailer.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { findProjectByModelId } = require('../../../models/projectSettings');
@@ -83,6 +85,14 @@ const revisionAdded = async ({ teamspace, project, model, revId, modelType }) =>
 			tag, author, timestamp, desc, rFile, format, statusCode, revCode,
 		} = await getRevisionByIdOrTag(teamspace, model, modelType, revId,
 			{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1, statusCode: 1, revCode: 1 });
+
+		if (modelTypes.DRAWING === modelType) {
+			createDrawingThumbnail(teamspace, project, model, revId).catch((err) => {
+				// It is not critical error if we failed to create a thumbnail.
+				// So catch the error and proceed
+				logger.logError(`Failed to create thumbnail for drawing ${teamspace}.${model}.${revId}: ${err?.message}`);
+			});
+		}
 
 		const modelEvents = {
 			[modelTypes.CONTAINER]: chatEvents.CONTAINER_NEW_REVISION,

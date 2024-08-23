@@ -16,7 +16,8 @@
  */
 
 const { src } = require('../../../../../helper/path');
-const { determineTestGroup, generateRandomString, generateRandomObject, generateUUIDString, generateRandomNumber } = require('../../../../../helper/services');
+const { determineTestGroup, generateRandomString, generateRandomObject, generateUUID,
+	generateUUIDString, generateRandomNumber } = require('../../../../../helper/services');
 
 jest.mock('../../../../../../../src/v5/models/projectSettings');
 const ProjectSettings = require(`${src}/models/projectSettings`);
@@ -30,7 +31,11 @@ jest.mock('../../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
 jest.mock('../../../../../../../src/v5/models/revisions');
 const Revisions = require(`${src}/models/revisions`);
+const { DRAWINGS_HISTORY_COL } = require(`${src}/models/revisions.constants`);
 jest.mock('../../../../../../../src/v5/services/eventsManager/eventsManager');
+
+jest.mock('../../../../../../../src/v5/utils/helper/images');
+const ImageHelper = require(`${src}/utils/helper/images`);
 
 const Drawings = require(`${src}/processors/teamspaces/projects/models/drawings`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
@@ -107,7 +112,7 @@ const testDeleteDrawing = () => {
 			await Drawings.deleteDrawing(teamspace, project, model);
 
 			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledTimes(1);
-			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`,
+			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL,
 				{ model });
 			expect(ModelSettings.deleteModel).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.deleteModel).toHaveBeenCalledWith(teamspace, project, model);
@@ -252,7 +257,7 @@ const testDownloadRevisionFiles = () => {
 			await expect(Drawings.downloadRevisionFiles(generateUUIDString(), generateUUIDString(),
 				generateUUIDString())).rejects.toEqual(templates.fileNotFound);
 
-			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(0);
+			expect(FilesManager.getFileAsStream).not.toHaveBeenCalled();
 		});
 
 		test('should download files if revision has file', async () => {
@@ -272,7 +277,92 @@ const testDownloadRevisionFiles = () => {
 				revision, { rFile: 1 });
 
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
-			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history.ref`, fileName);
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL, fileName);
+		});
+	});
+};
+
+const testGetLatestThumbnail = () => {
+	describe('get Latest thumbnail', () => {
+		test(`should reject with ${templates.fileNotFound} if there are no revisions`, async () => {
+			Revisions.getLatestRevision.mockRejectedValueOnce(new Error());
+
+			await expect(Drawings.getLatestThumbnail(generateUUIDString(), generateUUIDString(),
+				generateUUIDString())).rejects.toEqual(templates.fileNotFound);
+
+			expect(FilesManager.getFileAsStream).not.toHaveBeenCalled();
+		});
+
+		test(`should reject with ${templates.fileNotFound} if the latest revision does not have a thumbnail`, async () => {
+			Revisions.getLatestRevision.mockResolvedValueOnce({});
+
+			await expect(Drawings.getLatestThumbnail(generateUUIDString(), generateUUIDString(),
+				generateUUIDString())).rejects.toEqual(templates.fileNotFound);
+
+			expect(FilesManager.getFileAsStream).not.toHaveBeenCalled();
+		});
+
+		test('should return file buffer if the latest revision has a thumbnail', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const drawing = generateRandomString();
+			const thumbnailRef = generateRandomString();
+			const output = generateRandomObject();
+
+			Revisions.getLatestRevision.mockResolvedValueOnce({ thumbnail: thumbnailRef });
+			FilesManager.getFileAsStream.mockResolvedValueOnce(output);
+
+			await expect(Drawings.getLatestThumbnail(teamspace, project, drawing)).resolves.toEqual(output);
+
+			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(1);
+			expect(Revisions.getLatestRevision).toHaveBeenCalledWith(teamspace, drawing, modelTypes.DRAWING,
+				{ thumbnail: 1 });
+
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL, thumbnailRef);
+		});
+	});
+};
+
+const testGetImageByRevision = () => {
+	describe('get image by revision', () => {
+		test(`should reject with ${templates.fileNotFound} if there are no revisions`, async () => {
+			Revisions.getRevisionByIdOrTag.mockRejectedValueOnce(new Error());
+
+			await expect(Drawings.getImageByRevision(generateUUIDString(), generateUUIDString(),
+				generateUUIDString())).rejects.toEqual(templates.fileNotFound);
+
+			expect(FilesManager.getFileAsStream).not.toHaveBeenCalled();
+		});
+
+		test(`should reject with ${templates.fileNotFound} if the latest revision does not have a image`, async () => {
+			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({});
+
+			await expect(Drawings.getImageByRevision(generateUUIDString(), generateUUIDString(),
+				generateUUIDString())).rejects.toEqual(templates.fileNotFound);
+
+			expect(FilesManager.getFileAsStream).not.toHaveBeenCalled();
+		});
+
+		test('should return file buffer if the latest revision has a image', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const drawing = generateRandomString();
+			const imageRef = generateRandomString();
+			const revision = generateRandomString();
+			const output = generateRandomObject();
+
+			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ image: imageRef });
+			FilesManager.getFileAsStream.mockResolvedValueOnce(output);
+
+			await expect(Drawings.getImageByRevision(teamspace, project, drawing, revision)).resolves.toEqual(output);
+
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(teamspace, drawing, modelTypes.DRAWING,
+				revision, { image: 1 });
+
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL, imageRef);
 		});
 	});
 };
@@ -454,6 +544,69 @@ const testDeleteFavourites = () => {
 	});
 };
 
+const testCreateDrawingThumbnail = () => {
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const model = generateRandomString();
+	const revision = generateRandomString();
+
+	describe('Create drawing thumbnail', () => {
+		test('Should store the thumbnail if it has been successfully generated', async () => {
+			const imageRef = generateUUID();
+			const imageBuffer = generateRandomString();
+			const thumbnailBuffer = generateRandomString();
+			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ image: imageRef });
+			FilesManager.getFile.mockResolvedValueOnce(imageBuffer);
+			ImageHelper.createThumbnail.mockResolvedValueOnce(thumbnailBuffer);
+
+			await Drawings.createDrawingThumbnail(teamspace, project, model, revision);
+
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(teamspace, model,
+				modelTypes.DRAWING, revision, { image: 1 });
+
+			expect(FilesManager.getFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFile).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL, imageRef);
+
+			expect(ImageHelper.createThumbnail).toHaveBeenCalledTimes(1);
+			expect(ImageHelper.createThumbnail).toHaveBeenCalledWith(imageBuffer);
+
+			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL,
+				expect.anything(), thumbnailBuffer, { teamspace, project, model, rev_id: revision });
+
+			const thumbnailRef = FilesManager.storeFile.mock.calls[0][2];
+
+			expect(Revisions.addDrawingThumbnailRef).toHaveBeenCalledTimes(1);
+			expect(Revisions.addDrawingThumbnailRef).toHaveBeenCalledWith(teamspace, project, model,
+				revision, thumbnailRef);
+		});
+
+		test('Should not store the thumbnail it has not been successfully generated', async () => {
+			const imageRef = generateUUID();
+			const imageBuffer = generateRandomString();
+			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ image: imageRef });
+			FilesManager.getFile.mockResolvedValueOnce(imageBuffer);
+			ImageHelper.createThumbnail.mockResolvedValueOnce();
+
+			await Drawings.createDrawingThumbnail(teamspace, project, model, revision);
+
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(teamspace, model,
+				modelTypes.DRAWING, revision, { image: 1 });
+
+			expect(FilesManager.getFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFile).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL, imageRef);
+
+			expect(ImageHelper.createThumbnail).toHaveBeenCalledTimes(1);
+			expect(ImageHelper.createThumbnail).toHaveBeenCalledWith(imageBuffer);
+
+			expect(FilesManager.storeFile).not.toHaveBeenCalled();
+			expect(Revisions.addDrawingThumbnailRef).not.toHaveBeenCalled();
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testAddDrawing();
 	testUpdateSettings();
@@ -465,4 +618,7 @@ describe(determineTestGroup(__filename), () => {
 	testGetDrawingStats();
 	testAppendFavourites();
 	testDeleteFavourites();
+	testCreateDrawingThumbnail();
+	testGetLatestThumbnail();
+	testGetImageByRevision();
 });

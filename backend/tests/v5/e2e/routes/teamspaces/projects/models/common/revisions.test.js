@@ -84,8 +84,8 @@ const generateBasicData = () => {
 	};
 
 	const drawRevisions = {
-		nonVoidRevision: ServiceHelper.generateRevisionEntry(false, true, modelTypes.DRAWING),
-		voidRevision: ServiceHelper.generateRevisionEntry(true, true, modelTypes.DRAWING),
+		nonVoidRevision: ServiceHelper.generateRevisionEntry(false, true, modelTypes.DRAWING, true),
+		voidRevision: ServiceHelper.generateRevisionEntry(true, true, modelTypes.DRAWING, true),
 		noFileRevision: ServiceHelper.generateRevisionEntry(false, false, modelTypes.DRAWING),
 	};
 
@@ -476,6 +476,65 @@ const testDownloadRevisionFiles = () => {
 	});
 };
 
+const testGetImage = () => {
+	describe('Get Image', () => {
+		const basicData = generateBasicData();
+		const { users, teamspace, project, models, drawRevisions } = basicData;
+
+		beforeAll(async () => {
+			await setupData(basicData);
+		});
+
+		const generateTestData = () => {
+			const model = models.drawWithRev;
+			const revision = drawRevisions.nonVoidRevision;
+			const { noFileRevision } = drawRevisions;
+			const modelNotFound = templates.drawingNotFound;
+
+			const params = {
+				key: users.tsAdmin.apiKey,
+				ts: teamspace,
+				projectId: project.id,
+				modelId: model._id,
+				revision,
+			};
+
+			return [
+				['the user does not have a valid session', { ...params, key: null }, false, templates.notLoggedIn],
+				['the teamspace does not exist', { ...params, ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
+				['the user is not a member of the teamspace', { ...params, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
+				['the user does not have access to the model', { ...params, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
+				['the project does not exist', { ...params, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
+				['the model does not exist', { ...params, modelId: ServiceHelper.generateRandomString() }, false, modelNotFound],
+				['the model is of wrong type', { ...params, modelId: models.federation._id }, false, modelNotFound],
+				['the revision does not exist', { ...params, revision: ServiceHelper.generateRevisionEntry() }, false, templates.fileNotFound],
+				['the revision has no file', { ...params, revision: noFileRevision }, false, templates.fileNotFound],
+				['the revision has a file', params, true],
+				['the user is viewer', { ...params, key: users.viewer.apiKey }, true],
+				['the user is commenter', { ...params, key: users.commenter.apiKey }, true],
+			];
+		};
+
+		const runTest = (desc, params, success, error) => {
+			const route = ({ ts, projectId, modelId, revision, key }) => `/v5/teamspaces/${ts}/projects/${projectId}/drawings/${modelId}/revisions/${revision._id}/files/image?key=${key}`;
+
+			test(`should ${success ? 'succeed' : `fail with ${error.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : error.status;
+
+				const res = await agent.get(`${route(params)}`).expect(expectedStatus);
+
+				if (success) {
+					expect(res.body?.toString()).toEqual(params.revision.imageData);
+				} else {
+					expect(res.body.code).toEqual(error.code);
+				}
+			});
+		};
+
+		describe.each(generateTestData(modelTypes.DRAWING))('Drawing', runTest);
+	});
+};
+
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -491,4 +550,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	testCreateNewRevision();
 	testUpdateRevisionStatus();
 	testDownloadRevisionFiles();
+	testGetImage();
 });

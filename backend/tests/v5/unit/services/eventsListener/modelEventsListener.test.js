@@ -44,6 +44,9 @@ const CommentSchemas = require(`${src}/schemas/tickets/tickets.comments`);
 jest.mock('../../../../../src/v5/schemas/tickets/tickets.groups');
 const TicketGroupSchemas = require(`${src}/schemas/tickets/tickets.groups`);
 
+jest.mock('../../../../../src/v5/processors/teamspaces/projects/models/drawings');
+const DrawingProcessor = require(`${src}/processors/teamspaces/projects/models/drawings`);
+
 jest.mock('../../../../../src/v5/services/mailer');
 const Mailer = require(`${src}/services/mailer`);
 const { templates: mailTemplates } = require(`${src}/services/mailer/mailer.constants`);
@@ -266,6 +269,7 @@ const testQueueTaskCompleted = () => {
 };
 
 const testNewRevision = () => {
+	DrawingProcessor.createDrawingThumbnail.mockResolvedValue();
 	test(`Should create a ${chatEvents.CONTAINER_NEW_REVISION} chat event if there is a ${events.MODEL_IMPORT_FINISHED} (container)`, async () => {
 		const tag = generateRandomString();
 		const author = generateRandomString();
@@ -312,6 +316,7 @@ const testNewRevision = () => {
 		);
 
 		expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+		expect(DrawingProcessor.createDrawingThumbnail).not.toHaveBeenCalled();
 	});
 
 	test(`Should create a ${chatEvents.DRAWING_NEW_REVISION} chat event if there is a ${events.MODEL_IMPORT_FINISHED} (drawing)`, async () => {
@@ -322,7 +327,6 @@ const testNewRevision = () => {
 		const rFile = [generateRandomString()];
 		const timestamp = generateRandomDate();
 		Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp, rFile, desc, format });
-
 		const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 		const data = {
 			teamspace: generateRandomString(),
@@ -358,6 +362,62 @@ const testNewRevision = () => {
 			data.model,
 		);
 		expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+
+		expect(DrawingProcessor.createDrawingThumbnail).toHaveBeenCalledTimes(1);
+		expect(DrawingProcessor.createDrawingThumbnail).toHaveBeenCalledWith(data.teamspace,
+			data.project, data.model, data.revId);
+	});
+
+	test(`Should create a ${chatEvents.DRAWING_NEW_REVISION} chat event if there is a ${events.MODEL_IMPORT_FINISHED} even if thumbnail creation failed`, async () => {
+		const tag = generateRandomString();
+		const author = generateRandomString();
+		const desc = generateRandomString();
+		const format = generateRandomString();
+		const rFile = [generateRandomString()];
+		const timestamp = generateRandomDate();
+		Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp, rFile, desc, format });
+
+		const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+		const data = {
+			teamspace: generateRandomString(),
+			project: generateUUID(),
+			model: generateRandomString(),
+			success: true,
+			revId: generateUUID(),
+			user: generateRandomString(),
+			modelType: modelTypes.DRAWING,
+		};
+
+		DrawingProcessor.createDrawingThumbnail.mockRejectedValueOnce(new Error());
+		EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
+
+		await waitOnEvent;
+
+		expect(Revisions.getRevisionFormat).not.toHaveBeenCalled();
+		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
+		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, modelTypes.DRAWING,
+			data.revId, { _id: 0,
+				tag: 1,
+				author: 1,
+				timestamp: 1,
+				desc: 1,
+				rFile: 1,
+				format: 1,
+				statusCode: 1,
+				revCode: 1 });
+		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+		expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+			chatEvents.DRAWING_NEW_REVISION,
+			{ _id: UUIDToString(data.revId), tag, author, timestamp: timestamp.getTime(), desc, format },
+			data.teamspace,
+			UUIDToString(data.project),
+			data.model,
+		);
+		expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+
+		expect(DrawingProcessor.createDrawingThumbnail).toHaveBeenCalledTimes(1);
+		expect(DrawingProcessor.createDrawingThumbnail).toHaveBeenCalledWith(data.teamspace,
+			data.project, data.model, data.revId);
 	});
 
 	test(`Should create a ${chatEvents.FEDERATION_NEW_REVISION} chat event if if there is a ${events.MODEL_IMPORT_FINISHED} (federation)`, async () => {
@@ -400,6 +460,7 @@ const testNewRevision = () => {
 			data.model,
 		);
 		expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+		expect(DrawingProcessor.createDrawingThumbnail).not.toHaveBeenCalled();
 	});
 
 	test(`Should fail gracefully on error if there is a ${events.MODEL_IMPORT_FINISHED} (container)`, async () => {
