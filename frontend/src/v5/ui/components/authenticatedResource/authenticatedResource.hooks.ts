@@ -20,7 +20,6 @@ import { useEffect, useState } from 'react';
 
 const CachedURL: Record<string, string>  = {};
 
-
 export const downloadAuthUrl = async (url):Promise<string> => {
 	if ( !isApiUrl(url) ) return url;
 
@@ -33,6 +32,15 @@ export const downloadAuthUrl = async (url):Promise<string> => {
 };
 
 export const deleteAuthUrlFromCache = (url) => delete CachedURL[url];
+
+export const downloadFile = async (url: string, fileName?: string) => {
+	const urlParts = new URL(url).pathname.split('/');
+	const urlFileName = urlParts[urlParts.length - 1];
+	const anchor = document.createElement('a');
+	anchor.href = await downloadAuthUrl(url) ;
+	anchor.download = fileName || urlFileName;
+	anchor.click();
+};
 
 // It uses axios config to pass the token so images are returned safely
 export const useAuthenticatedImage = (src: string, onError?) => {

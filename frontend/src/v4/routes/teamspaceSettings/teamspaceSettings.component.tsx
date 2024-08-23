@@ -25,10 +25,9 @@ import { Field, Formik } from 'formik';
 import { isEmpty } from 'lodash';
 
 import { Switch } from '@mui/material';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { ROUTES } from '../../constants/routes';
-import { LONG_DATE_TIME_FORMAT } from '../../services/formatting/formatDate';
 import { ChipsInput } from '../components/chipsInput/chipsInput.component';
-import { DateTime } from '../components/dateTime/dateTime.component';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
 import { FileInputField } from './components/fileInputField/fileInputField.component';
@@ -202,8 +201,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 		if (this.treatmentsUpdatedAt) {
 			return (
 				<>
-					Last imported:&nbsp;
-					<DateTime value={this.treatmentsUpdatedAt} format={LONG_DATE_TIME_FORMAT} />
+					Last imported: {formatDateTime(this.treatmentsUpdatedAt)}
 				</>
 			);
 		}
