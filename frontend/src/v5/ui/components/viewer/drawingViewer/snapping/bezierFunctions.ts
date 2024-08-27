@@ -15,50 +15,49 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Vector2 } from './types';
+import { Vector2, QuinticPolynomial, CubicBezier } from './types';
 import { SVGSnapDiagnosticsHelper } from './debug';
 
-class CubicPolynomial {
-	n: number;
+class Root {
+	/** The parameter (position along the curve) where the root is */
+	u: number;
 
-	r: number;
-
-	s: number;
-
-	v: number;
-
-	evaluate(t: number): number {
-  		return this.n * t * t * t + this.r * t * t + this.s * t + this.v;
-	}
+	/** The number of iterations it took to find the root */
+	iterations: number;
 }
 
 /**
  * RootFinder isolates values of t, where Q is at a local minimum.
  *
  * This implementation is based on:
- * Fabrice Rouillier & Paul Zimmermann. Efficient isolation of polynomial's real roots. Journal of Computational and Applied Mathematics (2004)
- * Xiao-Diao Chen, Yin Zhou, Zhenyu Shu, Hua Su & Jean-Claude Paul. Improved Algebraic Algorithm On Point Projection For Bézier Curves. Proceedings of the Second International Multi-Symposiums on Computer and Computational Sciences (2007)
- * Jingfang Zhou, Evan C. Sherbrooke & Nicholas M. Patrikalakis. Computation of stationary points of distance functions. Engineering with Computers. (1993)
+ * - Fabrice Rouillier & Paul Zimmermann. Efficient isolation of polynomial's
+ *   real roots. Journal of Computational and Applied Mathematics (2004).
+ * - Xiao-Diao Chen, Yin Zhou, Zhenyu Shu, Hua Su & Jean-Claude Paul. Improved
+ *   Algebraic Algorithm On Point Projection For Bézier Curves. Proceedings of
+ *   the Second International Multi-Symposiums on Computer and Computational
+ *   Sciences (2007).
+ * - Jingfang Zhou, Evan C. Sherbrooke & Nicholas M. Patrikalakis. Computation
+ *   of stationary points of distance functions. Engineering with Computers.
+ *   (1993).
  *
  * The basis of the algorithm is to transform the point and curve distance
  * function into a quintic polynomial. In this form the roots - which should
  * correspond the local minima of the distance - can be isolated and then
  * robustly resolved with a simple interative bisection.
  *
- * (Note that RootFinder explicitly filters root intervals that do not
- * contain local minima. While it can be used as a general purpose
- * root finder for other problems, it will require modifications to stop
- * it filtering other roots.)
+ * (Note that RootFinder explicitly filters root intervals that do not contain
+ * local minima. While it can be used as a general purpose root finder for other
+ * problems, it will require modifications to stop it filtering other roots.)
  *
- * In slightly more detail, the algorithm takes the approach based on
- * Vincents Theorem. The polynomial is bisected into intervals, and then
- * transformed in such a way that Descartes Rule-of-Signs will give the
- * a bound on the number of roots in that interval (between 0 and 1).
- * The search works by transforming a polynomial representing an interval
- * into another, in place - so it is memory constant. The traversal order
- * is chosen such that transforming between adjacent intervals need only a
- * couple of operations with mostly known parameters, allowing them to be
- * implemented using basic arithmetic on the coefficients.
+ * In slightly more detail, the algorithm takes the approach based on Vincents
+ * Theorem. The polynomial is bisected into intervals, and then transformed in
+ * such a way that Descartes Rule-of-Signs will give a bound on the number of
+ * roots in that interval (between 0 and 1). The search works by transforming a
+ * polynomial representing an interval into another, in place - so it is memory
+ * constant. The traversal order is chosen such that transforming between
+ * adjacent intervals need only a couple of operations with mostly known
+ * parameters, allowing them to be implemented using basic arithmetic on the
+ * coefficients.
  * */
 class RootFinder {
 
@@ -70,7 +69,7 @@ class RootFinder {
 
 	qc: number; // Current value of c for the polynomial Qp
 
-	roots: any[]; // True roots of the polynomial
+	roots: Root[]; // True roots of the polynomial
 
 	findRoots(q: QuinticPolynomial) {
 		this.roots = [];
@@ -237,7 +236,10 @@ class RootFinder {
 			// of 3.1.3 and Definition 6 of Rouillier & Zimmerman).
 
 			if (Math.abs(this.Qp.evaluate(0.5)) < Number.EPSILON) {
-				this.roots.push(this.getLowerBound(k + 1, 2 * c + 1));
+				this.roots.push({
+					u: this.getLowerBound(k + 1, 2 * c + 1),
+					iterations: 0,
+				});
 			}
 
 			// Subdivide the nodes in a psuedo-depth first search, enqueing
@@ -268,8 +270,8 @@ class RootFinder {
 		let ai = this.getLowerBound(k, c);
 		let bi = this.getUpperBound(k, c);
 		const Qa = this.Q.evaluate(ai);
-		const Qb = this.Q.evaluate(bi);
-		if (Qa > 0 && Qb < 0) {
+		const Qb = this.Q.evaluate(bi) - 0.0000001; // Be a little tolerant with b approaching zero - if we get false positives the worst case is that we run the bisection algorithm for a redundant root
+		if (Qa >= 0 && Qb <= 0) {
 			let ri = 0;
 			let i = 0;
 			for (i = 0; i < 100; i++) { // Maximum limit on iteration, though we'd hope to get to the end before then...
@@ -284,9 +286,9 @@ class RootFinder {
 				if (Math.abs(Qm) < Number.EPSILON) {
 					ri = mi;
 					break;
-				} else if (Qm > 0) {
+				} else if (Qm >= 0) {
 					ai = mi;
-				} else if (Qm < 0) {
+				} else if (Qm <= 0) {
 					bi = mi;
 				}
 			}
@@ -299,210 +301,75 @@ class RootFinder {
 	}
 }
 
-class QuinticPolynomial {
+/**
+ * Returns the closest point on a curve to point p using the root isolation
+ * method. Will always return a value, even if it is just the start or end
+ * of the curve, if these turn out to be closest.
+ */
+export function closestPointOnCurve(curve: CubicBezier, p: Vector2): Vector2 {
 
-	a0: number;
+	// The coefficients for the q.q' will be unchanged no matter where p
+	// is, so compute these and store them. computeQq will also compute
+	// j, k & m where necessary.
 
-	a1: number;
+	curve.computeQq();
 
-	a2: number;
+	// p.q' will change with p, so compute just these parts of the
+	// coefficients. The coefficients for each power can then simply be
+	// added when it comes time to evaluate p-q.q'
 
-	a3: number;
+	const b2 = Vector2.dot(p, curve.j);
+	const b1 = Vector2.dot(p, curve.k);
+	const b0 = Vector2.dot(p, curve.m);
 
-	a4: number;
+	const Q = new QuinticPolynomial(
+		curve.qq.a5,
+		curve.qq.a4,
+		curve.qq.a3,
+		curve.qq.a2 + b2,
+		curve.qq.a1 + b1,
+		curve.qq.a0 + b0,
+	);
 
-	a5: number;
+	// We now have coefficients for a univariate polynomial, Q. Find the roots
+	// within the range 0..1 to get potential closest points.
 
-	constructor(a5, a4, a3, a2, a1, a0) {
-  		this.a0 = a0;
-		this.a1 = a1;
-		this.a2 = a2;
-		this.a3 = a3;
-		this.a4 = a4;
-		this.a5 = a5;
+	const f = new RootFinder();
+	f.findRoots(Q);
+
+	// Test the end of the curve (the last control point) by adding a fake root
+	// for it. The first control point is tested as part of the loop
+	// initialisation.
+
+	f.roots.push({
+		u: 1,
+		iterations: 0,
+	});
+
+	let closestPoint = curve.evaluate(0);
+	let closestDistance = Vector2.norm(closestPoint, p);
+
+	for (const root of f.roots) {
+		let q = curve.evaluate(root.u);
+		const d = Vector2.norm(q, p);
+
+		if (d < closestDistance) {
+			closestDistance = d;
+			closestPoint = q;
+		}
 	}
 
-	evaluate(t: number) {
-  		const t2 = t * t;
-		const t3 = t2 * t;
-		const t4 = t3 * t;
-		const t5 = t4 * t;
-  		return this.a5 * t5 + this.a4 * t4 + this.a3 * t3 + this.a2 * t2 + this.a1 * t + this.a0;
-	}
+	return closestPoint;
 }
 
-class CubicBezier {
-
-	p0: Vector2;
-
-	p1: Vector2;
-
-	p2: Vector2;
-
-	p3: Vector2;
-
-	constructor(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2) {
-		this.p0 = p0;
-		this.p1 = p1;
-		this.p2 = p2;
-		this.p3 = p3;
-	}
-
-	// Get polynomial per component - this is far easier to write out per component then
-	// per vector, since Js does not support operator overloading.
-
-	getPolynomial(p0, p1, p2, p3) {
-  		const P = new CubicPolynomial();
-		P.n = -p0 + 3 * p1 - 3 * p2 + p3;
-		P.r = 3 * p0 - 6 * p1 + 3 * p2;
-		P.s = -3 * p0 + 3 * p1;
-		P.v = p0;
-		return P;
-	}
-
-	// Defining the dot product of the closest point with the tangent (derivative) as the
-	// function to minimise is an important facet of this solution, as it allows the
-	// expanded polynomial to be univariate (as all the 2d terms are dot products).
-
-	closestPoint(p: Vector2, qs: any[], ps: any[], helper: SVGSnapDiagnosticsHelper): Vector2 {
-  		// Compute the polynomials of the parametric form of the Bezier curve
-
-		const n = new Vector2(
-    		-this.p0.x + 3 * this.p1.x - 3 * this.p2.x + this.p3.x,
-			-this.p0.y + 3 * this.p1.y - 3 * this.p2.y + this.p3.y,
-		);
-
-		const r = new Vector2(
-    		3 * this.p0.x - 6 * this.p1.x + 3 * this.p2.x,
-			3 * this.p0.y - 6 * this.p1.y + 3 * this.p2.y,
-		);
-
-		const s = new Vector2(
-    		-3 * this.p0.x + 3 * this.p1.x,
-			-3 * this.p0.y + 3 * this.p1.y,
-		);
-
-		const v = new Vector2(
-    		this.p0.x,
-			this.p0.y,
-		);
-
-		// From this form, compute the derivatives
-
-		const j = new Vector2(
-			3 * (-this.p0.x + 3 * this.p1.x - 3 * this.p2.x + this.p3.x),
-			3 * (-this.p0.y + 3 * this.p1.y - 3 * this.p2.y + this.p3.y),
-		);
-
-		const k = new Vector2(
-			2 * (3 * this.p0.x - 6 * this.p1.x + 3 * this.p2.x),
-			2 * (3 * this.p0.y - 6 * this.p1.y + 3 * this.p2.y),
-		);
-
-		const m = new Vector2(
-    		s.x,
-			s.y,
-		);
-
-		// The coefficients for the q.q' will be unchanged no matter where p
-		// is, so compute these and store them.
-
-		const a5 = -Vector2.dot(j, n);
-  	    const a4 = -(Vector2.dot(j, r) + Vector2.dot(k, n));
- 		const a3 = -(Vector2.dot(j, s) + Vector2.dot(k, r) + Vector2.dot(m, n));
- 		const a2 = -(Vector2.dot(j, v) + Vector2.dot(k, s) + Vector2.dot(m, r));
- 		const a1 = -(Vector2.dot(k, v) + Vector2.dot(m, s));
- 		const a0 = -Vector2.dot(m, v);
-
-		// p.q' will change with p, so compute just these parts of the
-		// coefficients. The coefficients for each power can simply be added
-		// when it comes time to evaluate p-q.q'
-
-		const start = performance.now();
-
-		const b2 = Vector2.dot(p, j);
-		const b1 = Vector2.dot(p, k);
-		const b0 = Vector2.dot(p, m);
-
-		const Q = new QuinticPolynomial(a5, a4, a3, a2 + b2, a1 + b1, a0 + b0);
-
-		// We now have coefficients for a univariate polynomial, Q. Find the roots
-		// within the range 0..1 to get potential closest points.
-
-		const f = new RootFinder();
-		f.findRoots(Q);
-
-		console.log('Test time ' + (performance.now() - start));
-
-		for (let t = 0; t <= 1; t += (1 / 20)) {
-			qs.push([t, Q.evaluate(t)]);
-			ps.push([t, this.distance(p, t)]);
-		}
-
-		helper.renderText('Num Roots ' + (f.roots.length), 100, 500);
-
-		// Check all the roots
-
-		if (f.roots.length == 0) {
-			return this.evaluate(0);
-		} else {
-			let closestPoint = this.evaluate(0);
-			let closestDistance = Vector2.norm(closestPoint, p);
-			for (const root of f.roots) {
-				let q = this.evaluate(root.u);
-				const d = Vector2.norm(q, p);
-				if (d < closestDistance) {
-					closestDistance = d;
-					closestPoint = q;
-				}
-			}
-			return closestPoint;
-		}
-	}
-
-	evaluate(t: number) {
-		// Get the Bezier in its polynomial form
-		const X = this.getPolynomial(this.p0.x, this.p1.x, this.p2.x, this.p3.x);
-		const Y = this.getPolynomial(this.p0.y, this.p1.y, this.p2.y, this.p3.y);
-		return new Vector2(X.evaluate(t), Y.evaluate(t));
-	}
-
-	distance(p: Vector2, t: number) {
-		return Vector2.norm(p, this.evaluate(t));
-	}
-
-	drawCurve(ctx: CanvasRenderingContext2D, s: number) {
-
-		ctx.beginPath();
-		ctx.moveTo(this.p0.x, this.p0.y);
-
-		for (let t = 0; t <= 1; t += (1 / s)) {
-    	const p = this.evaluate(t);
-    	ctx.lineTo(p.x, p.y);
-		}
-
-		ctx.strokeStyle = 'black';
-		ctx.stroke();
-	}
-
-	drawControlPoints(ctx) {
-		ctx.beginPath();
-		ctx.moveTo(this.p0.x, this.p0.y);
-		ctx.lineTo(this.p1.x, this.p1.y);
-		ctx.lineTo(this.p2.x, this.p2.y);
-		ctx.lineTo(this.p3.x, this.p3.y);
-		ctx.strokeStyle = 'blue';
-		ctx.stroke();
-	}
-}
-
-
+/*
 const C = new CubicBezier(
 	new Vector2(100, 50),
 	new Vector2(100, 200),
 	new Vector2(100, 50),
 	new Vector2(300, 50),
 );
+*/
 
 
 // U Bend
@@ -515,6 +382,7 @@ const C = new CubicBezier(
 );
 */
 
+
 // Crossing S curve
 /*
 const C = new CubicBezier(
@@ -526,7 +394,8 @@ const C = new CubicBezier(
 */
 
 
-/* Cusp
+// Cusp
+/*
 const C = new CubicBezier(
 	new Vector2(100, 150),
 	new Vector2(300, 150),
@@ -535,6 +404,7 @@ const C = new CubicBezier(
 );
 */
 
+// Closed
 /*
 const C = new CubicBezier(
 	new Vector2(100, 100),
@@ -543,6 +413,23 @@ const C = new CubicBezier(
 	new Vector2(100, 100),
 );
 */
+
+/* First and second point the same
+const C = new CubicBezier(
+	new Vector2(67.888791, 51.392449),
+	new Vector2(67.888791, 51.392449),
+	new Vector2(42.82704, 22.206614),
+	new Vector2(79.309335, 44.413228),
+);
+*/
+
+// Last and penultimate point the same
+const C = new CubicBezier(
+	new Vector2(99.612525, 83.116183),
+	new Vector2(79.626573, 65.985368),
+	new Vector2(154.81182, 62.812993),
+	new Vector2(154.81182, 62.812993),
+);
 
 export function setupIntersectionTest(helper: SVGSnapDiagnosticsHelper) {
 
@@ -563,16 +450,22 @@ export function setupIntersectionTest(helper: SVGSnapDiagnosticsHelper) {
 		}
 
 		helper.clear();
-		C.drawCurve(ctx, 50);
-		C.drawControlPoints(ctx);
+		helper.renderCurve(C, 50);
+		helper.renderControlPoints(C);
 
 		const rect = ctx.canvas.getBoundingClientRect();
-		const p = new Vector2(evt.clientX - rect.left, evt.clientY - rect.top);
+		//const p = new Vector2(evt.clientX - rect.left, evt.clientY - rect.top);
+
+		const p = new Vector2(133.52533409068846, 64.63712491249375);
 
 		const points = [];
 		const distances = [];
 
-		const cp = C.closestPoint(p, points, distances, helper);
+		const cp = closestPointOnCurve(C, p);
+
+
+
+		console.log('CP: ' + cp.x + ' ' + cp.y + ' n: ' + Vector2.norm(cp, p));
 
 		helper.beginPlot(100, 400, 200, 1 / 1000);
 		for (const a of points) {

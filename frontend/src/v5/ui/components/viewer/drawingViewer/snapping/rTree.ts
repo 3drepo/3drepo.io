@@ -15,20 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Vector2, Line } from './types';
+import { Vector2, Line, CubicBezier, Bounds } from './types';
 
 import { closestPointOnLine, lineLineIntersection } from './lineFunctions';
+import { closestPointOnCurve } from './bezierFunctions';
 
-export class RTreeNode {
-	xmin: number;
+export class RTreeNode extends Bounds {
+	line: Line | undefined;
 
-	xmax: number;
-
-	ymin: number;
-
-	ymax: number;
-
-	line: Line;
+	curve: CubicBezier | undefined;
 
 	children: RTreeNode[];
 
@@ -79,6 +74,8 @@ class TraversalContext {
 	numNodesTraversed: number;
 
 	numLineTests: number;
+
+	numCurveTests: number;
 
 	numIntersectingPairs: number;
 
@@ -134,23 +131,37 @@ class RTreeQueries {
 	// on any primitive
 	static findClosestEdge(ctx: TraversalContext) {
 		for (const node of ctx.nodes) {
-
-			// Implement more primitive checks here
-
-			const p = closestPointOnLine(node.line.start.x, node.line.start.y, node.line.end.x, node.line.end.y, ctx.position.x, ctx.position.y);
-			const d = Vector2.subtract(ctx.position, p).norm;
-			if (d < ctx.closestEdgeDistance) {
-				ctx.closestEdgeDistance = d;
-				ctx.closestEdge = p;
+			if (node.line) {
+				const p = closestPointOnLine(node.line.start.x, node.line.start.y, node.line.end.x, node.line.end.y, ctx.position.x, ctx.position.y);
+				const d = Vector2.subtract(ctx.position, p).norm;
+				if (d < ctx.closestEdgeDistance) {
+					ctx.closestEdgeDistance = d;
+					ctx.closestEdge = p;
+				}
+				ctx.numLineTests++;
 			}
-			ctx.numLineTests++;
+			if (node.curve) {
+				const p = closestPointOnCurve(node.curve, ctx.position);
+				const d = Vector2.subtract(ctx.position, p).norm;
+				if ( d < ctx.closestEdgeDistance) {
+					ctx.closestEdgeDistance = d;
+					ctx.closestEdge = p;
+				}
+				ctx.numCurveTests++;
+			}
 		}
 	}
 
 	static findClosestNode(ctx: TraversalContext) {
 		for (const node of ctx.nodes) {
-			this.testClosestPoint(node.line.start, ctx);
-			this.testClosestPoint(node.line.end, ctx);
+			if (node.line) {
+				this.testClosestPoint(node.line.start, ctx);
+				this.testClosestPoint(node.line.end, ctx);
+			}
+			if (node.curve) {
+				this.testClosestPoint(node.curve.p0, ctx);
+				this.testClosestPoint(node.curve.p3, ctx);
+			}
 		}
 	}
 
@@ -202,9 +213,19 @@ class RTreeQueries {
 		ctx.intersectionQueryTime = performance.now() - start;
 	}
 
-	static nodeNodeIntersection(a: RTreeNode, b: RTreeNode): Vector2 {
-		// Add more primitive tests here
-		return lineLineIntersection(a.line.start, a.line.end, b.line.start, b.line.end);
+	static nodeNodeIntersection(a: RTreeNode, b: RTreeNode): Vector2 | null {
+		if (a.line && b.line) {
+			return lineLineIntersection(a.line.start, a.line.end, b.line.start, b.line.end);
+		} else if (a.line && b.curve) {
+			console.warn('Line-Curve tests not implemented yet');
+			return null;
+		} else if (a.curve && b.line) {
+			console.warn('Line-Curve tests not implemented yet');
+			return null;
+		} else if (a.curve && b.curve) {
+			console.warn('Curve-Curve tests not implemented yet');
+			return null;
+		}
 	}
 
 }
@@ -275,6 +296,7 @@ export class RTree {
 
 export type RTreeOptions = {
 	lines: Line[],
+	curves: CubicBezier[],
 	n: number,
 };
 
@@ -297,23 +319,33 @@ export class RTreeBuilder {
 
 	lines: Line[];
 
+	curves: CubicBezier[];
+
 	n: number;
 
 	report: RTreeBuilderReport;
 
 	constructor(options: RTreeOptions) {
 		this.lines = options.lines;
+		this.curves = options.curves;
 		this.n = options.n;
 		this.report = new RTreeBuilderReport();
 	}
 
 	makeNodeFromLine(line: Line): RTreeNode {
 		const node = new RTreeNode();
-		node.xmin = Math.min(line.start.x, line.end.x);
-		node.xmax = Math.max(line.start.x, line.end.x);
-		node.ymin = Math.min(line.start.y, line.end.y);
-		node.ymax = Math.max(line.start.y, line.end.y);
+		line.getBounds(node);
 		node.line = line;
+		node.curve = null;
+		node.children = null;
+		return node;
+	}
+
+	makeNodeFromCurve(curve: CubicBezier): RTreeNode {
+		const node = new RTreeNode();
+		curve.getBounds(node);
+		node.curve = curve;
+		node.line = null;
 		node.children = null;
 		return node;
 	}
@@ -392,6 +424,10 @@ export class RTreeBuilder {
 		const nodes = this.lines.map( (line) => {
 			return this.makeNodeFromLine(line);
 		});
+
+		nodes.push(...this.curves.map( (curve) => {
+			return this.makeNodeFromCurve(curve);
+		}));
 
 		// Starting at the lowest level, construct each layer of the hierarchy
 

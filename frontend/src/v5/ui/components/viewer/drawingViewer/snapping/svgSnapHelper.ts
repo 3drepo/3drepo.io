@@ -16,7 +16,7 @@
  */
 
 import 'path-data-polyfill';
-import { Vector2, Line } from './types';
+import { Vector2, Line, CubicBezier } from './types';
 import { RTree, RTreeBuilder } from './rTree';
 import { SVGSnapDiagnosticsHelper } from './debug';
 
@@ -24,15 +24,22 @@ class PrimitiveCollector {
 
 	lines: Line[];
 
+	curves: CubicBezier[];
+
 	offset: Vector2;
 
 	constructor(offset: Vector2) {
 		this.lines = [];
+		this.curves = [];
 		this.offset = offset;
 	}
 
 	addLine(line: Line) {
 		this.lines.push(line);
+	}
+
+	addCurve(curve: CubicBezier) {
+		this.curves.push(curve);
 	}
 }
 
@@ -70,10 +77,13 @@ class PathCollector {
 	}
 
 	addCurve(values: number[]) {
-		const start = this.currentPosition;
-		const end = new Vector2(this.collector.offset.x + values[4], this.collector.offset.y + values[5]);
-
-		this.currentPosition = end;
+		const p0 = this.currentPosition;
+		const p1 = new Vector2(this.collector.offset.x + values[0], this.collector.offset.y + values[1]);
+		const p2 = new Vector2(this.collector.offset.x + values[2], this.collector.offset.y + values[3]);
+		const p3 = new Vector2(this.collector.offset.x + values[4], this.collector.offset.y + values[5]);
+		const curve = new CubicBezier(p0, p1, p2, p3);
+		this.collector.addCurve(curve);
+		this.currentPosition = p3;
 	}
 
 	// Closes the subpath by drawing a straight line from the current position
@@ -290,6 +300,7 @@ export class SVGSnapHelper {
 		// debug draw all the lines
 
 		this.debugHelper?.renderLines(collector.lines);
+		this.debugHelper?.renderCurves(collector.curves);
 
 		this.buildAccelerationStructures(collector);
 	}
@@ -297,6 +308,7 @@ export class SVGSnapHelper {
 	buildAccelerationStructures(collector: PrimitiveCollector) {
 		const rbuilder = new RTreeBuilder({
 			lines: collector.lines,
+			curves: collector.curves,
 			n: 10,
 		});
 		this.rtree = rbuilder.build();

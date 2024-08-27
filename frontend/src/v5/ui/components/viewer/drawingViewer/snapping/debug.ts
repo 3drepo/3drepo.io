@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Vector2, Line } from './types';
+import { Vector2, Line, CubicBezier } from './types';
 import { RTree, RTreeNode } from './rTree';
 
 
@@ -107,6 +107,35 @@ export class SVGSnapDiagnosticsHelper {
 				this.renderRTreeNode(child);
 			}
 		}
+	}
+
+	renderCurves(curves: CubicBezier[]) {
+		for (const c of curves) {
+			this.renderCurve(c, 20);
+		}
+	}
+
+	renderCurve(curve: CubicBezier, s: number) {
+		this.context.beginPath();
+		this.context.moveTo(curve.p0.x, curve.p0.y);
+
+		for (let t = 0; t <= 1; t += (1 / s)) {
+    	const p = curve.evaluate(t);
+    		this.context.lineTo(p.x, p.y);
+		}
+
+		this.context.strokeStyle = 'black';
+		this.context.stroke();
+	}
+
+	renderControlPoints(curve: CubicBezier) {
+		this.context.beginPath();
+		this.context.moveTo(curve.p0.x, curve.p0.y);
+		this.context.lineTo(curve.p1.x, curve.p1.y);
+		this.context.lineTo(curve.p2.x, curve.p2.y);
+		this.context.lineTo(curve.p3.x, curve.p3.y);
+		this.context.strokeStyle = 'blue';
+		this.context.stroke();
 	}
 
 	beginPlot(x, y, xs, ys) {

@@ -104,8 +104,8 @@ export const Viewer2D = () => {
 
 		// snapHandler.showDebugCanvas(document.querySelector('#app'));
 
-		const diag = new SVGSnapDiagnosticsHelper(document.querySelector('#app'));
-		setupIntersectionTest(diag);
+		// const diag = new SVGSnapDiagnosticsHelper(document.querySelector('#app'));
+		// setupIntersectionTest(diag);
 
 		// Set up a cursor to show the state of the snap.
 
