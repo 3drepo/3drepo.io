@@ -21,12 +21,10 @@ import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { UnityUtil } from '@/globals/unity-util';
 import { TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { isEqual } from 'lodash';
-import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 import { CalibrationContext } from '../../calibrationContext';
 
 export const Calibration3DHandler = () => {
 	const { isCalibrating3D, setIsCalibrating3D, vector3D, setVector3D } = useContext(CalibrationContext);
-	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
 	const [lastPickedPoint, setLastPickedPoint] = useState(null);
 
 	useEffect(() => {
@@ -62,7 +60,7 @@ export const Calibration3DHandler = () => {
 
 	useEffect(() => {
 		UnityUtil.setCalibrationToolMode('Vector');
-		setLeftPanelRatio(.5);
+		Viewer.isModelReady().then(() => setIsCalibrating3D(true));
 
 		return () => {
 			setIsCalibrating3D(false);
