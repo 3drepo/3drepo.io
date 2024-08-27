@@ -16,7 +16,7 @@
  */
 
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { CardContainer, CardHeader, CardContent } from '@components/viewer/cards/card.styles';
+import { CardContainer, CardContent } from '@components/viewer/cards/card.styles';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import TicketsIcon from '@assets/icons/filled/tickets-filled.svg';
@@ -25,6 +25,8 @@ import { TicketsList } from './ticketsList.component';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { ViewerParams } from '../../../routes.constants';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { CardHeader } from '@components/viewer/cards/cardHeader.component';
+import { formatMessage } from '@/v5/services/intl';
 
 export const TicketsListCard = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
@@ -33,11 +35,11 @@ export const TicketsListCard = () => {
 
 	return (
 		<CardContainer>
-			<CardHeader>
-				<TicketsIcon />
-				<FormattedMessage id="viewer.cards.tickets.title" defaultMessage="Tickets" />
-				{!readOnly && (<NewTicketMenu />)}
-			</CardHeader>
+			<CardHeader
+				icon={<TicketsIcon />}
+				title={formatMessage({ id: 'viewer.cards.tickets.title', defaultMessage: 'Tickets' })}
+				actions={!readOnly ? <NewTicketMenu /> : null}
+			/>
 			<CardContent onClick={TicketsCardActionsDispatchers.resetState}>
 				{tickets.length ? (
 					<TicketsList tickets={tickets} />
