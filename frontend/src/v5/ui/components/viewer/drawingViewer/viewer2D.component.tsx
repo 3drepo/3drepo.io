@@ -38,9 +38,6 @@ import { isFirefox } from '@/v5/helpers/browser.helper';
 import { ZoomableImage } from './zoomableImage.types';
 import { SVGSnapHelper } from './snapping/svgSnapHelper';
 import { Vector2 } from './snapping/types';
-import { SVGSnapDiagnosticsHelper } from './snapping/debug';
-import { setupIntersectionTest } from './snapping/bezierFunctions';
-
 
 export const Viewer2D = () => {
 	const [drawingId] = useSearchParam('drawingId');
@@ -101,11 +98,6 @@ export const Viewer2D = () => {
 		// The canvas and everything on it is in svg space, making it particularly
 		// useful to diagnose transform issues when going between the client and
 		// the svg coordinate systems.
-
-		// snapHandler.showDebugCanvas(document.querySelector('#app'));
-
-		// const diag = new SVGSnapDiagnosticsHelper(document.querySelector('#app'));
-		// setupIntersectionTest(diag);
 
 		// Set up a cursor to show the state of the snap.
 
