@@ -166,7 +166,6 @@ db.createRevision = async (teamspace, model, revision, modelType) => {
 	if (revision.thumbnail) {
 		writeReferencedData(revision.thumbnail, revision.thumbnailData);
 	}
-
 	const formattedRevision = {
 		...revision,
 		_id: stringToUUID(revision._id),

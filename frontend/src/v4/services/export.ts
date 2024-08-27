@@ -15,14 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { downloadFile } from "@components/authenticatedResource/authenticatedResource.hooks";
 import { downloadJSON } from "./api";
 import { getAPIUrl } from "./api/default";
 
-// import * as API from '../services/api';
-
-export const exportBCF = (teamspace, model, issueNumbers) => {
-	const exportUrl = getAPIUrl(`${teamspace}/${model}/issues.bcfzip?numbers=${issueNumbers}`);
-	window.open(exportUrl, '_blank', 'noopener');
+export const exportBCF = async (teamspace, model, issueNumbers) => {
+	await downloadFile(getAPIUrl(`${teamspace}/${model}/issues.bcfzip?numbers=${issueNumbers}`));
 };
 
 const handlePrint = (dataType) => (teamspace, model, dataNumbers) => {
