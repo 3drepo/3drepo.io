@@ -26,7 +26,7 @@ const Path = require('path');
 const { addRevision } = require('../models/revisions');
 const archiver = require('archiver');
 const { events } = require('./eventsManager/eventsManager.constants');
-const { exec } = require('child_process');
+const { execFile } = require('child_process');
 const { publish } = require('./eventsManager/eventsManager');
 const { cn_queue: queueConfig } = require('../utils/config');
 const processingLabel = require('../utils/logger').labels.modelProcessing;
@@ -225,13 +225,13 @@ ModelProcessing.getLogArchive = async (corId) => {
 						const isWin = process.platform === 'win32';
 						if (isWin) {
 							// eslint-disable-next-line security/detect-child-process
-							exec(`Get-Content ${logPath} -Tail 20`,
+							execFile('Get-Content', [logPath, '-Tail', '20'],
 								{ shell: 'powershell.exe' }, (error, stdout) => {
 									resolve(error ? undefined : stdout);
 								});
 						} else {
 							// eslint-disable-next-line security/detect-child-process
-							exec(`tail -n20 ${logPath}`,
+							execFile('tail', [logPath, '-n20'],
 								(error, stdout) => {
 									resolve(error ? undefined : stdout);
 								});
