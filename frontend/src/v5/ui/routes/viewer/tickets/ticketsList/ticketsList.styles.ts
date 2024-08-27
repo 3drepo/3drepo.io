@@ -88,3 +88,7 @@ export const ActionMenu = styled(ActionMenuBase).attrs({
 export const MenuItem = styled(MenuItemBase)`
 	padding: 5px 12px;
 `;
+
+export const Actions = styled.div` // Can be removed when #5009 merged in
+	display: contents;
+`;
