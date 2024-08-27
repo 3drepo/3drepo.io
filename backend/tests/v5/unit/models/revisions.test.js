@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { times } = require('lodash');
 const { src } = require('../../helper/path');
 
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const Revisions = require(`${src}/models/revisions`);
+const { DRAWINGS_HISTORY_COL } = require(`${src}/models/revisions.constants`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { generateRandomString, generateRandomObject, generateRandomNumber } = require('../../helper/services');
@@ -97,10 +97,14 @@ const testGetLatestRevision = () => {
 
 const testGetRevisions = () => {
 	const teamspace = generateRandomString();
+	const project = generateRandomString();
 	const model = generateRandomString();
 
 	const checkResults = (fn, showVoid, modelType) => {
-		const query = { incomplete: { $exists: false }, ...(modelType === modelTypes.DRAWING ? { model } : {}) };
+		const query = {
+			incomplete: { $exists: false },
+			...(modelType === modelTypes.DRAWING ? { model, project } : {}),
+		};
 
 		if (!showVoid) {
 			query.void = { $ne: true };
@@ -120,7 +124,7 @@ const testGetRevisions = () => {
 	describe('GetRevisions', () => {
 		test('Should return all container revisions', async () => {
 			const fn = jest.spyOn(db, 'find').mockResolvedValue(expectedData);
-			const res = await Revisions.getRevisions(teamspace, model, modelTypes.CONTAINER, true);
+			const res = await Revisions.getRevisions(teamspace, project, model, modelTypes.CONTAINER, true);
 			expect(res).toEqual(expectedData);
 			checkResults(fn, true);
 		});
@@ -128,23 +132,57 @@ const testGetRevisions = () => {
 		test('Should return non void container revisions', async () => {
 			const nonVoidRevisions = expectedData.filter((rev) => !rev.void);
 			const fn = jest.spyOn(db, 'find').mockResolvedValue(nonVoidRevisions);
-			const res = await Revisions.getRevisions(teamspace, model, modelTypes.CONTAINER, false);
+			const res = await Revisions.getRevisions(teamspace, project, model, modelTypes.CONTAINER, false);
 			expect(res).toEqual(nonVoidRevisions);
 			checkResults(fn, false);
 		});
 
 		test('Should return an empty object if there are no revisions', async () => {
 			const fn = jest.spyOn(db, 'find').mockResolvedValue([]);
-			const res = await Revisions.getRevisions(teamspace, model, modelTypes.CONTAINER, true);
+			const res = await Revisions.getRevisions(teamspace, project, model, modelTypes.CONTAINER, true);
 			expect(res).toEqual([]);
 			checkResults(fn, true);
 		});
 
 		test('Should return all container revisions (drawing)', async () => {
 			const fn = jest.spyOn(db, 'find').mockResolvedValue(expectedData);
-			const res = await Revisions.getRevisions(teamspace, model, modelTypes.DRAWING, true);
+			const res = await Revisions.getRevisions(teamspace, project, model, modelTypes.DRAWING, true);
 			expect(res).toEqual(expectedData);
 			checkResults(fn, true, modelTypes.DRAWING);
+		});
+	});
+};
+
+const testGetRevisionsByQuery = () => {
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const model = generateRandomString();
+	const query = generateRandomObject();
+	const projection = generateRandomObject();
+	const expectedData = [generateRandomObject(), generateRandomObject()];
+
+	describe('GetRevisionsByQuery', () => {
+		test('Should return the revisions (container)', async () => {
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedData);
+			const res = await Revisions.getRevisionsByQuery(teamspace, project, model, modelTypes.CONTAINER,
+				query, projection);
+			expect(res).toEqual(expectedData);
+
+			const formattedQuery = { incomplete: { $exists: false }, void: { $ne: true }, ...query };
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, formattedQuery, projection, { timestamp: -1 });
+		});
+
+		test('Should return the revisions (drawing)', async () => {
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedData);
+			const res = await Revisions.getRevisionsByQuery(teamspace, project, model, modelTypes.DRAWING,
+				query, projection);
+			expect(res).toEqual(expectedData);
+
+			const formattedQuery = { incomplete: { $exists: false }, void: { $ne: true }, project, model, ...query };
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL, formattedQuery,
+				projection, { timestamp: -1 });
 		});
 	});
 };
@@ -410,57 +448,11 @@ const testGetRevisionFormat = () => {
 	});
 };
 
-const testGetPreviousRevisions = () => {
-	const teamspace = generateRandomString();
-	const model = generateRandomString();
-	const project = generateRandomString();
-	const projection = generateRandomObject();
-	const revision = { _id: generateRandomString(), timestamp: generateRandomString() };
-	const previousRevisions = times(5, () => ({ _id: generateRandomString(), timestamp: generateRandomString() }));
-
-	describe('GetPreviousRevisions', () => {
-		test('Should return previous revision (container)', async () => {
-			const fn1 = jest.spyOn(db, 'findOne').mockResolvedValueOnce(revision);
-			const fn2 = jest.spyOn(db, 'find').mockResolvedValueOnce(previousRevisions);
-
-			const res = await Revisions.getPreviousRevisions(teamspace, project, model,
-				modelTypes.CONTAINER, revision._id, projection);
-
-			expect(res).toEqual(previousRevisions);
-			expect(fn1).toHaveBeenCalledTimes(1);
-			expect(fn1).toHaveBeenCalledWith(teamspace, `${model}.history`,
-				{ _id: revision._id, project }, { timestamp: 1 }, undefined);
-
-			expect(fn2).toHaveBeenCalledTimes(1);
-			expect(fn2).toHaveBeenCalledWith(teamspace, `${model}.history`,
-				{ ...excludeIncomplete, ...excludeVoids, project, timestamp: { $lt: revision.timestamp } },
-				projection, { timestamp: -1 });
-		});
-
-		test('Should return previous revision (drawing)', async () => {
-			const fn1 = jest.spyOn(db, 'findOne').mockResolvedValueOnce(revision);
-			const fn2 = jest.spyOn(db, 'find').mockResolvedValueOnce(previousRevisions);
-
-			const res = await Revisions.getPreviousRevisions(teamspace, project, model,
-				modelTypes.DRAWING, revision._id, projection);
-
-			expect(res).toEqual(previousRevisions);
-			expect(fn1).toHaveBeenCalledTimes(1);
-			expect(fn1).toHaveBeenCalledWith(teamspace, 'drawings.history',
-				{ _id: revision._id, project, model }, { timestamp: 1 }, undefined);
-
-			expect(fn2).toHaveBeenCalledTimes(1);
-			expect(fn2).toHaveBeenCalledWith(teamspace, 'drawings.history',
-				{ ...excludeIncomplete, ...excludeVoids, project, timestamp: { $lt: revision.timestamp }, model },
-				projection, { timestamp: -1 });
-		});
-	});
-};
-
 describe('models/revisions', () => {
 	testGetRevisionCount();
 	testGetLatestRevision();
 	testGetRevisions();
+	testGetRevisionsByQuery();
 	testAddRevision();
 	testDeleteModelRevisions();
 	testUpdateRevision();
@@ -469,5 +461,4 @@ describe('models/revisions', () => {
 	testIsRevAndStatusCodeUnique();
 	testGetRevisionByIdOrTag();
 	testGetRevisionFormat();
-	testGetPreviousRevisions();
 });

@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { calibrationStatuses } = require('../../../../../../../../../../src/v5/models/calibrations.constants');
 const { deleteIfUndefined } = require('../../../../../../../../../../src/v5/utils/helper/objects');
 const { src } = require('../../../../../../../../helper/path');
 
-const { determineTestGroup, generateRandomString } = require('../../../../../../../../helper/services');
+const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -95,10 +96,7 @@ const testValidateNewCalibration = () => {
 				params: { teamspace, project, drawing, revision },
 			};
 
-			const latestCalibration = {
-				rev_id: calibratedRev ? req.params.revision : generateRandomString(),
-				[generateRandomString()]: generateRandomString(),
-			};
+			const latestCalibration = generateRandomObject();
 
 			const mockCB = jest.fn(() => {});
 
@@ -107,14 +105,16 @@ const testValidateNewCalibration = () => {
 					throw new Error();
 				}
 
-				return latestCalibration;
+				return {
+					calibration: latestCalibration,
+					status: calibratedRev ? calibrationStatuses.CALIBRATED : calibrationStatuses.UNCONFIRMED,
+				};
 			});
 
 			await Calibrations.validateNewCalibration(req, {}, mockCB);
 
 			expect(CalibrationProc.getCalibration).toHaveBeenCalledTimes(1);
-			expect(CalibrationProc.getCalibration).toHaveBeenCalledWith(teamspace, project, drawing,
-				revision, true);
+			expect(CalibrationProc.getCalibration).toHaveBeenCalledWith(teamspace, project, drawing, revision);
 
 			if (sucess) {
 				expect(mockCB).toHaveBeenCalledTimes(1);

@@ -39,7 +39,7 @@ Calibrations.getCalibration = (teamspace, project, drawing, revision, projection
 	teamspace, CALIBRATIONS_COL, { drawing, rev_id: revision, project },
 	projection, { createdAt: -1 });
 
-Calibrations.deleteCalibrations = (teamspace, project, drawing) => db.deleteMany(
+Calibrations.deleteDrawingCalibrations = (teamspace, project, drawing) => db.deleteMany(
 	teamspace, CALIBRATIONS_COL, { project, drawing });
 
 Calibrations.getCalibrationForMultipleRevisions = (teamspace, revIds, projection) => {

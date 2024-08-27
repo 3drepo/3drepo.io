@@ -17,7 +17,8 @@
 
 const { times } = require('lodash');
 const { src } = require('../../../../../../helper/path');
-const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../../../../../helper/services');
+const { determineTestGroup, generateRandomString, generateRandomObject, generateRandomDate } = require('../../../../../../helper/services');
+const { calibrationStatuses } = require('../../../../../../../../src/v5/models/calibrations.constants');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
@@ -34,54 +35,108 @@ const testGetCalibration = () => {
 		const teamspace = generateRandomString();
 		const project = generateRandomString();
 		const drawing = generateRandomString();
-		const revision = generateRandomString();
-		const revisions = times(5, () => ({ _id: generateRandomString(), ...generateRandomObject() }));
+		const revisionId = generateRandomString();
 
-		test('should return error if there are no calibrations', async () => {
+		const calibration = generateRandomObject();
+		const revision = {
+			_id: generateRandomString(),
+			timestamp: generateRandomDate(),
+			...generateRandomObject(),
+		};
+
+		const revisions = times(5, () => ({
+			_id: generateRandomString(),
+			timestamp: generateRandomDate(),
+			...generateRandomObject(),
+		}));
+
+		const projection = {
+			horizontal: 1,
+			verticalRange: 1,
+			units: 1,
+			createdAt: 1,
+			createdBy: 1,
+		};
+
+		test('should return the latest revision calibration', async () => {
+			CalibrationsModel.getCalibration.mockResolvedValueOnce(calibration);
+
+			await expect(Calibrations.getCalibration(teamspace, project, drawing, revisionId))
+				.resolves.toEqual({ calibration, status: calibrationStatuses.CALIBRATED });
+
+			expect(CalibrationsModel.getCalibration).toHaveBeenCalledTimes(1);
+			expect(CalibrationsModel.getCalibration).toHaveBeenCalledWith(teamspace, project, drawing,
+				revisionId, projection);
+		});
+
+		test('should return error if the revision has no calibrations and there are no previous revisions', async () => {
 			CalibrationsModel.getCalibration.mockResolvedValueOnce(undefined);
-			RevisionsModel.getPreviousRevisions.mockResolvedValueOnce(revisions);
+			RevisionsModel.getRevisionByIdOrTag.mockResolvedValueOnce(revision);
+			RevisionsModel.getRevisionsByQuery.mockResolvedValueOnce([]);
 
-			await expect(Calibrations.getCalibration(teamspace, project, drawing, revision))
+			await expect(Calibrations.getCalibration(teamspace, project, drawing, revisionId))
 				.rejects.toEqual(templates.calibrationNotFound);
 
-			expect(RevisionsModel.getPreviousRevisions).toHaveBeenCalledTimes(1);
-			expect(RevisionsModel.getPreviousRevisions).toHaveBeenCalledWith(teamspace, project, drawing,
-				modelTypes.DRAWING, revision, { _id: 1 });
-			expect(CalibrationsModel.getCalibration).toHaveBeenCalledTimes(6);
-		});
-
-		test('should return the last available calibration if the provided revision has calibrations', async () => {
-			const calibration = generateRandomObject();
-			CalibrationsModel.getCalibration.mockResolvedValueOnce(calibration);
-
-			const lastCalibration = await Calibrations.getCalibration(teamspace, project,
-				drawing, revision);
-
-			expect(lastCalibration).toEqual(calibration);
-			expect(RevisionsModel.getPreviousRevisions).not.toHaveBeenCalled();
 			expect(CalibrationsModel.getCalibration).toHaveBeenCalledTimes(1);
-			expect(CalibrationsModel.getCalibration).toHaveBeenCalledWith(teamspace, project, drawing, revision,
-				{ _id: 0, horizontal: 1, verticalRange: 1, units: 1, createdAt: 1, createdBy: 1 },
-			);
+			expect(CalibrationsModel.getCalibration).toHaveBeenCalledWith(teamspace, project, drawing,
+				revisionId, projection);
+			expect(RevisionsModel.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
+			expect(RevisionsModel.getRevisionByIdOrTag).toHaveBeenCalledWith(teamspace, drawing,
+				modelTypes.DRAWING, revisionId, { _id: 0, timestamp: 1 });
+			expect(RevisionsModel.getRevisionsByQuery).toHaveBeenCalledTimes(1);
+			expect(RevisionsModel.getRevisionsByQuery).toHaveBeenCalledWith(teamspace, project, drawing,
+				modelTypes.DRAWING, { timestamp: { $lt: revision.timestamp } }, { _id: 1 });
+			expect(CalibrationsModel.getCalibrationForMultipleRevisions).toHaveBeenCalledTimes(1);
+			expect(CalibrationsModel.getCalibrationForMultipleRevisions).toHaveBeenCalledWith(teamspace, [],
+				projection);
 		});
 
-		test('should return the last available calibration if a previous revision has calibrations', async () => {
-			const calibration = generateRandomObject();
+		test('should return error if there is no calibration in any revision', async () => {
 			CalibrationsModel.getCalibration.mockResolvedValueOnce(undefined);
-			CalibrationsModel.getCalibration.mockResolvedValueOnce(calibration);
-			RevisionsModel.getPreviousRevisions.mockResolvedValueOnce(revisions);
+			RevisionsModel.getRevisionByIdOrTag.mockResolvedValueOnce(revision);
+			RevisionsModel.getRevisionsByQuery.mockResolvedValueOnce(revisions);
+			CalibrationsModel.getCalibrationForMultipleRevisions.mockResolvedValueOnce([]);
 
-			const lastCalibration = await Calibrations.getCalibration(teamspace, project,
-				drawing, revision, true);
+			await expect(Calibrations.getCalibration(teamspace, project, drawing, revisionId))
+				.rejects.toEqual(templates.calibrationNotFound);
 
-			expect(lastCalibration).toEqual(calibration);
-			expect(RevisionsModel.getPreviousRevisions).toHaveBeenCalledTimes(1);
-			expect(RevisionsModel.getPreviousRevisions).toHaveBeenCalledWith(teamspace, project, drawing,
-				modelTypes.DRAWING, revision, { _id: 1 });
-			expect(CalibrationsModel.getCalibration).toHaveBeenCalledTimes(2);
-			expect(CalibrationsModel.getCalibration).toHaveBeenCalledWith(teamspace, project, drawing, revision,
-				{ _id: 0, horizontal: 1, verticalRange: 1, units: 1, createdAt: 1, createdBy: 1, rev_id: 1 },
-			);
+			expect(CalibrationsModel.getCalibration).toHaveBeenCalledTimes(1);
+			expect(CalibrationsModel.getCalibration).toHaveBeenCalledWith(teamspace, project, drawing,
+				revisionId, projection);
+			expect(RevisionsModel.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
+			expect(RevisionsModel.getRevisionByIdOrTag).toHaveBeenCalledWith(teamspace, drawing,
+				modelTypes.DRAWING, revisionId, { _id: 0, timestamp: 1 });
+			expect(RevisionsModel.getRevisionsByQuery).toHaveBeenCalledTimes(1);
+			expect(RevisionsModel.getRevisionsByQuery).toHaveBeenCalledWith(teamspace, project, drawing,
+				modelTypes.DRAWING, { timestamp: { $lt: revision.timestamp } }, { _id: 1 });
+			expect(CalibrationsModel.getCalibrationForMultipleRevisions).toHaveBeenCalledTimes(1);
+			expect(CalibrationsModel.getCalibrationForMultipleRevisions).toHaveBeenCalledWith(teamspace,
+				revisions.map(({ _id }) => _id), projection);
+		});
+
+		test('should return calibration if a previous revision has one', async () => {
+			CalibrationsModel.getCalibration.mockResolvedValueOnce(undefined);
+			RevisionsModel.getRevisionByIdOrTag.mockResolvedValueOnce(revision);
+			RevisionsModel.getRevisionsByQuery.mockResolvedValueOnce(revisions);
+			CalibrationsModel.getCalibrationForMultipleRevisions.mockResolvedValueOnce([{
+				_id: revisions[0]._id, latestCalibration: calibration,
+			}]);
+
+			await expect(Calibrations.getCalibration(teamspace, project, drawing, revisionId))
+				.resolves.toEqual({ calibration, status: calibrationStatuses.UNCONFIRMED });
+
+			expect(CalibrationsModel.getCalibration).toHaveBeenCalledTimes(1);
+			expect(CalibrationsModel.getCalibration).toHaveBeenCalledWith(teamspace, project, drawing,
+				revisionId, projection);
+			expect(RevisionsModel.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
+			expect(RevisionsModel.getRevisionByIdOrTag).toHaveBeenCalledWith(teamspace, drawing,
+				modelTypes.DRAWING, revisionId, { _id: 0, timestamp: 1 });
+			expect(RevisionsModel.getRevisionsByQuery).toHaveBeenCalledTimes(1);
+			expect(RevisionsModel.getRevisionsByQuery).toHaveBeenCalledWith(teamspace, project, drawing,
+				modelTypes.DRAWING, { timestamp: { $lt: revision.timestamp } }, { _id: 1 });
+			expect(CalibrationsModel.getCalibrationForMultipleRevisions).toHaveBeenCalledTimes(1);
+			expect(CalibrationsModel.getCalibrationForMultipleRevisions).toHaveBeenCalledWith(teamspace,
+				revisions.map(({ _id }) => _id), projection);
 		});
 	});
 };

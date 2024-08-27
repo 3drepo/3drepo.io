@@ -52,8 +52,10 @@ const setupData = async () => {
 	await Promise.all([
 		ServiceHelper.db.createUser(user, [teamspace]),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, drawing._id]),
-		ServiceHelper.db.createRevision(teamspace, container._id, { ...containerRevision, author: user.user }),
-		ServiceHelper.db.createRevision(teamspace, drawing._id, { ...drawingRevision, author: user.user },
+		ServiceHelper.db.createRevision(teamspace, project.id, container._id,
+			{ ...containerRevision, author: user.user }),
+		ServiceHelper.db.createRevision(teamspace, project.id, drawing._id,
+			{ ...drawingRevision, author: user.user },
 			modelTypes.DRAWING),
 	]);
 };

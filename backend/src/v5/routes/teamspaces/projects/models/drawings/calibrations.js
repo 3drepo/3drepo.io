@@ -29,8 +29,8 @@ const getCalibration = async (req, res) => {
 	const { teamspace, project, drawing, revision } = req.params;
 
 	try {
-		const latestCalibration = await Calibrations.getCalibration(teamspace, project, drawing, revision);
-		respond(req, res, templates.ok, latestCalibration);
+		const { calibration } = await Calibrations.getCalibration(teamspace, project, drawing, revision);
+		respond(req, res, templates.ok, calibration);
 	} catch (err) {
 		/* istanbul ignore next */
 		respond(req, res, err);

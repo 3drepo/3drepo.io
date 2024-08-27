@@ -25,8 +25,7 @@ const { getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../..
 const { getProjectById, removeModelFromProject } = require('../../../../../models/projectSettings');
 const { DRAWINGS_HISTORY_COL } = require('../../../../../models/revisions.constants');
 const Path = require('path');
-const { deleteCalibrations } = require('../../../../../models/calibrations');
-const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
+const { deleteDrawingCalibrations } = require('../../../../../models/calibrations');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
 const { getCalibration } = require('./calibrations');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
@@ -49,7 +48,7 @@ Drawings.getDrawingStats = async (teamspace, project, drawing) => {
 		try {
 			latestRev = await getLatestRevision(teamspace, drawing, modelTypes.DRAWING,
 				{ _id: 1, statusCode: 1, revCode: 1, timestamp: 1 });
-			calibration = await getCalibration(teamspace, project, drawing, latestRev._id);
+			calibration = (await getCalibration(teamspace, project, drawing, latestRev._id)).status;
 		} catch {
 			// do nothing. A drawing can have 0 revision.
 		}
@@ -61,7 +60,7 @@ Drawings.getDrawingStats = async (teamspace, project, drawing) => {
 		getLatestRevAndCalibration(),
 	]);
 
-	return deleteIfUndefined({
+	return {
 		number: settings.number,
 		status: settings.status,
 		type: settings.type,
@@ -71,8 +70,8 @@ Drawings.getDrawingStats = async (teamspace, project, drawing) => {
 			lastUpdated: latestRev?.timestamp,
 			latestRevision: latestRev ? `${latestRev.statusCode}-${latestRev.revCode}` : undefined,
 		},
-		calibration,
-	});
+		...(calibration ? { calibration } : { }),
+	};
 };
 
 Drawings.addDrawing = (teamspace, project, data) => addModel(teamspace, project,
@@ -87,7 +86,7 @@ Drawings.deleteDrawing = async (teamspace, project, drawing) => {
 		deleteModelRevisions(teamspace, project, drawing, modelTypes.DRAWING),
 		deleteModel(teamspace, project, drawing),
 		removeModelFromProject(teamspace, project, drawing),
-		deleteCalibrations(teamspace, project, drawing),
+		deleteDrawingCalibrations(teamspace, project, drawing),
 	]);
 };
 

@@ -104,7 +104,7 @@ const setupData = async ({ users, teamspace, project, models, revisions, calibra
 		ServiceHelper.db.createProject(teamspace, project.id, project.name,
 			Object.keys(models).map((key) => models[key]._id)),
 		...Object.keys(revisions).map((key) => ServiceHelper.db.createRevision(teamspace,
-			models.drawWithRevisions._id, revisions[key], modelTypes.DRAWING)),
+			project.id, models.drawWithRevisions._id, revisions[key], modelTypes.DRAWING)),
 		...calibrations.map((calibration) => ServiceHelper.db.createCalibration(teamspace, project.id,
 			models.drawWithRevisions._id, revisions.rev2._id, calibration)),
 	]);
@@ -151,7 +151,11 @@ const testGetCalibration = () => {
 					const latestCalibration = calibrations.reduce(
 						(max, cal) => (max.createdAt > cal.createdAt ? max : cal));
 					const { horizontal, verticalRange, units } = latestCalibration;
-					expect(res.body).toEqual({ horizontal, verticalRange, units, createdAt: res.body.createdAt });
+					expect(res.body).toEqual({ horizontal,
+						verticalRange,
+						units,
+						createdAt: res.body.createdAt,
+						createdBy: res.body.createdBy });
 				} else {
 					expect(res.body.code).toEqual(error.code);
 				}
@@ -222,8 +226,11 @@ const testAddCalibration = () => {
 					if (parameters.usePrevious) {
 						expect(newlyCreatedRev).toEqual(lastRevBeforePost);
 					} else {
-						newlyCreatedRev.createdAt = payload.createdAt;
-						expect(newlyCreatedRev).toEqual(payload);
+						expect(newlyCreatedRev).toEqual({
+							...payload,
+							createdAt: newlyCreatedRev.createdAt,
+							createdBy: newlyCreatedRev.createdBy,
+						});
 					}
 				} else {
 					expect(res.body.code).toEqual(error.code);

@@ -150,7 +150,7 @@ db.createModel = (teamspace, _id, name, props) => {
 	return DbHandler.insertOne(teamspace, 'settings', settings);
 };
 
-db.createRevision = async (teamspace, model, revision, modelType) => {
+db.createRevision = async (teamspace, project, model, revision, modelType) => {
 	if (revision.rFile) {
 		const refId = revision.rFile[0];
 		await FilesManager.storeFile(teamspace, modelType === modelTypes.DRAWING ? `${modelType}s.history.ref` : `${model}.history.ref`, refId, revision.refData);
@@ -159,7 +159,7 @@ db.createRevision = async (teamspace, model, revision, modelType) => {
 	const formattedRevision = {
 		...revision,
 		_id: stringToUUID(revision._id),
-		...(modelType === modelTypes.DRAWING ? { model } : {}),
+		...(modelType === modelTypes.DRAWING ? { project: stringToUUID(project), model } : {}),
 	};
 
 	delete formattedRevision.refData;
@@ -292,8 +292,8 @@ db.addLoginRecords = async (records) => {
 	await DbHandler.insertMany(INTERNAL_DB, 'loginRecords', records);
 };
 
-db.createScene = (teamspace, modelId, rev, nodes, meshMap) => Promise.all([
-	db.createRevision(teamspace, modelId, rev),
+db.createScene = (teamspace, project, modelId, rev, nodes, meshMap) => Promise.all([
+	db.createRevision(teamspace, project, modelId, rev),
 	DbHandler.insertMany(teamspace, `${modelId}.scene`, nodes),
 	FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, `${UUIDToString(rev._id)}/idToMeshes.json`, JSON.stringify(meshMap)),
 

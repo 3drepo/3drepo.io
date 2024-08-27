@@ -85,7 +85,7 @@ const generateStashData = async (teamspace, model, rId) => {
 	return { objCount: allObjs.length, links: await findRefs(teamspace, stashCol, refs) };
 };
 
-const generateRevision = async (teamspace, model, incomplete, timestamp, modelType,
+const generateRevision = async (teamspace, project, model, incomplete, timestamp, modelType,
 	{ noRFile, hasSequence, stash } = { }) => {
 	const rev = { ...generateRevisionEntry(false, !noRFile, modelType), timestamp };
 	const rid = stringToUUID(rev._id);
@@ -96,7 +96,7 @@ const generateRevision = async (teamspace, model, incomplete, timestamp, modelTy
 
 	const retVal = { teamspace, model, modelType, revision: { rev: { ...rev, _id: rid } } };
 
-	await createRevision(teamspace, model, rev, modelType);
+	await createRevision(teamspace, project, model, rev, modelType);
 
 	if (hasSequence) {
 		retVal.sequence = await generateSequence(teamspace, model, rid);
@@ -112,6 +112,7 @@ const generateRevision = async (teamspace, model, incomplete, timestamp, modelTy
 
 const setupData = async () => {
 	const teamspace = generateRandomString();
+	const project = generateRandomString();
 	const con = generateRandomString();
 	const conNoIncomplete = generateRandomString();
 	const conNoSpecialCase = generateRandomString();
@@ -136,23 +137,23 @@ const setupData = async () => {
 		dateSets.map(async (dateDiff) => {
 			const date = adjustDate(dateDiff);
 			const [badConRev1, badConRev2, badConRev3, ...goodConRevs] = await Promise.all([
-				generateRevision(teamspace, con, true, date, modelTypes.CONTAINER),
-				generateRevision(teamspace, con, true, date, modelTypes.CONTAINER,
+				generateRevision(teamspace, project, con, true, date, modelTypes.CONTAINER),
+				generateRevision(teamspace, project, con, true, date, modelTypes.CONTAINER,
 					{ noRFile: true, hasSequence: true, stash: true }),
-				generateRevision(teamspace, conNoSpecialCase, true, date, modelTypes.CONTAINER),
-				generateRevision(teamspace, con, false, date, modelTypes.CONTAINER),
-				generateRevision(teamspace, conNoIncomplete, false, date, modelTypes.CONTAINER),
+				generateRevision(teamspace, project, conNoSpecialCase, true, date, modelTypes.CONTAINER),
+				generateRevision(teamspace, project, con, false, date, modelTypes.CONTAINER),
+				generateRevision(teamspace, project, conNoIncomplete, false, date, modelTypes.CONTAINER),
 			]);
 
 			completedRevs.push(...goodConRevs);
 			failedRevs[dateDiff].push(badConRev1, badConRev2, badConRev3);
 
 			const [badDrawRev1, badDrawRev2, badDrawRev3, ...goodDrawRevs] = await Promise.all([
-				generateRevision(teamspace, draw, true, date, modelTypes.DRAWING),
-				generateRevision(teamspace, draw, true, date, modelTypes.DRAWING, { noRFile: true }),
-				generateRevision(teamspace, drawNoSpecialCase, true, date, modelTypes.DRAWING),
-				generateRevision(teamspace, draw, false, date, modelTypes.DRAWING),
-				generateRevision(teamspace, drawNoIncomplete, false, date, modelTypes.DRAWING),
+				generateRevision(teamspace, project, draw, true, date, modelTypes.DRAWING),
+				generateRevision(teamspace, project, draw, true, date, modelTypes.DRAWING, { noRFile: true }),
+				generateRevision(teamspace, project, drawNoSpecialCase, true, date, modelTypes.DRAWING),
+				generateRevision(teamspace, project, draw, false, date, modelTypes.DRAWING),
+				generateRevision(teamspace, project, drawNoIncomplete, false, date, modelTypes.DRAWING),
 			]);
 
 			completedRevs.push(...goodDrawRevs);

@@ -65,8 +65,10 @@ const setupData = async () => {
 		ServiceHelper.db.createUser(user, [teamspace]),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name,
 			[container._id, container2._id, federation._id]),
-		ServiceHelper.db.createRevision(teamspace, container._id, { ...containerRevision, author: user.user }),
-		ServiceHelper.db.createRevision(teamspace, federation._id, { ...federationRevision, author: user.user }),
+		ServiceHelper.db.createRevision(teamspace, project.id, container._id,
+			{ ...containerRevision, author: user.user }),
+		ServiceHelper.db.createRevision(teamspace, project.id, federation._id,
+			{ ...federationRevision, author: user.user }),
 	]);
 };
 

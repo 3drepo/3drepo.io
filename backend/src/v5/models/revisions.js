@@ -78,6 +78,16 @@ Revisions.getRevisions = (teamspace, project, model, modelType, showVoid, projec
 	return findRevisionsByQuery(teamspace, project, model, modelType, query, projection, { timestamp: -1 });
 };
 
+Revisions.getRevisionsByQuery = (teamspace, project, model, modelType, query, projection) => {
+	const formattedQuery = deleteIfUndefined({
+		...excludeVoids,
+		...excludeIncomplete,
+		...query,
+	});
+
+	return findRevisionsByQuery(teamspace, project, model, modelType, formattedQuery, projection, { timestamp: -1 });
+};
+
 Revisions.getRevisionByIdOrTag = (teamspace, model, modelType, revision, projection = {}) => findOneRevisionByQuery(
 	teamspace, model, modelType, { $or: [{ _id: revision }, { tag: revision }] }, projection);
 
@@ -129,29 +139,6 @@ Revisions.updateRevisionStatus = async (teamspace, project, model, modelType, re
 		model,
 		modelType,
 		data: { _id: res._id, void: status } });
-};
-
-Revisions.getPreviousRevisions = async (teamspace, project, model, modelType, revisionId, projection) => {
-	const currentRevision = await findOneRevisionByQuery(teamspace, model, modelType,
-		{ _id: revisionId }, { timestamp: 1 });
-
-	const query = deleteIfUndefined({
-		...excludeVoids,
-		...excludeIncomplete,
-		timestamp: { $lt: currentRevision.timestamp },
-	});
-
-	return findRevisionsByQuery(teamspace, project, model, modelType, query, projection, { timestamp: -1 });
-};
-
-Revisions.getRevisionsByQuery = (teamspace, project, model, modelType, query, projection) => {
-	const formattedQuery = deleteIfUndefined({
-		...excludeVoids,
-		...excludeIncomplete,
-		...query,
-	});
-
-	return findRevisionsByQuery(teamspace, project, model, modelType, formattedQuery, projection, { timestamp: -1 });
 };
 
 Revisions.isTagUnique = async (teamspace, model, tag) => {

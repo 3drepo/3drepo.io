@@ -19,7 +19,6 @@ const { addCalibration, getCalibration, getCalibrationForMultipleRevisions } = r
 const { getRevisionByIdOrTag, getRevisionsByQuery } = require('../../../../../models/revisions');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const { calibrationStatuses } = require('../../../../../models/calibrations.constants');
-const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { templates } = require('../../../../../utils/responseCodes');
 
@@ -28,13 +27,14 @@ const Calibrations = { };
 Calibrations.addCalibration = addCalibration;
 
 Calibrations.getCalibration = async (teamspace, project, drawing, revision) => {
-	const projection = deleteIfUndefined({
+	const projection = {
+		_id: 0,
 		horizontal: 1,
 		verticalRange: 1,
 		units: 1,
 		createdAt: 1,
 		createdBy: 1,
-	});
+	};
 
 	const latestCalibration = await getCalibration(teamspace, project, drawing, revision, projection);
 

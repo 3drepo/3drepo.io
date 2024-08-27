@@ -123,9 +123,9 @@ const setupData = async ({ users, teamspace, project, models, drawRevisions, con
 		ServiceHelper.db.createProject(teamspace, project.id, project.name,
 			Object.keys(models).map((key) => models[key]._id)),
 		...Object.keys(drawRevisions).map((key) => ServiceHelper.db.createRevision(teamspace,
-			models.drawWithRev._id, drawRevisions[key], modelTypes.DRAWING)),
+			project.id, models.drawWithRev._id, drawRevisions[key], modelTypes.DRAWING)),
 		...Object.keys(conRevisions).map((key) => ServiceHelper.db.createRevision(teamspace,
-			models.conWithRev._id, conRevisions[key], modelTypes.CONTAINER)),
+			project.id, models.conWithRev._id, conRevisions[key], modelTypes.CONTAINER)),
 	]);
 };
 

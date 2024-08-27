@@ -27,14 +27,14 @@ const Calibrations = {};
 const validateConfirmCalibration = async (req, res, next) => {
 	try {
 		const { teamspace, project, drawing, revision } = req.params;
-		const latestCalibration = await getCalibration(teamspace, project, drawing, revision);
+		const calibration = await getCalibration(teamspace, project, drawing, revision);
 
-		if (latestCalibration.status !== calibrationStatuses.UNCONFIRMED) {
+		if (calibration.status !== calibrationStatuses.UNCONFIRMED) {
 			throw templates.calibrationNotFound;
 		}
 
-		req.body = latestCalibration;
-		delete req.body.rev_id;
+		req.body = calibration.calibration;
+
 		await next();
 	} catch {
 		respond(req, res, templates.calibrationNotFound);

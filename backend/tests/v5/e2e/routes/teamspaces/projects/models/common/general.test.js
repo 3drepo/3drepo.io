@@ -184,9 +184,9 @@ const addTickets = async (teamspace, project, model) => {
 	model.ticketCount = 5;
 };
 
-const addRevision = async (teamspace, model, modelType = modelTypes.CONTAINER) => {
+const addRevision = async (teamspace, project, model, modelType = modelTypes.CONTAINER) => {
 	const rev = ServiceHelper.generateRevisionEntry(false, false, modelType);
-	await ServiceHelper.db.createRevision(teamspace, model._id, rev, modelType);
+	await ServiceHelper.db.createRevision(teamspace, project.id, model._id, rev, modelType);
 
 	/* eslint-disable-next-line no-param-reassign */
 	model.revs = model.revs || [];
@@ -203,7 +203,6 @@ const testGetModelStats = () => {
 		);
 
 		const drawNoRev = ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING });
-		drawNoRev.properties.calibrationStatus = calibrationStatuses.UNCALIBRATED;
 
 		const [
 			conNoRev, conFailedProcessing1, conFailedProcessing2,
@@ -241,11 +240,11 @@ const testGetModelStats = () => {
 				addTickets(teamspace, project, fedWithNoRevInSubModel),
 			]);
 
-			const drawRev = await addRevision(teamspace, draw, modelTypes.DRAWING);
+			const drawRev = await addRevision(teamspace, project, draw, modelTypes.DRAWING);
 			await ServiceHelper.db.createCalibration(teamspace, project.id, draw._id, drawRev._id, calibration);
 			draw.properties.calibrationStatus = calibrationStatuses.CALIBRATED;
 
-			const rev = await addRevision(teamspace, con);
+			const rev = await addRevision(teamspace, project, con);
 			fed.revs = [rev];
 		});
 
@@ -323,7 +322,7 @@ const testGetModelStats = () => {
 			});
 
 			const latestRev = revs.length ? revs[revs.length - 1] : undefined;
-			const res = deleteIfUndefined({
+			const res = {
 				code: modelType === modelTypes.DRAWING ? undefined : props.code,
 				unit: modelType === modelTypes.DRAWING ? undefined : props.unit,
 				number: modelType === modelTypes.DRAWING ? number : undefined,
@@ -333,7 +332,7 @@ const testGetModelStats = () => {
 				status,
 				calibration: modelType === modelTypes.DRAWING ? calibrationStatus : undefined,
 				type: modelType === modelTypes.FEDERATION ? undefined : type,
-			});
+			};
 
 			if (federate) {
 				if (subModels) {
@@ -365,7 +364,7 @@ const testGetModelStats = () => {
 				};
 			}
 
-			return res;
+			return deleteIfUndefined(res);
 		};
 
 		const runTest = (desc, route, success, expectedOutput) => {
