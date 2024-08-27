@@ -45,19 +45,12 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	const availableTemplatesIds = uniq(tickets.map(({ type }) => type));
 	const availableTemplates = templates.filter(({ _id }) => availableTemplatesIds.includes(_id));
 	const queries = TicketsCardHooksSelectors.selectFilteringQueries();
-	const selectedPinId = TicketsCardHooksSelectors.selectSelectedTicketPinId();
-	const isShowingPins = TicketsCardHooksSelectors.selectIsShowingPins();
 
 	const filteredByQueriesAndCompleted = TicketsCardHooksSelectors.selectTicketsFilteredByQueriesAndCompleted();
 	const filteredItems = TicketsCardHooksSelectors.selectTicketsWithAllFiltersApplied();
 
 	const toggleTemplate = (templateId: string) => TicketsCardActionsDispatchers.setTemplateFilters(xor(selectedTemplates, [templateId]));
 	const onQueriesChange = (newQueries) => TicketsCardActionsDispatchers.setQueryFilters(newQueries);
-
-	useEffect(() => {
-		if (!selectedPinId) return;
-		ViewerService.setSelectionPin({ id: selectedPinId, isSelected: isShowingPins });
-	}, [selectedPinId, isShowingPins]);
 
 	useEffect(() => {
 		TicketsCardActionsDispatchers.setSelectedTicketPin(selectedTicket?._id);
