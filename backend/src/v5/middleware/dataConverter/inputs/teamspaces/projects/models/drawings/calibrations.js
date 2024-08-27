@@ -16,9 +16,9 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
-const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
 const Yup = require('yup');
 const YupHelper = require('../../../../../../../utils/helper/yup');
+const { calibrationStatuses } = require('../../../../../../../models/calibrations.constants');
 const { getCalibration } = require('../../../../../../../processors/teamspaces/projects/models/drawings/calibrations');
 const { respond } = require('../../../../../../../utils/responder');
 
@@ -27,8 +27,9 @@ const Calibrations = {};
 const validateConfirmCalibration = async (req, res, next) => {
 	try {
 		const { teamspace, project, drawing, revision } = req.params;
-		const latestCalibration = await getCalibration(teamspace, project, drawing, revision, true);
-		if (UUIDToString(latestCalibration.rev_id) === UUIDToString(revision)) {
+		const latestCalibration = await getCalibration(teamspace, project, drawing, revision);
+
+		if (latestCalibration.status !== calibrationStatuses.UNCONFIRMED) {
 			throw templates.calibrationNotFound;
 		}
 

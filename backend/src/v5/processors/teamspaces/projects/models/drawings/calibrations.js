@@ -18,6 +18,7 @@
 const { addCalibration, getCalibration, getCalibrationForMultipleRevisions } = require('../../../../../models/calibrations');
 const { getRevisionByIdOrTag, getRevisionsByQuery } = require('../../../../../models/revisions');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
+const { calibrationStatuses } = require('../../../../../models/calibrations.constants');
 const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { templates } = require('../../../../../utils/responseCodes');
@@ -26,36 +27,36 @@ const Calibrations = { };
 
 Calibrations.addCalibration = addCalibration;
 
-Calibrations.getCalibration = async (teamspace, project, drawing, revision, returnRevId) => {
+Calibrations.getCalibration = async (teamspace, project, drawing, revision) => {
 	const projection = deleteIfUndefined({
 		horizontal: 1,
 		verticalRange: 1,
 		units: 1,
 		createdAt: 1,
 		createdBy: 1,
-		rev_id: returnRevId ? 1 : undefined });
+	});
 
-	const latestCalibration = await getCalibration(teamspace, project, drawing, revision, { ...projection, _id: 0 });
+	const latestCalibration = await getCalibration(teamspace, project, drawing, revision, projection);
 
 	if (latestCalibration) {
-		return latestCalibration;
+		return { calibration: latestCalibration, status: calibrationStatuses.CALIBRATED };
 	}
 
 	const { timestamp } = await getRevisionByIdOrTag(teamspace, drawing,
 		modelTypes.DRAWING, revision, { _id: 0, timestamp: 1 });
 
 	const previousRevisions = await getRevisionsByQuery(teamspace, project, drawing, modelTypes.DRAWING,
-		{ timestamp: { $lt: timestamp } }, { _id: 1, timestamp: 1 });
+		{ timestamp: { $lt: timestamp } }, { _id: 1 });
 
 	const revCalibrations = await getCalibrationForMultipleRevisions(teamspace,
 		previousRevisions.map(({ _id }) => _id), projection);
 
 	for (let i = 0; i < previousRevisions.length; i++) {
-		const { _id: revId } = previousRevisions[i];
-		const latestCal = revCalibrations.find(({ _id }) => UUIDToString(_id) === UUIDToString(revId));
+		const revId = UUIDToString(previousRevisions[i]._id);
+		const revCalibation = revCalibrations.find(({ _id }) => UUIDToString(_id) === revId);
 
-		if (latestCal) {
-			return latestCal.latestCalibration;
+		if (revCalibation) {
+			return { calibration: revCalibation.latestCalibration, status: calibrationStatuses.UNCONFIRMED };
 		}
 	}
 

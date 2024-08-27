@@ -14,10 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-const { UUIDToString, generateUUID } = require('../utils/helper/uuids');
-const { calibrationStatuses } = require('./calibrations.constants');
 const db = require('../handler/db');
+const { generateUUID } = require('../utils/helper/uuids');
 
 const CALIBRATIONS_COL = 'drawings.calibrations';
 
@@ -41,25 +39,26 @@ Calibrations.getCalibration = (teamspace, project, drawing, revision, projection
 	teamspace, CALIBRATIONS_COL, { drawing, rev_id: revision, project },
 	projection, { createdAt: -1 });
 
-Calibrations.getCalibrationForMultipleRevisions = (teamspace, revIds, projection) => db.aggregate(
-	teamspace, CALIBRATIONS_COL, [
-		{ $match: { rev_id: { $in: revIds } } },
-		{ $sort: { createdAt: -1 } },
-		{ $group: { _id: '$rev_id', latestCalibration: { $first: '$$ROOT' } } },
-		// { $replaceRoot: { newRoot: '$latest_calibration' } },
-		{ $project: { _id: 1, latestCalibration: projection } },
-	]);
+Calibrations.deleteCalibrations = (teamspace, project, drawing) => db.deleteMany(
+	teamspace, CALIBRATIONS_COL, { project, drawing });
 
-Calibrations.getCalibrationStatus = async (teamspace, drawing, latestRevId) => {
-	const calibrations = await db.find(teamspace, CALIBRATIONS_COL, { drawing }, { rev_id: 1 });
+Calibrations.getCalibrationForMultipleRevisions = (teamspace, revIds, projection) => {
+	const formattedProjection = {};
 
-	if (!calibrations.length) {
-		return calibrationStatuses.UNCALIBRATED;
-	} if (calibrations.some(({ rev_id }) => UUIDToString(rev_id) === UUIDToString(latestRevId))) {
-		return calibrationStatuses.CALIBRATED;
+	for (const key in projection) {
+		if (projection[key] === 1) {
+			formattedProjection[`latestCalibration.${key}`] = 1;
+		}
 	}
 
-	return calibrationStatuses.UNCONFIRMED;
+	return db.aggregate(
+		teamspace, CALIBRATIONS_COL, [
+			{ $match: { rev_id: { $in: revIds } } },
+			{ $sort: { createdAt: -1 } },
+			{ $group: { _id: '$rev_id', latestCalibration: { $first: '$$ROOT' } } },
+			{ $project: { _id: 1, 'latestCalibration._id': 0 } },
+			{ $project: { _id: 1, ...formattedProjection } },
+		]);
 };
 
 module.exports = Calibrations;
