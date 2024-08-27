@@ -32,10 +32,3 @@ export const LayerLevel = styled.div`
 		top: 0;
 	}
 `;
-
-export const TransparentLayerLevel = styled(LayerLevel)`
-	pointer-events: none;
-	* {
-		pointer-events: all;
-	}
-`;

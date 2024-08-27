@@ -17,24 +17,23 @@
 import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useParams } from 'react-router-dom';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
-import { useContext, useRef } from 'react';
-import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
+import { useRef } from 'react';
 import { Coord2D, ViewBoxType } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { addZ } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
 import { DrawingViewerService } from '../drawingViewer.service';
 import { Container } from './pinsDropperLayer.styles';
 import { isEqual } from 'lodash';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 
 type PinsDropperLayerProps = { getCursorOffset: (e) => Coord2D, viewBox: ViewBoxType };
 export const PinsDropperLayer = ({ getCursorOffset, viewBox }: PinsDropperLayerProps) => {
 	const previousViewBox = useRef<ViewBoxType>(null);
 	const [drawingId] = useSearchParam('drawingId');
-	const { isCalibrating } = useContext(CalibrationContext);
-	const { containerOrFederation } = useParams();
+	const { containerOrFederation } = useParams<ViewerParams>();
 	const transform2DTo3D = DrawingsHooksSelectors.selectTransform2DTo3D(drawingId, containerOrFederation);
 	const { verticalRange } = DrawingsHooksSelectors.selectCalibration(drawingId, containerOrFederation);
 
-	if (isCalibrating || !transform2DTo3D) return null;
+	if (!transform2DTo3D) return null;
 
 	const handleMouseDown = () => previousViewBox.current = viewBox;
 
