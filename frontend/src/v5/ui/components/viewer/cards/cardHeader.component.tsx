@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,28 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
-import styled from 'styled-components';
+import { ReactNode } from 'react';
+import { Actions, CardHeaderContainer, Title } from './card.styles';
 
-const CommonChevronStyle = styled(ChevronIcon)`
-	&& {
-		height: 10px;
-	}
-`;
-
-export const ChevronLeft = styled(CommonChevronStyle)`
-	transform: rotate(90deg);
-	margin-right: 2px;
-`;
-
-export const ChevronRight = styled(CommonChevronStyle)`
-	transform: rotate(-90deg);
-	margin-left: 2px;
-`;
-
-export const BreakableText = styled.div`
-	max-width: 100%;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-`;
+type CardHeaderProps = {
+	icon: ReactNode;
+	title: ReactNode | string;
+	actions?: ReactNode;
+};
+export const CardHeader = ({ icon, title, actions }: CardHeaderProps) => (
+	<CardHeaderContainer>
+		{icon}
+		<Title>{title}</Title>
+		<Actions>{actions}</Actions>
+	</CardHeaderContainer>
+);
