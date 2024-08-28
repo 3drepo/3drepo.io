@@ -324,6 +324,48 @@ const testGetFileAsStream = () => {
 			expect(FSHandler.getFileStream).toHaveBeenCalledWith(fileEntry.link, undefined);
 		});
 
+		test('should return a stream with the recorded mimeType if the reference is found', async () => {
+			const mimeType = generateRandomString();
+			const fileEntry = { size: 100, type: 'fs', link: generateRandomString(), mimeType };
+			const readStream = { [generateRandomString()]: generateRandomString() };
+			FileRefs.getRefEntry.mockResolvedValueOnce(fileEntry);
+			FSHandler.getFileStream.mockResolvedValueOnce(readStream);
+
+			const teamspace = generateRandomString();
+			const collection = generateRandomString();
+			const fileName = generateRandomString();
+
+			await expect(FilesManager.getFileAsStream(teamspace, collection, fileName))
+				.resolves.toEqual({ readStream, size: fileEntry.size, mimeType });
+
+			expect(FileRefs.getRefEntry).toHaveBeenCalledTimes(1);
+			expect(FileRefs.getRefEntry).toHaveBeenCalledWith(teamspace, collection, fileName);
+
+			expect(FSHandler.getFileStream).toHaveBeenCalledTimes(1);
+			expect(FSHandler.getFileStream).toHaveBeenCalledWith(fileEntry.link, undefined);
+		});
+
+		test('should return a stream with the recorded mimeType if the reference is found (2)', async () => {
+			const mimeType = generateRandomString();
+			const fileEntry = { size: 100, type: 'fs', link: generateRandomString(), mime: mimeType };
+			const readStream = { [generateRandomString()]: generateRandomString() };
+			FileRefs.getRefEntry.mockResolvedValueOnce(fileEntry);
+			FSHandler.getFileStream.mockResolvedValueOnce(readStream);
+
+			const teamspace = generateRandomString();
+			const collection = generateRandomString();
+			const fileName = generateRandomString();
+
+			await expect(FilesManager.getFileAsStream(teamspace, collection, fileName))
+				.resolves.toEqual({ readStream, size: fileEntry.size, mimeType });
+
+			expect(FileRefs.getRefEntry).toHaveBeenCalledTimes(1);
+			expect(FileRefs.getRefEntry).toHaveBeenCalledWith(teamspace, collection, fileName);
+
+			expect(FSHandler.getFileStream).toHaveBeenCalledTimes(1);
+			expect(FSHandler.getFileStream).toHaveBeenCalledWith(fileEntry.link, undefined);
+		});
+
 		test('should return a stream of the reference is found (gridFs)', async () => {
 			const fileEntry = { size: 100, type: 'gridfs', link: generateRandomString() };
 			const readStream = { [generateRandomString()]: generateRandomString() };

@@ -16,11 +16,11 @@
  */
 
 const Models = {};
-const { SETTINGS_COL, getInfoFromCode, modelTypes } = require('./modelSettings.constants');
+const { SETTINGS_COL, modelTypes } = require('./modelSettings.constants');
+const { UUIDToString, generateUUIDString } = require('../utils/helper/uuids');
 const db = require('../handler/db');
 const { deleteIfUndefined } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
-const { generateUUIDString } = require('../utils/helper/uuids');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
@@ -102,6 +102,11 @@ Models.isFederation = async (ts, model) => {
 	return federate;
 };
 
+Models.getModelType = async (ts, model) => {
+	const item = await Models.getModelById(ts, model, { _id: 0, federate: 1, modelType: 1 });
+	return getModelType(item);
+};
+
 Models.getContainerById = async (ts, container, projection) => {
 	try {
 		return await Models.getModelByQuery(ts, { _id: container, ...noFederations, ...noDrawings }, projection);
@@ -153,11 +158,11 @@ Models.getDrawings = (ts, ids, projection, sort) => {
 	return findModels(ts, query, projection, sort);
 };
 
-Models.updateModelStatus = async (teamspace, project, model, status, corId) => {
+Models.updateModelStatus = async (teamspace, project, model, status, revId) => {
 	const query = { _id: model };
 	const updateObj = { status };
-	if (corId) {
-		updateObj.corID = corId;
+	if (revId) {
+		updateObj.corID = UUIDToString(revId);
 	}
 
 	const modelData = await findOneAndUpdateModel(teamspace, query, { $set: updateObj }, { federate: 1, modelType: 1 });
@@ -173,8 +178,8 @@ Models.updateModelStatus = async (teamspace, project, model, status, corId) => {
 	}
 };
 
-Models.newRevisionProcessed = async (teamspace, project, model, corId, retVal, user, containers) => {
-	const { success, message, userErr } = getInfoFromCode(retVal);
+Models.newRevisionProcessed = async (teamspace, project, model, revId,
+	{ retVal, success, message, userErr }, user, containers) => {
 	const query = { _id: model };
 	const set = {};
 	const unset = { corID: 1 };
@@ -199,16 +204,18 @@ Models.newRevisionProcessed = async (teamspace, project, model, corId, retVal, u
 	// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
 	// trigger notifications.
 
-		// only sent for v4 compatibility
+		const modelType = containers ? modelTypes.FEDERATION : modelTypes.CONTAINER;
 		publish(events.MODEL_IMPORT_FINISHED,
 			{ teamspace,
+				project,
 				model,
 				success,
 				message,
 				userErr,
-				corId,
+				revId,
 				errCode: retVal,
-				user });
+				user,
+				modelType });
 
 		const data = { ...set, status: set.status || 'ok' };
 		if (data.subModels) {
@@ -220,15 +227,7 @@ Models.newRevisionProcessed = async (teamspace, project, model, corId, retVal, u
 			project,
 			model,
 			data,
-			modelType: containers ? modelTypes.FEDERATION : modelTypes.CONTAINER });
-
-		if (success) {
-			publish(events.NEW_REVISION, { teamspace,
-				project,
-				model,
-				revision: corId,
-				modelType: containers ? modelTypes.FEDERATION : modelTypes.CONTAINER });
-		}
+			modelType });
 	}
 };
 
