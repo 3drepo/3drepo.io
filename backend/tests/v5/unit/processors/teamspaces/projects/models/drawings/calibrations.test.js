@@ -51,6 +51,7 @@ const testGetCalibration = () => {
 		}));
 
 		const projection = {
+			_id: 0,
 			horizontal: 1,
 			verticalRange: 1,
 			units: 1,
