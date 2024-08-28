@@ -76,10 +76,12 @@ const setupData = async () => {
 		ServiceHelper.db.createUser(user, [teamspace]),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name,
 			[container._id, container2._id, federation._id, drawing._id]),
-		ServiceHelper.db.createRevision(teamspace, project.id, container._id, { ...containerRevision, author: user.user }),
-		ServiceHelper.db.createRevision(teamspace, project.id, federation._id, { ...federationRevision, author: user.user }),
-		ServiceHelper.db.createRevision(teamspace, project.id, drawing._id, { ...drawingRevision, author: user.user },
-			modelTypes.DRAWING),
+		ServiceHelper.db.createRevision(teamspace, project.id, container._id,
+			{ ...containerRevision, author: user.user }),
+		ServiceHelper.db.createRevision(teamspace, project.id, federation._id,
+			{ ...federationRevision, author: user.user }, modelTypes.FEDERATION),
+		ServiceHelper.db.createRevision(teamspace, project.id, drawing._id,
+			{ ...drawingRevision, author: user.user }, modelTypes.DRAWING),
 	]);
 };
 

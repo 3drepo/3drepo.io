@@ -37,18 +37,15 @@ const Revisions = require(`${src}/models/revisions`);
 jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects/models/drawings/calibrations');
 const Calibrations = require(`${src}/processors/teamspaces/projects/models/drawings/calibrations`);
 jest.mock('../../../../../../../../src/v5/services/eventsManager/eventsManager');
-const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 
 const { DRAWINGS_HISTORY_COL } = require(`${src}/models/revisions.constants`);
-const { STATUSES } = require(`${src}/models/modelSettings.constants`);
 
-jest.mock('../../../../../../../src/v5/utils/helper/images');
+jest.mock('../../../../../../../../src/v5/utils/helper/images');
 const ImageHelper = require(`${src}/utils/helper/images`);
 
 const Drawings = require(`${src}/processors/teamspaces/projects/models/drawings`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 
 const testAddDrawing = () => {
 	describe('Add drawing', () => {

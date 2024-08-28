@@ -14,25 +14,22 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { STATUSES, modelTypes } = require('../../../../../models/modelSettings.constants');
-const { UUIDToString, generateUUID } = require('../../../../../utils/helper/uuids');
 
-const { addDrawingThumbnailRef, addRevision, deleteModelRevisions, getLatestRevision,
-	getRevisionByIdOrTag, getRevisionCount, getRevisions, updateRevision, updateRevisionStatus } = require('../../../../models/revisions');
-const { addModel, getModelList } = require('./commons/modelList');
-const { appendFavourites, deleteFavourites } = require('./commons/favourites');
-const { deleteModel, getDrawingById, getDrawings, updateModelSettings } = require('../../../../models/modelSettings');
-const { getFile, getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../../services/filesManager');
-const { getProjectById, removeModelFromProject } = require('../../../../models/projectSettings');
-const { DRAWINGS_HISTORY_COL } = require('../../../../models/revisions.constants');
-const { createThumbnail } = require('../../../../utils/helper/images');
-const { processDrawingUpload } = require('../../../../services/modelProcessing');
-const { templates } = require('../../../../utils/responseCodes');
-const Path = require('path');
+const { addDrawingThumbnailRef, deleteModelRevisions, getLatestRevision,
+	getRevisionByIdOrTag, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../../models/revisions');
+const { addModel, getModelList } = require('../commons/modelList');
+const { appendFavourites, deleteFavourites } = require('../commons/favourites');
+const { deleteModel, getDrawingById, getDrawings, updateModelSettings } = require('../../../../../models/modelSettings');
+const { getFile, getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../../../services/filesManager');
+const { getProjectById, removeModelFromProject } = require('../../../../../models/projectSettings');
+const { DRAWINGS_HISTORY_COL } = require('../../../../../models/revisions.constants');
+const { createThumbnail } = require('../../../../../utils/helper/images');
 const { deleteDrawingCalibrations } = require('../../../../../models/calibrations');
-const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
+const { generateUUID } = require('../../../../../utils/helper/uuids');
 const { getCalibration } = require('./calibrations');
-const { publish } = require('../../../../../services/eventsManager/eventsManager');
+const { modelTypes } = require('../../../../../models/modelSettings.constants');
+const { processDrawingUpload } = require('../../../../../services/modelProcessing');
+const { templates } = require('../../../../../utils/responseCodes');
 
 const Drawings = { };
 

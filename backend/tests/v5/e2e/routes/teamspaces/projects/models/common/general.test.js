@@ -185,7 +185,7 @@ const addTickets = async (teamspace, project, model) => {
 };
 
 const addRevision = async (teamspace, project, model, modelType = modelTypes.CONTAINER, hasFiles = false) => {
-	const rev = ServiceHelper.generateRevisionEntry(false, false, hasFiles, modelType);
+	const rev = ServiceHelper.generateRevisionEntry(false, hasFiles, modelType);
 	if (hasFiles) {
 		/* eslint-disable-next-line no-param-reassign */
 		model.files = model.files ?? [];
@@ -971,7 +971,7 @@ const testGetThumbnail = () => {
 		beforeAll(async () => {
 			const models = [draw, drawNoRev, fed];
 			await setupBasicData(users, teamspace, project, models);
-			await addRevision(teamspace, draw, modelTypes.DRAWING, true);
+			await addRevision(teamspace, project, draw, modelTypes.DRAWING, true);
 		});
 
 		const generateTestData = () => {

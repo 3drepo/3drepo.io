@@ -105,7 +105,7 @@ const testGetRevisions = () => {
 		const query = {
 			...excludeIncomplete,
 			...excludeFailed,
-			...(modelType === modelTypes.DRAWING ? { model, project } : {})
+			...(modelType === modelTypes.DRAWING ? { model, project } : {}),
 		};
 
 		if (!showVoid) {
