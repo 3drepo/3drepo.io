@@ -151,11 +151,21 @@ db.createModel = (teamspace, _id, name, props) => {
 };
 
 db.createRevision = async (teamspace, project, model, revision, modelType) => {
+	const historyCol = modelType === modelTypes.DRAWING ? `${modelType}s.history` : `${model}.history`;
+	const writeReferencedData = (id, buffer) => FilesManager.storeFile(teamspace,
+		historyCol, id, buffer);
+
 	if (revision.rFile) {
-		const refId = revision.rFile[0];
-		await FilesManager.storeFile(teamspace, modelType === modelTypes.DRAWING ? `${modelType}s.history.ref` : `${model}.history.ref`, refId, revision.refData);
+		writeReferencedData(revision.rFile[0], revision.refData);
 	}
 
+	if (revision.image) {
+		writeReferencedData(revision.image, revision.imageData);
+	}
+
+	if (revision.thumbnail) {
+		writeReferencedData(revision.thumbnail, revision.thumbnailData);
+	}
 	const formattedRevision = {
 		...revision,
 		_id: stringToUUID(revision._id),
@@ -163,7 +173,9 @@ db.createRevision = async (teamspace, project, model, revision, modelType) => {
 	};
 
 	delete formattedRevision.refData;
-	await DbHandler.insertOne(teamspace, modelType === modelTypes.DRAWING ? `${modelType}s.history` : `${model}.history`, formattedRevision);
+	delete formattedRevision.imageData;
+	delete formattedRevision.thumbnailData;
+	await DbHandler.insertOne(teamspace, historyCol, formattedRevision);
 };
 
 db.createCalibration = async (teamspace, project, drawing, revision, calibration) => {
@@ -462,6 +474,14 @@ ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, modelType
 	if (hasFile) {
 		entry.rFile = modelType === modelTypes.DRAWING ? [ServiceHelper.generateUUIDString()] : [`${_id}_${ServiceHelper.generateRandomString()}_ifc`];
 		entry.refData = ServiceHelper.generateRandomString();
+
+		if (modelType === modelTypes.DRAWING) {
+			entry.image = ServiceHelper.generateUUIDString();
+			entry.thumbnail = ServiceHelper.generateUUIDString();
+
+			entry.imageData = ServiceHelper.generateRandomString();
+			entry.thumbnailData = ServiceHelper.generateRandomString();
+		}
 	}
 
 	return entry;

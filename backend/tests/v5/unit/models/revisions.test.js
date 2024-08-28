@@ -24,13 +24,14 @@ const Revisions = require(`${src}/models/revisions`);
 const { DRAWINGS_HISTORY_COL } = require(`${src}/models/revisions.constants`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { generateRandomString, generateRandomObject, generateRandomNumber } = require('../../helper/services');
+const { determineTestGroup, generateUUID, generateRandomString, generateRandomObject, generateRandomNumber } = require('../../helper/services');
 
-const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+const { modelTypes, getInfoFromCode, processStatuses } = require(`${src}/models/modelSettings.constants`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 
 const excludeVoids = { void: { $ne: true } };
 const excludeIncomplete = { incomplete: { $exists: false } };
+const excludeFailed = { status: { $ne: processStatuses.FAILED } };
 
 const testGetRevisionCount = () => {
 	describe('GetRevisionCount', () => {
@@ -44,7 +45,7 @@ const testGetRevisionCount = () => {
 
 			expect(res).toEqual(expectedData);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, { ...excludeIncomplete, ...excludeVoids });
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, { ...excludeIncomplete, ...excludeFailed, ...excludeVoids });
 		});
 
 		test('should return the number of revision as per from the database query (drawing)', async () => {
@@ -54,7 +55,7 @@ const testGetRevisionCount = () => {
 			expect(res).toEqual(expectedData);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`,
-				{ ...excludeIncomplete, ...excludeVoids, model });
+				{ ...excludeIncomplete, ...excludeFailed, ...excludeVoids, model });
 		});
 	});
 };
@@ -71,7 +72,7 @@ const testGetLatestRevision = () => {
 
 			expect(res).toEqual(expectedData);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, { ...excludeIncomplete, ...excludeVoids }, {}, { timestamp: -1 });
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, { ...excludeIncomplete, ...excludeFailed, ...excludeVoids }, {}, { timestamp: -1 });
 		});
 
 		test('Should return the latest revision if there is one (drawing)', async () => {
@@ -81,7 +82,7 @@ const testGetLatestRevision = () => {
 			expect(res).toEqual(expectedData);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`,
-				{ ...excludeIncomplete, ...excludeVoids, model }, {}, { timestamp: -1 });
+				{ ...excludeIncomplete, ...excludeFailed, ...excludeVoids, model }, {}, { timestamp: -1 });
 		});
 
 		test('Should throw REVISION_NOT_FOUND if there is no revision', async () => {
@@ -90,7 +91,7 @@ const testGetLatestRevision = () => {
 				.rejects.toEqual(templates.revisionNotFound);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, { ...excludeIncomplete, ...excludeVoids }, {}, { timestamp: -1 });
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, { ...excludeIncomplete, ...excludeFailed, ...excludeVoids }, {}, { timestamp: -1 });
 		});
 	});
 };
@@ -102,8 +103,9 @@ const testGetRevisions = () => {
 
 	const checkResults = (fn, showVoid, modelType) => {
 		const query = {
-			incomplete: { $exists: false },
-			...(modelType === modelTypes.DRAWING ? { model, project } : {}),
+			...excludeIncomplete,
+			...excludeFailed,
+			...(modelType === modelTypes.DRAWING ? { model, project } : {})
 		};
 
 		if (!showVoid) {
@@ -287,51 +289,149 @@ const testDeleteModelRevisions = () => {
 	});
 };
 
-const testUpdateRevision = () => {
-	const teamspace = generateRandomString();
-	const model = generateRandomString();
-	const revision = { _id: 1, author: 'someUser', timestamp: new Date(), void: true };
-	const setUpdate = generateRandomObject();
-	const unsetUpdate = generateRandomObject();
-
-	const checkResults = (fn, modelType, setData, unsetData) => {
-		expect(fn).toHaveBeenCalledTimes(1);
-		expect(fn).toHaveBeenCalledWith(teamspace, modelType === modelTypes.DRAWING ? `${modelType}s.history` : `${model}.history`,
-			{ $or: [{ _id: revision._id }, { tag: revision._id }] },
-			{ ...(setData ? { $set: setData } : {}), ...(unsetData ? { $unset: unsetData } : {}) },
-			{ projection: { _id: 1 } },
-		);
-	};
-
-	describe('UpdateRevision', () => {
-		test('Should update a revision and set data', async () => {
+const testUpdateProcessingStatus = () => {
+	describe('Update processing status', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		const revisionId = generateRandomString();
+		const status = generateRandomString();
+		test('Should update the status and trigger a model settings update', async () => {
 			const modelType = modelTypes.CONTAINER;
-			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementationOnce(() => ({ _id: revision._id }));
-			await Revisions.updateRevision(teamspace, model, modelType, revision._id, setUpdate);
-			checkResults(fn, modelType, setUpdate);
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValueOnce({ _id: revisionId });
+
+			await Revisions.updateProcessingStatus(teamspace, project, model, modelType, revisionId, status);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`,
+				{ $or: [{ _id: revisionId }, { tag: revisionId }] }, { $set: { status } },
+				{ projection: { _id: 1 } },
+			);
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
+				{ teamspace, project, model, modelType, data: { status } });
 		});
 
-		test('Should update a revision and unset data', async () => {
-			const modelType = modelTypes.CONTAINER;
-			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementationOnce(() => ({ _id: revision._id }));
-			await Revisions.updateRevision(teamspace, model, modelType, revision._id, undefined, unsetUpdate);
-			checkResults(fn, modelType, undefined, unsetUpdate);
-		});
-
-		test('Should update a revision (drawing)', async () => {
+		test('Should not trigger a status update if the revision is not found', async () => {
 			const modelType = modelTypes.DRAWING;
-			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementationOnce(() => ({ _id: revision._id }));
-			await Revisions.updateRevision(teamspace, model, modelType,
-				revision._id, setUpdate, unsetUpdate);
-			checkResults(fn, modelType, setUpdate, unsetUpdate);
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValueOnce();
+
+			await expect(Revisions.updateProcessingStatus(teamspace, project, model, modelType, revisionId,
+				status)).rejects.toEqual(templates.revisionNotFound);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${modelType}s.history`,
+				{ $or: [{ _id: revisionId }, { tag: revisionId }] }, { $set: { status } },
+				{ projection: { _id: 1 } },
+			);
+
+			expect(EventsManager.publish).not.toHaveBeenCalled();
+		});
+	});
+};
+
+const testOnProcessingCompleted = () => {
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const model = generateRandomString();
+	const revId = generateRandomString();
+	const modelType = modelTypes.DRAWING;
+	const author = generateRandomString();
+
+	describe('On processing completed', () => {
+		test('Should update revision and publish 3 events upon success', async () => {
+			const retInfo = getInfoFromCode(0);
+			retInfo.retVal = 0;
+
+			const { success, message, userErr, retVal: errCode } = retInfo;
+
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValueOnce({ _id: revId, author });
+
+			await Revisions.onProcessingCompleted(teamspace, project, model, revId, retInfo, modelType);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${modelType}s.history`,
+				{ $or: [{ _id: revId }, { tag: revId }] }, { $unset: { status: 1, incomplete: 1 } },
+				{ projection: { author: 1 } },
+			);
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(2);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED, {
+				teamspace,
+				project,
+				model,
+				success,
+				message,
+				userErr,
+				revId,
+				errCode,
+				user: author,
+				modelType,
+			});
+
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
+				{ teamspace,
+					project,
+					model,
+					modelType,
+					data: { status: processStatuses.OK, timestamp: expect.anything() } });
 		});
 
-		test('Should throw REVISION_NOT_FOUND if it cannot find the revision in the revisions table', async () => {
-			const modelType = modelTypes.CONTAINER;
-			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementationOnce(() => undefined);
-			await expect(Revisions.updateRevision(teamspace, model,
-				modelType, revision._id, setUpdate, unsetUpdate)).rejects.toEqual(templates.revisionNotFound);
-			checkResults(fn, modelType, setUpdate, unsetUpdate);
+		test('Should update revision and publish 2 events upon failure', async () => {
+			const retInfo = getInfoFromCode(1);
+			retInfo.retVal = 1;
+
+			const { success, message, userErr, retVal: errCode } = retInfo;
+
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValueOnce({ _id: revId, author });
+
+			await Revisions.onProcessingCompleted(teamspace, project, model, revId, retInfo, modelType);
+
+			const setObj = { status: processStatuses.FAILED,
+				errorReason: expect.objectContaining({
+					message, errorCode: errCode }) };
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${modelType}s.history`,
+				{ $or: [{ _id: revId }, { tag: revId }] }, { $unset: { incomplete: 1 }, $set: setObj },
+				{ projection: { author: 1 } },
+			);
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(2);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED, {
+				teamspace,
+				project,
+				model,
+				success,
+				message,
+				userErr,
+				revId,
+				errCode,
+				user: author,
+				modelType,
+			});
+
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
+				{ teamspace, project, model, modelType, data: { ...setObj, timestamp: expect.anything() } });
+		});
+
+		test('Should not trigger any event if the revision is not found', async () => {
+			const retInfo = getInfoFromCode(0);
+			retInfo.retVal = 0;
+
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValueOnce();
+
+			await expect(Revisions.onProcessingCompleted(teamspace, project, model,
+				revId, retInfo, modelType)).rejects.toEqual(templates.revisionNotFound);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${modelType}s.history`,
+				{ $or: [{ _id: revId }, { tag: revId }] }, { $unset: { status: 1, incomplete: 1 } },
+				{ projection: { author: 1 } },
+			);
+
+			expect(EventsManager.publish).not.toHaveBeenCalled();
 		});
 	});
 };
@@ -448,17 +548,52 @@ const testGetRevisionFormat = () => {
 	});
 };
 
-describe('models/revisions', () => {
+const testAddDrawingThumbnailRef = () => {
+	describe('Add drawing thumbnail reference', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		const thumbnailRef = generateUUID();
+		const revId = generateUUID();
+		test('Should throw REVISION_NOT_FOUND if it cannot find the revision', async () => {
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValueOnce();
+			await expect(Revisions.addDrawingThumbnailRef(teamspace, project, model, revId, thumbnailRef))
+				.rejects.toEqual(templates.revisionNotFound);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`,
+				{ $or: [{ _id: revId }, { tag: revId }] }, { $set: { thumbnail: thumbnailRef } },
+				{ projection: { _id: 1 } },
+			);
+		});
+
+		test('Should add thumbnail reference as requested', async () => {
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValueOnce({ _id: generateRandomString() });
+			await expect(Revisions.addDrawingThumbnailRef(teamspace, project, model, revId, thumbnailRef))
+				.resolves.toBeUndefined();
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`,
+				{ $or: [{ _id: revId }, { tag: revId }] }, { $set: { thumbnail: thumbnailRef } },
+				{ projection: { _id: 1 } },
+			);
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	testGetRevisionCount();
 	testGetLatestRevision();
 	testGetRevisions();
 	testGetRevisionsByQuery();
 	testAddRevision();
 	testDeleteModelRevisions();
-	testUpdateRevision();
 	testUpdateRevisionStatus();
 	testIsTagUnique();
 	testIsRevAndStatusCodeUnique();
 	testGetRevisionByIdOrTag();
 	testGetRevisionFormat();
+	testUpdateProcessingStatus();
+	testOnProcessingCompleted();
+	testAddDrawingThumbnailRef();
 });

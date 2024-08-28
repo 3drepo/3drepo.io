@@ -29,6 +29,7 @@ PathHelper.imagesFolder = `${__dirname}/../resources/images`;
 PathHelper.objModel = Path.join(PathHelper.modelFolder, 'dummy.obj');
 PathHelper.dwgModel = Path.join(PathHelper.modelFolder, 'dummy.dwg');
 PathHelper.image = Path.join(PathHelper.imagesFolder, 'valid.png');
+PathHelper.svg = Path.join(PathHelper.imagesFolder, 'chevron.svg');
 PathHelper.oversizedImage = Path.join(PathHelper.imagesFolder, 'tooBig.png');
 PathHelper.objModelUppercaseExt = Path.join(PathHelper.modelFolder, 'dummyUppercaseExt.OBJ');
 PathHelper.dwgModelUppercaseExt = Path.join(PathHelper.modelFolder, 'dummyUppercaseExt.DWG');

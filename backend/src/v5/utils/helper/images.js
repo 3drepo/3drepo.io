@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,14 +14,24 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { formatDate } from '../../../services/formatting/formatDate';
 
-interface IProps {
-	value: any;
-	format?: string;
-}
+const sharp = require('sharp');
 
-export const DateTime = (props: IProps) => {
-	const formattedDateString = formatDate(props.value, props.format);
-	return <>{formattedDateString}</>;
+const ImageHelper = {};
+
+ImageHelper.createThumbnail = async (buffer, width = 600, density = 150) => {
+	if (!buffer) throw new Error('Image not provided');
+
+	const jpgBuffer = await sharp(buffer, { density })
+		.flatten({ background: '#ffffff' })
+		.toFormat('jpeg')
+		.toBuffer();
+
+	// (As far as I can tell) we have to export the buffer and re-import it for resize,
+	// otherwise it optimises out the density setting and we will miss out detailed lines.
+	return sharp(jpgBuffer)
+		.resize(width, undefined, {
+			fit: 'outside',
+		}).toBuffer();
 };
+module.exports = ImageHelper;

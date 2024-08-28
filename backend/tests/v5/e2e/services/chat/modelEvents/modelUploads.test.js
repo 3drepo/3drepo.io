@@ -16,7 +16,7 @@
  */
 
 const ServiceHelper = require('../../../../helper/services');
-const { src, objModel } = require('../../../../helper/path');
+const { src, objModel, dwgModel } = require('../../../../helper/path');
 const SuperTest = require('supertest');
 
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
@@ -25,7 +25,7 @@ const { queueMessage } = require(`${src}/handler/queue`);
 const { cn_queue: queueConfig } = require(`${src}/utils/config`);
 const { mkdirSync, writeFileSync } = require('fs');
 
-const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+const { modelTypes, processStatuses, statusCodes } = require(`${src}/models/modelSettings.constants`);
 
 const { getRevisionFormat } = require(`${src}/models/revisions`);
 
@@ -35,12 +35,17 @@ const project = ServiceHelper.generateRandomProject();
 const container = ServiceHelper.generateRandomModel();
 const container2 = ServiceHelper.generateRandomModel();
 const federation = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
+const drawing = ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING });
 const containerRevision = ServiceHelper.generateRevisionEntry();
 const federationRevision = ServiceHelper.generateRevisionEntry();
+const drawingRevision = { ...ServiceHelper.generateRevisionEntry(false, true, modelTypes.DRAWING),
+	incomplete: true,
+	status: processStatuses.PROCESSING };
 
 let agent;
 const setupData = async () => {
 	await ServiceHelper.db.createTeamspace(teamspace, [user.user]);
+
 	await Promise.all([
 		ServiceHelper.db.createModel(
 			teamspace,
@@ -60,15 +65,21 @@ const setupData = async () => {
 			federation.name,
 			federation.properties,
 		),
+		ServiceHelper.db.createModel(
+			teamspace,
+			drawing._id,
+			drawing.name,
+			drawing.properties,
+		),
 	]);
 	await Promise.all([
 		ServiceHelper.db.createUser(user, [teamspace]),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name,
-			[container._id, container2._id, federation._id]),
-		ServiceHelper.db.createRevision(teamspace, project.id, container._id,
-			{ ...containerRevision, author: user.user }),
-		ServiceHelper.db.createRevision(teamspace, project.id, federation._id,
-			{ ...federationRevision, author: user.user }),
+			[container._id, container2._id, federation._id, drawing._id]),
+		ServiceHelper.db.createRevision(teamspace, project.id, container._id, { ...containerRevision, author: user.user }),
+		ServiceHelper.db.createRevision(teamspace, project.id, federation._id, { ...federationRevision, author: user.user }),
+		ServiceHelper.db.createRevision(teamspace, project.id, drawing._id, { ...drawingRevision, author: user.user },
+			modelTypes.DRAWING),
 	]);
 };
 
@@ -116,6 +127,32 @@ const modelUploadTest = () => {
 				.expect(templates.ok.status);
 
 			await expect(modelUpdatePromise).resolves.toEqual({ ...data, data: { status: 'queued' } });
+			socket.close();
+		});
+
+		test(`should receive a ${EVENTS.DRAWING_SETTINGS_UPDATE} event after revision upload if the user has joined the room`, async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+
+			const data = { teamspace, project: project.id, model: drawing._id };
+			await ServiceHelper.socket.joinRoom(socket, data);
+
+			const socketPromise = new Promise((resolve, reject) => {
+				socket.on(EVENTS.DRAWING_SETTINGS_UPDATE, resolve);
+				setTimeout(reject, 1000);
+			});
+
+			await agent.post(`/v5/teamspaces/${teamspace}/projects/${project.id}/drawings/${drawing._id}/revisions?key=${user.apiKey}`)
+				.set('Content-Type', 'multipart/form-data')
+				.field('revCode', ServiceHelper.generateRandomString(10))
+				.field('statusCode', statusCodes[0].code)
+				.field('desc', ServiceHelper.generateRandomString())
+				.attach('file', dwgModel)
+				.expect(templates.ok.status);
+
+			await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/drawings/${drawing._id}/revisions?key=${user.apiKey}`);
+
+			await expect(socketPromise).resolves.toEqual({ ...data, data: { status: 'queued' } });
+
 			socket.close();
 		});
 
@@ -187,6 +224,21 @@ const queueUpdateTest = () => {
 
 			socket.close();
 		});
+
+		test(`should receive a ${EVENTS.DRAWING_SETTINGS_UPDATE} event if a drawing status has been updated`, async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+			const data = { teamspace, project: project.id, model: drawing._id };
+			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
+
+			const modelUpdatePromise = waitForEvent(socket, EVENTS.DRAWING_SETTINGS_UPDATE);
+
+			const content = { status: 'processing', database: teamspace, project: drawing._id };
+			await queueMessage(queueConfig.callback_queue, drawingRevision._id,
+				JSON.stringify(content));
+			await expect(modelUpdatePromise).resolves.toEqual({ ...data, data: { status: content.status } });
+
+			socket.close();
+		});
 	});
 };
 
@@ -220,6 +272,38 @@ const queueFinishedTest = () => {
 					timestamp: newRevisionResults.data.timestamp,
 					format: getRevisionFormat(containerRevision.rFile),
 					desc: containerRevision.desc,
+				} }));
+
+			socket.close();
+		});
+
+		test(`should receive a ${EVENTS.DRAWING_SETTINGS_UPDATE} event if a drawing revision has finished`, async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+			const data = { teamspace, project: project.id, model: drawing._id };
+			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
+
+			const modelUpdatePromise = waitForEvent(socket, EVENTS.DRAWING_SETTINGS_UPDATE);
+			const newRevisionPromise = waitForEvent(socket, EVENTS.DRAWING_NEW_REVISION);
+
+			const content = { value: 0, database: teamspace, project: drawing._id };
+			await queueMessage(queueConfig.callback_queue, drawingRevision._id, JSON.stringify(content));
+
+			const modelUpdateResults = await modelUpdatePromise;
+			expect(modelUpdateResults?.data?.timestamp).not.toBeUndefined();
+			expect(modelUpdateResults).toEqual(expect.objectContaining({ ...data,
+				data: { status: 'ok', timestamp: modelUpdateResults.data.timestamp } }));
+
+			const newRevisionResults = await newRevisionPromise;
+			expect(newRevisionResults?.data?.timestamp).not.toBeUndefined();
+			expect(newRevisionResults).toEqual(expect.objectContaining({ ...data,
+				data: {
+					_id: drawingRevision._id,
+					author: user.user,
+					statusCode: drawingRevision.statusCode,
+					revCode: drawingRevision.revCode,
+					timestamp: newRevisionResults.data.timestamp,
+					format: drawingRevision.format,
+					desc: drawingRevision.desc,
 				} }));
 
 			socket.close();

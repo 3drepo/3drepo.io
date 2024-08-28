@@ -30,6 +30,7 @@ import { ShareTextField } from '@controls/shareTextField';
 import { FormattedMessage } from 'react-intl';
 import { SectionTitle } from '../../settingsModal/settingsModal.styles';
 import { dirtyValuesChanged } from '@/v5/helpers/form.helper';
+import { pick } from 'lodash';
 
 interface Props { 
 	open: boolean; 
@@ -40,7 +41,7 @@ interface Props {
 export const EditDrawingDialog = ({ open, onClickClose, drawing }:Props) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
-	const categories = DrawingsHooksSelectors.selectCategories();
+	const types = DrawingsHooksSelectors.selectTypes();
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 
 	const { onSubmitError, formData } = useDrawingForm(drawing);
@@ -54,8 +55,10 @@ export const EditDrawingDialog = ({ open, onClickClose, drawing }:Props) => {
 
 	const onSubmit: SubmitHandler<IFormInput> = async (body) => {
 		try {
-			await new Promise<void>((accept, reject ) => 
-				DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawing._id, body as any, accept, reject));
+			await new Promise<void>((accept, reject) => {
+				const updatedDrawingData = pick(body, ['name', 'number', 'type', 'desc']);
+				DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawing._id, updatedDrawingData, accept, reject);
+			});
 			onClickClose();
 		} catch (err) {
 			onSubmitError(err);
@@ -94,21 +97,21 @@ export const EditDrawingDialog = ({ open, onClickClose, drawing }:Props) => {
 
 			<FormTextField
 				control={control}
-				name="drawingNumber"
-				label={formatMessage({ id: 'drawings.creation.form.drawingNumber', defaultMessage: 'Drawing Number' })}
-				formError={errors.drawingNumber}
+				name="number"
+				label={formatMessage({ id: 'drawings.creation.form.number', defaultMessage: 'Drawing Number' })}
+				formError={errors.number}
 				disabled={!isProjectAdmin}
 				required
 			/>
 			<FormSelect
 				control={control}
-				name="category"
-				label={formatMessage({ id: 'drawings.creation.form.category', defaultMessage: 'Category' })}
+				name="type"
+				label={formatMessage({ id: 'drawings.creation.form.type', defaultMessage: 'Category' })}
 				disabled={!isProjectAdmin}
 				required
 			>
-				{categories.map((category) => (
-					<MenuItem key={category} value={category}> {category}</MenuItem>
+				{types.map((type) => (
+					<MenuItem key={type} value={type}> {type}</MenuItem>
 				))}
 			</FormSelect>
 			<FormTextField

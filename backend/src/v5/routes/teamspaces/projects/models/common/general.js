@@ -27,6 +27,7 @@ const {
 	hasReadAccessToFederation,
 	isAdminToProject,
 } = require('../../../../../middleware/permissions/permissions');
+const { respond, writeStreamRespond } = require('../../../../../utils/responder');
 const { validateAddModelData, validateUpdateSettingsData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings');
 const Containers = require('../../../../../processors/teamspaces/projects/models/containers');
 const Drawings = require('../../../../../processors/teamspaces/projects/models/drawings/index');
@@ -35,7 +36,18 @@ const { Router } = require('express');
 const { canDeleteContainer } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
-const { respond } = require('../../../../../utils/responder');
+
+const getThumbnail = async (req, res) => {
+	const { teamspace, project, drawing } = req.params;
+
+	try {
+		const { readStream, filename, size, mimeType } = await Drawings.getLatestThumbnail(teamspace, project, drawing);
+		writeStreamRespond(req, res, templates.ok, readStream, filename, size, { mimeType });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
 
 const addModel = (modelType) => async (req, res) => {
 	const { teamspace, project } = req.params;
@@ -878,6 +890,45 @@ const establishRoutes = (modelType) => {
 	 *                   desc: The Drawing of the Lego House
 	 */
 	router.get('/:model', hasReadAccessToModel[modelType], getModelSettings(modelType), formatModelSettings);
+
+	if (modelType === modelTypes.DRAWING) {
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/thumbnail:
+	 *   get:
+	 *     description: Fetches the thumbnail for a drawing.
+	 *     tags: [Models]
+	 *     operationId: getThumbnail
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: drawing
+	 *         description: Drawing ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       200:
+	 *         description: returns a raster image of the thumbnail
+	 */
+		router.get('/:model/thumbnail', hasReadAccessToDrawing, getThumbnail);
+	}
+
 	return router;
 };
 
