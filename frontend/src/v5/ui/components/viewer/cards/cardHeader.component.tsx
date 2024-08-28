@@ -15,23 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const sharp = require('sharp');
+import { ReactNode } from 'react';
+import { Actions, CardHeaderContainer, Title } from './card.styles';
 
-const ImageHelper = {};
-
-ImageHelper.createThumbnail = async (buffer, width = 600, density = 150) => {
-	if (!buffer) throw new Error('Image not provided');
-
-	const jpgBuffer = await sharp(buffer, { density })
-		.flatten({ background: '#ffffff' })
-		.toFormat('jpeg')
-		.toBuffer();
-
-	// (As far as I can tell) we have to export the buffer and re-import it for resize,
-	// otherwise it optimises out the density setting and we will miss out detailed lines.
-	return sharp(jpgBuffer)
-		.resize(width, undefined, {
-			fit: 'outside',
-		}).toBuffer();
+type CardHeaderProps = {
+	icon: ReactNode;
+	title: ReactNode | string;
+	actions?: ReactNode;
 };
-module.exports = ImageHelper;
+export const CardHeader = ({ icon, title, actions }: CardHeaderProps) => (
+	<CardHeaderContainer>
+		{icon}
+		<Title>{title}</Title>
+		<Actions>{actions}</Actions>
+	</CardHeaderContainer>
+);

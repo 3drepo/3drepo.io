@@ -21,11 +21,12 @@ const { copyFile, mkdir, rm, stat, writeFile } = require('fs/promises');
 const { createWriteStream, readdirSync } = require('fs');
 const { listenToQueue, queueMessage } = require('../handler/queue');
 const { modelTypes, processStatuses } = require('../models/modelSettings.constants');
+const { DRAWINGS_HISTORY_COL } = require('../models/revisions.constants');
 const Path = require('path');
 const { addRevision } = require('../models/revisions');
 const archiver = require('archiver');
 const { events } = require('./eventsManager/eventsManager.constants');
-const { exec } = require('child_process');
+const { execFile } = require('child_process');
 const { publish } = require('./eventsManager/eventsManager');
 const { cn_queue: queueConfig } = require('../utils/config');
 const processingLabel = require('../utils/logger').labels.modelProcessing;
@@ -110,7 +111,7 @@ ModelProcessing.processDrawingUpload = async (teamspace, project, model, revInfo
 		{ ...revInfo, format, rFile: [fileId], incomplete: true });
 
 	const fileMeta = { name: file.originalname, rev_id, project, model };
-	await storeFile(teamspace, `${modelTypes.DRAWING}s.history`, fileId, file.buffer, fileMeta);
+	await storeFile(teamspace, DRAWINGS_HISTORY_COL, fileId, file.buffer, fileMeta);
 
 	const queueMeta = { format, size: file.buffer.length };
 	await queueDrawingUpload(teamspace, project, model, UUIDToString(rev_id), queueMeta, file.buffer);
@@ -144,7 +145,7 @@ ModelProcessing.queueModelUpload = async (teamspace, model, data, { originalname
 
 		await queueMessage(modelq, revId, msg);
 
-		publish(events.QUEUED_TASK_UPDATE, { teamspace, model, corId: revId, status: 'queued' });
+		publish(events.QUEUED_TASK_UPDATE, { teamspace, model, corId: revId, status: processStatuses.QUEUED });
 	} catch (err) {
 		// Clean up files we created
 		Promise.all([
@@ -181,7 +182,10 @@ ModelProcessing.queueFederationUpdate = async (teamspace, federation, info) => {
 		await writeFile(`${sharedDir}/${revId}/obj.json`, JSON.stringify(data));
 
 		await queueMessage(jobq, revId, `genFed ${filePath} ${teamspace}`);
-		publish(events.QUEUED_TASK_UPDATE, { teamspace, model: federation, corId: revId, status: 'queued' });
+		publish(events.QUEUED_TASK_UPDATE, { teamspace,
+			model: federation,
+			corId: revId,
+			status: processStatuses.QUEUED });
 	} catch (err) {
 		// Clean up files we created
 		rm(`${sharedDir}/${revId}/obj.json`).catch((cleanUpErr) => {
@@ -228,13 +232,13 @@ ModelProcessing.getLogArchive = async (corId) => {
 						const isWin = process.platform === 'win32';
 						if (isWin) {
 							// eslint-disable-next-line security/detect-child-process
-							exec(`Get-Content ${logPath} -Tail 20`,
+							execFile('Get-Content', [logPath, '-Tail', '20'],
 								{ shell: 'powershell.exe' }, (error, stdout) => {
 									resolve(error ? undefined : stdout);
 								});
 						} else {
 							// eslint-disable-next-line security/detect-child-process
-							exec(`tail -n20 ${logPath}`,
+							execFile('tail', [logPath, '-n20'],
 								(error, stdout) => {
 									resolve(error ? undefined : stdout);
 								});

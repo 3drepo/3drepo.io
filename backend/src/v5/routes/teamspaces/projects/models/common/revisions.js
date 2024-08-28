@@ -493,7 +493,7 @@ const establishRoutes = (modelType) => {
 	 *   get:
 	 *     description: Fetches the image for a drawing.
 	 *     tags: [Revisions]
-	 *     operationId: getThumbnail
+	 *     operationId: getImage
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace

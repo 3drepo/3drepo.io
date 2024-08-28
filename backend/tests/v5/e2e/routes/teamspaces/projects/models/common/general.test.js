@@ -332,7 +332,6 @@ const testGetModelStats = () => {
 				calibration: modelType === modelTypes.DRAWING ? calibration ?? 'uncalibrated' : undefined,
 				type: modelType === modelTypes.FEDERATION ? undefined : type,
 			});
-
 			if (federate) {
 				if (subModels) {
 					res.containers = subModels;
@@ -986,7 +985,7 @@ const testGetThumbnail = () => {
 				['the user does not have access to the drawing', getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
 				['the drawing does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
 				['the model is not a drawing', getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
-				['!!! the drawing has a thumbnail and user has access', getRoute(), true, model],
+				['the drawing has a thumbnail and user has access', getRoute(), true, model],
 				['the drawing does not have a thumbnail and user has access', getRoute({ modelId: drawNoRev._id }), false, templates.fileNotFound],
 			];
 		};

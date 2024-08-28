@@ -29,13 +29,13 @@ export const projectImageFileIsTooBig = (file): boolean => (file.size > clientCo
 export const PROJECT_IMAGE_MAX_SIZE_MESSAGE = formatInfoUnit(clientConfigService.projectImageSizeLimit);
 
 export enum ModelType {
-	CONTAINER,
-	FEDERATION,
-	DRAWING,
+	CONTAINER = 'Container',
+	FEDERATION = 'Federation',
+	DRAWING = 'Drawing',
 }
 
 export const getModelType = (model) => {
 	if (model.federate) return ModelType.FEDERATION;
-	if (model.drawingNumber) return ModelType.DRAWING;
-	return ModelType.CONTAINER;
+	if (model.units) return ModelType.CONTAINER;
+	return ModelType.DRAWING;
 };
