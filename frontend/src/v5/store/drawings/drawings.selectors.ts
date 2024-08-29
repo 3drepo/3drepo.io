@@ -34,7 +34,9 @@ export const selectDrawings = createSelector(
 
 export const selectCalibratedDrawings = createSelector(
 	selectDrawings,
-	(drawings) => (drawings.filter((d) => [CalibrationStates.CALIBRATED, CalibrationStates.OUT_OF_SYNC].includes(d.calibration))),
+	(drawings) => (drawings.filter((d) => (
+		[CalibrationStates.UNCALIBRATED, CalibrationStates.CALIBRATED, CalibrationStates.OUT_OF_SYNC].includes(d.calibration)))
+	),
 );
 
 export const selectFavouriteDrawings = createSelector(
