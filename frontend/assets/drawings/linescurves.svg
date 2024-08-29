@@ -39,8 +39,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="5.5250177"
-     inkscape:cx="107.23504"
-     inkscape:cy="263.48725"
+     inkscape:cx="107.59703"
+     inkscape:cy="165.20703"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -84,19 +84,19 @@
        id="path1422" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 49.238389,114.96435 c 58.099051,0 21.157645,64.89558 21.157645,-14.6379"
+       d="m 9.057522,114.42137 c 58.099051,0 21.157645,64.89558 21.157645,-14.637905"
        id="path1712"
        sodipodi:nodetypes="cc" />
     <text
        xml:space="preserve"
        style="font-size:3.175px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:center;text-anchor:middle;stroke-width:0.264583"
-       x="107.92049"
-       y="121.6423"
+       x="67.739616"
+       y="121.09932"
        id="text1420-2"><tspan
          sodipodi:role="line"
          id="tspan1418-9"
-         x="107.92049"
-         y="121.6423"
+         x="67.739616"
+         y="121.09932"
          style="stroke-width:0.264583">Self Intersecting Single Curve</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
@@ -201,5 +201,21 @@
        style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        d="m 141.9,290.49681 c 0,0 -25.52028,53.75548 -2.53393,35.11301"
        id="path897" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 129.95434,119.63763 c -14.66059,-20.995412 -43.981764,-2.17194 -20.81442,1.80995"
+       id="path899" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 118.00867,117.82768 c 8.50676,21.53839 11.94566,27.14923 11.94566,27.14923"
+       id="path901" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 137.01314,112.57882 c 5.97283,-40.723847 6.8778,57.19439 10.4977,21.3574"
+       id="path903" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 165.79133,119.99962 c 20.27142,-0.36199 -4.52488,-0.181 -4.34388,13.93661"
+       id="path905" />
   </g>
 </svg>
