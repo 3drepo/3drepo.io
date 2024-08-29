@@ -171,13 +171,12 @@ class RootFinder {
 	 * Pkc -> Pkc' where k' = k + 1 and c' = 2^k*c.
 	 * */
 	H(k: number) { // d should be the difference in k
-		const a = Math.pow(2, 5 * k);
-		this.Qp.a5 = this.Qp.a5 * a * Math.pow(2, -5 * k);
-		this.Qp.a4 = this.Qp.a4 * a * Math.pow(2, -4 * k);
-		this.Qp.a3 = this.Qp.a3 * a * Math.pow(2, -3 * k);
-		this.Qp.a2 = this.Qp.a2 * a * Math.pow(2, -2 * k);
-		this.Qp.a1 = this.Qp.a1 * a * Math.pow(2, -1 * k);
-		this.Qp.a0 = this.Qp.a0 * a;
+		this.Qp.a5 = this.Qp.a5;
+		this.Qp.a4 = this.Qp.a4 * Math.pow(2, k);
+		this.Qp.a3 = this.Qp.a3 * Math.pow(2, 2 * k);
+		this.Qp.a2 = this.Qp.a2 * Math.pow(2, 3 * k);
+		this.Qp.a1 = this.Qp.a1 * Math.pow(2, 4 * k);
+		this.Qp.a0 = this.Qp.a0 * Math.pow(2, 5 * k);
 
 		this.qk = this.qk + k;
 		this.qc = this.qc * Math.pow(2, k);
