@@ -43,6 +43,12 @@ export const ImageContainer = styled.div`
 	height: 75px;
 	width: 75px;
 	overflow: hidden;
+
+	img {
+		object-fit: cover;
+		width: 100%;
+		height: 100%;
+	}
 `;
 
 export const InfoContainer = styled.div`

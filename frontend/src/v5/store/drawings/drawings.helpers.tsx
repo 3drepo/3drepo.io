@@ -22,6 +22,7 @@ import NotCalibrated from '@assets/icons/filled/no_calibration-filled.svg';
 import { Display } from '@/v5/ui/themes/media';
 import { CalibrationStates, DrawingStats, DrawingUploadStatus, IDrawing, MinimumDrawing } from './drawings.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
+import { getUrl } from '@/v5/services/api/default';
 
 export const DRAWING_LIST_COLUMN_WIDTHS = {
 	name: {
@@ -103,4 +104,4 @@ export const prepareSingleDrawingData = (
 
 export const prepareDrawingsData = (drawings: Array<MinimumDrawing>) => drawings.map<IDrawing>((d) => prepareSingleDrawingData(d, null));
 
-export const getDrawingImageSrc = (drawingId: string) => `/assets/drawings/${drawingId}`;
+export const getDrawingThumbnailSrc = (teamspace, projectId, drawingId) => getUrl(`teamspaces/${teamspace}/projects/${projectId}/drawings/${drawingId}/thumbnail?key=7da76c239bbd6091967ea45a92f9fc21`);

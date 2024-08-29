@@ -35,6 +35,10 @@ import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { AuthImg } from '@components/authenticatedResource/authImg.component';
+import { useParams } from 'react-router';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { getDrawingThumbnailSrc } from '@/v5/store/drawings/drawings.helpers';
 
 const STATUS_CODE_TEXT = formatMessage({ id: 'drawings.list.item.statusCode', defaultMessage: 'Status code' });
 const REVISION_CODE_TEXT = formatMessage({ id: 'drawings.list.item.revisionCode', defaultMessage: 'Revision code' });
@@ -44,6 +48,7 @@ type DrawingItemProps = {
 	onClick: React.MouseEventHandler<HTMLDivElement>;
 };
 export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
+	const { teamspace, project } = useParams<ViewerParams>();
 	const [latestRevision] = DrawingRevisionsHooksSelectors.selectRevisions(drawing._id);
 	const { calibration, name, number, lastUpdated, desc } = drawing;
 	const { statusCode, revCode } = latestRevision || {};
@@ -86,7 +91,7 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 		<Container onClick={onClick} key={drawing._id} $selected={drawing._id === selectedDrawingId}>
 			<MainBody>
 				<ImageContainer>
-					<img src="https://placedog.net/73/73" />
+					<AuthImg src={getDrawingThumbnailSrc(teamspace, project, drawing._id)} onError={(e) => { window.myError = e;}}/>
 				</ImageContainer>
 				<InfoContainer>
 					<BreakingLine>
