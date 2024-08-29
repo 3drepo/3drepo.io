@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Vector2, QuinticPolynomial, CubicBezier } from './types';
-import { SVGSnapDiagnosticsHelper } from './debug';
+import { Vector2, QuinticPolynomial, CubicBezier, Line } from './types';
 
 class Root {
 	/** The parameter (position along the curve) where the root is */
@@ -301,6 +300,172 @@ class RootFinder {
 	}
 }
 
+// David Eberly, Geometric Tools, Redmond WA 98052
+// Copyright (c) 1998-2024
+// Distributed under the Boost Software License, Version 1.0.
+function computeDepressedCubicRoots(d0: number, d1: number, roots: any[]) {
+	if (d0 == 0.0) {
+		if (d1 > 0.0) {
+			// One real root, multiplicity 1.
+			roots[0] = 0;
+			return 1;
+		} else if (d1 < 0.0) {
+			// Three real roots, each multiplicity 1.
+			const sqrtNegD1 = Math.sqrt(-d1);
+			roots[0] = -sqrtNegD1;
+			roots[1] = 0;
+			roots[2] = sqrtNegD1;
+			return 3;
+		} else {
+			// One real root, multiplicity 3.
+			roots[0] = 0;
+			return 1;
+		}
+	}
+	// At this time d0 ̸= 0.
+	if (Math.abs(d1) < Number.EPSILON) {
+		// One real root, multiplicity 1.
+		const cbrtNegD0 = (d0 > 0.0 ? -Math.pow(d0, 1.0 / 3.0) : Math.pow(-d0, 1.0 / 3.0));
+		roots[0] = cbrtNegD0;
+		return 1;
+	}
+	// At this time d0 ̸= 0 and d1 ̸= 0.
+	const delta = -(27.0 * d0 * d0 + 4.0 * d1 * d1 * d1);
+	if (delta > 0.0) {
+		// Three real roots, each multiplicity 1.
+		const sqrt3 = Math.sqrt(3.0);
+		const rho = Math.pow(Math.abs(d1 / 3.0), 1.5);
+		const cbrtRho = Math.pow(rho, 1.0 / 3.0);
+		const theta = Math.atan2(Math.sqrt(delta / 27.0), -d0);
+		const thetaDiv3 = theta / 3.0;
+		const cosThetaDiv3 = Math.cos(thetaDiv3);
+		const sinThetaDiv3 = Math.sin(thetaDiv3);
+		const temp0 = cbrtRho * cosThetaDiv3;
+		const temp1 = sqrt3 * cbrtRho * sinThetaDiv3;
+		const r0 = 2.0 * temp0;
+		const r1 = -temp0 - temp1;
+
+		const r2 = -temp0 + temp1;
+		if (sinThetaDiv3 > 0.0) {
+			roots[0] = r1;
+			roots[1] = r2;
+			roots[2] = r0;
+		} else {
+			roots[0] = r2;
+			roots[1] = r1;
+			roots[2] = r0;
+		}
+		return 3;
+	}
+	if (delta < 0.0) {
+		// One real root, multiplicity 1.
+		if (d0 < 0.0) {
+			const w = 0.5 * (-d0 + Math.sqrt(-delta / 27.0));
+			const cbrtW = Math.pow(Math.abs(w), 1.0 / 3.0);
+			const r0 = cbrtW - d1 / (3.0 * cbrtW);
+			roots[0] = r0;
+		} else {
+			const negY = 0.5 * (d0 + Math.sqrt(-delta / 27.0));
+			const cbrtY = Math.pow(Math.abs(negY), 1.0 / 3.0);
+			const r0 = cbrtY - d1 / (3.0 * cbrtY);
+			roots[0] = r0;
+		}
+		return 1;
+	}
+	// The discriminant is ∆ = 0. Two real roots, one of multiplicity 2 and one of multiplicity 1.
+	const r0 = -3.0 * d0 / (2.0 * d1);
+	const r1 = 2.0 * r0;
+	if (r0 < r1) {
+		roots[0] = r0;
+		roots[1] = r1;
+	} else {
+		roots[0] = r1;
+		roots[1] = r0;
+	}
+	return 2;
+}
+
+// David Eberly, Geometric Tools, Redmond WA 98052
+// Copyright (c) 1998-2024
+// Distributed under the Boost Software License, Version 1.0.
+function computeDepressedQuadraticRoots(d0: number, roots: number[]): number {
+	if (d0 > 0.0) {
+		// Two non-real roots, each multiplicity 1.
+		return 0;
+	}
+	if (d0 == 0.0) {
+		// One real root, multiplicity 2.
+		roots[0] = 0;
+		return 1;
+	}
+	// Two real roots, each multiplicity 1.
+	const sqrtNegD0 = Math.sqrt(-d0);
+	roots[0] = -sqrtNegD0;
+	roots[1] = sqrtNegD0;
+	return 2;
+}
+
+function computeLinearRoots(a0: number, a1: number, roots: number[]) {
+	if (Math.abs(a1) < Number.EPSILON) {
+		return; // All real-valued x, or if a0 is non-zero there is no solution
+	} else if (Math.abs(a0) < Number.EPSILON) {
+		roots[0] = 0;
+	} else {
+		roots[0] = -a0 / a1;
+	}
+}
+
+function computeQuadraticRoots(a0: number, a1: number, a2: number, roots: number[]) {
+
+	// Check that the polynomial is actually quadratic - if the first term is zero
+	// the following algorithm will attempt to divide by zero and result in other
+	// rounding and precision errors.
+
+	if (Math.abs(a2) > Number.EPSILON) {
+
+		// Get the quadratic in depressed form to find the roots
+
+		const m0 = a0 / a2;
+		const m1 = a1 / a2;
+		const d0 = m0 - (m1 * m1) / 4;
+
+		computeDepressedQuadraticRoots(d0, roots);
+
+		for (let i = 0; i < roots.length; i++) {
+			roots[i] = roots[i] - m1 / 2;
+		}
+	} else {
+		computeLinearRoots(a0, a1, roots);
+	}
+}
+
+function computeCubicRoots(a0: number, a1: number, a2: number, a3: number, roots: number[]) {
+
+	// Check that the polynomial is actually cubic - if the first term is zero
+	// the following algorithm will attempt to divide by zero and result in other
+	// rounding and precision errors.
+
+	if (Math.abs(a3) > Number.EPSILON) {
+		// Get the cubic in depressed form to find the roots
+
+		const m0 = a0 / a3;
+		const m1 = a1 / a3;
+		const m2 = a2 / a3;
+		const d0 = m0 - m1 * m2 / 3 + 2 * Math.pow(m2, 3) / 27;
+		const d1 = m1 - (m2 * m2) / 3;
+
+		computeDepressedCubicRoots(d0, d1, roots);
+
+		// Transform root of d(y) to root of g(x)
+		for (let i = 0; i < roots.length; i++) {
+			roots[i] = roots[i] - m2 / 3;
+		}
+
+	} else {
+		computeQuadraticRoots(a0, a1, a2, roots);
+	}
+}
+
 /**
  * Returns the closest point on a curve to point p using the root isolation
  * method. Will always return a value, even if it is just the start or end
@@ -361,3 +526,43 @@ export function closestPointOnCurve(curve: CubicBezier, p: Vector2): Vector2 {
 
 	return closestPoint;
 }
+
+export function lineCurveIntersection(curve: CubicBezier, line: Line, results: Vector2[]) {
+
+	// Finds the intersection of a Line and a Bezier Curve using the root finding
+	// method.
+
+	// The equation of a line in implicit or linear form (ax + by - c = 0, or,
+	// A.X = c, for any xy) and the Curve in parametric form (X(t) = (1-t)^3P0...).
+	// Substituting the latter into the former gives a cubic polynomial which
+	// can be solved to get all values of t where the equation of the line is
+	// satisfied.
+
+	const L = line.getImplicit();
+
+	const p0 = Vector2.dot(L.A, curve.p0);
+	const p1 = Vector2.dot(L.A, curve.p1);
+	const p2 = Vector2.dot(L.A, curve.p2);
+	const p3 = Vector2.dot(L.A, curve.p3);
+
+	const a3 = (3 * p1 - p0 - 3 * p2 + p3);
+	const a2 = (3 * p0 - 6 * p1 + 3 * p2);
+	const a1 = (3 * p1 - 3 * p0);
+	const a0 = L.d + p0;
+
+	const roots: number[] = [];
+	computeCubicRoots(a0, a1, a2, a3, roots);
+
+	for (const root of roots) {
+		if (root >= 0 && root <= 1) { // Only consider points in the range of the curve
+			let q = curve.evaluate(root);
+			results.push(q);
+		}
+	}
+}
+
+/*
+export function curveCurveIntersection(a: CubicBezier, b: CubicBezier, results: Vector2[]){
+
+}
+*/

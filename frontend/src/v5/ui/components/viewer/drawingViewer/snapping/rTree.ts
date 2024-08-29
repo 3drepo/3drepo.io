@@ -18,7 +18,7 @@
 import { Vector2, Line, CubicBezier, Bounds } from './types';
 
 import { closestPointOnLine, lineLineIntersection } from './lineFunctions';
-import { closestPointOnCurve } from './bezierFunctions';
+import { closestPointOnCurve, lineCurveIntersection } from './bezierFunctions';
 
 export class RTreeNode extends Bounds {
 	line: Line | undefined;
@@ -140,14 +140,21 @@ class RTreeQueries {
 				}
 				ctx.numLineTests++;
 			}
-			if (node.curve) {
-				const p = closestPointOnCurve(node.curve, ctx.position);
-				const d = Vector2.subtract(ctx.position, p).norm;
-				if ( d < ctx.closestEdgeDistance) {
-					ctx.closestEdgeDistance = d;
-					ctx.closestEdge = p;
+
+			// Curve-Point tests are more expensive than line tests. Only run
+			// these if there are fewer than a hundred or so to consider. If
+			// there are more than this in range, the results will probably not
+			// be intelligible anyway.
+			if (ctx.nodes.length < 100) {
+				if (node.curve) {
+					const p = closestPointOnCurve(node.curve, ctx.position);
+					const d = Vector2.subtract(ctx.position, p).norm;
+					if ( d < ctx.closestEdgeDistance) {
+						ctx.closestEdgeDistance = d;
+						ctx.closestEdge = p;
+					}
+					ctx.numCurveTests++;
 				}
-				ctx.numCurveTests++;
 			}
 		}
 	}
@@ -189,15 +196,17 @@ class RTreeQueries {
 
 		const start = performance.now();
 
-		const nodes = ctx.nodes;
+		const intersections: Vector2[] = [];
 
+		const nodes = ctx.nodes;
 		for (let i = 0; i < nodes.length; i++) {
 			for (let j = i + 1; j < nodes.length; j++) {
 				const a = nodes[i];
 				const b = nodes[j];
 				if (RTreeNode.intersects(a, b)) {
-					const p = this.nodeNodeIntersection(a, b);
-					if ( p != null) { // P is an intersection between two primitives
+					this.nodeNodeIntersections(a, b, intersections);
+					while (intersections.length > 0) {
+						const p = intersections.pop();
 						const d2 = RTreeQueries.distance2(ctx.position, p);
 						if (d2 < ctx.closestIntersectionDistance2) {
 							ctx.closestIntersectionDistance2 = d2;
@@ -213,14 +222,18 @@ class RTreeQueries {
 		ctx.intersectionQueryTime = performance.now() - start;
 	}
 
-	static nodeNodeIntersection(a: RTreeNode, b: RTreeNode): Vector2 | null {
+	static nodeNodeIntersections(a: RTreeNode, b: RTreeNode, results: Vector2[]) {
 		if (a.line && b.line) {
-			return lineLineIntersection(a.line.start, a.line.end, b.line.start, b.line.end);
+			const p = lineLineIntersection(a.line.start, a.line.end, b.line.start, b.line.end);
+			if (p) {
+				results.push(p);
+			}
+			return;
 		} else if (a.line && b.curve) {
-			console.warn('Line-Curve tests not implemented yet');
+			lineCurveIntersection(b.curve, a.line, results);
 			return null;
 		} else if (a.curve && b.line) {
-			console.warn('Line-Curve tests not implemented yet');
+			lineCurveIntersection(a.curve, b.line, results);
 			return null;
 		} else if (a.curve && b.curve) {
 			console.warn('Curve-Curve tests not implemented yet');

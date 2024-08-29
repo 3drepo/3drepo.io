@@ -86,6 +86,18 @@ export interface IClosestPoint {
 	closestPoint(p: Vector2): Vector2;
 }
 
+/** A Line in implicit form (ax + by = d), where A is [a,b] and X is [x,y] */
+export class ImplicitLine {
+	A: Vector2;
+
+	d: number;
+
+	constructor(A: Vector2, d: number) {
+		this.A = A;
+		this.d = d;
+	}
+}
+
 export class Line implements IBounds {
 
 	start: Vector2;
@@ -106,6 +118,13 @@ export class Line implements IBounds {
 		n.xmax = Math.max(this.start.x, this.end.x);
 		n.ymin = Math.min(this.start.y, this.end.y);
 		n.ymax = Math.max(this.start.y, this.end.y);
+	}
+
+	getImplicit(): ImplicitLine {
+		return new ImplicitLine(
+			new Vector2(this.start.y - this.end.y, this.end.x - this.start.x),
+			this.start.x * this.end.y - this.end.x * this.start.y,
+		);
 	}
 }
 
