@@ -38,18 +38,18 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.3589741"
-     inkscape:cx="361.51006"
-     inkscape:cy="242.02306"
+     inkscape:zoom="5.5250177"
+     inkscape:cx="107.23504"
+     inkscape:cy="263.48725"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
      showgrid="false"
-     inkscape:window-width="3840"
-     inkscape:window-height="2066"
-     inkscape:window-x="-11"
-     inkscape:window-y="-11"
-     inkscape:window-maximized="1"
+     inkscape:window-width="2184"
+     inkscape:window-height="1407"
+     inkscape:window-x="1065"
+     inkscape:window-y="136"
+     inkscape:window-maximized="0"
      units="px" />
   <metadata
      id="metadata852">
@@ -59,7 +59,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -98,5 +98,108 @@
          x="107.92049"
          y="121.6423"
          style="stroke-width:0.264583">Self Intersecting Single Curve</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 12.064302,180.67189 c -18.1431583,-28.94595 69.525685,-26.3145 69.525685,-26.3145"
+       id="path854" />
+    <text
+       xml:space="preserve"
+       style="font-size:3.175px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:center;text-anchor:middle;stroke-width:0.264583"
+       x="57.804234"
+       y="169.41356"
+       id="text1420-2-2"><tspan
+         sodipodi:role="line"
+         id="tspan1418-9-3"
+         x="57.804234"
+         y="169.41356"
+         style="stroke-width:0.264583">Control point and last point are the same</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 117.71479,154.92912 c 0,0 125.35353,9.00979 37.4102,22.91619"
+       id="path880" />
+    <text
+       xml:space="preserve"
+       style="font-size:3.175px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:center;text-anchor:middle;stroke-width:0.264583"
+       x="136.89792"
+       y="169.52644"
+       id="text1420-2-2-8"><tspan
+         sodipodi:role="line"
+         id="tspan1418-9-3-4"
+         x="136.89792"
+         y="169.52644"
+         style="stroke-width:0.264583">Control point and first point are the same</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 17.431974,204.09121 c -14.2981357,16.64851 19.194759,33.88462 28.988003,21.1534"
+       id="path908" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="M 4.7007573,205.46226 53.079383,234.84199"
+       id="path910" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 144.94002,226.61567 c -1.37106,48.96622 26.83349,-62.67677 26.24589,-7.63873"
+       id="path912" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 135.34264,237.97583 53.86284,-34.47222"
+       id="path914" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 79.325278,223.09011 c 55.038032,-0.39173 16.256786,-42.89441 15.473326,14.29813"
+       id="path916"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.377953;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 81.088062,237.14341 117.7148,198.80286"
+       id="path918"
+       sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="font-size:3.175px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:center;text-anchor:middle;stroke-width:0.264583"
+       x="93.024193"
+       y="195.77232"
+       id="text1420-2-2-4"><tspan
+         sodipodi:role="line"
+         id="tspan1418-9-3-7"
+         x="93.024193"
+         y="195.77232"
+         style="stroke-width:0.264583">Intersection Tests</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 14.689866,266.57211 51.70833,21.741"
+       id="path944" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 18.607164,300.84846 50.729005,-25.0707"
+       id="path946" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 18.215434,249.14013 19.586489,59.54293"
+       id="path948" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 97.375254,282.35204 c 48.144646,0 -1.809949,-44.52475 23.529336,16.28954"
+       id="path869" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 129.57701,293.42739 c -17.1354,-44.99206 -40.965008,17.53845 6.84843,-27.78629"
+       id="path869-6" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 167.78227,269.5014 c -10.49771,29.68316 -16.83253,-1.08597 -16.83253,-1.08597"
+       id="path891" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="M 177.91798,296.46964 C 156.92258,262.80459 143.52895,280.1801 143.52895,280.1801"
+       id="path893" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 123.9815,312.2162 c 0,0 34.38903,-19.72845 33.30306,-8.32577"
+       id="path895" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 141.9,290.49681 c 0,0 -25.52028,53.75548 -2.53393,35.11301"
+       id="path897" />
   </g>
 </svg>
