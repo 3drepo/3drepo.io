@@ -21,8 +21,11 @@ import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { VirtualisedList, TableRow } from './drawingsList.styles';
 import { CardContent, CardList } from '@components/viewer/cards/card.styles';
-import { forwardRef, useContext } from 'react';
+import { forwardRef, useContext, useEffect } from 'react';
 import { ViewerCanvasesContext } from '../../viewerCanvases.context';
+import { enableRealtimeNewDrawing } from '@/v5/services/realtime/drawings.events';
+import { useParams } from 'react-router';
+import { ViewerParams } from '../../../routes.constants';
 
 const Table = forwardRef(({ children, ...props }, ref: any) => (
 	<table ref={ref} {...props}>
@@ -31,9 +34,12 @@ const Table = forwardRef(({ children, ...props }, ref: any) => (
 ));
 
 export const DrawingsList = () => {
-	const drawings = DrawingsHooksSelectors.selectCalibratedDrawings();
-	const isLoading = DrawingsHooksSelectors.selectCalibratedDrawingsHaveStatsPending();
+	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const drawings = DrawingsHooksSelectors.selectNonEmptyDrawings();
+	const isLoading = DrawingsHooksSelectors.selectNonEmptyDrawingsHaveStatsPending();
 	const { open2D } = useContext(ViewerCanvasesContext);
+
+	useEffect(() => { enableRealtimeNewDrawing(teamspace, project); }, [containerOrFederation]);
 
 	if (isLoading) return (
 		<CentredContainer>
