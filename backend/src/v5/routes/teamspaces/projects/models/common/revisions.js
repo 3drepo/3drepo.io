@@ -86,7 +86,7 @@ const createNewRevision = (modelType) => async (req, res) => {
 		[modelTypes.CONTAINER]: () => Containers.newRevision(teamspace, model,
 			{ ...req.body, owner }, file),
 		[modelTypes.DRAWING]: () => Drawings.newRevision(teamspace, project, model,
-			{ ...req.body, author: owner }, file),
+			{ ...req.body, owner }, file),
 	};
 
 	try {

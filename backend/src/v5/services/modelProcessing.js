@@ -106,14 +106,15 @@ const queueDrawingUpload = async (teamspace, project, model, revId, data, fileBu
 ModelProcessing.processDrawingUpload = async (teamspace, project, model, revInfo, file) => {
 	const format = Path.extname(file.originalname).toLowerCase();
 	const fileId = generateUUID();
+	const { owner, ...revData } = revInfo;
 
 	const rev_id = await addRevision(teamspace, project, model, modelTypes.DRAWING,
-		{ ...revInfo, format, rFile: [fileId], incomplete: true });
+		{ ...revData, author: owner, format, rFile: [fileId], incomplete: true });
 
 	const fileMeta = { name: file.originalname, rev_id, project, model };
 	await storeFile(teamspace, DRAWINGS_HISTORY_COL, fileId, file.buffer, fileMeta);
 
-	const queueMeta = { format, size: file.buffer.length };
+	const queueMeta = { format, size: file.buffer.length, owner };
 	await queueDrawingUpload(teamspace, project, model, UUIDToString(rev_id), queueMeta, file.buffer);
 };
 
