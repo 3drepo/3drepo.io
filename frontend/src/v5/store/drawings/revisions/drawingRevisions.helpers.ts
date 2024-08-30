@@ -18,6 +18,7 @@
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import { CreateDrawingRevisionBody, IDrawingRevision } from './drawingRevisions.types';
 import { NewDrawing } from '../drawings.types';
+import { getUrl } from '@/v5/services/api/default';
 
 export const prepareRevisionData = (revision): IDrawingRevision => ({
 	...revision,
@@ -44,3 +45,5 @@ export const createFormDataFromRevisionBody = (body: CreateDrawingRevisionBody) 
 	if (body.description) formData.append('desc', body.description);
 	return formData;
 };
+
+export const getDrawingImageSrc = (teamspace, projectId, drawingId, revision) => getUrl(`teamspaces/${teamspace}/projects/${projectId}/drawings/${drawingId}/revisions/${revision}/files/image`);
