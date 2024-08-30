@@ -29,7 +29,7 @@ import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 
 export const DrawingsListCard = () => {
 	const { teamspace, project } = useParams<ViewerParams>();
-	const drawings = DrawingsHooksSelectors.selectCalibratedDrawings();
+	const drawings = DrawingsHooksSelectors.selectNonEmptyDrawings();
 
 	useEffect(() => {
 		drawings.forEach((d) => DrawingRevisionsActionsDispatchers.fetch(teamspace, project, d._id));
