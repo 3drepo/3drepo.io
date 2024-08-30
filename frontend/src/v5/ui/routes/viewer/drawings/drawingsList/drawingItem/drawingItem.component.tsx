@@ -40,7 +40,7 @@ import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { getDrawingThumbnailSrc } from '@/v5/store/drawings/drawings.helpers';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { enableRealtimeDrawingRemoved, enableRealtimeDrawingUpdate } from '@/v5/services/realtime/drawings.events';
-import { enableRealtimeDrawingRevisionUpdate, enableRealtimeNewDrawingRevisionUpdate } from '@/v5/services/realtime/drawingRevision.events';
+import { enableRealtimeDrawingRevisionUpdate, enableRealtimeDrawingNewRevision } from '@/v5/services/realtime/drawingRevision.events';
 import { useEffect, useState } from 'react';
 import { deleteAuthUrlFromCache, downloadAuthUrl } from '@components/authenticatedResource/authenticatedResource.hooks';
 
@@ -66,14 +66,14 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 			enableRealtimeDrawingRemoved(teamspace, project, drawing._id),
 			enableRealtimeDrawingUpdate(teamspace, project, drawing._id),
 			enableRealtimeDrawingRevisionUpdate(teamspace, project, drawing._id),
-			enableRealtimeNewDrawingRevisionUpdate(teamspace, project, drawing._id),
+			enableRealtimeDrawingNewRevision(teamspace, project, drawing._id),
 		);
 	}, [drawing._id]);
 
 	useEffect(() => {
 		downloadAuthUrl(thumbnailSrc).then(setThumbnail);
 		return () => { deleteAuthUrlFromCache(thumbnailSrc); };
-	}, [latestRevision]);
+	}, [latestRevision._id]);
 
 	const LoadingCodes = () => (
 		<>
