@@ -1107,7 +1107,7 @@ export class ViewerService {
 		}
 	}
 
-	public async setCamera({ position, up, view_dir, look_at, type, orthographicSize, account, model }) {
+	public async setCamera({ position, up, view_dir, look_at, type, orthographicSize, account, model }, animation = true) {
 		await this.isModelReady();
 		UnityUtil.setViewpoint(
 			position,
@@ -1117,7 +1117,8 @@ export class ViewerService {
 			type,
 			orthographicSize,
 			account,
-			model
+			model,
+			animation ? undefined : 0,
 		);
 
 		this.emit(VIEWER_EVENTS.CAMERA_PROJECTION_SET, type);
@@ -1353,6 +1354,28 @@ export class ViewerService {
 
 	public calibrationPlanesChanged(planes) {
 		this.emit(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, planes);
+	}
+
+	public setCalibrationToolFloorToObject(teamspace, modelId, meshId) {
+		UnityUtil.setCalibrationToolFloorToObject(teamspace, modelId, meshId);
+	}
+
+	public setCalibrationToolSelectedColors(fill, border) {
+		UnityUtil.unityInstance.SendMessage('WebGLInterface', 'SetCalibrationToolSelectedColours', JSON.stringify({
+			fill,
+			border,
+		}));
+	}
+
+	public setCalibrationToolUnselectedColors(fill, border) {
+		UnityUtil.unityInstance.SendMessage('WebGLInterface', 'SetCalibrationToolUnselectedColours', JSON.stringify({
+			fill,
+			border,
+		}));
+	}
+
+	public SetCalibrationToolOcclusionOpacity(opacity) {
+		UnityUtil.unityInstance.SendMessage('WebGLInterface', 'SetCalibrationToolOcclusionOpacity', opacity);
 	}
 }
 

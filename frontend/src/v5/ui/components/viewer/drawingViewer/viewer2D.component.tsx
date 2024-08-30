@@ -43,7 +43,11 @@ export const Viewer2D = () => {
 	const [viewBox, setViewBox] = useState<ViewBoxType>(DEFAULT_VIEWBOX);
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
-	const [isDrawingVector, setIsDrawingVector] = useState(true);
+	const [isDrawingVector, setIsDrawingVector] = useState(false);
+
+	const [viewport, setViewport] = useState({ left:0, right: 0, top: 0, bottom:0 });
+
+	const containerRef = useRef();
 
 	const imgRef = useRef<HTMLImageElement>();
 	const imgContainerRef = useRef();
@@ -82,8 +86,22 @@ export const Viewer2D = () => {
 		});
 	}, [zoomHandler]);
 
+	useEffect(()=> {
+		const observer = new ResizeObserver((entry) =>  {
+			const rect = entry[0].contentRect;
+			const { scale, x, y } = viewBox;
+
+			setViewport({ left: -x / scale, right: (-x + rect.width) / scale, top: -y / scale, bottom: (-y + rect.height) / scale });
+		});
+		observer.observe(containerRef.current);
+
+		return () => observer.disconnect();
+	}, [viewBox]);
+	
+
+
 	return (
-		<ViewerContainer visible>
+		<ViewerContainer visible ref={containerRef}>
 			{step === 1 && (
 				<CalibrationInfoBox
 					title={formatMessage({ defaultMessage: '2D Alignment', id: 'infoBox.2dAlignment.title' })}
@@ -103,17 +121,19 @@ export const Viewer2D = () => {
 					active={isDrawingVector}
 					viewBox={viewBox}
 					value={vector2D}
+					viewport={viewport}
 					onChange={setVector2D}
+					cameraEnabled={!isCalibrating}
 				/>
 			</ImageContainer>
 			<ToolbarContainer>
 				<MainToolbar>
-					<ToolbarButton
+					{step === 1 && <ToolbarButton
 						Icon={CalibrationIcon}
 						onClick={onCalibrationClick}
 						title={formatMessage({ id: 'drawingViewer.toolbar.calibrate', defaultMessage: 'Calibrate' })}
 						selected={isDrawingVector}
-					/>
+					/>}
 					<ToolbarButton
 						Icon={ZoomOutIcon}
 						onClick={onClickZoomOut}

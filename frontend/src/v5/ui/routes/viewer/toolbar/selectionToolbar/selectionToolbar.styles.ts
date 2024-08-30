@@ -17,7 +17,6 @@
 
 import styled, { css } from 'styled-components';
 import PlusIcon from '@assets/icons/viewer/plus.svg';
-import { hexToOpacity } from '@/v5/ui/themes/theme';
 
 export const Section = styled.div`
 	display: inherit;
@@ -60,8 +59,8 @@ export const LozengeButton = styled.div<{ variant?: 'filled' | 'outlined', selec
 	margin: 0 0 0 5px;
 	user-select: none;
 
-	color: ${({ theme }) => hexToOpacity(theme.palette.primary.contrast, 100)};
-	border: 1px solid ${({ theme }) => hexToOpacity(theme.palette.primary.contrast, 100)};
+	color: ${({ theme }) => theme.palette.primary.contrast};
+	border: 1px solid ${({ theme }) => theme.palette.primary.contrast};
 
 	${({ variant }) => variant === 'filled' && css`
 		color: ${({ theme }) => theme.palette.primary.lightest};
@@ -75,14 +74,9 @@ export const LozengeButton = styled.div<{ variant?: 'filled' | 'outlined', selec
 		margin: 0;
 		border: 0;
 	}
-	${({ disabled }) => disabled && css`
-		cursor: auto;
-		pointer-events: none;
-		opacity: 0.25;
-	`}
 	${({ selected }) => selected && css`
-	color: ${({ theme }) => theme.palette.primary.main};
-	border-color: ${({ theme }) => theme.palette.primary.main};
+		color: ${({ theme }) => theme.palette.primary.main};
+		border-color: ${({ theme }) => theme.palette.primary.main};
 	`}
 
 	&:not([hidden]) {
@@ -95,8 +89,11 @@ export const LozengeButton = styled.div<{ variant?: 'filled' | 'outlined', selec
 	}
 `;
 
-export const VerticalRangeContainer = styled(LozengeButton).attrs({ disabled: true })`
+export const VerticalRangeContainer = styled(LozengeButton)`
 	padding-left: 3px;
+	cursor: auto;
+	pointer-events: none;
+	opacity: 0.25;
 `;
 
 export const VerticalRangeValue = styled.div`

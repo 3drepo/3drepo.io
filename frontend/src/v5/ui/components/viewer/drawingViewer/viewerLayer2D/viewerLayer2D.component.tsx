@@ -16,27 +16,32 @@
  */
 
 import { CSSProperties, useEffect, useRef, useState } from 'react';
-import { Container, LayerLevel } from './viewerLayer2D.styles';
+import { Container, LayerLevel, Viewport } from './viewerLayer2D.styles';
 import { PanZoomHandler } from '../panzoom/centredPanZoom';
 import { isEqual } from 'lodash';
 import { SvgArrow } from './svgArrow/svgArrow.component';
 import { SvgCircle } from './svgCircle/svgCircle.component';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { Coord2D, Vector2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
+import { Camera } from './camera/camera.component';
+import { CameraOffSight } from './camera/cameraOffSight.component';
 
 export type ViewBoxType = ReturnType<PanZoomHandler['getOriginalSize']> & ReturnType<PanZoomHandler['getTransform']>;
 type ViewerLayer2DProps = {
 	viewBox: ViewBoxType,
 	active: boolean,
 	value?: Vector2D,
+	viewport: any,
 	onChange?: (arrow: Vector2D) => void;
+	cameraEnabled: boolean;
 };
-export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2DProps) => {
+export const ViewerLayer2D = ({ viewBox, active, value, cameraEnabled, viewport, onChange }: ViewerLayer2DProps) => {
 	const [offsetStart, setOffsetStart] = useState<Coord2D>(value?.[0] || null);
 	const [offsetEnd, setOffsetEnd] = useState<Coord2D>(value?.[1] || null);
 	const previousViewBox = useRef<ViewBoxType>(null);
 	const [mousePosition, setMousePosition] = useState<Coord2D>(null);
 	const [drawingId] = useSearchParam('drawingId');
+	const [cameraOnSight, setCameraOnSight] = useState(false);
 
 	const containerStyle: CSSProperties = {
 		transformOrigin: '0 0',
@@ -84,20 +89,24 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 	}, [active]);
 
 	useEffect(() => { resetArrow(); }, [drawingId]);
-	
+
 	return (
-		<Container style={containerStyle}>
-			<LayerLevel>
-				{mousePosition && active && <SvgCircle coord={mousePosition} scale={viewBox.scale} />}
-				{offsetStart && <SvgArrow start={offsetStart} end={offsetEnd ?? mousePosition} scale={viewBox.scale} />}
-			</LayerLevel>
-			{active && (
-				<LayerLevel
-					onMouseUp={handleMouseUp}
-					onMouseDown={handleMouseDown}
-					onMouseMove={handleMouseMove}
-				/>
-			)}
-		</Container>
+		<Viewport>
+			{cameraEnabled && <CameraOffSight onCameraSightChanged={setCameraOnSight} scale={viewBox.scale} viewport={viewport}/>}
+			<Container style={containerStyle}>
+				<LayerLevel>
+					{mousePosition && active && <SvgCircle coord={mousePosition} scale={viewBox.scale} />}
+					{offsetStart && <SvgArrow start={offsetStart} end={offsetEnd ?? mousePosition} scale={viewBox.scale} />}
+					{(cameraOnSight && cameraEnabled) && <Camera scale={viewBox.scale} />}
+				</LayerLevel>
+				{active && (
+					<LayerLevel
+						onMouseUp={handleMouseUp}
+						onMouseDown={handleMouseDown}
+						onMouseMove={handleMouseMove}
+					/>
+				)}
+			</Container>
+		</Viewport>
 	);
 };
