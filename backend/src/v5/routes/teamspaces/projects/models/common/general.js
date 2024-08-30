@@ -30,7 +30,7 @@ const {
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
 const { validateAddModelData, validateUpdateSettingsData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings');
 const Containers = require('../../../../../processors/teamspaces/projects/models/containers');
-const Drawings = require('../../../../../processors/teamspaces/projects/models/drawings/index');
+const Drawings = require('../../../../../processors/teamspaces/projects/models/drawings');
 const Federations = require('../../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
 const { canDeleteContainer } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');

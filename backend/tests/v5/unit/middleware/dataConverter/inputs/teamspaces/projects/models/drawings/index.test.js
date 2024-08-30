@@ -30,7 +30,7 @@ const Responder = require(`${src}/utils/responder`);
 jest.mock('../../../../../../../../../../src/v5/models/revisions');
 const RevisionsModel = require(`${src}/models/revisions`);
 
-const Drawings = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/drawings/index`);
+const Drawings = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/drawings`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { statusCodes } = require(`${src}/models/modelSettings.constants`);
 

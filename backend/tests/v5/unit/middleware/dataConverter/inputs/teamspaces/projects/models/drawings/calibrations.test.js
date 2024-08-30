@@ -59,7 +59,7 @@ const testValidateNewCalibration = () => {
 		['Request with longer verticalRange array', { ...standardBody, verticalRange: [1, 2, 3] }],
 		['Request with shorter verticalRange array', { ...standardBody, verticalRange: [1] }],
 		['Request with verticalRange where the first item is larger than the second', { ...standardBody, verticalRange: [2, 1] }],
-		['Request with verticalRange where the first item is equal to the second', { ...standardBody, verticalRange: [1, 1] }],
+		['Request with verticalRange where the first item is equal to the second', { ...standardBody, verticalRange: [1, 1] }, true],
 		['Request without units', { ...standardBody, units: undefined }],
 		['Request with invalid units', { ...standardBody, units: generateRandomString() }],
 		['Request with valid data', standardBody, true],
@@ -85,7 +85,7 @@ const testValidateNewCalibration = () => {
 		['Request with calibrated revision', false, true],
 		['Request with uncalibrated revision', true, false],
 	])('Check confirm calibration', (desc, uncalibratedRev, calibratedRev, sucess) => {
-		test(`${desc} should ${!sucess ? `fail with ${templates.calibrationNotFound.code}` : ' succeed and next() should be called'}`, async () => {
+		test(`${desc} should ${!sucess ? 'fail with whatever error is thrown' : ' succeed and next() should be called'}`, async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const drawing = generateRandomString();
@@ -99,10 +99,10 @@ const testValidateNewCalibration = () => {
 			const latestCalibration = generateRandomObject();
 
 			const mockCB = jest.fn(() => {});
-
+			const error = uncalibratedRev ? templates.unknown : templates.calibrationNotFound;
 			CalibrationProc.getCalibration.mockImplementationOnce(() => {
 				if (uncalibratedRev) {
-					throw new Error();
+					throw error;
 				}
 
 				return {
@@ -123,8 +123,7 @@ const testValidateNewCalibration = () => {
 			} else {
 				expect(mockCB).not.toHaveBeenCalled();
 				expect(Responder.respond).toHaveBeenCalledTimes(1);
-				expect(Responder.respond.mock.results[0].value.code)
-					.toEqual(templates.calibrationNotFound.code);
+				expect(Responder.respond.mock.results[0].value.code).toEqual(error.code);
 			}
 		});
 	});

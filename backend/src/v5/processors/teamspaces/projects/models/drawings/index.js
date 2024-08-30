@@ -25,6 +25,7 @@ const { getProjectById, removeModelFromProject } = require('../../../../../model
 const { DRAWINGS_HISTORY_COL } = require('../../../../../models/revisions.constants');
 const { createThumbnail } = require('../../../../../utils/helper/images');
 const { deleteDrawingCalibrations } = require('../../../../../models/calibrations');
+const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
 const { generateUUID } = require('../../../../../utils/helper/uuids');
 const { getCalibration } = require('./calibrations');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
@@ -60,7 +61,7 @@ Drawings.getDrawingStats = async (teamspace, project, drawing) => {
 		getLatestRevAndCalibration(),
 	]);
 
-	return {
+	return deleteIfUndefined({
 		number: settings.number,
 		status: settings.status,
 		type: settings.type,
@@ -70,8 +71,8 @@ Drawings.getDrawingStats = async (teamspace, project, drawing) => {
 			lastUpdated: latestRev?.timestamp,
 			latestRevision: latestRev ? `${latestRev.statusCode}-${latestRev.revCode}` : undefined,
 		},
-		...(calibration ? { calibration } : { }),
-	};
+		calibration,
+	});
 };
 
 Drawings.addDrawing = (teamspace, project, data) => addModel(teamspace, project,

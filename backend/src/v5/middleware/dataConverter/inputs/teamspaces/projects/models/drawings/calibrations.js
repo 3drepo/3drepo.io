@@ -36,26 +36,22 @@ const validateConfirmCalibration = async (req, res, next) => {
 		req.body = calibration.calibration;
 
 		await next();
-	} catch {
-		respond(req, res, templates.calibrationNotFound);
+	} catch (err) {
+		respond(req, res, err);
 	}
 };
 
-const arePositionsDifferent = (array, is3d) => {
-	let areDifferent = true;
+const arePositionsDifferent = (positions) => {
+	const pos1 = positions[0];
 
-	const firstPos = array[0];
-	const secondPos = array[1];
-
-	if (firstPos && secondPos) {
-		areDifferent = firstPos[0] !== secondPos[0] || firstPos[1] !== secondPos[1];
-
-		if (is3d) {
-			areDifferent = areDifferent || firstPos[2] !== secondPos[2];
+	for (let i = 1; i < positions.length; i++) {
+		for (let j = 0; j < pos1.length; j++) {
+			if (pos1[j] !== positions[i][j]) {
+				return true;
+			}
 		}
 	}
-
-	return areDifferent;
+	return false;
 };
 
 const validateNewCalibrationData = async (req, res, next) => {
@@ -64,16 +60,16 @@ const validateNewCalibrationData = async (req, res, next) => {
 			model: Yup.array().of(YupHelper.types.position).length(2)
 			// eslint-disable-next-line no-template-curly-in-string
 				.test('not-identical-positions', 'The positions of ${path} cannot be identical',
-					(value) => arePositionsDifferent(value, true))
+					(value) => !value || arePositionsDifferent(value))
 				.required(),
 			drawing: Yup.array().of(YupHelper.types.position2d).length(2)
 			// eslint-disable-next-line no-template-curly-in-string
 				.test('not-identical-positions', 'The positions of ${path} cannot be identical',
-					(value) => arePositionsDifferent(value))
+					(value) => !value || arePositionsDifferent(value))
 				.required(),
 		}).required(),
 		verticalRange: Yup.array().of(Yup.number()).length(2).required()
-			.test('valid-verticalRange', 'The second number of the range must be larger than the first', (value) => value[0] < value[1]),
+			.test('valid-verticalRange', 'The second number of the range must be larger than the first', (value) => value[0] <= value[1]),
 		units: YupHelper.types.strings.unit.required(),
 	}).required().noUnknown();
 
