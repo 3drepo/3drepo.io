@@ -479,14 +479,14 @@ User.verify = async function (username, token, options) {
 	}
 
 	try {
-		const { customData: {firstName, lastName, email, billing, mailListOptOut /* , extras*/ } } = user;
+		const { customData: {firstName, lastName, email, billing, mailListOptOut, createdAt /* , extras*/ } } = user;
 		// const { jobTitle, phoneNumber, industry, howDidYouFindUs } = extras;
 
 		const subscribed = !mailListOptOut;
 		const company = get(billing, "billingInfo.company");
 
 		await Intercom.createContact(username, formatPronouns(firstName + " " + lastName), email,
-			subscribed, company /* , jobTitle, phoneNumber, industry, howDidYouFindUs */);
+			subscribed, company, createdAt /* , jobTitle, phoneNumber, industry, howDidYouFindUs */);
 	} catch (err) {
 		systemLogger.logError("Failed to create contact in intercom when verifying user", username, err);
 	}

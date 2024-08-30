@@ -225,6 +225,11 @@ const testGenerateResetPasswordToken = () => {
 
 const testSignUp = () => {
 	describe('Sign up a user', () => {
+		beforeAll(() => {
+			jest.useFakeTimers('modern');
+			jest.setSystemTime(new Date(2020, 3, 1));
+		});
+
 		const newUserData = {
 			username: generateRandomString(),
 			email: generateRandomString(),
@@ -251,6 +256,8 @@ const testSignUp = () => {
 
 		test('should generate a password sign a user up and fire VERIFY_USER event (SSO user)', async () => {
 			const sso = { id: generateRandomString() };
+			jest.mock('../../../../src/v5/models/users');
+			const UsersModel = require(`${src}/models/users`);
 			await Users.signUp({ ...newUserData, sso });
 			expect(UsersModel.addUser).toHaveBeenCalledTimes(1);
 			expect(UsersModel.addUser).toHaveBeenCalledWith({
@@ -266,8 +273,13 @@ const testSignUp = () => {
 				fullName: `${newUserData.firstName} ${newUserData.lastName}`,
 				company: newUserData.company,
 				mailListOptOut: newUserData.mailListOptOut,
+				createdAt: new Date(),
 			});
 		});
+	});
+
+	afterAll(() => {
+		jest.useRealTimers();
 	});
 };
 
@@ -285,6 +297,7 @@ const testVerify = () => {
 				fullName: `${user.customData.firstName} ${user.customData.lastName}`,
 				company: user.customData.billing.billingInfo.company,
 				mailListOptOut: user.customData.mailListOptOut,
+				createdAt: user.customData.createdAt,
 			});
 		});
 	});
