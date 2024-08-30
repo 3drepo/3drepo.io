@@ -20,7 +20,7 @@ import { ContainerRevisionsActions } from '@/v5/store/containers/revisions/conta
 import api from '@/v5/services/api/default';
 import { ContainersActions } from '@/v5/store/containers/containers.redux';
 import { mockCreateRevisionBody, containerRevisionsMockFactory } from './containerRevisions.fixtures';
-import { UploadStatus } from '@/v5/store/containers/containers.types';
+import { ContainerUploadStatus } from '@/v5/store/containers/containers.types';
 import { createTestStore, spyOnAxiosApiCallWithFile } from '../../test.helpers';
 import { selectRevisions, selectUploads } from '@/v5/store/containers/revisions/containerRevisions.selectors';
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
@@ -135,7 +135,7 @@ describe('Container Revisions: sagas', () => {
 				dispatch(ContainerRevisionsActions.createRevision(teamspace, projectId, uploadId, mockBody));
 			}, [
 				ContainerRevisionsActions.setUploadComplete(uploadId, false),
-				ContainersActions.setContainerStatus(projectId, mockBody.containerId, UploadStatus.QUEUED),
+				ContainersActions.setContainerStatus(projectId, mockBody.containerId, ContainerUploadStatus.QUEUED),
 				ContainerRevisionsActions.setUploadComplete(uploadId, true),
 			]);
 
@@ -158,7 +158,7 @@ describe('Container Revisions: sagas', () => {
 			}, [
 				ContainersActions.createContainerSuccess(projectId, newContainer),
 				ContainerRevisionsActions.setUploadComplete(uploadId, false),
-				ContainersActions.setContainerStatus(projectId, newContainer._id, UploadStatus.QUEUED),
+				ContainersActions.setContainerStatus(projectId, newContainer._id, ContainerUploadStatus.QUEUED),
 				ContainerRevisionsActions.setUploadComplete(uploadId, true),
 			]);
 			const uploadInStore = selectUploads(getState())[uploadId];

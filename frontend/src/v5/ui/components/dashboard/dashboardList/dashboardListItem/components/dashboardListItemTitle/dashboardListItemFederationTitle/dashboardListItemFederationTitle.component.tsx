@@ -16,7 +16,7 @@
  */
 
 import { viewerRoute } from '@/v5/services/routing/routing';
-import { UploadStatus } from '@/v5/store/containers/containers.types';
+import { ContainerUploadStatus } from '@/v5/store/containers/containers.types';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
@@ -40,7 +40,7 @@ export const DashboardListItemFederationTitle = ({
 	const { query } = useContext(SearchContext);
 
 	const { status, desc, name } = federation;
-	const uploadStatus = status === UploadStatus.OK
+	const uploadStatus = status === ContainerUploadStatus.OK
 		? <Highlight search={query}>{desc}</Highlight>
 		: <RevisionStatus status={status} name={name} />;
 

@@ -17,7 +17,7 @@
 
 import { FormattedMessage } from 'react-intl';
 
-import { UploadStatus } from '@/v5/store/containers/containers.types';
+import { ContainerUploadStatus } from '@/v5/store/containers/containers.types';
 import { Container, Label } from './latestRevision.styles';
 import { IRevisionStatus, RevisionStatus } from './revisionStatus/revisionStatus.component';
 
@@ -28,7 +28,7 @@ interface ILatestRevision extends IRevisionStatus {
 
 export const LatestRevision = ({ hasRevisions, status, emptyLabel, ...props }: ILatestRevision): JSX.Element => (
 	<Container disabled={!hasRevisions}>
-		{hasRevisions || status !== UploadStatus.OK ? (
+		{hasRevisions || status !== ContainerUploadStatus.OK ? (
 			<>
 				<Label>
 					<FormattedMessage

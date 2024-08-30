@@ -17,7 +17,7 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
-import { UploadStatus } from '@/v5/store/containers/containers.types';
+import { ContainerUploadStatus } from '@/v5/store/containers/containers.types';
 import { Button } from '@controls/button';
 import { useHistory, useParams, generatePath } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
@@ -25,7 +25,7 @@ import { Heading, OverlayContainer, Subheading } from './invalidViewerOverlay.st
 import { CONTAINERS_ROUTE, DashboardParams } from '../../routes.constants';
 
 type IInvalidContainer = {
-	status: UploadStatus;
+	status: ContainerUploadStatus;
 };
 
 export const InvalidContainerOverlay = ({ status }: IInvalidContainer) => {

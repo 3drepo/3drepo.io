@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { FormattedMessage } from 'react-intl';
-import { UploadStatus } from '@/v5/store/containers/containers.types';
+import { ContainerUploadStatus } from '@/v5/store/containers/containers.types';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { TextOverflow } from '@controls/textOverflow';
 import { formatDate } from '@/v5/services/intl';
@@ -24,7 +24,7 @@ import { DrawingUploadStatus } from '@/v5/store/drawings/drawings.types';
 
 export interface IRevisionStatus {
 	name: React.ReactElement | string;
-	status: UploadStatus | DrawingUploadStatus;
+	status: ContainerUploadStatus | DrawingUploadStatus;
 	error?: {
 		timestamp: Date | null;
 		message: string;
@@ -32,7 +32,7 @@ export interface IRevisionStatus {
 }
 
 export const RevisionStatus = ({ status, error, name }: IRevisionStatus): JSX.Element => {
-	if (status === UploadStatus.QUEUED) {
+	if (status === ContainerUploadStatus.QUEUED) {
 		return (
 			<QueuedStatus>
 				<FormattedMessage id="latestRevision.status.queued" defaultMessage="Queued" />
@@ -41,9 +41,9 @@ export const RevisionStatus = ({ status, error, name }: IRevisionStatus): JSX.El
 	}
 
 	if (
-		status === UploadStatus.PROCESSING
-		|| status === UploadStatus.GENERATING_BUNDLES
-		|| status === UploadStatus.QUEUED_FOR_UNITY
+		status === ContainerUploadStatus.PROCESSING
+		|| status === ContainerUploadStatus.GENERATING_BUNDLES
+		|| status === ContainerUploadStatus.QUEUED_FOR_UNITY
 	) {
 		return (
 			<ProcessingStatus>
@@ -52,7 +52,7 @@ export const RevisionStatus = ({ status, error, name }: IRevisionStatus): JSX.El
 		);
 	}
 
-	if (status === UploadStatus.FAILED && error) {
+	if (status === ContainerUploadStatus.FAILED && error) {
 		return (
 			<>
 				<Name>

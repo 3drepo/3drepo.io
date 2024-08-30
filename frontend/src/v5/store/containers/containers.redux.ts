@@ -21,7 +21,7 @@ import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import { prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
-import { ContainerStats, IContainer, NewContainer, UploadStatus, ContainerSettings } from './containers.types';
+import { ContainerStats, IContainer, NewContainer, ContainerUploadStatus, ContainerSettings } from './containers.types';
 import { TeamspaceProjectAndContainerId, ProjectAndContainerId, TeamspaceAndProjectId, ProjectId, SuccessAndErrorCallbacks, View } from '../store.types';
 import { IContainerRevision } from './revisions/containerRevisions.types';
 import { Role } from '../currentUser/currentUser.types';
@@ -127,7 +127,7 @@ export const createContainerSuccess = (state, {
 		...container,
 		isFavourite: false,
 		revisionsCount: 0,
-		status: UploadStatus.OK,
+		status: ContainerUploadStatus.OK,
 		role: Role.ADMIN,
 	});
 };
@@ -203,7 +203,7 @@ export type CreateContainerAction = Action<'CREATE_CONTAINER'> & TeamspaceAndPro
 export type CreateContainerSuccessAction = Action<'CREATE_CONTAINER_SUCCESS'> & ProjectId & { container: IContainer };
 export type DeleteContainerAction = Action<'DELETE'> & TeamspaceProjectAndContainerId & SuccessAndErrorCallbacks;
 export type DeleteContainerSuccessAction = Action<'DELETE_SUCCESS'> & ProjectAndContainerId;
-export type SetContainerStatusAction = Action<'SET_CONTAINER_STATUS'> & ProjectAndContainerId & { status: UploadStatus };
+export type SetContainerStatusAction = Action<'SET_CONTAINER_STATUS'> & ProjectAndContainerId & { status: ContainerUploadStatus };
 export type ContainerProcessingSuccessAction = Action<'CONTAINER_PROCESSING_SUCCESS'> & ProjectAndContainerId & { revision: IContainerRevision };
 
 export interface IContainersActionCreators {
@@ -270,7 +270,7 @@ export interface IContainersActionCreators {
 		onError: (error) => void,
 	) => DeleteContainerAction;
 	deleteContainerSuccess: (projectId: string, containerId: string) => DeleteContainerSuccessAction;
-	setContainerStatus: (projectId: string, containerId: string, status: UploadStatus) => SetContainerStatusAction;
+	setContainerStatus: (projectId: string, containerId: string, status: ContainerUploadStatus) => SetContainerStatusAction;
 	containerProcessingSuccess: (
 		projectId: string,
 		containerId: string,

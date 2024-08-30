@@ -23,7 +23,7 @@ import {
 	FederationSettings,
 	NewFederation,
 } from '@/v5/store/federations/federations.types';
-import { UploadStatus } from '@/v5/store/containers/containers.types';
+import { ContainerUploadStatus } from '@/v5/store/containers/containers.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import { Role } from '../currentUser/currentUser.types';
 
@@ -36,7 +36,7 @@ export const prepareNewFederation = (
 	{
 		...newFederation,
 		_id: federationId || '',
-		status: UploadStatus.OK,
+		status: ContainerUploadStatus.OK,
 		containers: [],
 		tickets: 0,
 		lastUpdated: new Date(),
@@ -57,7 +57,7 @@ export const prepareSingleFederationData = (
 		...federation,
 		code: stats?.code ?? '',
 		desc: stats?.desc ?? '',
-		status: stats?.status ?? UploadStatus.OK,
+		status: stats?.status ?? ContainerUploadStatus.OK,
 		tickets: stats?.tickets ?? 0,
 		containers,
 		lastUpdated: getNullableDate(stats?.lastUpdated),
