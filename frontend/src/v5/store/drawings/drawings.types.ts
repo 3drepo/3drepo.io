@@ -52,7 +52,7 @@ export interface DrawingStats {
 	status: DrawingUploadStatus,
 	errorReason?: {
 		message: string;
-		timestamp: Date | number;
+		timestamp: Date;
 	};
 	desc?: string;
 }
