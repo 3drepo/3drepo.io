@@ -31,9 +31,9 @@ const { validateUpdateRevisionData } = require('../../../../../middleware/dataCo
 const getImage = async (req, res) => {
 	const { teamspace, project, drawing, revision } = req.params;
 	try {
-		const { readStream, filename, size, mimeType } = await Drawings.getImageByRevision(
+		const { readStream, filename, size, mimeType, encoding } = await Drawings.getImageByRevision(
 			teamspace, project, drawing, revision);
-		writeStreamRespond(req, res, templates.ok, readStream, filename, size, { mimeType });
+		writeStreamRespond(req, res, templates.ok, readStream, filename, size, { mimeType, encoding });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
