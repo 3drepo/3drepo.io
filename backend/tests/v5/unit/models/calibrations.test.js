@@ -119,7 +119,6 @@ const testGetCalibrationForMultipleRevisions = () => {
 				{ $match: { rev_id: { $in: revIds } } },
 				{ $sort: { createdAt: -1 } },
 				{ $group: { _id: '$rev_id', latestCalibration: { $first: '$$ROOT' } } },
-				{ $project: { _id: 1, 'latestCalibration._id': 0 } },
 				{ $project: { _id: 1, ...getFormattedProjecion() } },
 			]);
 		});
