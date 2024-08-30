@@ -256,8 +256,6 @@ const testSignUp = () => {
 
 		test('should generate a password sign a user up and fire VERIFY_USER event (SSO user)', async () => {
 			const sso = { id: generateRandomString() };
-			jest.mock('../../../../src/v5/models/users');
-			const UsersModel = require(`${src}/models/users`);
 			await Users.signUp({ ...newUserData, sso });
 			expect(UsersModel.addUser).toHaveBeenCalledTimes(1);
 			expect(UsersModel.addUser).toHaveBeenCalledWith({
