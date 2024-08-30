@@ -104,4 +104,4 @@ export const prepareSingleDrawingData = (
 
 export const prepareDrawingsData = (drawings: Array<MinimumDrawing>) => drawings.map<IDrawing>((d) => prepareSingleDrawingData(d, null));
 
-export const getDrawingThumbnailSrc = (teamspace, projectId, drawingId) => getUrl(`teamspaces/${teamspace}/projects/${projectId}/drawings/${drawingId}/thumbnail?key=7da76c239bbd6091967ea45a92f9fc21`);
+export const getDrawingThumbnailSrc = (teamspace, projectId, drawingId) => getUrl(`teamspaces/${teamspace}/projects/${projectId}/drawings/${drawingId}/thumbnail`);

@@ -18,7 +18,6 @@
 import { createSelector } from 'reselect';
 import { prepareRevisionData } from './drawingRevisions.helpers';
 import { IDrawingRevisionsState } from './drawingRevisions.redux';
-import { selectDrawingById } from '../drawings.selectors';
 
 const selectRevisionsDomain = (state): IDrawingRevisionsState => state.drawingRevisions;
 const selectDrawingIdParam = (_, drawingId: string) => drawingId;
@@ -34,10 +33,9 @@ export const selectRevisions = createSelector(
 	(revisionsByDrawing, drawingId) => revisionsByDrawing[drawingId]?.map((revision) => prepareRevisionData(revision)) || [],
 );
 
-export const selectRevisionsPending = createSelector(
+export const selectLatestActiveRevision = createSelector(
 	selectRevisions,
-	selectDrawingById,
-	(revisions, drawing) => revisions.length !== drawing.revisionsCount,
+	(revisions) => revisions.find((r) => !r.void),
 );
 
 export const selectIsPending = createSelector(

@@ -35,10 +35,14 @@ import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
-import { AuthImg } from '@components/authenticatedResource/authImg.component';
 import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { getDrawingThumbnailSrc } from '@/v5/store/drawings/drawings.helpers';
+import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
+import { enableRealtimeDrawingRemoved, enableRealtimeDrawingUpdate } from '@/v5/services/realtime/drawings.events';
+import { enableRealtimeDrawingRevisionUpdate, enableRealtimeNewDrawingRevisionUpdate } from '@/v5/services/realtime/drawingRevision.events';
+import { useEffect, useState } from 'react';
+import { deleteAuthUrlFromCache, downloadAuthUrl } from '@components/authenticatedResource/authenticatedResource.hooks';
 
 const STATUS_CODE_TEXT = formatMessage({ id: 'drawings.list.item.statusCode', defaultMessage: 'Status code' });
 const REVISION_CODE_TEXT = formatMessage({ id: 'drawings.list.item.revisionCode', defaultMessage: 'Revision code' });
@@ -49,11 +53,27 @@ type DrawingItemProps = {
 };
 export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	const { teamspace, project } = useParams<ViewerParams>();
-	const [latestRevision] = DrawingRevisionsHooksSelectors.selectRevisions(drawing._id);
+	const latestRevision = DrawingRevisionsHooksSelectors.selectLatestActiveRevision(drawing._id);
 	const { calibration, name, number, lastUpdated, desc } = drawing;
 	const { statusCode, revCode } = latestRevision || {};
 	const areStatsPending = !revCode;
 	const [selectedDrawingId] = useSearchParam('drawingId');
+	const [thumbnail, setThumbnail] = useState('');
+	const thumbnailSrc = getDrawingThumbnailSrc(teamspace, project, drawing._id);
+
+	useEffect(() => {
+		return combineSubscriptions(
+			enableRealtimeDrawingRemoved(teamspace, project, drawing._id),
+			enableRealtimeDrawingUpdate(teamspace, project, drawing._id),
+			enableRealtimeDrawingRevisionUpdate(teamspace, project, drawing._id),
+			enableRealtimeNewDrawingRevisionUpdate(teamspace, project, drawing._id),
+		);
+	}, [drawing._id]);
+
+	useEffect(() => {
+		downloadAuthUrl(thumbnailSrc).then(setThumbnail);
+		return () => { deleteAuthUrlFromCache(thumbnailSrc); };
+	}, [latestRevision]);
 
 	const LoadingCodes = () => (
 		<>
@@ -91,7 +111,7 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 		<Container onClick={onClick} key={drawing._id} $selected={drawing._id === selectedDrawingId}>
 			<MainBody>
 				<ImageContainer>
-					<AuthImg src={getDrawingThumbnailSrc(teamspace, project, drawing._id)} onError={(e) => { window.myError = e;}}/>
+					<img src={thumbnail} />
 				</ImageContainer>
 				<InfoContainer>
 					<BreakingLine>
