@@ -87,7 +87,7 @@ const revisionAdded = async ({ teamspace, project, model, revId, modelType }) =>
 			{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1, statusCode: 1, revCode: 1 });
 
 		if (modelTypes.DRAWING === modelType) {
-			createDrawingThumbnail(teamspace, project, model, revId).catch((err) => {
+			await createDrawingThumbnail(teamspace, project, model, revId).catch((err) => {
 				// It is not critical error if we failed to create a thumbnail.
 				// So catch the error and proceed
 				logger.logError(`Failed to create thumbnail for drawing ${teamspace}.${model}.${revId}: ${err?.message}`);
