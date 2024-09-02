@@ -73,7 +73,7 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	useEffect(() => {
 		downloadAuthUrl(thumbnailSrc).then(setThumbnail);
 		return () => { deleteAuthUrlFromCache(thumbnailSrc); };
-	}, [latestRevision._id]);
+	}, [latestRevision?._id]);
 
 	const LoadingCodes = () => (
 		<>
