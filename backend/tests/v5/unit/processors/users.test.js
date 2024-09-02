@@ -225,11 +225,6 @@ const testGenerateResetPasswordToken = () => {
 
 const testSignUp = () => {
 	describe('Sign up a user', () => {
-		beforeAll(() => {
-			jest.useFakeTimers('modern');
-			jest.setSystemTime(new Date(2020, 3, 1));
-		});
-
 		const newUserData = {
 			username: generateRandomString(),
 			email: generateRandomString(),
@@ -255,6 +250,9 @@ const testSignUp = () => {
 		});
 
 		test('should generate a password sign a user up and fire VERIFY_USER event (SSO user)', async () => {
+			jest.useFakeTimers('modern');
+			jest.setSystemTime(new Date(2020, 3, 1));
+
 			const sso = { id: generateRandomString() };
 			await Users.signUp({ ...newUserData, sso });
 			expect(UsersModel.addUser).toHaveBeenCalledTimes(1);
@@ -273,11 +271,9 @@ const testSignUp = () => {
 				mailListOptOut: newUserData.mailListOptOut,
 				createdAt: new Date(),
 			});
-		});
-	});
 
-	afterAll(() => {
-		jest.useRealTimers();
+			jest.useRealTimers();
+		});
 	});
 };
 

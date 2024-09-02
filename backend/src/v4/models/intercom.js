@@ -46,20 +46,15 @@ Intercom.setIntercomHash = (userProfile) => {
 		.digest("hex");
 };
 
-Intercom.createContact = async (external_id, name, email, subscribed, company, createdAt /* , job_title, phone_number, industry, found_us*/) => {
+Intercom.createContact = async (external_id, name, email, subscribed, company, createdAt) => {
 	if (!accessToken) {
 		return;
 	}
 
-	const custom_attributes = {subscribed /* , job_title, industry, found_us*/ };
+	const custom_attributes = {subscribed};
 	if (company) {
-		custom_attributes.company_entered = company;
 		custom_attributes.company = company;
 	}
-
-	// if (phone_number) {
-	// 	custom_attributes.phone_number = phone_number;
-	// }
 
 	return await axios.post(getEndpoint("contacts"),
 		{
