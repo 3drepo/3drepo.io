@@ -41,32 +41,27 @@ const validateConfirmCalibration = async (req, res, next) => {
 	}
 };
 
-const arePositionsDifferent = (positions) => {
-	const pos1 = positions[0];
-
-	for (let i = 1; i < positions.length; i++) {
+const positionArray = (arrayType) => Yup.array().of(arrayType).length(2).test(
+	'not-identical-positions',
+	// eslint-disable-next-line no-template-curly-in-string
+	'The positions of ${path} cannot be identical',
+	(value) => {
+		if (value?.length !== 2) return true;
+		const [pos1, pos2] = value;
 		for (let j = 0; j < pos1.length; j++) {
-			if (pos1[j] !== positions[i][j]) {
+			if (pos1[j] !== pos2[j]) {
 				return true;
 			}
 		}
-	}
-	return false;
-};
+		return false;
+	},
+);
 
 const validateNewCalibrationData = async (req, res, next) => {
 	const schema = Yup.object({
 		horizontal: Yup.object({
-			model: Yup.array().of(YupHelper.types.position).length(2)
-			// eslint-disable-next-line no-template-curly-in-string
-				.test('not-identical-positions', 'The positions of ${path} cannot be identical',
-					(value) => !value || arePositionsDifferent(value))
-				.required(),
-			drawing: Yup.array().of(YupHelper.types.position2d).length(2)
-			// eslint-disable-next-line no-template-curly-in-string
-				.test('not-identical-positions', 'The positions of ${path} cannot be identical',
-					(value) => !value || arePositionsDifferent(value))
-				.required(),
+			model: positionArray(YupHelper.types.position).required(),
+			drawing: positionArray(YupHelper.types.position2d).required(),
 		}).required(),
 		verticalRange: Yup.array().of(Yup.number()).length(2).required()
 			.test('valid-verticalRange', 'The second number of the range must be larger than the first', (value) => value[0] <= value[1]),
