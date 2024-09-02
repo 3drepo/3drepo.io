@@ -104,6 +104,9 @@ Validators.propTypesToValidator = (propType, isUpdate, required) => {
 		return imposeNullableRule(Yup.array().of(types.strings.title));
 	case propTypes.IMAGE:
 		return types.embeddedImage(isNullable);
+	case propTypes.IMAGE_LIST:
+		return imposeNullableRule(Yup.array().of(isUpdate ? types.embeddedImageOrRef() : types.embeddedImage())
+			.transform((value) => (value?.length === 0 ? null : value)));
 	case propTypes.VIEW:
 		return generateViewValidator(isUpdate, required);
 	case propTypes.MEASUREMENTS:

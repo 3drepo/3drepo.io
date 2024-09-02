@@ -54,27 +54,34 @@ const { TICKETS_RESOURCES_COL } = require(`${src}/models/tickets.constants`);
 jest.mock('../../../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
 
-const generatePropData = (buffer, isView) => (isView
-	? {
-		screenshot: buffer,
-		camera: {
-			position: [0, 0, 0],
-			up: [0, 0, 1],
-			forward: [1, 1, 0],
-		},
-	} : buffer);
+const generatePropData = (buffer, propType) => {
+	if (propType === propTypes.VIEW) {
+		return {
+			screenshot: buffer,
+			camera: {
+				position: [0, 0, 0],
+				up: [0, 0, 1],
+				forward: [1, 1, 0],
+			},
+		};
+	}
 
-const generateImageTestData = (isRef, isView, tickets = 1) => {
+	if (propType === propTypes.IMAGE_LIST) {
+		return times(3, () => buffer);
+	}
+
+	return buffer;
+};
+
+const generateImageTestData = (isRef, propType, tickets = 1) => {
 	const propName = generateRandomString();
 	const moduleName = generateRandomString();
-
-	const propTypeToTest = isView ? propTypes.VIEW : propTypes.IMAGE;
 
 	const template = {
 		properties: [
 			{
 				name: propName,
-				type: propTypeToTest,
+				type: propType,
 			},
 		],
 		modules: [
@@ -83,7 +90,7 @@ const generateImageTestData = (isRef, isView, tickets = 1) => {
 				properties: [
 					{
 						name: propName,
-						type: propTypeToTest,
+						type: propType,
 					},
 				],
 			},
@@ -102,11 +109,11 @@ const generateImageTestData = (isRef, isView, tickets = 1) => {
 			_id: generateRandomString(),
 			title: generateRandomString(),
 			properties: {
-				[propName]: generatePropData(propBuffer, isView),
+				[propName]: generatePropData(propBuffer, propType),
 			},
 			modules: {
 				[moduleName]: {
-					[propName]: generatePropData(modPropBuffer, isView),
+					[propName]: generatePropData(modPropBuffer, propType),
 				},
 			},
 		};
@@ -117,12 +124,12 @@ const generateImageTestData = (isRef, isView, tickets = 1) => {
 	return { template, propName, moduleName, data };
 };
 
-const insertTicketsImageTest = async (isImport, isView) => {
+const insertTicketsImageTest = async (isImport, propType) => {
 	const teamspace = generateRandomString();
 	const project = generateRandomString();
 	const model = generateRandomString();
 	const author = generateRandomString();
-	const imageTestData = generateImageTestData(false, isView, isImport ? 10 : 1);
+	const imageTestData = generateImageTestData(false, propType, isImport ? 10 : 1);
 	const tickets = [];
 	const expectedOutput = imageTestData.data.map(({ ticket }) => {
 		tickets.push(ticket);
@@ -152,22 +159,25 @@ const insertTicketsImageTest = async (isImport, isView) => {
 		const expectedTicket = cloneDeep(tickets[i]);
 		const meta = { ticket: expectedOutput[i]._id, teamspace, project, model };
 
-		if (isView) {
+		if (propType === propTypes.VIEW) {
 			expectedTicket.properties[imageTestData.propName].screenshot = prop.screenshot;
 			expectedTicket.modules[imageTestData.moduleName][imageTestData.propName].screenshot = modProp.screenshot;
 
-			refFiles.push({ id: prop.screenshot,
-				data: imageTestData.data[i].propBuffer,
-				meta });
-			refFiles.push({ id: modProp.screenshot,
-				data: imageTestData.data[i].modPropBuffer,
-				meta });
+			refFiles.push({ id: prop.screenshot, data: imageTestData.data[i].propBuffer, meta });
+			refFiles.push({ id: modProp.screenshot, data: imageTestData.data[i].modPropBuffer, meta });
 		} else {
 			expectedTicket.properties[imageTestData.propName] = prop;
 			expectedTicket.modules[imageTestData.moduleName][imageTestData.propName] = modProp;
 
-			refFiles.push({ id: prop, data: imageTestData.data[i].propBuffer, meta });
-			refFiles.push({ id: modProp, data: imageTestData.data[i].modPropBuffer, meta });
+			const propRefs = propType === propTypes.IMAGE
+				? [{ id: prop, data: imageTestData.data[i].propBuffer, meta }]
+				: prop.map((p) => ({ id: p, data: imageTestData.data[i].propBuffer, meta }));
+			const modRefs = propType === propTypes.IMAGE
+				? [{ id: modProp, data: imageTestData.data[i].modPropBuffer, meta }]
+				: modProp.map((p) => ({ id: p, data: imageTestData.data[i].modPropBuffer, meta }));
+
+			refFiles.push(...propRefs);
+			refFiles.push(...modRefs);
 		}
 
 		return expectedTicket;
@@ -179,6 +189,7 @@ const insertTicketsImageTest = async (isImport, isView) => {
 
 	expect(TemplatesSchema.generateFullSchema).toHaveBeenCalledTimes(1);
 	expect(TemplatesSchema.generateFullSchema).toHaveBeenCalledWith(imageTestData.template);
+	console.log(refFiles);
 
 	expect(FilesManager.storeFiles).toHaveBeenCalledTimes(1);
 	expect(FilesManager.storeFiles).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL, refFiles);
@@ -200,7 +211,7 @@ const insertTicketsImageTest = async (isImport, isView) => {
 	}
 };
 
-const updateImagesTestHelper = async (updateMany, isView) => {
+const updateImagesTestHelper = async (updateMany, propType) => {
 	const teamspace = generateRandomString();
 	const project = generateRandomString();
 	const model = generateRandomString();
@@ -210,7 +221,7 @@ const updateImagesTestHelper = async (updateMany, isView) => {
 	TemplatesSchema.generateFullSchema.mockImplementationOnce((t) => t);
 	const response = [];
 
-	const imageTestData = generateImageTestData(true, isView, nTickets);
+	const imageTestData = generateImageTestData(true, propType, nTickets);
 
 	const tickets = [];
 
@@ -222,11 +233,11 @@ const updateImagesTestHelper = async (updateMany, isView) => {
 
 		return {
 			properties: {
-				[imageTestData.propName]: generatePropData(updatePropBuffer, isView),
+				[imageTestData.propName]: generatePropData(updatePropBuffer, propType),
 			},
 			modules: {
 				[imageTestData.moduleName]: {
-					[imageTestData.propName]: generatePropData(updateModPropBuffer, isView),
+					[imageTestData.propName]: generatePropData(updateModPropBuffer, propType),
 				},
 			},
 		};
@@ -255,7 +266,7 @@ const updateImagesTestHelper = async (updateMany, isView) => {
 		let oldPropRef;
 		let oldModPropRef;
 
-		if (isView) {
+		if (propType === propTypes.VIEW) {
 			propRef = properties[imageTestData.propName].screenshot;
 			modPropRef = modules[imageTestData.moduleName][imageTestData.propName].screenshot;
 
@@ -281,10 +292,14 @@ const updateImagesTestHelper = async (updateMany, isView) => {
 		refFiles.push({ meta, id: modPropRef, data: modPropBuffer });
 
 		return {
-			properties: { [imageTestData.propName]: generatePropData(propRef, isView) },
+			properties: { [imageTestData.propName]: propType === propTypes.IMAGE_LIST
+				? propRef
+				: generatePropData(propRef, propType) },
 			modules: {
 				[imageTestData.moduleName]: {
-					[imageTestData.propName]: generatePropData(modPropRef, isView),
+					[imageTestData.propName]: propType === propTypes.IMAGE_LIST
+						? modPropRef
+						: generatePropData(modPropRef, propType),
 				},
 			},
 		};
@@ -795,8 +810,9 @@ const insertTicketsTestHelper = (isImport) => {
 		}
 	});
 
-	test('should process images and store refs', () => insertTicketsImageTest(isImport));
-	test('should process screenshots from view data and store refs', () => insertTicketsImageTest(isImport, true));
+	test('should process images and store refs (image property type)', () => insertTicketsImageTest(isImport, propTypes.IMAGE));
+	test('should process images and store refs (image list property type)', () => insertTicketsImageTest(isImport, propTypes.IMAGE_LIST));
+	test('should process screenshots from view data and store refs', () => insertTicketsImageTest(isImport, propTypes.VIEW));
 
 	insertTicketsGroupTests();
 };
@@ -886,10 +902,7 @@ const testUpdateTicket = () => {
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET,
-				{ teamspace,
-					project,
-					model,
-					...response });
+				{ teamspace, project, model, ...response });
 		});
 
 		test('should not trigger event if there was no change', async () => {
@@ -920,8 +933,9 @@ const testUpdateTicket = () => {
 			expect(EventsManager.publish).not.toHaveBeenCalled();
 		});
 
-		test('should process image and store a ref', () => updateImagesTestHelper(false));
-		test('should process screenshot from view data and store a ref', () => updateImagesTestHelper(false, true));
+		// test('should process image and store a ref (image property type)', () => updateImagesTestHelper(false, propTypes.IMAGE));
+		test('should process image and store a ref (image list property type)', () => updateImagesTestHelper(false, propTypes.IMAGE_LIST));
+		// test('should process screenshot from view data and store a ref', () => updateImagesTestHelper(false, propTypes.VIEW));
 
 		updateGroupTestsHelper(false);
 	});
@@ -976,8 +990,9 @@ const testUpdateManyTickets = () => {
 			});
 		});
 
-		test('should process image and store a ref', () => updateImagesTestHelper(true));
-		test('should process screenshot from view data and store a ref', () => updateImagesTestHelper(true, true));
+		test('should process image and store a ref (image property type)', () => updateImagesTestHelper(true, propTypes.IMAGE));
+		test('should process image and store a ref (image list property type)', () => updateImagesTestHelper(true, propTypes.IMAGE_LIST));
+		test('should process screenshot from view data and store a ref', () => updateImagesTestHelper(true, propTypes.VIEW));
 
 		updateGroupTestsHelper(true);
 

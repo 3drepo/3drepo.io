@@ -31,13 +31,13 @@ const { createResponseCode, templates } = require('../../../../../utils/response
 const { deleteIfUndefined, isEmpty } = require('../../../../../utils/helper/objects');
 const { getFileWithMetaAsStream, removeFiles, storeFiles } = require('../../../../../services/filesManager');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
+const { isBuffer, isUUID } = require('../../../../../utils/helper/typeCheck');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
 const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
 const { getAllTemplates } = require('../../../../../models/tickets.templates');
 const { getArrayDifference } = require('../../../../../utils/helper/arrays');
 const { importComments } = require('./tickets.comments');
-const { isUUID } = require('../../../../../utils/helper/typeCheck');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
 
 const Tickets = {};
@@ -103,6 +103,26 @@ const processSpecialProperties = (template, oldTickets, updatedTickets) => {
 				}
 			};
 
+			const processImageArrayUpdate = () => {
+				const oldProp = oldProperties[name] ?? [];
+				const newProp = updatedProperties[name] ?? [];
+
+				externalReferences.binaries.toRemove.push(
+					...getArrayDifference(newProp.map(UUIDToString), oldProp.map(UUIDToString)).map(stringToUUID),
+				);
+
+				for (let i = 0; i < newProp.length; i++) {
+					const data = newProp[i];
+
+					if (isBuffer(data)) {
+						const ref = generateUUID();
+						externalReferences.binaries.toAdd.push({ ref, data });
+						// eslint-disable-next-line no-param-reassign
+						newProp[i] = ref;
+					}
+				}
+			};
+
 			if (type === propTypes.IMAGE) {
 				processImageUpdate();
 			} else if (type === propTypes.VIEW) {
@@ -111,6 +131,8 @@ const processSpecialProperties = (template, oldTickets, updatedTickets) => {
 				processGroupsUpdate(oldProperties[name], updatedProperties[name],
 					Object.values(viewGroups).map((groupName) => `state.${groupName}`),
 					externalReferences.groups);
+			} else if (type === propTypes.IMAGE_LIST) {
+				processImageArrayUpdate();
 			}
 		});
 	};

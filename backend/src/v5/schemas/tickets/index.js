@@ -34,14 +34,14 @@ const Yup = require('yup');
 const { deserialiseGroupSchema } = require('./tickets.groups');
 const { generateFullSchema } = require('./templates');
 const { getJobNames } = require('../../models/jobs');
-const { getTicketsByQuery } = require('../../models/tickets');
+const { getTicketById, getTicketsByQuery } = require('../../models/tickets');
 const { importCommentSchema } = require('./tickets.comments');
 const { logger } = require('../../utils/logger');
 const { propTypesToValidator } = require('./validators');
 
 const Tickets = {};
 
-const generatePropertiesValidator = async (teamspace, project, model, templateId, moduleName,
+const generatePropertiesValidator = async (teamspace, project, model, ticketId, templateId, moduleName,
 	properties, oldProperties, isNewTicket) => {
 	const obj = {};
 
@@ -111,6 +111,25 @@ const generatePropertiesValidator = async (teamspace, project, model, templateId
 					validator = validator.test('Immutable property', `Immutable property ${prop.name} cannot be edited`, (value) => value === undefined);
 				}
 
+				if (prop.type === propTypes.IMAGE_LIST) {
+					validator = validator.test('Invalid image refs', `Property ${prop.name} contains refs that do not correspond to an existing image`,
+						async (value, { originalValue }) => {
+							const newRefs = originalValue?.filter(isUUIDString) ?? [];
+
+							if (!newRefs.length) {
+								return true;
+							}
+
+							const ticket = await getTicketById(teamspace, project, model, ticketId,
+								{ _id: 0, [`${moduleName ?? 'properties'}.${prop.name}`]: 1 });
+
+							const existingRefs = ticket[[`${moduleName ?? 'properties'}`][prop.name]] ?? [];
+							const refsSet = new Set(existingRefs.map(UUIDToString));
+
+							return newRefs.every((ref) => refsSet.has(ref));
+						});
+				}
+
 				validator = stripWhen(validator, (p) => {
 					let valueToEval = p;
 					if (isObject(p) && !isDate(p)) {
@@ -136,13 +155,13 @@ const generatePropertiesValidator = async (teamspace, project, model, templateId
 	return Yup.object(obj).default({});
 };
 
-const generateModuleValidator = async (teamspace, project, model, templateId, modules, oldModules,
+const generateModuleValidator = async (teamspace, project, model, ticketId, templateId, modules, oldModules,
 	isNewTicket, cleanUpPass) => {
 	const moduleToSchema = {};
 	const proms = modules.map(async (module) => {
 		if (!module.deprecated) {
 			const id = module.name || module.type;
-			const modValidator = await generatePropertiesValidator(teamspace, project, model, templateId, id,
+			const modValidator = await generatePropertiesValidator(teamspace, project, model, ticketId, templateId, id,
 				module.properties, oldModules?.[id], isNewTicket);
 			moduleToSchema[id] = cleanUpPass
 				? stripWhen(modValidator, (val) => isEqual(val, {}) || !val) : modValidator;
@@ -161,10 +180,10 @@ Tickets.validateTicket = async (teamspace, project, model, template, newTicket, 
 	const validatorObj = {
 		title: isNewTicket ? types.strings.title.required()
 			: stripWhen(types.strings.title, (t) => isEqual(t, oldTicket?.title)),
-		properties: await generatePropertiesValidator(teamspace, project, model, template._id,
+		properties: await generatePropertiesValidator(teamspace, project, model, oldTicket?._id, template._id,
 			undefined, fullTem.properties, oldTicket?.properties, isNewTicket),
 		modules: Yup.object(
-			await generateModuleValidator(teamspace, project, model, template._id,
+			await generateModuleValidator(teamspace, project, model, oldTicket?._id, template._id,
 				fullTem.modules, oldTicket?.modules, isNewTicket),
 		).default({}),
 		type: Yup.mixed().strip(),
@@ -180,8 +199,8 @@ Tickets.validateTicket = async (teamspace, project, model, template, newTicket, 
 	const validatedTicket = await Yup.object(validatorObj).validate(newTicket, { stripUnknown: true });
 
 	// Run it again so we can check for unchanged properties that looked changed due to default values
-	validatorObj.modules = Yup.object(await generateModuleValidator(teamspace, project, model, template._id,
-		fullTem.modules, oldTicket?.modules, isNewTicket, true),
+	validatorObj.modules = Yup.object(await generateModuleValidator(teamspace, project, model, oldTicket?._id,
+		template._id, fullTem.modules, oldTicket?.modules, isNewTicket, true),
 	).default({});
 
 	const retVal = await Yup.object(validatorObj).validate(validatedTicket, { stripUnknown: true });

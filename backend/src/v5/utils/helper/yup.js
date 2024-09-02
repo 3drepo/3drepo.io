@@ -16,11 +16,12 @@
  */
 
 const { UUIDToString, stringToUUID } = require('./uuids');
-const { fileExtensionFromBuffer, isUUIDString } = require('./typeCheck');
+const { fileExtensionFromBuffer, isUUID, isUUIDString } = require('./typeCheck');
 const Yup = require('yup');
 const { fileUploads } = require('../config');
 const tz = require('countries-and-timezones');
 const zxcvbn = require('zxcvbn');
+const { isBuffer } = require('lodash');
 
 const YupHelper = { validators: {}, types: { strings: {} }, utils: {} };
 
@@ -117,7 +118,8 @@ YupHelper.types.dateInThePast = YupHelper.types.date.test(('date-in-the-past', '
 }));
 
 const imageValidityTests = (yupType, isNullable) => yupType.test('image-validity-test', 'Image is not valid', async (value, { createError, originalValue }) => {
-	if (isUUIDString(originalValue)) {
+	const isImageRef = isUUIDString(originalValue) || (isUUID(originalValue) && !isBuffer(originalValue));
+	if (isImageRef) {
 		return true;
 	}
 
@@ -147,7 +149,10 @@ YupHelper.types.embeddedImage = (isNullable) => imageValidityTests(
 YupHelper.types.embeddedImageOrRef = () => imageValidityTests(
 	Yup.mixed()
 		.transform((currValue, orgVal) => {
-			if (orgVal) return isUUIDString(orgVal) ? stringToUUID(orgVal) : Buffer.from(orgVal, 'base64');
+			if (orgVal && typeof orgVal === 'string') {
+				return isUUIDString(orgVal) ? stringToUUID(orgVal) : Buffer.from(orgVal, 'base64');
+			}
+
 			return currValue;
 		}),
 );
