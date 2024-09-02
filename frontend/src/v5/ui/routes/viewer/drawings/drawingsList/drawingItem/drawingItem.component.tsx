@@ -43,6 +43,7 @@ import { enableRealtimeDrawingRemoved, enableRealtimeDrawingUpdate } from '@/v5/
 import { enableRealtimeDrawingRevisionUpdate, enableRealtimeDrawingNewRevision } from '@/v5/services/realtime/drawingRevision.events';
 import { useEffect, useState } from 'react';
 import { deleteAuthUrlFromCache, downloadAuthUrl } from '@components/authenticatedResource/authenticatedResource.hooks';
+import { Thumbnail } from '@controls/thumbnail/thumbnail.component';
 
 const STATUS_CODE_TEXT = formatMessage({ id: 'drawings.list.item.statusCode', defaultMessage: 'Status code' });
 const REVISION_CODE_TEXT = formatMessage({ id: 'drawings.list.item.revisionCode', defaultMessage: 'Revision code' });
@@ -71,7 +72,9 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	}, [drawing._id]);
 
 	useEffect(() => {
-		downloadAuthUrl(thumbnailSrc).then(setThumbnail);
+		downloadAuthUrl(thumbnailSrc)
+			.then(setThumbnail)
+			.catch(() => setThumbnail(''));
 		return () => { deleteAuthUrlFromCache(thumbnailSrc); };
 	}, [latestRevision?._id]);
 
@@ -111,7 +114,7 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 		<Container onClick={onClick} key={drawing._id} $selected={drawing._id === selectedDrawingId}>
 			<MainBody>
 				<ImageContainer>
-					<img src={thumbnail} />
+					<Thumbnail src={thumbnail} />
 				</ImageContainer>
 				<InfoContainer>
 					<BreakingLine>
