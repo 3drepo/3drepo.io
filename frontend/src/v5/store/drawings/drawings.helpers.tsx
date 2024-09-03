@@ -90,15 +90,15 @@ export const fullDrawing = (
 	const state = getState();
 	const isPendingRevisions = selectRevisionsPending(state, drawing._id);
 	const activeRevisions = selectActiveRevisions(state, drawing._id);
-
 	const latestRevision = isPendingRevisions ? stats?.revisions?.latestRevision : selectLastRevision(state, drawing._id);
-	const revisionsCount = isPendingRevisions ? stats?.revisions?.total :  activeRevisions.length;
+	const revisionsCount = isPendingRevisions ? stats?.revisions?.total : activeRevisions.length;
 	const calibration = revisionsCount > 0 ? stats?.calibration : CalibrationStates.EMPTY;
+	const lastUpdated = isPendingRevisions ? stats?.revisions.lastUpdated :  (activeRevisions[0] || {}).timestamp;
 
 	const res = {
 		...drawing,
 		revisionsCount,
-		lastUpdated: getNullableDate(stats?.revisions.lastUpdated),
+		lastUpdated: getNullableDate(lastUpdated), 
 		latestRevision,
 		number: stats?.number ?? '',
 		type: stats?.type ?? '',
@@ -113,31 +113,3 @@ export const fullDrawing = (
 
 	return res;
 };
-
-export const prepareSingleDrawingData = (
-	drawing: MinimumDrawing,
-	stats?: DrawingStats,
-): IDrawing => ({
-	...drawing,
-	revisionsCount: stats?.revisions?.total ?? 0,
-	lastUpdated: getNullableDate(stats?.revisions.lastUpdated),
-	latestRevision: stats?.revisions.latestRevision ?? '',
-	number: stats?.number ?? '',
-	type: stats?.type ?? '',
-	desc: stats?.desc ?? '',
-	calibration: stats?.calibration ?? CalibrationStates.UNCALIBRATED,
-	status: stats?.status ?? DrawingUploadStatus.OK,
-	hasStatsPending: !stats,
-	errorReason: stats?.errorReason && {
-		message: stats.errorReason.message,
-		timestamp: getNullableDate(+stats?.errorReason.timestamp),
-	},
-});
-
-export const prepareDrawingsData = (
-	drawings: Array<MinimumDrawing>,
-	stats?: DrawingStats[],
-) => drawings.map<IDrawing>((Drawing, index) => {
-	const drawingStats = stats?.[index];
-	return prepareSingleDrawingData(Drawing, drawingStats);
-});

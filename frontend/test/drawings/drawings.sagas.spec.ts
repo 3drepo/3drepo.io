@@ -18,7 +18,7 @@
 import { DrawingsActions } from '@/v5/store/drawings/drawings.redux';
 import { mockServer } from '../../internals/testing/mockServer';
 import { pick } from 'lodash';
-import { prepareSingleDrawingData } from '@/v5/store/drawings/drawings.helpers';
+import { fullDrawing } from '@/v5/store/drawings/drawings.helpers';
 import { drawingMockFactory, prepareMockStats } from './drawings.fixtures';
 import { createTestStore } from '../test.helpers';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
@@ -116,7 +116,7 @@ describe('Drawings: sagas', () => {
 		const stats = prepareMockStats();
 
 		it('should fetch drawings data', async () => {
-			const mockDrawingWithoutStats = prepareSingleDrawingData(mockDrawing);
+			const mockDrawingWithoutStats = mockDrawing;
 			const mockDrawingBaseResponse = pick(mockDrawing, ['_id', 'name', 'role', 'isFavourite']);
 
 			mockServer
@@ -165,7 +165,7 @@ describe('Drawings: sagas', () => {
 			}, [DialogsTypes.OPEN]);
 
 			const drawingsInStore = selectDrawings(getState());
-			expect(drawingsInStore).toEqual([mockDrawing]);
+			expect(drawingsInStore).toEqual([fullDrawing(mockDrawing)]);
 		})
 	})
 
