@@ -20,8 +20,6 @@ import { FormattedMessage } from 'react-intl';
 import { Tooltip } from '@mui/material';
 import { Container, DownloadButton, DownloadIcon } from './revisionsListItem.styles';
 import { RevisionsListItemButton } from './revisionsListItemButton/revisionsListItemButton.component';
-import { downloadAuthUrl } from '@components/authenticatedResource/authenticatedResource.hooks';
-import { formatDateTime } from '@/v5/helpers/intl.helper';
 
 type IRevisionsListItem = {
 	onSetVoidStatus: (voidStatus: boolean) => void;
@@ -54,14 +52,10 @@ export const RevisionsListItem = ({
 	};
 
 	return (
-		<Container to={disabled ? null : viewerRoute(teamspace, project, containerId, revision)} disabled={disabled}>
-			<RevisionsListItemText width={140} tabletWidth={94}> {formatDateTime(timestamp)} </RevisionsListItemText>
-			<RevisionsListItemAuthor width={170} tabletWidth={155} authorName={author} />
-			<RevisionsListItemTag width={150} tabletWidth={300}> {tag} </RevisionsListItemTag>
-			<RevisionsListItemText hideWhenSmallerThan={1140}> {desc} </RevisionsListItemText>
-			<RevisionsListItemText width={90} tabletWidth={45} hideWhenSmallerThan={800}> {(format || '').toLowerCase()} </RevisionsListItemText>
-			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} disabled={!hasCollaboratorAccess} />
-			{ hasCollaboratorAccess && (
+		<Container to={disabled ? null : redirectTo} disabled={disabled}>
+			{children}
+			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} disabled={!hasPermission} />
+			{hasPermission && (
 				<Tooltip
 					title={(
 						<FormattedMessage
