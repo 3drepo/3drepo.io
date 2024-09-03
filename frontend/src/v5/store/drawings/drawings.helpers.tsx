@@ -22,6 +22,8 @@ import NotCalibrated from '@assets/icons/filled/no_calibration-filled.svg';
 import { Display } from '@/v5/ui/themes/media';
 import { CalibrationStates, DrawingStats, DrawingUploadStatus, IDrawing, MinimumDrawing } from './drawings.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
+import { getState } from '@/v4/modules/store';
+import { selectActiveRevisions, selectLastRevision, selectRevisionsPending } from './revisions/drawingRevisions.selectors';
 
 export const DRAWING_LIST_COLUMN_WIDTHS = {
 	name: {
@@ -79,6 +81,37 @@ export const canUploadToBackend = (status?: DrawingUploadStatus): boolean => {
 	];
 
 	return statusesForUpload.includes(status);
+};
+
+export const fullDrawing = (
+	drawing: MinimumDrawing,
+	stats?: DrawingStats,
+): IDrawing => {
+	const state = getState();
+	const isPendingRevisions = selectRevisionsPending(state, drawing._id);
+	const activeRevisions = selectActiveRevisions(state, drawing._id);
+
+	const latestRevision = isPendingRevisions ? stats?.revisions?.latestRevision : selectLastRevision(state, drawing._id);
+	const revisionsCount = isPendingRevisions ? stats?.revisions?.total :  activeRevisions.length;
+	const calibration = revisionsCount > 0 ? stats?.calibration : CalibrationStates.EMPTY;
+
+	const res = {
+		...drawing,
+		revisionsCount,
+		lastUpdated: getNullableDate(stats?.revisions.lastUpdated),
+		latestRevision,
+		number: stats?.number ?? '',
+		type: stats?.type ?? '',
+		desc: stats?.desc ?? '',
+		calibration, 
+		status: stats?.status ?? DrawingUploadStatus.OK,
+		hasStatsPending: !stats,
+		errorReason: stats?.errorReason && {
+			message: stats.errorReason.message,
+			timestamp: getNullableDate(+stats?.errorReason.timestamp),
+		} };
+
+	return res;
 };
 
 export const prepareSingleDrawingData = (

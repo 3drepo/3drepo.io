@@ -18,12 +18,11 @@
 import { Constants } from '@/v5/helpers/actions.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
-import { TeamspaceAndProjectId, ProjectId, ProjectAndDrawingId, TeamspaceProjectAndDrawingId, SuccessAndErrorCallbacks } from '../store.types';
+import { TeamspaceAndProjectId, ProjectId, ProjectAndDrawingId, TeamspaceProjectAndDrawingId, SuccessAndErrorCallbacks, DrawingId } from '../store.types';
 import { IDrawing, DrawingStats, DrawingUploadStatus, NewDrawing, CalibrationStates, MinimumDrawing } from './drawings.types';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import { IDrawingRevision } from './revisions/drawingRevisions.types';
-import { prepareSingleDrawingData } from './drawings.helpers';
 import { Role } from '../currentUser/currentUser.types';
 
 export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions({
@@ -63,9 +62,8 @@ export const fetchDrawingsSuccess = (state: DrawingsState, { projectId, drawings
 	state.drawingsByProject[projectId] = drawings;
 };
 
-export const fetchDrawingStatsSuccess = (state: DrawingsState, { drawingId, projectId, stats }:FetchDrawingStatsSuccessAction ) => {
-	const drawing = getDrawingFromState(state, projectId, drawingId);
-	Object.assign(drawing, prepareSingleDrawingData(drawing, stats));
+export const fetchDrawingStatsSuccess = (state: DrawingsState, { drawingId, stats }:FetchDrawingStatsSuccessAction ) => {
+	state.statsByDrawing[drawingId] = stats;
 };
 
 export const fetchTypesSuccess = (state: DrawingsState, { projectId, types }:FetchTypesSuccessAction ) => {
@@ -124,11 +122,13 @@ export const deleteDrawingSuccess = (state, {
 
 const INITIAL_STATE: DrawingsState = {
 	drawingsByProject: {},
+	statsByDrawing: {},
 	typesByProject: {},
 };
 
 export interface DrawingsState {
 	drawingsByProject: Record<string, IDrawing[]>;
+	statsByDrawing:  Record<string, DrawingStats>
 	typesByProject: Record<string, string[]>;
 }
 
@@ -151,7 +151,7 @@ export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & Projec
 export type FetchDrawingsAction = Action<'FETCH_DRAWINGS'> & TeamspaceAndProjectId;
 export type FetchDrawingsSuccessAction = Action<'FETCH_DRAWINGS_SUCCESS'> & ProjectId & { drawings: IDrawing[] };
 export type FetchDrawingStatsAction = Action<'FETCH_DRAWING_STATS'> & TeamspaceProjectAndDrawingId;
-export type FetchDrawingStatsSuccessAction = Action<'FETCH_DRAWING_STATS_SUCCESS'> & ProjectAndDrawingId & { stats: DrawingStats };
+export type FetchDrawingStatsSuccessAction = Action<'FETCH_DRAWING_STATS_SUCCESS'> & DrawingId & { stats: DrawingStats };
 export type DeleteDrawingAction = Action<'DELETE'> & TeamspaceProjectAndDrawingId & SuccessAndErrorCallbacks;
 export type DeleteDrawingSuccessAction = Action<'DELETE_SUCCESS'> & ProjectAndDrawingId;
 export type FetchTypesAction = Action<'FETCH_DRAWINGS_TYPES'> & TeamspaceAndProjectId;

@@ -56,8 +56,7 @@ export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: ID
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const isLoading = DrawingRevisionsHooksSelectors.selectIsPending(drawingId);
-	const revisions = DrawingRevisionsHooksSelectors.selectRevisions(drawingId)
-		.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+	const revisions = DrawingRevisionsHooksSelectors.selectRevisions(drawingId);
 	const selected = revisions.findIndex((r) => !r.void);
 
 	const handleDownloadRevision = async (revision: IDrawingRevision) => {
