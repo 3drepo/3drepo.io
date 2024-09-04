@@ -47,12 +47,9 @@ export const drawingIds = [
 	'acb2e432-draw-4088-b2b4-2616fc167711',
 	'58cf451a-draw-41ac-8909-f646ab114783',
 	'97933311-draw-4178-a241-1fe8219fffb6',
-	'9f3fea29-5482-4286-ab1c-64ed72994a18',
-	'6a20684e-38e0-43ad-80cd-290c5411aa9f',
-	'5fca4e1a-acaa-42fe-bc3d-34cfc44f473b',
 ];
 
-export const drawingFilesName = ['map.svg', 'fly.svg', 'blueprint.svg', 'box.svg', 'linescurves.svg', 'sample1.svg', 'carpark.svg', 'blueprint2.svg', 'blueprint.png', 'blueprint2.png', 'blueprint3.png', 'blueprint4.png'];
+export const drawingFilesName = ['map.svg', 'fly.svg', 'blueprint.svg', 'carpark.svg', 'blueprint2.svg', 'blueprint.png', 'blueprint2.png', 'blueprint3.png', 'blueprint4.png', 'rac_level_1.png', 'rac_level_2.png', 'rac_site.png', 'rac_level_1.svg', 'rac_level_2.svg', 'rac_site.svg'];
 export const mapDrawingIdToName = (id) => {
 	const index = drawingIds.findIndex((d) => d === id);
 	if (index !== -1) {

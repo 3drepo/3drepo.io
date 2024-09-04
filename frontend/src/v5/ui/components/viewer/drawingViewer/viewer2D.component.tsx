@@ -29,6 +29,10 @@ import { DrawingViewerImage } from './drawingViewerImage/drawingViewerImage.comp
 import { CloseButton } from '@controls/button/closeButton/closeButton.component';
 import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 import { DrawingViewerService } from './drawingViewer.service';
+import { CalibrationInfoBox } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationInfoBox/calibrationInfoBox.component';
+import CalibrationIcon from '@assets/icons/filled/calibration-filled.svg';
+import { ViewBoxType, ViewerLayer2D } from './viewerLayer2D/viewerLayer2D.component';
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
 import { SVGImage } from './svgImage/svgImage.component';
@@ -39,12 +43,15 @@ import { ZoomableImage } from './zoomableImage.types';
 import { SVGSnapHelper } from './snapping/svgSnapHelper';
 import { Vector2 } from './snapping/types';
 
+const DEFAULT_VIEWBOX = { scale: 1, x: 0, y: 0, width: 0, height: 0 };
 export const Viewer2D = () => {
 	const [drawingId] = useSearchParam('drawingId');
 	const src = getDrawingImageSrc(drawingId);
 
 	const { close2D } = useContext(ViewerCanvasesContext);
+	const { isCalibrating, step, vector2D, setVector2D, isCalibrating2D, setIsCalibrating2D } = useContext(CalibrationContext);
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
+	const [viewBox, setViewBox] = useState<ViewBoxType>(DEFAULT_VIEWBOX);
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
@@ -53,7 +60,9 @@ export const Viewer2D = () => {
 	const imgRef = useRef<ZoomableImage>();
 	const imgContainerRef = useRef();
 
+	const canCalibrate2D = isCalibrating && step === 1;
 
+	const pz = centredPanZoom(imgRef.current, 20, 20);
 
 	const onClickZoomIn = () => {
 		zoomHandler.zoomIn();
@@ -72,13 +81,21 @@ export const Viewer2D = () => {
 
 		DrawingViewerService.setImgContainer(imgContainerRef.current);
 
-		const pz = centredPanZoom(imgRef.current, 20, 20);
 		setZoomHandler(pz);
-		pz.on(Events.transform, () => {
-			const cantZoomOut = pz.getMinZoom() >= pz.getTransform().scale;
-			const cantZoomIn = pz.getMaxZoom() <= pz.getTransform().scale;
+	};
+
+	const onCalibrationClick = () => setIsCalibrating2D(!isCalibrating2D);
+
+	useEffect(() => {
+		if (!zoomHandler) return;
+		zoomHandler.on(Events.transform, () => {
+			const transform = zoomHandler.getTransform();
+			const { scale } = transform;
+			const cantZoomOut = zoomHandler.getMinZoom() >= scale;
+			const cantZoomIn = zoomHandler.getMaxZoom() <= scale;
 			setIsMinZoom(cantZoomOut);
 			setIsMaxZoom(cantZoomIn);
+			setViewBox({ ...transform, ...zoomHandler.getOriginalSize() });
 		});
 
 		// The svg snap helper should only ever have load called once (create a
@@ -233,7 +250,7 @@ export const Viewer2D = () => {
 				setCursor({ x:0, y:0 }, 'none');
 			}
 		});
-	};
+	}, [zoomHandler]);
 
 	useEffect(() => {
 		setIsLoading(true);
@@ -243,7 +260,19 @@ export const Viewer2D = () => {
 
 	return (
 		<ViewerContainer visible>
-			<CloseButton variant="secondary" onClick={close2D} />
+			{step === 1 && (
+				<CalibrationInfoBox
+					title={formatMessage({ defaultMessage: '2D Alignment', id: 'infoBox.2dAlignment.title' })}
+					description={formatMessage({
+						id: 'infoBox.2dAlignment.description',
+						defaultMessage: `
+							Click on the {icon} on your navigation bar and then please select your two points in the
+							2D Viewer that are the same points in your 3D Viewer.
+						`,
+					}, { icon: <CalibrationIcon /> })}
+				/>
+			)}
+			{!isCalibrating && <CloseButton variant="secondary" onClick={close2D} />}
 			<ImageContainer ref={imgContainerRef}>
 				{
 					isLoading &&
@@ -253,9 +282,22 @@ export const Viewer2D = () => {
 				}
 				{showSVGImage && <SVGImage ref={imgRef} src={src} onLoad={onImageLoad} />}
 				{!showSVGImage && <DrawingViewerImage ref={imgRef} src={src} onLoad={onImageLoad} />}
+				{ !isLoading && (<ViewerLayer2D
+					active={isCalibrating2D}
+					viewBox={viewBox}
+					value={vector2D}
+					onChange={setVector2D}
+				/>)}
 			</ImageContainer>
 			<ToolbarContainer>
 				<MainToolbar>
+					<ToolbarButton
+						Icon={CalibrationIcon}
+						onClick={onCalibrationClick}
+						title={formatMessage({ id: 'drawingViewer.toolbar.calibrate', defaultMessage: 'Calibrate' })}
+						selected={isCalibrating2D}
+						hidden={!canCalibrate2D}
+					/>
 					<ToolbarButton
 						Icon={ZoomOutIcon}
 						onClick={onClickZoomOut}

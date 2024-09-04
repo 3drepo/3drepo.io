@@ -20,7 +20,11 @@ import { Events, PanZoom, panzoom } from './panzoom';
 import { clamp } from 'lodash';
 import { ZoomableImage } from '../zoomableImage.types';
 
-export type PanZoomHandler = PanZoom & { zoomIn : () => void, zoomOut: () => void };
+export type PanZoomHandler = PanZoom & {
+	zoomIn : () => void,
+	zoomOut: () => void,
+	getOriginalSize: () => { width: number, height: number },
+};
 
 export const centredPanZoom = (target: ZoomableImage, paddingW: number, paddingH: number) => {
 	const targetContainer = target.getEventsEmitter();
@@ -79,5 +83,5 @@ export const centredPanZoom = (target: ZoomableImage, paddingW: number, paddingH
 
 	const zoomOut = () => pz.zoom(1 / 1.5);
 
-	return { ...pz, zoomIn, zoomOut, centerTarget } ;
+	return { ...pz, zoomIn, zoomOut, centerTarget, getOriginalSize: target.getNaturalSize } ;
 };

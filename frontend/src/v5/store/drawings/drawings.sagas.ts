@@ -134,9 +134,9 @@ export function* updateDrawing({ teamspace, projectId, drawingId, drawing, onSuc
 	try {
 		yield API.Drawings.updateDrawing(teamspace, projectId, drawingId, drawing);
 		yield put(DrawingsActions.updateDrawingSuccess(projectId, drawingId, drawing));
-		onSuccess();
+		onSuccess?.();
 	} catch (error) {
-		onError(error);
+		onError?.(error);
 	}
 }
 

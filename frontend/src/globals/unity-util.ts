@@ -25,6 +25,8 @@ import { ExternalWebRequestHandler } from './unity-externalwebrequesthandler';
 declare let SendMessage;
 declare let createUnityInstance;
 
+type DrawingImageSource = ImageBitmap | ImageData | HTMLImageElement | HTMLCanvasElement | OffscreenCanvas;
+
 export class UnityUtil {
 	/** @hidden */
 	private static errorCallback: any;
@@ -134,6 +136,21 @@ export class UnityUtil {
 	 * failures during the preamble, then this will be set to false.
 	 */
 	private static indexedDBAvailable = true;
+
+	/**
+	 * Temporarily holds references to DOM objects that can be bound to a WebGL texture by id (a number).
+	 * Use the corresponding counter to ensure numbers are unique. References will be removed automatically
+	 * by bindWebGLTexture. DrawingImageSource is a subset of types defined for TexImageSource, but not
+	 * including video types.
+	 */
+	/** @hidden */
+	private static domTextureReferences: { [id: number] : DrawingImageSource } = {};
+
+	/**
+	 * Convenience member to provide ids for domTextureReferences.
+	 */
+	/** @hidden */
+	private static domTextureReferenceCounter = 0;
 
 	/**
 	 * Contains a list of calls to make during the Unity Update method. One
@@ -718,6 +735,16 @@ export class UnityUtil {
 		if (UnityUtil.viewer && UnityUtil.viewer.measurementsCleared) {
 			UnityUtil.viewer.measurementsCleared();
 		}
+	}
+
+	/**
+	 * Called by the Calibration Tool when a user action changes the heights of the vertical planes.
+	 * Heights are given in Project coordinates from the origin.
+	 */
+	/** @hidden */
+	public static calibrationPlanesChanged(planesJson) {
+		const planes = JSON.parse(planesJson);
+		UnityUtil.viewer.calibrationPlanesChanged([planes.lower, planes.upper]);
 	}
 
 	/*
@@ -2444,6 +2471,147 @@ export class UnityUtil {
 			};
 			UnityUtil.toUnity('ResetMovedMeshes', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 		});
+	}
+
+	/**
+	 * Sets and enables the active Calibration Mode. There is no need to explicitly enable or disable the Calibration Tool.
+	 * Enabling Vertical Mode will store the current clip planes, and disabling it will restore them - the frontend must
+	 * disable the Clip Tool itself however.
+	 * @category Calibration
+	 * @param mode A string, ["Vector", "Vertical", "None"].
+	 */
+	public static setCalibrationToolMode(mode: string) {
+		UnityUtil.toUnity('SetCalibrationToolMode', UnityUtil.LoadingState.VIEWER_READY, mode);
+	}
+
+	/**
+	 * Highlights the Lower Floor Plane in Vertical mode, and makes it interactive.
+	 * @category Calibration
+	 */
+	public static selectCalibrationToolLowerPlane() {
+		UnityUtil.toUnity('SelectCalibrationToolLowerPlane', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
+	 * Highlights the Upper Floor Plane in Vertical mode, and makes it interactive.
+	 * @category Calibration
+	 */
+	public static selectCalibrationToolUpperPlane() {
+		UnityUtil.toUnity('SelectCalibrationToolUpperPlane', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
+	 * Sets the lower and upper range of the vertical planes (the floor) in Project coordinates.
+	 * This does not change the default floor height even if the magnitude of the range is different.
+	 * @category Calibration
+	 */
+	public static setCalibrationToolVerticalPlanes(min: number, max: number) {
+		var range = {
+			min,
+			max,
+		};
+		UnityUtil.toUnity('SetCalibrationToolVerticalPlanes', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(range));
+	}
+
+	/**
+	 * Aligns the Lower floor plane to the top of the specified mesh, and the Upper floor plane to the default floor height above this.
+	 * The interactive state of the planes is unchanged.
+	 * @category Calibration
+	 */
+	public static setCalibrationToolFloorToObject(teamspace: string, modelid: string, meshid: string) {
+		var parms = {
+			teamspace: teamspace,
+			modelId: modelid,
+			meshes: [ meshid ],
+		};
+		UnityUtil.toUnity('SetCalibrationToolFloorToObject', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(parms));
+	}
+
+	/**
+	 * Sets the default height of the floor used when calling setCalibrationToolFloorToObject, in meters.
+	 * @category Calibration
+	 */
+	public static setCalibrationToolFloorHeight(height: number) {
+		UnityUtil.toUnity('SetCalibrationToolFloorHeight', UnityUtil.LoadingState.VIEWER_READY, height);
+	}
+
+	/**
+	 * Sets or removes the Start and End of the Calibration Vector. If Start or End are set to null, the tool
+	 * will immediately allow the user to place them again. Vector Mode must be explicitly enabled - calling
+	 * this will not automatically enable the tool.
+	 * @category Calibration
+	 */
+	public static setCalibrationToolVector(start: number[] | null, end: number[] | null) {
+		UnityUtil.toUnity('SetCalibrationToolVector', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({ start, end }));
+	}
+
+	/**
+	 * Sets tint and border colours of the image in the image preview, for the level that is selected.
+	 * Both properties must be provided, and as HTML colour strings.
+	 * @category Calibration
+	 */
+	public static setCalibrationToolSelectedColors(fill: string, border: string) {
+		UnityUtil.toUnity('SetCalibrationToolSelectedColours', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({fill, border}));
+	}
+
+	/**
+	 * Sets tint and border colours of the image in the image preview, for the level that is not selected.
+	 * Both properties must be provided, and as HTML colour strings.
+	 * @category Calibration
+	 */
+	public static setCalibrationToolUnselectedColors(fill: string, border: string) {
+		UnityUtil.toUnity('SetCalibrationToolUnselectedColours', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({fill, border}));
+	}
+
+	/**
+	 * Sets the additional transparency that is applied, as a multiplier, to the image tint colour set by
+	 * setCalibrationToolSelectedColors or setCalibrationToolUnselectedColors when part of the preview
+	 * plane is obscured by model geometry. This should be between 0 and 1.
+	 * @category Calibration
+	 */
+	public static setCalibrationToolOcclusionOpacity(opacity: number) {
+		UnityUtil.toUnity('SetCalibrationToolOcclusionOpacity', UnityUtil.LoadingState.VIEWER_READY, opacity);
+	}
+
+	/**
+	 * Shows the DrawingImageSource for the Lower and Upper vertical planes at the horizontal location specified by rect.
+	 * rect should be the size and location of the image, given as the location of three corners (bottomLeft, bottomRight,
+	 * topLeft) in Project coordinates. The height will be taken from the current state of the Vertical Planes. If image is
+	 * null, the location of the existing image is updated. If no image has ever been loaded, a white rectangle is shown in
+	 * its place.
+	 * @category Calibration
+	 */
+	public static setCalibrationToolDrawing(image: DrawingImageSource, rect: number[]) {
+		let index = -1;
+		let dimensions = [0, 0];
+
+		if (image !== null) {
+			index = this.domTextureReferenceCounter++;
+			this.domTextureReferences[index] = image; // Store a reference to the image, as the viewer will request it momentarily
+			dimensions = [image.width, image.height];
+		}
+
+		var parms = {
+			worldRect: rect, //[bottomLeftX, bottomLeftY, bottomRightX, bottomRightY, topLeftX, topLeftY]
+			domId: index,
+			dimensions,
+		};
+		UnityUtil.toUnity('SetCalibrationToolDrawing', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(parms));
+	}
+
+	/**
+	 * Populates the provided WebGLTexture texture with the contents of the DrawingImageSource indexed by id.
+	 * (This method could be moved entirely inside Unity if desired in the future.)
+	 * @param ctx The rendering context used by Module
+	 * @param id The index of the DrawingImageSource in domTextureReferences. This will be removed from domTextureReferences.
+	 * @param texture The WebGLTexture created by Unity
+	 */
+	/** @hidden */
+	public static copyToWebGLTexture(ctx: WebGL2RenderingContext, index: number, texture: WebGLTexture) {
+		ctx.bindTexture(ctx.TEXTURE_2D, texture);
+		const image = this.domTextureReferences[index];
+		ctx.texSubImage2D(ctx.TEXTURE_2D, 0, 0, 0, image.width, image.height, ctx.RGBA, ctx.UNSIGNED_BYTE, image);
+		delete this.domTextureReferences[index];
 	}
 
 	/**

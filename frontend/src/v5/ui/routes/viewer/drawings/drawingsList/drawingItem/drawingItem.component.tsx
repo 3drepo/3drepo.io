@@ -19,7 +19,6 @@ import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import {
 	Container,
 	Title,
-	DrawingsCalibrationButton,
 	MainBody,
 	ImageContainer,
 	Property,
@@ -29,12 +28,18 @@ import {
 	InfoContainer,
 	BreakingLine,
 	SkeletonText,
+	CalibrationButton,
 } from './drawingItem.styles';
 import { FormattedMessage } from 'react-intl';
 import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { formatShortDateTime } from '@/v5/helpers/intl.helper';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
+import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { useContext } from 'react';
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
+import { viewerRoute } from '@/v5/services/routing/routing';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 
 const STATUS_CODE_TEXT = formatMessage({ id: 'drawings.list.item.statusCode', defaultMessage: 'Status code' });
 const REVISION_CODE_TEXT = formatMessage({ id: 'drawings.list.item.revisionCode', defaultMessage: 'Revision code' });
@@ -44,11 +49,21 @@ type DrawingItemProps = {
 	onClick: React.MouseEventHandler<HTMLDivElement>;
 };
 export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
-	const [latestRevision] = DrawingRevisionsHooksSelectors.selectRevisions(drawing._id);
-	const { calibration, name, drawingNumber, lastUpdated, desc } = drawing;
+	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
+	const history = useHistory();
+	const { pathname, search } = useLocation();
+	const { setOrigin } = useContext(CalibrationContext);
+	const { calibration, name, drawingNumber, lastUpdated, desc, _id: drawingId } = drawing;
+	const [latestRevision] = DrawingRevisionsHooksSelectors.selectRevisions(drawingId);
 	const { statusCode, revisionCode } = latestRevision || {};
 	const areStatsPending = !revisionCode;
 	const [selectedDrawingId] = useSearchParam('drawingId');
+	
+	const onCalibrateClick = () => {
+		const path = viewerRoute(teamspace, project, containerOrFederation, revision, { drawingId, isCalibrating: true }, false);
+		history.push(path);
+		setOrigin(pathname + search);
+	};
 
 	const LoadingCodes = () => (
 		<>
@@ -103,12 +118,13 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 				<BreakingLine>
 					<Property>
 						<FormattedMessage id="drawings.list.item.lastUpdated" defaultMessage="Last updated" />:
-						<PropertyValue>&nbsp;{formatShortDateTime(lastUpdated)}</PropertyValue>
+						<PropertyValue>&nbsp;{formatDateTime(lastUpdated)}</PropertyValue>
 					</Property>
 				</BreakingLine>
-				<DrawingsCalibrationButton
-					onClick={() => {}}
-					calibration={calibration}
+				<CalibrationButton
+					calibrationState={calibration?.state}
+					drawingId={drawingId}
+					onCalibrateClick={onCalibrateClick}
 				/>
 			</BottomLine>
 		</Container>

@@ -245,6 +245,8 @@ export class ViewerService {
 	}
 
 	public pickPointEvent(pointInfo) {
+		this.emit(VIEWER_EVENTS.PICK_POINT, pointInfo);
+
 		if (this.measureMode !== VIEWER_MEASURING_MODE.POINT) {
 			return;
 		}
@@ -1323,6 +1325,49 @@ export class ViewerService {
 			this.on(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onModeChanged);
 		})
 
+	}
+
+	/**
+	 * Drawings Calibration
+	 */
+	public setCalibrationToolMode(mode: string) {
+		UnityUtil.setCalibrationToolMode(mode);
+	}
+
+	public setCalibrationToolVerticalPlanes(lower, upper) {
+		UnityUtil.setCalibrationToolVerticalPlanes(lower, upper);
+	}
+
+	public selectCalibrationToolUpperPlane() {
+		UnityUtil.selectCalibrationToolUpperPlane();
+	}
+
+	public selectCalibrationToolLowerPlane() {
+		UnityUtil.selectCalibrationToolLowerPlane();
+	}
+
+	public setCalibrationToolDrawing(image: any, rect: number[]) {
+		UnityUtil.setCalibrationToolDrawing(image, rect);
+	}
+
+	public calibrationPlanesChanged(planes) {
+		this.emit(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, planes);
+	}
+
+	public setCalibrationToolFloorToObject(teamspace, modelId, meshId) {
+		UnityUtil.setCalibrationToolFloorToObject(teamspace, modelId, meshId);
+	}
+
+	public setCalibrationToolSelectedColors(fill, border) {
+		UnityUtil.setCalibrationToolSelectedColors(fill, border);
+	}
+
+	public setCalibrationToolUnselectedColors(fill, border) {
+		UnityUtil.setCalibrationToolUnselectedColors(fill, border);
+	}
+
+	public setCalibrationToolOcclusionOpacity(opacity) {
+		UnityUtil.setCalibrationToolOcclusionOpacity(opacity);
 	}
 }
 

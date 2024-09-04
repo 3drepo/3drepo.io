@@ -24,6 +24,9 @@ type Vector2 = { x:number, y:number };
 type Size = { width: number, height: number };
 
 export const pannableSVG = (container: HTMLElement, src: string) => {
+	let resizeFrameId = 0;
+	let animationFrameId = 0;
+
 
 	// The pannableSVG attemps to provide quick feedback by drawing a larger
 	// region of the image than the user actually sees, and using the (fast)
@@ -292,7 +295,7 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 			// Check if we've updated the transform since the last render.
 			// If so, issue the request again.
 			if (tn !== tframe) {
-				requestAnimationFrame(onAnimationFrame);
+				animationFrameId = requestAnimationFrame(onAnimationFrame);
 			} else {
 				drawing = false;
 			}
@@ -318,8 +321,6 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 			y: newOrigin.y + transform.y,
 			scale: transform.scale,
 		};
-
-		console.log(`resizing for ${JSON.stringify(viewSize)}`);
 
 		// Create the canvas and context
 		const newCanvas = document.createElement('canvas');
@@ -418,7 +419,7 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 
 		if (!drawing) {
 			drawing = true;
-			requestAnimationFrame(onAnimationFrame);
+			animationFrameId = requestAnimationFrame(onAnimationFrame);
 		}
 	};
 
@@ -433,13 +434,13 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		if (resizeFrameCount > resizeFramesThreshold) {
 			createCanvas(() => {
 				if (resizeFrameEvent != resizeEvent) {
-					requestAnimationFrame(onResizeFrame);
+					resizeFrameId = requestAnimationFrame(onResizeFrame);
 				} else {
 					drawing = false;
 				}
 			});
 		} else {
-			requestAnimationFrame(onResizeFrame);
+			resizeFrameId = requestAnimationFrame(onResizeFrame);
 		}
 	};
 
@@ -461,12 +462,19 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 
 		if (!drawing) {
 			drawing = true;
-			requestAnimationFrame(onResizeFrame);
+			resizeFrameId = requestAnimationFrame(onResizeFrame);
 		}
 	};
 
 	const resizeObserver = new ResizeObserver(onResize);
 	resizeObserver.observe(container);
+
+	const dispose = () => {
+		cancelAnimationFrame(resizeFrameId);
+		cancelAnimationFrame(animationFrameId);
+		resizeObserver.disconnect();
+	};
+
 
 	return {
 		set transform(t: Transform) {
@@ -514,6 +522,8 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 			);
 		},
 
+		dispose,
+
 		// Given a coordinate relative to the content rect, get the coordinate
 		// relative to the viewbox of the svg. Since most internal computations
 		// are done in canvas-space, here we make p relative to the canvas
@@ -537,6 +547,7 @@ export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ on
 		if (!containerRef.current || pannableImage.current) return;
 		pannableImage.current = pannableSVG(containerRef.current, src);
 		pannableImage.current.addEventListener('load', onLoad);
+		return () => pannableImage.current.dispose();
 	}, []);
 
 
@@ -553,7 +564,7 @@ export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ on
 		},
 
 		getEventsEmitter: () => {
-			return containerRef.current;
+			return containerRef.current.parentElement;
 		},
 
 		getBoundingClientRect: () => {

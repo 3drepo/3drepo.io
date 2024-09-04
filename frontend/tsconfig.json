@@ -1,10 +1,9 @@
 {
   "compilerOptions": {
-	  "isolatedModules": true,
+	"isolatedModules": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "node",
+    "module": "commonjs",
     "target": "es6",
     "types": [
       "react",
@@ -20,7 +19,7 @@
       "dom",
       "es2020.string",
       "es2021.string",
-      "ES2022.Array",
+      "es2022.Array",
       "WebWorker"
     ],
     "jsx": "react-jsx",
@@ -32,8 +31,7 @@
       "@controls/*": ["./src/v5/ui/controls/*"],
       "@assets/*": ["./assets/*"],
       "@/*": ["./src/*"]
-    },
-    "noEmit": true
+    }
   },
   "exclude": [
     "node_modules",

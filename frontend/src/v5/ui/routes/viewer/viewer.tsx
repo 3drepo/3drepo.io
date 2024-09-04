@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ViewerGui } from '@/v4/routes/viewerGui';
 import { useParams } from 'react-router-dom';
 import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ProjectsActionsDispatchers, TeamspacesActionsDispatchers, TicketsCardActionsDispatchers, ViewerActionsDispatchers } from '@/v5/services/actionsDispatchers';
@@ -30,6 +29,10 @@ import { SpinnerLoader } from '@controls/spinnerLoader';
 import { CentredContainer } from '@controls/centredContainer';
 import { TicketsCardViews } from './tickets/tickets.constants';
 import { ViewerCanvases } from '../dashboard/viewerCanvases/viewerCanvases.component';
+import { ViewerGui } from '@/v4/routes/viewerGui';
+import { CalibrationContext, CalibrationContextComponent } from '../dashboard/projects/calibration/calibrationContext';
+import { OpenDrawingFromUrl } from './openDrawingFromUrl/openDrawingFromUrl.component';
+import { CalibrationHandler } from '../dashboard/projects/calibration/calibrationHandler.component';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
@@ -102,11 +105,15 @@ export const Viewer = () => {
 	};
 
 	return (
-		<>
+		<CalibrationContextComponent>
 			<OpenTicketFromUrl />
+			<OpenDrawingFromUrl />
 			<CheckLatestRevisionReadiness />
 			<ViewerCanvases />
 			<ViewerGui match={v4Match} key={containerOrFederation} />
-		</>
+			<CalibrationContext.Consumer>
+				{({ isCalibrating }) => isCalibrating && <CalibrationHandler />}
+			</CalibrationContext.Consumer>
+		</CalibrationContextComponent>
 	);
 };
