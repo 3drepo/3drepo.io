@@ -32,8 +32,6 @@ import { DrawingsActions } from '../drawings.redux';
 import { DrawingUploadStatus } from '../drawings.types';
 import { createDrawingFromRevisionBody, createFormDataFromRevisionBody } from './drawingRevisions.helpers';
 import { selectIsPending, selectRevisions, selectStatusCodes } from './drawingRevisions.selectors';
-import { uuid } from '@/v4/helpers/uuid';
-import { selectUsername } from '../../currentUser/currentUser.selectors';
 
 export function* fetch({ teamspace, projectId, drawingId, onSuccess }: FetchAction) {
 	if (yield select(selectIsPending, drawingId)) return;
@@ -102,23 +100,9 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 			(percent) => DrawingRevisionsActionsDispatchers.setUploadProgress(uploadId, percent),
 			createFormDataFromRevisionBody(body),
 		);
+
 		yield put(DrawingsActions.setDrawingStatus(projectId, drawingId, DrawingUploadStatus.QUEUED));
 		yield put(DrawingRevisionsActions.setUploadComplete(uploadId, true));
-		yield put(DrawingsActions.setDrawingStatus(projectId, drawingId, DrawingUploadStatus.OK));
-		const revisions = yield select(selectRevisions, drawingId);
-		const author = yield select(selectUsername);
-		const newRevisions = [...revisions, {
-			_id: uuid(),
-			timestamp: new Date(),
-			desc: body.drawingDesc,
-			author,
-			format: body.file.name.split('.').slice(-1)[0],
-			statusCode: body.statusCode,
-			revCode: body.revCode,
-			void: false,
-		}];
-		yield put(DrawingRevisionsActions.fetchSuccess(drawingId, newRevisions));
-		yield put(DrawingsActions.updateDrawingSuccess(projectId, drawingId, { latestRevision: body.revCode, revisionsCount: newRevisions.length }));
 	} catch (error) {
 		let errorMessage = error.message;
 		if (error.response) {

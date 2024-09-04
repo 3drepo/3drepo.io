@@ -89,12 +89,11 @@ export const updateDrawingSuccess = (state: DrawingsState, { projectId, drawingI
 	Object.assign(oldDrawing,  drawing);
 };
 
-export const setDrawingStatus = (state, {
-	projectId,
+export const setDrawingStatus = (state: DrawingsState, {
 	drawingId,
 	status,
 }) => {
-	getDrawingFromState(state, projectId, drawingId).status = status;
+	state.statsByDrawing[drawingId].status = status;
 };
 
 export const drawingProcessingSuccess = (state, {
