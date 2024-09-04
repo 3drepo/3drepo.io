@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { useFormState } from 'react-hook-form';
-import { Description, OptionContainer, StatusCodeInput, Value } from './uploadListItemStatusCode.styles';
+import { Autocomplete, Description, OptionContainer, StatusCodeInput, Value } from './uploadListItemStatusCode.styles';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { get } from 'lodash';
 import { OptionsBox } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/uploadListItemDestination.styles';
 import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { StatusCode } from '@/v5/store/drawings/revisions/drawingRevisions.types';
-import { Autocomplete, Tooltip } from '@mui/material';
+import { Tooltip } from '@mui/material';
 
 interface IUploadListItemStatusCode {
 	value?: string;

@@ -20,8 +20,24 @@ import { Container as ItemRowContainer } from '@components/dashboard/dashboardLi
 import { DashboardListHeaderLabel, DashboardListItem } from '@components/dashboard/dashboardList';
 import { RevisionCodeTextField } from './uploadListItem/components/uploadListItemRevisionCode/uploadListItemRevisionCode.styles';
 import { DestinationAutocomplete } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/uploadListItemDestination.styles';
+import { Autocomplete as StatusCode } from './uploadListItem/components/uploadListItemStatusCode/uploadListItemStatusCode.styles';
+import { DashboardListItemTitle } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemTitle/uploadListItemTitle.styles';
 
 export const Label = styled(DashboardListHeaderLabel)<{ required?: boolean }>`
+	margin-right: 12px;
+
+	button {
+		max-width: 100%;
+		min-width: 38px;
+	}
+	
+	p {
+		overflow: hidden;
+		white-space: nowrap;
+		max-width: 100%;
+		text-overflow: ellipsis;
+	}
+
 	${({ required, theme }) => required && css`
 		&::after {
 			content: '*';
@@ -39,9 +55,24 @@ export const UploadListItemRowWrapper = styled(DashboardListItem)<{ selected: bo
 		cursor: default;
 		overflow: hidden;
 
+		${DashboardListItemTitle} {
+			min-width: 17px;
+		}
+
 		${DestinationAutocomplete} {
-			width: 340px;
+			width: 341px;
+			min-width: 110px;
 			height: 35px;
+		}
+
+		${StatusCode} {
+			width: 97px;
+			min-width: 90px;
+		}
+
+		${RevisionCodeTextField} {
+			width: 146px;
+			min-width: 85px;
 		}
 
 		${({ selected, theme }) => selected && css`
