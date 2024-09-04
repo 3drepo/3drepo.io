@@ -32,9 +32,9 @@ export const selectDrawings = createSelector(
 	})),
 );
 
-export const selectCalibratedDrawings = createSelector(
+export const selectNonEmptyDrawings = createSelector(
 	selectDrawings,
-	(drawings) => (drawings.filter((d) => [CalibrationStates.CALIBRATED, CalibrationStates.OUT_OF_SYNC].includes(d.calibration))),
+	(drawings) => drawings.filter((d) => d.revisionsCount > 0),
 );
 
 export const selectFavouriteDrawings = createSelector(
@@ -54,8 +54,8 @@ export const selectIsListPending = createSelector(
 	(state, currentProject) => !state.drawingsByProject[currentProject],
 );
 
-export const selectCalibratedDrawingsHaveStatsPending = createSelector(
-	selectCalibratedDrawings,
+export const selectNonEmptyDrawingsHaveStatsPending = createSelector(
+	selectNonEmptyDrawings,
 	(drawings) => drawings.some(({ hasStatsPending }) => hasStatsPending),
 );
 
