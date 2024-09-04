@@ -217,5 +217,10 @@
        style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        d="m 165.79133,119.99962 c 20.27142,-0.36199 -4.52488,-0.181 -4.34388,13.93661"
        id="path905" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 180.45191,127.7824 c -17.19451,1.08597 -7.78278,-2.71492 -2.71492,16.65153"
+       id="path909"
+       sodipodi:nodetypes="cc" />
   </g>
 </svg>
