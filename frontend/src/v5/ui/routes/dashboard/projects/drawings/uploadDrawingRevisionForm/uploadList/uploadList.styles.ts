@@ -61,13 +61,13 @@ export const UploadListItemRowWrapper = styled(DashboardListItem)<{ selected: bo
 
 		${DestinationAutocomplete} {
 			width: 341px;
-			min-width: 110px;
+			min-width: 100px;
 			height: 35px;
 		}
 
 		${StatusCode} {
-			width: 97px;
-			min-width: 90px;
+			width: 260px;
+			min-width: 100px;
 		}
 
 		${RevisionCodeTextField} {
