@@ -29,6 +29,7 @@ let agent;
 const generateBasicData = () => {
 	const users = {
 		tsAdmin: ServiceHelper.generateUserCredentials(),
+		tsAdmin2: ServiceHelper.generateUserCredentials(),
 		noProjectAccess: ServiceHelper.generateUserCredentials(),
 		viewer: ServiceHelper.generateUserCredentials(),
 		commenter: ServiceHelper.generateUserCredentials(),
@@ -72,6 +73,10 @@ const generateBasicData = () => {
 			...ServiceHelper.generateRevisionEntry(false, false, modelTypes.DRAWING),
 			timestamp: Date.now() + 500000,
 		},
+		rev4: {
+			...ServiceHelper.generateRevisionEntry(true, false, modelTypes.DRAWING),
+			timestamp: Date.now() + 500000,
+		},
 	};
 
 	const calibrations = times(5, () => ServiceHelper.generateCalibration());
@@ -87,7 +92,7 @@ const generateBasicData = () => {
 };
 
 const setupData = async ({ users, teamspace, project, models, revisions, calibrations }) => {
-	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
+	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user, users.tsAdmin2.user]);
 
 	const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], key !== 'nobody' ? [teamspace] : []));
 
@@ -202,11 +207,12 @@ const testAddCalibration = () => {
 			['the drawing does not exist', { ...params, drawingId: ServiceHelper.generateRandomString() }, standardPayload, false, templates.drawingNotFound],
 			['the model is of wrong type', { ...params, drawingId: models.container._id }, standardPayload, false, templates.drawingNotFound],
 			['the revision does not exist', { ...params, revisionId: ServiceHelper.generateRandomString() }, standardPayload, false, templates.revisionNotFound],
+			['the revision is void', { ...params, revisionId: revisions.rev4._id }, standardPayload, false, templates.revisionNotFound],
 			['the payload is invalid', params, { standardPayload, units: ServiceHelper.generateRandomString() }, false, templates.invalidArguments],
 			['the payload is valid', params, standardPayload, true],
 			['usePrevious is set to true but revision is uncalibrated', { ...params, revisionId: revisions.rev1._id, usePrevious: true }, {}, false, templates.calibrationNotFound],
 			['usePrevious is set to true but revision is calibrated', { ...params, revisionId: revisions.rev2._id, usePrevious: true }, {}, false, templates.calibrationNotFound],
-			['usePrevious is set to true and revision is unconfirmed', { ...params, revisionId: revisions.rev3._id, usePrevious: true }, {}, true],
+			['usePrevious is set to true and revision is unconfirmed', { ...params, key: users.tsAdmin2.apiKey, revisionId: revisions.rev3._id, usePrevious: true }, {}, true],
 		])('Add Calibration', (desc, parameters, payload, success, error) => {
 			test(`should ${success ? 'succeed' : `fail with ${error.code}`} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : error.status;
@@ -223,15 +229,13 @@ const testAddCalibration = () => {
 				if (success) {
 					const { body: newlyCreatedRev } = await agent.get(route(parameters));
 
-					if (parameters.usePrevious) {
-						expect(newlyCreatedRev).toEqual(lastRevBeforePost);
-					} else {
-						expect(newlyCreatedRev).toEqual({
-							...payload,
-							createdAt: newlyCreatedRev.createdAt,
-							createdBy: newlyCreatedRev.createdBy,
-						});
-					}
+					const calibrationData = parameters.usePrevious ? lastRevBeforePost : payload;
+
+					expect(newlyCreatedRev).toEqual({
+						...calibrationData,
+						createdAt: newlyCreatedRev.createdAt,
+						createdBy: newlyCreatedRev.createdBy,
+					});
 				} else {
 					expect(res.body.code).toEqual(error.code);
 				}

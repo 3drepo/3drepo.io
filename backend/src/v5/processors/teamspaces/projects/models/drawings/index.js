@@ -20,6 +20,7 @@ const { addDrawingThumbnailRef, deleteModelRevisions, getLatestRevision,
 const { addModel, getModelList } = require('../commons/modelList');
 const { appendFavourites, deleteFavourites } = require('../commons/favourites');
 const { deleteModel, getDrawingById, getDrawings, updateModelSettings } = require('../../../../../models/modelSettings');
+const { getCalibration, getCalibrationStatus } = require('./calibrations');
 const { getFile, getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../../../services/filesManager');
 const { getProjectById, removeModelFromProject } = require('../../../../../models/projectSettings');
 const { DRAWINGS_HISTORY_COL } = require('../../../../../models/revisions.constants');
@@ -27,7 +28,6 @@ const { createThumbnail } = require('../../../../../utils/helper/images');
 const { deleteDrawingCalibrations } = require('../../../../../models/calibrations');
 const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
 const { generateUUID } = require('../../../../../utils/helper/uuids');
-const { getCalibration } = require('./calibrations');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { processDrawingUpload } = require('../../../../../services/modelProcessing');
 const { templates } = require('../../../../../utils/responseCodes');
@@ -91,9 +91,17 @@ Drawings.deleteDrawing = async (teamspace, project, drawing) => {
 	]);
 };
 
-Drawings.getRevisions = (teamspace, project, drawing, showVoid) => getRevisions(teamspace, project, drawing,
-	modelTypes.DRAWING, showVoid,
-	{ _id: 1, author: 1, format: 1, timestamp: 1, statusCode: 1, revCode: 1, void: 1, desc: 1 });
+Drawings.getRevisions = async (teamspace, project, drawing, showVoid) => {
+	const revisions = await getRevisions(teamspace, project, drawing, modelTypes.DRAWING, showVoid,
+		{ _id: 1, author: 1, format: 1, timestamp: 1, statusCode: 1, revCode: 1, void: 1, desc: 1 });
+
+	const formattedRevs = await Promise.all(revisions.map(async (rev) => {
+		const calibration = await getCalibrationStatus(teamspace, project, drawing, rev._id);
+		return { ...rev, calibration };
+	}));
+
+	return formattedRevs;
+};
 
 Drawings.newRevision = processDrawingUpload;
 
@@ -101,7 +109,8 @@ Drawings.updateRevisionStatus = (teamspace, project, drawing, revision, status) 
 	teamspace, project, drawing, modelTypes.DRAWING, revision, status);
 
 Drawings.downloadRevisionFiles = async (teamspace, drawing, revision) => {
-	const rev = await getRevisionByIdOrTag(teamspace, drawing, modelTypes.DRAWING, revision, { rFile: 1 });
+	const rev = await getRevisionByIdOrTag(teamspace, drawing, modelTypes.DRAWING, revision, { rFile: 1 },
+		{ includeVoid: true });
 
 	if (!rev.rFile?.length) {
 		throw templates.fileNotFound;

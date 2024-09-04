@@ -170,7 +170,13 @@ const testGetRevisionsByQuery = () => {
 				query, projection);
 			expect(res).toEqual(expectedData);
 
-			const formattedQuery = { incomplete: { $exists: false }, void: { $ne: true }, ...query };
+			const formattedQuery = {
+				...excludeVoids,
+				...excludeFailed,
+				...excludeIncomplete,
+				...query,
+			};
+
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, formattedQuery, projection, { timestamp: -1 });
 		});
@@ -181,7 +187,15 @@ const testGetRevisionsByQuery = () => {
 				query, projection);
 			expect(res).toEqual(expectedData);
 
-			const formattedQuery = { incomplete: { $exists: false }, void: { $ne: true }, project, model, ...query };
+			const formattedQuery = {
+				...excludeVoids,
+				...excludeFailed,
+				...excludeIncomplete,
+				...query,
+				project,
+				model,
+			};
+
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL, formattedQuery,
 				projection, { timestamp: -1 });
@@ -193,15 +207,31 @@ const testGetRevisionByIdOrTag = () => {
 	const revision = { _id: 1, author: 'someUser', timestamp: new Date() };
 	const teamspace = generateRandomString();
 	const model = generateRandomString();
+	const projection = generateRandomObject();
 
 	describe('GetRevisionByIdOrTag', () => {
-		test('Should return revision', async () => {
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(revision);
-			const res = await Revisions.getRevisionByIdOrTag(teamspace, model, modelTypes.CONTAINER, revision._id);
-			expect(res).toEqual(revision);
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`,
-				{ $or: [{ _id: revision._id }, { tag: revision._id }] }, {}, undefined);
+		describe.each([
+			['includeVoid option set to true', { includeVoid: true }],
+			['includeFailed option set to true', { includeFailed: true }],
+			['includeIncomplete option set to true', { includeIncomplete: true }],
+		])('Query options', (desc, options) => {
+			test(`Should return revision with ${desc}`, async () => {
+				const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(revision);
+
+				const query = {
+					$or: [{ _id: revision._id }, { tag: revision._id }],
+					...(options.includeVoid ? {} : { ...excludeVoids }),
+					...(options.includeFailed ? {} : { ...excludeFailed }),
+					...(options.includeIncomplete ? {} : { ...excludeIncomplete }),
+				};
+
+				const res = await Revisions.getRevisionByIdOrTag(teamspace, model, modelTypes.CONTAINER,
+					revision._id, projection, options);
+
+				expect(res).toEqual(revision);
+				expect(fn).toHaveBeenCalledTimes(1);
+				expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, query, projection, undefined);
+			});
 		});
 
 		test('Should return revision (drawing)', async () => {
@@ -210,7 +240,11 @@ const testGetRevisionByIdOrTag = () => {
 			expect(res).toEqual(revision);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`,
-				{ $or: [{ _id: revision._id }, { tag: revision._id }], model }, {}, undefined);
+				{ $or: [{ _id: revision._id }, { tag: revision._id }],
+					model,
+					...excludeVoids,
+					...excludeFailed,
+					...excludeIncomplete }, {}, undefined);
 		});
 
 		test('Should throw REVISION_NOT_FOUND if it cannot find the revision in the revisions table', async () => {
@@ -219,7 +253,10 @@ const testGetRevisionByIdOrTag = () => {
 				.rejects.toEqual(templates.revisionNotFound);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`,
-				{ $or: [{ _id: revision._id }, { tag: revision._id }] }, {}, undefined);
+				{ $or: [{ _id: revision._id }, { tag: revision._id }],
+					...excludeVoids,
+					...excludeFailed,
+					...excludeIncomplete }, {}, undefined);
 		});
 	});
 };

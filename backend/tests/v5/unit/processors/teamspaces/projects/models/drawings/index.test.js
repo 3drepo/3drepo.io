@@ -17,7 +17,8 @@
 
 const { src } = require('../../../../../../helper/path');
 const { determineTestGroup, generateRandomString, generateRandomObject, generateUUID,
-	generateUUIDString, generateRandomNumber } = require('../../../../../../helper/services');
+	generateUUIDString, generateRandomNumber,
+	generateRevisionEntry } = require('../../../../../../helper/services');
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
@@ -141,16 +142,25 @@ const testGetRevisions = () => {
 			const project = generateRandomString();
 			const drawing = generateRandomString();
 			const showVoid = true;
-			const revisions = [generateRandomObject(), generateRandomObject()];
+			const revisions = [generateRevisionEntry(), generateRevisionEntry()];
 
 			const getRevisionsMock = Revisions.getRevisions.mockResolvedValueOnce(revisions);
+			const getClaibrationStatusMock = CalibrationsProc.getCalibrationStatus
+				.mockResolvedValueOnce(calibrationStatuses.CALIBRATED)
+				.mockResolvedValueOnce(calibrationStatuses.UNCONFIRMED);
 
 			const res = await Drawings.getRevisions(teamspace, project, drawing, showVoid);
+
+			revisions[0].calibration = calibrationStatuses.CALIBRATED;
+			revisions[1].calibration = calibrationStatuses.UNCONFIRMED;
+
 			expect(res).toEqual(revisions);
 			expect(getRevisionsMock).toHaveBeenCalledTimes(1);
 			expect(getRevisionsMock).toHaveBeenCalledWith(teamspace, project, drawing, modelTypes.DRAWING, showVoid,
-				{ _id: 1, author: 1, format: 1, timestamp: 1, statusCode: 1, revCode: 1, void: 1, desc: 1 },
-			);
+				{ _id: 1, author: 1, format: 1, timestamp: 1, statusCode: 1, revCode: 1, void: 1, desc: 1 });
+			expect(getClaibrationStatusMock).toHaveBeenCalledTimes(2);
+			expect(getClaibrationStatusMock).toHaveBeenCalledWith(teamspace, project, drawing, revisions[0]._id);
+			expect(getClaibrationStatusMock).toHaveBeenCalledWith(teamspace, project, drawing, revisions[1]._id);
 		});
 	});
 };
@@ -287,7 +297,7 @@ const testDownloadRevisionFiles = () => {
 
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(teamspace, drawing, modelTypes.DRAWING,
-				revision, { rFile: 1 });
+				revision, { rFile: 1 }, { includeVoid: true });
 
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL, fileName);

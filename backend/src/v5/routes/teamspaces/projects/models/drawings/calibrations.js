@@ -18,6 +18,7 @@
 const { hasReadAccessToDrawing, hasWriteAccessToDrawing } = require('../../../../../middleware/permissions/permissions');
 const Calibrations = require('../../../../../processors/teamspaces/projects/models/drawings/calibrations');
 const { Router } = require('express');
+const { formatCalibration } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/drawings/calibrations');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../utils/responder');
@@ -25,12 +26,13 @@ const { revisionExists } = require('../../../../../middleware/dataConverter/inpu
 const { templates } = require('../../../../../utils/responseCodes');
 const { validateNewCalibration } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/drawings/calibrations');
 
-const getCalibration = async (req, res) => {
+const getCalibration = async (req, res, next) => {
 	const { teamspace, project, drawing, revision } = req.params;
 
 	try {
 		const { calibration } = await Calibrations.getCalibration(teamspace, project, drawing, revision);
-		respond(req, res, templates.ok, calibration);
+		req.calibration = calibration;
+		await next();
 	} catch (err) {
 		/* istanbul ignore next */
 		respond(req, res, err);
@@ -253,7 +255,7 @@ const establishRoutes = () => {
 	 *                   example: mm
 	 *             example: { horizontal: { model: [[1, 2, 3], [4, 5, 6]], drawing: [[1, 2], [3, 4]] }, verticalRange: [0, 10], units: m }
 	 */
-	router.get('/', hasReadAccessToDrawing, revisionExists(modelTypes.DRAWING), getCalibration);
+	router.get('/', hasReadAccessToDrawing, revisionExists(modelTypes.DRAWING), getCalibration, formatCalibration);
 
 	return router;
 };

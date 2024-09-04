@@ -22,6 +22,7 @@ const { writeFileSync, unlinkSync } = require('fs');
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { modelTypes, statusCodes } = require(`${src}/models/modelSettings.constants`);
+const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 let server;
@@ -84,10 +85,21 @@ const generateBasicData = () => {
 	};
 
 	const drawRevisions = {
-		nonVoidRevision: ServiceHelper.generateRevisionEntry(false, true, modelTypes.DRAWING, true),
-		voidRevision: ServiceHelper.generateRevisionEntry(true, true, modelTypes.DRAWING, true),
-		noFileRevision: ServiceHelper.generateRevisionEntry(false, false, modelTypes.DRAWING),
+		voidRevision: { ...ServiceHelper.generateRevisionEntry(true, true, modelTypes.DRAWING),
+			timestamp: new Date(100000),
+			calibration: calibrationStatuses.UNCALIBRATED,
+		},
+		nonVoidRevision: { ...ServiceHelper.generateRevisionEntry(false, true, modelTypes.DRAWING),
+			timestamp: new Date(200000),
+			calibration: calibrationStatuses.CALIBRATED,
+		},
+		noFileRevision: { ...ServiceHelper.generateRevisionEntry(false, false, modelTypes.DRAWING),
+			timestamp: new Date(300000),
+			calibration: calibrationStatuses.UNCONFIRMED,
+		},
 	};
+
+	const calibration = ServiceHelper.generateCalibration();
 
 	const conRevisions = {
 		nonVoidRevision: ServiceHelper.generateRevisionEntry(),
@@ -102,10 +114,11 @@ const generateBasicData = () => {
 		models,
 		drawRevisions,
 		conRevisions,
+		calibration,
 	};
 };
 
-const setupData = async ({ users, teamspace, project, models, drawRevisions, conRevisions }) => {
+const setupData = async ({ users, teamspace, project, models, drawRevisions, conRevisions, calibration }) => {
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
 
 	const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], key !== 'nobody' ? [teamspace] : []));
@@ -126,6 +139,8 @@ const setupData = async ({ users, teamspace, project, models, drawRevisions, con
 			project.id, models.drawWithRev._id, drawRevisions[key], modelTypes.DRAWING)),
 		...Object.keys(conRevisions).map((key) => ServiceHelper.db.createRevision(teamspace,
 			project.id, models.conWithRev._id, conRevisions[key], modelTypes.CONTAINER)),
+		ServiceHelper.db.createCalibration(teamspace, project.id, models.drawWithRev._id,
+			drawRevisions.nonVoidRevision._id, calibration),
 	]);
 };
 
@@ -144,6 +159,9 @@ const testGetRevisions = () => {
 				.flatMap((rev) => (includeVoid || !rev.void ? deleteIfUndefined({
 					_id: rev._id,
 					revCode: modelType === modelTypes.DRAWING ? rev.revCode : undefined,
+					calibration: modelType === modelTypes.DRAWING
+						? (rev.calibration ?? calibrationStatuses.UNCALIBRATED)
+						: undefined,
 					statusCode: modelType === modelTypes.DRAWING ? rev.statusCode : undefined,
 					tag: modelType === modelTypes.CONTAINER ? rev.tag : undefined,
 					format: modelType === modelTypes.CONTAINER && rev.rFile ? '.'.concat(rev.rFile[0].split('_').pop()) : rev.format,
@@ -416,17 +434,20 @@ const testDownloadRevisionFiles = () => {
 			let model;
 			let revision;
 			let noFileRevision;
+			let voidRevision;
 			let modelNotFound;
 
 			if (modelType === modelTypes.CONTAINER) {
 				model = models.conWithRev;
 				revision = conRevisions.nonVoidRevision;
 				noFileRevision = conRevisions.noFileRevision;
+				voidRevision = conRevisions.voidRevision;
 				modelNotFound = templates.containerNotFound;
 			} else {
 				model = models.drawWithRev;
 				revision = drawRevisions.nonVoidRevision;
 				noFileRevision = drawRevisions.noFileRevision;
+				voidRevision = drawRevisions.voidRevision;
 				modelNotFound = templates.drawingNotFound;
 			}
 
@@ -452,6 +473,7 @@ const testDownloadRevisionFiles = () => {
 				['the revision does not exist', { ...params, revision: ServiceHelper.generateRevisionEntry() }, false, templates.revisionNotFound],
 				['the revision has no file', { ...params, revision: noFileRevision }, false, templates.fileNotFound],
 				['the revision has a file', params, true],
+				['the revision has a file (void revision)', { ...params, revision: voidRevision }, true],
 			];
 		};
 

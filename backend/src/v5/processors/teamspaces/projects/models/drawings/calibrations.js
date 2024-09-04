@@ -63,4 +63,16 @@ Calibrations.getCalibration = async (teamspace, project, drawing, revision) => {
 	throw templates.calibrationNotFound;
 };
 
+Calibrations.getCalibrationStatus = async (teamspace, project, drawing, revision) => {
+	let calibration;
+
+	try {
+		calibration = (await Calibrations.getCalibration(teamspace, project, drawing, revision)).status;
+	} catch {
+		calibration = calibrationStatuses.UNCALIBRATED;
+	}
+
+	return calibration;
+};
+
 module.exports = Calibrations;

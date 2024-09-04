@@ -47,6 +47,11 @@ const TicketGroupSchemas = require(`${src}/schemas/tickets/tickets.groups`);
 jest.mock('../../../../../src/v5/processors/teamspaces/projects/models/drawings');
 const DrawingProcessor = require(`${src}/processors/teamspaces/projects/models/drawings`);
 
+jest.mock('../../../../../src/v5/processors/teamspaces/projects/models/drawings/calibrations');
+const CalibrationProcessor = require(`${src}/processors/teamspaces/projects/models/drawings/calibrations`);
+
+const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
+
 jest.mock('../../../../../src/v5/services/mailer');
 const Mailer = require(`${src}/services/mailer`);
 const { templates: mailTemplates } = require(`${src}/services/mailer/mailer.constants`);
@@ -171,10 +176,14 @@ const testQueueTaskCompleted = () => {
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledWith(data.teamspace, project, data.model,
 				data.corId, dataInfo, data.user, data.containers);
+
+			expect(CalibrationProcessor.getCalibrationStatus).not.toHaveBeenCalled();
 		});
 
 		test(`Should trigger onProcessingCompleted if there is a ${events.QUEUED_TASK_COMPLETED} (${modelTypes.DRAWING})`, async () => {
 			const project = generateRandomString();
+			const calibration = calibrationStatuses.CALIBRATED;
+			CalibrationProcessor.getCalibrationStatus.mockResolvedValueOnce(calibration);
 			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
 			ModelSettings.getModelType.mockResolvedValueOnce(modelTypes.DRAWING);
 			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_COMPLETED);
@@ -193,12 +202,16 @@ const testQueueTaskCompleted = () => {
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
 
+			expect(CalibrationProcessor.getCalibrationStatus).toHaveBeenCalledTimes(1);
+			expect(CalibrationProcessor.getCalibrationStatus).toHaveBeenCalledWith(data.teamspace, project,
+				data.model, data.corId);
+
 			expect(ModelSettings.getModelType).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.getModelType).toHaveBeenCalledWith(data.teamspace, data.model);
 
 			expect(Revisions.onProcessingCompleted).toHaveBeenCalledTimes(1);
 			expect(Revisions.onProcessingCompleted).toHaveBeenCalledWith(data.teamspace, project, data.model,
-				data.corId, dataInfo, modelTypes.DRAWING);
+				data.corId, dataInfo, modelTypes.DRAWING, calibration);
 			expect(ModelSettings.newRevisionProcessed).not.toHaveBeenCalled();
 		});
 
@@ -326,6 +339,7 @@ const testNewRevision = () => {
 		const format = generateRandomString();
 		const rFile = [generateRandomString()];
 		const timestamp = generateRandomDate();
+		const calibration = calibrationStatuses.CALIBRATED;
 		Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp, rFile, desc, format });
 		const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 		const data = {
@@ -336,6 +350,7 @@ const testNewRevision = () => {
 			revId: generateUUID(),
 			user: generateRandomString(),
 			modelType: modelTypes.DRAWING,
+			calibration,
 		};
 		EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
 
@@ -356,7 +371,7 @@ const testNewRevision = () => {
 		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
 		expect(ChatService.createModelMessage).toHaveBeenCalledWith(
 			chatEvents.DRAWING_NEW_REVISION,
-			{ _id: UUIDToString(data.revId), tag, author, timestamp: timestamp.getTime(), desc, format },
+			{ _id: UUIDToString(data.revId), tag, author, timestamp: timestamp.getTime(), desc, format, calibration },
 			data.teamspace,
 			UUIDToString(data.project),
 			data.model,
@@ -375,6 +390,7 @@ const testNewRevision = () => {
 		const format = generateRandomString();
 		const rFile = [generateRandomString()];
 		const timestamp = generateRandomDate();
+		const calibration = calibrationStatuses.CALIBRATED;
 		Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp, rFile, desc, format });
 
 		const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
@@ -386,6 +402,7 @@ const testNewRevision = () => {
 			revId: generateUUID(),
 			user: generateRandomString(),
 			modelType: modelTypes.DRAWING,
+			calibration,
 		};
 
 		DrawingProcessor.createDrawingThumbnail.mockRejectedValueOnce(new Error());
@@ -408,7 +425,7 @@ const testNewRevision = () => {
 		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
 		expect(ChatService.createModelMessage).toHaveBeenCalledWith(
 			chatEvents.DRAWING_NEW_REVISION,
-			{ _id: UUIDToString(data.revId), tag, author, timestamp: timestamp.getTime(), desc, format },
+			{ _id: UUIDToString(data.revId), tag, author, timestamp: timestamp.getTime(), desc, format, calibration },
 			data.teamspace,
 			UUIDToString(data.project),
 			data.model,
@@ -709,9 +726,13 @@ const testRevisionUpdated = () => {
 				data.model,
 				undefined,
 			);
+
+			expect(CalibrationProcessor.getCalibrationStatus).not.toHaveBeenCalled();
 		});
 
 		test(`Should create a ${chatEvents.DRAWING_REVISION_UPDATE} chat event if there is a ${events.REVISION_UPDATED} and model type is drawing`, async () => {
+			const calibration = calibrationStatuses.CALIBRATED;
+			CalibrationProcessor.getCalibrationStatus.mockResolvedValueOnce(calibration);
 			const waitOnEvent = eventTriggeredPromise(events.REVISION_UPDATED);
 			const data = {
 				teamspace: generateRandomString(),
@@ -723,10 +744,15 @@ const testRevisionUpdated = () => {
 			EventsManager.publish(events.REVISION_UPDATED, data);
 
 			await waitOnEvent;
+
+			expect(CalibrationProcessor.getCalibrationStatus).toHaveBeenCalledTimes(1);
+			expect(CalibrationProcessor.getCalibrationStatus).toHaveBeenCalledWith(data.teamspace, data.project,
+				data.model, data.data._id);
+
 			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
 			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
 				chatEvents.DRAWING_REVISION_UPDATE,
-				{ ...data.data, _id: UUIDToString(data.data._id) },
+				{ ...data.data, _id: UUIDToString(data.data._id), calibration },
 				data.teamspace,
 				data.project,
 				data.model,

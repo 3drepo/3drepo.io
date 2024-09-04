@@ -103,7 +103,9 @@ Containers.updateRevisionStatus = (teamspace, project, container, revision, stat
 	teamspace, project, container, modelTypes.CONTAINER, revision, status);
 
 Containers.downloadRevisionFiles = async (teamspace, container, revision) => {
-	const rev = await getRevisionByIdOrTag(teamspace, container, modelTypes.CONTAINER, revision, { rFile: 1 });
+	const rev = await getRevisionByIdOrTag(teamspace, container, modelTypes.CONTAINER, revision, { rFile: 1 },
+		{ includeVoid: true },
+	);
 
 	if (!rev.rFile?.length) {
 		throw templates.fileNotFound;

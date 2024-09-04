@@ -27,6 +27,7 @@ const { templates: emailTemplates } = require('../../mailer/mailer.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { findProjectByModelId } = require('../../../models/projectSettings');
 const { generateFullSchema } = require('../../../schemas/tickets/templates');
+const { getCalibrationStatus } = require('../../../processors/teamspaces/projects/models/drawings/calibrations');
 const { getInfoFromCode } = require('../../../models/modelSettings.constants');
 const { getLogArchive } = require('../../modelProcessing');
 const { getTemplateById } = require('../../../models/tickets.templates');
@@ -66,8 +67,9 @@ const queueTasksCompleted = async ({ teamspace, model, value, corId, user, conta
 		const revId = stringToUUID(corId);
 
 		if (modelType === modelTypes.DRAWING) {
+			const calibration = await getCalibrationStatus(teamspace, projectId, model, revId);
 			// Revision status for drawings is tracked in the revision document - 3D will also move there eventually.
-			await onProcessingCompleted(teamspace, projectId, model, revId, errorInfo, modelType);
+			await onProcessingCompleted(teamspace, projectId, model, revId, errorInfo, modelType, calibration);
 		} else {
 			await newRevisionProcessed(teamspace, projectId, model, revId, errorInfo, user, containers);
 		}
@@ -79,7 +81,7 @@ const queueTasksCompleted = async ({ teamspace, model, value, corId, user, conta
 	}
 };
 
-const revisionAdded = async ({ teamspace, project, model, revId, modelType }) => {
+const revisionAdded = async ({ teamspace, project, model, revId, modelType, calibration }) => {
 	try {
 		const {
 			tag, author, timestamp, desc, rFile, format, statusCode, revCode,
@@ -100,14 +102,16 @@ const revisionAdded = async ({ teamspace, project, model, revId, modelType }) =>
 			[modelTypes.DRAWING]: chatEvents.DRAWING_NEW_REVISION,
 		};
 
-		await createModelMessage(modelEvents[modelType], deleteIfUndefined({ _id: UUIDToString(revId),
+		await createModelMessage(modelEvents[modelType], deleteIfUndefined({
+			_id: UUIDToString(revId),
 			tag,
 			statusCode,
 			revCode,
 			author,
 			timestamp: timestamp.getTime(),
 			desc,
-			...deleteIfUndefined({ format: format ?? getRevisionFormat(rFile) }),
+			format: format ?? getRevisionFormat(rFile),
+			calibration,
 		}), teamspace, UUIDToString(project), model);
 	} catch (err) {
 		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
@@ -115,9 +119,9 @@ const revisionAdded = async ({ teamspace, project, model, revId, modelType }) =>
 };
 
 const modelProcessingCompleted = async ({ teamspace, project, model, success, message,
-	userErr, revId, errCode, user, modelType }) => {
+	userErr, revId, errCode, user, modelType, calibration }) => {
 	if (success) {
-		revisionAdded({ teamspace, project, model, revId, modelType });
+		revisionAdded({ teamspace, project, model, revId, modelType, calibration });
 	} else if (!userErr) {
 		try {
 			const { zipPath, logPreview } = (await getLogArchive(UUIDToString(revId))) || {};
@@ -164,8 +168,17 @@ const revisionUpdated = async ({ teamspace, project, model, data, sender, modelT
 		[modelTypes.DRAWING]: chatEvents.DRAWING_REVISION_UPDATE,
 	};
 
-	await createModelMessage(modelEvents[modelType], { ...data, _id: UUIDToString(data._id) },
-		teamspace, project, model, sender);
+	let calibration;
+	if (modelType === modelTypes.DRAWING) {
+		calibration = await getCalibrationStatus(teamspace, project, model, data._id);
+	}
+
+	await createModelMessage(modelEvents[modelType], deleteIfUndefined({
+		...data,
+		_id: UUIDToString(data._id),
+		calibration,
+	}),
+	teamspace, project, model, sender);
 };
 
 const modelAdded = async ({ teamspace, project, model, data, sender, modelType }) => {

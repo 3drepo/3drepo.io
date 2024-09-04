@@ -142,6 +142,67 @@ const testGetCalibration = () => {
 	});
 };
 
+const testGetCalibrationStatus = () => {
+	describe('Get calibration status', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const drawing = generateRandomString();
+		const revisionId = generateRandomString();
+
+		const calibration = generateRandomObject();
+		const revision = {
+			_id: generateRandomString(),
+			timestamp: generateRandomDate(),
+			...generateRandomObject(),
+		};
+
+		const revisions = times(5, () => ({
+			_id: generateRandomString(),
+			timestamp: generateRandomDate(),
+			...generateRandomObject(),
+		}));
+
+		test(`should return ${calibrationStatuses.CALIBRATED} if the revision has a calibration`, async () => {
+			CalibrationsModel.getCalibration.mockResolvedValueOnce(calibration);
+
+			await expect(Calibrations.getCalibrationStatus(teamspace, project, drawing, revisionId))
+				.resolves.toEqual(calibrationStatuses.CALIBRATED);
+		});
+
+		test(`should return ${calibrationStatuses.CALIBRATED} if the revision has no calibrations and there are no previous revisions`, async () => {
+			CalibrationsModel.getCalibration.mockResolvedValueOnce(undefined);
+			RevisionsModel.getRevisionByIdOrTag.mockResolvedValueOnce(revision);
+			RevisionsModel.getRevisionsByQuery.mockResolvedValueOnce([]);
+
+			await expect(Calibrations.getCalibrationStatus(teamspace, project, drawing, revisionId))
+				.resolves.toEqual(calibrationStatuses.UNCALIBRATED);
+		});
+
+		test(`should return ${calibrationStatuses.CALIBRATED} if there is no calibration in any revision`, async () => {
+			CalibrationsModel.getCalibration.mockResolvedValueOnce(undefined);
+			RevisionsModel.getRevisionByIdOrTag.mockResolvedValueOnce(revision);
+			RevisionsModel.getRevisionsByQuery.mockResolvedValueOnce(revisions);
+			CalibrationsModel.getCalibrationForMultipleRevisions.mockResolvedValueOnce([]);
+
+			await expect(Calibrations.getCalibrationStatus(teamspace, project, drawing, revisionId))
+				.resolves.toEqual(calibrationStatuses.UNCALIBRATED);
+		});
+
+		test(`should return ${calibrationStatuses.UNCONFIRMED} if a previous revision has a calibration`, async () => {
+			CalibrationsModel.getCalibration.mockResolvedValueOnce(undefined);
+			RevisionsModel.getRevisionByIdOrTag.mockResolvedValueOnce(revision);
+			RevisionsModel.getRevisionsByQuery.mockResolvedValueOnce(revisions);
+			CalibrationsModel.getCalibrationForMultipleRevisions.mockResolvedValueOnce([{
+				_id: revisions[0]._id, latestCalibration: calibration,
+			}]);
+
+			await expect(Calibrations.getCalibrationStatus(teamspace, project, drawing, revisionId))
+				.resolves.toEqual(calibrationStatuses.UNCONFIRMED);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetCalibration();
+	testGetCalibrationStatus();
 });

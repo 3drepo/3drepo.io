@@ -38,7 +38,10 @@ const findRevisionsByQuery = (teamspace, project, model, modelType, query, proje
 
 const findOneRevisionByQuery = async (teamspace, model, modelType, query, projection, sort) => {
 	const rev = await db.findOne(teamspace, collectionName(modelType, model),
-		{ ...query, ...(modelType === modelTypes.DRAWING ? { model } : {}) },
+		{
+			...query,
+			...(modelType === modelTypes.DRAWING ? { model } : {}),
+		},
 		projection, sort);
 
 	if (!rev) {
@@ -88,14 +91,25 @@ Revisions.getRevisionsByQuery = (teamspace, project, model, modelType, query, pr
 	const formattedQuery = deleteIfUndefined({
 		...excludeVoids,
 		...excludeIncomplete,
+		...excludeFailed,
 		...query,
 	});
 
 	return findRevisionsByQuery(teamspace, project, model, modelType, formattedQuery, projection, { timestamp: -1 });
 };
 
-Revisions.getRevisionByIdOrTag = (teamspace, model, modelType, revision, projection = {}) => findOneRevisionByQuery(
-	teamspace, model, modelType, { $or: [{ _id: revision }, { tag: revision }] }, projection);
+Revisions.getRevisionByIdOrTag = (teamspace, model, modelType, revision, projection = {},
+	{ includeVoid, includeFailed, includeIncomplete } = {},
+) => {
+	const query = {
+		$or: [{ _id: revision }, { tag: revision }],
+		...(includeVoid ? {} : { ...excludeVoids }),
+		...(includeFailed ? {} : { ...excludeFailed }),
+		...(includeIncomplete ? {} : { ...excludeIncomplete }),
+	};
+
+	return findOneRevisionByQuery(teamspace, model, modelType, query, projection);
+};
 
 Revisions.addRevision = async (teamspace, project, model, modelType, data) => {
 	const newRevision = {
@@ -139,7 +153,7 @@ const updateRevision = async (teamspace, model, modelType, revision, setUpdate,
 };
 
 Revisions.onProcessingCompleted = async (teamspace, project, model, revId,
-	{ success, message, retVal, userErr }, modelType) => {
+	{ success, message, retVal, userErr }, modelType, calibration) => {
 	const set = {};
 	const unset = { incomplete: 1 };
 
@@ -164,6 +178,7 @@ Revisions.onProcessingCompleted = async (teamspace, project, model, revId,
 			errCode: retVal,
 			user,
 			modelType,
+			calibration,
 		});
 
 	// We're not updating model settings here, but this is a temporary hack as front end is looking
@@ -172,7 +187,7 @@ Revisions.onProcessingCompleted = async (teamspace, project, model, revId,
 		teamspace,
 		project,
 		model,
-		data: { ...set, status: set.status || processStatuses.OK, timestamp: new Date() },
+		data: { ...set, status: set.status || processStatuses.OK, timestamp: new Date(), calibration },
 		modelType,
 	});
 };

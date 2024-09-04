@@ -23,13 +23,13 @@ const Calibrations = {};
 
 Calibrations.addCalibration = async (teamspace, project, drawing, revision, createdBy, calibration) => {
 	const formattedData = {
+		...calibration,
 		_id: generateUUID(),
 		project,
 		drawing,
 		rev_id: revision,
 		createdAt: new Date(),
 		createdBy,
-		...calibration,
 	};
 
 	await db.insertOne(teamspace, CALIBRATIONS_COL, formattedData);
