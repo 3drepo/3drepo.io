@@ -62,7 +62,6 @@ export const Viewer2D = () => {
 
 	const canCalibrate2D = isCalibrating && step === 1;
 
-	const pz = centredPanZoom(imgRef.current, 20, 20);
 
 	const onClickZoomIn = () => {
 		zoomHandler.zoomIn();
@@ -81,22 +80,8 @@ export const Viewer2D = () => {
 
 		DrawingViewerService.setImgContainer(imgContainerRef.current);
 
+		const pz = centredPanZoom(imgRef.current, 20, 20);
 		setZoomHandler(pz);
-	};
-
-	const onCalibrationClick = () => setIsCalibrating2D(!isCalibrating2D);
-
-	useEffect(() => {
-		if (!zoomHandler) return;
-		zoomHandler.on(Events.transform, () => {
-			const transform = zoomHandler.getTransform();
-			const { scale } = transform;
-			const cantZoomOut = zoomHandler.getMinZoom() >= scale;
-			const cantZoomIn = zoomHandler.getMaxZoom() <= scale;
-			setIsMinZoom(cantZoomOut);
-			setIsMaxZoom(cantZoomIn);
-			setViewBox({ ...transform, ...zoomHandler.getOriginalSize() });
-		});
 
 		// The svg snap helper should only ever have load called once (create a
 		// new instance for new images). The helper will download the svg and
@@ -249,6 +234,21 @@ export const Viewer2D = () => {
 			} else {
 				setCursor({ x:0, y:0 }, 'none');
 			}
+		});
+	};
+
+	const onCalibrationClick = () => setIsCalibrating2D(!isCalibrating2D);
+
+	useEffect(() => {
+		if (!zoomHandler) return;
+		zoomHandler.on(Events.transform, () => {
+			const transform = zoomHandler.getTransform();
+			const { scale } = transform;
+			const cantZoomOut = zoomHandler.getMinZoom() >= scale;
+			const cantZoomIn = zoomHandler.getMaxZoom() <= scale;
+			setIsMinZoom(cantZoomOut);
+			setIsMaxZoom(cantZoomIn);
+			setViewBox({ ...transform, ...zoomHandler.getOriginalSize() });
 		});
 	}, [zoomHandler]);
 
