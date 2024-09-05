@@ -38,9 +38,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="5.5250177"
-     inkscape:cx="107.59703"
-     inkscape:cy="165.20703"
+     inkscape:zoom="5.9789363"
+     inkscape:cx="102.3183"
+     inkscape:cy="320.08737"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -222,5 +222,13 @@
        d="m 180.45191,127.7824 c -17.19451,1.08597 -7.78278,-2.71492 -2.71492,16.65153"
        id="path909"
        sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.377953;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 29.993635,331.15658 c 0,0 -25.5202803,53.75548 -2.53393,35.11301"
+       id="path897-7" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.377953;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 54.204447,379.42758 c 0,0 34.38903,-19.72845 33.30306,-8.32577"
+       id="path895-2" />
   </g>
 </svg>
