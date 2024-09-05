@@ -42,7 +42,7 @@ const InformationUnits = {
 };
 
 export const formatInfoUnit = (value: number): string => {
-	const formattedSize = byteSize(value) as ByteSizeType;
+	const formattedSize = byteSize(value, { byteSize: 'iec' }) as ByteSizeType;
 	formattedSize.unit = InformationUnits[formattedSize.unit];
 
 	return formatMessage({
