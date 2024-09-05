@@ -25,17 +25,12 @@ import { fullDrawing } from './drawings.helpers';
 
 const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
 
-export const selectDrawingStats = createSelector(
-	selectDrawingsDomain,
-	(state) => state.statsByDrawing || {},
-);
-
 export const selectDrawings = createSelector(
 	selectDrawingsDomain,
-	selectDrawingStats,
 	selectCurrentProject,
 	selectRevisionsByDrawing, // This selector is used here to recalculate the value after the revisions are fetched
-	(state, stats, currentProject) => (state.drawingsByProject[currentProject] ?? []).map((drawing) => fullDrawing(drawing, stats[drawing._id])),
+	(state, currentProject, revisionsByDrawing) => 
+		(state.drawingsByProject[currentProject] ?? []).map((drawing) => fullDrawing(drawing as any, revisionsByDrawing)),
 );
 
 export const selectFavouriteDrawings = createSelector(
@@ -49,12 +44,6 @@ export const selectDrawingById = createSelector(
 	(drawings, _id) => {
 		return drawings.find((d) => d._id === _id);
 	},
-);
-
-export const selectDrawingStatsById = createSelector(
-	selectDrawingStats,
-	(_, _id) => _id,
-	(stats, _id) => stats[_id],
 );
 
 export const selectIsListPending = createSelector(

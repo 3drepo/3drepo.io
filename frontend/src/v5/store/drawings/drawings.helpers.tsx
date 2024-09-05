@@ -24,6 +24,7 @@ import { CalibrationStates, DrawingStats, DrawingUploadStatus, IDrawing, Minimum
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import { getState } from '@/v4/modules/store';
 import { selectActiveRevisions, selectLastRevision, selectRevisionsPending } from './revisions/drawingRevisions.selectors';
+import { Role } from '../currentUser/currentUser.types';
 
 export const DRAWING_LIST_COLUMN_WIDTHS = {
 	name: {
@@ -83,33 +84,46 @@ export const canUploadToBackend = (status?: DrawingUploadStatus): boolean => {
 	return statusesForUpload.includes(status);
 };
 
-export const fullDrawing = (
-	drawing: MinimumDrawing,
+export const statsToDrawing = (
 	stats?: DrawingStats,
+): Partial<IDrawing> => ({
+	revisionsCount: stats?.revisions?.total ?? 0,
+	lastUpdated: getNullableDate(stats?.revisions.lastUpdated),
+	latestRevision: stats?.revisions.latestRevision ?? '',
+	number: stats?.number ?? '',
+	type: stats?.type ?? '',
+	desc: stats?.desc ?? '',
+	calibration: stats?.calibration ?? CalibrationStates.UNCALIBRATED,
+	status: stats?.status ?? DrawingUploadStatus.OK,
+	hasStatsPending: !stats,
+	errorReason: stats?.errorReason && {
+		message: stats.errorReason.message,
+		timestamp: getNullableDate(+stats?.errorReason.timestamp),
+	},
+});
+
+export const fullDrawing = (
+	drawing: Partial<IDrawing> &  MinimumDrawing,
 ): IDrawing => {
 	const state = getState();
 	const isPendingRevisions = selectRevisionsPending(state, drawing._id);
 	const activeRevisions = selectActiveRevisions(state, drawing._id);
-	const latestRevision = isPendingRevisions ? stats?.revisions?.latestRevision : selectLastRevision(state, drawing._id);
-	const revisionsCount = isPendingRevisions ? stats?.revisions?.total : activeRevisions.length;
-	const calibration = revisionsCount > 0 ? stats?.calibration : CalibrationStates.EMPTY;
-	const lastUpdated = isPendingRevisions ? stats?.revisions.lastUpdated :  (activeRevisions[0] || {}).timestamp;
+	const latestRevision = isPendingRevisions ? drawing.latestRevision : selectLastRevision(state, drawing._id);
+	const revisionsCount = isPendingRevisions ? drawing.revisionsCount : activeRevisions.length;
+	const calibration = revisionsCount > 0 ? drawing.calibration : CalibrationStates.EMPTY;
+	const lastUpdated = isPendingRevisions ? drawing.lastUpdated :  (activeRevisions[0] || {}).timestamp;
+	const status = drawing.status ?? DrawingUploadStatus.OK;
+	const isFavourite = drawing.isFavourite ?? false;
+	const role = drawing.role ?? Role.ADMIN;
 
-	const res = {
+	return {
 		...drawing,
-		revisionsCount,
-		lastUpdated: getNullableDate(lastUpdated), 
+		status,
+		isFavourite,
+		role,
 		latestRevision,
-		number: stats?.number ?? '',
-		type: stats?.type ?? '',
-		desc: stats?.desc ?? '',
+		revisionsCount,
 		calibration, 
-		status: stats?.status ?? DrawingUploadStatus.OK,
-		hasStatsPending: !stats,
-		errorReason: stats?.errorReason && {
-			message: stats.errorReason.message,
-			timestamp: getNullableDate(+stats?.errorReason.timestamp),
-		} };
-
-	return res;
+		lastUpdated: getNullableDate(lastUpdated), 
+	};
 };

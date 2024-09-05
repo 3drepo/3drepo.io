@@ -101,7 +101,7 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 			createFormDataFromRevisionBody(body),
 		);
 
-		yield put(DrawingsActions.setDrawingStatus(projectId, drawingId, DrawingUploadStatus.QUEUED));
+		yield put(DrawingsActions.updateDrawingSuccess(projectId, drawingId, { status: DrawingUploadStatus.QUEUED }));
 		yield put(DrawingRevisionsActions.setUploadComplete(uploadId, true));
 	} catch (error) {
 		let errorMessage = error.message;

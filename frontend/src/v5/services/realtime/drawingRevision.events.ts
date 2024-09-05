@@ -17,7 +17,7 @@
 /* eslint-disable implicit-arrow-linebreak */
 
 import { IDrawingRevision, IDrawingRevisionUpdate } from '@/v5/store/drawings/revisions/drawingRevisions.types';
-import { DrawingsActionsDispatchers, DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { subscribeToRoomEvent } from './realtime.service';
 
 export const enableRealtimeDrawingRevisionUpdate = (teamspace: string, project: string, drawingId: string) =>
@@ -28,6 +28,5 @@ export const enableRealtimeDrawingRevisionUpdate = (teamspace: string, project: 
 export const enableRealtimeNewDrawingRevisionUpdate = (teamspace: string, project: string, drawingId: string) =>
 	subscribeToRoomEvent({ teamspace, project, model: drawingId }, 'drawingNewRevision',
 		(revision: IDrawingRevision) => {
-			DrawingsActionsDispatchers.drawingProcessingSuccess(project, drawingId, revision);
 			DrawingRevisionsActionsDispatchers.revisionProcessingSuccess(drawingId, revision);
 		});
