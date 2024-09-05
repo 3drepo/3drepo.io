@@ -18,7 +18,7 @@
 import { Vector2, Line, CubicBezier, Bounds } from './types';
 
 import { closestPointOnLine, lineLineIntersection } from './lineFunctions';
-import { closestPointOnCurve, lineCurveIntersection } from './bezierFunctions';
+import { closestPointOnCurve, curveCurveIntersection, lineCurveIntersection } from './bezierFunctions';
 
 export class RTreeNode extends Bounds {
 	line: Line | undefined;
@@ -228,19 +228,14 @@ class RTreeQueries {
 			if (p) {
 				results.push(p);
 			}
-			return;
 		} else if (a.line && b.curve) {
 			lineCurveIntersection(b.curve, a.line, results);
-			return null;
 		} else if (a.curve && b.line) {
 			lineCurveIntersection(a.curve, b.line, results);
-			return null;
 		} else if (a.curve && b.curve) {
-			console.warn('Curve-Curve tests not implemented yet');
-			return null;
+			curveCurveIntersection(a.curve, b.curve, results);
 		}
 	}
-
 }
 
 export class RTree {
