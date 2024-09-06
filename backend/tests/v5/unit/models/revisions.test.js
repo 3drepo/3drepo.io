@@ -101,7 +101,7 @@ const testGetRevisions = () => {
 	const project = generateRandomString();
 	const model = generateRandomString();
 
-	const checkResults = (fn, showVoid, modelType) => {
+	const checkResults = (fn, showVoid, modelType, projection = {}, sort = { timestamp: -1 }) => {
 		const query = {
 			...excludeIncomplete,
 			...excludeFailed,
@@ -114,40 +114,43 @@ const testGetRevisions = () => {
 
 		expect(fn).toHaveBeenCalledTimes(1);
 		expect(fn).toHaveBeenCalledWith(teamspace, modelType === modelTypes.DRAWING ? `${modelType}s.history` : `${model}.history`,
-			query, {}, { timestamp: -1 });
+			query, projection, sort);
 	};
 
 	const expectedData = [
-		{ _id: 1, author: 'someUser', timestamp: new Date() },
-		{ _id: 2, author: 'someUser', timestamp: new Date() },
-		{ _id: 3, author: 'someUser', timestamp: new Date(), void: true },
+		{ _id: generateRandomString(), author: generateRandomString(), timestamp: new Date() },
+		{ _id: generateRandomString(), author: generateRandomString(), timestamp: new Date() },
+		{ _id: generateRandomString(), author: generateRandomString(), timestamp: new Date(), void: true },
 	];
 
 	describe('GetRevisions', () => {
 		test('Should return all container revisions', async () => {
-			const fn = jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedData);
 			const res = await Revisions.getRevisions(teamspace, project, model, modelTypes.CONTAINER, true);
 			expect(res).toEqual(expectedData);
 			checkResults(fn, true);
 		});
 
-		test('Should return non void container revisions', async () => {
+		test('Should return non void container revisions (with projection and sort)', async () => {
 			const nonVoidRevisions = expectedData.filter((rev) => !rev.void);
-			const fn = jest.spyOn(db, 'find').mockResolvedValue(nonVoidRevisions);
-			const res = await Revisions.getRevisions(teamspace, project, model, modelTypes.CONTAINER, false);
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(nonVoidRevisions);
+			const projection = { _id: 1 };
+			const sort = { [generateRandomString()]: -1 };
+			const res = await Revisions.getRevisions(teamspace, project, model,
+				modelTypes.CONTAINER, false, projection, sort);
 			expect(res).toEqual(nonVoidRevisions);
-			checkResults(fn, false);
+			checkResults(fn, false, projection, sort);
 		});
 
 		test('Should return an empty object if there are no revisions', async () => {
-			const fn = jest.spyOn(db, 'find').mockResolvedValue([]);
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce([]);
 			const res = await Revisions.getRevisions(teamspace, project, model, modelTypes.CONTAINER, true);
 			expect(res).toEqual([]);
 			checkResults(fn, true);
 		});
 
 		test('Should return all container revisions (drawing)', async () => {
-			const fn = jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedData);
 			const res = await Revisions.getRevisions(teamspace, project, model, modelTypes.DRAWING, true);
 			expect(res).toEqual(expectedData);
 			checkResults(fn, true, modelTypes.DRAWING);

@@ -17,9 +17,16 @@
 
 const { times } = require('lodash');
 const { src } = require('../../../../../../helper/path');
-const { determineTestGroup, generateRandomString, generateRandomObject, generateRandomDate } = require('../../../../../../helper/services');
+const {
+	determineTestGroup,
+	generateRandomString,
+	generateRandomObject,
+	generateRandomDate,
+	generateUUID,
+} = require('../../../../../../helper/services');
 
 const { templates } = require(`${src}/utils/responseCodes`);
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
 jest.mock('../../../../../../../../src/v5/models/calibrations');
@@ -207,6 +214,42 @@ const testGetCalibrationStatus = () => {
 	});
 };
 
+const testGetCalibrationStatusForAllRevs = () => {
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const drawing = generateRandomString();
+
+	const nRevs = 3;
+	const revs = times(nRevs, () => generateUUID());
+	const revStrs = times(nRevs, (i) => UUIDToString(revs[i]));
+	describe.each([
+		['No calibrations', [{ _id: revs[0] }, { _id: revs[1] }], [],
+			{ [revStrs[0]]: calibrationStatuses.UNCALIBRATED, [revStrs[1]]: calibrationStatuses.UNCALIBRATED }],
+		['All have calibrations', [{ _id: revs[0] }, { _id: revs[1] }], [{ _id: revs[0] }, { _id: revs[1] }],
+			{ [revStrs[0]]: calibrationStatuses.CALIBRATED, [revStrs[1]]: calibrationStatuses.CALIBRATED }],
+		['Unconfirm logic', [{ _id: revs[0] }, { _id: revs[1] }, { _id: revs[2] }], [{ _id: revs[1] }],
+			{ [revStrs[2]]: calibrationStatuses.UNCONFIRMED,
+				[revStrs[1]]: calibrationStatuses.CALIBRATED,
+				[revStrs[0]]: calibrationStatuses.UNCALIBRATED }],
+		['Void logic (1)', [{ _id: revs[0] }, { _id: revs[1], void: true }, { _id: revs[2] }], [{ _id: revs[1] }],
+			{ [revStrs[2]]: calibrationStatuses.UNCALIBRATED,
+				[revStrs[1]]: calibrationStatuses.CALIBRATED,
+				[revStrs[0]]: calibrationStatuses.UNCALIBRATED }],
+		['Void logic (2)', [{ _id: revs[0] }, { _id: revs[1], void: true }, { _id: revs[2] }], [{ _id: revs[1] }, { _id: revs[0] }],
+			{ [revStrs[2]]: calibrationStatuses.UNCONFIRMED,
+				[revStrs[1]]: calibrationStatuses.CALIBRATED,
+				[revStrs[0]]: calibrationStatuses.CALIBRATED }],
+	])('Get calibration status for all revs', (desc, revData, calibration, expectedResults) => {
+		test(desc, async () => {
+			RevisionsModel.getRevisions.mockResolvedValueOnce(revData);
+			CalibrationsModel.getCalibrationForMultipleRevisions.mockResolvedValueOnce(calibration);
+
+			await expect(Calibrations.getCalibrationStatusForAllRevs(teamspace, project, drawing))
+				.resolves.toEqual(expectedResults);
+		});
+	});
+};
+
 const testAddCalibration = () => {
 	describe('Add Calibration', () => {
 		const teamspace = generateRandomString();
@@ -254,5 +297,6 @@ const testAddCalibration = () => {
 describe(determineTestGroup(__filename), () => {
 	testGetCalibration();
 	testGetCalibrationStatus();
+	testGetCalibrationStatusForAllRevs();
 	testAddCalibration();
 });

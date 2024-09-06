@@ -20,15 +20,15 @@ const { addDrawingThumbnailRef, deleteModelRevisions, getLatestRevision,
 	getRevisionByIdOrTag, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../../models/revisions');
 const { addModel, getModelList } = require('../commons/modelList');
 const { appendFavourites, deleteFavourites } = require('../commons/favourites');
-const { deleteDrawingCalibrations, getCalibrationForMultipleRevisions } = require('../../../../../models/calibrations');
 const { deleteModel, getDrawingById, getDrawings, updateModelSettings } = require('../../../../../models/modelSettings');
+const { getCalibrationStatus, getCalibrationStatusForAllRevs } = require('./calibrations');
 const { getFile, getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../../../services/filesManager');
 const { getProjectById, removeModelFromProject } = require('../../../../../models/projectSettings');
 const { DRAWINGS_HISTORY_COL } = require('../../../../../models/revisions.constants');
 const { calibrationStatuses } = require('../../../../../models/calibrations.constants');
 const { createThumbnail } = require('../../../../../utils/helper/images');
+const { deleteDrawingCalibrations } = require('../../../../../models/calibrations');
 const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
-const { getCalibration } = require('./calibrations');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { processDrawingUpload } = require('../../../../../services/modelProcessing');
 const { templates } = require('../../../../../utils/responseCodes');
@@ -43,20 +43,19 @@ Drawings.getDrawingList = async (teamspace, project, user) => {
 };
 
 Drawings.getDrawingStats = async (teamspace, project, drawing) => {
-	let latestRev;
-	let calibration;
-
 	const getLatestRevAndCalibration = async () => {
 		try {
-			latestRev = await getLatestRevision(teamspace, drawing, modelTypes.DRAWING,
+			const latestRev = await getLatestRevision(teamspace, drawing, modelTypes.DRAWING,
 				{ _id: 1, statusCode: 1, revCode: 1, timestamp: 1 });
-			calibration = (await getCalibration(teamspace, project, drawing, latestRev._id)).status;
+			const calibration = await getCalibrationStatus(teamspace, project, drawing, latestRev._id);
+			return { latestRev, calibration };
 		} catch {
 			// do nothing. A drawing can have 0 revision.
+			return {};
 		}
 	};
 
-	const [settings, revCount] = await Promise.all([
+	const [settings, revCount, { latestRev, calibration }] = await Promise.all([
 		getDrawingById(teamspace, drawing, { number: 1, status: 1, type: 1, desc: 1 }),
 		getRevisionCount(teamspace, drawing, modelTypes.DRAWING),
 		getLatestRevAndCalibration(),
@@ -69,8 +68,9 @@ Drawings.getDrawingStats = async (teamspace, project, drawing) => {
 		desc: settings.desc,
 		revisions: {
 			total: revCount,
-			lastUpdated: latestRev?.timestamp,
-			latestRevision: latestRev ? `${latestRev.statusCode}-${latestRev.revCode}` : undefined,
+			...latestRev
+				? { lastUpdated: latestRev.timestamp, latestRevision: `${latestRev.statusCode}-${latestRev.revCode}` }
+				: {},
 		},
 		calibration,
 	});
@@ -93,23 +93,14 @@ Drawings.deleteDrawing = async (teamspace, project, drawing) => {
 };
 
 Drawings.getRevisions = async (teamspace, project, drawing, showVoid) => {
-	const revisions = await getRevisions(teamspace, project, drawing, modelTypes.DRAWING, showVoid,
-		{ _id: 1, author: 1, format: 1, timestamp: 1, statusCode: 1, revCode: 1, void: 1, desc: 1 });
+	const [revisions, calibrations] = await Promise.all([
+		getRevisions(teamspace, project, drawing, modelTypes.DRAWING, showVoid,
+			{ _id: 1, author: 1, format: 1, timestamp: 1, statusCode: 1, revCode: 1, void: 1, desc: 1 }),
+		getCalibrationStatusForAllRevs(teamspace, project, drawing),
+	]);
 
-	let calibrationsFound = false;
-	const calibrations = await getCalibrationForMultipleRevisions(teamspace, revisions.map((r) => r._id), { _id: 1 });
-
-	for (let i = revisions.length; i > 0; i--) {
-		const revision = revisions[i - 1];
-		const revCalibration = calibrations.find((c) => UUIDToString(c._id) === UUIDToString(revision._id));
-
-		if (revCalibration) {
-			calibrationsFound = true;
-			revision.calibration = calibrationStatuses.CALIBRATED;
-		} else {
-			revision.calibration = calibrationsFound
-				? calibrationStatuses.UNCONFIRMED : calibrationStatuses.UNCALIBRATED;
-		}
+	for (let i = 0; i < revisions.length; ++i) {
+		revisions[i].calibration = calibrations[UUIDToString(revisions[i]._id)] ?? calibrationStatuses.UNCALIBRATED;
 	}
 
 	return revisions;

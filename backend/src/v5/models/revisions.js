@@ -74,7 +74,8 @@ Revisions.getRevisionCount = (teamspace, model, modelType) => {
 	return db.count(teamspace, collectionName(modelType, model), query);
 };
 
-Revisions.getRevisions = (teamspace, project, model, modelType, showVoid, projection = {}) => {
+Revisions.getRevisions = (teamspace, project, model, modelType, showVoid,
+	projection = {}, sort = { timestamp: -1 }) => {
 	const query = {
 		...excludeIncomplete,
 		...excludeFailed,
@@ -84,7 +85,7 @@ Revisions.getRevisions = (teamspace, project, model, modelType, showVoid, projec
 		query.void = excludeVoids.void;
 	}
 
-	return findRevisionsByQuery(teamspace, project, model, modelType, query, projection, { timestamp: -1 });
+	return findRevisionsByQuery(teamspace, project, model, modelType, query, projection, sort);
 };
 
 Revisions.getRevisionsByQuery = (teamspace, project, model, modelType, query, projection) => {
