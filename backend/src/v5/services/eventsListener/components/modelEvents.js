@@ -21,6 +21,7 @@ const { createModelMessage, createProjectMessage } = require('../../chat');
 const { deleteIfUndefined, setNestedProperty } = require('../../../utils/helper/objects');
 const { getModelType, isFederation: isFederationCheck, newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
 const { getRevisionByIdOrTag, getRevisionFormat, onProcessingCompleted, updateProcessingStatus } = require('../../../models/revisions');
+const { modelTypes, processStatuses } = require('../../../models/modelSettings.constants');
 const { publish, subscribe } = require('../../eventsManager/eventsManager');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { createDrawingThumbnail } = require('../../../processors/teamspaces/projects/models/drawings');
@@ -33,7 +34,6 @@ const { getInfoFromCode } = require('../../../models/modelSettings.constants');
 const { getLogArchive } = require('../../modelProcessing');
 const { getTemplateById } = require('../../../models/tickets.templates');
 const { logger } = require('../../../utils/logger');
-const { modelTypes } = require('../../../models/modelSettings.constants');
 const { sendSystemEmail } = require('../../mailer');
 const { serialiseComment } = require('../../../schemas/tickets/tickets.comments');
 const { serialiseGroup } = require('../../../schemas/tickets/tickets.groups');
@@ -117,22 +117,23 @@ const revisionAdded = async ({ teamspace, project, model, revId, modelType, cali
 	}
 };
 
-const modelProcessingCompleted = async ({ teamspace, project, model, success, message,
-	userErr, revId, errCode, user, modelType, data }) => {
+const modelProcessingCompleted = async ({ teamspace, project, model, revId, user, modelType, data }) => {
+	const { errorReason, status } = data;
 	const calibration = modelType === modelTypes.DRAWING
 		? await getCalibrationStatus(teamspace, project, model, revId)
 		: undefined;
 
-	if (success) {
+	if (status === processStatuses.OK) {
 		revisionAdded({ teamspace, project, model, revId, modelType, calibration });
-	} else if (!userErr) {
+	} else if (!errorReason.userErr) {
 		try {
 			const { zipPath, logPreview } = (await getLogArchive(UUIDToString(revId))) || {};
+			const { errorCode, message } = errorReason;
 
 			await sendSystemEmail(emailTemplates.MODEL_IMPORT_ERROR.name,
 				{
 					errInfo: {
-						code: errCode,
+						code: errorCode,
 						message,
 					},
 					teamspace,
@@ -158,7 +159,7 @@ const modelProcessingCompleted = async ({ teamspace, project, model, success, me
 		teamspace,
 		project,
 		model,
-		data: { ...data, calibration },
+		data: deleteIfUndefined({ ...data, calibration }),
 		modelType,
 	});
 };

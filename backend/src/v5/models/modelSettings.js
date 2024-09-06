@@ -16,7 +16,7 @@
  */
 
 const Models = {};
-const { SETTINGS_COL, modelTypes } = require('./modelSettings.constants');
+const { SETTINGS_COL, modelTypes, processStatuses } = require('./modelSettings.constants');
 const { UUIDToString, generateUUIDString } = require('../utils/helper/uuids');
 const db = require('../handler/db');
 const { deleteIfUndefined } = require('../utils/helper/objects');
@@ -199,7 +199,7 @@ Models.newRevisionProcessed = async (teamspace, project, model, revId,
 			set.subModels = containers.map(({ project: _id, group }) => deleteIfUndefined({ _id, group }));
 		}
 	} else {
-		set.status = 'failed';
+		set.status = processStatuses.FAILED;
 		set.errorReason = { message, timestamp: new Date(), errorCode: retVal };
 	}
 
@@ -207,11 +207,14 @@ Models.newRevisionProcessed = async (teamspace, project, model, revId,
 	if (updated) {
 		// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
 		// trigger notifications.
-		const data = { ...set, status: set.status || 'ok' };
-		if (data.subModels) {
-			data.containers = data.subModels;
-			delete data.subModels;
-		}
+
+		const { errorReason, subModels, status, timestamp } = set;
+		const data = deleteIfUndefined({
+			timestamp,
+			errorReason: errorReason ? { ...errorReason, userErr } : undefined,
+			status: status ?? processStatuses.OK,
+			containers: subModels,
+		});
 
 		const modelType = containers ? modelTypes.FEDERATION : modelTypes.CONTAINER;
 		publish(events.MODEL_IMPORT_FINISHED,
@@ -219,11 +222,7 @@ Models.newRevisionProcessed = async (teamspace, project, model, revId,
 				teamspace,
 				project,
 				model,
-				success,
-				message,
-				userErr,
 				revId,
-				errCode: retVal,
 				user,
 				modelType,
 				data,

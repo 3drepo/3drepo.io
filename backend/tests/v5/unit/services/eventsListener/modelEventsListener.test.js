@@ -21,7 +21,7 @@ const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
 const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate } = require('../../../helper/services');
 
-const { modelTypes, getInfoFromCode } = require(`${src}/models/modelSettings.constants`);
+const { modelTypes, getInfoFromCode, processStatuses } = require(`${src}/models/modelSettings.constants`);
 
 jest.mock('../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
@@ -70,6 +70,21 @@ const EventsListener = require(`${src}/services/eventsListener/eventsListener`);
 const eventTriggeredPromise = (event) => new Promise(
 	(resolve) => EventsManager.subscribe(event, () => setTimeout(resolve, 10)),
 );
+
+const generateImportResult = (success, message = generateRandomString(), userErr, errorCode = 1) => {
+	if (success) {
+		return { status: processStatuses.OK, timestamp: new Date() };
+	}
+	return {
+		status: processStatuses.FAILED,
+		errorReason: {
+			timestamp: new Date(),
+			userErr,
+			message,
+			errorCode,
+		},
+	};
+};
 
 const testQueueTaskUpdate = () => {
 	describe(events.QUEUED_TASK_UPDATE, () => {
@@ -293,11 +308,10 @@ const testNewRevision = () => {
 			teamspace: generateRandomString(),
 			project: generateUUID(),
 			model: generateRandomString(),
-			success: true,
 			revId: generateUUID(),
 			user: generateRandomString(),
 			modelType: modelTypes.CONTAINER,
-			data: generateRandomObject(),
+			data: generateImportResult(true),
 		};
 
 		EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
@@ -357,11 +371,10 @@ const testNewRevision = () => {
 			teamspace: generateRandomString(),
 			project: generateUUID(),
 			model: generateRandomString(),
-			success: true,
 			revId: generateUUID(),
 			user: generateRandomString(),
 			modelType: modelTypes.DRAWING,
-			data: generateRandomObject(),
+			data: generateImportResult(true),
 		};
 		EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
 
@@ -431,11 +444,10 @@ const testNewRevision = () => {
 			teamspace: generateRandomString(),
 			project: generateUUID(),
 			model: generateRandomString(),
-			success: true,
 			revId: generateUUID(),
 			user: generateRandomString(),
 			modelType: modelTypes.DRAWING,
-			data: generateRandomObject(),
+			data: generateImportResult(true),
 		};
 
 		DrawingProcessor.createDrawingThumbnail.mockRejectedValueOnce(new Error());
@@ -501,11 +513,11 @@ const testNewRevision = () => {
 			teamspace: generateRandomString(),
 			project: generateUUID(),
 			model: generateRandomString(),
-			success: true,
 			revId: generateUUID(),
 			user: generateRandomString(),
 			modelType: modelTypes.FEDERATION,
-			data: generateRandomObject(),
+			data: generateImportResult(true),
+
 		};
 		EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
 
@@ -553,11 +565,10 @@ const testNewRevision = () => {
 			teamspace: generateRandomString(),
 			project: generateUUID(),
 			model: generateRandomString(),
-			success: true,
 			revId: generateUUID(),
 			user: generateRandomString(),
 			modelType: modelTypes.CONTAINER,
-			data: generateRandomObject(),
+			data: generateImportResult(true),
 		};
 
 		Revisions.getRevisionByIdOrTag.mockRejectedValueOnce(templates.revisionNotFound);
@@ -595,11 +606,10 @@ const testNewRevision = () => {
 			teamspace: generateRandomString(),
 			project: generateUUID(),
 			model: generateRandomString(),
-			success: true,
 			revId: generateUUID(),
 			user: generateRandomString(),
 			modelType: modelTypes.CONTAINER,
-			data: generateRandomObject(),
+			data: generateImportResult(true),
 		};
 
 		Revisions.getRevisionByIdOrTag.mockRejectedValueOnce(new Error(generateRandomString()));
@@ -646,11 +656,10 @@ const testModelProcessingCompleted = () => {
 					model: generateRandomString(),
 					project: generateUUID(),
 					success,
-					message: generateRandomString(),
-					userErr,
 					revId: generateUUID(),
 					user: generateRandomString(),
 					modelType: modelTypes.FEDERATION,
+					data: generateImportResult(success, generateRandomString(), userErr),
 				};
 
 				const zipPath = generateRandomString();
@@ -669,8 +678,8 @@ const testModelProcessingCompleted = () => {
 
 					const mailerData = {
 						errInfo: {
-							code: data.errCode,
-							message: data.message,
+							code: data.data.errorReason.errorCode,
+							message: data.data.errorReason.message,
 						},
 						teamspace: data.teamspace,
 						model: data.model,
@@ -697,12 +706,10 @@ const testModelProcessingCompleted = () => {
 				teamspace: generateRandomString(),
 				model: generateRandomString(),
 				project: generateUUID(),
-				success: false,
-				message: generateRandomString(),
-				userErr: false,
 				revId: generateUUID(),
 				user: generateRandomString(),
 				modelType: modelTypes.FEDERATION,
+				data: generateImportResult(false),
 			};
 
 			ModPro.getLogArchive.mockRejectedValueOnce(generateRandomString());
@@ -718,12 +725,10 @@ const testModelProcessingCompleted = () => {
 				teamspace: generateRandomString(),
 				model: generateRandomString(),
 				project: generateUUID(),
-				success: false,
-				message: generateRandomString(),
-				userErr: false,
 				revId: generateUUID(),
 				user: generateRandomString(),
 				modelType: modelTypes.FEDERATION,
+				data: generateImportResult(false),
 			};
 
 			ModPro.getLogArchive.mockRejectedValueOnce(new Error());
