@@ -65,8 +65,8 @@ Calibrations.getCalibration = async (teamspace, project, drawing, revision) => {
 
 Calibrations.getCalibrationStatus = async (teamspace, project, drawing, revision) => {
 	try {
-		const calibration = await Calibrations.getCalibration(teamspace, project, drawing, revision);
-		return calibration.status;
+		const { status } = await Calibrations.getCalibration(teamspace, project, drawing, revision);
+		return status;
 	} catch {
 		return calibrationStatuses.UNCALIBRATED;
 	}
