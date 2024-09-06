@@ -383,7 +383,7 @@ const testSerialiseTicket = () => {
 			});
 
 			res.properties[imageProp] = UUIDToString(res.properties[imageProp]);
-			res.properties[imageListProp] = res.properties[imageProp].map(UUIDToString);
+			res.properties[imageListProp] = res.properties[imageListProp].map(UUIDToString);
 			res.modules[modName][imageProp] = UUIDToString(res.modules[modName][imageProp]);
 			res.modules[modName][imageListProp] = res.modules[modName][imageListProp].map(UUIDToString);
 
