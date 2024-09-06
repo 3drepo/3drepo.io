@@ -22,7 +22,6 @@ const SuperTest = require('supertest');
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
 const { EVENTS } = require(`${src}/services/chat/chat.constants`);
-const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const user = ServiceHelper.generateUserCredentials();

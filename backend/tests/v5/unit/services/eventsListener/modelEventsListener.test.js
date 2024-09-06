@@ -385,7 +385,13 @@ const testNewRevision = () => {
 		const expectedCalls = [
 			[
 				chatEvents.DRAWING_NEW_REVISION,
-				{ _id: UUIDToString(data.revId), tag, author, timestamp: timestamp.getTime(), desc, format, calibration },
+				{ _id: UUIDToString(data.revId),
+					tag,
+					author,
+					timestamp: timestamp.getTime(),
+					desc,
+					format,
+					calibration },
 				data.teamspace,
 				UUIDToString(data.project),
 				data.model,
@@ -455,7 +461,13 @@ const testNewRevision = () => {
 		const expectedCalls = [
 			[
 				chatEvents.DRAWING_NEW_REVISION,
-				{ _id: UUIDToString(data.revId), tag, author, timestamp: timestamp.getTime(), desc, format, calibration },
+				{ _id: UUIDToString(data.revId),
+					tag,
+					author,
+					timestamp: timestamp.getTime(),
+					desc,
+					format,
+					calibration },
 				data.teamspace,
 				UUIDToString(data.project),
 				data.model,
