@@ -30,7 +30,7 @@ const getRevIdToCalibMap = (revCalibrations) => {
 	const revIdToCalib = {};
 
 	revCalibrations.forEach(({ _id, ...others }) => {
-		revIdToCalib[UUIDToString(_id)] = others ?? true;
+		revIdToCalib[UUIDToString(_id)] = others;
 	});
 
 	return revIdToCalib;

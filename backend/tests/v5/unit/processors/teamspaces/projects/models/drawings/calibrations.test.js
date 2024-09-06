@@ -132,7 +132,7 @@ const testGetCalibration = () => {
 			RevisionsModel.getRevisionByIdOrTag.mockResolvedValueOnce(revision);
 			RevisionsModel.getRevisionsByQuery.mockResolvedValueOnce(revisions);
 			CalibrationsModel.getCalibrationForMultipleRevisions.mockResolvedValueOnce([{
-				_id: revisions[0]._id, latestCalibration: calibration,
+				_id: revisions[1]._id, latestCalibration: calibration,
 			}]);
 
 			await expect(Calibrations.getCalibration(teamspace, project, drawing, revisionId))
