@@ -586,6 +586,7 @@ const testGetTicket = () => {
 		describe.each(generateTestData())('Containers', runTest);
 	});
 };
+
 const testGetTicketList = () => {
 	describe('Get ticket list', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
@@ -711,6 +712,7 @@ const testUpdateTicket = () => {
 		const immutableProp = ServiceHelper.generateRandomString();
 		const immutablePropWithDefaultValue = ServiceHelper.generateRandomString();
 		const imagePropName = ServiceHelper.generateRandomString();
+		const imageListPropName = ServiceHelper.generateRandomString();
 		const requiredImagePropName = ServiceHelper.generateRandomString();
 		const uniquePropName = ServiceHelper.generateRandomString();
 		const template = {
@@ -724,6 +726,10 @@ const testUpdateTicket = () => {
 				{
 					name: imagePropName,
 					type: propTypes.IMAGE,
+				},
+				{
+					name: imageListPropName,
+					type: propTypes.IMAGE_LIST,
 				},
 				{
 					name: requiredImagePropName,
@@ -752,12 +758,14 @@ const testUpdateTicket = () => {
 		const deprecatedTemplate = ServiceHelper.generateTemplate();
 		con.ticket = ServiceHelper.generateTicket(template);
 		con.ticket.properties[requiredImagePropName] = FS.readFileSync(image, { encoding: 'base64' });
+		con.ticket.properties[imageListPropName] = [FS.readFileSync(image, { encoding: 'base64' })];
 		delete con.ticket.properties[immutablePropWithDefaultValue];
 		con.depTemTicket = ServiceHelper.generateTicket(deprecatedTemplate);
 		const conUniqueProp = con.ticket.properties[uniquePropName];
 
 		fed.ticket = ServiceHelper.generateTicket(template);
 		fed.ticket.properties[requiredImagePropName] = FS.readFileSync(image, { encoding: 'base64' });
+		fed.ticket.properties[imageListPropName] = [FS.readFileSync(image, { encoding: 'base64' })];
 		delete fed.ticket.properties[immutablePropWithDefaultValue];
 		fed.depTemTicket = ServiceHelper.generateTicket(deprecatedTemplate);
 		const fedUniqueProp = fed.ticket.properties[uniquePropName];
@@ -827,6 +835,7 @@ const testUpdateTicket = () => {
 				['the update data conforms to the template but the user is a viewer', { ...baseRouteParams, key: users.viewer.apiKey }, false, templates.notAuthorized, { title: ServiceHelper.generateRandomString() }],
 				['the update data conforms to the template even if the template is deprecated', { ...baseRouteParams, ticket: model.depTemTicket }, true, undefined, { title: ServiceHelper.generateRandomString() }],
 				['an image property is updated', baseRouteParams, true, undefined, { title: ServiceHelper.generateRandomString(), properties: { [imagePropName]: FS.readFileSync(image, { encoding: 'base64' }) } }],
+				['an image list property is updated', baseRouteParams, true, undefined, { title: ServiceHelper.generateRandomString(), properties: { [imageListPropName]: [FS.readFileSync(image, { encoding: 'base64' })] } }],
 			];
 		};
 
@@ -866,6 +875,7 @@ const testUpdateTicket = () => {
 						...(payloadChanges?.properties ?? {}),
 						[imagePropName]: updatedTicket.properties[imagePropName],
 						[requiredImagePropName]: updatedTicket.properties[requiredImagePropName],
+						[imageListPropName]: updatedTicket.properties[imageListPropName],
 					};
 
 					expect(updatedTicket).toEqual(expectedUpdatedTicket);

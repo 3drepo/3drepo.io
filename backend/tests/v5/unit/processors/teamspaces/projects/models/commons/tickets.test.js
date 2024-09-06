@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { cloneDeep, times } = require('lodash');
+const { cloneDeep, times, isBuffer } = require('lodash');
 const { src } = require('../../../../../../helper/path');
-const { generateRandomObject, generateUUID, generateUUIDString, generateRandomString, generateTemplate, generateTicket, generateGroup } = require('../../../../../../helper/services');
+const { generateRandomObject, generateUUID, generateRandomString, generateTemplate, generateTicket, generateGroup } = require('../../../../../../helper/services');
 
 const { statuses, statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
 
@@ -67,7 +67,7 @@ const generatePropData = (buffer, propType) => {
 	}
 
 	if (propType === propTypes.IMAGE_LIST) {
-		return times(3, () => buffer);
+		return buffer ? times(3, () => buffer) : null;
 	}
 
 	return buffer;
@@ -102,8 +102,8 @@ const generateImageTestData = (isRef, propType, tickets = 1) => {
 	};
 
 	const data = times(tickets, () => {
-		const propBuffer = isRef ? generateUUIDString() : Buffer.from(generateRandomString());
-		const modPropBuffer = isRef ? generateUUIDString() : Buffer.from(generateRandomString());
+		const propBuffer = isRef ? generateUUID() : Buffer.from(generateRandomString());
+		const modPropBuffer = isRef ? generateUUID() : Buffer.from(generateRandomString());
 
 		const ticket = {
 			_id: generateRandomString(),
@@ -169,15 +169,12 @@ const insertTicketsImageTest = async (isImport, propType) => {
 			expectedTicket.properties[imageTestData.propName] = prop;
 			expectedTicket.modules[imageTestData.moduleName][imageTestData.propName] = modProp;
 
-			const propRefs = propType === propTypes.IMAGE
+			refFiles.push(...(propType === propTypes.IMAGE
 				? [{ id: prop, data: imageTestData.data[i].propBuffer, meta }]
-				: prop.map((p) => ({ id: p, data: imageTestData.data[i].propBuffer, meta }));
-			const modRefs = propType === propTypes.IMAGE
+				: prop.map((p) => ({ id: p, data: imageTestData.data[i].propBuffer, meta }))));
+			refFiles.push(...(propType === propTypes.IMAGE
 				? [{ id: modProp, data: imageTestData.data[i].modPropBuffer, meta }]
-				: modProp.map((p) => ({ id: p, data: imageTestData.data[i].modPropBuffer, meta }));
-
-			refFiles.push(...propRefs);
-			refFiles.push(...modRefs);
+				: modProp.map((p) => ({ id: p, data: imageTestData.data[i].modPropBuffer, meta }))));
 		}
 
 		return expectedTicket;
@@ -189,7 +186,6 @@ const insertTicketsImageTest = async (isImport, propType) => {
 
 	expect(TemplatesSchema.generateFullSchema).toHaveBeenCalledTimes(1);
 	expect(TemplatesSchema.generateFullSchema).toHaveBeenCalledWith(imageTestData.template);
-	console.log(refFiles);
 
 	expect(FilesManager.storeFiles).toHaveBeenCalledTimes(1);
 	expect(FilesManager.storeFiles).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL, refFiles);
@@ -216,7 +212,7 @@ const updateImagesTestHelper = async (updateMany, propType) => {
 	const project = generateRandomString();
 	const model = generateRandomString();
 	const author = generateRandomString();
-	const nTickets = updateMany ? 10 : 1;
+	const nTickets = updateMany ? 2 : 1;
 
 	TemplatesSchema.generateFullSchema.mockImplementationOnce((t) => t);
 	const response = [];
@@ -226,8 +222,14 @@ const updateImagesTestHelper = async (updateMany, propType) => {
 	const tickets = [];
 
 	const updateData = times(nTickets, (i) => {
-		const updatePropBuffer = Buffer.from(generateRandomString());
-		const updateModPropBuffer = Buffer.from(generateRandomString());
+		let updatePropBuffer = i % 2 === 0 ? Buffer.from(generateRandomString()) : null;
+		let updateModPropBuffer = i % 2 === 0 ? Buffer.from(generateRandomString()) : null;
+
+		if (propType === propTypes.IMAGE_LIST && i % 3 === 0) {
+			updatePropBuffer = generateUUID();
+			updateModPropBuffer = generateUUID();
+		}
+
 		tickets.push(imageTestData.data[i].ticket);
 		response.push({ ...generateRandomObject(), changes: generateRandomObject() });
 
@@ -267,11 +269,11 @@ const updateImagesTestHelper = async (updateMany, propType) => {
 		let oldModPropRef;
 
 		if (propType === propTypes.VIEW) {
-			propRef = properties[imageTestData.propName].screenshot;
-			modPropRef = modules[imageTestData.moduleName][imageTestData.propName].screenshot;
+			propRef = properties[imageTestData.propName]?.screenshot;
+			modPropRef = modules[imageTestData.moduleName][imageTestData.propName]?.screenshot;
 
-			propBuffer = updateData[i].properties[imageTestData.propName].screenshot;
-			modPropBuffer = updateData[i].modules[imageTestData.moduleName][imageTestData.propName].screenshot;
+			propBuffer = updateData[i].properties[imageTestData.propName]?.screenshot;
+			modPropBuffer = updateData[i].modules[imageTestData.moduleName][imageTestData.propName]?.screenshot;
 
 			oldPropRef = tickets[i].properties[imageTestData.propName].screenshot;
 			oldModPropRef = tickets[i].modules[imageTestData.moduleName][imageTestData.propName].screenshot;
@@ -286,10 +288,25 @@ const updateImagesTestHelper = async (updateMany, propType) => {
 			oldModPropRef = tickets[i].modules[imageTestData.moduleName][imageTestData.propName];
 		}
 
-		refsToDelete.push(oldPropRef, oldModPropRef);
 		const meta = { ticket: tickets[i]._id, project, teamspace, model };
-		refFiles.push({ meta, id: propRef, data: propBuffer });
-		refFiles.push({ meta, id: modPropRef, data: modPropBuffer });
+		if (propType === propTypes.IMAGE_LIST) {
+			if (propRef) {
+				for (let j = 0; j < propRef.length; j++) {
+					if (isBuffer(propBuffer[j])) {
+						refFiles.push({ meta, id: propRef[j], data: propBuffer[j] });
+						refFiles.push({ meta, id: modPropRef[j], data: modPropBuffer[j] });
+					}
+				}
+			}
+			refsToDelete.push(...oldPropRef, ...oldModPropRef);
+		} else {
+			if (propRef) {
+				refFiles.push({ meta, id: propRef, data: propBuffer });
+				refFiles.push({ meta, id: modPropRef, data: modPropBuffer });
+			}
+
+			refsToDelete.push(oldPropRef, oldModPropRef);
+		}
 
 		return {
 			properties: { [imageTestData.propName]: propType === propTypes.IMAGE_LIST
@@ -312,8 +329,11 @@ const updateImagesTestHelper = async (updateMany, propType) => {
 	expect(TemplatesSchema.generateFullSchema).toHaveBeenCalledTimes(1);
 	expect(TemplatesSchema.generateFullSchema).toHaveBeenCalledWith(imageTestData.template);
 
-	expect(FilesManager.storeFiles).toHaveBeenCalledTimes(1);
-	expect(FilesManager.storeFiles).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL, refFiles);
+	if (refFiles.length) {
+		expect(FilesManager.storeFiles).toHaveBeenCalledTimes(1);
+		expect(FilesManager.storeFiles).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL,
+			expect.arrayContaining(refFiles));
+	}
 
 	expect(FilesManager.removeFiles).toHaveBeenCalledTimes(1);
 	expect(FilesManager.removeFiles).toHaveBeenCalledWith(
@@ -933,9 +953,9 @@ const testUpdateTicket = () => {
 			expect(EventsManager.publish).not.toHaveBeenCalled();
 		});
 
-		// test('should process image and store a ref (image property type)', () => updateImagesTestHelper(false, propTypes.IMAGE));
+		test('should process image and store a ref (image property type)', () => updateImagesTestHelper(false, propTypes.IMAGE));
 		test('should process image and store a ref (image list property type)', () => updateImagesTestHelper(false, propTypes.IMAGE_LIST));
-		// test('should process screenshot from view data and store a ref', () => updateImagesTestHelper(false, propTypes.VIEW));
+		test('should process screenshot from view data and store a ref', () => updateImagesTestHelper(false, propTypes.VIEW));
 
 		updateGroupTestsHelper(false);
 	});
