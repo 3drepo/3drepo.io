@@ -20,6 +20,7 @@ import { createBrowserHistory } from 'history';
 import { applyMiddleware, compose, createStore } from 'redux';
 
 import createSagaMiddleware from 'redux-saga';
+import { setStore } from '@/v5/helpers/store.helpers';
 import { IS_DEVELOPMENT } from '../constants/environment';
 import createReducer from './reducers';
 
@@ -60,6 +61,9 @@ function configureStore() {
 
 export const store = configureStore();
 
+
 export const dispatch = store.dispatch;
 
 export const getState = store.getState;
+
+setStore(store);

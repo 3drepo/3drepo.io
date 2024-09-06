@@ -29,8 +29,8 @@ export const selectDrawings = createSelector(
 	selectDrawingsDomain,
 	selectCurrentProject,
 	selectRevisionsByDrawing, // This selector is used here to recalculate the value after the revisions are fetched
-	(state, currentProject, revisionsByDrawing) => 
-		(state.drawingsByProject[currentProject] ?? []).map((drawing) => fullDrawing(drawing as any, revisionsByDrawing)),
+	(state, currentProject) => 
+		(state.drawingsByProject[currentProject] ?? []).map((drawing) => fullDrawing(drawing as any)),
 );
 
 export const selectFavouriteDrawings = createSelector(
