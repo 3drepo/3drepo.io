@@ -250,6 +250,9 @@ const testSignUp = () => {
 		});
 
 		test('should generate a password sign a user up and fire VERIFY_USER event (SSO user)', async () => {
+			jest.useFakeTimers('modern');
+			jest.setSystemTime(new Date(2020, 3, 1));
+
 			const sso = { id: generateRandomString() };
 			await Users.signUp({ ...newUserData, sso });
 			expect(UsersModel.addUser).toHaveBeenCalledTimes(1);
@@ -266,7 +269,10 @@ const testSignUp = () => {
 				fullName: `${newUserData.firstName} ${newUserData.lastName}`,
 				company: newUserData.company,
 				mailListOptOut: newUserData.mailListOptOut,
+				createdAt: new Date(),
 			});
+
+			jest.useRealTimers();
 		});
 	});
 };
@@ -285,6 +291,7 @@ const testVerify = () => {
 				fullName: `${user.customData.firstName} ${user.customData.lastName}`,
 				company: user.customData.billing.billingInfo.company,
 				mailListOptOut: user.customData.mailListOptOut,
+				createdAt: user.customData.createdAt,
 			});
 		});
 	});
