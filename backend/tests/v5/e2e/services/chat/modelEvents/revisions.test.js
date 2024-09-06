@@ -20,6 +20,7 @@ const { src } = require('../../../../helper/path');
 const SuperTest = require('supertest');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
 
 const { EVENTS } = require(`${src}/services/chat/chat.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -110,6 +111,53 @@ const revisionUpdateTest = () => {
 					void: true,
 				},
 			});
+
+			socket.close();
+		});
+
+		test(`should trigger a ${EVENTS.DRAWING_REVISION_UPDATE} event when a calibration has been updated`, async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+
+			const data = { teamspace, project: project.id, model: drawing._id };
+			await ServiceHelper.socket.joinRoom(socket, data);
+
+			const socketPromise = new Promise((resolve, reject) => {
+				socket.on(EVENTS.DRAWING_REVISION_UPDATE, resolve);
+				setTimeout(reject, 1000);
+			});
+
+			const calibration = {
+				horizontal: {
+					model: [[0, 0, 0], [1, 1, 1]],
+					drawing: [[0, 0], [1, 1]],
+				},
+				verticalRange: [0, 10],
+				units: 'm',
+			};
+
+			await agent.post(`/v5/teamspaces/${teamspace}/projects/${project.id}/drawings/${drawing._id}/revisions/${drawingRevision._id}/calibrations?key=${user.apiKey}`)
+				.send(calibration)
+				.expect(templates.ok.status);
+
+			await expect(socketPromise).resolves.toEqual({
+				...data,
+				data: {
+					_id: drawingRevision._id,
+					calibration: calibrationStatuses.CALIBRATED,
+				},
+			});
+
+			// calibrating an already calibrated drawing should not trigger the event anymore
+			const socketPromise2 = new Promise((resolve, reject) => {
+				socket.on(EVENTS.DRAWING_REVISION_UPDATE, resolve);
+				setTimeout(reject, 1000);
+			});
+
+			await agent.post(`/v5/teamspaces/${teamspace}/projects/${project.id}/drawings/${drawing._id}/revisions/${drawingRevision._id}/calibrations?key=${user.apiKey}`)
+				.send(calibration)
+				.expect(templates.ok.status);
+
+			await expect(socketPromise2).rejects.toBeUndefined();
 
 			socket.close();
 		});
