@@ -139,7 +139,7 @@ const testGetRevisions = () => {
 			const res = await Revisions.getRevisions(teamspace, project, model,
 				modelTypes.CONTAINER, false, projection, sort);
 			expect(res).toEqual(nonVoidRevisions);
-			checkResults(fn, false, projection, sort);
+			checkResults(fn, false, modelTypes.CONTAINER, projection, sort);
 		});
 
 		test('Should return an empty object if there are no revisions', async () => {
