@@ -19,8 +19,13 @@ import { createStore, combineReducers, applyMiddleware, Action } from 'redux';
 import reducers from '@/v5/store/reducers';
 import createSagaMiddleware from 'redux-saga';
 import rootSaga from '@/v4/modules/sagas';
-import { isEqual } from 'lodash';
+import { isEqual, isFunction } from 'lodash';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
+
+
+export type WaitActionCallback = ((state?: object, action?:Action, previousState?: object) => boolean);
+export type WaitAction = (Action | string | WaitActionCallback) ;
+export type WaitForActions = (dispatchingfunction: () => any, waitActions: WaitAction[], debugActions?: boolean) => void;
 
 // A different Node version between the backend and the frontend
 // is causing a problem with axios when files are sent to an endpoint.
@@ -35,41 +40,54 @@ export const spyOnAxiosApiCallWithFile = (api, method) => {
 };
 
 export const createTestStore = () => {
-	let waitingActions: Action[] | string[] = [];
+	let waitingActions: WaitAction[] = [];
 	let resolvePromise;
+	let debugActions = false;
 
 	const sagaMiddleware = createSagaMiddleware();
 	const middlewares = applyMiddleware(sagaMiddleware);
 
-	const discountMatchingActions =  (action: Action) => {
+	const discountMatchingActions =  (state: object, action: Action, previousState: object) => {
 		const waitingAction = waitingActions[0];
 	
-		if (action.type === waitingAction || isEqual(waitingAction, action)) {
+		const successStep = isFunction(waitingAction) ? waitingAction(state, action, previousState) : false;
+
+		if (action.type === waitingAction || isEqual(waitingAction, action) || successStep) {
 			waitingActions.shift();
 		}
 	
 		return waitingActions.length === 0;
 	};
 
-	const store = createStore(combineReducers(
-		{
-			...reducers,
-			spyActions: (state, action) => {
+	const mainReducer = combineReducers(reducers);
 
-				if (discountMatchingActions(action) && resolvePromise) {
-					resolvePromise(true);
-					resolvePromise = null;
-				}
-				return {};
-			}
+
+	const store = createStore((state: any, action) =>{
+		const st = mainReducer(state, action);		
+
+		if (debugActions) {
+			console.log(JSON.stringify({
+				dispatchedAction: action,
+				waitingAction: waitingActions[0],
+			}, null, '\t'));
 		}
-	), middlewares);
+
+		if (discountMatchingActions(st, action, state) && resolvePromise) {
+			resolvePromise(true);
+			resolvePromise = null;
+		}
+		
+		return st;
+	}		
+	, middlewares);
 	
-	const waitForActions = (func, waitActions) =>  { 
+	const waitForActions:WaitForActions = (dispatchingfunction, waitActions, debug?: boolean) =>  { 
 		waitingActions = waitActions;
 		const { resolve, promiseToResolve } = getWaitablePromise();
 		resolvePromise = resolve;
-		func();
+		dispatchingfunction();
+
+		debugActions = debug;
 		return promiseToResolve;
 	}
 

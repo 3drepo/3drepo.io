@@ -20,7 +20,7 @@ import { mockServer } from '../../internals/testing/mockServer';
 import { pick } from 'lodash';
 import { fullDrawing } from '@/v5/store/drawings/drawings.helpers';
 import { drawingMockFactory, prepareMockStats } from './drawings.fixtures';
-import { createTestStore } from '../test.helpers';
+import { createTestStore, WaitForActions } from '../test.helpers';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { selectDrawingById, selectDrawings } from '@/v5/store/drawings/drawings.selectors';
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
@@ -32,7 +32,7 @@ describe('Drawings: sagas', () => {
 	const projectId = 'projectId';
 	const drawingId = 'drawingId';
 	let onSuccess, onError;
-	let dispatch, getState, waitForActions;
+	let dispatch, getState, waitForActions: WaitForActions;
 	const mockDrawing = drawingMockFactory({ _id: drawingId }) as any;
 
 	const populateStore = (drawing = mockDrawing) => {
@@ -116,17 +116,17 @@ describe('Drawings: sagas', () => {
 		const stats = prepareMockStats();
 
 		it('should fetch drawings data', async () => {
-			const mockDrawingWithoutStats = mockDrawing;
 			const mockDrawingBaseResponse = pick(mockDrawing, ['_id', 'name', 'role', 'isFavourite']);
 
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/drawings`)
 				.reply(200, { drawings: [mockDrawingBaseResponse] });
+	
 
 			await waitForActions(() => {
 				dispatch(DrawingsActions.fetchDrawings(teamspace, projectId));
 			}, [
-				DrawingsActions.fetchDrawingsSuccess(projectId, [mockDrawingWithoutStats]),
+				DrawingsActions.fetchDrawingsSuccess(projectId, [mockDrawingBaseResponse]),
 				DrawingsActions.fetchDrawingStats(teamspace, projectId, mockDrawing._id),
 			]);
 		})

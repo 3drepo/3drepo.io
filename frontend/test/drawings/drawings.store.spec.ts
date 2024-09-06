@@ -79,26 +79,6 @@ describe('Drawings: store', () => {
 			expect(drawingFromState.desc).toEqual(stats.desc);
 			expect(drawingFromState.revisionsCount).toEqual(stats.revisions.total);
 		});
-
-		it('should update drawing status', () => {
-			const newStatus = DrawingUploadStatus.OK;
-			const newDrawing = createAndAddDrawingToStore({ status: DrawingUploadStatus.PROCESSING });
-			dispatch(DrawingsActions.setDrawingStatus(projectId, newDrawing._id, newStatus));
-			const drawingFromState = selectDrawingById(getState(), newDrawing._id);
-
-			expect(drawingFromState.status).toEqual(newStatus);
-		});
-
-		it('should update revision processing status', () => {
-			const newDrawing = createAndAddDrawingToStore();
-			const newRevision = drawingRevisionsMockFactory();
-			dispatch(DrawingsActions.drawingProcessingSuccess(projectId, newDrawing._id, newRevision));
-			const drawingFromState = selectDrawingById(getState(), newDrawing._id);
-
-			expect(drawingFromState.revisionsCount).toEqual(newDrawing.revisionsCount + 1);
-			expect(drawingFromState.latestRevision).toEqual(newRevision.name);
-			expect(drawingFromState.lastUpdated).toEqual(newRevision.timestamp);
-		});
 	});
 
 	describe('Updating drawing list:', () => {

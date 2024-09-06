@@ -139,7 +139,7 @@ export interface IDrawingsActionCreators {
 	removeFavourite: (teamspace: string, projectId: string, drawingId: string) => RemoveFavouriteAction;
 	setFavouriteSuccess: (projectId: string, drawingId: string, isFavourite: boolean) => SetFavouriteSuccessAction;
 	fetchDrawings: (teamspace: string, projectId: string) => FetchDrawingsAction;
-	fetchDrawingsSuccess: (projectId: string, drawings: IDrawing[]) => FetchDrawingsSuccessAction;
+	fetchDrawingsSuccess: (projectId: string, drawings: Partial<IDrawing>[]) => FetchDrawingsSuccessAction;
 	fetchDrawingStats: (teamspace: string, projectId: string, drawingId: string) => FetchDrawingStatsAction;
 	fetchDrawingStatsSuccess: (projectId: string, drawingId: string, stats: DrawingStats) => FetchDrawingStatsSuccessAction;
 	deleteDrawing: (teamspace: string,
