@@ -171,7 +171,7 @@ const modelSettingsUpdated = async ({ teamspace, project, model, data, sender, m
 		[modelTypes.DRAWING]: chatEvents.DRAWING_SETTINGS_UPDATE,
 	};
 
-	await createModelMessage(modelEvents[modelType], deleteIfUndefined(data), teamspace,
+	await createModelMessage(modelEvents[modelType], data, teamspace,
 		UUIDToString(project), model, sender);
 };
 
@@ -181,7 +181,7 @@ const revisionUpdated = async ({ teamspace, project, model, data, sender, modelT
 		[modelTypes.DRAWING]: chatEvents.DRAWING_REVISION_UPDATE,
 	};
 
-	await createModelMessage(modelEvents[modelType], deleteIfUndefined({ ...data, _id: UUIDToString(data._id) }),
+	await createModelMessage(modelEvents[modelType], { ...data, _id: UUIDToString(data._id) },
 		teamspace, project, model, sender);
 };
 
