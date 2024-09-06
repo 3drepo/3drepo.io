@@ -298,6 +298,8 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 				}).nullable().default(undefined);
 			} else if (type === propTypes.IMAGE) {
 				res[name] = uuidString;
+			} else if (type === propTypes.IMAGE_LIST) {
+				res[name] = Yup.array().of(uuidString);
 			}
 		});
 

@@ -19,9 +19,9 @@ const { UUIDToString, stringToUUID } = require('./uuids');
 const { fileExtensionFromBuffer, isUUID, isUUIDString } = require('./typeCheck');
 const Yup = require('yup');
 const { fileUploads } = require('../config');
+const { isBuffer } = require('lodash');
 const tz = require('countries-and-timezones');
 const zxcvbn = require('zxcvbn');
-const { isBuffer } = require('lodash');
 
 const YupHelper = { validators: {}, types: { strings: {} }, utils: {} };
 
