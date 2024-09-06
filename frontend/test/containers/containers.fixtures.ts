@@ -16,7 +16,7 @@
  */
 
 import * as faker from 'faker';
-import { ContainerUploadStatus, IContainer, ContainerStats } from '@/v5/store/containers/containers.types';
+import { UploadStatus, IContainer, ContainerStats } from '@/v5/store/containers/containers.types';
 import { EMPTY_VIEW } from './../../src/v5/store/store.helpers';
 import { ContainerSettings } from '@/v5/store/containers/containers.types';
 import { ContainerBackendSettings } from '@/v5/store/containers/containers.types';
@@ -33,7 +33,7 @@ export const containerMockFactory = (overrides?: Partial<IContainer>): IContaine
 	desc: faker.random.words(3),
 	role: faker.random.arrayElement([Role.ADMIN, Role.COLLABORATOR]),
 	type: faker.random.word(),
-	status: ContainerUploadStatus.OK,
+	status: UploadStatus.OK,
 	code: faker.datatype.uuid(),
 	isFavourite: faker.datatype.boolean(),
 	hasStatsPending: true,
@@ -64,7 +64,7 @@ export const prepareMockStats = (overrides?: Partial<ContainerStats>): Container
 		latestRevision: faker.random.word(),
 	},
 	type: faker.random.word(),
-	status: ContainerUploadStatus.OK,
+	status: UploadStatus.OK,
 	unit: faker.random.arrayElement(['mm', 'cm', 'dm', 'm', 'ft']),
 	code: faker.datatype.uuid(),
 	...overrides,

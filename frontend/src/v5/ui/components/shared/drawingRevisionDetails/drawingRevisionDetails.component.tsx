@@ -23,7 +23,6 @@ import ArrowUpCircleIcon from '@assets/icons/filled/arrow_up_circle-filled.svg';
 import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors, DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
-import { DrawingUploadStatus } from '@/v5/store/drawings/drawings.types';
 import { canUploadToBackend } from '@/v5/store/drawings/drawings.helpers';
 import { uploadToDrawing } from '@/v5/ui/routes/dashboard/projects/drawings/uploadDrawingRevisionForm/uploadDrawingRevisionForm.helpers';
 import { SkeletonListItem } from '../revisionDetails/components/skeletonListItem/skeletonListItem.component';
@@ -46,11 +45,12 @@ import { RevisionsListItemAuthor } from '../revisionDetails/components/revisions
 import { RevisionsListItemTag } from '../revisionDetails/components/revisionsListItem/revisionsListItem.styles';
 import { IDrawingRevision } from '@/v5/store/drawings/revisions/drawingRevisions.types';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
+import { UploadStatus } from '@/v5/store/containers/containers.types';
 
 interface IDrawingRevisionDetails {
 	drawingId: string;
 	revisionsCount: number;
-	status?: DrawingUploadStatus;
+	status?: UploadStatus;
 }
 export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: IDrawingRevisionDetails): JSX.Element => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();

@@ -19,12 +19,13 @@ import { Constants } from '@/v5/helpers/actions.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { TeamspaceAndProjectId, ProjectId, ProjectAndDrawingId, TeamspaceProjectAndDrawingId, SuccessAndErrorCallbacks } from '../store.types';
-import { IDrawing, DrawingStats, DrawingUploadStatus, NewDrawing, CalibrationStates, MinimumDrawing } from './drawings.types';
+import { IDrawing, DrawingStats, NewDrawing, CalibrationStates, MinimumDrawing } from './drawings.types';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import { IDrawingRevision } from './revisions/drawingRevisions.types';
 import { prepareSingleDrawingData } from './drawings.helpers';
 import { Role } from '../currentUser/currentUser.types';
+import { UploadStatus } from '../containers/containers.types';
 
 export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions({
 	addFavourite: ['teamspace', 'projectId', 'drawingId'],
@@ -80,7 +81,7 @@ export const createDrawingSuccess = (state: DrawingsState, { projectId, drawing 
 		...drawing,
 		revisionsCount: 0,
 		calibration: CalibrationStates.EMPTY,
-		status: DrawingUploadStatus.OK,
+		status: UploadStatus.OK,
 		isFavourite: false,
 		role: Role.ADMIN,
 	}]);
@@ -160,7 +161,7 @@ export type CreateDrawingAction = Action<'CREATE_DRAWING'> & TeamspaceAndProject
 export type CreateDrawingSuccessAction = Action<'CREATE_DRAWING_SUCCESS'> &  ProjectId & { drawing: NewDrawing };
 export type UpdateDrawingAction = Action<'UPDATE_DRAWING'> & TeamspaceProjectAndDrawingId & SuccessAndErrorCallbacks & { drawing: Partial<MinimumDrawing> };
 export type UpdateDrawingSuccessAction = Action<'UPDATE_DRAWING_SUCCESS'> &  TeamspaceProjectAndDrawingId & { drawing: Partial<MinimumDrawing> };
-export type SetDrawingStatusAction = Action<'SET_DRAWING_STATUS'> & ProjectAndDrawingId & { status: DrawingUploadStatus };
+export type SetDrawingStatusAction = Action<'SET_DRAWING_STATUS'> & ProjectAndDrawingId & { status: UploadStatus };
 export type DrawingProcessingSuccessAction = Action<'DRAWING_PROCESSING_SUCCESS'> & ProjectAndDrawingId & { revision: IDrawingRevision };
 export type ResetDrawingStatsQueueAction = Action<'RESET_CONTAINER_STATS_QUEUE'>;
 
@@ -183,7 +184,7 @@ export interface IDrawingsActionCreators {
 	fetchTypesSuccess: (projectId: string, types: string[]) => FetchTypesSuccessAction;
 	createDrawing: (teamspace: string, projectId: string, drawing: NewDrawing, onSuccess: () => void, onError: (e:Error) => void) => CreateDrawingAction;
 	createDrawingSuccess: (projecId: string, drawing: NewDrawing) => CreateDrawingSuccessAction;
-	setDrawingStatus: (projectId: string, drawingId: string, status: DrawingUploadStatus) => SetDrawingStatusAction;
+	setDrawingStatus: (projectId: string, drawingId: string, status: UploadStatus) => SetDrawingStatusAction;
 	updateDrawing: (
 		teamspace: string, 
 		projectId: string, 

@@ -23,7 +23,7 @@ import ArrowUpCircleIcon from '@assets/icons/filled/arrow_up_circle-filled.svg';
 import { ContainerRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ProjectsHooksSelectors, ContainerRevisionsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
-import { ContainerUploadStatus } from '@/v5/store/containers/containers.types';
+import { UploadStatus } from '@/v5/store/containers/containers.types';
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
 import { uploadToContainer } from '@/v5/ui/routes/dashboard/projects/containers/uploadContainerRevisionForm/uploadContainerRevisionForm.helpers';
 import { SkeletonListItem } from '../revisionDetails/components/skeletonListItem/skeletonListItem.component';
@@ -51,7 +51,7 @@ import { formatDateTime } from '@/v5/helpers/intl.helper';
 interface IContainerRevisionDetails {
 	containerId: string;
 	revisionsCount: number;
-	status?: ContainerUploadStatus
+	status?: UploadStatus
 }
 
 export const ContainerRevisionDetails = ({ containerId, revisionsCount, status }: IContainerRevisionDetails): JSX.Element => {

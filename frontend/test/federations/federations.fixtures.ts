@@ -16,7 +16,7 @@
  */
 
 import * as faker from 'faker';
-import { ContainerUploadStatus } from '@/v5/store/containers/containers.types';
+import { UploadStatus } from '@/v5/store/containers/containers.types';
 import {
 	FederationBackendSettings,
 	FederationSettings,
@@ -47,7 +47,7 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 	desc: faker.random.words(3),
 	role: faker.random.arrayElement([Role.ADMIN, Role.COLLABORATOR]),
 	lastUpdated: faker.date.past(2),
-	status: ContainerUploadStatus.OK,
+	status: UploadStatus.OK,
 	code: faker.datatype.uuid(),
 	category: faker.random.words(2),
 	containers: [groupedContainerMockFactory()],
@@ -75,7 +75,7 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 export const prepareMockStats = (overrides?: Partial<IFederation>) => ({
 	code: faker.datatype.uuid(),
 	desc: faker.random.words(3),
-	status: ContainerUploadStatus.OK,
+	status: UploadStatus.OK,
 	containers: [groupedContainerMockFactory()],
 	tickets: {
 		issues: faker.datatype.number(),

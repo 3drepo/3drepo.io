@@ -16,7 +16,7 @@
  */
 
 import {
-	ContainerUploadStatus,
+	UploadStatus,
 	IContainer,
 	ContainerStats,
 	MinimumContainer,
@@ -27,10 +27,10 @@ import { getNullableDate } from '@/v5/helpers/getNullableDate';
 
 export const CONTAINERS_SEARCH_FIELDS = ['code', 'type', 'name', 'desc', 'latestRevision'];
 
-export const canUploadToBackend = (status?: ContainerUploadStatus): boolean => {
+export const canUploadToBackend = (status?: UploadStatus): boolean => {
 	const statusesForUpload = [
-		ContainerUploadStatus.OK,
-		ContainerUploadStatus.FAILED,
+		UploadStatus.OK,
+		UploadStatus.FAILED,
 	];
 
 	return statusesForUpload.includes(status);
@@ -46,7 +46,7 @@ export const prepareSingleContainerData = (
 	latestRevision: stats?.revisions.latestRevision ?? '',
 	type: stats?.type ?? '',
 	code: stats?.code ?? '',
-	status: stats?.status ?? ContainerUploadStatus.OK,
+	status: stats?.status ?? UploadStatus.OK,
 	unit: stats?.unit ?? '',
 	hasStatsPending: !stats,
 	errorReason: stats?.errorReason && {

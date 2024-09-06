@@ -19,7 +19,7 @@ import { ContainersActions } from '@/v5/store/containers/containers.redux';
 import { selectCanUploadToProject, selectContainerById, selectContainers, selectFavouriteContainers, selectHasCollaboratorAccess, selectHasCommenterAccess } from '@/v5/store/containers/containers.selectors';
 import { times } from 'lodash';
 import { containerMockFactory, prepareMockSettingsReply, prepareMockStats, prepareMockViews } from './containers.fixtures';
-import { NewContainer, ContainerUploadStatus } from '@/v5/store/containers/containers.types';
+import { NewContainer, UploadStatus } from '@/v5/store/containers/containers.types';
 import { containerRevisionsMockFactory } from './containerRevisions/containerRevisions.fixtures';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { createTestStore, listContainsElementWithId } from '../test.helpers';
@@ -79,8 +79,8 @@ describe('Containers: store', () => {
 		});
 
 		it('should update container status', () => {
-			const newStatus = ContainerUploadStatus.OK;
-			const newContainer = createAndAddContainerToStore({ status: ContainerUploadStatus.GENERATING_BUNDLES });
+			const newStatus = UploadStatus.OK;
+			const newContainer = createAndAddContainerToStore({ status: UploadStatus.GENERATING_BUNDLES });
 			dispatch(ContainersActions.setContainerStatus(projectId, newContainer._id, newStatus));
 			const containerFromState = selectContainerById(getState(), newContainer._id);
 

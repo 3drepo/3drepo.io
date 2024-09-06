@@ -18,7 +18,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { Role } from '../currentUser/currentUser.types';
 import { SurveyPoint, View } from '../store.types';
 
-export enum ContainerUploadStatus {
+export enum UploadStatus {
 	OK = 'ok',
 	FAILED = 'failed',
 	UPLOADING = 'uploading',
@@ -116,7 +116,7 @@ export interface IContainer extends MinimumContainer {
 	lastUpdated: Date;
 	type: string;
 	code: string;
-	status: ContainerUploadStatus;
+	status: UploadStatus;
 	hasStatsPending: boolean;
 	errorReason?: {
 		message: string;
@@ -150,7 +150,7 @@ export type ContainerStats = {
 		message: string;
 		timestamp: number;
 	};
-	status: ContainerUploadStatus;
+	status: UploadStatus;
 	unit: string;
 	code: string;
 };
@@ -160,7 +160,7 @@ export type ContainerBackendSettings = {
 	desc?: string;
 	name?: string;
 	surveyPoints?: SurveyPoint[];
-	status?: ContainerUploadStatus;
+	status?: UploadStatus;
 	timestamp?: number;
 	type?: string;
 	angleFromNorth?: number;

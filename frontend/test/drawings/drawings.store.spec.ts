@@ -19,11 +19,12 @@ import { DrawingsActions } from '@/v5/store/drawings/drawings.redux';
 import { selectCanUploadToProject, selectDrawingById, selectDrawings, selectFavouriteDrawings, selectHasCollaboratorAccess, selectHasCommenterAccess } from '@/v5/store/drawings/drawings.selectors';
 import { times } from 'lodash';
 import { drawingMockFactory, prepareMockStats } from './drawings.fixtures';
-import { NewDrawing, DrawingUploadStatus } from '@/v5/store/drawings/drawings.types';
+import { NewDrawing } from '@/v5/store/drawings/drawings.types';
 import { drawingRevisionsMockFactory } from './drawingRevisions/drawingRevisions.fixtures';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { createTestStore, listContainsElementWithId } from '../test.helpers';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
+import { UploadStatus } from '@/v5/store/containers/containers.types';
 
 describe('Drawings: store', () => {
 	let dispatch, getState;
@@ -81,8 +82,8 @@ describe('Drawings: store', () => {
 		});
 
 		it('should update drawing status', () => {
-			const newStatus = DrawingUploadStatus.OK;
-			const newDrawing = createAndAddDrawingToStore({ status: DrawingUploadStatus.PROCESSING });
+			const newStatus = UploadStatus.OK;
+			const newDrawing = createAndAddDrawingToStore({ status: UploadStatus.PROCESSING });
 			dispatch(DrawingsActions.setDrawingStatus(projectId, newDrawing._id, newStatus));
 			const drawingFromState = selectDrawingById(getState(), newDrawing._id);
 
