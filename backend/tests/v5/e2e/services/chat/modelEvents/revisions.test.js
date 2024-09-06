@@ -135,7 +135,6 @@ const revisionUpdateTest = () => {
 				data: {
 					_id: drawingRevision._id,
 					void: true,
-					calibration: calibrationStatuses.UNCALIBRATED,
 				},
 			});
 

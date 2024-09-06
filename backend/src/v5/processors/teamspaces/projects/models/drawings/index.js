@@ -15,19 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { UUIDToString, generateUUID } = require('../../../../../utils/helper/uuids');
 const { addDrawingThumbnailRef, deleteModelRevisions, getLatestRevision,
 	getRevisionByIdOrTag, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../../models/revisions');
 const { addModel, getModelList } = require('../commons/modelList');
 const { appendFavourites, deleteFavourites } = require('../commons/favourites');
+const { deleteDrawingCalibrations, getCalibrationForMultipleRevisions } = require('../../../../../models/calibrations');
 const { deleteModel, getDrawingById, getDrawings, updateModelSettings } = require('../../../../../models/modelSettings');
-const { getCalibration, getCalibrationStatus } = require('./calibrations');
 const { getFile, getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../../../services/filesManager');
 const { getProjectById, removeModelFromProject } = require('../../../../../models/projectSettings');
 const { DRAWINGS_HISTORY_COL } = require('../../../../../models/revisions.constants');
+const { calibrationStatuses } = require('../../../../../models/calibrations.constants');
 const { createThumbnail } = require('../../../../../utils/helper/images');
-const { deleteDrawingCalibrations } = require('../../../../../models/calibrations');
 const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
-const { generateUUID } = require('../../../../../utils/helper/uuids');
+const { getCalibration } = require('./calibrations');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { processDrawingUpload } = require('../../../../../services/modelProcessing');
 const { templates } = require('../../../../../utils/responseCodes');
@@ -95,12 +96,23 @@ Drawings.getRevisions = async (teamspace, project, drawing, showVoid) => {
 	const revisions = await getRevisions(teamspace, project, drawing, modelTypes.DRAWING, showVoid,
 		{ _id: 1, author: 1, format: 1, timestamp: 1, statusCode: 1, revCode: 1, void: 1, desc: 1 });
 
-	const formattedRevs = await Promise.all(revisions.map(async (rev) => {
-		const calibration = await getCalibrationStatus(teamspace, project, drawing, rev._id);
-		return { ...rev, calibration };
-	}));
+	let calibrationsFound = false;
+	const calibrations = await getCalibrationForMultipleRevisions(teamspace, revisions.map((r) => r._id), { _id: 1 });
 
-	return formattedRevs;
+	for (let i = revisions.length; i > 0; i--) {
+		const revision = revisions[i - 1];
+		const revCalibration = calibrations.find((c) => UUIDToString(c._id) === UUIDToString(revision._id));
+
+		if (revCalibration) {
+			calibrationsFound = true;
+			revision.calibration = calibrationStatuses.CALIBRATED;
+		} else {
+			revision.calibration = calibrationsFound
+				? calibrationStatuses.UNCONFIRMED : calibrationStatuses.UNCALIBRATED;
+		}
+	}
+
+	return revisions;
 };
 
 Drawings.newRevision = processDrawingUpload;

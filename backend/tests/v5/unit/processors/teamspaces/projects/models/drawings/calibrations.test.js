@@ -18,7 +18,6 @@
 const { times } = require('lodash');
 const { src } = require('../../../../../../helper/path');
 const { determineTestGroup, generateRandomString, generateRandomObject, generateRandomDate } = require('../../../../../../helper/services');
-const { calibrationStatuses } = require('../../../../../../../../src/v5/models/calibrations.constants');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
@@ -27,6 +26,12 @@ jest.mock('../../../../../../../../src/v5/models/calibrations');
 const CalibrationsModel = require(`${src}/models/calibrations`);
 jest.mock('../../../../../../../../src/v5/models/revisions');
 const RevisionsModel = require(`${src}/models/revisions`);
+
+jest.mock('../../../../../../../../src/v5/services/eventsManager/eventsManager');
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+
+const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
 
 const Calibrations = require(`${src}/processors/teamspaces/projects/models/drawings/calibrations`);
 
@@ -202,7 +207,52 @@ const testGetCalibrationStatus = () => {
 	});
 };
 
+const testAddCalibration = () => {
+	describe('Add Calibration', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const drawing = generateRandomString();
+		const revision = generateRandomString();
+		const createdBy = generateRandomString();
+		const calibration = generateRandomObject();
+
+		test('should add a new calibration', async () => {
+			CalibrationsModel.getCalibration.mockResolvedValueOnce(calibration);
+
+			await expect(Calibrations.addCalibration(teamspace, project, drawing, revision, createdBy, calibration));
+
+			expect(CalibrationsModel.addCalibration).toHaveBeenCalledTimes(1);
+			expect(CalibrationsModel.addCalibration).toHaveBeenCalledWith(teamspace, project, drawing, revision,
+				createdBy, calibration);
+			expect(CalibrationsModel.getCalibration).toHaveBeenCalledTimes(1);
+			expect(CalibrationsModel.getCalibration).toHaveBeenCalledWith(teamspace, project, drawing,
+				revision, { _id: 1 });
+			expect(EventsManager.publish).not.toHaveBeenCalled();
+		});
+
+		test('should add a new calibration and fire REVISION_UPDATED', async () => {
+			CalibrationsModel.getCalibration.mockResolvedValueOnce(null);
+
+			await expect(Calibrations.addCalibration(teamspace, project, drawing, revision, createdBy, calibration));
+
+			expect(CalibrationsModel.addCalibration).toHaveBeenCalledTimes(1);
+			expect(CalibrationsModel.addCalibration).toHaveBeenCalledWith(teamspace, project, drawing, revision,
+				createdBy, calibration);
+			expect(CalibrationsModel.getCalibration).toHaveBeenCalledTimes(1);
+			expect(CalibrationsModel.getCalibration).toHaveBeenCalledWith(teamspace, project, drawing,
+				revision, { _id: 1 });
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.REVISION_UPDATED, { teamspace,
+				project,
+				model: drawing,
+				modelType: modelTypes.DRAWING,
+				data: { _id: revision, calibration: calibrationStatuses.CALIBRATED } });
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetCalibration();
 	testGetCalibrationStatus();
+	testAddCalibration();
 });

@@ -66,11 +66,13 @@ Models.addModel = async (teamspace, project, data) => {
 		type: data.type,
 	});
 
-	publish(events.NEW_MODEL, { teamspace,
+	publish(events.NEW_MODEL, {
+		teamspace,
 		project,
 		model: _id,
 		data: eventData,
-		modelType });
+		modelType,
+	});
 
 	return _id;
 };
@@ -167,14 +169,16 @@ Models.updateModelStatus = async (teamspace, project, model, status, revId) => {
 
 	const modelData = await findOneAndUpdateModel(teamspace, query, { $set: updateObj }, { federate: 1, modelType: 1 });
 	if (modelData) {
-	// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
-	// trigger notifications.
+		// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
+		// trigger notifications.
 
-		publish(events.MODEL_SETTINGS_UPDATE, { teamspace,
+		publish(events.MODEL_SETTINGS_UPDATE, {
+			teamspace,
 			project,
 			model,
 			data: { status },
-			modelType: getModelType(modelData) });
+			modelType: getModelType(modelData),
+		});
 	}
 };
 
@@ -201,12 +205,18 @@ Models.newRevisionProcessed = async (teamspace, project, model, revId,
 
 	const updated = await updateOneModel(teamspace, query, { $set: set, $unset: unset });
 	if (updated) {
-	// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
-	// trigger notifications.
+		// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
+		// trigger notifications.
+		const data = { ...set, status: set.status || 'ok' };
+		if (data.subModels) {
+			data.containers = data.subModels;
+			delete data.subModels;
+		}
 
 		const modelType = containers ? modelTypes.FEDERATION : modelTypes.CONTAINER;
 		publish(events.MODEL_IMPORT_FINISHED,
-			{ teamspace,
+			{
+				teamspace,
 				project,
 				model,
 				success,
@@ -215,19 +225,9 @@ Models.newRevisionProcessed = async (teamspace, project, model, revId,
 				revId,
 				errCode: retVal,
 				user,
-				modelType });
-
-		const data = { ...set, status: set.status || 'ok' };
-		if (data.subModels) {
-			data.containers = data.subModels;
-			delete data.subModels;
-		}
-
-		publish(events.MODEL_SETTINGS_UPDATE, { teamspace,
-			project,
-			model,
-			data,
-			modelType });
+				modelType,
+				data,
+			});
 	}
 };
 
@@ -267,11 +267,13 @@ Models.updateModelSettings = async (teamspace, project, model, data) => {
 			throw templates.modelNotFound;
 		}
 
-		publish(events.MODEL_SETTINGS_UPDATE, { teamspace,
+		publish(events.MODEL_SETTINGS_UPDATE, {
+			teamspace,
 			project,
 			model,
 			data,
-			modelType: getModelType(result) });
+			modelType: getModelType(result),
+		});
 	}
 };
 

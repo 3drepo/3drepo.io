@@ -19,12 +19,12 @@ const { addCalibration, getCalibration, getCalibrationForMultipleRevisions } = r
 const { getRevisionByIdOrTag, getRevisionsByQuery } = require('../../../../../models/revisions');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const { calibrationStatuses } = require('../../../../../models/calibrations.constants');
+const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
+const { publish } = require('../../../../../services/eventsManager/eventsManager');
 const { templates } = require('../../../../../utils/responseCodes');
 
 const Calibrations = { };
-
-Calibrations.addCalibration = addCalibration;
 
 Calibrations.getCalibration = async (teamspace, project, drawing, revision) => {
 	const projection = {
@@ -64,15 +64,26 @@ Calibrations.getCalibration = async (teamspace, project, drawing, revision) => {
 };
 
 Calibrations.getCalibrationStatus = async (teamspace, project, drawing, revision) => {
-	let calibration;
-
 	try {
-		calibration = (await Calibrations.getCalibration(teamspace, project, drawing, revision)).status;
+		const calibration = await Calibrations.getCalibration(teamspace, project, drawing, revision);
+		return calibration.status;
 	} catch {
-		calibration = calibrationStatuses.UNCALIBRATED;
+		return calibrationStatuses.UNCALIBRATED;
 	}
+};
 
-	return calibration;
+Calibrations.addCalibration = async (teamspace, project, drawing, revision, createdBy, calibration) => {
+	const existingCalibration = await getCalibration(teamspace, project, drawing, revision, { _id: 1 });
+
+	await addCalibration(teamspace, project, drawing, revision, createdBy, calibration);
+
+	if (!existingCalibration) {
+		publish(events.REVISION_UPDATED, { teamspace,
+			project,
+			model: drawing,
+			modelType: modelTypes.DRAWING,
+			data: { _id: revision, calibration: calibrationStatuses.CALIBRATED } });
+	}
 };
 
 module.exports = Calibrations;

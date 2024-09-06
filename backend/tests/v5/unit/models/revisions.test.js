@@ -393,7 +393,8 @@ const testOnProcessingCompleted = () => {
 				{ projection: { author: 1 } },
 			);
 
-			expect(EventsManager.publish).toHaveBeenCalledTimes(2);
+			const { timestamp } = EventsManager.publish.mock.calls[0][1].data;
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED, {
 				teamspace,
 				project,
@@ -405,14 +406,8 @@ const testOnProcessingCompleted = () => {
 				errCode,
 				user: author,
 				modelType,
+				data: { status: processStatuses.OK, timestamp },
 			});
-
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
-				{ teamspace,
-					project,
-					model,
-					modelType,
-					data: { status: processStatuses.OK, timestamp: expect.anything() } });
 		});
 
 		test('Should update revision and publish 2 events upon failure', async () => {
@@ -435,7 +430,8 @@ const testOnProcessingCompleted = () => {
 				{ projection: { author: 1 } },
 			);
 
-			expect(EventsManager.publish).toHaveBeenCalledTimes(2);
+			const { timestamp } = EventsManager.publish.mock.calls[0][1].data;
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED, {
 				teamspace,
 				project,
@@ -447,10 +443,8 @@ const testOnProcessingCompleted = () => {
 				errCode,
 				user: author,
 				modelType,
+				data: { ...setObj, timestamp },
 			});
-
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
-				{ teamspace, project, model, modelType, data: { ...setObj, timestamp: expect.anything() } });
 		});
 
 		test('Should not trigger any event if the revision is not found', async () => {

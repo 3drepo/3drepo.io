@@ -142,25 +142,25 @@ const testGetRevisions = () => {
 			const project = generateRandomString();
 			const drawing = generateRandomString();
 			const showVoid = true;
-			const revisions = [generateRevisionEntry(), generateRevisionEntry()];
+			const revisions = [generateRevisionEntry(), generateRevisionEntry(), generateRevisionEntry()];
 
 			const getRevisionsMock = Revisions.getRevisions.mockResolvedValueOnce(revisions);
-			const getClaibrationStatusMock = CalibrationsProc.getCalibrationStatus
-				.mockResolvedValueOnce(calibrationStatuses.CALIBRATED)
-				.mockResolvedValueOnce(calibrationStatuses.UNCONFIRMED);
+			const getCalibrationForMultipleRevisionsMock = Calibrations.getCalibrationForMultipleRevisions
+				.mockResolvedValueOnce([{ _id: revisions[1]._id }]);
 
 			const res = await Drawings.getRevisions(teamspace, project, drawing, showVoid);
 
-			revisions[0].calibration = calibrationStatuses.CALIBRATED;
-			revisions[1].calibration = calibrationStatuses.UNCONFIRMED;
+			revisions[0].calibration = calibrationStatuses.UNCALIBRATED;
+			revisions[1].calibration = calibrationStatuses.CALIBRATED;
+			revisions[2].calibration = calibrationStatuses.UNCONFIRMED;
 
 			expect(res).toEqual(revisions);
 			expect(getRevisionsMock).toHaveBeenCalledTimes(1);
 			expect(getRevisionsMock).toHaveBeenCalledWith(teamspace, project, drawing, modelTypes.DRAWING, showVoid,
 				{ _id: 1, author: 1, format: 1, timestamp: 1, statusCode: 1, revCode: 1, void: 1, desc: 1 });
-			expect(getClaibrationStatusMock).toHaveBeenCalledTimes(2);
-			expect(getClaibrationStatusMock).toHaveBeenCalledWith(teamspace, project, drawing, revisions[0]._id);
-			expect(getClaibrationStatusMock).toHaveBeenCalledWith(teamspace, project, drawing, revisions[1]._id);
+			expect(getCalibrationForMultipleRevisionsMock).toHaveBeenCalledTimes(1);
+			expect(getCalibrationForMultipleRevisionsMock).toHaveBeenCalledWith(teamspace,
+				revisions.map((r) => r._id), { _id: 1 });
 		});
 	});
 };

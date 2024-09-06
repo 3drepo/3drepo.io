@@ -153,7 +153,7 @@ const updateRevision = async (teamspace, model, modelType, revision, setUpdate,
 };
 
 Revisions.onProcessingCompleted = async (teamspace, project, model, revId,
-	{ success, message, retVal, userErr }, modelType, calibration) => {
+	{ success, message, retVal, userErr }, modelType) => {
 	const set = {};
 	const unset = { incomplete: 1 };
 
@@ -178,18 +178,8 @@ Revisions.onProcessingCompleted = async (teamspace, project, model, revId,
 			errCode: retVal,
 			user,
 			modelType,
-			calibration,
+			data: { ...set, status: set.status || processStatuses.OK, timestamp: new Date() },
 		});
-
-	// We're not updating model settings here, but this is a temporary hack as front end is looking
-	// for this event.
-	publish(events.MODEL_SETTINGS_UPDATE, {
-		teamspace,
-		project,
-		model,
-		data: { ...set, status: set.status || processStatuses.OK, timestamp: new Date(), calibration },
-		modelType,
-	});
 };
 
 Revisions.addDrawingThumbnailRef = async (teamspace, project, model, revId, ref) => {

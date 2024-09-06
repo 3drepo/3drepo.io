@@ -526,7 +526,7 @@ const testNewRevisionProcessed = () => {
 			}
 			expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 
-			expect(EventsManager.publish).toHaveBeenCalledTimes(2);
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
 				{
 					teamspace,
@@ -539,15 +539,7 @@ const testNewRevisionProcessed = () => {
 					errCode: retVal,
 					user,
 					modelType: modelTypes.CONTAINER,
-				});
-
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
-				{
-					teamspace,
-					project,
-					model,
 					data: { ...action.$set, status: action.$set.status || 'ok' },
-					modelType: modelTypes.CONTAINER,
 				});
 		});
 	});
@@ -580,7 +572,13 @@ const testNewRevisionProcessed = () => {
 
 				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 
-				expect(EventsManager.publish).toHaveBeenCalledTimes(2);
+				const expectedData = { ...action.$set };
+				if (expectedData.subModels) {
+					expectedData.containers = expectedData.subModels;
+					delete expectedData.subModels;
+				}
+
+				expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
 					{
 						teamspace,
@@ -593,21 +591,7 @@ const testNewRevisionProcessed = () => {
 						errCode: retVal,
 						user,
 						modelType,
-					});
-
-				const expectedData = { ...action.$set };
-				if (expectedData.subModels) {
-					expectedData.containers = expectedData.subModels;
-					delete expectedData.subModels;
-				}
-
-				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
-					{
-						teamspace,
-						project,
-						model,
 						data: { ...expectedData, status: expectedData.status || 'ok' },
-						modelType,
 					});
 			});
 
@@ -632,7 +616,13 @@ const testNewRevisionProcessed = () => {
 
 				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 
-				expect(EventsManager.publish).toHaveBeenCalledTimes(2);
+				const expectedData = { ...action.$set };
+				if (expectedData.subModels) {
+					expectedData.containers = expectedData.subModels;
+					delete expectedData.subModels;
+				}
+
+				expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
 					{
 						teamspace,
@@ -645,21 +635,7 @@ const testNewRevisionProcessed = () => {
 						errCode: retVal,
 						user,
 						modelType,
-					});
-
-				const expectedData = { ...action.$set };
-				if (expectedData.subModels) {
-					expectedData.containers = expectedData.subModels;
-					delete expectedData.subModels;
-				}
-
-				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
-					{
-						teamspace,
-						project,
-						model,
 						data: { ...expectedData, status: expectedData.status || 'ok' },
-						modelType,
 					});
 			});
 	});

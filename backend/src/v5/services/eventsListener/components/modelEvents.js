@@ -21,6 +21,7 @@ const { createModelMessage, createProjectMessage } = require('../../chat');
 const { deleteIfUndefined, setNestedProperty } = require('../../../utils/helper/objects');
 const { getModelType, isFederation: isFederationCheck, newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
 const { getRevisionByIdOrTag, getRevisionFormat, onProcessingCompleted, updateProcessingStatus } = require('../../../models/revisions');
+const { publish, subscribe } = require('../../eventsManager/eventsManager');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { createDrawingThumbnail } = require('../../../processors/teamspaces/projects/models/drawings');
 const { templates: emailTemplates } = require('../../mailer/mailer.constants');
@@ -37,7 +38,6 @@ const { sendSystemEmail } = require('../../mailer');
 const { serialiseComment } = require('../../../schemas/tickets/tickets.comments');
 const { serialiseGroup } = require('../../../schemas/tickets/tickets.groups');
 const { serialiseTicket } = require('../../../schemas/tickets');
-const { subscribe } = require('../../eventsManager/eventsManager');
 
 const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
 	try {
@@ -67,9 +67,8 @@ const queueTasksCompleted = async ({ teamspace, model, value, corId, user, conta
 		const revId = stringToUUID(corId);
 
 		if (modelType === modelTypes.DRAWING) {
-			const calibration = await getCalibrationStatus(teamspace, projectId, model, revId);
 			// Revision status for drawings is tracked in the revision document - 3D will also move there eventually.
-			await onProcessingCompleted(teamspace, projectId, model, revId, errorInfo, modelType, calibration);
+			await onProcessingCompleted(teamspace, projectId, model, revId, errorInfo, modelType);
 		} else {
 			await newRevisionProcessed(teamspace, projectId, model, revId, errorInfo, user, containers);
 		}
@@ -119,7 +118,11 @@ const revisionAdded = async ({ teamspace, project, model, revId, modelType, cali
 };
 
 const modelProcessingCompleted = async ({ teamspace, project, model, success, message,
-	userErr, revId, errCode, user, modelType, calibration }) => {
+	userErr, revId, errCode, user, modelType, data }) => {
+	const calibration = modelType === modelTypes.DRAWING
+		? await getCalibrationStatus(teamspace, project, model, revId)
+		: undefined;
+
 	if (success) {
 		revisionAdded({ teamspace, project, model, revId, modelType, calibration });
 	} else if (!userErr) {
@@ -150,6 +153,14 @@ const modelProcessingCompleted = async ({ teamspace, project, model, success, me
 			}
 		}
 	}
+
+	publish(events.MODEL_SETTINGS_UPDATE, {
+		teamspace,
+		project,
+		model,
+		data: { ...data, calibration },
+		modelType,
+	});
 };
 
 const modelSettingsUpdated = async ({ teamspace, project, model, data, sender, modelType }) => {
@@ -159,7 +170,8 @@ const modelSettingsUpdated = async ({ teamspace, project, model, data, sender, m
 		[modelTypes.DRAWING]: chatEvents.DRAWING_SETTINGS_UPDATE,
 	};
 
-	await createModelMessage(modelEvents[modelType], data, teamspace, UUIDToString(project), model, sender);
+	await createModelMessage(modelEvents[modelType], deleteIfUndefined(data), teamspace,
+		UUIDToString(project), model, sender);
 };
 
 const revisionUpdated = async ({ teamspace, project, model, data, sender, modelType }) => {
@@ -168,17 +180,8 @@ const revisionUpdated = async ({ teamspace, project, model, data, sender, modelT
 		[modelTypes.DRAWING]: chatEvents.DRAWING_REVISION_UPDATE,
 	};
 
-	let calibration;
-	if (modelType === modelTypes.DRAWING) {
-		calibration = await getCalibrationStatus(teamspace, project, model, data._id);
-	}
-
-	await createModelMessage(modelEvents[modelType], deleteIfUndefined({
-		...data,
-		_id: UUIDToString(data._id),
-		calibration,
-	}),
-	teamspace, project, model, sender);
+	await createModelMessage(modelEvents[modelType], deleteIfUndefined({ ...data, _id: UUIDToString(data._id) }),
+		teamspace, project, model, sender);
 };
 
 const modelAdded = async ({ teamspace, project, model, data, sender, modelType }) => {
