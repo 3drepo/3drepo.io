@@ -219,7 +219,7 @@ const testAddCalibration = () => {
 		test('should add a new calibration', async () => {
 			CalibrationsModel.getCalibration.mockResolvedValueOnce(calibration);
 
-			await expect(Calibrations.addCalibration(teamspace, project, drawing, revision, createdBy, calibration));
+			await Calibrations.addCalibration(teamspace, project, drawing, revision, createdBy, calibration);
 
 			expect(CalibrationsModel.addCalibration).toHaveBeenCalledTimes(1);
 			expect(CalibrationsModel.addCalibration).toHaveBeenCalledWith(teamspace, project, drawing, revision,
@@ -233,7 +233,7 @@ const testAddCalibration = () => {
 		test('should add a new calibration and fire REVISION_UPDATED', async () => {
 			CalibrationsModel.getCalibration.mockResolvedValueOnce(null);
 
-			await expect(Calibrations.addCalibration(teamspace, project, drawing, revision, createdBy, calibration));
+			await Calibrations.addCalibration(teamspace, project, drawing, revision, createdBy, calibration);
 
 			expect(CalibrationsModel.addCalibration).toHaveBeenCalledTimes(1);
 			expect(CalibrationsModel.addCalibration).toHaveBeenCalledWith(teamspace, project, drawing, revision,
