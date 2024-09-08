@@ -307,7 +307,7 @@ const testSerialiseTicket = () => {
 					},
 					{
 						name: imageListProp,
-						type: propTypes.IMAGE,
+						type: propTypes.IMAGE_LIST,
 					},
 				],
 				modules: [
@@ -327,7 +327,7 @@ const testSerialiseTicket = () => {
 						},
 						{
 							name: imageListProp,
-							type: propTypes.IMAGE,
+							type: propTypes.IMAGE_LIST,
 						},
 						],
 					},
@@ -342,7 +342,7 @@ const testSerialiseTicket = () => {
 				type: generateRandomString(),
 				properties: {
 					[imageProp]: generateUUID(),
-					[imageListProp]: [times(3, () => generateUUID())],
+					[imageListProp]: times(3, () => generateUUID()),
 					[propName2]: {
 						state: {},
 					},
@@ -358,7 +358,7 @@ const testSerialiseTicket = () => {
 							},
 						},
 						[imageProp]: generateUUID(),
-						[imageListProp]: [times(3, () => generateUUID())],
+						[imageListProp]: times(3, () => generateUUID()),
 						[generateRandomString()]: generateRandomString(),
 					},
 				},
