@@ -212,7 +212,6 @@ const testPropertyConditions = () => {
 		['Should pass if required field is not present (ticket update)', { type: propTypes.TEXT, required: true }, true],
 		['Should fail if required field is set to null (ticket update)', { type: propTypes.TEXT, required: true }, false, null],
 		['Should fail if property is immutable (ticket update)', { type: propTypes.TEXT, immutable: true }, false, randomData],
-		['Should fail if property is immutable (ticket update)', { type: propTypes.TEXT, immutable: true }, false, randomData],
 	]);
 
 	testFn(addTicketPropertyConditionTests, false, true);
