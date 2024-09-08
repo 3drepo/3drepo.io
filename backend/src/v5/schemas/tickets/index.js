@@ -122,9 +122,7 @@ const generatePropertiesValidator = async (teamspace, project, model, templateId
 							}
 
 							const existingRefs = (oldValue ?? []).map(UUIDToString);
-							const diff = getArrayDifference(existingRefs, newRefs);
-
-							return diff.length === 0;
+							return getArrayDifference(existingRefs, newRefs).length === 0;
 						});
 				}
 
