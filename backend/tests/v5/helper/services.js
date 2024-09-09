@@ -150,7 +150,7 @@ db.createModel = (teamspace, _id, name, props) => {
 	return DbHandler.insertOne(teamspace, 'settings', settings);
 };
 
-db.createRevision = async (teamspace, model, revision, modelType) => {
+db.createRevision = async (teamspace, project, model, revision, modelType) => {
 	const historyCol = modelType === modelTypes.DRAWING ? `${modelType}s.history` : `${model}.history`;
 	const writeReferencedData = (id, buffer) => FilesManager.storeFile(teamspace,
 		historyCol, id, buffer);
@@ -169,13 +169,25 @@ db.createRevision = async (teamspace, model, revision, modelType) => {
 	const formattedRevision = {
 		...revision,
 		_id: stringToUUID(revision._id),
-		...(modelType === modelTypes.DRAWING ? { model } : {}),
+		...(modelType === modelTypes.DRAWING ? { project: stringToUUID(project), model } : {}),
 	};
 
 	delete formattedRevision.refData;
 	delete formattedRevision.imageData;
 	delete formattedRevision.thumbnailData;
 	await DbHandler.insertOne(teamspace, historyCol, formattedRevision);
+};
+
+db.createCalibration = async (teamspace, project, drawing, revision, calibration) => {
+	const formattedCalibration = {
+		...calibration,
+		_id: stringToUUID(calibration._id),
+		project: stringToUUID(project),
+		drawing,
+		rev_id: stringToUUID(revision),
+	};
+
+	await DbHandler.insertOne(teamspace, 'drawings.calibrations', formattedCalibration);
 };
 
 db.createSequence = async (teamspace, model, { sequence, states, activities, activityTree }) => {
@@ -292,8 +304,8 @@ db.addLoginRecords = async (records) => {
 	await DbHandler.insertMany(INTERNAL_DB, 'loginRecords', records);
 };
 
-db.createScene = (teamspace, modelId, rev, nodes, meshMap) => Promise.all([
-	db.createRevision(teamspace, modelId, rev),
+db.createScene = (teamspace, project, modelId, rev, nodes, meshMap) => Promise.all([
+	db.createRevision(teamspace, project, modelId, rev),
 	DbHandler.insertMany(teamspace, `${modelId}.scene`, nodes),
 	FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, `${UUIDToString(rev._id)}/idToMeshes.json`, JSON.stringify(meshMap)),
 
@@ -474,6 +486,18 @@ ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, modelType
 
 	return entry;
 };
+
+ServiceHelper.generateCalibration = () => ({
+	_id: ServiceHelper.generateUUIDString(),
+	horizontal: {
+		model: times(2, () => times(3, () => ServiceHelper.generateRandomNumber())),
+		drawing: times(2, () => times(2, () => ServiceHelper.generateRandomNumber())),
+	},
+	verticalRange: [0, 10],
+	units: 'm',
+	createdAt: ServiceHelper.generateRandomDate(),
+	createdBy: ServiceHelper.generateRandomString(),
+});
 
 ServiceHelper.generateRandomModelProperties = (modelType = modelTypes.CONTAINER) => ({
 	desc: ServiceHelper.generateRandomString(),

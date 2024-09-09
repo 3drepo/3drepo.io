@@ -17,6 +17,7 @@
 
 const RoutesManager = {};
 const AadRoutes = require('./sso/aad');
+const CalibrationRoutes = require('./teamspaces/projects/models/drawings/calibrations');
 const CreateGeneralRevisionRoutes = require('./teamspaces/projects/models/common/revisions');
 const CreateGroupRoutes = require('./teamspaces/projects/models/common/groups');
 const CreateModelGeneralRoutes = require('./teamspaces/projects/models/common/general');
@@ -69,6 +70,7 @@ RoutesManager.init = (app) => {
 	// Drawings
 	app.use('/v5/teamspaces/:teamspace/projects/:project/drawings', CreateModelGeneralRoutes(modelTypes.DRAWING));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/drawings/:model/revisions', CreateGeneralRevisionRoutes(modelTypes.DRAWING));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/drawings/:drawing/revisions/:revision/calibrations', CalibrationRoutes);
 };
 
 module.exports = RoutesManager;

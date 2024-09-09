@@ -21,7 +21,7 @@ const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
 const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate } = require('../../../helper/services');
 
-const { modelTypes, getInfoFromCode } = require(`${src}/models/modelSettings.constants`);
+const { modelTypes, getInfoFromCode, processStatuses } = require(`${src}/models/modelSettings.constants`);
 
 jest.mock('../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
@@ -47,6 +47,11 @@ const TicketGroupSchemas = require(`${src}/schemas/tickets/tickets.groups`);
 jest.mock('../../../../../src/v5/processors/teamspaces/projects/models/drawings');
 const DrawingProcessor = require(`${src}/processors/teamspaces/projects/models/drawings`);
 
+jest.mock('../../../../../src/v5/processors/teamspaces/projects/models/drawings/calibrations');
+const CalibrationProcessor = require(`${src}/processors/teamspaces/projects/models/drawings/calibrations`);
+
+const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
+
 jest.mock('../../../../../src/v5/services/mailer');
 const Mailer = require(`${src}/services/mailer`);
 const { templates: mailTemplates } = require(`${src}/services/mailer/mailer.constants`);
@@ -65,6 +70,21 @@ const EventsListener = require(`${src}/services/eventsListener/eventsListener`);
 const eventTriggeredPromise = (event) => new Promise(
 	(resolve) => EventsManager.subscribe(event, () => setTimeout(resolve, 10)),
 );
+
+const generateImportResult = (success, message = generateRandomString(), userErr, errorCode = 1) => {
+	if (success) {
+		return { status: processStatuses.OK, timestamp: new Date() };
+	}
+	return {
+		status: processStatuses.FAILED,
+		errorReason: {
+			timestamp: new Date(),
+			userErr,
+			message,
+			errorCode,
+		},
+	};
+};
 
 const testQueueTaskUpdate = () => {
 	describe(events.QUEUED_TASK_UPDATE, () => {
@@ -171,6 +191,8 @@ const testQueueTaskCompleted = () => {
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledWith(data.teamspace, project, data.model,
 				data.corId, dataInfo, data.user, data.containers);
+
+			expect(CalibrationProcessor.getCalibrationStatus).not.toHaveBeenCalled();
 		});
 
 		test(`Should trigger onProcessingCompleted if there is a ${events.QUEUED_TASK_COMPLETED} (${modelTypes.DRAWING})`, async () => {
@@ -277,6 +299,7 @@ const testNewRevision = () => {
 		const format = generateRandomString();
 		const rFile = [`${generateRandomString()}_${format}`];
 		const timestamp = generateRandomDate();
+
 		Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp, rFile, desc });
 		Revisions.getRevisionFormat.mockReturnValueOnce(`.${format}`);
 
@@ -285,11 +308,12 @@ const testNewRevision = () => {
 			teamspace: generateRandomString(),
 			project: generateUUID(),
 			model: generateRandomString(),
-			success: true,
 			revId: generateUUID(),
 			user: generateRandomString(),
 			modelType: modelTypes.CONTAINER,
+			data: generateImportResult(true),
 		};
+
 		EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
 
 		await waitOnEvent;
@@ -297,7 +321,8 @@ const testNewRevision = () => {
 		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
 		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model,
 			modelTypes.CONTAINER, data.revId,
-			{ _id: 0,
+			{
+				_id: 0,
 				tag: 1,
 				author: 1,
 				timestamp: 1,
@@ -305,16 +330,27 @@ const testNewRevision = () => {
 				rFile: 1,
 				format: 1,
 				statusCode: 1,
-				revCode: 1 });
-		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
-		expect(ChatService.createModelMessage).toHaveBeenCalledWith(
-			chatEvents.CONTAINER_NEW_REVISION,
-			{ _id: UUIDToString(data.revId), tag, author, timestamp: timestamp.getTime(), desc, format: `.${format}` },
-			data.teamspace,
-			UUIDToString(data.project),
-			data.model,
-		);
+				revCode: 1,
+			});
+		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(2);
+		const expectedCalls = [
+			[
+				chatEvents.CONTAINER_NEW_REVISION,
+				{ _id: UUIDToString(data.revId), tag, author, timestamp: timestamp.getTime(), desc, format: `.${format}` },
+				data.teamspace,
+				UUIDToString(data.project),
+				data.model,
+			],
+			[chatEvents.CONTAINER_SETTINGS_UPDATE,
+				data.data,
+				data.teamspace,
+				UUIDToString(data.project),
+				data.model,
+				undefined],
+		];
+		expect(ChatService.createModelMessage.mock.calls).toEqual(expect.arrayContaining(expectedCalls));
 
+		expect(CalibrationProcessor.getCalibrationStatus).not.toHaveBeenCalled();
 		expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
 		expect(DrawingProcessor.createDrawingThumbnail).not.toHaveBeenCalled();
 	});
@@ -326,16 +362,19 @@ const testNewRevision = () => {
 		const format = generateRandomString();
 		const rFile = [generateRandomString()];
 		const timestamp = generateRandomDate();
+		const calibration = calibrationStatuses.CALIBRATED;
 		Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp, rFile, desc, format });
+		CalibrationProcessor.getCalibrationStatus.mockResolvedValueOnce(calibration);
+
 		const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 		const data = {
 			teamspace: generateRandomString(),
 			project: generateUUID(),
 			model: generateRandomString(),
-			success: true,
 			revId: generateUUID(),
 			user: generateRandomString(),
 			modelType: modelTypes.DRAWING,
+			data: generateImportResult(true),
 		};
 		EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
 
@@ -344,7 +383,8 @@ const testNewRevision = () => {
 		expect(Revisions.getRevisionFormat).not.toHaveBeenCalled();
 		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
 		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, modelTypes.DRAWING,
-			data.revId, { _id: 0,
+			data.revId, {
+				_id: 0,
 				tag: 1,
 				author: 1,
 				timestamp: 1,
@@ -352,20 +392,40 @@ const testNewRevision = () => {
 				rFile: 1,
 				format: 1,
 				statusCode: 1,
-				revCode: 1 });
-		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
-		expect(ChatService.createModelMessage).toHaveBeenCalledWith(
-			chatEvents.DRAWING_NEW_REVISION,
-			{ _id: UUIDToString(data.revId), tag, author, timestamp: timestamp.getTime(), desc, format },
-			data.teamspace,
-			UUIDToString(data.project),
-			data.model,
-		);
+				revCode: 1,
+			});
+		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(2);
+		const expectedCalls = [
+			[
+				chatEvents.DRAWING_NEW_REVISION,
+				{ _id: UUIDToString(data.revId),
+					tag,
+					author,
+					timestamp: timestamp.getTime(),
+					desc,
+					format,
+					calibration },
+				data.teamspace,
+				UUIDToString(data.project),
+				data.model,
+			],
+			[chatEvents.DRAWING_SETTINGS_UPDATE,
+				{ ...data.data, calibration },
+				data.teamspace,
+				UUIDToString(data.project),
+				data.model,
+				undefined],
+		];
+		expect(ChatService.createModelMessage.mock.calls).toEqual(expect.arrayContaining(expectedCalls));
+
 		expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
 
 		expect(DrawingProcessor.createDrawingThumbnail).toHaveBeenCalledTimes(1);
 		expect(DrawingProcessor.createDrawingThumbnail).toHaveBeenCalledWith(data.teamspace,
 			data.project, data.model, data.revId);
+		expect(CalibrationProcessor.getCalibrationStatus).toHaveBeenCalledTimes(1);
+		expect(CalibrationProcessor.getCalibrationStatus).toHaveBeenCalledWith(data.teamspace, data.project,
+			data.model, data.revId);
 	});
 
 	test(`Should create a ${chatEvents.DRAWING_NEW_REVISION} chat event if there is a ${events.MODEL_IMPORT_FINISHED} even if thumbnail creation failed`, async () => {
@@ -375,17 +435,19 @@ const testNewRevision = () => {
 		const format = generateRandomString();
 		const rFile = [generateRandomString()];
 		const timestamp = generateRandomDate();
+		const calibration = calibrationStatuses.CALIBRATED;
 		Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp, rFile, desc, format });
+		CalibrationProcessor.getCalibrationStatus.mockResolvedValueOnce(calibration);
 
 		const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 		const data = {
 			teamspace: generateRandomString(),
 			project: generateUUID(),
 			model: generateRandomString(),
-			success: true,
 			revId: generateUUID(),
 			user: generateRandomString(),
 			modelType: modelTypes.DRAWING,
+			data: generateImportResult(true),
 		};
 
 		DrawingProcessor.createDrawingThumbnail.mockRejectedValueOnce(new Error());
@@ -396,7 +458,8 @@ const testNewRevision = () => {
 		expect(Revisions.getRevisionFormat).not.toHaveBeenCalled();
 		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
 		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, modelTypes.DRAWING,
-			data.revId, { _id: 0,
+			data.revId, {
+				_id: 0,
 				tag: 1,
 				author: 1,
 				timestamp: 1,
@@ -404,20 +467,39 @@ const testNewRevision = () => {
 				rFile: 1,
 				format: 1,
 				statusCode: 1,
-				revCode: 1 });
-		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
-		expect(ChatService.createModelMessage).toHaveBeenCalledWith(
-			chatEvents.DRAWING_NEW_REVISION,
-			{ _id: UUIDToString(data.revId), tag, author, timestamp: timestamp.getTime(), desc, format },
-			data.teamspace,
-			UUIDToString(data.project),
-			data.model,
-		);
+				revCode: 1,
+			});
+		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(2);
+		const expectedCalls = [
+			[
+				chatEvents.DRAWING_NEW_REVISION,
+				{ _id: UUIDToString(data.revId),
+					tag,
+					author,
+					timestamp: timestamp.getTime(),
+					desc,
+					format,
+					calibration },
+				data.teamspace,
+				UUIDToString(data.project),
+				data.model,
+			],
+			[chatEvents.DRAWING_SETTINGS_UPDATE,
+				{ ...data.data, calibration },
+				data.teamspace,
+				UUIDToString(data.project),
+				data.model,
+				undefined],
+		];
+		expect(ChatService.createModelMessage.mock.calls).toEqual(expect.arrayContaining(expectedCalls));
 		expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
 
 		expect(DrawingProcessor.createDrawingThumbnail).toHaveBeenCalledTimes(1);
 		expect(DrawingProcessor.createDrawingThumbnail).toHaveBeenCalledWith(data.teamspace,
 			data.project, data.model, data.revId);
+		expect(CalibrationProcessor.getCalibrationStatus).toHaveBeenCalledTimes(1);
+		expect(CalibrationProcessor.getCalibrationStatus).toHaveBeenCalledWith(data.teamspace, data.project,
+			data.model, data.revId);
 	});
 
 	test(`Should create a ${chatEvents.FEDERATION_NEW_REVISION} chat event if if there is a ${events.MODEL_IMPORT_FINISHED} (federation)`, async () => {
@@ -431,10 +513,11 @@ const testNewRevision = () => {
 			teamspace: generateRandomString(),
 			project: generateUUID(),
 			model: generateRandomString(),
-			success: true,
 			revId: generateUUID(),
 			user: generateRandomString(),
 			modelType: modelTypes.FEDERATION,
+			data: generateImportResult(true),
+
 		};
 		EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
 
@@ -442,7 +525,8 @@ const testNewRevision = () => {
 		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
 		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model,
 			modelTypes.FEDERATION, data.revId,
-			{ _id: 0,
+			{
+				_id: 0,
 				tag: 1,
 				author: 1,
 				timestamp: 1,
@@ -450,17 +534,28 @@ const testNewRevision = () => {
 				rFile: 1,
 				format: 1,
 				statusCode: 1,
-				revCode: 1 });
-		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
-		expect(ChatService.createModelMessage).toHaveBeenCalledWith(
-			chatEvents.FEDERATION_NEW_REVISION,
-			{ _id: UUIDToString(data.revId), tag, author, timestamp: timestamp.getTime() },
-			data.teamspace,
-			UUIDToString(data.project),
-			data.model,
-		);
+				revCode: 1,
+			});
+		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(2);
+		const expectedCalls = [
+			[
+				chatEvents.FEDERATION_NEW_REVISION,
+				{ _id: UUIDToString(data.revId), tag, author, timestamp: timestamp.getTime() },
+				data.teamspace,
+				UUIDToString(data.project),
+				data.model,
+			],
+			[chatEvents.FEDERATION_SETTINGS_UPDATE,
+				data.data,
+				data.teamspace,
+				UUIDToString(data.project),
+				data.model,
+				undefined],
+		];
+		expect(ChatService.createModelMessage.mock.calls).toEqual(expect.arrayContaining(expectedCalls));
 		expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
 		expect(DrawingProcessor.createDrawingThumbnail).not.toHaveBeenCalled();
+		expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
 	});
 
 	test(`Should fail gracefully on error if there is a ${events.MODEL_IMPORT_FINISHED} (container)`, async () => {
@@ -470,10 +565,10 @@ const testNewRevision = () => {
 			teamspace: generateRandomString(),
 			project: generateUUID(),
 			model: generateRandomString(),
-			success: true,
 			revId: generateUUID(),
 			user: generateRandomString(),
 			modelType: modelTypes.CONTAINER,
+			data: generateImportResult(true),
 		};
 
 		Revisions.getRevisionByIdOrTag.mockRejectedValueOnce(templates.revisionNotFound);
@@ -483,7 +578,8 @@ const testNewRevision = () => {
 		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
 		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model,
 			modelTypes.CONTAINER, data.revId,
-			{ _id: 0,
+			{
+				_id: 0,
 				tag: 1,
 				author: 1,
 				timestamp: 1,
@@ -491,8 +587,15 @@ const testNewRevision = () => {
 				rFile: 1,
 				format: 1,
 				statusCode: 1,
-				revCode: 1 });
-		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(0);
+				revCode: 1,
+			});
+		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+		expect(ChatService.createModelMessage).toHaveBeenCalledWith(chatEvents.CONTAINER_SETTINGS_UPDATE,
+			data.data,
+			data.teamspace,
+			UUIDToString(data.project),
+			data.model,
+			undefined);
 		expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
 	});
 
@@ -503,10 +606,10 @@ const testNewRevision = () => {
 			teamspace: generateRandomString(),
 			project: generateUUID(),
 			model: generateRandomString(),
-			success: true,
 			revId: generateUUID(),
 			user: generateRandomString(),
 			modelType: modelTypes.CONTAINER,
+			data: generateImportResult(true),
 		};
 
 		Revisions.getRevisionByIdOrTag.mockRejectedValueOnce(new Error(generateRandomString()));
@@ -516,7 +619,8 @@ const testNewRevision = () => {
 		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
 		expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model,
 			modelTypes.CONTAINER, data.revId,
-			{ _id: 0,
+			{
+				_id: 0,
 				tag: 1,
 				author: 1,
 				timestamp: 1,
@@ -524,8 +628,15 @@ const testNewRevision = () => {
 				rFile: 1,
 				format: 1,
 				statusCode: 1,
-				revCode: 1 });
-		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(0);
+				revCode: 1,
+			});
+		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+		expect(ChatService.createModelMessage).toHaveBeenCalledWith(chatEvents.CONTAINER_SETTINGS_UPDATE,
+			data.data,
+			data.teamspace,
+			UUIDToString(data.project),
+			data.model,
+			undefined);
 		expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
 	});
 };
@@ -545,11 +656,10 @@ const testModelProcessingCompleted = () => {
 					model: generateRandomString(),
 					project: generateUUID(),
 					success,
-					message: generateRandomString(),
-					userErr,
 					revId: generateUUID(),
 					user: generateRandomString(),
 					modelType: modelTypes.FEDERATION,
+					data: generateImportResult(success, generateRandomString(), userErr),
 				};
 
 				const zipPath = generateRandomString();
@@ -568,8 +678,8 @@ const testModelProcessingCompleted = () => {
 
 					const mailerData = {
 						errInfo: {
-							code: data.errCode,
-							message: data.message,
+							code: data.data.errorReason.errorCode,
+							message: data.data.errorReason.message,
 						},
 						teamspace: data.teamspace,
 						model: data.model,
@@ -596,12 +706,10 @@ const testModelProcessingCompleted = () => {
 				teamspace: generateRandomString(),
 				model: generateRandomString(),
 				project: generateUUID(),
-				success: false,
-				message: generateRandomString(),
-				userErr: false,
 				revId: generateUUID(),
 				user: generateRandomString(),
 				modelType: modelTypes.FEDERATION,
+				data: generateImportResult(false),
 			};
 
 			ModPro.getLogArchive.mockRejectedValueOnce(generateRandomString());
@@ -617,12 +725,10 @@ const testModelProcessingCompleted = () => {
 				teamspace: generateRandomString(),
 				model: generateRandomString(),
 				project: generateUUID(),
-				success: false,
-				message: generateRandomString(),
-				userErr: false,
 				revId: generateUUID(),
 				user: generateRandomString(),
 				modelType: modelTypes.FEDERATION,
+				data: generateImportResult(false),
 			};
 
 			ModPro.getLogArchive.mockRejectedValueOnce(new Error());
@@ -709,6 +815,8 @@ const testRevisionUpdated = () => {
 				data.model,
 				undefined,
 			);
+
+			expect(CalibrationProcessor.getCalibrationStatus).not.toHaveBeenCalled();
 		});
 
 		test(`Should create a ${chatEvents.DRAWING_REVISION_UPDATE} chat event if there is a ${events.REVISION_UPDATED} and model type is drawing`, async () => {
@@ -723,6 +831,7 @@ const testRevisionUpdated = () => {
 			EventsManager.publish(events.REVISION_UPDATED, data);
 
 			await waitOnEvent;
+
 			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
 			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
 				chatEvents.DRAWING_REVISION_UPDATE,

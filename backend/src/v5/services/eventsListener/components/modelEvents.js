@@ -21,22 +21,23 @@ const { createModelMessage, createProjectMessage } = require('../../chat');
 const { deleteIfUndefined, setNestedProperty } = require('../../../utils/helper/objects');
 const { getModelType, isFederation: isFederationCheck, newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
 const { getRevisionByIdOrTag, getRevisionFormat, onProcessingCompleted, updateProcessingStatus } = require('../../../models/revisions');
+const { modelTypes, processStatuses } = require('../../../models/modelSettings.constants');
+const { publish, subscribe } = require('../../eventsManager/eventsManager');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { createDrawingThumbnail } = require('../../../processors/teamspaces/projects/models/drawings');
 const { templates: emailTemplates } = require('../../mailer/mailer.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { findProjectByModelId } = require('../../../models/projectSettings');
 const { generateFullSchema } = require('../../../schemas/tickets/templates');
+const { getCalibrationStatus } = require('../../../processors/teamspaces/projects/models/drawings/calibrations');
 const { getInfoFromCode } = require('../../../models/modelSettings.constants');
 const { getLogArchive } = require('../../modelProcessing');
 const { getTemplateById } = require('../../../models/tickets.templates');
 const { logger } = require('../../../utils/logger');
-const { modelTypes } = require('../../../models/modelSettings.constants');
 const { sendSystemEmail } = require('../../mailer');
 const { serialiseComment } = require('../../../schemas/tickets/tickets.comments');
 const { serialiseGroup } = require('../../../schemas/tickets/tickets.groups');
 const { serialiseTicket } = require('../../../schemas/tickets');
-const { subscribe } = require('../../eventsManager/eventsManager');
 
 const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
 	try {
@@ -79,7 +80,7 @@ const queueTasksCompleted = async ({ teamspace, model, value, corId, user, conta
 	}
 };
 
-const revisionAdded = async ({ teamspace, project, model, revId, modelType }) => {
+const revisionAdded = async ({ teamspace, project, model, revId, modelType, calibration }) => {
 	try {
 		const {
 			tag, author, timestamp, desc, rFile, format, statusCode, revCode,
@@ -100,32 +101,39 @@ const revisionAdded = async ({ teamspace, project, model, revId, modelType }) =>
 			[modelTypes.DRAWING]: chatEvents.DRAWING_NEW_REVISION,
 		};
 
-		await createModelMessage(modelEvents[modelType], deleteIfUndefined({ _id: UUIDToString(revId),
+		await createModelMessage(modelEvents[modelType], deleteIfUndefined({
+			_id: UUIDToString(revId),
 			tag,
 			statusCode,
 			revCode,
 			author,
 			timestamp: timestamp.getTime(),
 			desc,
-			...deleteIfUndefined({ format: format ?? getRevisionFormat(rFile) }),
+			format: format ?? getRevisionFormat(rFile),
+			calibration,
 		}), teamspace, UUIDToString(project), model);
 	} catch (err) {
 		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
 	}
 };
 
-const modelProcessingCompleted = async ({ teamspace, project, model, success, message,
-	userErr, revId, errCode, user, modelType }) => {
-	if (success) {
-		revisionAdded({ teamspace, project, model, revId, modelType });
-	} else if (!userErr) {
+const modelProcessingCompleted = async ({ teamspace, project, model, revId, user, modelType, data }) => {
+	const { errorReason, status } = data;
+	const calibration = modelType === modelTypes.DRAWING
+		? await getCalibrationStatus(teamspace, project, model, revId)
+		: undefined;
+
+	if (status === processStatuses.OK) {
+		revisionAdded({ teamspace, project, model, revId, modelType, calibration });
+	} else if (!errorReason.userErr) {
 		try {
 			const { zipPath, logPreview } = (await getLogArchive(UUIDToString(revId))) || {};
+			const { errorCode, message } = errorReason;
 
 			await sendSystemEmail(emailTemplates.MODEL_IMPORT_ERROR.name,
 				{
 					errInfo: {
-						code: errCode,
+						code: errorCode,
 						message,
 					},
 					teamspace,
@@ -146,6 +154,14 @@ const modelProcessingCompleted = async ({ teamspace, project, model, success, me
 			}
 		}
 	}
+
+	publish(events.MODEL_SETTINGS_UPDATE, {
+		teamspace,
+		project,
+		model,
+		data: deleteIfUndefined({ ...data, calibration }),
+		modelType,
+	});
 };
 
 const modelSettingsUpdated = async ({ teamspace, project, model, data, sender, modelType }) => {
@@ -155,7 +171,8 @@ const modelSettingsUpdated = async ({ teamspace, project, model, data, sender, m
 		[modelTypes.DRAWING]: chatEvents.DRAWING_SETTINGS_UPDATE,
 	};
 
-	await createModelMessage(modelEvents[modelType], data, teamspace, UUIDToString(project), model, sender);
+	await createModelMessage(modelEvents[modelType], data, teamspace,
+		UUIDToString(project), model, sender);
 };
 
 const revisionUpdated = async ({ teamspace, project, model, data, sender, modelType }) => {

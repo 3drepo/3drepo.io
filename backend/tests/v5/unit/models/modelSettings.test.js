@@ -19,7 +19,7 @@ const { times } = require('lodash');
 const { src } = require('../../helper/path');
 const { generateRandomString, generateUUIDString, generateUUID } = require('../../helper/services');
 
-const { getInfoFromCode, modelTypes } = require(`${src}/models/modelSettings.constants`);
+const { getInfoFromCode, modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
@@ -526,28 +526,21 @@ const testNewRevisionProcessed = () => {
 			}
 			expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 
-			expect(EventsManager.publish).toHaveBeenCalledTimes(2);
+			const expectedData = { ...action.$set, status: action.$set.status || processStatuses.OK };
+			if (expectedData.errorReason) {
+				expectedData.errorReason.userErr = userErr;
+			}
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
 				{
 					teamspace,
 					project,
 					model,
 					revId: corId,
-					userErr,
-					message,
-					success,
-					errCode: retVal,
 					user,
 					modelType: modelTypes.CONTAINER,
-				});
-
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
-				{
-					teamspace,
-					project,
-					model,
-					data: { ...action.$set, status: action.$set.status || 'ok' },
-					modelType: modelTypes.CONTAINER,
+					data: expectedData,
 				});
 		});
 	});
@@ -564,7 +557,7 @@ const testNewRevisionProcessed = () => {
 		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED} event and a ${events.MODEL_SETTINGS_UPDATE} event`,
 			async () => {
 				const resInfo = { ...getInfoFromCode(retVal), retVal };
-				const { success, userErr, message } = resInfo;
+				const { success, userErr } = resInfo;
 				DBHandler.updateOne.mockResolvedValueOnce({ matchedCount: 1 });
 				EventsManager.publish.mockClear();
 				await expect(Model.newRevisionProcessed(
@@ -580,41 +573,34 @@ const testNewRevisionProcessed = () => {
 
 				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 
-				expect(EventsManager.publish).toHaveBeenCalledTimes(2);
+				const expectedData = { ...action.$set };
+				expectedData.status = expectedData.status ?? processStatuses.OK;
+
+				if (expectedData.errorReason) {
+					expectedData.errorReason.userErr = userErr;
+				}
+				if (expectedData.subModels) {
+					expectedData.containers = expectedData.subModels;
+					delete expectedData.subModels;
+				}
+
+				expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
 					{
 						teamspace,
 						project,
 						model,
 						revId: corId,
-						userErr,
-						message,
-						success,
-						errCode: retVal,
 						user,
 						modelType,
-					});
-
-				const expectedData = { ...action.$set };
-				if (expectedData.subModels) {
-					expectedData.containers = expectedData.subModels;
-					delete expectedData.subModels;
-				}
-
-				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
-					{
-						teamspace,
-						project,
-						model,
-						data: { ...expectedData, status: expectedData.status || 'ok' },
-						modelType,
+						data: expectedData,
 					});
 			});
 
 		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED} event and a ${events.MODEL_SETTINGS_UPDATE} event (with groups)`,
 			async () => {
 				const resInfo = { ...getInfoFromCode(retVal), retVal };
-				const { success, userErr, message } = resInfo;
+				const { success } = resInfo;
 				const containerData = containers.map((containerId) => ({
 					project: containerId, group: generateRandomString() }));
 
@@ -632,34 +618,24 @@ const testNewRevisionProcessed = () => {
 
 				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 
-				expect(EventsManager.publish).toHaveBeenCalledTimes(2);
+				const expectedData = { ...action.$set };
+
+				expectedData.status = expectedData.status ?? processStatuses.OK;
+				if (expectedData.subModels) {
+					expectedData.containers = expectedData.subModels;
+					delete expectedData.subModels;
+				}
+
+				expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
 					{
 						teamspace,
 						project,
 						model,
 						revId: corId,
-						userErr,
-						message,
-						success,
-						errCode: retVal,
 						user,
 						modelType,
-					});
-
-				const expectedData = { ...action.$set };
-				if (expectedData.subModels) {
-					expectedData.containers = expectedData.subModels;
-					delete expectedData.subModels;
-				}
-
-				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
-					{
-						teamspace,
-						project,
-						model,
-						data: { ...expectedData, status: expectedData.status || 'ok' },
-						modelType,
+						data: expectedData,
 					});
 			});
 	});

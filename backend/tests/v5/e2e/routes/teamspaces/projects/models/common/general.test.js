@@ -22,6 +22,7 @@ const { src } = require('../../../../../../helper/path');
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { updateOne } = require(`${src}/handler/db`);
@@ -45,6 +46,7 @@ const generateBasicData = () => {
 		con: ServiceHelper.generateRandomModel({ viewers: [viewer.user] }),
 		fed: ServiceHelper.generateRandomModel({ viewers: [viewer.user], modelType: modelTypes.FEDERATION }),
 		draw: ServiceHelper.generateRandomModel({ viewers: [viewer.user], modelType: modelTypes.DRAWING }),
+		calibration: ServiceHelper.generateCalibration(),
 	};
 
 	return data;
@@ -182,14 +184,14 @@ const addTickets = async (teamspace, project, model) => {
 	model.ticketCount = 5;
 };
 
-const addRevision = async (teamspace, model, modelType, hasFiles = false) => {
+const addRevision = async (teamspace, project, model, modelType = modelTypes.CONTAINER, hasFiles = false) => {
 	const rev = ServiceHelper.generateRevisionEntry(false, hasFiles, modelType);
 	if (hasFiles) {
 		/* eslint-disable-next-line no-param-reassign */
 		model.files = model.files ?? [];
 		model.files.push({ refData: rev.refData, thumbnailData: rev.thumbnailData, imageData: rev.imageData });
 	}
-	await ServiceHelper.db.createRevision(teamspace, model._id, rev, modelType);
+	await ServiceHelper.db.createRevision(teamspace, project.id, model._id, rev, modelType);
 
 	/* eslint-disable-next-line no-param-reassign */
 	model.revs = model.revs || [];
@@ -200,12 +202,13 @@ const addRevision = async (teamspace, model, modelType, hasFiles = false) => {
 
 const testGetModelStats = () => {
 	describe('Get model stats', () => {
-		const { users, teamspace, project, con, fed, draw } = generateBasicData();
+		const { users, teamspace, project, con, fed, draw, calibration } = generateBasicData();
 		const [fedWithNoSubModel, fedWithNoRevInSubModel] = times(
 			2, () => ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
 		);
 
 		const drawNoRev = ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING });
+
 		const [
 			conNoRev, conFailedProcessing1, conFailedProcessing2,
 		] = times(3, () => ServiceHelper.generateRandomModel());
@@ -242,8 +245,11 @@ const testGetModelStats = () => {
 				addTickets(teamspace, project, fedWithNoRevInSubModel),
 			]);
 
-			await addRevision(teamspace, draw, modelTypes.DRAWING);
-			const rev = await addRevision(teamspace, con, modelTypes.CONTAINER);
+			const drawRev = await addRevision(teamspace, project, draw, modelTypes.DRAWING);
+			await ServiceHelper.db.createCalibration(teamspace, project.id, draw._id, drawRev._id, calibration);
+			draw.properties.calibrationStatus = calibrationStatuses.CALIBRATED;
+
+			const rev = await addRevision(teamspace, project, con);
 			fed.revs = [rev];
 		});
 
@@ -306,7 +312,7 @@ const testGetModelStats = () => {
 		};
 
 		const formatToStats = ({ properties, ticketCount = 0, revs = [] }) => {
-			const { subModels, status, desc, number, properties: props, calibration,
+			const { subModels, status, desc, number, properties: props, calibrationStatus,
 				federate, errorReason, type } = properties;
 
 			let { modelType } = properties;
@@ -321,7 +327,7 @@ const testGetModelStats = () => {
 			});
 
 			const latestRev = revs.length ? revs[revs.length - 1] : undefined;
-			const res = deleteIfUndefined({
+			const res = {
 				code: modelType === modelTypes.DRAWING ? undefined : props.code,
 				unit: modelType === modelTypes.DRAWING ? undefined : props.unit,
 				number: modelType === modelTypes.DRAWING ? number : undefined,
@@ -329,9 +335,10 @@ const testGetModelStats = () => {
 				lastUpdated: modelType === modelTypes.FEDERATION ? latestRev?.timestamp?.getTime() : undefined,
 				containers: modelType === modelTypes.FEDERATION ? subModels : undefined,
 				status,
-				calibration: modelType === modelTypes.DRAWING ? calibration ?? 'uncalibrated' : undefined,
+				calibration: modelType === modelTypes.DRAWING ? calibrationStatus : undefined,
 				type: modelType === modelTypes.FEDERATION ? undefined : type,
-			});
+			};
+
 			if (federate) {
 				if (subModels) {
 					res.containers = subModels;
@@ -362,7 +369,7 @@ const testGetModelStats = () => {
 				};
 			}
 
-			return res;
+			return deleteIfUndefined(res);
 		};
 
 		const runTest = (desc, route, success, expectedOutput) => {
@@ -964,7 +971,7 @@ const testGetThumbnail = () => {
 		beforeAll(async () => {
 			const models = [draw, drawNoRev, fed];
 			await setupBasicData(users, teamspace, project, models);
-			await addRevision(teamspace, draw, modelTypes.DRAWING, true);
+			await addRevision(teamspace, project, draw, modelTypes.DRAWING, true);
 		});
 
 		const generateTestData = () => {
