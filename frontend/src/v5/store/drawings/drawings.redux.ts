@@ -19,10 +19,11 @@ import { Constants } from '@/v5/helpers/actions.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { TeamspaceAndProjectId, ProjectId, ProjectAndDrawingId, TeamspaceProjectAndDrawingId, SuccessAndErrorCallbacks } from '../store.types';
-import { IDrawing, DrawingStats, DrawingUploadStatus, NewDrawing, MinimumDrawing, CalibrationStates } from './drawings.types';
+import { IDrawing, DrawingStats, NewDrawing, MinimumDrawing, CalibrationStates } from './drawings.types';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { statsToDrawing } from './drawings.helpers';
 import { Role } from '../currentUser/currentUser.types';
+import { UploadStatus } from '../containers/containers.types';
 
 export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions({
 	addFavourite: ['teamspace', 'projectId', 'drawingId'],
@@ -76,7 +77,7 @@ export const createDrawingSuccess = (state: DrawingsState, { projectId, drawing 
 		...drawing,
 		revisionsCount: 0,
 		calibration: CalibrationStates.EMPTY,
-		status: DrawingUploadStatus.OK,
+		status: UploadStatus.OK,
 		isFavourite: false,
 		role: Role.ADMIN,
 	}]);

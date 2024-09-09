@@ -20,13 +20,13 @@ import { DrawingRevisionsActions } from '@/v5/store/drawings/revisions/drawingRe
 import api from '@/v5/services/api/default';
 import { DrawingsActions } from '@/v5/store/drawings/drawings.redux';
 import { drawingRevisionsMockFactory, mockCreateRevisionBody } from './drawingRevisions.fixtures';
-import { DrawingUploadStatus } from '@/v5/store/drawings/drawings.types';
 import { createTestStore, spyOnAxiosApiCallWithFile, WaitActionCallback, WaitForActions } from '../../test.helpers';
 import { selectRevisions, selectUploads } from '@/v5/store/drawings/revisions/drawingRevisions.selectors';
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
 import { drawingMockFactory } from '../drawings.fixtures';
 import { selectDrawingById } from '@/v5/store/drawings/drawings.selectors';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
+import { UploadStatus } from '@/v5/store/containers/containers.types';
 
 describe('Drawing Revisions: sagas', () => {
 	const teamspace = 'teamspace';
@@ -142,9 +142,9 @@ describe('Drawing Revisions: sagas', () => {
 			await waitForActions(() => {
 				dispatch(DrawingRevisionsActions.createRevision(teamspace, projectId, uploadId, mockBody));
 			}, [
-				statusIs(drawingId, DrawingUploadStatus.OK), 
+				statusIs(drawingId, UploadStatus.OK), 
 				DrawingRevisionsActions.setUploadComplete(uploadId, false),
-				statusIs(drawingId, DrawingUploadStatus.QUEUED), 
+				statusIs(drawingId, UploadStatus.QUEUED), 
 				DrawingRevisionsActions.setUploadComplete(uploadId, true),
 			]);
 
@@ -167,7 +167,7 @@ describe('Drawing Revisions: sagas', () => {
 			}, [
 				DrawingsActions.createDrawingSuccess(projectId, newDrawing),
 				DrawingRevisionsActions.setUploadComplete(uploadId, false),
-				statusIs(newDrawing._id, DrawingUploadStatus.QUEUED),
+				statusIs(newDrawing._id, UploadStatus.QUEUED),
 				DrawingRevisionsActions.setUploadComplete(uploadId, true),
 			]);
 			const uploadInStore = selectUploads(getState())[uploadId];

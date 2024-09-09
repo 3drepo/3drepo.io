@@ -29,9 +29,9 @@ import { CreateRevisionAction,
 	FetchStatusCodesAction,
 } from './drawingRevisions.redux';
 import { DrawingsActions } from '../drawings.redux';
-import { DrawingUploadStatus } from '../drawings.types';
 import { createDrawingFromRevisionBody, createFormDataFromRevisionBody } from './drawingRevisions.helpers';
 import { selectIsPending, selectRevisions, selectStatusCodes } from './drawingRevisions.selectors';
+import { UploadStatus } from '../../containers/containers.types';
 
 export function* fetch({ teamspace, projectId, drawingId, onSuccess }: FetchAction) {
 	if (yield select(selectIsPending, drawingId)) return;
@@ -101,7 +101,7 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 			createFormDataFromRevisionBody(body),
 		);
 
-		yield put(DrawingsActions.updateDrawingSuccess(projectId, drawingId, { status: DrawingUploadStatus.QUEUED }));
+		yield put(DrawingsActions.updateDrawingSuccess(projectId, drawingId, { status: UploadStatus.QUEUED }));
 		yield put(DrawingRevisionsActions.setUploadComplete(uploadId, true));
 	} catch (error) {
 		let errorMessage = error.message;
