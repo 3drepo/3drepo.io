@@ -78,11 +78,16 @@ YupHelper.types.position = Yup.array()
 		Yup.number(),
 	).length(3);
 
+YupHelper.types.position2d = Yup.array()
+	.of(
+		Yup.number(),
+	).length(2);
+
 YupHelper.types.surveyPoints = Yup.array()
 	.of(
 		Yup.object().shape({
 			position: YupHelper.types.position.required(),
-			latLong: Yup.array().of(Yup.number()).length(2).required(),
+			latLong: YupHelper.types.position2d.required(),
 		}),
 	);
 

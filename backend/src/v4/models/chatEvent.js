@@ -19,6 +19,7 @@
 const { v5Path } = require("../../interop");
 const EventsManager = require(`${v5Path}/services/eventsManager/eventsManager`);
 const EventsV5 = require(`${v5Path}/services/eventsManager/eventsManager.constants`).events;
+const { processStatuses } = require(`${v5Path}/models/modelSettings.constants`);
 const { findModelSettingById, prepareDefaultView } = require("./modelSetting");
 const utils = require("../utils");
 const Queue = require("../services/queue");
@@ -197,7 +198,7 @@ const subscribeToV5Events = () => {
 		}
 	});
 
-	EventsManager.subscribe(EventsV5.MODEL_IMPORT_FINISHED, async ({ teamspace, model, corId, success, user, message }) => {
+	EventsManager.subscribe(EventsV5.MODEL_IMPORT_FINISHED, async ({ teamspace, model, corId, user, data : importData }) => {
 		const { revisionCount, findLatest } = require("./history");
 		const notifications = require("./notification");
 		const rawSettings =  await findModelSettingById(teamspace, model);
@@ -209,7 +210,7 @@ const subscribeToV5Events = () => {
 		const data = { user, nRevisions, ...setting };
 		modelStatusChanged(null, teamspace, model, data);
 
-		if(success) {
+		if(importData.status === processStatuses.OK) {
 			const rev = await findLatest(teamspace, model, {tag: 1});
 			if(rev) {
 				const notes = await notifications.upsertModelUpdatedNotifications(teamspace, model, rev.tag || corId);
@@ -217,8 +218,8 @@ const subscribeToV5Events = () => {
 			}
 		}
 
-		if (message) {
-			const notes = await notifications.insertModelUpdatedFailedNotifications(teamspace, model, user, message);
+		if (importData.errorReason?.message) {
+			const notes = await notifications.insertModelUpdatedFailedNotifications(teamspace, model, user, importData.errorReason.message);
 			notes.forEach((note) => upsertedNotification(null, note));
 		}
 

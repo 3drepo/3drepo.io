@@ -384,30 +384,27 @@ const testGetRevisions = () => {
 		});
 
 		Revisions.getRevisionFormat.mockImplementation((rFile) => (rFile ? '.'.concat(rFile[0].split('_').pop()) : undefined));
+		const teamspace = generateRandomString();
+		const proj = generateRandomString();
+		const container = generateRandomString();
 
 		test('should return non-void revisions if the container exists', async () => {
-			const teamspace = generateRandomString();
-			const container = generateRandomString();
-
 			Revisions.getRevisions.mockImplementationOnce(() => revisions);
 
-			const res = await Containers.getRevisions(teamspace, container, false);
+			const res = await Containers.getRevisions(teamspace, proj, container, false);
 			expect(Revisions.getRevisions).toHaveBeenCalledTimes(1);
-			expect(Revisions.getRevisions).toHaveBeenCalledWith(teamspace, container, modelTypes.CONTAINER, false,
+			expect(Revisions.getRevisions).toHaveBeenCalledWith(teamspace, proj, container, modelTypes.CONTAINER, false,
 				{ _id: 1, author: 1, timestamp: 1, tag: 1, void: 1, desc: 1, rFile: 1 });
 
 			expect(res).toEqual(formatRevisions(revisions));
 		});
 
 		test('should return all revisions if the container exists', async () => {
-			const teamspace = generateRandomString();
-			const container = generateRandomString();
-
 			Revisions.getRevisions.mockImplementationOnce(() => revisions);
 
-			const res = await Containers.getRevisions(teamspace, container, true);
+			const res = await Containers.getRevisions(teamspace, proj, container, true);
 			expect(Revisions.getRevisions).toHaveBeenCalledTimes(1);
-			expect(Revisions.getRevisions).toHaveBeenCalledWith(teamspace, container, modelTypes.CONTAINER, true,
+			expect(Revisions.getRevisions).toHaveBeenCalledWith(teamspace, proj, container, modelTypes.CONTAINER, true,
 				{ _id: 1, author: 1, timestamp: 1, tag: 1, void: 1, desc: 1, rFile: 1 });
 
 			expect(res).toEqual(formatRevisions(revisions));
@@ -509,7 +506,7 @@ const testDownloadRevisionFiles = () => {
 
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(teamspace, container, modelTypes.CONTAINER,
-				revision, { rFile: 1 });
+				revision, { rFile: 1 }, { includeVoid: true });
 
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, `${container}.history.ref`, fileName);
