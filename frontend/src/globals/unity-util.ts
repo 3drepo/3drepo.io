@@ -2551,7 +2551,7 @@ export class UnityUtil {
 	 * @category Calibration
 	 */
 	public static setCalibrationToolSelectedColors(fill: string, border: string) {
-		UnityUtil.toUnity('SetCalibrationToolSelectedColours', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({fill, border}));
+		UnityUtil.toUnity('SetCalibrationToolSelectedColours', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({ fill, border }));
 	}
 
 	/**
@@ -2560,7 +2560,7 @@ export class UnityUtil {
 	 * @category Calibration
 	 */
 	public static setCalibrationToolUnselectedColors(fill: string, border: string) {
-		UnityUtil.toUnity('SetCalibrationToolUnselectedColours', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({fill, border}));
+		UnityUtil.toUnity('SetCalibrationToolUnselectedColours', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({ fill, border }));
 	}
 
 	/**

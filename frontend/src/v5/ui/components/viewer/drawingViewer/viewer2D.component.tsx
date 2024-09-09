@@ -35,17 +35,25 @@ import CalibrationIcon from '@assets/icons/filled/calibration-filled.svg';
 import { ViewBoxType, ViewerLayer2D } from './viewerLayer2D/viewerLayer2D.component';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
-import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
+import { getDrawingImageSrc } from '@/v5/store/drawings/revisions/drawingRevisions.helpers';
 import { SVGImage } from './svgImage/svgImage.component';
 import { CentredContainer } from '@controls/centredContainer/centredContainer.component';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { isFirefox } from '@/v5/helpers/browser.helper';
 import { ZoomableImage } from './zoomableImage.types';
+import { useParams } from 'react-router';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { useAuthenticatedImage } from '@components/authenticatedResource/authenticatedResource.hooks';
+import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 const DEFAULT_VIEWBOX = { scale: 1, x: 0, y: 0, width: 0, height: 0 };
 export const Viewer2D = () => {
+	const { teamspace, project } = useParams<ViewerParams>();
 	const [drawingId] = useSearchParam('drawingId');
-	const src = getDrawingImageSrc(drawingId);
+	const revision = DrawingRevisionsHooksSelectors.selectLatestActiveRevision(drawingId);
+	const src = revision ? getDrawingImageSrc(teamspace, project, drawingId, revision._id) : '';
+	const authSrc = useAuthenticatedImage(src);
 	
 	const { close2D } = useContext(ViewerCanvasesContext);
 	const { isCalibrating, step, vector2D, setVector2D, isCalibrating2D, setIsCalibrating2D } = useContext(CalibrationContext);
@@ -54,7 +62,6 @@ export const Viewer2D = () => {
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
-
 
 	const imgRef = useRef<ZoomableImage>();
 	const imgContainerRef = useRef();
@@ -101,7 +108,12 @@ export const Viewer2D = () => {
 		setIsLoading(true);
 	}, [drawingId]);
 
-	const showSVGImage = !isFirefox() && src.toLowerCase().endsWith('.svg');
+	const showSVGImage = !isFirefox() && !src.toLowerCase().endsWith('.png');
+
+	useEffect(() => {
+		if (revision) return;
+		DrawingRevisionsActionsDispatchers.fetch(teamspace, project, drawingId);
+	}, [revision]);
 
 	return (
 		<ViewerContainer visible>
@@ -125,8 +137,8 @@ export const Viewer2D = () => {
 						<Loader />
 					</CentredContainer>
 				}
-				{showSVGImage && <SVGImage ref={imgRef} src={src} onLoad={onImageLoad} />}
-				{!showSVGImage && <DrawingViewerImage ref={imgRef} src={src} onLoad={onImageLoad} />}
+				{showSVGImage && <SVGImage ref={imgRef} src={authSrc} onLoad={onImageLoad} />}
+				{!showSVGImage && <DrawingViewerImage ref={imgRef} src={authSrc} onLoad={onImageLoad} />}
 				{ !isLoading && (<ViewerLayer2D
 					active={isCalibrating2D}
 					viewBox={viewBox}

@@ -20,7 +20,9 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 
+const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { updateOne } = require(`${src}/handler/db`);
@@ -44,6 +46,7 @@ const generateBasicData = () => {
 		con: ServiceHelper.generateRandomModel({ viewers: [viewer.user] }),
 		fed: ServiceHelper.generateRandomModel({ viewers: [viewer.user], modelType: modelTypes.FEDERATION }),
 		draw: ServiceHelper.generateRandomModel({ viewers: [viewer.user], modelType: modelTypes.DRAWING }),
+		calibration: ServiceHelper.generateCalibration(),
 	};
 
 	return data;
@@ -181,22 +184,30 @@ const addTickets = async (teamspace, project, model) => {
 	model.ticketCount = 5;
 };
 
-const addRevision = async (teamspace, model) => {
-	const rev = ServiceHelper.generateRevisionEntry(false, false);
-	await ServiceHelper.db.createRevision(teamspace, model._id, rev);
+const addRevision = async (teamspace, project, model, modelType = modelTypes.CONTAINER, hasFiles = false) => {
+	const rev = ServiceHelper.generateRevisionEntry(false, hasFiles, modelType);
+	if (hasFiles) {
+		/* eslint-disable-next-line no-param-reassign */
+		model.files = model.files ?? [];
+		model.files.push({ refData: rev.refData, thumbnailData: rev.thumbnailData, imageData: rev.imageData });
+	}
+	await ServiceHelper.db.createRevision(teamspace, project.id, model._id, rev, modelType);
 
 	/* eslint-disable-next-line no-param-reassign */
 	model.revs = model.revs || [];
 	model.revs.push(rev);
+
 	return rev;
 };
 
 const testGetModelStats = () => {
 	describe('Get model stats', () => {
-		const { users, teamspace, project, con, fed } = generateBasicData();
+		const { users, teamspace, project, con, fed, draw, calibration } = generateBasicData();
 		const [fedWithNoSubModel, fedWithNoRevInSubModel] = times(
 			2, () => ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
 		);
+
+		const drawNoRev = ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING });
 
 		const [
 			conNoRev, conFailedProcessing1, conFailedProcessing2,
@@ -225,8 +236,8 @@ const testGetModelStats = () => {
 
 		beforeAll(async () => {
 			const models = [
-				fed, con, fedWithNoSubModel, fedWithNoRevInSubModel,
-				conNoRev, conFailedProcessing1, conFailedProcessing2,
+				fed, con, draw, fedWithNoSubModel, fedWithNoRevInSubModel,
+				conNoRev, drawNoRev, conFailedProcessing1, conFailedProcessing2,
 			];
 			await setupBasicData(users, teamspace, project, models);
 			await Promise.all([
@@ -234,15 +245,32 @@ const testGetModelStats = () => {
 				addTickets(teamspace, project, fedWithNoRevInSubModel),
 			]);
 
-			const rev = await addRevision(teamspace, con);
+			const drawRev = await addRevision(teamspace, project, draw, modelTypes.DRAWING);
+			await ServiceHelper.db.createCalibration(teamspace, project.id, draw._id, drawRev._id, calibration);
+			draw.properties.calibrationStatus = calibrationStatuses.CALIBRATED;
+
+			const rev = await addRevision(teamspace, project, con);
 			fed.revs = [rev];
 		});
 
-		const generateTestData = (isFed) => {
-			const modelType = isFed ? 'federation' : 'container';
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
-			const model = isFed ? fed : con;
-			const wrongTypeModel = isFed ? con : fed;
+		const generateTestData = (modelType) => {
+			let model;
+			let wrongTypeModel;
+			let modelNotFound;
+
+			if (modelType === modelTypes.CONTAINER) {
+				wrongTypeModel = fed;
+				model = con;
+				modelNotFound = templates.containerNotFound;
+			} else if (modelType === modelTypes.FEDERATION) {
+				wrongTypeModel = con;
+				model = fed;
+				modelNotFound = templates.federationNotFound;
+			} else {
+				wrongTypeModel = fed;
+				model = draw;
+				modelNotFound = templates.drawingNotFound;
+			}
 
 			const getRoute = ({
 				projectId = project.id,
@@ -259,25 +287,39 @@ const testGetModelStats = () => {
 				[`the model is not a ${modelType}`, getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
 			];
 
+			const customCases = {
+				[modelTypes.FEDERATION]: [
+					[`the ${modelType} contains subModels with revisions`, getRoute(), true, model],
+					[`the ${modelType} contains subModels with no revision`, getRoute({ modelId: fedWithNoRevInSubModel._id }), true, fedWithNoRevInSubModel],
+					[`the ${modelType} does not have subModels`, getRoute({ modelId: fedWithNoSubModel._id }), true, fedWithNoSubModel],
+				],
+				[modelTypes.CONTAINER]: [
+					[`the ${modelType} is valid and user has access`, getRoute(), true, model],
+					[`the ${modelType} is valid and user has access (no revision)`, getRoute({ modelId: conNoRev._id }), true, conNoRev],
+					[`the ${modelType} is valid and user has access (with failed revision - 1)`, getRoute({ modelId: conFailedProcessing1._id }), true, conFailedProcessing1],
+					[`the ${modelType} is valid and user has access (with failed revision - 2)`, getRoute({ modelId: conFailedProcessing2._id }), true, conFailedProcessing2],
+				],
+				[modelTypes.DRAWING]: [
+					[`the ${modelType} is valid and user has access`, getRoute(), true, model],
+					[`the ${modelType} is valid and user has access (no revision)`, getRoute({ modelId: drawNoRev._id }), true, drawNoRev],
+				],
+			};
+
 			return [
 				...basicCases,
-				...(isFed
-					? [
-						[`the ${modelType} contains subModels with revisions`, getRoute(), true, model],
-						[`the ${modelType} contains subModels with no revision`, getRoute({ modelId: fedWithNoRevInSubModel._id }), true, fedWithNoRevInSubModel],
-						[`the ${modelType} does not have subModels`, getRoute({ modelId: fedWithNoSubModel._id }), true, fedWithNoSubModel],
-					]
-					: [
-						[`the ${modelType} is valid and user has access`, getRoute(), true, model],
-						[`the ${modelType} is valid and user has access (no revision)`, getRoute({ modelId: conNoRev._id }), true, conNoRev],
-						[`the ${modelType} is valid and user has access (with failed revision - 1)`, getRoute({ modelId: conFailedProcessing1._id }), true, conFailedProcessing1],
-						[`the ${modelType} is valid and user has access (with failed revision - 2)`, getRoute({ modelId: conFailedProcessing2._id }), true, conFailedProcessing2],
-					]),
+				...customCases[modelType],
 			];
 		};
 
 		const formatToStats = ({ properties, ticketCount = 0, revs = [] }) => {
-			const { subModels, status, desc, properties: { code, unit }, federate, errorReason, type } = properties;
+			const { subModels, status, desc, number, properties: props, calibrationStatus,
+				federate, errorReason, type } = properties;
+
+			let { modelType } = properties;
+			if (!modelType) {
+				modelType = federate ? modelTypes.FEDERATION : modelTypes.CONTAINER;
+			}
+
 			revs.sort(({ timestamp: t1 }, { timestamp: t2 }) => {
 				if (t1 < t2) return -1;
 				if (t1 > t2) return 1;
@@ -286,9 +328,15 @@ const testGetModelStats = () => {
 
 			const latestRev = revs.length ? revs[revs.length - 1] : undefined;
 			const res = {
-				code,
-				unit,
+				code: modelType === modelTypes.DRAWING ? undefined : props.code,
+				unit: modelType === modelTypes.DRAWING ? undefined : props.unit,
+				number: modelType === modelTypes.DRAWING ? number : undefined,
+				desc: modelType === modelTypes.CONTAINER ? undefined : desc,
+				lastUpdated: modelType === modelTypes.FEDERATION ? latestRev?.timestamp?.getTime() : undefined,
+				containers: modelType === modelTypes.FEDERATION ? subModels : undefined,
 				status,
+				calibration: modelType === modelTypes.DRAWING ? calibrationStatus : undefined,
+				type: modelType === modelTypes.FEDERATION ? undefined : type,
 			};
 
 			if (federate) {
@@ -308,10 +356,10 @@ const testGetModelStats = () => {
 				res.revisions = {
 					total: revs.length,
 					lastUpdated: latestRev?.timestamp ? latestRev.timestamp.getTime() : undefined,
-					latestRevision: latestRev?.tag || latestRev?._id,
+					latestRevision: modelType === modelTypes.DRAWING && latestRev
+						? `${latestRev.statusCode}-${latestRev.revCode}`
+						: latestRev?.tag || latestRev?._id,
 				};
-
-				res.type = type;
 			}
 
 			if (status === 'failed') {
@@ -321,7 +369,7 @@ const testGetModelStats = () => {
 				};
 			}
 
-			return res;
+			return deleteIfUndefined(res);
 		};
 
 		const runTest = (desc, route, success, expectedOutput) => {
@@ -336,8 +384,9 @@ const testGetModelStats = () => {
 			});
 		};
 
-		describe.each(generateTestData(true))('Federations', runTest);
-		describe.each(generateTestData())('Containers', runTest);
+		describe.each(generateTestData(modelTypes.FEDERATION))('Federations', runTest);
+		describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
+		describe.each(generateTestData(modelTypes.DRAWING))('Drawings', runTest);
 	});
 };
 
@@ -914,6 +963,57 @@ const testGetSettings = () => {
 	});
 };
 
+const testGetThumbnail = () => {
+	describe('Get drawing thumbnail', () => {
+		const { users, teamspace, project, draw, fed } = generateBasicData();
+		const drawNoRev = ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING });
+
+		beforeAll(async () => {
+			const models = [draw, drawNoRev, fed];
+			await setupBasicData(users, teamspace, project, models);
+			await addRevision(teamspace, project, draw, modelTypes.DRAWING, true);
+		});
+
+		const generateTestData = () => {
+			const model = draw;
+			const wrongTypeModel = fed;
+			const modelNotFound = templates.drawingNotFound;
+
+			const getRoute = ({
+				projectId = project.id,
+				key = users.tsAdmin.apiKey,
+				modelId = model._id,
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/drawings/${modelId}/thumbnail${key ? `?key=${key}` : ''}`;
+
+			return [
+				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				['the user does not have access to the drawing', getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
+				['the drawing does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
+				['the model is not a drawing', getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
+				['the drawing has a thumbnail and user has access', getRoute(), true, model],
+				['the drawing does not have a thumbnail and user has access', getRoute({ modelId: drawNoRev._id }), false, templates.fileNotFound],
+			];
+		};
+
+		const runTest = (desc, route, success, expectedOutput) => {
+			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+				const res = await agent.get(route).expect(expectedStatus);
+				if (success) {
+					expect(res.body.toString()).toEqual(
+						expectedOutput.files[expectedOutput.files.length - 1].thumbnailData);
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
+
+		describe.each(generateTestData())('Drawings', runTest);
+	});
+};
+
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -928,4 +1028,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	testDeleteModel();
 	testUpdateModelSettings();
 	testGetSettings();
+	testGetThumbnail();
 });

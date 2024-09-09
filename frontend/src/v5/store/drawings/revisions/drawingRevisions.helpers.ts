@@ -18,28 +18,32 @@
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import { CreateDrawingRevisionBody, IDrawingRevision } from './drawingRevisions.types';
 import { NewDrawing } from '../drawings.types';
+import { getUrl } from '@/v5/services/api/default';
 
 export const prepareRevisionData = (revision): IDrawingRevision => ({
 	...revision,
 	timestamp: getNullableDate(revision.timestamp),
-	tag: revision?.tag || '',
+	name: revision?.name || '',
 	author: revision?.author || '',
 	desc: revision?.desc || '',
+	revCode: revision?.revCode || '',
 	void: revision?.void || false,
 });
 
-export const createDrawingFromRevisionBody = (body: CreateDrawingRevisionBody): NewDrawing => ({
+export const createDrawingFromRevisionBody = (body: CreateDrawingRevisionBody): Omit<NewDrawing, '_id'> => ({
 	name: body.drawingName,
-	drawingNumber: body.drawingNumber,
-	category: body.drawingCategory,
+	number: body.drawingNumber,
+	type: body.drawingType,
 	desc: body.drawingDesc,
 });
 
 export const createFormDataFromRevisionBody = (body: CreateDrawingRevisionBody) => {
 	const formData = new FormData();
 	formData.append('file', body.file);
-	formData.append('revisionCode', body.revisionCode);
+	formData.append('revCode', body.revCode);
 	formData.append('statusCode', body.statusCode);
 	if (body.description) formData.append('desc', body.description);
 	return formData;
 };
+
+export const getDrawingImageSrc = (teamspace, projectId, drawingId, revision) => getUrl(`teamspaces/${teamspace}/projects/${projectId}/drawings/${drawingId}/revisions/${revision}/files/image`);

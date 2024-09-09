@@ -19,12 +19,13 @@ import { Constants } from '@/v5/helpers/actions.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { TeamspaceAndProjectId, ProjectId, ProjectAndDrawingId, TeamspaceProjectAndDrawingId, SuccessAndErrorCallbacks } from '../store.types';
-import { IDrawing, DrawingStats, DrawingUploadStatus, NewDrawing, CalibrationState } from './drawings.types';
+import { IDrawing, DrawingStats, DrawingUploadStatus, NewDrawing, MinimumDrawing, CalibrationState } from './drawings.types';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import { IDrawingRevision } from './revisions/drawingRevisions.types';
 import { prepareSingleDrawingData } from './drawings.helpers';
 import { merge } from 'lodash';
+import { Role } from '../currentUser/currentUser.types';
 
 export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions({
 	addFavourite: ['teamspace', 'projectId', 'drawingId'],
@@ -36,14 +37,15 @@ export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions
 	fetchDrawingStatsSuccess: ['projectId', 'drawingId', 'stats'],
 	deleteDrawing: ['teamspace', 'projectId', 'drawingId', 'onSuccess', 'onError'],
 	deleteDrawingSuccess: ['projectId', 'drawingId'],
-	fetchCategories: ['teamspace', 'projectId'],
-	fetchCategoriesSuccess: ['projectId', 'categories'],
+	fetchTypes: ['teamspace', 'projectId'],
+	fetchTypesSuccess: ['projectId', 'types'],
 	createDrawing: ['teamspace', 'projectId', 'drawing', 'onSuccess', 'onError'],
 	createDrawingSuccess: ['projectId', 'drawing'],
 	updateDrawing: ['teamspace', 'projectId', 'drawingId', 'drawing', 'onSuccess', 'onError'],
 	updateDrawingSuccess: ['projectId', 'drawingId', 'drawing'],
 	setDrawingStatus: ['projectId', 'drawingId', 'status'],
 	drawingProcessingSuccess: ['projectId', 'drawingId', 'revision'],
+	resetDrawingStatsQueue: [],
 }, { prefix: 'DRAWINGS/' }) as { Types: Constants<IDrawingsActionCreators>; Creators: IDrawingsActionCreators };
 
 const getDrawingFromState = (state: DrawingsState, projectId, drawingId) => (
@@ -67,18 +69,21 @@ export const fetchDrawingStatsSuccess = (state: DrawingsState, { drawingId, proj
 	Object.assign(drawing, prepareSingleDrawingData(drawing, stats));
 };
 
-export const fetchCategoriesSuccess = (state: DrawingsState, { projectId, categories }:FetchCategoriesSuccessAction ) => {
-	state.categoriesByProject[projectId] = categories;
+export const fetchTypesSuccess = (state: DrawingsState, { projectId, types }:FetchTypesSuccessAction ) => {
+	state.typesByProject[projectId] = types;
 };
 
 export const createDrawingSuccess = (state: DrawingsState, { projectId, drawing }:CreateDrawingSuccessAction ) => {
+	// a drawing with that id already exists in the store
+	if (getDrawingFromState(state, projectId, drawing._id)) return;
+
 	state.drawingsByProject[projectId] = (state.drawingsByProject[projectId] || []).concat([{
 		...drawing,
 		revisionsCount: 0,
-		calibration: {
-			state: CalibrationState.EMPTY,
-		},
+		calibration: CalibrationState.EMPTY,
 		status: DrawingUploadStatus.OK,
+		isFavourite: false,
+		role: Role.ADMIN,
 	}]);
 };
 
@@ -104,7 +109,7 @@ export const drawingProcessingSuccess = (state, {
 	const newRevisionProperties = {
 		revisionsCount: drawing.revisionsCount + 1,
 		lastUpdated: getNullableDate(revision.timestamp),
-		latestRevision: revision.tag,
+		latestRevision: revision.name,
 	};
 	Object.assign(drawing, newRevisionProperties);
 };
@@ -120,12 +125,12 @@ export const deleteDrawingSuccess = (state, {
 
 const INITIAL_STATE: DrawingsState = {
 	drawingsByProject: {},
-	categoriesByProject: {},
+	typesByProject: {},
 };
 
 export interface DrawingsState {
 	drawingsByProject: Record<string, IDrawing[]>;
-	categoriesByProject: Record<string, string[]>;
+	typesByProject: Record<string, string[]>;
 }
 
 export const drawingsReducer = createReducer<DrawingsState>(INITIAL_STATE, produceAll({
@@ -133,7 +138,7 @@ export const drawingsReducer = createReducer<DrawingsState>(INITIAL_STATE, produ
 	[DrawingsTypes.FETCH_DRAWINGS_SUCCESS]: fetchDrawingsSuccess,
 	[DrawingsTypes.FETCH_DRAWING_STATS_SUCCESS]: fetchDrawingStatsSuccess,
 	[DrawingsTypes.DELETE_DRAWING_SUCCESS]: deleteDrawingSuccess,
-	[DrawingsTypes.FETCH_CATEGORIES_SUCCESS]: fetchCategoriesSuccess,
+	[DrawingsTypes.FETCH_TYPES_SUCCESS]: fetchTypesSuccess,
 	[DrawingsTypes.CREATE_DRAWING_SUCCESS]: createDrawingSuccess,
 	[DrawingsTypes.UPDATE_DRAWING_SUCCESS]: updateDrawingSuccess,
 	[DrawingsTypes.SET_DRAWING_STATUS]: setDrawingStatus,
@@ -150,14 +155,15 @@ export type FetchDrawingStatsAction = Action<'FETCH_DRAWING_STATS'> & TeamspaceP
 export type FetchDrawingStatsSuccessAction = Action<'FETCH_DRAWING_STATS_SUCCESS'> & ProjectAndDrawingId & { stats: DrawingStats };
 export type DeleteDrawingAction = Action<'DELETE'> & TeamspaceProjectAndDrawingId & SuccessAndErrorCallbacks;
 export type DeleteDrawingSuccessAction = Action<'DELETE_SUCCESS'> & ProjectAndDrawingId;
-export type FetchCategoriesAction = Action<'FETCH_DRAWINGS_CATEGORIES'> & TeamspaceAndProjectId;
-export type FetchCategoriesSuccessAction = Action<'FETCH_DRAWINGS_CATEGORIES_SUCCESS'> & ProjectId & { categories: string[] };
-export type CreateDrawingAction = Action<'CREATE_DRAWING'> & TeamspaceAndProjectId & SuccessAndErrorCallbacks & { drawing: IDrawing };
-export type CreateDrawingSuccessAction = Action<'CREATE_DRAWING_SUCCESS'> &  ProjectId & { drawing: IDrawing };
-export type UpdateDrawingAction = Action<'UPDATE_DRAWING'> & TeamspaceProjectAndDrawingId & SuccessAndErrorCallbacks & { drawing: Partial<IDrawing> };
-export type UpdateDrawingSuccessAction = Action<'UPDATE_DRAWING_SUCCESS'> &  TeamspaceProjectAndDrawingId & { drawing: Partial<IDrawing> };
+export type FetchTypesAction = Action<'FETCH_DRAWINGS_TYPES'> & TeamspaceAndProjectId;
+export type FetchTypesSuccessAction = Action<'FETCH_DRAWINGS_TYPES_SUCCESS'> & ProjectId & { types: string[] };
+export type CreateDrawingAction = Action<'CREATE_DRAWING'> & TeamspaceAndProjectId & SuccessAndErrorCallbacks & { drawing: NewDrawing };
+export type CreateDrawingSuccessAction = Action<'CREATE_DRAWING_SUCCESS'> &  ProjectId & { drawing: NewDrawing };
+export type UpdateDrawingAction = Action<'UPDATE_DRAWING'> & TeamspaceProjectAndDrawingId & SuccessAndErrorCallbacks & { drawing: Partial<MinimumDrawing> };
+export type UpdateDrawingSuccessAction = Action<'UPDATE_DRAWING_SUCCESS'> &  TeamspaceProjectAndDrawingId & { drawing: Partial<MinimumDrawing> };
 export type SetDrawingStatusAction = Action<'SET_DRAWING_STATUS'> & ProjectAndDrawingId & { status: DrawingUploadStatus };
 export type DrawingProcessingSuccessAction = Action<'DRAWING_PROCESSING_SUCCESS'> & ProjectAndDrawingId & { revision: IDrawingRevision };
+export type ResetDrawingStatsQueueAction = Action<'RESET_CONTAINER_STATS_QUEUE'>;
 
 export interface IDrawingsActionCreators {
 	addFavourite: (teamspace: string, projectId: string, drawingId: string) => AddFavouriteAction;
@@ -174,9 +180,9 @@ export interface IDrawingsActionCreators {
 		onError: (error) => void,
 	) => DeleteDrawingAction;
 	deleteDrawingSuccess: (projectId: string, drawingId: string) => DeleteDrawingSuccessAction;
-	fetchCategories: (teamspace: string, projectId: string) => FetchCategoriesAction;
-	fetchCategoriesSuccess: (projectId: string, categories: string[]) => FetchCategoriesSuccessAction;
-	createDrawing: (teamspace: string, projectId: string, drawing: IDrawing, onSuccess: () => void, onError: (e:Error) => void) => CreateDrawingAction;
+	fetchTypes: (teamspace: string, projectId: string) => FetchTypesAction;
+	fetchTypesSuccess: (projectId: string, types: string[]) => FetchTypesSuccessAction;
+	createDrawing: (teamspace: string, projectId: string, drawing: NewDrawing, onSuccess: () => void, onError: (e:Error) => void) => CreateDrawingAction;
 	createDrawingSuccess: (projecId: string, drawing: NewDrawing) => CreateDrawingSuccessAction;
 	setDrawingStatus: (projectId: string, drawingId: string, status: DrawingUploadStatus) => SetDrawingStatusAction;
 	updateDrawing: (
@@ -193,4 +199,5 @@ export interface IDrawingsActionCreators {
 		drawingId: string,
 		revision: IDrawingRevision
 	) => DrawingProcessingSuccessAction;
+	resetDrawingStatsQueue: () => ResetDrawingStatsQueueAction;
 }
