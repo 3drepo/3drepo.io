@@ -25,7 +25,7 @@ import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 
 export type WaitActionCallback = ((state?: object, action?:Action, previousState?: object) => boolean);
 type WaitAction = (Action | string | WaitActionCallback) ;
-export type WaitForActions = (dispatchingfunction: () => any, waitActions: WaitAction[], debugActions?: boolean) => void;
+export type WaitForActions = (dispatchingfunction: () => any, waitActions: WaitAction[]) => void;
 
 // A different Node version between the backend and the frontend
 // is causing a problem with axios when files are sent to an endpoint.
@@ -42,7 +42,6 @@ export const spyOnAxiosApiCallWithFile = (api, method) => {
 export const createTestStore = () => {
 	let waitingActions: WaitAction[] = [];
 	let resolvePromise;
-	let debugActions = false;
 
 	const sagaMiddleware = createSagaMiddleware();
 	const middlewares = applyMiddleware(sagaMiddleware);
@@ -65,13 +64,6 @@ export const createTestStore = () => {
 	const store = createStore((state: any, action) =>{
 		const st = mainReducer(state, action);		
 
-		if (debugActions) {
-			console.log(JSON.stringify({
-				dispatchedAction: action,
-				waitingAction: waitingActions[0],
-			}, null, '\t'));
-		}
-
 		if (discountMatchingActions(st, action, state) && resolvePromise) {
 			resolvePromise(true);
 			resolvePromise = null;
@@ -81,13 +73,11 @@ export const createTestStore = () => {
 	}		
 	, middlewares);
 	
-	const waitForActions:WaitForActions = (dispatchingfunction, waitActions, debug?: boolean) =>  { 
+	const waitForActions:WaitForActions = (dispatchingfunction, waitActions) =>  { 
 		waitingActions = waitActions;
 		const { resolve, promiseToResolve } = getWaitablePromise();
 		resolvePromise = resolve;
 		dispatchingfunction();
-
-		debugActions = debug;
 		return promiseToResolve;
 	}
 

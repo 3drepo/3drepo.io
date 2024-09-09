@@ -24,7 +24,7 @@ import { CalibrationStates, DrawingStats, DrawingUploadStatus, IDrawing, Minimum
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import { selectActiveRevisions, selectLastRevision, selectRevisionsPending } from './revisions/drawingRevisions.selectors';
 import { Role } from '../currentUser/currentUser.types';
-import { getState } from '@/v5/helpers/store.helpers';
+import { getState } from '@/v5/helpers/redux.helpers';
 
 export const DRAWING_LIST_COLUMN_WIDTHS = {
 	name: {
