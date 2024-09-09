@@ -41,7 +41,7 @@ const getImage = async (req, res) => {
 };
 
 const getRevisions = (modelType) => async (req, res, next) => {
-	const { teamspace, model } = req.params;
+	const { teamspace, project, model } = req.params;
 	const showVoid = req.query.showVoid === 'true';
 
 	const fn = {
@@ -50,7 +50,7 @@ const getRevisions = (modelType) => async (req, res, next) => {
 	};
 
 	try {
-		const revisions = await fn[modelType](teamspace, model, showVoid);
+		const revisions = await fn[modelType](teamspace, project, model, showVoid);
 		req.outputData = revisions;
 		next();
 	} catch (err) {

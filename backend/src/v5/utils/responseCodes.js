@@ -66,6 +66,7 @@ ResponseCodes.templates = {
 
 	// Drawing related error
 	drawingNotFound: { message: 'Drawing not found.', status: 404 },
+	calibrationNotFound: { message: 'Calibration not found.', status: 404 },
 
 	// Custom ticket related error
 	templateNotFound: { message: 'Template not found.', status: 404 },
