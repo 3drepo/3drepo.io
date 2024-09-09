@@ -37,6 +37,7 @@ export const useDrawingForm = (defaultValues?: IDrawing) => {
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const types = DrawingsHooksSelectors.selectTypes();
 	const isTypesPending = DrawingsHooksSelectors.selectIsTypesPending();
+	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	
 	const drawingsNames = [];
 	const drawingNumbers = [];
@@ -71,17 +72,16 @@ export const useDrawingForm = (defaultValues?: IDrawing) => {
 	};
 	
 	useEffect(() => {
-		if (isTypesPending) return;
+		if (isTypesPending || !isAdmin) return;
 		if (!defaultValues?.type) {
 			setValue('type', types[0]);
 		}
-	}, [isTypesPending]);
+	}, [isTypesPending, isAdmin]);
 
 	useEffect(() => {
-		if (!isTypesPending) return;
+		if (!isTypesPending || !isAdmin) return;
 		DrawingsActionsDispatchers.fetchTypes(teamspace, project);
-	}, []);
-
+	}, [isAdmin]);
 
 	return { onSubmitError, formData };
 };

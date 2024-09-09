@@ -46,6 +46,7 @@ import { RevisionsListItemAuthor } from '../revisionDetails/components/revisions
 import { RevisionsListItemTag } from '../revisionDetails/components/revisionsListItem/revisionsListItem.styles';
 import { IDrawingRevision } from '@/v5/store/drawings/revisions/drawingRevisions.types';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
+import { downloadFile } from '@components/authenticatedResource/authenticatedResource.hooks';
 
 interface IDrawingRevisionDetails {
 	drawingId: string;
@@ -61,10 +62,7 @@ export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: ID
 	const selected = revisions.findIndex((r) => !r.void);
 
 	const handleDownloadRevision = async (revision: IDrawingRevision) => {
-		const anchor = document.createElement('a');
-		anchor.href = await getRevisionFileUrl(teamspace, project, drawingId, revision._id);
-		anchor.download = `${revision.revCode}-${revision.statusCode}`;
-		anchor.click();
+		await downloadFile(getRevisionFileUrl(teamspace, project, drawingId, revision._id),  `${revision.revCode}-${revision.statusCode}${revision.format}`);
 	};
 
 	useEffect(() => {
