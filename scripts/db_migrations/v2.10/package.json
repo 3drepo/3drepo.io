@@ -3,6 +3,7 @@
   "version": "2.10.0",
   "private": true,
   "dependencies": {
+    "3drepo.io-scripts-db_migrations": "file:",
     "mongodb": "2.2.35",
     "mongodb-core": "3.0.3"
   },

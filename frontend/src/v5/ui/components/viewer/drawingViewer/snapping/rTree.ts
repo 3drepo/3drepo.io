@@ -16,9 +16,8 @@
  */
 
 import { Vector2, Line, CubicBezier, Bounds } from './types';
-
 import { closestPointOnLine, lineLineIntersection } from './lineFunctions';
-import { closestPointOnCurve, curveCurveIntersection, lineCurveIntersection } from './bezierFunctions';
+import { closestPointOnCurve, curveCurveIntersection, updateCurveSelfIntersection, lineCurveIntersection } from './bezierFunctions';
 
 export class RTreeNode extends Bounds {
 	line: Line | undefined;
@@ -105,6 +104,30 @@ class TraversalContext {
 		this.edgeQueryTime = 0;
 		this.intersectionQueryTime = 0;
 	}
+
+	updateClosestIntersection(p: Vector2) {
+		const d2 = Vector2.distance2(this.position, p);
+		if (d2 < this.closestIntersectionDistance2) {
+			this.closestIntersectionDistance2 = d2;
+			this.closestIntersection = p;
+		}
+	}
+
+	updateClosestEdge(p: Vector2) {
+		const d = Vector2.distance(this.position, p); // (Note edges are compared by distance, not distance squared)
+		if ( d < this.closestEdgeDistance) {
+			this.closestEdgeDistance = d;
+			this.closestEdge = p;
+		}
+	}
+
+	updateClosestNode(p: Vector2) {
+		const d2 = Vector2.distance2(this.position, p);
+		if (d2 < this.closestNodeDistance2) {
+			this.closestNodeDistance2 = d2;
+			this.closestNode = p;
+		}
+	}
 }
 
 export class IntersectionTestResults {
@@ -133,11 +156,7 @@ class RTreeQueries {
 		for (const node of ctx.nodes) {
 			if (node.line) {
 				const p = closestPointOnLine(node.line.start.x, node.line.start.y, node.line.end.x, node.line.end.y, ctx.position.x, ctx.position.y);
-				const d = Vector2.subtract(ctx.position, p).norm;
-				if (d < ctx.closestEdgeDistance) {
-					ctx.closestEdgeDistance = d;
-					ctx.closestEdge = p;
-				}
+				ctx.updateClosestEdge(p);
 				ctx.numLineTests++;
 			}
 
@@ -148,11 +167,7 @@ class RTreeQueries {
 			if (ctx.nodes.length < 100) {
 				if (node.curve) {
 					const p = closestPointOnCurve(node.curve, ctx.position);
-					const d = Vector2.subtract(ctx.position, p).norm;
-					if ( d < ctx.closestEdgeDistance) {
-						ctx.closestEdgeDistance = d;
-						ctx.closestEdge = p;
-					}
+					ctx.updateClosestEdge(p);
 					ctx.numCurveTests++;
 				}
 			}
@@ -162,27 +177,13 @@ class RTreeQueries {
 	static findClosestNode(ctx: TraversalContext) {
 		for (const node of ctx.nodes) {
 			if (node.line) {
-				this.testClosestPoint(node.line.start, ctx);
-				this.testClosestPoint(node.line.end, ctx);
+				ctx.updateClosestNode(node.line.start);
+				ctx.updateClosestNode(node.line.end);
 			}
 			if (node.curve) {
-				this.testClosestPoint(node.curve.p0, ctx);
-				this.testClosestPoint(node.curve.p3, ctx);
+				ctx.updateClosestNode(node.curve.p0);
+				ctx.updateClosestNode(node.curve.p3);
 			}
-		}
-	}
-
-	static distance2(a: { x: number, y: number }, b: { x: number, y: number }): number {
-		return (b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y);
-	}
-
-	static testClosestPoint(p: { x: number, y: number }, ctx: TraversalContext) {
-		const a = ctx.position;
-		const b = p;
-		const d2 = RTreeQueries.distance2(a, b);
-		if (d2 < ctx.closestNodeDistance2) {
-			ctx.closestNodeDistance2 = d2;
-			ctx.closestNode = new Vector2(p.x, p.y);
 		}
 	}
 
@@ -200,21 +201,28 @@ class RTreeQueries {
 
 		const nodes = ctx.nodes;
 		for (let i = 0; i < nodes.length; i++) {
+
+			const a = nodes[i];
+
 			for (let j = i + 1; j < nodes.length; j++) {
-				const a = nodes[i];
 				const b = nodes[j];
 				if (RTreeNode.intersects(a, b)) {
 					this.nodeNodeIntersections(a, b, intersections);
 					while (intersections.length > 0) {
-						const p = intersections.pop();
-						const d2 = RTreeQueries.distance2(ctx.position, p);
-						if (d2 < ctx.closestIntersectionDistance2) {
-							ctx.closestIntersectionDistance2 = d2;
-							ctx.closestIntersection = p;
-						}
+						ctx.updateClosestIntersection(intersections.pop());
 						ctx.numIntersectionTests++;
 					}
 					ctx.numIntersectingPairs++;
+				}
+			}
+
+			// Check for self-intersections for primitives that can have them
+			if (a.curve) {
+				if (a.curve.selfIntersection === undefined) {
+					updateCurveSelfIntersection(a.curve);
+				}
+				if (a.curve.selfIntersection) {
+					ctx.updateClosestIntersection(a.curve.selfIntersection);
 				}
 			}
 		}

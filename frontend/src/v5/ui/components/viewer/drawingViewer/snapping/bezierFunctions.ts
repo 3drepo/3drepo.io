@@ -1016,7 +1016,8 @@ export function lineCurveIntersection(curve: CubicBezier, line: Line, results: V
 
 export function curveCurveIntersection(a: CubicBezier, b: CubicBezier, results: Vector2[]) {
 
-	const start = performance.now();
+	// This creates a ninth-order polynomial, in a RootFinder problem that can
+	// be handed over directly.
 
 	const P = createCurveCurvePolynomial(b, a);
 	const f = new RootFinder();
@@ -1034,7 +1035,6 @@ export function curveCurveIntersection(a: CubicBezier, b: CubicBezier, results: 
 			let q = a.evaluate(root.u);
 			let c = closestPointOnCurve(b, q);
 
-
 			const d = Vector2.norm(c, q) / P.s; // P.s is the scale applied to normalise the polynomial. This is used to calibrate the threshold for rejecting intersections as outside 0..1.
 			if (d > 0.01) {
 				continue;
@@ -1043,8 +1043,56 @@ export function curveCurveIntersection(a: CubicBezier, b: CubicBezier, results: 
 			results.push(q);
 		}
 	}
+}
 
-	console.log('Time ' + (performance.now() - start));
+export function updateCurveSelfIntersection(a: CubicBezier) {
 
-	console.warn('Curve-Curve tests not finished yet');
+	// Updates the CubicBezier's selfIntersection member with the point of self
+	// intersection, or false if there is none.
+
+	// This method is based on setting P(u)=P(v) and then removing the trivial
+	// solution of u=v to get the reduced difference. The roots of this
+	// quadratic are the self-intersection points.
+
+	// We do this by getting the Canonical Form through solving a system of
+	// linear equations, and finding the roots using P3, as shown by Parcly Taxel:
+	// https://math.stackexchange.com/questions/3776840/2d-cubic-bezier-curve-point-of-self-intersection
+
+	// (The geometric transform method of canonicalisation is not robust, e.g.
+	// if a control line is parallel to a shear axis, whereas the linear solve
+	// requires inverting a 2x2 matrix, for which there exists an  explicit
+	// equation).
+
+	const a01x = (a.p0.x - a.p1.x);
+	const a01y = (a.p0.y - a.p1.y);
+	const a12x = (a.p1.x - a.p2.x);
+	const a12y = (a.p1.y - a.p2.y);
+	const a03x = (a.p0.x - a.p3.x);
+	const a03y = (a.p0.y - a.p3.y);
+	const x = (a01x * a03y) / (a01x * a12y - a12x * a01y) - (a03x * a01y) / (a01x * a12y - a12x * a01y);
+	const y = (a03x * a12y) / (a01x * a12y - a12x * a01y) - (a12x * a03y) / (a01x * a12y - a12x * a01y);
+
+	// (The canonical components may be NaN if the curve is a quadric, however
+	// quadrics cannot self-intersect so this will also be picked up by the
+	// NaN check below.)
+
+	// From this form we can get the root(s) of the quadratic
+
+	const u = (x - 3) / (x + y - 3);
+	const v = (u * u) + (3 / (x + y - 3));
+	const t = (u - Math.sqrt((u * u) - (4 * v))) / 2;
+
+	// See if this curve has any intersections
+
+	if (isNaN(t)) {
+		a.selfIntersection = false;
+		return;
+	}
+
+	if (t < 0 || t > 1) {
+		a.selfIntersection = false;
+		return;
+	}
+
+	a.selfIntersection = a.evaluate(t);
 }

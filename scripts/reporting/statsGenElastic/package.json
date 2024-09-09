@@ -14,7 +14,8 @@
     "@elastic/elasticsearch": "7.9.1",
     "crypto-js": "4.0.0",
     "mongodb": "3.3.5",
-    "neat-csv": "5.2.0"
+    "neat-csv": "5.2.0",
+    "threeDRepoStatsGenElastic": "file:"
   },
   "devDependencies": {
     "eslint": "6.8.0",

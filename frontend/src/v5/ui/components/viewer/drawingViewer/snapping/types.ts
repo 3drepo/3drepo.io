@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { MediaBluetoothOff } from '@mui/icons-material';
+
 export class Bounds {
 	xmin: number;
 
@@ -71,6 +73,15 @@ export class Vector2 {
 
 	static scale(a: Vector2, b: number): Vector2 {
 		return new Vector2(a.x * b, a.y * b);
+	}
+
+	static distance2(a: Vector2, b: Vector2): number {
+		return (b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y);
+	}
+
+	static distance(a: Vector2, b: Vector2): number {
+		return Math.sqrt((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y));
+
 	}
 
 	toString() {
@@ -221,6 +232,12 @@ export class CubicBezier implements IBounds {
 	// cached.
 
 	qq: QuinticPolynomial;
+
+	// A self-intersection point, or undefined if there is none. This will not
+	// be initialised automatically. Use curveSelfIntersection to set this to
+	// the point of self intersection, or false, if there is none.
+
+	selfIntersection: Vector2 | undefined | false;
 
 	constructor(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2) {
 		this.p0 = p0;

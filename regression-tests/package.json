@@ -30,6 +30,7 @@
     "@types/selenium-webdriver": "4.1.13",
     "chai": "4.3.7",
     "quoted-printable": "1.0.1",
+    "regression_tests": "file:",
     "selenium-webdriver": "4.15.0"
   }
 }
