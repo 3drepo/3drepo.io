@@ -1054,14 +1054,15 @@ export function updateCurveSelfIntersection(a: CubicBezier) {
 	// solution of u=v to get the reduced difference. The roots of this
 	// quadratic are the self-intersection points.
 
-	// We do this by getting the Canonical Form through solving a system of
-	// linear equations, and finding the roots using P3, as shown by Parcly Taxel:
+	// We do this by getting the Canonical form, and finding the roots using only
+	// P3 as shown by Parcly Taxel:
 	// https://math.stackexchange.com/questions/3776840/2d-cubic-bezier-curve-point-of-self-intersection
 
-	// (The geometric transform method of canonicalisation is not robust, e.g.
-	// if a control line is parallel to a shear axis, whereas the linear solve
-	// requires inverting a 2x2 matrix, for which there exists an  explicit
-	// equation).
+	// For canonicalisation, we use the change-of-basis matrix to map P3 to the
+	// canonical coordinate system. The geometric transform method is not robust
+	// - e.g to control lines being parallel to a shear axis - whereas the
+	// change-of-basis is a 2x2 matrix that can be inverted explicitly with a
+	// fairly simple equation.
 
 	const a01x = (a.p0.x - a.p1.x);
 	const a01y = (a.p0.y - a.p1.y);
