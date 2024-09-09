@@ -16,10 +16,9 @@
  */
 
 /**
- * This script is used to check the processing state of model(s).
- * Model status should be 'ok' or 'failed' unless it is either 'queued' or 'processing'.
- * Models that have a 'queued' or 'processing' status while not present in the queued
- * have in a bad state and resetProcessingFlag can be used to reset it.
+ * This script is used to check the processing status of models/drawings.
+ * Processing status should be 'ok' or 'failed'.
+ * The utility script `resetProcessingFlag` can be used to reset zombie statuses for models.
  */
 
 const { v5Path } = require('../../../interop');
@@ -28,48 +27,52 @@ const { logger } = require(`${v5Path}/utils/logger`);
 const { getTeamspaceList } = require('../../utils');
 
 const { find } = require(`${v5Path}/handler/db`);
-const { SETTINGS_COL } = require(`${v5Path}/models/modelSettings.constants`);
+const { SETTINGS_COL, processStatuses } = require(`${v5Path}/models/modelSettings.constants`);
+const { DRAWINGS_HISTORY_COL } = require(`${v5Path}/models/revisions.constants`);
 const { sendSystemEmail } = require(`${v5Path}/services/mailer`);
 const { templates: emailTemplates } = require(`${v5Path}/services/mailer/mailer.constants`);
+const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
 const Path = require('path');
 
 let TIME_LIMIT = 24 * 60 * 60 * 1000; // hours * 1 hour in ms
 
-const processTeamspace = async (teamspace, model) => {
+const processTeamspace = async (teamspace) => {
 	const expiredTimestamp = new Date((new Date()) - TIME_LIMIT);
-	const incompleteStatusQuery = { $or: [{ status: 'processing' }, { status: 'queued' }], timestamp: { $lt: expiredTimestamp } };
-	const query = model ? { ...incompleteStatusQuery, _id: model } : incompleteStatusQuery;
+	const zombieQuery = {
+		status: { $exists: true, $not: { $regex: `(${processStatuses.OK})|(${processStatuses.FAILED})` } },
+		timestamp: { $lt: expiredTimestamp },
+	};
 
-	const incompleteModels = await find(teamspace, SETTINGS_COL, query, { status: 1, timestamp: 1 });
 	logger.logInfo(`\t-${teamspace}`);
 
-	return incompleteModels.map(({ _id, status, timestamp }) => {
-		logger.logInfo(`\t\t${_id} - status: ${status}, timestamp: ${timestamp}`);
-		return { teamspace, model: _id, status, timestamp };
-	});
+	const zombieModels = await find(teamspace, SETTINGS_COL, zombieQuery, { status: 1, timestamp: 1 });
+	const zombieDrawings = await find(teamspace, DRAWINGS_HISTORY_COL, zombieQuery, { status: 1, timestamp: 1 });
+
+	return [
+		...await Promise.all(zombieModels.map(({ _id, status, timestamp }) => `${teamspace}, model, ${_id}, ${status}, ${timestamp}`)),
+		...await Promise.all(zombieDrawings.map(({ _id, status, timestamp }) => `${teamspace}, drawing, ${UUIDToString(_id)}, ${status}, ${timestamp}`)),
+	];
 };
 
-const run = async (teamspace, model, limit, notify) => {
-	if (model && !teamspace) {
-		throw new Error('Teamspace must be provided if model is defined');
-	}
-	logger.logInfo(`Check processing flag(s) in ${teamspace ?? 'all teamspaces'}${model ? `.${model}` : ''}`);
+const run = async (teamspace, limit, notify) => {
+	logger.logInfo(`Check processing flag(s) in ${teamspace ?? 'all teamspaces'}`);
 
 	if (limit) {
 		TIME_LIMIT = limit * 60 * 60 * 1000;
 	}
 
 	const teamspaces = teamspace ? [teamspace] : await getTeamspaceList();
-	const results = (await Promise.all(teamspaces.map((ts) => processTeamspace(ts, model)))).flat();
+	const results = (await Promise.all(teamspaces.map((ts) => processTeamspace(ts)))).flat();
 
 	if (notify && results.length > 0) {
+		logger.logInfo(`Zombie processing statuses found: ${results.length}`);
 		const data = {
-			err: JSON.stringify(results),
-			scope: Path.basename(__filename, Path.extname(__filename)),
-			title: 'Unexpected model status found',
-			message: `${results.length} unexpected status found`,
+			script: Path.basename(__filename, Path.extname(__filename)),
+			title: 'Zombie processing statuses found',
+			message: `${results.length} zombie processing statuses found`,
+			logExcerpt: JSON.stringify(results),
 		};
-		await sendSystemEmail(emailTemplates.ERROR_NOTIFICATION.name, data);
+		await sendSystemEmail(emailTemplates.ZOMBIE_PROCESSING_STATUSES.name, data);
 	}
 };
 
@@ -78,20 +81,17 @@ const genYargs = /* istanbul ignore next */(yargs) => {
 	const argsSpec = (subYargs) => subYargs.option('teamspace', {
 		describe: 'Target a specific teamspace (if unspecified, all teamspaces will be targetted)',
 		type: 'string',
-	}).option('model', {
-		describe: 'Target a specific model (if unspecified, all models will ba targetted)',
-		type: 'string',
 	}).option('limit', {
-		describe: 'Time limit (hours, default: 24) where models may still be processing',
+		describe: 'Time limit (hours, default: 24) where models/drawings may still be processing',
 		type: 'number',
 	}).option('notify', {
 		describe: 'Send e-mail notification if results are found (default: false)',
 		type: 'boolean',
 	});
 	return yargs.command(commandName,
-		'Checks the processing state of a model.',
+		'Checks the processing status of models/drawings.',
 		argsSpec,
-		(argv) => run(argv.teamspace, argv.model, argv.limit, argv.notify));
+		(argv) => run(argv.teamspace, argv.limit, argv.notify));
 };
 
 module.exports = {
