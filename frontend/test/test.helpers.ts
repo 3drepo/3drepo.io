@@ -24,7 +24,7 @@ import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 
 
 export type WaitActionCallback = ((state?: object, action?:Action, previousState?: object) => boolean);
-export type WaitAction = (Action | string | WaitActionCallback) ;
+type WaitAction = (Action | string | WaitActionCallback) ;
 export type WaitForActions = (dispatchingfunction: () => any, waitActions: WaitAction[], debugActions?: boolean) => void;
 
 // A different Node version between the backend and the frontend
