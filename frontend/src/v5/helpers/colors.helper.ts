@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,25 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { hexToOpacity } from '@/v5/helpers/colors.helper';
-import { Link as LinkBase } from 'react-router-dom';
-import styled from 'styled-components';
-
-export const Overlay = styled.div`
-	background-color: ${({ theme }) => hexToOpacity(theme.palette.primary.contrast, 80)};
-	font-weight: 600;
-	color: ${({ theme }) => theme.palette.base.dark};
-	height: calc(100% - 2px);
-	width: calc(100% - 2px);
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	flex-direction: row;
-	z-index: 1;
-	margin: 1px;
-	border-radius: 8px;
-`;
-
-export const Link = styled(LinkBase)`
-	color: ${({ theme }) => theme.palette.primary.main};
-`;
+export const hexToOpacity = (hex: string, opacityInPercentage: number): string => {
+	const formattedOpacity = Math.floor((opacityInPercentage / 100) * 255)
+		.toString(16).padStart(2, '0');
+	return hex + formattedOpacity;
+};

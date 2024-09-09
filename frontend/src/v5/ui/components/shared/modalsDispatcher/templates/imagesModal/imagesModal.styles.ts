@@ -19,8 +19,8 @@ import { formatMessage } from '@/v5/services/intl';
 import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
 import { Dialog } from '@mui/material';
 import styled, { css } from 'styled-components';
-import { hexToOpacity } from '@/v5/ui/themes/theme';
 import { AuthImg } from '@components/authenticatedResource/authImg.component';
+import { hexToOpacity } from '@/v5/helpers/colors.helper';
 
 export const Modal = styled(Dialog)`
 	.MuiPaper-root {
