@@ -16,8 +16,9 @@
  */
 
 import * as faker from 'faker';
-import { DrawingUploadStatus, IDrawing, DrawingStats, CalibrationStates } from '@/v5/store/drawings/drawings.types';
+import { IDrawing, DrawingStats, CalibrationStates } from '@/v5/store/drawings/drawings.types';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
+import { UploadStatus } from '@/v5/store/containers/containers.types';
 
 const getFakeCalibration = () => faker.random.arrayElement([CalibrationStates.CALIBRATED, CalibrationStates.OUT_OF_SYNC, CalibrationStates.UNCALIBRATED, CalibrationStates.EMPTY]);
 
@@ -32,7 +33,7 @@ export const drawingMockFactory = (overrides?: Partial<IDrawing>): IDrawing => (
 	hasStatsPending: true,
 	desc: faker.random.words(3),
 	type: faker.random.word(),
-	status: DrawingUploadStatus.OK,
+	status: UploadStatus.OK,
 	number: faker.random.alphaNumeric(),
 	calibration: getFakeCalibration(),
 	...overrides,
@@ -46,7 +47,7 @@ export const prepareMockStats = (overrides?: Partial<DrawingStats>): DrawingStat
 	},
 	desc: faker.random.words(3),
 	type: faker.random.word(),
-	status: DrawingUploadStatus.OK,
+	status: UploadStatus.OK,
 	number: faker.random.alphaNumeric(),
 	calibration: getFakeCalibration(),
 	...overrides,
