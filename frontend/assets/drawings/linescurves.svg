@@ -38,17 +38,17 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="5.9789363"
-     inkscape:cx="102.3183"
-     inkscape:cy="320.08737"
+     inkscape:zoom="4.5750852"
+     inkscape:cx="119.03774"
+     inkscape:cy="329.71986"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
      showgrid="false"
      inkscape:window-width="2184"
      inkscape:window-height="1407"
-     inkscape:window-x="1065"
-     inkscape:window-y="136"
+     inkscape:window-x="1324"
+     inkscape:window-y="250"
      inkscape:window-maximized="0"
      units="px" />
   <metadata
@@ -112,7 +112,12 @@
          id="tspan1418-9-3"
          x="57.804234"
          y="169.41356"
-         style="stroke-width:0.264583">Control point and last point are the same</tspan></text>
+         style="stroke-width:0.264583">Control point and last point are the same</tspan><tspan
+         sodipodi:role="line"
+         x="57.804234"
+         y="173.38231"
+         style="stroke-width:0.264583"
+         id="tspan954">(i.e. this degenerates to a quadtratic)</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        d="m 117.71479,154.92912 c 0,0 125.35353,9.00979 37.4102,22.91619"
@@ -127,7 +132,12 @@
          id="tspan1418-9-3-4"
          x="136.89792"
          y="169.52644"
-         style="stroke-width:0.264583">Control point and first point are the same</tspan></text>
+         style="stroke-width:0.264583">Control point and first point are the same</tspan><tspan
+         sodipodi:role="line"
+         x="136.89792"
+         y="173.49519"
+         style="stroke-width:0.264583"
+         id="tspan956">(i.e. this degenerates to a quadtratic)</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        d="m 17.431974,204.09121 c -14.2981357,16.64851 19.194759,33.88462 28.988003,21.1534"
@@ -222,13 +232,47 @@
        d="m 180.45191,127.7824 c -17.19451,1.08597 -7.78278,-2.71492 -2.71492,16.65153"
        id="path909"
        sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="font-size:3.175px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:center;text-anchor:middle;stroke-width:0.264583"
+       x="46.311581"
+       y="346.23477"
+       id="text1420-2-9"><tspan
+         sodipodi:role="line"
+         id="tspan1418-9-37"
+         x="46.311581"
+         y="346.23477"
+         style="stroke-width:0.264583">Self Intersecting Curves</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.37795276;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 27.510964,354.70598 c 0,36.01154 28.12919,18.85583 -4.482123,18.85583"
+       id="path906"
+       sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="font-size:3.175px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:center;text-anchor:middle;stroke-width:0.264583"
+       x="29.481438"
+       y="383.87573"
+       id="text1420-2-9-7"><tspan
+         sodipodi:role="line"
+         id="tspan1418-9-37-8"
+         x="29.481438"
+         y="383.87573"
+         style="stroke-width:0.264583">Control lines perpendicular</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:0.377953;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 29.993635,331.15658 c 0,0 -25.5202803,53.75548 -2.53393,35.11301"
-       id="path897-7" />
+       d="m 49.303358,363.51567 c 34.92965,0 2.31834,-22.1015 2.31834,2.31835"
+       id="path932"
+       sodipodi:nodetypes="cc" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.377953;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 54.204447,379.42758 c 0,0 34.38903,-19.72845 33.30306,-8.32577"
-       id="path895-2" />
+       d="M 85.801837,370.12834 C 117.1767,367.34633 71.737243,364.25522 71.737243,388.67507"
+       id="path932-7"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.377953;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 112.33078,365.29392 c 31.37486,-2.78201 -5.10301,-24.45201 15.66163,16.36098"
+       id="path932-7-6"
+       sodipodi:nodetypes="cc" />
   </g>
 </svg>
