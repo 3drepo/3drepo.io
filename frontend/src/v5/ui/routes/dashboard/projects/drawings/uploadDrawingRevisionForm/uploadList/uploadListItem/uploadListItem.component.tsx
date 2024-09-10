@@ -29,24 +29,25 @@ import { UploadListItemFileIcon } from '@components/shared/uploadFiles/uploadLis
 import { UploadListItemTitle } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemTitle/uploadListItemTitle.component';
 import { UploadProgress } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadProgress/uploadProgress.component';
 import { formatMessage } from '@/v5/services/intl';
-import { DrawingUploadStatus, IDrawing } from '@/v5/store/drawings/drawings.types';
+import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { UploadListItemStatusCode } from './components/uploadListItemStatusCode/uploadListItemStatusCode.component';
+import { UploadStatus } from '@/v5/store/containers/containers.types';
 
 const UNEXPETED_STATUS_ERROR = undefined;
 const STATUS_TEXT_BY_UPLOAD = {
 	[UNEXPETED_STATUS_ERROR]: formatMessage({ id: 'drawing.uploads.progress.status.unexpectedError', defaultMessage: 'Unexpected error' }),
-	[DrawingUploadStatus.FAILED]: formatMessage({ id: 'drawing.uploads.progress.status.failed', defaultMessage: 'Upload failed' }),
-	[DrawingUploadStatus.UPLOADED]: formatMessage({ id: 'drawing.uploads.progress.status.uploaded', defaultMessage: 'Upload complete' }),
-	[DrawingUploadStatus.UPLOADING]: formatMessage({ id: 'drawing.uploads.progress.status.uploading', defaultMessage: 'Uploading' }),
-	[DrawingUploadStatus.QUEUED]: formatMessage({ id: 'drawing.uploads.progress.status.queued', defaultMessage: 'Waiting to upload' }),
+	[UploadStatus.FAILED]: formatMessage({ id: 'drawing.uploads.progress.status.failed', defaultMessage: 'Upload failed' }),
+	[UploadStatus.UPLOADED]: formatMessage({ id: 'drawing.uploads.progress.status.uploaded', defaultMessage: 'Upload complete' }),
+	[UploadStatus.UPLOADING]: formatMessage({ id: 'drawing.uploads.progress.status.uploading', defaultMessage: 'Uploading' }),
+	[UploadStatus.QUEUED]: formatMessage({ id: 'drawing.uploads.progress.status.queued', defaultMessage: 'Waiting to upload' }),
 };
 
 const getUploadStatus = (progress, errorMessage) => {
-	if (errorMessage) return DrawingUploadStatus.FAILED;
-	if (progress === 100) return DrawingUploadStatus.UPLOADED;
-	if (progress < 100 && progress > 0) return DrawingUploadStatus.UPLOADING;
-	if (progress === 0) return DrawingUploadStatus.QUEUED;
+	if (errorMessage) return UploadStatus.FAILED;
+	if (progress === 100) return UploadStatus.UPLOADED;
+	if (progress < 100 && progress > 0) return UploadStatus.UPLOADING;
+	if (progress === 0) return UploadStatus.QUEUED;
 	return UNEXPETED_STATUS_ERROR;
 };
 
@@ -149,7 +150,7 @@ export const UploadListItem = ({
 						uploadId={uploadId}
 						errorMessage={uploadErrorMessage}
 						uploadStatus={uploadStatus}
-						uploadCompleted={uploadStatus === DrawingUploadStatus.UPLOADED}
+						uploadCompleted={uploadStatus === UploadStatus.UPLOADED}
 						statusText={STATUS_TEXT_BY_UPLOAD[uploadStatus]}
 						progress={progress}
 					/>

@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision/latestRevision.component';
 import { FormattedMessage } from 'react-intl';
 import { ExistingDestinationOption, InUseText, Name } from './existingDestination.styles';
+import { LatestRevision } from '@components/shared/latestRevision/latestRevision.component';
+import { formatMessage } from '@/v5/services/intl';
 
 interface IExistingDestination {
 	inUse: boolean;
@@ -29,7 +30,7 @@ interface IExistingDestination {
 export const ExistingDestination = ({ name, latestRevision, hasRevisions, status, inUse, ...props }: IExistingDestination) => (
 	<ExistingDestinationOption {...props}>
 		<Name>{name}</Name>
-		<LatestRevision hasRevisions={hasRevisions} name={latestRevision} status={status} />
+		<LatestRevision hasRevisions={hasRevisions} name={latestRevision} status={status} emptyLabel={formatMessage({ id: 'drawingsUploads.list.item.title.latestRevision.empty', defaultMessage: 'Drawing empty' })} />
 		<InUseText hidden={!inUse}>
 			<FormattedMessage id="uploads.destination.destinationInUse" defaultMessage="Already in use in another file upload" />
 		</InUseText>

@@ -29,11 +29,11 @@ import { CreateRevisionAction,
 	FetchStatusCodesAction,
 } from './drawingRevisions.redux';
 import { DrawingsActions } from '../drawings.redux';
-import { DrawingUploadStatus } from '../drawings.types';
 import { createDrawingFromRevisionBody, createFormDataFromRevisionBody } from './drawingRevisions.helpers';
 import { selectIsPending, selectRevisions, selectStatusCodes } from './drawingRevisions.selectors';
 import { uuid } from '@/v4/helpers/uuid';
 import { selectUsername } from '../../currentUser/currentUser.selectors';
+import { UploadStatus } from '../../containers/containers.types';
 
 export function* fetch({ teamspace, projectId, drawingId, onSuccess }: FetchAction) {
 	if (yield select(selectIsPending, drawingId)) return;
@@ -102,9 +102,9 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 			(percent) => DrawingRevisionsActionsDispatchers.setUploadProgress(uploadId, percent),
 			createFormDataFromRevisionBody(body),
 		);
-		yield put(DrawingsActions.setDrawingStatus(projectId, drawingId, DrawingUploadStatus.QUEUED));
+		yield put(DrawingsActions.setDrawingStatus(projectId, drawingId, UploadStatus.QUEUED));
 		yield put(DrawingRevisionsActions.setUploadComplete(uploadId, true));
-		yield put(DrawingsActions.setDrawingStatus(projectId, drawingId, DrawingUploadStatus.OK));
+		yield put(DrawingsActions.setDrawingStatus(projectId, drawingId, UploadStatus.OK));
 		const revisions = yield select(selectRevisions, drawingId);
 		const author = yield select(selectUsername);
 		const newRevisions = [...revisions, {

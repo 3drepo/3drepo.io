@@ -58,6 +58,7 @@ const importErrorMapping = {
 	35: systemFailureMsg,
 	36: { message: 'Failed to validate 3D Repo Server License. Please contact support.' },
 	37: { message: 'The file provided was encrypted or password protected. Please provide a file that can be opened without a password.', userErr: true },
+	38: { message: 'Failed to generate image file from drawing. If this is unexpected, please contact support.' },
 };
 
 ModelSettingConstants.processStatuses = {

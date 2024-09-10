@@ -20,9 +20,10 @@ import WarningIcon from '@assets/icons/outlined/stepper_error-outlined.svg';
 import CalibratedIcon from '@assets/icons/filled/calibration-filled.svg';
 import NotCalibrated from '@assets/icons/filled/no_calibration-filled.svg';
 import { Display } from '@/v5/ui/themes/media';
-import { CalibrationStates, DrawingStats, DrawingUploadStatus, IDrawing, MinimumDrawing } from './drawings.types';
+import { CalibrationStates, DrawingStats, IDrawing, MinimumDrawing } from './drawings.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import { getUrl } from '@/v5/services/api/default';
+import { UploadStatus } from '../containers/containers.types';
 
 export const DRAWING_LIST_COLUMN_WIDTHS = {
 	name: {
@@ -73,10 +74,10 @@ export const CALIBRATION_MAP = {
 	},
 };
 // TODO - fix (if necessary) when backend is available
-export const canUploadToBackend = (status?: DrawingUploadStatus): boolean => {
+export const canUploadToBackend = (status?: UploadStatus): boolean => {
 	const statusesForUpload = [
-		DrawingUploadStatus.OK,
-		DrawingUploadStatus.FAILED,
+		UploadStatus.OK,
+		UploadStatus.FAILED,
 	];
 
 	return statusesForUpload.includes(status);
@@ -94,7 +95,7 @@ export const prepareSingleDrawingData = (
 	type: stats?.type ?? '',
 	desc: stats?.desc ?? '',
 	calibration: stats?.calibration ?? CalibrationStates.UNCALIBRATED,
-	status: stats?.status ?? DrawingUploadStatus.OK,
+	status: stats?.status ?? UploadStatus.OK,
 	hasStatsPending: !stats,
 	errorReason: stats?.errorReason && {
 		message: stats.errorReason.message,

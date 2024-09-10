@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Name as RevisionStatus } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision/revisionStatus/revisionStatus.styles';
+import { Name as RevisionStatus } from '@components/shared/latestRevision/revisionStatus/revisionStatus.styles';
 import styled from 'styled-components';
 
 export const ExistingDestinationOption = styled.div`
