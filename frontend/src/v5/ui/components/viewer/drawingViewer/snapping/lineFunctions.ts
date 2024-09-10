@@ -15,62 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Vector2 } from 'three';
+import { Vector2, Vector2Like } from 'three';
+import { Line2 } from './types';
 
-export function clipLine(x0, y0, x1, y1, xmin, xmax, ymin, ymax, result: number[]) {
-	// Implements the Liang–Barsky algorithm.
-	// Uses for loop idea noted by Daniel White. https://www.skytopia.com/project/articles/compsci/clipping.html
-	// JsFiddle: https://jsfiddle.net/sebjf/yscuz7rj/107/
-
-	let t0 = 0;
-	let t1 = 1;
-	const dx = x1 - x0;
-	const dy = y1 - y0;
-	let p, q;
-
-	for (let edge = 0; edge < 4; edge++) {
-	  if (edge === 0) { p = -dx; q = -(xmin - x0); }
-	  if (edge === 1) { p =  dx; q =  (xmax - x0); }
-	  if (edge === 2) { p = -dy; q = -(ymin - y0); }
-	  if (edge === 3) { p =  dy; q =  (ymax - y0); }
-
-	  let r = q / p;
-
-	  if (p === 0 && q < 0) {
-		  return false;
-	  }
-
-	  if (p < 0) {
-			if (r > t1) {
-				return false;
-			} else if (r > t0) {
-				t0 = r;
-			}
-	  } else if (p > 0) {
-			if (r < t0) {
-				return false;
-			} else if (r < t1) {
-				t1 = r;
-			}
-	  }
-	}
-
-	if (result != null) {
-		result[0] = x0 + t0 * dx;
-		result[1] = y0 + t0 * dy;
-		result[2] = x0 + t1 * dx;
-		result[3] = y0 + t1 * dy;
-	}
-
-	return true;
+function equals0(x: number) {
+	return Math.abs(x) <= Number.EPSILON;
 }
 
-
-export function closestPointOnLine(x0, y0, x1, y1, x, y) {
-	const dx = x - x0;
-	const dy = y - y0;
-	const a = x1 - x0;
-	const b = y1 - y0;
+export function closestPointOnLine(line: Line2, p: Vector2Like) {
+	const dx = p.x - line.start.x;
+	const dy = p.y - line.start.y;
+	const a = line.end.x - line.start.x;
+	const b = line.end.y - line.start.y;
 	const n = Math.sqrt((a * a) + (b * b));
 	const nx = a / n;
 	const ny = b / n;
@@ -83,18 +39,17 @@ export function closestPointOnLine(x0, y0, x1, y1, x, y) {
   	    t = n;
 	}
 
-	return new Vector2(x0 + t * nx, y0 + t * ny);
-}
-
-
-function equals0(x: number) {
-	return Math.abs(x) <= Number.EPSILON;
+	return new Vector2(line.start.x + nx * t, line.start.y + ny * t);
 }
 
 /**
  * Based on the algorithm suggested here https://stackoverflow.com/questions/563198
  */
-export function lineLineIntersection(p0: Vector2, p1: Vector2, q0: Vector2, q1: Vector2): Vector2 {
+export function lineLineIntersection(a: Line2, b: Line2): Vector2 {
+	const p0 = a.start;
+	const p1 = a.end;
+	const q0 = b.start;
+	const q1 = b.end;
 	const p = p0;
 	const r = new Vector2().subVectors(p1, p0);
 	const q = q0;

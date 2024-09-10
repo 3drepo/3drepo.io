@@ -16,12 +16,12 @@
  */
 
 import { Vector2 } from 'three';
-import { Line, CubicBezier, Bounds } from './types';
+import { Line2, CubicBezier, Bounds } from './types';
 import { closestPointOnLine, lineLineIntersection } from './lineFunctions';
 import { closestPointOnCurve, curveCurveIntersection, updateCurveSelfIntersection, lineCurveIntersection } from './bezierFunctions';
 
 export class RTreeNode extends Bounds {
-	line: Line | undefined;
+	line: Line2 | undefined;
 
 	curve: CubicBezier | undefined;
 
@@ -156,7 +156,7 @@ class RTreeQueries {
 	static findClosestEdge(ctx: TraversalContext) {
 		for (const node of ctx.nodes) {
 			if (node.line) {
-				const p = closestPointOnLine(node.line.start.x, node.line.start.y, node.line.end.x, node.line.end.y, ctx.position.x, ctx.position.y);
+				const p = closestPointOnLine(node.line, ctx.position);
 				ctx.updateClosestEdge(p);
 				ctx.numLineTests++;
 			}
@@ -233,7 +233,7 @@ class RTreeQueries {
 
 	static nodeNodeIntersections(a: RTreeNode, b: RTreeNode, results: Vector2[]) {
 		if (a.line && b.line) {
-			const p = lineLineIntersection(a.line.start, a.line.end, b.line.start, b.line.end);
+			const p = lineLineIntersection(a.line, b.line);
 			if (p) {
 				results.push(p);
 			}

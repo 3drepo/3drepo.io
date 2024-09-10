@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Line, CubicBezier } from './types';
+import { Line2, CubicBezier } from './types';
 import { RTree, RTreeNode } from './rTree';
 import { Vector2Like } from 'three';
 
@@ -30,7 +30,7 @@ export class SVGSnapDiagnosticsHelper {
 
 	start: number;
 
-	lines: Line[];
+	lines: Line2[];
 
 	pp: { x: number, y: number, xs: number, ys: number, plotting: boolean } ;
 
@@ -55,7 +55,7 @@ export class SVGSnapDiagnosticsHelper {
 		this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 	}
 
-	renderLines(lines: Line[]) {
+	renderLines(lines: Line2[]) {
 		this.lines = lines;
 		this.start = 0;
 		requestAnimationFrame(this.renderBatch.bind(this));

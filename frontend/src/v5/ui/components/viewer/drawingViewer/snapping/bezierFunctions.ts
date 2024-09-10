@@ -16,7 +16,7 @@
  */
 
 import { Vector2 } from 'three';
-import { QuinticPolynomial, CubicBezier, Line } from './types';
+import { QuinticPolynomial, CubicBezier, Line2 } from './types';
 
 class NinthOrderPolynomial {
 	a9: number;
@@ -981,7 +981,7 @@ export function closestPointOnCurve(curve: CubicBezier, p: Vector2): Vector2 {
 	return closestPoint;
 }
 
-export function lineCurveIntersection(curve: CubicBezier, line: Line, results: Vector2[]) {
+export function lineCurveIntersection(curve: CubicBezier, line: Line2, results: Vector2[]) {
 
 	// Finds the intersection of a Line and a Bezier Curve using the root finding
 	// method.

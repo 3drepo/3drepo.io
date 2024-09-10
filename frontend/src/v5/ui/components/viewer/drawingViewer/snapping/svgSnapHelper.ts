@@ -17,7 +17,7 @@
 
 import 'path-data-polyfill';
 import { Vector2 } from 'three';
-import { Line, CubicBezier } from './types';
+import { Line2, CubicBezier } from './types';
 import { RTree, RTreeBuilder } from './rTree';
 import { SVGSnapDiagnosticsHelper } from './debug';
 
@@ -31,7 +31,7 @@ interface SVGPolyfilledGeometryElement extends SVGGeometryElement {
 
 class PrimitiveCollector {
 
-	lines: Line[];
+	lines: Line2[];
 
 	curves: CubicBezier[];
 
@@ -43,7 +43,7 @@ class PrimitiveCollector {
 		this.offset = offset;
 	}
 
-	addLine(line: Line) {
+	addLine(line: Line2) {
 		this.lines.push(line);
 	}
 
@@ -78,9 +78,9 @@ class PathCollector {
 	// index).
 	addLine(values: number[], offset: number) {
 		const position = new Vector2(values[offset] + this.collector.offset.x, values[offset + 1] + this.collector.offset.y); // For lines, arguments must always be a multiple of 2
-		const line = new Line(this.currentPosition, position);
+		const line = new Line2(this.currentPosition, position);
 		this.currentPosition = position;
-		if (line.length != 0) {
+		if (line.distance() != 0) {
 			this.collector.addLine(line);
 		}
 	}
@@ -98,7 +98,7 @@ class PathCollector {
 	// Closes the subpath by drawing a straight line from the current position
 	// to the start of the subpath.
 	closePath() {
-		const line = new Line(this.currentPosition, this.startPosition);
+		const line = new Line2(this.currentPosition, this.startPosition);
 		this.collector.addLine(line);
 
 		// If the next command is not MOVETO, then the subpath should revert back

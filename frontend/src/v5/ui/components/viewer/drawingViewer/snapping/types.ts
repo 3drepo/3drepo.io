@@ -47,7 +47,7 @@ export class ImplicitLine {
 	}
 }
 
-export class Line implements IBounds {
+export class Line2 implements IBounds {
 
 	start: Vector2;
 
@@ -58,7 +58,7 @@ export class Line implements IBounds {
 		this.end = end;
 	}
 
-	get length() {
+	distance() : number {
 		return this.start.distanceTo(this.end);
 	}
 
@@ -74,29 +74,6 @@ export class Line implements IBounds {
 			new Vector2(this.start.y - this.end.y, this.end.x - this.start.x),
 			this.start.x * this.end.y - this.end.x * this.start.y,
 		);
-	}
-}
-
-export class Point {
-	x: number;
-
-	y: number;
-
-	constructor(x: number, y: number) {
-		this.x = x;
-		this.y = y;
-	}
-}
-
-export class Size {
-
-	width: number;
-
-	height: number;
-
-	constructor(width, height) {
-		this.width = width;
-		this.height = height;
 	}
 }
 
