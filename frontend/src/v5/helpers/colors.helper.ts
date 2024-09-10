@@ -15,8 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { contrastColor } from 'contrast-color';
+
 export const hexToOpacity = (hex: string, opacityInPercentage: number): string => {
 	const formattedOpacity = Math.floor((opacityInPercentage / 100) * 255)
 		.toString(16).padStart(2, '0');
 	return hex + formattedOpacity;
 };
+
+export const isLight = (hex: string, freshold?: number) => contrastColor({ bgColor: hex, threshold: freshold ?? 127 }) !== '#FFFFFF';

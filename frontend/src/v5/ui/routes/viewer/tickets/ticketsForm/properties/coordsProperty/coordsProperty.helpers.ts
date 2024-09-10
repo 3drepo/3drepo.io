@@ -17,7 +17,6 @@
 import { hexToGLColor } from '@/v4/helpers/colors';
 import { compact, get, isArray, isEmpty, isObject } from 'lodash';
 import { IPinColorMapping, IPinSchema, ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
-import { contrastColor } from 'contrast-color';
 import { AdditionalProperties, TicketBaseKeys } from '../../../tickets.constants';
 import { IPin } from '@/v4/services/viewer/viewer';
 import { COLOR } from '@/v5/ui/themes/theme';
@@ -70,8 +69,6 @@ export const getPinColorHex = (name: string, template: ITemplate, ticket: ITicke
 	if (isObject(pinSchema?.color)) return getColorFromMapping(ticket, pinSchema.color); // a custom colour is set with mapping
 	return DEFAULT_COLOR; // if custom pin with no colouring set
 };
-
-export const isPinLight = (hex: string) => contrastColor({ bgColor: hex, threshold: 230 }) !== '#FFFFFF';
 
 export const formatPin = (pinId, position, isSelected: boolean, color: string): IPin => ({
 	id: pinId,

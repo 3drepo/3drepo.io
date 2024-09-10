@@ -18,7 +18,7 @@
 import styled, { css } from 'styled-components';
 import { ViewerInputContainer } from '../viewerInputContainer/viewerInputContainer.component';
 import { InputLabel } from '@mui/material';
-import { isPinLight } from './coordsProperty.helpers';
+import { isLight } from '@/v5/helpers/colors.helper';
 
 export const CoordsInputContainer = styled(ViewerInputContainer)`
 	padding: 8px 10px 8px 12px;
@@ -99,7 +99,7 @@ export const SelectPinButton = styled.div<{ color: string, isSelected: boolean; 
 	padding: 12px;
 	cursor: ${({  disabled }) => disabled ? 'default' : 'pointer'};
 
-	${({ color, isSelected, theme }) => isPinLight(color) && css`
+	${({ color, isSelected, theme }) => isLight(color, 220) && css`
 		outline-color: ${isSelected ? theme.palette.base.lighter : theme.palette.secondary.lightest};
 		> svg path {
 			stroke: ${theme.palette.secondary.main};
