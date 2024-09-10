@@ -42,7 +42,7 @@ export const selectActiveRevisions = createSelector(
 	(revisions) => revisions.filter((val) => !val.void),
 ); 
 
-export const selectLastRevision = createSelector(
+export const selectLastRevisionName = createSelector(
 	selectActiveRevisions,
 	(revisions) => {
 		const lastRev = revisions[0];
