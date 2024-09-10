@@ -103,12 +103,6 @@ export const Viewer2D = () => {
 		const snapHandler = new SVGSnapHelper();
 		snapHandler.load(src);
 
-		// Sets up a secondary canvas to render things, such as the primitives
-		// into, in order to visualise the behaviour of the snapping algorithms.
-		// The canvas and everything on it is in svg space, making it particularly
-		// useful to diagnose transform issues when going between the client and
-		// the svg coordinate systems.
-
 		// Set up a cursor to show the state of the snap.
 
 		const cursor = document.createElement('div');
