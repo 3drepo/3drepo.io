@@ -106,7 +106,7 @@ export const Viewer2D = () => {
 		// Set up a cursor to show the state of the snap.
 
 		const cursor = document.createElement('div');
-		cursor.setAttribute('style', 'position: absolute; width: 20px; height: 20px; border-radius: 50%; display: block; z-index: 1;');
+		cursor.setAttribute('style', 'position: absolute; width: 20px; height: 20px; border-radius: 50%; display: block; z-index: 1; pointer-events: none;');
 
 		const node = document.createElement('img');
 		node.src = '/assets/drawings/cursor-node.svg';
