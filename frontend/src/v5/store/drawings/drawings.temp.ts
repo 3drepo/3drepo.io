@@ -29,6 +29,7 @@ export const drawingIds = [
 	'53da2fd9-draw-4030-a0b5-00de693dd0e5',
 	'c7327b8c-draw-4391-afd0-5b5252400d1c',
 	'd1770dab-c5ba-425d-a424-3e7777411505',
+	'e0306dde-a290-48b3-95fb-a10680e454d6',
 	'8d4d07ac-draw-4013-ad09-8e5e65c55bef',
 	'66acfe8b-712f-404b-9b50-163dc63121a7',
 	'10aca284-draw-4a8c-9b22-02dcc248313d',
@@ -50,7 +51,7 @@ export const drawingIds = [
 	'97933311-draw-4178-a241-1fe8219fffb6',
 ];
 
-export const drawingFilesName = ['map.svg', 'fly.svg', 'blueprint.svg', 'linescurves.svg', 'carpark.svg', 'blueprint2.svg', 'blueprint.png', 'blueprint2.png', 'blueprint3.png', 'blueprint4.png', 'rac_level_1.png', 'rac_level_2.png', 'rac_site.png', 'rac_level_1.svg', 'rac_level_2.svg', 'rac_site.svg'];
+export const drawingFilesName = ['map.svg', 'fly.svg', 'blueprint.svg', 'linescurves.svg', 'basicshapes.svg', 'carpark.svg', 'blueprint2.svg', 'blueprint.png', 'blueprint2.png', 'blueprint3.png', 'blueprint4.png', 'rac_level_1.png', 'rac_level_2.png', 'rac_site.png', 'rac_level_1.svg', 'rac_level_2.svg', 'rac_site.svg'];
 export const mapDrawingIdToName = (id) => {
 	const index = drawingIds.findIndex((d) => d === id);
 	if (index !== -1) {

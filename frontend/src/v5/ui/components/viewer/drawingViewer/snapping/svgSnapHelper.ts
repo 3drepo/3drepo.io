@@ -20,6 +20,14 @@ import { Vector2, Line, CubicBezier } from './types';
 import { RTree, RTreeBuilder } from './rTree';
 import { SVGSnapDiagnosticsHelper } from './debug';
 
+// The following interface extension makes TypeScript aware that the getPathData
+// member has been implemented by the path-data-polyfill for all Geometry
+// Elements (that is, Basic Shapes).
+
+interface SVGPolyfilledGeometryElement extends SVGGeometryElement {
+	getPathData: (settings?: SVGPathDataSettings) => Array<SVGPathSegment>;
+}
+
 class PrimitiveCollector {
 
 	lines: Line[];
@@ -100,23 +108,6 @@ class PathCollector {
 	}
 }
 
-class PolyCollector {
-	collector: PrimitiveCollector;
-
-	constructor(collector: PrimitiveCollector) {
-		this.collector = collector;
-	}
-
-	addLine(start: DOMPoint, end: DOMPoint) {
-		this.collector.addLine(
-			new Line(
-				new Vector2(start.x, start.y),
-				new Vector2(end.x, end.y),
-			),
-		);
-	}
-}
-
 /** Parses the SVG and outputs the shapes contained within it into the
  * provided Collector.
  */
@@ -134,9 +125,9 @@ class SvgParser {
 		// in world-space - that is, it does not consider groups, instances or
 		// the transform attribute.
 
-		// Currently the svgs we get from ODA do not appear to use these features,
-		// however in the future we may need to from simply listing to performing
-		// a context-aware traversal of the entire DOM.
+		// Currently the svgs we get from ODA do not appear to use these
+		// features, however in the future we may need to move from simple
+		// enumeration to performing a context-aware traversal of the DOM.
 
 		this.getRectElements(svg);
 		this.getCircleElements(svg);
@@ -148,50 +139,27 @@ class SvgParser {
 	}
 
 	getRectElements(svg: SVGElement) {
-		const rects = svg.querySelectorAll<SVGRectElement>('rect');
-		if (rects.length > 0) {
-			console.warn('SVG contains <rect> elements but these are not currently handled.');
-		}
+		this.addGeometryElements(svg.querySelectorAll<SVGPolyfilledGeometryElement>('rect'));
 	}
 
 	getCircleElements(svg: SVGElement) {
-		const circles = svg.querySelectorAll<SVGCircleElement>('circle');
-		if (circles.length > 0) {
-			console.warn('SVG contains <circle> elements but these are not currently handled.');
-		}
+		this.addGeometryElements(svg.querySelectorAll<SVGPolyfilledGeometryElement>('circle'));
 	}
 
 	getEllipseElements(svg: SVGElement) {
-		const ellipses = svg.querySelectorAll<SVGEllipseElement>('ellipse');
-		if (ellipses.length > 0) {
-			console.warn('SVG contains <ellipse> elements but these are not currently handled.');
-		}
+		this.addGeometryElements(svg.querySelectorAll<SVGPolyfilledGeometryElement>('ellipse'));
 	}
 
 	getLineElements(svg: SVGElement) {
-		const lines = svg.querySelectorAll<SVGLineElement>('line');
-		if (lines.length > 0) {
-			console.warn('SVG contains <line> elements but these are not currently handled.');
-		}
+		this.addGeometryElements(svg.querySelectorAll<SVGPolyfilledGeometryElement>('line'));
 	}
 
 	getPolylineElements(svg: SVGElement) {
-		const polylines = svg.querySelectorAll<SVGPolylineElement>('polyline');
-		for (let i = 0; i < polylines.length; i++) {
-			const p = polylines[i];
-			const points = p.points;
-			const polyCollector = new PolyCollector(this.collector);
-			for (let j = 0; j < points.length - 1; j++) {
-				polyCollector.addLine(points[j], points[j + 1]);
-			}
-		}
+		this.addGeometryElements(svg.querySelectorAll<SVGPolyfilledGeometryElement>('polyline'));
 	}
 
 	getPolygonElements(svg: SVGElement) {
-		const polygons = svg.querySelectorAll<SVGPolygonElement>('polygon');
-		if (polygons.length > 0) {
-			console.warn('SVG contains <polygon> elements but these are not currently handled.');
-		}
+		this.addGeometryElements(svg.querySelectorAll<SVGPolyfilledGeometryElement>('polygon'));
 	}
 
 	getPathElements(svg: SVGSVGElement) {
@@ -199,28 +167,37 @@ class SvgParser {
 		for (let i = 0; i < paths.length; i++) {
 			const p = paths[i];
 			const segments = p.getPathData({ normalize: true });
+			this.addPathElements(segments);
+		}
+	}
 
-			const pathCollector = new PathCollector(this.collector);
+	addGeometryElements(nodes: NodeListOf<SVGPolyfilledGeometryElement>) {
+		for (let i = 0; i < nodes.length; i++) {
+			const r = nodes[i];
+			this.addPathElements(r.getPathData({ normalize: true }));
+		}
+	}
 
-			for (const segment of segments) {
-				// Passing the normalize flag means getPathData will transform
-				// all paths into one of the following absolute types
-				switch (segment.type) {
-					case 'M':
-						pathCollector.setStartPosition(segment.values);
-						break;
-					case 'L':
-						for (let s = 0; s < segment.values.length; s += 2) {
-							pathCollector.addLine(segment.values, s);
-						}
-						break;
-					case 'C':
-						pathCollector.addCurve(segment.values);
-						break;
-					case 'Z':
-						pathCollector.closePath();
-						break;
-				}
+	addPathElements(segments: SVGPathSegment[]) {
+		const pathCollector = new PathCollector(this.collector);
+		for (const segment of segments) {
+			// Passing the normalize flag means getPathData will transform
+			// all paths into one of the following absolute types
+			switch (segment.type) {
+				case 'M':
+					pathCollector.setStartPosition(segment.values);
+					break;
+				case 'L':
+					for (let s = 0; s < segment.values.length; s += 2) {
+						pathCollector.addLine(segment.values, s);
+					}
+					break;
+				case 'C':
+					pathCollector.addCurve(segment.values);
+					break;
+				case 'Z':
+					pathCollector.closePath();
+					break;
 			}
 		}
 	}
