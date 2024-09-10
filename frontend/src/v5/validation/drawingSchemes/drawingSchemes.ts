@@ -87,6 +87,11 @@ export const ListItemSchema = Yup.object().shape({
 			id: 'validation.drawing.revCode.error.required',
 			defaultMessage: 'Revision Code is a required field',
 		}),
+	).max(10,
+		formatMessage({
+			id: 'validation.drawing.revCode.error.max',
+			defaultMessage: 'Revision Code is limited to 10 characters',
+		}),
 	).test(
 		'statusCodeAndRevisionCodeAreUnique',
 		statusCodeAndRevisionCodeMustBeUniqueMessage,

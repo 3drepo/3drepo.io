@@ -15,24 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { CircleButton } from '@controls/circleButton';
-import { Container as ItemRowContainer } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemRow/dashboardListItemRow.styles';
-import { DashboardListItem } from '@components/dashboard/dashboardList';
 
 export const UploadListItemButton = styled(CircleButton)`
 	margin: 0;
 	&:hover, &.Mui-focusVisible { 
 		box-shadow: none;
-	}
-`;
-
-export const UploadListItemRowWrapper = styled(DashboardListItem)<{ selected: boolean; order: number }>`
-	${({ order }) => css`order: ${order}`};
-	${ItemRowContainer} {
-		padding: 8px 15px 8px 5px;
-		height: auto;
-		cursor: default;
-		overflow: hidden;
 	}
 `;
