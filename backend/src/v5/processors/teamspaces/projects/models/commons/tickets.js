@@ -96,25 +96,24 @@ const processSpecialProperties = (template, oldTickets, updatedTickets) => {
 				}
 
 				if (newProp) {
-					const newPropArr = isArray ? newProp : [newProp];
-
-					for (let i = 0; i < newPropArr.length; i++) {
-						const data = newPropArr[i];
-
+					const getRefFromBuffer = (data) => {
 						if (isBuffer(data)) {
 							const ref = generateUUID();
 							externalReferences.binaries.toAdd.push({ ref, data });
-
-							if (isArray) {
-								// eslint-disable-next-line no-param-reassign
-								updatedProperties[name][i] = ref;
-							} else if (field) {
-								setNestedProperty(updatedProperties[name], field, ref);
-							} else {
-								// eslint-disable-next-line no-param-reassign
-								updatedProperties[name] = ref;
-							}
+							return ref;
 						}
+
+						return data;
+					};
+
+					if (isArray) {
+						// eslint-disable-next-line no-param-reassign
+						updatedProperties[name] = newProp.map(getRefFromBuffer);
+					} else if (field) {
+						setNestedProperty(updatedProperties[name], field, getRefFromBuffer(newProp));
+					} else {
+						// eslint-disable-next-line no-param-reassign
+						updatedProperties[name] = getRefFromBuffer(newProp);
 					}
 				}
 			};
@@ -190,7 +189,8 @@ const processExternalData = async (teamspace, project, model, ticketIds, data) =
 		refsToRemove.push(...binaries.toRemove);
 
 		binariesToSave.push(...binaries.toAdd.map(({ ref, data: bin }) => ({
-			id: ref, data: bin, meta: { teamspace, project, model, ticket: ticketId } })));
+			id: ref, data: bin, meta: { teamspace, project, model, ticket: ticketId },
+		})));
 
 		await Promise.all([
 			groups.toAdd.length ? addGroups(teamspace, project, model, ticketId, groups.toAdd) : Promise.resolve(),
@@ -227,7 +227,8 @@ Tickets.importTickets = async (teamspace, project, model, template, tickets, aut
 	if (commentsByTickets.length) await importComments(teamspace, project, model, commentsByTickets, author);
 
 	publish(events.TICKETS_IMPORTED,
-		{ teamspace,
+		{
+			teamspace,
 			project,
 			model,
 			tickets: savedTickets,
@@ -240,7 +241,8 @@ Tickets.importTickets = async (teamspace, project, model, template, tickets, aut
 Tickets.addTicket = async (teamspace, project, model, template, ticket) => {
 	const [savedTicket] = await processNewTickets(teamspace, project, model, template, [ticket]);
 	publish(events.NEW_TICKET,
-		{ teamspace,
+		{
+			teamspace,
 			project,
 			model,
 			ticket: savedTicket,
@@ -259,7 +261,8 @@ Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, up
 			teamspace,
 			project,
 			model,
-			...data });
+			...data,
+		});
 	}
 };
 
@@ -289,7 +292,8 @@ Tickets.updateManyTickets = async (teamspace, project, model, template, oldTicke
 				teamspace,
 				project,
 				model,
-				...data });
+				...data,
+			});
 		}
 	});
 };
