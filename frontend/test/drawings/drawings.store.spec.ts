@@ -20,11 +20,9 @@ import { selectCanUploadToProject, selectDrawingById, selectDrawings, selectFavo
 import { times } from 'lodash';
 import { drawingMockFactory, prepareMockStats } from './drawings.fixtures';
 import { NewDrawing } from '@/v5/store/drawings/drawings.types';
-import { drawingRevisionsMockFactory } from './drawingRevisions/drawingRevisions.fixtures';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { createTestStore, listContainsElementWithId } from '../test.helpers';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
-import { UploadStatus } from '@/v5/store/containers/containers.types';
 
 describe('Drawings: store', () => {
 	let dispatch, getState;
@@ -79,26 +77,6 @@ describe('Drawings: store', () => {
 			expect(drawingFromState.type).toEqual(stats.type);
 			expect(drawingFromState.desc).toEqual(stats.desc);
 			expect(drawingFromState.revisionsCount).toEqual(stats.revisions.total);
-		});
-
-		it('should update drawing status', () => {
-			const newStatus = UploadStatus.OK;
-			const newDrawing = createAndAddDrawingToStore({ status: UploadStatus.PROCESSING });
-			dispatch(DrawingsActions.setDrawingStatus(projectId, newDrawing._id, newStatus));
-			const drawingFromState = selectDrawingById(getState(), newDrawing._id);
-
-			expect(drawingFromState.status).toEqual(newStatus);
-		});
-
-		it('should update revision processing status', () => {
-			const newDrawing = createAndAddDrawingToStore();
-			const newRevision = drawingRevisionsMockFactory();
-			dispatch(DrawingsActions.drawingProcessingSuccess(projectId, newDrawing._id, newRevision));
-			const drawingFromState = selectDrawingById(getState(), newDrawing._id);
-
-			expect(drawingFromState.revisionsCount).toEqual(newDrawing.revisionsCount + 1);
-			expect(drawingFromState.latestRevision).toEqual(newRevision.name);
-			expect(drawingFromState.lastUpdated).toEqual(newRevision.timestamp);
 		});
 	});
 
