@@ -272,7 +272,7 @@ Tickets.processReadOnlyValues = (oldTicket, newTicket, user) => {
 	}
 };
 
-const uuidString = Yup.string().transform((val, orgVal) => UUIDToString(orgVal));
+const uuidString = Yup.string().transform((val, orgVal) => UUIDToString(orgVal)).nullable();
 
 const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 	const groupCast = Yup.array().of(Yup.object({

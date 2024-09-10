@@ -83,42 +83,38 @@ const processSpecialProperties = (template, oldTickets, updatedTickets) => {
 
 	const updateReferences = (templateProperties, externalReferences, oldProperties = {}, updatedProperties = {}) => {
 		templateProperties.forEach(({ type, name }) => {
-			const processImageUpdate = (field) => {
+			const processImageUpdate = (isArray, field) => {
 				const oldProp = field ? getNestedProperty(oldProperties[name], field) : oldProperties[name];
 				const newProp = field ? getNestedProperty(updatedProperties[name], field) : updatedProperties[name];
 
 				if (oldProp && newProp !== undefined) {
-					externalReferences.binaries.toRemove.push(oldProp);
+					const idsToRemove = isArray
+						? getArrayDifference(newProp?.map(UUIDToString), oldProp.map(UUIDToString)).map(stringToUUID)
+						: [oldProp];
+
+					externalReferences.binaries.toRemove.push(...idsToRemove);
 				}
 
 				if (newProp) {
-					const ref = generateUUID();
-					if (field) {
-						setNestedProperty(updatedProperties[name], field, ref);
-					} else {
-						// eslint-disable-next-line no-param-reassign
-						updatedProperties[name] = ref;
-					}
-					externalReferences.binaries.toAdd.push({ ref, data: newProp });
-				}
-			};
+					const newPropArr = isArray ? newProp : [newProp];
 
-			const processImageArrayUpdate = () => {
-				const oldProp = oldProperties[name] ?? [];
-				const newProp = updatedProperties[name] ?? [];
+					for (let i = 0; i < newPropArr.length; i++) {
+						const data = newPropArr[i];
 
-				externalReferences.binaries.toRemove.push(
-					...getArrayDifference(newProp.map(UUIDToString), oldProp.map(UUIDToString)).map(stringToUUID),
-				);
+						if (isBuffer(data)) {
+							const ref = generateUUID();
+							externalReferences.binaries.toAdd.push({ ref, data });
 
-				for (let i = 0; i < newProp.length; i++) {
-					const data = newProp[i];
-
-					if (isBuffer(data)) {
-						const ref = generateUUID();
-						externalReferences.binaries.toAdd.push({ ref, data });
-						// eslint-disable-next-line no-param-reassign
-						newProp[i] = ref;
+							if (isArray) {
+								// eslint-disable-next-line no-param-reassign
+								updatedProperties[name][i] = ref;
+							} else if (field) {
+								setNestedProperty(updatedProperties[name], field, ref);
+							} else {
+								// eslint-disable-next-line no-param-reassign
+								updatedProperties[name] = ref;
+							}
+						}
 					}
 				}
 			};
@@ -127,12 +123,12 @@ const processSpecialProperties = (template, oldTickets, updatedTickets) => {
 				processImageUpdate();
 			} else if (type === propTypes.VIEW) {
 				// Make constants out of these
-				processImageUpdate('screenshot');
+				processImageUpdate(false, 'screenshot');
 				processGroupsUpdate(oldProperties[name], updatedProperties[name],
 					Object.values(viewGroups).map((groupName) => `state.${groupName}`),
 					externalReferences.groups);
 			} else if (type === propTypes.IMAGE_LIST) {
-				processImageArrayUpdate();
+				processImageUpdate(true);
 			}
 		});
 	};
