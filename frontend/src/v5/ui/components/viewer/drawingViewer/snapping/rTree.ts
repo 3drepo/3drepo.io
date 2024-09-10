@@ -20,7 +20,7 @@ import { Line2, CubicBezier, Bounds } from './types';
 import { closestPointOnLine, lineLineIntersection } from './lineFunctions';
 import { closestPointOnCurve, curveCurveIntersection, updateCurveSelfIntersection, lineCurveIntersection } from './bezierFunctions';
 
-export class RTreeNode extends Bounds {
+class RTreeNode extends Bounds {
 	line: Line2 | undefined;
 
 	curve: CubicBezier | undefined;
@@ -57,15 +57,15 @@ class TraversalContext {
 
 	radius: number;
 
-	closestEdge: Vector2;
+	closestEdge: Vector2 | null;
 
 	closestEdgeDistance: number;
 
-	closestNode: Vector2;
+	closestNode: Vector2 | null;
 
 	closestNodeDistance2: number;
 
-	closestIntersection: Vector2;
+	closestIntersection: Vector2 | null;
 
 	closestIntersectionDistance2: number;
 
@@ -128,25 +128,6 @@ class TraversalContext {
 			this.closestNodeDistance2 = d2;
 			this.closestNode = p;
 		}
-	}
-}
-
-export class IntersectionTestResults {
-	closestEdge: Vector2;
-
-	closestNode: Vector2;
-
-	closestIntersection: Vector2;
-
-	queryTime: number;
-
-	numNodes: number;
-
-	constructor() {
-		this.closestEdge = null;
-		this.closestNode = null;
-		this.closestIntersection = null;
-		this.queryTime = 0;
 	}
 }
 
@@ -247,12 +228,55 @@ class RTreeQueries {
 	}
 }
 
+/**
+ * Contains the results of an intersection test with a set of geometry. Three
+ * types of point are returned separately allowing for prioritisation.
+ */
+export class IntersectionTestResults {
+
+	// The nearest point to the cursor that sits on an edge-like element of any
+	// primitive
+	closestEdge: Vector2;
+
+	// The nearest point to the cursor that is coincident with a point-like
+	// element of any primitive, such as a control point or start or end point.
+	closestNode: Vector2;
+
+	// The nearest point to the cursor that is coincident with an intersection
+	// between two edge-like elements, either between two primitives or the
+	// same primitive if the edge self-intersects.
+	closestIntersection: Vector2;
+
+	// The total time in milliseconds taken to complete the search
+	queryTime: number;
+
+	// The number of nodes of the tree overlapping the search radius.
+	numNodes: number;
+
+	constructor() {
+		this.closestEdge = null;
+		this.closestNode = null;
+		this.closestIntersection = null;
+		this.queryTime = 0;
+	}
+}
+
 export class RTree {
 
 	root: RTreeNode;
 
-	query(p: Vector2, r: number) {
+	/**
+	 * Queries the RTree for three types of intersection given a position and
+	 * search radius. This is the entry point for searching the tree and the
+	 * only method necessary for looking for intersections.
+	 */
+	query(p: Vector2, r: number): IntersectionTestResults {
 		const start = performance.now();
+
+		// The query works by first traversing the RTree to find all nodes that
+		// overlap the search radius. These are stored in the context object.
+		// Afterwards, concrete intersection tests are run between the primitives
+		// contained in the overlapping nodes.
 
 		const ctx = new TraversalContext(p, r);
 		this.traverseNode(this.root, ctx);
@@ -271,7 +295,7 @@ export class RTree {
 		return results;
 	}
 
-	intersects(node: RTreeNode, ctx: TraversalContext) {
+	private intersects(node: RTreeNode, ctx: TraversalContext) {
 		// The intersection test can be done with a simple point in bounds test
 		// with a Minkowski sum
 
@@ -288,12 +312,11 @@ export class RTree {
 		);
 	}
 
-	// Peform tests against each primitive
-	traverseLeaf(node: RTreeNode, ctx: TraversalContext) {
+	private traverseLeaf(node: RTreeNode, ctx: TraversalContext) {
 		ctx.nodes.push(node); // Add to the list of overlapping nodes for the geometry tests
 	}
 
-	traverseBranch(node: RTreeNode, ctx: TraversalContext) {
+	private traverseBranch(node: RTreeNode, ctx: TraversalContext) {
 		for (const child of node.children) {
 			if (this.intersects(child, ctx)) {
 				this.traverseNode(child, ctx);
@@ -301,7 +324,7 @@ export class RTree {
 		}
 	}
 
-	traverseNode(node: RTreeNode, ctx: TraversalContext) {
+	private traverseNode(node: RTreeNode, ctx: TraversalContext) {
 		if (node.leafNode()) {
 			this.traverseLeaf(node, ctx);
 		} else {
@@ -312,7 +335,7 @@ export class RTree {
 }
 
 export type RTreeOptions = {
-	lines: Line[],
+	lines: Line2[],
 	curves: CubicBezier[],
 	n: number,
 };
@@ -329,12 +352,24 @@ export class RTreeBuilderReport {
 	}
 }
 
-
-// Constructs an R-Tree using the STR (Sort Tile Recursive) method
-// https://ia800900.us.archive.org/27/items/nasa_techdoc_19970016975/19970016975.pdf
+/*
+ * Constructs an R-Tree using the STR (Sort Tile Recursive) method.
+ *
+ * All primitives should be provided via the RTreeOptions argument. Call build()
+ * to construct the three. After construction the builder object will have a
+ * report available.
+ *
+ * The STR method is based on subdividing one axis at a time, an approach not
+ * dissimilar to a kd-tree, except each axis is divided into multiple bins in
+ * each iteration. Trees are constructed with effective spatialisation in 2D,
+ * without needing an explicit representation of 2D shapes or location.
+ *
+ * https://ieeexplore.ieee.org/document/582015
+ * https://ia800900.us.archive.org/27/items/nasa_techdoc_19970016975/19970016975.pdf
+ */
 export class RTreeBuilder {
 
-	lines: Line[];
+	lines: Line2[];
 
 	curves: CubicBezier[];
 
@@ -349,7 +384,7 @@ export class RTreeBuilder {
 		this.report = new RTreeBuilderReport();
 	}
 
-	makeNodeFromLine(line: Line): RTreeNode {
+	private makeNodeFromLine(line: Line2): RTreeNode {
 		const node = new RTreeNode();
 		line.getBounds(node);
 		node.line = line;
@@ -358,7 +393,7 @@ export class RTreeBuilder {
 		return node;
 	}
 
-	makeNodeFromCurve(curve: CubicBezier): RTreeNode {
+	private makeNodeFromCurve(curve: CubicBezier): RTreeNode {
 		const node = new RTreeNode();
 		curve.getBounds(node);
 		node.curve = curve;
@@ -367,7 +402,7 @@ export class RTreeBuilder {
 		return node;
 	}
 
-	makeNodeFromChildren(children: RTreeNode[]): RTreeNode {
+	private makeNodeFromChildren(children: RTreeNode[]): RTreeNode {
 		const node = new RTreeNode();
 
 		let xmin = Number.MAX_VALUE;
@@ -392,7 +427,7 @@ export class RTreeBuilder {
 		return node;
 	}
 
-	buildTree(nodes: RTreeNode[]): RTreeNode {
+	private buildTree(nodes: RTreeNode[]): RTreeNode {
 		let children = nodes;
 		do {
 			children = this.buildLevel(children);
@@ -401,7 +436,7 @@ export class RTreeBuilder {
 		return children[0]; // root node
 	}
 
-	buildLevel(nodes: RTreeNode[]): RTreeNode[] {
+	private buildLevel(nodes: RTreeNode[]): RTreeNode[] {
 		const n = this.n;
 		const next: RTreeNode[] = [];
 

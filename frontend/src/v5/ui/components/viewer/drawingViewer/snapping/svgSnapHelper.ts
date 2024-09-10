@@ -19,7 +19,6 @@ import 'path-data-polyfill';
 import { Vector2 } from 'three';
 import { Line2, CubicBezier } from './types';
 import { RTree, RTreeBuilder } from './rTree';
-import { SVGSnapDiagnosticsHelper } from './debug';
 
 // The following interface extension makes TypeScript aware that the getPathData
 // member has been implemented by the path-data-polyfill for all Geometry
@@ -229,8 +228,6 @@ export class SVGSnapHelper {
 
 	rtree: RTree; //RTree that stores Lines, Curves and similar line-type primitives
 
-	debugHelper: SVGSnapDiagnosticsHelper;
-
 	constructor() {
 		this.container = document.createElement('div');
 	}
@@ -240,10 +237,6 @@ export class SVGSnapHelper {
 		const text = await res.text();
 		this.container.innerHTML = text;
 		this.initialise();
-	}
-
-	showDebugCanvas(parentElement: Element) {
-		this.debugHelper = new SVGSnapDiagnosticsHelper(parentElement);
 	}
 
 	initialise() {
@@ -263,8 +256,6 @@ export class SVGSnapHelper {
 			console.error('SVG has a non-zero viewBox offset. SVGSnap will attempt to counteract the offset to match createImageBitamp, but this is not supported and the behaviour is not guaranteed.');
 		}
 
-		this.debugHelper?.setSvg(this.svg);
-
 		const collector = new PrimitiveCollector(viewBoxOffset.multiplyScalar(-1));
 
 		// Extract all the edge-like elements. The responses here should include
@@ -274,11 +265,6 @@ export class SVGSnapHelper {
 
 		const parser = new SvgParser(collector);
 		parser.parseSvg(this.svg);
-
-		// debug draw all the lines
-
-		this.debugHelper?.renderLines(collector.lines);
-		this.debugHelper?.renderCurves(collector.curves);
 
 		this.buildAccelerationStructures(collector);
 	}
@@ -293,8 +279,6 @@ export class SVGSnapHelper {
 	}
 
 	snap(position: Vector2, radius: number): SnapResults {
-
-		this.debugHelper?.renderRadius(position, radius);
 
 		const results = new SnapResults();
 

@@ -27,16 +27,11 @@ export class Bounds {
 	ymax: number;
 }
 
-export interface IBounds {
-	getBounds(n: Bounds);
-}
-
-export interface IClosestPoint {
-	closestPoint(p: Vector2): Vector2;
-}
-
-/** A Line in implicit form (ax + by = d), where A is [a,b] and X is [x,y] */
-export class ImplicitLine {
+/**
+ * A Line in implicit, or linear equation, form (ax + by = d), where A is [a,b]
+ * and X (any point on the line) is [x,y]
+ */
+export class ImplicitLine2 {
 	A: Vector2;
 
 	d: number;
@@ -47,7 +42,10 @@ export class ImplicitLine {
 	}
 }
 
-export class Line2 implements IBounds {
+/**
+ * This is the equivalent of a threejs Line3, but in 2D.
+ */
+export class Line2 {
 
 	start: Vector2;
 
@@ -69,8 +67,8 @@ export class Line2 implements IBounds {
 		n.ymax = Math.max(this.start.y, this.end.y);
 	}
 
-	getImplicit(): ImplicitLine {
-		return new ImplicitLine(
+	getImplicit(): ImplicitLine2 {
+		return new ImplicitLine2(
 			new Vector2(this.start.y - this.end.y, this.end.x - this.start.x),
 			this.start.x * this.end.y - this.end.x * this.start.y,
 		);
@@ -113,7 +111,7 @@ export class QuinticPolynomial {
 	}
 }
 
-export class CubicBezier implements IBounds {
+export class CubicBezier {
 
 	p0: Vector2;
 
