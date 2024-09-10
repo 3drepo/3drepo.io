@@ -20,7 +20,7 @@ import { IPinColorMapping, IPinSchema, ITemplate, ITicket } from '@/v5/store/tic
 import { AdditionalProperties, TicketBaseKeys } from '../../../tickets.constants';
 import { IPin } from '@/v4/services/viewer/viewer';
 import { COLOR } from '@/v5/ui/themes/theme';
-import { rgbToHex } from '@controls/inputs/colorPicker/colorPicker.helpers';
+import { rgbToHex } from '@/v5/helpers/colors.helper';
 
 export const NEW_TICKET_ID = 'temporaryIdForNewTickets';
 const DEFAULT_COLOR = COLOR.PRIMARY_MAIN;
