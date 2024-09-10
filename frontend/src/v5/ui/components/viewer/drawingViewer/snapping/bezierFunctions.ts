@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Vector2, QuinticPolynomial, CubicBezier, Line } from './types';
+import { Vector2 } from 'three';
+import { QuinticPolynomial, CubicBezier, Line } from './types';
 
 class NinthOrderPolynomial {
 	a9: number;
@@ -934,9 +935,9 @@ export function closestPointOnCurve(curve: CubicBezier, p: Vector2): Vector2 {
 	// coefficients. The coefficients for each power can then simply be
 	// added when it comes time to evaluate p-q.q'
 
-	const b2 = Vector2.dot(p, curve.j);
-	const b1 = Vector2.dot(p, curve.k);
-	const b0 = Vector2.dot(p, curve.m);
+	const b2 = p.dot(curve.j);
+	const b1 = p.dot(curve.k);
+	const b0 = p.dot(curve.m);
 
 	const P = new ClosestPointProblem(
 		new QuinticPolynomial(
@@ -965,11 +966,11 @@ export function closestPointOnCurve(curve: CubicBezier, p: Vector2): Vector2 {
 	});
 
 	let closestPoint = curve.evaluate(0);
-	let closestDistance = Vector2.norm(closestPoint, p);
+	let closestDistance = closestPoint.distanceTo(p);
 
 	for (const root of f.roots) {
 		let q = curve.evaluate(root.u);
-		const d = Vector2.norm(q, p);
+		const d = q.distanceTo(p);
 
 		if (d < closestDistance) {
 			closestDistance = d;
@@ -993,10 +994,10 @@ export function lineCurveIntersection(curve: CubicBezier, line: Line, results: V
 
 	const L = line.getImplicit();
 
-	const p0 = Vector2.dot(L.A, curve.p0);
-	const p1 = Vector2.dot(L.A, curve.p1);
-	const p2 = Vector2.dot(L.A, curve.p2);
-	const p3 = Vector2.dot(L.A, curve.p3);
+	const p0 = L.A.dot(curve.p0);
+	const p1 = L.A.dot(curve.p1);
+	const p2 = L.A.dot(curve.p2);
+	const p3 = L.A.dot(curve.p3);
 
 	const a3 = (3 * p1 - p0 - 3 * p2 + p3);
 	const a2 = (3 * p0 - 6 * p1 + 3 * p2);
@@ -1035,7 +1036,7 @@ export function curveCurveIntersection(a: CubicBezier, b: CubicBezier, results: 
 			let q = a.evaluate(root.u);
 			let c = closestPointOnCurve(b, q);
 
-			const d = Vector2.norm(c, q) / P.s; // P.s is the scale applied to normalise the polynomial. This is used to calibrate the threshold for rejecting intersections as outside 0..1.
+			const d = c.distanceTo(q) / P.s; // P.s is the scale applied to normalise the polynomial. This is used to calibrate the threshold for rejecting intersections as outside 0..1.
 			if (d > 0.01) {
 				continue;
 			}

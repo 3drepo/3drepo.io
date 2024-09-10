@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Vector2 } from './types';
+import { Vector2 } from 'three';
 
 export function clipLine(x0, y0, x1, y1, xmin, xmax, ymin, ymax, result: number[]) {
 	// Implements the Liang–Barsky algorithm.
@@ -96,12 +96,12 @@ function equals0(x: number) {
  */
 export function lineLineIntersection(p0: Vector2, p1: Vector2, q0: Vector2, q1: Vector2): Vector2 {
 	const p = p0;
-	const r = Vector2.subtract(p1, p0);
+	const r = new Vector2().subVectors(p1, p0);
 	const q = q0;
-	const s = Vector2.subtract(q1, q0);
-	const qp = Vector2.subtract(q, p);
-	const rs = Vector2.cross(r, s);
-	const qpr = Vector2.cross(qp, r);
+	const s = new Vector2().subVectors(q1, q0);
+	const qp = new Vector2().subVectors(q, p);
+	const rs = r.cross(s);
+	const qpr = qp.cross(r);
 
 	if (equals0(rs) && equals0(qpr)) { // Lines are colinear
 		// For intersection testing, we actaully don't care which it is, because
@@ -113,11 +113,11 @@ export function lineLineIntersection(p0: Vector2, p1: Vector2, q0: Vector2, q1: 
 		return null;
 	}
 
-	const t = Vector2.cross(qp, s) / rs;
-	const u = Vector2.cross(qp, r) / rs;
+	const t = qp.cross(s) / rs;
+	const u = qp.cross(r) / rs;
 
 	if (!equals0(rs) && t >= 0 && t <= 1 && u >= 0 && u <= 1) {
-		return Vector2.add(p0, Vector2.scale(r, t));
+		return new Vector2().addVectors(p0, r.multiplyScalar(t));
 	}
 
 	return null;

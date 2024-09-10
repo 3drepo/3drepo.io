@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Vector2, Line, CubicBezier, Bounds } from './types';
+import { Vector2 } from 'three';
+import { Line, CubicBezier, Bounds } from './types';
 import { closestPointOnLine, lineLineIntersection } from './lineFunctions';
 import { closestPointOnCurve, curveCurveIntersection, updateCurveSelfIntersection, lineCurveIntersection } from './bezierFunctions';
 
@@ -106,7 +107,7 @@ class TraversalContext {
 	}
 
 	updateClosestIntersection(p: Vector2) {
-		const d2 = Vector2.distance2(this.position, p);
+		const d2 = this.position.distanceToSquared(p);
 		if (d2 < this.closestIntersectionDistance2) {
 			this.closestIntersectionDistance2 = d2;
 			this.closestIntersection = p;
@@ -114,7 +115,7 @@ class TraversalContext {
 	}
 
 	updateClosestEdge(p: Vector2) {
-		const d = Vector2.distance(this.position, p); // (Note edges are compared by distance, not distance squared)
+		const d = this.position.distanceTo(p); // (Note edges are compared by distance, not distance squared)
 		if ( d < this.closestEdgeDistance) {
 			this.closestEdgeDistance = d;
 			this.closestEdge = p;
@@ -122,7 +123,7 @@ class TraversalContext {
 	}
 
 	updateClosestNode(p: Vector2) {
-		const d2 = Vector2.distance2(this.position, p);
+		const d2 = this.position.distanceToSquared(p);
 		if (d2 < this.closestNodeDistance2) {
 			this.closestNodeDistance2 = d2;
 			this.closestNode = p;

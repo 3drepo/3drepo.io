@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { MediaBluetoothOff } from '@mui/icons-material';
+import { Vector2 } from 'three';
 
 export class Bounds {
 	xmin: number;
@@ -25,68 +25,6 @@ export class Bounds {
 	ymin: number;
 
 	ymax: number;
-}
-
-export class Vector2 {
-
-	x: number;
-
-	y: number;
-
-	constructor(x: number, y: number) {
-		this.x = x;
-		this.y = y;
-	}
-
-	get norm() {
-		return Math.sqrt((this.x * this.x) + (this.y * this.y));
-	}
-
-	get inverse() {
-		return new Vector2(-this.x, -this.y);
-	}
-
-	static add(a: Vector2, b: Vector2) {
-		return new Vector2(a.x + b.x, a.y + b.y);
-	}
-
-	static subtract(a: Vector2, b: Vector2): Vector2 {
-		return new Vector2(a.x - b.x, a.y - b.y);
-	}
-
-	static norm(a: Vector2, b: Vector2): number {
-		const d = Vector2.subtract(a, b);
-		return d.norm;
-	}
-
-	static cross(a: Vector2, b: Vector2): number {
-		return a.x * b.y - a.y * b.x;
-	}
-
-	static dot(a: Vector2, b: Vector2): number {
-		return a.x * b.x + a.y * b.y;
-	}
-
-	static equals(a: Vector2, b: Vector2): boolean {
-		return (a.x == b.x) && (a.y == b.y);
-	}
-
-	static scale(a: Vector2, b: number): Vector2 {
-		return new Vector2(a.x * b, a.y * b);
-	}
-
-	static distance2(a: Vector2, b: Vector2): number {
-		return (b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y);
-	}
-
-	static distance(a: Vector2, b: Vector2): number {
-		return Math.sqrt((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y));
-
-	}
-
-	toString() {
-		return this.x + ', ' + this.y;
-	}
 }
 
 export interface IBounds {
@@ -121,7 +59,7 @@ export class Line implements IBounds {
 	}
 
 	get length() {
-		return Vector2.norm(this.start, this.end);
+		return this.start.distanceTo(this.end);
 	}
 
 	getBounds(n: Bounds) {
@@ -306,17 +244,17 @@ export class CubicBezier implements IBounds {
 	computeQq() {
 		if (!this.qq) {
 			this.computeJkm();
-			const a5 = -Vector2.dot(this.j, this.n);
-			const a4 = -(Vector2.dot(this.j, this.r) + Vector2.dot(this.k, this.n));
-			const a3 = -(Vector2.dot(this.j, this.s) + Vector2.dot(this.k, this.r) + Vector2.dot(this.m, this.n));
-			const a2 = -(Vector2.dot(this.j, this.v) + Vector2.dot(this.k, this.s) + Vector2.dot(this.m, this.r));
-			const a1 = -(Vector2.dot(this.k, this.v) + Vector2.dot(this.m, this.s));
-			const a0 = -Vector2.dot(this.m, this.v);
+			const a5 = -(this.j.dot(this.n));
+			const a4 = -(this.j.dot(this.r) + this.k.dot(this.n));
+			const a3 = -(this.j.dot(this.s) + this.k.dot(this.r) + this.m.dot(this.n));
+			const a2 = -(this.j.dot(this.v) + this.k.dot(this.s) + this.m.dot(this.r));
+			const a1 = -(this.k.dot(this.v) + this.m.dot(this.s));
+			const a0 = -(this.m.dot(this.v));
 			this.qq = new QuinticPolynomial(a5, a4, a3, a2, a1, a0);
 		}
 	}
 
-	evaluate(t: number) {
+	evaluate(t: number): Vector2 {
 
 		// nrsv are the components of the curve in parametric form (as a cubic
 		// polynomial), so to get the position on the curve, we evaluate these
@@ -330,7 +268,7 @@ export class CubicBezier implements IBounds {
 	}
 
 	distance(p: Vector2, t: number) {
-		return Vector2.norm(p, this.evaluate(t));
+		return p.distanceTo(this.evaluate(t));
 	}
 
 	getBounds(n: Bounds) {

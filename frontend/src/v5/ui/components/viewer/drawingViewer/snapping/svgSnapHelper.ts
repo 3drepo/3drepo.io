@@ -16,7 +16,8 @@
  */
 
 import 'path-data-polyfill';
-import { Vector2, Line, CubicBezier } from './types';
+import { Vector2 } from 'three';
+import { Line, CubicBezier } from './types';
 import { RTree, RTreeBuilder } from './rTree';
 import { SVGSnapDiagnosticsHelper } from './debug';
 
@@ -258,13 +259,13 @@ export class SVGSnapHelper {
 
 		const viewBoxOffset = new Vector2(this.svg.viewBox.baseVal.x, this.svg.viewBox.baseVal.y);
 
-		if (viewBoxOffset.norm != 0) {
+		if (viewBoxOffset.length() != 0) {
 			console.error('SVG has a non-zero viewBox offset. SVGSnap will attempt to counteract the offset to match createImageBitamp, but this is not supported and the behaviour is not guaranteed.');
 		}
 
 		this.debugHelper?.setSvg(this.svg);
 
-		const collector = new PrimitiveCollector(viewBoxOffset.inverse);
+		const collector = new PrimitiveCollector(viewBoxOffset.multiplyScalar(-1));
 
 		// Extract all the edge-like elements. The responses here should include
 		// all Basic Shapes, and directly declared Path elements.

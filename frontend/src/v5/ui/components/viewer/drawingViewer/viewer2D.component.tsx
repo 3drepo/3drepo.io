@@ -41,7 +41,7 @@ import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { isFirefox } from '@/v5/helpers/browser.helper';
 import { ZoomableImage } from './zoomableImage.types';
 import { SVGSnapHelper } from './snapping/svgSnapHelper';
-import { Vector2 } from './snapping/types';
+import { Vector2 } from 'three';
 import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -217,7 +217,7 @@ export const Viewer2D = () => {
 				y: coord.y + snapRadius,
 			});
 			const p1 = new Vector2(imagePosition1.x, imagePosition1.y);
-			const radius = Vector2.subtract(p, p1).norm;
+			const radius = p.distanceTo(p1);
 
 			// With the query point and radius in SVG coordinates, we can now
 			// invoke the snap.

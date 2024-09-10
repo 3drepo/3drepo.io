@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Vector2, Line, CubicBezier } from './types';
+import { Line, CubicBezier } from './types';
 import { RTree, RTreeNode } from './rTree';
+import { Vector2Like } from 'three';
 
 
 export class SVGSnapDiagnosticsHelper {
@@ -75,21 +76,21 @@ export class SVGSnapDiagnosticsHelper {
 		}
 	}
 
-	renderPoint(p: Vector2) {
+	renderPoint(p: Vector2Like) {
 		this.context.fillStyle = 'white';
 		this.context.beginPath();
 		this.context.arc(p.x, p.y, 1, 0, 2 * Math.PI);
 		this.context.fill();
 	}
 
-	renderRadius(p: Vector2, r: number) {
+	renderRadius(p: Vector2Like, r: number) {
 		this.context.strokeStyle = 'white';
 		this.context.beginPath();
 		this.context.arc(p.x, p.y, r, 0, 2 * Math.PI);
 		this.context.stroke();
 	}
 
-	renderLine(start: Vector2, end: Vector2) {
+	renderLine(start: Vector2Like, end: Vector2Like) {
 		this.context.beginPath();
 		this.context.moveTo(start.x, start.y);
 		this.context.lineTo(end.x, end.y);
