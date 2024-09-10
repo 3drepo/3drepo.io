@@ -27,7 +27,6 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 	let resizeFrameId = 0;
 	let animationFrameId = 0;
 
-
 	// The pannableSVG attemps to provide quick feedback by drawing a larger
 	// region of the image than the user actually sees, and using the (fast)
 	// DOM transform to immediately respond to transform changes, while the

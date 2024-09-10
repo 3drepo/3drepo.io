@@ -16,7 +16,7 @@
  */
 
 import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { CardContainer, CardHeader, CardContent } from '@components/viewer/cards/card.styles';
+import { CardContainer, CardContent } from '@components/viewer/cards/card.styles';
 import { FormattedMessage } from 'react-intl';
 import DrawingsIcon from '@assets/icons/outlined/drawings-outlined.svg';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
@@ -25,10 +25,11 @@ import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatc
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { ViewerParams } from '../../../routes.constants';
+import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 
 export const DrawingsListCard = () => {
 	const { teamspace, project } = useParams<ViewerParams>();
-	const drawings = DrawingsHooksSelectors.selectCalibratedDrawings();
+	const drawings = DrawingsHooksSelectors.selectNonEmptyDrawings();
 
 	useEffect(() => {
 		drawings.forEach((d) => DrawingRevisionsActionsDispatchers.fetch(teamspace, project, d._id));
@@ -36,10 +37,10 @@ export const DrawingsListCard = () => {
 
 	return (
 		<CardContainer>
-			<CardHeader>
-				<DrawingsIcon />
-				<FormattedMessage id="viewer.cards.drawings.title" defaultMessage="Drawings" />
-			</CardHeader>
+			<CardHeader
+				icon={<DrawingsIcon />}
+				title={<FormattedMessage id="viewer.cards.drawings.title" defaultMessage="Drawings" />}
+			/>
 			{drawings.length
 				? (<DrawingsList />)
 				: (
