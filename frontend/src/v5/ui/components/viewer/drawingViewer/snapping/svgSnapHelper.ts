@@ -138,31 +138,31 @@ class SvgParser {
 		this.getPathElements(svg);
 	}
 
-	getRectElements(svg: SVGElement) {
+	private getRectElements(svg: SVGElement) {
 		this.addGeometryElements(svg.querySelectorAll<SVGPolyfilledGeometryElement>('rect'));
 	}
 
-	getCircleElements(svg: SVGElement) {
+	private getCircleElements(svg: SVGElement) {
 		this.addGeometryElements(svg.querySelectorAll<SVGPolyfilledGeometryElement>('circle'));
 	}
 
-	getEllipseElements(svg: SVGElement) {
+	private getEllipseElements(svg: SVGElement) {
 		this.addGeometryElements(svg.querySelectorAll<SVGPolyfilledGeometryElement>('ellipse'));
 	}
 
-	getLineElements(svg: SVGElement) {
+	private getLineElements(svg: SVGElement) {
 		this.addGeometryElements(svg.querySelectorAll<SVGPolyfilledGeometryElement>('line'));
 	}
 
-	getPolylineElements(svg: SVGElement) {
+	private getPolylineElements(svg: SVGElement) {
 		this.addGeometryElements(svg.querySelectorAll<SVGPolyfilledGeometryElement>('polyline'));
 	}
 
-	getPolygonElements(svg: SVGElement) {
+	private getPolygonElements(svg: SVGElement) {
 		this.addGeometryElements(svg.querySelectorAll<SVGPolyfilledGeometryElement>('polygon'));
 	}
 
-	getPathElements(svg: SVGSVGElement) {
+	private getPathElements(svg: SVGSVGElement) {
 		const paths = svg.querySelectorAll<SVGPathElement>('path:not([stroke=\'none\'])');
 		for (let i = 0; i < paths.length; i++) {
 			const p = paths[i];
@@ -171,14 +171,14 @@ class SvgParser {
 		}
 	}
 
-	addGeometryElements(nodes: NodeListOf<SVGPolyfilledGeometryElement>) {
+	private addGeometryElements(nodes: NodeListOf<SVGPolyfilledGeometryElement>) {
 		for (let i = 0; i < nodes.length; i++) {
 			const r = nodes[i];
 			this.addPathElements(r.getPathData({ normalize: true }));
 		}
 	}
 
-	addPathElements(segments: SVGPathSegment[]) {
+	private addPathElements(segments: SVGPathSegment[]) {
 		const pathCollector = new PathCollector(this.collector);
 		for (const segment of segments) {
 			// Passing the normalize flag means getPathData will transform
@@ -232,6 +232,12 @@ export class SVGSnapHelper {
 		this.container = document.createElement('div');
 	}
 
+	/**
+	 * Loads an SVG from a URL into the Snap Helper. This method is asynchronous
+	 * and so it might be some time before the tree is initialised. During this
+	 * time snap() may be called but will return as if there are no snap points
+	 * in range.
+	 */
 	async load(src: string) {
 		const res = await fetch(src);
 		const text = await res.text();
@@ -239,7 +245,7 @@ export class SVGSnapHelper {
 		this.initialise();
 	}
 
-	initialise() {
+	private initialise() {
 
 		// This method parses the SVG body as an SVG to extract the primitives
 		// in local (svg) space.
@@ -269,7 +275,7 @@ export class SVGSnapHelper {
 		this.buildAccelerationStructures(collector);
 	}
 
-	buildAccelerationStructures(collector: PrimitiveCollector) {
+	private buildAccelerationStructures(collector: PrimitiveCollector) {
 		const rbuilder = new RTreeBuilder({
 			lines: collector.lines,
 			curves: collector.curves,
@@ -278,6 +284,11 @@ export class SVGSnapHelper {
 		this.rtree = rbuilder.build();
 	}
 
+	/**
+	 * Looks for three types of snap point around the cursor position, within
+	 * the provided search radius, and returns a structure with the closest
+	 * of each three types, individually.
+	 */
 	snap(position: Vector2, radius: number): SnapResults {
 
 		const results = new SnapResults();

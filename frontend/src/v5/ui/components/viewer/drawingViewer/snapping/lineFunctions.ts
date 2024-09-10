@@ -22,6 +22,9 @@ function equals0(x: number) {
 	return Math.abs(x) <= Number.EPSILON;
 }
 
+/**
+ * Returns the closest point to p that sits on line.
+ */
 export function closestPointOnLine(line: Line2, p: Vector2Like) {
 	const dx = p.x - line.start.x;
 	const dy = p.y - line.start.y;
@@ -43,9 +46,13 @@ export function closestPointOnLine(line: Line2, p: Vector2Like) {
 }
 
 /**
- * Based on the algorithm suggested here https://stackoverflow.com/questions/563198
+ * Returns the intersection point between two Lines, or null if they do not
+ * intersect.
+ * This implementation is based on the method for solving for t through the
+ * use of cross-products, as suggested by Gareth Rees,
+ * https://stackoverflow.com/questions/563198
  */
-export function lineLineIntersection(a: Line2, b: Line2): Vector2 {
+export function lineLineIntersection(a: Line2, b: Line2): Vector2 | null {
 	const p0 = a.start;
 	const p1 = a.end;
 	const q0 = b.start;
@@ -59,12 +66,13 @@ export function lineLineIntersection(a: Line2, b: Line2): Vector2 {
 	const qpr = qp.cross(r);
 
 	if (equals0(rs) && equals0(qpr)) { // Lines are colinear
-		// For intersection testing, we actaully don't care which it is, because
-		// neither case results in an individual point to snap to.
+		// (Colinear lines can overlap or be completely separate, while still
+		// sitting on the same ray. We don't care which case it is because
+		// neither offers a point to snap to.)
 		return null;
 	}
 
-	if (equals0(rs) && !equals0(qpr)) { // Parallel (and not intersecting)
+	if (equals0(rs) && !equals0(qpr)) { // Lines are parallel
 		return null;
 	}
 

@@ -192,7 +192,7 @@ export const Viewer2D = () => {
 
 			// SVGSnap operates in the local coordinate system of the SVG primitives.
 			// First, make the event coordinates relative to the client rect of the
-			// event emitter regardless of any child transforms and margins.
+			// image element regardless of any child transforms and margins.
 
 			const currentTargetRect = ev.currentTarget.getBoundingClientRect();
 			const content = getElementContentOffset(ev.currentTarget);
@@ -209,7 +209,7 @@ export const Viewer2D = () => {
 
 			// (We get the radius in SVG units simply by getting another point in
 			// image space, offset by the pixel radius, and taking the distance
-			// beteen them)
+			// between them)
 
 			const snapRadius = 10;
 			const imagePosition1 = imgRef.current.getImagePosition({
@@ -225,13 +225,14 @@ export const Viewer2D = () => {
 			const results = snapHandler.snap(p, radius);
 
 			// The snapResults object returns three types of snap point. This
-			// snippet snaps preferentially to nodes, then intersections, and
+			// snippet preferentially snaps to nodes, then intersections, and
 			// finally edges.
 
-			// Note that the positions are in SVG space - these are the coordinates
-			// that should be passed to the calibration system, and will need to be
-			// converted to the client rect in order to find out where to draw the
-			// cursor.
+			// Note that the positions are in SVG space - these are the
+			// coordinates that should be passed to the calibration system, and
+			// will need to be converted to the client rect in order to find out
+			// where to draw the cursor. In this sample, this is performed by
+			// updateCursorPosition in setCursor.
 
 			if (results.closestNode != null) {
 				setCursor(results.closestNode, 'node');

@@ -588,7 +588,7 @@ export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ on
 		},
 
 		// Given a coordinate in the content rect of the container, get the
-		// position in the local coordinate frame of the SVG viewbox.
+		// position in the local coordinate space of the SVG viewbox.
 		getImagePosition(contentPosition: Vector2) {
 			return pannableImage.current.localToSvg(contentPosition);
 		},

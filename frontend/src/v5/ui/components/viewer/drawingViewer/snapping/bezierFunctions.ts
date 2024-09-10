@@ -52,15 +52,19 @@ class NinthOrderPolynomial {
 	}
 }
 
+// Describes a root found by RootFinder
 class Root {
-	/** The parameter (position along the curve) where the root is */
+	// The parameter (position along the curve) where the root is
 	u: number;
 
-	/** The number of iterations it took to find the root */
+	// The number of iterations it took to find the root
 	iterations: number;
 }
 
-/** A polynomial that can be transformed by the interval k & c */
+/**
+ * A polynomial that can be transformed by the interval described by k & c using
+ * H & HTranslate.
+ */
 interface RootProblem {
 	countRoots(): number;
 	HTranslate(dk: number);
@@ -72,6 +76,11 @@ interface RootProblem {
 	filterInterval(ai: number, bi: number);
 }
 
+/**
+ * Holds a ninth-order polynomial whose roots represent the intersection points
+ * between two cubic Bezier curves. The class also holds a scale factor applied
+ * to the curves before building the polynomial.
+ */
 class CurveIntersectionProblem implements RootProblem  {
 
 	Q: NinthOrderPolynomial; // The polynomial we are finding the roots of
@@ -247,6 +256,12 @@ class CurveIntersectionProblem implements RootProblem  {
 	}
 }
 
+/**
+ * Holds a fifth-order polynomial whose roots describe the closest points between
+ * a cubic Bezier curve and a point in space.
+ * This class pre-filters the intervals based on the optimisation of Chen, et al
+ * that discards intervals that cannot contain local minima before bisection.
+ */
 class ClosestPointProblem implements RootProblem  {
 
 	Q: QuinticPolynomial; // The polynomial we are finding the roots of
@@ -384,7 +399,8 @@ class ClosestPointProblem implements RootProblem  {
 }
 
 /**
- * RootFinder isolates values of t, where Q is at a local minimum.
+ * RootFinder isolates values of t, where Q is at a local minimum, in order to
+ * solve 'problems' described by a polynomial.
  *
  * This implementation is based on:
  * - Fabrice Rouillier & Paul Zimmermann. Efficient isolation of polynomial's
@@ -397,24 +413,25 @@ class ClosestPointProblem implements RootProblem  {
  *   of stationary points of distance functions. Engineering with Computers.
  *   (1993).
  *
- * The basis of the algorithm is to transform the point and curve distance
- * function into a quintic polynomial. In this form the roots - which should
- * correspond the local minima of the distance - can be isolated and then
- * robustly resolved with a simple interative bisection.
+ * The algorithm takes the approach based on Vincents Theorem. The polynomial
+ * is bisected into intervals, and then transformed in such a way that Descartes
+ * Rule-of-Signs will give a bound on the number of roots in that interval
+ * (between 0 and 1). The search works by transforming a polynomial representing
+ * an interval into another, in place - so it is memory constant. The traversal
+ * order is chosen such that transforming between adjacent intervals need only a
+ * couple of operations with mostly known parameters, allowing them to be
+ * implemented using basic arithmetic on the coefficients. Once an interval has
+ * been found that contains only a single root, a simple bisection algorithm can
+ * find the exact root through iteration reliably.
  *
- * (Note that RootFinder explicitly filters root intervals that do not contain
- * local minima. While it can be used as a general purpose root finder for other
- * problems, it will require modifications to stop it filtering other roots.)
+ * The polynomial and state parameters are stored in RootProblem subclasses.
  *
- * In slightly more detail, the algorithm takes the approach based on Vincents
- * Theorem. The polynomial is bisected into intervals, and then transformed in
- * such a way that Descartes Rule-of-Signs will give a bound on the number of
- * roots in that interval (between 0 and 1). The search works by transforming a
- * polynomial representing an interval into another, in place - so it is memory
- * constant. The traversal order is chosen such that transforming between
- * adjacent intervals need only a couple of operations with mostly known
- * parameters, allowing them to be implemented using basic arithmetic on the
- * coefficients.
+ * A RootProblem holds the polynomial coefficients and interval parameters for
+ * the its current state.
+ *
+ * This allows RootFinder to work on different orders of polynomial, as well
+ * as allowing the subclasses to specialise - for example, pre-filtering
+ * intervals.
  * */
 class RootFinder {
 
@@ -728,7 +745,7 @@ function computeCubicRoots(a0: number, a1: number, a2: number, a3: number, roots
 	}
 }
 
-function createCurveCurvePolynomial(a: CubicBezier, b: CubicBezier): CurveIntersectionProblem {
+function createCurveCurveProblem(a: CubicBezier, b: CubicBezier): CurveIntersectionProblem {
 
 	// Normalise the curves
 
@@ -770,7 +787,6 @@ function createCurveCurvePolynomial(a: CubicBezier, b: CubicBezier): CurveInters
 	const m9 = (3 * B0y - 3 * B1y);
 	const m10 = (3 * A0y - 3 * A1y);
 	const m11 = (3 * A0x - 3 * A1x);
-
 
 	const n0  = Math.pow(m0, 3);
 	const n1  = Math.pow(m1, 3);
@@ -841,7 +857,6 @@ function createCurveCurvePolynomial(a: CubicBezier, b: CubicBezier): CurveInters
 	const l12 = A0y * B0y;
 	const l13 = A0x * A0y;
 	const l14 = A0x * B0y;
-
 
 	const j0 = k10 * n4k0;
 	const j1 = k12 * n10 * k2 * k3;
@@ -921,7 +936,7 @@ function createCurveCurvePolynomial(a: CubicBezier, b: CubicBezier): CurveInters
 /**
  * Returns the closest point on a curve to point p using the root isolation
  * method. Will always return a value, even if it is just the start or end
- * of the curve, if these turn out to be closest.
+ * of the curve, depending on which is closest.
  */
 export function closestPointOnCurve(curve: CubicBezier, p: Vector2): Vector2 {
 
@@ -981,10 +996,11 @@ export function closestPointOnCurve(curve: CubicBezier, p: Vector2): Vector2 {
 	return closestPoint;
 }
 
+/**
+ * Finds the intersection of a Line and a Bezier Curve using the root finding
+ * method.
+ */
 export function lineCurveIntersection(curve: CubicBezier, line: Line2, results: Vector2[]) {
-
-	// Finds the intersection of a Line and a Bezier Curve using the root finding
-	// method.
 
 	// The equation of a line in implicit or linear form (ax + by - c = 0, or,
 	// A.X = c, for any xy) and the Curve in parametric form (X(t) = (1-t)^3P0...).
@@ -1015,12 +1031,16 @@ export function lineCurveIntersection(curve: CubicBezier, line: Line2, results: 
 	}
 }
 
+/**
+ * Finds all the points of intersection between curves a & b (not including
+ * self intersections) and adds them to results.
+ */
 export function curveCurveIntersection(a: CubicBezier, b: CubicBezier, results: Vector2[]) {
 
 	// This creates a ninth-order polynomial, in a RootFinder problem that can
 	// be handed over directly.
 
-	const P = createCurveCurvePolynomial(b, a);
+	const P = createCurveCurveProblem(b, a);
 	const f = new RootFinder();
 	f.findRoots(P);
 
@@ -1046,10 +1066,11 @@ export function curveCurveIntersection(a: CubicBezier, b: CubicBezier, results: 
 	}
 }
 
+/**
+ * Updates the CubicBezier's selfIntersection member with the point of self
+ * intersection, or false if there is none.
+ */
 export function updateCurveSelfIntersection(a: CubicBezier) {
-
-	// Updates the CubicBezier's selfIntersection member with the point of self
-	// intersection, or false if there is none.
 
 	// This method is based on setting P(u)=P(v) and then removing the trivial
 	// solution of u=v to get the reduced difference. The roots of this
