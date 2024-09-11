@@ -100,6 +100,27 @@ export const panzoom = (target: ZoomableImage, options) => {
 		});
 	};
 
+	const smoothSetTransform = (x :number, y:number, zoom: number) => {
+		stopInertia();
+		
+		const initialScale = transform.scale;
+		const initialX = transform.x;
+		const initialY = transform.y;
+		const diffScale =  zoom - initialScale;
+		const diffX = x - initialX;
+		const diffY = y - initialY;
+				
+		animation = animate((currentTime) => {
+			const progress = zoomEasing(currentTime / zoomDuration);
+			setTransform(
+				initialX + diffX * progress, 
+				initialY + diffY * progress, 
+				initialScale + diffScale * progress,
+			);
+			return currentTime >= zoomDuration;
+		});
+	};
+
 	const zoom = (scaleFactor, smooth:boolean = true) => {
 		const contRect = container.getBoundingClientRect();
 		const pos = { x :contRect.width / 2,  y: contRect.height / 2 };
@@ -200,6 +221,7 @@ export const panzoom = (target: ZoomableImage, options) => {
 			emitter.emit(Events.transform);
 		},
 		smoothZoom,
+		smoothSetTransform,
 		moveTo,
 		setMinZoom,
 		getMinZoom: () => minZoom,

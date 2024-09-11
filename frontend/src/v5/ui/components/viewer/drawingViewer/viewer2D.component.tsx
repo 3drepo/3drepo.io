@@ -44,6 +44,8 @@ import { useAuthenticatedImage } from '@components/authenticatedResource/authent
 import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { selectViewerBackgroundColor } from '@/v4/modules/viewer/viewer.selectors';
 import { useSelector } from 'react-redux';
+import HomeIcon from '@assets/icons/viewer/home.svg';
+
 
 export const Viewer2D = () => {
 	const { teamspace, project } = useParams<ViewerParams>();
@@ -115,6 +117,11 @@ export const Viewer2D = () => {
 			</ImageContainer>
 			<ToolbarContainer>
 				<MainToolbar>
+					<ToolbarButton
+						Icon={HomeIcon}
+						onClick={() => zoomHandler.centreView()}
+						title={formatMessage({ id: 'viewer.toolbar.icon.home', defaultMessage: 'Home' })}
+					/>
 					<ToolbarButton
 						Icon={ZoomOutIcon}
 						onClick={onClickZoomOut}
