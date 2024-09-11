@@ -23,9 +23,12 @@ import { VirtualisedList, TableRow } from './drawingsList.styles';
 import { CardContent, CardList } from '@components/viewer/cards/card.styles';
 import { forwardRef, useContext, useEffect } from 'react';
 import { ViewerCanvasesContext } from '../../viewerCanvases.context';
-import { enableRealtimeNewDrawing } from '@/v5/services/realtime/drawings.events';
+import { enableRealtimeDrawingRemoved, enableRealtimeDrawingUpdate, enableRealtimeNewDrawing } from '@/v5/services/realtime/drawings.events';
 import { useParams } from 'react-router';
 import { ViewerParams } from '../../../routes.constants';
+import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
+import { enableRealtimeDrawingNewRevision, enableRealtimeDrawingRevisionUpdate } from '@/v5/services/realtime/drawingRevision.events';
+import { flattenDeep } from 'lodash';
 
 const Table = forwardRef(({ children, ...props }, ref: any) => (
 	<table ref={ref} {...props}>
@@ -34,12 +37,13 @@ const Table = forwardRef(({ children, ...props }, ref: any) => (
 ));
 
 export const DrawingsList = () => {
-	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
-	const drawings = DrawingsHooksSelectors.selectNonEmptyDrawings();
-	const isLoading = DrawingsHooksSelectors.selectNonEmptyDrawingsHaveStatsPending();
+	const { teamspace, project } = useParams<ViewerParams>();
+	const allDrawings = DrawingsHooksSelectors.selectDrawings();
+	const nonEmptyDrawings = allDrawings.filter((d) => d.revisionsCount > 0);
+	const isLoading = DrawingsHooksSelectors.selectAreStatsPending();
 	const { open2D } = useContext(ViewerCanvasesContext);
 
-	useEffect(() => { enableRealtimeNewDrawing(teamspace, project); }, [containerOrFederation]);
+	useEffect(() => enableRealtimeNewDrawing(teamspace, project), [project]);
 
 	if (isLoading) return (
 		<CentredContainer>
@@ -47,11 +51,21 @@ export const DrawingsList = () => {
 		</CentredContainer>
 	);
 
+	useEffect(() => {
+		const subscriptionsPerDrawing = allDrawings.map(({ _id }) => [
+			enableRealtimeDrawingRemoved(teamspace, project, _id),
+			enableRealtimeDrawingUpdate(teamspace, project, _id),
+			enableRealtimeDrawingRevisionUpdate(teamspace, project, _id),
+			enableRealtimeDrawingNewRevision(teamspace, project, _id),
+		]);
+		return combineSubscriptions(...flattenDeep(subscriptionsPerDrawing));
+	}, [allDrawings.length]);
+
 	return (
 		// @ts-ignore
 		<VirtualisedList
-			data={drawings}
-			totalCount={drawings.length}
+			data={nonEmptyDrawings}
+			totalCount={nonEmptyDrawings.length}
 			components={{
 				Table,
 				TableBody: CardList,
