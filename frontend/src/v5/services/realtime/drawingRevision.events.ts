@@ -17,17 +17,33 @@
 /* eslint-disable implicit-arrow-linebreak */
 
 import { IDrawingRevision, IDrawingRevisionUpdate } from '@/v5/store/drawings/revisions/drawingRevisions.types';
-import { DrawingsActionsDispatchers, DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DrawingRevisionsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { subscribeToRoomEvent } from './realtime.service';
+import { getState } from '@/v5/helpers/redux.helpers';
+import { selectRevisionsPending } from '@/v5/store/drawings/revisions/drawingRevisions.selectors';
+
+
 
 export const enableRealtimeDrawingRevisionUpdate = (teamspace: string, project: string, drawingId: string) =>
 	subscribeToRoomEvent({ teamspace, project, model: drawingId }, 'drawingRevisionUpdate',
-		(updatedStats: IDrawingRevisionUpdate) =>
-			DrawingRevisionsActionsDispatchers.updateRevisionSuccess(drawingId, updatedStats));
+		(updatedStats: IDrawingRevisionUpdate) => {
+			DrawingsActionsDispatchers.fetchDrawingStats(teamspace, project, drawingId);
+			
+			if (selectRevisionsPending(getState(), drawingId)) {
+				DrawingRevisionsActionsDispatchers.fetch(teamspace, project, drawingId);
+			} else {
+				DrawingRevisionsActionsDispatchers.updateRevisionSuccess(drawingId, updatedStats);
+			}
+		},
+	);
 
 export const enableRealtimeDrawingNewRevision = (teamspace: string, project: string, drawingId: string) =>
 	subscribeToRoomEvent({ teamspace, project, model: drawingId }, 'drawingNewRevision',
 		(revision: IDrawingRevision) => {
-			DrawingsActionsDispatchers.drawingProcessingSuccess(project, drawingId, revision);
-			DrawingRevisionsActionsDispatchers.revisionProcessingSuccess(drawingId, revision);
+			DrawingsActionsDispatchers.fetchDrawingStats(teamspace, project, drawingId);
+			if (selectRevisionsPending(getState(), drawingId)) {
+				DrawingRevisionsActionsDispatchers.fetch(teamspace, project, drawingId);
+			} else {
+				DrawingRevisionsActionsDispatchers.revisionProcessingSuccess(drawingId, revision);
+			}
 		});

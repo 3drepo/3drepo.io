@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,8 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const getNullableDate = (dateValue: number | Date): Date => (
-	dateValue
-		? new Date(dateValue)
-		: null
-);
+import { AnyAction, Store } from 'redux';
+
+let store: Store<unknown, AnyAction> = undefined;
+
+export const setStore = (newStore) => store = newStore;
+
+export const dispatch = (action: AnyAction) => store.dispatch(action);
+
+export const getState = () => store.getState();

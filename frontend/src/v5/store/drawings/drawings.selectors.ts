@@ -20,16 +20,17 @@ import { selectCurrentProject, selectIsProjectAdmin } from '../projects/projects
 import { DrawingsState } from './drawings.redux';
 import { isCollaboratorRole, isCommenterRole, isViewerRole } from '../store.helpers';
 import { Role } from '../currentUser/currentUser.types';
-import { CalibrationStates } from './drawings.types';
+import { selectRevisionsByDrawing } from './revisions/drawingRevisions.selectors';
+import { fullDrawing } from './drawings.helpers';
 
 const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
 
 export const selectDrawings = createSelector(
-	selectDrawingsDomain, selectCurrentProject,
-	(state, currentProject) => (state.drawingsByProject[currentProject] ?? []).map(({ calibration, ...drawing }) => ({
-		...drawing,
-		calibration: drawing.revisionsCount ? calibration : CalibrationStates.EMPTY,
-	})),
+	selectDrawingsDomain,
+	selectCurrentProject,
+	selectRevisionsByDrawing, // This selector is used here to recalculate the value after the revisions are fetched
+	(state, currentProject) => 
+		(state.drawingsByProject[currentProject] ?? []).map((drawing) => fullDrawing(drawing as any)),
 );
 
 export const selectNonEmptyDrawings = createSelector(
@@ -45,7 +46,9 @@ export const selectFavouriteDrawings = createSelector(
 export const selectDrawingById = createSelector(
 	selectDrawings,
 	(_, _id) => _id,
-	(drawings, _id) => drawings.find((d) => d._id === _id),
+	(drawings, _id) => {
+		return drawings.find((d) => d._id === _id);
+	},
 );
 
 export const selectIsListPending = createSelector(

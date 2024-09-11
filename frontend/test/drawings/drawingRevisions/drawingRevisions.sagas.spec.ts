@@ -20,7 +20,7 @@ import { DrawingRevisionsActions } from '@/v5/store/drawings/revisions/drawingRe
 import api from '@/v5/services/api/default';
 import { DrawingsActions } from '@/v5/store/drawings/drawings.redux';
 import { drawingRevisionsMockFactory, mockCreateRevisionBody } from './drawingRevisions.fixtures';
-import { createTestStore, spyOnAxiosApiCallWithFile } from '../../test.helpers';
+import { createTestStore, spyOnAxiosApiCallWithFile, WaitActionCallback, WaitForActions } from '../../test.helpers';
 import { selectRevisions, selectUploads } from '@/v5/store/drawings/revisions/drawingRevisions.selectors';
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
 import { drawingMockFactory } from '../drawings.fixtures';
@@ -37,7 +37,7 @@ describe('Drawing Revisions: sagas', () => {
 	// This breaks the tests as a Date is being compared against a string. This is to fix it
 	const mockRevision = drawingRevisionsMockFactory({ _id: revisionId, timestamp: null });
 	const mockDrawing = drawingMockFactory({ _id: drawingId });
-	let dispatch, getState, waitForActions;
+	let dispatch, getState, waitForActions: WaitForActions;
 	let onSuccess, onError;
 
 	beforeEach(() => {
@@ -46,6 +46,9 @@ describe('Drawing Revisions: sagas', () => {
 		onSuccess = jest.fn();
 		onError = jest.fn();
 	});
+
+	const statusIs = (drawingId, status): WaitActionCallback =>
+		(state) => selectDrawingById(state, drawingId).status === status;
 
 	describe('fetch', () => {
 		it('should fetch revisions', async () => {
@@ -139,8 +142,9 @@ describe('Drawing Revisions: sagas', () => {
 			await waitForActions(() => {
 				dispatch(DrawingRevisionsActions.createRevision(teamspace, projectId, uploadId, mockBody));
 			}, [
+				statusIs(drawingId, UploadStatus.OK), 
 				DrawingRevisionsActions.setUploadComplete(uploadId, false),
-				DrawingsActions.setDrawingStatus(projectId, mockBody.drawingId, UploadStatus.QUEUED),
+				statusIs(drawingId, UploadStatus.QUEUED), 
 				DrawingRevisionsActions.setUploadComplete(uploadId, true),
 			]);
 
@@ -163,7 +167,7 @@ describe('Drawing Revisions: sagas', () => {
 			}, [
 				DrawingsActions.createDrawingSuccess(projectId, newDrawing),
 				DrawingRevisionsActions.setUploadComplete(uploadId, false),
-				DrawingsActions.setDrawingStatus(projectId, newDrawing._id, UploadStatus.QUEUED),
+				statusIs(newDrawing._id, UploadStatus.QUEUED),
 				DrawingRevisionsActions.setUploadComplete(uploadId, true),
 			]);
 			const uploadInStore = selectUploads(getState())[uploadId];
