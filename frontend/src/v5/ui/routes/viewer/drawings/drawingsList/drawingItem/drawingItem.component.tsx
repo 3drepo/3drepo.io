@@ -44,6 +44,7 @@ import { enableRealtimeDrawingRevisionUpdate, enableRealtimeDrawingNewRevision }
 import { useEffect, useState } from 'react';
 import { deleteAuthUrlFromCache, downloadAuthUrl } from '@components/authenticatedResource/authenticatedResource.hooks';
 import { Thumbnail } from '@controls/thumbnail/thumbnail.component';
+import { Tooltip } from '@mui/material';
 
 const STATUS_CODE_TEXT = formatMessage({ id: 'drawings.list.item.statusCode', defaultMessage: 'Status code' });
 const REVISION_CODE_TEXT = formatMessage({ id: 'drawings.list.item.revisionCode', defaultMessage: 'Revision code' });
@@ -121,7 +122,9 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 						<Property>{number}</Property>
 					</BreakingLine>
 					<BreakingLine>
-						<Title>{name}</Title>
+						<Tooltip title={name}>
+							<Title>{name}</Title>
+						</Tooltip>
 					</BreakingLine>
 					{areStatsPending ? <LoadingCodes /> : <LoadedCodes />}
 					<Description>{desc}</Description>

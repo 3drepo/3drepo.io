@@ -76,6 +76,8 @@ export const Title = styled(PropertyValue)`
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+	display: inline-block;
+	padding-bottom: 0;
 
 	&:hover {
 		text-decoration: underline;
