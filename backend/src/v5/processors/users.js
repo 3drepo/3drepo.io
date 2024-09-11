@@ -50,6 +50,7 @@ Users.signUp = async (newUserData) => {
 			fullName: `${newUserData.firstName} ${newUserData.lastName}`,
 			company: newUserData.company,
 			mailListOptOut: newUserData.mailListOptOut,
+			createdAt: new Date(),
 		});
 	} else {
 		await sendEmail(templates.VERIFY_USER.name, newUserData.email, {
@@ -70,6 +71,7 @@ Users.verify = async (username, token) => {
 		fullName: `${customData.firstName} ${customData.lastName}`,
 		company: customData.billing.billingInfo.company,
 		mailListOptOut: customData.mailListOptOut,
+		createdAt: customData.createdAt,
 	});
 };
 
