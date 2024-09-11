@@ -38,9 +38,6 @@ import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { getDrawingThumbnailSrc } from '@/v5/store/drawings/drawings.helpers';
-import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
-import { enableRealtimeDrawingRemoved, enableRealtimeDrawingUpdate } from '@/v5/services/realtime/drawings.events';
-import { enableRealtimeDrawingRevisionUpdate, enableRealtimeDrawingNewRevision } from '@/v5/services/realtime/drawingRevision.events';
 import { useEffect, useState } from 'react';
 import { deleteAuthUrlFromCache, downloadAuthUrl } from '@components/authenticatedResource/authenticatedResource.hooks';
 import { Thumbnail } from '@controls/thumbnail/thumbnail.component';
@@ -62,15 +59,6 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	const [selectedDrawingId] = useSearchParam('drawingId');
 	const [thumbnail, setThumbnail] = useState('');
 	const thumbnailSrc = getDrawingThumbnailSrc(teamspace, project, drawing._id);
-
-	useEffect(() => {
-		return combineSubscriptions(
-			enableRealtimeDrawingRemoved(teamspace, project, drawing._id),
-			enableRealtimeDrawingUpdate(teamspace, project, drawing._id),
-			enableRealtimeDrawingRevisionUpdate(teamspace, project, drawing._id),
-			enableRealtimeDrawingNewRevision(teamspace, project, drawing._id),
-		);
-	}, [drawing._id]);
 
 	useEffect(() => {
 		downloadAuthUrl(thumbnailSrc)
