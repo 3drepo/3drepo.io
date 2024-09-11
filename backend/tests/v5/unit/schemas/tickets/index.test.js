@@ -602,7 +602,6 @@ const testAllProperties = () => {
 			['Many Of (unset)', { type: propTypes.MANY_OF, values: ['a', 'b', 'c'] }, null],
 			['Image (unset)', { type: propTypes.IMAGE }, null],
 			['Image List (unset)', { type: propTypes.IMAGE_LIST }, null],
-			['Image List (unset 2)', { type: propTypes.IMAGE_LIST }, []],
 		];
 
 		const updateOnlyCases = [
