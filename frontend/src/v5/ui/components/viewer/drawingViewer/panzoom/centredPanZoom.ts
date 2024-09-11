@@ -38,7 +38,7 @@ export const centredPanZoom = (target: ZoomableImage, paddingW: number, paddingH
 	
 	const scaleTarget = () => {
 		const parentRect = targetContainer.getBoundingClientRect();
-		const fittedSize = aspectRatio(naturalSize.width, naturalSize.height, parentRect.width - paddingW * 2, parentRect.height - paddingH * 2);
+		const fittedSize = aspectRatio(naturalSize.width, naturalSize.height, parentRect.width / 3, parentRect.height / 3);
 
 		let scale = Math.min(fittedSize.scaledWidth / naturalSize.width, fittedSize.scaledHeight / naturalSize.height );
 		pz.setMinZoom(scale);
