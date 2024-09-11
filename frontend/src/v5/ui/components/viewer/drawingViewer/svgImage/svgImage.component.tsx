@@ -18,6 +18,7 @@
 import { useRef, useEffect, forwardRef } from 'react';
 import { DrawingViewerImageProps } from '../drawingViewerImage/drawingViewerImage.component';
 import { ZoomableImage } from '../zoomableImage.types';
+import axios from 'axios';
 
 type Transform = { x:number, y:number, scale:number };
 type Vector2 = { x:number, y:number };
@@ -538,8 +539,19 @@ export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ on
 
 
 	useEffect(() => {
-		if (!pannableImage.current) return;
-		pannableImage.current.src = src;
+		if (!pannableImage.current || !src) return;
+		
+		// This bit is to change the background colour of the svg to white
+		axios.get(src).then((response) => {
+			const svgContent = response.data;
+			const svgContainer  = document.createElement('div');
+			svgContainer.innerHTML = svgContent;
+			const svg = svgContainer.querySelector('svg') as SVGSVGElement;
+			svg.setAttribute('style', 'background-color: white;');
+			const binString = Array.from(new TextEncoder().encode(svg.outerHTML), (byte) => String.fromCodePoint(byte)).join('');
+			const base64 = btoa(binString);
+			pannableImage.current.src = `data:image/svg+xml;base64,${base64}`;
+		});
 	}, [src]);
 
 
