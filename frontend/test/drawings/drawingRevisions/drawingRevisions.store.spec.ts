@@ -25,7 +25,7 @@ import {
 	selectUploadProgress,
 	selectUploads,
 } from '@/v5/store/drawings/revisions/drawingRevisions.selectors';
-import { times } from 'lodash';
+import { sortBy, times } from 'lodash';
 import { createTestStore } from '../../test.helpers';
 import { drawingMockFactory } from '../drawings.fixtures';
 import { drawingRevisionsMockFactory } from './drawingRevisions.fixtures';
@@ -46,8 +46,7 @@ describe('Drawing Revisions: store', () => {
 		dispatch(DrawingRevisionsActions.fetchSuccess(drawing._id, mockRevisions));
 		const revisions = selectRevisions(getState(), drawing._id);
 
-		expect(revisions[0]).toEqual(mockRevisions[0]);
-		expect(revisions[1]).toEqual(mockRevisions[1]);
+		expect(new Set(revisions)).toEqual(new Set(mockRevisions));
 	});
 
 	describe('Updating revision attributes:', () => {

@@ -25,16 +25,17 @@ import { selectFederationById } from '../federations/federations.selectors';
 import { convertUnits, convertVectorUnits, getUnitsConversionFactor } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
 import { EMPTY_CALIBRATION } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 import { Vector1D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
-import { CalibrationState } from './drawings.types';
+import { fullDrawing } from './drawings.helpers';
+import { selectRevisionsByDrawing } from './revisions/drawingRevisions.selectors';
 
 const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
 
 export const selectDrawings = createSelector(
-	selectDrawingsDomain, selectCurrentProject,
-	(state, currentProject) => (state.drawingsByProject[currentProject] ?? []).map(({ calibration, ...drawing }) => ({
-		...drawing,
-		calibration: drawing.revisionsCount ? calibration : CalibrationState.EMPTY,
-	})),
+	selectDrawingsDomain,
+	selectCurrentProject,
+	selectRevisionsByDrawing, // This selector is used here to recalculate the value after the revisions are fetched
+	(state, currentProject) => 
+		(state.drawingsByProject[currentProject] ?? []).map(fullDrawing),
 );
 
 export const selectNonEmptyDrawings = createSelector(
@@ -50,7 +51,9 @@ export const selectFavouriteDrawings = createSelector(
 export const selectDrawingById = createSelector(
 	selectDrawings,
 	(_, _id) => _id,
-	(drawings, _id) => drawings.find((d) => d._id === _id),
+	(drawings, _id) => {
+		return drawings.find((d) => d._id === _id);
+	},
 );
 
 export const selectDrawingCalibration = createSelector(

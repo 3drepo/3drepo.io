@@ -89,7 +89,7 @@ export const UploadDrawingRevisionForm = ({
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const allUploadsComplete = DrawingRevisionsHooksSelectors.selectUploadIsComplete();
 	const presetDrawing = DrawingsHooksSelectors.selectDrawingById(presetDrawingId);
-
+	const [isPresetLoading, setIsPresetLoading] = useState(!!presetFile);
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 
 	const formData = useForm<FormType>({
@@ -148,6 +148,7 @@ export const UploadDrawingRevisionForm = ({
 			});
 		}
 		append(filesToAppend);
+		setIsPresetLoading(false);
 	};
 
 	const removeUploadById = useCallback((uploadId) => {
@@ -179,6 +180,8 @@ export const UploadDrawingRevisionForm = ({
 		DrawingsActionsDispatchers.fetchTypes(teamspace, project);
 		DrawingRevisionsActionsDispatchers.fetchStatusCodes(teamspace, project);
 	}, []);
+
+	if (isPresetLoading) return null;
 
 	return (
 		<FormProvider {...formData}>
