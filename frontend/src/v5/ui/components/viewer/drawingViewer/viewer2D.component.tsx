@@ -42,6 +42,8 @@ import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useAuthenticatedImage } from '@components/authenticatedResource/authenticatedResource.hooks';
 import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { selectViewerBackgroundColor } from '@/v4/modules/viewer/viewer.selectors';
+import { useSelector } from 'react-redux';
 
 export const Viewer2D = () => {
 	const { teamspace, project } = useParams<ViewerParams>();
@@ -49,7 +51,8 @@ export const Viewer2D = () => {
 	const revision = DrawingRevisionsHooksSelectors.selectLatestActiveRevision(drawingId);
 	const src = revision ? getDrawingImageSrc(teamspace, project, drawingId, revision._id) : '';
 	const authSrc = useAuthenticatedImage(src);
-	
+	const backgroundColor = useSelector(selectViewerBackgroundColor);
+
 	const { close2D } = useContext(ViewerCanvasesContext);
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
 	const [isMinZoom, setIsMinZoom] = useState(false);
@@ -100,7 +103,7 @@ export const Viewer2D = () => {
 	return (
 		<ViewerContainer visible>
 			<CloseButton variant="secondary" onClick={close2D} />
-			<ImageContainer ref={imgContainerRef}>
+			<ImageContainer backgroundColor={backgroundColor} ref={imgContainerRef}>
 				{
 					isLoading && 
 					<CentredContainer>
