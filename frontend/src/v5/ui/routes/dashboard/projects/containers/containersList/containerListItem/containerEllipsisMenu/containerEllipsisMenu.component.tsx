@@ -100,7 +100,7 @@ export const ContainerEllipsisMenu = ({
 			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.viewTickets',
-					defaultMessage: 'View tickets',
+					defaultMessage: 'View Tickets',
 				})}
 				to={ticketsSelectionRoute( teamspace, project, container._id)}
 			/>
