@@ -100,13 +100,9 @@ export const ContainerEllipsisMenu = ({
 			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.viewTickets',
-					defaultMessage: 'View Issues',
+					defaultMessage: 'View tickets',
 				})}
-				to={{ pathname: ticketsSelectionRoute(
-					teamspace,
-					project,
-					container._id,
-				) }}
+				to={ticketsSelectionRoute( teamspace, project, container._id)}
 			/>
 			{onSelectOrToggleItem && (
 				<EllipsisMenuItem
