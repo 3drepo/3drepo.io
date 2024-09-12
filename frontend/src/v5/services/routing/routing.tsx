@@ -59,7 +59,4 @@ export const ticketsSelectionRoute = (
 	teamspace: string,
 	project: string,
 	containerOrFederation: string,
-) => {
-	const rr = generatePath(TICKETS_SELECTION_ROUTE, { teamspace, project }) + `?models=${containerOrFederation}`;
-	return rr;
-};
+) => generatePath(TICKETS_SELECTION_ROUTE, { teamspace, project }) + `?models=${containerOrFederation}`;
