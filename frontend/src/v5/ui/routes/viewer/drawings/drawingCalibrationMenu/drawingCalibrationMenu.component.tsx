@@ -37,9 +37,7 @@ export const DrawingsCalibrationMenu = ({ calibrationState, onCalibrateClick, dr
 	const disableButton = disabled || calibrationState === CalibrationState.EMPTY;
 
 	const approveCalibration = () => DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawingId, {
-		calibration: {
-			state: CalibrationState.CALIBRATED,
-		},
+		calibration: CalibrationState.CALIBRATED,
 	});
 
 	return (

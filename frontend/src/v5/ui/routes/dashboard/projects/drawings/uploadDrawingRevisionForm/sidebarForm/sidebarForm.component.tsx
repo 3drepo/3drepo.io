@@ -27,7 +27,7 @@ import { UploadFilesContext } from '@components/shared/uploadFiles/uploadFilesCo
 import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 export const SidebarForm = () => {
-	const categories = DrawingsHooksSelectors.selectCategories();
+	const types = DrawingsHooksSelectors.selectTypes();
 	const { getValues, formState: { errors } } = useFormContext();
 	const { fields, selectedId } = useContext(UploadFilesContext);
 	// @ts-ignore
@@ -49,14 +49,14 @@ export const SidebarForm = () => {
 					required
 				/>
 				<FormSelect
-					name={`${revisionPrefix}.drawingCategory`}
-					label={formatMessage({ id: 'drawing.uploads.sidebar.drawing.category', defaultMessage: 'Category' })}
-					formError={getError('drawingCategory')}
+					name={`${revisionPrefix}.drawingType`}
+					label={formatMessage({ id: 'drawing.uploads.sidebar.drawing.type', defaultMessage: 'Category' })}
+					formError={getError('drawingType')}
 					disabled={disableDrawingFields}
 					required
 				>
-					{categories.map((category) => (
-						<MenuItem key={category} value={category}> {category}</MenuItem>
+					{types.map((type) => (
+						<MenuItem key={type} value={type}> {type}</MenuItem>
 					))}
 				</FormSelect>
 				<FormTextField

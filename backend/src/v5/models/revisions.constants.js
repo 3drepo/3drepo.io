@@ -15,9 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TextOverflow } from '@controls/textOverflow';
-import styled from 'styled-components';
+const RevisionsConstants = {};
 
-export const RevisionCodeAndStatus = styled(TextOverflow)`
-	font-weight: bold;
-`;
+RevisionsConstants.DRAWINGS_HISTORY_COL = 'drawings.history';
+
+module.exports = RevisionsConstants;

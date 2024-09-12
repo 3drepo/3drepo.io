@@ -15,22 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { delay } from '@/v4/helpers/async';
-import { mockModelPermissions } from '@/v5/store/drawings/drawings.temp';
-import { fetchUsers } from './users';
 import { API as api } from './default';
 
 export const fetchModelsPermissions = async (teamspace, models) => {
-	const { data: users } = await fetchUsers(teamspace);
-	return { data: mockModelPermissions(models, users) };
-	// TODO #4789 revert this change when backend is introduced
-	// return api.get(`${teamspace}/models/permissions?models=${models.join(',')}`);
+	return api.get(`${teamspace}/models/permissions?models=${models.join(',')}`);
 };
 
 export const updateModelsPermissions = (teamspace, permissionsList) => {
-	return delay(500, { status: 200 });
-	// TODO #4789 revert this change when backend is introduced
-	// return api.patch(`${teamspace}/models/permissions`, permissionsList);
+	return api.patch(`${teamspace}/models/permissions`, permissionsList);
 };
 
 /**

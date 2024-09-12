@@ -33,6 +33,12 @@ export const ImageContainer = styled.div`
 	height: 75px;
 	width: 75px;
 	overflow: hidden;
+
+	img {
+		object-fit: cover;
+		width: 100%;
+		height: 100%;
+	}
 `;
 
 export const InfoContainer = styled.div`
@@ -60,6 +66,8 @@ export const Title = styled(PropertyValue)`
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+	display: inline-block;
+	padding-bottom: 0;
 
 	&:hover {
 		text-decoration: underline;

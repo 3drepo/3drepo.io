@@ -53,20 +53,23 @@ export const UploadList = ({
 	return (
 		<>
 			<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
-				<Label name="file.name" minWidth={122} sort>
+				<Label name="file.name" minWidth={37} sort>
 					<FormattedMessage id="drawing.uploads.list.header.filename" defaultMessage="Filename" />
 				</Label>
-				<Label width={352} required>
+				<Label width={341} minWidth={100} required>
 					<FormattedMessage id="drawing.uploads.list.header.destination" defaultMessage="Drawing Destination" />
 				</Label>
-				<Label width={160} required>
+				<Label width={260} minWidth={100} required>
 					<FormattedMessage id="drawing.uploads.list.header.statusCode" defaultMessage="Status Code" />
 				</Label>
-				<Label width={isUploading ? 154 : 203} required>
-					<FormattedMessage id="drawing.uploads.list.header.revisionName" defaultMessage="Revision Code" />
+				<Label width={isUploading ? 97 : 139} minWidth={78} required>
+					<FormattedMessage id="drawing.uploads.list.header.revisionCode" defaultMessage="Revision Code" />
 				</Label>
 				<Label width={297} hidden={!isUploading}>
 					<FormattedMessage id="drawing.uploads.list.header.progress" defaultMessage="Upload Progress" />
+				</Label>
+				<Label width={48} minWidth={48}>
+					{/* Placeholder to account for buttons */}
 				</Label>
 			</DashboardListHeader>
 			<ListContainer>

@@ -17,7 +17,7 @@
 
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
-import { DrawingsHooksSelectors, DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingsHooksSelectors, DrawingRevisionsHooksSelectors, TeamspacesHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { InputController } from '@controls/inputs/inputController.component';
 import { DashboardListItemRow as UploadListItemRow } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { UploadListItemDestination } from './components/uploadListItemDestination/uploadListItemDestination.component';
@@ -29,26 +29,25 @@ import { UploadListItemFileIcon } from '@components/shared/uploadFiles/uploadLis
 import { UploadListItemTitle } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemTitle/uploadListItemTitle.component';
 import { UploadProgress } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadProgress/uploadProgress.component';
 import { formatMessage } from '@/v5/services/intl';
-import { DrawingUploadStatus, IDrawing } from '@/v5/store/drawings/drawings.types';
-import { useParams } from 'react-router-dom';
+import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { UploadListItemStatusCode } from './components/uploadListItemStatusCode/uploadListItemStatusCode.component';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { UploadStatus } from '@/v5/store/containers/containers.types';
 
 const UNEXPETED_STATUS_ERROR = undefined;
 const STATUS_TEXT_BY_UPLOAD = {
 	[UNEXPETED_STATUS_ERROR]: formatMessage({ id: 'drawing.uploads.progress.status.unexpectedError', defaultMessage: 'Unexpected error' }),
-	[DrawingUploadStatus.FAILED]: formatMessage({ id: 'drawing.uploads.progress.status.failed', defaultMessage: 'Upload failed' }),
-	[DrawingUploadStatus.UPLOADED]: formatMessage({ id: 'drawing.uploads.progress.status.uploaded', defaultMessage: 'Upload complete' }),
-	[DrawingUploadStatus.UPLOADING]: formatMessage({ id: 'drawing.uploads.progress.status.uploading', defaultMessage: 'Uploading' }),
-	[DrawingUploadStatus.QUEUED]: formatMessage({ id: 'drawing.uploads.progress.status.queued', defaultMessage: 'Waiting to upload' }),
+	[UploadStatus.FAILED]: formatMessage({ id: 'drawing.uploads.progress.status.failed', defaultMessage: 'Upload failed' }),
+	[UploadStatus.UPLOADED]: formatMessage({ id: 'drawing.uploads.progress.status.uploaded', defaultMessage: 'Upload complete' }),
+	[UploadStatus.UPLOADING]: formatMessage({ id: 'drawing.uploads.progress.status.uploading', defaultMessage: 'Uploading' }),
+	[UploadStatus.QUEUED]: formatMessage({ id: 'drawing.uploads.progress.status.queued', defaultMessage: 'Waiting to upload' }),
 };
 
 const getUploadStatus = (progress, errorMessage) => {
-	if (errorMessage) return DrawingUploadStatus.FAILED;
-	if (progress === 100) return DrawingUploadStatus.UPLOADED;
-	if (progress < 100 && progress > 0) return DrawingUploadStatus.UPLOADING;
-	if (progress === 0) return DrawingUploadStatus.QUEUED;
+	if (errorMessage) return UploadStatus.FAILED;
+	if (progress === 100) return UploadStatus.UPLOADED;
+	if (progress < 100 && progress > 0) return UploadStatus.UPLOADING;
+	if (progress === 0) return UploadStatus.QUEUED;
 	return UNEXPETED_STATUS_ERROR;
 };
 
@@ -76,26 +75,27 @@ export const UploadListItem = ({
 	isUploading,
 }: IUploadListItem): JSX.Element => {
 	const revisionPrefix = `uploads.${index}`;
-	const { teamspace, project } = useParams<DashboardParams>();
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const projectId = ProjectsHooksSelectors.selectCurrentProject();
 	const uploadErrorMessage: string = DrawingRevisionsHooksSelectors.selectUploadError(uploadId);
 	const { watch, trigger, setValue } = useFormContext();
 	const drawingId = watch(`${revisionPrefix}.drawingId`);
 	const statusCode = watch(`${revisionPrefix}.statusCode`);
-	const revisionCode = watch(`${revisionPrefix}.revisionCode`);
+	const revCode = watch(`${revisionPrefix}.revCode`);
 	const selectedDrawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
 	const selectedDrawingRevisions = DrawingRevisionsHooksSelectors.selectRevisions(selectedDrawing?._id);
 	const progress = DrawingRevisionsHooksSelectors.selectUploadProgress(uploadId);
 	const uploadStatus = getUploadStatus(progress, uploadErrorMessage);
 
 	const sanitiseDrawing = (drawing: IDrawing) => ({
-		drawingNumber: drawing?.drawingNumber || '',
+		drawingNumber: drawing?.number || '',
 		drawingDesc: drawing?.desc || '',
-		drawingCategory: drawing?.category || '',
+		drawingType: drawing?.type || '',
 	});
 
 	useEffect(() => {
-		if (revisionCode) {
-			trigger(`${revisionPrefix}.revisionCode`);
+		if (revCode) {
+			trigger(`${revisionPrefix}.revCode`);
 		}
 	}, [drawingId, statusCode, selectedDrawingRevisions.length]);
 
@@ -103,14 +103,14 @@ export const UploadListItem = ({
 		if (statusCode) {
 			trigger(`${revisionPrefix}.statusCode`);
 		}
-	}, [drawingId, revisionCode, selectedDrawingRevisions.length]);
+	}, [drawingId, revCode, selectedDrawingRevisions.length]);
 
 	useEffect(() => {
 		for (const [key, val] of Object.entries(sanitiseDrawing(selectedDrawing))) {
 			setValue(`${revisionPrefix}.${key}`, val);
 		}
 		if (selectedDrawing?._id) {
-			DrawingRevisionsActionsDispatchers.fetch(teamspace, project, selectedDrawing._id);
+			DrawingRevisionsActionsDispatchers.fetch(teamspace, projectId, selectedDrawing._id);
 		}
 	}, [JSON.stringify(selectedDrawing)]);
 
@@ -140,8 +140,8 @@ export const UploadListItem = ({
 				disabled={isUploading}
 			/>
 			<UploadListItemRevisionCode
-				key={`${uploadId}.revisionCode`}
-				name={`${revisionPrefix}.revisionCode`}
+				key={`${uploadId}.revCode`}
+				name={`${revisionPrefix}.revCode`}
 				disabled={isUploading}
 			/>
 			{isUploading
@@ -150,7 +150,7 @@ export const UploadListItem = ({
 						uploadId={uploadId}
 						errorMessage={uploadErrorMessage}
 						uploadStatus={uploadStatus}
-						uploadCompleted={uploadStatus === DrawingUploadStatus.UPLOADED}
+						uploadCompleted={uploadStatus === UploadStatus.UPLOADED}
 						statusText={STATUS_TEXT_BY_UPLOAD[uploadStatus]}
 						progress={progress}
 					/>

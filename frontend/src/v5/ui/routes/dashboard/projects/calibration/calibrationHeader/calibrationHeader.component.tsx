@@ -53,15 +53,13 @@ export const CalibrationHeader = () => {
 	const handleConfirm = () => {
 		handleEndCalibration();
 		DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawingId, {
-			calibration: {
-				state: CalibrationState.CALIBRATED,
-				units: selectedModel.unit,
-				horizontal: {
-					model: vector3D,
-					drawing: vector2D,
-				},
-				verticalRange: verticalPlanes,
+			calibration: CalibrationState.CALIBRATED,
+			units: selectedModel.unit,
+			horizontal: {
+				model: vector3D,
+				drawing: vector2D,
 			},
+			verticalRange: verticalPlanes,
 		});
 	};
 

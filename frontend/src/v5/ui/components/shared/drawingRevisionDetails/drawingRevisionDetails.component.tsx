@@ -23,7 +23,6 @@ import ArrowUpCircleIcon from '@assets/icons/filled/arrow_up_circle-filled.svg';
 import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors, DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
-import { DrawingUploadStatus } from '@/v5/store/drawings/drawings.types';
 import { canUploadToBackend } from '@/v5/store/drawings/drawings.helpers';
 import { uploadToDrawing } from '@/v5/ui/routes/dashboard/projects/drawings/uploadDrawingRevisionForm/uploadDrawingRevisionForm.helpers';
 import { SkeletonListItem } from '../revisionDetails/components/skeletonListItem/skeletonListItem.component';
@@ -44,24 +43,25 @@ import { getState } from '@/v4/modules/store';
 import { RevisionsListItemText } from '../revisionDetails/components/revisionsListItem/revisionsListItemText/revisionsListItemText.component';
 import { RevisionsListItemAuthor } from '../revisionDetails/components/revisionsListItem/revisionsListItemAuthor/revisionsListItemAuthor.component';
 import { RevisionsListItemTag } from '../revisionDetails/components/revisionsListItem/revisionsListItem.styles';
+import { IDrawingRevision } from '@/v5/store/drawings/revisions/drawingRevisions.types';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
+import { UploadStatus } from '@/v5/store/containers/containers.types';
 import { downloadFile } from '@components/authenticatedResource/authenticatedResource.hooks';
 
 interface IDrawingRevisionDetails {
 	drawingId: string;
 	revisionsCount: number;
-	status?: DrawingUploadStatus;
+	status?: UploadStatus;
 }
 export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: IDrawingRevisionDetails): JSX.Element => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const isLoading = DrawingRevisionsHooksSelectors.selectIsPending(drawingId);
-	const revisions = DrawingRevisionsHooksSelectors.selectRevisions(drawingId)
-		.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+	const revisions = DrawingRevisionsHooksSelectors.selectRevisions(drawingId);
 	const selected = revisions.findIndex((r) => !r.void);
 
-	const handleDownloadRevision = (revisionId, filename) => {
-		downloadFile(getRevisionFileUrl(teamspace, project, drawingId, revisionId), filename);
+	const handleDownloadRevision = async (revision: IDrawingRevision) => {
+		await downloadFile(getRevisionFileUrl(teamspace, project, drawingId, revision._id),  `${revision.revCode}-${revision.statusCode}${revision.format}`);
 	};
 
 	useEffect(() => {
@@ -125,13 +125,13 @@ export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: ID
 									DrawingRevisionsActionsDispatchers.setVoidStatus(teamspace, project, drawingId, revision._id, voidStatus)
 								)}
 								voidStatus={revision.void}
-								onDownloadRevision={() => handleDownloadRevision(revision._id, revision.revisionCode + revision.format)}
+								onDownloadRevision={() => handleDownloadRevision(revision)}
 								hasPermission={selectHasCollaboratorAccess(getState(), drawingId)}
 							>
 								<RevisionsListItemText width={140} tabletWidth={94}> {formatDateTime(revision.timestamp)} </RevisionsListItemText>
 								<RevisionsListItemAuthor width={170} tabletWidth={155} authorName={revision.author} />
 								<RevisionsListItemTag width={150} tabletWidth={300}> {revision.statusCode || ''} </RevisionsListItemTag>
-								<RevisionsListItemTag width={150} tabletWidth={300}> {revision.revisionCode} </RevisionsListItemTag>
+								<RevisionsListItemTag width={150} tabletWidth={300}> {revision.revCode} </RevisionsListItemTag>
 								<RevisionsListItemText hideWhenSmallerThan={1140}> {revision.desc || ''} </RevisionsListItemText>
 								<RevisionsListItemText width={90} tabletWidth={45} hideWhenSmallerThan={800}> {(revision.format || '').toLowerCase()} </RevisionsListItemText>
 							</RevisionsListItem>

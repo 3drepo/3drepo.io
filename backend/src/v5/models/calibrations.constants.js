@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,4 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { RevisionStatus } from './revisionStatus.component';
+const CalibrationConstants = {};
+
+CalibrationConstants.calibrationStatuses = {
+	UNCALIBRATED: 'uncalibrated',
+	CALIBRATED: 'calibrated',
+	UNCONFIRMED: 'unconfirmed',
+};
+
+module.exports = CalibrationConstants;

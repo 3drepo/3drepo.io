@@ -34,7 +34,7 @@ export const RevisionStatus = ({ status, error, name }: IRevisionStatus): JSX.El
 	if (status === UploadStatus.QUEUED) {
 		return (
 			<QueuedStatus>
-				<FormattedMessage id="containers.list.item.latestRevision.status.queued" defaultMessage="Queued" />
+				<FormattedMessage id="latestRevision.status.queued" defaultMessage="Queued" />
 			</QueuedStatus>
 		);
 	}
@@ -46,7 +46,7 @@ export const RevisionStatus = ({ status, error, name }: IRevisionStatus): JSX.El
 	) {
 		return (
 			<ProcessingStatus>
-				<FormattedMessage id="containers.list.item.latestRevision.status.processing" defaultMessage="Processing" />
+				<FormattedMessage id="latestRevision.status.processing" defaultMessage="Processing" />
 			</ProcessingStatus>
 		);
 	}
@@ -60,7 +60,7 @@ export const RevisionStatus = ({ status, error, name }: IRevisionStatus): JSX.El
 				<ErrorTooltip>
 					{error.timestamp ? (
 						<FormattedMessage
-							id="containers.list.item.latestRevision.status.error.tooltipMessageWithDate"
+							id="latestRevision.status.error.tooltipMessageWithDate"
 							defaultMessage="The latest upload on <b>{date}</b> at <b>{time}</b> has failed due to <b>{message}</b>."
 							values={{
 								date: formatDate(error.timestamp),
@@ -74,7 +74,7 @@ export const RevisionStatus = ({ status, error, name }: IRevisionStatus): JSX.El
 						/>
 					) : (
 						<FormattedMessage
-							id="containers.list.item.latestRevision.status.error.tooltipMessageWithoutDate"
+							id="latestRevision.status.error.tooltipMessageWithoutDate"
 							defaultMessage="The latest upload has failed due to <b>{message}</b>."
 							values={{
 								message: error.message,
