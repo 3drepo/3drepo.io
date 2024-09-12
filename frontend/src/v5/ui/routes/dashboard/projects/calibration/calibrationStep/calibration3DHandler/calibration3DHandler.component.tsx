@@ -60,7 +60,6 @@ export const Calibration3DHandler = () => {
 
 	useEffect(() => {
 		UnityUtil.setCalibrationToolMode('Vector');
-		Viewer.isModelReady().then(() => setIsCalibrating3D(true));
 
 		return () => {
 			setIsCalibrating3D(false);

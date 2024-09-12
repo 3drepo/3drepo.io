@@ -74,7 +74,7 @@ export const VerticalSpatialBoundariesHandler = () => {
 	}, [isCalibratingPlanes, planesAreSet]);
 
 	useEffect(() => {
-		if (!planesAreSet) {
+		if (!planesAreSet && isCalibratingPlanes) {
 			const onClickFloorToObject = ({ account, model, id }) => {
 				Viewer.setCalibrationToolFloorToObject(account, model, id);
 				setSelectedPlane(PlaneType.UPPER);
@@ -86,7 +86,7 @@ export const VerticalSpatialBoundariesHandler = () => {
 				Viewer.off(VIEWER_EVENTS.OBJECT_SELECTED, onClickFloorToObject);
 			};
 		}
-	}, [planesAreSet]);
+	}, [planesAreSet, isCalibratingPlanes]);
 
 	useEffect(() => {
 		if (isAlignPlaneActive && planesAreSet) {
@@ -120,7 +120,6 @@ export const VerticalSpatialBoundariesHandler = () => {
 	
 	useEffect(() => {
 		applyImageToPlane();
-		setIsCalibratingPlanes(true);
 		Viewer.setCalibrationToolVerticalPlanes(...verticalPlanes);
 
 		return () => {
