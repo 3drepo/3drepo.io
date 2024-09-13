@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { CalibrationState } from '../drawings.types';
+
 export interface StatusCode {
 	code: string,
 	description: string,
@@ -30,6 +32,7 @@ export interface IDrawingRevision {
 	statusCode?: string;
 	revCode: string;
 	void?: boolean;
+	calibration: CalibrationState;
 }
 
 export interface IDrawingRevisionUploadStatus {
