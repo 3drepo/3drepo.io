@@ -89,7 +89,9 @@ export const DrawingsListItem = memo(({
 				<DashboardListItemButton
 					onClick={() => onSelectOrToggleItem(drawingId)}
 					tooltipTitle={
-						<FormattedMessage id="drawings.list.item.revisions.tooltip" defaultMessage="View revisions" />
+						!isSelected ? 
+							(<FormattedMessage id="drawings.list.item.revisions.tooltip.showRevisions" defaultMessage="Show revisions" />) :
+							(<FormattedMessage id="drawings.list.item.revisions.tooltip.hideRevisions" defaultMessage="Hide revisions" />)
 					}
 					{...DRAWING_LIST_COLUMN_WIDTHS.revisionsCount}
 				>
