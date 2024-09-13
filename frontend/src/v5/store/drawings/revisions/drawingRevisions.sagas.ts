@@ -39,8 +39,8 @@ export function* fetch({ teamspace, projectId, drawingId, onSuccess }: FetchActi
 	yield put(DrawingRevisionsActions.setIsPending(drawingId, true));
 	try {
 		const { data: { revisions } } = yield API.DrawingRevisions.fetchRevisions(teamspace, projectId, drawingId);
-		onSuccess?.();
 		yield put(DrawingRevisionsActions.fetchSuccess(drawingId, revisions));
+		onSuccess?.();
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'revisions.fetch.error', defaultMessage: 'trying to fetch revisions' }),
