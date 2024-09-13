@@ -16,6 +16,7 @@
  */
 
 import _ from 'lodash';
+import { UseFormReturn } from 'react-hook-form';
 
 export const dirtyValues = (
 	allValues: object,
@@ -33,6 +34,9 @@ export const dirtyValues = (
 		]),
 	);
 };
+
+export const dirtyValuesChanged = (formData: UseFormReturn<any>, defaultValues: any) => 
+	Object.keys(formData.formState.dirtyFields).some((dirtyField) => formData.getValues(dirtyField) !== defaultValues[dirtyField]);
 
 // eslint-disable-next-line max-len
 export const isBasicValue = (value: any) => _.isNull(value) || !!(value?.toDate) || !_.isObject(value) || Array.isArray(value) || _.isString(value) || _.isDate(value);

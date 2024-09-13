@@ -16,6 +16,8 @@
  */
 
 const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
+const { deleteIfUndefined } = require('../../../../../../../utils/helper/objects');
+const { modelTypes } = require('../../../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../../../utils/responder');
 const { templates } = require('../../../../../../../utils/responseCodes');
 
@@ -23,11 +25,12 @@ const ModelSettings = {};
 
 ModelSettings.formatModelSettings = (req, res) => {
 	const { defaultView, defaultLegend, ...settings } = req.outputData;
-	const formattedSettings = {
+
+	const formattedSettings = deleteIfUndefined({
 		...settings,
 		timestamp: settings.timestamp ? settings.timestamp.getTime() : undefined,
-		code: settings.properties.code,
-		unit: settings.properties.unit,
+		code: settings.properties?.code,
+		unit: settings.properties?.unit,
 		...(defaultView ? { defaultView: UUIDToString(defaultView) } : {}),
 		...(defaultLegend ? { defaultLegend: UUIDToString(defaultLegend) } : {}),
 		errorReason: settings.errorReason ? {
@@ -35,17 +38,17 @@ ModelSettings.formatModelSettings = (req, res) => {
 			timestamp: settings.errorReason.timestamp ? settings.errorReason.timestamp.getTime() : undefined,
 			errorCode: settings.errorReason.errorCode,
 		} : undefined,
-	};
+	});
 
 	delete formattedSettings.properties;
 
 	respond(req, res, templates.ok, formattedSettings);
 };
 
-ModelSettings.formatModelStats = (isFed) => (req, res) => {
+ModelSettings.formatModelStats = (modelType) => (req, res) => {
 	const { outputData } = req;
 
-	if (isFed) {
+	if (modelType === modelTypes.FEDERATION) {
 		if (outputData.lastUpdated) outputData.lastUpdated = outputData.lastUpdated.getTime();
 	} else {
 		outputData.revisions.lastUpdated = outputData.revisions.lastUpdated

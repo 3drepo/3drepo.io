@@ -17,16 +17,7 @@
 
 import { API as api } from './default';
 
-/**
- * Return project details
- * @param teamspace
- * @param model
- */
-export const fetchModelPermissions = (teamspace, model) => {
-	return api.get(`${teamspace}/${model}/permissions`);
-};
-
-export const fetchModelsPermissions = (teamspace, models) => {
+export const fetchModelsPermissions = async (teamspace, models) => {
 	return api.get(`${teamspace}/models/permissions?models=${models.join(',')}`);
 };
 
