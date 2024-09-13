@@ -383,6 +383,11 @@ Schemas.schemas.modelSettings = {
 			description: 'The type of the model',
 			example: 'Structural',
 		},
+		number: {
+			type: 'string',
+			description: 'Unique identifier of the model (Drawings only)',
+			example: 'SC1-SFT-V1-01-M3-ST-30_10_30-0001',
+		},
 		surveyPoints: {
 			type: 'array',
 			description: 'The survey points of the model',

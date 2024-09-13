@@ -25,9 +25,9 @@ import { FormattedMessage } from 'react-intl';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { DashboardListItemContainerTitle } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemTitle';
 import { uniq } from 'lodash';
-import { RevisionDetails } from '@components/shared/revisionDetails/revisionDetails.component';
+import { ContainerRevisionDetails } from '@components/shared/containerRevisionDetails/containerRevisionDetails.component';
 import { AutocompleteTextfield, DashboardListItemRow, Autocomplete } from './editFederationContainersListItem.styles';
-import { OptionsBox } from '../../../../../containers/uploadFileForm/uploadList/uploadListItem/components/uploadListItemDestination/options/optionsBox.styles';
+import { OptionsBox } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/uploadListItemDestination.styles';
 import { EditFederationContext } from '../../../editFederationContext';
 import { GroupOption } from './groupOption/groupOption.component';
 
@@ -172,7 +172,7 @@ export const EditFederationContainersListItem = memo(({
 				<Icon container={container} isSelected={isSelected} />
 			</DashboardListItemRow>
 			{isSelected && (
-				<RevisionDetails
+				<ContainerRevisionDetails
 					containerId={container._id}
 					revisionsCount={container.revisionsCount}
 					status={container.status}
