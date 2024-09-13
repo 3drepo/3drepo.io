@@ -34,8 +34,8 @@ type ViewerLayer2DProps = {
 };
 export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2DProps) => {
 	const { isCalibrating } = useContext(CalibrationContext);
-	const [offsetStart, setOffsetStart] = useState<Coord2D>(value?.[0] || null);
-	const [offsetEnd, setOffsetEnd] = useState<Coord2D>(value?.[1] || null);
+	const [offsetStart, setOffsetStart] = useState<Coord2D>(value[0]);
+	const [offsetEnd, setOffsetEnd] = useState<Coord2D>(value[1]);
 	const previousViewBox = useRef<ViewBoxType>(null);
 	const [mousePosition, setMousePosition] = useState<Coord2D>(null);
 
@@ -85,6 +85,11 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 		}
 	}, [active]);
 
+	useEffect(() => {
+		setOffsetStart(value[0]);
+		setOffsetEnd(value[1]);
+	}, [value]);
+	
 	return (
 		<Container style={containerStyle} id="viewerLayer2d">
 			{isCalibrating && (
