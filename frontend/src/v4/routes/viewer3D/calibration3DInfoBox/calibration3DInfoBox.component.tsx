@@ -20,6 +20,8 @@ import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibratio
 import { CalibrationInfoBox } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationInfoBox/calibrationInfoBox.component';
 import { useContext } from 'react';
 import CalibrationIcon from '@assets/icons/filled/calibration-filled.svg';
+import VerticalCalibrationIcon from '@assets/icons/viewer/vertical_calibration.svg';
+
 
 export const Calibration3DInfoBox = () => {
 	const { step } = useContext(CalibrationContext);
@@ -46,10 +48,10 @@ export const Calibration3DInfoBox = () => {
 				description={formatMessage({
 					id: 'infoBox.verticalExtents.description',
 					defaultMessage: `
-						This step filters features from 3D to make them visible in 2D (i.e. Custom Tickets).
-						Place the bottom and top planes to define the vertical extents of your drawing.
+						This step filters features from 3D to make them visible in 2D (i.e. Custom Tickets). 
+						Click on the {icon} to position the bottom plane and adjust the top plane to define the vertical extents of your drawing.
 					`,
-				})}
+				},  { icon: <VerticalCalibrationIcon /> })}
 			/>
 		);
 	};
