@@ -126,7 +126,7 @@ export const VerticalSpatialBoundariesHandler = () => {
 	}, [selectedPlane]);
 
 	useEffect(() => {
-		if (!src || tMatrix) return;
+		if (!src || !tMatrix) return;
 		applyImageToPlane();
 	}, [src, tMatrix]);
 	
