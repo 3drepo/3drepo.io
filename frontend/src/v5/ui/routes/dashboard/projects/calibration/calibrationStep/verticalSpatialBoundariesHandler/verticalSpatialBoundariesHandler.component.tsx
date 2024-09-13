@@ -29,6 +29,7 @@ import { COLOR, hexToOpacity } from '@/v5/ui/themes/theme';
 import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { useAuthenticatedImage } from '@components/authenticatedResource/authenticatedResource.hooks';
 
 export const VerticalSpatialBoundariesHandler = () => {
 	const { verticalPlanes, setVerticalPlanes, vector3D, vector2D, isCalibratingPlanes, setIsCalibratingPlanes, drawingId,
@@ -37,12 +38,13 @@ export const VerticalSpatialBoundariesHandler = () => {
 	const latestActiveRevision = DrawingRevisionsHooksSelectors.selectLatestActiveRevision(drawingId);
 	const planesRef = useRef(verticalPlanes); // ref needed to get plane values in useEffect without causing excessive retriggers
 	const planesAreSet = !verticalPlanes.some(isNull);
-	
+	const src = useAuthenticatedImage(getDrawingImageSrc(teamspace, project, drawingId, latestActiveRevision._id));
+	const tMatrix = getTransformationMatrix(vector2D, vector3D);
+
 	const applyImageToPlane = () => {
 		const i = new Image();
 		i.crossOrigin = 'anonymous';
-		i.src = getDrawingImageSrc(teamspace, project, drawingId, latestActiveRevision._id);
-		const tMatrix = getTransformationMatrix(vector2D, vector3D);
+		i.src = src;
 		i.onload = () => {
 			const topLeft = new Vector2(0, 0);
 			const bottomRight = new Vector2(i.naturalWidth, i.naturalHeight); // coord origin for drawing is at the top left
@@ -117,9 +119,13 @@ export const VerticalSpatialBoundariesHandler = () => {
 			Viewer.selectCalibrationToolUpperPlane();
 		}
 	}, [selectedPlane]);
+
+	useEffect(() => {
+		if (!src) return;
+		applyImageToPlane();
+	}, [src, tMatrix]);
 	
 	useEffect(() => {
-		applyImageToPlane();
 		setIsCalibratingPlanes(true);
 		Viewer.setCalibrationToolVerticalPlanes(...verticalPlanes);
 
