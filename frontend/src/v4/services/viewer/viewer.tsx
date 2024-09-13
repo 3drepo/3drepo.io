@@ -1327,24 +1327,39 @@ export class ViewerService {
 
 	}
 
+	// part of the hacek for callibratio tool plane
+	private calibrationtoolmode = 'none';
+
 	/**
 	 * Drawings Calibration
 	 */
 	public setCalibrationToolMode(mode: string) {
 		UnityUtil.setCalibrationToolMode(mode);
+		this.calibrationtoolmode = mode;
 	}
 
 	public setCalibrationToolVerticalPlanes(lower, upper) {
 		UnityUtil.setCalibrationToolVerticalPlanes(lower, upper);
 	}
 
-	public selectCalibrationToolUpperPlane() {
-		UnityUtil.selectCalibrationToolUpperPlane();
+	public selectCalibrationToolPlane(plane) {
+		if (plane === 'upper') {
+			UnityUtil.selectCalibrationToolUpperPlane();
+		}
+
+		if (plane === 'lower') {
+			UnityUtil.selectCalibrationToolLowerPlane();
+		}
+
+		if (plane === 'none') {
+			// bit of hack until the new api is implemented
+			UnityUtil.setCalibrationToolMode('Vertical');
+			UnityUtil.selectCalibrationToolUpperPlane();
+			UnityUtil.setCalibrationToolMode('None');
+			UnityUtil.setCalibrationToolMode('Vertical');
+		}
 	}
 
-	public selectCalibrationToolLowerPlane() {
-		UnityUtil.selectCalibrationToolLowerPlane();
-	}
 
 	public setCalibrationToolDrawing(image: any, rect: number[]) {
 		UnityUtil.setCalibrationToolDrawing(image, rect);

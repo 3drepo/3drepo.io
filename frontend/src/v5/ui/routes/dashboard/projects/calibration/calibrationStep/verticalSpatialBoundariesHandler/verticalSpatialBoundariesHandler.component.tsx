@@ -64,23 +64,32 @@ export const VerticalSpatialBoundariesHandler = () => {
 	}, [verticalPlanes]);
 	
 	useEffect(() => {
-		if (isCalibratingPlanes) {
-			Viewer.setCalibrationToolMode(planesAreSet ? 'Vertical' : 'None');
-			Viewer.on(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
-			return () => {
-				Viewer.setCalibrationToolMode('None');
-				Viewer.off(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
-				Viewer.clipToolDelete();
-			};
-		}
-	}, [isCalibratingPlanes, planesAreSet]);
+		Viewer.on(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
+
+		return () => {
+			Viewer.setCalibrationToolMode('None');
+			Viewer.off(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
+			Viewer.clipToolDelete();
+		};
+	}, [planesAreSet, isCalibratingPlanes]);
 
 	useEffect(() => {
+		Viewer.setCalibrationToolMode(planesAreSet ? 'Vertical' : 'None');
+		
+		if (!isCalibratingPlanes && planesAreSet) {
+			Viewer.selectCalibrationToolPlane('none');
+		}
+
+		if (isCalibratingPlanes) {
+			setSelectedPlane(PlaneType.UPPER);
+		}
+
 		if (!planesAreSet && isCalibratingPlanes) {
 			const onClickFloorToObject = ({ account, model, id }) => {
 				Viewer.setCalibrationToolFloorToObject(account, model, id);
 				setSelectedPlane(PlaneType.UPPER);
 			};
+
 			TreeActionsDispatchers.stopListenOnSelections();
 			Viewer.on(VIEWER_EVENTS.OBJECT_SELECTED, onClickFloorToObject);
 			return () => {
@@ -113,20 +122,15 @@ export const VerticalSpatialBoundariesHandler = () => {
 	}, [isAlignPlaneActive, selectedPlane, planesAreSet]);
 
 	useEffect(() => {
-		if (selectedPlane === PlaneType.LOWER) {
-			Viewer.selectCalibrationToolLowerPlane();
-		} else if (selectedPlane === PlaneType.UPPER) {
-			Viewer.selectCalibrationToolUpperPlane();
-		}
+		Viewer.selectCalibrationToolPlane(selectedPlane);
 	}, [selectedPlane]);
 
 	useEffect(() => {
-		if (!src) return;
+		if (!src || tMatrix) return;
 		applyImageToPlane();
 	}, [src, tMatrix]);
 	
 	useEffect(() => {
-		setIsCalibratingPlanes(true);
 		Viewer.setCalibrationToolVerticalPlanes(...verticalPlanes);
 
 		return () => {
