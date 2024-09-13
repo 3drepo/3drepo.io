@@ -157,6 +157,7 @@ export const Viewer2D = () => {
 					viewBox={viewBox}
 					value={vector2D}
 					onChange={setVector2D}
+					key={String(isCalibrating)}
 				/>)}
 			</ImageContainer>
 			<ToolbarContainer>
