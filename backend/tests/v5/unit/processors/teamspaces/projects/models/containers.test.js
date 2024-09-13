@@ -48,6 +48,7 @@ jest.mock('../../../../../../../src/v5/handler/queue');
 const QueueHandler = require(`${src}/handler/queue`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
 const newContainerId = 'newContainerId';
 ModelSettings.addModel.mockImplementation(() => newContainerId);
@@ -241,7 +242,7 @@ const testAppendFavourites = () => {
 
 		test('should return error if one or more containers are not found', async () => {
 			await expect(Containers.appendFavourites('user1', 'teamspace', 'project', [1, -1]))
-				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: -1' });
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The following models were not found: -1' });
 		});
 
 		test('should return error if the containers list provided is empty', async () => {
@@ -251,7 +252,7 @@ const testAppendFavourites = () => {
 
 		test('should return error if user has no permissions on one or more models', async () => {
 			await expect(Containers.appendFavourites('user1', 'teamspace', 'project', [1, 2]))
-				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: 2' });
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The following models were not found: 2' });
 		});
 	});
 };
@@ -264,7 +265,7 @@ const testDeleteFavourites = () => {
 
 		test('should return error if one or more containers are not found', async () => {
 			await expect(Containers.deleteFavourites('tsAdmin', 'teamspace', 'project', [1, -1]))
-				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: -1' });
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The following models were not found: -1' });
 		});
 
 		test('should return error if the containers list provided is empty', async () => {
@@ -274,7 +275,7 @@ const testDeleteFavourites = () => {
 
 		test('should return error if user has no permissions on one or more models', async () => {
 			await expect(Containers.deleteFavourites('user1', 'teamspace', 'project', [2]))
-				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: 2' });
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The following models were not found: 2' });
 		});
 	});
 };
@@ -306,7 +307,7 @@ const testGetContainerStats = () => {
 		['the container exists and some previous revision processing have failed', 'container4'],
 	])('Get container stats', (desc, container) => {
 		test(`should return the stats if ${desc}[${container}]`, async () => {
-			const res = await Containers.getContainerStats('teamspace', container);
+			const res = await Containers.getContainerStats('teamspace', 'project', container);
 			expect(res).toEqual(formatToStats(containerSettings[container], container === 'container2' ? 10 : 0, container === 'container2' ? container2Rev : {}));
 		});
 	});
@@ -320,7 +321,7 @@ const testAddContainer = () => {
 				code: 'code99',
 				unit: 'mm',
 			};
-			const res = await Containers.addContainer('teamspace', 'project', 'tsAdmin', data);
+			const res = await Containers.addContainer('teamspace', 'project', data);
 			expect(res).toEqual(newContainerId);
 			expect(ProjectSettings.addModelToProject.mock.calls.length).toBe(1);
 		});
@@ -383,30 +384,27 @@ const testGetRevisions = () => {
 		});
 
 		Revisions.getRevisionFormat.mockImplementation((rFile) => (rFile ? '.'.concat(rFile[0].split('_').pop()) : undefined));
+		const teamspace = generateRandomString();
+		const proj = generateRandomString();
+		const container = generateRandomString();
 
 		test('should return non-void revisions if the container exists', async () => {
-			const teamspace = generateRandomString();
-			const container = generateRandomString();
-
 			Revisions.getRevisions.mockImplementationOnce(() => revisions);
 
-			const res = await Containers.getRevisions(teamspace, container, false);
+			const res = await Containers.getRevisions(teamspace, proj, container, false);
 			expect(Revisions.getRevisions).toHaveBeenCalledTimes(1);
-			expect(Revisions.getRevisions).toHaveBeenCalledWith(teamspace, container, false,
+			expect(Revisions.getRevisions).toHaveBeenCalledWith(teamspace, proj, container, modelTypes.CONTAINER, false,
 				{ _id: 1, author: 1, timestamp: 1, tag: 1, void: 1, desc: 1, rFile: 1 });
 
 			expect(res).toEqual(formatRevisions(revisions));
 		});
 
 		test('should return all revisions if the container exists', async () => {
-			const teamspace = generateRandomString();
-			const container = generateRandomString();
-
 			Revisions.getRevisions.mockImplementationOnce(() => revisions);
 
-			const res = await Containers.getRevisions(teamspace, container, true);
+			const res = await Containers.getRevisions(teamspace, proj, container, true);
 			expect(Revisions.getRevisions).toHaveBeenCalledTimes(1);
-			expect(Revisions.getRevisions).toHaveBeenCalledWith(teamspace, container, true,
+			expect(Revisions.getRevisions).toHaveBeenCalledWith(teamspace, proj, container, modelTypes.CONTAINER, true,
 				{ _id: 1, author: 1, timestamp: 1, tag: 1, void: 1, desc: 1, rFile: 1 });
 
 			expect(res).toEqual(formatRevisions(revisions));
@@ -461,6 +459,23 @@ const testGetSettings = () => {
 	});
 };
 
+const testUpdateRevisionStatus = () => {
+	describe('Update revision status', () => {
+		test('should update the status of a revision', async () => {
+			const teamspace = generateRandomString();
+			const container = generateRandomString();
+			const revision = generateRandomString();
+			const status = generateRandomString();
+
+			await Containers.updateRevisionStatus(teamspace, project._id, container, revision, status);
+
+			expect(Revisions.updateRevisionStatus).toHaveBeenCalledTimes(1);
+			expect(Revisions.updateRevisionStatus).toHaveBeenCalledWith(teamspace, project._id, container,
+				modelTypes.CONTAINER, revision, status);
+		});
+	});
+};
+
 const formatFilename = (name) => name.substr(36).replace(/_([^_]*)$/, '.$1');
 
 const testDownloadRevisionFiles = () => {
@@ -490,7 +505,8 @@ const testDownloadRevisionFiles = () => {
 				.resolves.toEqual({ ...output, filename: formatFilename(fileName) });
 
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
-			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(teamspace, container, revision, { rFile: 1 });
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(teamspace, container, modelTypes.CONTAINER,
+				revision, { rFile: 1 }, { includeVoid: true });
 
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, `${container}.history.ref`, fileName);
@@ -508,5 +524,6 @@ describe(determineTestGroup(__filename), () => {
 	testGetRevisions();
 	testNewRevision();
 	testGetSettings();
+	testUpdateRevisionStatus();
 	testDownloadRevisionFiles();
 });

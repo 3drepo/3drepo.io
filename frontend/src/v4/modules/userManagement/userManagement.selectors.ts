@@ -131,12 +131,15 @@ export const selectUrlQueryProject = createSelector(
 );
 
 export const selectProjectModels = createSelector(
-	selectProject, selectModelsMap, (project, modelsMap) => {
+	selectProject,
+	selectModelsMap,
+	(project, modelsMap) => {
 		if (!project) {
 			return [];
 		}
 
-		return values(modelsMap).filter((m) => m.projectName === project._id);
+		// TODO #4789  remove the `m.drawingNumber` as the drawing models should include the projectId
+		return values(modelsMap).filter((m) => m.projectName === project._id || m.drawingNumber);
 	}
 );
 

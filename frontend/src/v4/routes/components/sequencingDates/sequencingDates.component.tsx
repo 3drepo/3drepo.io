@@ -25,7 +25,6 @@ import { createStructuredSelector } from 'reselect';
 import { selectHasSequences } from '@/v4/modules/sequences';
 
 import { isDateOutsideRange } from '../../../helpers/dateTime';
-import { LONG_DATE_TIME_FORMAT_V5, NAMED_MONTH_DATETIME_FORMAT } from '../../../services/formatting/formatDate';
 import {
 	FieldsRow,
 	StyledFormControl,
@@ -65,8 +64,6 @@ const SequenceDate = ({ name, onChange, showSequenceDate, min, max, initialFocus
 		<SequenceDateContainer>
 			<SequenceDateField
 				shouldDisableDate={(date: any) => isDateOutsideRange(min, max, date.$d)}
-				inputFormat={LONG_DATE_TIME_FORMAT_V5}
-				dateTime
 				name={name}
 				value={value}
 				onChange={handleChange}

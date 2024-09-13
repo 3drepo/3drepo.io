@@ -15,9 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent, ReactNode } from 'react';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { renderWhenTrue } from '../../../../helpers/rendering';
-import { LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
-import { DateTime } from '../../../components/dateTime/dateTime.component';
 import { UserMarker } from '../../../components/messagesList/components/message/components/userMarker';
 import { Author, Container, Date, Details, ExtraInfo, Icon, Status, OpenInViewerButton, UserAndModelDetails } from './previewItemInfo.styles';
 
@@ -52,7 +51,7 @@ export class PreviewItemInfo extends PureComponent<IProps, any> {
 
 	public renderDateTime = renderWhenTrue(() => (
 		<Date>
-			<DateTime value={this.props.createdAt} format={LONG_DATE_TIME_FORMAT} />
+			{formatDateTime(this.props.createdAt)}
 		</Date>
 	));
 

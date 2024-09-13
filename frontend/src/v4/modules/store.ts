@@ -22,6 +22,7 @@ import { applyMiddleware, compose, createStore } from 'redux';
 import createSagaMiddleware from 'redux-saga';
 import { IS_DEVELOPMENT } from '../constants/environment';
 import createReducer from './reducers';
+import { setStore } from '@/v5/helpers/redux.helpers';
 
 export const sagaMiddleware = createSagaMiddleware();
 
@@ -60,6 +61,9 @@ function configureStore() {
 
 export const store = configureStore();
 
+
 export const dispatch = store.dispatch;
 
 export const getState = store.getState;
+
+setStore(store);

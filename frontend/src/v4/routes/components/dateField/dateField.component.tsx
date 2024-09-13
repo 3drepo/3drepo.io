@@ -25,10 +25,8 @@ interface IProps {
 	initialFocusedDate?: any;
 	name: string;
 	disabled?: boolean;
-	inputFormat?: string;
 	placeholder?: string;
 	className?: string;
-	dateTime?: boolean;
 	onChange?: (event) => void;
 	onBlur?: (event) => void;
 	shouldDisableDate?: (day: any) => boolean;
@@ -40,12 +38,10 @@ export const DateField = ({
 	name,
 	value: propValue,
 	placeholder,
-	dateTime,
 	defaultValue,
 	...dateFieldProps
 }: IProps) => {
 	const [value, setValue] = useState(propValue || null);
-	const Picker = dateTime ? DateTimePicker : DatePicker;
 
 	const handleAccept = (newValue) => {
 		if (newValue) {
@@ -64,7 +60,7 @@ export const DateField = ({
 	}, [propValue]);
 
 	return (
-		<Picker
+		<DateTimePicker
 			value={value}
 			onAccept={handleAccept}
 			onChange={() => {}}

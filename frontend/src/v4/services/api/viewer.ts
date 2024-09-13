@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { formatDate } from '../formatting/formatDate';
+import { formatFilenameDate } from '@/v5/helpers/intl.helper';
 import { API as api } from './default';
 
 const triggerDownloadWithJSON = (data, filename) => {
@@ -36,12 +36,12 @@ const triggerDownloadWithJSON = (data, filename) => {
  * @param endpoint
  */
 export const downloadJSON = (panelName, modelName, endpoint) => {
-	const timestamp = formatDate(Date.now(), 'DD_MM_YYYY_HH_mm_ss');
+	const timestamp = formatFilenameDate(Date.now());
 	return api.get(endpoint).then((res) => triggerDownloadWithJSON(res.data, `${modelName}_${timestamp}_${panelName}.json`));
 };
 
 export const downloadJSONHttpPost = (panelName, modelName, endpoint, payload) => {
-	const timestamp = formatDate(Date.now(), 'DD_MM_YYYY_HH_mm_ss');
+	const timestamp = formatFilenameDate(Date.now());
 	return api.post(endpoint, payload).then(({data}) => triggerDownloadWithJSON(data, `${modelName}_${timestamp}_${panelName}.json`));
 }
 
