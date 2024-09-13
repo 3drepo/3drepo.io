@@ -21,7 +21,7 @@ import { Role } from '../currentUser/currentUser.types';
 
 export enum CalibrationState {
 	CALIBRATED = 'calibrated',
-	OUT_OF_SYNC = 'outOfSync',
+	UNCONFIRMED = 'unconfirmed',
 	UNCALIBRATED = 'uncalibrated',
 	EMPTY = 'empty',
 }
@@ -33,7 +33,7 @@ export interface MinimumDrawing {
 	isFavourite: boolean;
 }
 
-export interface Calibration {
+export interface CalibrationValues {
 	verticalRange: Vector1D;
 	horizontal: {
 		model: Vector3D,
@@ -42,7 +42,7 @@ export interface Calibration {
 	units: string,
 }
 
-export interface DrawingStats extends Partial<Calibration> {
+export interface DrawingStats {
 	revisions: {
 		total: number;
 		lastUpdated?: number;
@@ -50,6 +50,7 @@ export interface DrawingStats extends Partial<Calibration> {
 	};
 	number: string,
 	calibration?: CalibrationState,
+	calibrationValues: CalibrationValues,
 	type: string,
 	status: UploadStatus,
 	errorReason?: {

@@ -20,7 +20,7 @@ import { IDrawing, DrawingStats, CalibrationState } from '@/v5/store/drawings/dr
 import { Role } from '@/v5/store/currentUser/currentUser.types';
 import { UploadStatus } from '@/v5/store/containers/containers.types';
 
-const getFakeCalibration = () => faker.random.arrayElement([CalibrationState.CALIBRATED, CalibrationState.OUT_OF_SYNC, CalibrationState.UNCALIBRATED, CalibrationState.EMPTY]);
+const getFakeCalibration = () => faker.random.arrayElement([CalibrationState.CALIBRATED, CalibrationState.UNCONFIRMED, CalibrationState.UNCALIBRATED, CalibrationState.EMPTY]);
 
 export const drawingMockFactory = (overrides?: Partial<IDrawing>): IDrawing => ({
 	_id: faker.datatype.uuid(),

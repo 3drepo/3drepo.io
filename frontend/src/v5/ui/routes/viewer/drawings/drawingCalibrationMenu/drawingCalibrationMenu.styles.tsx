@@ -45,7 +45,7 @@ const emptyStyles = css`
 
 export const CALIBRATION_STYLE = {
 	[CalibrationState.CALIBRATED]: calibratedStyles,
-	[CalibrationState.OUT_OF_SYNC]: outOfSyncStyles,
+	[CalibrationState.UNCONFIRMED]: outOfSyncStyles,
 	[CalibrationState.UNCALIBRATED]: uncalibratedStyles,
 	[CalibrationState.EMPTY]: emptyStyles,
 };
@@ -58,7 +58,7 @@ export const DrawingsCalibrationButton = styled(DashboardListItemButton).attrs<{
 		${({ calibrationState }) => CALIBRATION_STYLE[calibrationState]}
 		border: solid 1px ${({ calibrationState, theme }) => {
 		if (calibrationState === CalibrationState.CALIBRATED) return theme.palette.success.light;
-		if (calibrationState === CalibrationState.OUT_OF_SYNC) return theme.palette.warning.light;
+		if (calibrationState === CalibrationState.UNCONFIRMED) return theme.palette.warning.light;
 		if (calibrationState === CalibrationState.UNCALIBRATED) return theme.palette.primary.light;
 		return theme.palette.base.light;
 	}};

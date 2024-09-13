@@ -36,9 +36,7 @@ export const DrawingsCalibrationMenu = ({ calibrationState, onCalibrateClick, dr
 	const { teamspace, project } = useParams<DashboardParams>();
 	const disableButton = disabled || calibrationState === CalibrationState.EMPTY;
 
-	const approveCalibration = () => DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawingId, {
-		calibration: CalibrationState.CALIBRATED,
-	});
+	const approveCalibration = () => DrawingsActionsDispatchers.approveCalibrationValues(teamspace, project, drawingId);
 
 	return (
 		<ActionMenu
@@ -53,13 +51,13 @@ export const DrawingsCalibrationMenu = ({ calibrationState, onCalibrateClick, dr
 			)}
 		>
 			<MenuList>
-				{calibrationState === CalibrationState.OUT_OF_SYNC && (
+				{calibrationState === CalibrationState.UNCONFIRMED && (
 					<EllipsisMenuItem
 						onClick={approveCalibration}
 						title={formatMessage({ defaultMessage: 'Approve Calibration', id: 'calibration.menu.approveCalibration' })}
 					/>
 				)}
-				{[CalibrationState.CALIBRATED, CalibrationState.OUT_OF_SYNC].includes(calibrationState) && (
+				{[CalibrationState.CALIBRATED, CalibrationState.UNCONFIRMED].includes(calibrationState) && (
 					<EllipsisMenuItem
 						onClick={onCalibrateClick}
 						title={formatMessage({ defaultMessage: 'Recalibrate', id: 'calibration.menu.recalibrate' })}
