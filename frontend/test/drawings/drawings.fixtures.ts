@@ -16,11 +16,12 @@
  */
 
 import * as faker from 'faker';
-import { IDrawing, DrawingStats } from '@/v5/store/drawings/drawings.types';
+import { IDrawing, DrawingStats, CalibrationValues } from '@/v5/store/drawings/drawings.types';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
 import { UploadStatus } from '@/v5/store/containers/containers.types';
 import { getFakeCalibration } from './drawingRevisions/drawingRevisions.fixtures';
 import { EMPTY_CALIBRATION_VALUES } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
+import { Vector } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 
 export const drawingMockFactory = (overrides?: Partial<IDrawing>): IDrawing => ({
 	_id: faker.datatype.uuid(),
@@ -53,3 +54,15 @@ export const prepareMockStats = (overrides?: Partial<DrawingStats>): DrawingStat
 	calibration: getFakeCalibration(),
 	...overrides,
 });
+
+const getFakeCoordinate = (dimensions: number): any => Array(dimensions).map(() => faker.datatype.number());
+const getFakeCalibrationArray = (dimensions: number): Vector<any> => [getFakeCoordinate(dimensions), getFakeCoordinate(dimensions)];
+export const prepareMockCalibrationValues = (overrides?: Partial<CalibrationValues>): CalibrationValues => ({
+	horizontal: {
+		drawing: getFakeCalibrationArray(2),
+		model: getFakeCalibrationArray(3),
+	},
+	verticalRange: getFakeCoordinate(3),
+	units: faker.random.arrayElement(['mm', 'cm', 'dm', 'm', 'ft']),
+	...overrides?.horizontal,
+})
