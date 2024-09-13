@@ -23,10 +23,11 @@ import { Role } from '../currentUser/currentUser.types';
 import { selectContainerById } from '../containers/containers.selectors';
 import { selectFederationById } from '../federations/federations.selectors';
 import { convertUnits, convertVectorUnits, getUnitsConversionFactor } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
-import { EMPTY_CALIBRATION } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
+import { EMPTY_CALIBRATION_VALUES } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 import { Vector1D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { fullDrawing } from './drawings.helpers';
 import { selectRevisionsByDrawing } from './revisions/drawingRevisions.selectors';
+import { CalibrationState } from './drawings.types';
 
 const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
 
@@ -34,8 +35,7 @@ export const selectDrawings = createSelector(
 	selectDrawingsDomain,
 	selectCurrentProject,
 	selectRevisionsByDrawing, // This selector is used here to recalculate the value after the revisions are fetched
-	(state, currentProject) => 
-		(state.drawingsByProject[currentProject] ?? []).map(fullDrawing),
+	(state, currentProject) => (state.drawingsByProject[currentProject] ?? []).map(fullDrawing),
 );
 
 export const selectNonEmptyDrawings = createSelector(
@@ -51,14 +51,12 @@ export const selectFavouriteDrawings = createSelector(
 export const selectDrawingById = createSelector(
 	selectDrawings,
 	(_, _id) => _id,
-	(drawings, _id) => {
-		return drawings.find((d) => d._id === _id);
-	},
+	(drawings, _id) => drawings.find((d) => d._id === _id),
 );
 
 export const selectDrawingCalibration = createSelector(
 	selectDrawingById,
-	(drawing) => drawing.calibration ?? EMPTY_CALIBRATION,
+	(drawing) => drawing.calibration ?? CalibrationState.EMPTY,
 );
 
 export const selectIsListPending = createSelector(
@@ -99,19 +97,20 @@ export const selectIsTypesPending = createSelector(
 	(state, currentProject) => !state.typesByProject[currentProject],
 );
 
-export const selectCalibration = createSelector(
+export const selectCalibrationValues = createSelector(
 	selectDrawingById,
 	(state, drawingId, modelId) => selectContainerById(state, modelId) || selectFederationById(state, modelId),
 	(drawing, model) => {
-		const conversionFactor = getUnitsConversionFactor(drawing?.units, model.unit);
-		const horizontalCalibration = drawing?.horizontal ?? EMPTY_CALIBRATION.horizontal;
+		const calibrationValues = drawing?.calibrationValues || EMPTY_CALIBRATION_VALUES;
+		const conversionFactor = getUnitsConversionFactor(calibrationValues.units, model.unit);
+		const horizontalCalibration = calibrationValues.horizontal;
 
 		return {
 			horizontal: {
 				model: convertVectorUnits(horizontalCalibration.model, conversionFactor),
 				drawing: convertVectorUnits(horizontalCalibration.drawing, conversionFactor),
 			},
-			verticalRange: convertUnits(drawing?.verticalRange ?? EMPTY_CALIBRATION.verticalRange, conversionFactor) as Vector1D,
+			verticalRange: convertUnits(calibrationValues.verticalRange, conversionFactor) as Vector1D,
 		};
 	},
 );

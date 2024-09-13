@@ -20,12 +20,13 @@ import { ActionMenu } from '@controls/actionMenu';
 import { FormattedMessage } from 'react-intl';
 import { DrawingsCalibrationButton } from './drawingCalibrationMenu.styles';
 import { DashboardListItemButtonProps } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemButton/dashboardListItemButton.component';
-import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DrawingRevisionsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useParams } from 'react-router-dom';
 import { MenuList } from '@mui/material';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import { formatMessage } from '@/v5/services/intl';
 import { DashboardParams } from '../../../routes.constants';
+import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 type DrawingsCalibrationMenuProps = DashboardListItemButtonProps & {
 	calibrationState: CalibrationState;
@@ -35,8 +36,16 @@ type DrawingsCalibrationMenuProps = DashboardListItemButtonProps & {
 export const DrawingsCalibrationMenu = ({ calibrationState, onCalibrateClick, drawingId, disabled, ...props }: DrawingsCalibrationMenuProps) => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const disableButton = disabled || calibrationState === CalibrationState.EMPTY;
+	const latestRevision = DrawingRevisionsHooksSelectors.selectLatestActiveRevision(drawingId);
 
-	const approveCalibration = () => DrawingsActionsDispatchers.approveCalibrationValues(teamspace, project, drawingId);
+	const onApproveCalibration = () => {
+		const approveCalibration = () => DrawingsActionsDispatchers.approveCalibrationValues(teamspace, project, drawingId);
+		if (latestRevision?._id) {
+			approveCalibration();
+		} else {
+			DrawingRevisionsActionsDispatchers.fetch(teamspace, project, drawingId, approveCalibration);
+		}
+	};
 
 	return (
 		<ActionMenu
@@ -53,7 +62,7 @@ export const DrawingsCalibrationMenu = ({ calibrationState, onCalibrateClick, dr
 			<MenuList>
 				{calibrationState === CalibrationState.UNCONFIRMED && (
 					<EllipsisMenuItem
-						onClick={approveCalibration}
+						onClick={onApproveCalibration}
 						title={formatMessage({ defaultMessage: 'Approve Calibration', id: 'calibration.menu.approveCalibration' })}
 					/>
 				)}

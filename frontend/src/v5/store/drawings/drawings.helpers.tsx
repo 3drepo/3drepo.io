@@ -27,6 +27,7 @@ import { selectActiveRevisions, selectLatestRevisionName, selectRevisionsPending
 import { Role } from '../currentUser/currentUser.types';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { UploadStatus } from '../containers/containers.types';
+import { EMPTY_CALIBRATION_VALUES } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 
 export const DRAWING_LIST_COLUMN_WIDTHS = {
 	name: {
@@ -63,7 +64,7 @@ export const CALIBRATION_MAP = {
 		label: formatMessage({ id: 'drawings.calibration.calibrated', defaultMessage: 'Calibrated' }),
 		icon: <CalibratedIcon />,
 	},
-	[CalibrationState.OUT_OF_SYNC]: {
+	[CalibrationState.UNCONFIRMED]: {
 		label: formatMessage({ id: 'drawings.calibration.outOfSync', defaultMessage: 'Calibrated' }),
 		icon: <WarningIcon />,
 	},
@@ -120,6 +121,7 @@ export const fullDrawing = (
 	const status = drawing.status ?? UploadStatus.OK;
 	const isFavourite = drawing.isFavourite ?? false;
 	const role = drawing.role ?? Role.ADMIN;
+	const calibrationValues = drawing.calibrationValues || EMPTY_CALIBRATION_VALUES;
 
 	return {
 		...drawing,
@@ -128,7 +130,8 @@ export const fullDrawing = (
 		role,
 		latestRevision,
 		revisionsCount,
-		calibration, 
+		calibration,
+		calibrationValues,
 		lastUpdated: getNullableDate(lastUpdated), 
 	};
 };

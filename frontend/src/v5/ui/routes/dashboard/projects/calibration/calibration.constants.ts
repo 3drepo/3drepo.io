@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Calibration } from '@/v5/store/drawings/drawings.types';
+import { CalibrationValues } from '@/v5/store/drawings/drawings.types';
 import { Vector } from './calibration.types';
 
 export const EMPTY_VECTOR = [null, null] as Vector<any>;
 
-export const EMPTY_CALIBRATION: Calibration = {
+export const EMPTY_CALIBRATION_VALUES: CalibrationValues = {
 	horizontal: {
 		model: EMPTY_VECTOR,
 		drawing: EMPTY_VECTOR,

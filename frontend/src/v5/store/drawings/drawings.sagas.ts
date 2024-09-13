@@ -16,14 +16,15 @@
  */
 
 import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
-import { AddFavouriteAction, DeleteDrawingAction, RemoveFavouriteAction, CreateDrawingAction, DrawingsActions, DrawingsTypes, FetchTypesAction, FetchDrawingStatsAction, FetchDrawingsAction, UpdateDrawingAction } from './drawings.redux';
+import { AddFavouriteAction, DeleteDrawingAction, RemoveFavouriteAction, CreateDrawingAction, DrawingsActions, DrawingsTypes, FetchTypesAction, FetchDrawingStatsAction, FetchDrawingsAction, UpdateDrawingAction, FetchCalibrationValuesAction, UpdateCalibrationValuesAction, ApproveCalibrationValuesAction } from './drawings.redux';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { LifoQueue } from '@/v5/helpers/functions.helpers';
-import { DrawingStats } from './drawings.types';
+import { CalibrationState, DrawingStats } from './drawings.types';
 import { selectDrawings, selectIsListPending } from './drawings.selectors';
 import { isEqualWith } from 'lodash';
+import { selectLatestActiveRevision } from './revisions/drawingRevisions.selectors';
 
 const statsQueue = new LifoQueue<DrawingStats>(API.Drawings.fetchDrawingsStats, 30);
 
@@ -71,6 +72,45 @@ export function* fetchDrawings({ teamspace, projectId }: FetchDrawingsAction) {
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'drawings.fetchAll.error', defaultMessage: 'trying to fetch drawings' }),
+			error,
+		}));
+	}
+}
+
+export function* fetchCalibrationValues({ teamspace, projectId, drawingId }: FetchCalibrationValuesAction) {
+	try {
+		const revision = yield select(selectLatestActiveRevision, drawingId);
+		const { data: calibrationValues } = yield API.DrawingRevisions.fetchCalibrationValues(teamspace, projectId, drawingId, revision._id);
+		yield put(DrawingsActions.updateDrawingSuccess(projectId, drawingId, { calibrationValues }));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'drawings.fetchCalibration.error', defaultMessage: 'trying to fetch drawing calibration' }),
+			error,
+		}));
+	}
+}
+
+export function* updateCalibrationValues({ teamspace, projectId, drawingId, calibrationValues }: UpdateCalibrationValuesAction) {
+	try {
+		const revision = yield select(selectLatestActiveRevision, drawingId);
+		yield API.DrawingRevisions.updateCalibrationValues(teamspace, projectId, drawingId, revision._id, calibrationValues);
+		yield put(DrawingsActions.updateDrawingSuccess(projectId, drawingId, { calibrationValues, calibration: CalibrationState.CALIBRATED }));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'drawings.updateCalibration.error', defaultMessage: 'trying to update drawing calibration' }),
+			error,
+		}));
+	}
+}
+
+export function* approveCalibrationValues({ teamspace, projectId, drawingId }: ApproveCalibrationValuesAction) {
+	try {
+		const revision = yield select(selectLatestActiveRevision, drawingId);
+		yield API.DrawingRevisions.approveCalibration(teamspace, projectId, drawingId, revision._id);
+		yield put(DrawingsActions.updateDrawingSuccess(projectId, drawingId, { calibration: CalibrationState.CALIBRATED }));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'drawings.approveCalibration.error', defaultMessage: 'trying to approve drawing calibration' }),
 			error,
 		}));
 	}
@@ -143,6 +183,9 @@ export default function* DrawingsSaga() {
 	yield takeLatest(DrawingsTypes.REMOVE_FAVOURITE, removeFavourites);
 	yield takeEvery(DrawingsTypes.FETCH_DRAWINGS, fetchDrawings);
 	yield takeEvery(DrawingsTypes.FETCH_DRAWING_STATS, fetchDrawingStats);
+	yield takeEvery(DrawingsTypes.FETCH_CALIBRATION_VALUES, fetchCalibrationValues);
+	yield takeEvery(DrawingsTypes.UPDATE_CALIBRATION_VALUES, updateCalibrationValues);
+	yield takeEvery(DrawingsTypes.APPROVE_CALIBRATION_VALUES, approveCalibrationValues);
 	yield takeLatest(DrawingsTypes.DELETE_DRAWING, deleteDrawing);
 	yield takeLatest(DrawingsTypes.FETCH_TYPES, fetchTypes);
 	yield takeEvery(DrawingsTypes.CREATE_DRAWING, createDrawing);

@@ -21,7 +21,6 @@ import { Step, StepLabel } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { CalibrationState } from '@/v5/store/drawings/drawings.types';
 import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useContext } from 'react';
 import { CalibrationContext } from '../calibrationContext';
@@ -52,8 +51,7 @@ export const CalibrationHeader = () => {
 
 	const handleConfirm = () => {
 		handleEndCalibration();
-		DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawingId, {
-			calibration: CalibrationState.CALIBRATED,
+		DrawingsActionsDispatchers.updateCalibrationValues(teamspace, project, drawingId, {
 			units: selectedModel.unit,
 			horizontal: {
 				model: vector3D,
