@@ -50,7 +50,7 @@ export interface DrawingStats {
 	};
 	number: string,
 	calibration?: CalibrationState,
-	calibrationValues: CalibrationValues,
+	calibrationValues?: CalibrationValues,
 	type: string,
 	status: UploadStatus,
 	errorReason?: {

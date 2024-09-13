@@ -16,11 +16,11 @@
  */
 
 import * as faker from 'faker';
-import { IDrawing, DrawingStats, CalibrationState } from '@/v5/store/drawings/drawings.types';
+import { IDrawing, DrawingStats } from '@/v5/store/drawings/drawings.types';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
 import { UploadStatus } from '@/v5/store/containers/containers.types';
-
-const getFakeCalibration = () => faker.random.arrayElement([CalibrationState.CALIBRATED, CalibrationState.UNCONFIRMED, CalibrationState.UNCALIBRATED, CalibrationState.EMPTY]);
+import { getFakeCalibration } from './drawingRevisions/drawingRevisions.fixtures';
+import { EMPTY_CALIBRATION_VALUES } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 
 export const drawingMockFactory = (overrides?: Partial<IDrawing>): IDrawing => ({
 	_id: faker.datatype.uuid(),
@@ -36,6 +36,7 @@ export const drawingMockFactory = (overrides?: Partial<IDrawing>): IDrawing => (
 	status: UploadStatus.OK,
 	number: faker.random.alphaNumeric(),
 	calibration: getFakeCalibration(),
+	calibrationValues: EMPTY_CALIBRATION_VALUES,
 	...overrides,
 });
 
