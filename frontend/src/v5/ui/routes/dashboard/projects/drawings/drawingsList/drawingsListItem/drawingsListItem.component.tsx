@@ -131,6 +131,7 @@ export const DrawingsListItem = memo(({
 						selected={isSelected}
 						drawing={drawing}
 						onSelectOrToggleItem={onSelectOrToggleItem}
+						onCalibrateClick={() => DialogsActionsDispatchers.open(SelectModelForCalibration, { drawingId })}
 					/>
 				</DashboardListItemIcon>
 			</DashboardListItemRow>

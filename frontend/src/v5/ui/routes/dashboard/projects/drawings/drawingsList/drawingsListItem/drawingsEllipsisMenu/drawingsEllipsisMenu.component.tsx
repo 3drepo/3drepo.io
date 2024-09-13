@@ -30,12 +30,14 @@ type DrawingsEllipsisMenuProps = {
 	selected?: boolean,
 	drawing: IDrawing,
 	onSelectOrToggleItem?: (id: string) => void,
+	onCalibrateClick: () => void,
 };
 
 export const DrawingsEllipsisMenu = ({
 	selected,
 	drawing,
 	onSelectOrToggleItem,
+	onCalibrateClick,
 }: DrawingsEllipsisMenuProps) => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
@@ -67,7 +69,7 @@ export const DrawingsEllipsisMenu = ({
 					id: 'drawings.ellipsisMenu.calibrate',
 					defaultMessage: 'Calibrate',
 				})}
-				onClick={() => { }} // TODO - add calibration functionality
+				onClick={onCalibrateClick}
 				disabled={!drawing.revisionsCount}
 				hidden={!hasCollaboratorAccess}
 			/>
