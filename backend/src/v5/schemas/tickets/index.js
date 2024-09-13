@@ -272,7 +272,7 @@ Tickets.processReadOnlyValues = (oldTicket, newTicket, user) => {
 	}
 };
 
-const uuidString = Yup.string().transform((val, orgVal) => UUIDToString(orgVal)).nullable();
+const uuidString = Yup.string().transform((val, orgVal) => UUIDToString(orgVal));
 
 const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 	const groupCast = Yup.array().of(Yup.object({
@@ -287,7 +287,7 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 				res[name] = Yup.number().transform((_, val) => (val === null ? val : val?.getTime())).nullable();
 			} else if (type === propTypes.VIEW) {
 				res[name] = Yup.object({
-					screenshot: uuidString,
+					screenshot: uuidString.nullable(),
 					state: Yup.object({
 						[viewGroups.COLORED]: groupCast,
 						[viewGroups.HIDDEN]: groupCast,
@@ -295,9 +295,9 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 					}).default(undefined),
 				}).nullable().default(undefined);
 			} else if (type === propTypes.IMAGE) {
-				res[name] = uuidString;
+				res[name] = uuidString.nullable();
 			} else if (type === propTypes.IMAGE_LIST) {
-				res[name] = Yup.array().of(uuidString);
+				res[name] = Yup.array().of(uuidString).nullable();
 			}
 		});
 

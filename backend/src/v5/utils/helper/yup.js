@@ -16,10 +16,9 @@
  */
 
 const { UUIDToString, stringToUUID } = require('./uuids');
-const { fileExtensionFromBuffer, isUUID, isUUIDString } = require('./typeCheck');
+const { fileExtensionFromBuffer, isString, isUUID, isUUIDString } = require('./typeCheck');
 const Yup = require('yup');
 const { fileUploads } = require('../config');
-const { isString } = require('lodash');
 const tz = require('countries-and-timezones');
 const zxcvbn = require('zxcvbn');
 
