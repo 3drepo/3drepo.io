@@ -22,6 +22,7 @@ import { TeamspaceAndProjectId, ProjectId, ProjectAndDrawingId, TeamspaceProject
 import { IDrawing, DrawingStats, NewDrawing, MinimumDrawing, CalibrationValues } from './drawings.types';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { statsToDrawing } from './drawings.helpers';
+import { merge } from 'lodash';
 
 export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions({
 	addFavourite: ['teamspace', 'projectId', 'drawingId'],
@@ -79,7 +80,7 @@ export const createDrawingSuccess = (state: DrawingsState, { projectId, drawing 
 
 export const updateDrawingSuccess = (state: DrawingsState, { projectId, drawingId, drawing }:UpdateDrawingSuccessAction ) => {
 	const oldDrawing = getDrawingFromState(state, projectId, drawingId);
-	Object.assign(oldDrawing, drawing);
+	merge(oldDrawing, drawing);
 };
 
 export const deleteDrawingSuccess = (state: DrawingsState, {
