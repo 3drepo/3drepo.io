@@ -1343,23 +1343,8 @@ export class ViewerService {
 	}
 
 	public selectCalibrationToolPlane(plane) {
-		if (plane === 'upper') {
-			UnityUtil.selectCalibrationToolUpperPlane();
-		}
-
-		if (plane === 'lower') {
-			UnityUtil.selectCalibrationToolLowerPlane();
-		}
-
-		if (plane === 'none') {
-			// bit of hack until the new api is implemented
-			UnityUtil.setCalibrationToolMode('Vertical');
-			UnityUtil.selectCalibrationToolUpperPlane();
-			UnityUtil.setCalibrationToolMode('None');
-			UnityUtil.setCalibrationToolMode('Vertical');
-		}
+		UnityUtil.selectCalibrationToolVerticalPlane(plane);
 	}
-
 
 	public setCalibrationToolDrawing(image: any, rect: number[]) {
 		UnityUtil.setCalibrationToolDrawing(image, rect);
@@ -1373,16 +1358,8 @@ export class ViewerService {
 		UnityUtil.setCalibrationToolFloorToObject(teamspace, modelId, meshId);
 	}
 
-	public setCalibrationToolSelectedColors(fill, border) {
-		UnityUtil.setCalibrationToolSelectedColors(fill, border);
-	}
-
-	public setCalibrationToolUnselectedColors(fill, border) {
-		UnityUtil.setCalibrationToolUnselectedColors(fill, border);
-	}
-
-	public setCalibrationToolOcclusionOpacity(opacity) {
-		UnityUtil.setCalibrationToolOcclusionOpacity(opacity);
+	public setCalibrationToolSelectedColors(plane, fill, border, drawing) {
+		UnityUtil.setCalibrationToolVerticalPlaneColours(plane, fill, border, drawing);
 	}
 }
 
