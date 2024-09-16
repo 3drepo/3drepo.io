@@ -25,7 +25,6 @@ import { TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { getTransformationMatrix } from '../../calibration.helpers';
 import { Vector2 } from 'three';
 import { isNull } from 'lodash';
-import { COLOR, hexToOpacity } from '@/v5/ui/themes/theme';
 import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -71,7 +70,7 @@ export const VerticalSpatialBoundariesHandler = () => {
 	}, [planesAreSet, isCalibratingPlanes]);
 
 	useEffect(() => {
-		Viewer.setCalibrationToolMode(planesAreSet ? 'Vertical' : 'None');		
+		Viewer.setCalibrationToolMode(planesAreSet ? 'Vertical' : 'None');
 		setSelectedPlane(isCalibratingPlanes ? PlaneType.UPPER : PlaneType.NONE);
 
 		if (!planesAreSet && isCalibratingPlanes) {

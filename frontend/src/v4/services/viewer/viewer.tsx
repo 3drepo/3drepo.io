@@ -19,6 +19,7 @@ import EventEmitter from 'eventemitter3';
 
 import { UnityUtil } from '@/globals/unity-util';
 import { isEmpty, isString } from 'lodash';
+import { COLOR, hexToOpacity } from '@/v5/ui/themes/theme';
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import {
 	VIEWER_EVENTS,
@@ -29,7 +30,6 @@ import {
 import { uuid as UUID } from '../../helpers/uuid';
 import { clientConfigService } from '../clientConfig';
 import { MultiSelect } from './multiSelect';
-import { COLOR, hexToOpacity } from '@/v5/ui/themes/theme';
 
 declare const Module;
 
