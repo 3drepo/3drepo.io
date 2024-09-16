@@ -29,6 +29,7 @@ import {
 import { uuid as UUID } from '../../helpers/uuid';
 import { clientConfigService } from '../clientConfig';
 import { MultiSelect } from './multiSelect';
+import { COLOR, hexToOpacity } from '@/v5/ui/themes/theme';
 
 declare const Module;
 
@@ -1343,6 +1344,11 @@ export class ViewerService {
 	}
 
 	public selectCalibrationToolPlane(plane) {
+		const unselectedPlane = plane !== 'lower' ? 'lower' : 'upper';
+
+		Viewer.setCalibrationToolVerticalPlaneColours(plane, hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 44), COLOR.PRIMARY_MAIN,  COLOR.PRIMARY_MAIN_CONTRAST);
+		Viewer.setCalibrationToolVerticalPlaneColours(unselectedPlane, hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 0), COLOR.PRIMARY_MAIN, hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 0));
+
 		UnityUtil.selectCalibrationToolVerticalPlane(plane);
 	}
 
@@ -1358,7 +1364,7 @@ export class ViewerService {
 		UnityUtil.setCalibrationToolFloorToObject(teamspace, modelId, meshId);
 	}
 
-	public setCalibrationToolSelectedColors(plane, fill, border, drawing) {
+	public setCalibrationToolVerticalPlaneColours(plane, fill, border, drawing) {
 		UnityUtil.setCalibrationToolVerticalPlaneColours(plane, fill, border, drawing);
 	}
 }

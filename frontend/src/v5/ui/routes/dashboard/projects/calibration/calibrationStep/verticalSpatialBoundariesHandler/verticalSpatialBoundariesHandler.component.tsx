@@ -53,9 +53,6 @@ export const VerticalSpatialBoundariesHandler = () => {
 			[bottomLeft, bottomRight, topLeft].map((corner) => corner.applyMatrix3(tMatrix));
 	
 			Viewer.setCalibrationToolDrawing(i, [...bottomLeft, ...bottomRight, ...topLeft]);
-			Viewer.setCalibrationToolSelectedColors(hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 40), COLOR.PRIMARY_MAIN);
-			Viewer.setCalibrationToolUnselectedColors(hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 10), COLOR.PRIMARY_MAIN_CONTRAST);
-			Viewer.setCalibrationToolOcclusionOpacity(0.5);
 		};
 	};
 
@@ -74,15 +71,8 @@ export const VerticalSpatialBoundariesHandler = () => {
 	}, [planesAreSet, isCalibratingPlanes]);
 
 	useEffect(() => {
-		Viewer.setCalibrationToolMode(planesAreSet ? 'Vertical' : 'None');
-		
-		if (!isCalibratingPlanes && planesAreSet) {
-			Viewer.selectCalibrationToolPlane('none');
-		}
-
-		if (isCalibratingPlanes) {
-			setSelectedPlane(PlaneType.UPPER);
-		}
+		Viewer.setCalibrationToolMode(planesAreSet ? 'Vertical' : 'None');		
+		setSelectedPlane(isCalibratingPlanes ? PlaneType.UPPER : PlaneType.NONE);
 
 		if (!planesAreSet && isCalibratingPlanes) {
 			const onClickFloorToObject = ({ account, model, id }) => {
