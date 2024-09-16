@@ -21,7 +21,6 @@ import { Step, StepLabel } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { CalibrationState } from '@/v5/store/drawings/drawings.types';
 import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useContext } from 'react';
 import { CalibrationContext } from '../calibrationContext';
@@ -35,7 +34,7 @@ const STEPS = [
 
 export const CalibrationHeader = () => {
 	const history = useHistory();
-	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const { project, containerOrFederation } = useParams<ViewerParams>();
 	const { step, setStep, vector2D, vector3D, drawingId, origin, verticalPlanes } = useContext(CalibrationContext);
 	const selectedModel = FederationsHooksSelectors.selectFederationById(containerOrFederation)
 		|| ContainersHooksSelectors.selectContainerById(containerOrFederation);
@@ -52,15 +51,15 @@ export const CalibrationHeader = () => {
 
 	const handleConfirm = () => {
 		handleEndCalibration();
-		DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawingId, {
-			calibration: CalibrationState.CALIBRATED,
+		// TODO - fix after backend integration
+		DrawingsActionsDispatchers.updateDrawingSuccess(project, drawingId, { calibrationValues: {
 			units: selectedModel.unit,
 			horizontal: {
 				model: vector3D,
 				drawing: vector2D,
 			},
 			verticalRange: verticalPlanes,
-		});
+		} });
 	};
 
 	return (

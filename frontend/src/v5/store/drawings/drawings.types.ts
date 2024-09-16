@@ -33,7 +33,7 @@ export interface MinimumDrawing {
 	isFavourite: boolean;
 }
 
-export interface Calibration {
+export interface CalibrationValues {
 	verticalRange: Vector1D;
 	horizontal: {
 		model: Vector3D,
@@ -42,7 +42,7 @@ export interface Calibration {
 	units: string,
 }
 
-export interface DrawingStats extends Partial<Calibration> {
+export interface DrawingStats {
 	revisions: {
 		total: number;
 		lastUpdated?: number;
@@ -50,6 +50,7 @@ export interface DrawingStats extends Partial<Calibration> {
 	};
 	number: string,
 	calibration?: CalibrationState,
+	calibrationValues?: CalibrationValues,
 	type: string,
 	status: UploadStatus,
 	errorReason?: {

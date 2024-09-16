@@ -100,11 +100,11 @@ export const selectIsTypesPending = createSelector(
 	(state, currentProject) => !state.typesByProject[currentProject],
 );
 
-export const selectCalibration = createSelector(
+export const selectCalibrationValues = createSelector(
 	selectDrawingById,
 	(state, drawingId, modelId) => selectContainerById(state, modelId) || selectFederationById(state, modelId),
 	(drawing, model) => {
-		const calibration = drawing?.calibration || EMPTY_CALIBRATION as any;
+		const calibration = drawing?.calibrationValues || EMPTY_CALIBRATION as any;
 		const conversionFactor = getUnitsConversionFactor(calibration?.units, model.unit);
 		const horizontalCalibration = calibration.horizontal || EMPTY_CALIBRATION.horizontal;
 		return {
@@ -119,7 +119,7 @@ export const selectCalibration = createSelector(
 
 
 export const selectTransformMatrix = createSelector(
-	selectCalibration,
+	selectCalibrationValues,
 	(calibration) => {
 		if (isEqual(calibration.horizontal.drawing, EMPTY_VECTOR) || isEqual(calibration.horizontal.model, EMPTY_VECTOR)) return null;
 		return getTransformationMatrix(calibration.horizontal.drawing, calibration.horizontal.model);
