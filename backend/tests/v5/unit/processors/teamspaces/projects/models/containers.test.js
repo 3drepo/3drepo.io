@@ -16,7 +16,11 @@
  */
 
 const { src, modelFolder, objModel } = require('../../../../../helper/path');
-const ServiceHelper = require('../../../../../helper/services');
+const {
+	determineTestGroup,
+	generateRandomString,
+	generateUUIDString,
+} = require('../../../../../helper/services');
 
 const fs = require('fs/promises');
 const path = require('path');
@@ -44,6 +48,7 @@ jest.mock('../../../../../../../src/v5/handler/queue');
 const QueueHandler = require(`${src}/handler/queue`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
 const newContainerId = 'newContainerId';
 ModelSettings.addModel.mockImplementation(() => newContainerId);
@@ -302,7 +307,7 @@ const testGetContainerStats = () => {
 		['the container exists and some previous revision processing have failed', 'container4'],
 	])('Get container stats', (desc, container) => {
 		test(`should return the stats if ${desc}[${container}]`, async () => {
-			const res = await Containers.getContainerStats('teamspace', container);
+			const res = await Containers.getContainerStats('teamspace', 'project', container);
 			expect(res).toEqual(formatToStats(containerSettings[container], container === 'container2' ? 10 : 0, container === 'container2' ? container2Rev : {}));
 		});
 	});
@@ -329,9 +334,9 @@ const testDeleteContainer = () => {
 			ModelHelper.removeModelData.mockResolvedValueOnce();
 			ProjectSettings.removeModelFromProject.mockResolvedValueOnce();
 
-			const teamspace = ServiceHelper.generateRandomString();
-			const projectId = ServiceHelper.generateRandomString();
-			const model = ServiceHelper.generateRandomString();
+			const teamspace = generateRandomString();
+			const projectId = generateRandomString();
+			const model = generateRandomString();
 			await Containers.deleteContainer(teamspace, projectId, model);
 
 			expect(ModelHelper.removeModelData).toHaveBeenCalledTimes(1);
@@ -345,21 +350,29 @@ const testDeleteContainer = () => {
 const testGetRevisions = () => {
 	describe('Get container revisions', () => {
 		const revisions = [
-			{ _id: ServiceHelper.generateUUIDString(),
-				author: ServiceHelper.generateRandomString(),
+			{
+				_id: generateUUIDString(),
+				author: generateRandomString(),
 				timestamp: new Date(),
-				rFile: [`${ServiceHelper.generateUUIDString()}_${ServiceHelper.generateUUIDString()}_ifc`] },
-			{ _id: ServiceHelper.generateUUIDString(),
-				author: ServiceHelper.generateRandomString(),
+				rFile: [`${generateUUIDString()}_${generateUUIDString()}_ifc`],
+			},
+			{
+				_id: generateUUIDString(),
+				author: generateRandomString(),
 				timestamp: new Date(),
-				rFile: [`${ServiceHelper.generateUUIDString()}_${ServiceHelper.generateUUIDString()}_obj`] },
-			{ _id: ServiceHelper.generateUUIDString(),
-				author: ServiceHelper.generateRandomString(),
-				timestamp: new Date() },
-			{ _id: ServiceHelper.generateUUIDString(),
-				author: ServiceHelper.generateRandomString(),
+				rFile: [`${generateUUIDString()}_${generateUUIDString()}_obj`],
+			},
+			{
+				_id: generateUUIDString(),
+				author: generateRandomString(),
 				timestamp: new Date(),
-				void: true },
+			},
+			{
+				_id: generateUUIDString(),
+				author: generateRandomString(),
+				timestamp: new Date(),
+				void: true,
+			},
 		];
 
 		const formatRevisions = (revs) => revs.map(({ rFile, ...r }) => {
@@ -371,30 +384,27 @@ const testGetRevisions = () => {
 		});
 
 		Revisions.getRevisionFormat.mockImplementation((rFile) => (rFile ? '.'.concat(rFile[0].split('_').pop()) : undefined));
+		const teamspace = generateRandomString();
+		const proj = generateRandomString();
+		const container = generateRandomString();
 
 		test('should return non-void revisions if the container exists', async () => {
-			const teamspace = ServiceHelper.generateRandomString();
-			const container = ServiceHelper.generateRandomString();
-
 			Revisions.getRevisions.mockImplementationOnce(() => revisions);
 
-			const res = await Containers.getRevisions(teamspace, container, false);
+			const res = await Containers.getRevisions(teamspace, proj, container, false);
 			expect(Revisions.getRevisions).toHaveBeenCalledTimes(1);
-			expect(Revisions.getRevisions).toHaveBeenCalledWith(teamspace, container, false,
+			expect(Revisions.getRevisions).toHaveBeenCalledWith(teamspace, proj, container, modelTypes.CONTAINER, false,
 				{ _id: 1, author: 1, timestamp: 1, tag: 1, void: 1, desc: 1, rFile: 1 });
 
 			expect(res).toEqual(formatRevisions(revisions));
 		});
 
 		test('should return all revisions if the container exists', async () => {
-			const teamspace = ServiceHelper.generateRandomString();
-			const container = ServiceHelper.generateRandomString();
-
 			Revisions.getRevisions.mockImplementationOnce(() => revisions);
 
-			const res = await Containers.getRevisions(teamspace, container, true);
+			const res = await Containers.getRevisions(teamspace, proj, container, true);
 			expect(Revisions.getRevisions).toHaveBeenCalledTimes(1);
-			expect(Revisions.getRevisions).toHaveBeenCalledWith(teamspace, container, true,
+			expect(Revisions.getRevisions).toHaveBeenCalledWith(teamspace, proj, container, modelTypes.CONTAINER, true,
 				{ _id: 1, author: 1, timestamp: 1, tag: 1, void: 1, desc: 1, rFile: 1 });
 
 			expect(res).toEqual(formatRevisions(revisions));
@@ -449,6 +459,23 @@ const testGetSettings = () => {
 	});
 };
 
+const testUpdateRevisionStatus = () => {
+	describe('Update revision status', () => {
+		test('should update the status of a revision', async () => {
+			const teamspace = generateRandomString();
+			const container = generateRandomString();
+			const revision = generateRandomString();
+			const status = generateRandomString();
+
+			await Containers.updateRevisionStatus(teamspace, project._id, container, revision, status);
+
+			expect(Revisions.updateRevisionStatus).toHaveBeenCalledTimes(1);
+			expect(Revisions.updateRevisionStatus).toHaveBeenCalledWith(teamspace, project._id, container,
+				modelTypes.CONTAINER, revision, status);
+		});
+	});
+};
+
 const formatFilename = (name) => name.substr(36).replace(/_([^_]*)$/, '.$1');
 
 const testDownloadRevisionFiles = () => {
@@ -456,21 +483,21 @@ const testDownloadRevisionFiles = () => {
 		test('should throw error if revision has no file', async () => {
 			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ rFile: [] });
 
-			await expect(Containers.downloadRevisionFiles('teamspace', 'container', ServiceHelper.generateUUIDString()))
+			await expect(Containers.downloadRevisionFiles('teamspace', 'container', generateUUIDString()))
 				.rejects.toEqual(templates.fileNotFound);
 
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(0);
 		});
 
 		test('should download files if revision has file', async () => {
-			const teamspace = ServiceHelper.generateRandomString();
-			const container = ServiceHelper.generateRandomString();
-			const fileName = `${ServiceHelper.generateUUIDString()}${ServiceHelper.generateUUIDString()}.ifc`;
-			const revision = ServiceHelper.generateRandomString();
+			const teamspace = generateRandomString();
+			const container = generateRandomString();
+			const fileName = `${generateUUIDString()}${generateUUIDString()}.ifc`;
+			const revision = generateRandomString();
 			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ rFile: [fileName] });
 
 			const output = {
-				[ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString(),
+				[generateRandomString()]: generateRandomString(),
 			};
 			FilesManager.getFileAsStream.mockResolvedValueOnce(output);
 
@@ -478,7 +505,8 @@ const testDownloadRevisionFiles = () => {
 				.resolves.toEqual({ ...output, filename: formatFilename(fileName) });
 
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
-			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(teamspace, container, revision, { rFile: 1 });
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(teamspace, container, modelTypes.CONTAINER,
+				revision, { rFile: 1 }, { includeVoid: true });
 
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, `${container}.history.ref`, fileName);
@@ -486,7 +514,7 @@ const testDownloadRevisionFiles = () => {
 	});
 };
 
-describe('processors/teamspaces/projects/containers', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetContainerList();
 	testGetContainerStats();
 	testAddContainer();
@@ -496,5 +524,6 @@ describe('processors/teamspaces/projects/containers', () => {
 	testGetRevisions();
 	testNewRevision();
 	testGetSettings();
+	testUpdateRevisionStatus();
 	testDownloadRevisionFiles();
 });

@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import styled from 'styled-components';
 
 export const SvgContainer = styled.div`
@@ -27,7 +28,8 @@ export const SvgContainer = styled.div`
 	overflow: hidden;
 `;
 
-export const ImageContainer = styled.div`
+export const ImageContainer = styled.div<{ backgroundColor: string }>`
+	user-select: none;
+	background-color: ${({ backgroundColor }) => backgroundColor};
 	height: 100%;
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 `;

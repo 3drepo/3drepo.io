@@ -21,17 +21,17 @@ import { useParams, generatePath } from 'react-router-dom';
 import { ContainersHooksSelectors, DrawingsHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { UnityUtil } from '@/globals/unity-util';
 import { Calibration3DHandler } from './calibrationStep/calibration3DHandler/calibration3DHandler.component';
-import { Calibration2DStep } from './calibrationStep/calibration2DStep/calibration2DStep.component';
+import { Calibration2DHandler } from './calibrationStep/calibration2DHandler/calibration2DHandler.component';
 import { ViewerCanvasesContext } from '../../../viewer/viewerCanvases.context';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { CalibrationContext } from './calibrationContext';
-import { DRAWINGS_ROUTE } from '../../../routes.constants';
 import { VerticalSpatialBoundariesHandler } from './calibrationStep/verticalSpatialBoundariesHandler/verticalSpatialBoundariesHandler.component';
+import { DRAWINGS_ROUTE, ViewerParams } from '../../../routes.constants';
 
 export const CalibrationHandler = () => {
-	const { teamspace, project, revision, containerOrFederation } = useParams();
+	const { teamspace, project, revision, containerOrFederation } = useParams<ViewerParams>();
 	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
-	const { step, drawingId, setVector3D, setVector2D, setOrigin, setStep, setIsCalibrating3D, origin, setVerticalPlanes } = useContext(CalibrationContext);
+	const { step, drawingId, setVector3D, setVector2D, setOrigin, setStep, origin, setVerticalPlanes } = useContext(CalibrationContext);
 	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
 	const { horizontal, verticalRange } = DrawingsHooksSelectors.selectCalibration(drawingId, containerOrFederation);
 
@@ -42,7 +42,6 @@ export const CalibrationHandler = () => {
 
 	useEffect(() => {
 		setStep(0);
-		setIsCalibrating3D(false);
 	}, [selectedModel, revision, drawing]);
 
 	useEffect(() => {
@@ -81,7 +80,7 @@ export const CalibrationHandler = () => {
 	return (
 		<>
 			{step === 0 && <Calibration3DHandler />}
-			{step === 1 && <Calibration2DStep />}
+			{step === 1 && <Calibration2DHandler />}
 			{step === 2 && <VerticalSpatialBoundariesHandler />}
 		</>
 	);

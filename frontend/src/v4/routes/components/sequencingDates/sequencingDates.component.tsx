@@ -20,12 +20,11 @@ import CloseIcon from '@mui/icons-material/Close';
 import SequencesIcon from '@assets/icons/outlined/sequence-outlined.svg';
 import { Field } from 'formik';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { createStructuredSelector } from 'reselect';
 import { selectHasSequences } from '@/v4/modules/sequences';
 
 import { isDateOutsideRange } from '../../../helpers/dateTime';
-import { LONG_DATE_TIME_FORMAT_V5, NAMED_MONTH_DATETIME_FORMAT } from '../../../services/formatting/formatDate';
 import {
 	FieldsRow,
 	StyledFormControl,
@@ -33,7 +32,7 @@ import {
 import { SmallIconButton } from '../smallIconButon/smallIconButton.component';
 import { SequenceDateActions, SequenceDateContainer, SequenceDateField } from './sequencingDates.styles';
 
-interface IProps {
+interface IProps extends RouteComponentProps<any> {
 	canEdit: boolean;
 	min: number;
 	max: number;
@@ -65,8 +64,6 @@ const SequenceDate = ({ name, onChange, showSequenceDate, min, max, initialFocus
 		<SequenceDateContainer>
 			<SequenceDateField
 				shouldDisableDate={(date: any) => isDateOutsideRange(min, max, date.$d)}
-				inputFormat={LONG_DATE_TIME_FORMAT_V5}
-				dateTime
 				name={name}
 				value={value}
 				onChange={handleChange}

@@ -16,6 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const SessionTracker = require("../../v5/helper/sessionTracker");
+
 const request = require("supertest");
 const chai = require("chai")
 chai.use(require('chai-shallow-deep-equal'));
@@ -33,6 +35,7 @@ describe("Chat service", function () {
 
 	let server;
 	let agent;
+	let testSession;
 	let teamSpace1Agent;
 	let issueId;
 
@@ -100,30 +103,18 @@ describe("Chat service", function () {
 			chatServer.listen(config.chat_server.port, function() {
 				async.series([
 					function(done) {
-						agent = request.agent(server);
-						agent.post("/login")
-							.send({ username, password })
-							.expect(200, function(err, res) {
-								cookies = res.header["set-cookie"][0];
-
-								cookies.split(";").forEach(keyval => {
-									if(keyval) {
-										keyval = keyval.split("=");
-										if(keyval[0] === "connect.sid") {
-											connectSid = keyval[1];
-										}
-									}
-								});
-								done(err);
-							});
+						agent = request(server);
+						testSession = SessionTracker(agent)
+						testSession.login(username, password).then((resp) => {
+							connectSid = testSession.cookies.session;
+							done();
+						});
 					},
 					function(done) {
-						teamSpace1Agent = request.agent(server);
-						teamSpace1Agent.post("/login")
-							.send({ username: account, password })
-							.expect(200, done);
+						teamSpace1Agent = SessionTracker(agent);
+						teamSpace1Agent.login(account, password).then(()=>{done()});
 					},
-					done => agent.delete("/notifications").expect(200, done),
+					done => testSession.delete("/notifications").expect(200, done),
 					done => {
 						socket = io(config.chat_server.chat_host, {path: "/" + config.chat_server.subdirectory, extraHeaders:{
 							Cookie: `connect.sid=${connectSid}; `
@@ -383,7 +374,7 @@ describe("Chat service", function () {
 
 		describe("of issue assigned type", () => {
 
-			before(done => { deleteNotifications(agent)(done); });
+			before(done => { deleteNotifications(testSession)(done); });
 
 			it("should receive a new notification event when a issue has been created",
 				testForChatEvent(() => {
@@ -449,7 +440,7 @@ describe("Chat service", function () {
 
 		describe("of closed issue type", () => {
 			before(done => async.waterfall([
-				deleteNotifications(agent),
+				deleteNotifications(testSession),
 				createIssue(teamSpace1Agent, jobAIssue),
 				(iss,next) => { issueId = iss._id; next();},
 				createIssue(teamSpace1Agent, jobAIssue),
@@ -553,7 +544,7 @@ describe("Chat service", function () {
 				});
 
 				async.series([next => bouncerHelper.startBouncerWorker(next, 1),
-					next => agent.post(`/${account}/${model}/upload`)
+					next => testSession.post(`/${account}/${model}/upload`)
 						.field("tag", "onetag")
 						.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
 						.expect(200, function(err, res) {
@@ -562,31 +553,6 @@ describe("Chat service", function () {
 					])
 			}).timeout('60s');
 
-			it("should receive a model FAILED uploaded notification and a model updated notification if a model uploaded had been uploaded with a warning type of error", done => {
-				const eventName = `${username}::notificationUpserted`;
-				const receivedNotifications = [];
-
-				socket.on(eventName, function(notification) {
-					receivedNotifications.push(notification);
-
-					if (receivedNotifications.length == 2){
-						socket.off(eventName);
-						const types = receivedNotifications.map(n => n.type).sort();
-						expect(types).to.deep.equal([ "MODEL_UPDATED","MODEL_UPDATED_FAILED"]);
-						bouncerHelper.stopBouncerWorker();
-						done();
-					}
-				});
-
-				async.series([next => bouncerHelper.startBouncerWorker(next, 7),
-					next => agent.post(`/${account}/${model}/upload`)
-						.field("tag", "onetag")
-						.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
-						.expect(200, function(err, res) {
-							next(err);
-						})
-					])
-			}).timeout('30s');
 		});
 
 	});

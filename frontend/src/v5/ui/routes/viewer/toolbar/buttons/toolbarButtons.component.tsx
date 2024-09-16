@@ -30,6 +30,7 @@ import { VerticalRangeContainer, VerticalRangeValue } from '../selectionToolbar/
 import { useContext } from 'react';
 import { CalibrationContext } from '../../../dashboard/projects/calibration/calibrationContext';
 import { UNITS_CONVERSION_FACTORS_TO_METRES } from '../../../dashboard/projects/calibration/calibration.helpers';
+import { CONTAINER_UNITS } from '@/v5/store/containers/containers.types';
 
 export const HomeButton = () => (
 	<ToolbarButton
@@ -110,20 +111,15 @@ export const VerticalCalibrationButton = () => {
 	);
 };
 
-export const VerticalRange = () => {
-	const { verticalPlanes, isCalibratingPlanes } = useContext(CalibrationContext);
+export const VerticalRange = ({ hidden }) => {
+	const { verticalPlanes } = useContext(CalibrationContext);
 	const unit = ModelHooksSelectors.selectUnit();
-	const conversionFactor = unit === 'ft' ? 1 : UNITS_CONVERSION_FACTORS_TO_METRES[unit];
+	const isMetric = unit !== 'ft';
+	const conversionFactor = isMetric ? UNITS_CONVERSION_FACTORS_TO_METRES[unit] : 1;
 	const rangeValue = ((verticalPlanes?.[1] - verticalPlanes?.[0]) / conversionFactor).toFixed(2);
-	const unitLabel = unit === 'ft' ? formatMessage({
-		id: 'viewer.toolbar.icon.verticalRange.imperial',
-		defaultMessage: 'ft',
-	}) : formatMessage({
-		id: 'viewer.toolbar.icon.verticalRange.metric',
-		defaultMessage: 'm',
-	});
+	const unitLabel = CONTAINER_UNITS.find(({ value }) => value === (isMetric ? 'm' : 'ft')).abbreviation;
 	return (
-		<VerticalRangeContainer hidden={!isCalibratingPlanes} disabled>
+		<VerticalRangeContainer hidden={hidden}>
 			<VerticalRangeValue>{rangeValue}</VerticalRangeValue>{unitLabel}
 		</VerticalRangeContainer>
 	);

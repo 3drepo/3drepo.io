@@ -16,7 +16,8 @@
  */
 
 import { Matrix3, Vector2 } from 'three';
-import { Coord2D } from './calibration.types';
+import { Coord2D, Vector2D, Vector3D } from './calibration.types';
+import { isNumber } from 'lodash';
 
 export const UNITS_CONVERSION_FACTORS_TO_METRES = {
 	'm': 1,
@@ -31,21 +32,18 @@ export const getUnitsConversionFactor = (drawingUnits, modelUnits) => {
 	return UNITS_CONVERSION_FACTORS_TO_METRES[drawingUnits] / UNITS_CONVERSION_FACTORS_TO_METRES[modelUnits];
 };
 
-export const convertCoordUnits = (coord, conversionFactor: number) => coord?.map((point) => point * conversionFactor) || null;
-export const convertVectorUnits = (vector, conversionFactor: number) => vector.map((coord) => convertCoordUnits(coord, conversionFactor));
+export const convertUnits = (coords: number[], conversionFactor: number) => coords?.map((coord) => isNumber(coord) ? coord * conversionFactor : null) || null;
+export const convertVectorUnits = (vector, conversionFactor: number) => vector.map((coord) => convertUnits(coord, conversionFactor));
 
-export const removeZ = (vector) => {
-	return [vector[0], vector[2]] as Coord2D;
-};
+export const removeZ = (vector) => [vector[0], vector[2]] as Coord2D;
 
-export const getTransformationMatrix = (vector2D: Vector2, vector3D: Vector2) => {
+export const getTransformationMatrix = (vector2D: Vector2D, vector3D: Vector3D) => {
 	const drawVecStart = new Vector2(...vector2D[0]);
 	const drawVecEnd = new Vector2(...vector2D[1]);
 	const modelVecStart = new Vector2(...removeZ(vector3D[0]));
 	const modelVecEnd = new Vector2(...removeZ(vector3D[1]));
 	const diff2D = new Vector2().subVectors(drawVecEnd, drawVecStart);
 	const diff3D = new Vector2().subVectors(modelVecEnd, modelVecStart);
-
 
 	const magnitudeA = diff2D.length();
 	const magnitudeB = diff3D.length();

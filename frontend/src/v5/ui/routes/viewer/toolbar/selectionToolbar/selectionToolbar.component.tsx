@@ -34,12 +34,11 @@ import { VIEWER_CLIP_MODES, VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { GizmoModeButtons } from '../buttons/buttonOptionsContainer/gizmoModeButtons.component';
 import { Viewer } from '@/v4/services/viewer/viewer';
 import { useContext, useEffect, useState } from 'react';
-import { VerticalRange } from '../buttons/toolbarButtons.component';
 import { CalibrationContext } from '../../../dashboard/projects/calibration/calibrationContext';
-import { PlaneType } from '../../../dashboard/projects/calibration/calibration.types';
+import { PlanesCalibrationSection } from './sections/planesCalibrationSection.component';
 
 export const SectionToolbar = () => {
-	const { verticalPlanes, isCalibratingPlanes, selectedPlane, setSelectedPlane, isAlignPlaneActive, setIsAlignPlaneActive } = useContext(CalibrationContext);
+	const { isCalibratingPlanes, verticalPlanes } = useContext(CalibrationContext);
 	const [alignActive, setAlignActive] = useState(false);
 	
 	const hasOverrides = !isEmpty(ViewerGuiHooksSelectors.selectColorOverrides());
@@ -98,30 +97,7 @@ export const SectionToolbar = () => {
 					title={formatMessage({ id: 'viewer.toolbar.icon.deleteClip', defaultMessage: 'Delete' })}
 				/>
 			</Section>
-			<Section hidden={!isCalibratingPlanes}>
-				<LozengeButton
-					hidden={!isCalibratingPlanes || planesAreUnset}
-					onClick={() => setSelectedPlane(PlaneType.LOWER) }
-					selected={selectedPlane === PlaneType.LOWER}
-				>
-					<FormattedMessage id="viewer.toolbar.icon.lowerPlane" defaultMessage="Bottom Plane" />
-				</LozengeButton>
-				<LozengeButton
-					hidden={!isCalibratingPlanes || planesAreUnset}
-					onClick={() => setSelectedPlane(PlaneType.UPPER) }
-					selected={selectedPlane === PlaneType.UPPER}
-				>
-					<FormattedMessage id="viewer.toolbar.icon.upperPlane" defaultMessage="Top Plane" />
-				</LozengeButton>
-				<VerticalRange />
-				<ToolbarButton
-					Icon={AlignIcon}
-					hidden={!isCalibratingPlanes}
-					onClick={() => setIsAlignPlaneActive(!isAlignPlaneActive)}
-					selected={isAlignPlaneActive}
-					title={formatMessage({ id: 'viewer.toolbar.icon.alignFloorToSurface', defaultMessage: 'Align Floor To Surface' })}
-				/>
-			</Section>
+			<PlanesCalibrationSection hidden={!isCalibratingPlanes || planesAreUnset} />
 			<Section hidden={!hasOverrides}>
 				<ToolbarButton
 					Icon={ClearOverridesIcon}

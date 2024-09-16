@@ -20,24 +20,28 @@ import { selectCurrentProject, selectIsProjectAdmin } from '../projects/projects
 import { DrawingsState } from './drawings.redux';
 import { isCollaboratorRole, isCommenterRole, isViewerRole } from '../store.helpers';
 import { Role } from '../currentUser/currentUser.types';
-import { CalibrationState } from './drawings.types';
 import { selectContainerById } from '../containers/containers.selectors';
 import { selectFederationById } from '../federations/federations.selectors';
-import { convertCoordUnits, convertVectorUnits, getTransformationMatrix, getUnitsConversionFactor, removeZ } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
+import { convertUnits, convertVectorUnits, getTransformationMatrix, getUnitsConversionFactor, removeZ } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
 import { EMPTY_CALIBRATION, EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 import { isEqual } from 'lodash';
 import { Vector2 } from 'three';
+import { fullDrawing } from './drawings.helpers';
+import { selectRevisionsByDrawing } from './revisions/drawingRevisions.selectors';
 
 const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
 
 export const selectDrawings = createSelector(
-	selectDrawingsDomain, selectCurrentProject,
-	(state, currentProject) => (state.drawingsByProject[currentProject] ?? []),
+	selectDrawingsDomain,
+	selectCurrentProject,
+	selectRevisionsByDrawing, // This selector is used here to recalculate the value after the revisions are fetched
+	(state, currentProject) => 
+		(state.drawingsByProject[currentProject] ?? []).map(fullDrawing),
 );
 
-export const selectCalibratedDrawings = createSelector(
+export const selectNonEmptyDrawings = createSelector(
 	selectDrawings,
-	(drawings) => (drawings.filter((d) => [CalibrationState.CALIBRATED, CalibrationState.OUT_OF_SYNC].includes(d.calibration?.state))),
+	(drawings) => drawings.filter((d) => d.revisionsCount > 0),
 );
 
 export const selectFavouriteDrawings = createSelector(
@@ -48,23 +52,20 @@ export const selectFavouriteDrawings = createSelector(
 export const selectDrawingById = createSelector(
 	selectDrawings,
 	(_, _id) => _id,
-	(drawings, _id) => drawings.find((d) => d._id === _id),
+	(drawings, _id) => {
+		return drawings.find((d) => d._id === _id);
+	},
 );
 
 export const selectDrawingCalibration = createSelector(
 	selectDrawingById,
-	(drawing) => drawing.calibration ?? {},
+	(drawing) => drawing.calibration ?? EMPTY_CALIBRATION,
 );
 
 export const selectIsListPending = createSelector(
 	selectDrawingsDomain, selectCurrentProject,
 	// Checks if the drawings for the project have been fetched
 	(state, currentProject) => !state.drawingsByProject[currentProject],
-);
-
-export const selectCalibratedDrawingsHaveStatsPending = createSelector(
-	selectCalibratedDrawings,
-	(drawings) => drawings.some(({ hasStatsPending }) => hasStatsPending),
 );
 
 export const selectAreStatsPending = createSelector(
@@ -88,15 +89,15 @@ export const selectCanUploadToProject = createSelector(
 	(drawings, isAdmin): boolean => isAdmin || drawings.some(({ role }) => isCollaboratorRole(role)),
 );
 
-export const selectCategories = createSelector(
+export const selectTypes = createSelector(
 	selectDrawingsDomain, selectCurrentProject,
-	(state, currentProject) => (state.categoriesByProject[currentProject] ?? []),
+	(state, currentProject) => state.typesByProject[currentProject] ?? [],
 );
 
-export const selectIsCategoriesPending = createSelector(
+export const selectIsTypesPending = createSelector(
 	selectDrawingsDomain, selectCurrentProject,
-	// Checks if the categories for the project have been fetched
-	(state, currentProject) => !state.categoriesByProject[currentProject],
+	// Checks if the types for the project have been fetched
+	(state, currentProject) => !state.typesByProject[currentProject],
 );
 
 export const selectCalibration = createSelector(
@@ -111,7 +112,7 @@ export const selectCalibration = createSelector(
 				model: convertVectorUnits(horizontalCalibration.model, conversionFactor),
 				drawing: convertVectorUnits(horizontalCalibration.drawing, conversionFactor),
 			},
-			verticalRange: convertCoordUnits(calibration.verticalRange || EMPTY_CALIBRATION.verticalRange, conversionFactor),
+			verticalRange: convertUnits(calibration.verticalRange || EMPTY_CALIBRATION.verticalRange, conversionFactor),
 		};
 	},
 );

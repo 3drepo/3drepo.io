@@ -29,6 +29,8 @@ const { io: ioClient } = require('socket.io-client');
 
 const { providers } = require(`${src}/services/sso/sso.constants`);
 
+const { CSRF_COOKIE, SESSION_HEADER } = require(`${src}/utils/sessions.constants`);
+
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
@@ -44,7 +46,7 @@ const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constant
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { isArray } = require(`${src}/utils/helper/typeCheck`);
 const FilesManager = require('../../../src/v5/services/filesManager');
-const { modelTypes } = require('../../../src/v5/models/modelSettings.constants');
+const { modelTypes, statusCodes } = require('../../../src/v5/models/modelSettings.constants');
 
 const { statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
 const { generateFullSchema } = require(`${src}/schemas/tickets/templates`);
@@ -148,14 +150,44 @@ db.createModel = (teamspace, _id, name, props) => {
 	return DbHandler.insertOne(teamspace, 'settings', settings);
 };
 
-db.createRevision = async (teamspace, modelId, revision) => {
+db.createRevision = async (teamspace, project, model, revision, modelType) => {
+	const historyCol = modelType === modelTypes.DRAWING ? `${modelType}s.history` : `${model}.history`;
+	const writeReferencedData = (id, buffer) => FilesManager.storeFile(teamspace,
+		historyCol, id, buffer);
+
 	if (revision.rFile) {
-		const refId = revision.rFile[0];
-		await FilesManager.storeFile(teamspace, `${modelId}.history.ref`, refId, revision.refData);
+		writeReferencedData(revision.rFile[0], revision.refData);
 	}
-	const formattedRevision = { ...revision, _id: stringToUUID(revision._id) };
+
+	if (revision.image) {
+		writeReferencedData(revision.image, revision.imageData);
+	}
+
+	if (revision.thumbnail) {
+		writeReferencedData(revision.thumbnail, revision.thumbnailData);
+	}
+	const formattedRevision = {
+		...revision,
+		_id: stringToUUID(revision._id),
+		...(modelType === modelTypes.DRAWING ? { project: stringToUUID(project), model } : {}),
+	};
+
 	delete formattedRevision.refData;
-	await DbHandler.insertOne(teamspace, `${modelId}.history`, formattedRevision);
+	delete formattedRevision.imageData;
+	delete formattedRevision.thumbnailData;
+	await DbHandler.insertOne(teamspace, historyCol, formattedRevision);
+};
+
+db.createCalibration = async (teamspace, project, drawing, revision, calibration) => {
+	const formattedCalibration = {
+		...calibration,
+		_id: stringToUUID(calibration._id),
+		project: stringToUUID(project),
+		drawing,
+		rev_id: stringToUUID(revision),
+	};
+
+	await DbHandler.insertOne(teamspace, 'drawings.calibrations', formattedCalibration);
 };
 
 db.createSequence = async (teamspace, model, { sequence, states, activities, activityTree }) => {
@@ -272,8 +304,8 @@ db.addLoginRecords = async (records) => {
 	await DbHandler.insertMany(INTERNAL_DB, 'loginRecords', records);
 };
 
-db.createScene = (teamspace, modelId, rev, nodes, meshMap) => Promise.all([
-	db.createRevision(teamspace, modelId, rev),
+db.createScene = (teamspace, project, modelId, rev, nodes, meshMap) => Promise.all([
+	db.createRevision(teamspace, project, modelId, rev),
 	DbHandler.insertMany(teamspace, `${modelId}.scene`, nodes),
 	FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, `${UUIDToString(rev._id)}/idToMeshes.json`, JSON.stringify(meshMap)),
 
@@ -425,24 +457,47 @@ ServiceHelper.generateRandomModel = ({ modelType = modelTypes.CONTAINER, viewers
 	};
 };
 
-ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true) => {
+ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, modelType) => {
 	const _id = ServiceHelper.generateUUIDString();
-	const entry = {
+	const entry = deleteIfUndefined({
 		_id,
-		tag: ServiceHelper.generateRandomString(),
+		tag: modelType === modelTypes.DRAWING ? undefined : ServiceHelper.generateRandomString(),
+		statusCode: modelType === modelTypes.DRAWING ? statusCodes[0].code : undefined,
+		revCode: modelType === modelTypes.DRAWING ? ServiceHelper.generateRandomString(10) : undefined,
+		format: modelType === modelTypes.DRAWING ? '.pdf' : undefined,
 		author: ServiceHelper.generateRandomString(),
 		timestamp: ServiceHelper.generateRandomDate(),
 		desc: ServiceHelper.generateRandomString(),
 		void: !!isVoid,
-	};
+	});
 
 	if (hasFile) {
-		entry.rFile = [`${_id}_${ServiceHelper.generateRandomString()}_ifc`];
+		entry.rFile = modelType === modelTypes.DRAWING ? [ServiceHelper.generateUUIDString()] : [`${_id}_${ServiceHelper.generateRandomString()}_ifc`];
 		entry.refData = ServiceHelper.generateRandomString();
+
+		if (modelType === modelTypes.DRAWING) {
+			entry.image = ServiceHelper.generateUUIDString();
+			entry.thumbnail = ServiceHelper.generateUUIDString();
+
+			entry.imageData = ServiceHelper.generateRandomString();
+			entry.thumbnailData = ServiceHelper.generateRandomString();
+		}
 	}
 
 	return entry;
 };
+
+ServiceHelper.generateCalibration = () => ({
+	_id: ServiceHelper.generateUUIDString(),
+	horizontal: {
+		model: times(2, () => times(3, () => ServiceHelper.generateRandomNumber())),
+		drawing: times(2, () => times(2, () => ServiceHelper.generateRandomNumber())),
+	},
+	verticalRange: [0, 10],
+	units: 'm',
+	createdAt: ServiceHelper.generateRandomDate(),
+	createdBy: ServiceHelper.generateRandomString(),
+});
 
 ServiceHelper.generateRandomModelProperties = (modelType = modelTypes.CONTAINER) => ({
 	desc: ServiceHelper.generateRandomString(),
@@ -730,13 +785,35 @@ ServiceHelper.chatApp = () => {
 	return ChatService.createApp(server);
 };
 
+ServiceHelper.parseSetCookie = (arr) => {
+	let token; let session;
+	arr.forEach((instr) => {
+		const matchSession = instr.match(/connect.sid=([^;]*)/);
+		if (matchSession) {
+			[, session] = matchSession;
+		}
+
+		const matchToken = instr.match(/csrf_token=([^;]*)/);
+		if (matchToken) {
+			[, token] = matchToken;
+		}
+	});
+
+	return { token, session };
+};
+
+ServiceHelper.generateCookieArray = ({ token, session }) => [
+	`${CSRF_COOKIE}=${token}`,
+	`${SESSION_HEADER}=${session}`,
+];
+
 ServiceHelper.loginAndGetCookie = async (agent, user, password, headers = {}) => {
 	const res = await agent.post('/v5/login')
 		.set(headers)
 		.send({ user, password })
 		.expect(templates.ok.status);
-	const [, cookie] = res.header['set-cookie'][0].match(/connect.sid=([^;]*)/);
-	return cookie;
+
+	return ServiceHelper.parseSetCookie(res.header['set-cookie']);
 };
 
 ServiceHelper.socket.connectToSocket = (session) => new Promise((resolve, reject) => {
@@ -754,7 +831,7 @@ ServiceHelper.socket.connectToSocket = (session) => new Promise((resolve, reject
 });
 
 ServiceHelper.socket.loginAndGetSocket = async (agent, user, password) => {
-	const cookie = await ServiceHelper.loginAndGetCookie(agent, user, password);
+	const { session: cookie } = await ServiceHelper.loginAndGetCookie(agent, user, password);
 	return ServiceHelper.socket.connectToSocket(cookie);
 };
 

@@ -21,18 +21,26 @@ import { NavigationButtons } from '@/v5/ui/routes/viewer/toolbar/buttons/buttonO
 import { ProjectionButtons } from '@/v5/ui/routes/viewer/toolbar/buttons/buttonOptionsContainer/projectionButtons.component';
 import { MainToolbar, ToolbarContainer } from '@/v5/ui/routes/viewer/toolbar/toolbar.styles';
 import { SectionToolbar } from '@/v5/ui/routes/viewer/toolbar/selectionToolbar/selectionToolbar.component';
+import { CalibrationContext } from '../calibrationContext';
+import { useContext } from 'react';
+import { isNull } from 'lodash';
 
-export const CalibrationToolbar = () => (
-	<ToolbarContainer>
-		<MainToolbar>
-			<HomeButton />
-			<ProjectionButtons />
-			<NavigationButtons />
-			<ClipButtons />
-			<BimButton />
-			<CalibrationButton />
-			<VerticalCalibrationButton />
-		</MainToolbar>
-		<SectionToolbar />
-	</ToolbarContainer>
-);
+export const CalibrationToolbar = () => {
+	const { verticalPlanes } = useContext(CalibrationContext);
+	const planesAreUnset = verticalPlanes.some(isNull);
+	
+	return (
+		<ToolbarContainer>
+			<MainToolbar>
+				<HomeButton />
+				<ProjectionButtons />
+				<NavigationButtons />
+				{planesAreUnset && <ClipButtons />}
+				<BimButton />
+				<CalibrationButton />
+				<VerticalCalibrationButton />
+			</MainToolbar>
+			<SectionToolbar />
+		</ToolbarContainer>
+	);
+};

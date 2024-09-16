@@ -20,7 +20,7 @@ import { useFormContext } from 'react-hook-form';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { createFilterOptions } from '@mui/material';
 import { DrawingsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { canUploadToBackend, prepareSingleDrawingData } from '@/v5/store/drawings/drawings.helpers';
+import { canUploadToBackend, fullDrawing } from '@/v5/store/drawings/drawings.helpers';
 import { formatMessage } from '@/v5/services/intl';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
 import { isCollaboratorRole } from '@/v5/store/store.helpers';
@@ -43,13 +43,11 @@ const NO_OPTIONS_TEXT_NON_ADMIN = formatMessage({
 	defaultMessage: 'There are no Drawings to upload to.',
 });
 
-const EMPTY_OPTION = prepareSingleDrawingData({
+const EMPTY_OPTION = fullDrawing({
 	_id: '',
 	name: '',
 	role: Role.NONE,
 	isFavourite: false,
-	category: '',
-	drawingNumber: '',
 });
 
 const NEW_ID = 'new';

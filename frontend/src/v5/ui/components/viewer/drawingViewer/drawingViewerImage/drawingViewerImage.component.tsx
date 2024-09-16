@@ -14,29 +14,38 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { forwardRef, useRef } from 'react';
+import { ZoomableImage } from '../zoomableImage.types';
 
-import { getDrawingImageSrc } from '@/v5/store/drawings/drawings.helpers';
-import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
-import { forwardRef, useEffect, useState } from 'react';
-import { Loader } from '@/v4/routes/components/loader/loader.component';
-import { CentredContainer } from '@controls/centredContainer';
+export type DrawingViewerImageProps = { 
+	onLoad?: (...args) => void, 
+	src: string 
+};
 
-type DrawingViewerImageProps = { onLoad: (...args) => void };
-export const DrawingViewerImage = forwardRef(({ onLoad }: DrawingViewerImageProps, ref: any) => {
-	const [drawingId] = useSearchParam('drawingId');
-	const [isLoading, setIsLoading] = useState(true);
-	const src = getDrawingImageSrc(drawingId);
+export const DrawingViewerImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ onLoad, src }, ref ) => {
+	const imgRef = useRef<HTMLImageElement>();
 
-	useEffect(() => {
-		setIsLoading(true);
-		fetch(src).then(() => setIsLoading(false));
-	}, [drawingId]);
+	(ref as any).current = {
+		setTransform: ({ scale, x, y }) => {
+			imgRef.current.style.transform = `matrix(${scale}, 0, 0, ${scale}, ${x}, ${y})`;
+		},
 
-	if (isLoading) return (
-		<CentredContainer>
-			<Loader />
-		</CentredContainer>
+		getEventsEmitter: () => {
+			return imgRef.current.parentElement;
+		},
+
+		getBoundingClientRect: () => {
+			return imgRef.current.getBoundingClientRect();
+		},
+		
+		getNaturalSize: () =>  {
+			const img = imgRef.current;
+			return { width: img.naturalWidth, height: img.naturalHeight };
+		},
+
+	};
+
+	return (
+		<img src={src} onLoad={onLoad} ref={imgRef} style={{ transformOrigin: '0 0', userSelect: 'none' }} draggable={false} />
 	);
-
-	return <img src={src} ref={ref} onLoad={onLoad} />;
 });

@@ -18,7 +18,7 @@
 import { formatMessage } from '@/v5/services/intl';
 import { ToolbarButton } from '@/v5/ui/routes/viewer/toolbar/buttons/toolbarButton.component';
 import { ToolbarContainer, MainToolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.styles';
-import { useEffect, useContext, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import ZoomOutIcon from '@assets/icons/viewer/zoom_out.svg';
 import ZoomInIcon from '@assets/icons/viewer/zoom_in.svg';
 
@@ -34,23 +34,46 @@ import { CalibrationInfoBox } from '@/v5/ui/routes/dashboard/projects/calibratio
 import CalibrationIcon from '@assets/icons/filled/calibration-filled.svg';
 import { ViewBoxType, ViewerLayer2D } from './viewerLayer2D/viewerLayer2D.component';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
+import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { getDrawingImageSrc } from '@/v5/store/drawings/revisions/drawingRevisions.helpers';
+import { SVGImage } from './svgImage/svgImage.component';
+import { CentredContainer } from '@controls/centredContainer/centredContainer.component';
+import { Loader } from '@/v4/routes/components/loader/loader.component';
+import { isFirefox } from '@/v5/helpers/browser.helper';
+import { ZoomableImage } from './zoomableImage.types';
+import { useParams } from 'react-router';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { useAuthenticatedImage } from '@components/authenticatedResource/authenticatedResource.hooks';
+import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { selectViewerBackgroundColor } from '@/v4/modules/viewer/viewer.selectors';
+import { useSelector } from 'react-redux';
+import HomeIcon from '@assets/icons/viewer/home.svg';
+
 
 const DEFAULT_VIEWBOX = { scale: 1, x: 0, y: 0, width: 0, height: 0 };
 export const Viewer2D = () => {
+	const { teamspace, project } = useParams<ViewerParams>();
+	const [drawingId] = useSearchParam('drawingId');
+	const revision = DrawingRevisionsHooksSelectors.selectLatestActiveRevision(drawingId);
+	const src = revision ? getDrawingImageSrc(teamspace, project, drawingId, revision._id) : '';
+	const authSrc = useAuthenticatedImage(src);
+	const backgroundColor = useSelector(selectViewerBackgroundColor);
+
 	const { close2D } = useContext(ViewerCanvasesContext);
-	const { isCalibrating, step, vector2D, setVector2D } = useContext(CalibrationContext);
+	const { isCalibrating, step, vector2D, setVector2D, isCalibrating2D, setIsCalibrating2D } = useContext(CalibrationContext);
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
 	const [viewBox, setViewBox] = useState<ViewBoxType>(DEFAULT_VIEWBOX);
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
-	const [isDrawingVector, setIsDrawingVector] = useState(false);
-
+	// const [isDrawingVector, setIsDrawingVector] = useState(false);
 	const [viewport, setViewport] = useState({ left:0, right: 0, top: 0, bottom:0 });
-
+	const [isLoading, setIsLoading] = useState(false);
 	const containerRef = useRef();
-
-	const imgRef = useRef<HTMLImageElement>();
+	const imgRef = useRef<ZoomableImage>();
 	const imgContainerRef = useRef();
+
+	const canCalibrate2D = isCalibrating && step === 1;
 
 	const onClickZoomIn = () => {
 		zoomHandler.zoomIn();
@@ -61,6 +84,8 @@ export const Viewer2D = () => {
 	};
 
 	const onImageLoad = () => {
+		setIsLoading(false);
+
 		if (zoomHandler) {
 			zoomHandler.dispose();
 		}
@@ -71,7 +96,7 @@ export const Viewer2D = () => {
 		setZoomHandler(pz);
 	};
 
-	const onCalibrationClick = () => setIsDrawingVector(!isDrawingVector);
+	const onCalibrationClick = () => setIsCalibrating2D(!isCalibrating2D);
 
 	useEffect(() => {
 		if (!zoomHandler) return;
@@ -99,6 +124,16 @@ export const Viewer2D = () => {
 	}, [viewBox]);
 	
 
+	useEffect(() => {
+		setIsLoading(true);
+	}, [drawingId]);
+
+	const showSVGImage = !isFirefox() && !src.toLowerCase().endsWith('.png');
+
+	useEffect(() => {
+		if (revision) return;
+		DrawingRevisionsActionsDispatchers.fetch(teamspace, project, drawingId);
+	}, [revision]);
 
 	return (
 		<ViewerContainer visible ref={containerRef}>
@@ -115,24 +150,39 @@ export const Viewer2D = () => {
 				/>
 			)}
 			{!isCalibrating && <CloseButton variant="secondary" onClick={close2D} />}
-			<ImageContainer ref={imgContainerRef}>
-				<DrawingViewerImage ref={imgRef} onLoad={onImageLoad} />
-				<ViewerLayer2D
-					active={isDrawingVector}
+			<CloseButton variant="secondary" onClick={close2D} />
+			<ImageContainer backgroundColor={backgroundColor} ref={imgContainerRef}>
+				{
+					isLoading && 
+					<CentredContainer>
+						<Loader />
+					</CentredContainer>
+				}
+				{showSVGImage && <SVGImage ref={imgRef} src={authSrc} onLoad={onImageLoad} />}
+				{!showSVGImage && <DrawingViewerImage ref={imgRef} src={authSrc} onLoad={onImageLoad} />}
+				{ !isLoading && (<ViewerLayer2D
+					active={isCalibrating2D}
 					viewBox={viewBox}
 					value={vector2D}
 					viewport={viewport}
 					onChange={setVector2D}
 					cameraEnabled={!isCalibrating}
-				/>
+				/>)}
 			</ImageContainer>
 			<ToolbarContainer>
 				<MainToolbar>
+					<ToolbarButton
+						Icon={HomeIcon}
+						onClick={() => zoomHandler.centreView()}
+						title={formatMessage({ id: 'viewer.toolbar.icon.home', defaultMessage: 'Home' })}
+					/>
 					{step === 1 && <ToolbarButton
 						Icon={CalibrationIcon}
 						onClick={onCalibrationClick}
 						title={formatMessage({ id: 'drawingViewer.toolbar.calibrate', defaultMessage: 'Calibrate' })}
-						selected={isDrawingVector}
+						selected={isCalibrating2D}
+						// selected={isDrawingVector}
+						hidden={!canCalibrate2D}
 					/>}
 					<ToolbarButton
 						Icon={ZoomOutIcon}

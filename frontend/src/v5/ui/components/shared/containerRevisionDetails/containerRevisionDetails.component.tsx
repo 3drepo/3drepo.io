@@ -41,11 +41,12 @@ import {
 import { getRevisionFileUrl } from '@/v5/services/api/containerRevisions';
 import { selectHasCollaboratorAccess } from '@/v5/store/containers/containers.selectors';
 import { getState } from '@/v4/modules/store';
-import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { RevisionsListItemText } from '../revisionDetails/components/revisionsListItem/revisionsListItemText/revisionsListItemText.component';
 import { RevisionsListItemAuthor } from '../revisionDetails/components/revisionsListItem/revisionsListItemAuthor/revisionsListItemAuthor.component';
 import { RevisionsListItemTag } from '../revisionDetails/components/revisionsListItem/revisionsListItem.styles';
 import { viewerRoute } from '@/v5/services/routing/routing';
+import { downloadFile } from '@components/authenticatedResource/authenticatedResource.hooks';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
 
 interface IContainerRevisionDetails {
 	containerId: string;
@@ -61,8 +62,8 @@ export const ContainerRevisionDetails = ({ containerId, revisionsCount, status }
 		.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 	const selected = revisions.findIndex((r) => !r.void);
 
-	const handleDownloadRevision = (revisionId) => {
-		window.location.href = getRevisionFileUrl(teamspace, project, containerId, revisionId);
+	const handleDownloadRevision = (revisionId, filename) => {
+		downloadFile(getRevisionFileUrl(teamspace, project, containerId, revisionId), filename);
 	};
 
 	useEffect(() => {
@@ -106,7 +107,7 @@ export const ContainerRevisionDetails = ({ containerId, revisionsCount, status }
 			<RevisionsListHeaderContainer>
 				<RevisionsListHeaderLabel width={140} tabletWidth={94}><FormattedMessage id="containerRevisionDetails.addedOn" defaultMessage="Added on" /></RevisionsListHeaderLabel>
 				<RevisionsListHeaderLabel width={170} tabletWidth={155}><FormattedMessage id="containerRevisionDetails.addedBy" defaultMessage="Added by" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel width={150} tabletWidth={300}><FormattedMessage id="containerRevisionDetails.revisionCode" defaultMessage="Revision name" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={150} tabletWidth={300}><FormattedMessage id="containerRevisionDetails.revisionName" defaultMessage="Revision name" /></RevisionsListHeaderLabel>
 				<RevisionsListHeaderLabel hideWhenSmallerThan={1140}><FormattedMessage id="containerRevisionDetails.description" defaultMessage="Description" /></RevisionsListHeaderLabel>
 				<RevisionsListHeaderLabel width={90} tabletWidth={45} hideWhenSmallerThan={800}><FormattedMessage id="containerRevisionDetails.format" defaultMessage="Format" /></RevisionsListHeaderLabel>
 			</RevisionsListHeaderContainer>
@@ -125,11 +126,11 @@ export const ContainerRevisionDetails = ({ containerId, revisionsCount, status }
 									ContainerRevisionsActionsDispatchers.setVoidStatus(teamspace, project, containerId, revision._id, voidStatus)
 								)}
 								voidStatus={revision.void}
-								onDownloadRevision={() => handleDownloadRevision(revision._id)}
+								onDownloadRevision={() => handleDownloadRevision(revision._id, revision.tag + revision.format)}
 								hasPermission={selectHasCollaboratorAccess(getState(), containerId)}
 								redirectTo={viewerRoute(teamspace, project, containerId, revision)}
 							>
-								<RevisionsListItemText width={140} tabletWidth={94}> {formatShortDateTime(revision.timestamp)} </RevisionsListItemText>
+								<RevisionsListItemText width={140} tabletWidth={94}> {formatDateTime(revision.timestamp)} </RevisionsListItemText>
 								<RevisionsListItemAuthor width={170} tabletWidth={155} authorName={revision.author} />
 								<RevisionsListItemTag width={150} tabletWidth={300}> {revision.tag} </RevisionsListItemTag>
 								<RevisionsListItemText hideWhenSmallerThan={1140}> {revision.desc || ''} </RevisionsListItemText>

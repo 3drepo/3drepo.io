@@ -547,7 +547,6 @@ export class ViewerService {
 				if (ids) {
 					const uniqueIds = Array.from(new Set(ids));
 					if (uniqueIds.length) {
-						// eslint-disable-next-line @typescript-eslint/await-thenable
 						await UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi, forceReHighlight);
 						this.emit(VIEWER_EVENTS.HIGHLIGHT_OBJECTS, {account, model, uniqueIds });
 						return;
@@ -1361,21 +1360,15 @@ export class ViewerService {
 	}
 
 	public setCalibrationToolSelectedColors(fill, border) {
-		UnityUtil.unityInstance.SendMessage('WebGLInterface', 'SetCalibrationToolSelectedColours', JSON.stringify({
-			fill,
-			border,
-		}));
+		UnityUtil.setCalibrationToolSelectedColors(fill, border);
 	}
 
 	public setCalibrationToolUnselectedColors(fill, border) {
-		UnityUtil.unityInstance.SendMessage('WebGLInterface', 'SetCalibrationToolUnselectedColours', JSON.stringify({
-			fill,
-			border,
-		}));
+		UnityUtil.setCalibrationToolUnselectedColors(fill, border);
 	}
 
-	public SetCalibrationToolOcclusionOpacity(opacity) {
-		UnityUtil.unityInstance.SendMessage('WebGLInterface', 'SetCalibrationToolOcclusionOpacity', opacity);
+	public setCalibrationToolOcclusionOpacity(opacity) {
+		UnityUtil.setCalibrationToolOcclusionOpacity(opacity);
 	}
 }
 

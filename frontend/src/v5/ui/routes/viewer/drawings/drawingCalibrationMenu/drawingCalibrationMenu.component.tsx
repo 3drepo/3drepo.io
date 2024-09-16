@@ -25,6 +25,7 @@ import { useParams } from 'react-router-dom';
 import { MenuList } from '@mui/material';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import { formatMessage } from '@/v5/services/intl';
+import { DashboardParams } from '../../../routes.constants';
 
 type DrawingsCalibrationMenuProps = DashboardListItemButtonProps & {
 	calibrationState: CalibrationState;
@@ -32,13 +33,11 @@ type DrawingsCalibrationMenuProps = DashboardListItemButtonProps & {
 	drawingId: string;
 };
 export const DrawingsCalibrationMenu = ({ calibrationState, onCalibrateClick, drawingId, disabled, ...props }: DrawingsCalibrationMenuProps) => {
-	const { teamspace, project } = useParams();
+	const { teamspace, project } = useParams<DashboardParams>();
 	const disableButton = disabled || calibrationState === CalibrationState.EMPTY;
 
 	const approveCalibration = () => DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawingId, {
-		calibration: {
-			state: CalibrationState.CALIBRATED,
-		},
+		calibration: CalibrationState.CALIBRATED,
 	});
 
 	return (

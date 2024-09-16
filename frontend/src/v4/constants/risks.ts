@@ -22,7 +22,6 @@ import ErrorOutline from '@mui/icons-material/ErrorOutline';
 import HighlightOff from '@mui/icons-material/HighlightOff';
 import NewReleases from '@mui/icons-material/NewReleases';
 import Pins from '@mui/icons-material/PinDrop';
-import Print from '@mui/icons-material/Print';
 import SyncProblem from '@mui/icons-material/SyncProblem';
 
 import { FILTER_TYPES } from '../routes/components/filterPanel/filterPanel';
@@ -288,10 +287,6 @@ export const ACTIONS_TYPES = {
 };
 
 export const RISKS_ACTIONS_MENU = {
-	PRINT: {
-		label: 'Create Report',
-		Icon: Print
-	},
 	SHOW_PINS: {
 		label:  'Show Pins',
 		Icon: Pins,

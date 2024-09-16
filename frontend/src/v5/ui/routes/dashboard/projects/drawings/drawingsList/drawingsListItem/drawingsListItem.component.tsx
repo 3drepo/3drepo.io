@@ -26,7 +26,7 @@ import {
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
-import { formatShortDateTime } from '@/v5/helpers/intl.helper';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { DrawingsListItemTitle } from './drawingsListItemTitle/drawingsListItemTitle.component';
 import { IsMainList } from '../../../containers/mainList.context';
 import { DrawingsEllipsisMenu } from './drawingsEllipsisMenu/drawingsEllipsisMenu.component';
@@ -38,6 +38,9 @@ import { DrawingRevisionDetails } from '@components/shared/drawingRevisionDetail
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DrawingsCalibrationMenu } from '@/v5/ui/routes/viewer/drawings/drawingCalibrationMenu/drawingCalibrationMenu.component';
 import { SelectModelForCalibration } from './selectModelForCalibration/selectModelForCalibration.component';
+import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
+import { enableRealtimeDrawingRemoved, enableRealtimeDrawingUpdate } from '@/v5/services/realtime/drawings.events';
+import { enableRealtimeDrawingRevisionUpdate, enableRealtimeDrawingNewRevision } from '@/v5/services/realtime/drawingRevision.events';
 
 interface IDrawingsListItem {
 	isSelected: boolean;
@@ -65,7 +68,12 @@ export const DrawingsListItem = memo(({
 
 	useEffect(() => {
 		if (isMainList) {
-			// TODO - add realtime events
+			return combineSubscriptions(
+				enableRealtimeDrawingRemoved(teamspace, project, drawing._id),
+				enableRealtimeDrawingUpdate(teamspace, project, drawing._id),
+				enableRealtimeDrawingRevisionUpdate(teamspace, project, drawing._id),
+				enableRealtimeDrawingNewRevision(teamspace, project, drawing._id),
+			);
 		}
 		return null;
 	}, [drawingId]);
@@ -81,7 +89,9 @@ export const DrawingsListItem = memo(({
 				<DashboardListItemButton
 					onClick={() => onSelectOrToggleItem(drawingId)}
 					tooltipTitle={
-						<FormattedMessage id="drawings.list.item.revisions.tooltip" defaultMessage="View revisions" />
+						!isSelected ? 
+							(<FormattedMessage id="drawings.list.item.revisions.tooltip.showRevisions" defaultMessage="Show revisions" />) :
+							(<FormattedMessage id="drawings.list.item.revisions.tooltip.hideRevisions" defaultMessage="Hide revisions" />)
 					}
 					{...DRAWING_LIST_COLUMN_WIDTHS.revisionsCount}
 				>
@@ -92,24 +102,24 @@ export const DrawingsListItem = memo(({
 					/>
 				</DashboardListItemButton>
 				<DrawingsCalibrationMenu
-					calibrationState={drawing.calibration?.state}
+					calibrationState={drawing.calibration}
 					onCalibrateClick={() => DialogsActionsDispatchers.open(SelectModelForCalibration, { drawingId })}
 					disabled={!isProjectAdmin}
 					drawingId={drawingId}
 					{...DRAWING_LIST_COLUMN_WIDTHS.calibration}
 				/>
-				<DashboardListItemText selected={isSelected} {...DRAWING_LIST_COLUMN_WIDTHS.drawingNumber}>
-					{drawing.drawingNumber}
+				<DashboardListItemText selected={isSelected} {...DRAWING_LIST_COLUMN_WIDTHS.number}>
+					{drawing.number}
 				</DashboardListItemText>
-				<DashboardListItemText selected={isSelected} {...DRAWING_LIST_COLUMN_WIDTHS.category}>
-					{drawing.category}
+				<DashboardListItemText selected={isSelected} {...DRAWING_LIST_COLUMN_WIDTHS.type}>
+					{drawing.type}
 				</DashboardListItemText>
 				<DashboardListItemText
 					selected={isSelected}
 					dontHighlight
 					{...DRAWING_LIST_COLUMN_WIDTHS.lastUpdated}
 				>
-					{drawing.lastUpdated && formatShortDateTime(drawing.lastUpdated)}
+					{drawing.lastUpdated && formatDateTime(drawing.lastUpdated)}
 				</DashboardListItemText>
 				<DashboardListItemIcon>
 					<FavouriteCheckbox

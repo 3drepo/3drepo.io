@@ -18,7 +18,7 @@
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { isFileFormatUnsupported, projectAlreadyExists } from '@/v5/validation/errors.helpers';
+import { isFileFormatUnsupported, isPathNotFound, projectAlreadyExists } from '@/v5/validation/errors.helpers';
 import { ProjectSchema } from '@/v5/validation/projectSchemes/projectsSchemes';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { FormTextField } from '@controls/inputs/formInputs.component';
@@ -35,11 +35,13 @@ import { testImageExists } from '@controls/fileUploader/imageFile.helper';
 import { Gap } from '@controls/gap';
 import { Form, Section, Header, SubmitButton, SuccessMessage, ImageInfo } from './projectSettings.styles';
 import { ProjectImageInput } from './projectImageInput/projectImageInput.component';
+import { deleteAuthUrlFromCache } from '@components/authenticatedResource/authenticatedResource.hooks';
 
 type IFormInput = {
 	name: string,
 	image?: string | File,
 };
+
 export const ProjectSettings = () => {
 	const [existingNames, setExistingNames] = useState([]);
 	const [showSuccessMessage, setShowSuccessMessage] = useState(false);
@@ -96,6 +98,7 @@ export const ProjectSettings = () => {
 		setShowSuccessMessage(true);
 		const resetBody = { ...body };
 		if ('image' in updatedProject) {
+			deleteAuthUrlFromCache(imgSrcAsUrl);
 			resetBody.image = (updatedProject.image === null) ? null : imgSrcAsUrl;
 		}
 		reset(resetBody);
@@ -172,7 +175,7 @@ export const ProjectSettings = () => {
 						<FormattedMessage id="project.settings.form.successMessage" defaultMessage="The project has been updated successfully." />
 					</SuccessMessage>
 				)}
-				<UnhandledErrorInterceptor expectedErrorValidators={[projectAlreadyExists, isFileFormatUnsupported]} />
+				<UnhandledErrorInterceptor expectedErrorValidators={[projectAlreadyExists, isFileFormatUnsupported, isPathNotFound]} />
 			</Form>
 		</FormProvider>
 	);

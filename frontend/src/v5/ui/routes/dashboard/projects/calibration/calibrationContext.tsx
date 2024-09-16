@@ -28,10 +28,12 @@ export interface CalibrationContextType {
 	setOrigin: (origin: string) => void;
 	isCalibrating3D: boolean,
 	setIsCalibrating3D: (isCalibrating3D: boolean) => void;
+	isCalibrating2D: boolean,
+	setIsCalibrating2D: (isCalibrating2D: boolean) => void;
 	vector3D: Vector3D,
 	setVector3D: (vectorState: React.SetStateAction<Vector3D>) => void;
 	vector2D: Vector2D,
-	setVector2D: (points: Vector2D) => void,
+	setVector2D: (vectorState: React.SetStateAction<Vector2D>) => void,
 	drawingId: string;
 	verticalPlanes: Vector1D,
 	setVerticalPlanes: (planes: Vector1D) => void,
@@ -51,6 +53,8 @@ const defaultValue: CalibrationContextType = {
 	setOrigin: () => {},
 	isCalibrating3D: false,
 	setIsCalibrating3D: () => {},
+	isCalibrating2D: false,
+	setIsCalibrating2D: () => {},
 	vector3D: EMPTY_VECTOR,
 	setVector3D: () => {},
 	vector2D: EMPTY_VECTOR,
@@ -74,6 +78,7 @@ export const CalibrationContextComponent = ({ children }) => {
 	const [isCalibrating] = useSearchParam('isCalibrating', Transformers.BOOLEAN);
 	const [isCalibrating3D, setIsCalibrating3D] = useState(false);
 	const [isCalibratingPlanes, setIsCalibratingPlanes] = useState(false);
+	const [isCalibrating2D, setIsCalibrating2D] = useState(false);
 	const [vector3D, setVector3D] = useState<Vector3D>(EMPTY_VECTOR);
 	const [vector2D, setVector2D] = useState<Vector2D>(EMPTY_VECTOR);
 	const [verticalPlanes, setVerticalPlanes] = useState<Vector1D>(EMPTY_VECTOR);
@@ -90,6 +95,8 @@ export const CalibrationContextComponent = ({ children }) => {
 			setOrigin,
 			isCalibrating3D,
 			setIsCalibrating3D,
+			isCalibrating2D,
+			setIsCalibrating2D,
 			vector2D,
 			setVector2D,
 			vector3D,
