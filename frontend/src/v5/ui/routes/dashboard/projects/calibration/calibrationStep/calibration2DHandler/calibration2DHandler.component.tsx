@@ -21,9 +21,7 @@ import { CalibrationContext } from '../../calibrationContext';
 import { EMPTY_VECTOR } from '../../calibration.constants';
 
 export const Calibration2DHandler = () => {
-	const { isCalibrating, step, setIsCalibrating2D, setVector2D } = useContext(CalibrationContext);
-
-	const canCalibrate2D = isCalibrating && step === 1;
+	const { setIsCalibrating2D, setVector2D } = useContext(CalibrationContext);
 
 	useEffect(() => {
 		UnityUtil.setCalibrationToolMode('Vector');
@@ -33,10 +31,6 @@ export const Calibration2DHandler = () => {
 			setVector2D((vector) => vector?.[1] ? vector : EMPTY_VECTOR);
 		};
 	}, []);
-
-	useEffect(() => {
-		setIsCalibrating2D(canCalibrate2D);
-	}, [canCalibrate2D]);
 
 	return null;
 };

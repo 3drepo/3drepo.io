@@ -19,6 +19,7 @@ import EventEmitter from 'eventemitter3';
 
 import { UnityUtil } from '@/globals/unity-util';
 import { isEmpty, isString } from 'lodash';
+import { COLOR, hexToOpacity } from '@/v5/ui/themes/theme';
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import {
 	VIEWER_EVENTS,
@@ -1327,23 +1328,29 @@ export class ViewerService {
 
 	}
 
+	// part of the hacek for callibratio tool plane
+	private calibrationtoolmode = 'none';
+
 	/**
 	 * Drawings Calibration
 	 */
 	public setCalibrationToolMode(mode: string) {
 		UnityUtil.setCalibrationToolMode(mode);
+		this.calibrationtoolmode = mode;
 	}
 
 	public setCalibrationToolVerticalPlanes(lower, upper) {
 		UnityUtil.setCalibrationToolVerticalPlanes(lower, upper);
 	}
 
-	public selectCalibrationToolUpperPlane() {
-		UnityUtil.selectCalibrationToolUpperPlane();
-	}
+	public selectCalibrationToolPlane(plane) {
+		const selectedPlane = plane === 'none' ? 'upper' : plane; // If none plane is selected show as if the top plane is selected.
+		const unselectedPlane = selectedPlane === 'upper' ? 'lower' : 'upper';
 
-	public selectCalibrationToolLowerPlane() {
-		UnityUtil.selectCalibrationToolLowerPlane();
+		Viewer.setCalibrationToolVerticalPlaneColours(selectedPlane, hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 44), COLOR.PRIMARY_MAIN,  COLOR.PRIMARY_MAIN_CONTRAST);
+		Viewer.setCalibrationToolVerticalPlaneColours(unselectedPlane, hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 0), COLOR.PRIMARY_MAIN, hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 0));
+
+		UnityUtil.selectCalibrationToolVerticalPlane(plane);
 	}
 
 	public setCalibrationToolDrawing(image: any, rect: number[]) {
@@ -1358,16 +1365,8 @@ export class ViewerService {
 		UnityUtil.setCalibrationToolFloorToObject(teamspace, modelId, meshId);
 	}
 
-	public setCalibrationToolSelectedColors(fill, border) {
-		UnityUtil.setCalibrationToolSelectedColors(fill, border);
-	}
-
-	public setCalibrationToolUnselectedColors(fill, border) {
-		UnityUtil.setCalibrationToolUnselectedColors(fill, border);
-	}
-
-	public setCalibrationToolOcclusionOpacity(opacity) {
-		UnityUtil.setCalibrationToolOcclusionOpacity(opacity);
+	public setCalibrationToolVerticalPlaneColours(plane, fill, border, drawing) {
+		UnityUtil.setCalibrationToolVerticalPlaneColours(plane, fill, border, drawing);
 	}
 }
 
