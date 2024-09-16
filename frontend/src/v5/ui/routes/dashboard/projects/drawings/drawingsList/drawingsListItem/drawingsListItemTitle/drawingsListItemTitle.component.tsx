@@ -56,11 +56,9 @@ export const DrawingsListItemTitle = ({
 				/>
 			)}
 			selected={isSelected}
-			tooltipTitle={canLaunchDrawing ? (
-				<FormattedMessage id="drawings.list.item.title.tooltip" defaultMessage="Launch latest revision" />
-			) : (
-				<FormattedMessage id="drawings.list.item.title.tooltip.empty" defaultMessage="No revisions" />
-			)
+			tooltipTitle={ !isSelected ? 
+				(<FormattedMessage id="drawings.list.item.title.tooltip.showRevisions" defaultMessage="Show revisions" />) :
+				(<FormattedMessage id="drawings.list.item.title.tooltip.hideRevisions" defaultMessage="Hide revisions" />)
 			}
 			disabled={!canLaunchDrawing}
 		>
