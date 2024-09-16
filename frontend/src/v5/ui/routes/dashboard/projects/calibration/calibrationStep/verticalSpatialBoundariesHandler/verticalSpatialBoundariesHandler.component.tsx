@@ -60,14 +60,17 @@ export const VerticalSpatialBoundariesHandler = () => {
 	}, [verticalPlanes]);
 	
 	useEffect(() => {
+		if (planesAreSet) {
+			Viewer.clipToolDelete();
+		}
+
 		Viewer.on(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
 
 		return () => {
-			Viewer.setCalibrationToolMode('None');
 			Viewer.off(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
-			Viewer.clipToolDelete();
 		};
-	}, [planesAreSet, isCalibratingPlanes]);
+
+	}, [planesAreSet]);
 
 	useEffect(() => {
 		Viewer.setCalibrationToolMode(planesAreSet ? 'Vertical' : 'None');
