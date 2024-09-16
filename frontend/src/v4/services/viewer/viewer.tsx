@@ -1344,9 +1344,10 @@ export class ViewerService {
 	}
 
 	public selectCalibrationToolPlane(plane) {
-		const unselectedPlane = plane !== 'lower' ? 'lower' : 'upper';
+		const selectedPlane = plane === 'none' ? 'upper' : plane; // If none plane is selected show as if the top plane is selected.
+		const unselectedPlane = selectedPlane === 'upper' ? 'lower' : 'upper';
 
-		Viewer.setCalibrationToolVerticalPlaneColours(plane, hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 44), COLOR.PRIMARY_MAIN,  COLOR.PRIMARY_MAIN_CONTRAST);
+		Viewer.setCalibrationToolVerticalPlaneColours(selectedPlane, hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 44), COLOR.PRIMARY_MAIN,  COLOR.PRIMARY_MAIN_CONTRAST);
 		Viewer.setCalibrationToolVerticalPlaneColours(unselectedPlane, hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 0), COLOR.PRIMARY_MAIN, hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 0));
 
 		UnityUtil.selectCalibrationToolVerticalPlane(plane);
