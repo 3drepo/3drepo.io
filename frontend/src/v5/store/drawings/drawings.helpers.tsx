@@ -20,8 +20,12 @@ import WarningIcon from '@assets/icons/outlined/warning-outlined.svg';
 import CalibratedIcon from '@assets/icons/filled/calibration-filled.svg';
 import NotCalibrated from '@assets/icons/filled/no_calibration-filled.svg';
 import { Display } from '@/v5/ui/themes/media';
-import { CalibrationStates, DrawingStats, DrawingUploadStatus, IDrawing, MinimumDrawing } from './drawings.types';
+import { CalibrationStates, DrawingStats, IDrawing, MinimumDrawing } from './drawings.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
+import { selectActiveRevisions, selectLastRevisionName, selectRevisionsPending } from './revisions/drawingRevisions.selectors';
+import { Role } from '../currentUser/currentUser.types';
+import { getState } from '@/v5/helpers/redux.helpers';
+import { UploadStatus } from '../containers/containers.types';
 
 export const DRAWING_LIST_COLUMN_WIDTHS = {
 	name: {
@@ -72,20 +76,19 @@ export const CALIBRATION_MAP = {
 	},
 };
 // TODO - fix (if necessary) when backend is available
-export const canUploadToBackend = (status?: DrawingUploadStatus): boolean => {
+export const canUploadToBackend = (status?: UploadStatus): boolean => {
 	const statusesForUpload = [
-		DrawingUploadStatus.OK,
-		DrawingUploadStatus.FAILED,
+		UploadStatus.OK,
+		UploadStatus.FAILED,
 	];
 
 	return statusesForUpload.includes(status);
 };
 
-export const prepareSingleDrawingData = (
-	drawing: MinimumDrawing,
+export const statsToDrawing = (
 	stats?: DrawingStats,
-): IDrawing => ({
-	...drawing,
+): Partial<IDrawing> => ({
+	...stats,
 	revisionsCount: stats?.revisions?.total ?? 0,
 	lastUpdated: getNullableDate(stats?.revisions.lastUpdated),
 	latestRevision: stats?.revisions.latestRevision ?? '',
@@ -93,7 +96,7 @@ export const prepareSingleDrawingData = (
 	type: stats?.type ?? '',
 	desc: stats?.desc ?? '',
 	calibration: stats?.calibration ?? CalibrationStates.UNCALIBRATED,
-	status: stats?.status ?? DrawingUploadStatus.OK,
+	status: stats?.status ?? UploadStatus.OK,
 	hasStatsPending: !stats,
 	errorReason: stats?.errorReason && {
 		message: stats.errorReason.message,
@@ -101,10 +104,28 @@ export const prepareSingleDrawingData = (
 	},
 });
 
-export const prepareDrawingsData = (
-	drawings: Array<MinimumDrawing>,
-	stats?: DrawingStats[],
-) => drawings.map<IDrawing>((Drawing, index) => {
-	const drawingStats = stats?.[index];
-	return prepareSingleDrawingData(Drawing, drawingStats);
-});
+export const fullDrawing = (
+	drawing: Partial<IDrawing> &  MinimumDrawing,
+): IDrawing => {
+	const state = getState();
+	const isPendingRevisions = selectRevisionsPending(state, drawing._id);
+	const activeRevisions = selectActiveRevisions(state, drawing._id);
+	const latestRevision = isPendingRevisions ? drawing.latestRevision : selectLastRevisionName(state, drawing._id);
+	const revisionsCount = isPendingRevisions ? drawing.revisionsCount : activeRevisions.length;
+	const calibration = revisionsCount > 0 ? drawing.calibration : CalibrationStates.EMPTY;
+	const lastUpdated = isPendingRevisions ? drawing.lastUpdated :  (activeRevisions[0] || {}).timestamp;
+	const status = drawing.status ?? UploadStatus.OK;
+	const isFavourite = drawing.isFavourite ?? false;
+	const role = drawing.role ?? Role.ADMIN;
+
+	return {
+		...drawing,
+		status,
+		isFavourite,
+		role,
+		latestRevision,
+		revisionsCount,
+		calibration, 
+		lastUpdated: getNullableDate(lastUpdated), 
+	};
+};

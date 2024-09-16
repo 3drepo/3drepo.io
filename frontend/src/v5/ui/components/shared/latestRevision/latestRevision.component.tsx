@@ -17,34 +17,27 @@
 
 import { FormattedMessage } from 'react-intl';
 
-import { RevisionStatus } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision/revisionStatus';
-import { IRevisionStatus } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision/revisionStatus/revisionStatus.component';
 import { UploadStatus } from '@/v5/store/containers/containers.types';
 import { Container, Label } from './latestRevision.styles';
+import { IRevisionStatus, RevisionStatus } from './revisionStatus/revisionStatus.component';
 
 interface ILatestRevision extends IRevisionStatus {
 	hasRevisions: boolean;
+	emptyLabel: string;
 }
 
-export const LatestRevision = ({ hasRevisions, status, ...props }: ILatestRevision): JSX.Element => (
+export const LatestRevision = ({ hasRevisions, status, emptyLabel, ...props }: ILatestRevision): JSX.Element => (
 	<Container disabled={!hasRevisions}>
 		{hasRevisions || status !== UploadStatus.OK ? (
 			<>
 				<Label>
 					<FormattedMessage
-						id="containers.list.item.latestRevision.label"
+						id="latestRevision.label"
 						defaultMessage="Latest revision: "
 					/>
 				</Label>
 				<RevisionStatus status={status} {...props} />
 			</>
-		) : (
-			<Label>
-				<FormattedMessage
-					id="containers.list.item.latestRevision.emptyContainer"
-					defaultMessage="Container empty"
-				/>
-			</Label>
-		)}
+		) : <Label>{emptyLabel}</Label>}
 	</Container>
 );

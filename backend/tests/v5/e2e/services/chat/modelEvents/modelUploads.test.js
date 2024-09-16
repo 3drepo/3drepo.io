@@ -25,6 +25,8 @@ const { queueMessage } = require(`${src}/handler/queue`);
 const { cn_queue: queueConfig } = require(`${src}/utils/config`);
 const { mkdirSync, writeFileSync } = require('fs');
 
+const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
+
 const { modelTypes, processStatuses, statusCodes } = require(`${src}/models/modelSettings.constants`);
 
 const { getRevisionFormat } = require(`${src}/models/revisions`);
@@ -41,6 +43,8 @@ const federationRevision = ServiceHelper.generateRevisionEntry();
 const drawingRevision = { ...ServiceHelper.generateRevisionEntry(false, true, modelTypes.DRAWING),
 	incomplete: true,
 	status: processStatuses.PROCESSING };
+
+const calibration = ServiceHelper.generateCalibration();
 
 let agent;
 const setupData = async () => {
@@ -76,10 +80,14 @@ const setupData = async () => {
 		ServiceHelper.db.createUser(user, [teamspace]),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name,
 			[container._id, container2._id, federation._id, drawing._id]),
-		ServiceHelper.db.createRevision(teamspace, container._id, { ...containerRevision, author: user.user }),
-		ServiceHelper.db.createRevision(teamspace, federation._id, { ...federationRevision, author: user.user }),
-		ServiceHelper.db.createRevision(teamspace, drawing._id, { ...drawingRevision, author: user.user },
-			modelTypes.DRAWING),
+		ServiceHelper.db.createRevision(teamspace, project.id, container._id,
+			{ ...containerRevision, author: user.user }),
+		ServiceHelper.db.createRevision(teamspace, project.id, federation._id,
+			{ ...federationRevision, author: user.user }, modelTypes.FEDERATION),
+		ServiceHelper.db.createRevision(teamspace, project.id, drawing._id,
+			{ ...drawingRevision, author: user.user }, modelTypes.DRAWING),
+		ServiceHelper.db.createCalibration(teamspace, project.id, drawing._id,
+			drawingRevision._id, calibration),
 	]);
 };
 
@@ -291,7 +299,7 @@ const queueFinishedTest = () => {
 			const modelUpdateResults = await modelUpdatePromise;
 			expect(modelUpdateResults?.data?.timestamp).not.toBeUndefined();
 			expect(modelUpdateResults).toEqual(expect.objectContaining({ ...data,
-				data: { status: 'ok', timestamp: modelUpdateResults.data.timestamp } }));
+				data: { status: 'ok', timestamp: modelUpdateResults.data.timestamp, calibration: calibrationStatuses.CALIBRATED } }));
 
 			const newRevisionResults = await newRevisionPromise;
 			expect(newRevisionResults?.data?.timestamp).not.toBeUndefined();
@@ -304,6 +312,7 @@ const queueFinishedTest = () => {
 					timestamp: newRevisionResults.data.timestamp,
 					format: drawingRevision.format,
 					desc: drawingRevision.desc,
+					calibration: calibrationStatuses.CALIBRATED,
 				} }));
 
 			socket.close();

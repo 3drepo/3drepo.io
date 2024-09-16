@@ -70,19 +70,27 @@ const onCallbackQMsg = async ({ content, properties }) => {
 	}
 };
 
-const queueDrawingUpload = async (teamspace, project, model, revId, data) => {
+const queueDrawingUpload = async (teamspace, project, model, revId, data, fileBuffer) => {
 	try {
+		const pathToRevFolder = Path.join(sharedDir, revId);
+		const file = Path.join(pathToRevFolder, `${revId}${data.format}`);
 		const json = {
 			...data,
 			database: teamspace,
 			project: model,
 			revId,
+			file,
 		};
 
-		const pathToRevFolder = Path.join(sharedDir, revId);
 		await mkdir(pathToRevFolder);
 
-		await writeFile(Path.join(pathToRevFolder, 'importParams.json'), JSON.stringify(json));
+		await Promise.all(
+			[
+				writeFile(file, fileBuffer),
+				writeFile(Path.join(pathToRevFolder, 'importParams.json'), JSON.stringify(json)),
+
+			],
+		);
 
 		const msg = `processDrawing ${SHARED_SPACE_TAG}/${revId}/importParams.json`;
 
@@ -98,16 +106,16 @@ const queueDrawingUpload = async (teamspace, project, model, revId, data) => {
 ModelProcessing.processDrawingUpload = async (teamspace, project, model, revInfo, file) => {
 	const format = Path.extname(file.originalname).toLowerCase();
 	const fileId = generateUUID();
+	const { owner, ...revData } = revInfo;
 
 	const rev_id = await addRevision(teamspace, project, model, modelTypes.DRAWING,
-		{ ...revInfo, format, rFile: [fileId], incomplete: true });
+		{ ...revData, author: owner, format, rFile: [fileId], incomplete: true });
 
 	const fileMeta = { name: file.originalname, rev_id, project, model };
 	await storeFile(teamspace, DRAWINGS_HISTORY_COL, fileId, file.buffer, fileMeta);
 
-	// TODO: for a different issue, but we don't want push through pdfs - should process it in .io
-	const queueMeta = { format, size: file.buffer.length };
-	await queueDrawingUpload(teamspace, project, model, UUIDToString(rev_id), queueMeta);
+	const queueMeta = { format, size: file.buffer.length, owner };
+	await queueDrawingUpload(teamspace, project, model, UUIDToString(rev_id), queueMeta, file.buffer);
 };
 
 ModelProcessing.queueModelUpload = async (teamspace, model, data, { originalname, path }) => {

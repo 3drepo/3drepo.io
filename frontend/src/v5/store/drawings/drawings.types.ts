@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { UploadStatus } from '../containers/containers.types';
 import { Role } from '../currentUser/currentUser.types';
 
 export enum CalibrationStates {
@@ -22,15 +23,6 @@ export enum CalibrationStates {
 	OUT_OF_SYNC = 'outOfSync',
 	UNCALIBRATED = 'uncalibrated',
 	EMPTY = 'empty',
-}
-
-export enum DrawingUploadStatus {
-	OK = 'ok',
-	FAILED = 'failed',
-	UPLOADING = 'uploading',
-	UPLOADED = 'uploaded',
-	QUEUED = 'queued',
-	PROCESSING = 'processing',
 }
 
 export interface MinimumDrawing {
@@ -49,10 +41,10 @@ export interface DrawingStats {
 	number: string,
 	calibration?: CalibrationStates,
 	type: string,
-	status: DrawingUploadStatus,
+	status: UploadStatus,
 	errorReason?: {
 		message: string;
-		timestamp: Date | number;
+		timestamp: Date;
 	};
 	desc?: string;
 }

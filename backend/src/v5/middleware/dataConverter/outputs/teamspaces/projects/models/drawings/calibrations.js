@@ -15,9 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TextOverflow } from '@controls/textOverflow';
-import styled from 'styled-components';
+const { respond } = require('../../../../../../../utils/responder');
+const { templates } = require('../../../../../../../utils/responseCodes');
 
-export const RevisionCodeAndStatus = styled(TextOverflow)`
-	font-weight: bold;
-`;
+const Calibrations = {};
+
+Calibrations.formatCalibration = (req, res) => {
+	const { calibration } = req;
+
+	calibration.createdAt = calibration.createdAt.getTime();
+
+	respond(req, res, templates.ok, calibration);
+};
+
+module.exports = Calibrations;

@@ -22,8 +22,8 @@ import { SearchContext } from '@controls/search/searchContext';
 import { useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
-import { Container, Label } from '../../../../containers/containersList/latestRevision/latestRevision.styles';
-import { RevisionCodeAndStatus } from './drawingsListItemTitle.styles';
+import { LatestRevision } from '@components/shared/latestRevision/latestRevision.component';
+import { formatMessage } from '@/v5/services/intl';
 
 interface IDrawingsListItemTitle extends FixedOrGrowContainerProps {
 	drawing: IDrawing;
@@ -42,32 +42,23 @@ export const DrawingsListItemTitle = ({
 	return (
 		<DashboardListItemTitle
 			{...props}
-			subtitle={!drawing.hasStatsPending && hasRevisions && (
-				<Container>
-					<Label>
-						<FormattedMessage id="drawings.list.item.latestRevision.label" defaultMessage="Latest revision:"/>
-					</Label>
-					<RevisionCodeAndStatus>
+			subtitle={!drawing.hasStatsPending && (
+				<LatestRevision
+					name={(
 						<Highlight search={query}>
-							{drawing.latestRevision} 
+							{drawing.latestRevision}
 						</Highlight>
-						{drawing.status && (
-							<>
-								<span>-</span>
-								<Highlight search={query}>
-									{drawing.status}
-								</Highlight>
-							</>
-						)}
-					</RevisionCodeAndStatus>
-				</Container>
+					)}
+					status={drawing.status}
+					error={drawing.errorReason}
+					hasRevisions={hasRevisions}
+					emptyLabel={formatMessage({ id: 'drawings.list.item.title.latestRevision.empty', defaultMessage: 'Drawing empty' })}
+				/>
 			)}
 			selected={isSelected}
-			tooltipTitle={canLaunchDrawing ? (
-				<FormattedMessage id="drawings.list.item.title.tooltip" defaultMessage="Launch latest revision" />
-			) : (
-				<FormattedMessage id="drawings.list.item.title.tooltip.empty" defaultMessage="No revisions" />
-			)
+			tooltipTitle={ !isSelected ? 
+				(<FormattedMessage id="drawings.list.item.title.tooltip.showRevisions" defaultMessage="Show revisions" />) :
+				(<FormattedMessage id="drawings.list.item.title.tooltip.hideRevisions" defaultMessage="Hide revisions" />)
 			}
 			disabled={!canLaunchDrawing}
 		>

@@ -66,6 +66,7 @@ ResponseCodes.templates = {
 
 	// Drawing related error
 	drawingNotFound: { message: 'Drawing not found.', status: 404 },
+	calibrationNotFound: { message: 'Calibration not found.', status: 404 },
 
 	// Custom ticket related error
 	templateNotFound: { message: 'Template not found.', status: 404 },
@@ -151,9 +152,9 @@ ResponseCodes.getSwaggerComponents = () => {
 ResponseCodes.codeExists = (code) => !!ResponseCodes.templates[toCamelCase(code)];
 
 ResponseCodes.createResponseCode = (errCode, message) => {
-	const codeExists = ResponseCodes.codeExists(errCode?.code);
+	const isError = errCode instanceof Error;
+	const codeExists = ResponseCodes.codeExists(errCode?.code) && !isError;
 	if (!codeExists) {
-		const isError = errCode instanceof Error;
 		if (isError && !logfile.silent) {
 			// eslint-disable-next-line
 			console.error(errCode)

@@ -31,9 +31,9 @@ const { validateUpdateRevisionData } = require('../../../../../middleware/dataCo
 const getImage = async (req, res) => {
 	const { teamspace, project, drawing, revision } = req.params;
 	try {
-		const { readStream, filename, size, mimeType } = await Drawings.getImageByRevision(
+		const { readStream, filename, size, mimeType, encoding } = await Drawings.getImageByRevision(
 			teamspace, project, drawing, revision);
-		writeStreamRespond(req, res, templates.ok, readStream, filename, size, { mimeType });
+		writeStreamRespond(req, res, templates.ok, readStream, filename, size, { mimeType, encoding });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -41,7 +41,7 @@ const getImage = async (req, res) => {
 };
 
 const getRevisions = (modelType) => async (req, res, next) => {
-	const { teamspace, model } = req.params;
+	const { teamspace, project, model } = req.params;
 	const showVoid = req.query.showVoid === 'true';
 
 	const fn = {
@@ -50,7 +50,7 @@ const getRevisions = (modelType) => async (req, res, next) => {
 	};
 
 	try {
-		const revisions = await fn[modelType](teamspace, model, showVoid);
+		const revisions = await fn[modelType](teamspace, project, model, showVoid);
 		req.outputData = revisions;
 		next();
 	} catch (err) {
@@ -86,7 +86,7 @@ const createNewRevision = (modelType) => async (req, res) => {
 		[modelTypes.CONTAINER]: () => Containers.newRevision(teamspace, model,
 			{ ...req.body, owner }, file),
 		[modelTypes.DRAWING]: () => Drawings.newRevision(teamspace, project, model,
-			{ ...req.body, author: owner }, file),
+			{ ...req.body, owner }, file),
 	};
 
 	try {

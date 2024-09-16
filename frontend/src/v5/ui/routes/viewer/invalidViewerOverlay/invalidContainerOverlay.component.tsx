@@ -51,7 +51,7 @@ export const InvalidContainerOverlay = ({ status }: IInvalidContainer) => {
 		<OverlayContainer>
 			<Heading>
 				<FormattedMessage
-					id="InvalidContainerOverlay.heading"
+					id="invalidContainerOverlay.heading"
 					defaultMessage="The Container is empty"
 				/>
 			</Heading>
@@ -60,7 +60,7 @@ export const InvalidContainerOverlay = ({ status }: IInvalidContainer) => {
 			</Subheading>
 			<Button onClick={onClickBack} variant="contained">
 				<FormattedMessage
-					id="InvalidContainerOverlay.backButton"
+					id="invalidContainerOverlay.backButton"
 					defaultMessage="Back to Containers"
 				/>
 			</Button>
