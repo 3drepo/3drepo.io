@@ -100,7 +100,7 @@ export const DrawingsListItem = memo(({
 					/>
 				</DashboardListItemButton>
 				<DrawingsCalibrationMenu
-					calibrationState={drawing.calibration}
+					calibrationStatus={drawing.calibrationStatus}
 					onCalibrateClick={() => DialogsActionsDispatchers.open(SelectModelForCalibration, { drawingId })}
 					disabled={!isProjectAdmin}
 					drawingId={drawingId}
@@ -131,7 +131,6 @@ export const DrawingsListItem = memo(({
 						selected={isSelected}
 						drawing={drawing}
 						onSelectOrToggleItem={onSelectOrToggleItem}
-						onCalibrateClick={() => DialogsActionsDispatchers.open(SelectModelForCalibration, { drawingId })}
 					/>
 				</DashboardListItemIcon>
 			</DashboardListItemRow>

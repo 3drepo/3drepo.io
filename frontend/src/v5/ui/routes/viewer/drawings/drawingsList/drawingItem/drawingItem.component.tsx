@@ -58,7 +58,7 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	const history = useHistory();
 	const { pathname, search } = useLocation();
 	const { setOrigin } = useContext(CalibrationContext);
-	const { calibration, name, number, lastUpdated, desc, _id: drawingId } = drawing;
+	const { calibrationStatus: calibration, name, number, lastUpdated, desc, _id: drawingId } = drawing;
 	const [latestRevision] = DrawingRevisionsHooksSelectors.selectRevisions(drawingId);
 	const { statusCode, revCode } = latestRevision || {};
 	const areStatsPending = !revCode;
@@ -142,7 +142,7 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 					</Property>
 				</BreakingLine>
 				<CalibrationButton
-					calibrationState={calibration}
+					calibrationStatus={calibration}
 					drawingId={drawingId}
 					onCalibrateClick={onCalibrateClick}
 				/>

@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { CalibrationState } from '@/v5/store/drawings/drawings.types';
+import { CalibrationStatus } from '@/v5/store/drawings/drawings.types';
 import { CALIBRATION_MAP } from '@/v5/store/drawings/drawings.helpers';
 import { DashboardListItemButton } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
@@ -44,22 +44,22 @@ const emptyStyles = css`
 `;
 
 export const CALIBRATION_STYLE = {
-	[CalibrationState.CALIBRATED]: calibratedStyles,
-	[CalibrationState.UNCONFIRMED]: outOfSyncStyles,
-	[CalibrationState.UNCALIBRATED]: uncalibratedStyles,
-	[CalibrationState.EMPTY]: emptyStyles,
+	[CalibrationStatus.CALIBRATED]: calibratedStyles,
+	[CalibrationStatus.UNCONFIRMED]: outOfSyncStyles,
+	[CalibrationStatus.UNCALIBRATED]: uncalibratedStyles,
+	[CalibrationStatus.EMPTY]: emptyStyles,
 };
-export const DrawingsCalibrationButton = styled(DashboardListItemButton).attrs<{ calibrationState: CalibrationState }>(({ calibrationState, disabled }) => ({
-	children: CALIBRATION_MAP[calibrationState]?.label,
-	startIcon: CALIBRATION_MAP[calibrationState]?.icon,
+export const DrawingsCalibrationButton = styled(DashboardListItemButton).attrs<{ calibrationStatus: CalibrationStatus }>(({ calibrationStatus, disabled }) => ({
+	children: CALIBRATION_MAP[calibrationStatus]?.label,
+	startIcon: CALIBRATION_MAP[calibrationStatus]?.icon,
 	endIcon: disabled ? null : <ChevronIcon />,
-}))<{ calibrationState: string }>`
+}))<{ calibrationStatus: string }>`
 	.MuiButtonBase-root {
-		${({ calibrationState }) => CALIBRATION_STYLE[calibrationState]}
-		border: solid 1px ${({ calibrationState, theme }) => {
-		if (calibrationState === CalibrationState.CALIBRATED) return theme.palette.success.light;
-		if (calibrationState === CalibrationState.UNCONFIRMED) return theme.palette.warning.light;
-		if (calibrationState === CalibrationState.UNCALIBRATED) return theme.palette.primary.light;
+		${({ calibrationStatus }) => CALIBRATION_STYLE[calibrationStatus]}
+		border: solid 1px ${({ calibrationStatus, theme }) => {
+		if (calibrationStatus === CalibrationStatus.CALIBRATED) return theme.palette.success.light;
+		if (calibrationStatus === CalibrationStatus.UNCONFIRMED) return theme.palette.warning.light;
+		if (calibrationStatus === CalibrationStatus.UNCALIBRATED) return theme.palette.primary.light;
 		return theme.palette.base.light;
 	}};
 	}

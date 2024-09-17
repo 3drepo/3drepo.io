@@ -16,11 +16,11 @@
  */
 
 import * as faker from 'faker';
-import { IDrawing, DrawingStats, CalibrationValues } from '@/v5/store/drawings/drawings.types';
+import { IDrawing, DrawingStats, Calibration } from '@/v5/store/drawings/drawings.types';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
 import { UploadStatus } from '@/v5/store/containers/containers.types';
-import { getFakeCalibration } from './drawingRevisions/drawingRevisions.fixtures';
-import { EMPTY_CALIBRATION_VALUES } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
+import { getFakeCalibrationStatus } from './drawingRevisions/drawingRevisions.fixtures';
+import { EMPTY_CALIBRATION } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 import { Vector } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 
 export const drawingMockFactory = (overrides?: Partial<IDrawing>): IDrawing => ({
@@ -36,8 +36,8 @@ export const drawingMockFactory = (overrides?: Partial<IDrawing>): IDrawing => (
 	type: faker.random.word(),
 	status: UploadStatus.OK,
 	number: faker.random.alphaNumeric(),
-	calibration: getFakeCalibration(),
-	calibrationValues: EMPTY_CALIBRATION_VALUES,
+	calibrationStatus: getFakeCalibrationStatus(),
+	calibration: EMPTY_CALIBRATION,
 	...overrides,
 });
 
@@ -51,13 +51,13 @@ export const prepareMockStats = (overrides?: Partial<DrawingStats>): DrawingStat
 	type: faker.random.word(),
 	status: UploadStatus.OK,
 	number: faker.random.alphaNumeric(),
-	calibration: getFakeCalibration(),
+	calibrationStatus: getFakeCalibrationStatus(),
 	...overrides,
 });
 
 const getFakeCoordinate = (dimensions: number): any => Array(dimensions).map(() => faker.datatype.number());
 const getFakeCalibrationArray = (dimensions: number): Vector<any> => [getFakeCoordinate(dimensions), getFakeCoordinate(dimensions)];
-export const prepareMockCalibrationValues = (overrides?: Partial<CalibrationValues>): CalibrationValues => ({
+export const prepareMockCalibration = (overrides?: Partial<Calibration>): Calibration => ({
 	horizontal: {
 		drawing: getFakeCalibrationArray(2),
 		model: getFakeCalibrationArray(3),

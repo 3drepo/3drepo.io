@@ -20,14 +20,14 @@ import WarningIcon from '@assets/icons/outlined/stepper_error-outlined.svg';
 import CalibratedIcon from '@assets/icons/filled/calibration-filled.svg';
 import NotCalibrated from '@assets/icons/filled/no_calibration-filled.svg';
 import { Display } from '@/v5/ui/themes/media';
-import { CalibrationState, DrawingStats, IDrawing, MinimumDrawing } from './drawings.types';
+import { CalibrationStatus, DrawingStats, IDrawing, MinimumDrawing } from './drawings.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import { getUrl } from '@/v5/services/api/default';
 import { selectActiveRevisions, selectLatestRevisionName, selectRevisionsPending } from './revisions/drawingRevisions.selectors';
 import { Role } from '../currentUser/currentUser.types';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { UploadStatus } from '../containers/containers.types';
-import { EMPTY_CALIBRATION_VALUES } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
+import { EMPTY_CALIBRATION } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 
 export const DRAWING_LIST_COLUMN_WIDTHS = {
 	name: {
@@ -60,19 +60,19 @@ export const DRAWING_LIST_COLUMN_WIDTHS = {
 export const DRAWINGS_SEARCH_FIELDS = ['name', 'latestRevision', 'type', 'number', 'status'];
 
 export const CALIBRATION_MAP = {
-	[CalibrationState.CALIBRATED]: {
+	[CalibrationStatus.CALIBRATED]: {
 		label: formatMessage({ id: 'drawings.calibration.calibrated', defaultMessage: 'Calibrated' }),
 		icon: <CalibratedIcon />,
 	},
-	[CalibrationState.UNCONFIRMED]: {
+	[CalibrationStatus.UNCONFIRMED]: {
 		label: formatMessage({ id: 'drawings.calibration.outOfSync', defaultMessage: 'Calibrated' }),
 		icon: <WarningIcon />,
 	},
-	[CalibrationState.UNCALIBRATED]: {
+	[CalibrationStatus.UNCALIBRATED]: {
 		label: formatMessage({ id: 'drawings.calibration.uncalibrated', defaultMessage: 'Uncalibrated' }),
 		icon: <NotCalibrated />,
 	},
-	[CalibrationState.EMPTY]: {
+	[CalibrationStatus.EMPTY]: {
 		label: formatMessage({ id: 'drawings.calibration.empty', defaultMessage: 'Empty' }),
 		icon: <NotCalibrated />,
 	},
@@ -97,7 +97,7 @@ export const statsToDrawing = (
 	number: stats?.number ?? '',
 	type: stats?.type ?? '',
 	desc: stats?.desc ?? '',
-	calibration: stats?.calibration ?? CalibrationState.EMPTY,
+	calibrationStatus: stats?.calibrationStatus ?? CalibrationStatus.EMPTY,
 	status: stats?.status ?? UploadStatus.OK,
 	hasStatsPending: !stats,
 	errorReason: stats?.errorReason && {
@@ -116,12 +116,12 @@ export const fullDrawing = (
 	const activeRevisions = selectActiveRevisions(state, drawing._id);
 	const latestRevision = isPendingRevisions ? drawing.latestRevision : selectLatestRevisionName(state, drawing._id);
 	const revisionsCount = isPendingRevisions ? drawing.revisionsCount : activeRevisions.length;
-	const calibration = revisionsCount > 0 ? drawing.calibration : CalibrationState.EMPTY;
+	const calibrationStatus = revisionsCount > 0 ? drawing.calibrationStatus : CalibrationStatus.EMPTY;
 	const lastUpdated = isPendingRevisions ? drawing.lastUpdated :  (activeRevisions[0] || {}).timestamp;
 	const status = drawing.status ?? UploadStatus.OK;
 	const isFavourite = drawing.isFavourite ?? false;
 	const role = drawing.role ?? Role.ADMIN;
-	const calibrationValues = drawing.calibrationValues || EMPTY_CALIBRATION_VALUES;
+	const calibration = drawing.calibration || EMPTY_CALIBRATION;
 
 	return {
 		...drawing,
@@ -130,8 +130,8 @@ export const fullDrawing = (
 		role,
 		latestRevision,
 		revisionsCount,
+		calibrationStatus,
 		calibration,
-		calibrationValues,
 		lastUpdated: getNullableDate(lastUpdated), 
 	};
 };

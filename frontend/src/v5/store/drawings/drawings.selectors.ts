@@ -23,11 +23,11 @@ import { Role } from '../currentUser/currentUser.types';
 import { selectContainerById } from '../containers/containers.selectors';
 import { selectFederationById } from '../federations/federations.selectors';
 import { convertUnits, convertVectorUnits, getUnitsConversionFactor } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
-import { EMPTY_CALIBRATION_VALUES } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
+import { EMPTY_CALIBRATION } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 import { Vector1D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { fullDrawing } from './drawings.helpers';
 import { selectRevisionsByDrawing } from './revisions/drawingRevisions.selectors';
-import { CalibrationState } from './drawings.types';
+import { CalibrationStatus } from './drawings.types';
 
 const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
 
@@ -56,7 +56,7 @@ export const selectDrawingById = createSelector(
 
 export const selectDrawingCalibration = createSelector(
 	selectDrawingById,
-	(drawing) => drawing.calibration ?? CalibrationState.EMPTY,
+	(drawing) => drawing.calibrationStatus ?? CalibrationStatus.EMPTY,
 );
 
 export const selectIsListPending = createSelector(
@@ -97,20 +97,20 @@ export const selectIsTypesPending = createSelector(
 	(state, currentProject) => !state.typesByProject[currentProject],
 );
 
-export const selectCalibrationValues = createSelector(
+export const selectCalibration = createSelector(
 	selectDrawingById,
 	(state, drawingId, modelId) => selectContainerById(state, modelId) || selectFederationById(state, modelId),
 	(drawing, model) => {
-		const calibrationValues = drawing?.calibrationValues || EMPTY_CALIBRATION_VALUES;
-		const conversionFactor = getUnitsConversionFactor(calibrationValues.units, model.unit);
-		const horizontalCalibration = calibrationValues.horizontal;
+		const calibration = drawing?.calibration || EMPTY_CALIBRATION;
+		const conversionFactor = getUnitsConversionFactor(calibration.units, model.unit);
+		const horizontalCalibration = calibration.horizontal;
 
 		return {
 			horizontal: {
 				model: convertVectorUnits(horizontalCalibration.model, conversionFactor),
 				drawing: convertVectorUnits(horizontalCalibration.drawing, conversionFactor),
 			},
-			verticalRange: convertUnits(calibrationValues.verticalRange, conversionFactor) as Vector1D,
+			verticalRange: convertUnits(calibration.verticalRange, conversionFactor) as Vector1D,
 		};
 	},
 );

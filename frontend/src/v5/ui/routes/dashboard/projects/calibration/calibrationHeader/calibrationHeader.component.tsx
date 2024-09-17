@@ -51,7 +51,7 @@ export const CalibrationHeader = () => {
 
 	const handleConfirm = () => {
 		handleEndCalibration();
-		DrawingsActionsDispatchers.updateCalibrationValues(teamspace, project, drawingId, {
+		DrawingsActionsDispatchers.updateCalibration(teamspace, project, drawingId, {
 			units: selectedModel.unit,
 			horizontal: {
 				model: vector3D,

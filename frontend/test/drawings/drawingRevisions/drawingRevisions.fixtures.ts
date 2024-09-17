@@ -17,9 +17,9 @@
 
 import * as faker from 'faker';
 import { CreateDrawingRevisionBody, IDrawingRevision } from '@/v5/store/drawings/revisions/drawingRevisions.types';
-import { CalibrationState } from '@/v5/store/drawings/drawings.types';
+import { CalibrationStatus } from '@/v5/store/drawings/drawings.types';
 
-export const getFakeCalibration = () => faker.random.arrayElement([CalibrationState.CALIBRATED, CalibrationState.UNCONFIRMED, CalibrationState.UNCALIBRATED, CalibrationState.EMPTY]);
+export const getFakeCalibrationStatus = () => faker.random.arrayElement([CalibrationStatus.CALIBRATED, CalibrationStatus.UNCONFIRMED, CalibrationStatus.UNCALIBRATED, CalibrationStatus.EMPTY]);
 
 export const drawingRevisionsMockFactory = (overrides?: Partial<IDrawingRevision>): IDrawingRevision => ({
 	_id: faker.datatype.uuid(),
@@ -31,7 +31,7 @@ export const drawingRevisionsMockFactory = (overrides?: Partial<IDrawingRevision
 	name: faker.random.word(),
 	revCode: faker.random.word(),
 	statusCode: faker.random.word(),
-	calibration: getFakeCalibration(),
+	calibration: getFakeCalibrationStatus(),
 	...overrides,
 });
 

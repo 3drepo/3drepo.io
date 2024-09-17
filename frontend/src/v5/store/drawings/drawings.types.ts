@@ -19,7 +19,7 @@ import { Vector1D, Vector2D, Vector3D } from '../../ui/routes/dashboard/projects
 import { UploadStatus } from '../containers/containers.types';
 import { Role } from '../currentUser/currentUser.types';
 
-export enum CalibrationState {
+export enum CalibrationStatus {
 	CALIBRATED = 'calibrated',
 	UNCONFIRMED = 'unconfirmed',
 	UNCALIBRATED = 'uncalibrated',
@@ -33,7 +33,7 @@ export interface MinimumDrawing {
 	isFavourite: boolean;
 }
 
-export interface CalibrationValues {
+export interface Calibration {
 	verticalRange: Vector1D;
 	horizontal: {
 		model: Vector3D,
@@ -49,8 +49,8 @@ export interface DrawingStats {
 		latestRevision?: string,
 	};
 	number: string,
-	calibration?: CalibrationState,
-	calibrationValues?: CalibrationValues,
+	calibrationStatus?: CalibrationStatus,
+	calibration?: Calibration,
 	type: string,
 	status: UploadStatus,
 	errorReason?: {

@@ -48,7 +48,7 @@ import { useAuthenticatedImage } from '@components/authenticatedResource/authent
 import { DrawingRevisionsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { selectViewerBackgroundColor } from '@/v4/modules/viewer/viewer.selectors';
 import { useSelector } from 'react-redux';
-import { CalibrationState } from '@/v5/store/drawings/drawings.types';
+import { CalibrationStatus } from '@/v5/store/drawings/drawings.types';
 
 const DEFAULT_VIEWBOX = { scale: 1, x: 0, y: 0, width: 0, height: 0 };
 export const Viewer2D = () => {
@@ -56,7 +56,7 @@ export const Viewer2D = () => {
 	const [drawingId] = useSearchParam('drawingId');
 	const latestActiveRevision = DrawingRevisionsHooksSelectors.selectLatestActiveRevision(drawingId);
 	const revisionId = latestActiveRevision?._id;
-	const hasCalibration = [CalibrationState.UNCONFIRMED, CalibrationState.CALIBRATED].includes(latestActiveRevision?.calibration);
+	const hasCalibration = [CalibrationStatus.UNCONFIRMED, CalibrationStatus.CALIBRATED].includes(latestActiveRevision?.calibration);
 	const src = revisionId ? getDrawingImageSrc(teamspace, project, drawingId, revisionId) : '';
 	const authSrc = useAuthenticatedImage(src);
 	const backgroundColor = useSelector(selectViewerBackgroundColor);
@@ -116,7 +116,7 @@ export const Viewer2D = () => {
 
 	useEffect(() => {
 		if (hasCalibration) {
-			DrawingsActionsDispatchers.fetchCalibrationValues(teamspace, project, drawingId);
+			DrawingsActionsDispatchers.fetchCalibration(teamspace, project, drawingId);
 		}
 	}, [hasCalibration, revisionId]);
 

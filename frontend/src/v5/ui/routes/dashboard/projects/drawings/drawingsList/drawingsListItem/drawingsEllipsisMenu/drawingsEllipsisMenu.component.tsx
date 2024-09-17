@@ -25,23 +25,25 @@ import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { EditDrawingDialog } from '../../../drawingDialogs/editDrawingDialog.component';
 import { uploadToDrawing } from '../../../uploadDrawingRevisionForm/uploadDrawingRevisionForm.helpers';
+import { SelectModelForCalibration } from '../selectModelForCalibration/selectModelForCalibration.component';
 
 type DrawingsEllipsisMenuProps = {
 	selected?: boolean,
 	drawing: IDrawing,
 	onSelectOrToggleItem?: (id: string) => void,
-	onCalibrateClick: () => void,
 };
 
 export const DrawingsEllipsisMenu = ({
 	selected,
 	drawing,
 	onSelectOrToggleItem,
-	onCalibrateClick,
 }: DrawingsEllipsisMenuProps) => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const hasCollaboratorAccess = DrawingsHooksSelectors.selectHasCollaboratorAccess(drawing._id);
+
+	const onCalibrateClick = () => DialogsActionsDispatchers.open(SelectModelForCalibration, { drawingId: drawing._id });
+
 
 	const onClickSettings = () => DialogsActionsDispatchers.open(EditDrawingDialog, { drawing });
 	
