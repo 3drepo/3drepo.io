@@ -21,10 +21,11 @@ import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { LifoQueue } from '@/v5/helpers/functions.helpers';
-import { CalibrationStatus, DrawingStats } from './drawings.types';
+import { CalibrationStatus, DrawingStats, IDrawing } from './drawings.types';
 import { selectDrawings, selectIsListPending } from './drawings.selectors';
-import { isEqualWith } from 'lodash';
+import { isEqualWith, unionBy } from 'lodash';
 import { selectLatestActiveRevision } from './revisions/drawingRevisions.selectors';
+import { compByColum } from '../store.helpers';
 
 const statsQueue = new LifoQueue<DrawingStats>(API.Drawings.fetchDrawingsStats, 30);
 
@@ -57,12 +58,14 @@ export function* removeFavourites({ teamspace, projectId, drawingId }: RemoveFav
 export function* fetchDrawings({ teamspace, projectId }: FetchDrawingsAction) {
 	try {
 		const { drawings } = yield API.Drawings.fetchDrawings(teamspace, projectId);
-		const storedDrawings = yield select(selectDrawings);
-		const isPending = yield select(selectIsListPending);
+		const storedDrawings: IDrawing[] = yield select(selectDrawings);
+		const isPending: IDrawing[] = yield select(selectIsListPending);
 
 		// Only update if theres is new data
-		if (isPending || !isEqualWith(storedDrawings, drawings)) {
+		if (isPending) {
 			yield put(DrawingsActions.fetchDrawingsSuccess(projectId, drawings));
+		} else if (!isEqualWith(storedDrawings, drawings, compByColum(['_id', 'name', 'role', 'isFavourite']))) {
+			yield put(DrawingsActions.fetchDrawingsSuccess(projectId, unionBy(storedDrawings, drawings, '_id')));
 		}
 		yield all(
 			drawings.map(
