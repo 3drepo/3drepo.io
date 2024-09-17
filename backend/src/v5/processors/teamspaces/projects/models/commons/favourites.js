@@ -29,7 +29,7 @@ const checkModelsAreValid = (accessibleModels, favourites) => {
 	const invalidFavourites = getArrayDifference(accessibleModels.map((c) => c._id), favourites);
 
 	if (invalidFavourites.length) {
-		throw createResponseCode(templates.invalidArguments, `The action cannot be performed on the following models: ${invalidFavourites}`);
+		throw createResponseCode(templates.invalidArguments, `The following models were not found: ${invalidFavourites}`);
 	}
 };
 

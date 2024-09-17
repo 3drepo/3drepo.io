@@ -40,10 +40,12 @@ export const nameAlreadyExists = (error: any): boolean => fieldAlreadyExists(err
 export const usernameAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'username');
 export const emailAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'email');
 export const projectAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'project');
+export const numberAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'number');
 
 export const isPathNotFound = (error): boolean => getErrorStatus(error) === 404;
 export const isPathNotAuthorized = (error): boolean => getErrorCode(error).endsWith('NOT_AUTHORIZED');
 
+export const isTeamspaceInvalid = (code: string): boolean => ['SSO_RESTRICTED'].includes(code);
 export const isProjectNotFound = (code: string): boolean => code === 'PROJECT_NOT_FOUND';
 export const isModelNotFound = (code: string): boolean => ['RESOURCE_NOT_FOUND', 'CONTAINER_NOT_FOUND'].includes(code);
 

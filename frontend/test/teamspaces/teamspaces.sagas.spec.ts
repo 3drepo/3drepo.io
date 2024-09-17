@@ -39,15 +39,10 @@ describe('Teamspaces: sagas', () => {
 				.get(`/teamspaces`)
 				.reply(200, { teamspaces });
 
-			mockServer
-				.get(`/teamspaces/${teamspaceName}/addOns`)
-				.reply(200, {modules:addOns});
-
 			await waitForActions(() => {
 				dispatch(TeamspacesActions.fetch());
 			}, [
 				TeamspacesActions.setTeamspacesArePending(true),
-				TeamspacesActions.fetchAddOnsSuccess(teamspaceName, addOns),
 				TeamspacesActions.fetchSuccess(teamspaces),
 				TeamspacesActions.setTeamspacesArePending(false),
 			]);

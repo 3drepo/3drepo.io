@@ -33,6 +33,7 @@ import { Content } from './projectContent.styles';
 import { ProjectSettings } from '../projectSettings/projectSettings.component';
 import { Board } from '../board/board.component';
 import { TicketsContent } from '../tickets/ticketsContent.component';
+import { Drawings } from '../drawings/drawings.component';
 import { useKanbanNavigationData } from '@/v5/helpers/kanban.hooks';
 
 export const ProjectContent = () => {
@@ -57,10 +58,13 @@ export const ProjectContent = () => {
 					<Route title={formatMessage({ id: 'pageTitle.containers', defaultMessage: ':project - Containers' })} exact path={`${path}/t/containers`}>
 						<Containers />
 					</Route>
-					{(shouldRenderKanbanContent) && 
-					<Route title={kanbanTitle} exact path={`${path}/t/board/:type/:containerOrFederation?`}>
-						{issuesOrRisksEnabled && <Board />}
+					<Route title={formatMessage({ id: 'pageTitle.drawings', defaultMessage: ':project - Drawings' })} exact path={`${path}/t/drawings`}>
+						<Drawings />
 					</Route>
+					{(shouldRenderKanbanContent) && 
+						<Route title={kanbanTitle} exact path={`${path}/t/board/:type/:containerOrFederation?`}>
+							{issuesOrRisksEnabled && <Board />}
+						</Route>
 					}
 					<Route title={kanbanTitle} exact path={`${path}/t/board`}>
 						{issuesEnabled && <Redirect to={`${discardSlash(pathname)}/issues`} />}
