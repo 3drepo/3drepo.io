@@ -28,6 +28,7 @@ import { Vector1D } from '@/v5/ui/routes/dashboard/projects/calibration/calibrat
 import { fullDrawing } from './drawings.helpers';
 import { selectRevisionsByDrawing } from './revisions/drawingRevisions.selectors';
 import { CalibrationStatus } from './drawings.types';
+import { orderBy } from 'lodash';
 
 const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
 
@@ -35,7 +36,10 @@ export const selectDrawings = createSelector(
 	selectDrawingsDomain,
 	selectCurrentProject,
 	selectRevisionsByDrawing, // This selector is used here to recalculate the value after the revisions are fetched
-	(state, currentProject) => (state.drawingsByProject[currentProject] ?? []).map(fullDrawing),
+	(state, currentProject) => {
+		const drawings = (state.drawingsByProject[currentProject] ?? []).map((drawing) => fullDrawing(drawing as any));
+		return orderBy(drawings, 'lastUpdated', 'desc');
+	},
 );
 
 export const selectNonEmptyDrawings = createSelector(
