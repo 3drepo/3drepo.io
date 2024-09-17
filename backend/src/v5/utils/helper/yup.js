@@ -16,7 +16,7 @@
  */
 
 const { UUIDToString, stringToUUID } = require('./uuids');
-const { fileExtensionFromBuffer, isUUIDString } = require('./typeCheck');
+const { fileExtensionFromBuffer, isString, isUUID, isUUIDString } = require('./typeCheck');
 const Yup = require('yup');
 const { fileUploads } = require('../config');
 const tz = require('countries-and-timezones');
@@ -123,7 +123,8 @@ YupHelper.types.dateInThePast = YupHelper.types.date.test(('date-in-the-past', '
 }));
 
 const imageValidityTests = (yupType, isNullable) => yupType.test('image-validity-test', 'Image is not valid', async (value, { createError, originalValue }) => {
-	if (isUUIDString(originalValue)) {
+	const isImageRef = isUUIDString(originalValue) || isUUID(originalValue);
+	if (isImageRef) {
 		return true;
 	}
 
@@ -153,7 +154,10 @@ YupHelper.types.embeddedImage = (isNullable) => imageValidityTests(
 YupHelper.types.embeddedImageOrRef = () => imageValidityTests(
 	Yup.mixed()
 		.transform((currValue, orgVal) => {
-			if (orgVal) return isUUIDString(orgVal) ? stringToUUID(orgVal) : Buffer.from(orgVal, 'base64');
+			if (isString(orgVal)) {
+				return isUUIDString(orgVal) ? stringToUUID(orgVal) : Buffer.from(orgVal, 'base64');
+			}
+
 			return currValue;
 		}),
 );
