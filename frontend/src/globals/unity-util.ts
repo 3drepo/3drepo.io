@@ -2485,19 +2485,15 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Highlights the Lower Floor Plane in Vertical mode, and makes it interactive.
+	 * Activates the Gizmo for the specified vertical plane, or none, if a valid plane is not given.
 	 * @category Calibration
 	 */
-	public static selectCalibrationToolLowerPlane() {
-		UnityUtil.toUnity('SelectCalibrationToolLowerPlane', UnityUtil.LoadingState.VIEWER_READY);
-	}
-
-	/**
-	 * Highlights the Upper Floor Plane in Vertical mode, and makes it interactive.
-	 * @category Calibration
-	 */
-	public static selectCalibrationToolUpperPlane() {
-		UnityUtil.toUnity('SelectCalibrationToolUpperPlane', UnityUtil.LoadingState.VIEWER_READY);
+	public static selectCalibrationToolVerticalPlane(plane: 'upper' | 'lower' | undefined) {
+		if (plane) {
+			UnityUtil.toUnity('SelectCalibrationToolVerticalPlane', UnityUtil.LoadingState.VIEWER_READY, plane);
+		} else {
+			UnityUtil.toUnity('SelectCalibrationToolVerticalPlane', UnityUtil.LoadingState.VIEWER_READY, 'none'); // (Don't try to call sendMessage with null)
+		}
 	}
 
 	/**
@@ -2546,21 +2542,20 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Sets tint and border colours of the image in the image preview, for the level that is selected.
-	 * Both properties must be provided, and as HTML colour strings.
+	 * Sets the colour scheme of the image preview plane, for the specific level. All three colours should be
+	 * provided as HTML colour strings (see: https://docs.unity3d.com/ScriptReference/ColorUtility.TryParseHtmlString.html)
+	 *  fill is the tint applied to the image, including the background.
+	 *  border is the colour of the border around the image.
+	 *  drawing is the tint applied to the image, before the background.
+	 *
+	 * All three arguments support alpha values. For example, setting drawing to #00000000 and fill to #ff000008 would
+	 * result in a purely red plane with an alpha value of 0.5 compared to the geometry.
+	 *
 	 * @category Calibration
 	 */
-	public static setCalibrationToolSelectedColors(fill: string, border: string) {
-		UnityUtil.toUnity('SetCalibrationToolSelectedColours', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({ fill, border }));
-	}
+	public static setCalibrationToolVerticalPlaneColours(plane: 'lower' | 'upper', fill: string, border: string, drawing: string) {
+		UnityUtil.toUnity('SetCalibrationToolVerticalPlaneColours', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({ plane, fill, border, drawing }));
 
-	/**
-	 * Sets tint and border colours of the image in the image preview, for the level that is not selected.
-	 * Both properties must be provided, and as HTML colour strings.
-	 * @category Calibration
-	 */
-	public static setCalibrationToolUnselectedColors(fill: string, border: string) {
-		UnityUtil.toUnity('SetCalibrationToolUnselectedColours', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({ fill, border }));
 	}
 
 	/**

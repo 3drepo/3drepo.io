@@ -49,6 +49,8 @@ import { DrawingRevisionsActionsDispatchers, DrawingsActionsDispatchers } from '
 import { selectViewerBackgroundColor } from '@/v4/modules/viewer/viewer.selectors';
 import { useSelector } from 'react-redux';
 import { CalibrationStatus } from '@/v5/store/drawings/drawings.types';
+import HomeIcon from '@assets/icons/viewer/home.svg';
+
 
 const DEFAULT_VIEWBOX = { scale: 1, x: 0, y: 0, width: 0, height: 0 };
 export const Viewer2D = () => {
@@ -162,6 +164,11 @@ export const Viewer2D = () => {
 			</ImageContainer>
 			<ToolbarContainer>
 				<MainToolbar>
+					<ToolbarButton
+						Icon={HomeIcon}
+						onClick={() => zoomHandler.centreView()}
+						title={formatMessage({ id: 'viewer.toolbar.icon.home', defaultMessage: 'Home' })}
+					/>
 					<ToolbarButton
 						Icon={CalibrationIcon}
 						onClick={onCalibrationClick}

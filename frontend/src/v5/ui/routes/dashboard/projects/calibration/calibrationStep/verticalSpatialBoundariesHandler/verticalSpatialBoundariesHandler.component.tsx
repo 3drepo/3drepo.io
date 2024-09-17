@@ -25,10 +25,10 @@ import { TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { getTransformationMatrix } from '../../calibration.helpers';
 import { Vector2 } from 'three';
 import { isNull } from 'lodash';
-import { COLOR, hexToOpacity } from '@/v5/ui/themes/theme';
 import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { useAuthenticatedImage } from '@components/authenticatedResource/authenticatedResource.hooks';
 
 export const VerticalSpatialBoundariesHandler = () => {
 	const { verticalPlanes, setVerticalPlanes, vector3D, vector2D, isCalibratingPlanes, setIsCalibratingPlanes, drawingId,
@@ -37,12 +37,13 @@ export const VerticalSpatialBoundariesHandler = () => {
 	const latestActiveRevision = DrawingRevisionsHooksSelectors.selectLatestActiveRevision(drawingId);
 	const planesRef = useRef(verticalPlanes); // ref needed to get plane values in useEffect without causing excessive retriggers
 	const planesAreSet = !verticalPlanes.some(isNull);
-	
+	const src = useAuthenticatedImage(getDrawingImageSrc(teamspace, project, drawingId, latestActiveRevision._id));
+	const tMatrix = getTransformationMatrix(vector2D, vector3D);
+
 	const applyImageToPlane = () => {
 		const i = new Image();
 		i.crossOrigin = 'anonymous';
-		i.src = getDrawingImageSrc(teamspace, project, drawingId, latestActiveRevision._id);
-		const tMatrix = getTransformationMatrix(vector2D, vector3D);
+		i.src = src;
 		i.onload = () => {
 			const topLeft = new Vector2(0, 0);
 			const bottomRight = new Vector2(i.naturalWidth, i.naturalHeight); // coord origin for drawing is at the top left
@@ -51,9 +52,6 @@ export const VerticalSpatialBoundariesHandler = () => {
 			[bottomLeft, bottomRight, topLeft].map((corner) => corner.applyMatrix3(tMatrix));
 	
 			Viewer.setCalibrationToolDrawing(i, [...bottomLeft, ...bottomRight, ...topLeft]);
-			Viewer.setCalibrationToolSelectedColors(hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 40), COLOR.PRIMARY_MAIN);
-			Viewer.setCalibrationToolUnselectedColors(hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 10), COLOR.PRIMARY_MAIN_CONTRAST);
-			Viewer.setCalibrationToolOcclusionOpacity(0.5);
 		};
 	};
 
@@ -62,23 +60,28 @@ export const VerticalSpatialBoundariesHandler = () => {
 	}, [verticalPlanes]);
 	
 	useEffect(() => {
-		if (isCalibratingPlanes) {
-			Viewer.setCalibrationToolMode(planesAreSet ? 'Vertical' : 'None');
-			Viewer.on(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
-			return () => {
-				Viewer.setCalibrationToolMode('None');
-				Viewer.off(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
-				Viewer.clipToolDelete();
-			};
+		if (planesAreSet) {
+			Viewer.clipToolDelete();
 		}
-	}, [isCalibratingPlanes, planesAreSet]);
+
+		Viewer.on(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
+
+		return () => {
+			Viewer.off(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, setVerticalPlanes);
+		};
+
+	}, [planesAreSet]);
 
 	useEffect(() => {
-		if (!planesAreSet) {
+		Viewer.setCalibrationToolMode(planesAreSet ? 'Vertical' : 'None');
+		setSelectedPlane(isCalibratingPlanes ? PlaneType.UPPER : PlaneType.NONE);
+
+		if (!planesAreSet && isCalibratingPlanes) {
 			const onClickFloorToObject = ({ account, model, id }) => {
 				Viewer.setCalibrationToolFloorToObject(account, model, id);
 				setSelectedPlane(PlaneType.UPPER);
 			};
+
 			TreeActionsDispatchers.stopListenOnSelections();
 			Viewer.on(VIEWER_EVENTS.OBJECT_SELECTED, onClickFloorToObject);
 			return () => {
@@ -86,7 +89,7 @@ export const VerticalSpatialBoundariesHandler = () => {
 				Viewer.off(VIEWER_EVENTS.OBJECT_SELECTED, onClickFloorToObject);
 			};
 		}
-	}, [planesAreSet]);
+	}, [planesAreSet, isCalibratingPlanes]);
 
 	useEffect(() => {
 		if (isAlignPlaneActive && planesAreSet) {
@@ -111,16 +114,15 @@ export const VerticalSpatialBoundariesHandler = () => {
 	}, [isAlignPlaneActive, selectedPlane, planesAreSet]);
 
 	useEffect(() => {
-		if (selectedPlane === PlaneType.LOWER) {
-			Viewer.selectCalibrationToolLowerPlane();
-		} else if (selectedPlane === PlaneType.UPPER) {
-			Viewer.selectCalibrationToolUpperPlane();
-		}
+		Viewer.selectCalibrationToolPlane(selectedPlane);
 	}, [selectedPlane]);
+
+	useEffect(() => {
+		if (!src || !tMatrix) return;
+		applyImageToPlane();
+	}, [src, tMatrix]);
 	
 	useEffect(() => {
-		applyImageToPlane();
-		setIsCalibratingPlanes(true);
 		Viewer.setCalibrationToolVerticalPlanes(...verticalPlanes);
 
 		return () => {
