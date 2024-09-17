@@ -457,7 +457,7 @@ ServiceHelper.generateRandomModel = ({ modelType = modelTypes.CONTAINER, viewers
 	};
 };
 
-ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, modelType) => {
+ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, modelType, status) => {
 	const _id = ServiceHelper.generateUUIDString();
 	const entry = deleteIfUndefined({
 		_id,
@@ -470,6 +470,10 @@ ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, modelType
 		desc: ServiceHelper.generateRandomString(),
 		void: !!isVoid,
 	});
+
+	if (status) {
+		entry.status = status;
+	}
 
 	if (hasFile) {
 		entry.rFile = modelType === modelTypes.DRAWING ? [ServiceHelper.generateUUIDString()] : [`${_id}_${ServiceHelper.generateRandomString()}_ifc`];
