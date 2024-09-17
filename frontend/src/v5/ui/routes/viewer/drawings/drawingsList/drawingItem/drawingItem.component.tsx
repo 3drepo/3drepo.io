@@ -44,7 +44,6 @@ import { getDrawingThumbnailSrc } from '@/v5/store/drawings/drawings.helpers';
 import { deleteAuthUrlFromCache, downloadAuthUrl } from '@components/authenticatedResource/authenticatedResource.hooks';
 import { Thumbnail } from '@controls/thumbnail/thumbnail.component';
 import { Tooltip } from '@mui/material';
-import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 const STATUS_CODE_TEXT = formatMessage({ id: 'drawings.list.item.statusCode', defaultMessage: 'Status code' });
 const REVISION_CODE_TEXT = formatMessage({ id: 'drawings.list.item.revisionCode', defaultMessage: 'Revision code' });
@@ -78,10 +77,6 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 			.catch(() => setThumbnail(''));
 		return () => { deleteAuthUrlFromCache(thumbnailSrc); };
 	}, [latestRevision?._id]);
-
-	useEffect(() => {
-		DrawingRevisionsActionsDispatchers.fetch(teamspace, project, drawingId);
-	}, []);
 
 	const LoadingCodes = () => (
 		<>
