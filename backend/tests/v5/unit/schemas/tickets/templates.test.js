@@ -852,6 +852,43 @@ const testValidate = () => {
 
 		expect(output).toEqual(expectedData);
 	});
+
+	test('Image List field will have the default field stripped if provided', () => {
+		const data = {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+			},
+			properties: [
+				{
+					name: generateRandomString(),
+					type: propTypes.IMAGE_LIST,
+					default: generateRandomString(),
+				},
+
+			],
+			modules: [
+				{
+					type: presetModules.SAFETIBASE,
+					properties: [
+						{
+							name: generateRandomString(),
+							type: propTypes.IMAGE_LIST,
+							default: generateRandomString(),
+						}],
+				}],
+		};
+		const expectedData = cloneDeep(data);
+		delete expectedData.properties[0].default;
+		delete expectedData.modules[0].properties[0].default;
+
+		data[generateRandomString()] = generateRandomString();
+		data.properties[0][generateRandomString()] = generateRandomString();
+		data.modules[0][generateRandomString()] = generateRandomString();
+		const output = TemplateSchema.validate(data);
+
+		expect(output).toEqual(expectedData);
+	});
 };
 
 const testGenerateFullSchema = () => {
