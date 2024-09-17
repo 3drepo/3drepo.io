@@ -30,7 +30,7 @@ import { CreateRevisionAction,
 } from './drawingRevisions.redux';
 import { DrawingsActions } from '../drawings.redux';
 import { createDrawingFromRevisionBody, createFormDataFromRevisionBody } from './drawingRevisions.helpers';
-import { selectIsPending, selectRevisions, selectStatusCodes } from './drawingRevisions.selectors';
+import { selectActiveRevisions, selectIsPending, selectStatusCodes } from './drawingRevisions.selectors';
 import { UploadStatus } from '../../containers/containers.types';
 
 export function* fetch({ teamspace, projectId, drawingId, onSuccess }: FetchAction) {
@@ -54,8 +54,7 @@ export function* setVoidStatus({ teamspace, projectId, drawingId, revisionId, is
 	try {
 		yield API.DrawingRevisions.setRevisionVoidStatus(teamspace, projectId, drawingId, revisionId, isVoid);
 		yield put(DrawingRevisionsActions.setVoidStatusSuccess(drawingId, revisionId, isVoid));
-		const revisions = yield select(selectRevisions, drawingId);
-		const activeRevisions = revisions.filter((rev) => !rev.void);
+		const activeRevisions = yield select(selectActiveRevisions, drawingId);
 		const revisionsCount = activeRevisions.length;
 		const latestRevision = revisionsCount ? orderBy(activeRevisions, 'timestamp')[0].name : null;
 		const updates = {
