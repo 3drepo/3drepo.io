@@ -31,7 +31,6 @@ import {
 	CalibrationButton,
 } from './drawingItem.styles';
 import { FormattedMessage } from 'react-intl';
-import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
