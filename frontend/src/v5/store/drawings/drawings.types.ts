@@ -19,9 +19,9 @@ import { Vector1D, Vector2D, Vector3D } from '../../ui/routes/dashboard/projects
 import { UploadStatus } from '../containers/containers.types';
 import { Role } from '../currentUser/currentUser.types';
 
-export enum CalibrationState {
+export enum CalibrationStatus {
 	CALIBRATED = 'calibrated',
-	OUT_OF_SYNC = 'outOfSync',
+	UNCONFIRMED = 'unconfirmed',
 	UNCALIBRATED = 'uncalibrated',
 	EMPTY = 'empty',
 }
@@ -42,14 +42,15 @@ export interface Calibration {
 	units: string,
 }
 
-export interface DrawingStats extends Partial<Calibration> {
+export interface DrawingStats {
 	revisions: {
 		total: number;
 		lastUpdated?: number;
 		latestRevision?: string,
 	};
 	number: string,
-	calibration?: CalibrationState,
+	calibrationStatus?: CalibrationStatus,
+	calibration?: Calibration,
 	type: string,
 	status: UploadStatus,
 	errorReason?: {

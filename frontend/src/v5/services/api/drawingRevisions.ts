@@ -17,6 +17,7 @@
 import { AxiosResponse } from 'axios';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import api, { generateV5ApiUrl } from './default';
+import { Calibration } from '@/v5/store/drawings/drawings.types';
 
 export const fetchRevisions = (teamspace: string, projectId: string, drawingId: string, showVoid = true): Promise<any> => (
 	api.get(`teamspaces/${teamspace}/projects/${projectId}/drawings/${drawingId}/revisions${showVoid ? '?showVoid=true' : ''}`)
@@ -49,3 +50,26 @@ export const getRevisionFileUrl = (teamspace: string, projectId: string, drawing
 );
 
 export const fetchStatusCodes = (teamspace, projectId): Promise<AxiosResponse<string[]>> => api.get(`teamspaces/${teamspace}/projects/${projectId}/settings/statusCodes`);
+
+export const fetchCalibration = async (teamspace: string, projectId: string, drawingId: string, revisionId: string): Promise<AxiosResponse<void>> => (
+	api.get(`teamspaces/${teamspace}/projects/${projectId}/drawings/${drawingId}/revisions/${revisionId}/calibrations`)
+);
+
+export const updateCalibration = async (
+	teamspace: string,
+	projectId: string,
+	drawingId: string,
+	revisionId: string,
+	calibration: Calibration,
+): Promise<AxiosResponse<void>> => (
+	api.post(`teamspaces/${teamspace}/projects/${projectId}/drawings/${drawingId}/revisions/${revisionId}/calibrations`, calibration)
+);
+
+export const approveCalibration = async (
+	teamspace: string,
+	projectId: string,
+	drawingId: string,
+	revisionId: string,
+): Promise<AxiosResponse<void>> => (
+	api.post(`teamspaces/${teamspace}/projects/${projectId}/drawings/${drawingId}/revisions/${revisionId}/calibrations?usePrevious=true`)
+);

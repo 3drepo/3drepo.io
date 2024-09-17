@@ -31,7 +31,6 @@ import {
 	CalibrationButton,
 } from './drawingItem.styles';
 import { FormattedMessage } from 'react-intl';
-import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
@@ -57,9 +56,8 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	const history = useHistory();
 	const { pathname, search } = useLocation();
 	const { setOrigin } = useContext(CalibrationContext);
-	const { calibration, name, number, lastUpdated, desc, _id: drawingId } = drawing;
-	const [latestRevision] = DrawingRevisionsHooksSelectors.selectRevisions(drawingId);
-	const { statusCode, revCode } = latestRevision || {};
+	const { calibrationStatus: calibration, name, number, lastUpdated, desc, _id: drawingId, latestRevision } = drawing;
+	const [statusCode, revCode] = drawing.latestRevision?.split('-');
 	const areStatsPending = !revCode;
 	const [selectedDrawingId] = useSearchParam('drawingId');
 	const [thumbnail, setThumbnail] = useState('');
@@ -76,7 +74,7 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 			.then(setThumbnail)
 			.catch(() => setThumbnail(''));
 		return () => { deleteAuthUrlFromCache(thumbnailSrc); };
-	}, [latestRevision?._id]);
+	}, [latestRevision]);
 
 	const LoadingCodes = () => (
 		<>
@@ -137,7 +135,7 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 					</Property>
 				</BreakingLine>
 				<CalibrationButton
-					calibrationState={calibration}
+					calibrationStatus={calibration}
 					drawingId={drawingId}
 					onCalibrateClick={onCalibrateClick}
 				/>

@@ -18,18 +18,13 @@
 import { useContext, useEffect } from 'react';
 import { UnityUtil } from '@/globals/unity-util';
 import { CalibrationContext } from '../../calibrationContext';
-import { EMPTY_VECTOR } from '../../calibration.constants';
 
 export const Calibration2DHandler = () => {
-	const { setIsCalibrating2D, setVector2D } = useContext(CalibrationContext);
+	const { setIsCalibrating2D } = useContext(CalibrationContext);
 
 	useEffect(() => {
 		UnityUtil.setCalibrationToolMode('Vector');
-
-		return () => {
-			setIsCalibrating2D(false);
-			setVector2D((vector) => vector?.[1] ? vector : EMPTY_VECTOR);
-		};
+		return () => setIsCalibrating2D(false);
 	}, []);
 
 	return null;

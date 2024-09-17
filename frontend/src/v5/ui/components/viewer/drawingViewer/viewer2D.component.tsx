@@ -45,9 +45,10 @@ import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useAuthenticatedImage } from '@components/authenticatedResource/authenticatedResource.hooks';
-import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DrawingRevisionsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { selectViewerBackgroundColor } from '@/v4/modules/viewer/viewer.selectors';
 import { useSelector } from 'react-redux';
+import { CalibrationStatus } from '@/v5/store/drawings/drawings.types';
 import HomeIcon from '@assets/icons/viewer/home.svg';
 
 
@@ -55,8 +56,10 @@ const DEFAULT_VIEWBOX = { scale: 1, x: 0, y: 0, width: 0, height: 0 };
 export const Viewer2D = () => {
 	const { teamspace, project } = useParams<ViewerParams>();
 	const [drawingId] = useSearchParam('drawingId');
-	const revision = DrawingRevisionsHooksSelectors.selectLatestActiveRevision(drawingId);
-	const src = revision ? getDrawingImageSrc(teamspace, project, drawingId, revision._id) : '';
+	const latestActiveRevision = DrawingRevisionsHooksSelectors.selectLatestActiveRevision(drawingId);
+	const revisionId = latestActiveRevision?._id;
+	const hasCalibration = [CalibrationStatus.UNCONFIRMED, CalibrationStatus.CALIBRATED].includes(latestActiveRevision?.calibration);
+	const src = revisionId ? getDrawingImageSrc(teamspace, project, drawingId, revisionId) : '';
 	const authSrc = useAuthenticatedImage(src);
 	const backgroundColor = useSelector(selectViewerBackgroundColor);
 
@@ -113,12 +116,18 @@ export const Viewer2D = () => {
 		setIsLoading(true);
 	}, [drawingId]);
 
+	useEffect(() => {
+		if (hasCalibration) {
+			DrawingsActionsDispatchers.fetchCalibration(teamspace, project, drawingId);
+		}
+	}, [hasCalibration, revisionId]);
+
 	const showSVGImage = !isFirefox() && !src.toLowerCase().endsWith('.png');
 
 	useEffect(() => {
-		if (revision) return;
+		if (revisionId) return;
 		DrawingRevisionsActionsDispatchers.fetch(teamspace, project, drawingId);
-	}, [revision]);
+	}, [revisionId]);
 
 	return (
 		<ViewerContainer visible>
@@ -150,6 +159,7 @@ export const Viewer2D = () => {
 					viewBox={viewBox}
 					value={vector2D}
 					onChange={setVector2D}
+					key={String(isCalibrating)}
 				/>)}
 			</ImageContainer>
 			<ToolbarContainer>
