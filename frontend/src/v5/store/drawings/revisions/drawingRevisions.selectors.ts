@@ -22,7 +22,7 @@ import { IDrawingRevisionsState } from './drawingRevisions.redux';
 const selectRevisionsDomain = (state): IDrawingRevisionsState => state.drawingRevisions;
 const selectDrawingIdParam = (_, drawingId: string) => drawingId;
 
-const selectRevisionsByDrawing = createSelector(
+export const selectRevisionsByDrawing = createSelector(
 	selectRevisionsDomain,
 	(state) => state.revisionsByDrawing || {},
 );
@@ -30,12 +30,32 @@ const selectRevisionsByDrawing = createSelector(
 export const selectRevisions = createSelector(
 	selectRevisionsByDrawing,
 	selectDrawingIdParam,
-	(revisionsByDrawing, drawingId) => revisionsByDrawing[drawingId]?.map((revision) => prepareRevisionData(revision)) || [],
+	(revisionsByDrawing, drawingId) => {
+		const revisions = (revisionsByDrawing[drawingId]?.map((revision) => prepareRevisionData(revision)) || []);
+		revisions.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+		return revisions;
+	},
+);
+
+export const selectActiveRevisions = createSelector(
+	selectRevisions,
+	(revisions) => revisions.filter((val) => !val.void),
 );
 
 export const selectLatestActiveRevision = createSelector(
-	selectRevisions,
-	(revisions) => revisions.find((r) => !r.void),
+	selectActiveRevisions,
+	(revisions) => revisions[0],
+);
+
+export const selectLatestRevisionName = createSelector(
+	selectLatestActiveRevision,
+	(lastRev) => !lastRev ? '' : lastRev.statusCode + '-' + lastRev.revCode,
+); 
+
+export const selectRevisionsPending = createSelector(
+	selectRevisionsByDrawing,
+	selectDrawingIdParam,
+	(revisionsByDrawing, drawingId) =>!revisionsByDrawing[drawingId],
 );
 
 export const selectIsPending = createSelector(

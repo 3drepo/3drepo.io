@@ -61,11 +61,24 @@ export const Title = styled(PropertyValue)`
 	font-weight: 600;
 	font-size: 12px;
 	line-height: 18px;
-	width: fit-content;
+	width: 100%;
 	max-width: 100%;
+	display: block;
+
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+
+	@supports (-webkit-line-clamp: 2) {
+		/* stylelint-disable-next-line */
+		display: -webkit-box;
+		/* stylelint-disable-next-line */
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		white-space: initial;
+		padding-bottom: 0;
+		line-height: 12px;
+	}
 
 	&:hover {
 		text-decoration: underline;
@@ -115,8 +128,8 @@ export const Description = styled(PropertyValue)`
 		-webkit-box-orient: vertical;
 		-webkit-line-clamp: 3;
 		white-space: initial;
-		padding-bottom: 1px;
 		margin-bottom: 4px;
+		padding-bottom: 0;
 	}
 `;
 

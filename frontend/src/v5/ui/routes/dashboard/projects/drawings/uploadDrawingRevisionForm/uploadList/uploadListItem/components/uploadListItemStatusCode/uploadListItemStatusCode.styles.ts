@@ -17,6 +17,11 @@
 
 import { AutocompleteInput } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/uploadListItemDestination.styles';
 import styled from 'styled-components';
+import { Autocomplete as AutocompleteBase } from '@mui/material';
+
+export const Autocomplete = styled(AutocompleteBase)`
+	margin-left: 12px;
+`;
 
 export const OptionContainer = styled.li`
 	display: flex;
@@ -43,12 +48,6 @@ export const Description = styled.span`
 `;
 
 export const StatusCodeInput = styled(AutocompleteInput)`
-	margin-left: 12px;
-	
-	.MuiAutocomplete-inputRoot {
-		width: 146px;
-	}
-
 	.Mui-disabled fieldset {
 		border: none;
 	}

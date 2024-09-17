@@ -47,6 +47,10 @@ import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useAuthenticatedImage } from '@components/authenticatedResource/authenticatedResource.hooks';
 import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { selectViewerBackgroundColor } from '@/v4/modules/viewer/viewer.selectors';
+import { useSelector } from 'react-redux';
+import HomeIcon from '@assets/icons/viewer/home.svg';
+
 
 const DEFAULT_VIEWBOX = { scale: 1, x: 0, y: 0, width: 0, height: 0 };
 export const Viewer2D = () => {
@@ -56,6 +60,7 @@ export const Viewer2D = () => {
 	const revision = DrawingRevisionsHooksSelectors.selectLatestActiveRevision(drawingId);
 	const src = revision ? getDrawingImageSrc(teamspace, project, drawingId, revision._id) : '';
 	const authSrc = useAuthenticatedImage(src);
+	const backgroundColor = useSelector(selectViewerBackgroundColor);
 
 	const { close2D } = useContext(ViewerCanvasesContext);
 	const { isCalibrating, step, vector2D, setVector2D, isCalibrating2D, setIsCalibrating2D } = useContext(CalibrationContext);
@@ -281,7 +286,8 @@ export const Viewer2D = () => {
 				/>
 			)}
 			{!isCalibrating && <CloseButton variant="secondary" onClick={close2D} />}
-			<ImageContainer ref={imgContainerRef}>
+			<CloseButton variant="secondary" onClick={close2D} />
+			<ImageContainer backgroundColor={backgroundColor} ref={imgContainerRef}>
 				{
 					isLoading &&
 					<CentredContainer>
@@ -299,6 +305,11 @@ export const Viewer2D = () => {
 			</ImageContainer>
 			<ToolbarContainer>
 				<MainToolbar>
+					<ToolbarButton
+						Icon={HomeIcon}
+						onClick={() => zoomHandler.centreView()}
+						title={formatMessage({ id: 'viewer.toolbar.icon.home', defaultMessage: 'Home' })}
+					/>
 					<ToolbarButton
 						Icon={CalibrationIcon}
 						onClick={onCalibrationClick}

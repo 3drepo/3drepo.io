@@ -51,7 +51,7 @@ export const InvalidFederationOverlay = ({ containers }: IInvalidFederation) => 
 		<OverlayContainer>
 			<Heading>
 				<FormattedMessage
-					id="InvalidFederationOverlay.heading"
+					id="invalidFederationOverlay.heading"
 					defaultMessage="The Federation is empty"
 				/>
 			</Heading>
@@ -60,7 +60,7 @@ export const InvalidFederationOverlay = ({ containers }: IInvalidFederation) => 
 			</Subheading>
 			<Button onClick={onClickBack} variant="contained">
 				<FormattedMessage
-					id="InvalidFederationOverlay.backButton"
+					id="invalidFederationOverlay.backButton"
 					defaultMessage="Back to Federations"
 				/>
 			</Button>

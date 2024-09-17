@@ -41,11 +41,9 @@ import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibratio
 import { viewerRoute } from '@/v5/services/routing/routing';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { getDrawingThumbnailSrc } from '@/v5/store/drawings/drawings.helpers';
-import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
-import { enableRealtimeDrawingRemoved, enableRealtimeDrawingUpdate } from '@/v5/services/realtime/drawings.events';
-import { enableRealtimeDrawingRevisionUpdate, enableRealtimeDrawingNewRevision } from '@/v5/services/realtime/drawingRevision.events';
 import { deleteAuthUrlFromCache, downloadAuthUrl } from '@components/authenticatedResource/authenticatedResource.hooks';
 import { Thumbnail } from '@controls/thumbnail/thumbnail.component';
+import { Tooltip } from '@mui/material';
 
 const STATUS_CODE_TEXT = formatMessage({ id: 'drawings.list.item.statusCode', defaultMessage: 'Status code' });
 const REVISION_CODE_TEXT = formatMessage({ id: 'drawings.list.item.revisionCode', defaultMessage: 'Revision code' });
@@ -72,15 +70,6 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 		history.push(path);
 		setOrigin(pathname + search);
 	};
-
-	useEffect(() => {
-		return combineSubscriptions(
-			enableRealtimeDrawingRemoved(teamspace, project, drawing._id),
-			enableRealtimeDrawingUpdate(teamspace, project, drawing._id),
-			enableRealtimeDrawingRevisionUpdate(teamspace, project, drawing._id),
-			enableRealtimeDrawingNewRevision(teamspace, project, drawing._id),
-		);
-	}, [drawing._id]);
 
 	useEffect(() => {
 		downloadAuthUrl(thumbnailSrc)
@@ -132,7 +121,9 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 						<Property>{number}</Property>
 					</BreakingLine>
 					<BreakingLine>
-						<Title>{name}</Title>
+						<Tooltip title={name}>
+							<Title>{name}</Title>
+						</Tooltip>
 					</BreakingLine>
 					{areStatsPending ? <LoadingCodes /> : <LoadedCodes />}
 					<Description>{desc}</Description>
