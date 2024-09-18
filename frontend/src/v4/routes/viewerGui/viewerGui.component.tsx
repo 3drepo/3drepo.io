@@ -24,6 +24,7 @@ import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { DrawingsListCard } from '@/v5/ui/routes/viewer/drawings/drawingsList/drawingsListCard.component';
 import { ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { AddOn } from '@/v5/store/store.types';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { getCalibrationViewerLeftPanels, getViewerLeftPanels, VIEWER_PANELS } from '../../constants/viewerGui';
 import { getWindowHeight, getWindowWidth, renderWhenTrue } from '../../helpers/rendering';
@@ -76,6 +77,8 @@ interface IProps {
 	ticketsCardView: TicketsCardViews;
 	isEditingGroups: boolean;
 	isCalibrating: boolean;
+	issuesEnabled: boolean;
+	risksEnabled: boolean;
 	stopListenOnSelections: () => void;
 	stopListenOnModelLoaded: () => void;
 	stopListenOnClickPin: () => void;
@@ -274,7 +277,7 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 		}
 		return (
 			<LeftPanelsButtons>
-				{getViewerLeftPanels().map(({ name, type }) => (
+				{getViewerLeftPanels(this.props.issuesEnabled, this.props.risksEnabled).map(({ name, type }) => (
 					<PanelButton
 						key={type}
 						onClick={this.handleTogglePanel}
@@ -306,6 +309,9 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 		<LeftPanels>
 			{panels.map((panel) => {
 				const PanelComponent = this.panelsMap[panel];
+				if (panel === AddOn.Issues && !this.props.issuesEnabled || panel === AddOn.Risks && !this.props.risksEnabled) {
+					return null;
+				}
 				return PanelComponent && <PanelComponent key={panel} id={panel + '-card'} {...this.urlParams} />;
 			})}
 		</LeftPanels>

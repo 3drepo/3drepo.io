@@ -20,7 +20,7 @@ import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { FederationsActionsDispatchers, DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { boardRoute, viewerRoute } from '@/v5/services/routing/routing';
+import { ticketsSelectionRoute, viewerRoute } from '@/v5/services/routing/routing';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { prefixBaseDomain } from '@/v5/helpers/url.helper';
@@ -98,28 +98,10 @@ export const FederationEllipsisMenu = ({
 
 			<EllipsisMenuItem
 				title={formatMessage({
-					id: 'federations.ellipsisMenu.viewIssues',
-					defaultMessage: 'View Issues',
+					id: 'federations.ellipsisMenu.viewTickets',
+					defaultMessage: 'View Tickets',
 				})}
-				to={{ pathname: boardRoute(
-					teamspace,
-					project,
-					'issues',
-					federation._id,
-				) }}
-			/>
-
-			<EllipsisMenuItem
-				title={formatMessage({
-					id: 'federations.ellipsisMenu.viewRisks',
-					defaultMessage: 'View Risks',
-				})}
-				to={{ pathname: boardRoute(
-					teamspace,
-					project,
-					'risks',
-					federation._id,
-				) }}
+				to={ticketsSelectionRoute( teamspace, project, federation._id)}
 			/>
 
 			<EllipsisMenuItem

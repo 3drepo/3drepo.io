@@ -25,7 +25,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { get } from 'lodash';
 import { useParams, generatePath } from 'react-router-dom';
 import TrelloBoard from 'react-trello';
-import { BOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { BOARD_ROUTE, ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { formatMessage } from '@/v5/services/intl';
 
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -131,6 +131,8 @@ interface IProps {
 	openCardDialog: (cardId: string, onChange: (index: number) => void) => void;
 	setSortBy: (field) => void;
 	criteria: any;
+	risksEnabled: boolean,
+	issuesEnabled: boolean,
 }
 
 const PANEL_PROPS = {
@@ -160,7 +162,7 @@ const IssueBoardCard = ({ metadata, onClick }: any) => (
 export function Board(props: IProps) {
 	const boardRef = useRef(null);
 	const firstUpdate = useRef(true);
-	const { type, teamspace, project: projectId, containerOrFederation } = useParams<RouteParams>();
+	const { type, teamspace, project: projectId, containerOrFederation } = useParams<ViewerParams & RouteParams>();
 	const v5Project = ProjectsHooksSelectors.selectCurrentProjectName();
 	const project = v5Project;
 	const modelId = containerOrFederation;
@@ -413,22 +415,27 @@ export function Board(props: IProps) {
 	const FILTER_VALUES = isIssuesBoard ? ISSUE_FILTER_VALUES : RISK_FILTER_VALUES;
 
 	const renderFilters = () => {
+		const risksAndIssuesEnabled = props.issuesEnabled && props.risksEnabled;
+
 		return (
 			<>
-				<SelectContainer>
-					<FormControl>
-						<InputLabel disabled={!containerOrFederation} shrink htmlFor="type-select">Show</InputLabel>
-						<CellSelect
-							placeholder="Select type"
-							items={types}
-							value={type}
-							onChange={handleTypeChange}
-							disabled={!types.length || !containerOrFederation}
-							disabledPlaceholder
-							inputId="type-select"
-						/>
-					</FormControl>
-				</SelectContainer>
+				{risksAndIssuesEnabled && (
+					<SelectContainer>
+						<FormControl>
+							<InputLabel disabled={!containerOrFederation} shrink htmlFor="type-select">Show</InputLabel>
+							<CellSelect
+								placeholder="Select type"
+								items={types}
+								value={type}
+								onChange={handleTypeChange}
+								disabled={!types.length || !containerOrFederation}
+								disabledPlaceholder
+								inputId="type-select"
+							/>
+						</FormControl>
+					</SelectContainer>
+				)
+				}
 				<SelectContainer>
 					<FormControl>
 						<InputLabel disabled={!containerOrFederation} shrink htmlFor="group-select">Group by</InputLabel>

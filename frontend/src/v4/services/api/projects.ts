@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { appendDrawingsToAxiosResponse } from '@/v5/store/drawings/drawings.temp';
 import { API as api } from './default';
 
 /**
@@ -25,7 +24,7 @@ import { API as api } from './default';
  * @param options
  */
 export const fetchProject = (teamspace, projectName, options = {}) => {
-	return appendDrawingsToAxiosResponse(api.get(`${teamspace}/projects/${projectName}`, options));
+	return api.get(`${teamspace}/projects/${projectName}`, options);
 };
 
 /**

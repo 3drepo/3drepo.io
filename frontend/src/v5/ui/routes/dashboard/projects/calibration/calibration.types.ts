@@ -29,6 +29,7 @@ export type Vector3D = Vector<Coord3D>;
 export enum PlaneType {
 	UPPER = 'upper',
 	LOWER = 'lower',
+	NONE = 'none',
 }
 
 export type ViewBoxType = ReturnType<PanZoomHandler['getOriginalSize']> & ReturnType<PanZoomHandler['getTransform']>;

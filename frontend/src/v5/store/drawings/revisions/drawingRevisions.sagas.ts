@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, select, takeEvery, delay, takeLatest } from 'redux-saga/effects';
+import { put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
@@ -29,24 +29,18 @@ import { CreateRevisionAction,
 	FetchStatusCodesAction,
 } from './drawingRevisions.redux';
 import { DrawingsActions } from '../drawings.redux';
-import { DrawingUploadStatus } from '../drawings.types';
 import { createDrawingFromRevisionBody, createFormDataFromRevisionBody } from './drawingRevisions.helpers';
-import { selectRevisions, selectStatusCodes } from './drawingRevisions.selectors';
-import { uuid } from '@/v4/helpers/uuid';
-import { selectUsername } from '../../currentUser/currentUser.selectors';
-import { selectDrawingById } from '../drawings.selectors';
+import { selectActiveRevisions, selectIsPending, selectStatusCodes } from './drawingRevisions.selectors';
+import { UploadStatus } from '../../containers/containers.types';
 
 export function* fetch({ teamspace, projectId, drawingId, onSuccess }: FetchAction) {
-	// TODO - remove next line after backend is wired in
-	if ((yield select(selectRevisions, drawingId)).length) return;
+	if (yield select(selectIsPending, drawingId)) return;
 
 	yield put(DrawingRevisionsActions.setIsPending(drawingId, true));
 	try {
-		// TODO - delete next line and remove last param of API.DrawingRevisions.fetchRevisions, it's for demo
-		const drawing = yield select(selectDrawingById, drawingId);
-		const { data: { revisions } } = yield API.DrawingRevisions.fetchRevisions(teamspace, projectId, drawingId, drawing.revisionsCount);
-		onSuccess?.();
+		const { data: { revisions } } = yield API.DrawingRevisions.fetchRevisions(teamspace, projectId, drawingId);
 		yield put(DrawingRevisionsActions.fetchSuccess(drawingId, revisions));
+		onSuccess?.();
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'revisions.fetch.error', defaultMessage: 'trying to fetch revisions' }),
@@ -60,10 +54,9 @@ export function* setVoidStatus({ teamspace, projectId, drawingId, revisionId, is
 	try {
 		yield API.DrawingRevisions.setRevisionVoidStatus(teamspace, projectId, drawingId, revisionId, isVoid);
 		yield put(DrawingRevisionsActions.setVoidStatusSuccess(drawingId, revisionId, isVoid));
-		const revisions = yield select(selectRevisions, drawingId);
-		const activeRevisions = revisions.filter((rev) => !rev.void);
+		const activeRevisions = yield select(selectActiveRevisions, drawingId);
 		const revisionsCount = activeRevisions.length;
-		const latestRevision = revisionsCount ? orderBy(activeRevisions, 'timestamp')[0].tag : null;
+		const latestRevision = revisionsCount ? orderBy(activeRevisions, 'timestamp')[0].name : null;
 		const updates = {
 			revisionsCount,
 			lastUpdated: new Date(),
@@ -106,26 +99,9 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 			(percent) => DrawingRevisionsActionsDispatchers.setUploadProgress(uploadId, percent),
 			createFormDataFromRevisionBody(body),
 		);
-		yield put(DrawingsActions.setDrawingStatus(projectId, drawingId, DrawingUploadStatus.QUEUED));
+
+		yield put(DrawingsActions.updateDrawingSuccess(projectId, drawingId, { status: UploadStatus.QUEUED }));
 		yield put(DrawingRevisionsActions.setUploadComplete(uploadId, true));
-		// TODO - remove until catch bock after backend is wired in
-		yield delay(Math.random() * 1000);
-		yield put(DrawingsActions.setDrawingStatus(projectId, drawingId, DrawingUploadStatus.OK));
-		const revisions = yield select(selectRevisions, drawingId);
-		const author = yield select(selectUsername);
-		const newRevisions = [...revisions, {
-			_id: uuid(),
-			name: body.drawingName,
-			timestamp: new Date(),
-			desc: body.drawingDesc,
-			author,
-			format: body.file.name.split('.').slice(-1)[0],
-			statusCode: body.statusCode,
-			revisionCode: body.revisionCode,
-			void: false,
-		}];
-		yield put(DrawingRevisionsActions.fetchSuccess(drawingId, newRevisions));
-		yield put(DrawingsActions.updateDrawingSuccess(projectId, drawingId, { latestRevision: body.revisionCode, revisionsCount: newRevisions.length }));
 	} catch (error) {
 		let errorMessage = error.message;
 		if (error.response) {

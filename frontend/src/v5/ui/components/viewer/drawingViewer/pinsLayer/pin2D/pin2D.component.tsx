@@ -20,15 +20,15 @@ import PinIcon from '@assets/icons/filled/ticket_pin-filled.svg';
 import { PinContainer } from './pin2D.styles';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 
 type Pin2DProps = IPin & { scale: number };
 export const Pin2D = ({ id, isSelected, position, colour, scale }: Pin2DProps) => {
-	const { containerOrFederation } = useParams<ViewerParams>();
 	const selectedMagnifierFactor = isSelected ? 1.2 : 1;
 	const height = 23 / scale * selectedMagnifierFactor;
 	const width = 18 / scale * selectedMagnifierFactor;
+	const { containerOrFederation } = useParams<ViewerParams>();
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 
 	const handleClick = (e) => {

@@ -17,7 +17,7 @@
 
 import { memo, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { formatShortDateTime } from '@/v5/helpers/intl.helper';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { useParams, useHistory } from 'react-router-dom';
 
 import {
@@ -37,7 +37,7 @@ import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { enableRealtimeFederationNewRevision, enableRealtimeFederationRemoved, enableRealtimeFederationUpdateSettings } from '@/v5/services/realtime/federation.events';
 import { DialogsActionsDispatchers, FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
-import { boardRoute } from '@/v5/services/routing/routing';
+import { ticketsSelectionRoute } from '@/v5/services/routing/routing';
 import { FederationEllipsisMenu } from './federationEllipsisMenu/federationEllipsisMenu.component';
 
 interface IFederationListItem {
@@ -50,7 +50,7 @@ export const FederationListItem = memo(({
 	const { teamspace, project } = useParams<DashboardParams>();
 	const history = useHistory();
 
-	const openBoardPage = (boardPage: 'issues' | 'risks') => history.push(boardRoute(teamspace, project, boardPage, federation._id));
+	const openTicketsPage = () => history.push(ticketsSelectionRoute(teamspace, project, federation._id));
 
 	const onChangeFavourite = ({ currentTarget: { checked } }) => {
 		if (checked) {
@@ -76,31 +76,19 @@ export const FederationListItem = memo(({
 						minWidth={90}
 						federation={federation}
 					/>
-					{/* issues */}
-					<DashboardListItemButton
-						hideWhenSmallerThan={1080}
-						width={165}
-						onClick={() => openBoardPage('issues')}
-						tooltipTitle={<FormattedMessage id="federations.list.item.issues.tooltip" defaultMessage="View issues" />}
-					>
-						<FormattedMessage
-							id="federations.list.item.issues"
-							defaultMessage="{count, plural, =0 {No issues} one {# issue} other {# issues}}"
-							values={{ count: federation.issues }}
-						/>
-					</DashboardListItemButton>
+					{/* tickets */}
 					<DashboardListItemButton
 						hideWhenSmallerThan={890}
-						onClick={() => openBoardPage('risks')}
+						onClick={() => openTicketsPage()}
 						width={165}
 						tooltipTitle={
-							<FormattedMessage id="federations.list.item.risks.tooltip" defaultMessage="View risks" />
+							<FormattedMessage id="federations.list.item.tickets.tooltip" defaultMessage="View tickets" />
 						}
 					>
 						<FormattedMessage
-							id="federations.list.item.risks"
-							defaultMessage="{count, plural, =0 {No risks} one {# risk} other {# risks}}"
-							values={{ count: federation.risks }}
+							id="federations.list.item.tickets"
+							defaultMessage="{count, plural, =0 {No tickets} one {# tickets} other {# tickets}}"
+							values={{ count: federation.tickets }}
 						/>
 					</DashboardListItemButton>
 					<DashboardListItemButton
@@ -121,7 +109,7 @@ export const FederationListItem = memo(({
 						{federation.code}
 					</DashboardListItemText>
 					<DashboardListItemText width={113} minWidth={89} dontHighlight>
-						{federation.lastUpdated && formatShortDateTime(federation.lastUpdated)}
+						{federation.lastUpdated && formatDateTime(federation.lastUpdated)}
 					</DashboardListItemText>
 					<DashboardListItemIcon>
 						<FavouriteCheckbox

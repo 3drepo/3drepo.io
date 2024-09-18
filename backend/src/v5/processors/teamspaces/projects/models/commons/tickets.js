@@ -23,18 +23,21 @@ const {
 	modulePropertyLabels,
 	presetModules,
 	propTypes,
+	statusTypes,
+	statuses,
 	viewGroups,
 } = require('../../../../../schemas/tickets/templates.constants');
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { deleteIfUndefined, isEmpty } = require('../../../../../utils/helper/objects');
 const { getFileWithMetaAsStream, removeFiles, storeFiles } = require('../../../../../services/filesManager');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
+const { isBuffer, isUUID } = require('../../../../../utils/helper/typeCheck');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
 const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
+const { getAllTemplates } = require('../../../../../models/tickets.templates');
 const { getArrayDifference } = require('../../../../../utils/helper/arrays');
 const { importComments } = require('./tickets.comments');
-const { isUUID } = require('../../../../../utils/helper/typeCheck');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
 
 const Tickets = {};
@@ -80,23 +83,38 @@ const processSpecialProperties = (template, oldTickets, updatedTickets) => {
 
 	const updateReferences = (templateProperties, externalReferences, oldProperties = {}, updatedProperties = {}) => {
 		templateProperties.forEach(({ type, name }) => {
-			const processImageUpdate = (field) => {
+			const processImageUpdate = (isArray, field) => {
 				const oldProp = field ? getNestedProperty(oldProperties[name], field) : oldProperties[name];
 				const newProp = field ? getNestedProperty(updatedProperties[name], field) : updatedProperties[name];
 
 				if (oldProp && newProp !== undefined) {
-					externalReferences.binaries.toRemove.push(oldProp);
+					const idsToRemove = isArray
+						? getArrayDifference(newProp?.map(UUIDToString), oldProp.map(UUIDToString)).map(stringToUUID)
+						: [oldProp];
+
+					externalReferences.binaries.toRemove.push(...idsToRemove);
 				}
 
 				if (newProp) {
-					const ref = generateUUID();
-					if (field) {
-						setNestedProperty(updatedProperties[name], field, ref);
+					const getRefFromBuffer = (data) => {
+						if (isBuffer(data)) {
+							const ref = generateUUID();
+							externalReferences.binaries.toAdd.push({ ref, data });
+							return ref;
+						}
+
+						return data;
+					};
+
+					if (isArray) {
+						// eslint-disable-next-line no-param-reassign
+						updatedProperties[name] = newProp.map(getRefFromBuffer);
+					} else if (field) {
+						setNestedProperty(updatedProperties[name], field, getRefFromBuffer(newProp));
 					} else {
 						// eslint-disable-next-line no-param-reassign
-						updatedProperties[name] = ref;
+						updatedProperties[name] = getRefFromBuffer(newProp);
 					}
-					externalReferences.binaries.toAdd.push({ ref, data: newProp });
 				}
 			};
 
@@ -104,10 +122,12 @@ const processSpecialProperties = (template, oldTickets, updatedTickets) => {
 				processImageUpdate();
 			} else if (type === propTypes.VIEW) {
 				// Make constants out of these
-				processImageUpdate('screenshot');
+				processImageUpdate(false, 'screenshot');
 				processGroupsUpdate(oldProperties[name], updatedProperties[name],
 					Object.values(viewGroups).map((groupName) => `state.${groupName}`),
 					externalReferences.groups);
+			} else if (type === propTypes.IMAGE_LIST) {
+				processImageUpdate(true);
 			}
 		});
 	};
@@ -169,7 +189,8 @@ const processExternalData = async (teamspace, project, model, ticketIds, data) =
 		refsToRemove.push(...binaries.toRemove);
 
 		binariesToSave.push(...binaries.toAdd.map(({ ref, data: bin }) => ({
-			id: ref, data: bin, meta: { teamspace, project, model, ticket: ticketId } })));
+			id: ref, data: bin, meta: { teamspace, project, model, ticket: ticketId },
+		})));
 
 		await Promise.all([
 			groups.toAdd.length ? addGroups(teamspace, project, model, ticketId, groups.toAdd) : Promise.resolve(),
@@ -206,7 +227,8 @@ Tickets.importTickets = async (teamspace, project, model, template, tickets, aut
 	if (commentsByTickets.length) await importComments(teamspace, project, model, commentsByTickets, author);
 
 	publish(events.TICKETS_IMPORTED,
-		{ teamspace,
+		{
+			teamspace,
 			project,
 			model,
 			tickets: savedTickets,
@@ -219,7 +241,8 @@ Tickets.importTickets = async (teamspace, project, model, template, tickets, aut
 Tickets.addTicket = async (teamspace, project, model, template, ticket) => {
 	const [savedTicket] = await processNewTickets(teamspace, project, model, template, [ticket]);
 	publish(events.NEW_TICKET,
-		{ teamspace,
+		{
+			teamspace,
 			project,
 			model,
 			ticket: savedTicket,
@@ -238,7 +261,8 @@ Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, up
 			teamspace,
 			project,
 			model,
-			...data });
+			...data,
+		});
 	}
 };
 
@@ -268,7 +292,8 @@ Tickets.updateManyTickets = async (teamspace, project, model, template, oldTicke
 				teamspace,
 				project,
 				model,
-				...data });
+				...data,
+			});
 		}
 	});
 };
@@ -339,6 +364,35 @@ Tickets.getTicketList = (teamspace, project, model,
 	}
 
 	return getAllTickets(teamspace, project, model, deleteIfUndefined({ projection, updatedSince, sort }));
+};
+
+Tickets.getOpenTicketsCount = async (teamspace, project, model) => {
+	const tickets = await getAllTickets(teamspace, project, model, {
+		projection: { type: 1, [`properties.${basePropertyLabels.STATUS}`]: 1 },
+	});
+
+	let openTicketsCount = 0;
+
+	const allTemplates = await getAllTemplates(teamspace, true, { _id: 1, config: 1 });
+
+	const templateToClosedStatuses = allTemplates.reduce((obj, { _id, config }) => {
+		const closedStatuses = config.status
+			? config.status.values
+				.flatMap((s) => (s.type === statusTypes.DONE || s.type === statusTypes.VOID ? s.name : []))
+			: [statuses.CLOSED, statuses.VOID];
+
+		return { ...obj, [UUIDToString(_id)]: closedStatuses };
+	}, {});
+
+	for (let i = 0; i < tickets.length; i++) {
+		const ticket = tickets[i];
+
+		if (!templateToClosedStatuses[UUIDToString(ticket.type)].includes(ticket.properties.Status)) {
+			openTicketsCount++;
+		}
+	}
+
+	return openTicketsCount;
 };
 
 module.exports = Tickets;

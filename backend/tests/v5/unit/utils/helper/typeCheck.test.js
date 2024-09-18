@@ -92,6 +92,7 @@ const testIsUUIDString = () => {
 const testIsUUID = () => {
 	describe.each(
 		[
+			[Buffer.from('abc'), false],
 			['7591fbdb-52b9-490a-8a77-fdb57c57dbc8', false],
 			[generateUUID(), true],
 			['', false],

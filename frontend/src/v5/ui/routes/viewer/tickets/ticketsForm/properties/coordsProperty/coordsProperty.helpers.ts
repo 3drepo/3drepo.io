@@ -23,8 +23,8 @@ import { IPin } from '@/v4/services/viewer/viewer';
 import { COLOR } from '@/v5/ui/themes/theme';
 import { rgbToHex } from '@controls/inputs/colorPicker/colorPicker.helpers';
 
-const DEFAULT_COLOR = COLOR.PRIMARY_MAIN;
 export const NEW_TICKET_ID = 'temporaryIdForNewTickets';
+const DEFAULT_COLOR = COLOR.PRIMARY_MAIN;
 
 const findByName = (array: any[], name: string) => array.find(({ name: n }) => n === name);
 

@@ -15,38 +15,44 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CalibrationState } from '@/v5/store/drawings/drawings.types';
+import { CalibrationStatus } from '@/v5/store/drawings/drawings.types';
 import { ActionMenu } from '@controls/actionMenu';
 import { FormattedMessage } from 'react-intl';
 import { DrawingsCalibrationButton } from './drawingCalibrationMenu.styles';
 import { DashboardListItemButtonProps } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemButton/dashboardListItemButton.component';
-import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DrawingRevisionsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useParams } from 'react-router-dom';
 import { MenuList } from '@mui/material';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import { formatMessage } from '@/v5/services/intl';
+import { DashboardParams } from '../../../routes.constants';
+import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 type DrawingsCalibrationMenuProps = DashboardListItemButtonProps & {
-	calibrationState: CalibrationState;
+	calibrationStatus: CalibrationStatus;
 	onCalibrateClick: () => void;
 	drawingId: string;
 };
-export const DrawingsCalibrationMenu = ({ calibrationState, onCalibrateClick, drawingId, disabled, ...props }: DrawingsCalibrationMenuProps) => {
-	const { teamspace, project } = useParams();
-	const disableButton = disabled || calibrationState === CalibrationState.EMPTY;
+export const DrawingsCalibrationMenu = ({ calibrationStatus, onCalibrateClick, drawingId, disabled, ...props }: DrawingsCalibrationMenuProps) => {
+	const { teamspace, project } = useParams<DashboardParams>();
+	const disableButton = disabled || calibrationStatus === CalibrationStatus.EMPTY;
+	const latestRevision = DrawingRevisionsHooksSelectors.selectLatestActiveRevision(drawingId);
 
-	const approveCalibration = () => DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawingId, {
-		calibration: {
-			state: CalibrationState.CALIBRATED,
-		},
-	});
+	const onApproveCalibration = () => {
+		const approveCalibration = () => DrawingsActionsDispatchers.approveCalibration(teamspace, project, drawingId);
+		if (latestRevision?._id) {
+			approveCalibration();
+		} else {
+			DrawingRevisionsActionsDispatchers.fetch(teamspace, project, drawingId, approveCalibration);
+		}
+	};
 
 	return (
 		<ActionMenu
 			disabled={disableButton}
 			TriggerButton={(
 				<DrawingsCalibrationButton
-					calibrationState={calibrationState}
+					calibrationStatus={calibrationStatus}
 					disabled={disableButton}
 					tooltipTitle={!disableButton && <FormattedMessage id="calibration.menu.tooltip" defaultMessage="Calibrate" />}
 					{...props}
@@ -54,19 +60,19 @@ export const DrawingsCalibrationMenu = ({ calibrationState, onCalibrateClick, dr
 			)}
 		>
 			<MenuList>
-				{calibrationState === CalibrationState.OUT_OF_SYNC && (
+				{calibrationStatus === CalibrationStatus.UNCONFIRMED && (
 					<EllipsisMenuItem
-						onClick={approveCalibration}
+						onClick={onApproveCalibration}
 						title={formatMessage({ defaultMessage: 'Approve Calibration', id: 'calibration.menu.approveCalibration' })}
 					/>
 				)}
-				{[CalibrationState.CALIBRATED, CalibrationState.OUT_OF_SYNC].includes(calibrationState) && (
+				{[CalibrationStatus.CALIBRATED, CalibrationStatus.UNCONFIRMED].includes(calibrationStatus) && (
 					<EllipsisMenuItem
 						onClick={onCalibrateClick}
 						title={formatMessage({ defaultMessage: 'Recalibrate', id: 'calibration.menu.recalibrate' })}
 					/>
 				)}
-				{calibrationState === CalibrationState.UNCALIBRATED && (
+				{calibrationStatus === CalibrationStatus.UNCALIBRATED && (
 					<EllipsisMenuItem
 						onClick={onCalibrateClick}
 						title={formatMessage({ defaultMessage: 'Calibrate', id: 'calibration.menu.calibrate' })}

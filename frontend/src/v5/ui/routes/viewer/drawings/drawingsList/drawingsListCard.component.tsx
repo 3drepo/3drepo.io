@@ -16,21 +16,22 @@
  */
 
 import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { CardContainer, CardHeader, CardContent } from '@components/viewer/cards/card.styles';
+import { CardContainer, CardContent } from '@components/viewer/cards/card.styles';
 import { FormattedMessage } from 'react-intl';
 import DrawingsIcon from '@assets/icons/outlined/drawings-outlined.svg';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { DrawingsList } from './drawingsList.component';
+import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 
 export const DrawingsListCard = () => {
-	const drawings = DrawingsHooksSelectors.selectCalibratedDrawings();
+	const drawings = DrawingsHooksSelectors.selectNonEmptyDrawings();
 
 	return (
 		<CardContainer>
-			<CardHeader>
-				<DrawingsIcon />
-				<FormattedMessage id="viewer.cards.drawings.title" defaultMessage="Drawings" />
-			</CardHeader>
+			<CardHeader
+				icon={<DrawingsIcon />}
+				title={<FormattedMessage id="viewer.cards.drawings.title" defaultMessage="Drawings" />}
+			/>
 			{drawings.length
 				? (<DrawingsList />)
 				: (

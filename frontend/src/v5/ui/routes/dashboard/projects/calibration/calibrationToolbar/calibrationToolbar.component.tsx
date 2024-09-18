@@ -23,9 +23,11 @@ import { MainToolbar, ToolbarContainer } from '@/v5/ui/routes/viewer/toolbar/too
 import { SectionToolbar } from '@/v5/ui/routes/viewer/toolbar/selectionToolbar/selectionToolbar.component';
 import { CalibrationContext } from '../calibrationContext';
 import { useContext } from 'react';
+import { isNull } from 'lodash';
 
 export const CalibrationToolbar = () => {
-	const { step } = useContext(CalibrationContext);
+	const { verticalPlanes } = useContext(CalibrationContext);
+	const planesAreUnset = verticalPlanes.some(isNull);
 	
 	return (
 		<ToolbarContainer>
@@ -33,7 +35,7 @@ export const CalibrationToolbar = () => {
 				<HomeButton />
 				<ProjectionButtons />
 				<NavigationButtons />
-				{step !== 2 && <ClipButtons />}
+				{planesAreUnset && <ClipButtons />}
 				<BimButton />
 				<CalibrationButton />
 				<VerticalCalibrationButton />

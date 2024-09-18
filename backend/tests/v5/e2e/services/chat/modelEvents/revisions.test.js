@@ -19,6 +19,9 @@ const ServiceHelper = require('../../../../helper/services');
 const { src } = require('../../../../helper/path');
 const SuperTest = require('supertest');
 
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
+
 const { EVENTS } = require(`${src}/services/chat/chat.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -26,7 +29,9 @@ const user = ServiceHelper.generateUserCredentials();
 const teamspace = ServiceHelper.generateRandomString();
 const project = ServiceHelper.generateRandomProject();
 const container = ServiceHelper.generateRandomModel();
+const drawing = ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING });
 const containerRevision = ServiceHelper.generateRevisionEntry();
+const drawingRevision = ServiceHelper.generateRevisionEntry(false, true, modelTypes.DRAWING);
 
 let agent;
 const setupData = async () => {
@@ -38,11 +43,21 @@ const setupData = async () => {
 			container.name,
 			container.properties,
 		),
+		ServiceHelper.db.createModel(
+			teamspace,
+			drawing._id,
+			drawing.name,
+			drawing.properties,
+		),
 	]);
 	await Promise.all([
 		ServiceHelper.db.createUser(user, [teamspace]),
-		ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id]),
-		ServiceHelper.db.createRevision(teamspace, container._id, { ...containerRevision, author: user.user }),
+		ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, drawing._id]),
+		ServiceHelper.db.createRevision(teamspace, project.id, container._id,
+			{ ...containerRevision, author: user.user }),
+		ServiceHelper.db.createRevision(teamspace, project.id, drawing._id,
+			{ ...drawingRevision, author: user.user },
+			modelTypes.DRAWING),
 	]);
 };
 
@@ -93,6 +108,79 @@ const revisionUpdateTest = () => {
 				...data,
 				data: {
 					_id: containerRevision._id,
+					void: true,
+				},
+			});
+
+			socket.close();
+		});
+
+		test(`should trigger a ${EVENTS.DRAWING_REVISION_UPDATE} event when a calibration has been updated`, async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+
+			const data = { teamspace, project: project.id, model: drawing._id };
+			await ServiceHelper.socket.joinRoom(socket, data);
+
+			const socketPromise = new Promise((resolve, reject) => {
+				socket.on(EVENTS.DRAWING_REVISION_UPDATE, resolve);
+				setTimeout(reject, 1000);
+			});
+
+			const calibration = {
+				horizontal: {
+					model: [[0, 0, 0], [1, 1, 1]],
+					drawing: [[0, 0], [1, 1]],
+				},
+				verticalRange: [0, 10],
+				units: 'm',
+			};
+
+			await agent.post(`/v5/teamspaces/${teamspace}/projects/${project.id}/drawings/${drawing._id}/revisions/${drawingRevision._id}/calibrations?key=${user.apiKey}`)
+				.send(calibration)
+				.expect(templates.ok.status);
+
+			await expect(socketPromise).resolves.toEqual({
+				...data,
+				data: {
+					_id: drawingRevision._id,
+					calibration: calibrationStatuses.CALIBRATED,
+				},
+			});
+
+			// calibrating an already calibrated drawing should not trigger the event anymore
+			const socketPromise2 = new Promise((resolve, reject) => {
+				socket.on(EVENTS.DRAWING_REVISION_UPDATE, resolve);
+				setTimeout(reject, 1000);
+			});
+
+			await agent.post(`/v5/teamspaces/${teamspace}/projects/${project.id}/drawings/${drawing._id}/revisions/${drawingRevision._id}/calibrations?key=${user.apiKey}`)
+				.send(calibration)
+				.expect(templates.ok.status);
+
+			await expect(socketPromise2).rejects.toBeUndefined();
+
+			socket.close();
+		});
+
+		test(`should trigger a ${EVENTS.DRAWING_REVISION_UPDATE} event when a drawing revision has been updated using revision Id`, async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+
+			const data = { teamspace, project: project.id, model: drawing._id };
+			await ServiceHelper.socket.joinRoom(socket, data);
+
+			const socketPromise = new Promise((resolve, reject) => {
+				socket.on(EVENTS.DRAWING_REVISION_UPDATE, resolve);
+				setTimeout(reject, 1000);
+			});
+
+			await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/drawings/${drawing._id}/revisions/${drawingRevision._id}?key=${user.apiKey}`)
+				.send({ void: true })
+				.expect(templates.ok.status);
+
+			await expect(socketPromise).resolves.toEqual({
+				...data,
+				data: {
+					_id: drawingRevision._id,
 					void: true,
 				},
 			});

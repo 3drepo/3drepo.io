@@ -18,7 +18,7 @@
 import { useParams } from 'react-router-dom';
 import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DrawingsCardActionsDispatchers, ProjectsActionsDispatchers, TeamspacesActionsDispatchers, TicketsCardActionsDispatchers, ViewerActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { CheckLatestRevisionReadiness } from './checkLatestRevisionReadiness/checkLatestRevisionReadiness.container';
@@ -30,12 +30,13 @@ import { CentredContainer } from '@controls/centredContainer';
 import { TicketsCardViews } from './tickets/tickets.constants';
 import { ViewerCanvases } from '../dashboard/viewerCanvases/viewerCanvases.component';
 import { ViewerGui } from '@/v4/routes/viewerGui';
-import { CalibrationContext, CalibrationContextComponent } from '../dashboard/projects/calibration/calibrationContext';
+import { CalibrationContext } from '../dashboard/projects/calibration/calibrationContext';
 import { OpenDrawingFromUrl } from './openDrawingFromUrl/openDrawingFromUrl.component';
 import { CalibrationHandler } from '../dashboard/projects/calibration/calibrationHandler.component';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
+	const { isCalibrating } = useContext(CalibrationContext);
 
 	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
 
@@ -109,15 +110,13 @@ export const Viewer = () => {
 	};
 
 	return (
-		<CalibrationContextComponent>
+		<>
 			<OpenTicketFromUrl />
 			<OpenDrawingFromUrl />
 			<CheckLatestRevisionReadiness />
 			<ViewerCanvases />
 			<ViewerGui match={v4Match} key={containerOrFederation} />
-			<CalibrationContext.Consumer>
-				{({ isCalibrating }) => isCalibrating && <CalibrationHandler />}
-			</CalibrationContext.Consumer>
-		</CalibrationContextComponent>
+			{isCalibrating && <CalibrationHandler />}
+		</>
 	);
 };

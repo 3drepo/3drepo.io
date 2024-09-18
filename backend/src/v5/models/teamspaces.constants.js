@@ -35,6 +35,12 @@ TeamspaceConstants.ADD_ONS = {
 	POWERBI: 'powerBIEnabled',
 	SRC: 'srcEnabled',
 	HERE: 'hereEnabled',
+	MODULES: 'modules',
+};
+
+TeamspaceConstants.ADD_ONS_MODULES = {
+	ISSUES: 'issues',
+	RISKS: 'risks',
 };
 
 TeamspaceConstants.DEFAULT_RISK_CATEGORIES = [

@@ -16,15 +16,15 @@
  */
 
 import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
-import { AddFavouriteAction, DeleteDrawingAction, RemoveFavouriteAction, CreateDrawingAction, DrawingsActions, DrawingsTypes, FetchCategoriesAction, FetchDrawingStatsAction, FetchDrawingsAction, UpdateDrawingAction } from './drawings.redux';
+import { AddFavouriteAction, DeleteDrawingAction, RemoveFavouriteAction, CreateDrawingAction, DrawingsActions, DrawingsTypes, FetchTypesAction, FetchDrawingStatsAction, FetchDrawingsAction, UpdateDrawingAction, FetchCalibrationAction, UpdateCalibrationAction, ApproveCalibrationAction } from './drawings.redux';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { LifoQueue } from '@/v5/helpers/functions.helpers';
-import { DrawingStats } from './drawings.types';
-import { prepareDrawingsData } from './drawings.helpers';
+import { CalibrationStatus, DrawingStats, IDrawing } from './drawings.types';
 import { selectDrawings, selectIsListPending } from './drawings.selectors';
-import { isEqualWith } from 'lodash';
+import { isEqualWith, unionBy } from 'lodash';
+import { selectLatestActiveRevision } from './revisions/drawingRevisions.selectors';
 import { compByColum } from '../store.helpers';
 
 const statsQueue = new LifoQueue<DrawingStats>(API.Drawings.fetchDrawingsStats, 30);
@@ -57,20 +57,18 @@ export function* removeFavourites({ teamspace, projectId, drawingId }: RemoveFav
 
 export function* fetchDrawings({ teamspace, projectId }: FetchDrawingsAction) {
 	try {
-		statsQueue.resetQueue();
-
-		const drawings = yield API.Drawings.fetchDrawings(teamspace, projectId);
-		const drawingsWithoutStats = prepareDrawingsData(drawings);
-		const storedDrawings = yield select(selectDrawings);
-		const isPending = yield select(selectIsListPending);
+		const { drawings } = yield API.Drawings.fetchDrawings(teamspace, projectId);
+		const storedDrawings: IDrawing[] = yield select(selectDrawings);
+		const isPending: IDrawing[] = yield select(selectIsListPending);
 
 		// Only update if theres is new data
-		if (isPending || !isEqualWith(storedDrawings, drawingsWithoutStats, compByColum(['_id', 'name', 'role', 'isFavourite']))) {
-			yield put(DrawingsActions.fetchDrawingsSuccess(projectId, drawingsWithoutStats));
+		if (isPending) {
+			yield put(DrawingsActions.fetchDrawingsSuccess(projectId, drawings));
+		} else if (!isEqualWith(storedDrawings, drawings, compByColum(['_id', 'name', 'role', 'isFavourite']))) {
+			yield put(DrawingsActions.fetchDrawingsSuccess(projectId, unionBy(storedDrawings, drawings, '_id')));
 		}
-		
 		yield all(
-			drawingsWithoutStats.map(
+			drawings.map(
 				(drawing) => put(DrawingsActions.fetchDrawingStats(teamspace, projectId, drawing._id)),
 			),
 		); 
@@ -82,10 +80,52 @@ export function* fetchDrawings({ teamspace, projectId }: FetchDrawingsAction) {
 	}
 }
 
+export function* fetchCalibration({ teamspace, projectId, drawingId }: FetchCalibrationAction) {
+	try {
+		const revision = yield select(selectLatestActiveRevision, drawingId);
+		const { data: calibration } = yield API.DrawingRevisions.fetchCalibration(teamspace, projectId, drawingId, revision._id);
+		yield put(DrawingsActions.updateDrawingSuccess(projectId, drawingId, { calibration }));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'drawings.fetchCalibration.error', defaultMessage: 'trying to fetch drawing calibration' }),
+			error,
+		}));
+	}
+}
+
+export function* updateCalibration({ teamspace, projectId, drawingId, calibration }: UpdateCalibrationAction) {
+	try {
+		const revision = yield select(selectLatestActiveRevision, drawingId);
+		yield API.DrawingRevisions.updateCalibration(teamspace, projectId, drawingId, revision._id, calibration);
+		yield put(DrawingsActions.updateDrawingSuccess(projectId, drawingId, {
+			calibration,
+			calibrationStatus: CalibrationStatus.CALIBRATED,
+		}));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'drawings.updateCalibration.error', defaultMessage: 'trying to update drawing calibration' }),
+			error,
+		}));
+	}
+}
+
+export function* approveCalibration({ teamspace, projectId, drawingId }: ApproveCalibrationAction) {
+	try {
+		const revision = yield select(selectLatestActiveRevision, drawingId);
+		yield API.DrawingRevisions.approveCalibration(teamspace, projectId, drawingId, revision._id);
+		yield put(DrawingsActions.updateDrawingSuccess(projectId, drawingId, { calibrationStatus: CalibrationStatus.CALIBRATED }));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'drawings.approveCalibration.error', defaultMessage: 'trying to approve drawing calibration' }),
+			error,
+		}));
+	}
+}
+
 export function* fetchDrawingStats({ teamspace, projectId, drawingId }: FetchDrawingStatsAction) {
 	try {
-		const stats = yield statsQueue.enqueue(teamspace, projectId, drawingId);
-		yield put(DrawingsActions.fetchDrawingStatsSuccess(projectId, drawingId, stats));
+		const { calibration: calibrationStatus, ...stats } = yield statsQueue.enqueue(teamspace, projectId, drawingId);
+		yield put(DrawingsActions.fetchDrawingStatsSuccess(projectId, drawingId, { calibrationStatus, ...stats }));
 
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -105,14 +145,14 @@ export function* deleteDrawing({ teamspace, projectId, drawingId, onSuccess, onE
 	}
 }
 
-export function* fetchCategories({ teamspace, projectId }: FetchCategoriesAction) {
+export function* fetchTypes({ teamspace, projectId }: FetchTypesAction) {
 	try {
-		const categories = yield API.Drawings.fetchCategories(teamspace, projectId);
-		yield put(DrawingsActions.fetchCategoriesSuccess(projectId, categories));
+		const { drawingCategories } = yield API.Drawings.fetchTypes(teamspace, projectId);
+		yield put(DrawingsActions.fetchTypesSuccess(projectId, drawingCategories));
 
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'drawings.fetchCategories.error', defaultMessage: 'trying to fetch drawing categories' }),
+			currentActions: formatMessage({ id: 'drawings.fetchTypes.error', defaultMessage: 'trying to fetch drawing categories' }),
 			error,
 		}));
 	}
@@ -140,13 +180,21 @@ export function* updateDrawing({ teamspace, projectId, drawingId, drawing, onSuc
 	}
 }
 
+export function* resetDrawingStatsQueue() {
+	statsQueue.resetQueue();
+}
+
 export default function* DrawingsSaga() {
 	yield takeLatest(DrawingsTypes.ADD_FAVOURITE, addFavourites);
 	yield takeLatest(DrawingsTypes.REMOVE_FAVOURITE, removeFavourites);
 	yield takeEvery(DrawingsTypes.FETCH_DRAWINGS, fetchDrawings);
 	yield takeEvery(DrawingsTypes.FETCH_DRAWING_STATS, fetchDrawingStats);
+	yield takeEvery(DrawingsTypes.FETCH_CALIBRATION, fetchCalibration);
+	yield takeEvery(DrawingsTypes.UPDATE_CALIBRATION, updateCalibration);
+	yield takeEvery(DrawingsTypes.APPROVE_CALIBRATION, approveCalibration);
 	yield takeLatest(DrawingsTypes.DELETE_DRAWING, deleteDrawing);
-	yield takeLatest(DrawingsTypes.FETCH_CATEGORIES, fetchCategories);
+	yield takeLatest(DrawingsTypes.FETCH_TYPES, fetchTypes);
 	yield takeEvery(DrawingsTypes.CREATE_DRAWING, createDrawing);
 	yield takeEvery(DrawingsTypes.UPDATE_DRAWING, updateDrawing);
+	yield takeEvery(DrawingsTypes.RESET_DRAWING_STATS_QUEUE, resetDrawingStatsQueue);
 }

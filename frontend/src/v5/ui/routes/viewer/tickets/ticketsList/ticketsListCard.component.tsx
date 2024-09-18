@@ -16,7 +16,7 @@
  */
 
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { CardContainer, CardHeader, CardContent } from '@components/viewer/cards/card.styles';
+import { CardContainer, CardContent } from '@components/viewer/cards/card.styles';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import TicketsIcon from '@assets/icons/outlined/tickets-outlined.svg';
@@ -29,7 +29,7 @@ import { EllipsisMenu } from '@controls/ellipsisMenu';
 import { formatMessage } from '@/v5/services/intl';
 import PinIcon from '@assets/icons/filled/ticket_pin-filled.svg';
 import { EllipsisMenuItemSwitch } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenuItemSwitch.component';
-import { Actions } from './ticketsList.styles';
+import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 
 export const TicketsListCard = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
@@ -43,21 +43,23 @@ export const TicketsListCard = () => {
 
 	return (
 		<CardContainer>
-			<CardHeader>
-				<TicketsIcon />
-				<FormattedMessage id="viewer.cards.tickets.title" defaultMessage="Tickets" />
-				<Actions>
-					{!readOnly && (<NewTicketMenu />)}
-					<EllipsisMenu>
-						<EllipsisMenuItemSwitch
-							icon={<PinIcon />}
-							title={formatMessage({ id: 'foobarbaz', defaultMessage: 'Show Pins' })}
-							active={isShowingPins}
-							onClick={onClickShowPins}
-						/>
-					</ EllipsisMenu>
-				</ Actions>
-			</CardHeader>
+			<CardHeader
+				icon={<TicketsIcon />}
+				title={formatMessage({ id: 'viewer.cards.tickets.title', defaultMessage: 'Tickets' })}
+				actions={(
+					<>
+						{!readOnly && (<NewTicketMenu />)}
+						<EllipsisMenu>
+							<EllipsisMenuItemSwitch
+								icon={<PinIcon />}
+								title={formatMessage({ id: 'foobarbaz', defaultMessage: 'Show Pins' })}
+								active={isShowingPins}
+								onClick={onClickShowPins}
+							/>
+						</ EllipsisMenu>
+					</>
+				)}
+			/>
 			<CardContent onClick={TicketsCardActionsDispatchers.resetState}>
 				{tickets.length ? (
 					<TicketsList tickets={tickets} />

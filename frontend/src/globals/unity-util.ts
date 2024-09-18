@@ -172,7 +172,6 @@ export class UnityUtil {
 		UnityUtil.modelLoaderProgressCallback = modelLoaderProgressCallback;
 		UnityUtil.unityBuildSubdirectory = '/unity/Build'; // These directories are determined by webpack.common.config.js
 		UnityUtil.setUnityMemory(0); // This forces the browser to update the viewer with the autodetected memory. If the user has set it explicitly in viewer settings, it will be overridden later when they are processed.
-		//UnityUtil.setLegacyAssetMode(); // This must be called before the initial assets list is loaded, if it is to have any effect, so it is either called here, or not at all.
 	}
 
 	/** @hidden */
@@ -368,6 +367,14 @@ export class UnityUtil {
 			const action = this.unityOnUpdateActions.shift();
 			action();
 		}
+	}
+
+	/**
+	 * @hidden
+	 * Called by the viewer to retrieve cookies in the application
+	 */
+	public static getCookies() {
+		return document?.cookie;
 	}
 
 	/**
@@ -744,14 +751,6 @@ export class UnityUtil {
 	 * =============== TO UNITY ====================
 	 */
 
-	/**
-	 * Tells the viewer to use AssetBundles instead of RepoBundles, even if
-	 * RepoBundles are available.
-	 * @category Configurations
-	 */
-	public static setLegacyAssetMode() {
-		UnityUtil.toUnity('SetLegacyAssetsMode', UnityUtil.LoadingState.VIEWER_READY);
-	}
 
 	/**
 	 * Tells the viewer the maximum amount of memory it can expect to be able
@@ -1612,6 +1611,7 @@ export class UnityUtil {
 	 * @param forceReHighlight - If set to true, existing highlighted objects will be forced
 	 * to re-highlight itself. This is typically used for re-colouring a highlight ]
 	 * or when you want a specific set of objects to stay highlighted when toggle mode is on
+	 * @return returns a promise which will resolve after Unity has invoked its highlightObjects function
 	 */
 	public static highlightObjects(
 		account: string,
@@ -1621,7 +1621,7 @@ export class UnityUtil {
 		toggleMode: boolean,
 		forceReHighlight: boolean,
 	) {
-		UnityUtil.multipleCallInChunks(idArr.length, (start, end) => {
+		return UnityUtil.multipleCallInChunks(idArr.length, (start, end) => {
 			const arr = idArr.slice(start, end);
 			const params: any = {
 				database: account,
@@ -1641,9 +1641,10 @@ export class UnityUtil {
 	 * @param account - name of teamspace
 	 * @param model - name of model
 	 * @param idArr - array of unique IDs associated with the objects to highlight
+	 * @return returns a promise which will resolve after Unity has invoked its unhighlightObjects function
 	 */
 	public static unhighlightObjects(account: string, model: string, idArr: string[]) {
-		UnityUtil.multipleCallInChunks(idArr.length, (start, end) => {
+		return UnityUtil.multipleCallInChunks(idArr.length, (start, end) => {
 			const ids = idArr.slice(start, end);
 			const params: any = {
 				database: account,
@@ -1789,9 +1790,10 @@ export class UnityUtil {
 	 * @param model - model ID the meshes resides in
 	 * @param meshIDs - unique IDs of the meshes to operate on
 	 * @param color - RGB value of the override color (note: alpha will be ignored)
+	 * @return returns a promise which will resolve after Unity has invoked its overrideMeshColor function
 	 */
 	public static overrideMeshColor(account: string, model: string, meshIDs: [string], color: [number]) {
-		UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
+		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
 				param.nameSpace = `${account}.${model}`;
@@ -1808,9 +1810,10 @@ export class UnityUtil {
 	 * @param account - teamspace the meshes resides in
 	 * @param model - model ID the meshes resides in
 	 * @param meshIDs - unique IDs of the meshes to operate on
+	 * @return returns a promise which will resolve after Unity has invoked its resetMeshColor function
 	 */
 	public static resetMeshColor(account: string, model: string, meshIDs: [string]) {
-		UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
+		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
 				param.nameSpace = `${account}.${model}`;
@@ -1828,9 +1831,10 @@ export class UnityUtil {
 	 * @param model - model ID the meshes resides in
 	 * @param meshIDs - unique IDs of the meshes to operate on
 	 * @param opacity - opacity (>0 - 1) value to override with
+	 * @return returns a promise which will resolve after Unity has invoked its overrideMeshOpacity function
 	 */
 	public static overrideMeshOpacity(account: string, model: string, meshIDs: [string], opacity: number) {
-		UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
+		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
 				param.nameSpace = `${account}.${model}`;
@@ -1847,9 +1851,10 @@ export class UnityUtil {
 	 * @param account - teamspace the meshes resides in
 	 * @param model - model ID the meshes resides in
 	 * @param meshIDs - unique IDs of the meshes to operate on
+	 * @return returns a promise which will resolve after Unity has invoked its resetMeshOpacity function
 	 */
 	public static resetMeshOpacity(account: string, model: string, meshIDs: [string]) {
-		UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
+		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
 				param.nameSpace = `${account}.${model}`;
@@ -2104,6 +2109,7 @@ export class UnityUtil {
 	 * @param lookAt - point in space the camera is looking at. (pivot point)
 	 * @param account - name of teamspace
 	 * @param model - name of model
+	 * @param animationTime - how long the camera should spend during the transition from the current viewpoint to this one
 	 */
 	public static setViewpoint(
 		pos: [number],
@@ -2114,6 +2120,7 @@ export class UnityUtil {
 		orthographicSize?: number,
 		account?: string,
 		model?: string,
+		animationTime?: number,
 	) {
 		const param: any = {};
 		if (account && model) {
@@ -2126,6 +2133,12 @@ export class UnityUtil {
 
 		if (orthographicSize) {
 			param.orthographicSize = orthographicSize;
+		}
+
+		if (typeof animationTime === 'number') { // don't check for a truthy value here because 0 is a valid animationTime
+			param.animationTime = animationTime;
+		} else {
+			param.animationTime = 1;
 		}
 
 		param.position = pos;
@@ -2187,17 +2200,21 @@ export class UnityUtil {
 	/**
 	 * @hidden
 	 * A helper function to split the calls into multiple calls when the array is too large for SendMessage to handle
+	 * @return returns a promise which will resolve after the last call chunk is invoked
 	 */
 	public static multipleCallInChunks(arrLength: number, func:(start: number, end: number) => any, chunkSize = 5000) {
-		let index = 0;
-		while (index < arrLength) {
-			const end = index + chunkSize >= arrLength ? undefined : index + chunkSize;
-			const i = index; // For the closure
-			this.unityOnUpdateActions.push(() => {
-				func(i, end);
-			});
-			index += chunkSize;
-		}
+		return new Promise((resolve) => {
+			let index = 0;
+			while (index < arrLength) {
+				const end = index + chunkSize >= arrLength ? undefined : index + chunkSize;
+				const i = index; // For the closure
+				this.unityOnUpdateActions.push(() => {
+					func(i, end);
+				});
+				index += chunkSize;
+			}
+			this.unityOnUpdateActions.push(resolve);
+		});
 	}
 
 	/**
@@ -2207,9 +2224,10 @@ export class UnityUtil {
 	 * @param model - name of model
 	 * @param ids - list of unique ids to toggle visibility
 	 * @param visibility - true = visible, false = invisible
+	 * @return returns a promise which will resolve after Unity has invoked its toggleVisibility function
 	 */
 	public static toggleVisibility(account: string, model: string, ids: [string], visibility: boolean) {
-		UnityUtil.multipleCallInChunks(ids.length, (start, end) => {
+		return UnityUtil.multipleCallInChunks(ids.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
 				param.nameSpace = `${account}.${model}`;
@@ -2431,9 +2449,10 @@ export class UnityUtil {
 	 * @param modelId modelID the meshes belongs in
 	 * @param meshes array of mesh unique IDs
 	 * @param matrix array of 16 numbers, representing the transformation on the meshes (row major)
+	 * @return returns a promise which will resolve after Unity has invoked its moveMeshes function
 	 */
 	public static moveMeshes(teamspace: string, modelId: string, meshes: string[], matrix: number[]) {
-		UnityUtil.multipleCallInChunks(meshes.length, (start, end) => {
+		return UnityUtil.multipleCallInChunks(meshes.length, (start, end) => {
 			const param: any = {
 				nameSpace: `${teamspace}.${modelId}`,
 				meshes: meshes.slice(start, end),
@@ -2450,9 +2469,10 @@ export class UnityUtil {
 	 * @param teamspace teamspace of the model
 	 * @param modelId modelID the meshes belongs in
 	 * @param meshes array of mesh unique IDs
+	 * @return returns a promise which will resolve after Unity has invoked its resetMovedMeshes function
 	 */
 	public static resetMovedMeshes(teamspace: string, modelId: string, meshes: string[]) {
-		UnityUtil.multipleCallInChunks(meshes.length, (start, end) => {
+		return UnityUtil.multipleCallInChunks(meshes.length, (start, end) => {
 			const param: any = {
 				nameSpace: `${teamspace}.${modelId}`,
 				meshes: meshes.slice(start, end),
@@ -2473,19 +2493,15 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Highlights the Lower Floor Plane in Vertical mode, and makes it interactive.
+	 * Activates the Gizmo for the specified vertical plane, or none, if a valid plane is not given.
 	 * @category Calibration
 	 */
-	public static selectCalibrationToolLowerPlane() {
-		UnityUtil.toUnity('SelectCalibrationToolLowerPlane', UnityUtil.LoadingState.VIEWER_READY);
-	}
-
-	/**
-	 * Highlights the Upper Floor Plane in Vertical mode, and makes it interactive.
-	 * @category Calibration
-	 */
-	public static selectCalibrationToolUpperPlane() {
-		UnityUtil.toUnity('SelectCalibrationToolUpperPlane', UnityUtil.LoadingState.VIEWER_READY);
+	public static selectCalibrationToolVerticalPlane(plane: 'upper' | 'lower' | undefined) {
+		if (plane) {
+			UnityUtil.toUnity('SelectCalibrationToolVerticalPlane', UnityUtil.LoadingState.VIEWER_READY, plane);
+		} else {
+			UnityUtil.toUnity('SelectCalibrationToolVerticalPlane', UnityUtil.LoadingState.VIEWER_READY, 'none'); // (Don't try to call sendMessage with null)
+		}
 	}
 
 	/**
@@ -2516,6 +2532,14 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Sets the default height of the floor used when calling setCalibrationToolFloorToObject, in meters.
+	 * @category Calibration
+	 */
+	public static setCalibrationToolFloorHeight(height: number) {
+		UnityUtil.toUnity('SetCalibrationToolFloorHeight', UnityUtil.LoadingState.VIEWER_READY, height);
+	}
+
+	/**
 	 * Sets or removes the Start and End of the Calibration Vector. If Start or End are set to null, the tool
 	 * will immediately allow the user to place them again. Vector Mode must be explicitly enabled - calling
 	 * this will not automatically enable the tool.
@@ -2523,6 +2547,33 @@ export class UnityUtil {
 	 */
 	public static setCalibrationToolVector(start: number[] | null, end: number[] | null) {
 		UnityUtil.toUnity('SetCalibrationToolVector', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({ start, end }));
+	}
+
+	/**
+	 * Sets the colour scheme of the image preview plane, for the specific level. All three colours should be
+	 * provided as HTML colour strings (see: https://docs.unity3d.com/ScriptReference/ColorUtility.TryParseHtmlString.html)
+	 *  fill is the tint applied to the image, including the background.
+	 *  border is the colour of the border around the image.
+	 *  drawing is the tint applied to the image, before the background.
+	 *
+	 * All three arguments support alpha values. For example, setting drawing to #00000000 and fill to #ff000008 would
+	 * result in a purely red plane with an alpha value of 0.5 compared to the geometry.
+	 *
+	 * @category Calibration
+	 */
+	public static setCalibrationToolVerticalPlaneColours(plane: 'lower' | 'upper', fill: string, border: string, drawing: string) {
+		UnityUtil.toUnity('SetCalibrationToolVerticalPlaneColours', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({ plane, fill, border, drawing }));
+
+	}
+
+	/**
+	 * Sets the additional transparency that is applied, as a multiplier, to the image tint colour set by
+	 * setCalibrationToolSelectedColors or setCalibrationToolUnselectedColors when part of the preview
+	 * plane is obscured by model geometry. This should be between 0 and 1.
+	 * @category Calibration
+	 */
+	public static setCalibrationToolOcclusionOpacity(opacity: number) {
+		UnityUtil.toUnity('SetCalibrationToolOcclusionOpacity', UnityUtil.LoadingState.VIEWER_READY, opacity);
 	}
 
 	/**
@@ -2565,7 +2616,7 @@ export class UnityUtil {
 		ctx.texSubImage2D(ctx.TEXTURE_2D, 0, 0, 0, image.width, image.height, ctx.RGBA, ctx.UNSIGNED_BYTE, image);
 		delete this.domTextureReferences[index];
 	}
-	
+
 	/**
 	 * Sets the maximum number of responses WebRequestManager2 should attempt to
 	 * handle at any one time. The higher this is the faster models will load but

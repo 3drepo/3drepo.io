@@ -16,7 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { selectCalibratedDrawings } from '../drawings.selectors';
+import { selectNonEmptyDrawings } from '../drawings.selectors';
 import { IDrawingsCardState } from './drawingsCard.redux';
 import { selectRevisions } from '../revisions/drawingRevisions.selectors';
 
@@ -28,7 +28,7 @@ export const selectQueries = createSelector(
 );
 
 export const selectDrawingsFilteredByQueries = createSelector(
-	selectCalibratedDrawings,
+	selectNonEmptyDrawings,
 	selectQueries,
 	(state) => (drawingId) => selectRevisions(state, drawingId),
 	(drawings, queries, selectDrawingRevisions) => drawings.filter((drawing) => {
@@ -37,10 +37,10 @@ export const selectDrawingsFilteredByQueries = createSelector(
 
 		const fields = [
 			drawing.desc,
-			drawing.drawingNumber,
+			drawing.number,
 			drawing.name,
 			latestRevision?.statusCode,
-			latestRevision?.revisionCode,
+			latestRevision?.revCode,
 		].filter(Boolean);
 
 		const drawingMatchesQuery = (query) => fields.some((str) => str.toLowerCase().includes(query.toLowerCase()));

@@ -16,7 +16,7 @@
  */
 export const getErrorMessage = (error: any) => error.response?.data?.message || error.message;
 export const getErrorCode = (error: any) => error?.response?.data?.code || '';
-export const getErrorStatus = (error: any) => error.response?.data?.status;
+export const getErrorStatus = (error: any) => error.response?.status;
 
 export const isInvalidArguments = (error: any): boolean => getErrorCode(error) === 'INVALID_ARGUMENTS';
 
@@ -42,9 +42,10 @@ export const emailAlreadyExists = (error: any): boolean => fieldAlreadyExists(er
 export const projectAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'project');
 export const numberAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'number');
 
-export const isPathNotFound = (error): boolean => getErrorCode(error).endsWith('NOT_FOUND');
+export const isPathNotFound = (error): boolean => getErrorStatus(error) === 404;
 export const isPathNotAuthorized = (error): boolean => getErrorCode(error).endsWith('NOT_AUTHORIZED');
 
+export const isTeamspaceInvalid = (code: string): boolean => ['SSO_RESTRICTED'].includes(code);
 export const isProjectNotFound = (code: string): boolean => code === 'PROJECT_NOT_FOUND';
 export const isModelNotFound = (code: string): boolean => ['RESOURCE_NOT_FOUND', 'CONTAINER_NOT_FOUND'].includes(code);
 

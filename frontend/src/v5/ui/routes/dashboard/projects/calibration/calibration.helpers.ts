@@ -17,6 +17,7 @@
 
 import { Matrix3, Vector2 } from 'three';
 import { Coord2D, Coord3D, Vector2D, Vector3D } from './calibration.types';
+import { isNumber } from 'lodash';
 
 export const UNITS_CONVERSION_FACTORS_TO_METRES = {
 	'm': 1,
@@ -31,8 +32,8 @@ export const getUnitsConversionFactor = (drawingUnits, modelUnits) => {
 	return UNITS_CONVERSION_FACTORS_TO_METRES[drawingUnits] / UNITS_CONVERSION_FACTORS_TO_METRES[modelUnits];
 };
 
-export const convertCoordUnits = (coords: number[], conversionFactor: number) => coords?.map((coord) => coord * conversionFactor) || null;
-export const convertVectorUnits = (vector, conversionFactor: number) => vector.map((coord) => convertCoordUnits(coord, conversionFactor));
+export const convertUnits = (coords: number[], conversionFactor: number) => coords?.map((coord) => isNumber(coord) ? coord * conversionFactor : null) || null;
+export const convertVectorUnits = (vector, conversionFactor: number) => vector.map((coord) => convertUnits(coord, conversionFactor));
 
 export const removeZ = ([x,, y]: Coord3D): Coord2D => [x, y];
 export const addZ = ([x, y]: Coord2D, z: number): Coord3D => [x, z, y];
@@ -57,7 +58,7 @@ export const getTransformationMatrix = (vector2D: Vector2D, vector3D: Vector3D) 
 	const scaleMatrix = new Matrix3().makeScale(scaleFactor, scaleFactor);
 	const rotationMatrix = new Matrix3().makeRotation(directionFactor * angle);
 	drawVecStart.applyMatrix3(scaleMatrix.clone().multiply(rotationMatrix));
-    
+	
 	const translationMatrix = new Matrix3().makeTranslation(new Vector2().subVectors(modelVecStart, drawVecStart));
 	const transformationMatrix = translationMatrix.multiply(scaleMatrix).multiply(rotationMatrix); 
 	return transformationMatrix;

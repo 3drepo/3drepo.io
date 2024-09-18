@@ -19,6 +19,7 @@ import EventEmitter from 'eventemitter3';
 
 import { UnityUtil } from '@/globals/unity-util';
 import { isEmpty, isString } from 'lodash';
+import { COLOR, hexToOpacity } from '@/v5/ui/themes/theme';
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import {
 	VIEWER_EVENTS,
@@ -547,7 +548,6 @@ export class ViewerService {
 				if (ids) {
 					const uniqueIds = Array.from(new Set(ids));
 					if (uniqueIds.length) {
-						// eslint-disable-next-line @typescript-eslint/await-thenable
 						await UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi, forceReHighlight);
 						this.emit(VIEWER_EVENTS.HIGHLIGHT_OBJECTS, {account, model, uniqueIds });
 						return;
@@ -1107,7 +1107,7 @@ export class ViewerService {
 		}
 	}
 
-	public async setCamera({ position, up, view_dir, look_at, type, orthographicSize, account, model }) {
+	public async setCamera({ position, up, view_dir, look_at, type, orthographicSize, account, model }, animation = true) {
 		await this.isModelReady();
 		UnityUtil.setViewpoint(
 			position,
@@ -1117,7 +1117,8 @@ export class ViewerService {
 			type,
 			orthographicSize,
 			account,
-			model
+			model,
+			animation ? undefined : 0,
 		);
 
 		this.emit(VIEWER_EVENTS.CAMERA_PROJECTION_SET, type);
@@ -1328,23 +1329,29 @@ export class ViewerService {
 
 	}
 
+	// part of the hacek for callibratio tool plane
+	private calibrationtoolmode = 'none';
+
 	/**
 	 * Drawings Calibration
 	 */
 	public setCalibrationToolMode(mode: string) {
 		UnityUtil.setCalibrationToolMode(mode);
+		this.calibrationtoolmode = mode;
 	}
 
 	public setCalibrationToolVerticalPlanes(lower, upper) {
 		UnityUtil.setCalibrationToolVerticalPlanes(lower, upper);
 	}
 
-	public selectCalibrationToolUpperPlane() {
-		UnityUtil.selectCalibrationToolUpperPlane();
-	}
+	public selectCalibrationToolPlane(plane) {
+		const selectedPlane = plane === 'none' ? 'upper' : plane; // If none plane is selected show as if the top plane is selected.
+		const unselectedPlane = selectedPlane === 'upper' ? 'lower' : 'upper';
 
-	public selectCalibrationToolLowerPlane() {
-		UnityUtil.selectCalibrationToolLowerPlane();
+		Viewer.setCalibrationToolVerticalPlaneColours(selectedPlane, hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 44), COLOR.PRIMARY_MAIN,  COLOR.PRIMARY_MAIN_CONTRAST);
+		Viewer.setCalibrationToolVerticalPlaneColours(unselectedPlane, hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 0), COLOR.PRIMARY_MAIN, hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 0));
+
+		UnityUtil.selectCalibrationToolVerticalPlane(plane);
 	}
 
 	public setCalibrationToolDrawing(image: any, rect: number[]) {
@@ -1359,22 +1366,8 @@ export class ViewerService {
 		UnityUtil.setCalibrationToolFloorToObject(teamspace, modelId, meshId);
 	}
 
-	public setCalibrationToolSelectedColors(fill, border) {
-		UnityUtil.unityInstance.SendMessage('WebGLInterface', 'SetCalibrationToolSelectedColours', JSON.stringify({
-			fill,
-			border,
-		}));
-	}
-
-	public setCalibrationToolUnselectedColors(fill, border) {
-		UnityUtil.unityInstance.SendMessage('WebGLInterface', 'SetCalibrationToolUnselectedColours', JSON.stringify({
-			fill,
-			border,
-		}));
-	}
-
-	public SetCalibrationToolOcclusionOpacity(opacity) {
-		UnityUtil.unityInstance.SendMessage('WebGLInterface', 'SetCalibrationToolOcclusionOpacity', opacity);
+	public setCalibrationToolVerticalPlaneColours(plane, fill, border, drawing) {
+		UnityUtil.setCalibrationToolVerticalPlaneColours(plane, fill, border, drawing);
 	}
 }
 
