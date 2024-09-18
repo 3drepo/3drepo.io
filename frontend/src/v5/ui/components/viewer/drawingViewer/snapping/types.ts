@@ -258,3 +258,10 @@ export class CubicBezier {
 		n.ymax = Math.max(this.p0.y, this.p1.y, this.p2.y, this.p3.y);
 	}
 }
+
+export enum SnapType {
+	NONE,
+	NODE,
+	INTERSECTION,
+	EDGE,
+}

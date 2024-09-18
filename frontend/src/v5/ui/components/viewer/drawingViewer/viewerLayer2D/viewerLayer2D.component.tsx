@@ -26,6 +26,7 @@ import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibratio
 import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 import { SVGSnapHelper } from '../snapping/svgSnapHelper';
 import { Vector2 } from 'three';
+import { SnapType } from '../snapping/types';
 
 export type ViewBoxType = ReturnType<PanZoomHandler['getOriginalSize']> & ReturnType<PanZoomHandler['getTransform']>;
 type ViewerLayer2DProps = {
@@ -42,6 +43,7 @@ export const ViewerLayer2D = ({ viewBox, active, snapHandler, value, onChange }:
 	const [offsetEnd, setOffsetEnd] = useState<Coord2D>(value?.[1] || null);
 	const previousViewBox = useRef<ViewBoxType>(null);
 	const [mousePosition, setMousePosition] = useState<Coord2D>(null);
+	const [snapType, setSnapType] = useState<SnapType>(SnapType.NONE);
 
 	const containerStyle: CSSProperties = {
 		transformOrigin: '0 0',
@@ -77,33 +79,23 @@ export const ViewerLayer2D = ({ viewBox, active, snapHandler, value, onChange }:
 
 	const handleMouseMove = (e) => {
 		let mousePos = getMousePosition(e);
-		// console.log(mousePos);
 
 		const radius = 10 / viewBox.scale;
-		const p = { 'x':0.4194745900850094, 'y':-17.04221139792132 };
-		// ,"closestNode":{"x":0,"y":0}}
 
-		const results = snapHandler.snap(p, 50);
+		const results = snapHandler?.snap(mousePos, radius) || { closestNode: undefined, closestIntersection: undefined, closestEdge: undefined };
 
-		// 	// The snapResults object returns three types of snap point. This
-		// 	// snippet preferentially snaps to nodes, then intersections, and
-		// 	// finally edges.
-
-		// 	// Note that the positions are in SVG space - these are the
-		// 	// coordinates that should be passed to the calibration system, and
-		// 	// will need to be converted to the client rect in order to find out
-		// 	// where to draw the cursor. In this sample, this is performed by
-		// 	// updateCursorPosition in setCursor.
 
 		if (results.closestNode != null) {
-			console.log('hey');
+			setSnapType(SnapType.NODE);
 			mousePos = results.closestNode;
 		} else if (results.closestIntersection != null) {
-			console.log('ho');
+			setSnapType(SnapType.INTERSECTION);
 			mousePos = results.closestIntersection;
 		} else if (results.closestEdge != null) {
-			console.log('lets go');
+			setSnapType(SnapType.EDGE);
 			mousePos = results.closestEdge;
+		} else {
+			setSnapType(SnapType.NONE);
 		}
 
 		setMousePosition([mousePos.x, mousePos.y]);
@@ -124,7 +116,7 @@ export const ViewerLayer2D = ({ viewBox, active, snapHandler, value, onChange }:
 		<Container style={containerStyle} id="viewerLayer2d">
 			{isCalibrating && (
 				<LayerLevel>
-					{mousePosition && active && <SvgCircle coord={mousePosition} scale={viewBox.scale} />}
+					{mousePosition && active && <SvgCircle coord={mousePosition} scale={viewBox.scale} snapType={snapType} />}
 					{offsetStart && <SvgArrow start={offsetStart} end={offsetEnd ?? mousePosition} scale={viewBox.scale} />}
 				</LayerLevel>
 			)}

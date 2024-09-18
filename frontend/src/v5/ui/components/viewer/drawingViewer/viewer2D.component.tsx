@@ -41,7 +41,6 @@ import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { isFirefox } from '@/v5/helpers/browser.helper';
 import { ZoomableImage } from './zoomableImage.types';
 import { SVGSnapHelper } from './snapping/svgSnapHelper';
-import { Vector2 } from 'three';
 import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -58,8 +57,8 @@ export const Viewer2D = () => {
 	const [drawingId] = useSearchParam('drawingId');
 
 	const revision = DrawingRevisionsHooksSelectors.selectLatestActiveRevision(drawingId);
-	const src = revision ? getDrawingImageSrc(teamspace, project, drawingId, revision._id) : '';
-	const authSrc = useAuthenticatedImage(src);
+	const plainSrc = revision ? getDrawingImageSrc(teamspace, project, drawingId, revision._id) : '';
+	const src = useAuthenticatedImage(plainSrc);
 	const backgroundColor = useSelector(selectViewerBackgroundColor);
 
 	const { close2D } = useContext(ViewerCanvasesContext);
@@ -75,9 +74,7 @@ export const Viewer2D = () => {
 	const imgContainerRef = useRef();
 
 	const canCalibrate2D = isCalibrating && step === 1;
-	const showSVGImage = !isFirefox() && !src.toLowerCase().endsWith('.png');
-
-
+	const showSVGImage = !isFirefox() && !plainSrc.toLowerCase().endsWith('.png');
 
 	const onClickZoomIn = () => {
 		zoomHandler.zoomIn();
@@ -125,7 +122,7 @@ export const Viewer2D = () => {
 
 	useEffect(() => {
 		setIsLoading(true);
-	}, [authSrc]);
+	}, [src]);
 
 	useEffect(() => {
 		if (revision) return;
@@ -155,9 +152,9 @@ export const Viewer2D = () => {
 						<Loader />
 					</CentredContainer>
 				}
-				{showSVGImage && authSrc && <SVGImage ref={imgRef} src={authSrc} onLoad={onImageLoad} />}
-				{!showSVGImage && authSrc && <DrawingViewerImage ref={imgRef} src={authSrc} onLoad={onImageLoad} />}
-				{ !isLoading && (<ViewerLayer2D
+				{showSVGImage && src && <SVGImage ref={imgRef} src={src} onLoad={onImageLoad} />}
+				{!showSVGImage && src && <DrawingViewerImage ref={imgRef} src={src} onLoad={onImageLoad} />}
+				{!isLoading && (<ViewerLayer2D
 					active={isCalibrating2D}
 					viewBox={viewBox}
 					value={vector2D}
@@ -177,7 +174,7 @@ export const Viewer2D = () => {
 						onClick={onCalibrationClick}
 						title={formatMessage({ id: 'drawingViewer.toolbar.calibrate', defaultMessage: 'Calibrate' })}
 						selected={isCalibrating2D}
-						// hidden={!canCalibrate2D}
+						hidden={!canCalibrate2D}
 					/>
 					<ToolbarButton
 						Icon={ZoomOutIcon}

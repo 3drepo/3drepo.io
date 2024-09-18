@@ -16,26 +16,42 @@
  */
 
 import { mapValues } from 'lodash';
-import { Circle, Svg } from './svgCircle.styles';
+import { Svg } from './svgCircle.styles';
 import { Coord2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
+import { SnapType } from '../../snapping/types';
 
-type SvgCircleProps = { coord: Coord2D, scale: number };
-export const SvgCircle = ({ coord, scale }: SvgCircleProps) => {
+const green = '#31f617';
+const yellow = '#f6e419';
+
+const CircleColours = {
+	[SnapType.NONE]: 'white',
+	[SnapType.NODE]: yellow,
+	[SnapType.INTERSECTION]: yellow,
+	[SnapType.EDGE]: green,
+};
+
+type SvgCircleProps = { coord: Coord2D, scale: number, snapType: SnapType };
+export const SvgCircle = ({ coord, scale, snapType }: SvgCircleProps) => {
 	const measures = mapValues({
-		strokeWidth: 1,
-		radius: 3,
+		strokeWidth: 0.5,
+		radius: 4,
 	}, (val) => val / scale);
+
+	const colour = CircleColours[snapType];
+
 	return (
 		<Svg
 			xmlns="http://www.w3.org/2000/svg"
 			version="1.1"
 			xmlnsXlink="http://www.w3.org/1999/xlink"
 		>
-			<Circle
+			<circle
 				cx={coord[0] + measures.strokeWidth / 2}
 				cy={coord[1] + measures.strokeWidth / 2}
 				r={measures.radius}
 				strokeWidth={measures.strokeWidth}
+				stroke='gray'
+				fill={colour}
 			/>
 		</Svg>
 	);
