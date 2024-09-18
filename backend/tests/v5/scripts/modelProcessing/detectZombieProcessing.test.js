@@ -65,16 +65,34 @@ const setupData = () => {
 	return Promise.all(modelProms);
 };
 
-/*
-const checkModelsStatus = async (teamspace, models) => {
-	const data = await findModels(teamspace, { _id: { $in: models } }, { _id: 1, status: 1, timestamp: 1 });
-
-	// const expectedData = models.map((_id, ind) => ({ _id, timestamp: recentDate, status: modelStates[ind] }));
-
-	expect(data.length).toBe(expectedData.length);
-	expect(data).toEqual(expect.arrayContaining(expectedData));
+const checkMail = (data, filteredTeamspace) => {
+	const expectedResults = data.map(({ teamspace, models, drawings }) => {
+		if (!filteredTeamspace || teamspace === filteredTeamspace) {
+			const expectedModels = models.map(({ model, status }) => {
+				if (status !== processStatuses.OK && status !== processStatuses.FAILED) {
+					return `${teamspace}, model, ${model}, ${status}, ${recentDate}`;
+				}
+			});
+			const expectedDrawings = drawings.map(({ drawing, status }) => {
+				if (status !== processStatuses.OK && status !== processStatuses.FAILED) {
+					return `${teamspace}, drawing, ${drawing}, ${status}, ${recentDate}`;
+				}
+			});
+			return [ ...expectedModels, ...expectedDrawings ];
+		}
+	}).flat().filter(Boolean);
+	console.log(expectedResults);
+	const expectedData = {
+		script: Path.basename(__filename, Path.extname(__filename)).replace(/\.test/, ''),
+		title: 'Zombie processing statuses found',
+		message: `${expectedResults.length} zombie processing statuses found`,
+		logExcerpt: JSON.stringify(expectedResults),
+	};
+	expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
+		emailTemplates.ZOMBIE_PROCESSING_STATUSES.name,
+		expectedData,
+	);
 };
-*/
 
 const runTest = () => {
 	describe('Detect zombie processing', () => {
@@ -92,38 +110,13 @@ const runTest = () => {
 		test('Should send system mail if notify is set', async () => {
 			await DetectZombieProcessing.run(undefined, undefined, true);
 			expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
-			const expectedResults = [];
-			data.forEach(({ teamspace, models, drawings }) => {
-				models.forEach(({ model, status }) => {
-					if (status !== processStatuses.OK && status !== processStatuses.FAILED) {
-						expectedResults.push(
-							`${teamspace}, model, ${model}, ${status}, ${recentDate}`,
-						);
-					}
-				});
-				drawings.forEach(({ drawing, status }) => {
-					if (status !== processStatuses.OK && status !== processStatuses.FAILED) {
-						expectedResults.push(
-							`${teamspace}, drawing, ${drawing}, ${status}, ${recentDate}`,
-						);
-					}
-				});
-			});
-			const expectedData = {
-				script: Path.basename(__filename, Path.extname(__filename)).replace(/\.test/, ''),
-				title: 'Zombie processing statuses found',
-				message: `${expectedResults.length} zombie processing statuses found`,
-				logExcerpt: JSON.stringify(expectedResults),
-			};
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
-				emailTemplates.ZOMBIE_PROCESSING_STATUSES.name,
-				expectedData,
-			);
+			checkMail(data);
 		});
 
 		test('Should send system mail if the predefined teamspace exists', async () => {
 			await DetectZombieProcessing.run(data[0].teamspace, undefined, true);
 			expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
+			checkMail(data, data[0].teamspace);
 		});
 
 		test('Should do nothing if teamspace is not found', async () => {
