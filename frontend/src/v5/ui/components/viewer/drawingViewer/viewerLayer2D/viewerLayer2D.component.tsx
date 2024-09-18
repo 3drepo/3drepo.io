@@ -23,9 +23,9 @@ import { SvgArrow } from './svgArrow/svgArrow.component';
 import { SvgCircle } from './svgCircle/svgCircle.component';
 import { Coord2D, Vector2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { PinsLayer } from '../viewerLayer2DPins/viewerLayer2DPins.component';
-import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { Camera } from './camera/camera.component';
 import { CameraOffSight } from './camera/cameraOffSight.component';
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 
 export type ViewBoxType = ReturnType<PanZoomHandler['getOriginalSize']> & ReturnType<PanZoomHandler['getTransform']>;

@@ -20,7 +20,6 @@ import { selectCurrentProject, selectIsProjectAdmin } from '../projects/projects
 import { DrawingsState } from './drawings.redux';
 import { isCollaboratorRole, isCommenterRole, isViewerRole } from '../store.helpers';
 import { Role } from '../currentUser/currentUser.types';
-import { Calibration, CalibrationStatus } from './drawings.types';
 import { selectContainerById } from '../containers/containers.selectors';
 import { selectFederationById } from '../federations/federations.selectors';
 import { convertUnits, convertVectorUnits, getTransformationMatrix, getUnitsConversionFactor, removeZ } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
@@ -29,6 +28,7 @@ import { isEqual, orderBy } from 'lodash';
 import { Vector2 } from 'three';
 import { fullDrawing } from './drawings.helpers';
 import { selectRevisionsByDrawing } from './revisions/drawingRevisions.selectors';
+import { Calibration, CalibrationStatus } from './drawings.types';
 
 const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
 
@@ -128,7 +128,6 @@ export const selectTransformMatrix = createSelector(
 	},
 );
 
-
 export const selectTransform2DTo3D = createSelector(
 	selectTransformMatrix,
 	(matrix) => {
@@ -142,7 +141,8 @@ export const selectTransform3DTo2D = createSelector(
 	(matrix) => {
 		if (!matrix) return null;
 		const inverseMat = matrix.clone().invert();
-		return (vector): Vector2 => new Vector2(...removeZ(vector)).applyMatrix3(inverseMat);
+
+		return (vector): Vector2 => new Vector2(...removeZ(vector)).applyMatrix3(inverseMat) ;
 	},
 );
 
