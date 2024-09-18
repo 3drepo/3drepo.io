@@ -45,9 +45,10 @@ import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useAuthenticatedImage } from '@components/authenticatedResource/authenticatedResource.hooks';
-import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DrawingRevisionsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { selectViewerBackgroundColor } from '@/v4/modules/viewer/viewer.selectors';
 import { useSelector } from 'react-redux';
+import { CalibrationStatus } from '@/v5/store/drawings/drawings.types';
 import HomeIcon from '@assets/icons/viewer/home.svg';
 
 
@@ -55,8 +56,10 @@ const DEFAULT_VIEWBOX = { scale: 1, x: 0, y: 0, width: 0, height: 0 };
 export const Viewer2D = () => {
 	const { teamspace, project } = useParams<ViewerParams>();
 	const [drawingId] = useSearchParam('drawingId');
-	const revision = DrawingRevisionsHooksSelectors.selectLatestActiveRevision(drawingId);
-	const src = revision ? getDrawingImageSrc(teamspace, project, drawingId, revision._id) : '';
+	const latestActiveRevision = DrawingRevisionsHooksSelectors.selectLatestActiveRevision(drawingId);
+	const revisionId = latestActiveRevision?._id;
+	const hasCalibration = [CalibrationStatus.UNCONFIRMED, CalibrationStatus.CALIBRATED].includes(latestActiveRevision?.calibration);
+	const src = revisionId ? getDrawingImageSrc(teamspace, project, drawingId, revisionId) : '';
 	const authSrc = useAuthenticatedImage(src);
 	const backgroundColor = useSelector(selectViewerBackgroundColor);
 
@@ -66,7 +69,6 @@ export const Viewer2D = () => {
 	const [viewBox, setViewBox] = useState<ViewBoxType>(DEFAULT_VIEWBOX);
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
-	// const [isDrawingVector, setIsDrawingVector] = useState(false);
 	const [viewport, setViewport] = useState({ left:0, right: 0, top: 0, bottom:0 });
 	const [isLoading, setIsLoading] = useState(false);
 	const containerRef = useRef();
@@ -126,14 +128,20 @@ export const Viewer2D = () => {
 
 	useEffect(() => {
 		setIsLoading(true);
-	}, [drawingId]);
+	}, [authSrc]);
+
+	useEffect(() => {
+		if (hasCalibration) {
+			DrawingsActionsDispatchers.fetchCalibration(teamspace, project, drawingId);
+		}
+	}, [hasCalibration, revisionId]);
 
 	const showSVGImage = !isFirefox() && !src.toLowerCase().endsWith('.png');
 
 	useEffect(() => {
-		if (revision) return;
+		if (revisionId) return;
 		DrawingRevisionsActionsDispatchers.fetch(teamspace, project, drawingId);
-	}, [revision]);
+	}, [revisionId]);
 
 	return (
 		<ViewerContainer visible ref={containerRef}>
@@ -158,15 +166,16 @@ export const Viewer2D = () => {
 						<Loader />
 					</CentredContainer>
 				}
-				{showSVGImage && <SVGImage ref={imgRef} src={authSrc} onLoad={onImageLoad} />}
-				{!showSVGImage && <DrawingViewerImage ref={imgRef} src={authSrc} onLoad={onImageLoad} />}
-				{ !isLoading && (<ViewerLayer2D
+				{showSVGImage && <SVGImage ref={imgRef} src={authSrc} onLoad={onImageLoad} key={authSrc} />}
+				{!showSVGImage && <DrawingViewerImage ref={imgRef} src={authSrc} onLoad={onImageLoad} key={authSrc} />}
+				{!isLoading && (<ViewerLayer2D
 					active={isCalibrating2D}
 					viewBox={viewBox}
 					value={vector2D}
 					viewport={viewport}
 					onChange={setVector2D}
 					cameraEnabled={!isCalibrating}
+					key={String(isCalibrating) + drawingId}
 				/>)}
 			</ImageContainer>
 			<ToolbarContainer>
@@ -181,7 +190,6 @@ export const Viewer2D = () => {
 						onClick={onCalibrationClick}
 						title={formatMessage({ id: 'drawingViewer.toolbar.calibrate', defaultMessage: 'Calibrate' })}
 						selected={isCalibrating2D}
-						// selected={isDrawingVector}
 						hidden={!canCalibrate2D}
 					/>}
 					<ToolbarButton

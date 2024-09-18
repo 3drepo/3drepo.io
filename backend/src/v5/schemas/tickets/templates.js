@@ -61,6 +61,7 @@ const uniqueTypeBlackList = [
 	propTypes.LONG_TEXT,
 	propTypes.BOOLEAN,
 	propTypes.IMAGE,
+	propTypes.IMAGE_LIST,
 	propTypes.VIEW,
 	propTypes.MEASUREMENTS,
 	propTypes.COORDS,
@@ -120,7 +121,7 @@ const propSchema = Yup.object().shape({
 
 		if (type === propTypes.ANY_OF) return res.oneOf(values);
 
-		if (type === propTypes.IMAGE) return Yup.mixed().strip();
+		if (type === propTypes.IMAGE || type === propTypes.IMAGE_LIST) return Yup.mixed().strip();
 
 		return res;
 	}),

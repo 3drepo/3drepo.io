@@ -34,7 +34,7 @@ const STEPS = [
 
 export const CalibrationHeader = () => {
 	const history = useHistory();
-	const { project, containerOrFederation } = useParams<ViewerParams>();
+	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const { step, setStep, vector2D, vector3D, drawingId, origin, verticalPlanes } = useContext(CalibrationContext);
 	const selectedModel = FederationsHooksSelectors.selectFederationById(containerOrFederation)
 		|| ContainersHooksSelectors.selectContainerById(containerOrFederation);
@@ -51,15 +51,14 @@ export const CalibrationHeader = () => {
 
 	const handleConfirm = () => {
 		handleEndCalibration();
-		// TODO - fix after backend integration
-		DrawingsActionsDispatchers.updateDrawingSuccess(project, drawingId, { calibrationValues: {
+		DrawingsActionsDispatchers.updateCalibration(teamspace, project, drawingId, {
 			units: selectedModel.unit,
 			horizontal: {
 				model: vector3D,
 				drawing: vector2D,
 			},
 			verticalRange: verticalPlanes,
-		} });
+		});
 	};
 
 	return (

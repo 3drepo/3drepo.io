@@ -17,7 +17,7 @@
 
 import { useContext, useEffect } from 'react';
 import { CompareActionsDispatchers, ContainersActionsDispatchers, FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { useParams, generatePath } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { ContainersHooksSelectors, DrawingsHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { UnityUtil } from '@/globals/unity-util';
 import { Calibration3DHandler } from './calibrationStep/calibration3DHandler/calibration3DHandler.component';
@@ -26,14 +26,15 @@ import { ViewerCanvasesContext } from '../../../viewer/viewerCanvases.context';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { CalibrationContext } from './calibrationContext';
 import { VerticalSpatialBoundariesHandler } from './calibrationStep/verticalSpatialBoundariesHandler/verticalSpatialBoundariesHandler.component';
-import { DRAWINGS_ROUTE, ViewerParams } from '../../../routes.constants';
+import { ViewerParams } from '../../../routes.constants';
+import { viewerRoute } from '@/v5/services/routing/routing';
 
 export const CalibrationHandler = () => {
 	const { teamspace, project, revision, containerOrFederation } = useParams<ViewerParams>();
 	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
 	const { step, drawingId, setVector3D, setVector2D, setOrigin, setStep, origin, setVerticalPlanes } = useContext(CalibrationContext);
 	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
-	const { horizontal, verticalRange } = DrawingsHooksSelectors.selectCalibrationValues(drawingId, containerOrFederation);
+	const { horizontal, verticalRange } = DrawingsHooksSelectors.selectCalibration(drawingId, containerOrFederation);
 
 	const isFed = modelIsFederation(containerOrFederation);
 	const selectedModel = isFed
@@ -59,7 +60,7 @@ export const CalibrationHandler = () => {
 		}
 
 		if (!origin) {
-			setOrigin(generatePath(DRAWINGS_ROUTE, { teamspace, project }));
+			setOrigin(viewerRoute(teamspace, project, containerOrFederation, revision, { drawingId }, false));
 		}
 
 		return () => {

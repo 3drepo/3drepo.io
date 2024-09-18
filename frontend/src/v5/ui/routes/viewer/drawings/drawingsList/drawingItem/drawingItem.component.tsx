@@ -31,7 +31,7 @@ import {
 	CalibrationButton,
 } from './drawingItem.styles';
 import { FormattedMessage } from 'react-intl';
-import { DrawingRevisionsHooksSelectors, DrawingsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
@@ -60,9 +60,8 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	const { pathname, search } = useLocation();
 	const { setOrigin } = useContext(CalibrationContext);
 	const queries = DrawingsCardHooksSelectors.selectQueries();
-	const { calibration, name, number, lastUpdated, desc, _id: drawingId } = drawing;
-	const [latestRevision] = DrawingRevisionsHooksSelectors.selectRevisions(drawingId);
-	const { statusCode, revCode } = latestRevision || {};
+	const { calibrationStatus, name, number, lastUpdated, desc, _id: drawingId, latestRevision } = drawing;
+	const [statusCode, revCode] = latestRevision?.split('-');
 	const areStatsPending = !revCode;
 	const [selectedDrawingId] = useSearchParam('drawingId');
 	const [thumbnail, setThumbnail] = useState('');
@@ -81,14 +80,14 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	}, [latestRevision]);
 
 	useEffect(() => {
-		if (!latestRevision?._id) return;
+		if (!latestRevision) return;
 		
 		downloadAuthUrl(thumbnailSrc)
 			.then(setThumbnail)
 			.catch(() => setThumbnail(''));
 
 		return () => { deleteAuthUrlFromCache(thumbnailSrc); };
-	}, [latestRevision?._id]);
+	}, [latestRevision]);
 
 	const LoadingCodes = () => (
 		<>
@@ -171,7 +170,7 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 					</Property>
 				</BreakingLine>
 				<CalibrationButton
-					calibrationState={calibration}
+					calibrationStatus={calibrationStatus}
 					drawingId={drawingId}
 					onCalibrateClick={onCalibrateClick}
 				/>

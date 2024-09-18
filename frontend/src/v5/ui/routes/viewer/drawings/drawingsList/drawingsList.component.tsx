@@ -21,7 +21,7 @@ import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { VirtualisedList, TableRow } from './drawingsList.styles';
 import { CardContent, CardList } from '@components/viewer/cards/card.styles';
-import { forwardRef, useContext, useEffect } from 'react';
+import { forwardRef, useContext, useEffect, useRef } from 'react';
 import { ViewerCanvasesContext } from '../../viewerCanvases.context';
 import { AutocompleteSearchInput } from '@controls/search/autocompleteSearchInput/autocompleteSearchInput.component';
 import { DrawingsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
@@ -33,6 +33,7 @@ import { ViewerParams } from '../../../routes.constants';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { enableRealtimeDrawingNewRevision, enableRealtimeDrawingRevisionUpdate } from '@/v5/services/realtime/drawingRevision.events';
 import { flattenDeep } from 'lodash';
+import { useSearchParam } from '../../../useSearchParam';
 
 const Table = forwardRef(({ children, ...props }, ref: any) => {
 	const queries = DrawingsCardHooksSelectors.selectQueries();
@@ -63,6 +64,9 @@ export const DrawingsList = () => {
 	const allDrawings = DrawingsHooksSelectors.selectDrawings();
 	const isLoading = DrawingsHooksSelectors.selectAreStatsPending();
 	const { open2D } = useContext(ViewerCanvasesContext);
+	const virtuosoRef = useRef<any>();
+	const [selectedDrawingId] = useSearchParam('drawingId');
+	const selectedIndex = drawings.findIndex((d) => d._id === selectedDrawingId);
 
 	useEffect(() => enableRealtimeNewDrawing(teamspace, project), [project]);
 
@@ -82,9 +86,19 @@ export const DrawingsList = () => {
 		return combineSubscriptions(...flattenDeep(subscriptionsPerDrawing));
 	}, [allDrawings.length]);
 
+	useEffect(() => {
+		virtuosoRef.current.scrollToIndex({
+			behavior: 'instant',
+			block: 'nearest',
+			align: 'start',
+			index: selectedIndex,
+		});
+	}, [drawings.length]);
+
 	return (
 		// @ts-ignore
 		<VirtualisedList
+			ref={virtuosoRef}
 			data={drawings}
 			totalCount={drawings.length}
 			components={{
