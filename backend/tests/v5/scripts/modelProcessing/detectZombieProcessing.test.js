@@ -25,7 +25,6 @@ const {
 const { times } = require('lodash');
 const { utilScripts, src } = require('../../helper/path');
 
-// const { findModels } = require(`${src}/models/modelSettings`);
 const { modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { disconnect } = require(`${src}/handler/db`);
@@ -34,12 +33,10 @@ const { templates: emailTemplates } = require(`${src}/services/mailer/mailer.con
 jest.mock('../../../../src/v5/services/mailer');
 const Mailer = require(`${src}/services/mailer`);
 
-// const Drawings = require(`${src}/processors/teamspaces/projects/models/drawings`);
-
 const DetectZombieProcessing = require(`${utilScripts}/modelProcessing/detectZombieProcessing`);
 const Path = require('path');
 
-const modelStates = Object.values(processStatuses); // ['processing', 'queued'];
+const modelStates = Object.values(processStatuses);
 
 const recentDate = new Date((new Date()) - 36 * 60 * 60 * 1000);
 
@@ -68,20 +65,16 @@ const setupData = () => {
 const checkMail = (data, filteredTeamspace) => {
 	const expectedResults = data.map(({ teamspace, models, drawings }) => {
 		if (!filteredTeamspace || teamspace === filteredTeamspace) {
-			const expectedModels = models.map(({ model, status }) => {
-				if (status !== processStatuses.OK && status !== processStatuses.FAILED) {
-					return `${teamspace}, model, ${model}, ${status}, ${recentDate}`;
-				}
-			});
-			const expectedDrawings = drawings.map(({ drawing, status }) => {
-				if (status !== processStatuses.OK && status !== processStatuses.FAILED) {
-					return `${teamspace}, drawing, ${drawing}, ${status}, ${recentDate}`;
-				}
-			});
-			return [ ...expectedModels, ...expectedDrawings ];
+			const expectedModels = models.map(({ model, status }) => (
+				(status !== processStatuses.OK && status !== processStatuses.FAILED)
+					? `${teamspace}, model, ${model}, ${status}, ${recentDate}` : ''));
+			const expectedDrawings = drawings.map(({ drawing, status }) => (
+				(status !== processStatuses.OK && status !== processStatuses.FAILED)
+					? `${teamspace}, drawing, ${drawing}, ${status}, ${recentDate}` : ''));
+			return [...expectedModels, ...expectedDrawings];
 		}
+		return undefined;
 	}).flat().filter(Boolean);
-	console.log(expectedResults);
 	const expectedData = {
 		script: Path.basename(__filename, Path.extname(__filename)).replace(/\.test/, ''),
 		title: 'Zombie processing statuses found',
