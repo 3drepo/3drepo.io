@@ -90,7 +90,13 @@ export const ViewerLayer2D = ({ viewBox, active, value, cameraEnabled, viewport,
 		}
 	}, [active]);
 
-	// useEffect(() => { resetArrow(); }, [drawingId]);
+	useEffect(() => {
+		// avoid resetting the values when 2d vector exists and the user sets a new start 
+		if (value[1] === null) return; 
+		setOffsetStart(value[0]);
+		setOffsetEnd(value[1]);
+	}, [value]);
+
 	return (
 		<Viewport>
 			{cameraEnabled && <CameraOffSight onCameraSightChanged={setCameraOnSight} scale={viewBox.scale} viewport={viewport}/>}
