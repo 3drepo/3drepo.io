@@ -65,6 +65,7 @@ export const Viewer2D = () => {
 	const { close2D } = useContext(ViewerCanvasesContext);
 	const { isCalibrating, step, vector2D, setVector2D, isCalibrating2D, setIsCalibrating2D } = useContext(CalibrationContext);
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
+	const [snapHandler, setSnapHandler] =  useState<SVGSnapHelper>();
 	const [viewBox, setViewBox] = useState<ViewBoxType>(DEFAULT_VIEWBOX);
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
@@ -74,6 +75,8 @@ export const Viewer2D = () => {
 	const imgContainerRef = useRef();
 
 	const canCalibrate2D = isCalibrating && step === 1;
+	const showSVGImage = !isFirefox() && !src.toLowerCase().endsWith('.png');
+
 
 
 	const onClickZoomIn = () => {
@@ -84,7 +87,7 @@ export const Viewer2D = () => {
 		zoomHandler.zoomOut();
 	};
 
-	const onImageLoad = ({ src }) => {
+	const onImageLoad = () => {
 		setIsLoading(false);
 
 		if (zoomHandler) {
@@ -93,156 +96,16 @@ export const Viewer2D = () => {
 
 		DrawingViewerService.setImgContainer(imgContainerRef.current);
 
+		if (showSVGImage) {
+			const snap = new SVGSnapHelper();
+			snap.load(src);
+			setSnapHandler(snap);
+		} else {
+			setSnapHandler(undefined);
+		}
+
 		const pz = centredPanZoom(imgRef.current, 20, 20);
 		setZoomHandler(pz);
-
-		// The svg snap helper should only ever have load called once (create a
-		// new instance for new images). The helper will download the svg and
-		// instantiate it as a DOM element, then parse it for everything it
-		// requires. While downloading is asynchronous, building the structure can
-		// take up to a second for the largest images.
-
-		// NOTE THAT THIS IMPLEMENTATION DOES NOT SUPPORT LOADING NEW IMAGES AT ALL
-		// BECAUSE THE ONMOUSEMOVE HANDLER IS NOT DEREGISTERED ANYWHERE.
-
-		const snapHandler = new SVGSnapHelper();
-		snapHandler.load(src);
-
-		// Set up a cursor to show the state of the snap.
-
-		const cursor = document.createElement('div');
-		cursor.setAttribute('style', 'position: absolute; width: 20px; height: 20px; border-radius: 50%; display: block; z-index: 1; pointer-events: none;');
-
-		const node = document.createElement('img');
-		node.src = '/assets/drawings/cursor-node.svg';
-		cursor.appendChild(node);
-		node.toggleAttribute('hidden');
-
-		const edge = document.createElement('img');
-		edge.src = '/assets/drawings/cursor-edge.svg';
-		cursor.appendChild(edge);
-		edge.toggleAttribute('hidden');
-
-		const intersect = document.createElement('img');
-		intersect.src = '/assets/drawings/cursor-intersect.svg';
-		cursor.appendChild(intersect);
-		intersect.toggleAttribute('hidden');
-
-		// Normally we'd resolve the cursor position from svg space to client
-		// space immediatley. However below we keep it in svg space, so that
-		// if the user pans or zooms the ZoomableImage, we can update the cursor
-		// and verify the precision of the snap.
-
-		let cursorSvgPosition = { x:0, y:0 };
-		const updateCursorPosition = () => {
-			const clientPosition = imgRef.current.getClientPosition(cursorSvgPosition);
-			cursor.style.setProperty('left', (clientPosition.x - 10) + 'px', '');
-			cursor.style.setProperty('top', (clientPosition.y - 10) + 'px', '');
-		};
-		pz.on(Events.transform, updateCursorPosition);
-
-		const setCursor = (clientPosition, type) => {
-			cursorSvgPosition = clientPosition;
-			updateCursorPosition();
-			switch (type) {
-				case 'node':
-					node.toggleAttribute('hidden', false);
-					edge.toggleAttribute('hidden', true);
-					intersect.toggleAttribute('hidden', true);
-					break;
-				case 'edge':
-					node.toggleAttribute('hidden', true);
-					edge.toggleAttribute('hidden', false);
-					intersect.toggleAttribute('hidden', true);
-					break;
-				case 'intersect':
-					node.toggleAttribute('hidden', true);
-					edge.toggleAttribute('hidden', true);
-					intersect.toggleAttribute('hidden', false);
-					break;
-				case 'none':
-					node.toggleAttribute('hidden', true);
-					edge.toggleAttribute('hidden', true);
-					intersect.toggleAttribute('hidden', true);
-					break;
-			}
-		};
-
-		imgRef.current.getEventsEmitter().appendChild(cursor);
-
-		const getComputedStyleAsFloat = (element, style) => {
-			return parseFloat(window.getComputedStyle(element).getPropertyValue(style)) || 0;
-		};
-
-		const getElementContentOffset = (element) => {
-			return {
-				x: getComputedStyleAsFloat(element, 'margin-left-width') + getComputedStyleAsFloat(element, 'border-left-width'),
-				y: getComputedStyleAsFloat(element, 'margin-top-width') + getComputedStyleAsFloat(element, 'border-top-width'),
-			};
-		};
-
-		imgRef.current.getEventsEmitter().addEventListener('mousemove', (ev) => {
-
-			// This callback serves as an example of how to implement snapping.
-
-			// Snapping to SVGs is handled by an instance of SVGSnap. A new instance
-			// should be created for each SVG (i.e. do not load a new svg into an
-			// existing instance). The SVGSnap takes the DOM of an SVG.
-
-			// SVGSnap operates in the local coordinate system of the SVG primitives.
-			// First, make the event coordinates relative to the client rect of the
-			// image element regardless of any child transforms and margins.
-
-			const currentTargetRect = ev.currentTarget.getBoundingClientRect();
-			const content = getElementContentOffset(ev.currentTarget);
-			const coord = {
-				x: ev.pageX - currentTargetRect.left - content.x,
-				y: ev.pageY - currentTargetRect.top - content.y - window.pageYOffset,
-			 };
-
-			// Then get the coordinates and radius in SVG image space using the
-			// SvgImage Component's getImagePosition method.
-
-			const imagePosition = imgRef.current.getImagePosition(coord);
-			const p = new Vector2(imagePosition.x, imagePosition.y);
-
-			// (We get the radius in SVG units simply by getting another point in
-			// image space, offset by the pixel radius, and taking the distance
-			// between them)
-
-			const snapRadius = 10;
-			const imagePosition1 = imgRef.current.getImagePosition({
-				x: coord.x + snapRadius,
-				y: coord.y + snapRadius,
-			});
-			const p1 = new Vector2(imagePosition1.x, imagePosition1.y);
-			const radius = p.distanceTo(p1);
-
-			// With the query point and radius in SVG coordinates, we can now
-			// invoke the snap.
-
-			const results = snapHandler.snap(p, radius);
-
-			// The snapResults object returns three types of snap point. This
-			// snippet preferentially snaps to nodes, then intersections, and
-			// finally edges.
-
-			// Note that the positions are in SVG space - these are the
-			// coordinates that should be passed to the calibration system, and
-			// will need to be converted to the client rect in order to find out
-			// where to draw the cursor. In this sample, this is performed by
-			// updateCursorPosition in setCursor.
-
-			if (results.closestNode != null) {
-				setCursor(results.closestNode, 'node');
-			} else if (results.closestIntersection != null) {
-				setCursor(results.closestIntersection, 'intersect');
-			} else if (results.closestEdge != null) {
-				setCursor(results.closestEdge, 'edge');
-			} else {
-				setCursor({ x:0, y:0 }, 'none');
-			}
-		});
 	};
 
 	const onCalibrationClick = () => setIsCalibrating2D(!isCalibrating2D);
@@ -262,9 +125,7 @@ export const Viewer2D = () => {
 
 	useEffect(() => {
 		setIsLoading(true);
-	}, [drawingId]);
-
-	const showSVGImage = !isFirefox() && !src.toLowerCase().endsWith('.png');
+	}, [authSrc]);
 
 	useEffect(() => {
 		if (revision) return;
@@ -294,12 +155,13 @@ export const Viewer2D = () => {
 						<Loader />
 					</CentredContainer>
 				}
-				{showSVGImage && <SVGImage ref={imgRef} src={authSrc} onLoad={onImageLoad} />}
-				{!showSVGImage && <DrawingViewerImage ref={imgRef} src={authSrc} onLoad={onImageLoad} />}
+				{showSVGImage && authSrc && <SVGImage ref={imgRef} src={authSrc} onLoad={onImageLoad} />}
+				{!showSVGImage && authSrc && <DrawingViewerImage ref={imgRef} src={authSrc} onLoad={onImageLoad} />}
 				{ !isLoading && (<ViewerLayer2D
 					active={isCalibrating2D}
 					viewBox={viewBox}
 					value={vector2D}
+					snapHandler={snapHandler}
 					onChange={setVector2D}
 				/>)}
 			</ImageContainer>
@@ -315,7 +177,7 @@ export const Viewer2D = () => {
 						onClick={onCalibrationClick}
 						title={formatMessage({ id: 'drawingViewer.toolbar.calibrate', defaultMessage: 'Calibrate' })}
 						selected={isCalibrating2D}
-						hidden={!canCalibrate2D}
+						// hidden={!canCalibrate2D}
 					/>
 					<ToolbarButton
 						Icon={ZoomOutIcon}

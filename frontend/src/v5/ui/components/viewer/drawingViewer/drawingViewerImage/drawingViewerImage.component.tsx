@@ -15,9 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { forwardRef, useEffect, useRef, useState } from 'react';
-import { Loader } from '@/v4/routes/components/loader/loader.component';
-import { CentredContainer } from '@controls/centredContainer';
+import { forwardRef, useRef } from 'react';
 import { ZoomableImage } from '../zoomableImage.types';
 
 

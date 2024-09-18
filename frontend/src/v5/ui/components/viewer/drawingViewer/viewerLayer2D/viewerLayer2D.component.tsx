@@ -24,15 +24,19 @@ import { SvgCircle } from './svgCircle/svgCircle.component';
 import { Coord2D, Vector2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
+import { SVGSnapHelper } from '../snapping/svgSnapHelper';
+import { Vector2 } from 'three';
 
 export type ViewBoxType = ReturnType<PanZoomHandler['getOriginalSize']> & ReturnType<PanZoomHandler['getTransform']>;
 type ViewerLayer2DProps = {
 	viewBox: ViewBoxType,
 	active: boolean,
 	value?: Vector2D,
+	snapHandler: SVGSnapHelper
 	onChange?: (arrow: Vector2D) => void;
 };
-export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2DProps) => {
+
+export const ViewerLayer2D = ({ viewBox, active, snapHandler, value, onChange }: ViewerLayer2DProps) => {
 	const { isCalibrating } = useContext(CalibrationContext);
 	const [offsetStart, setOffsetStart] = useState<Coord2D>(value?.[0] || null);
 	const [offsetEnd, setOffsetEnd] = useState<Coord2D>(value?.[1] || null);
@@ -47,11 +51,12 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 	};
 
 	// This returns the offset of the cursor from the top-left corner
-	const getCursorOffset = (e) => {
+	const getMousePosition = (e) => {
 		const rect = e.target.getBoundingClientRect();
 		const offsetX = e.clientX - rect.left;
 		const offsetY = e.clientY - rect.top;
-		return [offsetX, offsetY].map((point) => point / viewBox.scale) as Coord2D;
+		const pos = [offsetX, offsetY].map((point) => point / viewBox.scale);
+		return new Vector2(...pos);
 	};
 
 	const handleMouseDown = () => previousViewBox.current = viewBox;
@@ -71,7 +76,37 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 	};
 
 	const handleMouseMove = (e) => {
-		setMousePosition(getCursorOffset(e));
+		let mousePos = getMousePosition(e);
+		// console.log(mousePos);
+
+		const radius = 10 / viewBox.scale;
+		const p = { 'x':0.4194745900850094, 'y':-17.04221139792132 };
+		// ,"closestNode":{"x":0,"y":0}}
+
+		const results = snapHandler.snap(p, 50);
+
+		// 	// The snapResults object returns three types of snap point. This
+		// 	// snippet preferentially snaps to nodes, then intersections, and
+		// 	// finally edges.
+
+		// 	// Note that the positions are in SVG space - these are the
+		// 	// coordinates that should be passed to the calibration system, and
+		// 	// will need to be converted to the client rect in order to find out
+		// 	// where to draw the cursor. In this sample, this is performed by
+		// 	// updateCursorPosition in setCursor.
+
+		if (results.closestNode != null) {
+			console.log('hey');
+			mousePos = results.closestNode;
+		} else if (results.closestIntersection != null) {
+			console.log('ho');
+			mousePos = results.closestIntersection;
+		} else if (results.closestEdge != null) {
+			console.log('lets go');
+			mousePos = results.closestEdge;
+		}
+
+		setMousePosition([mousePos.x, mousePos.y]);
 	};
 
 	const resetArrow = () => {
