@@ -101,11 +101,7 @@ export const FederationEllipsisMenu = ({
 					id: 'federations.ellipsisMenu.viewTickets',
 					defaultMessage: 'View Tickets',
 				})}
-				to={{ pathname: ticketsSelectionRoute(
-					teamspace,
-					project,
-					federation._id,
-				) }}
+				to={ticketsSelectionRoute( teamspace, project, federation._id)}
 			/>
 
 			<EllipsisMenuItem
