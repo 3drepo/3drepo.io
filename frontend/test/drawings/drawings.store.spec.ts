@@ -18,7 +18,7 @@
 import { DrawingsActions } from '@/v5/store/drawings/drawings.redux';
 import { selectCanUploadToProject, selectDrawingById, selectDrawings, selectFavouriteDrawings, selectHasCollaboratorAccess, selectHasCommenterAccess } from '@/v5/store/drawings/drawings.selectors';
 import { times } from 'lodash';
-import { drawingMockFactory, prepareMockStats } from './drawings.fixtures';
+import { drawingMockFactory, prepareMockCalibration, prepareMockStats } from './drawings.fixtures';
 import { NewDrawing } from '@/v5/store/drawings/drawings.types';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { createTestStore, listContainsElementWithId } from '../test.helpers';
@@ -72,11 +72,23 @@ describe('Drawings: store', () => {
 			const drawingFromState = selectDrawingById(getState(), newDrawing._id);
 
 			expect(drawingFromState.number).toEqual(stats.number);
-			expect(drawingFromState.calibration).toEqual(stats.calibration);
+			expect(drawingFromState.calibrationStatus).toEqual(stats.calibrationStatus);
 			expect(drawingFromState.status).toEqual(stats.status);
 			expect(drawingFromState.type).toEqual(stats.type);
 			expect(drawingFromState.desc).toEqual(stats.desc);
 			expect(drawingFromState.revisionsCount).toEqual(stats.revisions.total);
+		});
+
+		it('should update drawing calibration', () => {
+			const newDrawing = createAndAddDrawingToStore();
+			const calibration = prepareMockCalibration();
+			dispatch(DrawingsActions.updateDrawingSuccess(projectId, newDrawing._id, { calibration }));
+			const drawingFromState = selectDrawingById(getState(), newDrawing._id);
+
+			expect(drawingFromState.calibration.horizontal.drawing).toEqual(calibration.horizontal.drawing);
+			expect(drawingFromState.calibration.horizontal.model).toEqual(calibration.horizontal.model);
+			expect(drawingFromState.calibration.verticalRange).toEqual(calibration.verticalRange);
+			expect(drawingFromState.calibration.units).toEqual(calibration.units);
 		});
 	});
 

@@ -27,6 +27,8 @@ import { EMPTY_CALIBRATION } from '@/v5/ui/routes/dashboard/projects/calibration
 import { Vector1D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { fullDrawing } from './drawings.helpers';
 import { selectRevisionsByDrawing } from './revisions/drawingRevisions.selectors';
+import { CalibrationStatus } from './drawings.types';
+import { orderBy } from 'lodash';
 
 const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
 
@@ -34,8 +36,10 @@ export const selectDrawings = createSelector(
 	selectDrawingsDomain,
 	selectCurrentProject,
 	selectRevisionsByDrawing, // This selector is used here to recalculate the value after the revisions are fetched
-	(state, currentProject) => 
-		(state.drawingsByProject[currentProject] ?? []).map(fullDrawing),
+	(state, currentProject) => {
+		const drawings = (state.drawingsByProject[currentProject] ?? []).map((drawing) => fullDrawing(drawing as any));
+		return orderBy(drawings, 'lastUpdated', 'desc');
+	},
 );
 
 export const selectNonEmptyDrawings = createSelector(
@@ -51,14 +55,12 @@ export const selectFavouriteDrawings = createSelector(
 export const selectDrawingById = createSelector(
 	selectDrawings,
 	(_, _id) => _id,
-	(drawings, _id) => {
-		return drawings.find((d) => d._id === _id);
-	},
+	(drawings, _id) => drawings.find((d) => d._id === _id),
 );
 
 export const selectDrawingCalibration = createSelector(
 	selectDrawingById,
-	(drawing) => drawing.calibration ?? EMPTY_CALIBRATION,
+	(drawing) => drawing.calibrationStatus ?? CalibrationStatus.EMPTY,
 );
 
 export const selectIsListPending = createSelector(
@@ -103,15 +105,16 @@ export const selectCalibration = createSelector(
 	selectDrawingById,
 	(state, drawingId, modelId) => selectContainerById(state, modelId) || selectFederationById(state, modelId),
 	(drawing, model) => {
-		const conversionFactor = getUnitsConversionFactor(drawing?.units, model.unit);
-		const horizontalCalibration = drawing?.horizontal ?? EMPTY_CALIBRATION.horizontal;
+		const calibration = drawing?.calibration || EMPTY_CALIBRATION;
+		const conversionFactor = getUnitsConversionFactor(calibration.units, model.unit);
+		const horizontalCalibration = calibration.horizontal;
 
 		return {
 			horizontal: {
 				model: convertVectorUnits(horizontalCalibration.model, conversionFactor),
 				drawing: convertVectorUnits(horizontalCalibration.drawing, conversionFactor),
 			},
-			verticalRange: convertUnits(drawing?.verticalRange ?? EMPTY_CALIBRATION.verticalRange, conversionFactor) as Vector1D,
+			verticalRange: convertUnits(calibration.verticalRange, conversionFactor) as Vector1D,
 		};
 	},
 );

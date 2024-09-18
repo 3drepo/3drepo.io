@@ -25,6 +25,7 @@ import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { EditDrawingDialog } from '../../../drawingDialogs/editDrawingDialog.component';
 import { uploadToDrawing } from '../../../uploadDrawingRevisionForm/uploadDrawingRevisionForm.helpers';
+import { SelectModelForCalibration } from '../selectModelForCalibration/selectModelForCalibration.component';
 
 type DrawingsEllipsisMenuProps = {
 	selected?: boolean,
@@ -40,6 +41,9 @@ export const DrawingsEllipsisMenu = ({
 	const { teamspace, project } = useParams<DashboardParams>();
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const hasCollaboratorAccess = DrawingsHooksSelectors.selectHasCollaboratorAccess(drawing._id);
+
+	const onCalibrateClick = () => DialogsActionsDispatchers.open(SelectModelForCalibration, { drawingId: drawing._id });
+
 
 	const onClickSettings = () => DialogsActionsDispatchers.open(EditDrawingDialog, { drawing });
 	
@@ -67,7 +71,7 @@ export const DrawingsEllipsisMenu = ({
 					id: 'drawings.ellipsisMenu.calibrate',
 					defaultMessage: 'Calibrate',
 				})}
-				onClick={() => { }} // TODO - add calibration functionality
+				onClick={onCalibrateClick}
 				disabled={!drawing.revisionsCount}
 				hidden={!hasCollaboratorAccess}
 			/>

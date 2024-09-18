@@ -45,9 +45,10 @@ import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useAuthenticatedImage } from '@components/authenticatedResource/authenticatedResource.hooks';
-import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DrawingRevisionsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { selectViewerBackgroundColor } from '@/v4/modules/viewer/viewer.selectors';
 import { useSelector } from 'react-redux';
+import { CalibrationStatus } from '@/v5/store/drawings/drawings.types';
 import HomeIcon from '@assets/icons/viewer/home.svg';
 
 
@@ -59,6 +60,11 @@ export const Viewer2D = () => {
 	const revision = DrawingRevisionsHooksSelectors.selectLatestActiveRevision(drawingId);
 	const plainSrc = revision ? getDrawingImageSrc(teamspace, project, drawingId, revision._id) : '';
 	const src = useAuthenticatedImage(plainSrc);
+	const latestActiveRevision = DrawingRevisionsHooksSelectors.selectLatestActiveRevision(drawingId);
+	const revisionId = latestActiveRevision?._id;
+	const hasCalibration = [CalibrationStatus.UNCONFIRMED, CalibrationStatus.CALIBRATED].includes(latestActiveRevision?.calibration);
+	const src = revisionId ? getDrawingImageSrc(teamspace, project, drawingId, revisionId) : '';
+	const authSrc = useAuthenticatedImage(src);
 	const backgroundColor = useSelector(selectViewerBackgroundColor);
 
 	const { close2D } = useContext(ViewerCanvasesContext);
@@ -125,9 +131,15 @@ export const Viewer2D = () => {
 	}, [src]);
 
 	useEffect(() => {
-		if (revision) return;
+		if (hasCalibration) {
+			DrawingsActionsDispatchers.fetchCalibration(teamspace, project, drawingId);
+		}
+	}, [hasCalibration, revisionId]);
+
+	useEffect(() => {
+		if (revisionId) return;
 		DrawingRevisionsActionsDispatchers.fetch(teamspace, project, drawingId);
-	}, [revision]);
+	}, [revisionId]);
 
 	return (
 		<ViewerContainer visible>
@@ -160,6 +172,7 @@ export const Viewer2D = () => {
 					value={vector2D}
 					snapHandler={snapHandler}
 					onChange={setVector2D}
+					key={String(isCalibrating)}
 				/>)}
 			</ImageContainer>
 			<ToolbarContainer>
