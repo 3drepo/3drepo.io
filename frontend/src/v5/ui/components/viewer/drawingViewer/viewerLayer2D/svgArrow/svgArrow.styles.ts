@@ -27,7 +27,3 @@ export const Svg = styled.svg`
 		stroke: currentColor;
 	}
 `;
-
-export const CrossLine = styled.line`
-	color: ${({ theme }) => theme.palette.primary.light};
-`;

@@ -16,7 +16,7 @@
  */
 
 import { mapValues } from 'lodash';
-import { Svg, CrossLine } from './svgArrow.styles';
+import { Svg } from './svgArrow.styles';
 import { Coord2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 
 type SvgArrowProps = { start: Coord2D, end: Coord2D, scale: number };
@@ -29,12 +29,10 @@ export const SvgArrow = ({ start, end, scale }: SvgArrowProps) => {
 	const perpedicularAngle = (Math.PI / 2) + angle;
 
 	const measures = mapValues({
-		arrowWidth: 5,
-		arrowHeadLength: 20,
-		arrowHeadHalfWidth: 10,
-		circleRadius: 10,
-		cirleLineWidth: 1,
-		cirleLineHalfLength: 8,
+		arrowWidth: 2,
+		arrowHeadLength: 11,
+		arrowHeadHalfWidth: 6,
+		circleRadius: 6,
 	}, (val) => val / scale);
 
 	const length = Math.hypot(dx, dy);
@@ -70,20 +68,6 @@ export const SvgArrow = ({ start, end, scale }: SvgArrowProps) => {
 			/>
 			{/* Base */}
 			<circle cx={x1} cy={y1} r={measures.circleRadius} strokeWidth={0} />
-			<CrossLine
-				x1={x1 + measures.cirleLineHalfLength}
-				y1={y1}
-				x2={x1 - measures.cirleLineHalfLength}
-				y2={y1}
-				strokeWidth={measures.cirleLineWidth}
-			/>
-			<CrossLine
-				x1={x1}
-				y1={y1 + measures.cirleLineHalfLength}
-				x2={x1}
-				y2={y1 - measures.cirleLineHalfLength}
-				strokeWidth={measures.cirleLineWidth}
-			/>
 		</Svg>
 	);
 };
