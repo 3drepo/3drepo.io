@@ -28,4 +28,5 @@ export type Vector3D = Vector<Coord3D>;
 export enum PlaneType {
 	UPPER = 'upper',
 	LOWER = 'lower',
+	NONE = 'none',
 }

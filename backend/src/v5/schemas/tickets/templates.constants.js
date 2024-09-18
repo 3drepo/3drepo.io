@@ -38,6 +38,7 @@ const propTypes = createConstantMapping([
 	'oneOf',
 	'manyOf',
 	'image',
+	'imageList',
 	'view',
 	'measurements',
 	'coords',
@@ -89,6 +90,14 @@ const createPropertyEntry = (name, type, config = {}) => {
 };
 
 const TemplateConstants = { propTypes, presetEnumValues, presetModules, riskLevels, viewGroups };
+
+TemplateConstants.statuses = {
+	OPEN: 'Open',
+	IN_PROGRESS: 'In Progress',
+	FOR_APPROVAL: 'For Approval',
+	CLOSED: 'Closed',
+	VOID: 'Void',
+};
 
 TemplateConstants.statusTypes = createConstantMapping(['open', 'active', 'review', 'done', 'void']);
 
@@ -171,7 +180,7 @@ const statusCustomiseFn = (prop, config) => {
 const pinCustomiseFn = (prop, config) => (config?.pin?.color ? { ...prop, color: config.pin.color } : prop);
 
 const customisableProperties = [
-	createCustomPropertyFn(createPropertyEntry('Status', propTypes.ONE_OF, { values: ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], default: 'Open' }), statusCustomiseFn),
+	createCustomPropertyFn(createPropertyEntry('Status', propTypes.ONE_OF, { values: Object.values(TemplateConstants.statuses), default: TemplateConstants.statuses.OPEN }), statusCustomiseFn),
 	createCustomPropertyFn(createPropertyEntry('Pin', propTypes.COORDS, { availableIf: ({ pin }) => pin }), pinCustomiseFn),
 ];
 

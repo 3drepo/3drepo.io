@@ -23,10 +23,10 @@ const Groups = require('./commons/groups');
 const TicketGroups = require('./commons/tickets.groups');
 const Tickets = require('./commons/tickets');
 const Views = require('./commons/views');
-const { getIssuesCount } = require('../../../../models/issues');
 const { getLatestRevision } = require('../../../../models/revisions');
+const { getOpenTicketsCount } = require('./commons/tickets');
 const { getProjectById } = require('../../../../models/projectSettings');
-const { getRisksCount } = require('../../../../models/risks');
+const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { queueFederationUpdate } = require('../../../../services/modelProcessing');
 
 const Federations = { ...Groups, ...Views, ...Tickets, ...Comments, ...TicketGroups };
@@ -67,7 +67,7 @@ const getLastUpdatesFromModels = async (teamspace, models) => {
 	if (models) {
 		await Promise.all(models.map(async (m) => {
 			try {
-				lastUpdates.push(await getLatestRevision(teamspace, m, { timestamp: 1 }));
+				lastUpdates.push(await getLatestRevision(teamspace, m, modelTypes.FEDERATION, { timestamp: 1 }));
 			} catch {
 				// do nothing. A container can have 0 revision.
 			}
@@ -78,7 +78,7 @@ const getLastUpdatesFromModels = async (teamspace, models) => {
         - a.timestamp)[0].timestamp : undefined;
 };
 
-Federations.getFederationStats = async (teamspace, federation) => {
+Federations.getFederationStats = async (teamspace, project, federation) => {
 	const { properties, status, subModels: containers, desc } = await getFederationById(teamspace, federation, {
 		properties: 1,
 		status: 1,
@@ -86,9 +86,8 @@ Federations.getFederationStats = async (teamspace, federation) => {
 		desc: 1,
 	});
 
-	const [issueCount, riskCount, lastUpdates] = await Promise.all([
-		getIssuesCount(teamspace, federation),
-		getRisksCount(teamspace, federation),
+	const [ticketsCount, lastUpdates] = await Promise.all([
+		getOpenTicketsCount(teamspace, project, federation),
 		getLastUpdatesFromModels(teamspace, containers ? containers.map(({ _id }) => _id) : containers),
 	]);
 
@@ -99,7 +98,7 @@ Federations.getFederationStats = async (teamspace, federation) => {
 		containers,
 		desc,
 		lastUpdated: lastUpdates,
-		tickets: { issues: issueCount, risks: riskCount },
+		tickets: ticketsCount,
 	};
 };
 

@@ -17,12 +17,12 @@
 "use strict";
 
 const request = require("supertest");
+const SessionTracker = require("../../v5/helper/sessionTracker")
 const {should, assert, expect, Assertion } = require("chai");
 const app = require("../../../src/v4/services/api.js").createApp();
 const responseCodes = require("../../../src/v4/response_codes.js");
 const {templates: responseCodesV5} = require("../../../src/v5/utils/responseCodes");
 const async = require("async");
-const { login } = require("../helpers/users.js");
 
 
 describe("ModelAssets", function () {
@@ -34,19 +34,24 @@ describe("ModelAssets", function () {
 	const model = '5bfc11fa-50ac-b7e7-4328-83aa11fa50ac';
 	let server;
 	let agent;
-	let agent2;
+	let viewerAgent;
+	let noAccessAgent;
 
-	before(function(done) {
-		server = app.listen(8080, function () {
-			console.log("API test server is listening on port 8080!");
-			agent = request.agent(server);
-			agent.post("/login")
-				.send({ username, password })
-				.expect(200, function(err, res) {
-					expect(res.body.username).to.equal(username);
-					done(err);
-				});
+	before(async function() {
+		await new Promise((resolve) => {
+			server = app.listen(8080, () => {
+				console.log("API test server is listening on port 8080!");
+				resolve();
+			});
+
 		});
+
+		agent = SessionTracker(request(server));
+		await agent.login(username, password);
+		viewerAgent = SessionTracker(request(server));
+		await viewerAgent.login(viewerUser, password);
+		noAccessAgent = SessionTracker(request(server));
+		await noAccessAgent.login(noAccessUser, password);
 	});
 
 	after(function(done) {
@@ -93,7 +98,7 @@ describe("ModelAssets", function () {
 		it("from invalid model should fail", function(done) {
 			agent.get(`/${username}/dfsfdsg/revision/master/head/srcAssets.json`)
 				.expect(404, (err, res) => {
-					expect(res.body.code).eq(responseCodesV5.modelNotFound.code);
+					expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
 					done(err);
 				});
 
@@ -109,46 +114,17 @@ describe("ModelAssets", function () {
 	});
 
 	describe("Get SRC list (Viewer)", function() {
-		before(function(done) {
-			async.series([
-				function(_done) {
-					agent.post("/logout")
-						.send({})
-						.expect(200, _done);
-				},
-				function(_done) {
-					agent.post("/login")
-						.send({username: viewerUser, password})
-						.expect(200, _done);
-				}
-			], done);
-		});
 
 		it("from the latest revision should succeed", function(done) {
-			agent.get(`/${username}/${model}/revision/master/head/srcAssets.json`)
+			viewerAgent.get(`/${username}/${model}/revision/master/head/srcAssets.json`)
 				.expect(200, done);
 		});
 
 	});
 
 	describe("Get SRC list (No Access)", function() {
-		before(function(done) {
-			async.series([
-				function(_done) {
-					agent.post("/logout")
-						.send({})
-						.expect(200, _done);
-				},
-				function(_done) {
-					agent.post("/login")
-						.send({username: noAccessUser, password})
-						.expect(200, _done);
-				}
-			], done);
-		});
-
 		it("from the latest revision should fail", function(done) {
-			agent.get(`/${username}/${model}/revision/master/head/srcAssets.json`)
+			noAccessAgent.get(`/${username}/${model}/revision/master/head/srcAssets.json`)
 				.expect(401, (err, res) => {
 					expect(res.body.value).eq(responseCodes.NOT_AUTHORIZED.value);
 					done(err);
@@ -159,21 +135,6 @@ describe("ModelAssets", function () {
 
 
 	describe("Get SRC file", function() {
-		before(function(done) {
-			async.series([
-				function(_done) {
-					agent.post("/logout")
-						.send({})
-						.expect(200, _done);
-				},
-				function(_done) {
-					agent.post("/login")
-						.send({username: username, password})
-						.expect(200, _done);
-				}
-			], done);
-		});
-
 		it("of a valid ID should succeed", function(done) {
 			agent.get(`/${username}/${model}/c4e6d66f-33ab-4dc5-97b6-e3d9a644cde4.src.mpc`)
 				.expect(200, done);
@@ -202,7 +163,7 @@ describe("ModelAssets", function () {
 		it("from invalid model should fail", function(done) {
 			agent.get(`/${username}/dfsfdsg/c4e6d66f-33ab-4dc5-97b6-e3d9a644cde4.src.mpc`)
 				.expect(404, (err, res) => {
-					expect(res.body.code).eq(responseCodesV5.modelNotFound.code);
+					expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
 					done(err);
 				});
 
@@ -211,46 +172,16 @@ describe("ModelAssets", function () {
 	});
 
 	describe("Get SRC file (Viewer)", function() {
-		before(function(done) {
-			async.series([
-				function(_done) {
-					agent.post("/logout")
-						.send({})
-						.expect(200, _done);
-				},
-				function(_done) {
-					agent.post("/login")
-						.send({username: viewerUser, password})
-						.expect(200, _done);
-				}
-			], done);
-		});
-
 		it("of a valid ID should succeed", function(done) {
-			agent.get(`/${username}/${model}/c4e6d66f-33ab-4dc5-97b6-e3d9a644cde4.src.mpc`)
+			viewerAgent.get(`/${username}/${model}/c4e6d66f-33ab-4dc5-97b6-e3d9a644cde4.src.mpc`)
 				.expect(200, done);
 		});
 
 	});
 
 	describe("Get SRC file (No Access)", function() {
-		before(function(done) {
-			async.series([
-				function(_done) {
-					agent.post("/logout")
-						.send({})
-						.expect(200, _done);
-				},
-				function(_done) {
-					agent.post("/login")
-						.send({username: noAccessUser, password})
-						.expect(200, _done);
-				}
-			], done);
-		});
-
 		it("of a valid ID should fail", function(done) {
-			agent.get(`/${username}/${model}/c4e6d66f-33ab-4dc5-97b6-e3d9a644cde4.src.mpc`)
+			noAccessAgent.get(`/${username}/${model}/c4e6d66f-33ab-4dc5-97b6-e3d9a644cde4.src.mpc`)
 				.expect(401, (err,res) => {
 					expect(res.body.value).eq(responseCodes.NOT_AUTHORIZED.value);
 					done(err);

@@ -33,6 +33,12 @@ export const ImageContainer = styled.div`
 	height: 75px;
 	width: 75px;
 	overflow: hidden;
+
+	img {
+		object-fit: cover;
+		width: 100%;
+		height: 100%;
+	}
 `;
 
 export const InfoContainer = styled.div`
@@ -57,9 +63,22 @@ export const Title = styled(PropertyValue)`
 	line-height: 18px;
 	width: fit-content;
 	max-width: 100%;
+	display: block;
+
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+
+	@supports (-webkit-line-clamp: 2) {
+		/* stylelint-disable-next-line */
+		display: -webkit-box;
+		/* stylelint-disable-next-line */
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		white-space: initial;
+		padding-bottom: 0;
+		line-height: 12px;
+	}
 
 	&:hover {
 		text-decoration: underline;
@@ -109,8 +128,8 @@ export const Description = styled(PropertyValue)`
 		-webkit-box-orient: vertical;
 		-webkit-line-clamp: 3;
 		white-space: initial;
-		padding-bottom: 1px;
 		margin-bottom: 4px;
+		padding-bottom: 0;
 	}
 `;
 

@@ -31,6 +31,7 @@ import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint } f
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 import { useContext } from 'react';
 import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 
 export const modelIsFederation = (modelId: string) => !!FederationsHooksSelectors.selectFederationById(modelId);
 
@@ -160,7 +161,7 @@ export const isResourceId = (str) => {
 };
 
 export const getImgSrc = (imgData) => {
-	const { teamspace, project } = useParams();
+	const { teamspace, project } = useParams<DashboardParams>();
 	const { containerOrFederation } = useContext(TicketContext);
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();

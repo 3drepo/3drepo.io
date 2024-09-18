@@ -21,10 +21,10 @@ import { Step, StepLabel } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { CalibrationState } from '@/v5/store/drawings/drawings.types';
 import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useContext } from 'react';
 import { CalibrationContext } from '../calibrationContext';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 
 const STEPS = [
 	formatMessage({ defaultMessage: '3D Alignment', id: 'calibration.step.3dCalibration' }),
@@ -34,7 +34,7 @@ const STEPS = [
 
 export const CalibrationHeader = () => {
 	const history = useHistory();
-	const { teamspace, project, containerOrFederation } = useParams();
+	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const { step, setStep, vector2D, vector3D, drawingId, origin, verticalPlanes } = useContext(CalibrationContext);
 	const selectedModel = FederationsHooksSelectors.selectFederationById(containerOrFederation)
 		|| ContainersHooksSelectors.selectContainerById(containerOrFederation);
@@ -42,7 +42,7 @@ export const CalibrationHeader = () => {
 
 	const getIsStepValid = () => {
 		if (step === 0) return !!(vector3D[0] && vector3D[1]);
-		if (step === 1) return !!(vector2D[0] && vector2D[1]); // TODO ensure start !== end
+		if (step === 1) return !!(vector2D[0] && vector2D[1]);
 		if (step === 2) return !!(verticalPlanes[0] && verticalPlanes[1]);
 		return false;
 	};
@@ -51,16 +51,13 @@ export const CalibrationHeader = () => {
 
 	const handleConfirm = () => {
 		handleEndCalibration();
-		DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawingId, {
-			calibration: {
-				state: CalibrationState.CALIBRATED,
-				units: selectedModel.unit,
-				horizontal: {
-					model: vector3D,
-					drawing: vector2D,
-				},
-				verticalRange: verticalPlanes,
+		DrawingsActionsDispatchers.updateCalibration(teamspace, project, drawingId, {
+			units: selectedModel.unit,
+			horizontal: {
+				model: vector3D,
+				drawing: vector2D,
 			},
+			verticalRange: verticalPlanes,
 		});
 	};
 

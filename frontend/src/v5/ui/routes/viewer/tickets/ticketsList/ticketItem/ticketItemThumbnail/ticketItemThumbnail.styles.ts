@@ -18,8 +18,6 @@
 import { OverlappingContainer } from '@controls/overlappingContainer/overlappingContainer.styles';
 import styled from 'styled-components';
 import ViewpointIconBase from '@assets/icons/outlined/camera_side-outlined.svg';
-import { CentredContainer } from '@controls/centredContainer';
-import ImageIconBase from '@assets/icons/outlined/image_thin-outlined.svg';
 
 export const ThumbnailContainer = styled(OverlappingContainer)`
 	height: 50px;
@@ -30,20 +28,6 @@ export const ThumbnailContainer = styled(OverlappingContainer)`
 	border-radius: 5px;
 	overflow: hidden;
 	margin-bottom: 6px;
-`;
-
-export const Thumbnail = styled.img`
-	object-fit: cover;
-	user-select: none;
-`;
-
-export const ImagePlaceholder = styled(CentredContainer)`
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	color: ${({ theme }) => theme.palette.base.lighter};
-`;
-
-export const ImageIcon = styled(ImageIconBase)`
-	display: block;
 `;
 
 export const ViewpointOverlay = styled.div`

@@ -18,6 +18,7 @@
 "use strict";
 
 const ServiceHelperV5 = require("../../v5/helper/services")
+const SessionTracker = require("../../v5/helper/sessionTracker")
 
 function signUpAndLogin(params) {
 
@@ -35,19 +36,12 @@ function signUpAndLogin(params) {
 	// hack: by starting the server earlier all the mongoose models like User will be connected to db without any configuration
 	request(server).get("/info").end(() => {
 
-		agent = request.agent(server);
+		agent = SessionTracker(request(server));
 
 		return ServiceHelperV5.db.createUser({user:  username, password, basicData: {email}}).then(() => {
 			return ServiceHelperV5.db.createTeamspace(username, [], undefined, false).then(() => {
 				// login
-				agent.post("/login")
-					.send({ username, password })
-					.expect(200, function(err, res) {
-						expect(res.body.username).to.equal(username);
-						console.log(typeof done);
-						done(err, agent);
-
-					});
+				agent.login(username, password).then(() => { done(undefined, agent) });
 
 			})
 		}).catch(err => {

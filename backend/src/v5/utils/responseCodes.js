@@ -46,6 +46,7 @@ ResponseCodes.templates = {
 	teamspaceNotFound: { message: 'Teamspace not found.', status: 404 },
 	ssoRestricted: { message: 'This teamspace only accepts Single Signed On users. Please link your account with an authority.', status: 401 },
 	domainRestricted: { message: 'Your email does not belong in a domain that is accepted by this teamspace. Please contact your teamspace administrator.', status: 401 },
+	moduleUnavailable: { message: 'This module is not available in this teamspace.', status: 400 },
 
 	// Project related error
 	projectNotFound: { message: 'Project not found.', status: 404 },
@@ -65,6 +66,7 @@ ResponseCodes.templates = {
 
 	// Drawing related error
 	drawingNotFound: { message: 'Drawing not found.', status: 404 },
+	calibrationNotFound: { message: 'Calibration not found.', status: 404 },
 
 	// Custom ticket related error
 	templateNotFound: { message: 'Template not found.', status: 404 },
@@ -150,9 +152,9 @@ ResponseCodes.getSwaggerComponents = () => {
 ResponseCodes.codeExists = (code) => !!ResponseCodes.templates[toCamelCase(code)];
 
 ResponseCodes.createResponseCode = (errCode, message) => {
-	const codeExists = ResponseCodes.codeExists(errCode?.code);
+	const isError = errCode instanceof Error;
+	const codeExists = ResponseCodes.codeExists(errCode?.code) && !isError;
 	if (!codeExists) {
-		const isError = errCode instanceof Error;
 		if (isError && !logfile.silent) {
 			// eslint-disable-next-line
 			console.error(errCode)

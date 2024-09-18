@@ -20,7 +20,6 @@ import Check from '@mui/icons-material/Check';
 import Copy from '@mui/icons-material/FileCopy';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
-import { LONG_DATE_TIME_FORMAT } from '@/v4/services/formatting/formatDate';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { FILTER_TYPES } from '../../filterPanel';
@@ -123,7 +122,6 @@ export class FiltersMenu extends PureComponent<IProps, IState> {
 							<DateTimePicker
 								value={this.getSelectedDate(item, subItem.value)}
 								onChange={this.onDateChange(item, subItem.value)}
-								inputFormat={LONG_DATE_TIME_FORMAT}
 							/>
 						</DateTimePickerWrapper>
 					}

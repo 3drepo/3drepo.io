@@ -26,6 +26,8 @@ const config = require(`${src}/utils/config`);
 const { updateSecurityRestrictions } = require(`${src}/models/teamspaceSettings`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
+const { ADD_ONS, ADD_ONS_MODULES } = require(`${src}/models/teamspaces.constants`);
+const { updateAddOns } = require(`${src}/models/teamspaceSettings`);
 
 let server;
 let agent;
@@ -53,6 +55,15 @@ const teamspaces = [
 	{ name: ServiceHelper.generateRandomString(), isAdmin: false },
 	{ name: ServiceHelper.generateRandomString(), isAdmin: true },
 ];
+const teamspaceWithAddOns = teamspaces[0];
+
+const addOns = {
+	[ADD_ONS.VR]: true,
+	[ADD_ONS.SRC]: true,
+	[ADD_ONS.HERE]: true,
+	[ADD_ONS.POWERBI]: true,
+	[ADD_ONS.MODULES]: Object.values(ADD_ONS_MODULES),
+};
 
 const fsAvatarData = ServiceHelper.generateRandomString();
 const gridFsAvatarData = ServiceHelper.generateRandomString();
@@ -91,6 +102,9 @@ const setupData = async () => {
 			return ServiceHelper.db.createTeamspace(name, perms);
 		},
 	));
+
+	await updateAddOns(teamspaceWithAddOns.name, addOns);
+
 	await Promise.all([
 		ServiceHelper.db.createTeamspace(tsWithFsAvatar.name, [userWithFsAvatar.user]),
 		ServiceHelper.db.createTeamspace(tsWithGridFsAvatar.name, [userWithGridFsAvatar.user]),
@@ -202,7 +216,7 @@ const setupData = async () => {
 			modelWithRev.properties),
 	]);
 
-	await ServiceHelper.db.createRevision(tsWithLicense.name, modelWithRev._id,
+	await ServiceHelper.db.createRevision(tsWithLicense.name, project.id, modelWithRev._id,
 		ServiceHelper.generateRevisionEntry(false, true));
 };
 
@@ -560,6 +574,30 @@ const testSSORestriction = () => {
 	});
 };
 
+const testGetAddOns = () => {
+	describe('Get add ons', () => {
+		const route = (key, ts) => `/v5/teamspaces/${ts}/addOns${key ? `?key=${key}` : ''}`;
+
+		describe.each([
+			['user does not have a valid session', undefined, teamspaceWithAddOns.name, false, templates.notLoggedIn],
+			['teamspace does not exist', testUser.apiKey, generateRandomString(), false, templates.teamspaceNotFound],
+			['user is not a member of the teamspace', testUser2.apiKey, teamspaceWithAddOns.name, false, templates.teamspaceNotFound],
+			['teamspace has add ons', testUser.apiKey, teamspaceWithAddOns.name, true, addOns],
+			['teamspace has no add ons', testUser.apiKey, teamspaces[2].name, true, {}],
+		])('', (desc, key, ts, success, expectedRes) => {
+			test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedRes.status;
+				const res = await agent.get(route(key, ts)).expect(expectedStatus);
+				if (success) {
+					expect(res.body).toEqual(expectedRes);
+				} else {
+					expect(res.body.code).toEqual(expectedRes.code);
+				}
+			});
+		});
+	});
+};
+
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -574,4 +612,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	testRemoveTeamspaceMember();
 	testGetMemberAvatar();
 	testSSORestriction();
+	testGetAddOns();
 });

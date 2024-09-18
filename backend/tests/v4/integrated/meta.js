@@ -17,6 +17,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+
+const SessionTracker = require("../../v5/helper/sessionTracker")
 const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../../src/v4/services/api.js").createApp();
@@ -35,6 +38,7 @@ describe("Metadata", function () {
 	const User = require("../../../src/v4/models/user");
 	let server;
 	let agent;
+	let groupUserAgent;
 	const username = "metaTest";
 	const password = "123456";
 	const model = "4d3df6a7-b4d5-4304-a6e1-dc192a761490";
@@ -46,20 +50,20 @@ describe("Metadata", function () {
 	const groupModel = "4ec71fdd-0450-4b6f-8478-c46633bb66e3";
 	const groupFederation = "80bc4290-0f94-11eb-970b-03c55a1e1b3a";
 
-	before(function(done) {
-
-		server = app.listen(8080, function () {
-			console.log("API test server is listening on port 8080!");
-
-			agent = request.agent(server);
-			agent.post("/login")
-				.send({ username, password })
-				.expect(200, function(err, res) {
-					expect(res.body.username).to.equal(username);
-					done(err);
-				});
+	before(async function() {
+		await new Promise((resolve) => {
+			server = app.listen(8080, () => {
+				console.log("API test server is listening on port 8080!");
+				resolve();
+			});
 
 		});
+
+		agent = SessionTracker(request(server));
+		await agent.login(username, password);
+
+		groupUserAgent = SessionTracker(request(server));
+		await groupUserAgent.login(groupUser, groupPassword);
 
 	});
 
@@ -200,7 +204,7 @@ describe("Metadata", function () {
 			"metadata": {
 				"IFC Type": "IfcBuildingElementProxy",
 				"IFC GUID": "0B97aBkeAuHeytNaMZaPJH",
-				"Meta With, Comma": "Value",				
+				"Meta With, Comma": "Value",
 			},
 			"parents": [ "916375ad-148a-4eda-a5a9-2b8aa25713ad" ]
 		};
@@ -265,7 +269,7 @@ describe("Metadata", function () {
 			"_id": "0062f1bb-b28e-4be2-a9d7-6f73abcdb760",
 			"metadata": {
 				"IFC Type": "IfcBuildingElementProxy",
-				"IFC GUID": "0WHuICC7qTG8oNFZ9AvcS0",	
+				"IFC GUID": "0WHuICC7qTG8oNFZ9AvcS0",
 				"Meta With, Comma": "Value",
 			},
 			"parents": [ "dba918f9-e065-4f98-921e-ab7c05d89ee5" ]
@@ -477,22 +481,6 @@ describe("Metadata", function () {
 				]
 			}
 		];
-
-		before(function(done) {
-			async.series([
-				function(done) {
-					agent.post("/logout")
-						.send({})
-						.expect(200, done);
-				},
-				function(done) {
-					agent.post("/login")
-						.send({username: groupUser, password: groupPassword})
-						.expect(200, done);
-				}
-			], done);
-		});
-
 		it("retrieving mesh IDs with rule query should succeed", function(done) {
 			const query = [
 				{
@@ -502,7 +490,7 @@ describe("Metadata", function () {
 				}
 			];
 
-			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules?meshids=true`)
+			groupUserAgent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules?meshids=true`)
 				.send(query)
 				.expect(200, function(err, res) {
 					res.body[0].mesh_ids.sort();
@@ -531,7 +519,7 @@ describe("Metadata", function () {
 				}
 			];
 
-			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules?meshids=true`)
+			groupUserAgent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules?meshids=true`)
 				.send(query)
 				.expect(200, function(err, res) {
 					expect(res.body[0].mesh_ids.length).to.equal(200);
@@ -542,7 +530,7 @@ describe("Metadata", function () {
 		it("retrieving mesh IDs with empty rule query should succeed", function(done) {
 			const query = [];
 
-			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules?meshids=true`)
+			groupUserAgent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules?meshids=true`)
 				.send(query)
 				.expect(200, function(err, res) {
 					expect(res.body[0].account).to.equal(groupUser);
@@ -607,7 +595,7 @@ describe("Metadata", function () {
 				]
 			};
 
-			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules`)
+			groupUserAgent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules`)
 				.send(query)
 				.expect(200, function(err, res) {
 					expect(res.body).to.deep.equal(goldenData);
@@ -667,7 +655,7 @@ describe("Metadata", function () {
 				]
 			};
 
-			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules`)
+			groupUserAgent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules`)
 				.send(query)
 				.expect(200, function(err, res) {
 					expect(res.body).to.deep.equal(goldenData);
@@ -678,7 +666,7 @@ describe("Metadata", function () {
 		it("retrieving metadata with empty rule query should succeed", function(done) {
 			const query = [];
 
-			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules`)
+			groupUserAgent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules`)
 				.send(query)
 				.expect(200, function(err, res) {
 					expect(res.body.data).to.exist;

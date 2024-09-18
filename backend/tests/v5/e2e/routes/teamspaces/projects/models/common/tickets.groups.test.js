@@ -216,7 +216,7 @@ const testGetGroup = () => {
 			await setupBasicData(basicData);
 			await ServiceHelper.db.createTemplates(teamspace, [extIdTestCase.template]);
 
-			await ServiceHelper.db.createScene(teamspace, con._id, extIdTestCase.scene.rev,
+			await ServiceHelper.db.createScene(teamspace, project.id, con._id, extIdTestCase.scene.rev,
 				extIdTestCase.scene.nodes, extIdTestCase.scene.meshMap);
 			await Promise.all([fed, con].map(async (model) => {
 				const modelType = fed === model ? 'federation' : 'container';

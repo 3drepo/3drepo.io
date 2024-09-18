@@ -18,8 +18,8 @@ import { IContainer } from '@/v5/store/containers/containers.types';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { IProject } from '@/v5/store/projects/projects.types';
 import { generatePath } from 'react-router';
+import { VIEWER_ROUTE, PROJECT_ROUTE_BASE, PROJECT_ROUTE, TICKETS_SELECTION_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { IContainerRevision } from '@/v5/store/containers/revisions/containerRevisions.types';
-import { VIEWER_ROUTE, PROJECT_ROUTE_BASE, PROJECT_ROUTE, BOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { generateFullPath } from '@/v5/helpers/url.helper';
 
 export const projectRoute = (teamspace: string, project: IProject | string) => {
@@ -65,9 +65,8 @@ export const viewerRoute = (
 	return generateFullPath(VIEWER_ROUTE, params, newSearchParams, keepSearchParams);
 };
 
-export const boardRoute = (
+export const ticketsSelectionRoute = (
 	teamspace: string,
 	project: string,
-	type: 'issues' | 'risks',
 	containerOrFederation: string,
-) => generatePath(BOARD_ROUTE, { teamspace, project, type, containerOrFederation });
+) => generatePath(TICKETS_SELECTION_ROUTE, { teamspace, project }) + `?models=${containerOrFederation}`;

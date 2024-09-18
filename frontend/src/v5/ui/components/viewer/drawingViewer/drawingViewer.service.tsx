@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import { domToPng } from 'modern-screenshot';
 
 type GetScreenshot = () => null | Promise<string>;
@@ -23,7 +22,7 @@ const DrawingViewerServiceCreator = () => {
 
 	const getScreenshot: GetScreenshot = () => imgContainer ? domToPng(imgContainer) : null;
 	const setImgContainer = (newImgContainer) => { imgContainer = newImgContainer; };
-
+	
 	return {
 		getScreenshot,
 		setImgContainer,

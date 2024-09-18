@@ -16,30 +16,34 @@
  */
 
 import { CSSProperties, useContext, useEffect, useRef, useState } from 'react';
-import { Container, LayerLevel } from './viewerLayer2D.styles';
+import { Container, LayerLevel, Viewport } from './viewerLayer2D.styles';
 import { PanZoomHandler } from '../panzoom/centredPanZoom';
 import { isEqual } from 'lodash';
 import { SvgArrow } from './svgArrow/svgArrow.component';
 import { SvgCircle } from './svgCircle/svgCircle.component';
-import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { Coord2D, Vector2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { PinsLayer } from '../viewerLayer2DPins/viewerLayer2DPins.component';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
+import { Camera } from './camera/camera.component';
+import { CameraOffSight } from './camera/cameraOffSight.component';
+import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 
 export type ViewBoxType = ReturnType<PanZoomHandler['getOriginalSize']> & ReturnType<PanZoomHandler['getTransform']>;
 type ViewerLayer2DProps = {
 	viewBox: ViewBoxType,
 	active: boolean,
 	value?: Vector2D,
+	viewport: any,
 	onChange?: (arrow: Vector2D) => void;
+	cameraEnabled: boolean;
 };
-export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2DProps) => {
-	const [offsetStart, setOffsetStart] = useState<Coord2D>(value?.[0] || null);
-	const [offsetEnd, setOffsetEnd] = useState<Coord2D>(value?.[1] || null);
+export const ViewerLayer2D = ({ viewBox, active, value, cameraEnabled, viewport, onChange }: ViewerLayer2DProps) => {
+	const { isCalibrating } = useContext(CalibrationContext);
+	const [offsetStart, setOffsetStart] = useState<Coord2D>(value[0]);
+	const [offsetEnd, setOffsetEnd] = useState<Coord2D>(value[1]);
 	const previousViewBox = useRef<ViewBoxType>(null);
 	const [mousePosition, setMousePosition] = useState<Coord2D>(null);
-	const [drawingId] = useSearchParam('drawingId');
-	const { isCalibrating } = useContext(CalibrationContext);
+	const [cameraOnSight, setCameraOnSight] = useState(false);
 
 	const containerStyle: CSSProperties = {
 		transformOrigin: '0 0',
@@ -59,13 +63,14 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 	const handleMouseDown = () => previousViewBox.current = viewBox;
 
 	const handleMouseUp = () => {
-		// check mouse up was fired after dragging or if it was an actual click
+		// check if mouse up was fired after dragging or if it was an actual click
 		if (!isEqual(viewBox, previousViewBox.current)) return;
 
 		if (offsetEnd || (!offsetEnd && !offsetStart)) {
 			setOffsetEnd(null);
 			setOffsetStart(mousePosition);
-		} else {
+			onChange(EMPTY_VECTOR);
+		} else if (!isEqual(offsetStart, mousePosition)) {
 			setOffsetEnd(mousePosition);
 			onChange?.([offsetStart, mousePosition]);
 		}
@@ -86,22 +91,38 @@ export const ViewerLayer2D = ({ viewBox, active, value, onChange }: ViewerLayer2
 		}
 	}, [active]);
 
-	useEffect(() => { resetArrow(); }, [drawingId]);
-	
+	useEffect(() => {
+		// avoid resetting the values when 2d vector exists and the user sets a new start 
+		if (value[1] === null) return; 
+		setOffsetStart(value[0]);
+		setOffsetEnd(value[1]);
+	}, [value]);
+
 	return (
-		<Container style={containerStyle}>
-			<LayerLevel>
-				{mousePosition && active && <SvgCircle coord={mousePosition} scale={viewBox.scale} />}
-				{offsetStart && <SvgArrow start={offsetStart} end={offsetEnd ?? mousePosition} scale={viewBox.scale} />}
-				{!isCalibrating && <PinsLayer scale={viewBox.scale} height={viewBox.height} width={viewBox.width} />}
-			</LayerLevel>
-			{active && (
-				<LayerLevel
-					onMouseUp={handleMouseUp}
-					onMouseDown={handleMouseDown}
-					onMouseMove={handleMouseMove}
-				/>
-			)}
-		</Container>
+		<Viewport>
+			{cameraEnabled && <CameraOffSight onCameraSightChanged={setCameraOnSight} scale={viewBox.scale} viewport={viewport}/>}
+			<Container style={containerStyle} id="viewerLayer2d">
+				<LayerLevel>
+					{isCalibrating ? (
+						<>
+							{mousePosition && active && <SvgCircle coord={mousePosition} scale={viewBox.scale} />}
+							{offsetStart && <SvgArrow start={offsetStart} end={offsetEnd ?? mousePosition} scale={viewBox.scale} />}
+						</>
+					) : (
+						<>
+							{(cameraOnSight && cameraEnabled) && <Camera scale={viewBox.scale} />}
+							<PinsLayer scale={viewBox.scale} height={viewBox.height} width={viewBox.width} />
+						</>
+					)}
+				</LayerLevel>
+				{active && (
+					<LayerLevel
+						onMouseUp={handleMouseUp}
+						onMouseDown={handleMouseDown}
+						onMouseMove={handleMouseMove}
+					/>
+				)}
+			</Container>
+		</Viewport>
 	);
 };
