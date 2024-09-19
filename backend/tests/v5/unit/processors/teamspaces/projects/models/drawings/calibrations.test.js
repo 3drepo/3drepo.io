@@ -24,6 +24,7 @@ const {
 	generateRandomDate,
 	generateUUID,
 } = require('../../../../../../helper/services');
+const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
@@ -294,8 +295,11 @@ const testAddCalibration = () => {
 		const drawing = generateRandomString();
 		const revision = generateRandomString();
 		const createdBy = generateRandomString();
-		const calibration = generateRandomObject();
-		const drawingData = generateRandomObject();
+		const calibration =  { 
+			...generateRandomObject(),
+			verticalRange: [0, 5],
+			units: 'm'
+		};
 
 		test('should add a new calibration', async () => {
 			CalibrationsModel.getCalibration.mockResolvedValueOnce(calibration);
@@ -305,10 +309,10 @@ const testAddCalibration = () => {
 
 			expect(CalibrationsModel.addCalibration).toHaveBeenCalledTimes(1);
 			expect(CalibrationsModel.addCalibration).toHaveBeenCalledWith(teamspace, project, drawing, revision,
-				createdBy, calibration);
+				createdBy, deleteIfUndefined({ ...calibration, verticalRange: undefined, units: undefined });
 			expect(ModelSettingsModel.updateModelSettings).toHaveBeenCalledTimes(1);
 			expect(ModelSettingsModel.updateModelSettings).toHaveBeenCalledWith(teamspace, project, drawing,
-				{ calibration: drawingData });
+				{ calibration: { verticalRange: calibration.verticalRange, units: calibration.units } });
 			expect(CalibrationsModel.getCalibration).toHaveBeenCalledTimes(1);
 			expect(CalibrationsModel.getCalibration).toHaveBeenCalledWith(teamspace, project, drawing,
 				revision, { _id: 1 });
@@ -323,10 +327,10 @@ const testAddCalibration = () => {
 
 			expect(CalibrationsModel.addCalibration).toHaveBeenCalledTimes(1);
 			expect(CalibrationsModel.addCalibration).toHaveBeenCalledWith(teamspace, project, drawing, revision,
-				createdBy, calibration);
+				createdBy, deleteIfUndefined({ ...calibration, verticalRange: undefined, units: undefined });
 			expect(ModelSettingsModel.updateModelSettings).toHaveBeenCalledTimes(1);
 			expect(ModelSettingsModel.updateModelSettings).toHaveBeenCalledWith(teamspace, project, drawing,
-				{ calibration: drawingData });
+				{ calibration: { verticalRange: calibration.verticalRange, units: calibration.units } });
 			expect(CalibrationsModel.getCalibration).toHaveBeenCalledTimes(1);
 			expect(CalibrationsModel.getCalibration).toHaveBeenCalledWith(teamspace, project, drawing,
 				revision, { _id: 1 });

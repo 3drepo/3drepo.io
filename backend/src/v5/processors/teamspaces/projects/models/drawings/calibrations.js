@@ -24,6 +24,7 @@ const { events } = require('../../../../../services/eventsManager/eventsManager.
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
 const { templates } = require('../../../../../utils/responseCodes');
+const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
 
 const Calibrations = {};
 
@@ -45,9 +46,10 @@ Calibrations.getCalibration = async (teamspace, project, drawing, revision) => {
 		createdBy: 1,
 	};
 
-	const { calibration: drawingData } = await getDrawingById(teamspace, drawing, { _id: 0, calibration: 1 });
-
-	const latestCalibration = await getCalibration(teamspace, project, drawing, revision, projection);
+	const [latestCalibration, { calibration: drawingData }] = await Promise.all([
+		getCalibration(teamspace, project, drawing, revision, projection),
+		getDrawingById(teamspace, drawing, { _id: 0, calibration: 1 }),
+	]);
 
 	if (latestCalibration) {
 		return { calibration: { ...latestCalibration, ...drawingData }, status: calibrationStatuses.CALIBRATED };
@@ -113,11 +115,13 @@ Calibrations.getCalibrationStatusForAllRevs = async (teamspace, project, drawing
 	return results;
 };
 
-Calibrations.addCalibration = async (teamspace, project, drawing, revision, createdBy, calibration, drawingData) => {
+Calibrations.addCalibration = async (teamspace, project, drawing, revision, createdBy, calibration) => {
 	const existingCalibration = await getCalibration(teamspace, project, drawing, revision, { _id: 1 });
 
-	await addCalibration(teamspace, project, drawing, revision, createdBy, calibration);
-	await updateModelSettings(teamspace, project, drawing, { calibration: drawingData });
+	await addCalibration(teamspace, project, drawing, revision, createdBy,
+		deleteIfUndefined({ ...calibration, verticalRange: undefined, units: undefined }));
+	await updateModelSettings(teamspace, project, drawing,
+		{ calibration: { verticalRange: calibration.verticalRange, units: calibration.units } });
 
 	if (!existingCalibration) {
 		publish(events.REVISION_UPDATED, {

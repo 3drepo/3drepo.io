@@ -68,13 +68,9 @@ const testValidateNewCalibration = () => {
 			const req = { body: deleteIfUndefined(body), query: {} };
 			const mockCB = jest.fn(() => {});
 
-			const { verticalRange, units } = body;
 			await Calibrations.validateNewCalibration(req, {}, mockCB);
 
 			if (sucess) {
-				expect(req.body).not.toHaveProperty('verticalRange');
-				expect(req.body).not.toHaveProperty('units');
-				expect(req.drawingData).toEqual({ verticalRange, units });
 				expect(mockCB).toHaveBeenCalledTimes(1);
 			} else {
 				expect(mockCB).not.toHaveBeenCalled();

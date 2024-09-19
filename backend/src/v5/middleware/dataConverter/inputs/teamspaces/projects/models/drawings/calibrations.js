@@ -71,11 +71,6 @@ const validateNewCalibrationData = async (req, res, next) => {
 
 	try {
 		req.body = await schema.validate(req.body);
-
-		const { verticalRange, units } = req.body;
-		req.drawingData = { verticalRange, units };
-		req.body = deleteIfUndefined({ ...req.body, verticalRange: undefined, units: undefined });
-
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
