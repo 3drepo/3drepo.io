@@ -45,8 +45,8 @@ export const CameraOffSight = ({ onCameraSightChanged, viewport, scale }: Props)
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const [position, setPosition] = useState({ x:0, y:0 });
 	const [angle, setAngle] = useState(0);
-	const transform2DTo3D = DrawingsHooksSelectors.selectTransform2Dto3D(drawingId, containerOrFederation);
-	const transform3DTo2D = DrawingsHooksSelectors.selectTransform3Dto2D(drawingId, containerOrFederation);
+	const transform2DTo3D = DrawingsHooksSelectors.selectTransform2DTo3D(drawingId, containerOrFederation);
+	const transform3DTo2D = DrawingsHooksSelectors.selectTransform3DTo2D(drawingId, containerOrFederation);
 	const modelLoading = useModelLoading();
 
 	useEffect(() => viewportRef.current = viewport, [viewport]);

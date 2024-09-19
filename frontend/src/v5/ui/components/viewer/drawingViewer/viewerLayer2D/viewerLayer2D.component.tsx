@@ -22,6 +22,7 @@ import { isEqual } from 'lodash';
 import { SvgArrow } from './svgArrow/svgArrow.component';
 import { SvgCircle } from './svgCircle/svgCircle.component';
 import { Coord2D, Vector2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
+import { PinsLayer } from '../viewerLayer2DPins/viewerLayer2DPins.component';
 import { Camera } from './camera/camera.component';
 import { CameraOffSight } from './camera/cameraOffSight.component';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
@@ -102,13 +103,17 @@ export const ViewerLayer2D = ({ viewBox, active, value, cameraEnabled, viewport,
 			{cameraEnabled && <CameraOffSight onCameraSightChanged={setCameraOnSight} scale={viewBox.scale} viewport={viewport}/>}
 			<Container style={containerStyle} id="viewerLayer2d">
 				<LayerLevel>
-					{isCalibrating
-						? (<>
+					{isCalibrating ? (
+						<>
 							{mousePosition && active && <SvgCircle coord={mousePosition} scale={viewBox.scale} />}
 							{offsetStart && <SvgArrow start={offsetStart} end={offsetEnd ?? mousePosition} scale={viewBox.scale} />}
-						</>)
-						: ((cameraOnSight && cameraEnabled) && <Camera scale={viewBox.scale} />)
-					}
+						</>
+					) : (
+						<>
+							{(cameraOnSight && cameraEnabled) && <Camera scale={viewBox.scale} />}
+							<PinsLayer scale={viewBox.scale} height={viewBox.height} width={viewBox.width} />
+						</>
+					)}
 				</LayerLevel>
 				{active && (
 					<LayerLevel
