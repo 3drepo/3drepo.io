@@ -15,6 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import nock = require('nock');
+import nock from 'nock';
 
 export const mockServer = nock('http://api1.app-3drepo.com:80/api/v5');

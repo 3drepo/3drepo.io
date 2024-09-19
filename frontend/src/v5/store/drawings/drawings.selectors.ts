@@ -22,6 +22,7 @@ import { isCollaboratorRole, isCommenterRole, isViewerRole } from '../store.help
 import { Role } from '../currentUser/currentUser.types';
 import { selectRevisionsByDrawing } from './revisions/drawingRevisions.selectors';
 import { fullDrawing } from './drawings.helpers';
+import { orderBy } from 'lodash';
 
 const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
 
@@ -29,8 +30,15 @@ export const selectDrawings = createSelector(
 	selectDrawingsDomain,
 	selectCurrentProject,
 	selectRevisionsByDrawing, // This selector is used here to recalculate the value after the revisions are fetched
-	(state, currentProject) => 
-		(state.drawingsByProject[currentProject] ?? []).map((drawing) => fullDrawing(drawing as any)),
+	(state, currentProject) => {
+		const drawings = (state.drawingsByProject[currentProject] ?? []).map((drawing) => fullDrawing(drawing as any));
+		return orderBy(drawings, 'lastUpdated', 'desc');
+	},
+);
+
+export const selectNonEmptyDrawings = createSelector(
+	selectDrawings,
+	(drawings) => drawings.filter((d) => d.revisionsCount > 0),
 );
 
 export const selectFavouriteDrawings = createSelector(

@@ -16,17 +16,17 @@
  */
 
 import { ComponentType } from 'react';
-import CompareIcon from '@mui/icons-material/Compare';
-import TreeIcon from '@mui/icons-material/DeviceHub';
-import GroupsIcon from '@mui/icons-material/GroupWork';
-import GisIcon from '@mui/icons-material/Layers';
-import SequencesIcon from '@mui/icons-material/Movie';
-import ViewsIcon from '@mui/icons-material/PhotoCamera';
-import IssuesIcon from '@mui/icons-material/Place';
-import MeasureIcon from '@mui/icons-material/Straighten';
-import TicketsIcon from '@assets/icons/filled/tickets-filled.svg';
-
-import { RisksIcon } from '../routes/viewerGui/components/risks/components/riskIcon/riskIcon.component';
+import CompareIcon from '@assets/icons/outlined/compare-outlined.svg';
+import TreeIcon from '@assets/icons/outlined/tree-outlined.svg';
+import GroupsIcon from '@assets/icons/outlined/groups-outlined.svg';
+import GisIcon from '@assets/icons/outlined/layers-outlined.svg';
+import SequencesIcon from '@assets/icons/outlined/sequence-outlined.svg';
+import ViewsIcon from '@assets/icons/outlined/view-outlined.svg';
+import IssuesIcon from '@assets/icons/outlined/issue-outlined.svg';
+import MeasureIcon from '@assets/icons/outlined/measure-outlined.svg';
+import TicketsIcon from '@assets/icons/outlined/tickets-outlined.svg';
+import DrawingsIcon from '@assets/icons/outlined/drawings-outlined.svg';
+import RisksIcon from '@assets/icons/outlined/safetibase-outlined.svg'
 
 import { clientConfigService } from '../services/clientConfig';
 
@@ -42,6 +42,7 @@ export const VIEWER_PANELS = {
 	COMPARE: 'compare',
 	SEQUENCES: 'sequences',
 	MEASUREMENTS: 'measurements',
+	DRAWINGS: 'drawings',
 	ACTIVITIES: 'activities',
 	LEGEND: 'legend',
 };
@@ -49,7 +50,7 @@ export const VIEWER_PANELS = {
 export const VIEWER_PANELS_ICONS = {
 	[VIEWER_PANELS.ISSUES]: IssuesIcon,
 	[VIEWER_PANELS.RISKS]: RisksIcon,
-	[VIEWER_PANELS.TICKETS]: TicketsIcon as ComponentType,
+	[VIEWER_PANELS.TICKETS]: TicketsIcon,
 	[VIEWER_PANELS.GROUPS]: GroupsIcon,
 	[VIEWER_PANELS.VIEWS]: ViewsIcon,
 	[VIEWER_PANELS.TREE]: TreeIcon,
@@ -57,7 +58,8 @@ export const VIEWER_PANELS_ICONS = {
 	[VIEWER_PANELS.GIS]: GisIcon,
 	[VIEWER_PANELS.SEQUENCES]: SequencesIcon,
 	[VIEWER_PANELS.MEASUREMENTS]: MeasureIcon,
-};
+	[VIEWER_PANELS.DRAWINGS]: DrawingsIcon,
+} as Record<string, ComponentType>;
 
 export const VIEWER_PANELS_MIN_HEIGHTS = {
 	[VIEWER_PANELS.ISSUES]: 200,
@@ -70,6 +72,7 @@ export const VIEWER_PANELS_MIN_HEIGHTS = {
 	[VIEWER_PANELS.GIS]: 185,
 	[VIEWER_PANELS.SEQUENCES]: 200,
 	[VIEWER_PANELS.MEASUREMENTS]: 200,
+	[VIEWER_PANELS.DRAWINGS]: 200,
 };
 
 export const VIEWER_PANELS_TITLES = {
@@ -83,6 +86,7 @@ export const VIEWER_PANELS_TITLES = {
 	[VIEWER_PANELS.GIS]: 'GIS',
 	[VIEWER_PANELS.SEQUENCES]: 'Sequences',
 	[VIEWER_PANELS.MEASUREMENTS]: 'Measurements',
+	[VIEWER_PANELS.DRAWINGS]: 'Drawings',
 };
 
 const getPanelConfig = (panelType) => ({
@@ -101,8 +105,10 @@ export const getViewerLeftPanels = (issuesEnabled, risksEnabled) =>  {
 		VIEWER_PANELS.GIS,
 		VIEWER_PANELS.SEQUENCES,
 		VIEWER_PANELS.MEASUREMENTS,
+		VIEWER_PANELS.DRAWINGS,
 	].filter((panel) =>
 	(clientConfigService.sequencesEnabled || panel !== VIEWER_PANELS.SEQUENCES))
+
 	if (risksEnabled) {
 		leftPanels.unshift(VIEWER_PANELS.RISKS);
 	}

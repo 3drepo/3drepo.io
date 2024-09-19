@@ -19,7 +19,7 @@ import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircularProgress } from '@mui/material';
-import TicketsIcon from '@assets/icons/filled/tickets-filled.svg';
+import TicketsIcon from '@assets/icons/outlined/tickets-outlined.svg';
 import { CardContainer, ArrowBack } from '@/v5/ui/components/viewer/cards/card.styles';
 import CloseIcon from '@assets/icons/outlined/cross_sharp_edges-outlined.svg';
 import { ITicket, NewTicket } from '@/v5/store/tickets/tickets.types';
