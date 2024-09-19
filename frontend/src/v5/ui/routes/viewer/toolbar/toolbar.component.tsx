@@ -22,7 +22,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { BimActionsDispatchers, MeasurementsActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { BimHooksSelectors, ModelHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
-import { MainToolbar, Container } from './toolbar.styles';
+import { MainToolbar, ToolbarContainer } from './toolbar.styles';
 import { NavigationButtons } from './buttons/buttonOptionsContainer/navigationButtons.component';
 import { ProjectionButtons } from './buttons/buttonOptionsContainer/projectionButtons.component';
 import { ToolbarButton } from './buttons/toolbarButton.component';
@@ -45,7 +45,7 @@ export const Toolbar = () => {
 	};
 
 	return (
-		<Container>
+		<ToolbarContainer>
 			<MainToolbar>
 				<ToolbarButton
 					Icon={HomeIcon}
@@ -75,6 +75,6 @@ export const Toolbar = () => {
 				/>
 			</MainToolbar>
 			<SectionToolbar />
-		</Container>
+		</ToolbarContainer>
 	);
 };

@@ -18,6 +18,6 @@ import styled from 'styled-components';
 
 export const DashboardListHeaderContainer = styled.div`
 	display: flex;
-	padding: 13px 20px 13px 31px;
+	padding: 13px 30px;
 	margin-top: 12px;
 `;

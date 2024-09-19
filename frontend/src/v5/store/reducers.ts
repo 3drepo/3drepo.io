@@ -17,6 +17,8 @@
 
 import { federationsReducer } from '@/v5/store/federations/federations.redux';
 import { containersReducer } from '@/v5/store/containers/containers.redux';
+import { drawingsReducer } from '@/v5/store/drawings/drawings.redux';
+import { drawingRevisionsReducer } from '@/v5/store/drawings/revisions/drawingRevisions.redux';
 import { dialogsReducer } from '@/v5/store/dialogs/dialogs.redux';
 import { projectsReducer } from '@/v5/store/projects/projects.redux';
 import { teamspacesReducer } from '@/v5/store/teamspaces/teamspaces.redux';
@@ -24,7 +26,7 @@ import { usersReducer } from '@/v5/store/users/users.redux';
 import { currentUserReducer } from '@/v5/store/currentUser/currentUser.redux';
 import { authReducer } from '@/v5/store/auth/auth.redux';
 import { ticketsReducer } from '@/v5/store/tickets/tickets.redux';
-import { revisionsReducer } from '@/v5/store/revisions/revisions.redux';
+import { containerRevisionsReducer } from '@/v5/store/containers/revisions/containerRevisions.redux';
 import { ticketsCardReducer } from '@/v5/store/tickets/card/ticketsCard.redux';
 import { ticketCommentsReducer } from '@/v5/store/tickets/comments/ticketComments.redux';
 import { viewerReducer } from '@/v5/store/viewer/viewer.redux';
@@ -34,11 +36,13 @@ import { viewerReducer } from '@/v5/store/viewer/viewer.redux';
 export default {
 	auth2: authReducer,
 	containers: containersReducer,
+	containerRevisions: containerRevisionsReducer,
 	currentUser2: currentUserReducer,
 	dialogsV5: dialogsReducer,
+	drawings: drawingsReducer,
+	drawingRevisions: drawingRevisionsReducer,
 	federations: federationsReducer,
 	projects: projectsReducer,
-	revisions: revisionsReducer,
 	teamspaces2: teamspacesReducer,
 	tickets: ticketsReducer,
 	ticketsCard: ticketsCardReducer,

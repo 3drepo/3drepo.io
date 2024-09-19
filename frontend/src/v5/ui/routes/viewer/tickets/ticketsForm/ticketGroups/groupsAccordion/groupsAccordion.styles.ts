@@ -97,7 +97,6 @@ export const NumberContainer = styled(CircledNumber)`
 	width: 22px;
 	height: 22px;
 	font-size: 10px;
-	margin-left: 5px;
 `;
 
 export const Checkbox = styled(GroupToggle)`

@@ -85,7 +85,7 @@ export const Containers = (): JSX.Element => {
 						title={(
 							<FormattedMessage
 								id="containers.all.collapseTitle"
-								defaultMessage="All containers"
+								defaultMessage="All Containers"
 							/>
 						)}
 						titleTooltips={{

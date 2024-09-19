@@ -19,7 +19,8 @@ const { src } = require('../../../../../../../../helper/path');
 
 const { cloneDeep } = require(`${src}/utils/helper/objects`);
 const { generateRandomString, generateUUID } = require('../../../../../../../../helper/services');
-const { UUIDToString } = require('../../../../../../../../../../src/v5/utils/helper/uuids');
+
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
 jest.mock('../../../../../../../../../../src/v5/models/tickets.comments');
 const TicketComments = require(`${src}/models/tickets.comments`);

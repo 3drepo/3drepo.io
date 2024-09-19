@@ -23,11 +23,13 @@ import teamspaces2Saga from '@/v5/store/teamspaces/teamspaces.sagas';
 import currentUser2Saga from '@/v5/store/currentUser/currentUser.sagas';
 import auth2Saga from '@/v5/store/auth/auth.sagas';
 import usersSaga from '@/v5/store/users/users.sagas';
-import revisionsSaga from '@/v5/store/revisions/revisions.sagas';
+import containerRevisionsSaga from '@/v5/store/containers/revisions/containerRevisions.sagas';
 import ticketsSaga from '@/v5/store/tickets/tickets.sagas';
 import ticketCommentsSaga from '@/v5/store/tickets/comments/ticketComments.sagas';
 import viewer2Saga from '@/v5/store/viewer/viewer.sagas';
 import ticketsCardSaga from '@/v5/store/tickets/card/ticketsCard.sagas';
+import drawingsSaga from '@/v5/store/drawings/drawings.sagas';
+import drawingRevisionsSaga from '@/v5/store/drawings/revisions/drawingRevisions.sagas';
 import activitiesSaga from './activities/activities.sagas';
 import bimSaga from './bim/bim.sagas';
 import boardSaga from './board/board.sagas';
@@ -86,10 +88,12 @@ export default function* rootSaga() {
 
 		fork(auth2Saga),
 		fork(containersSaga),
+		fork(containerRevisionsSaga),
 		fork(currentUser2Saga),
+		fork(drawingsSaga),
+		fork(drawingRevisionsSaga),
 		fork(federationsSaga),
 		fork(projectsSaga),
-		fork(revisionsSaga),
 		fork(ticketsSaga),
 		fork(ticketsCardSaga),
 		fork(ticketCommentsSaga),

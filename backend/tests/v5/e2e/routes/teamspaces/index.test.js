@@ -216,7 +216,7 @@ const setupData = async () => {
 			modelWithRev.properties),
 	]);
 
-	await ServiceHelper.db.createRevision(tsWithLicense.name, modelWithRev._id,
+	await ServiceHelper.db.createRevision(tsWithLicense.name, project.id, modelWithRev._id,
 		ServiceHelper.generateRevisionEntry(false, true));
 };
 

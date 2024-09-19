@@ -18,10 +18,10 @@
 import { Tickets } from '@/v5/ui/routes/viewer/tickets/tickets.component';
 import { isEmpty, isEqual } from 'lodash';
 import { PureComponent } from 'react';
-import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
 import { AdditionalProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { DrawingsListCard } from '@/v5/ui/routes/viewer/drawings/drawingsList/drawingsListCard.component';
 import { AddOn } from '@/v5/store/store.types';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { getViewerLeftPanels, VIEWER_PANELS } from '../../constants/viewerGui';
@@ -239,7 +239,6 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 				<CloseFocusModeButton isFocusMode={isFocusMode} />
 				<Container id="gui-container" className={this.props.className} hidden={isFocusMode}>
 					<RevisionsSwitch />
-					<Toolbar />
 					{this.renderLeftPanelsButtons()}
 					{this.renderLeftPanels(leftPanels)}
 					{this.renderRightPanels(rightPanels)}
@@ -280,6 +279,7 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 		[VIEWER_PANELS.GIS]: Gis,
 		[VIEWER_PANELS.SEQUENCES]: Sequences,
 		[VIEWER_PANELS.MEASUREMENTS]: Measurements,
+		[VIEWER_PANELS.DRAWINGS]: DrawingsListCard,
 	};
 
 	private renderLeftPanels = (panels) => (

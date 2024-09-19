@@ -33,6 +33,7 @@ const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
 const Yup = require('yup');
 const { deserialiseGroupSchema } = require('./tickets.groups');
 const { generateFullSchema } = require('./templates');
+const { getArrayDifference } = require('../../utils/helper/arrays');
 const { getJobNames } = require('../../models/jobs');
 const { getTicketsByQuery } = require('../../models/tickets');
 const { importCommentSchema } = require('./tickets.comments');
@@ -111,6 +112,20 @@ const generatePropertiesValidator = async (teamspace, project, model, templateId
 					validator = validator.test('Immutable property', `Immutable property ${prop.name} cannot be edited`, (value) => value === undefined);
 				}
 
+				if (prop.type === propTypes.IMAGE_LIST) {
+					validator = validator.test('Invalid image refs', `Property ${prop.name} contains refs that do not correspond to an existing image`,
+						(value, { originalValue }) => {
+							const newRefs = originalValue?.filter(isUUIDString) ?? [];
+
+							if (!newRefs.length) {
+								return true;
+							}
+
+							const existingRefs = (oldValue ?? []).map(UUIDToString);
+							return getArrayDifference(existingRefs, newRefs).length === 0;
+						});
+				}
+
 				validator = stripWhen(validator, (p) => {
 					let valueToEval = p;
 					if (isObject(p) && !isDate(p)) {
@@ -180,8 +195,8 @@ Tickets.validateTicket = async (teamspace, project, model, template, newTicket, 
 	const validatedTicket = await Yup.object(validatorObj).validate(newTicket, { stripUnknown: true });
 
 	// Run it again so we can check for unchanged properties that looked changed due to default values
-	validatorObj.modules = Yup.object(await generateModuleValidator(teamspace, project, model, template._id,
-		fullTem.modules, oldTicket?.modules, isNewTicket, true),
+	validatorObj.modules = Yup.object(await generateModuleValidator(teamspace, project, model,
+		template._id, fullTem.modules, oldTicket?.modules, isNewTicket, true),
 	).default({});
 
 	const retVal = await Yup.object(validatorObj).validate(validatedTicket, { stripUnknown: true });
@@ -272,7 +287,7 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 				res[name] = Yup.number().transform((_, val) => (val === null ? val : val?.getTime())).nullable();
 			} else if (type === propTypes.VIEW) {
 				res[name] = Yup.object({
-					screenshot: uuidString,
+					screenshot: uuidString.nullable(),
 					state: Yup.object({
 						[viewGroups.COLORED]: groupCast,
 						[viewGroups.HIDDEN]: groupCast,
@@ -280,7 +295,9 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 					}).default(undefined),
 				}).nullable().default(undefined);
 			} else if (type === propTypes.IMAGE) {
-				res[name] = uuidString;
+				res[name] = uuidString.nullable();
+			} else if (type === propTypes.IMAGE_LIST) {
+				res[name] = Yup.array().of(uuidString).nullable();
 			}
 		});
 

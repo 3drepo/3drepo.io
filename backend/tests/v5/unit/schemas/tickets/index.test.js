@@ -61,7 +61,7 @@ TemplateSchema.generateFullSchema.mockImplementation((t) => t);
 
 const testPropertyTypes = (testData, moduleProperty, isNewTicket = true) => {
 	describe.each(testData)(`${moduleProperty ? '[Modules] ' : ' '}Property types`,
-		(desc, schema, goodTest, badTest) => {
+		(desc, schema, goodTest, badTest, oldValue) => {
 			test(desc, async () => {
 				const teamspace = generateRandomString();
 				const project = generateRandomString();
@@ -93,8 +93,16 @@ const testPropertyTypes = (testData, moduleProperty, isNewTicket = true) => {
 					const oldTicket = isNewTicket ? undefined : {
 						title: generateRandomString(),
 						type: template._id,
-						properties: {},
-						modules: {},
+						properties: {
+							...(oldValue && !moduleProperty ? { [fieldName]: oldValue } : {}),
+						},
+						modules: {
+							...(oldValue && moduleProperty ? {
+								[presetModules.SEQUENCING]: {
+									[fieldName]: oldValue,
+								},
+							} : {}),
+						},
 					};
 
 					const fullData = ({
@@ -542,6 +550,8 @@ const testUniqueProperties = () => {
 
 const testAllProperties = () => {
 	describe('Set & unset of all property types', () => {
+		const imageRef = generateUUIDString();
+
 		const propertyTypeSetData = [
 			['Text', { type: propTypes.TEXT }, generateRandomString(), generateRandomString(121)],
 			['Long text', { type: propTypes.LONG_TEXT }, generateRandomString(), generateRandomString(1201)],
@@ -553,6 +563,7 @@ const testAllProperties = () => {
 			['One Of', { type: propTypes.ONE_OF, values: ['a', 'b'] }, 'a', generateRandomString()],
 			['Many Of', { type: propTypes.MANY_OF, values: ['a', 'b', 'c'] }, ['a'], ['b', generateRandomString()]],
 			['Image', { type: propTypes.IMAGE }, FS.readFileSync(image, { encoding: 'base64' }), generateRandomString()],
+			['Image List', { type: propTypes.IMAGE_LIST }, times(5, FS.readFileSync(image, { encoding: 'base64' })), generateRandomString()],
 			['View (empty)', { type: propTypes.VIEW }, {}, 123],
 			['View (Image only)', { type: propTypes.VIEW }, { screenshot: FS.readFileSync(image, { encoding: 'base64' }) }, { screenshot: 'abc' }],
 			['View', { type: propTypes.VIEW }, {
@@ -590,13 +601,20 @@ const testAllProperties = () => {
 			['One Of (unset)', { type: propTypes.ONE_OF, values: ['a', 'b'] }, null],
 			['Many Of (unset)', { type: propTypes.MANY_OF, values: ['a', 'b', 'c'] }, null],
 			['Image (unset)', { type: propTypes.IMAGE }, null],
+			['Image List (unset)', { type: propTypes.IMAGE_LIST }, null],
+		];
 
+		const updateOnlyCases = [
+			['Image List with refs', { type: propTypes.IMAGE_LIST }, [imageRef, FS.readFileSync(image, { encoding: 'base64' })], [generateUUIDString()], [stringToUUID(imageRef)]],
+			['Image List with refs when old value is null', { type: propTypes.IMAGE_LIST }, undefined, [imageRef]],
 		];
 
 		testPropertyTypes(propertyTypeSetData, false, true);
 		testPropertyTypes(propertyTypeSetData, true, true);
 		testPropertyTypes(propertyTypeUnsetData, false, false);
 		testPropertyTypes(propertyTypeUnsetData, true, false);
+		testPropertyTypes(updateOnlyCases, false, false);
+		testPropertyTypes(updateOnlyCases, true, false);
 
 		testGroups();
 	});

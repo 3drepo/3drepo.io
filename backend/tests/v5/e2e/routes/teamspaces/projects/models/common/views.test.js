@@ -19,6 +19,8 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+
 const { templates } = require(`${src}/utils/responseCodes`);
 
 let server;
@@ -34,7 +36,7 @@ const generateBasicData = () => {
 		teamspace: ServiceHelper.generateRandomString(),
 		project: ServiceHelper.generateRandomProject(),
 		con: ServiceHelper.generateRandomModel(),
-		fed: ServiceHelper.generateRandomModel({ isFederation: true }),
+		fed: ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
 	};
 	const models = [data.con, data.fed];
 	models.forEach((model) => {
@@ -73,7 +75,7 @@ const testViewList = () => {
 	describe('Views List', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
 		const conNoViews = ServiceHelper.generateRandomModel();
-		const fedNoViews = ServiceHelper.generateRandomModel({ isFederation: true });
+		const fedNoViews = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed, conNoViews, fedNoViews], [con, fed]);
 		});

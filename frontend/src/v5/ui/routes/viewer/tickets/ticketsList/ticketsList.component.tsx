@@ -28,9 +28,10 @@ import { FormattedMessage } from 'react-intl';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { TicketItem } from './ticketItem/ticketItem.component';
-import { List, Filters, CompletedFilterChip } from './ticketsList.styles';
+import { Filters, CompletedFilterChip, List } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
 import { TicketSearchInput } from './ticketSearchInput/ticketSearchInput.component';
+// import { CardList } from '@components/viewer/cards/card.styles';
 
 type TicketsListProps = {
 	tickets: ITicket[];

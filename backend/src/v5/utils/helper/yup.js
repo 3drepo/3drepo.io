@@ -16,7 +16,7 @@
  */
 
 const { UUIDToString, stringToUUID } = require('./uuids');
-const { fileExtensionFromBuffer, isUUIDString } = require('./typeCheck');
+const { fileExtensionFromBuffer, isString, isUUID, isUUIDString } = require('./typeCheck');
 const Yup = require('yup');
 const { fileUploads } = require('../config');
 const tz = require('countries-and-timezones');
@@ -26,9 +26,10 @@ const YupHelper = { validators: {}, types: { strings: {} }, utils: {} };
 
 YupHelper.utils.stripWhen = (schema, cond) => Yup.lazy((value) => (cond(value) ? schema.strip() : schema));
 
-YupHelper.validators.alphanumeric = (yupObj) => yupObj.matches(/^[\w|_|-]*$/,
+YupHelper.validators.alphanumeric = (yupObj, allowFullStops) => yupObj.matches(
+	allowFullStops ? /^[\w|_|.|-]*$/ : /^[\w|_|-]*$/,
 	// eslint-disable-next-line no-template-curly-in-string
-	'${path} can only contain alpha-numeric characters, hyphens or underscores');
+	`\${path} can only contain alpha-numeric characters, ${allowFullStops ? 'full stops, ' : ''}hyphens or underscores`);
 
 YupHelper.types.id = Yup.string().uuid('ids are expected to be of uuid format').transform((val, org) => UUIDToString(org));
 
@@ -77,11 +78,16 @@ YupHelper.types.position = Yup.array()
 		Yup.number(),
 	).length(3);
 
+YupHelper.types.position2d = Yup.array()
+	.of(
+		Yup.number(),
+	).length(2);
+
 YupHelper.types.surveyPoints = Yup.array()
 	.of(
 		Yup.object().shape({
 			position: YupHelper.types.position.required(),
-			latLong: Yup.array().of(Yup.number()).length(2).required(),
+			latLong: YupHelper.types.position2d.required(),
 		}),
 	);
 
@@ -117,7 +123,8 @@ YupHelper.types.dateInThePast = YupHelper.types.date.test(('date-in-the-past', '
 }));
 
 const imageValidityTests = (yupType, isNullable) => yupType.test('image-validity-test', 'Image is not valid', async (value, { createError, originalValue }) => {
-	if (isUUIDString(originalValue)) {
+	const isImageRef = isUUIDString(originalValue) || isUUID(originalValue);
+	if (isImageRef) {
 		return true;
 	}
 
@@ -147,7 +154,10 @@ YupHelper.types.embeddedImage = (isNullable) => imageValidityTests(
 YupHelper.types.embeddedImageOrRef = () => imageValidityTests(
 	Yup.mixed()
 		.transform((currValue, orgVal) => {
-			if (orgVal) return isUUIDString(orgVal) ? stringToUUID(orgVal) : Buffer.from(orgVal, 'base64');
+			if (isString(orgVal)) {
+				return isUUIDString(orgVal) ? stringToUUID(orgVal) : Buffer.from(orgVal, 'base64');
+			}
+
 			return currValue;
 		}),
 );

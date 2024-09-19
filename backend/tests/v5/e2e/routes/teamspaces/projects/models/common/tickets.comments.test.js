@@ -20,6 +20,8 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+
 const { templates } = require(`${src}/utils/responseCodes`);
 
 let server;
@@ -36,7 +38,7 @@ const generateBasicData = () => ({
 	teamspace: ServiceHelper.generateRandomString(),
 	project: ServiceHelper.generateRandomProject(),
 	con: ServiceHelper.generateRandomModel(),
-	fed: ServiceHelper.generateRandomModel({ isFederation: true }),
+	fed: ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
 });
 
 const setupBasicData = async (users, teamspace, project, models) => {

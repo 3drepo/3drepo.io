@@ -26,7 +26,7 @@ import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { ContainersHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { prefixBaseDomain } from '@/v5/helpers/url.helper';
 import { ContainerSettingsModal } from '../../../containerSettingsModal/containerSettingsModal.component';
-import { uploadToContainer } from '../../../uploadFileForm/uploadToContainer.component';
+import { uploadToContainer } from '../../../uploadContainerRevisionForm/uploadContainerRevisionForm.helpers';
 
 type ContainerEllipsisMenuProps = {
 	selected?: boolean,
@@ -100,13 +100,9 @@ export const ContainerEllipsisMenu = ({
 			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.viewTickets',
-					defaultMessage: 'View Issues',
+					defaultMessage: 'View Tickets',
 				})}
-				to={{ pathname: ticketsSelectionRoute(
-					teamspace,
-					project,
-					container._id,
-				) }}
+				to={ticketsSelectionRoute( teamspace, project, container._id)}
 			/>
 			{onSelectOrToggleItem && (
 				<EllipsisMenuItem
