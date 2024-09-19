@@ -59,7 +59,7 @@ const COLORS = {
 	WHITE_TRANSPARENT: 'rgba(255,255,255,0)'
 };
 
-const VALID_COLOR_RE =  /(^#[0-9A-F]{6}$)/i; // TODO all these color functions?
+const VALID_COLOR_RE =  /(^#[0-9A-F]{6}$)/i;
 const VALID_COLOR_ALPHA_RE =  /(^#[0-9A-F]{6}([0-9A-F]{2})?$)/i;
 
 const isShadeOfGrey = (color: string) => {
