@@ -63,8 +63,6 @@ export const Viewer2D = () => {
 	const latestActiveRevision = DrawingRevisionsHooksSelectors.selectLatestActiveRevision(drawingId);
 	const revisionId = latestActiveRevision?._id;
 	const hasCalibration = [CalibrationStatus.UNCONFIRMED, CalibrationStatus.CALIBRATED].includes(latestActiveRevision?.calibration);
-	const src = revisionId ? getDrawingImageSrc(teamspace, project, drawingId, revisionId) : '';
-	const authSrc = useAuthenticatedImage(src);
 	const backgroundColor = useSelector(selectViewerBackgroundColor);
 
 	const { close2D } = useContext(ViewerCanvasesContext);
