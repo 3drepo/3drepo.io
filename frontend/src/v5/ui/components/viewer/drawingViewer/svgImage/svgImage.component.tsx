@@ -369,14 +369,13 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 	let hasLoaded = false;
 
 	img.src = src;
-	img.onload = (ev) => {
+	img.onload = () => {
 
 		hasLoaded = true;
 
 		// Create a new canvas for the newly loaded image
 		createCanvas(() => {
-			ev.src = img.src; // Add the src property to the event until we have a proper way to hook this up
-			onLoad?.(ev);
+			onLoad?.();
 		});
 	};
 
@@ -506,24 +505,6 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 			return img.naturalHeight;
 		},
 
-		copyRegion(dctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number ) {
-			// Convert from the parent coordinates to canvas coordinates.
-			const t = invert(getCanvasTransform());
-			const sourceCoords = multiply(t, { x, y });
-
-			// Use drawImage to extract a region
-			dctx.drawImage(canvas,
-				sourceCoords.x,
-				sourceCoords.y,
-				w,
-				h,
-				0,
-				0,
-				w,
-				h,
-			);
-		},
-
 		dispose,
 
 		// Given a coordinate relative to the content rect, get the coordinate
@@ -591,14 +572,6 @@ export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ on
 
 		getNaturalSize: () =>  {
 			return { width: pannableImage.current.naturalWidth, height: pannableImage.current.naturalHeight };
-		},
-
-		setSize: ({ width, height }: Size ) => {},
-
-		// Draws a region of the image into the provided context, given sx & sy
-		// relative to the ZoomableImage's content rect.
-		copyRegion: (ctx: CanvasRenderingContext2D, sx: number, sy: number, w: number, h: number) => {
-			pannableImage.current.copyRegion(ctx, sx, sy, w, h);
 		},
 
 		// Given a coordinate in the content rect of the container, get the
