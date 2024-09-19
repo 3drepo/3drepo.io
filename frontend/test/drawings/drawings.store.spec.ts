@@ -17,7 +17,7 @@
 
 import { DrawingsActions } from '@/v5/store/drawings/drawings.redux';
 import { selectCanUploadToProject, selectDrawingById, selectDrawings, selectFavouriteDrawings, selectHasCollaboratorAccess, selectHasCommenterAccess } from '@/v5/store/drawings/drawings.selectors';
-import { times } from 'lodash';
+import { orderBy, times } from 'lodash';
 import { drawingMockFactory, prepareMockCalibration, prepareMockStats } from './drawings.fixtures';
 import { NewDrawing } from '@/v5/store/drawings/drawings.types';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
@@ -40,7 +40,8 @@ describe('Drawings: store', () => {
 	};
 
 	it('should set drawings', () => {
-		const mockDrawings = times(5, () => drawingMockFactory());
+		const unsortedMockDrawings = times(5, () => drawingMockFactory());
+		const mockDrawings = orderBy(unsortedMockDrawings, 'lastUpdated', 'desc')
 		dispatch(DrawingsActions.fetchDrawingsSuccess(projectId, mockDrawings));
 		const drawings = selectDrawings(getState());
 		expect(drawings).toEqual(mockDrawings);

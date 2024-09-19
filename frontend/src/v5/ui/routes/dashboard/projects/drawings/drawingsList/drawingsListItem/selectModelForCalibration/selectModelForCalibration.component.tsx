@@ -40,13 +40,14 @@ export const SelectModelForCalibration = ({ drawingId, onClickClose, ...props })
 	const federationsData = useFederationsData();
 	const { handleSubmit, control, watch } = useForm();
 	const model = watch('model');
+	const modelId = model?._id;
 	
 	const isLoadingModels = containersData.isListPending || federationsData.isListPending;
 	const containers = containersData.containers.filter((c) => !!c.latestRevision);
 	const federations = federationsData.federations.filter((f) => f.containers?.length);
 
 	const onSubmit = () => {
-		const path = viewerRoute(teamspace, project, model, undefined, { drawingId, isCalibrating: true }, false);
+		const path = viewerRoute(teamspace, project, modelId, undefined, { drawingId, isCalibrating: true }, false);
 		history.push(path);
 		onClickClose();
 	};
@@ -56,7 +57,7 @@ export const SelectModelForCalibration = ({ drawingId, onClickClose, ...props })
 			title={formatMessage({ id: 'calibration.title', defaultMessage: 'Select Federation / Container' })}
 			onSubmit={handleSubmit(onSubmit)}
 			confirmLabel={formatMessage({ id: 'calibration.button.ok', defaultMessage: 'Calibrate' })}
-			isValid={!!model}
+			isValid={!!modelId}
 			onClickClose={onClickClose}
 			{...props}
 		>
@@ -74,20 +75,21 @@ export const SelectModelForCalibration = ({ drawingId, onClickClose, ...props })
 				<FormSearchSelect
 					control={control}
 					label={formatMessage({ id: 'calibration.modelSelection.label', defaultMessage: 'Federation / Container' })}
-					value={model}
+					value={modelId}
+					renderValue={() => model?.name || ''}
 					name="model"
 				>
 					<ListSubheader>
 						<FormattedMessage id="calibration.modelSelection.federations" defaultMessage="Federations" />
 					</ListSubheader>
-					{...sortByName(federations).map(({ name, _id }) => (
-						<MenuItem key={_id} value={_id}>{name}</MenuItem>
+					{...sortByName(federations).map((fed) => (
+						<MenuItem key={fed._id} value={fed}>{fed.name}</MenuItem>
 					))}
 					<ListSubheader>
 						<FormattedMessage id="calibration.modelSelection.containers" defaultMessage="Containers" />
 					</ListSubheader>
-					{...sortByName(containers).map(({ name, _id }) => (
-						<MenuItem key={_id} value={_id}>{name}</MenuItem>
+					{...sortByName(containers).map((con) => (
+						<MenuItem key={con._id} value={con}>{con.name}</MenuItem>
 					))}
 				</FormSearchSelect>
 			)}
