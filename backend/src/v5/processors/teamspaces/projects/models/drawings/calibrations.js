@@ -16,6 +16,7 @@
  */
 
 const { addCalibration, getCalibration, getCalibrationForMultipleRevisions } = require('../../../../../models/calibrations');
+const { getDrawingById, updateModelSettings } = require('../../../../../models/modelSettings');
 const { getRevisionByIdOrTag, getRevisions, getRevisionsByQuery } = require('../../../../../models/revisions');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const { calibrationStatuses } = require('../../../../../models/calibrations.constants');
@@ -24,7 +25,7 @@ const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
 const { templates } = require('../../../../../utils/responseCodes');
 
-const Calibrations = { };
+const Calibrations = {};
 
 const getRevIdToCalibMap = (revCalibrations) => {
 	const revIdToCalib = {};
@@ -40,16 +41,16 @@ Calibrations.getCalibration = async (teamspace, project, drawing, revision) => {
 	const projection = {
 		_id: 0,
 		horizontal: 1,
-		verticalRange: 1,
-		units: 1,
 		createdAt: 1,
 		createdBy: 1,
 	};
 
+	const { calibration: drawingData } = await getDrawingById(teamspace, drawing, { _id: 0, calibration: 1 });
+
 	const latestCalibration = await getCalibration(teamspace, project, drawing, revision, projection);
 
 	if (latestCalibration) {
-		return { calibration: latestCalibration, status: calibrationStatuses.CALIBRATED };
+		return { calibration: { ...latestCalibration, ...drawingData }, status: calibrationStatuses.CALIBRATED };
 	}
 
 	const { timestamp } = await getRevisionByIdOrTag(teamspace, drawing,
@@ -67,7 +68,10 @@ Calibrations.getCalibration = async (teamspace, project, drawing, revision) => {
 		for (let i = 0; i < previousRevisions.length; ++i) {
 			const data = revIdToCalib[UUIDToString(previousRevisions[i]._id)];
 			if (data) {
-				return { calibration: data.latestCalibration, status: calibrationStatuses.UNCONFIRMED };
+				return {
+					calibration: { ...data.latestCalibration, ...drawingData },
+					status: calibrationStatuses.UNCONFIRMED,
+				};
 			}
 		}
 	}
@@ -109,17 +113,20 @@ Calibrations.getCalibrationStatusForAllRevs = async (teamspace, project, drawing
 	return results;
 };
 
-Calibrations.addCalibration = async (teamspace, project, drawing, revision, createdBy, calibration) => {
+Calibrations.addCalibration = async (teamspace, project, drawing, revision, createdBy, calibration, drawingData) => {
 	const existingCalibration = await getCalibration(teamspace, project, drawing, revision, { _id: 1 });
 
 	await addCalibration(teamspace, project, drawing, revision, createdBy, calibration);
+	await updateModelSettings(teamspace, project, drawing, { calibration: drawingData });
 
 	if (!existingCalibration) {
-		publish(events.REVISION_UPDATED, { teamspace,
+		publish(events.REVISION_UPDATED, {
+			teamspace,
 			project,
 			model: drawing,
 			modelType: modelTypes.DRAWING,
-			data: { _id: revision, calibration: calibrationStatuses.CALIBRATED } });
+			data: { _id: revision, calibration: calibrationStatuses.CALIBRATED },
+		});
 	}
 };
 

@@ -19,6 +19,7 @@ const { createResponseCode, templates } = require('../../../../../../../utils/re
 const Yup = require('yup');
 const YupHelper = require('../../../../../../../utils/helper/yup');
 const { calibrationStatuses } = require('../../../../../../../models/calibrations.constants');
+const { deleteIfUndefined } = require('../../../../../../../utils/helper/objects');
 const { getCalibration } = require('../../../../../../../processors/teamspaces/projects/models/drawings/calibrations');
 const { respond } = require('../../../../../../../utils/responder');
 
@@ -70,6 +71,11 @@ const validateNewCalibrationData = async (req, res, next) => {
 
 	try {
 		req.body = await schema.validate(req.body);
+
+		const { verticalRange, units } = req.body;
+		req.drawingData = { verticalRange, units };
+		req.body = deleteIfUndefined({ ...req.body, verticalRange: undefined, units: undefined });
+
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));

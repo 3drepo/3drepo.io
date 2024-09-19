@@ -179,13 +179,15 @@ db.createRevision = async (teamspace, project, model, revision, modelType) => {
 };
 
 db.createCalibration = async (teamspace, project, drawing, revision, calibration) => {
-	const formattedCalibration = {
+	const formattedCalibration = deleteIfUndefined({
 		...calibration,
 		_id: stringToUUID(calibration._id),
 		project: stringToUUID(project),
 		drawing,
 		rev_id: stringToUUID(revision),
-	};
+		verticalRange: undefined,
+		units: undefined,
+	});
 
 	await DbHandler.insertOne(teamspace, 'drawings.calibrations', formattedCalibration);
 };
@@ -504,6 +506,7 @@ ServiceHelper.generateRandomModelProperties = (modelType = modelTypes.CONTAINER)
 	...(modelType === modelTypes.DRAWING ? {
 		number: ServiceHelper.generateRandomString(),
 		type: ServiceHelper.generateRandomString(),
+		calibration: { verticalRange: [ServiceHelper.generateRandomNumber(0, 10), ServiceHelper.generateRandomNumber(11, 20)], units: 'm' },
 		modelType,
 	} : {
 		properties: {

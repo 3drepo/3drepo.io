@@ -87,6 +87,12 @@ const generateSchema = (newEntry, modelType, teamspace, project, modelId) => {
 	const name = modelNameType(teamspace, project, modelId);
 	const number = modelNumberType(teamspace, project, modelId);
 
+	const drawingCalibraion = Yup.object().shape({
+		verticalRange: Yup.array().of(Yup.number()).length(2).required()
+			.test('valid-verticalRange', 'The second number of the range must be larger than the first', (value) => value && value[0] <= value[1]),
+		units: types.strings.unit.required(),
+	});
+
 	const commonProps = {
 		name: newEntry ? name.required() : name,
 		desc: types.strings.shortDescription,
@@ -96,7 +102,10 @@ const generateSchema = (newEntry, modelType, teamspace, project, modelId) => {
 	const schema = {
 		...commonProps,
 		...(modelType === modelTypes.DRAWING
-			? { number: newEntry ? number.required() : number }
+			? {
+				number: newEntry ? number.required() : number,
+				calibration: newEntry ? drawingCalibraion.required() : drawingCalibraion,
+			}
 			: {
 				unit: newEntry ? types.strings.unit.required() : types.strings.unit,
 				code: types.strings.code,
