@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { hexToOpacity } from '@/v5/ui/themes/theme';
 import { BaseCircleButton } from '@controls/circleButton/circleButton.styles';
 import styled from 'styled-components';
+import { hexToOpacity } from '@/v5/helpers/colors.helper';
 
 export const Button = styled(BaseCircleButton)<{ $variant?: 'primary' | 'secondary' }>`
 	color:  ${({ theme: { palette }, $variant }) => $variant === 'secondary' ?  palette.base.main : palette.primary.contrast};
