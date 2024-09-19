@@ -27,5 +27,8 @@ export const V4ProjectsPermissions = styled(ProjectsPermissions)`
 `;
 
 export const Container = styled(FixedOrGrowContainer)`
+	display: flex;
+	flex-direction: column;
+    gap: 8px;
 	padding-top: 5px;
 `;
