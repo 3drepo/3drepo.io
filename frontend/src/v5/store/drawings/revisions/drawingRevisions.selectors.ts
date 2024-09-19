@@ -40,14 +40,16 @@ export const selectRevisions = createSelector(
 export const selectActiveRevisions = createSelector(
 	selectRevisions,
 	(revisions) => revisions.filter((val) => !val.void),
-); 
+);
 
-export const selectLastRevisionName = createSelector(
+export const selectLatestActiveRevision = createSelector(
 	selectActiveRevisions,
-	(revisions) => {
-		const lastRev = revisions[0];
-		return !lastRev ? '' : lastRev.statusCode + '-' + lastRev.revCode;
-	},
+	(revisions) => revisions[0],
+);
+
+export const selectLatestRevisionName = createSelector(
+	selectLatestActiveRevision,
+	(lastRev) => !lastRev ? '' : lastRev.statusCode + '-' + lastRev.revCode,
 ); 
 
 export const selectRevisionsPending = createSelector(

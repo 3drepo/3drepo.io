@@ -37,7 +37,7 @@ export const enableRealtimeDrawingRevisionUpdate = (teamspace: string, project: 
 		},
 	);
 
-export const enableRealtimeNewDrawingRevisionUpdate = (teamspace: string, project: string, drawingId: string) =>
+export const enableRealtimeDrawingNewRevision = (teamspace: string, project: string, drawingId: string) =>
 	subscribeToRoomEvent({ teamspace, project, model: drawingId }, 'drawingNewRevision',
 		(revision: IDrawingRevision) => {
 			DrawingsActionsDispatchers.fetchDrawingStats(teamspace, project, drawingId);

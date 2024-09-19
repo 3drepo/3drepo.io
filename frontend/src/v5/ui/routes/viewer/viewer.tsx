@@ -29,6 +29,7 @@ import { OpenTicketFromUrl } from './openTicketFromUrl/openTicketFromUrl.compone
 import { SpinnerLoader } from '@controls/spinnerLoader';
 import { CentredContainer } from '@controls/centredContainer';
 import { TicketsCardViews } from './tickets/tickets.constants';
+import { ViewerCanvases } from '../dashboard/viewerCanvases/viewerCanvases.component';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
@@ -104,6 +105,7 @@ export const Viewer = () => {
 		<>
 			<OpenTicketFromUrl />
 			<CheckLatestRevisionReadiness />
+			<ViewerCanvases />
 			<ViewerGui match={v4Match} key={containerOrFederation} />
 		</>
 	);

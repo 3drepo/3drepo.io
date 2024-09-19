@@ -66,6 +66,7 @@ export const COLOR = {
 	SUCCESS_LIGHTEST: '#EAF2EA',
 	WARNING_MAIN: '#ED6C02',
 	WARNING_DARK: '#BD5601',
+	WARNING_LIGHT: '#F6B580',
 	WARNING_LIGHTEST: '#FDF0E5',
 	FAVOURITE_MAIN: '#F5CB34',
 	FAVOURITE_DARK: '#D4AE26',
@@ -237,6 +238,7 @@ export const palette = {
 	warning: {
 		main: COLOR.WARNING_MAIN,
 		dark: COLOR.WARNING_DARK,
+		light: COLOR.WARNING_LIGHT,
 		lightest: COLOR.WARNING_LIGHTEST,
 	},
 	favourite: {
@@ -502,6 +504,7 @@ export const theme = createTheme({
 				PopperProps: {
 					// This is necessary for overriding styles of v4 tooltips
 					container: () => document.getElementById('v4Overrides'),
+					draggable: false,
 				},
 				disableInteractive: true,
 			},
@@ -510,6 +513,7 @@ export const theme = createTheme({
 					backgroundColor: COLOR.SECONDARY_DARK,
 					padding: '7px 10px 8px 10px',
 					borderRadius: '8px',
+					userSelect: 'none',
 					...typography.caption,
 				},
 				tooltipPlacementBottom: {

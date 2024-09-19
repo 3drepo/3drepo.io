@@ -101,7 +101,7 @@ export const revisionProcessingSuccess = (state, {
 }: RevisionProcessingSuccessAction) => {
 	const revisions = state.revisionsByDrawing;
 	revisions[drawingId] ||= [];
-	revisions[drawingId].push(revision);
+	revisions[drawingId].unshift(revision);
 };
 
 export const fetchStatusCodesSuccess = (state, { statusCodes }) => {

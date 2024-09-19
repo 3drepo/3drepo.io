@@ -17,7 +17,7 @@
 import { PureComponent, useState } from 'react';
 import InputLabel from '@mui/material/InputLabel';
 import CloseIcon from '@mui/icons-material/Close';
-import SequencesIcon from '@mui/icons-material/Movie';
+import SequencesIcon from '@assets/icons/outlined/sequence-outlined.svg';
 import { Field } from 'formik';
 import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
@@ -74,7 +74,7 @@ const SequenceDate = ({ name, onChange, showSequenceDate, min, max, initialFocus
 			/>
 			{ value &&
 				<SequenceDateActions>
-					<SmallIconButton onClick={(e) => showSequenceDate(value)} Icon={SequencesIcon} disabled={!hasSequences} />
+					<SmallIconButton onClick={(e) => showSequenceDate(value)} Icon={SequencesIcon as any} disabled={!hasSequences} />
 					<SmallIconButton onClick={deleteValue} Icon={CloseIcon} />
 				</SequenceDateActions>
 			}

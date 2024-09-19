@@ -16,13 +16,14 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import WarningIcon from '@assets/icons/outlined/warning-outlined.svg';
+import WarningIcon from '@assets/icons/outlined/stepper_error-outlined.svg';
 import CalibratedIcon from '@assets/icons/filled/calibration-filled.svg';
 import NotCalibrated from '@assets/icons/filled/no_calibration-filled.svg';
 import { Display } from '@/v5/ui/themes/media';
 import { CalibrationStates, DrawingStats, IDrawing, MinimumDrawing } from './drawings.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
-import { selectActiveRevisions, selectLastRevisionName, selectRevisionsPending } from './revisions/drawingRevisions.selectors';
+import { getUrl } from '@/v5/services/api/default';
+import { selectActiveRevisions, selectLatestRevisionName, selectRevisionsPending } from './revisions/drawingRevisions.selectors';
 import { Role } from '../currentUser/currentUser.types';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { UploadStatus } from '../containers/containers.types';
@@ -104,13 +105,15 @@ export const statsToDrawing = (
 	},
 });
 
+export const getDrawingThumbnailSrc = (teamspace, projectId, drawingId) => getUrl(`teamspaces/${teamspace}/projects/${projectId}/drawings/${drawingId}/thumbnail`);
+
 export const fullDrawing = (
 	drawing: Partial<IDrawing> &  MinimumDrawing,
 ): IDrawing => {
 	const state = getState();
 	const isPendingRevisions = selectRevisionsPending(state, drawing._id);
 	const activeRevisions = selectActiveRevisions(state, drawing._id);
-	const latestRevision = isPendingRevisions ? drawing.latestRevision : selectLastRevisionName(state, drawing._id);
+	const latestRevision = isPendingRevisions ? drawing.latestRevision : selectLatestRevisionName(state, drawing._id);
 	const revisionsCount = isPendingRevisions ? drawing.revisionsCount : activeRevisions.length;
 	const calibration = revisionsCount > 0 ? drawing.calibration : CalibrationStates.EMPTY;
 	const lastUpdated = isPendingRevisions ? drawing.lastUpdated :  (activeRevisions[0] || {}).timestamp;
