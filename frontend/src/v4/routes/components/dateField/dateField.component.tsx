@@ -17,7 +17,6 @@
 import { TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
-import { DatePicker } from '@controls/inputs/datePicker/datePicker.component';
 
 interface IProps {
 	value?: any;
