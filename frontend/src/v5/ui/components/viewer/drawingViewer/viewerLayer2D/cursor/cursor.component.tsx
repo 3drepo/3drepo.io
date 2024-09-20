@@ -14,45 +14,30 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { mapValues } from 'lodash';
-import { Svg } from './svgCircle.styles';
 import { Coord2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { SnapType } from '../../snapping/types';
+import { CursorEdge, CursorIntersection, CursorNode, CursorNone } from './cursor.styles';
 
-const green = '#31f617';
-const yellow = '#f6e419';
 
-const CircleColours = {
-	[SnapType.NONE]: 'white',
-	[SnapType.NODE]: yellow,
-	[SnapType.INTERSECTION]: yellow,
-	[SnapType.EDGE]: green,
+const CursorIcon = {
+	[SnapType.NONE]: CursorNone,
+	[SnapType.NODE]: CursorNode,
+	[SnapType.INTERSECTION]: CursorIntersection,
+	[SnapType.EDGE]: CursorEdge,
 };
 
 type SvgCircleProps = { coord: Coord2D, scale: number, snapType: SnapType };
-export const SvgCircle = ({ coord, scale, snapType }: SvgCircleProps) => {
-	const measures = mapValues({
-		strokeWidth: 0.5,
-		radius: 4,
-	}, (val) => val / scale);
-
-	const colour = CircleColours[snapType];
+export const Cursor = ({ coord, scale, snapType }: SvgCircleProps) => {
+	const Cursor = CursorIcon[snapType];
 
 	return (
-		<Svg
-			xmlns="http://www.w3.org/2000/svg"
-			version="1.1"
-			xmlnsXlink="http://www.w3.org/1999/xlink"
-		>
-			<circle
-				cx={coord[0] + measures.strokeWidth / 2}
-				cy={coord[1] + measures.strokeWidth / 2}
-				r={measures.radius}
-				strokeWidth={measures.strokeWidth}
-				stroke='gray'
-				fill={colour}
+		<Cursor id='pepelui' 
+			transform={`
+				translate(${coord[0]} ${coord[1]})
+				scale(${1/scale})
+			`}
+			
+			transform-origin="50% 50%"
 			/>
-		</Svg>
 	);
 };

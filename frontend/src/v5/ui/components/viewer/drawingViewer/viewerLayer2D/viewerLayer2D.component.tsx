@@ -20,7 +20,7 @@ import { Container, LayerLevel } from './viewerLayer2D.styles';
 import { PanZoomHandler } from '../panzoom/centredPanZoom';
 import { isEqual } from 'lodash';
 import { SvgArrow } from './svgArrow/svgArrow.component';
-import { SvgCircle } from './svgCircle/svgCircle.component';
+import { Cursor } from './cursor/cursor.component';
 import { Coord2D, Vector2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
@@ -84,7 +84,6 @@ export const ViewerLayer2D = ({ viewBox, active, snapHandler, value, onChange }:
 
 		const results = snapHandler?.snap(mousePos, radius) || { closestNode: undefined, closestIntersection: undefined, closestEdge: undefined };
 
-
 		if (results.closestNode != null) {
 			setSnapType(SnapType.NODE);
 			mousePos = results.closestNode;
@@ -116,7 +115,7 @@ export const ViewerLayer2D = ({ viewBox, active, snapHandler, value, onChange }:
 		<Container style={containerStyle} id="viewerLayer2d">
 			{isCalibrating && (
 				<LayerLevel>
-					{mousePosition && active && <SvgCircle coord={mousePosition} scale={viewBox.scale} snapType={snapType} />}
+					{mousePosition && active && <Cursor coord={mousePosition} scale={viewBox.scale} snapType={snapType} />}
 					{offsetStart && <SvgArrow start={offsetStart} end={offsetEnd ?? mousePosition} scale={viewBox.scale} />}
 				</LayerLevel>
 			)}

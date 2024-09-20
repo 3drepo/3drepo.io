@@ -15,9 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-
-export const Svg = styled.svg`
-	height: 100%;
-	width: 100%;
-`;
+export type IProps = {
+	className?: any;
+} & React.SVGProps<SVGSVGElement>;
