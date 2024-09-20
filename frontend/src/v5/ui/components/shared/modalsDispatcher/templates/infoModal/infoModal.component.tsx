@@ -29,7 +29,7 @@ export interface IInfoModal {
 	open: boolean,
 	onClickClose?: () => void;
 	onClickSecondary?: () => void;
-	Icon?: ReactNode;
+	Icon?: any;
 }
 
 export const InfoModal = ({
