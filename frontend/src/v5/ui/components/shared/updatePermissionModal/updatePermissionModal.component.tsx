@@ -23,10 +23,10 @@ import { WarningIcon } from '../modalsDispatcher/modalsDispatcher.styles';
 
 type UpdatePermissionProps = {
 	onConfirm: () => void,
-	permissionType: string,
-	permissionsChange?: number,
+	permissionsType: string,
+	permissionsCount?: number,
 };
-export const UpdatePermissionModal = ({ onConfirm, permissionType, permissionsChange = 1, ...props }: IInfoModal & UpdatePermissionProps) => (
+export const UpdatePermissionModal = ({ onConfirm, permissionsType, permissionsCount = 1, ...props }: IInfoModal & UpdatePermissionProps) => (
 	<InfoModal
 		Icon={WarningIcon}
 		primaryButtonLabel='Cancel'
@@ -35,10 +35,10 @@ export const UpdatePermissionModal = ({ onConfirm, permissionType, permissionsCh
 		message={formatMessage({
 			id: 'permissionsModal.message',
 			defaultMessage: `
-				You are about to change {permissionsChange} {permissionsChange, plural, one {user} other {users}}
-				permissions to {permissionType}.{br}Are you sure you would like to proceed?
+				You are about to change {permissionsCount} {permissionsCount, plural, one {user} other {users}}
+				permissions to {permissionsType}.{br}Are you sure you would like to proceed?
 			`,
-		}, { permissionsChange, permissionType, br: <br /> })}
+		}, { permissionsCount, permissionsType, br: <br /> })}
 		{...props}
 	/>
 );
