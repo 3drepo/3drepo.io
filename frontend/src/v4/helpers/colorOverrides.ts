@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { getState } from '../modules/store';
+import { getState } from '@/v5/helpers/redux.helpers';
 import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds,
 	selectTreeNodesList } from '../modules/tree';
 import { Viewer } from '../services/viewer/viewer';
