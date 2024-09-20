@@ -35,7 +35,7 @@ export const UpdatePermissionModal = ({ onConfirm, permissionsType, permissionsC
 		message={formatMessage({
 			id: 'permissionsModal.message',
 			defaultMessage: `
-				You are about to change {permissionsCount} {permissionsCount, plural, one {user} other {users}}
+				You are about to change {permissionsCount, plural, one {a user} other {{permissionsCount} users}}
 				permissions to {permissionsType}.{br}Are you sure you would like to proceed?
 			`,
 		}, { permissionsCount, permissionsType, br: <br /> })}

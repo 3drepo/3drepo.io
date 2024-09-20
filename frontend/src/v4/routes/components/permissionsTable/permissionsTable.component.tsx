@@ -21,7 +21,9 @@ import { isEmpty, isEqual, memoize, pick } from 'lodash';
 import { PureComponent } from 'react';
 
 import AdminIconSrc from '@assets/icons/v4/how_to_reg.svg';
-import { MODEL_ROLES_TYPES } from '../../../constants/model-permissions';
+import { updatePermissionsOrTriggerModal } from '@components/shared/updatePermissionModal/updatePermissionModal.component';
+import { getProjectPermissionLabelFromType, PROJECT_ROLES_LIST } from '@/v4/constants/project-permissions';
+import { getModelPermissionLabelFromType, MODEL_ROLES_TYPES } from '../../../constants/model-permissions';
 import { CellUserSearch } from '../customTable/components/cellUserSearch/cellUserSearch.component';
 import { TableHeadingRadio } from '../customTable/components/tableHeadingRadio/tableHeadingRadio.component';
 import { CheckboxField, CustomTable, CELL_TYPES } from '../customTable/customTable.component';
@@ -152,21 +154,28 @@ export class PermissionsTable extends PureComponent<IProps, IState> {
 		return !!this.props.onSelectionChange;
 	}
 
-	public onGlobalPermissionsChange = (event, value) => {
-		this.setState({ selectedGlobalPermissions: value });
-
-		if (this.props.onPermissionsChange) {
-			const updatedPermissions = this.state.rows
-				.reduce((permissionsList, row) => {
-					if (row.selected && !row.disabled) {
-						permissionsList.push({ ...row, key: value });
-					}
-					return permissionsList;
-				}, []);
-
-			this.props.onPermissionsChange(updatedPermissions);
-		}
+	private getPermissionsLabelFromType(type) {
+		return isEqual(PROJECT_ROLES_LIST, this.props.roles) ? getProjectPermissionLabelFromType(type) : getModelPermissionLabelFromType(type);
 	}
+
+	public onGlobalPermissionsChange = (event, value) => {
+		const updatedPermissions = this.state.rows
+			.reduce((permissionsList, row) => {
+				if (row.selected && !row.disabled) {
+					permissionsList.push({ ...row, key: value });
+				}
+				return permissionsList;
+			}, []);
+
+		updatePermissionsOrTriggerModal({
+			permissionsType: this.getPermissionsLabelFromType(value),
+			permissionsCount: updatedPermissions.length,
+			onConfirm: () => {
+				this.setState({ selectedGlobalPermissions: value });
+				this.props.onPermissionsChange?.(updatedPermissions);
+			},
+		});
+	};
 
 	public hasDisabledPermissions(row) {
 		if (this.props.rowStateInterceptor) {
@@ -175,14 +184,15 @@ export class PermissionsTable extends PureComponent<IProps, IState> {
 		return row.disabled;
 	}
 
-	public createPermissionsChangeHandler = (permissions, value) => () => {
-		if (this.props.onPermissionsChange) {
-			this.props.onPermissionsChange([{
+	public createPermissionsChangeHandler = (permissions, value) => () => updatePermissionsOrTriggerModal({
+		permissionsType: this.getPermissionsLabelFromType(value),
+		onConfirm: () => {
+			this.props.onPermissionsChange?.([{
 				...permissions,
 				key: value
 			}]);
-		}
-	}
+		},
+	});
 
 	public getTableCells = (roles) => {
 		const permissionCellProps = {

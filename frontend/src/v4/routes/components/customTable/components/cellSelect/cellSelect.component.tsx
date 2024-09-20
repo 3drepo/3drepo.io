@@ -16,6 +16,8 @@
  */
 import { PureComponent, Component } from 'react';
 import Input from '@mui/material/Input';
+import { updatePermissionsOrTriggerModal } from '@components/shared/updatePermissionModal/updatePermissionModal.component';
+import { TEAMSPACE_PERMISSIONS } from '@/v4/constants/teamspace-permissions';
 import { Item, StyledSelect } from './cellSelect.styles';
 
 interface IProps {
@@ -91,8 +93,13 @@ export class CellSelect extends PureComponent<IProps, IState> {
 		const selectedValue = event.target.value;
 
 		if (this.state.selectedValue !== selectedValue) {
-			this.setState({selectedValue});
-			this.props.onChange(event, selectedValue);
+			updatePermissionsOrTriggerModal({
+				permissionsType: (selectedValue ? TEAMSPACE_PERMISSIONS.admin : TEAMSPACE_PERMISSIONS.user).label,
+				onConfirm: () => {
+					this.setState({selectedValue});
+					this.props.onChange(event, selectedValue);
+				},
+			});
 		}
 	}
 
