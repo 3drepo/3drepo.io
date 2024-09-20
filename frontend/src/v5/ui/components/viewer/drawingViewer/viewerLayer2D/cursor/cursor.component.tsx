@@ -26,12 +26,12 @@ const CursorIcon = {
 	[SnapType.EDGE]: CursorEdge,
 };
 
-type SvgCircleProps = { coord: Coord2D, scale: number, snapType: SnapType };
-export const Cursor = ({ coord, scale, snapType }: SvgCircleProps) => {
+type CursorProps = { coord: Coord2D, scale: number, snapType: SnapType };
+export const Cursor = ({ coord, scale, snapType }: CursorProps) => {
 	const Cursor = CursorIcon[snapType];
 
 	return (
-		<Cursor id='pepelui' 
+		<Cursor
 			transform={`
 				translate(${coord[0]} ${coord[1]})
 				scale(${1/scale})

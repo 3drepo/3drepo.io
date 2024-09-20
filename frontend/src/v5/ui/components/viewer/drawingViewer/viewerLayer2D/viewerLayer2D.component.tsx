@@ -100,6 +100,8 @@ export const ViewerLayer2D = ({ viewBox, active, snapHandler, value, onChange }:
 		setMousePosition([mousePos.x, mousePos.y]);
 	};
 
+	const handleMouseLeave = () => setMousePosition(undefined)
+
 	const resetArrow = () => {
 		setOffsetStart(null);
 		setOffsetEnd(null);
@@ -110,7 +112,7 @@ export const ViewerLayer2D = ({ viewBox, active, snapHandler, value, onChange }:
 			resetArrow();
 		}
 	}, [active]);
-	
+
 	return (
 		<Container style={containerStyle} id="viewerLayer2d">
 			{isCalibrating && (
@@ -124,6 +126,7 @@ export const ViewerLayer2D = ({ viewBox, active, snapHandler, value, onChange }:
 					onMouseUp={handleMouseUp}
 					onMouseDown={handleMouseDown}
 					onMouseMove={handleMouseMove}
+					onMouseLeave={handleMouseLeave}
 				/>
 			)}
 		</Container>
