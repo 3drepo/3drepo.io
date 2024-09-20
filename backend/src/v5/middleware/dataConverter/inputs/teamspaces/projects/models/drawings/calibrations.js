@@ -19,7 +19,6 @@ const { createResponseCode, templates } = require('../../../../../../../utils/re
 const Yup = require('yup');
 const YupHelper = require('../../../../../../../utils/helper/yup');
 const { calibrationStatuses } = require('../../../../../../../models/calibrations.constants');
-const { deleteIfUndefined } = require('../../../../../../../utils/helper/objects');
 const { getCalibration } = require('../../../../../../../processors/teamspaces/projects/models/drawings/calibrations');
 const { respond } = require('../../../../../../../utils/responder');
 

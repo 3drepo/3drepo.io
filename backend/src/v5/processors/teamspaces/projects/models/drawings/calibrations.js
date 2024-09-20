@@ -20,11 +20,11 @@ const { getDrawingById, updateModelSettings } = require('../../../../../models/m
 const { getRevisionByIdOrTag, getRevisions, getRevisionsByQuery } = require('../../../../../models/revisions');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const { calibrationStatuses } = require('../../../../../models/calibrations.constants');
+const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
 const { templates } = require('../../../../../utils/responseCodes');
-const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
 
 const Calibrations = {};
 
