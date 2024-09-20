@@ -462,6 +462,7 @@ ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, modelType
 	const entry = deleteIfUndefined({
 		_id,
 		tag: modelType === modelTypes.DRAWING ? undefined : ServiceHelper.generateRandomString(),
+		status,
 		statusCode: modelType === modelTypes.DRAWING ? statusCodes[0].code : undefined,
 		revCode: modelType === modelTypes.DRAWING ? ServiceHelper.generateRandomString(10) : undefined,
 		format: modelType === modelTypes.DRAWING ? '.pdf' : undefined,
@@ -470,10 +471,6 @@ ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, modelType
 		desc: ServiceHelper.generateRandomString(),
 		void: !!isVoid,
 	});
-
-	if (status) {
-		entry.status = status;
-	}
 
 	if (hasFile) {
 		entry.rFile = modelType === modelTypes.DRAWING ? [ServiceHelper.generateUUIDString()] : [`${_id}_${ServiceHelper.generateRandomString()}_ifc`];

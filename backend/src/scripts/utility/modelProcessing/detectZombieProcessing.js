@@ -37,7 +37,7 @@ const Path = require('path');
 let TIME_LIMIT = 24 * 60 * 60 * 1000; // hours * 1 hour in ms
 
 const processTeamspace = async (teamspace) => {
-	const expiredTimestamp = new Date((new Date()) - TIME_LIMIT);
+	const expiredTimestamp = new Date(new Date() - TIME_LIMIT);
 	const zombieQuery = {
 		status: { $exists: true, $not: { $regex: `(${processStatuses.OK})|(${processStatuses.FAILED})` } },
 		timestamp: { $lt: expiredTimestamp },
@@ -49,8 +49,8 @@ const processTeamspace = async (teamspace) => {
 	const zombieDrawings = await find(teamspace, DRAWINGS_HISTORY_COL, zombieQuery, { status: 1, timestamp: 1 });
 
 	return [
-		...await Promise.all(zombieModels.map(({ _id, status, timestamp }) => `${teamspace}, model, ${_id}, ${status}, ${timestamp}`)),
-		...await Promise.all(zombieDrawings.map(({ _id, status, timestamp }) => `${teamspace}, drawing, ${UUIDToString(_id)}, ${status}, ${timestamp}`)),
+		...zombieModels.map(({ _id, status, timestamp }) => `${teamspace}, model, ${_id}, ${status}, ${timestamp}`),
+		...zombieDrawings.map(({ _id, status, timestamp }) => `${teamspace}, drawing, ${UUIDToString(_id)}, ${status}, ${timestamp}`),
 	];
 };
 
