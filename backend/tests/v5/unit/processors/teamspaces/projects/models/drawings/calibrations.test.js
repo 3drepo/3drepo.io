@@ -24,6 +24,7 @@ const {
 	generateRandomDate,
 	generateUUID,
 } = require('../../../../../../helper/services');
+
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -295,21 +296,20 @@ const testAddCalibration = () => {
 		const drawing = generateRandomString();
 		const revision = generateRandomString();
 		const createdBy = generateRandomString();
-		const calibration =  { 
+		const calibration = {
 			...generateRandomObject(),
 			verticalRange: [0, 5],
-			units: 'm'
+			units: 'm',
 		};
 
 		test('should add a new calibration', async () => {
 			CalibrationsModel.getCalibration.mockResolvedValueOnce(calibration);
 
-			await Calibrations.addCalibration(teamspace, project, drawing, revision, createdBy,
-				calibration, drawingData);
+			await Calibrations.addCalibration(teamspace, project, drawing, revision, createdBy, calibration);
 
 			expect(CalibrationsModel.addCalibration).toHaveBeenCalledTimes(1);
 			expect(CalibrationsModel.addCalibration).toHaveBeenCalledWith(teamspace, project, drawing, revision,
-				createdBy, deleteIfUndefined({ ...calibration, verticalRange: undefined, units: undefined });
+				createdBy, deleteIfUndefined({ ...calibration, verticalRange: undefined, units: undefined }));
 			expect(ModelSettingsModel.updateModelSettings).toHaveBeenCalledTimes(1);
 			expect(ModelSettingsModel.updateModelSettings).toHaveBeenCalledWith(teamspace, project, drawing,
 				{ calibration: { verticalRange: calibration.verticalRange, units: calibration.units } });
@@ -322,12 +322,11 @@ const testAddCalibration = () => {
 		test('should add a new calibration and fire REVISION_UPDATED', async () => {
 			CalibrationsModel.getCalibration.mockResolvedValueOnce(null);
 
-			await Calibrations.addCalibration(teamspace, project, drawing, revision, createdBy,
-				calibration, drawingData);
+			await Calibrations.addCalibration(teamspace, project, drawing, revision, createdBy, calibration);
 
 			expect(CalibrationsModel.addCalibration).toHaveBeenCalledTimes(1);
 			expect(CalibrationsModel.addCalibration).toHaveBeenCalledWith(teamspace, project, drawing, revision,
-				createdBy, deleteIfUndefined({ ...calibration, verticalRange: undefined, units: undefined });
+				createdBy, deleteIfUndefined({ ...calibration, verticalRange: undefined, units: undefined }));
 			expect(ModelSettingsModel.updateModelSettings).toHaveBeenCalledTimes(1);
 			expect(ModelSettingsModel.updateModelSettings).toHaveBeenCalledWith(teamspace, project, drawing,
 				{ calibration: { verticalRange: calibration.verticalRange, units: calibration.units } });
