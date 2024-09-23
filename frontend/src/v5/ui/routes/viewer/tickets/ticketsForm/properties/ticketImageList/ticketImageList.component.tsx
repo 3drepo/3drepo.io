@@ -80,14 +80,14 @@ export const TicketImageList = ({ value, onChange, onBlur, disabled, label, help
 		}
 	};
 
-	const uploadImages1 = async () => uploadImages((imagesToUpload) => imgsInModal.concat(imagesToUpload));
+	const handleUploadImages = async () => uploadImages((imagesToUpload) => setImgsInModal(imgsInModal.concat(imagesToUpload)));
 
 	const syncProps = useSyncProps({
 		images: imgsInModal,
 		...(disabled ? {} : {
 			onDelete: onDeleteImage,
 			onAddMarkup: onEditImage,
-			onUpload: uploadImages1,
+			onUpload: handleUploadImages,
 			onClose,
 		}),
 	});
@@ -96,7 +96,7 @@ export const TicketImageList = ({ value, onChange, onBlur, disabled, label, help
 
 	const onUploadImages = async () => {
 		const displayImageIndex = imgsInModal.length;
-		await uploadImages1();
+		await handleUploadImages();
 		openImagesModal(displayImageIndex);
 	};
 
