@@ -19,7 +19,7 @@ import { DrawingsActions } from '@/v5/store/drawings/drawings.redux';
 import { selectCanUploadToProject, selectDrawingById, selectDrawings, selectFavouriteDrawings, selectHasCollaboratorAccess, selectHasCommenterAccess } from '@/v5/store/drawings/drawings.selectors';
 import { orderBy, times } from 'lodash';
 import { drawingMockFactory, prepareMockCalibration, prepareMockStats } from './drawings.fixtures';
-import { NewDrawing } from '@/v5/store/drawings/drawings.types';
+import { IDrawing, NewDrawing } from '@/v5/store/drawings/drawings.types';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { createTestStore, listContainsElementWithId } from '../test.helpers';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
@@ -44,7 +44,15 @@ describe('Drawings: store', () => {
 		const mockDrawings = orderBy(unsortedMockDrawings, 'lastUpdated', 'desc')
 		dispatch(DrawingsActions.fetchDrawingsSuccess(projectId, mockDrawings));
 		const drawings = selectDrawings(getState());
-		expect(drawings).toEqual(mockDrawings);
+		expect(new Set(drawings)).toEqual(new Set(mockDrawings));
+	});
+
+	it('the selector for drawings should return it sorted by date ', () => {
+		const projectUpdatedDesc = (drawings: IDrawing[]) => drawings.map((d) => ({lastUpdated: d.lastUpdated, desc:d.desc }));
+		const mockDrawings = times(5, () => drawingMockFactory());
+		dispatch(DrawingsActions.fetchDrawingsSuccess(projectId, mockDrawings));
+		const drawings = selectDrawings(getState());
+		expect(projectUpdatedDesc(drawings)).toEqual(projectUpdatedDesc(orderBy(mockDrawings, 'lastUpdated', 'desc')));
 	});
 
 	describe('Updating drawing attributes:', () => {
