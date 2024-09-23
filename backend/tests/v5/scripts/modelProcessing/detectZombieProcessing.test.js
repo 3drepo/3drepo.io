@@ -74,7 +74,7 @@ const checkMail = (data, filteredTeamspace) => {
 			return [...expectedModels, ...expectedDrawings];
 		}
 		return undefined;
-	}).flat().filter(Boolean);
+	}).flat().filter(Boolean).sort();
 	const expectedData = {
 		script: Path.basename(__filename, Path.extname(__filename)).replace(/\.test/, ''),
 		title: 'Zombie processing statuses found',
