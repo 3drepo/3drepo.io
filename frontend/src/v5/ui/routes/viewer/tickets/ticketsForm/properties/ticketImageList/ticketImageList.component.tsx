@@ -22,11 +22,6 @@ import { FormInputProps } from '@controls/inputs/inputController.component';
 import { FormHelperText } from '@mui/material';
 import { ImagesModal } from '@components/shared/modalsDispatcher/templates/imagesModal/imagesModal.component';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { uploadFile } from '@controls/fileUploader/uploadFile';
-import { imageIsTooBig } from '@/v5/store/tickets/comments/ticketComments.helpers';
-import { formatMessage } from '@/v5/services/intl';
-import { clientConfigService } from '@/v4/services/clientConfig';
-import { convertFileToImageSrc, getSupportedImageExtensions, stripBase64Prefix, testImageExists } from '@controls/fileUploader/imageFile.helper';
 import { useSyncProps } from '@/v5/helpers/syncProps.hooks';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Actions, Content, ImagesContainer, ImagesGridContainer } from './ticketImageList.styles';
@@ -41,8 +36,9 @@ import EnlargeImageIcon from '@assets/icons/outlined/enlarge_image-outlined.svg'
 import { OverlappingContainer } from '@controls/overlappingContainer/overlappingContainer.styles';
 import { EmptyImageContainer, EnlargeContainer, IconText } from '../ticketImageContent/ticketImageDisplayer/ticketImageDisplayer.styles';
 import { AuthImg } from '@components/authenticatedResource/authImg.component';
-import { getImgSrcMapFunction } from '@/v5/store/tickets/tickets.helpers';
+import { getImgIdFromSrc, getImgSrcMapFunction } from '@/v5/store/tickets/tickets.helpers';
 import EmptyImageIcon from '@assets/icons/outlined/add_image_thin-outlined.svg';
+import { uploadImages } from '@controls/fileUploader/uploadImages';
 
 const EmptyImage = ({ disabled, onClick }) => (
 	<EmptyImageContainer disabled={disabled} onClick={onClick}>
@@ -74,7 +70,7 @@ export const TicketImageList = ({ value, onChange, onBlur, disabled, label, help
 	const imgsSrcs = (value || []).map(getImgSrc);
 	const [imgsInModal, setImgsInModal] = useState(imgsSrcs);
 
-	const onClose = () => onChange(imgsInModal?.length ? imgsInModal.map(stripBase64Prefix) : null);
+	const onClose = () => onChange(imgsInModal?.length ? imgsInModal.map(getImgIdFromSrc) : null);
 	const onDeleteImages = () => onChange(null);
 	const onDeleteImage = (index) => setImgsInModal(imgsInModal.filter((img, i) => index !== i));
 	const onEditImage = (newValue, index) => {
@@ -84,61 +80,14 @@ export const TicketImageList = ({ value, onChange, onBlur, disabled, label, help
 		}
 	};
 
-	const uploadImages = async () => {
-		const files = await uploadFile(getSupportedImageExtensions(), true) as File[];
-		const imagesToUpload = [];
-		let corruptedImagesCount = 0;
-		let imagesTooBigCount = 0;
-		for (const file of files) {
-			if (imageIsTooBig(file)) {
-				imagesTooBigCount++;
-				continue;
-			}
-			try {
-				const imgSrc = await convertFileToImageSrc(file) as string;
-				await testImageExists(imgSrc);
-				imagesToUpload.push(imgSrc);
-			} catch (e) {
-				corruptedImagesCount++;
-			}
-		}
-		if (imagesToUpload.length) {
-			setImgsInModal(imgsInModal.concat(imagesToUpload));
-		}
-		if (imagesTooBigCount) {
-			DialogsActionsDispatchers.open('warning', {
-				title: formatMessage({
-					defaultMessage: 'Max file size exceeded',
-					id: 'ticketImageList.uploadImages.error.imageTooBig.title',
-				}),
-				message: formatMessage({
-					defaultMessage: `
-						{imagesTooBigCount} {imagesTooBigCount, plural, one {file was} other {files were}} too big and could not be uploaded.
-						The max file size is {maxFileSize}`,
-					id: 'ticketImageList.uploadImages.error.imageTooBig.message',
-				}, { imagesTooBigCount, maxFileSize: clientConfigService.resourceUploadSizeLimit }),
-			});
-		}
-		if (corruptedImagesCount) {
-			DialogsActionsDispatchers.open('warning', {
-				title: formatMessage({
-					defaultMessage: 'Invalid images',
-					id: 'ticketImageList.uploadImages.error.corruptedImage.title',
-				}),
-				message: formatMessage({
-					defaultMessage: '{corruptedImagesCount} {corruptedImagesCount, plural, one {file was} other {files were}} corrupted and could not be uploaded.',
-					id: 'ticketImageList.uploadImages.error.corruptedImage.message',
-				}, { corruptedImagesCount }),
-			});
-		}
-	};
+	const uploadImages1 = async () => uploadImages((imagesToUpload) => imgsInModal.concat(imagesToUpload));
 
 	const syncProps = useSyncProps({
 		images: imgsInModal,
 		...(disabled ? {} : {
 			onDelete: onDeleteImage,
 			onAddMarkup: onEditImage,
-			onUpload: uploadImages,
+			onUpload: uploadImages1,
 			onClose,
 		}),
 	});
@@ -147,7 +96,7 @@ export const TicketImageList = ({ value, onChange, onBlur, disabled, label, help
 
 	const onUploadImages = async () => {
 		const displayImageIndex = imgsInModal.length;
-		await uploadImages();
+		await uploadImages1();
 		openImagesModal(displayImageIndex);
 	};
 

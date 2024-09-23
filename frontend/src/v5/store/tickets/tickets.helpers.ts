@@ -17,14 +17,14 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { FederationsHooksSelectors, SequencesHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { camelCase, isEmpty, isEqual, isObject, mapKeys } from 'lodash';
+import { camelCase, isEmpty, isEqual, isObject, mapKeys, last } from 'lodash';
 import { getUrl } from '@/v5/services/api/default';
 import ClashIcon from '@assets/icons/outlined/clash-outlined.svg';
 import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
 import SafetibaseIcon from '@assets/icons/outlined/safetibase-outlined.svg';
 import ShapesIcon from '@assets/icons/outlined/shapes-outlined.svg';
 import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
-import { addBase64Prefix } from '@controls/fileUploader/imageFile.helper';
+import { addBase64Prefix, stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useParams } from 'react-router-dom';
 import { TicketBaseKeys, SequencingProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint } from './tickets.types';
@@ -173,6 +173,14 @@ export const getImgSrcMapFunction = () => {
 		}
 		return addBase64Prefix(imgData);
 	};
+};
+
+export const isUrlResource = (str) => str.startsWith(getUrl(''));
+
+export const getImgIdFromSrc = (imgSrc) => {
+	if (!imgSrc) return '';
+	if (isUrlResource(imgSrc)) return last(imgSrc.split('/'));
+	return stripBase64Prefix(imgSrc);
 };
 
 const overrideHasEditedGroup = (override: GroupOverride, oldOverrides: GroupOverride[]) => {
