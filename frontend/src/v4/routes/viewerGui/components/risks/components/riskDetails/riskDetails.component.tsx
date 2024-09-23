@@ -274,7 +274,7 @@ export class RiskDetails extends PureComponent<IProps, IState> {
 	}
 
 	public handleHeaderClick = () => {
-		if (!this.isNewRisk) { // if its a new issue it shouldnt go to the viewpoint
+		if (!this.isNewRisk && !this.props.disableViewer) { // if its a new issue or kanban it shouldnt go to the viewpoint
 			this.setCameraOnViewpoint({ viewpoint: this.riskData.viewpoint });
 		}
 	}
