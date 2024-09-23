@@ -22,7 +22,14 @@ export const useModelLoading = () => {
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		ViewerService.isModelReady().then(() => setLoading(false));
+		let mounted = true;
+
+		ViewerService.isModelReady().then(() => {
+			if (!mounted) return;
+			setLoading(false);
+		});
+
+		return () => {mounted = false;};
 	}, []);
 
 	return loading;
