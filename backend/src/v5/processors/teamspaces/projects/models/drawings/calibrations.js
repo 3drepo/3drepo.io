@@ -118,10 +118,12 @@ Calibrations.getCalibrationStatusForAllRevs = async (teamspace, project, drawing
 Calibrations.addCalibration = async (teamspace, project, drawing, revision, createdBy, calibration) => {
 	const existingCalibration = await getCalibration(teamspace, project, drawing, revision, { _id: 1 });
 
-	await addCalibration(teamspace, project, drawing, revision, createdBy,
-		deleteIfUndefined({ ...calibration, verticalRange: undefined, units: undefined }));
-	await updateModelSettings(teamspace, project, drawing,
-		{ calibration: { verticalRange: calibration.verticalRange, units: calibration.units } });
+	const { verticalRange, units, ...calibrationData } = calibration;
+
+	await Promise.all([
+		addCalibration(teamspace, project, drawing, revision, createdBy, { ...calibrationData, units }),
+		updateModelSettings(teamspace, project, drawing, { calibration: { verticalRange, units } }),
+	]);
 
 	if (!existingCalibration) {
 		publish(events.REVISION_UPDATED, {

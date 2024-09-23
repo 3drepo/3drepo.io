@@ -307,12 +307,14 @@ const testAddCalibration = () => {
 
 			await Calibrations.addCalibration(teamspace, project, drawing, revision, createdBy, calibration);
 
+			const { verticalRange, units, ...calibrationData } = calibration;
+
 			expect(CalibrationsModel.addCalibration).toHaveBeenCalledTimes(1);
 			expect(CalibrationsModel.addCalibration).toHaveBeenCalledWith(teamspace, project, drawing, revision,
-				createdBy, deleteIfUndefined({ ...calibration, verticalRange: undefined, units: undefined }));
+				createdBy, { ...calibrationData, units });
 			expect(ModelSettingsModel.updateModelSettings).toHaveBeenCalledTimes(1);
 			expect(ModelSettingsModel.updateModelSettings).toHaveBeenCalledWith(teamspace, project, drawing,
-				{ calibration: { verticalRange: calibration.verticalRange, units: calibration.units } });
+				{ calibration: { verticalRange, units } });
 			expect(CalibrationsModel.getCalibration).toHaveBeenCalledTimes(1);
 			expect(CalibrationsModel.getCalibration).toHaveBeenCalledWith(teamspace, project, drawing,
 				revision, { _id: 1 });
@@ -324,12 +326,14 @@ const testAddCalibration = () => {
 
 			await Calibrations.addCalibration(teamspace, project, drawing, revision, createdBy, calibration);
 
+			const { verticalRange, units, ...calibrationData } = calibration;
+
 			expect(CalibrationsModel.addCalibration).toHaveBeenCalledTimes(1);
 			expect(CalibrationsModel.addCalibration).toHaveBeenCalledWith(teamspace, project, drawing, revision,
-				createdBy, deleteIfUndefined({ ...calibration, verticalRange: undefined, units: undefined }));
+				createdBy, { ...calibrationData, units });
 			expect(ModelSettingsModel.updateModelSettings).toHaveBeenCalledTimes(1);
 			expect(ModelSettingsModel.updateModelSettings).toHaveBeenCalledWith(teamspace, project, drawing,
-				{ calibration: { verticalRange: calibration.verticalRange, units: calibration.units } });
+				{ calibration: { verticalRange, units } });
 			expect(CalibrationsModel.getCalibration).toHaveBeenCalledTimes(1);
 			expect(CalibrationsModel.getCalibration).toHaveBeenCalledWith(teamspace, project, drawing,
 				revision, { _id: 1 });
