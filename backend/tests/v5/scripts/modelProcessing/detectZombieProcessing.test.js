@@ -63,7 +63,7 @@ const setupData = () => {
 };
 
 const checkMail = (data, filteredTeamspace) => {
-	const expectedResults = data.map(({ teamspace, models, drawings }) => {
+	const expectedLogExcerpt = data.map(({ teamspace, models, drawings }) => {
 		if (!filteredTeamspace || teamspace === filteredTeamspace) {
 			const expectedModels = models.map(({ model, status }) => (
 				(status !== processStatuses.OK && status !== processStatuses.FAILED)
@@ -74,17 +74,18 @@ const checkMail = (data, filteredTeamspace) => {
 			return [...expectedModels, ...expectedDrawings];
 		}
 		return undefined;
-	}).flat().filter(Boolean).sort();
+	}).flat().filter(Boolean);
 	const expectedData = {
 		script: Path.basename(__filename, Path.extname(__filename)).replace(/\.test/, ''),
 		title: 'Zombie processing statuses found',
-		message: `${expectedResults.length} zombie processing statuses found`,
-		logExcerpt: JSON.stringify(expectedResults),
+		message: `${expectedLogExcerpt.length} zombie processing statuses found`,
 	};
 	expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
 		emailTemplates.ZOMBIE_PROCESSING_STATUSES.name,
-		expectedData,
+		expect.objectContaining(expectedData),
 	);
+	const actualLogExcerpt = JSON.parse(Mailer.sendSystemEmail.mock.calls[0][1].logExcerpt);
+	expect(actualLogExcerpt).toEqual(expect.arrayContaining(expectedLogExcerpt));
 };
 
 const runTest = () => {

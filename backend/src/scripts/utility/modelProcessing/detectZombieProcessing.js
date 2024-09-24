@@ -62,7 +62,7 @@ const run = async (teamspace, limit, notify) => {
 	}
 
 	const teamspaces = teamspace ? [teamspace] : await getTeamspaceList();
-	const results = (await Promise.all(teamspaces.map((ts) => processTeamspace(ts)))).flat().sort();
+	const results = (await Promise.all(teamspaces.map((ts) => processTeamspace(ts)))).flat();
 
 	if (notify && results.length > 0) {
 		logger.logInfo(`Zombie processing statuses found: ${results.length}`);
