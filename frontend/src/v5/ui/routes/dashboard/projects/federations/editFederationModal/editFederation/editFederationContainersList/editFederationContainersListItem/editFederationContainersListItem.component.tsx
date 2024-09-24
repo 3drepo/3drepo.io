@@ -30,6 +30,7 @@ import { AutocompleteTextfield, DashboardListItemRow, Autocomplete } from './edi
 import { OptionsBox } from '../../../../../containers/uploadFileForm/uploadList/uploadListItem/components/uploadListItemDestination/options/optionsBox.styles';
 import { EditFederationContext } from '../../../editFederationContext';
 import { GroupOption } from './groupOption/groupOption.component';
+import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 
 export type IconButtonProps = {
 	container: IContainer;
@@ -123,10 +124,7 @@ export const EditFederationContainersListItem = memo(({
 				</DashboardListItemText>
 				{/* eslint-disable-next-line */}
 				<div onClick={(e) => e.stopPropagation()}>
-					<DashboardListItemText
-						width={160}
-						selected={isSelected}
-					>
+					<FixedOrGrowContainer width={160}>
 						{isIncluded && (
 							<Autocomplete
 								value={groupValue}
@@ -152,7 +150,7 @@ export const EditFederationContainersListItem = memo(({
 								disabled={isReadOnly}
 							/>
 						)}
-					</DashboardListItemText>
+					</FixedOrGrowContainer>
 				</div>
 				<DashboardListItemText
 					width={160}

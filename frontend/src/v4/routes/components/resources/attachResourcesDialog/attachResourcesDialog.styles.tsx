@@ -90,11 +90,11 @@ export const DropzoneContent = styled(DashedContainer).attrs<{ error?: boolean, 
 	error,
 	isDragActive,
 }) => ({
-	strokeWidth: 2,
-	dashSize: 5,
-	gapSize: 5,
-	zeroPadding: true,
-	strokeColor: dropZoneColors(primary.main, primary.dark, errorPalette.main)({ error, isDragActive }),
+	$strokeWidth: 2,
+	$dashSize: 5,
+	$gapSize: 5,
+	$zeroPadding: true,
+	$strokeColor: dropZoneColors(primary.main, primary.dark, errorPalette.main)({ error, isDragActive }),
 }))`
 	${({ theme: { palette: { primary, secondary, error } } }) => css`
 		background-color: ${dropZoneColors(primary.contrast, primary.lightest, error.lightest)};

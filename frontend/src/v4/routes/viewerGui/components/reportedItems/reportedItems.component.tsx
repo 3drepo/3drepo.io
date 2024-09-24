@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PureComponent, ReactChildren, createRef, useEffect, useRef } from 'react';
+import { PureComponent, ReactChildren, createRef, forwardRef, useEffect, useRef } from 'react';
 import IconButton from '@mui/material/IconButton';
 import AddIcon from '@mui/icons-material/Add';
 import ArrowBack from '@mui/icons-material/ArrowBack';
@@ -116,8 +116,6 @@ export class ReportedItems extends PureComponent<IProps> {
 	}
 
 	public renderItemsList = renderWhenTrue(() => {
-		const activeItemRef = createRef<any>();
-
 		return (
 			<ListContainer>
 				{this.props.items.map((item, index) => (
@@ -128,7 +126,6 @@ export class ReportedItems extends PureComponent<IProps> {
 						onItemClick={this.handleItemFocus(item)}
 						onArrowClick={this.handleShowItemDetails(item)}
 						active={this.props.activeItemId === item._id}
-						ref={this.props.activeItemId === item._id ? activeItemRef : undefined}
 						hasViewPermission={this.hasPermission(VIEW_ISSUE)}
 						modelLoaded={this.props.isModelLoaded}
 						panelName={this.props.type}

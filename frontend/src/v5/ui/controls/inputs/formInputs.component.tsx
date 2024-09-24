@@ -43,9 +43,9 @@ export const FormDueDate = (props: InputControllerProps<DueDateProps>) => (<Inpu
 // select inputs
 export const FormSelectView = (props: InputControllerProps<SelectViewProps>) => (<InputController Input={SelectView} {...props} />);
 export const FormSelect = (props: InputControllerProps<SelectProps>) => (<InputController Input={Select} {...props} />);
-export const FormChipSelect = (props: InputControllerProps<ChipSelectProps>) => (<InputController Input={ChipSelect} {...props} />);
+export const FormChipSelect = (props: InputControllerProps<ChipSelectProps>) => (<InputController Input={({ inputRef, ...chipProps }: any) => <ChipSelect {...chipProps} />} {...props} />);
 export const FormAssigneesSelect = (props: InputControllerProps<AssigneesSelectProps>) => (<InputController Input={AssigneesSelect} {...props} />);
 export const FormSearchSelect = (props: InputControllerProps<SelectProps>) => (<InputController Input={SearchSelect} {...props} />);
 
 // control inputs
-export const FormCheckbox = (props: InputControllerProps<CheckboxProps>) => (<InputController Input={Checkbox} {...props} />);
+export const FormCheckbox = (props: InputControllerProps<CheckboxProps>) => (<InputController Input={({ error, helperText,  ...checkboxProps }: any) => <Checkbox {...checkboxProps} />} {...props} />);
