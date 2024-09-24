@@ -160,19 +160,22 @@ export const isResourceId = (str) => {
 	return regexExp.test(str);
 };
 
-export const getImgSrcMapFunction = () => {
+export const getImgSrcContext = () => {
 	const { teamspace, project } = useParams<ViewerParams>();
 	const { containerOrFederation } = useContext(TicketContext);
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 
-	return (imgData) => {
-		if (!imgData) return '';
-		if (isResourceId(imgData)) {
-			return getTicketResourceUrl(teamspace, project, containerOrFederation, ticketId, imgData, isFederation);
-		}
-		return addBase64Prefix(imgData);
-	};
+	return { teamspace, project, containerOrFederation, ticketId, isFederation };
+};
+
+export const getImgSrc = (imgData, context = getImgSrcContext()) => {
+	const { teamspace, project, containerOrFederation, ticketId, isFederation } = context;
+	if (!imgData) return '';
+	if (isResourceId(imgData)) {
+		return getTicketResourceUrl(teamspace, project, containerOrFederation, ticketId, imgData, isFederation);
+	}
+	return addBase64Prefix(imgData);
 };
 
 export const isUrlResource = (str) => str.startsWith(getUrl(''));

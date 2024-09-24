@@ -36,7 +36,7 @@ import EnlargeImageIcon from '@assets/icons/outlined/enlarge_image-outlined.svg'
 import { OverlappingContainer } from '@controls/overlappingContainer/overlappingContainer.styles';
 import { EmptyImageContainer, EnlargeContainer, IconText } from '../ticketImageContent/ticketImageDisplayer/ticketImageDisplayer.styles';
 import { AuthImg } from '@components/authenticatedResource/authImg.component';
-import { getImgIdFromSrc, getImgSrcMapFunction } from '@/v5/store/tickets/tickets.helpers';
+import { getImgIdFromSrc, getImgSrc, getImgSrcContext } from '@/v5/store/tickets/tickets.helpers';
 import EmptyImageIcon from '@assets/icons/outlined/add_image_thin-outlined.svg';
 import { uploadImages } from '@controls/fileUploader/uploadImages';
 
@@ -65,9 +65,9 @@ const EnlargeImagesOverlay = ({ children, onClick }) => (
 
 export const TicketImageList = ({ value, onChange, onBlur, disabled, label, helperText, ...props }: FormInputProps) => {
 	const { isViewer } = useContext(TicketContext);
-	const getImgSrc = getImgSrcMapFunction();
+	const imgContext = getImgSrcContext();
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
-	const imgsSrcs = (value || []).map(getImgSrc);
+	const imgsSrcs = (value || []).map((img) => getImgSrc(img, imgContext));
 	const [imgsInModal, setImgsInModal] = useState(imgsSrcs);
 
 	const onClose = () => onChange(imgsInModal?.length ? imgsInModal.map(getImgIdFromSrc) : null);

@@ -18,7 +18,7 @@
 import { useEffect, useRef } from 'react';
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { FormInputProps } from '@controls/inputs/inputController.component';
-import { getImgSrcMapFunction } from '@/v5/store/tickets/tickets.helpers';
+import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 import { FormHelperText } from '@mui/material';
 import { TicketImageContent } from '../ticketImageContent.component';
 import { TicketImageActionMenu } from '../ticketImageActionMenu.component';
@@ -28,7 +28,6 @@ import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useSyncProps } from '@/v5/helpers/syncProps.hooks';
 
 export const TicketImage = ({ value, onChange, onBlur, disabled, label, helperText, ...props }: FormInputProps) => {
-	const getImgSrc = getImgSrcMapFunction();
 	const imgSrc = getImgSrc(value);
 	const imgInModal = useRef(imgSrc);
 	const syncProps = useSyncProps({ images: [imgInModal.current] });
