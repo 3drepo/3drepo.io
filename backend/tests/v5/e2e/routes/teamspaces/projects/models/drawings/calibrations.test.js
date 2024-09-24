@@ -22,6 +22,7 @@ const { times } = require('lodash');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
+const { convertArrayUnits } = require(`${src}/utils/helper/units`);
 
 let server;
 let agent;
@@ -156,9 +157,11 @@ const testGetCalibration = () => {
 					const latestCalibration = calibrations.reduce(
 						(max, cal) => (max.createdAt > cal.createdAt ? max : cal));
 
+					const { verticalRange, units: drawingUnits } = parameters.drawing.properties.calibration;
+
 					expect(res.body).toEqual({
-						verticalRange: parameters.drawing.properties.calibration.verticalRange,
-						units: parameters.drawing.properties.calibration.units,
+						verticalRange: convertArrayUnits(verticalRange, drawingUnits, latestCalibration.units),
+						units: latestCalibration.units,
 						horizontal: latestCalibration.horizontal,
 						createdAt: res.body.createdAt,
 						createdBy: res.body.createdBy });
@@ -190,7 +193,7 @@ const testAddCalibration = () => {
 				drawing: times(2, () => times(2, () => ServiceHelper.generateRandomNumber())),
 			},
 			verticalRange: [ServiceHelper.generateRandomNumber(0, 10), ServiceHelper.generateRandomNumber(11, 20)],
-			units: 'm',
+			units: 'mm',
 		};
 
 		beforeAll(async () => {

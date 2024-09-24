@@ -25,8 +25,6 @@ const {
 	generateUUID,
 } = require('../../../../../../helper/services');
 
-const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
-
 const { templates } = require(`${src}/utils/responseCodes`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
@@ -53,7 +51,7 @@ const testGetCalibration = () => {
 		const drawing = generateRandomString();
 		const revisionId = generateRandomString();
 
-		const calibration = generateRandomObject();
+		const calibration = { units: 'mm', ...generateRandomObject() };
 		const drawingData = {
 			calibration: { verticalRange: [0, 10], units: 'm' },
 		};
@@ -75,6 +73,7 @@ const testGetCalibration = () => {
 			horizontal: 1,
 			createdAt: 1,
 			createdBy: 1,
+			units: 1,
 		};
 
 		test('should return the latest revision calibration', async () => {
@@ -83,7 +82,7 @@ const testGetCalibration = () => {
 
 			await expect(Calibrations.getCalibration(teamspace, project, drawing, revisionId))
 				.resolves.toEqual({
-					calibration: { ...calibration, ...drawingData.calibration },
+					calibration: { ...calibration, verticalRange: [0, 10000] },
 					status: calibrationStatuses.CALIBRATED,
 				});
 
@@ -159,7 +158,7 @@ const testGetCalibration = () => {
 
 			await expect(Calibrations.getCalibration(teamspace, project, drawing, revisionId))
 				.resolves.toEqual({
-					calibration: { ...calibration, ...drawingData.calibration },
+					calibration: { ...calibration, verticalRange: [0, 10000] },
 					status: calibrationStatuses.UNCONFIRMED,
 				});
 

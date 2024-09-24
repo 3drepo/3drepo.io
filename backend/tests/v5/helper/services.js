@@ -186,7 +186,6 @@ db.createCalibration = async (teamspace, project, drawing, revision, calibration
 		drawing,
 		rev_id: stringToUUID(revision),
 		verticalRange: undefined,
-		units: undefined,
 	});
 
 	await DbHandler.insertOne(teamspace, 'drawings.calibrations', formattedCalibration);
@@ -496,7 +495,7 @@ ServiceHelper.generateCalibration = () => ({
 		drawing: times(2, () => times(2, () => ServiceHelper.generateRandomNumber())),
 	},
 	verticalRange: [0, 10],
-	units: 'm',
+	units: 'mm',
 	createdAt: ServiceHelper.generateRandomDate(),
 	createdBy: ServiceHelper.generateRandomString(),
 });

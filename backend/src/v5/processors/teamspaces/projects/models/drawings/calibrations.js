@@ -20,7 +20,7 @@ const { getDrawingById, updateModelSettings } = require('../../../../../models/m
 const { getRevisionByIdOrTag, getRevisions, getRevisionsByQuery } = require('../../../../../models/revisions');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const { calibrationStatuses } = require('../../../../../models/calibrations.constants');
-const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
+const { convertArrayUnits } = require('../../../../../utils/helper/units');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
@@ -44,6 +44,7 @@ Calibrations.getCalibration = async (teamspace, project, drawing, revision) => {
 		horizontal: 1,
 		createdAt: 1,
 		createdBy: 1,
+		units: 1,
 	};
 
 	const [latestCalibration, { calibration: drawingData }] = await Promise.all([
@@ -52,7 +53,12 @@ Calibrations.getCalibration = async (teamspace, project, drawing, revision) => {
 	]);
 
 	if (latestCalibration) {
-		return { calibration: { ...latestCalibration, ...drawingData }, status: calibrationStatuses.CALIBRATED };
+		return {
+			calibration: {
+				...latestCalibration,
+				verticalRange: convertArrayUnits(drawingData.verticalRange, drawingData.units, latestCalibration.units),
+			},
+			status: calibrationStatuses.CALIBRATED };
 	}
 
 	const { timestamp } = await getRevisionByIdOrTag(teamspace, drawing,
@@ -71,7 +77,11 @@ Calibrations.getCalibration = async (teamspace, project, drawing, revision) => {
 			const data = revIdToCalib[UUIDToString(previousRevisions[i]._id)];
 			if (data) {
 				return {
-					calibration: { ...data.latestCalibration, ...drawingData },
+					calibration: {
+						...data.latestCalibration,
+						verticalRange: convertArrayUnits(drawingData.verticalRange, drawingData.units,
+							data.latestCalibration.units),
+					},
 					status: calibrationStatuses.UNCONFIRMED,
 				};
 			}
