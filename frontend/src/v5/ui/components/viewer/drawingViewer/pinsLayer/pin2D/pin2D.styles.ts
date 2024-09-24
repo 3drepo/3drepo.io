@@ -58,11 +58,8 @@ export const PinContainer = styled.div<{ height, width, colour, position, select
 	svg {
 		height: ${({ height }) => height}px;
 		width: ${({ width }) => width}px;
-
-		${({ selected }) => selected && css`
-			overflow: visible;
-			stroke: #000;
-			stroke-width: 3%;
-		`}
+		stroke: #000;
+		stroke-width: 2%;
+		overflow: visible;
 	}
 `;
