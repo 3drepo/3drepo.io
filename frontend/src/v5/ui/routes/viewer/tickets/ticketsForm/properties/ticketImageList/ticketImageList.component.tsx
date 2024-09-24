@@ -19,7 +19,7 @@ import { useContext, useEffect, useState } from 'react';
 import FileIcon from '@assets/icons/outlined/file-outlined.svg';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { FormInputProps } from '@controls/inputs/inputController.component';
-import { FormHelperText } from '@mui/material';
+import { FormHelperText, Tooltip } from '@mui/material';
 import { ImagesModal } from '@components/shared/modalsDispatcher/templates/imagesModal/imagesModal.component';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useSyncProps } from '@/v5/helpers/syncProps.hooks';
@@ -39,6 +39,8 @@ import { AuthImg } from '@components/authenticatedResource/authImg.component';
 import { getImgIdFromSrc, getImgSrc, getImgSrcContext } from '@/v5/store/tickets/tickets.helpers';
 import EmptyImageIcon from '@assets/icons/outlined/add_image_thin-outlined.svg';
 import { uploadImages } from '@controls/fileUploader/uploadImages';
+import { DrawingViewerService } from '@components/viewer/drawingViewer/drawingViewer.service';
+import { ViewerCanvasesContext } from '../../../../viewerCanvases.context';
 
 const EmptyImage = ({ disabled, onClick }) => (
 	<EmptyImageContainer disabled={disabled} onClick={onClick}>
@@ -65,6 +67,7 @@ const EnlargeImagesOverlay = ({ children, onClick }) => (
 
 export const TicketImageList = ({ value, onChange, onBlur, disabled, label, helperText, ...props }: FormInputProps) => {
 	const { isViewer } = useContext(TicketContext);
+	const { is2DOpen } = useContext(ViewerCanvasesContext);
 	const imgContext = getImgSrcContext();
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const imgsSrcs = (value || []).map((img) => getImgSrc(img, imgContext));
@@ -100,12 +103,14 @@ export const TicketImageList = ({ value, onChange, onBlur, disabled, label, help
 		openImagesModal(displayImageIndex);
 	};
 
-	const onTakeScreenshot = async () => {
+	const uploadScreenshot = async (screenshot) => {
 		const displayImageIndex = imgsInModal.length;
-		const screenshot = await ViewerService.getScreenshot();
 		setImgsInModal(imgsInModal.concat(screenshot));
 		openImagesModal(displayImageIndex);
 	};
+	const upload3DScreenshot = async () => uploadScreenshot(await ViewerService.getScreenshot());
+	const upload2DScreenshot = async () => uploadScreenshot(await DrawingViewerService.getScreenshot());
+
 
 	useEffect(() => {
 		setImgsInModal(imgsSrcs);
@@ -140,10 +145,24 @@ export const TicketImageList = ({ value, onChange, onBlur, disabled, label, help
 					>
 						<EllipsisMenu disabled={disabled}>
 							<EllipsisMenuItem
-								title={<FormattedMessage id="viewer.card.ticketImageList.action.takeScreenshot" defaultMessage="Take screenshot" />}
-								onClick={onTakeScreenshot}
+								title={<FormattedMessage id="viewer.card.ticketImageList.action.takeScreenshot.3d" defaultMessage="Take 3D screenshot" />}
+								onClick={upload3DScreenshot}
 								disabled={!isViewer}
 							/>
+							<Tooltip title={(!isViewer || is2DOpen) ? '' : (
+								<FormattedMessage
+									id="viewer.card.ticketImageList.action.takeScreenshot.2d.disabled"
+									defaultMessage="Open the 2d viewer to enable this option"
+								/>
+							)}>
+								<div>
+									<EllipsisMenuItem
+										title={<FormattedMessage id="viewer.card.ticketImageList.action.takeScreenshot" defaultMessage="Take 2D screenshot" />}
+										onClick={upload2DScreenshot}
+										disabled={!isViewer || !is2DOpen}
+									/>
+								</div>
+							</Tooltip>
 							<EllipsisMenuItem
 								title={<FormattedMessage id="viewer.card.ticketImageList.action.uploadImages" defaultMessage="Upload images" />}
 								onClick={onUploadImages}
