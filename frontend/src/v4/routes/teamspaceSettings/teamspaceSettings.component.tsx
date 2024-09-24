@@ -26,10 +26,16 @@ import { isEmpty } from 'lodash';
 
 import { Switch } from '@mui/material';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
+import { DatePicker } from '@controls/inputs/datePicker/datePicker.component';
+import { Gap } from '@controls/gap';
+import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
+import { FormattedMessage } from 'react-intl';
+import { formatMessage } from '@/v5/services/intl';
 import { ROUTES } from '../../constants/routes';
 import { ChipsInput } from '../components/chipsInput/chipsInput.component';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
+import { DateField } from '../components/dateField/dateField.component';
 import { FileInputField } from './components/fileInputField/fileInputField.component';
 import {
 	BackButton,
@@ -41,6 +47,7 @@ import {
 	Headline,
 	InfoColumnWrapper,
 	LoaderContainer,
+	PermissionsLogContainer,
 	StyledButton,
 	StyledForm,
 	StyledGrid,
@@ -266,6 +273,43 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 		);
 	}
 
+	private renderPermissionLogOption = () => {
+		return (
+			<PermissionsLogContainer gap="10px" container direction="column" wrap="nowrap">
+				<Headline color="textPrimary" variant="subtitle1">
+					<FormattedMessage id="teamspaceSettings.permissionsLog.heading" defaultMessage="User Permission Log Download" />
+				</Headline>
+				<DataText variant="body1">
+					<FormattedMessage
+						id="teamspaceSettings.permissionsLog.subHeading"
+						defaultMessage="Download your User Permission Change logs for this teamspace by selecting the range below and clicking download."
+					/>
+				</DataText>
+				<FileGrid container direction="row" justifyContent="space-between" alignItems="center" wrap="nowrap">
+					<Grid gap="10px" container alignItems="end" wrap="nowrap">
+						<DateTimePicker
+							disableFuture
+							label={formatMessage({ id: 'teamspaceSettings.permissionsLog.startDate', defaultMessage: 'Start Date' })}
+							name="startDate"
+						/>
+						<DateTimePicker
+							disableFuture
+							label={formatMessage({ id: 'teamspaceSettings.permissionsLog.endDate', defaultMessage: 'End Date' })}
+							name="endDate"
+						/>
+						<Button
+							color="primary"
+							variant="contained"
+							onClick={() => { }}
+						>
+							<FormattedMessage id="teamspaceSettings.permissionsLog.download" defaultMessage="Download" />
+						</Button>
+					</Grid>
+				</FileGrid>
+			</PermissionsLogContainer>
+		);
+	}
+
 	public renderForm = () => {
 		const { topicTypes, riskCategories, createMitigationSuggestions  } = this.state;
 
@@ -282,11 +326,11 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 					<StyledForm>
 						<StyledGrid>
 							<TextField
-									value={this.teamspace}
-									label="Teamspace"
-									margin="dense"
-									fullWidth
-									disabled
+								value={this.teamspace}
+								label="Teamspace"
+								margin="dense"
+								fullWidth
+								disabled
 							/>
 						</StyledGrid>
 
@@ -308,6 +352,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 
 						{this.renderTreatmentSuggestionsSection()}
 						{this.renderCreateMitigationSuggestionsOption()}
+						{this.renderPermissionLogOption()}
 						<ButtonContainer container direction="column" alignItems="flex-end">
 							<Field render={({ form }) =>
 								<Button
