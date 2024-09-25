@@ -99,7 +99,7 @@ export const SelectPinButton = styled.div<{ color: string, isSelected: boolean; 
 	padding: 12px;
 	cursor: ${({  disabled }) => disabled ? 'default' : 'pointer'};
 
-	${({ color, isSelected, theme }) => isLight(color, 220) && css`
+	${({ color, isSelected, theme }) => isLight(color, 230) && css`
 		outline-color: ${isSelected ? theme.palette.base.lighter : theme.palette.secondary.lightest};
 		> svg path {
 			stroke: ${theme.palette.secondary.main};

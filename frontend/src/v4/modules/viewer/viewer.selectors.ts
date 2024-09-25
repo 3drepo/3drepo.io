@@ -40,7 +40,6 @@ export const selectFarPlaneAlgorithm = createSelector(
 );
 
 export const selectViewerBackgroundColor = createSelector(
-	// selectSettings, (state) => rgbToHex(state.viewerBackgroundColor.map((col) => Math.round(col * 255)))
 	selectSettings, (state) => GLToHexColor(state.viewerBackgroundColor)
 );
 
