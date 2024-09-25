@@ -35,6 +35,7 @@ const Federations = require('../../../../../processors/teamspaces/projects/model
 const { Router } = require('express');
 const { canDeleteContainer } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { getUserFromSession } = require('../../../../../utils/sessions');
+const { isArray } = require('../../../../../utils/helper/typeCheck');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 
 const getThumbnail = async (req, res) => {
@@ -104,14 +105,19 @@ const getModelList = (modelType) => async (req, res) => {
 const appendFavourites = (modelType) => async (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
-	const favouritesToAdd = req.body[`${modelType}s`];
-	const fn = {
-		[modelTypes.CONTAINER]: Containers.appendFavourites,
-		[modelTypes.FEDERATION]: Federations.appendFavourites,
-		[modelTypes.DRAWING]: Drawings.appendFavourites,
-	};
-
 	try {
+		const favouritesToAdd = req.body[`${modelType}s`];
+
+		if (!isArray(favouritesToAdd)) {
+			throw createResponseCode(templates.invalidArguments, `${modelType}s must be an array`);
+		}
+
+		const fn = {
+			[modelTypes.CONTAINER]: Containers.appendFavourites,
+			[modelTypes.FEDERATION]: Federations.appendFavourites,
+			[modelTypes.DRAWING]: Drawings.appendFavourites,
+		};
+
 		await fn[modelType](user, teamspace, project, favouritesToAdd);
 		respond(req, res, templates.ok);
 	} catch (err) {

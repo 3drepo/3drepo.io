@@ -234,7 +234,6 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		const sh = Math.round(ctx.canvas.height / scale);
 
 		// Render asynchronously using createImageBitmap (does not work in Firefox)
-
 		createImageBitmap(img, sx, sy, sw, sh, { resizeWidth: ctx.canvas.width, resizeHeight: ctx.canvas.height }).then((bm) => {
 			// transferFromImageBitmap should take place almost immediately. An
 			// alternative is to pass control of the canvas to a WebWorker and
@@ -263,6 +262,9 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 			if (resolve) {
 				resolve(p);
 			}
+		}).catch((e) => {
+			// eslint-disable-next-line no-console
+			console.log(e);
 		});
 
 

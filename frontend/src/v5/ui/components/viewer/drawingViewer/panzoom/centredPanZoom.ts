@@ -20,7 +20,7 @@ import { Events, PanZoom, panzoom } from './panzoom';
 import { clamp } from 'lodash';
 import { ZoomableImage } from '../zoomableImage.types';
 
-export type PanZoomHandler = PanZoom & { zoomIn : () => void, zoomOut: () => void };
+export type PanZoomHandler = PanZoom & { zoomIn : () => void, zoomOut: () => void, centreView: () => void };
 
 export const centredPanZoom = (target: ZoomableImage, paddingW: number, paddingH: number) => {
 	const targetContainer = target.getEventsEmitter();
@@ -38,7 +38,7 @@ export const centredPanZoom = (target: ZoomableImage, paddingW: number, paddingH
 	
 	const scaleTarget = () => {
 		const parentRect = targetContainer.getBoundingClientRect();
-		const fittedSize = aspectRatio(naturalSize.width, naturalSize.height, parentRect.width - paddingW * 2, parentRect.height - paddingH * 2);
+		const fittedSize = aspectRatio(naturalSize.width, naturalSize.height, parentRect.width / 3, parentRect.height / 3);
 
 		let scale = Math.min(fittedSize.scaledWidth / naturalSize.width, fittedSize.scaledHeight / naturalSize.height );
 		pz.setMinZoom(scale);
@@ -63,14 +63,18 @@ export const centredPanZoom = (target: ZoomableImage, paddingW: number, paddingH
 		pz.moveTo(x, y);
 	});
 
-	const centerTarget = () => {
+	const centerTarget = (animate = false) => {
 		const parentRect = targetContainer.getBoundingClientRect();
 		const fittedSize = aspectRatio(naturalSize.width, naturalSize.height, parentRect.width - paddingW * 2, parentRect.height - paddingH * 2);
 		let scale = Math.min(fittedSize.scaledWidth / naturalSize.width, fittedSize.scaledHeight / naturalSize.height );
 		const x = (parentRect.width - fittedSize.scaledWidth) / 2;
 		const y = (parentRect.height - fittedSize.scaledHeight) / 2;
 
-		pz.setTransform(x, y, scale);
+		if (!animate) {
+			pz.setTransform(x, y, scale);
+		} else {
+			pz.smoothSetTransform(x, y, scale);
+		}
 	};
 
 	centerTarget();
@@ -79,5 +83,5 @@ export const centredPanZoom = (target: ZoomableImage, paddingW: number, paddingH
 
 	const zoomOut = () => pz.zoom(1 / 1.5);
 
-	return { ...pz, zoomIn, zoomOut, centerTarget } ;
+	return { ...pz, zoomIn, zoomOut, centreView: () => centerTarget(true) } ;
 };
