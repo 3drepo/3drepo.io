@@ -139,6 +139,8 @@ export const Viewer2D = () => {
 		DrawingRevisionsActionsDispatchers.fetch(teamspace, project, drawingId);
 	}, [revisionId]);
 
+	const [snapping, setSnapping] = useState(false);
+
 	return (
 		<ViewerContainer visible>
 			{step === 1 && (
@@ -171,10 +173,17 @@ export const Viewer2D = () => {
 					snapHandler={snapHandler}
 					onChange={setVector2D}
 					key={String(isCalibrating)}
+					snapping={snapping}
 				/>)}
 			</ImageContainer>
 			<ToolbarContainer>
 				<MainToolbar>
+					<ToolbarButton
+						Icon={() => (<h1>S</h1>)}
+						onClick={() => setSnapping(!snapping)}
+						title={formatMessage({ id: 'viewer.toolbar.icon.snapping', defaultMessage: 'Bro' })}
+						selected={snapping}
+					/>
 					<ToolbarButton
 						Icon={HomeIcon}
 						onClick={() => zoomHandler.centreView()}

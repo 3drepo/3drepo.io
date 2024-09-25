@@ -33,17 +33,19 @@ type ViewerLayer2DProps = {
 	viewBox: ViewBoxType,
 	active: boolean,
 	value?: Vector2D,
-	snapHandler: SVGSnapHelper
+	snapHandler: SVGSnapHelper,
+	snapping?: boolean,
 	onChange?: (arrow: Vector2D) => void;
 };
 
-export const ViewerLayer2D = ({ viewBox, active, snapHandler, value, onChange }: ViewerLayer2DProps) => {
+export const ViewerLayer2D = ({ viewBox, active, snapHandler, value, onChange, snapping }: ViewerLayer2DProps) => {
 	const { isCalibrating } = useContext(CalibrationContext);
 	const [offsetStart, setOffsetStart] = useState<Coord2D>(value[0]);
 	const [offsetEnd, setOffsetEnd] = useState<Coord2D>(value[1]);
 	const previousViewBox = useRef<ViewBoxType>(null);
 	const [mousePosition, setMousePosition] = useState<Coord2D>(null);
 	const [snapType, setSnapType] = useState<SnapType>(SnapType.NONE);
+	// const [snapping, setSnapping] = useState(false);
 
 	const containerStyle: CSSProperties = {
 		transformOrigin: '0 0',
@@ -54,11 +56,7 @@ export const ViewerLayer2D = ({ viewBox, active, snapHandler, value, onChange }:
 
 	// This returns the offset of the cursor from the top-left corner
 	const getMousePosition = (e) => {
-		const rect = e.target.getBoundingClientRect();
-		const offsetX = e.clientX - rect.left;
-		const offsetY = e.clientY - rect.top;
-		const pos = [offsetX, offsetY].map((point) => point / viewBox.scale);
-		return new Vector2(...pos);
+		return new Vector2(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
 	};
 
 	const handleMouseDown = () => previousViewBox.current = viewBox;
@@ -100,7 +98,7 @@ export const ViewerLayer2D = ({ viewBox, active, snapHandler, value, onChange }:
 		setMousePosition([mousePos.x, mousePos.y]);
 	};
 
-	const handleMouseLeave = () => setMousePosition(undefined)
+	const handleMouseLeave = () => setMousePosition(undefined);
 
 	const resetArrow = () => {
 		setOffsetStart(null);
@@ -108,27 +106,24 @@ export const ViewerLayer2D = ({ viewBox, active, snapHandler, value, onChange }:
 	};
 
 	useEffect(() => {
+		// setSnapping(active);
 		if (!active && !offsetEnd) {
 			resetArrow();
 		}
 	}, [active]);
 
 	return (
-		<Container style={containerStyle} id="viewerLayer2d">
-			{isCalibrating && (
-				<LayerLevel>
-					{mousePosition && active && <Cursor coord={mousePosition} scale={viewBox.scale} snapType={snapType} />}
-					{offsetStart && <SvgArrow start={offsetStart} end={offsetEnd ?? mousePosition} scale={viewBox.scale} />}
-				</LayerLevel>
-			)}
-			{active && (
-				<LayerLevel
-					onMouseUp={handleMouseUp}
-					onMouseDown={handleMouseDown}
-					onMouseMove={handleMouseMove}
-					onMouseLeave={handleMouseLeave}
-				/>
-			)}
+		<Container style={containerStyle} id="viewerLayer2d" >
+			<LayerLevel>
+				{snapping && mousePosition &&  <Cursor coord={mousePosition} scale={viewBox.scale} snapType={snapType} />}
+				{isCalibrating && offsetStart && <SvgArrow start={offsetStart} end={offsetEnd ?? mousePosition} scale={viewBox.scale} />}
+			</LayerLevel>
+			<LayerLevel
+				onMouseUp={handleMouseUp}
+				onMouseDown={handleMouseDown}
+				onMouseMove={handleMouseMove}
+				onMouseLeave={handleMouseLeave}
+			/>
 		</Container>
 	);
 };
