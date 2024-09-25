@@ -79,7 +79,7 @@ const queueDrawingUpload = async (teamspace, project, model, revId, data, fileBu
 			database: teamspace,
 			project: model,
 			revId,
-			file: `${SHARED_SPACE_TAG}/${Path.join(revId, `${revId}${data.format}`)}`,
+			file: `${SHARED_SPACE_TAG}/${revId}/${revId}${data.format}`,
 		};
 
 		await mkdir(pathToRevFolder);
