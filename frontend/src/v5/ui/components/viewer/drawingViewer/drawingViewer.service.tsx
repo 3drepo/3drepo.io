@@ -21,20 +21,25 @@ import { domToPng } from 'modern-screenshot';
 
 export const DRAWING_VIEWER_EVENTS = {
 	PICK_POINT: 'PICK_POINT',
+	POINT_POSITION: 'POINT_POSITION',
+	SNAPPING_CHANGED: 'SNAPPING_CHANGED',
 };
 
 type GetScreenshot = () => null | Promise<string>;
 const DrawingViewerServiceCreator = () => {
 	let imgContainer = null;
-	const emitter = new EventEmitter();
+	let snapping = false;
 
-	const on = (event, fn, ...args) => emitter.on(event, fn, ...args);
-	const emit = (event, ...args) => emitter.emit(event, ...args);
+	const emitter = new EventEmitter();
+	const on = emitter.on.bind(emitter);
+	const off = emitter.off.bind(emitter);
+	const emit = emitter.emit.bind(emitter);
 
 	const getScreenshot: GetScreenshot = () => imgContainer ? domToPng(imgContainer) : null;
 	const setImgContainer = (newImgContainer) => { imgContainer = newImgContainer; };
 	
-	const emitPickPointEvent = (drawingPosition, modelPosition ) => emit(DRAWING_VIEWER_EVENTS.PICK_POINT, { drawingPosition, modelPosition });
+	const emitPickPointEvent = (drawingPosition, modelPosition? ) => emit(DRAWING_VIEWER_EVENTS.PICK_POINT, { drawingPosition, modelPosition });
+	const emitPointPositionEvent = (drawingPosition, modelPosition? ) => emit(DRAWING_VIEWER_EVENTS.POINT_POSITION, { drawingPosition, modelPosition });
 
 	const getClickPoint = async () => {
 		return new Promise(async (resolve) => {
@@ -43,11 +48,23 @@ const DrawingViewerServiceCreator = () => {
 		});
 	};
 
+	const setSnapping = (enabled) => {
+		snapping = enabled;
+		emit(DRAWING_VIEWER_EVENTS.SNAPPING_CHANGED, enabled);
+	};
+
+	const getSnapping = () => snapping;
+
 	return {
 		getScreenshot,
 		setImgContainer,
 		emitPickPointEvent,
+		emitPointPositionEvent,
 		getClickPoint,
+		getSnapping,
+		setSnapping,
+		on,
+		off,
 	};
 };
 export const DrawingViewerService = DrawingViewerServiceCreator();

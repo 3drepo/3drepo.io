@@ -16,11 +16,11 @@
  */
 
 import { mapValues } from 'lodash';
-import { Svg } from './svgArrow.styles';
+import { Svg } from './arrow.styles';
 import { Coord2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 
-type SvgArrowProps = { start: Coord2D, end: Coord2D, scale: number };
-export const SvgArrow = ({ start, end, scale }: SvgArrowProps) => {
+type ArrowProps = { start: Coord2D, end: Coord2D, scale: number };
+export const Arrow = ({ start, end, scale }: ArrowProps) => {
 	const [x1, y1] = start;
 	const [x2, y2] = end;
 	const dx = x2 - x1;

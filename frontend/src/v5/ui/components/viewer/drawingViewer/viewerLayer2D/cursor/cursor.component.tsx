@@ -27,17 +27,17 @@ const CursorIcon = {
 };
 
 type CursorProps = { coord: Coord2D, scale: number, snapType: SnapType };
-export const Cursor = ({ coord, scale, snapType }: CursorProps) => {
+export const SnapCursor = ({ coord, scale, snapType }: CursorProps) => {
 	const Cursor = CursorIcon[snapType];
 
 	return (
 		<Cursor
 			transform={`
 				translate(${coord[0]} ${coord[1]})
-				scale(${1/scale})
+				scale(${1 / scale})
 			`}
 			
 			transform-origin="50% 50%"
-			/>
+		/>
 	);
 };

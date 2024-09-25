@@ -66,7 +66,7 @@ export const Viewer2D = () => {
 	const backgroundColor = useSelector(selectViewerBackgroundColor);
 
 	const { close2D } = useContext(ViewerCanvasesContext);
-	const { isCalibrating, step, vector2D, setVector2D, isCalibrating2D, setIsCalibrating2D } = useContext(CalibrationContext);
+	const { isCalibrating, step, isCalibrating2D, setIsCalibrating2D } = useContext(CalibrationContext);
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
 	const [snapHandler, setSnapHandler] =  useState<SVGSnapHelper>();
 	const [viewBox, setViewBox] = useState<ViewBoxType>(DEFAULT_VIEWBOX);
@@ -139,8 +139,6 @@ export const Viewer2D = () => {
 		DrawingRevisionsActionsDispatchers.fetch(teamspace, project, drawingId);
 	}, [revisionId]);
 
-	const [snapping, setSnapping] = useState(false);
-
 	return (
 		<ViewerContainer visible>
 			{step === 1 && (
@@ -169,21 +167,12 @@ export const Viewer2D = () => {
 				{!isLoading && (<ViewerLayer2D
 					active={isCalibrating2D}
 					viewBox={viewBox}
-					value={vector2D}
 					snapHandler={snapHandler}
-					onChange={setVector2D}
 					key={String(isCalibrating)}
-					snapping={snapping}
 				/>)}
 			</ImageContainer>
 			<ToolbarContainer>
 				<MainToolbar>
-					<ToolbarButton
-						Icon={() => (<h1>S</h1>)}
-						onClick={() => setSnapping(!snapping)}
-						title={formatMessage({ id: 'viewer.toolbar.icon.snapping', defaultMessage: 'Bro' })}
-						selected={snapping}
-					/>
 					<ToolbarButton
 						Icon={HomeIcon}
 						onClick={() => zoomHandler.centreView()}
