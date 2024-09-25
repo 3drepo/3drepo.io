@@ -98,7 +98,6 @@ const queueDrawingUpload = async (teamspace, project, model, revId, data, fileBu
 
 		publish(events.QUEUED_TASK_UPDATE, { teamspace, model, corId: revId, status: processStatuses.QUEUED });
 	} catch (err) {
-		console.log(err);
 		logger.logError('Failed to queue drawing task', err.message);
 		publish(events.QUEUED_TASK_COMPLETED, { teamspace, model, corId: revId, value: 4 });
 	}
