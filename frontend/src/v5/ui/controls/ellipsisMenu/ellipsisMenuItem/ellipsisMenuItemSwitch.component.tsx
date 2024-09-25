@@ -15,21 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { PanZoomHandler } from '@components/viewer/drawingViewer/panzoom/centredPanZoom';
+import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
+import { EllipsisMenuItem, EllipsisMenuItemProps } from './ellipsisMenutItem.component';
+import { ReactNode } from 'react';
+import { SwitchContainer } from './ellipsisMenuItem.styles';
 
-export type Coord2D = [number, number];
-export type Coord3D = [number, number, number];
-
-export type Vector<CoordType> = [CoordType | null, CoordType | null];
-
-export type Vector1D = Vector<number>;
-export type Vector2D = Vector<Coord2D>;
-export type Vector3D = Vector<Coord3D>;
-
-export enum PlaneType {
-	UPPER = 'upper',
-	LOWER = 'lower',
-	NONE = 'none',
-}
-
-export type ViewBoxType = ReturnType<PanZoomHandler['getOriginalSize']> & ReturnType<PanZoomHandler['getTransform']>;
+type EllipsisMenuItemSwitchProps = Omit<EllipsisMenuItemProps, 'to'> & {
+	icon?: ReactNode,
+	active: boolean,
+};
+export const EllipsisMenuItemSwitch = ({ icon, title, active, ...props }: EllipsisMenuItemSwitchProps) => (
+	<EllipsisMenuItem 
+		title={
+			<SwitchContainer>
+				{icon}
+				{title}
+				{active && <TickIcon />}
+			</SwitchContainer>}
+		{...props}
+	/>
+);
