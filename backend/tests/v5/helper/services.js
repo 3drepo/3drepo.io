@@ -457,16 +457,17 @@ ServiceHelper.generateRandomModel = ({ modelType = modelTypes.CONTAINER, viewers
 	};
 };
 
-ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, modelType) => {
+ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, modelType, timestamp, status) => {
 	const _id = ServiceHelper.generateUUIDString();
 	const entry = deleteIfUndefined({
 		_id,
 		tag: modelType === modelTypes.DRAWING ? undefined : ServiceHelper.generateRandomString(),
+		status,
 		statusCode: modelType === modelTypes.DRAWING ? statusCodes[0].code : undefined,
 		revCode: modelType === modelTypes.DRAWING ? ServiceHelper.generateRandomString(10) : undefined,
 		format: modelType === modelTypes.DRAWING ? '.pdf' : undefined,
 		author: ServiceHelper.generateRandomString(),
-		timestamp: ServiceHelper.generateRandomDate(),
+		timestamp: timestamp || ServiceHelper.generateRandomDate(),
 		desc: ServiceHelper.generateRandomString(),
 		void: !!isVoid,
 	});
