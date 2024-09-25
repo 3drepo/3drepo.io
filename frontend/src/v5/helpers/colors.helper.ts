@@ -17,7 +17,7 @@
 
 import { contrastColor } from 'contrast-color';
 import { rgbToHex as muiRgbToHex, hexToRgb as muiHexToRgb } from '@mui/material';
-import { memoize } from 'lodash';
+import { isNumber, memoize } from 'lodash';
 
 type GroupColor = {
 	color?: any,
@@ -64,7 +64,7 @@ export const hasTransparency = (color) => Array.isArray(color) ? color.length > 
 export const getTransparency = (color) => (Array.isArray(color) ? color[3] : parseInt(color.slice(7), 16)) / 255;
 
 // RGB converters
-export const rgbToHex = (color: RgbArray) => color && muiRgbToHex(`rgb(${color.join()})`);
+export const rgbToHex = (color: RgbArray) => color && muiRgbToHex(`rgb(${color.filter(isNumber).join()})`);
 export const rgbGroupColorToHex = ({ opacity, color }: RgbGroupColor): HexGroupColor => ({
 	opacity,
 	color: rgbToHex(color),
