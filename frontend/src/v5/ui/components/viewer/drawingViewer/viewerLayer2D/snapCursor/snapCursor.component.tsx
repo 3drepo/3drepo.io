@@ -14,10 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Coord2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { SnapType } from '../../snapping/types';
-import { CursorEdge, CursorIntersection, CursorNode, CursorNone } from './cursor.styles';
-
+import { CursorEdge, CursorIntersection, CursorNode, CursorNone } from './snapCursor.styles';
+import { useMousePosition, useScale } from '../../drawingViewer.service.hooks';
 
 const CursorIcon = {
 	[SnapType.NONE]: CursorNone,
@@ -26,14 +25,18 @@ const CursorIcon = {
 	[SnapType.EDGE]: CursorEdge,
 };
 
-type CursorProps = { coord: Coord2D, scale: number, snapType: SnapType };
-export const SnapCursor = ({ coord, scale, snapType }: CursorProps) => {
+type CursorProps = { snapType: SnapType };
+export const SnapCursor = ({ snapType }: CursorProps) => {
 	const Cursor = CursorIcon[snapType];
+	const position = useMousePosition();
+	const scale = useScale();
+
+	if (!position) return null;
 
 	return (
 		<Cursor
 			transform={`
-				translate(${coord[0]} ${coord[1]})
+				translate(${position[0]} ${position[1]})
 				scale(${1 / scale})
 			`}
 			

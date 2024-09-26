@@ -19,43 +19,36 @@ import { Coord2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibrati
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { useContext, useEffect, useState } from 'react';
 import { Arrow } from '../arrow/arrow.component';
-import { DRAWING_VIEWER_EVENTS, DrawingViewerService } from '../../drawingViewer.service';
+import { DrawingViewerService } from '../../drawingViewer.service';
 import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 import { isEqual } from 'lodash';
+import { useClickEffect, useMousePosition, useScale } from '../../drawingViewer.service.hooks';
 
-export const CalibrationArrow = ({ scale }) => {
+export const CalibrationArrow = () => {
 	const { isCalibrating2D,  vector2D, setVector2D } = useContext(CalibrationContext);
 	const [offsetStart, setOffsetStart] = useState<Coord2D>(vector2D[0]);
 	const [offsetEnd, setOffsetEnd] = useState<Coord2D>(vector2D[1]);
+	const scale = useScale();
+	const mousePosition = useMousePosition();
 
 	useEffect(() => {
-		const onPositionChanged = ({ drawingPosition }) => {
-			if (offsetStart && !vector2D[1]) {
-				setOffsetEnd(drawingPosition);
-			}
-		};
+		if (offsetStart && !vector2D[1]) {
+			setOffsetEnd(mousePosition);
+		}
+	}, [mousePosition]);
 
-		const onClickPoint = ({ drawingPosition }) => {
-			if (!isCalibrating2D) return;
+	useClickEffect((position) => {
+		if (!isCalibrating2D) return;
 
-			if (offsetEnd || (!offsetEnd && !offsetStart)) {
-				setOffsetEnd(null);
-				setOffsetStart(drawingPosition);
-				setVector2D(EMPTY_VECTOR);
-			} else if (!isEqual(offsetStart, drawingPosition)) {
-				setOffsetEnd(drawingPosition);
-				setVector2D?.([offsetStart, drawingPosition]);
-			}
-		};
-
-		DrawingViewerService.on(DRAWING_VIEWER_EVENTS.POINT_POSITION, onPositionChanged);
-		DrawingViewerService.on(DRAWING_VIEWER_EVENTS.PICK_POINT, onClickPoint);
-
-		return () => {
-			DrawingViewerService.off(DRAWING_VIEWER_EVENTS.POINT_POSITION, onPositionChanged);
-			DrawingViewerService.off(DRAWING_VIEWER_EVENTS.PICK_POINT, onClickPoint);
-		};
-	}, [isCalibrating2D, vector2D, offsetStart]);
+		if (offsetEnd || (!offsetEnd && !offsetStart)) {
+			setOffsetEnd(null);
+			setOffsetStart(position);
+			setVector2D(EMPTY_VECTOR);
+		} else if (!isEqual(offsetStart, position)) {
+			setOffsetEnd(position);
+			setVector2D?.([offsetStart, position]);
+		}
+	}, [offsetEnd, offsetStart ]);
 
 	const resetArrow = () => {
 		setOffsetStart(null);
@@ -66,10 +59,8 @@ export const CalibrationArrow = ({ scale }) => {
 		if (!isCalibrating2D && !offsetEnd) {
 			resetArrow();
 		}
-
 		DrawingViewerService.setSnapping(isCalibrating2D);
 	}, [isCalibrating2D]);
-
 
 
 	if (!offsetStart) return null;

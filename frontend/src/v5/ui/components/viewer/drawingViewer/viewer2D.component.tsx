@@ -165,7 +165,6 @@ export const Viewer2D = () => {
 				{showSVGImage && src && <SVGImage ref={imgRef} src={src} onLoad={onImageLoad} />}
 				{!showSVGImage && src && <DrawingViewerImage ref={imgRef} src={src} onLoad={onImageLoad} />}
 				{!isLoading && (<ViewerLayer2D
-					active={isCalibrating2D}
 					viewBox={viewBox}
 					snapHandler={snapHandler}
 					key={String(isCalibrating)}

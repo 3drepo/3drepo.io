@@ -19,7 +19,7 @@ import { CSSProperties, useCallback, useContext, useEffect, useRef, useState } f
 import { Container, LayerLevel } from './viewerLayer2D.styles';
 import { PanZoomHandler } from '../panzoom/centredPanZoom';
 import { isEqual } from 'lodash';
-import { SnapCursor } from './cursor/cursor.component';
+import { SnapCursor } from './snapCursor/snapCursor.component';
 import { Coord2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { SVGSnapHelper } from '../snapping/svgSnapHelper';
@@ -27,11 +27,11 @@ import { Vector2 } from 'three';
 import { SnapType } from '../snapping/types';
 import { DrawingViewerService } from '../drawingViewer.service';
 import { CalibrationArrow } from './calibrationArrow/calibrationArrow.component';
+import { useSnapping } from '../drawingViewer.service.hooks';
 
 export type ViewBoxType = ReturnType<PanZoomHandler['getOriginalSize']> & ReturnType<PanZoomHandler['getTransform']>;
 type ViewerLayer2DProps = {
 	viewBox: ViewBoxType,
-	active: boolean,
 	snapHandler: SVGSnapHelper,
 	snapping?: boolean,
 };
@@ -41,8 +41,7 @@ export const ViewerLayer2D = ({ viewBox, snapHandler }: ViewerLayer2DProps) => {
 	const previousViewBox = useRef<ViewBoxType>(null);
 	const [mousePosition, setMousePosition] = useState<Coord2D>(null);
 	const [snapType, setSnapType] = useState<SnapType>(SnapType.NONE);
-	
-	// const [snapping, setSnapping] = useState(false);
+	const snapping = useSnapping();
 
 	const containerStyle: CSSProperties = {
 		transformOrigin: '0 0',
@@ -51,24 +50,19 @@ export const ViewerLayer2D = ({ viewBox, snapHandler }: ViewerLayer2DProps) => {
 		height: `${viewBox.height}px`,
 	};
 
-	// This returns the offset of the cursor from the top-left corner
-	const getMousePosition = (e) => {
-		return new Vector2(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
-	};
-
 	const handleMouseDown = () => previousViewBox.current = viewBox;
 
 	const handleMouseUp = useCallback(() => {
 		// check if mouse up was fired after dragging or if it was an actual click
 		if (!isEqual(viewBox, previousViewBox.current)) return;
 
-		DrawingViewerService.emitPickPointEvent(mousePosition);
+		DrawingViewerService.emitMouseClickEvent(mousePosition);
 	}, [mousePosition]);
 
 	const handleMouseMove = useCallback((e) => {
-		let mousePos = getMousePosition(e);
+		let mousePos = new Vector2(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
 
-		if (DrawingViewerService.getSnapping()) {
+		if (snapping) {
 			const radius = 10 / viewBox.scale;
 			const results = snapHandler?.snap(mousePos, radius) || { closestNode: undefined, closestIntersection: undefined, closestEdge: undefined };
 	
@@ -87,17 +81,19 @@ export const ViewerLayer2D = ({ viewBox, snapHandler }: ViewerLayer2DProps) => {
 		}
 
 		setMousePosition([mousePos.x, mousePos.y]);
-	}, [snapHandler]);
+	}, [snapHandler, snapping]);
 
 	const handleMouseLeave = () => setMousePosition(undefined);
 
-	useEffect(() => { DrawingViewerService.emitPointPositionEvent(mousePosition); }, [mousePosition]);
+	useEffect(() => { DrawingViewerService.setMousePosition(mousePosition); }, [mousePosition]);
+	useEffect(() => { DrawingViewerService.setScale(viewBox.scale); }, [viewBox]);
+
 
 	return (
 		<Container style={containerStyle} id="viewerLayer2d" >
 			<LayerLevel>
-				{DrawingViewerService.getSnapping() && mousePosition &&  <SnapCursor coord={mousePosition} scale={viewBox.scale} snapType={snapType} />}
-				{isCalibrating && <CalibrationArrow scale={viewBox.scale} />}
+				{snapping && <SnapCursor snapType={snapType} />}
+				{isCalibrating && <CalibrationArrow />}
 			</LayerLevel>
 			<LayerLevel
 				onMouseUp={handleMouseUp}
