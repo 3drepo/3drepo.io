@@ -30,12 +30,13 @@ const UNITS_CONVERSION_FACTORS_TO_METRES = {
 UnitsHelper.convertArrayUnits = (array, fromUnit, toUnit) => {
 	const fromFactor = UNITS_CONVERSION_FACTORS_TO_METRES[fromUnit];
 	const toFactor = UNITS_CONVERSION_FACTORS_TO_METRES[toUnit];
+	const scale = toFactor / fromFactor;
 
 	if (!array.every(isNumber) || !fromFactor || !toFactor) {
-		return null;
+		return array;
 	}
 
-	return array.map((n) => (n / fromFactor) * toFactor);
+	return array.map((n) => n * scale);
 };
 
 module.exports = UnitsHelper;
