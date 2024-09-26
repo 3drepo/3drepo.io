@@ -91,6 +91,9 @@ export const UploadListItem = ({
 		drawingNumber: drawing?.number || '',
 		drawingDesc: drawing?.desc || '',
 		drawingType: drawing?.type || '',
+		// drawingBottomExtent: drawing?.bottomExtent ?? 0,
+		// drawingTopExtent: drawing?.topExtent ?? 0,
+		// drawingUnits: drawing?.units || '',
 	});
 
 	useEffect(() => {

@@ -145,6 +145,10 @@ export const UploadDrawingRevisionForm = ({
 				drawingNumber: drawing?.number || '',
 				drawingDesc: drawing?.desc || '',
 				drawingType: drawing?.type || '',
+				calibration: {
+					verticalRange: drawing?.calibration?.verticalRange || [0, 1],
+					units: drawing?.calibration?.units || 'mm',
+				},
 			});
 		}
 		append(filesToAppend);

@@ -28,9 +28,12 @@ export interface IFormInput {
 	name: string;
 	number: string;
 	type: string;
-	desc: string
+	desc: string;
+	calibration: {
+		verticalRange: [number, number];
+		units: string;
+	};
 }
-
 
 export const useDrawingForm = (defaultValues?: IDrawing) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
@@ -58,7 +61,9 @@ export const useDrawingForm = (defaultValues?: IDrawing) => {
 		defaultValues,
 	});
 
-	const { getValues, setValue, trigger }  = formData;
+	const { getValues, setValue, trigger, watch, formState: { dirtyFields } }  = formData;
+	const verticalRange = watch('calibration.verticalRange');
+
 	const onSubmitError = (err) => {
 		if (nameAlreadyExists(err)) {
 			setAlreadyExistingNames([getValues('name'), ...alreadyExistingNames]);
@@ -82,6 +87,12 @@ export const useDrawingForm = (defaultValues?: IDrawing) => {
 		if (!isTypesPending || !isAdmin) return;
 		DrawingsActionsDispatchers.fetchTypes(teamspace, project);
 	}, [isAdmin]);
+
+	useEffect(() => {
+		if (dirtyFields.calibration?.verticalRange.some((v) => v)) {
+			trigger('calibration.verticalRange');
+		}
+	}, [verticalRange?.[0], verticalRange?.[1]]);
 
 	return { onSubmitError, formData };
 };

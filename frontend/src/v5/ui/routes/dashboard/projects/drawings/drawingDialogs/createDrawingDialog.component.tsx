@@ -16,33 +16,23 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { FormTextField, FormSelect } from '@controls/inputs/formInputs.component';
-import { MenuItem } from '@mui/material';
 import { SubmitHandler } from 'react-hook-form';
 import { FormModal } from '@controls/formModal/formModal.component';
-import { DrawingsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { nameAlreadyExists, numberAlreadyExists } from '@/v5/validation/errors.helpers';
-import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { IFormInput, useDrawingForm } from './drawingsDialogs.hooks';
+import { DrawingForm } from './drawingForm.component';
 
 export const CreateDrawingDialog = ({ open, onClickClose }) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
-	const types = DrawingsHooksSelectors.selectTypes();
 
 	const { onSubmitError, formData } = useDrawingForm();
-
-	const {
-		handleSubmit,
-		control,
-		formState,
-		formState: { errors },
-	} = formData;
+	const { handleSubmit, formState } = formData;
 
 	const onSubmit: SubmitHandler<IFormInput> = async (body) => {
 		try {
-			await new Promise<void>((accept, reject ) => DrawingsActionsDispatchers.createDrawing(teamspace, project, body as any, accept, reject));
+			await new Promise<void>((accept, reject) => DrawingsActionsDispatchers.createDrawing(teamspace, project, body as any, accept, reject));
 			onClickClose();
 		} catch (err) {
 			onSubmitError(err);
@@ -59,38 +49,7 @@ export const CreateDrawingDialog = ({ open, onClickClose }) => {
 			maxWidth="sm"
 			{...formState}
 		>
-			<FormTextField
-				control={control}
-				name="name"
-				label={formatMessage({ id: 'drawings.creation.form.name', defaultMessage: 'Name' })}
-				formError={errors.name}
-				required
-			/>
-
-			<FormTextField
-				control={control}
-				name="number"
-				label={formatMessage({ id: 'drawings.creation.form.number', defaultMessage: 'Number' })}
-				formError={errors.number}
-				required
-			/>
-			<FormSelect
-				required
-				control={control}
-				label={formatMessage({ id: 'drawings.creation.form.type', defaultMessage: 'Category' })}
-				name="type"
-			>
-				{types.map((type) => (
-					<MenuItem key={type} value={type}> {type}</MenuItem>
-				))}
-			</FormSelect>
-			<FormTextField
-				control={control}
-				name="desc"
-				label={formatMessage({ id: 'drawings.creation.form.description', defaultMessage: 'Description' })}
-				formError={errors.desc}
-			/>
-			<UnhandledErrorInterceptor expectedErrorValidators={[nameAlreadyExists, numberAlreadyExists]} />
+			<DrawingForm formData={formData} />
 		</FormModal>
 	);
 };
