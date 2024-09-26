@@ -28,15 +28,17 @@ const CursorIcon = {
 type CursorProps = { snapType: SnapType };
 export const SnapCursor = ({ snapType }: CursorProps) => {
 	const Cursor = CursorIcon[snapType];
-	const position = useMousePosition();
+	const mousePosition = useMousePosition();
 	const scale = useScale();
 
-	if (!position) return null;
+	console.log(JSON.stringify({loc: 'snap', scale, mousePosition}));
+
+	if (!mousePosition) return null;
 
 	return (
 		<Cursor
 			transform={`
-				translate(${position[0]} ${position[1]})
+				translate(${mousePosition[0]} ${mousePosition[1]})
 				scale(${1 / scale})
 			`}
 			

@@ -36,10 +36,29 @@ type ViewerLayer2DProps = {
 	snapping?: boolean,
 };
 
+const snap = (mousePos:Coord2D, snapHandler: SVGSnapHelper, radius) => {
+	const results = snapHandler?.snap(new Vector2(...mousePos), radius) || { closestNode: undefined, closestIntersection: undefined, closestEdge: undefined };
+	let snapType = SnapType.NONE;
+
+	if (results.closestNode != null) {
+		snapType = SnapType.NODE;
+		mousePos = [results.closestNode.x, results.closestNode.y];
+	} else if (results.closestIntersection != null) {
+		snapType = SnapType.INTERSECTION;
+		mousePos = [results.closestIntersection.x, results.closestIntersection.y];
+	} else if (results.closestEdge != null) {
+		snapType = SnapType.EDGE;
+		mousePos = [results.closestEdge.x, results.closestEdge.y];
+	} 
+	return {
+		mousePos,
+		snapType,
+	};
+};
+
 export const ViewerLayer2D = ({ viewBox, snapHandler }: ViewerLayer2DProps) => {
 	const { isCalibrating } = useContext(CalibrationContext);
 	const previousViewBox = useRef<ViewBoxType>(null);
-	const [mousePosition, setMousePosition] = useState<Coord2D>(null);
 	const [snapType, setSnapType] = useState<SnapType>(SnapType.NONE);
 	const snapping = useSnapping();
 
@@ -52,42 +71,51 @@ export const ViewerLayer2D = ({ viewBox, snapHandler }: ViewerLayer2DProps) => {
 
 	const handleMouseDown = () => previousViewBox.current = viewBox;
 
-	const handleMouseUp = useCallback(() => {
+	const getCursorOffset = (e) => {
+		const rect = e.target.getBoundingClientRect();
+		const offsetX = e.clientX - rect.left;
+		const offsetY = e.clientY - rect.top;
+		return [offsetX, offsetY].map((point) => point / viewBox.scale) as Coord2D;
+	};
+
+	const handleMouseUp = useCallback((e) => {
+		let mousePosition = getCursorOffset(e);
+
 		// check if mouse up was fired after dragging or if it was an actual click
 		if (!isEqual(viewBox, previousViewBox.current)) return;
 
-		DrawingViewerService.emitMouseClickEvent(mousePosition);
-	}, [mousePosition]);
-
-	const handleMouseMove = useCallback((e) => {
-		let mousePos = new Vector2(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
-
 		if (snapping) {
 			const radius = 10 / viewBox.scale;
-			const results = snapHandler?.snap(mousePos, radius) || { closestNode: undefined, closestIntersection: undefined, closestEdge: undefined };
-	
-			if (results.closestNode != null) {
-				setSnapType(SnapType.NODE);
-				mousePos = results.closestNode;
-			} else if (results.closestIntersection != null) {
-				setSnapType(SnapType.INTERSECTION);
-				mousePos = results.closestIntersection;
-			} else if (results.closestEdge != null) {
-				setSnapType(SnapType.EDGE);
-				mousePos = results.closestEdge;
-			} else {
-				setSnapType(SnapType.NONE);
+			const res = snap(mousePosition, snapHandler, radius);
+			mousePosition = res.mousePos;
+
+			if (snapType !== res.snapType) {
+				setSnapType(res.snapType);
 			}
 		}
 
-		setMousePosition([mousePos.x, mousePos.y]);
-	}, [snapHandler, snapping]);
+		DrawingViewerService.emitMouseClickEvent(mousePosition);
+	}, []);
 
-	const handleMouseLeave = () => setMousePosition(undefined);
+	const handleMouseMove = useCallback((e) => {
+		let mousePos = getCursorOffset(e);
 
-	useEffect(() => { DrawingViewerService.setMousePosition(mousePosition); }, [mousePosition]);
+		if (snapping) {
+			const radius = 10 / viewBox.scale;
+			const res = snap(mousePos, snapHandler, radius);
+			mousePos = res.mousePos;
+
+			if (snapType !== res.snapType) {
+				setSnapType(res.snapType);
+			}
+		}
+
+		DrawingViewerService.setMousePosition(mousePos);
+	}, [snapHandler, snapType, snapping, viewBox]);
+
+	const handleMouseLeave = () => DrawingViewerService.setMousePosition(undefined);
+
 	useEffect(() => { DrawingViewerService.setScale(viewBox.scale); }, [viewBox]);
-
 
 	return (
 		<Container style={containerStyle} id="viewerLayer2d" >

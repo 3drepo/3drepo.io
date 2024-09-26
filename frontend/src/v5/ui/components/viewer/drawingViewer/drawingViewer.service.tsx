@@ -43,11 +43,23 @@ const DrawingViewerServiceCreator = () => {
 	
 	const setMousePosition = (mp: Coord2D) => {
 		mousePosition = mp ; 
-		emit(DRAWING_VIEWER_EVENTS.MOUSE_CHANGED, mousePosition);
+		emit(DRAWING_VIEWER_EVENTS.MOUSE_CHANGED, mp);
 	};
-	const emitMouseClickEvent = (mp: Coord2D) => { setMousePosition(mp); emit(DRAWING_VIEWER_EVENTS.MOUSE_CLICK, mousePosition); };
-	const setScale = (sc: number) => { scale = sc ;  emit(DRAWING_VIEWER_EVENTS.SCALE_CHANGED, sc); };
-	const setSnapping = (sp: boolean) =>{ snapping = sp ;  emit(DRAWING_VIEWER_EVENTS.SNAPPING_CHANGED, sp);};
+
+	const emitMouseClickEvent = (mp: Coord2D) => {
+		setMousePosition(mp); 
+		emit(DRAWING_VIEWER_EVENTS.MOUSE_CLICK, mousePosition);
+	};
+
+	const setScale = (sc: number) => { 
+		scale = sc ;  
+		emit(DRAWING_VIEWER_EVENTS.SCALE_CHANGED, sc); 
+	};
+
+	const setSnapping = (sp: boolean) =>{
+		snapping = sp ;
+		emit(DRAWING_VIEWER_EVENTS.SNAPPING_CHANGED, sp);
+	};
 
 	return {
 		getScreenshot,

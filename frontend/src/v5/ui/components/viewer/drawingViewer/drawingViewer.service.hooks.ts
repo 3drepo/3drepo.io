@@ -25,6 +25,7 @@ const useViewerEventEffect = <T>(event:string, callback:(params:T ) => void, dep
 		return () => {
 			DrawingViewerService.off(event, callback);
 		};
+
 	}, deps);
 };
 
