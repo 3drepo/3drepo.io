@@ -80,6 +80,7 @@ interface IProps {
 	teamspaceSettings: any;
 	isSettingsLoading: boolean;
 	treatmentsUpdatedAt: any;
+	isTeamspaceAdmin: boolean;
 }
 
 export class TeamspaceSettings extends PureComponent<IProps, IState> {
@@ -274,6 +275,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 	}
 
 	private renderPermissionLogOption = () => {
+		const isAdmin = this.props.isTeamspaceAdmin;
 		return (
 			<PermissionsLogContainer gap="10px" container direction="column" wrap="nowrap">
 				<Headline color="textPrimary" variant="subtitle1">
@@ -288,16 +290,19 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 				<FileGrid container direction="row" justifyContent="space-between" alignItems="center" wrap="nowrap">
 					<Grid gap="10px" container alignItems="end" wrap="nowrap">
 						<DateTimePicker
+							disabled={!isAdmin}
 							disableFuture
 							label={formatMessage({ id: 'teamspaceSettings.permissionsLog.startDate', defaultMessage: 'Start Date' })}
 							name="startDate"
 						/>
 						<DateTimePicker
+							disabled={!isAdmin}
 							disableFuture
 							label={formatMessage({ id: 'teamspaceSettings.permissionsLog.endDate', defaultMessage: 'End Date' })}
 							name="endDate"
 						/>
 						<Button
+							disabled={!isAdmin}
 							color="primary"
 							variant="contained"
 							onClick={() => { }}
