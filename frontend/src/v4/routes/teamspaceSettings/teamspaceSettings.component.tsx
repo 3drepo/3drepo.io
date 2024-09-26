@@ -31,6 +31,7 @@ import { Gap } from '@controls/gap';
 import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ROUTES } from '../../constants/routes';
 import { ChipsInput } from '../components/chipsInput/chipsInput.component';
 import { Loader } from '../components/loader/loader.component';
@@ -276,6 +277,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 
 	private renderPermissionLogOption = () => {
 		const isAdmin = this.props.isTeamspaceAdmin;
+
 		return (
 			<PermissionsLogContainer gap="10px" container direction="column" wrap="nowrap">
 				<Headline color="textPrimary" variant="subtitle1">
@@ -305,7 +307,26 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 							disabled={!isAdmin}
 							color="primary"
 							variant="contained"
-							onClick={() => { }}
+							onClick={() => {
+ 								DialogsActionsDispatchers.open('info', {
+									title: formatMessage({ id: 'teamspaceSettings.permissionsLog.modal.title', defaultMessage: 'Encrypted Download' }),
+									message: formatMessage({
+										id: 'teamspaceSettings.permissionsLog.modal.message',
+										defaultMessage: 'A password will be sent to your email for this encryoted download.',
+									}),
+									primaryButtonLabel: formatMessage({
+										id: 'teamspaceSettings.permissionsLog.modal.primaryLabel',
+										defaultMessage: 'Cancel',
+									}),
+									secondaryButtonLabel: formatMessage({
+										id: 'teamspaceSettings.permissionsLog.modal',
+										defaultMessage: 'Continue',
+									}),
+									onClickSecondary: () => {
+										console.log('download')
+									},
+								})
+							}}
 						>
 							<FormattedMessage id="teamspaceSettings.permissionsLog.download" defaultMessage="Download" />
 						</Button>
