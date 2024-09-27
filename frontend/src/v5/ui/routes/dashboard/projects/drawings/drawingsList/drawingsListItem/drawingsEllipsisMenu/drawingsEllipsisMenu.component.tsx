@@ -25,6 +25,7 @@ import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { EditDrawingDialog } from '../../../drawingDialogs/editDrawingDialog.component';
 import { uploadToDrawing } from '../../../uploadDrawingRevisionForm/uploadDrawingRevisionForm.helpers';
+import { canUploadToBackend } from '@/v5/store/drawings/drawings.helpers';
 
 type DrawingsEllipsisMenuProps = {
 	selected?: boolean,
@@ -92,6 +93,7 @@ export const DrawingsEllipsisMenu = ({
 					defaultMessage: 'Upload',
 				})}
 				onClick={() => uploadToDrawing(drawing._id)}
+				disabled={!canUploadToBackend(drawing.status)}
 				hidden={!hasCollaboratorAccess}
 			/>
 			<EllipsisMenuItem

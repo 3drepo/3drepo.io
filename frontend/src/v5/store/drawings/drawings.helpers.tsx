@@ -76,7 +76,7 @@ export const CALIBRATION_MAP = {
 		icon: <NotCalibrated />,
 	},
 };
-// TODO - fix (if necessary) when backend is available
+
 export const canUploadToBackend = (status?: UploadStatus): boolean => {
 	const statusesForUpload = [
 		UploadStatus.OK,
