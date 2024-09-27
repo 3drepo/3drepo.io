@@ -68,6 +68,8 @@ interface IState {
 	riskCategories?: string[];
 	fileName: string;
 	createMitigationSuggestions: boolean;
+	permissionsLogStart: number;
+	permissionsLogEnd: number;
 }
 
 interface IProps {
@@ -90,6 +92,8 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 		riskCategories: [],
 		fileName: '',
 		createMitigationSuggestions: false,
+		permissionsLogStart: null,
+		permissionsLogEnd: null,
 	};
 
 	get teamspace() {
@@ -295,16 +299,20 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 							disabled={!isAdmin}
 							disableFuture
 							label={formatMessage({ id: 'teamspaceSettings.permissionsLog.startDate', defaultMessage: 'Start Date' })}
-							name="startDate"
+							maxDateTime={this.state.permissionsLogEnd && new Date(this.state.permissionsLogEnd)}
+							value={this.state.permissionsLogStart}
+							onChange={(val) => this.setState({ permissionsLogStart: val })}
 						/>
 						<DateTimePicker
 							disabled={!isAdmin}
 							disableFuture
 							label={formatMessage({ id: 'teamspaceSettings.permissionsLog.endDate', defaultMessage: 'End Date' })}
-							name="endDate"
+							minDateTime={this.state.permissionsLogStart && new Date(this.state.permissionsLogStart)}
+							value={this.state.permissionsLogEnd}
+							onChange={(val) => this.setState({ permissionsLogEnd: val })}
 						/>
 						<Button
-							disabled={!isAdmin}
+							disabled={!isAdmin || (!this.state.permissionsLogStart && this.state.permissionsLogEnd)}
 							color="primary"
 							variant="contained"
 							onClick={() => {
