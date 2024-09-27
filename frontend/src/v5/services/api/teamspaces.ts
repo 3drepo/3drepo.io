@@ -26,3 +26,8 @@ export const fetchAddons = async (teamspace: string): Promise<AddOn[]> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/addOns`);
 	return data.modules;
 };
+
+export const fetchActivityLog = async (teamspace: string, from: Date, to: Date): Promise<any> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/settings/activities/archive`, { from, to });
+	return data;
+};

@@ -26,17 +26,15 @@ import { isEmpty } from 'lodash';
 
 import { Switch } from '@mui/material';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
-import { DatePicker } from '@controls/inputs/datePicker/datePicker.component';
-import { Gap } from '@controls/gap';
 import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
-import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DialogsActionsDispatchers, TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import dayjs from 'dayjs';
 import { ROUTES } from '../../constants/routes';
 import { ChipsInput } from '../components/chipsInput/chipsInput.component';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
-import { DateField } from '../components/dateField/dateField.component';
 import { FileInputField } from './components/fileInputField/fileInputField.component';
 import {
 	BackButton,
@@ -280,8 +278,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 	}
 
 	private renderPermissionLogOption = () => {
-		const isAdmin = this.props.isTeamspaceAdmin;
-
+		const { isTeamspaceAdmin } = this.props;
 		return (
 			<PermissionsLogContainer gap="10px" container direction="column" wrap="nowrap">
 				<Headline color="textPrimary" variant="subtitle1">
@@ -296,45 +293,41 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 				<FileGrid container direction="row" justifyContent="space-between" alignItems="center" wrap="nowrap">
 					<Grid gap="10px" container alignItems="end" wrap="nowrap">
 						<DateTimePicker
-							disabled={!isAdmin}
+							disabled={!isTeamspaceAdmin}
 							disableFuture
 							label={formatMessage({ id: 'teamspaceSettings.permissionsLog.startDate', defaultMessage: 'Start Date' })}
-							maxDateTime={this.state.permissionsLogEnd && new Date(this.state.permissionsLogEnd)}
+							maxDateTime={dayjs(this.state.permissionsLogEnd)}
 							value={this.state.permissionsLogStart}
-							onChange={(val) => this.setState({ permissionsLogStart: val })}
+							onChange={(permissionsLogStart) => this.setState({ permissionsLogStart })}
 						/>
 						<DateTimePicker
-							disabled={!isAdmin}
+							disabled={!isTeamspaceAdmin}
 							disableFuture
 							label={formatMessage({ id: 'teamspaceSettings.permissionsLog.endDate', defaultMessage: 'End Date' })}
-							minDateTime={this.state.permissionsLogStart && new Date(this.state.permissionsLogStart)}
+							minDateTime={dayjs(this.state.permissionsLogStart)}
 							value={this.state.permissionsLogEnd}
-							onChange={(val) => this.setState({ permissionsLogEnd: val })}
+							onChange={(permissionsLogEnd) => this.setState({ permissionsLogEnd })}
 						/>
 						<Button
-							disabled={!isAdmin || (!this.state.permissionsLogStart && this.state.permissionsLogEnd)}
+							disabled={!isTeamspaceAdmin || (!this.state.permissionsLogStart && !this.state.permissionsLogEnd)}
 							color="primary"
 							variant="contained"
-							onClick={() => {
- 								DialogsActionsDispatchers.open('info', {
-									title: formatMessage({ id: 'teamspaceSettings.permissionsLog.modal.title', defaultMessage: 'Encrypted Download' }),
-									message: formatMessage({
-										id: 'teamspaceSettings.permissionsLog.modal.message',
-										defaultMessage: 'A password will be sent to your email for this encryoted download.',
-									}),
-									primaryButtonLabel: formatMessage({
-										id: 'teamspaceSettings.permissionsLog.modal.primaryLabel',
-										defaultMessage: 'Cancel',
-									}),
-									secondaryButtonLabel: formatMessage({
-										id: 'teamspaceSettings.permissionsLog.modal',
-										defaultMessage: 'Continue',
-									}),
-									onClickSecondary: () => {
-										console.log('download')
-									},
-								})
-							}}
+							onClick={() => DialogsActionsDispatchers.open('info', {
+								title: formatMessage({ id: 'teamspaceSettings.permissionsLog.modal.title', defaultMessage: 'Encrypted Download' }),
+								message: formatMessage({
+									id: 'teamspaceSettings.permissionsLog.modal.message',
+									defaultMessage: 'A password will be sent to your email for this encryoted download.',
+								}),
+								primaryButtonLabel: formatMessage({
+									id: 'teamspaceSettings.permissionsLog.modal.primaryLabel',
+									defaultMessage: 'Cancel',
+								}),
+								secondaryButtonLabel: formatMessage({
+									id: 'teamspaceSettings.permissionsLog.modal',
+									defaultMessage: 'Continue',
+								}),
+								onClickSecondary: () => TeamspacesActionsDispatchers.fetchActivityLog(this.teamspace, this.state.permissionsLogStart, this.state.permissionsLogEnd)
+							})}
 						>
 							<FormattedMessage id="teamspaceSettings.permissionsLog.download" defaultMessage="Download" />
 						</Button>

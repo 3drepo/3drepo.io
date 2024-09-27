@@ -25,6 +25,7 @@ export const DateTimePicker = ({ onBlur, onChange, ...props }: DateTimePickerPro
 		rifmFormatter={formatDateTime}
 		onChange={(val) => {
 			onChange(val);
+			onBlur?.();
 			onBlur();
 		}}
 		{...props}
