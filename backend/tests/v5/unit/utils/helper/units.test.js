@@ -20,36 +20,51 @@ const { generateRandomString } = require('../../../helper/services');
 
 const UnitsHelper = require(`${src}/utils/helper/units`);
 
+const UNITS_CONVERSION_FACTORS_TO_METRES = {
+	m: 1,
+	dm: 10,
+	cm: 100,
+	mm: 1000,
+	ft: 3.28084,
+};
+
+const getScaleFactor = (fromUnit, toUnit) => {
+	const fromFactor = UNITS_CONVERSION_FACTORS_TO_METRES[fromUnit];
+	const toFactor = UNITS_CONVERSION_FACTORS_TO_METRES[toUnit];
+	return toFactor / fromFactor;
+};
+
 const testConvertArrayUnits = () => {
 	describe.each([
-		['invalid fromUnit', [1, 5], generateRandomString(), 'm'],
-		['invalid toUnit', [1, 5], 'm', generateRandomString()],
-		['array with non numbers', [generateRandomString(), 5], 'm', 'mm'],
-		['m to dm', [1, 5], 'm', 'dm', [10, 50]],
-		['m to cm', [1, 5], 'm', 'cm', [100, 500]],
-		['m to mm', [1, 5], 'm', 'mm', [1000, 5000]],
-		['m to ft', [1, 5], 'm', 'ft', [3.281, 16.404]],
-		['dm to m', [1, 5], 'dm', 'm', [0.1, 0.5]],
-		['dm to cm', [1, 5], 'dm', 'cm', [10, 50]],
-		['dm to mm', [1, 5], 'dm', 'mm', [100, 500]],
-		['dm to ft', [1, 5], 'dm', 'ft', [0.328, 1.640]],
-		['mm to dm', [1, 5], 'mm', 'dm', [0.01, 0.05]],
-		['mm to cm', [1, 5], 'mm', 'cm', [0.1, 0.5]],
-		['mm to m', [1, 5], 'mm', 'm', [0.001, 0.005]],
-		['mm to ft', [1, 5], 'mm', 'ft', [0.003, 0.016]],
-		['ft to dm', [1, 5], 'ft', 'dm', [3.048, 15.24]],
-		['ft to cm', [1, 5], 'ft', 'cm', [30.48, 152.4]],
-		['ft to m', [1, 5], 'ft', 'm', [0.305, 1.524]],
-		['ft to mm', [1, 5], 'ft', 'mm', [304.8, 1524]],
-	])('Convert array units', (description, array, fromUnit, toUnit, result = null) => {
-		test(`with ${description} should return ${result}`, () => {
-			let res = UnitsHelper.convertArrayUnits(array, fromUnit, toUnit);
+		['invalid fromUnit', [1, 5], generateRandomString(), 'm', true],
+		['invalid toUnit', [1, 5], 'm', generateRandomString(), true],
+		['array with non numbers', [generateRandomString(), 5], 'm', 'mm', true],
+		['m to dm', [1, 5], 'm', 'dm'],
+		['m to cm', [1, 5], 'm', 'cm'],
+		['m to mm', [1, 5], 'm', 'mm'],
+		['m to ft', [1, 5], 'm', 'ft'],
+		['dm to m', [1, 5], 'dm', 'm'],
+		['dm to cm', [1, 5], 'dm', 'cm'],
+		['dm to mm', [1, 5], 'dm', 'mm'],
+		['dm to ft', [1, 5], 'dm', 'ft'],
+		['mm to dm', [1, 5], 'mm', 'dm'],
+		['mm to cm', [1, 5], 'mm', 'cm'],
+		['mm to m', [1, 5], 'mm', 'm'],
+		['mm to ft', [1, 5], 'mm', 'ft'],
+		['ft to dm', [1, 5], 'ft', 'dm'],
+		['ft to cm', [1, 5], 'ft', 'cm'],
+		['ft to m', [1, 5], 'ft', 'm'],
+		['ft to mm', [1, 5], 'ft', 'mm'],
+	])('Convert array units', (description, array, fromUnit, toUnit, invalidInput) => {
+		test(`with ${description} should return ${invalidInput ? 'the same array' : 'the converted array'}`, () => {
+			const res = UnitsHelper.convertArrayUnits(array, fromUnit, toUnit);
 
-			if (res) {
-				res = res.map((r) => Math.round(r * 1000) / 1000);
+			if (invalidInput) {
+				expect(res).toEqual(array);
+			} else {
+				const scaleFactor = getScaleFactor(fromUnit, toUnit);
+				expect(res).toEqual(array.map((n) => n * scaleFactor));
 			}
-
-			expect(res).toEqual(result);
 		});
 	});
 };
