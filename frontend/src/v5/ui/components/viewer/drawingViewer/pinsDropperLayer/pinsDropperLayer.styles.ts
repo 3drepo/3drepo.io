@@ -15,21 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { PanZoomHandler } from '@components/viewer/drawingViewer/panzoom/centredPanZoom';
+import styled from 'styled-components';
 
-export type Coord2D = [number, number];
-export type Coord3D = [number, number, number];
-
-export type Vector<CoordType> = [CoordType | null, CoordType | null];
-
-export type Vector1D = Vector<number>;
-export type Vector2D = Vector<Coord2D>;
-export type Vector3D = Vector<Coord3D>;
-
-export enum PlaneType {
-	UPPER = 'upper',
-	LOWER = 'lower',
-	NONE = 'none',
-}
-
-export type ViewBoxType = ReturnType<PanZoomHandler['getOriginalSize']> & ReturnType<PanZoomHandler['getTransform']>;
+export const Container = styled.div`
+	height: 100%;
+	width: 100%;
+`;

@@ -17,18 +17,18 @@
 
 import { CSSProperties, useContext, useEffect, useRef, useState } from 'react';
 import { Container, LayerLevel, Viewport } from './viewerLayer2D.styles';
-import { PanZoomHandler } from '../panzoom/centredPanZoom';
 import { isEqual } from 'lodash';
 import { SvgArrow } from './svgArrow/svgArrow.component';
 import { SvgCircle } from './svgCircle/svgCircle.component';
-import { Coord2D, Vector2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
-import { PinsLayer } from '../viewerLayer2DPins/viewerLayer2DPins.component';
+import { Coord2D, Vector2D, ViewBoxType } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
+import { PinsLayer } from '../pinsLayer/pinsLayer.component';
+import { PinsDropperLayer } from '../pinsDropperLayer/pinsDropperLayer.component';
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Camera } from './camera/camera.component';
 import { CameraOffSight } from './camera/cameraOffSight.component';
-import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 
-export type ViewBoxType = ReturnType<PanZoomHandler['getOriginalSize']> & ReturnType<PanZoomHandler['getTransform']>;
 type ViewerLayer2DProps = {
 	viewBox: ViewBoxType,
 	active: boolean,
@@ -43,6 +43,7 @@ export const ViewerLayer2D = ({ viewBox, active, value, cameraEnabled, viewport,
 	const [offsetEnd, setOffsetEnd] = useState<Coord2D>(value[1]);
 	const previousViewBox = useRef<ViewBoxType>(null);
 	const [mousePosition, setMousePosition] = useState<Coord2D>(null);
+	const isDroppingPin = !!TicketsCardHooksSelectors.selectPinToDrop();
 	const [cameraOnSight, setCameraOnSight] = useState(false);
 
 	const containerStyle: CSSProperties = {
@@ -111,6 +112,7 @@ export const ViewerLayer2D = ({ viewBox, active, value, cameraEnabled, viewport,
 					) : (
 						<>
 							{(cameraOnSight && cameraEnabled) && <Camera scale={viewBox.scale} />}
+							{isDroppingPin && <PinsDropperLayer getCursorOffset={getCursorOffset} viewBox={viewBox} />}
 							<PinsLayer scale={viewBox.scale} height={viewBox.height} width={viewBox.width} />
 						</>
 					)}
