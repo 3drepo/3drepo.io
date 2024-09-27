@@ -15,21 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Image, ExtraImages, OverlappingContainer } from './commentImage.styles';
+import { Image, ExtraImages, OverlappingContainer } from './imageWithExtraCount.styles';
 
-type CommentImageProps = {
+type ImageWithExtraCountProps = {
 	src: string,
 	className?: string,
 	extraCount?: number,
 	onClick?: () => void,
 };
-export const CommentImage = ({
+export const ImageWithExtraCount = ({
 	src,
 	extraCount,
 	className,
 	onClick,
 	...imgProps
-}: CommentImageProps) => {
+}: ImageWithExtraCountProps) => {
 	if (!extraCount || extraCount === 1) {
 		return (<Image src={src} onClick={onClick} className={className} {...imgProps} />);
 	}
