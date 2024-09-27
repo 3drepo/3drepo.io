@@ -50,6 +50,9 @@ const propertyValidator = ({ required, name, type }: PropertyDefinition) => {
 		case 'image':
 			validator = Yup.string().nullable();
 			break;
+		case 'imageList':
+			validator = Yup.array().nullable();
+			break;
 		case 'oneOf':
 			validator = trimmedString;
 			break;
