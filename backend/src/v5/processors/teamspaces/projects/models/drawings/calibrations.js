@@ -16,15 +16,17 @@
  */
 
 const { addCalibration, getCalibration, getCalibrationForMultipleRevisions } = require('../../../../../models/calibrations');
+const { getDrawingById, updateModelSettings } = require('../../../../../models/modelSettings');
 const { getRevisionByIdOrTag, getRevisions, getRevisionsByQuery } = require('../../../../../models/revisions');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const { calibrationStatuses } = require('../../../../../models/calibrations.constants');
+const { convertArrayUnits } = require('../../../../../utils/helper/units');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
 const { templates } = require('../../../../../utils/responseCodes');
 
-const Calibrations = { };
+const Calibrations = {};
 
 const getRevIdToCalibMap = (revCalibrations) => {
 	const revIdToCalib = {};
@@ -40,16 +42,23 @@ Calibrations.getCalibration = async (teamspace, project, drawing, revision) => {
 	const projection = {
 		_id: 0,
 		horizontal: 1,
-		verticalRange: 1,
-		units: 1,
 		createdAt: 1,
 		createdBy: 1,
+		units: 1,
 	};
 
-	const latestCalibration = await getCalibration(teamspace, project, drawing, revision, projection);
+	const [latestCalibration, { calibration: drawingData }] = await Promise.all([
+		getCalibration(teamspace, project, drawing, revision, projection),
+		getDrawingById(teamspace, drawing, { _id: 0, calibration: 1 }),
+	]);
 
 	if (latestCalibration) {
-		return { calibration: latestCalibration, status: calibrationStatuses.CALIBRATED };
+		return {
+			calibration: {
+				...latestCalibration,
+				verticalRange: convertArrayUnits(drawingData.verticalRange, drawingData.units, latestCalibration.units),
+			},
+			status: calibrationStatuses.CALIBRATED };
 	}
 
 	const { timestamp } = await getRevisionByIdOrTag(teamspace, drawing,
@@ -67,7 +76,14 @@ Calibrations.getCalibration = async (teamspace, project, drawing, revision) => {
 		for (let i = 0; i < previousRevisions.length; ++i) {
 			const data = revIdToCalib[UUIDToString(previousRevisions[i]._id)];
 			if (data) {
-				return { calibration: data.latestCalibration, status: calibrationStatuses.UNCONFIRMED };
+				return {
+					calibration: {
+						...data.latestCalibration,
+						verticalRange: convertArrayUnits(drawingData.verticalRange, drawingData.units,
+							data.latestCalibration.units),
+					},
+					status: calibrationStatuses.UNCONFIRMED,
+				};
 			}
 		}
 	}
@@ -112,14 +128,21 @@ Calibrations.getCalibrationStatusForAllRevs = async (teamspace, project, drawing
 Calibrations.addCalibration = async (teamspace, project, drawing, revision, createdBy, calibration) => {
 	const existingCalibration = await getCalibration(teamspace, project, drawing, revision, { _id: 1 });
 
-	await addCalibration(teamspace, project, drawing, revision, createdBy, calibration);
+	const { verticalRange, units, ...calibrationData } = calibration;
+
+	await Promise.all([
+		addCalibration(teamspace, project, drawing, revision, createdBy, { ...calibrationData, units }),
+		updateModelSettings(teamspace, project, drawing, { calibration: { verticalRange, units } }),
+	]);
 
 	if (!existingCalibration) {
-		publish(events.REVISION_UPDATED, { teamspace,
+		publish(events.REVISION_UPDATED, {
+			teamspace,
 			project,
 			model: drawing,
 			modelType: modelTypes.DRAWING,
-			data: { _id: revision, calibration: calibrationStatuses.CALIBRATED } });
+			data: { _id: revision, calibration: calibrationStatuses.CALIBRATED },
+		});
 	}
 };
 

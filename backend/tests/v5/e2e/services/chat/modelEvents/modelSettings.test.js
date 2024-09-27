@@ -223,9 +223,13 @@ const modelAddedTest = () => {
 				setTimeout(reject, 1000);
 			});
 
-			const payload = { name: ServiceHelper.generateRandomString(),
+			const payload = {
+				name: ServiceHelper.generateRandomString(),
 				type: generateRandomString(),
-				number: generateRandomString() };
+				number: generateRandomString(),
+				calibration: { verticalRange: [0, 10], units: 'm' },
+			};
+
 			const res = await agent.post(`/v5/teamspaces/${teamspace}/projects/${project.id}/drawings?key=${user.apiKey}`)
 				.send(payload)
 				.expect(templates.ok.status);
