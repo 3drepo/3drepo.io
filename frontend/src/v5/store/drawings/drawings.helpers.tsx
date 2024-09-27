@@ -121,7 +121,7 @@ export const fullDrawing = (
 	const status = drawing.status ?? UploadStatus.OK;
 	const isFavourite = drawing.isFavourite ?? false;
 	const role = drawing.role ?? Role.ADMIN;
-	const calibration = drawing.calibration || EMPTY_CALIBRATION;
+	const calibration = { ...EMPTY_CALIBRATION, ...drawing.calibration };
 
 	return {
 		...drawing,
