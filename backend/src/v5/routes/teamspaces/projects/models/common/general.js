@@ -894,6 +894,7 @@ const establishRoutes = (modelType) => {
      *                   number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
 	 *                   type: Structural
 	 *                   desc: The Drawing of the Lego House
+	 *                   calibration: { verticalRange: [0,10], units: m }
 	 */
 	router.get('/:model', hasReadAccessToModel[modelType], getModelSettings(modelType), formatModelSettings);
 

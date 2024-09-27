@@ -628,6 +628,7 @@ const testAddModel = () => {
 				name,
 				number: modelType === modelTypes.DRAWING ? ServiceHelper.generateRandomString() : undefined,
 				unit: modelType === modelTypes.DRAWING ? undefined : 'mm',
+				calibration: modelType === modelTypes.DRAWING ? { verticalRange: [0, 5], units: 'mm' } : undefined,
 				type: modelType === modelTypes.FEDERATION ? undefined : ServiceHelper.generateRandomString(),
 			});
 
@@ -924,6 +925,7 @@ const testGetSettings = () => {
 			type: settings.properties.type,
 			...(modelType === modelTypes.DRAWING ? {
 				number: settings.properties.number,
+				calibration: settings.properties.calibration,
 			} : {
 				code: settings.properties.properties.code,
 				unit: settings.properties.properties.unit,
