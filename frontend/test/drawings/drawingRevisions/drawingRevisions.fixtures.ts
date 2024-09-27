@@ -19,6 +19,7 @@ import * as faker from 'faker';
 import { CreateDrawingRevisionBody, IDrawingRevision } from '@/v5/store/drawings/revisions/drawingRevisions.types';
 import { CalibrationStatus } from '@/v5/store/drawings/drawings.types';
 import { MODEL_UNITS } from '@/v5/ui/routes/dashboard/projects/models.helpers';
+import { Vector1D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 
 export const getFakeCalibrationStatus = () => faker.random.arrayElement([CalibrationStatus.CALIBRATED, CalibrationStatus.UNCONFIRMED, CalibrationStatus.UNCALIBRATED, CalibrationStatus.EMPTY]);
 
@@ -36,8 +37,18 @@ export const drawingRevisionsMockFactory = (overrides?: Partial<IDrawingRevision
 	...overrides,
 });
 
-export const mockCreateRevisionBody = (overrides?: Partial<CreateDrawingRevisionBody>): CreateDrawingRevisionBody => {
+export const getFakeVerticalRange = () => {
 	const topExtent = faker.datatype.number();
+	return [faker.datatype.number(topExtent), topExtent] as Vector1D;
+};
+
+export const getRandomUnits = () => faker.random.arrayElement(MODEL_UNITS).value;
+export const getFakeDrawingSettingsCalibration = () => ({
+	verticalRange: getFakeVerticalRange(),
+	units: getRandomUnits(),
+});
+
+export const mockCreateRevisionBody = (overrides?: Partial<CreateDrawingRevisionBody>): CreateDrawingRevisionBody => {
 	return {
 		file: new File(['file'], 'filename.dwg'),
 		drawingId: faker.datatype.uuid(),
@@ -46,9 +57,7 @@ export const mockCreateRevisionBody = (overrides?: Partial<CreateDrawingRevision
 		drawingDesc: faker.random.words(3),
 		drawingNumber: faker.random.word(),
 		description: faker.random.word(),
-		drawingBottomExtent: faker.datatype.number(topExtent),
-		drawingTopExtent: topExtent,
-		drawingUnits: faker.random.arrayElement(MODEL_UNITS).value,
+		calibration: getFakeDrawingSettingsCalibration(),
 		name: faker.random.word(),
 		revCode: faker.random.word(),
 		statusCode: faker.random.word(),
