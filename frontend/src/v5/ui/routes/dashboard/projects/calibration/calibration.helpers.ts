@@ -16,8 +16,13 @@
  */
 
 import { Matrix3, Vector2 } from 'three';
-import { Coord2D, Vector2D, Vector3D } from './calibration.types';
+import { Coord2D, Vector1D, Vector2D, Vector3D } from './calibration.types';
 import { isNumber } from 'lodash';
+
+export const DEFAULT_SETTINGS_CALIBRATION = {
+	units: 'mm',
+	verticalRange: [0, 1] as Vector1D,
+};
 
 export const UNITS_CONVERSION_FACTORS_TO_METRES = {
 	'm': 1,

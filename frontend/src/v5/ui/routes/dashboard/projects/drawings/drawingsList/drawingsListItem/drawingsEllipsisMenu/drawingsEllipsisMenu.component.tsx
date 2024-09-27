@@ -40,12 +40,12 @@ export const DrawingsEllipsisMenu = ({
 }: DrawingsEllipsisMenuProps) => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
-	const hasCollaboratorAccess = DrawingsHooksSelectors.selectHasCollaboratorAccess(drawing._id);
+	const drawingId = drawing._id;
+	const hasCollaboratorAccess = DrawingsHooksSelectors.selectHasCollaboratorAccess(drawingId);
 
-	const onCalibrateClick = () => DialogsActionsDispatchers.open(SelectModelForCalibration, { drawingId: drawing._id });
+	const onCalibrateClick = () => DialogsActionsDispatchers.open(SelectModelForCalibration, { drawingId });
 
-
-	const onClickSettings = () => DialogsActionsDispatchers.open(EditDrawingDialog, { drawing });
+	const onClickSettings = () => DialogsActionsDispatchers.open(EditDrawingDialog, { drawingId });
 	
 	const onClickDelete = () => DialogsActionsDispatchers.open('delete', {
 		name: drawing.name,
@@ -53,7 +53,7 @@ export const DrawingsEllipsisMenu = ({
 			(accept, reject) => DrawingsActionsDispatchers.deleteDrawing(
 				teamspace,
 				project,
-				drawing._id,
+				drawingId,
 				accept,
 				reject,
 			),
@@ -87,7 +87,7 @@ export const DrawingsEllipsisMenu = ({
 					title={formatMessage(selected
 						? { id: 'drawings.ellipsisMenu.hideRevisions', defaultMessage: 'Hide Revisions' }
 						: { id: 'drawings.ellipsisMenu.viewRevisions', defaultMessage: 'View Revisions' })}
-					onClick={() => onSelectOrToggleItem(drawing._id)}
+					onClick={() => onSelectOrToggleItem(drawingId)}
 				/>
 			)}
 			<EllipsisMenuItem
@@ -95,7 +95,7 @@ export const DrawingsEllipsisMenu = ({
 					id: 'drawings.ellipsisMenu.upload',
 					defaultMessage: 'Upload',
 				})}
-				onClick={() => uploadToDrawing(drawing._id)}
+				onClick={() => uploadToDrawing(drawingId)}
 				hidden={!hasCollaboratorAccess}
 			/>
 			<EllipsisMenuItem

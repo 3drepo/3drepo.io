@@ -18,10 +18,9 @@
 import { formatMessage } from '@/v5/services/intl';
 import { SubmitHandler } from 'react-hook-form';
 import { FormModal } from '@controls/formModal/formModal.component';
-import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { IFormInput, useDrawingForm } from './drawingsDialogs.hooks';
-import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { dirtyValuesChanged } from '@/v5/helpers/form.helper';
 import { pick } from 'lodash';
 import { DrawingForm } from './drawingForm.component';
@@ -31,12 +30,13 @@ import { Loader } from '@/v4/routes/components/loader/loader.component';
 interface Props { 
 	open: boolean; 
 	onClickClose: () => void;
-	drawing: IDrawing
+	drawingId: string
 }
 
-export const EditDrawingDialog = ({ open, onClickClose, drawing }:Props) => {
+export const EditDrawingDialog = ({ open, onClickClose, drawingId }:Props) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
+	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
 
 	const { onSubmitError, formData } = useDrawingForm(drawing);
 	const { handleSubmit, formState } = formData;
@@ -44,8 +44,8 @@ export const EditDrawingDialog = ({ open, onClickClose, drawing }:Props) => {
 	const onSubmit: SubmitHandler<IFormInput> = async (body) => {
 		try {
 			await new Promise<void>((accept, reject) => {
-				const updatedDrawingData = pick(body, ['name', 'number', 'type', 'desc']);
-				DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawing._id, updatedDrawingData, accept, reject);
+				const updatedDrawingData = pick(body, Object.keys(formState.dirtyFields));
+				DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawingId, updatedDrawingData, accept, reject);
 			});
 			onClickClose();
 		} catch (err) {
@@ -54,8 +54,14 @@ export const EditDrawingDialog = ({ open, onClickClose, drawing }:Props) => {
 	};
 
 	useEffect(() => {
-		DrawingsActionsDispatchers.fetchCalibration(teamspace, project, drawing._id);
+		DrawingsActionsDispatchers.fetchDrawingSettings(
+			teamspace,
+			project,
+			drawingId,
+		);
 	}, []);
+
+	useEffect(() => { formData.reset(drawing); }, [JSON.stringify(drawing)]);
 
 	return (
 		<FormModal
@@ -66,7 +72,7 @@ export const EditDrawingDialog = ({ open, onClickClose, drawing }:Props) => {
 			confirmLabel={formatMessage({ id: 'drawings.edit.ok', defaultMessage: 'Save Drawing' })}
 			maxWidth="sm"
 			{...formState}
-			isValid={dirtyValuesChanged(formData, drawing) && formState.isValid}
+			isValid={dirtyValuesChanged(formData, drawingId) && formState.isValid}
 		>
 			{drawing.calibration.units
 				? <DrawingForm formData={formData} drawing={drawing} />

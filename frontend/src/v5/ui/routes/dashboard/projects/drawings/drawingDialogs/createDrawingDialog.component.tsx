@@ -22,12 +22,13 @@ import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { IFormInput, useDrawingForm } from './drawingsDialogs.hooks';
 import { DrawingForm } from './drawingForm.component';
+import { DEFAULT_SETTINGS_CALIBRATION } from '../../calibration/calibration.helpers';
 
 export const CreateDrawingDialog = ({ open, onClickClose }) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 
-	const { onSubmitError, formData } = useDrawingForm();
+	const { onSubmitError, formData } = useDrawingForm({ calibration: DEFAULT_SETTINGS_CALIBRATION } as any);
 	const { handleSubmit, formState } = formData;
 
 	const onSubmit: SubmitHandler<IFormInput> = async (body) => {
