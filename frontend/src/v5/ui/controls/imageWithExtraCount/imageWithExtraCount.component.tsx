@@ -15,25 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { ImageWithExtraCount as CommentImageBase } from '@controls/imageWithExtraCount/imageWithExtraCount.component';
-import CameraIconBase from '@assets/icons/outlined/camera-outlined.svg';
-import { CommentMarkDown as CommentMarkDownBase } from '../commentMarkDown/commentMarkDown.component';
+import { Image, ExtraImages, OverlappingContainer } from './imageWithExtraCount.styles';
 
-export const CommentMarkDown = styled(CommentMarkDownBase)`
-	display: inline;
-`;
+type ImageWithExtraCountProps = {
+	src: string,
+	className?: string,
+	extraCount?: number,
+	onClick?: () => void,
+};
+export const ImageWithExtraCount = ({
+	src,
+	extraCount,
+	className,
+	onClick,
+	...imgProps
+}: ImageWithExtraCountProps) => {
+	if (!extraCount || extraCount === 1) {
+		return (<Image src={src} onClick={onClick} className={className} {...imgProps} />);
+	}
 
-export const CameraIcon = styled(CameraIconBase)`
-	margin-right: 5px;
-	margin-bottom: -1px;
-`;
-
-export const OriginalMessage = styled.div`
-	display: inline-block;
-`;
-
-export const CommentImage = styled(CommentImageBase)`
-	min-width: 67px;
-	height: 67px;
-`;
+	return (
+		<OverlappingContainer onClick={onClick} className={className}>
+			<Image src={src} {...imgProps} />
+			<ExtraImages>+{extraCount}</ExtraImages>
+		</OverlappingContainer>
+	);
+};
