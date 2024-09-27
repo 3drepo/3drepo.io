@@ -31,8 +31,6 @@ export const SnapCursor = ({ snapType }: CursorProps) => {
 	const mousePosition = useMousePosition();
 	const scale = useScale();
 
-	console.log(JSON.stringify({loc: 'snap', scale, mousePosition}));
-
 	if (!mousePosition) return null;
 
 	return (

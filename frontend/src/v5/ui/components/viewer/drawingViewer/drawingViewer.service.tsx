@@ -48,11 +48,11 @@ const DrawingViewerServiceCreator = () => {
 
 	const emitMouseClickEvent = (mp: Coord2D) => {
 		setMousePosition(mp); 
-		emit(DRAWING_VIEWER_EVENTS.MOUSE_CLICK, mousePosition);
+		emit(DRAWING_VIEWER_EVENTS.MOUSE_CLICK, mp);
 	};
 
 	const setScale = (sc: number) => { 
-		scale = sc ;  
+		scale = sc ;
 		emit(DRAWING_VIEWER_EVENTS.SCALE_CHANGED, sc); 
 	};
 

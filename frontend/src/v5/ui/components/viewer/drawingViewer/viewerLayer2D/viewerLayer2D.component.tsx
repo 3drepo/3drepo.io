@@ -95,7 +95,7 @@ export const ViewerLayer2D = ({ viewBox, snapHandler }: ViewerLayer2DProps) => {
 		}
 
 		DrawingViewerService.emitMouseClickEvent(mousePosition);
-	}, []);
+	}, [viewBox]);
 
 	const handleMouseMove = useCallback((e) => {
 		let mousePos = getCursorOffset(e);

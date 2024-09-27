@@ -22,20 +22,13 @@ import { Arrow } from '../arrow/arrow.component';
 import { DrawingViewerService } from '../../drawingViewer.service';
 import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 import { isEqual } from 'lodash';
-import { useClickEffect, useMousePosition, useScale } from '../../drawingViewer.service.hooks';
+import { useClickEffect, useScale } from '../../drawingViewer.service.hooks';
 
 export const CalibrationArrow = () => {
 	const { isCalibrating2D,  vector2D, setVector2D } = useContext(CalibrationContext);
 	const [offsetStart, setOffsetStart] = useState<Coord2D>(vector2D[0]);
 	const [offsetEnd, setOffsetEnd] = useState<Coord2D>(vector2D[1]);
 	const scale = useScale();
-	const mousePosition = useMousePosition();
-
-	useEffect(() => {
-		if (offsetStart && !vector2D[1]) {
-			setOffsetEnd(mousePosition);
-		}
-	}, [mousePosition]);
 
 	useClickEffect((position) => {
 		if (!isCalibrating2D) return;
@@ -48,7 +41,7 @@ export const CalibrationArrow = () => {
 			setOffsetEnd(position);
 			setVector2D?.([offsetStart, position]);
 		}
-	}, [offsetEnd, offsetStart ]);
+	}, [offsetEnd, offsetStart, isCalibrating2D]);
 
 	const resetArrow = () => {
 		setOffsetStart(null);
