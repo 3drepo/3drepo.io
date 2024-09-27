@@ -20,13 +20,14 @@ import { FormattedMessage } from 'react-intl';
 import { useFormContext } from 'react-hook-form';
 import { MenuItem } from '@mui/material';
 import { FormNumberField, FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
-import { get } from 'lodash';
+import { get, isNumber } from 'lodash';
 import { Heading, Title, FlexContainer } from './sidebarForm.styles';
 import { useContext, useEffect } from 'react';
 import { UploadFilesContext } from '@components/shared/uploadFiles/uploadFilesContext';
 import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { MODEL_UNITS } from '../../../models.helpers';
 import { DoubleInputLineContainer } from '../../drawingDialogs/drawingForm.styles';
+import { Loader } from '@/v4/routes/components/loader/loader.component';
 
 export const SidebarForm = () => {
 	const types = DrawingsHooksSelectors.selectTypes();
@@ -45,6 +46,8 @@ export const SidebarForm = () => {
 			trigger(`${revisionPrefix}.calibration.verticalRange`);
 		}
 	}, [verticalRange?.[0], verticalRange?.[1]]);
+
+	if (drawingId && !isNumber(getValues(`${revisionPrefix}.calibration.verticalRange.0`))) return <Loader />;
 
 	return (
 		<>

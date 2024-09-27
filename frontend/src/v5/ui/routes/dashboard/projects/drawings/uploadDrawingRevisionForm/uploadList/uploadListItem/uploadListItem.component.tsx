@@ -30,9 +30,10 @@ import { UploadListItemTitle } from '@components/shared/uploadFiles/uploadList/u
 import { UploadProgress } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadProgress/uploadProgress.component';
 import { formatMessage } from '@/v5/services/intl';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
-import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DrawingRevisionsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { UploadListItemStatusCode } from './components/uploadListItemStatusCode/uploadListItemStatusCode.component';
 import { UploadStatus } from '@/v5/store/containers/containers.types';
+import { DEFAULT_SETTINGS_CALIBRATION } from '../../../../calibration/calibration.helpers';
 
 const UNEXPETED_STATUS_ERROR = undefined;
 const STATUS_TEXT_BY_UPLOAD = {
@@ -91,9 +92,7 @@ export const UploadListItem = ({
 		drawingNumber: drawing?.number || '',
 		drawingDesc: drawing?.desc || '',
 		drawingType: drawing?.type || '',
-		// drawingBottomExtent: drawing?.bottomExtent ?? 0,
-		// drawingTopExtent: drawing?.topExtent ?? 0,
-		// drawingUnits: drawing?.units || '',
+		calibration: drawing?.calibration || DEFAULT_SETTINGS_CALIBRATION,
 	});
 
 	useEffect(() => {
@@ -109,13 +108,15 @@ export const UploadListItem = ({
 	}, [drawingId, revCode, selectedDrawingRevisions.length]);
 
 	useEffect(() => {
-		for (const [key, val] of Object.entries(sanitiseDrawing(selectedDrawing))) {
-			setValue(`${revisionPrefix}.${key}`, val);
-		}
+		setValue(revisionPrefix, sanitiseDrawing(selectedDrawing));
+	}, [JSON.stringify(selectedDrawing)]);
+
+	useEffect(() => {
 		if (selectedDrawing?._id) {
 			DrawingRevisionsActionsDispatchers.fetch(teamspace, projectId, selectedDrawing._id);
+			DrawingsActionsDispatchers.fetchDrawingSettings(teamspace, projectId, selectedDrawing._id);
 		}
-	}, [JSON.stringify(selectedDrawing)]);
+	}, [selectedDrawing?._id]);
 
 	return (
 		<UploadListItemRow selected={isSelected}>
