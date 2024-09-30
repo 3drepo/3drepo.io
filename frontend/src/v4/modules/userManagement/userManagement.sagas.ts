@@ -22,6 +22,7 @@ import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { selectCurrentQuotaSeats } from '@/v5/store/teamspaces/teamspaces.selectors';
+import { updatePermissionsOrTriggerModal } from '@components/shared/updatePermissionModal/updatePermissionModal.component';
 import {
 	FederationReminderDialog
 } from '../../routes/modelsPermissions/components/federationReminderDialog/federationReminderDialog.component';
@@ -232,8 +233,15 @@ export function* updateUserJob({ username, job }) {
 	}
 }
 
-export function* updatePermissions({ permissions }) {
+export function* updatePermissions({ permissions, permissionsType, permissionsCount }) {
 	try {
+		const shouldUpdate = yield updatePermissionsOrTriggerModal({
+			permissionsType,
+			permissionsCount,
+		});
+		if (!shouldUpdate) {
+			return;
+		}
 		const teamspace = yield select(selectCurrentTeamspace);
 		const currentUser = yield select(selectCurrentUser);
 
@@ -280,8 +288,15 @@ export function* fetchProject({ project }) {
 	}
 }
 
-export function* updateProjectPermissions({ permissions }) {
+export function* updateProjectPermissions({ permissions, permissionsType, permissionsCount }) {
 	try {
+		const shouldUpdate = yield updatePermissionsOrTriggerModal({
+			permissionsType,
+			permissionsCount,
+		});
+		if (!shouldUpdate) {
+			return;
+		}
 		const teamspace = yield select(selectCurrentTeamspace);
 		const {name} = yield select(selectProject);
 		const project = {name, permissions};
@@ -321,7 +336,7 @@ export function* fetchModelsPermissions({ models }) {
 	}
 }
 
-export function* updateModelsPermissionsPre({ modelsWithPermissions }) {
+export function* updateModelsPermissionsPre({ modelsWithPermissions, permissionsType, permissionsCount }) {
 	try {
 		const currentProject = yield select(selectProject);
 		const permissionlessModels = [];
@@ -340,7 +355,7 @@ export function* updateModelsPermissionsPre({ modelsWithPermissions }) {
 			}
 		}
 
-		const resolveUpdate = UserManagementActions.updateModelsPermissions(modelsWithPermissions);
+		const resolveUpdate = UserManagementActions.updateModelsPermissions(modelsWithPermissions, permissionsType, permissionsCount);
 
 		if (permissionlessModels.length) {
 			const config = {
@@ -361,8 +376,16 @@ export function* updateModelsPermissionsPre({ modelsWithPermissions }) {
 	}
 }
 
-export function* updateModelsPermissions({ modelsWithPermissions }) {
+export function* updateModelsPermissions({ modelsWithPermissions, permissionsType, permissionsCount }) {
 	try {
+		const shouldUpdate = yield updatePermissionsOrTriggerModal({
+			permissionsType,
+			permissionsCount,
+		});
+		if (!shouldUpdate) {
+			return;
+		}
+
 		const teamspace = yield select(selectCurrentTeamspace);
 		const response = yield API.updateModelsPermissions(teamspace, modelsWithPermissions);
 

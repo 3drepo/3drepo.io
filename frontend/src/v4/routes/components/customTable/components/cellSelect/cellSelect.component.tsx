@@ -32,7 +32,7 @@ interface IProps {
 	hidden?: boolean;
 	inputId?: string;
 	labelName?: string;
-	onChange: (event, selectedValue: string) => void;
+	onChange: (event, selectedValue: string, permissionsType) => void;
 }
 
 interface IState {
@@ -93,13 +93,7 @@ export class CellSelect extends PureComponent<IProps, IState> {
 		const selectedValue = event.target.value;
 
 		if (this.state.selectedValue !== selectedValue) {
-			updatePermissionsOrTriggerModal({
-				permissionsType: (selectedValue ? TEAMSPACE_PERMISSIONS.admin : TEAMSPACE_PERMISSIONS.user).label,
-				onConfirm: () => {
-					this.setState({selectedValue});
-					this.props.onChange(event, selectedValue);
-				},
-			});
+			this.props.onChange(event, selectedValue, (selectedValue ? TEAMSPACE_PERMISSIONS.admin : TEAMSPACE_PERMISSIONS.user).label);
 		}
 	}
 

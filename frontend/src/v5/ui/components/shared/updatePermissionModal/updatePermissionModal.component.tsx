@@ -20,9 +20,10 @@ import { IInfoModal, InfoModal } from '../modalsDispatcher/templates/infoModal/i
 import { formatMessage } from '@/v5/services/intl';
 import { isPermissionModalSuppressed } from './updatePermissionModal.helpers';
 import { WarningIcon } from '../modalsDispatcher/modalsDispatcher.styles';
+import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 
 type UpdatePermissionProps = {
-	onConfirm: () => void,
+	onConfirm?: () => void,
 	permissionsType: string,
 	permissionsCount?: number,
 };
@@ -43,10 +44,14 @@ export const UpdatePermissionModal = ({ onConfirm, permissionsType, permissionsC
 	/>
 );
 
-export const updatePermissionsOrTriggerModal = (props: UpdatePermissionProps) => {
-	if (isPermissionModalSuppressed()) {
-		props.onConfirm();
-		return;
-	}
-	DialogsActionsDispatchers.open(UpdatePermissionModal, props);
+export const updatePermissionsOrTriggerModal = async (props: UpdatePermissionProps) => {
+	if (isPermissionModalSuppressed()) return true;
+
+	const { resolve, promiseToResolve } = getWaitablePromise();
+	let confirmed = false;
+	const onConfirm = () => { confirmed = true; };
+	DialogsActionsDispatchers.open(UpdatePermissionModal, { onConfirm, onClose: resolve, ...props });
+	await promiseToResolve;
+
+	return confirmed;
 };

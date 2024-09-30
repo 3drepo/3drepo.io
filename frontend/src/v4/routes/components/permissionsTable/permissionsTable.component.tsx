@@ -112,7 +112,7 @@ interface IProps {
 	context?: string;
 	onSelectionChange?: (selectedUsers) => void;
 	onFilterChange?: (filteredUsers) => void;
-	onPermissionsChange?: (permissions) => void;
+	onPermissionsChange?: (permissions, permissionsType, permissionsCount?) => void;
 	rowStateInterceptor?: (props) => void;
 }
 
@@ -167,14 +167,8 @@ export class PermissionsTable extends PureComponent<IProps, IState> {
 				return permissionsList;
 			}, []);
 
-		updatePermissionsOrTriggerModal({
-			permissionsType: this.getPermissionsLabelFromType(value),
-			permissionsCount: updatedPermissions.length,
-			onConfirm: () => {
-				this.setState({ selectedGlobalPermissions: value });
-				this.props.onPermissionsChange?.(updatedPermissions);
-			},
-		});
+			this.setState({ selectedGlobalPermissions: value });
+			this.props.onPermissionsChange?.(updatedPermissions, this.getPermissionsLabelFromType(value), updatedPermissions.length);
 	};
 
 	public hasDisabledPermissions(row) {
@@ -184,15 +178,12 @@ export class PermissionsTable extends PureComponent<IProps, IState> {
 		return row.disabled;
 	}
 
-	public createPermissionsChangeHandler = (permissions, value) => () => updatePermissionsOrTriggerModal({
-		permissionsType: this.getPermissionsLabelFromType(value),
-		onConfirm: () => {
-			this.props.onPermissionsChange?.([{
-				...permissions,
-				key: value
-			}]);
-		},
-	});
+	public createPermissionsChangeHandler = (permissions, value) => () => {
+		this.props.onPermissionsChange?.([{
+			...permissions,
+			key: value
+		}], this.getPermissionsLabelFromType(value));
+	}
 
 	public getTableCells = (roles) => {
 		const permissionCellProps = {
