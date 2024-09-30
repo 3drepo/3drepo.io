@@ -17,7 +17,7 @@
 
 import { UnityUtil } from "@/globals/unity-util";
 import { isEqual } from "lodash";
-import { getState } from "../modules/store";
+import { getState } from "@/v5/helpers/redux.helpers";
 import { selectGetMeshesByIds, selectGetSharedIdsFromNodeIds, selectHiddenGeometryVisible, selectNodesBySharedIdsMap, selectTreeNodesList } from "../modules/tree";
 import { selectColorOverrides } from "../modules/viewerGui";
 import { Viewer } from "../services/viewer/viewer";

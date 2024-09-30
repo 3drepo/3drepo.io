@@ -22,6 +22,7 @@ import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { selectCurrentQuotaSeats } from '@/v5/store/teamspaces/teamspaces.selectors';
+import { dispatch } from '@/v5/helpers/redux.helpers';
 import {
 	FederationReminderDialog
 } from '../../routes/modelsPermissions/components/federationReminderDialog/federationReminderDialog.component';
@@ -30,7 +31,6 @@ import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { JobsActions } from '../jobs';
 import { SnackbarActions } from '../snackbar';
-import { dispatch } from '../store';
 import {
 	selectCurrentTeamspace,
 	selectInvitations,

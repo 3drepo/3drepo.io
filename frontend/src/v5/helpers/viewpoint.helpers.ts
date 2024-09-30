@@ -18,10 +18,10 @@ import { Viewpoint, Group, ViewpointGroupOverrideType, GroupOverride, ViewpointS
 import { getGroupHexColor, rgbaToHex } from '@/v4/helpers/colors';
 import { generateViewpoint as generateViewpointV4, getNodesIdsFromSharedIds, toSharedIds } from '@/v4/helpers/viewpoints';
 import { formatMessage } from '@/v5/services/intl';
-import { getState } from '@/v4/modules/store';
 import { isEmpty, isString } from 'lodash';
 import { selectCurrentTeamspace } from '../store/teamspaces/teamspaces.selectors';
 import { ViewpointsActionsDispatchers } from '../services/actionsDispatchers';
+import { getState } from './redux.helpers';
 
 export const convertToV5GroupNodes = (objects) => objects.map((object) => ({
 	container: object.model as string,

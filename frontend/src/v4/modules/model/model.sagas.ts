@@ -19,6 +19,7 @@ import { cloneDeep } from 'lodash';
 import { put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 
 import { getAPIUrl } from '@/v4/services/api/default';
+import { dispatch } from '@/v5/helpers/redux.helpers';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import * as API from '../../services/api';
 import { clientConfigService } from '../../services/clientConfig';
@@ -26,7 +27,6 @@ import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
-import { dispatch } from '../store';
 import { TeamspacesActions } from '../teamspaces';
 import { uploadFileStatuses } from './model.helpers';
 import { ModelActions, ModelTypes } from './model.redux';

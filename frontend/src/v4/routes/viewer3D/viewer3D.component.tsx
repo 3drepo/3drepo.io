@@ -16,10 +16,10 @@
  */
 import { PureComponent, createRef } from 'react';
 import { difference, differenceBy, isEqual, omit } from 'lodash';
-import { dispatch } from '@/v4/modules/store';
 import { DialogActions } from '@/v4/modules/dialog';
 import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
 import { LifoQueue } from '@/v5/helpers/functions.helpers';
+import { dispatch } from '@/v5/helpers/redux.helpers';
 import {queuableFunction} from '../../helpers/async';
 
 import { ROUTES } from '../../constants/routes';

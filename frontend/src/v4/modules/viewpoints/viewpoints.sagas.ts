@@ -23,6 +23,7 @@ import { generatePath } from 'react-router-dom';
 import { prefixBaseDomain } from '@/v5/helpers/url.helper';
 import { getAPIUrl } from '@/v4/services/api/default';
 import { CHAT_CHANNELS } from '@/v4/constants/chat';
+import { dispatch } from '@/v5/helpers/redux.helpers';
 import { ROUTES } from '../../constants/routes';
 import { prepareGroup } from '../../helpers/groups';
 import { createGroupsFromViewpoint, generateViewpoint,
@@ -34,7 +35,6 @@ import { ModelActions } from '../model';
 import { selectCurrentRevisionId } from '../model';
 import { SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
-import { dispatch } from '../store';
 import { TreeActions } from '../tree';
 import { waitForTreeToBeReady } from '../tree/tree.sagas';
 import { ViewerGuiActions } from '../viewerGui';
