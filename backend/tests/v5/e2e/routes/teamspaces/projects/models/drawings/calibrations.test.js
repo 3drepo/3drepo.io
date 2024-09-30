@@ -22,6 +22,7 @@ const { times } = require('lodash');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
+const { convertArrayUnits } = require(`${src}/utils/helper/units`);
 
 let server;
 let agent;
@@ -124,7 +125,7 @@ const testGetCalibration = () => {
 			key: users.tsAdmin.apiKey,
 			ts: teamspace,
 			projectId: project.id,
-			drawingId: models.drawWithRevisions._id,
+			drawing: models.drawWithRevisions,
 			revisionId: revisions.rev2._id,
 		};
 
@@ -138,27 +139,30 @@ const testGetCalibration = () => {
 			['the user is not a member of the teamspace', { ...params, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
 			['the user does not have access to the drawing', { ...params, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 			['the project does not exist', { ...params, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
-			['the drawing does not exist', { ...params, drawingId: ServiceHelper.generateRandomString() }, false, templates.drawingNotFound],
+			['the drawing does not exist', { ...params, drawing: ServiceHelper.generateRandomString() }, false, templates.drawingNotFound],
 			['the revision does not exist', { ...params, revisionId: ServiceHelper.generateRandomString() }, false, templates.revisionNotFound],
-			['the model is of wrong type', { ...params, drawingId: models.container._id }, false, templates.drawingNotFound],
-			['the drawing has no revisions', { ...params, drawingId: models.drawWithNoRevisions._id }, false, templates.revisionNotFound],
+			['the model is of wrong type', { ...params, drawing: models.container }, false, templates.drawingNotFound],
+			['the drawing has no revisions', { ...params, drawing: models.drawWithNoRevisions }, false, templates.revisionNotFound],
 			['the drawing has revisions but revisions have no calibrations', { ...params, revisionId: revisions.rev1._id }, false, templates.calibrationNotFound],
 			['the drawing has revisions and revision has calibrations', params, true],
 			['the drawing has revisions and previous revision has calibrations', { ...params, revisionId: revisions.rev3._id }, true],
 		])('Get Calibration', (desc, parameters, success, error) => {
 			test(`should ${success ? 'succeed' : `fail with ${error.code}`} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : error.status;
-				const route = ({ ts, projectId, drawingId, revisionId, key }) => `/v5/teamspaces/${ts}/projects/${projectId}/drawings/${drawingId}/revisions/${revisionId}/calibrations?key=${key}`;
+				const route = ({ ts, projectId, drawing, revisionId, key }) => `/v5/teamspaces/${ts}/projects/${projectId}/drawings/${drawing._id}/revisions/${revisionId}/calibrations?key=${key}`;
 
 				const res = await agent.get(route(parameters)).expect(expectedStatus);
 
 				if (success) {
 					const latestCalibration = calibrations.reduce(
 						(max, cal) => (max.createdAt > cal.createdAt ? max : cal));
-					const { horizontal, verticalRange, units } = latestCalibration;
-					expect(res.body).toEqual({ horizontal,
-						verticalRange,
-						units,
+
+					const { verticalRange, units: drawingUnits } = parameters.drawing.properties.calibration;
+
+					expect(res.body).toEqual({
+						verticalRange: convertArrayUnits(verticalRange, drawingUnits, latestCalibration.units),
+						units: latestCalibration.units,
+						horizontal: latestCalibration.horizontal,
 						createdAt: res.body.createdAt,
 						createdBy: res.body.createdBy });
 				} else {
@@ -188,8 +192,8 @@ const testAddCalibration = () => {
 				model: times(2, () => times(3, () => ServiceHelper.generateRandomNumber())),
 				drawing: times(2, () => times(2, () => ServiceHelper.generateRandomNumber())),
 			},
-			verticalRange: [0, 10],
-			units: 'm',
+			verticalRange: [ServiceHelper.generateRandomNumber(0, 10), ServiceHelper.generateRandomNumber(11, 20)],
+			units: 'mm',
 		};
 
 		beforeAll(async () => {
@@ -217,24 +221,31 @@ const testAddCalibration = () => {
 			test(`should ${success ? 'succeed' : `fail with ${error.code}`} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : error.status;
 				const route = ({ ts, projectId, drawingId, revisionId, usePrevious, key }) => `/v5/teamspaces/${ts}/projects/${projectId}/drawings/${drawingId}/revisions/${revisionId}/calibrations?key=${key}&usePrevious=${usePrevious}`;
+				const drawingRoute = ({ ts, projectId, drawingId, key }) => `/v5/teamspaces/${ts}/projects/${projectId}/drawings/${drawingId}?key=${key}`;
 
-				let lastRevBeforePost;
+				let lastCalBeforePost;
 				if (success && parameters.usePrevious) {
 					const { body } = await agent.get(route(parameters));
-					lastRevBeforePost = body;
+					lastCalBeforePost = body;
 				}
 
 				const res = await agent.post(route(parameters)).send(payload).expect(expectedStatus);
 
 				if (success) {
-					const { body: newlyCreatedRev } = await agent.get(route(parameters));
+					const { body: newlyCreatedCal } = await agent.get(route(parameters));
+					const { body: updatedDrawing } = await agent.get(drawingRoute(parameters));
 
-					const calibrationData = parameters.usePrevious ? lastRevBeforePost : payload;
+					const calibrationData = parameters.usePrevious ? lastCalBeforePost : payload;
 
-					expect(newlyCreatedRev).toEqual({
+					expect(newlyCreatedCal).toEqual({
 						...calibrationData,
-						createdAt: newlyCreatedRev.createdAt,
-						createdBy: newlyCreatedRev.createdBy,
+						createdAt: newlyCreatedCal.createdAt,
+						createdBy: newlyCreatedCal.createdBy,
+					});
+
+					expect(updatedDrawing.calibration).toEqual({
+						verticalRange: calibrationData.verticalRange,
+						units: calibrationData.units,
 					});
 				} else {
 					expect(res.body.code).toEqual(error.code);

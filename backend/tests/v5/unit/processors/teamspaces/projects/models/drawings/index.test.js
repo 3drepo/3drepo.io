@@ -403,7 +403,7 @@ const testGetSettings = () => {
 			const drawingSettings = generateRandomString();
 			const teamspace = generateRandomString();
 			const drawing = generateRandomString();
-			const projection = { name: 1, number: 1, type: 1, desc: 1 };
+			const projection = { name: 1, number: 1, type: 1, desc: 1, calibration: 1 };
 			ModelSettings.getDrawingById.mockResolvedValueOnce(drawingSettings);
 
 			const res = await Drawings.getSettings(teamspace, drawing);
