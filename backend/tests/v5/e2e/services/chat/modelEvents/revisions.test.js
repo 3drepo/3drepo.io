@@ -126,13 +126,18 @@ const revisionUpdateTest = () => {
 				setTimeout(reject, 1000);
 			});
 
+			const modelUpdateSocketPromise = new Promise((resolve, reject) => {
+				socket.on(EVENTS.DRAWING_SETTINGS_UPDATE, resolve);
+				setTimeout(reject, 1000);
+			});
+
 			const calibration = {
 				horizontal: {
 					model: [[0, 0, 0], [1, 1, 1]],
 					drawing: [[0, 0], [1, 1]],
 				},
-				verticalRange: [0, 10],
-				units: 'm',
+				verticalRange: [ServiceHelper.generateRandomNumber(0, 5), ServiceHelper.generateRandomNumber(6, 10)],
+				units: 'mm',
 			};
 
 			await agent.post(`/v5/teamspaces/${teamspace}/projects/${project.id}/drawings/${drawing._id}/revisions/${drawingRevision._id}/calibrations?key=${user.apiKey}`)
@@ -144,6 +149,13 @@ const revisionUpdateTest = () => {
 				data: {
 					_id: drawingRevision._id,
 					calibration: calibrationStatuses.CALIBRATED,
+				},
+			});
+
+			await expect(modelUpdateSocketPromise).resolves.toEqual({
+				...data,
+				data: {
+					calibration: { verticalRange: calibration.verticalRange, units: calibration.units },
 				},
 			});
 

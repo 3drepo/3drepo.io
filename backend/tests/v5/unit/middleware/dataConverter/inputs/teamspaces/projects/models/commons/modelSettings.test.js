@@ -151,6 +151,8 @@ const testValidateUpdateSettingsData = () => {
 				[modelType, { params, body: { number: null } }, false, 'with null number'],
 				[modelType, { params, body: { number: existingModelNumber } }, false, 'with drawing type and duplicate number'],
 				[modelType, { params, body: { unit: generateRandomString() } }, false, 'with valid units'],
+				[modelType, { params, body: { calibration: null } }, false, 'with null calibration'],
+				[modelType, { params, body: { calibration: { verticalRange: [0, 5], units: 'm' } } }, true, 'with valid calibration'],
 			];
 
 			if (modelType === modelTypes.DRAWING) {
@@ -185,12 +187,14 @@ const testValidateAddModelData = () => {
 			});
 		};
 
+		const calibration = { verticalRange: [0, 10], units: 'm' };
 		const generatePayload = (modelType) => (deleteIfUndefined({
 			name: generateRandomString(),
 			desc: generateRandomString(),
 			type: modelType === modelTypes.FEDERATION ? undefined : 'Structure',
 			code: modelType === modelTypes.DRAWING ? undefined : generateRandomString(),
 			unit: modelType === modelTypes.DRAWING ? undefined : 'mm',
+			calibration: modelType === modelTypes.DRAWING ? calibration : undefined,
 			number: modelType === modelTypes.DRAWING ? generateRandomString() : undefined,
 		}));
 
@@ -335,6 +339,7 @@ const testValidateAddModelData = () => {
 					body: {
 						name: generateRandomString(),
 						type: 'Structure',
+						calibration,
 					},
 				}, modelTypes.DRAWING, false, 'if number is missing'],
 				[{
@@ -356,8 +361,52 @@ const testValidateAddModelData = () => {
 					body: {
 						name: generateRandomString(),
 						number: generateRandomString(),
+						calibration,
 					},
 				}, modelTypes.DRAWING, false, 'if type is missing'],
+				[{
+					params,
+					body: {
+						name: generateRandomString(),
+						number: generateRandomString(),
+						type: 'Structure',
+					},
+				}, modelTypes.DRAWING, false, 'if calibration is missing'],
+				[{
+					params,
+					body: {
+						...generatePayload(modelTypes.DRAWING),
+						calibration: { units: 'm' },
+					},
+				}, modelTypes.DRAWING, false, 'if calibration verticalRange is missing'],
+				[{
+					params,
+					body: {
+						...generatePayload(modelTypes.DRAWING),
+						calibration: { ...calibration, verticalRange: [10, 0] },
+					},
+				}, modelTypes.DRAWING, false, 'if calibration verticalRange is invalid'],
+				[{
+					params,
+					body: {
+						...generatePayload(modelTypes.DRAWING),
+						calibration: { ...calibration, verticalRange: generateRandomString() },
+					},
+				}, modelTypes.DRAWING, false, 'if calibration verticalRange is string'],
+				[{
+					params,
+					body: {
+						...generatePayload(modelTypes.DRAWING),
+						calibration: { verticalRange: [0, 10] },
+					},
+				}, modelTypes.DRAWING, false, 'if calibration units are missing'],
+				[{
+					params,
+					body: {
+						...generatePayload(modelTypes.DRAWING),
+						calibration: { ...calibration, units: generateRandomString() },
+					},
+				}, modelTypes.DRAWING, false, 'if calibration units is invalid'],
 			];
 
 			if (modelType === modelTypes.DRAWING) {
