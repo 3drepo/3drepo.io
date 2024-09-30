@@ -536,7 +536,7 @@ export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ on
 
 	useEffect(() => {
 		if (!pannableImage.current || !src) return;
-		
+
 		// This bit is to change the background colour of the svg to white
 		axios.get(src).then((response) => {
 			const svgContent = response.data;
@@ -544,6 +544,11 @@ export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ on
 			svgContainer.innerHTML = svgContent;
 			const svg = svgContainer.querySelector('svg') as SVGSVGElement;
 			svg.setAttribute('style', 'background-color: white;');
+			const width = Math.ceil(Number.parseFloat(svg.getAttribute('width')));
+			const height = Math.ceil(Number.parseFloat(svg.getAttribute('height')));
+			svg.setAttribute('width', width.toString());
+			svg.setAttribute('height', height.toString());
+			svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
 			const binString = Array.from(new TextEncoder().encode(svg.outerHTML), (byte) => String.fromCodePoint(byte)).join('');
 			const base64 = btoa(binString);
 			pannableImage.current.src = `data:image/svg+xml;base64,${base64}`;
