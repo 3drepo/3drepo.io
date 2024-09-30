@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Vector2 } from 'three';
+import { Vector2, Vector2Like } from 'three';
 
 export class Bounds {
 	xmin: number;
@@ -51,9 +51,9 @@ export class Line2 {
 
 	end: Vector2;
 
-	constructor(start: Vector2, end: Vector2) {
-		this.start = start;
-		this.end = end;
+	constructor(start: Vector2Like, end: Vector2Like) {
+		this.start = new Vector2(start.x, start.y);
+		this.end = new Vector2(end.x, end.y);
 	}
 
 	distance() : number {
@@ -113,13 +113,13 @@ export class QuinticPolynomial {
 
 export class CubicBezier {
 
-	p0: Vector2;
+	p0: Vector2Like;
 
-	p1: Vector2;
+	p1: Vector2Like;
 
-	p2: Vector2;
+	p2: Vector2Like;
 
-	p3: Vector2;
+	p3: Vector2Like;
 
 	// n, r, s & v are the curve in parametric form. These are computed on
 	// demand and cached.
@@ -152,7 +152,7 @@ export class CubicBezier {
 
 	selfIntersection: Vector2 | undefined | false;
 
-	constructor(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2) {
+	constructor(p0: Vector2Like, p1: Vector2Like, p2: Vector2Like, p3: Vector2Like) {
 		this.p0 = p0;
 		this.p1 = p1;
 		this.p2 = p2;

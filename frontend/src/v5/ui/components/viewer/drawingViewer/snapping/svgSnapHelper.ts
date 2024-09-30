@@ -16,7 +16,7 @@
  */
 
 import 'path-data-polyfill';
-import { Vector2 } from 'three';
+import { Vector2, Vector2Like } from 'three';
 import { Line2, CubicBezier } from './types';
 import { RTree, RTreeBuilder } from './rTree';
 
@@ -34,12 +34,13 @@ class PrimitiveCollector {
 
 	curves: CubicBezier[];
 
-	offset: Vector2;
+	transformStack: DOMMatrix[];
 
-	constructor(offset: Vector2) {
+	constructor() {
 		this.lines = [];
 		this.curves = [];
-		this.offset = offset;
+		this.transformStack = [];
+		this.transformStack.push(new DOMMatrix()); // Default constructor should return identity
 	}
 
 	addLine(line: Line2) {
@@ -48,6 +49,18 @@ class PrimitiveCollector {
 
 	addCurve(curve: CubicBezier) {
 		this.curves.push(curve);
+	}
+
+	getTransform() {
+		return this.transformStack[this.transformStack.length - 1];
+	}
+
+	pushTransform(matrix: DOMMatrix) {
+		this.transformStack.push(this.getTransform().multiply(matrix));
+	}
+
+	popTransform() {
+		this.transformStack.pop();
 	}
 }
 
@@ -58,9 +71,9 @@ class PrimitiveCollector {
 class PathCollector {
 	collector: PrimitiveCollector;
 
-	currentPosition: Vector2;
+	currentPosition: Vector2Like;
 
-	startPosition: Vector2;
+	startPosition: Vector2Like;
 
 	constructor(collector: PrimitiveCollector) {
 		this.collector = collector;
@@ -68,7 +81,7 @@ class PathCollector {
 	}
 
 	setStartPosition(values: number[]) {
-		this.startPosition = new Vector2(values[0] + this.collector.offset.x, values[1] + this.collector.offset.y);
+		this.startPosition = new DOMPoint(values[0], values[1]).matrixTransform(this.collector.getTransform());
 		this.currentPosition = new Vector2(this.startPosition.x, this.startPosition.y); // Copy the vector
 	}
 
@@ -76,7 +89,7 @@ class PathCollector {
 	// offset should be given as an array index (rather than 2-componetn coord
 	// index).
 	addLine(values: number[], offset: number) {
-		const position = new Vector2(values[offset] + this.collector.offset.x, values[offset + 1] + this.collector.offset.y); // For lines, arguments must always be a multiple of 2
+		const position = new DOMPoint(values[offset], values[offset + 1]).matrixTransform(this.collector.getTransform()); // For lines, arguments must always be a multiple of 2
 		const line = new Line2(this.currentPosition, position);
 		this.currentPosition = position;
 		if (line.distance() != 0) {
@@ -85,10 +98,11 @@ class PathCollector {
 	}
 
 	addCurve(values: number[]) {
+		const m = this.collector.getTransform();
 		const p0 = this.currentPosition;
-		const p1 = new Vector2(this.collector.offset.x + values[0], this.collector.offset.y + values[1]);
-		const p2 = new Vector2(this.collector.offset.x + values[2], this.collector.offset.y + values[3]);
-		const p3 = new Vector2(this.collector.offset.x + values[4], this.collector.offset.y + values[5]);
+		const p1 = new DOMPoint(values[0], values[1]).matrixTransform(m);
+		const p2 = new DOMPoint(values[2], values[3]).matrixTransform(m);
+		const p3 = new DOMPoint(values[4], values[5]).matrixTransform(m);
 		const curve = new CubicBezier(p0, p1, p2, p3);
 		this.collector.addCurve(curve);
 		this.currentPosition = p3;
@@ -120,62 +134,54 @@ class SvgParser {
 	}
 
 	parseSvg(svg: SVGSVGElement) {
-
-		// The current version of this parser assumes all elements are defined
-		// in world-space - that is, it does not consider groups, instances or
-		// the transform attribute.
-
-		// Currently the svgs we get from ODA do not appear to use these
-		// features, however in the future we may need to move from simple
-		// enumeration to performing a context-aware traversal of the DOM.
-
-		this.getRectElements(svg);
-		this.getCircleElements(svg);
-		this.getEllipseElements(svg);
-		this.getLineElements(svg);
-		this.getPolylineElements(svg);
-		this.getPolygonElements(svg);
-		this.getPathElements(svg);
+		this.parseNode(svg);
 	}
 
-	private getRectElements(svg: SVGElement) {
-		this.addGeometryElements(svg.querySelectorAll<SVGPolyfilledGeometryElement>('rect'));
-	}
+	private parseNode(node: SVGGraphicsElement) {
 
-	private getCircleElements(svg: SVGElement) {
-		this.addGeometryElements(svg.querySelectorAll<SVGPolyfilledGeometryElement>('circle'));
-	}
+		let shouldPop = false;
 
-	private getEllipseElements(svg: SVGElement) {
-		this.addGeometryElements(svg.querySelectorAll<SVGPolyfilledGeometryElement>('ellipse'));
-	}
+		if (node.transform && node.transform.baseVal.numberOfItems > 0) {
+			const m = node.transform.baseVal[0].matrix;
+			this.collector.pushTransform(m);
+			shouldPop = true;
+		}
 
-	private getLineElements(svg: SVGElement) {
-		this.addGeometryElements(svg.querySelectorAll<SVGPolyfilledGeometryElement>('line'));
-	}
+		switch (node.nodeName) {
+			case 'path':
+			case 'polygon':
+			case 'polyline':
+			case 'line':
+			case 'ellipse':
+			case 'circle':
+			case 'rect':
+				this.addGeometryElement(node as SVGPolyfilledGeometryElement); // (That is, any elements that have the getPathData method)
+				break;
+			case 'svg':
+			case 'g':
+				for (const child of node.children) {
+					this.parseNode(child as SVGGraphicsElement);
+				}
+				break;
+			// The following container elements are not currently supported,
+			// because the exporters we consider do not use them...
+			//  a
+			//  clipPath
+			//  defs
+			//  marker
+			//  mask
+			//  pattern
+			//  switch
+			//  symbol
+		}
 
-	private getPolylineElements(svg: SVGElement) {
-		this.addGeometryElements(svg.querySelectorAll<SVGPolyfilledGeometryElement>('polyline'));
-	}
-
-	private getPolygonElements(svg: SVGElement) {
-		this.addGeometryElements(svg.querySelectorAll<SVGPolyfilledGeometryElement>('polygon'));
-	}
-
-	private getPathElements(svg: SVGSVGElement) {
-		const paths = svg.querySelectorAll<SVGPathElement>('path:not([stroke=\'none\'])');
-		for (let i = 0; i < paths.length; i++) {
-			const p = paths[i];
-			const segments = p.getPathData({ normalize: true });
-			this.addPathElements(segments);
+		if (shouldPop) {
+			this.collector.popTransform();
 		}
 	}
 
-	private addGeometryElements(nodes: NodeListOf<SVGPolyfilledGeometryElement>) {
-		for (let i = 0; i < nodes.length; i++) {
-			const r = nodes[i];
-			this.addPathElements(r.getPathData({ normalize: true }));
-		}
+	private addGeometryElement(node: SVGPolyfilledGeometryElement) {
+		this.addPathElements(node.getPathData({ normalize: true }));
 	}
 
 	private addPathElements(segments: SVGPathSegment[]) {
@@ -253,16 +259,16 @@ export class SVGSnapHelper {
 		this.svg = this.container.querySelector('svg') as SVGSVGElement;
 
 		if (!this.svg.width || this.svg.width.baseVal.unitType != 1) {
-			console.error('SVG width is not correctly specified. Width and Height are expected to be given, without units. SVGSnap may not work.');
+			console.error('SVG width is not correctly specified. Width and Height are expected to be given, without units. Snapping may not work.');
 		}
 
 		const viewBoxOffset = new Vector2(this.svg.viewBox.baseVal.x, this.svg.viewBox.baseVal.y);
 
 		if (viewBoxOffset.length() != 0) {
-			console.error('SVG has a non-zero viewBox offset. SVGSnap will attempt to counteract the offset to match createImageBitamp, but this is not supported and the behaviour is not guaranteed.');
+			console.error('SVG has a non-zero viewBox offset. This is not supported. Snapping will not work.');
 		}
 
-		const collector = new PrimitiveCollector(viewBoxOffset.multiplyScalar(-1));
+		const collector = new PrimitiveCollector();
 
 		// Extract all the edge-like elements. The responses here should include
 		// all Basic Shapes, and directly declared Path elements.
