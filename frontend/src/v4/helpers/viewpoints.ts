@@ -17,12 +17,12 @@
 
 import { UnityUtil } from "@/globals/unity-util";
 import { isEqual } from "lodash";
+import { hexToRgb } from "@/v5/helpers/colors.helper";
 import { getState } from "../modules/store";
 import { selectGetMeshesByIds, selectGetSharedIdsFromNodeIds, selectHiddenGeometryVisible, selectNodesBySharedIdsMap, selectTreeNodesList } from "../modules/tree";
 import { selectColorOverrides } from "../modules/viewerGui";
 import { Viewer } from "../services/viewer/viewer";
 import { selectTransformations } from "../modules/viewpoints/viewpoints.selectors";
-import { hexToArray } from "./colors";
 
 // This merges a viewpoint
 // TO BE REVIEWED.
@@ -107,11 +107,11 @@ function createGroupsByColor(overrides) {
 			const { teamspace, modelId } = modelsDict[objectId];
 
 			// if there is a group with that color already use that one
-			let colorGroup = arr.find(({color}) => color.join(',') === hexToArray(overrides[objectId]).join(','));
+			let colorGroup = arr.find(({color}) => color.join(',') === hexToRgb(overrides[objectId]).join(','));
 
 			if (!colorGroup) {
 				// Otherwise create a group with that color
-				colorGroup = { color: hexToArray(overrides[objectId]), objects: [] , totalSavedMeshes: 0};
+				colorGroup = { color: hexToRgb(overrides[objectId]), objects: [] , totalSavedMeshes: 0};
 
 				arr.push(colorGroup);
 			}

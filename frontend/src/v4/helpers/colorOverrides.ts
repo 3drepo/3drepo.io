@@ -14,11 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { hexToGLColor } from '@/v5/helpers/colors.helper';
 import { getState } from '../modules/store';
 import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds,
 	selectTreeNodesList } from '../modules/tree';
 import { Viewer } from '../services/viewer/viewer';
-import { hexToGLColor } from './colors';
 
 // Adds to a dictionary of shared_id -> value a new group with
 // its share_ids from 'objects' field pointing to value

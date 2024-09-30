@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { hexToOpacity } from '@/v5/ui/themes/theme';
+import { hexToOpacity } from '@/v5/helpers/colors.helper';
 import { CoverImage } from '@controls/coverImage/coverImage.component';
 import { Content as ProjectContent } from '../../projects/projectContent/projectContent.styles';
 
