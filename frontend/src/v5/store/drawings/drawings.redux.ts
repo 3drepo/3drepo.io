@@ -78,9 +78,10 @@ export const createDrawingSuccess = (state: DrawingsState, { projectId, drawing 
 	state.drawingsByProject[projectId] = (state.drawingsByProject[projectId] || []).concat([drawing]);
 };
 
-export const updateDrawingSuccess = (state: DrawingsState, { projectId, drawingId, drawing }:UpdateDrawingSuccessAction ) => {
+export const updateDrawingSuccess = (state: DrawingsState, { projectId, drawingId, drawing: { calibration, ...drawing } }:UpdateDrawingSuccessAction ) => {
 	const oldDrawing = getDrawingFromState(state, projectId, drawingId);
 	Object.assign(oldDrawing, drawing);
+	oldDrawing.calibration = { ...oldDrawing.calibration, ...calibration };
 };
 
 export const deleteDrawingSuccess = (state: DrawingsState, {
