@@ -49,7 +49,7 @@ export const DrawingForm = ({ formData, drawing }:Props) => {
 			</Title>
 			{(drawing as any)?._id && (
 				<ShareTextField
-					label={formatMessage({ id: 'drawings.id', defaultMessage: 'ID' })}
+					label={formatMessage({ id: 'drawings.form.id', defaultMessage: 'ID' })}
 					value={(drawing as any)?._id}
 				/>
 			)}
