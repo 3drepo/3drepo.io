@@ -20,9 +20,10 @@ import { SubmitHandler } from 'react-hook-form';
 import { FormModal } from '@controls/formModal/formModal.component';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { IFormInput, useDrawingForm } from './drawingsDialogs.hooks';
+import { useDrawingForm } from './drawingsDialogs.hooks';
 import { DrawingForm } from './drawingForm.component';
 import { DEFAULT_SETTINGS_CALIBRATION } from '../../calibration/calibration.helpers';
+import { DrawingSettings } from '@/v5/store/drawings/drawings.types';
 
 export const CreateDrawingDialog = ({ open, onClickClose }) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
@@ -31,7 +32,7 @@ export const CreateDrawingDialog = ({ open, onClickClose }) => {
 	const { onSubmitError, formData } = useDrawingForm({ calibration: DEFAULT_SETTINGS_CALIBRATION } as any);
 	const { handleSubmit, formState } = formData;
 
-	const onSubmit: SubmitHandler<IFormInput> = async (body) => {
+	const onSubmit: SubmitHandler<DrawingSettings> = async (body) => {
 		try {
 			await new Promise<void>((accept, reject) => DrawingsActionsDispatchers.createDrawing(teamspace, project, body as any, accept, reject));
 			onClickClose();

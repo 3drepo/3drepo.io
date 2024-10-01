@@ -17,23 +17,12 @@
 
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { DrawingsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { IDrawing } from '@/v5/store/drawings/drawings.types';
+import { DrawingSettings, IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingFormSchema } from '@/v5/validation/drawingSchemes/drawingSchemes';
 import { nameAlreadyExists, numberAlreadyExists } from '@/v5/validation/errors.helpers';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-
-export interface IFormInput {
-	name: string;
-	number: string;
-	type: string;
-	desc: string;
-	calibration: {
-		verticalRange: [number, number];
-		units: string;
-	};
-}
 
 export const useDrawingForm = (defaultValues?: IDrawing) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
@@ -54,7 +43,7 @@ export const useDrawingForm = (defaultValues?: IDrawing) => {
 	const [alreadyExistingNames, setAlreadyExistingNames] = useState(drawingsNames);
 	const [alreadyExistingNumbers, setAlreadyExistingNumbers] = useState(drawingNumbers);
 	
-	const formData = useForm<IFormInput>({
+	const formData = useForm<DrawingSettings>({
 		mode: 'onChange',
 		resolver: yupResolver(DrawingFormSchema),
 		context: { alreadyExistingNames, alreadyExistingNumbers },

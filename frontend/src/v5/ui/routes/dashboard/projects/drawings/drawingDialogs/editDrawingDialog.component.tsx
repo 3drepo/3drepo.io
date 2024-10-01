@@ -20,12 +20,13 @@ import { SubmitHandler } from 'react-hook-form';
 import { FormModal } from '@controls/formModal/formModal.component';
 import { DrawingsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { IFormInput, useDrawingForm } from './drawingsDialogs.hooks';
+import { useDrawingForm } from './drawingsDialogs.hooks';
 import { dirtyValuesChanged } from '@/v5/helpers/form.helper';
 import { pick } from 'lodash';
 import { DrawingForm } from './drawingForm.component';
 import { useEffect } from 'react';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
+import { DrawingSettings } from '@/v5/store/drawings/drawings.types';
 
 interface Props { 
 	open: boolean; 
@@ -41,7 +42,7 @@ export const EditDrawingDialog = ({ open, onClickClose, drawingId }:Props) => {
 	const { onSubmitError, formData } = useDrawingForm(drawing);
 	const { handleSubmit, formState } = formData;
 
-	const onSubmit: SubmitHandler<IFormInput> = async (body) => {
+	const onSubmit: SubmitHandler<DrawingSettings> = async (body) => {
 		try {
 			await new Promise<void>((accept, reject) => {
 				const updatedDrawingData = pick(body, Object.keys(formState.dirtyFields));
