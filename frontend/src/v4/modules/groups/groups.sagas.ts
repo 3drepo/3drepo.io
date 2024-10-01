@@ -20,9 +20,9 @@ import { call, all, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { takeEveryInOrder } from '@/v5/helpers/sagas.helpers';
 import { dispatch, getState } from '@/v5/helpers/redux.helpers';
+import { getRandomRgbColor, hexToGLColor } from '@/v5/helpers/colors.helper';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { GROUPS_TYPES } from '../../constants/groups';
-import { getRandomColor, hexToGLColor } from '../../helpers/colors';
 import { normalizeGroup, prepareGroup, prepareGroupWithCount } from '../../helpers/groups';
 import { calculateTotalMeshes } from '../../helpers/tree';
 import * as API from '../../services/api';
@@ -32,7 +32,7 @@ import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
-import { TreeActions, TreeTypes, selectTreeNodesList } from '../tree';
+import { TreeActions, TreeTypes } from '../tree';
 import { ViewpointsActions } from '../viewpoints';
 import { selectNodesBySharedIds, showNodesBySharedIds } from '../tree/tree.sagas';
 import { GroupsActions, GroupsTypes, INITIAL_CRITERIA_FIELD_STATE } from './groups.redux';
@@ -353,7 +353,7 @@ function* setNewGroup() {
 		const editingGroup = prepareGroup({
 			author: currentUser.username,
 			name: `Untitled group ${groupNumber}`,
-			color: getRandomColor(),
+			color: getRandomRgbColor(),
 			description: ''
 		});
 

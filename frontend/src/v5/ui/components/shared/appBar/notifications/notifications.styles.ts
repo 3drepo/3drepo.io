@@ -16,10 +16,10 @@
  */
 
 import styled, { css } from 'styled-components';
-import { hexToOpacity } from '@/v5/ui/themes/theme';
 import { Container as NotificationTeamspace, NotificationsPanelItem } from '@/v4/routes/components/notifications/components/panel/panel.styles';
 import { Item, ItemSecondaryAction } from '@/v4/routes/components/notifications/components/notificationItem/notificationItem.styles';
 import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
+import { hexToOpacity } from '@/v5/helpers/colors.helper';
 
 const navbarButtonStyles = css`
 	& > button {

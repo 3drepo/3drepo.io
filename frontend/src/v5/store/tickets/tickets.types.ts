@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { RgbArray } from '@/v5/helpers/colors.helper';
 import { TicketStatusTypes } from '@controls/chip/chip.types';
-import { RgbArray } from '@controls/inputs/colorPicker/colorPicker.helpers';
 
 export type PropertyTypeDefinition = 'text' | 'longText' | 'boolean' | 'number' | 'date' | 'view' | 'manyOf' | 'oneOf' | 'image' | 'imageList' | 'coords' | 'measurements';
 
