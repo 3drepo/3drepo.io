@@ -15,25 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { hexToOpacity } from '@/v5/helpers/colors.helper';
-import { Link as LinkBase } from 'react-router-dom';
-import styled from 'styled-components';
+import { Image, ExtraImages, OverlappingContainer } from './imageWithExtraCount.styles';
 
-export const Overlay = styled.div`
-	background-color: ${({ theme }) => hexToOpacity(theme.palette.primary.contrast, 80)};
-	font-weight: 600;
-	color: ${({ theme }) => theme.palette.base.dark};
-	height: calc(100% - 2px);
-	width: calc(100% - 2px);
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	flex-direction: row;
-	z-index: 1;
-	margin: 1px;
-	border-radius: 8px;
-`;
+type ImageWithExtraCountProps = {
+	src: string,
+	className?: string,
+	extraCount?: number,
+	onClick?: () => void,
+};
+export const ImageWithExtraCount = ({
+	src,
+	extraCount,
+	className,
+	onClick,
+	...imgProps
+}: ImageWithExtraCountProps) => {
+	if (!extraCount || extraCount === 1) {
+		return (<Image src={src} onClick={onClick} className={className} {...imgProps} />);
+	}
 
-export const Link = styled(LinkBase)`
-	color: ${({ theme }) => theme.palette.primary.main};
-`;
+	return (
+		<OverlappingContainer onClick={onClick} className={className}>
+			<Image src={src} {...imgProps} />
+			<ExtraImages>+{extraCount}</ExtraImages>
+		</OverlappingContainer>
+	);
+};

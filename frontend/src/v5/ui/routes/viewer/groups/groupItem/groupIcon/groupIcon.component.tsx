@@ -16,16 +16,15 @@
  */
 
 import LightningIcon from '@assets/icons/filled/lightning-filled.svg';
-import { contrastColor } from 'contrast-color';
 import { Container, Background, GroupIcon } from './groupIcon.styles';
+import { isLight } from '@/v5/helpers/colors.helper';
 
 const isSmart = (rules) => (rules || []).length > 0;
-const isLight = (color) => contrastColor({ bgColor: color, threshold: 170 }) === '#FFFFFF';
 
 export const GroupIconComponent = ({ rules, color }) => (
 	<Container>
 		<Background />
-		<GroupIcon $color={color} $variant={isLight(color) ? 'dark' : 'light'}>
+		<GroupIcon $color={color} $variant={isLight(color) ? 'light' : 'dark'}>
 			{isSmart(rules) && <LightningIcon /> }
 		</GroupIcon>
 	</Container>

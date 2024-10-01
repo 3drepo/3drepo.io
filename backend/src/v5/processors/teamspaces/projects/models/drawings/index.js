@@ -176,6 +176,6 @@ Drawings.deleteFavourites = async (username, teamspace, project, favouritesToRem
 };
 
 Drawings.getSettings = (teamspace, drawing) => getDrawingById(teamspace,
-	drawing, { name: 1, number: 1, type: 1, desc: 1 });
+	drawing, { name: 1, number: 1, type: 1, desc: 1, calibration: 1 });
 
 module.exports = Drawings;
