@@ -32,9 +32,9 @@ export const UNITS_CONVERSION_FACTORS_TO_METRES = {
 	'ft': 3.28084,
 } as const;
 
-export const getUnitsConversionFactor = (drawingUnits, modelUnits) => {
-	if (!drawingUnits) return 1;
-	return UNITS_CONVERSION_FACTORS_TO_METRES[drawingUnits] / UNITS_CONVERSION_FACTORS_TO_METRES[modelUnits];
+export const getUnitsConversionFactor = (to, from) => {
+	if (!to) return 1;
+	return UNITS_CONVERSION_FACTORS_TO_METRES[to] / UNITS_CONVERSION_FACTORS_TO_METRES[from];
 };
 
 export const convertUnits = (coords: number[], conversionFactor: number) => coords?.map((coord) => isNumber(coord) ? coord * conversionFactor : null) || null;
