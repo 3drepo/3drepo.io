@@ -134,8 +134,6 @@ export const Viewer2D = () => {
 	useEffect(() => {
 		if (hasCalibration) {
 			DrawingsActionsDispatchers.fetchCalibration(teamspace, project, drawingId);
-		} else {
-			DrawingsActionsDispatchers.fetchDrawingSettings(teamspace, project, drawingId);
 		}
 	}, [hasCalibration, revisionId]);
 
