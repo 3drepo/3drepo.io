@@ -15,10 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { isLight } from '@/v5/helpers/colors.helper';
 import styled, { css } from 'styled-components';
-import { contrastColor } from 'contrast-color';
-
-export const isLight = (bgColor) => contrastColor({ bgColor, threshold: 220 }) !== '#FFFFFF';
 
 export const ColorCircle = styled.div<{ $size: number, $color?: string }>`
 	height: ${({ $size }) => $size}px;
@@ -27,7 +25,7 @@ export const ColorCircle = styled.div<{ $size: number, $color?: string }>`
 	background-color: ${({ $color }) => $color};
 	box-sizing: border-box;
 
-	${({ $color, theme }) => isLight($color) && css`
+	${({ $color, theme }) => isLight($color, 220) && css`
 		border: solid 1px ${theme.palette.base.lightest};
 	`}
 

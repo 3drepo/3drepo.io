@@ -18,7 +18,7 @@
 import { Meta, StoryObj } from '@storybook/react';
 import { OverlappingContainer } from '@controls/overlappingContainer/overlappingContainer.styles';
 import styled from 'styled-components';
-import { hexToOpacity } from '@/v5/ui/themes/theme';
+import { hexToOpacity } from '@/v5/helpers/colors.helper';
 
 const OverlappingContainerWithSize = styled(OverlappingContainer)`
 	width: 400px;
