@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,21 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
-import { IUser } from '@/v5/store/users/users.redux';
-import { IPopoverCircle } from '../popoverCircle.component';
-import { UserPopover } from './userPopover/userPopover.component';
-import { UserCircle } from './userPopoverCircle.styles';
+import { AvatarProps } from '@mui/material';
+import { forwardRef } from 'react';
+import { Popover } from './popoverCircle.styles';
 
-type UserPopoverCircleProps = IPopoverCircle & {
-	user: IUser;
-	className?: string;
+export type IPopoverCircle = AvatarProps & {
+	size?: 'small' | 'medium';
+	backgroundColor?: string;
 };
-export const UserPopoverCircle = ({ user, ...props }: UserPopoverCircleProps) => {
-	if (!user) return null;
-	return (
-		<HoverPopover anchor={() => <UserCircle user={user} {...props} />}>
-			<UserPopover user={user} />
-		</HoverPopover>
-	);
-};
+
+export const PopoverCircle = forwardRef(({ backgroundColor, ...props }: IPopoverCircle, ref) => (
+	<Popover {...props} $backgroundColor={backgroundColor} ref={ref} />
+));

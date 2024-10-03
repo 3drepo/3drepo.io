@@ -16,7 +16,7 @@
  */
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { Meta, StoryObj } from '@storybook/react';
-import { PopoverCircle } from '@components/shared/popoverCircles/popoverCircle.styles';
+import { PopoverCircle } from '@components/shared/popoverCircles/popoverCircle.component';
 
 export default {
 	title: 'Info/PopoverCircle',
