@@ -113,13 +113,13 @@ export class QuinticPolynomial {
 
 export class CubicBezier {
 
-	p0: Vector2Like;
+	p0: Vector2;
 
-	p1: Vector2Like;
+	p1: Vector2;
 
-	p2: Vector2Like;
+	p2: Vector2;
 
-	p3: Vector2Like;
+	p3: Vector2;
 
 	// n, r, s & v are the curve in parametric form. These are computed on
 	// demand and cached.
@@ -153,10 +153,10 @@ export class CubicBezier {
 	selfIntersection: Vector2 | undefined | false;
 
 	constructor(p0: Vector2Like, p1: Vector2Like, p2: Vector2Like, p3: Vector2Like) {
-		this.p0 = p0;
-		this.p1 = p1;
-		this.p2 = p2;
-		this.p3 = p3;
+		this.p0 = new Vector2(p0.x, p0.y);
+		this.p1 = new Vector2(p1.x, p1.y);
+		this.p2 = new Vector2(p2.x, p2.y);
+		this.p3 = new Vector2(p3.x, p3.y);
 	}
 
 	/**
