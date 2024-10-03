@@ -28,7 +28,7 @@ import { isEqual, orderBy } from 'lodash';
 import { Vector2 } from 'three';
 import { fullDrawing } from './drawings.helpers';
 import { selectRevisionsByDrawing } from './revisions/drawingRevisions.selectors';
-import { Calibration, CalibrationStatus } from './drawings.types';
+import { Calibration } from './drawings.types';
 
 const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
 
@@ -56,11 +56,6 @@ export const selectDrawingById = createSelector(
 	selectDrawings,
 	(_, _id) => _id,
 	(drawings, _id) => drawings.find((d) => d._id === _id),
-);
-
-export const selectDrawingCalibration = createSelector(
-	selectDrawingById,
-	(drawing) => drawing.calibrationStatus ?? CalibrationStatus.EMPTY,
 );
 
 export const selectIsListPending = createSelector(
@@ -105,8 +100,8 @@ export const selectCalibration = createSelector(
 	selectDrawingById,
 	(state, drawingId, modelId) => selectContainerById(state, modelId) || selectFederationById(state, modelId),
 	(drawing, model) => {
-		const calibration = drawing?.calibration || EMPTY_CALIBRATION;
-		const conversionFactor = getUnitsConversionFactor(calibration.units, model.unit);
+		const calibration = { ...EMPTY_CALIBRATION, ...drawing?.calibration };
+		const conversionFactor = getUnitsConversionFactor(model.unit, calibration.units);
 		const horizontalCalibration = calibration.horizontal;
 
 		return {

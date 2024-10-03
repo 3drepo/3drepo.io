@@ -35,7 +35,7 @@ export interface MinimumDrawing {
 
 export interface Calibration {
 	verticalRange: Vector1D;
-	horizontal: {
+	horizontal?: {
 		model: Vector3D,
 		drawing: Vector2D,
 	}
@@ -50,7 +50,6 @@ export interface DrawingStats {
 	};
 	number: string,
 	calibrationStatus?: CalibrationStatus,
-	calibration?: Calibration,
 	type: string,
 	status: UploadStatus,
 	errorReason?: {
@@ -60,11 +59,22 @@ export interface DrawingStats {
 	desc?: string;
 }
 
+type DrawingSettingsCalibration = Omit<Calibration, 'horizontal'>;
+
+export interface DrawingSettings {
+	name: string,
+	number: string,
+	type: string,
+	desc: string,
+	calibration: DrawingSettingsCalibration,
+}
+
 export interface IDrawing extends MinimumDrawing, Partial<Omit<DrawingStats, 'revisions'>> {
 	lastUpdated?: Date;
 	latestRevision?: string;
 	revisionsCount: number;
 	hasStatsPending?: boolean;
+	calibration: Calibration;
 }
 
 export type NewDrawing = {
@@ -73,4 +83,5 @@ export type NewDrawing = {
 	type: string;
 	number: string;
 	desc?: string;
+	calibration: DrawingSettingsCalibration;
 };
