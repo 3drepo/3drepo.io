@@ -11020,7 +11020,7 @@ path-browserify@^1.0.1:
   resolved "https://registry.yarnpkg.com/path-browserify/-/path-browserify-1.0.1.tgz#d98454a9c3753d5790860f16f68867b9e46be1fd"
   integrity sha512-b7uo2UCUOYZcnF/3ID0lulOJi/bafxa1xPe7ZPsammBSpjSWQkjNxlt635YGS2MiR9GjvuXCtz2emr3jbsz98g==
 
-path-data-polyfill@^1.0.6:
+path-data-polyfill@1.0.6:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/path-data-polyfill/-/path-data-polyfill-1.0.6.tgz#422b413e158f2597eb79a9bfbf32a9259a657f93"
   integrity sha512-7hZGCg2qTX7ODzSKO71XIKZ1Nt3vi/IEg9IXH38av6X6TJRF9IIsxENUQ7bfAOperUvqdgUbyAXXj1nOg4z64Q==
