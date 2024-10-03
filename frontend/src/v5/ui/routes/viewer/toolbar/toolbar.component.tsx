@@ -16,7 +16,7 @@
  */
 import HomeIcon from '@assets/icons/viewer/home.svg';
 import CoordinatesIcon from '@assets/icons/viewer/coordinates.svg';
-import FocusIcon from '@assets/icons/viewer/focus.svg';
+// import FocusIcon from '@assets/icons/viewer/focus.svg';
 import InfoIcon from '@assets/icons/viewer/info.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { BimActionsDispatchers, MeasurementsActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
@@ -54,11 +54,11 @@ export const Toolbar = () => {
 				/>
 				<ProjectionButtons />
 				<NavigationButtons />
-				<ToolbarButton
+				{/* <ToolbarButton // Commented out in case we need to easily reinstate it
 					Icon={FocusIcon}
 					onClick={() => ViewerGuiActionsDispatchers.setIsFocusMode(true)}
 					title={formatMessage({ id: 'viewer.toolbar.icon.focus', defaultMessage: 'Focus' })}
-				/>
+				/> */}
 				<ClipButtons />
 				<ToolbarButton
 					Icon={CoordinatesIcon}
