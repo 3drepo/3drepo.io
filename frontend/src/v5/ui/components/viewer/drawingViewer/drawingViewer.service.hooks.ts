@@ -31,7 +31,7 @@ const useViewerEventEffect = <T>(event:string, callback:(params:T ) => void, dep
 
 const useViewerEventValue = <T>(event:string, defaultValue) => {
 	const [value, setValue] = useState<T>(defaultValue);
-	useViewerEventEffect(event, setValue, [setValue]);
+	useViewerEventEffect(event, setValue, []);
 	return value;
 };
 

@@ -78,7 +78,7 @@
 		"modern-screenshot": "4.4.39",
 		"normalize.css": "8.0.1",
 		"normalizr": "3.4.0",
-		"path-data-polyfill": "^1.0.6",
+		"path-data-polyfill": "1.0.6",
 		"pdf-lib": "1.17.1",
 		"prop-types": "15.5.8",
 		"query-string": "6.2.0",
