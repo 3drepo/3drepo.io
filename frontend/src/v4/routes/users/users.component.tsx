@@ -95,7 +95,7 @@ interface IProps extends RouteComponentProps<any> {
 	addUser: (user) => void;
 	removeUser: (username) => void;
 	updateUserJob: (username, job) => void;
-	updatePermissions: (permissions, permissionsType, count?) => void;
+	updatePermissions: (permissions) => void;
 	onUsersSearch: (searchText) => void;
 	clearUsersSuggestions: () => void;
 	showDialog: (config: any) => void;
@@ -148,7 +148,7 @@ export class Users extends PureComponent<IProps, IState> {
 			permissions: isAdmin ? [TEAMSPACE_PERMISSIONS.admin.key] : []
 		};
 
-		this.props.updatePermissions(permissionData, (isAdmin ? TEAMSPACE_PERMISSIONS.admin : TEAMSPACE_PERMISSIONS.user).label);
+		this.props.updatePermissions(permissionData);
 	}
 
 	public handleChange = (user, field) => (event, value) => cond([

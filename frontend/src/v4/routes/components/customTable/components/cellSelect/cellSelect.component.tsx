@@ -32,7 +32,7 @@ interface IProps {
 	hidden?: boolean;
 	inputId?: string;
 	labelName?: string;
-	onChange: (event, selectedValue: string, permissionsType) => void;
+	onChange: (event, selectedValue: string) => void;
 }
 
 interface IState {
@@ -93,7 +93,7 @@ export class CellSelect extends PureComponent<IProps, IState> {
 		const selectedValue = event.target.value;
 
 		if (this.state.selectedValue !== selectedValue) {
-			this.props.onChange(event, selectedValue, (selectedValue ? TEAMSPACE_PERMISSIONS.admin : TEAMSPACE_PERMISSIONS.user).label);
+			this.props.onChange(event, selectedValue);
 		}
 	}
 

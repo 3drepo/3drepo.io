@@ -112,7 +112,7 @@ interface IProps {
 	context?: string;
 	onSelectionChange?: (selectedUsers) => void;
 	onFilterChange?: (filteredUsers) => void;
-	onPermissionsChange?: (permissions, permissionsType) => void;
+	onPermissionsChange?: (permissions) => void;
 	rowStateInterceptor?: (props) => void;
 }
 
@@ -168,7 +168,7 @@ export class PermissionsTable extends PureComponent<IProps, IState> {
 			}, []);
 
 			this.setState({ selectedGlobalPermissions: value });
-			this.props.onPermissionsChange?.(updatedPermissions, this.getPermissionsLabelFromType(value));
+			this.props.onPermissionsChange?.(updatedPermissions);
 	};
 
 	public hasDisabledPermissions(row) {
@@ -182,7 +182,7 @@ export class PermissionsTable extends PureComponent<IProps, IState> {
 		this.props.onPermissionsChange?.([{
 			...permissions,
 			key: value
-		}], this.getPermissionsLabelFromType(value));
+		}]);
 	}
 
 	public getTableCells = (roles) => {

@@ -23,6 +23,9 @@ import { all, put, select, takeLatest } from 'redux-saga/effects';
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { selectCurrentQuotaSeats } from '@/v5/store/teamspaces/teamspaces.selectors';
 import { updatePermissionsOrTriggerModal } from '@components/shared/updatePermissionModal/updatePermissionModal.component';
+import { getProjectPermissionLabelFromType } from '@/v4/constants/project-permissions';
+import { getModelPermissionLabelFromType } from '@/v4/constants/model-permissions';
+import { TEAMSPACE_PERMISSIONS } from '@/v4/constants/teamspace-permissions';
 import {
 	FederationReminderDialog
 } from '../../routes/modelsPermissions/components/federationReminderDialog/federationReminderDialog.component';
@@ -233,7 +236,8 @@ export function* updateUserJob({ username, job }) {
 	}
 }
 
-export function* updatePermissions({ permissions, permissionsType }) {
+export function* updatePermissions({ permissions }) {
+	const permissionsType = (permissions[0] === TEAMSPACE_PERMISSIONS.admin.key ? TEAMSPACE_PERMISSIONS.admin : TEAMSPACE_PERMISSIONS.user).label
 	try {
 		const shouldUpdate = yield updatePermissionsOrTriggerModal({
 			permissionsType,
@@ -288,10 +292,10 @@ export function* fetchProject({ project }) {
 	}
 }
 
-export function* updateProjectPermissions({ permissions, permissionsType }) {
+export function* updateProjectPermissions({ permissions }) {
 	try {
 		const shouldUpdate = yield updatePermissionsOrTriggerModal({
-			permissionsType,
+			permissionsType: getProjectPermissionLabelFromType(permissions[0].permissions[0] || ''),
 			permissionsCount: permissions.length,
 		});
 		if (!shouldUpdate) {
@@ -336,7 +340,7 @@ export function* fetchModelsPermissions({ models }) {
 	}
 }
 
-export function* updateModelsPermissionsPre({ modelsWithPermissions, permissionsType }) {
+export function* updateModelsPermissionsPre({ modelsWithPermissions }) {
 	try {
 		const currentProject = yield select(selectProject);
 		const permissionlessModels = [];
@@ -355,7 +359,7 @@ export function* updateModelsPermissionsPre({ modelsWithPermissions, permissions
 			}
 		}
 
-		const resolveUpdate = UserManagementActions.updateModelsPermissions(modelsWithPermissions, permissionsType);
+		const resolveUpdate = UserManagementActions.updateModelsPermissions(modelsWithPermissions);
 
 		if (permissionlessModels.length) {
 			const config = {
@@ -377,10 +381,10 @@ export function* updateModelsPermissionsPre({ modelsWithPermissions, permissions
 }
 
 const getUsersCountForModelsPermissionChanges = (permissions) => new Set(flatten(permissions.map((perm) => perm.permissions.map((p) => p.user)))).size;
-export function* updateModelsPermissions({ modelsWithPermissions, permissionsType }) {
+export function* updateModelsPermissions({ modelsWithPermissions }) {
 	try {
 		const shouldUpdate = yield updatePermissionsOrTriggerModal({
-			permissionsType,
+			permissionsType: getModelPermissionLabelFromType(modelsWithPermissions[0].permissions[0].permission || ''),
 			permissionsCount: getUsersCountForModelsPermissionChanges(modelsWithPermissions),
 		});
 		if (!shouldUpdate) {
