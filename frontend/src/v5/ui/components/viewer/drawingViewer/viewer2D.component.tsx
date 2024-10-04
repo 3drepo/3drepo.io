@@ -21,7 +21,6 @@ import { ToolbarContainer, MainToolbar } from '@/v5/ui/routes/viewer/toolbar/too
 import { useContext, useEffect, useRef, useState } from 'react';
 import ZoomOutIcon from '@assets/icons/viewer/zoom_out.svg';
 import ZoomInIcon from '@assets/icons/viewer/zoom_in.svg';
-
 import { PanZoomHandler, centredPanZoom } from './panzoom/centredPanZoom';
 import { ViewerContainer } from '@/v4/routes/viewer3D/viewer3D.styles';
 import { ImageContainer } from './viewer2D.styles';
@@ -41,6 +40,7 @@ import { CentredContainer } from '@controls/centredContainer/centredContainer.co
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { isFirefox } from '@/v5/helpers/browser.helper';
 import { ZoomableImage } from './zoomableImage.types';
+import { SVGSnapHelper } from './snapping/svgSnapHelper';
 import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -56,16 +56,19 @@ const DEFAULT_VIEWBOX = { scale: 1, x: 0, y: 0, width: 0, height: 0 };
 export const Viewer2D = () => {
 	const { teamspace, project } = useParams<ViewerParams>();
 	const [drawingId] = useSearchParam('drawingId');
+
+	const revision = DrawingRevisionsHooksSelectors.selectLatestActiveRevision(drawingId);
+	const plainSrc = revision ? getDrawingImageSrc(teamspace, project, drawingId, revision._id) : '';
+	const src = useAuthenticatedImage(plainSrc);
 	const latestActiveRevision = DrawingRevisionsHooksSelectors.selectLatestActiveRevision(drawingId);
 	const revisionId = latestActiveRevision?._id;
 	const hasCalibration = [CalibrationStatus.UNCONFIRMED, CalibrationStatus.CALIBRATED].includes(latestActiveRevision?.calibration);
-	const src = revisionId ? getDrawingImageSrc(teamspace, project, drawingId, revisionId) : '';
-	const authSrc = useAuthenticatedImage(src);
 	const backgroundColor = useSelector(selectViewerBackgroundColor);
 
 	const { close2D } = useContext(ViewerCanvasesContext);
-	const { isCalibrating, step, vector2D, setVector2D, isCalibrating2D, setIsCalibrating2D } = useContext(CalibrationContext);
+	const { isCalibrating, step, isCalibrating2D, setIsCalibrating2D } = useContext(CalibrationContext);
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
+	const [snapHandler, setSnapHandler] =  useState<SVGSnapHelper>();
 	const [viewBox, setViewBox] = useState<ViewBoxType>(DEFAULT_VIEWBOX);
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
@@ -75,6 +78,7 @@ export const Viewer2D = () => {
 	const imgContainerRef = useRef();
 
 	const canCalibrate2D = isCalibrating && step === 1;
+	const showSVGImage = !isFirefox() && !plainSrc.toLowerCase().endsWith('.png');
 
 	const onClickZoomIn = () => {
 		zoomHandler.zoomIn();
@@ -92,6 +96,14 @@ export const Viewer2D = () => {
 		}
 
 		DrawingViewerService.setImgContainer(imgContainerRef.current);
+
+		if (showSVGImage) {
+			const snap = new SVGSnapHelper();
+			snap.load(src);
+			setSnapHandler(snap);
+		} else {
+			setSnapHandler(undefined);
+		}
 
 		const pz = centredPanZoom(imgRef.current, 20, 20);
 		setZoomHandler(pz);
@@ -114,15 +126,13 @@ export const Viewer2D = () => {
 
 	useEffect(() => {
 		setIsLoading(true);
-	}, [drawingId]);
+	}, [src]);
 
 	useEffect(() => {
 		if (hasCalibration) {
 			DrawingsActionsDispatchers.fetchCalibration(teamspace, project, drawingId);
 		}
 	}, [hasCalibration, revisionId]);
-
-	const showSVGImage = !isFirefox() && !src.toLowerCase().endsWith('.png');
 
 	useEffect(() => {
 		if (revisionId) return;
@@ -147,18 +157,16 @@ export const Viewer2D = () => {
 			<CloseButton variant="secondary" onClick={close2D} />
 			<ImageContainer backgroundColor={backgroundColor} ref={imgContainerRef}>
 				{
-					isLoading && 
+					isLoading &&
 					<CentredContainer>
 						<Loader />
 					</CentredContainer>
 				}
-				{showSVGImage && <SVGImage ref={imgRef} src={authSrc} onLoad={onImageLoad} />}
-				{!showSVGImage && <DrawingViewerImage ref={imgRef} src={authSrc} onLoad={onImageLoad} />}
-				{ !isLoading && (<ViewerLayer2D
-					active={isCalibrating2D}
+				{showSVGImage && src && <SVGImage ref={imgRef} src={src} onLoad={onImageLoad} />}
+				{!showSVGImage && src && <DrawingViewerImage ref={imgRef} src={src} onLoad={onImageLoad} />}
+				{!isLoading && (<ViewerLayer2D
 					viewBox={viewBox}
-					value={vector2D}
-					onChange={setVector2D}
+					snapHandler={snapHandler}
 					key={String(isCalibrating)}
 				/>)}
 			</ImageContainer>

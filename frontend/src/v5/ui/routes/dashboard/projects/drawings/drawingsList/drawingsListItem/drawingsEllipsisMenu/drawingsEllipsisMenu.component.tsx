@@ -47,7 +47,7 @@ export const DrawingsEllipsisMenu = ({
 
 
 	const onClickSettings = () => DialogsActionsDispatchers.open(EditDrawingDialog, { drawing });
-	
+
 	const onClickDelete = () => DialogsActionsDispatchers.open('delete', {
 		name: drawing.name,
 		onClickConfirm: () => new Promise<void>(
