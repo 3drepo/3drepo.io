@@ -76,7 +76,7 @@ export const LeftPanelsButtons = styled.div`
 	position: relative;
 `;
 
-export const GuiContainer = styled.div`
+export const GuiContainer = styled.div<{ $isCalibrating: boolean }>`
 	overflow: hidden;
-	height: 100%;
+	height: calc(100% - ${({ $isCalibrating }) => $isCalibrating ? 58 : 0}px);
 `;
