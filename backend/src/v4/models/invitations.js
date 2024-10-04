@@ -149,8 +149,7 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 		await coll.insertOne(invitation);
 		await sendInvitationEmail(email, username, teamspace);
 
-		publish(events.INVITATION_SENT, { teamspace,
-			data: { executor: username, email, job, permissions }});
+		publish(events.INVITATION_ADDED, { teamspace, executor: username, email, job, permissions});
 	}
 
 	return {email, job, permissions};
@@ -175,8 +174,7 @@ invitations.removeTeamspaceFromInvitation = async (username, email, teamspace) =
 		await coll.updateOne({_id:email}, { $set: data });
 	}
 
-	publish(events.INVITATION_REVOKED, { teamspace,
-		data: { email, executor: username, job: entryToRemove.job, permissions: entryToRemove.permissions }});
+	publish(events.INVITATION_REVOKED, { teamspace, executor: username, email, job: entryToRemove.job, permissions: entryToRemove.permissions});
 
 	return {};
 

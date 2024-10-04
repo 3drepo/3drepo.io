@@ -18,6 +18,7 @@
 "use strict";
 (() => {
 
+	const { v5Path } = require("../../interop");
 	const C = require("../constants");
 	const db = require("../handler/db");
 	const responseCodes = require("../response_codes.js");
@@ -26,6 +27,8 @@
 	const { changePermissions, prepareDefaultView, findModelSettings, findPermissionByUser, removePermissionsFromModels } = require("./modelSetting");
 	const { getTeamspaceSettings } = require("./teamspaceSetting");
 	const PermissionTemplates = require("./permissionTemplates");
+	const { publish } = require(`${v5Path}/services/eventsManager/eventsManager`);
+	const { events } = require(`${v5Path}/services/eventsManager/eventsManager.constants`);
 
 	const PROJECTS_COLLECTION_NAME = "projects";
 
@@ -383,7 +386,7 @@
 		return setUserAsProjectAdminByQuery(teamspace, user, {_id: utils.stringToUUID(projectId)});
 	};
 
-	Project.updateAttrs = async function(account, projectName, data) {
+	Project.updateAttrs = async function(account, projectName, data, executor) {
 		const project = await Project.findOneProject(account, {name: projectName});
 
 		if (!project) {
@@ -395,6 +398,8 @@
 
 		let usersToRemove = [];
 		let check = Promise.resolve();
+
+		const initialPermissions = [{ project: project._id, permissions: project.permissions }];
 
 		if (data.permissions) {
 			// user to delete
@@ -454,10 +459,16 @@
 
 		await db.updateOne(account, PROJECTS_COLLECTION_NAME, {name: projectName}, { $set: project });
 
+		if(data.permissions && executor) {
+			publish(events.PERMISSIONS_UPDATED, { teamspace: account, executor,
+				initialPermissions,
+				updatedPermissions: [{ project: project._id, permissions: data.permissions }]});
+		}
+
 		return project;
 	};
 
-	Project.updateProject = async function(account, projectName, data) {
+	Project.updateProject = async function(account, projectName, data, executor) {
 		const project = await Project.findOneProject(account, { name: projectName });
 
 		if (!project) {
@@ -485,7 +496,7 @@
 			}));
 		}
 
-		return Project.updateAttrs(account, projectName, project);
+		return Project.updateAttrs(account, projectName, project, executor);
 	};
 
 	Project.removePermissionsFromAllProjects = async (account, userToRemove) => {

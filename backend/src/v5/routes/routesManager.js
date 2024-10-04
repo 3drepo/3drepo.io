@@ -17,6 +17,7 @@
 
 const RoutesManager = {};
 const AadRoutes = require('./sso/aad');
+const ActivitiesRoutes = require('./teamspaces/activities');
 const ContainerRevisionRoutes = require('./teamspaces/projects/models/containers/revisions');
 const CreateGroupRoutes = require('./teamspaces/projects/models/common/groups');
 const CreateModelGeneralRoutes = require('./teamspaces/projects/models/common/general');
@@ -46,6 +47,7 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/settings', TeamspaceSettingsRoutes);
 	app.use('/v5/teamspaces/:teamspace/jobs', TeamspaceJobRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects', ProjectRoutes);
+	app.use('/v5/teamspaces/:teamspace/settings/activities', ActivitiesRoutes);
 
 	// Containers
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers', CreateModelGeneralRoutes());

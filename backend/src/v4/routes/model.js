@@ -2242,7 +2242,7 @@ function uploadModel(req, res, next) {
 function updatePermissions(req, res, next) {
 	const { account, model } = req.params;
 
-	return ModelSetting.updatePermissions(account, model, req.body).then(response => {
+	return ModelSetting.updatePermissions(account, model, req.body, req.session.user.username).then(response => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, response);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -2260,7 +2260,7 @@ function changePermissions(req, res, next) {
 }
 
 function batchUpdatePermissions(req, res, next) {
-	return ModelSetting.batchUpdatePermissions(req.params.account, req.body).then(response => {
+	return ModelSetting.batchUpdatePermissions(req.params.account, req.body,req.session.user.username).then(response => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, response);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);

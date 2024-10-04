@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,33 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { createResponseCode, templates } = require('../../../../utils/responseCodes');
+const Yup = require('yup');
+const { respond } = require('../../../../utils/responder');
+const { types } = require('../../../../utils/helper/yup');
+
 const Activities = {};
-const db = require('../handler/db');
-const { deleteIfUndefined } = require('../utils/helper/objects');
-const { generateUUID } = require('../utils/helper/uuids');
 
-const COL_NAME = 'activities';
+Activities.validateGetActivitiesParams = async (req, res, next) => {
+	const schema = Yup.object({
+		from: types.date,
+		to: types.date,
+	});
 
-Activities.getActivities = (teamspace, from, to) => {
-	const query = {};
-
-	if (from || to) {
-		query.timestamp = deleteIfUndefined({ $gte: from, $lte: to });
+	try {
+		await schema.validate(req.query, { stripUnknown: true });
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err.message));
+		return;
 	}
 
-	return db.find(teamspace, COL_NAME, query);
-};
-
-Activities.addActivity = async (teamspace, action, executor, data) => {
-	const formattedData = {
-		_id: generateUUID(),
-		action,
-		timestamp: new Date(),
-		executor,
-		data,
-	};
-
-	await db.insertOne(teamspace, COL_NAME, formattedData);
+	await next();
 };
 
 module.exports = Activities;
