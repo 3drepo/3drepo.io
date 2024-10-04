@@ -34,7 +34,7 @@ import { PaddedCrossIcon } from '@controls/chip/chip.styles';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { isEqual } from 'lodash';
 import { useFormContext, useWatch } from 'react-hook-form';
-import { DrawingViewerService } from '@components/viewer/drawingViewer/drawingViewer.service';
+// import { DrawingViewerService } from '@components/viewer/drawingViewer/drawingViewer.service';
 import { hexToGLColor } from '@/v5/helpers/colors.helper';
 
 export const CoordsProperty = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
@@ -74,7 +74,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 		TicketsCardActionsDispatchers.setPinToDrop(pinId);
 		const pin = await Promise.race([
 			ViewerService.getClickPoint(),
-			DrawingViewerService.getClickPoint(),
+			// DrawingViewerService.getClickPoint(),
 		]);
 		TicketsCardActionsDispatchers.setPinToDrop(null);
 

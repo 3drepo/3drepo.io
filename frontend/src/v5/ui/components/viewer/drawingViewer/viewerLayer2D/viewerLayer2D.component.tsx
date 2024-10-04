@@ -116,6 +116,12 @@ export const ViewerLayer2D = ({ viewBox, snapHandler, viewport }: ViewerLayer2DP
 		<Viewport>
 			{!isCalibrating && <CameraOffSight onCameraSightChanged={setCameraOnSight} scale={viewBox.scale} viewport={viewport}/>}
 			<Container style={containerStyle} id="viewerLayer2d" >
+				<LayerLevel
+					onMouseUp={handleMouseUp}
+					onMouseDown={handleMouseDown}
+					onMouseMove={handleMouseMove}
+					onMouseLeave={handleMouseLeave}
+				/>
 				<LayerLevel>
 					{snapping && <SnapCursor snapType={snapType} />}
 					{isCalibrating && <CalibrationArrow />}
@@ -126,12 +132,6 @@ export const ViewerLayer2D = ({ viewBox, snapHandler, viewport }: ViewerLayer2DP
 					</>)}
 	
 				</LayerLevel>
-				<LayerLevel
-					onMouseUp={handleMouseUp}
-					onMouseDown={handleMouseDown}
-					onMouseMove={handleMouseMove}
-					onMouseLeave={handleMouseLeave}
-				/>
 			</Container>
 		</Viewport>
 	);
