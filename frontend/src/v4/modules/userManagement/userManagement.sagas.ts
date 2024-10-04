@@ -17,7 +17,7 @@
 
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
-import { isEmpty } from 'lodash';
+import _, { flatten, isEmpty } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
@@ -233,11 +233,11 @@ export function* updateUserJob({ username, job }) {
 	}
 }
 
-export function* updatePermissions({ permissions, permissionsType, permissionsCount }) {
+export function* updatePermissions({ permissions, permissionsType }) {
 	try {
 		const shouldUpdate = yield updatePermissionsOrTriggerModal({
 			permissionsType,
-			permissionsCount,
+			permissionsCount: permissions.length,
 		});
 		if (!shouldUpdate) {
 			return;
@@ -288,11 +288,11 @@ export function* fetchProject({ project }) {
 	}
 }
 
-export function* updateProjectPermissions({ permissions, permissionsType, permissionsCount }) {
+export function* updateProjectPermissions({ permissions, permissionsType }) {
 	try {
 		const shouldUpdate = yield updatePermissionsOrTriggerModal({
 			permissionsType,
-			permissionsCount,
+			permissionsCount: permissions.length,
 		});
 		if (!shouldUpdate) {
 			return;
@@ -336,7 +336,7 @@ export function* fetchModelsPermissions({ models }) {
 	}
 }
 
-export function* updateModelsPermissionsPre({ modelsWithPermissions, permissionsType, permissionsCount }) {
+export function* updateModelsPermissionsPre({ modelsWithPermissions, permissionsType }) {
 	try {
 		const currentProject = yield select(selectProject);
 		const permissionlessModels = [];
@@ -355,7 +355,7 @@ export function* updateModelsPermissionsPre({ modelsWithPermissions, permissions
 			}
 		}
 
-		const resolveUpdate = UserManagementActions.updateModelsPermissions(modelsWithPermissions, permissionsType, permissionsCount);
+		const resolveUpdate = UserManagementActions.updateModelsPermissions(modelsWithPermissions, permissionsType);
 
 		if (permissionlessModels.length) {
 			const config = {
@@ -376,11 +376,12 @@ export function* updateModelsPermissionsPre({ modelsWithPermissions, permissions
 	}
 }
 
-export function* updateModelsPermissions({ modelsWithPermissions, permissionsType, permissionsCount }) {
+const getUsersCountForModelsPermissionChanges = (permissions) => new Set(flatten(permissions.map((perm) => perm.permissions.map((p) => p.user)))).size;
+export function* updateModelsPermissions({ modelsWithPermissions, permissionsType }) {
 	try {
 		const shouldUpdate = yield updatePermissionsOrTriggerModal({
 			permissionsType,
-			permissionsCount,
+			permissionsCount: getUsersCountForModelsPermissionChanges(modelsWithPermissions),
 		});
 		if (!shouldUpdate) {
 			return;
