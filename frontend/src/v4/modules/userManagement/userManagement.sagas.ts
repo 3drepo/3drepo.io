@@ -237,7 +237,7 @@ export function* updateUserJob({ username, job }) {
 }
 
 export function* updatePermissions({ permissions }) {
-	const permissionsType = (permissions[0] === TEAMSPACE_PERMISSIONS.admin.key ? TEAMSPACE_PERMISSIONS.admin : TEAMSPACE_PERMISSIONS.user).label
+	const permissionsType = (permissions.permissions[0] === TEAMSPACE_PERMISSIONS.admin.key ? TEAMSPACE_PERMISSIONS.admin : TEAMSPACE_PERMISSIONS.user).label
 	try {
 		const shouldUpdate = yield updatePermissionsOrTriggerModal({
 			permissionsType,
