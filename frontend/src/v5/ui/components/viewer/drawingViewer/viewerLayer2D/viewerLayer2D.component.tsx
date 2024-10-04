@@ -30,6 +30,11 @@ import { useSnapping } from '../drawingViewer.service.hooks';
 import { PinsLayer } from '../pinsLayer/pinsLayer.component';
 import { CameraOffSight } from './camera/cameraOffSight.component';
 import { Camera } from './camera/camera.component';
+import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { useParams } from 'react-router-dom';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { addZ } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
 
 type ViewerLayer2DProps = {
 	viewBox: ViewBoxType,
@@ -68,6 +73,12 @@ export const ViewerLayer2D = ({ viewBox, snapHandler, viewport }: ViewerLayer2DP
 	const [snapType, setSnapType] = useState<SnapType>(SnapType.NONE);
 	const snapping = useSnapping();
 
+	const [drawingId] = useSearchParam('drawingId');
+	const { containerOrFederation } = useParams<ViewerParams>();
+	const transform2DTo3D = DrawingsHooksSelectors.selectTransform2DTo3D(drawingId, containerOrFederation);
+	const { verticalRange } = DrawingsHooksSelectors.selectCalibration(drawingId, containerOrFederation);
+
+
 	const containerStyle: CSSProperties = {
 		transformOrigin: '0 0',
 		transform: `matrix(${viewBox.scale}, 0, 0, ${viewBox.scale}, ${viewBox.x}, ${viewBox.y})`,
@@ -101,7 +112,14 @@ export const ViewerLayer2D = ({ viewBox, snapHandler, viewport }: ViewerLayer2DP
 		if (!isEqual(viewBox, previousViewBox.current)) return;
 		let mousePosition = getCursorOffset(e);
 		DrawingViewerService.emitMouseClickEvent(mousePosition);
-	}, [viewBox]);
+
+		if (transform2DTo3D) {
+			const { x, y } = transform2DTo3D(getCursorOffset(e));
+			const pin3D = addZ([x, y], verticalRange[0]);
+			DrawingViewerService.emitClickPointEvent(pin3D);
+		}
+
+	}, [viewBox, verticalRange, transform2DTo3D]);
 
 	const handleMouseMove = useCallback((e) => {
 		let mousePos = getCursorOffset(e);
@@ -116,12 +134,6 @@ export const ViewerLayer2D = ({ viewBox, snapHandler, viewport }: ViewerLayer2DP
 		<Viewport>
 			{!isCalibrating && <CameraOffSight onCameraSightChanged={setCameraOnSight} scale={viewBox.scale} viewport={viewport}/>}
 			<Container style={containerStyle} id="viewerLayer2d" >
-				<LayerLevel
-					onMouseUp={handleMouseUp}
-					onMouseDown={handleMouseDown}
-					onMouseMove={handleMouseMove}
-					onMouseLeave={handleMouseLeave}
-				/>
 				<LayerLevel>
 					{snapping && <SnapCursor snapType={snapType} />}
 					{isCalibrating && <CalibrationArrow />}
@@ -130,8 +142,13 @@ export const ViewerLayer2D = ({ viewBox, snapHandler, viewport }: ViewerLayer2DP
 						{cameraOnSight && <Camera scale={viewBox.scale} />}
 						<PinsLayer scale={viewBox.scale} height={viewBox.height} width={viewBox.width} />
 					</>)}
-	
 				</LayerLevel>
+				{snapping && <LayerLevel
+					onMouseUp={handleMouseUp}
+					onMouseDown={handleMouseDown}
+					onMouseMove={handleMouseMove}
+					onMouseLeave={handleMouseLeave}
+				/>}
 			</Container>
 		</Viewport>
 	);

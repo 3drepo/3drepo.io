@@ -24,6 +24,7 @@ export const DRAWING_VIEWER_EVENTS = {
 	MOUSE_CHANGED: 'MOUSE_CHANGED',
 	SCALE_CHANGED: 'SCALE_CHANGED',
 	SNAPPING_CHANGED: 'SNAPPING_CHANGED',
+	CLICK_POINT: 'CLICK_POINT',
 };
 
 type GetScreenshot = () => null | Promise<string>;
@@ -51,6 +52,11 @@ const DrawingViewerServiceCreator = () => {
 		emit(DRAWING_VIEWER_EVENTS.MOUSE_CLICK, mp);
 	};
 
+	// This is use for the click in 3d coordinates within a calibrated drawing 
+	const emitClickPointEvent = (mp) => {
+		emit(DRAWING_VIEWER_EVENTS.CLICK_POINT, mp);
+	};
+
 	const setScale = (sc: number) => { 
 		scale = sc ;
 		emit(DRAWING_VIEWER_EVENTS.SCALE_CHANGED, sc); 
@@ -61,16 +67,28 @@ const DrawingViewerServiceCreator = () => {
 		emit(DRAWING_VIEWER_EVENTS.SNAPPING_CHANGED, sp);
 	};
 
+	const getClickPoint = () => {
+		return new Promise((accept) => {
+			setSnapping(true);
+			on(DRAWING_VIEWER_EVENTS.CLICK_POINT, (point) => {
+				setSnapping(false);
+				accept(point);
+			});
+		});
+	};
+
 	return {
 		getScreenshot,
 		setImgContainer,
 		emitMouseClickEvent,
+		emitClickPointEvent,
 		setMousePosition,
 		setScale,
 		setSnapping,
 		getMousePosition: () => mousePosition,
 		getScale: () => scale,
 		getSnapping: () => snapping,
+		getClickPoint,
 		on,
 		off,
 	};
