@@ -33,7 +33,7 @@ import { isNull } from 'lodash';
 export const CalibrationHandler = () => {
 	const { teamspace, project, revision, containerOrFederation } = useParams<ViewerParams>();
 	const { setLeftPanelRatio } = useContext(ViewerCanvasesContext);
-	const { step, drawingId, setVector3D, setVector2D, setOrigin, setStep, origin, setVerticalPlanes } = useContext(CalibrationContext);
+	const { step, drawingId, setVector3D, setVector2D, setOrigin, setStep, origin, setVerticalPlanes, isCalibrating } = useContext(CalibrationContext);
 	const { horizontal, verticalRange } = DrawingsHooksSelectors.selectCalibration(drawingId, containerOrFederation);
 
 	const isFed = modelIsFederation(containerOrFederation);
@@ -49,7 +49,7 @@ export const CalibrationHandler = () => {
 		setVector3D(horizontal.model);
 		setVector2D(horizontal.drawing);
 		setVerticalPlanes(verticalRange);
-	}, [horizontal, verticalRange]);
+	}, [horizontal, verticalRange, isCalibrating]);
 
 	useEffect(() => {
 		CompareActionsDispatchers.resetComponentState();

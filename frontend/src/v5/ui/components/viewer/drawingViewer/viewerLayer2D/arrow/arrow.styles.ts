@@ -18,11 +18,12 @@
 import styled from 'styled-components';
 
 export const Svg = styled.svg`
+	color: ${({ theme }) => theme.palette.primary.main};
 	height: 100%;
 	width: 100%;
-`;
 
-export const Circle = styled.circle`
-	stroke: ${({ theme }) => theme.palette.base.dark};
-	fill: ${({ theme }) => theme.palette.tertiary.light};
+	* {
+		fill: currentColor;
+		stroke: currentColor;
+	}
 `;

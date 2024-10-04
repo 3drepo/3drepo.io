@@ -28,7 +28,6 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 	let resizeFrameId = 0;
 	let animationFrameId = 0;
 
-
 	// The pannableSVG attemps to provide quick feedback by drawing a larger
 	// region of the image than the user actually sees, and using the (fast)
 	// DOM transform to immediately respond to transform changes, while the
@@ -370,13 +369,13 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 	let hasLoaded = false;
 
 	img.src = src;
-	img.onload = (ev) => {
+	img.onload = () => {
 
 		hasLoaded = true;
 
 		// Create a new canvas for the newly loaded image
 		createCanvas(() => {
-			onLoad?.(ev);
+			onLoad?.();
 		});
 	};
 
@@ -506,37 +505,19 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 			return img.naturalHeight;
 		},
 
-		copyRegion(dctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number ) {
-			// Convert from the parent coordinates to canvas coordinates.
-			const t = invert(getCanvasTransform());
-			const sourceCoords = multiply(t, { x, y });
-
-			// Use drawImage to extract a region
-			dctx.drawImage(canvas,
-				sourceCoords.x,
-				sourceCoords.y,
-				w,
-				h,
-				0,
-				0,
-				w,
-				h,
-			);
-		},
-
 		dispose,
 
 		// Given a coordinate relative to the content rect, get the coordinate
-		// relative to the viewbox of the svg. This is straightforward in
-		// principle, but internally most of the computations are done in canvas
-		// space, so we get the position in canvas space, then transform into
-		// SVG space through the inverse of D (which is SVG -> Canvas).
+		// relative to the viewbox of the svg. Since most internal computations
+		// are done in canvas-space, here we make p relative to the canvas
+		// and then we can simply invert D (the SVG -> Canvas transform).
 
 		localToSvg(p: Vector2): Vector2 {
-			const contentToCanvas = invert(getCanvasTransform());
-			const canvasToSvg = invert(D);
-			const t = compose(contentToCanvas, canvasToSvg);
-			return multiply(t, p);
+			return multiply(compose(origin, invert(D)), p);
+		},
+
+		svgToLocal(p: Vector2): Vector2 {
+			return multiply(compose(D, invert(origin)), p);
 		},
 	};
 };
@@ -555,7 +536,7 @@ export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ on
 
 	useEffect(() => {
 		if (!pannableImage.current || !src) return;
-		
+
 		// This bit is to change the background colour of the svg to white
 		axios.get(src).then((response) => {
 			const svgContent = response.data;
@@ -563,6 +544,11 @@ export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ on
 			svgContainer.innerHTML = svgContent;
 			const svg = svgContainer.querySelector('svg') as SVGSVGElement;
 			svg.setAttribute('style', 'background-color: white;');
+			const width = Math.ceil(Number.parseFloat(svg.getAttribute('width')));
+			const height = Math.ceil(Number.parseFloat(svg.getAttribute('height')));
+			svg.setAttribute('width', width.toString());
+			svg.setAttribute('height', height.toString());
+			svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
 			const binString = Array.from(new TextEncoder().encode(svg.outerHTML), (byte) => String.fromCodePoint(byte)).join('');
 			const base64 = btoa(binString);
 			pannableImage.current.src = `data:image/svg+xml;base64,${base64}`;
@@ -591,6 +577,16 @@ export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ on
 
 		getNaturalSize: () =>  {
 			return { width: pannableImage.current.naturalWidth, height: pannableImage.current.naturalHeight };
+		},
+
+		// Given a coordinate in the content rect of the container, get the
+		// position in the local coordinate space of the SVG viewbox.
+		getImagePosition(contentPosition: Vector2) {
+			return pannableImage.current.localToSvg(contentPosition);
+		},
+
+		getClientPosition(imagePosition: Vector2) {
+			return pannableImage.current.svgToLocal(imagePosition);
 		},
 	};
 

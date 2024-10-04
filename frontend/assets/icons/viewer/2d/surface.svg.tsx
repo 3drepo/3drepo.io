@@ -15,19 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { IProps } from '@assets/icons/icons.types';
 
-export const Svg = styled.svg`
-	color: ${({ theme }) => theme.palette.primary.main};
-	height: 100%;
-	width: 100%;
-
-	* {
-		fill: currentColor;
-		stroke: currentColor;
-	}
-`;
-
-export const CrossLine = styled.line`
-	color: ${({ theme }) => theme.palette.primary.light};
-`;
+export default ({ className, ...rest }: IProps) => (
+	<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} {...rest} >
+		<circle cx="50" cy="50" r="15" fill="currentColor" />
+	</svg>
+);

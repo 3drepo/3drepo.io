@@ -18,7 +18,7 @@
 import { Typography } from '@mui/material';
 import styled, { css } from 'styled-components';
 import { CentredContainer } from '@controls/centredContainer';
-import { hexToOpacity } from '@/v5/ui/themes/theme';
+import { hexToOpacity } from '@/v5/helpers/colors.helper';
 import { AuthImg } from '@components/authenticatedResource/authImg.component';
 
 export const Container = styled.div`

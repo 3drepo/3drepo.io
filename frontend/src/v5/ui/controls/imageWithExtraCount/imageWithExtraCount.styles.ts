@@ -18,7 +18,7 @@
 import styled from 'styled-components';
 import { OverlappingContainer as OverlappingContainerBase } from '@controls/overlappingContainer/overlappingContainer.styles';
 import { ImageWithSkeleton } from '@controls/imageWithSkeleton/imageWithSkeleton.component';
-import { hexToOpacity } from '../../themes/theme';
+import { hexToOpacity } from '@/v5/helpers/colors.helper';
 
 export const OverlappingContainer = styled(OverlappingContainerBase)`
 	border-radius: 5px;

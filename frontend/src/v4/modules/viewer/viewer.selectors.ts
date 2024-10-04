@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { rgbToHex } from '@controls/inputs/colorPicker/colorPicker.helpers';
+import { GLToHexColor } from '@/v5/helpers/colors.helper';
 import { createSelector } from 'reselect';
 
 export const selectViewerDomain = (state) => ({...state.viewer});
@@ -40,7 +40,7 @@ export const selectFarPlaneAlgorithm = createSelector(
 );
 
 export const selectViewerBackgroundColor = createSelector(
-	selectSettings, (state) => rgbToHex(state.viewerBackgroundColor.map((col) => Math.round(col * 255)))
+	selectSettings, (state) => GLToHexColor(state.viewerBackgroundColor)
 );
 
 export const selectXraySetting = createSelector(
