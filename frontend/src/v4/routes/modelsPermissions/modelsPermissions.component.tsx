@@ -61,7 +61,7 @@ interface IProps {
 	permissions: any[];
 	className?: string;
 	onSelectionChange: (selectedModels) => void;
-	onPermissionsChange: (modelsWithPermissions, permissionType) => void;
+	onPermissionsChange: (modelsWithPermissions) => void;
 	selectedContFedId?: string;
 }
 
@@ -125,7 +125,7 @@ export class ModelsPermissions extends PureComponent<IProps, IState> {
 		});
 	}
 
-	public handlePermissionsChange = (permissions, permissionType) => {
+	public handlePermissionsChange = (permissions, ) => {
 		if (this.props.onPermissionsChange) {
 			const modelsWithPermissions = this.props.selectedModels.map(({ model, ...modelProps }) => {
 				const permissionsToSave = modelProps.permissions.reduce((updatedUserPermissions, currentPermissions) => {
@@ -158,7 +158,7 @@ export class ModelsPermissions extends PureComponent<IProps, IState> {
 				};
 			});
 
-			this.props.onPermissionsChange(modelsWithPermissions, permissionType);
+			this.props.onPermissionsChange(modelsWithPermissions);
 		}
 	}
 

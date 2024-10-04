@@ -16,8 +16,6 @@
  */
 import { PureComponent, Component } from 'react';
 import Input from '@mui/material/Input';
-import { updatePermissionsOrTriggerModal } from '@components/shared/updatePermissionModal/updatePermissionModal.component';
-import { TEAMSPACE_PERMISSIONS } from '@/v4/constants/teamspace-permissions';
 import { Item, StyledSelect } from './cellSelect.styles';
 
 interface IProps {

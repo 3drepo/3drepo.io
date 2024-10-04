@@ -17,9 +17,9 @@
 import { isEqual, partition } from 'lodash';
 import { formatMessage } from '@/v5/services/intl';
 import { GLToHexColor } from '@/v5/helpers/colors.helper';
-import { getState } from '../store';
 import { STEP_SCALE } from '../../constants/sequences';
 import { Viewer } from '../../services/viewer/viewer';
+import { getState } from '../store';
 import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds } from '../tree';
 import { IStateDefinitions } from './sequences.redux';
 

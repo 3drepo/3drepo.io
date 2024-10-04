@@ -25,7 +25,7 @@ import { Container } from './projectsPermissions.styles';
 interface IProps {
 	projectName: string;
 	permissions: any[];
-	onPermissionsChange: (project, permissionType) => void;
+	onPermissionsChange: (project) => void;
 	className?: string;
 }
 
@@ -68,7 +68,7 @@ export class ProjectsPermissions extends PureComponent<IProps, IState> {
 		});
 	}
 
-	public handlePermissionsChange = (permissions, permissionType) => {
+	public handlePermissionsChange = (permissions) => {
 		if (this.props.onPermissionsChange) {
 			const permissionsToSave = this.props.permissions.reduce((updatedUserPermissions, currentPermissions) => {
 				const filteredUsernames = this.state.filteredUsers.map(({ user }) => user);
@@ -95,7 +95,7 @@ export class ProjectsPermissions extends PureComponent<IProps, IState> {
 				return updatedUserPermissions;
 			}, []);
 
-			this.props.onPermissionsChange(permissionsToSave, permissionType);
+			this.props.onPermissionsChange(permissionsToSave);
 		}
 	}
 
