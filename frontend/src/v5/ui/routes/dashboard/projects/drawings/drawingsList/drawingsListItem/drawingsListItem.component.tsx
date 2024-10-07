@@ -57,7 +57,6 @@ export const DrawingsListItem = memo(({
 	const { teamspace, project } = useParams<DashboardParams>();
 	const isMainList = useContext(IsMainList);
 	const { setOrigin } = useContext(CalibrationContext);
-	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const drawingId = drawing._id;
 
 	const onChangeFavourite = ({ currentTarget: { checked } }) => {
@@ -111,7 +110,6 @@ export const DrawingsListItem = memo(({
 				<DrawingsCalibrationMenu
 					calibrationStatus={drawing.calibrationStatus}
 					onCalibrateClick={onCalibrateClick}
-					disabled={!isProjectAdmin}
 					drawingId={drawingId}
 					{...DRAWING_LIST_COLUMN_WIDTHS.calibration}
 				/>
