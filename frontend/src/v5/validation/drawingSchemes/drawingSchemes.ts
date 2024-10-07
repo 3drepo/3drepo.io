@@ -79,7 +79,7 @@ const testCombinationIsUnique = (val, testContext) => {
 };
 const statusCodeAndRevisionCodeMustBeUniqueMessage = formatMessage({
 	id: 'validation.drawing.statusCode.error.characters',
-	defaultMessage: 'The conmbination of Status Code and Revision Code must be unique',
+	defaultMessage: 'The combination of Status Code and Revision Code must be unique',
 });
 export const ListItemSchema = Yup.object().shape({
 	file: uploadFile,
