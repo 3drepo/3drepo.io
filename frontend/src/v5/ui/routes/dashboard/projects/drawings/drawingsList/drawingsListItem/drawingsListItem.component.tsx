@@ -35,7 +35,6 @@ import { DashboardParams, DRAWINGS_ROUTE } from '@/v5/ui/routes/routes.constants
 import { DialogsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingRevisionDetails } from '@components/shared/drawingRevisionDetails/drawingRevisionDetails.component';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DrawingsCalibrationMenu } from '@/v5/ui/routes/viewer/drawings/drawingCalibrationMenu/drawingCalibrationMenu.component';
 import { SelectModelForCalibration } from './selectModelForCalibration/selectModelForCalibration.component';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
