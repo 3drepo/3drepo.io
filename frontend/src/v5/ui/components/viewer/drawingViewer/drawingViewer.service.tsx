@@ -70,10 +70,26 @@ const DrawingViewerServiceCreator = () => {
 	const getClickPoint = () => {
 		return new Promise((accept) => {
 			setSnapping(true);
-			on(DRAWING_VIEWER_EVENTS.CLICK_POINT, (point) => {
+
+			let pinDropped = false;
+
+			const onClickPoint = (point) => {
+				pinDropped = true;
 				setSnapping(false);
 				accept(point);
-			});
+			};
+
+			const onSnappingChanged = () => {
+				off(DRAWING_VIEWER_EVENTS.CLICK_POINT, onClickPoint);
+				off(DRAWING_VIEWER_EVENTS.SNAPPING_CHANGED, onSnappingChanged);
+
+				if (!pinDropped) {
+					accept(undefined);
+				}
+			};
+
+			on(DRAWING_VIEWER_EVENTS.CLICK_POINT, onClickPoint);
+			on(DRAWING_VIEWER_EVENTS.SNAPPING_CHANGED, onSnappingChanged);
 		});
 	};
 

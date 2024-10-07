@@ -79,6 +79,9 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	
 		TicketsCardActionsDispatchers.setPinToDrop(null);
 
+		ViewerService.clearMeasureMode();
+		DrawingViewerService.setSnapping(false);
+
 		//  If the returned pin is undefined, edit mode has been cancelled
 		if (pin !== undefined) {
 			onChange?.(pin);
