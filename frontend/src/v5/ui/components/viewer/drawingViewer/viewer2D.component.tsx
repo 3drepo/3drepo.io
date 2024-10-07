@@ -124,6 +124,10 @@ export const Viewer2D = () => {
 			setIsMaxZoom(cantZoomIn);
 			setViewBox({ ...transform, ...zoomHandler.getOriginalSize() });
 		});
+
+		return () => {
+			zoomHandler.off(Events.transform);
+		};
 	}, [zoomHandler]);
 
 	useEffect(()=> {

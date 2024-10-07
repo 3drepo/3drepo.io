@@ -59,7 +59,6 @@ export const panzoom = (target: ZoomableImage, options) => {
 
 	const applyTransform = () => {
 		target.setTransform(transform);
-		emitter.emit(Events.transform);
 	};
 
 	const setTransform = (x: number, y: number, scale: number) => {
@@ -219,6 +218,9 @@ export const panzoom = (target: ZoomableImage, options) => {
 		on: (event, fn) => {
 			emitter.on(event, fn);
 			emitter.emit(Events.transform);
+		},
+		off: (event, fn?) => {
+			emitter.off(event, fn);
 		},
 		smoothZoom,
 		smoothSetTransform,
