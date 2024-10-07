@@ -46,8 +46,8 @@ export const UploadListItemStatusCode = ({ value, inputRef, onChange, ...props }
 			onChange={(e, newValue: StatusCode) => onChange(newValue?.code || '')}
 			getOptionLabel={(option: StatusCode) => option.code || ''}
 			renderOption={(optionProps, option: StatusCode) => (
-				<Tooltip title={option.description}>
-					<OptionContainer {...optionProps} key={option.code}>
+				<Tooltip title={option.description} key={option.code}>
+					<OptionContainer {...optionProps}>
 						<Value>{option.code}</Value>
 						<Description>{option.description}</Description>
 					</OptionContainer>
