@@ -30,12 +30,10 @@ Activities.validateGetActivitiesParams = async (req, res, next) => {
 
 	try {
 		req.query = await schema.validate(req.query, { stripUnknown: true });
+		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err.message));
-		return;
 	}
-
-	await next();
 };
 
 module.exports = Activities;
