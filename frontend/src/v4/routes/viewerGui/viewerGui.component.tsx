@@ -17,14 +17,16 @@
 
 import { Tickets } from '@/v5/ui/routes/viewer/tickets/tickets.component';
 import { isEmpty, isEqual } from 'lodash';
-import { PureComponent } from 'react';
+import { PureComponent, useContext } from 'react';
 import { AdditionalProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { DrawingsListCard } from '@/v5/ui/routes/viewer/drawings/drawingsList/drawingsListCard.component';
+import { ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { AddOn } from '@/v5/store/store.types';
 import { VIEWER_EVENTS } from '../../constants/viewer';
-import { getViewerLeftPanels, VIEWER_PANELS } from '../../constants/viewerGui';
+import { getCalibrationViewerLeftPanels, getViewerLeftPanels, VIEWER_PANELS } from '../../constants/viewerGui';
 import { getWindowHeight, getWindowWidth, renderWhenTrue } from '../../helpers/rendering';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { Activities } from './components/activities/';
@@ -74,6 +76,7 @@ interface IProps {
 	treeNodesList: any;
 	ticketsCardView: TicketsCardViews;
 	isEditingGroups: boolean;
+	isCalibrating: boolean;
 	issuesEnabled: boolean;
 	risksEnabled: boolean;
 	stopListenOnSelections: () => void;
@@ -103,7 +106,7 @@ interface IState {
 	loaderProgress: number;
 }
 
-export class ViewerGui extends PureComponent<IProps, IState> {
+class ViewerGuiBase extends PureComponent<IProps, IState> {
 
 	private get urlParams() {
 		return this.props.match.params;
@@ -232,10 +235,10 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 	private handleMeasureRemoved = (measurementId) => this.props.removeMeasurement(measurementId);
 
 	public render() {
-		const { leftPanels, rightPanels, draggablePanels, isFocusMode, viewer } = this.props;
+		const { leftPanels, rightPanels, draggablePanels, isFocusMode, viewer, isCalibrating } = this.props;
 
 		return (
-			<GuiContainer>
+			<GuiContainer $isCalibrating={isCalibrating}>
 				<CloseFocusModeButton isFocusMode={isFocusMode} />
 				<Container id="gui-container" className={this.props.className} hidden={isFocusMode}>
 					<RevisionsSwitch />
@@ -253,20 +256,40 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 		this.props.setPanelVisibility(panelType);
 	}
 
-	private renderLeftPanelsButtons = () => (
-		<LeftPanelsButtons>
-			{getViewerLeftPanels(this.props.issuesEnabled, this.props.risksEnabled).map(({ name, type }) => (
-				<PanelButton
-					key={type}
-					onClick={this.handleTogglePanel}
-					label={name}
-					type={type}
-					id={type + '-panel-button'}
-					active={this.props.leftPanels.includes(type)}
-				/>
-			))}
-		</LeftPanelsButtons>
-	)
+	private renderLeftPanelsButtons = () => {
+		const { isCalibrating } = this.props;
+
+		if (isCalibrating) {
+			return (
+				<LeftPanelsButtons>
+					{getCalibrationViewerLeftPanels().map(({ name, type }) => (
+						<PanelButton
+							key={type}
+							onClick={ViewerGuiActionsDispatchers.setPanelVisibility}
+							label={name}
+							type={type}
+							id={type + '-panel-button'}
+							active={this.props.leftPanels.includes(type)}
+						/>
+					))}
+				</LeftPanelsButtons>
+			);
+		}
+		return (
+			<LeftPanelsButtons>
+				{getViewerLeftPanels(this.props.issuesEnabled, this.props.risksEnabled).map(({ name, type }) => (
+					<PanelButton
+						key={type}
+						onClick={this.handleTogglePanel}
+						label={name}
+						type={type}
+						id={type + '-panel-button'}
+						active={this.props.leftPanels.includes(type)}
+					/>
+				))}
+			</LeftPanelsButtons>
+		);
+	};
 
 	private panelsMap = {
 		[VIEWER_PANELS.ISSUES]: Issues,
@@ -313,3 +336,8 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 		</DraggablePanels>
 	)
 }
+
+export const ViewerGui = (props: Omit<IProps, 'isCalibrating'>) => {
+	const { isCalibrating } = useContext(CalibrationContext);
+	return <ViewerGuiBase {...props} isCalibrating={isCalibrating} />
+};

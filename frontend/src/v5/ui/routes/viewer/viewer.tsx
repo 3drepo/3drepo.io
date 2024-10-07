@@ -15,11 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ViewerGui } from '@/v4/routes/viewerGui';
 import { useParams } from 'react-router-dom';
 import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ProjectsActionsDispatchers, TeamspacesActionsDispatchers, TicketsCardActionsDispatchers, ViewerActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { CheckLatestRevisionReadiness } from './checkLatestRevisionReadiness/checkLatestRevisionReadiness.container';
@@ -30,9 +29,14 @@ import { SpinnerLoader } from '@controls/spinnerLoader';
 import { CentredContainer } from '@controls/centredContainer';
 import { TicketsCardViews } from './tickets/tickets.constants';
 import { ViewerCanvases } from '../dashboard/viewerCanvases/viewerCanvases.component';
+import { ViewerGui } from '@/v4/routes/viewerGui';
+import { CalibrationContext } from '../dashboard/projects/calibration/calibrationContext';
+import { OpenDrawingFromUrl } from './openDrawingFromUrl/openDrawingFromUrl.component';
+import { CalibrationHandler } from '../dashboard/projects/calibration/calibrationHandler.component';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
+	const { isCalibrating } = useContext(CalibrationContext);
 
 	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
 
@@ -104,9 +108,11 @@ export const Viewer = () => {
 	return (
 		<>
 			<OpenTicketFromUrl />
+			<OpenDrawingFromUrl />
 			<CheckLatestRevisionReadiness />
 			<ViewerCanvases />
 			<ViewerGui match={v4Match} key={containerOrFederation} />
+			{isCalibrating && <CalibrationHandler />}
 		</>
 	);
 };

@@ -21,7 +21,6 @@ import { ToolbarContainer, MainToolbar } from '@/v5/ui/routes/viewer/toolbar/too
 import { useContext, useEffect, useRef, useState } from 'react';
 import ZoomOutIcon from '@assets/icons/viewer/zoom_out.svg';
 import ZoomInIcon from '@assets/icons/viewer/zoom_in.svg';
-
 import { PanZoomHandler, centredPanZoom } from './panzoom/centredPanZoom';
 import { ViewerContainer } from '@/v4/routes/viewer3D/viewer3D.styles';
 import { ImageContainer } from './viewer2D.styles';
@@ -30,6 +29,10 @@ import { DrawingViewerImage } from './drawingViewerImage/drawingViewerImage.comp
 import { CloseButton } from '@controls/button/closeButton/closeButton.component';
 import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 import { DrawingViewerService } from './drawingViewer.service';
+import { CalibrationInfoBox } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationInfoBox/calibrationInfoBox.component';
+import CalibrationIcon from '@assets/icons/filled/calibration-filled.svg';
+import { ViewBoxType, ViewerLayer2D } from './viewerLayer2D/viewerLayer2D.component';
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { getDrawingImageSrc } from '@/v5/store/drawings/revisions/drawingRevisions.helpers';
 import { SVGImage } from './svgImage/svgImage.component';
@@ -37,32 +40,45 @@ import { CentredContainer } from '@controls/centredContainer/centredContainer.co
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { isFirefox } from '@/v5/helpers/browser.helper';
 import { ZoomableImage } from './zoomableImage.types';
+import { SVGSnapHelper } from './snapping/svgSnapHelper';
 import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useAuthenticatedImage } from '@components/authenticatedResource/authenticatedResource.hooks';
-import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DrawingRevisionsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { selectViewerBackgroundColor } from '@/v4/modules/viewer/viewer.selectors';
 import { useSelector } from 'react-redux';
+import { CalibrationStatus } from '@/v5/store/drawings/drawings.types';
 import HomeIcon from '@assets/icons/viewer/home.svg';
 
 
+const DEFAULT_VIEWBOX = { scale: 1, x: 0, y: 0, width: 0, height: 0 };
 export const Viewer2D = () => {
 	const { teamspace, project } = useParams<ViewerParams>();
 	const [drawingId] = useSearchParam('drawingId');
+
 	const revision = DrawingRevisionsHooksSelectors.selectLatestActiveRevision(drawingId);
-	const src = revision ? getDrawingImageSrc(teamspace, project, drawingId, revision._id) : '';
-	const authSrc = useAuthenticatedImage(src);
+	const plainSrc = revision ? getDrawingImageSrc(teamspace, project, drawingId, revision._id) : '';
+	const src = useAuthenticatedImage(plainSrc);
+	const latestActiveRevision = DrawingRevisionsHooksSelectors.selectLatestActiveRevision(drawingId);
+	const revisionId = latestActiveRevision?._id;
+	const hasCalibration = [CalibrationStatus.UNCONFIRMED, CalibrationStatus.CALIBRATED].includes(latestActiveRevision?.calibration);
 	const backgroundColor = useSelector(selectViewerBackgroundColor);
 
 	const { close2D } = useContext(ViewerCanvasesContext);
+	const { isCalibrating, step, isCalibrating2D, setIsCalibrating2D } = useContext(CalibrationContext);
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
+	const [snapHandler, setSnapHandler] =  useState<SVGSnapHelper>();
+	const [viewBox, setViewBox] = useState<ViewBoxType>(DEFAULT_VIEWBOX);
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 
 	const imgRef = useRef<ZoomableImage>();
 	const imgContainerRef = useRef();
+
+	const canCalibrate2D = isCalibrating && step === 1;
+	const showSVGImage = !isFirefox() && !plainSrc.toLowerCase().endsWith('.png');
 
 	const onClickZoomIn = () => {
 		zoomHandler.zoomIn();
@@ -81,39 +97,78 @@ export const Viewer2D = () => {
 
 		DrawingViewerService.setImgContainer(imgContainerRef.current);
 
+		if (showSVGImage) {
+			const snap = new SVGSnapHelper();
+			snap.load(src);
+			setSnapHandler(snap);
+		} else {
+			setSnapHandler(undefined);
+		}
+
 		const pz = centredPanZoom(imgRef.current, 20, 20);
 		setZoomHandler(pz);
-		pz.on(Events.transform, () => {
-			const cantZoomOut = pz.getMinZoom() >= pz.getTransform().scale;
-			const cantZoomIn = pz.getMaxZoom() <= pz.getTransform().scale;
+	};
+
+	const onCalibrationClick = () => setIsCalibrating2D(!isCalibrating2D);
+
+	useEffect(() => {
+		if (!zoomHandler) return;
+		zoomHandler.on(Events.transform, () => {
+			const transform = zoomHandler.getTransform();
+			const { scale } = transform;
+			const cantZoomOut = zoomHandler.getMinZoom() >= scale;
+			const cantZoomIn = zoomHandler.getMaxZoom() <= scale;
 			setIsMinZoom(cantZoomOut);
 			setIsMaxZoom(cantZoomIn);
+			setViewBox({ ...transform, ...zoomHandler.getOriginalSize() });
 		});
-	};
+	}, [zoomHandler]);
 
 	useEffect(() => {
 		setIsLoading(true);
-	}, [drawingId]);
-
-	const showSVGImage = !isFirefox() && !src.toLowerCase().endsWith('.png');
+	}, [src]);
 
 	useEffect(() => {
-		if (revision) return;
+		if (hasCalibration) {
+			DrawingsActionsDispatchers.fetchCalibration(teamspace, project, drawingId);
+		}
+	}, [hasCalibration, revisionId]);
+
+	useEffect(() => {
+		if (revisionId) return;
 		DrawingRevisionsActionsDispatchers.fetch(teamspace, project, drawingId);
-	}, [revision]);
+	}, [revisionId]);
 
 	return (
 		<ViewerContainer visible>
+			{step === 1 && (
+				<CalibrationInfoBox
+					title={formatMessage({ defaultMessage: '2D Alignment', id: 'infoBox.2dAlignment.title' })}
+					description={formatMessage({
+						id: 'infoBox.2dAlignment.description',
+						defaultMessage: `
+							Click on the {icon} on your navigation bar and then please select your two points in the
+							2D Viewer that are the same points in your 3D Viewer.
+						`,
+					}, { icon: <CalibrationIcon /> })}
+				/>
+			)}
+			{!isCalibrating && <CloseButton variant="secondary" onClick={close2D} />}
 			<CloseButton variant="secondary" onClick={close2D} />
 			<ImageContainer backgroundColor={backgroundColor} ref={imgContainerRef}>
 				{
-					isLoading && 
+					isLoading &&
 					<CentredContainer>
 						<Loader />
 					</CentredContainer>
 				}
-				{showSVGImage && <SVGImage ref={imgRef} src={authSrc} onLoad={onImageLoad} />}
-				{!showSVGImage && <DrawingViewerImage ref={imgRef} src={authSrc} onLoad={onImageLoad} />}
+				{showSVGImage && src && <SVGImage ref={imgRef} src={src} onLoad={onImageLoad} />}
+				{!showSVGImage && src && <DrawingViewerImage ref={imgRef} src={src} onLoad={onImageLoad} />}
+				{!isLoading && (<ViewerLayer2D
+					viewBox={viewBox}
+					snapHandler={snapHandler}
+					key={String(isCalibrating)}
+				/>)}
 			</ImageContainer>
 			<ToolbarContainer>
 				<MainToolbar>
@@ -121,6 +176,13 @@ export const Viewer2D = () => {
 						Icon={HomeIcon}
 						onClick={() => zoomHandler.centreView()}
 						title={formatMessage({ id: 'viewer.toolbar.icon.home', defaultMessage: 'Home' })}
+					/>
+					<ToolbarButton
+						Icon={CalibrationIcon}
+						onClick={onCalibrationClick}
+						title={formatMessage({ id: 'drawingViewer.toolbar.calibrate', defaultMessage: 'Calibrate' })}
+						selected={isCalibrating2D}
+						hidden={!canCalibrate2D}
 					/>
 					<ToolbarButton
 						Icon={ZoomOutIcon}
