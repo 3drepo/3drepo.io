@@ -46,6 +46,45 @@ const getActivities = async (req, res) => {
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/settings/activities/archive:
+	 *   get:
+	 *     description: Get an encrypted zip file containing the requested activity logs. The password to unlock the file will be sent to the user via email
+	 *     tags: [Activities]
+	 *     operationId: archive
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: from
+	 *         description: Only return logs that have been created after a certain time (in epoch timestamp)
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: number
+	 *       - name: to
+	 *         description: Only return logs that have been created after before certain time (in epoch timestamp)
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: number
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: downloads the encrypted zip file
+	 *         content:
+	 *           application/octet-stream:
+	 *             schema:
+	 *               type: string
+	 *               format: binary
+	 */
 	router.get('/archive', isTeamspaceAdmin, validateGetActivitiesParams, getActivities);
 
 	return router;
