@@ -421,30 +421,6 @@ ModelSetting.updateHeliSpeed = async function(account, model, newSpeed) {
 	return ModelSetting.updateModelSetting(account, model, {heliSpeed: newSpeed});
 };
 
-ModelSetting.updateMultiplePermissions = async function(account, modelIds, updatedData) {
-	const modelsList = await ModelSetting.findModelSettings(account, {"_id" : {"$in" : modelIds}});
-
-	if (!modelsList.length) {
-		throw responseCodes.MODEL_INFO_NOT_FOUND;
-	}
-
-	const modelsPromises = modelsList.map((model) => {
-		const newModelPermissions = updatedData.find((modelPermissions) => modelPermissions.model === model._id);
-		return ModelSetting.changePermissions(account, model._id, newModelPermissions.permissions || {});
-	});
-
-	const models = await Promise.all(modelsPromises);
-	const populatedPermissionsPromises = models.map(({permissions}) => {
-		return ModelSetting.populateUsers(account, permissions);
-	});
-	const populatedPermissions = await Promise.all(populatedPermissionsPromises);
-
-	return populatedPermissions.map((permissions, index) => {
-		const {name, federate, _id: model, subModels} =  models[index] || {};
-		return {name, federate, model, permissions, subModels};
-	});
-};
-
 ModelSetting.updatePermissions = async function(account, model, permissions = [], executor) {
 	const { findByUserName, teamspaceMemberCheck } = require("./user");
 
