@@ -29,7 +29,7 @@ Activities.validateGetActivitiesParams = async (req, res, next) => {
 	});
 
 	try {
-		await schema.validate(req.query, { stripUnknown: true });
+		req.query = await schema.validate(req.query, { stripUnknown: true });
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err.message));
 		return;
