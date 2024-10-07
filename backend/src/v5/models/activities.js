@@ -22,11 +22,11 @@ const { generateUUID } = require('../utils/helper/uuids');
 
 const COL_NAME = 'activities';
 
-Activities.getActivities = (teamspace, from, to) => {
+Activities.getActivities = (teamspace, fromDate, toDate) => {
 	const query = {};
 
-	if (from || to) {
-		query.timestamp = deleteIfUndefined({ $gte: from, $lte: to });
+	if (fromDate || toDate) {
+		query.timestamp = deleteIfUndefined({ $gte: fromDate, $lte: toDate });
 	}
 
 	return db.find(teamspace, COL_NAME, query);

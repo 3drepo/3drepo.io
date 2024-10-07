@@ -17,6 +17,7 @@
 
 const Activities = require('../../processors/teamspaces/activities');
 const { Router } = require('express');
+const { getUserFromSession } = require('../../utils/sessions');
 const { isTeamspaceAdmin } = require('../../middleware/permissions/permissions');
 const { respond } = require('../../utils/responder');
 const { validateGetActivitiesParams } = require('../../middleware/dataConverter/inputs/teamspaces/activities');
@@ -24,9 +25,10 @@ const { validateGetActivitiesParams } = require('../../middleware/dataConverter/
 const getActivities = async (req, res) => {
 	const { teamspace } = req.params;
 	const { from, to } = req.query;
+	const user = getUserFromSession(req.session);
 
 	try {
-		const file = await Activities.getActivitiesFile(teamspace, from, to);
+		const file = await Activities.getActivitiesFile(teamspace, user, from, to);
 
 		const headers = {
 			'Content-Disposition': 'attachment;filename=activities.zip',

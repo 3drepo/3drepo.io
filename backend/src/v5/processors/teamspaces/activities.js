@@ -17,7 +17,12 @@
 
 const { createResponseCode, templates } = require('../../utils/responseCodes');
 const archiver = require('archiver');
+archiver.registerFormat('zip-encrypted', require('archiver-zip-encrypted'));
+const { templates: emailTemplates } = require('../../services/mailer/mailer.constants');
+const { generateHashString } = require('../../utils/helper/strings');
 const { getActivities } = require('../../models/activities');
+const { getUserByUsername } = require('../../models/users');
+const { sendEmail } = require('../../services/mailer');
 const { uuidToString } = require('../../../v4/utils');
 
 const Activities = {};
@@ -26,18 +31,23 @@ const createActivitiesZip = (activities) => {
 	const jsonBuffer = Buffer.from(JSON.stringify(activities), 'utf8');
 
 	try {
-		const file = archiver('zip', { zlib: { level: 1 } });
-		file.append(jsonBuffer, { name: 'data.json' });
+		const password = generateHashString();
+		const file = archiver('zip-encrypted', { zlib: { level: 1 }, encryptionMethod: 'aes256', password });
+		file.append(jsonBuffer, { name: 'activities.json' });
 		file.finalize();
-		return file;
+		return { file, password };
 	} catch (err) {
 		throw createResponseCode(templates.unknown, 'Failed to create zip file.');
 	}
 };
 
-Activities.getActivitiesFile = async (teamspace, from, to) => {
-	const activities = await getActivities(teamspace, from, to);
-	const file = createActivitiesZip(activities.map((a) => ({ ...a, _id: uuidToString(a._id) })));
+Activities.getActivitiesFile = async (teamspace, username, fromDate, toDate) => {
+	const activities = await getActivities(teamspace, fromDate, toDate);
+	const { file, password } = createActivitiesZip(activities.map((a) => ({ ...a, _id: uuidToString(a._id) })));
+
+	const { customData: { email, firstName } } = await getUserByUsername(username, { 'customData.email': 1, 'customData.firstName': 1 });
+	await sendEmail(emailTemplates.ACTIVITIES.name, email, { firstName, password });
+
 	return file;
 };
 
