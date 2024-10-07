@@ -17,12 +17,15 @@
 
 const {
 	hasAdminAccessToContainer,
+	hasAdminAccessToDrawing,
 	hasAdminAccessToFederation,
 	hasCommenterAccessToContainer,
 	hasCommenterAccessToFederation,
 	hasReadAccessToContainer,
+	hasReadAccessToDrawing,
 	hasReadAccessToFederation,
 	hasWriteAccessToContainer,
+	hasWriteAccessToDrawing,
 	hasWriteAccessToFederation,
 } = require('../../../utils/permissions/permissions');
 const { getUserFromSession } = require('../../../utils/sessions');
@@ -31,11 +34,10 @@ const { templates } = require('../../../utils/responseCodes');
 
 const ModelPerms = {};
 
-const permissionsCheckTemplate = (callback, isFed = false) => async (req, res, next) => {
+const permissionsCheckTemplate = (callback) => async (req, res, next) => {
 	const { session, params } = req;
 	const user = getUserFromSession(session);
-	const { teamspace, project } = params;
-	const model = isFed ? params.federation : params.container;
+	const { teamspace, project, model } = params;
 
 	try {
 		if (await callback(teamspace, project, model, user)) {
@@ -53,9 +55,13 @@ ModelPerms.hasWriteAccessToContainer = permissionsCheckTemplate(hasWriteAccessTo
 ModelPerms.hasCommenterAccessToContainer = permissionsCheckTemplate(hasCommenterAccessToContainer);
 ModelPerms.hasAdminAccessToContainer = permissionsCheckTemplate(hasAdminAccessToContainer);
 
-ModelPerms.hasReadAccessToFederation = permissionsCheckTemplate(hasReadAccessToFederation, true);
-ModelPerms.hasWriteAccessToFederation = permissionsCheckTemplate(hasWriteAccessToFederation, true);
-ModelPerms.hasCommenterAccessToFederation = permissionsCheckTemplate(hasCommenterAccessToFederation, true);
-ModelPerms.hasAdminAccessToFederation = permissionsCheckTemplate(hasAdminAccessToFederation, true);
+ModelPerms.hasReadAccessToDrawing = permissionsCheckTemplate(hasReadAccessToDrawing);
+ModelPerms.hasWriteAccessToDrawing = permissionsCheckTemplate(hasWriteAccessToDrawing);
+ModelPerms.hasAdminAccessToDrawing = permissionsCheckTemplate(hasAdminAccessToDrawing);
+
+ModelPerms.hasReadAccessToFederation = permissionsCheckTemplate(hasReadAccessToFederation);
+ModelPerms.hasWriteAccessToFederation = permissionsCheckTemplate(hasWriteAccessToFederation);
+ModelPerms.hasCommenterAccessToFederation = permissionsCheckTemplate(hasCommenterAccessToFederation);
+ModelPerms.hasAdminAccessToFederation = permissionsCheckTemplate(hasAdminAccessToFederation);
 
 module.exports = ModelPerms;

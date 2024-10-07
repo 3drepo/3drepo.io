@@ -17,12 +17,13 @@
 
 import styled from 'styled-components';
 
-export const PROGRESS_BAR_COLOUR_MAP = {
-	failed: ({ theme }) => theme.palette.error.main,
+export const PROGRESS_BAR_COLOR_MAP = {
 	queued: ({ theme }) => theme.palette.base.main,
 	uploading: ({ theme }) => theme.palette.tertiary.main,
 	uploaded: ({ theme }) => theme.palette.primary.main,
-};
+	failed: ({ theme }) => theme.palette.error.main,
+} as const;
+export const getProgressBarColor = (status = 'failed') => PROGRESS_BAR_COLOR_MAP[status];
 
 const ProgressBarPercentage = styled.div`
 	position: absolute;
@@ -52,8 +53,8 @@ export const ProgressBarLabelDark = styled(ProgressBarPercentage)<{ progress: nu
 
 export const LabelledProgressBar = styled.div<{ uploadstatus: string; }>`
 	position: relative;
-	color: ${({ uploadstatus }) => PROGRESS_BAR_COLOUR_MAP[uploadstatus]};
+	color: ${({ uploadstatus }) => getProgressBarColor(uploadstatus)};
 	.MuiLinearProgress-barColorPrimary {
-		background-color: ${({ uploadstatus }) => PROGRESS_BAR_COLOUR_MAP[uploadstatus]};
+		background-color: ${({ uploadstatus }) => getProgressBarColor(uploadstatus)};
 	}
 `;

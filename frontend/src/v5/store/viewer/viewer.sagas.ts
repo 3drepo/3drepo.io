@@ -27,6 +27,7 @@ import { FederationsActions, FederationsTypes } from '../federations/federations
 import { selectContainersByFederationId } from '../federations/federations.selectors';
 import { TicketsCardActions } from '../tickets/card/ticketsCard.redux';
 import { FetchDataAction, ViewerActions, ViewerTypes } from './viewer.redux';
+import { DrawingsActions } from '../drawings/drawings.redux';
 
 function* fetchData({ teamspace, containerOrFederation, project }: FetchDataAction) {
 	yield put(ViewerActions.setFetching(true));
@@ -71,6 +72,7 @@ function* fetchData({ teamspace, containerOrFederation, project }: FetchDataActi
 		}
 
 		yield put(TicketsCardActions.fetchTicketsList(teamspace, project, containerOrFederation, isFederation));
+		yield put(DrawingsActions.fetchDrawings(teamspace, project));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'viewer.fetch.error', defaultMessage: 'trying to fetch viewer data' }),

@@ -289,6 +289,7 @@ const testSerialiseTicket = () => {
 			const propName = generateRandomString();
 			const propName2 = generateRandomString();
 			const imageProp = generateRandomString();
+			const imageListProp = generateRandomString();
 			const modName = generateRandomString();
 			const template = {
 				properties: [
@@ -303,6 +304,10 @@ const testSerialiseTicket = () => {
 					{
 						name: imageProp,
 						type: propTypes.IMAGE,
+					},
+					{
+						name: imageListProp,
+						type: propTypes.IMAGE_LIST,
 					},
 				],
 				modules: [
@@ -320,6 +325,10 @@ const testSerialiseTicket = () => {
 							name: imageProp,
 							type: propTypes.IMAGE,
 						},
+						{
+							name: imageListProp,
+							type: propTypes.IMAGE_LIST,
+						},
 						],
 					},
 				],
@@ -333,6 +342,7 @@ const testSerialiseTicket = () => {
 				type: generateRandomString(),
 				properties: {
 					[imageProp]: generateUUID(),
+					[imageListProp]: times(3, () => generateUUID()),
 					[propName2]: {
 						state: {},
 					},
@@ -348,6 +358,7 @@ const testSerialiseTicket = () => {
 							},
 						},
 						[imageProp]: generateUUID(),
+						[imageListProp]: times(3, () => generateUUID()),
 						[generateRandomString()]: generateRandomString(),
 					},
 				},
@@ -372,7 +383,9 @@ const testSerialiseTicket = () => {
 			});
 
 			res.properties[imageProp] = UUIDToString(res.properties[imageProp]);
+			res.properties[imageListProp] = res.properties[imageListProp].map(UUIDToString);
 			res.modules[modName][imageProp] = UUIDToString(res.modules[modName][imageProp]);
+			res.modules[modName][imageListProp] = res.modules[modName][imageListProp].map(UUIDToString);
 
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, res);

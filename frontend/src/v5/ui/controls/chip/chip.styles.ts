@@ -17,9 +17,7 @@
 
 import styled, { css } from 'styled-components';
 import CrossIcon from '@assets/icons/outlined/close-outlined.svg';
-import { contrastColor } from 'contrast-color';
-
-const isLight = (color) => contrastColor({ bgColor: color, threshold: 170 }) === '#000000';
+import { isLight } from '@/v5/helpers/colors.helper';
 
 const filledStyles = (color: string) => css`
 	color: ${({ theme }) => isLight(color) ? '#20232A' : theme.palette.primary.contrast};

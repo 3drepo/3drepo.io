@@ -183,6 +183,10 @@ DBHandler.findOne = async (database, colName, query, projection, sort) => {
 	const collection = await getCollection(database, colName);
 	const options = deleteIfUndefined({ projection, sort });
 
+	if (sort) {
+		return collection.find(query, options).limit(1).next();
+	}
+
 	return collection.findOne(query, options);
 };
 

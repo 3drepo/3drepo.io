@@ -31,7 +31,6 @@ import { isEmpty, set } from 'lodash';
 import { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { useSelectedModels } from '../../ticketsTable/newTicketMenu/useSelectedModels';
 
 type TicketSlideProps = {
 	ticketId: string,
@@ -45,8 +44,7 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
 	const templateValidationSchema = getValidators(template);
 	const isAlertOpen = DialogsHooksSelectors.selectIsAlertOpen();
-
-	const models = useSelectedModels();
+	const ticketsHaveBeenFetched = TicketsHooksSelectors.selectTicketsHaveBeenFetched()(containerOrFederation);
 
 	const formData = useForm({
 		resolver: yupResolver(templateValidationSchema),
@@ -79,7 +77,7 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 	}, [JSON.stringify(ticket)]);
 
 	useEffect(() => {
-		if (!containerOrFederation || !models.length) return;
+		if (!containerOrFederation || !ticketsHaveBeenFetched) return;
 		TicketsActionsDispatchers.fetchTicket(
 			teamspace,
 			project,
@@ -87,7 +85,7 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 			ticketId,
 			isFederation,
 		);
-	}, [ticketId, containerOrFederation, models.length]);
+	}, [ticketId, ticketsHaveBeenFetched]);
 
 	useEffect(() => {
 		return isFederation

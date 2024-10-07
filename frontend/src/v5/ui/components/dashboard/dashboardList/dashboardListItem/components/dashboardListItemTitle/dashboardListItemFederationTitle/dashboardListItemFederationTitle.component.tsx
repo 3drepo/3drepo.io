@@ -16,9 +16,8 @@
  */
 
 import { viewerRoute } from '@/v5/services/routing/routing';
-import { UploadStatuses } from '@/v5/store/containers/containers.types';
+import { UploadStatus } from '@/v5/store/containers/containers.types';
 import { IFederation } from '@/v5/store/federations/federations.types';
-import { RevisionStatus } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision/revisionStatus';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { Highlight } from '@controls/highlight';
@@ -28,6 +27,7 @@ import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router';
 import { Link } from 'react-router-dom';
 import { DashboardListItemTitle } from '../dashboardListItemTitle.component';
+import { RevisionStatus } from '@components/shared/latestRevision/revisionStatus/revisionStatus.component';
 
 interface IFederationTitle extends FixedOrGrowContainerProps {
 	federation: IFederation;
@@ -40,7 +40,7 @@ export const DashboardListItemFederationTitle = ({
 	const { query } = useContext(SearchContext);
 
 	const { status, desc, name } = federation;
-	const uploadStatus = status === UploadStatuses.OK
+	const uploadStatus = status === UploadStatus.OK
 		? <Highlight search={query}>{desc}</Highlight>
 		: <RevisionStatus status={status} name={name} />;
 

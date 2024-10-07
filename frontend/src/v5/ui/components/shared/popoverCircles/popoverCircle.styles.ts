@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { isLight } from '@/v5/helpers/colors.helper';
 import { AuthAvatarMui } from '@components/authenticatedResource/authAvatarMui.component';
-import { contrastColor } from 'contrast-color';
 import styled, { css } from 'styled-components';
 
 const CIRCLE_SIZE = {
@@ -24,12 +24,10 @@ const CIRCLE_SIZE = {
 	medium: '32px',
 };
 
-const isLight = (color) => contrastColor({ bgColor: color, threshold: 170 }) === '#FFFFFF';
-
 export const Popover = styled(AuthAvatarMui)<{ $backgroundColor }>`
 	margin: 0;
-	color: ${({ $backgroundColor, theme }) => (isLight($backgroundColor) ? theme.palette.primary.contrast : theme.palette.secondary.main)};
-	background-color: ${({ $backgroundColor, theme }) => $backgroundColor || theme.palette.primary.contrast};
+	color: ${({ $backgroundColor, theme }) => (isLight($backgroundColor, 170) ? theme.palette.secondary.main : theme.palette.primary.contrast)};
+	background-color: ${({ backgroundColor, theme }) => backgroundColor || theme.palette.primary.contrast};
 	pointer-events: auto;
 	font-size: 9px;
 	${({ size = 'medium' }) => css`

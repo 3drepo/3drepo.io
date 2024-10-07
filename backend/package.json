@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@azure/msal-node": "1.18.4",
-    "@elastic/elasticsearch": "7.17.0",
+    "@elastic/elasticsearch": "7.17.14",
     "amqplib": "0.8.0",
     "apidoc": "0.29.0",
     "app-config": "1.0.1",
@@ -46,7 +46,7 @@
     "dayjs": "1.11.11",
     "device": "0.3.12",
     "ejs": "3.1.10",
-    "elastic-apm-node": "3.41.1",
+    "elastic-apm-node": "4.7.3",
     "express": "4.19.2",
     "express-body-parser-error-handler": "1.0.7",
     "express-session": "1.18.0",

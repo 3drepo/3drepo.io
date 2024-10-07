@@ -25,7 +25,7 @@ import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { TicketsTableGroup } from './ticketsTableGroup/ticketsTableGroup.component';
 import {  groupTickets, NEW_TICKET_ID, NONE_OPTION, SetTicketValue, UNSET } from '../ticketsTable.helper';
-import { EmptyTicketsView } from '../../emptyTicketsView/emptyTicketsView.styles';
+import { EmptyPageView } from '../../../../../../components/shared/emptyPageView/emptyPageView.styles';
 import { Container, Title } from './ticketsTableContent.styles';
 
 type TicketsTableContentProps = {
@@ -43,12 +43,12 @@ export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy 
 
 	if (!filteredItems.length) {
 		return (
-			<EmptyTicketsView>
+			<EmptyPageView>
 				<FormattedMessage
 					id="ticketTable.emptyView"
 					defaultMessage="We couldn't find any tickets to show. Please refine your selection."
 				/>
-			</EmptyTicketsView>
+			</EmptyPageView>
 		);
 	}
 

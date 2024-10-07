@@ -16,8 +16,8 @@
  */
 import { isEmpty, isNumber, values } from 'lodash';
 import { createSelector } from 'reselect';
+import { getTransparency, hasTransparency } from '@/v5/helpers/colors.helper';
 import { addToGroupDictionary } from '../../helpers/colorOverrides';
-import { getTransparency, hasTransparency } from '../../helpers/colors';
 import { selectActiveIssue } from '../issues';
 import { selectDefaultView } from '../model';
 import { selectActiveRisk } from '../risks';

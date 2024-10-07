@@ -19,7 +19,6 @@ import { useRouteMatch, useLocation, Switch, Redirect } from 'react-router-dom';
 import { GlobalStyle } from '@/v5/ui/themes/global';
 import { formatMessage } from '@/v5/services/intl';
 import { NotFound } from '@/v5/ui/routes/notFound';
-import { ViewerCanvas } from '@/v4/routes/viewerCanvas';
 import { DashboardProjectLayout } from '@components/dashboard/dashboardProjectLayout/dashboardProjectLayout.component';
 import { DashboardViewerLayout } from '@components/dashboard/dashboardViewerLayout/dashboardViewerLayout.component';
 import { Route } from '@/v5/services/routing/route.component';
@@ -54,6 +53,7 @@ import { UserSignupSSO } from '../userSignup/userSignUpSSO/userSignUpSSO.compone
 import { useEffect } from 'react';
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
+import { CalibrationContextComponent } from './projects/calibration/calibrationContext';
 
 export const MainRoute = () => {
 	const { path } = useRouteMatch();
@@ -67,9 +67,8 @@ export const MainRoute = () => {
 	}, [authenticationFetched]);
 
 	return (
-		<>
+		<CalibrationContextComponent>
 			<GlobalStyle />
-			<ViewerCanvas location={{ pathname }} />
 			<Switch>
 				<Route title={formatMessage({ id: 'pageTitle.login', defaultMessage: 'Log in' })} exact path={LOGIN_PATH}>
 					<Login />
@@ -137,6 +136,6 @@ export const MainRoute = () => {
 					<NotFound />
 				</AuthenticatedRoute>
 			</Switch>
-		</>
+		</CalibrationContextComponent>
 	);
 };

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Place from '@mui/icons-material/Place';
+import Place from '@assets/icons/outlined/issue-outlined.svg';
 import styled from 'styled-components';
 
 import { COLOR } from '../../../../styles';

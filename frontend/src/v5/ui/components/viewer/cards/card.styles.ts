@@ -63,6 +63,27 @@ export const CardContent = styled.div`
 	height: 100%;
 `;
 
+// TODO - fix after new palette is released
+export const CardListItem = styled.div<{ $selected?: boolean }>`
+	position: relative;
+	cursor: pointer;
+	padding: 12px 14px 16px;
+	background-color: ${({ theme, $selected }) => ($selected ? '#edf0f8' : theme.palette.primary.contrast)};
+`;
+
+export const CardList = styled.div`
+	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
+	border-radius: 8px;
+	overflow: hidden;
+	display: inline-block;
+	width: 100%;
+	box-sizing: border-box;
+	margin-bottom: 0;
+	${/* sc-selector */ CardListItem}:not(:last-child) {
+		border-bottom: solid 1px ${({ theme }) => theme.palette.base.lightest};
+	}
+`;
+
 export const EmptyCardMessage = styled(DashedContainer).attrs({
 	$strokeColor: '#c0c8d5', // TODO - fix when new palette is released
 	$dashSize: 2,

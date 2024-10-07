@@ -17,9 +17,8 @@
 import { formatMessage } from '@/v5/services/intl';
 import { Role } from '../currentUser/currentUser.types';
 import { SurveyPoint, View } from '../store.types';
-import { CreateRevisionBody } from '../revisions/revisions.types';
 
-export enum UploadStatuses {
+export enum UploadStatus {
 	OK = 'ok',
 	FAILED = 'failed',
 	UPLOADING = 'uploading',
@@ -85,36 +84,44 @@ export const CONTAINER_UNITS = [
 	{
 		value: 'mm',
 		name: formatMessage({ id: 'containers.unit.name.mm', defaultMessage: 'Millimetres' }),
+		abbreviation: formatMessage({ id: 'containers.unit.abbreviation.mm', defaultMessage: 'mm' }),
 	},
 	{
 		value: 'cm',
 		name: formatMessage({ id: 'containers.unit.name.cm', defaultMessage: 'Centimetres' }),
+		abbreviation: formatMessage({ id: 'containers.unit.abbreviation.cm', defaultMessage: 'cm' }),
 	},
 	{
 		value: 'dm',
 		name: formatMessage({ id: 'containers.unit.name.dm', defaultMessage: 'Decimetres' }),
+		abbreviation: formatMessage({ id: 'containers.unit.abbreviation.dm', defaultMessage: 'dm' }),
 	},
 	{
 		value: 'm',
 		name: formatMessage({ id: 'containers.unit.name.m', defaultMessage: 'Metres' }),
+		abbreviation: formatMessage({ id: 'containers.unit.abbreviation.m', defaultMessage: 'm' }),
 	},
 	{
 		value: 'ft',
 		name: formatMessage({ id: 'containers.unit.name.ft', defaultMessage: 'Feet and Inches' }),
+		abbreviation: formatMessage({ id: 'containers.unit.abbreviation.ft', defaultMessage: 'ft' }),
 	},
 ];
 
-export interface IContainer {
-	_id: string;
-	name: string;
+export interface MinimumContainer {
+	_id: string,
+	name: string,
+	role: Role,
+	isFavourite: boolean
+}
+
+export interface IContainer extends MinimumContainer {
 	latestRevision: string;
 	revisionsCount?: number;
 	lastUpdated: Date;
 	type: string;
 	code: string;
-	status: UploadStatuses;
-	isFavourite: boolean;
-	role: Role;
+	status: UploadStatus;
 	hasStatsPending: boolean;
 	errorReason?: {
 		message: string;
@@ -126,13 +133,6 @@ export interface IContainer {
 	angleFromNorth?: number;
 	defaultView?: string;
 	unit?: string;
-}
-
-export interface MinimumContainer {
-	_id: string,
-	name: string,
-	role: Role,
-	isFavourite: boolean
 }
 
 export type NewContainer = {
@@ -155,7 +155,7 @@ export type ContainerStats = {
 		message: string;
 		timestamp: number;
 	};
-	status: UploadStatuses;
+	status: UploadStatus;
 	unit: string;
 	code: string;
 };
@@ -165,7 +165,7 @@ export type ContainerBackendSettings = {
 	desc?: string;
 	name?: string;
 	surveyPoints?: SurveyPoint[];
-	status?: UploadStatuses;
+	status?: UploadStatus;
 	timestamp?: number;
 	type?: string;
 	angleFromNorth?: number;
@@ -184,23 +184,3 @@ export type ContainerSettings = Omit<ContainerBackendSettings, 'surveyPoints'> &
 };
 
 export type FetchContainerViewsResponseView = { views: View[] };
-
-export type DestinationOption = {
-	containerId: string;
-	containerName: string;
-	containerUnit?: string;
-	containerType?: string;
-	containerDesc?: string;
-	containerCode?: string;
-	latestRevision: string;
-};
-
-export type UploadItemFields = CreateRevisionBody & {
-	uploadId: string;
-	progress: number;
-	extension: string;
-};
-
-export type UploadFieldArray = {
-	uploads: UploadItemFields[];
-};

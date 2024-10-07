@@ -54,6 +54,8 @@ import { CommentReply } from '../comment/commentReply/commentReply.component';
 import { ActionMenu } from '../../../ticketsList/ticketsList.styles';
 import { TicketContext } from '../../../ticket.context';
 import { useSyncProps } from '@/v5/helpers/syncProps.hooks';
+import { DrawingViewerService } from '@components/viewer/drawingViewer/drawingViewer.service';
+import { ViewerCanvasesContext } from '../../../../viewerCanvases.context';
 
 type ImageToUpload = {
 	id: string,
@@ -80,6 +82,7 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 	const messageInput = watch('message');
 
 	const { teamspace, project } = useParams<ViewerParams>();
+	const { is2DOpen } = useContext(ViewerCanvasesContext);
 	
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
@@ -169,8 +172,7 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 		openImagesDialog(imagesToUpload.length);
 	};
 
-	const uploadScreenshot = async () => {
-		const image = await ViewerService.getScreenshot() as unknown as string;
+	const uploadScreenshot = async (image) => {
 		const imageToUpload: ImageToUpload = {
 			src: image,
 			id: uuid(),
@@ -178,6 +180,9 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 		setImagesToUpload(imagesToUpload.concat(imageToUpload));
 		openImagesDialog(imagesToUpload.length);
 	};
+	
+	const upload3DScreenshot = async () => uploadScreenshot(await ViewerService.getScreenshot());
+	const upload2DScreenshot = async () => uploadScreenshot(await DrawingViewerService.getScreenshot());
 
 	const handleDragLeave = ({ relatedTarget }) => {
 		if (containerRef.current.contains(relatedTarget) || !relatedTarget.parentElement) return;
@@ -254,8 +259,13 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 			<Controls>
 				<ActionMenu TriggerButton={<FileIconInput><FileIcon /></FileIconInput>}>
 					<ActionMenuItem>
-						<MenuItem onClick={uploadScreenshot} disabled={!isViewer}>
-							<FormattedMessage id="customTicket.comments.action.createScreenshot" defaultMessage="Create screenshot" />
+						{is2DOpen && (
+							<MenuItem onClick={upload2DScreenshot} disabled={!isViewer}>
+								<FormattedMessage id="customTicket.comments.action.create2DScreenshot" defaultMessage="Create 2D screenshot" />
+							</MenuItem>
+						)}
+						<MenuItem onClick={upload3DScreenshot} disabled={!isViewer}>
+							<FormattedMessage id="customTicket.comments.action.create3DScreenshot" defaultMessage="Create 3D screenshot" />
 						</MenuItem>
 						<MenuItem onClick={handleUploadImages}>
 							<FormattedMessage id="customTicket.comments.action.uploadImage" defaultMessage="Upload images" />

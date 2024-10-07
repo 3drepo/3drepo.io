@@ -35,7 +35,8 @@ TypeChecker.isUUIDString = (uuid) => {
 TypeChecker.isUUID = (uuid) => {
 	if (!TypeChecker.isObject(uuid)) return false;
 	try {
-		return !!UUIDParse.unparse(uuid.buffer);
+		const uuidString = UUIDParse.unparse(uuid.buffer);
+		return TypeChecker.isUUIDString(uuidString);
 	} catch {
 		return false;
 	}

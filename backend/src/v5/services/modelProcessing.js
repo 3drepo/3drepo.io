@@ -15,15 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { UUIDToString, generateUUID, generateUUIDString } = require('../utils/helper/uuids');
 const { codeExists, templates } = require('../utils/responseCodes');
 const { copyFile, mkdir, rm, stat, writeFile } = require('fs/promises');
+const { createWriteStream, readdirSync } = require('fs');
 const { listenToQueue, queueMessage } = require('../handler/queue');
+const { modelTypes, processStatuses } = require('../models/modelSettings.constants');
+const { DRAWINGS_HISTORY_COL } = require('../models/revisions.constants');
+const Path = require('path');
+const { addRevision } = require('../models/revisions');
+const archiver = require('archiver');
 const { events } = require('./eventsManager/eventsManager.constants');
-const { generateUUIDString } = require('../utils/helper/uuids');
+const { execFile } = require('child_process');
 const { publish } = require('./eventsManager/eventsManager');
 const { cn_queue: queueConfig } = require('../utils/config');
 const processingLabel = require('../utils/logger').labels.modelProcessing;
 const logger = require('../utils/logger').logWithLabel(processingLabel);
+const { storeFile } = require('./filesManager');
 
 const ModelProcessing = {};
 
@@ -32,6 +40,7 @@ const {
 	callback_queue: callbackq,
 	worker_queue: jobq,
 	model_queue: modelq,
+	drawing_queue: drawingq,
 	shared_storage: sharedDir,
 } = queueConfig;
 
@@ -59,6 +68,54 @@ const onCallbackQMsg = async ({ content, properties }) => {
 	} catch (err) {
 		logger.logError(`[${properties.correlationId}] Failed to process message: ${err?.message}`);
 	}
+};
+
+const queueDrawingUpload = async (teamspace, project, model, revId, data, fileBuffer) => {
+	try {
+		const pathToRevFolder = Path.join(sharedDir, revId);
+		const file = Path.join(pathToRevFolder, `${revId}${data.format}`);
+		const json = {
+			...data,
+			database: teamspace,
+			project: model,
+			revId,
+			file: `${SHARED_SPACE_TAG}/${revId}/${revId}${data.format}`,
+		};
+
+		await mkdir(pathToRevFolder);
+
+		await Promise.all(
+			[
+				writeFile(file, fileBuffer),
+				writeFile(Path.join(pathToRevFolder, 'importParams.json'), JSON.stringify(json)),
+
+			],
+		);
+
+		const msg = `processDrawing ${SHARED_SPACE_TAG}/${revId}/importParams.json`;
+
+		await queueMessage(drawingq, revId, msg);
+
+		publish(events.QUEUED_TASK_UPDATE, { teamspace, model, corId: revId, status: processStatuses.QUEUED });
+	} catch (err) {
+		logger.logError('Failed to queue drawing task', err.message);
+		publish(events.QUEUED_TASK_COMPLETED, { teamspace, model, corId: revId, value: 4 });
+	}
+};
+
+ModelProcessing.processDrawingUpload = async (teamspace, project, model, revInfo, file) => {
+	const format = Path.extname(file.originalname).toLowerCase();
+	const fileId = generateUUID();
+	const { owner, ...revData } = revInfo;
+
+	const rev_id = await addRevision(teamspace, project, model, modelTypes.DRAWING,
+		{ ...revData, author: owner, format, rFile: [fileId], incomplete: true });
+
+	const fileMeta = { name: file.originalname, rev_id, project, model };
+	await storeFile(teamspace, DRAWINGS_HISTORY_COL, fileId, file.buffer, fileMeta);
+
+	const queueMeta = { format, size: file.buffer.length, owner };
+	await queueDrawingUpload(teamspace, project, model, UUIDToString(rev_id), queueMeta, file.buffer);
 };
 
 ModelProcessing.queueModelUpload = async (teamspace, model, data, { originalname, path }) => {
@@ -89,7 +146,7 @@ ModelProcessing.queueModelUpload = async (teamspace, model, data, { originalname
 
 		await queueMessage(modelq, revId, msg);
 
-		publish(events.QUEUED_TASK_UPDATE, { teamspace, model, corId: revId, status: 'queued' });
+		publish(events.QUEUED_TASK_UPDATE, { teamspace, model, corId: revId, status: processStatuses.QUEUED });
 	} catch (err) {
 		// Clean up files we created
 		Promise.all([
@@ -126,7 +183,10 @@ ModelProcessing.queueFederationUpdate = async (teamspace, federation, info) => {
 		await writeFile(`${sharedDir}/${revId}/obj.json`, JSON.stringify(data));
 
 		await queueMessage(jobq, revId, `genFed ${filePath} ${teamspace}`);
-		publish(events.QUEUED_TASK_UPDATE, { teamspace, model: federation, corId: revId, status: 'queued' });
+		publish(events.QUEUED_TASK_UPDATE, { teamspace,
+			model: federation,
+			corId: revId,
+			status: processStatuses.QUEUED });
 	} catch (err) {
 		// Clean up files we created
 		rm(`${sharedDir}/${revId}/obj.json`).catch((cleanUpErr) => {
@@ -139,6 +199,63 @@ ModelProcessing.queueFederationUpdate = async (teamspace, federation, info) => {
 
 		logger.logError('Failed to queue federate job', err?.message);
 		throw templates.queueInsertionFailed;
+	}
+};
+
+ModelProcessing.getLogArchive = async (corId) => {
+	const filename = 'logs.zip';
+
+	try {
+		const taskDir = Path.join(sharedDir, corId);
+		const zipPath = Path.join(taskDir, filename);
+		const files = readdirSync(taskDir);
+		const archive = archiver('zip', { zlib: { level: 1 } });
+
+		const archiveReady = new Promise((resolve, reject) => {
+			const output = createWriteStream(zipPath);
+			output.on('close', resolve);
+			output.on('error', reject);
+			archive.on('error', reject);
+			archive.pipe(output);
+		});
+
+		let logPreviewProm;
+		files.forEach((file) => {
+			if (file.endsWith('.log')) {
+				const logPath = Path.join(taskDir, file);
+				archive.file(logPath, { name: file });
+				if (!logPreviewProm) {
+					// we're trying to get the last n lines of a file here
+					// going native is the most efficient (and painless...)
+
+					/* istanbul ignore next */
+					logPreviewProm = new Promise((resolve) => {
+						const isWin = process.platform === 'win32';
+						if (isWin) {
+							// eslint-disable-next-line security/detect-child-process
+							execFile('Get-Content', [logPath, '-Tail', '20'],
+								{ shell: 'powershell.exe' }, (error, stdout) => {
+									resolve(error ? undefined : stdout);
+								});
+						} else {
+							// eslint-disable-next-line security/detect-child-process
+							execFile('tail', [logPath, '-n20'],
+								(error, stdout) => {
+									resolve(error ? undefined : stdout);
+								});
+						}
+					});
+				}
+			}
+		});
+
+		archive.finalize();
+		await archiveReady;
+
+		return { zipPath, logPreview: await logPreviewProm };
+	} catch (err) {
+		logger.logError(`Error while compressing log files for import error email: ${err.message}`);
+		return undefined;
 	}
 };
 
