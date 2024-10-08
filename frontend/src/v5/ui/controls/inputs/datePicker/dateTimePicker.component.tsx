@@ -26,7 +26,6 @@ export const DateTimePicker = ({ onBlur, onChange, ...props }: DateTimePickerPro
 		onChange={(val) => {
 			onChange(val);
 			onBlur?.();
-			onBlur();
 		}}
 		{...props}
 	/>
