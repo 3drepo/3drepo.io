@@ -20,8 +20,14 @@ import { selectCurrentProject, selectIsProjectAdmin } from '../projects/projects
 import { DrawingsState } from './drawings.redux';
 import { isCollaboratorRole, isCommenterRole, isViewerRole } from '../store.helpers';
 import { Role } from '../currentUser/currentUser.types';
-import { selectRevisionsByDrawing } from './revisions/drawingRevisions.selectors';
+import { selectContainerById } from '../containers/containers.selectors';
+import { selectFederationById } from '../federations/federations.selectors';
+import { convertUnits, convertVectorUnits, getUnitsConversionFactor } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
+import { EMPTY_CALIBRATION } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
+import { Vector1D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { fullDrawing } from './drawings.helpers';
+import { selectRevisionsByDrawing } from './revisions/drawingRevisions.selectors';
+import { CalibrationStatus } from './drawings.types';
 import { orderBy } from 'lodash';
 
 const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
@@ -49,9 +55,12 @@ export const selectFavouriteDrawings = createSelector(
 export const selectDrawingById = createSelector(
 	selectDrawings,
 	(_, _id) => _id,
-	(drawings, _id) => {
-		return drawings.find((d) => d._id === _id);
-	},
+	(drawings, _id) => drawings.find((d) => d._id === _id),
+);
+
+export const selectDrawingCalibration = createSelector(
+	selectDrawingById,
+	(drawing) => drawing.calibrationStatus ?? CalibrationStatus.EMPTY,
 );
 
 export const selectIsListPending = createSelector(
@@ -92,6 +101,23 @@ export const selectIsTypesPending = createSelector(
 	(state, currentProject) => !state.typesByProject[currentProject],
 );
 
+export const selectCalibration = createSelector(
+	selectDrawingById,
+	(state, drawingId, modelId) => selectContainerById(state, modelId) || selectFederationById(state, modelId),
+	(drawing, model) => {
+		const calibration = drawing?.calibration || EMPTY_CALIBRATION;
+		const conversionFactor = getUnitsConversionFactor(calibration.units, model.unit);
+		const horizontalCalibration = calibration.horizontal;
+
+		return {
+			horizontal: {
+				model: convertVectorUnits(horizontalCalibration.model, conversionFactor),
+				drawing: convertVectorUnits(horizontalCalibration.drawing, conversionFactor),
+			},
+			verticalRange: convertUnits(calibration.verticalRange, conversionFactor) as Vector1D,
+		};
+	},
+);
 
 export const selectHasCommenterAccess = createSelector(
 	selectDrawingRole,

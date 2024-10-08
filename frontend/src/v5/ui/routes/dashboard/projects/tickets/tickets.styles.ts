@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { Button } from '@controls/button';
-import ListSubheaderBase from '@mui/material/ListSubheader';
 import { SearchInput as SearchInputBase } from '@controls/search/searchInput';
 import styled, { css } from 'styled-components';
 import { Drawer } from '@mui/material';
@@ -36,14 +35,6 @@ export const FiltersContainer = styled.div`
 	justify-content: space-between;
 	align-items: flex-end;
 	margin-bottom: 28px;
-`;
-
-export const ListSubheader = styled(ListSubheaderBase)`
-	height: 40px;
-	padding: 10px 12px;
-	margin: 5px 0 0;
-	color: ${({ theme }) => theme.palette.secondary.main};
-	${({ theme }) => theme.typography.h3}
 `;
 
 export const FlexContainer = styled.div`
