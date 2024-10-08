@@ -279,6 +279,9 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 
 	private renderPermissionLogOption = () => {
 		const { isTeamspaceAdmin } = this.props;
+		if (!isTeamspaceAdmin) {
+			return null;
+		}
 		return (
 			<PermissionsLogContainer gap="10px" container direction="column" wrap="nowrap">
 				<Headline color="textPrimary" variant="subtitle1">
@@ -293,7 +296,6 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 				<FileGrid container direction="row" justifyContent="space-between" alignItems="center" wrap="nowrap">
 					<Grid gap="10px" container alignItems="end" wrap="nowrap">
 						<DateTimePicker
-							disabled={!isTeamspaceAdmin}
 							disableFuture
 							label={formatMessage({ id: 'teamspaceSettings.permissionsLog.startDate', defaultMessage: 'Start Date' })}
 							maxDateTime={dayjs(this.state.permissionsLogEnd)}
@@ -301,7 +303,6 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 							onChange={(permissionsLogStart) => this.setState({ permissionsLogStart })}
 						/>
 						<DateTimePicker
-							disabled={!isTeamspaceAdmin}
 							disableFuture
 							label={formatMessage({ id: 'teamspaceSettings.permissionsLog.endDate', defaultMessage: 'End Date' })}
 							minDateTime={dayjs(this.state.permissionsLogStart)}
@@ -309,14 +310,14 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 							onChange={(permissionsLogEnd) => this.setState({ permissionsLogEnd })}
 						/>
 						<Button
-							disabled={!isTeamspaceAdmin || (!this.state.permissionsLogStart && !this.state.permissionsLogEnd)}
+							disabled={!this.state.permissionsLogStart && !this.state.permissionsLogEnd}
 							color="primary"
 							variant="contained"
 							onClick={() => DialogsActionsDispatchers.open('info', {
 								title: formatMessage({ id: 'teamspaceSettings.permissionsLog.modal.title', defaultMessage: 'Encrypted Download' }),
 								message: formatMessage({
 									id: 'teamspaceSettings.permissionsLog.modal.message',
-									defaultMessage: 'A password will be sent to your email for this encryoted download.',
+									defaultMessage: 'A password will be sent to your email for this encrypted download.',
 								}),
 								primaryButtonLabel: formatMessage({
 									id: 'teamspaceSettings.permissionsLog.modal.primaryLabel',
