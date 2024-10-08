@@ -24,8 +24,12 @@ const { getURLDomain } = require('./helper/strings');
 
 const referrerMatch = (sessionReferrer, headerReferrer) => {
 	const domain = getURLDomain(headerReferrer);
-	return domain === sessionReferrer
-        || apiUrls.all.some((api) => api.match(domain));
+	try {
+		return domain === sessionReferrer
+			|| apiUrls.all.some((api) => api.match(domain));
+	} catch (err) {
+		return false;
+	}
 };
 
 const SessionUtils = {};
