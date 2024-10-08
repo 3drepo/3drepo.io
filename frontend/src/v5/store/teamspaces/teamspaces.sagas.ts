@@ -24,6 +24,7 @@ import { TeamspacesActions, TeamspacesTypes, ITeamspace } from './teamspaces.red
 import { RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
 import { selectIsFetchingAddons } from './teamspaces.selectors';
 import { formatFilenameDate } from '@/v5/helpers/intl.helper';
+import { downloadFile } from '@/v5/helpers/download.helper';
 
 export function* fetch() {
 	yield put(TeamspacesActions.setTeamspacesArePending(true));
@@ -69,15 +70,11 @@ export function* waitForAddons() {
 
 export function* fetchActivityLog({ teamspace, startDate, endDate }) {
 	try {
-		const log = yield API.Teamspaces.fetchActivityLog(teamspace, startDate, endDate);
-		const url = window.URL.createObjectURL(new Blob([log]));
-		const link = document.createElement('a');
-		link.href = url;
+		const logFile = yield API.Teamspaces.fetchActivityLog(teamspace, startDate, endDate);
+		const url = window.URL.createObjectURL(new Blob([logFile]));
 		const range = [startDate, endDate].filter(Boolean).map((date) => formatFilenameDate(date)).join('__');
-		link.download = formatMessage({ id: 'teamspaces.fetchActivityLog.filename', defaultMessage: 'activity_log_{range}.zip' }, { range });
-		document.body.appendChild(link);
-		link.click();
-		document.body.removeChild(link);
+		const filename = formatMessage({ id: 'teamspaces.fetchActivityLog.filename', defaultMessage: 'activity_log_{range}.zip' }, { range });
+		downloadFile(url, filename);
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({
