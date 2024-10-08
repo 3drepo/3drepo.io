@@ -15,21 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { escapeRegexChrs, getURLDomain } = require('./helper/strings');
 const { CSRF_HEADER } = require('./sessions.constants');
 const { v4Path } = require('../../interop');
 // FIXME: can remove the disable once we migrated config
 // eslint-disable-next-line
 const { apiUrls } = require(`${v4Path}/config`);
-const { getURLDomain } = require('./helper/strings');
 
 const referrerMatch = (sessionReferrer, headerReferrer) => {
 	const domain = getURLDomain(headerReferrer);
-	try {
-		return domain === sessionReferrer
-			|| apiUrls.all.some((api) => api.match(domain));
-	} catch (err) {
-		return false;
-	}
+	return domain === sessionReferrer
+			|| apiUrls.all.some((api) => api.match(escapeRegexChrs(domain)));
 };
 
 const SessionUtils = {};
