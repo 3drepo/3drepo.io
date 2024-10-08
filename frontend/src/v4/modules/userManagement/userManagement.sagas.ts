@@ -237,15 +237,7 @@ export function* updateUserJob({ username, job }) {
 }
 
 export function* updatePermissions({ permissions }) {
-	const permissionsType = (permissions.permissions[0] === TEAMSPACE_PERMISSIONS.admin.key ? TEAMSPACE_PERMISSIONS.admin : TEAMSPACE_PERMISSIONS.user).label
 	try {
-		const shouldUpdate = yield updatePermissionsOrTriggerModal({
-			permissionsType,
-			permissionsCount: permissions.length,
-		});
-		if (!shouldUpdate) {
-			return;
-		}
 		const teamspace = yield select(selectCurrentTeamspace);
 		const currentUser = yield select(selectCurrentUser);
 

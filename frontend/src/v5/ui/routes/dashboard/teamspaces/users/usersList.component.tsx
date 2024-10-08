@@ -24,7 +24,6 @@ import { CurrentUserHooksSelectors, TeamspacesHooksSelectors } from '@/v5/servic
 import { FormattedMessage } from 'react-intl';
 import { V5UserListOverrides } from '@/v5/ui/v4Adapter/overrides/userList.overrides';
 import { Header, Title } from '../projects/projectsList.styles';
-import { SuppressPermissionModalToggle } from '@components/shared/updatePermissionModal/suppressPermissionModalToggle.component';
 
 export const UsersList = () => {
 	const dispatch = useDispatch();
@@ -40,7 +39,6 @@ export const UsersList = () => {
 
 	return (
 		<V5UserListOverrides>
-			<SuppressPermissionModalToggle />
 			<Header>
 				<Title>
 					<FormattedMessage id="usersList.title" defaultMessage="Users" />
