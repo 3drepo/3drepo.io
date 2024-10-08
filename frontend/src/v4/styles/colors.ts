@@ -17,7 +17,7 @@
 
 import { mapValues } from 'lodash';
 
-import { hexToGLColor, hexToRgba } from '../helpers/colors';
+import { hexToGLColor, hexToOpacity } from '@/v5/helpers/colors.helper';
 
 export const BLACK = '#000000';
 export const WHITE = '#ffffff';
@@ -29,33 +29,33 @@ export const COLOR = {
 	PRIMARY_LIGHT: '#3c5876',
 	PRIMARY_DARK: '#08203a',
 	SECONDARY_MAIN: '#06563c',
-	SECONDARY_MAIN_54: hexToRgba(SECONDARY_MAIN, .54),
+	SECONDARY_MAIN_54: hexToOpacity(SECONDARY_MAIN, 54),
 	SECONDARY_LIGHT: '#377763',
 	SECONDARY_DARK: '#043827',
-	PRIMARY_MAIN_80: hexToRgba(PRIMARY_MAIN, .8),
-	PRIMARY_MAIN_6: hexToRgba(PRIMARY_MAIN, .06),
+	PRIMARY_MAIN_80: hexToOpacity(PRIMARY_MAIN, 80),
+	PRIMARY_MAIN_6: hexToOpacity(PRIMARY_MAIN, 6),
 
 	WHITE,
-	WHITE_20: hexToRgba(WHITE, .2),
-	WHITE_10: hexToRgba(WHITE, .1),
-	WHITE_87: hexToRgba(WHITE, 0.87),
+	WHITE_20: hexToOpacity(WHITE, 20),
+	WHITE_10: hexToOpacity(WHITE, 10),
+	WHITE_87: hexToOpacity(WHITE, 87),
 
-	TRANSPARENT : hexToRgba(WHITE, 0),
+	TRANSPARENT : hexToOpacity(WHITE, 0),
 
 	BLACK,
-	BLACK_6: hexToRgba(BLACK, .06),
-	BLACK_12: hexToRgba(BLACK, .12),
-	BLACK_16: hexToRgba(BLACK, .16),
-	BLACK_20: hexToRgba(BLACK, .2),
-	BLACK_26: hexToRgba(BLACK, .26),
-	BLACK_30: hexToRgba(BLACK, .3),
-	BLACK_40: hexToRgba(BLACK, .4),
-	BLACK_50: hexToRgba(BLACK, .5),
-	BLACK_54: hexToRgba(BLACK, .54),
-	BLACK_60: hexToRgba(BLACK, .6),
-	BLACK_70: hexToRgba(BLACK, .7),
-	BLACK_80: hexToRgba(BLACK, .8),
-	BLACK_87: hexToRgba(BLACK, .87),
+	BLACK_6: hexToOpacity(BLACK, 6),
+	BLACK_12: hexToOpacity(BLACK, 12),
+	BLACK_16: hexToOpacity(BLACK, 16),
+	BLACK_20: hexToOpacity(BLACK, 20),
+	BLACK_26: hexToOpacity(BLACK, 26),
+	BLACK_30: hexToOpacity(BLACK, 30),
+	BLACK_40: hexToOpacity(BLACK, 40),
+	BLACK_50: hexToOpacity(BLACK, 50),
+	BLACK_54: hexToOpacity(BLACK, 54),
+	BLACK_60: hexToOpacity(BLACK, 60),
+	BLACK_70: hexToOpacity(BLACK, 70),
+	BLACK_80: hexToOpacity(BLACK, 80),
+	BLACK_87: hexToOpacity(BLACK, 87),
 
 	DARK_GRAY: '#bfbfbf',
 	DARK_GRAY_20: 'rgba(158, 158, 158, .2)',

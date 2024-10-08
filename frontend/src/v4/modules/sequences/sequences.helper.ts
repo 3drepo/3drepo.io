@@ -16,7 +16,7 @@
  */
 import { isEqual, partition } from 'lodash';
 import { formatMessage } from '@/v5/services/intl';
-import { GLToHexColor } from '@/v4/helpers/colors';
+import { GLToHexColor } from '@/v5/helpers/colors.helper';
 import { STEP_SCALE } from '../../constants/sequences';
 import { Viewer } from '../../services/viewer/viewer';
 import { getState } from '../store';

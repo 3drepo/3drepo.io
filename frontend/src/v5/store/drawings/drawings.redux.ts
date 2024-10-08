@@ -19,11 +19,9 @@ import { Constants } from '@/v5/helpers/actions.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { TeamspaceAndProjectId, ProjectId, ProjectAndDrawingId, TeamspaceProjectAndDrawingId, SuccessAndErrorCallbacks } from '../store.types';
-import { IDrawing, DrawingStats, NewDrawing, MinimumDrawing, CalibrationStates } from './drawings.types';
+import { IDrawing, DrawingStats, NewDrawing, MinimumDrawing, Calibration } from './drawings.types';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { statsToDrawing } from './drawings.helpers';
-import { Role } from '../currentUser/currentUser.types';
-import { UploadStatus } from '../containers/containers.types';
 
 export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions({
 	addFavourite: ['teamspace', 'projectId', 'drawingId'],
@@ -33,6 +31,9 @@ export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions
 	fetchDrawingsSuccess: ['projectId', 'drawings'],
 	fetchDrawingStats: ['teamspace', 'projectId', 'drawingId'],
 	fetchDrawingStatsSuccess: ['projectId', 'drawingId', 'stats'],
+	fetchCalibration: ['teamspace', 'projectId', 'drawingId'],
+	updateCalibration: ['teamspace', 'projectId', 'drawingId', 'calibration'],
+	approveCalibration: ['teamspace', 'projectId', 'drawingId'],
 	deleteDrawing: ['teamspace', 'projectId', 'drawingId', 'onSuccess', 'onError'],
 	deleteDrawingSuccess: ['projectId', 'drawingId'],
 	fetchTypes: ['teamspace', 'projectId'],
@@ -73,19 +74,12 @@ export const createDrawingSuccess = (state: DrawingsState, { projectId, drawing 
 	// a drawing with that id already exists in the store
 	if (getDrawingFromState(state, projectId, drawing._id)) return;
 
-	state.drawingsByProject[projectId] = (state.drawingsByProject[projectId] || []).concat([{
-		...drawing,
-		revisionsCount: 0,
-		calibration: CalibrationStates.EMPTY,
-		status: UploadStatus.OK,
-		isFavourite: false,
-		role: Role.ADMIN,
-	}]);
+	state.drawingsByProject[projectId] = (state.drawingsByProject[projectId] || []).concat([drawing]);
 };
 
 export const updateDrawingSuccess = (state: DrawingsState, { projectId, drawingId, drawing }:UpdateDrawingSuccessAction ) => {
 	const oldDrawing = getDrawingFromState(state, projectId, drawingId);
-	Object.assign(oldDrawing,  drawing);
+	Object.assign(oldDrawing, drawing);
 };
 
 export const deleteDrawingSuccess = (state: DrawingsState, {
@@ -124,6 +118,9 @@ export type FetchDrawingsAction = Action<'FETCH_DRAWINGS'> & TeamspaceAndProject
 export type FetchDrawingsSuccessAction = Action<'FETCH_DRAWINGS_SUCCESS'> & ProjectId & { drawings: IDrawing[] };
 export type FetchDrawingStatsAction = Action<'FETCH_DRAWING_STATS'> & TeamspaceProjectAndDrawingId;
 export type FetchDrawingStatsSuccessAction = Action<'FETCH_DRAWING_STATS_SUCCESS'> & ProjectAndDrawingId & { stats: DrawingStats };
+export type FetchCalibrationAction = Action<'FETCH_CALIBRATION'> & TeamspaceProjectAndDrawingId;
+export type UpdateCalibrationAction = Action<'UPDATE_CALIBRATION'> & TeamspaceProjectAndDrawingId & { calibration: Calibration };
+export type ApproveCalibrationAction = Action<'APPROVE_CALIBRATION'> & TeamspaceProjectAndDrawingId;
 export type DeleteDrawingAction = Action<'DELETE'> & TeamspaceProjectAndDrawingId & SuccessAndErrorCallbacks;
 export type DeleteDrawingSuccessAction = Action<'DELETE_SUCCESS'> & ProjectAndDrawingId;
 export type FetchTypesAction = Action<'FETCH_DRAWINGS_TYPES'> & TeamspaceAndProjectId;
@@ -142,6 +139,9 @@ export interface IDrawingsActionCreators {
 	fetchDrawingsSuccess: (projectId: string, drawings: Partial<IDrawing>[]) => FetchDrawingsSuccessAction;
 	fetchDrawingStats: (teamspace: string, projectId: string, drawingId: string) => FetchDrawingStatsAction;
 	fetchDrawingStatsSuccess: (projectId: string, drawingId: string, stats: DrawingStats) => FetchDrawingStatsSuccessAction;
+	fetchCalibration: (teamspace: string, projectId: string, drawingId: string) => FetchCalibrationAction;
+	updateCalibration: (teamspace: string, projectId: string, drawingId: string, calibration: Calibration) => UpdateCalibrationAction;
+	approveCalibration: (teamspace: string, projectId: string, drawingId: string) => ApproveCalibrationAction;
 	deleteDrawing: (teamspace: string,
 		projectId: string,
 		drawingId: string,
@@ -158,8 +158,8 @@ export interface IDrawingsActionCreators {
 		projectId: string, 
 		drawingId: string, 
 		drawing: Partial<IDrawing>, 
-		onSuccess: () => void, 
-		onError: (e:Error) => void
+		onSuccess?: () => void, 
+		onError?: (e:Error) => void
 	) => UpdateDrawingAction;
 	updateDrawingSuccess: (projecId: string, drawingId: string, drawing: Partial<IDrawing>) => UpdateDrawingSuccessAction;
 	resetDrawingStatsQueue: () => ResetDrawingStatsQueueAction;

@@ -14,12 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PureComponent, createRef } from 'react';
-import { difference, differenceBy, isEqual, omit } from 'lodash';
+import { PureComponent, createRef, useContext } from 'react';
+import { difference, differenceBy, isEqual } from 'lodash';
 import { dispatch } from '@/v4/modules/store';
 import { DialogActions } from '@/v4/modules/dialog';
 import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
+import { CalibrationToolbar } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationToolbar/calibrationToolbar.component';
 import { LifoQueue } from '@/v5/helpers/functions.helpers';
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
+import { useViewerCalibrationSetup } from '@/v5/ui/routes/dashboard/projects/calibration/useViewerCalibrationSetup';
 import {queuableFunction} from '../../helpers/async';
 
 import { ROUTES } from '../../constants/routes';
@@ -28,6 +31,7 @@ import { pinsDiff, pinsRemoved, pinsSelectionChanged } from '../../helpers/pins'
 import { moveMeshes, resetMovedMeshes, transformationDiffChanges,
 transformationDiffRemoves } from '../../modules/sequences/sequences.helper';
 import { ViewerService } from '../../services/viewer/viewer';
+import { Calibration3DInfoBox } from './calibration3DInfoBox/calibration3DInfoBox.component';
 import { ViewerContainer } from './viewer3D.styles';
 
 interface IProps {
@@ -46,6 +50,9 @@ interface IProps {
 	issuePins: any[];
 	riskPins: any[];
 	measurementPins: any[];
+	measurementsAngle: any[];
+	measurementsArea: any[];
+	measurementsLength: any[];
 	transformations: any[];
 	gisLayers: string[];
 	hasGisCoordinates: boolean;
@@ -58,9 +65,10 @@ interface IProps {
 	issuesHighlightedShapes: any[];
 	risksHighlightedShapes: any[];
 	ticketPins: any;
+	isCalibrating: boolean;
 }
 
-export class Viewer3D extends PureComponent<IProps, any> {
+export class Viewer3DBase extends PureComponent<IProps, any> {
 	private containerRef = createRef<HTMLDivElement>();
 	public state = { updatesQueue: new LifoQueue((prevProps, currProps) => this.onComponentDidUpdate(prevProps, currProps), 1, false) };
 
@@ -186,7 +194,7 @@ export class Viewer3D extends PureComponent<IProps, any> {
 			gisCoordinates, gisLayers, transparencies, transformations,
 			viewerManipulationEnabled, viewer, issuesShapes, issuesHighlightedShapes,
 			risksShapes, risksHighlightedShapes,
-			ticketPins
+			ticketPins, measurementsAngle, measurementsArea, measurementsLength
 		} = currProps;
 
 		if (colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
@@ -241,6 +249,18 @@ export class Viewer3D extends PureComponent<IProps, any> {
 			await this.renderMeasurementsHighlights(prevProps.risksHighlightedShapes, risksHighlightedShapes);
 		}
 
+		if (!isEqual(prevProps.measurementsAngle, measurementsAngle)) {
+			await this.renderMeasurements(prevProps.measurementsAngle, measurementsAngle);
+		}
+
+		if (!isEqual(prevProps.measurementsLength, measurementsLength)) {
+			await this.renderMeasurements(prevProps.measurementsLength, measurementsLength);
+		}
+
+		if (!isEqual(prevProps.measurementsArea, measurementsArea)) {
+			await this.renderMeasurements(prevProps.measurementsArea, measurementsArea);
+		}
+
 		if (prevProps.viewerManipulationEnabled !== viewerManipulationEnabled) {
 			if (viewerManipulationEnabled) {
 				viewer.setNavigationOn();
@@ -253,9 +273,27 @@ export class Viewer3D extends PureComponent<IProps, any> {
 	public render() {
 		return (
 			<ViewerContainer visible={this.shouldBeVisible} >
+				<Calibration3DInfoBox />
 				<div ref={this.containerRef} className={this.props.className} />
-				<Toolbar />
+				{this.props.isCalibrating ? <CalibrationToolbar /> : <Toolbar />}
 			</ ViewerContainer>
 		);
 	}
+}
+
+const getCalibrationProps = (props) => ({
+	...props,
+	issuePins: [],
+	riskPins: [],
+	measurementPins: [],
+	ticketPins: [],
+	measurementsArea: [],
+	measurementsLength: [],
+	measurementsAngle: [],
+});
+
+export const Viewer3D = (props: Omit<IProps, 'isCalibrating'>) => {
+	const { isCalibrating } = useContext(CalibrationContext);
+	useViewerCalibrationSetup();
+	return (<Viewer3DBase {...(isCalibrating ? getCalibrationProps(props) : props)} isCalibrating={isCalibrating} />)
 }

@@ -267,12 +267,6 @@ export const palette = {
 	},
 };
 
-export const hexToOpacity = (hex: string, opacityInPercentage: number): string => {
-	const formattedOpacity = Math.floor((opacityInPercentage / 100) * 255)
-		.toString(16).padStart(2, '0');
-	return hex + formattedOpacity;
-};
-
 export const theme = createTheme({
 	palette,
 	typography: typography as TypographyOptions,

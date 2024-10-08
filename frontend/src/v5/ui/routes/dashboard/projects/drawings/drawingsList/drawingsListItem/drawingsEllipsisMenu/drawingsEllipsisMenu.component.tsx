@@ -25,6 +25,8 @@ import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { EditDrawingDialog } from '../../../drawingDialogs/editDrawingDialog.component';
 import { uploadToDrawing } from '../../../uploadDrawingRevisionForm/uploadDrawingRevisionForm.helpers';
+import { SelectModelForCalibration } from '../selectModelForCalibration/selectModelForCalibration.component';
+import { canUploadToBackend } from '@/v5/store/drawings/drawings.helpers';
 
 type DrawingsEllipsisMenuProps = {
 	selected?: boolean,
@@ -41,8 +43,11 @@ export const DrawingsEllipsisMenu = ({
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const hasCollaboratorAccess = DrawingsHooksSelectors.selectHasCollaboratorAccess(drawing._id);
 
+	const onCalibrateClick = () => DialogsActionsDispatchers.open(SelectModelForCalibration, { drawingId: drawing._id });
+
+
 	const onClickSettings = () => DialogsActionsDispatchers.open(EditDrawingDialog, { drawing });
-	
+
 	const onClickDelete = () => DialogsActionsDispatchers.open('delete', {
 		name: drawing.name,
 		onClickConfirm: () => new Promise<void>(
@@ -67,7 +72,7 @@ export const DrawingsEllipsisMenu = ({
 					id: 'drawings.ellipsisMenu.calibrate',
 					defaultMessage: 'Calibrate',
 				})}
-				onClick={() => { }} // TODO - add calibration functionality
+				onClick={onCalibrateClick}
 				disabled={!drawing.revisionsCount}
 				hidden={!hasCollaboratorAccess}
 			/>
@@ -92,6 +97,7 @@ export const DrawingsEllipsisMenu = ({
 					defaultMessage: 'Upload',
 				})}
 				onClick={() => uploadToDrawing(drawing._id)}
+				disabled={!canUploadToBackend(drawing.status)}
 				hidden={!hasCollaboratorAccess}
 			/>
 			<EllipsisMenuItem

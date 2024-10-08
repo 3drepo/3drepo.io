@@ -179,13 +179,14 @@ db.createRevision = async (teamspace, project, model, revision, modelType) => {
 };
 
 db.createCalibration = async (teamspace, project, drawing, revision, calibration) => {
-	const formattedCalibration = {
+	const formattedCalibration = deleteIfUndefined({
 		...calibration,
 		_id: stringToUUID(calibration._id),
 		project: stringToUUID(project),
 		drawing,
 		rev_id: stringToUUID(revision),
-	};
+		verticalRange: undefined,
+	});
 
 	await DbHandler.insertOne(teamspace, 'drawings.calibrations', formattedCalibration);
 };
@@ -457,16 +458,17 @@ ServiceHelper.generateRandomModel = ({ modelType = modelTypes.CONTAINER, viewers
 	};
 };
 
-ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, modelType) => {
+ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, modelType, timestamp, status) => {
 	const _id = ServiceHelper.generateUUIDString();
 	const entry = deleteIfUndefined({
 		_id,
 		tag: modelType === modelTypes.DRAWING ? undefined : ServiceHelper.generateRandomString(),
+		status,
 		statusCode: modelType === modelTypes.DRAWING ? statusCodes[0].code : undefined,
 		revCode: modelType === modelTypes.DRAWING ? ServiceHelper.generateRandomString(10) : undefined,
 		format: modelType === modelTypes.DRAWING ? '.pdf' : undefined,
 		author: ServiceHelper.generateRandomString(),
-		timestamp: ServiceHelper.generateRandomDate(),
+		timestamp: timestamp || ServiceHelper.generateRandomDate(),
 		desc: ServiceHelper.generateRandomString(),
 		void: !!isVoid,
 	});
@@ -494,7 +496,7 @@ ServiceHelper.generateCalibration = () => ({
 		drawing: times(2, () => times(2, () => ServiceHelper.generateRandomNumber())),
 	},
 	verticalRange: [0, 10],
-	units: 'm',
+	units: 'mm',
 	createdAt: ServiceHelper.generateRandomDate(),
 	createdBy: ServiceHelper.generateRandomString(),
 });
@@ -504,6 +506,7 @@ ServiceHelper.generateRandomModelProperties = (modelType = modelTypes.CONTAINER)
 	...(modelType === modelTypes.DRAWING ? {
 		number: ServiceHelper.generateRandomString(),
 		type: ServiceHelper.generateRandomString(),
+		calibration: { verticalRange: [ServiceHelper.generateRandomNumber(0, 10), ServiceHelper.generateRandomNumber(11, 20)], units: 'm' },
 		modelType,
 	} : {
 		properties: {
