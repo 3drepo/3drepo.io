@@ -32,7 +32,7 @@ const createActivitiesZip = (activities) => {
 
 	try {
 		const password = generateHashString();
-		const file = archiver('zip-encrypted', { zlib: { level: 1 }, encryptionMethod: 'aes256', password });
+		const file = archiver.create('zip-encrypted', { zlib: { level: 1 }, encryptionMethod: 'aes256', password });
 		file.append(jsonBuffer, { name: 'activities.json' });
 		file.finalize();
 		return { file, password };

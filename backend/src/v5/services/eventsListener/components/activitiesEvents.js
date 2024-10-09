@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { actions } = require('../../../models/activities.constants');
 const { addActivity } = require('../../../models/activities');
 const { deleteIfUndefined } = require('../../../utils/helper/objects');
 const { events } = require('../../eventsManager/eventsManager.constants');
@@ -23,22 +24,11 @@ const { logger } = require('../../../utils/logger');
 const { subscribe } = require('../../eventsManager/eventsManager');
 const { uuidToString } = require('../../../../v4/utils');
 
-const actions = {
-	USER_ADDED: 'USER_ADDED',
-	USER_REMOVED: 'USER_REMOVED',
-	PERMISSIONS_UPDATED: 'PERMISSIONS_UPDATED',
-	INVITATION_ADDED: 'INVITATION_ADDED',
-	INVITATION_REVOKED: 'INVITATION_REVOKED',
-};
-
 const userAdded = async ({ teamspace, executor, user }) => {
 	try {
 		await addActivity(teamspace, actions.USER_ADDED, executor, { user });
 	} catch (err) {
 		logger.logError(`Failed to add a ${actions.USER_ADDED} activity`);
-		if (err.stack) {
-			logger.logError(err.stack);
-		}
 	}
 };
 
@@ -47,9 +37,6 @@ const userRemoved = async ({ teamspace, executor, user }) => {
 		await addActivity(teamspace, actions.USER_REMOVED, executor, { user });
 	} catch (err) {
 		logger.logError(`Failed to add a ${actions.USER_REMOVED} activity`);
-		if (err.stack) {
-			logger.logError(err.stack);
-		}
 	}
 };
 
@@ -127,15 +114,10 @@ const permissionsUpdated = async ({ teamspace, executor, isTsUpdate, initialPerm
 			mergedEntries[usersKey].permissions.push(...entry.permissions);
 		});
 
-		await Promise.all([
-			Object.values(mergedEntries).map((e) => addActivity(teamspace, actions.PERMISSIONS_UPDATED, executor,
-				{ users: e.users, permissions: e.permissions })),
-		]);
+		await Promise.all(Object.values(mergedEntries).map((e) => addActivity(teamspace,
+			actions.PERMISSIONS_UPDATED, executor, { users: e.users, permissions: e.permissions })));
 	} catch (err) {
 		logger.logError(`Failed to add a ${actions.PERMISSIONS_UPDATED} activity`);
-		if (err.stack) {
-			logger.logError(err.stack);
-		}
 	}
 };
 
@@ -144,9 +126,6 @@ const invitationAdded = async ({ teamspace, executor, email, job, permissions })
 		await addActivity(teamspace, actions.INVITATION_ADDED, executor, { email, job, permissions });
 	} catch (err) {
 		logger.logError(`Failed to add a ${actions.INVITATION_ADDED} activity`);
-		if (err.stack) {
-			logger.logError(err.stack);
-		}
 	}
 };
 
@@ -155,9 +134,6 @@ const invitationRevoked = async ({ teamspace, executor, email, job, permissions 
 		await addActivity(teamspace, actions.INVITATION_REVOKED, executor, { email, job, permissions });
 	} catch (err) {
 		logger.logError(`Failed to add a ${actions.INVITATION_REVOKED} activity`);
-		if (err.stack) {
-			logger.logError(err.stack);
-		}
 	}
 };
 

@@ -16,10 +16,14 @@
  */
 
 const { times } = require('lodash');
-const { UUIDToString } = require('../../../../../src/v5/utils/helper/uuids');
-const { templates } = require('../../../../../src/v5/utils/responseCodes');
+
 const { src } = require('../../../helper/path');
 const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate } = require('../../../helper/services');
+
+const { actions } = require(`${src}/models/activities.constants`);
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
+const { templates } = require(`${src}/utils/responseCodes`);
+const { MODEL_VIEWER, MODEL_COMMENTER, MODEL_COLLABORATOR, PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 
 jest.mock('../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
@@ -38,6 +42,9 @@ const TicketLogs = require(`${src}/models/tickets.logs`);
 
 jest.mock('../../../../../src/v5/models/tickets.templates');
 const TicketTemplates = require(`${src}/models/tickets.templates`);
+
+jest.mock('../../../../../src/v5/models/activities');
+const Activities = require(`${src}/models/activities`);
 
 jest.mock('../../../../../src/v5/schemas/tickets/tickets.comments');
 const CommentSchemas = require(`${src}/schemas/tickets/tickets.comments`);
@@ -1000,9 +1007,265 @@ const testUserEventsListener = () => {
 	});
 };
 
+const testActivitiesEventsListener = () => {
+	describe('Activities Events', () => {
+		test(`Should trigger userAdded if there is a ${events.USER_ADDED}`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.USER_ADDED);
+			const teamspace = generateRandomString();
+			const executor = generateRandomString();
+			const user = generateRandomString();
+			EventsManager.publish(events.USER_ADDED, { teamspace, executor, user });
+			await waitOnEvent;
+
+			expect(Activities.addActivity).toHaveBeenCalledTimes(1);
+			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.USER_ADDED, executor, { user });
+		});
+
+		test(`Should fail gracefully on error if there is an ${events.USER_ADDED} event`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.USER_ADDED);
+			const teamspace = generateRandomString();
+			const executor = generateRandomString();
+			const user = generateRandomString();
+
+			Activities.addActivity.mockRejectedValueOnce(generateRandomString());
+			EventsManager.publish(events.USER_ADDED, { teamspace, executor, user });
+
+			await waitOnEvent;
+			expect(Activities.addActivity).toHaveBeenCalledTimes(1);
+			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.USER_ADDED, executor, { user });
+		});
+
+		test(`Should trigger userRemoved if there is a ${events.USER_REMOVED}`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.USER_REMOVED);
+			const teamspace = generateRandomString();
+			const executor = generateRandomString();
+			const user = generateRandomString();
+			EventsManager.publish(events.USER_REMOVED, { teamspace, executor, user });
+			await waitOnEvent;
+			expect(Teamspaces.initTeamspace).not.toHaveBeenCalled();
+			expect(Activities.addActivity).toHaveBeenCalledTimes(1);
+			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.USER_REMOVED, executor, { user });
+		});
+
+		test(`Should fail gracefully on error if there is an ${events.USER_REMOVED} event`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.USER_REMOVED);
+			const teamspace = generateRandomString();
+			const executor = generateRandomString();
+			const user = generateRandomString();
+
+			Activities.addActivity.mockRejectedValueOnce(generateRandomString());
+			EventsManager.publish(events.USER_REMOVED, { teamspace, executor, user });
+
+			await waitOnEvent;
+			expect(Activities.addActivity).toHaveBeenCalledTimes(1);
+			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.USER_REMOVED, executor, { user });
+		});
+
+		test(`Should trigger invitationAdded if there is a ${events.INVITATION_ADDED}`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.INVITATION_ADDED);
+			const teamspace = generateRandomString();
+			const executor = generateRandomString();
+			const email = generateRandomString();
+			const job = generateRandomString();
+			const permissions = generateRandomString();
+			EventsManager.publish(events.INVITATION_ADDED, { teamspace, executor, email, job, permissions });
+			await waitOnEvent;
+
+			expect(Activities.addActivity).toHaveBeenCalledTimes(1);
+			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.INVITATION_ADDED, executor,
+				{ email, job, permissions });
+		});
+
+		test(`Should fail gracefully on error if there is an ${events.INVITATION_ADDED} event`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.INVITATION_ADDED);
+			const teamspace = generateRandomString();
+			const executor = generateRandomString();
+			const email = generateRandomString();
+			const job = generateRandomString();
+			const permissions = generateRandomString();
+
+			Activities.addActivity.mockRejectedValueOnce(generateRandomString());
+			EventsManager.publish(events.INVITATION_ADDED, { teamspace, executor, email, job, permissions });
+			await waitOnEvent;
+
+			expect(Activities.addActivity).toHaveBeenCalledTimes(1);
+			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.INVITATION_ADDED, executor,
+				{ email, job, permissions });
+		});
+
+		test(`Should trigger invitationRevoked if there is a ${events.INVITATION_REVOKED}`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.INVITATION_REVOKED);
+			const teamspace = generateRandomString();
+			const executor = generateRandomString();
+			const email = generateRandomString();
+			const job = generateRandomString();
+			const permissions = generateRandomString();
+			EventsManager.publish(events.INVITATION_REVOKED, { teamspace, executor, email, job, permissions });
+			await waitOnEvent;
+
+			expect(Activities.addActivity).toHaveBeenCalledTimes(1);
+			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.INVITATION_REVOKED, executor,
+				{ email, job, permissions });
+		});
+
+		test(`Should fail gracefully on error if there is an ${events.INVITATION_REVOKED} event`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.INVITATION_REVOKED);
+			const teamspace = generateRandomString();
+			const executor = generateRandomString();
+			const email = generateRandomString();
+			const job = generateRandomString();
+			const permissions = generateRandomString();
+
+			Activities.addActivity.mockRejectedValueOnce(generateRandomString());
+			EventsManager.publish(events.INVITATION_REVOKED, { teamspace, executor, email, job, permissions });
+			await waitOnEvent;
+
+			expect(Activities.addActivity).toHaveBeenCalledTimes(1);
+			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.INVITATION_REVOKED, executor,
+				{ email, job, permissions });
+		});
+
+		test(`Should trigger permissionsUpdated if there is a ${events.PERMISSIONS_UPDATED} and it is a teamspace permissions update`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.PERMISSIONS_UPDATED);
+			const teamspace = generateRandomString();
+			const executor = generateRandomString();
+			const initialPermissions = [];
+			const updatedPermissions = [{ user: generateRandomString(), permissions: ['teamspace_admin'] }];
+
+			EventsManager.publish(events.PERMISSIONS_UPDATED,
+				{ teamspace, executor, isTsUpdate: true, initialPermissions, updatedPermissions });
+			await waitOnEvent;
+
+			expect(Activities.addActivity).toHaveBeenCalledTimes(1);
+			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.PERMISSIONS_UPDATED, executor,
+				{ users: updatedPermissions.map((u) => u.user), permissions: [{ from: null, to: 'teamspace_admin' }] });
+		});
+
+		test(`Should trigger permissionsUpdated if there is a ${events.PERMISSIONS_UPDATED} and it is a project permissions update`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.PERMISSIONS_UPDATED);
+			const teamspace = generateRandomString();
+			const executor = generateRandomString();
+			const project = generateUUID();
+			const user1 = generateRandomString();
+			const user2 = generateRandomString();
+			const initialPermissions = [{ project,
+				permissions: [{ user: user1, permissions: [PROJECT_ADMIN] }] }];
+			const updatedPermissions = [{ project,
+				permissions: [{ user: user2, permissions: [PROJECT_ADMIN] }] }];
+
+			EventsManager.publish(events.PERMISSIONS_UPDATED,
+				{ teamspace, executor, initialPermissions, updatedPermissions });
+			await waitOnEvent;
+
+			expect(Activities.addActivity).toHaveBeenCalledTimes(2);
+			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.PERMISSIONS_UPDATED, executor,
+				{ users: [user1], permissions: [{ from: PROJECT_ADMIN, to: null, project }] });
+			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.PERMISSIONS_UPDATED, executor,
+				{ users: [user2], permissions: [{ from: null, to: PROJECT_ADMIN, project }] });
+		});
+
+		test(`Should trigger permissionsUpdated if there is a ${events.PERMISSIONS_UPDATED} and it is a project and model permissions update`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.PERMISSIONS_UPDATED);
+			const teamspace = generateRandomString();
+			const executor = generateRandomString();
+			const project = generateUUID();
+			const model1 = generateUUID();
+			const model2 = generateUUID();
+			const user1 = 'user1';
+			const user2 = 'user2';
+			const initialPermissions = [
+				{
+					project,
+					permissions: [
+						{ user: user1, permissions: [PROJECT_ADMIN] },
+					],
+				},
+				{
+					model: model1,
+					permissions: [
+						{ user: user1, permission: MODEL_VIEWER },
+						{ user: user2, permission: MODEL_VIEWER },
+					],
+				},
+				{
+					model: model2,
+					permissions: [
+						{ user: user1, permission: MODEL_VIEWER },
+						{ user: user2, permission: MODEL_COMMENTER },
+					],
+				},
+			];
+
+			const updatedPermissions = [
+				{
+					project,
+					permissions: [
+						{ user: user2, permissions: [PROJECT_ADMIN] },
+					],
+				},
+				{
+					model: model1,
+					permissions: [
+						{ user: user1, permission: MODEL_COLLABORATOR },
+						{ user: user2, permission: MODEL_COLLABORATOR },
+					],
+				},
+				{
+					model: model2,
+					permissions: [
+						{ user: user1, permission: MODEL_VIEWER },
+						{ user: user2, permission: MODEL_VIEWER },
+					],
+				},
+			];
+
+			ProjectSettings.getProjectList.mockResolvedValueOnce([{ _id: project, models: [model1, model2] }]);
+			EventsManager.publish(events.PERMISSIONS_UPDATED,
+				{ teamspace, executor, initialPermissions, updatedPermissions });
+			await waitOnEvent;
+
+			expect(Activities.addActivity).toHaveBeenCalledTimes(3);
+			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.PERMISSIONS_UPDATED, executor,
+				{ users: [user1],
+					permissions: [
+						{ from: PROJECT_ADMIN, to: null, project },
+					] });
+			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.PERMISSIONS_UPDATED, executor,
+				{ users: [user2],
+					permissions: [
+						{ from: null, to: PROJECT_ADMIN, project },
+						{ from: MODEL_COMMENTER, to: MODEL_VIEWER, project, model: model2 },
+					] });
+			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.PERMISSIONS_UPDATED, executor,
+				{ users: [user1, user2],
+					permissions: [
+						{ from: MODEL_VIEWER, to: MODEL_COLLABORATOR, project, model: model1 },
+					] });
+		});
+
+		test(`Should fail gracefully on error if there is an ${events.PERMISSIONS_UPDATED} event`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.PERMISSIONS_UPDATED);
+			const teamspace = generateRandomString();
+			const executor = generateRandomString();
+			const initialPermissions = [];
+			const updatedPermissions = [{ user: generateRandomString(), permissions: ['teamspace_admin'] }];
+
+			Activities.addActivity.mockRejectedValueOnce(generateRandomString());
+			EventsManager.publish(events.PERMISSIONS_UPDATED,
+				{ teamspace, executor, isTsUpdate: true, initialPermissions, updatedPermissions });
+			await waitOnEvent;
+
+			expect(Activities.addActivity).toHaveBeenCalledTimes(1);
+			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.PERMISSIONS_UPDATED, executor,
+				{ users: updatedPermissions.map((u) => u.user), permissions: [{ from: null, to: 'teamspace_admin' }] });
+		});
+	});
+};
+
 describe('services/eventsListener/eventsListener', () => {
 	EventsListener.init();
 	testModelEventsListener();
 	testAuthEventsListener();
 	testUserEventsListener();
+	testActivitiesEventsListener();
 });
