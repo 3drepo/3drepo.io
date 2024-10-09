@@ -118,7 +118,6 @@ export const CameraOffSight = ({ onCameraSightChanged, viewport, viewbox }: Prop
 	};
 
 	const onMouseDown:MouseEventHandler<HTMLElement> = (ev) => {
-		console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
 		ev.stopPropagation();
 		ev.nativeEvent.stopPropagation();
 		ev.nativeEvent.stopImmediatePropagation();
