@@ -18,16 +18,17 @@ import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
 import { clamp } from 'lodash';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, MouseEventHandler } from 'react';
 import { useParams } from 'react-router';
 import { Vector2 } from 'three';
 import { useModelLoading, useViewpointSubscription } from './viewer.hooks';
 import { CameraOffSightIcon } from './camera.styles';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { setCameraPos } from './camera.helpers';
 
 interface Props {
 	onCameraSightChanged: (cameraOnSight: boolean) => void;
-	scale: any;
+	viewbox: any;
 	viewport: any;
 }
 
@@ -35,11 +36,11 @@ interface Props {
 const cameraPadding = 3;
 const iconSize = 56;
 
-export const CameraOffSight = ({ onCameraSightChanged, viewport, scale }: Props) => {
+export const CameraOffSight = ({ onCameraSightChanged, viewport, viewbox }: Props) => {
 	const viewpoint = useRef(null);
 	const viewportRef = useRef(viewport);
 	const camInSight = useRef(false);
-	const scaleRef = useRef(scale);
+	const scaleRef = useRef(viewbox.scale);
 
 	const [drawingId] = useSearchParam('drawingId');
 	const { containerOrFederation } = useParams<ViewerParams>();
@@ -50,7 +51,7 @@ export const CameraOffSight = ({ onCameraSightChanged, viewport, scale }: Props)
 	const modelLoading = useModelLoading();
 
 	useEffect(() => viewportRef.current = viewport, [viewport]);
-	useEffect(() => scaleRef.current = scale, [scale]);
+	useEffect(() => scaleRef.current = viewbox.scale, [viewbox.scale]);
 
 	useViewpointSubscription((v) => {
 		if (!transform2DTo3D) return;
@@ -88,10 +89,57 @@ export const CameraOffSight = ({ onCameraSightChanged, viewport, scale }: Props)
 		viewpoint.current = v;
 	}, [transform3DTo2D]); 
 
+	const [dragging, setDragging] = useState(false);
 
-	if (!transform3DTo2D || camInSight.current || modelLoading) {
+	const onMouseMove = (ev: MouseEvent) => {
+		ev.stopPropagation();
+		ev.stopImmediatePropagation();
+		ev.preventDefault();
+
+		const rect = (ev.currentTarget as HTMLElement).getBoundingClientRect();
+		const offsetX = ev.clientX - rect.left;
+		const offsetY = ev.clientY - rect.top;
+
+		const x = (-viewbox.x + offsetX) / viewbox.scale;
+		const y = (-viewbox.y + offsetY) / viewbox.scale;
+		// console.log(JSON.stringify({ posx: offsetX, left: rect.x }));
+
+		const newPosition = transform2DTo3D([x, y]);
+
+		setCameraPos(newPosition, viewpoint.current);
+	};
+
+	const onMouseUp = (ev: MouseEvent) => {
+		const target = ev.currentTarget as HTMLElement;
+		target.removeEventListener('mousemove', onMouseMove);
+		target.removeEventListener('mouseup', onMouseUp);
+		target.removeEventListener('mouseleave', onMouseUp);
+		setDragging(false);
+	};
+
+	const onMouseDown:MouseEventHandler<HTMLElement> = (ev) => {
+		console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+		ev.stopPropagation();
+		ev.nativeEvent.stopPropagation();
+		ev.nativeEvent.stopImmediatePropagation();
+		setDragging(true);
+		const container = ev.currentTarget.parentElement;
+
+		container.addEventListener('mousemove', onMouseMove);
+		container.addEventListener('mouseup', onMouseUp);
+		container.addEventListener('mouseleave', onMouseUp);
+	};
+
+
+
+	if (!transform3DTo2D || (camInSight.current && !dragging) || modelLoading ) {
 		return null;
 	}
 
-	return (<CameraOffSightIcon  style={{ transform: `translate(${position.x}px, ${position.y}px) ` }} arrowAngle={angle}/>);
+	return (
+		<div style={{ transform: `translate(${position.x}px, ${position.y}px) `, width:'56px', height:'56px', position:'absolute' }} 
+			onMouseDown={onMouseDown}>
+			{!camInSight.current && <CameraOffSightIcon arrowAngle={angle}/>}
+		</div>
+	);
 };

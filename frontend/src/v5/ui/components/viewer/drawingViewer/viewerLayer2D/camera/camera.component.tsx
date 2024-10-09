@@ -18,11 +18,11 @@ import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { Vector3 } from 'three';
 import { useModelLoading, useViewpointSubscription } from './viewer.hooks';
 import { CameraIcon } from './camera.styles';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { setCameraPos } from './camera.helpers';
 
 
 
@@ -80,27 +80,9 @@ export const Camera = ({ scale }) => {
 		ev.stopPropagation();
 
 		const point = getCursorOffset(ev);
+		const newPosition = transform2DTo3D(point);
 
-
-		const newPosition =  transform2DTo3D(point);
-		const {
-			up,
-			// eslint-disable-next-line @typescript-eslint/naming-convention
-			view_dir,
-			position: pos, type } = viewpoint.current;
-
-		const cam = {
-			position: [newPosition.x,  pos[1], newPosition.y ],
-			view_dir,
-			up,
-			type, 
-			look_at: undefined, 
-			orthographicSize: undefined, 
-			account: undefined, 
-			model: undefined,
-		};
-
-		ViewerService.setCamera(cam, false);
+		setCameraPos(newPosition, viewpoint.current);
 	};
 
 	const onMouseUp = (ev: MouseEvent) => {
