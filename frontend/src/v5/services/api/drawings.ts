@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DrawingStats, MinimumDrawing } from '@/v5/store/drawings/drawings.types';
 import { AxiosResponse } from 'axios';
+import { DrawingSettings, DrawingStats, MinimumDrawing } from '@/v5/store/drawings/drawings.types';
 import api from './default';
 
 export const addFavourite = (teamspace, projectId, drawingId): Promise<AxiosResponse<void>> => (
@@ -34,6 +34,11 @@ export const fetchDrawings = async (teamspace, projectId): Promise<AxiosResponse
 
 export const fetchDrawingsStats = async (teamspace, projectId, drawingId): Promise<DrawingStats> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/drawings/${drawingId}/stats`);
+	return data;
+};
+
+export const fetchDrawingSettings = async (teamspace, projectId, drawingId): Promise<DrawingSettings> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/drawings/${drawingId}`);
 	return data;
 };
 

@@ -16,7 +16,7 @@
  */
 
 import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
-import { AddFavouriteAction, DeleteDrawingAction, RemoveFavouriteAction, CreateDrawingAction, DrawingsActions, DrawingsTypes, FetchTypesAction, FetchDrawingStatsAction, FetchDrawingsAction, UpdateDrawingAction, FetchCalibrationAction, UpdateCalibrationAction, ApproveCalibrationAction } from './drawings.redux';
+import { AddFavouriteAction, DeleteDrawingAction, RemoveFavouriteAction, CreateDrawingAction, DrawingsActions, DrawingsTypes, FetchTypesAction, FetchDrawingStatsAction, FetchDrawingsAction, UpdateDrawingAction, FetchCalibrationAction, UpdateCalibrationAction, ApproveCalibrationAction, FetchDrawingSettingsAction } from './drawings.redux';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActions } from '../dialogs/dialogs.redux';
@@ -88,6 +88,18 @@ export function* fetchCalibration({ teamspace, projectId, drawingId }: FetchCali
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'drawings.fetchCalibration.error', defaultMessage: 'trying to fetch drawing calibration' }),
+			error,
+		}));
+	}
+}
+
+export function* fetchDrawingSettings({ teamspace, projectId, drawingId }: FetchDrawingSettingsAction) {
+	try {
+		const data = yield API.Drawings.fetchDrawingSettings(teamspace, projectId, drawingId);
+		yield put(DrawingsActions.updateDrawingSuccess(projectId, drawingId, data));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'drawings.fetchSettings.error', defaultMessage: 'trying to fetch drawing settings' }),
 			error,
 		}));
 	}
@@ -188,6 +200,7 @@ export default function* DrawingsSaga() {
 	yield takeLatest(DrawingsTypes.ADD_FAVOURITE, addFavourites);
 	yield takeLatest(DrawingsTypes.REMOVE_FAVOURITE, removeFavourites);
 	yield takeEvery(DrawingsTypes.FETCH_DRAWINGS, fetchDrawings);
+	yield takeEvery(DrawingsTypes.FETCH_DRAWING_SETTINGS, fetchDrawingSettings);
 	yield takeEvery(DrawingsTypes.FETCH_DRAWING_STATS, fetchDrawingStats);
 	yield takeEvery(DrawingsTypes.FETCH_CALIBRATION, fetchCalibration);
 	yield takeEvery(DrawingsTypes.UPDATE_CALIBRATION, updateCalibration);

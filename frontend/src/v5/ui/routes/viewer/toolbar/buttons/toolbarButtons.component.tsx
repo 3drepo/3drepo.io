@@ -30,7 +30,7 @@ import { VerticalRangeContainer, VerticalRangeValue } from '../selectionToolbar/
 import { useContext } from 'react';
 import { CalibrationContext } from '../../../dashboard/projects/calibration/calibrationContext';
 import { UNITS_CONVERSION_FACTORS_TO_METRES } from '../../../dashboard/projects/calibration/calibration.helpers';
-import { CONTAINER_UNITS } from '@/v5/store/containers/containers.types';
+import { MODEL_UNITS } from '../../../dashboard/projects/models.helpers';
 
 export const HomeButton = () => (
 	<ToolbarButton
@@ -117,7 +117,7 @@ export const VerticalRange = ({ hidden }) => {
 	const isMetric = unit !== 'ft';
 	const conversionFactor = isMetric ? UNITS_CONVERSION_FACTORS_TO_METRES[unit] : 1;
 	const rangeValue = ((verticalPlanes?.[1] - verticalPlanes?.[0]) / conversionFactor).toFixed(2);
-	const unitLabel = CONTAINER_UNITS.find(({ value }) => value === (isMetric ? 'm' : 'ft')).abbreviation;
+	const unitLabel = MODEL_UNITS.find(({ value }) => value === (isMetric ? 'm' : 'ft')).abbreviation;
 	return (
 		<VerticalRangeContainer hidden={hidden}>
 			<VerticalRangeValue>{rangeValue}</VerticalRangeValue>{unitLabel}

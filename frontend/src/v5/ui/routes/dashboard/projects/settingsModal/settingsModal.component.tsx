@@ -32,29 +32,7 @@ import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledError
 import { FormNumberField, FormSelect, FormSelectView, FormTextField } from '@controls/inputs/formInputs.component';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FlexContainer, SectionTitle, Placeholder, HiddenMenuItem } from './settingsModal.styles';
-
-const UNITS = [
-	{
-		name: formatMessage({ id: 'units.mm.name', defaultMessage: 'Millimetres' }),
-		abbreviation: formatMessage({ id: 'units.mm.abbreviation', defaultMessage: 'mm' }),
-	},
-	{
-		name: formatMessage({ id: 'units.cm.name', defaultMessage: 'Centimetres' }),
-		abbreviation: formatMessage({ id: 'units.cm.abbreviation', defaultMessage: 'cm' }),
-	},
-	{
-		name: formatMessage({ id: 'units.dm.name', defaultMessage: 'Decimetres' }),
-		abbreviation: formatMessage({ id: 'units.dm.abbreviation', defaultMessage: 'dm' }),
-	},
-	{
-		name: formatMessage({ id: 'units.m.name', defaultMessage: 'Metres' }),
-		abbreviation: formatMessage({ id: 'units.m.abbreviation', defaultMessage: 'm' }),
-	},
-	{
-		name: formatMessage({ id: 'units.ft.name', defaultMessage: 'Feet and inches' }),
-		abbreviation: formatMessage({ id: 'units.ft.abbreviation', defaultMessage: 'ft' }),
-	},
-];
+import { MODEL_UNITS } from '../models.helpers';
 
 const CONTAINER_TYPES = [
 	formatMessage({ id: 'settings.type.uncategorised', defaultMessage: 'Uncategorised' }),
@@ -88,7 +66,7 @@ interface IFormInput {
 }
 
 const getDefaultValues = (containerOrFederation: IContainer | IFederation, isContainer?: boolean) => {
-	const DEFAULT_UNIT = UNITS[0];
+	const DEFAULT_UNIT = MODEL_UNITS[0];
 	const {
 		unit = DEFAULT_UNIT.abbreviation,
 		angleFromNorth,
@@ -275,7 +253,7 @@ export const SettingsModal = ({
 					control={control}
 					disabled={!isProjectAdmin}
 				>
-					{UNITS.map(({ name, abbreviation }) => (
+					{MODEL_UNITS.map(({ name, abbreviation }) => (
 						<MenuItem key={abbreviation} value={abbreviation}>
 							{name}
 						</MenuItem>

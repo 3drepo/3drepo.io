@@ -16,10 +16,10 @@
  */
 
 import * as faker from 'faker';
-import { IDrawing, DrawingStats, Calibration } from '@/v5/store/drawings/drawings.types';
+import { IDrawing, DrawingStats, Calibration, DrawingSettings } from '@/v5/store/drawings/drawings.types';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
 import { UploadStatus } from '@/v5/store/containers/containers.types';
-import { getFakeCalibrationStatus } from './drawingRevisions/drawingRevisions.fixtures';
+import { getFakeCalibrationStatus, getFakeDrawingSettingsCalibration, getFakeVerticalRange, getRandomUnits } from './drawingRevisions/drawingRevisions.fixtures';
 import { EMPTY_CALIBRATION } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
 import { Vector } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 
@@ -55,14 +55,23 @@ export const prepareMockStats = (overrides?: Partial<DrawingStats>): DrawingStat
 	...overrides,
 });
 
-const getFakeCoordinate = (dimensions: number): any => Array(dimensions).map(() => faker.datatype.number());
-const getFakeCalibrationArray = (dimensions: number): Vector<any> => [getFakeCoordinate(dimensions), getFakeCoordinate(dimensions)];
+export const getFakeCoordinate = (dimensions: number): any => Array(dimensions).map(() => faker.datatype.number());
+export const getFakeCalibrationArray = (dimensions: number): Vector<any> => [getFakeCoordinate(dimensions), getFakeCoordinate(dimensions)];
 export const prepareMockCalibration = (overrides?: Partial<Calibration>): Calibration => ({
 	horizontal: {
 		drawing: getFakeCalibrationArray(2),
 		model: getFakeCalibrationArray(3),
 	},
-	verticalRange: getFakeCoordinate(3),
-	units: faker.random.arrayElement(['mm', 'cm', 'dm', 'm', 'ft']),
-	...overrides?.horizontal,
-})
+	verticalRange: getFakeVerticalRange(),
+	units: getRandomUnits(),
+	...overrides,
+});
+
+export const prepareMockSettings = (overrides?: Partial<DrawingSettings>): DrawingSettings => ({
+	calibration: getFakeDrawingSettingsCalibration(),
+	desc: faker.random.words(3),
+	type: faker.random.word(),
+	number: faker.random.alphaNumeric(),
+	name: faker.random.word(),
+	...overrides,
+});

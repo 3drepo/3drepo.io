@@ -1108,7 +1108,7 @@ export class ViewerService {
 		}
 	}
 
-	public async setCamera({ position, up, view_dir, look_at, type, orthographicSize, account, model }) {
+	public async setCamera({ position, up, view_dir, look_at, type, orthographicSize, account, model }, animation = true) {
 		await this.isModelReady();
 		UnityUtil.setViewpoint(
 			position,
@@ -1118,7 +1118,8 @@ export class ViewerService {
 			type,
 			orthographicSize,
 			account,
-			model
+			model,
+			animation ? undefined : 0,
 		);
 
 		this.emit(VIEWER_EVENTS.CAMERA_PROJECTION_SET, type);

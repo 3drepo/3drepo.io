@@ -2109,6 +2109,7 @@ export class UnityUtil {
 	 * @param lookAt - point in space the camera is looking at. (pivot point)
 	 * @param account - name of teamspace
 	 * @param model - name of model
+	 * @param animationTime - how long the camera should spend during the transition from the current viewpoint to this one
 	 */
 	public static setViewpoint(
 		pos: [number],
@@ -2119,6 +2120,7 @@ export class UnityUtil {
 		orthographicSize?: number,
 		account?: string,
 		model?: string,
+		animationTime?: number,
 	) {
 		const param: any = {};
 		if (account && model) {
@@ -2131,6 +2133,12 @@ export class UnityUtil {
 
 		if (orthographicSize) {
 			param.orthographicSize = orthographicSize;
+		}
+
+		if (typeof animationTime === 'number') { // don't check for a truthy value here because 0 is a valid animationTime
+			param.animationTime = animationTime;
+		} else {
+			param.animationTime = 1;
 		}
 
 		param.position = pos;

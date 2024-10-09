@@ -19,44 +19,35 @@ import { AutocompleteProps, TextFieldProps } from '@mui/material';
 import SearchIcon from '@assets/icons/outlined/search-outlined.svg';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
-import { TextField, StartAdornment, SearchChip } from '../../../../../controls/search/searchInput/searchInput.styles';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { Autocomplete } from './ticketSearchInput.styles';
+import { TextField, StartAdornment, SearchChip } from '../searchInput/searchInput.styles';
+import { Autocomplete } from './autocompleteSearchInput.styles';
 
-type ITicketSearchInput = {
+type AutocompleteSearchInputProps = Omit<Partial<AutocompleteProps<TextFieldProps, boolean, undefined, undefined, typeof SearchChip>>, 'onChange' | 'value'> & {
 	variant?: 'filled' | 'outlined',
 	placeholder?: string,
-} & Partial<AutocompleteProps<TextFieldProps, boolean, undefined, undefined, typeof SearchChip>>;
-
-export const TicketSearchInput = ({ variant = 'filled', placeholder, ...props }: ITicketSearchInput): JSX.Element => {
-	const queries = TicketsCardHooksSelectors.selectFilteringQueries();
-
-	const onChange = (_, newQueries, reason) => {
-		TicketsCardActionsDispatchers.setQueryFilters((reason === 'clear') ? [] : newQueries);
-	};
-
-	const removeQuery = (deletedQuery) => TicketsCardActionsDispatchers.setQueryFilters(queries.filter((query) => query !== deletedQuery ));
-
+	onChange: (value: string[]) => void;
+	value: string[];
+};
+export const AutocompleteSearchInput = ({ variant = 'filled', placeholder, value, onChange, ...props }: AutocompleteSearchInputProps): JSX.Element => {
+	const handleChange = (event, newQueries, reason) => onChange(reason === 'clear' ? [] : newQueries);
+	const handleDeleteQuery = (deletedQuery) => onChange(value.filter((query) => query !== deletedQuery));
 	return (
 		<Autocomplete
-			value={queries}
+			value={value}
 			open={false}
 			freeSolo
 			multiple
 			options={[]}
 			clearIcon={<CloseIcon />}
 			getOptionLabel={(labelObject) => labelObject[0] ?? ''} // This silences a console error
-			renderTags={(
-				values: string[],
-			) => values.map((value: string) => (
+			renderTags={(queries: string[]) => queries.map((query: string) => (
 				<SearchChip
-					key={value}
-					label={value}
-					onDelete={() => removeQuery(value)}
+					key={query}
+					label={query}
+					onDelete={() => handleDeleteQuery(query)}
 				/>
 			))}
-			onChange={onChange}
+			onChange={handleChange}
 			{...props}
 			renderInput={(params: any) => (
 				<TextField
@@ -66,8 +57,8 @@ export const TicketSearchInput = ({ variant = 'filled', placeholder, ...props }:
 					InputProps={{
 						...params.InputProps,
 						startAdornment: (
-							// Mui Autocomplete sets the startAdornment to be the query chips
-							// therefore this is required to prevent the search icon and chips overwriting eachother
+						// Mui Autocomplete sets the startAdornment to be the query chips
+						// therefore this is required to prevent the search icon and chips overwriting eachother
 							<>
 								<StartAdornment>
 									<SearchIcon />

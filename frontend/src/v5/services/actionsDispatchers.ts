@@ -44,6 +44,7 @@ import { ClipMode, GizmoMode, MeasureMode, NavigationMode, ProjectionMode } from
 import { DrawingRevisionsActions, IDrawingRevisionsActionCreators } from '../store/drawings/revisions/drawingRevisions.redux';
 import { CompareActions } from '@/v4/modules/compare';
 import { ViewpointsActions } from '@/v4/modules/viewpoints';
+import { DrawingsCardActions, IDrawingsCardActionCreators } from '../store/drawings/card/drawingsCard.redux';
 
 interface IBimActionCreators {
 	setIsActive: (active: boolean) => Action;
@@ -123,6 +124,7 @@ export const ContainerRevisionsActionsDispatchers = createActionsDispatchers<ICo
 export const CurrentUserActionsDispatchers = createActionsDispatchers<ICurrentUserActionCreators>(CurrentUserActions);
 export const DialogsActionsDispatchers = createActionsDispatchers<IDialogsActionCreators>(DialogsActions);
 export const DrawingsActionsDispatchers =  createActionsDispatchers<IDrawingsActionCreators>(DrawingsActions);
+export const DrawingsCardActionsDispatchers =  createActionsDispatchers<IDrawingsCardActionCreators>(DrawingsCardActions);
 export const DrawingRevisionsActionsDispatchers =  createActionsDispatchers<IDrawingRevisionsActionCreators>(DrawingRevisionsActions);
 export const FederationsActionsDispatchers = createActionsDispatchers<IFederationsActionCreators>(FederationsActions);
 export const GroupsActionsDispatchers = createActionsDispatchers<IGroupsActionCreators>(GroupsActions);
