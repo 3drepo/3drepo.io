@@ -16,8 +16,10 @@
  */
 
 const { src } = require('../../../helper/path');
-const { generateRandomString } = require('../../../helper/services');
-const { times } = require('lodash');
+
+const { actions } = require(`${src}/models/activities.constants`);
+const { MODEL_VIEWER, PROJECT_ADMIN, MODEL_COMMENTER, MODEL_COLLABORATOR } = require(`${src}/utils/permissions/permissions.constants`);
+const { generateRandomString, generateUUID } = require('../../../helper/services');
 
 jest.mock('../../../../../src/v5/models/loginRecords');
 const LoginRecords = require(`${src}/models/loginRecords`);
@@ -26,7 +28,6 @@ const ProjectSettings = require(`${src}/models/projectSettings`);
 
 jest.mock('../../../../../src/v5/models/activities');
 const Activities = require(`${src}/models/activities`);
-
 
 jest.mock('../../../../../src/v5/services/chat');
 const ChatService = require(`${src}/services/chat`);

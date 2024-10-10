@@ -33,7 +33,7 @@ const templates = {
 	errorNotification,
 	modelImportError,
 	zombieProcessingStatuses,
-	activities
+	activities,
 };
 
 MailerConstants.templates = {};
