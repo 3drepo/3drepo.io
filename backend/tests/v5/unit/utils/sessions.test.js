@@ -30,6 +30,10 @@ const testIsSessionValid = () => {
 	const session = { user: { referer: 'http://abc.com' }, token };
 	const cookies = { [CSRF_COOKIE]: token };
 	const headers = { referer: 'http://abc.com', [CSRF_HEADER]: token };
+
+	// eslint-disable-next-line no-script-url
+	const strangeReferrer = 'javascript:/*</script><img/onerror=\'-/"/-/ onmouseover=1/-/[`*/[]/[(new(Image)).src=(/;/+/vzy1ss35kc0243rb5dn8ks685zbuzy3mvdj860upX;oastify.com/).replace(/.;/g,[])]//\'src=>';
+
 	describe.each([
 		['a valid session', session, cookies, headers, true],
 		['a valid session but the CRSF token is in lower case', session, cookies, { ...headers, [CSRF_HEADER.toLowerCase()]: token }, true],
@@ -38,6 +42,7 @@ const testIsSessionValid = () => {
 		['a valid session but no csrf cookie', { user: session.user }, {}, headers, false],
 		['a valid session with a matching domain in the referer', session, cookies, { ...headers, referer: 'http://abc.com/xyz' }, true],
 		['a valid session with a mismatched referer', session, cookies, { ...headers, referer: 'http://xyz.com' }, false],
+		['referrer contains javascript injection', session, cookies, { ...headers, referer: strangeReferrer }, false],
 		['a valid session with no referer in the request', session, cookies, { ...headers, referer: undefined }, true],
 		['a valid session with the referer being one of the api URLS', session, cookies, { ...headers, referer: apiUrls[0] }, true],
 		['an invalid session', { user: {} }, cookies, { ...headers, referer: 'https://abc.com' }, false],
