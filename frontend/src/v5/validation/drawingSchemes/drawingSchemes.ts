@@ -19,7 +19,7 @@ import { revisionDesc } from '../containerAndFederationSchemes/validators';
 import { desc, name, alphaNumericHyphens, uploadFile, trimmedString } from '../shared/validators';
 import { formatMessage } from '@/v5/services/intl';
 import { selectRevisions } from '@/v5/store/drawings/revisions/drawingRevisions.selectors';
-import { getState } from '@/v4/modules/store';
+import { getState } from '@/v5/helpers/redux.helpers';
 
 const number = Yup.string()
 	.matches(alphaNumericHyphens,
