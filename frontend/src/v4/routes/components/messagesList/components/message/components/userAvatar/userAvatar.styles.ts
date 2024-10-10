@@ -21,8 +21,8 @@ import { AuthAvatarMui } from '@components/authenticatedResource/authAvatarMui.c
 import { COLOR } from '../../../../../../../styles';
 
 const jobBorderStyles = (color) => css`
-	height: 30px;
-	width: 30px;
+	height: 34px;
+	width: 34px;
 	border-style: solid;
 	border-color: ${color};
 	border-width: 2px;

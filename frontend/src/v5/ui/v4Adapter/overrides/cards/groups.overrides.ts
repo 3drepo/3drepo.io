@@ -259,6 +259,8 @@ const expandedGroupItem = css`
 
 				${SelectedCriteria} {
 					padding: 5px 15px 12px;
+					box-sizing: content-box;
+
 					${ButtonContainer} {
 						top: -25px;
 						right: 14px;
