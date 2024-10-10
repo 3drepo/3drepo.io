@@ -27,7 +27,7 @@ const CIRCLE_SIZE = {
 export const Popover = styled(AuthAvatarMui)<{ $backgroundColor }>`
 	margin: 0;
 	color: ${({ $backgroundColor, theme }) => (isLight($backgroundColor, 170) ? theme.palette.secondary.main : theme.palette.primary.contrast)};
-	background-color: ${({ backgroundColor, theme }) => backgroundColor || theme.palette.primary.contrast};
+	background-color: ${({ $backgroundColor, theme }) => $backgroundColor || theme.palette.primary.contrast};
 	pointer-events: auto;
 	font-size: 9px;
 	${({ size = 'medium' }) => css`
