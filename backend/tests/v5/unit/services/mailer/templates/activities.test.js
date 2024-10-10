@@ -37,6 +37,7 @@ const testHtml = () => {
 		test('should get activities template html', async () => {
 			const data = {
 				password: generateRandomString(),
+				firstName: generateRandomString(),
 			};
 			const res = await Activities.html(data);
 			expect(isHtml(res)).toEqual(true);
@@ -44,6 +45,16 @@ const testHtml = () => {
 	});
 };
 
+const testSubject = () => {
+	describe('get subject', () => {
+		test('should get the subject of the template', () => {
+			const res = Activities.subject();
+			expect(res).toEqual('Activity logs file password');
+		});
+	});
+};
+
 describe('services/mailer/templates/activities', () => {
 	testHtml();
+	testSubject();
 });
