@@ -155,7 +155,7 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 	return {email, job, permissions};
 };
 
-invitations.removeTeamspaceFromInvitation = async (username, email, teamspace) => {
+invitations.removeTeamspaceFromInvitation = async (email, teamspace, executor) => {
 	email = email.toLowerCase();
 	const coll = await getCollection();
 	const result = await coll.findOne({_id:email});
@@ -174,7 +174,7 @@ invitations.removeTeamspaceFromInvitation = async (username, email, teamspace) =
 		await coll.updateOne({_id:email}, { $set: data });
 	}
 
-	publish(events.INVITATION_REVOKED, { teamspace, executor: username, email, job: entryToRemove.job, permissions: entryToRemove.permissions});
+	publish(events.INVITATION_REVOKED, { teamspace, executor, email, job: entryToRemove.job, permissions: entryToRemove.permissions});
 
 	return {};
 

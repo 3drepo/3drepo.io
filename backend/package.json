@@ -31,7 +31,7 @@
     "apidoc": "0.29.0",
     "app-config": "1.0.1",
     "archiver": "6.0.2",
-    "archiver-zip-encrypted": "^2.0.0",
+    "archiver-zip-encrypted": "2.0.0",
     "async": "3.2.5",
     "axios": "1.7.2",
     "body-parser": "1.20.2",

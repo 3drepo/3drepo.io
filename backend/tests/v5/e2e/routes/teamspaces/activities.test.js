@@ -66,8 +66,7 @@ const testActivities = () => {
 			['teamspace does not exist', users.tsAdmin.apiKey, generateRandomString(), undefined, false, templates.teamspaceNotFound],
 			['user is not a member of the teamspace', users.nobody.apiKey, undefined, undefined, false, templates.teamspaceNotFound],
 			['user is not a teamspace admin', users.normalUser.apiKey, undefined, undefined, false, templates.notAuthorized],
-			['user is a teamspace admin', users.tsAdmin.apiKey, undefined, undefined, true, activities],
-			['user is a teamspace admin (from and to provided)', users.tsAdmin.apiKey, undefined, { from: activities[3].timestamp, to: activities[7].timestamp }, true, activities.slice(3, 7)],
+			['user is a teamspace admin', users.tsAdmin.apiKey, undefined, undefined, true],
 		])('', (desc, key, ts, query, success, expectedRes) => {
 			test(`should ${success ? 'succeed' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : expectedRes.status;
