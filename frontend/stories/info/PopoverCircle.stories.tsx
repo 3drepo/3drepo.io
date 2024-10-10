@@ -16,7 +16,7 @@
  */
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { Meta, StoryObj } from '@storybook/react';
-import { PopoverCircle } from '@components/shared/popoverCircles/popoverCircle.styles';
+import { PopoverCircle } from '@components/shared/popoverCircles/popoverCircle.component';
 
 export default {
 	title: 'Info/PopoverCircle',
@@ -29,7 +29,6 @@ type Story = StoryObj<typeof PopoverCircle>;
 export const PopoverCircleWithImage: Story = {
 	args: {
 		src: 'https://i.pinimg.com/170x/26/5c/1c/265c1cc710304eb15607e18c6f591c85.jpg',
-		PopoverComponent: () => <div>I am a popover</div>,
 	},
 	render: (args) => (
 		<HoverPopover anchor={() => (<PopoverCircle {...args} />)}>

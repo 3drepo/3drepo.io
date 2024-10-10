@@ -19,8 +19,8 @@ import styled, { css } from 'styled-components';
 import { Typography } from '@controls/typography';
 import { ChevronButton as ChevronButtonBase } from '@controls/chevronButton';
 
-export const Container = styled.div<{ isLoading?: boolean }>`
-	${({ isLoading }) => isLoading && css`
+export const Container = styled.div<{ $isLoading?: boolean }>`
+	${({ $isLoading }) => $isLoading && css`
 		pointer-events: none;
 	`}
 `;

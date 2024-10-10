@@ -57,7 +57,7 @@ export const InputController: InputControllerType = forwardRef(<T,>({
 		name={name}
 		control={control}
 		defaultValue={defaultValue}
-		render={({ field }) => (
+		render={({ field: { ref: fieldRef, ...field } }) => (
 			// @ts-ignore
 			<Input
 				{...field}
@@ -71,7 +71,7 @@ export const InputController: InputControllerType = forwardRef(<T,>({
 					field.onBlur();
 					onBlur?.();
 				}}
-				inputRef={ref || field.ref}
+				inputRef={ref || fieldRef}
 				error={!!formError}
 				helperText={formError?.message}
 			/>

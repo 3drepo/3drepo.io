@@ -97,7 +97,7 @@ export const SquaredColorOption = styled(ColorCircle).attrs({
 
 export const HexTextField = styled(TextField).attrs({
 	inputProps: {
-		maxLength: '6',
+		maxlength: '6',
 	},
 })`
 	width: 82px;

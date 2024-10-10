@@ -105,6 +105,7 @@ export class ButtonMenu extends PureComponent<IProps, IState> {
 			IconProps,
 			ripple,
 			className,
+			onOpen,
 			...props
 		} = this.props;
 		const { activeMenu } = this.state;

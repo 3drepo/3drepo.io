@@ -48,8 +48,11 @@ export const useSyncProps = (props) => {
 		ref.current = new EventEmitter();
 	} 
 	
-	ref.current.emit(UPDATE_EVENT, props);
 	ref.current.props = props;
+
+	useEffect(() => { 
+		ref.current.emit(UPDATE_EVENT, props);
+	}, [props]);
 
 	return ref;
 };

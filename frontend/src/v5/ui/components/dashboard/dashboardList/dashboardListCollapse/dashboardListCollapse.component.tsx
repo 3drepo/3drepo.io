@@ -46,7 +46,7 @@ export const DashboardListCollapse = ({
 	const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
 	return (
-		<Container className={className} isLoading={!interactableWhileLoading && isLoading}>
+		<Container className={className} $isLoading={!interactableWhileLoading && isLoading}>
 			<ControlsContainer>
 				<ButtonContainer onClick={() => setIsExpanded((state) => !state)}>
 					<Tooltip title={(isExpanded ? tooltipTitles?.visible : tooltipTitles?.collapsed) ?? ''}>

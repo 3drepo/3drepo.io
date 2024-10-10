@@ -15,14 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Link as BaseLink } from 'react-router-dom';
 import styled from 'styled-components';
 import { Button } from '@controls/button';
 import MicrosoftIcon from '@assets/icons/thirdParty/microsoft.svg';
 import { createElement } from 'react';
 
 export const MicrosoftButton = styled(Button).attrs({
-	component: BaseLink,
 	variant: 'contained',
 	color: 'primary',
 	startIcon: createElement(MicrosoftIcon),

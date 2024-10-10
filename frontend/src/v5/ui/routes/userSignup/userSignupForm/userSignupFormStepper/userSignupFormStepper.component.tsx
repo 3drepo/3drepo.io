@@ -46,7 +46,7 @@ export interface UserSignupFormStepperProps extends StepperProps {
 	onContextUpdated?: (contextValue: UserSignupFormStepperContextValue) => void;
 }
 
-export const UserSignupFormStepper = ({ children, onSubmit, ...props }: UserSignupFormStepperProps) => {
+export const UserSignupFormStepper = ({ children, onSubmit, onContextUpdated, ...props }: UserSignupFormStepperProps) => {
 	const [activeStep, setActiveStep] = useState(props.activeStep || 0);
 	const [completedSteps, setCompletedSteps] = useState(new Set<number>());
 	const [erroredStep, setErroredStep] = useState<number | null>();
@@ -117,7 +117,7 @@ export const UserSignupFormStepper = ({ children, onSubmit, ...props }: UserSign
 		};
 
 		setContextValue(newContextValue);
-		props.onContextUpdated?.(newContextValue);
+		onContextUpdated?.(newContextValue);
 	}, [activeStep, completedSteps, erroredStep]);
 
 	return (
