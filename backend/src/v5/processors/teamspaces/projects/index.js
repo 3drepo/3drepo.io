@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { MODEL_CATEGORIES, statusCodes } = require('../../../models/modelSettings.constants');
 const { createProject, deleteProject, getProjectById, getProjectList, updateProject } = require('../../../models/projectSettings');
 const { getFile, removeFile, storeFile } = require('../../../services/filesManager');
 const {
@@ -70,5 +71,9 @@ Projects.getImage = (teamspace, project) => getFile(teamspace, COL_NAME, project
 Projects.updateImage = (teamspace, project, imageBuffer) => storeFile(teamspace, COL_NAME, project, imageBuffer);
 
 Projects.deleteImage = (teamspace, project) => removeFile(teamspace, COL_NAME, project);
+
+Projects.getDrawingCategories = () => MODEL_CATEGORIES;
+
+Projects.getStatusCodes = () => statusCodes;
 
 module.exports = Projects;

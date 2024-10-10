@@ -22,6 +22,8 @@ const ServiceHelper = require('../../../../../../helper/services');
 const { src, image } = require('../../../../../../helper/path');
 const { serialiseTicketTemplate } = require('../../../../../../../../src/v5/middleware/dataConverter/outputs/common/tickets.templates');
 
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+
 const { basePropertyLabels, propTypes, presetEnumValues, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 const { updateOne, findOne } = require(`${src}/handler/db`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
@@ -42,7 +44,7 @@ const generateBasicData = () => ({
 	teamspace: ServiceHelper.generateRandomString(),
 	project: ServiceHelper.generateRandomProject(),
 	con: ServiceHelper.generateRandomModel(),
-	fed: ServiceHelper.generateRandomModel({ isFederation: true }),
+	fed: ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
 });
 
 const setupBasicData = async (users, teamspace, project, models, templatesToAdd) => {
@@ -586,11 +588,12 @@ const testGetTicket = () => {
 		describe.each(generateTestData())('Containers', runTest);
 	});
 };
+
 const testGetTicketList = () => {
 	describe('Get ticket list', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
 		const conNoTickets = ServiceHelper.generateRandomModel();
-		const fedNoTickets = ServiceHelper.generateRandomModel({ isFederation: true });
+		const fedNoTickets = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
 		const templatesToUse = times(3, () => ServiceHelper.generateTemplate());
 
 		con.tickets = times(10, (n) => ServiceHelper.generateTicket(templatesToUse[n % templatesToUse.length]));
@@ -711,6 +714,7 @@ const testUpdateTicket = () => {
 		const immutableProp = ServiceHelper.generateRandomString();
 		const immutablePropWithDefaultValue = ServiceHelper.generateRandomString();
 		const imagePropName = ServiceHelper.generateRandomString();
+		const imageListPropName = ServiceHelper.generateRandomString();
 		const requiredImagePropName = ServiceHelper.generateRandomString();
 		const uniquePropName = ServiceHelper.generateRandomString();
 		const template = {
@@ -724,6 +728,10 @@ const testUpdateTicket = () => {
 				{
 					name: imagePropName,
 					type: propTypes.IMAGE,
+				},
+				{
+					name: imageListPropName,
+					type: propTypes.IMAGE_LIST,
 				},
 				{
 					name: requiredImagePropName,
@@ -752,12 +760,14 @@ const testUpdateTicket = () => {
 		const deprecatedTemplate = ServiceHelper.generateTemplate();
 		con.ticket = ServiceHelper.generateTicket(template);
 		con.ticket.properties[requiredImagePropName] = FS.readFileSync(image, { encoding: 'base64' });
+		con.ticket.properties[imageListPropName] = [FS.readFileSync(image, { encoding: 'base64' })];
 		delete con.ticket.properties[immutablePropWithDefaultValue];
 		con.depTemTicket = ServiceHelper.generateTicket(deprecatedTemplate);
 		const conUniqueProp = con.ticket.properties[uniquePropName];
 
 		fed.ticket = ServiceHelper.generateTicket(template);
 		fed.ticket.properties[requiredImagePropName] = FS.readFileSync(image, { encoding: 'base64' });
+		fed.ticket.properties[imageListPropName] = [FS.readFileSync(image, { encoding: 'base64' })];
 		delete fed.ticket.properties[immutablePropWithDefaultValue];
 		fed.depTemTicket = ServiceHelper.generateTicket(deprecatedTemplate);
 		const fedUniqueProp = fed.ticket.properties[uniquePropName];
@@ -812,7 +822,7 @@ const testUpdateTicket = () => {
 				['the user does not have a valid session', { ...baseRouteParams, key: null }, false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', { ...baseRouteParams, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
 				['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
-				[`the ${modelType} does not exist`, { ...baseRouteParams, model: ServiceHelper.generateRandomModel({ isFederation: true }) }, false, modelNotFound],
+				[`the ${modelType} does not exist`, { ...baseRouteParams, model: ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }) }, false, modelNotFound],
 				[`the model provided is not a ${modelType}`, { ...baseRouteParams, model: wrongTypeModel }, false, modelNotFound],
 				[`the user does not have access to the ${modelType}`, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 				['the ticketId provided does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, false, templates.ticketNotFound, { title: ServiceHelper.generateRandomString() }],
@@ -827,6 +837,7 @@ const testUpdateTicket = () => {
 				['the update data conforms to the template but the user is a viewer', { ...baseRouteParams, key: users.viewer.apiKey }, false, templates.notAuthorized, { title: ServiceHelper.generateRandomString() }],
 				['the update data conforms to the template even if the template is deprecated', { ...baseRouteParams, ticket: model.depTemTicket }, true, undefined, { title: ServiceHelper.generateRandomString() }],
 				['an image property is updated', baseRouteParams, true, undefined, { title: ServiceHelper.generateRandomString(), properties: { [imagePropName]: FS.readFileSync(image, { encoding: 'base64' }) } }],
+				['an image list property is updated', baseRouteParams, true, undefined, { title: ServiceHelper.generateRandomString(), properties: { [imageListPropName]: [FS.readFileSync(image, { encoding: 'base64' })] } }],
 			];
 		};
 
@@ -866,6 +877,7 @@ const testUpdateTicket = () => {
 						...(payloadChanges?.properties ?? {}),
 						[imagePropName]: updatedTicket.properties[imagePropName],
 						[requiredImagePropName]: updatedTicket.properties[requiredImagePropName],
+						[imageListPropName]: updatedTicket.properties[imageListPropName],
 					};
 
 					expect(updatedTicket).toEqual(expectedUpdatedTicket);

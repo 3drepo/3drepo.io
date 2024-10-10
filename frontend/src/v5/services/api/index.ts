@@ -22,8 +22,10 @@ import * as Teamspaces from './teamspaces';
 import * as Projects from './projects';
 import * as Containers from './containers';
 import * as Federations from './federations';
-import * as Revisions from './revisions';
+import * as ContainerRevisions from './containerRevisions';
 import * as Users from './users';
 import * as Tickets from './tickets';
+import * as Drawings from './drawings';
+import * as DrawingRevisions from './drawingRevisions';
 
-export { Auth, TicketComments, CurrentUser, Teamspaces, Projects, Containers, Federations, Revisions, Users, Tickets };
+export { Auth, TicketComments, CurrentUser, Teamspaces, Projects, Containers, Federations, ContainerRevisions, Users, Tickets, Drawings, DrawingRevisions };

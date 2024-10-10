@@ -17,8 +17,8 @@
 
 import { put, select, takeLatest } from 'redux-saga/effects';
 
-import { hexColorRE } from '@/v4/helpers/colors';
 import { IJob } from '@/v5/store/jobs/jobs.types';
+import { getColorHexIsValid } from '@/v5/helpers/colors.helper';
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
@@ -26,7 +26,7 @@ import { selectCurrentTeamspace } from '../userManagement';
 import { JobsActions, JobsTypes } from './jobs.redux';
 
 const sanitizeJob =  (job: IJob) => {
-	if (!hexColorRE.test(job.color)) {
+	if (!getColorHexIsValid(job.color)) {
 		delete job.color;
 	}
 
@@ -57,7 +57,7 @@ export function* fetchJobsAndColors() {
 }
 
 export function* updateJobColor({ job }) {
-	if (!hexColorRE.test(job.color)) {
+	if (!getColorHexIsValid(job.color)) {
 		return;
 	}
 
@@ -74,7 +74,7 @@ export function* updateJobColor({ job }) {
 }
 
 export function* createJob({ job }) {
-	if (!hexColorRE.test(job.color)) {
+	if (!getColorHexIsValid(job.color)) {
 		return;
 	}
 

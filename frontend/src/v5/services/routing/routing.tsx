@@ -18,8 +18,9 @@ import { IContainer } from '@/v5/store/containers/containers.types';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { IProject } from '@/v5/store/projects/projects.types';
 import { generatePath } from 'react-router';
-import { IRevision } from '@/v5/store/revisions/revisions.types';
 import { VIEWER_ROUTE, PROJECT_ROUTE_BASE, PROJECT_ROUTE, TICKETS_SELECTION_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { IContainerRevision } from '@/v5/store/containers/revisions/containerRevisions.types';
+import { generateFullPath } from '@/v5/helpers/url.helper';
 
 export const projectRoute = (teamspace: string, project: IProject | string) => {
 	const projectId = (project as IProject)?._id || (project as string);
@@ -31,19 +32,28 @@ export const projectTabRoute = (teamspace: string, project: IProject | string, t
 	return generatePath(PROJECT_ROUTE, { teamspace, project: projectId, tab });
 };
 
-type RevisionParam = IRevision | string | null | undefined;
+type RevisionParam = IContainerRevision | string | null | undefined;
 type ContainerOrFederationParam = IContainer | IFederation | string;
+type ViewerSearchParams = {
+	drawingId?: string,
+	isCalibrating?: boolean,
+	ticketId?: string,
+	issueId?: string,
+	riskId?: string,
+};
 
 export const viewerRoute = (
 	teamspace: string,
 	project,
 	containerOrFederation: ContainerOrFederationParam,
 	revision: RevisionParam = undefined,
+	newSearchParams: ViewerSearchParams = {},
+	keepSearchParams = true,
 ) => {
 	const containerOrFederationId = (containerOrFederation as IContainer | IFederation)?._id
 		|| (containerOrFederation as string);
 
-	const revisionId = (revision as IRevision)?._id || (revision as string);
+	const revisionId = (revision as IContainerRevision)?._id || (revision as string);
 
 	const params = {
 		teamspace,
@@ -52,7 +62,7 @@ export const viewerRoute = (
 		revision: revisionId,
 	};
 
-	return generatePath(VIEWER_ROUTE, params);
+	return generateFullPath(VIEWER_ROUTE, params, newSearchParams, keepSearchParams);
 };
 
 export const ticketsSelectionRoute = (
