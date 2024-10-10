@@ -14,33 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { isApiUrl } from '@/v5/services/api/default';
-import axios from 'axios';
+import { downloadAuthUrl } from '@/v5/helpers/download.helper';
 import { useEffect, useState } from 'react';
-
-const CachedURL: Record<string, string>  = {};
-
-export const downloadAuthUrl = async (url):Promise<string> => {
-	if ( !isApiUrl(url) ) return url;
-
-	if (!CachedURL[url]) {
-		const response = await axios.get(url, { responseType: 'blob' });
-		CachedURL[url] = URL.createObjectURL(response.data);
-	}
-
-	return CachedURL[url];
-};
-
-export const deleteAuthUrlFromCache = (url) => delete CachedURL[url];
-
-export const downloadFile = async (url: string, fileName?: string) => {
-	const urlParts = new URL(url).pathname.split('/');
-	const urlFileName = urlParts[urlParts.length - 1];
-	const anchor = document.createElement('a');
-	anchor.href = await downloadAuthUrl(url) ;
-	anchor.download = fileName || urlFileName;
-	anchor.click();
-};
 
 // It uses axios config to pass the token so images are returned safely
 export const useAuthenticatedImage = (src: string, onError?) => {
