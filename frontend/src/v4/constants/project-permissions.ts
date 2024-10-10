@@ -39,3 +39,5 @@ export const PROJECT_ROLES_LIST = [
 		tooltip: PROJECT_ROLES_DESC.ADMINISTRATOR
 	}
 ];
+
+export const getProjectPermissionLabelFromType = (type) => PROJECT_ROLES_LIST.find(({ key }) => key === type).label;

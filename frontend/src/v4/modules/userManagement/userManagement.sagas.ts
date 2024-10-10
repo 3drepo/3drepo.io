@@ -17,11 +17,15 @@
 
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
-import { isEmpty } from 'lodash';
+import _, { flatten, isEmpty } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { selectCurrentQuotaSeats } from '@/v5/store/teamspaces/teamspaces.selectors';
+import { updatePermissionsOrTriggerModal } from '@components/shared/updatePermissionModal/updatePermissionModal.component';
+import { getProjectPermissionLabelFromType } from '@/v4/constants/project-permissions';
+import { getModelPermissionLabelFromType } from '@/v4/constants/model-permissions';
+import { TEAMSPACE_PERMISSIONS } from '@/v4/constants/teamspace-permissions';
 import {
 	FederationReminderDialog
 } from '../../routes/modelsPermissions/components/federationReminderDialog/federationReminderDialog.component';
@@ -282,6 +286,13 @@ export function* fetchProject({ project }) {
 
 export function* updateProjectPermissions({ permissions }) {
 	try {
+		const shouldUpdate = yield updatePermissionsOrTriggerModal({
+			permissionsType: getProjectPermissionLabelFromType(permissions[0].permissions[0] || ''),
+			permissionsCount: permissions.length,
+		});
+		if (!shouldUpdate) {
+			return;
+		}
 		const teamspace = yield select(selectCurrentTeamspace);
 		const {name} = yield select(selectProject);
 		const project = {name, permissions};
@@ -361,8 +372,17 @@ export function* updateModelsPermissionsPre({ modelsWithPermissions }) {
 	}
 }
 
+const getUsersCountForModelsPermissionChanges = (permissions) => new Set(flatten(permissions.map((perm) => perm.permissions.map((p) => p.user)))).size;
 export function* updateModelsPermissions({ modelsWithPermissions }) {
 	try {
+		const shouldUpdate = yield updatePermissionsOrTriggerModal({
+			permissionsType: getModelPermissionLabelFromType(modelsWithPermissions[0].permissions[0].permission || ''),
+			permissionsCount: getUsersCountForModelsPermissionChanges(modelsWithPermissions),
+		});
+		if (!shouldUpdate) {
+			return;
+		}
+
 		const teamspace = yield select(selectCurrentTeamspace);
 		const response = yield API.updateModelsPermissions(teamspace, modelsWithPermissions);
 
