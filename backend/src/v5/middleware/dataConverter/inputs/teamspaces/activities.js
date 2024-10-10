@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,18 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const activitiesEventsListener = require('./components/activitiesEvents');
-const authEventsListener = require('./components/authEvents');
-const modelEventsListener = require('./components/modelEvents');
-const userEventsListener = require('./components/userEvents');
+const { createResponseCode, templates } = require('../../../../utils/responseCodes');
+const Yup = require('yup');
+const { respond } = require('../../../../utils/responder');
+const { types } = require('../../../../utils/helper/yup');
 
-const EventsListener = {};
+const Activities = {};
 
-EventsListener.init = () => {
-	modelEventsListener.init();
-	authEventsListener.init();
-	userEventsListener.init();
-	activitiesEventsListener.init();
+Activities.validateGetActivitiesParams = async (req, res, next) => {
+	const schema = Yup.object({
+		from: types.date,
+		to: types.date,
+	});
+
+	try {
+		req.query = await schema.validate(req.query, { stripUnknown: true });
+		await next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err.message));
+	}
 };
 
-module.exports = EventsListener;
+module.exports = Activities;

@@ -217,7 +217,7 @@ function sendInvitation(req, res, next) {
 function removeInvitation(req, res, next) {
 	const { account, email } = req.params;
 
-	Invitations.removeTeamspaceFromInvitation(email, account).then(() => {
+	Invitations.removeTeamspaceFromInvitation(email, account, req.session.user.username).then(() => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {email});
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);

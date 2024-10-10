@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,18 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const activitiesEventsListener = require('./components/activitiesEvents');
-const authEventsListener = require('./components/authEvents');
-const modelEventsListener = require('./components/modelEvents');
-const userEventsListener = require('./components/userEvents');
+const Yup = require('yup');
+const { generateTemplateFn } = require('./common');
 
-const EventsListener = {};
+const TEMPLATE_PATH = `${__dirname}/html/activities.html`;
 
-EventsListener.init = () => {
-	modelEventsListener.init();
-	authEventsListener.init();
-	userEventsListener.init();
-	activitiesEventsListener.init();
-};
+const dataSchema = Yup.object({
+	password: Yup.string().required(),
+}).required(true);
 
-module.exports = EventsListener;
+const ActivitiesTemplate = {};
+ActivitiesTemplate.subject = () => 'Activity logs file password';
+
+ActivitiesTemplate.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
+
+module.exports = ActivitiesTemplate;

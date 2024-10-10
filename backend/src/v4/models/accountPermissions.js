@@ -16,14 +16,23 @@
  */
 
 "use strict";
+const { v5Path } = require("../../interop");
+
 const responseCodes = require("../response_codes.js");
 const C = require("../constants");
 const { intersection } = require("lodash");
 const { removeUserFromProjects, removePermissionsFromAllProjects } = require("./project");
 
-const updatePermissions = async function(teamspaceSettings, updatedPermissions) {
+const { publish } = require(`${v5Path}/services/eventsManager/eventsManager`);
+const { events } = require(`${v5Path}/services/eventsManager/eventsManager.constants`);
+
+const updatePermissions = async function(teamspaceSettings, updatedPermissions, executor) {
 	const User = require("./user");
 	await User.updatePermissions(teamspaceSettings._id, updatedPermissions);
+
+	publish(events.PERMISSIONS_UPDATED, { teamspace: teamspaceSettings._id, executor, isTsUpdate: true,
+		initialPermissions: teamspaceSettings.permissions, updatedPermissions });
+
 	return updatedPermissions;
 };
 
@@ -49,18 +58,18 @@ AccountPermissions.get = function(teamspaceSettings) {
 	return  (teamspaceSettings || {}).permissions || [];
 };
 
-AccountPermissions.updateOrCreate = async function(teamspaceSettings, username, permissions) {
+AccountPermissions.updateOrCreate = async function(teamspaceSettings, username, permissions, executor) {
 	await checkValidUpdate(teamspaceSettings, username, permissions);
 
 	if(permissions && permissions.length === 0) {
 		// this is actually a remove
-		return await this.remove(teamspaceSettings, username);
+		return await this.remove(teamspaceSettings, username,executor);
 	}
 
 	const updatedPermissions = this.get(teamspaceSettings).filter(perm => perm.user !== username)
 		.concat({user: username, permissions});
 
-	const permissionsToReturn = await updatePermissions(teamspaceSettings, updatedPermissions);
+	const permissionsToReturn = await updatePermissions(teamspaceSettings, updatedPermissions, executor);
 	if(permissions.includes(C.PERM_TEAMSPACE_ADMIN)) {
 		await removePermissionsFromAllProjects(teamspaceSettings._id, username);
 	}
@@ -68,17 +77,17 @@ AccountPermissions.updateOrCreate = async function(teamspaceSettings, username, 
 	return permissionsToReturn;
 };
 
-AccountPermissions.update = async function(teamspaceSettings, username, permissions) {
+AccountPermissions.update = async function(teamspaceSettings, username, permissions, executor) {
 	const currPermission = this.findByUser(teamspaceSettings, username);
 
 	if(!currPermission) {
 		throw (responseCodes.ACCOUNT_PERM_NOT_FOUND);
 	}
 
-	return await this.updateOrCreate(teamspaceSettings, username, permissions);
+	return await this.updateOrCreate(teamspaceSettings, username, permissions, executor);
 };
 
-AccountPermissions.remove = async function(teamspaceSettings, userToRemove) {
+AccountPermissions.remove = async function(teamspaceSettings, userToRemove, executor) {
 	const updatedPermissions = this.get(teamspaceSettings).filter(perm => perm.user !== userToRemove);
 
 	if (updatedPermissions.length >=  this.get(teamspaceSettings).length) {
@@ -87,7 +96,7 @@ AccountPermissions.remove = async function(teamspaceSettings, userToRemove) {
 
 	await removeUserFromProjects(teamspaceSettings._id, userToRemove);
 
-	return await updatePermissions(teamspaceSettings, updatedPermissions);
+	return updatePermissions(teamspaceSettings, updatedPermissions, executor);
 };
 
 module.exports = AccountPermissions;
