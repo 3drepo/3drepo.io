@@ -35,7 +35,6 @@ import { DashboardParams, DRAWINGS_ROUTE } from '@/v5/ui/routes/routes.constants
 import { DialogsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingRevisionDetails } from '@components/shared/drawingRevisionDetails/drawingRevisionDetails.component';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DrawingsCalibrationMenu } from '@/v5/ui/routes/viewer/drawings/drawingCalibrationMenu/drawingCalibrationMenu.component';
 import { SelectModelForCalibration } from './selectModelForCalibration/selectModelForCalibration.component';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
@@ -57,7 +56,6 @@ export const DrawingsListItem = memo(({
 	const { teamspace, project } = useParams<DashboardParams>();
 	const isMainList = useContext(IsMainList);
 	const { setOrigin } = useContext(CalibrationContext);
-	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const drawingId = drawing._id;
 
 	const onChangeFavourite = ({ currentTarget: { checked } }) => {
@@ -111,7 +109,6 @@ export const DrawingsListItem = memo(({
 				<DrawingsCalibrationMenu
 					calibrationStatus={drawing.calibrationStatus}
 					onCalibrateClick={onCalibrateClick}
-					disabled={!isProjectAdmin}
 					drawingId={drawingId}
 					{...DRAWING_LIST_COLUMN_WIDTHS.calibration}
 				/>

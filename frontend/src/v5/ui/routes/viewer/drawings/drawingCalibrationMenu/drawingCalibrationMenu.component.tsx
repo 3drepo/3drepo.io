@@ -26,16 +26,17 @@ import { MenuList } from '@mui/material';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import { formatMessage } from '@/v5/services/intl';
 import { DashboardParams } from '../../../routes.constants';
-import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingRevisionsHooksSelectors, DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 
-type DrawingsCalibrationMenuProps = DashboardListItemButtonProps & {
+type DrawingsCalibrationMenuProps = Omit<DashboardListItemButtonProps, 'disabled'> & {
 	calibrationStatus: CalibrationStatus;
 	onCalibrateClick: () => void;
 	drawingId: string;
 };
-export const DrawingsCalibrationMenu = ({ calibrationStatus, onCalibrateClick, drawingId, disabled, ...props }: DrawingsCalibrationMenuProps) => {
+export const DrawingsCalibrationMenu = ({ calibrationStatus, onCalibrateClick, drawingId, ...props }: DrawingsCalibrationMenuProps) => {
 	const { teamspace, project } = useParams<DashboardParams>();
-	const disableButton = disabled || calibrationStatus === CalibrationStatus.EMPTY;
+	const hasCollaboratorAccess = DrawingsHooksSelectors.selectHasCollaboratorAccess(drawingId);
+	const disableButton = !hasCollaboratorAccess || calibrationStatus === CalibrationStatus.EMPTY;
 	const latestRevision = DrawingRevisionsHooksSelectors.selectLatestActiveRevision(drawingId);
 
 	const onApproveCalibration = () => {
