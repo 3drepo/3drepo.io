@@ -16,19 +16,29 @@
  */
 
 import { createSelector } from 'reselect';
-import { selectNonEmptyDrawings } from '../drawings.selectors';
+import { selectDrawings } from '../drawings.selectors';
 import { IDrawingsCardState } from './drawingsCard.redux';
 import { selectRevisions } from '../revisions/drawingRevisions.selectors';
+import { CalibrationStatus } from '../drawings.types';
 
 const selectDrawingsCardDomain = (state): IDrawingsCardState => state.drawingsCard || {};
+
+const ValidStatuses = new Set([CalibrationStatus.CALIBRATED, CalibrationStatus.UNCONFIRMED]);
+
+
+export const selectValidDrawings = createSelector(
+	selectDrawings,
+	(drawings) => drawings.filter((d) => ValidStatuses.has(d.calibrationStatus)),
+);
 
 export const selectQueries = createSelector(
 	selectDrawingsCardDomain,
 	(drawingCardState) => drawingCardState.queries || [],
 );
 
+
 export const selectDrawingsFilteredByQueries = createSelector(
-	selectNonEmptyDrawings,
+	selectValidDrawings,
 	selectQueries,
 	(state) => (drawingId) => selectRevisions(state, drawingId),
 	(drawings, queries, selectDrawingRevisions) => drawings.filter((drawing) => {

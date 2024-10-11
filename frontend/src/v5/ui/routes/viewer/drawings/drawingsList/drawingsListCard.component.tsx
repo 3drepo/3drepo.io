@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CardContainer, CardContent } from '@components/viewer/cards/card.styles';
 import { FormattedMessage } from 'react-intl';
 import DrawingsIcon from '@assets/icons/outlined/drawings-outlined.svg';
@@ -24,7 +24,7 @@ import { DrawingsList } from './drawingsList.component';
 import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 
 export const DrawingsListCard = () => {
-	const drawings = DrawingsHooksSelectors.selectNonEmptyDrawings();
+	const drawings = DrawingsCardHooksSelectors.selectValidDrawings();
 
 	return (
 		<CardContainer>

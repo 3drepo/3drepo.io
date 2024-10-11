@@ -42,11 +42,6 @@ export const selectDrawings = createSelector(
 	},
 );
 
-export const selectNonEmptyDrawings = createSelector(
-	selectDrawings,
-	(drawings) => drawings.filter((d) => d.revisionsCount > 0),
-);
-
 export const selectFavouriteDrawings = createSelector(
 	selectDrawings,
 	(drawings) => drawings.filter(({ isFavourite }) => isFavourite),
