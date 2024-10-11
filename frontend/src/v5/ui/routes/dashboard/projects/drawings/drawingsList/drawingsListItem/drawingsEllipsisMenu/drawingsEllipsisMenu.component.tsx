@@ -69,19 +69,21 @@ export const DrawingsEllipsisMenu = ({
 		<EllipsisMenu selected={selected}>
 			<EllipsisMenuItem
 				title={formatMessage({
-					id: 'drawings.ellipsisMenu.calibrate',
-					defaultMessage: 'Calibrate',
+					id: 'drawings.ellipsisMenu.upload',
+					defaultMessage: 'Upload new revision',
 				})}
-				onClick={onCalibrateClick}
-				disabled={!drawing.revisionsCount}
+				onClick={() => uploadToDrawing(drawingId)}
+				disabled={!canUploadToBackend(drawing.status)}
 				hidden={!hasCollaboratorAccess}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({
-					id: 'drawings.ellipsisMenu.settings',
-					defaultMessage: 'Settings',
+					id: 'drawings.ellipsisMenu.calibrate',
+					defaultMessage: 'Calibrate latest revision',
 				})}
-				onClick={onClickSettings}
+				onClick={onCalibrateClick}
+				disabled={!drawing.revisionsCount}
+				hidden={!hasCollaboratorAccess}
 			/>
 			{onSelectOrToggleItem && (
 				<EllipsisMenuItem
@@ -93,12 +95,10 @@ export const DrawingsEllipsisMenu = ({
 			)}
 			<EllipsisMenuItem
 				title={formatMessage({
-					id: 'drawings.ellipsisMenu.upload',
-					defaultMessage: 'Upload',
+					id: 'drawings.ellipsisMenu.settings',
+					defaultMessage: 'Settings',
 				})}
-				onClick={() => uploadToDrawing(drawingId)}
-				disabled={!canUploadToBackend(drawing.status)}
-				hidden={!hasCollaboratorAccess}
+				onClick={onClickSettings}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({
