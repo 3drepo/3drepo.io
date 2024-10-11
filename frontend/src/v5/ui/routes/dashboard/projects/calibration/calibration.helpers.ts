@@ -20,8 +20,8 @@ import { Coord2D, Coord3D, Vector1D, Vector2D, Vector3D } from './calibration.ty
 import { isNumber } from 'lodash';
 
 export const DEFAULT_SETTINGS_CALIBRATION = {
-	units: 'mm',
-	verticalRange: [0, 1] as Vector1D,
+	units: 'm',
+	verticalRange: [0, 2.4] as Vector1D,
 };
 
 export const UNITS_CONVERSION_FACTORS_TO_METRES = {
