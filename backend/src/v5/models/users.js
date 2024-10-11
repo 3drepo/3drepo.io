@@ -17,10 +17,10 @@
 
 const { USERS_COL, USERS_DB_NAME } = require('./users.constants');
 const { createResponseCode, templates } = require('../utils/responseCodes');
-const { generateHashString, sanitiseRegex } = require('../utils/helper/strings');
 const config = require('../utils/config');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
+const { generateHashString } = require('../utils/helper/strings');
 const { publish } = require('../services/eventsManager/eventsManager');
 
 const User = {};
@@ -56,11 +56,11 @@ User.getUserByUsername = (user, projection) => User.getUserByQuery({ user }, pro
 User.getUserByEmail = (email, projection) => User.getUserByQuery({ 'customData.email': email }, projection);
 
 User.getUserByUsernameOrEmail = (usernameOrEmail, projection) => {
-	const sanitisedUsernameOrEmail = sanitiseRegex(usernameOrEmail);
+	const one = 1;
 	return User.getUserByQuery({
 		$or: [{ user: usernameOrEmail },
 		// eslint-disable-next-line security/detect-non-literal-regexp
-			{ 'customData.email': new RegExp(`^${sanitisedUsernameOrEmail}$`, 'i') }],
+			{ 'customData.email': new RegExp(`^${usernameOrEmail.replace(/(\W)/g, '\\$1')}$`, 'i') }],
 	}, projection);
 };
 
