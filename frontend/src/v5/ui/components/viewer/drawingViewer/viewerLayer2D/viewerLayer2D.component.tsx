@@ -76,7 +76,7 @@ export const ViewerLayer2D = ({ viewBox, snapHandler, viewport }: ViewerLayer2DP
 	const [drawingId] = useSearchParam('drawingId');
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const transform2DTo3D = DrawingsHooksSelectors.selectTransform2DTo3D(drawingId, containerOrFederation);
-	const { verticalRange } = DrawingsHooksSelectors.selectCalibration(drawingId, containerOrFederation);
+	const verticalRange = DrawingsHooksSelectors.selectCalibrationVertical(drawingId, containerOrFederation);
 
 
 	const containerStyle: CSSProperties = {

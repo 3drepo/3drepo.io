@@ -114,6 +114,10 @@ export const selectCalibration = createSelector(
 	},
 );
 
+export const selectCalibrationVertical = createSelector(
+	selectCalibration,
+	(calibration) => calibration.verticalRange,
+);
 
 export const selectTransformMatrix = createSelector(
 	selectCalibration,

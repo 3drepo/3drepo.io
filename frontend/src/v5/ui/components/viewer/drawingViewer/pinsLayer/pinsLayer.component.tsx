@@ -27,16 +27,19 @@ export const PinsLayer = ({ scale, height, width }: PinsLayerProps) => {
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const pins = compact(TicketsCardHooksSelectors.selectTicketPins().concat(TicketsCardHooksSelectors.selectNewTicketPins()));
 	const transform3DTo2D = DrawingsHooksSelectors.selectTransform3DTo2D(drawingId, containerOrFederation);
+	const verticalRange =  DrawingsHooksSelectors.selectCalibrationVertical(drawingId, containerOrFederation);
 
 	if (!transform3DTo2D) return null;
 
 	const mapPin3DTo2D = (pin) => {
 		const { x, y } = transform3DTo2D(pin.position);
-		return { ...pin, position: [x, y] };
+		return { ...pin, position: [x, y], vertical: pin.position[1] };
 	};
 
+	const isInVerticalRange = (vertical: number) => verticalRange[0] <= vertical &&  vertical <= verticalRange[1];
 	const isInRange = (val, limit) => val >= 0 && val <= limit; 
-	const pinIsInRange = ({ position }) => isInRange(position[0], width) && isInRange(position[1], height);
+	const pinIsInRange = ({ position, vertical }) => 
+		isInRange(position[0], width) && isInRange(position[1], height) && isInVerticalRange(vertical);
 
 	const pins2D = pins.map(mapPin3DTo2D).filter(pinIsInRange);
 
