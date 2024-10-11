@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { SnapType } from '../../snapping/types';
-import { CursorEdge, CursorIntersection, CursorNode, CursorNone } from './snapCursor.styles';
+import { CursorEdge, CursorIntersection, CursorNone } from './snapCursor.styles';
 import { useMousePosition, useScale } from '../../drawingViewer.service.hooks';
 
 const CursorIcon = {
 	[SnapType.NONE]: CursorNone,
-	[SnapType.NODE]: CursorNode,
+	[SnapType.NODE]: CursorIntersection,
 	[SnapType.INTERSECTION]: CursorIntersection,
 	[SnapType.EDGE]: CursorEdge,
 };
