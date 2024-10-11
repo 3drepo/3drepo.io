@@ -76,7 +76,7 @@ Projects.getProjectAdmins = async (ts, project) => {
 };
 
 Projects.createProject = async (teamspace, name) => {
-	const addedProject = { _id: generateUUID(), name, models: [], permissions: [] };
+	const addedProject = { _id: generateUUID(), createdAt: new Date(), name, models: [], permissions: [] };
 	await db.insertOne(teamspace, COL_NAME, addedProject);
 	return addedProject._id;
 };
