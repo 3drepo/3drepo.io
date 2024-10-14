@@ -48,6 +48,7 @@ const PermissionTemplates = require("./permissionTemplates");
 const { get } = require("lodash");
 const { fileExists } = require("./fileRef");
 const {v5Path} = require("../../interop");
+const { sanitiseRegex } = require(`${v5Path}/utils/helper/strings.js`);
 const { getAddOns } = require(`${v5Path}/models/teamspaceSettings`);
 const { getSpaceUsed } = require(`${v5Path}/utils/quota.js`);
 const UserProcessorV5 = require(`${v5Path}/processors/users`);
@@ -994,8 +995,8 @@ User.findByUserName = async function (username, projection) {
 };
 
 User.findByEmail = async function (email) {
-	const sanitizedEmail = utils.sanitizeString(email);
-	return await findOne({ "customData.email":  new RegExp(`^${sanitizedEmail}$`, "i") });
+	const sanitisedEmail = sanitiseRegex(email);
+	return await findOne({ "customData.email":  new RegExp(`^${sanitisedEmail}$`, "i") });
 };
 
 User.findByUsernameOrEmail = async function (userNameOrEmail) {

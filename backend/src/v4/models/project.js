@@ -299,61 +299,6 @@
 		return projects.map(p => p.name);
 	};
 
-	Project.listModels = async function(account, project, username, filters) {
-		const AccountPermissions = require("./accountPermissions");
-		const ModelHelper = require("./helper/model");
-
-		const [dbUser, projectObj] = await Promise.all([
-			getTeamspaceSettings(account),
-			Project.findOneProject(account, {name: project})
-		]);
-
-		if (!projectObj) {
-			throw responseCodes.PROJECT_NOT_FOUND;
-		}
-
-		if (filters && filters.name) {
-			filters.name = new RegExp(".*" + filters.name + ".*", "i");
-		}
-
-		let modelsSettings =  await findModelSettings(account, { _id: { $in : projectObj.models }, ...filters});
-		let permissions = [];
-
-		const accountPerm = AccountPermissions.findByUser(dbUser, username);
-		const projectPerm = projectObj.permissions.find(p=> p.user === username);
-
-		if (accountPerm && accountPerm.permissions) {
-			permissions = permissions.concat(ModelHelper.flattenPermissions(accountPerm.permissions));
-		}
-
-		if (projectPerm && projectPerm.permissions) {
-			permissions  = permissions.concat(ModelHelper.flattenPermissions(projectPerm.permissions));
-		}
-
-		modelsSettings = await Promise.all(modelsSettings.map(async setting => {
-			const template = await findPermissionByUser(account, setting._id, username);
-
-			let settingsPermissions = [];
-			if(template) {
-				const permissionTemplate = PermissionTemplates.findById(dbUser, template.permission);
-				if (permissionTemplate && permissionTemplate.permissions) {
-					settingsPermissions = settingsPermissions.concat(ModelHelper.flattenPermissions(permissionTemplate.permissions, true));
-				}
-			}
-
-			setting = await prepareDefaultView(account, setting._id, setting);
-			setting.permissions = _.uniq(permissions.concat(settingsPermissions));
-			setting.model = setting._id;
-			setting.account = account;
-			setting.subModels = await ModelHelper.listSubModels(account, setting._id, C.MASTER_BRANCH_NAME);
-			setting.headRevisions = {};
-
-			return setting;
-		}));
-
-		return modelsSettings;
-	};
-
 	Project.isProjectAdmin = async function(teamspace, model, user) {
 		const projection = { "permissions": { "$elemMatch": { user: user } }};
 		const project = await Project.findOneProject(teamspace, {models: model}, projection);
