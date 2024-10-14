@@ -19,6 +19,7 @@ import { createContext, useState } from 'react';
 import { Transformers, useSearchParam } from '../../../useSearchParam';
 import { PlaneType, Vector1D, Vector2D, Vector3D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
+import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 export interface CalibrationContextType {
 	step: number;
@@ -85,12 +86,13 @@ export const CalibrationContextComponent = ({ children }) => {
 	const [selectedPlane, setSelectedPlane] = useState<PlaneType>(null);
 	const [isAlignPlaneActive, setIsAlignPlaneActive] = useState(false);
 	const [drawingId] = useSearchParam('drawingId');
+	const hasCollaboratorAccess = DrawingsHooksSelectors.selectHasCollaboratorAccess(drawingId);
 
 	return (
 		<CalibrationContext.Provider value={{
 			step,
 			setStep,
-			isCalibrating,
+			isCalibrating: isCalibrating && hasCollaboratorAccess,
 			origin,
 			setOrigin,
 			isCalibrating3D,
