@@ -17,10 +17,12 @@
 
 "use strict";
 
+const { v5Path } = require("../../interop");
 const {map, compact, uniq} = require("lodash");
 const responseCodes = require("../response_codes.js");
 const C = require("../constants.js");
 const db = require("../handler/db");
+const { sanitiseRegex } = require(`${v5Path}/utils/helper/strings.js`);
 
 function validateJobName(jobName) {
 	const regex = "^[^/?=#+]{0,119}[^/?=#+ ]{1}$";
@@ -94,8 +96,8 @@ Job.addUserToJob = async function(teamspace, jobName, user) {
 };
 
 Job.findByJob = async function(teamspace, jobName, caseSensitive = true) {
-
-	const query = caseSensitive ? { _id: jobName } : { _id: new RegExp(jobName, "i")};
+	const sanitisedJobName = sanitiseRegex(jobName);
+	const query = caseSensitive ? { _id: jobName } : { _id: new RegExp(sanitisedJobName, "i")};
 	const foundJob = await db.findOne(teamspace, JOBS_COLLECTION_NAME, query);
 
 	if (foundJob && !foundJob.users) {
