@@ -994,7 +994,8 @@ User.findByUserName = async function (username, projection) {
 };
 
 User.findByEmail = async function (email) {
-	return await findOne({ "customData.email":  new RegExp("^" + utils.sanitizeString(email) + "$", "i") });
+	const sanitizedEmail = utils.sanitizeString(email);
+	return await findOne({ "customData.email":  new RegExp(`^${sanitizedEmail}$`, "i") });
 };
 
 User.findByUsernameOrEmail = async function (userNameOrEmail) {
