@@ -34,7 +34,7 @@ export interface IHandleCalloutDrawingProps extends IHandleBaseDrawingProps {
 	activeShape: number;
 	handleNewDrawnShape: (shape: number, attrs, updateState?: boolean) => void;
 	handleNewDrawnLine: (line, type?, updateState?: boolean) => void;
-	handleNewText: (position, text?: string, updateState?: boolean) => void;
+	handleNewText: (position, text?: string, width?: number, updateState?: boolean) => void;
 }
 
 export interface IHandleCalloutDrawingStates extends IHandleBaseDrawingStates {
@@ -270,10 +270,10 @@ export class HandleCalloutDrawing
 		this.layer.add(this.lastShape);
 	}
 
-	public addText = (position, text) => {
+	public addText = (position, text, width) => {
 		batchGroupBy.start();
 		this.saveCallout();
-		this.props.handleNewText(position, text, false);
+		this.props.handleNewText(position, text, width, false);
 		batchGroupBy.end();
 		setTimeout(() => {
 			this.setState({ calloutState: 1, isCurrentlyDrawn: false });
@@ -282,10 +282,10 @@ export class HandleCalloutDrawing
 
 	public drawShape = () => {
 		const draw = getDrawFunction(
-				this.calloutShapeNormalizedMap[this.activeShape],
-				this.lastShape,
-				this.initialPointerPosition,
-				this.pointerPosition,
+			this.calloutShapeNormalizedMap[this.activeShape],
+			this.lastShape,
+			this.initialPointerPosition,
+			this.pointerPosition,
 		);
 		draw();
 		this.layer.batchDraw();

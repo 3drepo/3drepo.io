@@ -15,48 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, {css} from 'styled-components';
+import styled from 'styled-components';
 
-const commonStyles = css`
+export const TextBox = styled.div<{ $placeholder: string }>`
 	font-family: 'Arial', sans-serif;
 	line-height: 1;
-`;
-
-export const Textarea = styled.textarea`
-	${commonStyles};
-	background: none;
 	position: absolute;
-	border: none;
 	padding: 0;
 	margin: 0;
-	resize: none;
-	outline: none;
-	overflow: hidden;
 	transform-origin: left top;
 	z-index: 3;
+	display: inline-block;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+	cursor: text;
+	overflow: hidden;
+    position: sticky;
+    bottom: 0;
 
 	&:focus {
 		outline: none;
 	}
-`;
 
-export const AssistantElement = styled.pre`
-	${commonStyles};
-	display: inline;
-	position: absolute;
-	visibility: hidden;
-	margin: 0;
-`;
-
-export const GhostElement = styled.pre`
-	${commonStyles};
-	display: inline;
-	font-size: 14px;
-	line-height: 16.625px;
-	font-family: inherit;
-	position: absolute;
-	visibility: hidden;
-	margin: 0;
-	padding-right: 56px;
-	white-space: pre-wrap;
+	&:empty::before {
+		content: "${({ $placeholder }) => $placeholder}";
+		color: ${({ theme }) => theme.palette.base.light};
+	}
 `;

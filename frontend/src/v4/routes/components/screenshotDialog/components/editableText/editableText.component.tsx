@@ -14,110 +14,63 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useState, useRef, useEffect, CSSProperties, MutableRefObject } from 'react';
-import Konva from 'konva';
+import { useEffect, CSSProperties, useRef, useState } from 'react';
 
-import { isEmpty } from 'lodash';
-import { useFocus, useOutsideClick } from '../../../../../hooks';
+import { ClickAwayListener } from '@mui/material';
 import { EDITABLE_TEXTAREA_NAME, EDITABLE_TEXTAREA_PLACEHOLDER } from '../../screenshotDialog.helpers';
-import { AssistantElement, Textarea } from './editableText.styles';
+import { TextBox } from './editableText.styles';
 
 interface IProps {
-	value: string;
-	visible: boolean;
 	styles: CSSProperties;
-	onTextEdit: (props: any) => void;
-	onTextareaKeyDown: (props: any) => void;
-	onAddText: () => void;
-	onRefreshDrawingLayer?: () => void;
-	boxRef?: Konva.Rect;
-	size?: number;
+	onAddText: (newtext: string, width: number) => void;
+	onChange?: ({ width, height }) => void;
+	onClick?: () => void;
 }
 
-export const EditableText = ({
-	value, visible, styles, onTextEdit, onTextareaKeyDown, boxRef, onRefreshDrawingLayer, onAddText, size
-	}: IProps) => {
-	const [textareaRef, setTextareaFocus] = useFocus();
-	const assistantElementRef = useRef<HTMLPreElement>(null);
-	const [initialTextareaWidth, setInitialTextareaWidth] = useState<number>(0);
-	const [additionalStyles, setAdditionalStyles] = useState<object>({});
+const pxToNumber = (size: string) => +size.replaceAll('px', '');
+export const EditableText = ({ styles, onAddText, onChange, onClick }: IProps) => {
+	const ref = useRef<HTMLDivElement>(null);
+	const [size, setSize] = useState({ width: 0, height: 0 });
 
-	useEffect(() => {
-		if (textareaRef.current && !value) {
-			const currentTextarea = textareaRef.current;
-			currentTextarea.setAttribute('size', currentTextarea.getAttribute('placeholder').length.toString());
-			if (initialTextareaWidth && assistantElementRef.current) {
-				setInitialTextareaWidth(assistantElementRef.current.offsetWidth);
-			} else {
-				setInitialTextareaWidth(currentTextarea.offsetWidth);
-			}
+	const updateSize = () => {
+		const compStyles = getComputedStyle(ref.current);
+		setSize({
+			width: pxToNumber(compStyles.width),
+			height: pxToNumber(compStyles.height),
+		});
+	}
+
+	const saveText = () => onAddText(ref.current.innerText, size.width);
+
+	const handleKeyDown = (e) => {
+		if (e.keyCode === 13 && !e.shiftKey) {
+			saveText();
 		}
-	}, [styles.fontSize, value]);
+	};
 
 	useEffect(() => {
 		setTimeout(() => {
-			setTextareaFocus();
+			ref.current?.focus();
+			updateSize();
 		});
-	}, [visible, textareaRef.current]);
+	}, []);
 
 	useEffect(() => {
-		if (textareaRef && assistantElementRef) {
-			const shouldExpand = assistantElementRef.current.offsetWidth > initialTextareaWidth;
-			const width = shouldExpand ? assistantElementRef.current.offsetWidth : initialTextareaWidth;
-			const height = assistantElementRef.current.offsetHeight;
-
-			if (!isEmpty(boxRef) && onRefreshDrawingLayer) {
-				boxRef.width(width +  Math.max(6, size * 2));
-				boxRef.height(height + Math.max(6, size * 2));
-				onRefreshDrawingLayer();
-			}
-
-			setAdditionalStyles({
-				...additionalStyles,
-				height: `${height}px`,
-				width: `${width}px`,
-			});
-		}
-	}, [value, initialTextareaWidth, styles.fontSize, boxRef]);
-
-	const isFocused = () => document.activeElement === textareaRef.current;
-
-	useOutsideClick(textareaRef, () => {
-		if (visible && !isFocused()) {
-			(async () => onAddText())();
-		}
-	});
-
-	const getPlaceholder = () => {
-		if (textareaRef.current) {
-			return ` ${textareaRef.current.getAttribute('placeholder')} `;
-		}
-		return '';
-	};
+		onChange?.(size);
+	}, [size]);
 
 	return (
-		<>
-			<Textarea
-				ref={textareaRef as MutableRefObject<HTMLTextAreaElement>}
+		<ClickAwayListener onClickAway={saveText}>
+			<TextBox
+				ref={ref}
 				id={EDITABLE_TEXTAREA_NAME}
-				name={EDITABLE_TEXTAREA_NAME}
-				placeholder={EDITABLE_TEXTAREA_PLACEHOLDER}
-				value={value}
-				style={{
-					...styles,
-					...additionalStyles
-				}}
-				onChange={onTextEdit}
-				onKeyDown={onTextareaKeyDown}
+				$placeholder={EDITABLE_TEXTAREA_PLACEHOLDER}
+				style={styles}
+				onKeyDown={handleKeyDown}
+				onInput={updateSize}
+				onClick={onClick}
+				contentEditable
 			/>
-			<AssistantElement
-				ref={assistantElementRef}
-				style={{
-					fontSize: styles.fontSize,
-				}}
-			>
-				{value ? ` ${value} ` : getPlaceholder()}
-			</AssistantElement>
-		</>
+		</ClickAwayListener>
 	);
 };
