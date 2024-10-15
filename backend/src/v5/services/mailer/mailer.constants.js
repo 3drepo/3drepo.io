@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const activities = require('./templates/activities');
 const errorNotification = require('./templates/errorNotification');
 const forgotPassword = require('./templates/forgotPassword');
 const forgotPasswordSso = require('./templates/forgotPasswordSSO');
@@ -32,6 +33,7 @@ const templates = {
 	errorNotification,
 	modelImportError,
 	zombieProcessingStatuses,
+	activities,
 };
 
 MailerConstants.templates = {};

@@ -26,6 +26,10 @@ const db = require("../handler/db");
 const systemLogger = require("../logger.js").systemLogger;
 const PermissionTemplates = require("./permissionTemplates");
 
+const { cloneDeep } = require(`${v5Path}/utils/helper/objects.js`);
+const { publish } = require(`${v5Path}/services/eventsManager/eventsManager`);
+const { events } = require(`${v5Path}/services/eventsManager/eventsManager.constants`);
+
 const MODELS_COLL = "settings";
 
 const MODEL_CODE_REGEX = /^[a-zA-Z0-9]{0,50}$/;
@@ -66,9 +70,14 @@ function clean(setting) {
 
 const ModelSetting = {};
 
-ModelSetting.batchUpdatePermissions = async function(account, batchPermissions = []) {
+ModelSetting.batchUpdatePermissions = async function(account, batchPermissions = [], executor) {
 	const updatePromises = batchPermissions.map((update) => ModelSetting.updatePermissions(account, update.model, update.permissions));
 	const updateResponses = await Promise.all(updatePromises);
+
+	publish(events.PERMISSIONS_UPDATED, { teamspace: account, executor,
+		initialPermissions: updateResponses.map(r => r.initialPermissions),
+		updatedPermissions: updateResponses.map(r => r.updatedPermissions)});
+
 	const okStatus = "ok";
 	const badStatusIndex = updateResponses.findIndex((response) => okStatus !== response.status);
 
@@ -412,31 +421,7 @@ ModelSetting.updateHeliSpeed = async function(account, model, newSpeed) {
 	return ModelSetting.updateModelSetting(account, model, {heliSpeed: newSpeed});
 };
 
-ModelSetting.updateMultiplePermissions = async function(account, modelIds, updatedData) {
-	const modelsList = await ModelSetting.findModelSettings(account, {"_id" : {"$in" : modelIds}});
-
-	if (!modelsList.length) {
-		throw responseCodes.MODEL_INFO_NOT_FOUND;
-	}
-
-	const modelsPromises = modelsList.map((model) => {
-		const newModelPermissions = updatedData.find((modelPermissions) => modelPermissions.model === model._id);
-		return ModelSetting.changePermissions(account, model._id, newModelPermissions.permissions || {});
-	});
-
-	const models = await Promise.all(modelsPromises);
-	const populatedPermissionsPromises = models.map(({permissions}) => {
-		return ModelSetting.populateUsers(account, permissions);
-	});
-	const populatedPermissions = await Promise.all(populatedPermissionsPromises);
-
-	return populatedPermissions.map((permissions, index) => {
-		const {name, federate, _id: model, subModels} =  models[index] || {};
-		return {name, federate, model, permissions, subModels};
-	});
-};
-
-ModelSetting.updatePermissions = async function(account, model, permissions = []) {
+ModelSetting.updatePermissions = async function(account, model, permissions = [], executor) {
 	const { findByUserName, teamspaceMemberCheck } = require("./user");
 
 	if (!Array.isArray(permissions)) {
@@ -444,6 +429,8 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 	}
 
 	const setting = await ModelSetting.findModelSettingById(account, model);
+	const initialPermissions = { model, permissions: cloneDeep(setting.permissions) };
+
 	if (!setting) {
 		throw responseCodes.MODEL_NOT_FOUND;
 	}
@@ -470,7 +457,13 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 
 	await Promise.all(promises);
 	await db.updateOne(account, MODELS_COLL, { _id: model }, { $set: { permissions: setting.permissions } });
-	return { status: setting.status };
+
+	const updatedPermissions = { model, permissions: setting.permissions };
+	if(executor) {
+		publish(events.PERMISSIONS_UPDATED,  { teamspace: account, executor, initialPermissions: [initialPermissions], updatedPermissions: [updatedPermissions] });
+	}
+
+	return { status: setting.status, initialPermissions,  updatedPermissions};
 };
 
 ModelSetting.getDefaultLegendId = async (account, model) => {
