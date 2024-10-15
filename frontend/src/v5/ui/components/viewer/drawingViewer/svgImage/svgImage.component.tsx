@@ -533,6 +533,10 @@ export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ on
 		return () => pannableImage.current.dispose();
 	}, []);
 
+	useEffect(() => {
+		if (!containerRef.current) return;
+		pannableImage.current.addEventListener('load', onLoad);
+	}, [onLoad, pannableImage.current]);
 
 	useEffect(() => {
 		if (!pannableImage.current || !src) return;
