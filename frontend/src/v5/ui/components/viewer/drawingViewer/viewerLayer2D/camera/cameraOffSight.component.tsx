@@ -22,7 +22,7 @@ import { useRef, useState, useEffect, MouseEventHandler } from 'react';
 import { useParams } from 'react-router';
 import { Vector2 } from 'three';
 import { useModelLoading, useViewpointSubscription } from './viewer.hooks';
-import { CameraOffSightIcon } from './camera.styles';
+import { CameraOffSightContainer, CameraOffSightIcon } from './camera.styles';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { setCameraPos } from './camera.helpers';
 
@@ -136,9 +136,9 @@ export const CameraOffSight = ({ onCameraSightChanged, viewport, viewbox }: Prop
 	}
 
 	return (
-		<div style={{ transform: `translate(${position.x}px, ${position.y}px) `, width:'56px', height:'56px', position:'absolute' }} 
+		<CameraOffSightContainer style={{ transform: `translate(${position.x}px, ${position.y}px) ` }} 
 			onMouseDown={onMouseDown}>
 			{!camInSight.current && <CameraOffSightIcon arrowAngle={angle}/>}
-		</div>
+		</CameraOffSightContainer>
 	);
 };

@@ -22,9 +22,19 @@ export const CameraIcon = styled(CameraSVG)`
 	color: ${({ theme }) => theme.palette.primary.main};
 	overflow: unset;
 	transform-origin: 0 0;
-	cursor:grab; 
+	cursor: grab; 
 `;
+
+
 export const CameraOffSightIcon = styled(CameraOffSightSVG)`
 	color: ${({ theme }) => theme.palette.primary.main};
 	transform-origin: 0 0;
+`;
+
+
+export const CameraOffSightContainer = styled.div`
+	width: 56px;
+	height: 56px;
+	position: absolute;
+	cursor: grab; 
 `;
