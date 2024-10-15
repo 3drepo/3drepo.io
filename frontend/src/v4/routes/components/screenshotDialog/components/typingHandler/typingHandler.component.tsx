@@ -38,9 +38,10 @@ export const TypingHandler = ({
 	selected, mode, stage, layer, boxRef, fontSize, size, color, onRefreshDrawingLayer, onAddNewText
 }: IProps) => {
 	const [visible, setVisible] = useState<boolean>(false);
-	const [styles, setStyles] = useState<CSSProperties>({});
+	const [offset, setOffset] = useState<CSSProperties>({});
 	const [positionLocked, setPositionLocked] = useState<boolean>(false);
 	const [maxSizes, setMaxSizes] = useState({ maxWidth: 0, maxHeight: 0 });
+	const isCallout = !!boxRef;
 
 	useEffect(() => {
 		if (stage) {
@@ -63,7 +64,7 @@ export const TypingHandler = ({
 			left = position.x - layer.x();
 			top = position.y - layer.y();
 		}
-		setStyles({ top, left });
+		setOffset({ top, left });
 		const { width, height } = stage.attrs;
 		setMaxSizes({
 			maxWidth: width - left,
@@ -71,7 +72,7 @@ export const TypingHandler = ({
 		});
 	};
 
-	const recomputeTextBoxSizeAndRefresh = ({ width, height }) => {
+	const redrawCalloutBox = ({ width, height }) => {
 		if (!isEmpty(boxRef) && onRefreshDrawingLayer) {
 			boxRef.width(width + Math.max(6, size * 2));
 			boxRef.height(height + Math.max(6, size * 2));
@@ -86,12 +87,12 @@ export const TypingHandler = ({
 	};
 
 	useEffect(() => {
-		if (!isEmpty(boxRef) && !isEmpty(styles) && onRefreshDrawingLayer) {
-			boxRef.x(Number(styles.left) - Math.max(3, size));
-			boxRef.y(Number(styles.top) - Math.max(3, size));
+		if (!isEmpty(boxRef) && !isEmpty(offset) && onRefreshDrawingLayer) {
+			boxRef.x(Number(offset.left) - Math.max(3, size));
+			boxRef.y(Number(offset.top) - Math.max(3, size));
 			onRefreshDrawingLayer();
 		}
-	}, [styles]);
+	}, [offset]);
 
 	const handleClick = useCallback(() => {
 		setTextPosition();
@@ -100,7 +101,7 @@ export const TypingHandler = ({
 	}, []);
 
 	const onTextChange = (newText: string, width: number) => {
-		onAddNewText({ x: styles.left, y: styles.top }, newText, width);
+		onAddNewText({ x: offset.left, y: offset.top }, newText, width);
 		setVisible(false);
 		setPositionLocked(false);
 	};
@@ -111,11 +112,11 @@ export const TypingHandler = ({
 
 	return (
 		<EditableText
-			onChange={recomputeTextBoxSizeAndRefresh}
+			onChange={redrawCalloutBox}
 			onAddText={onTextChange}
 			onClick={handleClick}
 			styles={{
-				...styles,
+				...offset,
 				color,
 				fontSize: `${fontSize}px`,
 				visibility: visible ? 'visible' : 'hidden',
