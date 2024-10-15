@@ -442,8 +442,47 @@ const testCheckTicketTemplateExists = () => {
 	});
 };
 
+const testValidateGetActivitiesParams = () => {
+	const validQuery = { from: Date.now().toString(), to: Date.now().toString() };
+	const validQueryCasted = {
+		from: new Date(Number(validQuery.from)),
+		to: new Date(Number(validQuery.to)),
+	};
+
+	describe.each([
+		['No query object', undefined, true, {}],
+		['query object has unrelated fields', { [generateRandomString()]: generateRandomString() }, true, {}],
+		['query object has valid fields', { [generateRandomString()]: generateRandomString(), ...validQuery }, true, validQueryCasted],
+		['from is not a valid timestamp', { ...validQuery, from: generateRandomString() }, false],
+		['to is not a valid timestamp', { ...validQuery, to: generateRandomString() }, false],
+		['both from and to are valid', validQuery, true, validQueryCasted],
+		['from is missing', { ...validQuery, from: undefined }, true, { ...validQueryCasted, from: undefined }],
+		['to is missing', { ...validQuery, to: undefined }, true, { ...validQueryCasted, to: undefined }],
+	])('Validate get activities params', (desc, query, success, expectedOutput) => {
+		test(`Should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
+			const req = { query: cloneDeep(query) };
+			const res = {};
+			const next = jest.fn();
+
+			await TeamspaceSettings.validateGetActivitiesParams(req, res, next);
+
+			if (success) {
+				expect(next).toHaveBeenCalledTimes(1);
+				expect(req.query).toEqual(expectedOutput);
+				expect(Responder.respond).not.toHaveBeenCalled();
+			} else {
+				expect(next).not.toHaveBeenCalled();
+				expect(Responder.respond).toHaveBeenCalledTimes(1);
+				expect(Responder.respond).toHaveBeenCalledWith(req, {},
+					expect.objectContaining({ code: templates.invalidArguments.code }));
+			}
+		});
+	});
+};
+
 describe('middleware/dataConverter/inputs/teamspaces', () => {
 	testValidateNewTicketSchema();
 	testValidateUpdateTicketSchema();
 	testCheckTicketTemplateExists();
+	testValidateGetActivitiesParams();
 });

@@ -20,7 +20,7 @@ const { Router } = require('express');
 const { getUserFromSession } = require('../../utils/sessions');
 const { isTeamspaceAdmin } = require('../../middleware/permissions/permissions');
 const { respond } = require('../../utils/responder');
-const { validateGetActivitiesParams } = require('../../middleware/dataConverter/inputs/teamspaces/activities');
+const { validateGetActivitiesParams } = require('../../middleware/dataConverter/inputs/teamspaces/settings');
 
 const getActivities = async (req, res) => {
 	const { teamspace } = req.params;
