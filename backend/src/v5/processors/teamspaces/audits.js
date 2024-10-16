@@ -27,12 +27,16 @@ const { sendEmail } = require('../../services/mailer');
 const Audit = {};
 
 const createAuditLogArchive = (actions) => {
-	const jsonBuffer = Buffer.from(JSON.stringify(actions), 'utf8');
-
 	try {
 		const password = generateHashString();
 		const file = archiver.create('zip-encrypted', { zlib: { level: 1 }, encryptionMethod: 'aes256', password });
-		file.append(jsonBuffer, { name: 'audit.json' });
+		let content = '';
+		actions.forEach((action) => {
+			content += `${JSON.stringify(action)},`;
+		});
+		content = `[${content.slice(0, -1)}]`;
+
+		file.append(content, { name: 'audit.json' });
 		file.finalize();
 		return { file, password };
 	} catch (err) {

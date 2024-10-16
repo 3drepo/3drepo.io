@@ -458,7 +458,7 @@ const testValidateGetAuditLogParams = () => {
 		['both from and to are valid', validQuery, true, validQueryCasted],
 		['from is missing', { ...validQuery, from: undefined }, true, { ...validQueryCasted, from: undefined }],
 		['to is missing', { ...validQuery, to: undefined }, true, { ...validQueryCasted, to: undefined }],
-		['from is greater than to', { from: Date.now(), to: Date.now() - 10000 }],
+		['from param is greater than to param', { from: Date.now(), to: Date.now() - 10000 }],
 	])('Validate get audit log params', (desc, query, success, expectedOutput) => {
 		test(`Should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
 			const req = { query: cloneDeep(query) };

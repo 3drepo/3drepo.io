@@ -22,17 +22,23 @@ const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
 
 const { templates } = require(`${src}/utils/responseCodes`);
+const { templates: emailTemplates } = require(`${src}/services/mailer/mailer.constants`);
 const { propTypes } = require(`${src}/schemas/tickets/templates.constants`);
+
+jest.mock('../../../../../src/v5/services/mailer');
+const Mailer = require(`${src}/services/mailer`);
 
 let server;
 let agent;
 const tsAdmin = ServiceHelper.generateUserCredentials();
 const normalUser = ServiceHelper.generateUserCredentials();
+const nobody = ServiceHelper.generateUserCredentials();
 
 const teamspace = { name: ServiceHelper.generateRandomString() };
 const noTemplatesTS = { name: ServiceHelper.generateRandomString() };
 
 const teamspaces = [teamspace, noTemplatesTS];
+const auditActions = times(10, () => ServiceHelper.generateAuditAction()).sort((a) => a.timestamp);
 
 const setupData = async () => {
 	await Promise.all(teamspaces.map(
@@ -40,14 +46,10 @@ const setupData = async () => {
 	));
 
 	await Promise.all([
-		ServiceHelper.db.createUser(
-			tsAdmin,
-			[...teamspaces.map(({ name }) => name)],
-		),
-		ServiceHelper.db.createUser(
-			normalUser,
-			[teamspace.name],
-		),
+		...auditActions.map((action) => ServiceHelper.db.createAuditAction(teamspace.name, action)),
+		ServiceHelper.db.createUser(tsAdmin, [...teamspaces.map(({ name }) => name)]),
+		ServiceHelper.db.createUser(normalUser, [teamspace.name]),
+		ServiceHelper.db.createUser(nobody, []),
 	]);
 };
 
@@ -219,6 +221,39 @@ const testGetRiskCategories = () => {
 	});
 };
 
+const testGetAuditLogArchive = () => {
+	describe('Get audit log archive', () => {
+		const route = (key, ts = teamspace.name, query) => `/v5/teamspaces/${ts}/settings/activities/archive${key ? `?key=${key}${query ? `&from=${query.from}&to=${query.to}` : ''}` : ''}`;
+
+		describe.each([
+			['user does not have a valid session', undefined, undefined, undefined, false, templates.notLoggedIn],
+			['teamspace does not exist', tsAdmin.apiKey, generateRandomString(), undefined, false, templates.teamspaceNotFound],
+			['user is not a member of the teamspace', nobody.apiKey, undefined, undefined, false, templates.teamspaceNotFound],
+			['user is not a teamspace admin', normalUser.apiKey, undefined, undefined, false, templates.notAuthorized],
+			['user is a teamspace admin', tsAdmin.apiKey, undefined, undefined, true],
+			['query is invalid', tsAdmin.apiKey, undefined, { from: Date.now() + 10000, to: Date.now() - 10000 }, false, templates.invalidArguments],
+		])('', (desc, key, ts, query, success, expectedRes) => {
+			test(`should ${success ? 'succeed' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedRes.status;
+
+				const res = await agent.get(route(key, ts, query))
+					.expect(expectedStatus);
+
+				if (success) {
+					expect(res.headers['content-disposition']).toEqual('attachment;filename=audit.zip');
+					expect(res.headers['content-type']).toEqual('application/zip');
+					expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
+					const { password } = Mailer.sendEmail.mock.calls[0][2];
+					expect(Mailer.sendEmail).toHaveBeenCalledWith(emailTemplates.AUDIT.name,
+						tsAdmin.basicData.email, { firstName: tsAdmin.basicData.firstName, password });
+				} else {
+					expect(res.body.code).toEqual(expectedRes.code);
+				}
+			});
+		});
+	});
+};
+
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -231,4 +266,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	testGetTemplate();
 	testGetTemplateList();
 	testGetRiskCategories();
+	testGetAuditLogArchive();
 });
