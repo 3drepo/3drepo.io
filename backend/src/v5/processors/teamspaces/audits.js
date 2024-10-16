@@ -44,7 +44,7 @@ Audit.getAuditLogArchive = async (teamspace, username, fromDate, toDate) => {
 	const actions = await getActionLog(teamspace, fromDate, toDate);
 	const { file, password } = createAuditLogArchive(actions.map(({ _id, ...data }) => data));
 	const { customData: { email, firstName } } = await getUserByUsername(username, { 'customData.email': 1, 'customData.firstName': 1 });
-	await sendEmail(emailTemplates.ACTIVITIES.name, email, { firstName, password });
+	await sendEmail(emailTemplates.AUDIT.name, email, { firstName, password });
 
 	return file;
 };

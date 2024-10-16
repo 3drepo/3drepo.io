@@ -192,13 +192,13 @@ db.createCalibration = async (teamspace, project, drawing, revision, calibration
 	await DbHandler.insertOne(teamspace, 'drawings.calibrations', formattedCalibration);
 };
 
-db.createAuditAction = (teamspace, activity) => {
-	const formattedActivity = {
-		_id: stringToUUID(activity._id),
-		...activity,
+db.createAuditAction = (teamspace, action) => {
+	const formattedAction = {
+		_id: stringToUUID(action._id),
+		...action,
 	};
 
-	return DbHandler.insertOne(teamspace, 'auditing', formattedActivity);
+	return DbHandler.insertOne(teamspace, 'auditing', formattedAction);
 };
 
 db.createSequence = async (teamspace, model, { sequence, states, activities, activityTree }) => {

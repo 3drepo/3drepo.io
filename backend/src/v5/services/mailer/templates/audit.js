@@ -18,15 +18,15 @@
 const Yup = require('yup');
 const { generateTemplateFn } = require('./common');
 
-const TEMPLATE_PATH = `${__dirname}/html/activities.html`;
+const TEMPLATE_PATH = `${__dirname}/html/audit.html`;
 
 const dataSchema = Yup.object({
 	password: Yup.string().required(),
 }).required(true);
 
-const ActivitiesTemplate = {};
-ActivitiesTemplate.subject = () => 'Activity logs file password';
+const AuditTemplate = {};
+AuditTemplate.subject = () => 'Audit logs file password';
 
-ActivitiesTemplate.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
+AuditTemplate.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
 
-module.exports = ActivitiesTemplate;
+module.exports = AuditTemplate;

@@ -290,7 +290,7 @@ const establishRoutes = () => {
 	 * @openapi
 	 * /teamspaces/{teamspace}/settings/activities/archive:
 	 *   get:
-	 *     description: Get an encrypted zip file containing the requested activity logs. The password to unlock the file will be sent to the user via email
+	 *     description: Get an encrypted zip file containing the requested audit logs. The password to unlock the file will be sent to the user via email
 	 *     tags: [Teamspaces]
 	 *     operationId: getAuditLogArchive
 	 *     parameters:

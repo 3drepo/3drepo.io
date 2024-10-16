@@ -65,7 +65,7 @@ const testGetAuditLogArchive = () => {
 			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(username, { 'customData.email': 1, 'customData.firstName': 1 });
 			expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
 			const { password } = Mailer.sendEmail.mock.calls[0][2];
-			expect(Mailer.sendEmail).toHaveBeenCalledWith(emailTemplates.ACTIVITIES.name, email,
+			expect(Mailer.sendEmail).toHaveBeenCalledWith(emailTemplates.AUDIT.name, email,
 				{ firstName, password });
 		});
 
