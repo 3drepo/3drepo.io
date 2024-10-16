@@ -126,9 +126,10 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 
 			await Promise.all([
 				...toRemove.map(viewer.removePin.bind(viewer)),
-				...toChangeSelection.map(viewer.setSelectionPin.bind(viewer)),
 				...toShow.map(viewer.showPin.bind(viewer)),
 			]);
+
+			await Promise.all(toChangeSelection.map(viewer.setSelectionPin.bind(viewer)));
 		}
 	}
 

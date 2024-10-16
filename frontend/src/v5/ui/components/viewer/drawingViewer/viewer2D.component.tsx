@@ -31,8 +31,9 @@ import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.cont
 import { DrawingViewerService } from './drawingViewer.service';
 import { CalibrationInfoBox } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationInfoBox/calibrationInfoBox.component';
 import CalibrationIcon from '@assets/icons/filled/calibration-filled.svg';
-import { ViewBoxType, ViewerLayer2D } from './viewerLayer2D/viewerLayer2D.component';
+import { ViewerLayer2D } from './viewerLayer2D/viewerLayer2D.component';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
+import { ViewBoxType } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { getDrawingImageSrc } from '@/v5/store/drawings/revisions/drawingRevisions.helpers';
 import { SVGImage } from './svgImage/svgImage.component';
@@ -72,8 +73,9 @@ export const Viewer2D = () => {
 	const [viewBox, setViewBox] = useState<ViewBoxType>(DEFAULT_VIEWBOX);
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
+	const [viewport, setViewport] = useState({ left:0, right: 0, top: 0, bottom:0 });
 	const [isLoading, setIsLoading] = useState(false);
-
+	const containerRef = useRef();
 	const imgRef = useRef<ZoomableImage>();
 	const imgContainerRef = useRef();
 
@@ -122,11 +124,28 @@ export const Viewer2D = () => {
 			setIsMaxZoom(cantZoomIn);
 			setViewBox({ ...transform, ...zoomHandler.getOriginalSize() });
 		});
+
+		return () => {
+			zoomHandler.off(Events.transform);
+		};
 	}, [zoomHandler]);
+
+	useEffect(()=> {
+		const observer = new ResizeObserver((entry) =>  {
+			const rect = entry[0].contentRect;
+			const { scale, x, y } = viewBox;
+
+			setViewport({ left: -x / scale, right: (-x + rect.width) / scale, top: -y / scale, bottom: (-y + rect.height) / scale });
+		});
+		observer.observe(containerRef.current);
+
+		return () => observer.disconnect();
+	}, [viewBox]);
+	
 
 	useEffect(() => {
 		setIsLoading(true);
-	}, [src]);
+	}, [plainSrc]);
 
 	useEffect(() => {
 		if (hasCalibration) {
@@ -140,7 +159,7 @@ export const Viewer2D = () => {
 	}, [revisionId]);
 
 	return (
-		<ViewerContainer visible>
+		<ViewerContainer visible ref={containerRef}>
 			{step === 1 && (
 				<CalibrationInfoBox
 					title={formatMessage({ defaultMessage: '2D Alignment', id: 'infoBox.2dAlignment.title' })}
@@ -167,7 +186,8 @@ export const Viewer2D = () => {
 				{!isLoading && (<ViewerLayer2D
 					viewBox={viewBox}
 					snapHandler={snapHandler}
-					key={String(isCalibrating)}
+					viewport={viewport}
+					key={String(isCalibrating) + drawingId}
 				/>)}
 			</ImageContainer>
 			<ToolbarContainer>
@@ -177,13 +197,13 @@ export const Viewer2D = () => {
 						onClick={() => zoomHandler.centreView()}
 						title={formatMessage({ id: 'viewer.toolbar.icon.home', defaultMessage: 'Home' })}
 					/>
-					<ToolbarButton
+					{step === 1 && <ToolbarButton
 						Icon={CalibrationIcon}
 						onClick={onCalibrationClick}
 						title={formatMessage({ id: 'drawingViewer.toolbar.calibrate', defaultMessage: 'Calibrate' })}
 						selected={isCalibrating2D}
 						hidden={!canCalibrate2D}
-					/>
+					/>}
 					<ToolbarButton
 						Icon={ZoomOutIcon}
 						onClick={onClickZoomOut}
