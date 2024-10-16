@@ -23,10 +23,10 @@ const { templates } = require('../../../../../src/v5/utils/responseCodes');
 
 const { templates: emailTemplates } = require(`${src}/services/mailer/mailer.constants`);
 
-const Activities = require(`${src}/processors/teamspaces/activities`);
+const Audits = require(`${src}/processors/teamspaces/audits`);
 
-jest.mock('../../../../../src/v5/models/activities');
-const ActivitiesModel = require(`${src}/models/activities`);
+jest.mock('../../../../../src/v5/models/teamspaces.audits');
+const AuditsModel = require(`${src}/models/teamspaces.audits`);
 
 jest.mock('../../../../../src/v5/services/mailer');
 const Mailer = require(`${src}/services/mailer`);
@@ -37,30 +37,30 @@ const UsersModel = require(`${src}/models/users`);
 jest.mock('archiver');
 const Archiver = require('archiver');
 
-const testGetActivitiesFile = () => {
-	describe('Get Activities File', () => {
+const testGetAuditLogArchive = () => {
+	describe('Get Audit Log Archive', () => {
 		const teamspace = generateRandomString();
 		const username = generateRandomString();
 		const email = generateRandomString();
 		const firstName = generateRandomString();
 		const fromDate = generateRandomString();
 		const toDate = generateRandomString();
-		const activities = times(5, () => ({ _id: generateUUID(), ...generateRandomObject() }));
+		const actions = times(5, () => ({ _id: generateUUID(), ...generateRandomObject() }));
 
-		test('should get activities file and send an email with the password', async () => {
+		test('should get audit log archive and send an email with the password', async () => {
 			Archiver.registerFormat.mockReturnValueOnce(undefined);
 			Archiver.create.mockReturnValueOnce({
 				append: () => {},
 				finalize: () => {},
 			});
 
-			ActivitiesModel.getActivities.mockResolvedValueOnce(activities);
+			AuditsModel.getActionLog.mockResolvedValueOnce(actions);
 			UsersModel.getUserByUsername.mockResolvedValueOnce({ customData: { email, firstName } });
 
-			await Activities.getActivitiesFile(teamspace, username, fromDate, toDate);
+			await Audits.getAuditLogArchive(teamspace, username, fromDate, toDate);
 
-			expect(ActivitiesModel.getActivities).toHaveBeenCalledTimes(1);
-			expect(ActivitiesModel.getActivities).toHaveBeenCalledWith(teamspace, fromDate, toDate);
+			expect(AuditsModel.getActionLog).toHaveBeenCalledTimes(1);
+			expect(AuditsModel.getActionLog).toHaveBeenCalledWith(teamspace, fromDate, toDate);
 			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
 			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(username, { 'customData.email': 1, 'customData.firstName': 1 });
 			expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
@@ -73,19 +73,19 @@ const testGetActivitiesFile = () => {
 			Archiver.registerFormat.mockReturnValueOnce(undefined);
 			Archiver.create.mockImplementationOnce(() => { throw new Error(); });
 
-			ActivitiesModel.getActivities.mockResolvedValueOnce(activities);
+			AuditsModel.getActionLog.mockResolvedValueOnce(actions);
 
-			await expect(Activities.getActivitiesFile(teamspace, username, fromDate, toDate))
+			await expect(Audits.getAuditLogArchive(teamspace, username, fromDate, toDate))
 				.rejects.toEqual({ ...templates.unknown, message: 'Failed to create zip file.' });
 
-			expect(ActivitiesModel.getActivities).toHaveBeenCalledTimes(1);
-			expect(ActivitiesModel.getActivities).toHaveBeenCalledWith(teamspace, fromDate, toDate);
+			expect(AuditsModel.getActionLog).toHaveBeenCalledTimes(1);
+			expect(AuditsModel.getActionLog).toHaveBeenCalledWith(teamspace, fromDate, toDate);
 			expect(UsersModel.getUserByUsername).not.toHaveBeenCalled();
 			expect(Mailer.sendEmail).not.toHaveBeenCalled();
 		});
 	});
 };
 
-describe('processors/teamspaces/activities', () => {
-	testGetActivitiesFile();
+describe('processors/teamspaces/audits', () => {
+	testGetAuditLogArchive();
 });

@@ -442,8 +442,8 @@ const testCheckTicketTemplateExists = () => {
 	});
 };
 
-const testValidateGetActivitiesParams = () => {
-	const validQuery = { from: Date.now().toString(), to: Date.now().toString() };
+const testValidateGetAuditLogParams = () => {
+	const validQuery = { from: Date.now().toString(), to: (Date.now() + 10000).toString() };
 	const validQueryCasted = {
 		from: new Date(Number(validQuery.from)),
 		to: new Date(Number(validQuery.to)),
@@ -458,13 +458,14 @@ const testValidateGetActivitiesParams = () => {
 		['both from and to are valid', validQuery, true, validQueryCasted],
 		['from is missing', { ...validQuery, from: undefined }, true, { ...validQueryCasted, from: undefined }],
 		['to is missing', { ...validQuery, to: undefined }, true, { ...validQueryCasted, to: undefined }],
+		['from is greater than to', { from: Date.now(), to: Date.now() - 10000 }],
 	])('Validate get activities params', (desc, query, success, expectedOutput) => {
 		test(`Should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
 			const req = { query: cloneDeep(query) };
 			const res = {};
 			const next = jest.fn();
 
-			await TeamspaceSettings.validateGetActivitiesParams(req, res, next);
+			await TeamspaceSettings.validateGetAuditLogParams(req, res, next);
 
 			if (success) {
 				expect(next).toHaveBeenCalledTimes(1);
@@ -484,5 +485,5 @@ describe('middleware/dataConverter/inputs/teamspaces', () => {
 	testValidateNewTicketSchema();
 	testValidateUpdateTicketSchema();
 	testCheckTicketTemplateExists();
-	testValidateGetActivitiesParams();
+	testValidateGetAuditLogParams();
 });

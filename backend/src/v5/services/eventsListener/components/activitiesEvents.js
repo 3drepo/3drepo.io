@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { actions } = require('../../../models/activities.constants');
-const { addActivity } = require('../../../models/activities');
+const { actions } = require('../../../models/teamspaces.audits.constants');
+const { addActivity } = require('../../../models/teamspaces.audits');
 const { deleteIfUndefined } = require('../../../utils/helper/objects');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { getProjectList } = require('../../../models/projectSettings');

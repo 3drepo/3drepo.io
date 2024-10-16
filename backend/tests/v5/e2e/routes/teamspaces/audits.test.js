@@ -17,7 +17,7 @@
 
 const { times } = require('lodash');
 const SuperTest = require('supertest');
-const { db, determineTestGroup, generateUserCredentials, generateRandomString, generateActivity, closeApp, app } = require('../../../helper/services');
+const { db, determineTestGroup, generateUserCredentials, generateRandomString, generateAuditAction, closeApp, app } = require('../../../helper/services');
 const { src } = require('../../../helper/path');
 
 jest.mock('../../../../../src/v5/services/mailer');
@@ -36,27 +36,27 @@ const generateBasicData = () => ({
 		normalUser: generateUserCredentials(),
 	},
 	teamspace: generateRandomString(),
-	activities: times(10, () => generateActivity()).sort((a) => a.timestamp),
+	actions: times(10, () => generateAuditAction()).sort((a) => a.timestamp),
 });
 
-const setupBasicData = async (users, teamspace, activities) => {
+const setupBasicData = async (users, teamspace, actions) => {
 	await db.createTeamspace(teamspace, [users.tsAdmin.user]);
 
 	const userProms = Object.keys(users).map((key) => db.createUser(users[key], key !== 'nobody' ? [teamspace] : []));
-	const activityProms = activities.map((activity) => db.createActivity(teamspace, activity));
+	const actionProms = actions.map((action) => db.createAuditAction(teamspace, action));
 
 	await Promise.all([
 		...userProms,
-		...activityProms,
+		...actionProms,
 	]);
 };
 
-const testActivities = () => {
-	describe('Get activities', () => {
-		const { users, teamspace, activities } = generateBasicData();
+const testGetAuditLogArchive = () => {
+	describe('Get audit log archive', () => {
+		const { users, teamspace, actions } = generateBasicData();
 
 		beforeAll(async () => {
-			await setupBasicData(users, teamspace, activities);
+			await setupBasicData(users, teamspace, actions);
 		});
 
 		const route = (key, ts = teamspace, query) => `/v5/teamspaces/${ts}/settings/activities/archive${key ? `?key=${key}${query ? `&from=${query.from}&to=${query.to}` : ''}` : ''}`;
@@ -67,6 +67,7 @@ const testActivities = () => {
 			['user is not a member of the teamspace', users.nobody.apiKey, undefined, undefined, false, templates.teamspaceNotFound],
 			['user is not a teamspace admin', users.normalUser.apiKey, undefined, undefined, false, templates.notAuthorized],
 			['user is a teamspace admin', users.tsAdmin.apiKey, undefined, undefined, true],
+			['query is invalid', users.tsAdmin.apiKey, undefined, { from: Date.now() + 10000, to: Date.now() - 10000 }, false, templates.invalidArguments],
 		])('', (desc, key, ts, query, success, expectedRes) => {
 			test(`should ${success ? 'succeed' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : expectedRes.status;
@@ -75,7 +76,7 @@ const testActivities = () => {
 					.expect(expectedStatus);
 
 				if (success) {
-					expect(res.headers['content-disposition']).toEqual('attachment;filename=activities.zip');
+					expect(res.headers['content-disposition']).toEqual('attachment;filename=audit.zip');
 					expect(res.headers['content-type']).toEqual('application/zip');
 					expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
 					const { password } = Mailer.sendEmail.mock.calls[0][2];
@@ -95,5 +96,5 @@ describe(determineTestGroup(__filename), () => {
 		agent = await SuperTest(server);
 	});
 	afterAll(() => closeApp(server));
-	testActivities();
+	testGetAuditLogArchive();
 });

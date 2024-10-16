@@ -119,11 +119,11 @@ Settings.checkTicketTemplateExists = async (req, res, next) => {
 
 Settings.validateUpdateTicketSchema = validateMany([Settings.checkTicketTemplateExists, validateUpdateTemplateSchema]);
 
-Settings.validateGetActivitiesParams = async (req, res, next) => {
+Settings.validateGetAuditLogParams = async (req, res, next) => {
 	const schema = Yup.object({
 		from: types.date,
 		to: types.date,
-	});
+	}).test('valid-dates', 'The end date must be greater than the first.', (value) => !value.from || !value.to || value.to > value.from);
 
 	try {
 		req.query = await schema.validate(req.query, { stripUnknown: true });

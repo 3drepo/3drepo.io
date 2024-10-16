@@ -19,14 +19,14 @@ const { times } = require('lodash');
 const { generateRandomString, generateRandomDate, generateRandomObject } = require('../../helper/services');
 const { src } = require('../../helper/path');
 
-const Activities = require(`${src}/models/activities`);
+const Audits = require(`${src}/models/teamspaecs.audits`);
 
 const db = require(`${src}/handler/db`);
 
-const ACTIVITIES_COL = 'activities';
+const AUDITS_COL = 'auditing';
 
-const testGetActivities = () => {
-	describe('Get activities', () => {
+const tesGetActionLog = () => {
+	describe('Get action log', () => {
 		const teamspace = generateRandomString();
 		const fromDate = generateRandomDate();
 		const toDate = generateRandomDate();
@@ -36,11 +36,11 @@ const testGetActivities = () => {
 
 			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
 
-			await expect(Activities.getActivities(teamspace, fromDate, toDate))
+			await expect(Audits.getActionLog(teamspace, fromDate, toDate))
 				.resolves.toEqual(expectedOutput);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, ACTIVITIES_COL,
+			expect(fn).toHaveBeenCalledWith(teamspace, AUDITS_COL,
 				{ timestamp: ({ $gte: fromDate, $lte: toDate }) });
 		});
 
@@ -49,11 +49,11 @@ const testGetActivities = () => {
 
 			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
 
-			await expect(Activities.getActivities(teamspace))
+			await expect(Audits.getActionLog(teamspace))
 				.resolves.toEqual(expectedOutput);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, ACTIVITIES_COL, {});
+			expect(fn).toHaveBeenCalledWith(teamspace, AUDITS_COL, {});
 		});
 
 		test('should return whatever the database query returns (only from param)', async () => {
@@ -61,18 +61,18 @@ const testGetActivities = () => {
 
 			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
 
-			await expect(Activities.getActivities(teamspace, fromDate))
+			await expect(Audits.getActionLog(teamspace, fromDate))
 				.resolves.toEqual(expectedOutput);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, ACTIVITIES_COL, { timestamp: ({ $gte: fromDate }) });
+			expect(fn).toHaveBeenCalledWith(teamspace, AUDITS_COL, { timestamp: ({ $gte: fromDate }) });
 		});
 	});
 };
 
-const testAddActivity = () => {
-	describe('Add activity', () => {
-		test('should add the activity', async () => {
+const testLogAction = () => {
+	describe('Log action', () => {
+		test('should log an action', async () => {
 			const teamspace = generateRandomString();
 			const action = generateRandomString();
 			const executor = generateRandomString();
@@ -80,17 +80,17 @@ const testAddActivity = () => {
 
 			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
 
-			await Activities.addActivity(teamspace, action, executor, data);
+			await Audits.logAction(teamspace, action, executor, data);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			const { _id, timestamp } = fn.mock.calls[0][2];
-			expect(fn).toHaveBeenCalledWith(teamspace, ACTIVITIES_COL,
+			expect(fn).toHaveBeenCalledWith(teamspace, AUDITS_COL,
 				{ action, executor, data, _id, timestamp });
 		});
 	});
 };
 
-describe('models/activities', () => {
-	testGetActivities();
-	testAddActivity();
+describe('models/teamspaces.audits', () => {
+	tesGetActionLog();
+	testLogAction();
 });

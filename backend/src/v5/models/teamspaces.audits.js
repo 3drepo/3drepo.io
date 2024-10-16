@@ -15,14 +15,33 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const ActivitiesConstants = {};
+const Audit = {};
+const db = require('../handler/db');
+const { deleteIfUndefined } = require('../utils/helper/objects');
+const { generateUUID } = require('../utils/helper/uuids');
 
-ActivitiesConstants.actions = {
-	USER_ADDED: 'USER_ADDED',
-	USER_REMOVED: 'USER_REMOVED',
-	PERMISSIONS_UPDATED: 'PERMISSIONS_UPDATED',
-	INVITATION_ADDED: 'INVITATION_ADDED',
-	INVITATION_REVOKED: 'INVITATION_REVOKED',
+const COL_NAME = 'auditing';
+
+Audit.getActionLog = (teamspace, fromDate, toDate) => {
+	const query = {};
+
+	if (fromDate || toDate) {
+		query.timestamp = deleteIfUndefined({ $gte: fromDate, $lte: toDate });
+	}
+
+	return db.find(teamspace, COL_NAME, query);
 };
 
-module.exports = ActivitiesConstants;
+Audit.logAction = async (teamspace, action, executor, data) => {
+	const formattedData = {
+		_id: generateUUID(),
+		action,
+		timestamp: new Date(),
+		executor,
+		data,
+	};
+
+	await db.insertOne(teamspace, COL_NAME, formattedData);
+};
+
+module.exports = Audit;

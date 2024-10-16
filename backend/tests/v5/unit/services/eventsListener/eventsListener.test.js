@@ -17,7 +17,7 @@
 
 const { src } = require('../../../helper/path');
 
-const { actions } = require(`${src}/models/activities.constants`);
+const { actions } = require(`${src}/models/teamspaces.audits.constants`);
 const { MODEL_VIEWER, PROJECT_ADMIN, MODEL_COMMENTER, MODEL_COLLABORATOR } = require(`${src}/utils/permissions/permissions.constants`);
 const { generateRandomString, generateUUID } = require('../../../helper/services');
 
@@ -26,8 +26,8 @@ const LoginRecords = require(`${src}/models/loginRecords`);
 jest.mock('../../../../../src/v5/models/projectSettings');
 const ProjectSettings = require(`${src}/models/projectSettings`);
 
-jest.mock('../../../../../src/v5/models/activities');
-const Activities = require(`${src}/models/activities`);
+jest.mock('../../../../../src/v5/models/teamspaces.audits');
+const Audits = require(`${src}/models/teamspaces.audits`);
 
 jest.mock('../../../../../src/v5/services/chat');
 const ChatService = require(`${src}/services/chat`);
@@ -177,7 +177,7 @@ const testUserEventsListener = () => {
 	});
 };
 
-const testActivitiesEventsListener = () => {
+const testAuditEventsListener = () => {
 	describe('Activities Events', () => {
 		test(`Should trigger userAdded if there is a ${events.USER_ADDED}`, async () => {
 			const waitOnEvent = eventTriggeredPromise(events.USER_ADDED);
@@ -187,8 +187,8 @@ const testActivitiesEventsListener = () => {
 			EventsManager.publish(events.USER_ADDED, { teamspace, executor, user });
 			await waitOnEvent;
 
-			expect(Activities.addActivity).toHaveBeenCalledTimes(1);
-			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.USER_ADDED, executor, { user });
+			expect(Audits.logAction).toHaveBeenCalledTimes(1);
+			expect(Audits.logAction).toHaveBeenCalledWith(teamspace, actions.USER_ADDED, executor, { user });
 		});
 
 		test(`Should fail gracefully on error if there is an ${events.USER_ADDED} event`, async () => {
@@ -197,12 +197,12 @@ const testActivitiesEventsListener = () => {
 			const executor = generateRandomString();
 			const user = generateRandomString();
 
-			Activities.addActivity.mockRejectedValueOnce(generateRandomString());
+			Audits.logAction.mockRejectedValueOnce(generateRandomString());
 			EventsManager.publish(events.USER_ADDED, { teamspace, executor, user });
 
 			await waitOnEvent;
-			expect(Activities.addActivity).toHaveBeenCalledTimes(1);
-			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.USER_ADDED, executor, { user });
+			expect(Audits.logAction).toHaveBeenCalledTimes(1);
+			expect(Audits.logAction).toHaveBeenCalledWith(teamspace, actions.USER_ADDED, executor, { user });
 		});
 
 		test(`Should trigger userRemoved if there is a ${events.USER_REMOVED}`, async () => {
@@ -213,8 +213,8 @@ const testActivitiesEventsListener = () => {
 			EventsManager.publish(events.USER_REMOVED, { teamspace, executor, user });
 			await waitOnEvent;
 			expect(Teamspaces.initTeamspace).not.toHaveBeenCalled();
-			expect(Activities.addActivity).toHaveBeenCalledTimes(1);
-			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.USER_REMOVED, executor, { user });
+			expect(Audits.logAction).toHaveBeenCalledTimes(1);
+			expect(Audits.logAction).toHaveBeenCalledWith(teamspace, actions.USER_REMOVED, executor, { user });
 		});
 
 		test(`Should fail gracefully on error if there is an ${events.USER_REMOVED} event`, async () => {
@@ -223,12 +223,12 @@ const testActivitiesEventsListener = () => {
 			const executor = generateRandomString();
 			const user = generateRandomString();
 
-			Activities.addActivity.mockRejectedValueOnce(generateRandomString());
+			Audits.logAction.mockRejectedValueOnce(generateRandomString());
 			EventsManager.publish(events.USER_REMOVED, { teamspace, executor, user });
 
 			await waitOnEvent;
-			expect(Activities.addActivity).toHaveBeenCalledTimes(1);
-			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.USER_REMOVED, executor, { user });
+			expect(Audits.logAction).toHaveBeenCalledTimes(1);
+			expect(Audits.logAction).toHaveBeenCalledWith(teamspace, actions.USER_REMOVED, executor, { user });
 		});
 
 		test(`Should trigger invitationAdded if there is a ${events.INVITATION_ADDED}`, async () => {
@@ -241,8 +241,8 @@ const testActivitiesEventsListener = () => {
 			EventsManager.publish(events.INVITATION_ADDED, { teamspace, executor, email, job, permissions });
 			await waitOnEvent;
 
-			expect(Activities.addActivity).toHaveBeenCalledTimes(1);
-			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.INVITATION_ADDED, executor,
+			expect(Audits.logAction).toHaveBeenCalledTimes(1);
+			expect(Audits.logAction).toHaveBeenCalledWith(teamspace, actions.INVITATION_ADDED, executor,
 				{ email, job, permissions });
 		});
 
@@ -254,12 +254,12 @@ const testActivitiesEventsListener = () => {
 			const job = generateRandomString();
 			const permissions = generateRandomString();
 
-			Activities.addActivity.mockRejectedValueOnce(generateRandomString());
+			Audits.logAction.mockRejectedValueOnce(generateRandomString());
 			EventsManager.publish(events.INVITATION_ADDED, { teamspace, executor, email, job, permissions });
 			await waitOnEvent;
 
-			expect(Activities.addActivity).toHaveBeenCalledTimes(1);
-			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.INVITATION_ADDED, executor,
+			expect(Audits.logAction).toHaveBeenCalledTimes(1);
+			expect(Audits.logAction).toHaveBeenCalledWith(teamspace, actions.INVITATION_ADDED, executor,
 				{ email, job, permissions });
 		});
 
@@ -273,8 +273,8 @@ const testActivitiesEventsListener = () => {
 			EventsManager.publish(events.INVITATION_REVOKED, { teamspace, executor, email, job, permissions });
 			await waitOnEvent;
 
-			expect(Activities.addActivity).toHaveBeenCalledTimes(1);
-			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.INVITATION_REVOKED, executor,
+			expect(Audits.logAction).toHaveBeenCalledTimes(1);
+			expect(Audits.logAction).toHaveBeenCalledWith(teamspace, actions.INVITATION_REVOKED, executor,
 				{ email, job, permissions });
 		});
 
@@ -286,12 +286,12 @@ const testActivitiesEventsListener = () => {
 			const job = generateRandomString();
 			const permissions = generateRandomString();
 
-			Activities.addActivity.mockRejectedValueOnce(generateRandomString());
+			Audits.logAction.mockRejectedValueOnce(generateRandomString());
 			EventsManager.publish(events.INVITATION_REVOKED, { teamspace, executor, email, job, permissions });
 			await waitOnEvent;
 
-			expect(Activities.addActivity).toHaveBeenCalledTimes(1);
-			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.INVITATION_REVOKED, executor,
+			expect(Audits.logAction).toHaveBeenCalledTimes(1);
+			expect(Audits.logAction).toHaveBeenCalledWith(teamspace, actions.INVITATION_REVOKED, executor,
 				{ email, job, permissions });
 		});
 
@@ -306,8 +306,8 @@ const testActivitiesEventsListener = () => {
 				{ teamspace, executor, isTsUpdate: true, initialPermissions, updatedPermissions });
 			await waitOnEvent;
 
-			expect(Activities.addActivity).toHaveBeenCalledTimes(1);
-			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.PERMISSIONS_UPDATED, executor,
+			expect(Audits.logAction).toHaveBeenCalledTimes(1);
+			expect(Audits.logAction).toHaveBeenCalledWith(teamspace, actions.PERMISSIONS_UPDATED, executor,
 				{ users: updatedPermissions.map((u) => u.user), permissions: [{ from: null, to: 'teamspace_admin' }] });
 		});
 
@@ -327,10 +327,10 @@ const testActivitiesEventsListener = () => {
 				{ teamspace, executor, initialPermissions, updatedPermissions });
 			await waitOnEvent;
 
-			expect(Activities.addActivity).toHaveBeenCalledTimes(2);
-			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.PERMISSIONS_UPDATED, executor,
+			expect(Audits.logAction).toHaveBeenCalledTimes(2);
+			expect(Audits.logAction).toHaveBeenCalledWith(teamspace, actions.PERMISSIONS_UPDATED, executor,
 				{ users: [user1], permissions: [{ from: PROJECT_ADMIN, to: null, project }] });
-			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.PERMISSIONS_UPDATED, executor,
+			expect(Audits.logAction).toHaveBeenCalledWith(teamspace, actions.PERMISSIONS_UPDATED, executor,
 				{ users: [user2], permissions: [{ from: null, to: PROJECT_ADMIN, project }] });
 		});
 
@@ -394,19 +394,19 @@ const testActivitiesEventsListener = () => {
 				{ teamspace, executor, initialPermissions, updatedPermissions });
 			await waitOnEvent;
 
-			expect(Activities.addActivity).toHaveBeenCalledTimes(3);
-			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.PERMISSIONS_UPDATED, executor,
+			expect(Audits.logAction).toHaveBeenCalledTimes(3);
+			expect(Audits.logAction).toHaveBeenCalledWith(teamspace, actions.PERMISSIONS_UPDATED, executor,
 				{ users: [user1],
 					permissions: [
 						{ from: PROJECT_ADMIN, to: null, project },
 					] });
-			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.PERMISSIONS_UPDATED, executor,
+			expect(Audits.logAction).toHaveBeenCalledWith(teamspace, actions.PERMISSIONS_UPDATED, executor,
 				{ users: [user2],
 					permissions: [
 						{ from: null, to: PROJECT_ADMIN, project },
 						{ from: MODEL_COMMENTER, to: MODEL_VIEWER, project, model: model2 },
 					] });
-			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.PERMISSIONS_UPDATED, executor,
+			expect(Audits.logAction).toHaveBeenCalledWith(teamspace, actions.PERMISSIONS_UPDATED, executor,
 				{ users: [user1, user2],
 					permissions: [
 						{ from: MODEL_VIEWER, to: MODEL_COLLABORATOR, project, model: model1 },
@@ -420,13 +420,13 @@ const testActivitiesEventsListener = () => {
 			const initialPermissions = [];
 			const updatedPermissions = [{ user: generateRandomString(), permissions: ['teamspace_admin'] }];
 
-			Activities.addActivity.mockRejectedValueOnce(generateRandomString());
+			Audits.logAction.mockRejectedValueOnce(generateRandomString());
 			EventsManager.publish(events.PERMISSIONS_UPDATED,
 				{ teamspace, executor, isTsUpdate: true, initialPermissions, updatedPermissions });
 			await waitOnEvent;
 
-			expect(Activities.addActivity).toHaveBeenCalledTimes(1);
-			expect(Activities.addActivity).toHaveBeenCalledWith(teamspace, actions.PERMISSIONS_UPDATED, executor,
+			expect(Audits.logAction).toHaveBeenCalledTimes(1);
+			expect(Audits.logAction).toHaveBeenCalledWith(teamspace, actions.PERMISSIONS_UPDATED, executor,
 				{ users: updatedPermissions.map((u) => u.user), permissions: [{ from: null, to: 'teamspace_admin' }] });
 		});
 	});
@@ -436,5 +436,5 @@ describe('services/eventsListener/eventsListener', () => {
 	EventsListener.init();
 	testAuthEventsListener();
 	testUserEventsListener();
-	testActivitiesEventsListener();
+	testAuditEventsListener();
 });

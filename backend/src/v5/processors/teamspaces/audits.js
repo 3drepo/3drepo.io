@@ -20,35 +20,33 @@ const archiver = require('archiver');
 archiver.registerFormat('zip-encrypted', require('archiver-zip-encrypted'));
 const { templates: emailTemplates } = require('../../services/mailer/mailer.constants');
 const { generateHashString } = require('../../utils/helper/strings');
-const { getActivities } = require('../../models/activities');
+const { getActionLog } = require('../../models/teamspaces.audits');
 const { getUserByUsername } = require('../../models/users');
 const { sendEmail } = require('../../services/mailer');
-const { uuidToString } = require('../../../v4/utils');
 
-const Activities = {};
+const Audit = {};
 
-const createActivitiesZip = (activities) => {
-	const jsonBuffer = Buffer.from(JSON.stringify(activities), 'utf8');
+const createAuditLogArchive = (actions) => {
+	const jsonBuffer = Buffer.from(JSON.stringify(actions), 'utf8');
 
 	try {
 		const password = generateHashString();
 		const file = archiver.create('zip-encrypted', { zlib: { level: 1 }, encryptionMethod: 'aes256', password });
-		file.append(jsonBuffer, { name: 'activities.json' });
+		file.append(jsonBuffer, { name: 'audit.json' });
 		file.finalize();
 		return { file, password };
 	} catch (err) {
-		throw createResponseCode(templates.unknown, 'Failed to create zip file.');
+		throw createResponseCode(templates.unknown, `Failed to create zip file: ${err.message}`);
 	}
 };
 
-Activities.getActivitiesFile = async (teamspace, username, fromDate, toDate) => {
-	const activities = await getActivities(teamspace, fromDate, toDate);
-	const { file, password } = createActivitiesZip(activities.map((a) => ({ ...a, _id: uuidToString(a._id) })));
-
+Audit.getAuditLogArchive = async (teamspace, username, fromDate, toDate) => {
+	const actions = await getActionLog(teamspace, fromDate, toDate);
+	const { file, password } = createAuditLogArchive(actions.map(({ _id, ...data }) => data));
 	const { customData: { email, firstName } } = await getUserByUsername(username, { 'customData.email': 1, 'customData.firstName': 1 });
 	await sendEmail(emailTemplates.ACTIVITIES.name, email, { firstName, password });
 
 	return file;
 };
 
-module.exports = Activities;
+module.exports = Audit;
