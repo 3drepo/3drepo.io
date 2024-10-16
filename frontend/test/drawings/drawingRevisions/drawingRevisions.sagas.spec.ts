@@ -127,6 +127,7 @@ describe('Drawing Revisions: sagas', () => {
 			number: mockBody.drawingNumber,
 			type: mockBody.drawingType,
 			desc: mockBody.drawingDesc,
+			calibration: mockBody.calibration,
 		};
 
 		const spy = spyOnAxiosApiCallWithFile(api, 'post');
