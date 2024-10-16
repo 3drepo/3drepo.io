@@ -200,6 +200,7 @@ const testCreateProject = () => {
 			expect(fn.mock.calls[0][1]).toEqual('projects');
 			expect(fn.mock.calls[0][2].name).toEqual({ name: 'newName' });
 			expect(fn.mock.calls[0][2]).toHaveProperty('_id');
+			expect(fn.mock.calls[0][2]).toHaveProperty('createdAt');
 			expect(isUUIDString(fn.mock.calls[0][2]._id));
 			expect(res).toEqual(fn.mock.calls[0][2]._id);
 		});

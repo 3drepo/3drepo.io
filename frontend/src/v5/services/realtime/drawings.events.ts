@@ -22,8 +22,7 @@ import { subscribeToRoomEvent } from './realtime.service';
 
 export const enableRealtimeDrawingUpdate = (teamspace:string, project:string, drawingId:string) =>
 	subscribeToRoomEvent({ teamspace, project, model: drawingId }, 'drawingSettingsUpdate',
-		(settings: Partial<IDrawing>) =>
-			DrawingsActionsDispatchers.updateDrawingSuccess(project, drawingId, settings));
+		(settings: Partial<IDrawing>) => DrawingsActionsDispatchers.updateDrawingSuccess(project, drawingId, settings));
 
 export const enableRealtimeNewDrawing = (teamspace:string, project:string) =>
 	subscribeToRoomEvent({ teamspace, project }, 'newDrawing',

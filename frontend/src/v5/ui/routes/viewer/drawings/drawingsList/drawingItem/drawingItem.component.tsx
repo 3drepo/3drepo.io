@@ -19,7 +19,6 @@ import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import {
 	Container,
 	Title,
-	DrawingsCalibrationButton,
 	MainBody,
 	ImageContainer,
 	Property,
@@ -29,16 +28,21 @@ import {
 	InfoContainer,
 	BreakingLine,
 	SkeletonText,
+	CalibrationButton,
 } from './drawingItem.styles';
 import { FormattedMessage } from 'react-intl';
-import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
+import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
-import { useParams } from 'react-router';
+import { useContext, useEffect, useState } from 'react';
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
+import { viewerRoute } from '@/v5/services/routing/routing';
+import { Highlight } from '@controls/highlight';
+import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { getDrawingThumbnailSrc } from '@/v5/store/drawings/drawings.helpers';
-import { useEffect, useState } from 'react';
 import { deleteAuthUrlFromCache, downloadAuthUrl } from '@components/authenticatedResource/authenticatedResource.hooks';
 import { Thumbnail } from '@controls/thumbnail/thumbnail.component';
 import { Tooltip } from '@mui/material';
@@ -51,21 +55,39 @@ type DrawingItemProps = {
 	onClick: React.MouseEventHandler<HTMLDivElement>;
 };
 export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
-	const { teamspace, project } = useParams<ViewerParams>();
-	const latestRevision = DrawingRevisionsHooksSelectors.selectLatestActiveRevision(drawing._id);
-	const { calibration, name, number, lastUpdated, desc } = drawing;
-	const { statusCode, revCode } = latestRevision || {};
+	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
+	const history = useHistory();
+	const { pathname, search } = useLocation();
+	const { setOrigin } = useContext(CalibrationContext);
+	const queries = DrawingsCardHooksSelectors.selectQueries();
+	const { calibrationStatus, name, number, lastUpdated, desc, _id: drawingId, latestRevision } = drawing;
+	const [statusCode, revCode] = latestRevision?.split('-');
 	const areStatsPending = !revCode;
 	const [selectedDrawingId] = useSearchParam('drawingId');
 	const [thumbnail, setThumbnail] = useState('');
 	const thumbnailSrc = getDrawingThumbnailSrc(teamspace, project, drawing._id);
 
+	const onCalibrateClick = () => {
+		const path = viewerRoute(teamspace, project, containerOrFederation, revision, { drawingId, isCalibrating: true }, false);
+		history.push(path);
+		setOrigin(pathname + search);
+	};
+
 	useEffect(() => {
+		if (!latestRevision) {
+			DrawingRevisionsActionsDispatchers.fetch(teamspace, project, drawing._id);
+		}
+	}, [latestRevision]);
+
+	useEffect(() => {
+		if (!latestRevision) return;
+		
 		downloadAuthUrl(thumbnailSrc)
 			.then(setThumbnail)
 			.catch(() => setThumbnail(''));
+
 		return () => { deleteAuthUrlFromCache(thumbnailSrc); };
-	}, [latestRevision?._id]);
+	}, [latestRevision]);
 
 	const LoadingCodes = () => (
 		<>
@@ -87,13 +109,23 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 			{statusCode && (
 				<BreakingLine>
 					<Property>
-						{STATUS_CODE_TEXT}: <PropertyValue>{statusCode}</PropertyValue>
+						{STATUS_CODE_TEXT}: 
+						<PropertyValue>
+							<Highlight search={queries}>
+								{statusCode}
+							</Highlight>
+						</PropertyValue>
 					</Property>
 				</BreakingLine>
 			)}
 			<BreakingLine>
 				<Property>
-					{REVISION_CODE_TEXT}: <PropertyValue>{revCode}</PropertyValue>
+					{REVISION_CODE_TEXT}: 
+					<PropertyValue>
+						<Highlight search={queries}>
+							{revCode}
+						</Highlight>
+					</PropertyValue>
 				</Property>
 			</BreakingLine>
 		</>
@@ -107,15 +139,27 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 				</ImageContainer>
 				<InfoContainer>
 					<BreakingLine>
-						<Property>{number}</Property>
+						<Property>
+							<Highlight search={queries}>
+								{number}
+							</Highlight>
+						</Property>
 					</BreakingLine>
 					<BreakingLine>
 						<Tooltip title={name}>
-							<Title>{name}</Title>
+							<Title>
+								<Highlight search={queries}>
+									{name}
+								</Highlight>
+							</Title>
 						</Tooltip>
 					</BreakingLine>
 					{areStatsPending ? <LoadingCodes /> : <LoadedCodes />}
-					<Description>{desc}</Description>
+					<Description>
+						<Highlight search={queries}>
+							{desc}
+						</Highlight>
+					</Description>
 				</InfoContainer>
 			</MainBody>
 			<BottomLine>
@@ -125,9 +169,10 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 						<PropertyValue>&nbsp;{formatDateTime(lastUpdated)}</PropertyValue>
 					</Property>
 				</BreakingLine>
-				<DrawingsCalibrationButton
-					onClick={() => {}}
-					calibration={calibration}
+				<CalibrationButton
+					calibrationStatus={calibrationStatus}
+					drawingId={drawingId}
+					onCalibrateClick={onCalibrateClick}
 				/>
 			</BottomLine>
 		</Container>

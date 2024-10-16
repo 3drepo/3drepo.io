@@ -20,6 +20,7 @@ import { IProject } from '@/v5/store/projects/projects.types';
 import { generatePath } from 'react-router';
 import { VIEWER_ROUTE, PROJECT_ROUTE_BASE, PROJECT_ROUTE, TICKETS_SELECTION_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { IContainerRevision } from '@/v5/store/containers/revisions/containerRevisions.types';
+import { generateFullPath } from '@/v5/helpers/url.helper';
 
 export const projectRoute = (teamspace: string, project: IProject | string) => {
 	const projectId = (project as IProject)?._id || (project as string);
@@ -33,12 +34,21 @@ export const projectTabRoute = (teamspace: string, project: IProject | string, t
 
 type RevisionParam = IContainerRevision | string | null | undefined;
 type ContainerOrFederationParam = IContainer | IFederation | string;
+type ViewerSearchParams = {
+	drawingId?: string,
+	isCalibrating?: boolean,
+	ticketId?: string,
+	issueId?: string,
+	riskId?: string,
+};
 
 export const viewerRoute = (
 	teamspace: string,
 	project,
 	containerOrFederation: ContainerOrFederationParam,
 	revision: RevisionParam = undefined,
+	newSearchParams: ViewerSearchParams = {},
+	keepSearchParams = true,
 ) => {
 	const containerOrFederationId = (containerOrFederation as IContainer | IFederation)?._id
 		|| (containerOrFederation as string);
@@ -52,7 +62,7 @@ export const viewerRoute = (
 		revision: revisionId,
 	};
 
-	return generatePath(VIEWER_ROUTE, params);
+	return generateFullPath(VIEWER_ROUTE, params, newSearchParams, keepSearchParams);
 };
 
 export const ticketsSelectionRoute = (

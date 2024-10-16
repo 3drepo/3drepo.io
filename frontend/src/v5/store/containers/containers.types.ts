@@ -80,29 +80,6 @@ export const CONTAINER_TYPES = [
 	},
 ];
 
-export const CONTAINER_UNITS = [
-	{
-		value: 'mm',
-		name: formatMessage({ id: 'containers.unit.name.mm', defaultMessage: 'Millimetres' }),
-	},
-	{
-		value: 'cm',
-		name: formatMessage({ id: 'containers.unit.name.cm', defaultMessage: 'Centimetres' }),
-	},
-	{
-		value: 'dm',
-		name: formatMessage({ id: 'containers.unit.name.dm', defaultMessage: 'Decimetres' }),
-	},
-	{
-		value: 'm',
-		name: formatMessage({ id: 'containers.unit.name.m', defaultMessage: 'Metres' }),
-	},
-	{
-		value: 'ft',
-		name: formatMessage({ id: 'containers.unit.name.ft', defaultMessage: 'Feet and Inches' }),
-	},
-];
-
 export interface MinimumContainer {
 	_id: string,
 	name: string,

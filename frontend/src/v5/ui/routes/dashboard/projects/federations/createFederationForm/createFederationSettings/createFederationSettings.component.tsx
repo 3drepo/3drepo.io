@@ -16,7 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { CONTAINER_UNITS } from '@/v5/store/containers/containers.types';
+import { MODEL_UNITS } from '../../../models.helpers';
 import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 import { MenuItem } from '@mui/material';
 import { useFormContext } from 'react-hook-form';
@@ -57,7 +57,7 @@ export const CreateFederationFormSettings = () => {
 					})}
 					control={control}
 				>
-					{CONTAINER_UNITS.map(({ name, value }) => (
+					{MODEL_UNITS.map(({ name, value }) => (
 						<MenuItem key={value} value={value}>
 							{name}
 						</MenuItem>

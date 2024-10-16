@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { CardList } from '@components/teamspace/teamspaceList/teamspaceList.styles';
 import { TableVirtuoso } from 'react-virtuoso';
 import styled from 'styled-components';
 
@@ -23,14 +22,8 @@ export const VirtualisedList = styled(TableVirtuoso)`
 	box-sizing: border-box;
 	overflow-x: hidden;
 
-	${/* sc-selector */CardList} {
+	table {
 		width: 100%;
-		box-sizing: border-box;
-		height: 100%;
-
-		& > * {
-			width: 100%;
-		}
 	}
 `;
 

@@ -23,6 +23,7 @@ import * as ContainersSelectors from '@/v5/store/containers/containers.selectors
 import * as ContainerRevisionsSelectors from '@/v5/store/containers/revisions/containerRevisions.selectors';
 import * as CurrentUserSelectors from '@/v5/store/currentUser/currentUser.selectors';
 import * as DrawingsSelectors from '@/v5/store/drawings/drawings.selectors';
+import * as DrawingsCardSelectors from '@/v5/store/drawings/card/drawingsCard.selectors';
 import * as DrawingRevisionsSelectors from '@/v5/store/drawings/revisions/drawingRevisions.selectors';
 import * as DialogsSelectors from '@/v5/store/dialogs/dialogs.selectors';
 import * as ProjectsSelectors from '@/v5/store/projects/projects.selectors';
@@ -48,6 +49,7 @@ export const ContainersHooksSelectors = createHooksSelectors(ContainersSelectors
 export const CanvasHistoryHooksSelectors = createHooksSelectors(CanvasHistorySelectors);
 export const CurrentUserHooksSelectors = createHooksSelectors(CurrentUserSelectors);
 export const DrawingsHooksSelectors = createHooksSelectors(DrawingsSelectors);
+export const DrawingsCardHooksSelectors = createHooksSelectors(DrawingsCardSelectors);
 export const DrawingRevisionsHooksSelectors = createHooksSelectors(DrawingRevisionsSelectors);
 export const DialogsHooksSelectors = createHooksSelectors(DialogsSelectors);
 export const FederationsHooksSelectors = createHooksSelectors(FederationsSelectors);

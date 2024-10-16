@@ -15,12 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Vector1D, Vector2D, Vector3D } from '../../ui/routes/dashboard/projects/calibration/calibration.types';
 import { UploadStatus } from '../containers/containers.types';
 import { Role } from '../currentUser/currentUser.types';
 
-export enum CalibrationStates {
+export enum CalibrationStatus {
 	CALIBRATED = 'calibrated',
-	OUT_OF_SYNC = 'outOfSync',
+	UNCONFIRMED = 'unconfirmed',
 	UNCALIBRATED = 'uncalibrated',
 	EMPTY = 'empty',
 }
@@ -32,6 +33,15 @@ export interface MinimumDrawing {
 	isFavourite: boolean;
 }
 
+export interface Calibration {
+	verticalRange: Vector1D;
+	horizontal?: {
+		model: Vector3D,
+		drawing: Vector2D,
+	}
+	units: string,
+}
+
 export interface DrawingStats {
 	revisions: {
 		total: number;
@@ -39,7 +49,7 @@ export interface DrawingStats {
 		latestRevision?: string,
 	};
 	number: string,
-	calibration?: CalibrationStates,
+	calibrationStatus?: CalibrationStatus,
 	type: string,
 	status: UploadStatus,
 	errorReason?: {
@@ -49,11 +59,22 @@ export interface DrawingStats {
 	desc?: string;
 }
 
+type DrawingSettingsCalibration = Omit<Calibration, 'horizontal'>;
+
+export interface DrawingSettings {
+	name: string,
+	number: string,
+	type: string,
+	desc: string,
+	calibration: DrawingSettingsCalibration,
+}
+
 export interface IDrawing extends MinimumDrawing, Partial<Omit<DrawingStats, 'revisions'>> {
 	lastUpdated?: Date;
 	latestRevision?: string;
 	revisionsCount: number;
 	hasStatsPending?: boolean;
+	calibration: Calibration;
 }
 
 export type NewDrawing = {
@@ -62,4 +83,5 @@ export type NewDrawing = {
 	type: string;
 	number: string;
 	desc?: string;
+	calibration: DrawingSettingsCalibration;
 };

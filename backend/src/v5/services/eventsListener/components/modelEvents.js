@@ -159,7 +159,7 @@ const modelProcessingCompleted = async ({ teamspace, project, model, revId, user
 		teamspace,
 		project,
 		model,
-		data: deleteIfUndefined({ ...data, calibration }),
+		data,
 		modelType,
 	});
 };

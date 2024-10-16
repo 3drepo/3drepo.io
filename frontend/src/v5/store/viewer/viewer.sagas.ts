@@ -49,6 +49,9 @@ function* fetchData({ teamspace, containerOrFederation, project }: FetchDataActi
 			// selectContainersByFederationId only returns containers user has permissions to
 			const assignedContainers = yield select(selectContainersByFederationId, containerOrFederation);
 			containerToFetchStatsOf = assignedContainers.map((cont) => cont._id);
+
+			yield put(FederationsActions.fetchFederationSettings(teamspace, project, containerOrFederation));
+			yield take(FederationsTypes.FETCH_FEDERATION_SETTINGS_SUCCESS);
 		} else {
 			containerToFetchStatsOf = [containerOrFederation];
 		}

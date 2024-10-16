@@ -19,13 +19,14 @@ import { DrawingsActions } from '@/v5/store/drawings/drawings.redux';
 import { mockServer } from '../../internals/testing/mockServer';
 import { pick } from 'lodash';
 import { fullDrawing } from '@/v5/store/drawings/drawings.helpers';
-import { drawingMockFactory, prepareMockStats } from './drawings.fixtures';
+import { drawingMockFactory, prepareMockSettings, prepareMockStats } from './drawings.fixtures';
 import { createTestStore, WaitForActions } from '../test.helpers';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { selectDrawingById, selectDrawings } from '@/v5/store/drawings/drawings.selectors';
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 import { NewDrawing } from '@/v5/store/drawings/drawings.types';
+import { DEFAULT_SETTINGS_CALIBRATION } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
 
 describe('Drawings: sagas', () => {
 	const teamspace = 'teamspace';
@@ -114,6 +115,7 @@ describe('Drawings: sagas', () => {
 
 	describe('fetchDrawings', () => {
 		const stats = prepareMockStats();
+		const settings = prepareMockSettings();
 
 		it('should fetch drawings data', async () => {
 			const mockDrawingBaseResponse = pick(mockDrawing, ['_id', 'name', 'role', 'isFavourite']);
@@ -167,6 +169,31 @@ describe('Drawings: sagas', () => {
 			const drawingsInStore = selectDrawings(getState());
 			expect(drawingsInStore).toEqual([fullDrawing(mockDrawing)]);
 		})
+
+		it('should fetch settings', async () => {
+			populateStore();
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/drawings/${drawingId}`)
+				.reply(200, settings);
+
+			await waitForActions(() => {
+				dispatch(DrawingsActions.fetchDrawingSettings(teamspace, projectId, drawingId));
+			}, [DrawingsActions.updateDrawingSuccess(projectId, drawingId, settings)]);
+		})
+
+		it('should call fetch drawing settings endpoint with 401', async () => {
+			populateStore();
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/drawings/${drawingId}`)
+				.reply(401);
+
+			await waitForActions(() => {
+				dispatch(DrawingsActions.fetchDrawingSettings(teamspace, projectId, drawingId));
+			}, [DialogsTypes.OPEN]);
+
+			const drawingsInStore = selectDrawings(getState());
+			expect(drawingsInStore).toEqual([fullDrawing(mockDrawing)]);
+		})
 	})
 
 	describe('createDrawing', () => {
@@ -175,6 +202,7 @@ describe('Drawings: sagas', () => {
 			type: 'Other',
 			number: 'number',
 			desc: 'desc',
+			calibration: DEFAULT_SETTINGS_CALIBRATION,
 		};
 		it('should call createDrawing endpoint', async () => {
 			mockServer

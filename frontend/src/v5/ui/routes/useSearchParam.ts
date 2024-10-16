@@ -47,7 +47,7 @@ export const useSearchParam = <T = string>(name: string, transformer: Transforme
 	const value = useMemo(() => transformer.from(unprocessedValue), [unprocessedValue]);
 	
 	const getSearchParams = useCallback((newValue: T, search?: string) => {
-		const searchParams = new URLSearchParams(search || location.search);
+		const searchParams = new URLSearchParams(search || window.location.search);
 		const transformedNewValue = transformer.to(newValue);
 		if (transformedNewValue) {
 			searchParams.set(name, transformedNewValue);

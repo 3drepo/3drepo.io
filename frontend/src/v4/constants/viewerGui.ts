@@ -120,6 +120,12 @@ export const getViewerLeftPanels = (issuesEnabled, risksEnabled) =>  {
 	return leftPanels.map(getPanelConfig);
 };
 
+export const getCalibrationViewerLeftPanels = () =>  [
+	VIEWER_PANELS.GROUPS,
+	VIEWER_PANELS.VIEWS,
+	VIEWER_PANELS.TREE,
+].map(getPanelConfig);
+
 export const VIEWER_DRAGGABLE_PANELS = [
 	VIEWER_PANELS.LEGEND,
 ];

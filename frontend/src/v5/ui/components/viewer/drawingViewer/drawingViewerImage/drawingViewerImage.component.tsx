@@ -14,12 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import { forwardRef, useRef } from 'react';
 import { ZoomableImage } from '../zoomableImage.types';
 
-export type DrawingViewerImageProps = { 
-	onLoad?: (...args) => void, 
-	src: string 
+
+export type DrawingViewerImageProps = {
+	onLoad?: (...args) => void,
+	src: string
 };
 
 export const DrawingViewerImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ onLoad, src }, ref ) => {
@@ -37,7 +39,7 @@ export const DrawingViewerImage = forwardRef<ZoomableImage, DrawingViewerImagePr
 		getBoundingClientRect: () => {
 			return imgRef.current.getBoundingClientRect();
 		},
-		
+
 		getNaturalSize: () =>  {
 			const img = imgRef.current;
 			return { width: img.naturalWidth, height: img.naturalHeight };

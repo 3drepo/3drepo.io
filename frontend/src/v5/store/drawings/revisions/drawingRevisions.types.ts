@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Calibration, CalibrationStatus } from '../drawings.types';
+
 export interface StatusCode {
 	code: string,
 	description: string,
@@ -30,6 +32,7 @@ export interface IDrawingRevision {
 	statusCode?: string;
 	revCode: string;
 	void?: boolean;
+	calibration: CalibrationStatus;
 }
 
 export interface IDrawingRevisionUploadStatus {
@@ -50,6 +53,7 @@ export type CreateDrawingRevisionBody = {
 	drawingNumber: string;
 	drawingType: string;
 	drawingDesc?: string;
+	calibration: Omit<Calibration, 'horizontal'>;
 };
 
 export type CreateDrawingRevisionPayload = {

@@ -53,6 +53,7 @@ import { UserSignupSSO } from '../userSignup/userSignUpSSO/userSignUpSSO.compone
 import { useEffect } from 'react';
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
+import { CalibrationContextComponent } from './projects/calibration/calibrationContext';
 
 export const MainRoute = () => {
 	const { path } = useRouteMatch();
@@ -66,7 +67,7 @@ export const MainRoute = () => {
 	}, [authenticationFetched]);
 
 	return (
-		<>
+		<CalibrationContextComponent>
 			<GlobalStyle />
 			<Switch>
 				<Route title={formatMessage({ id: 'pageTitle.login', defaultMessage: 'Log in' })} exact path={LOGIN_PATH}>
@@ -135,6 +136,6 @@ export const MainRoute = () => {
 					<NotFound />
 				</AuthenticatedRoute>
 			</Switch>
-		</>
+		</CalibrationContextComponent>
 	);
 };
