@@ -34,7 +34,7 @@ export const HandleTicketsCardSearchParams = () => {
 	const [templateFiltersRaw] = useSearchParam('templates');
 	const templateFilters = templateFiltersRaw?.split(',').filter((f) => f);
 	const [completedRaw] = useSearchParam('completed');
-	const completed = completedRaw && JSON.parse(completedRaw);
+	const completed = completedRaw.toLowerCase() === 'true';
 
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
