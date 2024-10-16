@@ -25,8 +25,8 @@ type Vector2 = { x:number, y:number };
 type Size = { width: number, height: number };
 
 export const pannableSVG = (container: HTMLElement, src: string) => {
-	let resizeFrameId = 0;
-	let animationFrameId = 0;
+	let resizeAnimationFrameId = 0;
+	let transformAnimationFrameId = 0;
 
 	// The pannableSVG attemps to provide quick feedback by drawing a larger
 	// region of the image than the user actually sees, and using the (fast)
@@ -61,12 +61,12 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 	let projection: Transform;
 	let tframe = 0;
 	let drawing = false; // Same flag should act as a mutex for both drawing and resizing redraws
-	let resizeEvent = 0;
-	let resizeFrameEvent = 0;
-	let resizeFrameCount = 0;
+	let onResizeEventId = 0;
+	let onResizeDebounceEventId = 0;
+	let onResizeDebounceFrameCounter = 0;
 	let onLoad: any;
 
-	const resizeFramesThreshold = 5;
+	const onResizeDebounceFrameThreshold = 5;
 
 	const img = new Image();
 
@@ -297,19 +297,26 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 			// Check if we've updated the transform since the last render.
 			// If so, issue the request again.
 			if (tn !== tframe) {
-				animationFrameId = requestAnimationFrame(onAnimationFrame);
+				transformAnimationFrameId = requestAnimationFrame(onAnimationFrame);
 			} else {
 				drawing = false;
 			}
 		});
 	};
 
-	// Creates a new canvas based on the current container size, and replaces
-	// the current one - if any - with it when it is finished drawing.
+	let requestCanvasCurrentToken = 0;
 
-	let currentCanvasRequest = 0;
+	const requestCanvasPendingCallbacks = [];
 
-	const createCanvas = (completed) => {
+	/**
+	 * Requests a rebuild of the canvas based on the current container size, and
+	 * replaces the current one - if any - with it when it is finished drawing.
+	 * Multiple calls to requestCanvas may take place during one re-initialistaion;
+	 * the canvas may be rebuilt once, many times, or never, in response to these
+	 * calls. completed will always be called however, even if that call does not
+	 * result in a new canvas.
+	 */
+	const requestCanvas = (completed) => {
 		// Get the new canvas size based on the container size
 		const viewSize = getViewSize();
 		const canvasSize = getCanvasSize();
@@ -332,12 +339,18 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 
 		// Store the token to indicate what the current request is. If a callback
 		// arrives after this has been updated, it will be ignored.
-		const request = ++currentCanvasRequest;
+		const request = ++requestCanvasCurrentToken;
+
+		// Add the callback to the list of pending callbacks
+		requestCanvasPendingCallbacks.push(completed);
 
 		// Draw the image into the canvas
 		drawImage(newD, newCtx, (np) => {
-			if (request != currentCanvasRequest) {
-				return; // Some other callback will handle this...
+			// This drawImage call has already been superceded; ignore it as
+			// another drawImage callback will handle the remainder of this
+			// function and issue the pending completed calls.
+			if (request != requestCanvasCurrentToken) {
+				return;
 			}
 
 			// Replace the canvas for the component and DOM
@@ -357,7 +370,10 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 			// this regular call to update the DOM transform
 			updateCanvasTransform();
 
-			completed?.();
+			// Issue the callbacks
+			requestCanvasPendingCallbacks.forEach((cb) => {
+				cb?.();
+			});
 		});
 	};
 
@@ -374,7 +390,7 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		hasLoaded = true;
 
 		// Create a new canvas for the newly loaded image
-		createCanvas(() => {
+		requestCanvas(() => {
 			onLoad?.();
 		});
 	};
@@ -420,28 +436,30 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 
 		if (!drawing) {
 			drawing = true;
-			animationFrameId = requestAnimationFrame(onAnimationFrame);
+			transformAnimationFrameId = requestAnimationFrame(onAnimationFrame);
 		}
 	};
 
-	const onResizeFrame = async () => {
-		if (resizeFrameEvent != resizeEvent) {
-			resizeFrameEvent = resizeEvent;
-			resizeFrameCount = 0;
+	const onResizeDebounce = async () => {
+		if (onResizeDebounceEventId != onResizeEventId) {
+			onResizeDebounceEventId = onResizeEventId;
+			onResizeDebounceFrameCounter = 0;
 		} else {
-			resizeFrameCount++;
+			onResizeDebounceFrameCounter++;
 		}
 
-		if (resizeFrameCount > resizeFramesThreshold) {
-			createCanvas(() => {
-				if (resizeFrameEvent != resizeEvent) {
-					resizeFrameId = requestAnimationFrame(onResizeFrame);
+		// Rebuilding and rendering is expensive, so don't remake the canvas until
+		// the user has stopped moving.
+		if (onResizeDebounceFrameCounter > onResizeDebounceFrameThreshold) {
+			requestCanvas(() => {
+				if (onResizeDebounceEventId != onResizeEventId) { // If during the canvas rebuild, the user has resized again
+					resizeAnimationFrameId = requestAnimationFrame(onResizeDebounce);
 				} else {
 					drawing = false;
 				}
 			});
 		} else {
-			resizeFrameId = requestAnimationFrame(onResizeFrame);
+			resizeAnimationFrameId = requestAnimationFrame(onResizeDebounce);
 		}
 	};
 
@@ -459,11 +477,11 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		// After the container is resized, we need to rebuild the canvas, which
 		// will involve redrawing the image.
 
-		resizeEvent++;
+		onResizeEventId++;
 
 		if (!drawing) {
 			drawing = true;
-			resizeFrameId = requestAnimationFrame(onResizeFrame);
+			resizeAnimationFrameId = requestAnimationFrame(onResizeDebounce);
 		}
 	};
 
@@ -471,8 +489,8 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 	resizeObserver.observe(container);
 
 	const dispose = () => {
-		cancelAnimationFrame(resizeFrameId);
-		cancelAnimationFrame(animationFrameId);
+		cancelAnimationFrame(resizeAnimationFrameId);
+		cancelAnimationFrame(transformAnimationFrameId);
 		resizeObserver.disconnect();
 	};
 
