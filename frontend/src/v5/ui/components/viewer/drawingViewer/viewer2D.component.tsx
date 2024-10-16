@@ -145,7 +145,7 @@ export const Viewer2D = () => {
 
 	useEffect(() => {
 		setIsLoading(true);
-	}, [src]);
+	}, [plainSrc]);
 
 	useEffect(() => {
 		if (hasCalibration) {
