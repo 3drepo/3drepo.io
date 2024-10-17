@@ -29,11 +29,11 @@ export const HandleTicketsCardSearchParams = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const [ticketId, setTicketId] = useSearchParam('ticketId');
 
-	const [queriesRaw] = useSearchParam('queries');
+	const [queriesRaw, setQueriesParam] = useSearchParam('queries');
 	const queries = queriesRaw?.split(',').filter((f) => f);
-	const [templateFiltersRaw] = useSearchParam('templates');
+	const [templateFiltersRaw, setTemplatesParams] = useSearchParam('templates');
 	const templateFilters = templateFiltersRaw?.split(',').filter((f) => f);
-	const [completedRaw] = useSearchParam('completed');
+	const [completedRaw, setCompletedParam] = useSearchParam('completed');
 	const completed = completedRaw.toLowerCase() === 'true';
 
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
@@ -64,6 +64,10 @@ export const HandleTicketsCardSearchParams = () => {
 		if (completed) {
 			TicketsCardActionsDispatchers.toggleCompleteFilter();
 		}
+
+		setQueriesParam();
+		setCompletedParam();
+		setTemplatesParams();
 	}, [templateFiltersRaw, queriesRaw, completedRaw]);
 
 	return <></>;
