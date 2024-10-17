@@ -23,6 +23,8 @@ import { formatMessage } from '@/v5/services/intl';
 import { TeamspacesActions, TeamspacesTypes, ITeamspace } from './teamspaces.redux';
 import { RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
 import { selectIsFetchingAddons } from './teamspaces.selectors';
+import { formatFilenameDate } from '@/v5/helpers/intl.helper';
+import { downloadFile } from '@/v5/helpers/download.helper';
 
 export function* fetch() {
 	yield put(TeamspacesActions.setTeamspacesArePending(true));
@@ -58,7 +60,7 @@ export function* fetchQuota({ teamspace }) {
 	}
 }
 
-export  function* waitForAddons() {
+export function* waitForAddons() {
 	const isFetchingAddons = yield select(selectIsFetchingAddons);
 
 	if (isFetchingAddons) {
@@ -66,7 +68,27 @@ export  function* waitForAddons() {
 	}
 }
 
+export function* fetchActivityLog({ teamspace, startDate, endDate }) {
+	try {
+		const logFile = yield API.Teamspaces.fetchActivityLog(teamspace, startDate, endDate);
+		const url = window.URL.createObjectURL(new Blob([logFile]));
+		const range = [startDate, endDate].filter(Boolean).map((date) => formatFilenameDate(date)).join('__');
+		const filename = formatMessage({ id: 'teamspaces.fetchActivityLog.filename', defaultMessage: 'activity_log_{range}.zip' }, { range });
+		downloadFile(url, filename);
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({
+				id: 'teamspaces.fetchActivityLog.error.action',
+				defaultMessage: 'fetching the activity log',
+			}),
+			error,
+			details: RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE,
+		}));
+	}
+}
+
 export default function* TeamspacesSaga() {
 	yield takeLatest(TeamspacesTypes.FETCH as any, fetch);
 	yield takeLatest(TeamspacesTypes.FETCH_QUOTA as any, fetchQuota);
+	yield takeLatest(TeamspacesTypes.FETCH_ACTIVITY_LOG as any, fetchActivityLog);
 }

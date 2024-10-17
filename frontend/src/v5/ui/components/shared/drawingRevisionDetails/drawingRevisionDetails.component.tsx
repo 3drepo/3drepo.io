@@ -46,7 +46,7 @@ import { RevisionsListItemTag } from '../revisionDetails/components/revisionsLis
 import { IDrawingRevision } from '@/v5/store/drawings/revisions/drawingRevisions.types';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { UploadStatus } from '@/v5/store/containers/containers.types';
-import { downloadFile } from '@components/authenticatedResource/authenticatedResource.hooks';
+import { downloadFile } from '@/v5/helpers/download.helper';
 
 interface IDrawingRevisionDetails {
 	drawingId: string;
