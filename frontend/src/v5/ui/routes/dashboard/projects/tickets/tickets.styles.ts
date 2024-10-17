@@ -90,7 +90,7 @@ export const SidePanel = styled(Drawer).attrs({
 })``;
 
 export const SlidePanelHeader = styled.div`
-	height: 49px;
+	height: 50px;
 	width: 100%;
 	display: flex;
 	flex-direction: row;

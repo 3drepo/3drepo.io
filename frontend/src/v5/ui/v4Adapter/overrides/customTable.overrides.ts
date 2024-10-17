@@ -68,7 +68,7 @@ export default css`
 	}
 
 	${Row} {
-		min-height: 80px;
+		min-height: 80.7px;
 		&:last-child {
 			border: none;
 		}

@@ -23,6 +23,7 @@ export const Container = styled.div<{ $error?: boolean, $height: number }>`
 	border-color: ${({ theme }) => theme.palette.base.lightest};
 	border-radius: 8px;
 	overflow: hidden overlay;
+	box-sizing: content-box;
 	height: ${({ $height }) => $height}px;
 
 	${({ theme, $error }) => ($error ? css`

@@ -32,7 +32,7 @@ export const ErrorMessage = styled(ErrorMessageBase)`
 `;
 
 export const ImageContainer = styled.div`
-	width: 229px;
+	width: 253px;
 	padding: 12px;
 	border-radius: 9px;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};

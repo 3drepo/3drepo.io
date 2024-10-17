@@ -31,7 +31,7 @@ export const ToolbarContainer = styled.div`
 
 	& > * {
 		border: solid 1px ${({ theme }) => theme.palette.secondary.light};
-		height: 48px;
+		height: 50px;
 		border-radius: 24px;
 		padding: 0 10px;
 		display: flex;
