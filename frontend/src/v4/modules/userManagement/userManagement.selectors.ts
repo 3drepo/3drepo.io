@@ -81,11 +81,15 @@ export const selectSelectedModels = createSelector(
 		}
 );
 
+// Flag indicating more than one different permission exist for the same model
+const MIXED_PERMISSION = 'mixed';
 const  mergeEqualPermissions = (permissionsA, permissionsB: any[]) => {
 	const mergedPermission =  permissionsA.reduce((totalPermissions, currPermission) => {
 			const permissionBValue = permissionsB.find( (perm) => perm.user === currPermission.user);
 			if ((permissionBValue || {}).permission  === currPermission.permission) {
 				totalPermissions.push(currPermission);
+			} else {
+				totalPermissions.push({ ...currPermission, permission: MIXED_PERMISSION });
 			}
 
 			return totalPermissions;
