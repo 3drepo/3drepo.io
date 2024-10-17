@@ -17,7 +17,7 @@
 
 import { ROUTES } from '@/v4/constants/routes';
 import { DialogActions } from '@/v4/modules/dialog';
-import { dispatch } from '@/v4/modules/store';
+import { dispatch } from '@/v5/helpers/redux.helpers';
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import axios from 'axios';
 import { push } from 'connected-react-router';

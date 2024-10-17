@@ -17,11 +17,11 @@
 
  import { all, put, select, takeLatest } from 'redux-saga/effects';
 
+import { dispatch } from '@/v5/helpers/redux.helpers';
  import { VIEWER_EVENTS } from '../../constants/viewer';
  import { disableConflictingMeasurementActions, generateName } from '../../helpers/measurements';
  import { Viewer } from '../../services/viewer/viewer';
  import { DialogActions } from '../dialog';
- import { dispatch } from '../store';
  import { MEASURE_TYPE_STATE_MAP } from './measurements.constants';
  import {
 	 selectAreaMeasurements,
