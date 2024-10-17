@@ -18,6 +18,7 @@
 import { formatMessage } from '@/v5/services/intl';
 import { groupBy } from 'lodash';
 
+import { getModelType, ModelType } from '@/v5/store/projects/projects.helpers';
 import IssueDetails from '../viewerGui/components/issues/components/issueDetails/issueDetails.container';
 import { ListNavigation } from '../viewerGui/components/listNavigation/listNavigation.component';
 import RiskDetails from '../viewerGui/components/risks/components/riskDetails/riskDetails.container';
@@ -53,7 +54,9 @@ export const getProjectModels = (teamspaces = [], projectsMap, modelsMap, curren
 
 		const projectModels = selectedProject && selectedProject.models && selectedProject.models.length ?
 			selectedProject.models.map((model) => modelsMap[model]) : [];
-		const filteredModels = projectModels.filter((m) => m.model);
+		const filteredModels = projectModels
+			.filter((m) => m.model)
+			.filter((m) => getModelType(m) !== ModelType.DRAWING);
 		const { federations, models } = groupBy(filteredModels, ({ federate }) => (federate ? 'federations' : 'models'));
 
 		const list = [];

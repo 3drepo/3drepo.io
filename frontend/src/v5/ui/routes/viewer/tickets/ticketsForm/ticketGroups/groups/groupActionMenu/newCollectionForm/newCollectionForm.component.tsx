@@ -27,7 +27,7 @@ import { InputController } from '@controls/inputs/inputController.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { NewCollectionSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { Buttons, Form } from './newCollectionForm.styles';
-import { GroupsCollectionSelect } from '../../addOrEditGroup/groupSettingsForm.component.tsx/groupsCollectionSelect/groupsCollectionSelect.component';
+import { GroupsCollectionSelect } from '../../addOrEditGroup/groupSettingsForm/groupsCollectionSelect/groupsCollectionSelect.component';
 
 type NewCollectionFormProps = {
 	value?: string[];

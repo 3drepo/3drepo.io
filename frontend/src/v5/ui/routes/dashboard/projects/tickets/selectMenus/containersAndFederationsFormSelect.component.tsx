@@ -15,16 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
-import { FormattedMessage } from 'react-intl';
-import { formatMessage } from '@/v5/services/intl';
 import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { sortByName } from '@/v5/store/store.helpers';
-import { ListSubheader } from '../tickets.styles';
 import { openUnsavedNewTicketWarningModal } from './selectMenus.helpers';
+import { formatMessage } from '@/v5/services/intl';
 import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
 import { SelectProps } from '@controls/inputs/select/select.component';
 import { InputControllerProps, InputController } from '@controls/inputs/inputController.component';
+import { FormattedMessage } from 'react-intl';
+import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
+import { ListSubheader } from './selectMenus.styles';
 
 type ContainersAndFederationsSelectProps = { isNewTicketDirty?: boolean } & SelectProps;
 export const ContainersAndFederationsSelect = ({ isNewTicketDirty, ...props }: ContainersAndFederationsSelectProps) => {

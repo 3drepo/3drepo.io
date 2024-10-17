@@ -18,8 +18,10 @@
 const errorNotification = require('./templates/errorNotification');
 const forgotPassword = require('./templates/forgotPassword');
 const forgotPasswordSso = require('./templates/forgotPasswordSSO');
+const modelImportError = require('./templates/modelImportError');
 const { toConstantCase } = require('../../utils/helper/strings');
 const verifyUser = require('./templates/verifyUser');
+const zombieProcessingStatuses = require('./templates/zombieProcessingStatuses');
 
 const MailerConstants = {};
 
@@ -28,6 +30,8 @@ const templates = {
 	forgotPassword,
 	forgotPasswordSso,
 	errorNotification,
+	modelImportError,
+	zombieProcessingStatuses,
 };
 
 MailerConstants.templates = {};

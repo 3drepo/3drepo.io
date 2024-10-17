@@ -25,12 +25,13 @@ import { DialogsHooksSelectors } from '@/v5/services/selectorsHooks';
 const ModalTemplateContainer = ({ id, modalType, props, syncProps }: IDialogConfig) => {
 	const [openState, setOpenState] = useState(true);
 
+	const modalProps = useSyncPropsEffect(syncProps || props || {});
+
 	const onClickClose = () => {
 		setOpenState(false);
 		setTimeout(() => DialogsActionsDispatchers.close(id), 500);
+		modalProps?.onClose();
 	};
-
-	const modalProps = useSyncPropsEffect(syncProps || props || {});
 
 	if (syncProps) {
 		Object.assign(modalProps, props);

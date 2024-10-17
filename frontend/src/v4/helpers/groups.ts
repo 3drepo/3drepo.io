@@ -17,10 +17,10 @@
 
 import {  isEqual, omit, pick } from 'lodash';
 import { select } from 'redux-saga/effects';
+import { getGroupHexColor, hexToRgb } from '@/v5/helpers/colors.helper';
 import { GROUP_TYPES_ICONS, GROUPS_TYPES } from '../constants/groups';
 import { selectNumNodesByMeshSharedIdsArray } from '../modules/tree';
 import { COLOR } from '../styles';
-import { getGroupHexColor, hexToArray } from './colors';
 import { prepareCriterion } from './criteria';
 import { calculateTotalMeshes } from './tree';
 
@@ -76,7 +76,7 @@ export function* prepareGroupWithCount(group) {
 
 export const normalizeGroup = (group) => {
 	const normalizedGroup = {
-		color: hexToArray(group.color),
+		color: hexToRgb(group.color),
 		...pick(group, ['name', 'author']),
 		description: group.desc || group.description
 	} as any;

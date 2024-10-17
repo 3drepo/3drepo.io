@@ -16,13 +16,13 @@
  */
 import { DatePicker as MuiDatePicker, DatePickerProps as MuiDatePickerProps } from '@mui/x-date-pickers';
 import { BaseCalendarPicker, BaseCalendarPickerProps } from './baseCalendarPicker/baseCalendarPicker.component';
-import { getDateMask } from './dateFormatHelper';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
 
 type DatePickerProps = Partial<BaseCalendarPickerProps> & Partial<MuiDatePickerProps<any, any>>;
 export const DatePicker = (props: DatePickerProps) => (
 	<BaseCalendarPicker
 		PickerComponent={MuiDatePicker}
-		inputFormat={getDateMask()}
+		rifmFormatter={formatDateTime}
 		{...props}
 	/>
 );

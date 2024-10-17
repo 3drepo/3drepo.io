@@ -16,9 +16,9 @@
  */
 
 import { ROUTES } from '@/v4/constants/routes';
-import { AuthActions } from '@/v4/modules/auth';
 import { DialogActions } from '@/v4/modules/dialog';
 import { dispatch } from '@/v4/modules/store';
+import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import axios from 'axios';
 import { push } from 'connected-react-router';
 const configAxios = () => {
@@ -39,7 +39,7 @@ const configAxios = () => {
 							const sessionHasExpired = unauthorized && notLogin;
 
 							if (sessionHasExpired) {
-								dispatch(AuthActions.sessionExpired());
+								AuthActionsDispatchers.sessionExpired();
 							} else {
 								throw error.response;
 							}

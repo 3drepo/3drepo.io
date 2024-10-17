@@ -22,7 +22,6 @@ import RemoveIcon from '@mui/icons-material/Close';
 import { Formik } from 'formik';
 import { cond, matches, stubTrue } from 'lodash';
 
-import { hexToGLColor, GLToHexColor } from '../../../../../../helpers/colors';
 import { MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';

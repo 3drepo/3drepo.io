@@ -185,6 +185,7 @@ User.verify = async (username) => {
 			'customData.email': 1,
 			'customData.billing.billingInfo.company': 1,
 			'customData.mailListOptOut': 1,
+			'customData.createdAt': 1,
 		} });
 
 	return customData;

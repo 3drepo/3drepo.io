@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { CommentImage as CommentImageBase } from '@/v5/ui/routes/viewer/tickets/ticketsForm/commentsPanel/commentImage/commentImage.component';
+import { ImageWithExtraCount as CommentImageBase } from '@controls/imageWithExtraCount/imageWithExtraCount.component';
 import CameraIconBase from '@assets/icons/outlined/camera-outlined.svg';
 import { CommentMarkDown as CommentMarkDownBase } from '../commentMarkDown/commentMarkDown.component';
 

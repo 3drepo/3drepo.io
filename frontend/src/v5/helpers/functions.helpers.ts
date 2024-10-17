@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 type QueueItem<T> = { promise: Promise<T>, resolve, reject, args, resolved: boolean };
 export class LifoQueue<T> {
 	private queue: QueueItem<T>[] = [] ;
@@ -23,21 +22,29 @@ export class LifoQueue<T> {
 
 	private batchSize;
 
+	private reuseCall;
+
 	private running = false;
 
 	private func: (...args) => Promise<T>;
 
-	private getPromise(args):QueueItem<T>  {
+	private createPromise(args) {
+		const prom = {} as QueueItem<T>;
+		prom.promise = new Promise((resolve, reject) => {
+			prom.resolve = resolve;
+			prom.reject = reject;
+		});
+		prom.args = args;
+		prom.resolved = false;
+		return prom;
+	}
+
+	private getPromise(args): QueueItem<T> {
+		if (!this.reuseCall) return this.createPromise(args);
+	
 		let prom = this.dict[JSON.stringify(args)];
 		if (!prom) {
-			prom = {};
-			prom.promise = new Promise((resolve, reject) => {
-				prom.resolve = resolve;
-				prom.reject = reject;
-			});
-			prom.args = args;
-			prom.resolved = false;
-
+			prom = this.createPromise(args);
 			this.dict[JSON.stringify(args)] = prom;
 		}
 		
@@ -83,8 +90,9 @@ export class LifoQueue<T> {
 		this.running = false;
 	}
 
-	public constructor(func: (...args) => Promise<T>, batchSize) {
+	public constructor(func: (...args) => Promise<T>, batchSize, reuseCall = true) {
 		this.func = func;
 		this.batchSize = batchSize;
+		this.reuseCall = reuseCall;
 	}
 }

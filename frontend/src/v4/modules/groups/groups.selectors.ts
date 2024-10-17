@@ -17,8 +17,8 @@
 
 import { values } from 'lodash';
 import { createSelector } from 'reselect';
+import { getTransparency, hasTransparency } from '@/v5/helpers/colors.helper';
 import { addToGroupDictionary } from '../../helpers/colorOverrides';
-import { getTransparency, hasTransparency } from '../../helpers/colors';
 import { searchByFilters } from '../../helpers/searching';
 import { selectFocusedIssueOverrideGroups } from '../issues';
 import { IGroupState } from './groups.redux';

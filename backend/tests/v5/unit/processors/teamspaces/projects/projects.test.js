@@ -34,6 +34,8 @@ const ModelHelper = require(`${src}/utils/helper/models`);
 const Projects = require(`${src}/processors/teamspaces/projects`);
 const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 
+const { MODEL_CATEGORIES, statusCodes } = require(`${src}/models/modelSettings.constants`);
+
 const projectList = [
 	{ _id: '1', name: 'project1', permissions: [{ user: 'projAdmin', permissions: [PROJECT_ADMIN] }], models: ['modelA'] },
 	{ _id: '2', name: 'project2', permissions: [{ user: 'projAdmin', permissions: [PROJECT_ADMIN] }], models: ['modelB'] },
@@ -263,6 +265,22 @@ const testDeleteImage = () => {
 	});
 };
 
+const testGetDrawingCategories = () => {
+	describe('Get drawing categories', () => {
+		test('should get drawing categories', async () => {
+			await expect(Projects.getDrawingCategories()).toEqual(MODEL_CATEGORIES);
+		});
+	});
+};
+
+const testGetStatusCodes = () => {
+	describe('Get status codes', () => {
+		test('should get status codes', async () => {
+			await expect(Projects.getStatusCodes()).toEqual(statusCodes);
+		});
+	});
+};
+
 describe('processors/teamspaces/projects', () => {
 	testGetProjectList();
 	testDeleteProject();
@@ -272,4 +290,6 @@ describe('processors/teamspaces/projects', () => {
 	testGetImage();
 	testUpdateImage();
 	testDeleteImage();
+	testGetDrawingCategories();
+	testGetStatusCodes();
 });

@@ -28,9 +28,9 @@ import { FormattedMessage } from 'react-intl';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { TicketItem } from './ticketItem/ticketItem.component';
-import { List, Filters, CompletedFilterChip } from './ticketsList.styles';
+import { Filters, CompletedFilterChip, List } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
-import { TicketSearchInput } from './ticketSearchInput/ticketSearchInput.component';
+import { AutocompleteSearchInput } from '@controls/search/autocompleteSearchInput/autocompleteSearchInput.component';
 
 type TicketsListProps = {
 	tickets: ITicket[];
@@ -44,11 +44,13 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	const showingCompleted = TicketsCardHooksSelectors.selectFilteringCompleted();
 	const availableTemplatesIds = uniq(tickets.map(({ type }) => type));
 	const availableTemplates = templates.filter(({ _id }) => availableTemplatesIds.includes(_id));
+	const queries = TicketsCardHooksSelectors.selectFilteringQueries();
 
 	const filteredByQueriesAndCompleted = TicketsCardHooksSelectors.selectTicketsFilteredByQueriesAndCompleted();
 	const filteredItems = TicketsCardHooksSelectors.selectTicketsWithAllFiltersApplied();
 
 	const toggleTemplate = (templateId: string) => TicketsCardActionsDispatchers.setTemplateFilters(xor(selectedTemplates, [templateId]));
+	const onQueriesChange = (newQueries) => TicketsCardActionsDispatchers.setQueryFilters(newQueries);
 
 	useEffect(() => {
 		TicketsCardActionsDispatchers.setSelectedTicketPin(selectedTicket?._id);
@@ -60,7 +62,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 
 	return (
 		<>
-			<TicketSearchInput />
+			<AutocompleteSearchInput value={queries} onChange={onQueriesChange} />
 			<Filters>
 				<CompletedFilterChip
 					key="completed"

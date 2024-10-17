@@ -18,7 +18,7 @@
 import styled from 'styled-components';
 import { Typography } from '@controls/typography';
 import { IconButton } from '@mui/material';
-import { hexToOpacity } from '@/v5/ui/themes/theme';
+import { hexToOpacity } from '@/v5/helpers/colors.helper';
 
 export const CloseButton = styled(IconButton)`
 	&& {

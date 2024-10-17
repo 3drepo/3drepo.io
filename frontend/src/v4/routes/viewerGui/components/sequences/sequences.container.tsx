@@ -20,16 +20,17 @@ import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
+import { ViewpointsActions } from '@/v4/modules/viewpoints';
 import { ActivitiesActions } from '../../../../modules/activities';
 import { LegendActions } from '../../../../modules/legend';
 import {
-	selectActivitiesPending, selectCurrentActivities, selectEndDate, selectFrames, selectIsLoadingFrameState,
-	selectSelectedDate,
-	selectSelectedEndingDate, selectSelectedFrameColors, selectSelectedSequence, selectSelectedStartingDate,
-	selectSequences, selectStartDate, selectStepInterval, selectStepScale, SequencesActions,
+	selectActivitiesPending, selectCurrentActivities, selectEndDate, selectFrames,
+	selectFramePending, selectSelectedDate, selectSelectedEndingDate,
+	selectSelectedSequence, selectSelectedStartingDate, selectSequences,
+	selectStartDate, selectStepInterval, selectStepScale, SequencesActions,
+	selectSelectedFrameViewpoint,
 } from '../../../../modules/sequences';
 import { selectDraggablePanels, selectRightPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
-import { selectIsLoadingSequenceViewpoint } from '../../../../modules/viewpoints';
 import { Sequences } from './sequences.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -40,16 +41,15 @@ const mapStateToProps = createStructuredSelector({
 	selectedDate: selectSelectedDate,
 	selectedStartDate: selectSelectedStartingDate,
 	selectedEndingDate: selectSelectedEndingDate,
-	colorOverrides: selectSelectedFrameColors,
 	stepInterval: selectStepInterval,
 	stepScale: selectStepScale,
 	currentTasks: selectCurrentActivities,
-	loadingFrameState: selectIsLoadingFrameState,
-	loadingViewpoint: selectIsLoadingSequenceViewpoint,
+	loadingFrame: selectFramePending,
 	selectedSequence: selectSelectedSequence,
 	rightPanels: selectRightPanels,
 	draggablePanels: selectDraggablePanels,
 	isActivitiesPending: selectActivitiesPending,
+	viewpoint: selectSelectedFrameViewpoint,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -62,7 +62,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	resetLegendPanel: LegendActions.resetPanel,
 	fetchActivityDetails: ActivitiesActions.fetchDetails,
 	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
-	clearTransformations: ViewerGuiActions.clearTransformations,
+	clearTransformations: ViewpointsActions.clearTransformations,
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Sequences));

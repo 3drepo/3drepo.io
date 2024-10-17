@@ -15,13 +15,52 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { validateAddModelData, validateUpdateSettingsData } = require('./commons/modelSettings');
-const { validateNewRevisionData } = require('./commons/revisions');
+const { createResponseCode, templates } = require('../../../../../../utils/responseCodes');
+const Yup = require('yup');
+const YupHelper = require('../../../../../../utils/helper/yup');
+const { getContainers } = require('../../../../../../models/modelSettings');
+const { isString } = require('../../../../../../utils/helper/typeCheck');
+const { modelsExistInProject } = require('../../../../../../models/projectSettings');
+const { respond } = require('../../../../../../utils/responder');
 
 const Federations = {};
 
-Federations.validateAddModelData = validateAddModelData(true);
-Federations.validateUpdateSettingsData = validateUpdateSettingsData(true);
-Federations.validateNewRevisionData = validateNewRevisionData(true);
+Federations.validateNewRevisionData = async (req, res, next) => {
+	const containerEntry = Yup.object({
+		_id: YupHelper.types.id.required(),
+		group: YupHelper.types.strings.title,
+	}).transform((v, oldVal) => {
+		if (isString(oldVal)) {
+			return { _id: oldVal };
+		}
+		return v;
+	});
+
+	const schemaBase = {
+		containers: Yup.array().of(containerEntry).min(1).required()
+			.test('containers-validation', 'Containers must exist within the same project', (value) => {
+				const { teamspace, project } = req.params;
+				return value?.length
+					&& modelsExistInProject(teamspace, project, value.map((v) => v?._id)).catch(() => false);
+			})
+			.test('containers-validation', 'IDs provided cannot be of type federation', async (value) => {
+				if (value?.length) {
+					const { teamspace } = req.params;
+					const foundContainers = await getContainers(teamspace, value.map((v) => v?._id), { _id: 1 });
+					return foundContainers?.length === value?.length;
+				}
+				return false;
+			}),
+	};
+
+	const schema = Yup.object().noUnknown().required().shape(schemaBase);
+
+	try {
+		req.body = await schema.validate(req.body);
+		await next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
 
 module.exports = Federations;

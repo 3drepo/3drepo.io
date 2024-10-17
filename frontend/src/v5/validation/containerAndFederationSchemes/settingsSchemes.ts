@@ -18,7 +18,8 @@
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
-import { name, unit, desc, code, nullableNumberField } from './validators';
+import { unit, code, nullableNumberField } from './validators';
+import { desc, name } from '../shared/validators';
 import { isNumber } from 'lodash';
 
 export const SettingsSchema = Yup.object().shape({

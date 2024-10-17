@@ -24,10 +24,10 @@ import { isEqual, isNil, keyBy, omit, uniqBy } from 'lodash';
 import Autosuggest from 'react-autosuggest';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import * as yup from 'yup';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { BACKSPACE, ENTER_KEY } from '../../../constants/keys';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { compareStrings } from '../../../helpers/searching';
-import { formatShortDateTime } from '../../../services/formatting/formatDate';
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import { Filter } from '../fontAwesomeIcon';
 import { Highlight } from '../highlight/highlight.component';
@@ -256,7 +256,7 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 
 	public onSelectDateFilter = (dateFilter, child) => {
 		dateFilter.label = child.label;
-		dateFilter.value.label = formatShortDateTime(child.date);
+		dateFilter.value.label = formatDateTime(child.date);
 		const selectedFilterIndex = this.state.selectedFilters.findIndex(
 			(filter) => filter.value.value === child.value && filter.relatedField === dateFilter.relatedField
 		);
@@ -265,7 +265,7 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 			this.setState((prevState) => {
 				const newFilters = [...prevState.selectedFilters];
 				newFilters[selectedFilterIndex].label = child.label;
-				newFilters[selectedFilterIndex].value.label = formatShortDateTime(child.date);
+				newFilters[selectedFilterIndex].value.label = formatDateTime(child.date);
 				newFilters[selectedFilterIndex].value.date = child.date;
 				return newFilters as any;
 			}, this.handleFiltersChange);

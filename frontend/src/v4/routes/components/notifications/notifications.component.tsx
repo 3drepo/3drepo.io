@@ -25,8 +25,8 @@ import Close from '@mui/icons-material/Close';
 import MoreVert from '@mui/icons-material/MoreVert';
 import NotificationsIcon from '@assets/icons/outlined/bell-outlined.svg';
 
+import { formatSimpleDate } from '@/v5/helpers/intl.helper';
 import { renderWhenTrue } from '../../../helpers/rendering';
-import { simpleDate } from '../../../services/formatting/formatDate';
 import { BarIconButton } from '../components.styles';
 import { ListSubheaderToolbar } from '../listSubheaderToolbar/listSubheaderToolbar.component';
 import { NotificationEmptyItem } from './components/emptyItem/emptyItem.component';
@@ -84,7 +84,7 @@ export class Notifications extends PureComponent<IProps, any> {
 	};
 
 	get today() {
-		return simpleDate(new Date());
+		return formatSimpleDate(new Date());
 	}
 
 	get hasNotifications() {

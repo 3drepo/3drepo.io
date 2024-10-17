@@ -67,5 +67,8 @@ export const V4ModelsPermissions = styled(ModelsPermissions)`
 `;
 
 export const Container = styled(FixedOrGrowContainer)`
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
 	padding-top: 5px;
 `;

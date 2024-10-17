@@ -14,25 +14,5 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { formatDate, formatMessage } from '@/v5/services/intl';
-
-export const getDateMask = () => {
-	const isoString = '2018/10/25'; // example date!
-	const [year, month, day] = isoString.split('/');
-
-	const intlString = formatDate(isoString); // generate a formatted date
-
-	return intlString
-		.replace(day, 'DD')
-		.replace(month, 'MM')
-		.replace(year, 'YYYY');
-};
-
-export const getDateTimeMask = () => `${getDateMask()} @ HH:mm`;
-
-export const formatTime = (time) => time.replace('@', formatMessage({
-	id: 'form.dateTime.at',
-	defaultMessage: 'at',
-}));
 
 export const formatDayOfWeek = (day) => day[0].toUpperCase() + day[1];

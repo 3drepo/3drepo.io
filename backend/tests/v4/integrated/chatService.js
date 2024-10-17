@@ -553,31 +553,6 @@ describe("Chat service", function () {
 					])
 			}).timeout('60s');
 
-			it("should receive a model FAILED uploaded notification and a model updated notification if a model uploaded had been uploaded with a warning type of error", done => {
-				const eventName = `${username}::notificationUpserted`;
-				const receivedNotifications = [];
-
-				socket.on(eventName, function(notification) {
-					receivedNotifications.push(notification);
-
-					if (receivedNotifications.length == 2){
-						socket.off(eventName);
-						const types = receivedNotifications.map(n => n.type).sort();
-						expect(types).to.deep.equal([ "MODEL_UPDATED","MODEL_UPDATED_FAILED"]);
-						bouncerHelper.stopBouncerWorker();
-						done();
-					}
-				});
-
-				async.series([next => bouncerHelper.startBouncerWorker(next, 7),
-					next => testSession.post(`/${account}/${model}/upload`)
-						.field("tag", "onetag")
-						.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
-						.expect(200, function(err, res) {
-							next(err);
-						})
-					])
-			}).timeout('30s');
 		});
 
 	});

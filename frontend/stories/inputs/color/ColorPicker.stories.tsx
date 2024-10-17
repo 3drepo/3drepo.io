@@ -16,9 +16,10 @@
  */
 import { Meta, StoryObj } from '@storybook/react';
 import { ColorPicker } from '@controls/inputs/colorPicker/colorPicker.component';
-import { RgbArray, UNSET_RGB_COLOR } from '@controls/inputs/colorPicker/colorPicker.helpers';
+import { UNSET_RGB_COLOR } from '@controls/inputs/colorPicker/colorPicker.helpers';
 import { useState } from 'react';
 import { FormDecorator } from '../inputDecorators';
+import { RgbArray } from '@/v5/helpers/colors.helper';
 
 export default {
 	title: 'Inputs/Color/ColorPicker',

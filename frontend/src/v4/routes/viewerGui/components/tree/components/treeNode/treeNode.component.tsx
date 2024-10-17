@@ -24,6 +24,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import IsolateIcon from '@mui/icons-material/VisibilityOutlined';
 
+import { RouteComponentProps } from 'react-router';
 import {
 	SELECTION_STATES,
 	TREE_ITEM_FEDERATION_TYPE,
@@ -35,7 +36,7 @@ import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
 import { Actions, Container, Name, NameWrapper, ParentOfVisible, StyledExpandableButton } from './treeNode.styles';
 
-interface IProps {
+interface IProps extends RouteComponentProps<any> {
 	style: any;
 	key: any;
 	index: number;

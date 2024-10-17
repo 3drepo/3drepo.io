@@ -21,6 +21,8 @@ const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 const { idTypesToKeys, idTypes } = require('../../../../../../../../src/v5/models/metadata.constants');
 
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+
 const { propTypes } = require(`${src}/schemas/tickets/templates.constants`);
 
 const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
@@ -46,7 +48,8 @@ const generateBasicData = () => {
 		teamspace: ServiceHelper.generateRandomString(),
 		project: ServiceHelper.generateRandomProject(),
 		con,
-		fed: ServiceHelper.generateRandomModel({ isFederation: true, properties: { subModels: [{ _id: con._id }] } }),
+		fed: ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION,
+			properties: { subModels: [{ _id: con._id }] } }),
 		template,
 		ticket: ServiceHelper.generateTicket(template, false, con._id),
 	});
@@ -213,7 +216,7 @@ const testGetGroup = () => {
 			await setupBasicData(basicData);
 			await ServiceHelper.db.createTemplates(teamspace, [extIdTestCase.template]);
 
-			await ServiceHelper.db.createScene(teamspace, con._id, extIdTestCase.scene.rev,
+			await ServiceHelper.db.createScene(teamspace, project.id, con._id, extIdTestCase.scene.rev,
 				extIdTestCase.scene.nodes, extIdTestCase.scene.meshMap);
 			await Promise.all([fed, con].map(async (model) => {
 				const modelType = fed === model ? 'federation' : 'container';

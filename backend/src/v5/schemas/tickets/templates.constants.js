@@ -38,6 +38,7 @@ const propTypes = createConstantMapping([
 	'oneOf',
 	'manyOf',
 	'image',
+	'imageList',
 	'view',
 	'measurements',
 	'coords',

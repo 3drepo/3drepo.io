@@ -29,6 +29,7 @@ import {
 } from 'lodash';
 import ReactDOM from 'react-dom';
 
+import { RouteComponentProps } from 'react-router';
 import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
@@ -79,7 +80,7 @@ const getPreparedJobs = (jobs) => {
 	return jobs.map(({ _id: name, color }) => ({ name, color, value: name }));
 };
 
-interface IProps {
+interface IProps extends RouteComponentProps<any> {
 	users: any[];
 	usersSuggestions: any[];
 	projects: any[];

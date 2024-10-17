@@ -21,8 +21,9 @@ import { defaults, isNumber } from 'lodash';
 import { ActionMenu } from '@controls/actionMenu';
 import { Container } from './colorPicker.styles';
 import { ColorPickerPalette } from './colorPickerPalette/colorPickerPalette.component';
-import { HexGroupColor, RgbGroupColor, UNSET_RGB_COLOR, hexGroupColorToRgb, rgbGroupColorToHex } from './colorPicker.helpers';
+import { UNSET_RGB_COLOR } from './colorPicker.helpers';
 import { ColorCircle } from './colorCircle/colorCircle.styles';
+import { HexGroupColor, hexGroupColorToRgb, RgbGroupColor, rgbGroupColorToHex } from '@/v5/helpers/colors.helper';
 
 type ColorPickerPreviewProps = { color: string, selected: boolean, disabled?: boolean };
 const ColorPickerPreview = ({ color, selected, disabled }: ColorPickerPreviewProps) => (

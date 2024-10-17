@@ -19,15 +19,17 @@ import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/mate
 import { Modal, ModalContent, Actions, CloseButton } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
 import { formatMessage } from '@/v5/services/intl';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
+import { ReactNode } from 'react';
 
-interface IInfoModal {
+export interface IInfoModal {
 	title: string;
-	message: string;
+	message: string | ReactNode;
 	primaryButtonLabel?: string;
 	secondaryButtonLabel?: string;
 	open: boolean,
 	onClickClose?: () => void;
 	onClickSecondary?: () => void;
+	Icon?: any;
 }
 
 export const InfoModal = ({
@@ -41,9 +43,11 @@ export const InfoModal = ({
 	onClickClose,
 	onClickSecondary,
 	open,
+	Icon,
 }: IInfoModal) => (
 	<Modal open={open} onClose={onClickClose}>
 		<ModalContent>
+			{Icon && <Icon />}
 			<DialogTitle>
 				{ title }
 			</DialogTitle>

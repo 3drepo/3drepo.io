@@ -70,7 +70,7 @@ const getNextWeekTimestamp = memoize((nextWeekNumber = 1) => {
 const getProp = (item, prop) => {
 	if (prop === ISSUE_FILTER_PROPS.due_date.value) {
 		const dueDate = dayjs(item[prop]);
-		if (Number(!!(new Date().valueOf() >= dueDate.valueOf()))) {
+		if (new Date().valueOf() >= dueDate.valueOf()) {
 			return 'overdue';
 		}
 

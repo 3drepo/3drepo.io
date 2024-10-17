@@ -129,7 +129,7 @@ FilesManager.getFile = async (teamspace, collection, fileName) => {
 };
 
 const getFileAsStream = async (teamspace, collection, refEntry, chunkInfo) => {
-	const { type, link, size, mimeType = DEFAULT_MIME_TYPE, encoding } = refEntry;
+	const { type, link, size, mimeType, encoding } = refEntry;
 	let readStream;
 
 	switch (type) {
@@ -143,7 +143,7 @@ const getFileAsStream = async (teamspace, collection, refEntry, chunkInfo) => {
 		logger.logError(`Unrecognised external service: ${type}`);
 		throw templates.fileNotFound;
 	}
-	return { readStream, size, mimeType, encoding };
+	return { readStream, size, mimeType: mimeType ?? DEFAULT_MIME_TYPE, encoding };
 };
 
 FilesManager.getFileWithMetaAsStream = async (teamspace, collection, file, meta) => {

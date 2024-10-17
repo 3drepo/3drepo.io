@@ -30,10 +30,8 @@ import { createGroupsFromViewpoint, generateViewpoint,
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
-import { IssuesActions } from '../issues';
 import { ModelActions } from '../model';
 import { selectCurrentRevisionId } from '../model';
-import { RisksActions } from '../risks';
 import { SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { dispatch } from '../store';
@@ -194,10 +192,6 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 			viewpointsGroups = yield select(selectViewpointsGroups);
 		}
 
-		if (viewpoint.override_groups) {
-			yield put(ViewerGuiActions.clearColorOverrides());
-		}
-
 		yield put(TreeActions.clearCurrentlySelected());
 
 		if (viewpoint.hidden_group?.objects?.length > 0) {
@@ -214,20 +208,6 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 		}
 
 		yield put(ViewpointsActions.setSelectedViewpoint(viewpoint));
-	}
-}
-
-export function * deselectViewsAndLeaveClipping() {
-	const selectedViewpoint = yield select(selectSelectedViewpoint);
-	yield put(ViewpointsActions.setActiveViewpoint(null));
-
-	if (selectedViewpoint) {
-		const { clippingPlanes } = selectedViewpoint;
-		yield take(ViewpointsTypes.SHOW_VIEWPOINT);
-		if (clippingPlanes) {
-			const viewpoint = { viewpoint: { clippingPlanes } };
-			yield put(ViewpointsActions.showViewpoint(null, null, viewpoint));
-		}
 	}
 }
 
@@ -260,7 +240,7 @@ export function* fetchViewpointGroups({teamspace, modelId, view}) {
 			yield put(ViewpointsActions.addViewpointGroupsBeingLoaded(groupsToFetch));
 			const fetchedGroups =  (yield all(groupsToFetch.map((groupId) =>
 				API.getGroup(teamspace, modelId, groupId, revision))))
-				.map(({data}) => prepareGroup(data));
+					.map(({data}) => prepareGroup(data));
 
 			yield all(fetchedGroups.map((group) => put(ViewpointsActions.fetchGroupSuccess(group))));
 		}
@@ -371,7 +351,6 @@ export default function* ViewpointsSaga() {
 	yield takeEvery(ViewpointsTypes.SHARE_VIEWPOINT_LINK, shareViewpointLink);
 	yield takeEvery(ViewpointsTypes.SET_DEFAULT_VIEWPOINT, setDefaultViewpoint);
 	yield takeEvery(ViewpointsTypes.CLEAR_DEFAULT_VIEWPOINT, clearDefaultViewpoint);
-	yield takeEvery(ViewpointsTypes.DESELECT_VIEWS_AND_LEAVE_CLIPPING, deselectViewsAndLeaveClipping);
 	yield takeEvery(ViewpointsTypes.CACHE_GROUPS_FROM_VIEWPOINT, cacheGroupsFromViewpoint);
 	yield takeEvery(ViewpointsTypes.SHOW_PRESET, showPreset);
 	yield takeEvery(ViewpointsTypes.FETCH_VIEWPOINT_GROUPS, fetchViewpointGroups);

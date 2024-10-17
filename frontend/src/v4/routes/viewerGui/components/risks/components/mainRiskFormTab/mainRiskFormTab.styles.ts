@@ -20,3 +20,11 @@ import styled from 'styled-components';
 export const DateFieldContainer = styled.div`
 	margin-top: 16px;
 `;
+
+export const RiskLevelIconResizer = styled.div`
+	display: contents;
+	svg {
+		width: 50px;
+		height: 50px;
+	}
+`;

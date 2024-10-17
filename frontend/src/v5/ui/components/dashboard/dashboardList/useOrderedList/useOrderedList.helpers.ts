@@ -33,6 +33,10 @@ export const getSortingFunction = <T>(sortConfig) => {
 				? sortingFunction(a, b, index + 1) : sortingFunction(b, a, index + 1);
 		}
 
+		if (typeof aValue === 'boolean') {
+			return +aValue - +bValue;
+		}
+
 		if (typeof aValue === 'string') {
 			return aValue.localeCompare(bValue);
 		}

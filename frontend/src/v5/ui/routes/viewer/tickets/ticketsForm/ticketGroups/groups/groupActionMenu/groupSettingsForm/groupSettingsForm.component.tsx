@@ -35,11 +35,10 @@ import { ColorPicker } from '@controls/inputs/colorPicker/colorPicker.component'
 import { convertToV4GroupNodes, convertToV5GroupNodes, meshObjectsToV5GroupNode } from '@/v5/helpers/viewpoint.helpers';
 import { getRandomSuggestedColor } from '@controls/inputs/colorPicker/colorPicker.helpers';
 import { Gap } from '@controls/gap';
-import { hexToArray } from '@/v4/helpers/colors';
 import { getMeshIDsByQuery } from '@/v4/services/api';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
-import { GroupsCollectionSelect } from '../../addOrEditGroup/groupSettingsForm.component.tsx/groupsCollectionSelect/groupsCollectionSelect.component';
+import { GroupsCollectionSelect } from '../../addOrEditGroup/groupSettingsForm/groupsCollectionSelect/groupsCollectionSelect.component';
 import {
 	Buttons,
 	LabelAndColor,
@@ -67,6 +66,7 @@ import { RulesField } from './rulesField/ruelsField.component';
 import { Popper } from '../../../ticketGroups.styles';
 import { appendCopySuffixToDuplicateNames } from '../../groupRulesForm/groupRulesForm.helpers';
 import { TicketContext } from '../../../../../ticket.context';
+import { hexToRgb } from '@/v5/helpers/colors.helper';
 
 type GroupSettingsFormProps = {
 	value?: IGroupSettingsForm,
@@ -168,7 +168,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		resetFilterMenu();
 		if (isNewGroup) {
 			formData.reset({
-				...(isColored ? { color: hexToArray(getRandomSuggestedColor()) } : {}),
+				...(isColored ? { color: hexToRgb(getRandomSuggestedColor()) } : {}),
 				opacity: 1,
 				prefix: [],
 				group: {},

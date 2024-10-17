@@ -16,7 +16,6 @@
  */
 
 const SocketIO = require('socket.io');
-const sharedSession = require('express-socket.io-session');
 
 const RealTimeMsging = {};
 
@@ -24,7 +23,7 @@ const socketWrapper = (callback) => (socket) => {
 	const roomsJoined = new Set();
 	const wrapperObj = {
 		id: socket.id,
-		session: socket?.handshake?.session,
+		session: socket?.request?.session,
 		onDisconnect: (fn) => socket.on('disconnect', fn),
 		onJoin: (fn) => socket.on('join', fn),
 		onLeave: (fn) => socket.on('leave', fn),
@@ -44,7 +43,7 @@ const socketWrapper = (callback) => (socket) => {
 
 RealTimeMsging.createApp = (server, sessionService, onNewSockets) => {
 	const service = SocketIO(server, { path: '/chat' });
-	service.use(sharedSession(sessionService, { autoSave: true }));
+	service.engine.use(sessionService);
 
 	const newSocketsFn = socketWrapper(onNewSockets);
 	service.on('connection', (socket) => {

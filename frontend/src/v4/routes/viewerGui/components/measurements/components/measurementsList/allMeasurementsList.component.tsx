@@ -17,7 +17,7 @@
 
 import { isEmpty } from 'lodash';
 import { useEffect, useState } from 'react';
-import { GLToHexColor } from '../../../../../../helpers/colors';
+import { GLToHexColor } from '@/v5/helpers/colors.helper';
 import { MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
 import { IMeasure } from '../measureItem/measureItem.component';
 import { MeasurementsList } from './measurementsList.component';

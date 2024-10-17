@@ -21,13 +21,13 @@ import { OverlappingContainer } from '@controls/overlappingContainer/overlapping
 import { InputContainer } from '@controls/inputs/inputContainer/inputContainer.styles';
 import { FormattedMessage } from 'react-intl';
 import { generatePath, useParams } from 'react-router-dom';
-import { VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { VIEWER_ROUTE, ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Overlay, Link } from './viewerInputContainer.styles';
 
 export const ViewerInputContainer = (props) => {
 	const { isViewer, containerOrFederation } = useContext(TicketContext);
-	const { teamspace, project } = useParams();
+	const { teamspace, project } = useParams<ViewerParams>();
 	
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 

@@ -11,7 +11,7 @@
       "lodash",
       "node",
       "jest",
-      "webpack-env" 
+      "webpack-env"
     ],
     "lib": [
       "es2015",
@@ -19,8 +19,9 @@
       "dom",
       "es2020.string",
       "es2021.string",
-      "ES2022.Array",
-      "WebWorker"
+      "es2022.Array",
+      "WebWorker",
+      "DOM.Iterable"
     ],
     "jsx": "react-jsx",
     "removeComments": true,

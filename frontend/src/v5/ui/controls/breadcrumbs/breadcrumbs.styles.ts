@@ -60,9 +60,8 @@ export const Container = styled(Breadcrumbs)`
 	}
 `;
 
-export const Breadcrumb: typeof Link = styled(Button).attrs({
+const BasicBreadcrumb = styled(Button).attrs({
 	variant: 'text',
-	component: Link,
 })`
 	&& {
 		color: ${({ theme }) => theme.palette.primary.contrast};
@@ -81,10 +80,12 @@ export const Breadcrumb: typeof Link = styled(Button).attrs({
 	}
 `;
 
-export const InteractiveBreadcrumb = styled(Breadcrumb).attrs({
-	variant: 'text',
-	component: 'div',
-})`
+
+export const Breadcrumb: typeof Link = styled(BasicBreadcrumb).attrs({
+	component: Link,
+})``;
+
+export const InteractiveBreadcrumb = styled(BasicBreadcrumb)<{ $secondary: boolean }>`
 	&& {
 		${({ theme }) => theme.typography.h3};
 		color: ${({ theme }) => theme.palette.primary.main};

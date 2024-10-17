@@ -17,8 +17,7 @@
 import { FunctionComponent } from 'react';
 import SystemInfoIcon from '@mui/icons-material/InfoOutlined';
 
-import { DATE_TIME_FORMAT } from '../../../../../../../services/formatting/formatDate';
-import { DateTime } from '../../../../../dateTime/dateTime.component';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { Avatar, CommentWrapper, Container, DateTimeContainer, MarkdownComment } from './systemMessage.styles';
 
 interface IProps {
@@ -43,7 +42,7 @@ export const SystemMessage = ({ created, propertyName, comment }: IProps) => {
 			<CommentWrapper>
 				<Comment propertyName={propertyName}>{comment}</Comment>
 				<DateTimeContainer>
-					<DateTime value={created} format={DATE_TIME_FORMAT} />
+					{formatDateTime(created)}
 				</DateTimeContainer>
 			</CommentWrapper>
 		</Container>

@@ -23,7 +23,8 @@ import { ActionMenuItem } from '@controls/actionMenu';
 import { ColorGrid, BottomBar, HexTextField, PercentageTextField, SquaredColorOption, GradientButton, ColorOption, ColorActionMenu, UpdateButton } from './colorPickerPalette.styles';
 import { ColorPickerMenu } from '../colorPickerMenu/colorPickerMenu.component';
 import { ColorPickerGradient } from '../colorPickerGradient/colorPickerGradient.component';
-import { HexGroupColor, getColorIsValid, DEFAULT_SUGGESTED_HEX_COLORS, UNSET_HEX_COLOR, NON_TRANSPARENT_OPTION } from '../colorPicker.helpers';
+import { DEFAULT_SUGGESTED_HEX_COLORS, UNSET_HEX_COLOR, NON_TRANSPARENT_OPTION } from '../colorPicker.helpers';
+import { getColorHexIsValid, HexGroupColor } from '@/v5/helpers/colors.helper';
 
 type ColorPickerPaletteProps = {
 	value: HexGroupColor,
@@ -36,7 +37,7 @@ export const ColorPickerPalette = ({ disableTransparent = false, value, onChange
 	const [opacity, setOpacity] = useState<number>(value.opacity);
 	const ref = useRef();
 
-	const colorisValid = getColorIsValid(color);
+	const colorisValid = getColorHexIsValid(color);
 	const opacityInPercentage = Math.round((opacity ?? 1) * 100);
 
 	const handleColorChange = (newColor) => setColor(`#${newColor}`);
