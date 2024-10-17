@@ -61,7 +61,7 @@ export const Title = styled(PropertyValue)`
 	font-weight: 600;
 	font-size: 12px;
 	line-height: 18px;
-	width: 100%;
+	width: fit-content;
 	max-width: 100%;
 	display: block;
 
