@@ -69,10 +69,15 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 		setOrigin(pathname + search);
 	};
 
+	const handleSetThumbnail = (newThumbnail) => {
+		if (!!setThumbnail) return;
+		setThumbnail(newThumbnail);
+	};
+
 	useEffect(() => {
 		downloadAuthUrl(thumbnailSrc)
-			.then(setThumbnail)
-			.catch(() => setThumbnail(''));
+			.then(handleSetThumbnail)
+			.catch(() => handleSetThumbnail(''));
 		return () => { deleteAuthUrlFromCache(thumbnailSrc); };
 	}, [latestRevision]);
 

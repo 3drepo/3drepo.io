@@ -132,11 +132,11 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 						followOutput={() => true}
 						overscan={800}
 						components={{
-							Table: Table,
+							Table,
 							// @ts-ignore
-							TableBody: TableBody,
-							TableRow: TableRow,
-							FillerRow: FillerRow,
+							TableBody,
+							TableRow,
+							FillerRow,
 						}}
 						itemContent={(index, comment: ITicketComment) => (
 							<>

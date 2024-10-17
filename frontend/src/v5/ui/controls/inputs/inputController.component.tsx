@@ -25,6 +25,7 @@ export type FormInputProps = Partial<Omit<ControllerRenderProps, 'ref'> & {
 	error: boolean,
 	helperText: string,
 	className: string,
+	inputRef: any,
 }>;
 
 // eslint-disable-next-line @typescript-eslint/comma-dangle

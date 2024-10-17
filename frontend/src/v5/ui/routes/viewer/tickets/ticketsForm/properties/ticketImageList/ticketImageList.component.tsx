@@ -65,7 +65,7 @@ const EnlargeImagesOverlay = ({ children, onClick }) => (
 	</OverlappingContainer>
 );
 
-export const TicketImageList = ({ value, onChange, onBlur, disabled, label, helperText, ...props }: FormInputProps) => {
+export const TicketImageList = ({ value, onChange, onBlur, disabled, label, helperText, inputRef, ...props }: FormInputProps) => {
 	const { isViewer } = useContext(TicketContext);
 	const { is2DOpen } = useContext(ViewerCanvasesContext);
 	const imgContext = getImgSrcContext();
@@ -118,7 +118,7 @@ export const TicketImageList = ({ value, onChange, onBlur, disabled, label, help
 	}, [value]);
 
 	return (
-		<InputContainer disabled={disabled} {...props}>
+		<InputContainer disabled={disabled} ref={inputRef} {...props}>
 			<Label>{label}</Label>
 			<Content>
 				<ImagesContainer>
