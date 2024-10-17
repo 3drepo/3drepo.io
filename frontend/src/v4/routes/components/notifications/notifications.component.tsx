@@ -33,7 +33,7 @@ import { NotificationEmptyItem } from './components/emptyItem/emptyItem.componen
 import { INotification } from './components/notificationItem/notificationItem.component';
 import { NotificationsPanel } from './components/panel/panel.component';
 import { NotificationsPanelHeader } from './components/panelHeader/panelHeader.component';
-import { NotificationsList, NotificationWeekHeader } from './notifications.styles';
+import { NotificationsIconContainer, NotificationsList, NotificationWeekHeader } from './notifications.styles';
 
 interface IProps {
 	notifications: INotification[];
@@ -61,12 +61,11 @@ interface IProps {
 }
 
 const NotificationButton = ({ unreadCount, onClick, id }) => (
-	<IconButton
+	<NotificationsIconContainer
         onClick={onClick}
         aria-label="Show notifications"
         aria-haspopup="true"
         id={id}
-        size="large"
 	>
 		<Badge
 			badgeContent={unreadCount}
@@ -74,7 +73,7 @@ const NotificationButton = ({ unreadCount, onClick, id }) => (
 		>
 			<NotificationsIcon />
 		</Badge>
-	</IconButton>
+	</NotificationsIconContainer>
 );
 
 export class Notifications extends PureComponent<IProps, any> {

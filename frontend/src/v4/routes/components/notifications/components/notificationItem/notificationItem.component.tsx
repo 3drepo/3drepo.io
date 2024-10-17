@@ -218,7 +218,7 @@ export class NotificationItem extends PureComponent<IProps, IState> {
 		const summary = getSummary(this.props);
 
 		const containerProps: any = {
-			read,
+			$read: !!read,
 			onClick: this.onClick
 		};
 

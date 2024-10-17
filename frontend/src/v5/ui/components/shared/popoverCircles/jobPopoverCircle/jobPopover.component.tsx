@@ -18,7 +18,7 @@
 import { getJobAbbreviation } from '@/v5/store/jobs/jobs.helpers';
 import { IJob } from '@/v5/store/jobs/jobs.types';
 import { AvatarWrapper, Data, Heading, PopoverContainer } from '../userPopoverCircle/userPopover/userPopover.styles';
-import { PopoverCircle } from '../popoverCircle.styles';
+import { PopoverCircle } from '../popoverCircle.component';
 
 interface IJobPopover {
 	job: IJob;

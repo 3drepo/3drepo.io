@@ -46,9 +46,9 @@ export const Tickets = () => {
 	const readOnly = isFederation
 		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
 		: !ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
-	TicketsCardActionsDispatchers.setReadOnly(readOnly);
 
 	useEffect(() => {
+		TicketsCardActionsDispatchers.setReadOnly(readOnly);
 		UsersActionsDispatchers.fetchUsers(teamspace);
 		TicketsActionsDispatchers.fetchRiskCategories(teamspace);
 	}, []);

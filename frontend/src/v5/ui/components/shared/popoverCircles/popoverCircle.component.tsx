@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,29 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import axios from 'axios';
-import { useEffect, useState } from 'react';
 
-export const useErrorInterceptor = () => {
-	const [error, setError] = useState(null);
+import { AvatarProps } from '@mui/material';
+import { forwardRef } from 'react';
+import { Popover } from './popoverCircle.styles';
 
-	const handleSuccess = (res) => {
-		setError(null);
-		return res;
-	};
-
-	const handleError = (err) => {
-		setError(err);
-		return Promise.reject(err);
-	};
-
-	useEffect(() => {
-		const interceptorId = axios.interceptors.response.use(
-			handleSuccess,
-			handleError,
-		);
-		return () => axios.interceptors.response.eject(interceptorId);
-	}, []);
-
-	return error;
+export type IPopoverCircle = AvatarProps & {
+	size?: 'small' | 'medium';
+	backgroundColor?: string;
 };
+
+export const PopoverCircle = forwardRef(({ backgroundColor, ...props }: IPopoverCircle, ref) => (
+	<Popover {...props} $backgroundColor={backgroundColor} ref={ref} />
+));

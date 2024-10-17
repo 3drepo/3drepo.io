@@ -129,7 +129,7 @@ export const TicketImageList = ({ value, onChange, onBlur, disabled, label, help
 								{imgsSrcs?.length === 1 && <AuthImg src={imgsSrcs[0]} />}
 								{imgsSrcs?.length > 1 && (
 									<ImagesGridContainer>
-										{imgsSrcs.slice(0, 3).map((imgSrc) => (<AuthImg src={imgSrc} />))}
+										{imgsSrcs.slice(0, 3).map((imgSrc, i) => (<AuthImg src={imgSrc} key={i + imgSrc} />))}
 										{imgsSrcs.length > 3 && <ImageWithExtraCount src={imgsSrcs[3]} extraCount={imgsSrcs.length - 3} />}
 									</ImagesGridContainer>
 								)}

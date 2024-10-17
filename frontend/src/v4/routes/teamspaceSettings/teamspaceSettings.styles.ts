@@ -48,8 +48,8 @@ export const FieldsRow = styled(Grid)`
 	}
 `;
 
-export const StyledGrid = styled(Grid)<{ gridPaddingBottom?: boolean }>`
-	padding: ${({ gridPaddingBottom }) => gridPaddingBottom ? '12px 24px 24px' : '12px 24px'};
+export const StyledGrid = styled(Grid)<{ $gridPaddingBottom?: boolean }>`
+	padding: ${({ $gridPaddingBottom }) => $gridPaddingBottom ? '12px 24px 24px' : '12px 24px'};
 `;
 
 export const SuggestionsContainer = styled(Grid)`
