@@ -35,6 +35,7 @@ export const createDrawingFromRevisionBody = (body: CreateDrawingRevisionBody): 
 	number: body.drawingNumber,
 	type: body.drawingType,
 	desc: body.drawingDesc,
+	calibration: body.calibration,
 });
 
 export const createFormDataFromRevisionBody = (body: CreateDrawingRevisionBody) => {
