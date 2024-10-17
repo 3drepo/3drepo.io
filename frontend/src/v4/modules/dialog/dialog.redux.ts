@@ -21,8 +21,12 @@ import { generatePath } from 'react-router';
 import { get, omit } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import uuid from 'uuidv4';
+import { ErrorDialog } from '@/v4/routes/components/dialogContainer/components/errorDialog/errorDialog.component';
+import { ConfirmDialog } from '@/v4/routes/components/dialogContainer/components/confirmDialog/confirmDialog.component';
+import { RevisionsDialog } from '@/v4/routes/components/dialogContainer/components/revisionsDialog/revisionsDialog.component';
+import { NewUpdateDialog } from '@/v4/routes/components/dialogContainer/components/newUpdateDialog/newUpdateDialog.component';
+import { RedirectToTeamspaceDialog } from '@/v4/routes/components/dialogContainer/components/redirectToTeamspaceDialog/redirectToTeamspaceDialog.component';
 import { ROUTES } from '../../constants/routes';
-import * as Dialogs from '../../routes/components/dialogContainer/components';
 
 export interface IDialogConfig {
 	id: number;
@@ -84,7 +88,7 @@ const showErrorDialog = (state = INITIAL_STATE, action) => {
 	console.debug(message);
 	const config = {
 		title: 'Error',
-		template: Dialogs.ErrorDialog,
+		template: ErrorDialog,
 		data: {
 			method,
 			dataType,
@@ -113,12 +117,12 @@ const showEndpointErrorDialog = (state = INITIAL_STATE, { method, dataType, erro
 };
 
 const showConfirmDialog = (state = INITIAL_STATE, action) => {
-	const config = { ...action.config, template: Dialogs.ConfirmDialog } as IDialogConfig;
+	const config = { ...action.config, template: ConfirmDialog } as IDialogConfig;
 	return showDialog(state, { config });
 };
 
 const showRevisionsDialog = (state = INITIAL_STATE, action) => {
-	const config = { ...action.config, template: Dialogs.RevisionsDialog } as IDialogConfig;
+	const config = { ...action.config, template: RevisionsDialog } as IDialogConfig;
 	return showDialog(state, { config });
 };
 
@@ -144,7 +148,7 @@ const showScreenshotDialog = (state = INITIAL_STATE, action) => {
 const showNewUpdateDialog = (state = INITIAL_STATE, action) => {
 	const config = {
 		title: 'Update Available',
-		template: Dialogs.NewUpdateDialog,
+		template: NewUpdateDialog,
 		onConfirm: action.config.onConfirm
 	};
 
@@ -175,7 +179,7 @@ const showRedirectToTeamspaceDialog = (state = INITIAL_STATE, action) => {
 	const config = {
 		title: 'Error',
 		content: 'We cannot load the model due to the following:',
-		template: Dialogs.RedirectToTeamspaceDialog,
+		template: RedirectToTeamspaceDialog,
 		onCancel: () => push(teamspaceRoute),
 		onConfirm: () => push(teamspaceRoute),
 		data: {

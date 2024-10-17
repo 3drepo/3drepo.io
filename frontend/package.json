@@ -54,6 +54,7 @@
 		"@types/three": "0.167.1",
 		"@webscopeio/react-textarea-autocomplete": "4.9.0",
 		"axios": "1.6.5",
+		"babel-jest": "29.7.0",
 		"bezier-easing": "2.1.0",
 		"byte-size": "8.1.0",
 		"connected-react-router": "6.9.1",
