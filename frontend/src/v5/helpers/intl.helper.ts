@@ -86,7 +86,7 @@ export const formatDateTime = (date) => formatDate(date, { // DD/MM/YYYY hh:mm
 	month: 'numeric',
 	year: 'numeric',
 	hour12: false,
-}).replaceAll(',', '');
+})?.replaceAll(',', '');
 
 export const formatFilenameDate = (date) => formatDate(date, { // DD_MM_YYYY_HH_mm_ss
 	hour: 'numeric',
