@@ -23,7 +23,7 @@ import { DashboardListItemRow as UploadListItemRow } from '@components/dashboard
 import { UploadListItemDestination } from './components/uploadListItemDestination/uploadListItemDestination.component';
 import { UploadListItemRevisionCode } from './components/uploadListItemRevisionCode/uploadListItemRevisionCode.component';
 import { UploadListItemButton } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItem.styles';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { useEffect } from 'react';
 import { UploadListItemFileIcon } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemTitle } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemTitle/uploadListItemTitle.component';
@@ -34,6 +34,8 @@ import { DrawingRevisionsActionsDispatchers, DrawingsActionsDispatchers } from '
 import { UploadListItemStatusCode } from './components/uploadListItemStatusCode/uploadListItemStatusCode.component';
 import { UploadStatus } from '@/v5/store/containers/containers.types';
 import { DEFAULT_SETTINGS_CALIBRATION } from '../../../../calibration/calibration.helpers';
+import { get } from 'lodash';
+import { statusCodeAndRevisionCodeMustBeUniqueMessage } from '@/v5/validation/drawingSchemes/drawingSchemes';
 
 const UNEXPETED_STATUS_ERROR = undefined;
 const STATUS_TEXT_BY_UPLOAD = {
@@ -79,12 +81,12 @@ export const UploadListItem = ({
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const projectId = ProjectsHooksSelectors.selectCurrentProject();
 	const uploadErrorMessage: string = DrawingRevisionsHooksSelectors.selectUploadError(uploadId);
-	const { watch, trigger, setValue } = useFormContext();
-	const drawingId = watch(`${revisionPrefix}.drawingId`);
-	const statusCode = watch(`${revisionPrefix}.statusCode`);
-	const revCode = watch(`${revisionPrefix}.revCode`);
+	const { trigger, setValue, formState: { errors } } = useFormContext();
+	const drawingId = useWatch({ name: `${revisionPrefix}.drawingId` });
+	const statusCode = useWatch({ name: `${revisionPrefix}.statusCode` });
+	const revCode = useWatch({ name: `${revisionPrefix}.revCode` });
 	const selectedDrawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
-	const selectedDrawingRevisions = DrawingRevisionsHooksSelectors.selectRevisions(selectedDrawing?._id);
+	// const selectedDrawingRevisions = DrawingRevisionsHooksSelectors.selectRevisions(selectedDrawing?._id);
 	const progress = DrawingRevisionsHooksSelectors.selectUploadProgress(uploadId);
 	const uploadStatus = getUploadStatus(progress, uploadErrorMessage);
 
@@ -95,17 +97,29 @@ export const UploadListItem = ({
 		calibration: drawing?.calibration || DEFAULT_SETTINGS_CALIBRATION,
 	});
 
-	useEffect(() => {
-		if (revCode) {
-			trigger(`${revisionPrefix}.revCode`);
-		}
-	}, [drawingId, statusCode, selectedDrawingRevisions.length]);
+	const revCodeError = get(errors, `${revisionPrefix}.revCode`)?.message;
+	const statusCodeError = get(errors, `${revisionPrefix}.statusCode`)?.message;
 
 	useEffect(() => {
-		if (statusCode) {
-			trigger(`${revisionPrefix}.statusCode`);
+		// Dont trigger the error if it was already triggered
+		const errorWasAlreadyTriggered = revCodeError === statusCodeError;
+
+		if (errorWasAlreadyTriggered) {
+			return;
 		}
-	}, [drawingId, revCode, selectedDrawingRevisions.length]);
+
+		// Only trigger the revCode if its clearing the error or if the the unique error was thrown
+		if (statusCodeError === statusCodeAndRevisionCodeMustBeUniqueMessage || !statusCodeError ) {
+			console.log('triggering');
+			trigger(`${revisionPrefix}.revCode`);
+		}
+	}, [drawingId, statusCodeError]);
+
+	// useEffect(() => {
+	// 	if (statusCode) {
+	// 		trigger(`${revisionPrefix}.statusCode`);
+	// 	}
+	// }, [drawingId, revCode, selectedDrawingRevisions.length]);
 
 	useEffect(() => {
 		setValue(revisionPrefix, sanitiseDrawing(selectedDrawing));
@@ -118,6 +132,13 @@ export const UploadListItem = ({
 		}
 	}, [selectedDrawing?._id]);
 
+	useEffect(() => {
+		const id = '936477e6-6fec-413e-ba5f-9b2defbf0f6c';
+		DrawingRevisionsActionsDispatchers.fetch(teamspace, projectId, id);
+		DrawingsActionsDispatchers.fetchDrawingSettings(teamspace, projectId, id);
+	}, []);
+
+
 	return (
 		<UploadListItemRow selected={isSelected}>
 			<UploadListItemFileIcon extension={fileData.extension} />
@@ -128,7 +149,7 @@ export const UploadListItem = ({
 				name={fileData.name}
 				size={fileData.size}
 			/>
-			<InputController
+			{/* <InputController
 				Input={UploadListItemDestination}
 				name={`${revisionPrefix}.drawingName`}
 				key={`${uploadId}.dest`}
@@ -137,8 +158,14 @@ export const UploadListItem = ({
 				disabled={isUploading}
 				onSelectNewDestination={onClickEdit}
 			/>
-			<InputController
+			*/}
+			{/* <InputController
 				Input={UploadListItemStatusCode}
+				key={`${uploadId}.statusCode`}
+				name={`${revisionPrefix}.statusCode`}
+				disabled={isUploading}
+			/> */}
+			<UploadListItemStatusCode
 				key={`${uploadId}.statusCode`}
 				name={`${revisionPrefix}.statusCode`}
 				disabled={isUploading}
