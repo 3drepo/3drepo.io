@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useFormState } from 'react-hook-form';
+import { useFormContext, useFormState } from 'react-hook-form';
 import { Autocomplete, Description, OptionContainer, StatusCodeInput, Value } from './uploadListItemStatusCode.styles';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { get } from 'lodash';
@@ -22,6 +22,7 @@ import { OptionsBox } from '@components/shared/uploadFiles/uploadList/uploadList
 import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { StatusCode } from '@/v5/store/drawings/revisions/drawingRevisions.types';
 import { Tooltip } from '@mui/material';
+import { useCallback, useRef } from 'react';
 
 interface IUploadListItemStatusCode {
 	value?: string;
@@ -31,41 +32,67 @@ interface IUploadListItemStatusCode {
 	className?: string;
 	inputRef?: any;
 }
+
+
+
 export const UploadListItemStatusCode = ({ value, inputRef, onChange, ...props }: IUploadListItemStatusCode) => {
+	const renderCount = useRef(0);
+
 	const { errors } = useFormState();
 	const error = get(errors, props.name)?.message;
 	const options = DrawingRevisionsHooksSelectors.selectStatusCodes();
-	const getValue = () => options.find((o) => o.code === value) || '';
+	const { register } = useFormContext();
+	// const getValue = () => options.find((o) => o.code === value) || '';
+
+	// const { ref, ...inputprops} = register(props.name);
+	console.log(props.name + ':' + (renderCount.current++));
+
+	const reset = useCallback((e) => {
+		e.preventDefault();
+		renderCount.current = 0;
+	}, []);
 
 	return (
-		<Autocomplete
-			{...props}
-			options={options as StatusCode[]}
-			autoHighlight
-			value={getValue()}
-			onChange={(e, newValue: StatusCode) => onChange(newValue?.code || '')}
-			getOptionLabel={(option: StatusCode) => option.code || ''}
-			renderOption={(optionProps, option: StatusCode) => (
-				<Tooltip title={option.description} key={option.code}>
-					<OptionContainer {...optionProps}>
-						<Value>{option.code}</Value>
-						<Description>{option.description}</Description>
-					</OptionContainer>
-				</Tooltip>
-			)}
-			renderInput={({ InputProps, ...params }) => (
-				<StatusCodeInput
-					{...params}
-					InputProps={{
-						...InputProps,
-						startAdornment: !!error && (<ErrorTooltip>{error}</ErrorTooltip>),
-					}}
-					inputRef={inputRef}
-					error={!!error}
-				/>
-			)}
-			ListboxComponent={OptionsBox}
-			disableClearable={!value}
-		/>
+		<>
+			<button onClick={reset}>reset </button>
+			<div style={{ backgroundColor:'red' }}>{error  || ''}</div>
+			<select {...register(props.name)} >
+				{options.map(({ code, description }) => (
+					<option value={code}>{code}</option>))}
+			</select>
+		</>);
+
+	return (
+		<>
+			<Autocomplete
+				{...props}
+				options={options as StatusCode[]}
+				autoHighlight
+				value={getValue()}
+				onChange={(e, newValue: StatusCode) => onChange(newValue?.code || '')}
+				getOptionLabel={(option: StatusCode) => option.code || ''}
+				renderOption={(optionProps, option: StatusCode) => (
+					<Tooltip title={option.description} key={option.code}>
+						<OptionContainer {...optionProps}>
+							<Value>{option.code}</Value>
+							<Description>{option.description}</Description>
+						</OptionContainer>
+					</Tooltip>
+				)}
+				renderInput={({ InputProps, ...params }) => (
+					<StatusCodeInput
+						{...params}
+						InputProps={{
+							...InputProps,
+							startAdornment: !!error && (<ErrorTooltip>{error}</ErrorTooltip>),
+						}}
+						inputRef={inputRef}
+						error={!!error}
+					/>
+				)}
+				ListboxComponent={OptionsBox}
+				disableClearable={!value}
+			/>
+		</>
 	);
 };
