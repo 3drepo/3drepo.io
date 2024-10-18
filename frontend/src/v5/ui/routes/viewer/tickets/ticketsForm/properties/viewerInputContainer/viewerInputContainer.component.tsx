@@ -25,13 +25,13 @@ import { VIEWER_ROUTE, ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Overlay, Link } from './viewerInputContainer.styles';
 
-export const ViewerInputContainer = (props) => {
+export const ViewerInputContainer = ({ inputRef = undefined, ...props }) => {
 	const { isViewer, containerOrFederation } = useContext(TicketContext);
 	const { teamspace, project } = useParams<ViewerParams>();
 	
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 
-	if (isViewer) return (<InputContainer {...props} />);
+	if (isViewer) return (<InputContainer ref={inputRef} {...props} />);
 
 	const getOpenInViewerLink = () => {
 		if (!containerOrFederation) return '/';
@@ -45,7 +45,7 @@ export const ViewerInputContainer = (props) => {
 
 	return (
 		<OverlappingContainer>
-			<InputContainer {...props} />
+			<InputContainer ref={inputRef} {...props} />
 			{!isViewer && (
 				<Overlay>
 					<FormattedMessage

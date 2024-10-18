@@ -19,7 +19,7 @@ type IProps = {
 };
 
 export default ({ className }: IProps) => (
-	<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="100%" viewBox="0 0 1224 488" enable-background="new 0 0 1224 488" className={className}>
+	<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="100%" viewBox="0 0 1224 488" enableBackground="new 0 0 1224 488" className={className}>
 		<path fill="transparent" opacity="1.000000" stroke="none" 
 			d="M218.000000,489.000000 
 	C199.312439,489.000000 180.624878,489.000000 161.426605,488.532928 

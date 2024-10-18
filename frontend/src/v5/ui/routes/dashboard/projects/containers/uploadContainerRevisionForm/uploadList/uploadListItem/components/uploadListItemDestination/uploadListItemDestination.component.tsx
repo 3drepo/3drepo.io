@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { memo, useState } from 'react';
+import { memo, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { IContainer } from '@/v5/store/containers/containers.types';
@@ -57,21 +57,28 @@ interface IUploadListItemDestination {
 	disabled?: boolean;
 	className?: string;
 	index: number;
+	name: string,
+	inputRef?: any;
+	helperText?: string,
+	error?: boolean,
 }
 export const UploadListItemDestination = memo(({
 	value,
 	revisionPrefix,
 	index,
+	error,
+	helperText,
+	name,
+	inputRef,
 	...props
 }: IUploadListItemDestination): JSX.Element => {
 	const [newOrExisting, setNewOrExisting] = useState<NewOrExisting>('');
-	const [error, setError] = useState('');
-	const { getValues, setValue } = useFormContext();
+	const { getValues, setValue, setError, clearErrors } = useFormContext();
 
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const federationsNames = FederationsHooksSelectors.selectFederationsNames();
 	const containers = ContainersHooksSelectors.selectContainers();
-	const selectedContainer = containers.find((c) => c.name === value);
+	const selectedContainer = useRef(containers.find((c) => c.name === value));
 
 	const [processingContainersNames, setProcessingContainersNames] = useState([]);
 	const [newContainersInModal, setNewContainersInModal] = useState([]);
@@ -91,10 +98,10 @@ export const UploadListItemDestination = memo(({
 				trimmedValue,
 				{ context: { alreadyExistingNames: federationsNames } },
 			);
-			setError('');
-			setNewOrExisting(containers.find(({ name }) => name === trimmedValue) ? 'existing' : 'new');
+			clearErrors(name);
+			setNewOrExisting(containers.find((container) => container.name === trimmedValue) ? 'existing' : 'new');
 		} catch (validationError) {
-			setError(validationError.message);
+			setError(name, validationError);
 			setNewOrExisting('');
 		}
 	};
@@ -104,9 +111,9 @@ export const UploadListItemDestination = memo(({
 
 		// filter out currently selected value and containers with insufficient permissions
 		const filteredOptions = getFilteredDestinationOptions(options, params)
-			.filter(({ name, role }) => name !== value && isCollaboratorRole(role));
+			.filter((option) => option.name !== value && isCollaboratorRole(option.role));
 
-		const containerNameExists = options.some(({ name }) => inputValue.toLowerCase() === (name || '').toLowerCase());
+		const containerNameExists = options.some((option) => inputValue.toLowerCase() === (option.name || '').toLowerCase());
 
 		if (inputValue && !containerNameExists && isProjectAdmin) {
 			// create an extra option to transform into a
@@ -120,7 +127,7 @@ export const UploadListItemDestination = memo(({
 		return filteredOptions;
 	};
 
-	const nameIsTaken = ({ name }) => takenContainerNames.map((n) => n.toLowerCase()).includes(name.toLowerCase());
+	const nameIsTaken = (container) => takenContainerNames.map((n) => n.toLowerCase()).includes(container.name.toLowerCase());
 
 	const renderOption = (optionProps, option: IContainer) => {
 		if (!option._id) {
@@ -192,14 +199,14 @@ export const UploadListItemDestination = memo(({
 		setProcessingContainersNames(
 			containers
 				.filter((container) => !canUploadToBackend(container.status))
-				.map(({ name }) => name),
+				.map((container) => container.name),
 		);
 	};
 
 	return (
 		<DestinationAutocomplete
 			{...props}
-			defaultValue={selectedContainer}
+			defaultValue={selectedContainer.current}
 			filterOptions={getFilterOptions}
 			getOptionDisabled={nameIsTaken}
 			getOptionLabel={(option: IContainer) => option.name || ''}
@@ -212,15 +219,21 @@ export const UploadListItemDestination = memo(({
 			renderOption={renderOption}
 			renderInput={({ InputProps, ...params }) => (
 				<DestinationInput
-					error={!!error}
+					error={error}
 					{...params}
 					neworexisting={newOrExisting}
+					inputRef={inputRef}
 					InputProps={{
 						...InputProps,
-						startAdornment: !!error && (<ErrorTooltip>{error}</ErrorTooltip>),
+						startAdornment: error && (<ErrorTooltip>{helperText}</ErrorTooltip>),
 					}}
 				/>
 			)}
 		/>
 	);
-}, (prev, next) => prev.revisionPrefix === next.revisionPrefix && prev.value === next.value && prev.disabled === next.disabled);
+}, (prev, next) => (
+	prev.revisionPrefix === next.revisionPrefix &&
+	prev.value === next.value &&
+	prev.disabled === next.disabled &&
+	prev.error === next.error
+));

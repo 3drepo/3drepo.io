@@ -14,25 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { TableVirtuoso } from 'react-virtuoso';
-import styled from 'styled-components';
 
-export const VirtualisedList = styled(TableVirtuoso)`
-	height: 100%;
-	box-sizing: border-box;
-	overflow-x: hidden;
+import { AvatarProps } from '@mui/material';
+import { forwardRef } from 'react';
+import { Popover } from './popoverCircle.styles';
 
-	table {
-		width: 100%;
-	}
-`;
+export type IPopoverCircle = AvatarProps & {
+	size?: 'small' | 'medium';
+	backgroundColor?: string;
+};
 
-export const TableRow = styled.div`
-	&:not(:last-child) > * {
-		border-bottom: solid 1px ${({ theme }) => theme.palette.base.lightest};
-	}
-`;
-
-export const FillerRow = styled.div<{ height: number }>`
-	height: ${({ height }) => height}px;
-`;
+export const PopoverCircle = forwardRef(({ backgroundColor, ...props }: IPopoverCircle, ref) => (
+	<Popover {...props} $backgroundColor={backgroundColor} ref={ref} />
+));
