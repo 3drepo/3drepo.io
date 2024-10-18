@@ -19,16 +19,19 @@ import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { useFormContext } from 'react-hook-form';
 import { MenuItem } from '@mui/material';
-import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
-import { get } from 'lodash';
+import { FormNumberField, FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
+import { get, isNumber } from 'lodash';
 import { Heading, Title, FlexContainer } from './sidebarForm.styles';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { UploadFilesContext } from '@components/shared/uploadFiles/uploadFilesContext';
 import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { MODEL_UNITS } from '../../../models.helpers';
+import { DoubleInputLineContainer } from '../../drawingDialogs/drawingForm.styles';
+import { Loader } from '@/v4/routes/components/loader/loader.component';
 
 export const SidebarForm = () => {
 	const types = DrawingsHooksSelectors.selectTypes();
-	const { getValues, formState: { errors } } = useFormContext();
+	const { getValues, formState: { errors, dirtyFields }, trigger, watch } = useFormContext();
 	const { fields, selectedId } = useContext(UploadFilesContext);
 	// @ts-ignore
 	const selectedIndex = fields.findIndex(({ uploadId }) => uploadId === selectedId);
@@ -36,6 +39,15 @@ export const SidebarForm = () => {
 	const [drawingId, drawingName] = getValues([`${revisionPrefix}.drawingId`, `${revisionPrefix}.drawingName`]);
 	const disableDrawingFields = !(drawingName && !drawingId);
 	const getError = (field: string) => get(errors, `${revisionPrefix}.${field}`);
+	const verticalRange = watch(`${revisionPrefix}.calibration.verticalRange`);
+
+	useEffect(() => {
+		if (get(dirtyFields, `${revisionPrefix}.calibration.verticalRange`)?.some((v) => v)) {
+			trigger(`${revisionPrefix}.calibration.verticalRange`);
+		}
+	}, [verticalRange?.[0], verticalRange?.[1]]);
+
+	if (drawingId && !isNumber(getValues(`${revisionPrefix}.calibration.verticalRange.0`))) return <Loader />;
 
 	return (
 		<>
@@ -66,6 +78,41 @@ export const SidebarForm = () => {
 					disabled={disableDrawingFields}
 				/>
 			</FlexContainer>
+			<Heading>
+				<FormattedMessage
+					defaultMessage="Calibration Information"
+					id="drawing.uploads.sidebar.drawing.calibrationInformation"
+				/>
+			</Heading>
+			<DoubleInputLineContainer>
+				<FormNumberField
+					name={`${revisionPrefix}.calibration.verticalRange.0`}
+					formError={getError('calibration.verticalRange.0')}
+					label={formatMessage({ id: 'drawings.form.bottomExtent', defaultMessage: 'Bottom Extent' })}
+					defaultValue={0}
+					disabled={disableDrawingFields}
+					required
+				/>
+				<FormNumberField
+					name={`${revisionPrefix}.calibration.verticalRange.1`}
+					formError={getError('calibration.verticalRange.1') ? {} : ''}
+					label={formatMessage({ id: 'drawings.form.topExtent', defaultMessage: 'Top Extent' })}
+					required
+					disabled={disableDrawingFields}
+					defaultValue={1}
+				/>
+			</DoubleInputLineContainer>
+			<FormSelect
+				name={`${revisionPrefix}.calibration.units`}
+				formError={getError('units')}
+				label={formatMessage({ id: 'drawings.form.units', defaultMessage: 'Units' })}
+				defaultValue="mm"
+				disabled={disableDrawingFields}
+			>
+				{MODEL_UNITS.map(({ value, name }) => (
+					<MenuItem key={value} value={value}>{name}</MenuItem>
+				))}
+			</FormSelect>
 			<Heading>
 				<FormattedMessage id="drawing.uploads.sidebar.drawingRevisionDetails" defaultMessage="Revision details" />
 			</Heading>

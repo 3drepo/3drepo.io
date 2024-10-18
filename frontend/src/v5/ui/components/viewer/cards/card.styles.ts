@@ -107,5 +107,6 @@ export const Title = styled.div`
 
 export const Actions = styled.div`
 	display: inline-flex;
+	align-items: center;
 	gap: 5px;
 `;

@@ -15,25 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CardContainer, CardContent } from '@components/viewer/cards/card.styles';
 import { FormattedMessage } from 'react-intl';
 import DrawingsIcon from '@assets/icons/outlined/drawings-outlined.svg';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { DrawingsList } from './drawingsList.component';
 import { CardHeader } from '@components/viewer/cards/cardHeader.component';
-import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { useParams } from 'react-router-dom';
-import { useEffect } from 'react';
-import { ViewerParams } from '../../../routes.constants';
 
 export const DrawingsListCard = () => {
-	const { teamspace, project } = useParams<ViewerParams>();
-	const drawings = DrawingsHooksSelectors.selectNonEmptyDrawings();
-	
-	useEffect(() => {
-		drawings.forEach((d) => DrawingRevisionsActionsDispatchers.fetch(teamspace, project, d._id));
-	}, []);
+	const drawings = DrawingsCardHooksSelectors.selectValidDrawings();
 
 	return (
 		<CardContainer>

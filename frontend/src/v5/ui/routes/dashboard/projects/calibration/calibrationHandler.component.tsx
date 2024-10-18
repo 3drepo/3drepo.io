@@ -16,7 +16,7 @@
  */
 
 import { useContext, useEffect } from 'react';
-import { CompareActionsDispatchers, ContainersActionsDispatchers, FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { CompareActionsDispatchers, ContainersActionsDispatchers, DrawingsActionsDispatchers, FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useParams } from 'react-router-dom';
 import { ContainersHooksSelectors, DrawingsHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { UnityUtil } from '@/globals/unity-util';
@@ -28,6 +28,7 @@ import { CalibrationContext } from './calibrationContext';
 import { VerticalSpatialBoundariesHandler } from './calibrationStep/verticalSpatialBoundariesHandler/verticalSpatialBoundariesHandler.component';
 import { ViewerParams } from '../../../routes.constants';
 import { viewerRoute } from '@/v5/services/routing/routing';
+import { isNull } from 'lodash';
 
 export const CalibrationHandler = () => {
 	const { teamspace, project, revision, containerOrFederation } = useParams<ViewerParams>();
@@ -60,6 +61,10 @@ export const CalibrationHandler = () => {
 
 		if (!origin) {
 			setOrigin(viewerRoute(teamspace, project, containerOrFederation, revision, { drawingId }, false));
+		}
+
+		if (verticalRange.some(isNull)) {
+			DrawingsActionsDispatchers.fetchDrawingSettings(teamspace, project, drawingId);
 		}
 
 		return () => {
