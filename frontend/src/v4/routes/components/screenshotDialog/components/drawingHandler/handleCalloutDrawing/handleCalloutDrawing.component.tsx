@@ -29,6 +29,11 @@ import {
 } from '../handleBaseDrawing/handleBaseDrawing.component';
 import { getLinePoints } from './handleCalloutDrawing.helpers';
 
+enum CalloutState {
+	SETTING_ANCHOR = 'settingAnchor',
+	POSITIONING_TEXT_BOX = 'positioningTextBox',
+};
+
 export interface IHandleCalloutDrawingProps extends IHandleBaseDrawingProps {
 	textSize: number;
 	activeShape: number;
@@ -38,7 +43,7 @@ export interface IHandleCalloutDrawingProps extends IHandleBaseDrawingProps {
 }
 
 export interface IHandleCalloutDrawingStates extends IHandleBaseDrawingStates {
-	calloutState: number;
+	calloutState: typeof CalloutState;
 	lastShape: any;
 }
 
@@ -51,7 +56,7 @@ export class HandleCalloutDrawing
 
 	public state = {
 		...super.state,
-		calloutState: 1,
+		calloutState: CalloutState.SETTING_ANCHOR,
 		lastShape: {},
 	};
 
@@ -81,13 +86,13 @@ export class HandleCalloutDrawing
 			this.activeShape = this.props.activeShape;
 		}
 
-		if (this.state.calloutState === 1) {
+		if (this.state.calloutState === CalloutState.SETTING_ANCHOR) {
 			if (this.activeShape === SHAPE_TYPES.CALLOUT_DOT) {
 				this.subscribeDotDrawingEvents();
 			} else {
 				this.subscribeShapeDrawingEvents();
 			}
-		} else if (this.state.calloutState === 2) {
+		} else if (this.state.calloutState === CalloutState.POSITIONING_TEXT_BOX) {
 			this.subscribeLineDrawingEvents();
 		}
 	}
@@ -222,7 +227,7 @@ export class HandleCalloutDrawing
 		this.layer.batchDraw();
 		this.lastPointerPosition = this.pointerPosition;
 
-		this.setState({ calloutState: 2 });
+		this.setState({ calloutState: CalloutState.POSITIONING_TEXT_BOX });
 		this.shape = this.lastShape;
 		this.lastShape = {};
 
@@ -276,7 +281,7 @@ export class HandleCalloutDrawing
 		this.props.handleNewText(position, text, width, false);
 		batchGroupBy.end();
 		setTimeout(() => {
-			this.setState({ calloutState: 1, isCurrentlyDrawn: false });
+			this.setState({ calloutState: CalloutState.SETTING_ANCHOR, isCurrentlyDrawn: false });
 		});
 	}
 
@@ -307,6 +312,6 @@ export class HandleCalloutDrawing
 	));
 
 	public render() {
-		return this.renderEditableTextarea(this.state.calloutState === 2);
+		return this.renderEditableTextarea(this.state.calloutState === CalloutState.POSITIONING_TEXT_BOX);
 	}
 }
