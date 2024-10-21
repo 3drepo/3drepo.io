@@ -18,7 +18,6 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 
 export const useErrorInterceptor = () => {
-	const [interceptor, setInterceptor] = useState(null);
 	const [error, setError] = useState(null);
 
 	const handleSuccess = (res) => {
@@ -31,18 +30,12 @@ export const useErrorInterceptor = () => {
 		return Promise.reject(err);
 	};
 
-	const onMount = () => {
-		setInterceptor(axios.interceptors.response.use(
+	useEffect(() => {
+		const interceptorId = axios.interceptors.response.use(
 			handleSuccess,
 			handleError,
-		));
-	};
-
-	const onUnmount = () => axios.interceptors.request.eject(interceptor);
-
-	useEffect(() => {
-		onMount();
-		return onUnmount;
+		);
+		return () => axios.interceptors.response.eject(interceptorId);
 	}, []);
 
 	return error;

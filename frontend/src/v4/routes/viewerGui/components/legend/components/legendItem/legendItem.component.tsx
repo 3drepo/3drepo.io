@@ -118,7 +118,7 @@ export const LegendItem = ({
 								autoFocus={props.autoFocus}
 								onChange={handleSave}
 								disableShowDefaultUnderline
-								inputProps={{ maxLength: 20 }}
+								inputProps={{ maxlength: 20 }}
 								{...additionalTextFieldProps}
 							/>
 						)} />
