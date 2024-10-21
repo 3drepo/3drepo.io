@@ -53,7 +53,7 @@ export const selectSelectedNodes = createSelector(
 	(treeProcessing, objects) => objects.map((o) => ({
 		model: o.modelId,
 		account: o.teamspace,
-		shared_ids: o.meshes.map((meshId) => treeProcessing.nodesList[treeProcessing.nodesIndexesMap[meshId]].shared_id),
+		shared_ids: o.meshes.map((meshId) => treeProcessing.nodesList[treeProcessing.nodesIndexesMap[meshId]]?.shared_id),
 	})),
 );
 
