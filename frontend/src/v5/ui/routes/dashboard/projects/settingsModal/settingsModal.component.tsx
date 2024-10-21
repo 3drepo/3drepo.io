@@ -177,21 +177,21 @@ export const SettingsModal = ({
 	const onSubmit: SubmitHandler<IFormInput> = ({
 		latitude, longitude, angleFromNorth,
 		x, y, z,
-		...nonGISSettings
+		code,
+		...rest
 	}) => {
-		const settings = isNumber(latitude) ? {
-			surveyPoint: {
+		const settings = { ...rest, code } as ContainerSettings | FederationSettings;
+		if (isNumber(latitude)) {
+			settings.surveyPoint = {
 				latLong: [latitude, longitude],
 				position: [x, y, z],
-			},
-			angleFromNorth,
-			...nonGISSettings,
-		} : nonGISSettings;
+			};
+		}
 		updateSettings(
 			teamspace,
 			project,
 			containerOrFederation._id,
-			settings as ContainerSettings | FederationSettings,
+			settings,
 			onClickClose,
 			onSubmitError,
 		);
