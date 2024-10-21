@@ -63,7 +63,7 @@ export const DrawingListItemLoading = ({
 				<FixedOrGrowContainer {...DRAWING_LIST_COLUMN_WIDTHS.revisionsCount} >
 					<ButtonSkeleton delay={delay} />
 				</FixedOrGrowContainer>
-				<FixedOrGrowContainer {...DRAWING_LIST_COLUMN_WIDTHS.calibration} >
+				<FixedOrGrowContainer {...DRAWING_LIST_COLUMN_WIDTHS.calibrationStatus} >
 					<ButtonSkeleton delay={delay} />
 				</FixedOrGrowContainer>
 				<FixedOrGrowContainer {...DRAWING_LIST_COLUMN_WIDTHS.number}>
