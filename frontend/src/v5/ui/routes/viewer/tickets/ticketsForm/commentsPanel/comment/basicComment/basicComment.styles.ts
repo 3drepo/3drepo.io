@@ -37,7 +37,7 @@ export const CommentAge = styled(CommentSmallText)`
 `;
 
 export const CommentContainer = styled.div`
-	max-width: 241px;
+	max-width: 236px;
 	width: fit-content;
 	padding: 10px 12px 7px;
 	box-sizing: border-box;
