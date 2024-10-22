@@ -37,7 +37,7 @@ import {
 	RevisionsListEmptyContainer,
 	RevisionsListEmptyText,
 } from '../revisionDetails/revisionDetails.styles';
-import { fooBar, getRevisionFileUrl } from '@/v5/services/api/drawingRevisions';
+import { getRevisionFileUrl } from '@/v5/services/api/drawingRevisions';
 import { selectHasCollaboratorAccess } from '@/v5/store/drawings/drawings.selectors';
 import { getState } from '@/v4/modules/store';
 import { RevisionsListItemText } from '../revisionDetails/components/revisionsListItem/revisionsListItemText/revisionsListItemText.component';
@@ -46,7 +46,7 @@ import { RevisionsListItemTag } from '../revisionDetails/components/revisionsLis
 import { IDrawingRevision } from '@/v5/store/drawings/revisions/drawingRevisions.types';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { UploadStatus } from '@/v5/store/containers/containers.types';
-import { downloadFile, downloadFileFromRes } from '@components/authenticatedResource/authenticatedResource.hooks';
+import { downloadFile } from '@components/authenticatedResource/authenticatedResource.hooks';
 
 interface IDrawingRevisionDetails {
 	drawingId: string;
