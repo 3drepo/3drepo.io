@@ -307,7 +307,7 @@ export const selectNodesByMeshSharedIdsArray = createSelector(
 		}
 		const foundNodes = new Set();
 
-		meshes.forEach((mesh) => {
+		meshes?.forEach((mesh) => {
 			const meshId = nodesBySharedIds[mesh];
 			if (meshId && nodeList[nodeMap[meshId]]) {
 				const meshEntry = nodeList[nodeMap[meshId]];
