@@ -180,7 +180,7 @@ export const SettingsModal = ({
 		code,
 		...rest
 	}) => {
-		const settings = { ...rest, code } as ContainerSettings | FederationSettings;
+		const settings = { ...rest, angleFromNorth, code } as ContainerSettings | FederationSettings;
 		if (isNumber(latitude)) {
 			settings.surveyPoint = {
 				latLong: [latitude, longitude],
