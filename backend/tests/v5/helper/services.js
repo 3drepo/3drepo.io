@@ -45,9 +45,9 @@ const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helpe
 const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { isArray } = require(`${src}/utils/helper/typeCheck`);
-const FilesManager = require('../../../src/v5/services/filesManager');
-const { modelTypes, statusCodes } = require('../../../src/v5/models/modelSettings.constants');
-const { actions } = require('../../../src/v5/models/teamspaces.audits.constants');
+const FilesManager = require(`${src}/services/filesManager`);
+const { modelTypes, statusCodes } = require(`${src}/models/modelSettings.constants`);
+const { actions } = require(`${src}/models/teamspaces.audits.constants`);
 
 const { statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
 const { generateFullSchema } = require(`${src}/schemas/tickets/templates`);
