@@ -85,7 +85,7 @@ const genYargs = /* istanbul ignore next */(yargs) => {
 			})
 		.option(ADD_ONS.MODULES,
 			{
-				describe: 'Comma seperated string of enabled modules',
+				describe: 'Comma seperated string of enabled modules (null to remove all):',
 				type: 'string',
 			})
 		.option('teamspace',
