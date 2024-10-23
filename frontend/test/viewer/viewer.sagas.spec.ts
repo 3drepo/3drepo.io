@@ -89,6 +89,10 @@ describe('Viewer: sagas', () => {
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${containerOrFederationId}/stats`)
 				.reply(200, getFederationMockStats(theFederation));
+			
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${containerOrFederationId}`)
+				.reply(200, getFederationMockStats(theFederation));
 
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${baseContainers[0]._id}/stats`)

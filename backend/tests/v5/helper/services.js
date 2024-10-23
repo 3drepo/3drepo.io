@@ -134,6 +134,7 @@ db.createTeamspace = async (teamspace, admins = [], subscriptions, createUser = 
 db.createProject = (teamspace, _id, name, models = [], admins = []) => {
 	const project = {
 		_id: stringToUUID(_id),
+		createdAt: new Date(),
 		name,
 		models,
 		permissions: admins.map((user) => ({ user, permissions: [PROJECT_ADMIN] })),

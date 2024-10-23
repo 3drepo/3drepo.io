@@ -22,13 +22,13 @@ import { isCollaboratorRole, isCommenterRole, isViewerRole } from '../store.help
 import { Role } from '../currentUser/currentUser.types';
 import { selectContainerById } from '../containers/containers.selectors';
 import { selectFederationById } from '../federations/federations.selectors';
-import { convertUnits, convertVectorUnits, getUnitsConversionFactor } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
-import { EMPTY_CALIBRATION } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
-import { Vector1D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
+import { convertUnits, convertVectorUnits, getTransformationMatrix, getUnitsConversionFactor, removeZ } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
+import { EMPTY_CALIBRATION, EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
+import { isEqual, orderBy } from 'lodash';
+import { Vector2 } from 'three';
 import { fullDrawing } from './drawings.helpers';
 import { selectRevisionsByDrawing } from './revisions/drawingRevisions.selectors';
-import { CalibrationStatus } from './drawings.types';
-import { orderBy } from 'lodash';
+import { Calibration } from './drawings.types';
 
 const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
 
@@ -42,11 +42,6 @@ export const selectDrawings = createSelector(
 	},
 );
 
-export const selectNonEmptyDrawings = createSelector(
-	selectDrawings,
-	(drawings) => drawings.filter((d) => d.revisionsCount > 0),
-);
-
 export const selectFavouriteDrawings = createSelector(
 	selectDrawings,
 	(drawings) => drawings.filter(({ isFavourite }) => isFavourite),
@@ -56,11 +51,6 @@ export const selectDrawingById = createSelector(
 	selectDrawings,
 	(_, _id) => _id,
 	(drawings, _id) => drawings.find((d) => d._id === _id),
-);
-
-export const selectDrawingCalibration = createSelector(
-	selectDrawingById,
-	(drawing) => drawing.calibrationStatus ?? CalibrationStatus.EMPTY,
 );
 
 export const selectIsListPending = createSelector(
@@ -105,8 +95,8 @@ export const selectCalibration = createSelector(
 	selectDrawingById,
 	(state, drawingId, modelId) => selectContainerById(state, modelId) || selectFederationById(state, modelId),
 	(drawing, model) => {
-		const calibration = drawing?.calibration || EMPTY_CALIBRATION;
-		const conversionFactor = getUnitsConversionFactor(calibration.units, model.unit);
+		const calibration = { ...EMPTY_CALIBRATION, ...drawing?.calibration };
+		const conversionFactor = getUnitsConversionFactor(model.unit, calibration.units);
 		const horizontalCalibration = calibration.horizontal;
 
 		return {
@@ -114,8 +104,39 @@ export const selectCalibration = createSelector(
 				model: convertVectorUnits(horizontalCalibration.model, conversionFactor),
 				drawing: convertVectorUnits(horizontalCalibration.drawing, conversionFactor),
 			},
-			verticalRange: convertUnits(calibration.verticalRange, conversionFactor) as Vector1D,
-		};
+			verticalRange: convertUnits(calibration.verticalRange, conversionFactor),
+		} as Calibration;
+	},
+);
+
+export const selectCalibrationVertical = createSelector(
+	selectCalibration,
+	(calibration) => calibration.verticalRange,
+);
+
+export const selectTransformMatrix = createSelector(
+	selectCalibration,
+	(calibration) => {
+		if (isEqual(calibration.horizontal.drawing, EMPTY_VECTOR) || isEqual(calibration.horizontal.model, EMPTY_VECTOR)) return null;
+		return getTransformationMatrix(calibration.horizontal.drawing, calibration.horizontal.model);
+	},
+);
+
+export const selectTransform2DTo3D = createSelector(
+	selectTransformMatrix,
+	(matrix) => {
+		if (!matrix) return null;
+		return (vector): Vector2 => new Vector2(...vector).applyMatrix3(matrix);
+	},
+);
+
+export const selectTransform3DTo2D = createSelector(
+	selectTransformMatrix,
+	(matrix) => {
+		if (!matrix) return null;
+		const inverseMat = matrix.clone().invert();
+
+		return (vector): Vector2 => new Vector2(...removeZ(vector)).applyMatrix3(inverseMat) ;
 	},
 );
 

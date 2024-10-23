@@ -173,7 +173,8 @@ export function* createTicket({ teamspace, projectId, modelId, ticket, isFederat
 			? API.Tickets.createFederationTicket
 			: API.Tickets.createContainerTicket;
 		const { _id: ticketId } = yield updateModelTicket(teamspace, projectId, modelId, ticket);
-		yield put(TicketsActions.upsertTicketSuccess(modelId, { _id: ticketId, ...ticket }));
+		const properties = { ...ticket.properties, 'Created at': new Date().getTime() };
+		yield put(TicketsActions.upsertTicketSuccess(modelId, { _id: ticketId, ...ticket, properties }));
 		onSuccess(ticketId);
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
