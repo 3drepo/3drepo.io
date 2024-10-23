@@ -41,20 +41,20 @@ export const DrawingsEllipsisMenu = ({
 }: DrawingsEllipsisMenuProps) => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
-	const hasCollaboratorAccess = DrawingsHooksSelectors.selectHasCollaboratorAccess(drawing._id);
+	const drawingId = drawing._id;
+	const hasCollaboratorAccess = DrawingsHooksSelectors.selectHasCollaboratorAccess(drawingId);
 
-	const onCalibrateClick = () => DialogsActionsDispatchers.open(SelectModelForCalibration, { drawingId: drawing._id });
+	const onCalibrateClick = () => DialogsActionsDispatchers.open(SelectModelForCalibration, { drawingId });
 
-
-	const onClickSettings = () => DialogsActionsDispatchers.open(EditDrawingDialog, { drawing });
-
+	const onClickSettings = () => DialogsActionsDispatchers.open(EditDrawingDialog, { drawingId });
+	
 	const onClickDelete = () => DialogsActionsDispatchers.open('delete', {
 		name: drawing.name,
 		onClickConfirm: () => new Promise<void>(
 			(accept, reject) => DrawingsActionsDispatchers.deleteDrawing(
 				teamspace,
 				project,
-				drawing._id,
+				drawingId,
 				accept,
 				reject,
 			),
@@ -69,36 +69,36 @@ export const DrawingsEllipsisMenu = ({
 		<EllipsisMenu selected={selected}>
 			<EllipsisMenuItem
 				title={formatMessage({
-					id: 'drawings.ellipsisMenu.calibrate',
-					defaultMessage: 'Calibrate',
+					id: 'drawings.ellipsisMenu.upload',
+					defaultMessage: 'Upload new revision',
 				})}
-				onClick={onCalibrateClick}
-				disabled={!drawing.revisionsCount}
+				onClick={() => uploadToDrawing(drawingId)}
+				disabled={!canUploadToBackend(drawing.status)}
 				hidden={!hasCollaboratorAccess}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({
-					id: 'drawings.ellipsisMenu.settings',
-					defaultMessage: 'Settings',
+					id: 'drawings.ellipsisMenu.calibrate',
+					defaultMessage: 'Calibrate latest revision',
 				})}
-				onClick={onClickSettings}
+				onClick={onCalibrateClick}
+				disabled={!drawing.revisionsCount}
+				hidden={!hasCollaboratorAccess}
 			/>
 			{onSelectOrToggleItem && (
 				<EllipsisMenuItem
 					title={formatMessage(selected
 						? { id: 'drawings.ellipsisMenu.hideRevisions', defaultMessage: 'Hide Revisions' }
 						: { id: 'drawings.ellipsisMenu.viewRevisions', defaultMessage: 'View Revisions' })}
-					onClick={() => onSelectOrToggleItem(drawing._id)}
+					onClick={() => onSelectOrToggleItem(drawingId)}
 				/>
 			)}
 			<EllipsisMenuItem
 				title={formatMessage({
-					id: 'drawings.ellipsisMenu.upload',
-					defaultMessage: 'Upload',
+					id: 'drawings.ellipsisMenu.settings',
+					defaultMessage: 'Settings',
 				})}
-				onClick={() => uploadToDrawing(drawing._id)}
-				disabled={!canUploadToBackend(drawing.status)}
-				hidden={!hasCollaboratorAccess}
+				onClick={onClickSettings}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({

@@ -53,8 +53,9 @@ export const CalibrationArrow = () => {
 			resetArrow();
 		}
 		DrawingViewerService.setSnapping(isCalibrating2D);
-	}, [isCalibrating2D]);
 
+		return () => DrawingViewerService.setSnapping(false);
+	}, [isCalibrating2D]);
 
 	if (!offsetStart) return null;
 	return (<Arrow start={offsetStart} end={offsetEnd || offsetStart} scale={scale} />);

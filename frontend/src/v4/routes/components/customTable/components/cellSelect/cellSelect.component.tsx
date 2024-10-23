@@ -33,11 +33,7 @@ interface IProps {
 	onChange: (event, selectedValue: string) => void;
 }
 
-interface IState {
-	selectedValue: string;
-}
-
-export class CellSelect extends PureComponent<IProps, IState> {
+export class CellSelect extends PureComponent<IProps> {
 	public static defaultProps = {
 		value: '',
 		items: [],
@@ -46,20 +42,6 @@ export class CellSelect extends PureComponent<IProps, IState> {
 		disabledPlaceholder: false,
 		hidden: false,
 	};
-
-	public state = {
-		selectedValue: ''
-	};
-
-	public componentDidUpdate(prevProps, prevState) {
-		if (prevProps.value !== this.props.value) {
-			this.setState({selectedValue: this.props.value});
-		}
-	}
-
-	public componentDidMount() {
-		this.setState({selectedValue: this.props.value});
-	}
 
 	public renderOptions = (items, TemplateComponent) => {
 		const labelName =  this.props.labelName || 'name';
@@ -90,15 +72,13 @@ export class CellSelect extends PureComponent<IProps, IState> {
 	public handleChange = (event) => {
 		const selectedValue = event.target.value;
 
-		if (this.state.selectedValue !== selectedValue) {
-			this.setState({selectedValue});
+		if (this.props.value !== selectedValue) {
 			this.props.onChange(event, selectedValue);
 		}
 	}
 
 	public render() {
-		const {items, itemTemplate, disabled, placeholder, disabledPlaceholder, readOnly, inputId, name, hidden} = this.props;
-		const {selectedValue} = this.state;
+		const {items, itemTemplate, disabled, placeholder, disabledPlaceholder, readOnly, inputId, name, hidden, value} = this.props;
 		const hasNoOptions = !items.length;
 		const options = [];
 
@@ -120,7 +100,7 @@ export class CellSelect extends PureComponent<IProps, IState> {
 				hidden={hidden}
 				displayEmpty
 				input={<Input id={inputId} readOnly={readOnly} />}
-				value={selectedValue}
+				value={value}
 				onChange={this.handleChange}
 			>
 				{this.renderOptions(options, itemTemplate)}
