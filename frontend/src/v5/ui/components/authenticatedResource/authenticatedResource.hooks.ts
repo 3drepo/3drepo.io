@@ -27,7 +27,7 @@ export const downloadAuthUrl = async (url):Promise<string> => {
 	if (!CachedURL[url]) {
 		const response = await axios.get(url, { responseType: 'blob' });
 		CachedURL[url] = URL.createObjectURL(response.data);
-		filenameFromRes = response.headers['content-disposition'].split('filename=')[1];
+		filenameFromRes = response.headers['content-disposition']?.split('filename=')[1];
 	}
 
 	return CachedURL[url];
