@@ -26,13 +26,9 @@ const { removeUserFromProjects, removePermissionsFromAllProjects } = require("./
 const { publish } = require(`${v5Path}/services/eventsManager/eventsManager`);
 const { events } = require(`${v5Path}/services/eventsManager/eventsManager.constants`);
 
-const updatePermissions = async function(teamspaceSettings, updatedPermissions, executor) {
+const updatePermissions = async function(teamspaceSettings, updatedPermissions) {
 	const User = require("./user");
 	await User.updatePermissions(teamspaceSettings._id, updatedPermissions);
-
-	publish(events.PERMISSIONS_UPDATED, { teamspace: teamspaceSettings._id, executor, isTsUpdate: true,
-		initialPermissions: teamspaceSettings.permissions, updatedPermissions });
-
 	return updatedPermissions;
 };
 
@@ -69,7 +65,11 @@ AccountPermissions.updateOrCreate = async function(teamspaceSettings, username, 
 	const updatedPermissions = this.get(teamspaceSettings).filter(perm => perm.user !== username)
 		.concat({user: username, permissions});
 
-	const permissionsToReturn = await updatePermissions(teamspaceSettings, updatedPermissions, executor);
+	const permissionsToReturn = await updatePermissions(teamspaceSettings, updatedPermissions);
+
+	publish(events.TEAMSPACE_PERMISSIONS_UPDATED, { teamspace: teamspaceSettings._id, executor,
+		users: [username], from: null, to: [C.PERM_TEAMSPACE_ADMIN] });
+
 	if(permissions.includes(C.PERM_TEAMSPACE_ADMIN)) {
 		await removePermissionsFromAllProjects(teamspaceSettings._id, username);
 	}
@@ -96,7 +96,12 @@ AccountPermissions.remove = async function(teamspaceSettings, userToRemove, exec
 
 	await removeUserFromProjects(teamspaceSettings._id, userToRemove);
 
-	return updatePermissions(teamspaceSettings, updatedPermissions, executor);
+	const updatedPermission = await updatePermissions(teamspaceSettings, updatedPermissions);
+
+	publish(events.TEAMSPACE_PERMISSIONS_UPDATED, { teamspace: teamspaceSettings._id, executor,
+		users: [userToRemove], from:  [C.PERM_TEAMSPACE_ADMIN], to: null });
+
+	return updatedPermission;
 };
 
 module.exports = AccountPermissions;

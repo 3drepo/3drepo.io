@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const activitiesEventsListener = require('./components/activitiesEvents');
 const authEventsListener = require('./components/authEvents');
 const modelEventsListener = require('./components/modelEvents');
 const userEventsListener = require('./components/userEvents');
@@ -26,7 +25,6 @@ EventsListener.init = () => {
 	modelEventsListener.init();
 	authEventsListener.init();
 	userEventsListener.init();
-	activitiesEventsListener.init();
 };
 
 module.exports = EventsListener;

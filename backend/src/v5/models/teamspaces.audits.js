@@ -32,7 +32,7 @@ Audit.getActionLog = (teamspace, fromDate, toDate) => {
 	return db.find(teamspace, COL_NAME, query);
 };
 
-Audit.logAction = async (teamspace, action, executor, data) => {
+const logAction = async (teamspace, action, executor, data) => {
 	const formattedData = {
 		_id: generateUUID(),
 		action,
@@ -42,6 +42,18 @@ Audit.logAction = async (teamspace, action, executor, data) => {
 	};
 
 	await db.insertOne(teamspace, COL_NAME, formattedData);
+};
+
+Audit.logUserAction = async (teamspace, action, executor, user) => {
+	await logAction(teamspace, action, executor, { user });
+};
+
+Audit.logPermissionAction = async (teamspace, action, executor, users, permissions) => {
+	await logAction(teamspace, action, executor, { users, permissions });
+};
+
+Audit.logInvitationAction = async (teamspace, action, executor, email, job, permissions) => {
+	await logAction(teamspace, action, executor, { email, job, permissions });
 };
 
 module.exports = Audit;

@@ -16,6 +16,7 @@
  */
 
 const { createResponseCode, templates } = require('../../utils/responseCodes');
+const { PassThrough } = require('stream');
 const archiver = require('archiver');
 archiver.registerFormat('zip-encrypted', require('archiver-zip-encrypted'));
 const { templates: emailTemplates } = require('../../services/mailer/mailer.constants');
@@ -26,19 +27,30 @@ const { sendEmail } = require('../../services/mailer');
 
 const Audit = {};
 
-const createAuditLogArchive = (actions) => {
+const createAuditLogArchive = async (actions) => {
 	try {
 		const password = generateHashString();
-		const file = archiver.create('zip-encrypted', { zlib: { level: 1 }, encryptionMethod: 'aes256', password });
-		let content = '';
-		actions.forEach((action) => {
-			content += `${JSON.stringify(action)},`;
-		});
-		content = `[${content.slice(0, -1)}]`;
+		const stream = new PassThrough();
 
-		file.append(content, { name: 'audit.json' });
-		file.finalize();
-		return { file, password };
+		const archive = archiver.create('zip-encrypted', {
+			zlib: { level: 1 },
+			encryptionMethod: 'aes256',
+			password,
+		});
+
+		const content = `[${actions.map((action) => JSON.stringify(action)).join(',')}]`;
+		archive.append(content, { name: 'audit.json' });
+
+		const archiveReady = new Promise((resolve, reject) => {
+			archive.on('end', resolve);
+			archive.on('error', reject);
+			archive.pipe(stream);
+		});
+
+		archive.finalize();
+		await archiveReady;
+
+		return { archive: stream, password };
 	} catch (err) {
 		throw createResponseCode(templates.unknown, `Failed to create zip file: ${err.message}`);
 	}
@@ -46,11 +58,11 @@ const createAuditLogArchive = (actions) => {
 
 Audit.getAuditLogArchive = async (teamspace, username, fromDate, toDate) => {
 	const actions = await getActionLog(teamspace, fromDate, toDate);
-	const { file, password } = createAuditLogArchive(actions.map(({ _id, ...data }) => data));
+	const { archive, password } = await createAuditLogArchive(actions.map(({ _id, ...data }) => data));
 	const { customData: { email, firstName } } = await getUserByUsername(username, { 'customData.email': 1, 'customData.firstName': 1 });
 	await sendEmail(emailTemplates.AUDIT.name, email, { firstName, password });
 
-	return file;
+	return archive;
 };
 
 module.exports = Audit;
