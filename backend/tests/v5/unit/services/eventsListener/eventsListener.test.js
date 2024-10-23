@@ -17,17 +17,10 @@
 
 const { src } = require('../../../helper/path');
 
-const { actions } = require(`${src}/models/teamspaces.audits.constants`);
-const { MODEL_VIEWER, PROJECT_ADMIN, MODEL_COMMENTER, MODEL_COLLABORATOR } = require(`${src}/utils/permissions/permissions.constants`);
-const { generateRandomString, generateUUID } = require('../../../helper/services');
+const { generateRandomString } = require('../../../helper/services');
 
 jest.mock('../../../../../src/v5/models/loginRecords');
 const LoginRecords = require(`${src}/models/loginRecords`);
-jest.mock('../../../../../src/v5/models/projectSettings');
-const ProjectSettings = require(`${src}/models/projectSettings`);
-
-jest.mock('../../../../../src/v5/models/teamspaces.audits');
-const Audits = require(`${src}/models/teamspaces.audits`);
 
 jest.mock('../../../../../src/v5/services/chat');
 const ChatService = require(`${src}/services/chat`);

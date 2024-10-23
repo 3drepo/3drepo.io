@@ -21,7 +21,8 @@ const { src } = require('../../../helper/path');
 const { actions } = require(`${src}/models/teamspaces.audits.constants`);
 const { MODEL_VIEWER, PROJECT_ADMIN, MODEL_COMMENTER } = require(`${src}/utils/permissions/permissions.constants`);
 const { generateRandomString, generateUUID } = require('../../../helper/services');
-const { generateUUIDString } = require('../../../../../src/v5/utils/helper/uuids');
+
+const { generateUUIDString } = require(`${src}/utils/helper/uuids`);
 
 jest.mock('../../../../../src/v5/models/teamspaces.audits');
 const Audits = require(`${src}/models/teamspaces.audits`);
