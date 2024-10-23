@@ -48,6 +48,8 @@ const PermissionTemplates = require("./permissionTemplates");
 const { get } = require("lodash");
 const { fileExists } = require("./fileRef");
 const {v5Path} = require("../../interop");
+const { events } = require(`${v5Path}/services/eventsManager/eventsManager.constants`);
+const { publish } = require(`${v5Path}/services/eventsManager/eventsManager.js`);
 const { getAddOns } = require(`${v5Path}/models/teamspaceSettings`);
 const { getSpaceUsed } = require(`${v5Path}/utils/quota.js`);
 const UserProcessorV5 = require(`${v5Path}/processors/users`);
@@ -809,7 +811,7 @@ User.listAccounts = async function(user) {
 	return _createAccounts(user.roles, user.user);
 };
 
-User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove) {
+User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove, executor) {
 	if (teamspace.user === userToRemove) {
 		// The user should not be able to remove itself from the teamspace
 		return Promise.reject(responseCodes.SUBSCRIPTION_CANNOT_REMOVE_SELF);
@@ -837,7 +839,7 @@ User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove) 
 	} else {
 
 		await Promise.all([
-			teamspacePerm ? AccountPermissions.remove(teamspace, userToRemove) : Promise.resolve(),
+			teamspacePerm ? AccountPermissions.remove(teamspace, userToRemove, executor) : Promise.resolve(),
 			...models.map(model =>	changePermissions(teamspace.user, model._id, model.permissions.filter(p => p.user !== userToRemove))),
 			removeUserFromProjects(teamspace.user, userToRemove),
 			removeUserFromAnyJob(teamspace.user, userToRemove)
@@ -845,10 +847,12 @@ User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove) 
 		]);
 	}
 
+	publish(events.USER_REMOVED, { teamspace: teamspace.user, executor, user: userToRemove});
+
 	return Role.revokeTeamSpaceRoleFromUser(userToRemove, teamspace.user);
 };
 
-User.addTeamMember = async function(teamspace, userToAdd, job, permissions) {
+User.addTeamMember = async function(teamspace, userToAdd, job, permissions, executor) {
 	await hasReachedLicenceLimit(teamspace);
 
 	let userEntry = null;
@@ -871,6 +875,7 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions) {
 	}
 
 	await Role.grantTeamSpaceRoleToUser(userEntry.user, teamspace);
+	publish(events.USER_ADDED, { teamspace, executor, user: userEntry.user});
 
 	const promises = [];
 	promises.push(addUserToJob(teamspace, job, userEntry.user));
@@ -878,7 +883,7 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions) {
 	const teamspaceSettings = await TeamspaceSettings.getTeamspaceSettings(teamspace);
 
 	if (permissions && permissions.length) {
-		promises.push(AccountPermissions.updateOrCreate(teamspaceSettings, userEntry.user, permissions));
+		promises.push(AccountPermissions.updateOrCreate(teamspaceSettings, userEntry.user, permissions, executor));
 	}
 
 	await Promise.all(promises);

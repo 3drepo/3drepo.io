@@ -18,6 +18,7 @@
 "use strict";
 (() => {
 
+	const { v5Path } = require("../../interop");
 	const C = require("../constants");
 	const db = require("../handler/db");
 	const responseCodes = require("../response_codes.js");
@@ -26,6 +27,8 @@
 	const { changePermissions, prepareDefaultView, findModelSettings, findPermissionByUser, removePermissionsFromModels } = require("./modelSetting");
 	const { getTeamspaceSettings } = require("./teamspaceSetting");
 	const PermissionTemplates = require("./permissionTemplates");
+	const { publish } = require(`${v5Path}/services/eventsManager/eventsManager`);
+	const { events } = require(`${v5Path}/services/eventsManager/eventsManager.constants`);
 
 	const PROJECTS_COLLECTION_NAME = "projects";
 
@@ -457,7 +460,7 @@
 		return project;
 	};
 
-	Project.updateProject = async function(account, projectName, data) {
+	Project.updateProject = async function(account, projectName, data, executor) {
 		const project = await Project.findOneProject(account, { name: projectName });
 
 		if (!project) {
@@ -468,9 +471,20 @@
 			project.name = data.name;
 		}
 
+		let permissionChange;
 		if (data.permissions) {
 			await Promise.all(data.permissions.map(async (permissionUpdate) => {
 				const userIndex = project.permissions.findIndex(x => x.user === permissionUpdate.user);
+
+				if(!permissionChange) {
+					permissionChange = {
+						users: [],
+						from: project.permissions[userIndex]?.permissions ?? null,
+						to: permissionUpdate.permissions.length ? permissionUpdate.permissions : null
+					};
+				}
+
+				permissionChange.users.push(permissionUpdate.user);
 
 				if (-1 !== userIndex) {
 					if (permissionUpdate.permissions && permissionUpdate.permissions.length) {
@@ -485,7 +499,13 @@
 			}));
 		}
 
-		return Project.updateAttrs(account, projectName, project);
+		const updatedProject = await Project.updateAttrs(account, projectName, project, executor);
+
+		if (permissionChange) {
+			publish(events.PROJECT_PERMISSIONS_UPDATED, { teamspace: account, executor, project: project._id, ...permissionChange});
+		}
+
+		return updatedProject;
 	};
 
 	Project.removePermissionsFromAllProjects = async (account, userToRemove) => {

@@ -45,8 +45,9 @@ const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helpe
 const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { isArray } = require(`${src}/utils/helper/typeCheck`);
-const FilesManager = require('../../../src/v5/services/filesManager');
-const { modelTypes, statusCodes } = require('../../../src/v5/models/modelSettings.constants');
+const FilesManager = require(`${src}/services/filesManager`);
+const { modelTypes, statusCodes } = require(`${src}/models/modelSettings.constants`);
+const { actions } = require(`${src}/models/teamspaces.audits.constants`);
 
 const { statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
 const { generateFullSchema } = require(`${src}/schemas/tickets/templates`);
@@ -190,6 +191,15 @@ db.createCalibration = async (teamspace, project, drawing, revision, calibration
 	});
 
 	await DbHandler.insertOne(teamspace, 'drawings.calibrations', formattedCalibration);
+};
+
+db.createAuditAction = (teamspace, action) => {
+	const formattedAction = {
+		_id: stringToUUID(action._id),
+		...action,
+	};
+
+	return DbHandler.insertOne(teamspace, 'auditing', formattedAction);
 };
 
 db.createSequence = async (teamspace, model, { sequence, states, activities, activityTree }) => {
@@ -632,6 +642,16 @@ const generateProperties = (propTemplate, internalType, container) => {
 
 	return properties;
 };
+
+ServiceHelper.generateAuditAction = () => ({
+	_id: ServiceHelper.generateUUIDString(),
+	action: actions.USER_ADDED,
+	executor: ServiceHelper.generateRandomString(),
+	timestamp: ServiceHelper.generateRandomDate(),
+	data: {
+		user: ServiceHelper.generateRandomString(),
+	},
+});
 
 ServiceHelper.generateRandomObject = () => ({
 	[ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString(),
