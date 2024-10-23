@@ -27,7 +27,7 @@ const userAdded = async ({ teamspace, executor, user }) => {
 	try {
 		await logUserAction(teamspace, actions.USER_ADDED, executor, user);
 	} catch (err) {
-		logger.logError(`Failed to add a ${actions.USER_ADDED} activity`);
+		logger.logError(`Failed to add a ${actions.USER_ADDED} audit log`);
 	}
 };
 
@@ -35,7 +35,7 @@ const userRemoved = async ({ teamspace, executor, user }) => {
 	try {
 		await logUserAction(teamspace, actions.USER_REMOVED, executor, user);
 	} catch (err) {
-		logger.logError(`Failed to add a ${actions.USER_REMOVED} activity`);
+		logger.logError(`Failed to add a ${actions.USER_REMOVED} audit log`);
 	}
 };
 
@@ -53,7 +53,7 @@ const teamspacePermissionsUpdated = async ({ teamspace, executor, users, from, t
 		await schema.validate(permissions, { stripUnknown: true });
 		await logPermissionAction(teamspace, actions.PERMISSIONS_UPDATED, executor, users, permissions);
 	} catch (err) {
-		logger.logError(`Failed to add a ${actions.PERMISSIONS_UPDATED} activity`);
+		logger.logError(`Failed to add a ${actions.PERMISSIONS_UPDATED} audit log`);
 	}
 };
 
@@ -69,7 +69,7 @@ const projectPermissionsUpdated = async ({ teamspace, executor, project, users, 
 		await schema.validate(permissions, { stripUnknown: true });
 		await logPermissionAction(teamspace, actions.PERMISSIONS_UPDATED, executor, users, permissions);
 	} catch (err) {
-		logger.logError(`Failed to add a ${actions.PERMISSIONS_UPDATED} activity`);
+		logger.logError(`Failed to add a ${actions.PERMISSIONS_UPDATED} audit log`);
 	}
 };
 
@@ -85,7 +85,7 @@ const modelsPermissionsUpdated = async ({ teamspace, executor, users, permission
 		await schema.validate(permissions, { stripUnknown: true });
 		await logPermissionAction(teamspace, actions.PERMISSIONS_UPDATED, executor, users, permissions);
 	} catch (err) {
-		logger.logError(`Failed to add a ${actions.PERMISSIONS_UPDATED} activity`);
+		logger.logError(`Failed to add a ${actions.PERMISSIONS_UPDATED} audit log`);
 	}
 };
 
@@ -93,7 +93,7 @@ const invitationAdded = async ({ teamspace, executor, email, job, permissions })
 	try {
 		await logInvitationAction(teamspace, actions.INVITATION_ADDED, executor, email, job, permissions);
 	} catch (err) {
-		logger.logError(`Failed to add a ${actions.INVITATION_ADDED} activity`);
+		logger.logError(`Failed to add a ${actions.INVITATION_ADDED} audit log`);
 	}
 };
 
@@ -101,7 +101,7 @@ const invitationRevoked = async ({ teamspace, executor, email, job, permissions 
 	try {
 		await logInvitationAction(teamspace, actions.INVITATION_REVOKED, executor, email, job, permissions);
 	} catch (err) {
-		logger.logError(`Failed to add a ${actions.INVITATION_REVOKED} activity`);
+		logger.logError(`Failed to add a ${actions.INVITATION_REVOKED} audit log`);
 	}
 };
 
