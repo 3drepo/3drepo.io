@@ -231,6 +231,7 @@ const testGetAuditLogArchive = () => {
 			['user is not a member of the teamspace', nobody.apiKey, undefined, undefined, false, templates.teamspaceNotFound],
 			['user is not a teamspace admin', normalUser.apiKey, undefined, undefined, false, templates.notAuthorized],
 			['user is a teamspace admin', tsAdmin.apiKey, undefined, undefined, true],
+			['user is a teamspace admin but there are no activities', tsAdmin.apiKey, noTemplatesTS.name, undefined, true],
 			['query is invalid', tsAdmin.apiKey, undefined, { from: Date.now() + 10000, to: Date.now() - 10000 }, false, templates.invalidArguments],
 		])('', (desc, key, ts, query, success, expectedRes) => {
 			test(`should ${success ? 'succeed' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {

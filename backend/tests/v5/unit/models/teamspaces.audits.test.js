@@ -19,7 +19,7 @@ const { times } = require('lodash');
 const { generateRandomString, generateRandomDate, generateRandomObject } = require('../../helper/services');
 const { src } = require('../../helper/path');
 
-const Audits = require(`${src}/models/teamspaecs.audits`);
+const Audits = require(`${src}/models/teamspaces.audits`);
 
 const db = require(`${src}/handler/db`);
 
@@ -70,27 +70,72 @@ const tesGetActionLog = () => {
 	});
 };
 
-const testLogAction = () => {
-	describe('Log action', () => {
-		test('should log an action', async () => {
+const testLogUserAction = () => {
+	describe('Log user action', () => {
+		test('should log a user action', async () => {
 			const teamspace = generateRandomString();
 			const action = generateRandomString();
 			const executor = generateRandomString();
-			const data = generateRandomObject();
+			const user = generateRandomString();
 
 			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
 
-			await Audits.logAction(teamspace, action, executor, data);
+			await Audits.logUserAction(teamspace, action, executor, user);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			const { _id, timestamp } = fn.mock.calls[0][2];
 			expect(fn).toHaveBeenCalledWith(teamspace, AUDITS_COL,
-				{ action, executor, data, _id, timestamp });
+				{ action, executor, data: { user }, _id, timestamp });
+		});
+	});
+};
+
+const testLogPermissionsAction = () => {
+	describe('Log permission action', () => {
+		test('should log a permission action', async () => {
+			const teamspace = generateRandomString();
+			const action = generateRandomString();
+			const executor = generateRandomString();
+			const users = times(5, () => generateRandomString());
+			const permissions = times(5, () => generateRandomObject());
+
+			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
+
+			await Audits.logPermissionAction(teamspace, action, executor, users, permissions);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			const { _id, timestamp } = fn.mock.calls[0][2];
+			expect(fn).toHaveBeenCalledWith(teamspace, AUDITS_COL,
+				{ action, executor, data: { users, permissions }, _id, timestamp });
+		});
+	});
+};
+
+const testLogInvitationAction = () => {
+	describe('Log permission action', () => {
+		test('should log a permission action', async () => {
+			const teamspace = generateRandomString();
+			const action = generateRandomString();
+			const executor = generateRandomString();
+			const email = generateRandomString();
+			const job = generateRandomString();
+			const permissions = times(5, () => generateRandomObject());
+
+			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
+
+			await Audits.logInvitationAction(teamspace, action, executor, email, job, permissions);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			const { _id, timestamp } = fn.mock.calls[0][2];
+			expect(fn).toHaveBeenCalledWith(teamspace, AUDITS_COL,
+				{ action, executor, data: { email, job, permissions }, _id, timestamp });
 		});
 	});
 };
 
 describe('models/teamspaces.audits', () => {
 	tesGetActionLog();
-	testLogAction();
+	testLogUserAction();
+	testLogPermissionsAction();
+	testLogInvitationAction();
 });

@@ -37,7 +37,7 @@ const validateCookie = (session, cookies, headers) => {
 
 	const csrfMatched = !!session.token && (headerToken === session.token);
 
-	return referrerMatched;
+	return csrfMatched && referrerMatched;
 };
 
 SessionUtils.isSessionValid = (session, cookies, headers, ignoreApiKey = false) => {

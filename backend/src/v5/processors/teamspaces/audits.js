@@ -43,7 +43,7 @@ const createAuditLogArchive = async (actions) => {
 
 		const archiveReady = new Promise((resolve, reject) => {
 			archive.on('end', resolve);
-			archive.on('error', reject);
+			archive.on('error', reject(templates.streamError));
 			archive.pipe(stream);
 		});
 

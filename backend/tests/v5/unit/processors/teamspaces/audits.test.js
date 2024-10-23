@@ -49,11 +49,10 @@ const testGetAuditLogArchive = () => {
 
 		test('should get audit log archive and send an email with the password', async () => {
 			Archiver.registerFormat.mockReturnValueOnce(undefined);
-			Archiver.create.mockReturnValueOnce({
-				append: () => {},
-				finalize: () => {},
-			});
+			const mockArchive = { append: jest.fn(), on: jest.fn(), pipe: jest.fn(), finalize: jest.fn() };
+			Archiver.create.mockReturnValueOnce(mockArchive);
 
+			mockArchive.on.mockImplementation((event, callback) => { if (event === 'end') callback(); });
 			AuditsModel.getActionLog.mockResolvedValueOnce(actions);
 			UsersModel.getUserByUsername.mockResolvedValueOnce({ customData: { email, firstName } });
 
@@ -69,14 +68,32 @@ const testGetAuditLogArchive = () => {
 				{ firstName, password });
 		});
 
-		test('should return error if an archiver method fails', async () => {
+		test('should return error if stream fails', async () => {
 			Archiver.registerFormat.mockReturnValueOnce(undefined);
-			Archiver.create.mockImplementationOnce(() => { throw new Error(); });
+			const mockArchive = { append: jest.fn(), on: jest.fn(), pipe: jest.fn(), finalize: jest.fn() };
+			Archiver.create.mockReturnValueOnce(mockArchive);
+
+			mockArchive.on.mockImplementation((event, callback) => { if (event === 'error') callback(); });
+			AuditsModel.getActionLog.mockResolvedValueOnce(actions);
+
+			await expect(Audits.getAuditLogArchive(teamspace, username, fromDate, toDate))
+				.rejects.toEqual({ ...templates.unknown, message: `Failed to create zip file: ${templates.streamError.message}` });
+
+			expect(AuditsModel.getActionLog).toHaveBeenCalledTimes(1);
+			expect(AuditsModel.getActionLog).toHaveBeenCalledWith(teamspace, fromDate, toDate);
+			expect(UsersModel.getUserByUsername).not.toHaveBeenCalled();
+			expect(Mailer.sendEmail).not.toHaveBeenCalled();
+		});
+
+		test('should return error if an archiver method fails', async () => {
+			const errorMessage = generateRandomString();
+			Archiver.registerFormat.mockReturnValueOnce(undefined);
+			Archiver.create.mockImplementationOnce(() => { throw new Error(errorMessage); });
 
 			AuditsModel.getActionLog.mockResolvedValueOnce(actions);
 
 			await expect(Audits.getAuditLogArchive(teamspace, username, fromDate, toDate))
-				.rejects.toEqual({ ...templates.unknown, message: 'Failed to create zip file.' });
+				.rejects.toEqual({ ...templates.unknown, message: `Failed to create zip file: ${errorMessage}` });
 
 			expect(AuditsModel.getActionLog).toHaveBeenCalledTimes(1);
 			expect(AuditsModel.getActionLog).toHaveBeenCalledWith(teamspace, fromDate, toDate);
