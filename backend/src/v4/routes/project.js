@@ -24,7 +24,6 @@
 	const middlewares = require("../middlewares/middlewares");
 	const Project = require("../models/project");
 	const utils = require("../utils");
-	const _ = require("lodash");
 
 	/**
 	 * @api {post} /:teamspace/projects Create project

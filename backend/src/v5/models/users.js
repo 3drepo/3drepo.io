@@ -17,10 +17,10 @@
 
 const { USERS_COL, USERS_DB_NAME } = require('./users.constants');
 const { createResponseCode, templates } = require('../utils/responseCodes');
+const { generateHashString, sanitiseRegex } = require('../utils/helper/strings');
 const config = require('../utils/config');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
-const { generateHashString, sanitiseRegex } = require('../utils/helper/strings');
 const { publish } = require('../services/eventsManager/eventsManager');
 
 const User = {};

@@ -23,9 +23,7 @@
 	const responseCodes = require("../response_codes.js");
 	const utils = require("../utils");
 	const _ = require("lodash");
-	const { changePermissions, prepareDefaultView, findModelSettings, findPermissionByUser, removePermissionsFromModels } = require("./modelSetting");
-	const { getTeamspaceSettings } = require("./teamspaceSetting");
-	const PermissionTemplates = require("./permissionTemplates");
+	const { changePermissions, findModelSettings, removePermissionsFromModels } = require("./modelSetting");
 
 	const PROJECTS_COLLECTION_NAME = "projects";
 
