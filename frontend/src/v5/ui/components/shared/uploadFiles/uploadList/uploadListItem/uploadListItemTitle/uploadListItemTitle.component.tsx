@@ -18,7 +18,6 @@
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { Tooltip } from '@mui/material';
 import { get, useFormContext } from 'react-hook-form';
-import filesize from 'filesize';
 import { DashboardListItemTitle, SubTitleError } from './uploadListItemTitle.styles';
 import { FormattedMessage } from 'react-intl';
 import { formatInfoUnit } from '@/v5/helpers/intl.helper';
