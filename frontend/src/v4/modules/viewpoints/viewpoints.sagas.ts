@@ -24,6 +24,7 @@ import { prefixBaseDomain } from '@/v5/helpers/url.helper';
 import { getAPIUrl } from '@/v4/services/api/default';
 import { CHAT_CHANNELS } from '@/v4/constants/chat';
 import { dispatch } from '@/v5/helpers/redux.helpers';
+import { VIEWER_CLIP_MODES } from '@/v4/constants/viewer';
 import { ROUTES } from '../../constants/routes';
 import { prepareGroup } from '../../helpers/groups';
 import { createGroupsFromViewpoint, generateViewpoint,
@@ -180,6 +181,11 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 		yield put(TreeActions.setHiddenGeometryVisible(viewpoint.hideIfc === false));
 
 		yield Viewer.updateClippingPlanes(clippingPlanes, teamspace, modelId);
+		if (!viewpoint.clippingPlanes?.length) {
+			yield put(ViewerGuiActions.setClippingMode(null));
+		} else {
+			yield put(ViewerGuiActions.setClippingMode(viewpoint.clippingPlanes.length === 1 ? VIEWER_CLIP_MODES.SINGLE : VIEWER_CLIP_MODES.BOX));
+		}
 		yield put(ViewerGuiActions.setClipEdit(false));
 
 		yield waitForTreeToBeReady();
