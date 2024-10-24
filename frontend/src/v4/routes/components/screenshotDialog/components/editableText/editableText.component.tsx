@@ -22,25 +22,29 @@ import { TextBox } from './editableText.styles';
 
 interface IProps {
 	styles: CSSProperties;
-	onAddText: (newtext: string, width: number) => void;
-	onChange?: ({ width, height }) => void;
+	disabled?: boolean;
+	onAddText?: (newtext: string, width: number) => void;
+	onResize?: ({ width, height }) => void;
 	onClick?: () => void;
 }
 
 const pxToNumber = (size: string) => +size.replaceAll('px', '');
-export const EditableText = ({ styles, onAddText, onChange, onClick }: IProps) => {
+export const EditableText = ({ styles, disabled, onAddText, onClick, onResize }: IProps) => {
 	const ref = useRef<HTMLDivElement>(null);
 	const [size, setSize] = useState({ width: 0, height: 0 });
 
 	const updateSize = () => {
+		if (!ref.current) return;
 		const compStyles = getComputedStyle(ref.current);
-		setSize({
+		const newSize = {
 			width: pxToNumber(compStyles.width),
 			height: pxToNumber(compStyles.height),
-		});
+		};
+		onResize?.(newSize);
+		setSize(newSize);
 	}
 
-	const saveText = () => onAddText(ref.current.innerText, size.width);
+	const saveText = () => onAddText?.(ref.current.innerText, size.width);
 
 	const handleKeyDown = (e) => {
 		if (e.keyCode === 13 && !e.shiftKey) {
@@ -50,14 +54,12 @@ export const EditableText = ({ styles, onAddText, onChange, onClick }: IProps) =
 
 	useEffect(() => {
 		setTimeout(() => {
-			ref.current?.focus();
-			updateSize();
+			new ResizeObserver(updateSize).observe(ref.current);
+			if (!disabled) {
+				ref.current?.focus();
+			}
 		});
-	}, []);
-
-	useEffect(() => {
-		onChange?.(size);
-	}, [size]);
+	}, [disabled]);
 
 	return (
 		<ClickAwayListener onClickAway={saveText}>
@@ -67,9 +69,9 @@ export const EditableText = ({ styles, onAddText, onChange, onClick }: IProps) =
 				$placeholder={EDITABLE_TEXTAREA_PLACEHOLDER}
 				style={styles}
 				onKeyDown={handleKeyDown}
-				onInput={updateSize}
 				onClick={onClick}
-				contentEditable
+				contentEditable={!disabled}
+				disabled={disabled}
 			/>
 		</ClickAwayListener>
 	);

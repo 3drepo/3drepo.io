@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,16 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useState, useEffect, useCallback, CSSProperties } from 'react';
+import { useState, useEffect, CSSProperties } from 'react';
 import Konva from 'konva';
 import { isEmpty } from 'lodash';
-
-import { MODES } from '../../markupStage/markupStage.helpers';
 import { EditableText } from '../editableText/editableText.component';
 
 interface IProps {
-	selected: string;
-	mode: string;
 	stage: Konva.Stage;
 	layer: Konva.Layer;
 	boxRef?: any;
@@ -34,25 +30,12 @@ interface IProps {
 	onAddNewText: (position, text: string, width: number, updateState?: boolean) => void;
 }
 
-export const TypingHandler = ({
-	selected, mode, stage, layer, boxRef, fontSize, size, color, onRefreshDrawingLayer, onAddNewText
+export const TypingCalloutHandler = ({
+	stage, layer, boxRef, fontSize, size, color, onRefreshDrawingLayer, onAddNewText
 }: IProps) => {
-	const [visible, setVisible] = useState<boolean>(false);
+	const [isPositionLocked, setIsPositionLocked] = useState(false);
 	const [offset, setOffset] = useState<CSSProperties>({});
-	const [positionLocked, setPositionLocked] = useState<boolean>(false);
 	const [maxSizes, setMaxSizes] = useState({ maxWidth: 0, maxHeight: 0 });
-
-	useEffect(() => {
-		if (stage && mode === MODES.TEXT && !visible && !positionLocked && !selected) {
-			stage.on('mousemove touchmove', handleMouseMove);
-			stage.on('click touchstart', handleClick);
-
-			return () => {
-				stage.off('mousemove touchmove', handleMouseMove);
-				stage.off('click touchstart', handleClick);
-			};
-		}
-	}, [mode, stage, positionLocked, selected]);
 
 	const setTextPosition = () => {
 		let left = 0, top = 0;
@@ -69,11 +52,33 @@ export const TypingHandler = ({
 		});
 	};
 
-	const handleMouseMove = () => {
-		if (!positionLocked) {
-			setTextPosition();
-		}
+	const onTextChange = (newText: string, width: number) => {
+		onAddNewText({ x: offset.left, y: offset.top }, newText, width);
+		setIsPositionLocked(false);
 	};
+
+	const redrawCalloutBox = ({ width, height }) => {
+		if (!isEmpty(boxRef) && onRefreshDrawingLayer) {
+			boxRef.width(width + Math.max(6, size * 2));
+			boxRef.height(height + Math.max(6, size * 2));
+			onRefreshDrawingLayer();
+		}
+	}
+
+	useEffect(() => {
+		if (isPositionLocked) return;
+
+		const handleMouseMove = () => setTextPosition();
+		const handleClick = () => setTimeout(() => setIsPositionLocked(true));
+
+		stage.on('mousemove touchmove', handleMouseMove);
+		stage.on('click touchstart', handleClick);
+
+		return () => {
+			stage.off('mousemove touchmove', handleMouseMove);
+			stage.off('click touchstart', handleClick);
+		}
+	}, [isPositionLocked]);
 
 	useEffect(() => {
 		if (!isEmpty(boxRef) && !isEmpty(offset) && onRefreshDrawingLayer) {
@@ -83,29 +88,20 @@ export const TypingHandler = ({
 		}
 	}, [offset]);
 
-	const handleClick = useCallback(() => {
-		setTextPosition();
-		setVisible(true);
-		setPositionLocked(true);
-	}, []);
-
-	const onTextChange = (newText: string, width: number) => {
-		onAddNewText({ x: offset.left, y: offset.top }, newText, width);
-		setVisible(false);
-		setPositionLocked(false);
+	const styles = {
+		...offset,
+		...maxSizes,
+		color,
+		fontSize: `${fontSize}px`,
 	};
 
-	if (!visible) return null;
+	if (!isPositionLocked) return <EditableText disabled styles={styles} onResize={redrawCalloutBox} />;
 
 	return (
 		<EditableText
 			onAddText={onTextChange}
-			styles={{
-				...offset,
-				color,
-				fontSize: `${fontSize}px`,
-				...maxSizes,
-			}}
+			styles={styles}
+			onResize={redrawCalloutBox}
 		/>
 	);
 };

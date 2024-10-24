@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-export const TextBox = styled.div<{ $placeholder: string }>`
+export const TextBox = styled.div<{ $placeholder: string; disabled?: boolean }>`
 	font-family: 'Arial', sans-serif;
 	line-height: 1;
 	position: absolute;
@@ -32,6 +32,10 @@ export const TextBox = styled.div<{ $placeholder: string }>`
 	overflow: hidden;
     position: sticky;
     bottom: 0;
+
+	${({ disabled }) => disabled && css`
+		pointer-events: none;
+	`}
 
 	&:focus {
 		outline: none;
