@@ -18,6 +18,7 @@
 import { federationsReducer } from '@/v5/store/federations/federations.redux';
 import { containersReducer } from '@/v5/store/containers/containers.redux';
 import { drawingsReducer } from '@/v5/store/drawings/drawings.redux';
+import { drawingsCardReducer } from './drawings/card/drawingsCard.redux';
 import { drawingRevisionsReducer } from '@/v5/store/drawings/revisions/drawingRevisions.redux';
 import { dialogsReducer } from '@/v5/store/dialogs/dialogs.redux';
 import { projectsReducer } from '@/v5/store/projects/projects.redux';
@@ -40,6 +41,7 @@ export default {
 	currentUser2: currentUserReducer,
 	dialogsV5: dialogsReducer,
 	drawings: drawingsReducer,
+	drawingsCard: drawingsCardReducer,
 	drawingRevisions: drawingRevisionsReducer,
 	federations: federationsReducer,
 	projects: projectsReducer,

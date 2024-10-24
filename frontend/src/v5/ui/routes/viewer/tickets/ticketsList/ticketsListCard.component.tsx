@@ -25,20 +25,40 @@ import { TicketsList } from './ticketsList.component';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { ViewerParams } from '../../../routes.constants';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { CardHeader } from '@components/viewer/cards/cardHeader.component';
+import { EllipsisMenu } from '@controls/ellipsisMenu';
 import { formatMessage } from '@/v5/services/intl';
+import PinIcon from '@assets/icons/filled/ticket_pin-filled.svg';
+import { EllipsisMenuItemSwitch } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenuItemSwitch.component';
+import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 
 export const TicketsListCard = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
+	const isShowingPins = TicketsCardHooksSelectors.selectIsShowingPins();
+
+	const onClickShowPins = () => {
+		TicketsCardActionsDispatchers.setIsShowingPins(!isShowingPins);
+	};
 
 	return (
 		<CardContainer>
 			<CardHeader
 				icon={<TicketsIcon />}
 				title={formatMessage({ id: 'viewer.cards.tickets.title', defaultMessage: 'Tickets' })}
-				actions={!readOnly ? <NewTicketMenu /> : null}
+				actions={(
+					<>
+						{!readOnly && (<NewTicketMenu />)}
+						<EllipsisMenu>
+							<EllipsisMenuItemSwitch
+								icon={<PinIcon />}
+								title={formatMessage({ id: 'foobarbaz', defaultMessage: 'Show Pins' })}
+								active={isShowingPins}
+								onClick={onClickShowPins}
+							/>
+						</ EllipsisMenu>
+					</>
+				)}
 			/>
 			<CardContent onClick={TicketsCardActionsDispatchers.resetState}>
 				{tickets.length ? (

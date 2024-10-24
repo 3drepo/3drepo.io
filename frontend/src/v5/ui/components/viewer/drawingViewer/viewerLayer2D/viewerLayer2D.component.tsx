@@ -16,11 +16,10 @@
  */
 
 import { CSSProperties, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { Container, LayerLevel } from './viewerLayer2D.styles';
-import { PanZoomHandler } from '../panzoom/centredPanZoom';
+import { Container, LayerLevel, Viewport } from './viewerLayer2D.styles';
 import { isEqual } from 'lodash';
 import { SnapCursor } from './snapCursor/snapCursor.component';
-import { Coord2D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
+import { Coord2D, ViewBoxType } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { SVGSnapHelper } from '../snapping/svgSnapHelper';
 import { Vector2 } from 'three';
@@ -28,10 +27,18 @@ import { SnapType } from '../snapping/types';
 import { DrawingViewerService } from '../drawingViewer.service';
 import { CalibrationArrow } from './calibrationArrow/calibrationArrow.component';
 import { useSnapping } from '../drawingViewer.service.hooks';
+import { PinsLayer } from '../pinsLayer/pinsLayer.component';
+import { CameraOffSight } from './camera/cameraOffSight.component';
+import { Camera } from './camera/camera.component';
+import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { useParams } from 'react-router-dom';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { addZ } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
 
-export type ViewBoxType = ReturnType<PanZoomHandler['getOriginalSize']> & ReturnType<PanZoomHandler['getTransform']>;
 type ViewerLayer2DProps = {
 	viewBox: ViewBoxType,
+	viewport: any, 
 	snapHandler: SVGSnapHelper,
 	snapping?: boolean,
 };
@@ -56,11 +63,21 @@ const snap = (mousePos:Coord2D, snapHandler: SVGSnapHelper, radius) => {
 	};
 };
 
-export const ViewerLayer2D = ({ viewBox, snapHandler }: ViewerLayer2DProps) => {
+export const ViewerLayer2D = ({ viewBox, snapHandler, viewport }: ViewerLayer2DProps) => {
 	const { isCalibrating } = useContext(CalibrationContext);
 	const previousViewBox = useRef<ViewBoxType>(null);
+	// const [mousePosition, setMousePosition] = useState<Coord2D>(null);
+
+	// const isDroppingPin =  false; //!!TicketsCardHooksSelectors.selectPinToDrop();
+	const [cameraOnSight, setCameraOnSight] = useState(false);
 	const [snapType, setSnapType] = useState<SnapType>(SnapType.NONE);
 	const snapping = useSnapping();
+
+	const [drawingId] = useSearchParam('drawingId');
+	const { containerOrFederation } = useParams<ViewerParams>();
+	const transform2DTo3D = DrawingsHooksSelectors.selectTransform2DTo3D(drawingId, containerOrFederation);
+	const verticalRange = DrawingsHooksSelectors.selectCalibrationVertical(drawingId, containerOrFederation);
+
 
 	const containerStyle: CSSProperties = {
 		transformOrigin: '0 0',
@@ -95,7 +112,14 @@ export const ViewerLayer2D = ({ viewBox, snapHandler }: ViewerLayer2DProps) => {
 		if (!isEqual(viewBox, previousViewBox.current)) return;
 		let mousePosition = getCursorOffset(e);
 		DrawingViewerService.emitMouseClickEvent(mousePosition);
-	}, [viewBox]);
+
+		if (transform2DTo3D) {
+			const { x, y } = transform2DTo3D(getCursorOffset(e));
+			const pin3D = addZ([x, y], verticalRange[0]);
+			DrawingViewerService.emitClickPointEvent(pin3D);
+		}
+
+	}, [viewBox, verticalRange, transform2DTo3D]);
 
 	const handleMouseMove = useCallback((e) => {
 		let mousePos = getCursorOffset(e);
@@ -107,17 +131,25 @@ export const ViewerLayer2D = ({ viewBox, snapHandler }: ViewerLayer2DProps) => {
 	useEffect(() => { DrawingViewerService.setScale(viewBox.scale); }, [viewBox]);
 
 	return (
-		<Container style={containerStyle} id="viewerLayer2d" >
-			<LayerLevel>
-				{snapping && <SnapCursor snapType={snapType} />}
-				{isCalibrating && <CalibrationArrow />}
-			</LayerLevel>
-			<LayerLevel
-				onMouseUp={handleMouseUp}
-				onMouseDown={handleMouseDown}
-				onMouseMove={handleMouseMove}
-				onMouseLeave={handleMouseLeave}
-			/>
-		</Container>
+		<Viewport>
+			<Container style={containerStyle} id="viewerLayer2d" >
+				<LayerLevel>
+					{snapping && <SnapCursor snapType={snapType} />}
+					{isCalibrating && <CalibrationArrow />}
+
+					{!isCalibrating && (<>
+						{cameraOnSight && <Camera scale={viewBox.scale} />}
+						<PinsLayer scale={viewBox.scale} height={viewBox.height} width={viewBox.width} />
+					</>)}
+				</LayerLevel>
+				{snapping && <LayerLevel
+					onMouseUp={handleMouseUp}
+					onMouseDown={handleMouseDown}
+					onMouseMove={handleMouseMove}
+					onMouseLeave={handleMouseLeave}
+				/>}
+			</Container>
+			{!isCalibrating && <CameraOffSight onCameraSightChanged={setCameraOnSight} viewbox={viewBox} viewport={viewport}/>}
+		</Viewport>
 	);
 };

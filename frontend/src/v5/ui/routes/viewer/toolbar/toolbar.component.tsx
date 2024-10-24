@@ -19,7 +19,7 @@ import { NavigationButtons } from './buttons/buttonOptionsContainer/navigationBu
 import { ProjectionButtons } from './buttons/buttonOptionsContainer/projectionButtons.component';
 import { ClipButtons } from './buttons/buttonOptionsContainer/clipButtons.component';
 import { SectionToolbar } from './selectionToolbar/selectionToolbar.component';
-import { HomeButton, FocusButton, CoordinatesButton, BimButton } from './buttons/toolbarButtons.component';
+import { HomeButton, CoordinatesButton, BimButton } from './buttons/toolbarButtons.component';
 
 export const Toolbar = () => (
 	<ToolbarContainer>
