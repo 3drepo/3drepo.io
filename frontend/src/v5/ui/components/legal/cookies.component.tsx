@@ -27,7 +27,7 @@ export const CookiesLegalPaper = () => (
 			to our use of cookies.
 		</p>
 		<p>A cookie is a small file of letters and numbers that we store on your browser or the hard drive of your
-			computerif you agree. Cookies contain information that is transferred to your computer&apos;s hard drive.
+			computer if you agree. Cookies contain information that is transferred to your computer&apos;s hard drive.
 		</p>
 		<p>We may use the following cookies:</p>
 		<ul>

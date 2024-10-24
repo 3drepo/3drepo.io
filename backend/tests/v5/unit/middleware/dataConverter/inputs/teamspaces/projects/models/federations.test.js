@@ -36,18 +36,6 @@ Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
 const modelNotInProject = generateUUIDString();
 
-const testValidateUpdateSettingsData = () => {
-	describe('Update federation settings', () => {
-		test(`should respond with ${templates.invalidArguments.code} if the user is trying to update type`, async () => {
-			const mockCB = jest.fn();
-			await Federations.validateUpdateSettingsData({ params: { teamspace: 'a', project: 'b' } }, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
-		});
-	});
-};
-
 Projects.modelsExistInProject.mockImplementation(
 	(teamspace, project, models) => {
 		if (project === 'throw') return Promise.reject(templates.projectNotFound);
@@ -94,6 +82,5 @@ const testValidateNewRevisionData = () => {
 };
 
 describe('middleware/dataConverter/inputs/teamspaces/projects/models/federations', () => {
-	testValidateUpdateSettingsData();
 	testValidateNewRevisionData();
 });

@@ -19,8 +19,8 @@ import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircularProgress } from '@mui/material';
-import TicketsIcon from '@assets/icons/filled/tickets-filled.svg';
-import { CardContainer, CardHeader, ArrowBack } from '@/v5/ui/components/viewer/cards/card.styles';
+import TicketsIcon from '@assets/icons/outlined/tickets-outlined.svg';
+import { CardContainer, ArrowBack } from '@/v5/ui/components/viewer/cards/card.styles';
 import CloseIcon from '@assets/icons/outlined/cross_sharp_edges-outlined.svg';
 import { ITicket, NewTicket } from '@/v5/store/tickets/tickets.types';
 import { filterEmptyTicketValues, getEditableProperties, getDefaultTicket, modelIsFederation, templateAlreadyFetched, sanitizeViewVals } from '@/v5/store/tickets/tickets.helpers';
@@ -31,7 +31,7 @@ import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useContext, useEffect } from 'react';
 import { InputController } from '@controls/inputs/inputController.component';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
-import { merge } from 'lodash';
+import { cloneDeep, merge } from 'lodash';
 import { BottomArea, CloseButton, Form, SaveButton } from './newTicket.styles';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 import { ViewerParams } from '../../../routes.constants';
@@ -39,6 +39,7 @@ import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component
 import { TicketContext, TicketDetailsView } from '../ticket.context';
 import { CardContent } from '../ticketsForm/ticketsForm.styles';
 import { TicketsCardViews } from '../tickets.constants';
+import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 
 export const NewTicketCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
@@ -69,12 +70,12 @@ export const NewTicketCard = () => {
 	};
 
 	const onSubmit = async (vals) => {
-		const ticket = { type: templateId, ...vals };
+		const ticket = { type: templateId, ...cloneDeep(vals) };
 
 		const { promiseToResolve, resolve } = getWaitablePromise();
 
 		const parsedTicket = filterEmptyTicketValues(ticket) as NewTicket;
-		sanitizeViewVals(ticket, { modules: {} } as ITicket, template);
+		sanitizeViewVals(parsedTicket, { modules: {} } as ITicket, template);
 		TicketsActionsDispatchers.createTicket(
 			teamspace,
 			project,
@@ -91,6 +92,8 @@ export const NewTicketCard = () => {
 		await promiseToResolve;
 	};
 
+	const updateUnsavedTicket = () => TicketsCardActionsDispatchers.setUnsavedTicket(formData.getValues());
+
 	useEffect(() => {
 		if (!templateAlreadyFetched(template)) {
 			TicketsActionsDispatchers.fetchTemplate(
@@ -102,9 +105,9 @@ export const NewTicketCard = () => {
 			);
 		}
 
-		return () => {
-			TicketsCardActionsDispatchers.setUnsavedTicket(formData.getValues());
-		};
+		TicketsCardActionsDispatchers.setUnsavedTicket(defaultTicket);
+
+		return () => { updateUnsavedTicket(); };
 	}, []);
 
 	useEffect(() => {
@@ -119,14 +122,14 @@ export const NewTicketCard = () => {
 				<Form onSubmit={formData.handleSubmit(onSubmit)}>
 					{detailsView === TicketDetailsView.Groups && (
 						<>
-							<CardHeader>
-								<ArrowBack onClick={() => setDetailViewAndProps(TicketDetailsView.Form)} />
-								<FormattedMessage
+							<CardHeader
+								icon={<ArrowBack onClick={() => setDetailViewAndProps(TicketDetailsView.Form)} />}
+								title={<FormattedMessage
 									id="viewer.cards.newTicketTitleGroups"
 									defaultMessage="New {template} ticket:Groups"
 									values={{ template: template.name }}
-								/>
-							</CardHeader>
+								/>}
+							/>
 							<CardContent>
 								<InputController
 									Input={TicketGroups}
@@ -138,17 +141,17 @@ export const NewTicketCard = () => {
 
 					{detailsView === TicketDetailsView.Form && (
 						<>
-							<CardHeader>
-								<TicketsIcon />
-								<FormattedMessage
+							<CardHeader
+								icon={<TicketsIcon />}
+								title={<FormattedMessage
 									id="viewer.cards.newTicketTitle"
 									defaultMessage="New {template} ticket"
 									values={{ template: template.name }}
-								/>
-								<CloseButton onClick={goBack}>
+								/>}
+								actions={<CloseButton onClick={goBack}>
 									<CloseIcon />
-								</CloseButton>
-							</CardHeader>
+								</CloseButton>}
+							/>
 							{isLoading ? (
 								<CardContent>
 									<CircularProgress />
@@ -159,6 +162,7 @@ export const NewTicketCard = () => {
 									// Im not sure this is still needed here, because we are already depending on react-hook-form to fill the form
 									ticket={defaultTicket}
 									focusOnTitle
+									onPropertyBlur={updateUnsavedTicket}
 								/>
 							)}
 						</>

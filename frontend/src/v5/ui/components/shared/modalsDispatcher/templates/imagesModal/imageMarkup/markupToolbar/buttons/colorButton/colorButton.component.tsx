@@ -21,9 +21,9 @@ import { formatMessage } from '@/v5/services/intl';
 import { ToolbarButton } from '../../toolbarButton/toolbarButton.component';
 import { ColorPickerPalette } from '@controls/inputs/colorPicker/colorPickerPalette/colorPickerPalette.component';
 import { theme } from '@/v5/ui/routes/viewer/theme';
-import { decimalToHex, hexToDecimal } from '@controls/inputs/colorPicker/colorPicker.helpers';
 import { useState } from 'react';
 import { FloatingButtonsContainer } from '@controls/toolbarSelect/toolbarSelect.styles';
+import { decimalToHex, hexToDecimal } from '@/v5/helpers/colors.helper';
 
 type ColorButtonProps = {
 	onChange: (value: string) => void;

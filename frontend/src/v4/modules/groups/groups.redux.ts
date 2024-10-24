@@ -24,9 +24,9 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	togglePendingState: ['isPending'],
 	toggleDetailsPendingState: ['isPending'],
 	setComponentState: ['componentState'],
-	setActiveGroup: ['group', 'revision'],
+	setActiveGroup: ['group'],
 	resetActiveGroup: ['group'],
-	showDetails: ['group', 'revision'],
+	showDetails: ['group'],
 	closeDetails: [],
 	setNewGroup: [],
 	selectGroup: ['group'],
@@ -256,9 +256,7 @@ export const showDeleteInfo = (state = INITIAL_STATE, { groupIds }) => {
 	return { ...state, groupsMap, componentState: { ...state.componentState, editingGroup } };
 };
 
-const resetComponentState = (state = INITIAL_STATE) => {
-	return { ...state, componentState: INITIAL_STATE.componentState };
-};
+const resetComponentState = () => cloneDeep(INITIAL_STATE);
 
 export const setOverrideAllSuccess = (state = INITIAL_STATE) => {
 	let groupIds = [];

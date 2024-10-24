@@ -31,6 +31,7 @@ export const ProjectNavigation = (): JSX.Element => {
 		<Container>
 			<Link to={`${url}/t/federations`}><FormattedMessage id="projectNavigation.federations" defaultMessage="Federations" /></Link>
 			<Link to={`${url}/t/containers`}><FormattedMessage id="projectNavigation.containers" defaultMessage="Containers" /></Link>
+			<Link to={`${url}/t/drawings`}><FormattedMessage id="projectNavigation.drawings" defaultMessage="Drawings" /></Link>
 			{shouldRenderLink &&  <Link to={`${url}/t/board`}>{linkLabel}</Link> }
 			<Link to={`${url}/t/tickets`}><FormattedMessage id="projectNavigation.tickets" defaultMessage="Tickets" /></Link>
 			<Link to={`${discardUrlComponent(url, 'settings')}/t/project_settings`}><FormattedMessage id="projectNavigation.settings" defaultMessage="Project settings" /></Link>

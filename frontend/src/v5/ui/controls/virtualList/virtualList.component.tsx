@@ -58,6 +58,7 @@ export const VirtualList = ({ items, itemHeight, itemContent }:Props) => {
 
 	let onScroll;
 	onScroll = () => {
+		if (!elem.current) return;
 		const rect = elem.current.getBoundingClientRect();
 		let shouldUpdate = rect.y !== prevRect.current?.y;
 

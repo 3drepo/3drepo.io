@@ -16,17 +16,13 @@
  */
 
 "use strict";
-const archiver = require("archiver");
-const fs = require("fs");
 const { v5Path } = require("../../interop");
 const EventsManager = require(`${v5Path}/services/eventsManager/eventsManager`);
 const EventsV5 = require(`${v5Path}/services/eventsManager/eventsManager.constants`).events;
-const path = require("path");
-const sharedSpacePath = require("../config").cn_queue.shared_storage;
+const { processStatuses } = require(`${v5Path}/models/modelSettings.constants`);
+const { findModelSettingById, prepareDefaultView } = require("./modelSetting");
 const utils = require("../utils");
 const Queue = require("../services/queue");
-const { sendImportError } = require("../mailer/mailer");
-const { systemLogger } = require("../logger");
 
 const eventTypes = Object.freeze({
 	CREATED: "Created",
@@ -38,9 +34,9 @@ async function insertEventQueue(event, emitter, account, model, extraKeys, data)
 
 	let channel = `notifications::${account}`;
 	if (model) {
-		const { findOneProject } = require("./project");
+		const { findProjectByModelId } = require(`${v5Path}/models/projectSettings`);
 
-		const project = await findOneProject(account, { models: model }, { _id: 1 });
+		const project = await findProjectByModelId(account, model, { _id: 1 });
 
 		if (!project) {
 			// models must be inside a project
@@ -202,10 +198,9 @@ const subscribeToV5Events = () => {
 		}
 	});
 
-	EventsManager.subscribe(EventsV5.MODEL_IMPORT_FINISHED, async ({ teamspace, model, corId, success, user, userErr, errCode, message }) => {
+	EventsManager.subscribe(EventsV5.MODEL_IMPORT_FINISHED, async ({ teamspace, model, corId, user, data : importData }) => {
 		const { revisionCount, findLatest } = require("./history");
 		const notifications = require("./notification");
-		const { findModelSettingById, prepareDefaultView } = require("./modelSetting");
 		const rawSettings =  await findModelSettingById(teamspace, model);
 		const [nRevisions, setting]  = await Promise.all([
 			revisionCount(teamspace, model),
@@ -215,7 +210,7 @@ const subscribeToV5Events = () => {
 		const data = { user, nRevisions, ...setting };
 		modelStatusChanged(null, teamspace, model, data);
 
-		if(success) {
+		if(importData.status === processStatuses.OK) {
 			const rev = await findLatest(teamspace, model, {tag: 1});
 			if(rev) {
 				const notes = await notifications.upsertModelUpdatedNotifications(teamspace, model, rev.tag || corId);
@@ -223,54 +218,9 @@ const subscribeToV5Events = () => {
 			}
 		}
 
-		if (message) {
-			const notes = await notifications.insertModelUpdatedFailedNotifications(teamspace, model, user, message);
+		if (importData.errorReason?.message) {
+			const notes = await notifications.insertModelUpdatedFailedNotifications(teamspace, model, user, importData.errorReason.message);
 			notes.forEach((note) => upsertedNotification(null, note));
-
-			if (!userErr) {
-				const filename = "logs.zip";
-				let zipPath;
-				try {
-					const sharedDir = path.join(sharedSpacePath, corId);
-					zipPath = path.join(sharedDir, filename);
-					const output = fs.createWriteStream(zipPath);
-					const archive = archiver("zip", { zlib: { level: 1 } });
-
-					const archiveReady = new Promise((resolve, reject) => {
-						output.on("close", resolve);
-						output.on("error", reject);
-						archive.on("error", reject);
-					});
-
-					archive.pipe(output);
-
-					const files = fs.readdirSync(sharedDir);
-					files.forEach((file) => {
-						if (file.endsWith(".log")) {
-							archive.file(path.join(sharedDir, file), { name: file });
-						}
-					});
-
-					archive.finalize();
-					await archiveReady;
-				} catch (err) {
-					systemLogger.logError(`Error while compressing log files for import error email: ${err.message}`);
-				}
-
-				try {
-					await sendImportError({
-						account: teamspace,
-						model,
-						username: user,
-						err: message,
-						corID: corId,
-						bouncerErr: errCode,
-						...(zipPath ? { attachments: [{ filename, path: zipPath }] } : {})
-					});
-				} catch (err) {
-					systemLogger.logError(`Error while sending import error email: ${err.message}`);
-				}
-			}
 		}
 
 	});

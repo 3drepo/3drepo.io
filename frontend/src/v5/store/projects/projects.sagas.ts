@@ -19,14 +19,17 @@ import { put, select, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
-import { ProjectsActions, ProjectsTypes } from './projects.redux';
+import { FetchProjectsAction, ProjectsActions, ProjectsTypes } from './projects.redux';
 import { IProject } from './projects.types';
 import { selectContainers } from '../containers/containers.selectors';
 import { selectFederationById, selectFederations } from '../federations/federations.selectors';
 import { RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
+import { TeamspacesActions } from '../teamspaces/teamspaces.redux';
 
-export function* fetch({ teamspace }) {
+export function* fetch({ teamspace }: FetchProjectsAction) {
 	try {
+		const addOns = yield API.Teamspaces.fetchAddons(teamspace);
+		yield put(TeamspacesActions.fetchAddOnsSuccess(teamspace, addOns));
 		const { data: { projects } } = yield API.Projects.fetchProjects(teamspace);
 		yield put(ProjectsActions.fetchSuccess(teamspace, projects as IProject[]));
 	} catch (error) {

@@ -96,7 +96,7 @@ export const FederationsList = ({
 					<DashboardListHeaderLabel name="name" minWidth={90}>
 						<FormattedMessage id="federations.list.header.federation" defaultMessage="Federation" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="risks" width={165} hideWhenSmallerThan={890}>
+					<DashboardListHeaderLabel name="tickets" width={165} hideWhenSmallerThan={890}>
 						<FormattedMessage id="federations.list.header.tickets" defaultMessage="Open tickets" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="containers" width={165} hideWhenSmallerThan={Display.Tablet}>
@@ -105,8 +105,11 @@ export const FederationsList = ({
 					<DashboardListHeaderLabel name="code" width={172} minWidth={43}>
 						<FormattedMessage id="federations.list.header.code" defaultMessage="Code" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="lastUpdated" width={210} minWidth={166}>
+					<DashboardListHeaderLabel name="lastUpdated" width={120} minWidth={100}>
 						<FormattedMessage id="federations.list.header.lastUpdated" defaultMessage="Last updated" />
+					</DashboardListHeaderLabel>
+					<DashboardListHeaderLabel name="isFavourite" width={90}>
+						<FormattedMessage id="federations.list.header.actions" defaultMessage="Actions" />
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>
 				<DashboardList>

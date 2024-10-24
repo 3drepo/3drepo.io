@@ -59,3 +59,5 @@ export const MODEL_ROLES_LIST = [
 		tooltip: MODEL_ROLES_DESC.ADMINISTRATOR
 	}
 ];
+
+export const getModelPermissionLabelFromType = (type) => MODEL_ROLES_LIST.find(({ key }) => key === type).label;

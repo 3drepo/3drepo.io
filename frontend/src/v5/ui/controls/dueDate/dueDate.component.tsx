@@ -18,7 +18,7 @@
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
-import { formatShortDateTime } from '@/v5/helpers/intl.helper';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
 import { CalendarIcon, DateContainer, DueDateContainer, EmptyDateContainer } from './dueDate.styles';
 
@@ -40,7 +40,7 @@ export const DueDate = ({ value, disabled, tooltip, className, ...props }: DueDa
 							{value ? (
 								<DateContainer {...args} ref={inputRef} isOverdue={isOverdue} disabled={disabled}>
 									<CalendarIcon />
-									{formatShortDateTime(value)}
+									{formatDateTime(value)}
 								</DateContainer>
 							) : (
 								<EmptyDateContainer {...args} ref={inputRef} disabled={disabled}><CalendarIcon />

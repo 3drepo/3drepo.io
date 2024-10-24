@@ -24,6 +24,7 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { V4DialogsAdapter } from '@/v5/ui/v4Adapter/dialogs/v4DialogsAdapter.component';
 
+import { RouteComponentProps } from 'react-router';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { IDialogConfig } from '../../../../../modules/dialog/dialog.redux';
 import { dispatch } from '../../../../../modules/store';
@@ -31,7 +32,7 @@ import { COLOR } from '../../../../../styles';
 import { SearchButton } from '../../../../viewerGui/components/panelBarActions/searchButton';
 import { DialogActions, DialogTitle, TopDialogActions } from './dialog.styles';
 
-interface IProps {
+interface IProps extends RouteComponentProps<any> {
 	id: number;
 	config: IDialogConfig;
 	data?: any;

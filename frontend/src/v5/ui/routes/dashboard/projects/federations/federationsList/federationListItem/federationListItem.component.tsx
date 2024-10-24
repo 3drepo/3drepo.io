@@ -17,7 +17,7 @@
 
 import { memo, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { formatShortDateTime } from '@/v5/helpers/intl.helper';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { useParams, useHistory } from 'react-router-dom';
 
 import {
@@ -109,7 +109,7 @@ export const FederationListItem = memo(({
 						{federation.code}
 					</DashboardListItemText>
 					<DashboardListItemText width={113} minWidth={89} dontHighlight>
-						{federation.lastUpdated && formatShortDateTime(federation.lastUpdated)}
+						{federation.lastUpdated && formatDateTime(federation.lastUpdated)}
 					</DashboardListItemText>
 					<DashboardListItemIcon>
 						<FavouriteCheckbox

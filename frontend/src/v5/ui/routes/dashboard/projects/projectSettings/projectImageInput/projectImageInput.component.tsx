@@ -30,6 +30,7 @@ import { isString } from 'lodash';
 import { formatMessage } from '@/v5/services/intl';
 import { useFormContext } from 'react-hook-form';
 import { ButtonsContainer, ImageButton, GrayBodyText, ImageContainer, Image, ErrorMessage } from './projectImageInput.styles';
+import { PROJECT_IMAGE_MAX_SIZE_MESSAGE } from '@/v5/store/projects/projects.helpers';
 
 export const ProjectImageInput = ({ onChange, value, name, error, disabled, helperText }: FormInputProps) => {
 	const [imgSrc, setImgSrc] = useState(value);
@@ -146,7 +147,8 @@ export const ProjectImageInput = ({ onChange, value, name, error, disabled, help
 				<GrayBodyText>
 					<FormattedMessage
 						id="project.settings.form.image.maxFileSize"
-						defaultMessage="Maximum file size: 5MB"
+						defaultMessage="Maximum file size: {size}"
+						values={{ size: PROJECT_IMAGE_MAX_SIZE_MESSAGE }}
 					/>
 				</GrayBodyText>
 			</DragAndDrop>

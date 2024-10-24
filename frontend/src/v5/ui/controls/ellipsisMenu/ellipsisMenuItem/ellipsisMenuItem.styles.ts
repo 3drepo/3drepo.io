@@ -19,7 +19,8 @@ import styled from 'styled-components';
 import { MenuItem as MenuItemComponent } from '@mui/material';
 import { Link } from 'react-router-dom';
 
-export const MenuItem = styled(MenuItemComponent)<typeof Link>`
+export const MenuItem = styled(MenuItemComponent)<React.ComponentProps<typeof Link>>`
+	${({ theme }) => theme.typography.body1};
 	color: ${({ theme }) => theme.palette.secondary.main};
 	margin: 0;
 	height: 40px;
@@ -36,5 +37,18 @@ export const MenuItem = styled(MenuItemComponent)<typeof Link>`
 
 	&:active {
 		background-color: ${({ theme }) => theme.palette.base.light};
+	}
+`;
+
+export const SwitchContainer = styled.span`
+	width: 100%;
+	height: 32px;
+	align-content: center;
+	text-align: left;
+	display: grid;
+	grid-template-columns: 26px auto 16px;
+	svg {
+		height: 16px;
+		width: 16px;
 	}
 `;

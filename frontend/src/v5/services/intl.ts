@@ -63,17 +63,12 @@ export const getIntl = () => {
 	return intlInternal;
 };
 
-// eslint-disable-next-line max-len
 export const formatMessage: typeof intlInternal.formatMessage = (descriptor, values?, opts?): string => getIntl().formatMessage(descriptor, values, opts);
 
-// eslint-disable-next-line max-len
-export const formatDate: typeof intlInternal.formatDate = (value, opts?): string => getIntl().formatDate(value, opts);
+export const formatDate: typeof intlInternal.formatDate = (value, opts?): string => value && getIntl().formatDate(value, opts);
 
-// eslint-disable-next-line max-len
-export const formatTime: typeof intlInternal.formatTime = (value, opts?): string => getIntl().formatTime(value, opts);
+export const formatTime: typeof intlInternal.formatTime = (value, opts?): string => value && getIntl().formatTime(value, opts);
 
-// eslint-disable-next-line max-len
 export const formatRelativeTime: typeof intlInternal.formatRelativeTime = (value, unit?, opts?): string => getIntl().formatRelativeTime(value, unit, opts);
 
-// eslint-disable-next-line max-len
 export const formatPlural: typeof intlInternal.formatPlural = (value, opts?): Intl.LDMLPluralRule => getIntl().formatPlural(value, opts);

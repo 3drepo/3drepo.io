@@ -35,6 +35,7 @@ export default css`
 
 		${StyledIconButton} {
 			margin-right: -4px;
+			margin-bottom: 2px;
 			background-color: ${({ theme }) => theme.palette.secondary.main};
 
 			&:hover svg :is(path, circle) {

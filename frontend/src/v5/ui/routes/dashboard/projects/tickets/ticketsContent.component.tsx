@@ -28,11 +28,11 @@ import { TicketsTable } from './ticketsTable/ticketsTable.component';
 import { TicketsSelection } from './ticketsSelection/ticketsSelection.component';
 import { useContainersData } from '../containers/containers.hooks';
 import { useFederationsData } from '../federations/federations.hooks';
-import { EmptyTicketsView } from './emptyTicketsView/emptyTicketsView.styles';
-import { TICKETS_ROUTE } from '../../../routes.constants';
+import { EmptyPageView } from '../../../../components/shared/emptyPageView/emptyPageView.styles';
+import { DashboardParams, TICKETS_ROUTE } from '../../../routes.constants';
 
 export const TicketsContent = () => {
-	const { teamspace, project } = useParams();
+	const { teamspace, project } = useParams<DashboardParams>();
 	let { path } = useRouteMatch();
 	path = discardSlash(path);
 
@@ -52,23 +52,23 @@ export const TicketsContent = () => {
 
 	if (!hasModels && !templatesArePending) {
 		return (
-			<EmptyTicketsView>
+			<EmptyPageView>
 				<FormattedMessage
 					id="ticketsTable.emptyModels"
 					defaultMessage="This project is empty. Please, proceed to create a container or a federation to access this content."
 				/>
-			</EmptyTicketsView>
+			</EmptyPageView>
 		);
 	}
 
 	if (hasModels && !templatesArePending && !templates.length) {
 		return (
-			<EmptyTicketsView>
+			<EmptyPageView>
 				<FormattedMessage
 					id="ticketsTable.emptyTemplates"
 					defaultMessage="There are no templates available for this project."
 				/>
-			</EmptyTicketsView>
+			</EmptyPageView>
 		);
 	}
 

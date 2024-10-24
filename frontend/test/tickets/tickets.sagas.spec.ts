@@ -29,6 +29,7 @@ import { federationMockFactory } from '../federations/federations.fixtures';
 import { createTestStore } from '../test.helpers';
 import { mockGroup, mockRiskCategories, templateMockFactory, ticketMockFactory, ticketWithGroupMockFactory } from './tickets.fixture';
 import { mockServer } from '../../internals/testing/mockServer';
+import Mockdate from 'mockdate';
 
 describe('Tickets: sagas', () => {
 	let onSuccess;
@@ -144,6 +145,7 @@ describe('Tickets: sagas', () => {
 		});
 
 		it('should call createContainerTicket endpoint', async () => {
+			Mockdate.set(new Date());
 			const newTicket = ticketMockFactory();
 			delete newTicket._id;
 			const _id = 'containerTicketId';
@@ -154,10 +156,11 @@ describe('Tickets: sagas', () => {
 
 			await waitForActions(() => {
 				dispatch(TicketsActions.createTicket(teamspace, projectId, modelId, newTicket, false, onSuccess, onError));
-			}, [TicketsActions.upsertTicketSuccess(modelId, { _id, ...newTicket })]);
+			}, [TicketsActions.upsertTicketSuccess(modelId, { _id, ...newTicket, properties: { ...newTicket.properties, 'Created at': new Date().getTime() } })]);
 
 			expect(onSuccess).toHaveBeenCalledWith(_id);
 			expect(onError).not.toHaveBeenCalled();
+			Mockdate.reset();
 		});
 
 		it('should call createContainerTicket endpoint with a 404', async () => {
@@ -259,8 +262,9 @@ describe('Tickets: sagas', () => {
 		});
 
 		it('should call createFederationTicket endpoint', async () => {
-			const newticket = ticketMockFactory();
-			delete newticket._id;
+			Mockdate.set(new Date());
+			const newTicket = ticketMockFactory();
+			delete newTicket._id;
 			const _id = 'federationTicketId';
 
 			mockServer
@@ -268,22 +272,23 @@ describe('Tickets: sagas', () => {
 				.reply(200, { _id });
 
 			await waitForActions(() => {
-				dispatch(TicketsActions.createTicket(teamspace, projectId, modelId, newticket, true, onSuccess, onError));
-			}, [TicketsActions.upsertTicketSuccess(modelId, { _id, ...newticket })]);
+				dispatch(TicketsActions.createTicket(teamspace, projectId, modelId, newTicket, true, onSuccess, onError));
+			}, [TicketsActions.upsertTicketSuccess(modelId, { _id, ...newTicket, properties: { ...newTicket.properties, 'Created at': new Date().getTime() } })]);
 			expect(onSuccess).toHaveBeenCalledWith(_id);
 			expect(onError).not.toHaveBeenCalled();
+			Mockdate.reset();
 		});
 
 		it('should call createFederationTicket endpoint with a 404', async () => {
-			const newticket = ticketMockFactory();
-			delete newticket._id;
+			const newTicket = ticketMockFactory();
+			delete newTicket._id;
 
 			mockServer
 				.post(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets`)
 				.reply(404);
 
 			await waitForActions(() => {
-				dispatch(TicketsActions.createTicket(teamspace, projectId, modelId, newticket, true, onSuccess, onError));
+				dispatch(TicketsActions.createTicket(teamspace, projectId, modelId, newTicket, true, onSuccess, onError));
 			}, [DialogsTypes.OPEN]);
 
 			const ticketsFromState = selectTickets(getState(), modelId);

@@ -15,12 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ReactNode, SyntheticEvent, useContext } from 'react';
-import { Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
 import { MenuItem } from './ellipsisMenuItem.styles';
 
-type EllipsisMenuItemProps = {
+export type EllipsisMenuItemProps = {
 	title: ReactNode;
 	to?: any;
 	key?: string;
@@ -42,14 +41,12 @@ export const EllipsisMenuItem = ({ to, title, hidden, onClick, ...props }: Ellip
 
 	return (
 		<MenuItem
-			component={to ? Link : null}
+			component={to ? Link : undefined}
 			to={to}
 			onClick={handleClick}
 			{...props}
 		>
-			<Typography variant="body1" noWrap>
-				{title}
-			</Typography>
+			{title}
 		</MenuItem>
 	);
 };

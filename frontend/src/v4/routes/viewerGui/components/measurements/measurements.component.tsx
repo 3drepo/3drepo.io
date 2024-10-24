@@ -143,7 +143,7 @@ export class Measurements extends PureComponent<IProps, IState> {
 				.filter(({name}) => name !== MEASURE_ACTIONS_ITEMS.UNITS_DISPLAYED_IN || this.props.modelUnit !== 'ft')
 				.map(( {name, Icon, label }) => (
 				<StyledListItem key={name} onClick={this.menuActionsMap[name]}>
-					<IconWrapper><Icon fontSize="small" /></IconWrapper>
+					<IconWrapper><Icon /></IconWrapper>
 					<StyledItemText>
 						{label}
 						{(name === MEASURE_ACTIONS_ITEMS.EDGE_SNAPPING && this.props.edgeSnappingEnabled) && <Check fontSize="small" />}

@@ -19,22 +19,20 @@ import { PureComponent } from 'react';
 
 import ArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
+import { RouteComponentProps } from 'react-router';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { renderWhenTrue } from '../../../../helpers/rendering';
-import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
 import { Container, DisplayedText, ProgressWrapper, StyledCircularProgress } from './revisionsSwitch.styles';
 
-interface IProps {
+interface IProps extends RouteComponentProps<any> {
 	className?: string;
-	urlParams: any;
 	modelSettings?: any;
 	revisions?: any[];
-	history: any;
-	location: any;
 	hideDialog: () => void;
 	showRevisionsDialog: (config) => void;
 	currentRevision: any;
 	getCompareModels: (revisionId) => void;
-}
+};
 
 export class RevisionsSwitch extends PureComponent<IProps, any> {
 
@@ -74,7 +72,7 @@ export class RevisionsSwitch extends PureComponent<IProps, any> {
 
 	get revisionName() {
 		const { currentRevision: revision } = this.props;
-		return revision.tag || formatDate(revision.timestamp, LONG_DATE_TIME_FORMAT);
+		return revision.tag || formatDateTime(revision.timestamp);
 	}
 
 	private setNewRevision = (revision) => {

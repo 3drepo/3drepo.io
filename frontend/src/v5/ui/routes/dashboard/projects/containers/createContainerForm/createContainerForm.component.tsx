@@ -20,7 +20,8 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { FormModal } from '@controls/formModal/formModal.component';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { CONTAINER_TYPES, CONTAINER_UNITS } from '@/v5/store/containers/containers.types';
+import { CONTAINER_TYPES } from '@/v5/store/containers/containers.types';
+import { MODEL_UNITS } from '../../models.helpers';
 import { CreateContainerSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
 import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 import { MenuItem } from '@mui/material';
@@ -101,7 +102,7 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 					name="unit"
 					label={formatMessage({ id: 'containers.creation.form.units', defaultMessage: 'Units' })}
 				>
-					{CONTAINER_UNITS.map((unit) => (
+					{MODEL_UNITS.map((unit) => (
 						<MenuItem key={unit.value} value={unit.value}>
 							{unit.name}
 						</MenuItem>

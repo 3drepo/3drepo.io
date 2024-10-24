@@ -423,6 +423,11 @@ const testFindOne = () => {
 				.resolves.toEqual(null);
 		});
 
+		test('Should return null if no document is found (sort and projection)', async () => {
+			await expect(DB.findOne(dbName, col, { [generateRandomString()]: generateRandomString() },
+				{ n: 1, _id: 0 }, { n: -1 })).resolves.toEqual(null);
+		});
+
 		test('Should return null if collection doesn\'t exist', async () => {
 			await expect(DB.findOne(dbName, generateRandomString(), { _id: data[3]._id })).resolves.toEqual(null);
 		});

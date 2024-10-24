@@ -136,6 +136,7 @@ module.exports = {
 		 * Please refer to elastic documentation for configuration settings
 		 * https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/client-configuration.html
 		*/
+	    namespace: "" // namespace of deployment
     },
 	termsUpdatedAt: 1520592720000,
 }

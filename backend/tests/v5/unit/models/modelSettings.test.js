@@ -17,13 +17,13 @@
 
 const { times } = require('lodash');
 const { src } = require('../../helper/path');
-const { generateRandomString, generateUUIDString } = require('../../helper/services');
+const { generateRandomString, generateUUIDString, generateUUID } = require('../../helper/services');
 
+const { getInfoFromCode, modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const Model = require(`${src}/models/modelSettings`);
-const { getInfoFromCode } = require(`${src}/models/modelSettings.constants`);
 jest.mock('../../../../src/v5/handler/db');
 const DBHandler = require(`${src}/handler/db`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
@@ -76,6 +76,33 @@ const testGetContainerById = () => {
 			DBHandler.findOne.mockRejectedValueOnce(err);
 
 			await expect(Model.getContainerById('someTS', 'someContainer'))
+				.rejects.toEqual(err);
+		});
+	});
+};
+
+const testGetDrawingById = () => {
+	describe('GetDrawingById', () => {
+		test('should return content of drawing settings if found', async () => {
+			const expectedData = generateRandomString();
+			DBHandler.findOne.mockResolvedValueOnce(expectedData);
+
+			const res = await Model.getDrawingById(generateRandomString(), generateRandomString());
+			expect(res).toEqual(expectedData);
+		});
+
+		test('should return error if drawing does not exists', async () => {
+			DBHandler.findOne.mockResolvedValueOnce(undefined);
+
+			await expect(Model.getDrawingById(generateRandomString(), generateRandomString()))
+				.rejects.toEqual(templates.drawingNotFound);
+		});
+
+		test('should return error if some unknown error occured', async () => {
+			const err = generateRandomString();
+			DBHandler.findOne.mockRejectedValueOnce(err);
+
+			await expect(Model.getDrawingById(generateRandomString(), generateRandomString()))
 				.rejects.toEqual(err);
 		});
 	});
@@ -166,7 +193,37 @@ const testGetContainers = () => {
 			expect(res).toEqual(expectedData);
 			expect(DBHandler.find).toHaveBeenCalledTimes(1);
 			expect(DBHandler.find).toHaveBeenCalledWith(teamspace, SETTINGS_COL,
-				{ _id: { $in: modelIds }, federate: { $ne: true } }, undefined, undefined);
+				{ _id: { $in: modelIds },
+					federate: { $ne: true },
+					modelType: { $ne: modelTypes.DRAWING } }, undefined, undefined);
+		});
+	});
+};
+
+const testGetDrawings = () => {
+	describe('Get drawings', () => {
+		test('should return the list of drawings ', async () => {
+			const expectedData = [
+				{
+					_id: generateRandomString(),
+					name: generateRandomString(),
+				},
+				{
+					_id: generateRandomString(),
+					name: generateRandomString(),
+				},
+			];
+
+			DBHandler.find.mockResolvedValueOnce(expectedData);
+
+			const teamspace = generateRandomString();
+			const modelIds = [generateRandomString()];
+			const res = await Model.getDrawings(teamspace, modelIds);
+			expect(res).toEqual(expectedData);
+			expect(DBHandler.find).toHaveBeenCalledTimes(1);
+			expect(DBHandler.find).toHaveBeenCalledWith(teamspace, SETTINGS_COL,
+				{ _id: { $in: modelIds }, modelType: modelTypes.DRAWING },
+				undefined, undefined);
 		});
 	});
 };
@@ -220,7 +277,7 @@ const testAddModel = () => {
 				project,
 				model: newId,
 				data: { code: data.properties.code, type: data.type, unit: data.properties.unit, name: data.name },
-				isFederation: false,
+				modelType: modelTypes.CONTAINER,
 			});
 		});
 
@@ -251,7 +308,32 @@ const testAddModel = () => {
 					unit: data.properties.unit,
 					name: data.name,
 				},
-				isFederation: true });
+				modelType: modelTypes.FEDERATION });
+		});
+
+		test('should return inserted ID on success when a drawing is added', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const data = {
+				name: generateRandomString(),
+				number: generateRandomString(),
+				type: generateRandomString(),
+				modelType: modelTypes.DRAWING };
+			const res = await Model.addModel(teamspace, project, data);
+
+			expect(DBHandler.insertOne).toHaveBeenCalledTimes(1);
+			expect(DBHandler.insertOne).toHaveBeenCalledWith(teamspace, SETTINGS_COL, expect.any(Object));
+			const newId = DBHandler.insertOne.mock.calls[0][2]._id;
+			expect(isUUIDString(newId));
+			expect(res).toEqual(newId);
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_MODEL, { teamspace,
+				project,
+				model: newId,
+				data: { type: data.type, name: data.name, number: data.number },
+				modelType: modelTypes.DRAWING,
+			});
 		});
 	});
 };
@@ -269,14 +351,14 @@ const testDeleteModel = () => {
 			expect(res).toEqual(undefined);
 			expect(DBHandler.findOneAndDelete).toHaveBeenCalledTimes(1);
 			expect(DBHandler.findOneAndDelete).toHaveBeenCalledWith(
-				teamspace, SETTINGS_COL, { _id: model }, { federate: 1 },
+				teamspace, SETTINGS_COL, { _id: model }, { federate: 1, modelType: 1 },
 			);
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.DELETE_MODEL, {
 				teamspace,
 				project,
 				model,
-				isFederation: true,
+				modelType: modelTypes.FEDERATION,
 			});
 		});
 
@@ -291,14 +373,36 @@ const testDeleteModel = () => {
 			expect(res).toEqual(undefined);
 			expect(DBHandler.findOneAndDelete).toHaveBeenCalledTimes(1);
 			expect(DBHandler.findOneAndDelete).toHaveBeenCalledWith(
-				teamspace, SETTINGS_COL, { _id: model }, { federate: 1 },
+				teamspace, SETTINGS_COL, { _id: model }, { federate: 1, modelType: 1 },
 			);
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.DELETE_MODEL, {
 				teamspace,
 				project,
 				model,
-				isFederation: false,
+				modelType: modelTypes.CONTAINER,
+			});
+		});
+
+		test('should succeed (drawing)', async () => {
+			const expectedData = { _id: generateRandomString(), modelType: modelTypes.DRAWING };
+			DBHandler.findOneAndDelete.mockResolvedValueOnce(expectedData);
+
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const res = await Model.deleteModel(teamspace, project, model);
+			expect(res).toEqual(undefined);
+			expect(DBHandler.findOneAndDelete).toHaveBeenCalledTimes(1);
+			expect(DBHandler.findOneAndDelete).toHaveBeenCalledWith(
+				teamspace, SETTINGS_COL, { _id: model }, { federate: 1, modelType: 1 },
+			);
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.DELETE_MODEL, {
+				teamspace,
+				project,
+				model,
+				modelType: modelTypes.DRAWING,
 			});
 		});
 
@@ -312,7 +416,7 @@ const testDeleteModel = () => {
 				.rejects.toEqual(templates.modelNotFound);
 			expect(DBHandler.findOneAndDelete).toHaveBeenCalledTimes(1);
 			expect(DBHandler.findOneAndDelete).toHaveBeenCalledWith(
-				teamspace, SETTINGS_COL, { _id: model }, { federate: 1 },
+				teamspace, SETTINGS_COL, { _id: model }, { federate: 1, modelType: 1 },
 			);
 			expect(EventsManager.publish).toHaveBeenCalledTimes(0);
 		});
@@ -326,6 +430,7 @@ const testUpdateModelStatus = () => {
 		const model = generateRandomString();
 		const status = 'queued';
 		const corId = generateRandomString();
+
 		test(`should update container status and trigger a ${events.MODEL_SETTINGS_UPDATE} event`, async () => {
 			DBHandler.findOneAndUpdate.mockResolvedValueOnce({ federate: false });
 			await expect(Model.updateModelStatus(teamspace, project, model, status, corId)).resolves.toBe(undefined);
@@ -337,7 +442,7 @@ const testUpdateModelStatus = () => {
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
-				{ teamspace, model, project, data: { status }, isFederation: false });
+				{ teamspace, model, project, data: { status }, modelType: modelTypes.CONTAINER });
 		});
 
 		test(`should update federation status and trigger a ${events.MODEL_SETTINGS_UPDATE} event`, async () => {
@@ -352,7 +457,21 @@ const testUpdateModelStatus = () => {
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
-				{ teamspace, model, project, data: { status }, isFederation: true });
+				{ teamspace, model, project, data: { status }, modelType: modelTypes.FEDERATION });
+		});
+
+		test(`should update drawing status and trigger a ${events.MODEL_SETTINGS_UPDATE} event`, async () => {
+			DBHandler.findOneAndUpdate.mockResolvedValueOnce({ modelType: modelTypes.DRAWING });
+			await expect(Model.updateModelStatus(teamspace, project, model, status, corId)).resolves.toBe(undefined);
+
+			expect(DBHandler.findOneAndUpdate).toHaveBeenCalledTimes(1);
+			const action = DBHandler.findOneAndUpdate.mock.calls[0][3];
+			expect(action.$set.corID).toEqual(corId);
+			expect(action.$set.status).toEqual(status);
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
+				{ teamspace, model, project, data: { status }, modelType: modelTypes.DRAWING });
 		});
 
 		test('should not trigger event if model no longer exists ', async () => {
@@ -375,18 +494,21 @@ const testNewRevisionProcessed = () => {
 		[0], [1], [14], [100],
 	])('Update with new revision', (retVal) => {
 		const teamspace = generateRandomString();
-		const project = generateRandomString();
+		const project = generateUUID();
 		const model = generateRandomString();
 		const user = generateRandomString();
-		const corId = generateRandomString();
-		const { success, message, userErr } = getInfoFromCode(retVal);
-		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED},
-			a ${events.MODEL_SETTINGS_UPDATE} and a ${events.NEW_REVISION} event`,
+		const corId = generateUUID();
+
+		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED}
+			and a ${events.MODEL_SETTINGS_UPDATE} event`,
 		async () => {
 			DBHandler.updateOne.mockResolvedValueOnce({ matchedCount: 1 });
 			EventsManager.publish.mockClear();
+
+			const resInfo = { ...getInfoFromCode(retVal), retVal };
+			const { success, userErr, message } = resInfo;
 			await expect(Model.newRevisionProcessed(
-				teamspace, project, model, corId, retVal, user,
+				teamspace, project, model, corId, resInfo, user,
 			)).resolves.toBe(undefined);
 
 			expect(DBHandler.updateOne.mock.calls.length).toBe(1);
@@ -404,38 +526,22 @@ const testNewRevisionProcessed = () => {
 			}
 			expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 
-			expect(EventsManager.publish).toHaveBeenCalledTimes(success ? 3 : 2);
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
-				{
-					teamspace,
-					model,
-					corId,
-					userErr,
-					message,
-					success,
-					errCode: retVal,
-					user,
-				});
+			const expectedData = { ...action.$set, status: action.$set.status || processStatuses.OK };
+			if (expectedData.errorReason) {
+				expectedData.errorReason.userErr = userErr;
+			}
 
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
 				{
 					teamspace,
 					project,
 					model,
-					data: { ...action.$set, status: action.$set.status || 'ok' },
-					isFederation: false,
+					revId: corId,
+					user,
+					modelType: modelTypes.CONTAINER,
+					data: expectedData,
 				});
-
-			if (success) {
-				expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_REVISION,
-					{
-						teamspace,
-						project,
-						model,
-						revision: corId,
-						isFederation: false,
-					});
-			}
 		});
 	});
 
@@ -447,13 +553,15 @@ const testNewRevisionProcessed = () => {
 		const user = generateRandomString();
 		const corId = generateRandomString();
 		const containers = [generateRandomString(), generateRandomString(), generateRandomString()];
-		const { success, message, userErr } = getInfoFromCode(retVal);
+		const modelType = modelTypes.FEDERATION;
 		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED} event and a ${events.MODEL_SETTINGS_UPDATE} event`,
 			async () => {
+				const resInfo = { ...getInfoFromCode(retVal), retVal };
+				const { success, userErr } = resInfo;
 				DBHandler.updateOne.mockResolvedValueOnce({ matchedCount: 1 });
 				EventsManager.publish.mockClear();
 				await expect(Model.newRevisionProcessed(
-					teamspace, project, model, corId, retVal, user,
+					teamspace, project, model, corId, resInfo, user,
 					containers.map((containerId) => ({ project: containerId })),
 				)).resolves.toBe(undefined);
 
@@ -465,53 +573,41 @@ const testNewRevisionProcessed = () => {
 
 				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 
-				expect(EventsManager.publish).toHaveBeenCalledTimes(3);
-				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
-					{
-						teamspace,
-						model,
-						corId,
-						userErr,
-						message,
-						success,
-						errCode: retVal,
-						user,
-					});
-
 				const expectedData = { ...action.$set };
+				expectedData.status = expectedData.status ?? processStatuses.OK;
+
+				if (expectedData.errorReason) {
+					expectedData.errorReason.userErr = userErr;
+				}
 				if (expectedData.subModels) {
 					expectedData.containers = expectedData.subModels;
 					delete expectedData.subModels;
 				}
 
-				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
+				expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
 					{
 						teamspace,
 						project,
 						model,
-						data: { ...expectedData, status: expectedData.status || 'ok' },
-						isFederation: true,
-					});
-
-				expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_REVISION,
-					{
-						teamspace,
-						project,
-						model,
-						revision: corId,
-						isFederation: true,
+						revId: corId,
+						user,
+						modelType,
+						data: expectedData,
 					});
 			});
 
 		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED} event and a ${events.MODEL_SETTINGS_UPDATE} event (with groups)`,
 			async () => {
+				const resInfo = { ...getInfoFromCode(retVal), retVal };
+				const { success } = resInfo;
 				const containerData = containers.map((containerId) => ({
 					project: containerId, group: generateRandomString() }));
 
 				DBHandler.updateOne.mockResolvedValueOnce({ matchedCount: 1 });
 				EventsManager.publish.mockClear();
 				await expect(Model.newRevisionProcessed(
-					teamspace, project, model, corId, retVal, user, containerData,
+					teamspace, project, model, corId, resInfo, user, containerData,
 				)).resolves.toBe(undefined);
 
 				expect(DBHandler.updateOne.mock.calls.length).toBe(1);
@@ -522,41 +618,24 @@ const testNewRevisionProcessed = () => {
 
 				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 
-				expect(EventsManager.publish).toHaveBeenCalledTimes(3);
-				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
-					{
-						teamspace,
-						model,
-						corId,
-						userErr,
-						message,
-						success,
-						errCode: retVal,
-						user,
-					});
-
 				const expectedData = { ...action.$set };
+
+				expectedData.status = expectedData.status ?? processStatuses.OK;
 				if (expectedData.subModels) {
 					expectedData.containers = expectedData.subModels;
 					delete expectedData.subModels;
 				}
 
-				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
+				expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
 					{
 						teamspace,
 						project,
 						model,
-						data: { ...expectedData, status: expectedData.status || 'ok' },
-						isFederation: true,
-					});
-
-				expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_REVISION,
-					{
-						teamspace,
-						project,
-						model,
-						revision: corId,
-						isFederation: true,
+						revId: corId,
+						user,
+						modelType,
+						data: expectedData,
 					});
 			});
 	});
@@ -572,8 +651,9 @@ const testNewRevisionProcessed = () => {
 			const user = generateRandomString();
 			const retVal = 0;
 			const corId = generateRandomString();
+			const resInfo = { ...getInfoFromCode(retVal), retVal };
 			await expect(Model.newRevisionProcessed(
-				teamspace, project, model, corId, retVal, user,
+				teamspace, project, model, corId, resInfo, user,
 			)).resolves.toBe(undefined);
 
 			expect(DBHandler.updateOne.mock.calls.length).toBe(1);
@@ -628,7 +708,7 @@ const testUpdateModelSettings = () => {
 					project,
 					model,
 					data,
-					isFederation: false,
+					modelType: modelTypes.CONTAINER,
 				});
 		});
 
@@ -661,7 +741,7 @@ const testUpdateModelSettings = () => {
 					project,
 					model,
 					data,
-					isFederation: true,
+					modelType: modelTypes.FEDERATION,
 				});
 		});
 
@@ -694,7 +774,7 @@ const testUpdateModelSettings = () => {
 					project,
 					model,
 					data,
-					isFederation: false,
+					modelType: modelTypes.CONTAINER,
 				});
 		});
 
@@ -720,7 +800,7 @@ const testUpdateModelSettings = () => {
 					project,
 					model,
 					data,
-					isFederation: false,
+					modelType: modelTypes.CONTAINER,
 				});
 		});
 
@@ -792,12 +872,37 @@ const testIsFederation = () => {
 	});
 };
 
+const testGetModelType = () => {
+	describe.each([
+		['federate is set to true', { federate: true }, modelTypes.FEDERATION],
+		['modelType is set (drawing)', { modelType: modelTypes.DRAWING }, modelTypes.DRAWING],
+		['modelType is set (container)', { modelType: modelTypes.CONTAINER }, modelTypes.CONTAINER],
+		['modelType is set (federation)', { modelType: modelTypes.FEDERATION }, modelTypes.FEDERATION],
+		['unspecified', { modelType: modelTypes.CONTAINER }, modelTypes.CONTAINER],
+	])(
+		'Get model type', (desc, expectedData, expectedRes) => {
+			test(`Should return ${expectedRes} when ${desc}`, async () => {
+				DBHandler.findOne.mockResolvedValueOnce(expectedData);
+				const ts = generateRandomString();
+				const model = generateRandomString();
+				await expect(Model.getModelType(ts, model)).resolves.toEqual(expectedRes);
+
+				expect(DBHandler.findOne).toHaveBeenCalledTimes(1);
+				expect(DBHandler.findOne).toHaveBeenCalledWith(ts, SETTINGS_COL,
+					{ _id: model }, { _id: 0, federate: 1, modelType: 1 });
+			});
+		},
+	);
+};
+
 describe('models/modelSettings', () => {
 	testGetModelById();
 	testGetContainerById();
+	testGetDrawingById();
 	testGetFederationById();
 	testGetModelByQuery();
 	testGetContainers();
+	testGetDrawings();
 	testGetFederations();
 	testAddModel();
 	testDeleteModel();
@@ -806,4 +911,5 @@ describe('models/modelSettings', () => {
 	testUpdateModelSettings();
 	testRemoveUserFromAllModels();
 	testIsFederation();
+	testGetModelType();
 });

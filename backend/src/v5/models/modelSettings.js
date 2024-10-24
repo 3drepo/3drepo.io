@@ -16,11 +16,11 @@
  */
 
 const Models = {};
-const { SETTINGS_COL, getInfoFromCode } = require('./modelSettings.constants');
+const { SETTINGS_COL, modelTypes, processStatuses } = require('./modelSettings.constants');
+const { UUIDToString, generateUUIDString } = require('../utils/helper/uuids');
 const db = require('../handler/db');
 const { deleteIfUndefined } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
-const { generateUUIDString } = require('../utils/helper/uuids');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
@@ -34,7 +34,20 @@ const findOneAndUpdateModel = (ts, query, action, projection) => db.findOneAndUp
 );
 
 const noFederations = { federate: { $ne: true } };
+const noDrawings = { modelType: { $ne: modelTypes.DRAWING } };
 const onlyFederations = { federate: true };
+
+const getModelType = (model) => {
+	if (model.modelType) {
+		return model.modelType;
+	}
+
+	if (model.federate) {
+		return modelTypes.FEDERATION;
+	}
+
+	return modelTypes.CONTAINER;
+};
 
 Models.findModels = findModels;
 
@@ -42,34 +55,41 @@ Models.addModel = async (teamspace, project, data) => {
 	const _id = generateUUIDString();
 	await insertOneModel(teamspace, { ...data, _id });
 
-	const eventData = { code: data.properties?.code, name: data.name, unit: data.properties?.unit };
-	if (data.federate) {
-		eventData.desc = data.desc;
-	} else {
-		eventData.type = data.type;
-	}
+	const modelType = getModelType(data);
 
-	publish(events.NEW_MODEL, { teamspace,
+	const eventData = deleteIfUndefined({
+		name: data.name,
+		number: data.number,
+		unit: data.properties?.unit,
+		code: data.properties?.code,
+		desc: data.desc,
+		type: data.type,
+	});
+
+	publish(events.NEW_MODEL, {
+		teamspace,
 		project,
 		model: _id,
 		data: eventData,
-		isFederation: !!data.federate });
+		modelType,
+	});
 
 	return _id;
 };
 
 Models.deleteModel = async (teamspace, project, model) => {
-	const deletedModel = await findAndDeleteOneModel(teamspace, { _id: model }, { federate: 1 });
+	const deletedModel = await findAndDeleteOneModel(teamspace, { _id: model }, { federate: 1, modelType: 1 });
 
 	if (!deletedModel) {
 		throw templates.modelNotFound;
 	}
 
-	publish(events.DELETE_MODEL, { teamspace, project, model, isFederation: !!deletedModel.federate });
+	publish(events.DELETE_MODEL, { teamspace, project, model, modelType: getModelType(deletedModel) });
 };
 
 Models.getModelByQuery = async (ts, query, projection) => {
 	const res = await findOneModel(ts, query, projection);
+
 	if (!res) {
 		throw templates.modelNotFound;
 	}
@@ -84,12 +104,30 @@ Models.isFederation = async (ts, model) => {
 	return federate;
 };
 
+Models.getModelType = async (ts, model) => {
+	const item = await Models.getModelById(ts, model, { _id: 0, federate: 1, modelType: 1 });
+	return getModelType(item);
+};
+
 Models.getContainerById = async (ts, container, projection) => {
 	try {
-		return await Models.getModelByQuery(ts, { _id: container, ...noFederations }, projection);
+		return await Models.getModelByQuery(ts, { _id: container, ...noFederations, ...noDrawings }, projection);
 	} catch (err) {
 		if (err?.code === templates.modelNotFound.code) {
 			throw templates.containerNotFound;
+		}
+
+		throw err;
+	}
+};
+
+Models.getDrawingById = async (ts, drawing, projection) => {
+	try {
+		return await Models.getModelByQuery(ts,
+			{ _id: drawing, modelType: modelTypes.DRAWING }, projection);
+	} catch (err) {
+		if (err?.code === templates.modelNotFound.code) {
+			throw templates.drawingNotFound;
 		}
 
 		throw err;
@@ -108,7 +146,7 @@ Models.getFederationById = async (ts, federation, projection) => {
 };
 
 Models.getContainers = (ts, ids, projection, sort) => {
-	const query = { _id: { $in: ids }, ...noFederations };
+	const query = { _id: { $in: ids }, ...noFederations, ...noDrawings };
 	return findModels(ts, query, projection, sort);
 };
 
@@ -117,28 +155,35 @@ Models.getFederations = (ts, ids, projection, sort) => {
 	return findModels(ts, query, projection, sort);
 };
 
-Models.updateModelStatus = async (teamspace, project, model, status, corId) => {
+Models.getDrawings = (ts, ids, projection, sort) => {
+	const query = { _id: { $in: ids }, modelType: modelTypes.DRAWING };
+	return findModels(ts, query, projection, sort);
+};
+
+Models.updateModelStatus = async (teamspace, project, model, status, revId) => {
 	const query = { _id: model };
 	const updateObj = { status };
-	if (corId) {
-		updateObj.corID = corId;
+	if (revId) {
+		updateObj.corID = UUIDToString(revId);
 	}
 
-	const modelData = await findOneAndUpdateModel(teamspace, query, { $set: updateObj }, { federate: 1 });
+	const modelData = await findOneAndUpdateModel(teamspace, query, { $set: updateObj }, { federate: 1, modelType: 1 });
 	if (modelData) {
-	// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
-	// trigger notifications.
+		// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
+		// trigger notifications.
 
-		publish(events.MODEL_SETTINGS_UPDATE, { teamspace,
+		publish(events.MODEL_SETTINGS_UPDATE, {
+			teamspace,
 			project,
 			model,
 			data: { status },
-			isFederation: !!modelData.federate });
+			modelType: getModelType(modelData),
+		});
 	}
 };
 
-Models.newRevisionProcessed = async (teamspace, project, model, corId, retVal, user, containers) => {
-	const { success, message, userErr } = getInfoFromCode(retVal);
+Models.newRevisionProcessed = async (teamspace, project, model, revId,
+	{ retVal, success, message, userErr }, user, containers) => {
 	const query = { _id: model };
 	const set = {};
 	const unset = { corID: 1 };
@@ -154,45 +199,34 @@ Models.newRevisionProcessed = async (teamspace, project, model, corId, retVal, u
 			set.subModels = containers.map(({ project: _id, group }) => deleteIfUndefined({ _id, group }));
 		}
 	} else {
-		set.status = 'failed';
+		set.status = processStatuses.FAILED;
 		set.errorReason = { message, timestamp: new Date(), errorCode: retVal };
 	}
 
 	const updated = await updateOneModel(teamspace, query, { $set: set, $unset: unset });
 	if (updated) {
-	// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
-	// trigger notifications.
+		// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
+		// trigger notifications.
 
-		// only sent for v4 compatibility
+		const { errorReason, subModels, status, timestamp } = set;
+		const data = deleteIfUndefined({
+			timestamp,
+			errorReason: errorReason ? { ...errorReason, userErr } : undefined,
+			status: status ?? processStatuses.OK,
+			containers: subModels,
+		});
+
+		const modelType = containers ? modelTypes.FEDERATION : modelTypes.CONTAINER;
 		publish(events.MODEL_IMPORT_FINISHED,
-			{ teamspace,
-				model,
-				success,
-				message,
-				userErr,
-				corId,
-				errCode: retVal,
-				user });
-
-		const data = { ...set, status: set.status || 'ok' };
-		if (data.subModels) {
-			data.containers = data.subModels;
-			delete data.subModels;
-		}
-
-		publish(events.MODEL_SETTINGS_UPDATE, { teamspace,
-			project,
-			model,
-			data,
-			isFederation: !!containers });
-
-		if (success) {
-			publish(events.NEW_REVISION, { teamspace,
+			{
+				teamspace,
 				project,
 				model,
-				revision: corId,
-				isFederation: !!containers });
-		}
+				revId,
+				user,
+				modelType,
+				data,
+			});
 	}
 };
 
@@ -225,17 +259,20 @@ Models.updateModelSettings = async (teamspace, project, model, data) => {
 	}
 
 	if (Object.keys(updateJson).length) {
-		const result = await findOneAndUpdateModel(teamspace, { _id: model }, updateJson, { federate: 1 });
+		const result = await findOneAndUpdateModel(teamspace, { _id: model }, updateJson,
+			{ federate: 1, modelType: 1 });
 
 		if (!result) {
 			throw templates.modelNotFound;
 		}
 
-		publish(events.MODEL_SETTINGS_UPDATE, { teamspace,
+		publish(events.MODEL_SETTINGS_UPDATE, {
+			teamspace,
 			project,
 			model,
 			data,
-			isFederation: !!result.federate });
+			modelType: getModelType(result),
+		});
 	}
 };
 

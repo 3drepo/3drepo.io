@@ -19,6 +19,8 @@ import EventEmitter from 'eventemitter3';
 
 import { UnityUtil } from '@/globals/unity-util';
 import { isEmpty, isString } from 'lodash';
+import { COLOR } from '@/v5/ui/themes/theme';
+import { hexToOpacity } from '@/v5/helpers/colors.helper';
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import {
 	VIEWER_EVENTS,
@@ -115,7 +117,10 @@ export class ViewerService {
 		unityHolder.style['pointer-events'] = 'all';
 
 		this.element.appendChild(this.viewer);
-		this.viewer.appendChild(unityHolder);
+
+		if (!this.viewer.hasChildNodes()) {
+			this.viewer.appendChild(unityHolder);
+		}
 		this.canvas = unityHolder;
 
 		this.unityLoaderScript = document.createElement('script');
@@ -242,6 +247,8 @@ export class ViewerService {
 	}
 
 	public pickPointEvent(pointInfo) {
+		this.emit(VIEWER_EVENTS.PICK_POINT, pointInfo);
+
 		if (this.measureMode !== VIEWER_MEASURING_MODE.POINT) {
 			return;
 		}
@@ -542,7 +549,6 @@ export class ViewerService {
 				if (ids) {
 					const uniqueIds = Array.from(new Set(ids));
 					if (uniqueIds.length) {
-						// eslint-disable-next-line @typescript-eslint/await-thenable
 						await UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi, forceReHighlight);
 						this.emit(VIEWER_EVENTS.HIGHLIGHT_OBJECTS, {account, model, uniqueIds });
 						return;
@@ -1102,7 +1108,7 @@ export class ViewerService {
 		}
 	}
 
-	public async setCamera({ position, up, view_dir, look_at, type, orthographicSize, account, model }) {
+	public async setCamera({ position, up, view_dir, look_at, type, orthographicSize, account, model }, animation = true) {
 		await this.isModelReady();
 		UnityUtil.setViewpoint(
 			position,
@@ -1112,7 +1118,8 @@ export class ViewerService {
 			type,
 			orthographicSize,
 			account,
-			model
+			model,
+			animation ? undefined : 0,
 		);
 
 		this.emit(VIEWER_EVENTS.CAMERA_PROJECTION_SET, type);
@@ -1321,6 +1328,47 @@ export class ViewerService {
 			this.on(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, onModeChanged);
 		})
 
+	}
+
+	// part of the hacek for callibratio tool plane
+	private calibrationtoolmode = 'none';
+
+	/**
+	 * Drawings Calibration
+	 */
+	public setCalibrationToolMode(mode: string) {
+		UnityUtil.setCalibrationToolMode(mode);
+		this.calibrationtoolmode = mode;
+	}
+
+	public setCalibrationToolVerticalPlanes(lower, upper) {
+		UnityUtil.setCalibrationToolVerticalPlanes(lower, upper);
+	}
+
+	public selectCalibrationToolPlane(plane) {
+		const selectedPlane = plane === 'none' ? 'upper' : plane; // If none plane is selected show as if the top plane is selected.
+		const unselectedPlane = selectedPlane === 'upper' ? 'lower' : 'upper';
+
+		Viewer.setCalibrationToolVerticalPlaneColours(selectedPlane, hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 44), COLOR.PRIMARY_MAIN,  COLOR.PRIMARY_MAIN_CONTRAST);
+		Viewer.setCalibrationToolVerticalPlaneColours(unselectedPlane, hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 0), COLOR.PRIMARY_MAIN, hexToOpacity(COLOR.PRIMARY_MAIN_CONTRAST, 0));
+
+		UnityUtil.selectCalibrationToolVerticalPlane(plane);
+	}
+
+	public setCalibrationToolDrawing(image: any, rect: number[]) {
+		UnityUtil.setCalibrationToolDrawing(image, rect);
+	}
+
+	public calibrationPlanesChanged(planes) {
+		this.emit(VIEWER_EVENTS.UPDATE_CALIBRATION_PLANES, planes);
+	}
+
+	public setCalibrationToolFloorToObject(teamspace, modelId, meshId) {
+		UnityUtil.setCalibrationToolFloorToObject(teamspace, modelId, meshId);
+	}
+
+	public setCalibrationToolVerticalPlaneColours(plane, fill, border, drawing) {
+		UnityUtil.setCalibrationToolVerticalPlaneColours(plane, fill, border, drawing);
 	}
 }
 

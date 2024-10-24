@@ -17,7 +17,7 @@
 import { PureComponent, ComponentType, SyntheticEvent } from 'react';
 import { Tooltip } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
-import Place from '@mui/icons-material/Place';
+import Place from '@assets/icons/outlined/issue-outlined.svg';
 
 import ChangeHistory from '@mui/icons-material/ChangeHistory';
 import Clear from '@mui/icons-material/Clear';

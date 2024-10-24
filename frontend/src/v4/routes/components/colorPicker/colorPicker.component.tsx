@@ -22,7 +22,7 @@ import ArrowDropDown from '@mui/icons-material/ArrowDropDown';
 import { identity } from 'lodash';
 import { PureComponent, useEffect, useRef, useState, createRef } from 'react';
 
-import { componentToHex, hexToGLColor, rgbaToHex, GLToHexColor } from '../../../helpers/colors';
+import { componentToHex, hexToGLColor, GLToHexColor, rgbToHex } from '@/v5/helpers/colors.helper';
 import {
 	Canvas,
 	CanvasContainer,
@@ -82,9 +82,8 @@ const alphaToHex = (val) => componentToHex(Math.round(val));
 const getCanvasColor = (event, canvasCtx) => {
 	const x = event.offsetX;
 	const y = event.offsetY;
-	const imageData = canvasCtx.getImageData(x, y, 1, 1).data;
-	const rgbaColor = `rgba(${imageData[0]}, ${imageData[1]}, ${imageData[2]}, 1)`;
-	return rgbaToHex(rgbaColor).slice(0, -2);
+	const [r, g, b] = canvasCtx.getImageData(x, y, 1, 1).data;
+	return rgbToHex([r, g, b]);
 };
 
 interface IProps {

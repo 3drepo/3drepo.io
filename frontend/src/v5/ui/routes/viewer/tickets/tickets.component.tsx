@@ -35,11 +35,13 @@ import { TicketDetailsCard } from './ticketDetailsCard/ticketsDetailsCard.compon
 import { NewTicketCard } from './newTicket/newTicket.component';
 import { ViewerParams } from '../../routes.constants';
 import { TicketContextComponent } from './ticket.context';
+import { Viewer } from '@/v4/services/viewer/viewer';
 
 export const Tickets = () => {
 	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const view = TicketsCardHooksSelectors.selectView();
+	const newTicketPins = TicketsCardHooksSelectors.selectNewTicketPins();
 
 	const readOnly = isFederation
 		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
@@ -66,15 +68,12 @@ export const Tickets = () => {
 		);
 	}, [containerOrFederation, revision]);
 
-	useEffect(() => () => {
-		if (view === TicketsCardViews.New) {
+	useEffect(() => {
+		if (view !== TicketsCardViews.New) {
 			TicketsCardActionsDispatchers.setUnsavedTicket(null);
+			newTicketPins.forEach(({ id }) => Viewer.removePin(id));
 		}
 	}, [view]);
-
-	useEffect(() => {
-		TicketsCardActionsDispatchers.setUnsavedTicket(null);
-	}, [containerOrFederation]);
 
 	return (
 		<TicketContextComponent isViewer containerOrFederation={containerOrFederation}>

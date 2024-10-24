@@ -26,25 +26,25 @@ const testGetRequest = () => {
 	describe('Get request', () => {
 		test('Should make a get request', async () => {
 			const getResponse = generateRandomString();
-			axios.default.get.mockResolvedValueOnce(getResponse);
+			axios.get.mockResolvedValueOnce(getResponse);
 
 			const uri = generateRandomString();
 			const res = await WebRequests.get(uri);
 			expect(res).toEqual(getResponse);
-			expect(axios.default.get).toHaveBeenCalledTimes(1);
-			expect(axios.default.get).toHaveBeenCalledWith(uri, {});
+			expect(axios.get).toHaveBeenCalledTimes(1);
+			expect(axios.get).toHaveBeenCalledWith(uri, {});
 		});
 
 		test('Should make a get request with headers', async () => {
 			const getResponse = generateRandomString();
-			axios.default.get.mockResolvedValueOnce(getResponse);
+			axios.get.mockResolvedValueOnce(getResponse);
 
 			const uri = generateRandomString();
 			const headers = { Authorisation: `Bearer ${generateRandomString()}` };
 			const res = await WebRequests.get(uri, headers);
 			expect(res).toEqual(getResponse);
-			expect(axios.default.get).toHaveBeenCalledTimes(1);
-			expect(axios.default.get).toHaveBeenCalledWith(uri, { headers });
+			expect(axios.get).toHaveBeenCalledTimes(1);
+			expect(axios.get).toHaveBeenCalledWith(uri, { headers });
 		});
 	});
 };
@@ -55,16 +55,16 @@ const testPostRequest = () => {
 			const data = { someData: generateRandomString() };
 			const uri = generateRandomString();
 			await WebRequests.post(uri, data);
-			expect(axios.default.post).toHaveBeenCalledTimes(1);
-			expect(axios.default.post).toHaveBeenCalledWith(uri, data, undefined);
+			expect(axios.post).toHaveBeenCalledTimes(1);
+			expect(axios.post).toHaveBeenCalledWith(uri, data, undefined);
 		});
 
 		test('Should make a post request with query params', async () => {
 			const config = { params: { someData: generateRandomString() } };
 			const uri = generateRandomString();
 			await WebRequests.post(uri, undefined, config);
-			expect(axios.default.post).toHaveBeenCalledTimes(1);
-			expect(axios.default.post).toHaveBeenCalledWith(uri, undefined, config);
+			expect(axios.post).toHaveBeenCalledTimes(1);
+			expect(axios.post).toHaveBeenCalledWith(uri, undefined, config);
 		});
 	});
 };

@@ -21,7 +21,6 @@ import { Group, GroupOverride } from '@/v5/store/tickets/tickets.types';
 import { useContext, useEffect } from 'react';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
-import { rgbaToHex } from '@/v4/helpers/colors';
 import { FormattedMessage } from 'react-intl';
 import { GroupIconComponent } from '@/v5/ui/routes/viewer/groups/groupItem/groupIcon/groupIcon.component';
 import { TicketButton } from '@/v5/ui/routes/viewer/tickets/ticketButton/ticketButton.styles';
@@ -43,6 +42,7 @@ import {
 } from './groupItem.styles';
 import { GroupToggle } from '../../groupToggle/groupToggle.component';
 import { TicketGroupsContext } from '../../ticketGroupsContext';
+import { RgbArray, rgbToHex } from '@/v5/helpers/colors.helper';
 
 type GroupProps = { override: GroupOverride, index: number };
 export const GroupItem = ({ override, index }: GroupProps) => {
@@ -105,8 +105,8 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 		}
 	};
 
-	const alphaColor = (color || [255, 255, 255]).concat(opacity);
-	const alphaHexColor = rgbaToHex(alphaColor.join());
+	const alphaColor = (color || [255, 255, 255]).concat(opacity) as RgbArray;
+	const alphaHexColor = rgbToHex(alphaColor);
 
 	const highlightGroupObjects = () => {
 		const objects = convertToV4GroupNodes((group as Group).objects);

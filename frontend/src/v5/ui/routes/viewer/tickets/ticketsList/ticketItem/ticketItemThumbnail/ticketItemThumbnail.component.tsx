@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ViewpointOverlay, ImagePlaceholder, Thumbnail, ThumbnailContainer, ViewpointIcon, ImageIcon } from './ticketItemThumbnail.styles';
+import { ViewpointOverlay, ThumbnailContainer, ViewpointIcon } from './ticketItemThumbnail.styles';
 import { get, has } from 'lodash';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
@@ -23,6 +23,7 @@ import { getTicketResourceUrl, modelIsFederation } from '@/v5/store/tickets/tick
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { AdditionalProperties } from '../../../tickets.constants';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { Thumbnail } from '@controls/thumbnail/thumbnail.component';
 
 type ITicketItemThumbnail = {
 	ticket: ITicket;
@@ -49,11 +50,7 @@ export const TicketItemThumbnail = ({ ticket, selectTicket }: ITicketItemThumbna
 
 	return (
 		<ThumbnailContainer onClick={goToViewpoint}>
-			{thumbnailSrc ? ( <Thumbnail src={thumbnailSrc} loading="lazy" /> ) : (
-				<ImagePlaceholder>
-					<ImageIcon />
-				</ImagePlaceholder>
-			)}
+			<Thumbnail src={thumbnailSrc} />
 			{hasViewpoint && (
 				<ViewpointOverlay>
 					<ViewpointIcon />

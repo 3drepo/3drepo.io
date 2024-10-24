@@ -17,15 +17,18 @@
 
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
-import { isEmpty } from 'lodash';
+import _, { flatten, isEmpty } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { selectCurrentQuotaSeats } from '@/v5/store/teamspaces/teamspaces.selectors';
+import { updatePermissionsOrTriggerModal } from '@components/shared/updatePermissionModal/updatePermissionModal.component';
+import { getProjectPermissionLabelFromType } from '@/v4/constants/project-permissions';
+import { getModelPermissionLabelFromType } from '@/v4/constants/model-permissions';
+import { TEAMSPACE_PERMISSIONS } from '@/v4/constants/teamspace-permissions';
 import {
 	FederationReminderDialog
 } from '../../routes/modelsPermissions/components/federationReminderDialog/federationReminderDialog.component';
-import { RemoveUserDialog } from '../../routes/users/components/removeUserDialog/removeUserDialog.component';
 import * as API from '../../services/api';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
@@ -36,9 +39,7 @@ import {
 	selectCurrentTeamspace,
 	selectInvitations,
 	selectProject,
-	selectProjectPermissions,
 	selectUserNotExists,
-	selectUsers,
 	UserManagementActions,
 	UserManagementTypes,
 } from '../userManagement';
@@ -285,6 +286,13 @@ export function* fetchProject({ project }) {
 
 export function* updateProjectPermissions({ permissions }) {
 	try {
+		const shouldUpdate = yield updatePermissionsOrTriggerModal({
+			permissionsType: getProjectPermissionLabelFromType(permissions[0].permissions[0] || ''),
+			permissionsCount: permissions.length,
+		});
+		if (!shouldUpdate) {
+			return;
+		}
 		const teamspace = yield select(selectCurrentTeamspace);
 		const {name} = yield select(selectProject);
 		const project = {name, permissions};
@@ -319,7 +327,7 @@ export function* fetchModelsPermissions({ models }) {
 		yield put(UserManagementActions.fetchModelPermissionsSuccess(data));
 		yield put(UserManagementActions.setProjectsPending(false));
 	} catch (error) {
-		yield put(DialogActions.showEndpointErrorDialog('get', 'models/federations permissions', error));
+		yield put(DialogActions.showEndpointErrorDialog('get', 'containers/federations/drawings permissions', error));
 		yield put(UserManagementActions.setProjectsPending(false));
 	}
 }
@@ -360,23 +368,32 @@ export function* updateModelsPermissionsPre({ modelsWithPermissions }) {
 			yield put(resolveUpdate);
 		}
 	} catch (error) {
-		yield put(DialogActions.showEndpointErrorDialog('update', 'models/federations permissions', error));
+		yield put(DialogActions.showEndpointErrorDialog('update', 'containers/federations/drawings permissions', error));
 	}
 }
 
+const getUsersCountForModelsPermissionChanges = (permissions) => new Set(flatten(permissions.map((perm) => perm.permissions.map((p) => p.user)))).size;
 export function* updateModelsPermissions({ modelsWithPermissions }) {
 	try {
+		const shouldUpdate = yield updatePermissionsOrTriggerModal({
+			permissionsType: getModelPermissionLabelFromType(modelsWithPermissions[0].permissions[0].permission || ''),
+			permissionsCount: getUsersCountForModelsPermissionChanges(modelsWithPermissions),
+		});
+		if (!shouldUpdate) {
+			return;
+		}
+
 		const teamspace = yield select(selectCurrentTeamspace);
 		const response = yield API.updateModelsPermissions(teamspace, modelsWithPermissions);
 
 		if (response.status === 200) {
 			yield put(UserManagementActions.updateModelPermissionsSuccess(modelsWithPermissions));
-			yield put(SnackbarActions.show('Models/federations permissions updated'));
+			yield put(SnackbarActions.show('containers/federations/drawings permissions updated'));
 		} else {
-			yield put(DialogActions.showErrorDialog('update', 'models/federations permissions', dialogMessages.UPDATE_ERROR));
+			yield put(DialogActions.showErrorDialog('update', 'containers/federations/drawings permissions', dialogMessages.UPDATE_ERROR));
 		}
 	} catch (error) {
-		yield put(DialogActions.showEndpointErrorDialog('update', 'models/federations permissions', error));
+		yield put(DialogActions.showEndpointErrorDialog('update', 'containers/federations/drawings permissions', error));
 	}
 }
 

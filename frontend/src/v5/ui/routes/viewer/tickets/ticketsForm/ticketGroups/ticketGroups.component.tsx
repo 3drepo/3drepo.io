@@ -25,8 +25,7 @@ import { cloneDeep, isString, isUndefined, uniqBy, xor } from 'lodash';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { selectLeftPanels } from '@/v4/modules/viewerGui';
 import { selectHiddenGeometryVisible } from '@/v4/modules/tree/tree.selectors';
-import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { ViewpointsActions } from '@/v4/modules/viewpoints';
+import { TicketsCardActionsDispatchers, ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Container, Popper } from './ticketGroups.styles';
@@ -196,7 +195,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	}, [hasClearedOverrides]);
 
 	useEffect(() => {
-		dispatch(ViewpointsActions.clearColorOverrides());
+		ViewpointsActionsDispatchers.clearColorOverrides();
 
 		ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED, clearHighlightedIndex);
 

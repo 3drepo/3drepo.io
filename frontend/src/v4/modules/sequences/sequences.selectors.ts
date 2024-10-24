@@ -18,7 +18,6 @@
 import { createSelector } from 'reselect';
 
 import { STEP_SCALE } from '../../constants/sequences';
-import { GLToHexColor } from '../../helpers/colors';
 import { selectSettings } from '../model';
 import { getDateByStep, getSelectedFrame, getSelectedFrameIndex } from './sequences.helper';
 
@@ -49,10 +48,6 @@ export const selectInitialised = createSelector(
 
 export const selectHasSequences = createSelector(
 	selectSequences, (sequences) => (sequences || []).length > 0
-);
-
-export const selectStateDefinitions = createSelector(
-	selectSequencesDomain, (state) => state.stateDefinitions
 );
 
 export const selectOpenOnToday = createSelector(
@@ -132,6 +127,7 @@ export const selectSelectedStartingDate = createSelector(
 	}
 );
 
+const FRAMES_TO_FETCH = 4;
 export const selectNextKeyFramesDates =  createSelector(
 	selectSelectedStartingDate, selectStepScale, selectStepInterval , selectEndDate, selectFrames,
 		(startingDate, scale, interval, endDate, frames) => {
@@ -142,9 +138,9 @@ export const selectNextKeyFramesDates =  createSelector(
 			if (scale !== STEP_SCALE.FRAME) {
 				let lastFrame = frames[frameIndex];
 				let nextFrame = null;
-				let date = getDateByStep(startingDate, scale, interval);
+				let date = startingDate;
 				endDate = new Date(endDate);
-				for (let i = 0; i < 3 ; i++) {
+				for (let i = 0; i < FRAMES_TO_FETCH - 1; i++) {
 					date = getDateByStep(date, scale, interval);
 					nextFrame = getSelectedFrame(frames, date);
 
@@ -157,10 +153,9 @@ export const selectNextKeyFramesDates =  createSelector(
 					lastFrame = nextFrame;
 				}
 			} else {
-				for (let i = frameIndex; i < frameIndex + 3 && i < frames.length; ++i) {
+				for (let i = frameIndex + 1; i < frameIndex + FRAMES_TO_FETCH && i < frames.length; ++i) {
 					keyFrames.push(new Date(frames[i].dateTime));
 				}
-
 			}
 
 			return keyFrames.filter((d) => d <= endDate);
@@ -174,100 +169,16 @@ export const selectSelectedEndingDate = createSelector(
 		}
 );
 
-export const selectLastSelectedFrame = createSelector(
-	selectFrames, selectSequencesDomain, (frames, state) => {
-		return state.lastSelectedDate ? getSelectedFrame(frames, state.lastSelectedDate) : undefined;
-	}
-);
-
 export const selectSelectedFrame = createSelector(
 	selectFrames, selectSelectedStartingDate, getSelectedFrame
 );
 
-export const selectSelectedStateId = createSelector(
-	selectSelectedFrame, (frame) =>  (frame || {}).state
-);
-
 export const selectSelectedFrameViewpoint = createSelector(
-	selectSelectedFrame,  (frame) =>  (frame || {}).viewpoint
+	selectSelectedFrame, (frame) => frame?.viewpoint
 );
 
-export const selectLastSelectedStateId = createSelector(
-	selectLastSelectedFrame, (frame) =>  (frame || {}).state
-);
-
-export const selectIsViewpointFrame = createSelector(
-	selectSelectedFrameViewpoint, (viewpoint) => Boolean(viewpoint)
-);
-
-export const selectIsLoadingFrameState = createSelector(
-	selectSelectedStateId, selectStateDefinitions, (stateId, stateDefinitions) => {
-		return stateId && !(stateDefinitions || {}).hasOwnProperty(stateId);
-	}
-);
-
-export const selectSelectedStateDefinition = createSelector(
-	selectSequencesDomain, (state) => state.selectedStateDefinition || {}
-);
-
-export const selectSelectedState = createSelector(
-	selectSelectedStateDefinition, selectLastSelectedStateId, selectStateDefinitions,
-	(selectedStateDefinition, prevStateId, stateDefinitions) => {
-		return selectedStateDefinition || stateDefinitions[prevStateId];
-	}
-);
-
-const convertToDictionary = (stateChanges) => {
-	return stateChanges.reduce((dict, actual) => {
-		actual.shared_ids.forEach((id) => {
-			dict[id] = actual.value;
-		});
-
-		return dict;
-	}, {});
-};
-
-export const selectSelectedFrameColors = createSelector(
-	selectSelectedState, (state) => {
-		if (!state) {
-			return null;
-		}
-
-		try {
-			const colors = (state?.color || []).map((c) => ({...c, value: GLToHexColor(c.value)}));
-			return convertToDictionary(colors);
-		} catch (e) {
-			return {};
-		}
-	}
-);
-
-export const selectSelectedFrameTransparencies = createSelector(
-	selectSelectedState, selectSelectedStartingDate, (state) => {
-		if (!state) {
-			return null;
-		}
-
-		try {
-			return  convertToDictionary(state.transparency);
-		} catch (e) {
-			return {};
-		}
-	}
-);
-
-export const selectSelectedFrameTransformations = createSelector(
-	selectSelectedState, (state) => {
-		if (!state) {
-			return null;
-		}
-
-		try {
-			return  convertToDictionary(state.transformation);
-		} catch (e) {
-			return {};
-		}
-	}
+export const selectFramePending = createSelector(
+	selectSelectedFrameViewpoint, (viewpoint) => !viewpoint
 );
 
 // Filters the activities by range as well as it's subActivities
@@ -308,9 +219,4 @@ export const selectCurrentActivities = createSelector(
 			const foundActivities = getActivitiesByRange(activities || [], minSelectedDate, maxSelectedDate);
 			return replaceDates(foundActivities);
 		}
-);
-
-export const selectSelectedHiddenNodes = createSelector(
-	selectSelectedFrameTransparencies, (transparencies) =>
-		transparencies ? Object.keys(transparencies).filter((nodeId) => transparencies[nodeId] === 0 ) : null
 );

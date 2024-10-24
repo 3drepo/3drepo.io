@@ -29,6 +29,8 @@ import {
 	PROJECT_ROUTE,
 	BOARD_ROUTE,
 	TICKETS_ROUTE,
+	ViewerParams,
+	DashboardParams,
 } from '@/v5/ui/routes/routes.constants';
 import { useSelector } from 'react-redux';
 import { selectRevisions } from '@/v4/modules/model/model.selectors';
@@ -37,9 +39,10 @@ import { BreadcrumbItem } from '@controls/breadcrumbs/breadcrumbDropdown/breadcr
 import { Breadcrumbs } from '@controls/breadcrumbs';
 import { BreadcrumbItemOrOptions } from '@controls/breadcrumbs/breadcrumbs.component';
 import { sortBreadcrumbOptions } from '@controls/breadcrumbs/breadcrumbs.helpers';
+import { viewerRoute } from '@/v5/services/routing/routing';
 
 export const BreadcrumbsRouting = () => {
-	const params = useParams();
+	const params = useParams<ViewerParams>();
 	const { teamspace, revision, containerOrFederation: containerOrFederationId } = params;
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
@@ -47,7 +50,6 @@ export const BreadcrumbsRouting = () => {
 
 	const federations = FederationsHooksSelectors.selectFederations();
 	const containers = ContainersHooksSelectors.selectContainers();
-
 	// Because we are using v4 viewer for now, we use the v4 selector.
 	const revisions = useSelector(selectRevisions);
 
@@ -104,14 +106,14 @@ export const BreadcrumbsRouting = () => {
 			},
 			{
 				title: project?.name,
-				to: generatePath(FEDERATIONS_ROUTE, params),
+				to: generatePath(FEDERATIONS_ROUTE, params as DashboardParams),
 			},
 		];
 
 		if (isFederation) { // In the case the user is viewing a federation
 			options = federations.map(({ _id, name }) => ({
 				title: name,
-				to: generatePath(VIEWER_ROUTE, { ...params, containerOrFederation: _id, revision: null }),
+				to: viewerRoute(params.teamspace, params.project, _id, null),
 				selected: _id === containerOrFederationId,
 			}));
 
@@ -119,7 +121,7 @@ export const BreadcrumbsRouting = () => {
 		} else { // In the case that the user is viewing a container
 			options = containers.map(({ _id, name }) => ({
 				title: name,
-				to: generatePath(VIEWER_ROUTE, { ...params, containerOrFederation: _id, revision: null }),
+				to: viewerRoute(params.teamspace, params.project, _id, null),
 				selected: _id === containerOrFederationId,
 			}));
 			breadcrumbs.push({ options: sortBreadcrumbOptions(options) });
@@ -129,7 +131,7 @@ export const BreadcrumbsRouting = () => {
 
 			const revisionOptions = revisions.map(({ _id, tag }) => ({
 				title: tag || noName,
-				to: generatePath(VIEWER_ROUTE, { ...params, revision: tag || _id }),
+				to: viewerRoute(params.teamspace, params.project, params.containerOrFederation, tag || _id),
 				selected: _id === revision || tag === revision,
 			}));
 

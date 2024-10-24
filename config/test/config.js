@@ -147,6 +147,7 @@ module.exports = {
 		}
 	},
 	uploadSizeLimit: 8388608, // 8MB in test enviroment
+	drawingSizeLimit: 8388608, // 8MB in test enviroment
 	test_helper_api: false,
 	paypal:{
 		validateIPN: false,

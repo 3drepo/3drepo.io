@@ -63,7 +63,11 @@ export const COLOR = {
 	SUCCESS_MAIN: '#2E7D32',
 	SUCCESS_DARK: '#1B5E20',
 	SUCCESS_LIGHT: '#4CAF50',
+	SUCCESS_LIGHTEST: '#EAF2EA',
 	WARNING_MAIN: '#ED6C02',
+	WARNING_DARK: '#BD5601',
+	WARNING_LIGHT: '#F6B580',
+	WARNING_LIGHTEST: '#FDF0E5',
 	FAVOURITE_MAIN: '#F5CB34',
 	FAVOURITE_DARK: '#D4AE26',
 	FAVOURITE_MID: '#FDBF4E',
@@ -229,9 +233,13 @@ export const palette = {
 		main: COLOR.SUCCESS_MAIN,
 		dark: COLOR.SUCCESS_DARK,
 		light: COLOR.SUCCESS_LIGHT,
+		lightest: COLOR.SUCCESS_LIGHTEST,
 	},
 	warning: {
 		main: COLOR.WARNING_MAIN,
+		dark: COLOR.WARNING_DARK,
+		light: COLOR.WARNING_LIGHT,
+		lightest: COLOR.WARNING_LIGHTEST,
 	},
 	favourite: {
 		main: COLOR.FAVOURITE_MAIN,
@@ -257,12 +265,6 @@ export const palette = {
 		level_9: SHADOW.LEVEL_9,
 		level_10: SHADOW.LEVEL_10,
 	},
-};
-
-export const hexToOpacity = (hex: string, opacityInPercentage: number): string => {
-	const formattedOpacity = Math.floor((opacityInPercentage / 100) * 255)
-		.toString(16).padStart(2, '0');
-	return hex + formattedOpacity;
 };
 
 export const theme = createTheme({
@@ -496,6 +498,7 @@ export const theme = createTheme({
 				PopperProps: {
 					// This is necessary for overriding styles of v4 tooltips
 					container: () => document.getElementById('v4Overrides'),
+					draggable: false,
 				},
 				disableInteractive: true,
 			},
@@ -504,6 +507,7 @@ export const theme = createTheme({
 					backgroundColor: COLOR.SECONDARY_DARK,
 					padding: '7px 10px 8px 10px',
 					borderRadius: '8px',
+					userSelect: 'none',
 					...typography.caption,
 				},
 				tooltipPlacementBottom: {

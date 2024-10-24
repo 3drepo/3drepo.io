@@ -18,7 +18,6 @@
 import { viewerRoute } from '@/v5/services/routing/routing';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { IContainer } from '@/v5/store/containers/containers.types';
-import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision/latestRevision.component';
 import { FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { Highlight } from '@controls/highlight';
 import { SearchContext } from '@controls/search/searchContext';
@@ -26,6 +25,8 @@ import { useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router-dom';
 import { DashboardListItemTitle } from '../dashboardListItemTitle.component';
+import { LatestRevision } from '@components/shared/latestRevision/latestRevision.component';
+import { formatMessage } from '@/v5/services/intl';
 
 interface IContainerTitle extends FixedOrGrowContainerProps {
 	container: IContainer;
@@ -65,6 +66,7 @@ export const DashboardListItemContainerTitle = ({
 					status={container.status}
 					error={container.errorReason}
 					hasRevisions={hasRevisions}
+					emptyLabel={formatMessage({ id: 'containers.list.item.title.latestRevision.empty', defaultMessage: 'Container empty' })}
 				/>
 			)}
 			selected={isSelected}

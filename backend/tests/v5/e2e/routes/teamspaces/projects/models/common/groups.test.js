@@ -19,6 +19,8 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+
 const { valueOperators } = require(`${src}/models/metadata.rules.constants`);
 const { convertLegacyRules } = require(`${src}/schemas/rules`);
 
@@ -43,8 +45,8 @@ const testExportGroups = () => {
 
 	const container = ServiceHelper.generateRandomModel();
 	const containerNoGroups = ServiceHelper.generateRandomModel();
-	const fed = ServiceHelper.generateRandomModel({ isFederation: true });
-	const fedNoGroups = ServiceHelper.generateRandomModel({ isFederation: true });
+	const fed = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
+	const fedNoGroups = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
 
 	const groups = [
 		ServiceHelper.generateLegacyGroup(teamspace, container._id),
@@ -143,7 +145,7 @@ const testImportGroups = () => {
 	};
 
 	const container = ServiceHelper.generateRandomModel();
-	const fed = ServiceHelper.generateRandomModel({ isFederation: true });
+	const fed = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
 
 	const groups = [
 		ServiceHelper.generateLegacyGroup(teamspace, container._id),

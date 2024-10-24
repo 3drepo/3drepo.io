@@ -20,8 +20,15 @@ const { src } = require('../../../../../../../../helper/path');
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
 
+jest.mock('../../../../../../../../../../src/v5/models/revisions');
+const RevisionsModel = require(`${src}/models/revisions`);
+
 const Revisions = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions`);
 const { templates } = require(`${src}/utils/responseCodes`);
+
+const { generateRandomString } = require('../../../../../../../../helper/services');
+
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
@@ -76,6 +83,40 @@ const testValidateUpdateRevisionData = () => {
 	});
 };
 
+const testRevisionExists = () => {
+	describe('Check if a revision exists', () => {
+		const req = {
+			params: {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				revision: generateRandomString(),
+			},
+		};
+
+		test('should respond with revisionNotFound if the revision doesnt exist', async () => {
+			const mockCB = jest.fn(() => {});
+			RevisionsModel.getRevisionByIdOrTag.mockRejectedValueOnce(templates.revisionNotFound);
+
+			await Revisions.revisionExists(modelTypes.DRAWING)(req, {}, mockCB);
+
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.revisionNotFound.code);
+		});
+
+		test('next() should be called if the revision exists', async () => {
+			const mockCB = jest.fn(() => {});
+			RevisionsModel.getRevisionByIdOrTag.mockResolvedValueOnce({});
+
+			await Revisions.revisionExists(modelTypes.CONTAINER)(req, {}, mockCB);
+
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).not.toHaveBeenCalled();
+		});
+	});
+};
+
 describe('middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions', () => {
 	testValidateUpdateRevisionData();
+	testRevisionExists();
 });

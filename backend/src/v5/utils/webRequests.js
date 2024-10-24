@@ -26,9 +26,9 @@ WebRequests.get = (uri, headers) => {
 		options.headers = headers;
 	}
 
-	return axios.default.get(uri, options);
+	return axios.get(uri, options);
 };
 
-WebRequests.post = (uri, data, config) => axios.default.post(uri, data, config);
+WebRequests.post = (uri, data, config) => axios.post(uri, data, config);
 
 module.exports = WebRequests;

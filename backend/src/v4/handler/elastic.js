@@ -19,6 +19,7 @@
 const { Client } = require("@elastic/elasticsearch");
 const logger = require("../logger");
 const systemLogger = logger.systemLogger;
+const { host } = require("../config");
 const elasticConfig = require("../config").elastic;
 const repoLicense = require("../config").repoLicense;
 const { v5Path } = require("../../interop");
@@ -46,13 +47,33 @@ const loginRecordMapping = {
 	"OS.Name": { "type": "text" },
 	"OS.Version": { "type": "text" },
 	"Device": { "type": "text" },
-	"licenseKey": { "type": "keyword" }
+	"licenseKey": { "type": "keyword" },
+	"namespace": { "type": "text" },
+	"host": { "type": "text" }
+};
+
+const activityRecordIndex = "io-activity";
+const activityRecordMapping = {
+	"status" : { "type": "long" },
+	"code" : { "type": "text" },
+	"latency" : { "type": "ip" },
+	"contentLength" : { "type": "long" },
+	"user" : { "type": "text" },
+	"method" : { "type": "text" },
+	"originalUrl": { "type": "text" },
+	"timestamp": { "type": "date" },
+	"namespace": { "type": "text" },
+	"host": { "type": "text" }
 };
 
 const indicesMappings = [
 	{
 		index: loginRecordIndex,
 		mapping: loginRecordMapping
+	},
+	{
+		index: activityRecordIndex,
+		mapping: activityRecordMapping
 	}
 ];
 
@@ -94,10 +115,17 @@ const establishIndices = async (client)=>{
 
 const elasticClientPromise = createElasticClient();
 
-const createElasticRecord = async (index, body, id) => {
+Elastic.createElasticRecord = async (index, body, id) => {
 	try {
 		const elasticClient = await elasticClientPromise;
 		if (elasticClient && body) {
+			const { namespace } = elasticConfig;
+			if (namespace) {
+				body.namespace = namespace;
+			}
+			if (host) {
+				body.host = host;
+			}
 			await elasticClient.create({
 				index,
 				id,
@@ -131,7 +159,7 @@ Elastic.createLoginRecord = async (username, loginRecord) => {
 		"licenseKey": repoLicense
 	};
 
-	await createElasticRecord(loginRecordIndex, elasticBody, elasticBody.Id);
+	await Elastic.createElasticRecord(loginRecordIndex, elasticBody, elasticBody.Id);
 };
 
 Elastic.subscribeToV5Events = () => {
@@ -139,5 +167,7 @@ Elastic.subscribeToV5Events = () => {
 		await Elastic.createLoginRecord(username, loginRecord);
 	});
 };
+
+Elastic.activityRecordIndex = activityRecordIndex;
 
 module.exports = Elastic;

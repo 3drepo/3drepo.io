@@ -28,6 +28,7 @@ import { selectCurrentProjectTemplates } from '@/v5/store/projects/projects.sele
 import api from '@/v5/services/api/default';
 import { FederationsActions } from '@/v5/store/federations/federations.redux';
 import { federationMockFactory } from '../federations/federations.fixtures';
+import { AddOn } from '@/v5/store/store.types';
 
 describe('Teamspaces: sagas', () => {
 	const teamspace = 'teamspace';
@@ -58,22 +59,42 @@ describe('Teamspaces: sagas', () => {
 	afterAll(() => { spy.mockClear(); });
 
 	describe('fetch', () => {
+		const addOns = [AddOn.Risks];
 		it('should fetch projects data and dispatch FETCH_SUCCESS', async () => {
 			const projects = [mockProject];
 
 			mockServer
+				.get(`/teamspaces/${teamspace}/addOns`)
+				.reply(200, {modules: addOns})
 				.get(`/teamspaces/${teamspace}/projects`)
 				.reply(200, { projects })
 
 			await waitForActions(() => {
+				dispatch(TeamspacesActions.fetchAddOnsSuccess(teamspace, addOns));
 				dispatch(ProjectsActions.fetch(teamspace));
 			}, [ProjectsActions.fetchSuccess(teamspace, projects)]);
 		});
 
 		it('should handle projects api error and dispatch FETCH_FAILURE', async () => {
 			mockServer
+				.get(`/teamspaces/${teamspace}/addOns`)
+				.reply(200, {modules: addOns})
 				.get(`/teamspaces/${teamspace}/projects`)
 				.reply(404)
+
+			await waitForActions(() => {
+				dispatch(ProjectsActions.fetch(teamspace));
+				dispatch(TeamspacesActions.fetchAddOnsSuccess(teamspace, addOns));
+			}, [DialogsTypes.OPEN]);
+				
+			const projectsInStore = selectCurrentProjects(getState());
+			expect(projectsInStore).toEqual([]);
+		});
+
+		it('should handle teamspace api error and dispatch FETCH_FAILURE', async () => {
+			mockServer
+				.get(`/teamspaces/${teamspace}/addOns`)
+				.reply(401)
 
 			await waitForActions(() => {
 				dispatch(ProjectsActions.fetch(teamspace));

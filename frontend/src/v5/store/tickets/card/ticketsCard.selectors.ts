@@ -16,12 +16,11 @@
  */
 
 import { selectCurrentModel } from '@/v4/modules/model';
-import { SequencingProperties, TicketBaseKeys, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { SequencingProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { createSelector } from 'reselect';
 import { selectTemplateById, selectTemplates, selectTicketById, selectTickets } from '../tickets.selectors';
 import { ITicketsCardState } from './ticketsCard.redux';
-import { DEFAULT_PIN, getPinColorHex, formatPin } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers';
-import { compact, get } from 'lodash';
+import { DEFAULT_PIN, getPinColorHex, formatPin, getTicketPins } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { IPin } from '@/v4/services/viewer/viewer';
 import { selectSelectedDate } from '@/v4/modules/sequences';
 import { ticketIsCompleted } from '@controls/chip/statusChip/statusChip.helpers';
@@ -60,6 +59,10 @@ export const selectIsEditingGroups = createSelector(
 	(ticketCardState) => ticketCardState.isEditingGroups,
 );
 
+export const selectPinToDrop = createSelector(
+	selectTicketsCardDomain,
+	(ticketCardState) => ticketCardState.pinToDrop,
+);
 
 export const selectSelectedTicketId = createSelector(
 	selectTicketsCardDomain,
@@ -152,6 +155,10 @@ export const selectTicketsWithAllFiltersApplied = createSelector(
 	},
 );
 
+export const selectIsShowingPins = createSelector(
+	selectTicketsCardDomain, (state) => state.isShowingPins,
+);
+
 export const selectTicketPins = createSelector(
 	selectTicketsWithAllFiltersApplied,
 	selectCurrentTemplates,
@@ -159,27 +166,11 @@ export const selectTicketPins = createSelector(
 	selectSelectedTicketPinId,
 	selectSelectedTicket,
 	selectSelectedDate,
-	(tickets, templates, view, selectedTicketPinId, selectedTicket, selectedSequenceDate): IPin[] => {
-		if (view === TicketsCardViews.New || !tickets.length) return [];
+	selectIsShowingPins,
+	(tickets, templates, view, selectedTicketPinId, selectedTicket, selectedSequenceDate, isShowingPins): IPin[] => {
+		if (view === TicketsCardViews.New || !tickets.length || (view === TicketsCardViews.List && !isShowingPins)) return [];
 		if (view === TicketsCardViews.Details) {
-			const pinArray = [];
-			const selectedTemplate = templates.find(({ _id }) => _id === selectedTicket.type);
-			
-			const moduleToPins = (modulePath) => ({ name, type }) => {
-				const pinPath = `${modulePath}.${name}`;
-				if (type !== 'coords' || !get(selectedTicket, pinPath)) return;
-				const pinId = pinPath === DEFAULT_PIN ? selectedTicket._id : `${selectedTicket._id}.${pinPath}`;
-				const color = getPinColorHex(pinPath, selectedTemplate, selectedTicket);
-				const isSelected = pinId === selectedTicketPinId;
-				return formatPin(pinId, get(selectedTicket, pinPath), isSelected, color);
-			};
-			pinArray.push(...selectedTemplate.properties.map(moduleToPins(TicketBaseKeys.PROPERTIES)));
-			selectedTemplate.modules.forEach((module) => {
-				const moduleName = module.name || module.type;
-				if (!selectedTicket.modules[moduleName]) return;
-				pinArray.push(...module.properties.map(moduleToPins(`${TicketBaseKeys.MODULES}.${moduleName}`)));
-			});
-			return compact(pinArray);
+			return getTicketPins(templates, selectedTicket, selectedTicketPinId);
 		}
 		return tickets.reduce(
 			(accum, ticket) => {
@@ -208,4 +199,11 @@ export const selectTicketPins = createSelector(
 
 export const selectUnsavedTicket = createSelector(
 	selectTicketsCardDomain, (state) => state.unsavedTicket || null,
+);
+
+export const selectNewTicketPins = createSelector(
+	selectCurrentTemplates,
+	selectUnsavedTicket,
+	selectSelectedTicketPinId,
+	getTicketPins,
 );

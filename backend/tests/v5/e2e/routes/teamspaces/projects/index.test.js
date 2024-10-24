@@ -23,6 +23,8 @@ const { image, oversizedImage, objModel, src } = require('../../../../helper/pat
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 const fs = require('fs');
 
+const { MODEL_CATEGORIES, statusCodes } = require(`${src}/models/modelSettings.constants`);
+
 const { fileMimeFromBuffer } = require(`${src}/utils/helper/typeCheck`);
 const Responder = require(`${src}/utils/responder`);
 
@@ -509,6 +511,95 @@ const testDeleteProjectImage = () => {
 	describe.each(testCases)('Delete project image', runTest);
 };
 
+const testGetDrawingCategories = () => {
+	const basicData = generateBasicData();
+	const { users, teamspace, projects } = basicData;
+
+	beforeAll(async () => {
+		await setupBasicData(basicData);
+	});
+
+	const baseRouteParams = {
+		key: users.tsAdmin.apiKey,
+		teamspace,
+		projectId: projects.projectWithPngImage.id,
+	};
+
+	const testCases = [
+		['the user does not have a valid session', { ...baseRouteParams, key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
+		['the teamspace does not exist', { ...baseRouteParams, teamspace: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
+		['the user is not a member of the teamspace', { ...baseRouteParams, key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
+		['the user does not have access to the project', { ...baseRouteParams, key: users.modelPermUser.apiKey }, false, templates.notAuthorized],
+		['the user is not project admin', { ...baseRouteParams, key: users.nonAdminUser.apiKey }, false, templates.notAuthorized],
+		['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
+		['the user is teamspace admin', { ...baseRouteParams }, true],
+		['the user is project admin', { ...baseRouteParams, key: users.projectAdmin.apiKey }, true],
+	];
+
+	const runTest = (desc, { ...routeParams }, success, expectedOutput) => {
+		const route = ({ teamspace: ts, projectId, key }) => `/v5/teamspaces/${ts}/projects/${projectId}/settings/drawingCategories${key ? `?key=${key}` : ''}`;
+
+		test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+			const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+
+			const getRes = await agent.get(route({ ...routeParams }))
+				.expect(expectedStatus);
+
+			if (success) {
+				expect(getRes.body).toEqual({ drawingCategories: MODEL_CATEGORIES });
+			} else {
+				expect(getRes.body.code).toEqual(expectedOutput.code);
+			}
+		});
+	};
+
+	describe.each(testCases)('Get Drawing Categories', runTest);
+};
+
+const testGetStatusCodes = () => {
+	const basicData = generateBasicData();
+	const { users, teamspace, projects } = basicData;
+
+	beforeAll(async () => {
+		await setupBasicData(basicData);
+	});
+
+	const baseRouteParams = {
+		key: users.tsAdmin.apiKey,
+		teamspace,
+		projectId: projects.projectWithPngImage.id,
+	};
+
+	const testCases = [
+		['the user does not have a valid session', { ...baseRouteParams, key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
+		['the teamspace does not exist', { ...baseRouteParams, teamspace: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
+		['the user is not a member of the teamspace', { ...baseRouteParams, key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
+		['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
+		['the user is teamspace admin', { ...baseRouteParams }, true],
+		['the user is project admin', { ...baseRouteParams, key: users.projectAdmin.apiKey }, true],
+		['the user is not project admin', { ...baseRouteParams, key: users.nonAdminUser.apiKey }, true],
+	];
+
+	const runTest = (desc, { ...routeParams }, success, expectedOutput) => {
+		const route = ({ teamspace: ts, projectId, key }) => `/v5/teamspaces/${ts}/projects/${projectId}/settings/statusCodes${key ? `?key=${key}` : ''}`;
+
+		test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+			const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+
+			const getRes = await agent.get(route({ ...routeParams }))
+				.expect(expectedStatus);
+
+			if (success) {
+				expect(getRes.body).toEqual({ statusCodes });
+			} else {
+				expect(getRes.body.code).toEqual(expectedOutput.code);
+			}
+		});
+	};
+
+	describe.each(testCases)('Get Status Codes', runTest);
+};
+
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -524,4 +615,6 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	testGetProjectImage();
 	testUpdateProjectImage();
 	testDeleteProjectImage();
+	testGetDrawingCategories();
+	testGetStatusCodes();
 });

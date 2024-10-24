@@ -18,6 +18,7 @@ import { FunctionComponent } from 'react';
 import InputLabel from '@mui/material/InputLabel';
 import { Field } from 'formik';
 
+import RisksIcon from '@assets/icons/outlined/safetibase-outlined.svg'
 import {
 	LEVELS_OF_RISK,
 	RISK_CONSEQUENCES,
@@ -29,7 +30,6 @@ import { TextField } from '../../../../../components/textField/textField.compone
 import { UpdateButtons } from '../../../updateButtons/updateButtons.component';
 import { AutoSuggestField } from '../autoSuggestField/autosuggestField.component';
 import { LevelOfRisk } from '../levelOfRisk/levelOfRisk.component';
-import { NAMED_MONTH_DATETIME_FORMAT } from '../../../../../../services/formatting/formatDate';
 import { DateField } from '../../../../../components/dateField/dateField.component';
 
 import {
@@ -40,9 +40,8 @@ import {
 	FieldsRow,
 	StyledFormControl,
 } from '../riskDetails/riskDetails.styles';
-import { RisksIcon } from '../riskIcon/riskIcon.component';
 import { RiskSchema } from '../riskDetails/riskDetails.schema';
-import { DateFieldContainer } from './mainRiskFormTab.styles';
+import { DateFieldContainer, RiskLevelIconResizer } from './mainRiskFormTab.styles';
 
 interface IProps {
 	risk: any;
@@ -148,7 +147,9 @@ export const MainRiskFormTab: FunctionComponent<IProps> = ({
 
 				<FieldsContainer size={'tight'}>
 					<StyledFormControl>
-						<LevelOfRisk header="Level of Risk" level={values.level_of_risk} Icon={RisksIcon} />
+						<RiskLevelIconResizer>
+							<LevelOfRisk header="Level of Risk" level={values.level_of_risk} Icon={RisksIcon} />
+						</RiskLevelIconResizer>
 						<Field name="level_of_risk" render={({ field }) => (
 							<CellSelect
 								{...field}
@@ -256,8 +257,6 @@ export const MainRiskFormTab: FunctionComponent<IProps> = ({
 							<DateFieldContainer>
 								<DateField
 									{...field}
-									dateTime
-									inputFormat={NAMED_MONTH_DATETIME_FORMAT}
 									disabled={!canEditBasicProperty}
 									placeholder="Choose a due date"
 								/>

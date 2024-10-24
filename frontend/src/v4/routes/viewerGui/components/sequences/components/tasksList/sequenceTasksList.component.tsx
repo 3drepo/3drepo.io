@@ -16,7 +16,7 @@
  */
 
 import { PureComponent } from 'react';
-import { formatShortDateTime } from '../../../../../../services/formatting/formatDate';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { SequenceTasksListContainer, SequenceTasksListItem, TaskListLabel, TaskListLabelTime } from '../../sequences.styles';
 import { IActivity, TaskItem } from './sequenceTaskItem.component';
 
@@ -49,9 +49,9 @@ export class TasksList extends PureComponent<IProps, IState> {
 		return (
 			<>
 				Activities from
-				<TaskListLabelTime> {formatShortDateTime(startDate)} </TaskListLabelTime>
+				<TaskListLabelTime> {formatDateTime(startDate)} </TaskListLabelTime>
 				to
-				<TaskListLabelTime> {formatShortDateTime(endDate)}</TaskListLabelTime>
+				<TaskListLabelTime> {formatDateTime(endDate)}</TaskListLabelTime>
 			</>
 		);
 	}

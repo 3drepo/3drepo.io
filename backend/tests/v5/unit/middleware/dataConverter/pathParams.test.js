@@ -19,6 +19,8 @@ const { src } = require('../../../helper/path');
 
 const PathParams = require(`${src}/middleware/dataConverter/pathParams`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+const { generateRandomString } = require('../../../helper/services');
 
 const testConvertAllUUIDs = () => {
 	describe('Convert UUIDs in params', () => {
@@ -38,6 +40,8 @@ const testConvertAllUUIDs = () => {
 				e: '7591fbdb-52b9-490a-8a77-fdb57c57dbc8',
 				f: '120965d4-dd6e-4505-a2d2-e9a5cdcaad81',
 				container: '120965d4-dd6e-4505-a2d2-e9a5cdcaad81',
+				federation: '120965d4-dd6e-4505-a2d2-e9a5cdcaad81',
+				drawing: '120965d4-dd6e-4505-a2d2-e9a5cdcaad81',
 			};
 			const expectedResult = {
 				...params,
@@ -58,6 +62,7 @@ const testConvertAllUUIDs = () => {
 				...params,
 				container: params.model,
 				federation: params.model,
+				drawing: params.model,
 			};
 			PathParams.convertAllUUIDs({ params }, {}, mockCB);
 			expect(mockCB.mock.calls.length).toBe(1);
@@ -66,6 +71,46 @@ const testConvertAllUUIDs = () => {
 	});
 };
 
+const testGetModelIdFromParam = () => {
+	describe('Get Model Id from req params', () => {
+		test('next() should be called with no changes to the params if model is already populated', () => {
+			const mockCB = jest.fn(() => {});
+			const req = { params: { model: generateRandomString() } };
+			PathParams.getModelIdFromParam(modelTypes.CONTAINER)(req, {}, mockCB);
+
+			expect(mockCB).toHaveBeenCalledTimes(1);
+		});
+
+		test('next() should be called with model populated from container', () => {
+			const mockCB = jest.fn(() => {});
+			const req = { params: { container: generateRandomString() } };
+			PathParams.getModelIdFromParam(modelTypes.CONTAINER)(req, {}, mockCB);
+
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(req.params.model).toEqual(req.params.container);
+		});
+
+		test('next() should be called with model populated from federation', () => {
+			const mockCB = jest.fn(() => {});
+			const req = { params: { federation: generateRandomString() } };
+			PathParams.getModelIdFromParam(modelTypes.FEDERATION)(req, {}, mockCB);
+
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(req.params.model).toEqual(req.params.federation);
+		});
+
+		test('next() should be called with model populated from drawing', () => {
+			const mockCB = jest.fn(() => {});
+			const req = { params: { drawing: generateRandomString() } };
+			PathParams.getModelIdFromParam(modelTypes.DRAWING)(req, {}, mockCB);
+
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(req.params.model).toEqual(req.params.drawing);
+		});
+	});
+};
+
 describe('middleware/dataConverter/pathParams', () => {
 	testConvertAllUUIDs();
+	testGetModelIdFromParam();
 });

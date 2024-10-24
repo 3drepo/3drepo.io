@@ -27,6 +27,7 @@ export const useFederationsData = () => {
 	const isListPending = FederationsHooksSelectors.selectIsListPending();
 
 	useEffect(() => {
+		if (!teamspace || !project) return;
 		FederationsActionsDispatchers.fetchFederations(teamspace, project);
 	}, [project]);
 

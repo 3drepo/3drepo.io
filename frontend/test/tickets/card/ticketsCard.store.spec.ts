@@ -1,5 +1,5 @@
 import { TicketsCardActions } from "@/v5/store/tickets/card/ticketsCard.redux";
-import { selectFilteringCompleted, selectFilteringQueries, selectFilteringTemplates, selectReadOnly, selectSelectedTemplateId, selectSelectedTicketId, selectSelectedTicketPinId, selectView } from "@/v5/store/tickets/card/ticketsCard.selectors";
+import { selectFilteringCompleted, selectFilteringQueries, selectFilteringTemplates, selectIsEditingGroups, selectIsShowingPins, selectReadOnly, selectSelectedTemplateId, selectSelectedTicketId, selectSelectedTicketPinId, selectView } from "@/v5/store/tickets/card/ticketsCard.selectors";
 import { TicketsCardViews } from "@/v5/ui/routes/viewer/tickets/tickets.constants";
 import { createTestStore } from "../../test.helpers";
 
@@ -46,6 +46,20 @@ describe('Tickets: store', () => {
 			const readOnlyFromState = selectReadOnly(getState());
 		
 			expect(readOnlyFromState).toEqual(true);
+		});
+
+		it('should set if the groups are being editted', () => {
+			dispatch(TicketsCardActions.setEditingGroups(true));
+			const EditingGroupsFromState = selectIsEditingGroups(getState());
+		
+			expect(EditingGroupsFromState).toEqual(true);
+		});
+
+		it('should set if the pins are showing', () => {
+			dispatch(TicketsCardActions.setIsShowingPins(false));
+			const showingPinsFromState = selectIsShowingPins(getState());
+		
+			expect(showingPinsFromState).toEqual(false);
 		});
 
 		describe('filters', () => {

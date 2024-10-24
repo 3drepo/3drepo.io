@@ -21,7 +21,6 @@ import { Field } from 'formik';
 import { ISSUE_PRIORITIES, ISSUE_STATUSES } from '../../../../../../constants/issues';
 import { LONG_TEXT_CHAR_LIM } from '../../../../../../constants/viewerGui';
 import { canChangeStatus } from '../../../../../../helpers/issues';
-import { NAMED_MONTH_DATETIME_FORMAT } from '../../../../../../services/formatting/formatDate';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { DateField } from '../../../../../components/dateField/dateField.component';
 import { TextField } from '../../../../../components/textField/textField.component';
@@ -161,8 +160,6 @@ export const MainIssueFormTab: FunctionComponent<IProps> = ({
 						<DateFieldContainer>
 							<DateField
 								{...field}
-								dateTime
-								inputFormat={NAMED_MONTH_DATETIME_FORMAT}
 								disabled={!canEditBasicProperty}
 								placeholder="Choose a due date"
 							/>

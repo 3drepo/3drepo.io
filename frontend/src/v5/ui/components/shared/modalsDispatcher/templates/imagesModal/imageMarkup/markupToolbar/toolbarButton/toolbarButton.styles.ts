@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { hexToOpacity } from '@/v5/ui/themes/theme';
+import { hexToOpacity } from '@/v5/helpers/colors.helper';
 import styled, { css } from 'styled-components';
 
 export const Container = styled.div<{ disabled?: boolean, selected?: boolean, $expanded?: boolean }>`

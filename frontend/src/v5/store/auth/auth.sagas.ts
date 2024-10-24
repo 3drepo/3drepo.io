@@ -23,6 +23,7 @@ import { DialogsActions } from '../dialogs/dialogs.redux';
 import { CurrentUserActions } from '../currentUser/currentUser.redux';
 import { cookies } from '@/v5/helpers/cookie.helper';
 import axios from 'axios';
+import { setPermissionModalSuppressed } from '@components/shared/updatePermissionModal/updatePermissionModal.helpers';
 
 const CSRF_TOKEN = 'csrf_token';
 const TOKEN_HEADER = 'X-CSRF-TOKEN';
@@ -56,6 +57,7 @@ function* login({ username, password }: LoginAction) {
 		axios.defaults.headers[TOKEN_HEADER] = cookies(CSRF_TOKEN);
 		yield put(CurrentUserActions.fetchUser());
 		yield put(AuthActions.setAuthenticationStatus(true));
+		setPermissionModalSuppressed(false);
 	} catch (error) {
 		const data = error.response?.data;
 		const lockoutDuration = Math.round(ClientConfig.loginPolicy.lockoutDuration / 1000 / 60);

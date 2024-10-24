@@ -25,6 +25,7 @@ import { ManyOfProperty } from './manyOfProperty.component';
 import { OneOfProperty } from './oneOfProperty.component';
 import { TicketImage } from './ticketImageContent/ticketImage/ticketImage.component';
 import { TicketView } from './ticketView/ticketView.component';
+import { TicketImageList } from './ticketImageList/ticketImageList.component';
 
 export const TicketProperty = {
 	text: TextField,
@@ -37,5 +38,6 @@ export const TicketProperty = {
 	coords: CoordsProperty,
 	number: NumberField,
 	image: TicketImage,
+	imageList: TicketImageList,
 	view: TicketView,
 };

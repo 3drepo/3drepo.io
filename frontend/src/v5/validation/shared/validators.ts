@@ -14,9 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { formatInfoUnit } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
 import { isNumber } from 'lodash';
 import * as Yup from 'yup';
+
+export const stripIfBlankString = (value) => (
+	value === ''
+		? Yup.string().strip()
+		: Yup.string());
 
 export const trimmedString = Yup.string().transform((value) => value && value.trim());
 
@@ -39,3 +45,47 @@ export const getMaxFileSizeMessage = (value) => formatMessage({
 	id: 'validation.file.error.fileSize',
 	defaultMessage: 'The file you tried to upload was too big. File uploads should be no larger than {value}.',
 }, { value });
+
+export const uploadFile = Yup.mixed().nullable().test(
+	'fileSize',
+	formatMessage({
+		id: 'validation.revisions.file.error.tooLarge',
+		defaultMessage: 'File exceeds size limit of {sizeLimit}',
+	}, { sizeLimit: formatInfoUnit(ClientConfig.uploadSizeLimit) }),
+	({ size }) => size && (size < ClientConfig.uploadSizeLimit),
+);
+
+export const alphaNumericHyphens = /^[\w|_|-]*$/;
+
+export const name = trimmedString
+	.max(120,
+		formatMessage({
+			id: 'validation.model.name.error.max',
+			defaultMessage: 'Name is limited to 120 characters',
+		}))
+	.required(
+		formatMessage({
+			id: 'validation.model.name.error.required',
+			defaultMessage: 'Name is a required field',
+		}),
+	)
+	.test(
+		'alreadyExistingNames',
+		formatMessage({
+			id: 'validation.model.name.alreadyExisting',
+			defaultMessage: 'This name is already used within this project',
+		}),
+		(nameValue, testContext) => {
+			if (!testContext.options?.context) return true;
+			return !testContext.options.context.alreadyExistingNames?.map((n) => n.trim().toLocaleLowerCase()).includes(nameValue?.toLocaleLowerCase());
+		},
+	);
+
+export const desc = Yup.lazy((value) => (
+	stripIfBlankString(value)
+		.max(660,
+			formatMessage({
+				id: 'validation.model.description.error.max',
+				defaultMessage: 'Description is limited to 660 characters',
+			}))
+));
