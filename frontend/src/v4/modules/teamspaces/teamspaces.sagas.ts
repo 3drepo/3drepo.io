@@ -18,6 +18,7 @@
 import { normalize } from 'normalizr';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
+import { dispatch } from '@/v5/helpers/redux.helpers';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import * as API from '../../services/api';
 import { ChatActions } from '../chat';
@@ -25,7 +26,6 @@ import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
 import { selectStarredModels, StarredActions } from '../starred';
-import { dispatch } from '../store';
 import { UserManagementActions } from '../userManagement';
 import { TeamspacesActions, TeamspacesTypes } from './teamspaces.redux';
 import { teamspacesSchema } from './teamspaces.schema';

@@ -18,9 +18,9 @@
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import { alphaNumericHyphens, stripIfBlankString } from '../shared/validators';
-import { getState } from '@/v4/modules/store';
 import { selectRevisions, selectRevisionsPending } from '@/v5/store/containers/revisions/containerRevisions.selectors';
 import { ContainerRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { getState } from '@/v5/helpers/redux.helpers';
 
 export const nullableNumberField = Yup.number()
 	.transform((value) => (Number.isNaN(value) ? null : value))

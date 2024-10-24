@@ -22,6 +22,7 @@ import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { TicketsCardActions } from '@/v5/store/tickets/card/ticketsCard.redux';
 import { TicketsActions } from '@/v5/store/tickets/tickets.redux';
+import { dispatch } from '@/v5/helpers/redux.helpers';
 import { INITIAL_HELICOPTER_SPEED, VIEWER_GIZMO_MODES, VIEWER_EVENTS, VIEWER_CLIP_MODES } from '../../constants/viewer';
 import * as API from '../../services/api';
 import { MultiSelect } from '../../services/viewer/multiSelect';
@@ -41,7 +42,6 @@ import { selectRisksMap, RisksActions } from '../risks';
 import { selectUrlParams } from '../router/router.selectors';
 import { SequencesActions } from '../sequences';
 import { StarredActions } from '../starred';
-import { dispatch } from '../store';
 import { TreeActions } from '../tree';
 import { selectInitialView, selectViewpointsDomain, ViewpointsActions, ViewpointsTypes } from '../viewpoints';
 import { ViewerGuiActions, ViewerGuiTypes } from './viewerGui.redux';

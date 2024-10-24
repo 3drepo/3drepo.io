@@ -19,6 +19,7 @@ import { cloneDeep } from 'lodash';
 import { call, all, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { takeEveryInOrder } from '@/v5/helpers/sagas.helpers';
+import { dispatch, getState } from '@/v5/helpers/redux.helpers';
 import { getRandomRgbColor, hexToGLColor } from '@/v5/helpers/colors.helper';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { GROUPS_TYPES } from '../../constants/groups';
@@ -31,7 +32,6 @@ import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
-import { dispatch, getState } from '../store';
 import { TreeActions, TreeTypes } from '../tree';
 import { ViewpointsActions } from '../viewpoints';
 import { selectNodesBySharedIds, showNodesBySharedIds } from '../tree/tree.sagas';
@@ -45,7 +45,6 @@ import {
 	selectGroups,
 	selectGroupsMap,
 	selectIsAllOverridden,
-	selectSelectedFilters,
 	selectShowDetails
 } from './groups.selectors';
 
