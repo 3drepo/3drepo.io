@@ -55,7 +55,6 @@ export function* updatePersonalData({
 }: UpdatePersonalDataAction) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
-		yield put(UsersActions.fetchUsers(teamspace));
 		const user = yield select(selectUsername);
 		let updateUserData = pick(restOfPersonalData, 'firstName', 'lastName', 'company');
 		yield API.CurrentUser.updateUser(restOfPersonalData);
@@ -69,7 +68,7 @@ export function* updatePersonalData({
 			updateUserData = { ...updateUserData, ...avatarData };
 		}
 		yield put(CurrentUserActions.updateUserSuccess(restOfPersonalData));
-		if (!isEmpty(updateUserData)) {
+		if (teamspace && !isEmpty(updateUserData)) {
 			yield put(UsersActions.updateUserSuccess(teamspace, user, updateUserData));
 		}
 		onSuccess();
