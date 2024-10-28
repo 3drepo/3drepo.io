@@ -52,17 +52,26 @@ export const EditableText = forwardRef((
 	const updateSizes = () => {
 		const newSize = getCurrentSizes();
 		onResize?.(newSize);
-		setSizes(newSize);
+		if (ref.current) {
+			setSizes(newSize);
+		}
 	};
 
 	const observer = new ResizeObserver(updateSizes);
 
 	const saveText = () => onAddText?.(ref.current.innerText, sizes.width);
 
+	const keepTopScrolling = () => requestAnimationFrame(() => {
+		if (ref.current) {
+			ref.current.scrollTop = 0;
+		}
+	});
+
 	const handleChange = (e) => {
 		if (e.keyCode === 13 && !e.shiftKey) {
 			saveText();
 		}
+		keepTopScrolling();
 	};
 
 	useEffect(() => {
@@ -87,7 +96,8 @@ export const EditableText = forwardRef((
 				id={EDITABLE_TEXTAREA_NAME}
 				$placeholder={EDITABLE_TEXTAREA_PLACEHOLDER}
 				style={styles}
-				onInputCapture={handleChange}
+				onInput={handleChange}
+				onKeyDown={keepTopScrolling}
 				onClick={onClick}
 				contentEditable={!disabled}
 				disabled={disabled}
