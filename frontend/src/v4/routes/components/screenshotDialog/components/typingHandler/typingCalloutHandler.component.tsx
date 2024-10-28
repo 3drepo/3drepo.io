@@ -14,10 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useState, useEffect, CSSProperties } from 'react';
+import { useState, useEffect, CSSProperties, useRef } from 'react';
 import Konva from 'konva';
-import { isEmpty } from 'lodash';
-import { EditableText } from '../editableText/editableText.component';
+import { isEmpty, isEqual } from 'lodash';
+import { EditableText, TextBoxRef, TextBoxSizes } from '../editableText/editableText.component';
 
 interface IProps {
 	stage: Konva.Stage;
@@ -36,6 +36,8 @@ export const TypingCalloutHandler = ({
 	const [isPositionLocked, setIsPositionLocked] = useState(false);
 	const [offset, setOffset] = useState<CSSProperties>({});
 	const [maxSizes, setMaxSizes] = useState({ maxWidth: 0, maxHeight: 0 });
+	const textBoxRef = useRef<TextBoxRef>();
+	const previousBoxSizes = useRef<TextBoxSizes>(null);
 
 	const setTextPosition = () => {
 		let left = 0, top = 0;
@@ -81,10 +83,14 @@ export const TypingCalloutHandler = ({
 	}, [isPositionLocked]);
 
 	useEffect(() => {
-		if (!isEmpty(boxRef) && !isEmpty(offset) && onRefreshDrawingLayer) {
+		if (!isEmpty(boxRef) && !isEmpty(offset)) {
 			boxRef.x(Number(offset.left) - Math.max(3, size));
 			boxRef.y(Number(offset.top) - Math.max(3, size));
-			onRefreshDrawingLayer();
+			const currentBoxSizes = textBoxRef.current.getCurrentSizes();
+			if (!isEqual(previousBoxSizes.current, currentBoxSizes)) {
+				redrawCalloutBox(currentBoxSizes);
+				previousBoxSizes.current = currentBoxSizes;
+			};
 		}
 	}, [offset]);
 
@@ -95,13 +101,21 @@ export const TypingCalloutHandler = ({
 		fontSize: `${fontSize}px`,
 	};
 
-	if (!isPositionLocked) return <EditableText disabled styles={styles} onResize={redrawCalloutBox} />;
+	if (!isPositionLocked) return (
+		<EditableText
+			styles={styles}
+			onResize={redrawCalloutBox}
+			disabled
+			ref={textBoxRef}
+		/>
+	);
 
 	return (
 		<EditableText
-			onAddText={onTextChange}
 			styles={styles}
 			onResize={redrawCalloutBox}
+			ref={textBoxRef}
+			onAddText={onTextChange}
 		/>
 	);
 };

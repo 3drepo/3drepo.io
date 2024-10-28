@@ -30,13 +30,11 @@ export const TextBox = styled.div<{ $placeholder: string; disabled?: boolean }>`
 	overflow-wrap: break-word;
 	cursor: text;
 	overflow: hidden;
-    position: sticky;
-    bottom: 0;
 
 	${({ disabled }) => disabled && css`
 		pointer-events: none;
 	`}
-
+	
 	&:focus {
 		outline: none;
 	}

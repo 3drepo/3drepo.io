@@ -14,39 +14,52 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useEffect, CSSProperties, useRef, useState } from 'react';
+import { useEffect, CSSProperties, useRef, useState, forwardRef, MutableRefObject } from 'react';
 
 import { ClickAwayListener } from '@mui/material';
 import { EDITABLE_TEXTAREA_NAME, EDITABLE_TEXTAREA_PLACEHOLDER } from '../../screenshotDialog.helpers';
 import { TextBox } from './editableText.styles';
 
+const EMPTY_BOX_SIZES = { width: 0, height: 0 };
+export type TextBoxSizes = { height: number, width: number };
+export type TextBoxRef = {
+	getCurrentSizes: () => TextBoxSizes,
+};
 interface IProps {
 	styles: CSSProperties;
 	disabled?: boolean;
 	onAddText?: (newtext: string, width: number) => void;
-	onResize?: ({ width, height }) => void;
+	onResize?: (sizes: TextBoxSizes) => void;
 	onClick?: () => void;
 }
-
 const pxToNumber = (size: string) => +size.replaceAll('px', '');
-export const EditableText = ({ styles, disabled, onAddText, onClick, onResize }: IProps) => {
+export const EditableText = forwardRef((
+	{ styles, disabled, onAddText, onClick, onResize }: IProps,
+	parentRef: MutableRefObject<TextBoxRef>,
+) => {
+	const [sizes, setSizes] = useState(EMPTY_BOX_SIZES);
 	const ref = useRef<HTMLDivElement>(null);
-	const [size, setSize] = useState({ width: 0, height: 0 });
 
-	const updateSize = () => {
-		if (!ref.current) return;
+	const getCurrentSizes = () => {
+		if (!ref.current) return EMPTY_BOX_SIZES;
 		const compStyles = getComputedStyle(ref.current);
-		const newSize = {
+		return {
 			width: pxToNumber(compStyles.width),
 			height: pxToNumber(compStyles.height),
 		};
+	};
+
+	const updateSizes = () => {
+		const newSize = getCurrentSizes();
 		onResize?.(newSize);
-		setSize(newSize);
-	}
+		setSizes(newSize);
+	};
 
-	const saveText = () => onAddText?.(ref.current.innerText, size.width);
+	const observer = new ResizeObserver(updateSizes);
 
-	const handleKeyDown = (e) => {
+	const saveText = () => onAddText?.(ref.current.innerText, sizes.width);
+
+	const handleChange = (e) => {
 		if (e.keyCode === 13 && !e.shiftKey) {
 			saveText();
 		}
@@ -54,12 +67,18 @@ export const EditableText = ({ styles, disabled, onAddText, onClick, onResize }:
 
 	useEffect(() => {
 		setTimeout(() => {
-			new ResizeObserver(updateSize).observe(ref.current);
+			if (!ref.current) return;
+			observer.observe(ref.current);
 			if (!disabled) {
 				ref.current?.focus();
 			}
 		});
 	}, [disabled]);
+
+	useEffect(() => {
+		if (!parentRef) return;
+		parentRef.current = { getCurrentSizes };
+	}, []);
 
 	return (
 		<ClickAwayListener onClickAway={saveText}>
@@ -68,11 +87,11 @@ export const EditableText = ({ styles, disabled, onAddText, onClick, onResize }:
 				id={EDITABLE_TEXTAREA_NAME}
 				$placeholder={EDITABLE_TEXTAREA_PLACEHOLDER}
 				style={styles}
-				onKeyDown={handleKeyDown}
+				onInputCapture={handleChange}
 				onClick={onClick}
 				contentEditable={!disabled}
 				disabled={disabled}
 			/>
 		</ClickAwayListener>
 	);
-};
+});
