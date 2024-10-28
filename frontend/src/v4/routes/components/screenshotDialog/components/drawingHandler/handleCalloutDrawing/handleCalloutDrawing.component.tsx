@@ -294,8 +294,6 @@ export class HandleCalloutDrawing
 	}
 
 	public renderEditableTextarea = renderWhenTrue(() => (
-		<>
-			{console.log(this.lastShape)}
 		<TypingCalloutHandler
 			stage={this.props.stage}
 			layer={this.layer}
@@ -306,7 +304,6 @@ export class HandleCalloutDrawing
 			onAddNewText={this.addText}
 			boxRef={this.state.lastShape}
 		/>
-		</>
 	));
 
 	public render() {
