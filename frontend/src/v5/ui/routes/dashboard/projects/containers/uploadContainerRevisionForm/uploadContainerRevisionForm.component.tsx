@@ -38,6 +38,7 @@ import { extensionIsSpm } from './extensions.helpers';
 import { UploadList } from './uploadList/uploadList.component';
 import { SidebarForm } from './sidebarForm/sidebarForm.component';
 import { parseFileName, reduceFileData } from '@components/shared/uploadFiles/uploadFiles.helpers';
+import { formatInfoUnit } from '@/v5/helpers/intl.helper';
 
 type UploadModalLabelTypes = {
 	isUploading: boolean;
@@ -158,8 +159,13 @@ export const UploadContainerRevisionForm = ({
 
 	const supportedFilesMessage = formatMessage({
 		id: 'container.uploads.dropzone.message',
-		defaultMessage: 'Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>',
+		defaultMessage: `
+			Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>{br}
+			Maximum file size: {sizeLimit}
+		`,
 	}, {
+		br: <br />,
+		sizeLimit: formatInfoUnit(ClientConfig.uploadSizeLimit),
 		MoreLink: (child: string) => (
 			<a
 				href="https://help.3drepo.io/en/articles/4798885-supported-file-formats"
