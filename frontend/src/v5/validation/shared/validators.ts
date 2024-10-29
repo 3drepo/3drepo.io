@@ -55,7 +55,7 @@ export const uploadFile = Yup.mixed().nullable().test(
 	({ size }) => size && (size < ClientConfig.uploadSizeLimit),
 );
 
-export const alphaNumericHyphens = /^[\w|-]*$/;
+export const alphaNumericHyphens = /^[\w-]*$/;
 
 export const name = trimmedString
 	.max(120,
