@@ -34,9 +34,9 @@ async function insertEventQueue(event, emitter, account, model, extraKeys, data)
 
 	let channel = `notifications::${account}`;
 	if (model) {
-		const { findOneProject } = require("./project");
+		const { findProjectByModelId } = require(`${v5Path}/models/projectSettings`);
 
-		const project = await findOneProject(account, { models: model }, { _id: 1 });
+		const project = await findProjectByModelId(account, model, { _id: 1 });
 
 		if (!project) {
 			// models must be inside a project

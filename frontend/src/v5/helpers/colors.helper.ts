@@ -71,27 +71,6 @@ export const rgbGroupColorToHex = ({ opacity, color }: RgbGroupColor): HexGroupC
 });
 
 // Hex converters
-export const parseHex = (hex) => {
-	if (Array.isArray(hex)) return hex; // if is already a rgb array return it
-
-	hex = hex.replace(/^#/, '');
-
-	if (hex.length <= 4) {
-		hex = hex.map((v) => [v, v]).flat();
-	}
-
-	const red = parseInt(hex.substr(0, 2), 16);
-	const green = parseInt(hex.substr(2, 2), 16);
-	const blue = parseInt(hex.substr(4, 2), 16);
-	let alpha: any = { alpha: parseInt(hex.substr(6, 2), 16) };
-
-	if ( isNaN(alpha.alpha)) {
-		alpha = {};
-	}
-
-	return { red, green, blue, ...alpha };
-};
-
 const rgbaValuesRE = /\((.*)\)/;
 export const hexToRgb = (color) => color && muiHexToRgb(color).match(rgbaValuesRE)[1].split(',').map(Number) as RgbArray;
 export const hexToRgbWithOpacity = (hex, opacity) => hexToRgb(hexToOpacity(hex, opacity * 100));
