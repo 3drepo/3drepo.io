@@ -18,6 +18,14 @@
 import { Matrix3, Vector2 } from 'three';
 import { Coord2D, Coord3D, Vector1D, Vector2D, Vector3D } from './calibration.types';
 import { isNumber } from 'lodash';
+import { CalibrationStatus } from '@/v5/store/drawings/drawings.types';
+
+export const CALIBRATION_SORT_ORDER = {
+	[CalibrationStatus.EMPTY]: 0,
+	[CalibrationStatus.UNCALIBRATED]: 1,
+	[CalibrationStatus.UNCONFIRMED]: 2,
+	[CalibrationStatus.CALIBRATED]: 3,
+};
 
 export const DEFAULT_SETTINGS_CALIBRATION = {
 	units: 'm',
