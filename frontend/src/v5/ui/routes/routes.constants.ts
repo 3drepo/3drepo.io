@@ -44,7 +44,7 @@ export const PRIVACY_ROUTE = 'https://www.asite.com/privacy-policy';
 export const COOKIES_ROUTE = '/v5/cookies';
 export const TERMS_ROUTE = '/v5/terms';
 
-export const RELEASE_NOTES_ROUTE = 'https://help.3drepo.io/en/collections/3358238';
+export const RELEASE_NOTES_ROUTE = 'https://github.com/3drepo/3drepo.io/releases';
 
 // eslint-disable-next-line no-restricted-globals
 export const matchesPath = (path) => Boolean(matchPath(location.pathname, { path, exact: true }));

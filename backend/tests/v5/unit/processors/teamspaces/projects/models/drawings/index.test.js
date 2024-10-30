@@ -48,7 +48,7 @@ jest.mock('../../../../../../../../src/v5/utils/helper/images');
 const ImageHelper = require(`${src}/utils/helper/images`);
 
 const Drawings = require(`${src}/processors/teamspaces/projects/models/drawings`);
-const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+const { modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const testAddDrawing = () => {
@@ -172,9 +172,9 @@ const testGetRevisions = () => {
 	});
 };
 
-const formatToStats = (settings, revCount, latestRev, calibration) => (deleteIfUndefined({
+const formatToStats = (settings, revCount, latestRev, calibration, latestStatus) => (deleteIfUndefined({
 	number: settings.number,
-	status: settings.status,
+	status: latestStatus?.status,
 	type: settings.type,
 	desc: settings.desc,
 	revisions: {
@@ -193,7 +193,6 @@ const testGetDrawingStats = () => {
 		const revCount = generateRandomNumber();
 		const settings = {
 			number: generateRandomNumber(),
-			status: generateRandomString(),
 			type: generateRandomString(),
 			desc: generateRandomString(),
 		};
@@ -208,6 +207,7 @@ const testGetDrawingStats = () => {
 			ModelSettings.getDrawingById.mockResolvedValueOnce(settings);
 			Revisions.getRevisionCount.mockResolvedValueOnce(revCount);
 			Revisions.getLatestRevision.mockResolvedValueOnce(latestRev);
+			Revisions.getLatestRevision.mockResolvedValueOnce(latestRev);
 			CalibrationsProc.getCalibrationStatus.mockResolvedValueOnce(calibrationStatuses.CALIBRATED);
 
 			const res = await Drawings.getDrawingStats(teamspace, project, drawing);
@@ -215,10 +215,10 @@ const testGetDrawingStats = () => {
 			expect(res).toEqual(formatToStats(settings, revCount, latestRev, calibrationStatuses.CALIBRATED));
 			expect(ModelSettings.getDrawingById).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.getDrawingById).toHaveBeenCalledWith(teamspace, drawing,
-				{ number: 1, status: 1, type: 1, desc: 1 });
+				{ number: 1, type: 1, desc: 1 });
 			expect(Revisions.getRevisionCount).toHaveBeenCalledTimes(1);
 			expect(Revisions.getRevisionCount).toHaveBeenCalledWith(teamspace, drawing, modelTypes.DRAWING);
-			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(1);
+			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(2);
 			expect(Revisions.getLatestRevision).toHaveBeenCalledWith(teamspace, drawing, modelTypes.DRAWING,
 				{ _id: 1, statusCode: 1, revCode: 1, timestamp: 1 });
 			expect(CalibrationsProc.getCalibrationStatus).toHaveBeenCalledTimes(1);
@@ -230,16 +230,38 @@ const testGetDrawingStats = () => {
 			ModelSettings.getDrawingById.mockResolvedValueOnce(settings);
 			Revisions.getRevisionCount.mockResolvedValueOnce(revCount);
 			Revisions.getLatestRevision.mockRejectedValueOnce(undefined);
+			Revisions.getLatestRevision.mockRejectedValueOnce(undefined);
 
 			const res = await Drawings.getDrawingStats(teamspace, project, drawing);
 
 			expect(res).toEqual(formatToStats(settings, revCount));
 			expect(ModelSettings.getDrawingById).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.getDrawingById).toHaveBeenCalledWith(teamspace, drawing,
-				{ number: 1, status: 1, type: 1, desc: 1 });
+				{ number: 1, type: 1, desc: 1 });
 			expect(Revisions.getRevisionCount).toHaveBeenCalledTimes(1);
 			expect(Revisions.getRevisionCount).toHaveBeenCalledWith(teamspace, drawing, modelTypes.DRAWING);
-			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(1);
+			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(2);
+			expect(Revisions.getLatestRevision).toHaveBeenCalledWith(teamspace, drawing, modelTypes.DRAWING,
+				{ _id: 1, statusCode: 1, revCode: 1, timestamp: 1 });
+			expect(CalibrationsProc.getCalibrationStatus).not.toHaveBeenCalled();
+		});
+
+		test('!!!should return the drawing stats with a failed status if there was a failed revision', async () => {
+			const failedRev = { status: processStatuses.FAILED };
+			ModelSettings.getDrawingById.mockResolvedValueOnce(settings);
+			Revisions.getRevisionCount.mockResolvedValueOnce(revCount);
+			Revisions.getLatestRevision.mockRejectedValueOnce(undefined);
+			Revisions.getLatestRevision.mockResolvedValueOnce(failedRev);
+
+			const res = await Drawings.getDrawingStats(teamspace, project, drawing);
+
+			expect(res).toEqual(formatToStats(settings, revCount, undefined, undefined, failedRev));
+			expect(ModelSettings.getDrawingById).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.getDrawingById).toHaveBeenCalledWith(teamspace, drawing,
+				{ number: 1, type: 1, desc: 1 });
+			expect(Revisions.getRevisionCount).toHaveBeenCalledTimes(1);
+			expect(Revisions.getRevisionCount).toHaveBeenCalledWith(teamspace, drawing, modelTypes.DRAWING);
+			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(2);
 			expect(Revisions.getLatestRevision).toHaveBeenCalledWith(teamspace, drawing, modelTypes.DRAWING,
 				{ _id: 1, statusCode: 1, revCode: 1, timestamp: 1 });
 			expect(CalibrationsProc.getCalibrationStatus).not.toHaveBeenCalled();

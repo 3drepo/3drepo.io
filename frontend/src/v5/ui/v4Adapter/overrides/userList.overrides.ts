@@ -45,6 +45,12 @@ const AddUserButton = css`
 			&:hover {
 				background-color: ${({ theme }) => theme.palette.primary.dark};
 			}
+			&:disabled {
+				background-color: ${({ theme }) => theme.palette.base.lightest};
+				svg {
+					color: ${({ theme }) => theme.palette.base.lightest};
+				}
+			}
 			svg {
 				border-radius: 50%;
 				color: ${({ theme }) => theme.palette.primary.main};
