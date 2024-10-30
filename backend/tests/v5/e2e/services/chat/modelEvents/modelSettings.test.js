@@ -20,6 +20,8 @@ const { src } = require('../../../../helper/path');
 const SuperTest = require('supertest');
 const { generateRandomString } = require('../../../../helper/services');
 
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+
 const { EVENTS } = require(`${src}/services/chat/chat.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -28,8 +30,10 @@ const teamspace = ServiceHelper.generateRandomString();
 const project = ServiceHelper.generateRandomProject();
 const container = ServiceHelper.generateRandomModel();
 const containerToBeDeleted = ServiceHelper.generateRandomModel();
-const federation = ServiceHelper.generateRandomModel({ isFederation: true });
-const federationToBeDeleted = ServiceHelper.generateRandomModel({ isFederation: true });
+const federation = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
+const federationToBeDeleted = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
+const drawing = ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING });
+const drawingToBeDeleted = ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING });
 
 let agent;
 const setupData = async () => {
@@ -59,11 +63,23 @@ const setupData = async () => {
 			federationToBeDeleted.name,
 			federationToBeDeleted.properties,
 		),
+		ServiceHelper.db.createModel(
+			teamspace,
+			drawing._id,
+			drawing.name,
+			drawing.properties,
+		),
+		ServiceHelper.db.createModel(
+			teamspace,
+			drawingToBeDeleted._id,
+			drawingToBeDeleted.name,
+			drawingToBeDeleted.properties,
+		),
 	]);
 	await Promise.all([
 		ServiceHelper.db.createUser(user, [teamspace]),
-		ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, federation._id,
-			containerToBeDeleted._id, federationToBeDeleted._id], [user.user]),
+		ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, federation._id, drawing._id,
+			containerToBeDeleted._id, federationToBeDeleted._id, drawingToBeDeleted._id], [user.user]),
 	]);
 };
 
@@ -103,6 +119,27 @@ const modelSettingsTest = () => {
 
 			const payload = { name: ServiceHelper.generateRandomString() };
 			await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federation._id}?key=${user.apiKey}`)
+				.send(payload)
+				.expect(templates.ok.status);
+
+			await expect(socketPromise).resolves.toEqual({ ...data, data: payload });
+
+			socket.close();
+		});
+
+		test(`should trigger a ${EVENTS.DRAWING_SETTINGS_UPDATE} event when settings have been updated`, async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+
+			const data = { teamspace, project: project.id, model: drawing._id };
+			await ServiceHelper.socket.joinRoom(socket, data);
+
+			const socketPromise = new Promise((resolve, reject) => {
+				socket.on(EVENTS.DRAWING_SETTINGS_UPDATE, resolve);
+				setTimeout(reject, 1000);
+			});
+
+			const payload = { name: ServiceHelper.generateRandomString() };
+			await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/drawings/${drawing._id}?key=${user.apiKey}`)
 				.send(payload)
 				.expect(templates.ok.status);
 
@@ -174,6 +211,41 @@ const modelAddedTest = () => {
 
 			socket.close();
 		});
+
+		test(`should trigger a ${EVENTS.NEW_DRAWING} event when a new drawing has been added`, async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+
+			const data = { teamspace, project: project.id };
+			await ServiceHelper.socket.joinRoom(socket, data);
+
+			const socketPromise = new Promise((resolve, reject) => {
+				socket.on(EVENTS.NEW_DRAWING, resolve);
+				setTimeout(reject, 1000);
+			});
+
+			const payload = {
+				name: ServiceHelper.generateRandomString(),
+				type: generateRandomString(),
+				number: generateRandomString(),
+				calibration: { verticalRange: [0, 10], units: 'm' },
+			};
+
+			const res = await agent.post(`/v5/teamspaces/${teamspace}/projects/${project.id}/drawings?key=${user.apiKey}`)
+				.send(payload)
+				.expect(templates.ok.status);
+
+			await expect(socketPromise).resolves.toEqual({
+				...data,
+				data: {
+					_id: res.body._id,
+					name: payload.name,
+					number: payload.number,
+					type: payload.type,
+				},
+			});
+
+			socket.close();
+		});
 	});
 };
 
@@ -210,6 +282,25 @@ const modelDeletedTest = () => {
 			});
 
 			await agent.delete(`/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federationToBeDeleted._id}?key=${user.apiKey}`)
+				.expect(templates.ok.status);
+
+			await expect(socketPromise).resolves.toEqual({ ...data, data: {} });
+
+			socket.close();
+		});
+
+		test(`should trigger a ${EVENTS.DRAWING_REMOVED} event when a drawing has been deleted`, async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+
+			const data = { teamspace, project: project.id, model: drawingToBeDeleted._id };
+			await ServiceHelper.socket.joinRoom(socket, data);
+
+			const socketPromise = new Promise((resolve, reject) => {
+				socket.on(EVENTS.DRAWING_REMOVED, resolve);
+				setTimeout(reject, 1000);
+			});
+
+			await agent.delete(`/v5/teamspaces/${teamspace}/projects/${project.id}/drawings/${drawingToBeDeleted._id}?key=${user.apiKey}`)
 				.expect(templates.ok.status);
 
 			await expect(socketPromise).resolves.toEqual({ ...data, data: {} });

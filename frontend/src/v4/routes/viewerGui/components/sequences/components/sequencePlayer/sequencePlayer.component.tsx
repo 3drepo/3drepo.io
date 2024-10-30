@@ -23,16 +23,15 @@ import StepBackIcon from '@mui/icons-material/FastRewind';
 import PlayArrow from '@mui/icons-material/PlayArrow';
 import Replay from '@mui/icons-material/Replay';
 import Stop from '@mui/icons-material/Stop';
-import { debounce, noop } from 'lodash';
+import { debounce } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DialogsActionsDispatchers, SequencesActionsDispatchers, ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 import { STEP_SCALE } from '../../../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
 import { isDateOutsideRange } from '../../../../../../helpers/dateTime';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { MODAL_TODAY_NOT_AVAILABLE_BODY, getDateByStep, getDateWithinBoundaries, getSelectedFrameIndex } from '../../../../../../modules/sequences/sequences.helper';
-import { LONG_DATE_TIME_FORMAT_V5 } from '../../../../../../services/formatting/formatDate';
 import {
 	DatePicker,
 	FlexCol,
@@ -71,6 +70,7 @@ interface IProps {
 	isActivitiesPending: boolean;
 	draggablePanels: string[];
 	toggleLegend: () => void;
+	viewpoint: any;
 }
 
 interface IState {
@@ -151,6 +151,8 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 	public componentDidUpdate(prevProps: IProps) {
 		if (prevProps.value !== this.props.value) {
 			this.setState({value: this.props.value});
+
+			SequencesActionsDispatchers.prefetchFrames();
 		}
 
 		if (prevProps.stepScale !== this.props.stepScale) {
@@ -167,6 +169,10 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 				this.nextStep();
 				this.play();
 			}, this.playInterval);
+		}
+
+		if ((prevProps.viewpoint !== this.props.viewpoint)) {
+			ViewpointsActionsDispatchers.showViewpoint(null, null, { viewpoint: this.props.viewpoint });
 		}
 	}
 
@@ -314,10 +320,8 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 										shouldDisableDate={(date: any) => isDateOutsideRange(this.props.min, this.props.max, date.$d)}
 										name="date"
 										value={value}
-										inputFormat={LONG_DATE_TIME_FORMAT_V5}
 										onChange={(e) => this.gotoDate(new Date(e.target.value))}
 										placeholder="date"
-										dateTime
 									/>
 									<SetToCurrentDateButton onClick={goToToday}>
 										<FormattedMessage id="viewer.sequences.setToCurrentDate" defaultMessage="Set to current date" />

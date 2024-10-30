@@ -196,7 +196,7 @@ const testAppendFavourites = () => {
 
 		test('should return error if one or more federations are not found', async () => {
 			await expect(Federations.appendFavourites('user1', 'teamspace', 'project', [1, -1]))
-				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: -1' });
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The following models were not found: -1' });
 		});
 
 		test('should return error if the federations list provided is empty', async () => {
@@ -206,7 +206,7 @@ const testAppendFavourites = () => {
 
 		test('should return error if user has no permissions on one or more models', async () => {
 			await expect(Federations.appendFavourites('user1', 'teamspace', 'project', [1, 2]))
-				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: 2' });
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The following models were not found: 2' });
 		});
 	});
 };
@@ -219,7 +219,7 @@ const testDeleteFavourites = () => {
 
 		test('should return error if one or more federations are not found', async () => {
 			await expect(Federations.deleteFavourites('tsAdmin', 'teamspace', 'project', [1, -1]))
-				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: -1' });
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The following models were not found: -1' });
 		});
 
 		test('should return error if the federations list provided is empty', async () => {
@@ -229,7 +229,7 @@ const testDeleteFavourites = () => {
 
 		test('should return error if user has no permissions on one or more models', async () => {
 			await expect(Federations.deleteFavourites('user1', 'teamspace', 'project', [2]))
-				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: 2' });
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The following models were not found: 2' });
 		});
 	});
 };

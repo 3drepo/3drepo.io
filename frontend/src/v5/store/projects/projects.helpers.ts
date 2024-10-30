@@ -27,3 +27,15 @@ export const getProjectImgSrc = (teamspace: string, project: string) => (
 
 export const projectImageFileIsTooBig = (file): boolean => (file.size > clientConfigService.projectImageSizeLimit);
 export const PROJECT_IMAGE_MAX_SIZE_MESSAGE = formatInfoUnit(clientConfigService.projectImageSizeLimit);
+
+export enum ModelType {
+	CONTAINER = 'Container',
+	FEDERATION = 'Federation',
+	DRAWING = 'Drawing',
+}
+
+export const getModelType = (model) => {
+	if (model.federate) return ModelType.FEDERATION;
+	if (model.units) return ModelType.CONTAINER;
+	return ModelType.DRAWING;
+};

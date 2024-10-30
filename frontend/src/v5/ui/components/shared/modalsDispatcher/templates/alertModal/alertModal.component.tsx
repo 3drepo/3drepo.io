@@ -19,7 +19,7 @@ import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/mate
 import { FormattedMessage } from 'react-intl';
 import { Modal, Actions, Details, Status, WarningIcon, ModalContent, CloseButton } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
 import { AxiosError } from 'axios';
-import { getErrorCode, getErrorMessage, getErrorStatus, isPathNotFound, isPathNotAuthorized, isProjectNotFound, isModelNotFound } from '@/v5/validation/errors.helpers';
+import { getErrorCode, getErrorMessage, getErrorStatus, isPathNotFound, isPathNotAuthorized, isProjectNotFound, isModelNotFound, isTeamspaceInvalid } from '@/v5/validation/errors.helpers';
 import { generatePath, useHistory } from 'react-router';
 import { DASHBOARD_ROUTE, TEAMSPACE_ROUTE_BASE, PROJECT_ROUTE_BASE } from '@/v5/ui/routes/routes.constants';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -48,6 +48,7 @@ export const AlertModal: FC<IAlertModal> = ({ onClickClose, currentActions = '',
 	const pathNotFound = isPathNotFound(error);
 	const modelNotFound = isModelNotFound(code);
 	const projectNotFound = isProjectNotFound(code);
+	const teamspaceInvalid = isTeamspaceInvalid(code);
 	const unauthorized = isPathNotAuthorized(error);
 
 	const getSafePath = () => {
@@ -75,7 +76,9 @@ export const AlertModal: FC<IAlertModal> = ({ onClickClose, currentActions = '',
 	};
 
 	useEffect(() => () => {
-		if (pathNotFound || unauthorized) redirectToSafePath();
+		if (pathNotFound || unauthorized || teamspaceInvalid) {
+			redirectToSafePath();
+		}
 	}, []);
 
 	return (
@@ -88,7 +91,7 @@ export const AlertModal: FC<IAlertModal> = ({ onClickClose, currentActions = '',
 						defaultMessage="Something went wrong when {currentActions}"
 						values={{ currentActions }}
 					/>
-					{(pathNotFound || unauthorized) && (
+					{(pathNotFound || unauthorized || teamspaceInvalid) && (
 						<>.
 							<br />
 							<FormattedMessage

@@ -14,12 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { isEqual } from 'lodash';
+import { isEqual, partition } from 'lodash';
 import { formatMessage } from '@/v5/services/intl';
+import { GLToHexColor } from '@/v5/helpers/colors.helper';
 import { STEP_SCALE } from '../../constants/sequences';
 import { Viewer } from '../../services/viewer/viewer';
 import { getState } from '../store';
 import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds } from '../tree';
+import { IStateDefinitions } from './sequences.redux';
 
 export const getSelectedFrame = (frames, endingDate) => {
 	const index = getSelectedFrameIndex(frames, endingDate);
@@ -181,3 +183,37 @@ export const resetMovedMeshes = (sharedIds: any[]) => {
 	}
 
 };
+
+type IOverrideGroup = {
+	objects: Array<{ shared_ids: string[] }>;
+	color?: string;
+	opacity?: number;
+}
+
+export const convertStateDefToViewpoint = ({ color = [], transparency: hiddenAndTransparent = [], transformation = [] }: IStateDefinitions) => {
+	const [hidden, transparency] = partition(hiddenAndTransparent, ({ value }) => value === 0);
+	const hidden_group: IOverrideGroup = { objects: [{ shared_ids: hidden[0]?.shared_ids || [] }] };
+
+	const override_groups: IOverrideGroup[] = color.map(({ shared_ids = [], value }) => ({
+		color: GLToHexColor(value),
+		objects: [{ shared_ids }],
+	}));
+
+	transparency.forEach(({ shared_ids = [], value } ) => {
+		override_groups.push({ opacity: value, objects: [{ shared_ids }] })
+	})
+
+	const transformation_groups: IOverrideGroup[] = transformation.map(({ shared_ids = [], value }) => ({
+		transformation: value,
+		objects: [{ shared_ids }],
+	}));
+
+	return ({
+		viewpoint: {
+			hidden_group,
+			override_groups,
+			transformation_groups,
+			hideIfc: false,
+		},
+	})
+}

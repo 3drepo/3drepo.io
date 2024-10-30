@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import CircledPlusIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import PinIcon from '@assets/icons/filled/ticket_pin-filled.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
@@ -23,10 +23,9 @@ import MoveIcon from '@assets/icons/outlined/arrow_cross-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { FormHelperText, Tooltip } from '@mui/material';
-import { hexToGLColor } from '@/v4/helpers/colors';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { CoordsAction, CoordsActionLabel, CoordsActions, CoordsInputContainer, Label, FlexRow, SelectPinButton } from './coordsProperty.styles';
-import { DEFAULT_PIN, getLinkedValuePath, getPinColorHex } from './coordsProperty.helpers';
+import { DEFAULT_PIN, getLinkedValuePath, getPinColorHex, NEW_TICKET_ID } from './coordsProperty.helpers';
 import { TicketContext } from '../../../ticket.context';
 import { formatMessage } from '@/v5/services/intl';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -35,12 +34,12 @@ import { PaddedCrossIcon } from '@controls/chip/chip.styles';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { isEqual } from 'lodash';
 import { useFormContext, useWatch } from 'react-hook-form';
-
-const NEW_TICKET_ID = 'temporaryIdForNewTickets';
+import { DrawingViewerService } from '@components/viewer/drawingViewer/drawingViewer.service';
+import { hexToGLColor } from '@/v5/helpers/colors.helper';
 
 export const CoordsProperty = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
 	const { isViewer, containerOrFederation } = useContext(TicketContext);
-	const [editMode, setEditMode] = useState(false);
+	const pinToDrop = TicketsCardHooksSelectors.selectPinToDrop();
 	const prevValue = useRef(undefined);
 	const { getValues } = useFormContext();
 	const ticket = getValues() as ITicket;
@@ -54,13 +53,14 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const isNewTicket = !ticket?._id;
 	const ticketId = !isNewTicket ? ticket._id : NEW_TICKET_ID;
 	const pinId = name === DEFAULT_PIN ? ticketId : `${ticketId}.${name}`;
+	const editMode = pinToDrop === pinId;
 	const isSelected = selectedPin === pinId;
 	const hasPin = !!value;
 	const colorHex = getPinColorHex(name, template, ticket);
 
 	const cancelEdit = () => {
 		if (!editMode) return;
-		setEditMode(false);
+		TicketsCardActionsDispatchers.setPinToDrop(null);
 		ViewerService.clearMeasureMode();
 	};
 
@@ -71,9 +71,16 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	};
 
 	const onClickEdit = async () => {
-		setEditMode(true);
-		const pin = await ViewerService.getClickPoint();
-		setEditMode(false);
+		TicketsCardActionsDispatchers.setPinToDrop(pinId);
+		const pin = await Promise.race([
+			ViewerService.getClickPoint(),
+			DrawingViewerService.getClickPoint(),
+		]);
+	
+		TicketsCardActionsDispatchers.setPinToDrop(null);
+
+		ViewerService.clearMeasureMode();
+		DrawingViewerService.setSnapping(false);
 
 		//  If the returned pin is undefined, edit mode has been cancelled
 		if (pin !== undefined) {
@@ -129,6 +136,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	}, [isSelected]);
 
 	useEffect(() => () => {
+		TicketsCardActionsDispatchers.setPinToDrop(null);
 		if (isNewTicket) ViewerService.removePin(pinId);
 	}, []);
 

@@ -25,7 +25,7 @@ import styled, { css } from 'styled-components';
 
 const AddUserButton = css`
 	${FloatingButtonContainer} {
-		top: 8px;
+		top: 26px;
 		height: 35px;
 		right: 0;
 		${FloatingButton} {
@@ -44,6 +44,12 @@ const AddUserButton = css`
 			border: none;
 			&:hover {
 				background-color: ${({ theme }) => theme.palette.primary.dark};
+			}
+			&:disabled {
+				background-color: ${({ theme }) => theme.palette.base.lightest};
+				svg {
+					color: ${({ theme }) => theme.palette.base.lightest};
+				}
 			}
 			svg {
 				border-radius: 50%;

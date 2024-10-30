@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import GroupsIcon from '@mui/icons-material/GroupWork';
+import GroupsIcon from '@assets/icons/outlined/groups-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import { ViewpointState } from '@/v5/store/tickets/tickets.types';
 import { EllipsisMenu } from '@controls/ellipsisMenu';

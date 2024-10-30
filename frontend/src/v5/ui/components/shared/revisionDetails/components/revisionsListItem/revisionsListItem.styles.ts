@@ -18,11 +18,11 @@ import styled, { css } from 'styled-components';
 import DownloadIconBase from '@assets/icons/outlined/download_arrow-outlined.svg';
 import { IconButton } from '@mui/material';
 import { Container as fixedOrGrowContainer } from '@/v5/ui/controls/fixedOrGrowContainer/fixedOrGrowContainer.styles';
-import { hexToOpacity } from '@/v5/ui/themes/theme';
+import { hexToOpacity } from '@/v5/helpers/colors.helper';
 import { Link } from 'react-router-dom';
 import { RevisionsListItemText } from './revisionsListItemText/revisionsListItemText.component';
 
-export const Container = styled(Link) <{ diabled: boolean }>`
+export const Container = styled(Link) <{ disabled: boolean }>`
 	display: flex;
 	align-items: center;
 	height: 100%;

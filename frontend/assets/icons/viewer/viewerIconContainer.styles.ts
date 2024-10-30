@@ -26,6 +26,10 @@ const selectedStyles = css`
 
 const disabledStyles = css`
 	color: ${({ theme }) => theme.palette.base.main};
+
+	.highlight {
+		color: ${({ theme }) => theme.palette.base.main};
+	}
 `;
 
 export const ViewerIconContainer = styled.div<{ selected?: boolean, disabled?: boolean }>`

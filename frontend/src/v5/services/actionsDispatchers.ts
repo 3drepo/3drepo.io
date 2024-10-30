@@ -21,12 +21,13 @@ import { BimActions } from '@/v4/modules/bim';
 import { ContainersActions, IContainersActionCreators } from '@/v5/store/containers/containers.redux';
 import { CurrentUserActions, ICurrentUserActionCreators } from '@/v5/store/currentUser/currentUser.redux';
 import { DialogsActions, IDialogsActionCreators } from '@/v5/store/dialogs/dialogs.redux';
+import { IDrawingsActionCreators, DrawingsActions } from '@/v5/store/drawings/drawings.redux';
 import { FederationsActions, IFederationsActionCreators } from '@/v5/store/federations/federations.redux';
 import { GroupsActions } from '@/v4/modules/groups';
 import { JobsActions } from '@/v4/modules/jobs';
 import { MeasurementsActions } from '@/v4/modules/measurements';
 import { IProjectsActionCreators, ProjectsActions } from '@/v5/store/projects/projects.redux';
-import { IRevisionsActionCreators, RevisionsActions } from '@/v5/store/revisions/revisions.redux';
+import { IContainerRevisionsActionCreators, ContainerRevisionsActions } from '@/v5/store/containers/revisions/containerRevisions.redux';
 import { ITeamspacesActionCreators, TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { SequencesActions } from '@/v4/modules/sequences';
 import { TicketsActions, ITicketsActionCreators } from '@/v5/store/tickets/tickets.redux';
@@ -40,6 +41,10 @@ import { Action } from 'redux';
 import { CanvasHistoryActions } from '@/v4/modules/canvasHistory';
 
 import { ClipMode, GizmoMode, MeasureMode, NavigationMode, ProjectionMode } from '../ui/routes/viewer/toolbar/toolbar.types';
+import { DrawingRevisionsActions, IDrawingRevisionsActionCreators } from '../store/drawings/revisions/drawingRevisions.redux';
+import { CompareActions } from '@/v4/modules/compare';
+import { ViewpointsActions } from '@/v4/modules/viewpoints';
+import { DrawingsCardActions, IDrawingsCardActionCreators } from '../store/drawings/card/drawingsCard.redux';
 
 interface IBimActionCreators {
 	setIsActive: (active: boolean) => Action;
@@ -51,10 +56,17 @@ interface ICanvasHistoryActionCreators {
 	redo: () => Action;
 }
 
+
+interface ICompareActionCreators {
+	resetComponentState: () => Action;
+}
+
 interface ITreeActionCreators {
 	showAllNodes: () => Action;
 	hideSelectedNodes: () => Action;
 	isolateSelectedNodes: (containerOrFederation: string) => Action;
+	stopListenOnSelections: () => Action;
+	startListenOnSelections: () => Action;
 }
 interface IGroupsActionCreators {
 	setColorOverrides: (groupIds: string[], on: boolean) => Action;
@@ -67,6 +79,7 @@ interface IGroupsActionCreators {
 interface ISequencesActionCreators {
 	showSequenceDate: (date: Date | null) => Action;
 	setSelectedDate: (date: Date | null) => Action;
+	prefetchFrames: () => Action,
 }
 
 interface IJobsActionCreators {
@@ -89,24 +102,35 @@ interface IViewerGuiActionCreators {
 	setClippingMode: (mode: ClipMode) => Action;
 	setGizmoMode: (mode: GizmoMode) => Action;
 	setCoordView: (visible: boolean) => Action;
-	setPanelVisibility: (panelName: string, visible: boolean) => Action;
+	setPanelVisibility: (panelName: string, visible?: boolean) => Action;
 	setClipEdit: (isClipEdit: boolean) => Action;
 	clearColorOverrides: () => Action;
 	clearTransformations: () => Action;
+	resetPanels: () => Action;
+}
+
+interface IViewpointsActionCreators {
+	showViewpoint: (teamspace: string, modelId: string, view: any, ignoreCamera?: boolean) => Action,
+	clearColorOverrides: () => Action,
+	clearTransformations: () => Action,
 }
 
 export const AuthActionsDispatchers = createActionsDispatchers<IAuthActionCreators>(AuthActions);
 export const BimActionsDispatchers = createActionsDispatchers<IBimActionCreators>(BimActions);
 export const CanvasHistoryActionsDispatchers = createActionsDispatchers<ICanvasHistoryActionCreators>(CanvasHistoryActions);
+export const CompareActionsDispatchers = createActionsDispatchers<ICompareActionCreators>(CompareActions);
 export const ContainersActionsDispatchers = createActionsDispatchers<IContainersActionCreators>(ContainersActions);
+export const ContainerRevisionsActionsDispatchers = createActionsDispatchers<IContainerRevisionsActionCreators>(ContainerRevisionsActions);
 export const CurrentUserActionsDispatchers = createActionsDispatchers<ICurrentUserActionCreators>(CurrentUserActions);
 export const DialogsActionsDispatchers = createActionsDispatchers<IDialogsActionCreators>(DialogsActions);
+export const DrawingsActionsDispatchers =  createActionsDispatchers<IDrawingsActionCreators>(DrawingsActions);
+export const DrawingsCardActionsDispatchers =  createActionsDispatchers<IDrawingsCardActionCreators>(DrawingsCardActions);
+export const DrawingRevisionsActionsDispatchers =  createActionsDispatchers<IDrawingRevisionsActionCreators>(DrawingRevisionsActions);
 export const FederationsActionsDispatchers = createActionsDispatchers<IFederationsActionCreators>(FederationsActions);
 export const GroupsActionsDispatchers = createActionsDispatchers<IGroupsActionCreators>(GroupsActions);
 export const JobsActionsDispatchers = createActionsDispatchers<IJobsActionCreators>(JobsActions);
 export const MeasurementsActionsDispatchers = createActionsDispatchers<IMeasurementsActionCreators>(MeasurementsActions);
 export const ProjectsActionsDispatchers = createActionsDispatchers<IProjectsActionCreators>(ProjectsActions);
-export const RevisionsActionsDispatchers = createActionsDispatchers<IRevisionsActionCreators>(RevisionsActions);
 export const SequencesActionsDispatchers = createActionsDispatchers<ISequencesActionCreators>(SequencesActions);
 export const TeamspacesActionsDispatchers = createActionsDispatchers<ITeamspacesActionCreators>(TeamspacesActions);
 export const TicketsActionsDispatchers = createActionsDispatchers<ITicketsActionCreators>(TicketsActions);
@@ -116,3 +140,4 @@ export const TreeActionsDispatchers = createActionsDispatchers<ITreeActionCreato
 export const UsersActionsDispatchers = createActionsDispatchers<IUsersActions>(UsersActions);
 export const ViewerActionsDispatchers = createActionsDispatchers<ViewerActionsCreators>(ViewerActions);
 export const ViewerGuiActionsDispatchers = createActionsDispatchers<IViewerGuiActionCreators>(ViewerGuiActions);
+export const ViewpointsActionsDispatchers = createActionsDispatchers<IViewpointsActionCreators>(ViewpointsActions);

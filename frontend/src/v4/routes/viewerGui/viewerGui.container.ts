@@ -27,12 +27,11 @@ import { selectCurrentTeamspace, selectCurrentUser } from '../../modules/current
 import { IssuesActions } from '../../modules/issues';
 import { MeasurementsActions } from '../../modules/measurements';
 import { selectIsPending, selectSettings, ModelActions } from '../../modules/model';
-import { selectIsPresentationActive, PresentationActions } from '../../modules/presentation';
 import { RisksActions } from '../../modules/risks';
 import { selectQueryParams } from '../../modules/router/router.selectors';
 import { TreeActions, selectTreeNodesList } from '../../modules/tree';
 import {
-	selectDisabledPanelButtons, selectDraggablePanels, selectIsFocusMode, selectLeftPanels, selectRightPanels,
+	selectDraggablePanels, selectIsFocusMode, selectLeftPanels, selectRightPanels,
 	ViewerGuiActions,
 } from '../../modules/viewerGui';
 import { withDataCache } from '../../services/dataCache';
@@ -49,8 +48,6 @@ const mapStateToProps = createStructuredSelector({
 	rightPanels: selectRightPanels,
 	draggablePanels: selectDraggablePanels,
 	isFocusMode: selectIsFocusMode,
-	disabledPanelButtons: selectDisabledPanelButtons,
-	isPresentationActive: selectIsPresentationActive,
 	selectedTicket: selectSelectedTicket,
 	treeNodesList: selectTreeNodesList,
 	ticketsCardView: selectView,
@@ -71,7 +68,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	resetViewerGui: ViewerGuiActions.reset,
 	removeMeasurement: MeasurementsActions.removeMeasurement,
 	resetCompareComponent: CompareActions.resetComponentState,
-	joinPresentation: PresentationActions.joinPresentation,
 	subscribeOnIssueChanges: IssuesActions.subscribeOnIssueChanges,
 	unsubscribeOnIssueChanges: IssuesActions.unsubscribeOnIssueChanges,
 	subscribeOnRiskChanges: RisksActions.subscribeOnRiskChanges,

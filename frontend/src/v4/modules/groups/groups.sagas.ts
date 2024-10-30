@@ -16,12 +16,12 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { all, put, select, take, takeLatest } from 'redux-saga/effects';
+import { call, all, put, select, take, takeLatest } from 'redux-saga/effects';
 
-import { TicketsCardActions } from '@/v5/store/tickets/card/ticketsCard.redux';
+import { takeEveryInOrder } from '@/v5/helpers/sagas.helpers';
+import { getRandomRgbColor, hexToGLColor } from '@/v5/helpers/colors.helper';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { GROUPS_TYPES } from '../../constants/groups';
-import { getRandomColor, hexToGLColor } from '../../helpers/colors';
 import { normalizeGroup, prepareGroup, prepareGroupWithCount } from '../../helpers/groups';
 import { calculateTotalMeshes } from '../../helpers/tree';
 import * as API from '../../services/api';
@@ -32,8 +32,9 @@ import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
-import { TreeActions, TreeTypes, selectTreeNodesList } from '../tree';
+import { TreeActions, TreeTypes } from '../tree';
 import { ViewpointsActions } from '../viewpoints';
+import { selectNodesBySharedIds, showNodesBySharedIds } from '../tree/tree.sagas';
 import { GroupsActions, GroupsTypes, INITIAL_CRITERIA_FIELD_STATE } from './groups.redux';
 import {
 	selectActiveGroupDetails,
@@ -61,16 +62,15 @@ function* fetchGroups({teamspace, modelId, revision}) {
 	yield put(GroupsActions.togglePendingState(false));
 }
 
-function* setActiveGroup({ group, revision }) {
+function* setActiveGroup({ group }) {
 	try {
-		const filteredGroups = yield select(selectFilteredGroups);
 		const activeGroupId = yield select(selectActiveGroupId);
 		if (group && group._id === activeGroupId) {
 			return;
 		}
 
 		yield all([
-			put(GroupsActions.selectGroup(group, filteredGroups, revision)),
+			put(GroupsActions.selectGroup(group)),
 			put(GroupsActions.setComponentState({ activeGroup: group ? group._id : null }))
 		]);
 
@@ -93,12 +93,13 @@ function* resetActiveGroup() {
 
 function* highlightGroup({ group }) {
 	try {
-		const color = group.color ? hexToGLColor(group.color) : Viewer.getDefaultHighlightColor();
+		const colour = group.color ? hexToGLColor(group.color) : Viewer.getDefaultHighlightColor();
 		yield put(GroupsActions.addToHighlighted(group._id));
 
 		if (group.objects && group.objects.length > 0) {
-			yield put(TreeActions.showNodesBySharedIds(group.objects));
-			yield put(TreeActions.selectNodesBySharedIds(group.objects, color));
+			const { objects } = group;
+			yield call(showNodesBySharedIds, { objects });
+			yield call(selectNodesBySharedIds, { objects, colour });
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('higlight', 'group', error));
@@ -240,15 +241,15 @@ function* importGroups({ teamspace, modelId, file}) {
 
 
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('export', 'groups', error));
+		yield put(DialogActions.showErrorDialog('import', 'groups', error));
 	}
 }
 
 
-function* showDetails({ group, revision }) {
+function* showDetails({ group }) {
 	try {
-		yield put(GroupsActions.clearSelectionHighlights());
-		yield put(GroupsActions.highlightGroup(group));
+		yield call(clearSelectionHighlights, {});
+		yield call(highlightGroup, { group });
 		yield put(GroupsActions.setComponentState({
 			activeGroup: group._id,
 			showDetails: true,
@@ -353,7 +354,7 @@ function* setNewGroup() {
 		const editingGroup = prepareGroup({
 			author: currentUser.username,
 			name: `Untitled group ${groupNumber}`,
-			color: getRandomColor(),
+			color: getRandomRgbColor(),
 			description: ''
 		});
 
@@ -463,7 +464,7 @@ export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.DOWNLOAD_GROUPS, downloadGroups);
 	yield takeLatest(GroupsTypes.EXPORT_GROUPS, exportGroups);
 	yield takeLatest(GroupsTypes.IMPORT_GROUPS, importGroups);
-	yield takeLatest(GroupsTypes.SHOW_DETAILS, showDetails);
+	yield takeEveryInOrder(GroupsTypes.SHOW_DETAILS, showDetails);
 	yield takeLatest(GroupsTypes.CLOSE_DETAILS, closeDetails);
 	yield takeLatest(GroupsTypes.CREATE_GROUP, createGroup);
 	yield takeLatest(GroupsTypes.UPDATE_GROUP, updateGroup);

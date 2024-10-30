@@ -46,19 +46,15 @@ Intercom.setIntercomHash = (userProfile) => {
 		.digest("hex");
 };
 
-Intercom.createContact = async (external_id, name, email, subscribed, company /* , job_title, phone_number, industry, found_us*/) => {
+Intercom.createContact = async (external_id, name, email, subscribed, company, createdAt) => {
 	if (!accessToken) {
 		return;
 	}
 
-	const custom_attributes = {subscribed /* , job_title, industry, found_us*/ };
+	const custom_attributes = {subscribed};
 	if (company) {
-		custom_attributes.company_entered = company;
+		custom_attributes.company = company;
 	}
-
-	// if (phone_number) {
-	// 	custom_attributes.phone_number = phone_number;
-	// }
 
 	return await axios.post(getEndpoint("contacts"),
 		{
@@ -66,6 +62,8 @@ Intercom.createContact = async (external_id, name, email, subscribed, company /*
 			role: "user",
 			email,
 			name,
+			unsubscribed_from_emails: !subscribed,
+			signed_up_at: createdAt,
 			custom_attributes
 		}
 		, { headers });
@@ -99,9 +97,9 @@ Intercom.subscribeToV5Events = () => {
 		}
 	});
 
-	EventsManager.subscribe(EventsV5.USER_VERIFIED, async ({username, email, fullName, company, mailListOptOut}) => {
+	EventsManager.subscribe(EventsV5.USER_VERIFIED, async ({username, email, fullName, company, mailListOptOut, createdAt}) => {
 		try{
-			await Intercom.createContact (username, fullName, email, !mailListOptOut, company);
+			await Intercom.createContact (username, fullName, email, !mailListOptOut, company, createdAt);
 		} catch (err) {
 			systemLogger.logError("Failed to create contact in intercom when verifying user", username, err);
 		}

@@ -81,11 +81,15 @@ export const selectSelectedModels = createSelector(
 		}
 );
 
+// Flag indicating more than one different permission exist for the same model
+const MIXED_PERMISSION = 'mixed';
 const  mergeEqualPermissions = (permissionsA, permissionsB: any[]) => {
 	const mergedPermission =  permissionsA.reduce((totalPermissions, currPermission) => {
 			const permissionBValue = permissionsB.find( (perm) => perm.user === currPermission.user);
 			if ((permissionBValue || {}).permission  === currPermission.permission) {
 				totalPermissions.push(currPermission);
+			} else {
+				totalPermissions.push({ ...currPermission, permission: MIXED_PERMISSION });
 			}
 
 			return totalPermissions;
@@ -131,12 +135,15 @@ export const selectUrlQueryProject = createSelector(
 );
 
 export const selectProjectModels = createSelector(
-	selectProject, selectModelsMap, (project, modelsMap) => {
+	selectProject,
+	selectModelsMap,
+	(project, modelsMap) => {
 		if (!project) {
 			return [];
 		}
 
-		return values(modelsMap).filter((m) => m.projectName === project._id);
+		// TODO #4789  remove the `m.drawingNumber` as the drawing models should include the projectId
+		return values(modelsMap).filter((m) => m.projectName === project._id || m.drawingNumber);
 	}
 );
 

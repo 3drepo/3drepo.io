@@ -19,6 +19,8 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+
 const { templates } = require(`${src}/utils/responseCodes`);
 
 let server;
@@ -44,7 +46,7 @@ const models = [
 	ServiceHelper.generateRandomModel({ viewers: [users.viewer.user],
 		commenters: [users.commenter.user],
 		collaborators: [users.collaborator.user] }),
-	ServiceHelper.generateRandomModel({ isFederation: true }),
+	ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
 	ServiceHelper.generateRandomModel(),
 ];
 const container = models[0];

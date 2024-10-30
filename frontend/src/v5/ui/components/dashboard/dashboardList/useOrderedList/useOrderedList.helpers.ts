@@ -18,6 +18,7 @@
 // Positive infinity ensures null values are shown at the top
 export const dateToNum = (date) => (date ? (date).getTime() : Number.POSITIVE_INFINITY);
 
+import { CALIBRATION_SORT_ORDER } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { get, isArray } from 'lodash';
 
@@ -31,6 +32,14 @@ export const getSortingFunction = <T>(sortConfig) => {
 		if (aValue === bValue && (index + 1 < column.length)) {
 			return direction[index] === SortingDirection.ASCENDING
 				? sortingFunction(a, b, index + 1) : sortingFunction(b, a, index + 1);
+		}
+
+		if (typeof aValue === 'boolean') {
+			return +aValue - +bValue;
+		}
+
+		if (aValue in CALIBRATION_SORT_ORDER && bValue in CALIBRATION_SORT_ORDER) {
+			return CALIBRATION_SORT_ORDER[aValue] - CALIBRATION_SORT_ORDER[bValue];
 		}
 
 		if (typeof aValue === 'string') {

@@ -46,6 +46,7 @@ const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constant
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { isArray } = require(`${src}/utils/helper/typeCheck`);
 const FilesManager = require('../../../src/v5/services/filesManager');
+const { modelTypes, statusCodes } = require('../../../src/v5/models/modelSettings.constants');
 
 const { statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
 const { generateFullSchema } = require(`${src}/schemas/tickets/templates`);
@@ -108,10 +109,12 @@ db.addSSO = async (user, id = ServiceHelper.generateRandomString()) => {
 db.createUser = (userCredentials, tsList = [], customData = {}) => {
 	const { user, password, apiKey, basicData = {} } = userCredentials;
 	const roles = tsList.map((ts) => ({ db: ts, role: 'team_member' }));
-	return DbHandler.createUser(user, password, { billing: { billingInfo: {} },
+	return DbHandler.createUser(user, password, {
+		billing: { billingInfo: {} },
 		...basicData,
 		...customData,
-		apiKey }, roles);
+		apiKey,
+	}, roles);
 };
 
 db.createTeamspaceRole = (ts) => createTeamspaceRole(ts);
@@ -130,6 +133,7 @@ db.createTeamspace = async (teamspace, admins = [], subscriptions, createUser = 
 db.createProject = (teamspace, _id, name, models = [], admins = []) => {
 	const project = {
 		_id: stringToUUID(_id),
+		createdAt: new Date(),
 		name,
 		models,
 		permissions: admins.map((user) => ({ user, permissions: [PROJECT_ADMIN] })),
@@ -147,14 +151,45 @@ db.createModel = (teamspace, _id, name, props) => {
 	return DbHandler.insertOne(teamspace, 'settings', settings);
 };
 
-db.createRevision = async (teamspace, modelId, revision) => {
+db.createRevision = async (teamspace, project, model, revision, modelType) => {
+	const historyCol = modelType === modelTypes.DRAWING ? `${modelType}s.history` : `${model}.history`;
+	const writeReferencedData = (id, buffer) => FilesManager.storeFile(teamspace,
+		historyCol, id, buffer);
+
 	if (revision.rFile) {
-		const refId = revision.rFile[0];
-		await FilesManager.storeFile(teamspace, `${modelId}.history.ref`, refId, revision.refData);
+		writeReferencedData(revision.rFile[0], revision.refData);
 	}
-	const formattedRevision = { ...revision, _id: stringToUUID(revision._id) };
+
+	if (revision.image) {
+		writeReferencedData(revision.image, revision.imageData);
+	}
+
+	if (revision.thumbnail) {
+		writeReferencedData(revision.thumbnail, revision.thumbnailData);
+	}
+	const formattedRevision = {
+		...revision,
+		_id: stringToUUID(revision._id),
+		...(modelType === modelTypes.DRAWING ? { project: stringToUUID(project), model } : {}),
+	};
+
 	delete formattedRevision.refData;
-	await DbHandler.insertOne(teamspace, `${modelId}.history`, formattedRevision);
+	delete formattedRevision.imageData;
+	delete formattedRevision.thumbnailData;
+	await DbHandler.insertOne(teamspace, historyCol, formattedRevision);
+};
+
+db.createCalibration = async (teamspace, project, drawing, revision, calibration) => {
+	const formattedCalibration = deleteIfUndefined({
+		...calibration,
+		_id: stringToUUID(calibration._id),
+		project: stringToUUID(project),
+		drawing,
+		rev_id: stringToUUID(revision),
+		verticalRange: undefined,
+	});
+
+	await DbHandler.insertOne(teamspace, 'drawings.calibrations', formattedCalibration);
 };
 
 db.createSequence = async (teamspace, model, { sequence, states, activities, activityTree }) => {
@@ -271,8 +306,8 @@ db.addLoginRecords = async (records) => {
 	await DbHandler.insertMany(INTERNAL_DB, 'loginRecords', records);
 };
 
-db.createScene = (teamspace, modelId, rev, nodes, meshMap) => Promise.all([
-	db.createRevision(teamspace, modelId, rev),
+db.createScene = (teamspace, project, modelId, rev, nodes, meshMap) => Promise.all([
+	db.createRevision(teamspace, project, modelId, rev),
 	DbHandler.insertMany(teamspace, `${modelId}.scene`, nodes),
 	FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, `${UUIDToString(rev._id)}/idToMeshes.json`, JSON.stringify(meshMap)),
 
@@ -398,7 +433,8 @@ ServiceHelper.generateRandomProject = (projectAdmins = []) => ({
 	permissions: projectAdmins.map(({ user }) => ({ user, permissions: ['admin_project'] })),
 });
 
-ServiceHelper.generateRandomModel = ({ isFederation, viewers, commenters, collaborators, properties = {} } = {}) => {
+ServiceHelper.generateRandomModel = ({ modelType = modelTypes.CONTAINER, viewers, commenters,
+	collaborators, properties = {} } = {}) => {
 	const permissions = [];
 	if (viewers?.length) {
 		permissions.push(...viewers.map((user) => ({ user, permission: 'viewer' })));
@@ -416,57 +452,87 @@ ServiceHelper.generateRandomModel = ({ isFederation, viewers, commenters, collab
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
 		properties: {
-			...ServiceHelper.generateRandomModelProperties(isFederation),
-			...(isFederation ? { federate: true } : {}),
+			...ServiceHelper.generateRandomModelProperties(modelType),
 			...properties,
 			permissions,
 		},
 	};
 };
 
-ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true) => {
+ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, modelType, timestamp, status) => {
 	const _id = ServiceHelper.generateUUIDString();
-	const entry = {
+	const entry = deleteIfUndefined({
 		_id,
-		tag: ServiceHelper.generateRandomString(),
+		tag: modelType === modelTypes.DRAWING ? undefined : ServiceHelper.generateRandomString(),
+		status,
+		statusCode: modelType === modelTypes.DRAWING ? statusCodes[0].code : undefined,
+		revCode: modelType === modelTypes.DRAWING ? ServiceHelper.generateRandomString(10) : undefined,
+		format: modelType === modelTypes.DRAWING ? '.pdf' : undefined,
 		author: ServiceHelper.generateRandomString(),
-		timestamp: ServiceHelper.generateRandomDate(),
+		timestamp: timestamp || ServiceHelper.generateRandomDate(),
 		desc: ServiceHelper.generateRandomString(),
 		void: !!isVoid,
-	};
+	});
 
 	if (hasFile) {
-		entry.rFile = [`${_id}_${ServiceHelper.generateRandomString()}_ifc`];
+		entry.rFile = modelType === modelTypes.DRAWING ? [ServiceHelper.generateUUIDString()] : [`${_id}_${ServiceHelper.generateRandomString()}_ifc`];
 		entry.refData = ServiceHelper.generateRandomString();
+
+		if (modelType === modelTypes.DRAWING) {
+			entry.image = ServiceHelper.generateUUIDString();
+			entry.thumbnail = ServiceHelper.generateUUIDString();
+
+			entry.imageData = ServiceHelper.generateRandomString();
+			entry.thumbnailData = ServiceHelper.generateRandomString();
+		}
 	}
 
 	return entry;
 };
 
-ServiceHelper.generateRandomModelProperties = (isFed = false) => ({
-	properties: {
-		code: ServiceHelper.generateRandomString(),
-		unit: 'm',
+ServiceHelper.generateCalibration = () => ({
+	_id: ServiceHelper.generateUUIDString(),
+	horizontal: {
+		model: times(2, () => times(3, () => ServiceHelper.generateRandomNumber())),
+		drawing: times(2, () => times(2, () => ServiceHelper.generateRandomNumber())),
 	},
+	verticalRange: [0, 10],
+	units: 'mm',
+	createdAt: ServiceHelper.generateRandomDate(),
+	createdBy: ServiceHelper.generateRandomString(),
+});
+
+ServiceHelper.generateRandomModelProperties = (modelType = modelTypes.CONTAINER) => ({
 	desc: ServiceHelper.generateRandomString(),
-	...(isFed ? { federate: true } : { type: ServiceHelper.generateRandomString() }),
-	status: 'ok',
-	surveyPoints: [
-		{
-			position: [
-				ServiceHelper.generateRandomNumber(),
-				ServiceHelper.generateRandomNumber(),
-				ServiceHelper.generateRandomNumber(),
-			],
-			latLong: [
-				ServiceHelper.generateRandomNumber(),
-				ServiceHelper.generateRandomNumber(),
-			],
+	...(modelType === modelTypes.DRAWING ? {
+		number: ServiceHelper.generateRandomString(),
+		type: ServiceHelper.generateRandomString(),
+		calibration: { verticalRange: [ServiceHelper.generateRandomNumber(0, 10), ServiceHelper.generateRandomNumber(11, 20)], units: 'm' },
+		modelType,
+	} : {
+		properties: {
+			code: ServiceHelper.generateRandomString(),
+			unit: 'm',
 		},
-	],
-	angleFromNorth: 123,
-	defaultView: ServiceHelper.generateUUIDString(),
-	defaultLegend: ServiceHelper.generateUUIDString(),
+		...(modelType === modelTypes.FEDERATION ? { federate: true } : { type: ServiceHelper.generateRandomString() }),
+		status: 'ok',
+		surveyPoints: [
+			{
+				position: [
+					ServiceHelper.generateRandomNumber(),
+					ServiceHelper.generateRandomNumber(),
+					ServiceHelper.generateRandomNumber(),
+				],
+				latLong: [
+					ServiceHelper.generateRandomNumber(),
+					ServiceHelper.generateRandomNumber(),
+				],
+			},
+		],
+		angleFromNorth: 123,
+		defaultView: ServiceHelper.generateUUIDString(),
+		defaultLegend: ServiceHelper.generateUUIDString(),
+	}),
 });
 
 ServiceHelper.generateTemplate = (deprecated, hasView = false, configOptions = {}) => ({

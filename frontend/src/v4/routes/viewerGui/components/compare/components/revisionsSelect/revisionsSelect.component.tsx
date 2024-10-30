@@ -17,9 +17,8 @@
 
 import { keyBy } from 'lodash';
 import { PureComponent } from 'react';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { formatShortDateTime, NAMED_MONTH_DATETIME_FORMAT } from '../../../../../../services/formatting/formatDate';
-import { DateTime } from '../../../../../components/dateTime/dateTime.component';
 import { RevisionTooltip } from '../compareDiffItem/compareDiffItem.styles';
 import { Date, MenuItem, Name, SelectField } from './revisionsSelect.styles';
 
@@ -133,12 +132,12 @@ export class RevisionsSelect extends PureComponent<IProps, IState> {
 	}
 
 	private getRevisionName = (revision) => {
-		return revision.tag || formatShortDateTime(revision.timestamp);
+		return revision.tag || formatDateTime(revision.timestamp);
 	}
 
 	private renderValue = () => (<Name>{this.value}</Name>);
 
 	private renderName = (revision) => (<Name>{this.getRevisionName(revision)}</Name>);
 
-	private renderDate = (timestamp) => (<Date><DateTime value={timestamp} format={NAMED_MONTH_DATETIME_FORMAT} /></Date>);
+	private renderDate = (timestamp) => (<Date>{formatDateTime(timestamp)}</Date>);
 }

@@ -42,21 +42,18 @@ export const CardContainer = styled.div`
 	}
 `;
 
-export const CardHeader = styled.div`
+export const CardHeaderContainer = styled.div`
 	${({ theme }) => theme.typography.h3}
+	font-size: 17px;
 	background: ${({ theme }) => theme.palette.primary.contrast};
-	display: flex;
 	align-items: center;
 	min-height: 48px;
-	padding: 0 15px;
+	padding: 0 16px;
 	border-bottom: 1px solid  ${({ theme }) => theme.palette.base.lightest};
-	gap: 5px;
-`;
-
-export const HeaderButtons = styled.span`
-	display: flex;
-	gap: 5px;
-	margin-left: auto;
+	display: grid;
+	grid-template-columns: 32px 1fr max-content;
+	width: 100%;
+	box-sizing: border-box;
 `;
 
 export const CardContent = styled.div`
@@ -64,6 +61,27 @@ export const CardContent = styled.div`
 	box-sizing: border-box;
 	overflow: overlay;
 	height: 100%;
+`;
+
+// TODO - fix after new palette is released
+export const CardListItem = styled.div<{ $selected?: boolean }>`
+	position: relative;
+	cursor: pointer;
+	padding: 12px 14px 16px;
+	background-color: ${({ theme, $selected }) => ($selected ? '#edf0f8' : theme.palette.primary.contrast)};
+`;
+
+export const CardList = styled.div`
+	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
+	border-radius: 8px;
+	overflow: hidden;
+	display: inline-block;
+	width: 100%;
+	box-sizing: border-box;
+	margin-bottom: 0;
+	${/* sc-selector */ CardListItem}:not(:last-child) {
+		border-bottom: solid 1px ${({ theme }) => theme.palette.base.lightest};
+	}
 `;
 
 export const EmptyCardMessage = styled(DashedContainer).attrs({
@@ -80,4 +98,15 @@ export const EmptyCardMessage = styled(DashedContainer).attrs({
 	padding: 10px;
 	box-sizing: border-box;
 	width: 100%;
+`;
+
+export const Title = styled.div`
+	display: inline-flex;
+	overflow: hidden;
+`;
+
+export const Actions = styled.div`
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
 `;

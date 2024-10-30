@@ -16,14 +16,12 @@
  */
 import { isEmpty, isNumber, values } from 'lodash';
 import { createSelector } from 'reselect';
+import { getTransparency, hasTransparency } from '@/v5/helpers/colors.helper';
 import { addToGroupDictionary } from '../../helpers/colorOverrides';
-import { getTransparency, hasTransparency } from '../../helpers/colors';
 import { selectActiveIssue } from '../issues';
 import { selectDefaultView } from '../model';
 import { selectActiveRisk } from '../risks';
 import { selectQueryParams } from '../router/router.selectors';
-import { selectIsViewpointFrame, selectSelectedFrameViewpoint } from '../sequences';
-
 
 export const groupsOfViewpoint = function*(viewpoint) {
 	const groupsProperties = ['override_group_ids', 'transformation_group_ids',
@@ -161,15 +159,4 @@ export const selectViewpointsGroups = createSelector(
 
 export const selectViewpointsGroupsBeingLoaded = createSelector(
 	selectViewpointsDomain, (state) => state.viewpointsGroupsBeingLoaded
-);
-
-export const selectIsLoadingSequenceViewpoint = createSelector(
-	selectIsViewpointFrame, selectSelectedFrameViewpoint , selectViewpointsGroups,
-	(isViewpointFrame, viewpoint, groups) => {
-		if (!isViewpointFrame) {
-			return false;
-		}
-
-		return !isViewpointLoaded(viewpoint, groups);
-	}
 );

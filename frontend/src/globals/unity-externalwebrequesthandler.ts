@@ -107,10 +107,10 @@ export class ExternalWebRequestHandler {
 
 			const cookies = document?.cookie;
 			const headers = {};
-			if(cookies){
+			if (cookies) {
 				const tokenMatch = cookies.match(/(^| )csrf_token=([^;]+)/);
-				if(tokenMatch){
-					headers[`X-CSRF-TOKEN`] = tokenMatch[2];
+				if (tokenMatch) {
+					headers['X-CSRF-TOKEN'] = tokenMatch[2];
 				}
 			}
 

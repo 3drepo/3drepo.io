@@ -17,20 +17,20 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
-import { UploadStatuses } from '@/v5/store/containers/containers.types';
+import { UploadStatus } from '@/v5/store/containers/containers.types';
 import { Button } from '@controls/button';
 import { useHistory, useParams, generatePath } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { Heading, OverlayContainer, Subheading } from './invalidViewerOverlay.styles';
-import { CONTAINERS_ROUTE } from '../../routes.constants';
+import { CONTAINERS_ROUTE, DashboardParams } from '../../routes.constants';
 
 type IInvalidContainer = {
-	status: UploadStatuses;
+	status: UploadStatus;
 };
 
 export const InvalidContainerOverlay = ({ status }: IInvalidContainer) => {
 	const history = useHistory();
-	const params = useParams();
+	const params = useParams<DashboardParams>();
 	const containersListRoute = generatePath(CONTAINERS_ROUTE, params);
 
 	const message = canUploadToBackend(status) ? (
@@ -51,7 +51,7 @@ export const InvalidContainerOverlay = ({ status }: IInvalidContainer) => {
 		<OverlayContainer>
 			<Heading>
 				<FormattedMessage
-					id="InvalidContainerOverlay.heading"
+					id="invalidContainerOverlay.heading"
 					defaultMessage="The Container is empty"
 				/>
 			</Heading>
@@ -60,7 +60,7 @@ export const InvalidContainerOverlay = ({ status }: IInvalidContainer) => {
 			</Subheading>
 			<Button onClick={onClickBack} variant="contained">
 				<FormattedMessage
-					id="InvalidContainerOverlay.backButton"
+					id="invalidContainerOverlay.backButton"
 					defaultMessage="Back to Containers"
 				/>
 			</Button>

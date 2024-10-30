@@ -20,7 +20,6 @@ import { Field, Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import * as Yup from 'yup';
 import { DEFAULT_SETTINGS } from '../../../../../constants/viewer';
-import { IS_FIREFOX } from '../../../../../helpers/browser';
 import { schema } from '../../../../../services/validation';
 import { ColorPicker } from '../../../colorPicker/colorPicker.component';
 import { SelectField } from '../../../selectField/selectField.component';
@@ -37,7 +36,7 @@ const SettingsSchema = Yup.object().shape({
 	farPlaneSamplingPoints: schema.integer(1, Number.POSITIVE_INFINITY),
 	maxShadowDistance: schema.integer(1, Number.POSITIVE_INFINITY),
 	numCacheThreads: schema.integer(1, 15),
-	clipPlaneBorderWidth: schema.number(0, Number.POSITIVE_INFINITY),
+	clipPlaneBorderWidth: schema.number(0, 1),
 	memoryThreshold: schema.number(0, 2032),
 	fovWeight: schema.number(0, 10),
 	meshFactor: schema.number(1, Number.POSITIVE_INFINITY),
