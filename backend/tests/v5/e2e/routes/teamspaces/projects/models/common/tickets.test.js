@@ -40,6 +40,7 @@ const generateBasicData = () => ({
 		viewer: ServiceHelper.generateUserCredentials(),
 		noProjectAccess: ServiceHelper.generateUserCredentials(),
 		nobody: ServiceHelper.generateUserCredentials(),
+		projectAdmin: ServiceHelper.generateUserCredentials(),
 	},
 	teamspace: ServiceHelper.generateRandomString(),
 	project: ServiceHelper.generateRandomProject(),
@@ -60,7 +61,7 @@ const setupBasicData = async (users, teamspace, project, models, templatesToAdd)
 	await Promise.all([
 		...userProms,
 		...modelProms,
-		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
+		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id), [users.projectAdmin.user]),
 		ServiceHelper.db.createTemplates(teamspace, templatesToAdd),
 	]);
 };
@@ -200,7 +201,8 @@ const testGetTemplateDetails = () => {
 const testAddTicket = () => {
 	describe('Add ticket', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
-		const jobsAndUsersPropName = ServiceHelper.generateRandomString();
+		const oneOfJobsAndUsersPropName = ServiceHelper.generateRandomString();
+		const manyOfJobsAndUsersPropName = ServiceHelper.generateRandomString();
 		const uniquePropertyName = ServiceHelper.generateRandomString();
 		const template = ServiceHelper.generateTemplate();
 		template.properties.push({ name: uniquePropertyName, type: propTypes.TEXT, unique: true });
@@ -223,7 +225,12 @@ const testAddTicket = () => {
 			},
 			properties: [
 				{
-					name: jobsAndUsersPropName,
+					name: manyOfJobsAndUsersPropName,
+					type: propTypes.MANY_OF,
+					values: presetEnumValues.JOBS_AND_USERS,
+				},
+				{
+					name: oneOfJobsAndUsersPropName,
 					type: propTypes.ONE_OF,
 					values: presetEnumValues.JOBS_AND_USERS,
 				},
@@ -268,10 +275,12 @@ const testAddTicket = () => {
 				['the ticket data conforms to the template', true, getRoute()],
 				['the ticket data conforms to the template but the user is a viewer', false, getRoute({ key: users.viewer.apiKey }), templates.notAuthorized],
 				['the ticket has a template that contains all preset modules, preset enums and configs', true, getRoute(), undefined, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums) }],
-				['jobsAndUsers property is populated with a user that has inadequate permissions', false, getRoute(), templates.invalidArguments, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums), properties: { [jobsAndUsersPropName]: users.noProjectAccess.user } }],
-				['jobsAndUsers property is populated', true, getRoute(), undefined, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums), properties: { [jobsAndUsersPropName]: users.tsAdmin.user } }],
-				['assignees property is populated with a user that has inadequate permissions', false, getRoute(), templates.invalidArguments, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums), properties: { [basePropertyLabels.ASSIGNEES]: [users.viewer.user] } }],
-				['assignees property is populated', true, getRoute(), undefined, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums), properties: { [basePropertyLabels.ASSIGNEES]: [users.tsAdmin.user] } }],
+				['oneOf jobsAndUsers property is populated with a user that has inadequate permissions', false, getRoute(), templates.invalidArguments, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums), properties: { [oneOfJobsAndUsersPropName]: users.noProjectAccess.user } }],
+				['oneOf jobsAndUsers property is populated', true, getRoute(), undefined, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums), properties: { [oneOfJobsAndUsersPropName]: users.tsAdmin.user } }],
+				['manyOf jobsAndUsers property is populated with a user that has inadequate permissions', false, getRoute(), templates.invalidArguments, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums), properties: { [manyOfJobsAndUsersPropName]: [users.noProjectAccess.user, users.tsAdmin.user] } }],
+				['manyOf jobsAndUsers property is populated', true, getRoute(), undefined, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums), properties: { [manyOfJobsAndUsersPropName]: [users.tsAdmin.user, users.projectAdmin.user] } }],
+				['assignees property is populated with a user that has inadequate permissions', false, getRoute(), templates.invalidArguments, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums), properties: { [basePropertyLabels.ASSIGNEES]: [users.viewer.user, users.tsAdmin.user] } }],
+				['assignees property is populated', true, getRoute(), undefined, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums), properties: { [basePropertyLabels.ASSIGNEES]: [users.tsAdmin.user, users.projectAdmin.user] } }],
 			];
 		};
 
