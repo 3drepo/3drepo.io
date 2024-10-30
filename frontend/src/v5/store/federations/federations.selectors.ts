@@ -85,3 +85,13 @@ export const selectHasCommenterAccess = createSelector(
 	selectFederationRole,
 	(role): boolean => isCommenterRole(role),
 );
+
+export const selectFederationUsers = createSelector(
+	selectFederationById,
+	(federation) => federation.users || [],
+);
+
+export const selectFederationJobs = createSelector(
+	selectFederationById,
+	(federation) => federation.jobs || [],
+);

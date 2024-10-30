@@ -23,9 +23,11 @@ import {
 	ContainersTypes,
 	CreateContainerAction,
 	DeleteContainerAction,
+	FetchContainerJobsAction,
 	FetchContainersAction,
 	FetchContainerSettingsAction,
 	FetchContainerStatsAction,
+	FetchContainerUsersAction,
 	FetchContainerViewsAction,
 	RemoveFavouriteAction,
 	UpdateContainerSettingsAction,
@@ -152,6 +154,38 @@ export function* fetchContainerSettings({
 	}
 }
 
+export function* fetchContainerUsers({
+	teamspace,
+	projectId,
+	containerId,
+}: FetchContainerUsersAction) {
+	try {
+		const users = yield API.Containers.fetchContainerUsers(teamspace, projectId, containerId);
+		yield put(ContainersActions.updateContainerSuccess(projectId, containerId, users));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'containers.fetchUsers.error', defaultMessage: 'trying to fetch container users' }),
+			error,
+		}));
+	}
+}
+
+export function* fetchContainerJobs({
+	teamspace,
+	projectId,
+	containerId,
+}: FetchContainerJobsAction) {
+	try {
+		const jobs = yield API.Containers.fetchContainerJobs(teamspace, projectId, containerId);
+		yield put(ContainersActions.updateContainerSuccess(projectId, containerId, jobs));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'containers.fetchJobs.error', defaultMessage: 'trying to fetch container Jobs' }),
+			error,
+		}));
+	}
+}
+
 export function* updateContainerSettings({
 	teamspace,
 	projectId,
@@ -207,6 +241,8 @@ export default function* ContainersSaga() {
 	yield takeEvery(ContainersTypes.FETCH_CONTAINER_VIEWS, fetchContainerViews);
 	yield takeEvery(ContainersTypes.FETCH_CONTAINER_SETTINGS, fetchContainerSettings);
 	yield takeLatest(ContainersTypes.UPDATE_CONTAINER_SETTINGS, updateContainerSettings);
+	yield takeLatest(ContainersTypes.FETCH_CONTAINER_USERS, fetchContainerUsers);
+	yield takeLatest(ContainersTypes.FETCH_CONTAINER_JOBS, fetchContainerJobs);
 	yield takeEvery(ContainersTypes.CREATE_CONTAINER, createContainer);
 	yield takeLatest(ContainersTypes.DELETE_CONTAINER, deleteContainer);
 	yield takeEvery(ContainersTypes.RESET_CONTAINER_STATS_QUEUE, resetContainerStatsQueue);

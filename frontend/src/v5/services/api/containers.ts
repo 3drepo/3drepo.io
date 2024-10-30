@@ -67,6 +67,24 @@ export const deleteContainer = (teamspace, projectId, containerId): Promise<Axio
 	api.delete(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
 );
 
+export const fetchContainerUsers = async (
+	teamspace: string,
+	projectId: string,
+	modelId: string,
+) => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/members`);
+	return data;
+};
+
+export const fetchContainerJobs = async (
+	teamspace: string,
+	projectId: string,
+	modelId: string,
+) => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/jobs`);
+	return data;
+};
+
 /**
  * Types
 */

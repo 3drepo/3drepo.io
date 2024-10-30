@@ -105,6 +105,8 @@ export interface IContainer extends MinimumContainer {
 	angleFromNorth?: number;
 	defaultView?: string;
 	unit?: string;
+	users?: string[];
+	jobs?: string[],
 }
 
 export type NewContainer = {

@@ -71,6 +71,16 @@ export const selectHasViewerAccess = createSelector(
 	(role): boolean => isViewerRole(role),
 );
 
+export const selectContainerUsers = createSelector(
+	selectContainerById,
+	(container) => container.users || [],
+);
+
+export const selectContainerJobs = createSelector(
+	selectContainerById,
+	(container) => container.jobs || [],
+);
+
 export const selectCanUploadToProject = createSelector(
 	selectContainers,
 	selectIsProjectAdmin,

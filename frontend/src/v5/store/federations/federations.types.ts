@@ -65,6 +65,8 @@ export interface IFederation {
 	defaultView?: string;
 	unit?: string;
 	revision?: FederationRevision;
+	users?: string[];
+	jobs?: string[],
 }
 
 export type NewFederation = {

@@ -23,9 +23,11 @@ import {
 	DeleteFederationAction,
 	FederationsActions,
 	FederationsTypes,
+	FetchFederationJobsAction,
 	FetchFederationsAction,
 	FetchFederationSettingsAction,
 	FetchFederationStatsAction,
+	FetchFederationUsersAction,
 	FetchFederationViewsAction,
 	RemoveFavouriteAction,
 	UpdateFederationContainersAction,
@@ -179,6 +181,38 @@ export function* updateFederationSettings({
 		onSuccess();
 	} catch (error) {
 		onError(error);
+	}
+}
+
+export function* fetchFederationUsers({
+	teamspace,
+	projectId,
+	federationId,
+}: FetchFederationUsersAction) {
+	try {
+		const users = yield API.Federations.fetchFederationUsers(teamspace, projectId, federationId);
+		yield put(FederationsActions.updateFederationSuccess(projectId, federationId, users));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'federations.fetchUsers.error', defaultMessage: 'trying to fetch federation users' }),
+			error,
+		}));
+	}
+}
+
+export function* fetchFederationJobs({
+	teamspace,
+	projectId,
+	federationId,
+}: FetchFederationJobsAction) {
+	try {
+		const jobs = yield API.Federations.fetchFederationJobs(teamspace, projectId, federationId);
+		yield put(FederationsActions.updateFederationSuccess(projectId, federationId, jobs));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'federations.fetchJobs.error', defaultMessage: 'trying to fetch federation Jobs' }),
+			error,
+		}));
 	}
 }
 
