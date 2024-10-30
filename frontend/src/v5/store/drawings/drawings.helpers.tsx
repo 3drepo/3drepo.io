@@ -38,7 +38,7 @@ export const DRAWING_LIST_COLUMN_WIDTHS = {
 		width: 155,
 		hideWhenSmallerThan: Display.Desktop,
 	},
-	calibration: {
+	calibrationStatus: {
 		width: 155,
 		hideWhenSmallerThan: Display.Tablet,
 	},

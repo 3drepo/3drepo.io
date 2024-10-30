@@ -102,6 +102,7 @@ interface IProps extends RouteComponentProps<any> {
 	fetchQuotaAndInvitations: (teamspace) => void;
 	isPending: boolean;
 	className?: string;
+	isTeamspaceAdmin?: boolean;
 }
 
 interface IState {
@@ -349,6 +350,10 @@ export class Users extends PureComponent<IProps, IState> {
 					<Loader content={content} />
 				</LoaderContainer>
 			);
+		}
+
+		if (!this.props.isTeamspaceAdmin) {
+			return null;
 		}
 
 		return (

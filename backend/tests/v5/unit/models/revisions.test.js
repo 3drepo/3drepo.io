@@ -75,6 +75,36 @@ const testGetLatestRevision = () => {
 			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, { ...excludeIncomplete, ...excludeFailed, ...excludeVoids }, {}, { timestamp: -1 });
 		});
 
+		test('Should include voids if it is specified', async () => {
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(expectedData);
+			const res = await Revisions.getLatestRevision(teamspace, model, modelTypes.CONTAINER,
+				undefined, { includeVoid: true });
+
+			expect(res).toEqual(expectedData);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, { ...excludeIncomplete, ...excludeFailed }, {}, { timestamp: -1 });
+		});
+
+		test('Should include failures if it is specified', async () => {
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(expectedData);
+			const res = await Revisions.getLatestRevision(teamspace, model, modelTypes.CONTAINERR,
+				undefined, { includeFailed: true });
+
+			expect(res).toEqual(expectedData);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, { ...excludeIncomplete, ...excludeVoids }, {}, { timestamp: -1 });
+		});
+
+		test('Should include incompletes if it is specified', async () => {
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(expectedData);
+			const res = await Revisions.getLatestRevision(teamspace, model, modelTypes.CONTAINERR,
+				undefined, { includeIncomplete: true });
+
+			expect(res).toEqual(expectedData);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, { ...excludeFailed, ...excludeVoids }, {}, { timestamp: -1 });
+		});
+
 		test('Should return the latest revision if there is one (drawing)', async () => {
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(expectedData);
 			const res = await Revisions.getLatestRevision(teamspace, model, modelTypes.DRAWING);
