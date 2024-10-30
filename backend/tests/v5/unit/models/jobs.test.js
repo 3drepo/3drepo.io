@@ -16,8 +16,9 @@
  */
 
 const { src } = require('../../helper/path');
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString, generateRandomObject } = require('../../helper/services');
 const { DEFAULT_JOBS } = require('../../../../src/v5/models/jobs.constants');
+const { times } = require('lodash');
 
 const Jobs = require(`${src}/models/jobs`);
 const db = require(`${src}/handler/db`);
@@ -81,19 +82,27 @@ const testRemoveUserFromJobs = () => {
 	});
 };
 
-const testGetJobNames = () => {
-	describe('Get job names', () => {
-		test('return names of all available jobs', async () => {
+const testGetAccessibleJobs = () => {
+	describe('Get accessible jobs', () => {
+		test('return names of all accessible jobs', async () => {
 			const teamspace = generateRandomString();
-			const jobs = [generateRandomString(), generateRandomString(), generateRandomString()];
-			jest.spyOn(db, 'find').mockResolvedValueOnce(jobs.map((_id) => ({ _id })));
-			await expect(Jobs.getJobNames(teamspace)).resolves.toEqual(jobs);
+			const users = times(5, () => generateRandomString());
+			const jobs = times(5, () => ({ _id: generateRandomString, ...generateRandomObject() }));
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(jobs);
+			await expect(Jobs.getAccessibleJobs(teamspace, users)).resolves.toEqual(jobs.map((j) => j._id));
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, JOB_COL, { users: { $in: users } }, { _id: 1 }, undefined);
 		});
 
 		test('return an empty array if there are no jobs', async () => {
 			const teamspace = generateRandomString();
-			jest.spyOn(db, 'find').mockResolvedValueOnce([]);
-			await expect(Jobs.getJobNames(teamspace)).resolves.toEqual([]);
+			const users = times(5, () => generateRandomString());
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce([]);
+			await expect(Jobs.getAccessibleJobs(teamspace, users)).resolves.toEqual([]);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, JOB_COL, { users: { $in: users } }, { _id: 1 }, undefined);
 		});
 	});
 };
@@ -124,6 +133,6 @@ describe('models/jobs', () => {
 	testAddDefaultJobs();
 	testAssignUserToJob();
 	testRemoveUserFromJobs();
-	testGetJobNames();
+	testGetAccessibleJobs();
 	testGetJobs();
 });

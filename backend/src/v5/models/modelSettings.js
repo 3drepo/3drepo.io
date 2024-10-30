@@ -109,6 +109,18 @@ Models.getModelType = async (ts, model) => {
 	return getModelType(item);
 };
 
+Models.getMembers = async (ts, model, excludeViewers) => {
+	const pipeline = [
+		{ $match: { _id: model } },
+		{ $unwind: '$permissions' },
+		{ $match: excludeViewers ? { 'permissions.permission': { $ne: 'viewer' } } : {} },
+		{ $project: { _id: 0, user: '$permissions.user' } },
+	];
+
+	const permissions = await db.aggregate(ts, SETTINGS_COL, pipeline);
+	return permissions.map(({ user }) => user);
+};
+
 Models.getContainerById = async (ts, container, projection) => {
 	try {
 		return await Models.getModelByQuery(ts, { _id: container, ...noFederations, ...noDrawings }, projection);

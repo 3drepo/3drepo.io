@@ -37,6 +37,9 @@ const TemplateSchema = require(`${src}/schemas/tickets/templates`);
 jest.mock('../../../../../src/v5/models/jobs');
 const JobsModel = require(`${src}/models/jobs`);
 
+jest.mock('../../../../../src/v5/processors/teamspaces/projects/models/commons/settings');
+const ModelSettingsProcessor = require(`${src}/processors/teamspaces/projects/models/commons/settings`);
+
 jest.mock('../../../../../src/v5/models/tickets');
 const TicketsModel = require(`${src}/models/tickets`);
 
@@ -285,8 +288,8 @@ const testPresetValues = () => {
 
 			const jobs = times(5, () => generateRandomString());
 			const users = times(5, () => generateRandomString());
-			JobsModel.getJobNames.mockResolvedValue(jobs);
-			TeamspaceModel.getAllUsersInTeamspace.mockResolvedValue(users);
+			JobsModel.getAccessibleJobs.mockResolvedValue(jobs);
+			ModelSettingsProcessor.getMembers.mockResolvedValue(users);
 
 			const testCases = [
 				['With existing jobs', createData(jobs[2], jobs[4]), true],

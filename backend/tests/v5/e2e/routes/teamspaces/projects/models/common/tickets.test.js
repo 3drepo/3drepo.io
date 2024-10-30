@@ -200,6 +200,7 @@ const testGetTemplateDetails = () => {
 const testAddTicket = () => {
 	describe('Add ticket', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
+		const jobsAndUsersPropName = ServiceHelper.generateRandomString();
 		const uniquePropertyName = ServiceHelper.generateRandomString();
 		const template = ServiceHelper.generateTemplate();
 		template.properties.push({ name: uniquePropertyName, type: propTypes.TEXT, unique: true });
@@ -220,11 +221,18 @@ const testAddTicket = () => {
 				pin: true,
 				status: { values: statusValues, default: statusValues[0].name },
 			},
-			properties: Object.values(presetEnumValues).map((values) => ({
-				name: ServiceHelper.generateRandomString(),
-				type: propTypes.ONE_OF,
-				values,
-			})),
+			properties: [
+				{
+					name: jobsAndUsersPropName,
+					type: propTypes.ONE_OF,
+					values: presetEnumValues.JOBS_AND_USERS,
+				},
+				...Object.values(presetEnumValues).map((values) => ({
+					name: ServiceHelper.generateRandomString(),
+					type: propTypes.ONE_OF,
+					values,
+				})),
+			],
 			modules: Object.values(presetModules).map((type) => ({ type, properties: [] })),
 		};
 
@@ -260,6 +268,10 @@ const testAddTicket = () => {
 				['the ticket data conforms to the template', true, getRoute()],
 				['the ticket data conforms to the template but the user is a viewer', false, getRoute({ key: users.viewer.apiKey }), templates.notAuthorized],
 				['the ticket has a template that contains all preset modules, preset enums and configs', true, getRoute(), undefined, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums) }],
+				['jobsAndUsers property is populated with a user that has inadequate permissions', false, getRoute(), templates.invalidArguments, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums), properties: { [jobsAndUsersPropName]: users.noProjectAccess.user } }],
+				['jobsAndUsers property is populated', true, getRoute(), undefined, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums), properties: { [jobsAndUsersPropName]: users.tsAdmin.user } }],
+				['assignees property is populated with a user that has inadequate permissions', false, getRoute(), templates.invalidArguments, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums), properties: { [basePropertyLabels.ASSIGNEES]: [users.viewer.user] } }],
+				['assignees property is populated', true, getRoute(), undefined, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums), properties: { [basePropertyLabels.ASSIGNEES]: [users.tsAdmin.user] } }],
 			];
 		};
 
@@ -710,6 +722,7 @@ const testGetTicketList = () => {
 const testUpdateTicket = () => {
 	describe('Update ticket', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
+		const jobsAndUsersPropName = ServiceHelper.generateRandomString();
 		const requiredPropName = ServiceHelper.generateRandomString();
 		const immutableProp = ServiceHelper.generateRandomString();
 		const immutablePropWithDefaultValue = ServiceHelper.generateRandomString();
@@ -718,8 +731,13 @@ const testUpdateTicket = () => {
 		const requiredImagePropName = ServiceHelper.generateRandomString();
 		const uniquePropName = ServiceHelper.generateRandomString();
 		const template = {
-			...ServiceHelper.generateTemplate(),
+			...ServiceHelper.generateTemplate(false, false, { issueProperties: true }),
 			properties: [
+				{
+					name: jobsAndUsersPropName,
+					type: propTypes.ONE_OF,
+					values: presetEnumValues.JOBS_AND_USERS,
+				},
 				{
 					name: requiredPropName,
 					type: propTypes.TEXT,
@@ -838,6 +856,10 @@ const testUpdateTicket = () => {
 				['the update data conforms to the template even if the template is deprecated', { ...baseRouteParams, ticket: model.depTemTicket }, true, undefined, { title: ServiceHelper.generateRandomString() }],
 				['an image property is updated', baseRouteParams, true, undefined, { title: ServiceHelper.generateRandomString(), properties: { [imagePropName]: FS.readFileSync(image, { encoding: 'base64' }) } }],
 				['an image list property is updated', baseRouteParams, true, undefined, { title: ServiceHelper.generateRandomString(), properties: { [imageListPropName]: [FS.readFileSync(image, { encoding: 'base64' })] } }],
+				['jobsAndUsers property is updated with a user that has inadequate permissions', baseRouteParams, false, templates.invalidArguments, { title: ServiceHelper.generateRandomString(), properties: { [jobsAndUsersPropName]: users.noProjectAccess.user } }],
+				['jobsAndUsers property is updated', baseRouteParams, true, undefined, { title: ServiceHelper.generateRandomString(), properties: { [jobsAndUsersPropName]: users.tsAdmin.user } }],
+				['assignees property is updated with a user that has inadequate permissions', baseRouteParams, false, templates.invalidArguments, { title: ServiceHelper.generateRandomString(), properties: { [basePropertyLabels.ASSIGNEES]: [users.viewer.user] } }],
+				['assignees property is updated', baseRouteParams, true, undefined, { title: ServiceHelper.generateRandomString(), properties: { [jobsAndUsersPropName]: users.tsAdmin.user, [basePropertyLabels.ASSIGNEES]: [users.tsAdmin.user] } }],
 			];
 		};
 

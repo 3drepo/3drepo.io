@@ -27,14 +27,15 @@ const {
 	viewGroups,
 } = require('./templates.constants');
 const { deleteIfUndefined, isEqual } = require('../../utils/helper/objects');
-const { getAllUsersInTeamspace, getRiskCategories } = require('../../models/teamspaceSettings');
 const { isDate, isObject, isUUIDString } = require('../../utils/helper/typeCheck');
 const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
 const Yup = require('yup');
 const { deserialiseGroupSchema } = require('./tickets.groups');
 const { generateFullSchema } = require('./templates');
+const { getAccessibleJobs } = require('../../models/jobs');
 const { getArrayDifference } = require('../../utils/helper/arrays');
-const { getJobNames } = require('../../models/jobs');
+const { getMembers } = require('../../processors/teamspaces/projects/models/commons/settings');
+const { getRiskCategories } = require('../../models/teamspaceSettings');
 const { getTicketsByQuery } = require('../../models/tickets');
 const { importCommentSchema } = require('./tickets.comments');
 const { logger } = require('../../utils/logger');
@@ -55,12 +56,11 @@ const generatePropertiesValidator = async (teamspace, project, model, templateId
 				switch (prop.values) {
 				case presetEnumValues.JOBS_AND_USERS:
 					{
-						const [jobs, users] = await Promise.all([
-							getJobNames(teamspace),
-							getAllUsersInTeamspace(teamspace),
-						]);
+						const excludeViewers = prop.name === basePropertyLabels.ASSIGNEES;
+						const members = await getMembers(teamspace, project, model, excludeViewers);
+						const accessibleJobs = await getAccessibleJobs(teamspace, members);
 
-						values = [...jobs, ...users];
+						values = [...accessibleJobs, ...members];
 					}
 					break;
 				case presetEnumValues.RISK_CATEGORIES:
