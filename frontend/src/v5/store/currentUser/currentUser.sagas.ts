@@ -68,7 +68,7 @@ export function* updatePersonalData({
 			updateUserData = { ...updateUserData, ...avatarData };
 		}
 		yield put(CurrentUserActions.updateUserSuccess(restOfPersonalData));
-		if (!isEmpty(updateUserData)) {
+		if (teamspace && !isEmpty(updateUserData)) {
 			yield put(UsersActions.updateUserSuccess(teamspace, user, updateUserData));
 		}
 		onSuccess();

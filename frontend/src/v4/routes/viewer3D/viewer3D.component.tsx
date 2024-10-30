@@ -106,12 +106,13 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 		viewer.setupInstance(this.containerRef.current, this.handleUnityError);
 	}
 
-	public renderGisCoordinates(coordinates) {
+	public async renderGisCoordinates(coordinates) {
 		const { viewer, gisLayers } = this.props;
 		viewer.mapInitialise(coordinates);
 
 		if (gisLayers.length > 0) {
 			viewer.mapStop();
+			await new Promise((resolve) => setTimeout(resolve, 100));
 			viewer.mapStart();
 		}
 	}
@@ -126,9 +127,10 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 
 			await Promise.all([
 				...toRemove.map(viewer.removePin.bind(viewer)),
-				...toChangeSelection.map(viewer.setSelectionPin.bind(viewer)),
 				...toShow.map(viewer.showPin.bind(viewer)),
 			]);
+
+			await Promise.all(toChangeSelection.map(viewer.setSelectionPin.bind(viewer)));
 		}
 	}
 

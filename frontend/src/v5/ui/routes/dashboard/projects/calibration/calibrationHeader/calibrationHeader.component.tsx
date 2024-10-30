@@ -25,6 +25,7 @@ import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/servic
 import { useContext } from 'react';
 import { CalibrationContext } from '../calibrationContext';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { isNumber } from 'lodash';
 
 const STEPS = [
 	formatMessage({ defaultMessage: '3D Alignment', id: 'calibration.step.3dCalibration' }),
@@ -43,11 +44,14 @@ export const CalibrationHeader = () => {
 	const getIsStepValid = () => {
 		if (step === 0) return !!(vector3D[0] && vector3D[1]);
 		if (step === 1) return !!(vector2D[0] && vector2D[1]);
-		if (step === 2) return !!(verticalPlanes[0] && verticalPlanes[1]);
+		if (step === 2) return verticalPlanes.every(isNumber);
 		return false;
 	};
 
-	const handleEndCalibration = () => history.push(origin);
+	const handleEndCalibration = () => {
+		history.push(origin);
+		setStep(0);
+	};
 
 	const handleConfirm = () => {
 		handleEndCalibration();

@@ -15,8 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { PanZoomHandler } from '@components/viewer/drawingViewer/panzoom/centredPanZoom';
+
 export type Coord2D = [number, number];
-type Coord3D = [number, number, number];
+export type Coord3D = [number, number, number];
 
 export type Vector<CoordType> = [CoordType | null, CoordType | null];
 
@@ -29,3 +31,5 @@ export enum PlaneType {
 	LOWER = 'lower',
 	NONE = 'none',
 }
+
+export type ViewBoxType = ReturnType<PanZoomHandler['getOriginalSize']> & ReturnType<PanZoomHandler['getTransform']>;

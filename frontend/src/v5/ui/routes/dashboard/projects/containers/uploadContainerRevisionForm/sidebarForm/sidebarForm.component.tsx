@@ -18,7 +18,8 @@
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { useFormContext } from 'react-hook-form';
-import { CONTAINER_TYPES, CONTAINER_UNITS } from '@/v5/store/containers/containers.types';
+import { CONTAINER_TYPES } from '@/v5/store/containers/containers.types';
+import { MODEL_UNITS } from '../../../models.helpers';
 import * as countriesAndTimezones from 'countries-and-timezones';
 import { MenuItem } from '@mui/material';
 import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
@@ -71,7 +72,7 @@ export const SidebarForm = () => {
 					name={`${revisionPrefix}.containerUnit`}
 					label={formatMessage({ id: 'containers.creation.form.units', defaultMessage: 'Units' })}
 				>
-					{CONTAINER_UNITS.map((unit) => (
+					{MODEL_UNITS.map((unit) => (
 						<MenuItem key={unit.value} value={unit.value}>
 							{unit.name}
 						</MenuItem>

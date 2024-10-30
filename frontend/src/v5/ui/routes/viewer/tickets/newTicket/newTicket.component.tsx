@@ -31,7 +31,7 @@ import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useContext, useEffect } from 'react';
 import { InputController } from '@controls/inputs/inputController.component';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
-import { merge } from 'lodash';
+import { cloneDeep, merge } from 'lodash';
 import { BottomArea, CloseButton, Form, SaveButton } from './newTicket.styles';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 import { ViewerParams } from '../../../routes.constants';
@@ -70,12 +70,12 @@ export const NewTicketCard = () => {
 	};
 
 	const onSubmit = async (vals) => {
-		const ticket = { type: templateId, ...vals };
+		const ticket = { type: templateId, ...cloneDeep(vals) };
 
 		const { promiseToResolve, resolve } = getWaitablePromise();
 
 		const parsedTicket = filterEmptyTicketValues(ticket) as NewTicket;
-		sanitizeViewVals(ticket, { modules: {} } as ITicket, template);
+		sanitizeViewVals(parsedTicket, { modules: {} } as ITicket, template);
 		TicketsActionsDispatchers.createTicket(
 			teamspace,
 			project,
@@ -92,6 +92,8 @@ export const NewTicketCard = () => {
 		await promiseToResolve;
 	};
 
+	const updateUnsavedTicket = () => TicketsCardActionsDispatchers.setUnsavedTicket(formData.getValues());
+
 	useEffect(() => {
 		if (!templateAlreadyFetched(template)) {
 			TicketsActionsDispatchers.fetchTemplate(
@@ -102,7 +104,10 @@ export const NewTicketCard = () => {
 				isFederation,
 			);
 		}
+
 		TicketsCardActionsDispatchers.setUnsavedTicket(defaultTicket);
+
+		return () => { updateUnsavedTicket(); };
 	}, []);
 
 	useEffect(() => {
@@ -157,7 +162,7 @@ export const NewTicketCard = () => {
 									// Im not sure this is still needed here, because we are already depending on react-hook-form to fill the form
 									ticket={defaultTicket}
 									focusOnTitle
-									onPropertyBlur={() => TicketsCardActionsDispatchers.setUnsavedTicket(formData.getValues())}
+									onPropertyBlur={updateUnsavedTicket}
 								/>
 							)}
 						</>

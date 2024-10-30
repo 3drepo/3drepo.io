@@ -29,6 +29,7 @@ export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions
 	setFavouriteSuccess: ['projectId', 'drawingId', 'isFavourite'],
 	fetchDrawings: ['teamspace', 'projectId'],
 	fetchDrawingsSuccess: ['projectId', 'drawings'],
+	fetchDrawingSettings: ['teamspace', 'projectId', 'drawingId'],
 	fetchDrawingStats: ['teamspace', 'projectId', 'drawingId'],
 	fetchDrawingStatsSuccess: ['projectId', 'drawingId', 'stats'],
 	fetchCalibration: ['teamspace', 'projectId', 'drawingId'],
@@ -77,9 +78,10 @@ export const createDrawingSuccess = (state: DrawingsState, { projectId, drawing 
 	state.drawingsByProject[projectId] = (state.drawingsByProject[projectId] || []).concat([drawing]);
 };
 
-export const updateDrawingSuccess = (state: DrawingsState, { projectId, drawingId, drawing }:UpdateDrawingSuccessAction ) => {
+export const updateDrawingSuccess = (state: DrawingsState, { projectId, drawingId, drawing: { calibration, ...drawing } }:UpdateDrawingSuccessAction ) => {
 	const oldDrawing = getDrawingFromState(state, projectId, drawingId);
 	Object.assign(oldDrawing, drawing);
+	oldDrawing.calibration = { ...oldDrawing.calibration, ...calibration };
 };
 
 export const deleteDrawingSuccess = (state: DrawingsState, {
@@ -116,6 +118,7 @@ export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & TeamspaceProjec
 export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & ProjectAndDrawingId & { isFavourite: boolean };
 export type FetchDrawingsAction = Action<'FETCH_DRAWINGS'> & TeamspaceAndProjectId;
 export type FetchDrawingsSuccessAction = Action<'FETCH_DRAWINGS_SUCCESS'> & ProjectId & { drawings: IDrawing[] };
+export type FetchDrawingSettingsAction = Action<'FETCH_DRAWING_SETTINGS'> & TeamspaceProjectAndDrawingId;
 export type FetchDrawingStatsAction = Action<'FETCH_DRAWING_STATS'> & TeamspaceProjectAndDrawingId;
 export type FetchDrawingStatsSuccessAction = Action<'FETCH_DRAWING_STATS_SUCCESS'> & ProjectAndDrawingId & { stats: DrawingStats };
 export type FetchCalibrationAction = Action<'FETCH_CALIBRATION'> & TeamspaceProjectAndDrawingId;
@@ -137,6 +140,7 @@ export interface IDrawingsActionCreators {
 	setFavouriteSuccess: (projectId: string, drawingId: string, isFavourite: boolean) => SetFavouriteSuccessAction;
 	fetchDrawings: (teamspace: string, projectId: string) => FetchDrawingsAction;
 	fetchDrawingsSuccess: (projectId: string, drawings: Partial<IDrawing>[]) => FetchDrawingsSuccessAction;
+	fetchDrawingSettings: (teamspace: string, projectId: string, drawingId: string) => FetchDrawingSettingsAction;
 	fetchDrawingStats: (teamspace: string, projectId: string, drawingId: string) => FetchDrawingStatsAction;
 	fetchDrawingStatsSuccess: (projectId: string, drawingId: string, stats: DrawingStats) => FetchDrawingStatsSuccessAction;
 	fetchCalibration: (teamspace: string, projectId: string, drawingId: string) => FetchCalibrationAction;

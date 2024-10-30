@@ -38,7 +38,7 @@ export const DRAWING_LIST_COLUMN_WIDTHS = {
 		width: 155,
 		hideWhenSmallerThan: Display.Desktop,
 	},
-	calibration: {
+	calibrationStatus: {
 		width: 155,
 		hideWhenSmallerThan: Display.Tablet,
 	},
@@ -115,13 +115,13 @@ export const fullDrawing = (
 	const isPendingRevisions = selectRevisionsPending(state, drawing._id);
 	const activeRevisions = selectActiveRevisions(state, drawing._id);
 	const latestRevision = isPendingRevisions ? drawing.latestRevision : selectLatestRevisionName(state, drawing._id);
-	const revisionsCount = isPendingRevisions ? drawing.revisionsCount : activeRevisions.length;
+	const revisionsCount = (isPendingRevisions ? drawing.revisionsCount : activeRevisions.length) ?? 0;
 	const calibrationStatus = revisionsCount > 0 ? drawing.calibrationStatus : CalibrationStatus.EMPTY;
 	const lastUpdated = isPendingRevisions ? drawing.lastUpdated :  (activeRevisions[0] || {}).timestamp;
 	const status = drawing.status ?? UploadStatus.OK;
 	const isFavourite = drawing.isFavourite ?? false;
 	const role = drawing.role ?? Role.ADMIN;
-	const calibration = drawing.calibration || EMPTY_CALIBRATION;
+	const calibration = { ...EMPTY_CALIBRATION, ...drawing.calibration };
 
 	return {
 		...drawing,

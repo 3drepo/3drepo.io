@@ -33,7 +33,7 @@ const millisecondsPerSecond = 1000;
 const acc = 9.8;
 const mass = 10;
 const zoomDuration = 300;
-const maxSpeed = 230;
+const maxSpeed = 150;
 
 /* eslint-disable @typescript-eslint/no-use-before-define */
 export const panzoom = (target: ZoomableImage, options) => {
@@ -147,8 +147,9 @@ export const panzoom = (target: ZoomableImage, options) => {
 	};
 
 	const onMouseMove = (ev: MouseEvent) => {
-		speed.x = clamp(ev.movementX * 10, -maxSpeed, maxSpeed);
-		speed.y = clamp(ev.movementY * 10, -maxSpeed, maxSpeed);
+		const scaledMaxSpeed = clamp(transform.scale * maxSpeed, 50, maxSpeed) ;
+		speed.x = clamp(ev.movementX * 10, -scaledMaxSpeed, scaledMaxSpeed);
+		speed.y = clamp(ev.movementY * 10, -scaledMaxSpeed, scaledMaxSpeed);
 		moveTo(transform.x + ev.movementX, transform.y + ev.movementY);
 	};
 
@@ -219,6 +220,9 @@ export const panzoom = (target: ZoomableImage, options) => {
 		on: (event, fn) => {
 			emitter.on(event, fn);
 			emitter.emit(Events.transform);
+		},
+		off: (event, fn?) => {
+			emitter.off(event, fn);
 		},
 		smoothZoom,
 		smoothSetTransform,

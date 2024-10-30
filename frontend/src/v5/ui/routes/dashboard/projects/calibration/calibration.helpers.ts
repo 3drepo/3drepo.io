@@ -16,8 +16,21 @@
  */
 
 import { Matrix3, Vector2 } from 'three';
-import { Coord2D, Vector2D, Vector3D } from './calibration.types';
+import { Coord2D, Coord3D, Vector1D, Vector2D, Vector3D } from './calibration.types';
 import { isNumber } from 'lodash';
+import { CalibrationStatus } from '@/v5/store/drawings/drawings.types';
+
+export const CALIBRATION_SORT_ORDER = {
+	[CalibrationStatus.EMPTY]: 0,
+	[CalibrationStatus.UNCALIBRATED]: 1,
+	[CalibrationStatus.UNCONFIRMED]: 2,
+	[CalibrationStatus.CALIBRATED]: 3,
+};
+
+export const DEFAULT_SETTINGS_CALIBRATION = {
+	units: 'm',
+	verticalRange: [0, 2.4] as Vector1D,
+};
 
 export const UNITS_CONVERSION_FACTORS_TO_METRES = {
 	'm': 1,
@@ -27,15 +40,16 @@ export const UNITS_CONVERSION_FACTORS_TO_METRES = {
 	'ft': 3.28084,
 } as const;
 
-export const getUnitsConversionFactor = (drawingUnits, modelUnits) => {
-	if (!drawingUnits) return 1;
-	return UNITS_CONVERSION_FACTORS_TO_METRES[drawingUnits] / UNITS_CONVERSION_FACTORS_TO_METRES[modelUnits];
+export const getUnitsConversionFactor = (to, from) => {
+	if (!to) return 1;
+	return UNITS_CONVERSION_FACTORS_TO_METRES[to] / UNITS_CONVERSION_FACTORS_TO_METRES[from];
 };
 
 export const convertUnits = (coords: number[], conversionFactor: number) => coords?.map((coord) => isNumber(coord) ? coord * conversionFactor : null) || null;
 export const convertVectorUnits = (vector, conversionFactor: number) => vector.map((coord) => convertUnits(coord, conversionFactor));
 
-const removeZ = (vector) => [vector[0], vector[2]] as Coord2D;
+export const removeZ = ([x,, y]: Coord3D): Coord2D => [x, y];
+export const addZ = ([x, y]: Coord2D, z: number): Coord3D => [x, z, y];
 
 export const getTransformationMatrix = (vector2D: Vector2D, vector3D: Vector3D) => {
 	const drawVecStart = new Vector2(...vector2D[0]);
@@ -57,7 +71,7 @@ export const getTransformationMatrix = (vector2D: Vector2D, vector3D: Vector3D) 
 	const scaleMatrix = new Matrix3().makeScale(scaleFactor, scaleFactor);
 	const rotationMatrix = new Matrix3().makeRotation(directionFactor * angle);
 	drawVecStart.applyMatrix3(scaleMatrix.clone().multiply(rotationMatrix));
-    
+	
 	const translationMatrix = new Matrix3().makeTranslation(new Vector2().subVectors(modelVecStart, drawVecStart));
 	const transformationMatrix = translationMatrix.multiply(scaleMatrix).multiply(rotationMatrix); 
 	return transformationMatrix;

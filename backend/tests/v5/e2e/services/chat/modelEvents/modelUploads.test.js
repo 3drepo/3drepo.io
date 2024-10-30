@@ -299,7 +299,7 @@ const queueFinishedTest = () => {
 			const modelUpdateResults = await modelUpdatePromise;
 			expect(modelUpdateResults?.data?.timestamp).not.toBeUndefined();
 			expect(modelUpdateResults).toEqual(expect.objectContaining({ ...data,
-				data: { status: 'ok', timestamp: modelUpdateResults.data.timestamp, calibration: calibrationStatuses.CALIBRATED } }));
+				data: { status: 'ok', timestamp: modelUpdateResults.data.timestamp } }));
 
 			const newRevisionResults = await newRevisionPromise;
 			expect(newRevisionResults?.data?.timestamp).not.toBeUndefined();
