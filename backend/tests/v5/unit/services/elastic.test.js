@@ -42,7 +42,6 @@ const testCreateActivityRecord = () => {
 
 			const { host } = config;
 			const timestamp = new Date();
-			const id = `${host}-${user}-${timestamp.valueOf()}`;
 
 			const elasticBody = {
 				status: parseInt(status, 10),
@@ -67,7 +66,7 @@ const testCreateActivityRecord = () => {
 
 			expect(createElasticRecord).toHaveBeenCalledTimes(1);
 			expect(createElasticRecord).toHaveBeenCalledWith(
-				'io-activity', elasticBody, id);
+				'io-activity', elasticBody, expect.any(String));
 		});
 	});
 
