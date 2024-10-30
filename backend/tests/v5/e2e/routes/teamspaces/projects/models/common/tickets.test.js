@@ -61,7 +61,8 @@ const setupBasicData = async (users, teamspace, project, models, templatesToAdd)
 	await Promise.all([
 		...userProms,
 		...modelProms,
-		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id), [users.projectAdmin.user]),
+		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id),
+			[users.projectAdmin.user]),
 		ServiceHelper.db.createTemplates(teamspace, templatesToAdd),
 	]);
 };
