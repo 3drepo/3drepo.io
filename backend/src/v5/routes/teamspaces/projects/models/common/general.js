@@ -986,7 +986,7 @@ const establishRoutes = (modelType) => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/members:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/jobs:
 	 *   get:
 	 *     description: Get the name of the jobs that are associated with users who have access to the model
 	 *     tags: [Models]
