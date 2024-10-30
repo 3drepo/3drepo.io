@@ -16,8 +16,10 @@
  */
 
 const { src, srcV4 } = require('../../helper/path');
-const config = require('../../../../src/v5/utils/config');
-const { determineTestGroup, generateRandomString, generateRandomNumber } = require('../../helper/services');
+
+const { determineTestGroup, generateRandomString, generateRandomNumber, generateUUIDString } = require('../../helper/services');
+
+jest.mock('uuid', () => ({ v4: () => 'xyz' }));
 
 jest.mock('../../../../src/v4/handler/elastic');
 const { createElasticRecord } = require(`${srcV4}/handler/elastic`);
@@ -40,9 +42,8 @@ const testCreateActivityRecord = () => {
 			const method = generateRandomString();
 			const originalUrl = generateRandomString();
 
-			const { host } = config;
 			const timestamp = new Date();
-			const id = `${host}-${user}-${timestamp.valueOf()}`;
+			const id = generateUUIDString();
 
 			const elasticBody = {
 				status: parseInt(status, 10),
