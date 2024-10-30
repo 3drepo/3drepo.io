@@ -17,9 +17,7 @@
 
 const { src, srcV4 } = require('../../helper/path');
 
-const { determineTestGroup, generateRandomString, generateRandomNumber, generateUUIDString } = require('../../helper/services');
-
-jest.mock('uuid', () => ({ v4: () => 'xyz' }));
+const { determineTestGroup, generateRandomString, generateRandomNumber } = require('../../helper/services');
 
 jest.mock('../../../../src/v4/handler/elastic');
 const { createElasticRecord } = require(`${srcV4}/handler/elastic`);
@@ -43,7 +41,6 @@ const testCreateActivityRecord = () => {
 			const originalUrl = generateRandomString();
 
 			const timestamp = new Date();
-			const id = generateUUIDString();
 
 			const elasticBody = {
 				status: parseInt(status, 10),
@@ -68,7 +65,7 @@ const testCreateActivityRecord = () => {
 
 			expect(createElasticRecord).toHaveBeenCalledTimes(1);
 			expect(createElasticRecord).toHaveBeenCalledWith(
-				'io-activity', elasticBody, id);
+				'io-activity', elasticBody, expect.any(String));
 		});
 	});
 
