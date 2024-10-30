@@ -241,7 +241,7 @@ function* importGroups({ teamspace, modelId, file}) {
 
 
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('export', 'groups', error));
+		yield put(DialogActions.showErrorDialog('import', 'groups', error));
 	}
 }
 

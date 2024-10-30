@@ -74,7 +74,7 @@ export const Login = () => {
 		>
 			<AuthFormLogin onSubmit={handleSubmit(onSubmit)}>
 				<AuthHeading>
-					<FormattedMessage id="auth.login.heading" defaultMessage="Sign into your account" />
+					<FormattedMessage id="auth.login.heading" defaultMessage="Sign in to your account" />
 				</AuthHeading>
 				<AuthSubHeader>
 					<FormattedMessage id="auth.login.heading.signInWithMicrosoft" defaultMessage="Sign in with Microsoft" />
