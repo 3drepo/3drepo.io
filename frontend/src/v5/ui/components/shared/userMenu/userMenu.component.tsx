@@ -28,7 +28,6 @@ import { ActionMenuSection, ActionMenuItem, ActionMenuItemLink } from '@controls
 import { selectSettings, ViewerActions } from '@/v4/modules/viewer';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useSelector } from 'react-redux';
-import { dispatch } from '@/v4/modules/store';
 import {
 	ActionMenu,
 	AvatarContainer,
@@ -41,6 +40,7 @@ import {
 } from './userMenu.styles';
 import { EditProfileModal } from './editProfileModal/editProfileModal.component';
 import { VisualSettingsModal } from './visualSettingsModal/visualSettingsModal.component';
+import { dispatch } from '@/v5/helpers/redux.helpers';
 
 type UserMenuProps = {
 	user: ICurrentUser;
