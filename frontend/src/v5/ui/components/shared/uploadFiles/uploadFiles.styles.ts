@@ -21,9 +21,6 @@ import { DashboardListHeader } from '@components/dashboard/dashboardList/dashboa
 import { FormModal } from '@controls/formModal/formModal.component';
 import { Typography } from '@controls/typography';
 import { memo } from 'react';
-import { MODAL_BODY_MAX_HEIGHT } from '@controls/formModal/modalBody/modalBody.styles';
-
-const MODAL_PADDING = 35;
 
 export const Modal = memo(styled(FormModal)`
 	.MuiPaper-root {
@@ -46,21 +43,21 @@ export const Modal = memo(styled(FormModal)`
 export const UploadsContainer = styled.div`
 	display: flex;
 	flex-direction: row;
-	max-height: min(calc(100vh - 211px), ${MODAL_BODY_MAX_HEIGHT});
+	max-height: min(calc(100vh - 211px), calc(70vh - 46px));
 	width: 100%;
 	box-sizing: border-box;
 	overflow: hidden;
 `;
 
 export const UploadsListScroll = styled.div`
-	min-height: ${MODAL_BODY_MAX_HEIGHT};
-	max-height: min(calc(100vh - 211px), ${MODAL_BODY_MAX_HEIGHT});
+	min-height: calc(70vh - 46px);
+	max-height: min(calc(100vh - 211px), calc(70vh - 46px));
 	width: 100%;
 	overflow-y: scroll;
 `;
 
 export const Padding = styled.div`
-	margin: ${MODAL_PADDING}px;
+	margin: 35px;
 	padding-bottom: 0;
 	box-sizing: border-box;
 `;

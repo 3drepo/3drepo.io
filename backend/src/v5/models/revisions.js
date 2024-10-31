@@ -51,11 +51,13 @@ const findOneRevisionByQuery = async (teamspace, model, modelType, query, projec
 	return rev;
 };
 
-Revisions.getLatestRevision = (teamspace, model, modelType, projection = {}) => {
+Revisions.getLatestRevision = (teamspace, model, modelType, projection = {},
+	{ includeVoid, includeFailed, includeIncomplete } = {},
+) => {
 	const query = deleteIfUndefined({
-		...excludeVoids,
-		...excludeIncomplete,
-		...excludeFailed,
+		...(includeVoid ? {} : { ...excludeVoids }),
+		...(includeFailed ? {} : { ...excludeFailed }),
+		...(includeIncomplete ? {} : { ...excludeIncomplete }),
 		model: modelType === modelTypes.DRAWING ? model : undefined,
 	});
 
