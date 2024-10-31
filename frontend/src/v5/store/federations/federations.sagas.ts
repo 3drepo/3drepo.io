@@ -254,6 +254,8 @@ export default function* FederationsSagas() {
 	yield takeEvery(FederationsTypes.FETCH_FEDERATION_STATS, fetchFederationStats);
 	yield takeEvery(FederationsTypes.FETCH_FEDERATION_VIEWS, fetchFederationViews);
 	yield takeEvery(FederationsTypes.FETCH_FEDERATION_SETTINGS, fetchFederationSettings);
+	yield takeEvery(FederationsTypes.FETCH_FEDERATION_USERS, fetchFederationUsers);
+	yield takeEvery(FederationsTypes.FETCH_FEDERATION_JOBS, fetchFederationJobs);
 	yield takeLatest(FederationsTypes.UPDATE_FEDERATION_SETTINGS, updateFederationSettings);
 	yield takeLatest(FederationsTypes.DELETE_FEDERATION, deleteFederation);
 	yield takeLatest(FederationsTypes.UPDATE_FEDERATION_CONTAINERS, updateFederationContainers);
