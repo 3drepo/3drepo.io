@@ -21,6 +21,7 @@ import { useDispatch } from 'react-redux';
 import { ProjectsHooksSelectors, CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TeamspacesActions } from '@/v4/modules/teamspaces';
 import { Container, V4ModelsPermissions } from './userPermissions.styles';
+import { SuppressPermissionModalToggle } from '@components/shared/updatePermissionModal/suppressPermissionModalToggle.component';
 
 export const UserPermissions = () => {
 	const dispatch = useDispatch();
@@ -43,6 +44,7 @@ export const UserPermissions = () => {
 
 	return (
 		<Container>
+			<SuppressPermissionModalToggle />
 			<V4ModelsPermissions />
 		</Container>
 	);
