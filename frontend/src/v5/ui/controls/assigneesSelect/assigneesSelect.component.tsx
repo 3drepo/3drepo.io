@@ -18,7 +18,7 @@
 import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { FormattedMessage } from 'react-intl';
-import { useCallback, useState } from 'react';
+import { useCallback, useContext, useState } from 'react';
 import { SelectProps } from '@controls/inputs/select/select.component';
 import { formatMessage } from '@/v5/services/intl';
 import AddUserIcon from '@assets/icons/outlined/add_user-outlined.svg';
@@ -30,11 +30,7 @@ import { AssigneeCircle } from './assigneeCircle/assigneeCircle.component';
 import { ExtraAssigneesPopover } from './extraAssigneesCircle/extraAssigneesPopover.component';
 import { ExtraAssigneesCircle } from './extraAssigneesCircle/extraAssignees.styles';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
-import { useParams } from 'react-router';
-import { DashboardParams } from '../../routes/routes.constants';
-import { getState } from '@/v5/helpers/redux.helpers';
-import { selectUser } from '@/v5/store/users/users.selectors';
-import { selectJobById } from '@/v4/modules/jobs';
+import { TicketContext } from '../../routes/viewer/tickets/ticket.context';
 
 export type AssigneesSelectProps = Pick<FormInputProps, 'value'> & SelectProps & {
 	maxItems?: number;
@@ -55,20 +51,17 @@ export const AssigneesSelect = ({
 	...props
 }: AssigneesSelectProps) => {
 	const [open, setOpen] = useState(false);
-	const { containerOrFederation, teamspace } = useParams<DashboardParams>();
+	const { containerOrFederation } = useContext(TicketContext);
 
 	const isFed = modelIsFederation(containerOrFederation);
 
-	const usernames = isFed
+	const users = isFed
 		? FederationsHooksSelectors.selectFederationUsers(containerOrFederation)
 		: ContainersHooksSelectors.selectContainerUsers(containerOrFederation);
-	const users = usernames.map((username) => selectUser(getState(), teamspace, username));
 
-	const jobsAsStrings = isFed
+	const jobs = isFed
 		? FederationsHooksSelectors.selectFederationJobs(containerOrFederation)
 		: ContainersHooksSelectors.selectContainerJobs(containerOrFederation);
-	const jobs = jobsAsStrings.map((job) => selectJobById(getState(), job));
-
 
 	const emptyValue = multiple ? [] : '';
 	const value = valueRaw || emptyValue;

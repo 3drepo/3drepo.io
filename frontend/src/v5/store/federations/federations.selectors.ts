@@ -23,6 +23,8 @@ import { IFederation } from './federations.types';
 import { selectContainers } from '../containers/containers.selectors';
 import { Role } from '../currentUser/currentUser.types';
 import { isCollaboratorRole, isCommenterRole } from '../store.helpers';
+import { selectJobs } from '@/v4/modules/jobs';
+import { selectCurrentTeamspaceUsers } from '../users/users.selectors';
 
 const selectFederationsDomain = (state): IFederationsState => state?.federations || ({ federationsByProject: {} });
 
@@ -88,10 +90,12 @@ export const selectHasCommenterAccess = createSelector(
 
 export const selectFederationUsers = createSelector(
 	selectFederationById,
-	(federation) => federation.users || [],
+	selectCurrentTeamspaceUsers,
+	(federation, users) => (federation?.users || []).map((username) => users.find((u: any) => u.user === username)),
 );
 
 export const selectFederationJobs = createSelector(
 	selectFederationById,
-	(federation) => federation.jobs || [],
+	selectJobs,
+	(federation, jobs) => (federation?.jobs || []).map((jobId) => jobs.find((j) => j._id === jobId)),
 );
