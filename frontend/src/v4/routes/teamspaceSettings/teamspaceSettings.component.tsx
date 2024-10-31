@@ -285,12 +285,12 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 		return (
 			<PermissionsLogContainer gap="10px" container direction="column" wrap="nowrap">
 				<Headline color="textPrimary" variant="subtitle1">
-					<FormattedMessage id="teamspaceSettings.permissionsLog.heading" defaultMessage="User Permission Log Download" />
+					<FormattedMessage id="teamspaceSettings.permissionsLog.heading" defaultMessage="Audit log" />
 				</Headline>
 				<DataText variant="body1">
 					<FormattedMessage
 						id="teamspaceSettings.permissionsLog.subHeading"
-						defaultMessage="Download your User Permission Change logs for this teamspace by selecting the range below and clicking download."
+						defaultMessage="Download the audit trail of all access-related actions performed within the specified date range"
 					/>
 				</DataText>
 				<FileGrid container direction="row" justifyContent="space-between" alignItems="center" wrap="nowrap">
