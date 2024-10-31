@@ -61,7 +61,7 @@ const AttachResourcesContainer = css`
 
 	${AttachResourcesMainContainer} {
 		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-		width: 460px;
+		width: 520px;
 		
 		${Content} {
 			min-height: 160px;
