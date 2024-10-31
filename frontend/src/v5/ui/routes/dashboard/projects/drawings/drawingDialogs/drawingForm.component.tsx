@@ -106,6 +106,7 @@ export const DrawingForm = ({ formData, drawing }:Props) => {
 					name="calibration.verticalRange.0"
 					label={formatMessage({ id: 'drawings.form.bottomExtent', defaultMessage: 'Bottom Extent' })}
 					formError={errors.calibration?.verticalRange?.[0]}
+					disabled={!isProjectAdmin}
 					required
 				/>
 				<FormNumberField
@@ -113,6 +114,7 @@ export const DrawingForm = ({ formData, drawing }:Props) => {
 					name="calibration.verticalRange.1"
 					label={formatMessage({ id: 'drawings.form.topExtent', defaultMessage: 'Top Extent' })}
 					formError={errors.calibration?.verticalRange?.[1]}
+					disabled={!isProjectAdmin}
 					required
 				/>
 			</DoubleInputLineContainer>
@@ -121,6 +123,7 @@ export const DrawingForm = ({ formData, drawing }:Props) => {
 				control={control}
 				label={formatMessage({ id: 'drawings.form.units', defaultMessage: 'Units' })}
 				name="calibration.units"
+				disabled={!isProjectAdmin}
 			>
 				{MODEL_UNITS.map(({ value, name }) => (
 					<MenuItem key={value} value={value}>{name}</MenuItem>

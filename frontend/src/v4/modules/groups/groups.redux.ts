@@ -256,9 +256,7 @@ export const showDeleteInfo = (state = INITIAL_STATE, { groupIds }) => {
 	return { ...state, groupsMap, componentState: { ...state.componentState, editingGroup } };
 };
 
-const resetComponentState = (state = INITIAL_STATE) => {
-	return { ...state, componentState: INITIAL_STATE.componentState };
-};
+const resetComponentState = () => cloneDeep(INITIAL_STATE);
 
 export const setOverrideAllSuccess = (state = INITIAL_STATE) => {
 	let groupIds = [];

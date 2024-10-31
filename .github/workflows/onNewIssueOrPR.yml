@@ -29,7 +29,7 @@ jobs:
           project_number: 22
           content_id: ${{ github.event.issue.node_id}}
           field: Sprint
-          value: 'V5 Revamp'
+          value: 'Web'
   update-pr:
     name: Update project fields (PR)
     runs-on: ubuntu-latest

@@ -23,6 +23,11 @@ export const CameraIcon = styled(CameraSVG)`
 	overflow: unset;
 	transform-origin: 0 0;
 	cursor: grab; 
+	pointer-events: none;
+
+	& > * {
+		pointer-events: all;
+	}
 `;
 
 

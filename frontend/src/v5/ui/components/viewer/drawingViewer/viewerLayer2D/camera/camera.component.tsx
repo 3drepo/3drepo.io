@@ -28,7 +28,7 @@ import { setCameraPos } from './camera.helpers';
 
 const haloAngleCutoff = Math.PI / 4;
 
-export const Camera = ({ scale }) => {
+export const Camera = ({ scale, offsetRef }) => {
 	const viewpoint = useRef(null);
 	const scaleRef = useRef(scale);
 	
@@ -71,8 +71,8 @@ export const Camera = ({ scale }) => {
 
 	const getCursorOffset = (e) => {
 		const rect = e.currentTarget.getBoundingClientRect();
-		const offsetX = e.clientX - rect.left;
-		const offsetY = e.clientY - rect.top;
+		const offsetX = e.clientX - rect.left - offsetRef.current.x;
+		const offsetY = e.clientY - rect.top - offsetRef.current.y;
 		return [ offsetX / scaleRef.current, offsetY / scaleRef.current];
 	};
 
@@ -97,7 +97,7 @@ export const Camera = ({ scale }) => {
 		ev.nativeEvent.stopPropagation();
 		ev.nativeEvent.stopImmediatePropagation();
 
-		const container = ev.currentTarget.parentElement;
+		const container = ev.currentTarget.parentElement.parentElement.parentElement;
 
 		container.addEventListener('mousemove', onMouseMove);
 		container.addEventListener('mouseup', onMouseUp);

@@ -34,6 +34,26 @@ export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 	const group = useRef<any>(null);
 	const hasLineLikeBehavior = [SHAPE_TYPES.LINE, SHAPE_TYPES.ARROW].includes(figure);
 
+	const getSize = () => {
+		const currentShape = shape.current;
+		const selfRect = currentShape.getSelfRect();
+
+		// This is to fix a bug in the current version konva, should be fixed in later versions:
+		// Drawing a triangle, creates a transformation box that is incorrectly placed. This is
+		// because the transformation box is bounding a (imaginary) circle drawn around the shape
+		if (currentShape.attrs?.sides === 3) {
+			return {
+				height: selfRect.height,
+				width: selfRect.width,
+			};
+		}
+
+		return {
+			width: currentShape.width() || selfRect.width,
+			height: currentShape.height() || selfRect.height,
+		};
+	}
+
 	useEffect(() => {
 		if (isSelected && transformer.current) {
 			transformer.current.attachTo(group.current);
@@ -44,10 +64,9 @@ export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 	useEffect(() => {
 		if (shape.current) {
 			const currentShape = shape.current;
-			const selfRect = shape.current.getSelfRect();
-			const width = shape.current.width() || selfRect.width;
-			const height = shape.current.height() || selfRect.height;
-			const { x, y } = shape.current.getAbsolutePosition();
+			const selfRect = currentShape.getSelfRect();
+			const { x, y } = currentShape.getAbsolutePosition();
+			const { width, height } = getSize();
 
 			if (figure === SHAPE_TYPES.CLOUD) {
 				rect.current.x(x);
