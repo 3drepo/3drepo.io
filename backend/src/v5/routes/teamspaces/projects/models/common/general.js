@@ -201,25 +201,25 @@ const getModelSettings = (modelType) => async (req, res, next) => {
 	}
 };
 
-const getMembers = async (req, res) => {
+const getUsersWithPermissions = async (req, res) => {
 	const { teamspace, project, model } = req.params;
 	const excludeViewers = req.query.excludeViewers === 'true';
 
 	try {
-		const members = await ModelSettings.getMembers(teamspace, project, model, excludeViewers);
-		respond(req, res, templates.ok, { users: members });
+		const users = await ModelSettings.getUsersWithPermissions(teamspace, project, model, excludeViewers);
+		respond(req, res, templates.ok, { users });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
 	}
 };
 
-const getAccessibleJobs = async (req, res) => {
+const getJobsWithAccess = async (req, res) => {
 	const { teamspace, project, model } = req.params;
 	const excludeViewers = req.query.excludeViewers === 'true';
 
 	try {
-		const jobs = await ModelSettings.getAccessibleJobs(teamspace, project, model, excludeViewers);
+		const jobs = await ModelSettings.getJobsWithAccess(teamspace, project, model, excludeViewers);
 		respond(req, res, templates.ok, { jobs });
 	} catch (err) {
 		// istanbul ignore next
@@ -931,7 +931,7 @@ const establishRoutes = (modelType) => {
 	 *   get:
 	 *     description: Get the name of the users who have access to the model
 	 *     tags: [Models]
-	 *     operationId: getMembers
+	 *     operationId: getUsersWithPermissions
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -982,15 +982,15 @@ const establishRoutes = (modelType) => {
 	 *                     type: string
 	 *                     example: user1
 	 */
-	router.get('/:model/members', hasReadAccessToModel[modelType], getMembers);
+	router.get('/:model/members', hasReadAccessToModel[modelType], getUsersWithPermissions);
 
 	/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/jobs:
 	 *   get:
-	 *     description: Get the name of the jobs that are associated with users who have access to the model
+	 *     description: Get the names of the jobs that are associated with users who have access to the model
 	 *     tags: [Models]
-	 *     operationId: getAccessibleJobs
+	 *     operationId: getJobsWithAccess
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -1041,7 +1041,7 @@ const establishRoutes = (modelType) => {
 	 *                     type: string
 	 *                     example: Architect
 	 */
-	router.get('/:model/jobs', hasReadAccessToModel[modelType], getAccessibleJobs);
+	router.get('/:model/jobs', hasReadAccessToModel[modelType], getJobsWithAccess);
 
 	if (modelType === modelTypes.DRAWING) {
 	/**

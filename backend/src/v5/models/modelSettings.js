@@ -109,16 +109,9 @@ Models.getModelType = async (ts, model) => {
 	return getModelType(item);
 };
 
-Models.getMembers = async (ts, model, excludeViewers) => {
-	const pipeline = [
-		{ $match: { _id: model } },
-		{ $unwind: '$permissions' },
-		{ $match: excludeViewers ? { 'permissions.permission': { $ne: 'viewer' } } : {} },
-		{ $project: { _id: 0, user: '$permissions.user' } },
-	];
-
-	const permissions = await db.aggregate(ts, SETTINGS_COL, pipeline);
-	return permissions.map(({ user }) => user);
+Models.getUsersWithPermissions = async (ts, model, excludeViewers) => {
+	const { permissions } = await findOneModel(ts, { _id: model }, { permissions: 1 });
+	return permissions.flatMap((p) => (!excludeViewers || p.permission !== 'viewer' ? p.user : []));
 };
 
 Models.getContainerById = async (ts, container, projection) => {

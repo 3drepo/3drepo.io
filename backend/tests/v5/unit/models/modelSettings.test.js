@@ -17,7 +17,7 @@
 
 const { times } = require('lodash');
 const { src } = require('../../helper/path');
-const { generateRandomString, generateUUIDString, generateUUID, generateRandomObject } = require('../../helper/services');
+const { generateRandomString, generateUUIDString, generateUUID } = require('../../helper/services');
 
 const { getInfoFromCode, modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
@@ -895,44 +895,39 @@ const testGetModelType = () => {
 	);
 };
 
-const testGetMembers = () => {
-	describe('Get members', () => {
+const testGetUsersWithPermissions = () => {
+	describe('Get users with permissions', () => {
+		const teamspace = generateRandomString();
+		const modelId = generateRandomString();
+
+		const model = {
+			permissions: [
+				{ user: generateRandomString(), permission: 'viewer' },
+				{ user: generateRandomString(), permission: 'commenter' },
+				{ user: generateRandomString(), permission: 'collaborator' },
+			],
+		};
+
 		test('should return the users who have access to the model', async () => {
-			const teamspace = generateRandomString();
-			const model = generateRandomString();
-			const pipeline = [
-				{ $match: { _id: model } },
-				{ $unwind: '$permissions' },
-				{ $match: {} },
-				{ $project: { _id: 0, user: '$permissions.user' } },
-			];
+			DBHandler.findOne.mockResolvedValueOnce(model);
 
-			const users = times(5, () => ({ user: generateRandomString(), ...generateRandomObject() }));
-			DBHandler.aggregate.mockResolvedValueOnce(users);
+			await expect(Model.getUsersWithPermissions(teamspace, modelId))
+				.resolves.toEqual(model.permissions.map((u) => u.user));
 
-			await expect(Model.getMembers(teamspace, model)).resolves.toEqual(users.map((u) => u.user));
-
-			expect(DBHandler.aggregate).toHaveBeenCalledTimes(1);
-			expect(DBHandler.aggregate).toHaveBeenCalledWith(teamspace, SETTINGS_COL, pipeline);
+			expect(DBHandler.findOne).toHaveBeenCalledTimes(1);
+			expect(DBHandler.findOne).toHaveBeenCalledWith(teamspace, SETTINGS_COL,
+				{ _id: modelId }, { permissions: 1 });
 		});
 
-		test('should return the users who have access to the model excuding viewerw', async () => {
-			const teamspace = generateRandomString();
-			const model = generateRandomString();
-			const pipeline = [
-				{ $match: { _id: model } },
-				{ $unwind: '$permissions' },
-				{ $match: { 'permissions.permission': { $ne: 'viewer' } } },
-				{ $project: { _id: 0, user: '$permissions.user' } },
-			];
+		test('should return the users who have access to the model excuding viewers', async () => {
+			DBHandler.findOne.mockResolvedValueOnce(model);
 
-			const users = times(5, () => ({ user: generateRandomString(), ...generateRandomObject() }));
-			DBHandler.aggregate.mockResolvedValueOnce(users);
+			await expect(Model.getUsersWithPermissions(teamspace, modelId, true))
+				.resolves.toEqual(model.permissions.slice(1).map((u) => u.user));
 
-			await expect(Model.getMembers(teamspace, model, true)).resolves.toEqual(users.map((u) => u.user));
-
-			expect(DBHandler.aggregate).toHaveBeenCalledTimes(1);
-			expect(DBHandler.aggregate).toHaveBeenCalledWith(teamspace, SETTINGS_COL, pipeline);
+			expect(DBHandler.findOne).toHaveBeenCalledTimes(1);
+			expect(DBHandler.findOne).toHaveBeenCalledWith(teamspace, SETTINGS_COL,
+				{ _id: modelId }, { permissions: 1 });
 		});
 	});
 };
@@ -954,5 +949,5 @@ describe('models/modelSettings', () => {
 	testRemoveUserFromAllModels();
 	testIsFederation();
 	testGetModelType();
-	testGetMembers();
+	testGetUsersWithPermissions();
 });

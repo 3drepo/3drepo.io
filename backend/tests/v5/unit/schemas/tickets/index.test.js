@@ -288,8 +288,8 @@ const testPresetValues = () => {
 
 			const jobs = times(5, () => generateRandomString());
 			const users = times(5, () => generateRandomString());
-			JobsModel.getAccessibleJobs.mockResolvedValue(jobs);
-			ModelSettingsProcessor.getMembers.mockResolvedValue(users);
+			JobsModel.getJobsByUsers.mockResolvedValue(jobs);
+			ModelSettingsProcessor.getUsersWithPermissions.mockResolvedValue(users);
 
 			const testCases = [
 				['With existing jobs', createData(jobs[2], jobs[4]), true],
