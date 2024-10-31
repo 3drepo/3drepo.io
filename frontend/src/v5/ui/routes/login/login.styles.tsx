@@ -49,7 +49,7 @@ export const UnhandledErrorInterceptor = styled(UnhandledErrorInterceptorBase)`
 
 export const AuthFormLogin = styled(AuthForm)`
 	min-width: 0;
-	width: 361px;
+	width: 489px;
 `;
 
 export const MicrosoftButton = styled(MicrosoftButtonBase)`

@@ -61,7 +61,7 @@ export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: ID
 	const selected = revisions.findIndex((r) => !r.void);
 
 	const handleDownloadRevision = async (revision: IDrawingRevision) => {
-		await downloadFile(getRevisionFileUrl(teamspace, project, drawingId, revision._id),  `${revision.revCode}-${revision.statusCode}${revision.format}`);
+		await downloadFile(getRevisionFileUrl(teamspace, project, drawingId, revision._id));
 	};
 
 	useEffect(() => {

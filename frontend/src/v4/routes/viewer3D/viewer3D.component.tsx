@@ -106,12 +106,13 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 		viewer.setupInstance(this.containerRef.current, this.handleUnityError);
 	}
 
-	public renderGisCoordinates(coordinates) {
+	public async renderGisCoordinates(coordinates) {
 		const { viewer, gisLayers } = this.props;
 		viewer.mapInitialise(coordinates);
 
 		if (gisLayers.length > 0) {
 			viewer.mapStop();
+			await new Promise((resolve) => setTimeout(resolve, 100));
 			viewer.mapStart();
 		}
 	}

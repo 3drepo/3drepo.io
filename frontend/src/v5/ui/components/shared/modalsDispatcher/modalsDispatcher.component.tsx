@@ -30,7 +30,7 @@ const ModalTemplateContainer = ({ id, modalType, props, syncProps }: IDialogConf
 	const onClickClose = () => {
 		setOpenState(false);
 		setTimeout(() => DialogsActionsDispatchers.close(id), 500);
-		modalProps?.onClose();
+		modalProps.onClose?.();
 	};
 
 	if (syncProps) {

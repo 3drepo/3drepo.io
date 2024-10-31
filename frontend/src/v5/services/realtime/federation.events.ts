@@ -19,11 +19,12 @@
 import { FederationRevision, FederationSettings, NewFederationRealtime } from '@/v5/store/federations/federations.types';
 import { FederationsActionsDispatchers } from '../actionsDispatchers';
 import { subscribeToRoomEvent } from './realtime.service';
+import { prepareFederationSettingsForFrontend } from '@/v5/store/federations/federations.helpers';
 
 export const enableRealtimeFederationUpdateSettings = (teamspace:string, project:string, federationId:string) =>
 	subscribeToRoomEvent({ teamspace, project, model: federationId }, 'federationSettingsUpdate',
 		(settings: FederationSettings) =>
-			FederationsActionsDispatchers.fetchFederationSettingsSuccess(project, federationId, settings));
+			FederationsActionsDispatchers.fetchFederationSettingsSuccess(project, federationId, prepareFederationSettingsForFrontend(settings)));
 
 export const enableRealtimeNewFederation = (teamspace:string, project:string) =>
 	subscribeToRoomEvent({ teamspace, project }, 'newFederation',

@@ -173,7 +173,6 @@ export const Viewer2D = () => {
 				/>
 			)}
 			{!isCalibrating && <CloseButton variant="secondary" onClick={close2D} />}
-			<CloseButton variant="secondary" onClick={close2D} />
 			<ImageContainer backgroundColor={backgroundColor} ref={imgContainerRef}>
 				{
 					isLoading &&
