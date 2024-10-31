@@ -39,7 +39,6 @@ import {
 } from '../revisionDetails/revisionDetails.styles';
 import { getRevisionFileUrl } from '@/v5/services/api/drawingRevisions';
 import { selectHasCollaboratorAccess } from '@/v5/store/drawings/drawings.selectors';
-import { getState } from '@/v4/modules/store';
 import { RevisionsListItemText } from '../revisionDetails/components/revisionsListItem/revisionsListItemText/revisionsListItemText.component';
 import { RevisionsListItemAuthor } from '../revisionDetails/components/revisionsListItem/revisionsListItemAuthor/revisionsListItemAuthor.component';
 import { RevisionsListItemTag } from '../revisionDetails/components/revisionsListItem/revisionsListItem.styles';
@@ -47,6 +46,7 @@ import { IDrawingRevision } from '@/v5/store/drawings/revisions/drawingRevisions
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { UploadStatus } from '@/v5/store/containers/containers.types';
 import { downloadFile } from '@/v5/helpers/download.helper';
+import { getState } from '@/v5/helpers/redux.helpers';
 
 interface IDrawingRevisionDetails {
 	drawingId: string;
