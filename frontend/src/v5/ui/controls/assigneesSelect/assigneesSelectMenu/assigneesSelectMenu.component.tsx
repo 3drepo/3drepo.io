@@ -15,19 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SearchContext, SearchContextType } from '@controls/search/searchContext';
 import { NoResults, SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
 import { ListSubheader } from '@mui/material';
-import { get, partition } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { SelectProps } from '@controls/inputs/select/select.component';
-import { useCallback, useContext, useState, useEffect } from 'react';
-import { IUser } from '@/v5/store/users/users.redux';
-import { IJob } from '@/v5/store/jobs/jobs.types';
+import { useCallback, useContext } from 'react';
 import { AssigneesSelectMenuItem } from './assigneesSelectMenuItem/assigneesSelectMenuItem.component';
 import { HiddenSelect, HorizontalRule, SearchInput } from './assigneesSelectMenu.styles';
-
-const isUser = (assignee) => get(assignee, 'user');
+import { SearchContext } from '@controls/search/searchContext';
+import { groupBy } from 'lodash';
 
 const preventPropagation = (e) => {
 	if (e.key !== 'Escape') {
@@ -42,18 +38,13 @@ export const AssigneesSelectMenu = ({
 	multiple,
 	...props
 }: SelectProps) => {
-	const [users, setUsers] = useState([]);
-	const [jobs, setJobs] = useState([]);
-	const { filteredItems } = useContext<SearchContextType<IJob | IUser>>(SearchContext);
+	const { filteredItems } = useContext(SearchContext);
+	const { jobs = [], users = [] } = groupBy(filteredItems, (item) => item?.user ? 'users' : 'jobs');
+
 	const onClickList = useCallback((e) => {
 		preventPropagation(e);
 		onClick?.(e);
 	}, []);
-	useEffect(() => {
-		const [filteredUsers, filteredJobs] = partition(filteredItems, isUser);
-		setUsers(filteredUsers);
-		setJobs(filteredJobs);
-	}, [filteredItems.length]);
 
 	return (
 		// @ts-ignore
@@ -70,12 +61,12 @@ export const AssigneesSelectMenu = ({
 			<ListSubheader>
 				<FormattedMessage id="assigneesSelectMenu.jobsHeading" defaultMessage="Jobs" />
 			</ListSubheader>
-			{jobs.length > 0 && jobs.map(({ _id }) => (
+			{jobs.length > 0 && jobs.map(({ _id: job }) => (
 				<AssigneesSelectMenuItem
-					key={_id}
-					assignee={_id}
-					value={_id}
-					title={_id}
+					key={job}
+					assignee={job}
+					value={job}
+					title={job}
 					multiple={multiple}
 				/>
 			))}

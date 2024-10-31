@@ -47,3 +47,9 @@ export const selectJobsPending = createSelector(
 export const selectColorsPending = createSelector(
 	selectJobsDomain, (state) => state.colorsPending
 );
+
+export const selectJobById = createSelector(
+	selectJobs,
+	(state, jobId) => jobId,
+	(jobs, jobId) => jobs.find(({ _id }) => _id === jobId)
+);

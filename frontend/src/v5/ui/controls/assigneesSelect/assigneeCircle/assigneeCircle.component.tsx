@@ -15,12 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useSelector } from 'react-redux';
-import { selectJobs } from '@/v4/modules/jobs/jobs.selectors';
 import { JobPopoverCircle } from '@components/shared/popoverCircles/jobPopoverCircle/jobPopoverCircle.component';
 import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.component';
 import { IPopoverCircle } from '@components/shared/popoverCircles/popoverCircle.styles';
-import { UsersHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { UsersHooksSelectors, TeamspacesHooksSelectors, JobsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { memo } from 'react';
 
 type IAssigneeCircle = IPopoverCircle & {
@@ -29,11 +27,10 @@ type IAssigneeCircle = IPopoverCircle & {
 
 export const AssigneeCircle = memo(({ assignee, ...props }: IAssigneeCircle) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
-	const jobsInTeamspace = useSelector(selectJobs);
-	const isJob = jobsInTeamspace.some(({ _id }) => _id === assignee);
+	const job = JobsHooksSelectors.selectJobById(assignee);
 	const user = UsersHooksSelectors.selectUser(teamspace, assignee);
 
 	if (!assignee) return null;
-	if (isJob) return <JobPopoverCircle job={jobsInTeamspace.find(({ _id }) => _id === assignee)} {...props} />;
+	if (!!job) return <JobPopoverCircle job={job} {...props} />;
 	return (<UserPopoverCircle user={user} {...props} />);
 });
