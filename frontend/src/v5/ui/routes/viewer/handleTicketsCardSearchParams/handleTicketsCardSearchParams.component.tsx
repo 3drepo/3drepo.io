@@ -15,18 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DialogsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DialogsActionsDispatchers, TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEmpty } from 'lodash';
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { ViewerParams } from '../../routes.constants';
-import { useSearchParam } from '../../useSearchParam';
+import { Transformers, useSearchParam } from '../../useSearchParam';
+import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 
-export const OpenTicketFromUrl = () => {
-	const [ticketId, setTicketId] = useSearchParam('ticketId');
+export const HandleTicketsCardSearchParams = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
+	const [ticketId, setTicketId] = useSearchParam('ticketId');
+
+	const [queriesParam, setQueriesParam] = useSearchParam('queries', Transformers.STRING_ARRAY);
+	const [templatesParam, setTemplatesParam] = useSearchParam('templates', Transformers.STRING_ARRAY);
+	const [completedParam, setCompletedParam] = useSearchParam('completed', Transformers.BOOLEAN);
 
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
@@ -45,6 +50,22 @@ export const OpenTicketFromUrl = () => {
 			TicketsCardActionsDispatchers.openTicket(ticketId);
 		}
 	}, [hasTicketData]);
+	
+	useEffect(() => {
+		if (!templatesParam.length && !queriesParam.length && !completedParam) return;
+		ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.TICKETS, true);
+		TicketsCardActionsDispatchers.setTemplateFilters(templatesParam);
+		if (queriesParam.length) {
+			TicketsCardActionsDispatchers.setQueryFilters(queriesParam);
+		}
+		if (completedParam) {
+			TicketsCardActionsDispatchers.toggleCompleteFilter();
+		}
+
+		setQueriesParam();
+		setCompletedParam();
+		setTemplatesParam();
+	}, [templatesParam, queriesParam, completedParam]);
 
 	return <></>;
 };
