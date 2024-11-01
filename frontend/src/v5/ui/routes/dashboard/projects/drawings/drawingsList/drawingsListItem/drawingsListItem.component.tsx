@@ -110,7 +110,7 @@ export const DrawingsListItem = memo(({
 					calibrationStatus={drawing.calibrationStatus}
 					onCalibrateClick={onCalibrateClick}
 					drawingId={drawingId}
-					{...DRAWING_LIST_COLUMN_WIDTHS.calibration}
+					{...DRAWING_LIST_COLUMN_WIDTHS.calibrationStatus}
 				/>
 				<DashboardListItemText selected={isSelected} {...DRAWING_LIST_COLUMN_WIDTHS.number}>
 					{drawing.number}

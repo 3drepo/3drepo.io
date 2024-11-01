@@ -48,7 +48,10 @@ export const CalibrationHeader = () => {
 		return false;
 	};
 
-	const handleEndCalibration = () => history.push(origin);
+	const handleEndCalibration = () => {
+		history.push(origin);
+		setStep(0);
+	};
 
 	const handleConfirm = () => {
 		handleEndCalibration();

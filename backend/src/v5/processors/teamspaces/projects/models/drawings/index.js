@@ -45,7 +45,8 @@ Drawings.getDrawingList = async (teamspace, project, user) => {
 Drawings.getDrawingStats = async (teamspace, project, drawing) => {
 	const getLatestRevAndCalibration = async () => {
 		try {
-			const latestRev = await getLatestRevision(teamspace, drawing, modelTypes.DRAWING,
+			const latestRev = await
+			getLatestRevision(teamspace, drawing, modelTypes.DRAWING,
 				{ _id: 1, statusCode: 1, revCode: 1, timestamp: 1 });
 			const calibration = await getCalibrationStatus(teamspace, project, drawing, latestRev._id);
 			return { latestRev, calibration };
@@ -55,15 +56,28 @@ Drawings.getDrawingStats = async (teamspace, project, drawing) => {
 		}
 	};
 
-	const [settings, revCount, { latestRev, calibration }] = await Promise.all([
-		getDrawingById(teamspace, drawing, { number: 1, status: 1, type: 1, desc: 1 }),
+	const getDrawingStatus = async () => {
+		try {
+			const { status } = await getLatestRevision(teamspace, drawing, modelTypes.DRAWING,
+				{ status: 1 },
+				{ includeFailed: true, includeIncomplete: true });
+			return status;
+		} catch {
+			// do nothing. A drawing can have 0 revision.
+			return undefined;
+		}
+	};
+
+	const [settings, revCount, { latestRev, calibration }, status] = await Promise.all([
+		getDrawingById(teamspace, drawing, { number: 1, type: 1, desc: 1 }),
 		getRevisionCount(teamspace, drawing, modelTypes.DRAWING),
 		getLatestRevAndCalibration(),
+		getDrawingStatus(),
 	]);
 
 	return deleteIfUndefined({
 		number: settings.number,
-		status: settings.status,
+		status,
 		type: settings.type,
 		desc: settings.desc,
 		revisions: {

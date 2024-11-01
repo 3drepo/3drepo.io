@@ -61,9 +61,4 @@ function configureStore() {
 
 export const store = configureStore();
 
-
-export const dispatch = store.dispatch;
-
-export const getState = store.getState;
-
 setStore(store);
