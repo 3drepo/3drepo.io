@@ -97,7 +97,7 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 									event.stopPropagation();
 									removeContainers([container._id]);
 								}}
-								dark={isSelected}
+								$dark={isSelected}
 								hidden={!isCollaborator}
 							>
 								<RemoveIcon />
@@ -151,7 +151,7 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 									event.stopPropagation();
 									includeContainers([container._id]);
 								}}
-								dark={isSelected}
+								$dark={isSelected}
 								hidden={!isCollaborator}
 							>
 								<IncludeIcon />

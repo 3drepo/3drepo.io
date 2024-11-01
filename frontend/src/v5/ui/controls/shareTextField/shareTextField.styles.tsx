@@ -18,22 +18,14 @@ import styled from 'styled-components';
 import { TextField } from '@mui/material';
 import Tooltip, { TooltipProps } from '@mui/material/Tooltip';
 import copyToClipboardIcon from '@assets/icons/outlined/copy_to_clipboard-outlined.svg';
-import tick from '@assets/icons/outlined/tick-outlined.svg';
 
-const SVG_PADDING_IN_PX = 9;
-
-export const CopyToClipboardIcon = styled(copyToClipboardIcon)`
-	padding: ${SVG_PADDING_IN_PX}px;
-`;
-
-export const Tick = styled(tick)`
-	padding: ${SVG_PADDING_IN_PX}px;
-	padding-left: ${SVG_PADDING_IN_PX - 2}px;
-	padding-right: ${SVG_PADDING_IN_PX + 2}px;
-`;
+export const CopyToClipboardIcon = styled(copyToClipboardIcon)``;
 
 export const CopyToClipboardIconContainer = styled.div`
 	display: grid;
+	place-content: center;
+	width: 33px;
+    height: 33px;
 `;
 
 export const LinkBar = styled(TextField)`
@@ -42,13 +34,13 @@ export const LinkBar = styled(TextField)`
 			cursor: pointer;
 		`}
 		margin-top: 0;
-		padding-right: ${9 - SVG_PADDING_IN_PX}px;
+		padding-right: 0;
 
 
 		.MuiOutlinedInput-input {
 			pointer-events: none;
 			user-select: none;
-			padding-right: ${9 - SVG_PADDING_IN_PX}px;
+			padding-right: 0;
 		}
 	}
 

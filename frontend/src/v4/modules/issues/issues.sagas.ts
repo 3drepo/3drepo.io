@@ -18,13 +18,14 @@
 import { push } from 'connected-react-router';
 import filesize from 'filesize';
 import { isEmpty, isEqual, map, omit} from 'lodash';
-import { all, put, select, takeEvery, takeLatest, take  } from 'redux-saga/effects';
+import { put, select, takeEvery, takeLatest, take  } from 'redux-saga/effects';
 
 import * as queryString from 'query-string';
 import { generatePath } from 'react-router';
 import { generateViewpoint } from '@/v4/helpers/viewpoints';
 import { waitForAddons } from '@/v5/store/teamspaces/teamspaces.sagas';
 import { selectIssuesEnabled } from '@/v5/store/teamspaces/teamspaces.selectors';
+import { dispatch, getState } from '@/v5/helpers/redux.helpers';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { DEFAULT_PROPERTIES, ISSUE_DEFAULT_HIDDEN_STATUSES, PRIORITIES, STATUSES } from '../../constants/issues';
 import { EXTENSION_RE } from '../../constants/resources';
@@ -51,7 +52,6 @@ import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
 import { selectSelectedSequence, selectSelectedStartingDate, SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
-import { dispatch, getState } from '../store';
 import { selectTopicTypes } from '../teamspace';
 import { TreeActions } from '../tree';
 import { ViewpointsActions } from '../viewpoints';
