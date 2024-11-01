@@ -85,11 +85,11 @@ export const CardList = styled.div`
 `;
 
 export const EmptyCardMessage = styled(DashedContainer).attrs({
-	strokeColor: '#c0c8d5', // TODO - fix when new palette is released
-	dashSize: 2,
-	gapSize: 2,
-	strokeWidth: 2,
-	zeroPadding: true,
+	$strokeColor: '#c0c8d5', // TODO - fix when new palette is released
+	$dashSize: 2,
+	$gapSize: 2,
+	$strokeWidth: 2,
+	$zeroPadding: true,
 })`
 	text-align: center;
 	font-size: 13px;
