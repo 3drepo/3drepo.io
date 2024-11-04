@@ -89,14 +89,21 @@ export const UploadContainerRevisionForm = ({
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const allUploadsComplete = ContainerRevisionsHooksSelectors.selectUploadIsComplete();
+	const revisionsArePending = ContainerRevisionsHooksSelectors.selectRevisionsPending(presetContainerId);
+	const revisions = ContainerRevisionsHooksSelectors.selectRevisions(presetContainerId);
 	const presetContainer = ContainersHooksSelectors.selectContainerById(presetContainerId);
-
+	const [alreadyExistingTags, setAlreadyExistingTags] = useState([]);
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 
 	const formData = useForm<FormType>({
 		mode: 'onChange',
 		resolver: !isUploading ? yupResolver(UploadsSchema) : undefined,
-		context: { alreadyExistingNames: [], teamspace, project },
+		context: {
+			alreadyExistingNames: [],
+			alreadyExistingTags,
+			teamspace,
+			project,
+		},
 	});
 
 	const {
@@ -188,6 +195,16 @@ export const UploadContainerRevisionForm = ({
 		}
 		FederationsActionsDispatchers.fetchFederations(teamspace, project);
 	}, []);
+
+	useEffect(() => {
+		if (!presetContainerId || !revisionsArePending) return;
+		ContainerRevisionsActionsDispatchers.fetch(teamspace, project, presetContainerId);
+	}, []);
+
+	useEffect(() => {
+		if (!revisions.length) return;
+		setAlreadyExistingTags(revisions.map((r) => r.tag));
+	}, [revisions.length]);
 
 	return (
 		<FormProvider {...formData}>
