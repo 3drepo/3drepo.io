@@ -258,21 +258,11 @@ export interface IContainersActionCreators {
 		projectId: string,
 		containerId: string,
 	) => FetchContainerUsersAction,
-	// fetchContainerUsersSuccess: (
-	// 	projectId: string,
-	// 	containerId: string,
-	// 	users: string[],
-	// ) => FetchContainerUsersSuccessAction;
 	fetchContainerJobs: (
 		teamspace: string,
 		projectId: string,
 		containerId: string,
 	) => FetchContainerJobsAction,
-	// fetchContainerJobsSuccess: (
-	// 	projectId: string,
-	// 	containerId: string,
-	// 	jobs: string[],
-	// ) => FetchContainerJobsSuccessAction;
 	updateContainerSettings: (
 		teamspace: string,
 		projectId: string,

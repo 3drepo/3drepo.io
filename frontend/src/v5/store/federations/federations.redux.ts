@@ -241,21 +241,11 @@ export interface IFederationsActionCreators {
 		projectId: string,
 		federationId: string,
 	) => FetchFederationUsersAction,
-	// fetchFederationUsersSuccess: (
-	// 	projectId: string,
-	// 	federationId: string,
-	// 	users: string[],
-	// ) => FetchFederationUsersSuccessAction;
 	fetchFederationJobs: (
 		teamspace: string,
 		projectId: string,
 		federationId: string,
 	) => FetchFederationJobsAction,
-	// fetchFederationJobsSuccess: (
-	// 	projectId: string,
-	// 	federationId: string,
-	// 	jobs: string[],
-	// ) => FetchFederationJobsSuccessAction;
 	updateFederationSettings: (
 		teamspace: string,
 		projectId: string,
