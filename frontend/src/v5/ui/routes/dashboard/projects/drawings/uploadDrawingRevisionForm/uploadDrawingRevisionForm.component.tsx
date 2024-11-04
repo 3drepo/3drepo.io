@@ -90,6 +90,7 @@ export const UploadDrawingRevisionForm = ({
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const allUploadsComplete = DrawingRevisionsHooksSelectors.selectUploadIsComplete();
 	const presetDrawing = DrawingsHooksSelectors.selectDrawingById(presetDrawingId);
+	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const [isPresetLoading, setIsPresetLoading] = useState(!!presetFile);
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 
@@ -182,9 +183,13 @@ export const UploadDrawingRevisionForm = ({
 		if (presetFile) {
 			addFilesToList([presetFile], presetDrawing);
 		}
-		DrawingsActionsDispatchers.fetchTypes(teamspace, project);
 		DrawingRevisionsActionsDispatchers.fetchStatusCodes(teamspace, project);
 	}, []);
+
+	useEffect(() => {
+		if (!isAdmin) return;
+		DrawingsActionsDispatchers.fetchTypes(teamspace, project);
+	}, [isAdmin]);
 
 	if (isPresetLoading) return null;
 

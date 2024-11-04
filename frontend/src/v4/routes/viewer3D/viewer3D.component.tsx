@@ -16,11 +16,11 @@
  */
 import { PureComponent, createRef, useContext } from 'react';
 import { difference, differenceBy, isEqual } from 'lodash';
-import { dispatch } from '@/v4/modules/store';
 import { DialogActions } from '@/v4/modules/dialog';
 import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
 import { CalibrationToolbar } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationToolbar/calibrationToolbar.component';
 import { LifoQueue } from '@/v5/helpers/functions.helpers';
+import { dispatch } from '@/v5/helpers/redux.helpers';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { useViewerCalibrationSetup } from '@/v5/ui/routes/dashboard/projects/calibration/useViewerCalibrationSetup';
 import {queuableFunction} from '../../helpers/async';
@@ -106,12 +106,13 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 		viewer.setupInstance(this.containerRef.current, this.handleUnityError);
 	}
 
-	public renderGisCoordinates(coordinates) {
+	public async renderGisCoordinates(coordinates) {
 		const { viewer, gisLayers } = this.props;
 		viewer.mapInitialise(coordinates);
 
 		if (gisLayers.length > 0) {
 			viewer.mapStop();
+			await new Promise((resolve) => setTimeout(resolve, 100));
 			viewer.mapStart();
 		}
 	}

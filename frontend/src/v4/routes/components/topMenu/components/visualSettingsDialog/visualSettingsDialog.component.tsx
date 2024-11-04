@@ -36,7 +36,7 @@ const SettingsSchema = Yup.object().shape({
 	farPlaneSamplingPoints: schema.integer(1, Number.POSITIVE_INFINITY),
 	maxShadowDistance: schema.integer(1, Number.POSITIVE_INFINITY),
 	numCacheThreads: schema.integer(1, 15),
-	clipPlaneBorderWidth: schema.number(0, Number.POSITIVE_INFINITY),
+	clipPlaneBorderWidth: schema.number(0, 1),
 	memoryThreshold: schema.number(0, 2032),
 	fovWeight: schema.number(0, 10),
 	meshFactor: schema.number(1, Number.POSITIVE_INFINITY),
@@ -94,7 +94,7 @@ const BasicSettings = (props) => {
 								<ShortInput
 									error={Boolean(form.errors.clipPlaneBorderWidth)}
 									{...field}
-									helperText={form.errors.clipPlaneBorderWidth}
+									helpertext={form.errors.clipPlaneBorderWidth}
 								/>
 							</ErrorTooltip>
 							<V5ErrorText>

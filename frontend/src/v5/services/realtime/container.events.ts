@@ -19,11 +19,12 @@
 import { ContainerSettings, NewContainer } from '@/v5/store/containers/containers.types';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { subscribeToRoomEvent } from './realtime.service';
+import { prepareContainerSettingsForFrontend } from '@/v5/store/containers/containers.helpers';
 
 export const enableRealtimeContainerUpdateSettings = (teamspace:string, project:string, containerId:string) =>
 	subscribeToRoomEvent({ teamspace, project, model: containerId }, 'containerSettingsUpdate',
 		(settings: ContainerSettings) =>
-			ContainersActionsDispatchers.fetchContainerSettingsSuccess(project, containerId, settings));
+			ContainersActionsDispatchers.fetchContainerSettingsSuccess(project, containerId, prepareContainerSettingsForFrontend(settings)));
 
 export const enableRealtimeNewContainer = (teamspace:string, project:string) =>
 	subscribeToRoomEvent({ teamspace, project }, 'newContainer',
