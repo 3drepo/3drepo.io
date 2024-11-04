@@ -17,7 +17,6 @@
 
 import styled from 'styled-components';
 import { DragAndDrop } from '@controls/dragAndDrop';
-import { DashboardListHeader } from '@components/dashboard/dashboardList/dashboardListHeader';
 import { FormModal } from '@controls/formModal/formModal.component';
 import { Typography } from '@controls/typography';
 import { memo } from 'react';
@@ -65,11 +64,6 @@ export const Padding = styled.div`
 export const DropZone = styled(DragAndDrop)`
 	max-height: 190px;
 	width: auto;
-`;
-
-export const UploadsListHeader = styled(DashboardListHeader)`
-	padding: 0 45px 13px 25px;
-	margin-top: 0;
 `;
 
 export const HelpText = styled(Typography).attrs({
