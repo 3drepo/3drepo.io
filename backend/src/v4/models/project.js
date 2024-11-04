@@ -476,15 +476,16 @@
 			await Promise.all(data.permissions.map(async (permissionUpdate) => {
 				const userIndex = project.permissions.findIndex(x => x.user === permissionUpdate.user);
 
-				if(!permissionChange) {
-					permissionChange = {
-						users: [],
-						from: project.permissions[userIndex]?.permissions ?? null,
-						to: permissionUpdate.permissions.length ? permissionUpdate.permissions : null
-					};
-				}
+				const fromVal = project.permissions[userIndex]?.permissions[0] ?? null;
+				const toVal = permissionUpdate.permissions.length ? permissionUpdate.permissions[0] : null;
 
-				permissionChange.users.push(permissionUpdate.user);
+				if(fromVal !== toVal) {
+					if(!permissionChange) {
+						permissionChange = { from: fromVal ? [fromVal] : fromVal, to: toVal ? [toVal] : toVal, users: [] };
+					}
+
+					permissionChange.users.push(permissionUpdate.user);
+				}
 
 				if (-1 !== userIndex) {
 					if (permissionUpdate.permissions && permissionUpdate.permissions.length) {

@@ -134,7 +134,6 @@ APIService.createAppAsync = async (config, v5Init = true) => {
 	if(v5Init) {
 		await Promise.all([
 			require(`${v5Path}/services/eventsListener/eventsListener`).init(),
-			require(`${v5Path}/services/journaling`).init(),
 			require("../models/chatEvent").subscribeToV5Events(),
 			require("../models/intercom").subscribeToV5Events(),
 			require("../handler/elastic").subscribeToV5Events(),
@@ -199,7 +198,6 @@ APIService.createApp = (config, v5Init = true) => {
 
 	if(v5Init) {
 		require(`${v5Path}/services/eventsListener/eventsListener`).init();
-		require(`${v5Path}/services/journaling`).init();
 		require("../models/chatEvent").subscribeToV5Events();
 		require("../models/intercom").subscribeToV5Events();
 		require("../handler/elastic").subscribeToV5Events();
