@@ -32,11 +32,11 @@ const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
 const Yup = require('yup');
 const { deserialiseGroupSchema } = require('./tickets.groups');
 const { generateFullSchema } = require('./templates');
-const { getAccessibleJobs } = require('../../models/jobs');
 const { getArrayDifference } = require('../../utils/helper/arrays');
-const { getMembers } = require('../../processors/teamspaces/projects/models/commons/settings');
+const { getJobsByUsers } = require('../../models/jobs');
 const { getRiskCategories } = require('../../models/teamspaceSettings');
 const { getTicketsByQuery } = require('../../models/tickets');
+const { getUsersWithPermissions } = require('../../processors/teamspaces/projects/models/commons/settings');
 const { importCommentSchema } = require('./tickets.comments');
 const { logger } = require('../../utils/logger');
 const { propTypesToValidator } = require('./validators');
@@ -57,10 +57,10 @@ const generatePropertiesValidator = async (teamspace, project, model, templateId
 				case presetEnumValues.JOBS_AND_USERS:
 					{
 						const excludeViewers = prop.name === basePropertyLabels.ASSIGNEES;
-						const members = await getMembers(teamspace, project, model, excludeViewers);
-						const accessibleJobs = await getAccessibleJobs(teamspace, members);
+						const users = await getUsersWithPermissions(teamspace, project, model, excludeViewers);
+						const accessibleJobs = await getJobsByUsers(teamspace, users);
 
-						values = [...accessibleJobs, ...members];
+						values = [...accessibleJobs, ...users];
 					}
 					break;
 				case presetEnumValues.RISK_CATEGORIES:

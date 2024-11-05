@@ -37,9 +37,9 @@ const TeamspaceSettings = require(`${src}/models/teamspaceSettings`);
 jest.mock('../../../../../../../../src/v5/models/jobs');
 const Jobs = require(`${src}/models/jobs`);
 
-const testGetMembers = () => {
-	describe('Get members', () => {
-		test('should get the members of a model', async () => {
+const testGetUsersWithPermissions = () => {
+	describe('Get users with permissions', () => {
+		test('should get the users with permissions to a model', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
@@ -50,24 +50,24 @@ const testGetMembers = () => {
 			const modelMembers = times(5, () => generateRandomString());
 			TeamspaceSettings.getTeamspaceAdmins.mockResolvedValueOnce(tsAdmins);
 			ProjectSettings.getProjectAdmins.mockResolvedValueOnce(projAdmins);
-			ModelSettings.getMembers.mockResolvedValueOnce(modelMembers);
+			ModelSettings.getUsersWithPermissions.mockResolvedValueOnce(modelMembers);
 
-			await expect(Settings.getMembers(teamspace, project, model, excludeViewers))
+			await expect(Settings.getUsersWithPermissions(teamspace, project, model, excludeViewers))
 				.resolves.toEqual([...tsAdmins, ...projAdmins, ...modelMembers]);
 
 			expect(TeamspaceSettings.getTeamspaceAdmins).toHaveBeenCalledTimes(1);
 			expect(TeamspaceSettings.getTeamspaceAdmins).toHaveBeenCalledWith(teamspace);
 			expect(ProjectSettings.getProjectAdmins).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.getProjectAdmins).toHaveBeenCalledWith(teamspace, project);
-			expect(ModelSettings.getMembers).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getMembers).toHaveBeenCalledWith(teamspace, model, excludeViewers);
+			expect(ModelSettings.getUsersWithPermissions).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.getUsersWithPermissions).toHaveBeenCalledWith(teamspace, model, excludeViewers);
 		});
 	});
 };
 
-const testGetAccessibleJobs = () => {
-	describe('Get accessible jobs', () => {
-		test('should get the accessible jobs for a model', async () => {
+const testGetJobsWithAccess = () => {
+	describe('Get jobs with access', () => {
+		test('should get the all jobs of users who have access to a model', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
@@ -79,26 +79,26 @@ const testGetAccessibleJobs = () => {
 			const jobs = times(5, () => generateRandomString());
 			TeamspaceSettings.getTeamspaceAdmins.mockResolvedValueOnce(tsAdmins);
 			ProjectSettings.getProjectAdmins.mockResolvedValueOnce(projAdmins);
-			ModelSettings.getMembers.mockResolvedValueOnce(modelMembers);
-			Jobs.getAccessibleJobs.mockResolvedValueOnce(jobs);
+			ModelSettings.getUsersWithPermissions.mockResolvedValueOnce(modelMembers);
+			Jobs.getJobsByUsers.mockResolvedValueOnce(jobs);
 
-			await expect(Settings.getAccessibleJobs(teamspace, project, model, excludeViewers))
+			await expect(Settings.getJobsWithAccess(teamspace, project, model, excludeViewers))
 				.resolves.toEqual(jobs);
 
 			expect(TeamspaceSettings.getTeamspaceAdmins).toHaveBeenCalledTimes(1);
 			expect(TeamspaceSettings.getTeamspaceAdmins).toHaveBeenCalledWith(teamspace);
 			expect(ProjectSettings.getProjectAdmins).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.getProjectAdmins).toHaveBeenCalledWith(teamspace, project);
-			expect(ModelSettings.getMembers).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getMembers).toHaveBeenCalledWith(teamspace, model, excludeViewers);
-			expect(Jobs.getAccessibleJobs).toHaveBeenCalledTimes(1);
-			expect(Jobs.getAccessibleJobs).toHaveBeenCalledWith(teamspace,
+			expect(ModelSettings.getUsersWithPermissions).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.getUsersWithPermissions).toHaveBeenCalledWith(teamspace, model, excludeViewers);
+			expect(Jobs.getJobsByUsers).toHaveBeenCalledTimes(1);
+			expect(Jobs.getJobsByUsers).toHaveBeenCalledWith(teamspace,
 				[...tsAdmins, ...projAdmins, ...modelMembers]);
 		});
 	});
 };
 
 describe(determineTestGroup(__filename), () => {
-	testGetMembers();
-	testGetAccessibleJobs();
+	testGetUsersWithPermissions();
+	testGetJobsWithAccess();
 });

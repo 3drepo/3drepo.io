@@ -17,7 +17,7 @@
 
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { IUser } from '@/v5/store/users/users.redux';
-import { IPopoverCircle } from '../popoverCircle.styles';
+import { IPopoverCircle } from '../popoverCircle.component';
 import { UserPopover } from './userPopover/userPopover.component';
 import { UserCircle } from './userPopoverCircle.styles';
 

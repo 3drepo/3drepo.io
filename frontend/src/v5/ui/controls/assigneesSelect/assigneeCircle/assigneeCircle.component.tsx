@@ -17,7 +17,7 @@
 
 import { JobPopoverCircle } from '@components/shared/popoverCircles/jobPopoverCircle/jobPopoverCircle.component';
 import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.component';
-import { IPopoverCircle } from '@components/shared/popoverCircles/popoverCircle.styles';
+import { IPopoverCircle } from '@components/shared/popoverCircles/popoverCircle.component';
 import { UsersHooksSelectors, TeamspacesHooksSelectors, JobsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { memo } from 'react';
 

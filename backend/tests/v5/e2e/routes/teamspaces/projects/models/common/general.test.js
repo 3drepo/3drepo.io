@@ -1039,8 +1039,8 @@ const testGetThumbnail = () => {
 	});
 };
 
-const testGetMembers = () => {
-	describe('Get model members', () => {
+const testGetUsersWithPermissions = () => {
+	describe('Get users with permissions', () => {
 		const { users, teamspace, project, con, fed, draw } = generateBasicData();
 
 		beforeAll(async () => {
@@ -1103,8 +1103,8 @@ const testGetMembers = () => {
 	});
 };
 
-const testGetAccessibleJobs = () => {
-	describe('Get accessible jobs', () => {
+const testGetJobsWithAccess = () => {
+	describe('Get jobs with access', () => {
 		const { users, teamspace, project, con, fed, draw, jobs } = generateBasicData();
 
 		beforeAll(async () => {
@@ -1183,6 +1183,6 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	testUpdateModelSettings();
 	testGetSettings();
 	testGetThumbnail();
-	testGetMembers();
-	testGetAccessibleJobs();
+	testGetUsersWithPermissions();
+	testGetJobsWithAccess();
 });

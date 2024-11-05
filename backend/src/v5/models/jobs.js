@@ -41,7 +41,7 @@ Jobs.removeUserFromJobs = async (teamspace, userToRemove) => {
 	await updateMany(teamspace, { users: userToRemove }, { $pull: { users: userToRemove } });
 };
 
-Jobs.getAccessibleJobs = async (teamspace, users) => {
+Jobs.getJobsByUsers = async (teamspace, users) => {
 	const jobs = await findMany(teamspace, { users: { $in: users } }, { _id: 1 });
 	return jobs.map((j) => j._id);
 };

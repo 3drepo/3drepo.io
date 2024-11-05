@@ -15,23 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { getAccessibleJobs } = require('../../../../../models/jobs');
-const { getMembers } = require('../../../../../models/modelSettings');
+const { getJobsByUsers } = require('../../../../../models/jobs');
 const { getProjectAdmins } = require('../../../../../models/projectSettings');
 const { getTeamspaceAdmins } = require('../../../../../models/teamspaceSettings');
+const { getUsersWithPermissions } = require('../../../../../models/modelSettings');
 
 const Settings = {};
 
-Settings.getMembers = async (teamspace, project, model, excludeViewers) => {
-	const tsAdmins = await getTeamspaceAdmins(teamspace);
-	const projectAdmins = await getProjectAdmins(teamspace, project);
-	const modelMembers = await getMembers(teamspace, model, excludeViewers);
+Settings.getUsersWithPermissions = async (teamspace, project, model, excludeViewers) => {
+	const [tsAdmins, projectAdmins, modelMembers] = await Promise.all([
+		getTeamspaceAdmins(teamspace),
+		getProjectAdmins(teamspace, project),
+		getUsersWithPermissions(teamspace, model, excludeViewers),
+	]);
 	return [...tsAdmins, ...projectAdmins, ...modelMembers];
 };
 
-Settings.getAccessibleJobs = async (teamspace, project, model, excludeViewers) => {
-	const members = await Settings.getMembers(teamspace, project, model, excludeViewers);
-	return getAccessibleJobs(teamspace, members);
+Settings.getJobsWithAccess = async (teamspace, project, model, excludeViewers) => {
+	const users = await Settings.getUsersWithPermissions(teamspace, project, model, excludeViewers);
+	return getJobsByUsers(teamspace, users);
 };
 
 module.exports = Settings;

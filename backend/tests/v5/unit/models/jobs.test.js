@@ -82,15 +82,15 @@ const testRemoveUserFromJobs = () => {
 	});
 };
 
-const testGetAccessibleJobs = () => {
-	describe('Get accessible jobs', () => {
-		test('return names of all accessible jobs', async () => {
+const testGetJobsByUsers = () => {
+	describe('Get jobs by users', () => {
+		test('return names of all jobs thats users have access', async () => {
 			const teamspace = generateRandomString();
 			const users = times(5, () => generateRandomString());
 			const jobs = times(5, () => ({ _id: generateRandomString, ...generateRandomObject() }));
 
 			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(jobs);
-			await expect(Jobs.getAccessibleJobs(teamspace, users)).resolves.toEqual(jobs.map((j) => j._id));
+			await expect(Jobs.getJobsByUsers(teamspace, users)).resolves.toEqual(jobs.map((j) => j._id));
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, JOB_COL, { users: { $in: users } }, { _id: 1 }, undefined);
 		});
@@ -100,7 +100,7 @@ const testGetAccessibleJobs = () => {
 			const users = times(5, () => generateRandomString());
 
 			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce([]);
-			await expect(Jobs.getAccessibleJobs(teamspace, users)).resolves.toEqual([]);
+			await expect(Jobs.getJobsByUsers(teamspace, users)).resolves.toEqual([]);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, JOB_COL, { users: { $in: users } }, { _id: 1 }, undefined);
 		});
@@ -133,6 +133,6 @@ describe('models/jobs', () => {
 	testAddDefaultJobs();
 	testAssignUserToJob();
 	testRemoveUserFromJobs();
-	testGetAccessibleJobs();
+	testGetJobsByUsers();
 	testGetJobs();
 });
