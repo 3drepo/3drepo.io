@@ -97,5 +97,5 @@ export const selectFederationUsers = createSelector(
 export const selectFederationJobs = createSelector(
 	selectFederationById,
 	selectJobs,
-	(federation, jobs) => (federation?.jobs || []).map((jobId) => jobs.find((j) => j._id === jobId)),
+	(federation, jobs) => (federation?.jobs || []).map((jobId) => jobs.find((j) => j._id === jobId)).filter(Boolean),
 );

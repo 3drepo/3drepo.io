@@ -82,7 +82,7 @@ export const selectContainerUsers = createSelector(
 export const selectContainerJobs = createSelector(
 	selectContainerById,
 	selectJobs,
-	(container, jobs) => (container?.jobs || []).map((jobId) => jobs.find((j) => j._id === jobId)),
+	(container, jobs) => (container?.jobs || []).map((jobId) => jobs.find((j) => j._id === jobId)).filter(Boolean),
 );
 
 export const selectCanUploadToProject = createSelector(
