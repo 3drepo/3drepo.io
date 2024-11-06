@@ -48,7 +48,7 @@ export const selectCurrentTeamspaceUsers = createSelector(
 	},
 );
 
-export const selectUsersAndJobs = createSelector(
+export const selectJobsAndUsers = createSelector(
 	selectCurrentTeamspaceUsers,
 	selectJobs,
 	(users, jobs) => [...users, ...jobs],
