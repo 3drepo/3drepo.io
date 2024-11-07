@@ -1143,7 +1143,7 @@ export class UnityUtil {
 	 * Set the measure tool mode.
 	 * @category Measuring tool
 	 * @param mode - The measuring mode, accepted values are "Point", "Raycast", "MinimumDistance",
-	 * "SurfaceArea", "PolygonArea", "PolyLine" or "Angle".
+	 * "SurfaceArea", "PolygonArea", "PolyLine", "Angle" or "Slope".
 	 */
 	public static setMeasureToolMode(mode) {
 		UnityUtil.toUnity('SetMeasureToolMode', undefined, mode);
@@ -1156,6 +1156,15 @@ export class UnityUtil {
 	 */
 	public static setMeasureToolUnits(units) {
 		UnityUtil.toUnity('SetMeasureToolUnits', undefined, units);
+	}
+
+	/**
+	 * Set the measure tool units for the slope measurements.
+	 * @category Measuring tool
+	 * @param units - The measuring units accepted values are "Degrees", "Percentage"
+	 */
+	public static setMeasureToolSlopeUnit(units) {
+		UnityUtil.toUnity('SetMeasureToolSlopeUnit', undefined, units);
 	}
 
 	/**
