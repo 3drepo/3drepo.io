@@ -38,6 +38,7 @@ export type IconButtonProps = {
 };
 
 type EditFederationContainersListItemProps = {
+	isIncluded?: boolean;
 	isSelected: boolean;
 	container: IContainer;
 	filterQuery?: string;
@@ -46,15 +47,14 @@ type EditFederationContainersListItemProps = {
 };
 export const EditFederationContainersListItem = memo(({
 	icon: Icon,
+	isIncluded,
 	isSelected,
 	container,
 	filterQuery,
 	onItemClick,
 }: EditFederationContainersListItemProps) => {
-	const { setGroupsByContainer, groupsByContainer, groups, includedContainers, isReadOnly } = useContext(EditFederationContext);
+	const { setGroupsByContainer, groupsByContainer, groups, isReadOnly } = useContext(EditFederationContext);
 	const [groupValue, setGroupValue] = useState(groupsByContainer[container._id] || null);
-
-	const isIncluded = !!includedContainers.find(({ _id }) => _id === container._id);
 
 	const updateGroupsByContainer = (newValue) => {
 		setGroupsByContainer((existingGroups) => ({ ...existingGroups, [container._id]: newValue }));
