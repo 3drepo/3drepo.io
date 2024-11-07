@@ -19,27 +19,27 @@ const { src } = require('../../../../helper/path');
 const { generateRandomString } = require('../../../../helper/services');
 const isHtml = require('is-html-content');
 
-const Audit = require(`${src}/services/mailer/templates/audit`);
+const AuditLogPassword = require(`${src}/services/mailer/templates/auditLogPassword`);
 
 const testHtml = () => {
-	describe('get audit template html', () => {
+	describe('get auditLogPassword template html', () => {
 		describe.each([
 			['data is undefined', undefined],
 			['password is undefined', { }],
 		])(
 			'Error checking ', (desc, data) => {
 				test(`should throw an error if ${desc}`, async () => {
-					await expect(Audit.html(data)).rejects.toThrow();
+					await expect(AuditLogPassword.html(data)).rejects.toThrow();
 				});
 			},
 		);
 
-		test('should get audit template html', async () => {
+		test('should get auditLogPassword template html', async () => {
 			const data = {
 				password: generateRandomString(),
 				firstName: generateRandomString(),
 			};
-			const res = await Audit.html(data);
+			const res = await AuditLogPassword.html(data);
 			expect(isHtml(res)).toEqual(true);
 		});
 	});
@@ -48,13 +48,13 @@ const testHtml = () => {
 const testSubject = () => {
 	describe('get subject', () => {
 		test('should get the subject of the template', () => {
-			const res = Audit.subject();
+			const res = AuditLogPassword.subject();
 			expect(res).toEqual('Audit logs file password');
 		});
 	});
 };
 
-describe('services/mailer/templates/audit', () => {
+describe('services/mailer/templates/auditLogPassword', () => {
 	testHtml();
 	testSubject();
 });

@@ -64,20 +64,21 @@ const testGetAuditLogArchive = () => {
 			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(username, { 'customData.email': 1, 'customData.firstName': 1 });
 			expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
 			const { password } = Mailer.sendEmail.mock.calls[0][2];
-			expect(Mailer.sendEmail).toHaveBeenCalledWith(emailTemplates.AUDIT.name, email,
+			expect(Mailer.sendEmail).toHaveBeenCalledWith(emailTemplates.AUDIT_LOG_PASSWORD.name, email,
 				{ firstName, password });
 		});
 
 		test('should return error if stream fails', async () => {
 			Archiver.registerFormat.mockReturnValueOnce(undefined);
+			const errorMessage = generateRandomString();
 			const mockArchive = { append: jest.fn(), on: jest.fn(), pipe: jest.fn(), finalize: jest.fn() };
 			Archiver.create.mockReturnValueOnce(mockArchive);
 
-			mockArchive.on.mockImplementation((event, callback) => { if (event === 'error') callback(); });
+			mockArchive.on.mockImplementation((event, callback) => { if (event === 'error') callback(new Error(errorMessage)); });
 			AuditsModel.getActionLog.mockResolvedValueOnce(actions);
 
 			await expect(Audits.getAuditLogArchive(teamspace, username, fromDate, toDate))
-				.rejects.toEqual({ ...templates.unknown, message: `Failed to create zip file: ${templates.streamError.message}` });
+				.rejects.toEqual(templates.unknown);
 
 			expect(AuditsModel.getActionLog).toHaveBeenCalledTimes(1);
 			expect(AuditsModel.getActionLog).toHaveBeenCalledWith(teamspace, fromDate, toDate);
@@ -93,7 +94,7 @@ const testGetAuditLogArchive = () => {
 			AuditsModel.getActionLog.mockResolvedValueOnce(actions);
 
 			await expect(Audits.getAuditLogArchive(teamspace, username, fromDate, toDate))
-				.rejects.toEqual({ ...templates.unknown, message: `Failed to create zip file: ${errorMessage}` });
+				.rejects.toEqual(templates.unknown);
 
 			expect(AuditsModel.getActionLog).toHaveBeenCalledTimes(1);
 			expect(AuditsModel.getActionLog).toHaveBeenCalledWith(teamspace, fromDate, toDate);

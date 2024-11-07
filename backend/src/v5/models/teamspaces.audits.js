@@ -16,6 +16,7 @@
  */
 
 const Audit = {};
+const { actions } = require('./teamspaces.audits.constants');
 const db = require('../handler/db');
 const { deleteIfUndefined } = require('../utils/helper/objects');
 const { generateUUID } = require('../utils/helper/uuids');
@@ -44,16 +45,24 @@ const logAction = async (teamspace, action, executor, data) => {
 	await db.insertOne(teamspace, COL_NAME, formattedData);
 };
 
-Audit.logUserAction = async (teamspace, action, executor, user) => {
-	await logAction(teamspace, action, executor, { user });
+Audit.logSeatAllocation = async (teamspace, executor, user) => {
+	await logAction(teamspace, actions.USER_ADDED, executor, { user });
 };
 
-Audit.logPermissionAction = async (teamspace, action, executor, users, permissions) => {
-	await logAction(teamspace, action, executor, { users, permissions });
+Audit.logSeatRemoval = async (teamspace, executor, user) => {
+	await logAction(teamspace, actions.USER_REMOVED, executor, { user });
 };
 
-Audit.logInvitationAction = async (teamspace, action, executor, email, job, permissions) => {
-	await logAction(teamspace, action, executor, { email, job, permissions });
+Audit.logPermissionUpdate = async (teamspace, executor, users, permissions) => {
+	await logAction(teamspace, actions.PERMISSIONS_UPDATED, executor, { users, permissions });
+};
+
+Audit.logInvitationAddition = async (teamspace, executor, email, job, permissions) => {
+	await logAction(teamspace, actions.INVITATION_ADDED, executor, { email, job, permissions });
+};
+
+Audit.logInvitationRemoval = async (teamspace, executor, email, job, permissions) => {
+	await logAction(teamspace, actions.INVITATION_REVOKED, executor, { email, job, permissions });
 };
 
 module.exports = Audit;

@@ -15,17 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { logInvitationAction, logPermissionAction, logUserAction } = require('../../models/teamspaces.audits');
+const { logInvitationAddition, logInvitationRemoval, logPermissionUpdate, logSeatAllocation, logSeatRemoval } = require('../../models/teamspaces.audits');
 const Yup = require('yup');
 const { actions } = require('../../models/teamspaces.audits.constants');
 const { events } = require('../eventsManager/eventsManager.constants');
-const { logger } = require('../../utils/logger');
+const journalingLabel = require('../../utils/logger').labels.journaling;
+const logger = require('../../utils/logger').logWithLabel(journalingLabel);
 const { subscribe } = require('../eventsManager/eventsManager');
 const { types } = require('../../utils/helper/yup');
 
 const userAdded = async ({ teamspace, executor, user }) => {
 	try {
-		await logUserAction(teamspace, actions.USER_ADDED, executor, user);
+		await logSeatAllocation(teamspace, executor, user);
 	} catch (err) {
 		logger.logError(`Failed to add a ${actions.USER_ADDED} audit log`);
 	}
@@ -33,14 +34,13 @@ const userAdded = async ({ teamspace, executor, user }) => {
 
 const userRemoved = async ({ teamspace, executor, user }) => {
 	try {
-		await logUserAction(teamspace, actions.USER_REMOVED, executor, user);
+		await logSeatRemoval(teamspace, executor, user);
 	} catch (err) {
 		logger.logError(`Failed to add a ${actions.USER_REMOVED} audit log`);
 	}
 };
 
-const permissionsSchema = Yup.array().of(Yup.string()).nullable().min(1)
-	.default(null);
+const permissionsSchema = Yup.array().of(Yup.string()).nullable().min(1);
 
 const teamspacePermissionsUpdated = async ({ teamspace, executor, users, from, to }) => {
 	try {
@@ -50,8 +50,8 @@ const teamspacePermissionsUpdated = async ({ teamspace, executor, users, from, t
 		}));
 
 		const permissions = [{ from, to }];
-		await schema.validate(permissions, { stripUnknown: true });
-		await logPermissionAction(teamspace, actions.PERMISSIONS_UPDATED, executor, users, permissions);
+		await schema.validate(permissions);
+		await logPermissionUpdate(teamspace, executor, users, permissions);
 	} catch (err) {
 		logger.logError(`Failed to add a ${actions.PERMISSIONS_UPDATED} audit log`);
 	}
@@ -67,7 +67,7 @@ const projectPermissionsUpdated = async ({ teamspace, executor, project, users, 
 
 		const permissions = [{ project, from, to }];
 		await schema.validate(permissions, { stripUnknown: true });
-		await logPermissionAction(teamspace, actions.PERMISSIONS_UPDATED, executor, users, permissions);
+		await logPermissionUpdate(teamspace, executor, users, permissions);
 	} catch (err) {
 		logger.logError(`Failed to add a ${actions.PERMISSIONS_UPDATED} audit log`);
 	}
@@ -83,7 +83,7 @@ const modelsPermissionsUpdated = async ({ teamspace, executor, users, permission
 		}));
 
 		await schema.validate(permissions, { stripUnknown: true });
-		await logPermissionAction(teamspace, actions.PERMISSIONS_UPDATED, executor, users, permissions);
+		await logPermissionUpdate(teamspace, executor, users, permissions);
 	} catch (err) {
 		logger.logError(`Failed to add a ${actions.PERMISSIONS_UPDATED} audit log`);
 	}
@@ -91,7 +91,7 @@ const modelsPermissionsUpdated = async ({ teamspace, executor, users, permission
 
 const invitationAdded = async ({ teamspace, executor, email, job, permissions }) => {
 	try {
-		await logInvitationAction(teamspace, actions.INVITATION_ADDED, executor, email, job, permissions);
+		await logInvitationAddition(teamspace, executor, email, job, permissions);
 	} catch (err) {
 		logger.logError(`Failed to add a ${actions.INVITATION_ADDED} audit log`);
 	}
@@ -99,7 +99,7 @@ const invitationAdded = async ({ teamspace, executor, email, job, permissions })
 
 const invitationRevoked = async ({ teamspace, executor, email, job, permissions }) => {
 	try {
-		await logInvitationAction(teamspace, actions.INVITATION_REVOKED, executor, email, job, permissions);
+		await logInvitationRemoval(teamspace, executor, email, job, permissions);
 	} catch (err) {
 		logger.logError(`Failed to add a ${actions.INVITATION_REVOKED} audit log`);
 	}

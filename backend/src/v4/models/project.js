@@ -500,9 +500,9 @@
 			}));
 		}
 
-		const updatedProject = await Project.updateAttrs(account, projectName, project, executor);
+		const updatedProject = await Project.updateAttrs(account, projectName, project);
 
-		if (permissionChange) {
+		if (permissionChange && executor) {
 			publish(events.PROJECT_PERMISSIONS_UPDATED, { teamspace: account, executor, project: project._id, ...permissionChange});
 		}
 

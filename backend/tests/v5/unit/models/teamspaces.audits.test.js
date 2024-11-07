@@ -19,6 +19,8 @@ const { times } = require('lodash');
 const { generateRandomString, generateRandomDate, generateRandomObject } = require('../../helper/services');
 const { src } = require('../../helper/path');
 
+const { actions } = require(`${src}/models/teamspaces.audits.constants`);
+
 const Audits = require(`${src}/models/teamspaces.audits`);
 
 const db = require(`${src}/handler/db`);
@@ -70,52 +72,68 @@ const tesGetActionLog = () => {
 	});
 };
 
-const testLogUserAction = () => {
-	describe('Log user action', () => {
-		test('should log a user action', async () => {
+const testLogSeatAllocation = () => {
+	describe('Log seat allocation', () => {
+		test('should log a seat allocation', async () => {
 			const teamspace = generateRandomString();
-			const action = generateRandomString();
 			const executor = generateRandomString();
 			const user = generateRandomString();
 
 			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
 
-			await Audits.logUserAction(teamspace, action, executor, user);
+			await Audits.logSeatAllocation(teamspace, executor, user);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			const { _id, timestamp } = fn.mock.calls[0][2];
 			expect(fn).toHaveBeenCalledWith(teamspace, AUDITS_COL,
-				{ action, executor, data: { user }, _id, timestamp });
+				{ action: actions.USER_ADDED, executor, data: { user }, _id, timestamp });
 		});
 	});
 };
 
-const testLogPermissionsAction = () => {
-	describe('Log permission action', () => {
-		test('should log a permission action', async () => {
+const testLogSeatRemoval = () => {
+	describe('Log seat removal', () => {
+		test('should log a seat removal', async () => {
 			const teamspace = generateRandomString();
-			const action = generateRandomString();
+			const executor = generateRandomString();
+			const user = generateRandomString();
+
+			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
+
+			await Audits.logSeatRemoval(teamspace, executor, user);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			const { _id, timestamp } = fn.mock.calls[0][2];
+			expect(fn).toHaveBeenCalledWith(teamspace, AUDITS_COL,
+				{ action: actions.USER_REMOVED, executor, data: { user }, _id, timestamp });
+		});
+	});
+};
+
+const testLogPermissionsUpdate = () => {
+	describe('Log permission update', () => {
+		test('should log a permission update', async () => {
+			const teamspace = generateRandomString();
 			const executor = generateRandomString();
 			const users = times(5, () => generateRandomString());
 			const permissions = times(5, () => generateRandomObject());
 
 			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
 
-			await Audits.logPermissionAction(teamspace, action, executor, users, permissions);
+			await Audits.logPermissionUpdate(teamspace, executor, users, permissions);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			const { _id, timestamp } = fn.mock.calls[0][2];
 			expect(fn).toHaveBeenCalledWith(teamspace, AUDITS_COL,
-				{ action, executor, data: { users, permissions }, _id, timestamp });
+				{ action: actions.PERMISSIONS_UPDATED, executor, data: { users, permissions }, _id, timestamp });
 		});
 	});
 };
 
-const testLogInvitationAction = () => {
-	describe('Log permission action', () => {
-		test('should log a permission action', async () => {
+const testLogInvitationAddition = () => {
+	describe('Log invitation addition', () => {
+		test('should log a invitation addition', async () => {
 			const teamspace = generateRandomString();
-			const action = generateRandomString();
 			const executor = generateRandomString();
 			const email = generateRandomString();
 			const job = generateRandomString();
@@ -123,19 +141,42 @@ const testLogInvitationAction = () => {
 
 			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
 
-			await Audits.logInvitationAction(teamspace, action, executor, email, job, permissions);
+			await Audits.logInvitationAddition(teamspace, executor, email, job, permissions);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			const { _id, timestamp } = fn.mock.calls[0][2];
 			expect(fn).toHaveBeenCalledWith(teamspace, AUDITS_COL,
-				{ action, executor, data: { email, job, permissions }, _id, timestamp });
+				{ action: actions.INVITATION_ADDED, executor, data: { email, job, permissions }, _id, timestamp });
+		});
+	});
+};
+
+const testLogInvitationRemoval = () => {
+	describe('Log invitation removal', () => {
+		test('should log a invitation removal', async () => {
+			const teamspace = generateRandomString();
+			const executor = generateRandomString();
+			const email = generateRandomString();
+			const job = generateRandomString();
+			const permissions = times(5, () => generateRandomObject());
+
+			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
+
+			await Audits.logInvitationRemoval(teamspace, executor, email, job, permissions);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			const { _id, timestamp } = fn.mock.calls[0][2];
+			expect(fn).toHaveBeenCalledWith(teamspace, AUDITS_COL,
+				{ action: actions.INVITATION_REVOKED, executor, data: { email, job, permissions }, _id, timestamp });
 		});
 	});
 };
 
 describe('models/teamspaces.audits', () => {
 	tesGetActionLog();
-	testLogUserAction();
-	testLogPermissionsAction();
-	testLogInvitationAction();
+	testLogSeatAllocation();
+	testLogSeatRemoval();
+	testLogPermissionsUpdate();
+	testLogInvitationAddition();
+	testLogInvitationRemoval();
 });

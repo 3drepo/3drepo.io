@@ -126,7 +126,7 @@ Settings.validateGetAuditLogParams = async (req, res, next) => {
 	}).test('valid-dates', 'The end date must be greater than the first.', (value) => !value.from || !value.to || value.to > value.from);
 
 	try {
-		req.query = await schema.validate(req.query, { stripUnknown: true });
+		req.query = await schema.validate(req.query);
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err.message));

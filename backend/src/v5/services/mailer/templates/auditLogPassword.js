@@ -24,9 +24,9 @@ const dataSchema = Yup.object({
 	password: Yup.string().required(),
 }).required(true);
 
-const AuditTemplate = {};
-AuditTemplate.subject = () => 'Audit logs file password';
+const AuditLogPasswordTemplate = {};
+AuditLogPasswordTemplate.subject = () => 'Audit logs file password';
 
-AuditTemplate.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
+AuditLogPasswordTemplate.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
 
-module.exports = AuditTemplate;
+module.exports = AuditLogPasswordTemplate;

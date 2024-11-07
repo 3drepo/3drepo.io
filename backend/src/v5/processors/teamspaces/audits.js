@@ -15,15 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createResponseCode, templates } = require('../../utils/responseCodes');
 const { PassThrough } = require('stream');
+const Yup = require('yup');
 const archiver = require('archiver');
 archiver.registerFormat('zip-encrypted', require('archiver-zip-encrypted'));
 const { templates: emailTemplates } = require('../../services/mailer/mailer.constants');
 const { generateHashString } = require('../../utils/helper/strings');
 const { getActionLog } = require('../../models/teamspaces.audits');
 const { getUserByUsername } = require('../../models/users');
+const { logger } = require('../../utils/logger');
 const { sendEmail } = require('../../services/mailer');
+const { templates } = require('../../utils/responseCodes');
+const { types } = require('../../utils/helper/yup');
 
 const Audit = {};
 
@@ -38,29 +41,50 @@ const createAuditLogArchive = async (actions) => {
 			password,
 		});
 
-		const content = `[${actions.map((action) => JSON.stringify(action)).join(',')}]`;
-		archive.append(content, { name: 'audit.json' });
+		const contentsStream = new PassThrough();
+
+		const actionSchema = Yup.object({
+			data: Yup.object({
+				permissions: Yup.array().of(Yup.object({
+					project: types.id,
+				})),
+			}),
+			timestamp: types.timestamp,
+		});
+
+		contentsStream.write('[');
+		actions.forEach(({ _id, ...data }, index) => {
+			const formattedData = actionSchema.validateSync(data);
+			contentsStream.write(`${JSON.stringify(formattedData)}`);
+			if (index !== actions.length - 1) {
+				contentsStream.write(', ');
+			}
+		});
+		contentsStream.write(']');
+		contentsStream.end();
+
+		archive.append(contentsStream, { name: 'audit.json' });
 
 		const archiveReady = new Promise((resolve, reject) => {
 			archive.on('end', resolve);
-			archive.on('error', reject(templates.streamError));
+			archive.on('error', (err) => reject(err));
 			archive.pipe(stream);
 		});
 
 		archive.finalize();
 		await archiveReady;
-
 		return { archive: stream, password };
 	} catch (err) {
-		throw createResponseCode(templates.unknown, `Failed to create zip file: ${err.message}`);
+		logger.logError(err);
+		throw templates.unknown;
 	}
 };
 
 Audit.getAuditLogArchive = async (teamspace, username, fromDate, toDate) => {
 	const actions = await getActionLog(teamspace, fromDate, toDate);
-	const { archive, password } = await createAuditLogArchive(actions.map(({ _id, ...data }) => data));
+	const { archive, password } = await createAuditLogArchive(actions);
 	const { customData: { email, firstName } } = await getUserByUsername(username, { 'customData.email': 1, 'customData.firstName': 1 });
-	await sendEmail(emailTemplates.AUDIT.name, email, { firstName, password });
+	await sendEmail(emailTemplates.AUDIT_LOG_PASSWORD.name, email, { firstName, password });
 
 	return archive;
 };

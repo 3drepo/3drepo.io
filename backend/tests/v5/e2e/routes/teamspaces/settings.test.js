@@ -245,7 +245,7 @@ const testGetAuditLogArchive = () => {
 					expect(res.headers['content-type']).toEqual('application/zip');
 					expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
 					const { password } = Mailer.sendEmail.mock.calls[0][2];
-					expect(Mailer.sendEmail).toHaveBeenCalledWith(emailTemplates.AUDIT.name,
+					expect(Mailer.sendEmail).toHaveBeenCalledWith(emailTemplates.AUDIT_LOG_PASSWORD.name,
 						tsAdmin.basicData.email, { firstName: tsAdmin.basicData.firstName, password });
 				} else {
 					expect(res.body.code).toEqual(expectedRes.code);
