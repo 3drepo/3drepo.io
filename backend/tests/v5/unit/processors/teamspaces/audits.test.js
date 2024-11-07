@@ -45,7 +45,7 @@ const testGetAuditLogArchive = () => {
 		const firstName = generateRandomString();
 		const fromDate = generateRandomString();
 		const toDate = generateRandomString();
-		const actions = times(5, () => ({ _id: generateUUID(), ...generateRandomObject() }));
+		const actions = times(5, () => ({ _id: generateUUID(), timestamp: new Date(), ...generateRandomObject() }));
 
 		test('should get audit log archive and send an email with the password', async () => {
 			Archiver.registerFormat.mockReturnValueOnce(undefined);
@@ -66,6 +66,9 @@ const testGetAuditLogArchive = () => {
 			const { password } = Mailer.sendEmail.mock.calls[0][2];
 			expect(Mailer.sendEmail).toHaveBeenCalledWith(emailTemplates.AUDIT_LOG_PASSWORD.name, email,
 				{ firstName, password });
+			expect(mockArchive.append).toHaveBeenCalledTimes(1);
+			const stream = mockArchive.append.mock.calls[0][0];
+			expect(mockArchive.append).toHaveBeenCalledWith(stream, { name: 'audit.json' });
 		});
 
 		test('should return error if stream fails', async () => {

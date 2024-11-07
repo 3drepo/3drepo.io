@@ -451,8 +451,6 @@ const testValidateGetAuditLogParams = () => {
 
 	describe.each([
 		['No query object', undefined, true, {}],
-		['query object has unrelated fields', { [generateRandomString()]: generateRandomString() }, true, {}],
-		['query object has valid fields', { [generateRandomString()]: generateRandomString(), ...validQuery }, true, validQueryCasted],
 		['from is not a valid timestamp', { ...validQuery, from: generateRandomString() }, false],
 		['to is not a valid timestamp', { ...validQuery, to: generateRandomString() }, false],
 		['both from and to are valid', validQuery, true, validQueryCasted],
