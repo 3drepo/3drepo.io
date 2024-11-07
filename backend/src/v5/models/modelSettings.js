@@ -109,6 +109,11 @@ Models.getModelType = async (ts, model) => {
 	return getModelType(item);
 };
 
+Models.getUsersWithPermissions = async (ts, model, excludeViewers) => {
+	const { permissions } = await findOneModel(ts, { _id: model }, { permissions: 1 });
+	return permissions.flatMap((p) => (!excludeViewers || p.permission !== 'viewer' ? p.user : []));
+};
+
 Models.getContainerById = async (ts, container, projection) => {
 	try {
 		return await Models.getModelByQuery(ts, { _id: container, ...noFederations, ...noDrawings }, projection);

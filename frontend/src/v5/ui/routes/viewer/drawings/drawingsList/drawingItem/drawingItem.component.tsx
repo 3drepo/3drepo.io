@@ -36,14 +36,14 @@ import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { viewerRoute } from '@/v5/services/routing/routing';
 import { Highlight } from '@controls/highlight';
 import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { getDrawingThumbnailSrc } from '@/v5/store/drawings/drawings.helpers';
-import { deleteAuthUrlFromCache, downloadAuthUrl } from '@components/authenticatedResource/authenticatedResource.hooks';
+import { deleteAuthUrlFromCache } from '@components/authenticatedResource/authenticatedResource.hooks';
 import { Thumbnail } from '@controls/thumbnail/thumbnail.component';
 import { Tooltip } from '@mui/material';
 
@@ -64,7 +64,6 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	const [statusCode, revCode] = latestRevision?.split('-');
 	const areStatsPending = !revCode;
 	const [selectedDrawingId] = useSearchParam('drawingId');
-	const [thumbnail, setThumbnail] = useState('');
 	const thumbnailSrc = getDrawingThumbnailSrc(teamspace, project, drawing._id);
 
 	const onCalibrateClick = () => {
@@ -74,19 +73,11 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	};
 
 	useEffect(() => {
-		if (!latestRevision) {
+		if (latestRevision) {
 			DrawingRevisionsActionsDispatchers.fetch(teamspace, project, drawing._id);
+		} else {
+			return () => { deleteAuthUrlFromCache(thumbnailSrc); };
 		}
-	}, [latestRevision]);
-
-	useEffect(() => {
-		if (!latestRevision) return;
-		
-		downloadAuthUrl(thumbnailSrc)
-			.then(setThumbnail)
-			.catch(() => setThumbnail(''));
-
-		return () => { deleteAuthUrlFromCache(thumbnailSrc); };
 	}, [latestRevision]);
 
 	const LoadingCodes = () => (
@@ -135,7 +126,7 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 		<Container onClick={onClick} key={drawing._id} $selected={drawing._id === selectedDrawingId}>
 			<MainBody>
 				<ImageContainer>
-					<Thumbnail src={thumbnail} />
+					<Thumbnail src={thumbnailSrc} key={latestRevision} />
 				</ImageContainer>
 				<InfoContainer>
 					<BreakingLine>

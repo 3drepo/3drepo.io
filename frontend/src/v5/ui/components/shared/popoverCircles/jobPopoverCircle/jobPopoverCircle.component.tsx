@@ -18,7 +18,7 @@
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { getJobAbbreviation } from '@/v5/store/jobs/jobs.helpers';
 import { IJob } from '@/v5/store/jobs/jobs.types';
-import { IPopoverCircle, PopoverCircle } from '../popoverCircle.styles';
+import { IPopoverCircle, PopoverCircle } from '../popoverCircle.component';
 import { JobPopover } from './jobPopover.component';
 
 type JobPopoverCircleProps = IPopoverCircle & {
