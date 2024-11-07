@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { FormattedMessage } from 'react-intl';
 import { useCallback, useContext, useState } from 'react';
@@ -31,6 +31,7 @@ import { ExtraAssigneesPopover } from './extraAssigneesCircle/extraAssigneesPopo
 import { ExtraAssigneesCircle } from './extraAssigneesCircle/extraAssignees.styles';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { TicketContext } from '../../routes/viewer/tickets/ticket.context';
+import { uniq } from 'lodash';
 
 export type AssigneesSelectProps = Pick<FormInputProps, 'value'> & SelectProps & {
 	maxItems?: number;
@@ -53,6 +54,8 @@ export const AssigneesSelect = ({
 	const [open, setOpen] = useState(false);
 	const { containerOrFederation } = useContext(TicketContext);
 
+	const teamspaceJobsAndUsers = UsersHooksSelectors.selectJobsAndUsers();
+	
 	const isFed = modelIsFederation(containerOrFederation);
 
 	const users = isFed
@@ -62,10 +65,27 @@ export const AssigneesSelect = ({
 	const jobs = isFed
 		? FederationsHooksSelectors.selectFederationJobs(containerOrFederation)
 		: ContainersHooksSelectors.selectContainerJobs(containerOrFederation);
-
+	
 	const emptyValue = multiple ? [] : '';
 	const value = valueRaw || emptyValue;
-	const allUsersAndJobs = [...users, ...jobs];
+	const getInvalidJobsAndUsersInValue = useCallback(() => {
+		const jobsAndUsersNotValidForModel = [], jobsAndUsersNotFound = [];
+		(multiple ? value : [value]).forEach((val) => {
+			const jobOrUser = teamspaceJobsAndUsers.find((ju) => (ju._id || ju.user) === val);
+			if (!jobOrUser) {
+				jobsAndUsersNotFound.push(val);
+				return;
+			}
+			const valueExistsForModel = !!(users.find((user) => user === jobOrUser) || jobs.find((job) => job === jobOrUser));
+			if (!valueExistsForModel) {
+				jobsAndUsersNotValidForModel.push(jobOrUser);
+			}
+		});
+		return { jobsAndUsersNotValidForModel, jobsAndUsersNotFound };
+	}, [value, users, jobs]);
+	const { jobsAndUsersNotFound, jobsAndUsersNotValidForModel } = getInvalidJobsAndUsersInValue();
+	
+	const allJobsAndUsers = uniq([...users, ...jobs, ...jobsAndUsersNotValidForModel].filter(Boolean));
 	// Using this logic instead of a simple partition because ExtraAssigneesCircle needs to occupy
 	// the last position when the overflow value is 2+. There is no point showing +1 overflow
 	// since the overflowing assignee could just be displayed instead
@@ -84,7 +104,7 @@ export const AssigneesSelect = ({
 	};
 
 	return (
-		<SearchContextComponent fieldsToFilter={['_id', 'firstName', 'lastName', 'job']} items={allUsersAndJobs}>
+		<SearchContextComponent fieldsToFilter={['_id', 'firstName', 'lastName', 'job']} items={allJobsAndUsers}>
 			<AssigneesListContainer onClick={handleOpen} className={className}>
 				<AssigneesSelectMenu
 					open={open}
@@ -93,6 +113,8 @@ export const AssigneesSelect = ({
 					onOpen={handleOpen}
 					disabled={disabled}
 					multiple={multiple}
+					jobsAndUsersNotFound={jobsAndUsersNotFound}
+					jobsAndUsersNotValidForModel={jobsAndUsersNotValidForModel}
 					{...props}
 				/>
 				{!listedAssignees.length && showEmptyText && (
