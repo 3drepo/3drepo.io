@@ -76,13 +76,27 @@ export const selectHasViewerAccess = createSelector(
 export const selectContainerUsers = createSelector(
 	selectContainerById,
 	selectCurrentTeamspaceUsers,
-	(container, users) => (container?.users || []).map((username) => users.find((u) => u.user === username)),
+	(container, users) => (container?.users || []).reduce(
+		(teamspaceUsers, user) => {
+			const teamspaceUser = users.find((u) => u.user === user.user);
+			if (!teamspaceUser) return teamspaceUsers;
+			return teamspaceUsers.concat({ ...user, ...teamspaceUser });
+		},
+		[],
+	),
 );
 
 export const selectContainerJobs = createSelector(
 	selectContainerById,
 	selectJobs,
-	(container, jobs) => (container?.jobs || []).map((jobId) => jobs.find((j) => j._id === jobId)).filter(Boolean),
+	(container, jobs) => (container?.jobs || []).reduce(
+		(teamspaceJobs, job) => {
+			const teamspaceJob = jobs.find((j) => j._id === job._id);
+			if (!teamspaceJob) return teamspaceJobs;
+			return teamspaceJobs.concat({ ...job, ...teamspaceJob });
+		},
+		[],
+	),
 );
 
 export const selectCanUploadToProject = createSelector(

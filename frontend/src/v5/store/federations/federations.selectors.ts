@@ -91,11 +91,25 @@ export const selectHasCommenterAccess = createSelector(
 export const selectFederationUsers = createSelector(
 	selectFederationById,
 	selectCurrentTeamspaceUsers,
-	(federation, users) => (federation?.users || []).map((username) => users.find((u: any) => u.user === username)),
+	(federation, users) => (federation?.users || []).reduce(
+		(teamspaceUsers, user) => {
+			const teamspaceUser = users.find((u) => u.user === user.user);
+			if (!teamspaceUser) return teamspaceUsers;
+			return teamspaceUsers.concat({ ...user, ...teamspaceUser });
+		},
+		[],
+	),
 );
 
 export const selectFederationJobs = createSelector(
 	selectFederationById,
 	selectJobs,
-	(federation, jobs) => (federation?.jobs || []).map((jobId) => jobs.find((j) => j._id === jobId)).filter(Boolean),
+	(federation, jobs) => (federation?.jobs || []).reduce(
+		(teamspaceJobs, job) => {
+			const teamspaceJob = jobs.find((j) => j._id === job._id);
+			if (!teamspaceJob) return teamspaceJobs;
+			return teamspaceJobs.concat({ ...job, ...teamspaceJob });
+		},
+		[],
+	),
 );

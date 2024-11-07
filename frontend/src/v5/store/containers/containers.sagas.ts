@@ -160,8 +160,11 @@ export function* fetchContainerUsers({
 	containerId,
 }: FetchContainerUsersAction) {
 	try {
-		const users = yield API.Containers.fetchContainerUsers(teamspace, projectId, containerId);
-		yield put(ContainersActions.updateContainerSuccess(projectId, containerId, users));
+		const { users: nonViewerUsers } = yield API.Containers.fetchContainerUsers(teamspace, projectId, containerId, true);
+		const { users: allUsers } = yield API.Containers.fetchContainerUsers(teamspace, projectId, containerId);
+		const users = allUsers.map((user) => ({ user, isViewer: !nonViewerUsers.includes(user) }));
+
+		yield put(ContainersActions.updateContainerSuccess(projectId, containerId, { users }));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'containers.fetchUsers.error', defaultMessage: 'trying to fetch container users' }),
@@ -176,8 +179,11 @@ export function* fetchContainerJobs({
 	containerId,
 }: FetchContainerJobsAction) {
 	try {
-		const jobs = yield API.Containers.fetchContainerJobs(teamspace, projectId, containerId);
-		yield put(ContainersActions.updateContainerSuccess(projectId, containerId, jobs));
+		const { jobs: nonViewerJobs } = yield API.Containers.fetchContainerJobs(teamspace, projectId, containerId, true);
+		const { jobs: allJobs } = yield API.Containers.fetchContainerJobs(teamspace, projectId, containerId);
+		const jobs = allJobs.map((job) => ({ _id: job, isViewer: !nonViewerJobs.includes(job) }));
+
+		yield put(ContainersActions.updateContainerSuccess(projectId, containerId, { jobs }));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'containers.fetchJobs.error', defaultMessage: 'trying to fetch container Jobs' }),

@@ -190,8 +190,11 @@ export function* fetchFederationUsers({
 	federationId,
 }: FetchFederationUsersAction) {
 	try {
-		const users = yield API.Federations.fetchFederationUsers(teamspace, projectId, federationId);
-		yield put(FederationsActions.updateFederationSuccess(projectId, federationId, users));
+		const { users: nonViewerUsers } = yield API.Federations.fetchFederationUsers(teamspace, projectId, federationId, true);
+		const { users: allUsers } = yield API.Federations.fetchFederationUsers(teamspace, projectId, federationId);
+		const users = allUsers.map((user) => ({ user, isViewer: !nonViewerUsers.includes(user) }));
+
+		yield put(FederationsActions.updateFederationSuccess(projectId, federationId, { users }));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'federations.fetchUsers.error', defaultMessage: 'trying to fetch federation users' }),
@@ -206,8 +209,11 @@ export function* fetchFederationJobs({
 	federationId,
 }: FetchFederationJobsAction) {
 	try {
-		const jobs = yield API.Federations.fetchFederationJobs(teamspace, projectId, federationId);
-		yield put(FederationsActions.updateFederationSuccess(projectId, federationId, jobs));
+		const { jobs: nonViewerJobs } = yield API.Federations.fetchFederationJobs(teamspace, projectId, federationId, true);
+		const { jobs: allJobs } = yield API.Federations.fetchFederationJobs(teamspace, projectId, federationId);
+		const jobs = allJobs.map((job) => ({ _id: job, isViewer: !nonViewerJobs.includes(job) }));
+
+		yield put(FederationsActions.updateFederationSuccess(projectId, federationId, { jobs }));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'federations.fetchJobs.error', defaultMessage: 'trying to fetch federation Jobs' }),
