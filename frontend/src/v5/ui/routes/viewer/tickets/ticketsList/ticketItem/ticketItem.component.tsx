@@ -92,7 +92,15 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 					{description && <Description>{description}</Description>}
 					{hasIssueProperties && (
 						<IssuePropertiesContainer>
-							<Assignees value={assignees} maxItems={5} multiple showAddButton onBlur={onBlurAssignees} disabled={readOnly} />
+							<Assignees
+								value={assignees}
+								maxItems={5}
+								multiple
+								showAddButton
+								onBlur={onBlurAssignees}
+								disabled={readOnly}
+								filterViewers
+							/>
 							<FlexRow>
 								<DueDate value={dueDate} onChange={onChangeDueDate} disabled={readOnly} />
 								<PriorityChip {...PRIORITY_LEVELS_MAP[priority]} />

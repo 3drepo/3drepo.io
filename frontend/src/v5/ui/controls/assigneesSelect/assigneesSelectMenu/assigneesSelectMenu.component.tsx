@@ -24,8 +24,6 @@ import { AssigneesSelectMenuItem } from './assigneesSelectMenuItem/assigneesSele
 import { HiddenSelect, HorizontalRule, SearchInput } from './assigneesSelectMenu.styles';
 import { SearchContext } from '@controls/search/searchContext';
 import { groupBy } from 'lodash';
-import { IUser } from '@/v5/store/users/users.redux';
-import { IJob } from '@/v5/store/jobs/jobs.types';
 
 const preventPropagation = (e) => {
 	if (e.key !== 'Escape') {
@@ -33,39 +31,27 @@ const preventPropagation = (e) => {
 	}
 };
 type AssigneesSelectMenuProps = SelectProps & {
-	jobsAndUsersNotFound: string[];
-	jobsAndUsersNotValidForModel: (IUser | IJob)[];
+	invalidValues: string[];
 };
 export const AssigneesSelectMenu = ({
 	open,
 	value,
 	onClick,
-	onChange,
 	multiple,
-	jobsAndUsersNotFound,
-	jobsAndUsersNotValidForModel,
+	invalidValues,
 	...props
 }: AssigneesSelectMenuProps) => {
 	const { filteredItems } = useContext(SearchContext);
-	const { jobs = [], users = [] } = groupBy(filteredItems, (item) => item?.user ? 'users' : 'jobs');
+	const { users = [], jobs = [], jobsAndUsersNotFoundInTeamspace = [] } = groupBy(filteredItems, (item) => {
+		if (item?.user) return 'users';
+		if (item?._id) return 'jobs';
+		return 'jobsAndUsersNotFoundInTeamspace';
+	});
 
 	const onClickList = useCallback((e) => {
 		preventPropagation(e);
 		onClick?.(e);
 	}, []);
-
-	const handleChange = (e) => {
-		if (!multiple) {
-			onChange(e);
-			return;
-		}
-
-		// clean up invalid values
-		const values = e.target.value;
-		const invalidValues = [...jobsAndUsersNotFound, ...jobsAndUsersNotValidForModel.map((ju: any) => ju._id || ju.user)];
-		const validValues = values.filter((v) => !invalidValues.includes(v));
-		onChange({ ...e, target: { ...e.target, value: validValues } });
-	};
 
 	return (
 		// @ts-ignore
@@ -75,7 +61,6 @@ export const AssigneesSelectMenu = ({
 			onClick={onClickList}
 			multiple={multiple}
 			{...props}
-			onChange={handleChange}
 		>
 			<SearchInputContainer>
 				<SearchInput onClick={preventPropagation} onKeyDown={preventPropagation} />
@@ -83,12 +68,12 @@ export const AssigneesSelectMenu = ({
 			{/* The following "invalid" components cannot be grouped together inside a fragment
 				Because MuiSelect passes has to pass props to the MenuItem components and it can
 				only do so if they are direct children */}
-			{jobsAndUsersNotFound.length > 0 && (
+			{jobsAndUsersNotFoundInTeamspace.length > 0 && (
 				<ListSubheader>
 					<FormattedMessage id="assigneesSelectMenu.notFoundHeading" defaultMessage="Users and Jobs not found" />
 				</ListSubheader>
 			)}
-			{jobsAndUsersNotFound.map((ju) => (
+			{jobsAndUsersNotFoundInTeamspace.map(({ invalidItemName: ju }) => (
 				<AssigneesSelectMenuItem
 					key={ju}
 					assignee={ju}
@@ -99,7 +84,7 @@ export const AssigneesSelectMenu = ({
 					error
 				/>
 			))}
-			{jobsAndUsersNotFound.length > 0 && (<HorizontalRule />)}
+			{jobsAndUsersNotFoundInTeamspace.length > 0 && (<HorizontalRule />)}
 			<ListSubheader>
 				<FormattedMessage id="assigneesSelectMenu.jobsHeading" defaultMessage="Jobs" />
 			</ListSubheader>
@@ -110,7 +95,7 @@ export const AssigneesSelectMenu = ({
 					value={job._id}
 					title={job._id}
 					multiple={multiple}
-					error={jobsAndUsersNotValidForModel.includes(job)}
+					error={invalidValues.includes(job._id)}
 				/>
 			))}
 			{!jobs.length && (
@@ -135,7 +120,7 @@ export const AssigneesSelectMenu = ({
 					title={`${user.firstName} ${user.lastName}`}
 					subtitle={user.job}
 					multiple={multiple}
-					error={jobsAndUsersNotValidForModel.includes(user)}
+					error={invalidValues.includes(user.user)}
 				/>
 			))}
 			{!users.length && (

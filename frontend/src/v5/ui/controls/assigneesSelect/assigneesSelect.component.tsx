@@ -31,13 +31,14 @@ import { ExtraAssigneesPopover } from './extraAssigneesCircle/extraAssigneesPopo
 import { ExtraAssigneesCircle } from './extraAssigneesCircle/extraAssignees.styles';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { TicketContext } from '../../routes/viewer/tickets/ticket.context';
-import { uniq } from 'lodash';
+import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 
 export type AssigneesSelectProps = Pick<FormInputProps, 'value'> & SelectProps & {
 	maxItems?: number;
 	showAddButton?: boolean;
 	showEmptyText?: boolean;
 	onBlur?: () => void;
+	filterViewers?: boolean;
 };
 
 export const AssigneesSelect = ({
@@ -49,43 +50,39 @@ export const AssigneesSelect = ({
 	disabled,
 	onBlur,
 	className,
+	filterViewers = false,
+	onChange,
 	...props
 }: AssigneesSelectProps) => {
 	const [open, setOpen] = useState(false);
 	const { containerOrFederation } = useContext(TicketContext);
-
-	const teamspaceJobsAndUsers = UsersHooksSelectors.selectJobsAndUsers();
 	
 	const isFed = modelIsFederation(containerOrFederation);
 
-	const users = isFed
+	const modelUsers = isFed
 		? FederationsHooksSelectors.selectFederationUsers(containerOrFederation)
 		: ContainersHooksSelectors.selectContainerUsers(containerOrFederation);
 
-	const jobs = isFed
+	const modelJobs = isFed
 		? FederationsHooksSelectors.selectFederationJobs(containerOrFederation)
 		: ContainersHooksSelectors.selectContainerJobs(containerOrFederation);
-	
+
+	const teamspaceJobsAndUsers = UsersHooksSelectors.selectJobsAndUsers();
+	const modelJobsAndUsers = [...modelUsers, ...modelJobs];
+
 	const emptyValue = multiple ? [] : '';
 	const value = valueRaw || emptyValue;
-	const getInvalidJobsAndUsersInValue = useCallback(() => {
-		const jobsAndUsersNotValidForModel = [], jobsAndUsersNotFound = [];
-		(multiple ? value : [value]).forEach((val) => {
-			const jobOrUser = teamspaceJobsAndUsers.find((ju) => (ju._id || ju.user) === val);
-			if (!jobOrUser) {
-				jobsAndUsersNotFound.push(val);
-				return;
-			}
-			const valueExistsForModel = !!(users.find((user) => user === jobOrUser) || jobs.find((job) => job === jobOrUser));
-			if (!valueExistsForModel) {
-				jobsAndUsersNotValidForModel.push(jobOrUser);
-			}
-		});
-		return { jobsAndUsersNotValidForModel, jobsAndUsersNotFound };
-	}, [value, users, jobs]);
-	const { jobsAndUsersNotFound, jobsAndUsersNotValidForModel } = getInvalidJobsAndUsersInValue();
-	
-	const allJobsAndUsers = uniq([...users, ...jobs, ...jobsAndUsersNotValidForModel].filter(Boolean));
+
+	const jobOrUserToString = (ju): string | null => (ju._id || ju.user);
+	const validJobsAndUsers = filterViewers ? modelJobsAndUsers.filter((ju) => (!ju?.isViewer)) : modelJobsAndUsers;
+	const validValues = validJobsAndUsers.map(jobOrUserToString);
+	const invalidValues = (multiple ? value : [value]).filter((val) => !validValues.includes(val));
+
+	const handleChange = (e) => {
+		if (!multiple) return onChange(e);
+		const validVals = e.target.value.filter((v) => !invalidValues.includes(v));
+		onChange({ target: { value: validVals } });
+	};
 	// Using this logic instead of a simple partition because ExtraAssigneesCircle needs to occupy
 	// the last position when the overflow value is 2+. There is no point showing +1 overflow
 	// since the overflowing assignee could just be displayed instead
@@ -103,8 +100,19 @@ export const AssigneesSelect = ({
 		onBlur();
 	};
 
+	const valueToJobOrUser = (val: string) => teamspaceJobsAndUsers.find((ju) => jobOrUserToString(ju) === val);
+	const allJobsAndUsersToDisplay = [
+		...validValues.map(valueToJobOrUser),
+		...invalidValues.map((v) => valueToJobOrUser(v) || ({ invalidItemName: v })),
+	];
+
+	if (!modelUsers.length || !modelJobs.length) return (
+		<AssigneesListContainer className={className}>
+			<Spinner />
+		</AssigneesListContainer>
+	);
 	return (
-		<SearchContextComponent fieldsToFilter={['_id', 'firstName', 'lastName', 'job']} items={allJobsAndUsers}>
+		<SearchContextComponent fieldsToFilter={['_id', 'firstName', 'lastName', 'job', 'invalidItemName']} items={allJobsAndUsersToDisplay}>
 			<AssigneesListContainer onClick={handleOpen} className={className}>
 				<AssigneesSelectMenu
 					open={open}
@@ -113,8 +121,8 @@ export const AssigneesSelect = ({
 					onOpen={handleOpen}
 					disabled={disabled}
 					multiple={multiple}
-					jobsAndUsersNotFound={jobsAndUsersNotFound}
-					jobsAndUsersNotValidForModel={jobsAndUsersNotValidForModel}
+					invalidValues={invalidValues}
+					onChange={handleChange}
 					{...props}
 				/>
 				{!listedAssignees.length && showEmptyText && (

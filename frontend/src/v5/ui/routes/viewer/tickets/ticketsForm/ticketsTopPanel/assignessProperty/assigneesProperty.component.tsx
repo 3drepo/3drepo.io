@@ -41,6 +41,7 @@ export const AssigneesProperty = ({ onBlur, readOnly }) => (
 				disabled={readOnly}
 				showAddButton
 				multiple
+				filterViewers
 				maxItems={17}
 			/>
 		</InputContainer>
