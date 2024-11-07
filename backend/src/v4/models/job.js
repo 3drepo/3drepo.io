@@ -96,9 +96,7 @@ Job.addUserToJob = async function(teamspace, jobName, user) {
 };
 
 Job.findByJob = async function(teamspace, jobName, caseSensitive = true) {
-	// const sanitisedJobName = sanitiseRegex(jobName);
-	// const query = caseSensitive ? { _id: jobName } : { _id: new RegExp(sanitisedJobName, "i")};
-	const query = caseSensitive ? { _id: jobName } : { _id: new RegExp(jobName, "i")};
+	const query = caseSensitive ? { _id: jobName } : { _id: new RegExp(sanitiseRegex(jobName), "i")};
 	const foundJob = await db.findOne(teamspace, JOBS_COLLECTION_NAME, query);
 
 	if (foundJob && !foundJob.users) {
