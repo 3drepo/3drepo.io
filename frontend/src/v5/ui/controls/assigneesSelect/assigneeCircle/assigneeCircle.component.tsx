@@ -20,17 +20,30 @@ import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopover
 import { IPopoverCircle } from '@components/shared/popoverCircles/popoverCircle.component';
 import { UsersHooksSelectors, TeamspacesHooksSelectors, JobsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { memo } from 'react';
+import { ErrorPopoverCircle } from '@components/shared/popoverCircles/errorPopoverCircle/errorPopoverCircle.component';
+import { formatMessage } from '@/v5/services/intl';
+
+const JOB_OR_USER_NOT_FOUND = formatMessage({
+	id: 'errorPopover.inexistentJorOrUser',
+	defaultMessage: 'The user/job could not be found in this teamspace',
+});
 
 type IAssigneeCircle = IPopoverCircle & {
 	assignee: string;
 };
-
 export const AssigneeCircle = memo(({ assignee, ...props }: IAssigneeCircle) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const job = JobsHooksSelectors.selectJobById(assignee);
 	const user = UsersHooksSelectors.selectUser(teamspace, assignee);
 
 	if (!assignee) return null;
+	if (!job && user.isNotTeamspaceMember) return (
+		<ErrorPopoverCircle
+			value={assignee}
+			message={JOB_OR_USER_NOT_FOUND}
+			{...props}
+		/>
+	);
 	if (!!job) return <JobPopoverCircle job={job} {...props} />;
 	return (<UserPopoverCircle user={user} {...props} />);
 });
