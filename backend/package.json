@@ -115,7 +115,8 @@
     "supertest": "3.4.2"
   },
   "resolutions": {
-      "string-width": "4.2.3"
+      "string-width": "4.2.3",
+      "wrap-ansi": "6.2.0"
   },
   "description": "The backend for 3drepo.io",
   "main": "3drepo.js",
