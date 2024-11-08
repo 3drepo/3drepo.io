@@ -43,10 +43,9 @@ import { Highlight } from '@controls/highlight';
 import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { getDrawingThumbnailSrc } from '@/v5/store/drawings/drawings.helpers';
-import { deleteAuthUrlFromCache } from '@components/authenticatedResource/authenticatedResource.hooks';
 import { Thumbnail } from '@controls/thumbnail/thumbnail.component';
 import { Tooltip } from '@mui/material';
-import { deleteAuthUrlFromCache, downloadAuthUrl } from '@/v5/helpers/download.helper';
+import { deleteAuthUrlFromCache } from '@/v5/helpers/download.helper';
 
 const STATUS_CODE_TEXT = formatMessage({ id: 'drawings.list.item.statusCode', defaultMessage: 'Status code' });
 const REVISION_CODE_TEXT = formatMessage({ id: 'drawings.list.item.revisionCode', defaultMessage: 'Revision code' });

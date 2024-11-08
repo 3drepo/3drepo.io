@@ -19,7 +19,7 @@ import axios from 'axios';
 import { isApiUrl } from '../services/api/default';
 
 const CachedURL: Record<string, string>  = {};
-let filenameFromRes: string = '';
+const filenames: Record<string, string>  = {};
 
 export const downloadAuthUrl = async (url):Promise<string> => {
 	if ( !isApiUrl(url) ) return url;
@@ -27,7 +27,7 @@ export const downloadAuthUrl = async (url):Promise<string> => {
 	if (!CachedURL[url]) {
 		const response = await axios.get(url, { responseType: 'blob' });
 		CachedURL[url] = URL.createObjectURL(response.data);
-		filenameFromRes = response.headers['content-disposition']?.split('filename=')[1];
+		filenames[url] = response.headers['content-disposition']?.split('filename=')[1];
 	}
 
 	return CachedURL[url];
@@ -40,6 +40,6 @@ export const downloadFile = async (url: string, fileName?: string) => {
 	const urlFileName = urlParts[urlParts.length - 1];
 	const anchor = document.createElement('a');
 	anchor.href = await downloadAuthUrl(url) ;
-	anchor.download = fileName || filenameFromRes || urlFileName;
+	anchor.download = fileName || filenames[url] || urlFileName;
 	anchor.click();
 };
