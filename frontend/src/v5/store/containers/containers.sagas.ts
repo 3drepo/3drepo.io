@@ -166,6 +166,7 @@ export function* fetchContainerUsers({
 
 		yield put(ContainersActions.updateContainerSuccess(projectId, containerId, { users }));
 	} catch (error) {
+		console.log('error', error);
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'containers.fetchUsers.error', defaultMessage: 'trying to fetch container users' }),
 			error,
@@ -182,7 +183,6 @@ export function* fetchContainerJobs({
 		const { jobs: nonViewerJobs } = yield API.Containers.fetchContainerJobs(teamspace, projectId, containerId, true);
 		const { jobs: allJobs } = yield API.Containers.fetchContainerJobs(teamspace, projectId, containerId);
 		const jobs = allJobs.map((job) => ({ _id: job, isViewer: !nonViewerJobs.includes(job) }));
-
 		yield put(ContainersActions.updateContainerSuccess(projectId, containerId, { jobs }));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {

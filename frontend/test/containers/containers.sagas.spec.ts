@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as faker from 'faker';
 import { ContainersActions } from '@/v5/store/containers/containers.redux';
 import { mockServer } from '../../internals/testing/mockServer';
-import { pick } from 'lodash';
+import { pick, times } from 'lodash';
 import { prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
 import { containerMockFactory, prepareMockSettingsReply, prepareMockStats } from './containers.fixtures';
 import { omit } from 'lodash';
@@ -373,6 +374,122 @@ describe('Containers: sagas', () => {
 				
 			expect(onSuccess).not.toHaveBeenCalled();
 			expect(onError).toHaveBeenCalled();
+		})
+	})
+
+	describe('fetchJobs', () => {
+		beforeEach(() => populateStore({ ...mockContainer, jobs: undefined }));
+
+		test('should fetch jobs', async () => {
+			const viewerJobs = times(2, () => faker.random.word());
+			const nonViewerJobs = times(2, () => faker.random.word());
+			const allJobs = [
+				...viewerJobs.map((_id) => ({ _id, isViewer: true })),
+				...nonViewerJobs.map(((_id) => ({ _id, isViewer: false }))),
+			];
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/jobs?excludeViewers=${true}`)
+				.reply(200, { jobs: nonViewerJobs })
+	
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/jobs?excludeViewers=${false}`)
+				.reply(200, { jobs: [...viewerJobs, ...nonViewerJobs] })
+
+			await waitForActions(() => {
+				dispatch(ContainersActions.fetchContainerJobs(teamspace, projectId, containerId));
+			}, [ContainersActions.updateContainerSuccess(projectId, containerId, { jobs: allJobs })]);
+
+			expect(selectContainers(getState())[0].jobs).toEqual(allJobs);
+		})
+
+		test('should fetch jobs even if there is none', async () => {
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/jobs?excludeViewers=${true}`)
+				.reply(200, { jobs: [] })
+
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/jobs?excludeViewers=${false}`)
+				.reply(200, { jobs: [] })
+
+
+			await waitForActions(() => {
+				dispatch(ContainersActions.fetchContainerJobs(teamspace, projectId, containerId));
+			}, [ContainersActions.updateContainerSuccess(projectId, containerId, { jobs: [] })]);
+
+			expect(selectContainers(getState())[0].jobs).toEqual([]);
+		})
+
+		it('should call fetchJobs endpoint with 404', async () => {
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/jobs?excludeViewers=${true}`)
+				.reply(404);
+
+			const containersBefore = selectContainers(getState());
+
+			await waitForActions(() => {
+				dispatch(ContainersActions.fetchContainerJobs(teamspace, projectId, containerId));
+			}, [DialogsTypes.OPEN]);
+
+			const containersAfter = selectContainers(getState());
+			expect(containersBefore).toEqual(containersAfter);
+		})
+	})
+
+	describe('fetchUsers', () => {
+		beforeEach(() => populateStore({ ...mockContainer, users: undefined }));
+
+		test('should fetch users', async () => {
+			const viewerUsers = times(2, () => faker.random.word());
+			const nonViewerUsers = times(2, () => faker.random.word());
+			const allUsers = [
+				...viewerUsers.map((user) => ({ user, isViewer: true })),
+				...nonViewerUsers.map(((user) => ({ user, isViewer: false }))),
+			];
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/members?excludeViewers=${true}`)
+				.reply(200, { users: nonViewerUsers })
+	
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/members?excludeViewers=${false}`)
+				.reply(200, { users: [...viewerUsers, ...nonViewerUsers] })
+
+			await waitForActions(() => {
+				dispatch(ContainersActions.fetchContainerUsers(teamspace, projectId, containerId));
+			}, [ContainersActions.updateContainerSuccess(projectId, containerId, { users: allUsers })]);
+
+			expect(selectContainers(getState())[0].users).toEqual(allUsers);
+		})
+
+		test('should fetch users even if there is none', async () => {
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/members?excludeViewers=${true}`)
+				.reply(200, { users: [] })
+
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/members?excludeViewers=${false}`)
+				.reply(200, { users: [] })
+
+
+			await waitForActions(() => {
+				dispatch(ContainersActions.fetchContainerUsers(teamspace, projectId, containerId));
+			}, [ContainersActions.updateContainerSuccess(projectId, containerId, { users: [] })]);
+
+			expect(selectContainers(getState())[0].users).toEqual([]);
+		})
+
+		it('should call fetchUsers endpoint with 404', async () => {
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/members?excludeViewers=${true}`)
+				.reply(404);
+
+			const containersBefore = selectContainers(getState());
+
+			await waitForActions(() => {
+				dispatch(ContainersActions.fetchContainerUsers(teamspace, projectId, containerId));
+			}, [DialogsTypes.OPEN]);
+
+			const containersAfter = selectContainers(getState());
+			expect(containersBefore).toEqual(containersAfter);
 		})
 	})
 })
