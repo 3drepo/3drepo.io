@@ -166,7 +166,6 @@ export function* fetchContainerUsers({
 
 		yield put(ContainersActions.updateContainerSuccess(projectId, containerId, { users }));
 	} catch (error) {
-		console.log('error', error);
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'containers.fetchUsers.error', defaultMessage: 'trying to fetch container users' }),
 			error,
