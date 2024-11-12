@@ -15,10 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as faker from 'faker';
 import { ContainersActions } from '@/v5/store/containers/containers.redux';
 import { mockServer } from '../../internals/testing/mockServer';
-import { pick, times } from 'lodash';
+import { pick } from 'lodash';
 import { prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
 import { containerMockFactory, prepareMockSettingsReply, prepareMockStats } from './containers.fixtures';
 import { omit } from 'lodash';
@@ -29,6 +28,7 @@ import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { selectContainerById, selectContainers } from '@/v5/store/containers/containers.selectors';
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
+import { prepareMockJobs, prepareMockUsers } from '../models.fixture';
 
 describe('Containers: sagas', () => {
 	const teamspace = 'teamspace';
@@ -381,12 +381,8 @@ describe('Containers: sagas', () => {
 		beforeEach(() => populateStore({ ...mockContainer, jobs: undefined }));
 
 		test('should fetch jobs', async () => {
-			const viewerJobs = times(2, () => faker.random.word());
-			const nonViewerJobs = times(2, () => faker.random.word());
-			const allJobs = [
-				...viewerJobs.map((_id) => ({ _id, isViewer: true })),
-				...nonViewerJobs.map(((_id) => ({ _id, isViewer: false }))),
-			];
+			const { viewerJobs, nonViewerJobs, modelJobs } = prepareMockJobs();
+
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/jobs?excludeViewers=${true}`)
 				.reply(200, { jobs: nonViewerJobs })
@@ -397,9 +393,9 @@ describe('Containers: sagas', () => {
 
 			await waitForActions(() => {
 				dispatch(ContainersActions.fetchContainerJobs(teamspace, projectId, containerId));
-			}, [ContainersActions.updateContainerSuccess(projectId, containerId, { jobs: allJobs })]);
+			}, [ContainersActions.updateContainerSuccess(projectId, containerId, { jobs: modelJobs })]);
 
-			expect(selectContainers(getState())[0].jobs).toEqual(allJobs);
+			expect(selectContainers(getState())[0].jobs).toEqual(modelJobs);
 		})
 
 		test('should fetch jobs even if there is none', async () => {
@@ -439,12 +435,8 @@ describe('Containers: sagas', () => {
 		beforeEach(() => populateStore({ ...mockContainer, users: undefined }));
 
 		test('should fetch users', async () => {
-			const viewerUsers = times(2, () => faker.random.word());
-			const nonViewerUsers = times(2, () => faker.random.word());
-			const allUsers = [
-				...viewerUsers.map((user) => ({ user, isViewer: true })),
-				...nonViewerUsers.map(((user) => ({ user, isViewer: false }))),
-			];
+			const { viewerUsers, nonViewerUsers, modelUsers } = prepareMockUsers();
+
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/members?excludeViewers=${true}`)
 				.reply(200, { users: nonViewerUsers })
@@ -455,9 +447,9 @@ describe('Containers: sagas', () => {
 
 			await waitForActions(() => {
 				dispatch(ContainersActions.fetchContainerUsers(teamspace, projectId, containerId));
-			}, [ContainersActions.updateContainerSuccess(projectId, containerId, { users: allUsers })]);
+			}, [ContainersActions.updateContainerSuccess(projectId, containerId, { users: modelUsers })]);
 
-			expect(selectContainers(getState())[0].users).toEqual(allUsers);
+			expect(selectContainers(getState())[0].users).toEqual(modelUsers);
 		})
 
 		test('should fetch users even if there is none', async () => {

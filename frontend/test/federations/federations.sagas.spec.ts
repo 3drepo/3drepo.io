@@ -15,10 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as faker from 'faker';
 import { FederationsActions } from '@/v5/store/federations/federations.redux';
 import { mockServer } from '../../internals/testing/mockServer';
-import { omit, times } from 'lodash';
+import { omit } from 'lodash';
 import {
 	federationMockFactory,
 	prepareMockStats,
@@ -34,6 +33,7 @@ import { selectFederationById, selectFederations } from '@/v5/store/federations/
 import { createTestStore } from '../test.helpers';
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
+import { prepareMockJobs, prepareMockUsers } from '../models.fixture';
 
 describe('Federations: sagas', () => {
 	const teamspace = 'teamspace';
@@ -380,12 +380,8 @@ describe('Federations: sagas', () => {
 		beforeEach(() => populateStore({ ...mockFederation, jobs: undefined }));
 	
 		test('should fetch jobs', async () => {
-			const viewerJobs = times(2, () => faker.random.word());
-			const nonViewerJobs = times(2, () => faker.random.word());
-			const allJobs = [
-				...viewerJobs.map((_id) => ({ _id, isViewer: true })),
-				...nonViewerJobs.map(((_id) => ({ _id, isViewer: false }))),
-			];
+			const { viewerJobs, nonViewerJobs, modelJobs } = prepareMockJobs();
+
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/jobs?excludeViewers=${true}`)
 				.reply(200, { jobs: nonViewerJobs })
@@ -396,9 +392,9 @@ describe('Federations: sagas', () => {
 	
 			await waitForActions(() => {
 				dispatch(FederationsActions.fetchFederationJobs(teamspace, projectId, federationId));
-			}, [FederationsActions.updateFederationSuccess(projectId, federationId, { jobs: allJobs })]);
+			}, [FederationsActions.updateFederationSuccess(projectId, federationId, { jobs: modelJobs })]);
 	
-			expect(selectFederations(getState())[0].jobs).toEqual(allJobs);
+			expect(selectFederations(getState())[0].jobs).toEqual(modelJobs);
 		})
 	
 		test('should fetch jobs even if there is none', async () => {
@@ -438,12 +434,7 @@ describe('Federations: sagas', () => {
 		beforeEach(() => populateStore({ ...mockFederation, users: undefined }));
 	
 		test('should fetch users', async () => {
-			const viewerUsers = times(2, () => faker.random.word());
-			const nonViewerUsers = times(2, () => faker.random.word());
-			const allUsers = [
-				...viewerUsers.map((user) => ({ user, isViewer: true })),
-				...nonViewerUsers.map(((user) => ({ user, isViewer: false }))),
-			];
+			const { viewerUsers, nonViewerUsers, modelUsers } = prepareMockUsers();
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/members?excludeViewers=${true}`)
 				.reply(200, { users: nonViewerUsers })
@@ -454,9 +445,9 @@ describe('Federations: sagas', () => {
 	
 			await waitForActions(() => {
 				dispatch(FederationsActions.fetchFederationUsers(teamspace, projectId, federationId));
-			}, [FederationsActions.updateFederationSuccess(projectId, federationId, { users: allUsers })]);
+			}, [FederationsActions.updateFederationSuccess(projectId, federationId, { users: modelUsers })]);
 	
-			expect(selectFederations(getState())[0].users).toEqual(allUsers);
+			expect(selectFederations(getState())[0].users).toEqual(modelUsers);
 		})
 	
 		test('should fetch users even if there is none', async () => {
