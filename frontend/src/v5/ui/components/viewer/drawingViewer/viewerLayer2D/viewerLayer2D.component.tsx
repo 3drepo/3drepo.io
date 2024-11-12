@@ -66,9 +66,7 @@ const snap = (mousePos:Coord2D, snapHandler: SVGSnapHelper, radius) => {
 export const ViewerLayer2D = ({ viewBox, snapHandler, viewport }: ViewerLayer2DProps) => {
 	const { isCalibrating } = useContext(CalibrationContext);
 	const previousViewBox = useRef<ViewBoxType>(null);
-	// const [mousePosition, setMousePosition] = useState<Coord2D>(null);
 
-	// const isDroppingPin =  false; //!!TicketsCardHooksSelectors.selectPinToDrop();
 	const [cameraOnSight, setCameraOnSight] = useState(false);
 	const [snapType, setSnapType] = useState<SnapType>(SnapType.NONE);
 	const snapping = useSnapping();
@@ -78,7 +76,7 @@ export const ViewerLayer2D = ({ viewBox, snapHandler, viewport }: ViewerLayer2DP
 	const transform2DTo3D = DrawingsHooksSelectors.selectTransform2DTo3D(drawingId, containerOrFederation);
 	const verticalRange = DrawingsHooksSelectors.selectCalibrationVertical(drawingId, containerOrFederation);
 
-
+	const offsetRef = useRef<{ x, y }>({ x: viewBox.x, y: viewBox.y });
 	const containerStyle: CSSProperties = {
 		transformOrigin: '0 0',
 		transform: `matrix(${viewBox.scale}, 0, 0, ${viewBox.scale}, ${viewBox.x}, ${viewBox.y})`,
@@ -128,7 +126,10 @@ export const ViewerLayer2D = ({ viewBox, snapHandler, viewport }: ViewerLayer2DP
 
 	const handleMouseLeave = () => DrawingViewerService.setMousePosition(undefined);
 
-	useEffect(() => { DrawingViewerService.setScale(viewBox.scale); }, [viewBox]);
+	useEffect(() => {
+		DrawingViewerService.setScale(viewBox.scale);
+		offsetRef.current = { x: viewBox.x, y: viewBox.y };
+	}, [viewBox]);
 
 	return (
 		<Viewport>
@@ -138,7 +139,7 @@ export const ViewerLayer2D = ({ viewBox, snapHandler, viewport }: ViewerLayer2DP
 					{isCalibrating && <CalibrationArrow />}
 
 					{!isCalibrating && (<>
-						{cameraOnSight && <Camera scale={viewBox.scale} />}
+						{cameraOnSight && <Camera scale={viewBox.scale} offsetRef={offsetRef} />}
 						<PinsLayer scale={viewBox.scale} height={viewBox.height} width={viewBox.width} />
 					</>)}
 				</LayerLevel>

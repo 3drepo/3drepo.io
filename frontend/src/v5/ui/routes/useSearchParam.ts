@@ -30,7 +30,7 @@ export const Transformers = {
 	},
 	BOOLEAN: {
 		from: (param) => JSON.parse(param || 'false'),
-		to: JSON.stringify,
+		to: (param) =>  param ? JSON.stringify(param) : '',
 	},
 	STRING_ARRAY: {
 		from: (arr) => arr ? arr.split(',') : [],

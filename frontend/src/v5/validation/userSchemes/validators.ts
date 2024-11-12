@@ -19,7 +19,7 @@ import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import { getPasswordStrength } from '@/v4/services/validation';
 import { avatarFileIsTooBig, AVATAR_MAX_SIZE_MESSAGE } from '@/v5/store/currentUser/currentUser.helpers';
-import { getMaxFileSizeMessage, trimmedString } from '../shared/validators';
+import { alphaNumericHyphens, getMaxFileSizeMessage, trimmedString } from '../shared/validators';
 
 export const username = trimmedString
 	.required(
@@ -38,7 +38,7 @@ export const username = trimmedString
 			id: 'userRegistration.username.error.max',
 			defaultMessage: 'Username is limited to 63 characters',
 		}))
-	.matches(/^[a-zA-Z0-9_\w-]{2,63}$/, formatMessage({
+	.matches(alphaNumericHyphens, formatMessage({
 		id: 'user.username.error.characters',
 		defaultMessage: 'Username can only consist of letters, numbers, hyphens, and underscores',
 	}))

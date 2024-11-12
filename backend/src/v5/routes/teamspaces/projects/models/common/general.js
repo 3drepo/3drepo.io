@@ -32,6 +32,7 @@ const { validateAddModelData, validateUpdateSettingsData } = require('../../../.
 const Containers = require('../../../../../processors/teamspaces/projects/models/containers');
 const Drawings = require('../../../../../processors/teamspaces/projects/models/drawings');
 const Federations = require('../../../../../processors/teamspaces/projects/models/federations');
+const ModelSettings = require('../../../../../processors/teamspaces/projects/models/commons/settings');
 const { Router } = require('express');
 const { canDeleteContainer } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { getUserFromSession } = require('../../../../../utils/sessions');
@@ -194,6 +195,32 @@ const getModelSettings = (modelType) => async (req, res, next) => {
 
 		req.outputData = settings;
 		await next();
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getUsersWithPermissions = async (req, res) => {
+	const { teamspace, project, model } = req.params;
+	const excludeViewers = req.query.excludeViewers === 'true';
+
+	try {
+		const users = await ModelSettings.getUsersWithPermissions(teamspace, project, model, excludeViewers);
+		respond(req, res, templates.ok, { users });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getJobsWithAccess = async (req, res) => {
+	const { teamspace, project, model } = req.params;
+	const excludeViewers = req.query.excludeViewers === 'true';
+
+	try {
+		const jobs = await ModelSettings.getJobsWithAccess(teamspace, project, model, excludeViewers);
+		respond(req, res, templates.ok, { jobs });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -897,6 +924,124 @@ const establishRoutes = (modelType) => {
 	 *                   calibration: { verticalRange: [0,10], units: m }
 	 */
 	router.get('/:model', hasReadAccessToModel[modelType], getModelSettings(modelType), formatModelSettings);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/members:
+	 *   get:
+	 *     description: Get the name of the users who have access to the model
+	 *     tags: [Models]
+	 *     operationId: getUsersWithPermissions
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations, drawings]
+	 *       - name: model
+	 *         description: Model ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: excludeViewers
+	 *         description: exclude users who have viewer permission
+	 *         in: query
+	 *         schema:
+	 *           type: boolean
+	 *         example: true
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: returns the users who have access to the model
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 users:
+	 *                   type: array
+	 *                   items:
+	 *                     type: string
+	 *                     example: user1
+	 */
+	router.get('/:model/members', hasReadAccessToModel[modelType], getUsersWithPermissions);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/jobs:
+	 *   get:
+	 *     description: Get the names of the jobs that are associated with users who have access to the model
+	 *     tags: [Models]
+	 *     operationId: getJobsWithAccess
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations, drawings]
+	 *       - name: model
+	 *         description: Model ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: excludeViewers
+	 *         description: exclude users who have viewer permission
+	 *         in: query
+	 *         schema:
+	 *           type: boolean
+	 *         example: true
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: returns the jobs that are associated with users who have access to the model
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 jobs:
+	 *                   type: array
+	 *                   items:
+	 *                     type: string
+	 *                     example: Architect
+	 */
+	router.get('/:model/jobs', hasReadAccessToModel[modelType], getJobsWithAccess);
 
 	if (modelType === modelTypes.DRAWING) {
 	/**
