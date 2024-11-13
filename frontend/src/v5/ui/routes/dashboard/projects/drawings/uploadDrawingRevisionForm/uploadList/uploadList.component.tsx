@@ -16,7 +16,7 @@
  */
 
 import { UploadItemFields } from '@/v5/store/drawings/revisions/drawingRevisions.types';
-import { useCallback, useContext } from 'react';
+import { useContext } from 'react';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { UploadFilesContext } from '@components/shared/uploadFiles/uploadFilesContext';
@@ -37,9 +37,6 @@ const DEFAULT_SORT_CONFIG = {
 	direction: [SortingDirection.DESCENDING, SortingDirection.ASCENDING],
 };
 
-
-let renderCount = 0;
-
 export const UploadList = ({
 	values,
 	removeUploadById,
@@ -53,15 +50,8 @@ export const UploadList = ({
 		if (isSelected) setSelectedId();
 	};
 
-	console.log(renderCount++);
-	const resetCount = useCallback((e) => {
-		e.preventDefault();
-		renderCount = 0;
-	}, []);
-
 	return (
 		<>
-			<button onClick={resetCount}>reset rendercount</button>
 			<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
 				<Label name="file.name" minWidth={37} sort>
 					<FormattedMessage id="drawing.uploads.list.header.filename" defaultMessage="Filename" />
