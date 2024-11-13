@@ -50,6 +50,7 @@ interface IProps {
 	measurements: IMeasure[];
 	areaMeasurements: IMeasure[];
 	angleMeasurements: IMeasure[];
+	slopeMeasurements: IMeasure[];
 	lengthMeasurements: IMeasure[];
 	pointMeasurements: IMeasure[];
 	removeMeasurement: (uuid) => void;
@@ -166,7 +167,7 @@ export class Measurements extends PureComponent<IProps, IState> {
 
 	public render() {
 		const { isViewerReady } = this.state;
-		const { areaMeasurements, lengthMeasurements, pointMeasurements, angleMeasurements } = this.props;
+		const { areaMeasurements, lengthMeasurements, pointMeasurements, angleMeasurements, slopeMeasurements } = this.props;
 		return (
 			<ViewsContainer
 				Icon={this.getTitleIcon()}
@@ -175,9 +176,19 @@ export class Measurements extends PureComponent<IProps, IState> {
 				id={this.props.id}
 			>
 				<Container>
-					{this.renderEmptyState(isEmpty(areaMeasurements) && isEmpty(lengthMeasurements) && isEmpty(pointMeasurements) && isEmpty(angleMeasurements))}
+					{this.renderEmptyState(
+						isEmpty(areaMeasurements)
+						&& isEmpty(lengthMeasurements)
+						&& isEmpty(pointMeasurements)
+						&& isEmpty(angleMeasurements)
+						&& isEmpty(slopeMeasurements)
+					)}
 					{this.renderMeasurementDetails(
-							!isEmpty(areaMeasurements) || !isEmpty(lengthMeasurements) || !isEmpty(pointMeasurements) || !isEmpty(angleMeasurements)
+							!isEmpty(areaMeasurements)
+							|| !isEmpty(lengthMeasurements)
+							|| !isEmpty(pointMeasurements)
+							|| !isEmpty(angleMeasurements)
+							|| !isEmpty(slopeMeasurements)
 					)}
 				</Container>
 				{this.renderFooterContent()}

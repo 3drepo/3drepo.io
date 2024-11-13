@@ -51,6 +51,10 @@ export const selectAngleMeasurements = createSelector(
 	selectMeasurementsDomain, (state) => state.angleMeasurements
 );
 
+export const selectSlopeMeasurements = createSelector(
+	selectMeasurementsDomain, (state) => state.slopeMeasurements
+);
+
 export const selectPins = createSelector(
 	selectPointMeasurements, (state) =>
 		state.map(({ customColor, ...measure }) => {

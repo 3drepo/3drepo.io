@@ -51,6 +51,7 @@ interface IProps {
 	riskPins: any[];
 	measurementPins: any[];
 	measurementsAngle: any[];
+	measurementsSlope: any[];
 	measurementsArea: any[];
 	measurementsLength: any[];
 	transformations: any[];
@@ -196,7 +197,7 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 			gisCoordinates, gisLayers, transparencies, transformations,
 			viewerManipulationEnabled, viewer, issuesShapes, issuesHighlightedShapes,
 			risksShapes, risksHighlightedShapes,
-			ticketPins, measurementsAngle, measurementsArea, measurementsLength
+			ticketPins, measurementsAngle, measurementsSlope, measurementsArea, measurementsLength
 		} = currProps;
 
 		if (colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
@@ -255,6 +256,10 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 			await this.renderMeasurements(prevProps.measurementsAngle, measurementsAngle);
 		}
 
+		if (!isEqual(prevProps.measurementsSlope, measurementsSlope)) {
+			await this.renderMeasurements(prevProps.measurementsSlope, measurementsSlope);
+		}
+
 		if (!isEqual(prevProps.measurementsLength, measurementsLength)) {
 			await this.renderMeasurements(prevProps.measurementsLength, measurementsLength);
 		}
@@ -292,6 +297,7 @@ const getCalibrationProps = (props) => ({
 	measurementsArea: [],
 	measurementsLength: [],
 	measurementsAngle: [],
+	measurementsSlope: [],
 });
 
 export const Viewer3D = (props: Omit<IProps, 'isCalibrating'>) => {

@@ -35,6 +35,7 @@ import { dispatch } from '@/v5/helpers/redux.helpers';
 	 MeasurementsTypes,
 	 selectXyzDisplay,
 	 selectAngleMeasurements,
+	 selectSlopeMeasurements,
  } from './';
 
 const onMeasurementCreated = (measure) => {
@@ -146,6 +147,7 @@ export function* resetMeasurementColors() {
 		const lengthMeasurements = yield select(selectLengthMeasurements);
 		const pointMeasurements = yield select(selectPointMeasurements);
 		const angleMeasurements = yield select(selectAngleMeasurements);
+		const slopeMeasurements = yield select(selectSlopeMeasurements);
 
 		const setDefaultColor = async ({ uuid, color }) => {
 			await Viewer.setMeasurementColor(uuid, color);
@@ -165,6 +167,10 @@ export function* resetMeasurementColors() {
 
 		if (angleMeasurements.length) {
 			angleMeasurements.forEach(setDefaultColor);
+		}
+
+		if (slopeMeasurements.length) {
+			slopeMeasurements.forEach(setDefaultColor);
 		}
 
 		yield put(MeasurementsActions.resetMeasurementColorsSuccess());
@@ -206,8 +212,9 @@ export function* clearMeasurements() {
 		const areaMeasurements = yield select(selectAreaMeasurements);
 		const lengthMeasurements = yield select(selectLengthMeasurements);
 		const angleMeasurements = yield select(selectAngleMeasurements);
+		const slopeMeasurements = yield select(selectSlopeMeasurements);
 
-		[...areaMeasurements, ...lengthMeasurements, ...angleMeasurements].forEach(({uuid}) => Viewer.removeMeasurement(uuid));
+		[...areaMeasurements, ...lengthMeasurements, ...angleMeasurements, ...slopeMeasurements].forEach(({uuid}) => Viewer.removeMeasurement(uuid));
 		yield put(MeasurementsActions.clearMeasurementsSuccess());
 	} catch (error) {
 		DialogActions.showErrorDialog('clear', 'measurements', error);
