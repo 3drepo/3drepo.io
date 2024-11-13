@@ -66,7 +66,7 @@ const roundNumber = (num: number, numDP: number) => {
 };
 
 export const getValue = (measureValue: number, units: string, type: number, modelUnits: string) => {
-	if (type === MEASURE_TYPE.ANGLE) {
+	if ([MEASURE_TYPE.ANGLE, MEASURE_TYPE.SLOPE].includes(type)) {
 		return (measureValue * 180 / Math.PI).toFixed(2);
 	}
 	const isAreaMeasurement = type === MEASURE_TYPE.AREA;
@@ -95,7 +95,7 @@ export const getUnits = (units: string, type: number) => {
 			</>
 		);
 	}
-	if (type === MEASURE_TYPE.ANGLE) {
+	if ([MEASURE_TYPE.ANGLE, MEASURE_TYPE.SLOPE].includes(type)) {
 		return <DegreesSymbol />;
 	}
 	return units;
@@ -126,7 +126,7 @@ export const MeasureItem = ({
 	};
 
 	const isPointTypeMeasure = type === MEASURE_TYPE.POINT;
-	const isAngleTypeMeasure = type === MEASURE_TYPE.ANGLE;
+	const isAngleTypeMeasure = [MEASURE_TYPE.ANGLE, MEASURE_TYPE.SLOPE].includes(type);
 
 	return (
 		<Container tall={Number(isPointTypeMeasure)}>
