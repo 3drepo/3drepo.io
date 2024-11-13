@@ -73,21 +73,17 @@ export const DrawingFormSchema =  Yup.object().shape({
 
 const isSameCode = (codeA = '', codeB = '') => codeA.toLocaleLowerCase().trim() === codeB.toLocaleLowerCase().trim();
 const testCombinationIsUnique = (val, testContext) => {
-	if (!testContext.options?.context) return true;
-	const drawingId = '936477e6-6fec-413e-ba5f-9b2defbf0f6c';
-	const revisions = selectRevisions(getState(), drawingId);
+	if (!testContext.options?.context || !testContext.parent?.drawingId) return true;
+	const revisions = selectRevisions(getState(), testContext.parent.drawingId);
 	return !revisions.some((rev) => isSameCode(rev.statusCode, testContext.parent.statusCode) && isSameCode(rev.revCode, testContext.parent.revCode));
-
-
-	// if (!testContext.options?.context || !testContext.parent?.drawingId) return true;
-	// const revisions = selectRevisions(getState(), testContext.parent.drawingId);
-	// return !revisions.some((rev) => isSameCode(rev.statusCode, testContext.parent.statusCode) && isSameCode(rev.revCode, testContext.parent.revCode));
 };
 
-export const statusCodeAndRevisionCodeMustBeUniqueMessage = formatMessage({
+const statusCodeAndRevisionCodeMustBeUniqueMessage = formatMessage({
 	id: 'validation.drawing.statusCode.error.characters',
 	defaultMessage: 'The combination of Status Code and Revision Code must be unique',
 });
+
+export const isUniqueRevisionStatusError = (error) => error === statusCodeAndRevisionCodeMustBeUniqueMessage;
 
 export const ListItemSchema = Yup.object().shape({
 	file: uploadFile,
@@ -95,8 +91,7 @@ export const ListItemSchema = Yup.object().shape({
 		formatMessage({
 			id: 'validation.drawing.statusCode.error.required',
 			defaultMessage: 'Status Code is a required field',
-		}),
-	).test(
+		})).test(
 		'statusCodeAndRevisionCodeAreUnique',
 		statusCodeAndRevisionCodeMustBeUniqueMessage,
 		testCombinationIsUnique,
@@ -105,22 +100,18 @@ export const ListItemSchema = Yup.object().shape({
 		formatMessage({
 			id: 'validation.drawing.revCode.error.characters',
 			defaultMessage: 'Revision Code can only consist of letters, numbers, hyphens or underscores',
-		}),
-	).required(
+		})).required(
 		formatMessage({
 			id: 'validation.drawing.revCode.error.required',
 			defaultMessage: 'Revision Code is a required field',
-		}),
-	).max(10,
+		})).max(10,
 		formatMessage({
 			id: 'validation.drawing.revCode.error.max',
 			defaultMessage: 'Revision Code is limited to 10 characters',
-		}),
-	).test(
+		})).test(
 		'statusCodeAndRevisionCodeAreUnique',
 		statusCodeAndRevisionCodeMustBeUniqueMessage,
-		testCombinationIsUnique,
-	),
+		testCombinationIsUnique),
 	revisionDesc,
 });
 

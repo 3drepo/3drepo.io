@@ -35,7 +35,7 @@ import { UploadListItemStatusCode } from './components/uploadListItemStatusCode/
 import { UploadStatus } from '@/v5/store/containers/containers.types';
 import { DEFAULT_SETTINGS_CALIBRATION } from '../../../../calibration/calibration.helpers';
 import { get } from 'lodash';
-import { statusCodeAndRevisionCodeMustBeUniqueMessage } from '@/v5/validation/drawingSchemes/drawingSchemes';
+import { isUniqueRevisionStatusError } from '@/v5/validation/drawingSchemes/drawingSchemes';
 
 const UNEXPETED_STATUS_ERROR = undefined;
 const STATUS_TEXT_BY_UPLOAD = {
@@ -86,7 +86,7 @@ export const UploadListItem = ({
 	const statusCode = useWatch({ name: `${revisionPrefix}.statusCode` });
 	const revCode = useWatch({ name: `${revisionPrefix}.revCode` });
 	const selectedDrawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
-	// const selectedDrawingRevisions = DrawingRevisionsHooksSelectors.selectRevisions(selectedDrawing?._id);
+	const selectedDrawingRevisions = DrawingRevisionsHooksSelectors.selectRevisions(selectedDrawing?._id);
 	const progress = DrawingRevisionsHooksSelectors.selectUploadProgress(uploadId);
 	const uploadStatus = getUploadStatus(progress, uploadErrorMessage);
 
@@ -99,6 +99,7 @@ export const UploadListItem = ({
 
 	const revCodeError = get(errors, `${revisionPrefix}.revCode`)?.message;
 	const statusCodeError = get(errors, `${revisionPrefix}.statusCode`)?.message;
+	const drawingNameError = get(errors, `${revisionPrefix}.drawingName`)?.message;
 
 	useEffect(() => {
 		// Dont trigger the error if it was already triggered
@@ -109,17 +110,24 @@ export const UploadListItem = ({
 		}
 
 		// Only trigger the revCode if its clearing the error or if the the unique error was thrown
-		if (statusCodeError === statusCodeAndRevisionCodeMustBeUniqueMessage || !statusCodeError ) {
-			console.log('triggering');
+		if (isUniqueRevisionStatusError(statusCodeError) || !statusCodeError ) {
 			trigger(`${revisionPrefix}.revCode`);
 		}
 	}, [drawingId, statusCodeError]);
 
-	// useEffect(() => {
-	// 	if (statusCode) {
-	// 		trigger(`${revisionPrefix}.statusCode`);
-	// 	}
-	// }, [drawingId, revCode, selectedDrawingRevisions.length]);
+	useEffect(() => {
+		// Dont trigger the error if it was already triggered
+		const errorWasAlreadyTriggered = revCodeError === statusCodeError;
+
+		if (errorWasAlreadyTriggered) {
+			return;
+		}
+
+		// Only trigger the revCode if its clearing the error or if the the unique error was thrown
+		if (isUniqueRevisionStatusError(revCodeError) || !revCodeError ) {
+			trigger(`${revisionPrefix}.statusCode`);
+		}
+	}, [drawingId, revCodeError]);
 
 	useEffect(() => {
 		setValue(revisionPrefix, sanitiseDrawing(selectedDrawing));
@@ -133,11 +141,10 @@ export const UploadListItem = ({
 	}, [selectedDrawing?._id]);
 
 	useEffect(() => {
-		const id = '936477e6-6fec-413e-ba5f-9b2defbf0f6c';
-		DrawingRevisionsActionsDispatchers.fetch(teamspace, projectId, id);
-		DrawingsActionsDispatchers.fetchDrawingSettings(teamspace, projectId, id);
-	}, []);
-
+		if (statusCode && revCode) {
+			trigger(`${revisionPrefix}.statusCode`);
+		}
+	}, [selectedDrawingRevisions]);
 
 	return (
 		<UploadListItemRow selected={isSelected}>
@@ -149,23 +156,18 @@ export const UploadListItem = ({
 				name={fileData.name}
 				size={fileData.size}
 			/>
-			{/* <InputController
-				Input={UploadListItemDestination}
+			<UploadListItemDestination 
 				name={`${revisionPrefix}.drawingName`}
 				key={`${uploadId}.dest`}
+				onSelectNewDestination={onClickEdit}
 				index={index}
 				revisionPrefix={revisionPrefix}
 				disabled={isUploading}
-				onSelectNewDestination={onClickEdit}
+				error={!!drawingNameError}
+				helperText={drawingNameError}
 			/>
-			*/}
-			{/* <InputController
+			<InputController
 				Input={UploadListItemStatusCode}
-				key={`${uploadId}.statusCode`}
-				name={`${revisionPrefix}.statusCode`}
-				disabled={isUploading}
-			/> */}
-			<UploadListItemStatusCode
 				key={`${uploadId}.statusCode`}
 				name={`${revisionPrefix}.statusCode`}
 				disabled={isUploading}
