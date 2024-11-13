@@ -90,7 +90,7 @@ export const EditableText = forwardRef((
 	}, []);
 
 	return (
-		<ClickAwayListener onClickAway={saveText}>
+		<ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={saveText}>
 			<TextBox
 				ref={ref}
 				id={EDITABLE_TEXTAREA_NAME}
