@@ -63,7 +63,6 @@ export const UploadListItemStatusCode = ({ value, inputRef, onChange, helperText
 				/>
 			)}
 			ListboxComponent={OptionsBox}
-			// disableClearable={!value}
 		/>
 	);
 };

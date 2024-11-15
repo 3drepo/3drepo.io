@@ -32,6 +32,15 @@ import { Calibration } from './drawings.types';
 
 const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
 
+const selectRawDrawingById =  createSelector(
+	selectDrawingsDomain,
+	selectCurrentProject,
+	(_, id: string) => id,
+	(state, currentProject, id) =>
+		(state.drawingsByProject[currentProject] ?? []).find((drawing) => drawing._id === id) || {},
+);
+
+
 export const selectDrawings = createSelector(
 	selectDrawingsDomain,
 	selectCurrentProject,
@@ -63,6 +72,11 @@ export const selectAreStatsPending = createSelector(
 	selectDrawings,
 	(drawings) => drawings.some(({ hasStatsPending }) => hasStatsPending),
 );
+
+export const selectAreSettingsPending = createSelector(
+	selectRawDrawingById,
+	({ name, number, type, desc, calibration }) => [name, number, type, desc, calibration].includes(undefined),
+); 
 
 export const selectDrawingRole = createSelector(
 	selectDrawingById,

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { createFilterOptions } from '@mui/material';
@@ -84,7 +84,7 @@ export const UploadListItemDestination = memo(({
 
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const drawings = DrawingsHooksSelectors.selectDrawings();
-	const selectedDrawing = (useCallback(() => drawings.find((c) => c.name === value), [drawings, value]))();
+	const selectedDrawing = useMemo(() => drawings.find((c) => c.name === value), [drawings, value]);
 
 	const [processingDrawingsNames, setProcessingDrawingsNames] = useState([]);
 	const [newDrawingsInModal, setNewDrawingsInModal] = useState([]);
@@ -116,9 +116,7 @@ export const UploadListItemDestination = memo(({
 				setError(name, validationError);
 			}
 
-			if (newOrExisting !== '') {
-				setNewOrExisting('');
-			}
+			setNewOrExisting('');
 		}
 	};
 

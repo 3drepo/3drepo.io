@@ -36,6 +36,9 @@ import { UploadStatus } from '@/v5/store/containers/containers.types';
 import { DEFAULT_SETTINGS_CALIBRATION } from '../../../../calibration/calibration.helpers';
 import { get } from 'lodash';
 import { isUniqueRevisionStatusError } from '@/v5/validation/drawingSchemes/drawingSchemes';
+import { getState } from '@/v5/helpers/redux.helpers';
+import { selectRevisionsPending } from '@/v5/store/drawings/revisions/drawingRevisions.selectors';
+import { selectAreSettingsPending } from '@/v5/store/drawings/drawings.selectors';
 
 const UNEXPETED_STATUS_ERROR = undefined;
 const STATUS_TEXT_BY_UPLOAD = {
@@ -123,7 +126,7 @@ export const UploadListItem = ({
 			return;
 		}
 
-		// Only trigger the revCode if its clearing the error or if the the unique error was thrown
+		// Only trigger the statusCode if its clearing the error or if the the unique error was thrown
 		if (isUniqueRevisionStatusError(revCodeError) || !revCodeError ) {
 			trigger(`${revisionPrefix}.statusCode`);
 		}
@@ -135,8 +138,13 @@ export const UploadListItem = ({
 
 	useEffect(() => {
 		if (selectedDrawing?._id) {
-			DrawingRevisionsActionsDispatchers.fetch(teamspace, projectId, selectedDrawing._id);
-			DrawingsActionsDispatchers.fetchDrawingSettings(teamspace, projectId, selectedDrawing._id);
+			if (selectRevisionsPending(getState(), selectedDrawing._id)) {
+				DrawingRevisionsActionsDispatchers.fetch(teamspace, projectId, selectedDrawing._id);
+			}
+
+			if (selectAreSettingsPending(getState(), selectedDrawing._id)) {
+				DrawingsActionsDispatchers.fetchDrawingSettings(teamspace, projectId, selectedDrawing._id);
+			}
 		}
 	}, [selectedDrawing?._id]);
 
