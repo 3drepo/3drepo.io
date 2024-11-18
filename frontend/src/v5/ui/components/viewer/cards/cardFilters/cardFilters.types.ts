@@ -15,7 +15,5 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FILTER_OPERATOR_ICON } from './filterChip/filters.helpers';
-
-export type CardFilterOperator = keyof typeof FILTER_OPERATOR_ICON;
+export type CardFilterOperator = 'ex' | 'nex' | 'eq' | 'neq' | 'ss' | 'nss' | 'rng' | 'nrng' | 'gt' | 'gte' | 'lt' | 'lte';
 export type CardFilters = Record<string, any[]>;
