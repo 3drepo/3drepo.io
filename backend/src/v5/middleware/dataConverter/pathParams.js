@@ -20,7 +20,7 @@ const { stringToUUID } = require('../../utils/helper/uuids');
 
 const PathParams = {};
 
-const paramsToIgnore = ['container', 'federation', 'model', 'drawing'];
+const paramsToIgnore = ['container', 'federation', 'model', 'drawing', 'bundle'];
 
 PathParams.getModelIdFromParam = (modelType) => (req, res, next) => {
 	if (!req.params.model) {
