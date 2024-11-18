@@ -56,7 +56,7 @@ export const CollapseButton = styled.button`
 	border: none;
 	cursor: pointer;
 	color: ${({ theme }) => theme.palette.primary.contrast};
-	background-color: ${({ theme }) => theme.palette.base.mid};
+	background-color: ${({ theme }) => theme.palette.base.main};
 	height: 18px;
 	border-radius: 0 0 6px 6px;
 	display: flex;
@@ -92,6 +92,7 @@ export const ClearButton = styled(Typography).attrs({ variant: 'label' })`
 export const ChevronIconContainer = styled.div<{ $collapsed: boolean }>`
 	transform: rotate(180deg);
 	transition: all .2s;
+	height: 9px;
 	${({ $collapsed }) => $collapsed && css`
 		transform: rotate(0deg);
 	`}
