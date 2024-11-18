@@ -22,9 +22,11 @@ export const TextWrapper = styled.div`
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
+	display: inline-flex;
+	gap: 3px;
 `;
 
-export const FilterIconContainer = styled.div`
+export const OperatorIconContainer = styled.div`
 	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
 	width: 18px;
 	height: 18px;
@@ -32,7 +34,6 @@ export const FilterIconContainer = styled.div`
 	display: inline-flex;
 	justify-content: center;
 	align-items: center;
-	margin: 0 3px;
 `;
 
 export const DeleteButton = styled.div`
@@ -60,7 +61,7 @@ const selectedOrHoveredStyles = css`
 	color: ${({ theme }) => theme.palette.primary.contrast};
 	border-color: ${({ theme }) => theme.palette.base.main};
 
-	${FilterIconContainer} {
+	${OperatorIconContainer} {
 		border-color: currentColor;
 	}
 
