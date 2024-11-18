@@ -25,9 +25,11 @@ import InRangeIcon from '@assets/icons/filters/in_range.svg';
 import NotInRangeIcon from '@assets/icons/filters/not_in_range.svg';
 import ExistIcon from '@assets/icons/filters/exist.svg';
 import NotExistIcon from '@assets/icons/filters/not_exist.svg';
+import ContainIcon from '@assets/icons/filters/contain.svg';
+import NotContainIcon from '@assets/icons/filters/not_contain.svg';
 import { formatMessage } from '@/v5/services/intl';
 
-export const FILTER_ICON = {
+export const FILTER_OPERATOR_ICON = {
 	equal: EqualIcon,
 	notEqual: NotEqualIcon,
 	greaterThan: GreaterEqualIcon,
@@ -38,19 +40,21 @@ export const FILTER_ICON = {
 	notInRange: NotInRangeIcon,
 	exist: ExistIcon,
 	notExist: NotExistIcon,
+	contain: ContainIcon,
+	notContain: NotContainIcon,
 } as const;
 
-export type FilterType = keyof typeof FILTER_ICON;
-
-export const FILTER_LABEL: Record<FilterType, string> = {
-	exist: formatMessage({ id: 'cardFilter.exists', defaultMessage: 'exists' }),
-	notExist: formatMessage({ id: 'cardFilter.doesNotExist', defaultMessage: 'does not exist' }),
-	equal: formatMessage({ id: 'cardFilter.equals', defaultMessage: 'equals' }),
-	notEqual: formatMessage({ id: 'cardFilter.doesNotEqual', defaultMessage: 'does not equal' }),
-	greaterThan: formatMessage({ id: 'cardFilter.greaterThan', defaultMessage: 'greater than' }),
-	greaterThanEqual: formatMessage({ id: 'cardFilter.greaterOrEqualTo', defaultMessage: 'greater or equal to' }),
-	lessThan: formatMessage({ id: 'cardFilter.lessThan', defaultMessage: 'less than' }),
-	lessThanEqual: formatMessage({ id: 'cardFilter.lessOrEqualTo', defaultMessage: 'less or equal to' }),
-	inRange: formatMessage({ id: 'cardFilter.inRange', defaultMessage: 'in range' }),
-	notInRange: formatMessage({ id: 'cardFilter.notInRange', defaultMessage: 'not in range' }),
+export const FILTER_OPERATOR_LABEL = {
+	exist: formatMessage({ id: 'cardFilter.operator.exists', defaultMessage: 'Exists' }),
+	notExist: formatMessage({ id: 'cardFilter.operator.doesNotExist', defaultMessage: 'Does not exist' }),
+	equal: formatMessage({ id: 'cardFilter.operator.equals', defaultMessage: 'Equals' }),
+	notEqual: formatMessage({ id: 'cardFilter.operator.doesNotEqual', defaultMessage: 'Does not equal' }),
+	greaterThan: formatMessage({ id: 'cardFilter.operator.greaterThan', defaultMessage: 'Greater than' }),
+	greaterThanEqual: formatMessage({ id: 'cardFilter.operator.greaterOrEqualTo', defaultMessage: 'Greater or equal to' }),
+	lessThan: formatMessage({ id: 'cardFilter.operator.lessThan', defaultMessage: 'Less than' }),
+	lessThanEqual: formatMessage({ id: 'cardFilter.operator.lessOrEqualTo', defaultMessage: 'Less or equal to' }),
+	inRange: formatMessage({ id: 'cardFilter.operator.inRange', defaultMessage: 'In range' }),
+	notInRange: formatMessage({ id: 'cardFilter.operator.notInRange', defaultMessage: 'Not in range' }),
+	contain: formatMessage({ id: 'cardFilter.operator.contain', defaultMessage: 'Contains' }),
+	notContain: formatMessage({ id: 'cardFilter.operator.notContain', defaultMessage: 'Does not contain' }),
 };
