@@ -92,6 +92,8 @@ export const UploadListItem = ({
 	const selectedDrawingRevisions = DrawingRevisionsHooksSelectors.selectRevisions(selectedDrawing?._id);
 	const progress = DrawingRevisionsHooksSelectors.selectUploadProgress(uploadId);
 	const uploadStatus = getUploadStatus(progress, uploadErrorMessage);
+	const fileError = !!get(errors, `${revisionPrefix}.file`)?.message;
+	const disabled = fileError || isUploading;
 
 	const sanitiseDrawing = (drawing: IDrawing) => ({
 		drawingNumber: drawing?.number || '',
@@ -154,6 +156,10 @@ export const UploadListItem = ({
 		}
 	}, [selectedDrawingRevisions]);
 
+	useEffect(() => {
+		trigger(`${revisionPrefix}.file`);
+	}, []);
+
 	return (
 		<UploadListItemRow selected={isSelected}>
 			<UploadListItemFileIcon extension={fileData.extension} />
@@ -170,7 +176,7 @@ export const UploadListItem = ({
 				onSelectNewDestination={onClickEdit}
 				index={index}
 				revisionPrefix={revisionPrefix}
-				disabled={isUploading}
+				disabled={disabled}
 				error={!!drawingNameError}
 				helperText={drawingNameError}
 			/>
@@ -178,12 +184,12 @@ export const UploadListItem = ({
 				Input={UploadListItemStatusCode}
 				key={`${uploadId}.statusCode`}
 				name={`${revisionPrefix}.statusCode`}
-				disabled={isUploading}
+				disabled={disabled}
 			/>
 			<UploadListItemRevisionCode
 				key={`${uploadId}.revCode`}
 				name={`${revisionPrefix}.revCode`}
-				disabled={isUploading}
+				disabled={disabled}
 			/>
 			{isUploading
 				? (
@@ -197,7 +203,7 @@ export const UploadListItem = ({
 					/>
 				) : (
 					<>
-						<UploadListItemButton variant={isSelected ? 'secondary' : 'primary'} onClick={onClickEdit}>
+						<UploadListItemButton variant={isSelected ? 'secondary' : 'primary'} onClick={onClickEdit} disabled={disabled}>
 							<EditIcon />
 						</UploadListItemButton>
 						<UploadListItemButton variant={isSelected ? 'secondary' : 'primary'} onClick={onClickDelete}>
