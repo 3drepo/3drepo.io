@@ -104,7 +104,7 @@ export const ChipContainer = styled.div<{ selected: boolean }>`
 	padding: 3px 3px 3px 6px;
 	display: inline-flex;
 	justify-content: space-between;
-    align-items: center;
+	align-items: center;
 	gap: 4px;
 	cursor: pointer;
 

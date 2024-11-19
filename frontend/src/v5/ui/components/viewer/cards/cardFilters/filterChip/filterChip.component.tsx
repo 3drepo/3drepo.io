@@ -16,7 +16,7 @@
  */
 
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
-import { ChipContainer, DeleteButton, TextWrapper, OperatorIconContainer, DisplayValue, Property, TooltipRefHolder } from './filterChip.styles';
+import { ChipContainer, DeleteButton, TextWrapper, OperatorIconContainer, DisplayValue, Property } from './filterChip.styles';
 import { FILTER_OPERATOR_ICON, FILTER_OPERATOR_LABEL } from '../cardFilters.helpers';
 import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
