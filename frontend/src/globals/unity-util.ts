@@ -1183,6 +1183,26 @@ export class UnityUtil {
 		UnityUtil.toUnity('DisableSnapping', undefined, undefined);
 	}
 
+	 /**
+	 * Enable Cursor
+	 * Note: Changing the snap mode can affect the cursor.
+	 * Call this after setting snapping.
+	 * @category Configurations
+	 */
+	public static enableCursor(){
+		UnityUtil.toUnity('EnableCursor', undefined, undefined);
+	}
+
+     /**
+	 * Disable Cursor
+	 * Note: Changing the snap mode can affect the cursor.
+	 * Call this after setting snapping.
+	 * @category Configurations
+	 */
+	public static disableCursor(){
+		UnityUtil.toUnity('DisableCursor', undefined, undefined);
+	}
+
 	/**
 	 * Clear all measurements
 	 * @category Measuring tool
