@@ -62,7 +62,7 @@ export const CardFilters = () => {
 			alert('This will crash the app. This operator is not supported');
 			return;
 		}
-		addFilter(filter, isDate ? new Date(value) : value);
+		addFilter(filter, isDate ? new Date(+value) : value);
 	};
 
 	// TODO - remove this
@@ -94,7 +94,7 @@ export const CardFilters = () => {
 				<br />
 				<label>
 					is Date:
-					<input type='checkbox' /> (if yes, convert to `new Date(value)`)
+					<input type='checkbox' /> (if yes, convert to `new Date(+value)`)
 				</label>
 				<br />
 				<button>[submit]</button>
