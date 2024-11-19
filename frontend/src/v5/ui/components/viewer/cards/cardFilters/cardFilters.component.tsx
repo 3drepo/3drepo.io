@@ -17,9 +17,9 @@
 
 import { useEffect, useState } from 'react';
 import { TicketsFiltersList } from '../tickets/ticketsFiltersList/ticketsFiltersList.component';
-import { set } from 'lodash';
 import { CardFilterOperator } from './cardFilters.types';
 import { FILTER_OPERATOR_ICON, getOperatorMaxValuesSupported } from './cardFilters.helpers';
+import { get, set } from 'lodash';
 
 export const CardFilters = () => {
 	const [filters, setFilters] = useState({});
@@ -27,23 +27,29 @@ export const CardFilters = () => {
 	const hasFilters = Object.keys(filters).length > 0;
 
 	const onDeleteAllFilters = () => setFilters({});
-	const onDeleteFilter = (module, property, type) => {
-		const filter = [module, property, type].join('.');
-		delete filters[filter];
-		setFilters({ ...filters });
+	const onDeleteFilter = (module: string, property: string, operator: CardFilterOperator) => {
+		const newFilters = { ...filters };
+		delete newFilters[module][property][operator];
+		if (!Object.values(newFilters[module][property]).length) {
+			delete newFilters[module][property];
+			if (!Object.values(newFilters[module]).length) {
+				delete newFilters[module];
+			}
+		}
+		setFilters(newFilters);
 	};
-	const addFilter = (filter: string, value?: string | number | Date) => {
-		const operator = filter.split('.').at(-1) as CardFilterOperator;
+	const addFilter = (module: string, property: string, operator: CardFilterOperator, value?: string | number | Date) => {
+		const filterPath = [module, property, operator];
 		switch (getOperatorMaxValuesSupported(operator)) {
 			case 0:
-				filters[filter] = [];
+				set(filters, filterPath, []);
 				break;
 			case 1:
-				filters[filter] = [value];
+				set(filters, filterPath, [value]);
 				break;
 			default:
-				filters[filter] ||= [];
-				filters[filter].push(value);
+				const currentVal = get(filters, filterPath, []);
+				set(filters, filterPath, currentVal.concat(value));
 		}
 		setFilters({ ...filters });
 	};
@@ -54,36 +60,41 @@ export const CardFilters = () => {
 		const filter = e.target[0].value;
 		const value = e.target[1].value;
 		const isDate = e.target[2].checked;
-		if  (filter.split('.').length !== 3) {
+		const filterPath = filter.split('.') as [string, string, CardFilterOperator];
+		if  (filterPath.length !== 3) {
 			alert("This will crash the app. Remeber: 'module'.'property'.'type'");
 			return;
 		}
-		if  (!Object.keys(FILTER_OPERATOR_ICON).includes(filter.split('.').at(-1))) {
+		if  (!Object.keys(FILTER_OPERATOR_ICON).includes(filterPath.at(-1))) {
 			alert('This will crash the app. This operator is not supported');
 			return;
 		}
-		addFilter(filter, isDate ? new Date(+value) : value);
+		addFilter(...filterPath, isDate ? new Date(+value) : value);
 	};
 
 	// TODO - remove this
 	useEffect(() => {
 		setFilters({
-			'.property1.rng': [new Date('12/12/2024'), new Date('12/20/2024')],
-			'.assignees.ss': ['Ale', 'San', 'Dan'],
-			'.property2.eq': [0],
-			'.porpertyThatLooksVeryLong.eq': [1],
-			'.porpertyThatLooksVeryLongs.eq': [11231231231231],
-			'.porpertyThatLooksVeryLongsa.eq': [0, 1],
-			'module1.property1.ex': [],
-			'module1.property1.ss': [2, 3],
+			'': {
+				'property1': {
+					'rng': [new Date('12/12/2024'), new Date('12/20/2024')],
+					'nrng': [3],
+				},
+				'property2': {
+					'eq': [4],
+				},
+				'.assignees': {
+					'ss': ['Ale', 'San', 'Dan'],
+				},
+			},
+			'module1': {
+				'property1': {
+					'ex': [],
+					'ss': [2, 3],
+				},
+			},
 		});
 	}, []);
-
-	const getFiltersDictionary = () => {
-		const filtersDict = {};
-		Object.entries(filters).forEach(([key, values]) => set(filtersDict, key, values));
-		return filtersDict;
-	};
 
 	return (
 		<>
@@ -101,7 +112,7 @@ export const CardFilters = () => {
 			</form>
 			{hasFilters && (
 				<TicketsFiltersList
-					filters={getFiltersDictionary()}
+					filters={filters}
 					onDeleteAllFilters={onDeleteAllFilters}
 					onDeleteFilter={onDeleteFilter}
 				/>
