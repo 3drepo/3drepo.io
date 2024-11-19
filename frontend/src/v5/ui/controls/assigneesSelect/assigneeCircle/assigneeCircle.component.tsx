@@ -24,7 +24,7 @@ import { ErrorPopoverCircle } from '@components/shared/popoverCircles/errorPopov
 import { formatMessage } from '@/v5/services/intl';
 
 const JOB_OR_USER_NOT_FOUND = formatMessage({
-	id: 'errorPopover.inexistentJorOrUser',
+	id: 'errorPopover.nonexistentJobOrUser',
 	defaultMessage: 'The user/job could not be found in this teamspace',
 });
 
