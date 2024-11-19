@@ -16,15 +16,16 @@
  */
 
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
-import { ChipContainer, DeleteButton, TextWrapper, OperatorIconContainer } from './filterChip.styles';
-import { FILTER_OPERATOR_ICON, FILTER_OPERATOR_LABEL } from './filters.helpers';
+import { ChipContainer, DeleteButton, TextWrapper, OperatorIconContainer, DisplayValue, Property, TooltipRefHolder } from './filterChip.styles';
+import { FILTER_OPERATOR_ICON, FILTER_OPERATOR_LABEL } from '../cardFilters.helpers';
 import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { CardFilterOperator } from '../cardFilters.types';
+import { formatSimpleDate } from '@/v5/helpers/intl.helper';
 
 type FilterChipProps = {
 	property: string;
-	values: any[];
+	values: (number | string | Date)[];
 	onDelete: () => void;
 	operator: CardFilterOperator;
 	selected?: boolean;
@@ -32,28 +33,26 @@ type FilterChipProps = {
 export const FilterChip = ({ property, values, onDelete, operator, selected }: FilterChipProps) => {
 	const OperatorIcon = FILTER_OPERATOR_ICON[operator];
 	const hasMultipleValues = values.length > 1;
-	const displayValues = values?.join(', ') ?? '';
+	const displayValue = values[0] instanceof Date ? values.map(formatSimpleDate) : values.join(', ') ?? '';
 
 	return (
 		<ChipContainer selected={selected}>
-			<TextWrapper>
-				<span>{property}</span>
-				<Tooltip title={FILTER_OPERATOR_LABEL[operator]}>
+			<Tooltip title={`${property} ${FILTER_OPERATOR_LABEL[operator]} ${displayValue}`}>
+				<TextWrapper>
+					<Property>{property}</Property>
 					<OperatorIconContainer>
 						<OperatorIcon />
 					</OperatorIconContainer>
-				</Tooltip>
-				{hasMultipleValues && (
-					<Tooltip title={displayValues}>
-						<u>
+					{hasMultipleValues && (
+						<DisplayValue $multiple>
 							<FormattedMessage id="cardFilter.valuesCount" defaultMessage="{count} values" values={{ count: values.length }} />
-						</u>
-					</Tooltip>
-				)}
-				{!hasMultipleValues && !!values.length && (
-					<span>{displayValues}</span>
-				)}
-			</TextWrapper>
+						</DisplayValue>
+					)}
+					{!hasMultipleValues && !!values?.length && (
+						<DisplayValue>{displayValue}</DisplayValue>
+					)}
+				</TextWrapper>
+			</Tooltip>
 			<DeleteButton onClick={onDelete}>
 				<CloseIcon />
 			</DeleteButton>

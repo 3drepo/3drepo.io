@@ -20,20 +20,39 @@ import styled, { css } from 'styled-components';
 export const TextWrapper = styled.div`
 	max-width: 150px;
 	overflow: hidden;
+	display: inline-flex;
+`;
+
+export const Property = styled.span`
+	flex-shrink: 4;
+	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
-	display: inline-flex;
-	gap: 3px;
 `;
 
 export const OperatorIconContainer = styled.div`
 	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
-	width: 18px;
-	height: 18px;
 	border-radius: 50%;
+	height: 18px;
+	width: 18px;
+	flex-shrink: 0;
 	display: inline-flex;
 	justify-content: center;
 	align-items: center;
+	margin-left: 3px;
+`;
+
+export const DisplayValue = styled.span<{ $multiple?: boolean }>`
+	margin-left: 3px;
+	flex-shrink: 1;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	
+	${({ $multiple }) => $multiple && css`
+		text-decoration: underline;
+		flex-shrink: 0;
+	`}
 `;
 
 export const DeleteButton = styled.div`
