@@ -18,6 +18,8 @@
 import { useEffect, useState } from 'react';
 import { TicketsFiltersList } from '../tickets/ticketsFiltersList/ticketsFiltersList.component';
 import { set } from 'lodash';
+import { CardFilterOperator } from './cardFilters.types';
+import { FILTER_OPERATOR_ICON, getOperatorMaxValuesSupported } from './cardFilters.helpers';
 
 export const CardFilters = () => {
 	const [filters, setFilters] = useState({});
@@ -30,11 +32,18 @@ export const CardFilters = () => {
 		delete filters[filter];
 		setFilters({ ...filters });
 	};
-	const addFilter = (filter: string, value?) => {
-		if (filters[filter]?.length) {
-			filters[filter].push(value);
-		} else {
-			filters[filter] = [value];
+	const addFilter = (filter: string, value?: string | number | Date) => {
+		const operator = filter.split('.').at(-1) as CardFilterOperator;
+		switch (getOperatorMaxValuesSupported(operator)) {
+			case 0:
+				filters[filter] = [];
+				break;
+			case 1:
+				filters[filter] = [value];
+				break;
+			default:
+				filters[filter] ||= [];
+				filters[filter].push(value);
 		}
 		setFilters({ ...filters });
 	};
@@ -43,16 +52,24 @@ export const CardFilters = () => {
 		e.preventDefault();
 		const filter = e.target[0].value;
 		const value = e.target[1].value;
-		addFilter(filter, value);
+		const isDate = e.target[2].checked;
+		if  (filter.split('.').length !== 3 || !Object.keys(FILTER_OPERATOR_ICON).includes(filter.split('.').at(-1))) {
+			alert("this will crash the app. Remeber: 'module'.'property'.'type' (the latter from the existing ones)");
+			return;
+		}
+		addFilter(filter, isDate ? new Date(value) : value);
 	};
 
 	useEffect(() => {
 		setFilters({
-			'.property1.inRange': [[0, 4]],
-			'.property1.notInRange': [[2, 3]],
-			'.property2.equal': [0],
-			'module1.property1.exist': [],
-			'module1.property1.contain': [2, 3],
+			'.property1.rng': [new Date('12/12/2024'), new Date('12/20/2024')],
+			'.assignees.ss': ['Ale', 'San', 'Dan'],
+			'.property2.eq': [0],
+			'.porpertyThatLooksVeryLong.eq': [1],
+			'.porpertyThatLooksVeryLongs.eq': [11231231231231],
+			'.porpertyThatLooksVeryLongsa.eq': [0, 1],
+			'module1.property1.ex': [],
+			'module1.property1.ss': [2, 3],
 		});
 	}, []);
 
@@ -65,9 +82,16 @@ export const CardFilters = () => {
 	return (
 		<>
 			<form onSubmit={handleAddFilter}>
-				<input name="filter" />
-				<input name="val" />
-				<button>submit</button>
+				filter: <input name="filter" placeholder='module.property.type' />
+				<br />
+				value: <input name="value" placeholder='value'/>
+				<br />
+				<label>
+					is Date:
+					<input type='checkbox' /> (if yes, convert to `new Date(value)`)
+				</label>
+				<br />
+				<button>[submit]</button>
 			</form>
 			{hasFilters && (
 				<TicketsFiltersList
