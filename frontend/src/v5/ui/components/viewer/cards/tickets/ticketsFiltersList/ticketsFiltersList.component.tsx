@@ -31,7 +31,7 @@ export const TicketsFiltersList = ({ filters, onDeleteFilter, onDeleteAllFilters
 
 	return (
 		<FiltersAccordion onClear={onDeleteAllFilters}>
-			{Object.entries(filters).map(([moduleName, moduleFilters]) => (
+			{Object.entries(filters).sort((a, b) => a[0].localeCompare(b[0])).map(([moduleName, moduleFilters]) => (
 				<Fragment key={moduleName}>
 					{moduleName && (<ModuleTitle>{moduleName}</ModuleTitle>)}
 					<FiltersSection filters={moduleFilters} onDeleteFilter={onDeleteModuleFilter(moduleName)} />
