@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CollapsibleContainer, CollapseButton, ClearButton, CollapseButtonContainer, PaddedContainer, BottomLine, ChevronIconContainer } from './filtersAccordion.styles';
+import { CollapsibleContainer, CollapseButton, ClearButton, CollapseButtonContainer, BottomSection, ChevronIconContainer } from './filtersAccordion.styles';
 import { useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
@@ -35,17 +35,15 @@ export const FiltersAccordion = ({ children, onClear }: FiltersAccordionProps) =
 	useEffect(() => {
 		if (!filterContainerRef.current) return;
 		const filtersContainerHeight = Number(getComputedStyle(filterContainerRef.current).height.replace('px', ''));
-		setCanCollapse(filtersContainerHeight > 32);
+		setCanCollapse(filtersContainerHeight > 35);
 	}, [children]);
 
 	return (
 		<>
-			<PaddedContainer $collapsed={collapsed}>
-				<CollapsibleContainer ref={filterContainerRef}>
-					{children}
-				</CollapsibleContainer>
-			</PaddedContainer>
-			<BottomLine>
+			<CollapsibleContainer $collapsed={collapsed} ref={filterContainerRef}>
+				{children}
+			</CollapsibleContainer>
+			<BottomSection>
 				{canCollapse && (
 					<CollapseButtonContainer>
 						<CollapseButton onClick={toggleCollapsedState}>
@@ -63,7 +61,7 @@ export const FiltersAccordion = ({ children, onClear }: FiltersAccordionProps) =
 					<FormattedMessage id="filtersList.clearAllButton" defaultMessage="Clear all" />
 					<CloseIcon />
 				</ClearButton>
-			</BottomLine>
+			</BottomSection>
 		</>
 	);
 };

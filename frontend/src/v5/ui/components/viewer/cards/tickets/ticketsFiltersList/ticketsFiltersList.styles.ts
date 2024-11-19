@@ -16,12 +16,17 @@
  */
 
 import styled from 'styled-components';
+import { Section } from '../../cardFilters/filtersList/filtersSection/filtersSection.styles';
 
 export const ModuleTitle = styled.p`
 	color: ${({ theme }) => theme.palette.base.main};
 	text-transform: uppercase;
-	margin: 10px 0;
+	margin: 0 0 10px 0;
 	font-size: 9px;
 	line-height: 12px;
 	letter-spacing: 3px;
+
+	${Section} + & {
+		margin-top: 10px;
+	}
 `;

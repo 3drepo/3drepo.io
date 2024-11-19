@@ -18,30 +18,23 @@
 import { Typography } from '@controls/typography';
 import styled, { css } from 'styled-components';
 
-export const PaddedContainer = styled.div<{ $collapsed: boolean }>`
-	padding: 10px 0;
+export const CollapsibleContainer = styled.div<{ $collapsed: boolean }>`
+	height: fit-content;
 	box-sizing: border-box;
 	transition: max-height .3s;
 	max-height: 100%;
 	overflow: hidden;
-	
-	${({ $collapsed }) => $collapsed && css`
-		overflow-y: scroll;
-		max-height: 50px;
-	`}
+	overflow-y: scroll;
+	max-height: ${({ $collapsed }) => $collapsed ? '50px' : 'calc(100% - 14px)'};
+	padding-bottom: 10px;
 `;
 
-export const CollapsibleContainer = styled.div`
-	height: fit-content;
-`;
-
-export const BottomLine = styled.div`
+export const BottomSection = styled.div`
 	width: 100%;
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
-    place-items: center;
-    align-items: flex-start;
-	padding: 0 10px;
+	place-items: center;
+	align-items: flex-start;
 	box-sizing: border-box;
 	border-top: 1px solid ${({ theme }) => theme.palette.base.lightest};
 `;
@@ -51,7 +44,7 @@ export const CollapseButtonContainer = styled.div`
 	position: relative;
 	display: flex;
 	justify-content: center;
-    grid-column-start: 2;
+	grid-column-start: 2;
 `;
 
 export const CollapseButton = styled.button`
@@ -76,8 +69,8 @@ export const ClearButton = styled(Typography).attrs({ variant: 'label' })`
 	align-items: center;
 	padding: 6px 0 6px 1px;
 	cursor: pointer;
-    grid-column-start: 3;
-    margin-left: auto;
+	grid-column-start: 3;
+	margin-left: auto;
 
 	svg {
 		margin-left: 4px;
