@@ -48,18 +48,24 @@ export const CardFilters = () => {
 		setFilters({ ...filters });
 	};
 
+	// TODO - remove this
 	const handleAddFilter = (e) => {
 		e.preventDefault();
 		const filter = e.target[0].value;
 		const value = e.target[1].value;
 		const isDate = e.target[2].checked;
-		if  (filter.split('.').length !== 3 || !Object.keys(FILTER_OPERATOR_ICON).includes(filter.split('.').at(-1))) {
-			alert("this will crash the app. Remeber: 'module'.'property'.'type' (the latter from the existing ones)");
+		if  (filter.split('.').length !== 3) {
+			alert("This will crash the app. Remeber: 'module'.'property'.'type'");
+			return;
+		}
+		if  (!Object.keys(FILTER_OPERATOR_ICON).includes(filter.split('.').at(-1))) {
+			alert('This will crash the app. This operator is not supported');
 			return;
 		}
 		addFilter(filter, isDate ? new Date(value) : value);
 	};
 
+	// TODO - remove this
 	useEffect(() => {
 		setFilters({
 			'.property1.rng': [new Date('12/12/2024'), new Date('12/20/2024')],
