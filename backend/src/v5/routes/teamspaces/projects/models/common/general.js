@@ -34,33 +34,10 @@ const Drawings = require('../../../../../processors/teamspaces/projects/models/d
 const Federations = require('../../../../../processors/teamspaces/projects/models/federations');
 const ModelSettings = require('../../../../../processors/teamspaces/projects/models/commons/settings');
 const { Router } = require('express');
-const UnityAssets = require('../../../../../models/unityAssets');
 const { canDeleteContainer } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { isArray } = require('../../../../../utils/helper/typeCheck');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
-
-const getRepoBundle = async (req, res) => {
-	const { teamspace, model, bundle } = req.params;
-
-	try {
-		const { readStream, size, mimeType, encoding } = await UnityAssets.getRepoBundle(teamspace, model, bundle);
-		writeStreamRespond(req, res, templates.ok, readStream, undefined, size, { mimeType, encoding });
-	} catch (err) {
-		respond(req, res, err);
-	}
-};
-
-const getUnityBundle = async (req, res) => {
-	const { teamspace, model, bundle } = req.params;
-
-	try {
-		const { readStream, size, mimeType, encoding } = await UnityAssets.getUnityBundle(teamspace, model, bundle);
-		writeStreamRespond(req, res, templates.ok, readStream, undefined, size, { mimeType, encoding });
-	} catch (err) {
-		respond(req, res, err);
-	}
-};
 
 const getThumbnail = async (req, res) => {
 	const { teamspace, project, drawing } = req.params;
@@ -947,102 +924,6 @@ const establishRoutes = (modelType) => {
 	 *                   calibration: { verticalRange: [0,10], units: m }
 	 */
 	router.get('/:model', hasReadAccessToModel[modelType], getModelSettings(modelType), formatModelSettings);
-
-	/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/containers/{model}/{bundle}.repobundle:
-	 *   get:
-	 *     description: Get the repo bundle with the specified ID for the specified model
-	 *     tags: [Models]
-	 *     operationId: getRepoBundle
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: Name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: project
-	 *         description: Project ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: model
-	 *         description: Model ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
- 	 *       - name: bundle
-	 *         description: Bundle ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       404:
-	 *         $ref: "#/components/responses/teamspaceNotFound"
-	 *       404:
-	 *         $ref: "#/components/responses/projectNotFound"
-	 *       404:
-	 *         $ref: "#components/responses/containerNotFound"
-	 *       404:
-	 *         $ref: "#components/responses/fileNotFound"
-	 *       200:
-	 *         description: returns the repobundle file containing the bundle with the specified ID for the specified model
-	 */
-	router.get('/:model/:bundle.repobundle', hasReadAccessToModel[modelType], getRepoBundle);
-
-	/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/containers/{model}/{bundle}.unity3d:
-	 *   get:
-	 *     description: Get the unity bundle with the specified ID for the specified model
-	 *     tags: [Models]
-	 *     operationId: getRepoBundle
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: Name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: project
-	 *         description: Project ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: model
-	 *         description: Model ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
- 	 *       - name: bundle
-	 *         description: Bundle ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       404:
-	 *         $ref: "#/components/responses/teamspaceNotFound"
-	 *       404:
-	 *         $ref: "#/components/responses/projectNotFound"
-	 *       404:
-	 *         $ref: "#components/responses/containerNotFound"
-	 *       404:
-	 *         $ref: "#components/responses/fileNotFound"
-	 *       200:
-	 *         description: returns the unity3d file containing the bundle with the specified ID for the specified model
-	 */
-	router.get('/:model/:bundle.unity3d', hasReadAccessToModel[modelType], getUnityBundle);
 
 	/**
 	 * @openapi
