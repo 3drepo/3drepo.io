@@ -21,7 +21,9 @@ import styled, { css } from 'styled-components';
 export const PaddedContainer = styled.div<{ $collapsed: boolean }>`
 	padding: 10px 0;
 	box-sizing: border-box;
-	transition: height .3s;
+	transition: max-height .3s;
+	max-height: 100%;
+	overflow: hidden;
 	
 	${({ $collapsed }) => $collapsed && css`
 		overflow-y: scroll;
