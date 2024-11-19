@@ -22,7 +22,6 @@ export const CollapsibleContainer = styled.div<{ $collapsed: boolean }>`
 	height: fit-content;
 	box-sizing: border-box;
 	transition: max-height .3s;
-	max-height: 100%;
 	overflow: hidden;
 	overflow-y: scroll;
 	max-height: ${({ $collapsed }) => $collapsed ? '50px' : 'calc(100% - 14px)'};
