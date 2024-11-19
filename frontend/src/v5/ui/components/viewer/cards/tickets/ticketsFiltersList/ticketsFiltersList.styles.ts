@@ -21,7 +21,8 @@ import { Section } from '../../cardFilters/filtersList/filtersSection/filtersSec
 export const ModuleTitle = styled.p`
 	color: ${({ theme }) => theme.palette.base.main};
 	text-transform: uppercase;
-	margin: 0 0 10px 0;
+	margin-top: 0;
+	margin-bottom: 10px;
 	font-size: 9px;
 	line-height: 12px;
 	letter-spacing: 3px;
