@@ -33,6 +33,7 @@ const SsoRoutes = require('./sso');
 const TeamspaceJobRoutes = require('./teamspaces/jobs');
 const TeamspaceRoutes = require('./teamspaces/teamspaces');
 const TeamspaceSettingsRoutes = require('./teamspaces/settings');
+const TextureRoutes = require('./teamspaces/projects/models/containers/textures');
 const UserRoutes = require('./users');
 const { modelTypes } = require('../models/modelSettings.constants');
 
@@ -58,7 +59,8 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/views', CreateViewRoutes());
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/revisions', CreateGeneralRevisionRoutes(modelTypes.CONTAINER));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/metadata', MetadataRoutes);
-	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/bundle', BundleRoutes);
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/bundles', BundleRoutes);
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/textures', TextureRoutes);
 
 	// Federations
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations', CreateModelGeneralRoutes(modelTypes.FEDERATION));

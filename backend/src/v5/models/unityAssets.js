@@ -16,6 +16,8 @@
  */
 
 const FilesManager = require('../services/filesManager');
+const db = require('../handler/db');
+const responseCodes = require('../utils/responseCodes');
 
 const UnityAssets = {};
 
@@ -25,10 +27,43 @@ UnityAssets.getRepoBundle = function (account, model, id) {
 	return FilesManager.getFileAsStream(account, collection, bundleFileName);
 };
 
-UnityAssets.getUnityBundle = function(account, model, id) {
+UnityAssets.getUnityBundle = function (account, model, id) {
 	const bundleFileName = `${id}.unity3d`;
 	const collection = `${model}.stash.unity3d.ref`;
 	return FilesManager.getFileAsStream(account, collection, bundleFileName);
+};
+
+UnityAssets.getTexture = async function (account, model, id) {
+	const collection = `${model}.scene`;
+
+	const node = await db.findOne(account, collection, { _id: id, type: 'texture' }, {
+		_id: 1,
+		_blobRef: 1,
+		extension: 1,
+	});
+
+	if (!node) {
+		throw (responseCodes.TEXTURE_NOT_FOUND);
+	}
+
+	const { elements, buffer } = node._blobRef;
+
+	// chunkInfo is passed to createReadStream, which expects `start` and `end` properties
+	const chunkInfo = {
+		start: buffer.start + elements.data.start,
+		end: buffer.start + elements.data.start + elements.data.size,
+	};
+
+	const response = await FilesManager.getFileAsStream(account, collection, buffer.name, chunkInfo);
+
+	if (node.extension === 'jpg') {
+		node.extension = 'jpeg'; // jpg is not a valid mime type, only jpeg, even though the extensions are equivalent
+	}
+
+	response.mimeType = `image/${node.extension}`;
+	response.size = chunkInfo.end - chunkInfo.start;
+
+	return response;
 };
 
 module.exports = UnityAssets;
