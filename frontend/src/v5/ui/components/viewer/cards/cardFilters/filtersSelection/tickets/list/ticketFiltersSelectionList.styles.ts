@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,18 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { PrimaryButton, SecondaryButton, ViewerButton } from './circleButton.styles';
+import { MenuList as MenuListBase } from '@mui/material';
+import { EmptyListMessage as EmptyListMessageBase } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
+import styled from 'styled-components';
 
-interface ICircleButton {
-	variant?: 'primary' | 'secondary' | 'viewer';
-	disabled?: boolean;
-	onClick?: (e) => void;
-	children: any;
-	active?: boolean;
-}
+export const MenuList = styled(MenuListBase)`
+	box-shadow: none !important;
+	padding: 0;
+	overflow-x: hidden;
+	border-radius: 0;
+	max-height: calc(70vh - 55px);
+`;
 
-export const CircleButton = ({ variant = 'primary', ...props }: ICircleButton) => {
-	if (variant === 'primary') return (<PrimaryButton {...props} />);
-	if (variant === 'viewer') return (<ViewerButton {...props} />);
-	return (<SecondaryButton {...props} />);
-};
+export const EmptyListMessage = styled(EmptyListMessageBase)`
+	margin: 0 10px 10px
+`;

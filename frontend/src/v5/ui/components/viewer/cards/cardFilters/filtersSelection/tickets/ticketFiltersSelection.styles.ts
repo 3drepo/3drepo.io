@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,18 +15,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { PrimaryButton, SecondaryButton, ViewerButton } from './circleButton.styles';
+import { ActionMenu as ActionMenuBase } from '@controls/actionMenu';
+import { SearchInput as SearchInputBase } from '@controls/search/searchInput';
 
-interface ICircleButton {
-	variant?: 'primary' | 'secondary' | 'viewer';
-	disabled?: boolean;
-	onClick?: (e) => void;
-	children: any;
-	active?: boolean;
-}
+import styled from 'styled-components';
 
-export const CircleButton = ({ variant = 'primary', ...props }: ICircleButton) => {
-	if (variant === 'primary') return (<PrimaryButton {...props} />);
-	if (variant === 'viewer') return (<ViewerButton {...props} />);
-	return (<SecondaryButton {...props} />);
-};
+export const SearchInput = styled(SearchInputBase)`
+	margin: 0;
+	padding: 10px;
+
+	.MuiInputBase-root {
+		border: solid 1px ${({ theme }) => theme.palette.base.lightest};
+
+		&, &:hover {
+			background-color: transparent;
+		}
+
+		input {
+			padding-right: 0;
+		}
+
+		.MuiInputAdornment-positionEnd {
+			margin: 0;
+		}
+	}
+`;
+
+export const ActionMenu = styled(ActionMenuBase)`
+	.MuiPaper-root {
+		left: 88px !important;
+		width: 365px;
+	}
+`;

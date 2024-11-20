@@ -30,6 +30,7 @@ import { formatMessage } from '@/v5/services/intl';
 import PinIcon from '@assets/icons/filled/ticket_pin-filled.svg';
 import { EllipsisMenuItemSwitch } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenuItemSwitch.component';
 import { CardHeader } from '@components/viewer/cards/cardHeader.component';
+import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
 
 export const TicketsListCard = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
@@ -49,14 +50,15 @@ export const TicketsListCard = () => {
 				actions={(
 					<>
 						{!readOnly && (<NewTicketMenu />)}
+						<FilterSelection />
 						<EllipsisMenu>
 							<EllipsisMenuItemSwitch
 								icon={<PinIcon />}
-								title={formatMessage({ id: 'foobarbaz', defaultMessage: 'Show Pins' })}
+								title={formatMessage({ id: 'viewer.cards.tickets.showPins', defaultMessage: 'Show Pins' })}
 								active={isShowingPins}
 								onClick={onClickShowPins}
 							/>
-						</ EllipsisMenu>
+						</EllipsisMenu>
 					</>
 				)}
 			/>
