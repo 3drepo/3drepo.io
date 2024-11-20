@@ -16,14 +16,134 @@
  */
 
 const Scene = {};
+const DbConstants = require('../handler/db.constants');
+const History = require('./history');
+const Permissions = require('../utils/permissions/permissions');
 const db = require('../handler/db');
+const uuidHelper = require('../utils/helper/uuids');
 
 const getCollection = (model) => `${model}.scene`;
+const getStashCollection = (model) => `${model}.stash.3drepo`;
 
 Scene.getNodesBySharedIds = (teamspace, project, model, revId, sharedIds, projection) => db.find(
 	teamspace, getCollection(model), { rev_id: revId, shared_id: { $in: sharedIds } }, projection);
 
 Scene.getNodesByIds = (teamspace, project, model, ids, projection) => db.find(
 	teamspace, getCollection(model), { _id: { $in: ids } }, projection);
+
+const clean = (nodeToClean) => {
+	const node = nodeToClean;
+	if (node) {
+		if (node._id) {
+			node._id = uuidHelper.uuidToString(node._id);
+		}
+
+		if (node.parents) {
+			node.parents = node.parents.map((p) => uuidHelper.uuidToString(p));
+		}
+	}
+
+	return node;
+};
+
+const cleanAll = (nodesToClean) => nodesToClean.map(clean);
+
+const findNodes = async (account, model, branch, revision, query = {}, projection = {}) => {
+	const history = await History.getHistory(account, model, branch, revision);
+
+	return cleanAll(await db.find(account, getCollection(model), { rev_id: history._id, ...query }, projection));
+};
+
+const findNodesByType = async (account, model, branch, revision, type, searchString, projection) => {
+	const query = {
+		type,
+	};
+
+	if (searchString) {
+		query.name = new RegExp(searchString, 'i');
+	}
+
+	const result = await findNodes(account, model, branch, revision, query, projection);
+	return result;
+};
+
+const findStashNodes = async (account, model, branch, revision, query = {}, projection = {}) => {
+	const history = await History.getHistory(account, model, branch, revision);
+
+	const results = await db.find(
+		account,
+		getStashCollection(model),
+		{ rev_id: history._id, ...query },
+		projection,
+	);
+
+	return cleanAll(results);
+};
+
+Scene.findStashNodesByType = async (account, model, branch, revision, type, searchString, projection) => {
+	const query = {
+		type,
+	};
+
+	if (searchString) {
+		query.name = new RegExp(searchString, 'i');
+	}
+
+	const result = await findStashNodes(account, model, branch, revision, query, projection);
+	return result;
+};
+
+Scene.getContainerMeshInfo = async (teamspace, model, branch, rev) => {
+	const projection = {
+		_id: 1,
+		vertices_count: 1,
+		faces_count: 1,
+		uv_channels_count: 1,
+		bounding_box: 1,
+		primitive: 1,
+	};
+	const results = await Scene.findStashNodesByType(teamspace, model, branch, rev, 'mesh', undefined, projection);
+	return {
+		superMeshes: results.map(({
+			_id,
+			vertices_count,
+			faces_count,
+			uv_channels_count,
+			bounding_box,
+			primitive,
+		}) => ({
+			_id: uuidHelper.uuidToString(_id),
+			nVertices: vertices_count || 0,
+			nFaces: faces_count || 0,
+			nUVChannels: uv_channels_count || 0,
+			primitive: primitive || 3,
+			min: bounding_box[0],
+			max: bounding_box[1],
+		})),
+	};
+};
+
+Scene.getFederationMeshInfo = async (ts, project, federation, branch, rev, user) => {
+	const refNodes = await findNodesByType(ts, federation, branch, rev, 'ref', undefined, { project: 1 });
+
+	const subModelMeshes = await Promise.all(refNodes.reduce(async ({ results, container }) => {
+		if (await Permissions.hasReadAccessToContainer(ts, project, container, user, false)) {
+			try {
+				const superMeshes = await Scene.getContainerMeshInfo(
+					ts,
+					container,
+					DbConstants.MASTER_BRANCH_NAME,
+					undefined,
+				);
+				results.push({ teamspace: ts, model: container, superMeshes });
+				return results;
+			} catch {
+				return results;
+			}
+		}
+		return results;
+	}));
+	return { subModels: subModelMeshes.filter(Boolean) };
+};
 
 module.exports = Scene;

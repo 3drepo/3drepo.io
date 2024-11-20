@@ -19,5 +19,6 @@ const DbConstants = {};
 
 DbConstants.ADMIN_DB = 'admin';
 DbConstants.INTERNAL_DB = 'internal';
+DbConstants.MASTER_BRANCH_NAME = 'master';
 
 module.exports = DbConstants;
