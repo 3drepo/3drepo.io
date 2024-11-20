@@ -17,3 +17,4 @@
 
 export type CardFilterOperator = 'ex' | 'nex' | 'eq' | 'neq' | 'ss' | 'nss' | 'rng' | 'nrng' | 'gt' | 'gte' | 'lt' | 'lte';
 export type CardFilters = Record<string, any[]>;
+export type FilterListItemType = { module?: string, property: string, type: string };
