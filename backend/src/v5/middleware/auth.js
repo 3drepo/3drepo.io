@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const config = require('../utils/config');
 const { isAccountActive } = require('../models/users');
 const { isAccountLocked } = require('../models/loginRecords');
 const { isSessionValid } = require('../utils/sessions');
@@ -24,7 +25,25 @@ const { validateMany } = require('./common');
 
 const AuthMiddleware = {};
 
-AuthMiddleware.validSession = async (req, res, next) => {
+const isIpAddressValid = async (req, res, next) => {
+	const ipMatch = req.session.ipAddress === (req.ips[0] || req.ip);
+
+	if (req.session.user.isAPIKey || ipMatch) {
+		await next();
+		return;
+	}
+
+	try {
+		req.session.destroy(() => {
+			res.clearCookie('connect.sid', { domain: config.cookie_domain, path: '/' });
+			respond(req, res, templates.notLoggedIn);
+		});
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
+
+const validSession = async (req, res, next) => {
 	const { headers, session, cookies } = req;
 	if (isSessionValid(session, cookies, headers)) {
 		await next();
@@ -76,5 +95,6 @@ const accountNotLocked = async (req, res, next) => {
 };
 
 AuthMiddleware.canLogin = validateMany([AuthMiddleware.notLoggedIn, accountActive, accountNotLocked]);
+AuthMiddleware.validSession = validateMany([validSession, isIpAddressValid]);
 
 module.exports = AuthMiddleware;

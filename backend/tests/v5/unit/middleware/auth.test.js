@@ -36,8 +36,9 @@ const AuthMiddlewares = require(`${src}/middleware/auth`);
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
+const ipAddress = generateRandomString();
 const token = generateRandomString();
-const session = { user: { referer: 'http://abc.com' }, token };
+const session = { user: { referer: 'http://abc.com' }, token, ipAddress, destroy: (callback) => { callback(); } };
 const cookies = { [CSRF_COOKIE]: token };
 const headers = { referer: 'http://abc.com/', [CSRF_HEADER]: token };
 
@@ -46,7 +47,7 @@ const testValidSession = () => {
 		test('next() should be called if the session is valid', () => {
 			const mockCB = jest.fn(() => {});
 			AuthMiddlewares.validSession(
-				{ headers, session, cookies },
+				{ ips: [ipAddress], headers, session, cookies },
 				{},
 				mockCB,
 			);
@@ -56,17 +57,43 @@ const testValidSession = () => {
 		test('next() should be called if there is an apiKey session ', () => {
 			const mockCB = jest.fn(() => {});
 			AuthMiddlewares.validSession(
-				{ headers, session: { user: { referer: 'http://abc.com', isAPIKey: true } } },
+				{ ip: ipAddress, ips: [], headers, session: { user: { referer: 'http://abc.com', isAPIKey: true }, ipAddress } },
 				{},
 				mockCB,
 			);
 			expect(mockCB.mock.calls.length).toBe(1);
 		});
 
+		test('should respond with notLoggedIn errCode if the ip address missmatched', () => {
+			const mockCB = jest.fn(() => {});
+			AuthMiddlewares.validSession(
+				{ ips: [generateRandomString()], headers, session, cookies },
+				{ clearCookie: () => {} },
+				mockCB,
+			);
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond.mock.results[0].value).toEqual(templates.notLoggedIn);
+		});
+
+		test('should respond with whatever error destroySession throws', () => {
+			const error = new Error();
+			const mockCB = jest.fn(() => {});
+			AuthMiddlewares.validSession({ ips: [generateRandomString()],
+				headers,
+				session: { ...session, destroy: () => { throw error; } },
+				cookies },
+			{ clearCookie: () => {} },
+			mockCB);
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond.mock.results[0].value).toEqual(error);
+		});
+
 		test('should respond with notLoggedIn errCode if the referrer mismatched', () => {
 			const mockCB = jest.fn(() => {});
 			AuthMiddlewares.validSession(
-				{ headers: { ...headers, referer: 'http://xyz.com' }, session, cookies },
+				{ ips: [ipAddress], headers: { ...headers, referer: 'http://xyz.com' }, session, cookies },
 				{},
 				mockCB,
 			);
@@ -78,7 +105,7 @@ const testValidSession = () => {
 		test('should respond with notLoggedIn errCode if csrf token mismatched', () => {
 			const mockCB = jest.fn(() => {});
 			AuthMiddlewares.validSession(
-				{ headers: { ...headers, [CSRF_HEADER]: generateRandomString() }, session, cookies },
+				{ ips: [ipAddress], headers: { ...headers, [CSRF_HEADER]: generateRandomString() }, session, cookies },
 				{},
 				mockCB,
 			);
@@ -90,7 +117,7 @@ const testValidSession = () => {
 		test('next should be called if csrf token is provided in upper case', () => {
 			const mockCB = jest.fn(() => {});
 			AuthMiddlewares.validSession(
-				{ headers: { ...headers, [CSRF_HEADER.toUpperCase()]: token }, session, cookies },
+				{ ips: [ipAddress], headers: { ...headers, [CSRF_HEADER.toUpperCase()]: token }, session, cookies },
 				{},
 				mockCB,
 			);
@@ -100,7 +127,7 @@ const testValidSession = () => {
 		test('next should be called if csrf token is provided in lower case', () => {
 			const mockCB = jest.fn(() => {});
 			AuthMiddlewares.validSession(
-				{ headers: { ...headers, [CSRF_HEADER.toLowerCase()]: token }, session, cookies },
+				{ ips: [ipAddress], headers: { ...headers, [CSRF_HEADER.toLowerCase()]: token }, session, cookies },
 				{},
 				mockCB,
 			);
@@ -114,7 +141,7 @@ const testNotLoggedIn = () => {
 		test('next() should be called if the session is invalid', () => {
 			const mockCB = jest.fn(() => {});
 			AuthMiddlewares.notLoggedIn(
-				{ headers: { referer: 'http://xyz.com' }, session, cookies },
+				{ ips: [ipAddress], headers: { referer: 'http://xyz.com' }, session, cookies },
 				{},
 				mockCB,
 			);
@@ -124,7 +151,7 @@ const testNotLoggedIn = () => {
 		test('next() should be called if there is no session in the req', () => {
 			const mockCB = jest.fn(() => {});
 			AuthMiddlewares.notLoggedIn(
-				{ headers: { referer: 'http://xyz.com' }, cookies },
+				{ ips: [ipAddress], headers: { referer: 'http://xyz.com' }, cookies },
 				{},
 				mockCB,
 			);
@@ -134,7 +161,7 @@ const testNotLoggedIn = () => {
 		test('next() should be called if the session is invalid and there is an API key', () => {
 			const mockCB = jest.fn(() => {});
 			AuthMiddlewares.notLoggedIn(
-				{ headers: { referer: 'http://xyz.com' }, session: { user: { referer: 'http://abc.com', isAPIKey: true } } },
+				{ ips: [ipAddress], headers: { referer: 'http://xyz.com' }, session: { user: { referer: 'http://abc.com', isAPIKey: true } } },
 				{},
 				mockCB,
 			);
@@ -144,7 +171,7 @@ const testNotLoggedIn = () => {
 		test('should respond with alreadyLoggedIn errCode if the session is valid', () => {
 			const mockCB = jest.fn(() => {});
 			AuthMiddlewares.notLoggedIn(
-				{ headers, session, cookies },
+				{ ips: [ipAddress], headers, session, cookies },
 				{},
 				mockCB,
 			);
@@ -160,7 +187,7 @@ const testIsLoggedIn = () => {
 		test('next() should be called if the session is valid', () => {
 			const mockCB = jest.fn(() => {});
 			AuthMiddlewares.isLoggedIn(
-				{ headers, session, cookies },
+				{ ips: [ipAddress], headers, session, cookies },
 				{},
 				mockCB,
 			);
@@ -170,7 +197,7 @@ const testIsLoggedIn = () => {
 		test('should respond with notLoggedIn errCode if the session is invalid', () => {
 			const mockCB = jest.fn(() => {});
 			AuthMiddlewares.isLoggedIn(
-				{ headers: { ...headers, referer: 'http://xyz.com' }, session, cookies },
+				{ ips: [ipAddress], headers: { ...headers, referer: 'http://xyz.com' }, session, cookies },
 				{},
 				mockCB,
 			);
@@ -182,7 +209,7 @@ const testIsLoggedIn = () => {
 		test('should respond with notLoggedIn errCode if the session is invalid and there is an API key', () => {
 			const mockCB = jest.fn(() => {});
 			AuthMiddlewares.isLoggedIn(
-				{ headers, session: { user: { referer: 'http://abc.com', isAPIKey: true } } },
+				{ ips: [ipAddress], headers, session: { user: { referer: 'http://abc.com', isAPIKey: true } } },
 				{},
 				mockCB,
 			);
@@ -201,7 +228,7 @@ const testCanLogin = () => {
 			LoginRecords.isAccountLocked.mockResolvedValueOnce(false);
 			const user = generateRandomString();
 			await AuthMiddlewares.canLogin(
-				{ body: { user }, headers: {} },
+				{ ips: [ipAddress], body: { user }, headers: {} },
 				{},
 				mockCB,
 			);
@@ -220,7 +247,7 @@ const testCanLogin = () => {
 			const mockCB = jest.fn();
 			Users.isAccountActive.mockResolvedValueOnce(false);
 			const user = generateRandomString();
-			const req = { body: { user }, headers: {} };
+			const req = { ips: [ipAddress], body: { user }, headers: {} };
 			const res = {};
 			await AuthMiddlewares.canLogin(
 				req,
@@ -241,7 +268,7 @@ const testCanLogin = () => {
 			Users.isAccountActive.mockResolvedValueOnce(true);
 			LoginRecords.isAccountLocked.mockResolvedValueOnce(true);
 			const user = generateRandomString();
-			const req = { body: { user }, headers: {} };
+			const req = { ips: [ipAddress], body: { user }, headers: {} };
 			const res = {};
 			await AuthMiddlewares.canLogin(
 				req,

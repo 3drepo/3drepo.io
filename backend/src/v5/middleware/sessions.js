@@ -75,10 +75,13 @@ const updateSessionDetails = (req) => {
 		session.cookie.maxAge = config.cookie.maxAge;
 	}
 
+	const ipAddress = req.ips[0] || req.ip;
+	session.ipAddress = ipAddress;
+
 	publish(events.SESSION_CREATED, {
 		username: updatedUser.username,
 		sessionID: req.sessionID,
-		ipAddress: req.ips[0] || req.ip,
+		ipAddress,
 		userAgent,
 		socketId: req.headers[SOCKET_HEADER],
 		referer: updatedUser.referer });
