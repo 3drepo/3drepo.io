@@ -17,8 +17,8 @@
 
 import { Fragment } from 'react';
 import { CardFilterOperator } from '../../cardFilters/cardFilters.types';
-import { FiltersAccordion } from '../../cardFilters/filtersList/filtersAccordion/filtersAccordion.component';
-import { FiltersSection } from '../../cardFilters/filtersList/filtersSection/filtersSection.component';
+import { FiltersAccordion } from '../../cardFilters/filtersAccordion/filtersAccordion.component';
+import { FiltersSection } from '../../cardFilters/filtersSection/filtersSection.component';
 import { ModuleTitle } from './ticketsFiltersList.styles';
 
 type TicketsFiltersListProps = {

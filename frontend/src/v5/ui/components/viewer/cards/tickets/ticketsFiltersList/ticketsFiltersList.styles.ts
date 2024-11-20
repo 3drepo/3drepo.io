@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { Section } from '../../cardFilters/filtersList/filtersSection/filtersSection.styles';
+import { Section } from '../../cardFilters/filtersSection/filtersSection.styles';
 
 export const ModuleTitle = styled.p`
 	color: ${({ theme }) => theme.palette.base.main};

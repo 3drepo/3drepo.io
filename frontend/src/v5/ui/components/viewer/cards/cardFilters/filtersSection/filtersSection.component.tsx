@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CardFilterOperator } from '../../cardFilters.types';
-import { FilterChip } from '../../filterChip/filterChip.component';
+import { CardFilterOperator } from '../cardFilters.types';
+import { FilterChip } from '../filterChip/filterChip.component';
 import { Section } from './filtersSection.styles';
 
 type FiltersSectionProps = {
