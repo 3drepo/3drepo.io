@@ -52,7 +52,6 @@ export const AlertModal: FC<IAlertModal> = ({ onClickClose, currentActions = '',
 	const unauthorized = isPathNotAuthorized(error);
 
 	const getSafePath = () => {
-		// eslint-disable-next-line max-len
 		if ((modelNotFound || unauthorized) && hasAccessToProject) return generatePath(PROJECT_ROUTE_BASE, { teamspace, project });
 		if ((projectNotFound || unauthorized) && teamspace) return generatePath(TEAMSPACE_ROUTE_BASE, { teamspace });
 		// Teamspace not found
