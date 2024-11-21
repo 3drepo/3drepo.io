@@ -68,8 +68,14 @@ export const FilterSelection = () => {
 						<TicketFiltersSelectionList setSelectedFilter={setSelectedFilter} />
 					</DrillDownItem>
 					<DrillDownItem $visible={!showFiltersList}>
-						{selectedFilter?.type}
-						<button onClick={() => setSelectedFilter(null)}>back</button>
+						<div style={{ height: '100px', padding: 20 }}>
+							{selectedFilter?.module && <>{selectedFilter?.module}&nbsp;:&nbsp;</>}{selectedFilter?.property}
+							<br />
+							type: {selectedFilter?.type}
+							<br />
+							<button onClick={() => setSelectedFilter(null)}>back</button>
+							<button onClick={() => setSelectedFilter(null)}>apply</button>
+						</div>
 					</DrillDownItem>
 				</DrillDownList>
 			</SearchContextComponent>
