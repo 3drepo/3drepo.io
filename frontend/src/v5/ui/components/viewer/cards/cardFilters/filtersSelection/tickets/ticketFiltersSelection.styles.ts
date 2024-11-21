@@ -17,7 +17,7 @@
 
 import { ActionMenu as ActionMenuBase } from '@controls/actionMenu';
 import { SearchInput as SearchInputBase } from '@controls/search/searchInput';
-import styled, { keyframes } from 'styled-components';
+import styled, { css } from 'styled-components';
 
 export const SearchInput = styled(SearchInputBase)`
 	margin: 0;
@@ -47,23 +47,20 @@ export const ActionMenu = styled(ActionMenuBase)`
 	}
 `;
 
-const slideInAnimation = keyframes`
-	from {
-		height: 0;
-	} to {
-		height: 100%;
-	}
-`;
-
 export const DrillDownItem = styled.div<{ $visible: boolean }>`
-	/* transition: opacity height .2s; */
-	animation: ${slideInAnimation} ${({ $visible }) => $visible ? 'forwards' : 'backwards'} 2s;
+	transition: opacity height .2s;
+	${({ $visible }) => $visible ? css`
+		height: 100%;
+	` : css`
+		height: 0;
+		overflow-y: hidden;
+	`};
 	width: 100%;
 `;
 
 export const DrillDownList = styled.div<{ $visibleIndex: number }>`
 	width: 200%;
-	height: 100%;
+	height: fit-content;
 	overflow-x: hidden;
 	display: flex;
 	flex-direction: row;
