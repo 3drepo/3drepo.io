@@ -231,6 +231,7 @@ export const UploadListItemDestination = memo(({
 			onOpen={onOpen}
 			options={sortByName([...drawings, ...newDrawingsInModal])}
 			renderOption={renderOption}
+			disableClearable={!value}
 			renderInput={({ InputProps, ...params }) => (
 				<DestinationInput
 					error={error}
