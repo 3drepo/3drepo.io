@@ -104,7 +104,6 @@ export const UploadListItem = ({
 
 	const revCodeError = get(errors, `${revisionPrefix}.revCode`)?.message;
 	const statusCodeError = get(errors, `${revisionPrefix}.statusCode`)?.message;
-	const drawingNameError = get(errors, `${revisionPrefix}.drawingName`)?.message;
 
 	useEffect(() => {
 		// Dont trigger the error if it was already triggered
@@ -178,19 +177,7 @@ export const UploadListItem = ({
 				onSelectNewDestination={onClickEdit}
 				index={index}
 				revisionPrefix={revisionPrefix}
-				error={!!drawingNameError}
-				helperText={drawingNameError}
 			/>
-			{/* <UploadListItemDestination 
-				name={`${revisionPrefix}.drawingName`}
-				key={`${uploadId}.dest`}
-				onSelectNewDestination={onClickEdit}
-				index={index}
-				revisionPrefix={revisionPrefix}
-				disabled={disabled}
-				error={!!drawingNameError}
-				helperText={drawingNameError}
-			/> */}
 			<InputController
 				Input={UploadListItemStatusCode}
 				key={`${uploadId}.statusCode`}

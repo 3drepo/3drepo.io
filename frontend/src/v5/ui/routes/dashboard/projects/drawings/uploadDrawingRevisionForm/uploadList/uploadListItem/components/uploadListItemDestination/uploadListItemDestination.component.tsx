@@ -231,7 +231,6 @@ export const UploadListItemDestination = memo(({
 			onOpen={onOpen}
 			options={sortByName([...drawings, ...newDrawingsInModal])}
 			renderOption={renderOption}
-			isOptionEqualToValue={(option: any, val: any) => option._id === val._id}
 			renderInput={({ InputProps, ...params }) => (
 				<DestinationInput
 					error={error}
