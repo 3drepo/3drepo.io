@@ -23,12 +23,15 @@ import { Highlight } from '@controls/highlight';
 import { useContext } from 'react';
 import { SearchContext } from '@controls/search/searchContext';
 
-export const TicketFiltersSelectionItem = ({ module, property, type }: FilterListItemType) => {
+type TicketFiltersSelectionItemProps = FilterListItemType & {
+	onClick: () => void;
+};
+export const TicketFiltersSelectionItem = ({ module, property, type, onClick }: TicketFiltersSelectionItemProps) => {
 	const { query } = useContext(SearchContext);
 	const Icon = TYPE_TO_ICON[type];
 
 	return (
-		<MenuItem onClick={() => {}}>
+		<MenuItem onClick={onClick}>
 			<FilterIconContainer>
 				<Icon />
 			</FilterIconContainer>
