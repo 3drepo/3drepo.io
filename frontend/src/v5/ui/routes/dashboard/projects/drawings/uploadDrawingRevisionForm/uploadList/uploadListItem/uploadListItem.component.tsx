@@ -34,6 +34,7 @@ import { DrawingRevisionsActionsDispatchers, DrawingsActionsDispatchers } from '
 import { UploadListItemStatusCode } from './components/uploadListItemStatusCode/uploadListItemStatusCode.component';
 import { UploadStatus } from '@/v5/store/containers/containers.types';
 import { DEFAULT_SETTINGS_CALIBRATION } from '../../../../calibration/calibration.helpers';
+import { get } from 'lodash';
 
 const UNEXPETED_STATUS_ERROR = undefined;
 const STATUS_TEXT_BY_UPLOAD = {
@@ -79,7 +80,7 @@ export const UploadListItem = ({
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const projectId = ProjectsHooksSelectors.selectCurrentProject();
 	const uploadErrorMessage: string = DrawingRevisionsHooksSelectors.selectUploadError(uploadId);
-	const { watch, trigger, setValue } = useFormContext();
+	const { watch, trigger, setValue, formState: { errors } } = useFormContext();
 	const drawingId = watch(`${revisionPrefix}.drawingId`);
 	const statusCode = watch(`${revisionPrefix}.statusCode`);
 	const revCode = watch(`${revisionPrefix}.revCode`);
@@ -87,6 +88,8 @@ export const UploadListItem = ({
 	const selectedDrawingRevisions = DrawingRevisionsHooksSelectors.selectRevisions(selectedDrawing?._id);
 	const progress = DrawingRevisionsHooksSelectors.selectUploadProgress(uploadId);
 	const uploadStatus = getUploadStatus(progress, uploadErrorMessage);
+	const fileError = !!get(errors, `${revisionPrefix}.file`)?.message;
+	const disabled = fileError || isUploading;
 
 	const sanitiseDrawing = (drawing: IDrawing) => ({
 		drawingNumber: drawing?.number || '',
@@ -118,6 +121,10 @@ export const UploadListItem = ({
 		}
 	}, [selectedDrawing?._id]);
 
+	useEffect(() => {
+		trigger(`${revisionPrefix}.file`);
+	}, []);
+
 	return (
 		<UploadListItemRow selected={isSelected}>
 			<UploadListItemFileIcon extension={fileData.extension} />
@@ -134,19 +141,19 @@ export const UploadListItem = ({
 				key={`${uploadId}.dest`}
 				index={index}
 				revisionPrefix={revisionPrefix}
-				disabled={isUploading}
+				disabled={disabled}
 				onSelectNewDestination={onClickEdit}
 			/>
 			<InputController
 				Input={UploadListItemStatusCode}
 				key={`${uploadId}.statusCode`}
 				name={`${revisionPrefix}.statusCode`}
-				disabled={isUploading}
+				disabled={disabled}
 			/>
 			<UploadListItemRevisionCode
 				key={`${uploadId}.revCode`}
 				name={`${revisionPrefix}.revCode`}
-				disabled={isUploading}
+				disabled={disabled}
 			/>
 			{isUploading
 				? (
@@ -160,7 +167,7 @@ export const UploadListItem = ({
 					/>
 				) : (
 					<>
-						<UploadListItemButton variant={isSelected ? 'secondary' : 'primary'} onClick={onClickEdit}>
+						<UploadListItemButton variant={isSelected ? 'secondary' : 'primary'} onClick={onClickEdit} disabled={disabled}>
 							<EditIcon />
 						</UploadListItemButton>
 						<UploadListItemButton variant={isSelected ? 'secondary' : 'primary'} onClick={onClickDelete}>

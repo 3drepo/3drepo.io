@@ -188,10 +188,10 @@ class BaseMarkupStage extends PureComponent<IProps, any> {
 		}
 	}
 
-	public addNewText = (position, text?: string, updateState: boolean = true) => {
+	public addNewText = (position, text: string, width?: number, updateState: boolean = true) => {
 		if (!this.props.selectedObjectName) {
 			position.y = position.y + 1;
-			const newText = getNewText(this.props.color, this.props.fontSize, position, text);
+			const newText = getNewText(this.props.color, this.props.fontSize, position, text, width);
 			this.props.addElement(newText);
 
 			if (updateState) {
