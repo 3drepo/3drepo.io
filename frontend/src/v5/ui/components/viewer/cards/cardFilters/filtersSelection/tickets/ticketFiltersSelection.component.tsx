@@ -29,15 +29,18 @@ import { useState } from 'react';
 import FennelIcon from '@assets/icons/filters/fennel.svg';
 import { Tooltip } from '@mui/material';
 import { TicketFiltersSelectionList } from './list/ticketFiltersSelectionList.component';
-import { ActionMenu, SearchInput } from './ticketFiltersSelection.styles';
+import { ActionMenu, SearchInput, DrillDownList, DrillDownItem } from './ticketFiltersSelection.styles';
+import { FilterListItemType } from '../../cardFilters.types';
 
 export const FilterSelection = () => {
 	const [active, setActive] = useState(false);
+	const [selectedFilter, setSelectedFilter] = useState<FilterListItemType>(null);
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const tickets = TicketsHooksSelectors.selectTicketsRaw(containerOrFederation);
 	const usedTemplates = uniq(tickets.map((t) => t.type));
 	const templates = usedTemplates.map((t) => selectTemplateById(getState(), containerOrFederation, t));
 	const filterElements = templatesToFilters(templates);
+	const showFiltersList = !selectedFilter?.property;
 
 	return (
 		<ActionMenu
@@ -54,13 +57,21 @@ export const FilterSelection = () => {
 			onClose={() => setActive(false)}
 		>
 			<SearchContextComponent items={filterElements}>
-				<SearchInput
-					placeholder={formatMessage({
-						id: 'viewer.card.tickets.filters.searchInputPlaceholder',
-						defaultMessage: 'Serach for property...',
-					})}
-				/>
-				<TicketFiltersSelectionList />
+				<DrillDownList $visibleIndex={showFiltersList ? 0 : 1}>
+					<DrillDownItem $visible={showFiltersList}>
+						<SearchInput
+							placeholder={formatMessage({
+								id: 'viewer.card.tickets.filters.searchInputPlaceholder',
+								defaultMessage: 'Serach for property...',
+							})}
+						/>
+						<TicketFiltersSelectionList setSelectedFilter={setSelectedFilter} />
+					</DrillDownItem>
+					<DrillDownItem $visible={!showFiltersList}>
+						{selectedFilter?.type}
+						<button onClick={() => setSelectedFilter(null)}>back</button>
+					</DrillDownItem>
+				</DrillDownList>
 			</SearchContextComponent>
 		</ActionMenu>
 	);
