@@ -170,7 +170,18 @@ export const UploadListItem = ({
 				name={fileData.name}
 				size={fileData.size}
 			/>
-			<UploadListItemDestination 
+			<InputController
+				Input={UploadListItemDestination}
+				name={`${revisionPrefix}.drawingName`}
+				key={`${uploadId}.dest`}
+				disabled={disabled}
+				onSelectNewDestination={onClickEdit}
+				index={index}
+				revisionPrefix={revisionPrefix}
+				error={!!drawingNameError}
+				helperText={drawingNameError}
+			/>
+			{/* <UploadListItemDestination 
 				name={`${revisionPrefix}.drawingName`}
 				key={`${uploadId}.dest`}
 				onSelectNewDestination={onClickEdit}
@@ -179,7 +190,7 @@ export const UploadListItem = ({
 				disabled={disabled}
 				error={!!drawingNameError}
 				helperText={drawingNameError}
-			/>
+			/> */}
 			<InputController
 				Input={UploadListItemStatusCode}
 				key={`${uploadId}.statusCode`}
