@@ -88,14 +88,14 @@ export const AssigneesSelectMenu = ({
 			<ListSubheader>
 				<FormattedMessage id="assigneesSelectMenu.jobsHeading" defaultMessage="Jobs" />
 			</ListSubheader>
-			{jobs.length > 0 && jobs.map((job) => (
+			{jobs.length > 0 && jobs.map(({ _id }) => (
 				<AssigneesSelectMenuItem
-					key={job._id}
-					assignee={job._id}
-					value={job._id}
-					title={job._id}
+					key={_id}
+					assignee={_id}
+					value={_id}
+					title={_id}
 					multiple={multiple}
-					error={invalidValues.includes(job._id)}
+					error={invalidValues.includes(_id)}
 				/>
 			))}
 			{!jobs.length && (
