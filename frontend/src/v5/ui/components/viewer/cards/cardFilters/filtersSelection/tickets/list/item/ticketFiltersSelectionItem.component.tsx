@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FilterListItemType } from '@components/viewer/cards/cardFilters/cardFilters.types';
+import { TicketFilterListItemType } from '@components/viewer/cards/cardFilters/cardFilters.types';
 import { TYPE_TO_ICON } from '../ticketFiltersSelectionList.helpers';
 import { ExpandIconContainer, FilterIconContainer, MenuItem } from './ticketFiltersSelectionItem.styles';
 import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
@@ -23,7 +23,7 @@ import { Highlight } from '@controls/highlight';
 import { useContext } from 'react';
 import { SearchContext } from '@controls/search/searchContext';
 
-type TicketFiltersSelectionItemProps = FilterListItemType & {
+type TicketFiltersSelectionItemProps = TicketFilterListItemType & {
 	onClick: () => void;
 };
 export const TicketFiltersSelectionItem = ({ module, property, type, onClick }: TicketFiltersSelectionItemProps) => {

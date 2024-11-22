@@ -16,7 +16,7 @@
  */
 
 import { Fragment } from 'react';
-import { CardFilterOperator } from '../../cardFilters/cardFilters.types';
+import { CardFilterOperator, CardFiltersByOperator } from '../../cardFilters/cardFilters.types';
 import { FiltersAccordion } from '../../cardFilters/filtersAccordion/filtersAccordion.component';
 import { FiltersSection } from '../../cardFilters/filtersSection/filtersSection.component';
 import { ModuleTitle } from './ticketsFiltersList.styles';
@@ -24,7 +24,7 @@ import { ModuleTitle } from './ticketsFiltersList.styles';
 type TicketsFiltersListProps = {
 	onDeleteFilter: (module: string, property: string, operator: CardFilterOperator) => void;
 	onDeleteAllFilters: () => void;
-	filters: Record<string, any>;
+	filters: Record<string, Record<string, CardFiltersByOperator>>;
 };
 export const TicketsFiltersList = ({ filters, onDeleteFilter, onDeleteAllFilters }: TicketsFiltersListProps) => {
 	const onDeleteModuleFilter = (moduleName) => (property, operator) => onDeleteFilter(moduleName, property, operator);
@@ -34,7 +34,7 @@ export const TicketsFiltersList = ({ filters, onDeleteFilter, onDeleteAllFilters
 			{Object.entries(filters).sort((a, b) => a[0].localeCompare(b[0])).map(([moduleName, moduleFilters]) => (
 				<Fragment key={moduleName}>
 					{moduleName && (<ModuleTitle>{moduleName}</ModuleTitle>)}
-					<FiltersSection filters={moduleFilters} onDeleteFilter={onDeleteModuleFilter(moduleName)} />
+					<FiltersSection moduleName={moduleName} filters={moduleFilters} onDeleteFilter={onDeleteModuleFilter(moduleName)} />
 				</Fragment>
 			))}
 		</FiltersAccordion>

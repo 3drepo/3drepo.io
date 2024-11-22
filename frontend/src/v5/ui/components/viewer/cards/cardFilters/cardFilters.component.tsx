@@ -17,12 +17,12 @@
 
 import { useEffect, useState } from 'react';
 import { TicketsFiltersList } from '../tickets/ticketsFiltersList/ticketsFiltersList.component';
-import { CardFilterOperator } from './cardFilters.types';
+import { CardFilter, CardFilterOperator, CardFiltersByOperator } from './cardFilters.types';
 import { FILTER_OPERATOR_ICON, getOperatorMaxValuesSupported } from './cardFilters.helpers';
 import { get, set } from 'lodash';
 
 export const CardFilters = () => {
-	const [filters, setFilters] = useState({});
+	const [filters, setFilters] = useState<Record<string, Record<string, CardFiltersByOperator>>>({});
 	
 	const hasFilters = Object.keys(filters).length > 0;
 
@@ -38,19 +38,9 @@ export const CardFilters = () => {
 		}
 		setFilters(newFilters);
 	};
-	const addFilter = (module: string, property: string, operator: CardFilterOperator, value?: string | number | Date) => {
+	const addFilter = (module: string, property: string, operator: CardFilterOperator, filter: CardFilter) => {
 		const filterPath = [module, property, operator];
-		switch (getOperatorMaxValuesSupported(operator)) {
-			case 0:
-				set(filters, filterPath, []);
-				break;
-			case 1:
-				set(filters, filterPath, [value]);
-				break;
-			default:
-				const currentVal = get(filters, filterPath, []);
-				set(filters, filterPath, currentVal.concat(value));
-		}
+		set(filters, filterPath, filter);
 		setFilters({ ...filters });
 	};
 
@@ -58,39 +48,71 @@ export const CardFilters = () => {
 	const handleAddFilter = (e) => {
 		e.preventDefault();
 		const filter = e.target[0].value;
-		const value = e.target[1].value;
+		let value = e.target[1].value;
 		const isDate = e.target[2].checked;
 		const filterPath = filter.split('.') as [string, string, CardFilterOperator];
 		if  (filterPath.length !== 3) {
 			alert("This will crash the app. Remeber: 'module'.'property'.'type'");
 			return;
 		}
-		if  (!Object.keys(FILTER_OPERATOR_ICON).includes(filterPath.at(-1))) {
+		const operator = filterPath.at(-1);
+		if  (!Object.keys(FILTER_OPERATOR_ICON).includes(operator)) {
 			alert('This will crash the app. This operator is not supported');
 			return;
 		}
-		addFilter(...filterPath, isDate ? new Date(+value) : value);
+		switch (getOperatorMaxValuesSupported(operator as CardFilterOperator)) {
+			case 0:
+				value = [];
+				break;
+			case 1:
+				value = [value];
+			default:
+				const currentVal = get(filters, [...filterPath, 'values'], []);
+				value = currentVal.concat(value);
+		}
+		addFilter(...filterPath, { type: isDate ? 'date' : 'text', values: isDate ? new Date(+value) : value });
 	};
 
 	// TODO - remove this
 	useEffect(() => {
 		setFilters({
 			'': {
+				'createdAt': {
+					'eq': {
+						values: [new Date('12/12/2024')],
+						type: 'pastDate',
+					},
+				},
 				'property1': {
-					'rng': [new Date('12/12/2024'), new Date('12/20/2024')],
-					'nrng': [3],
+					'rng': {
+						values: [new Date('12/12/2024'), new Date('12/20/2024')],
+						type: 'date',
+					},
+					'nrng': {
+						values: [3],
+						type: 'number',
+					},
 				},
 				'property2': {
-					'eq': [4],
+					'eq': {
+						values: [4],
+						type: 'number',
+					},
 				},
-				'.assignees': {
-					'ss': ['Ale', 'San', 'Dan'],
+				'assignees': {
+					'ss': {
+						values: ['Ale', 'San', 'Dan'],
+						type: 'manyOf',
+					},
 				},
 			},
 			'module1': {
 				'property1': {
-					'ex': [],
-					'ss': [2, 3],
+					'ex': { values: [] },
+					'ss': {
+						values: [2, 3],
+						type: 'oneOf',
+					},
 				},
 			},
 		});

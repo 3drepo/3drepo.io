@@ -16,5 +16,8 @@
  */
 
 export type CardFilterOperator = 'ex' | 'nex' | 'eq' | 'neq' | 'ss' | 'nss' | 'rng' | 'nrng' | 'gt' | 'gte' | 'lt' | 'lte';
-export type CardFilters = Record<string, any[]>;
-export type FilterListItemType = { module?: string, property: string, type: string };
+export type CardFilterType = 'text' | 'longText' | 'date' | 'pastDate' | 'sequencing' | 'oneOf' | 'manyOf' | 'boolean' | 'number' | 'template';
+export type CardFilterValue = string | number | Date;
+export type CardFilter = { values: CardFilterValue[], type?: CardFilterType };
+export type CardFiltersByOperator = Partial<Record<CardFilterOperator, CardFilter>>;
+export type TicketFilterListItemType = { module?: string, property: string, type: CardFilterType };
