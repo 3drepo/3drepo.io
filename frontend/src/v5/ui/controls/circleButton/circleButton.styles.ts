@@ -52,7 +52,7 @@ export const SecondaryButton = styled(BaseCircleButton)`
 	}
 `;
 
-export const ViewerButton = styled(BaseCircleButton)<{ active?: boolean }>`
+export const ViewerButton = styled(BaseCircleButton)<{ $active?: boolean }>`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	color: ${({ theme }) => theme.palette.secondary.main};
 	margin: 0;
@@ -62,7 +62,7 @@ export const ViewerButton = styled(BaseCircleButton)<{ active?: boolean }>`
 	&:hover {
 		background-color: ${({ theme }) => theme.palette.tertiary.lighter};
 	}
-	${({ active }) => active && css`
+	${({ $active }) => $active && css`
 		&, &:hover {
 			background-color: ${({ theme }) => theme.palette.secondary.main};
 			color: ${({ theme }) => theme.palette.secondary.contrastText};
