@@ -33,7 +33,7 @@ interface IUploadListItemStatusCode {
 }
 export const UploadListItemStatusCode = ({ value, inputRef, onChange, helperText, error, ...props }: IUploadListItemStatusCode) => {
 	const options = DrawingRevisionsHooksSelectors.selectStatusCodes();
-	const getValue = () => options.find((o) => o.code === value) || '';
+	const getValue = () => options.find((o) => o.code === value) || null;
 
 	return (
 		<Autocomplete
