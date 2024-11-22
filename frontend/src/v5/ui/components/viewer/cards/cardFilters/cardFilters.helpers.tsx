@@ -61,7 +61,7 @@ export const FILTER_OPERATOR_LABEL: Record<CardFilterOperator, string> = {
 	nss: formatMessage({ id: 'cardFilter.operator.notContain', defaultMessage: 'Does not contain' }),
 };
 
-export const getOperatorMaxValuesSupported = (op: CardFilterOperator) => {
+export const getOperatorMaxSupportedValues = (op: CardFilterOperator) => {
 	switch (op) {
 		case 'ex':
 		case 'nex':
