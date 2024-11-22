@@ -30,11 +30,13 @@ import FennelIcon from '@assets/icons/filters/fennel.svg';
 import { Tooltip } from '@mui/material';
 import { TicketFiltersSelectionList } from './list/ticketFiltersSelectionList.component';
 import { ActionMenu, SearchInput, DrillDownList, DrillDownItem } from './ticketFiltersSelection.styles';
-import { FilterListItemType } from '../../cardFilters.types';
+import { TicketFilterListItemType } from '../../cardFilters.types';
+import { FilterForm } from '../../filterForm/filterForm.component';
+import { getFilterFormTitle } from '../../cardFilters.helpers';
 
 export const FilterSelection = () => {
 	const [active, setActive] = useState(false);
-	const [selectedFilter, setSelectedFilter] = useState<FilterListItemType>(null);
+	const [selectedFilter, setSelectedFilter] = useState<TicketFilterListItemType>(null);
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const tickets = TicketsHooksSelectors.selectTicketsRaw(containerOrFederation);
 	const usedTemplates = uniq(tickets.map((t) => t.type));
@@ -47,7 +49,7 @@ export const FilterSelection = () => {
 			TriggerButton={(
 				<Tooltip title={formatMessage({ id: 'viewer.card.tickets.addFilter', defaultMessage: 'Add Filter' })}>
 					<div>
-						<CardAction disabled={!filterElements.length} active={active}>
+						<CardAction disabled={!filterElements.length} $active={active}>
 							<FennelIcon />
 						</CardAction>
 					</div>
@@ -68,14 +70,12 @@ export const FilterSelection = () => {
 						<TicketFiltersSelectionList setSelectedFilter={setSelectedFilter} />
 					</DrillDownItem>
 					<DrillDownItem $visible={!showFiltersList}>
-						<div style={{ height: '100px', padding: 20 }}>
-							{selectedFilter?.module && <>{selectedFilter?.module}&nbsp;:&nbsp;</>}{selectedFilter?.property}
-							<br />
-							type: {selectedFilter?.type}
-							<br />
-							<button onClick={() => setSelectedFilter(null)}>back</button>
-							<button onClick={() => setSelectedFilter(null)}>apply</button>
-						</div>
+						<FilterForm
+							title={getFilterFormTitle([selectedFilter?.module, selectedFilter?.property])}
+							type={selectedFilter?.type}
+							onSubmit={() => setSelectedFilter(null)}
+							onCancel={() => setSelectedFilter(null)}
+						/>
 					</DrillDownItem>
 				</DrillDownList>
 			</SearchContextComponent>

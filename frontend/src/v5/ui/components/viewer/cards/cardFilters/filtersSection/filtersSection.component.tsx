@@ -15,19 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CardFilterOperator } from '../cardFilters.types';
+import { ActionMenu } from '@controls/actionMenu';
+import { CardFilterOperator, CardFiltersByOperator } from '../cardFilters.types';
 import { FilterChip } from '../filterChip/filterChip.component';
 import { Section } from './filtersSection.styles';
+import { FilterForm } from '../filterForm/filterForm.component';
+import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
+import { getFilterFormTitle } from '../cardFilters.helpers';
 
 type FiltersSectionProps = {
-	filters: Record<string, Record<string, any[]>>;
+	moduleName?: string;
+	filters: Record<string, CardFiltersByOperator>;
 	onDeleteFilter: (property: string, operator: CardFilterOperator) => void;
 };
-export const FiltersSection = ({ filters, onDeleteFilter }: FiltersSectionProps) => {
+export const FiltersSection = ({ moduleName, filters, onDeleteFilter }: FiltersSectionProps) => {
 	const filtersToChips = () => {
 		const filterChips = [];
-		Object.entries(filters).forEach(([property, operatorAndValues]) => {
-			const moduleFilterChips = Object.entries(operatorAndValues).map(([operator, values]) => [property, operator, values]);
+		Object.entries(filters).forEach(([property, operatorAndFilter]) => {
+			const moduleFilterChips = Object.entries(operatorAndFilter).map(([operator, filter]) => [property, operator, filter]);
 			filterChips.push(...moduleFilterChips);
 		});
 		return filterChips;
@@ -35,14 +40,28 @@ export const FiltersSection = ({ filters, onDeleteFilter }: FiltersSectionProps)
 
 	return (
 		<Section>
-			{filtersToChips().map(([property, operator, values]) => (
-				<FilterChip
-					key={`${property}.${operator}`}
-					values={values}
-					operator={operator}
-					property={property}
-					onDelete={() => onDeleteFilter(property, operator)}
-				/>
+			{filtersToChips().map(([property, operator, filter]) => (
+				<ActionMenu key={`${property}.${operator}`} TriggerButton={(
+					<FilterChip
+						{...filter}
+						operator={operator}
+						property={property}
+						onDelete={() => onDeleteFilter(property, operator)}
+					/>
+				)}>
+					<ActionMenuContext.Consumer>
+						{({ close }) => (
+							<FilterForm
+								onCancel={close}
+								// TODO - call onEditFilter or smth alike
+								onSubmit={close}
+								title={getFilterFormTitle([moduleName, property])}
+								{...filter}
+								operator={operator}
+							/>
+						)}
+					</ActionMenuContext.Consumer>
+				</ActionMenu>
 			))}
 		</Section>
 	);

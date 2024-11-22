@@ -29,6 +29,7 @@ import ContainIcon from '@assets/icons/filters/contain.svg';
 import NotContainIcon from '@assets/icons/filters/not_contain.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { CardFilterOperator } from './cardFilters.types';
+import { compact } from 'lodash';
 
 export const FILTER_OPERATOR_ICON: Record<CardFilterOperator, any> = {
 	eq: EqualIcon,
@@ -74,3 +75,5 @@ export const getOperatorMaxValuesSupported = (op: CardFilterOperator) => {
 			return Number.MAX_SAFE_INTEGER;
 	}
 };
+
+export const getFilterFormTitle = (elements: string[]) => compact(elements).join(' : ');
