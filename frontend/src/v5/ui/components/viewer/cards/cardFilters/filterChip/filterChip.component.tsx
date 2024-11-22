@@ -20,20 +20,22 @@ import { ChipContainer, DeleteButton, TextWrapper, OperatorIconContainer, Displa
 import { FILTER_OPERATOR_ICON, FILTER_OPERATOR_LABEL } from '../cardFilters.helpers';
 import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
-import { CardFilterOperator } from '../cardFilters.types';
+import { CardFilterOperator, CardFilterType, CardFilterValue } from '../cardFilters.types';
 import { formatSimpleDate } from '@/v5/helpers/intl.helper';
 
 type FilterChipProps = {
 	property: string;
-	values: (number | string | Date)[];
-	onDelete: () => void;
 	operator: CardFilterOperator;
+	values: CardFilterValue[];
+	type: CardFilterType;
 	selected?: boolean;
+	onDelete: () => void;
 };
-export const FilterChip = ({ property, values, onDelete, operator, selected }: FilterChipProps) => {
+export const FilterChip = ({ property, values, onDelete, operator, selected, type }: FilterChipProps) => {
 	const OperatorIcon = FILTER_OPERATOR_ICON[operator];
 	const hasMultipleValues = values.length > 1;
-	const displayValue = values[0] instanceof Date ? values.map(formatSimpleDate) : values.join(', ') ?? '';
+	const isDate = ['date', 'pastDate'].includes(type);
+	const displayValue = isDate ? values.map(formatSimpleDate) : values.join(', ') ?? '';
 
 	return (
 		<ChipContainer selected={selected}>
