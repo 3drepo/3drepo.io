@@ -42,6 +42,21 @@ UuidUtils.UUIDToString = (uuid) => {
 	}
 };
 
+UuidUtils.isUUID = (uuid) => {
+	const result = uuid
+		&& uuid.match
+		&& Boolean(uuid.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i));
+	return result;
+};
+
+UuidUtils.isUUIDObject = (value) => {
+	try {
+		return this.isObject(value) && !!this.UUIDToString(value);
+	} catch (e) {
+		return false;
+	}
+};
+
 class LookUpTable {
 	constructor(ids) {
 		this.items = new Set(ids?.length ? ids.map(UuidUtils.UUIDToString) : []);

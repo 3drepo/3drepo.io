@@ -35,11 +35,11 @@ const clean = (nodeToClean) => {
 	const node = nodeToClean;
 	if (node) {
 		if (node._id) {
-			node._id = uuidHelper.uuidToString(node._id);
+			node._id = uuidHelper.UUIDToString(node._id);
 		}
 
 		if (node.parents) {
-			node.parents = node.parents.map((p) => uuidHelper.uuidToString(p));
+			node.parents = node.parents.map((p) => uuidHelper.UUIDToString(p));
 		}
 	}
 
@@ -51,7 +51,8 @@ const cleanAll = (nodesToClean) => nodesToClean.map(clean);
 const findNodes = async (account, model, branch, revision, query = {}, projection = {}) => {
 	const history = await History.getHistory(account, model, branch, revision);
 
-	return cleanAll(await db.find(account, getCollection(model), { rev_id: history._id, ...query }, projection));
+	const nodes = await db.find(account, getCollection(model), { rev_id: history._id, ...query }, projection)
+	return cleanAll(nodes);
 };
 
 const findNodesByType = async (account, model, branch, revision, type, searchString, projection) => {
@@ -112,7 +113,7 @@ Scene.getContainerMeshInfo = async (teamspace, model, branch, rev) => {
 			bounding_box,
 			primitive,
 		}) => ({
-			_id: uuidHelper.uuidToString(_id),
+			_id: uuidHelper.UUIDToString(_id),
 			nVertices: vertices_count || 0,
 			nFaces: faces_count || 0,
 			nUVChannels: uv_channels_count || 0,
@@ -123,11 +124,13 @@ Scene.getContainerMeshInfo = async (teamspace, model, branch, rev) => {
 	};
 };
 
-Scene.getFederationMeshInfo = async (ts, project, federation, branch, rev, user) => {
+Scene.getFederationMeshInfo = async (ts, proj, federation, branch, rev, user) => {
 	const refNodes = await findNodesByType(ts, federation, branch, rev, 'ref', undefined, { project: 1 });
 
-	const subModelMeshes = await Promise.all(refNodes.reduce(async ({ results, container }) => {
-		if (await Permissions.hasReadAccessToContainer(ts, project, container, user, false)) {
+	const subModelMeshes = await Promise.all(refNodes.map(async (node) => {
+		// Note that in this table, the "project" column actually contains the IDs of containers
+		const container = node.project;
+		if (await Permissions.hasReadAccessToContainer(ts, proj, container, user.username)) {
 			try {
 				const superMeshes = await Scene.getContainerMeshInfo(
 					ts,
@@ -135,14 +138,14 @@ Scene.getFederationMeshInfo = async (ts, project, federation, branch, rev, user)
 					DbConstants.MASTER_BRANCH_NAME,
 					undefined,
 				);
-				results.push({ teamspace: ts, model: container, superMeshes });
-				return results;
+				return { teamspace: ts, model: container, superMeshes };
 			} catch {
-				return results;
+				return undefined;
 			}
 		}
-		return results;
+		return undefined;
 	}));
+
 	return { subModels: subModelMeshes.filter(Boolean) };
 };
 
