@@ -27,6 +27,9 @@ import { uniqBy } from 'lodash';
 import { CardFilterType, TicketFilterListItemType } from '../../../cardFilters.types';
 
 export const TYPE_TO_ICON: Record<CardFilterType, any> = {
+	'template': TemplateIcon,
+	'ticketTitle': TextIcon,
+	'ticketId': TextIcon,
 	'text': TextIcon,
 	'longText': TextIcon,
 	'date': CalendarIcon,
@@ -36,14 +39,13 @@ export const TYPE_TO_ICON: Record<CardFilterType, any> = {
 	'manyOf': ListIcon,
 	'boolean': BooleanIcon,
 	'number': NumberIcon,
-	'template': TemplateIcon,
 };
 
 const VALID_FILTERING_PROPERTY_TYPES = Object.keys(TYPE_TO_ICON);
 
 export const DEFAULT_FILTERS = [
-	{ type: 'template', property: formatMessage({ defaultMessage: 'Ticket title', id: 'viewer.card.filters.element.ticketTitle' }) },
-	{ type: 'template', property: formatMessage({ defaultMessage: 'Ticket ID', id: 'viewer.card.filters.element.ticketId' }) },
+	{ type: 'ticketTitle', property: formatMessage({ defaultMessage: 'Ticket title', id: 'viewer.card.filters.element.ticketTitle' }) },
+	{ type: 'ticketId', property: formatMessage({ defaultMessage: 'Ticket ID', id: 'viewer.card.filters.element.ticketId' }) },
 	{ type: 'template', property: formatMessage({ defaultMessage: 'Ticket template', id: 'viewer.card.filters.element.ticketTemplate' }) },
 ];
 
