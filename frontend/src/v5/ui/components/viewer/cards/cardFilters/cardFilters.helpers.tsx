@@ -16,7 +16,7 @@
  */
 
 import EqualIcon from '@assets/icons/filters/equal.svg';
-import GreaterEqualThanIcon from '@assets/icons/filters/greater_than_equal';
+import GreaterEqualThanIcon from '@assets/icons/filters/greater_than_equal.svg';
 import GreaterEqualIcon from '@assets/icons/filters/greater_than.svg';
 import NotEqualIcon from '@assets/icons/filters/not_equal.svg';
 import LessThanIcon from '@assets/icons/filters/less_than.svg';
