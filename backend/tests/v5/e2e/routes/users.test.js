@@ -28,7 +28,7 @@ const { updateProfile } = require('../../../../src/v5/models/users');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
-const config = require(`${src}/utils/config`);
+const { loginPolicy } = require(`${src}/utils/config`);
 
 jest.mock('../../../../src/v5/services/mailer');
 const Mailer = require(`${src}/services/mailer`);
@@ -104,12 +104,12 @@ const setupData = async () => {
 
 		ServiceHelper.db.createAvatar(userWithFsAvatar.user, 'fs', fsAvatarData),
 		ServiceHelper.db.createAvatar(userWithGridFsAvatar.user, 'gridfs', gridFsAvatarData),
-		ServiceHelper.db.addLoginRecords(times(config.loginPolicy.maxUnsuccessfulLoginAttempts, (count) => ({
+		ServiceHelper.db.addLoginRecords(times(loginPolicy.maxUnsuccessfulLoginAttempts, (count) => ({
 			user: lockedUser.user,
 			loginTime: new Date(Date.now() - count),
 			failed: true,
 		}))),
-		ServiceHelper.db.addLoginRecords(times(config.loginPolicy.maxUnsuccessfulLoginAttempts, () => ({
+		ServiceHelper.db.addLoginRecords(times(loginPolicy.maxUnsuccessfulLoginAttempts, () => ({
 			user: lockedUserWithExpiredLock.user,
 			loginTime: new Date(1 / 1 / 18),
 			failed: true,
@@ -252,15 +252,6 @@ const testGetProfile = () => {
 	describe('Get profile of the logged in user', () => {
 		test('should fail if the user is not logged in', async () => {
 			const res = await agent.get('/v5/user/').expect(templates.notLoggedIn.status);
-			expect(res.body.code).toEqual(templates.notLoggedIn.code);
-		});
-
-		test('should fail if the req has a different IP address than the one stored in the session', async () => {
-			const testSession = SessionTracker(agent);
-			await testSession.login(testUser.user, testUser.password);
-			const res = await testSession.get('/v5/user/')
-				.set('X-Forwarded-For', '1.1.1.1')
-				.expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
@@ -801,11 +792,9 @@ const testVerify = () => {
 
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
-		config.trust_proxy = true;
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);
 		await setupData();
-		config.trust_proxy = false;
 	});
 
 	afterAll(() => ServiceHelper.closeApp(server));

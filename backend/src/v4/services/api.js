@@ -98,7 +98,7 @@ APIService.createAppAsync = async (config, v5Init = true) => {
 	const app = express();
 	app.use(cookieParser());
 
-	if (config && ((!config.using_ssl && config.public_protocol === "https") || config.trust_proxy)) {
+	if (config && !config.using_ssl && config.public_protocol === "https") {
 		app.set("trust proxy", 1);
 	}
 
