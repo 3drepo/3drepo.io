@@ -36,7 +36,7 @@ import { CardFilterActionMenu } from '../../filterForm/filterForm.styles';
 import { TicketFiltersContext } from '@components/viewer/cards/tickets/ticketFiltersContext';
 
 export const FilterSelection = () => {
-	const { upsertFilter } = useContext(TicketFiltersContext);
+	const { upsertFilter, hasFilter } = useContext(TicketFiltersContext);
 	const [active, setActive] = useState(false);
 	const [selectedItem, setSelectedItem] = useState<TicketFilterListItemType>(null);
 	const { containerOrFederation } = useParams<ViewerParams>();
@@ -44,6 +44,7 @@ export const FilterSelection = () => {
 	const usedTemplates = uniq(tickets.map((t) => t.type));
 	const templates = usedTemplates.map((t) => selectTemplateById(getState(), containerOrFederation, t));
 	const filterElements = templatesToFilters(templates);
+	const unusedFilters = filterElements.filter((f) => !hasFilter(f));
 	const showFiltersList = !selectedItem?.property;
 
 	const onOpen = () => setActive(true);
@@ -58,7 +59,7 @@ export const FilterSelection = () => {
 			TriggerButton={(
 				<Tooltip title={formatMessage({ id: 'viewer.card.tickets.addFilter', defaultMessage: 'Add Filter' })}>
 					<div>
-						<CardAction disabled={!filterElements.length} $active={active}>
+						<CardAction disabled={!unusedFilters.length} $active={active}>
 							<FennelIcon />
 						</CardAction>
 					</div>
@@ -67,7 +68,7 @@ export const FilterSelection = () => {
 			onOpen={onOpen}
 			onClose={onClose}
 		>
-			<SearchContextComponent items={filterElements}>
+			<SearchContextComponent items={unusedFilters}>
 				<DrillDownList $visibleIndex={showFiltersList ? 0 : 1}>
 					<DrillDownItem $visible={showFiltersList}>
 						<SearchInput

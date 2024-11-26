@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { get, isEmpty, set, unset } from 'lodash';
+import { get, has, isEmpty, set, unset } from 'lodash';
 import { createContext, useState } from 'react';
 import { CardFilter } from '../cardFilters/cardFilters.types';
 
@@ -24,6 +24,7 @@ export interface TicketFiltersContextType {
 	upsertFilter: (filter: CardFilter) => void;
 	deleteFilter: (filter: Omit<CardFilter, 'filter'>) => void;
 	deleteAllFilters: () => void;
+	hasFilter: (filter: Omit<CardFilter, 'filter'>) => boolean;
 }
 
 const defaultValue: TicketFiltersContextType = {
@@ -31,6 +32,7 @@ const defaultValue: TicketFiltersContextType = {
 	upsertFilter: () => {},
 	deleteFilter: () => {},
 	deleteAllFilters: () => {},
+	hasFilter: () => false,
 };
 export const TicketFiltersContext = createContext(defaultValue);
 TicketFiltersContext.displayName = 'TicketFiltersContext';
@@ -67,12 +69,15 @@ export const TicketFiltersContextComponent = ({ filters: initialFilters, childre
 		
 	const deleteAllFilters = () => setFilters({});
 
+	const hasFilter = ({ module, property, type }: CardFilter) => has(filters, [module, property, type]);
+
 	return (
 		<TicketFiltersContext.Provider value={{
 			filters,
 			upsertFilter,
 			deleteFilter,
 			deleteAllFilters,
+			hasFilter,
 		}}>
 			{children}
 		</TicketFiltersContext.Provider>
