@@ -18,6 +18,7 @@
 import { createSelector } from 'reselect';
 import { prepareRevisionData } from './drawingRevisions.helpers';
 import { IDrawingRevisionsState } from './drawingRevisions.redux';
+import { memoize } from 'lodash';
 
 const selectRevisionsDomain = (state): IDrawingRevisionsState => state.drawingRevisions;
 const selectDrawingIdParam = (_, drawingId: string) => drawingId;
@@ -30,11 +31,11 @@ export const selectRevisionsByDrawing = createSelector(
 export const selectRevisions = createSelector(
 	selectRevisionsByDrawing,
 	selectDrawingIdParam,
-	(revisionsByDrawing, drawingId) => {
+	memoize((revisionsByDrawing, drawingId) => {
 		const revisions = (revisionsByDrawing[drawingId]?.map((revision) => prepareRevisionData(revision)) || []);
 		revisions.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 		return revisions;
-	},
+	}, (revisionsByDrawing, drawingId) => revisionsByDrawing[drawingId]),
 );
 
 export const selectActiveRevisions = createSelector(
