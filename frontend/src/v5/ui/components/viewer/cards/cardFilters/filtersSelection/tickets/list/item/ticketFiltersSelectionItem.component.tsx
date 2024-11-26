@@ -22,7 +22,6 @@ import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
 import { Highlight } from '@controls/highlight';
 import { useContext } from 'react';
 import { SearchContext } from '@controls/search/searchContext';
-import { TicketBaseKeys } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 
 type TicketFiltersSelectionItemProps = TicketFilterListItemType & {
 	onClick: () => void;
@@ -37,7 +36,7 @@ export const TicketFiltersSelectionItem = ({ module, property, type, onClick }: 
 				<Icon />
 			</FilterIconContainer>
 			<span>
-				{module && (module !== TicketBaseKeys.PROPERTIES) && (<>
+				{module && (<>
 					<Highlight search={query}>{module}</Highlight>
 					&nbsp;:&nbsp; 
 				</>)}

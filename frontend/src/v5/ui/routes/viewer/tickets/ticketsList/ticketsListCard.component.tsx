@@ -32,58 +32,6 @@ import { EllipsisMenuItemSwitch } from '@controls/ellipsisMenu/ellipsisMenuItem/
 import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
 import { TicketFiltersContextComponent } from '@components/viewer/cards/tickets/ticketFiltersContext';
-import { TicketBaseKeys } from '../tickets.constants';
-
-// TODO - delete this
-const defaultFilters = {
-	'': {
-		'templateId': {
-			'templateId': {
-				values: ['template id'],
-				operator: 'eq',
-			},
-		},
-	},
-	[TicketBaseKeys.PROPERTIES]: {
-		'createdAt': {
-			'pastDate': {
-				values: [new Date('12/12/2024')],
-				operator: 'eq',
-			},
-		},
-		'property1': {
-			'date': {
-				values: [new Date('12/12/2024'), new Date('12/20/2024')],
-				operator:'rng',
-			},
-		},
-		'property2': {
-			'number': {
-				values: [4],
-				operator: 'eq',
-			},
-		},
-		'assignees': {
-			'manyOf': {
-				values: ['Ale', 'San', 'Dan'],
-				operator: 'ss',
-			},
-		},
-	},
-	'module1': {
-		'numberOrStringProperty': {
-			'number': {
-				values: [],
-				operator: 'ex',
-			},
-			// This is
-			'text': {
-				values: [2, 3],
-				operator:'ss',
-			},
-		},
-	},
-};
 
 export const TicketsListCard = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
@@ -96,7 +44,7 @@ export const TicketsListCard = () => {
 	};
 
 	return (
-		<TicketFiltersContextComponent filters={defaultFilters}>
+		<TicketFiltersContextComponent>
 			<CardContainer>
 				<CardHeader
 					icon={<TicketsIcon />}

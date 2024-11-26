@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { formatSimpleDate } from '@/v5/helpers/intl.helper';
 import { FormattedMessage } from 'react-intl';
 import { CardFilterOperator, CardFilterValue, CardFilter, CardFilterType, FormFilter } from '../cardFilters.types';
 import { FILTER_OPERATOR_LABEL, getFilterFormTitle } from '../cardFilters.helpers';
@@ -65,8 +64,6 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel 
 				{Array(valuesInputsCount).fill(0).map((i, index) => (
 					<FormTextField name={`values.${index}`} />
 				))}
-				<br />
-				current values: {['date', 'pastDate'].includes(type) ? values.map(formatSimpleDate) : values.join(', ') ?? ''}
 				<ButtonsContainer>
 					<Button onClick={onCancel} color="secondary">
 						{isUpdatingFilter

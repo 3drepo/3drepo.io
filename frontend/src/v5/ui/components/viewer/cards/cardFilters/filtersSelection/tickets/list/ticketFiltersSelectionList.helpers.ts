@@ -25,7 +25,6 @@ import TextIcon from '@assets/icons/filters/text.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
 import { sortBy, uniqBy } from 'lodash';
 import { CardFilterType, TicketFilterListItemType } from '../../../cardFilters.types';
-import { TicketBaseKeys } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 
 export const TYPE_TO_ICON: Record<CardFilterType, any> = {
 	'template': TemplateIcon,
@@ -59,7 +58,7 @@ const propertiesToValidFilters = (properties: { name: string, type: string }[], 
 	}) as TicketFilterListItemType);
 
 const templateToFilters = (template: ITemplate): TicketFilterListItemType[] => [
-	...propertiesToValidFilters(template.properties, TicketBaseKeys.PROPERTIES),
+	...propertiesToValidFilters(template.properties, ''),
 	...template.modules.flatMap(({ properties, name, type }) => propertiesToValidFilters(properties, name || type)),
 ];
 

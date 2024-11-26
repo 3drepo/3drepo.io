@@ -38,12 +38,11 @@ export const TicketFiltersContext = createContext(defaultValue);
 TicketFiltersContext.displayName = 'TicketFiltersContext';
 
 export interface TicketFiltersContextProps {
-	filters: Record<string, any>;
 	children: any;
 }
 
-export const TicketFiltersContextComponent = ({ filters: initialFilters, children }: TicketFiltersContextProps) => {
-	const [filters, setFilters] = useState(initialFilters);
+export const TicketFiltersContextComponent = ({ children }: TicketFiltersContextProps) => {
+	const [filters, setFilters] = useState({});
 
 	// delete filter and recursiverly delete parent entry if empty
 	const deleteFilterAndEmptyAncestors = (fltrs, path) => {

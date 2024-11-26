@@ -20,7 +20,6 @@ import { FiltersAccordion } from './filtersAccordion/filtersAccordion.component'
 import { ModuleTitle } from './cardFilters.styles';
 import { FiltersSection } from './filtersSection/filtersSection.component';
 import { TicketFiltersContext } from '../tickets/ticketFiltersContext';
-import { TicketBaseKeys } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 
 export const CardFilters = () => {
 	const { filters, deleteAllFilters } = useContext(TicketFiltersContext);
@@ -32,7 +31,7 @@ export const CardFilters = () => {
 		<FiltersAccordion onClear={deleteAllFilters}>
 			{Object.entries(filters).sort((a, b) => a[0].localeCompare(b[0])).map(([module, moduleFilters]) => (
 				<Fragment key={module}>
-					{module && (module !== TicketBaseKeys.PROPERTIES) && (<ModuleTitle>{module}</ModuleTitle>)}
+					{module && (<ModuleTitle>{module}</ModuleTitle>)}
 					<FiltersSection
 						module={module}
 						filters={moduleFilters}
