@@ -31,6 +31,59 @@ import PinIcon from '@assets/icons/filled/ticket_pin-filled.svg';
 import { EllipsisMenuItemSwitch } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenuItemSwitch.component';
 import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
+import { TicketFiltersContextComponent } from '@components/viewer/cards/tickets/ticketFiltersContext';
+import { TicketBaseKeys } from '../tickets.constants';
+
+// TODO - delete this
+const defaultFilters = {
+	'': {
+		'templateId': {
+			'eq': {
+				values: ['template id'],
+				type: 'templateId',
+			},
+		},
+	},
+	[TicketBaseKeys.PROPERTIES]: {
+		'createdAt': {
+			'eq': {
+				values: [new Date('12/12/2024')],
+				type: 'pastDate',
+			},
+		},
+		'property1': {
+			'rng': {
+				values: [new Date('12/12/2024'), new Date('12/20/2024')],
+				type: 'date',
+			},
+			'nrng': {
+				values: [3],
+				type: 'number',
+			},
+		},
+		'property2': {
+			'eq': {
+				values: [4],
+				type: 'number',
+			},
+		},
+		'assignees': {
+			'ss': {
+				values: ['Ale', 'San', 'Dan'],
+				type: 'manyOf',
+			},
+		},
+	},
+	'module1': {
+		'property1': {
+			'ex': { values: [] },
+			'ss': {
+				values: [2, 3],
+				type: 'oneOf',
+			},
+		},
+	},
+};
 
 export const TicketsListCard = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
@@ -43,34 +96,36 @@ export const TicketsListCard = () => {
 	};
 
 	return (
-		<CardContainer>
-			<CardHeader
-				icon={<TicketsIcon />}
-				title={formatMessage({ id: 'viewer.cards.tickets.title', defaultMessage: 'Tickets' })}
-				actions={(
-					<>
-						{!readOnly && (<NewTicketMenu />)}
-						<FilterSelection />
-						<EllipsisMenu>
-							<EllipsisMenuItemSwitch
-								icon={<PinIcon />}
-								title={formatMessage({ id: 'viewer.cards.tickets.showPins', defaultMessage: 'Show Pins' })}
-								active={isShowingPins}
-								onClick={onClickShowPins}
-							/>
-						</EllipsisMenu>
-					</>
-				)}
-			/>
-			<CardContent onClick={TicketsCardActionsDispatchers.resetState}>
-				{tickets.length ? (
-					<TicketsList tickets={tickets} />
-				) : (
-					<EmptyListMessage>
-						<FormattedMessage id="viewer.cards.tickets.noTickets" defaultMessage="No tickets have been created yet" />
-					</EmptyListMessage>
-				)}
-			</CardContent>
-		</CardContainer>
+		<TicketFiltersContextComponent filters={defaultFilters}>
+			<CardContainer>
+				<CardHeader
+					icon={<TicketsIcon />}
+					title={formatMessage({ id: 'viewer.cards.tickets.title', defaultMessage: 'Tickets' })}
+					actions={(
+						<>
+							{!readOnly && (<NewTicketMenu />)}
+							<FilterSelection />
+							<EllipsisMenu>
+								<EllipsisMenuItemSwitch
+									icon={<PinIcon />}
+									title={formatMessage({ id: 'viewer.cards.tickets.showPins', defaultMessage: 'Show Pins' })}
+									active={isShowingPins}
+									onClick={onClickShowPins}
+								/>
+							</EllipsisMenu>
+						</>
+					)}
+				/>
+				<CardContent onClick={TicketsCardActionsDispatchers.resetState}>
+					{tickets.length ? (
+						<TicketsList />
+					) : (
+						<EmptyListMessage>
+							<FormattedMessage id="viewer.cards.tickets.noTickets" defaultMessage="No tickets have been created yet" />
+						</EmptyListMessage>
+					)}
+				</CardContent>
+			</CardContainer>
+		</TicketFiltersContextComponent>
 	);
 };
