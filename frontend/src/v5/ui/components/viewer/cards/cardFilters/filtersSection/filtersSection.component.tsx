@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CardFiltersByOperator, CardFilterOperator, FormFilter, CardFilter } from '../cardFilters.types';
+import { CardFiltersByType } from '../cardFilters.types';
 import { FilterChip } from '../filterChip/filterChip.component';
 import { Section } from './filtersSection.styles';
 import { FilterForm } from '../filterForm/filterForm.component';
@@ -26,20 +26,18 @@ import { TicketFiltersContext } from '../../tickets/ticketFiltersContext';
 
 type FiltersSectionProps = {
 	module?: string;
-	filters: Record<string, CardFiltersByOperator>;
+	filters: Record<string, CardFiltersByType>;
 };
 export const FiltersSection = ({ module, filters }: FiltersSectionProps) => {
-	const [selectedChip, setSelectedChip] = useState('');
-	const { deleteFilter, editFilter } = useContext(TicketFiltersContext);
+	const [selectedProperty, setSelectedProperty] = useState('');
+	const { deleteFilter, upsertFilter } = useContext(TicketFiltersContext);
 
-	const onDeleteFilter = (property, operator) => deleteFilter({ module, property, operator });
-
-	const handleEditFilter = (oldOperator: CardFilterOperator) => (newFilter: CardFilter) => editFilter(newFilter, oldOperator);
+	const onDeleteFilter = (property, type) => deleteFilter({ module, property, type });
 
 	const filtersToChips = () => {
 		const filterChips = [];
-		Object.entries(filters).forEach(([property, operatorAndFilter]) => {
-			const moduleFilterChips = Object.entries(operatorAndFilter).map(([operator, filter]) => [property, operator, filter]);
+		Object.entries(filters).forEach(([property, typeAndFilter]) => {
+			const moduleFilterChips = Object.entries(typeAndFilter).map(([type, filter]) => [property, type, filter]);
 			filterChips.push(...moduleFilterChips);
 		});
 		return filterChips;
@@ -47,38 +45,35 @@ export const FiltersSection = ({ module, filters }: FiltersSectionProps) => {
 
 	return (
 		<Section>
-			{filtersToChips().map(([property, operator, filter]) => {
-				const filterKey = `${property}.${operator}`;
-				return (
-					<CardFilterActionMenu
-						key={filterKey}
-						onOpen={() => setSelectedChip(filterKey)}
-						onClose={() => setSelectedChip('')}
-						TriggerButton={(
-							<FilterChip
-								{...filter}
-								operator={operator}
+			{filtersToChips().map(([property, type, filter]) => (
+				<CardFilterActionMenu
+					key={property}
+					onOpen={() => setSelectedProperty(property)}
+					onClose={() => setSelectedProperty('')}
+					TriggerButton={(
+						<FilterChip
+							property={property}
+							type={type}
+							filter={filter}
+							selected={selectedProperty === property}
+							onDelete={() => onDeleteFilter(property, type)}
+						/>
+					)}
+				>
+					<ActionMenuContext.Consumer>
+						{({ close }) => (
+							<FilterForm
+								onCancel={close}
+								onSubmit={upsertFilter}
+								module={module}
 								property={property}
-								selected={selectedChip === filterKey}
-								onDelete={() => onDeleteFilter(property, operator)}
+								type={type}
+								filter={filter}
 							/>
 						)}
-					>
-						<ActionMenuContext.Consumer>
-							{({ close }) => (
-								<FilterForm
-									onCancel={close}
-									onSubmit={handleEditFilter(operator)}
-									module={module}
-									property={property}
-									operator={operator}
-									{...filter}
-								/>
-							)}
-						</ActionMenuContext.Consumer>
-					</CardFilterActionMenu>
-				);
-			})}
+					</ActionMenuContext.Consumer>
+				</CardFilterActionMenu>
+			))}
 		</Section>
 	);
 };

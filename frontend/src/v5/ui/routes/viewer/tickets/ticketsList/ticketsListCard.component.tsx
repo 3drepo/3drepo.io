@@ -38,48 +38,48 @@ import { TicketBaseKeys } from '../tickets.constants';
 const defaultFilters = {
 	'': {
 		'templateId': {
-			'eq': {
+			'templateId': {
 				values: ['template id'],
-				type: 'templateId',
+				operator: 'eq',
 			},
 		},
 	},
 	[TicketBaseKeys.PROPERTIES]: {
 		'createdAt': {
-			'eq': {
+			'pastDate': {
 				values: [new Date('12/12/2024')],
-				type: 'pastDate',
+				operator: 'eq',
 			},
 		},
 		'property1': {
-			'rng': {
+			'date': {
 				values: [new Date('12/12/2024'), new Date('12/20/2024')],
-				type: 'date',
-			},
-			'nrng': {
-				values: [3],
-				type: 'number',
+				operator:'rng',
 			},
 		},
 		'property2': {
-			'eq': {
+			'number': {
 				values: [4],
-				type: 'number',
+				operator: 'eq',
 			},
 		},
 		'assignees': {
-			'ss': {
+			'manyOf': {
 				values: ['Ale', 'San', 'Dan'],
-				type: 'manyOf',
+				operator: 'ss',
 			},
 		},
 	},
 	'module1': {
-		'property1': {
-			'ex': { values: [] },
-			'ss': {
+		'numberOrStringProperty': {
+			'number': {
+				values: [],
+				operator: 'ex',
+			},
+			// This is
+			'text': {
 				values: [2, 3],
-				type: 'oneOf',
+				operator:'ss',
 			},
 		},
 	},

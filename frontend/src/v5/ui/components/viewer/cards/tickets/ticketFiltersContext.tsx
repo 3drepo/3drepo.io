@@ -17,20 +17,18 @@
 
 import { get, isEmpty, set, unset } from 'lodash';
 import { createContext, useState } from 'react';
-import { CardFilterOperator, CardFilter } from '../cardFilters/cardFilters.types';
+import { CardFilter } from '../cardFilters/cardFilters.types';
 
 export interface TicketFiltersContextType {
 	filters: Record<string, any>;
-	addFilter: (filter: CardFilter) => void;
-	editFilter: (filter: CardFilter, oldOperator: CardFilterOperator) => void;
+	upsertFilter: (filter: CardFilter) => void;
 	deleteFilter: (filter: Omit<CardFilter, 'filter'>) => void;
 	deleteAllFilters: () => void;
 }
 
 const defaultValue: TicketFiltersContextType = {
 	filters: {},
-	addFilter: () => {},
-	editFilter: () => {},
+	upsertFilter: () => {},
 	deleteFilter: () => {},
 	deleteAllFilters: () => {},
 };
@@ -52,41 +50,29 @@ export const TicketFiltersContextComponent = ({ filters: initialFilters, childre
 			path.pop();
 		} while (path.length && isEmpty(get(fltrs, path)));
 	};
+		
+	const upsertFilter = ({ module, property, type, filter }: CardFilter) => {
+		let newFilters = { ...filters };
+		const path = [module, property, type];
+		set(newFilters, path, filter);
+		setFilters({ ...newFilters });
+	};
 	
-	const addFilter = ({ module, property, operator, filter }: CardFilter) => {
-		let newFilters = { ...filters };
-		const path = [module, property, operator];
-		set(newFilters, path, filter);
-		setFilters({ ...newFilters });
-	};
-
-	const editFilter = ({ module, property, operator, filter }: CardFilter, oldOperator?: CardFilterOperator) => {
-		let newFilters = { ...filters };
-		const path = [module, property, operator];
-		set(newFilters, path, filter);
-		if (operator !== oldOperator) {
-			const oldPath = [module, property, oldOperator];
-			deleteFilterAndEmptyAncestors(newFilters, oldPath);
-		}
-		setFilters({ ...newFilters });
-	};
-
-	const deleteFilter = ({ module, property, operator }: CardFilter) => {
+	const deleteFilter = ({ module, property, type }: CardFilter) => {
 		const newFilters = { ...filters };
-		const path = [module, property, operator];
+		const path = [module, property, type];
 		deleteFilterAndEmptyAncestors(newFilters, path);
 		setFilters(newFilters);
 	};
-	
-	const handleDeleteAllFilters = () => setFilters({});
+		
+	const deleteAllFilters = () => setFilters({});
 
 	return (
 		<TicketFiltersContext.Provider value={{
 			filters,
-			addFilter: addFilter,
-			editFilter: editFilter,
-			deleteFilter: deleteFilter,
-			deleteAllFilters: handleDeleteAllFilters,
+			upsertFilter,
+			deleteFilter,
+			deleteAllFilters,
 		}}>
 			{children}
 		</TicketFiltersContext.Provider>

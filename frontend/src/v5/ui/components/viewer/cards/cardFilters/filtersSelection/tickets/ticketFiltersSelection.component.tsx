@@ -36,7 +36,7 @@ import { CardFilterActionMenu } from '../../filterForm/filterForm.styles';
 import { TicketFiltersContext } from '@components/viewer/cards/tickets/ticketFiltersContext';
 
 export const FilterSelection = () => {
-	const { addFilter } = useContext(TicketFiltersContext);
+	const { upsertFilter } = useContext(TicketFiltersContext);
 	const [active, setActive] = useState(false);
 	const [selectedItem, setSelectedItem] = useState<TicketFilterListItemType>(null);
 	const { containerOrFederation } = useParams<ViewerParams>();
@@ -81,7 +81,7 @@ export const FilterSelection = () => {
 					<DrillDownItem $visible={!showFiltersList}>
 						<FilterForm
 							{...(selectedItem || {} as any)}
-							onSubmit={addFilter}
+							onSubmit={upsertFilter}
 							onCancel={onCancel}
 						/>
 					</DrillDownItem>

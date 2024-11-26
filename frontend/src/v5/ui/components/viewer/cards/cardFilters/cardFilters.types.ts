@@ -16,15 +16,16 @@
  */
 
 export type TicketFilterListItemType = { module: string, property: string, type: CardFilterType };
-export type FormFilter = { values: CardFilterValue[], type?: CardFilterType };
 
 export type CardFilterOperator = 'ex' | 'nex' | 'eq' | 'neq' | 'ss' | 'nss' | 'rng' | 'nrng' | 'gt' | 'gte' | 'lt' | 'lte';
 export type CardFilterType = 'text' | 'longText' | 'date' | 'pastDate' | 'sequencing' | 'oneOf' | 'manyOf' | 'boolean' | 'number' | 'ticketTitle' | 'ticketId' | 'template';
 export type CardFilterValue = string | number | Date;
-export type CardFiltersByOperator = Partial<Record<CardFilterOperator, FormFilter>>;
+export type FormFilter = { operator: CardFilterOperator, values: CardFilterValue[] };
+
+export type CardFiltersByType = Partial<Record<CardFilterType, FormFilter>>;
 export type CardFilter = {
 	module: string,
 	property: string,
-	operator: CardFilterOperator,
+	type: CardFilterType,
 	filter: FormFilter,
 };

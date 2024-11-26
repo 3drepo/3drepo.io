@@ -20,18 +20,18 @@ import { ChipContainer, DeleteButton, TextWrapper, OperatorIconContainer, Displa
 import { FILTER_OPERATOR_ICON, FILTER_OPERATOR_LABEL } from '../cardFilters.helpers';
 import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
-import { CardFilterOperator, CardFilterType, CardFilterValue } from '../cardFilters.types';
+import { CardFilterType, FormFilter } from '../cardFilters.types';
 import { formatSimpleDate } from '@/v5/helpers/intl.helper';
 
 type FilterChipProps = {
 	property: string;
-	operator: CardFilterOperator;
-	values: CardFilterValue[];
-	type: CardFilterType;
+	type: CardFilterType,
+	filter: FormFilter,
 	selected?: boolean;
 	onDelete: () => void;
 };
-export const FilterChip = ({ property, values, onDelete, operator, selected, type }: FilterChipProps) => {
+export const FilterChip = ({ property, onDelete, selected, type, filter }: FilterChipProps) => {
+	const { operator, values } = filter;
 	const OperatorIcon = FILTER_OPERATOR_ICON[operator];
 	const hasMultipleValues = values.length > 1;
 	const isDate = ['date', 'pastDate'].includes(type);

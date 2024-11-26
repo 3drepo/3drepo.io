@@ -17,7 +17,7 @@
 
 import { formatSimpleDate } from '@/v5/helpers/intl.helper';
 import { FormattedMessage } from 'react-intl';
-import { CardFilterOperator, CardFilterValue, CardFilter, CardFilterType } from '../cardFilters.types';
+import { CardFilterOperator, CardFilterValue, CardFilter, CardFilterType, FormFilter } from '../cardFilters.types';
 import { FILTER_OPERATOR_LABEL, getFilterFormTitle } from '../cardFilters.helpers';
 import { Container, ButtonsContainer, Button } from './filterForm.styles';
 import { MenuItem } from '@mui/material';
@@ -33,21 +33,21 @@ type FilterFormProps = {
 	module: string,
 	property: string,
 	type: CardFilterType,
-	values?: CardFilterValue[]
-	operator?: CardFilterOperator,
+	filter?: FormFilter,
 	onSubmit: (newFilter: CardFilter) => void,
 	onCancel: () => void,
 };
-export const FilterForm = ({ module, property, operator, type, values = [], onSubmit, onCancel }: FilterFormProps) => {
+export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel }: FilterFormProps) => {
+	const { operator, values = [] } = filter || {};
 	const formData = useForm<FormType>({ defaultValues: _.defaults({ values, operator }, DEFAULT_VALUES) });
 
 	const handleSubmit = formData.handleSubmit((body: FormType) => {
 		// TODO - remove this line
 		const newValues = body.values.filter((x) => ![undefined, ''].includes(x as any));
-		onSubmit({ module, property, operator: body.operator, filter: { values: newValues, type } });
+		onSubmit({ module, property, type, filter: { operator: body.operator, values: newValues } });
 	});
 
-	const isUpdatingFilter = !!operator;
+	const isUpdatingFilter = !!filter;
 	const canSubmit = formData.formState.isValid && !isEmpty(formData.formState.dirtyFields);
 	const formOperator = formData.watch('operator');
 	const valuesInputsCount = Math.min(getOperatorMaxSupportedValues(formOperator), 3);
