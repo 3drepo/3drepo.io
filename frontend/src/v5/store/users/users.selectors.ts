@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { createSelector } from 'reselect';
-import { sortBy } from 'lodash';
-import { selectJobs } from '@/v4/modules/jobs';
+import { selectJobsByJobId as selectJobsById } from '@/v4/modules/jobs';
 import { selectCurrentTeamspace } from '../teamspaces/teamspaces.selectors';
 import { IUser, IUsersState } from './users.redux';
 import { getDefaultUserNotFound } from './users.helpers';
@@ -39,17 +38,19 @@ export const selectUser = createSelector(
 	},
 );
 
-export const selectCurrentTeamspaceUsers = createSelector(
+const selectCurrentTeamspaceUsers = createSelector(
 	selectUsersDomain,
 	selectCurrentTeamspace,
-	(state, teamspace) => {
-		const users = (state.usersByTeamspace || {})[teamspace] || [];
-		return sortBy(users, 'firstName');
-	},
+	(state, teamspace) => (state.usersByTeamspace || {})[teamspace] || [],
+);
+
+export const selectCurrentTeamspaceUsersById = createSelector(
+	selectCurrentTeamspaceUsers,
+	(users) => Object.fromEntries(users.map((user) => [user.user, user])),
 );
 
 export const selectJobsAndUsers = createSelector(
-	selectCurrentTeamspaceUsers,
-	selectJobs,
-	(users, jobs) => [...users, ...jobs],
+	selectCurrentTeamspaceUsersById,
+	selectJobsById,
+	(users, jobs) => ({ ...users, ...jobs }),
 );

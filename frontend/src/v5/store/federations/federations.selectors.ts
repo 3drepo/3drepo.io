@@ -17,14 +17,14 @@
 
 import { createSelector } from 'reselect';
 import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
-import { compact } from 'lodash';
+import { compact, isEmpty } from 'lodash';
 import { IFederationsState } from './federations.redux';
 import { IFederation } from './federations.types';
 import { selectContainers } from '../containers/containers.selectors';
 import { Role } from '../currentUser/currentUser.types';
 import { isCollaboratorRole, isCommenterRole } from '../store.helpers';
-import { selectJobs } from '@/v4/modules/jobs';
-import { selectCurrentTeamspaceUsers } from '../users/users.selectors';
+import { selectJobsByJobId } from '@/v4/modules/jobs';
+import { selectCurrentTeamspaceUsersById } from '../users/users.selectors';
 
 const selectFederationsDomain = (state): IFederationsState => state?.federations || ({ federationsByProject: {} });
 
@@ -90,26 +90,18 @@ export const selectHasCommenterAccess = createSelector(
 
 export const selectFederationUsers = createSelector(
 	selectFederationById,
-	selectCurrentTeamspaceUsers,
-	(federation, users) => (federation?.users || []).reduce(
-		(teamspaceUsers, user) => {
-			const teamspaceUser = users.find((u) => u.user === user.user);
-			if (!teamspaceUser) return teamspaceUsers;
-			return teamspaceUsers.concat({ ...user, ...teamspaceUser });
-		},
-		[],
-	),
+	selectCurrentTeamspaceUsersById,
+	(federations, users) => {
+		if (isEmpty(users)) return [];
+		return (federations?.users || []).map((user) => ({ ...user, ...users[user.user] }));
+	},
 );
 
 export const selectFederationJobs = createSelector(
 	selectFederationById,
-	selectJobs,
-	(federation, jobs) => (federation?.jobs || []).reduce(
-		(teamspaceJobs, job) => {
-			const teamspaceJob = jobs.find((j) => j._id === job._id);
-			if (!teamspaceJob) return teamspaceJobs;
-			return teamspaceJobs.concat({ ...job, ...teamspaceJob });
-		},
-		[],
-	),
+	selectJobsByJobId,
+	(federation, jobs) => {
+		if (isEmpty(jobs)) return [];
+		return (federation?.jobs || []).map((job) => ({ ...job, ...jobs[job._id] }));
+	},
 );

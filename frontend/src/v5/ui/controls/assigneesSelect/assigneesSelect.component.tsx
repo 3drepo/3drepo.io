@@ -100,7 +100,7 @@ export const AssigneesSelect = ({
 		onBlur();
 	};
 
-	const valueToJobOrUser = (val: string) => teamspaceJobsAndUsers.find((ju) => jobOrUserToString(ju) === val);
+	const valueToJobOrUser = (val: string) => teamspaceJobsAndUsers[val];
 	const allJobsAndUsersToDisplay = [
 		...validValues.map(valueToJobOrUser),
 		...invalidValues.map((v) => valueToJobOrUser(v) || ({ invalidItemName: v })),
