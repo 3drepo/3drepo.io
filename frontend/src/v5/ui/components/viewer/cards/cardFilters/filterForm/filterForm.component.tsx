@@ -17,38 +17,73 @@
 
 import { formatSimpleDate } from '@/v5/helpers/intl.helper';
 import { FormattedMessage } from 'react-intl';
-import { CardFilterOperator } from '../cardFilters.types';
-import { FILTER_OPERATOR_LABEL } from '../cardFilters.helpers';
+import { CardFilterOperator, CardFilterValue, CardFilter, CardFilterType } from '../cardFilters.types';
+import { FILTER_OPERATOR_LABEL, getFilterFormTitle } from '../cardFilters.helpers';
 import { Container, ButtonsContainer, Button } from './filterForm.styles';
-import { Select } from '@controls/inputs/select/select.component';
 import { MenuItem } from '@mui/material';
+import { FormProvider, useForm } from 'react-hook-form';
+import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
+import _, { isEmpty } from 'lodash';
+import { ActionMenuItem } from '@controls/actionMenu';
+import { getOperatorMaxSupportedValues } from './filterForm.helpers';
 
-
+const DEFAULT_VALUES = { values: [], operator: 'eq' };
+type FormType = { values: CardFilterValue[], operator: CardFilterOperator };
 type FilterFormProps = {
-	title: any,
-	type: string,
-	values?: any,
+	module: string,
+	property: string,
+	type: CardFilterType,
+	values?: CardFilterValue[]
 	operator?: CardFilterOperator,
-	onSubmit: () => void,
+	onSubmit: (newFilter: CardFilter) => void,
 	onCancel: () => void,
 };
-export const FilterForm = ({ title, type, values = [], operator = 'eq', onSubmit, onCancel }: FilterFormProps) => (
-	<Container>
-		{title}
-		<Select defaultValue={operator}>
-			{Object.entries(FILTER_OPERATOR_LABEL).map(([key, label]) => (
-				<MenuItem key={key} value={key}>{label}</MenuItem>
-			))}
-		</Select>
-		type: {type}
-		{/* values: {['date', 'pastDate'].includes(type) ? values.map(formatSimpleDate) : values.join(', ') ?? ''} */}
-		<ButtonsContainer>
-			<Button onClick={onCancel} color="secondary">
-				<FormattedMessage id="viewer.card.tickets.filters.form.back" defaultMessage="Back" />
-			</Button>
-			<Button onClick={onSubmit} color="primary" variant="contained">
-				<FormattedMessage id="viewer.card.tickets.filters.form.apply" defaultMessage="Apply" />
-			</Button>
-		</ButtonsContainer>
-	</Container>
-);
+export const FilterForm = ({ module, property, operator, type, values = [], onSubmit, onCancel }: FilterFormProps) => {
+	const formData = useForm<FormType>({ defaultValues: _.defaults({ values, operator }, DEFAULT_VALUES) });
+
+	const handleSubmit = formData.handleSubmit((body: FormType) => {
+		// TODO - remove this line
+		const newValues = body.values.filter((x) => ![undefined, ''].includes(x as any));
+		onSubmit({ module, property, operator: body.operator, filter: { values: newValues, type } });
+	});
+
+	const isUpdatingFilter = !!operator;
+	const canSubmit = formData.formState.isValid && !isEmpty(formData.formState.dirtyFields);
+	const formOperator = formData.watch('operator');
+	const valuesInputsCount = Math.min(getOperatorMaxSupportedValues(formOperator), 3);
+	
+	return (
+		<FormProvider {...formData}>
+			<Container>
+				{getFilterFormTitle([module, property])}
+				<FormSelect name='operator'>
+					{Object.entries(FILTER_OPERATOR_LABEL).map(([key, label]) => (
+						<MenuItem key={key} value={key}>{label}</MenuItem>
+					))}
+				</FormSelect>
+				type: {type}
+				{Array(valuesInputsCount).fill(0).map((i, index) => (
+					<FormTextField name={`values.${index}`} />
+				))}
+				<br />
+				current values: {['date', 'pastDate'].includes(type) ? values.map(formatSimpleDate) : values.join(', ') ?? ''}
+				<ButtonsContainer>
+					<Button onClick={onCancel} color="secondary">
+						{isUpdatingFilter
+							? <FormattedMessage id="viewer.card.tickets.filters.form.cancel" defaultMessage="Cancel" />
+							: <FormattedMessage id="viewer.card.tickets.filters.form.back" defaultMessage="Back" />
+						}
+					</Button>
+					<ActionMenuItem disabled={!canSubmit}>
+						<Button onClick={handleSubmit} color="primary" variant="contained">
+							{isUpdatingFilter
+								? <FormattedMessage id="viewer.card.tickets.filters.form.update" defaultMessage="Update" />
+								: <FormattedMessage id="viewer.card.tickets.filters.form.apply" defaultMessage="Apply" />
+							}
+						</Button>
+					</ActionMenuItem>
+				</ButtonsContainer>
+			</Container>
+		</FormProvider>
+	);
+};

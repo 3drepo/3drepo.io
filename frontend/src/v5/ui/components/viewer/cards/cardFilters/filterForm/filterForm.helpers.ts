@@ -15,31 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ActionMenu } from '@controls/actionMenu';
-import { Button as ButtonBase } from '@controls/button';
-import styled from 'styled-components';
+import { CardFilterOperator } from '../cardFilters.types';
 
-export const CardFilterActionMenu = styled(ActionMenu)`
-	.MuiPaper-root {
-		left: 88px !important;
-		width: 365px;
+export const getOperatorMaxSupportedValues = (operator: CardFilterOperator) => {
+	switch (operator) {
+		case 'ex':
+		case 'nex':
+			return 0;
+		case 'gt':
+		case 'gte':
+		case 'lt':
+		case 'lte':
+			return 1;
+		default:
+			return Number.MAX_SAFE_INTEGER;
 	}
-`;
-
-export const Container = styled.div`
-	padding: 10px;
-	display: flex;
-	flex-direction: column;
-	gap: 10px;
-`;
-
-export const Button = styled(ButtonBase)`
-	margin: 0;
-`;
-
-export const ButtonsContainer = styled.div`
-	margin-left: auto;
-	width: fit-content;
-	display: flex;
-	gap: 10px;
-`;
+};
