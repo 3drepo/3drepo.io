@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ActionMenu as ActionMenuBase } from '@controls/actionMenu';
 import { SearchInput as SearchInputBase } from '@controls/search/searchInput';
 import styled, { css } from 'styled-components';
 
@@ -37,13 +36,6 @@ export const SearchInput = styled(SearchInputBase)`
 		.MuiInputAdornment-positionEnd {
 			margin: 0;
 		}
-	}
-`;
-
-export const ActionMenu = styled(ActionMenuBase)`
-	.MuiPaper-root {
-		left: 88px !important;
-		width: 365px;
 	}
 `;
 

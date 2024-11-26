@@ -25,27 +25,36 @@ import { uniq } from 'lodash';
 import { useParams } from 'react-router';
 import { templatesToFilters } from './list/ticketFiltersSelectionList.helpers';
 import { CardAction } from '../../../cardAction/cardAction.styles';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import FennelIcon from '@assets/icons/filters/fennel.svg';
 import { Tooltip } from '@mui/material';
 import { TicketFiltersSelectionList } from './list/ticketFiltersSelectionList.component';
-import { ActionMenu, SearchInput, DrillDownList, DrillDownItem } from './ticketFiltersSelection.styles';
+import { SearchInput, DrillDownList, DrillDownItem } from './ticketFiltersSelection.styles';
 import { TicketFilterListItemType } from '../../cardFilters.types';
 import { FilterForm } from '../../filterForm/filterForm.component';
-import { getFilterFormTitle } from '../../cardFilters.helpers';
+import { CardFilterActionMenu } from '../../filterForm/filterForm.styles';
+import { TicketFiltersContext } from '@components/viewer/cards/tickets/ticketFiltersContext';
 
 export const FilterSelection = () => {
+	const { addFilter } = useContext(TicketFiltersContext);
 	const [active, setActive] = useState(false);
-	const [selectedFilter, setSelectedFilter] = useState<TicketFilterListItemType>(null);
+	const [selectedItem, setSelectedItem] = useState<TicketFilterListItemType>(null);
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const tickets = TicketsHooksSelectors.selectTicketsRaw(containerOrFederation);
 	const usedTemplates = uniq(tickets.map((t) => t.type));
 	const templates = usedTemplates.map((t) => selectTemplateById(getState(), containerOrFederation, t));
 	const filterElements = templatesToFilters(templates);
-	const showFiltersList = !selectedFilter?.property;
+	const showFiltersList = !selectedItem?.property;
+
+	const onOpen = () => setActive(true);
+	const onClose = () => {
+		setActive(false);
+		setSelectedItem(null);
+	};
+	const onCancel = () => setSelectedItem(null);
 
 	return (
-		<ActionMenu
+		<CardFilterActionMenu
 			TriggerButton={(
 				<Tooltip title={formatMessage({ id: 'viewer.card.tickets.addFilter', defaultMessage: 'Add Filter' })}>
 					<div>
@@ -55,8 +64,8 @@ export const FilterSelection = () => {
 					</div>
 				</Tooltip>
 			)}
-			onOpen={() => setActive(true)}
-			onClose={() => setActive(false)}
+			onOpen={onOpen}
+			onClose={onClose}
 		>
 			<SearchContextComponent items={filterElements}>
 				<DrillDownList $visibleIndex={showFiltersList ? 0 : 1}>
@@ -67,18 +76,17 @@ export const FilterSelection = () => {
 								defaultMessage: 'Serach for property...',
 							})}
 						/>
-						<TicketFiltersSelectionList setSelectedFilter={setSelectedFilter} />
+						<TicketFiltersSelectionList setSelectedFilter={setSelectedItem} />
 					</DrillDownItem>
 					<DrillDownItem $visible={!showFiltersList}>
 						<FilterForm
-							title={getFilterFormTitle([selectedFilter?.module, selectedFilter?.property])}
-							type={selectedFilter?.type}
-							onSubmit={() => setSelectedFilter(null)}
-							onCancel={() => setSelectedFilter(null)}
+							{...(selectedItem || {} as any)}
+							onSubmit={addFilter}
+							onCancel={onCancel}
 						/>
 					</DrillDownItem>
 				</DrillDownList>
 			</SearchContextComponent>
-		</ActionMenu>
+		</CardFilterActionMenu>
 	);
 };
