@@ -19,7 +19,6 @@ import { Fragment, useContext } from 'react';
 import { FiltersAccordion } from './filtersAccordion/filtersAccordion.component';
 import { ModuleTitle } from './cardFilters.styles';
 import { FiltersSection } from './filtersSection/filtersSection.component';
-import { CardFiltersCreatorForm } from './cardFiltersCreatorForm/cardFiltersCreatorForm.temp';
 import { TicketFiltersContext } from '../tickets/ticketFiltersContext';
 import { TicketBaseKeys } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 
@@ -27,22 +26,19 @@ export const CardFilters = () => {
 	const { filters, deleteAllFilters } = useContext(TicketFiltersContext);
 	const hasFilters = Object.keys(filters).length > 0;
 
+	if (!hasFilters) return null;
+
 	return (
-		<>
-			<CardFiltersCreatorForm />
-			{hasFilters && (
-				<FiltersAccordion onClear={deleteAllFilters}>
-					{Object.entries(filters).sort((a, b) => a[0].localeCompare(b[0])).map(([module, moduleFilters]) => (
-						<Fragment key={module}>
-							{module && (module !== TicketBaseKeys.PROPERTIES) && (<ModuleTitle>{module}</ModuleTitle>)}
-							<FiltersSection
-								module={module}
-								filters={moduleFilters}
-							/>
-						</Fragment>
-					))}
-				</FiltersAccordion>
-			)}
-		</>
+		<FiltersAccordion onClear={deleteAllFilters}>
+			{Object.entries(filters).sort((a, b) => a[0].localeCompare(b[0])).map(([module, moduleFilters]) => (
+				<Fragment key={module}>
+					{module && (module !== TicketBaseKeys.PROPERTIES) && (<ModuleTitle>{module}</ModuleTitle>)}
+					<FiltersSection
+						module={module}
+						filters={moduleFilters}
+					/>
+				</Fragment>
+			))}
+		</FiltersAccordion>
 	);
 };
