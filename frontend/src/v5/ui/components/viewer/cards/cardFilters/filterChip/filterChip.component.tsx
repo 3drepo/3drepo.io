@@ -35,7 +35,7 @@ export const FilterChip = ({ property, values, onDelete, operator, selected, typ
 	const OperatorIcon = FILTER_OPERATOR_ICON[operator];
 	const hasMultipleValues = values.length > 1;
 	const isDate = ['date', 'pastDate'].includes(type);
-	const displayValue = isDate ? values.map(formatSimpleDate) : values.join(', ') ?? '';
+	const displayValue = isDate ? values.map((d) => formatSimpleDate(new Date(+d))) : values.join(', ') ?? '';
 
 	return (
 		<ChipContainer selected={selected}>
