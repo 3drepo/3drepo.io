@@ -24,7 +24,6 @@ import { hasDefaultPin } from '../../ticketsForm/properties/coordsProperty/coord
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
 import { ControlledAssigneesSelect as Assignees } from '@controls/assigneesSelect/controlledAssigneesSelect.component';
-import { Highlight } from '@controls/highlight/highlight.component';
 import { IssueProperties, TicketBaseKeys } from '../../tickets.constants';
 import { has, isEqual } from 'lodash';
 import { getPropertiesInCamelCase, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
@@ -43,7 +42,6 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 	const isSelected = selectedTicketId === ticket._id;
 	const isFederation = modelIsFederation(containerOrFederation);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket.type);
-	const queries = TicketsCardHooksSelectors.selectFilteringQueries();
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const { description = '', assignees = [], priority, dueDate = null } = getPropertiesInCamelCase(ticket[TicketBaseKeys.PROPERTIES]);
 	const hasIssueProperties = has(template, [TicketBaseKeys.CONFIG, 'issueProperties']);
@@ -85,9 +83,7 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 			<FlexRow>
 				<FlexColumn>
 					<Title>
-						<Highlight search={queries}>
-							{ticket.title}
-						</Highlight>
+						{ticket.title}
 					</Title>
 					{description && <Description>{description}</Description>}
 					{hasIssueProperties && (
@@ -104,9 +100,7 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 			</FlexRow>
 			<BottomRow>
 				<Id>
-					<Highlight search={queries}>
-						{`${template?.code}:${ticket.number}`}
-					</Highlight>
+					{template?.code}:{ticket.number}
 				</Id>
 				<StatusChip {...getChipPropsFromConfig(statusConfig, ticket.properties.Status)} />
 			</BottomRow>

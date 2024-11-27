@@ -15,26 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CardFiltersByType } from '../cardFilters.types';
+import { CardFilterType, FilterOperatorsByProperty, FormFilter } from '../cardFilters.types';
 import { FilterChip } from '../filterChip/filterChip.component';
 import { Section } from './filtersSection.styles';
 import { FilterForm } from '../filterForm/filterForm.component';
 import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
 import { CardFilterActionMenu } from '../filterForm/filterForm.styles';
-import { useContext, useState } from 'react';
-import { TicketFiltersContext } from '../../tickets/ticketFiltersContext';
+import { useState } from 'react';
+import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 type FiltersSectionProps = {
 	module?: string;
-	filters: Record<string, CardFiltersByType>;
+	filters: Partial<FilterOperatorsByProperty>;
 };
 export const FiltersSection = ({ module, filters }: FiltersSectionProps) => {
 	const [selectedProperty, setSelectedProperty] = useState('');
-	const { deleteFilter, upsertFilter } = useContext(TicketFiltersContext);
 
-	const onDeleteFilter = (property, type) => deleteFilter({ module, property, type });
+	const onDeleteFilter = (property, type) => TicketsCardActionsDispatchers.deleteFilter({ module, property, type });
 
-	const filtersToChips = () => {
+	const filtersToChips = (): [string, CardFilterType, FormFilter][] => {
 		const filterChips = [];
 		Object.entries(filters).forEach(([property, typeAndFilter]) => {
 			const moduleFilterChips = Object.entries(typeAndFilter).map(([type, filter]) => [property, type, filter]);
@@ -64,7 +63,7 @@ export const FiltersSection = ({ module, filters }: FiltersSectionProps) => {
 						{({ close }) => (
 							<FilterForm
 								onCancel={close}
-								onSubmit={upsertFilter}
+								onSubmit={TicketsCardActionsDispatchers.upsertFilter}
 								module={module}
 								property={property}
 								type={type}

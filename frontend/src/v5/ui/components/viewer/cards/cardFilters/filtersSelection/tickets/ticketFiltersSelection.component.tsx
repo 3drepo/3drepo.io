@@ -15,17 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { getState } from '@/v5/helpers/redux.helpers';
 import { formatMessage } from '@/v5/services/intl';
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { selectTemplateById } from '@/v5/store/tickets/tickets.selectors';
-import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { SearchContextComponent } from '@controls/search/searchContext';
-import { uniq } from 'lodash';
-import { useParams } from 'react-router';
-import { templatesToFilters } from './list/ticketFiltersSelectionList.helpers';
 import { CardAction } from '../../../cardAction/cardAction.styles';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import FennelIcon from '@assets/icons/filters/fennel.svg';
 import { Tooltip } from '@mui/material';
 import { TicketFiltersSelectionList } from './list/ticketFiltersSelectionList.component';
@@ -33,23 +27,19 @@ import { SearchInput, DrillDownList, DrillDownItem } from './ticketFiltersSelect
 import { TicketFilterListItemType } from '../../cardFilters.types';
 import { FilterForm } from '../../filterForm/filterForm.component';
 import { CardFilterActionMenu } from '../../filterForm/filterForm.styles';
-import { TicketFiltersContext } from '@components/viewer/cards/tickets/ticketFiltersContext';
+import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 export const FilterSelection = () => {
-	const { upsertFilter, hasFilter } = useContext(TicketFiltersContext);
-	const [active, setActive] = useState(false);
+	const [selected, setSelected] = useState(false);
 	const [selectedItem, setSelectedItem] = useState<TicketFilterListItemType>(null);
-	const { containerOrFederation } = useParams<ViewerParams>();
-	const tickets = TicketsHooksSelectors.selectTicketsRaw(containerOrFederation);
-	const usedTemplates = uniq(tickets.map((t) => t.type));
-	const templates = usedTemplates.map((t) => selectTemplateById(getState(), containerOrFederation, t));
-	const filterElements = templatesToFilters(templates);
-	const unusedFilters = filterElements.filter((f) => !hasFilter(f));
+	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
+	const unusedFilters = TicketsCardHooksSelectors.selectUnusedTemplatesFilters();
 	const showFiltersList = !selectedItem?.property;
+	const disabled = !unusedFilters.length || !tickets.length;
 
-	const onOpen = () => setActive(true);
+	const onOpen = () => setSelected(true);
 	const onClose = () => {
-		setActive(false);
+		setSelected(false);
 		setSelectedItem(null);
 	};
 	const onCancel = () => setSelectedItem(null);
@@ -59,7 +49,7 @@ export const FilterSelection = () => {
 			TriggerButton={(
 				<Tooltip title={formatMessage({ id: 'viewer.card.tickets.addFilter', defaultMessage: 'Add Filter' })}>
 					<div>
-						<CardAction disabled={!unusedFilters.length} $active={active}>
+						<CardAction disabled={disabled} selected={selected}>
 							<FennelIcon />
 						</CardAction>
 					</div>
@@ -67,6 +57,7 @@ export const FilterSelection = () => {
 			)}
 			onOpen={onOpen}
 			onClose={onClose}
+			disabled={disabled}
 		>
 			<SearchContextComponent items={unusedFilters}>
 				<DrillDownList $visibleIndex={showFiltersList ? 0 : 1}>
@@ -82,7 +73,7 @@ export const FilterSelection = () => {
 					<DrillDownItem $visible={!showFiltersList}>
 						<FilterForm
 							{...(selectedItem || {} as any)}
-							onSubmit={upsertFilter}
+							onSubmit={TicketsCardActionsDispatchers.upsertFilter}
 							onCancel={onCancel}
 						/>
 					</DrillDownItem>

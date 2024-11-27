@@ -15,20 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Fragment, useContext } from 'react';
+import { Fragment } from 'react';
 import { FiltersAccordion } from './filtersAccordion/filtersAccordion.component';
 import { ModuleTitle } from './cardFilters.styles';
 import { FiltersSection } from './filtersSection/filtersSection.component';
-import { TicketFiltersContext } from '../tickets/ticketFiltersContext';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 export const CardFilters = () => {
-	const { filters, deleteAllFilters } = useContext(TicketFiltersContext);
+	const filters = TicketsCardHooksSelectors.selectFilters();
 	const hasFilters = Object.keys(filters).length > 0;
 
 	if (!hasFilters) return null;
 
 	return (
-		<FiltersAccordion onClear={deleteAllFilters}>
+		<FiltersAccordion onClear={TicketsCardActionsDispatchers.resetFilters}>
 			{Object.entries(filters).sort((a, b) => a[0].localeCompare(b[0])).map(([module, moduleFilters]) => (
 				<Fragment key={module}>
 					{module && (<ModuleTitle>{module}</ModuleTitle>)}

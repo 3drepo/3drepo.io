@@ -28,7 +28,7 @@ import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.co
 export const TicketsList = () => {
 	const selectedTicket = TicketsCardHooksSelectors.selectSelectedTicket();
 
-	const filteredItems = TicketsCardHooksSelectors.selectTicketsWithAllFiltersApplied();
+	const filteredItems = TicketsCardHooksSelectors.selectFilteredTickets();
 
 	useEffect(() => {
 		TicketsCardActionsDispatchers.setSelectedTicketPin(selectedTicket?._id);

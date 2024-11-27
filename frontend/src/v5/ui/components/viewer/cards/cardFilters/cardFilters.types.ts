@@ -22,10 +22,12 @@ export type CardFilterType = 'text' | 'longText' | 'date' | 'pastDate' | 'sequen
 export type CardFilterValue = string | number | Date;
 export type FormFilter = { operator: CardFilterOperator, values: CardFilterValue[] };
 
-export type CardFiltersByType = Partial<Record<CardFilterType, FormFilter>>;
 export type CardFilter = {
 	module: string,
 	property: string,
 	type: CardFilterType,
 	filter: FormFilter,
 };
+
+export type CardFiltersByType = Partial<Record<CardFilterType, FormFilter>>;
+export type FilterOperatorsByProperty = Record<CardFilterOperator, CardFiltersByType>;

@@ -23,7 +23,8 @@ import { ITicketsCardState } from './ticketsCard.redux';
 import { DEFAULT_PIN, getPinColorHex, formatPin, getTicketPins } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { IPin } from '@/v4/services/viewer/viewer';
 import { selectSelectedDate } from '@/v4/modules/sequences';
-import { ticketIsCompleted } from '@controls/chip/statusChip/statusChip.helpers';
+import { has, uniq } from 'lodash';
+import { templatesToFilters } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/list/ticketFiltersSelectionList.helpers';
 
 const selectTicketsCardDomain = (state): ITicketsCardState => state.ticketsCard || {};
 
@@ -113,46 +114,31 @@ export const selectSelectedTemplate = createSelector(
 	selectTemplateById,
 );
 
-export const selectFilteringCompleted = createSelector(
+export const selectFilters = createSelector(
 	selectTicketsCardDomain,
-	(ticketCardState) => ticketCardState.filters.complete,
+	(ticketCardState) => ticketCardState.filters || {},
 );
 
-export const selectFilteringTemplates = createSelector(
-	selectTicketsCardDomain,
-	(ticketCardState) => ticketCardState.filters.templates,
-);
-
-export const selectFilteringQueries = createSelector(
-	selectTicketsCardDomain,
-	(ticketCardState) => ticketCardState.filters.queries,
-);
-
-export const selectTicketsFilteredByQueriesAndCompleted = createSelector(
-	selectCurrentTickets,
-	selectFilteringCompleted,
-	selectFilteringQueries,
+export const selectTemplatesFilters = createSelector(
 	selectCurrentTemplates,
-	(tickets, isComplete, queries, templates) => tickets.filter((ticket) => {
-		const template = templates.find((t) => t._id === ticket.type);
-		const ticketCode = `${template.code}:${ticket.number}`;
-		const ticketMatchesIsCompleted = ticketIsCompleted(ticket, template) === isComplete;
-		if (!ticketMatchesIsCompleted) return false;
-
-		if (!queries.length) return true;
-
-		const ticketMatchesQuery = (query) => [ticketCode, ticket.title].some((str) => str.toLowerCase().includes(query.toLowerCase()));
-		return queries.some(ticketMatchesQuery);
-	}),
+	selectCurrentTickets,
+	(templates, tickets) => {
+		const idsOfTemplatesWithAtLeastOneTicket = uniq(tickets.map((t) => t.type));
+		const templatesWithAtLeastOneTicket = templates.filter((t) => idsOfTemplatesWithAtLeastOneTicket.includes(t._id));
+		return templatesToFilters(templatesWithAtLeastOneTicket);
+	},
 );
 
-export const selectTicketsWithAllFiltersApplied = createSelector(
-	selectTicketsFilteredByQueriesAndCompleted,
-	selectFilteringTemplates,
-	(tickets, filteredTemplates) => {
-		if (!filteredTemplates.length) return tickets;
-		return tickets.filter(({ type }) => filteredTemplates.includes(type));
-	},
+export const selectUnusedTemplatesFilters = createSelector(
+	selectFilters,
+	selectTemplatesFilters,
+	(usedFilters, allFilters) => allFilters.filter(({ module, property, type }) => !has(usedFilters, [module, property, type])),
+);
+
+// TODO - this will rely on the backend which is WIP atm
+export const selectFilteredTickets = createSelector(
+	selectCurrentTickets,
+	(tickets) => tickets,
 );
 
 export const selectIsShowingPins = createSelector(
@@ -160,7 +146,7 @@ export const selectIsShowingPins = createSelector(
 );
 
 export const selectTicketPins = createSelector(
-	selectTicketsWithAllFiltersApplied,
+	selectFilteredTickets,
 	selectCurrentTemplates,
 	selectView,
 	selectSelectedTicketPinId,
