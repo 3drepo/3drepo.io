@@ -15,19 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export type TicketFilterListItemType = { module: string, property: string, type: CardFilterType };
-
 export type CardFilterOperator = 'ex' | 'nex' | 'eq' | 'neq' | 'ss' | 'nss' | 'rng' | 'nrng' | 'gt' | 'gte' | 'lt' | 'lte';
 export type CardFilterType = 'text' | 'longText' | 'date' | 'pastDate' | 'sequencing' | 'oneOf' | 'manyOf' | 'boolean' | 'number' | 'ticketTitle' | 'ticketId' | 'template';
 export type CardFilterValue = string | number | Date;
-export type FormFilter = { operator: CardFilterOperator, values: CardFilterValue[] };
-
-export type CardFilter = {
-	module: string,
-	property: string,
-	type: CardFilterType,
-	filter: FormFilter,
+export type BaseFilter = { operator: CardFilterOperator, values: CardFilterValue[] };
+export type TypesByProperty = {
+	[property in string]: {
+		[type in CardFilterType]?: BaseFilter;
+	};
 };
 
-export type CardFiltersByType = Partial<Record<CardFilterType, FormFilter>>;
-export type FilterOperatorsByProperty = Record<CardFilterOperator, CardFiltersByType>;
+export type CardFilter = {
+	property: string,
+	type: CardFilterType,
+	filter: BaseFilter,
+};
+export type TicketCardFilter = CardFilter & { module: string };
+export type TicketFilterDescription = Omit<TicketCardFilter, 'filter'>;

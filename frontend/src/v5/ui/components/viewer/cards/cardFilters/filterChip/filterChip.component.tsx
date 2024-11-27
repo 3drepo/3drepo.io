@@ -20,13 +20,13 @@ import { ChipContainer, DeleteButton, TextWrapper, OperatorIconContainer, Displa
 import { FILTER_OPERATOR_ICON, FILTER_OPERATOR_LABEL } from '../cardFilters.helpers';
 import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
-import { CardFilterType, FormFilter } from '../cardFilters.types';
+import { CardFilterType, BaseFilter } from '../cardFilters.types';
 import { formatSimpleDate } from '@/v5/helpers/intl.helper';
 
 type FilterChipProps = {
 	property: string;
 	type: CardFilterType,
-	filter: FormFilter,
+	filter: BaseFilter,
 	selected?: boolean;
 	onDelete: () => void;
 };

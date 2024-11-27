@@ -22,7 +22,7 @@ import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '@/v5/helpers/actions.helper';
 import { EditableTicket, OverridesDicts, TicketsCardFilters } from '../tickets.types';
 import { TeamspaceProjectAndModel } from '../../store.types';
-import { CardFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
+import { TicketCardFilter, TicketFilterDescription } from '@components/viewer/cards/cardFilters/cardFilters.types';
 import { get, isEmpty, set, unset } from 'lodash';
 
 export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createActions({
@@ -172,8 +172,8 @@ export type SetSelectedTemplateAction = Action<'SET_SELECTED_TEMPLATE'> & { temp
 export type SetSelectedTicketPinAction = Action<'SET_SELECTED_TICKET_PIN'> & { pinId: string };
 export type SetPinToDropAction = Action<'SET_PIN_TO_DROP'> & { pinToDrop: string };
 export type SetFiltersAction = Action<'SET_FILTERS'> & { filters: TicketsCardFilters };
-export type UpsertFilterAction = Action<'UPSERT_FILTER'> & { filter: CardFilter };
-export type DeleteFilterAction = Action<'DELETE_FILTER'> & { filter: Omit<CardFilter, 'filter'> };
+export type UpsertFilterAction = Action<'UPSERT_FILTER'> & { filter: TicketCardFilter };
+export type DeleteFilterAction = Action<'DELETE_FILTER'> & { filter: TicketFilterDescription };
 export type ResetFiltersAction = Action<'RESET_FILTERS'>;
 export type FetchTicketsListAction = Action<'FETCH_TICKETS_LIST'> & TeamspaceProjectAndModel & { isFederation: boolean };
 export type SetCardViewAction = Action<'SET_CARD_VIEW'> & { view: TicketsCardViews, props?:any };
@@ -192,8 +192,8 @@ export interface ITicketsCardActionCreators {
 	setSelectedTicketPin: (pinId: string) => SetSelectedTicketPinAction,
 	setPinToDrop: (pinToDrop: string) => SetPinToDropAction,
 	setFilters: (filters: TicketsCardFilters) => SetFiltersAction,
-	upsertFilter: (filter: CardFilter) => UpsertFilterAction,
-	deleteFilter: (filter: Omit<CardFilter, 'filter'>) => DeleteFilterAction,
+	upsertFilter: (filter: TicketCardFilter) => UpsertFilterAction,
+	deleteFilter: (filter: TicketFilterDescription) => DeleteFilterAction,
 	resetFilters: () => ResetFiltersAction,
 	fetchTicketsList: (
 		teamspace: string,
