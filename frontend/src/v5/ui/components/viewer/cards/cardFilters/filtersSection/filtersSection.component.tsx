@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CardFilterType, FilterOperatorsByProperty, FormFilter } from '../cardFilters.types';
+import { CardFilter } from '../cardFilters.types';
 import { FilterChip } from '../filterChip/filterChip.component';
 import { Section } from './filtersSection.styles';
 import { FilterForm } from '../filterForm/filterForm.component';
@@ -26,25 +26,16 @@ import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers'
 
 type FiltersSectionProps = {
 	module?: string;
-	filters: Partial<FilterOperatorsByProperty>;
+	filters: CardFilter[];
 };
 export const FiltersSection = ({ module, filters }: FiltersSectionProps) => {
 	const [selectedProperty, setSelectedProperty] = useState('');
 
 	const onDeleteFilter = (property, type) => TicketsCardActionsDispatchers.deleteFilter({ module, property, type });
 
-	const filtersToChips = (): [string, CardFilterType, FormFilter][] => {
-		const filterChips = [];
-		Object.entries(filters).forEach(([property, typeAndFilter]) => {
-			const moduleFilterChips = Object.entries(typeAndFilter).map(([type, filter]) => [property, type, filter]);
-			filterChips.push(...moduleFilterChips);
-		});
-		return filterChips;
-	};
-
 	return (
 		<Section>
-			{filtersToChips().map(([property, type, filter]) => (
+			{filters.map(({ property, type, filter }) => (
 				<CardFilterActionMenu
 					key={property}
 					onOpen={() => setSelectedProperty(property)}

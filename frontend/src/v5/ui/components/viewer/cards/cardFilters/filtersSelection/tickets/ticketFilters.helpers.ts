@@ -16,7 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { ITemplate } from '@/v5/store/tickets/tickets.types';
+import { ITemplate, TicketsCardFilters } from '@/v5/store/tickets/tickets.types';
 import BooleanIcon from '@assets/icons/filters/boolean.svg';
 import ListIcon from '@assets/icons/filters/list.svg';
 import NumberIcon from '@assets/icons/filters/number.svg';
@@ -24,7 +24,7 @@ import TemplateIcon from '@assets/icons/filters/template.svg';
 import TextIcon from '@assets/icons/filters/text.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
 import { sortBy, uniqBy } from 'lodash';
-import { CardFilterType, TicketFilterListItemType } from '../../cardFilters.types';
+import { CardFilter, CardFilterType, TypesByProperty, BaseFilter, TicketFilterDescription } from '../../cardFilters.types';
 
 export const TYPE_TO_ICON: Record<CardFilterType, any> = {
 	'template': TemplateIcon,
@@ -43,31 +43,42 @@ export const TYPE_TO_ICON: Record<CardFilterType, any> = {
 
 const VALID_FILTERING_PROPERTY_TYPES = Object.keys(TYPE_TO_ICON);
 
-export const DEFAULT_FILTERS: TicketFilterListItemType[] = [
+export const DEFAULT_FILTERS: TicketFilterDescription[] = [
 	{ module: '', type: 'ticketTitle', property: formatMessage({ defaultMessage: 'Ticket title', id: 'viewer.card.filters.element.ticketTitle' }) },
 	{ module: '', type: 'ticketId', property: formatMessage({ defaultMessage: 'Ticket ID', id: 'viewer.card.filters.element.ticketId' }) },
 	{ module: '', type: 'template', property: formatMessage({ defaultMessage: 'Ticket template', id: 'viewer.card.filters.element.ticketTemplate' }) },
 ];
 
-const propertiesToValidFilters = (properties: { name: string, type: string }[], module: string = ''): TicketFilterListItemType[] => properties
+const propertiesToValidFilters = (properties: { name: string, type: string }[], module: string = ''): TicketFilterDescription[] => properties
 	.filter(({ type }) => VALID_FILTERING_PROPERTY_TYPES.includes(type))
 	.map(({ name, type }) => ({
 		module,
 		property: name,
 		type,
-	}) as TicketFilterListItemType);
+	}) as TicketFilterDescription);
 
-const templateToFilters = (template: ITemplate): TicketFilterListItemType[] => [
+const templateToFilters = (template: ITemplate): TicketFilterDescription[] => [
 	...propertiesToValidFilters(template.properties, ''),
 	...template.modules.flatMap(({ properties, name, type }) => propertiesToValidFilters(properties, name || type)),
 ];
 
-export const templatesToFilters = (templates: ITemplate[]): TicketFilterListItemType[] => {
-	let filters: TicketFilterListItemType[] = [...templates.flatMap(templateToFilters)];
+export const templatesToFilters = (templates: ITemplate[]): TicketFilterDescription[] => {
+	let filters: TicketFilterDescription[] = [...templates.flatMap(templateToFilters)];
 	filters = uniqBy(filters, (f) => f.module + f.property + f.type);
 	filters = sortBy(filters, 'module');
 	return [
 		...DEFAULT_FILTERS,
 		...filters,
 	];
+};
+
+const toCardFilter = (typesByProperty: TypesByProperty): CardFilter[] => (
+	Object.entries(typesByProperty).flatMap(([property, filterByType]) => (
+		Object.entries(filterByType).map(([type, filter]: [CardFilterType, BaseFilter]) => ({ property, type, filter }))),
+	)
+);
+
+export const getFiltersByModule = (filters: TicketsCardFilters) => {
+	const sortedFiltersByModule = Object.entries(filters).sort((a, b) => a[0].localeCompare(b[0]));
+	return sortedFiltersByModule.map(([module, properties]) => [module, toCardFilter(properties)] as [string, CardFilter[]]);
 };
