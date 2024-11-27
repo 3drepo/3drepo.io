@@ -22,7 +22,7 @@ interface ICircleButton {
 	disabled?: boolean;
 	onClick?: (e) => void;
 	children: any;
-	$active?: boolean;
+	selected?: boolean;
 }
 
 export const CircleButton = ({ variant = 'primary', ...props }: ICircleButton) => {
