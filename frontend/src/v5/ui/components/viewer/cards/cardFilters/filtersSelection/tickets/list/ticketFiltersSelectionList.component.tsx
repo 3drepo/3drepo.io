@@ -22,7 +22,10 @@ import { FormattedMessage } from 'react-intl';
 import { MenuList, EmptyListMessage } from './ticketFiltersSelectionList.styles';
 import { TicketFilterListItemType } from '../../../cardFilters.types';
 
-export const TicketFiltersSelectionList = ({ setSelectedFilter }: { setSelectedFilter: (filter) => void }) => {
+type TicketFiltersSelectionListProps = {
+	onFilterClick: (filter) => void;
+};
+export const TicketFiltersSelectionList = ({ onFilterClick }: TicketFiltersSelectionListProps) => {
 	const { filteredItems, query } = useContext<SearchContextType<TicketFilterListItemType>>(SearchContext);
 
 	if (!filteredItems.length) return (
@@ -43,7 +46,7 @@ export const TicketFiltersSelectionList = ({ setSelectedFilter }: { setSelectedF
 				<TicketFiltersSelectionItem
 					{...filter}
 					key={filter.module + filter.property + filter.type}
-					onClick={() => setSelectedFilter(filter)}
+					onClick={() => onFilterClick(filter)}
 				/>
 			))}
 		</MenuList>

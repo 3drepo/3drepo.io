@@ -30,26 +30,26 @@ import { CardFilterActionMenu } from '../../filterForm/filterForm.styles';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 export const FilterSelection = () => {
-	const [selected, setSelected] = useState(false);
-	const [selectedItem, setSelectedItem] = useState<TicketFilterListItemType>(null);
+	const [open, setOpen] = useState(false);
+	const [selectedFilter, setSelectedFilter] = useState<TicketFilterListItemType>(null);
 	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
-	const unusedFilters = TicketsCardHooksSelectors.selectUnusedTemplatesFilters();
-	const showFiltersList = !selectedItem?.property;
+	const unusedFilters = TicketsCardHooksSelectors.selectAvailableTemplatesFilters();
+	const showFiltersList = !selectedFilter?.property;
 	const disabled = !unusedFilters.length || !tickets.length;
 
-	const onOpen = () => setSelected(true);
+	const onOpen = () => setOpen(true);
 	const onClose = () => {
-		setSelected(false);
-		setSelectedItem(null);
+		setOpen(false);
+		setSelectedFilter(null);
 	};
-	const onCancel = () => setSelectedItem(null);
+	const onCancel = () => setSelectedFilter(null);
 
 	return (
 		<CardFilterActionMenu
 			TriggerButton={(
 				<Tooltip title={formatMessage({ id: 'viewer.card.tickets.addFilter', defaultMessage: 'Add Filter' })}>
 					<div>
-						<CardAction disabled={disabled} selected={selected}>
+						<CardAction disabled={disabled} selected={open}>
 							<FennelIcon />
 						</CardAction>
 					</div>
@@ -68,11 +68,11 @@ export const FilterSelection = () => {
 								defaultMessage: 'Serach for property...',
 							})}
 						/>
-						<TicketFiltersSelectionList setSelectedFilter={setSelectedItem} />
+						<TicketFiltersSelectionList onFilterClick={setSelectedFilter} />
 					</DrillDownItem>
 					<DrillDownItem $visible={!showFiltersList}>
 						<FilterForm
-							{...(selectedItem || {} as any)}
+							{...(selectedFilter || {} as any)}
 							onSubmit={TicketsCardActionsDispatchers.upsertFilter}
 							onCancel={onCancel}
 						/>

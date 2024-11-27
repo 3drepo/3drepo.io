@@ -24,7 +24,7 @@ import TemplateIcon from '@assets/icons/filters/template.svg';
 import TextIcon from '@assets/icons/filters/text.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
 import { sortBy, uniqBy } from 'lodash';
-import { CardFilterType, TicketFilterListItemType } from '../../../cardFilters.types';
+import { CardFilterType, TicketFilterListItemType } from '../../cardFilters.types';
 
 export const TYPE_TO_ICON: Record<CardFilterType, any> = {
 	'template': TemplateIcon,

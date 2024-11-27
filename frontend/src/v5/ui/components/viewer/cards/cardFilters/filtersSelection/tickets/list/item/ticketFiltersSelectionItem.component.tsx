@@ -16,7 +16,7 @@
  */
 
 import { TicketFilterListItemType } from '@components/viewer/cards/cardFilters/cardFilters.types';
-import { TYPE_TO_ICON } from '../ticketFiltersSelectionList.helpers';
+import { TYPE_TO_ICON } from '../../ticketFilters.helpers';
 import { ExpandIconContainer, FilterIconContainer, MenuItem } from './ticketFiltersSelectionItem.styles';
 import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
 import { Highlight } from '@controls/highlight';
