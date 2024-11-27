@@ -19,7 +19,7 @@ export type CardFilterOperator = 'ex' | 'nex' | 'eq' | 'neq' | 'ss' | 'nss' | 'r
 export type CardFilterType = 'text' | 'longText' | 'date' | 'pastDate' | 'sequencing' | 'oneOf' | 'manyOf' | 'boolean' | 'number' | 'ticketTitle' | 'ticketId' | 'template';
 export type CardFilterValue = string | number | Date;
 export type BaseFilter = { operator: CardFilterOperator, values: CardFilterValue[] };
-export type TypesByProperty = {
+export type FilterTypesByProperty = {
 	[property in string]: {
 		[type in CardFilterType]?: BaseFilter;
 	};

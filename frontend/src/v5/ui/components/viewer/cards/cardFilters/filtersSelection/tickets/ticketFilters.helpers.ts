@@ -24,7 +24,7 @@ import TemplateIcon from '@assets/icons/filters/template.svg';
 import TextIcon from '@assets/icons/filters/text.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
 import { sortBy, uniqBy } from 'lodash';
-import { CardFilter, CardFilterType, TypesByProperty, BaseFilter, TicketFilterDescription } from '../../cardFilters.types';
+import { CardFilter, CardFilterType, FilterTypesByProperty, BaseFilter, TicketFilterDescription } from '../../cardFilters.types';
 
 export const TYPE_TO_ICON: Record<CardFilterType, any> = {
 	'template': TemplateIcon,
@@ -43,7 +43,7 @@ export const TYPE_TO_ICON: Record<CardFilterType, any> = {
 
 const VALID_FILTERING_PROPERTY_TYPES = Object.keys(TYPE_TO_ICON);
 
-export const DEFAULT_FILTERS: TicketFilterDescription[] = [
+const DEFAULT_FILTERS: TicketFilterDescription[] = [
 	{ module: '', type: 'ticketTitle', property: formatMessage({ defaultMessage: 'Ticket title', id: 'viewer.card.filters.element.ticketTitle' }) },
 	{ module: '', type: 'ticketId', property: formatMessage({ defaultMessage: 'Ticket ID', id: 'viewer.card.filters.element.ticketId' }) },
 	{ module: '', type: 'template', property: formatMessage({ defaultMessage: 'Ticket template', id: 'viewer.card.filters.element.ticketTemplate' }) },
@@ -72,7 +72,7 @@ export const templatesToFilters = (templates: ITemplate[]): TicketFilterDescript
 	];
 };
 
-const toCardFilter = (typesByProperty: TypesByProperty): CardFilter[] => (
+const toCardFilter = (typesByProperty: FilterTypesByProperty): CardFilter[] => (
 	Object.entries(typesByProperty).flatMap(([property, filterByType]) => (
 		Object.entries(filterByType).map(([type, filter]: [CardFilterType, BaseFilter]) => ({ property, type, filter }))),
 	)
