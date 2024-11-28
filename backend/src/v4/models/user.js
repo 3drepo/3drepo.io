@@ -48,6 +48,8 @@ const PermissionTemplates = require("./permissionTemplates");
 const { get } = require("lodash");
 const { fileExists } = require("./fileRef");
 const {v5Path} = require("../../interop");
+const { types: { strings } } = require(`${v5Path}/utils/helper/yup.js`);
+const { sanitiseRegex } = require(`${v5Path}/utils/helper/strings.js`);
 const { events } = require(`${v5Path}/services/eventsManager/eventsManager.constants`);
 const { publish } = require(`${v5Path}/services/eventsManager/eventsManager.js`);
 const { getAddOns } = require(`${v5Path}/models/teamspaceSettings`);
@@ -146,7 +148,7 @@ User.authenticate =  async function (username, password) {
 
 	let user = null;
 
-	if (C.EMAIL_REGEXP.test(username)) { // if the submited username is the email
+	if(strings.email.isValidSync(username)) { // if the submited username is the email
 		user = await User.findByEmail(username);
 	} else {
 		user = await User.findByUserName(username);
@@ -335,7 +337,7 @@ User.checkUserNameAvailableAndValid = async function (username) {
 };
 
 User.checkEmailAvailableAndValid = async function (email, exceptUser) {
-	if (!C.EMAIL_REGEXP.test(email)) {
+	if (!strings.email.isValidSync(email)) {
 		throw(responseCodes.EMAIL_INVALID);
 	}
 
@@ -856,7 +858,7 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions, exec
 	await hasReachedLicenceLimit(teamspace);
 
 	let userEntry = null;
-	if (C.EMAIL_REGEXP.test(userToAdd)) { // if the submited username is the email
+	if (strings.email.isValidSync(userToAdd)) { // if the submited username is the email
 		userEntry = await User.findByEmail(userToAdd);
 	} else {
 		userEntry = await User.findByUserName(userToAdd);
@@ -999,7 +1001,8 @@ User.findByUserName = async function (username, projection) {
 };
 
 User.findByEmail = async function (email) {
-	return await findOne({ "customData.email":  new RegExp("^" + utils.sanitizeString(email) + "$", "i") });
+	const sanitisedEmail = sanitiseRegex(email);
+	return await findOne({ "customData.email":  new RegExp(`^${sanitisedEmail}$`, "i") });
 };
 
 User.findByUsernameOrEmail = async function (userNameOrEmail) {

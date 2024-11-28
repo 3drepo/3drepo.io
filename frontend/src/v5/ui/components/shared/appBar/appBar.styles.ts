@@ -34,6 +34,9 @@ export const Items = styled.div`
 		justify-content: flex-end;
 		min-width: 152px;
 	}
+	&:first-child {
+		justify-content: left;
+	}
 `;
 
 export const AppBarContainer = styled(AppBar).attrs({
