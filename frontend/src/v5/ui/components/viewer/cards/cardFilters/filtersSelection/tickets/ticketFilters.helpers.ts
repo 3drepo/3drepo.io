@@ -16,7 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { ITemplate, TicketsCardFilters } from '@/v5/store/tickets/tickets.types';
+import { ITemplate, FilterPropertiesByModule } from '@/v5/store/tickets/tickets.types';
 import BooleanIcon from '@assets/icons/filters/boolean.svg';
 import ListIcon from '@assets/icons/filters/list.svg';
 import NumberIcon from '@assets/icons/filters/number.svg';
@@ -78,7 +78,7 @@ export const toCardFilter = (typesByProperty: FilterTypesByProperty): CardFilter
 	)
 );
 
-export const getFiltersByModule = (filters: TicketsCardFilters) => {
+export const getFiltersByModule = (filters: FilterPropertiesByModule) => {
 	const sortedFiltersByModule = Object.entries(filters).sort((a, b) => a[0].localeCompare(b[0]));
 	return sortedFiltersByModule.map(([module, properties]) => [module, toCardFilter(properties)] as [string, CardFilter[]]);
 };

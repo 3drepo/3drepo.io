@@ -20,7 +20,7 @@ import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '@/v5/helpers/actions.helper';
-import { EditableTicket, OverridesDicts, TicketsCardFilters } from '../tickets.types';
+import { EditableTicket, OverridesDicts, FilterPropertiesByModule } from '../tickets.types';
 import { TeamspaceProjectAndModel } from '../../store.types';
 import { TicketCardFilter, TicketFilterDescription } from '@components/viewer/cards/cardFilters/cardFilters.types';
 import { get, isEmpty, set, unset } from 'lodash';
@@ -50,7 +50,7 @@ export interface ITicketsCardState {
 	selectedTemplateId: string | null,
 	selectedTicketPinId: string | null,
 	pinToDrop: string | null,
-	filters: TicketsCardFilters,
+	filters: FilterPropertiesByModule,
 	view: TicketsCardViews,
 	viewProps: any,
 	readOnly: boolean,
