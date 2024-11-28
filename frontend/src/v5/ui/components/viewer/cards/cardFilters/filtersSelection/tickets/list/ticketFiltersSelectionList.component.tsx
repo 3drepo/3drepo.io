@@ -20,13 +20,13 @@ import { useContext } from 'react';
 import { TicketFiltersSelectionItem } from './item/ticketFiltersSelectionItem.component';
 import { FormattedMessage } from 'react-intl';
 import { MenuList, EmptyListMessage } from './ticketFiltersSelectionList.styles';
-import { TicketFilterDescription } from '../../../cardFilters.types';
+import { TicketCardFilterDescription } from '../../../cardFilters.types';
 
 type TicketFiltersSelectionListProps = {
 	onFilterClick: (filter) => void;
 };
 export const TicketFiltersSelectionList = ({ onFilterClick }: TicketFiltersSelectionListProps) => {
-	const { filteredItems, query } = useContext<SearchContextType<TicketFilterDescription>>(SearchContext);
+	const { filteredItems, query } = useContext<SearchContextType<TicketCardFilterDescription>>(SearchContext);
 
 	if (!filteredItems.length) return (
 		<EmptyListMessage>

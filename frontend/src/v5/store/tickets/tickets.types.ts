@@ -16,7 +16,7 @@
  */
 
 import { RgbArray } from '@/v5/helpers/colors.helper';
-import { FilterTypesByProperty } from '@components/viewer/cards/cardFilters/cardFilters.types';
+import { BaseFilter, CardFilterType } from '@components/viewer/cards/cardFilters/cardFilters.types';
 import { TicketStatusTypes } from '@controls/chip/chip.types';
 
 export type PropertyTypeDefinition = 'text' | 'longText' | 'boolean' | 'number' | 'date' | 'view' | 'manyOf' | 'oneOf' | 'image' | 'imageList' | 'coords' | 'measurements';
@@ -213,6 +213,11 @@ export type OverridesDicts = {
 	transparencies: MeshIdTransparencyDict,
 };
 
+export type FilterTypesByProperty = {
+	[property in string]: {
+		[type in CardFilterType]?: BaseFilter;
+	};
+};
 export type FilterPropertiesByModule = {
 	[module in string]?: FilterTypesByProperty;
 };

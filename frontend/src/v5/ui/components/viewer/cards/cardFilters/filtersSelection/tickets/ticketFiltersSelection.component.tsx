@@ -24,14 +24,14 @@ import FennelIcon from '@assets/icons/filters/fennel.svg';
 import { Tooltip } from '@mui/material';
 import { TicketFiltersSelectionList } from './list/ticketFiltersSelectionList.component';
 import { SearchInput, DrillDownList, DrillDownItem } from './ticketFiltersSelection.styles';
-import { TicketFilterDescription } from '../../cardFilters.types';
+import { TicketCardFilterDescription } from '../../cardFilters.types';
 import { FilterForm } from '../../filterForm/filterForm.component';
 import { CardFilterActionMenu } from '../../filterForm/filterForm.styles';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 export const FilterSelection = () => {
 	const [open, setOpen] = useState(false);
-	const [selectedFilter, setSelectedFilter] = useState<TicketFilterDescription>(null);
+	const [selectedFilter, setSelectedFilter] = useState<TicketCardFilterDescription>(null);
 	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
 	const unusedFilters = TicketsCardHooksSelectors.selectAvailableTemplatesFilters();
 	const showFiltersList = !selectedFilter?.property;

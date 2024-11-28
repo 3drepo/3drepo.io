@@ -19,11 +19,6 @@ export type CardFilterOperator = 'ex' | 'nex' | 'eq' | 'neq' | 'ss' | 'nss' | 'r
 export type CardFilterType = 'text' | 'longText' | 'date' | 'pastDate' | 'sequencing' | 'oneOf' | 'manyOf' | 'boolean' | 'number' | 'ticketTitle' | 'ticketId' | 'template';
 export type CardFilterValue = string | number | Date;
 export type BaseFilter = { operator: CardFilterOperator, values: CardFilterValue[] };
-export type FilterTypesByProperty = {
-	[property in string]: {
-		[type in CardFilterType]?: BaseFilter;
-	};
-};
 
 export type CardFilter = {
 	property: string,
@@ -31,4 +26,4 @@ export type CardFilter = {
 	filter: BaseFilter,
 };
 export type TicketCardFilter = CardFilter & { module: string };
-export type TicketFilterDescription = Omit<TicketCardFilter, 'filter'>;
+export type TicketCardFilterDescription = Omit<TicketCardFilter, 'filter'>;
