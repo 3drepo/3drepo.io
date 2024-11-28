@@ -22,6 +22,7 @@ const { getUserAgentInfo } = require('../utils/helper/userAgent');
 const { isAccountActive } = require('../models/users');
 const { isAccountLocked } = require('../models/loginRecords');
 const { isSessionValid } = require('../utils/sessions');
+const { logger } = require('../utils/logger');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { respond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');
@@ -40,6 +41,8 @@ const validSessionDetails = async (req, res, next) => {
 		if (!ipMatch || !applicationNameMatch) {
 			try {
 				req.session.destroy(() => {
+					logger.logInfo('Session destroyed due to IP or application name missmatch');
+
 					res.clearCookie(CSRF_COOKIE, { domain: cookie.domain });
 					res.clearCookie(SESSION_HEADER, { domain: cookie_domain, path: '/' });
 
