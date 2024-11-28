@@ -111,7 +111,7 @@ export const CompletedChip = styled(FilterChip).attrs(({ selected, theme }: any)
 		align-self: flex-end;
 		margin: 0 0 18px 15px;
 
-		&, .MuiChip-root:hover {
+		&, &:hover {
 			color: ${({ theme }) => theme.palette.success.main};
 			border: 1px solid ${({ theme }) => theme.palette.success.main};
 			${({ selected, theme: { palette } }) => selected && css`
