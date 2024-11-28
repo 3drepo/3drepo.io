@@ -16,7 +16,7 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { CardFilterOperator, CardFilterValue, CardFilter, CardFilterType, BaseFilter } from '../cardFilters.types';
+import { CardFilterOperator, CardFilterValue, CardFilterType, BaseFilter, TicketCardFilter } from '../cardFilters.types';
 import { FILTER_OPERATOR_LABEL, getFilterFormTitle } from '../cardFilters.helpers';
 import { Container, ButtonsContainer, Button } from './filterForm.styles';
 import { MenuItem } from '@mui/material';
@@ -33,7 +33,7 @@ type FilterFormProps = {
 	property: string,
 	type: CardFilterType,
 	filter?: BaseFilter,
-	onSubmit: (newFilter: CardFilter) => void,
+	onSubmit: (newFilter: TicketCardFilter) => void,
 	onCancel: () => void,
 };
 export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel }: FilterFormProps) => {
