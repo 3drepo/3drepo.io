@@ -118,13 +118,13 @@ const areBatchPermissionsValid = (batchPermissions) => {
 
 	const referenceUsers = batchPermissions[0].permissions.map(p => p.user);
 
-	batchPermissions.forEach(batchPerm => {
-		const users = batchPerm.permissions.map(p => p.user);
+	for(let i = 1; i < batchPermissions.length; i++) {
+		const users = batchPermissions[i].permissions.map(p => p.user);
 
 		if(getArrayDifference(referenceUsers, users).length) {
 			return false;
 		}
-	});
+	}
 
 	return true;
 };

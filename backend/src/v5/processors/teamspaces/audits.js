@@ -54,7 +54,7 @@ const createAuditLogArchive = async (actions) => {
 
 		contentsStream.write('[');
 		actions.forEach(({ _id, ...data }, index) => {
-			const formattedData = actionSchema.validateSync(data);
+			const formattedData = actionSchema.cast(data);
 			contentsStream.write(`${JSON.stringify(formattedData)}`);
 			if (index !== actions.length - 1) {
 				contentsStream.write(', ');
