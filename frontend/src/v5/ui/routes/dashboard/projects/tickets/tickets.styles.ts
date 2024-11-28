@@ -103,11 +103,7 @@ export const SlidePanelHeader = styled.div`
 	background: ${({ theme }) => theme.palette.primary.contrast};
 `;
 
-
-export const CompletedFilterChip = styled(FilterChip)`
-`;
-
-export const CompletedChip = styled(CompletedFilterChip).attrs(({ selected, theme }: any) => ({
+export const CompletedChip = styled(FilterChip).attrs(({ selected, theme }: any) => ({
 	color: theme.palette.success.main,
 	variant: selected ? 'filled' : 'outlined',
 }))<{ selected: boolean }>`
