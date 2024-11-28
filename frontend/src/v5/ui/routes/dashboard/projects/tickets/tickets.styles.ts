@@ -103,7 +103,11 @@ export const SlidePanelHeader = styled.div`
 	background: ${({ theme }) => theme.palette.primary.contrast};
 `;
 
-export const CompletedChip = styled(FilterChip).attrs(({ selected, theme }: any) => ({
+
+export const CompletedFilterChip = styled(FilterChip)`
+`;
+
+export const CompletedChip = styled(CompletedFilterChip).attrs(({ selected, theme }: any) => ({
 	color: theme.palette.success.main,
 	variant: selected ? 'filled' : 'outlined',
 }))<{ selected: boolean }>`
@@ -111,7 +115,7 @@ export const CompletedChip = styled(FilterChip).attrs(({ selected, theme }: any)
 		align-self: flex-end;
 		margin: 0 0 18px 15px;
 
-		&, .MuiChip-root:hover {
+		&, &:hover {
 			color: ${({ theme }) => theme.palette.success.main};
 			border: 1px solid ${({ theme }) => theme.palette.success.main};
 			${({ selected, theme: { palette } }) => selected && css`
