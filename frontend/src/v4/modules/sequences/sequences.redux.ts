@@ -155,7 +155,7 @@ export const updateFrameWithViewpoint = (state, { sequenceId, stateId, viewpoint
 		return;
 	}
 	const sequenceToUpdate = state.sequences.find(({ _id }) => _id === sequenceId);
-	const frameToUpdate = sequenceToUpdate.frames.find(({ state: s }) => s === stateId);
+	const frameToUpdate = sequenceToUpdate.frames.find(({ state: s, dateTime }) => s === stateId || dateTime === stateId);
 
 	if (!frameToUpdate) {
 		// If two successive dates correspond to the same frame updateFrameViewpoint can get called for a frame that has already been converted
@@ -163,6 +163,7 @@ export const updateFrameWithViewpoint = (state, { sequenceId, stateId, viewpoint
 	}
 	Object.assign(frameToUpdate, viewpoint);
 	delete frameToUpdate.state;
+	delete frameToUpdate.dateTime;
 };
 
 export const setStepInterval = (state, { stepInterval }) => {
