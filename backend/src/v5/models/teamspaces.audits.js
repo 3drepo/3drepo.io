@@ -45,23 +45,23 @@ const logAction = async (teamspace, action, executor, data) => {
 	await db.insertOne(teamspace, COL_NAME, formattedData);
 };
 
-Audit.logSeatAllocation = async (teamspace, executor, user) => {
+Audit.logSeatAllocated = async (teamspace, executor, user) => {
 	await logAction(teamspace, actions.USER_ADDED, executor, { user });
 };
 
-Audit.logSeatRemoval = async (teamspace, executor, user) => {
+Audit.logSeatDeallocated = async (teamspace, executor, user) => {
 	await logAction(teamspace, actions.USER_REMOVED, executor, { user });
 };
 
-Audit.logPermissionUpdate = async (teamspace, executor, users, permissions) => {
+Audit.logPermissionsUpdated = async (teamspace, executor, users, permissions) => {
 	await logAction(teamspace, actions.PERMISSIONS_UPDATED, executor, { users, permissions });
 };
 
-Audit.logInvitationAddition = async (teamspace, executor, email, job, permissions) => {
+Audit.logUserInvited = async (teamspace, executor, email, job, permissions) => {
 	await logAction(teamspace, actions.INVITATION_ADDED, executor, { email, job, permissions });
 };
 
-Audit.logInvitationRemoval = async (teamspace, executor, email, job, permissions) => {
+Audit.logUserUninvited = async (teamspace, executor, email, job, permissions) => {
 	await logAction(teamspace, actions.INVITATION_REVOKED, executor, { email, job, permissions });
 };
 

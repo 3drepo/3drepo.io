@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { logInvitationAddition, logInvitationRemoval, logPermissionUpdate, logSeatAllocation, logSeatRemoval } = require('../../models/teamspaces.audits');
+const { logPermissionsUpdated, logSeatAllocated, logSeatDeallocated, logUserInvited, logUserUninvited } = require('../../models/teamspaces.audits');
 const Yup = require('yup');
 const { actions } = require('../../models/teamspaces.audits.constants');
 const { events } = require('../eventsManager/eventsManager.constants');
@@ -26,7 +26,7 @@ const { types } = require('../../utils/helper/yup');
 
 const userAdded = async ({ teamspace, executor, user }) => {
 	try {
-		await logSeatAllocation(teamspace, executor, user);
+		await logSeatAllocated(teamspace, executor, user);
 	} catch (err) {
 		logger.logError(`Failed to add a ${actions.USER_ADDED} audit log`);
 	}
@@ -34,7 +34,7 @@ const userAdded = async ({ teamspace, executor, user }) => {
 
 const userRemoved = async ({ teamspace, executor, user }) => {
 	try {
-		await logSeatRemoval(teamspace, executor, user);
+		await logSeatDeallocated(teamspace, executor, user);
 	} catch (err) {
 		logger.logError(`Failed to add a ${actions.USER_REMOVED} audit log`);
 	}
@@ -51,7 +51,7 @@ const teamspacePermissionsUpdated = async ({ teamspace, executor, users, from, t
 
 		const permissions = [{ from, to }];
 		await schema.validate(permissions);
-		await logPermissionUpdate(teamspace, executor, users, permissions);
+		await logPermissionsUpdated(teamspace, executor, users, permissions);
 	} catch (err) {
 		logger.logError(`Failed to add a ${actions.PERMISSIONS_UPDATED} audit log`);
 	}
@@ -67,7 +67,7 @@ const projectPermissionsUpdated = async ({ teamspace, executor, project, users, 
 
 		const permissions = [{ project, from, to }];
 		await schema.validate(permissions, { stripUnknown: true });
-		await logPermissionUpdate(teamspace, executor, users, permissions);
+		await logPermissionsUpdated(teamspace, executor, users, permissions);
 	} catch (err) {
 		logger.logError(`Failed to add a ${actions.PERMISSIONS_UPDATED} audit log`);
 	}
@@ -83,7 +83,7 @@ const modelsPermissionsUpdated = async ({ teamspace, executor, users, permission
 		}));
 
 		await schema.validate(permissions, { stripUnknown: true });
-		await logPermissionUpdate(teamspace, executor, users, permissions);
+		await logPermissionsUpdated(teamspace, executor, users, permissions);
 	} catch (err) {
 		logger.logError(`Failed to add a ${actions.PERMISSIONS_UPDATED} audit log`);
 	}
@@ -91,7 +91,7 @@ const modelsPermissionsUpdated = async ({ teamspace, executor, users, permission
 
 const invitationAdded = async ({ teamspace, executor, email, job, permissions }) => {
 	try {
-		await logInvitationAddition(teamspace, executor, email, job, permissions);
+		await logUserInvited(teamspace, executor, email, job, permissions);
 	} catch (err) {
 		logger.logError(`Failed to add a ${actions.INVITATION_ADDED} audit log`);
 	}
@@ -99,7 +99,7 @@ const invitationAdded = async ({ teamspace, executor, email, job, permissions })
 
 const invitationRevoked = async ({ teamspace, executor, email, job, permissions }) => {
 	try {
-		await logInvitationRemoval(teamspace, executor, email, job, permissions);
+		await logUserUninvited(teamspace, executor, email, job, permissions);
 	} catch (err) {
 		logger.logError(`Failed to add a ${actions.INVITATION_REVOKED} audit log`);
 	}

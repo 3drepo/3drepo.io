@@ -52,8 +52,8 @@ const testAuditEvents = () => {
 			EventsManager.publish(events.USER_ADDED, { teamspace, executor, user });
 			await waitOnEvent;
 
-			expect(Audits.logSeatAllocation).toHaveBeenCalledTimes(1);
-			expect(Audits.logSeatAllocation).toHaveBeenCalledWith(teamspace, executor, user);
+			expect(Audits.logSeatAllocated).toHaveBeenCalledTimes(1);
+			expect(Audits.logSeatAllocated).toHaveBeenCalledWith(teamspace, executor, user);
 		});
 
 		test(`Should fail gracefully on error if there is a ${events.USER_ADDED} event`, async () => {
@@ -62,12 +62,12 @@ const testAuditEvents = () => {
 			const executor = generateRandomString();
 			const user = generateRandomString();
 
-			Audits.logSeatAllocation.mockRejectedValueOnce(generateRandomString());
+			Audits.logSeatAllocated.mockRejectedValueOnce(generateRandomString());
 			EventsManager.publish(events.USER_ADDED, { teamspace, executor, user });
 
 			await waitOnEvent;
-			expect(Audits.logSeatAllocation).toHaveBeenCalledTimes(1);
-			expect(Audits.logSeatAllocation).toHaveBeenCalledWith(teamspace, executor, user);
+			expect(Audits.logSeatAllocated).toHaveBeenCalledTimes(1);
+			expect(Audits.logSeatAllocated).toHaveBeenCalledWith(teamspace, executor, user);
 		});
 
 		test(`Should trigger userRemoved if there is a ${events.USER_REMOVED} event`, async () => {
@@ -78,8 +78,8 @@ const testAuditEvents = () => {
 			EventsManager.publish(events.USER_REMOVED, { teamspace, executor, user });
 			await waitOnEvent;
 
-			expect(Audits.logSeatRemoval).toHaveBeenCalledTimes(1);
-			expect(Audits.logSeatRemoval).toHaveBeenCalledWith(teamspace, executor, user);
+			expect(Audits.logSeatDeallocated).toHaveBeenCalledTimes(1);
+			expect(Audits.logSeatDeallocated).toHaveBeenCalledWith(teamspace, executor, user);
 		});
 
 		test(`Should fail gracefully on error if there is a ${events.USER_REMOVED} event`, async () => {
@@ -88,12 +88,12 @@ const testAuditEvents = () => {
 			const executor = generateRandomString();
 			const user = generateRandomString();
 
-			Audits.logSeatRemoval.mockRejectedValueOnce(generateRandomString());
+			Audits.logSeatDeallocated.mockRejectedValueOnce(generateRandomString());
 			EventsManager.publish(events.USER_REMOVED, { teamspace, executor, user });
 
 			await waitOnEvent;
-			expect(Audits.logSeatRemoval).toHaveBeenCalledTimes(1);
-			expect(Audits.logSeatRemoval).toHaveBeenCalledWith(teamspace, executor, user);
+			expect(Audits.logSeatDeallocated).toHaveBeenCalledTimes(1);
+			expect(Audits.logSeatDeallocated).toHaveBeenCalledWith(teamspace, executor, user);
 		});
 
 		test(`Should trigger invitationAdded if there is an ${events.INVITATION_ADDED} event`, async () => {
@@ -106,8 +106,8 @@ const testAuditEvents = () => {
 			EventsManager.publish(events.INVITATION_ADDED, { teamspace, executor, email, job, permissions });
 			await waitOnEvent;
 
-			expect(Audits.logInvitationAddition).toHaveBeenCalledTimes(1);
-			expect(Audits.logInvitationAddition).toHaveBeenCalledWith(teamspace, executor,
+			expect(Audits.logUserInvited).toHaveBeenCalledTimes(1);
+			expect(Audits.logUserInvited).toHaveBeenCalledWith(teamspace, executor,
 				email, job, permissions);
 		});
 
@@ -119,12 +119,12 @@ const testAuditEvents = () => {
 			const job = generateRandomString();
 			const permissions = generateRandomString();
 
-			Audits.logInvitationAddition.mockRejectedValueOnce(generateRandomString());
+			Audits.logUserInvited.mockRejectedValueOnce(generateRandomString());
 			EventsManager.publish(events.INVITATION_ADDED, { teamspace, executor, email, job, permissions });
 			await waitOnEvent;
 
-			expect(Audits.logInvitationAddition).toHaveBeenCalledTimes(1);
-			expect(Audits.logInvitationAddition).toHaveBeenCalledWith(teamspace, executor,
+			expect(Audits.logUserInvited).toHaveBeenCalledTimes(1);
+			expect(Audits.logUserInvited).toHaveBeenCalledWith(teamspace, executor,
 				email, job, permissions);
 		});
 
@@ -138,8 +138,8 @@ const testAuditEvents = () => {
 			EventsManager.publish(events.INVITATION_REVOKED, { teamspace, executor, email, job, permissions });
 			await waitOnEvent;
 
-			expect(Audits.logInvitationRemoval).toHaveBeenCalledTimes(1);
-			expect(Audits.logInvitationRemoval).toHaveBeenCalledWith(teamspace, executor,
+			expect(Audits.logUserUninvited).toHaveBeenCalledTimes(1);
+			expect(Audits.logUserUninvited).toHaveBeenCalledWith(teamspace, executor,
 				email, job, permissions);
 		});
 
@@ -151,12 +151,12 @@ const testAuditEvents = () => {
 			const job = generateRandomString();
 			const permissions = generateRandomString();
 
-			Audits.logInvitationRemoval.mockRejectedValueOnce(generateRandomString());
+			Audits.logUserUninvited.mockRejectedValueOnce(generateRandomString());
 			EventsManager.publish(events.INVITATION_REVOKED, { teamspace, executor, email, job, permissions });
 			await waitOnEvent;
 
-			expect(Audits.logInvitationRemoval).toHaveBeenCalledTimes(1);
-			expect(Audits.logInvitationRemoval).toHaveBeenCalledWith(teamspace, executor,
+			expect(Audits.logUserUninvited).toHaveBeenCalledTimes(1);
+			expect(Audits.logUserUninvited).toHaveBeenCalledWith(teamspace, executor,
 				email, job, permissions);
 		});
 
@@ -171,8 +171,8 @@ const testAuditEvents = () => {
 			EventsManager.publish(events.TEAMSPACE_PERMISSIONS_UPDATED, { teamspace, executor, users, from, to });
 			await waitOnEvent;
 
-			expect(Audits.logPermissionUpdate).toHaveBeenCalledTimes(1);
-			expect(Audits.logPermissionUpdate).toHaveBeenCalledWith(teamspace, executor, users, [{ from, to }]);
+			expect(Audits.logPermissionsUpdated).toHaveBeenCalledTimes(1);
+			expect(Audits.logPermissionsUpdated).toHaveBeenCalledWith(teamspace, executor, users, [{ from, to }]);
 		});
 
 		test(`Should fail gracefully on error if there is a ${events.TEAMSPACE_PERMISSIONS_UPDATED} event`, async () => {
@@ -183,12 +183,12 @@ const testAuditEvents = () => {
 			const from = null;
 			const to = ['teamspace_admin'];
 
-			Audits.logPermissionUpdate.mockRejectedValueOnce(generateRandomString());
+			Audits.logPermissionsUpdated.mockRejectedValueOnce(generateRandomString());
 			EventsManager.publish(events.TEAMSPACE_PERMISSIONS_UPDATED, { teamspace, executor, users, from, to });
 			await waitOnEvent;
 
-			expect(Audits.logPermissionUpdate).toHaveBeenCalledTimes(1);
-			expect(Audits.logPermissionUpdate).toHaveBeenCalledWith(teamspace,
+			expect(Audits.logPermissionsUpdated).toHaveBeenCalledTimes(1);
+			expect(Audits.logPermissionsUpdated).toHaveBeenCalledWith(teamspace,
 				executor, users, [{ from, to }]);
 		});
 
@@ -205,8 +205,8 @@ const testAuditEvents = () => {
 				{ teamspace, project, users, executor, from, to });
 			await waitOnEvent;
 
-			expect(Audits.logPermissionUpdate).toHaveBeenCalledTimes(1);
-			expect(Audits.logPermissionUpdate).toHaveBeenCalledWith(teamspace, executor,
+			expect(Audits.logPermissionsUpdated).toHaveBeenCalledTimes(1);
+			expect(Audits.logPermissionsUpdated).toHaveBeenCalledWith(teamspace, executor,
 				users, [{ from, to, project }]);
 		});
 
@@ -219,13 +219,13 @@ const testAuditEvents = () => {
 			const from = null;
 			const to = [PROJECT_ADMIN];
 
-			Audits.logPermissionUpdate.mockRejectedValueOnce(generateRandomString());
+			Audits.logPermissionsUpdated.mockRejectedValueOnce(generateRandomString());
 			EventsManager.publish(events.PROJECT_PERMISSIONS_UPDATED,
 				{ teamspace, executor, project, users, from, to });
 			await waitOnEvent;
 
-			expect(Audits.logPermissionUpdate).toHaveBeenCalledTimes(1);
-			expect(Audits.logPermissionUpdate).toHaveBeenCalledWith(teamspace,
+			expect(Audits.logPermissionsUpdated).toHaveBeenCalledTimes(1);
+			expect(Audits.logPermissionsUpdated).toHaveBeenCalledWith(teamspace,
 				executor, users, [{ project, from, to }]);
 		});
 
@@ -254,8 +254,8 @@ const testAuditEvents = () => {
 				{ teamspace, executor, project, users, permissions });
 			await waitOnEvent;
 
-			expect(Audits.logPermissionUpdate).toHaveBeenCalledTimes(1);
-			expect(Audits.logPermissionUpdate).toHaveBeenCalledWith(teamspace,
+			expect(Audits.logPermissionsUpdated).toHaveBeenCalledTimes(1);
+			expect(Audits.logPermissionsUpdated).toHaveBeenCalledWith(teamspace,
 				executor, users, permissions);
 		});
 
@@ -270,13 +270,13 @@ const testAuditEvents = () => {
 			const users = [times(5, () => generateRandomString())];
 			const permissions = [{ project, model, from, to }];
 
-			Audits.logPermissionUpdate.mockRejectedValueOnce(generateRandomString());
+			Audits.logPermissionsUpdated.mockRejectedValueOnce(generateRandomString());
 			EventsManager.publish(events.MODEL_PERMISSIONS_UPDATED,
 				{ teamspace, executor, project, users, permissions });
 			await waitOnEvent;
 
-			expect(Audits.logPermissionUpdate).toHaveBeenCalledTimes(1);
-			expect(Audits.logPermissionUpdate).toHaveBeenCalledWith(teamspace,
+			expect(Audits.logPermissionsUpdated).toHaveBeenCalledTimes(1);
+			expect(Audits.logPermissionsUpdated).toHaveBeenCalledWith(teamspace,
 				executor, users, [{ project, model, from, to }]);
 		});
 	});

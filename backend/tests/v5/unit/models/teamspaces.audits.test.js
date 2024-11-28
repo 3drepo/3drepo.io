@@ -72,7 +72,7 @@ const tesGetActionLog = () => {
 	});
 };
 
-const testLogSeatAllocation = () => {
+const testLogSeatAllocated = () => {
 	describe('Log seat allocation', () => {
 		test('should log a seat allocation', async () => {
 			const teamspace = generateRandomString();
@@ -81,7 +81,7 @@ const testLogSeatAllocation = () => {
 
 			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
 
-			await Audits.logSeatAllocation(teamspace, executor, user);
+			await Audits.logSeatAllocated(teamspace, executor, user);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			const { _id, timestamp } = fn.mock.calls[0][2];
@@ -91,7 +91,7 @@ const testLogSeatAllocation = () => {
 	});
 };
 
-const testLogSeatRemoval = () => {
+const testLogSeatDeallocated = () => {
 	describe('Log seat removal', () => {
 		test('should log a seat removal', async () => {
 			const teamspace = generateRandomString();
@@ -100,7 +100,7 @@ const testLogSeatRemoval = () => {
 
 			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
 
-			await Audits.logSeatRemoval(teamspace, executor, user);
+			await Audits.logSeatDeallocated(teamspace, executor, user);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			const { _id, timestamp } = fn.mock.calls[0][2];
@@ -120,7 +120,7 @@ const testLogPermissionsUpdate = () => {
 
 			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
 
-			await Audits.logPermissionUpdate(teamspace, executor, users, permissions);
+			await Audits.logPermissionsUpdated(teamspace, executor, users, permissions);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			const { _id, timestamp } = fn.mock.calls[0][2];
@@ -130,7 +130,7 @@ const testLogPermissionsUpdate = () => {
 	});
 };
 
-const testLogInvitationAddition = () => {
+const testLogUserInvited = () => {
 	describe('Log invitation addition', () => {
 		test('should log a invitation addition', async () => {
 			const teamspace = generateRandomString();
@@ -141,7 +141,7 @@ const testLogInvitationAddition = () => {
 
 			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
 
-			await Audits.logInvitationAddition(teamspace, executor, email, job, permissions);
+			await Audits.logUserInvited(teamspace, executor, email, job, permissions);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			const { _id, timestamp } = fn.mock.calls[0][2];
@@ -151,9 +151,9 @@ const testLogInvitationAddition = () => {
 	});
 };
 
-const testLogInvitationRemoval = () => {
-	describe('Log invitation removal', () => {
-		test('should log a invitation removal', async () => {
+const testLogUserUninvited = () => {
+	describe('Log user uninvited', () => {
+		test('should log a invitation revoke', async () => {
 			const teamspace = generateRandomString();
 			const executor = generateRandomString();
 			const email = generateRandomString();
@@ -162,7 +162,7 @@ const testLogInvitationRemoval = () => {
 
 			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
 
-			await Audits.logInvitationRemoval(teamspace, executor, email, job, permissions);
+			await Audits.logUserUninvited(teamspace, executor, email, job, permissions);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			const { _id, timestamp } = fn.mock.calls[0][2];
@@ -174,9 +174,9 @@ const testLogInvitationRemoval = () => {
 
 describe('models/teamspaces.audits', () => {
 	tesGetActionLog();
-	testLogSeatAllocation();
-	testLogSeatRemoval();
+	testLogSeatAllocated();
+	testLogSeatDeallocated();
 	testLogPermissionsUpdate();
-	testLogInvitationAddition();
-	testLogInvitationRemoval();
+	testLogUserInvited();
+	testLogUserUninvited();
 });
