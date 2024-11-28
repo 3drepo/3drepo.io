@@ -33,19 +33,30 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 const AuthMiddlewares = require(`${src}/middleware/auth`);
 
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+const { USER_AGENT_HEADER } = require(`${src}/utils/sessions.constants`);
+
+jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
+const EventManager = require(`${src}/services/eventsManager/eventsManager`);
+
+jest.mock('../../../../src/v5/utils/helper/userAgent');
+const UserAgentHelper = require(`${src}/utils/helper/userAgent`);
+
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
 const ipAddress = generateRandomString();
 const token = generateRandomString();
-const session = { user: { referer: 'http://abc.com' }, token, ipAddress, destroy: (callback) => { callback(); } };
+const applicationName = generateRandomString();
+const session = { user: { referer: 'http://abc.com', applicationName }, token, ipAddress, destroy: (callback) => { callback(); } };
 const cookies = { [CSRF_COOKIE]: token };
-const headers = { referer: 'http://abc.com/', [CSRF_HEADER]: token };
+const headers = { referer: 'http://abc.com/', [CSRF_HEADER]: token, [USER_AGENT_HEADER]: generateRandomString() };
 
 const testValidSession = () => {
 	describe('Valid sessions', () => {
 		test('next() should be called if the session is valid', () => {
 			const mockCB = jest.fn(() => {});
+			UserAgentHelper.getUserAgentInfo.mockImplementationOnce(() => ({ application: { name: applicationName } }));
 			AuthMiddlewares.validSession(
 				{ ips: [ipAddress], headers, session, cookies },
 				{},
@@ -54,10 +65,10 @@ const testValidSession = () => {
 			expect(mockCB.mock.calls.length).toBe(1);
 		});
 
-		test('next() should be called if there is an apiKey session ', () => {
+		test('next() should be called if there is an apiKey session', () => {
 			const mockCB = jest.fn(() => {});
 			AuthMiddlewares.validSession(
-				{ ip: ipAddress, ips: [], headers, session: { user: { referer: 'http://abc.com', isAPIKey: true }, ipAddress } },
+				{ headers, session: { user: { referer: 'http://abc.com', isAPIKey: true }, ipAddress } },
 				{},
 				mockCB,
 			);
@@ -66,19 +77,48 @@ const testValidSession = () => {
 
 		test('should respond with notLoggedIn errCode if the ip address missmatched', () => {
 			const mockCB = jest.fn(() => {});
+			const sessionID = generateRandomString();
+			UserAgentHelper.getUserAgentInfo.mockImplementationOnce(() => ({ application: { name: applicationName } }));
 			AuthMiddlewares.validSession(
-				{ ips: [generateRandomString()], headers, session, cookies },
+				{ ips: [],
+					ip: generateRandomString(),
+					headers,
+					session,
+					cookies,
+					sessionID },
 				{ clearCookie: () => {} },
 				mockCB,
 			);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond.mock.results[0].value).toEqual(templates.notLoggedIn);
+			expect(EventManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventManager.publish).toHaveBeenCalledWith(events.SESSIONS_REMOVED, { ids: [sessionID] });
+		});
+
+		test('should respond with notLoggedIn errCode if the application name missmatched', () => {
+			const mockCB = jest.fn(() => {});
+			const sessionID = generateRandomString();
+			UserAgentHelper.getUserAgentInfo.mockImplementationOnce(() => ({
+				application: { name: generateRandomString() },
+			}));
+
+			AuthMiddlewares.validSession(
+				{ ips: [ipAddress], headers, session, cookies, sessionID },
+				{ clearCookie: () => {} },
+				mockCB,
+			);
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond.mock.results[0].value).toEqual(templates.notLoggedIn);
+			expect(EventManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventManager.publish).toHaveBeenCalledWith(events.SESSIONS_REMOVED, { ids: [sessionID] });
 		});
 
 		test('should respond with whatever error destroySession throws', () => {
 			const error = new Error();
 			const mockCB = jest.fn(() => {});
+			UserAgentHelper.getUserAgentInfo.mockImplementationOnce(() => ({ application: { name: applicationName } }));
 			AuthMiddlewares.validSession({ ips: [generateRandomString()],
 				headers,
 				session: { ...session, destroy: () => { throw error; } },
@@ -116,6 +156,7 @@ const testValidSession = () => {
 
 		test('next should be called if csrf token is provided in upper case', () => {
 			const mockCB = jest.fn(() => {});
+			UserAgentHelper.getUserAgentInfo.mockImplementationOnce(() => ({ application: { name: applicationName } }));
 			AuthMiddlewares.validSession(
 				{ ips: [ipAddress], headers: { ...headers, [CSRF_HEADER.toUpperCase()]: token }, session, cookies },
 				{},
@@ -126,6 +167,7 @@ const testValidSession = () => {
 
 		test('next should be called if csrf token is provided in lower case', () => {
 			const mockCB = jest.fn(() => {});
+			UserAgentHelper.getUserAgentInfo.mockImplementationOnce(() => ({ application: { name: applicationName } }));
 			AuthMiddlewares.validSession(
 				{ ips: [ipAddress], headers: { ...headers, [CSRF_HEADER.toLowerCase()]: token }, session, cookies },
 				{},

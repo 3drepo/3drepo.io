@@ -255,6 +255,16 @@ const testGetProfile = () => {
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
+		test('should fail if a different applicationName is provided', async () => {
+			const testSession = SessionTracker(agent);
+			await testSession.login(testUser.user, testUser.password);
+
+			const res = await testSession.get('/v5/user/')
+				.set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Edge/91.0.864.67 Safari/537.36')
+				.expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
 		test('should return the user profile if the user has a session via an API key', async () => {
 			const res = await agent.get(`/v5/user?key=${testUser.apiKey}`).expect(200);
 			expect(res.body).toEqual(formatUserProfile(testUser));

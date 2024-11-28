@@ -18,6 +18,7 @@
 const ServiceHelper = require('../../../../helper/services');
 const SuperTest = require('supertest');
 const { src } = require('../../../../helper/path');
+const SessionTracker = require('../../../../helper/sessionTracker');
 
 const { EVENTS, SOCKET_HEADER } = require(`${src}/services/chat/chat.constants`);
 
@@ -57,6 +58,23 @@ const runSessionsRemovedTests = () => {
 			});
 
 			await ServiceHelper.loginAndGetCookie(agent, user.user, user.password, headers);
+			await expect(onLogOutMessage).resolves.toEqual({ reason: 'You have logged in else where' });
+			socket.close();
+		});
+
+		test('Should log user out if the application name is different', async () => {
+			const headers = { referer: referrer, 'user-agent': userAgent };
+			const testSession = SessionTracker(agent);
+			await testSession.login(user.user, user.password, headers);
+			const socket = await ServiceHelper.socket.connectToSocket(testSession.cookies.session);
+
+			const onLogOutMessage = new Promise((resolve) => {
+				socket.on(EVENTS.LOGGED_OUT, resolve);
+			});
+
+			await testSession.get('/v5/user/')
+				.set('user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Edge/91.0.864.67 Safari/537.36');
+
 			await expect(onLogOutMessage).resolves.toEqual({ reason: 'You have logged in else where' });
 			socket.close();
 		});
