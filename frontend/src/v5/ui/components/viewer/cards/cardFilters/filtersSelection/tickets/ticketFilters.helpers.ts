@@ -72,7 +72,7 @@ export const templatesToFilters = (templates: ITemplate[]): TicketFilterDescript
 	];
 };
 
-const toCardFilter = (typesByProperty: FilterTypesByProperty): CardFilter[] => (
+export const toCardFilter = (typesByProperty: FilterTypesByProperty): CardFilter[] => (
 	Object.entries(typesByProperty).flatMap(([property, filterByType]) => (
 		Object.entries(filterByType).map(([type, filter]: [CardFilterType, BaseFilter]) => ({ property, type, filter }))),
 	)
