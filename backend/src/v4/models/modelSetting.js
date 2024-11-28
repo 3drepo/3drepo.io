@@ -112,7 +112,7 @@ const publishPermissionUpdates = (teamspace, project, initialPermissions, update
 };
 
 const areBatchPermissionsValid = (batchPermissions) => {
-	if(!batchPermissions?.length) {
+	if(!Array.isArray(batchPermissions) || !batchPermissions.length) {
 		return false;
 	}
 
