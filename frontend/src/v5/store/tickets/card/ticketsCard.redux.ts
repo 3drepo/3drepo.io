@@ -29,7 +29,6 @@ export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createA
 	setSelectedTicket: ['ticketId'],
 	setSelectedTemplate: ['templateId'],
 	setSelectedTicketPin: ['pinId'],
-	setFilters: ['filters'],
 	upsertFilter: ['filter'],
 	deleteFilter: ['filter'],
 	resetFilters: [],
@@ -94,10 +93,6 @@ export const setPinToDrop = (state: ITicketsCardState, { pinToDrop }: SetPinToDr
 	state.pinToDrop = pinToDrop;
 };
 
-export const setFilters = (state: ITicketsCardState, { filters }: SetFiltersAction) => {
-	state.filters = filters;
-};
-
 const getFilterPath = ({ module, property, type }) => [module, property, type];
 export const upsertFilter = (state: ITicketsCardState, { filter }: UpsertFilterAction) => {
 	const path = getFilterPath(filter);
@@ -154,7 +149,6 @@ export const ticketsCardReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsCardTypes.SET_SELECTED_TEMPLATE]: setSelectedTemplate,
 	[TicketsCardTypes.SET_SELECTED_TICKET_PIN]: setSelectedTicketPin,
 	[TicketsCardTypes.SET_PIN_TO_DROP]: setPinToDrop,
-	[TicketsCardTypes.SET_FILTERS]: setFilters,
 	[TicketsCardTypes.UPSERT_FILTER]: upsertFilter,
 	[TicketsCardTypes.DELETE_FILTER]: deleteFilter,
 	[TicketsCardTypes.RESET_FILTERS]: resetFilters,
@@ -171,7 +165,6 @@ export type SetSelectedTicketAction = Action<'SET_SELECTED_TICKET'> & { ticketId
 export type SetSelectedTemplateAction = Action<'SET_SELECTED_TEMPLATE'> & { templateId: string };
 export type SetSelectedTicketPinAction = Action<'SET_SELECTED_TICKET_PIN'> & { pinId: string };
 export type SetPinToDropAction = Action<'SET_PIN_TO_DROP'> & { pinToDrop: string };
-export type SetFiltersAction = Action<'SET_FILTERS'> & { filters: TicketsCardFilters };
 export type UpsertFilterAction = Action<'UPSERT_FILTER'> & { filter: TicketCardFilter };
 export type DeleteFilterAction = Action<'DELETE_FILTER'> & { filter: TicketFilterDescription };
 export type ResetFiltersAction = Action<'RESET_FILTERS'>;
@@ -191,7 +184,6 @@ export interface ITicketsCardActionCreators {
 	setSelectedTemplate: (templateId: string) => SetSelectedTemplateAction,
 	setSelectedTicketPin: (pinId: string) => SetSelectedTicketPinAction,
 	setPinToDrop: (pinToDrop: string) => SetPinToDropAction,
-	setFilters: (filters: TicketsCardFilters) => SetFiltersAction,
 	upsertFilter: (filter: TicketCardFilter) => UpsertFilterAction,
 	deleteFilter: (filter: TicketFilterDescription) => DeleteFilterAction,
 	resetFilters: () => ResetFiltersAction,
