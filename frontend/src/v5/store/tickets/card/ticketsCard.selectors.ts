@@ -140,7 +140,6 @@ export const selectAvailableTemplatesFilters = createSelector(
 	(usedFilters, allFilters) => allFilters.filter(({ module, property, type }) => !has(usedFilters, [module, property, type])),
 );
 
-// TODO - this will rely on the backend which is WIP atm
 export const selectFilteredTickets = createSelector(
 	selectCurrentTickets,
 	(tickets) => tickets,

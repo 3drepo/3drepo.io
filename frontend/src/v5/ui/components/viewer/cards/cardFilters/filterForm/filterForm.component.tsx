@@ -41,7 +41,6 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel 
 	const formData = useForm<FormType>({ defaultValues: _.defaults({ values, operator }, DEFAULT_VALUES) });
 
 	const handleSubmit = formData.handleSubmit((body: FormType) => {
-		// TODO - remove this line
 		const newValues = body.values.filter((x) => ![undefined, ''].includes(x as any));
 		onSubmit({ module, property, type, filter: { operator: body.operator, values: newValues } });
 	});
