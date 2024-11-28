@@ -121,7 +121,7 @@ export const selectFilters = createSelector(
 
 export const selectFiltersByModule = createSelector(
 	selectFilters,
-	(filters) => getFiltersByModule(filters),
+	(filters) => getFiltersByModule(filters) || [],
 );
 
 export const selectTemplatesFilters = createSelector(
