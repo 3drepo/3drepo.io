@@ -105,26 +105,8 @@ const publishPermissionUpdates = (teamspace, project, initialPermissions, update
 	});
 };
 
-const areBatchPermissionsValid = (batchPermissions) => {
-	if(!Array.isArray(batchPermissions) || !batchPermissions.length) {
-		return false;
-	}
-
-	const referenceUsers = batchPermissions[0].permissions.map(p => p.user);
-
-	for(let i = 1; i < batchPermissions.length; i++) {
-		const users = batchPermissions[i].permissions.map(p => p.user);
-
-		if(getArrayDifference(referenceUsers, users).length) {
-			return false;
-		}
-	}
-
-	return true;
-};
-
 ModelSetting.batchUpdatePermissions = async function(account, batchPermissions = [], executor) {
-	if(!areBatchPermissionsValid(batchPermissions)) {
+	if(!batchPermissions.length) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
