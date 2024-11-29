@@ -35,7 +35,7 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	setOpenOnTodaySuccess: ['openOnToday'],
 	fetchFrame: ['date'],
 	prefetchFrames: [],
-	updateFrameWithViewpoint: ['sequenceId', 'stateId', 'viewpoint'],
+	updateFrameWithViewpoint: ['sequenceId', 'stateId', 'dateTime', 'viewpoint'],
 	setStepInterval: ['stepInterval'],
 	setStepScale: ['stepScale'],
 	fetchActivitiesDefinitions: ['sequenceId'],
@@ -150,12 +150,14 @@ export const setSelectedDateSuccess =  (state, { date }) => {
 	state.selectedDate = date;
 };
 
-export const updateFrameWithViewpoint = (state, { sequenceId, stateId, viewpoint }) => {
+export const updateFrameWithViewpoint = (state, { sequenceId, stateId, dateTime, viewpoint }) => {
 	if (isEmpty(viewpoint)) {
 		return;
 	}
 	const sequenceToUpdate = state.sequences.find(({ _id }) => _id === sequenceId);
-	const frameToUpdate = sequenceToUpdate.frames.find(({ state: s, dateTime }) => s === stateId || dateTime === stateId);
+	const frameToUpdate = sequenceToUpdate.frames.find((frame) =>
+		frame.state === stateId || (!stateId && frame.dateTime === dateTime)
+	);
 
 	if (!frameToUpdate) {
 		// If two successive dates correspond to the same frame updateFrameViewpoint can get called for a frame that has already been converted
@@ -163,7 +165,6 @@ export const updateFrameWithViewpoint = (state, { sequenceId, stateId, viewpoint
 	}
 	Object.assign(frameToUpdate, viewpoint);
 	delete frameToUpdate.state;
-	delete frameToUpdate.dateTime;
 };
 
 export const setStepInterval = (state, { stepInterval }) => {
