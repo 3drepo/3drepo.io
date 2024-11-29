@@ -87,21 +87,15 @@ const publishPermissionUpdates = (teamspace, project, initialPermissions, update
 				updatedValue = null;
 			}
 
-			const key = `${initialValue}_${updatedValue}`;
-			const existingUpdate = map[key];
+			const existingUpdate = map[user];
 
 			const from = initialValue ? [initialValue] : initialValue;
 			const to = updatedValue ? [updatedValue] : updatedValue;
 
 			if (!existingUpdate) {
-				map[key] = { users: [user], permissions: [{ model, project, from, to }] };
+				map[user] = { users: [user], permissions: [{ model, project, from, to }] };
 			} else {
-				if (!existingUpdate.users.includes(user)) {
-					existingUpdate.users.push(user);
-				}
-				if (!existingUpdate.permissions.find(u => u.model === model)) {
-					existingUpdate.permissions.push({ model, project, from, to });
-				}
+				existingUpdate.permissions.push({ model, project, from, to });
 			}
 		});
 	});
