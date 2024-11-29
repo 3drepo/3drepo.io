@@ -66,7 +66,7 @@ export const AssigneesSelectMenu = ({
 				<SearchInput onClick={preventPropagation} onKeyDown={preventPropagation} />
 			</SearchInputContainer>
 			{/* The following "invalid" components cannot be grouped together inside a fragment
-				Because MuiSelect passes has to pass props to the MenuItem components and it can
+				Because MuiSelect passes props to the MenuItem components and it can
 				only do so if they are direct children */}
 			{jobsAndUsersNotFoundInTeamspace.length > 0 && (
 				<ListSubheader>
