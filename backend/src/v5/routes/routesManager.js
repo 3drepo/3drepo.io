@@ -73,11 +73,6 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/drawings', CreateModelGeneralRoutes(modelTypes.DRAWING));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/drawings/:model/revisions', CreateGeneralRevisionRoutes(modelTypes.DRAWING));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/drawings/:drawing/revisions/:revision/calibrations', CalibrationRoutes);
-
-	// If the route is not matched by any of the endpoints
-	app.use(/^\/v5(.*)$/, (req, res) => {
-		respond(req, res, templates.pageNotFound);
-	});
 };
 
 module.exports = RoutesManager;
