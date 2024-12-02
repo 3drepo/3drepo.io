@@ -25,7 +25,7 @@ export const selectJobs = createSelector(
 	selectJobsDomain, (state): IJob[] => state.jobs || []
 );
 
-export const selectJobsByJobId = createSelector(
+export const selectJobsByIds = createSelector(
 	selectJobs,
 	(jobs) => Object.fromEntries(jobs.map((job) => [job._id, job]))
 )
@@ -55,7 +55,7 @@ export const selectColorsPending = createSelector(
 );
 
 export const selectJobById = createSelector(
-	selectJobsByJobId,
+	selectJobsByIds,
 	(state, jobId) => jobId,
 	(jobs, jobId) => jobs[jobId]
 );

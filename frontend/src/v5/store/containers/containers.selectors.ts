@@ -21,8 +21,8 @@ import { IContainersState } from './containers.redux';
 import { IContainer } from './containers.types';
 import { Role } from '../currentUser/currentUser.types';
 import { isCollaboratorRole, isCommenterRole, isViewerRole } from '../store.helpers';
-import { selectJobsByJobId } from '@/v4/modules/jobs';
-import { selectCurrentTeamspaceUsersById } from '../users/users.selectors';
+import { selectJobsByIds } from '@/v4/modules/jobs';
+import { selectCurrentTeamspaceUsersByIds } from '../users/users.selectors';
 import { isEmpty } from 'lodash';
 
 const selectContainersDomain = (state): IContainersState => state?.containers || ({ containersByProject: {} });
@@ -76,7 +76,7 @@ export const selectHasViewerAccess = createSelector(
 
 export const selectContainerUsers = createSelector(
 	selectContainerById,
-	selectCurrentTeamspaceUsersById,
+	selectCurrentTeamspaceUsersByIds,
 	(container, users) => {
 		if (isEmpty(users)) return [];
 		return (container?.users || []).map((user) => ({ ...user, ...users[user.user] }));
@@ -85,7 +85,7 @@ export const selectContainerUsers = createSelector(
 
 export const selectContainerJobs = createSelector(
 	selectContainerById,
-	selectJobsByJobId,
+	selectJobsByIds,
 	(container, jobs) => {
 		if (isEmpty(jobs)) return [];
 		return (container?.jobs || []).map((job) => ({ ...job, ...jobs[job._id] }));
