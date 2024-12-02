@@ -26,7 +26,6 @@ const db = require("../handler/db");
 const systemLogger = require("../logger.js").systemLogger;
 const PermissionTemplates = require("./permissionTemplates");
 const { findProjectByModelId } = require(`${v5Path}/models/projectSettings.js`);
-const { getArrayDifference } = require(`${v5Path}/utils/helper/arrays.js`);
 const { cloneDeep } = require(`${v5Path}/utils/helper/objects.js`);
 const { publish } = require(`${v5Path}/services/eventsManager/eventsManager`);
 const { events } = require(`${v5Path}/services/eventsManager/eventsManager.constants`);
