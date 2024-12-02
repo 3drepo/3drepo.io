@@ -52,12 +52,11 @@ export const AssigneesSelect = ({
 	const { containerOrFederation } = useContext(TicketContext);
 
 	const { jobs, users } = getModelJobsAndUsers(containerOrFederation);
-	const modelJobsAndUsers = [...jobs, ...users];
 
 	const emptyValue = multiple ? [] : '';
 	const value = valueRaw || emptyValue;
 	const valueAsArray = multiple ? value : [value].filter(Boolean);
-	const validValues = getValidValues(modelJobsAndUsers, excludeViewers);
+	const validValues = getValidValues([...jobs, ...users], excludeViewers);
 	const invalidValues = getInvalidValues(valueAsArray, validValues);
 
 	const teamspaceJobsAndUsers = UsersHooksSelectors.selectJobsAndUsersByIds();
@@ -94,7 +93,7 @@ export const AssigneesSelect = ({
 			<AssigneesListContainer onClick={handleOpen} className={className}>
 				<AssigneesSelectMenu
 					open={open}
-					value={value ?? emptyValue}
+					value={value}
 					onClose={handleClose}
 					onOpen={handleOpen}
 					disabled={disabled}
