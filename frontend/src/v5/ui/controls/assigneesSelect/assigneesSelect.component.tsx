@@ -15,24 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ContainersHooksSelectors, FederationsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useCallback, useContext, useState } from 'react';
 import { SelectProps } from '@controls/inputs/select/select.component';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { AssigneesListContainer } from './assigneesSelect.styles';
 import { AssigneesSelectMenu } from './assigneesSelectMenu/assigneesSelectMenu.component';
-import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { TicketContext } from '../../routes/viewer/tickets/ticket.context';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { AssigneesValuesDisplay } from './assigneeValuesDisplay/assigneeValuesDisplay.component';
+import { getInvalidValues, getModelJobsAndUsers, getValidValues } from './assignees.helpers';
 
 export type AssigneesSelectProps = Pick<FormInputProps, 'value'> & SelectProps & {
 	maxItems?: number;
 	showAddButton?: boolean;
 	showEmptyText?: boolean;
 	onBlur?: () => void;
-	filterViewers?: boolean;
+	excludeViewers?: boolean;
 };
 
 export const AssigneesSelect = ({
@@ -44,33 +44,28 @@ export const AssigneesSelect = ({
 	disabled,
 	onBlur,
 	className,
-	filterViewers = false,
+	excludeViewers = false,
 	onChange,
 	...props
 }: AssigneesSelectProps) => {
 	const [open, setOpen] = useState(false);
 	const { containerOrFederation } = useContext(TicketContext);
-	
-	const isFed = modelIsFederation(containerOrFederation);
 
-	const modelUsers = isFed
-		? FederationsHooksSelectors.selectFederationUsers(containerOrFederation)
-		: ContainersHooksSelectors.selectContainerUsers(containerOrFederation);
-
-	const modelJobs = isFed
-		? FederationsHooksSelectors.selectFederationJobs(containerOrFederation)
-		: ContainersHooksSelectors.selectContainerJobs(containerOrFederation);
-
-	const teamspaceJobsAndUsers = UsersHooksSelectors.selectJobsAndUsers();
-	const modelJobsAndUsers = [...modelUsers, ...modelJobs];
+	const { jobs, users } = getModelJobsAndUsers(containerOrFederation);
+	const modelJobsAndUsers = [...jobs, ...users];
 
 	const emptyValue = multiple ? [] : '';
 	const value = valueRaw || emptyValue;
+	const valueAsArray = multiple ? value : [value].filter(Boolean);
+	const validValues = getValidValues(modelJobsAndUsers, excludeViewers);
+	const invalidValues = getInvalidValues(valueAsArray, validValues);
 
-	const jobOrUserToString = (ju): string | null => (ju._id || ju.user);
-	const validJobsAndUsers = filterViewers ? modelJobsAndUsers.filter((ju) => (!ju?.isViewer)) : modelJobsAndUsers;
-	const validValues = validJobsAndUsers.map(jobOrUserToString);
-	const invalidValues = (multiple ? value : [value]).filter((val) => !validValues.includes(val));
+	const teamspaceJobsAndUsers = UsersHooksSelectors.selectJobsAndUsersByIds();
+	const valueToJobOrUser = (val: string) => teamspaceJobsAndUsers[val];
+	const allJobsAndUsersToDisplay = [
+		...validValues.map(valueToJobOrUser),
+		...invalidValues.map((v) => valueToJobOrUser(v) || ({ invalidItemName: v })),
+	];
 
 	const handleChange = (e) => {
 		if (!multiple) return onChange(e);
@@ -89,13 +84,7 @@ export const AssigneesSelect = ({
 		onBlur();
 	};
 
-	const valueToJobOrUser = (val: string) => teamspaceJobsAndUsers[val];
-	const allJobsAndUsersToDisplay = [
-		...validValues.map(valueToJobOrUser),
-		...invalidValues.map((v) => valueToJobOrUser(v) || ({ invalidItemName: v })),
-	];
-
-	if (!modelUsers.length || !modelJobs.length) return (
+	if (!users.length || !jobs.length) return (
 		<AssigneesListContainer className={className}>
 			<Spinner />
 		</AssigneesListContainer>
@@ -115,7 +104,7 @@ export const AssigneesSelect = ({
 					{...props}
 				/>
 				<AssigneesValuesDisplay
-					value={multiple ? value : [value]}
+					value={valueAsArray}
 					maxItems={maxItems}
 					showEmptyText={showEmptyText}
 					disabled={disabled || !showAddButton}

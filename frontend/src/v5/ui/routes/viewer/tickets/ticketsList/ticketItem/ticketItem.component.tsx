@@ -99,7 +99,7 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 								showAddButton
 								onBlur={onBlurAssignees}
 								disabled={readOnly}
-								filterViewers
+								excludeViewers
 							/>
 							<FlexRow>
 								<DueDate value={dueDate} onChange={onChangeDueDate} disabled={readOnly} />
