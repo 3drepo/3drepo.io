@@ -26,7 +26,8 @@ import { groupsOfViewpoint, selectViewpointsGroups, selectViewpointsGroupsBeingL
 import { dispatch } from './redux.helpers';
 import { getGroup as APIgetGroup } from '@/v4/services/api/groups';
 import { prepareGroup } from '@/v4/helpers/groups';
-import { selectCurrentRevisionId } from '@/v4/modules/model/model.selectors';
+import { selectCurrentRevisionId, selectIsFederation } from '@/v4/modules/model/model.selectors';
+
 export const convertToV5GroupNodes = (objects) => objects.map((object) => ({
 	container: object.model as string,
 	_ids: getNodesIdsFromSharedIds([object]),
@@ -228,7 +229,7 @@ export const getViewpointWithGroups = async ({ teamspace, modelId, view }) => {
 		return null;
 	}
 
-	const revision = selectCurrentRevisionId(getState());
+	const revision = selectIsFederation(getState()) ? null : selectCurrentRevisionId(getState());
 	const viewpointsGroups = selectViewpointsGroups(getState());
 	const viewpointsGroupsBeingLoaded: Set<string> = selectViewpointsGroupsBeingLoaded(getState());
 
