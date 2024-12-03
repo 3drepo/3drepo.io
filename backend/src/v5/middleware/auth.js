@@ -15,14 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { CSRF_COOKIE, SESSION_HEADER, USER_AGENT_HEADER } = require('../utils/sessions.constants');
-const { cookie, cookie_domain } = require('../utils/config');
-const { events } = require('../services/eventsManager/eventsManager.constants');
+const { destroySession, isSessionValid } = require('../utils/sessions');
+const { USER_AGENT_HEADER } = require('../utils/sessions.constants');
 const { isAccountActive } = require('../models/users');
 const { isAccountLocked } = require('../models/loginRecords');
-const { isSessionValid } = require('../utils/sessions');
 const { logger } = require('../utils/logger');
-const { publish } = require('../services/eventsManager/eventsManager');
 const { respond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');
 const { validateMany } = require('./common');
@@ -31,7 +28,7 @@ const AuthMiddleware = {};
 
 const validSessionDetails = async (req, res, next) => {
 	if (!req.session.user.isAPIKey) {
-		const { ipAddress, user: { userAgent } } = req.session;
+		const { id: sessionId, ipAddress, user: { userAgent } } = req.session;
 		const reqUserAgent = req.headers[USER_AGENT_HEADER];
 
 		const ipMatch = ipAddress === (req.ips[0] || req.ip);
@@ -39,16 +36,12 @@ const validSessionDetails = async (req, res, next) => {
 
 		if (!ipMatch || !userAgentMatch) {
 			try {
-				req.session.destroy(() => {
-					logger.logInfo(`Session ${req.sessionID} destroyed due to IP or user agent mismatch`);
-
-					res.clearCookie(CSRF_COOKIE, { domain: cookie.domain });
-					res.clearCookie(SESSION_HEADER, { domain: cookie_domain, path: '/' });
-
-					publish(events.SESSIONS_REMOVED, { ids: [req.sessionID] });
-
+				const callback = () => {
+					logger.logInfo(`Session ${sessionId} destroyed due to IP or user agent mismatch`);
 					respond(req, res, templates.notLoggedIn);
-				});
+				};
+
+				destroySession(req.session, res, callback);
 			} catch (err) {
 				respond(req, res, err);
 			}

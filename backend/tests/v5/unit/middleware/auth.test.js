@@ -45,7 +45,8 @@ Responder.respond.mockImplementation((req, res, errCode) => errCode);
 const ipAddress = generateRandomString();
 const token = generateRandomString();
 const userAgent = generateRandomString();
-const session = { user: { referer: 'http://abc.com', userAgent }, token, ipAddress, destroy: (callback) => { callback(); } };
+const sessionID = generateRandomString();
+const session = { user: { referer: 'http://abc.com', userAgent }, id: sessionID, token, ipAddress, destroy: (callback) => { callback(); } };
 const cookies = { [CSRF_COOKIE]: token };
 const headers = { referer: 'http://abc.com/', [CSRF_HEADER]: token, [USER_AGENT_HEADER]: userAgent };
 
@@ -73,7 +74,6 @@ const testValidSession = () => {
 
 		test('should respond with notLoggedIn errCode if the ip address mismatched', () => {
 			const mockCB = jest.fn(() => {});
-			const sessionID = generateRandomString();
 			AuthMiddlewares.validSession(
 				{ ips: [],
 					ip: generateRandomString(),
@@ -93,7 +93,6 @@ const testValidSession = () => {
 
 		test('should respond with notLoggedIn errCode if the user agent mismatched', () => {
 			const mockCB = jest.fn(() => {});
-			const sessionID = generateRandomString();
 
 			AuthMiddlewares.validSession(
 				{
