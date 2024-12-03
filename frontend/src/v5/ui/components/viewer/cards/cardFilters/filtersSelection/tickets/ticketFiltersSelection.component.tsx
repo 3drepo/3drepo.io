@@ -20,7 +20,7 @@ import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { CardAction } from '../../../cardAction/cardAction.styles';
 import { useState } from 'react';
-import FennelIcon from '@assets/icons/filters/fennel.svg';
+import FunnelIcon from '@assets/icons/filters/funnel.svg';
 import { Tooltip } from '@mui/material';
 import { TicketFiltersSelectionList } from './list/ticketFiltersSelectionList.component';
 import { SearchInput, DrillDownList, DrillDownItem } from './ticketFiltersSelection.styles';
@@ -50,7 +50,7 @@ export const FilterSelection = () => {
 				<Tooltip title={formatMessage({ id: 'viewer.card.tickets.addFilter', defaultMessage: 'Add Filter' })}>
 					<div>
 						<CardAction disabled={disabled} selected={open}>
-							<FennelIcon />
+							<FunnelIcon />
 						</CardAction>
 					</div>
 				</Tooltip>
