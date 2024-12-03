@@ -65,7 +65,7 @@ export const FilterSelection = () => {
 						<SearchInput
 							placeholder={formatMessage({
 								id: 'viewer.card.tickets.filters.searchInputPlaceholder',
-								defaultMessage: 'Serach for property...',
+								defaultMessage: 'Search for property...',
 							})}
 						/>
 						<TicketFiltersSelectionList onFilterClick={setSelectedFilter} />
