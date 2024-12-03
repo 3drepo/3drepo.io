@@ -25,20 +25,29 @@ import { HiddenSelect, HorizontalRule, SearchInput } from './assigneesSelectMenu
 import { SearchContext } from '@controls/search/searchContext';
 import { groupBy } from 'lodash';
 
+const NoResultsMessage = () => (
+	<NoResults>
+		<FormattedMessage
+			id="form.searchSelect.menuContent.emptyList"
+			defaultMessage="No results"
+		/>
+	</NoResults>
+);
+
 const preventPropagation = (e) => {
 	if (e.key !== 'Escape') {
 		e.stopPropagation();
 	}
 };
 type AssigneesSelectMenuProps = SelectProps & {
-	invalidValues: string[];
+	isInvalid: (val: string) => boolean;
 };
 export const AssigneesSelectMenu = ({
 	open,
 	value,
 	onClick,
 	multiple,
-	invalidValues,
+	isInvalid,
 	...props
 }: AssigneesSelectMenuProps) => {
 	const { filteredItems } = useContext(SearchContext);
@@ -95,17 +104,10 @@ export const AssigneesSelectMenu = ({
 					value={_id}
 					title={_id}
 					multiple={multiple}
-					error={invalidValues.includes(_id)}
+					error={isInvalid(_id)}
 				/>
 			))}
-			{!jobs.length && (
-				<NoResults>
-					<FormattedMessage
-						id="form.searchSelect.menuContent.emptyList"
-						defaultMessage="No results"
-					/>
-				</NoResults>
-			)}
+			{!jobs.length && (<NoResultsMessage />)}
 
 			<HorizontalRule />
 
@@ -120,17 +122,10 @@ export const AssigneesSelectMenu = ({
 					title={`${user.firstName} ${user.lastName}`}
 					subtitle={user.job}
 					multiple={multiple}
-					error={invalidValues.includes(user.user)}
+					error={isInvalid(user.user)}
 				/>
 			))}
-			{!users.length && (
-				<NoResults>
-					<FormattedMessage
-						id="form.searchSelect.menuContent.emptyList"
-						defaultMessage="No results"
-					/>
-				</NoResults>
-			)}
+			{!users.length && (<NoResultsMessage />)}
 		</HiddenSelect>
 	);
 };

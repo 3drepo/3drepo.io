@@ -39,4 +39,4 @@ export const getValidValues = (jobsAndUsers, excludeViewers): (string | null)[] 
 	return validJobsAndUsers.map(jobOrUserToString);
 };
 
-export const getInvalidValues = (value: any[], validValues) => value.filter((val) => !validValues.includes(val));
+export const getInvalidValues = (value: string[], validValues) => value.filter((val) => !validValues.includes(val));

@@ -98,7 +98,7 @@ export const AssigneesSelect = ({
 					onOpen={handleOpen}
 					disabled={disabled}
 					multiple={multiple}
-					invalidValues={invalidValues}
+					isInvalid={(v) => invalidValues.includes(v)}
 					onChange={handleChange}
 					{...props}
 				/>
