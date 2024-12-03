@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useEffect } from 'react';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
@@ -26,11 +25,7 @@ import { TicketItem } from './ticketItem/ticketItem.component';
 import { List } from './ticketsList.styles';
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
 
-type TicketsListProps = {
-	tickets: ITicket[];
-};
-
-export const TicketsList = ({ }: TicketsListProps) => {
+export const TicketsList = () => {
 	const selectedTicket = TicketsCardHooksSelectors.selectSelectedTicket();
 
 	const filteredItems = TicketsCardHooksSelectors.selectTicketsWithAllFiltersApplied();
