@@ -15,13 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { Viewpoint, Group, ViewpointGroupOverrideType, GroupOverride, ViewpointState, V4GroupObjects, OverridesDicts } from '@/v5/store/tickets/tickets.types';
-import { generateViewpoint as generateViewpointV4, getNodesIdsFromSharedIds, toSharedIds } from '@/v4/helpers/viewpoints';
+import { generateViewpoint as generateViewpointV4, getNodesIdsFromSharedIds, setGroupData, toSharedIds } from '@/v4/helpers/viewpoints';
 import { formatMessage } from '@/v5/services/intl';
 import { getState } from '@/v4/modules/store';
 import { isEmpty, isString } from 'lodash';
 import { selectCurrentTeamspace } from '../store/teamspaces/teamspaces.selectors';
 import { ViewpointsActionsDispatchers } from '../services/actionsDispatchers';
 import { getGroupHexColor, rgbToHex } from './colors.helper';
+import { groupsOfViewpoint, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded, ViewpointsActions } from '@/v4/modules/viewpoints';
+import { dispatch } from './redux.helpers';
+import { getGroup as APIgetGroup } from '@/v4/services/api/groups';
+import { prepareGroup } from '@/v4/helpers/groups';
+import { selectCurrentRevisionId, selectIsFederation } from '@/v4/modules/model/model.selectors';
 
 export const convertToV5GroupNodes = (objects) => objects.map((object) => ({
 	container: object.model as string,
@@ -216,4 +221,42 @@ export const goToView = async (view: Viewpoint) => {
 	}
 	
 	ViewpointsActionsDispatchers.showViewpoint(null, null, viewpointV5ToV4(view));
+};
+
+
+export const getViewpointWithGroups = async ({ teamspace, modelId, view }) => {
+	if (!view.viewpoint) {
+		return null;
+	}
+
+	const revision = selectIsFederation(getState()) ? null : selectCurrentRevisionId(getState());
+	const viewpointsGroups = selectViewpointsGroups(getState());
+	const viewpointsGroupsBeingLoaded: Set<string> = selectViewpointsGroupsBeingLoaded(getState());
+
+	const viewpoint = view.viewpoint;
+
+	const groupsToFetch = [];
+
+	// This part discriminates which groups hasnt been loaded yet and add their ids to
+	// the groupsToFetch array
+	const ids = [];
+	for (const id of groupsOfViewpoint(viewpoint)) {
+		ids.push(id);
+		if (!viewpointsGroups[id] && !viewpointsGroupsBeingLoaded.has(id)) {
+			groupsToFetch.push(id);
+		}
+	}
+
+	if (groupsToFetch.length > 0) {
+		dispatch(ViewpointsActions.addViewpointGroupsBeingLoaded(groupsToFetch));
+		const fetchedGroups =  (await Promise.all(groupsToFetch.map((groupId) =>
+			APIgetGroup(teamspace, modelId, groupId, revision))))
+			.map(({ data }) => prepareGroup(data));
+
+
+		fetchedGroups.map((group) => dispatch(ViewpointsActions.fetchGroupSuccess(group)));
+	}
+
+	const groupsMap = selectViewpointsGroups(getState());
+	return setGroupData(viewpoint, groupsMap);
 };
