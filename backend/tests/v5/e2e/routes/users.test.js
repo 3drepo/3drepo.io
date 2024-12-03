@@ -255,7 +255,7 @@ const testGetProfile = () => {
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
-		test('should fail if a different applicationName is provided', async () => {
+		test('should fail if a different userAgent is provided', async () => {
 			const testSession = SessionTracker(agent);
 			await testSession.login(testUser.user, testUser.password);
 

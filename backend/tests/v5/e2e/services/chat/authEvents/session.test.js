@@ -62,7 +62,7 @@ const runSessionsRemovedTests = () => {
 			socket.close();
 		});
 
-		test('Should log user out if the application name is different', async () => {
+		test('Should log user out if the user agent is different', async () => {
 			const headers = { referer: referrer, 'user-agent': userAgent };
 			const testSession = SessionTracker(agent);
 			await testSession.login(user.user, user.password, headers);

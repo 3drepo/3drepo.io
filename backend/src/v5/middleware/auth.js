@@ -18,7 +18,6 @@
 const { CSRF_COOKIE, SESSION_HEADER, USER_AGENT_HEADER } = require('../utils/sessions.constants');
 const { cookie, cookie_domain } = require('../utils/config');
 const { events } = require('../services/eventsManager/eventsManager.constants');
-const { getUserAgentInfo } = require('../utils/helper/userAgent');
 const { isAccountActive } = require('../models/users');
 const { isAccountLocked } = require('../models/loginRecords');
 const { isSessionValid } = require('../utils/sessions');
@@ -32,16 +31,16 @@ const AuthMiddleware = {};
 
 const validSessionDetails = async (req, res, next) => {
 	if (!req.session.user.isAPIKey) {
-		const { ipAddress, user: { applicationName } } = req.session;
-		const userAgent = req.headers[USER_AGENT_HEADER];
+		const { ipAddress, user: { userAgent } } = req.session;
+		const reqUserAgent = req.headers[USER_AGENT_HEADER];
 
 		const ipMatch = ipAddress === (req.ips[0] || req.ip);
-		const applicationNameMatch = getUserAgentInfo(userAgent).application.name === applicationName;
+		const userAgentMatch = reqUserAgent === userAgent;
 
-		if (!ipMatch || !applicationNameMatch) {
+		if (!ipMatch || !userAgentMatch) {
 			try {
 				req.session.destroy(() => {
-					logger.logInfo('Session destroyed due to IP or application name missmatch');
+					logger.logInfo(`Session ${req.sessionID} destroyed due to IP or user agent mismatch`);
 
 					res.clearCookie(CSRF_COOKIE, { domain: cookie.domain });
 					res.clearCookie(SESSION_HEADER, { domain: cookie_domain, path: '/' });

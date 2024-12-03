@@ -64,7 +64,7 @@ const updateSessionDetails = (req) => {
 
 	if (userAgent) {
 		updatedUser.webSession = isFromWebBrowser(userAgent);
-		updatedUser.applicationName = getUserAgentInfo(userAgent).application.name;
+		updatedUser.userAgent = userAgent;
 	}
 
 	if (req.token) {
