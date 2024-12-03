@@ -135,9 +135,16 @@ describe('Tickets: store', () => {
 		})
 
 		it('should reset the state', () => {
+			const [ticketTitleFilter] = templatesToFilters([]);
+			const baseFilter: BaseFilter = {
+				operator: 'eq',
+				values: [],
+			};
+			const ticketTitleCardFilter: TicketCardFilter = { ...ticketTitleFilter, filter: baseFilter };
 			dispatch(TicketsCardActions.setSelectedTicket(ticketId));
 			dispatch(TicketsCardActions.setSelectedTemplate(templateId));
 			dispatch(TicketsCardActions.setSelectedTicketPin(pinId));
+			dispatch(TicketsCardActions.upsertFilter(ticketTitleCardFilter));
 			dispatch(TicketsCardActions.resetFilters());
 			dispatch(TicketsCardActions.resetState());
 
