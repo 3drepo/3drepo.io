@@ -16,7 +16,10 @@
  */
 
 import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { IJob } from '@/v5/store/jobs/jobs.types';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { IUser } from '@/v5/store/users/users.redux';
+import { groupBy } from 'lodash';
 
 export const getModelJobsAndUsers = (containerOrFederation) => {
 	const isFed = modelIsFederation(containerOrFederation);
@@ -40,3 +43,12 @@ export const getValidValues = (jobsAndUsers, excludeViewers): (string | null)[] 
 };
 
 export const getInvalidValues = (value: string[], validValues) => value.filter((val) => !validValues.includes(val));
+
+export const groupJobsAndUsers = (items) => {
+	const { users = [], jobs = [], notFound = [] } = groupBy(items, (item) => {
+		if (item?.user) return 'users';
+		if (item?._id) return 'jobs';
+		return 'notFound';
+	});
+	return { users, jobs, notFound } as { users: IUser[], jobs: IJob[], notFound: { notFoundName: string }[] };
+};

@@ -22,8 +22,8 @@ import { SelectProps } from '@controls/inputs/select/select.component';
 import { useCallback, useContext } from 'react';
 import { AssigneesSelectMenuItem } from './assigneesSelectMenuItem/assigneesSelectMenuItem.component';
 import { HiddenSelect, HorizontalRule, SearchInput } from './assigneesSelectMenu.styles';
+import { groupJobsAndUsers } from '../assignees.helpers';
 import { SearchContext } from '@controls/search/searchContext';
-import { groupBy } from 'lodash';
 
 const NoResultsMessage = () => (
 	<NoResults>
@@ -51,12 +51,7 @@ export const AssigneesSelectMenu = ({
 	...props
 }: AssigneesSelectMenuProps) => {
 	const { filteredItems } = useContext(SearchContext);
-	const { users = [], jobs = [], jobsAndUsersNotFoundInTeamspace = [] } = groupBy(filteredItems, (item) => {
-		if (item?.user) return 'users';
-		if (item?._id) return 'jobs';
-		return 'jobsAndUsersNotFoundInTeamspace';
-	});
-
+	const { users, jobs, notFound } = groupJobsAndUsers(filteredItems);
 	const onClickList = useCallback((e) => {
 		preventPropagation(e);
 		onClick?.(e);
@@ -77,12 +72,12 @@ export const AssigneesSelectMenu = ({
 			{/* The following "invalid" components cannot be grouped together inside a fragment
 				Because MuiSelect passes props to the MenuItem components and it can
 				only do so if they are direct children */}
-			{jobsAndUsersNotFoundInTeamspace.length > 0 && (
+			{notFound.length > 0 && (
 				<ListSubheader>
 					<FormattedMessage id="assigneesSelectMenu.notFoundHeading" defaultMessage="Users and Jobs not found" />
 				</ListSubheader>
 			)}
-			{jobsAndUsersNotFoundInTeamspace.map(({ invalidItemName: ju }) => (
+			{notFound.map(({ notFoundName: ju }) => (
 				<AssigneesSelectMenuItem
 					key={ju}
 					assignee={ju}
@@ -93,7 +88,8 @@ export const AssigneesSelectMenu = ({
 					error
 				/>
 			))}
-			{jobsAndUsersNotFoundInTeamspace.length > 0 && (<HorizontalRule />)}
+			{notFound.length > 0 && (<HorizontalRule />)}
+
 			<ListSubheader>
 				<FormattedMessage id="assigneesSelectMenu.jobsHeading" defaultMessage="Jobs" />
 			</ListSubheader>
