@@ -16,10 +16,10 @@
  */
 
 const { src } = require('../../../helper/path');
-const { times } = require('lodash');
 
-const { generateRandomString, generateRandomObject, generateUUID } = require('../../../helper/services');
-const { templates } = require('../../../../../src/v5/utils/responseCodes');
+const { generateRandomString, generateAuditAction } = require('../../../helper/services');
+
+const { templates } = require(`${src}/utils/responseCodes`);
 
 const { templates: emailTemplates } = require(`${src}/services/mailer/mailer.constants`);
 
@@ -37,6 +37,8 @@ const UsersModel = require(`${src}/models/users`);
 jest.mock('archiver');
 const Archiver = require('archiver');
 
+const { actions: actionTypes } = require(`${src}/models/teamspaces.audits.constants`);
+
 const testGetAuditLogArchive = () => {
 	describe('Get Audit Log Archive', () => {
 		const teamspace = generateRandomString();
@@ -45,7 +47,10 @@ const testGetAuditLogArchive = () => {
 		const firstName = generateRandomString();
 		const fromDate = generateRandomString();
 		const toDate = generateRandomString();
-		const actions = times(5, () => ({ _id: generateUUID(), timestamp: new Date(), ...generateRandomObject() }));
+		const actions = [
+			generateAuditAction(actionTypes.PERMISSIONS_UPDATED),
+			generateAuditAction(actionTypes.USER_ADDED),
+		];
 
 		test('should get audit log archive and send an email with the password', async () => {
 			Archiver.registerFormat.mockReturnValueOnce(undefined);

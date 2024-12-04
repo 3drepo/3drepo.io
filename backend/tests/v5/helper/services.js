@@ -668,7 +668,7 @@ ServiceHelper.generateAuditAction = (actionType) => {
 
 	return {
 		_id: ServiceHelper.generateUUIDString(),
-		action: actionTypes.USER_ADDED,
+		action: actionType,
 		executor: ServiceHelper.generateRandomString(),
 		timestamp: ServiceHelper.generateRandomDate(),
 		data: actionData[actionType],
