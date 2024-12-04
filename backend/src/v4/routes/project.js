@@ -415,7 +415,7 @@
 	}
 
 	function updateProject(req, res, next) {
-		Project.updateProject(req.params.account, req.params.project, req.body).then(project => {
+		Project.updateProject(req.params.account, req.params.project, req.body, req.session.user.username).then(project => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);

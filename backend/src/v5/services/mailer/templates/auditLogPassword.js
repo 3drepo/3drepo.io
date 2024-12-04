@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,18 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { init } = require('./journaling/index');
-const { initialise: initInvites } = require('../models/invitations');
-const { initialise: initLoginRecs } = require('../models/loginRecords');
-const { initialise: initNotifs } = require('../models/notifications');
+const Yup = require('yup');
+const { generateTemplateFn } = require('./common');
 
-const Initialiser = {};
+const TEMPLATE_PATH = `${__dirname}/html/audit.html`;
 
-Initialiser.initialiseSystem = () => Promise.all([
-	initLoginRecs(),
-	initInvites(),
-	initNotifs(),
-	init(),
-]);
+const dataSchema = Yup.object({
+	password: Yup.string().required(),
+}).required(true);
 
-module.exports = Initialiser;
+const AuditLogPasswordTemplate = {};
+AuditLogPasswordTemplate.subject = () => 'Audit logs file password';
+
+AuditLogPasswordTemplate.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
+
+module.exports = AuditLogPasswordTemplate;
