@@ -17,8 +17,10 @@
 
 const { PassThrough } = require('stream');
 const Yup = require('yup');
+const { actions: actionTypes } = require('../../models/teamspaces.audits.constants');
 const archiver = require('archiver');
 archiver.registerFormat('zip-encrypted', require('archiver-zip-encrypted'));
+const { deleteIfUndefined } = require('../../utils/helper/objects');
 const { templates: emailTemplates } = require('../../services/mailer/mailer.constants');
 const { generateHashString } = require('../../utils/helper/strings');
 const { getActionLog } = require('../../models/teamspaces.audits');
@@ -43,18 +45,19 @@ const createAuditLogArchive = async (actions) => {
 
 		const contentsStream = new PassThrough();
 
-		const actionSchema = Yup.object({
-			data: Yup.object({
+		const actionSchema = (isPermissionsAction) => Yup.object(deleteIfUndefined({
+			data: isPermissionsAction ? Yup.object({
 				permissions: Yup.array().of(Yup.object({
 					project: types.id,
 				})),
-			}),
+			}) : undefined,
 			timestamp: types.timestamp,
-		});
+		}));
 
 		contentsStream.write('[');
 		actions.forEach(({ _id, ...data }, index) => {
-			const formattedData = actionSchema.cast(data);
+			const isPermissionsAction = data.action === actionTypes.PERMISSIONS_UPDATED;
+			const formattedData = actionSchema(isPermissionsAction).cast(data);
 			contentsStream.write(`${JSON.stringify(formattedData)}`);
 			if (index !== actions.length - 1) {
 				contentsStream.write(', ');

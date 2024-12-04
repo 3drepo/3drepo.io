@@ -21,6 +21,7 @@ const ServiceHelper = require('../../../helper/services');
 const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
 
+const { actions } = require(`${src}/models/teamspaces.audits.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { templates: emailTemplates } = require(`${src}/services/mailer/mailer.constants`);
 const { propTypes } = require(`${src}/schemas/tickets/templates.constants`);
@@ -38,7 +39,14 @@ const teamspace = { name: ServiceHelper.generateRandomString() };
 const noTemplatesTS = { name: ServiceHelper.generateRandomString() };
 
 const teamspaces = [teamspace, noTemplatesTS];
-const auditActions = times(10, () => ServiceHelper.generateAuditAction()).sort((a) => a.timestamp);
+
+const auditActions = [
+	ServiceHelper.generateAuditAction(actions.USER_ADDED),
+	ServiceHelper.generateAuditAction(actions.USER_REMOVED),
+	ServiceHelper.generateAuditAction(actions.PERMISSIONS_UPDATED),
+	ServiceHelper.generateAuditAction(actions.INVITATION_ADDED),
+	ServiceHelper.generateAuditAction(actions.INVITATION_REVOKED),
+].sort((a) => a.timestamp);
 
 const setupData = async () => {
 	await Promise.all(teamspaces.map(

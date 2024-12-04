@@ -42,12 +42,12 @@ const { editSubscriptions, grantAdminToUser } = require(`${src}/models/teamspace
 const { createTeamspaceRole } = require(`${src}/models/roles`);
 const { initTeamspace } = require(`${src}/processors/teamspaces/teamspaces`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
-const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
+const { MODEL_COMMENTER, MODEL_VIEWER, PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { isArray } = require(`${src}/utils/helper/typeCheck`);
 const FilesManager = require(`${src}/services/filesManager`);
 const { modelTypes, statusCodes } = require(`${src}/models/modelSettings.constants`);
-const { actions } = require(`${src}/models/teamspaces.audits.constants`);
+const { actions: actionTypes } = require(`${src}/models/teamspaces.audits.constants`);
 
 const { statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
 const { generateFullSchema } = require(`${src}/schemas/tickets/templates`);
@@ -643,15 +643,37 @@ const generateProperties = (propTemplate, internalType, container) => {
 	return properties;
 };
 
-ServiceHelper.generateAuditAction = () => ({
-	_id: ServiceHelper.generateUUIDString(),
-	action: actions.USER_ADDED,
-	executor: ServiceHelper.generateRandomString(),
-	timestamp: ServiceHelper.generateRandomDate(),
-	data: {
-		user: ServiceHelper.generateRandomString(),
-	},
-});
+ServiceHelper.generateAuditAction = (actionType) => {
+	const actionData = {
+		[actionTypes.USER_ADDED]: { user: ServiceHelper.generateRandomString() },
+		[actionTypes.USER_REMOVED]: { user: ServiceHelper.generateRandomString() },
+		[actionTypes.INVITATION_ADDED]: {
+			email: ServiceHelper.generateRandomString(),
+			job: ServiceHelper.generateRandomString(),
+			permissions: { teamspace_admin: true },
+		},
+		[actionTypes.INVITATION_REVOKED]: {
+			email: ServiceHelper.generateRandomString(),
+			job: ServiceHelper.generateRandomString(),
+			permissions: { teamspace_admin: true },
+		},
+		[actionTypes.PERMISSIONS_UPDATED]: { users: [ServiceHelper.generateRandomString()],
+			permissions: [{
+				model: ServiceHelper.generateUUID(),
+				project: ServiceHelper.generateUUID(),
+				from: [MODEL_COMMENTER],
+				to: [MODEL_VIEWER],
+			}] },
+	};
+
+	return {
+		_id: ServiceHelper.generateUUIDString(),
+		action: actionTypes.USER_ADDED,
+		executor: ServiceHelper.generateRandomString(),
+		timestamp: ServiceHelper.generateRandomDate(),
+		data: actionData[actionType],
+	};
+};
 
 ServiceHelper.generateRandomObject = () => ({
 	[ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString(),
