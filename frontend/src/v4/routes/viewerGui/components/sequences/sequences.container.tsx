@@ -21,6 +21,7 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { ViewpointsActions } from '@/v4/modules/viewpoints';
+import { selectCurrentModelTeamspace } from '@/v4/modules/model/model.selectors';
 import { ActivitiesActions } from '../../../../modules/activities';
 import { LegendActions } from '../../../../modules/legend';
 import {
@@ -29,6 +30,7 @@ import {
 	selectSelectedSequence, selectSelectedStartingDate, selectSequences,
 	selectStartDate, selectStepInterval, selectStepScale, SequencesActions,
 	selectSelectedFrameViewpoint,
+	selectSequenceModel,
 } from '../../../../modules/sequences';
 import { selectDraggablePanels, selectRightPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
 import { Sequences } from './sequences.component';
@@ -50,6 +52,8 @@ const mapStateToProps = createStructuredSelector({
 	draggablePanels: selectDraggablePanels,
 	isActivitiesPending: selectActivitiesPending,
 	viewpoint: selectSelectedFrameViewpoint,
+	teamspace: selectCurrentModelTeamspace,
+	model: selectSequenceModel,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
