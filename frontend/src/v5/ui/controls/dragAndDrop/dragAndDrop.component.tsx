@@ -22,8 +22,12 @@ interface IDragAndDrop {
 	onDrop: (files) => void,
 	className?: string;
 	children?: any;
+	accept?: string;
 	hidden?: boolean;
 }
+
+export const DragAndDrop = ({ children, onDrop, hidden, accept, ...props }: IDragAndDrop) => {
+	const { getRootProps, isDragActive } = useDropzone({ onDrop, accept, noClick: true });
 	if (hidden) return null;
 	return (
 		<DropArea {...props} {...getRootProps()}>
