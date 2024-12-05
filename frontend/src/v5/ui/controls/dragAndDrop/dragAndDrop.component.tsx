@@ -15,43 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
-import { Container, DashedContainer, DropArea } from './dragAndDrop.styles';
+import { DashedContainer, DropArea } from './dragAndDrop.styles';
+import { useDropzone } from 'react-dropzone';
 
 interface IDragAndDrop {
-	hidden?: boolean;
 	onDrop: (files) => void,
 	className?: string;
 	children?: any;
 	accept?: string;
+	hidden?: boolean;
 }
-export const DragAndDrop = ({ children, onDrop, hidden = false, ...props }: IDragAndDrop) => {
-	const [dragOverlay, setDragOverlay] = useState(false);
 
-	const handleDragEnter = (e) => {
-		if (e.dataTransfer.items.length > 0) {
-			setDragOverlay(true);
-		}
-	};
-
-	const handleDragLeave = () => {
-		setDragOverlay(false);
-	};
-
-	const handleDrop = (files) => {
-		onDrop(files);
-		setDragOverlay(false);
-	};
+export const DragAndDrop = ({ children, onDrop, hidden, accept, ...props }: IDragAndDrop) => {
+	const { getRootProps, isDragActive } = useDropzone({ onDrop, accept, noClick: true });
+	if (hidden) return null;
 	return (
-		<DropArea hidden={hidden} disableClick onDrop={handleDrop} {...props}>
-			<Container
-				onDragEnter={handleDragEnter}
-				onDragLeave={handleDragLeave}
-			>
-				<DashedContainer $dragOverlay={dragOverlay}>
-					{children}
-				</DashedContainer>
-			</Container>
+		<DropArea {...props} {...getRootProps()}>
+			<DashedContainer $isDragActive={isDragActive}>
+				{children}
+			</DashedContainer>
 		</DropArea>
 	);
 };
