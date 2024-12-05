@@ -16,7 +16,7 @@
  */
 
 import { ConnectedRouter } from 'connected-react-router';
-import { Route, Switch, Redirect } from 'react-router-dom';
+import { Switch, Redirect } from 'react-router-dom';
 import 'font-awesome/css/font-awesome.min.css';
 import 'normalize.css/normalize.css';
 import ReactDOM from 'react-dom';
@@ -43,10 +43,10 @@ import configAxios from './v4/services/api/config-axios';
 import { setSocketIdHeader } from './v5/services/api/default';
 import rootSaga from './v4/modules/sagas';
 import { NotFound } from '@/v5/ui/routes/notFound';
-import { AuthenticatedRoute } from './v5/services/routing/authenticatedRoute.component';
 import { initializeGoogleTagManager } from './v5/services/googleTagManager';
 import { initializeHotjar } from './v5/services/hotjar';
 import { dispatch } from './v5/helpers/redux.helpers';
+import { Route } from './v5/services/routing/route.component';
 
 window.UnityUtil = UnityUtil;
 
@@ -84,9 +84,9 @@ const render = () => {
 							<Route path="/v5">
 								<V5Root />
 							</Route>
-							<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.notFound', defaultMessage: 'Page Not Found' })} path="*">
+							<Route title={formatMessage({ id: 'pageTitle.notFound', defaultMessage: 'Page Not Found' })} path="*">
 								<NotFound />
-							</AuthenticatedRoute>
+							</Route>
 						</Switch>
 					</LocalizationProvider>
 				</IntlProvider>

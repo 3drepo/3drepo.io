@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,17 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useRef } from 'react';
+const Yup = require('yup');
+const { generateTemplateFn } = require('./common');
 
-export const useFocus = () => {
-	const htmlElRef = useRef<HTMLElement>();
-	const setFocus = () => {
-		const currentEl = htmlElRef.current;
+const TEMPLATE_PATH = `${__dirname}/html/audit.html`;
 
-		if (currentEl) {
-			currentEl.focus();
-		}
-	};
+const dataSchema = Yup.object({
+	password: Yup.string().required(),
+}).required(true);
 
-	return [htmlElRef, setFocus] as const;
-};
+const AuditLogPasswordTemplate = {};
+AuditLogPasswordTemplate.subject = () => 'Audit logs file password';
+
+AuditLogPasswordTemplate.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
+
+module.exports = AuditLogPasswordTemplate;

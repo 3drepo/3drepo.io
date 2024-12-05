@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,5 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export * from './useFocus';
-export * from './useOutsideClick';
+const AuditConstants = {};
+
+AuditConstants.actions = {
+	USER_ADDED: 'USER_ADDED',
+	USER_REMOVED: 'USER_REMOVED',
+	PERMISSIONS_UPDATED: 'PERMISSIONS_UPDATED',
+	INVITATION_ADDED: 'INVITATION_ADDED',
+	INVITATION_REVOKED: 'INVITATION_REVOKED',
+};
+
+module.exports = AuditConstants;
