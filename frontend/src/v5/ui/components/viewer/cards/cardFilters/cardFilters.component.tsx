@@ -21,22 +21,23 @@ import { ModuleTitle } from './cardFilters.styles';
 import { FiltersSection } from './filtersSection/filtersSection.component';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { groupBy } from 'lodash';
 
 export const CardFilters = () => {
-	const filtersByModule = TicketsCardHooksSelectors.selectFiltersByModule();
-	const hasFilters = Object.keys(filtersByModule).length > 0;
+	const filters = TicketsCardHooksSelectors.selectCardFilters();
+	const hasFilters = Object.keys(filters).length > 0;
 
 	if (!hasFilters) return null;
+	
+	const ticketsByModule = groupBy(filters, (f) => f.module);
+	const sortedModuleNames = Object.keys(ticketsByModule).sort((a, b) => a.localeCompare(b));
 
 	return (
 		<FiltersAccordion onClear={TicketsCardActionsDispatchers.resetFilters}>
-			{filtersByModule.map(([module, moduleFilters]) => (
+			{sortedModuleNames.map((module) => (
 				<Fragment key={module}>
 					{module && (<ModuleTitle>{module}</ModuleTitle>)}
-					<FiltersSection
-						module={module}
-						filters={moduleFilters}
-					/>
+					<FiltersSection filters={ticketsByModule[module]} />
 				</Fragment>
 			))}
 		</FiltersAccordion>

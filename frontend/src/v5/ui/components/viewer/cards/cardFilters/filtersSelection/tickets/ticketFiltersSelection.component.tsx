@@ -24,14 +24,14 @@ import FunnelIcon from '@assets/icons/filters/funnel.svg';
 import { Tooltip } from '@mui/material';
 import { TicketFiltersSelectionList } from './list/ticketFiltersSelectionList.component';
 import { SearchInput, DrillDownList, DrillDownItem } from './ticketFiltersSelection.styles';
-import { TicketCardFilterDescription } from '../../cardFilters.types';
+import { CardFilter } from '../../cardFilters.types';
 import { FilterForm } from '../../filterForm/filterForm.component';
 import { CardFilterActionMenu } from '../../filterForm/filterForm.styles';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 export const FilterSelection = () => {
 	const [open, setOpen] = useState(false);
-	const [selectedFilter, setSelectedFilter] = useState<TicketCardFilterDescription>(null);
+	const [selectedFilter, setSelectedFilter] = useState<CardFilter>(null);
 	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
 	const unusedFilters = TicketsCardHooksSelectors.selectAvailableTemplatesFilters();
 	const showFiltersList = !selectedFilter?.property;

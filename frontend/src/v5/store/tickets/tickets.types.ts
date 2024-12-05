@@ -213,11 +213,4 @@ export type OverridesDicts = {
 	transparencies: MeshIdTransparencyDict,
 };
 
-export type FilterTypesByProperty = {
-	[property in string]: {
-		[type in CardFilterType]?: BaseFilter;
-	};
-};
-export type FilterPropertiesByModule = {
-	[module in string]?: FilterTypesByProperty;
-};
+export type TicketFilterKey = `${string}.${string}.${CardFilterType}`;

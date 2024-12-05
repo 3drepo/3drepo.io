@@ -23,7 +23,6 @@ export type BaseFilter = { operator: CardFilterOperator, values: CardFilterValue
 export type CardFilter = {
 	property: string,
 	type: CardFilterType,
-	filter: BaseFilter,
+	filter?: BaseFilter,
+	module?: string,
 };
-export type TicketCardFilter = CardFilter & { module: string };
-export type TicketCardFilterDescription = Omit<TicketCardFilter, 'filter'>;

@@ -23,8 +23,8 @@ import { ITicketsCardState } from './ticketsCard.redux';
 import { DEFAULT_PIN, getPinColorHex, formatPin, getTicketPins } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { IPin } from '@/v4/services/viewer/viewer';
 import { selectSelectedDate } from '@/v4/modules/sequences';
-import { has, uniq } from 'lodash';
-import { getFiltersByModule, templatesToFilters } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
+import { uniq } from 'lodash';
+import { ToTicketCardFilter, templatesToFilters } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 
 const selectTicketsCardDomain = (state): ITicketsCardState => state.ticketsCard || {};
 
@@ -119,9 +119,9 @@ export const selectFilters = createSelector(
 	(ticketCardState) => ticketCardState.filters || {},
 );
 
-export const selectFiltersByModule = createSelector(
+export const selectCardFilters = createSelector(
 	selectFilters,
-	(filters) => getFiltersByModule(filters) || [],
+	(filters) => ToTicketCardFilter(filters) || [],
 );
 
 export const selectTemplatesFilters = createSelector(
@@ -137,7 +137,7 @@ export const selectTemplatesFilters = createSelector(
 export const selectAvailableTemplatesFilters = createSelector(
 	selectFilters,
 	selectTemplatesFilters,
-	(usedFilters, allFilters) => allFilters.filter(({ module, property, type }) => !has(usedFilters, [module, property, type])),
+	(usedFilters, allFilters) => allFilters.filter(({ module, property, type }) => !usedFilters[`${module}.${property}.${type}`]),
 );
 
 export const selectFilteredTickets = createSelector(

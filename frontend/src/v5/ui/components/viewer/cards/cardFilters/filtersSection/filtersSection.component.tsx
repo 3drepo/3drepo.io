@@ -23,30 +23,26 @@ import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
 import { CardFilterActionMenu } from '../filterForm/filterForm.styles';
 import { useState } from 'react';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { isEqual } from 'lodash';
 
 type FiltersSectionProps = {
-	module?: string;
 	filters: CardFilter[];
 };
-export const FiltersSection = ({ module, filters }: FiltersSectionProps) => {
-	const [selectedProperty, setSelectedProperty] = useState('');
-
-	const onDeleteFilter = (property, type) => TicketsCardActionsDispatchers.deleteFilter({ module, property, type });
+export const FiltersSection = ({ filters }: FiltersSectionProps) => {
+	const [selectedFilter, setSelectedFilter] = useState({});
 
 	return (
 		<Section>
-			{filters.map(({ property, type, filter }) => (
+			{filters.map((filter) => (
 				<CardFilterActionMenu
-					key={property}
-					onOpen={() => setSelectedProperty(property)}
-					onClose={() => setSelectedProperty('')}
+					key={Object.keys(filter).join()}
+					onOpen={() => setSelectedFilter(filter)}
+					onClose={() => setSelectedFilter({})}
 					TriggerButton={(
 						<FilterChip
-							property={property}
-							type={type}
-							filter={filter}
-							selected={selectedProperty === property}
-							onDelete={() => onDeleteFilter(property, type)}
+							{...filter}
+							selected={isEqual(selectedFilter, filter)}
+							onDelete={() => TicketsCardActionsDispatchers.deleteFilter(filter)}
 						/>
 					)}
 				>
@@ -55,10 +51,7 @@ export const FiltersSection = ({ module, filters }: FiltersSectionProps) => {
 							<FilterForm
 								onCancel={close}
 								onSubmit={TicketsCardActionsDispatchers.upsertFilter}
-								module={module}
-								property={property}
-								type={type}
-								filter={filter}
+								{...filter}
 							/>
 						)}
 					</ActionMenuContext.Consumer>

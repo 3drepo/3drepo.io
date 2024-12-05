@@ -1,9 +1,9 @@
 import { TicketsCardActions } from "@/v5/store/tickets/card/ticketsCard.redux";
-import { selectAvailableTemplatesFilters, selectFilters, selectFiltersByModule, selectIsEditingGroups, selectIsShowingPins, selectReadOnly, selectSelectedTemplateId, selectSelectedTicketId, selectSelectedTicketPinId, selectView } from "@/v5/store/tickets/card/ticketsCard.selectors";
+import { selectAvailableTemplatesFilters, selectFilters, selectCardFilters, selectIsEditingGroups, selectIsShowingPins, selectReadOnly, selectSelectedTemplateId, selectSelectedTicketId, selectSelectedTicketPinId, selectView } from "@/v5/store/tickets/card/ticketsCard.selectors";
 import { TicketsCardViews } from "@/v5/ui/routes/viewer/tickets/tickets.constants";
 import { createTestStore } from "../../test.helpers";
-import { BaseFilter, CardFilter, TicketCardFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
-import { templatesToFilters, toCardFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
+import { BaseFilter, CardFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
+import { templatesToFilters } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 
 
 describe('Tickets: store', () => {
@@ -73,32 +73,28 @@ describe('Tickets: store', () => {
 				operator: 'gt',
 				values: [2],
 			};
-			const ticketIdCardFilter: TicketCardFilter = { ...ticketIdFilter, filter: baseFilter };
-			const ticketTitleCardFilter: TicketCardFilter = { ...ticketTitleFilter, filter: baseFilter };
-			const updatedTicketTitleCardFilter: TicketCardFilter = { ...ticketTitleCardFilter, filter: editedBaseFilter };
+			const ticketIdCardFilter: CardFilter = { ...ticketIdFilter, filter: baseFilter };
+			const ticketTitleCardFilter: CardFilter = { ...ticketTitleFilter, filter: baseFilter };
+			const updatedTicketTitleCardFilter: CardFilter = { ...ticketTitleCardFilter, filter: editedBaseFilter };
 			
 			describe('existing filters', () => {
 				it('should add a filter', () => {
 					dispatch(TicketsCardActions.upsertFilter(ticketTitleCardFilter));
-					const filtersInStore = selectFiltersByModule(getState());
-					const { module, ...rest } = ticketTitleCardFilter;
-					const moduleAndticketIdCardFilter: [string, CardFilter[]] = [module, [rest as CardFilter]];
-					expect(filtersInStore).toEqual([moduleAndticketIdCardFilter]);
+					const filtersInStore = selectCardFilters(getState());
+					expect(filtersInStore).toEqual([ticketTitleCardFilter]);
 				});
 
 				it('should edit a filter', () => {
 					dispatch(TicketsCardActions.upsertFilter(ticketTitleCardFilter));
 					dispatch(TicketsCardActions.upsertFilter(updatedTicketTitleCardFilter));
-					const filtersInStore = selectFiltersByModule(getState());
-					const { module, ...rest } = updatedTicketTitleCardFilter;
-					const moduleAndticketIdCardFilter: [string, CardFilter[]] = [module, [rest as CardFilter]];
-					expect(filtersInStore).toEqual([moduleAndticketIdCardFilter]);
+					const filtersInStore = selectCardFilters(getState());
+					expect(filtersInStore).toEqual([updatedTicketTitleCardFilter]);
 				});
 
 				it('should delete a filter', () => {
 					dispatch(TicketsCardActions.upsertFilter(ticketTitleCardFilter));
 					dispatch(TicketsCardActions.deleteFilter(ticketTitleCardFilter));
-					const filtersInStore = selectFiltersByModule(getState());
+					const filtersInStore = selectCardFilters(getState());
 					expect(filtersInStore).toEqual([]);
 				});
 			})
@@ -140,7 +136,7 @@ describe('Tickets: store', () => {
 				operator: 'eq',
 				values: [],
 			};
-			const ticketTitleCardFilter: TicketCardFilter = { ...ticketTitleFilter, filter: baseFilter };
+			const ticketTitleCardFilter: CardFilter = { ...ticketTitleFilter, filter: baseFilter };
 			dispatch(TicketsCardActions.setSelectedTicket(ticketId));
 			dispatch(TicketsCardActions.setSelectedTemplate(templateId));
 			dispatch(TicketsCardActions.setSelectedTicketPin(pinId));
