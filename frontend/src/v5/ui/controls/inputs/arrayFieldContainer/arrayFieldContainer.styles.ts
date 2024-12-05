@@ -20,7 +20,6 @@ import styled, { css } from 'styled-components';
 export const Container = styled.div`
 	display: flex;
 	flex-direction: row;
-	align-items: end;
 	gap: 10px;
 `;
 
@@ -36,7 +35,7 @@ export const IconContainer = styled.button.attrs({
 	display: inline-block;
 	padding: 0;
 	height: 18px;
-	margin-bottom: 15px;
+	margin-top: 4px;
 	border: none;
 	background: transparent;
 `;
