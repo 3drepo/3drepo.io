@@ -40,11 +40,12 @@ export const SearchInput = styled(SearchInputBase)`
 `;
 
 export const DrillDownItem = styled.div<{ $visible: boolean }>`
-	transition: opacity height .2s;
+	transition: max-height .6s;
+	height: 100%;
 	${({ $visible }) => $visible ? css`
-		height: 100%;
+		max-height: 604px;
 	` : css`
-		height: 0;
+		max-height: 0;
 		overflow-y: hidden;
 	`};
 	width: 100%;
@@ -56,7 +57,6 @@ export const DrillDownList = styled.div<{ $visibleIndex: number }>`
 	overflow-x: hidden;
 	display: flex;
 	flex-direction: row;
-	transition: margin-left .2s;
-	transition-delay: .2s;
+	transition: margin-left .4s;
 	margin-left: ${({ $visibleIndex }) => -($visibleIndex * 100)}%;
 `;

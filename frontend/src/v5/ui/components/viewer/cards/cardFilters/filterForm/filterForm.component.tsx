@@ -18,7 +18,7 @@
 import { FormattedMessage } from 'react-intl';
 import { CardFilterOperator, CardFilterValue, CardFilterType, BaseFilter, CardFilter } from '../cardFilters.types';
 import { FILTER_OPERATOR_LABEL, getFilterFormTitle } from '../cardFilters.helpers';
-import { Container, ButtonsContainer, Button } from './filterForm.styles';
+import { Container, ButtonsContainer, Button, TitleContainer } from './filterForm.styles';
 import { MenuItem } from '@mui/material';
 import { FormProvider, useForm } from 'react-hook-form';
 import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
@@ -53,7 +53,10 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel 
 	return (
 		<FormProvider {...formData}>
 			<Container>
-				{getFilterFormTitle([module, property])}
+				{/* The <div> is for a smoother animation when creating the filter */}
+				<TitleContainer>
+					{getFilterFormTitle([module, property])}
+				</TitleContainer>
 				<FormSelect name='operator'>
 					{Object.entries(FILTER_OPERATOR_LABEL).map(([key, label]) => (
 						<MenuItem key={key} value={key}>{label}</MenuItem>

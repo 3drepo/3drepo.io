@@ -33,6 +33,10 @@ export const Container = styled.div`
 	gap: 10px;
 `;
 
+export const TitleContainer = styled.div`
+	height: 15px;
+`;
+
 export const Button = styled(ButtonBase)`
 	margin: 0;
 `;
