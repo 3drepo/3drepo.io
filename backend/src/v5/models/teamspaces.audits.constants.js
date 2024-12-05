@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,18 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { init } = require('./journaling/index');
-const { initialise: initInvites } = require('../models/invitations');
-const { initialise: initLoginRecs } = require('../models/loginRecords');
-const { initialise: initNotifs } = require('../models/notifications');
+const AuditConstants = {};
 
-const Initialiser = {};
+AuditConstants.actions = {
+	USER_ADDED: 'USER_ADDED',
+	USER_REMOVED: 'USER_REMOVED',
+	PERMISSIONS_UPDATED: 'PERMISSIONS_UPDATED',
+	INVITATION_ADDED: 'INVITATION_ADDED',
+	INVITATION_REVOKED: 'INVITATION_REVOKED',
+};
 
-Initialiser.initialiseSystem = () => Promise.all([
-	initLoginRecs(),
-	initInvites(),
-	initNotifs(),
-	init(),
-]);
-
-module.exports = Initialiser;
+module.exports = AuditConstants;
