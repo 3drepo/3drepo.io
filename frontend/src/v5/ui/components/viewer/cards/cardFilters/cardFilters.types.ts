@@ -16,7 +16,7 @@
  */
 
 export type CardFilterOperator = 'ex' | 'nex' | 'eq' | 'neq' | 'ss' | 'nss' | 'rng' | 'nrng' | 'gt' | 'gte' | 'lt' | 'lte';
-export type CardFilterType = 'text' | 'longText' | 'date' | 'pastDate' | 'sequencing' | 'oneOf' | 'manyOf' | 'boolean' | 'number' | 'ticketTitle' | 'ticketId' | 'template';
+export type CardFilterType = 'text' | 'longText' | 'date' | 'oneOf' | 'manyOf' | 'boolean' | 'number' | 'ticketTitle' | 'ticketId' | 'template';
 export type CardFilterValue = string | number | Date;
 export type BaseFilter = { operator: CardFilterOperator, values: CardFilterValue[] };
 

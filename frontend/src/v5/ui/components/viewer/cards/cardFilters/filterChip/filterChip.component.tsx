@@ -34,7 +34,7 @@ export const FilterChip = ({ property, onDelete, selected, type, filter }: Filte
 	const { operator, values } = filter;
 	const OperatorIcon = FILTER_OPERATOR_ICON[operator];
 	const hasMultipleValues = values.length > 1;
-	const isDate = ['date', 'pastDate'].includes(type);
+	const isDate = type === 'date';
 	const displayValue = isDate ? values.map((d) => formatSimpleDate(new Date(+d))) : values.join(', ') ?? '';
 
 	return (

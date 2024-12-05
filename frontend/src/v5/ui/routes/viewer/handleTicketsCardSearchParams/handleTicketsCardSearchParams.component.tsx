@@ -58,10 +58,10 @@ export const HandleTicketsCardSearchParams = () => {
 		// TODO - to use new filtering logic
 		// TicketsCardActionsDispatchers.setTemplateFilters(templatesParam);
 		// if (queriesParam.length) {
-		// 	TicketsCardActionsDispatchers.setQueryFilters(queriesParam);
+		// TicketsCardActionsDispatchers.setQueryFilters(queriesParam);
 		// }
 		// if (completedParam) {
-		// 	TicketsCardActionsDispatchers.toggleCompleteFilter();
+		// TicketsCardActionsDispatchers.toggleCompleteFilter();
 		// }
 
 		setQueriesParam();

@@ -40,7 +40,7 @@ export const FiltersSection = ({ filters }: FiltersSectionProps) => {
 					onClose={() => setSelectedFilter({})}
 					TriggerButton={(
 						<FilterChip
-							{...filter}
+							{...filter as any}
 							selected={isEqual(selectedFilter, filter)}
 							onDelete={() => TicketsCardActionsDispatchers.deleteFilter(filter)}
 						/>
@@ -49,9 +49,9 @@ export const FiltersSection = ({ filters }: FiltersSectionProps) => {
 					<ActionMenuContext.Consumer>
 						{({ close }) => (
 							<FilterForm
+								{...filter as any}
 								onCancel={close}
 								onSubmit={TicketsCardActionsDispatchers.upsertFilter}
-								{...filter}
 							/>
 						)}
 					</ActionMenuContext.Consumer>
