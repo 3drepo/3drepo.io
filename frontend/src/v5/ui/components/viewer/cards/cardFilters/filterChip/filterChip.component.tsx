@@ -37,6 +37,12 @@ export const FilterChip = ({ property, onDelete, selected, type, filter }: Filte
 	const isDate = type === 'date';
 	const displayValue = isDate ? values.map((d) => formatSimpleDate(new Date(+d))) : values.join(', ') ?? '';
 
+	const handleDelete = (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+		onDelete();
+	};
+
 	return (
 		<ChipContainer selected={selected}>
 			<Tooltip title={`${property} ${FILTER_OPERATOR_LABEL[operator]} ${displayValue}`}>
@@ -55,7 +61,7 @@ export const FilterChip = ({ property, onDelete, selected, type, filter }: Filte
 					)}
 				</TextWrapper>
 			</Tooltip>
-			<DeleteButton onClick={onDelete}>
+			<DeleteButton onClick={handleDelete}>
 				<CloseIcon />
 			</DeleteButton>
 		</ChipContainer>
