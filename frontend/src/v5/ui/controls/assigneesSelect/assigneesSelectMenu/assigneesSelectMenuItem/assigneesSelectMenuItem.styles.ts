@@ -16,9 +16,9 @@
  */
 
 import { Checkbox as BaseCheckbox, MenuItem } from '@mui/material';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-export const ListItemContainer = styled(MenuItem)`
+export const ListItemContainer = styled(MenuItem)<{ $error?: boolean }>`
 	width: auto;
 	height: 44px;
 	gap: 7px;
@@ -26,6 +26,17 @@ export const ListItemContainer = styled(MenuItem)`
 	display: flex;
 	align-items: center;
 	box-sizing: border-box;
+	${({ $error, theme }) => $error && css`
+		background-color: ${theme.palette.error.lightest};
+
+		&&&:hover {
+			background-color: ${theme.palette.error.light};
+		}
+
+		.MuiCheckbox-root:hover {
+			background-color: transparent;
+		}
+	`};
 `;
 
 export const Titles = styled.div`

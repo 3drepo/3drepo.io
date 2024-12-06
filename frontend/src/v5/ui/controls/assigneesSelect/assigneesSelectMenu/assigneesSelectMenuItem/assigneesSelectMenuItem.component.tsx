@@ -24,10 +24,11 @@ type IAssigneesSelectMenuItem = MenuItemProps & {
 	subtitle?: string;
 	assignee: string;
 	multiple: boolean;
+	error?: boolean
 };
 
-export const AssigneesSelectMenuItem = ({ assignee, title, subtitle, selected, multiple, ...props }: IAssigneesSelectMenuItem) => (
-	<ListItemContainer selected={!multiple && selected} {...props}>
+export const AssigneesSelectMenuItem = ({ assignee, title, subtitle, selected, multiple, error, ...props }: IAssigneesSelectMenuItem) => (
+	<ListItemContainer selected={!multiple && selected} $error={error} {...props}>
 		<AssigneeCircle assignee={assignee} />
 		<Titles>
 			<Title>{title}</Title>

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { JobsActionsDispatchers, ProjectsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { ContainersActionsDispatchers, FederationsActionsDispatchers, JobsActionsDispatchers, ProjectsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
@@ -149,7 +149,15 @@ export const TicketsTable = () => {
 
 		containersAndFederations.forEach((modelId) => {
 			if (ticketHasBeenFetched(modelId)) return;
-			TicketsActionsDispatchers.fetchTickets(teamspace, project, modelId, isFed(modelId));
+			const isFederation = isFed(modelId);
+			TicketsActionsDispatchers.fetchTickets(teamspace, project, modelId, isFederation);
+			if (isFederation) {
+				FederationsActionsDispatchers.fetchFederationUsers(teamspace, project, modelId);
+				FederationsActionsDispatchers.fetchFederationJobs(teamspace, project, modelId);
+			} else {
+				ContainersActionsDispatchers.fetchContainerUsers(teamspace, project, modelId);
+				ContainersActionsDispatchers.fetchContainerJobs(teamspace, project, modelId);
+			}
 		});
 
 		const subscriptions = containersAndFederations.flatMap((modelId) => {

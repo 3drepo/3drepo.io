@@ -15,45 +15,47 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SearchContext, SearchContextType } from '@controls/search/searchContext';
 import { NoResults, SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
 import { ListSubheader } from '@mui/material';
-import { get, partition } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { SelectProps } from '@controls/inputs/select/select.component';
-import { useCallback, useContext, useState, useEffect } from 'react';
-import { IUser } from '@/v5/store/users/users.redux';
-import { IJob } from '@/v5/store/jobs/jobs.types';
+import { useCallback, useContext } from 'react';
 import { AssigneesSelectMenuItem } from './assigneesSelectMenuItem/assigneesSelectMenuItem.component';
 import { HiddenSelect, HorizontalRule, SearchInput } from './assigneesSelectMenu.styles';
+import { groupJobsAndUsers } from '../assignees.helpers';
+import { SearchContext } from '@controls/search/searchContext';
 
-const isUser = (assignee) => get(assignee, 'user');
+const NoResultsMessage = () => (
+	<NoResults>
+		<FormattedMessage
+			id="form.searchSelect.menuContent.emptyList"
+			defaultMessage="No results"
+		/>
+	</NoResults>
+);
 
 const preventPropagation = (e) => {
 	if (e.key !== 'Escape') {
 		e.stopPropagation();
 	}
 };
-
+type AssigneesSelectMenuProps = SelectProps & {
+	isInvalid: (val: string) => boolean;
+};
 export const AssigneesSelectMenu = ({
 	open,
 	value,
 	onClick,
 	multiple,
+	isInvalid,
 	...props
-}: SelectProps) => {
-	const [users, setUsers] = useState([]);
-	const [jobs, setJobs] = useState([]);
-	const { filteredItems } = useContext<SearchContextType<IJob | IUser>>(SearchContext);
+}: AssigneesSelectMenuProps) => {
+	const { filteredItems } = useContext(SearchContext);
+	const { users, jobs, notFound } = groupJobsAndUsers(filteredItems);
 	const onClickList = useCallback((e) => {
 		preventPropagation(e);
 		onClick?.(e);
 	}, []);
-	useEffect(() => {
-		const [filteredUsers, filteredJobs] = partition(filteredItems, isUser);
-		setUsers(filteredUsers);
-		setJobs(filteredJobs);
-	}, [filteredItems.length]);
 
 	return (
 		// @ts-ignore
@@ -67,6 +69,27 @@ export const AssigneesSelectMenu = ({
 			<SearchInputContainer>
 				<SearchInput onClick={preventPropagation} onKeyDown={preventPropagation} />
 			</SearchInputContainer>
+			{/* The following "invalid" components cannot be grouped together inside a fragment
+				Because MuiSelect passes props to the MenuItem components and it can
+				only do so if they are direct children */}
+			{notFound.length > 0 && (
+				<ListSubheader>
+					<FormattedMessage id="assigneesSelectMenu.notFoundHeading" defaultMessage="Users and Jobs not found" />
+				</ListSubheader>
+			)}
+			{notFound.map(({ notFoundName: ju }) => (
+				<AssigneesSelectMenuItem
+					key={ju}
+					assignee={ju}
+					value={ju}
+					title={ju}
+					multiple={multiple}
+					selected
+					error
+				/>
+			))}
+			{notFound.length > 0 && (<HorizontalRule />)}
+
 			<ListSubheader>
 				<FormattedMessage id="assigneesSelectMenu.jobsHeading" defaultMessage="Jobs" />
 			</ListSubheader>
@@ -77,16 +100,10 @@ export const AssigneesSelectMenu = ({
 					value={_id}
 					title={_id}
 					multiple={multiple}
+					error={isInvalid(_id)}
 				/>
 			))}
-			{!jobs.length && (
-				<NoResults>
-					<FormattedMessage
-						id="form.searchSelect.menuContent.emptyList"
-						defaultMessage="No results"
-					/>
-				</NoResults>
-			)}
+			{!jobs.length && (<NoResultsMessage />)}
 
 			<HorizontalRule />
 
@@ -101,16 +118,10 @@ export const AssigneesSelectMenu = ({
 					title={`${user.firstName} ${user.lastName}`}
 					subtitle={user.job}
 					multiple={multiple}
+					error={isInvalid(user.user)}
 				/>
 			))}
-			{!users.length && (
-				<NoResults>
-					<FormattedMessage
-						id="form.searchSelect.menuContent.emptyList"
-						defaultMessage="No results"
-					/>
-				</NoResults>
-			)}
+			{!users.length && (<NoResultsMessage />)}
 		</HiddenSelect>
 	);
 };
