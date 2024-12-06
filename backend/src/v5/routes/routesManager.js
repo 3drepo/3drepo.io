@@ -19,6 +19,7 @@ const RoutesManager = {};
 const AadRoutes = require('./sso/aad');
 const BundleRoutes = require('./teamspaces/projects/models/containers/bundles');
 const CalibrationRoutes = require('./teamspaces/projects/models/drawings/calibrations');
+const CreateAssetMapRoutes = require('./teamspaces/projects/models/common/assetMaps');
 const CreateAssetMetaRoutes = require('./teamspaces/projects/models/common/metadata');
 const CreateGeneralRevisionRoutes = require('./teamspaces/projects/models/common/revisions');
 const CreateGroupRoutes = require('./teamspaces/projects/models/common/groups');
@@ -63,6 +64,7 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/bundles', BundleRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/textures', TextureRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assetsMeta/', CreateAssetMetaRoutes(modelTypes.CONTAINER));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assetMaps/', CreateAssetMapRoutes(modelTypes.CONTAINER));
 
 	// Federations
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations', CreateModelGeneralRoutes(modelTypes.FEDERATION));
@@ -73,6 +75,7 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/views', CreateViewRoutes(true));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:federation/revisions', FederationRevisionRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/assetsMeta/', CreateAssetMetaRoutes(modelTypes.FEDERATION));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/assetMaps/', CreateAssetMapRoutes(modelTypes.FEDERATION));
 
 	// Drawings
 	app.use('/v5/teamspaces/:teamspace/projects/:project/drawings', CreateModelGeneralRoutes(modelTypes.DRAWING));

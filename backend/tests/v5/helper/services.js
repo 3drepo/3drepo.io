@@ -47,6 +47,7 @@ const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { isArray } = require(`${src}/utils/helper/typeCheck`);
 const FilesManager = require('../../../src/v5/services/filesManager');
 const { modelTypes, statusCodes } = require('../../../src/v5/models/modelSettings.constants');
+const DbConstants = require('../../../src/v5/handler/db.constants');
 
 const { statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
 const { generateFullSchema } = require(`${src}/schemas/tickets/templates`);
@@ -177,6 +178,31 @@ db.createRevision = async (teamspace, project, model, revision, modelType) => {
 	delete formattedRevision.imageData;
 	delete formattedRevision.thumbnailData;
 	await DbHandler.insertOne(teamspace, historyCol, formattedRevision);
+};
+
+db.createStash = async (teamspace, project, stashEntry) => {
+	const modelId = stashEntry.model;
+	const stashCol = stashEntry.repobundleStash ? `${modelId}.stash.repobundles` : `${modelId}.stash.unity3d`;
+	const stashFileCol = `${modelId}.stash.json_mpc.ref`;
+
+	const writeReferencedData = (id, buffer) => FilesManager.storeFile(teamspace,
+		stashFileCol, id, buffer);
+
+	if (stashEntry.jsonFiles) {
+		for (let i = 0; i < stashEntry.jsonFiles.length; i++) {
+			writeReferencedData(stashEntry.jsonFiles[i], stashEntry.jsonData[i]);
+		}
+	}
+
+	const formattedStashEntry = {
+		...stashEntry,
+		_id: stringToUUID(stashEntry._id),
+		model: modelId,
+	};
+
+	delete formattedStashEntry.jsonData;
+	delete formattedStashEntry.repobundleStash;
+	await DbHandler.insertOne(teamspace, stashCol, formattedStashEntry);
 };
 
 db.createCalibration = async (teamspace, project, drawing, revision, calibration) => {
@@ -461,8 +487,11 @@ ServiceHelper.generateRandomModel = ({ modelType = modelTypes.CONTAINER, viewers
 
 ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, modelType, timestamp, status) => {
 	const _id = ServiceHelper.generateUUIDString();
+	const shared_id = stringToUUID(DbConstants.MASTER_BRANCH);
 	const entry = deleteIfUndefined({
 		_id,
+		shared_id,
+		type: 'revision',
 		tag: modelType === modelTypes.DRAWING ? undefined : ServiceHelper.generateRandomString(),
 		status,
 		statusCode: modelType === modelTypes.DRAWING ? statusCodes[0].code : undefined,
@@ -486,6 +515,38 @@ ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, modelType
 			entry.thumbnailData = ServiceHelper.generateRandomString();
 		}
 	}
+
+	return entry;
+};
+
+ServiceHelper.generateStashEntry = (revId, modelId, teamspace, repobundleStash) => {
+	const _id = revId;
+	const asset1Id = ServiceHelper.generateUUIDString();
+	const asset1Data = `{"testData": "${ServiceHelper.generateRandomString()}"}`;
+
+	const asset2Id = ServiceHelper.generateUUIDString();
+	const asset2Data = `{"testData": "${ServiceHelper.generateRandomString()}"}`;
+
+	const assets = [asset1Id, asset2Id];
+	const jsonFiles = [asset1Id, asset2Id];
+	const jsonData = [asset1Data, asset2Data];
+
+	const offset = [
+		ServiceHelper.generateRandomNumber(),
+		ServiceHelper.generateRandomNumber(),
+		ServiceHelper.generateRandomNumber(),
+	];
+
+	const entry = deleteIfUndefined({
+		_id,
+		assets,
+		database: teamspace,
+		model: modelId,
+		offset,
+		jsonFiles,
+		jsonData,
+		repobundleStash,
+	});
 
 	return entry;
 };

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,32 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const _ = require('lodash');
+const JsonAssetsConstants = {};
 
-const Objects = {};
+JsonAssetsConstants.JSON_FILE_REF_EXT = '.stash.json_mpc.ref';
 
-Objects.cloneDeep = _.cloneDeep;
-
-Objects.removeFields = _.omit;
-
-Objects.isEmpty = _.isEmpty;
-
-Objects.isEqual = _.isEqual;
-
-Objects.getNestedProperty = _.get;
-
-Objects.setNestedProperty = _.set;
-
-Objects.isObject = _.isObject;
-
-Objects.deleteIfUndefined = (obj, includeNull) => {
-	const res = { ...obj };
-	Object.keys(obj).forEach((key) => {
-		const toDitch = obj[key] === undefined || (includeNull && obj[key] === null);
-		if (toDitch) delete res[key];
-	});
-
-	return res;
-};
-
-module.exports = Objects;
+module.exports = JsonAssetsConstants;

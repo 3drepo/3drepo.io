@@ -85,10 +85,16 @@ History.getHistory = async (account, model, branch, revId, projection) => {
 	}
 
 	if (!history) {
-		throw responseCodes.INVALID_TAG_NAME;
+		throw responseCodes.templates.revisionNotFound;
 	}
 
 	return history;
+};
+
+// get the head of default branch (master)
+History.findLatest = async (account, model, projection) => {
+	const results = await History.findByBranch(account, model, null, projection);
+	return results;
 };
 
 module.exports = History;

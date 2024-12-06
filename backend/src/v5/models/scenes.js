@@ -51,21 +51,8 @@ const cleanAll = (nodesToClean) => nodesToClean.map(clean);
 const findNodes = async (account, model, branch, revision, query = {}, projection = {}) => {
 	const history = await History.getHistory(account, model, branch, revision);
 
-	const nodes = await db.find(account, getCollection(model), { rev_id: history._id, ...query }, projection)
+	const nodes = await db.find(account, getCollection(model), { rev_id: history._id, ...query }, projection);
 	return cleanAll(nodes);
-};
-
-const findNodesByType = async (account, model, branch, revision, type, searchString, projection) => {
-	const query = {
-		type,
-	};
-
-	if (searchString) {
-		query.name = new RegExp(searchString, 'i');
-	}
-
-	const result = await findNodes(account, model, branch, revision, query, projection);
-	return result;
 };
 
 const findStashNodes = async (account, model, branch, revision, query = {}, projection = {}) => {
@@ -91,6 +78,19 @@ Scene.findStashNodesByType = async (account, model, branch, revision, type, sear
 	}
 
 	const result = await findStashNodes(account, model, branch, revision, query, projection);
+	return result;
+};
+
+Scene.findNodesByType = async (account, model, branch, revision, type, searchString, projection) => {
+	const query = {
+		type,
+	};
+
+	if (searchString) {
+		query.name = new RegExp(searchString, 'i');
+	}
+
+	const result = await findNodes(account, model, branch, revision, query, projection);
 	return result;
 };
 
@@ -125,7 +125,7 @@ Scene.getContainerMeshInfo = async (teamspace, model, branch, rev) => {
 };
 
 Scene.getFederationMeshInfo = async (ts, proj, federation, branch, rev, user) => {
-	const refNodes = await findNodesByType(ts, federation, branch, rev, 'ref', undefined, { project: 1 });
+	const refNodes = await Scene.findNodesByType(ts, federation, branch, rev, 'ref', undefined, { project: 1 });
 
 	const subModelMeshes = await Promise.all(refNodes.map(async (node) => {
 		// Note that in this table, the "project" column actually contains the IDs of containers

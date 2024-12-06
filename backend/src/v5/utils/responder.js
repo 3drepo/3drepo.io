@@ -152,4 +152,59 @@ Responder.writeStreamRespond = (req, res, resCode, readStream, fileName, fileSiz
 	responseStream.pipe(res);
 };
 
+// Override for unknown stream length and custom headers
+Responder.writeCustomStreamRespond = (
+	req, res, resCode, readStream, fileName, { encoding, mimeType } = {}, customHeader = {}) => {
+	const headers = customHeader;
+
+	// Assemble headers
+	if (fileName) {
+		headers['Content-Disposition'] = `attachment;filename=${fileName}`;
+	}
+
+	const contentType = Responder.mimeTypes[req.params.format] || mimeType;
+	if (contentType) {
+		headers['Content-Type'] = contentType;
+	}
+
+	let response = createResponseCode(resCode);
+
+	let responseStream = readStream;
+
+	if (encoding) {
+		if (req.acceptsEncoding(encoding)) {
+			headers['Content-Encoding'] = encoding;
+		} else {
+			// If the agent cannot accept our statically-compressed files, then
+			// decompress it and let Node re-compress to the agents' preference
+			switch (encoding) {
+			case 'gzip':
+				responseStream = readStream.pipe(zlib.createGunzip());
+				break;
+			default:
+				res.status(createResponseCode());
+				res.end();
+				logger.logError(`Unexpected encoding type: ${encoding}`);
+				logger.logError(genResponseLogging(response.code, undefined, req)); // Note: FileSize unknown in this case
+				return;
+			}
+		}
+	}
+
+	responseStream.on('error', (error) => {
+		response = createResponseCode(error);
+		logger.logInfo(genResponseLogging(response.code, undefined, req)); // Note: FileSize unknown in this case
+		res.status(response.status);
+		res.end();
+	});
+
+	responseStream.on('end', () => {
+		logger.logInfo(genResponseLogging(response.code, undefined, req)); // Note: FileSize unknown in this case
+	});
+
+	// Write headers
+	res.writeHead(response.status, headers);
+	responseStream.pipe(res);
+};
+
 module.exports = Responder;
