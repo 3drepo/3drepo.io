@@ -21,25 +21,32 @@ import { MenuItem } from '@mui/material';
 import { CardFilterOperator } from '../../../cardFilters.types';
 import { FilterIconContainer } from './filterFormOperators.styles';
 
-const OperatorMenuItem = ({ operator }) => {
+const MenuItemContent = ({ operator }) => {
 	const Icon = FILTER_OPERATOR_ICON[operator];
 	const label = FILTER_OPERATOR_LABEL[operator];
 
 	return (
-		<MenuItem key={operator} value={operator}>
+		<>
 			<FilterIconContainer>
 				<Icon />
 			</FilterIconContainer>
 			{label}
-		</MenuItem>
+		</>
 	);
 };
 
 export const FilterFormOperators = ({ type }) => {
 	const operators = getValidOperators(type);
 	return (
-		<FormSelect name='operator' renderValue={(op: CardFilterOperator) => FILTER_OPERATOR_LABEL[op]}>
-			{operators.map((op) => (<OperatorMenuItem operator={op} />))}
+		<FormSelect
+			name='operator'
+			renderValue={(op: CardFilterOperator) => FILTER_OPERATOR_LABEL[op]}
+		>
+			{operators.map((operator) => (
+				<MenuItem value={operator}>
+					<MenuItemContent operator={operator} />
+				</MenuItem>
+			))}
 		</FormSelect>
 	);
 };
