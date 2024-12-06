@@ -28,5 +28,10 @@ export const MenuList = styled(MenuListBase)`
 `;
 
 export const EmptyListMessage = styled(EmptyListMessageBase)`
-	margin: 0 10px 10px
+	margin: 0 10px 10px;
+`;
+
+export const SearchWord = styled.b`
+	max-width: 365px;
+	word-break: break-word;
 `;
