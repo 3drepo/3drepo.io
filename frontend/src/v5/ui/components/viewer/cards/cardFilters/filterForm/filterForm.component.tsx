@@ -17,18 +17,17 @@
 
 import { FormattedMessage } from 'react-intl';
 import { CardFilterOperator, CardFilterValue, CardFilterType, BaseFilter, CardFilter } from '../cardFilters.types';
-import { FILTER_OPERATOR_LABEL, getFilterFormTitle, getValidOperators } from '../cardFilters.helpers';
+import { getFilterFormTitle } from '../cardFilters.helpers';
 import { Container, ButtonsContainer, Button, TitleContainer } from './filterForm.styles';
 import { FormProvider, useForm } from 'react-hook-form';
 import { isEmpty } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { FilterFormValues } from './filterFormValues/filterFormValues.componen';
-import { FormSelect } from '@controls/inputs/formInputs.component';
-import { MenuItem } from '@mui/material';
 import { useEffect } from 'react';
 import { mapArrayToFormArray, mapFormArrayToArray } from '@/v5/helpers/form.helper';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FilterSchema } from '@/v5/validation/ticketSchemes/validators';
+import { FilterFormOperators } from './filterFormValues/operators/filterFormOperators.component';
 
 const DEFAULT_OPERATOR = 'eq';
 type FormType = { values: { value: CardFilterValue }[], operator: CardFilterOperator };
@@ -66,16 +65,14 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel 
 	useEffect(() => {
 		if (type) reset();
 	}, [type]);
-	
+
 	return (
 		<FormProvider {...formData}>
 			<Container>
 				<TitleContainer>
 					{getFilterFormTitle([module, property])}
 				</TitleContainer>
-				<FormSelect name='operator'>
-					{getValidOperators(type).map((op) => (<MenuItem key={op} value={op}>{FILTER_OPERATOR_LABEL[op]}</MenuItem>))}
-				</FormSelect>
+				<FilterFormOperators type={type} />
 				<FilterFormValues type={type} />
 				<ButtonsContainer>
 					<Button onClick={onCancel} color="secondary">
