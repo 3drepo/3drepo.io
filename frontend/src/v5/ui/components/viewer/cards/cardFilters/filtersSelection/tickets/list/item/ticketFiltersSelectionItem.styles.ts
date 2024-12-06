@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,21 +14,36 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import { MenuItem as MenuItemBase } from '@mui/material';
 import styled from 'styled-components';
-import { Typography } from '@mui/material';
 
-export const KickerTypography = styled(Typography)`
-	${({ theme }) => theme.typography.kicker};
+export const MenuItem = styled(MenuItemBase)`
+	display: grid;
+	grid-template-columns: 11px 1fr 11px;
+	height: 32px;
+	gap: 8px;
+
+	svg {
+		color: ${({ theme }) => theme.palette.base.main}
+	}
 `;
 
-export const KickerTitleTypography = styled(Typography)`
-	${({ theme }) => theme.typography.kickerTitle};
+export const ExpandIconContainer = styled.div`
+	transform: rotate(-90deg);
+	height: 11px;
 `;
 
-export const LinkTypography = styled(Typography)`
-	${({ theme }) => theme.typography.link};
+export const FilterName = styled.div`
+	color: ${({ theme }) => theme.palette.secondary.main};
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 `;
 
-export const LabelTypography = styled(Typography)`
-	${({ theme }) => theme.typography.label};
+export const FilterIconContainer = styled.div`
+	display: grid;
+	place-content: center;
+	aspect-ratio: 1;
+	width: 11px;
 `;

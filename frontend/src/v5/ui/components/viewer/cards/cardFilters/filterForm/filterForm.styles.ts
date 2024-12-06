@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,18 +15,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { PrimaryButton, SecondaryButton, ViewerButton } from './circleButton.styles';
+import { ActionMenu } from '@controls/actionMenu';
+import { Button as ButtonBase } from '@controls/button';
+import styled from 'styled-components';
 
-interface ICircleButton {
-	variant?: 'primary' | 'secondary' | 'viewer';
-	disabled?: boolean;
-	onClick?: (e) => void;
-	children: any;
-	selected?: boolean;
-}
+export const CardFilterActionMenu = styled(ActionMenu)`
+	.MuiPaper-root {
+		left: 88px !important;
+		width: 365px;
+	}
+`;
 
-export const CircleButton = ({ variant = 'primary', ...props }: ICircleButton) => {
-	if (variant === 'primary') return (<PrimaryButton {...props} />);
-	if (variant === 'viewer') return (<ViewerButton {...props} />);
-	return (<SecondaryButton {...props} />);
-};
+export const Container = styled.div`
+	padding: 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+`;
+
+export const TitleContainer = styled.div`
+	height: 15px;
+`;
+
+export const Button = styled(ButtonBase)`
+	margin: 0;
+`;
+
+export const ButtonsContainer = styled.div`
+	margin-left: auto;
+	width: fit-content;
+	display: flex;
+	gap: 10px;
+`;

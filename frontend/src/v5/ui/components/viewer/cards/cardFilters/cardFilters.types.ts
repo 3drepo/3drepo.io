@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,18 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { PrimaryButton, SecondaryButton, ViewerButton } from './circleButton.styles';
+export type CardFilterOperator = 'ex' | 'nex' | 'eq' | 'neq' | 'ss' | 'nss' | 'rng' | 'nrng' | 'gt' | 'gte' | 'lt' | 'lte';
+export type CardFilterType = 'text' | 'longText' | 'date' | 'oneOf' | 'manyOf' | 'boolean' | 'number' | 'ticketTitle' | 'ticketId' | 'template';
+export type CardFilterValue = string | number | Date;
+export type BaseFilter = { operator: CardFilterOperator, values: CardFilterValue[] };
 
-interface ICircleButton {
-	variant?: 'primary' | 'secondary' | 'viewer';
-	disabled?: boolean;
-	onClick?: (e) => void;
-	children: any;
-	selected?: boolean;
-}
-
-export const CircleButton = ({ variant = 'primary', ...props }: ICircleButton) => {
-	if (variant === 'primary') return (<PrimaryButton {...props} />);
-	if (variant === 'viewer') return (<ViewerButton {...props} />);
-	return (<SecondaryButton {...props} />);
+export type CardFilter = {
+	property: string,
+	type: CardFilterType,
+	filter?: BaseFilter,
+	module?: string,
 };
