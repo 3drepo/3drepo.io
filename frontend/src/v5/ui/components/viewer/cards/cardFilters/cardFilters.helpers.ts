@@ -65,6 +65,6 @@ export const getFilterFormTitle = (elements: string[]) => compact(elements).join
 
 export const isTextType = (type: CardFilterType) => ['template', 'ticketId', 'ticketTitle', 'text', 'longText'].includes(type);
 export const getValidOperators = (type: CardFilterType): CardFilterOperator[] => {
-	if (type) return ['eq', 'neq', 'ss', 'nss', 'ex', 'nex'];
+	if (isTextType(type)) return ['eq', 'neq', 'ss', 'nss', 'ex', 'nex'];
 	return Object.keys(FILTER_OPERATOR_LABEL) as CardFilterOperator[];
 };
