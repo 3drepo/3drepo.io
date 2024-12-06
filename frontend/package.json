@@ -48,7 +48,7 @@
 		"@mui/icons-material": "5.16.7",
 		"@mui/lab": "5.0.0-alpha.71",
 		"@mui/material": "5.16.7",
-		"@mui/system": "5.4.1",
+		"@mui/system": "5.16.7",
 		"@mui/x-date-pickers": "5.0.3",
 		"@popperjs/core": "2.6.0",
 		"@types/three": "0.167.1",
