@@ -51,6 +51,7 @@ export interface IMeasurementState {
 	lengthMeasurements: any[];
 	pointMeasurements: any[];
 	angleMeasurements: any[];
+	slopeMeasurements: any[];
 	edgeSnapping: boolean;
 	xyzDisplay: boolean;
 }
@@ -63,6 +64,7 @@ export const INITIAL_STATE: IMeasurementState = {
 	lengthMeasurements: [],
 	pointMeasurements: [],
 	angleMeasurements: [],
+	slopeMeasurements: [],
 	edgeSnapping: true,
 	xyzDisplay: false,
 };
@@ -83,6 +85,7 @@ export const clearMeasurementsSuccess  = (state = INITIAL_STATE) => ({
 	lengthMeasurements: INITIAL_STATE.lengthMeasurements,
 	pointMeasurements: INITIAL_STATE.pointMeasurements,
 	angleMeasurements: INITIAL_STATE.angleMeasurements,
+	slopeMeasurements: INITIAL_STATE.slopeMeasurements,
 });
 
 export const removeMeasurementSuccess = (state = INITIAL_STATE, { uuid }) => ({
@@ -91,6 +94,7 @@ export const removeMeasurementSuccess = (state = INITIAL_STATE, { uuid }) => ({
 	lengthMeasurements: state.lengthMeasurements.filter((measurement) => measurement.uuid !== uuid),
 	pointMeasurements: state.pointMeasurements.filter((measurement) => measurement.uuid !== uuid),
 	angleMeasurements: state.angleMeasurements.filter((measurement) => measurement.uuid !== uuid),
+	slopeMeasurements: state.slopeMeasurements.filter((measurement) => measurement.uuid !== uuid),
 });
 
 export const addMeasurementSuccess = (state = INITIAL_STATE, { measurement }) => {
@@ -120,6 +124,8 @@ export const setMeasurementColorSuccess = (state = INITIAL_STATE, { uuid, color 
 	const lengthMeasurement = state.lengthMeasurements.find((measure) => measure.uuid === uuid);
 	const pointMeasurement = state.pointMeasurements.find((measure) => measure.uuid === uuid);
 	const angleMeasurement = state.angleMeasurements.find((measure) => measure.uuid === uuid);
+	const slopeMeasurement = state.slopeMeasurements.find((measure) => measure.uuid === uuid);
+
 
 	if (areaMeasurement) {
 		areaMeasurement.customColor = color;
@@ -133,6 +139,9 @@ export const setMeasurementColorSuccess = (state = INITIAL_STATE, { uuid, color 
 	} else if (angleMeasurement) {
 		angleMeasurement.customColor = color;
 		return ({ ...state, angleMeasurements: [...state.angleMeasurements]});
+	} else if (slopeMeasurement) {
+		slopeMeasurement.customColor = color;
+		return ({ ...state, slopeMeasurements: [...state.slopeMeasurements]});
 	}
 
 	return ({ ...state });
@@ -144,6 +153,7 @@ export const resetMeasurementColorsSuccess = (state = INITIAL_STATE, {}) => {
 	const lengthMeasurements = state.lengthMeasurements.map(removeCustomColor);
 	const pointMeasurements = state.pointMeasurements.map(removeCustomColor);
 	const angleMeasurements = state.angleMeasurements.map(removeCustomColor);
+	const slopeMeasurements = state.slopeMeasurements.map(removeCustomColor);
 
 	return ({
 		...state,
@@ -151,6 +161,7 @@ export const resetMeasurementColorsSuccess = (state = INITIAL_STATE, {}) => {
 		lengthMeasurements,
 		pointMeasurements,
 		angleMeasurements,
+		slopeMeasurements,
 	});
 };
 
