@@ -30,6 +30,7 @@ import { FilterSchema } from '@/v5/validation/ticketSchemes/validators';
 import { FilterFormOperators } from './filterFormValues/operators/filterFormOperators.component';
 
 const DEFAULT_OPERATOR = 'eq';
+const DEFAULT_VALUES = [''];
 type FormType = { values: { value: CardFilterValue }[], operator: CardFilterOperator };
 type FilterFormProps = {
 	module: string,
@@ -42,7 +43,7 @@ type FilterFormProps = {
 export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel }: FilterFormProps) => {
 	const defaultValues = {
 		operator: filter?.operator || DEFAULT_OPERATOR,
-		values: mapArrayToFormArray(filter?.values || []),
+		values: mapArrayToFormArray(filter?.values || DEFAULT_VALUES),
 	};
 
 	const formData = useForm<FormType>({
