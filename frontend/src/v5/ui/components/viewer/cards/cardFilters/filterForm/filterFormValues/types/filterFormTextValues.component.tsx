@@ -28,8 +28,8 @@ export const FilterFormTextValues = () => {
 		name: 'values',
 	});
 	const error = errors.values || {};
-	const formOperator = watch('operator');
-	const maxValues = getOperatorMaxSupportedValues(formOperator);
+	const operator = watch('operator');
+	const maxValues = getOperatorMaxSupportedValues(operator);
 
 	useEffect(() => {
 		if (!fields.length) {
