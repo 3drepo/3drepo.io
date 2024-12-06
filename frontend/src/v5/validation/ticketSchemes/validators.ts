@@ -18,7 +18,7 @@
 import * as Yup from 'yup';
 import { trimmedString } from '../shared/validators';
 import { MAX_LONG_TEXT_LENGTH, MAX_TEXT_LENGTH } from '@/v5/store/tickets/tickets.validators';
-import { getOperatorMaxSupportedValues } from '@components/viewer/cards/cardFilters/filterForm/filterForm.helpers';
+import { getOperatorMaxFieldsAllowed } from '@components/viewer/cards/cardFilters/filterForm/filterForm.helpers';
 import { isTextType } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
 
 const getValueType = (type) => {
@@ -38,8 +38,8 @@ export const FilterSchema = Yup.object().shape({
 		.when(
 			'operator',
 			(operator, schema) => {
-				const requiresAtLeastOneValue = !getOperatorMaxSupportedValues(operator);
-				return schema.min(requiresAtLeastOneValue ? 1 : 0);
+				const maxFields = getOperatorMaxFieldsAllowed(operator);
+				return schema.min(Math.min(maxFields, 1));
 			},
 		),
 });
