@@ -47,7 +47,7 @@
     "device": "0.3.12",
     "ejs": "3.1.10",
     "elastic-apm-node": "4.8.0",
-    "express": "4.21.1",
+    "express": "4.21.2",
     "express-body-parser-error-handler": "1.0.7",
     "express-session": "1.18.1",
     "file-type": "16.5.4",
