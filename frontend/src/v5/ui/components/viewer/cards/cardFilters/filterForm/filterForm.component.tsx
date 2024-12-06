@@ -70,7 +70,6 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel 
 	return (
 		<FormProvider {...formData}>
 			<Container>
-				{/* The <div> is for a smoother animation when creating the filter */}
 				<TitleContainer>
 					{getFilterFormTitle([module, property])}
 				</TitleContainer>
