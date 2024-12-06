@@ -54,13 +54,15 @@ export const HandleTicketsCardSearchParams = () => {
 	useEffect(() => {
 		if (!templatesParam.length && !queriesParam.length && !completedParam) return;
 		ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.TICKETS, true);
-		TicketsCardActionsDispatchers.setTemplateFilters(templatesParam);
-		if (queriesParam.length) {
-			TicketsCardActionsDispatchers.setQueryFilters(queriesParam);
-		}
-		if (completedParam) {
-			TicketsCardActionsDispatchers.toggleCompleteFilter();
-		}
+		// TODO - waiting for refactor of URL params or a decision to create an adapter here
+		// TODO - to use new filtering logic
+		// TicketsCardActionsDispatchers.setTemplateFilters(templatesParam);
+		// if (queriesParam.length) {
+		// TicketsCardActionsDispatchers.setQueryFilters(queriesParam);
+		// }
+		// if (completedParam) {
+		// TicketsCardActionsDispatchers.toggleCompleteFilter();
+		// }
 
 		setQueriesParam();
 		setCompletedParam();

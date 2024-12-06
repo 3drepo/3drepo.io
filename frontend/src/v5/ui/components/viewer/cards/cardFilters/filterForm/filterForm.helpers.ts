@@ -15,14 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export type CardFilterOperator = 'ex' | 'nex' | 'eq' | 'neq' | 'ss' | 'nss' | 'rng' | 'nrng' | 'gt' | 'gte' | 'lt' | 'lte';
-export type CardFilterType = 'text' | 'longText' | 'date' | 'oneOf' | 'manyOf' | 'boolean' | 'number' | 'ticketTitle' | 'ticketId' | 'template';
-export type CardFilterValue = string | number | Date;
-export type BaseFilter = { operator: CardFilterOperator, values: CardFilterValue[] };
+import { CardFilterOperator } from '../cardFilters.types';
 
-export type CardFilter = {
-	property: string,
-	type: CardFilterType,
-	filter?: BaseFilter,
-	module?: string,
+export const getOperatorMaxSupportedValues = (operator: CardFilterOperator) => {
+	switch (operator) {
+		case 'ex':
+		case 'nex':
+			return 0;
+		case 'gt':
+		case 'gte':
+		case 'lt':
+		case 'lte':
+			return 1;
+		default:
+			return Number.MAX_SAFE_INTEGER;
+	}
 };

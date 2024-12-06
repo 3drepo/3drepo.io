@@ -15,14 +15,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export type CardFilterOperator = 'ex' | 'nex' | 'eq' | 'neq' | 'ss' | 'nss' | 'rng' | 'nrng' | 'gt' | 'gte' | 'lt' | 'lte';
-export type CardFilterType = 'text' | 'longText' | 'date' | 'oneOf' | 'manyOf' | 'boolean' | 'number' | 'ticketTitle' | 'ticketId' | 'template';
-export type CardFilterValue = string | number | Date;
-export type BaseFilter = { operator: CardFilterOperator, values: CardFilterValue[] };
+import { ActionMenu } from '@controls/actionMenu';
+import { Button as ButtonBase } from '@controls/button';
+import styled from 'styled-components';
 
-export type CardFilter = {
-	property: string,
-	type: CardFilterType,
-	filter?: BaseFilter,
-	module?: string,
-};
+export const CardFilterActionMenu = styled(ActionMenu)`
+	.MuiPaper-root {
+		left: 88px !important;
+		width: 365px;
+	}
+`;
+
+export const Container = styled.div`
+	padding: 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+`;
+
+export const TitleContainer = styled.div`
+	height: 15px;
+`;
+
+export const Button = styled(ButtonBase)`
+	margin: 0;
+`;
+
+export const ButtonsContainer = styled.div`
+	margin-left: auto;
+	width: fit-content;
+	display: flex;
+	gap: 10px;
+`;

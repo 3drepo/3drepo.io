@@ -15,14 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export type CardFilterOperator = 'ex' | 'nex' | 'eq' | 'neq' | 'ss' | 'nss' | 'rng' | 'nrng' | 'gt' | 'gte' | 'lt' | 'lte';
-export type CardFilterType = 'text' | 'longText' | 'date' | 'oneOf' | 'manyOf' | 'boolean' | 'number' | 'ticketTitle' | 'ticketId' | 'template';
-export type CardFilterValue = string | number | Date;
-export type BaseFilter = { operator: CardFilterOperator, values: CardFilterValue[] };
+import { MenuList as MenuListBase } from '@mui/material';
+import { EmptyListMessage as EmptyListMessageBase } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
+import styled from 'styled-components';
 
-export type CardFilter = {
-	property: string,
-	type: CardFilterType,
-	filter?: BaseFilter,
-	module?: string,
-};
+export const MenuList = styled(MenuListBase)`
+	box-shadow: none !important;
+	padding: 0;
+	overflow-x: hidden;
+	border-radius: 0;
+	max-height: calc(70vh - 55px);
+`;
+
+export const EmptyListMessage = styled(EmptyListMessageBase)`
+	margin: 0 10px 10px
+`;

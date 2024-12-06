@@ -15,14 +15,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export type CardFilterOperator = 'ex' | 'nex' | 'eq' | 'neq' | 'ss' | 'nss' | 'rng' | 'nrng' | 'gt' | 'gte' | 'lt' | 'lte';
-export type CardFilterType = 'text' | 'longText' | 'date' | 'oneOf' | 'manyOf' | 'boolean' | 'number' | 'ticketTitle' | 'ticketId' | 'template';
-export type CardFilterValue = string | number | Date;
-export type BaseFilter = { operator: CardFilterOperator, values: CardFilterValue[] };
+import { MenuItem as MenuItemBase } from '@mui/material';
+import styled from 'styled-components';
 
-export type CardFilter = {
-	property: string,
-	type: CardFilterType,
-	filter?: BaseFilter,
-	module?: string,
-};
+export const MenuItem = styled(MenuItemBase)`
+	display: grid;
+	grid-template-columns: 11px 1fr 11px;
+	height: 32px;
+	gap: 8px;
+
+	svg {
+		color: ${({ theme }) => theme.palette.base.main}
+	}
+`;
+
+export const ExpandIconContainer = styled.div`
+	transform: rotate(-90deg);
+	height: 11px;
+`;
+
+export const FilterName = styled.div`
+	color: ${({ theme }) => theme.palette.secondary.main};
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+`;
+
+export const FilterIconContainer = styled.div`
+	display: grid;
+	place-content: center;
+	aspect-ratio: 1;
+	width: 11px;
+`;
