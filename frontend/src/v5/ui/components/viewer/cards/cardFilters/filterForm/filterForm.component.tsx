@@ -22,7 +22,7 @@ import { Container, ButtonsContainer, Button, TitleContainer } from './filterFor
 import { FormProvider, useForm } from 'react-hook-form';
 import { isEmpty } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
-import { FilterFormValues } from './filterFormValues/filterFormValues.componen';
+import { FilterFormValues } from './filterFormValues/filterFormValues.component';
 import { useEffect } from 'react';
 import { mapArrayToFormArray, mapFormArrayToArray } from '@/v5/helpers/form.helper';
 import { yupResolver } from '@hookform/resolvers/yup';
