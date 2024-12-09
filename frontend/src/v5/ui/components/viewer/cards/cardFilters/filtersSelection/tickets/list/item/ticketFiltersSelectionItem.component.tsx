@@ -17,11 +17,12 @@
 
 import { CardFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
 import { TYPE_TO_ICON } from '../../ticketFilters.helpers';
-import { ExpandIconContainer, FilterIconContainer, MenuItem } from './ticketFiltersSelectionItem.styles';
+import { ExpandIconContainer, MenuItem } from './ticketFiltersSelectionItem.styles';
 import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
 import { Highlight } from '@controls/highlight';
 import { useContext } from 'react';
 import { SearchContext } from '@controls/search/searchContext';
+import { FilterIconContainer } from '@components/viewer/cards/cardFilters/filterForm/filterFormValues/operators/filterFormOperators.styles';
 
 type TicketFiltersSelectionItemProps = CardFilter & {
 	onClick: () => void;
