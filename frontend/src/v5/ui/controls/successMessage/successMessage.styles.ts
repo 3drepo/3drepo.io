@@ -31,8 +31,8 @@ export const IconContainer = styled.div`
 
 	svg {
 		border: solid 1px;
-		width: 10px;
-		height: 10px;
+		width: 20px;
+		height: 20px;
 		border-radius: 50%;
 		padding: 4px;
 		margin-top: 1px;

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { host } = require('../utils/config');
+const { generateUUIDString } = require('../utils/helper/uuids');
 
 const { v4Path } = require('../../interop');
 // eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
@@ -25,7 +25,7 @@ const Elastic = {};
 
 Elastic.createActivityRecord = (status, code, latency, contentLength, user, method, originalUrl) => {
 	const timestamp = new Date();
-	const id = `${host}-${user}-${timestamp.valueOf()}`;
+	const id = generateUUIDString();
 	const elasticBody = {
 		status: parseInt(status, 10),
 		code,

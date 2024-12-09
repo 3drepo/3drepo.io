@@ -14,8 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { formatInfoUnit } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
-import filesize from 'filesize';
 import { isNumber } from 'lodash';
 import * as Yup from 'yup';
 
@@ -51,11 +51,11 @@ export const uploadFile = Yup.mixed().nullable().test(
 	formatMessage({
 		id: 'validation.revisions.file.error.tooLarge',
 		defaultMessage: 'File exceeds size limit of {sizeLimit}',
-	}, { sizeLimit: filesize(ClientConfig.uploadSizeLimit) }),
+	}, { sizeLimit: formatInfoUnit(ClientConfig.uploadSizeLimit) }),
 	({ size }) => size && (size < ClientConfig.uploadSizeLimit),
 );
 
-export const alphaNumericHyphens = /^[\w|_|-]*$/;
+export const alphaNumericHyphens = /^[\w-]*$/;
 
 export const name = trimmedString
 	.max(120,

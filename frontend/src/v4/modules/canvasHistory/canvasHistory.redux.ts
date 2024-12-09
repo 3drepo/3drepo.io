@@ -16,7 +16,9 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
+import undoable from 'redux-undo';
 import { ELEMENT_TYPES } from '../../routes/components/screenshotDialog/markupStage/markupStage.helpers';
+import { batchGroupBy } from './canvasHistory.helpers';
 
 export const { Types: CanvasHistoryTypes, Creators: CanvasHistoryActions } = createActions({
 	setActiveSuccess: ['isActive'],
@@ -44,16 +46,8 @@ export const add = (state = INITIAL_STATE, { element }) => {
 export const update = (state = INITIAL_STATE, { elementName, properties }) => {
 	const selectedIndex = state.elements.findIndex((el) => el.name === elementName);
 	const elements = [...state.elements];
-	const [elementType] = elementName.split('-');
 
 	if (selectedIndex >= 0) {
-		if (properties && elementType === ELEMENT_TYPES.SHAPE) {
-			const propertiesNotFilled = !properties.fill && elements[selectedIndex].fill !== 'transparent';
-			const elementNotFilled = properties.fill === 'transparent' && !elements[selectedIndex].fill;
-			const fill = propertiesNotFilled || elementNotFilled ? properties.color : properties.fill;
-			properties.fill = fill;
-		}
-
 		elements[selectedIndex] = {
 			...elements[selectedIndex],
 			...properties
@@ -82,17 +76,25 @@ export const clear = (state = INITIAL_STATE, {}) => {
 };
 
 export const init = (state = INITIAL_STATE, {}) => {
-	return { elements: [] };
+	return { ...state, elements: [] };
 };
 
-export const reducer = createReducer(INITIAL_STATE, {
-	[CanvasHistoryTypes.SET_ACTIVE_SUCCESS]: setActiveSuccess,
-	[CanvasHistoryTypes.SET_DISABLED_SUCCESS]: setDisabledSuccess,
-	[CanvasHistoryTypes.UNDO]: undo,
-	[CanvasHistoryTypes.REDO]: redo,
-	[CanvasHistoryTypes.CLEAR_HISTORY]: clear,
-	[CanvasHistoryTypes.INIT_HISTORY]: init,
-	[CanvasHistoryTypes.ADD]: add,
-	[CanvasHistoryTypes.UPDATE]: update,
-	[CanvasHistoryTypes.REMOVE]: remove
-});
+export const reducer = undoable(
+	createReducer(INITIAL_STATE, {
+		[CanvasHistoryTypes.SET_ACTIVE_SUCCESS]: setActiveSuccess,
+		[CanvasHistoryTypes.SET_DISABLED_SUCCESS]: setDisabledSuccess,
+		[CanvasHistoryTypes.UNDO]: undo,
+		[CanvasHistoryTypes.REDO]: redo,
+		[CanvasHistoryTypes.CLEAR_HISTORY]: clear,
+		[CanvasHistoryTypes.INIT_HISTORY]: init,
+		[CanvasHistoryTypes.ADD]: add,
+		[CanvasHistoryTypes.UPDATE]: update,
+		[CanvasHistoryTypes.REMOVE]: remove
+	}), {
+		undoType: CanvasHistoryTypes.UNDO,
+		redoType: CanvasHistoryTypes.REDO,
+		groupBy: batchGroupBy.init([]),
+		clearHistoryType: CanvasHistoryTypes.CLEAR_HISTORY,
+		ignoreInitialState: true
+	},
+);

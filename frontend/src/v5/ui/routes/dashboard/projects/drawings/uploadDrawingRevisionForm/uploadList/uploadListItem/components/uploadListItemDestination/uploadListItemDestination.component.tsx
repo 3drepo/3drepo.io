@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { createFilterOptions } from '@mui/material';
@@ -63,21 +63,28 @@ interface IUploadListItemDestination {
 	className?: string;
 	index: number;
 	onSelectNewDestination: () => void;
+	name: string,
+	inputRef?: any;
+	helperText?: string,
+	error?: boolean,
 }
 export const UploadListItemDestination = memo(({
 	value,
 	revisionPrefix,
 	index,
 	onSelectNewDestination,
+	name,
+	inputRef,
+	error,
+	helperText,
 	...props
 }: IUploadListItemDestination): JSX.Element => {
 	const [newOrExisting, setNewOrExisting] = useState<NewOrExisting>('');
-	const [error, setError] = useState('');
-	const { getValues, setValue } = useFormContext();
+	const { getValues, setValue, setError, clearErrors } = useFormContext();
 
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const drawings = DrawingsHooksSelectors.selectDrawings();
-	const selectedDrawing = drawings.find((c) => c.name === value);
+	const selectedDrawing = useMemo(() => drawings.find((c) => c.name === value), [drawings, value]);
 
 	const [processingDrawingsNames, setProcessingDrawingsNames] = useState([]);
 	const [newDrawingsInModal, setNewDrawingsInModal] = useState([]);
@@ -92,15 +99,23 @@ export const UploadListItemDestination = memo(({
 
 	const handleInputChange = (_, newValue: string) => {
 		const trimmedValue = newValue?.trim();
+
 		try {
 			drawingNameScheme.validateSync(
 				trimmedValue,
 				{ context: { alreadyExistingNames: [] } },
 			);
-			setError('');
-			setNewOrExisting(drawings.find(({ name }) => name === trimmedValue) ? 'existing' : 'new');
+
+			if (error) {
+				clearErrors(name);
+			}
+
+			setNewOrExisting(drawings.find((drawing) => drawing.name === trimmedValue) ? 'existing' : 'new');
 		} catch (validationError) {
-			setError(validationError.message);
+			if (validationError.message !== helperText) {
+				setError(name, validationError);
+			}
+
 			setNewOrExisting('');
 		}
 	};
@@ -110,9 +125,9 @@ export const UploadListItemDestination = memo(({
 
 		// filter out currently selected value and drawings with insufficient permissions
 		const filteredOptions = getFilteredDrawingsOptions(options, params)
-			.filter(({ name, role }) => name !== value && isCollaboratorRole(role));
+			.filter((option) => option.name !== value && isCollaboratorRole(option.role));
 
-		const drawingNameExists = options.some(({ name }) => inputValue.toLowerCase() === (name || '').toLowerCase());
+		const drawingNameExists = options.some((option) => inputValue.toLowerCase() === (option.name || '').toLowerCase());
 
 		if (inputValue && !drawingNameExists && isProjectAdmin) {
 			// create an extra option to transform into a
@@ -126,7 +141,7 @@ export const UploadListItemDestination = memo(({
 		return filteredOptions;
 	};
 
-	const nameIsTaken = ({ name }) => takenDrawingNames.map((n) => n.toLowerCase()).includes(name.toLowerCase());
+	const nameIsTaken = (drawing) => takenDrawingNames.map((n) => n.toLowerCase()).includes(drawing.name.toLowerCase());
 
 	const renderOption = (optionProps, option: IDrawing) => {
 		if (!option._id) {
@@ -135,7 +150,7 @@ export const UploadListItemDestination = memo(({
 				return (<AlreadyUsedName key={option.name} />);
 			}
 
-			if (isProjectAdmin) {
+			if (isProjectAdmin && !error) {
 				const message = formatMessage({
 					id: 'drawing.uploads.destination.addNewDestination',
 					defaultMessage: 'Add <Bold>{name}</Bold> as a new drawing',
@@ -192,7 +207,7 @@ export const UploadListItemDestination = memo(({
 		setProcessingDrawingsNames(
 			drawings
 				.filter((drawing) => !canUploadToBackend(drawing.status))
-				.map(({ name }) => name),
+				.map((drawing) => drawing.name),
 		);
 	};
 
@@ -205,7 +220,7 @@ export const UploadListItemDestination = memo(({
 	return (
 		<DestinationAutocomplete
 			{...props}
-			defaultValue={selectedDrawing}
+			value={selectedDrawing}
 			filterOptions={getFilterOptions}
 			getOptionDisabled={nameIsTaken}
 			getOptionLabel={(option: IDrawing) => option.name || ''}
@@ -216,17 +231,24 @@ export const UploadListItemDestination = memo(({
 			onOpen={onOpen}
 			options={sortByName([...drawings, ...newDrawingsInModal])}
 			renderOption={renderOption}
+			disableClearable={!value}
 			renderInput={({ InputProps, ...params }) => (
 				<DestinationInput
-					error={!!error}
+					error={error}
 					{...params}
 					neworexisting={newOrExisting}
+					inputRef={inputRef}
 					InputProps={{
 						...InputProps,
-						startAdornment: !!error && (<ErrorTooltip>{error}</ErrorTooltip>),
+						startAdornment: error && (<ErrorTooltip>{helperText}</ErrorTooltip>),
 					}}
 				/>
 			)}
 		/>
 	);
-}, (prev, next) => prev.revisionPrefix === next.revisionPrefix && prev.value === next.value && prev.disabled === next.disabled);
+}, (prev, next) => (
+	prev.revisionPrefix === next.revisionPrefix &&
+	prev.value === next.value &&
+	prev.disabled === next.disabled &&
+	prev.error === next.error
+));

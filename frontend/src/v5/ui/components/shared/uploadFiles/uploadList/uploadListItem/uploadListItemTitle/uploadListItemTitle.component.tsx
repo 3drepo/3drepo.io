@@ -18,9 +18,9 @@
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { Tooltip } from '@mui/material';
 import { get, useFormContext } from 'react-hook-form';
-import filesize from 'filesize';
 import { DashboardListItemTitle, SubTitleError } from './uploadListItemTitle.styles';
 import { FormattedMessage } from 'react-intl';
+import { formatInfoUnit } from '@/v5/helpers/intl.helper';
 
 type IUploadListItemTitle = {
 	name: string;
@@ -39,9 +39,18 @@ export const UploadListItemTitle = ({
 	const errorMessage = get(errors, `${revisionPrefix}.file`)?.message;
 	const isMultiPagePdf = getValues(`${revisionPrefix}.isMultiPagePdf`);
 
+	const ErrorSubTitle = () => (
+		<>
+			{formatInfoUnit(size)}
+			<SubTitleError>
+				{errorMessage}
+			</SubTitleError>
+		</>
+	);
+
 	const SubTitle = () => (
 		<>
-			{filesize(size)}
+			{formatInfoUnit(size)}
 			{isMultiPagePdf && (
 				<SubTitleError>
 					<FormattedMessage
@@ -54,7 +63,7 @@ export const UploadListItemTitle = ({
 	);
 
 	return (
-		<DashboardListItemTitle key={revisionPrefix} subtitle={<SubTitle />} selected={isSelected}>
+		<DashboardListItemTitle key={revisionPrefix} subtitle={errorMessage ? <ErrorSubTitle /> : <SubTitle />} selected={isSelected}>
 			<Tooltip title={name} placement="bottom-start">
 				<span>{name}</span>
 			</Tooltip>

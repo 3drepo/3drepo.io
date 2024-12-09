@@ -23,7 +23,9 @@ import { generatePath } from 'react-router-dom';
 import { prefixBaseDomain } from '@/v5/helpers/url.helper';
 import { getAPIUrl } from '@/v4/services/api/default';
 import { CHAT_CHANNELS } from '@/v4/constants/chat';
+import { dispatch } from '@/v5/helpers/redux.helpers';
 import { VIEWER_CLIP_MODES } from '@/v4/constants/viewer';
+import { getViewpointWithGroups } from '@/v5/helpers/viewpoint.helpers';
 import { ROUTES } from '../../constants/routes';
 import { prepareGroup } from '../../helpers/groups';
 import { createGroupsFromViewpoint, generateViewpoint,
@@ -35,14 +37,13 @@ import { ModelActions } from '../model';
 import { selectCurrentRevisionId } from '../model';
 import { SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
-import { dispatch } from '../store';
 import { TreeActions } from '../tree';
 import { waitForTreeToBeReady } from '../tree/tree.sagas';
 import { ViewerGuiActions } from '../viewerGui';
 import { ChatActions } from '../chat/chat.redux';
 import { PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
-import { groupsOfViewpoint, isViewpointLoaded, selectSelectedViewpoint, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded } from '.';
+import { isViewpointLoaded, selectSelectedViewpoint, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded } from '.';
 
 export const getThumbnailUrl = (thumbnail) => getAPIUrl(thumbnail);
 
@@ -219,41 +220,8 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 
 export function* fetchViewpointGroups({teamspace, modelId, view}) {
 	try  {
-		if (!view.viewpoint) {
-			return;
-		}
-
-		const revision = yield select(selectCurrentRevisionId);
-		const viewpointsGroups = yield select(selectViewpointsGroups);
-		const viewpointsGroupsBeingLoaded: Set<string> = yield select(selectViewpointsGroupsBeingLoaded);
-
-		const viewpoint = view.viewpoint;
-
-		const groupsToFetch = [];
-
-		// This part discriminates which groups hasnt been loaded yet and add their ids to
-		// the groupsToFetch array
-		const ids = [];
-		for (const id of groupsOfViewpoint(viewpoint)) {
-			ids.push(id);
-			if (!viewpointsGroups[id] && !viewpointsGroupsBeingLoaded.has(id)) {
-				groupsToFetch.push(id);
-			}
-		}
-
-		if (groupsToFetch.length > 0) {
-
-			yield put(ViewpointsActions.addViewpointGroupsBeingLoaded(groupsToFetch));
-			const fetchedGroups =  (yield all(groupsToFetch.map((groupId) =>
-				API.getGroup(teamspace, modelId, groupId, revision))))
-					.map(({data}) => prepareGroup(data));
-
-			yield all(fetchedGroups.map((group) => put(ViewpointsActions.fetchGroupSuccess(group))));
-		}
-
-		const groupsMap = yield select(selectViewpointsGroups);
-		const groupsObject = setGroupData(viewpoint, groupsMap);
-		mergeGroupsDataFromViewpoint(viewpoint, groupsObject);
+		const groupsObject = getViewpointWithGroups({teamspace, modelId, view});
+		mergeGroupsDataFromViewpoint(view.viewpoint, groupsObject);
 	} catch {
 		// groups doesnt exists, still continue
 	}

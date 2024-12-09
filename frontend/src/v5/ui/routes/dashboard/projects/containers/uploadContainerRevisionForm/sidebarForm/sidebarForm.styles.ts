@@ -48,7 +48,7 @@ export const Heading = styled(Typography).attrs({
 
 export const AnimationsCheckbox = styled(FormCheckbox)`
 	padding: 15px 0 0;
-	height: 24px;
+	height: 39px;
 `;
 
 export const FlexContainer = styled.div`

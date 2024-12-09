@@ -36,6 +36,7 @@ import { DrawingRevisionsActionsDispatchers, DrawingsActionsDispatchers } from '
 import { UploadList } from './uploadList/uploadList.component';
 import { parseFileName, reduceFileData, isPdf, getPdfFirstPage, fileToPdf, pdfToFile } from '@components/shared/uploadFiles/uploadFiles.helpers';
 import { UploadItemFields } from '@/v5/store/drawings/revisions/drawingRevisions.types';
+import { formatInfoUnit } from '@/v5/helpers/intl.helper';
 
 const REVISION_NAME_MAX_LENGTH = 50;
 
@@ -89,6 +90,7 @@ export const UploadDrawingRevisionForm = ({
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const allUploadsComplete = DrawingRevisionsHooksSelectors.selectUploadIsComplete();
 	const presetDrawing = DrawingsHooksSelectors.selectDrawingById(presetDrawingId);
+	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const [isPresetLoading, setIsPresetLoading] = useState(!!presetFile);
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 
@@ -170,16 +172,24 @@ export const UploadDrawingRevisionForm = ({
 
 	const supportedFilesMessage = formatMessage({
 		id: 'drawing.uploads.dropzone.message',
-		defaultMessage: 'Supported file formats: PDF and DWG{br}Note: AutoCalibration is only possible with DWG formats.',
-	}, { br: <br /> });
+		defaultMessage:`
+			Supported file formats: PDF and DWG{br}
+			Note: AutoCalibration is only possible with DWG formats.{br}
+			Maximum file size: {sizeLimit}
+		`,
+	}, { br: <br />, sizeLimit: formatInfoUnit(ClientConfig.uploadSizeLimit) });
 
 	useEffect(() => {
 		if (presetFile) {
 			addFilesToList([presetFile], presetDrawing);
 		}
-		DrawingsActionsDispatchers.fetchTypes(teamspace, project);
 		DrawingRevisionsActionsDispatchers.fetchStatusCodes(teamspace, project);
 	}, []);
+
+	useEffect(() => {
+		if (!isAdmin) return;
+		DrawingsActionsDispatchers.fetchTypes(teamspace, project);
+	}, [isAdmin]);
 
 	if (isPresetLoading) return null;
 
