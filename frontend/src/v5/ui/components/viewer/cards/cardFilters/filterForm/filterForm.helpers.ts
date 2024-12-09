@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,18 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { PrimaryButton, SecondaryButton, ViewerButton } from './circleButton.styles';
+import { CardFilterOperator } from '../cardFilters.types';
 
-interface ICircleButton {
-	variant?: 'primary' | 'secondary' | 'viewer';
-	disabled?: boolean;
-	onClick?: (e) => void;
-	children: any;
-	selected?: boolean;
-}
-
-export const CircleButton = ({ variant = 'primary', ...props }: ICircleButton) => {
-	if (variant === 'primary') return (<PrimaryButton {...props} />);
-	if (variant === 'viewer') return (<ViewerButton {...props} />);
-	return (<SecondaryButton {...props} />);
+export const getOperatorMaxSupportedValues = (operator: CardFilterOperator) => {
+	switch (operator) {
+		case 'ex':
+		case 'nex':
+			return 0;
+		case 'gt':
+		case 'gte':
+		case 'lt':
+		case 'lte':
+			return 1;
+		default:
+			return Number.MAX_SAFE_INTEGER;
+	}
 };
