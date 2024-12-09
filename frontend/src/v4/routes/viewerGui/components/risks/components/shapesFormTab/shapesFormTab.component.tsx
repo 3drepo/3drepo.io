@@ -51,6 +51,7 @@ export const ShapesFormTab = ({
 	const areaMeasurements = shapes.filter(({type}) => type === MEASURE_TYPE.AREA);
 	const lengthMeasurements = shapes.filter(({type}) => type === MEASURE_TYPE.LENGTH);
 	const angleMeasurements = shapes.filter(({type}) => type === MEASURE_TYPE.ANGLE);
+	const slopeMeasurements = shapes.filter(({type}) => type === MEASURE_TYPE.SLOPE);
 
 	useEffect(() => {
 		if (!active) {
@@ -74,6 +75,7 @@ export const ShapesFormTab = ({
 				lengthMeasurements={lengthMeasurements}
 				pointMeasurements={[]}
 				angleMeasurements={angleMeasurements}
+				slopeMeasurements={slopeMeasurements}
 				modelUnit={props.units}
 				units={props.units === 'ft' ? props.units : 'm'}
 			/>
