@@ -55,16 +55,16 @@ export const formRuleToGroupRule = ({ values, field, ...rule }: IFormRule): IGro
 		operator: field.operator,
 		values: mapFormArrayToArray(field.values),
 	},
-	values: mapFormArrayToArray(values || []),
+	values: mapFormArrayToArray(values),
 });
 
 export const groupRuleToFormRule = ({ values, field, ...rule }: IGroupRule): IFormRule => ({
 	...rule,
 	field: {
 		operator: field.operator,
-		values: mapArrayToFormArray(field.values || []),
+		values: mapArrayToFormArray(field.values),
 	},
-	values: mapArrayToFormArray(values || []),
+	values: mapArrayToFormArray(values),
 });
 
 export const appendCopySuffixToDuplicateNames = (existingRules: IGroupRule[], newRules: IGroupRule[]) => {
