@@ -53,6 +53,7 @@ export class ViewerService {
 	public viewer: HTMLElement;
 	public currentNavMode = null;
 	public units = 'm';
+	public measuringSlopeUnits = 'Degrees';
 	public convertToM = 1.0;
 	public isInitialised = false;
 	public measuringUnits = '';
@@ -394,6 +395,12 @@ export class ViewerService {
 		this.measuringUnits = units;
 		await this.isViewerReady();
 		UnityUtil.setMeasureToolUnits(units);
+	}
+
+	public async setMeasuringSlopeUnits(slopeUnits) {
+		this.measuringSlopeUnits = slopeUnits;
+		await this.isViewerReady();
+		UnityUtil.setMeasureToolSlopeUnits(slopeUnits);
 	}
 
 	public getMeasuringUnits() {

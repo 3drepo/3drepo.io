@@ -27,6 +27,10 @@ export const selectMeasureUnits = createSelector(
 	selectMeasurementsDomain, (state) => state.units
 );
 
+export const selectMeasureSlopeUnits = createSelector(
+	selectMeasurementsDomain, (state) => state.slopeUnits
+);
+
 export const selectEdgeSnapping = createSelector(
 	selectMeasurementsDomain, (state) => state.edgeSnapping
 );

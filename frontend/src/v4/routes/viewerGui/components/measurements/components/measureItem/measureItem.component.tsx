@@ -22,6 +22,7 @@ import RemoveIcon from '@mui/icons-material/Close';
 import { Formik } from 'formik';
 import { cond, matches, stubTrue } from 'lodash';
 
+import { DEGREES_SYMBOL, slopeUnitsToSymbol } from '@/v4/constants/measure';
 import { MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
@@ -30,7 +31,6 @@ import {
 	AxisLabel,
 	AxisValue,
 	Container,
-	DegreesSymbol,
 	MeasurementPoint,
 	MeasurementValue,
 	StyledForm,
@@ -81,24 +81,32 @@ export const getValue = (measureValue: number, units: string, type: number, mode
 			[stubTrue, () => Math.round(measureValue)]
 	])(modelUnits);
 
-	const valueInUnits = (units === 'mm') ? Math.round(roundedValueMM)
-		: roundNumber(roundedValueMM / Math.pow(1000, factor), 2);
+	let valueInUnits;
+	if (MEASURE_TYPE.SLOPE === type) {
+		valueInUnits = roundedValueMM;
+	} else {
+		valueInUnits = (units === 'mm')
+			? Math.round(roundedValueMM)
+			: roundNumber(roundedValueMM / Math.pow(1000, factor), 2);
+	}
 
 	return Number.parseFloat(valueInUnits.toPrecision(7)).toString(); // Unity only gives 7sf
 };
 
 export const getUnits = (units: string, type: number) => {
-	if (type === MEASURE_TYPE.AREA) {
-		return (
-			<>
-				{units}<sup>2</sup>
-			</>
-		);
+	switch (type) {
+		case MEASURE_TYPE.AREA:
+			return (
+				<>
+					{units}<sup>2</sup>
+				</>
+			);
+		case MEASURE_TYPE.SLOPE:
+			return slopeUnitsToSymbol(units);
+		case MEASURE_TYPE.ANGLE:
+			return DEGREES_SYMBOL;
+		default: return units;
 	}
-	if ([MEASURE_TYPE.ANGLE, MEASURE_TYPE.SLOPE].includes(type)) {
-		return <DegreesSymbol />;
-	}
-	return units;
 };
 
 const chopGLAlpha = (color) => color.slice(0, 3);
@@ -168,8 +176,16 @@ export const MeasureItem = ({
 						</MeasurementPoint>
 					</div>
 				)}
-				{isAngleTypeMeasure && (<MeasurementValue>{getValue(value, units, type, props.modelUnit)} {getUnits(units, type)}</MeasurementValue>)}
-				{!isPointTypeMeasure && !isAngleTypeMeasure && (<MeasurementValue>{getValue(value, units, type, props.modelUnit)} {getUnits(units, type)}</MeasurementValue>)}
+				{isAngleTypeMeasure && (
+					<MeasurementValue>
+						{getValue(value, units, type, props.modelUnit)} {getUnits(units, type)}
+					</MeasurementValue>
+				)}
+				{!isPointTypeMeasure && !isAngleTypeMeasure && (
+					<MeasurementValue>
+						{getValue(value, units, type, props.modelUnit)} {getUnits(units, type)}
+					</MeasurementValue>
+				)}
 				<ColorPicker
 					value={chopGLAlpha(customColor || color)}
 					onChange={handleColorChange}

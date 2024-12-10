@@ -29,6 +29,7 @@ export interface IProps {
 	angleMeasurements: IMeasure[];
 	slopeMeasurements: IMeasure[];
 	units: string;
+	slopeUnits: string;
 	removeMeasurement: (uuid) => void;
 	setMeasurementColor: (uuid, color) => void;
 	setMeasurementName: (uuid, type, name) => void;
@@ -72,7 +73,7 @@ export const AllMeasurementsList = ({areaMeasurements, lengthMeasurements, point
 			}
 			{
 				!isEmpty(slopeMeasurements) &&
-				<MeasurementsList {...props} measureType={MEASURE_TYPE.SLOPE} measurements={slopeMeasurements} colors={colors} />
+				<MeasurementsList {...props} units={props.slopeUnits} measureType={MEASURE_TYPE.SLOPE} measurements={slopeMeasurements} colors={colors} />
 			}
 		</div>
 	);

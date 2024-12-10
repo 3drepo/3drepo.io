@@ -1163,7 +1163,7 @@ export class UnityUtil {
 	 * @category Measuring tool
 	 * @param units - The measuring units accepted values are "Degrees", "Percentage"
 	 */
-	public static setMeasureToolSlopeUnit(units) {
+	public static setMeasureToolSlopeUnits(units) {
 		UnityUtil.toUnity('SetMeasureToolSlopeUnit', undefined, units);
 	}
 

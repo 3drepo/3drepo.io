@@ -84,6 +84,7 @@ interface IProps {
 	sequences: any[];
 	measureMode: string;
 	units: string;
+	slopeUnits: string;
 }
 
 interface IState {
