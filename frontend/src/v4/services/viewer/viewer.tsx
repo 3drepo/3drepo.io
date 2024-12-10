@@ -400,7 +400,7 @@ export class ViewerService {
 	public async setMeasuringSlopeUnits(slopeUnits) {
 		this.measuringSlopeUnits = slopeUnits;
 		await this.isViewerReady();
-		UnityUtil.setMeasureToolSlopeUnit(slopeUnits);
+		UnityUtil.setMeasureToolSlopeUnits(slopeUnits);
 	}
 
 	public getMeasuringUnits() {
