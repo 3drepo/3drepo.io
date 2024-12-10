@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,8 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export type IJob = {
-	_id: string;
-	color: string;
-	isViewer?: boolean;
-};
+import styled from 'styled-components';
+import { PopoverCircle } from '../popoverCircle.component';
+
+export const ErrorCircle = styled(PopoverCircle)`
+	color: ${({ theme }) => theme.palette.error.main};
+	border: solid 2px currentColor;
+	background-color: ${({ theme }) => theme.palette.error.lightest};
+`;

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,8 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export type IJob = {
-	_id: string;
-	color: string;
-	isViewer?: boolean;
-};
+import { AvatarWrapper, Data, Heading, PopoverContainer, Username } from '../userPopoverCircle/userPopover/userPopover.styles';
+import { ErrorCircle } from './errorPopoverCircle.styles';
+import { getJobAbbreviation } from '@/v5/store/jobs/jobs.helpers';
+
+export const ErrorPopover = ({ value, message }) => (
+	<PopoverContainer>
+		<AvatarWrapper>
+			<ErrorCircle>{getJobAbbreviation(value)}</ErrorCircle>
+		</AvatarWrapper>
+		<Data>
+			<Heading>{value}</Heading>
+			<Username>{message}</Username>
+		</Data>
+	</PopoverContainer>
+);
