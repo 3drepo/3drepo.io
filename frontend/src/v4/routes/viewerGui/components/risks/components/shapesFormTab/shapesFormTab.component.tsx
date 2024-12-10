@@ -32,6 +32,7 @@ interface IProps {
 	addButtonsEnabled: boolean;
 	shapes: IMeasure[];
 	units: string;
+	slopeUnits: string;
 	measureMode: string;
 	canEdit: boolean;
 	removeMeasurement: (uuid) => void;
@@ -78,6 +79,7 @@ export const ShapesFormTab = ({
 				slopeMeasurements={slopeMeasurements}
 				modelUnit={props.units}
 				units={props.units === 'ft' ? props.units : 'm'}
+				slopeUnits={props.slopeUnits}
 			/>
 
 			{isEmpty(shapes) && <EmptyStateInfo>No shapes have been attached yet</EmptyStateInfo>}

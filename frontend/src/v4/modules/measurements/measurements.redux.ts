@@ -23,6 +23,8 @@ export const { Types: MeasurementsTypes, Creators: MeasurementsActions } = creat
 	setMeasureModeSuccess: ['mode'],
 	setMeasureUnits: ['units'],
 	setMeasureUnitsSuccess: ['units'],
+	setMeasureSlopeUnits: ['slopeUnits'],
+	setMeasureSlopeUnitsSuccess: ['slopeUnits'],
 	addMeasurement: ['measurement'],
 	addMeasurementSuccess: ['measurement'],
 	clearMeasurements: [],
@@ -47,6 +49,7 @@ export interface IMeasurementState {
 	isDisabled: boolean;
 	mode: string;
 	units: string;
+	slopeUnits: 'Degrees' | 'Percentage';
 	areaMeasurements: any[];
 	lengthMeasurements: any[];
 	pointMeasurements: any[];
@@ -60,6 +63,7 @@ export const INITIAL_STATE: IMeasurementState = {
 	isDisabled: false,
 	mode: '',
 	units: 'm',
+	slopeUnits: 'Degrees',
 	areaMeasurements: [],
 	lengthMeasurements: [],
 	pointMeasurements: [],
@@ -72,6 +76,8 @@ export const INITIAL_STATE: IMeasurementState = {
 export const setMeasureModeSuccess = (state = INITIAL_STATE, { mode }) => ({ ...state, mode });
 
 export const setMeasureUnitsSuccess = (state = INITIAL_STATE, { units }) => ({ ...state, units });
+
+export const setMeasureSlopeUnitsSuccess = (state = INITIAL_STATE, { slopeUnits }) => ({ ...state, slopeUnits });
 
 export const setMeasureEdgeSnappingSuccess = (state = INITIAL_STATE, { edgeSnapping }) => ({ ...state, edgeSnapping });
 
@@ -168,6 +174,7 @@ export const resetMeasurementColorsSuccess = (state = INITIAL_STATE, {}) => {
 export const reducer = createReducer(INITIAL_STATE, {
 	[MeasurementsTypes.SET_MEASURE_MODE_SUCCESS]: setMeasureModeSuccess,
 	[MeasurementsTypes.SET_MEASURE_UNITS_SUCCESS]: setMeasureUnitsSuccess,
+	[MeasurementsTypes.SET_MEASURE_SLOPE_UNITS_SUCCESS]: setMeasureSlopeUnitsSuccess,
 	[MeasurementsTypes.ADD_MEASUREMENT_SUCCESS]: addMeasurementSuccess,
 	[MeasurementsTypes.CLEAR_MEASUREMENTS_SUCCESS]: clearMeasurementsSuccess,
 	[MeasurementsTypes.REMOVE_MEASUREMENT_SUCCESS]: removeMeasurementSuccess,

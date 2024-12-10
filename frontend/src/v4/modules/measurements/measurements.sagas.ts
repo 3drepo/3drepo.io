@@ -96,6 +96,17 @@ export function* setMeasureUnits({ units }) {
 	}
 }
 
+export function* setMeasureSlopeUnits({ slopeUnits }) {
+	try {
+		yield all([
+			Viewer.setMeasuringSlopeUnits(slopeUnits),
+			put(MeasurementsActions.setMeasureSlopeUnitsSuccess(slopeUnits))
+		]);
+	} catch (error) {
+		DialogActions.showErrorDialog('set', `measure slope slopeUnits to ${slopeUnits}`, error);
+	}
+}
+
 export function* addMeasurement({ measurement }) {
 	try {
 		const measurementStateName = MEASURE_TYPE_STATE_MAP[measurement.type];
@@ -234,6 +245,7 @@ export function* resetMeasurementTool() {
 export default function* MeasurementsSaga() {
 	yield takeLatest(MeasurementsTypes.SET_MEASURE_MODE, setMeasureMode);
 	yield takeLatest(MeasurementsTypes.SET_MEASURE_UNITS, setMeasureUnits);
+	yield takeLatest(MeasurementsTypes.SET_MEASURE_SLOPE_UNITS, setMeasureSlopeUnits);
 	yield takeLatest(MeasurementsTypes.ADD_MEASUREMENT, addMeasurement);
 	yield takeLatest(MeasurementsTypes.REMOVE_MEASUREMENT, removeMeasurement);
 	yield takeLatest(MeasurementsTypes.CLEAR_MEASUREMENTS, clearMeasurements);
