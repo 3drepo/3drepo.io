@@ -21,24 +21,26 @@ import { MenuItem, Select, TextField } from '@mui/material';
 import faker from 'faker';
 import { range } from 'lodash';
 import { Gap } from '@controls/gap';
-import { useState } from 'react';
+import { useFieldArray, useForm } from 'react-hook-form';
+import { InputController } from '@controls/inputs/inputController.component';
 
 const StatefulContainer = ({ disableAdd, disableRemove, Input }) => {
-	const [length, setLength] = useState(1);
+	const { control } = useForm({ defaultValues: { values: [{ value: '' }] } });
+	const { fields, append, remove } = useFieldArray({ name: 'values', control });
 	return (
 		<>
-			{range(0, length).map((key, i) => (
+			{fields.map((field, i) => (
 				<>
 					<ArrayFieldContainer
-						disableRemove={disableRemove || length === 1}
-						disableAdd={disableAdd || i < (length - 1)}
-						key={key}
-						onRemove={() => setLength(length - 1)}
-						onAdd={() => setLength(length + 1)}
+						disableRemove={disableRemove || fields.length === 1}
+						disableAdd={disableAdd || i < (fields.length - 1)}
+						key={field.id}
+						onRemove={() => remove(i)}
+						onAdd={() => append({ value: '' })}
 					>
-						<Input />
+						<InputController control={control} Input={Input} name={`values.${i}.value`} />
 					</ArrayFieldContainer>
-					{i < (length - 1) && <Gap $height='8px' />}
+					{i < (fields.length - 1) && <Gap $height='8px' />}
 				</>
 			))}
 		</>
