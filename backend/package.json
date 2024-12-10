@@ -48,7 +48,7 @@
     "device": "0.3.12",
     "ejs": "3.1.10",
     "elastic-apm-node": "4.8.0",
-    "express": "4.21.1",
+    "express": "4.21.2",
     "express-body-parser-error-handler": "1.0.7",
     "express-session": "1.18.1",
     "file-type": "16.5.4",
@@ -115,7 +115,9 @@
   },
   "resolutions": {
       "string-width": "4.2.3",
-      "wrap-ansi": "6.2.0"
+      "wrap-ansi": "6.2.0",
+      "cross-spawn": "7.0.6",
+      "micromatch": "4.0.8"
   },
   "description": "The backend for 3drepo.io",
   "main": "3drepo.js",
