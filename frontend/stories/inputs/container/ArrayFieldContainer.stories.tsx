@@ -26,17 +26,17 @@ import { InputController } from '@controls/inputs/inputController.component';
 
 const StatefulContainer = ({ disableAdd, disableRemove, Input }) => {
 	const { control } = useForm({ defaultValues: { values: [{ value: '' }] } });
-	const { fields, append, remove } = useFieldArray({ name: 'values', control });
+	const { fields, insert, remove } = useFieldArray({ name: 'values', control });
 	return (
 		<>
 			{fields.map((field, i) => (
 				<>
 					<ArrayFieldContainer
 						disableRemove={disableRemove || fields.length === 1}
-						disableAdd={disableAdd || i < (fields.length - 1)}
+						disableAdd={disableAdd}
 						key={field.id}
 						onRemove={() => remove(i)}
-						onAdd={() => append({ value: '' })}
+						onAdd={() => insert(i + 1, { value: '' })}
 					>
 						<InputController control={control} Input={Input} name={`values.${i}.value`} />
 					</ArrayFieldContainer>
