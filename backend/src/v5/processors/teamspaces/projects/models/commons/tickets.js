@@ -329,7 +329,7 @@ const filtersToProjection = (filters) => {
 };
 
 Tickets.getTicketList = (teamspace, project, model,
-	{ filters = [], updatedSince, sortBy, sortDesc }) => {
+	{ filters = [], updatedSince, sortBy, sortDesc, limit, skip }) => {
 	const { SAFETIBASE, SEQUENCING } = presetModules;
 	const {
 		[SAFETIBASE]: safetibaseProps,
@@ -363,7 +363,7 @@ Tickets.getTicketList = (teamspace, project, model,
 		sort = { [propertyToFilterName(sortBy)]: sortDesc ? -1 : 1 };
 	}
 
-	return getAllTickets(teamspace, project, model, deleteIfUndefined({ projection, updatedSince, sort }));
+	return getAllTickets(teamspace, project, model, deleteIfUndefined({ projection, updatedSince, sort, limit, skip }));
 };
 
 Tickets.getOpenTicketsCount = async (teamspace, project, model) => {
