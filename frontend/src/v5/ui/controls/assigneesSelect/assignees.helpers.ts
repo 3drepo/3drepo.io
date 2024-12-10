@@ -50,5 +50,5 @@ export const groupJobsAndUsers = (items) => {
 		if (item?._id) return 'jobs';
 		return 'notFound';
 	});
-	return { users, jobs, notFound } as { users: IUser[], jobs: IJob[], notFound: { notFoundName: string }[] };
+	return { users, jobs, notFound } as { users: IUser[], jobs: IJob[], notFound: { invalidItemName: string }[] };
 };

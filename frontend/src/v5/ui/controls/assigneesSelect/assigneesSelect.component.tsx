@@ -62,7 +62,7 @@ export const AssigneesSelect = ({
 	const teamspaceJobsAndUsers = UsersHooksSelectors.selectJobsAndUsersByIds();
 	const valueToJobOrUser = (val: string) => teamspaceJobsAndUsers[val];
 	const allJobsAndUsersToDisplay = [
-		...validValues.map(valueToJobOrUser),
+		...validValues.map((v) => valueToJobOrUser || ({ invalidItemName: v })),
 		...invalidValues.map((v) => valueToJobOrUser(v) || ({ invalidItemName: v })),
 	];
 
