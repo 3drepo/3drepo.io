@@ -19,7 +19,7 @@ import { SearchContext, SearchContextType } from '@controls/search/searchContext
 import { useContext } from 'react';
 import { TicketFiltersSelectionItem } from './item/ticketFiltersSelectionItem.component';
 import { FormattedMessage } from 'react-intl';
-import { MenuList, EmptyListMessage } from './ticketFiltersSelectionList.styles';
+import { MenuList, EmptyListMessage, SearchWord } from './ticketFiltersSelectionList.styles';
 import { CardFilter } from '../../../cardFilters.types';
 
 type TicketFiltersSelectionListProps = {
@@ -34,7 +34,7 @@ export const TicketFiltersSelectionList = ({ onFilterClick }: TicketFiltersSelec
 				id="viewer.card.tickets.filters.emptyList"
 				defaultMessage="We couldn't find a match for {query}. Please try another search."
 				values={{
-					query: <b>&quot;{query}&quot;</b>,
+					query: <SearchWord>&quot;{query}&quot;</SearchWord>,
 				}}
 			/>
 		</EmptyListMessage>

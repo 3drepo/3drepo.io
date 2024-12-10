@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,14 +16,12 @@
  */
 
 import styled from 'styled-components';
-import { ListSubheader as ListSubheaderBase } from '@mui/material';
 
-export const ListSubheader = styled(ListSubheaderBase)`
-	font-weight: 700;
-	padding: 5px 12px 0;
-	line-height: 35px;
-
-	&:first-of-type {
-		padding-top: 0;
-	}
+export const FilterIconContainer = styled.div`
+	display: grid;
+	place-content: center;
+	aspect-ratio: 1;
+	width: 11px;
+	margin-right: 10px;
+	color: ${({ theme }) => theme.palette.base.main};
 `;

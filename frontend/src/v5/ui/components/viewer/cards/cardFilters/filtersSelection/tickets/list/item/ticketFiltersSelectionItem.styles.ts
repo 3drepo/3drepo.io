@@ -19,19 +19,16 @@ import { MenuItem as MenuItemBase } from '@mui/material';
 import styled from 'styled-components';
 
 export const MenuItem = styled(MenuItemBase)`
-	display: grid;
-	grid-template-columns: 11px 1fr 11px;
+	display: flex;
 	height: 32px;
-	gap: 8px;
-
-	svg {
-		color: ${({ theme }) => theme.palette.base.main}
-	}
+	padding-right: 3px;
 `;
 
 export const ExpandIconContainer = styled.div`
 	transform: rotate(-90deg);
 	height: 11px;
+	margin-left: auto;
+	color: ${({ theme }) => theme.palette.base.main};
 `;
 
 export const FilterName = styled.div`
@@ -39,11 +36,4 @@ export const FilterName = styled.div`
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
-`;
-
-export const FilterIconContainer = styled.div`
-	display: grid;
-	place-content: center;
-	aspect-ratio: 1;
-	width: 11px;
 `;
