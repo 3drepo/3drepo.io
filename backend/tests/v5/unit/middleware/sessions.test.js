@@ -32,6 +32,7 @@ jest.mock('../../../../src/v5/services/eventsManager/eventsManager.constants');
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const { SOCKET_HEADER } = require(`${src}/services/chat/chat.constants`);
 const { CSRF_COOKIE } = require(`${src}/utils/sessions.constants`);
+const { USER_AGENT_HEADER } = require(`${src}/utils/sessions.constants`);
 
 // Need to mock these 2 to ensure we are not trying to create a real session configuration
 jest.mock('express-session', () => () => { });
@@ -80,7 +81,7 @@ const testCreateSession = () => {
 				username: request.loginData.username,
 				sessionID: request.sessionID,
 				ipAddress: request.ips[0] || request.ip,
-				userAgent: request.headers['user-agent'],
+				userAgent: request.headers[USER_AGENT_HEADER],
 				referer: request?.session?.user?.referer,
 				socketId: request.headers[SOCKET_HEADER],
 			});
@@ -100,14 +101,21 @@ const testCreateSession = () => {
 		describe.each([
 			['the request has a referer', true, { ...req, headers: { ...req.headers, referer: 'http://abc.com/' } }],
 			['the request has socket id', true, { ...req, headers: { ...req.headers, [SOCKET_HEADER]: 'socketsdlfkdsj' } }],
-			['the request has user agent', true, { ...req, headers: { ...req.headers, 'user-agent': 'some user agent' } }],
-			['the request has web user agent', true, { ...req, headers: { ...req.headers, 'user-agent': webBrowserUserAgent } }],
+			['the request has user agent', true, { ...req, headers: { ...req.headers, [USER_AGENT_HEADER]: 'some user agent' } }],
+			['the request has web user agent', true, { ...req, headers: { ...req.headers, [USER_AGENT_HEADER]: webBrowserUserAgent } }],
 			['the request has empty ips array', true, { ...req, ips: [] }],
 			['v4 is flagged', true, { ...req, v4: true }],
 			['the session cannot be regenerated', false, { ...req, session: { regenerate: (callback) => { callback(1); } } }, 1],
 		])('Regenerate Session', (desc, success, request, error) => {
 			test(`should ${success ? 'succeed if' : `fail with ${error}`} if ${desc}`, async () => {
 				const res = { cookie: jest.fn() };
+
+				if (request.headers[USER_AGENT_HEADER]) {
+					UserAgentHelper.getUserAgentInfo.mockImplementationOnce(() => ({
+						application: { name: generateRandomString() },
+					}));
+				}
+
 				await Sessions.createSession(request, res);
 				if (success) {
 					checkResults(request);
@@ -230,14 +238,21 @@ const testUpdateSession = () => {
 		['the request has a referer (SSO)', { ...req, session: { ...req.session, ssoInfo: { referer: 'http://abc.com/' } } }],
 		['the session has a referer', { ...req, headers: { ...req.headers, referer: generateRandomString() } }],
 		['the request has socket id', { ...req, headers: { ...req.headers, [SOCKET_HEADER]: 'socketsdlfkdsj' } }],
-		['the request has user agent from the plugin', { ...req, headers: { ...req.headers, 'user-agent': pluginAgent } }, pluginAgent],
+		['the request has user agent from the plugin', { ...req, headers: { ...req.headers, [USER_AGENT_HEADER]: pluginAgent } }, pluginAgent],
 		['the request has user agent from the plugin (SSO)', { ...req, session: { ...req.session, ssoInfo: { userAgent: pluginAgent } } }, pluginAgent],
-		['the request has web user agent', { ...req, headers: { ...req.headers, 'user-agent': webBrowserUserAgent } }, webBrowserUserAgent],
+		['the request has web user agent', { ...req, headers: { ...req.headers, [USER_AGENT_HEADER]: webBrowserUserAgent } }, webBrowserUserAgent],
 		['the request has web user agent (SSO)', { ...req, session: { ...req.session, ssoInfo: { userAgent: webBrowserUserAgent } } }, webBrowserUserAgent],
 		['the request has empty ips array', { ...req, ips: [] }],
 	])('Update Session', (desc, request, userAgent) => {
 		test(`should update session if ${desc}`, async () => {
 			const mockCB = jest.fn();
+
+			if (userAgent) {
+				UserAgentHelper.getUserAgentInfo.mockImplementationOnce(() => ({
+					application: { name: generateRandomString() },
+				}));
+			}
+
 			await Sessions.updateSession(request, {}, mockCB);
 			checkResults(request, userAgent, mockCB);
 		});

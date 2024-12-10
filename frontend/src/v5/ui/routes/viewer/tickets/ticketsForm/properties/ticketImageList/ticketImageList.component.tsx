@@ -65,7 +65,7 @@ const EnlargeImagesOverlay = ({ children, onClick }) => (
 	</OverlappingContainer>
 );
 
-export const TicketImageList = ({ value, onChange, onBlur, disabled, label, helperText, ...props }: FormInputProps) => {
+export const TicketImageList = ({ value, onChange, onBlur, disabled, label, helperText, inputRef, ...props }: FormInputProps) => {
 	const { isViewer } = useContext(TicketContext);
 	const { is2DOpen } = useContext(ViewerCanvasesContext);
 	const imgContext = getImgSrcContext();
@@ -118,7 +118,7 @@ export const TicketImageList = ({ value, onChange, onBlur, disabled, label, help
 	}, [value]);
 
 	return (
-		<InputContainer disabled={disabled} {...props}>
+		<InputContainer disabled={disabled} ref={inputRef} {...props}>
 			<Label>{label}</Label>
 			<Content>
 				<ImagesContainer>
@@ -129,7 +129,7 @@ export const TicketImageList = ({ value, onChange, onBlur, disabled, label, help
 								{imgsSrcs?.length === 1 && <AuthImg src={imgsSrcs[0]} />}
 								{imgsSrcs?.length > 1 && (
 									<ImagesGridContainer>
-										{imgsSrcs.slice(0, 3).map((imgSrc) => (<AuthImg src={imgSrc} />))}
+										{imgsSrcs.slice(0, 3).map((imgSrc, i) => (<AuthImg src={imgSrc} key={i + imgSrc} />))}
 										{imgsSrcs.length > 3 && <ImageWithExtraCount src={imgsSrcs[3]} extraCount={imgsSrcs.length - 3} />}
 									</ImagesGridContainer>
 								)}

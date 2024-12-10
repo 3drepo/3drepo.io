@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { PopoverCircle } from '@components/shared/popoverCircles/popoverCircle.styles';
+import { PopoverCircle } from '@components/shared/popoverCircles/popoverCircle.component';
 import { Tooltip as TooltipBase } from '@mui/material';
 import styled from 'styled-components';
 

@@ -94,7 +94,7 @@ const BasicSettings = (props) => {
 								<ShortInput
 									error={Boolean(form.errors.clipPlaneBorderWidth)}
 									{...field}
-									helperText={form.errors.clipPlaneBorderWidth}
+									helpertext={form.errors.clipPlaneBorderWidth}
 								/>
 							</ErrorTooltip>
 							<V5ErrorText>

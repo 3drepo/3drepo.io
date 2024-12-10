@@ -21,6 +21,7 @@ import createSagaMiddleware from 'redux-saga';
 import rootSaga from '@/v4/modules/sagas';
 import { isEqual, isFunction } from 'lodash';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
+import { setStore } from '@/v5/helpers/redux.helpers';
 
 
 export type WaitActionCallback = ((state?: object, action?:Action, previousState?: object) => boolean);
@@ -60,18 +61,26 @@ export const createTestStore = () => {
 
 	const mainReducer = combineReducers(reducers);
 
+	let currentState;
 
-	const store = createStore((state: any, action) =>{
-		const st = mainReducer(state, action);		
+    const store = createStore((state: any, action) =>{
+        const st = mainReducer(state, action);
 
-		if (discountMatchingActions(st, action, state) && resolvePromise) {
-			resolvePromise(true);
-			resolvePromise = null;
-		}
-		
-		return st;
-	}		
-	, middlewares);
+        currentState = st;
+
+        if (discountMatchingActions(st, action, state) && resolvePromise) {
+            resolvePromise(true);
+            resolvePromise = null;
+        }
+        
+        return st;
+    }       
+    , middlewares);
+
+    const getState = () => currentState;
+
+    store.getState = getState;
+	setStore(store)
 	
 	const waitForActions:WaitForActions = (dispatchingfunction, waitActions) =>  { 
 		waitingActions = waitActions;

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,17 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useRef } from 'react';
+import styled from 'styled-components';
+import { PopoverCircle } from '../popoverCircle.component';
 
-export const useFocus = () => {
-	const htmlElRef = useRef<HTMLElement>();
-	const setFocus = () => {
-		const currentEl = htmlElRef.current;
-
-		if (currentEl) {
-			currentEl.focus();
-		}
-	};
-
-	return [htmlElRef, setFocus] as const;
-};
+export const ErrorCircle = styled(PopoverCircle)`
+	color: ${({ theme }) => theme.palette.error.main};
+	border: solid 2px currentColor;
+	background-color: ${({ theme }) => theme.palette.error.lightest};
+`;

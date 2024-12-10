@@ -16,7 +16,7 @@
  */
 
 import { clientConfigService } from '@/v4/services/clientConfig';
-import { downloadAuthUrl } from '@components/authenticatedResource/authenticatedResource.hooks';
+import { downloadAuthUrl } from '@/v5/helpers/download.helper';
 
 export const stripBase64Prefix = (base64name) => base64name.replace('data:', '').replace(/^.+,/, '');
 export const addBase64Prefix = (value, imageType = 'png') => `data:image/${imageType};base64,${value}`;

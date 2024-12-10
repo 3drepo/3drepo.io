@@ -15,14 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { IJob } from '@/v5/store/jobs/jobs.types';
 import { uniq } from 'lodash';
 import { createSelector } from 'reselect';
 
 export const selectJobsDomain = (state) => ({...state.jobs});
 
 export const selectJobs = createSelector(
-	selectJobsDomain, (state) => state.jobs || []
+	selectJobsDomain, (state): IJob[] => state.jobs || []
 );
+
+export const selectJobsByIds = createSelector(
+	selectJobs,
+	(jobs) => Object.fromEntries(jobs.map((job) => [job._id, job]))
+)
 
 export const selectJobsColors = createSelector(
 	selectJobs, (jobs) => uniq(jobs.map(({color}) => color))
@@ -46,4 +52,10 @@ export const selectJobsPending = createSelector(
 
 export const selectColorsPending = createSelector(
 	selectJobsDomain, (state) => state.colorsPending
+);
+
+export const selectJobById = createSelector(
+	selectJobsByIds,
+	(state, jobId) => jobId,
+	(jobs, jobId) => jobs[jobId]
 );

@@ -58,9 +58,9 @@ export const DashboardListHeader = ({
 
 	return (
 		<DashboardListHeaderContainer className={className}>
-			{children.map((child) => (
+			{children.map((child, index) => (
 				cloneElement(child, {
-					key: child.props.name,
+					key: child.props.name || index,
 					...registerSort(child.props.name),
 					...child.props,
 				})

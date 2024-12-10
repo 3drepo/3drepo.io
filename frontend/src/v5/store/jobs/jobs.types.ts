@@ -18,4 +18,5 @@
 export type IJob = {
 	_id: string;
 	color: string;
+	isViewer?: boolean;
 };

@@ -79,7 +79,6 @@ module.exports = {
 		'brace-style': ['error', '1tbs'],
 		'block-scoped-var': 'error',
 		'comma-style': ['error', 'last'],
-		curly: 'error',
 		eqeqeq: 'error',
 		'import/order': [
 			'error',

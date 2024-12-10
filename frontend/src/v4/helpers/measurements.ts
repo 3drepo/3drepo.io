@@ -15,9 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BimActions } from '../modules/bim';
+import { dispatch } from '@/v5/helpers/redux.helpers';
 import { MEASURE_TYPE_NAME } from '../modules/measurements/measurements.constants';
-import { dispatch } from '../modules/store';
 import { ViewerGuiActions } from '../modules/viewerGui';
 
 export const generateName = (measurement, measurements) => {

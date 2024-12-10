@@ -505,7 +505,7 @@
 
 	function addTeamMember(req, res, next) {
 		const responsePlace = utils.APIInfo(req);
-		User.addTeamMember(req.params.account, req.body.user, req.body.job, req.body.permissions)
+		User.addTeamMember(req.params.account, req.body.user, req.body.job, req.body.permissions, req.session.user.username)
 			.then((user) => {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, user);
 			})
@@ -519,7 +519,7 @@
 		const responsePlace = utils.APIInfo(req);
 		User.findByUserName(req.params.account)
 			.then(dbUser => {
-				return User.removeTeamMember(dbUser, req.params.user, req.query.cascadeRemove);
+				return User.removeTeamMember(dbUser, req.params.user, req.query.cascadeRemove, req.session.user.username);
 			})
 			.then(() => {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {user: req.params.user});

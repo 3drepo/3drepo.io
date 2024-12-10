@@ -68,6 +68,9 @@ module.exports = (options) => ({
 			'@controls': PATHS.CONTROLS,
 			"styled-components": path.resolve("node_modules", "styled-components"),
 		},
+		fallback: {
+			'process/browser': require.resolve('process/browser'),
+		},
 	},
 	target: 'web',
 	stats: options.stats

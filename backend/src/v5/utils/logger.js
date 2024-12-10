@@ -40,6 +40,7 @@ Logger.labels = {
 	chat: 'CHAT',
 	modelProcessing: 'MODPRO',
 	aad: 'AAD',
+	journaling: 'JRN',
 };
 
 module.exports = Logger;

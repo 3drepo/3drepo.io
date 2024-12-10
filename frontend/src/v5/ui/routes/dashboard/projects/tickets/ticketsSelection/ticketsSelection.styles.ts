@@ -19,8 +19,8 @@ import { Typography } from '@controls/typography';
 import styled from 'styled-components';
 
 export const Form = styled.form`
-	width: 398px;
-	height: 402px;
+	width: 430px;
+	height: 434px;
 	display: flex;
 	flex-direction: column;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};

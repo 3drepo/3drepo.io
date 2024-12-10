@@ -42,10 +42,11 @@ import { EditFederationContainersListItemLoading } from './editFederationContain
 export type ActionButtonProps = {
 	children: ReactNode;
 	disabled?: boolean;
-	filteredContainers?: IContainer[];
+	filteredContainersIds?: string[];
 };
 
 type EditFederationContainersProps = {
+	isIncluded?: boolean;
 	title: string;
 	collapsableTooltips?: {
 		visible: ReactNode;
@@ -61,6 +62,7 @@ type EditFederationContainersProps = {
 };
 
 export const EditFederationContainers = ({
+	isIncluded,
 	title,
 	collapsableTooltips,
 	emptyListMessage,
@@ -98,7 +100,7 @@ export const EditFederationContainers = ({
 				tooltipTitles={collapsableTooltips}
 				sideElement={(
 					<CollapseSideElementGroup>
-						<ActionButton disabled={isEmpty(containers)} filteredContainers={sortedList}>
+						<ActionButton disabled={isEmpty(containers)} filteredContainersIds={sortedList.map((c) => c._id)}>
 							{!query.length
 								? actionButtonTexts.allResults
 								: actionButtonTexts.filteredResults}
@@ -144,6 +146,7 @@ export const EditFederationContainers = ({
 										container={container}
 										filterQuery={query}
 										onItemClick={selectOrToggleItem}
+										isIncluded={isIncluded}
 									/>
 								)
 							)

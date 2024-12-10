@@ -34,7 +34,7 @@ import { Gap } from '@controls/gap';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { sanitiseMessage, stripMetadata } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { ViewerParams } from '../../../../routes.constants';
-import { Accordion, Comments, EmptyCommentsBox, VirtualisedList } from './commentsPanel.styles';
+import { Accordion, Comments, EmptyCommentsBox, FillerRow, Table, TableBody, TableRow, VirtualisedList } from './commentsPanel.styles';
 import { Comment } from './comment/comment.component';
 import { CreateCommentBox } from './createCommentBox/createCommentBox.component';
 import { TicketContext } from '../../ticket.context';
@@ -131,6 +131,13 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 						initialTopMostItemIndex={commentsLength - 1}
 						followOutput={() => true}
 						overscan={800}
+						components={{
+							Table,
+							// @ts-ignore
+							TableBody,
+							TableRow,
+							FillerRow,
+						}}
 						itemContent={(index, comment: ITicketComment) => (
 							<>
 								<Comment

@@ -33,7 +33,7 @@ export const UploadListItemRevisionTag = ({
 }: IUploadListItemRevision): JSX.Element => {
 	const name = `${revisionPrefix}.revisionTag`;
 	const { errors } = useFormState();
-	const errorMessage = get(errors, name)?.message;
+	const errorMessage = !disabled ? get(errors, name)?.message : '';
 	const errorAdornment = errorMessage ? {
 		InputProps: {
 			startAdornment: (

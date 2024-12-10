@@ -105,8 +105,7 @@ describe("Sharing/Unsharing a model", function () {
 						.expect(200, function(err, res) {
 							expect(res.body).to.have.property("accounts").that.is.an("array");
 							const account = res.body.accounts.find(a => a.account === username);
-							expect(account).to.have.property("models").that.is.an("array");
-							const modelObj = account.models.find(_model => _model.model === model);
+							const modelObj = account.projects[0].models.find(_model => _model.model === model);
 							expect(modelObj).to.have.property("model", model);
 							expect(modelObj.permissions).to.deep.equal(C.VIEWER_TEMPLATE_PERMISSIONS);
 
@@ -120,44 +119,6 @@ describe("Sharing/Unsharing a model", function () {
 			], done);
 		});
 
-		it("should succeed and the viewer is able to see the model [DEPRECATED]", function(done) {
-
-			const permissions = [
-				{ user: username_viewer, permission: "viewer"}
-			];
-
-			async.series([
-				function share(done) {
-
-					agent.post(`/${username}/${model}/permissions`)
-						.send(permissions)
-						.expect(200, function(err, res) {
-							done(err);
-						});
-				},
-				function checkSharedModelInList(done) {
-
-					viewerAgent.get(`/${username_viewer}.json`)
-						.expect(200, function(err, res) {
-							expect(res.body).to.have.property("accounts").that.is.an("array");
-							const account = res.body.accounts.find(a => a.account === username);
-							expect(account).to.have.property("models").that.is.an("array");
-							const modelObj = account.models.find(_model => _model.model === model);
-							expect(modelObj).to.have.property("model", model);
-							expect(modelObj.permissions).to.deep.equal(C.VIEWER_TEMPLATE_PERMISSIONS);
-
-							done(err);
-						});
-				},
-				function ableToViewModel(done) {
-					viewerAgent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
-						.expect(200, function(err ,res) {
-							done(err);
-						});
-				}
-			], done);
-
-		});
 
 		it("model info api shows correct permissions", function(done) {
 			viewerAgent.get(`/${username}/${model}.json`).
@@ -239,41 +200,6 @@ describe("Sharing/Unsharing a model", function () {
 				], done);
 			});
 
-			it("should succeed and the viewer is NOT able to see the model [DEPRECATED]", function(done) {
-
-				const permissions = [];
-
-				async.waterfall([
-					function remove(done) {
-
-						agent.post(`/${username}/${model}/permissions`)
-							.send(permissions)
-							.expect(200, function(err, res) {
-								done(err);
-							});
-					},
-					function checkSharedModelInList(done) {
-
-						viewerAgent.get(`/${username_viewer}.json`)
-							.expect(200, function(err, res) {
-
-								expect(res.body).to.have.property("accounts").that.is.an("array");
-								const account = res.body.accounts.find(a => a.account === username);
-								expect(account).to.be.undefined;
-
-								done(err);
-							});
-					},
-					function notAbleToViewModel(done) {
-
-						viewerAgent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
-							.expect(401, function(err ,res) {
-								done(err);
-							});
-					}
-				], done);
-
-			});
 
 			it("and the viewer should NOT be able to see raise issue", function(done) {
 				viewerAgent.post(`/${username}/${model}/issues`)
@@ -300,8 +226,7 @@ describe("Sharing/Unsharing a model", function () {
 						.expect(200, function(err, res) {
 							expect(res.body).to.have.property("accounts").that.is.an("array");
 							const account = res.body.accounts.find(a => a.account === username);
-							expect(account).to.have.property("models").that.is.an("array");
-							const modelObj = account.models.find(_model => _model.model === model);
+							const modelObj = account.projects[0].models.find(_model => _model.model === model);
 							expect(modelObj).to.have.property("model", model);
 							expect(modelObj.permissions).to.deep.equal(C.COMMENTER_TEMPLATE_PERMISSIONS);
 
@@ -313,47 +238,6 @@ describe("Sharing/Unsharing a model", function () {
 						.expect(200, done);
 				}
 			], done);
-		});
-
-		it("should succeed and the commenter is able to see the model [DEPRECATED]", function(done) {
-
-			const permissions = [
-				{ user: username_commenter, permission: "commenter"}
-			];
-
-			async.series([
-				function share(done) {
-
-					agent.post(`/${username}/${model}/permissions`)
-						.send(permissions)
-						.expect(200, function(err, res) {
-							done(err);
-						});
-				},
-				function checkSharedModelInList(done) {
-
-					commenterAgent.get(`/${username_commenter}.json`)
-						.expect(200, function(err, res) {
-
-							expect(res.body).to.have.property("accounts").that.is.an("array");
-							const account = res.body.accounts.find(a => a.account === username);
-							expect(account).to.have.property("models").that.is.an("array");
-							const modelObj = account.models.find(_model => _model.model === model);
-							expect(modelObj).to.have.property("model", model);
-							expect(modelObj.permissions).to.deep.equal(C.COMMENTER_TEMPLATE_PERMISSIONS);
-
-							done(err);
-						});
-				},
-				function ableToViewModel(done) {
-
-					commenterAgent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
-						.expect(200, function(err ,res) {
-							done(err);
-						});
-				}
-			], done);
-
 		});
 
 		it("model info api shows correct permissions", function(done) {
@@ -460,43 +344,6 @@ describe("Sharing/Unsharing a model", function () {
 				], done);
 			});
 
-			it("should succeed and the commenter is NOT able to see the model [DEPRECATED]", function(done) {
-
-				const permissions = [];
-
-				async.waterfall([
-					function remove(done) {
-
-						agent.post(`/${username}/${model}/permissions`)
-							.send(permissions)
-							.expect(200, function(err, res) {
-								done(err);
-							});
-					},
-
-					function checkSharedModelInList(done) {
-
-						commenterAgent.get(`/${username_commenter}.json`)
-							.expect(200, function(err, res) {
-
-								expect(res.body).to.have.property("accounts").that.is.an("array");
-								const account = res.body.accounts.find(a => a.account === username);
-								expect(account).to.be.undefined;
-
-								done(err);
-							});
-					},
-					function notAbleToViewModel(done) {
-
-						commenterAgent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
-							.expect(401, function(err ,res) {
-								done(err);
-							});
-					}
-				], done);
-
-			});
-
 			it("and the commenter should NOT be able to see raise issue", function(done) {
 				commenterAgent.post(`/${username}/${model}/issues`)
 					.send({ })
@@ -522,8 +369,7 @@ describe("Sharing/Unsharing a model", function () {
 						.expect(200, function(err, res) {
 							expect(res.body).to.have.property("accounts").that.is.an("array");
 							const account = res.body.accounts.find(a => a.account === username);
-							expect(account).to.have.property("models").that.is.an("array");
-							const modelObj = account.models.find(_model => _model.model === model);
+							const modelObj = account.projects[0].models.find(_model => _model.model === model);
 							expect(modelObj).to.have.property("model", model);
 							expect(modelObj.permissions).to.deep.equal(C.COLLABORATOR_TEMPLATE_PERMISSIONS);
 
@@ -535,47 +381,6 @@ describe("Sharing/Unsharing a model", function () {
 						.expect(200, done);
 				}
 			], done);
-		});
-
-		it("should succeed and the editor is able to see the model [DEPRECATED]", function(done) {
-
-			const permissions = [
-				{ user: username_editor, permission: "collaborator"}
-			];
-
-			async.series([
-				function share(done) {
-
-					agent.post(`/${username}/${model}/permissions`)
-						.send(permissions)
-						.expect(200, function(err, res) {
-							done(err);
-						});
-				},
-				function checkSharedModelInList(done) {
-
-					collaboratorAgent.get(`/${username_editor}.json`)
-						.expect(200, function(err, res) {
-
-							expect(res.body).to.have.property("accounts").that.is.an("array");
-							const account = res.body.accounts.find(a => a.account === username);
-							expect(account).to.have.property("models").that.is.an("array");
-							const modelObj = account.models.find(_model => _model.model === model);
-							expect(modelObj).to.have.property("model", model);
-							expect(modelObj.permissions).to.deep.equal(C.COLLABORATOR_TEMPLATE_PERMISSIONS);
-
-							done(err);
-						});
-				},
-				function ableToViewModel(done) {
-
-					collaboratorAgent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
-						.expect(200, function(err ,res) {
-							done(err);
-						});
-				}
-			], done);
-
 		});
 
 		it("model info api shows correct permissions", function(done) {
@@ -685,41 +490,6 @@ describe("Sharing/Unsharing a model", function () {
 				], done);
 			});
 
-			it("should succeed and the editor is NOT able to see the model [DEPRECATED]", function(done) {
-
-				const permissions = [];
-
-				async.waterfall([
-					function remove(done) {
-
-						agent.post(`/${username}/${model}/permissions`)
-							.send(permissions)
-							.expect(200, function(err, res) {
-								done(err);
-							});
-					},
-					function checkSharedModelInList(done) {
-
-						collaboratorAgent.get(`/${username_editor}.json`)
-							.expect(200, function(err, res) {
-
-								expect(res.body).to.have.property("accounts").that.is.an("array");
-								const account = res.body.accounts.find(a => a.account === username);
-								expect(account).to.be.undefined;
-
-								done(err);
-							});
-					},
-					function notAbleToViewModel(done) {
-
-						collaboratorAgent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
-							.expect(401, function(err ,res) {
-								done(err);
-							});
-					}
-				], done);
-
-			});
 
 			it("and the editor should NOT be able to raise issue", function(done) {
 				collaboratorAgent.post(`/${username}/${model}/issues`)
@@ -742,17 +512,7 @@ describe("Sharing/Unsharing a model", function () {
 				});
 		});
 
-		it("should fail [DEPRECATED]", function(done) {
 
-			const permissions = [{ user: username_viewer + "99", permission: "collaborator"}];
-
-			agent.post(`/${username}/${model}/permissions`)
-				.send(permissions)
-				.expect(404, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
-					done(err);
-				});
-		});
 
 	});
 
@@ -782,28 +542,7 @@ describe("Sharing/Unsharing a model", function () {
 			], done);
 		});
 
-		it("should be ok and reduced to one by the backend and response body should show all subscription users [DEPRECATED]", function(done) {
 
-			async.series([
-				done => {
-					agent.post(`/${username}/${model}/permissions`)
-						.send(permissions)
-						.expect(200, function(err, res) {
-							done(err);
-						});
-				},
-				done => {
-					agent.get(`/${username}/${model}/permissions`)
-						.expect(200, function(err, res) {
-							expect(res.body.find(p => p.user === username_viewer)).to.deep.equal({ user: username_viewer, permission: "viewer"});
-							expect(res.body.find(p => p.user === username_editor)).to.deep.equal({ user: username_editor});
-							expect(res.body.find(p => p.user === username_commenter)).to.deep.equal({ user: username_commenter});
-							done(err);
-						});
-				}
-			], done);
-
-		});
 
 	});
 

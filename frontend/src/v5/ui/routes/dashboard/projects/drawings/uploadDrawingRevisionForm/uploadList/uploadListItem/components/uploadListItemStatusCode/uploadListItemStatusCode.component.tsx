@@ -14,10 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useFormState } from 'react-hook-form';
 import { Autocomplete, Description, OptionContainer, StatusCodeInput, Value } from './uploadListItemStatusCode.styles';
 import { ErrorTooltip } from '@controls/errorTooltip';
-import { get } from 'lodash';
 import { OptionsBox } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/uploadListItemDestination.styles';
 import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { StatusCode } from '@/v5/store/drawings/revisions/drawingRevisions.types';
@@ -30,12 +28,12 @@ interface IUploadListItemStatusCode {
 	disabled?: boolean;
 	className?: string;
 	inputRef?: any;
+	helperText?: string,
+	error?: boolean,
 }
-export const UploadListItemStatusCode = ({ value, inputRef, onChange, ...props }: IUploadListItemStatusCode) => {
-	const { errors } = useFormState();
-	const error = get(errors, props.name)?.message;
+export const UploadListItemStatusCode = ({ value, inputRef, onChange, helperText, error, ...props }: IUploadListItemStatusCode) => {
 	const options = DrawingRevisionsHooksSelectors.selectStatusCodes();
-	const getValue = () => options.find((o) => o.code === value) || '';
+	const getValue = () => options.find((o) => o.code === value) || null;
 
 	return (
 		<Autocomplete
@@ -46,8 +44,8 @@ export const UploadListItemStatusCode = ({ value, inputRef, onChange, ...props }
 			onChange={(e, newValue: StatusCode) => onChange(newValue?.code || '')}
 			getOptionLabel={(option: StatusCode) => option.code || ''}
 			renderOption={(optionProps, option: StatusCode) => (
-				<Tooltip title={option.description}>
-					<OptionContainer {...optionProps} key={option.code}>
+				<Tooltip title={option.description} key={option.code}>
+					<OptionContainer {...optionProps}>
 						<Value>{option.code}</Value>
 						<Description>{option.description}</Description>
 					</OptionContainer>
@@ -58,10 +56,10 @@ export const UploadListItemStatusCode = ({ value, inputRef, onChange, ...props }
 					{...params}
 					InputProps={{
 						...InputProps,
-						startAdornment: !!error && (<ErrorTooltip>{error}</ErrorTooltip>),
+						startAdornment: error && (<ErrorTooltip>{helperText}</ErrorTooltip>),
 					}}
 					inputRef={inputRef}
-					error={!!error}
+					error={error}
 				/>
 			)}
 			ListboxComponent={OptionsBox}

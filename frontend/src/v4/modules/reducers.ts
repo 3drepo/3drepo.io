@@ -17,11 +17,8 @@
 
 import { connectRouter } from 'connected-react-router';
 import { combineReducers } from 'redux';
-import undoable from 'redux-undo';
 
 import v5Reducers from '@/v5/store/reducers';
-import { CanvasHistoryTypes } from './canvasHistory';
-import { batchGroupBy } from './canvasHistory/canvasHistory.helpers';
 
 import { reducer as activitiesReducer } from './activities/activities.redux';
 import { reducer as bimReducer } from './bim/bim.redux';
@@ -56,13 +53,7 @@ import { reducer as viewpointsReducer } from './viewpoints/viewpoints.redux';
 export default function createReducer(history) {
 	return combineReducers({
 		router: connectRouter(history),
-		canvasHistory: undoable(canvasHistoryReducer, {
-			undoType: CanvasHistoryTypes.UNDO,
-			redoType: CanvasHistoryTypes.REDO,
-			groupBy: batchGroupBy.init([]),
-			clearHistoryType: CanvasHistoryTypes.CLEAR_HISTORY,
-			ignoreInitialState: true
-		}),
+		canvasHistory: canvasHistoryReducer,
 		activities: activitiesReducer,
 		bim: bimReducer,
 		board: boardReducer,

@@ -37,6 +37,7 @@ ResponseCodes.templates = {
 	ssoUser: { message: 'Single sign on is already enabled for this user.', status: 400 },
 
 	// Fail safe
+	pageNotFound: { message: 'Page not found.', status: 404 },
 	unknown: { message: 'Unknown error occured. Please contact support.', status: 500 },
 
 	// User document related error

@@ -45,7 +45,7 @@ export const SequenceForm = ({ id, name, updateSequence }) => {
 						name="newName"
 						mutable
 						onChange={handleSave}
-						inputProps={{ maxLength: 29 }}
+						inputProps={{ maxlength: 29 }}
 						disableShowDefaultUnderline
 					/>
 				</TextFieldWrapper>

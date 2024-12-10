@@ -18,6 +18,7 @@
 const { isBuffer, isString } = require('./helper/typeCheck');
 const { createActivityRecord } = require('../services/elastic');
 const { createResponseCode } = require('./responseCodes');
+const { deleteIfUndefined } = require('./helper/objects');
 const networkLabel = require('./logger').labels.network;
 const logger = require('./logger').logWithLabel(networkLabel);
 const { v4Path } = require('../../interop');
@@ -148,7 +149,7 @@ Responder.writeStreamRespond = (req, res, resCode, readStream, fileName, fileSiz
 		logger.logInfo(genResponseLogging(response.code, fileSize, req));
 	});
 
-	res.writeHead(response.status, headers);
+	res.writeHead(response.status, deleteIfUndefined(headers));
 	responseStream.pipe(res);
 };
 
