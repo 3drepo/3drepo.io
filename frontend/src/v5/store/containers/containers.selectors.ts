@@ -23,7 +23,7 @@ import { Role } from '../currentUser/currentUser.types';
 import { isCollaboratorRole, isCommenterRole, isViewerRole } from '../store.helpers';
 import { selectJobsByIds } from '@/v4/modules/jobs';
 import { selectCurrentTeamspaceUsersByIds } from '../users/users.selectors';
-import { isEmpty } from 'lodash';
+import { isEmpty, some } from 'lodash';
 
 const selectContainersDomain = (state): IContainersState => state?.containers || ({ containersByProject: {} });
 
@@ -79,7 +79,7 @@ export const selectContainerUsers = createSelector(
 	selectCurrentTeamspaceUsersByIds,
 	(container, users) => {
 		if (isEmpty(users)) return [];
-		return (container?.users || []).map((user) => ({ ...user, ...users[user.user] }));
+		return (container?.users || []).map((user) => ({ ...user, ...users[user.user], isNotTeamspaceUser: !some(users, ((u) => u.user === user.user)) }));
 	},
 );
 

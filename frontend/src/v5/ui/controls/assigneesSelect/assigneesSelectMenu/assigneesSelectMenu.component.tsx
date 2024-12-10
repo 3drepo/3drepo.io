@@ -77,7 +77,7 @@ export const AssigneesSelectMenu = ({
 					<FormattedMessage id="assigneesSelectMenu.notFoundHeading" defaultMessage="Users and Jobs not found" />
 				</ListSubheader>
 			)}
-			{notFound.map(({ invalidItemName: ju }) => (
+			{notFound.map(({ notFoundName: ju }) => (
 				<AssigneesSelectMenuItem
 					key={ju}
 					assignee={ju}

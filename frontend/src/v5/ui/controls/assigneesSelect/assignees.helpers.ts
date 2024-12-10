@@ -38,7 +38,8 @@ export const getModelJobsAndUsers = (containerOrFederation) => {
 export const jobOrUserToString = (ju): string | null => (ju._id || ju.user);
 
 export const getValidValues = (jobsAndUsers, excludeViewers): (string | null)[] => {
-	const validJobsAndUsers = excludeViewers ? jobsAndUsers.filter((ju) => (!ju?.isViewer)) : jobsAndUsers;
+	const jobsAndTeamspaceUsers = jobsAndUsers.filter((ju) => !ju.isNotTeamspaceUser);
+	const validJobsAndUsers = excludeViewers ? jobsAndTeamspaceUsers.filter((ju) => (!ju?.isViewer)) : jobsAndTeamspaceUsers;
 	return validJobsAndUsers.map(jobOrUserToString);
 };
 
@@ -50,5 +51,5 @@ export const groupJobsAndUsers = (items) => {
 		if (item?._id) return 'jobs';
 		return 'notFound';
 	});
-	return { users, jobs, notFound } as { users: IUser[], jobs: IJob[], notFound: { invalidItemName: string }[] };
+	return { users, jobs, notFound } as { users: IUser[], jobs: IJob[], notFound: { notFoundName: string }[] };
 };
