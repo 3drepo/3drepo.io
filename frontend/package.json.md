@@ -26,7 +26,10 @@
 	"resolutions": {
 		// This is required to use styled-components with MUI. Refer to this link
 		// https://mui.com/material-ui/guides/styled-components/#with-yarn
-		"@mui/styled-engine": "npm:@mui/styled-engine-sc@5.12.0"
+		"@mui/styled-engine": "npm:@mui/styled-engine-sc@5.12.0",
+		"cookie": "0.7.0", // storybook
+		"postcss": "8.4.31", // stylelint-processor-styled-components
+		"send": "0.19.0", // storybook
 	}
 }
 ```

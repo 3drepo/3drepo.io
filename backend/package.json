@@ -31,6 +31,7 @@
     "apidoc": "0.29.0",
     "app-config": "1.0.1",
     "archiver": "6.0.2",
+    "archiver-zip-encrypted": "2.0.0",
     "async": "3.2.5",
     "axios": "1.7.2",
     "body-parser": "1.20.3",
@@ -75,7 +76,6 @@
     "swagger-jsdoc": "6.2.8",
     "swagger-ui-express": "4.3.0",
     "ua-parser-js": "0.7.33",
-    "useragent": "2.3.0",
     "uuid": "8.3.2",
     "uuid-parse": "1.1.0",
     "vhost": "3.0.2",
@@ -112,6 +112,10 @@
     "sinon": "7.2.3",
     "socket.io-client": "4.8.0",
     "supertest": "3.4.2"
+  },
+  "resolutions": {
+      "string-width": "4.2.3",
+      "wrap-ansi": "6.2.0"
   },
   "description": "The backend for 3drepo.io",
   "main": "3drepo.js",

@@ -30,6 +30,7 @@ import { AutocompleteTextfield, DashboardListItemRow, Autocomplete } from './edi
 import { OptionsBox } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/uploadListItemDestination.styles';
 import { EditFederationContext } from '../../../editFederationContext';
 import { GroupOption } from './groupOption/groupOption.component';
+import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 
 export type IconButtonProps = {
 	container: IContainer;
@@ -37,6 +38,7 @@ export type IconButtonProps = {
 };
 
 type EditFederationContainersListItemProps = {
+	isIncluded?: boolean;
 	isSelected: boolean;
 	container: IContainer;
 	filterQuery?: string;
@@ -45,15 +47,14 @@ type EditFederationContainersListItemProps = {
 };
 export const EditFederationContainersListItem = memo(({
 	icon: Icon,
+	isIncluded,
 	isSelected,
 	container,
 	filterQuery,
 	onItemClick,
 }: EditFederationContainersListItemProps) => {
-	const { setGroupsByContainer, groupsByContainer, groups, includedContainers, isReadOnly } = useContext(EditFederationContext);
+	const { setGroupsByContainer, groupsByContainer, groups, isReadOnly } = useContext(EditFederationContext);
 	const [groupValue, setGroupValue] = useState(groupsByContainer[container._id] || null);
-
-	const isIncluded = !!includedContainers.find(({ _id }) => _id === container._id);
 
 	const updateGroupsByContainer = (newValue) => {
 		setGroupsByContainer((existingGroups) => ({ ...existingGroups, [container._id]: newValue }));
@@ -123,10 +124,7 @@ export const EditFederationContainersListItem = memo(({
 				</DashboardListItemText>
 				{/* eslint-disable-next-line */}
 				<div onClick={(e) => e.stopPropagation()}>
-					<DashboardListItemText
-						width={160}
-						selected={isSelected}
-					>
+					<FixedOrGrowContainer width={160}>
 						{isIncluded && (
 							<Autocomplete
 								value={groupValue}
@@ -152,7 +150,7 @@ export const EditFederationContainersListItem = memo(({
 								disabled={isReadOnly}
 							/>
 						)}
-					</DashboardListItemText>
+					</FixedOrGrowContainer>
 				</div>
 				<DashboardListItemText
 					width={160}

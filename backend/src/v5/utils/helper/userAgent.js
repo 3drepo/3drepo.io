@@ -17,7 +17,6 @@
 
 const Device = require('device');
 const UaParserJs = require('ua-parser-js');
-const useragent = require('useragent');
 
 const UserAgent = {};
 
@@ -67,9 +66,9 @@ const getUserAgentInfoFromBrowser = (userAgentString) => {
 const isUserAgentFromPlugin = (userAgent) => userAgent.split(' ')[0] === 'PLUGIN:';
 
 UserAgent.isFromWebBrowser = (userAgent) => {
-	const ua = useragent.is(userAgent);
-	const isFromWebBrowser = ['webkit', 'opera', 'ie', 'chrome', 'safari', 'mobile_safari', 'firefox', 'mozilla', 'android']
-		.some((browserType) => ua[browserType]); // If any of these browser types matches then is a websession
+	const { browser } = UaParserJs(userAgent);
+	const isFromWebBrowser = ['WebKit', 'Opera', 'IE', 'Edge', 'Chrome', 'Safari', 'Mobile Safari', 'Firefox', 'Mozilla']
+		.includes(browser.name); // If any of these browser types matches then is a websession
 	return isFromWebBrowser;
 };
 

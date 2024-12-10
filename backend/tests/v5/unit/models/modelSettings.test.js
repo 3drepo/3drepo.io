@@ -895,6 +895,43 @@ const testGetModelType = () => {
 	);
 };
 
+const testGetUsersWithPermissions = () => {
+	describe('Get users with permissions', () => {
+		const teamspace = generateRandomString();
+		const modelId = generateRandomString();
+
+		const model = {
+			permissions: [
+				{ user: generateRandomString(), permission: 'viewer' },
+				{ user: generateRandomString(), permission: 'commenter' },
+				{ user: generateRandomString(), permission: 'collaborator' },
+			],
+		};
+
+		test('should return the users who have access to the model', async () => {
+			DBHandler.findOne.mockResolvedValueOnce(model);
+
+			await expect(Model.getUsersWithPermissions(teamspace, modelId))
+				.resolves.toEqual(model.permissions.map((u) => u.user));
+
+			expect(DBHandler.findOne).toHaveBeenCalledTimes(1);
+			expect(DBHandler.findOne).toHaveBeenCalledWith(teamspace, SETTINGS_COL,
+				{ _id: modelId }, { permissions: 1 });
+		});
+
+		test('should return the users who have access to the model excuding viewers', async () => {
+			DBHandler.findOne.mockResolvedValueOnce(model);
+
+			await expect(Model.getUsersWithPermissions(teamspace, modelId, true))
+				.resolves.toEqual(model.permissions.slice(1).map((u) => u.user));
+
+			expect(DBHandler.findOne).toHaveBeenCalledTimes(1);
+			expect(DBHandler.findOne).toHaveBeenCalledWith(teamspace, SETTINGS_COL,
+				{ _id: modelId }, { permissions: 1 });
+		});
+	});
+};
+
 describe('models/modelSettings', () => {
 	testGetModelById();
 	testGetContainerById();
@@ -912,4 +949,5 @@ describe('models/modelSettings', () => {
 	testRemoveUserFromAllModels();
 	testIsFederation();
 	testGetModelType();
+	testGetUsersWithPermissions();
 });

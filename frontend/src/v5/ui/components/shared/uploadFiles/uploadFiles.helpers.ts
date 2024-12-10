@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { IContainer } from '@/v5/store/containers/containers.types';
 import { createFilterOptions } from '@mui/material';
 import { orderBy } from 'lodash';
 import { PDFDocument } from 'pdf-lib';
@@ -29,7 +30,7 @@ export const parseFileName = (fileName: string, maxLength: number): string => {
 	return noExceedingMax;
 };
 
-export const getFilteredDestinationOptions = createFilterOptions({ trim: true });
+export const getFilteredDestinationOptions = createFilterOptions<IContainer>({ trim: true });
 
 export const sortByName = (options) => orderBy(options, ({ name }) => name.toLowerCase());
 export const isPdf = (file: File) => file.type.endsWith('pdf');
