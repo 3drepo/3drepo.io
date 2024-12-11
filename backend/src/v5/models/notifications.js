@@ -17,15 +17,39 @@
 
 const { INTERNAL_DB } = require('../handler/db.constants');
 const db = require('../handler/db');
+const { generateUUID } = require('../utils/helper/uuids');
+const { notificationTypes } = require('./notifications.constants');
 
 const Notifications = {};
-const NOTIFICATIONS_COLL = 'notifications';
+const NOTIFICATIONS_COL = 'notifications';
 
-Notifications.initialise = () => db.createIndex(INTERNAL_DB, NOTIFICATIONS_COLL,
+Notifications.initialise = () => db.createIndex(INTERNAL_DB, NOTIFICATIONS_COL,
 	{ user: 1, timestamp: -1 }, { runInBackground: true });
 
 Notifications.removeAllUserNotifications = async (user) => {
-	await db.deleteMany(INTERNAL_DB, NOTIFICATIONS_COLL, { user });
+	await db.deleteMany(INTERNAL_DB, NOTIFICATIONS_COL, { user });
+};
+
+Notifications.addTicketAssignedNotifications = async (teamspace, project, model, notifications) => {
+	const timestamp = new Date();
+	const records = notifications.flatMap(({ toNotify, ticket, assignedBy }) => {
+		if (toNotify?.length && ticket && assignedBy) {
+			return toNotify.map((user) => ({
+				_id: generateUUID(),
+				user,
+				type: notificationTypes.TICKET_ASSIGNED,
+				timestamp,
+				data: {
+					teamspace, project, model, ticket, assignedBy,
+				},
+			}));
+		}
+		return [];
+	});
+
+	if (records?.length) {
+		await db.insertMany(INTERNAL_DB, NOTIFICATIONS_COL, records);
+	}
 };
 
 module.exports = Notifications;

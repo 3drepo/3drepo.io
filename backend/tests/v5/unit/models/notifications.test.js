@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
 const { src } = require('../../helper/path');
 const { generateRandomString } = require('../../helper/services');
 
@@ -22,6 +23,7 @@ const db = require(`${src}/handler/db`);
 const { INTERNAL_DB } = require(`${src}/handler/db.constants`);
 
 const Notifications = require(`${src}/models/notifications`);
+const { notificationTypes } = require(`${src}/models/notifications.constants`);
 
 const NOTIFICATIONS_COLL = 'notifications';
 
@@ -51,7 +53,114 @@ const testInitialise = () => {
 	});
 };
 
+const testAddTicketAssignedNotifications = () => {
+	describe('Ticket assigned notifications', () => {
+		test('Should not insert any records if there were no tickets', async () => {
+			const fn = jest.spyOn(db, 'insertMany');
+			await Notifications.addTicketAssignedNotifications(generateRandomString(),
+				generateRandomString(),
+				generateRandomString(),
+				[],
+			);
+
+			expect(fn).not.toHaveBeenCalled();
+		});
+
+		test('Multiple toNotifys should produce multiple records', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+
+			const fn = jest.spyOn(db, 'insertMany').mockResolvedValueOnce();
+			const input = [
+				{
+					toNotify: times(10, () => generateRandomString()),
+					ticket: generateRandomString(),
+					assignedBy: generateRandomString(),
+				},
+			];
+			await Notifications.addTicketAssignedNotifications(
+				teamspace,
+				project,
+				model,
+				input,
+			);
+
+			const expectedRecords = input[0].toNotify.map((user) => ({
+				_id: expect.anything(),
+				type: notificationTypes.TICKET_ASSIGNED,
+				timestamp: expect.any(Date),
+				user,
+				data: {
+					teamspace,
+					project,
+					model,
+					ticket: input[0].ticket,
+					assignedBy: input[0].assignedBy,
+				},
+			}));
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COLL, expectedRecords);
+		});
+
+		test('Multiple notifications should work, missing data rows should be ignored', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+
+			const fn = jest.spyOn(db, 'insertMany').mockResolvedValueOnce();
+			const input = [
+				{
+					toNotify: times(10, () => generateRandomString()),
+					ticket: generateRandomString(),
+					assignedBy: generateRandomString(),
+				},
+				{
+					ticket: generateRandomString(),
+					assignedBy: generateRandomString(),
+				},
+				{
+					toNotify: times(10, () => generateRandomString()),
+					ticket: generateRandomString(),
+				},
+				{
+					toNotify: times(10, () => generateRandomString()),
+					ticket: generateRandomString(),
+					assignedBy: generateRandomString(),
+				},
+
+			];
+			await Notifications.addTicketAssignedNotifications(
+				teamspace,
+				project,
+				model,
+				input,
+			);
+
+			const expectedRecords = [input[0], input[3]].flatMap(({ toNotify, ticket, assignedBy }) => toNotify.map(
+				(user) => ({
+					_id: expect.anything(),
+					type: notificationTypes.TICKET_ASSIGNED,
+					timestamp: expect.any(Date),
+					user,
+					data: {
+						teamspace,
+						project,
+						model,
+						ticket,
+						assignedBy,
+					},
+				})));
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COLL, expectedRecords);
+		});
+	});
+};
+
 describe('models/notifications', () => {
 	testRemoveAllUserNotifications();
+	testAddTicketAssignedNotifications();
 	testInitialise();
 });
