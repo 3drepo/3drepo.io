@@ -17,12 +17,13 @@
 
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { getOperatorMaxFieldsAllowed } from '../filterForm.helpers';
-import { isTextType } from '../../cardFilters.helpers';
+import { isRangeOperator, isTextType } from '../../cardFilters.helpers';
 import { FormNumberField, FormTextField } from '@controls/inputs/formInputs.component';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { range } from 'lodash';
 import { CardFilterType } from '../../cardFilters.types';
+import { RangeInput } from './rangeInput/rangeInput.component';
 
 const name = 'values';
 export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
@@ -34,31 +35,58 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 	const error = errors.values || {};
 	const operator = watch('operator');
 	const maxFields = getOperatorMaxFieldsAllowed(operator);
+	const isRangeOp = isRangeOperator(operator);
+	// Switching from a non-range to a range input type crashes the app
+	// as the range input tries to access either the first or second value
+	// of an array, whereas the non-range input type relies on string, and
+	// so it tries to access [string].0
+	const prevIsRangeOp = useRef(isRangeOp);
+	const emptyValue = { value: isRangeOp ? ['', ''] : '' };
+
+	useEffect(() => {
+		if (!fields.length && maxFields > 0) {
+			append(emptyValue);
+		}
+	}, [fields.length]);
 	
 	useEffect(() => {
 		if (maxFields === 0) {
 			remove();
-		} else if (!fields.length) {
-			append({ value: '' });
 		}
 	}, [maxFields]);
 
-	if (maxFields === 0) return null;
+	useEffect(() => {
+		remove();
+		prevIsRangeOp.current = isRangeOp;
+	}, [isRangeOp]);
+
+	if (maxFields === 0 || prevIsRangeOp.current !== isRangeOp) return null;
 
 	if (type === 'number' || isTextType(type)) {
 		const InputField = type === 'number' ? FormNumberField : FormTextField;
 
 		if (maxFields === 1) return <InputField name={`${name}.0.value`} formError={!!error?.[0]} />;
+
+		const getFieldContainerProps = (field, i) => ({
+			key: field.id,
+			onRemove: () => remove(i),
+			disableRemove: fields.length === 1,
+			onAdd: () => append(emptyValue),
+			disableAdd: i !== (fields.length - 1),
+		});
+		if (isRangeOp) return (
+			<>
+				{fields.map((field, i) => (
+					<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
+						<RangeInput Input={InputField} name={`${name}.${i}.value`} error={error?.[i]?.value} />
+					</ArrayFieldContainer>
+				))}
+			</>
+		);
 		return (
 			<>
 				{fields.map((field, i) => (
-					<ArrayFieldContainer
-						key={field.id}
-						onRemove={() => remove(i)}
-						disableRemove={fields.length === 1}
-						onAdd={() => append({ value: '' })}
-						disableAdd={i !== (fields.length - 1)}
-					>
+					<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
 						<InputField name={`${name}.${i}.value`} formError={!!error?.[i]} />
 					</ArrayFieldContainer>
 				))}

@@ -17,11 +17,23 @@
 
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { ChipContainer, DeleteButton, TextWrapper, OperatorIconContainer, DisplayValue, Property } from './filterChip.styles';
-import { FILTER_OPERATOR_ICON, FILTER_OPERATOR_LABEL } from '../cardFilters.helpers';
+import { FILTER_OPERATOR_ICON, FILTER_OPERATOR_LABEL, isRangeOperator } from '../cardFilters.helpers';
 import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
-import { CardFilterType, BaseFilter } from '../cardFilters.types';
+import { CardFilterType, BaseFilter, CardFilterOperator, CardFilterValue } from '../cardFilters.types';
 import { formatSimpleDate } from '@/v5/helpers/intl.helper';
+
+const getDisplayValue = (values: CardFilterValue[], operator: CardFilterOperator, type: CardFilterType) => {
+	const isRange = isRangeOperator(operator);
+	const vals = isRange
+		? (values as [number, number][]).map(([a, b]) => `[${a}, ${b}]`)
+		: values;
+	
+	const isDate = type === 'date';
+	return isDate
+		? vals.map((d) => formatSimpleDate(new Date(+d)))
+		: vals.join(', ') ?? '';
+};
 
 type FilterChipProps = {
 	property: string;
@@ -34,8 +46,7 @@ export const FilterChip = ({ property, onDelete, selected, type, filter }: Filte
 	const { operator, values } = filter;
 	const OperatorIcon = FILTER_OPERATOR_ICON[operator];
 	const hasMultipleValues = values.length > 1;
-	const isDate = type === 'date';
-	const displayValue = isDate ? values.map((d) => formatSimpleDate(new Date(+d))) : values.join(', ') ?? '';
+	const displayValue = getDisplayValue(values, operator, type);
 
 	const handleDelete = (e) => {
 		e.preventDefault();

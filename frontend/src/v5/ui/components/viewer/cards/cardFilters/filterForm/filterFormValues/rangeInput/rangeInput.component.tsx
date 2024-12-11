@@ -15,15 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export type CardFilterOperator = 'ex' | 'nex' | 'eq' | 'neq' | 'ss' | 'nss' | 'rng' | 'nrng' | 'gt' | 'gte' | 'lt' | 'lte';
-export type CardFilterType = 'text' | 'longText' | 'date' | 'oneOf' | 'manyOf' | 'boolean' | 'number' | 'ticketTitle' | 'ticketId' | 'template';
-type ValueType = string | number | Date;
-export type CardFilterValue = ValueType | [ValueType, ValueType];
-export type BaseFilter = { operator: CardFilterOperator, values: CardFilterValue[] };
+import { useEffect } from 'react';
+import { FormattedMessage } from 'react-intl';
+import { RangeContainer } from './rangeInput.styles';
+import { useFormContext } from 'react-hook-form';
+import { get } from 'lodash';
 
-export type CardFilter = {
-	property: string,
-	type: CardFilterType,
-	filter?: BaseFilter,
-	module?: string,
+export const RangeInput = ({ Input, name, error }) => {
+	const { trigger, formState: { dirtyFields } } = useFormContext();
+
+	useEffect(() => {
+		const dirty = get(dirtyFields, name);
+		if (dirty?.[0] || dirty?.[1]) {
+			trigger(name);
+		}
+	}, [error?.[0]?.message, error?.[1]?.message]);
+
+	return (
+		<RangeContainer>
+			<Input name={`${name}.0`} formError={!!error} />
+			<FormattedMessage id="rangeInputs.to" defaultMessage="to" />
+			<Input name={`${name}.1`} formError={!!error} />
+		</RangeContainer>
+	);
 };

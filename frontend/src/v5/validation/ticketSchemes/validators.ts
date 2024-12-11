@@ -16,16 +16,15 @@
  */
 
 import * as Yup from 'yup';
-import { trimmedString } from '../shared/validators';
+import { nullableNumber, numberRange, trimmedString } from '../shared/validators';
 import { MAX_LONG_TEXT_LENGTH, MAX_TEXT_LENGTH } from '@/v5/store/tickets/tickets.validators';
 import { getOperatorMaxFieldsAllowed } from '@components/viewer/cards/cardFilters/filterForm/filterForm.helpers';
-import { isTextType } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
-import { CardFilterType } from '@components/viewer/cards/cardFilters/cardFilters.types';
+import { isRangeOperator, isTextType } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
+import { CardFilterOperator, CardFilterType } from '@components/viewer/cards/cardFilters/cardFilters.types';
 
 const getValueValidator = (type: CardFilterType) => {
-	if (isTextType(type)) {
-		return trimmedString.required().max(type === 'longText' ? MAX_LONG_TEXT_LENGTH : MAX_TEXT_LENGTH);
-	}
+	if (isTextType(type)) return trimmedString.required().max(type === 'longText' ? MAX_LONG_TEXT_LENGTH : MAX_TEXT_LENGTH);
+	if (type === 'number') return nullableNumber;
 	return trimmedString;
 };
 
@@ -33,8 +32,12 @@ export const FilterSchema = Yup.object().shape({
 	operator: trimmedString,
 	values: Yup.array()
 		.when(
-			'$type',
-			(filterType, schema) => schema.of(Yup.object({ value: getValueValidator(filterType) })),
+			['operator', '$type'],
+			// @ts-ignore
+			(operator: CardFilterOperator, filterType: CardFilterType, schema) => {
+				const value = isRangeOperator(operator) ? numberRange() : getValueValidator(filterType);
+				return schema.of(Yup.object({ value: value }));
+			},
 		)
 		.when(
 			'operator',

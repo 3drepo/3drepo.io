@@ -16,7 +16,7 @@
  */
 import * as Yup from 'yup';
 import { revisionDesc } from '../containerAndFederationSchemes/validators';
-import { desc, name, alphaNumericHyphens, uploadFile, trimmedString, requiredNumber } from '../shared/validators';
+import { desc, name, alphaNumericHyphens, uploadFile, trimmedString, numberRange } from '../shared/validators';
 import { formatMessage } from '@/v5/services/intl';
 import { selectRevisions } from '@/v5/store/drawings/revisions/drawingRevisions.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
@@ -54,14 +54,12 @@ const calibration = Yup.object().shape({
 		id: 'validation.drawing.calibration.units.error.required',
 		defaultMessage: 'Units is a required field',
 	})),
-	verticalRange: Yup.array().of(requiredNumber().test(
-		'bottomShouldBeSmallerThanTop',
+	verticalRange: numberRange(
 		formatMessage({
 			id: 'validation.drawing.calibration.error.invalidRange',
 			defaultMessage: 'Bottom extent should be smaller than top',
 		}),
-		(v, ctx) => ctx.parent[0] < ctx.parent[1],
-	)),
+	),
 });
 
 export const DrawingFormSchema =  Yup.object().shape({
