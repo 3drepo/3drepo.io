@@ -178,36 +178,34 @@ const addSuperMeshMappingsToStream = async (account, model, revId, jsonFiles, ou
 	}
 };
 
-const getSuperMeshMappingForModels = async (modelsToProcess, outStream) => {
-	const promises = [];
+const getSuperMeshMappingForEntry = async (entry, index, outStream) => {
+	let assetList = await DB.findOne(
+		entry.teamspace, `${entry.model}.stash.repobundles`, { _id: entry.rev }, { jsonFiles: 1 });
 
-	const getMapping = async (entry, i) => {
-		let assetList = await DB.findOne(
-			entry.teamspace, `${entry.model}.stash.repobundles`, { _id: entry.rev }, { jsonFiles: 1 });
+	if (!assetList) {
+		assetList = await DB.findOne(
+			entry.teamspace, `${entry.model}.stash.unity3d`, { _id: entry.rev }, { jsonFiles: 1 });
+	}
 
-		if (!assetList) {
-			assetList = await DB.findOne(
-				entry.teamspace, `${entry.model}.stash.unity3d`, { _id: entry.rev }, { jsonFiles: 1 });
-		}
-
-		if (assetList) {
-			await addSuperMeshMappingsToStream(
-				entry.teamspace, entry.model, entry.rev, assetList.jsonFiles, outStream);
-		}
-
-		if (i !== modelsToProcess.length - 1) {
+	if (assetList) {
+		if (index !== 0) {
 			outStream.write(',');
 		}
-	};
 
+		await addSuperMeshMappingsToStream(
+			entry.teamspace, entry.model, entry.rev, assetList.jsonFiles, outStream);
+	}
+};
+
+const getSuperMeshMappingForModels = async (modelsToProcess, outStream) => {
 	for (let i = 0; i < modelsToProcess.length; ++i) {
 		const entry = modelsToProcess[i];
 		if (entry) {
-			promises.push(getMapping(entry, i));
+			// Ignore necessary to avoid writing to the stream in parallel.
+			// eslint-disable-next-line no-await-in-loop
+			await getSuperMeshMappingForEntry(entry, i, outStream);
 		}
 	}
-
-	await Promise.all(promises);
 };
 
 JSONAssets.getAllSuperMeshMappingForContainer = async (teamspace, container, branch, rev) => {

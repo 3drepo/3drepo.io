@@ -18,7 +18,6 @@
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
-const { sort } = require('../../../../../../../../src/v4/models/addressMeta');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -26,94 +25,6 @@ const uuidHelper = require(`${src}/utils/helper/uuids`);
 
 let server;
 let agent;
-
-const generateBasicData = () => {
-	const users = {
-		tsAdmin: ServiceHelper.generateUserCredentials(),
-		noProjectAccess: ServiceHelper.generateUserCredentials(),
-		viewer: ServiceHelper.generateUserCredentials(),
-		commenter: ServiceHelper.generateUserCredentials(),
-		nobody: ServiceHelper.generateUserCredentials(),
-	};
-
-	const teamspace = ServiceHelper.generateRandomString();
-	const project = ServiceHelper.generateRandomProject();
-
-	const models = {
-		conWithRev: {
-			_id: ServiceHelper.generateUUIDString(),
-			name: ServiceHelper.generateRandomString(),
-			properties: {
-				...ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
-				permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
-			},
-		},
-		conWithNoRev: {
-			_id: ServiceHelper.generateUUIDString(),
-			name: ServiceHelper.generateRandomString(),
-			properties: ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
-		},
-		federation: {
-			_id: ServiceHelper.generateUUIDString(),
-			name: ServiceHelper.generateRandomString(),
-			properties: { ...ServiceHelper.generateRandomModelProperties(modelTypes.FEDERATION),
-				permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
-			},
-		},
-	};
-
-	models.federation.properties.subModels = [{ _id: models.conWithRev._id }];
-
-	const revisionDates = [
-		ServiceHelper.generateRandomDate(),
-		ServiceHelper.generateRandomDate(),
-		ServiceHelper.generateRandomDate(),
-	];
-	revisionDates.sort((a, b) => a - b);
-
-	const conRevisions = {
-		nonVoidRevision: ServiceHelper.generateRevisionEntry(false, true, modelTypes.CONTAINER, revisionDates[2]),
-		voidRevision: ServiceHelper.generateRevisionEntry(true, true, modelTypes.CONTAINER, revisionDates[1]),
-		noFileRevision: ServiceHelper.generateRevisionEntry(false, false, modelTypes.CONTAINER, revisionDates[0]),
-	};
-
-	const fedRevision = ServiceHelper.generateRevisionEntry(false, false);
-
-	const stashEntries = {
-		conStashEntry: ServiceHelper.generateStashEntry(conRevisions.nonVoidRevision._id,
-			models.conWithRev._id, teamspace, true),
-		fedStashEntry: ServiceHelper.generateStashEntry(fedRevision._id,
-			models.federation._id, teamspace, true),
-	};
-
-	// Generate nodes for scene mock
-	const revId = fedRevision._id;
-	const rootNode = ServiceHelper.generateBasicNode('transformation', revId);
-	const refNode = ServiceHelper.generateBasicNode('ref', revId,
-		[rootNode.shared_id], { owner: teamspace, project: models.conWithRev._id });
-	const meshNode = ServiceHelper.generateBasicNode('mesh', revId, [rootNode.shared_id]);
-
-	const nodes = [rootNode, refNode, meshNode];
-
-	// Create Mesh Map for scene mock
-	const meshIdStr = uuidHelper.UUIDToString(meshNode._id);
-	const meshMap = {
-		[`${uuidHelper.UUIDToString(rootNode._id)}`]: [meshIdStr],
-		[meshIdStr]: meshIdStr,
-	};
-
-	return {
-		users,
-		teamspace,
-		project,
-		models,
-		conRevisions,
-		fedRevision,
-		stashEntries,
-		nodes,
-		meshMap,
-	};
-};
 
 const getRandomDatesDesc = (numberOfDates) => {
 	const dates = [];
@@ -222,17 +133,23 @@ const generateTestEnvData = () => {
 	// - Valid Revision R3
 // - Container C3:
 	// - Void revision R4
+	// - Valid Revision R5
 // - Container C4:
-	// - NoFile revision R5
+	// - NoFile revision R6
+	// - Valid Revision R7
+// - Container C5:
+	// - Void Revision R8
+// - Container C6:
+	// - Void Revision R9
 // - Federation F1:
 	// - C1
 	// - C2
 // - Federation F2:
-	// - C2
-	// - C3
-// - Federation F3:
 	// - C3
 	// - C4
+// - Federation F3:
+	// - C5
+	// - C6
 
 	// Create users
 	const users = {
@@ -254,18 +171,26 @@ const generateTestEnvData = () => {
 	const project = ServiceHelper.generateRandomProject();
 
 	// Create Revisions for C1
-	const dates = getRandomDatesDesc(5);
+	const dates = getRandomDatesDesc(9);
 	const R1 = ServiceHelper.generateRevisionEntry(false, true, modelTypes.CONTAINER, dates[0]);
 	const R2 = ServiceHelper.generateRevisionEntry(false, true, modelTypes.CONTAINER, dates[1]);
 
-	// Create Revision for C2
+	// Create Revisions for C2
 	const R3 = ServiceHelper.generateRevisionEntry(false, true, modelTypes.CONTAINER, dates[2]);
 
-	// Create Revision for C3
+	// Create Revisions for C3
 	const R4 = ServiceHelper.generateRevisionEntry(true, true, modelTypes.CONTAINER, dates[3]);
+	const R5 = ServiceHelper.generateRevisionEntry(false, true, modelTypes.CONTAINER, dates[4]);
 
-	// Create Revision for C4
-	const R5 = ServiceHelper.generateRevisionEntry(false, false, modelTypes.CONTAINER, dates[4]);
+	// Create Revisions for C4
+	const R6 = ServiceHelper.generateRevisionEntry(false, false, modelTypes.CONTAINER, dates[5]);
+	const R7 = ServiceHelper.generateRevisionEntry(false, true, modelTypes.CONTAINER, dates[6]);
+
+	// Create Revisions for C5
+	const R8 = ServiceHelper.generateRevisionEntry(true, true, modelTypes.CONTAINER, dates[7]);
+
+	// Create Revisions for C6
+	const R9 = ServiceHelper.generateRevisionEntry(false, false, modelTypes.CONTAINER, dates[8]);
 
 	// Create Container objects
 	const C1 = createContainerObject(
@@ -283,13 +208,25 @@ const generateTestEnvData = () => {
 	const C3 = createContainerObject(
 		teamspace,
 		permissions,
-		[R4],
+		[R4, R5],
 	);
 
 	const C4 = createContainerObject(
 		teamspace,
 		permissions,
-		[R5],
+		[R6, R7],
+	);
+
+	const C5 = createContainerObject(
+		teamspace,
+		permissions,
+		[R8],
+	);
+
+	const C6 = createContainerObject(
+		teamspace,
+		permissions,
+		[R9],
 	);
 
 	const containers = {
@@ -297,6 +234,8 @@ const generateTestEnvData = () => {
 		C2,
 		C3,
 		C4,
+		C5,
+		C6,
 	};
 
 	// Create Federation objects
@@ -308,13 +247,13 @@ const generateTestEnvData = () => {
 
 	const F2 = createFederationObject(
 		teamspace,
-		[C2, C3],
+		[C3, C4],
 		permissions,
 	);
 
 	const F3 = createFederationObject(
 		teamspace,
-		[C3, C4],
+		[C5, C6],
 		permissions,
 	);
 
@@ -408,44 +347,8 @@ const setupTestData = async ({ users, teamspace, project, containers, federation
 	]);
 };
 
-const setupData = async ({ users, teamspace, project, models, conRevisions, fedRevision, stashEntries,
-	nodes, meshMap }) => {
-	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
-
-	const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], key !== 'nobody' ? [teamspace] : []));
-
-	const modelProms = Object.keys(models).map((key) => ServiceHelper.db.createModel(
-		teamspace,
-		models[key]._id,
-		models[key].name,
-		models[key].properties,
-	));
-
-	return Promise.all([
-		...userProms,
-		...modelProms,
-		ServiceHelper.db.createProject(teamspace, project.id, project.name,
-			Object.keys(models).map((key) => models[key]._id)),
-		...Object.keys(conRevisions).map((key) => ServiceHelper.db.createRevision(teamspace,
-			project.id, models.conWithRev._id, conRevisions[key], modelTypes.CONTAINER)),
-		// ServiceHelper.db.createRevision(teamspace, project.id, models.federation._id,
-		// 	fedRevision, modelTypes.FEDERATION),
-		...Object.keys(stashEntries).map((key) => ServiceHelper.db.createStash(teamspace,
-			project.id, stashEntries[key])),
-		ServiceHelper.db.createScene(teamspace, project, models.federation._id, fedRevision, nodes, meshMap),
-	]);
-};
-
 const testGetAssetMaps = () => {
 	describe('Get asset maps', () => {
-		// const basicData = generateBasicData();
-		// const { users, teamspace, project, models, conRevisions, fedRevision,
-		// 	stashEntries, nodes, meshMap } = basicData;
-
-		// beforeAll(async () => {
-		// 	await setupData(basicData);
-		// });
-
 		const testEnvData = generateTestEnvData();
 		const { users, teamspace, project, containers, federations } = testEnvData;
 
@@ -478,57 +381,42 @@ const testGetAssetMaps = () => {
 
 				let result = '';
 
-				const revisionId = revId || cont.revisions[0]._id;
-
-				const stashEntry = stashEntries.find((entry) => entry._id === revisionId);
-
-				if (stashEntry) {
-					result += `{"model":"${modelId}","supermeshes":[`;
-					const assetIds = stashEntry.assets;
-					const assetData = stashEntry.jsonData;
-
-					let assetString = '';
-					for (let i = 0; i < assetIds.length; i++) {
-						const id = assetIds[i];
-						const data = assetData[i];
-						assetString += `{"id":"${id}","data":${data}}`;
-
-						if (i !== (assetIds.length - 1)) {
-							assetString += ',';
+				const findFirstValidRev = () => {
+					for (let i = 0; i < cont.revisions.length; i++) {
+						const rev = cont.revisions[i];
+						if (!rev.void) {
+							return rev._id;
 						}
 					}
-					result += `${assetString}]}`;
+					return undefined;
+				};
+
+				const revisionId = revId || findFirstValidRev();
+
+				if (revisionId) {
+					const stashEntry = stashEntries.find((entry) => entry._id === revisionId);
+
+					if (stashEntry) {
+						result += `{"model":"${modelId}","supermeshes":[`;
+						const assetIds = stashEntry.assets;
+						const assetData = stashEntry.jsonData;
+
+						let assetString = '';
+						for (let i = 0; i < assetIds.length; i++) {
+							const id = assetIds[i];
+							const data = assetData[i];
+							assetString += `{"id":"${id}","data":${data}}`;
+
+							if (i !== (assetIds.length - 1)) {
+								assetString += ',';
+							}
+						}
+						result += `${assetString}]}`;
+					}
 				}
 
 				return result;
 			};
-
-			// const getBasicContResult = () => {
-			// 	const modelId = models.conWithRev._id;
-
-			// 	const stashEntry = stashEntries.conStashEntry;
-			// 	const assetIds = stashEntry.assets;
-			// 	const assetData = stashEntry.jsonData;
-
-			// 	let result = '';
-
-			// 	result += `{"model":"${modelId}","supermeshes":[`;
-
-			// 	let assetString = '';
-			// 	for (let i = 0; i < assetIds.length; i++) {
-			// 		const id = assetIds[i];
-			// 		const data = assetData[i];
-			// 		assetString += `{"id":"${id}","data":${data}}`;
-
-			// 		if (i !== (assetIds.length - 1)) {
-			// 			assetString += ',';
-			// 		}
-			// 	}
-
-			// 	result += `${assetString}]}`;
-
-			// 	return result;
-			// };
 
 			const getFedResult = (fed) => {
 				let result = '';
@@ -539,11 +427,12 @@ const testGetAssetMaps = () => {
 				for (let i = 0; i < conts.length; i++) {
 					const cont = conts[i];
 					const contResult = getContResult(cont);
-					result += contResult;
 
-					if (i !== (conts.length - 1) && contResult !== '') {
+					if (i !== 0 && contResult !== '') {
 						result += ',';
 					}
+
+					result += contResult;
 				}
 
 				result += ']}';
@@ -551,164 +440,106 @@ const testGetAssetMaps = () => {
 				return result;
 			};
 
-			//const getBasicFedResult = () => `{"submodels":[${getBasicContResult()}]}`;
-
 			// Basic tests
-			// - User has no valid session
-			// - Teamspace does not exist
-			// - User is not a member of the teamspace
-			// - The user does not have access to the model
-			// - The user is viewer ?
-			// - The user is commenter ?
-			// - The project does not exist
-			// const randomString = ServiceHelper.generateRandomString();
-			// const nobodyKey = users.nobody.apiKey;
-			// const noProjAccKey = users.noProjectAccess.apiKey;
+			const randomString = ServiceHelper.generateRandomString();
+			const nobodyKey = users.nobody.apiKey;
+			const noProjAccKey = users.noProjectAccess.apiKey;
 			const viewerKey = users.viewer.apiKey;
 			const commenterKey = users.commenter.apiKey;
-			// const fedId = models.federation._id;
-			// const detachedRev = ServiceHelper.generateRevisionEntry()._id;
-			// const { containerNotFound, federationNotFound } = templates;
-			// const contId = models.conWithRev._id;
+			const fedId = federations.F1.fedObj._id;
+			const detachedRev = ServiceHelper.generateRevisionEntry()._id;
+			const { containerNotFound, federationNotFound } = templates;
+			const contId = containers.C1._id;
 			const masterRevId = 'master/head';
 
 			const basicFailCasesCont = [
-				// ['the user does not have a valid session', getContRoute({ key: null }), false, templates.notLoggedIn],
-				// ['the teamspace does not exist', getContRoute({ ts: randomString }), false, templates.teamspaceNotFound],
-				// ['the project does not exist', getContRoute({ projectId: randomString }), false, templates.projectNotFound],
-				// ['the Container does not exist', getContRoute({ modelId: randomString }), false, containerNotFound],
-				// ['the revision does not exist', getContRoute({ revisionId: detachedRev }), false, templates.revisionNotFound],
-				// ['the user is not a member of the teamspace', getContRoute({ key: nobodyKey }), false, templates.teamspaceNotFound],
-				// ['the user does not have access to the model', getContRoute({ key: noProjAccKey }), false, templates.notAuthorized],
-				// ['the model is of wrong type', getContRoute({ modelId: fedId }), false, containerNotFound],
+				['the user does not have a valid session', getContRoute({ key: null }), false, templates.notLoggedIn],
+				['the teamspace does not exist', getContRoute({ ts: randomString }), false, templates.teamspaceNotFound],
+				['the project does not exist', getContRoute({ projectId: randomString }), false, templates.projectNotFound],
+				['the Container does not exist', getContRoute({ modelId: randomString }), false, containerNotFound],
+				['the revision does not exist', getContRoute({ revisionId: detachedRev }), false, templates.revisionNotFound],
+				['the user is not a member of the teamspace', getContRoute({ key: nobodyKey }), false, templates.teamspaceNotFound],
+				['the user does not have access to the model', getContRoute({ key: noProjAccKey }), false, templates.notAuthorized],
+				['the model is of wrong type', getContRoute({ modelId: fedId }), false, containerNotFound],
 			];
 
 			const basicFailCasesFed = [
-				// ['the user does not have a valid session', getFedRoute({ key: null }), false, templates.notLoggedIn],
-				// ['the teamspace does not exist', getFedRoute({ ts: randomString }), false, templates.teamspaceNotFound],
-				// ['the project does not exist', getFedRoute({ projectId: randomString }), false, templates.projectNotFound],
-				// ['the Federation does not exist', getFedRoute({ modelId: randomString }), false, federationNotFound],
-				// ['the user is not a member of the teamspace', getFedRoute({ key: nobodyKey }), false, templates.teamspaceNotFound],
-				// ['the user does not have access to the model', getFedRoute({ key: noProjAccKey }), false, templates.notAuthorized],
-				// ['the user is viewer', getFedRoute({ key: viewerKey }), false, templates.ok],
-				// ['the user is commenter', getFedRoute({ key: commenterKey }), false, templates.ok],
-				// ['the model is of wrong type', getFedRoute({ modelId: contId }), false, federationNotFound],
+				['the user does not have a valid session', getFedRoute({ key: null }), false, templates.notLoggedIn],
+				['the teamspace does not exist', getFedRoute({ ts: randomString }), false, templates.teamspaceNotFound],
+				['the project does not exist', getFedRoute({ projectId: randomString }), false, templates.projectNotFound],
+				['the Federation does not exist', getFedRoute({ modelId: randomString }), false, federationNotFound],
+				['the user is not a member of the teamspace', getFedRoute({ key: nobodyKey }), false, templates.teamspaceNotFound],
+				['the user does not have access to the model', getFedRoute({ key: noProjAccKey }), false, templates.notAuthorized],
+				['the model is of wrong type', getFedRoute({ modelId: contId }), false, federationNotFound],
 			];
 
+			// Valid Container Tests
 			const { C1 } = containers;
-			const { C2 } = containers;
 			const { C3 } = containers;
 			const { C4 } = containers;
 
-			const C1Id = C1._id;
-			const C2Id = C2._id;
 			const C3Id = C3._id;
 			const C4Id = C4._id;
 
 			const R1Id = C1.revisions[0]._id;
 			const R2Id = C1.revisions[1]._id;
-			const R3Id = C2.revisions[0]._id;
 			const R4Id = C3.revisions[0]._id;
-			const R5Id = C4.revisions[0]._id;
+			const R5Id = C3.revisions[1]._id;
+			const R6Id = C4.revisions[0]._id;
 
 			const curRevResult = getContResult(C1, R1Id);
 			const prevRevResult = getContResult(C1, R2Id);
 			const contValidRevs = [
-				// ['Access current rev via rev ID', getContRoute(), true, curRevResult],
-				// ['Access current via master/head', getContRoute({ revisionId: masterRevId }), true, curRevResult],
-				// ['Access previous via rev ID', getContRoute({ revisionId: R2Id }), true, prevRevResult],
-				// ['Access current with viewer via rev ID', getContRoute({ key: viewerKey }), true, curRevResult],
-				// ['Access current with commenter via rev ID', getContRoute({ key: commenterKey }), true, curRevResult],
-				// ['Access current with viewer via master/head', getContRoute({ revisionId: masterRevId, key: viewerKey }), true, curRevResult],
-				// ['Access current with commenter via master/head', getContRoute({ revisionId: masterRevId, key: commenterKey }), true, curRevResult],
+				['Access current rev via rev ID', getContRoute(), true, curRevResult],
+				['Access current via master/head', getContRoute({ revisionId: masterRevId }), true, curRevResult],
+				['Access previous via rev ID', getContRoute({ revisionId: R2Id }), true, prevRevResult],
+				['Access current with viewer via rev ID', getContRoute({ key: viewerKey }), true, curRevResult],
+				['Access current with commenter via rev ID', getContRoute({ key: commenterKey }), true, curRevResult],
+				['Access current with viewer via master/head', getContRoute({ revisionId: masterRevId, key: viewerKey }), true, curRevResult],
+				['Access current with commenter via master/head', getContRoute({ revisionId: masterRevId, key: commenterKey }), true, curRevResult],
 			];
 
+			// Void Container Tests
 			const voidRevResult = getContResult(C3, R4Id);
+			const validRevResultC3 = getContResult(C3, R5Id);
 			const contVoidRevs = [
-				// ['Access Void revision via rev ID', getContRoute({ modelId: C3Id, revisionId: R4Id }), true, voidRevResult],
-				['Access Void revision via master/head', getContRoute({ modelId: C3Id, revisionId: masterRevId }), true, voidRevResult],
-				// ['Access Void revision with viewer via rev ID', getContRoute({ modelId: C3Id, revisionId: R4Id, key: viewerKey }), true, voidRevResult],
-				// ['Access Void revision with commenter via rev ID', getContRoute({ modelId: C3Id, revisionId: R4Id, key: commenterKey }), true, voidRevResult],
-				// ['Access Void revision with viewer via master/head', getContRoute({ modelId: C3Id, revisionId: masterRevId, key: viewerKey }), true, voidRevResult],
-				// ['Access Void revision with commenter via master/head', getContRoute({ modelId: C3Id, revisionId: masterRevId, key: commenterKey }), true, voidRevResult],
+				['Try to access void revision via rev ID (admin)', getContRoute({ modelId: C3Id, revisionId: R4Id }), true, voidRevResult],
+				['Try to access void revision via rev ID (viewer)', getContRoute({ modelId: C3Id, revisionId: R4Id, key: viewerKey }), true, voidRevResult],
+				['Try to access void revision via rev ID (commenter)', getContRoute({ modelId: C3Id, revisionId: R4Id, key: commenterKey }), true, voidRevResult],
+				['Get latest form container with newer void revision via master/head (admin)', getContRoute({ modelId: C3Id, revisionId: masterRevId }), true, validRevResultC3],
+				['Get latest form container with newer void revision via master/head (viewer)', getContRoute({ modelId: C3Id, revisionId: masterRevId, key: viewerKey }), true, validRevResultC3],
+				['Get latest form container with newer void revision via master/head (commenter)', getContRoute({ modelId: C3Id, revisionId: masterRevId, key: commenterKey }), true, validRevResultC3],
 			];
 
-			const noFileRevResult = getContResult(C4, R5Id);
+			// NoFile Container Tests
+			const noFileRevResult = getContResult(C4, R6Id);
 			const contNoFileRevisions = [
-				// ['Access NoFile revision via rev ID', getContRoute({ modelId: C4Id, revisionId: R5Id }), true, noFileRevResult],
-				// ['Access NoFile revision via master/head', getContRoute({ modelId: C4Id, revisionId: masterRevId }), true, noFileRevResult],
-				// ['Access NoFile revision with viewer via rev ID', getContRoute({ modelId: C4Id, revisionId: R5Id, key: viewerKey }), true, noFileRevResult],
-				// ['Access NoFile revision with commenter via rev ID', getContRoute({ modelId: C4Id, revisionId: R5Id, key: commenterKey }), true, noFileRevResult],
-				// ['Access NoFile revision with viewer via master/head', getContRoute({ modelId: C4Id, revisionId: masterRevId, key: viewerKey }), true, noFileRevResult],
-				// ['Access NoFile revision with commenter via master/head', getContRoute({ modelId: C4Id, revisionId: masterRevId, key: commenterKey }), true, noFileRevResult],
+				['Try to access noFile revision via rev ID (admin)', getContRoute({ modelId: C4Id, revisionId: R6Id }), true, noFileRevResult],
+				['Try to access noFile revision via rev ID (viewer)', getContRoute({ modelId: C4Id, revisionId: R6Id, key: viewerKey }), true, noFileRevResult],
+				['Try to access noFile revision via rev ID (commenter)', getContRoute({ modelId: C4Id, revisionId: R6Id, key: commenterKey }), true, noFileRevResult],
+				['Try to access noFile revision via master/head (admin)', getContRoute({ modelId: C4Id, revisionId: masterRevId }), true, noFileRevResult],
+				['Try to access noFile revision via master/head (viewer)', getContRoute({ modelId: C4Id, revisionId: masterRevId, key: viewerKey }), true, noFileRevResult],
+				['Try to access noFile revision via master/head (commenter)', getContRoute({ modelId: C4Id, revisionId: masterRevId, key: commenterKey }), true, noFileRevResult],
 			];
 
-			const F2Id = federations.F1.fedObj._id;
+			// Federation tests
+			const F2Id = federations.F2.fedObj._id;
 			const F3Id = federations.F3.fedObj._id;
 
 			const fed1Results = getFedResult(federations.F1);
 			const fed2Results = getFedResult(federations.F2);
 			const fed3Results = getFedResult(federations.F3);
 			const fedRevCombCases = [
-				// ['Access fed with two submodels with valid revisions as admin', getFedRoute(), true, fed1Results],
-				// ['Access fed with two submodels with valid revisions as viewer', getFedRoute({ key: viewerKey }), true, fed1Results],
-				// ['Access fed with two submodels with valid revisions as commenter', getFedRoute({ key: commenterKey }), true, fed1Results],
-				// ['Access fed with two submodels with one valid and one void as admin', getFedRoute({ modelId: F2Id }), true, fed2Results],
-				// ['Access fed with two submodels with one valid and one void as viewer', getFedRoute({ modelId: F2Id, key: viewerKey }), true, fed2Results],
-				// ['Access fed with two submodels with one valid and one void as commenter', getFedRoute({ modelId: F2Id, key: commenterKey }), true, fed2Results],
-				// ['Access fed with two submodels with one void and one NoFile as admin', getFedRoute({ modelId: F3Id }), true, fed3Results],
-				// ['Access fed with two submodels with one void and one NoFile as viewer', getFedRoute({ modelId: F3Id, key: viewerKey }), true, fed3Results],
-				// ['Access fed with two submodels with one void and one NoFile as commenter', getFedRoute({ modelId: F3Id, key: commenterKey }), true, fed3Results],
+				['Access fed with two containers with valid revisions (admin)', getFedRoute(), true, fed1Results],
+				['Access fed with two containers with valid revisions (viewer)', getFedRoute({ key: viewerKey }), true, fed1Results],
+				['Access fed with two containers with valid revisions (commenter)', getFedRoute({ key: commenterKey }), true, fed1Results],
+				['Access fed with two containers with one void and one noFile as head (admin)', getFedRoute({ modelId: F2Id }), true, fed2Results],
+				['Access fed with two containers with one void and one noFile as head (viewer)', getFedRoute({ modelId: F2Id, key: viewerKey }), true, fed2Results],
+				['Access fed with two containers with one void and one noFile as head (commenter)', getFedRoute({ modelId: F2Id, key: commenterKey }), true, fed2Results],
+				['Access fed with two containers with both only void revisions (admin)', getFedRoute({ modelId: F3Id }), true, fed3Results],
+				['Access fed with two containers with both only void revisions (admin)', getFedRoute({ modelId: F3Id, key: viewerKey }), true, fed3Results],
+				['Access fed with two containers with both only void revisions (admin)', getFedRoute({ modelId: F3Id, key: commenterKey }), true, fed3Results],
 			];
-
-// 			○ Containers:
-// 			§ Valid Revisions
-// 				□ Access current via rev ID
-// 				□ Access current via master/head
-// 				□ Access previous via rev ID
-// 				□ Access current with admin, viewer, and commenter rights via rev ID
-// 				□ Access current with admin, viewer, and commenter rights via master/head
-// 				□ Access previous with admin, viewer, and commenter rights via rev ID
-// 			§ Invalid Revisions
-// 				□ Access Void revision via rev ID
-// 				□ Access Void revision via master/head
-// 				□ Access Void revision with admin, viewer, and commenter rights via rev ID
-// 				□ Access Void revision with admin, viewer, and commenter rights via master/head
-// 			§ NoFile Revisions
-// 				□ Access NoFile revision via rev ID
-// 				□ Access NoFile revision via master/head
-// 				□ Access NoFile revision with admin, viewer, and commenter rights via rev ID
-// 				□ Access NoFile revision with admin, viewer, and commenter rights via master/head
-// 		○ Federations
-// 			§ Revision combinations
-// 				□ Access federation with two submodels with valid revisions as admin, viewer, and commenter
-// 				□ Access federation with two submodels with one valid and one void as admin viewer and commenter
-// Access federation with two submodels with one void and one NoFile revision as admin viewer and commenter
-
-
-			// const basicSuccCasesCont = [
-			// 	['the user is admin', getContRoute(), true, getBasicContResult()],
-			// 	['the user is viewer', getContRoute({ key: viewerKey }), true, getBasicContResult()],
-			// 	['the user is commenter', getContRoute({ key: commenterKey }), true, getBasicContResult()],
-			// ];
-
-			// const basicSuccCasesFed = [
-			// 	['the user is admin', getFedRoute(), true, getBasicFedResult()],
-			// 	['the user is viewer', getFedRoute({ key: viewerKey }), true, getBasicFedResult()],
-			// 	['the user is commenter', getFedRoute({ key: commenterKey }), true, getBasicFedResult()],
-			// ];
-
-			// Container only test
-			// That it works, of course
-			// providing revision /master/head returns most current revision
-			// providing previous revision returns previous revision
-
-			// Federation only tests
-			// - Revision requested off federation should not work
-			// - Federation should only get latest revisions from models.
-
-			// Drawing test
-			// Route does not exists for drawings
 
 			return [
 				...basicFailCasesCont,
@@ -732,7 +563,6 @@ const testGetAssetMaps = () => {
 				}
 			});
 		};
-		console.log(generateTestData());
 		describe.each(generateTestData())('Get asset maps', runTest);
 	});
 };
