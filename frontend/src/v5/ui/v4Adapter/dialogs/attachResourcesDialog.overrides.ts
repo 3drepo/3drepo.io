@@ -27,7 +27,7 @@ import {
 	ResourceListItem,
 	ResourcesListContainer,
 	ResourcesListScroller,
-	StyledDropZone,
+	DropZone,
 } from '@/v4/routes/components/resources/attachResourcesDialog/attachResourcesDialog.styles';
 import { LoaderContainer } from '@/v4/routes/components/messagesList/messagesList.styles';
 
@@ -104,7 +104,7 @@ const AttachResourcesFile = css`
 		${buttonsStyling}
 	}
 
-	${StyledDropZone} {
+	${DropZone} {
 		padding: 27px 0 28px;
 		margin: 0 23px;
 		border-top: solid 1px ${({ theme }) => theme.palette.base.lightest};

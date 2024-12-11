@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { DialogContent } from '@mui/material';
-import Dropzone from 'react-dropzone';
 import styled, { css } from 'styled-components';
 import { DashedContainer } from '@controls/dashedContainer/dashedContainer.component';
 
@@ -39,7 +38,7 @@ export const ResourcesContainer = styled.div`
 	width: 520px;
 `;
 
-export const StyledDropZone = styled(Dropzone)`
+export const DropZone = styled.div`
 	margin-left: 20px;
 	margin-top: 20px;
 	margin-right: 20px;
