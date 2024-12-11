@@ -46,12 +46,13 @@ const generateTicket = (owner, assignees) => ({
 });
 
 const testOnNewTickets = (multipleTickets = false) => {
-	describe('On new tickets', () => {
+	describe(`On new ticket ${multipleTickets ? 'import' : ''}`, () => {
 		const teamspace = generateRandomString();
 		const project = generateRandomString();
 		const model = generateRandomString();
 		const job = generateRandomString();
 		const owner = generateRandomString();
+		const nTickets = multipleTickets ? 10 : 1;
 
 		const eventToTrigger = multipleTickets ? events.TICKETS_IMPORTED : events.NEW_TICKET;
 
@@ -67,7 +68,8 @@ const testOnNewTickets = (multipleTickets = false) => {
 		};
 
 		test(`should not generate notifications if there are no assignees on ${eventToTrigger}`, async () => {
-			await eventCallbacks[eventToTrigger](createEventData({}));
+			const ticketData = multipleTickets ? times(nTickets, () => {}) : {};
+			await eventCallbacks[eventToTrigger](createEventData(ticketData));
 
 			expect(JobsModels.getJobsToUsers).not.toHaveBeenCalled();
 			expect(SettingsProcessor.getUsersWithPermissions).not.toHaveBeenCalled();
@@ -76,10 +78,13 @@ const testOnNewTickets = (multipleTickets = false) => {
 		});
 
 		test(`should not generate notifications if the ticket is assigned to a job with no accessible users on ${eventToTrigger}`, async () => {
+			const ticketData = multipleTickets ? times(nTickets, () => generateTicket(owner, [job]))
+				: generateTicket(owner, [job]);
+
 			JobsModels.getJobsToUsers.mockResolvedValue({ [job]: [generateRandomString()] });
 			SettingsProcessor.getUsersWithPermissions.mockResolvedValue(times(10, () => generateRandomString()));
 
-			await eventCallbacks[eventToTrigger](createEventData(generateTicket(owner, [job])));
+			await eventCallbacks[eventToTrigger](createEventData(ticketData));
 
 			expect(JobsModels.getJobsToUsers).toHaveBeenCalledTimes(1);
 			expect(JobsModels.getJobsToUsers).toHaveBeenCalledWith(teamspace);
@@ -91,14 +96,33 @@ const testOnNewTickets = (multipleTickets = false) => {
 		});
 
 		test(`should generate notifications for users assigned to the ticket and has permissions on ${eventToTrigger}`, async () => {
-			const assignedUsers = times(5, () => generateRandomString());
-			const [assignedUser1, assignedUser2, noPermUser1, ...users] = assignedUsers;
-			JobsModels.getJobsToUsers.mockResolvedValue({ [job]: [noPermUser1, ...users] });
-			SettingsProcessor.getUsersWithPermissions.mockResolvedValue([assignedUser1, ...users]);
+			const jobs = {};
+			const usersWithPermissions = [];
+			const expectedNotifications = [];
 
-			const ticket = generateTicket(owner, [job, assignedUser1, assignedUser2]);
+			const ticketData = times(nTickets, () => {
+				const assignedUsers = times(5, () => generateRandomString());
+				const [assignedUser1, assignedUser2, noPermUser1, ...users] = assignedUsers;
+				const assignedJob = generateRandomString();
+				jobs[assignedJob] = [noPermUser1, ...users];
+				const ticketOwner = generateRandomString();
+				usersWithPermissions.push(assignedUser1, ...users);
 
-			await eventCallbacks[eventToTrigger](createEventData(ticket));
+				const ticket = generateTicket(ticketOwner, [assignedJob, assignedUser1, assignedUser2]);
+
+				expectedNotifications.push({
+					ticket: ticket._id,
+					assignedBy: ticketOwner,
+					users: [...users, assignedUser1],
+				});
+
+				return ticket;
+			});
+
+			JobsModels.getJobsToUsers.mockResolvedValue(jobs);
+			SettingsProcessor.getUsersWithPermissions.mockResolvedValue(usersWithPermissions);
+
+			await eventCallbacks[eventToTrigger](createEventData(multipleTickets ? ticketData : ticketData[0]));
 
 			expect(JobsModels.getJobsToUsers).toHaveBeenCalledTimes(1);
 			expect(JobsModels.getJobsToUsers).toHaveBeenCalledWith(teamspace);
@@ -107,12 +131,6 @@ const testOnNewTickets = (multipleTickets = false) => {
 			expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledWith(teamspace, project, model, false);
 
 			expect(NotificationModels.addTicketAssignedNotifications).toHaveBeenCalledTimes(1);
-
-			const expectedNotifications = [{
-				ticket: ticket._id,
-				assignedBy: owner,
-				users: [...users, assignedUser1],
-			}];
 
 			expect(NotificationModels.addTicketAssignedNotifications).toHaveBeenCalledWith(teamspace, project, model,
 				expectedNotifications);
@@ -129,4 +147,5 @@ describe(determineTestGroup(__filename), () => {
 	});
 
 	testOnNewTickets();
+	testOnNewTickets(true);
 });
