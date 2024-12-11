@@ -23,6 +23,8 @@ export const { Types: MeasurementsTypes, Creators: MeasurementsActions } = creat
 	setMeasureModeSuccess: ['mode'],
 	setMeasureUnits: ['units'],
 	setMeasureUnitsSuccess: ['units'],
+	setMeasureSlopeUnits: ['slopeUnits'],
+	setMeasureSlopeUnitsSuccess: ['slopeUnits'],
 	addMeasurement: ['measurement'],
 	addMeasurementSuccess: ['measurement'],
 	clearMeasurements: [],
@@ -47,10 +49,12 @@ export interface IMeasurementState {
 	isDisabled: boolean;
 	mode: string;
 	units: string;
+	slopeUnits: 'Degrees' | 'Percentage';
 	areaMeasurements: any[];
 	lengthMeasurements: any[];
 	pointMeasurements: any[];
 	angleMeasurements: any[];
+	slopeMeasurements: any[];
 	edgeSnapping: boolean;
 	xyzDisplay: boolean;
 }
@@ -59,10 +63,12 @@ export const INITIAL_STATE: IMeasurementState = {
 	isDisabled: false,
 	mode: '',
 	units: 'm',
+	slopeUnits: 'Degrees',
 	areaMeasurements: [],
 	lengthMeasurements: [],
 	pointMeasurements: [],
 	angleMeasurements: [],
+	slopeMeasurements: [],
 	edgeSnapping: true,
 	xyzDisplay: false,
 };
@@ -70,6 +76,8 @@ export const INITIAL_STATE: IMeasurementState = {
 export const setMeasureModeSuccess = (state = INITIAL_STATE, { mode }) => ({ ...state, mode });
 
 export const setMeasureUnitsSuccess = (state = INITIAL_STATE, { units }) => ({ ...state, units });
+
+export const setMeasureSlopeUnitsSuccess = (state = INITIAL_STATE, { slopeUnits }) => ({ ...state, slopeUnits });
 
 export const setMeasureEdgeSnappingSuccess = (state = INITIAL_STATE, { edgeSnapping }) => ({ ...state, edgeSnapping });
 
@@ -83,6 +91,7 @@ export const clearMeasurementsSuccess  = (state = INITIAL_STATE) => ({
 	lengthMeasurements: INITIAL_STATE.lengthMeasurements,
 	pointMeasurements: INITIAL_STATE.pointMeasurements,
 	angleMeasurements: INITIAL_STATE.angleMeasurements,
+	slopeMeasurements: INITIAL_STATE.slopeMeasurements,
 });
 
 export const removeMeasurementSuccess = (state = INITIAL_STATE, { uuid }) => ({
@@ -91,6 +100,7 @@ export const removeMeasurementSuccess = (state = INITIAL_STATE, { uuid }) => ({
 	lengthMeasurements: state.lengthMeasurements.filter((measurement) => measurement.uuid !== uuid),
 	pointMeasurements: state.pointMeasurements.filter((measurement) => measurement.uuid !== uuid),
 	angleMeasurements: state.angleMeasurements.filter((measurement) => measurement.uuid !== uuid),
+	slopeMeasurements: state.slopeMeasurements.filter((measurement) => measurement.uuid !== uuid),
 });
 
 export const addMeasurementSuccess = (state = INITIAL_STATE, { measurement }) => {
@@ -120,6 +130,8 @@ export const setMeasurementColorSuccess = (state = INITIAL_STATE, { uuid, color 
 	const lengthMeasurement = state.lengthMeasurements.find((measure) => measure.uuid === uuid);
 	const pointMeasurement = state.pointMeasurements.find((measure) => measure.uuid === uuid);
 	const angleMeasurement = state.angleMeasurements.find((measure) => measure.uuid === uuid);
+	const slopeMeasurement = state.slopeMeasurements.find((measure) => measure.uuid === uuid);
+
 
 	if (areaMeasurement) {
 		areaMeasurement.customColor = color;
@@ -133,6 +145,9 @@ export const setMeasurementColorSuccess = (state = INITIAL_STATE, { uuid, color 
 	} else if (angleMeasurement) {
 		angleMeasurement.customColor = color;
 		return ({ ...state, angleMeasurements: [...state.angleMeasurements]});
+	} else if (slopeMeasurement) {
+		slopeMeasurement.customColor = color;
+		return ({ ...state, slopeMeasurements: [...state.slopeMeasurements]});
 	}
 
 	return ({ ...state });
@@ -144,6 +159,7 @@ export const resetMeasurementColorsSuccess = (state = INITIAL_STATE, {}) => {
 	const lengthMeasurements = state.lengthMeasurements.map(removeCustomColor);
 	const pointMeasurements = state.pointMeasurements.map(removeCustomColor);
 	const angleMeasurements = state.angleMeasurements.map(removeCustomColor);
+	const slopeMeasurements = state.slopeMeasurements.map(removeCustomColor);
 
 	return ({
 		...state,
@@ -151,12 +167,14 @@ export const resetMeasurementColorsSuccess = (state = INITIAL_STATE, {}) => {
 		lengthMeasurements,
 		pointMeasurements,
 		angleMeasurements,
+		slopeMeasurements,
 	});
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[MeasurementsTypes.SET_MEASURE_MODE_SUCCESS]: setMeasureModeSuccess,
 	[MeasurementsTypes.SET_MEASURE_UNITS_SUCCESS]: setMeasureUnitsSuccess,
+	[MeasurementsTypes.SET_MEASURE_SLOPE_UNITS_SUCCESS]: setMeasureSlopeUnitsSuccess,
 	[MeasurementsTypes.ADD_MEASUREMENT_SUCCESS]: addMeasurementSuccess,
 	[MeasurementsTypes.CLEAR_MEASUREMENTS_SUCCESS]: clearMeasurementsSuccess,
 	[MeasurementsTypes.REMOVE_MEASUREMENT_SUCCESS]: removeMeasurementSuccess,

@@ -19,12 +19,17 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EdgeSnappingIcon from '@mui/icons-material/PermDataSetting';
 import ResetIcon from '@mui/icons-material/RotateLeft';
 import UnitsIcon from '@assets/icons/outlined/measure-outlined.svg';
+import SlopeUnitsIcon from '@assets/icons/measurements/slope_units.svg';
 import ShowXYZIcon from '@mui/icons-material/Toc';
+
+export const DEGREES_SYMBOL = '°';
+export const slopeUnitsToSymbol = (slopeUnits) => slopeUnits === 'Degrees' ? DEGREES_SYMBOL : '%';
 
 export const MEASURE_ACTIONS_ITEMS = {
 	EDGE_SNAPPING: 'edgeSnapping',
 	SHOW_XYZ: 'showXYZ',
 	UNITS_DISPLAYED_IN: 'unitsDisplayedIn',
+	SLOPE_UNITS_DISPLAYED_IN: 'slopeUnitsDisplayedIn',
 	RESET_COLOURS: 'resetColours',
 	DELETE_ALL: 'deleteAll'
 };
@@ -44,6 +49,11 @@ export const MEASURE_ACTIONS_MENU = [
 		name: MEASURE_ACTIONS_ITEMS.UNITS_DISPLAYED_IN,
 		label: 'Units displayed in',
 		Icon: UnitsIcon
+	},
+	{
+		name: MEASURE_ACTIONS_ITEMS.SLOPE_UNITS_DISPLAYED_IN,
+		label: 'Slope units displayed in',
+		Icon: SlopeUnitsIcon
 	},
 	{
 		name: MEASURE_ACTIONS_ITEMS.RESET_COLOURS,

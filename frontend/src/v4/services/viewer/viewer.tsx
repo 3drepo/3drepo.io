@@ -53,6 +53,7 @@ export class ViewerService {
 	public viewer: HTMLElement;
 	public currentNavMode = null;
 	public units = 'm';
+	public measuringSlopeUnits = 'Degrees';
 	public convertToM = 1.0;
 	public isInitialised = false;
 	public measuringUnits = '';
@@ -77,6 +78,7 @@ export class ViewerService {
 
 	public measureMode: string;
 	public measureModeLabels: boolean;
+	public isSnappingCursorEnabled: boolean;
 
 	public constructor({ name = 'viewer', ...config}: IViewerConstructor) {
 		this.name = name;
@@ -395,6 +397,12 @@ export class ViewerService {
 		UnityUtil.setMeasureToolUnits(units);
 	}
 
+	public async setMeasuringSlopeUnits(slopeUnits) {
+		this.measuringSlopeUnits = slopeUnits;
+		await this.isViewerReady();
+		UnityUtil.setMeasureToolSlopeUnits(slopeUnits);
+	}
+
 	public getMeasuringUnits() {
 		return this.measuringUnits;
 	}
@@ -414,14 +422,34 @@ export class ViewerService {
 		UnityUtil.setMeasureToolMeasurementName(uuid, name);
 	}
 
+	public async enableSnappingCursor() {
+		await this.isViewerReady();
+		UnityUtil.enableCursor();
+		this.isSnappingCursorEnabled = true;
+	}
+
+	public async disableSnappingCursor() {
+		await this.isViewerReady();
+		UnityUtil.disableCursor();
+		this.isSnappingCursorEnabled = false;
+	}
+
 	public async enableEdgeSnapping() {
 		await this.isViewerReady();
 		UnityUtil.enableSnapping();
+		// Slope has its own icon that can overlap with snapping icon.
+		// When both are active, edge snapping icon should not be visible
+		if (this.measureMode === VIEWER_MEASURING_MODE.SLOPE) {
+			this.disableSnappingCursor();
+		} else {
+			this.enableSnappingCursor();
+		}
 	}
 
 	public async disableEdgeSnapping() {
 		await this.isViewerReady();
 		UnityUtil.disableSnapping();
+		this.disableSnappingCursor();
 	}
 
 	public async enableMeasureXYZDisplay() {
