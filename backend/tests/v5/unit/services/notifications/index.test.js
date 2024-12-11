@@ -45,7 +45,7 @@ const generateTicket = (owner, assignees) => ({
 	},
 });
 
-const testOnNewTickets = () => {
+const testOnNewTickets = (multipleTickets = false) => {
 	describe('On new tickets', () => {
 		const teamspace = generateRandomString();
 		const project = generateRandomString();
@@ -53,8 +53,21 @@ const testOnNewTickets = () => {
 		const job = generateRandomString();
 		const owner = generateRandomString();
 
-		test(`should not generate notifications if there are no assignees on ${events.NEW_TICKET}`, async () => {
-			await eventCallbacks[events.NEW_TICKET]({ teamspace, project, model, ticket: {} });
+		const eventToTrigger = multipleTickets ? events.TICKETS_IMPORTED : events.NEW_TICKET;
+
+		const createEventData = (ticketData) => {
+			const res = { teamspace, project, model };
+			if (multipleTickets) {
+				res.tickets = ticketData;
+			} else {
+				res.ticket = ticketData;
+			}
+
+			return res;
+		};
+
+		test(`should not generate notifications if there are no assignees on ${eventToTrigger}`, async () => {
+			await eventCallbacks[eventToTrigger](createEventData({}));
 
 			expect(JobsModels.getJobsToUsers).not.toHaveBeenCalled();
 			expect(SettingsProcessor.getUsersWithPermissions).not.toHaveBeenCalled();
@@ -62,14 +75,11 @@ const testOnNewTickets = () => {
 			expect(NotificationModels.addTicketAssignedNotifications).not.toHaveBeenCalled();
 		});
 
-		test(`should not generate notifications if the ticket is assigned to a job with no accessible users on ${events.NEW_TICKET}`, async () => {
+		test(`should not generate notifications if the ticket is assigned to a job with no accessible users on ${eventToTrigger}`, async () => {
 			JobsModels.getJobsToUsers.mockResolvedValue({ [job]: [generateRandomString()] });
 			SettingsProcessor.getUsersWithPermissions.mockResolvedValue(times(10, () => generateRandomString()));
 
-			await eventCallbacks[events.NEW_TICKET]({ teamspace,
-				project,
-				model,
-				ticket: generateTicket(owner, [job]) });
+			await eventCallbacks[eventToTrigger](createEventData(generateTicket(owner, [job])));
 
 			expect(JobsModels.getJobsToUsers).toHaveBeenCalledTimes(1);
 			expect(JobsModels.getJobsToUsers).toHaveBeenCalledWith(teamspace);
@@ -80,7 +90,7 @@ const testOnNewTickets = () => {
 			expect(NotificationModels.addTicketAssignedNotifications).not.toHaveBeenCalled();
 		});
 
-		test(`should generate notifications for users assigned to the ticket and has permissions on ${events.NEW_TICKET}`, async () => {
+		test(`should generate notifications for users assigned to the ticket and has permissions on ${eventToTrigger}`, async () => {
 			const assignedUsers = times(5, () => generateRandomString());
 			const [assignedUser1, assignedUser2, noPermUser1, ...users] = assignedUsers;
 			JobsModels.getJobsToUsers.mockResolvedValue({ [job]: [noPermUser1, ...users] });
@@ -88,7 +98,7 @@ const testOnNewTickets = () => {
 
 			const ticket = generateTicket(owner, [job, assignedUser1, assignedUser2]);
 
-			await eventCallbacks[events.NEW_TICKET]({ teamspace, project, model, ticket });
+			await eventCallbacks[eventToTrigger](createEventData(ticket));
 
 			expect(JobsModels.getJobsToUsers).toHaveBeenCalledTimes(1);
 			expect(JobsModels.getJobsToUsers).toHaveBeenCalledWith(teamspace);
