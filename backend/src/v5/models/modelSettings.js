@@ -110,7 +110,7 @@ Models.getModelType = async (ts, model) => {
 };
 
 Models.getUsersWithPermissions = async (ts, model, excludeViewers) => {
-	const { permissions } = await findOneModel(ts, { _id: model }, { permissions: 1 });
+	const { permissions = [] } = await findOneModel(ts, { _id: model }, { permissions: 1 });
 	return permissions.flatMap((p) => (!excludeViewers || p.permission !== 'viewer' ? p.user : []));
 };
 
