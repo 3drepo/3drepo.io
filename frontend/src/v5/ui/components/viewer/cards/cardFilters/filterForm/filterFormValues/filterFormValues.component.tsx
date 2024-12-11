@@ -18,21 +18,23 @@
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { getOperatorMaxFieldsAllowed } from '../filterForm.helpers';
 import { isTextType } from '../../cardFilters.helpers';
-import { FormTextField } from '@controls/inputs/formInputs.component';
+import { FormNumberField, FormTextField } from '@controls/inputs/formInputs.component';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
 import { useEffect } from 'react';
 import { range } from 'lodash';
+import { CardFilterType } from '../../cardFilters.types';
 
-export const FilterFormValues = ({ type }) => {
+const name = 'values';
+export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 	const { control, watch, formState: { errors } } = useFormContext();
 	const { fields, append, remove } = useFieldArray({
 		control,
-		name: 'values',
+		name,
 	});
 	const error = errors.values || {};
 	const operator = watch('operator');
 	const maxFields = getOperatorMaxFieldsAllowed(operator);
-
+	
 	useEffect(() => {
 		if (maxFields === 0) {
 			remove();
@@ -43,8 +45,10 @@ export const FilterFormValues = ({ type }) => {
 
 	if (maxFields === 0) return null;
 
-	if (isTextType(type)) {
-		if (maxFields === 1) return <FormTextField name="values.0.value" formError={!!error?.[0]} />;
+	if (type === 'number' || isTextType(type)) {
+		const InputField = type === 'number' ? FormNumberField : FormTextField;
+
+		if (maxFields === 1) return <InputField name={`${name}.0.value`} formError={!!error?.[0]} />;
 		return (
 			<>
 				{fields.map((field, i) => (
@@ -55,7 +59,7 @@ export const FilterFormValues = ({ type }) => {
 						onAdd={() => append({ value: '' })}
 						disableAdd={i !== (fields.length - 1)}
 					>
-						<FormTextField name={`values.${i}.value`} formError={!!error?.[i]} />
+						<InputField name={`${name}.${i}.value`} formError={!!error?.[i]} />
 					</ArrayFieldContainer>
 				))}
 			</>
