@@ -192,7 +192,8 @@ const avatarStyles = css`
 	}
 `;
 
-export const Container = styled(NavbarButton)`
+export const Container = styled(NavbarButton).attrs({ as: 'div' })`
+	box-sizing: border-box;
 	* {
 		text-transform: none;
 	}

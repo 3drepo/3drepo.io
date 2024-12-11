@@ -19,7 +19,7 @@ import { DrawingItem } from './drawingItem/drawingItem.component';
 import { CentredContainer } from '@controls/centredContainer';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
-import { VirtualisedList, TableRow } from './drawingsList.styles';
+import { VirtualisedList, TableRow, FillerRow } from './drawingsList.styles';
 import { CardContent, CardList } from '@components/viewer/cards/card.styles';
 import { forwardRef, useContext, useEffect, useRef } from 'react';
 import { ViewerCanvasesContext } from '../../viewerCanvases.context';
@@ -38,7 +38,7 @@ import { useSearchParam } from '../../../useSearchParam';
 const Table = forwardRef(({ children, ...props }, ref: any) => {
 	const queries = DrawingsCardHooksSelectors.selectQueries();
 	return (
-		<table ref={ref} {...props}>
+		<div ref={ref} {...props}>
 			<CardContent>
 				<AutocompleteSearchInput
 					value={queries}
@@ -46,7 +46,7 @@ const Table = forwardRef(({ children, ...props }, ref: any) => {
 				/>
 				{children}
 			</CardContent>
-		</table>
+		</div>
 	);
 });
 
@@ -105,6 +105,7 @@ export const DrawingsList = () => {
 				Table,
 				TableBody: CardList,
 				TableRow,
+				FillerRow,
 				EmptyPlaceholder,
 			}}
 			itemContent={(index, drawing: IDrawing) => (

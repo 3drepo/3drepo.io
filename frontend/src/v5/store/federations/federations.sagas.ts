@@ -23,9 +23,11 @@ import {
 	DeleteFederationAction,
 	FederationsActions,
 	FederationsTypes,
+	FetchFederationJobsAction,
 	FetchFederationsAction,
 	FetchFederationSettingsAction,
 	FetchFederationStatsAction,
+	FetchFederationUsersAction,
 	FetchFederationViewsAction,
 	RemoveFavouriteAction,
 	UpdateFederationContainersAction,
@@ -182,6 +184,44 @@ export function* updateFederationSettings({
 	}
 }
 
+export function* fetchFederationUsers({
+	teamspace,
+	projectId,
+	federationId,
+}: FetchFederationUsersAction) {
+	try {
+		const { users: nonViewerUsers } = yield API.Federations.fetchFederationUsers(teamspace, projectId, federationId, true);
+		const { users: allUsers } = yield API.Federations.fetchFederationUsers(teamspace, projectId, federationId);
+		const users = allUsers.map((user) => ({ user, isViewer: !nonViewerUsers.includes(user) }));
+
+		yield put(FederationsActions.updateFederationSuccess(projectId, federationId, { users }));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'federations.fetchUsers.error', defaultMessage: 'trying to fetch federation users' }),
+			error,
+		}));
+	}
+}
+
+export function* fetchFederationJobs({
+	teamspace,
+	projectId,
+	federationId,
+}: FetchFederationJobsAction) {
+	try {
+		const { jobs: nonViewerJobs } = yield API.Federations.fetchFederationJobs(teamspace, projectId, federationId, true);
+		const { jobs: allJobs } = yield API.Federations.fetchFederationJobs(teamspace, projectId, federationId);
+		const jobs = allJobs.map((job) => ({ _id: job, isViewer: !nonViewerJobs.includes(job) }));
+
+		yield put(FederationsActions.updateFederationSuccess(projectId, federationId, { jobs }));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'federations.fetchJobs.error', defaultMessage: 'trying to fetch federation Jobs' }),
+			error,
+		}));
+	}
+}
+
 export function* deleteFederation({ teamspace, projectId, federationId, onSuccess, onError }: DeleteFederationAction) {
 	try {
 		yield API.Federations.deleteFederation(teamspace, projectId, federationId);
@@ -220,6 +260,8 @@ export default function* FederationsSagas() {
 	yield takeEvery(FederationsTypes.FETCH_FEDERATION_STATS, fetchFederationStats);
 	yield takeEvery(FederationsTypes.FETCH_FEDERATION_VIEWS, fetchFederationViews);
 	yield takeEvery(FederationsTypes.FETCH_FEDERATION_SETTINGS, fetchFederationSettings);
+	yield takeEvery(FederationsTypes.FETCH_FEDERATION_USERS, fetchFederationUsers);
+	yield takeEvery(FederationsTypes.FETCH_FEDERATION_JOBS, fetchFederationJobs);
 	yield takeLatest(FederationsTypes.UPDATE_FEDERATION_SETTINGS, updateFederationSettings);
 	yield takeLatest(FederationsTypes.DELETE_FEDERATION, deleteFederation);
 	yield takeLatest(FederationsTypes.UPDATE_FEDERATION_CONTAINERS, updateFederationContainers);
