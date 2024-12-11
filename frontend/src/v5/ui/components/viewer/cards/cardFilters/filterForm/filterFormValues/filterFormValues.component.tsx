@@ -47,7 +47,7 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 		if (!fields.length && maxFields > 0) {
 			append(emptyValue);
 		}
-	}, [fields.length]);
+	}, [fields.length, operator]);
 	
 	useEffect(() => {
 		if (maxFields === 0) {
