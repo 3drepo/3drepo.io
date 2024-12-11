@@ -16,7 +16,7 @@
  */
 
 import * as Yup from 'yup';
-import { nullableNumber, numberRange, trimmedString } from '../shared/validators';
+import { requiredNumber, numberRange, trimmedString } from '../shared/validators';
 import { MAX_LONG_TEXT_LENGTH, MAX_TEXT_LENGTH } from '@/v5/store/tickets/tickets.validators';
 import { getOperatorMaxFieldsAllowed } from '@components/viewer/cards/cardFilters/filterForm/filterForm.helpers';
 import { isRangeOperator, isTextType } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
@@ -24,7 +24,7 @@ import { CardFilterOperator, CardFilterType } from '@components/viewer/cards/car
 
 const getValueValidator = (type: CardFilterType) => {
 	if (isTextType(type)) return trimmedString.required().max(type === 'longText' ? MAX_LONG_TEXT_LENGTH : MAX_TEXT_LENGTH);
-	if (type === 'number') return nullableNumber;
+	if (type === 'number') return requiredNumber();
 	return trimmedString;
 };
 
