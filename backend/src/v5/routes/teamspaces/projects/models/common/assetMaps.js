@@ -72,10 +72,210 @@ const establishRoutes = (modelType) => {
 	};
 
 	if (modelType === modelTypes.CONTAINER) {
+		/**
+		 * @openapi
+		 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/assetMaps/revision/{revision}:
+		 *   get:
+		 *     description: Get asset maps for the specified model and revision.
+		 *     tags: [Models]
+		 *     operationId: getAssetMaps
+		 *     parameters:
+		 *       - name: teamspace
+		 *         description: Name of teamspace
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: project
+		 *         description: Project ID
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: container
+		 *         description: Container ID
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: revision
+		 *         description: Revision ID
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *     responses:
+		 *       401:
+		 *         $ref: "#/components/responses/notLoggedIn"
+		 *       404:
+		 *         $ref: "#/components/responses/containerNotFound"
+		 *       200:
+		 *         description: Returns list of supermeshes and their attributes
+		 *         content:
+		 *           application/json
+		 *             schema:
+		 *               type: object
+		 *               properties:
+		 *                 model:
+		 *                   type: string
+		 *                   description: Model ID
+		 *                   example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
+		 *                 supermeshes:
+		 *                   type: array
+		 *                   items:
+		 *                     type: object
+		 *                     properties:
+		 *                       id:
+		 *                         type: string
+		 *                         description: ID of the supermesh
+		 *                         example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
+		 *                       data:
+		 *                         type: object
+		 *                         description: data describing this supermesh
+		 *                         properties:
+		 *                           numberOfIDs:
+		 *                             type: number
+		 *                             description: number of IDs in this mapping
+		 *                             example: 5000
+		 *                           maxGeoCount:
+		 *                             type: number
+		 *                             description: number of maximum geometry
+		 *                             example: 5000
+		 *                           mapping:
+		 *                             type: array
+		 *                             description: Array containing the mapping of geometry to supermesh
+		 *                             items:
+		 *                               type: object
+		 *                               properties:
+		 *                                 name:
+		 *                                   type: string
+		 *                                   description: geometry ID
+		 *                                   example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
+		 *                                 sharedID:
+		 *                                   type: string
+		 *                                   description: shared ID
+		 *                                   example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
+		 *                                 min:
+		 *                                  type: array
+		 *                                  description: The minimum coordinates of the geometry (x,y,z)
+		 *                                  items:
+		 *                                    type: number
+		 *                                    example: 23.45
+		 *                                 max:
+		 *                                  type: array
+		 *                                  description: The maximum coordinates of the geometry (x,y,z)
+		 *                                  items:
+		 *                                    type: number
+		 *                                    example: 23.45
+		 *                                 usage:
+		 *                                   type: string
+		 *                                   description: ID of the supermesh using this geometry object.
+		 *                                   example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
+		 */
 		router.get('/revision/:revision', hasReadAccessToModel[modelType], getAssetMaps(modelType));
 	}
 
 	if (modelType === modelTypes.CONTAINER || modelType === modelTypes.FEDERATION) {
+		/**
+		 * @openapi
+		 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/assetMaps/:
+		 *   get:
+		 *     description: Get asset maps for the specified model and revision.
+		 *     tags: [Models]
+		 *     operationId: getAssetMaps
+		 *     parameters:
+		 *       - name: teamspace
+		 *         description: Name of teamspace
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: project
+		 *         description: Project ID
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: container
+		 *         description: Container ID
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *     responses:
+		 *       401:
+		 *         $ref: "#/components/responses/notLoggedIn"
+		 *       404:
+		 *         $ref: "#/components/responses/containerNotFound"
+		 *       200:
+		 *         description: Returns list of submodels with their supermeshes and attributes
+		 *         content:
+		 *           application/json
+		 *             schema:
+		 *               type: object:
+		 *               properties:
+		 *                 submodels:
+		 *                   type: array
+		 *                   description: Array of submodels in the federation
+		 *                   items:
+		 *                     type: object
+		 *                     properties:
+		 *                       model:
+		 *                         type: string
+		 *                         description: Model ID
+		 *                         example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
+		 *                       supermeshes:
+		 *                         type: array
+		 *                         items:
+		 *                           type: object
+		 *                           properties:
+		 *                             id:
+		 *                               type: string
+		 *                               description: ID of the supermesh
+		 *                               example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
+		 *                             data:
+		 *                               type: object
+		 *                               description: data describing this supermesh
+		 *                               properties:
+		 *                                 numberOfIDs:
+		 *                                   type: number
+		 *                                   description: number of IDs in this mapping
+		 *                                   example: 5000
+		 *                                 maxGeoCount:
+		 *                                   type: number
+		 *                                   description: number of maximum geometry
+		 *                                   example: 5000
+		 *                                 mapping:
+		 *                                   type: array
+		 *                                   description: Array containing the mapping of geometry to supermesh
+		 *                                   items:
+		 *                                     type: object
+		 *                                     properties:
+		 *                                       name:
+		 *                                         type: string
+		 *                                         description: geometry ID
+		 *                                         example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
+		 *                                       sharedID:
+		 *                                         type: string
+		 *                                         description: shared ID
+		 *                                         example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
+		 *                                       min:
+		 *                                        type: array
+		 *                                        description: The minimum coordinates of the geometry (x,y,z)
+		 *                                        items:
+		 *                                          type: number
+		 *                                          example: 23.45
+		 *                                       max:
+		 *                                        type: array
+		 *                                        description: The maximum coordinates of the geometry (x,y,z)
+		 *                                        items:
+		 *                                          type: number
+		 *                                          example: 23.45
+		 *                                       usage:
+		 *                                         type: string
+		 *                                         description: ID of the supermesh using this geometry object.
+		 *                                         example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
+		 */
 		router.get('/revision/master/head', hasReadAccessToModel[modelType], getAssetMaps(modelType));
 	}
 
