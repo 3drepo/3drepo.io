@@ -14,15 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { DropzoneContent, StyledDropZone } from './attachResourcesDialog.styles';
+import { useDropzone } from 'react-dropzone'
+import { DropzoneContent, DropZone } from './attachResourcesDialog.styles';
 
-export const ResourcesDropzone = ({onDrop, errorMessage}) => (
-	<StyledDropZone onDrop={onDrop} disabled={Boolean(errorMessage)}>
-		{(args) => (
-			<DropzoneContent isDragActive={args.isDragActive} error={Boolean(errorMessage)}>
-				{! Boolean(errorMessage) && 'Click or drop to add files.'}
-				{Boolean(errorMessage) && errorMessage}
+export const ResourcesDropzone = ({ onDrop, errorMessage }) => {
+	const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, disabled: !!errorMessage });
+	return (
+		<DropZone {...getRootProps()}>
+			<DropzoneContent isDragActive={isDragActive} error={!!errorMessage}>
+			<input {...getInputProps()} />
+				{errorMessage || 'Click or drop to add files.'}
 			</DropzoneContent>
-		)}
-	</StyledDropZone>
-);
+		</DropZone>
+	);
+}
