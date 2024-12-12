@@ -21,6 +21,7 @@ import { UnityUtil } from '@/globals/unity-util';
 import { isEmpty, isString } from 'lodash';
 import { COLOR } from '@/v5/ui/themes/theme';
 import { hexToOpacity } from '@/v5/helpers/colors.helper';
+import { SLOPE_UNITS } from '@/v4/constants/measure';
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import {
 	VIEWER_EVENTS,
@@ -53,7 +54,7 @@ export class ViewerService {
 	public viewer: HTMLElement;
 	public currentNavMode = null;
 	public units = 'm';
-	public measuringSlopeUnits = 'Degrees';
+	public measuringSlopeUnits = SLOPE_UNITS.DEGREES;
 	public convertToM = 1.0;
 	public isInitialised = false;
 	public measuringUnits = '';
