@@ -52,4 +52,26 @@ Notifications.addTicketAssignedNotifications = async (teamspace, project, model,
 	}
 };
 
+Notifications.updateTicketNotifications = async (teamspace, project, model, notifications) => {
+	const timestamp = new Date();
+	const records = notifications.flatMap(({ toNotify, ticket, author, changes }) => {
+		if (toNotify?.length && ticket) {
+			return toNotify.map((user) => ({
+				_id: generateUUID(),
+				user,
+				type: notificationTypes.TICKET_UPDATED,
+				timestamp,
+				data: {
+					teamspace, project, model, ticket, author, changes,
+				},
+			}));
+		}
+		return [];
+	});
+
+	if (records?.length) {
+		await db.insertMany(INTERNAL_DB, NOTIFICATIONS_COL, records);
+	}
+};
+
 module.exports = Notifications;
