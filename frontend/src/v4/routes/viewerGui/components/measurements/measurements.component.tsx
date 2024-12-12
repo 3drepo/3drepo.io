@@ -20,7 +20,7 @@ import { PureComponent } from 'react';
 import Check from '@mui/icons-material/Check';
 import { isEmpty } from 'lodash';
 
-import { MEASURE_ACTIONS_ITEMS, MEASURE_ACTIONS_MENU, slopeUnitsToSymbol } from '../../../../constants/measure';
+import { MEASURE_ACTIONS_ITEMS, MEASURE_ACTIONS_MENU, SLOPE_UNITS, slopeUnitsToSymbol } from '../../../../constants/measure';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { Viewer } from '../../../../services/viewer/viewer';
@@ -118,7 +118,7 @@ export class Measurements extends PureComponent<IProps, IState> {
 
 	private handleToggleMeasureUnits = () => this.props.setMeasureUnits(this.props.measureUnits === 'm' ? 'mm' : 'm' );
 
-	private handleToggleMeasureSlopeUnits = () => this.props.setMeasureSlopeUnits(this.props.measureSlopeUnits === 'Degrees' ? 'Percentage' : 'Degrees');
+	private handleToggleMeasureSlopeUnits = () => this.props.setMeasureSlopeUnits(this.props.measureSlopeUnits === SLOPE_UNITS.DEGREES ? SLOPE_UNITS.PERCENTAGE : SLOPE_UNITS.DEGREES);
 
 	private handleClearMeasurements = () => this.props.clearMeasurements();
 

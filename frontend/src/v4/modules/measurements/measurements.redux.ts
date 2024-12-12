@@ -16,6 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
+import { SLOPE_UNITS } from '@/v4/constants/measure';
 import { MEASURE_TYPE_STATE_MAP } from './measurements.constants';
 
 export const { Types: MeasurementsTypes, Creators: MeasurementsActions } = createActions({
@@ -63,7 +64,7 @@ export const INITIAL_STATE: IMeasurementState = {
 	isDisabled: false,
 	mode: '',
 	units: 'm',
-	slopeUnits: 'Degrees',
+	slopeUnits: SLOPE_UNITS.DEGREES,
 	areaMeasurements: [],
 	lengthMeasurements: [],
 	pointMeasurements: [],
