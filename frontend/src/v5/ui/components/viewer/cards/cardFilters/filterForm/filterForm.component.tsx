@@ -17,17 +17,21 @@
 
 import { FormattedMessage } from 'react-intl';
 import { CardFilterOperator, CardFilterValue, CardFilterType, BaseFilter, CardFilter } from '../cardFilters.types';
-import { FILTER_OPERATOR_LABEL, getFilterFormTitle } from '../cardFilters.helpers';
+import { getFilterFormTitle } from '../cardFilters.helpers';
 import { Container, ButtonsContainer, Button, TitleContainer } from './filterForm.styles';
-import { MenuItem } from '@mui/material';
 import { FormProvider, useForm } from 'react-hook-form';
-import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
-import _, { isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
-import { getOperatorMaxSupportedValues } from './filterForm.helpers';
+import { FilterFormValues } from './filterFormValues/filterFormValues.component';
+import { useEffect } from 'react';
+import { mapArrayToFormArray, mapFormArrayToArray } from '@/v5/helpers/form.helper';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { FilterSchema } from '@/v5/validation/ticketSchemes/validators';
+import { FilterFormOperators } from './filterFormValues/operators/filterFormOperators.component';
 
-const DEFAULT_VALUES = { values: [], operator: 'eq' };
-type FormType = { values: CardFilterValue[], operator: CardFilterOperator };
+const DEFAULT_OPERATOR = 'eq';
+const DEFAULT_VALUES = [''];
+type FormType = { values: { value: CardFilterValue }[], operator: CardFilterOperator };
 type FilterFormProps = {
 	module: string,
 	property: string,
@@ -37,35 +41,40 @@ type FilterFormProps = {
 	onCancel: () => void,
 };
 export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel }: FilterFormProps) => {
-	const { operator, values = [] } = filter || {};
-	const formData = useForm<FormType>({ defaultValues: _.defaults({ values, operator }, DEFAULT_VALUES) });
+	const defaultValues = {
+		operator: filter?.operator || DEFAULT_OPERATOR,
+		values: mapArrayToFormArray(filter?.values || DEFAULT_VALUES),
+	};
+
+	const formData = useForm<FormType>({
+		defaultValues,
+		mode: 'onChange',
+		resolver: yupResolver(FilterSchema),
+		context: { type },
+	});
+	const { formState: { isValid, dirtyFields }, reset } = formData;
+
+	const isUpdatingFilter = !!filter;
+	const canSubmit = isValid && !isEmpty(dirtyFields);
 
 	const handleSubmit = formData.handleSubmit((body: FormType) => {
-		const newValues = body.values.filter((x) => ![undefined, ''].includes(x as any));
+		const newValues = mapFormArrayToArray(body.values)
+			.filter((x) => ![undefined, ''].includes(x as any));
 		onSubmit({ module, property, type, filter: { operator: body.operator, values: newValues } });
 	});
 
-	const isUpdatingFilter = !!filter;
-	const canSubmit = formData.formState.isValid && !isEmpty(formData.formState.dirtyFields);
-	const formOperator = formData.watch('operator');
-	const valuesInputsCount = Math.min(getOperatorMaxSupportedValues(formOperator), 3);
-	
+	useEffect(() => {
+		if (type) reset();
+	}, [type]);
+
 	return (
 		<FormProvider {...formData}>
 			<Container>
-				{/* The <div> is for a smoother animation when creating the filter */}
 				<TitleContainer>
 					{getFilterFormTitle([module, property])}
 				</TitleContainer>
-				<FormSelect name='operator'>
-					{Object.entries(FILTER_OPERATOR_LABEL).map(([key, label]) => (
-						<MenuItem key={key} value={key}>{label}</MenuItem>
-					))}
-				</FormSelect>
-				type: {type}
-				{Array(valuesInputsCount).fill(0).map((i, index) => (
-					<FormTextField name={`values.${index}`} />
-				))}
+				<FilterFormOperators type={type} />
+				<FilterFormValues type={type} />
 				<ButtonsContainer>
 					<Button onClick={onCancel} color="secondary">
 						{isUpdatingFilter
@@ -74,7 +83,7 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel 
 						}
 					</Button>
 					<ActionMenuItem disabled={!canSubmit}>
-						<Button onClick={handleSubmit} color="primary" variant="contained">
+						<Button onClick={handleSubmit} color="primary" variant="contained" disabled={!canSubmit}>
 							{isUpdatingFilter
 								? <FormattedMessage id="viewer.card.tickets.filters.form.update" defaultMessage="Update" />
 								: <FormattedMessage id="viewer.card.tickets.filters.form.apply" defaultMessage="Apply" />

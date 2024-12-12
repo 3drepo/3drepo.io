@@ -17,7 +17,7 @@
 
 import { CardFilterOperator } from '../cardFilters.types';
 
-export const getOperatorMaxSupportedValues = (operator: CardFilterOperator) => {
+export const getOperatorMaxFieldsAllowed = (operator: CardFilterOperator) => {
 	switch (operator) {
 		case 'ex':
 		case 'nex':

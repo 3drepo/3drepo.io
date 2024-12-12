@@ -28,7 +28,7 @@ import NotExistIcon from '@assets/icons/filters/not_exist.svg';
 import ContainIcon from '@assets/icons/filters/contain.svg';
 import NotContainIcon from '@assets/icons/filters/not_contain.svg';
 import { formatMessage } from '@/v5/services/intl';
-import { CardFilterOperator } from './cardFilters.types';
+import { CardFilterOperator, CardFilterType } from './cardFilters.types';
 import { compact } from 'lodash';
 
 export const FILTER_OPERATOR_ICON: Record<CardFilterOperator, any> = {
@@ -62,3 +62,9 @@ export const FILTER_OPERATOR_LABEL: Record<CardFilterOperator, string> = {
 };
 
 export const getFilterFormTitle = (elements: string[]) => compact(elements).join(' : ');
+
+export const isTextType = (type: CardFilterType) => ['template', 'ticketId', 'ticketTitle', 'text', 'longText'].includes(type);
+export const getValidOperators = (type: CardFilterType): CardFilterOperator[] => {
+	if (isTextType(type)) return ['eq', 'neq', 'ss', 'nss', 'ex', 'nex'];
+	return Object.keys(FILTER_OPERATOR_LABEL) as CardFilterOperator[];
+};
