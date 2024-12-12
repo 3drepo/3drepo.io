@@ -20,8 +20,9 @@ import { trimmedString } from '../shared/validators';
 import { MAX_LONG_TEXT_LENGTH, MAX_TEXT_LENGTH } from '@/v5/store/tickets/tickets.validators';
 import { getOperatorMaxFieldsAllowed } from '@components/viewer/cards/cardFilters/filterForm/filterForm.helpers';
 import { isTextType } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
+import { CardFilterType } from '@components/viewer/cards/cardFilters/cardFilters.types';
 
-const getValueType = (type) => {
+const getValueValidator = (type: CardFilterType) => {
 	if (isTextType(type)) {
 		return trimmedString.required().max(type === 'longText' ? MAX_LONG_TEXT_LENGTH : MAX_TEXT_LENGTH);
 	}
@@ -33,7 +34,7 @@ export const FilterSchema = Yup.object().shape({
 	values: Yup.array()
 		.when(
 			'$type',
-			(type, schema) => schema.of(Yup.object({ value: getValueType(type) })),
+			(filterType, schema) => schema.of(Yup.object({ value: getValueValidator(filterType) })),
 		)
 		.when(
 			'operator',
