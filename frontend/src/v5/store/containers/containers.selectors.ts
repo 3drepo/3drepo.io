@@ -79,7 +79,7 @@ export const selectContainerUsers = createSelector(
 	selectCurrentTeamspaceUsersByIds,
 	(container, users) => {
 		if (isEmpty(users)) return [];
-		return (container?.users || []).map((user) => ({ ...user, ...users[user.user], isNotTeamspaceUser: !users[user.user] }));
+		return (container?.users || []).map((user) => ({ ...user, ...users[user.user], isNotTeamspaceMember: !users[user.user] }));
 	},
 );
 

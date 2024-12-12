@@ -93,7 +93,7 @@ export const selectFederationUsers = createSelector(
 	selectCurrentTeamspaceUsersByIds,
 	(federations, users) => {
 		if (isEmpty(users)) return [];
-		return (federations?.users || []).map((user) => ({ ...user, ...users[user.user], isNotTeamspaceUser: !users[user.user] }));
+		return (federations?.users || []).map((user) => ({ ...user, ...users[user.user], isNotTeamspaceMember: !users[user.user] }));
 	},
 );
 
