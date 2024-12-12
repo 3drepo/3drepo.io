@@ -22,7 +22,7 @@ import RemoveIcon from '@mui/icons-material/Close';
 import { Formik } from 'formik';
 import { cond, matches, stubTrue } from 'lodash';
 
-import { DEGREES_SYMBOL, MAX_SLOPE_DEGREES_DISPLAYABLE_IN_PERCENTAGE, slopeUnitsToSymbol } from '@/v4/constants/measure';
+import { DEGREES_SYMBOL, MAX_SLOPE_IN_PERCENTAGE, SLOPE_UNITS, slopeUnitsToSymbol } from '@/v4/constants/measure';
 import { MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
@@ -67,12 +67,12 @@ const roundNumber = (num: number, numDP: number) => {
 
 const toDeg = (angle) => angle * 180 / Math.PI;
 export const getValue = (measureValue: number, units: string, type: number, modelUnits: string) => {
-	if (type === MEASURE_TYPE.ANGLE || units === 'Degrees') {
+	if (type === MEASURE_TYPE.ANGLE || units === SLOPE_UNITS.DEGREES) {
 		return toDeg(measureValue).toFixed(2);
 	}
 	if (type === MEASURE_TYPE.SLOPE) {
-		const isInf = toDeg(measureValue) >= MAX_SLOPE_DEGREES_DISPLAYABLE_IN_PERCENTAGE;
-		return isInf ? 'Vertical' : Math.trunc(Math.tan(measureValue) * 100);
+		const isVertical = measureValue >= MAX_SLOPE_IN_PERCENTAGE;
+		return isVertical ? 'Vertical' : Math.trunc(Math.tan(measureValue) * 100);
 	}
 	const isAreaMeasurement = type === MEASURE_TYPE.AREA;
 
@@ -133,7 +133,12 @@ export const MeasureItem = ({
 	};
 
 	const isPointTypeMeasure = type === MEASURE_TYPE.POINT;
-	const isAngleTypeMeasure = [MEASURE_TYPE.ANGLE, MEASURE_TYPE.SLOPE].includes(type);
+
+	const isVerticalSlopePercentage = (
+		type === MEASURE_TYPE.SLOPE &&
+		units === SLOPE_UNITS.PERCENTAGE &&
+		value >= MAX_SLOPE_IN_PERCENTAGE
+	);
 
 	return (
 		<Container tall={Number(isPointTypeMeasure)}>
@@ -159,7 +164,7 @@ export const MeasureItem = ({
 				</Tooltip>
 			</Formik>
 			<Actions>
-				{isPointTypeMeasure && (
+				{isPointTypeMeasure ? (
 					<div>
 						<MeasurementPoint>
 							<AxisLabel>x:</AxisLabel>
@@ -174,15 +179,9 @@ export const MeasureItem = ({
 							<AxisValue>{getValue(position[1], units, type, props.modelUnit)} {getUnits(units, type)}</AxisValue>
 						</MeasurementPoint>
 					</div>
-				)}
-				{isAngleTypeMeasure && (
+				) : (
 					<MeasurementValue>
-						{getValue(value, units, type, props.modelUnit)} {getUnits(units, type)}
-					</MeasurementValue>
-				)}
-				{!isPointTypeMeasure && !isAngleTypeMeasure && (
-					<MeasurementValue>
-						{getValue(value, units, type, props.modelUnit)} {getUnits(units, type)}
+						{getValue(value, units, type, props.modelUnit)} {!isVerticalSlopePercentage && getUnits(units, type)}
 					</MeasurementValue>
 				)}
 				<ColorPicker
