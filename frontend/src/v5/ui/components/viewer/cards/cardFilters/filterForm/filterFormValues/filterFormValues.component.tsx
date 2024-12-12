@@ -20,8 +20,8 @@ import { getOperatorMaxFieldsAllowed } from '../filterForm.helpers';
 import { isRangeOperator, isTextType } from '../../cardFilters.helpers';
 import { FormNumberField, FormTextField } from '@controls/inputs/formInputs.component';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
-import { useEffect, useRef } from 'react';
-import { range } from 'lodash';
+import { useEffect } from 'react';
+import { isArray, range } from 'lodash';
 import { CardFilterType } from '../../cardFilters.types';
 import { RangeInput } from './rangeInput/rangeInput.component';
 
@@ -36,11 +36,6 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 	const operator = watch('operator');
 	const maxFields = getOperatorMaxFieldsAllowed(operator);
 	const isRangeOp = isRangeOperator(operator);
-	// Switching from a non-range to a range input type crashes the app
-	// as the range input tries to access either the first or second value
-	// of an array, whereas the non-range input type relies on string, and
-	// so it tries to access [string].0
-	const prevIsRangeOp = useRef(isRangeOp);
 	const emptyValue = { value: isRangeOp ? ['', ''] : '' };
 
 	useEffect(() => {
@@ -57,10 +52,9 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 
 	useEffect(() => {
 		remove();
-		prevIsRangeOp.current = isRangeOp;
 	}, [isRangeOp]);
 
-	if (maxFields === 0 || prevIsRangeOp.current !== isRangeOp) return null;
+	if (maxFields === 0) return null;
 
 	if (type === 'number' || isTextType(type)) {
 		const InputField = type === 'number' ? FormNumberField : FormTextField;
@@ -74,7 +68,14 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 			onAdd: () => append(emptyValue),
 			disableAdd: i !== (fields.length - 1),
 		});
-		if (isRangeOp) return (
+		
+		// Switching from single-value to range inputs crashes the app as
+		// the latter try to access either the value at the first or second index
+		// of what they expect to be array but is a values instead, and the
+		// useEffect that adapts fields' values to be arrays is async
+		// and it is only called later
+		// @ts-ignore
+		if (isRangeOp && isArray(fields[0]?.value)) return (
 			<>
 				{fields.map((field, i) => (
 					<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
