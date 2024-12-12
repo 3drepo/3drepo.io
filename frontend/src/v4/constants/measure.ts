@@ -22,6 +22,7 @@ import UnitsIcon from '@assets/icons/outlined/measure-outlined.svg';
 import SlopeUnitsIcon from '@assets/icons/measurements/slope_units.svg';
 import ShowXYZIcon from '@mui/icons-material/Toc';
 
+export const MAX_SLOPE_DEGREES_DISPLAYABLE_IN_PERCENTAGE = 89.99;
 export const DEGREES_SYMBOL = '°';
 export const slopeUnitsToSymbol = (slopeUnits) => slopeUnits === 'Degrees' ? DEGREES_SYMBOL : '%';
 

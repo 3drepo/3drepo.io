@@ -22,7 +22,7 @@ import RemoveIcon from '@mui/icons-material/Close';
 import { Formik } from 'formik';
 import { cond, matches, stubTrue } from 'lodash';
 
-import { DEGREES_SYMBOL, slopeUnitsToSymbol } from '@/v4/constants/measure';
+import { DEGREES_SYMBOL, MAX_SLOPE_DEGREES_DISPLAYABLE_IN_PERCENTAGE, slopeUnitsToSymbol } from '@/v4/constants/measure';
 import { MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
@@ -65,9 +65,14 @@ const roundNumber = (num: number, numDP: number) => {
 	return Math.round((num + Number.EPSILON) * factor) / factor;
 };
 
+const toDeg = (angle) => angle * 180 / Math.PI;
 export const getValue = (measureValue: number, units: string, type: number, modelUnits: string) => {
-	if ([MEASURE_TYPE.ANGLE, MEASURE_TYPE.SLOPE].includes(type)) {
-		return (measureValue * 180 / Math.PI).toFixed(2);
+	if (type === MEASURE_TYPE.ANGLE || units === 'Degrees') {
+		return toDeg(measureValue).toFixed(2);
+	}
+	if (type === MEASURE_TYPE.SLOPE) {
+		const isInf = toDeg(measureValue) >= MAX_SLOPE_DEGREES_DISPLAYABLE_IN_PERCENTAGE;
+		return isInf ? 'Vertical' : Math.trunc(Math.tan(measureValue) * 100);
 	}
 	const isAreaMeasurement = type === MEASURE_TYPE.AREA;
 
@@ -81,14 +86,8 @@ export const getValue = (measureValue: number, units: string, type: number, mode
 			[stubTrue, () => Math.round(measureValue)]
 	])(modelUnits);
 
-	let valueInUnits;
-	if (MEASURE_TYPE.SLOPE === type) {
-		valueInUnits = roundedValueMM;
-	} else {
-		valueInUnits = (units === 'mm')
-			? Math.round(roundedValueMM)
-			: roundNumber(roundedValueMM / Math.pow(1000, factor), 2);
-	}
+	const valueInUnits = (units === 'mm') ? Math.round(roundedValueMM)
+		: roundNumber(roundedValueMM / Math.pow(1000, factor), 2);
 
 	return Number.parseFloat(valueInUnits.toPrecision(7)).toString(); // Unity only gives 7sf
 };
