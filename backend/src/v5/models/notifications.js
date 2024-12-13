@@ -30,7 +30,7 @@ Notifications.removeAllUserNotifications = async (user) => {
 	await db.deleteMany(INTERNAL_DB, NOTIFICATIONS_COL, { user });
 };
 
-Notifications.addTicketAssignedNotifications = async (teamspace, project, model, notifications) => {
+Notifications.insertTicketAssignedNotifications = async (teamspace, project, model, notifications) => {
 	const timestamp = new Date();
 	const records = notifications.flatMap(({ toNotify, ticket, assignedBy }) => {
 		if (toNotify?.length && ticket && assignedBy) {
@@ -52,7 +52,7 @@ Notifications.addTicketAssignedNotifications = async (teamspace, project, model,
 	}
 };
 
-Notifications.updateTicketNotifications = async (teamspace, project, model, notifications) => {
+Notifications.insertTicketUpdatedNotifications = async (teamspace, project, model, notifications) => {
 	const timestamp = new Date();
 	const records = notifications.flatMap(({ toNotify, ticket, author, changes }) => {
 		if (toNotify?.length && ticket) {

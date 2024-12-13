@@ -15,79 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addTicketAssignedNotifications, updateTicketNotifications } = require('../../models/notifications');
-const { basePropertyLabels } = require('../../schemas/tickets/templates.constants');
-const { events } = require('../eventsManager/eventsManager.constants');
-const { getCommonElements } = require('../../utils/helper/arrays');
-const { getJobsToUsers } = require('../../models/jobs');
-const { getTicketById } = require('../../models/tickets');
-const { getUsersWithPermissions } = require('../../processors/teamspaces/projects/models/commons/settings');
-const { subscribe } = require('../eventsManager/eventsManager');
+const TicketNotifications = require('./tickets');
 
 const NotificationService = {};
 
-const getUserList = (jobToUsers, toNotify) => toNotify.flatMap(
-	(entry) => (jobToUsers[entry] ? jobToUsers[entry] : entry));
-
-const generateTicketNotifications = async (teamspace, project, model, actionedBy, info, notifyFn) => {
-	const [jobToUsers, usersWithAccess] = await Promise.all([
-		getJobsToUsers(teamspace),
-		getUsersWithPermissions(teamspace, project, model, false),
-	]);
-
-	const notifications = info.flatMap(({ toNotify, ...data }) => {
-		const users = getCommonElements(getUserList(jobToUsers, toNotify), usersWithAccess)
-			.filter((user) => user !== actionedBy);
-		console.log(data);
-		return users.length ? { ...data, users } : [];
-	});
-
-	if (notifications.length) {
-		await notifyFn(teamspace, project, model, notifications);
-	}
-};
-
-const onNewTickets = async (teamspace, project, model, tickets) => {
-	let assignedBy;
-	const info = tickets.flatMap((ticket) => {
-		const assignees = ticket?.properties?.[basePropertyLabels.ASSIGNEES];
-		if (assignees?.length > 0) {
-			assignedBy = ticket?.properties?.[basePropertyLabels.OWNER];
-			return { toNotify: assignees, ticket: ticket._id, assignedBy };
-		}
-		return [];
-	});
-
-	if (info.length > 0) {
-		await generateTicketNotifications(teamspace, project, model, assignedBy,
-			info, addTicketAssignedNotifications);
-	}
-};
-
-const onTicketUpdated = async (teamspace, project, model, ticket, author, changes) => {
-	const { properties } = await getTicketById(teamspace, project, model, ticket, {
-		[`properties.${basePropertyLabels.ASSIGNEES}`]: 1,
-		[`properties.${basePropertyLabels.OWNER}`]: 1,
-	});
-
-	const toNotify = [properties[basePropertyLabels.OWNER],
-		...(properties[basePropertyLabels.ASSIGNEES] || [])];
-
-	const notification = { toNotify, ticket, changes, author };
-
-	await generateTicketNotifications(teamspace, project, model, author, [notification], updateTicketNotifications);
-
-	// FIXME: assignments and closures
-};
-
 NotificationService.init = () => {
-	subscribe(events.NEW_TICKET, ({ teamspace, project, model, ticket }) => onNewTickets(
-		teamspace, project, model, [ticket]));
-	subscribe(events.TICKETS_IMPORTED, ({ teamspace, project, model, tickets }) => onNewTickets(
-		teamspace, project, model, tickets));
-	subscribe(events.UPDATE_TICKET, ({ teamspace, project, model, ticket, author,
-		changes }) => onTicketUpdated(teamspace, project, model, ticket, author, changes));
-	// subscribe(events.NEW_COMMENT, ticketCommentAdded);
+	TicketNotifications.subscribe();
 };
 
 module.exports = NotificationService;
