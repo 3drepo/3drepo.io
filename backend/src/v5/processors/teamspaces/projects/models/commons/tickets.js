@@ -27,15 +27,14 @@ const {
 } = require('../../../../../schemas/tickets/templates.constants');
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { deleteIfUndefined, isEmpty } = require('../../../../../utils/helper/objects');
+const { generateFullSchema, getClosedStatuses } = require('../../../../../schemas/tickets/templates');
 const { getFileWithMetaAsStream, removeFiles, storeFiles } = require('../../../../../services/filesManager');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
 const { isBuffer, isUUID } = require('../../../../../utils/helper/typeCheck');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
-const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
 const { getAllTemplates } = require('../../../../../models/tickets.templates');
 const { getArrayDifference } = require('../../../../../utils/helper/arrays');
-const { getClosedStatuses } = require('../../../../../schemas/tickets/templates.constants');
 const { importComments } = require('./tickets.comments');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
 

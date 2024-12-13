@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { init } = require('./journaling/index');
 const { initialise: initInvites } = require('../models/invitations');
+const { init: initJournalingService } = require('./journaling');
 const { initialise: initLoginRecs } = require('../models/loginRecords');
+const { init: initNotificationService } = require('./notifications');
 const { initialise: initNotifs } = require('../models/notifications');
 
 const Initialiser = {};
@@ -26,7 +27,8 @@ Initialiser.initialiseSystem = () => Promise.all([
 	initLoginRecs(),
 	initInvites(),
 	initNotifs(),
-	init(),
+	initJournalingService(),
+	initNotificationService(),
 ]);
 
 module.exports = Initialiser;
