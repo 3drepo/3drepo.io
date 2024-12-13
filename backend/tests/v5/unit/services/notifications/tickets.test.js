@@ -20,7 +20,7 @@ const { src } = require('../../../helper/path');
 const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../../helper/services');
 
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
-const { basePropertyLabels } = require(`${src}/schemas/tickets/templates.constants`);
+const { basePropertyLabels, statuses } = require(`${src}/schemas/tickets/templates.constants`);
 
 jest.mock('../../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManagerMock = require(`${src}/services/eventsManager/eventsManager`);
@@ -32,6 +32,9 @@ const TicketsModel = require(`${src}/models/tickets`);
 
 jest.mock('../../../../../src/v5/models/jobs');
 const JobsModels = require(`${src}/models/jobs`);
+
+jest.mock('../../../../../src/v5/models/tickets.templates');
+const TicketTemplatesModel = require(`${src}/models/tickets.templates`);
 
 jest.mock('../../../../../src/v5/processors/teamspaces/projects/models/commons/settings');
 const SettingsProcessor = require(`${src}/processors/teamspaces/projects/models/commons/settings`);
@@ -171,7 +174,8 @@ const testOnUpdatedTicket = () => {
 			teamspace, project, model, ticket, author: actionedBy, changes,
 		});
 
-		const generateTicketInfo = (owner, assignees) => ({
+		const generateTicketInfo = (owner, assignees, template = generateRandomString()) => ({
+			type: template,
 			properties: {
 				[basePropertyLabels.ASSIGNEES]: assignees,
 				[basePropertyLabels.OWNER]: owner,
@@ -364,9 +368,96 @@ const testOnUpdatedTicket = () => {
 		});
 
 		describe('When status has changed', () => {
-			// to a closed status should generate closed notifications
-			// to a non close status should generate update notifications
+			const template = generateRandomString();
+			const assignees = times(3, () => generateRandomString());
 
+			test('Should generate ticket closed notifications if the ticket is resolved', async () => {
+				TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(author, assignees, template));
+				JobsModels.getJobsToUsers.mockResolvedValueOnce({});
+				SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([author, ...assignees]);
+
+				TicketTemplatesModel.getTemplateById.mockResolvedValueOnce({});
+
+				const newStatus = statuses.CLOSED;
+
+				const changes = {
+					properties: {
+						[basePropertyLabels.STATUS]: {
+							from: null,
+							to: newStatus,
+						},
+						...generateRandomObject(),
+					},
+				};
+				const eventData = createEventData(author, changes);
+				await eventCallbacks[events.UPDATE_TICKET](eventData);
+
+				expect(JobsModels.getJobsToUsers).toHaveBeenCalledTimes(1);
+				expect(JobsModels.getJobsToUsers).toHaveBeenCalledWith(teamspace);
+
+				expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledTimes(1);
+				expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledWith(teamspace,
+					project, model, false);
+
+				const expectedClosedNotifications = [{
+					ticket,
+					status: newStatus,
+					author,
+					users: assignees,
+				}];
+
+				expect(NotificationModels.insertTicketClosedNotifications).toHaveBeenCalledTimes(1);
+				expect(NotificationModels.insertTicketClosedNotifications).toHaveBeenCalledWith(
+					teamspace, project, model, expectedClosedNotifications);
+
+				expect(TicketTemplatesModel.getTemplateById).toHaveBeenCalledTimes(1);
+				expect(TicketTemplatesModel.getTemplateById).toHaveBeenCalledWith(teamspace, template, { 'config.status': 1 });
+			});
+
+			test('Should generate update notifications if the ticket is not resolved', async () => {
+				TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(author, assignees, template));
+				JobsModels.getJobsToUsers.mockResolvedValueOnce({});
+				SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([author, ...assignees]);
+
+				TicketTemplatesModel.getTemplateById.mockResolvedValueOnce({});
+
+				const newStatus = statuses.OPEN;
+
+				const changes = {
+					properties: {
+						[basePropertyLabels.STATUS]: {
+							from: statuses.CLOSED,
+							to: newStatus,
+						},
+						...generateRandomObject(),
+					},
+				};
+				const eventData = createEventData(author, changes);
+				await eventCallbacks[events.UPDATE_TICKET](eventData);
+
+				expect(JobsModels.getJobsToUsers).toHaveBeenCalledTimes(1);
+				expect(JobsModels.getJobsToUsers).toHaveBeenCalledWith(teamspace);
+
+				expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledTimes(1);
+				expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledWith(teamspace,
+					project, model, false);
+
+				const expectedNotifications = [{
+					ticket,
+					changes,
+					author,
+					users: assignees,
+				}];
+
+				expect(NotificationModels.insertTicketClosedNotifications).not.toHaveBeenCalled();
+
+				expect(NotificationModels.insertTicketUpdatedNotifications).toHaveBeenCalledTimes(1);
+				expect(NotificationModels.insertTicketUpdatedNotifications).toHaveBeenCalledWith(
+					teamspace, project, model, expectedNotifications);
+
+				expect(TicketTemplatesModel.getTemplateById).toHaveBeenCalledTimes(1);
+				expect(TicketTemplatesModel.getTemplateById).toHaveBeenCalledWith(teamspace, template, { 'config.status': 1 });
+			});
 		});
 	});
 };

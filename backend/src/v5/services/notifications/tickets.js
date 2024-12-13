@@ -16,10 +16,16 @@
  */
 
 const { getArrayDifference, getCommonElements } = require('../../utils/helper/arrays');
-const { insertTicketAssignedNotifications, insertTicketUpdatedNotifications } = require('../../models/notifications');
+const {
+	insertTicketAssignedNotifications,
+	insertTicketClosedNotifications,
+	insertTicketUpdatedNotifications,
+} = require('../../models/notifications');
 const { basePropertyLabels } = require('../../schemas/tickets/templates.constants');
 const { events } = require('../eventsManager/eventsManager.constants');
+const { getClosedStatuses } = require('../../schemas/tickets/templates');
 const { getJobsToUsers } = require('../../models/jobs');
+const { getTemplateById } = require('../../models/tickets.templates');
 const { getTicketById } = require('../../models/tickets');
 const { getUsersWithPermissions } = require('../../processors/teamspaces/projects/models/commons/settings');
 const { subscribe } = require('../eventsManager/eventsManager');
@@ -71,9 +77,10 @@ const onNewTickets = async (teamspace, project, model, tickets) => {
 };
 
 const onTicketUpdated = async (teamspace, project, model, ticket, author, changes) => {
-	const { properties } = await getTicketById(teamspace, project, model, ticket, {
+	const { properties, type: templateId } = await getTicketById(teamspace, project, model, ticket, {
 		[`properties.${basePropertyLabels.ASSIGNEES}`]: 1,
 		[`properties.${basePropertyLabels.OWNER}`]: 1,
+		type: 1,
 	});
 
 	const notifications = [];
@@ -103,15 +110,26 @@ const onTicketUpdated = async (teamspace, project, model, ticket, author, change
 		notifyUpdate.push(...properties[basePropertyLabels.ASSIGNEES]);
 	}
 
-	if (changes?.properties?.[basePropertyLabels.STATUS]) {
-		// If the ticket is closed, we want to send ticket
-		// closed notification instead of update
+	let ticketClosed = false;
 
+	if (changes?.properties?.[basePropertyLabels.STATUS]) {
+		const { to } = changes?.properties?.[basePropertyLabels.STATUS];
+		if (to) {
+			const template = await getTemplateById(teamspace, templateId, { 'config.status': 1 });
+			const closedStatuses = getClosedStatuses(template);
+			ticketClosed = closedStatuses.includes(to);
+
+			if (ticketClosed) {
+				const info = [{ toNotify: notifyUpdate, ticket, author, status: to }];
+				notifications.push({ info, notifyFn: insertTicketClosedNotifications });
+			}
+		}
 	}
 
-	const info = [{ toNotify: notifyUpdate, ticket, changes, author }];
-
-	notifications.push({ info, notifyFn: insertTicketUpdatedNotifications });
+	if (!ticketClosed) {
+		const info = [{ toNotify: notifyUpdate, ticket, changes, author }];
+		notifications.push({ info, notifyFn: insertTicketUpdatedNotifications });
+	}
 
 	await generateTicketNotifications(teamspace, project, model, author, notifications);
 

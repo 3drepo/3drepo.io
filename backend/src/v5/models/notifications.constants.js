@@ -20,7 +20,7 @@ const { createConstantsObject } = require('../utils/helper/objects');
 const NotificationConstants = {};
 
 NotificationConstants.notificationTypes = createConstantsObject([
-	'TICKET_ASSIGNED', 'TICKET_UPDATED',
+	'TICKET_ASSIGNED', 'TICKET_UPDATED', 'TICKET_CLOSED',
 ]);
 
 module.exports = NotificationConstants;

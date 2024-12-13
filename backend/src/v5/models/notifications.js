@@ -74,4 +74,26 @@ Notifications.insertTicketUpdatedNotifications = async (teamspace, project, mode
 	}
 };
 
+Notifications.insertTicketClosedNotifications = async (teamspace, project, model, notifications) => {
+	const timestamp = new Date();
+	const records = notifications.flatMap(({ toNotify, ticket, author, status }) => {
+		if (toNotify?.length && ticket) {
+			return toNotify.map((user) => ({
+				_id: generateUUID(),
+				user,
+				type: notificationTypes.TICKET_CLOSED,
+				timestamp,
+				data: {
+					teamspace, project, model, ticket, author, status,
+				},
+			}));
+		}
+		return [];
+	});
+
+	if (records?.length) {
+		await db.insertMany(INTERNAL_DB, NOTIFICATIONS_COL, records);
+	}
+};
+
 module.exports = Notifications;
