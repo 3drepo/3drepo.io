@@ -190,7 +190,7 @@ const generateTestEnvData = () => {
 	const R8 = ServiceHelper.generateRevisionEntry(true, true, modelTypes.CONTAINER, dates[7]);
 
 	// Create Revisions for C6
-	const R9 = ServiceHelper.generateRevisionEntry(false, false, modelTypes.CONTAINER, dates[8]);
+	const R9 = ServiceHelper.generateRevisionEntry(true, true, modelTypes.CONTAINER, dates[8]);
 
 	// Create Container objects
 	const C1 = createContainerObject(
