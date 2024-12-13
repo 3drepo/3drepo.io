@@ -185,7 +185,7 @@ const testOnUpdatedTicket = () => {
 		test(`should not generate notifications if there are no assignees and the owner changed the ticket on ${events.UPDATE_TICKET}`, async () => {
 			const owner = generateRandomString();
 
-			TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(owner, [owner]));
+			TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(owner, []));
 			JobsModels.getJobsToUsers.mockResolvedValueOnce({ [job]: [generateRandomString()] });
 			SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([owner]);
 
@@ -329,6 +329,48 @@ const testOnUpdatedTicket = () => {
 				expect(NotificationModels.insertTicketAssignedNotifications).not.toHaveBeenCalled();
 			});
 
+			test('should not generate assigned notifications if new assignees is a subset of the old', async () => {
+				const [removed1, removed2, ...oldAssignees] = times(
+					10, () => generateRandomString());
+
+				TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(author, oldAssignees));
+				JobsModels.getJobsToUsers.mockResolvedValueOnce({});
+				SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([
+					author, removed1, removed2, ...oldAssignees]);
+
+				const changes = {
+					properties: {
+						[basePropertyLabels.ASSIGNEES]: {
+							from: [removed1, removed2, ...oldAssignees],
+							to: oldAssignees,
+						},
+						...generateRandomObject(),
+					},
+				};
+				const eventData = createEventData(author, changes);
+				await eventCallbacks[events.UPDATE_TICKET](eventData);
+
+				expect(JobsModels.getJobsToUsers).toHaveBeenCalledTimes(1);
+				expect(JobsModels.getJobsToUsers).toHaveBeenCalledWith(teamspace);
+
+				expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledTimes(1);
+				expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledWith(teamspace,
+					project, model, false);
+
+				const expectedUpdateNotifications = [{
+					ticket,
+					changes: eventData.changes,
+					author,
+					users: [removed1, removed2, ...oldAssignees],
+				}];
+
+				expect(NotificationModels.insertTicketUpdatedNotifications).toHaveBeenCalledTimes(1);
+				expect(NotificationModels.insertTicketUpdatedNotifications).toHaveBeenCalledWith(
+					teamspace, project, model, expectedUpdateNotifications);
+
+				expect(NotificationModels.insertTicketAssignedNotifications).not.toHaveBeenCalled();
+			});
+
 			test('should function if the ticket did not have assignees', async () => {
 				const newAssignees = times(3, () => generateRandomString());
 
@@ -457,6 +499,48 @@ const testOnUpdatedTicket = () => {
 
 				expect(TicketTemplatesModel.getTemplateById).toHaveBeenCalledTimes(1);
 				expect(TicketTemplatesModel.getTemplateById).toHaveBeenCalledWith(teamspace, template, { 'config.status': 1 });
+			});
+
+			test('Should generate update notifications if the ticket status is removed', async () => {
+				TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(author, assignees, template));
+				JobsModels.getJobsToUsers.mockResolvedValueOnce({});
+				SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([author, ...assignees]);
+
+				TicketTemplatesModel.getTemplateById.mockResolvedValueOnce({});
+
+				const changes = {
+					properties: {
+						[basePropertyLabels.STATUS]: {
+							from: statuses.CLOSED,
+							to: null,
+						},
+						...generateRandomObject(),
+					},
+				};
+				const eventData = createEventData(author, changes);
+				await eventCallbacks[events.UPDATE_TICKET](eventData);
+
+				expect(JobsModels.getJobsToUsers).toHaveBeenCalledTimes(1);
+				expect(JobsModels.getJobsToUsers).toHaveBeenCalledWith(teamspace);
+
+				expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledTimes(1);
+				expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledWith(teamspace,
+					project, model, false);
+
+				const expectedNotifications = [{
+					ticket,
+					changes,
+					author,
+					users: assignees,
+				}];
+
+				expect(NotificationModels.insertTicketClosedNotifications).not.toHaveBeenCalled();
+
+				expect(NotificationModels.insertTicketUpdatedNotifications).toHaveBeenCalledTimes(1);
+				expect(NotificationModels.insertTicketUpdatedNotifications).toHaveBeenCalledWith(
+					teamspace, project, model, expectedNotifications);
+
+				expect(TicketTemplatesModel.getTemplateById).not.toHaveBeenCalled();
 			});
 		});
 	});
