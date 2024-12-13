@@ -161,6 +161,14 @@ const testOnNewTickets = (multipleTickets = false) => {
 	});
 };
 
+const generateTicketInfo = (owner, assignees, template = generateRandomString()) => ({
+	type: template,
+	properties: {
+		[basePropertyLabels.ASSIGNEES]: assignees,
+		[basePropertyLabels.OWNER]: owner,
+	},
+});
+
 const testOnUpdatedTicket = () => {
 	describe('On ticket updated', () => {
 		const teamspace = generateRandomString();
@@ -172,14 +180,6 @@ const testOnUpdatedTicket = () => {
 
 		const createEventData = (actionedBy = author, changes = generateRandomObject()) => ({
 			teamspace, project, model, ticket, author: actionedBy, changes,
-		});
-
-		const generateTicketInfo = (owner, assignees, template = generateRandomString()) => ({
-			type: template,
-			properties: {
-				[basePropertyLabels.ASSIGNEES]: assignees,
-				[basePropertyLabels.OWNER]: owner,
-			},
 		});
 
 		test(`should not generate notifications if there are no assignees and the owner changed the ticket on ${events.UPDATE_TICKET}`, async () => {
@@ -462,6 +462,63 @@ const testOnUpdatedTicket = () => {
 	});
 };
 
+const testOnNewTicketComment = () => {
+	describe('On new ticket comment', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		const job = generateRandomString();
+		const ticket = generateRandomString();
+		const author = generateRandomString();
+
+		const createEventData = (actionedBy, comment) => ({
+			teamspace, project, model, ticket, author: actionedBy, data: comment,
+		});
+
+		test('Should create a ticket update notification for everyone but the author', async () => {
+			const template = generateRandomString();
+			const [assigneeNoPerm, commenter, ...assignees] = times(5, () => generateRandomString());
+			const [jobMemNoPerm, ...jobMembers] = times(3, () => generateRandomString());
+
+			TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(author,
+				[job, assigneeNoPerm, commenter, ...assignees], template));
+			JobsModels.getJobsToUsers.mockResolvedValueOnce({ [job]: [jobMemNoPerm, ...jobMembers] });
+			SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([
+				author, commenter, ...jobMembers, ...assignees]);
+
+			TicketTemplatesModel.getTemplateById.mockResolvedValueOnce({});
+
+			const comment = {
+				_id: generateRandomString(),
+				message: generateRandomString(),
+				ticket,
+				author: commenter,
+			};
+
+			const eventData = createEventData(author, comment);
+			await eventCallbacks[events.NEW_COMMENT](eventData);
+
+			expect(JobsModels.getJobsToUsers).toHaveBeenCalledTimes(1);
+			expect(JobsModels.getJobsToUsers).toHaveBeenCalledWith(teamspace);
+
+			expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledTimes(1);
+			expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledWith(teamspace,
+				project, model, false);
+
+			const expectedNotifications = [{
+				ticket,
+				comment: { _id: comment._id, message: comment.message },
+				author: commenter,
+				users: [author, ...jobMembers, ...assignees],
+			}];
+
+			expect(NotificationModels.insertTicketUpdatedNotifications).toHaveBeenCalledTimes(1);
+			expect(NotificationModels.insertTicketUpdatedNotifications).toHaveBeenCalledWith(
+				teamspace, project, model, expectedNotifications);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		EventsManagerMock.subscribe.mockImplementation((event, callback) => {
@@ -473,4 +530,5 @@ describe(determineTestGroup(__filename), () => {
 	testOnNewTickets();
 	testOnNewTickets(true);
 	testOnUpdatedTicket();
+	testOnNewTicketComment();
 });

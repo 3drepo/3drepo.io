@@ -76,12 +76,14 @@ const onNewTickets = async (teamspace, project, model, tickets) => {
 	}
 };
 
+const getTicketInfo = (teamspace, project, model, ticket) => getTicketById(teamspace, project, model, ticket, {
+	[`properties.${basePropertyLabels.ASSIGNEES}`]: 1,
+	[`properties.${basePropertyLabels.OWNER}`]: 1,
+	type: 1,
+});
+
 const onTicketUpdated = async (teamspace, project, model, ticket, author, changes) => {
-	const { properties, type: templateId } = await getTicketById(teamspace, project, model, ticket, {
-		[`properties.${basePropertyLabels.ASSIGNEES}`]: 1,
-		[`properties.${basePropertyLabels.OWNER}`]: 1,
-		type: 1,
-	});
+	const { properties, type: templateId } = await getTicketInfo(teamspace, project, model, ticket);
 
 	const notifications = [];
 
@@ -132,8 +134,17 @@ const onTicketUpdated = async (teamspace, project, model, ticket, author, change
 	}
 
 	await generateTicketNotifications(teamspace, project, model, author, notifications);
+};
 
-	// closures
+const onNewTicketComment = async (teamspace, project, model, { author, ticket, _id, message }) => {
+	const { properties } = await getTicketInfo(teamspace, project, model, ticket);
+
+	const toNotify = [properties[basePropertyLabels.OWNER], ...properties[basePropertyLabels.ASSIGNEES]];
+
+	const info = [{ toNotify, ticket, comment: { _id, message }, author }];
+	const notifications = [{ notifyFn: insertTicketUpdatedNotifications, info }];
+
+	await generateTicketNotifications(teamspace, project, model, author, notifications);
 };
 
 TicketNotifications.subscribe = () => {
@@ -143,7 +154,8 @@ TicketNotifications.subscribe = () => {
 		teamspace, project, model, tickets));
 	subscribe(events.UPDATE_TICKET, ({ teamspace, project, model, ticket, author,
 		changes }) => onTicketUpdated(teamspace, project, model, ticket, author, changes));
-	// subscribe(events.NEW_COMMENT, ticketCommentAdded);
+	subscribe(events.NEW_COMMENT, ({ teamspace, project, model, data }) => onNewTicketComment(
+		teamspace, project, model, data));
 };
 
 module.exports = TicketNotifications;
