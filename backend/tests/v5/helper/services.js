@@ -338,6 +338,12 @@ db.createScene = (teamspace, project, modelId, rev, nodes, meshMap) => Promise.a
 	FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, `${UUIDToString(rev._id)}/idToMeshes.json`, JSON.stringify(meshMap)),
 
 ]);
+
+db.createStashNodes = async (teamspace, modelId, nodes) => {
+	const collection = `${modelId}.stash.3drepo`;
+	await DbHandler.insertMany(teamspace, collection, nodes);
+};
+
 ServiceHelper.createQueryString = (options) => {
 	const keys = Object.keys(deleteIfUndefined(options, true));
 

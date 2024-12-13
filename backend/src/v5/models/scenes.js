@@ -114,12 +114,12 @@ Scene.getContainerMeshInfo = async (teamspace, model, branch, rev) => {
 			primitive,
 		}) => ({
 			_id: uuidHelper.UUIDToString(_id),
-			nVertices: vertices_count || 0,
+			max: bounding_box[1],
+			min: bounding_box[0],
 			nFaces: faces_count || 0,
 			nUVChannels: uv_channels_count || 0,
+			nVertices: vertices_count || 0,
 			primitive: primitive || 3,
-			min: bounding_box[0],
-			max: bounding_box[1],
 		})),
 	};
 };
