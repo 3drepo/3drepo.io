@@ -344,6 +344,18 @@ db.createStashNodes = async (teamspace, modelId, nodes) => {
 	await DbHandler.insertMany(teamspace, collection, nodes);
 };
 
+db.createRepoBundle = async (teamspace, modelId, bundleId, data) => {
+	const bundleFileName = `${bundleId}`;
+	const collection = `${modelId}.stash.repobundles.ref`;
+	await FilesManager.storeFile(teamspace, collection, bundleFileName, data);
+};
+
+db.createUnityBundle = async (teamspace, modelId, bundleId, data) => {
+	const bundleFileName = `${bundleId}.unity3d`;
+	const collection = `${modelId}.stash.unity3d.ref`;
+	await FilesManager.storeFile(teamspace, collection, bundleFileName, data);
+};
+
 ServiceHelper.createQueryString = (options) => {
 	const keys = Object.keys(deleteIfUndefined(options, true));
 
