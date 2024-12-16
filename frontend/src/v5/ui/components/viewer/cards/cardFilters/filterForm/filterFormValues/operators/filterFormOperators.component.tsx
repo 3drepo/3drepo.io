@@ -47,7 +47,7 @@ export const FilterFormOperators = ({ type }: FilterFormOperatorsProps) => {
 			renderValue={renderValue}
 		>
 			{operators.map((operator) => (
-				<MenuItem value={operator}>
+				<MenuItem value={operator} key={operator}>
 					<MenuItemContent operator={operator} type={type} />
 				</MenuItem>
 			))}
