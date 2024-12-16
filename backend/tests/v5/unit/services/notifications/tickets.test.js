@@ -87,7 +87,7 @@ const testOnNewTickets = (multipleTickets = false) => {
 			const ticketData = multipleTickets ? times(nTickets, () => generateTicket(owner, [owner]))
 				: generateTicket(owner, [owner]);
 
-			JobsModels.getJobsToUsers.mockResolvedValueOnce({ [job]: [generateRandomString()] });
+			JobsModels.getJobsToUsers.mockResolvedValueOnce([{ _id: job, users: [generateRandomString()] }]);
 			SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([job, owner]);
 			await eventCallbacks[eventToTrigger](createEventData(ticketData));
 
@@ -104,7 +104,7 @@ const testOnNewTickets = (multipleTickets = false) => {
 			const ticketData = multipleTickets ? times(nTickets, () => generateTicket(owner, [job]))
 				: generateTicket(owner, [job]);
 
-			JobsModels.getJobsToUsers.mockResolvedValueOnce({ [job]: [generateRandomString()] });
+			JobsModels.getJobsToUsers.mockResolvedValueOnce([{ _id: job, users: [generateRandomString()] }]);
 			SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce(times(10, () => generateRandomString()));
 
 			await eventCallbacks[eventToTrigger](createEventData(ticketData));
@@ -118,8 +118,8 @@ const testOnNewTickets = (multipleTickets = false) => {
 			expect(NotificationModels.insertTicketAssignedNotifications).not.toHaveBeenCalled();
 		});
 
-		test(`should generate notifications for users assigned to the ticket and has permissions on ${eventToTrigger}`, async () => {
-			const jobs = {};
+		test(`!should generate notifications for users assigned to the ticket and has permissions on ${eventToTrigger}`, async () => {
+			const jobs = [];
 			const usersWithPermissions = [];
 			const expectedNotifications = [];
 
@@ -127,7 +127,7 @@ const testOnNewTickets = (multipleTickets = false) => {
 				const assignedUsers = times(5, () => generateRandomString());
 				const [assignedUser1, assignedUser2, noPermUser1, ...users] = assignedUsers;
 				const assignedJob = generateRandomString();
-				jobs[assignedJob] = [noPermUser1, ...users];
+				jobs.push({ _id: assignedJob, users: [noPermUser1, ...users] });
 				const ticketOwner = generateRandomString();
 				usersWithPermissions.push(assignedUser1, ...users);
 
@@ -186,7 +186,7 @@ const testOnUpdatedTicket = () => {
 			const owner = generateRandomString();
 
 			TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(owner, []));
-			JobsModels.getJobsToUsers.mockResolvedValueOnce({ [job]: [generateRandomString()] });
+			JobsModels.getJobsToUsers.mockResolvedValueOnce([{ _id: job, users: [generateRandomString()] }]);
 			SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([owner]);
 
 			await eventCallbacks[events.UPDATE_TICKET](createEventData(owner));
@@ -207,7 +207,7 @@ const testOnUpdatedTicket = () => {
 
 			TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(owner,
 				[assigned1, assignedNoPerm, job]));
-			JobsModels.getJobsToUsers.mockResolvedValueOnce({ [job]: [assignedJobNoPerm, ...jobMembers] });
+			JobsModels.getJobsToUsers.mockResolvedValueOnce([{ _id: job, users: [assignedJobNoPerm, ...jobMembers] }]);
 			SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([owner, assigned1, ...jobMembers]);
 
 			const eventData = createEventData();
@@ -242,7 +242,7 @@ const testOnUpdatedTicket = () => {
 
 				TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(author,
 					[...oldAssignees, ...newAssignees]));
-				JobsModels.getJobsToUsers.mockResolvedValueOnce({});
+				JobsModels.getJobsToUsers.mockResolvedValueOnce([]);
 				SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([author, ...oldAssignees,
 					...newAssignees, removed1, removed2]);
 
@@ -293,7 +293,7 @@ const testOnUpdatedTicket = () => {
 
 				TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(author,
 					undefined));
-				JobsModels.getJobsToUsers.mockResolvedValueOnce({});
+				JobsModels.getJobsToUsers.mockResolvedValueOnce([]);
 				SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([author, ...oldAssignees]);
 
 				const changes = {
@@ -334,7 +334,7 @@ const testOnUpdatedTicket = () => {
 					10, () => generateRandomString());
 
 				TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(author, oldAssignees));
-				JobsModels.getJobsToUsers.mockResolvedValueOnce({});
+				JobsModels.getJobsToUsers.mockResolvedValueOnce([]);
 				SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([
 					author, removed1, removed2, ...oldAssignees]);
 
@@ -375,7 +375,7 @@ const testOnUpdatedTicket = () => {
 				const newAssignees = times(3, () => generateRandomString());
 
 				TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(author, ...newAssignees));
-				JobsModels.getJobsToUsers.mockResolvedValueOnce({});
+				JobsModels.getJobsToUsers.mockResolvedValueOnce([]);
 				SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([author, ...newAssignees]);
 
 				const changes = {
@@ -415,7 +415,7 @@ const testOnUpdatedTicket = () => {
 
 			test('Should generate ticket closed notifications if the ticket is resolved', async () => {
 				TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(author, assignees, template));
-				JobsModels.getJobsToUsers.mockResolvedValueOnce({});
+				JobsModels.getJobsToUsers.mockResolvedValueOnce([]);
 				SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([author, ...assignees]);
 
 				TicketTemplatesModel.getTemplateById.mockResolvedValueOnce({});
@@ -458,7 +458,7 @@ const testOnUpdatedTicket = () => {
 
 			test('Should generate update notifications if the ticket is not resolved', async () => {
 				TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(author, assignees, template));
-				JobsModels.getJobsToUsers.mockResolvedValueOnce({});
+				JobsModels.getJobsToUsers.mockResolvedValueOnce([]);
 				SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([author, ...assignees]);
 
 				TicketTemplatesModel.getTemplateById.mockResolvedValueOnce({});
@@ -503,7 +503,7 @@ const testOnUpdatedTicket = () => {
 
 			test('Should generate update notifications if the ticket status is removed', async () => {
 				TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(author, assignees, template));
-				JobsModels.getJobsToUsers.mockResolvedValueOnce({});
+				JobsModels.getJobsToUsers.mockResolvedValueOnce([]);
 				SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([author, ...assignees]);
 
 				TicketTemplatesModel.getTemplateById.mockResolvedValueOnce({});
@@ -566,7 +566,7 @@ const testOnNewTicketComment = () => {
 
 			TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(author,
 				[job, assigneeNoPerm, commenter, ...assignees], template));
-			JobsModels.getJobsToUsers.mockResolvedValueOnce({ [job]: [jobMemNoPerm, ...jobMembers] });
+			JobsModels.getJobsToUsers.mockResolvedValueOnce([{ _id: job, users: [jobMemNoPerm, ...jobMembers] }]);
 			SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([
 				author, commenter, ...jobMembers, ...assignees]);
 

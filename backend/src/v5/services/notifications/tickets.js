@@ -144,7 +144,11 @@ const onTicketUpdated = async (teamspace, project, model, { _id: ticket }, autho
 const onNewTicketComment = async (teamspace, project, model, { author, ticket, _id, message }) => {
 	const { properties } = await getTicketInfo(teamspace, project, model, ticket);
 
-	const toNotify = [properties[basePropertyLabels.OWNER], ...properties[basePropertyLabels.ASSIGNEES]];
+	const toNotify = [properties[basePropertyLabels.OWNER]];
+
+	if (properties[basePropertyLabels.ASSIGNEES]?.length) {
+		toNotify.push(...properties[basePropertyLabels.ASSIGNEES]);
+	}
 
 	const info = [{ toNotify, ticket, comment: { _id, message }, author }];
 	const notifications = [{ notifyFn: insertTicketUpdatedNotifications, info }];
