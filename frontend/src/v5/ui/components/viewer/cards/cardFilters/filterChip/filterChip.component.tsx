@@ -17,7 +17,7 @@
 
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { ChipContainer, DeleteButton, TextWrapper, OperatorIconContainer, DisplayValue, Property } from './filterChip.styles';
-import { FILTER_OPERATOR_ICON, FILTER_OPERATOR_LABEL, isRangeOperator } from '../cardFilters.helpers';
+import { FILTER_OPERATOR_ICON, getFilterOperatorLabels, isRangeOperator } from '../cardFilters.helpers';
 import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { CardFilterType, BaseFilter, CardFilterOperator, CardFilterValue } from '../cardFilters.types';
@@ -47,6 +47,7 @@ export const FilterChip = ({ property, onDelete, selected, type, filter }: Filte
 	const OperatorIcon = FILTER_OPERATOR_ICON[operator];
 	const hasMultipleValues = values.length > 1;
 	const displayValue = getDisplayValue(values, operator, type);
+	const labels = getFilterOperatorLabels(type);
 
 	const handleDelete = (e) => {
 		e.preventDefault();
@@ -56,7 +57,7 @@ export const FilterChip = ({ property, onDelete, selected, type, filter }: Filte
 
 	return (
 		<ChipContainer selected={selected}>
-			<Tooltip title={`${property} ${FILTER_OPERATOR_LABEL[operator]} ${displayValue}`}>
+			<Tooltip title={`${property} ${labels[operator]} ${displayValue}`}>
 				<TextWrapper>
 					<Property>{property}</Property>
 					<OperatorIconContainer>

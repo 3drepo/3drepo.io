@@ -16,14 +16,14 @@
  */
 
 import { FormSelect } from '@controls/inputs/formInputs.component';
-import { FILTER_OPERATOR_ICON, FILTER_OPERATOR_LABEL, getValidOperators } from '../../../cardFilters.helpers';
+import { FILTER_OPERATOR_ICON, getFilterOperatorLabels, getValidOperators } from '../../../cardFilters.helpers';
 import { MenuItem } from '@mui/material';
-import { CardFilterOperator } from '../../../cardFilters.types';
+import { CardFilterOperator, CardFilterType } from '../../../cardFilters.types';
 import { FilterIconContainer } from './filterFormOperators.styles';
 
-const MenuItemContent = ({ operator }) => {
+const MenuItemContent = ({ operator, type }) => {
 	const Icon = FILTER_OPERATOR_ICON[operator];
-	const label = FILTER_OPERATOR_LABEL[operator];
+	const label = getFilterOperatorLabels(type)[operator];
 
 	return (
 		<>
@@ -35,16 +35,20 @@ const MenuItemContent = ({ operator }) => {
 	);
 };
 
-export const FilterFormOperators = ({ type }) => {
+type FilterFormOperatorsProps = { type: CardFilterType };
+export const FilterFormOperators = ({ type }: FilterFormOperatorsProps) => {
 	const operators = getValidOperators(type);
+
+	const renderValue = (op: CardFilterOperator) => getFilterOperatorLabels(type)[op];
+
 	return (
 		<FormSelect
 			name='operator'
-			renderValue={(op: CardFilterOperator) => FILTER_OPERATOR_LABEL[op]}
+			renderValue={renderValue}
 		>
 			{operators.map((operator) => (
 				<MenuItem value={operator}>
-					<MenuItemContent operator={operator} />
+					<MenuItemContent operator={operator} type={type} />
 				</MenuItem>
 			))}
 		</FormSelect>
