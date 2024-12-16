@@ -27,6 +27,8 @@ const bodyParser = require("body-parser");
 const bodyParserErrorHandler = require("express-body-parser-error-handler");
 const utils = require("../utils");
 const keyAuthentication =  require("../middlewares/keyAuthentication");
+const { respond } = require(`${v5Path}/utils/responder`);
+const { templates } = require(`${v5Path}/utils/responseCodes`);
 const { initialiseSystem } = require(`${v5Path}/services/initialiser`);
 
 const APIService = {};
@@ -90,6 +92,10 @@ const addV4Routes = (app) => {
 	// presentation handler
 	app.use("/:account/:model", require("../routes/presentation"));
 
+	// If the route is not matched by any of the endpoints
+	app.use((req, res) => {
+		respond(req, res, templates.pageNotFound);
+	});
 };
 
 APIService.createAppAsync = async (config, v5Init = true) => {

@@ -71,7 +71,7 @@ export const CalibrationHeader = () => {
 				<Stepper activeStep={step} alternativeLabel connector={<Connector />} >
 					{STEPS.map((label) => (
 						<Step key={label}>
-							<StepLabel StepIconComponent={({ icon }) => icon}>{label}</StepLabel>
+							<StepLabel StepIconComponent={({ icon }) => icon as any}>{label}</StepLabel>
 						</Step>
 					))}
 				</Stepper>

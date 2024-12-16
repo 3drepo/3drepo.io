@@ -180,7 +180,7 @@
 			} else {
 				getTeamspaceSettings(req.params.account)
 					.then(teamspace => {
-						return AccountPermissions.updateOrCreate(teamspace, req.body.user, req.body.permissions);
+						return AccountPermissions.updateOrCreate(teamspace, req.body.user, req.body.permissions, req.session.user.username);
 					})
 					.then(permission => {
 						responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
@@ -202,7 +202,7 @@
 			} else {
 				getTeamspaceSettings(req.params.account)
 					.then(teamspace => {
-						return AccountPermissions.update(teamspace, req.params.user, req.body.permissions);
+						return AccountPermissions.update(teamspace, req.params.user, req.body.permissions, req.session.user.username);
 					})
 					.then(permission => {
 						responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);

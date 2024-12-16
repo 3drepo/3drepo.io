@@ -30,6 +30,7 @@ import { Tooltip } from '@mui/material';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { Row, Cell, CellChipText, CellOwner, OverflowContainer, SmallFont, CellDate } from './ticketsTableRow.styles';
 import { getChipPropsFromConfig } from '@controls/chip/statusChip/statusChip.helpers';
+import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 
 type TicketsTableRowProps = {
 	ticket: ITicket,
@@ -77,54 +78,56 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelId, selec
 	};
 
 	return (
-		<Row key={id} onClickCapture={handleClick} $selected={selected}>
-			<Cell width={80}>
-				<Highlight search={query}>{`${template.code}:${number}`}</Highlight>
-			</Cell>
-			<Cell>
-				<Tooltip title={title}>
-					<OverflowContainer>
-						<Highlight search={query}>
-							{title}
-						</Highlight>
-					</OverflowContainer>
-				</Tooltip>
-			</Cell>
-			<Cell width={145} hidden={!showModelName}>
-				<Tooltip title={modelName}>
-					<OverflowContainer>
-						<Highlight search={query}>
-							{modelName}
-						</Highlight>
-					</OverflowContainer>
-				</Tooltip>
-			</Cell>
-			<Cell width={127}>
-				<SmallFont>
-					{formatDateTime(createdAt)}
-				</SmallFont>
-			</Cell>
-			<Cell width={96} hidden={!hasProperties}>
-				{!!assignees?.length && (<AssigneesSelect value={assignees} multiple disabled />)}
-			</Cell>
-			<CellOwner width={52}>
-				<UserPopoverCircle user={ownerAsUser} />
-			</CellOwner>
-			<CellDate width={147} hidden={!hasProperties}>
-				{!!dueDate && (<DueDate value={dueDate} disabled />)}
-			</CellDate>
-			<CellChipText width={90} hidden={!hasProperties}>
-				<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />
-			</CellChipText>
-			<CellChipText width={150}>
-				<Chip {...getChipPropsFromConfig(statusConfig, status)} />
-			</CellChipText>
-			<Cell width={137} hidden={!hasSafetibase}>
-				<Chip {...RISK_LEVELS_MAP[levelOfRisk]} variant="filled" />
-			</Cell>
-			<Cell width={134} hidden={!hasSafetibase}>
-				<Chip {...TREATMENT_LEVELS_MAP[treatmentStatus]} variant="filled" />
-			</Cell>
-		</Row>
+		<TicketContextComponent containerOrFederation={modelId}>
+			<Row key={id} onClickCapture={handleClick} $selected={selected}>
+				<Cell width={80}>
+					<Highlight search={query}>{`${template.code}:${number}`}</Highlight>
+				</Cell>
+				<Cell>
+					<Tooltip title={title}>
+						<OverflowContainer>
+							<Highlight search={query}>
+								{title}
+							</Highlight>
+						</OverflowContainer>
+					</Tooltip>
+				</Cell>
+				<Cell width={145} hidden={!showModelName}>
+					<Tooltip title={modelName}>
+						<OverflowContainer>
+							<Highlight search={query}>
+								{modelName}
+							</Highlight>
+						</OverflowContainer>
+					</Tooltip>
+				</Cell>
+				<Cell width={127}>
+					<SmallFont>
+						{formatDateTime(createdAt)}
+					</SmallFont>
+				</Cell>
+				<Cell width={96} hidden={!hasProperties}>
+					{!!assignees?.length && (<AssigneesSelect value={assignees} multiple disabled />)}
+				</Cell>
+				<CellOwner width={52}>
+					<UserPopoverCircle user={ownerAsUser} />
+				</CellOwner>
+				<CellDate width={147} hidden={!hasProperties}>
+					{!!dueDate && (<DueDate value={dueDate} disabled />)}
+				</CellDate>
+				<CellChipText width={90} hidden={!hasProperties}>
+					<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />
+				</CellChipText>
+				<CellChipText width={150}>
+					<Chip {...getChipPropsFromConfig(statusConfig, status)} />
+				</CellChipText>
+				<Cell width={137} hidden={!hasSafetibase}>
+					<Chip {...RISK_LEVELS_MAP[levelOfRisk]} variant="filled" />
+				</Cell>
+				<Cell width={134} hidden={!hasSafetibase}>
+					<Chip {...TREATMENT_LEVELS_MAP[treatmentStatus]} variant="filled" />
+				</Cell>
+			</Row>
+		</TicketContextComponent>
 	);
 };

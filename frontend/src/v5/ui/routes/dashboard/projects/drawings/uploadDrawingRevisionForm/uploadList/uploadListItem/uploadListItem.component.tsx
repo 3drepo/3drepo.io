@@ -23,7 +23,7 @@ import { DashboardListItemRow as UploadListItemRow } from '@components/dashboard
 import { UploadListItemDestination } from './components/uploadListItemDestination/uploadListItemDestination.component';
 import { UploadListItemRevisionCode } from './components/uploadListItemRevisionCode/uploadListItemRevisionCode.component';
 import { UploadListItemButton } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItem.styles';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { useEffect } from 'react';
 import { UploadListItemFileIcon } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemTitle } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemTitle/uploadListItemTitle.component';
@@ -34,6 +34,11 @@ import { DrawingRevisionsActionsDispatchers, DrawingsActionsDispatchers } from '
 import { UploadListItemStatusCode } from './components/uploadListItemStatusCode/uploadListItemStatusCode.component';
 import { UploadStatus } from '@/v5/store/containers/containers.types';
 import { DEFAULT_SETTINGS_CALIBRATION } from '../../../../calibration/calibration.helpers';
+import { get } from 'lodash';
+import { isUniqueRevisionStatusError } from '@/v5/validation/drawingSchemes/drawingSchemes';
+import { getState } from '@/v5/helpers/redux.helpers';
+import { selectRevisionsPending } from '@/v5/store/drawings/revisions/drawingRevisions.selectors';
+import { selectAreSettingsPending } from '@/v5/store/drawings/drawings.selectors';
 
 const UNEXPETED_STATUS_ERROR = undefined;
 const STATUS_TEXT_BY_UPLOAD = {
@@ -79,14 +84,16 @@ export const UploadListItem = ({
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const projectId = ProjectsHooksSelectors.selectCurrentProject();
 	const uploadErrorMessage: string = DrawingRevisionsHooksSelectors.selectUploadError(uploadId);
-	const { watch, trigger, setValue } = useFormContext();
-	const drawingId = watch(`${revisionPrefix}.drawingId`);
-	const statusCode = watch(`${revisionPrefix}.statusCode`);
-	const revCode = watch(`${revisionPrefix}.revCode`);
+	const { trigger, setValue, formState: { errors } } = useFormContext();
+	const drawingId = useWatch({ name: `${revisionPrefix}.drawingId` });
+	const statusCode = useWatch({ name: `${revisionPrefix}.statusCode` });
+	const revCode = useWatch({ name: `${revisionPrefix}.revCode` });
 	const selectedDrawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
 	const selectedDrawingRevisions = DrawingRevisionsHooksSelectors.selectRevisions(selectedDrawing?._id);
 	const progress = DrawingRevisionsHooksSelectors.selectUploadProgress(uploadId);
 	const uploadStatus = getUploadStatus(progress, uploadErrorMessage);
+	const fileError = !!get(errors, `${revisionPrefix}.file`)?.message;
+	const disabled = fileError || isUploading;
 
 	const sanitiseDrawing = (drawing: IDrawing) => ({
 		drawingNumber: drawing?.number || '',
@@ -95,17 +102,36 @@ export const UploadListItem = ({
 		calibration: drawing?.calibration || DEFAULT_SETTINGS_CALIBRATION,
 	});
 
-	useEffect(() => {
-		if (revCode) {
-			trigger(`${revisionPrefix}.revCode`);
-		}
-	}, [drawingId, statusCode, selectedDrawingRevisions.length]);
+	const revCodeError = get(errors, `${revisionPrefix}.revCode`)?.message;
+	const statusCodeError = get(errors, `${revisionPrefix}.statusCode`)?.message;
 
 	useEffect(() => {
-		if (statusCode) {
+		// Dont trigger the error if it was already triggered
+		const errorWasAlreadyTriggered = revCodeError === statusCodeError;
+
+		if (errorWasAlreadyTriggered) {
+			return;
+		}
+
+		// Only trigger the revCode if its clearing the error or if the the unique error was thrown
+		if (isUniqueRevisionStatusError(statusCodeError) || !statusCodeError ) {
+			trigger(`${revisionPrefix}.revCode`);
+		}
+	}, [drawingId, statusCodeError]);
+
+	useEffect(() => {
+		// Dont trigger the error if it was already triggered
+		const errorWasAlreadyTriggered = revCodeError === statusCodeError;
+
+		if (errorWasAlreadyTriggered) {
+			return;
+		}
+
+		// Only trigger the statusCode if its clearing the error or if the the unique error was thrown
+		if (isUniqueRevisionStatusError(revCodeError) || !revCodeError ) {
 			trigger(`${revisionPrefix}.statusCode`);
 		}
-	}, [drawingId, revCode, selectedDrawingRevisions.length]);
+	}, [drawingId, revCodeError]);
 
 	useEffect(() => {
 		setValue(revisionPrefix, sanitiseDrawing(selectedDrawing));
@@ -113,10 +139,25 @@ export const UploadListItem = ({
 
 	useEffect(() => {
 		if (selectedDrawing?._id) {
-			DrawingRevisionsActionsDispatchers.fetch(teamspace, projectId, selectedDrawing._id);
-			DrawingsActionsDispatchers.fetchDrawingSettings(teamspace, projectId, selectedDrawing._id);
+			if (selectRevisionsPending(getState(), selectedDrawing._id)) {
+				DrawingRevisionsActionsDispatchers.fetch(teamspace, projectId, selectedDrawing._id);
+			}
+
+			if (selectAreSettingsPending(getState(), selectedDrawing._id)) {
+				DrawingsActionsDispatchers.fetchDrawingSettings(teamspace, projectId, selectedDrawing._id);
+			}
 		}
 	}, [selectedDrawing?._id]);
+
+	useEffect(() => {
+		if (statusCode && revCode) {
+			trigger(`${revisionPrefix}.statusCode`);
+		}
+	}, [selectedDrawingRevisions]);
+
+	useEffect(() => {
+		trigger(`${revisionPrefix}.file`);
+	}, []);
 
 	return (
 		<UploadListItemRow selected={isSelected}>
@@ -132,21 +173,21 @@ export const UploadListItem = ({
 				Input={UploadListItemDestination}
 				name={`${revisionPrefix}.drawingName`}
 				key={`${uploadId}.dest`}
+				disabled={disabled}
+				onSelectNewDestination={onClickEdit}
 				index={index}
 				revisionPrefix={revisionPrefix}
-				disabled={isUploading}
-				onSelectNewDestination={onClickEdit}
 			/>
 			<InputController
 				Input={UploadListItemStatusCode}
 				key={`${uploadId}.statusCode`}
 				name={`${revisionPrefix}.statusCode`}
-				disabled={isUploading}
+				disabled={disabled}
 			/>
 			<UploadListItemRevisionCode
 				key={`${uploadId}.revCode`}
 				name={`${revisionPrefix}.revCode`}
-				disabled={isUploading}
+				disabled={disabled}
 			/>
 			{isUploading
 				? (
@@ -160,7 +201,7 @@ export const UploadListItem = ({
 					/>
 				) : (
 					<>
-						<UploadListItemButton variant={isSelected ? 'secondary' : 'primary'} onClick={onClickEdit}>
+						<UploadListItemButton variant={isSelected ? 'secondary' : 'primary'} onClick={onClickEdit} disabled={disabled}>
 							<EditIcon />
 						</UploadListItemButton>
 						<UploadListItemButton variant={isSelected ? 'secondary' : 'primary'} onClick={onClickDelete}>
