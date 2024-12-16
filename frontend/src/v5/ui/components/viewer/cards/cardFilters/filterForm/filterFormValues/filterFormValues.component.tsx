@@ -24,6 +24,16 @@ import { useEffect } from 'react';
 import { isArray, range } from 'lodash';
 import { CardFilterType } from '../../cardFilters.types';
 import { RangeInput } from './rangeInput/rangeInput.component';
+import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
+import { InputController } from '@controls/inputs/inputController.component';
+
+const getInputField = (type: CardFilterType) => {
+	switch (type) {
+		case 'number': return FormNumberField;
+		case 'date': return (props) => <InputController Input={DateTimePicker} {...props} />;
+		default: return FormTextField;
+	}
+};
 
 const name = 'values';
 export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
@@ -56,8 +66,8 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 
 	if (maxFields === 0) return null;
 
-	if (type === 'number' || isTextType(type)) {
-		const InputField = type === 'number' ? FormNumberField : FormTextField;
+	if (type === 'number' || type === 'date' || isTextType(type)) {
+		const InputField = getInputField(type);
 
 		if (maxFields === 1) return <InputField name={`${name}.0.value`} formError={!!error?.[0]} />;
 
