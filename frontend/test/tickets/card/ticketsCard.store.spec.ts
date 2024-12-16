@@ -1,7 +1,9 @@
 import { TicketsCardActions } from "@/v5/store/tickets/card/ticketsCard.redux";
-import { selectFilteringCompleted, selectFilteringQueries, selectFilteringTemplates, selectIsEditingGroups, selectIsShowingPins, selectReadOnly, selectSelectedTemplateId, selectSelectedTicketId, selectSelectedTicketPinId, selectView } from "@/v5/store/tickets/card/ticketsCard.selectors";
+import { selectAvailableTemplatesFilters, selectFilters, selectCardFilters, selectIsEditingGroups, selectIsShowingPins, selectReadOnly, selectSelectedTemplateId, selectSelectedTicketId, selectSelectedTicketPinId, selectView } from "@/v5/store/tickets/card/ticketsCard.selectors";
 import { TicketsCardViews } from "@/v5/ui/routes/viewer/tickets/tickets.constants";
 import { createTestStore } from "../../test.helpers";
+import { BaseFilter, CardFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
+import { templatesToFilters } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 
 
 describe('Tickets: store', () => {
@@ -9,7 +11,6 @@ describe('Tickets: store', () => {
 	const ticketId = 'ticketId';
 	const templateId = 'templateId';
 	const pinId = 'pinId';
-	const query = 'query';
 
 	beforeEach(() => {
 		({ dispatch, getState } = createTestStore());
@@ -63,54 +64,95 @@ describe('Tickets: store', () => {
 		});
 
 		describe('filters', () => {
-			it('should toggle the completed filter', () => {
-				dispatch(TicketsCardActions.toggleCompleteFilter());
-				const completedFilterFromState1 = selectFilteringCompleted(getState());
-				
-				expect(completedFilterFromState1).toEqual(true);
-				
-				dispatch(TicketsCardActions.toggleCompleteFilter());
-				const completedFilterFromState2 = selectFilteringCompleted(getState());
+			const [ticketTitleFilter, ticketIdFilter, templateIdFilter] = templatesToFilters([]);
+			const baseFilter: BaseFilter = {
+				operator: 'eq',
+				values: [],
+			};
+			const editedBaseFilter: BaseFilter = {
+				operator: 'gt',
+				values: [2],
+			};
+			const ticketIdCardFilter: CardFilter = { ...ticketIdFilter, filter: baseFilter };
+			const ticketTitleCardFilter: CardFilter = { ...ticketTitleFilter, filter: baseFilter };
+			const updatedTicketTitleCardFilter: CardFilter = { ...ticketTitleCardFilter, filter: editedBaseFilter };
+			
+			describe('existing filters', () => {
+				it('should add a filter', () => {
+					dispatch(TicketsCardActions.upsertFilter(ticketTitleCardFilter));
+					const filtersInStore = selectCardFilters(getState());
+					expect(filtersInStore).toEqual([ticketTitleCardFilter]);
+				});
 
-				expect(completedFilterFromState2).toEqual(false);
-			});
-			it('should set template filters', () => {
-				dispatch(TicketsCardActions.setTemplateFilters([templateId]));
-				const templateFiltersFromState = selectFilteringTemplates(getState());
-				
-				expect(templateFiltersFromState).toEqual([templateId]);
-			});
+				it('should edit a filter', () => {
+					dispatch(TicketsCardActions.upsertFilter(ticketTitleCardFilter));
+					dispatch(TicketsCardActions.upsertFilter(updatedTicketTitleCardFilter));
+					const filtersInStore = selectCardFilters(getState());
+					expect(filtersInStore).toEqual([updatedTicketTitleCardFilter]);
+				});
 
-			it('should set query filters', () => {
-				dispatch(TicketsCardActions.setQueryFilters([query]));
-				const queryFiltersFromState = selectFilteringQueries(getState());
-				
-				expect(queryFiltersFromState).toEqual([query]);
+				it('should delete a filter', () => {
+					dispatch(TicketsCardActions.upsertFilter(ticketTitleCardFilter));
+					dispatch(TicketsCardActions.deleteFilter(ticketTitleCardFilter));
+					const filtersInStore = selectCardFilters(getState());
+					expect(filtersInStore).toEqual([]);
+				});
+			})
+
+			describe('available template filters', () => {
+				const getAvailableFilters = () => selectAvailableTemplatesFilters(getState());
+				it('all the default filters should be available originally', () => {
+					expect(getAvailableFilters()).toEqual([ticketTitleFilter, ticketIdFilter, templateIdFilter]);
+				})
+				it('adding filters should make the unavailable', () => {
+					// add first filter
+					dispatch(TicketsCardActions.upsertFilter(ticketTitleCardFilter));
+					expect(getAvailableFilters()).toEqual([ticketIdFilter, templateIdFilter]);
+					// add second filter
+					dispatch(TicketsCardActions.upsertFilter(ticketIdCardFilter));
+					expect(getAvailableFilters()).toEqual([templateIdFilter]);
+				})
+				it('editing a filter shouldn\'t affect the available filters', () => {
+					dispatch(TicketsCardActions.upsertFilter(ticketTitleCardFilter));
+					dispatch(TicketsCardActions.upsertFilter(ticketIdCardFilter));
+					const availableFiltersBeforeEditing = getAvailableFilters();
+					// editing filter
+					dispatch(TicketsCardActions.upsertFilter(updatedTicketTitleCardFilter));
+					expect(getAvailableFilters()).toEqual(availableFiltersBeforeEditing);
+				})
+				it('removing a filter should make it available', () => {
+					dispatch(TicketsCardActions.upsertFilter(ticketTitleCardFilter));
+					dispatch(TicketsCardActions.upsertFilter(ticketIdCardFilter));
+					// delete filter
+					dispatch(TicketsCardActions.deleteFilter(ticketTitleCardFilter));
+					expect(getAvailableFilters()).toEqual([ticketTitleFilter, templateIdFilter]);
+				})
 			});
 		})
 
 		it('should reset the state', () => {
+			const [ticketTitleFilter] = templatesToFilters([]);
+			const baseFilter: BaseFilter = {
+				operator: 'eq',
+				values: [],
+			};
+			const ticketTitleCardFilter: CardFilter = { ...ticketTitleFilter, filter: baseFilter };
 			dispatch(TicketsCardActions.setSelectedTicket(ticketId));
 			dispatch(TicketsCardActions.setSelectedTemplate(templateId));
 			dispatch(TicketsCardActions.setSelectedTicketPin(pinId));
-			dispatch(TicketsCardActions.toggleCompleteFilter());
-			dispatch(TicketsCardActions.setTemplateFilters([templateId]));
-			dispatch(TicketsCardActions.setQueryFilters([query]));
+			dispatch(TicketsCardActions.upsertFilter(ticketTitleCardFilter));
+			dispatch(TicketsCardActions.resetFilters());
 			dispatch(TicketsCardActions.resetState());
 
 			const selectedTicketIdFromState = selectSelectedTicketId(getState());
 			const selectedTemplateIdFromState = selectSelectedTemplateId(getState());
 			const selectedTicketPinIdFromState = selectSelectedTicketPinId(getState());
-			const completeFilterFromState = selectFilteringCompleted(getState());
-			const templateFiltersFromState = selectFilteringTemplates(getState());
-			const queryFiltersFromState = selectFilteringQueries(getState());
+			const filters = selectFilters(getState());
 		
 			expect(selectedTicketIdFromState).toEqual(null);
 			expect(selectedTemplateIdFromState).toEqual(null);
 			expect(selectedTicketPinIdFromState).toEqual(null);
-			expect(completeFilterFromState).toEqual(true);
-			expect(templateFiltersFromState).toEqual([templateId]);
-			expect(queryFiltersFromState).toEqual([query]);
+			expect(filters).toEqual({});
 		});
 	});
 });
