@@ -66,7 +66,7 @@ const testInsertTicketAssignedNotifications = () => {
 			expect(fn).not.toHaveBeenCalled();
 		});
 
-		test('Multiple toNotifys should produce multiple records', async () => {
+		test('Multiple userss should produce multiple records', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
@@ -74,7 +74,7 @@ const testInsertTicketAssignedNotifications = () => {
 			const fn = jest.spyOn(db, 'insertMany').mockResolvedValueOnce();
 			const input = [
 				{
-					toNotify: times(10, () => generateRandomString()),
+					users: times(10, () => generateRandomString()),
 					ticket: generateRandomString(),
 					assignedBy: generateRandomString(),
 				},
@@ -86,7 +86,7 @@ const testInsertTicketAssignedNotifications = () => {
 				input,
 			);
 
-			const expectedRecords = input[0].toNotify.map((user) => ({
+			const expectedRecords = input[0].users.map((user) => ({
 				_id: expect.anything(),
 				type: notificationTypes.TICKET_ASSIGNED,
 				timestamp: expect.any(Date),
@@ -112,7 +112,7 @@ const testInsertTicketAssignedNotifications = () => {
 			const fn = jest.spyOn(db, 'insertMany').mockResolvedValueOnce();
 			const input = [
 				{
-					toNotify: times(10, () => generateRandomString()),
+					users: times(10, () => generateRandomString()),
 					ticket: generateRandomString(),
 					assignedBy: generateRandomString(),
 				},
@@ -121,11 +121,11 @@ const testInsertTicketAssignedNotifications = () => {
 					assignedBy: generateRandomString(),
 				},
 				{
-					toNotify: times(10, () => generateRandomString()),
+					users: times(10, () => generateRandomString()),
 					ticket: generateRandomString(),
 				},
 				{
-					toNotify: times(10, () => generateRandomString()),
+					users: times(10, () => generateRandomString()),
 					ticket: generateRandomString(),
 					assignedBy: generateRandomString(),
 				},
@@ -138,7 +138,7 @@ const testInsertTicketAssignedNotifications = () => {
 				input,
 			);
 
-			const expectedRecords = [input[0], input[3]].flatMap(({ toNotify, ticket, assignedBy }) => toNotify.map(
+			const expectedRecords = [input[0], input[3]].flatMap(({ users, ticket, assignedBy }) => users.map(
 				(user) => ({
 					_id: expect.anything(),
 					type: notificationTypes.TICKET_ASSIGNED,
@@ -172,7 +172,7 @@ const testInsertTicketUpdatedNotifications = () => {
 			expect(fn).not.toHaveBeenCalled();
 		});
 
-		test('Multiple toNotifys should produce multiple records', async () => {
+		test('Multiple userss should produce multiple records', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
@@ -180,7 +180,7 @@ const testInsertTicketUpdatedNotifications = () => {
 			const fn = jest.spyOn(db, 'insertMany').mockResolvedValueOnce();
 			const input = [
 				{
-					toNotify: times(10, () => generateRandomString()),
+					users: times(10, () => generateRandomString()),
 					ticket: generateRandomString(),
 					author: generateRandomString(),
 					changes: generateRandomObject(),
@@ -193,7 +193,7 @@ const testInsertTicketUpdatedNotifications = () => {
 				input,
 			);
 
-			const expectedRecords = input[0].toNotify.map((user) => ({
+			const expectedRecords = input[0].users.map((user) => ({
 				_id: expect.anything(),
 				type: notificationTypes.TICKET_UPDATED,
 				timestamp: expect.any(Date),
@@ -220,7 +220,7 @@ const testInsertTicketUpdatedNotifications = () => {
 			const fn = jest.spyOn(db, 'insertMany').mockResolvedValueOnce();
 			const input = [
 				{
-					toNotify: times(10, () => generateRandomString()),
+					users: times(10, () => generateRandomString()),
 					ticket: generateRandomString(),
 					author: generateRandomString(),
 					changes: generateRandomObject(),
@@ -231,12 +231,12 @@ const testInsertTicketUpdatedNotifications = () => {
 					changes: generateRandomObject(),
 				},
 				{
-					toNotify: times(10, () => generateRandomString()),
+					users: times(10, () => generateRandomString()),
 					author: generateRandomString(),
 					changes: generateRandomObject(),
 				},
 				{
-					toNotify: times(10, () => generateRandomString()),
+					users: times(10, () => generateRandomString()),
 					ticket: generateRandomString(),
 					author: generateRandomString(),
 					changes: generateRandomObject(),
@@ -251,7 +251,7 @@ const testInsertTicketUpdatedNotifications = () => {
 			);
 
 			const expectedRecords = [input[0], input[3]].flatMap(({
-				toNotify, ticket, author, changes }) => toNotify.map(
+				users, ticket, author, changes }) => users.map(
 				(user) => ({
 					_id: expect.anything(),
 					type: notificationTypes.TICKET_UPDATED,
@@ -286,7 +286,7 @@ const testInsertTicketDeletedNotifications = () => {
 			expect(fn).not.toHaveBeenCalled();
 		});
 
-		test('Multiple toNotifys should produce multiple records', async () => {
+		test('Multiple userss should produce multiple records', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
@@ -294,7 +294,7 @@ const testInsertTicketDeletedNotifications = () => {
 			const fn = jest.spyOn(db, 'insertMany').mockResolvedValueOnce();
 			const input = [
 				{
-					toNotify: times(10, () => generateRandomString()),
+					users: times(10, () => generateRandomString()),
 					ticket: generateRandomString(),
 					author: generateRandomString(),
 					status: generateRandomString(),
@@ -307,7 +307,7 @@ const testInsertTicketDeletedNotifications = () => {
 				input,
 			);
 
-			const expectedRecords = input[0].toNotify.map((user) => ({
+			const expectedRecords = input[0].users.map((user) => ({
 				_id: expect.anything(),
 				type: notificationTypes.TICKET_CLOSED,
 				timestamp: expect.any(Date),
@@ -334,7 +334,7 @@ const testInsertTicketDeletedNotifications = () => {
 			const fn = jest.spyOn(db, 'insertMany').mockResolvedValueOnce();
 			const input = [
 				{
-					toNotify: times(10, () => generateRandomString()),
+					users: times(10, () => generateRandomString()),
 					ticket: generateRandomString(),
 					author: generateRandomString(),
 					status: generateRandomString(),
@@ -345,12 +345,12 @@ const testInsertTicketDeletedNotifications = () => {
 					status: generateRandomString(),
 				},
 				{
-					toNotify: times(10, () => generateRandomString()),
+					users: times(10, () => generateRandomString()),
 					author: generateRandomString(),
 					status: generateRandomString(),
 				},
 				{
-					toNotify: times(10, () => generateRandomString()),
+					users: times(10, () => generateRandomString()),
 					ticket: generateRandomString(),
 					author: generateRandomString(),
 					status: generateRandomString(),
@@ -365,7 +365,7 @@ const testInsertTicketDeletedNotifications = () => {
 			);
 
 			const expectedRecords = [input[0], input[3]].flatMap(({
-				toNotify, ticket, author, status }) => toNotify.map(
+				users, ticket, author, status }) => users.map(
 				(user) => ({
 					_id: expect.anything(),
 					type: notificationTypes.TICKET_CLOSED,

@@ -41,10 +41,15 @@ const getUserList = (jobToUsers, toNotify) => toNotify.flatMap(
  * and notifyFn is a function to call to add the notification (assigned, updateTicket etc)
  */
 const generateTicketNotifications = async (teamspace, project, model, actionedBy, notificationData) => {
-	const [jobToUsers, usersWithAccess] = await Promise.all([
+	const [jobList, usersWithAccess] = await Promise.all([
 		getJobsToUsers(teamspace),
 		getUsersWithPermissions(teamspace, project, model, false),
 	]);
+
+	const jobToUsers = {};
+	jobList.forEach(({ _id, users }) => {
+		jobToUsers[_id] = users;
+	});
 
 	await Promise.all(notificationData.map(async ({ info, notifyFn }) => {
 		const notifications = info.flatMap(({ toNotify, ...data }) => {
@@ -82,7 +87,7 @@ const getTicketInfo = (teamspace, project, model, ticket) => getTicketById(teams
 	type: 1,
 });
 
-const onTicketUpdated = async (teamspace, project, model, ticket, author, changes) => {
+const onTicketUpdated = async (teamspace, project, model, { _id: ticket }, author, changes) => {
 	const { properties, type: templateId } = await getTicketInfo(teamspace, project, model, ticket);
 
 	const notifications = [];

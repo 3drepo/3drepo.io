@@ -175,7 +175,7 @@ const testOnUpdatedTicket = () => {
 		const project = generateRandomString();
 		const model = generateRandomString();
 		const job = generateRandomString();
-		const ticket = generateRandomString();
+		const ticket = { _id: generateRandomString() };
 		const author = generateRandomString();
 
 		const createEventData = (actionedBy = author, changes = generateRandomObject()) => ({
@@ -220,7 +220,7 @@ const testOnUpdatedTicket = () => {
 			expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledWith(teamspace, project, model, false);
 
 			const expectedNotifications = [{
-				ticket,
+				ticket: ticket._id,
 				changes: eventData.changes,
 				author,
 				users: [owner, assigned1, ...jobMembers],
@@ -266,14 +266,14 @@ const testOnUpdatedTicket = () => {
 					project, model, false);
 
 				const expectedUpdateNotifications = [{
-					ticket,
+					ticket: ticket._id,
 					changes: eventData.changes,
 					author,
 					users: [removed1, removed2, ...oldAssignees],
 				}];
 
 				const expectedAssignedNotifications = [{
-					ticket,
+					ticket: ticket._id,
 					assignedBy: author,
 					users: newAssignees,
 				}];
@@ -316,7 +316,7 @@ const testOnUpdatedTicket = () => {
 					project, model, false);
 
 				const expectedUpdateNotifications = [{
-					ticket,
+					ticket: ticket._id,
 					changes: eventData.changes,
 					author,
 					users: oldAssignees,
@@ -358,7 +358,7 @@ const testOnUpdatedTicket = () => {
 					project, model, false);
 
 				const expectedUpdateNotifications = [{
-					ticket,
+					ticket: ticket._id,
 					changes: eventData.changes,
 					author,
 					users: [removed1, removed2, ...oldAssignees],
@@ -398,7 +398,7 @@ const testOnUpdatedTicket = () => {
 					project, model, false);
 
 				const expectedAssignedNotifications = [{
-					ticket,
+					ticket: ticket._id,
 					assignedBy: author,
 					users: newAssignees,
 				}];
@@ -442,7 +442,7 @@ const testOnUpdatedTicket = () => {
 					project, model, false);
 
 				const expectedClosedNotifications = [{
-					ticket,
+					ticket: ticket._id,
 					status: newStatus,
 					author,
 					users: assignees,
@@ -485,7 +485,7 @@ const testOnUpdatedTicket = () => {
 					project, model, false);
 
 				const expectedNotifications = [{
-					ticket,
+					ticket: ticket._id,
 					changes,
 					author,
 					users: assignees,
@@ -528,7 +528,7 @@ const testOnUpdatedTicket = () => {
 					project, model, false);
 
 				const expectedNotifications = [{
-					ticket,
+					ticket: ticket._id,
 					changes,
 					author,
 					users: assignees,
