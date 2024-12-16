@@ -58,6 +58,16 @@ export const SuggestionsContainer = styled(Grid)`
 	}
 `;
 
+export const PermissionsLogContainer = styled(Grid)`
+	margin: 24px 0;
+	.MuiTextField-root, .MuiButton-root {
+		margin: 0;
+	}
+	.MuiInputBase-root, .MuiOutlinedInput-notchedOutline {
+		height: 26px;
+	}
+`;
+
 export const StyledForm = styled(Form)`
 	padding-top: 10px;
 	padding-bottom: 80px;

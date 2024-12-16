@@ -18,6 +18,8 @@
 import { all, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
+import { getViewpointWithGroups } from '@/v5/helpers/viewpoint.helpers';
+import { isEmpty } from 'lodash';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 
 import * as API from '../../services/api';
@@ -107,7 +109,8 @@ export function* fetchFrame({ date }) {
 		const model = yield select(selectSequenceModel);
 		const sequenceId =  yield select(selectSelectedSequenceId);
 		const frames = yield select(selectFrames);
-		const { state: stateId } = getSelectedFrame(frames, date);
+		const frame = getSelectedFrame(frames, date);
+		const stateId = frame.state;
 
 		if (stateId) {
 			const cacheEnabled = yield select(selectCacheSetting);
@@ -115,15 +118,22 @@ export function* fetchFrame({ date }) {
 
 			const cachedViewpoint = cacheEnabled ? yield DataCache.getValue(STORE_NAME.FRAMES, iDBKey) : null;
 			if (cachedViewpoint) {
-				yield put(SequencesActions.updateFrameWithViewpoint(sequenceId, stateId, cachedViewpoint));
+				yield put(SequencesActions.updateFrameWithViewpoint(sequenceId, stateId, null, cachedViewpoint));
 			} else {
 				const frameState = (yield API.getSequenceState(teamspace, model, sequenceId, stateId))?.data;
 				const viewpointFromState = yield convertStateDefToViewpoint(frameState);
-				yield put(SequencesActions.updateFrameWithViewpoint(sequenceId, stateId, viewpointFromState));
+				yield put(SequencesActions.updateFrameWithViewpoint(sequenceId, stateId, null, viewpointFromState));
 
 				if (cacheEnabled) {
 					yield DataCache.putValue(STORE_NAME.FRAMES, iDBKey, viewpointFromState);
 				}
+			}
+		}
+
+		if (frame.dateTime) {
+			const viewpoint = yield getViewpointWithGroups({teamspace, modelId: model, view: frame});
+			if (!isEmpty(viewpoint)) {
+				yield put(SequencesActions.updateFrameWithViewpoint(sequenceId, null, frame.dateTime, {viewpoint}));
 			}
 		}
 	} catch (error) {

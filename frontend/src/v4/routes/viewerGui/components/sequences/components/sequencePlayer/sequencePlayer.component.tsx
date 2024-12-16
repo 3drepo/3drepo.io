@@ -71,6 +71,8 @@ interface IProps {
 	draggablePanels: string[];
 	toggleLegend: () => void;
 	viewpoint: any;
+	teamspace: string;
+	model: string;
 }
 
 interface IState {
@@ -81,6 +83,7 @@ interface IState {
 	stepScale: STEP_SCALE;
 	waitingForFrameLoad: boolean;
 	sliderValue: number | number[] | null;
+
 }
 
 export class SequencePlayer extends PureComponent<IProps, IState> {
@@ -172,7 +175,7 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 		}
 
 		if ((prevProps.viewpoint !== this.props.viewpoint)) {
-			ViewpointsActionsDispatchers.showViewpoint(null, null, { viewpoint: this.props.viewpoint });
+			ViewpointsActionsDispatchers.showViewpoint(this.props.teamspace, this.props.model, { viewpoint: this.props.viewpoint });
 		}
 	}
 

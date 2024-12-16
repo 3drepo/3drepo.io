@@ -26,6 +26,9 @@ import { selectContainerById } from '@/v5/store/containers/containers.selectors'
 import { prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
 import { selectFederationById } from '@/v5/store/federations/federations.selectors';
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
+import { FederationsActions } from '@/v5/store/federations/federations.redux';
+import { prepareMockJobs, prepareMockUsers } from '../models.fixture';
+import { ContainersActions } from '@/v5/store/containers/containers.redux';
 
 describe('Viewer: sagas', () => {
 	const teamspace = 'myteamspace';
@@ -39,6 +42,9 @@ describe('Viewer: sagas', () => {
 	});	
 
 	describe('fetch', () => {
+		const { viewerJobs, nonViewerJobs, modelJobs } = prepareMockJobs();
+		const { viewerUsers, nonViewerUsers, modelUsers } = prepareMockUsers();
+
 		it('should fetch the containers, the federations and the container particular data for viewing a container', async () => {
 			const containers = times(3, () => containerMockFactory());
 			const federations  = times(3, () => federationMockFactory());
@@ -58,13 +64,35 @@ describe('Viewer: sagas', () => {
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerOrFederationId}/stats`)
 				.reply(200, containerStat);
 
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerOrFederationId}/jobs?excludeViewers=${false}`)
+				.reply(200, { jobs: [...viewerJobs, ...nonViewerJobs] })
+
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerOrFederationId}/jobs?excludeViewers=${true}`)
+				.reply(200, { jobs: nonViewerJobs })
+
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerOrFederationId}/members?excludeViewers=${false}`)
+				.reply(200, { users: [...viewerUsers, ...nonViewerUsers] })
+
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerOrFederationId}/members?excludeViewers=${true}`)
+				.reply(200, { users: nonViewerUsers })
+
 			await waitForActions(() => {
 				dispatch(ViewerActions.fetchData(teamspace, projectId, containerOrFederationId));
-			}, [ViewerActions.setFetching(false)]);
+			}, [
+				ViewerActions.setFetching(false),
+				ContainersActions.updateContainerSuccess(projectId, containerOrFederationId, { jobs: modelJobs }),
+				ContainersActions.updateContainerSuccess(projectId, containerOrFederationId, { users: modelUsers }),
+			]);
 
-			const container = selectContainerById(getState(), containerOrFederationId);
+			const { jobs, users, ...container } = selectContainerById(getState(), containerOrFederationId);
 
 			expect(container).toEqual(prepareSingleContainerData(baseContainers[1], containerStat));
+			expect(jobs).toEqual(modelJobs);
+			expect(users).toEqual(modelUsers);
 		});
 
 		it('should fetch the containers, the federations, the federation data and the containers data for a particular federation', async () => {
@@ -102,12 +130,36 @@ describe('Viewer: sagas', () => {
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${baseContainers[2]._id}/stats`)
 				.reply(200, containersStats[2]);
 
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${containerOrFederationId}/jobs?excludeViewers=${false}`)
+				.reply(200, { jobs: [...viewerJobs, ...nonViewerJobs] })
+
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${containerOrFederationId}/jobs?excludeViewers=${true}`)
+				.reply(200, { jobs: nonViewerJobs })
+
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${containerOrFederationId}/members?excludeViewers=${false}`)
+				.reply(200, { users: [...viewerUsers, ...nonViewerUsers] })
+
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${containerOrFederationId}/members?excludeViewers=${true}`)
+				.reply(200, { users: nonViewerUsers })
+			
+
 			await waitForActions(() => {
 				dispatch(ViewerActions.fetchData(teamspace, projectId, containerOrFederationId));
-			}, [ViewerActions.setFetching(false)]);
+			}, [
+				FederationsActions.updateFederationSuccess(projectId, containerOrFederationId, { jobs: modelJobs }),
+				FederationsActions.updateFederationSuccess(projectId, containerOrFederationId, { users: modelUsers }),
+				ViewerActions.setFetching(false),
+			]);
 
 
 			const federation = selectFederationById(getState(), containerOrFederationId);
+
+			expect(federation.jobs).toEqual(modelJobs);
+			expect(federation.users).toEqual(modelUsers);
 			const groupedContainers = [...federation.containers].sort();
 	
 			groupedContainers.forEach(({ _id }) => {

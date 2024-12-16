@@ -25,6 +25,10 @@ const utils = require("../utils");
 const db = require("../handler/db");
 const systemLogger = require("../logger.js").systemLogger;
 const PermissionTemplates = require("./permissionTemplates");
+const { findProjectByModelId } = require(`${v5Path}/models/projectSettings.js`);
+const { cloneDeep } = require(`${v5Path}/utils/helper/objects.js`);
+const { publish } = require(`${v5Path}/services/eventsManager/eventsManager`);
+const { events } = require(`${v5Path}/services/eventsManager/eventsManager.constants`);
 
 const MODELS_COLL = "settings";
 
@@ -66,9 +70,53 @@ function clean(setting) {
 
 const ModelSetting = {};
 
-ModelSetting.batchUpdatePermissions = async function(account, batchPermissions = []) {
+const publishPermissionUpdates = (teamspace, project, initialPermissions, updatedPermissions, executor) => {
+	const map = {};
+
+	updatedPermissions.forEach(({ model, permissions: updPermissions }) => {
+		const { permissions: initPermissions } = initialPermissions.find((p) => p.model === model);
+
+		const users = updPermissions.map((p) => p.user);
+
+		users.forEach((user) => {
+			const initialValue = initPermissions.find((p) => p.user === user)?.permission ?? null;
+			let updatedValue = updPermissions.find((p) => p.user === user)?.permission;
+
+			if(updatedValue === "") {
+				updatedValue = null;
+			}
+
+			const existingUpdate = map[user];
+
+			const from = initialValue ? [initialValue] : initialValue;
+			const to = updatedValue ? [updatedValue] : updatedValue;
+
+			if (!existingUpdate) {
+				map[user] = { users: [user], permissions: [{ model, project, from, to }] };
+			} else {
+				existingUpdate.permissions.push({ model, project, from, to });
+			}
+		});
+	});
+
+	Object.values(map).forEach(({ users, permissions }) => {
+		publish(events.MODEL_PERMISSIONS_UPDATED, { teamspace, executor, users, permissions});
+	});
+};
+
+ModelSetting.batchUpdatePermissions = async function(account, batchPermissions = [], executor) {
+	if(!batchPermissions.length) {
+		throw responseCodes.INVALID_ARGUMENTS;
+	}
+
 	const updatePromises = batchPermissions.map((update) => ModelSetting.updatePermissions(account, update.model, update.permissions));
-	const updateResponses = await Promise.all(updatePromises);
+	const [updateResponses, { _id: projectId }] = await Promise.all([
+		Promise.all(updatePromises),
+		findProjectByModelId(account, batchPermissions[0].model, { _id: 1 })
+	]);
+
+	publishPermissionUpdates(account, projectId, updateResponses.map(r => r.initialPermissions), batchPermissions, executor);
+
 	const okStatus = "ok";
 	const badStatusIndex = updateResponses.findIndex((response) => okStatus !== response.status);
 
@@ -412,31 +460,7 @@ ModelSetting.updateHeliSpeed = async function(account, model, newSpeed) {
 	return ModelSetting.updateModelSetting(account, model, {heliSpeed: newSpeed});
 };
 
-ModelSetting.updateMultiplePermissions = async function(account, modelIds, updatedData) {
-	const modelsList = await ModelSetting.findModelSettings(account, {"_id" : {"$in" : modelIds}});
-
-	if (!modelsList.length) {
-		throw responseCodes.MODEL_INFO_NOT_FOUND;
-	}
-
-	const modelsPromises = modelsList.map((model) => {
-		const newModelPermissions = updatedData.find((modelPermissions) => modelPermissions.model === model._id);
-		return ModelSetting.changePermissions(account, model._id, newModelPermissions.permissions || {});
-	});
-
-	const models = await Promise.all(modelsPromises);
-	const populatedPermissionsPromises = models.map(({permissions}) => {
-		return ModelSetting.populateUsers(account, permissions);
-	});
-	const populatedPermissions = await Promise.all(populatedPermissionsPromises);
-
-	return populatedPermissions.map((permissions, index) => {
-		const {name, federate, _id: model, subModels} =  models[index] || {};
-		return {name, federate, model, permissions, subModels};
-	});
-};
-
-ModelSetting.updatePermissions = async function(account, model, permissions = []) {
+ModelSetting.updatePermissions = async function(account, model, permissions = [], executor) {
 	const { findByUserName, teamspaceMemberCheck } = require("./user");
 
 	if (!Array.isArray(permissions)) {
@@ -444,6 +468,8 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 	}
 
 	const setting = await ModelSetting.findModelSettingById(account, model);
+	const initialPermissions = { model, permissions: cloneDeep(setting.permissions) };
+
 	if (!setting) {
 		throw responseCodes.MODEL_NOT_FOUND;
 	}
@@ -470,7 +496,15 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 
 	await Promise.all(promises);
 	await db.updateOne(account, MODELS_COLL, { _id: model }, { $set: { permissions: setting.permissions } });
-	return { status: setting.status };
+
+	const updatedPermissions = { model, permissions: setting.permissions };
+
+	if(executor) {
+		const { _id: projectId } = await findProjectByModelId(account, model, { _id: 1 });
+		publishPermissionUpdates(account, projectId, [initialPermissions], [updatedPermissions], executor);
+	}
+
+	return { status: setting.status, initialPermissions, updatedPermissions};
 };
 
 ModelSetting.getDefaultLegendId = async (account, model) => {
