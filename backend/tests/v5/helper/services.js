@@ -356,6 +356,11 @@ db.createUnityBundle = async (teamspace, modelId, bundleId, data) => {
 	await FilesManager.storeFile(teamspace, collection, bundleFileName, data);
 };
 
+db.createTexture = async (teamspace, modelId, texId, data) => {
+	const collection = `${modelId}.scene.ref`;
+	await FilesManager.storeFile(teamspace, collection, texId, data);
+};
+
 ServiceHelper.createQueryString = (options) => {
 	const keys = Object.keys(deleteIfUndefined(options, true));
 

@@ -17,23 +17,25 @@
 
 const FilesManager = require('../services/filesManager');
 const db = require('../handler/db');
-const responseCodes = require('../utils/responseCodes');
+const { templates } = require('../utils/responseCodes');
 
 const UnityAssets = {};
 
-UnityAssets.getRepoBundle = function (account, model, id) {
+UnityAssets.getRepoBundle = async (account, model, id) => {
 	const bundleFileName = `${id}`;
 	const collection = `${model}.stash.repobundles.ref`;
-	return FilesManager.getFileAsStream(account, collection, bundleFileName);
+	const result = await FilesManager.getFileAsStream(account, collection, bundleFileName);
+	return result;
 };
 
-UnityAssets.getUnityBundle = function (account, model, id) {
+UnityAssets.getUnityBundle = async (account, model, id) => {
 	const bundleFileName = `${id}.unity3d`;
 	const collection = `${model}.stash.unity3d.ref`;
-	return FilesManager.getFileAsStream(account, collection, bundleFileName);
+	const result = await FilesManager.getFileAsStream(account, collection, bundleFileName);
+	return result;
 };
 
-UnityAssets.getTexture = async function (account, model, id) {
+UnityAssets.getTexture = async (account, model, id) => {
 	const collection = `${model}.scene`;
 
 	const node = await db.findOne(account, collection, { _id: id, type: 'texture' }, {
@@ -43,9 +45,10 @@ UnityAssets.getTexture = async function (account, model, id) {
 	});
 
 	if (!node) {
-		throw (responseCodes.TEXTURE_NOT_FOUND);
+		throw (templates.textureNotFound);
 	}
 
+	// eslint-disable-next-line no-underscore-dangle
 	const { elements, buffer } = node._blobRef;
 
 	// chunkInfo is passed to createReadStream, which expects `start` and `end` properties
