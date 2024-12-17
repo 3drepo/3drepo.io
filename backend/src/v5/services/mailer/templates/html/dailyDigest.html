@@ -1,0 +1,51 @@
+<p>Here is your daily digest based on your chosen notification preferences:</p>
+<p style="text-align: center"><span class="greeting"><%= teamspace %></span></p>
+<% for(const { project, model, tickets } of notifications) { %>
+	<div class="notifications">
+		<div class="notificationsTable">
+			<div class="notificationsHeader">
+				<div class="headerTitle">
+					<img src="https://www.3drepo.local/assets/email-resources/notifications/tickets.png">
+					<p class="title"><%= project %>::<%= model %></p>
+				</div>
+			</div>
+			<div class="notificationsContent">
+
+				<% if(tickets.assigned) { %>
+				<div class="notificationsRow">
+					<div class="notificationIconBorder">
+						<img class="notificationType" src="https://www.3drepo.local/assets/email-resources/notifications/new.png">
+					</div>
+					<div style="flex: 1 1 0">
+						<p class="notificationsText"><%= tickets.assigned.count %> tickets have been assigned to you.</p>
+					</div>
+					<a href="<%= tickets.assigned.link %>" target="_blank"><img "margin-top: 4px" src="https://www.3drepo.local/assets/email-resources/notifications/openLink.png"></a>
+				</div>
+				<% } %>
+				<% if(tickets.updated) { %>
+ 				 <div class="notificationsRow">
+					<div class="notificationIconBorder">
+						<img class="notificationType" src="https://www.3drepo.local/assets/email-resources/notifications/edit.png">
+					</div>
+					<div style="flex: 1 1 0">
+					   <p class="notificationsText"><%= tickets.updated.count %> tickets you are associated with are updated.</p>
+					</div>
+					<a href="<%= tickets.updated.link %>" target="_blank"><img "margin-top: 4px" src="https://www.3drepo.local/assets/email-resources/notifications/openLink.png"></a>
+				</div>
+				<% } %>
+				<% if(tickets.closed) { %>
+				<div class="notificationsRow">
+					<div class="notificationIconBorder notificationDoneIconBorder">
+						<img class="notificationType" src="https://www.3drepo.local/assets/email-resources/notifications/done.png">
+					</div>
+					<div style="flex: 1 1 0">
+					   <p class="notificationsText"><%= tickets.closed.count %> tickets you are associated with are closed.</p>
+					</div>
+					<a href="<%= tickets.closed.link %>" target="_blank"><img style="margin-top: 4px" src="https://www.3drepo.local/assets/email-resources/notifications/openLink.png"></a>
+				</div>
+				<% } %>
+			</div>
+		</div>
+	</div>
+<% } %>
+

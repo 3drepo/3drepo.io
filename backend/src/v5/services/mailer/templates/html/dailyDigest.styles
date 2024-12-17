@@ -1,0 +1,83 @@
+div.notifications {
+	width: 100%;
+	padding: 10px 0;
+	align-items: center;
+	display: inline-flex
+}
+
+div.notificationsTable {
+	flex: 1 1 0;
+	border-radius: 10px;
+	border: 1px #E5EDF4 solid;
+	flex-direction: column;
+	display: inline-flex
+}
+
+div.notificationsHeader {
+	align-self: stretch;
+	padding: 0px 10px;
+	background: #E5EDF4;
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+	justify-content: space-between;
+	align-items: center;
+	display: inline-flex
+}
+
+div.headerTitle {
+	gap: 10px;
+	display: flex;
+	align-items: center;
+}
+
+p.title {
+	font-size: 0.9rem;
+	color: #172B4D;
+	font-weight: 500;
+	margin: 20px 0;
+	word-wrap: break-word;
+}
+
+p.notificationsText {
+	flex: 1 1 0;
+	margin: 10px 5px
+}
+
+
+div.notificationsContent {
+	padding: 5px 15px;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 2px;
+	display: flex
+}
+
+div.notificationsRow {
+	align-self: stretch;
+	justify-content: flex-start;
+	align-items: center;
+	gap: 10px;
+	padding: 0;
+	display: inline-flex
+}
+
+.notificationIconBorder {
+	padding: 3px;
+	border-radius: 18px;
+	overflow: hidden;
+	box-shadow: 0 0 1px 1px #016CA7;
+	justify-content: center;
+	align-items: center;
+	display: flex
+}
+
+.notificationDoneIconBorder {
+	box-shadow: 0 0 1px 1px #555f70;
+	height: 11px;
+
+}
+
+img.notificationType {
+	width: 11px
+}
+
