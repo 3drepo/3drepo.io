@@ -23,7 +23,7 @@ import { useState } from 'react';
 import FunnelIcon from '@assets/icons/filters/funnel.svg';
 import { Tooltip } from '@mui/material';
 import { TicketFiltersSelectionList } from './list/ticketFiltersSelectionList.component';
-import { SearchInput, DrillDownList, DrillDownItem } from './ticketFiltersSelection.styles';
+import { SearchInput, DrillDownList, DrillDownItem, DrillDownItemFiltersList } from './ticketFiltersSelection.styles';
 import { CardFilter } from '../../cardFilters.types';
 import { FilterForm } from '../../filterForm/filterForm.component';
 import { CardFilterActionMenu } from '../../filterForm/filterForm.styles';
@@ -61,7 +61,7 @@ export const FilterSelection = () => {
 		>
 			<SearchContextComponent items={unusedFilters}>
 				<DrillDownList $visibleIndex={showFiltersList ? 0 : 1}>
-					<DrillDownItem $visible={showFiltersList}>
+					<DrillDownItemFiltersList $visible={showFiltersList}>
 						<SearchInput
 							placeholder={formatMessage({
 								id: 'viewer.card.tickets.filters.searchInputPlaceholder',
@@ -69,7 +69,7 @@ export const FilterSelection = () => {
 							})}
 						/>
 						<TicketFiltersSelectionList onFilterClick={setSelectedFilter} />
-					</DrillDownItem>
+					</DrillDownItemFiltersList>
 					<DrillDownItem $visible={!showFiltersList}>
 						<FilterForm
 							{...(selectedFilter || {} as any)}

@@ -51,6 +51,11 @@ export const DrillDownItem = styled.div<{ $visible: boolean }>`
 	width: 100%;
 `;
 
+export const DrillDownItemFiltersList = styled(DrillDownItem)`
+	display: grid;
+	grid-template-rows: 55px 1fr;
+`;
+
 export const DrillDownList = styled.div<{ $visibleIndex: number }>`
 	width: 200%;
 	height: fit-content;
