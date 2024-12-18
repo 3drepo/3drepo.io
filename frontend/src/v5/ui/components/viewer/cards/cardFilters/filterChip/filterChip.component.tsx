@@ -22,17 +22,23 @@ import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { CardFilterType, BaseFilter, CardFilterOperator, CardFilterValue } from '../cardFilters.types';
 import { formatSimpleDate } from '@/v5/helpers/intl.helper';
+import { formatMessage } from '@/v5/services/intl';
+
+const valueToDisplayDate = (value) => formatSimpleDate(new Date(value));
+const formatDateRange = ([from, to]) => formatMessage(
+	{ defaultMessage: '{from} to {to}', id: 'dateRange.joined' },
+	{ from: valueToDisplayDate(from), to: valueToDisplayDate(to) },
+);
 
 const getDisplayValue = (values: CardFilterValue[], operator: CardFilterOperator, type: CardFilterType) => {
 	const isRange = isRangeOperator(operator);
-	const vals = isRange
-		? (values as [number, number][]).map(([a, b]) => `[${a}, ${b}]`)
-		: values;
-	
 	const isDate = type === 'date';
-	return isDate
-		? vals.map((d) => formatSimpleDate(new Date(+d)))
-		: vals.join(', ') ?? '';
+	if (isDate) {
+		if (!isRange) return values.map(valueToDisplayDate);
+		return values.map((range: any) => formatDateRange(range.map(valueToDisplayDate)));
+	}
+	
+	return (isRange ? values.map(([a, b]: any) => `[${a}, ${b}]`) : values).join(', ') ?? '';
 };
 
 type FilterChipProps = {
