@@ -180,17 +180,13 @@ db.createRevision = async (teamspace, project, model, revision, modelType) => {
 	await DbHandler.insertOne(teamspace, historyCol, formattedRevision);
 };
 
-db.createStash = async (teamspace, project, stashEntry) => {
+db.createStash = async (teamspace, stashEntry) => {
 	const modelId = stashEntry.model;
 	const stashCol = stashEntry.repobundleStash ? `${modelId}.stash.repobundles` : `${modelId}.stash.unity3d`;
-	const stashFileCol = `${modelId}.stash.json_mpc.ref`;
-
-	const writeReferencedData = (id, buffer) => FilesManager.storeFile(teamspace,
-		stashFileCol, id, buffer);
 
 	if (stashEntry.jsonFiles) {
 		for (let i = 0; i < stashEntry.jsonFiles.length; i++) {
-			writeReferencedData(stashEntry.jsonFiles[i], stashEntry.jsonData[i]);
+			db.createJsonFile(teamspace, modelId, stashEntry.jsonFiles[i], stashEntry.jsonData[i]);
 		}
 	}
 
@@ -203,6 +199,11 @@ db.createStash = async (teamspace, project, stashEntry) => {
 	delete formattedStashEntry.jsonData;
 	delete formattedStashEntry.repobundleStash;
 	await DbHandler.insertOne(teamspace, stashCol, formattedStashEntry);
+};
+
+db.createJsonFile = (teamspace, modelId, filename, buffer) => {
+	const stashFileCol = `${modelId}.stash.json_mpc.ref`;
+	FilesManager.storeFile(teamspace, stashFileCol, filename, buffer);
 };
 
 db.createCalibration = async (teamspace, project, drawing, revision, calibration) => {

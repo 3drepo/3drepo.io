@@ -24,6 +24,7 @@ const CreateAssetMetaRoutes = require('./teamspaces/projects/models/common/metad
 const CreateGeneralRevisionRoutes = require('./teamspaces/projects/models/common/revisions');
 const CreateGroupRoutes = require('./teamspaces/projects/models/common/groups');
 const CreateModelGeneralRoutes = require('./teamspaces/projects/models/common/general');
+const CreateModelPropertiesRoutes = require('./teamspaces/projects/models/common/modelProperties');
 const CreateTicketCommentsRoutes = require('./teamspaces/projects/models/common/tickets.comments');
 const CreateTicketGroupsRoutes = require('./teamspaces/projects/models/common/tickets.groups');
 const CreateTicketRoutes = require('./teamspaces/projects/models/common/tickets');
@@ -65,6 +66,7 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/textures', TextureRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assetsMeta/', CreateAssetMetaRoutes(modelTypes.CONTAINER));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assetMaps/', CreateAssetMapRoutes(modelTypes.CONTAINER));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/modelProperties/', CreateModelPropertiesRoutes(modelTypes.CONTAINER));
 
 	// Federations
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations', CreateModelGeneralRoutes(modelTypes.FEDERATION));
@@ -76,6 +78,7 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:federation/revisions', FederationRevisionRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/assetsMeta/', CreateAssetMetaRoutes(modelTypes.FEDERATION));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/assetMaps/', CreateAssetMapRoutes(modelTypes.FEDERATION));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/modelProperties/', CreateModelPropertiesRoutes(modelTypes.FEDERATION));
 
 	// Drawings
 	app.use('/v5/teamspaces/:teamspace/projects/:project/drawings', CreateModelGeneralRoutes(modelTypes.DRAWING));

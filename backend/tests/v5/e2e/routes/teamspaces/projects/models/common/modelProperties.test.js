@@ -18,6 +18,7 @@
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
+const DbConstants = require('../../../../../../../../src/v5/handler/db.constants');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -40,20 +41,19 @@ const getRandomDatesDesc = (numberOfDates) => {
 const createContainerObject = (teamspace, permissions, revisions) => {
 	const _id = ServiceHelper.generateUUIDString();
 
-	// Create stash entries for the revisions
-	const stashEntries = [];
+	// Create json files for the revisions
+	const jsonFiles = [];
 	for (let i = 0; i < revisions.length; i++) {
 		const rev = revisions[i];
 
-		// Generate stash entry only if not void and has file
-		if (!rev.void && rev.rFile) {
-			const stashEntry = ServiceHelper.generateStashEntry(
-				rev._id,
-				_id,
-				teamspace,
-				true,
-			);
-			stashEntries.push(stashEntry);
+		// Generate json file only if it has file
+		if (rev.rFile) {
+			const jsonFile = {
+				revId: rev._id,
+				fileName: `${rev._id}/modelProperties.json`,
+				fileContent: `{"testData": "${ServiceHelper.generateRandomString()}"}`,
+			};
+			jsonFiles.push(jsonFile);
 		}
 	}
 
@@ -65,7 +65,7 @@ const createContainerObject = (teamspace, permissions, revisions) => {
 			permissions,
 		},
 		revisions,
-		stashEntries,
+		jsonFiles,
 	};
 };
 
@@ -89,17 +89,21 @@ const createFederationObject = (teamspace, containers, permissions) => {
 	const fedRevision = ServiceHelper.generateRevisionEntry(false, false);
 	const revId = fedRevision._id;
 
-	// Create federation stash entry
-	const fedStashEntry = ServiceHelper.generateStashEntry(revId,
-		fedObj._id, teamspace, true);
+	// Create federation json file
+	const fedJsonFile = {
+		revId,
+		fileName: `${revId}/modelProperties.json`,
+		fileContent: `{"testData": "${ServiceHelper.generateRandomString()}"}`,
+	};
 
 	// Generate nodes for scene mock
 	const rootNode = ServiceHelper.generateBasicNode('transformation', revId);
 	const meshNode = ServiceHelper.generateBasicNode('mesh', revId, [rootNode.shared_id]);
+	const masterUUID = uuidHelper.stringToUUID(DbConstants.MASTER_BRANCH);
 	const refNodes = [];
 	for (let i = 0; i < containers.length; i++) {
 		const refNode = ServiceHelper.generateBasicNode('ref', revId,
-			[rootNode.shared_id], { owner: teamspace, project: containers[i]._id });
+			[rootNode.shared_id], { owner: teamspace, project: containers[i]._id, _rid: masterUUID });
 		refNodes.push(refNode);
 	}
 
@@ -118,7 +122,7 @@ const createFederationObject = (teamspace, containers, permissions) => {
 	return {
 		fedObj,
 		fedRevision,
-		fedStashEntry,
+		fedJsonFile,
 		nodes,
 		meshMap,
 		containers,
@@ -297,12 +301,14 @@ const setupTestData = async ({ users, teamspace, project, containers, federation
 				modelTypes.CONTAINER,
 			));
 		}
-		const { stashEntries } = containers[key];
-		for (let i = 0; i < stashEntries.length; i++) {
-			const stashEntry = stashEntries[i];
-			proms.push(ServiceHelper.db.createStash(
+		const { jsonFiles } = containers[key];
+		for (let i = 0; i < jsonFiles.length; i++) {
+			const jsonFile = jsonFiles[i];
+			proms.push(ServiceHelper.db.createJsonFile(
 				teamspace,
-				stashEntry,
+				containers[key]._id,
+				jsonFile.fileName,
+				jsonFile.fileContent,
 			));
 		}
 
@@ -317,9 +323,11 @@ const setupTestData = async ({ users, teamspace, project, containers, federation
 			federations[key].fedObj.name,
 			federations[key].fedObj.properties,
 		));
-		proms.push(ServiceHelper.db.createStash(
+		proms.push(ServiceHelper.db.createJsonFile(
 			teamspace,
-			federations[key].fedStashEntry,
+			federations[key].fedObj._id,
+			federations[key].fedJsonFile.fileName,
+			federations[key].fedJsonFile.fileContent,
 		));
 		proms.push(ServiceHelper.db.createScene(
 			teamspace,
@@ -345,8 +353,8 @@ const setupTestData = async ({ users, teamspace, project, containers, federation
 	]);
 };
 
-const testGetAssetMaps = () => {
-	describe('Get asset maps', () => {
+const testModelProperties = () => {
+	describe('Get model properties', () => {
 		const testEnvData = generateTestEnvData();
 		const { users, teamspace, project, containers, federations } = testEnvData;
 
@@ -362,7 +370,7 @@ const testGetAssetMaps = () => {
 				modelId = containers.C1._id,
 				revisionId = containers.C1.revisions[0]._id,
 				key = users.tsAdmin.apiKey,
-			} = {}) => `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/assetMaps/revision/${revisionId}?key=${key}`;
+			} = {}) => `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/modelProperties/revision/${revisionId}?key=${key}`;
 
 			const getFedRoute = ({
 				ts = teamspace,
@@ -370,12 +378,10 @@ const testGetAssetMaps = () => {
 				modelType = modelTypes.FEDERATION,
 				modelId = federations.F1.fedObj._id,
 				key = users.tsAdmin.apiKey,
-			} = {}) => `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/assetMaps/revision/master/head?key=${key}`;
+			} = {}) => `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/modelProperties/revision/master/head?key=${key}`;
 
 			const getContResult = (cont, revId) => {
-				const modelId = cont._id;
-
-				const { stashEntries } = cont;
+				const { jsonFiles } = cont;
 
 				let result = '';
 
@@ -392,24 +398,10 @@ const testGetAssetMaps = () => {
 				const revisionId = revId || findFirstValidRev();
 
 				if (revisionId) {
-					const stashEntry = stashEntries.find((entry) => entry._id === revisionId);
+					const jsonFile = jsonFiles.find((file) => file.revId === revisionId);
 
-					if (stashEntry) {
-						result += `{"model":"${modelId}","supermeshes":[`;
-						const assetIds = stashEntry.assets;
-						const assetData = stashEntry.jsonData;
-
-						let assetString = '';
-						for (let i = 0; i < assetIds.length; i++) {
-							const id = assetIds[i];
-							const data = assetData[i];
-							assetString += `{"id":"${id}","data":${data}}`;
-
-							if (i !== (assetIds.length - 1)) {
-								assetString += ',';
-							}
-						}
-						result += `${assetString}]}`;
+					if (jsonFile) {
+						result += `{"properties":${jsonFile.fileContent}}`;
 					}
 				}
 
@@ -419,18 +411,49 @@ const testGetAssetMaps = () => {
 			const getFedResult = (fed) => {
 				let result = '';
 
-				result += '{"submodels":[';
+				const { fedJsonFile } = fed;
+				result += `{"properties":${fedJsonFile.fileContent}`;
 
 				const conts = fed.containers;
+				const subModelJsonFiles = [];
 				for (let i = 0; i < conts.length; i++) {
 					const cont = conts[i];
-					const contResult = getContResult(cont);
+					const { jsonFiles } = cont;
 
-					if (i !== 0 && contResult !== '') {
-						result += ',';
+					const findFirstValidRev = () => {
+						for (let e = 0; e < cont.revisions.length; e++) {
+							const rev = cont.revisions[e];
+							if (!rev.void) {
+								return rev._id;
+							}
+						}
+						return undefined;
+					};
+
+					const revisionId = findFirstValidRev();
+
+					if (revisionId) {
+						const jsonFile = jsonFiles.find((file) => file.revId === revisionId);
+
+						if (jsonFile) {
+							jsonFile.contId = cont._id;
+							subModelJsonFiles.push(jsonFile);
+						}
 					}
+				}
 
-					result += contResult;
+				result += ',"subModels":[';
+
+				if (subModelJsonFiles.length > 0) {
+					for (let i = 0; i < subModelJsonFiles.length; i++) {
+						if (i !== 0) {
+							result += ',';
+						}
+
+						const file = subModelJsonFiles[i];
+						const fileContent = file.fileContent.substring(1, file.fileContent.length - 1);
+						result += `{"account":"${teamspace}","model":"${file.contId}",${fileContent}}`;
+					}
 				}
 
 				result += ']}';
@@ -501,23 +524,18 @@ const testGetAssetMaps = () => {
 			const voidRevResult = getContResult(C3, R4Id);
 			const validRevResultC3 = getContResult(C3, R5Id);
 			const contVoidRevs = [
-				['Try to access void revision via rev ID (admin)', getContRoute({ modelId: C3Id, revisionId: R4Id }), true, voidRevResult],
-				['Try to access void revision via rev ID (viewer)', getContRoute({ modelId: C3Id, revisionId: R4Id, key: viewerKey }), true, voidRevResult],
-				['Try to access void revision via rev ID (commenter)', getContRoute({ modelId: C3Id, revisionId: R4Id, key: commenterKey }), true, voidRevResult],
-				['Get latest form container with newer void revision via master/head (admin)', getContRoute({ modelId: C3Id, revisionId: masterRevId }), true, validRevResultC3],
-				['Get latest form container with newer void revision via master/head (viewer)', getContRoute({ modelId: C3Id, revisionId: masterRevId, key: viewerKey }), true, validRevResultC3],
-				['Get latest form container with newer void revision via master/head (commenter)', getContRoute({ modelId: C3Id, revisionId: masterRevId, key: commenterKey }), true, validRevResultC3],
+				['trying to access void revision via rev ID (admin)', getContRoute({ modelId: C3Id, revisionId: R4Id }), true, voidRevResult],
+				['trying to access void revision via rev ID (viewer)', getContRoute({ modelId: C3Id, revisionId: R4Id, key: viewerKey }), true, voidRevResult],
+				['trying to access void revision via rev ID (commenter)', getContRoute({ modelId: C3Id, revisionId: R4Id, key: commenterKey }), true, voidRevResult],
+				['getting latest form container with newer void revision via master/head (admin)', getContRoute({ modelId: C3Id, revisionId: masterRevId }), true, validRevResultC3],
+				['getting latest form container with newer void revision via master/head (viewer)', getContRoute({ modelId: C3Id, revisionId: masterRevId, key: viewerKey }), true, validRevResultC3],
+				['getting latest form container with newer void revision via master/head (commenter)', getContRoute({ modelId: C3Id, revisionId: masterRevId, key: commenterKey }), true, validRevResultC3],
 			];
 
 			// NoFile Container Tests
-			const noFileRevResult = getContResult(C4, R6Id);
 			const contNoFileRevisions = [
-				['Try to access noFile revision via rev ID (admin)', getContRoute({ modelId: C4Id, revisionId: R6Id }), true, noFileRevResult],
-				['Try to access noFile revision via rev ID (viewer)', getContRoute({ modelId: C4Id, revisionId: R6Id, key: viewerKey }), true, noFileRevResult],
-				['Try to access noFile revision via rev ID (commenter)', getContRoute({ modelId: C4Id, revisionId: R6Id, key: commenterKey }), true, noFileRevResult],
-				['Try to access noFile revision via master/head (admin)', getContRoute({ modelId: C4Id, revisionId: masterRevId }), true, noFileRevResult],
-				['Try to access noFile revision via master/head (viewer)', getContRoute({ modelId: C4Id, revisionId: masterRevId, key: viewerKey }), true, noFileRevResult],
-				['Try to access noFile revision via master/head (commenter)', getContRoute({ modelId: C4Id, revisionId: masterRevId, key: commenterKey }), true, noFileRevResult],
+				['trying to access noFile revision via rev ID', getContRoute({ modelId: C4Id, revisionId: R6Id }), false, templates.fileNotFound],
+				['trying to access noFile revision via master/head', getContRoute({ modelId: C4Id, revisionId: masterRevId }), false, templates.fileNotFound],
 			];
 
 			// Federation tests
@@ -561,7 +579,7 @@ const testGetAssetMaps = () => {
 				}
 			});
 		};
-		describe.each(generateTestData())('Get asset maps', runTest);
+		describe.each(generateTestData())('Get model properties', runTest);
 	});
 };
 
@@ -573,5 +591,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 
 	afterAll(() => ServiceHelper.closeApp(server));
 
-	testGetAssetMaps();
+	testModelProperties();
 });
