@@ -19,4 +19,17 @@ const Tickets = {};
 
 Tickets.TICKETS_RESOURCES_COL = 'tickets.resources';
 
+Tickets.queryOperators = {
+	EXISTS: 'ex',
+	NOT_EXISTS: 'nex',
+	EQUALS: 'eq',
+	NOT_EQUALS: 'neq',
+	CONTAINS: 'ss',
+	NOT_CONTAINS: 'nss',
+	RANGE: 'rng',
+	NOT_IN_RANGE: 'nrng',
+	GREATER_OR_EQUAL_TO: 'gte',
+	LESSER_OR_EQUAL_TO: 'lte',
+};
+
 module.exports = Tickets;

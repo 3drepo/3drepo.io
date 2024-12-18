@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { TICKETS_RESOURCES_COL, queryOperators } = require('../../../../../models/tickets.constants');
 const { UUIDToString, generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { addGroups, deleteGroups, getGroupsByIds } = require('./tickets.groups');
 const { addTicketsWithTemplate, getAllTickets, getTicketById, updateTickets } = require('../../../../../models/tickets');
@@ -32,7 +33,6 @@ const { deleteIfUndefined, isEmpty } = require('../../../../../utils/helper/obje
 const { getFileWithMetaAsStream, removeFiles, storeFiles } = require('../../../../../services/filesManager');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
 const { isBuffer, isUUID } = require('../../../../../utils/helper/typeCheck');
-const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
 const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
 const { getAllTemplates } = require('../../../../../models/tickets.templates');
@@ -328,8 +328,52 @@ const filtersToProjection = (filters) => {
 	return projectionObject;
 };
 
+const getQueryFromFilters = (filters) => {
+	const operatorToQuery = {
+		[queryOperators.EXISTS]: (propertyName) => ({
+			[propertyName]: { $exists: true },
+		}),
+		[queryOperators.NOT_EXISTS]: (propertyName) => ({
+			[propertyName]: { $not: { $exists: true } },
+		}),
+		[queryOperators.EQUALS]: (propertyName, value) => ({
+			[propertyName]: { $in: value },
+		}),
+		[queryOperators.NOT_EQUALS]: (propertyName, value) => ({
+			[propertyName]: { $not: { $in: value } },
+		}),
+		[queryOperators.CONTAINS]: (propertyName, value) => ({
+			$or: value.map((val) => ({ [propertyName]: { $regex: val, $options: 'i' } })),
+		}),
+		[queryOperators.NOT_CONTAINS]: (propertyName, value) => ({
+			$nor: value.map((val) => ({ [propertyName]: { $regex: val, $options: 'i' } })),
+		}),
+		[queryOperators.RANGE]: (propertyName, value) => ({
+			[propertyName]: { $gte: value[0], $lte: value[1] },
+		}),
+		[queryOperators.NOT_IN_RANGE]: (propertyName, value) => ({
+			[propertyName]: { $not: { $gte: value[0], $lte: value[1] } },
+		}),
+		[queryOperators.GREATER_OR_EQUAL_TO]: (propertyName, value) => ({
+			$or: [{ [propertyName]: { $gte: value } }, { [propertyName]: { $gte: new Date(value) } }],
+		}),
+		[queryOperators.LESSER_OR_EQUAL_TO]: (propertyName, value) => ({
+			$or: [{ [propertyName]: { $lte: value } }, { [propertyName]: { $lte: new Date(value) } }],
+		}),
+	};
+
+	let query = {};
+
+	filters.forEach(({ propertyName, operator, value }) => {
+		const propQuery = operatorToQuery[operator](propertyName, value);
+		query = { ...query, ...propQuery };
+	});
+
+	return query;
+};
+
 Tickets.getTicketList = (teamspace, project, model,
-	{ filters = [], updatedSince, sortBy, sortDesc, limit, skip }) => {
+	{ filters = [], updatedSince, sortBy, sortDesc, limit, skip, queryFilters }) => {
 	const { SAFETIBASE, SEQUENCING } = presetModules;
 	const {
 		[SAFETIBASE]: safetibaseProps,
@@ -363,7 +407,9 @@ Tickets.getTicketList = (teamspace, project, model,
 		sort = { [propertyToFilterName(sortBy)]: sortDesc ? -1 : 1 };
 	}
 
-	return getAllTickets(teamspace, project, model, deleteIfUndefined({ projection, updatedSince, sort, limit, skip }));
+	const query = queryFilters ? getQueryFromFilters(queryFilters) : undefined;
+	return getAllTickets(teamspace, project, model,
+		deleteIfUndefined({ projection, updatedSince, sort, limit, skip, query }));
 };
 
 Tickets.getOpenTicketsCount = async (teamspace, project, model) => {
