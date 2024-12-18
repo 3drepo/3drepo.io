@@ -25,6 +25,7 @@ import { StopBackgroundInteraction } from '@controls/dueDate/dueDate.styles';
 export type BaseCalendarPickerProps = FormInputProps & {
 	defaultValue?: Date;
 	PickerComponent: any;
+	placeholder?: string;
 };
 
 export const BaseCalendarPicker = ({
@@ -37,6 +38,7 @@ export const BaseCalendarPicker = ({
 	value,
 	onChange,
 	onBlur,
+	placeholder,
 	...props
 }: BaseCalendarPickerProps) => {
 	const [open, setOpen] = useState(false);
@@ -81,7 +83,7 @@ export const BaseCalendarPicker = ({
 						required={required}
 						inputProps={{
 							...textFieldProps.inputProps,
-							placeholder: formatMessage({
+							placeholder: placeholder ?? formatMessage({
 								id: 'calendarPicker.placeholder',
 								defaultMessage: 'Choose a date',
 							}),
