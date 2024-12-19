@@ -105,11 +105,12 @@ Mailer.sendEmail = async (templateName, to, data, attachments) => {
 	try {
 		await checkMailerConfig();
 		const emailContent = await template.html(data);
+		const extraStyles = template.styles ?? '';
 		const mailOptions = {
 			from: config.mail.sender,
 			to,
 			subject: template.subject(data),
-			html: await baseTemplate.html({ ...data, emailContent }),
+			html: await baseTemplate.html({ ...data, emailContent, extraStyles }),
 		};
 
 		if (attachments) {
@@ -117,7 +118,7 @@ Mailer.sendEmail = async (templateName, to, data, attachments) => {
 		}
 		await transporter.sendMail(mailOptions);
 	} catch (err) {
-		logger.logError(`Email error - ${err.message}`);
+		logger.logError(`Failed to send email with template ${templateName} - ${err.message}`);
 		throw err;
 	}
 };
