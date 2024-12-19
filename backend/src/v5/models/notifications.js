@@ -96,4 +96,115 @@ Notifications.insertTicketClosedNotifications = async (teamspace, project, model
 	}
 };
 
+const getGroupedNotificationsByQuery = (query) => {
+	const pipelines = [
+		query,
+		{
+			// group by user/teamspace/project/model/type, count up the tickets
+			$group: {
+				_id: {
+					user: '$user',
+					teamspace: '$data.teamspace',
+					project: '$data.project',
+					model: '$data.model',
+					type: '$type',
+				},
+				tickets: { $push: '$data.ticket' },
+				count: { $sum: 1 },
+			},
+		},
+		{
+			// group the data by user/temaspace/project/model
+			$group: {
+				_id: {
+					user: '$_id.user',
+					teamspace: '$_id.teamspace',
+					project: '$_id.project',
+					model: '$_id.model',
+				},
+				notification: {
+					$push: {
+						type: '$_id.type',
+						ticket: '$tickets',
+						count: '$count',
+					},
+				},
+			},
+		},
+		{
+			$sort: {
+				'_id.project': 1,
+				'_id.model': 1,
+			},
+		},
+		{
+			$group: {
+				_id: {
+					user: '$_id.user',
+					teamspace: '$_id.teamspace',
+
+				},
+				data: {
+					$push: { project: '$_id.project', model: '$_id.model', data: '$notification' },
+				},
+			},
+		},
+
+	];
+
+	return db.aggregate(INTERNAL_DB, NOTIFICATIONS_COL, pipelines);
+};
+
+const getAllAssociatedTicketsInQuery = (query) => {
+	const pipelines = [
+		query,
+		{
+			$group: {
+				_id: {
+					teamspace: '$data.teamspace',
+					project: '$data.project',
+					model: '$data.model',
+				},
+				tickets: { $addToSet: '$data.ticket' },
+			},
+		}, {
+			$group: {
+				_id: {
+					teamspace: '$data.teamspace',
+					project: '$data.project',
+					model: '$data.model',
+				},
+				tickets: { $addToSet: '$data.ticket' },
+			} },
+		{
+			$group: {
+				_id: '$_id.teamspace',
+				data: { $push: {
+					project: '$_id.project',
+					model: '$_id.model',
+					tickets: '$tickets',
+				} } } },
+	];
+	return db.aggregate(INTERNAL_DB, NOTIFICATIONS_COL, pipelines);
+};
+
+Notifications.composeDailyDigests = async (teamspaces) => {
+	const startDate = new Date();
+	startDate.setDate(startDate.getDate() - 1);
+
+	const query = {
+		$match: {
+			'data.teamspace': { $in: teamspaces },
+			timestamp: { $gte: startDate },
+		},
+	};
+
+	const [contextData, digestData] = await Promise.all([
+		getAllAssociatedTicketsInQuery(query),
+		getGroupedNotificationsByQuery(query),
+	]);
+
+	return { contextData, digestData };
+};
+
 module.exports = Notifications;

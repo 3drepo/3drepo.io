@@ -16,14 +16,45 @@
  */
 
 const Path = require('path');
+const { getTeamspaceList } = require('../../utils');
 const { v5Path } = require('../../../interop');
+
+const { composeDailyDigests } = require(`${v5Path}/models/notifications`);
+const { getAddOns } = require(`${v5Path}/models/teamspaceSettings`);
+const { ADD_ONS } = require(`${v5Path}/models/teamspaceSettings.constants`);
 
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const { sendEmail } = require(`${v5Path}/services/mailer`);
 const { templates } = require(`${v5Path}/services/mailer/mailer.constants`);
 
+// this processes the list of project/model/ticket ids into their names
+const getContextDataLUT = async (contextData) => {
+	const dataLookUp = {};
+
+	await Promise.all(contextData.map(async ({ _id: teamspace, data }) => {
+		dataLookUp[teamspace] = {};
+		const projects = [];
+		const models = [];
+
+		const ticketProcessingProm = data.map(async ({ project, model, tickets }) => {
+			projects.push(project);
+			models.push(model);
+		});
+	}));
+
+	return dataLookUp;
+};
+
 const run = async (teamspace) => {
+	const teamspaces = teamspace ? [teamspace] : await getTeamspaceList();
+	const teamspacesWithDDEnabled = await Promise.all(teamspaces.flatMap(async (ts) => {
+		const addOns = await getAddOns(ts);
+		return addOns[ADD_ONS.DAILY_DIGEST] ? ts : [];
+	}));
+
+	const { contextData, digestData } = await composeDailyDigests(teamspacesWithDDEnabled);
+
 	await sendEmail(templates.DAILY_DIGEST.name, 'cfan@asite.com',
 		{
 			username: 'carmen',
