@@ -51,12 +51,31 @@ export const DrillDownItem = styled.div<{ $visible: boolean }>`
 	width: 100%;
 `;
 
+// Very small viewports in chrome (and any viewport in Firefox) create a visual bug
+// that prevents the `DrillDownItem`s from being correctly placed. As a result, the
+// filter list is always partly hidden and the filter form is visible since the beginning.
+// This fixes it.
+const spreadAnimation = css`
+	@keyframes spread {
+		from {
+			width: 100%;
+		} to {
+			width: 200%;
+		}
+	}
+
+	animation-name: spread;
+	animation-duration: 0;
+	animation-fill-mode: forwards;
+	animation-delay: .1s;
+`;
+
 export const DrillDownList = styled.div<{ $visibleIndex: number }>`
-	width: 200%;
 	height: fit-content;
 	overflow-x: hidden;
 	display: flex;
 	flex-direction: row;
 	transition: margin-left .4s;
 	margin-left: ${({ $visibleIndex }) => -($visibleIndex * 100)}%;
+	${spreadAnimation}
 `;
