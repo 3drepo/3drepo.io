@@ -38,7 +38,8 @@ export const getModelJobsAndUsers = (containerOrFederation) => {
 export const jobOrUserToString = (ju): string | null => (ju._id || ju.user);
 
 export const getValidValues = (jobsAndUsers, excludeViewers): (string | null)[] => {
-	const validJobsAndUsers = excludeViewers ? jobsAndUsers.filter((ju) => (!ju?.isViewer)) : jobsAndUsers;
+	const jobsAndTeamspaceUsers = jobsAndUsers.filter((ju) => !ju.isNotTeamspaceMember);
+	const validJobsAndUsers = excludeViewers ? jobsAndTeamspaceUsers.filter((ju) => (!ju?.isViewer)) : jobsAndTeamspaceUsers;
 	return validJobsAndUsers.map(jobOrUserToString);
 };
 
