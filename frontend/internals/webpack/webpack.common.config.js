@@ -67,6 +67,7 @@ module.exports = (options) => ({
 			'@components': PATHS.COMPONENTS,
 			'@controls': PATHS.CONTROLS,
 			"styled-components": path.resolve("node_modules", "styled-components"),
+			"react/jsx-runtime": path.resolve("node_modules", "react", "jsx-runtime.js"),
 		},
 		fallback: {
 			'process/browser': require.resolve('process/browser'),
