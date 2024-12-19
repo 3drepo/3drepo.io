@@ -15,11 +15,48 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const DbConstants = require('../handler/db.constants');
 const FilesManager = require('../services/filesManager');
+const History = require('./history');
+const Permissions = require('../utils/permissions/permissions');
+const Ref = require('./ref');
 const db = require('../handler/db');
 const { templates } = require('../utils/responseCodes');
+const uuidHelper = require('../utils/helper/uuids');
 
 const UnityAssets = {};
+
+const getAssetListEntry = async (teamspace, modelId, revId) => {
+	const collection = `${modelId}.stash.repobundles`;
+	let assets = await db.findOne(teamspace, collection, { _id: revId });
+
+	// falls back on Unity bundles if RepoBundles are not available.
+	if (!assets) {
+		const legacyCollection = `${modelId}.stash.unity3d`;
+		assets = await db.findOne(teamspace, legacyCollection, { _id: revId });
+	}
+
+	return assets;
+};
+
+const getAssetListFromRef = async (teamspace, project, ref, username) => {
+	const modelId = ref.project;
+	const granted = await Permissions.hasReadAccessToContainer(teamspace, project, modelId, username);
+
+	if (granted) {
+		// eslint-disable-next-line no-underscore-dangle
+		let revId = uuidHelper.UUIDToString(ref._rid);
+		if (revId === DbConstants.MASTER_BRANCH) {
+			revId = await History.findLatest(ref.owner, modelId, { _id: 1 });
+		}
+
+		if (revId) {
+			const listEntry = await getAssetListEntry(ref.owner, modelId, revId._id);
+			return listEntry;
+		}
+	}
+	return undefined;
+};
 
 UnityAssets.getRepoBundle = async (account, model, id) => {
 	const bundleFileName = `${id}`;
@@ -67,6 +104,29 @@ UnityAssets.getTexture = async (account, model, id) => {
 	response.size = chunkInfo.end - chunkInfo.start;
 
 	return response;
+};
+
+UnityAssets.getAssetListForCont = async (teamspace, model, branch, rev) => {
+	const history = await History.getHistory(teamspace, model, branch, rev);
+
+	const assetEntry = await getAssetListEntry(teamspace, model, history._id);
+	const models = [];
+	if (assetEntry) {
+		models.push(assetEntry);
+	}
+	return { models };
+};
+
+UnityAssets.getAssetListForFed = async (teamspace, project, model, branch, rev, username) => {
+	const subModelRefs = await Ref.getRefNodes(teamspace, model, branch, rev);
+
+	const fetchPromise = [];
+	subModelRefs.forEach((ref) => {
+		fetchPromise.push(getAssetListFromRef(teamspace, project, ref, username));
+	});
+
+	const assetLists = await Promise.all(fetchPromise);
+	return { models: assetLists.filter((list) => list) };
 };
 
 module.exports = UnityAssets;

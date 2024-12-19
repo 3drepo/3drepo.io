@@ -25,6 +25,7 @@ const CreateGeneralRevisionRoutes = require('./teamspaces/projects/models/common
 const CreateGroupRoutes = require('./teamspaces/projects/models/common/groups');
 const CreateModelGeneralRoutes = require('./teamspaces/projects/models/common/general');
 const CreateModelPropertiesRoutes = require('./teamspaces/projects/models/common/modelProperties');
+const CreateRepoAssetRoutes = require('./teamspaces/projects/models/common/repoAssets');
 const CreateTicketCommentsRoutes = require('./teamspaces/projects/models/common/tickets.comments');
 const CreateTicketGroupsRoutes = require('./teamspaces/projects/models/common/tickets.groups');
 const CreateTicketRoutes = require('./teamspaces/projects/models/common/tickets');
@@ -67,6 +68,7 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assetsMeta/', CreateAssetMetaRoutes(modelTypes.CONTAINER));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assetMaps/', CreateAssetMapRoutes(modelTypes.CONTAINER));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/modelProperties/', CreateModelPropertiesRoutes(modelTypes.CONTAINER));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/repoAssets/', CreateRepoAssetRoutes(modelTypes.CONTAINER));
 
 	// Federations
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations', CreateModelGeneralRoutes(modelTypes.FEDERATION));
@@ -79,6 +81,7 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/assetsMeta/', CreateAssetMetaRoutes(modelTypes.FEDERATION));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/assetMaps/', CreateAssetMapRoutes(modelTypes.FEDERATION));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/modelProperties/', CreateModelPropertiesRoutes(modelTypes.FEDERATION));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/repoAssets/', CreateRepoAssetRoutes(modelTypes.FEDERATION));
 
 	// Drawings
 	app.use('/v5/teamspaces/:teamspace/projects/:project/drawings', CreateModelGeneralRoutes(modelTypes.DRAWING));

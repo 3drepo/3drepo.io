@@ -20,9 +20,8 @@ const DB = require('../handler/db');
 const DbConstants = require('../handler/db.constants');
 const FilesManager = require('../services/filesManager');
 const History = require('./history');
-const ModelSettings = require('./modelSettings');
 const Permissions = require('../utils/permissions/permissions');
-const Scene = require('./scenes');
+const Ref = require('./ref');
 const Stream = require('stream');
 const jsonAssetsConstants = require('./jsonAssets.constants');
 const uuidHelper = require('../utils/helper/uuids');
@@ -52,18 +51,6 @@ const jsonFileExists = async (teamspace, model, fileName) => {
 	const collection = getJSONCollection(model);
 	const result = await FilesManager.fileExists(teamspace, collection, fileName);
 	return result;
-};
-
-// Note: in v4, this was part of its own file. Is it still used enough to
-// justify this again? See if other routes also need it.
-const getRefNodes = async (teamspace, federation, branch, rev) => {
-	const settings = await ModelSettings.getModelById(teamspace, federation);
-	if (settings.federate) {
-		const result = await Scene.findNodesByType(teamspace, federation, branch, rev, 'ref', undefined);
-		return result;
-	}
-
-	return [];
 };
 
 const splitEntriesToGroups = (entries, maxParallelFiles = 100) => {
@@ -229,7 +216,7 @@ JSONAssets.getAllSuperMeshMappingForContainer = async (teamspace, container, bra
 };
 
 JSONAssets.getAllSuperMeshMappingForFederation = async (teamspace, federation, branch, rev) => {
-	const subModelRefs = await getRefNodes(teamspace, federation, branch, rev);
+	const subModelRefs = await Ref.getRefNodes(teamspace, federation, branch, rev);
 
 	const getSubModelInfoProms = subModelRefs.map(async ({ owner, project }) => {
 		const revNode = await History.findLatest(owner, project, { _id: 1 });
@@ -314,7 +301,7 @@ const getFileFromRef = async (teamspace, project, ref, username, filename) => {
 };
 
 const getFileFromSubModels = async (teamspace, project, model, branch, revision, username, filename) => {
-	const subModelRefs = await getRefNodes(teamspace, model, branch, revision);
+	const subModelRefs = await Ref.getRefNodes(teamspace, model, branch, revision);
 
 	const getFileProm = [];
 	subModelRefs.forEach((ref) => {
