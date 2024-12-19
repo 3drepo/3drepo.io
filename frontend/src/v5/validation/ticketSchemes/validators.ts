@@ -24,7 +24,7 @@ import { CardFilterOperator, CardFilterType } from '@components/viewer/cards/car
 
 const getValueValidator = (type: CardFilterType) => {
 	if (isTextType(type)) return trimmedString.required().max(type === 'longText' ? MAX_LONG_TEXT_LENGTH : MAX_TEXT_LENGTH);
-	if (type === 'number') return requiredNumber();
+	if (['number', 'date'].includes(type)) return requiredNumber();
 	return trimmedString;
 };
 

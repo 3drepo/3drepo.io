@@ -24,6 +24,17 @@ import { useEffect } from 'react';
 import { isArray, range } from 'lodash';
 import { CardFilterType } from '../../cardFilters.types';
 import { RangeInput } from './rangeInput/rangeInput.component';
+import { InputController } from '@controls/inputs/inputController.component';
+import { DateRangeInput } from './rangeInput/dateRangeInput.component';
+import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
+
+const getInputField = (type: CardFilterType) => {
+	switch (type) {
+		case 'number': return FormNumberField;
+		case 'date': return (props) => <InputController Input={DateTimePicker} {...props} />;
+		default: return FormTextField;
+	}
+};
 
 const name = 'values';
 export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
@@ -56,8 +67,8 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 
 	if (maxFields === 0) return null;
 
-	if (type === 'number' || isTextType(type)) {
-		const InputField = type === 'number' ? FormNumberField : FormTextField;
+	if (type === 'number' || type === 'date' || isTextType(type)) {
+		const InputField = getInputField(type);
 
 		if (maxFields === 1) return <InputField name={`${name}.0.value`} formError={!!error?.[0]} />;
 
@@ -75,15 +86,26 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 		// useEffect that adapts fields' values to be arrays is async
 		// and it is only called later
 		// @ts-ignore
-		if (isRangeOp && isArray(fields[0]?.value)) return (
-			<>
-				{fields.map((field, i) => (
-					<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
-						<RangeInput Input={InputField} name={`${name}.${i}.value`} error={error?.[i]?.value} />
-					</ArrayFieldContainer>
-				))}
-			</>
-		);
+		if (isRangeOp && isArray(fields[0]?.value)) {
+			if (type === 'date') return (
+				<>
+					{fields.map((field, i) => (
+						<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
+							<DateRangeInput name={`${name}.${i}.value`} error={error?.[i]?.value} />
+						</ArrayFieldContainer>
+					))}
+				</>
+			);
+			return (
+				<>
+					{fields.map((field, i) => (
+						<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
+							<RangeInput Input={InputField} name={`${name}.${i}.value`} error={error?.[i]?.value} />
+						</ArrayFieldContainer>
+					))}
+				</>
+			);
+		}
 		return (
 			<>
 				{fields.map((field, i) => (
