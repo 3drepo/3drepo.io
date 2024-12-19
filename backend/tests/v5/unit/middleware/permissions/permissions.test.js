@@ -26,6 +26,7 @@ const { templates } = require(`${src}/utils/responseCodes`);
 jest.mock('../../../../../src/v5/utils/sessions');
 const Sessions = require(`${src}/utils/sessions`);
 const PermMiddlewares = require(`${src}/middleware/permissions/permissions`);
+const { generateRandomString } = require('../../../helper/services');
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
@@ -36,19 +37,22 @@ Sessions.getUserFromSession.mockImplementation(() => 'hi');
 
 const testHasAccessToTeamspace = () => {
 	describe('HasAccessToTeamspace', () => {
+		const ipAddress = generateRandomString();
+
 		test('next() should be called if the user has access', async () => {
 			const mockCB = jest.fn(() => {});
 			await PermMiddlewares.hasAccessToTeamspace(
-				{ params: { teamspace: 'ts' }, headers: { referer: 'http://abc.com/' }, session: { user: { username: 'hi', referer: 'http://abc.com' } } },
+				{ ips: [ipAddress], params: { teamspace: 'ts' }, headers: { referer: 'http://abc.com/' }, session: { ipAddress, user: { username: 'hi', referer: 'http://abc.com' } } },
 				{},
 				mockCB,
 			);
 			expect(mockCB.mock.calls.length).toBe(1);
 		});
+
 		test('should respond with notLoggedIn errCode if the session is invalid', async () => {
 			const mockCB = jest.fn(() => {});
 			await PermMiddlewares.hasAccessToTeamspace(
-				{ params: { teamspace: 'ts' }, headers: { referer: 'http://xyz.com' } },
+				{ ips: [ipAddress], params: { teamspace: 'ts' }, headers: { referer: 'http://xyz.com' } },
 				{},
 				mockCB,
 			);
@@ -60,7 +64,7 @@ const testHasAccessToTeamspace = () => {
 		test('should respond with teamspace not found if the user has no access', async () => {
 			const mockCB = jest.fn(() => {});
 			await PermMiddlewares.hasAccessToTeamspace(
-				{ params: { teamspace: 'ts1' }, headers: { referer: 'http://xyz.com' }, session: { user: { username: 'hi', referer: 'http://xyz.com' } } },
+				{ ips: [ipAddress], params: { teamspace: 'ts1' }, headers: { referer: 'http://xyz.com' }, session: { ipAddress, user: { username: 'hi', referer: 'http://xyz.com' } } },
 				{},
 				mockCB,
 			);
@@ -73,10 +77,12 @@ const testHasAccessToTeamspace = () => {
 
 const testHasReadAccessToContainer = () => {
 	describe('HasReadAccessToContainer', () => {
+		const ipAddress = generateRandomString();
+
 		test('next() should be called if the user has access', async () => {
 			const mockCB = jest.fn(() => {});
 			await PermMiddlewares.hasReadAccessToContainer(
-				{ params: { teamspace: 'ts', project: 'ok' }, headers: { referer: 'http://abc.com/' }, session: { user: { username: 'hi', referer: 'http://abc.com' } } },
+				{ ips: [ipAddress], params: { teamspace: 'ts', project: 'ok' }, headers: { referer: 'http://abc.com/' }, session: { ipAddress, user: { username: 'hi', referer: 'http://abc.com' } } },
 				{},
 				mockCB,
 			);
@@ -86,7 +92,7 @@ const testHasReadAccessToContainer = () => {
 		test('should respond with notAuthorized if the user has no access', async () => {
 			const mockCB = jest.fn(() => {});
 			await PermMiddlewares.hasReadAccessToContainer(
-				{ params: { teamspace: 'ts', project: 'nope' }, headers: { referer: 'http://abc.com/' }, session: { user: { username: 'hi', referer: 'http://abc.com' } } },
+				{ ips: [ipAddress], params: { teamspace: 'ts', project: 'nope' }, headers: { referer: 'http://abc.com/' }, session: { ipAddress, user: { username: 'hi', referer: 'http://abc.com' } } },
 				{},
 				mockCB,
 			);
@@ -98,7 +104,7 @@ const testHasReadAccessToContainer = () => {
 		test('should respond with notLoggedIn errCode if the session is invalid', async () => {
 			const mockCB = jest.fn(() => {});
 			await PermMiddlewares.hasReadAccessToContainer(
-				{ params: { teamspace: 'ts' }, headers: { referer: 'http://xyz.com' } },
+				{ ips: [ipAddress], params: { teamspace: 'ts' }, headers: { referer: 'http://xyz.com' } },
 				{},
 				mockCB,
 			);
@@ -110,7 +116,7 @@ const testHasReadAccessToContainer = () => {
 		test('should respond with teamspace not found if the user has no access', async () => {
 			const mockCB = jest.fn(() => {});
 			await PermMiddlewares.hasReadAccessToContainer(
-				{ params: { teamspace: 'ts1' }, headers: { referer: 'http://xyz.com' }, session: { user: { username: 'hi', referer: 'http://xyz.com' } } },
+				{ ips: [ipAddress], params: { teamspace: 'ts1' }, headers: { referer: 'http://xyz.com' }, session: { ipAddress, user: { username: 'hi', referer: 'http://xyz.com' } } },
 				{},
 				mockCB,
 			);

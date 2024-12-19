@@ -18,6 +18,8 @@
 const { CSRF_COOKIE } = require('../utils/sessions.constants');
 const { SOCKET_HEADER } = require('../services/chat/chat.constants');
 const config = require('../utils/config');
+const { deleteIfUndefined } = require('../utils/helper/objects');
+const { destroySession } = require('../utils/sessions');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUIDString } = require('../utils/helper/uuids');
 const { getURLDomain } = require('../utils/helper/strings');
@@ -62,23 +64,27 @@ const updateSessionDetails = (req) => {
 
 	if (userAgent) {
 		updatedUser.webSession = isFromWebBrowser(userAgent);
+		updatedUser.userAgent = userAgent;
 	}
 
 	if (req.token) {
 		session.token = req.token;
 	}
 
-	session.user = updatedUser;
+	session.user = deleteIfUndefined(updatedUser);
 	session.cookie.domain = config.cookie_domain;
 
 	if (config.cookie.maxAge) {
 		session.cookie.maxAge = config.cookie.maxAge;
 	}
 
+	const ipAddress = req.ips[0] || req.ip;
+	session.ipAddress = ipAddress;
+
 	publish(events.SESSION_CREATED, {
 		username: updatedUser.username,
 		sessionID: req.sessionID,
-		ipAddress: req.ips[0] || req.ip,
+		ipAddress,
 		userAgent,
 		socketId: req.headers[SOCKET_HEADER],
 		referer: updatedUser.referer });
@@ -98,26 +104,14 @@ const createSession = (req, res) => {
 	});
 };
 
-const removeCSRFToken = async (req, res, next) => {
-	const { domain } = config.cookie;
-	res.clearCookie(CSRF_COOKIE, { domain });
-	await next();
-};
-
-const destroySession = (req, res) => {
+Sessions.destroySession = (req, res) => {
 	const username = req.session?.user?.username;
+
 	try {
-		req.session.destroy(() => {
-			res.clearCookie('connect.sid', { domain: config.cookie_domain, path: '/' });
-			const sessionData = { user: { username } };
-
-			publish(events.SESSIONS_REMOVED, {
-				ids: [req.sessionID],
-				elective: true,
-			});
-
-			respond({ ...req, session: sessionData }, res, templates.ok, req.v4 ? { username } : undefined);
-		});
+		const sessionData = { user: { username: req.session?.user?.username } };
+		const callback = () => respond({ ...req, session: sessionData }, res, templates.ok,
+			req.v4 ? { username } : undefined);
+		destroySession(req.session, res, callback, true);
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -138,6 +132,5 @@ Sessions.updateSession = async (req, res, next) => {
 };
 
 Sessions.createSession = validateMany([Sessions.appendCSRFToken, createSession]);
-Sessions.destroySession = validateMany([removeCSRFToken, destroySession]);
 
 module.exports = Sessions;

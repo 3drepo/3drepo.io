@@ -23,7 +23,7 @@ export const Container = styled.div`
 	justify-content: stretch;
 	max-width: 951px;
 	border-radius: 20px;
-	max-height: 627px;
+	max-height: 717px;
 	z-index: 2;
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	padding: 45px;

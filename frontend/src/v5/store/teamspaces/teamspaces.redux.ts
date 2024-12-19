@@ -30,6 +30,7 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 	setCurrentTeamspace: ['currentTeamspace'],
 	setTeamspacesArePending: ['teamspacesArePending'],
 	fetchAddOnsSuccess: ['teamspace', 'addOns'],
+	fetchActivityLog: ['teamspace', 'startDate', 'endDate'],
 }, { prefix: 'TEAMSPACES2/' }) as { Types: Constants<ITeamspacesActionCreators>; Creators: ITeamspacesActionCreators };
 
 export const INITIAL_STATE: TeamspacesState = {
@@ -108,9 +109,9 @@ export type FetchQuotaSuccessAction = Action<'FETCH_QUOTA_SUCCESS'> & { teamspac
 export type SetCurrentTeamspaceAction = Action<'SET_CURRENT_TEAMSPACE'> & { currentTeamspace: string };
 export type SetTeamspacesArePendingAction = Action<'SET_TEAMSPACES_ARE_PENDING'> & { teamspacesArePending: boolean };
 export type SetUsedQuotaSeatsAction = Action<'SET_USED_QUOTA_SEATS'> & { teamspace: string, seats: number };
-
 export type FetchAddOnsAction = Action<'FETCH_ADD_ONS'> & { teamspace: string };
 export type FetchAddOnsSuccessAction = Action<'FETCH_ADD_ONS_SUCCESS'> & { teamspace: string, addOns: AddOn[] };
+export type FetchActivityLogAction = Action<'FETCH_ACTIVITY_LOG'> & { teamspace: string, startDate?: Date, endDate?: Date };
 
 export interface ITeamspacesActionCreators {
 	fetch: () => FetchAction;
@@ -121,4 +122,5 @@ export interface ITeamspacesActionCreators {
 	fetchQuotaSuccess: (teamspace: string, quota: Quota) => FetchQuotaSuccessAction;
 	setUsedQuotaSeats: (teamspace: string, seats: number) => SetUsedQuotaSeatsAction;
 	fetchAddOnsSuccess: (teamspace: string, addOns: AddOn[]) => FetchAddOnsSuccessAction;
+	fetchActivityLog: (teamspace: string, startDate?: Date, endDate?: Date) => FetchActivityLogAction;
 }

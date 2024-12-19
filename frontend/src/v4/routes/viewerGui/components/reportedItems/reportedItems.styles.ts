@@ -19,12 +19,12 @@ import { DashedContainer as DashedContainerBase } from '@controls/dashedContaine
 import { COLOR } from '@/v4/styles';
 
 export const DashedContainer = styled(DashedContainerBase).attrs({
-	strokeColor: '#c0c8d5', // TODO - fix when new palette is released
-	borderRadius: 5,
-	dashSize: 2,
-	gapSize: 2,
-	strokeWidth: 2,
-	zeroPadding: true,
+	$strokeColor: '#c0c8d5', // TODO - fix when new palette is released
+	$borderRadius: 5,
+	$dashSize: 2,
+	$gapSize: 2,
+	$strokeWidth: 2,
+	$zeroPadding: true,
 })`
 	margin: 12px 15px;
 `;

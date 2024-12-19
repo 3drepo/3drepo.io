@@ -32,6 +32,7 @@ import { UploadListItemFileIcon } from '@components/shared/uploadFiles/uploadLis
 import { UploadListItemTitle } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemTitle/uploadListItemTitle.component';
 import { UploadProgress } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadProgress/uploadProgress.component';
 import { formatMessage } from '@/v5/services/intl';
+import { get } from 'lodash';
 
 const UNEXPETED_STATUS_ERROR = undefined;
 const STATUS_TEXT_BY_UPLOAD = {
@@ -75,12 +76,14 @@ export const UploadListItem = ({
 }: IUploadListItem): JSX.Element => {
 	const revisionPrefix = `uploads.${index}`;
 	const uploadErrorMessage: string = ContainerRevisionsHooksSelectors.selectUploadError(uploadId);
-	const { watch, trigger, setValue } = useFormContext();
+	const { watch, trigger, setValue, formState: { errors } } = useFormContext();
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const projectId = ProjectsHooksSelectors.selectCurrentProject();
 	const containerId = watch(`${revisionPrefix}.containerId`);
 	const selectedContainer = ContainersHooksSelectors.selectContainerById(containerId);
 	const progress = ContainerRevisionsHooksSelectors.selectUploadProgress(uploadId);
+	const fileError = !!get(errors, `${revisionPrefix}.file`)?.message;
+	const disabled = fileError || isUploading;
 
 	const uploadStatus = getUploadStatus(progress, uploadErrorMessage);
 
@@ -109,6 +112,10 @@ export const UploadListItem = ({
 		);
 	}, [containerId]);
 
+	useEffect(() => {
+		trigger(`${revisionPrefix}.file`);
+	}, []);
+
 	return (
 		<UploadListItemRow selected={isSelected}>
 			<UploadListItemFileIcon extension={fileData.extension} />
@@ -125,12 +132,12 @@ export const UploadListItem = ({
 				key={`${uploadId}.dest`}
 				index={index}
 				revisionPrefix={revisionPrefix}
-				disabled={isUploading}
+				disabled={disabled}
 			/>
 			<UploadListItemRevisionTag
 				key={`${uploadId}.revisionTag`}
 				revisionPrefix={revisionPrefix}
-				disabled={isUploading}
+				disabled={disabled}
 			/>
 			{isUploading
 				? (
@@ -144,7 +151,7 @@ export const UploadListItem = ({
 					/>
 				) : (
 					<>
-						<UploadListItemButton variant={isSelected ? 'secondary' : 'primary'} onClick={onClickEdit}>
+						<UploadListItemButton variant={isSelected ? 'secondary' : 'primary'} onClick={onClickEdit} disabled={disabled}>
 							<EditIcon />
 						</UploadListItemButton>
 						<UploadListItemButton variant={isSelected ? 'secondary' : 'primary'} onClick={onClickDelete}>
