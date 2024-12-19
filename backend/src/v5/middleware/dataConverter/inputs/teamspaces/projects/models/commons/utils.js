@@ -17,7 +17,6 @@
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const Yup = require('yup');
-const { parseQueryString } = require('./ticketQueryFilters');
 const { respond } = require('../../../../../../../utils/responder');
 const { types } = require('../../../../../../../utils/helper/yup');
 
@@ -41,9 +40,6 @@ Utils.validateListSortAndFilter = async (req, res, next) => {
 		});
 		try {
 			req.listOptions = await schema.validate(req.query, { stripUnknown: true });
-			if (req.query.query) {
-				req.listOptions.queryFilters = await parseQueryString(req.query.query);
-			}
 		} catch (err) {
 			respond(req, res, createResponseCode(templates.invalidArguments, err.message));
 			return;

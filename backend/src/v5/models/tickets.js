@@ -21,6 +21,7 @@ const { getNestedProperty, setNestedProperty } = require('../utils/helper/object
 const { isDate, isObject, isUUID } = require('../utils/helper/typeCheck');
 const DbHandler = require('../handler/db');
 const { basePropertyLabels } = require('../schemas/tickets/templates.constants');
+const { getTemplatesByQuery } = require('./tickets.templates');
 const { templates } = require('../utils/responseCodes');
 
 const { Long } = DbHandler.dataTypes;
@@ -161,12 +162,13 @@ Tickets.getTicketById = async (
 Tickets.getTicketsByQuery = (teamspace, project, model, query, projection) => DbHandler.find(teamspace,
 	TICKETS_COL, { teamspace, project, model, ...query }, projection);
 
-Tickets.getAllTickets = (
+Tickets.getAllTickets = async (
 	teamspace,
 	project,
 	model,
 	{
 		query,
+		templateQuery,
 		projection = { teamspace: 0, project: 0, model: 0 },
 		updatedSince,
 		sort = { [`properties.${basePropertyLabels.Created_AT}`]: -1 },
@@ -179,6 +181,11 @@ Tickets.getAllTickets = (
 
 	if (updatedSince) {
 		formattedQuery[`properties.${basePropertyLabels.UPDATED_AT}`] = { $gt: updatedSince };
+	}
+
+	if (templateQuery) {
+		const temps = await getTemplatesByQuery(teamspace, templateQuery, { _id: 1 });
+		formattedQuery.type = { $in: temps.map(({ _id }) => _id) };
 	}
 
 	return DbHandler.find(teamspace, TICKETS_COL, formattedQuery, projection, sort, limit, skip);

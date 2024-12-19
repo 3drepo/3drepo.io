@@ -328,7 +328,7 @@ const filtersToProjection = (filters) => {
 	return projectionObject;
 };
 
-const getQueryFromFilters = (filters) => {
+const getQueriesFromFilters = (filters) => {
 	const operatorToQuery = {
 		[queryOperators.EXISTS]: (propertyName) => ({
 			[propertyName]: { $exists: true },
@@ -349,27 +349,44 @@ const getQueryFromFilters = (filters) => {
 			$nor: value.map((val) => ({ [propertyName]: { $regex: val, $options: 'i' } })),
 		}),
 		[queryOperators.RANGE]: (propertyName, value) => ({
-			[propertyName]: { $gte: value[0], $lte: value[1] },
+			$or: [
+				{ [propertyName]: { $gte: value[0], $lte: value[1] } },
+				{ [propertyName]: { $gte: new Date(value[0]), $lte: new Date(value[1]) } },
+			],
 		}),
 		[queryOperators.NOT_IN_RANGE]: (propertyName, value) => ({
-			[propertyName]: { $not: { $gte: value[0], $lte: value[1] } },
+			$nor: [
+				{ [propertyName]: { $gte: value[0], $lte: value[1] } },
+				{ [propertyName]: { $gte: new Date(value[0]), $lte: new Date(value[1]) } },
+			],
 		}),
 		[queryOperators.GREATER_OR_EQUAL_TO]: (propertyName, value) => ({
-			$or: [{ [propertyName]: { $gte: value } }, { [propertyName]: { $gte: new Date(value) } }],
+			$or: [
+				{ [propertyName]: { $gte: value } },
+				{ [propertyName]: { $gte: new Date(value) } },
+			],
 		}),
 		[queryOperators.LESSER_OR_EQUAL_TO]: (propertyName, value) => ({
-			$or: [{ [propertyName]: { $lte: value } }, { [propertyName]: { $lte: new Date(value) } }],
+			$or: [
+				{ [propertyName]: { $lte: value } },
+				{ [propertyName]: { $lte: new Date(value) } },
+			],
 		}),
 	};
 
-	let query = {};
+	let templateQuery;
+	let query;
 
 	filters.forEach(({ propertyName, operator, value }) => {
-		const propQuery = operatorToQuery[operator](propertyName, value);
-		query = { ...query, ...propQuery };
+		if (propertyName === 'template') {
+			templateQuery = operatorToQuery[operator]('code', value);
+		} else {
+			const propQuery = operatorToQuery[operator](propertyName, value);
+			query = { ...query, ...propQuery };
+		}
 	});
 
-	return query;
+	return { query, templateQuery };
 };
 
 Tickets.getTicketList = (teamspace, project, model,
@@ -407,9 +424,9 @@ Tickets.getTicketList = (teamspace, project, model,
 		sort = { [propertyToFilterName(sortBy)]: sortDesc ? -1 : 1 };
 	}
 
-	const query = queryFilters ? getQueryFromFilters(queryFilters) : undefined;
+	const queries = queryFilters ? getQueriesFromFilters(queryFilters) : undefined;
 	return getAllTickets(teamspace, project, model,
-		deleteIfUndefined({ projection, updatedSince, sort, limit, skip, query }));
+		deleteIfUndefined({ projection, updatedSince, sort, limit, skip, ...queries }));
 };
 
 Tickets.getOpenTicketsCount = async (teamspace, project, model) => {

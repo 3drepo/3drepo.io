@@ -48,6 +48,7 @@ const { getAllTemplates: getAllTemplatesInProject } = require('../../../../../pr
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { templates } = require('../../../../../utils/responseCodes');
 const { validateListSortAndFilter } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/utils');
+const { validateQueryString } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/ticketQueryFilters');
 
 const createTicket = (isFed) => async (req, res) => {
 	const { teamspace, project, model } = req.params;
@@ -643,7 +644,7 @@ const establishRoutes = (isFed) => {
 	 *                         description: ticket modules and their properties
 	 *
 	 */
-	router.get('/', hasReadAccess, validateListSortAndFilter, getTicketsInModel(isFed), serialiseTicketList);
+	router.get('/', hasReadAccess, validateListSortAndFilter, validateQueryString, getTicketsInModel(isFed), serialiseTicketList);
 
 	/**
 	 * @openapi

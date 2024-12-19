@@ -17,71 +17,71 @@
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const Yup = require('yup');
-const { deleteIfUndefined } = require('../../../../../../../utils/helper/objects');
-const { isArray } = require('../../../../../../../utils/helper/typeCheck');
+const { isEmpty } = require('../../../../../../../utils/helper/objects');
 const { queryOperators } = require('../../../../../../../models/tickets.constants');
+const { respond } = require('../../../../../../../utils/responder');
 const { types } = require('../../../../../../../utils/helper/yup');
 
 const TicketQueryFilters = {};
 
-const operatorToSchema = (operator) => {
-	switch (operator) {
-	case queryOperators.EQUALS:
-	case queryOperators.NOT_EQUALS:
-	case queryOperators.CONTAINS:
-	case queryOperators.NOT_CONTAINS:
-		return Yup.array().of(types.strings.title)
-			.transform((v, value) => (value ? value.match(/[^,"]+|"([^"]*)"/g).map((val) => val.replace(/"/g, '').trim()) : value))
-			.test('non-array-value', 'Value must be an array', isArray);
-	case queryOperators.RANGE:
-	case queryOperators.NOT_IN_RANGE:
-		return types.range;
-	case queryOperators.GREATER_OR_EQUAL_TO:
-	case queryOperators.LESSER_OR_EQUAL_TO:
-		return Yup.number();
-	default:
-		return undefined;
-	}
-};
+const querySchema = Yup.string()
+	.test('wrapped-in-single-quote', 'Query string must start and end with a single quote', (val) => val.startsWith("'") && val.endsWith("'"))
+	.test('not-empty-string', 'Query string cannot be empty', (val) => !isEmpty(val.slice(1, -1)));
 
-TicketQueryFilters.parseQueryString = async (query) => {
-	const params = query.replace(/^['"]|['"]$/g, '').split('&');
-	const parsedParams = [];
-
-	await Promise.all(params.map(async (param) => {
-		const parts = param.split('::');
-
-		const propertyNameString = parts[0];
-		if (!propertyNameString) {
-			throw createResponseCode(templates.invalidArguments, `Invalid property name in query param: ${param}`);
-		}
-
-		const operator = parts[1];
-		if (!Object.values(queryOperators).includes(operator)) {
-			throw createResponseCode(templates.invalidArguments, `Invalid operator in query param: ${param}`);
-		}
-
-		const propertyNameParts = propertyNameString.split(':');
-		let propertyName;
+const queryParamSchema = Yup.object().shape({
+	propertyName: types.strings.title.transform((value) => {
+		const propertyNameParts = value.split(':');
 		if (propertyNameParts.length === 2) {
-			propertyName = `modules.${propertyNameParts[0]}.${propertyNameParts[1]}`;
-		} else {
-			const propName = propertyNameParts[0];
-			propertyName = propName.startsWith('$') ? propName.substring(1) : `properties.${propName}`;
+			return `modules.${propertyNameParts[0]}.${propertyNameParts[1]}`;
 		}
+		const propName = propertyNameParts[0];
+		return propName.startsWith('$') ? propName.substring(1) : `properties.${propName}`;
+	}).required(),
+	operator: Yup.string().oneOf(Object.values(queryOperators)).required(),
+	value: Yup.mixed()
+		.when('operator', {
+			is: (operator) => operator === queryOperators.EQUALS || operator === queryOperators.NOT_EQUALS
+                || operator === queryOperators.CONTAINS || operator === queryOperators.NOT_CONTAINS,
+			then: Yup.array().of(types.strings.title).required()
+				.transform((v, value) => (value ? value.match(/([^",]+|"(.*?)")/g).map((val) => val.replace(/^"|"$/g, '').trim()) : value)),
+		})
+		.when('operator', {
+			is: (operator) => operator === queryOperators.RANGE || operator === queryOperators.NOT_IN_RANGE,
+			then: types.range.required(),
+		})
+		.when('operator', {
+			is: (operator) => operator === queryOperators.GREATER_OR_EQUAL_TO
+                || operator === queryOperators.LESSER_OR_EQUAL_TO,
+			then: Yup.number().required(),
+		}),
+});
 
-		const value = parts[2];
-
+TicketQueryFilters.validateQueryString = async (req, res, next) => {
+	if (req.query.query) {
 		try {
-			const schema = operatorToSchema(operator);
-			const validatedValue = await schema.validate(value);
-			parsedParams.push(deleteIfUndefined({ propertyName, value: validatedValue, operator }));
-		} catch {
-			throw createResponseCode(templates.invalidArguments, `Invalid value in query param: ${param}`);
-		}
-	}));
+			const queryString = await querySchema.validate(req.query.query);
+			const queryParams = queryString.replace(/^'(.*)'$/, '$1').split('&');
+			const queryFilters = [];
 
-	return parsedParams;
+			await Promise.all(queryParams.map(async (param) => {
+				const queryParts = param.split('::');
+				const query = { propertyName: queryParts[0], operator: queryParts[1], value: queryParts[2] };
+				try {
+					const validatedQuery = await queryParamSchema.validate(query);
+					queryFilters.push(validatedQuery);
+				} catch (err) {
+					throw createResponseCode(templates.invalidArguments, `Error at '${query.propertyName}' query filter: ${err.message}`);
+				}
+			}));
+
+			req.listOptions.queryFilters = queryFilters;
+		} catch (err) {
+			respond(req, res, createResponseCode(templates.invalidArguments, err.message));
+			return;
+		}
+	}
+
+	await next();
 };
 
 module.exports = TicketQueryFilters;
