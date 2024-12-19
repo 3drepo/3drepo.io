@@ -87,6 +87,7 @@ interface IProps {
 	selectedDate: Date;
 	sequences: any[];
 	units: string;
+	slopeUnits: string;
 	measureMode: string;
 }
 

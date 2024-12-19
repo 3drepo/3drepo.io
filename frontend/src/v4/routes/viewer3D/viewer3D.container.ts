@@ -24,7 +24,7 @@ import { selectTransformations } from '@/v4/modules/viewpoints/viewpoints.select
 import { selectGisLayers } from '../../modules/gis';
 import { selectHighlightedShapes as selectIssuesHighlightedShapes,
 	selectPins as selectIssuePins, selectShapes as selectIssuesShapes } from '../../modules/issues';
-import { selectPins as selectMeasurementPins, selectAngleMeasurements, selectAreaMeasurements, selectLengthMeasurements } from '../../modules/measurements';
+import { selectPins as selectMeasurementPins, selectAngleMeasurements, selectSlopeMeasurements, selectAreaMeasurements, selectLengthMeasurements } from '../../modules/measurements';
 import { selectGISCoordinates, selectHasGISCoordinates } from '../../modules/model';
 import { selectHighlightedShapes as selectRisksHighlightedShapes,
 	selectPins as selectRiskPins, selectShapes as selectRisksShapes  } from '../../modules/risks';
@@ -40,6 +40,7 @@ const mapStateToProps = createStructuredSelector({
 	riskPins: selectRiskPins,
 	measurementPins: selectMeasurementPins,
 	measurementsAngle: selectAngleMeasurements,
+	measurementsSlope: selectSlopeMeasurements,
 	measurementsArea: selectAreaMeasurements,
 	measurementsLength: selectLengthMeasurements,
 	gisCoordinates: selectGISCoordinates,

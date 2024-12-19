@@ -29,6 +29,7 @@ import {
 import { VIEWER_MEASURING_MODE } from '@/v4/constants/viewer';
 import PolylineIcon from '@assets/icons/measurements/polyline.svg';
 import AngleIcon from '@assets/icons/measurements/angle.svg';
+import SlopeIcon from '@assets/icons/measurements/slope.svg';
 
 export const MEASURING_TYPES = [
 	{
@@ -62,6 +63,11 @@ export const MEASURING_TYPES = [
 		Icon: AngleIcon,
 	},
 	{
+		name: MEASURING_TYPE.SLOPE,
+		mode: VIEWER_MEASURING_MODE.SLOPE,
+		Icon: SlopeIcon,
+	},
+	{
 		name: MEASURING_TYPE.SAM,
 		mode: VIEWER_MEASURING_MODE.SAM,
 		Icon: SAMIcon,
@@ -77,5 +83,6 @@ export const BASIC_TYPES = [
 	VIEWER_MEASURING_MODE.POINT_TO_POINT,
 	VIEWER_MEASURING_MODE.CSAM,
 	VIEWER_MEASURING_MODE.POLYLINE,
-	VIEWER_MEASURING_MODE.ANGLE
+	VIEWER_MEASURING_MODE.ANGLE,
+	VIEWER_MEASURING_MODE.SLOPE,
 ];
