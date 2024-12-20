@@ -63,9 +63,8 @@ const validateNewCalibrationData = async (req, res, next) => {
 			model: positionArray(YupHelper.types.position).required(),
 			drawing: positionArray(YupHelper.types.position2d).required(),
 		}).required(),
-		verticalRange: Yup.array().of(Yup.number()).length(2).required()
-			.test('valid-verticalRange', 'The second number of the range must be larger than the first', (value) => value[0] <= value[1]),
-		units: YupHelper.types.range.required(),
+		verticalRange: YupHelper.types.range.required(),
+		units: YupHelper.types.strings.unit.required(),
 	}).required().noUnknown();
 
 	try {

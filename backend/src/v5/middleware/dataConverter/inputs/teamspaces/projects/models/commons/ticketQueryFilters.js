@@ -59,7 +59,7 @@ const queryParamSchema = Yup.object().shape({
 TicketQueryFilters.validateQueryString = async (req, res, next) => {
 	if (req.query.query) {
 		try {
-			const queryString = await querySchema.validate(req.query.query);
+			const queryString = await querySchema.validate(decodeURIComponent(req.query.query));
 			const queryParams = queryString.replace(/^'(.*)'$/, '$1').split('&');
 			const queryFilters = [];
 

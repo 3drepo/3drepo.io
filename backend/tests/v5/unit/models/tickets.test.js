@@ -162,19 +162,23 @@ const testGetAllTickets = () => {
 		const teamspace = generateRandomString();
 		const project = generateRandomString();
 		const model = generateRandomString();
+
 		test('Should return whatever the query returns', async () => {
 			const projection = { [generateRandomString()]: generateRandomString() };
 			const sort = { [generateRandomString()]: generateRandomString() };
+			const limit = generateRandomNumber();
+			const skip = generateRandomNumber();
+
 			const expectedOutput = { [generateRandomString()]: generateRandomString() };
 
 			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
 
-			await expect(Ticket.getAllTickets(teamspace, project, model, { projection, sort }))
+			await expect(Ticket.getAllTickets(teamspace, project, model, { projection, sort, limit, skip }))
 				.resolves.toEqual(expectedOutput);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
-				{ teamspace, project, model }, projection, sort);
+				{ teamspace, project, model }, projection, sort, limit, skip);
 		});
 
 		test('Should impose default projection and sort if not provided', async () => {
@@ -187,7 +191,7 @@ const testGetAllTickets = () => {
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
-				{ teamspace, project, model }, { teamspace: 0, project: 0, model: 0 }, { [`properties.${basePropertyLabels.Created_AT}`]: -1 });
+				{ teamspace, project, model }, { teamspace: 0, project: 0, model: 0 }, { [`properties.${basePropertyLabels.Created_AT}`]: -1 }, undefined, undefined);
 		});
 
 		test('Should impose query for updated since a certain date if it is provided', async () => {
@@ -202,7 +206,22 @@ const testGetAllTickets = () => {
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
 				{ teamspace, project, model, [`properties.${basePropertyLabels.UPDATED_AT}`]: { $gt: date } },
-				{ teamspace: 0, project: 0, model: 0 }, { [`properties.${basePropertyLabels.Created_AT}`]: -1 });
+				{ teamspace: 0, project: 0, model: 0 }, { [`properties.${basePropertyLabels.Created_AT}`]: -1 }, undefined, undefined);
+		});
+
+		test('Should impose additional query for if it is provided', async () => {
+			const expectedOutput = { [generateRandomString()]: generateRandomString() };
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
+
+			const query = generateRandomObject();
+			await expect(Ticket.getAllTickets(teamspace, project, model, { query }))
+				.resolves.toEqual(expectedOutput);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
+				{ teamspace, project, model, ...query },
+				{ teamspace: 0, project: 0, model: 0 }, { [`properties.${basePropertyLabels.Created_AT}`]: -1 }, undefined, undefined);
 		});
 	});
 };

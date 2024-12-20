@@ -35,7 +35,7 @@ const { getNestedProperty, setNestedProperty } = require('../../../../../utils/h
 const { isBuffer, isUUID } = require('../../../../../utils/helper/typeCheck');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
 const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
-const { getAllTemplates } = require('../../../../../models/tickets.templates');
+const { getAllTemplates, getTemplatesByQuery } = require('../../../../../models/tickets.templates');
 const { getArrayDifference } = require('../../../../../utils/helper/arrays');
 const { importComments } = require('./tickets.comments');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
@@ -328,7 +328,7 @@ const filtersToProjection = (filters) => {
 	return projectionObject;
 };
 
-const getQueriesFromFilters = (filters) => {
+const getQueryFromFilters = async (teamspace, filters) => {
 	const operatorToQuery = {
 		[queryOperators.EXISTS]: (propertyName) => ({
 			[propertyName]: { $exists: true },
@@ -374,8 +374,8 @@ const getQueriesFromFilters = (filters) => {
 		}),
 	};
 
-	let templateQuery;
 	let query;
+	let templateQuery;
 
 	filters.forEach(({ propertyName, operator, value }) => {
 		if (propertyName === 'template') {
@@ -386,7 +386,12 @@ const getQueriesFromFilters = (filters) => {
 		}
 	});
 
-	return { query, templateQuery };
+	if (templateQuery) {
+		const temps = await getTemplatesByQuery(teamspace, templateQuery, { _id: 1 });
+		query.type = { $in: temps.map(({ _id }) => _id) };
+	}
+
+	return query;
 };
 
 Tickets.getTicketList = (teamspace, project, model,
@@ -424,9 +429,10 @@ Tickets.getTicketList = (teamspace, project, model,
 		sort = { [propertyToFilterName(sortBy)]: sortDesc ? -1 : 1 };
 	}
 
-	const queries = queryFilters ? getQueriesFromFilters(queryFilters) : undefined;
+	const query = queryFilters ? getQueryFromFilters(queryFilters) : undefined;
+
 	return getAllTickets(teamspace, project, model,
-		deleteIfUndefined({ projection, updatedSince, sort, limit, skip, ...queries }));
+		deleteIfUndefined({ projection, updatedSince, sort, limit, skip, query }));
 };
 
 Tickets.getOpenTicketsCount = async (teamspace, project, model) => {
