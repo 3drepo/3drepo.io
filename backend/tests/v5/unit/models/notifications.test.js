@@ -50,6 +50,15 @@ const testInitialise = () => {
 			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COLL,
 				{ user: 1, timestamp: -1 }, { runInBackground: true });
 		});
+
+		test('should not cause issues if this operation failed', async () => {
+			const err = { message: generateRandomString() };
+			const fn = jest.spyOn(db, 'createIndex').mockRejectedValueOnce(err);
+			await Notifications.initialise();
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COLL,
+				{ user: 1, timestamp: -1 }, { runInBackground: true });
+		});
 	});
 };
 
