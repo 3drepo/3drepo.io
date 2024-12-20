@@ -357,9 +357,9 @@ db.createUnityBundle = async (teamspace, modelId, bundleId, data) => {
 	await FilesManager.storeFile(teamspace, collection, bundleFileName, data);
 };
 
-db.createTexture = async (teamspace, modelId, texId, data) => {
+db.createFile = async (teamspace, modelId, fileId, data) => {
 	const collection = `${modelId}.scene.ref`;
-	await FilesManager.storeFile(teamspace, collection, texId, data);
+	await FilesManager.storeFile(teamspace, collection, fileId, data);
 };
 
 ServiceHelper.createQueryString = (options) => {
@@ -399,6 +399,17 @@ ServiceHelper.generateRandomIfcGuid = () => ServiceHelper.generateRandomString(2
 ServiceHelper.generateRandomRvtId = () => Math.floor(Math.random() * 10000);
 
 ServiceHelper.generateRandomURL = () => `http://${ServiceHelper.generateRandomString()}.com/`;
+
+ServiceHelper.generateRandomMatrix = (size) => {
+	const matrix = new Array(size);
+	for (let i = 0; i < size; i++) {
+		matrix[i] = new Array(size);
+		for (let j = 0; j < size; j++) {
+			matrix[i][j] = ServiceHelper.generateRandomNumber();
+		}
+	}
+	return matrix;
+};
 
 ServiceHelper.generateCustomStatusValues = () => Object.values(statusTypes).map((type) => ({
 	name: ServiceHelper.generateRandomString(15),

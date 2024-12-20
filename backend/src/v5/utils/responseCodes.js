@@ -99,6 +99,10 @@ ResponseCodes.templates = {
 
 	// Texture related
 	textureNotFound: { message: 'Texture not found.', status: 404 },
+
+	// Mesh related
+	meshNotFound: { message: 'Mesh not found.', status: 404 },
+	meshDataNotFound: { message: 'Could not find mesh data for the mesh', status: 404 },
 };
 
 Object.keys(ResponseCodes.templates).forEach((key) => {

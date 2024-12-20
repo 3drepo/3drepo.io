@@ -31,6 +31,7 @@ const CreateTicketGroupsRoutes = require('./teamspaces/projects/models/common/ti
 const CreateTicketRoutes = require('./teamspaces/projects/models/common/tickets');
 const CreateViewRoutes = require('./teamspaces/projects/models/common/views');
 const FederationRevisionRoutes = require('./teamspaces/projects/models/federations/revisions');
+const MeshRoutes = require('./teamspaces/projects/models/containers/meshes');
 const MetadataRoutes = require('./teamspaces/projects/models/containers/metadata');
 const ProjectRoutes = require('./teamspaces/projects/projects');
 const SsoRoutes = require('./sso');
@@ -65,6 +66,7 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/metadata', MetadataRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/bundles', BundleRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/textures', TextureRoutes);
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/meshes', MeshRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assetsMeta/', CreateAssetMetaRoutes(modelTypes.CONTAINER));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assetMaps/', CreateAssetMapRoutes(modelTypes.CONTAINER));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/modelProperties/', CreateModelPropertiesRoutes(modelTypes.CONTAINER));

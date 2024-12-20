@@ -20,16 +20,11 @@ const DbConstants = require('../handler/db.constants');
 const History = require('./history');
 const Permissions = require('../utils/permissions/permissions');
 const db = require('../handler/db');
+const matrix = require('../utils/helper/matrix');
 const uuidHelper = require('../utils/helper/uuids');
 
 const getCollection = (model) => `${model}.scene`;
 const getStashCollection = (model) => `${model}.stash.3drepo`;
-
-Scene.getNodesBySharedIds = (teamspace, project, model, revId, sharedIds, projection) => db.find(
-	teamspace, getCollection(model), { rev_id: revId, shared_id: { $in: sharedIds } }, projection);
-
-Scene.getNodesByIds = (teamspace, project, model, ids, projection) => db.find(
-	teamspace, getCollection(model), { _id: { $in: ids } }, projection);
 
 const clean = (nodeToClean) => {
 	const node = nodeToClean;
@@ -45,6 +40,21 @@ const clean = (nodeToClean) => {
 
 	return node;
 };
+
+const getNodeBySharedId = async (teamspace, model, shared_id, revisionIds, projection = {}) => {
+	const node = await db.findOne(
+		teamspace, getCollection(model), { shared_id, rev_id: { $in: revisionIds } }, projection);
+	return node;
+};
+
+Scene.getNodesBySharedIds = (teamspace, project, model, revId, sharedIds, projection) => db.find(
+	teamspace, getCollection(model), { rev_id: revId, shared_id: { $in: sharedIds } }, projection);
+
+Scene.getNodeById = async (teamspace, model, id, projection = {}) => clean(
+	await db.findOne(teamspace, getCollection(model), { _id: id }, projection));
+
+Scene.getNodesByIds = (teamspace, project, model, ids, projection) => db.find(
+	teamspace, getCollection(model), { _id: { $in: ids } }, projection);
 
 const cleanAll = (nodesToClean) => nodesToClean.map(clean);
 
@@ -147,6 +157,19 @@ Scene.getFederationMeshInfo = async (ts, proj, federation, branch, rev, user) =>
 	}));
 
 	return { subModels: subModelMeshes.filter(Boolean) };
+};
+
+Scene.getParentMatrix = async (teamspace, model, parent, revisionIds) => {
+	const mesh = await getNodeBySharedId(teamspace, model, uuidHelper.stringToUUID(parent), revisionIds);
+
+	if ((mesh.parents || []).length > 0) {
+		const parentMatrix = await Scene.getParentMatrix(teamspace, model, mesh.parents[0], revisionIds);
+		if (mesh.matrix) {
+			return matrix.multiply(parentMatrix, mesh.matrix);
+		}
+	}
+
+	return mesh.matrix || matrix.getIdentity(4);
 };
 
 module.exports = Scene;

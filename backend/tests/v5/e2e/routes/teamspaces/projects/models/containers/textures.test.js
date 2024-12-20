@@ -145,7 +145,7 @@ const setupTestData = async ({ users, teamspace, project, container, texData }) 
 	);
 
 	// Create texture file
-	const texPromise = ServiceHelper.db.createTexture(
+	const texPromise = ServiceHelper.db.createFile(
 		teamspace,
 		container._id,
 		texData.texRefId,
