@@ -22,7 +22,7 @@ const { readFileSync } = require('fs');
 
 const ticketObjectSchema = Yup.object({
 	count: Yup.number().min(1).required(),
-	link: Yup.string().url().required(),
+	link: Yup.string().required(),
 }).default(undefined);
 
 const dataSchema = Yup.object({
@@ -33,7 +33,7 @@ const dataSchema = Yup.object({
 		project: Yup.string().required(),
 		model: Yup.string().required(),
 		tickets: Yup.object({
-			updated: ticketObjectSchema.nullable(),
+			updated: ticketObjectSchema,
 			assigned: ticketObjectSchema,
 			closed: ticketObjectSchema,
 		}).required(),
@@ -45,7 +45,7 @@ const TEMPLATE_PATH = `${__dirname}/html/dailyDigest.html`;
 
 const DailyDigestTemplate = {};
 
-DailyDigestTemplate.subject = ({ teamspace }) => `[${teamspace}]Activities you've missed`;
+DailyDigestTemplate.subject = ({ teamspace }) => `[${teamspace}] Activities you have missed`;
 
 DailyDigestTemplate.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
 

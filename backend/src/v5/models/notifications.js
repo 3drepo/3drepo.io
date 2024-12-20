@@ -125,7 +125,7 @@ const getGroupedNotificationsByQuery = (query) => {
 				notification: {
 					$push: {
 						type: '$_id.type',
-						ticket: '$tickets',
+						tickets: '$tickets',
 						count: '$count',
 					},
 				},
@@ -167,15 +167,7 @@ const getAllAssociatedTicketsInQuery = (query) => {
 				},
 				tickets: { $addToSet: '$data.ticket' },
 			},
-		}, {
-			$group: {
-				_id: {
-					teamspace: '$data.teamspace',
-					project: '$data.project',
-					model: '$data.model',
-				},
-				tickets: { $addToSet: '$data.ticket' },
-			} },
+		},
 		{
 			$group: {
 				_id: '$_id.teamspace',
@@ -185,6 +177,7 @@ const getAllAssociatedTicketsInQuery = (query) => {
 					tickets: '$tickets',
 				} } } },
 	];
+
 	return db.aggregate(INTERNAL_DB, NOTIFICATIONS_COL, pipelines);
 };
 
@@ -199,12 +192,13 @@ Notifications.composeDailyDigests = async (teamspaces) => {
 		},
 	};
 
-	const [contextData, digestData] = await Promise.all([
+	const [contextData, digestData, recipients] = await Promise.all([
 		getAllAssociatedTicketsInQuery(query),
 		getGroupedNotificationsByQuery(query),
+		db.distinct(INTERNAL_DB, NOTIFICATIONS_COL, 'user', query.$match),
 	]);
 
-	return { contextData, digestData };
+	return { contextData, digestData, recipients };
 };
 
 module.exports = Notifications;

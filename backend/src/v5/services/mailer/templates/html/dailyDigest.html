@@ -5,7 +5,7 @@
 		<div class="notificationsTable">
 			<div class="notificationsHeader">
 				<div class="headerTitle">
-					<img src="https://www.3drepo.local/assets/email-resources/notifications/tickets.png">
+					<img src="<%= domain %>/assets/email-resources/notifications/tickets.png">
 					<p class="title"><%= project %>::<%= model %></p>
 				</div>
 			</div>
@@ -14,34 +14,34 @@
 				<% if(tickets.assigned) { %>
 				<div class="notificationsRow">
 					<div class="notificationIconBorder">
-						<img class="notificationType" src="https://www.3drepo.local/assets/email-resources/notifications/new.png">
+						<img class="notificationType" src="<%= domain %>/assets/email-resources/notifications/new.png">
 					</div>
 					<div style="flex: 1 1 0">
-						<p class="notificationsText"><%= tickets.assigned.count %> tickets have been assigned to you.</p>
+						<p class="notificationsText"><%= tickets.assigned.count %> <%= tickets.assigned.count === 1? "ticket" : "tickets" %> <%= tickets.assigned.count === 1? "was" : "were" %> assigned to you.</p>
 					</div>
-					<a href="<%= tickets.assigned.link %>" target="_blank"><img "margin-top: 4px" src="https://www.3drepo.local/assets/email-resources/notifications/openLink.png"></a>
+					<a href="<%= domain %><%= tickets.assigned.link %>" target="_blank"><img "margin-top: 4px" src="<%= domain %>/assets/email-resources/notifications/openLink.png"></a>
 				</div>
 				<% } %>
 				<% if(tickets.updated) { %>
  				 <div class="notificationsRow">
 					<div class="notificationIconBorder">
-						<img class="notificationType" src="https://www.3drepo.local/assets/email-resources/notifications/edit.png">
+						<img class="notificationType" src="<%= domain %>/assets/email-resources/notifications/edit.png">
 					</div>
 					<div style="flex: 1 1 0">
-					   <p class="notificationsText"><%= tickets.updated.count %> tickets you are associated with are updated.</p>
+						<p class="notificationsText"><%= tickets.updated.count %> <%= tickets.updated.count === 1? "ticket" : "tickets" %> you are associated with <%= tickets.updated.count === 1? "was" : "were" %> updated.</p>
 					</div>
-					<a href="<%= tickets.updated.link %>" target="_blank"><img "margin-top: 4px" src="https://www.3drepo.local/assets/email-resources/notifications/openLink.png"></a>
+					<a href="<%= domain %><%= tickets.updated.link %>" target="_blank"><img "margin-top: 4px" src="<%= domain %>/assets/email-resources/notifications/openLink.png"></a>
 				</div>
 				<% } %>
 				<% if(tickets.closed) { %>
 				<div class="notificationsRow">
 					<div class="notificationIconBorder notificationDoneIconBorder">
-						<img class="notificationType" src="https://www.3drepo.local/assets/email-resources/notifications/done.png">
+						<img class="notificationType" src="<%= domain %>/assets/email-resources/notifications/done.png">
 					</div>
 					<div style="flex: 1 1 0">
-					   <p class="notificationsText"><%= tickets.closed.count %> tickets you are associated with are closed.</p>
+					   <p class="notificationsText"><%= tickets.closed.count %> <%= tickets.closed.count === 1? "ticket" : "tickets" %> you are associated with <%= tickets.closed.count === 1? "was" : "were" %> closed.</p>
 					</div>
-					<a href="<%= tickets.closed.link %>" target="_blank"><img style="margin-top: 4px" src="https://www.3drepo.local/assets/email-resources/notifications/openLink.png"></a>
+					<a href="<%= domain %><%= tickets.closed.link %>" target="_blank"><img style="margin-top: 4px" src="<%= domain %>/assets/email-resources/notifications/openLink.png"></a>
 				</div>
 				<% } %>
 			</div>
