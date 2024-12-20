@@ -1,235 +1,233 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link href="https://fonts.googleapis.com/css?family=Inter" rel="stylesheet" />
-    <style>
-        a {
-            color: inherit !important;
-        }
+	<link href="https://fonts.googleapis.com/css?family=Inter" rel="stylesheet" />
+	<style>
+		a {
+			color: inherit !important;
+		}
 
-        .logoDiv {
-            width: 100px;
-            height: 100px;
-            margin-left: auto;
-            margin-right: auto;
-            position: relative;
-            top: 25px;
-        }
-        .logoDiv img {
-            height: 50%
-        }
+		.logoDiv {
+			margin-top: 25px;
+			margin-bottom: 25px;
+		}
 
-        .content {
-            width: 100%;
-            height: 100vh;
-            margin: auto;
-            background: rgba(242,246,252,1);
-            font-family: 'Inter', 'Roboto', 'inherit', Helvetica;
-            font-style: normal;
-            opacity: 1;
-            text-align: left;
-        }
+		img.logo {
+			height: 50px;
+			margin-left: auto;
+			margin-right: auto;
+			display: block;
+		}
 
-        .contentBorder {
-            background: rgba(255, 255, 255, 255);
-            /* 01 dp */
-            box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.14);
-            border-radius: 10px;
-            margin-left: auto;
-            margin-right: auto;
-            overflow: auto;
-            max-width: 550px;
-        }
+		.content {
+			width: 100%;
+			height: 100%;
+			margin: auto;
+			font-family: 'Inter', 'Roboto', 'inherit', Helvetica;
+			font-style: normal;
+			opacity: 1;
+			text-align: left;
+		}
 
-        .contentBody {
-            position: relative;
-            margin: 12%
-        }
+		.contentBorder {
+			background: rgba(255, 255, 255, 255);
+			/* 01 dp */
+			box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.14);
+			border-radius: 10px;
+			margin-left: 50px;
+			margin-right: 50px;
+			overflow: auto;
+			min-width: 550px;
+		}
 
-        .greeting {
-            color: rgba(23,43,77,1);
-            height: 68px;
-            font-weight: 500;
-            font-size: 24px;
-            line-height: 24px;
-            align-items: center;
-        }
+		.contentBody {
+			position: relative;
+			margin: 12%
+		}
 
-        p {
-            margin-top: 20px;
-            color: rgba(107,119,140,1);
-            font-size: 12px;
-            opacity: 1;
-            text-align: left;
-            overflow-wrap: normal;
-        }
+		.greeting {
+			color: rgba(23,43,77,1);
+			height: 68px;
+			font-weight: 500;
+			font-size: 24px;
+			line-height: 24px;
+			align-items: center;
+		}
 
-        .textBold {
-            font-weight: 600;
-        }
+		p {
+			margin-top: 20px;
+			color: rgba(107,119,140,1);
+			font-size: 12px;
+			opacity: 1;
+			text-align: left;
+			overflow-wrap: normal;
+		}
 
-        .primaryButton {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 8px 16px;
-            width: max-content;
-            height: 35px;
-            /* Primary/6 (main) */
-            background: #00C1D4;
-            /* Primary/6 (main) */
-            border: 1px solid #00C1D4;
-            box-sizing: border-box;
-            /* drop-shadow / button-primary */
-            box-shadow: 0px 2px 0px rgba(0, 0, 0, 0.043);
-            border-radius: 5px;
-            margin-top: 15px
-        }
+		.textBold {
+			font-weight: 600;
+		}
 
-        .primaryButtonText {
-            /* H5/regular */
-            font-style: normal;
-            font-weight: 400;
-            font-size: 13px;
-            line-height: 19px;
-            /* identical to box height, or 146% */
-            text-align: center;
-            /* Character / Primary(inverse) */
-            color: #FFFFFF;
-            /* Inside auto layout */
-            flex: none;
-            order: 0;
-            flex-grow: 0;
-            margin: auto;
-        }
+		.primaryButton {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			padding: 8px 16px;
+			width: max-content;
+			height: 35px;
+			/* Primary/6 (main) */
+			background: #00C1D4;
+			/* Primary/6 (main) */
+			border: 1px solid #00C1D4;
+			box-sizing: border-box;
+			/* drop-shadow / button-primary */
+			box-shadow: 0px 2px 0px rgba(0, 0, 0, 0.043);
+			border-radius: 5px;
+			margin-top: 15px
+		}
 
-        .breakLine {
-            height: 1px;
-            /* Base/palette.base.lightest */
-            background: #D0D9EB;
-            margin-bottom: 20px;
-            margin-top: 20px;
-        }
+		.primaryButtonText {
+			/* H5/regular */
+			font-style: normal;
+			font-weight: 400;
+			font-size: 13px;
+			line-height: 19px;
+			/* identical to box height, or 146% */
+			text-align: center;
+			/* Character / Primary(inverse) */
+			color: #FFFFFF;
+			/* Inside auto layout */
+			flex: none;
+			order: 0;
+			flex-grow: 0;
+			margin: auto;
+		}
 
-        .sign {
-            font-weight: 600;
-            margin-bottom: 30px;
-            margin-top: 15px;
-            color: rgba(107,119,140,1);
-            font-size: 12px;
-            opacity: 1;
-            text-align: left;
-            overflow-wrap: normal;
-        }
+		.breakLine {
+			height: 1px;
+			/* Base/palette.base.lightest */
+			background: #D0D9EB;
+			margin-bottom: 20px;
+			margin-top: 20px;
+		}
 
-        .footer {
-            margin: auto;
-            width: max-content;
-        }
+		.sign {
+			font-weight: 600;
+			margin-bottom: 30px;
+			margin-top: 15px;
+			color: rgba(107,119,140,1);
+			font-size: 12px;
+			opacity: 1;
+			text-align: left;
+			overflow-wrap: normal;
+		}
 
-        .footNotes {
-            width: 407px;
-            color: rgba(188,190,202,1);
-            top: 565px;
-            left: 63px;
-            font-weight: Medium;
-            font-size: 10px;
-            text-align: center;
-        }
+		.footer {
+			margin: auto;
+			width: max-content;
+		}
 
-        .linkPanel {
-            width: max-content;
-            overflow: hidden;
-            margin: auto;
-            margin-top: 25px;
-            margin-bottom: 25px;
-        }
+		.footNotes {
+			width: 407px;
+			color: rgba(188,190,202,1);
+			top: 565px;
+			left: 63px;
+			font-weight: Medium;
+			font-size: 10px;
+			text-align: center;
+		}
 
-        .iconBg {
-            width: 38px;
-            height: 38px;
-            background: rgba(207,216,234,1);
-            opacity: 1;
-            position: relative;
-            border-radius: 50%;
-            float: left;
-            margin: 5px;
-            display: table-cell;
-            text-align: center;
-        }
+		.linkPanel {
+			width: max-content;
+			overflow: hidden;
+			margin: auto;
+			margin-top: 25px;
+			margin-bottom: 25px;
+		}
 
-        .linkIcon {
-            margin: auto;
-            display: block !important;
-            height: 18px;
-            margin-top: 10px;
-        }
+		.iconBg {
+			width: 38px;
+			height: 38px;
+			background: rgba(207,216,234,1);
+			opacity: 1;
+			position: relative;
+			border-radius: 50%;
+			float: left;
+			margin: 5px;
+			display: table-cell;
+			text-align: center;
+		}
 
-        .buttonLink {
-            text-decoration: none
-        }
+		.linkIcon {
+			margin: auto;
+			display: block !important;
+			height: 18px;
+			margin-top: 10px;
+		}
+
+		.buttonLink {
+			text-decoration: none
+		}
 
 		<%- extraStyles %>
 
-    </style>
+	</style>
 </head>
-<body>
-    <div class="content">
-        <div class="logoDiv"></div>
-        <div class="logoDiv">
-            <a class="buttonLink" href="<%= domain %>" target="_blank">
-                <img style="max-height:60px" src="<%= `${domain}/assets/email-resources/3drepo-logo.png` %>" />
-            </a>
-        </div>
+<body style="background: rgba(242,246,252,1)">
+	<div class="content">
+		<div class="logoDiv">
+			<a class="buttonLink" href="<%= domain %>" target="_blank">
+				<img class="logo" src="<%= `${domain}/assets/email-resources/3drepo-logo.png` %>" />
+			</a>
+		</div>
 
-        <div class="contentBorder">
-            <div class="contentBody">
-                <p><span class="greeting">Hello <%= firstName %>,</span></p>
-                <%- emailContent %>
-                <p>
-                    All the best,
-                </p>
-                <p class="sign">3D Repo team </p>
-            </div>
-        </div>
-        <div class="footer">
-            <div class="linkPanel">
-                <a class="buttonLink" href="https://twitter.com/3drepo" target="_blank">
-                    <div class="iconBg">
-                        <img class="linkIcon" src="<%= `${domain}/assets/email-resources/twitter.png` %>" />
-                    </div>
-                </a>
-                <a class="buttonLink" href="https://en-gb.facebook.com/3DRepo/" target="_blank">
-                    <div class="iconBg">
-                        <img class="linkIcon" src="<%= `${domain}/assets/email-resources/facebook.png` %>" />
-                    </div>
-                </a>
-                <a class="buttonLink" href="https://www.linkedin.com/company/3d-repo" target="_blank">
-                    <div class="iconBg">
-                        <img class="linkIcon" src="<%= `${domain}/assets/email-resources/linkedIn.png` %>" />
-                    </div>
-                </a>
-                <a class="buttonLink" href="https://github.com/3drepo" target="_blank">
-                    <div class="iconBg">
-                        <img class="linkIcon" src="<%= `${domain}/assets/email-resources/github.png` %>" />
-                    </div>
-                </a>
-                <a class="buttonLink" href="https://www.youtube.com/channel/UC9ofPaxxyQy0jPEB9YlNpuA" target="_blank">
-                    <div class="iconBg">
-                        <img class="linkIcon" src="<%= `${domain}/assets/email-resources/youtube.png` %>" />
-                    </div>
-                </a>
-            </div>
+		<div class="contentBorder">
+			<div class="contentBody">
+				<p><span class="greeting">Hello <%= firstName %>,</span></p>
+				<%- emailContent %>
+				<p>
+					All the best,
+				</p>
+				<p class="sign">3D Repo team </p>
+			</div>
+		</div>
+		<div class="footer">
+			<div class="linkPanel">
+				<a class="buttonLink" href="https://twitter.com/3drepo" target="_blank">
+					<div class="iconBg">
+						<img class="linkIcon" src="<%= `${domain}/assets/email-resources/twitter.png` %>" />
+					</div>
+				</a>
+				<a class="buttonLink" href="https://en-gb.facebook.com/3DRepo/" target="_blank">
+					<div class="iconBg">
+						<img class="linkIcon" src="<%= `${domain}/assets/email-resources/facebook.png` %>" />
+					</div>
+				</a>
+				<a class="buttonLink" href="https://www.linkedin.com/company/3d-repo" target="_blank">
+					<div class="iconBg">
+						<img class="linkIcon" src="<%= `${domain}/assets/email-resources/linkedIn.png` %>" />
+					</div>
+				</a>
+				<a class="buttonLink" href="https://github.com/3drepo" target="_blank">
+					<div class="iconBg">
+						<img class="linkIcon" src="<%= `${domain}/assets/email-resources/github.png` %>" />
+					</div>
+				</a>
+				<a class="buttonLink" href="https://www.youtube.com/channel/UC9ofPaxxyQy0jPEB9YlNpuA" target="_blank">
+					<div class="iconBg">
+						<img class="linkIcon" src="<%= `${domain}/assets/email-resources/youtube.png` %>" />
+					</div>
+				</a>
+			</div>
 
-            <p class="footNotes">
-                Copyright &#0064; 2022 Asite 3D Repo Ltd. all rights reserved.
-            </p>
-            <p class="footNotes">
-                Asite 3D Repo, 7th Floor, Leconfield House, Curzon Street<br />
-                London, W1J 5JA, United Kingdom
-            </p>
-        </div>
-    </div>
+			<p class="footNotes">
+				Copyright &#0064; 2022 Asite 3D Repo Ltd. all rights reserved.
+			</p>
+			<p class="footNotes">
+				Asite 3D Repo, 7th Floor, Leconfield House, Curzon Street<br />
+				London, W1J 5JA, United Kingdom
+			</p>
+		</div>
+	</div>
 </body>
 </html>

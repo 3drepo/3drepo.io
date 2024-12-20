@@ -116,6 +116,7 @@ Mailer.sendEmail = async (templateName, to, data, attachments) => {
 		if (attachments) {
 			mailOptions.attachments = attachments;
 		}
+
 		await transporter.sendMail(mailOptions);
 	} catch (err) {
 		logger.logError(`Failed to send email with template ${templateName} - ${err.message}`);
