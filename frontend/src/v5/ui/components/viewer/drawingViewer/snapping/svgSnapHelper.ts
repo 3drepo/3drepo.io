@@ -19,6 +19,7 @@ import 'path-data-polyfill';
 import { Vector2, Vector2Like } from 'three';
 import { Line2, CubicBezier } from './types';
 import { RTree, RTreeBuilder } from './rTree';
+import DOMPurify from 'dompurify';
 
 // The following interface extension makes TypeScript aware that the getPathData
 // member has been implemented by the path-data-polyfill for all Geometry
@@ -247,7 +248,7 @@ export class SVGSnapHelper {
 	async load(src: string) {
 		const res = await fetch(src);
 		const text = await res.text();
-		this.container.innerHTML = text;
+		this.container.innerHTML = DOMPurify.sanitize(text);
 		this.initialise();
 	}
 
