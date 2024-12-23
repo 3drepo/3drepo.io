@@ -180,6 +180,49 @@ const testNewRevision = () => {
 	});
 };
 
+const testGetFederationMD5Hash = () => {
+	const route = (
+		teamspace,
+		projectId = project.id,
+		model = models[0]._id,
+		revision = ServiceHelper.generateUUIDString()
+	) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${model}/revisions/${revision}/files/original/info`
+	describe('Get Federation MD5 Files', () => {
+		test('should fail without a valid session', async () => {
+			const res = await agent.get(route()).expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user is not a member of the teamspace', async () => {
+			const res = await agent.get(`${route()}?key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail if the user does not have access to the project', async () => {
+			const res = await agent.get(`${route()}?key=${users.noProjectAccess.apiKey}`).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
+		});
+
+		test('should fail if the project does not exist', async () => {
+			const res = await agent.get(`${route(teamspace, 'nelskfjdlsf')}?key=${users.tsAdmin.apiKey}`)
+				.expect(templates.projectNotFound.status);
+			expect(res.body.code).toEqual(templates.projectNotFound.code);
+		});
+
+		test('should fail if the federation does not exist', async () => {
+			const res = await agent.get(`${route(teamspace, project.id, 'sdlfkds')}?key=${users.tsAdmin.apiKey}`)
+				.expect(templates.federationNotFound.status);
+			expect(res.body.code).toEqual(templates.federationNotFound.code);
+		});
+
+		test('should succeed if correct parameters are sent', async () => {
+			await agent.get(`${route()}?key=${users.tsAdmin.apiKey}`)
+				.expect(templates.ok.status);
+		});
+	})
+}
+
+
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -191,4 +234,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		ServiceHelper.closeApp(server),
 	]));
 	testNewRevision();
+	testGetFederationMD5Hash();
 });

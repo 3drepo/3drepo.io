@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addModel, deleteModel, getModelList } = require('./commons/modelList');
+const { addModel, deleteModel, getModelList, getModelMD5Hash } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getContainerById, getContainers, updateModelSettings } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisionFormat, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
@@ -33,6 +33,7 @@ const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { queueModelUpload } = require('../../../../services/modelProcessing');
 const { templates } = require('../../../../utils/responseCodes');
 const { timestampToString } = require('../../../../utils/helper/dates');
+
 
 const Containers = { ...Groups, ...Views, ...Tickets, ...Comments, ...TicketGroups };
 
@@ -132,5 +133,10 @@ Containers.updateSettings = updateModelSettings;
 
 Containers.getSettings = (teamspace, container) => getContainerById(teamspace,
 	container, { corID: 0, account: 0, permissions: 0 });
+
+Containers.getRevisionMD5Hash = async (teamspace, container, revision, user) =>{
+	const response = await getModelMD5Hash(teamspace, container, revision, user)
+	return response;
+}
 
 module.exports = Containers;

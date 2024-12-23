@@ -498,6 +498,69 @@ const testDownloadRevisionFiles = () => {
 	});
 };
 
+const testGetRevisionMD5Hash = () => {
+	describe('Get Revision MD5 Hash', () => {
+		const basicData = generateBasicData();
+		const { users, teamspace, project, models, conRevisions } = basicData;
+
+		beforeAll(async () => {
+			await setupData(basicData);
+		});
+
+		const generateTestData = () => {
+			let model = models.conWithRev;
+			let revision = conRevisions.nonVoidRevision;
+			let noFileRevision = conRevisions.noFileRevision;
+			let voidRevision = conRevisions.voidRevision;
+			let modelNotFound = templates.containerNotFound;
+
+			const params = {
+				key: users.tsAdmin.apiKey,
+				ts: teamspace,
+				projectId: project.id,
+				modelId: model._id,
+				modelType,
+				revision,
+			};
+
+			return [
+				['the user does not have a valid session', { ...params, key: null }, false, templates.notLoggedIn],
+				['the teamspace does not exist', { ...params, ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
+				['the user is not a member of the teamspace', { ...params, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
+				['the user does not have access to the model', { ...params, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
+				['the user is viewer', { ...params, key: users.viewer.apiKey }, false, templates.notAuthorized],
+				['the user is commenter', { ...params, key: users.commenter.apiKey }, false, templates.notAuthorized],
+				['the project does not exist', { ...params, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
+				['the model does not exist', { ...params, modelId: ServiceHelper.generateRandomString() }, false, modelNotFound],
+				['the model is of wrong type', { ...params, modelId: models.federation._id }, false, modelNotFound],
+				['the revision does not exist', { ...params, revision: ServiceHelper.generateRevisionEntry() }, false, templates.revisionNotFound],
+				['the revision has no file', { ...params, revision: noFileRevision }, false, templates.fileNotFound],
+				['the revision has a file', params, true],
+				['the revision has a file (void revision)', { ...params, revision: voidRevision }, false, templates.revisionNotFound],
+			]
+		};
+
+		const runTest = (desc, params, success, error) =>{
+			const route = ({ts, projectId, modelId, revision, modelType, key}) => `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/revisions/${revision._id}/files/original/info?key=${key}`;
+
+			test(`should ${success? 'succeed' : `fail with ${error.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : error.status;
+
+				const res = await agent.get(`${route(params)}`).expect(expectedStatus);
+
+				if (sucess){
+				expect(res.text).toEqual(params.revision.refData);
+				} else {
+				expect(res.body.code).toEqual(error.code);
+				}
+			});
+		};
+
+		describe.each(generateTestData())(runTest)
+
+	})
+}
+
 const testGetImage = () => {
 	describe('Get Image', () => {
 		const basicData = generateBasicData();
@@ -573,4 +636,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	testUpdateRevisionStatus();
 	testDownloadRevisionFiles();
 	testGetImage();
+	testGetRevisionMD5Hash();
 });
