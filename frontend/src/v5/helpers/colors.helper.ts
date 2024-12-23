@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { contrastColor } from 'contrast-color';
 import { rgbToHex as muiRgbToHex, hexToRgb as muiHexToRgb } from '@mui/material';
 import { isNumber, memoize } from 'lodash';
 
@@ -28,7 +27,23 @@ export type RgbGroupColor = GroupColor & { color?: RgbArray };
 export type HexGroupColor = GroupColor & { color?: string };
 
 // Misc
-export const isLight = (hex: string, freshold?: number) => contrastColor({ bgColor: hex, threshold: freshold ?? 127 }) !== '#FFFFFF';
+export const contrastColor = ({ hex = '#FFFFFF', threshold }) => {
+	if (hex.indexOf('#') === 0) {
+		hex = hex.slice(1);
+	}
+	if (hex.length === 3) {
+		hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+	}
+	const r = parseInt(hex.slice(0, 2), 16);
+	const g = parseInt(hex.slice(2, 4), 16);
+	const b = parseInt(hex.slice(4, 6), 16);
+
+	return (r * 0.299 + g * 0.587 + b * 0.114) > (threshold ?? 127)
+		? '#000000'
+		: '#FFFFFF';
+};
+
+export const isLight = (hex: string, threshold?: number) => contrastColor({ hex, threshold }) !== '#FFFFFF';
 
 export const getRandomRgbColor = () => ([
 	parseInt((Math.random() * 255).toFixed(0), 10),
