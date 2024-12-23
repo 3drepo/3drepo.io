@@ -115,10 +115,7 @@ ModelHelper.getMeshById = async (teamspace, container, meshId) => {
 
 	return {
 		readStream: combinedStream,
-		size: combinedStream.dataSize,
 		mimeType: '"application/json; charset=utf-8"',
-		encoding: false,
-		filename: undefined,
 	};
 };
 

@@ -71,9 +71,11 @@ const createBinaryFaceData = (size, isLittleEndian = false) => {
 	const faceArray = [];
 	for (let i = 0; i < size; i++) {
 		const face = [];
-		face.push(ServiceHelper.generateRandomNumber(0, 4294967295));
-		face.push(ServiceHelper.generateRandomNumber(0, 4294967295));
-		face.push(ServiceHelper.generateRandomNumber(0, 4294967295));
+		for (let e = 0; e < 3; e++) {
+			const randNum = ServiceHelper.generateRandomNumber(0, 4294967295);
+			const randInt = Math.round(randNum);
+			face.push(randInt);
+		}
 		faceArray.push(face);
 	}
 
@@ -139,7 +141,7 @@ const createMeshData = () => {
 	// Create Nodes
 	const rev = ServiceHelper.generateRevisionEntry(false, false);
 	const revId = rev._id;
-	const rootNode = ServiceHelper.generateBasicNode('transformation', revId, { matrix });
+	const rootNode = ServiceHelper.generateBasicNode('transformation', revId, [], { matrix });
 	const meshNode = ServiceHelper.generateBasicNode('mesh', revId, [rootNode.shared_id], additionalMeshNodeData);
 
 	const nodes = [
@@ -193,7 +195,7 @@ const generateTestEnvData = () => {
 		permissions,
 	);
 
-	// Create texture data
+	// Create mesh data
 	const meshData = createMeshData();
 
 	return {
@@ -264,39 +266,12 @@ const testMesh = () => {
 				key = users.tsAdmin.apiKey,
 			} = {}) => `/v5/teamspaces/${ts}/projects/${projectId}/containers/${contId}/meshes/${meshId}?key=${key}`;
 
-			const getMeshResult = () => {
-				let result = '';
-
-				result += `{{"matrix":${JSON.stringify(meshData.matrix)}`;
-				result += ',"primitive":"3"';
-				result += ',"vertices":[';
-
-				for (let i = 0; i < meshData.vertData.length; i++) {
-					const vert = meshData.vertData[i];
-
-					if (i !== 0) {
-						result += ',';
-					}
-
-					result += `${vert[0]},${vert[1]},${vert[2]}`;
-				}
-
-				result += '],"faces":[';
-
-				for (let i = 0; i < meshData.faceData.length; i++) {
-					const face = meshData.faceData[i];
-
-					if (i !== 0) {
-						result += ',';
-					}
-
-					result += `${face[0]},${face[1]},${face[2]}`;
-				}
-
-				result += ']}';
-
-				return result;
-			};
+			const getMeshResult = () => ({
+				matrix: meshData.matrix,
+				primitive: 3,
+				vertices: meshData.vertData,
+				faces: meshData.faceData.flat(),
+			});
 
 			// Basic tests
 			const randomString = ServiceHelper.generateRandomString();
@@ -305,29 +280,101 @@ const testMesh = () => {
 			const viewerKey = users.viewer.apiKey;
 			const commenterKey = users.commenter.apiKey;
 			const invalidTexId = ServiceHelper.generateUUIDString();
-			console.log(getRoute());
+
 			const basicFailCases = [
-				// ['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
-				// ['the teamspace does not exist', getRoute({ ts: randomString }), false, templates.teamspaceNotFound],
-				// ['the project does not exist', getRoute({ projectId: randomString }), false, templates.projectNotFound],
-				// ['the Container does not exist', getRoute({ contId: randomString }), false, templates.containerNotFound],
-				// ['the Mesh does not exist', getRoute({ meshId: invalidTexId }), false, templates.meshNotFound],
-				// ['the user is not a member of the teamspace', getRoute({ key: nobodyKey }), false, templates.teamspaceNotFound],
-				// ['the user does not have access to the model', getRoute({ key: noProjAccKey }), false, templates.notAuthorized],
+				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
+				['the teamspace does not exist', getRoute({ ts: randomString }), false, templates.teamspaceNotFound],
+				['the project does not exist', getRoute({ projectId: randomString }), false, templates.projectNotFound],
+				['the container does not exist', getRoute({ contId: randomString }), false, templates.containerNotFound],
+				['the mesh does not exist', getRoute({ meshId: invalidTexId }), false, templates.meshNotFound],
+				['the user is not a member of the teamspace', getRoute({ key: nobodyKey }), false, templates.teamspaceNotFound],
+				['the user does not have access to the model', getRoute({ key: noProjAccKey }), false, templates.notAuthorized],
 			];
 
-			// Valid Texture tests
+			// Valid mesh tests
 			const meshResult = getMeshResult();
-			const validTextureCases = [
-				['the texture is accessed (admin)', getRoute(), true, meshResult],
-				// ['the texture is accessed (viewer)', getRoute({ key: viewerKey }), true, meshResult],
-				// ['the texture is accessed (commenter)', getRoute({ key: commenterKey }), true, meshResult],
+			const validMeshCases = [
+				['the mesh is accessed (admin)', getRoute(), true, meshResult],
+				['the mesh is accessed (viewer)', getRoute({ key: viewerKey }), true, meshResult],
+				['the mesh is accessed (commenter)', getRoute({ key: commenterKey }), true, meshResult],
 			];
 
 			return [
 				...basicFailCases,
-				...validTextureCases,
+				...validMeshCases,
 			];
+		};
+
+		const compareResults = (objA, objB, epsilon) => {
+			// Compare matrices
+			const matA = objA.matrix;
+			const matB = objB.matrix;
+
+			if (matA.length !== matB.length) {
+				return false;
+			}
+
+			for (let i = 0; i < matA.length; i++) {
+				for (let e = 0; e < matA.length; e++) {
+					if (matA[i][e] !== matB[i][e]) {
+						return false;
+					}
+				}
+			}
+
+			// Compare primitive field
+			if (objA.primitive !== objB.primitive) {
+				return false;
+			}
+
+			// Compare vertices
+			const verticesA = objA.vertices;
+			const verticesB = objB.vertices;
+
+			if (verticesA.length !== verticesB.length) {
+				return false;
+			}
+
+			for (let i = 0; i < verticesA.length; i++) {
+				const vertA = verticesA[i];
+				const vertB = verticesB[i];
+
+				let test1 = vertA[0] - vertB[0];
+				let test2 = vertA[1] - vertB[1];
+				let test3 = vertA[2] - vertB[2];
+
+				test1 = Math.abs(test1);
+				test2 = Math.abs(test2);
+				test3 = Math.abs(test3);
+
+				if (Math.abs(vertA[0] - vertB[0]) > epsilon
+				|| Math.abs(vertA[1] - vertB[1]) > epsilon
+				|| Math.abs(vertA[2] - vertB[2]) > epsilon
+				) {
+					return false;
+				}
+			}
+
+			// Compare faces
+			const facesA = objA.faces;
+			const facesB = objB.faces;
+
+			if (facesA.length !== facesB.length) {
+				return false;
+			}
+
+			for (let i = 0; i < facesA.length; i++) {
+				const faceA = facesA[i];
+				const faceB = facesB[i];
+				if (faceA[0] !== faceB[0]
+				|| faceA[1] !== faceB[1]
+				|| faceA[2] !== faceB[2]
+				) {
+					return false;
+				}
+			}
+
+			return true;
 		};
 
 		const runTest = (desc, route, success, expectedOutput) => {
@@ -336,7 +383,7 @@ const testMesh = () => {
 
 				const res = await agent.get(route).expect(expectedStatus);
 				if (success) {
-					expect(res.body.toString()).toEqual(expectedOutput);
+					expect(compareResults(res.body, expectedOutput, 0.0001)).toEqual(true);
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}
