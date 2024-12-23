@@ -508,11 +508,11 @@ const testGetRevisionMD5Hash = () => {
 		});
 
 		const generateTestData = () => {
-			let model = models.conWithRev;
-			let revision = conRevisions.nonVoidRevision;
-			let noFileRevision = conRevisions.noFileRevision;
-			let voidRevision = conRevisions.voidRevision;
-			let modelNotFound = templates.containerNotFound;
+			const model = models.conWithRev;
+			const revision = conRevisions.nonVoidRevision;
+			const { noFileRevision } = conRevisions;
+			const { voidRevision } = conRevisions;
+			const modelNotFound = templates.containerNotFound;
 
 			const params = {
 				key: users.tsAdmin.apiKey,
@@ -537,29 +537,28 @@ const testGetRevisionMD5Hash = () => {
 				['the revision has no file', { ...params, revision: noFileRevision }, false, templates.fileNotFound],
 				['the revision has a file', params, true],
 				['the revision has a file (void revision)', { ...params, revision: voidRevision }, false, templates.revisionNotFound],
-			]
+			];
 		};
 
-		const runTest = (desc, params, success, error) =>{
-			const route = ({ts, projectId, modelId, revision, modelType, key}) => `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/revisions/${revision._id}/files/original/info?key=${key}`;
+		const runTest = (desc, params, success, error) => {
+			const route = ({ ts, projectId, modelId, revision, modelType, key }) => `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/revisions/${revision._id}/files/original/info?key=${key}`;
 
-			test(`should ${success? 'succeed' : `fail with ${error.code}`} if ${desc}`, async () => {
+			test(`should ${success ? 'succeed' : `fail with ${error.code}`} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : error.status;
 
 				const res = await agent.get(`${route(params)}`).expect(expectedStatus);
 
-				if (sucess){
-				expect(res.text).toEqual(params.revision.refData);
+				if (sucess) {
+					expect(res.text).toEqual(params.revision.refData);
 				} else {
-				expect(res.body.code).toEqual(error.code);
+					expect(res.body.code).toEqual(error.code);
 				}
 			});
 		};
 
-		describe.each(generateTestData())(runTest)
-
-	})
-}
+		describe.each(generateTestData())(runTest);
+	});
+};
 
 const testGetImage = () => {
 	describe('Get Image', () => {

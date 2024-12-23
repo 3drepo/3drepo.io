@@ -60,17 +60,17 @@ const getRevisions = (modelType) => async (req, res, next) => {
 };
 
 const getRevisionMD5Hash = () => async (req, res) => {
-	const { teamspace, container, revision } = req.params
-	const user = getUserFromSession(req.session)
+	const { teamspace, container, revision } = req.params;
+	const user = getUserFromSession(req.session);
 
 	try {
-		const response = await Containers.getRevisionMD5Hash(teamspace, container, revision, user)
-		respond(req, res, templates.ok, response)
+		const response = await Containers.getRevisionMD5Hash(teamspace, container, revision, user);
+		respond(req, res, templates.ok, response);
 	} catch (err) {
 		/* istanbul ignore next */
-		respond(req, res, err)
+		respond(req, res, err);
 	}
-}
+};
 
 const updateRevisionStatus = (modelType) => async (req, res) => {
 	const { teamspace, project, model, revision } = req.params;

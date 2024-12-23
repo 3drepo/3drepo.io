@@ -39,10 +39,10 @@ const Legends = require(`${src}/models/legends`);
 jest.mock('../../../../../../../src/v5/models/legends');
 const { templates } = require(`${src}/utils/responseCodes`);
 
-jest.mock('../../../../../../../src/v5/services/filesManager')
-const FilesManager = require(`${src}/services/filesManager`)
-jest.mock('../../../../../../../src/v5/models/fileRefs')
-const FilesRef = require(`${src}/models/fileRefs`)
+jest.mock('../../../../../../../src/v5/services/filesManager');
+const FilesManager = require(`${src}/services/filesManager`);
+jest.mock('../../../../../../../src/v5/models/fileRefs');
+const FilesRef = require(`${src}/models/fileRefs`);
 
 jest.mock('../../../../../../../src/v5/utils/helper/models');
 const ModelHelper = require(`${src}/utils/helper/models`);
@@ -369,97 +369,95 @@ const testGetTicketGroupById = () => {
 
 const testGetMD5Hash = () => {
 	describe('Get MD5 hashes for each container in the federation', () => {
-		const revisionMock = {_id:Buffer.from('testBuffer'), rFile: ['success!'], timestamp: new Date()}
+		const revisionMock = { _id: Buffer.from('testBuffer'), rFile: ['success!'], timestamp: new Date() };
 		const fileEntry = { size: 100, type: 'fs', link: generateRandomString() };
-		const mockConatiners = [{_id: '1', name: 'test1', permissions: [{user: 'user1'}]},{_id: '2', name: 'test2', permissions: []},{_id: '3', name: 'test3'}]
-		ModelSettings.getContainers.mockImplementation((teamspace, containers, params)=>{
-			if(containers.length > 1){
-				return mockConatiners
+		const mockConatiners = [{ _id: '1', name: 'test1', permissions: [{ user: 'user1' }] }, { _id: '2', name: 'test2', permissions: [] }, { _id: '3', name: 'test3' }];
+		ModelSettings.getContainers.mockImplementation((teamspace, containers, params) => {
+			if (containers.length > 1) {
+				return mockConatiners;
 			}
-			else{
-				return mockConatiners.filter(container => container._id === containers[0])
-			}
-		} )
 
-		//it should get an empty array if user doesn't have rights to the container
+			return mockConatiners.filter((container) => container._id === containers[0]);
+		});
+
+		// it should get an empty array if user doesn't have rights to the container
 		test('should get an empty array if user does not have rights to the container', async () => {
 			// given
-			ModelSettings.getFederationById.mockResolvedValueOnce({subModels: [{_id: '1'},{_id: '2'}, {_id: '3'}]})
-			
-			//it should
-			await expect(Federations.getMD5Hash('teamspace','federation', 'NoAcessUser')).resolves.toEqual([])
+			ModelSettings.getFederationById.mockResolvedValueOnce({ subModels: [{ _id: '1' }, { _id: '2' }, { _id: '3' }] });
 
-			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(4)
+			// it should
+			await expect(Federations.getMD5Hash('teamspace', 'federation', 'NoAcessUser')).resolves.toEqual([]);
+
+			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(4);
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(0);
 			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(0);
-		})
-		//it should return just the containers the user has access to
+		});
+		// it should return just the containers the user has access to
 		test('it should return just the containers users have access to', async () => {
-			//given
-			ModelSettings.getFederationById.mockResolvedValueOnce({subModels: [{_id: '1'},{_id: '2'}, {_id: '3'}]})
-			FilesManager.getFile.mockImplementation(() => revisionMock._id)
-			Revisions.getLatestRevision.mockResolvedValueOnce(revisionMock)
-			FilesRef.getRefEntry.mockResolvedValueOnce(fileEntry)
+			// given
+			ModelSettings.getFederationById.mockResolvedValueOnce({ subModels: [{ _id: '1' }, { _id: '2' }, { _id: '3' }] });
+			FilesManager.getFile.mockImplementation(() => revisionMock._id);
+			Revisions.getLatestRevision.mockResolvedValueOnce(revisionMock);
+			FilesRef.getRefEntry.mockResolvedValueOnce(fileEntry);
 
-			//it should
-			await expect(Federations.getMD5Hash('teamspace','federation','user1')).resolves.toEqual([{container: '1',
+			// it should
+			await expect(Federations.getMD5Hash('teamspace', 'federation', 'user1')).resolves.toEqual([{ container: '1',
 				code: UUIDParse.unparse(revisionMock._id.buffer),
 				uploadedAt: new Date(revisionMock.timestamp).getTime(),
 				hash: CryptoJs.MD5(revisionMock._id).toString(),
 				filename: revisionMock.rFile[0],
-				size: fileEntry.size}])
+				size: fileEntry.size }]);
 
-			expect(ModelSettings.getFederationById).toHaveBeenCalledTimes(1)
-			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(4)
+			expect(ModelSettings.getFederationById).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(4);
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(0);
 			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(1);
-			expect(FilesManager.getFile).toHaveBeenCalledTimes(1)
-			expect(FilesRef.getRefEntry).toHaveBeenCalledTimes(1)
-		})
+			expect(FilesManager.getFile).toHaveBeenCalledTimes(1);
+			expect(FilesRef.getRefEntry).toHaveBeenCalledTimes(1);
+		});
 
-		//it should return an array with all the containers if admin
+		// it should return an array with all the containers if admin
 		test('it should return an array with all the containers if admin', async () => {
-			//given
-			ModelSettings.getFederationById.mockResolvedValueOnce({subModels: [{_id: '1'},{_id: '2'}, {_id: '3'}]})
-			FilesManager.getFile.mockImplementation(() => revisionMock._id)
-			Revisions.getLatestRevision.mockResolvedValue(revisionMock)
-			FilesRef.getRefEntry.mockResolvedValue(fileEntry)
+			// given
+			ModelSettings.getFederationById.mockResolvedValueOnce({ subModels: [{ _id: '1' }, { _id: '2' }, { _id: '3' }] });
+			FilesManager.getFile.mockImplementation(() => revisionMock._id);
+			Revisions.getLatestRevision.mockResolvedValue(revisionMock);
+			FilesRef.getRefEntry.mockResolvedValue(fileEntry);
 
-			//it should
-			await expect(Federations.getMD5Hash('teamspace','federation','tsAdmin')).resolves.toEqual([
+			// it should
+			await expect(Federations.getMD5Hash('teamspace', 'federation', 'tsAdmin')).resolves.toEqual([
 				{
 					container: '1',
 					code: UUIDParse.unparse(revisionMock._id.buffer),
 					uploadedAt: new Date(revisionMock.timestamp).getTime(),
 					hash: CryptoJs.MD5(revisionMock._id).toString(),
 					filename: revisionMock.rFile[0],
-					size: fileEntry.size
+					size: fileEntry.size,
 				}, {
 					container: '2',
 					code: UUIDParse.unparse(revisionMock._id.buffer),
 					uploadedAt: new Date(revisionMock.timestamp).getTime(),
 					hash: CryptoJs.MD5(revisionMock._id).toString(),
 					filename: revisionMock.rFile[0],
-					size: fileEntry.size
+					size: fileEntry.size,
 				}, {
 					container: '3',
 					code: UUIDParse.unparse(revisionMock._id.buffer),
 					uploadedAt: new Date(revisionMock.timestamp).getTime(),
 					hash: CryptoJs.MD5(revisionMock._id).toString(),
 					filename: revisionMock.rFile[0],
-					size: fileEntry.size
-				}])
+					size: fileEntry.size,
+				}]);
 
-			expect(ModelSettings.getFederationById).toHaveBeenCalledTimes(1)
-			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(4)
+			expect(ModelSettings.getFederationById).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(4);
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(0);
 			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(3);
-			expect(FilesManager.getFile).toHaveBeenCalledTimes(3)
-			expect(FilesRef.getRefEntry).toHaveBeenCalledTimes(3)
-		})
-
-	})
-}
+			expect(FilesManager.getFile).toHaveBeenCalledTimes(3);
+			expect(FilesRef.getRefEntry).toHaveBeenCalledTimes(3);
+		});
+	});
+};
 
 describe(determineTestGroup(__filename), () => {
 	testGetFederationList();

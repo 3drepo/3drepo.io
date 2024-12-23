@@ -45,8 +45,8 @@ const Legends = require(`${src}/models/legends`);
 jest.mock('../../../../../../../src/v5/models/legends');
 jest.mock('../../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
-jest.mock('../../../../../../../src/v5/models/fileRefs')
-const FileRefs = require(`${src}/models/fileRefs`)
+jest.mock('../../../../../../../src/v5/models/fileRefs');
+const FileRefs = require(`${src}/models/fileRefs`);
 
 jest.mock('../../../../../../../src/v5/handler/queue');
 const QueueHandler = require(`${src}/handler/queue`);
@@ -521,52 +521,52 @@ const testDownloadRevisionFiles = () => {
 const testGetMD5Hash = () => {
 	describe('Get revision MD5 hash', () => {
 		test('should return empty if revision has no file', async () => {
-			//given:
+			// given:
 			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce(templates.revisionNotFound);
 
-			//it shoul
+			// it shoul
 			await expect(Containers.getRevisionMD5Hash('teamspace', 'container', generateUUIDString(), 'user1')).resolves.toEqual();
 
-			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(1)
+			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(1);
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
 			expect(FilesManager.getFile).toHaveBeenCalledTimes(0);
-		})
+		});
 		test('should return empty if user does not have access to the revision', async () => {
 			// given
 
-			//it shuld
+			// it shuld
 			await expect(Containers.getRevisionMD5Hash('teamspace', 'container', generateUUIDString(), 'NoAccess')).resolves.toEqual();
 
-			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(1)
+			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(1);
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(0);
 			expect(FilesManager.getFile).toHaveBeenCalledTimes(0);
-		})
+		});
 		test('should return an object if revision has file', async () => {
 			// given:
-			const revisionMock = {_id:Buffer.from('testBuffer'), rFile: ['success!'], timestamp: new Date()}
-			const revisionCodeMock = generateUUIDString()
+			const revisionMock = { _id: Buffer.from('testBuffer'), rFile: ['success!'], timestamp: new Date() };
+			const revisionCodeMock = generateUUIDString();
 			const fileEntry = { size: 100, type: 'fs', link: generateRandomString() };
-			
-			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce(revisionMock);
-			FilesManager.getFile.mockResolvedValueOnce(revisionMock._id)
-			FileRefs.getRefEntry.mockResolvedValueOnce(fileEntry)
 
-			//it should
+			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce(revisionMock);
+			FilesManager.getFile.mockResolvedValueOnce(revisionMock._id);
+			FileRefs.getRefEntry.mockResolvedValueOnce(fileEntry);
+
+			// it should
 			await expect(Containers.getRevisionMD5Hash('teamspace', 'container', revisionCodeMock, 'user1')).resolves.toEqual({
 				container: 'container',
 				code: UUIDParse.unparse(revisionMock._id.buffer),
 				uploadedAt: new Date(revisionMock.timestamp).getTime(),
 				hash: CryptoJs.MD5(revisionMock._id).toString(),
 				filename: revisionMock.rFile[0],
-				size: fileEntry.size
+				size: fileEntry.size,
 			});
 
-			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(1)
+			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(1);
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
 			expect(FilesManager.getFile).toHaveBeenCalledTimes(1);
-		})
-	})
-}
+		});
+	});
+};
 
 describe(determineTestGroup(__filename), () => {
 	testGetContainerList();

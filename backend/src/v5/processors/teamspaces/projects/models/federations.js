@@ -24,11 +24,11 @@ const TicketGroups = require('./commons/tickets.groups');
 const Tickets = require('./commons/tickets');
 const Views = require('./commons/views');
 const { getLatestRevision } = require('../../../../models/revisions');
+const { getModelMD5Hash } = require('./commons/modelList');
 const { getOpenTicketsCount } = require('./commons/tickets');
 const { getProjectById } = require('../../../../models/projectSettings');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { queueFederationUpdate } = require('../../../../services/modelProcessing');
-const { getModelMD5Hash } = require('../../projects/models/commons/modelList')
 
 const Federations = { ...Groups, ...Views, ...Tickets, ...Comments, ...TicketGroups };
 
@@ -110,19 +110,20 @@ Federations.getSettings = (teamspace, federation) => getFederationById(teamspace
 
 Federations.getMD5Hash = async (teamspace, federation, user) => {
 	const { subModels: containers } = await getFederationById(teamspace, federation, { subModels: 1 });
-	const containerWithMetadata = await getContainers(teamspace, containers.map(container => container._id), { _id: 1, name: 1, permissions: 1 })
+	const containerWithMetadata = await getContainers(
+		teamspace,
+		containers.map((container) => container._id),
+		{ _id: 1, name: 1, permissions: 1 });
 
-	const listOfPromises = containerWithMetadata.map(container => {
-		return getModelMD5Hash(teamspace, container._id, null, user)
-	})
+	const listOfPromises = containerWithMetadata.map(
+		(container) => getModelMD5Hash(teamspace, container._id, null, user));
 
-	const promiseResponses = await Promise.allSettled(listOfPromises)
+	const promiseResponses = await Promise.allSettled(listOfPromises);
 	const responses = promiseResponses
-		.filter(response => response.status === 'fulfilled' && response.value !== undefined)
-		.map(response => response.value)
+		.filter((response) => response.status === 'fulfilled' && response.value !== undefined)
+		.map((response) => response.value);
 
-	return responses
-
-}
+	return responses;
+};
 
 module.exports = Federations;

@@ -38,17 +38,17 @@ const createNewFederationRevision = async (req, res) => {
 };
 
 const getFederationMD5Hash = async (req, res) => {
-	const {teamspace, federation} = req.params;
-	const user = getUserFromSession(req.session)
+	const { teamspace, federation } = req.params;
+	const user = getUserFromSession(req.session);
 
 	try {
-		const response = await Federations.getMD5Hash(teamspace, federation, user)
-		respond(req, res, templates.ok, response)
+		const response = await Federations.getMD5Hash(teamspace, federation, user);
+		respond(req, res, templates.ok, response);
 	} catch (err) {
 		/* istanbul ignore next */
 		respond(req, res, err);
 	}
-}
+};
 
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });

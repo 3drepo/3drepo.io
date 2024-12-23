@@ -34,7 +34,6 @@ const { queueModelUpload } = require('../../../../services/modelProcessing');
 const { templates } = require('../../../../utils/responseCodes');
 const { timestampToString } = require('../../../../utils/helper/dates');
 
-
 const Containers = { ...Groups, ...Views, ...Tickets, ...Comments, ...TicketGroups };
 
 Containers.addContainer = addModel;
@@ -134,9 +133,9 @@ Containers.updateSettings = updateModelSettings;
 Containers.getSettings = (teamspace, container) => getContainerById(teamspace,
 	container, { corID: 0, account: 0, permissions: 0 });
 
-Containers.getRevisionMD5Hash = async (teamspace, container, revision, user) =>{
-	const response = await getModelMD5Hash(teamspace, container, revision, user)
+Containers.getRevisionMD5Hash = async (teamspace, container, revision, user) => {
+	const response = await getModelMD5Hash(teamspace, container, revision, user);
 	return response;
-}
+};
 
 module.exports = Containers;

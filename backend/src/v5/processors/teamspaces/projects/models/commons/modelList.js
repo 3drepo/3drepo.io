@@ -15,19 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addModelToProject, getProjectById, removeModelFromProject } = require('../../../../../models/projectSettings');
-const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions/permissions');
-const { USERS_DB_NAME } = require('../../../../../models/users.constants');
 const { addModel, getContainers } = require('../../../../../models/modelSettings');
-const { modelTypes } = require('../../../../../models/modelSettings.constants');
-const { getFavourites } = require('../../../../../models/users');
-const { removeModelData } = require('../../../../../utils/helper/models');
-const UUIDParse = require('uuid-parse');
+const { addModelToProject, getProjectById, removeModelFromProject } = require('../../../../../models/projectSettings');
+const { getLatestRevision, getRevisionByIdOrTag } = require('../../../../../models/revisions');
+const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions/permissions');
 const CryptoJs = require('crypto-js');
-const { getFile } = require('../../../../../services/filesManager')
-const { getLatestRevision, getRevisionByIdOrTag } = require('../../../../../models/revisions')
-const { getRefEntry } = require('../../../../../models/fileRefs')
-
+const { USERS_DB_NAME } = require('../../../../../models/users.constants');
+const UUIDParse = require('uuid-parse');
+const { getFavourites } = require('../../../../../models/users');
+const { getFile } = require('../../../../../services/filesManager');
+const { getRefEntry } = require('../../../../../models/fileRefs');
+const { modelTypes } = require('../../../../../models/modelSettings.constants');
+const { removeModelData } = require('../../../../../utils/helper/models');
 
 const ModelList = {};
 
@@ -61,7 +60,7 @@ ModelList.getModelList = async (teamspace, project, user, modelSettings) => {
 				_id,
 				name,
 				role: isAdmin ? USERS_DB_NAME : perm.permission,
-				isFavourite: favourites.includes(_id)
+				isFavourite: favourites.includes(_id),
 			};
 	});
 };
@@ -69,21 +68,26 @@ ModelList.getModelList = async (teamspace, project, user, modelSettings) => {
 ModelList.getModelMD5Hash = async (teamspace, container, revision, user) => {
 	const [isAdmin, containers] = await Promise.all([
 		isTeamspaceAdmin(teamspace, user),
-		getContainers(teamspace, [container], { _id: 1, name: 1, permissions: 1 })
-	])
+		getContainers(teamspace, [container], { _id: 1, name: 1, permissions: 1 }),
+	]);
 	let rev;
 
-	//if not allowed just return nothing
-	if (!isAdmin && !containers[0].permissions?.some(permission => permission?.user === user)) return;
+	// if not allowed just return nothing
+	if (!isAdmin && !containers[0].permissions?.some((permission) => permission?.user === user)) return;
 
-	//retrieve the right revision
+	// retrieve the right revision
 	if (revision?.length) {
-		rev = await getRevisionByIdOrTag(teamspace, container, modelTypes.CONTAINER, revision, { rFile: 1, timestamp: 1, fileSize: 1 }, { includeVoid: false })
+		rev = await getRevisionByIdOrTag(
+			teamspace, container, modelTypes.CONTAINER, revision,
+			{ rFile: 1, timestamp: 1, fileSize: 1 },
+			{ includeVoid: false });
 	} else {
-		rev = await getLatestRevision(teamspace, container, modelTypes.CONTAINER, { rFile: 1, timestamp: 1, fileSize: 1 })
+		rev = await getLatestRevision(
+			teamspace, container, modelTypes.CONTAINER,
+			{ rFile: 1, timestamp: 1, fileSize: 1 });
 	}
 
-	//check if anything is in there
+	// check if anything is in there
 	if (!rev.rFile?.length) return;
 
 	const filename = rev.rFile[0];
@@ -101,9 +105,8 @@ ModelList.getModelMD5Hash = async (teamspace, container, revision, user) => {
 		uploadedAt,
 		hash,
 		filename,
-		size: refEntry.size
+		size: refEntry.size,
 	};
-
-}
+};
 
 module.exports = ModelList;

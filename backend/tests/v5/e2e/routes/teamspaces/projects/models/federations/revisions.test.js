@@ -185,8 +185,8 @@ const testGetFederationMD5Hash = () => {
 		teamspace,
 		projectId = project.id,
 		model = models[0]._id,
-		revision = ServiceHelper.generateUUIDString()
-	) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${model}/revisions/${revision}/files/original/info`
+		revision = ServiceHelper.generateUUIDString(),
+	) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${model}/revisions/${revision}/files/original/info`;
 	describe('Get Federation MD5 Files', () => {
 		test('should fail without a valid session', async () => {
 			const res = await agent.get(route()).expect(templates.notLoggedIn.status);
@@ -219,9 +219,8 @@ const testGetFederationMD5Hash = () => {
 			await agent.get(`${route()}?key=${users.tsAdmin.apiKey}`)
 				.expect(templates.ok.status);
 		});
-	})
-}
-
+	});
+};
 
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
