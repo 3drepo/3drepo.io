@@ -511,13 +511,13 @@ const testModelProperties = () => {
 			const curRevResult = getContResult(C1, R1Id);
 			const prevRevResult = getContResult(C1, R2Id);
 			const contValidRevs = [
-				['Access current rev via rev ID', getContRoute(), true, curRevResult],
-				['Access current via master/head', getContRoute({ revisionId: masterRevId }), true, curRevResult],
-				['Access previous via rev ID', getContRoute({ revisionId: R2Id }), true, prevRevResult],
-				['Access current with viewer via rev ID', getContRoute({ key: viewerKey }), true, curRevResult],
-				['Access current with commenter via rev ID', getContRoute({ key: commenterKey }), true, curRevResult],
-				['Access current with viewer via master/head', getContRoute({ revisionId: masterRevId, key: viewerKey }), true, curRevResult],
-				['Access current with commenter via master/head', getContRoute({ revisionId: masterRevId, key: commenterKey }), true, curRevResult],
+				['trying to access current rev via rev ID', getContRoute(), true, curRevResult],
+				['trying to access current via master/head', getContRoute({ revisionId: masterRevId }), true, curRevResult],
+				['trying to access previous via rev ID', getContRoute({ revisionId: R2Id }), true, prevRevResult],
+				['trying to access current with viewer via rev ID', getContRoute({ key: viewerKey }), true, curRevResult],
+				['trying to access current with commenter via rev ID', getContRoute({ key: commenterKey }), true, curRevResult],
+				['trying to access current with viewer via master/head', getContRoute({ revisionId: masterRevId, key: viewerKey }), true, curRevResult],
+				['trying to access current with commenter via master/head', getContRoute({ revisionId: masterRevId, key: commenterKey }), true, curRevResult],
 			];
 
 			// Void Container Tests
@@ -546,15 +546,15 @@ const testModelProperties = () => {
 			const fed2Results = getFedResult(federations.F2);
 			const fed3Results = getFedResult(federations.F3);
 			const fedRevCombCases = [
-				['Access fed with two containers with valid revisions (admin)', getFedRoute(), true, fed1Results],
-				['Access fed with two containers with valid revisions (viewer)', getFedRoute({ key: viewerKey }), true, fed1Results],
-				['Access fed with two containers with valid revisions (commenter)', getFedRoute({ key: commenterKey }), true, fed1Results],
-				['Access fed with two containers with one void and one noFile as head (admin)', getFedRoute({ modelId: F2Id }), true, fed2Results],
-				['Access fed with two containers with one void and one noFile as head (viewer)', getFedRoute({ modelId: F2Id, key: viewerKey }), true, fed2Results],
-				['Access fed with two containers with one void and one noFile as head (commenter)', getFedRoute({ modelId: F2Id, key: commenterKey }), true, fed2Results],
-				['Access fed with two containers with both only void revisions (admin)', getFedRoute({ modelId: F3Id }), true, fed3Results],
-				['Access fed with two containers with both only void revisions (admin)', getFedRoute({ modelId: F3Id, key: viewerKey }), true, fed3Results],
-				['Access fed with two containers with both only void revisions (admin)', getFedRoute({ modelId: F3Id, key: commenterKey }), true, fed3Results],
+				['trying to access fed with two containers with valid revisions (admin)', getFedRoute(), true, fed1Results],
+				['trying to access fed with two containers with valid revisions (viewer)', getFedRoute({ key: viewerKey }), true, fed1Results],
+				['trying to access fed with two containers with valid revisions (commenter)', getFedRoute({ key: commenterKey }), true, fed1Results],
+				['trying to access fed with two containers with one void and one noFile as head (admin)', getFedRoute({ modelId: F2Id }), true, fed2Results],
+				['trying to access fed with two containers with one void and one noFile as head (viewer)', getFedRoute({ modelId: F2Id, key: viewerKey }), true, fed2Results],
+				['trying to access fed with two containers with one void and one noFile as head (commenter)', getFedRoute({ modelId: F2Id, key: commenterKey }), true, fed2Results],
+				['trying to access fed with two containers with both only void revisions (admin)', getFedRoute({ modelId: F3Id }), true, fed3Results],
+				['trying to access fed with two containers with both only void revisions (admin)', getFedRoute({ modelId: F3Id, key: viewerKey }), true, fed3Results],
+				['trying to access fed with two containers with both only void revisions (admin)', getFedRoute({ modelId: F3Id, key: commenterKey }), true, fed3Results],
 			];
 
 			return [
