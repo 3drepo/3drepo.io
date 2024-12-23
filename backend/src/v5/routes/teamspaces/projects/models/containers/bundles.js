@@ -79,16 +79,16 @@ const establishRoutes = () => {
 	 *         schema:
 	 *           type: string
 	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       404:
-	 *         $ref: "#/components/responses/teamspaceNotFound"
-	 *       404:
-	 *         $ref: "#/components/responses/projectNotFound"
-	 *       404:
-	 *         $ref: "#components/responses/containerNotFound"
-	 *       404:
-	 *         $ref: "#components/responses/fileNotFound"
+		 *       401:
+		 *         oneOf:
+		 *           - $ref: "#/components/responses/notLoggedIn"
+		 *           - $ref: "#/components/responses/notAuthorized"
+		 *       404:
+	 	 *         oneOf:
+	 	 *           - $ref: "#/components/responses/teamspaceNotFound"
+	 	 *           - $ref: "#/components/responses/projectNotFound"
+	 	 *           - $ref: "#components/responses/containerNotFound"
+	 	 *           - $ref: "#components/responses/fileNotFound"
 	 *       200:
 	 *         description: returns the repobundle file containing the bundle with the specified ID for the specified model
 	 */
@@ -100,7 +100,7 @@ const establishRoutes = () => {
 	 *   get:
 	 *     description: Get the unity bundle with the specified ID for the specified model
 	 *     tags: [Models]
-	 *     operationId: getRepoBundle
+	 *     operationId: getUnityBundle
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -127,16 +127,16 @@ const establishRoutes = () => {
 	 *         schema:
 	 *           type: string
 	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       404:
-	 *         $ref: "#/components/responses/teamspaceNotFound"
-	 *       404:
-	 *         $ref: "#/components/responses/projectNotFound"
-	 *       404:
-	 *         $ref: "#components/responses/containerNotFound"
-	 *       404:
-	 *         $ref: "#components/responses/fileNotFound"
+		 *       401:
+		 *         oneOf:
+		 *           - $ref: "#/components/responses/notLoggedIn"
+		 *           - $ref: "#/components/responses/notAuthorized"
+		 *       404:
+	 	 *         oneOf:
+	 	 *           - $ref: "#/components/responses/teamspaceNotFound"
+	 	 *           - $ref: "#/components/responses/projectNotFound"
+	 	 *           - $ref: "#components/responses/containerNotFound"
+	 	 *           - $ref: "#components/responses/fileNotFound"
 	 *       200:
 	 *         description: returns the unity3d file containing the bundle with the specified ID for the specified model
 	 */

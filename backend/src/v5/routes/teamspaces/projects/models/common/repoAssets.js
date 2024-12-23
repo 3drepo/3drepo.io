@@ -93,9 +93,15 @@ const establishRoutes = (modelType) => {
 		 *           type: string
 		 *     responses:
 		 *       401:
-		 *         $ref: "#/components/responses/notLoggedIn"
+		 *         oneOf:
+		 *           - $ref: "#/components/responses/notLoggedIn"
+		 *           - $ref: "#/components/responses/notAuthorized"
 		 *       404:
-		 *         $ref: "#/components/responses/containerNotFound"
+	 	 *         oneOf:
+	 	 *           - $ref: "#/components/responses/teamspaceNotFound"
+	 	 *           - $ref: "#/components/responses/projectNotFound"
+	 	 *           - $ref: "#/components/responses/containerNotFound"
+	 	 *           - $ref: "#/components/responses/revisionNotFound"
 		 *       200:
 		 *         description: Returns json file containing the list of assets associated with this container and revision
 		 *         content:
@@ -173,9 +179,15 @@ const establishRoutes = (modelType) => {
 		 *           type: string
 		 *     responses:
 		 *       401:
-		 *         $ref: "#/components/responses/notLoggedIn"
+		 *         oneOf:
+		 *           - $ref: "#/components/responses/notLoggedIn"
+		 *           - $ref: "#/components/responses/notAuthorized"
 		 *       404:
-		 *         $ref: "#/components/responses/containerNotFound"
+	 	 *         oneOf:
+	 	 *           - $ref: "#/components/responses/teamspaceNotFound"
+	 	 *           - $ref: "#/components/responses/projectNotFound"
+	 	 *           - $ref: "#/components/responses/containerNotFound"
+		 *           - $ref: "#/components/responses/federationNotFound"
 		 *       200:
 		 *         description: Returns json file containing the list of assets associated with this container and revision
 		 *         content:

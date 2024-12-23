@@ -68,16 +68,18 @@ const establishRoutes = () => {
 	 *         schema:
 	 *           type: string
 	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       404:
-	 *         $ref: "#/components/responses/teamspaceNotFound"
-	 *       404:
-	 *         $ref: "#/components/responses/projectNotFound"
-	 *       404:
-	 *         $ref: "#components/responses/containerNotFound"
-	 *       404:
-	 *         $ref: "#components/responses/fileNotFound"
+		 *       401:
+		 *         oneOf:
+		 *           - $ref: "#/components/responses/notLoggedIn"
+		 *           - $ref: "#/components/responses/notAuthorized"
+		 *       404:
+	 	 *         oneOf:
+	 	 *           - $ref: "#/components/responses/teamspaceNotFound"
+	 	 *           - $ref: "#/components/responses/projectNotFound"
+	 	 *           - $ref: "#/components/responses/containerNotFound"
+	 	 *           - $ref: "#/components/responses/fileNotFound"
+		 *           - $ref: "#/components/responses/meshNotFound"
+		 *           - $ref: "#/components/responses/meshDataNotFound"
 	 *       200:
 	 *         description:
 	 *         content:

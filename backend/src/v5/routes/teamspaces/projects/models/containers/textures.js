@@ -39,9 +39,9 @@ const establishRoutes = () => {
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/containers/{model}/textures/{texture}.texture:
 	 *   get:
-	 *     description: Get the repo bundle with the specified ID for the specified model
+	 *     description: Get the texture with the specified ID for the specified model
 	 *     tags: [Models]
-	 *     operationId: getRepoBundle
+	 *     operationId: getTexture
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -69,15 +69,17 @@ const establishRoutes = () => {
 	 *           type: string
 	 *     responses:
 	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
+	 *         oneOf:
+	 *           - $ref: "#/components/responses/notLoggedIn"
+	 *           - $ref: "#/components/responses/notAuthorized"
 	 *       404:
-	 *         $ref: "#/components/responses/teamspaceNotFound"
-	 *       404:
-	 *         $ref: "#/components/responses/projectNotFound"
-	 *       404:
-	 *         $ref: "#components/responses/containerNotFound"
-	 *       404:
-	 *         $ref: "#components/responses/fileNotFound"
+ 	 *         oneOf:
+ 	 *           - $ref: "#/components/responses/teamspaceNotFound"
+ 	 *           - $ref: "#/components/responses/projectNotFound"
+ 	 *           - $ref: "#components/responses/containerNotFound"
+ 	 *           - $ref: "#components/responses/revisionNotFound"
+ 	 *           - $ref: "#components/responses/fileNotFound"
+  	 *           - $ref: "#components/responses/textureNotFound"
 	 *       200:
 	 *         description: returns the texture file with the specified ID for the specified model
 	 */
