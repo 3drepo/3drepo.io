@@ -90,6 +90,7 @@ const transformVector = (matrix, vector) => {
 module.exports = {
 	multiply,
 	getIdentity,
+	multiplyVectors,
 	transformVector,
 	addVectors,
 	subtractVectors,
