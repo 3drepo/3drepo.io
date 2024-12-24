@@ -19,6 +19,7 @@ const DbConstants = require('../handler/db.constants');
 const db = require('../handler/db');
 const responseCodes = require('../utils/responseCodes');
 const uuidHelper = require('../utils/helper/uuids');
+const { isUUID, isUUIDString } = require('../utils/helper/typeCheck');
 
 const History = {};
 
@@ -75,7 +76,7 @@ History.getHistory = async (account, model, branch, revId, projection) => {
 	let history;
 
 	if (revId) {
-		if (uuidHelper.isUUIDObject(revId) || uuidHelper.isUUID(revId)) {
+		if (isUUID(revId) || isUUIDString(revId)) {
 			history = await History.findByUID(account, model, uuidHelper.stringToUUID(revId), projection);
 		} else {
 			history = await History.findByTag(account, model, revId, projection);
