@@ -71,9 +71,10 @@ ModelList.getModelMD5Hash = async (teamspace, container, revision, user) => {
 		getContainers(teamspace, [container], { _id: 1, name: 1, permissions: 1 }),
 	]);
 	let rev;
+	let returnValue;
 
 	// if not allowed just return nothing
-	if (!isAdmin && !containers[0].permissions?.some((permission) => permission?.user === user)) return;
+	if (!isAdmin && !containers[0].permissions?.some((permission) => permission?.user === user)) return returnValue;
 
 	// retrieve the right revision
 	if (revision?.length) {
@@ -88,7 +89,7 @@ ModelList.getModelMD5Hash = async (teamspace, container, revision, user) => {
 	}
 
 	// check if anything is in there
-	if (!rev.rFile?.length) return;
+	if (!rev.rFile?.length) return returnValue;
 
 	const filename = rev.rFile[0];
 
@@ -99,7 +100,7 @@ ModelList.getModelMD5Hash = async (teamspace, container, revision, user) => {
 	const code = UUIDParse.unparse(rev._id.buffer);
 	const uploadedAt = new Date(rev.timestamp).getTime();
 
-	return {
+	returnValue = {
 		container,
 		code,
 		uploadedAt,
@@ -107,6 +108,8 @@ ModelList.getModelMD5Hash = async (teamspace, container, revision, user) => {
 		filename,
 		size: refEntry.size,
 	};
+
+	return returnValue;
 };
 
 module.exports = ModelList;

@@ -120,6 +120,7 @@ Federations.getMD5Hash = async (teamspace, federation, user) => {
 
 	const promiseResponses = await Promise.allSettled(listOfPromises);
 	const responses = promiseResponses
+		// make sure the promise is fulfilled and the value is not undefined or empty
 		.filter((response) => response.status === 'fulfilled' && response.value !== undefined)
 		.map((response) => response.value);
 

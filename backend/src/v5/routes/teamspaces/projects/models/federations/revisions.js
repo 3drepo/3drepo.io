@@ -18,11 +18,11 @@
 const Federations = require('../../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
 const { getUserFromSession } = require('../../../../../utils/sessions');
+const { hasReadAccessToFederation } = require('../../../../../utils/permissions/permissions');
 const { hasWriteAccessToFederation } = require('../../../../../middleware/permissions/permissions');
 const { respond } = require('../../../../../utils/responder');
 const { templates } = require('../../../../../utils/responseCodes');
 const { validateNewRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/federations');
-const { hasReadAccessToFederation } = require('../../../../../utils/permissions/permissions');
 
 const createNewFederationRevision = async (req, res) => {
 	const revInfo = req.body;
@@ -154,7 +154,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: get the details of the original file uploaded to that revision of the container
 	 *         content:
-     *           application/json:
+	 *           application/json:
 	 *             schema:
 	 *               type: array
 	 *               items:
@@ -167,24 +167,24 @@ const establishRoutes = () => {
 	 *                     code:
 	 *                       type: string
 	 *                       description: Revision Code
-     *                       example: X01
+	 *                       example: X01
 	 *                     uploadedAt:
 	 *                       type: number
 	 *                       description: Upload date
-     *                       example: 1435068682
+	 *                       example: 1435068682
 	 *                     hash:
 	 *                       type: string
 	 *                       description: MD5 hash of the original file uploaded
-     *                       example: 76dea970d89477ed03dc5289f297443c
+	 *                       example: 76dea970d89477ed03dc5289f297443c
 	 *                     filename:
 	 *                       type: string
 	 *                       description: Name of the file
-     *                       example: test.rvt
+	 *                       example: test.rvt
 	 *                     size:
 	 *                       type: number
 	 *                       description: File size in bytes
-     *                       example: 329487234
-     *               example:
+	 *                       example: 329487234
+	 *               example:
 	 *                 - container: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 *                   code: X01
 	 *                   uploadedAt: 1711929600

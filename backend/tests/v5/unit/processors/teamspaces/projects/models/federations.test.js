@@ -372,7 +372,7 @@ const testGetMD5Hash = () => {
 		const revisionMock = { _id: Buffer.from('testBuffer'), rFile: ['success!'], timestamp: new Date() };
 		const fileEntry = { size: 100, type: 'fs', link: generateRandomString() };
 		const mockConatiners = [{ _id: '1', name: 'test1', permissions: [{ user: 'user1' }] }, { _id: '2', name: 'test2', permissions: [] }, { _id: '3', name: 'test3' }];
-		ModelSettings.getContainers.mockImplementation((teamspace, containers, params) => {
+		ModelSettings.getContainers.mockImplementation((teamspace, containers) => {
 			if (containers.length > 1) {
 				return mockConatiners;
 			}

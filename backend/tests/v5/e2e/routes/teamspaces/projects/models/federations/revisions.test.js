@@ -18,8 +18,10 @@
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
+const CryptoJs = require('crypto-js');
 
 const { templates } = require(`${src}/utils/responseCodes`);
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
 let server;
 let agent;
@@ -39,6 +41,20 @@ const project = {
 	id: ServiceHelper.generateUUIDString(),
 	name: ServiceHelper.generateRandomString(),
 };
+const containers = [{
+	_id: ServiceHelper.generateUUIDString(),
+	name: ServiceHelper.generateRandomString(),
+	properties: {
+		...ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
+		permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
+	},
+}, {
+	_id: ServiceHelper.generateUUIDString(),
+	name: ServiceHelper.generateRandomString(),
+	properties: {
+		...ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
+	},
+}];
 
 const models = [
 	{
@@ -48,15 +64,17 @@ const models = [
 			...ServiceHelper.generateRandomModelProperties(),
 			permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
 			federate: true,
+			subModels: containers.map((model) => ({ _id: model._id })),
 		},
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
 		properties: {
-			...ServiceHelper.generateRandomModelProperties(),
+			...ServiceHelper.generateRandomModelProperties(modelTypes.FEDERATION),
 			permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
 			federate: true,
+			subModels: containers.map((model) => ({ _id: model._id })),
 		},
 	},
 	{
@@ -68,6 +86,7 @@ const models = [
 
 const container = models[2];
 const anotherFed = models[1];
+const conRevisions = ServiceHelper.generateRevisionEntry();
 
 const setupData = async () => {
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
@@ -81,9 +100,25 @@ const setupData = async () => {
 		model.name,
 		model.properties,
 	));
+	const containerProms = containers.map((subModel) => ServiceHelper.db.createModel(
+		teamspace,
+		subModel._id,
+		subModel.name,
+		subModel.properties,
+	));
+	const revisionsProms = containers.map((subModel) => ServiceHelper.db.createRevision(
+		teamspace,
+		project.id,
+		subModel._id,
+		conRevisions,
+		modelTypes.CONTAINER,
+	));
+
 	return Promise.all([
 		...userProms,
 		...modelProms,
+		...containerProms,
+		...revisionsProms,
 		ServiceHelper.db.createUser(nobody),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
 	]);
@@ -181,44 +216,61 @@ const testNewRevision = () => {
 };
 
 const testGetFederationMD5Hash = () => {
-	const route = (
-		teamspace,
-		projectId = project.id,
-		model = models[0]._id,
-		revision = ServiceHelper.generateUUIDString(),
-	) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${model}/revisions/${revision}/files/original/info`;
 	describe('Get Federation MD5 Files', () => {
-		test('should fail without a valid session', async () => {
-			const res = await agent.get(route()).expect(templates.notLoggedIn.status);
-			expect(res.body.code).toEqual(templates.notLoggedIn.code);
-		});
+		const generateTestData = () => {
+			const parameters = {
+				ts: teamspace,
+				projectId: project.id,
+				modelId: models[1]._id,
+				revisionId: ServiceHelper.generateUUIDString(),
+				key: users.tsAdmin.apiKey,
+				response: [],
+			};
+			const viewerResponse = [{
+				container: containers[0]._id,
+				code: conRevisions._id,
+				uploadedAt: new Date(conRevisions.timestamp).getTime(),
+				hash: CryptoJs.MD5(Buffer.from(conRevisions.rFile[0])).toString(),
+				filename: conRevisions.rFile[0],
+				size: 20,
+			}];
+			const adminResponse = containers.map((model) => ({
+				container: model._id,
+				code: conRevisions._id,
+				uploadedAt: new Date(conRevisions.timestamp).getTime(),
+				hash: CryptoJs.MD5(Buffer.from(conRevisions.rFile[0])).toString(),
+				filename: conRevisions.rFile[0],
+				size: 20,
+			}));
 
-		test('should fail if the user is not a member of the teamspace', async () => {
-			const res = await agent.get(`${route()}?key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
-			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
-		});
+			// ask about the empty array problem
+			return [
+				['there is no valid session key but return an empty array.', { ...parameters, key: null }, true],
+				['the user is not a member of the teamspace but return an empty array.', { ...parameters, key: nobody.apiKey }, true],
+				['the user does not have access to the project but return an empty array.', { ...parameters, key: users.noProjectAccess.apiKey }, true],
+				['the teamspace does not exist but return an empty array.', { ...parameters, ts: ServiceHelper.generateUUIDString() }, false, templates.federationNotFound],
+				['the federation does not exist but return an empty array.', { ...parameters, modelId: ServiceHelper.generateUUIDString() }, false, templates.federationNotFound],
+				['the viewer access it and return just that information.', { ...parameters, key: users.viewer.apiKey, response: viewerResponse }, true],
+				['the admin access it and return all the information.', { ...parameters, response: adminResponse }, true],
+			];
+		};
 
-		test('should fail if the user does not have access to the project', async () => {
-			const res = await agent.get(`${route()}?key=${users.noProjectAccess.apiKey}`).expect(templates.notAuthorized.status);
-			expect(res.body.code).toEqual(templates.notAuthorized.code);
-		});
+		const runTest = (description, parameters, success, error) => {
+			const route = ({ ts, projectId, modelId, revisionId, key }) => `/v5/teamspaces/${ts}/projects/${projectId}/federations/${modelId}/revisions/${revisionId}/files/original/info${key ? `?key=${key}` : ''}`;
 
-		test('should fail if the project does not exist', async () => {
-			const res = await agent.get(`${route(teamspace, 'nelskfjdlsf')}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.projectNotFound.status);
-			expect(res.body.code).toEqual(templates.projectNotFound.code);
-		});
+			test(`should ${success ? 'succeed' : `fail with ${error.code}`} if ${description}`, async () => {
+				const expectedStatus = success ? templates.ok.status : error.status;
+				const res = await agent.get(`${route(parameters)}`).expect(expectedStatus);
 
-		test('should fail if the federation does not exist', async () => {
-			const res = await agent.get(`${route(teamspace, project.id, 'sdlfkds')}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.federationNotFound.status);
-			expect(res.body.code).toEqual(templates.federationNotFound.code);
-		});
+				if (success) {
+					expect(JSON.parse(res.text)).toEqual(parameters.response);
+				} else {
+					expect(res.body.code).toEqual(error.code);
+				}
+			});
+		};
 
-		test('should succeed if correct parameters are sent', async () => {
-			await agent.get(`${route()}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.ok.status);
-		});
+		describe.each(generateTestData())('Federations', runTest);
 	});
 };
 
@@ -232,6 +284,7 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		ServiceHelper.queue.purgeQueues(),
 		ServiceHelper.closeApp(server),
 	]));
+
 	testNewRevision();
 	testGetFederationMD5Hash();
 });
