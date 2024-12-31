@@ -21,7 +21,6 @@ const { getNestedProperty, setNestedProperty } = require('../utils/helper/object
 const { isDate, isObject, isUUID } = require('../utils/helper/typeCheck');
 const DbHandler = require('../handler/db');
 const { basePropertyLabels } = require('../schemas/tickets/templates.constants');
-const { getTemplatesByQuery } = require('./tickets.templates');
 const { templates } = require('../utils/responseCodes');
 
 const { Long } = DbHandler.dataTypes;
@@ -172,7 +171,7 @@ Tickets.getAllTickets = (
 		updatedSince,
 		sort = { [`properties.${basePropertyLabels.Created_AT}`]: -1 },
 		limit,
-		skip,
+		skip = 0,
 	} = {},
 ) => {
 	const formattedQuery = { teamspace, project, model, ...query };
@@ -181,7 +180,21 @@ Tickets.getAllTickets = (
 		formattedQuery[`properties.${basePropertyLabels.UPDATED_AT}`] = { $gt: updatedSince };
 	}
 
-	return DbHandler.find(teamspace, TICKETS_COL, formattedQuery, projection, sort, limit, skip);
+	const pipelines = [
+		{ $lookup: { from: 'templates', localField: 'type', foreignField: '_id', as: 'templateDetails' } },
+		{ $unwind: '$templateDetails' },
+		{ $addFields: { ticketCode: { $concat: ['$templateDetails.code', ':', { $toString: '$number' }] } } },
+		{ $match: formattedQuery },
+		{ $project: projection },
+		{ $sort: sort },
+		{ $skip: skip },
+	];
+
+	if (limit) {
+		pipelines.push({ $limit: limit });
+	}
+
+	return DbHandler.aggregate(teamspace, TICKETS_COL, pipelines);
 };
 
 module.exports = Tickets;

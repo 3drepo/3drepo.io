@@ -32,4 +32,17 @@ Tickets.queryOperators = {
 	LESSER_OR_EQUAL_TO: 'lte',
 };
 
+Tickets.defaultQueryProps = {
+	TITLE: 'title',
+	TICKET_CODE: 'ticketCode',
+	TEMPLATE: 'template',
+};
+
+Tickets.defaultQueryOperators = [
+	Tickets.queryOperators.EQUALS,
+	Tickets.queryOperators.NOT_EQUALS,
+	Tickets.queryOperators.CONTAINS,
+	Tickets.queryOperators.NOT_CONTAINS,
+];
+
 module.exports = Tickets;

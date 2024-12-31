@@ -16,9 +16,9 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
+const { defaultQueryOperators, defaultQueryProps, queryOperators } = require('../../../../../../../models/tickets.constants');
 const Yup = require('yup');
 const { isEmpty } = require('../../../../../../../utils/helper/objects');
-const { queryOperators } = require('../../../../../../../models/tickets.constants');
 const { respond } = require('../../../../../../../utils/responder');
 const { types } = require('../../../../../../../utils/helper/yup');
 
@@ -29,30 +29,44 @@ const querySchema = Yup.string()
 	.test('not-empty-string', 'Query string cannot be empty', (val) => !isEmpty(val.slice(1, -1)));
 
 const queryParamSchema = Yup.object().shape({
-	propertyName: types.strings.title.transform((value) => {
-		const propertyNameParts = value.split(':');
-		if (propertyNameParts.length === 2) {
-			return `modules.${propertyNameParts[0]}.${propertyNameParts[1]}`;
-		}
-		const propName = propertyNameParts[0];
-		return propName.startsWith('$') ? propName.substring(1) : `properties.${propName}`;
-	}).required(),
-	operator: Yup.string().oneOf(Object.values(queryOperators)).required(),
+	propertyName: types.strings.title
+		.transform((value) => {
+			if (isEmpty(value)) return value;
+
+			const propertyNameParts = value.split(':');
+			if (propertyNameParts.length === 2) {
+				return `modules.${propertyNameParts[0]}.${propertyNameParts[1]}`;
+			}
+
+			const propName = propertyNameParts[0];
+			return propName.startsWith('$') ? propName.substring(1) : `properties.${propName}`;
+		}).required(),
+	operator: Yup.string().required()
+		.when('propertyName', (propertyName, schema) => {
+			const validOperators = Object.values(defaultQueryProps).includes(propertyName)
+				? defaultQueryOperators
+				: Object.values(queryOperators);
+
+			return schema.oneOf(validOperators);
+		}),
 	value: Yup.mixed()
-		.when('operator', {
-			is: (operator) => operator === queryOperators.EQUALS || operator === queryOperators.NOT_EQUALS
-                || operator === queryOperators.CONTAINS || operator === queryOperators.NOT_CONTAINS,
-			then: Yup.array().of(types.strings.title).required()
-				.transform((v, value) => (value ? value.match(/([^",]+|"(.*?)")/g).map((val) => val.replace(/^"|"$/g, '').trim()) : value)),
-		})
-		.when('operator', {
-			is: (operator) => operator === queryOperators.RANGE || operator === queryOperators.NOT_IN_RANGE,
-			then: types.range.required(),
-		})
-		.when('operator', {
-			is: (operator) => operator === queryOperators.GREATER_OR_EQUAL_TO
-                || operator === queryOperators.LESSER_OR_EQUAL_TO,
-			then: Yup.number().required(),
+		.when('operator', (operator, schema) => {
+			if (operator === queryOperators.EXISTS || operator === queryOperators.NOT_EXISTS) {
+				return schema.strip();
+			}
+
+			if (operator === queryOperators.RANGE || operator === queryOperators.NOT_IN_RANGE) {
+				return types.range.required();
+			}
+
+			if (operator === queryOperators.GREATER_OR_EQUAL_TO
+				|| operator === queryOperators.LESSER_OR_EQUAL_TO) {
+				return Yup.number().required();
+			}
+
+			return Yup.array().of(types.strings.title).required()
+				.transform((v, value) => (value ? value.match(/([^",]+|"(.*?)")/g)
+					.map((val) => val.replace(/^"|"$/g, '').trim()) : value));
 		}),
 });
 
@@ -60,7 +74,7 @@ TicketQueryFilters.validateQueryString = async (req, res, next) => {
 	if (req.query.query) {
 		try {
 			const queryString = await querySchema.validate(decodeURIComponent(req.query.query));
-			const queryParams = queryString.replace(/^'(.*)'$/, '$1').split('&');
+			const queryParams = queryString.slice(1, -1).split('&');
 			const queryFilters = [];
 
 			await Promise.all(queryParams.map(async (param) => {
