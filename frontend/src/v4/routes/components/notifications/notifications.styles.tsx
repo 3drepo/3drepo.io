@@ -36,6 +36,16 @@ export const NotificationsIcon = styled(Notifications)`
 	}
 `;
 
+export const NotificationsIconContainer = styled.div`
+	cursor: pointer;
+	padding: 10px;
+
+	.MuiBadge-root {
+		margin-top: -2px;
+		margin-left: -.4px;
+	}
+`;
+
 export const NotificationWeekHeader = styled(NotificationsPanelHeader)`
 	padding-bottom: 0;
 `;

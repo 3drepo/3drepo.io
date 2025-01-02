@@ -40,13 +40,13 @@ import {
 } from '../revisionDetails/revisionDetails.styles';
 import { getRevisionFileUrl } from '@/v5/services/api/containerRevisions';
 import { selectHasCollaboratorAccess } from '@/v5/store/containers/containers.selectors';
-import { getState } from '@/v4/modules/store';
 import { RevisionsListItemText } from '../revisionDetails/components/revisionsListItem/revisionsListItemText/revisionsListItemText.component';
 import { RevisionsListItemAuthor } from '../revisionDetails/components/revisionsListItem/revisionsListItemAuthor/revisionsListItemAuthor.component';
 import { RevisionsListItemTag } from '../revisionDetails/components/revisionsListItem/revisionsListItem.styles';
 import { viewerRoute } from '@/v5/services/routing/routing';
-import { downloadFile } from '@components/authenticatedResource/authenticatedResource.hooks';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
+import { downloadFile } from '@/v5/helpers/download.helper';
+import { getState } from '@/v5/helpers/redux.helpers';
 
 interface IContainerRevisionDetails {
 	containerId: string;

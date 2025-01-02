@@ -313,13 +313,6 @@ export const theme = createTheme({
 							'-moz-appearance': 'textfield',
 						},
 
-						'::placeholder': {
-							opacity: 1,
-							color: COLOR.BASE_MAIN,
-							'&:hover': {
-								color: COLOR.SECONDARY_MAIN,
-							},
-						},
 					},
 					'.Mui-error': {
 						'.MuiOutlinedInput-notchedOutline': {
@@ -952,9 +945,6 @@ export const theme = createTheme({
 					},
 					'&:hover:not(.Mui-focused)': {
 						backgroundColor: COLOR.TERTIARY_LIGHTER,
-						'.MuiInputBase-input::placeholder': {
-							color: COLOR.SECONDARY_MAIN,
-						},
 					},
 					'&, &:hover, &.Mui-focused': {
 						'&:not(.Mui-disabled):before, &:not(.Mui-disabled):after': {
@@ -964,6 +954,13 @@ export const theme = createTheme({
 				},
 				input: {
 					padding: '0 12px',
+					'::placeholder': {
+						opacity: 1,
+						color: COLOR.BASE_MAIN,
+					},
+					'&:hover:not(.Mui-focused)::placeholder': {
+						color: COLOR.SECONDARY_MAIN,
+					},
 				},
 			},
 		},
@@ -989,6 +986,10 @@ export const theme = createTheme({
 						padding: '0px 15px',
 						height: 35,
 						lineHeight: '35px',
+					},
+					'&&&& ::placeholder': {
+						opacity: '1 !important',
+						color: COLOR.BASE_LIGHTER,
 					},
 				},
 				notchedOutline: {
