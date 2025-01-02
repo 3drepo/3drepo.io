@@ -190,10 +190,10 @@ DBHandler.findOne = async (database, colName, query, projection, sort) => {
 	return collection.findOne(query, options);
 };
 
-DBHandler.find = async (database, colName, query, projection, sort, limit, skip = 0) => {
+DBHandler.find = async (database, colName, query, projection, sort, limit) => {
 	const collection = await getCollection(database, colName);
 	const options = deleteIfUndefined({ projection, sort });
-	const cmd = collection.find(query, options).skip(skip);
+	const cmd = collection.find(query, options);
 	return limit ? cmd.limit(limit).toArray() : cmd.toArray();
 };
 
