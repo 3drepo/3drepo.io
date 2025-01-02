@@ -524,7 +524,7 @@ const testGetMD5Hash = () => {
 			// given:
 			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce(templates.revisionNotFound);
 
-			// it shoul
+			// it should
 			await expect(Containers.getRevisionMD5Hash('teamspace', 'container', generateUUIDString(), 'user1')).resolves.toEqual();
 
 			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(1);
@@ -534,14 +534,14 @@ const testGetMD5Hash = () => {
 		test('should return empty if user does not have access to the revision', async () => {
 			// given
 
-			// it shuld
+			// it should
 			await expect(Containers.getRevisionMD5Hash('teamspace', 'container', generateUUIDString(), 'NoAccess')).resolves.toEqual();
 
 			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(1);
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(0);
 			expect(FilesManager.getFile).toHaveBeenCalledTimes(0);
 		});
-		test('should return an object if revision has file', async () => {
+		test('should return an object if revision has a valid file and the file should be retrieved if no MD5Hash exists in the fileRef', async () => {
 			// given:
 			const revisionMock = { _id: Buffer.from('testBuffer'), rFile: ['success!'], timestamp: new Date() };
 			const revisionCodeMock = generateUUIDString();
@@ -564,6 +564,30 @@ const testGetMD5Hash = () => {
 			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(1);
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
 			expect(FilesManager.getFile).toHaveBeenCalledTimes(1);
+		});
+		test('should return an object if revision has has a valid file and the file should not be retrieved if MD5Hash exists in the fileRef', async () => {
+			// given:
+			const revisionMock = { _id: Buffer.from('testBuffer'), rFile: ['success!'], timestamp: new Date() };
+			const revisionCodeMock = generateUUIDString();
+			const fileEntry = { size: 100, type: 'fs', link: generateRandomString(), MD5Hash: CryptoJs.MD5(revisionMock._id).toString() };
+
+			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce(revisionMock);
+			FilesManager.getFile.mockResolvedValueOnce(revisionMock._id);
+			FileRefs.getRefEntry.mockResolvedValueOnce(fileEntry);
+
+			// it should
+			await expect(Containers.getRevisionMD5Hash('teamspace', 'container', revisionCodeMock, 'user1')).resolves.toEqual({
+				container: 'container',
+				code: UUIDParse.unparse(revisionMock._id.buffer),
+				uploadedAt: new Date(revisionMock.timestamp).getTime(),
+				hash: CryptoJs.MD5(revisionMock._id).toString(),
+				filename: revisionMock.rFile[0],
+				size: fileEntry.size,
+			});
+
+			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(1);
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFile).toHaveBeenCalledTimes(0);
 		});
 	});
 };

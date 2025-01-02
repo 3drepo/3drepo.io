@@ -18,13 +18,13 @@
 const { addModel, getContainers } = require('../../../../../models/modelSettings');
 const { addModelToProject, getProjectById, removeModelFromProject } = require('../../../../../models/projectSettings');
 const { getLatestRevision, getRevisionByIdOrTag } = require('../../../../../models/revisions');
+const { getRefEntry, updateRef } = require('../../../../../models/fileRefs');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions/permissions');
 const CryptoJs = require('crypto-js');
 const { USERS_DB_NAME } = require('../../../../../models/users.constants');
 const UUIDParse = require('uuid-parse');
 const { getFavourites } = require('../../../../../models/users');
 const { getFile } = require('../../../../../services/filesManager');
-const { getRefEntry } = require('../../../../../models/fileRefs');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { removeModelData } = require('../../../../../utils/helper/models');
 
@@ -91,23 +91,40 @@ ModelList.getModelMD5Hash = async (teamspace, container, revision, user) => {
 	// check if anything is in there
 	if (!rev.rFile?.length) return returnValue;
 
-	const filename = rev.rFile[0];
-
-	const file = await getFile(teamspace, `${container}.history`, filename);
-	const refEntry = await getRefEntry(teamspace, `${container}.history.ref`, filename);
-
-	const hash = CryptoJs.MD5(file).toString();
 	const code = UUIDParse.unparse(rev._id.buffer);
 	const uploadedAt = new Date(rev.timestamp).getTime();
+	const filename = rev.rFile[0];
 
-	returnValue = {
-		container,
-		code,
-		uploadedAt,
-		hash,
-		filename,
-		size: refEntry.size,
-	};
+	// check if the ref has the MD5 hash
+	const refEntry = await getRefEntry(teamspace, `${container}.history.ref`, filename);
+
+	if (Object.keys(refEntry).includes('MD5Hash')) {
+		// if the ref has the hash create the object
+		returnValue = {
+			container,
+			code,
+			uploadedAt,
+			hash: refEntry.MD5Hash,
+			filename,
+			size: refEntry.size,
+		};
+	} else {
+		// if the ref does not have the hash get the file, create the hash, set the return object and update the ref with the hash
+		const file = await getFile(teamspace, `${container}.history`, filename);
+
+		const hash = CryptoJs.MD5(file).toString();
+
+		returnValue = {
+			container,
+			code,
+			uploadedAt,
+			hash,
+			filename,
+			size: refEntry.size,
+		};
+
+		await updateRef(teamspace, `${container}.history.ref`, { _id: filename }, { $set: { MD5Hash: hash } });
+	}
 
 	return returnValue;
 };
