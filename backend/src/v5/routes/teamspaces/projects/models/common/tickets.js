@@ -600,6 +600,12 @@ const establishRoutes = (isFed) => {
 	 *         required: false
 	 *         schema:
 	 *           type: string
+	 *       - name: query
+	 *         description: Query string that defies tickets to be included in the response
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: string
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
