@@ -15,15 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export type CardFilterOperator = 'ex' | 'nex' | 'eq' | 'neq' | 'ss' | 'nss' | 'rng' | 'nrng' | 'gt' | 'gte' | 'lt' | 'lte';
-export type CardFilterType = 'text' | 'longText' | 'date' | 'oneOf' | 'manyOf' | 'boolean' | 'number' | 'ticketTitle' | 'ticketId' | 'template';
-type ValueType = string | number | Date;
-export type CardFilterValue = ValueType | [ValueType, ValueType];
-export type BaseFilter = { operator: CardFilterOperator, values: CardFilterValue[] };
+import { FormattedMessage } from 'react-intl';
+import { RangeContainer } from './rangeInput.styles';
 
-export type CardFilter = {
-	property: string,
-	type: CardFilterType,
-	filter?: BaseFilter,
-	module?: string,
-};
+export const RangeInput = ({ Input, name, error }) => (
+	<RangeContainer>
+		<Input name={`${name}.0`} formError={!!error} />
+		<FormattedMessage id="rangeInputs.to" defaultMessage="to" />
+		<Input name={`${name}.1`} formError={!!error} />
+	</RangeContainer>
+);
