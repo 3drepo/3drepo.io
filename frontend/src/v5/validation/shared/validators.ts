@@ -96,5 +96,8 @@ export const numberRange = (message?) => Yup.array().of(requiredNumber().test(
 		id: 'validation.range.error.invalidRange',
 		defaultMessage: 'Invalid range',
 	}),
-	(v, ctx) => ctx.parent[0] < ctx.parent[1],
+	(v, ctx) => {
+		if (ctx.parent.some((x) => !isNumber(x))) return true;
+		return ctx.parent[0] < ctx.parent[1];
+	},
 ));
