@@ -64,7 +64,7 @@ export const INITIAL_STATE: IMeasurementState = {
 	isDisabled: false,
 	mode: '',
 	units: 'm',
-	slopeUnits: SLOPE_UNITS.DEGREES,
+	slopeUnits: SLOPE_UNITS.PERCENTAGE,
 	areaMeasurements: [],
 	lengthMeasurements: [],
 	pointMeasurements: [],
