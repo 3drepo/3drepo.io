@@ -15,26 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { RangeContainer } from './rangeInput.styles';
 import { useFormContext } from 'react-hook-form';
-import { get } from 'lodash';
 import { InputController } from '@controls/inputs/inputController.component';
 import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
 import { formatMessage } from '@/v5/services/intl';
 
 export const DateRangeInput = ({ name, error }) => {
-	const { trigger, getValues, formState: { dirtyFields } } = useFormContext();
+	const { getValues } = useFormContext();
 	const fromDate = getValues(`${name}.0`);
 	const toDate = getValues(`${name}.1`);
-
-	useEffect(() => {
-		const dirty = get(dirtyFields, name);
-		if (dirty?.[0] || dirty?.[1]) {
-			trigger(name);
-		}
-	}, [error?.[0]?.message, error?.[1]?.message]);
 
 	return (
 		<RangeContainer>
