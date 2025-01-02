@@ -15,26 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { downloadAuthUrl } from '@/v5/helpers/download.helper';
-import { isApiUrl } from '@/v5/services/api/default';
+import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
+import { getJobAbbreviation } from '@/v5/store/jobs/jobs.helpers';
+import { ErrorPopover } from './errorPopover.component';
+import { ErrorCircle } from './errorPopoverCircle.styles';
+import { IPopoverCircle } from '../popoverCircle.component';
 
-export const AuthAnchor = (props: React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>) => {
-	const a = document.createElement('a');
-	a.download = props.download;
-	
-	const onClick = async (e) => {
-		if (!isApiUrl(props.href)) return;
-		e.preventDefault();
-
-		if (!a.href) {
-			a.href = await downloadAuthUrl(props.href);
-		}
-
-		a.click();
-	};
-
-	return (
-		<a {...props} onClick={onClick} /> 
-	);
+type ErrorPopoverCircleProps = IPopoverCircle & {
+	value: string;
+	className?: string;
+	message: string;
 };
 
+export const ErrorPopoverCircle = ({ value, size, message, className }: ErrorPopoverCircleProps) => (
+	<HoverPopover
+		className={className}
+		anchor={() => <ErrorCircle size={size}>{getJobAbbreviation(value)}</ErrorCircle>}
+	>
+		<ErrorPopover value={value} message={message} />
+	</HoverPopover>
+);

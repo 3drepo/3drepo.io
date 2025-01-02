@@ -73,6 +73,26 @@ export const updateFederationContainers = async (teamspace, projectId, federatio
 	})
 );
 
+export const fetchFederationUsers = async (
+	teamspace: string,
+	projectId: string,
+	modelId: string,
+	excludeViewers: boolean = false,
+) => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/members?excludeViewers=${excludeViewers}`);
+	return data;
+};
+
+export const fetchFederationJobs = async (
+	teamspace: string,
+	projectId: string,
+	modelId: string,
+	excludeViewers: boolean = false,
+) => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/jobs?excludeViewers=${excludeViewers}`);
+	return data;
+};
+
 /**
  * Types
 */

@@ -21,6 +21,9 @@ import { IContainersState } from './containers.redux';
 import { IContainer } from './containers.types';
 import { Role } from '../currentUser/currentUser.types';
 import { isCollaboratorRole, isCommenterRole, isViewerRole } from '../store.helpers';
+import { selectJobsByIds } from '@/v4/modules/jobs';
+import { selectCurrentTeamspaceUsersByIds } from '../users/users.selectors';
+import { isEmpty } from 'lodash';
 
 const selectContainersDomain = (state): IContainersState => state?.containers || ({ containersByProject: {} });
 
@@ -69,6 +72,24 @@ export const selectHasCommenterAccess = createSelector(
 export const selectHasViewerAccess = createSelector(
 	selectContainerRole,
 	(role): boolean => isViewerRole(role),
+);
+
+export const selectContainerUsers = createSelector(
+	selectContainerById,
+	selectCurrentTeamspaceUsersByIds,
+	(container, users) => {
+		if (isEmpty(users)) return [];
+		return (container?.users || []).map((user) => ({ ...user, ...users[user.user] }));
+	},
+);
+
+export const selectContainerJobs = createSelector(
+	selectContainerById,
+	selectJobsByIds,
+	(container, jobs) => {
+		if (isEmpty(jobs)) return [];
+		return (container?.jobs || []).map((job) => ({ ...job, ...jobs[job._id] }));
+	},
 );
 
 export const selectCanUploadToProject = createSelector(

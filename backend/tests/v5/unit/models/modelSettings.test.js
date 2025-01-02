@@ -929,6 +929,17 @@ const testGetUsersWithPermissions = () => {
 			expect(DBHandler.findOne).toHaveBeenCalledWith(teamspace, SETTINGS_COL,
 				{ _id: modelId }, { permissions: 1 });
 		});
+
+		test('should return empty array if the model has no specific permissions', async () => {
+			DBHandler.findOne.mockResolvedValueOnce({});
+
+			await expect(Model.getUsersWithPermissions(teamspace, modelId, true))
+				.resolves.toEqual([]);
+
+			expect(DBHandler.findOne).toHaveBeenCalledTimes(1);
+			expect(DBHandler.findOne).toHaveBeenCalledWith(teamspace, SETTINGS_COL,
+				{ _id: modelId }, { permissions: 1 });
+		});
 	});
 };
 
