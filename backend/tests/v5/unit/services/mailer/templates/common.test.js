@@ -36,6 +36,7 @@ const testRenderTemplate = () => {
 				domain: Yup.string().required(),
 				firstName: Yup.string().required(),
 				emailContent: Yup.string().required(),
+				extraStyles: Yup.string().default(''),
 			}).required(true);
 
 			const data = {
