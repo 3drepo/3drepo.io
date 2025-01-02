@@ -26,7 +26,6 @@ import { renderWhenTrue } from '../../../../helpers/rendering';
 import { Viewer } from '../../../../services/viewer/viewer';
 import { EmptyStateInfo } from '../../../components/components.styles';
 import {
-	IconWrapper,
 	MenuList, StyledItemText,
 	StyledListItem
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
@@ -41,6 +40,7 @@ import {
 	MeasureUnit,
 	ViewerBottomActions,
 	ViewsContainer,
+	IconWrapper,
 } from './measurements.styles';
 
 interface IProps {

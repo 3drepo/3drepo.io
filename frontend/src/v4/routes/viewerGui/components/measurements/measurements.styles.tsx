@@ -23,6 +23,7 @@ import {
 	VIEWER_PANELS_TITLES
 } from '../../../../constants/viewerGui';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
+import { IconWrapper as IconWrapperBase } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 
 export const MeasureIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.MEASUREMENTS];
 
@@ -30,6 +31,10 @@ export const ViewsContainer = styled(ViewerPanel).attrs({
 	title: VIEWER_PANELS_TITLES[VIEWER_PANELS.MEASUREMENTS]
 })`
 	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.MEASUREMENTS]}px;
+`;
+
+export const IconWrapper = styled(IconWrapperBase)`
+	min-width: 24px;
 `;
 
 export const Container = styled.div`
