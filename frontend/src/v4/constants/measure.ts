@@ -52,7 +52,7 @@ export const MEASURE_ACTIONS_MENU = [
 	},
 	{
 		name: MEASURE_ACTIONS_ITEMS.UNITS_DISPLAYED_IN,
-		label: 'Units displayed in',
+		label: 'Length units displayed in',
 		Icon: UnitsIcon
 	},
 	{
