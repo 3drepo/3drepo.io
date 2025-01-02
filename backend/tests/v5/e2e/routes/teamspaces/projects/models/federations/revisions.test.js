@@ -62,7 +62,7 @@ const models = [
 		name: ServiceHelper.generateRandomString(),
 		properties: {
 			...ServiceHelper.generateRandomModelProperties(),
-			permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
+			permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
 			federate: true,
 			subModels: containers.map((model) => ({ _id: model._id })),
 		},
@@ -72,7 +72,7 @@ const models = [
 		name: ServiceHelper.generateRandomString(),
 		properties: {
 			...ServiceHelper.generateRandomModelProperties(modelTypes.FEDERATION),
-			permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
+			permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
 			federate: true,
 			subModels: containers.map((model) => ({ _id: model._id })),
 		},
@@ -216,62 +216,59 @@ const testNewRevision = () => {
 };
 
 const testGetFederationMD5Hash = () => {
-	describe('Get Federation MD5 Files', () => {
-		const generateTestData = () => {
-			const parameters = {
-				ts: teamspace,
-				projectId: project.id,
-				modelId: models[1]._id,
-				revisionId: ServiceHelper.generateUUIDString(),
-				key: users.tsAdmin.apiKey,
-				response: [],
-			};
-			const viewerResponse = [{
-				container: containers[0]._id,
-				code: conRevisions._id,
-				uploadedAt: new Date(conRevisions.timestamp).getTime(),
-				hash: CryptoJs.MD5(Buffer.from(conRevisions.rFile[0])).toString(),
-				filename: conRevisions.rFile[0],
-				size: 20,
-			}];
-			const adminResponse = containers.map((model) => ({
-				container: model._id,
-				code: conRevisions._id,
-				uploadedAt: new Date(conRevisions.timestamp).getTime(),
-				hash: CryptoJs.MD5(Buffer.from(conRevisions.rFile[0])).toString(),
-				filename: conRevisions.rFile[0],
-				size: 20,
-			}));
-
-			// ask about the empty array problem
-			return [
-				['there is no valid session key but return an empty array.', { ...parameters, key: null }, true],
-				['the user is not a member of the teamspace but return an empty array.', { ...parameters, key: nobody.apiKey }, true],
-				['the user does not have access to the project but return an empty array.', { ...parameters, key: users.noProjectAccess.apiKey }, true],
-				['the teamspace does not exist but return an empty array.', { ...parameters, ts: ServiceHelper.generateUUIDString() }, false, templates.federationNotFound],
-				['the federation does not exist but return an empty array.', { ...parameters, modelId: ServiceHelper.generateUUIDString() }, false, templates.federationNotFound],
-				['the viewer access it and return just that information.', { ...parameters, key: users.viewer.apiKey, response: viewerResponse }, true],
-				['the admin access it and return all the information.', { ...parameters, response: adminResponse }, true],
-			];
+	const generateTestData = () => {
+		const parameters = {
+			ts: teamspace,
+			projectId: project.id,
+			modelId: models[1]._id,
+			revisionId: ServiceHelper.generateUUIDString(),
+			key: users.tsAdmin.apiKey,
+			response: [],
 		};
+		const viewerResponse = [{
+			container: containers[0]._id,
+			code: conRevisions._id,
+			uploadedAt: new Date(conRevisions.timestamp).getTime(),
+			hash: CryptoJs.MD5(Buffer.from(conRevisions.rFile[0])).toString(),
+			filename: conRevisions.rFile[0],
+			size: 20,
+		}];
+		const adminResponse = containers.map((model) => ({
+			container: model._id,
+			code: conRevisions._id,
+			uploadedAt: new Date(conRevisions.timestamp).getTime(),
+			hash: CryptoJs.MD5(Buffer.from(conRevisions.rFile[0])).toString(),
+			filename: conRevisions.rFile[0],
+			size: 20,
+		}));
 
-		const runTest = (description, parameters, success, error) => {
-			const route = ({ ts, projectId, modelId, revisionId, key }) => `/v5/teamspaces/${ts}/projects/${projectId}/federations/${modelId}/revisions/${revisionId}/files/original/info${key ? `?key=${key}` : ''}`;
+		return [
+			['there is no valid session key but return an empty array.', { ...parameters, key: null }, false, templates.notLoggedIn],
+			['the user is not a member of the teamspace but return an empty array.', { ...parameters, key: nobody.apiKey }, false, templates.teamspaceNotFound],
+			['the user does not have access to the project but return an empty array.', { ...parameters, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
+			['the teamspace does not exist but return an empty array.', { ...parameters, ts: ServiceHelper.generateUUIDString() }, false, templates.teamspaceNotFound],
+			['the federation does not exist but return an empty array.', { ...parameters, modelId: ServiceHelper.generateUUIDString() }, false, templates.federationNotFound],
+			['the viewer access it and return just that information.', { ...parameters, key: users.viewer.apiKey, response: viewerResponse }, true],
+			['the admin access it and return all the information.', { ...parameters, response: adminResponse }, true],
+		];
+	};
 
-			test(`should ${success ? 'succeed' : `fail with ${error.code}`} if ${description}`, async () => {
-				const expectedStatus = success ? templates.ok.status : error.status;
-				const res = await agent.get(`${route(parameters)}`).expect(expectedStatus);
+	const runTest = (description, parameters, success, error) => {
+		const route = ({ ts, projectId, modelId, revisionId, key }) => `/v5/teamspaces/${ts}/projects/${projectId}/federations/${modelId}/revisions/${revisionId}/files/original/info${key ? `?key=${key}` : ''}`;
 
-				if (success) {
-					expect(JSON.parse(res.text)).toEqual(parameters.response);
-				} else {
-					expect(res.body.code).toEqual(error.code);
-				}
-			});
-		};
+		test(`should ${success ? 'succeed' : `fail with ${error.code}`} if ${description}`, async () => {
+			const expectedStatus = success ? templates.ok.status : error.status;
+			const res = await agent.get(`${route(parameters)}`).expect(expectedStatus);
 
-		describe.each(generateTestData())('Federations', runTest);
-	});
+			if (success) {
+				expect(JSON.parse(res.text)).toEqual(parameters.response);
+			} else {
+				expect(res.body.code).toEqual(error.code);
+			}
+		});
+	};
+
+	describe.each(generateTestData())('Get Federation MD5 Files', runTest);
 };
 
 describe(ServiceHelper.determineTestGroup(__filename), () => {

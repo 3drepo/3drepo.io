@@ -15,11 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { hasReadAccessToFederation, hasWriteAccessToFederation } = require('../../../../../middleware/permissions/permissions');
 const Federations = require('../../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
 const { getUserFromSession } = require('../../../../../utils/sessions');
-const { hasReadAccessToFederation } = require('../../../../../utils/permissions/permissions');
-const { hasWriteAccessToFederation } = require('../../../../../middleware/permissions/permissions');
 const { respond } = require('../../../../../utils/responder');
 const { templates } = require('../../../../../utils/responseCodes');
 const { validateNewRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/federations');
