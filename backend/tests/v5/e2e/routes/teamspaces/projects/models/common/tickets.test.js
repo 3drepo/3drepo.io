@@ -21,6 +21,7 @@ const FS = require('fs');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src, image } = require('../../../../../../helper/path');
 const { serialiseTicketTemplate } = require('../../../../../../../../src/v5/middleware/dataConverter/outputs/common/tickets.templates');
+const { queryOperators, defaultQueryProps } = require('../../../../../../../../src/v5/models/tickets.constants');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
@@ -616,7 +617,13 @@ const testGetTicketList = () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
 		const conNoTickets = ServiceHelper.generateRandomModel();
 		const fedNoTickets = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
-		const templatesToUse = times(3, () => ServiceHelper.generateTemplate());
+		const textProp = { name: ServiceHelper.generateRandomString(), type: propTypes.TEXT };
+
+		const templatesToUse = times(3, () => {
+			const template = ServiceHelper.generateTemplate();
+			template.properties.push(textProp);
+			return template;
+		});
 
 		con.tickets = times(10, (n) => ServiceHelper.generateTicket(templatesToUse[n % templatesToUse.length]));
 		fed.tickets = times(10, (n) => ServiceHelper.generateTicket(templatesToUse[n % templatesToUse.length]));
@@ -664,11 +671,11 @@ const testGetTicketList = () => {
 			const baseRouteParams = { key: users.tsAdmin.apiKey, modelType, projectId: project.id, model };
 
 			const checkTicketList = (ascending = true) => (tickets) => {
-				// check the list is sorted by created at, ascending order
+				// check the list is sorted by updated at, ascending order
 				let lastTicketTime;
 
 				for (const entry of tickets) {
-					const createdAt = entry.properties[basePropertyLabels.CREATED_AT];
+					const createdAt = entry.properties[basePropertyLabels.UPDATED_AT];
 					if (lastTicketTime) expect(lastTicketTime < createdAt).toBe(ascending);
 					lastTicketTime = createdAt;
 				}
@@ -687,6 +694,8 @@ const testGetTicketList = () => {
 				['the model returning only tickets updated since now', { ...baseRouteParams, options: { updatedSince: Date.now() + 1000000 } }, true, []],
 				['the model returning tickets sorted by updated at in ascending order', { ...baseRouteParams, options: { sortBy: basePropertyLabels.UPDATED_AT, sortDesc: false }, checkTicketList: checkTicketList() }, true, model.tickets],
 				['the model returning tickets sorted by updated at in descending order', { ...baseRouteParams, options: { sortBy: basePropertyLabels.UPDATED_AT, sortDesc: true }, checkTicketList: checkTicketList(false) }, true, model.tickets],
+				['the model has tickets with query filter imposed', { ...baseRouteParams, options: { query: `'${textProp.name}::${queryOperators.EQUALS}::${model.tickets[5].properties[textProp.name]}'` } }, true, [model.tickets[5]]],
+				['the model has tickets with template query filter imposed', { ...baseRouteParams, options: { query: `'$${defaultQueryProps.TEMPLATE}::${queryOperators.EQUALS}::${templatesToUse[1].code}'` } }, true, model.tickets.filter((t) => t.type === templatesToUse[1]._id)],
 			];
 		};
 
