@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -110,7 +110,8 @@ const generateEmails = (data, dataRef, usersToUserInfo) => Promise.all(
 			const uri = `/v5/viewer/${teamspace}/${projectIDStr}/${modelIDStr}`;
 
 			notifData.forEach(({ type, tickets: ticketsArr, count }) => {
-				const ticketCodes = ticketsArr.map((ticketId) => tsData.tickets[(UUIDToString(ticketId))]);
+				const ticketCodes = ticketsArr.flatMap((ticketId) => tsData.tickets[(UUIDToString(ticketId))] ?? []);
+				if (!ticketCodes.length) return;
 				switch (type) {
 				case notificationTypes.TICKET_UPDATED:
 					tickets.updated = { count, link: `${uri}?ticketSearch=${ticketCodes.join(',')}` };
@@ -145,21 +146,24 @@ const generateEmails = (data, dataRef, usersToUserInfo) => Promise.all(
 
 const run = async (teamspace) => {
 	const teamspaces = teamspace ? [teamspace] : await getTeamspaceList();
-	const teamspacesWithDDEnabled = await Promise.all(teamspaces.flatMap(async (ts) => {
+	const teamspacesWithDDEnabled = await Promise.all(teamspaces.map(async (ts) => {
 		const addOns = await getAddOns(ts);
-		return addOns[ADD_ONS.DAILY_DIGEST] ? ts : [];
+		return addOns[ADD_ONS.DAILY_DIGEST] ? ts : undefined;
 	}));
 
-	const { contextData, recipients, digestData } = await composeDailyDigests(teamspacesWithDDEnabled);
+	const teamspacesToProcess = teamspacesWithDDEnabled.filter((ts) => !!ts);
 
-	const [
-		dataLookUp, usersToUserInfo,
-	] = await Promise.all([
-		getContextDataLookUp(contextData),
-		getUserDetails(recipients),
-	]);
+	if (teamspacesToProcess?.length) {
+		const { contextData, recipients, digestData } = await composeDailyDigests(teamspacesToProcess);
+		const [
+			dataLookUp, usersToUserInfo,
+		] = await Promise.all([
+			getContextDataLookUp(contextData),
+			getUserDetails(recipients),
+		]);
 
-	await generateEmails(digestData, dataLookUp, usersToUserInfo);
+		await generateEmails(digestData, dataLookUp, usersToUserInfo);
+	}
 };
 
 const genYargs = /* istanbul ignore next */(yargs) => {
