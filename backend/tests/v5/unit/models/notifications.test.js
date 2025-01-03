@@ -25,7 +25,7 @@ const { INTERNAL_DB } = require(`${src}/handler/db.constants`);
 const Notifications = require(`${src}/models/notifications`);
 const { notificationTypes } = require(`${src}/models/notifications.constants`);
 
-const NOTIFICATIONS_COLL = 'notifications';
+const NOTIFICATIONS_COL = 'notifications';
 
 const testRemoveAllUserNotifications = () => {
 	describe('Remove all user notifications', () => {
@@ -36,7 +36,7 @@ const testRemoveAllUserNotifications = () => {
 			await expect(Notifications.removeAllUserNotifications(user)).resolves.toBeUndefined();
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COLL, { user });
+			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COL, { user });
 		});
 	});
 };
@@ -47,7 +47,7 @@ const testInitialise = () => {
 			const fn = jest.spyOn(db, 'createIndex').mockResolvedValueOnce(undefined);
 			await Notifications.initialise();
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COLL,
+			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COL,
 				{ user: 1, timestamp: -1 }, { runInBackground: true });
 		});
 
@@ -56,7 +56,7 @@ const testInitialise = () => {
 			const fn = jest.spyOn(db, 'createIndex').mockRejectedValueOnce(err);
 			await Notifications.initialise();
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COLL,
+			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COL,
 				{ user: 1, timestamp: -1 }, { runInBackground: true });
 		});
 	});
@@ -110,7 +110,7 @@ const testInsertTicketAssignedNotifications = () => {
 			}));
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COLL, expectedRecords);
+			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COL, expectedRecords);
 		});
 
 		test('Multiple notifications should work, missing data rows should be ignored', async () => {
@@ -163,7 +163,7 @@ const testInsertTicketAssignedNotifications = () => {
 				})));
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COLL, expectedRecords);
+			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COL, expectedRecords);
 		});
 	});
 };
@@ -218,7 +218,7 @@ const testInsertTicketUpdatedNotifications = () => {
 			}));
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COLL, expectedRecords);
+			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COL, expectedRecords);
 		});
 
 		test('Multiple notifications should work, missing data rows should be ignored', async () => {
@@ -277,7 +277,7 @@ const testInsertTicketUpdatedNotifications = () => {
 				})));
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COLL, expectedRecords);
+			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COL, expectedRecords);
 		});
 	});
 };
@@ -332,7 +332,7 @@ const testInsertTicketDeletedNotifications = () => {
 			}));
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COLL, expectedRecords);
+			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COL, expectedRecords);
 		});
 
 		test('Multiple notifications should work, missing data rows should be ignored', async () => {
@@ -391,7 +391,41 @@ const testInsertTicketDeletedNotifications = () => {
 				})));
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COLL, expectedRecords);
+			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COL, expectedRecords);
+		});
+	});
+};
+
+const testComposeDailyDigests = () => {
+	describe('Daily digest', () => {
+		test('Should run multiple queries related to the teamspace provided', async () => {
+			const teamspaces = [generateRandomString(), generateRandomString()];
+			const aggregateResults = generateRandomString();
+			const distinctResults = generateRandomString();
+
+			const aggregateFn = jest.spyOn(db, 'aggregate');
+			const distinctFn = jest.spyOn(db, 'distinct');
+
+			aggregateFn.mockResolvedValue(aggregateResults);
+			distinctFn.mockResolvedValue(distinctResults);
+
+			await expect(Notifications.composeDailyDigests(teamspaces)).resolves.toEqual({
+				contextData: aggregateResults, digestData: aggregateResults, recipients: distinctResults });
+
+			expect(aggregateFn).toHaveBeenCalledTimes(2);
+
+			// Not worth copying the pipeline to match the pipelines over. Will check the query separately.
+			expect(aggregateFn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COL, expect.any(Array));
+
+			const expectedQuery = {
+				'data.teamspace': { $in: teamspaces },
+				timestamp: { $gte: expect.any(Date) } };
+
+			expect(aggregateFn.mock.calls[0][2][0]).toEqual({ $match: expectedQuery });
+			expect(aggregateFn.mock.calls[1][2][0]).toEqual({ $match: expectedQuery });
+
+			expect(distinctFn).toHaveBeenCalledTimes(1);
+			expect(distinctFn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COL, 'user', expectedQuery);
 		});
 	});
 };
@@ -402,4 +436,5 @@ describe('models/notifications', () => {
 	testInsertTicketUpdatedNotifications();
 	testInsertTicketDeletedNotifications();
 	testInitialise();
+	testComposeDailyDigests();
 });

@@ -600,6 +600,48 @@ const testOnNewTicketComment = () => {
 			expect(NotificationModels.insertTicketUpdatedNotifications).toHaveBeenCalledWith(
 				teamspace, project, model, expectedNotifications);
 		});
+
+		test('Should create a ticket update notification for everyone but the author (ticket with no assignee)', async () => {
+			const template = generateRandomString();
+			const [commenter] = times(5, () => generateRandomString());
+			const [jobMemNoPerm, ...jobMembers] = times(3, () => generateRandomString());
+
+			TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(author,
+				[], template));
+			JobsModels.getJobsToUsers.mockResolvedValueOnce([{ _id: job, users: [jobMemNoPerm, ...jobMembers] }]);
+			SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([
+				author, commenter, ...jobMembers]);
+
+			TicketTemplatesModel.getTemplateById.mockResolvedValueOnce({});
+
+			const comment = {
+				_id: generateRandomString(),
+				message: generateRandomString(),
+				ticket,
+				author: commenter,
+			};
+
+			const eventData = createEventData(author, comment);
+			await eventCallbacks[events.NEW_COMMENT](eventData);
+
+			expect(JobsModels.getJobsToUsers).toHaveBeenCalledTimes(1);
+			expect(JobsModels.getJobsToUsers).toHaveBeenCalledWith(teamspace);
+
+			expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledTimes(1);
+			expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledWith(teamspace,
+				project, model, false);
+
+			const expectedNotifications = [{
+				ticket,
+				comment: { _id: comment._id, message: comment.message },
+				author: commenter,
+				users: [author],
+			}];
+
+			expect(NotificationModels.insertTicketUpdatedNotifications).toHaveBeenCalledTimes(1);
+			expect(NotificationModels.insertTicketUpdatedNotifications).toHaveBeenCalledWith(
+				teamspace, project, model, expectedNotifications);
+		});
 	});
 };
 
