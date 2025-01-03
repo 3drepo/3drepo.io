@@ -31,7 +31,7 @@ const {
 const { src, utilScripts } = require('../../helper/path');
 
 const { ADD_ONS } = require(`${src}/models/teamspaces.constants`);
-const { insertTicketAssignedNotifications } = require(`${src}/models/notifications`);
+const { insertTicketAssignedNotifications, insertTicketUpdatedNotifications, insertTicketClosedNotifications } = require(`${src}/models/notifications`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { templates: emailTemplates } = require(`${src}/services/mailer/mailer.constants`);
 
@@ -40,7 +40,21 @@ const SendDailyDigests = require(`${utilScripts}/teamspaces/sendDailyDigest`);
 jest.mock('../../../../src/v5/services/mailer');
 const mailer = require(`${src}/services/mailer`);
 
-const { disconnect } = require(`${src}/handler/db`);
+const { disconnect, insertMany } = require(`${src}/handler/db`);
+const { INTERNAL_DB } = require(`${src}/handler/db.constants`);
+
+const insertBogusNotification = (teamspace, project, model, users, ticket) => insertMany(
+	INTERNAL_DB, 'notifications',
+	users.map((user) => ({
+		_id: generateUUID(),
+		user,
+		type: generateRandomString(),
+		timestamp: new Date(),
+		data: {
+			teamspace, project, model, ticket,
+		},
+	})),
+);
 
 const setupData = async ({ users, ...teamspaces }) => {
 	await Promise.all([...users, ...Object.values(teamspaces)].map((entry) => createUser(entry)));
@@ -63,6 +77,9 @@ const setupData = async ({ users, ...teamspaces }) => {
 		const template = generateTemplate();
 		const ticket = generateTicket(template, true);
 
+		const recipients = ts.user === teamspaces.teamspaceUserNotFound.user ? [generateRandomString()] : usernameArr;
+		const ticketId = stringToUUID(ticket._id);
+
 		await Promise.all([
 			ts.user === teamspaces.teamspaceProjNotFound.user ? Promise.resolve()
 				: createProject(ts.user, project, generateRandomString(), [model]),
@@ -70,9 +87,18 @@ const setupData = async ({ users, ...teamspaces }) => {
 			ts.user === teamspaces.teamspaceNoTemplate.user ? Promise.resolve() : createTemplates(ts.user, [template]),
 			createTicket(ts.user, project, model, ticket),
 			insertTicketAssignedNotifications(ts.user, project, model, [{
-				users: ts.user === teamspaces.teamspaceUserNotFound.user ? [generateRandomString()] : usernameArr,
-				ticket: stringToUUID(ticket._id),
+				users: recipients,
+				ticket: ticketId,
 				assignedBy: usernameArr[0] }]),
+			insertTicketUpdatedNotifications(ts.user, project, model, [{
+				users: recipients,
+				ticket: ticketId,
+				author: usernameArr[0] }]),
+			insertTicketClosedNotifications(ts.user, project, model, [{
+				users: recipients,
+				ticket: ticketId,
+				author: usernameArr[0] }]),
+			insertBogusNotification(ts.user, project, model, recipients, ticketId),
 		]);
 	}));
 };
