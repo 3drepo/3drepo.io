@@ -33,14 +33,13 @@ export const TYPE_TO_ICON: Record<CardFilterType, any> = {
 	'text': TextIcon,
 	'longText': TextIcon,
 	'date': CalendarIcon,
+	'pastDate': CalendarIcon,
+	'sequencing': CalendarIcon,
 	'oneOf': ListIcon,
 	'manyOf': ListIcon,
 	'boolean': BooleanIcon,
 	'number': NumberIcon,
 };
-
-const DATE_TYPES_VARIANTS = ['pastDate', 'sequencing'];
-const VALID_FILTERING_PROPERTY_TYPES = [...Object.keys(TYPE_TO_ICON), ...DATE_TYPES_VARIANTS];
 
 const DEFAULT_FILTERS: CardFilter[] = [
 	{ module: '', type: 'ticketTitle', property: formatMessage({ defaultMessage: 'Ticket title', id: 'viewer.card.filters.element.ticketTitle' }) },
@@ -49,7 +48,7 @@ const DEFAULT_FILTERS: CardFilter[] = [
 ];
 
 const propertiesToValidFilters = (properties: { name: string, type: string }[], module: string = ''): CardFilter[] => properties
-	.filter(({ type }) => VALID_FILTERING_PROPERTY_TYPES.includes(type))
+	.filter(({ type }) => Object.keys(TYPE_TO_ICON).includes(type))
 	.map(({ name, type }) => ({
 		module,
 		property: name,
@@ -61,17 +60,8 @@ const templateToFilters = (template: ITemplate): CardFilter[] => [
 	...template.modules.flatMap(({ properties, name, type }) => propertiesToValidFilters(properties, name || type)),
 ];
 
-const toFiltersWithValidTypes = (filter: CardFilter): CardFilter => {
-	const validFilter = { ...filter };
-	if (DATE_TYPES_VARIANTS.includes(filter.type)) {
-		validFilter.type = 'date';
-	}
-	return validFilter;
-};
-
 export const templatesToFilters = (templates: ITemplate[]): CardFilter[] => {
 	let filters = templates.flatMap(templateToFilters);
-	filters = filters.map(toFiltersWithValidTypes);
 	filters = uniqBy(filters, (f) => f.module + f.property + f.type);
 	filters = sortBy(filters, 'module');
 	return [

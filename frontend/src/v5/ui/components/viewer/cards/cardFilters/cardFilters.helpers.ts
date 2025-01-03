@@ -73,10 +73,11 @@ export const getFilterFormTitle = (elements: string[]) => compact(elements).join
 
 export const isRangeOperator = (operator: CardFilterOperator) => ['rng', 'nrng'].includes(operator);
 
+export const isDateType = (type: CardFilterType) => ['date', 'pastDate', 'sequencing'].includes(type);
 export const isTextType = (type: CardFilterType) => ['template', 'ticketId', 'ticketTitle', 'text', 'longText'].includes(type);
 export const getValidOperators = (type: CardFilterType): CardFilterOperator[] => {
 	if (isTextType(type)) return ['eq', 'neq', 'ss', 'nss', 'ex', 'nex'];
 	if (type === 'number') return ['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'rng', 'nrng', 'ex', 'nex'];
-	if (type === 'date') return ['eq', 'lte', 'gte', 'rng', 'nrng', 'ex', 'nex'];
+	if (isDateType(type)) return ['eq', 'lte', 'gte', 'rng', 'nrng', 'ex', 'nex'];
 	return Object.keys(FILTER_OPERATOR_LABEL) as CardFilterOperator[];
 };

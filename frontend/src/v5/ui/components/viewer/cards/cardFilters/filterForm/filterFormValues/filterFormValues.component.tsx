@@ -17,7 +17,7 @@
 
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { getOperatorMaxFieldsAllowed } from '../filterForm.helpers';
-import { isRangeOperator, isTextType } from '../../cardFilters.helpers';
+import { isRangeOperator, isDateType, isTextType } from '../../cardFilters.helpers';
 import { FormDateTime, FormNumberField, FormTextField } from '@controls/inputs/formInputs.component';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
 import { useEffect } from 'react';
@@ -65,7 +65,7 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 
 	if (maxFields === 0) return null;
 
-	if (type === 'number' || type === 'date' || isTextType(type)) {
+	if (type === 'number' || isDateType(type) || isTextType(type)) {
 		const InputField = getInputField(type);
 
 		if (maxFields === 1) return <InputField name={`${name}.0.value`} formError={!!error?.[0]} />;
@@ -85,7 +85,7 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 		// and it is only called later
 		// @ts-ignore
 		if (isRangeOp && isArray(fields[0]?.value)) {
-			if (type === 'date') return (
+			if (isDateType(type)) return (
 				<>
 					{fields.map((field, i) => (
 						<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
