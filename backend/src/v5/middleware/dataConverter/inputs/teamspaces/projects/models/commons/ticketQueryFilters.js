@@ -16,59 +16,10 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
-const { defaultQueryOperators, defaultQueryProps, queryOperators } = require('../../../../../../../models/tickets.constants');
-const Yup = require('yup');
-const { isEmpty } = require('../../../../../../../utils/helper/objects');
+const { queryParamSchema, querySchema } = require('../../../../../../../schemas/tickets/tickets.filters');
 const { respond } = require('../../../../../../../utils/responder');
-const { types } = require('../../../../../../../utils/helper/yup');
 
 const TicketQueryFilters = {};
-
-const querySchema = Yup.string()
-	.test('wrapped-in-single-quote', 'Query string must start and end with a single quote', (val) => val.startsWith("'") && val.endsWith("'"))
-	.test('not-empty-string', 'Query string cannot be empty', (val) => !isEmpty(val.slice(1, -1)));
-
-const queryParamSchema = Yup.object().shape({
-	propertyName: types.strings.title
-		.transform((value) => {
-			if (isEmpty(value)) return value;
-
-			const propertyNameParts = value.split(':');
-			if (propertyNameParts.length === 2) {
-				return `modules.${propertyNameParts[0]}.${propertyNameParts[1]}`;
-			}
-
-			const propName = propertyNameParts[0];
-			return propName.startsWith('$') ? propName.substring(1) : `properties.${propName}`;
-		}).required(),
-	operator: Yup.string().required()
-		.when('propertyName', (propertyName, schema) => {
-			const validOperators = Object.values(defaultQueryProps).includes(propertyName)
-				? defaultQueryOperators
-				: Object.values(queryOperators);
-
-			return schema.oneOf(validOperators);
-		}),
-	value: Yup.mixed()
-		.when('operator', (operator, schema) => {
-			if (operator === queryOperators.EXISTS || operator === queryOperators.NOT_EXISTS) {
-				return schema.strip();
-			}
-
-			if (operator === queryOperators.RANGE || operator === queryOperators.NOT_IN_RANGE) {
-				return types.range.required();
-			}
-
-			if (operator === queryOperators.GREATER_OR_EQUAL_TO
-				|| operator === queryOperators.LESSER_OR_EQUAL_TO) {
-				return Yup.number().required();
-			}
-
-			return Yup.array().of(types.strings.title).required()
-				.transform((v, value) => (value ? value.match(/([^",]+|"(.*?)")/g)
-					.map((val) => val.replace(/^"|"$/g, '').trim()) : value));
-		}),
-});
 
 TicketQueryFilters.validateQueryString = async (req, res, next) => {
 	if (req.query.query) {
@@ -78,13 +29,12 @@ TicketQueryFilters.validateQueryString = async (req, res, next) => {
 			const queryFilters = [];
 
 			await Promise.all(queryParams.map(async (param) => {
-				const queryParts = param.split('::');
-				const query = { propertyName: queryParts[0], operator: queryParts[1], value: queryParts[2] };
+				const [propertyName, operator, value] = param.split('::');
 				try {
-					const validatedQuery = await queryParamSchema.validate(query);
+					const validatedQuery = await queryParamSchema.validate({ propertyName, operator, value });
 					queryFilters.push(validatedQuery);
 				} catch (err) {
-					throw createResponseCode(templates.invalidArguments, `Error at '${query.propertyName}' query filter: ${err.message}`);
+					throw createResponseCode(templates.invalidArguments, `Error at '${propertyName}' query filter: ${err.message}`);
 				}
 			}));
 

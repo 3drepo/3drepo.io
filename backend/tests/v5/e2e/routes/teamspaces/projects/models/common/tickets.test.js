@@ -21,7 +21,7 @@ const FS = require('fs');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src, image } = require('../../../../../../helper/path');
 const { serialiseTicketTemplate } = require('../../../../../../../../src/v5/middleware/dataConverter/outputs/common/tickets.templates');
-const { queryOperators, defaultQueryProps } = require('../../../../../../../../src/v5/models/tickets.constants');
+const { queryOperators, specialQueryFields } = require('../../../../../../../../src/v5/schemas/tickets/tickets.filters');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
@@ -675,9 +675,9 @@ const testGetTicketList = () => {
 				let lastTicketTime;
 
 				for (const entry of tickets) {
-					const createdAt = entry.properties[basePropertyLabels.UPDATED_AT];
-					if (lastTicketTime) expect(lastTicketTime < createdAt).toBe(ascending);
-					lastTicketTime = createdAt;
+					const updatedAt = entry.properties[basePropertyLabels.UPDATED_AT];
+					if (lastTicketTime) expect(lastTicketTime < updatedAt).toBe(ascending);
+					lastTicketTime = updatedAt;
 				}
 			};
 
@@ -695,7 +695,7 @@ const testGetTicketList = () => {
 				['the model returning tickets sorted by updated at in ascending order', { ...baseRouteParams, options: { sortBy: basePropertyLabels.UPDATED_AT, sortDesc: false }, checkTicketList: checkTicketList() }, true, model.tickets],
 				['the model returning tickets sorted by updated at in descending order', { ...baseRouteParams, options: { sortBy: basePropertyLabels.UPDATED_AT, sortDesc: true }, checkTicketList: checkTicketList(false) }, true, model.tickets],
 				['the model has tickets with query filter imposed', { ...baseRouteParams, options: { query: `'${textProp.name}::${queryOperators.EQUALS}::${model.tickets[5].properties[textProp.name]}'` } }, true, [model.tickets[5]]],
-				['the model has tickets with template query filter imposed', { ...baseRouteParams, options: { query: `'$${defaultQueryProps.TEMPLATE}::${queryOperators.EQUALS}::${templatesToUse[1].code}'` } }, true, model.tickets.filter((t) => t.type === templatesToUse[1]._id)],
+				['the model has tickets with template query filter imposed', { ...baseRouteParams, options: { query: `'$${specialQueryFields.TEMPLATE}::${queryOperators.EQUALS}::${templatesToUse[1].code}'` } }, true, model.tickets.filter((t) => t.type === templatesToUse[1]._id)],
 			];
 		};
 

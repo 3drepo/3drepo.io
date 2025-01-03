@@ -20,7 +20,7 @@ const { src } = require('../../../../../../helper/path');
 const { generateRandomObject, generateUUID, generateRandomString, generateTemplate, generateTicket, generateGroup, generateRandomNumber } = require('../../../../../../helper/services');
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
-const { queryOperators, defaultQueryProps } = require(`${src}/models/tickets.constants`);
+const { queryOperators, specialQueryFields } = require(`${src}/schemas/tickets/tickets.filters`);
 
 const { statuses, statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
 
@@ -1260,7 +1260,7 @@ const testGetTicketList = () => {
 		['template filter', [], {}, undefined, { }, {
 			isTemplateQuery: true,
 			queryFilters: [
-				{ propertyName: defaultQueryProps.TEMPLATE, operator: queryOperators.EQUALS, value: [propertyValue] },
+				{ propertyName: specialQueryFields.TEMPLATE, operator: queryOperators.EQUALS, value: [propertyValue] },
 				{ propertyName, operator: queryOperators.EQUALS, value: [propertyValue, propertyValue2] },
 			],
 			expectedQuery: {

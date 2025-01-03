@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { TICKETS_RESOURCES_COL, defaultQueryProps, queryOperators } = require('../../../../../models/tickets.constants');
+const { TICKETS_RESOURCES_COL, operatorToQuery } = require('../../../../../models/tickets.constants');
 const { UUIDToString, generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { addGroups, deleteGroups, getGroupsByIds } = require('./tickets.groups');
 const { addTicketsWithTemplate, getAllTickets, getTicketById, updateTickets } = require('../../../../../models/tickets');
@@ -39,6 +39,7 @@ const { generateFullSchema } = require('../../../../../schemas/tickets/templates
 const { getArrayDifference } = require('../../../../../utils/helper/arrays');
 const { importComments } = require('./tickets.comments');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
+const { specialQueryFields } = require('../../../../../schemas/tickets/tickets.filters');
 
 const Tickets = {};
 
@@ -328,57 +329,12 @@ const filtersToProjection = (filters) => {
 	return projectionObject;
 };
 
-const operatorToQuery = {
-	[queryOperators.EXISTS]: (propertyName) => ({
-		[propertyName]: { $exists: true },
-	}),
-	[queryOperators.NOT_EXISTS]: (propertyName) => ({
-		[propertyName]: { $not: { $exists: true } },
-	}),
-	[queryOperators.EQUALS]: (propertyName, value) => ({
-		[propertyName]: { $in: value },
-	}),
-	[queryOperators.NOT_EQUALS]: (propertyName, value) => ({
-		[propertyName]: { $not: { $in: value } },
-	}),
-	[queryOperators.CONTAINS]: (propertyName, value) => ({
-		$or: value.map((val) => ({ [propertyName]: { $regex: val, $options: 'i' } })),
-	}),
-	[queryOperators.NOT_CONTAINS]: (propertyName, value) => ({
-		$nor: value.map((val) => ({ [propertyName]: { $regex: val, $options: 'i' } })),
-	}),
-	[queryOperators.RANGE]: (propertyName, value) => ({
-		$or: [
-			{ [propertyName]: { $gte: value[0], $lte: value[1] } },
-			{ [propertyName]: { $gte: new Date(value[0]), $lte: new Date(value[1]) } },
-		],
-	}),
-	[queryOperators.NOT_IN_RANGE]: (propertyName, value) => ({
-		$nor: [
-			{ [propertyName]: { $gte: value[0], $lte: value[1] } },
-			{ [propertyName]: { $gte: new Date(value[0]), $lte: new Date(value[1]) } },
-		],
-	}),
-	[queryOperators.GREATER_OR_EQUAL_TO]: (propertyName, value) => ({
-		$or: [
-			{ [propertyName]: { $gte: value } },
-			{ [propertyName]: { $gte: new Date(value) } },
-		],
-	}),
-	[queryOperators.LESSER_OR_EQUAL_TO]: (propertyName, value) => ({
-		$or: [
-			{ [propertyName]: { $lte: value } },
-			{ [propertyName]: { $lte: new Date(value) } },
-		],
-	}),
-};
-
 const getQueryFromQueryFilters = async (teamspace, queryFilters) => {
 	let query = {};
 	let templateQuery;
 
 	queryFilters.forEach(({ propertyName, operator, value }) => {
-		if (propertyName === defaultQueryProps.TEMPLATE) {
+		if (propertyName === specialQueryFields.TEMPLATE) {
 			const tempQuery = operatorToQuery[operator]('code', value);
 			templateQuery = { ...templateQuery, ...tempQuery };
 		} else {

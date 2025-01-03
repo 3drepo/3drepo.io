@@ -17,7 +17,7 @@
 
 const { src } = require('../../../../../../../../helper/path');
 
-const { queryOperators, defaultQueryProps } = require(`${src}/models/tickets.constants`);
+const { queryOperators, specialQueryFields } = require(`${src}/schemas/tickets/tickets.filters`);
 
 const { determineTestGroup, generateRandomString, generateRandomNumber } = require('../../../../../../../../helper/services');
 
@@ -73,12 +73,12 @@ const testValidateQueryString = () => {
 		['property name is empty', getQueryProp('', queryOperators.CONTAINS, stringPropValue), false],
 		['operator is empty', getQueryProp(generateRandomString(), '', generateRandomString()), false],
 		['value is empty', getQueryProp(generateRandomString(), queryOperators.CONTAINS, ''), false],
-		['title is queried and operator is invalid', getQueryProp(`$${defaultQueryProps.TITLE}`, queryOperators.GREATER_OR_EQUAL_TO, generateRandomString()), false],
-		['title is queried and operator is valid', getQueryProp(`$${defaultQueryProps.TITLE}`, queryOperators.CONTAINS, stringPropValue), true, [{ operator: queryOperators.CONTAINS, propertyName: defaultQueryProps.TITLE, value: [stringPropValue] }]],
-		['ticket code is queried and operator is invalid', getQueryProp(`$${defaultQueryProps.TICKET_CODE}`, queryOperators.GREATER_OR_EQUAL_TO, generateRandomString()), false],
-		['ticket code is queried and operator is valid', getQueryProp(`$${defaultQueryProps.TICKET_CODE}`, queryOperators.CONTAINS, stringPropValue), true, [{ operator: queryOperators.CONTAINS, propertyName: defaultQueryProps.TICKET_CODE, value: [stringPropValue] }]],
-		['template is queried and operator is invalid', getQueryProp(`$${defaultQueryProps.TEMPLATE}`, queryOperators.GREATER_OR_EQUAL_TO, generateRandomString()), false],
-		['template is queried and operator is valid', getQueryProp(`$${defaultQueryProps.TEMPLATE}`, queryOperators.CONTAINS, stringPropValue), true, [{ operator: queryOperators.CONTAINS, propertyName: defaultQueryProps.TEMPLATE, value: [stringPropValue] }]],
+		['title is queried and operator is invalid', getQueryProp(`$${specialQueryFields.TITLE}`, queryOperators.GREATER_OR_EQUAL_TO, generateRandomString()), false],
+		['title is queried and operator is valid', getQueryProp(`$${specialQueryFields.TITLE}`, queryOperators.CONTAINS, stringPropValue), true, [{ operator: queryOperators.CONTAINS, propertyName: specialQueryFields.TITLE, value: [stringPropValue] }]],
+		['ticket code is queried and operator is invalid', getQueryProp(`$${specialQueryFields.TICKET_CODE}`, queryOperators.GREATER_OR_EQUAL_TO, generateRandomString()), false],
+		['ticket code is queried and operator is valid', getQueryProp(`$${specialQueryFields.TICKET_CODE}`, queryOperators.CONTAINS, stringPropValue), true, [{ operator: queryOperators.CONTAINS, propertyName: specialQueryFields.TICKET_CODE, value: [stringPropValue] }]],
+		['template is queried and operator is invalid', getQueryProp(`$${specialQueryFields.TEMPLATE}`, queryOperators.GREATER_OR_EQUAL_TO, generateRandomString()), false],
+		['template is queried and operator is valid', getQueryProp(`$${specialQueryFields.TEMPLATE}`, queryOperators.CONTAINS, stringPropValue), true, [{ operator: queryOperators.CONTAINS, propertyName: specialQueryFields.TEMPLATE, value: [stringPropValue] }]],
 		[`operator is ${queryOperators.EXISTS}`, getQueryProp(propName, queryOperators.EXISTS, ''), true, [{ operator: queryOperators.EXISTS, propertyName: `properties.${propName}` }]],
 		[`operator is ${queryOperators.NOT_EXISTS}`, getQueryProp(propName, queryOperators.NOT_EXISTS, ''), true, [{ operator: queryOperators.NOT_EXISTS, propertyName: `properties.${propName}` }]],
 		['multiple properties with different operators are provided', `'${propName}::${queryOperators.EQUALS}::${stringPropValue}&${moduleName}:${propName2}::${queryOperators.GREATER_OR_EQUAL_TO}::${numberPropValue}'`, true, [{ operator: queryOperators.GREATER_OR_EQUAL_TO, propertyName: `modules.${moduleName}.${propName2}`, value: numberPropValue }, { operator: queryOperators.EQUALS, propertyName: `properties.${propName}`, value: [stringPropValue] }]],

@@ -15,34 +15,55 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { queryOperators } = require('../schemas/tickets/tickets.filters');
+
 const Tickets = {};
 
 Tickets.TICKETS_RESOURCES_COL = 'tickets.resources';
 
-Tickets.queryOperators = {
-	EXISTS: 'ex',
-	NOT_EXISTS: 'nex',
-	EQUALS: 'eq',
-	NOT_EQUALS: 'neq',
-	CONTAINS: 'ss',
-	NOT_CONTAINS: 'nss',
-	RANGE: 'rng',
-	NOT_IN_RANGE: 'nrng',
-	GREATER_OR_EQUAL_TO: 'gte',
-	LESSER_OR_EQUAL_TO: 'lte',
+Tickets.operatorToQuery = {
+	[queryOperators.EXISTS]: (propertyName) => ({
+		[propertyName]: { $exists: true },
+	}),
+	[queryOperators.NOT_EXISTS]: (propertyName) => ({
+		[propertyName]: { $not: { $exists: true } },
+	}),
+	[queryOperators.EQUALS]: (propertyName, value) => ({
+		[propertyName]: { $in: value },
+	}),
+	[queryOperators.NOT_EQUALS]: (propertyName, value) => ({
+		[propertyName]: { $not: { $in: value } },
+	}),
+	[queryOperators.CONTAINS]: (propertyName, value) => ({
+		$or: value.map((val) => ({ [propertyName]: { $regex: val, $options: 'i' } })),
+	}),
+	[queryOperators.NOT_CONTAINS]: (propertyName, value) => ({
+		$nor: value.map((val) => ({ [propertyName]: { $regex: val, $options: 'i' } })),
+	}),
+	[queryOperators.RANGE]: (propertyName, value) => ({
+		$or: [
+			{ [propertyName]: { $gte: value[0], $lte: value[1] } },
+			{ [propertyName]: { $gte: new Date(value[0]), $lte: new Date(value[1]) } },
+		],
+	}),
+	[queryOperators.NOT_IN_RANGE]: (propertyName, value) => ({
+		$nor: [
+			{ [propertyName]: { $gte: value[0], $lte: value[1] } },
+			{ [propertyName]: { $gte: new Date(value[0]), $lte: new Date(value[1]) } },
+		],
+	}),
+	[queryOperators.GREATER_OR_EQUAL_TO]: (propertyName, value) => ({
+		$or: [
+			{ [propertyName]: { $gte: value } },
+			{ [propertyName]: { $gte: new Date(value) } },
+		],
+	}),
+	[queryOperators.LESSER_OR_EQUAL_TO]: (propertyName, value) => ({
+		$or: [
+			{ [propertyName]: { $lte: value } },
+			{ [propertyName]: { $lte: new Date(value) } },
+		],
+	}),
 };
-
-Tickets.defaultQueryProps = {
-	TITLE: 'title',
-	TICKET_CODE: 'ticketCode',
-	TEMPLATE: 'template',
-};
-
-Tickets.defaultQueryOperators = [
-	Tickets.queryOperators.EQUALS,
-	Tickets.queryOperators.NOT_EQUALS,
-	Tickets.queryOperators.CONTAINS,
-	Tickets.queryOperators.NOT_CONTAINS,
-];
 
 module.exports = Tickets;
