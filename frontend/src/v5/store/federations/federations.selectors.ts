@@ -17,7 +17,7 @@
 
 import { createSelector } from 'reselect';
 import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
-import { compact, isEmpty } from 'lodash';
+import { compact, isEmpty, some } from 'lodash';
 import { IFederationsState } from './federations.redux';
 import { IFederation } from './federations.types';
 import { selectContainers } from '../containers/containers.selectors';
@@ -93,7 +93,7 @@ export const selectFederationUsers = createSelector(
 	selectCurrentTeamspaceUsersByIds,
 	(federations, users) => {
 		if (isEmpty(users)) return [];
-		return (federations?.users || []).map((user) => ({ ...user, ...users[user.user] }));
+		return (federations?.users || []).map((user) => ({ ...user, ...users[user.user], isNotTeamspaceMember: !users[user.user] }));
 	},
 );
 
