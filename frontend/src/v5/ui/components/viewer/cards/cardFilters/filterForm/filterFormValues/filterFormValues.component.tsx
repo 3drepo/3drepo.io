@@ -17,13 +17,14 @@
 
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { getOperatorMaxFieldsAllowed } from '../filterForm.helpers';
-import { isRangeOperator, isTextType } from '../../cardFilters.helpers';
-import { FormNumberField, FormTextField } from '@controls/inputs/formInputs.component';
+import { isRangeOperator, isTextType, isSelectType } from '../../cardFilters.helpers';
+import { FormNumberField, FormTextField, FormSelect } from '@controls/inputs/formInputs.component';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
 import { useEffect } from 'react';
 import { isArray, range } from 'lodash';
 import { CardFilterType } from '../../cardFilters.types';
 import { RangeInput } from './rangeInput/rangeInput.component';
+import { MenuItem } from '@mui/material';
 
 const name = 'values';
 export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
@@ -92,6 +93,15 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 					</ArrayFieldContainer>
 				))}
 			</>
+		);
+	}
+	if (isSelectType(type)) {
+		const valuesFoo = ['foo', 'bar', 'baz'];
+
+		return (
+			<FormSelect name={'values.0.value'} formError={!!error?.[0]}>
+				{valuesFoo.map((val) => <MenuItem key={val} value={val}>{val}</MenuItem>)}
+			</FormSelect>
 		);
 	}
 
