@@ -18,20 +18,18 @@
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { getOperatorMaxFieldsAllowed } from '../filterForm.helpers';
 import { isRangeOperator, isTextType } from '../../cardFilters.helpers';
-import { FormNumberField, FormTextField } from '@controls/inputs/formInputs.component';
+import { FormDateTime, FormNumberField, FormTextField } from '@controls/inputs/formInputs.component';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
 import { useEffect } from 'react';
 import { isArray, range } from 'lodash';
 import { CardFilterType } from '../../cardFilters.types';
 import { RangeInput } from './rangeInput/rangeInput.component';
-import { InputController } from '@controls/inputs/inputController.component';
 import { DateRangeInput } from './rangeInput/dateRangeInput.component';
-import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
 
 const getInputField = (type: CardFilterType) => {
 	switch (type) {
 		case 'number': return FormNumberField;
-		case 'date': return (props) => <InputController Input={DateTimePicker} {...props} />;
+		case 'date': return FormDateTime;
 		default: return FormTextField;
 	}
 };

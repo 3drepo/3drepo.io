@@ -18,9 +18,8 @@
 import { FormattedMessage } from 'react-intl';
 import { RangeContainer } from './rangeInput.styles';
 import { useFormContext } from 'react-hook-form';
-import { InputController } from '@controls/inputs/inputController.component';
-import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
 import { formatMessage } from '@/v5/services/intl';
+import { FormDateTime } from '@controls/inputs/formInputs.component';
 
 export const DateRangeInput = ({ name, error }) => {
 	const { getValues } = useFormContext();
@@ -29,8 +28,7 @@ export const DateRangeInput = ({ name, error }) => {
 
 	return (
 		<RangeContainer>
-			<InputController
-				Input={DateTimePicker}
+			<FormDateTime
 				maxDate={toDate}
 				name={`${name}.0`}
 				formError={!!error}
@@ -41,8 +39,7 @@ export const DateRangeInput = ({ name, error }) => {
 				disableOpenPicker
 			/>
 			<FormattedMessage id="dateRangeInputs.to" defaultMessage="to" />
-			<InputController
-				Input={DateTimePicker}
+			<FormDateTime
 				minDate={fromDate}
 				name={`${name}.1`}
 				formError={!!error}
