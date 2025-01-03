@@ -75,7 +75,7 @@ const toTicketFilter = (modulePropertyAndType: string) => {
 	return { module, property, type } as CardFilter;
 };
 
-export const ToTicketCardFilter = (filters: Record<string, BaseFilter>): CardFilter[] => (
+export const toTicketCardFilter = (filters: Record<string, BaseFilter>): CardFilter[] => (
 	Object.entries(filters)
 		.map(([modulePropertyAndType, filter]) => ({
 			...toTicketFilter(modulePropertyAndType),
