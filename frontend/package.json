@@ -61,7 +61,7 @@
 		"contrast-color": "1.0.1",
 		"copy-to-clipboard": "3.2.0",
 		"countries-and-timezones": "3.3.0",
-		"dayjs": "1.8.11",
+		"dayjs": "1.11.13",
 		"eventemitter3": "3.1.0",
 		"faker": "5.5.3",
 		"file-dialog": "0.0.7",
