@@ -32,11 +32,7 @@ const formatDateRange = ([from, to]) => formatMessage(
 
 const getDisplayValue = (values: CardFilterValue[], operator: CardFilterOperator, type: CardFilterType) => {
 	const isRange = isRangeOperator(operator);
-	if (isDateType(type)) {
-		if (!isRange) return values.map(valueToDisplayDate);
-		return values.map((range: any) => formatDateRange(range.map(valueToDisplayDate)));
-	}
-	
+	if (isDateType(type)) return values.map(isRange ? formatDateRange : valueToDisplayDate);
 	return (isRange ? values.map(([a, b]: any) => `[${a}, ${b}]`) : values).join(', ') ?? '';
 };
 
