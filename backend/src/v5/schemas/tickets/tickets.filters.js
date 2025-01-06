@@ -60,7 +60,8 @@ Filters.queryParamSchema = Yup.object().shape({
 			}
 
 			if (operator === Filters.queryOperators.RANGE || operator === Filters.queryOperators.NOT_IN_RANGE) {
-				return types.range.required();
+				return Yup.array().of(types.range.required())
+					.transform((v, value) => (value ? value.split(/,(?=\[)/) : value));
 			}
 
 			if (operator === Filters.queryOperators.GREATER_OR_EQUAL_TO

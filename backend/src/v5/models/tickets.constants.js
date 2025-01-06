@@ -41,16 +41,16 @@ Tickets.operatorToQuery = {
 		$nor: value.map((val) => ({ [propertyName]: { $regex: val, $options: 'i' } })),
 	}),
 	[queryOperators.RANGE]: (propertyName, value) => ({
-		$or: [
-			{ [propertyName]: { $gte: value[0], $lte: value[1] } },
-			{ [propertyName]: { $gte: new Date(value[0]), $lte: new Date(value[1]) } },
-		],
+		$or: value.flatMap((range) => [
+			{ [propertyName]: { $gte: range[0], $lte: range[1] } },
+			{ [propertyName]: { $gte: new Date(range[0]), $lte: new Date(range[1]) } },
+		]),
 	}),
 	[queryOperators.NOT_IN_RANGE]: (propertyName, value) => ({
-		$nor: [
-			{ [propertyName]: { $gte: value[0], $lte: value[1] } },
-			{ [propertyName]: { $gte: new Date(value[0]), $lte: new Date(value[1]) } },
-		],
+		$nor: value.flatMap((range) => [
+			{ [propertyName]: { $gte: range[0], $lte: range[1] } },
+			{ [propertyName]: { $gte: new Date(range[0]), $lte: new Date(range[1]) } },
+		]),
 	}),
 	[queryOperators.GREATER_OR_EQUAL_TO]: (propertyName, value) => ({
 		$or: [
