@@ -41,6 +41,20 @@ const testRemoveAllUserNotifications = () => {
 	});
 };
 
+const testRemoveAllTeamspaceNotifications = () => {
+	describe('Remove all teamspace notifications', () => {
+		test('Should delete teamspace notifications', async () => {
+			const fn = jest.spyOn(db, 'deleteMany').mockResolvedValue(undefined);
+
+			const teamspace = generateRandomString();
+			await expect(Notifications.removeAllTeamspaceNotifications(teamspace)).resolves.toBeUndefined();
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COL, { 'data.teamspace': teamspace });
+		});
+	});
+};
+
 const testInitialise = () => {
 	describe('Initialise', () => {
 		test('should ensure indices exist', async () => {
@@ -432,6 +446,7 @@ const testComposeDailyDigests = () => {
 
 describe('models/notifications', () => {
 	testRemoveAllUserNotifications();
+	testRemoveAllTeamspaceNotifications();
 	testInsertTicketAssignedNotifications();
 	testInsertTicketUpdatedNotifications();
 	testInsertTicketDeletedNotifications();
