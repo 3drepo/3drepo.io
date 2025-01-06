@@ -36,7 +36,7 @@ export default css`
 			background-color: ${({ theme }) => theme.palette.primary.contrast};
 			${({ theme }) => theme.typography.h3};
 			border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
-			height: 48px;
+			height: 49px;
 			font-size: 17px;
 
 			.panelTitle { 
@@ -92,7 +92,7 @@ export default css`
 				box-shadow: none;
 				border: 0;
 				border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
-				height: 48px;
+				height: 49px;
 				font-size: 17px;
 
 				.panelTitle {

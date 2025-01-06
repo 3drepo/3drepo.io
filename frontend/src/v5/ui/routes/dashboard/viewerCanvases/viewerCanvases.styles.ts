@@ -18,11 +18,11 @@
 import { PropsWithChildren } from 'react';
 import BaseSplitPane, { SplitPaneProps } from 'react-split-pane';
 import ResizePaneIcon from '@assets/icons/outlined/horizontal_resize-outlined.svg';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { ComponentToString } from '@/v5/helpers/react.helper';
 import { OverlappingContainer } from '@controls/overlappingContainer/overlappingContainer.styles';
 
-export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps> & { $isCalibrating: boolean }>`
+export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps> & { $isCalibrating: boolean, $is2DOpen }>`
 	height: calc(100vh - ${({ $isCalibrating }) => $isCalibrating ? 120 : 62}px) !important;
 	.Resizer {
 		box-sizing: border-box;
@@ -78,6 +78,15 @@ export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps>
 	.Pane2 {
 		display: contents;
 	}
+
+	${({ $is2DOpen }) => !$is2DOpen && css`
+		.Resizer {
+			display: none;
+		}
+		.Pane1 {
+			max-width: 100%;
+		}
+	`}
 `;
 
 export const LeftPane = styled(OverlappingContainer)`

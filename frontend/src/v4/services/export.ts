@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { downloadFile } from "@components/authenticatedResource/authenticatedResource.hooks";
+import { downloadFile } from "@/v5/helpers/download.helper";
 import { downloadJSON } from "./api";
 import { getAPIUrl } from "./api/default";
 

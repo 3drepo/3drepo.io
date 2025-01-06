@@ -15,15 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { IContainer } from '@/v5/store/containers/containers.types';
 import { GroupedContainer, IFederation } from '@/v5/store/federations/federations.types';
 import { createContext, useEffect, useState } from 'react';
 import { orderBy, uniq } from 'lodash';
-import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 export interface EditFederationContextType {
-	includedContainers: IContainer[];
-	setIncludedContainers: (containers) => void;
+	includedContainersIds: string[];
+	setIncludedContainersIds: React.Dispatch<React.SetStateAction<string[]>>;
 	groupsByContainer: Record<string, string>;
 	setGroupsByContainer: (groupsByContainer) => void;
 	getGroupedContainers: () => GroupedContainer[];
@@ -31,8 +30,8 @@ export interface EditFederationContextType {
 	isReadOnly: boolean;
 }
 const defaultValue: EditFederationContextType = {
-	includedContainers: [],
-	setIncludedContainers: () => {},
+	includedContainersIds: [],
+	setIncludedContainersIds: () => {},
 	groupsByContainer: {},
 	setGroupsByContainer: () => {},
 	getGroupedContainers: () => [],
@@ -48,12 +47,11 @@ export const EditFederationContextComponent = ({ federation, children }: Props) 
 		(acc, { _id, group }) => ({ ...acc, [_id]: group }),
 		{},
 	);
-	const [includedContainers, setIncludedContainers] = useState<IContainer[]>([]);
+	const [includedContainersIds, setIncludedContainersIds] = useState<string[]>([]);
 	const [groupsByContainer, setGroupsByContainer] = useState(getGroupsByContainer() || {});
-	const containers = ContainersHooksSelectors.selectContainers();
 	const federations = FederationsHooksSelectors.selectFederations();
 
-	const getGroupedContainers = () => includedContainers.map(({ _id }) => {
+	const getGroupedContainers = () => includedContainersIds.map((_id) => {
 		const container: GroupedContainer = { _id };
 		const group = groupsByContainer[_id];
 		if (group) {
@@ -68,19 +66,19 @@ export const EditFederationContextComponent = ({ federation, children }: Props) 
 	const isReadOnly = federation && !FederationsHooksSelectors.selectHasCollaboratorAccess(federation._id);
 
 	useEffect(() => {
-		if (!containers.length || !federation?.containers) return;
+		if (!federation?.containers) return;
 		const containersToInclude = federation.containers
-			.map(({ _id }) => containers.find((c) => c._id === _id))
+			.map(({ _id }) => _id)
 			// filter containers for users without sufficient permission
 			.filter(Boolean);
-		setIncludedContainers(containersToInclude);
-	}, [containers]);
+		setIncludedContainersIds(containersToInclude);
+	}, [federation?.containers]);
 
 	return (
 		<EditFederationContext.Provider
 			value={{
-				includedContainers,
-				setIncludedContainers,
+				includedContainersIds,
+				setIncludedContainersIds,
 				groupsByContainer,
 				setGroupsByContainer,
 				getGroupedContainers,

@@ -38,6 +38,7 @@ import { extensionIsSpm } from './extensions.helpers';
 import { UploadList } from './uploadList/uploadList.component';
 import { SidebarForm } from './sidebarForm/sidebarForm.component';
 import { parseFileName, reduceFileData } from '@components/shared/uploadFiles/uploadFiles.helpers';
+import { formatInfoUnit } from '@/v5/helpers/intl.helper';
 
 type UploadModalLabelTypes = {
 	isUploading: boolean;
@@ -88,14 +89,21 @@ export const UploadContainerRevisionForm = ({
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const allUploadsComplete = ContainerRevisionsHooksSelectors.selectUploadIsComplete();
+	const revisionsArePending = ContainerRevisionsHooksSelectors.selectRevisionsPending(presetContainerId);
+	const revisions = ContainerRevisionsHooksSelectors.selectRevisions(presetContainerId);
 	const presetContainer = ContainersHooksSelectors.selectContainerById(presetContainerId);
-
+	const [alreadyExistingTags, setAlreadyExistingTags] = useState([]);
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 
 	const formData = useForm<FormType>({
 		mode: 'onChange',
 		resolver: !isUploading ? yupResolver(UploadsSchema) : undefined,
-		context: { alreadyExistingNames: [], teamspace, project },
+		context: {
+			alreadyExistingNames: [],
+			alreadyExistingTags,
+			teamspace,
+			project,
+		},
 	});
 
 	const {
@@ -158,8 +166,13 @@ export const UploadContainerRevisionForm = ({
 
 	const supportedFilesMessage = formatMessage({
 		id: 'container.uploads.dropzone.message',
-		defaultMessage: 'Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>',
+		defaultMessage: `
+			Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>{br}
+			Maximum file size: {sizeLimit}
+		`,
 	}, {
+		br: <br />,
+		sizeLimit: formatInfoUnit(ClientConfig.uploadSizeLimit),
 		MoreLink: (child: string) => (
 			<a
 				href="https://help.3drepo.io/en/articles/4798885-supported-file-formats"
@@ -182,6 +195,16 @@ export const UploadContainerRevisionForm = ({
 		}
 		FederationsActionsDispatchers.fetchFederations(teamspace, project);
 	}, []);
+
+	useEffect(() => {
+		if (!presetContainerId || !revisionsArePending) return;
+		ContainerRevisionsActionsDispatchers.fetch(teamspace, project, presetContainerId);
+	}, []);
+
+	useEffect(() => {
+		if (!revisions.length) return;
+		setAlreadyExistingTags(revisions.map((r) => r.tag));
+	}, [revisions.length]);
 
 	return (
 		<FormProvider {...formData}>

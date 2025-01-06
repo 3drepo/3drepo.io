@@ -29,7 +29,7 @@ export const Item = styled(ListItemButton)`
 export const Container = styled(Paper)`
 	background-color: transparent;
 	margin: 3px;
-	${({ read }: any) => !read && css`
+	${({ $read }: any) => !$read && css`
 		.MuiButtonBase-root:hover .MuiListItemText-root > span {
 			text-decoration: underline;
 		}

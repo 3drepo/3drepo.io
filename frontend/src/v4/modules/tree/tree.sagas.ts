@@ -18,12 +18,12 @@ import { all, call, put, select, take, takeLatest, delay } from 'redux-saga/effe
 
 import { selectHasViewerAccess } from '@/v5/store/containers/containers.selectors';
 import _ from 'lodash';
+import { dispatch } from '@/v5/helpers/redux.helpers';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
 import { GroupsActions } from '../groups';
-import { dispatch } from '../store';
 
 import { SELECTION_STATES, VISIBILITY_STATES } from '../../constants/tree';
 import { VIEWER_PANELS } from '../../constants/viewerGui';

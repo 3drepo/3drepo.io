@@ -137,10 +137,9 @@ class Mitigation {
 		});
 
 		for(const record of records) {
-			if(record?.referencedRisks?.length > 2
-				&& record.referencedRisks.match(/^\[(.+::.+::.+)*\]$/)?.length
-			) {
-				const riskRefsArray = record.referencedRisks.substring(1, record.referencedRisks.length - 1).split(",");
+			const risks = record?.referencedRisks;
+			if (risks && risks.startsWith("[") && risks.endsWith("]") && risks.split("::").length >= 3) {
+				const riskRefsArray = risks.substring(1, risks.length - 1).split(",");
 				record.referencedRisks = riskRefsArray.map((entry) => entry.replace(/"|'/g, ""));
 			} else {
 				delete record.referencedRisks;

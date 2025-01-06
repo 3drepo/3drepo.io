@@ -103,6 +103,8 @@ export const GlobalStyle = createGlobalStyle`
 
 	// scrollbar
 	* {
+		box-sizing: border-box;
+
 		&::-webkit-scrollbar,
 		&::-webkit-scrollbar-thumb {
 			width: 11px;
@@ -115,5 +117,10 @@ export const GlobalStyle = createGlobalStyle`
 			background: ${({ theme }) => theme.palette.base.lightest};
 			background-clip: padding-box;
 		}
+	}
+
+	button {
+		cursor: pointer;
+		border: none;
 	}
 `;

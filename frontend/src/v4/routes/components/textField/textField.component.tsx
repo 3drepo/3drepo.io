@@ -253,14 +253,13 @@ export class TextField extends PureComponent<IProps, IState> {
 			...props
 		} = this.props;
 
-		this.setState({
-			hasError: Boolean(form.errors[name])
-		});
+		const onLoad = () => this.setState({ hasError: Boolean(form.errors[name]) });
 
 		return (
 			<StyledTextField
 				{...props}
 				{...field}
+				onLoad={onLoad}
 				value={this.fieldValue}
 				inputRef={this.textFieldRef}
 				fullWidth
@@ -278,7 +277,7 @@ export class TextField extends PureComponent<IProps, IState> {
 			setTimeout(() => {
 				if (!currentTarget.contains(document.activeElement)) {
 					this.declineChange();
-					this.props.onBlur(e);
+					this.props.onBlur?.(e);
 				}
 			}, 0);
 		}
