@@ -63,7 +63,7 @@ export const AssigneesSelect = ({
 	const valueToJobOrUser = (val: string) => teamspaceJobsAndUsers[val];
 	const allJobsAndUsersToDisplay = [
 		...validValues.map(valueToJobOrUser),
-		...invalidValues.map((v) => valueToJobOrUser(v) || ({ invalidItemName: v })),
+		...invalidValues.map((v) => valueToJobOrUser(v) || ({ notFoundName: v })),
 	];
 
 	const handleChange = (e) => {
@@ -89,7 +89,7 @@ export const AssigneesSelect = ({
 		</AssigneesListContainer>
 	);
 	return (
-		<SearchContextComponent fieldsToFilter={['_id', 'firstName', 'lastName', 'job', 'invalidItemName']} items={allJobsAndUsersToDisplay}>
+		<SearchContextComponent fieldsToFilter={['_id', 'firstName', 'lastName', 'job', 'notFoundName']} items={allJobsAndUsersToDisplay}>
 			<AssigneesListContainer onClick={handleOpen} className={className}>
 				<AssigneesSelectMenu
 					open={open}
