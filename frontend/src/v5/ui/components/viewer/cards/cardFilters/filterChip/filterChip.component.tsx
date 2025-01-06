@@ -26,7 +26,7 @@ import { formatMessage } from '@/v5/services/intl';
 
 const valueToDisplayDate = (value) => formatSimpleDate(new Date(value));
 const formatDateRange = ([from, to]) => formatMessage(
-	{ defaultMessage: '{from} to {to}', id: 'dateRange.joined' },
+	{ defaultMessage: '{from} to {to}', id: 'cardFilter.dateRange.join' },
 	{ from: valueToDisplayDate(from), to: valueToDisplayDate(to) },
 );
 
