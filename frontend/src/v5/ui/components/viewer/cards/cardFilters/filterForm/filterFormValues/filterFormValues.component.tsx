@@ -25,9 +25,19 @@ import { isArray, range } from 'lodash';
 import { CardFilterType } from '../../cardFilters.types';
 import { RangeInput } from './rangeInput/rangeInput.component';
 import { MenuItem } from '@mui/material';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { useParams } from 'react-router-dom';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 
 const name = 'values';
-export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
+type FilterFolrmValuesType = {
+	module: string,
+	property: string,
+	type: CardFilterType,
+};
+
+export const FilterFormValues = ({ module, property, type }: FilterFolrmValuesType) => {
+	const { containerOrFederation } = useParams<ViewerParams>();
 	const { control, watch, formState: { errors } } = useFormContext();
 	const { fields, append, remove } = useFieldArray({
 		control,
@@ -38,6 +48,7 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 	const maxFields = getOperatorMaxFieldsAllowed(operator);
 	const isRangeOp = isRangeOperator(operator);
 	const emptyValue = { value: isRangeOp ? ['', ''] : '' };
+	const selectOptions = TicketsHooksSelectors.selectAllValuesByModuleAndProperty(containerOrFederation, module, property);
 
 	useEffect(() => {
 		if (!fields.length && maxFields > 0) {
@@ -96,11 +107,9 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 		);
 	}
 	if (isSelectType(type)) {
-		const valuesFoo = ['foo', 'bar', 'baz'];
-
 		return (
-			<FormSelect name={'values.0.value'} formError={!!error?.[0]}>
-				{valuesFoo.map((val) => <MenuItem key={val} value={val}>{val}</MenuItem>)}
+			<FormSelect name="values.0.value" formError={!!error?.[0]}>
+				{selectOptions.map((val) => <MenuItem key={val} value={val}>{val}</MenuItem>)}
 			</FormSelect>
 		);
 	}

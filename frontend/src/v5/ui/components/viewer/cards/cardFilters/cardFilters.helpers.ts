@@ -70,6 +70,10 @@ export const isSelectType = (type: CardFilterType) => ['template', 'oneOf', 'man
 export const getValidOperators = (type: CardFilterType): CardFilterOperator[] => {
 	if (isTextType(type)) return ['eq', 'neq', 'ss', 'nss', 'ex', 'nex'];
 	if (type === 'number') return ['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'rng', 'nrng', 'ex', 'nex'];
-	if (isSelectType(type)) return ['eq', 'neq', 'ex', 'nex'];
+	if (isSelectType(type)) {
+		if (type === 'template') return ['eq', 'neq'];
+		return ['eq', 'neq', 'ex', 'nex'];
+	}
+	
 	return Object.keys(FILTER_OPERATOR_LABEL) as CardFilterOperator[];
 };

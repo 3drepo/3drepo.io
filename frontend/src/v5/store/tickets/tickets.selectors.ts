@@ -16,7 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { orderBy } from 'lodash';
+import { orderBy, uniq } from 'lodash';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ITicketsState } from './tickets.redux';
 import { ticketWithGroups } from './ticketsGroups.helpers';
@@ -122,3 +122,29 @@ export const selectStatusConfigByTemplateId = createSelector(
 	(state, ...args) => selectCurrentProjectTemplateById(state, args.at(-1)),
 	(ticketTemplate, projectTemplate) => ticketTemplate?.config?.status || projectTemplate?.config?.status || DEFAULT_STATUS_CONFIG,
 );
+
+export const selectAllValuesByModuleAndProperty = createSelector(
+	selectTemplates,
+	selectRiskCategories,
+	(state, modelId, module) => module,
+	(state, modelId, module, property) => property,
+	(templates, riskCategories, module, property) => {
+		if (property === 'Ticket template') return templates.map(({ name }) => name);
+		if (!property) return;
+		const allValues = [];
+		templates.forEach((template) => {
+			const matchingModule = module ? template.modules.find((mod) => (mod.name || mod.type) === module)?.properties : template.properties;
+			const matchingProperty = matchingModule?.find(({ name, type }) => (name === property) && (['manyOf', 'oneOf'].includes(type)));
+			if (!matchingProperty) return;
+			const values = matchingProperty?.values;
+			if (values === 'riskCategories') {
+				allValues.push(...riskCategories);
+				return;
+			}
+			if (values.length < 1) return;
+			allValues.push(...values);
+		});
+		return uniq(allValues);
+	},
+);
+
