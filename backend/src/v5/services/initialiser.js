@@ -19,14 +19,12 @@ const { initialise: initInvites } = require('../models/invitations');
 const { init: initJournalingService } = require('./journaling');
 const { initialise: initLoginRecs } = require('../models/loginRecords');
 const { init: initNotificationService } = require('./notifications');
-const { initialise: initNotifs } = require('../models/notifications');
 
 const Initialiser = {};
 
 Initialiser.initialiseSystem = () => Promise.all([
 	initLoginRecs(),
 	initInvites(),
-	initNotifs(),
 	initJournalingService(),
 	initNotificationService(),
 ]);

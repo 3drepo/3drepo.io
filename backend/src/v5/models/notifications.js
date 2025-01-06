@@ -24,7 +24,7 @@ const { notificationTypes } = require('./notifications.constants');
 const Notifications = {};
 const NOTIFICATIONS_COL = 'notifications';
 
-Notifications.initialise = async () => {
+Notifications.ensureIndicesExist = async () => {
 	try {
 		await db.createIndex(INTERNAL_DB, NOTIFICATIONS_COL,
 			{ user: 1, timestamp: -1 }, { runInBackground: true });

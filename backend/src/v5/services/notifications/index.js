@@ -15,12 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const TicketNotifications = require('./tickets');
+const { ensureIndicesExist } = require('../../models/notifications');
+const { subscribe: subscribeToTickets } = require('./tickets');
 
 const NotificationService = {};
 
-NotificationService.init = () => {
-	TicketNotifications.subscribe();
+NotificationService.init = async () => {
+	await ensureIndicesExist();
+	subscribeToTickets();
 };
 
 module.exports = NotificationService;

@@ -59,7 +59,7 @@ const testInitialise = () => {
 	describe('Initialise', () => {
 		test('should ensure indices exist', async () => {
 			const fn = jest.spyOn(db, 'createIndex').mockResolvedValueOnce(undefined);
-			await Notifications.initialise();
+			await Notifications.ensureIndicesExist();
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COL,
 				{ user: 1, timestamp: -1 }, { runInBackground: true });
@@ -68,7 +68,7 @@ const testInitialise = () => {
 		test('should not cause issues if this operation failed', async () => {
 			const err = { message: generateRandomString() };
 			const fn = jest.spyOn(db, 'createIndex').mockRejectedValueOnce(err);
-			await Notifications.initialise();
+			await Notifications.ensureIndicesExist();
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COL,
 				{ user: 1, timestamp: -1 }, { runInBackground: true });

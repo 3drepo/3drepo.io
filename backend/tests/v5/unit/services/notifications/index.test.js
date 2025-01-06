@@ -23,11 +23,15 @@ const NotificationService = require(`${src}/services/notifications`);
 jest.mock('../../../../../src/v5/services/notifications/tickets');
 const TicketsModule = require(`${src}/services/notifications/tickets`);
 
+jest.mock('../../../../../src/v5/models/notifications');
+const NotificationsModel = require(`${src}/models/notifications`);
+
 const testInit = () => {
-	describe('On new ticket comment', () => {
-		test('Should subscribe to relevant events on init', () => {
-			NotificationService.init();
+	describe('On initialisation', () => {
+		test('Should subscribe to relevant events on init and ensure indices exist', async () => {
+			await NotificationService.init();
 			expect(TicketsModule.subscribe).toHaveBeenCalledTimes(1);
+			expect(NotificationsModel.ensureIndicesExist).toHaveBeenCalledTimes(1);
 		});
 	});
 };
