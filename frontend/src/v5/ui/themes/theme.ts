@@ -520,7 +520,6 @@ export const theme = createTheme({
 				openText: '',
 				closeText: '',
 				clearText: '',
-				handleHomeEndKeys: true,
 			},
 			styleOverrides: {
 				root: {
@@ -545,7 +544,6 @@ export const theme = createTheme({
 					},
 				},
 				endAdornment: {
-					position: 'static',
 					color: 'inherit',
 					paddingLeft: 3,
 					marginRight: 5,
