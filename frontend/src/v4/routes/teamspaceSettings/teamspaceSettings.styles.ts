@@ -30,6 +30,7 @@ export const DateInputsGrid = styled(Grid)`
 	display: grid;
 	gap: 10px;
 	grid-template-columns: repeat(2, 197px) auto;
+	align-items: flex-end;
 `;
 
 export const StyledTextField = styled(TextField)``;
