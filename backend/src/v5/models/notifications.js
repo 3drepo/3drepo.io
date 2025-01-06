@@ -28,6 +28,8 @@ Notifications.ensureIndicesExist = async () => {
 	try {
 		await db.createIndex(INTERNAL_DB, NOTIFICATIONS_COL,
 			{ user: 1, timestamp: -1 }, { runInBackground: true });
+		await db.createIndex(INTERNAL_DB, NOTIFICATIONS_COL,
+			{ 'data.teamspace': 1, timestamp: -1 }, { runInBackground: true });
 	} catch (err) {
 		logger.logError(`Failed to create index for notification: ${err.message}`);
 	}
