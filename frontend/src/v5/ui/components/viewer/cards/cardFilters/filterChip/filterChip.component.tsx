@@ -17,7 +17,7 @@
 
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { ChipContainer, DeleteButton, TextWrapper, OperatorIconContainer, DisplayValue, Property } from './filterChip.styles';
-import { FILTER_OPERATOR_ICON, getFilterOperatorLabels, isRangeOperator } from '../cardFilters.helpers';
+import { FILTER_OPERATOR_ICON, getFilterOperatorLabels, isDateType, isRangeOperator } from '../cardFilters.helpers';
 import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { CardFilterType, BaseFilter, CardFilterOperator, CardFilterValue } from '../cardFilters.types';
@@ -32,8 +32,7 @@ const formatDateRange = ([from, to]) => formatMessage(
 
 const getDisplayValue = (values: CardFilterValue[], operator: CardFilterOperator, type: CardFilterType) => {
 	const isRange = isRangeOperator(operator);
-	const isDate = type === 'date';
-	if (isDate) {
+	if (isDateType(type)) {
 		if (!isRange) return values.map(valueToDisplayDate);
 		return values.map((range: any) => formatDateRange(range.map(valueToDisplayDate)));
 	}

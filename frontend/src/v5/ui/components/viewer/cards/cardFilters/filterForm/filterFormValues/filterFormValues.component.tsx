@@ -27,11 +27,9 @@ import { RangeInput } from './rangeInput/rangeInput.component';
 import { DateRangeInput } from './rangeInput/dateRangeInput.component';
 
 const getInputField = (type: CardFilterType) => {
-	switch (type) {
-		case 'number': return FormNumberField;
-		case 'date': return FormDateTime;
-		default: return FormTextField;
-	}
+	if (type === 'number') return FormNumberField;
+	if (isDateType(type)) return FormDateTime;
+	return FormTextField;
 };
 
 const name = 'values';

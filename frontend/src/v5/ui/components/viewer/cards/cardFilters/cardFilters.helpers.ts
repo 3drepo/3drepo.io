@@ -67,14 +67,14 @@ const DATE_FILTER_OPERATOR_LABEL: Record<CardFilterOperator, string> = {
 	lte: formatMessage({ id: 'cardFilter.date.operator.onOrBefore', defaultMessage: 'On or before' }),
 };
 
-export const getFilterOperatorLabels = (type: CardFilterType) => type === 'date' ? DATE_FILTER_OPERATOR_LABEL : FILTER_OPERATOR_LABEL;
+export const isDateType = (type: CardFilterType) => ['date', 'pastDate', 'sequencing'].includes(type);
+export const isTextType = (type: CardFilterType) => ['template', 'ticketId', 'ticketTitle', 'text', 'longText'].includes(type);
+
+export const getFilterOperatorLabels = (type: CardFilterType) => isDateType(type) ? DATE_FILTER_OPERATOR_LABEL : FILTER_OPERATOR_LABEL;
 
 export const getFilterFormTitle = (elements: string[]) => compact(elements).join(' : ');
 
 export const isRangeOperator = (operator: CardFilterOperator) => ['rng', 'nrng'].includes(operator);
-
-export const isDateType = (type: CardFilterType) => ['date', 'pastDate', 'sequencing'].includes(type);
-export const isTextType = (type: CardFilterType) => ['template', 'ticketId', 'ticketTitle', 'text', 'longText'].includes(type);
 export const getValidOperators = (type: CardFilterType): CardFilterOperator[] => {
 	if (isTextType(type)) return ['eq', 'neq', 'ss', 'nss', 'ex', 'nex'];
 	if (type === 'number') return ['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'rng', 'nrng', 'ex', 'nex'];
