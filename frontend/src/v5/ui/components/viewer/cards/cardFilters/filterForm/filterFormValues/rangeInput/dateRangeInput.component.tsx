@@ -20,18 +20,21 @@ import { RangeContainer } from './rangeInput.styles';
 import { useFormContext } from 'react-hook-form';
 import { formatMessage } from '@/v5/services/intl';
 import { FormDateTime } from '@controls/inputs/formInputs.component';
+import { useRangeEffect } from './useRangeEffect';
 
-export const DateRangeInput = ({ name, error }) => {
+export const DateRangeInput = ({ name, formError }) => {
 	const { getValues } = useFormContext();
 	const fromDate = getValues(`${name}.0`);
 	const toDate = getValues(`${name}.1`);
+
+	useRangeEffect({ formError, name });
 
 	return (
 		<RangeContainer>
 			<FormDateTime
 				maxDate={toDate}
 				name={`${name}.0`}
-				formError={!!error}
+				formError={formError?.[0]}
 				placeholder={formatMessage({
 					id: 'dateRangeInputs.dateFrom',
 					defaultMessage: 'Date from',
@@ -42,7 +45,7 @@ export const DateRangeInput = ({ name, error }) => {
 			<FormDateTime
 				minDate={fromDate}
 				name={`${name}.1`}
-				formError={!!error}
+				formError={formError?.[1]}
 				placeholder={formatMessage({
 					id: 'dateRangeInputs.dateTo',
 					defaultMessage: 'Date to',

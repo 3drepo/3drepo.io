@@ -68,14 +68,15 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 	if (type === 'number' || isDateType(type) || isTextType(type)) {
 		const InputField = getInputField(type);
 
-		if (maxFields === 1) return <InputField name={`${name}.0.value`} formError={!!error?.[0]} />;
+		if (maxFields === 1) return <InputField name={`${name}.0.value`} formError={error?.[0]} />;
 
-		const getFieldContainerProps = (field, i) => ({
+		const getFieldContainerProps = (field, i, err) => ({
 			key: field.id,
 			onRemove: () => remove(i),
 			disableRemove: fields.length === 1,
 			onAdd: () => append(emptyValue),
 			disableAdd: i !== (fields.length - 1),
+			error: err,
 		});
 		
 		// Switching from single-value to range inputs crashes the app as
@@ -88,8 +89,8 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 			if (isDateType(type)) return (
 				<>
 					{fields.map((field, i) => (
-						<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
-							<DateRangeInput name={`${name}.${i}.value`} error={error?.[i]?.value} />
+						<ArrayFieldContainer {...getFieldContainerProps(field, i, !!error?.[i]?.value)}>
+							<DateRangeInput name={`${name}.${i}.value`} formError={error?.[i]?.value} />
 						</ArrayFieldContainer>
 					))}
 				</>
@@ -97,8 +98,8 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 			return (
 				<>
 					{fields.map((field, i) => (
-						<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
-							<RangeInput Input={InputField} name={`${name}.${i}.value`} error={error?.[i]?.value} />
+						<ArrayFieldContainer {...getFieldContainerProps(field, i, !!error?.[i]?.value)}>
+							<RangeInput Input={InputField} name={`${name}.${i}.value`} formError={error?.[i]?.value} />
 						</ArrayFieldContainer>
 					))}
 				</>
@@ -107,8 +108,8 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 		return (
 			<>
 				{fields.map((field, i) => (
-					<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
-						<InputField name={`${name}.${i}.value`} formError={!!error?.[i]} />
+					<ArrayFieldContainer {...getFieldContainerProps(field, i, !!error?.[i]?.value)}>
+						<InputField name={`${name}.${i}.value`} formError={error?.[i]?.value} />
 					</ArrayFieldContainer>
 				))}
 			</>

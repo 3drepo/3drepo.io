@@ -17,10 +17,15 @@
 
 import styled, { css } from 'styled-components';
 
-export const Container = styled.div`
+export const Container = styled.div<{ $error?: boolean }>`
 	display: flex;
 	flex-direction: row;
+	align-items: flex-start;
 	gap: 10px;
+
+	${({ $error }) => $error && css`
+		height: 33px;
+	`}
 `;
 
 export const IconContainer = styled.button.attrs({
