@@ -29,6 +29,8 @@ const { getTemplateById } = require('../../models/tickets.templates');
 const { getTicketById } = require('../../models/tickets');
 const { getUsersWithPermissions } = require('../../processors/teamspaces/projects/models/commons/settings');
 const { subscribe } = require('../eventsManager/eventsManager');
+const chatLabel = require('../../utils/logger').labels.notifications;
+const logger = require('../../utils/logger').logWithLabel(chatLabel);
 
 const TicketNotifications = {};
 
@@ -65,19 +67,23 @@ const generateTicketNotifications = async (teamspace, project, model, actionedBy
 };
 
 const onNewTickets = async (teamspace, project, model, tickets) => {
-	let assignedBy;
-	const info = tickets.flatMap((ticket) => {
-		const assignees = ticket?.properties?.[basePropertyLabels.ASSIGNEES];
-		if (assignees?.length > 0) {
-			assignedBy = ticket?.properties?.[basePropertyLabels.OWNER];
-			return { toNotify: assignees, ticket: ticket._id, assignedBy };
-		}
-		return [];
-	});
+	try {
+		let assignedBy;
+		const info = tickets.flatMap((ticket) => {
+			const assignees = ticket?.properties?.[basePropertyLabels.ASSIGNEES];
+			if (assignees?.length > 0) {
+				assignedBy = ticket?.properties?.[basePropertyLabels.OWNER];
+				return { toNotify: assignees, ticket: ticket._id, assignedBy };
+			}
+			return [];
+		});
 
-	if (info.length > 0) {
-		await generateTicketNotifications(teamspace, project, model, assignedBy,
-			[{ info, notifyFn: insertTicketAssignedNotifications }]);
+		if (info.length > 0) {
+			await generateTicketNotifications(teamspace, project, model, assignedBy,
+				[{ info, notifyFn: insertTicketAssignedNotifications }]);
+		}
+	} catch (err) {
+		logger.logError(`Failed to generate notifications for tickets created: ${err.message}`);
 	}
 };
 
@@ -88,72 +94,80 @@ const getTicketInfo = (teamspace, project, model, ticket) => getTicketById(teams
 });
 
 const onTicketUpdated = async (teamspace, project, model, { _id: ticket }, author, changes) => {
-	const { properties, type: templateId } = await getTicketInfo(teamspace, project, model, ticket);
+	try {
+		const { properties, type: templateId } = await getTicketInfo(teamspace, project, model, ticket);
 
-	const notifications = [];
+		const notifications = [];
 
-	const notifyUpdate = [properties[basePropertyLabels.OWNER]];
+		const notifyUpdate = [properties[basePropertyLabels.OWNER]];
 
-	if (changes?.properties?.[basePropertyLabels.ASSIGNEES]) {
+		if (changes?.properties?.[basePropertyLabels.ASSIGNEES]) {
 		// If assignees were changed, we want to notify old assignees of the ticket update,
 		// and new assignees that they're assigned to a ticket
 
-		const { from, to } = changes?.properties?.[basePropertyLabels.ASSIGNEES];
+			const { from, to } = changes?.properties?.[basePropertyLabels.ASSIGNEES];
 
-		if (from?.length) {
-			notifyUpdate.push(...from);
+			if (from?.length) {
+				notifyUpdate.push(...from);
+			}
+
+			if (to?.length) {
+				const toNotify = getArrayDifference(from ?? [], to);
+				if (toNotify?.length) {
+					notifications.push({
+						info: [{ toNotify, ticket, assignedBy: author }],
+						notifyFn: insertTicketAssignedNotifications,
+					});
+				}
+			}
+		} else if (properties[basePropertyLabels.ASSIGNEES]?.length) {
+			notifyUpdate.push(...properties[basePropertyLabels.ASSIGNEES]);
 		}
 
-		if (to?.length) {
-			const toNotify = getArrayDifference(from ?? [], to);
-			if (toNotify?.length) {
-				notifications.push({
-					info: [{ toNotify, ticket, assignedBy: author }],
-					notifyFn: insertTicketAssignedNotifications,
-				});
+		let ticketClosed = false;
+
+		if (changes?.properties?.[basePropertyLabels.STATUS]) {
+			const { to } = changes?.properties?.[basePropertyLabels.STATUS];
+			if (to) {
+				const template = await getTemplateById(teamspace, templateId, { 'config.status': 1 });
+				const closedStatuses = getClosedStatuses(template);
+				ticketClosed = closedStatuses.includes(to);
+
+				if (ticketClosed) {
+					const info = [{ toNotify: notifyUpdate, ticket, author, status: to }];
+					notifications.push({ info, notifyFn: insertTicketClosedNotifications });
+				}
 			}
 		}
-	} else if (properties[basePropertyLabels.ASSIGNEES]?.length) {
-		notifyUpdate.push(...properties[basePropertyLabels.ASSIGNEES]);
-	}
 
-	let ticketClosed = false;
-
-	if (changes?.properties?.[basePropertyLabels.STATUS]) {
-		const { to } = changes?.properties?.[basePropertyLabels.STATUS];
-		if (to) {
-			const template = await getTemplateById(teamspace, templateId, { 'config.status': 1 });
-			const closedStatuses = getClosedStatuses(template);
-			ticketClosed = closedStatuses.includes(to);
-
-			if (ticketClosed) {
-				const info = [{ toNotify: notifyUpdate, ticket, author, status: to }];
-				notifications.push({ info, notifyFn: insertTicketClosedNotifications });
-			}
+		if (!ticketClosed) {
+			const info = [{ toNotify: notifyUpdate, ticket, changes, author }];
+			notifications.push({ info, notifyFn: insertTicketUpdatedNotifications });
 		}
-	}
 
-	if (!ticketClosed) {
-		const info = [{ toNotify: notifyUpdate, ticket, changes, author }];
-		notifications.push({ info, notifyFn: insertTicketUpdatedNotifications });
+		await generateTicketNotifications(teamspace, project, model, author, notifications);
+	} catch (err) {
+		logger.logError(`Failed to generate notifications for ticket updated: ${err.message}`);
 	}
-
-	await generateTicketNotifications(teamspace, project, model, author, notifications);
 };
 
 const onNewTicketComment = async (teamspace, project, model, { author, ticket, _id, message }) => {
-	const { properties } = await getTicketInfo(teamspace, project, model, ticket);
+	try {
+		const { properties } = await getTicketInfo(teamspace, project, model, ticket);
 
-	const toNotify = [properties[basePropertyLabels.OWNER]];
+		const toNotify = [properties[basePropertyLabels.OWNER]];
 
-	if (properties[basePropertyLabels.ASSIGNEES]?.length) {
-		toNotify.push(...properties[basePropertyLabels.ASSIGNEES]);
+		if (properties[basePropertyLabels.ASSIGNEES]?.length) {
+			toNotify.push(...properties[basePropertyLabels.ASSIGNEES]);
+		}
+
+		const info = [{ toNotify, ticket, comment: { _id, message }, author }];
+		const notifications = [{ notifyFn: insertTicketUpdatedNotifications, info }];
+
+		await generateTicketNotifications(teamspace, project, model, author, notifications);
+	} catch (err) {
+		logger.logError(`Failed to generate notifications for new ticket comment: ${err.message}`);
 	}
-
-	const info = [{ toNotify, ticket, comment: { _id, message }, author }];
-	const notifications = [{ notifyFn: insertTicketUpdatedNotifications, info }];
-
-	await generateTicketNotifications(teamspace, project, model, author, notifications);
 };
 
 TicketNotifications.subscribe = () => {

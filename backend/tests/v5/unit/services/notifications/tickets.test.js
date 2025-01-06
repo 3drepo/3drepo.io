@@ -83,6 +83,16 @@ const testOnNewTickets = (multipleTickets = false) => {
 			expect(NotificationModels.insertTicketAssignedNotifications).not.toHaveBeenCalled();
 		});
 
+		test(`should handle error gracefully if something went wrong during a message on ${eventToTrigger}`, async () => {
+			const ticketData = multipleTickets ? times(nTickets, () => generateTicket(owner, [owner]))
+				: generateTicket(owner, [owner]);
+			JobsModels.getJobsToUsers.mockRejectedValueOnce(new Error());
+
+			await eventCallbacks[eventToTrigger](createEventData(ticketData));
+
+			expect(NotificationModels.insertTicketAssignedNotifications).not.toHaveBeenCalled();
+		});
+
 		test(`should not generate notifications if the owner assigned themselves on ${eventToTrigger}`, async () => {
 			const ticketData = multipleTickets ? times(nTickets, () => generateTicket(owner, [owner]))
 				: generateTicket(owner, [owner]);
@@ -221,6 +231,16 @@ const testOnUpdatedTicket = () => {
 
 		const createEventData = (actionedBy = author, changes = generateRandomObject()) => ({
 			teamspace, project, model, ticket, author: actionedBy, changes,
+		});
+
+		test(`should handle errors gracfully on ${events.UPDATE_TICKET}`, async () => {
+			const owner = generateRandomString();
+
+			TicketsModel.getTicketById.mockRejectedValueOnce(new Error());
+
+			await eventCallbacks[events.UPDATE_TICKET](createEventData(owner));
+
+			expect(NotificationModels.insertTicketUpdatedNotifications).not.toHaveBeenCalled();
 		});
 
 		test(`should not generate notifications if there are no assignees and the owner changed the ticket on ${events.UPDATE_TICKET}`, async () => {
@@ -598,6 +618,22 @@ const testOnNewTicketComment = () => {
 
 		const createEventData = (actionedBy, comment) => ({
 			teamspace, project, model, ticket, author: actionedBy, data: comment,
+		});
+
+		test('Should handle errors gracefully', async () => {
+			TicketsModel.getTicketById.mockRejectedValueOnce(new Error());
+
+			const comment = {
+				_id: generateRandomString(),
+				message: generateRandomString(),
+				ticket,
+				author: generateRandomString(),
+			};
+
+			const eventData = createEventData(author, comment);
+			await eventCallbacks[events.NEW_COMMENT](eventData);
+
+			expect(NotificationModels.insertTicketUpdatedNotifications).not.toHaveBeenCalledTimes(1);
 		});
 
 		test('Should create a ticket update notification for everyone but the author', async () => {
