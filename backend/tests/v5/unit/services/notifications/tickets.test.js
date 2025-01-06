@@ -118,7 +118,7 @@ const testOnNewTickets = (multipleTickets = false) => {
 			expect(NotificationModels.insertTicketAssignedNotifications).not.toHaveBeenCalled();
 		});
 
-		test(`!should generate notifications for users assigned to the ticket and has permissions on ${eventToTrigger}`, async () => {
+		test(`should generate notifications for users assigned to the ticket and has permissions on ${eventToTrigger}`, async () => {
 			const jobs = [];
 			const usersWithPermissions = [];
 			const expectedNotifications = [];
@@ -137,6 +137,47 @@ const testOnNewTickets = (multipleTickets = false) => {
 					ticket: ticket._id,
 					assignedBy: ticketOwner,
 					users: [...users, assignedUser1],
+				});
+
+				return ticket;
+			});
+
+			JobsModels.getJobsToUsers.mockResolvedValueOnce(jobs);
+			SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce(usersWithPermissions);
+
+			await eventCallbacks[eventToTrigger](createEventData(multipleTickets ? ticketData : ticketData[0]));
+
+			expect(JobsModels.getJobsToUsers).toHaveBeenCalledTimes(1);
+			expect(JobsModels.getJobsToUsers).toHaveBeenCalledWith(teamspace);
+
+			expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledTimes(1);
+			expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledWith(teamspace, project, model, false);
+
+			expect(NotificationModels.insertTicketAssignedNotifications).toHaveBeenCalledTimes(1);
+
+			expect(NotificationModels.insertTicketAssignedNotifications).toHaveBeenCalledWith(teamspace, project, model,
+				expectedNotifications);
+		});
+
+		test('should generate notifications for users assigned but should not duplicate', async () => {
+			const jobs = [];
+			const usersWithPermissions = [];
+			const expectedNotifications = [];
+
+			const ticketData = times(nTickets, () => {
+				const assignedUsers = times(5, () => generateRandomString());
+				const [assignedUser1, assignedUser2, noPermUser1, ...users] = assignedUsers;
+				const assignedJob = generateRandomString();
+				jobs.push({ _id: assignedJob, users: [assignedUser1, noPermUser1, ...users] });
+				const ticketOwner = generateRandomString();
+				usersWithPermissions.push(assignedUser1, ...users);
+
+				const ticket = generateTicket(ticketOwner, [assignedJob, assignedUser1, assignedUser1, assignedUser2]);
+
+				expectedNotifications.push({
+					ticket: ticket._id,
+					assignedBy: ticketOwner,
+					users: [assignedUser1, ...users],
 				});
 
 				return ticket;
