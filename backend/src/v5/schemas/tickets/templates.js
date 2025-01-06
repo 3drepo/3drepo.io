@@ -55,7 +55,7 @@ const pinColSchema = Yup.lazy((val) => {
 	});
 });
 
-const blackListedChrsRegex = /^(?!\$)[^.,[\]]*$/;
+const blackListedChrsRegex = /^(?!\$)[^.,[\]":]*$/;
 
 const uniqueTypeBlackList = [
 	propTypes.LONG_TEXT,
