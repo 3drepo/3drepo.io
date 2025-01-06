@@ -55,14 +55,16 @@ const testRemoveAllTeamspaceNotifications = () => {
 	});
 };
 
-const testInitialise = () => {
-	describe('Initialise', () => {
+const testEnsureIndicesExist = () => {
+	describe('EnsureIndicesExist', () => {
 		test('should ensure indices exist', async () => {
 			const fn = jest.spyOn(db, 'createIndex').mockResolvedValueOnce(undefined);
 			await Notifications.ensureIndicesExist();
-			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledTimes(2);
 			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COL,
 				{ user: 1, timestamp: -1 }, { runInBackground: true });
+			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COL,
+				{ 'data.teamspace': 1, timestamp: -1 }, { runInBackground: true });
 		});
 
 		test('should not cause issues if this operation failed', async () => {
@@ -70,8 +72,6 @@ const testInitialise = () => {
 			const fn = jest.spyOn(db, 'createIndex').mockRejectedValueOnce(err);
 			await Notifications.ensureIndicesExist();
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COL,
-				{ user: 1, timestamp: -1 }, { runInBackground: true });
 		});
 	});
 };
@@ -450,6 +450,6 @@ describe('models/notifications', () => {
 	testInsertTicketAssignedNotifications();
 	testInsertTicketUpdatedNotifications();
 	testInsertTicketDeletedNotifications();
-	testInitialise();
+	testEnsureIndicesExist();
 	testComposeDailyDigests();
 });
