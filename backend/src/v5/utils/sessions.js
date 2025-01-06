@@ -15,9 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { CSRF_COOKIE, CSRF_HEADER, SESSION_HEADER } = require('./sessions.constants');
+const { cookie, cookie_domain } = require('./config');
 const { escapeRegexChrs, getURLDomain } = require('./helper/strings');
-const { CSRF_HEADER } = require('./sessions.constants');
+const { deleteIfUndefined } = require('./helper/objects');
+const { events } = require('../services/eventsManager/eventsManager.constants');
+const { publish } = require('../services/eventsManager/eventsManager');
 const { v4Path } = require('../../interop');
+
 // FIXME: can remove the disable once we migrated config
 // eslint-disable-next-line
 const { apiUrls } = require(`${v4Path}/config`);
@@ -53,5 +58,16 @@ SessionUtils.isSessionValid = (session, cookies, headers, ignoreApiKey = false) 
 };
 
 SessionUtils.getUserFromSession = ({ user } = {}) => (user ? user.username : undefined);
+
+SessionUtils.destroySession = (session, res, callback, elective) => {
+	session.destroy(() => {
+		res.clearCookie(CSRF_COOKIE, { domain: cookie.domain });
+		res.clearCookie(SESSION_HEADER, { domain: cookie_domain, path: '/' });
+
+		publish(events.SESSIONS_REMOVED, deleteIfUndefined({ ids: [session.id], elective }));
+
+		callback();
+	});
+};
 
 module.exports = SessionUtils;

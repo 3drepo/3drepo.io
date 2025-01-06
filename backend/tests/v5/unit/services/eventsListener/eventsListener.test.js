@@ -16,6 +16,7 @@
  */
 
 const { src } = require('../../../helper/path');
+
 const { generateRandomString } = require('../../../helper/services');
 
 jest.mock('../../../../../src/v5/models/loginRecords');

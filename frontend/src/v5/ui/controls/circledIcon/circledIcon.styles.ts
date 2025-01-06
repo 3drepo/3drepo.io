@@ -18,9 +18,9 @@
 import styled, { css } from 'styled-components';
 
 const SIZE_MAP = {
-	small: 50,
-	medium: 70,
-	large: 90,
+	small: 54,
+	medium: 74,
+	large: 94,
 };
 
 const COLOUR_MAP = {

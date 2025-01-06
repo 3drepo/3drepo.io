@@ -34,20 +34,42 @@ let agent;
 
 const generateBasicData = () => {
 	const viewer = ServiceHelper.generateUserCredentials();
+	const commenter = ServiceHelper.generateUserCredentials();
+	const collaborator = ServiceHelper.generateUserCredentials();
 	const data = {
 		users: {
 			tsAdmin: ServiceHelper.generateUserCredentials(),
 			noProjectAccess: ServiceHelper.generateUserCredentials(),
 			nobody: ServiceHelper.generateUserCredentials(),
+			projectAdmin: ServiceHelper.generateUserCredentials(),
 			viewer,
+			commenter,
+			collaborator,
 		},
 		teamspace: ServiceHelper.generateRandomString(),
 		project: ServiceHelper.generateRandomProject(),
-		con: ServiceHelper.generateRandomModel({ viewers: [viewer.user] }),
-		fed: ServiceHelper.generateRandomModel({ viewers: [viewer.user], modelType: modelTypes.FEDERATION }),
-		draw: ServiceHelper.generateRandomModel({ viewers: [viewer.user], modelType: modelTypes.DRAWING }),
+		con: ServiceHelper.generateRandomModel({
+			viewers: [viewer.user],
+			commenters: [commenter.user],
+			collaborators: [collaborator.user] }),
+		fed: ServiceHelper.generateRandomModel({
+			viewers: [viewer.user],
+			commenters: [commenter.user],
+			collaborators: [collaborator.user],
+			modelType: modelTypes.FEDERATION }),
+		draw: ServiceHelper.generateRandomModel({
+			viewers: [viewer.user],
+			commenters: [commenter.user],
+			collaborators: [collaborator.user],
+			modelType: modelTypes.DRAWING }),
 		calibration: ServiceHelper.generateCalibration(),
 	};
+
+	data.jobs = [
+		{ _id: ServiceHelper.generateRandomString(), users: [viewer.user] },
+		{ _id: ServiceHelper.generateRandomString(), users: [collaborator.user] },
+		{ _id: ServiceHelper.generateRandomString(), users: Object.values(data.users).map(({ user }) => user) },
+	];
 
 	return data;
 };
@@ -65,7 +87,8 @@ const setupBasicData = async (users, teamspace, project, models) => {
 	await Promise.all([
 		...userProms,
 		...modelProms,
-		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
+		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id),
+			[users.projectAdmin.user]),
 	]);
 };
 
@@ -1016,6 +1039,135 @@ const testGetThumbnail = () => {
 	});
 };
 
+const testGetUsersWithPermissions = () => {
+	describe('Get users with permissions', () => {
+		const { users, teamspace, project, con, fed, draw } = generateBasicData();
+
+		beforeAll(async () => {
+			await setupBasicData(users, teamspace, project, [con, fed, draw]);
+		});
+
+		const generateTestData = (modelType) => {
+			let model;
+			let wrongTypeModel;
+			let modelNotFound;
+
+			if (modelType === modelTypes.CONTAINER) {
+				model = con;
+				wrongTypeModel = fed;
+				modelNotFound = templates.containerNotFound;
+			} else if (modelType === modelTypes.FEDERATION) {
+				model = fed;
+				wrongTypeModel = con;
+				modelNotFound = templates.federationNotFound;
+			} else {
+				model = draw;
+				wrongTypeModel = con;
+				modelNotFound = templates.drawingNotFound;
+			}
+
+			const getRoute = ({
+				projectId = project.id,
+				key = users.tsAdmin.apiKey,
+				modelId = model._id,
+				excludeViewers,
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/members${key ? `?key=${key}${excludeViewers ? '&excludeViewers=true' : ''}` : ''}`;
+
+			return [
+				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				['the user does not have access to the model', getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
+				['the model does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
+				['the model is of wrong type', getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
+				['excludeViewers is set to false', getRoute(), true, { users: [teamspace, users.tsAdmin.user, users.projectAdmin.user, users.viewer.user, users.commenter.user, users.collaborator.user] }],
+				['excludeViewers is set to true', getRoute({ excludeViewers: true }), true, { users: [teamspace, users.tsAdmin.user, users.projectAdmin.user, users.commenter.user, users.collaborator.user] }],
+			];
+		};
+
+		const runTest = (desc, route, success, expectedOutput) => {
+			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+				const res = await agent.get(route).expect(expectedStatus);
+				if (success) {
+					expect(res.body).toEqual(expectedOutput);
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
+
+		describe.each(generateTestData(modelTypes.FEDERATION))('Federations', runTest);
+		describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
+		describe.each(generateTestData(modelTypes.DRAWING))('Drawing', runTest);
+	});
+};
+
+const testGetJobsWithAccess = () => {
+	describe('Get jobs with access', () => {
+		const { users, teamspace, project, con, fed, draw, jobs } = generateBasicData();
+
+		beforeAll(async () => {
+			await setupBasicData(users, teamspace, project, [con, fed, draw], jobs);
+			await ServiceHelper.db.createJobs(teamspace, jobs);
+		});
+
+		const generateTestData = (modelType) => {
+			let model;
+			let wrongTypeModel;
+			let modelNotFound;
+
+			if (modelType === modelTypes.CONTAINER) {
+				model = con;
+				wrongTypeModel = fed;
+				modelNotFound = templates.containerNotFound;
+			} else if (modelType === modelTypes.FEDERATION) {
+				model = fed;
+				wrongTypeModel = con;
+				modelNotFound = templates.federationNotFound;
+			} else {
+				model = draw;
+				wrongTypeModel = con;
+				modelNotFound = templates.drawingNotFound;
+			}
+
+			const getRoute = ({
+				projectId = project.id,
+				key = users.tsAdmin.apiKey,
+				modelId = model._id,
+				excludeViewers,
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/jobs${key ? `?key=${key}${excludeViewers ? '&excludeViewers=true' : ''}` : ''}`;
+
+			return [
+				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				['the user does not have access to the model', getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
+				['the model does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
+				['the model is of wrong type', getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
+				['excludeViewers is set to false', getRoute(), true, { jobs: ['Admin', ...jobs.map(({ _id }) => _id)] }],
+				['excludeViewers is set to true', getRoute({ excludeViewers: true }), true, { jobs: ['Admin', ...jobs.slice(1).map(({ _id }) => _id)] }],
+			];
+		};
+
+		const runTest = (desc, route, success, expectedOutput) => {
+			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+				const res = await agent.get(route).expect(expectedStatus);
+				if (success) {
+					expect(res.body).toEqual(expectedOutput);
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
+
+		describe.each(generateTestData(modelTypes.FEDERATION))('Federations', runTest);
+		describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
+		describe.each(generateTestData(modelTypes.DRAWING))('Drawing', runTest);
+	});
+};
+
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -1031,4 +1183,6 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	testUpdateModelSettings();
 	testGetSettings();
 	testGetThumbnail();
+	testGetUsersWithPermissions();
+	testGetJobsWithAccess();
 });

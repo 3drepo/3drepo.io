@@ -17,12 +17,19 @@
 
 const { INTERNAL_DB } = require('../handler/db.constants');
 const db = require('../handler/db');
+const { logger } = require('../utils/logger');
 
 const Notifications = {};
 const NOTIFICATIONS_COLL = 'notifications';
 
-Notifications.initialise = () => db.createIndex(INTERNAL_DB, NOTIFICATIONS_COLL,
-	{ user: 1, timestamp: -1 }, { runInBackground: true });
+Notifications.initialise = async () => {
+	try {
+		await db.createIndex(INTERNAL_DB, NOTIFICATIONS_COLL,
+			{ user: 1, timestamp: -1 }, { runInBackground: true });
+	} catch (err) {
+		logger.logError(`Failed to create index for notification: ${err.message}`);
+	}
+};
 
 Notifications.removeAllUserNotifications = async (user) => {
 	await db.deleteMany(INTERNAL_DB, NOTIFICATIONS_COLL, { user });

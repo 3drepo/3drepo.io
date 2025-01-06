@@ -49,12 +49,12 @@ export const MessageContainer = styled.div`
 
 export const PreviewDetails = styled(PreviewDetailsBase)``;
 
-export const Container = styled.div<{ fill?: boolean, top?: boolean }>`
+export const Container = styled.div<{ $fill?: boolean, top?: boolean }>`
 	display: flex;
 	flex-direction: column;
 	position: relative;
 	overflow: hidden;
-	flex: ${({ fill }) => fill ? 1 : 'auto'};
+	flex: ${({ $fill }) => $fill ? 1 : 'auto'};
 	padding-top: ${({ top }) => top ? '16px' : 'auto'};
 
 	${TextFieldStyles.StyledTextField} {
