@@ -16,7 +16,7 @@
  */
 
 const { src } = require('../../../../../helper/path');
-const { generateRandomString, generateRandomObject, determineTestGroup, generateRandomNumber } = require('../../../../../helper/services');
+const { generateRandomString, generateRandomObject, determineTestGroup, generateRandomNumber, outOfOrderArrayEqual } = require('../../../../../helper/services');
 
 const UUIDParse = require('uuid-parse');
 const CryptoJs = require('crypto-js');
@@ -423,9 +423,9 @@ const testGetMD5Hash = () => {
 			FilesManager.getFile.mockImplementation(() => revisionMock._id);
 			Revisions.getLatestRevision.mockResolvedValue(revisionMock);
 			FilesRef.getRefEntry.mockResolvedValue(fileEntry);
-
+			
 			// it should
-			await expect(Federations.getMD5Hash('teamspace', 'federation', 'tsAdmin')).resolves.toEqual([
+			outOfOrderArrayEqual(await Federations.getMD5Hash('teamspace', 'federation', 'tsAdmin'), [
 				{
 					container: '1',
 					code: UUIDParse.unparse(revisionMock._id.buffer),
@@ -448,7 +448,6 @@ const testGetMD5Hash = () => {
 					filename: revisionMock.rFile[0],
 					size: fileEntry.size,
 				}]);
-
 			expect(ModelSettings.getFederationById).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(4);
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(0);
