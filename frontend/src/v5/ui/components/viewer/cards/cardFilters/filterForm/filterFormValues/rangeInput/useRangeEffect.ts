@@ -20,17 +20,19 @@ import { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 export const useRangeEffect = ({ formError, name }) => {
-	const { trigger, formState: { dirtyFields } } = useFormContext();
+	const { trigger, getValues, formState: { dirtyFields } } = useFormContext();
+
+	const triggerFieldIfDirtyOrNotEmpty = (fieldName) => {
+		if (get(dirtyFields, fieldName) || getValues(fieldName)) {
+			trigger(fieldName);
+		}
+	};
 
 	useEffect(() => {
-		if (get(dirtyFields, `${name}.1`)) {
-			trigger(`${name}.1`);
-		}
+		triggerFieldIfDirtyOrNotEmpty(`${name}.1`);
 	}, [formError?.[0]?.message]);
 
 	useEffect(() => {
-		if (get(dirtyFields, `${name}.0`)) {
-			trigger(`${name}.0`);
-		}
+		triggerFieldIfDirtyOrNotEmpty(`${name}.0`);
 	}, [formError?.[1]?.message]);
 };
