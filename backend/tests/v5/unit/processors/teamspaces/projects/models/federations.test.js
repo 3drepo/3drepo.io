@@ -423,7 +423,7 @@ const testGetMD5Hash = () => {
 			FilesManager.getFile.mockImplementation(() => revisionMock._id);
 			Revisions.getLatestRevision.mockResolvedValue(revisionMock);
 			FilesRef.getRefEntry.mockResolvedValue(fileEntry);
-			
+
 			// it should
 			outOfOrderArrayEqual(await Federations.getMD5Hash('teamspace', 'federation', 'tsAdmin'), [
 				{

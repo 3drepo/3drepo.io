@@ -19,7 +19,7 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 const CryptoJs = require('crypto-js');
-const {outOfOrderArrayEqual} = require('../../../../../../helper/services')
+const { outOfOrderArrayEqual } = require('../../../../../../helper/services');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
@@ -262,7 +262,7 @@ const testGetFederationMD5Hash = () => {
 			const res = await agent.get(`${route(parameters)}`).expect(expectedStatus);
 
 			if (success) {
-				outOfOrderArrayEqual(JSON.parse(res.text),parameters.response);
+				outOfOrderArrayEqual(JSON.parse(res.text), parameters.response);
 			} else {
 				expect(res.body.code).toEqual(error.code);
 			}
