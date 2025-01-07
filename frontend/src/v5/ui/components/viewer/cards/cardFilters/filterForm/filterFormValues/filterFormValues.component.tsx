@@ -108,7 +108,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFolrmValuesTy
 	}
 	if (isSelectType(type)) {
 		return (
-			<FormSelect name="values.0.value" formError={!!error?.[0]}>
+			<FormSelect name={`${name}.0.value`} formError={!!error?.[0]}>
 				{selectOptions.map((val) => <MenuItem key={val} value={val}>{val}</MenuItem>)}
 			</FormSelect>
 		);
