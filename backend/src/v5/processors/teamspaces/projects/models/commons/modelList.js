@@ -77,7 +77,7 @@ ModelList.getModelMD5Hash = async (teamspace, container, revision, user) => {
 	if (!isAdmin && !containers[0].permissions?.some((permission) => permission?.user === user)) return returnValue;
 
 	// retrieve the right revision
-	if (revision?.length) {
+	if (revision) {
 		rev = await getRevisionByIdOrTag(
 			teamspace, container, modelTypes.CONTAINER, revision,
 			{ rFile: 1, timestamp: 1, fileSize: 1 },
