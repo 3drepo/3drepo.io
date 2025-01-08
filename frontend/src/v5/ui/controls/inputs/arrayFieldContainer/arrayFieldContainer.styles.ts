@@ -17,15 +17,19 @@
 
 import styled, { css } from 'styled-components';
 
-export const Container = styled.div<{ $error?: boolean }>`
+export const Container = styled.div`
 	display: flex;
 	flex-direction: row;
 	align-items: flex-start;
 	gap: 10px;
-
-	${({ $error }) => $error && css`
-		height: 33px;
-	`}
+	
+	.MuiFormHelperText-root {
+		position: unset;
+		max-height: unset;
+		height: auto;
+		margin-top: 2px;
+		margin-bottom: -6px;
+	}
 `;
 
 export const IconContainer = styled.button.attrs({

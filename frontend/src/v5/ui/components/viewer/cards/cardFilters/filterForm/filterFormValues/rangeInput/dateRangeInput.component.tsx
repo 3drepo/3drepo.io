@@ -15,22 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormattedMessage } from 'react-intl';
-import { RangeContainer } from './rangeInput.styles';
+import { RangeContainer, RangeInputSeparator } from './rangeInput.styles';
 import { useFormContext } from 'react-hook-form';
 import { formatMessage } from '@/v5/services/intl';
 import { FormDateTime } from '@controls/inputs/formInputs.component';
 import { useRangeEffect } from './useRangeEffect';
+import { INVALID_DATE_RANGE_MESSAGE } from '@/v5/validation/shared/validators';
 
 export const DateRangeInput = ({ name, formError }) => {
 	const { getValues } = useFormContext();
 	const fromDate = getValues(`${name}.0`);
 	const toDate = getValues(`${name}.1`);
+	const isInvalidRangeError = formError?.[1]?.message === INVALID_DATE_RANGE_MESSAGE;
 
 	useRangeEffect({ formError, name });
 
 	return (
-		<RangeContainer>
+		<RangeContainer $showOneError={isInvalidRangeError}>
 			<FormDateTime
 				maxDate={toDate}
 				name={`${name}.0`}
@@ -41,7 +42,7 @@ export const DateRangeInput = ({ name, formError }) => {
 				})}
 				disableOpenPicker
 			/>
-			<FormattedMessage id="dateRangeInputs.to" defaultMessage="to" />
+			<RangeInputSeparator />
 			<FormDateTime
 				minDate={fromDate}
 				name={`${name}.1`}

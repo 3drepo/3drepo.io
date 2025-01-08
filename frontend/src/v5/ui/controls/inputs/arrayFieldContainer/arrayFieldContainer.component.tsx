@@ -25,10 +25,9 @@ type ArrayFieldContainerProps = {
 	disableAdd?: boolean,
 	onRemove: () => void,
 	onAdd: () => void,
-	error?: boolean,
 };
-export const ArrayFieldContainer = ({ children, onRemove, onAdd, disableAdd, disableRemove, error }: ArrayFieldContainerProps) => (
-	<Container $error={error}>
+export const ArrayFieldContainer = ({ children, onRemove, onAdd, disableAdd, disableRemove }: ArrayFieldContainerProps) => (
+	<Container>
 		{children}
 		<IconContainer onClick={onRemove} disabled={disableRemove}>
 			<RemoveValueIcon />

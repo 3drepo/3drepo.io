@@ -94,7 +94,7 @@ export const desc = Yup.lazy((value) => (
 
 export const INVALID_DATE_RANGE_MESSAGE = formatMessage({
 	id: 'validation.range.error.invalidRange',
-	defaultMessage: '\'from\' date should be earlier than \'to\' date',
+	defaultMessage: '\'From\' date should be earlier than \'To\' date',
 });
 
 export const INVALID_NUMBER_RANGE_MESSAGE = formatMessage({

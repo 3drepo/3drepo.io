@@ -15,13 +15,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { formatMessage } from '@/v5/services/intl';
+import styled, { css } from 'styled-components';
 
-export const RangeContainer = styled.div`
+export const RangeContainer = styled.div<{ $showOneError: boolean }>`
 	display: grid;
 	grid-template-columns: 1fr auto 1fr;
 	width: 100%;
 	gap: 5px;
-	align-items: center;
+	align-items: flex-start;
 	color: ${({ theme }) => theme.palette.secondary.main};
+
+	${({ $showOneError }) => $showOneError && css`
+		& > *:first-child .MuiFormHelperText-root {
+			min-width: 215%;
+		}
+
+		& > *:last-child .MuiFormHelperText-root {
+			display: none;
+		}
+	`}
+`;
+
+export const RangeInputSeparator = styled.span`
+	margin-top: 3px;
+
+	&::after {
+		content: "${formatMessage({ id: 'rangeInputs.to', defaultMessage: 'to' })}";
+	}
 `;

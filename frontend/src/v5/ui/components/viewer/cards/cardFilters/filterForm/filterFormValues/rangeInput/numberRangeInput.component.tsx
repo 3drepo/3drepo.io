@@ -15,17 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormattedMessage } from 'react-intl';
-import { RangeContainer } from './rangeInput.styles';
+import { RangeContainer, RangeInputSeparator } from './rangeInput.styles';
 import { useRangeEffect } from './useRangeEffect';
+import { FormNumberField } from '@controls/inputs/formInputs.component';
+import { INVALID_NUMBER_RANGE_MESSAGE } from '@/v5/validation/shared/validators';
 
-export const RangeInput = ({ Input, name, formError }) => {
+export const NumberRangeInput = ({ name, formError }) => {
+	const isInvalidRangeError = formError?.[1]?.message === INVALID_NUMBER_RANGE_MESSAGE;
 	useRangeEffect({ name, formError });
 	return (
-		<RangeContainer>
-			<Input name={`${name}.0`} formError={formError?.[0]} />
-			<FormattedMessage id="rangeInputs.to" defaultMessage="to" />
-			<Input name={`${name}.1`} formError={formError?.[1]} />
+		<RangeContainer $showOneError={isInvalidRangeError}>
+			<FormNumberField name={`${name}.0`} formError={formError?.[0]} />
+			<RangeInputSeparator />
+			<FormNumberField name={`${name}.1`} formError={formError?.[1]} />
 		</RangeContainer>
 	);
 };

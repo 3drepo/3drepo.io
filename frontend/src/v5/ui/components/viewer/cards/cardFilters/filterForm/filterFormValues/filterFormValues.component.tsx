@@ -23,7 +23,7 @@ import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayF
 import { useEffect } from 'react';
 import { isArray, range } from 'lodash';
 import { CardFilterType } from '../../cardFilters.types';
-import { RangeInput } from './rangeInput/rangeInput.component';
+import { NumberRangeInput } from './rangeInput/numberRangeInput.component';
 import { DateRangeInput } from './rangeInput/dateRangeInput.component';
 
 const getInputField = (type: CardFilterType) => {
@@ -68,13 +68,12 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 
 		if (maxFields === 1) return <InputField name={`${name}.0.value`} formError={error?.[0]} />;
 
-		const getFieldContainerProps = (field, i, err) => ({
+		const getFieldContainerProps = (field, i) => ({
 			key: field.id,
 			onRemove: () => remove(i),
 			disableRemove: fields.length === 1,
 			onAdd: () => append(emptyValue),
 			disableAdd: i !== (fields.length - 1),
-			error: err,
 		});
 		
 		// Switching from single-value to range inputs crashes the app as
@@ -84,20 +83,12 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 		// and it is only called later
 		// @ts-ignore
 		if (isRangeOp && isArray(fields[0]?.value)) {
-			if (isDateType(type)) return (
-				<>
-					{fields.map((field, i) => (
-						<ArrayFieldContainer {...getFieldContainerProps(field, i, !!error?.[i]?.value)}>
-							<DateRangeInput name={`${name}.${i}.value`} formError={error?.[i]?.value} />
-						</ArrayFieldContainer>
-					))}
-				</>
-			);
+			const RangeInput = isDateType(type) ? DateRangeInput : NumberRangeInput;
 			return (
 				<>
 					{fields.map((field, i) => (
-						<ArrayFieldContainer {...getFieldContainerProps(field, i, !!error?.[i]?.value)}>
-							<RangeInput Input={InputField} name={`${name}.${i}.value`} formError={error?.[i]?.value} />
+						<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
+							<RangeInput name={`${name}.${i}.value`} formError={error?.[i]?.value} />
 						</ArrayFieldContainer>
 					))}
 				</>
@@ -106,7 +97,7 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 		return (
 			<>
 				{fields.map((field, i) => (
-					<ArrayFieldContainer {...getFieldContainerProps(field, i, !!error?.[i]?.value)}>
+					<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
 						<InputField name={`${name}.${i}.value`} formError={error?.[i]?.value} />
 					</ArrayFieldContainer>
 				))}
