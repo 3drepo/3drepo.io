@@ -65,10 +65,12 @@ const validateTicket = (isNewTicket) => async (req, res, next) => {
 const bodyContainsTicketsArray = async (req, res, next) => {
 	try {
 		const tickets = req?.body?.tickets;
+
 		if (!tickets || !isArray(tickets) || !tickets.length) {
 			throw createResponseCode(
 				templates.invalidArguments, 'Expected body to contain an array of tickets');
 		}
+
 		await next();
 	} catch (err) {
 		respond(req, res, err);
@@ -80,6 +82,18 @@ const validateTicketImportData = (isNew) => async (req, res, next) => {
 	try {
 		const template = req.templateData;
 		const user = getUserFromSession(req.session);
+
+		template.properties.forEach((property) => {
+			if (property.unique) {
+				const uniqueProps = {};
+				req.body.tickets.forEach((ticket) => {
+					if (uniqueProps[ticket[property.name]]) {
+						throw createResponseCode(templates.invalidArguments, `Value '${property.name}' must be unique.`);
+					}
+					uniqueProps[ticket[property.name]] = true;
+				});
+			}
+		});
 
 		if (isNew && template.deprecated) {
 			throw createResponseCode(templates.invalidArguments, 'Template has been deprecated');
