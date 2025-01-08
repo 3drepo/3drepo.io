@@ -128,13 +128,14 @@ export const selectAllValuesByModuleAndProperty = createSelector(
 	selectRiskCategories,
 	(state, modelId, module) => module,
 	(state, modelId, module, property) => property,
-	(templates, riskCategories, module, property) => {
-		if (property === 'Ticket template') return templates.map(({ name }) => name);
-		if (!property) return;
+	(state, modelId, module, property, type) => type,
+	(templates, riskCategories, module, property, type) => {
+		if (type === 'template') return templates.map(({ name }) => name);
+		if (!type) return;
 		const allValues = [];
 		templates.forEach((template) => {
 			const matchingModule = module ? template.modules.find((mod) => (mod.name || mod.type) === module)?.properties : template.properties;
-			const matchingProperty = matchingModule?.find(({ name, type }) => (name === property) && (['manyOf', 'oneOf'].includes(type)));
+			const matchingProperty = matchingModule?.find(({ name, type: t }) => (name === property) && (['manyOf', 'oneOf'].includes(t)));
 			if (!matchingProperty) return;
 			const values = matchingProperty?.values;
 			if (values === 'riskCategories') {
@@ -147,4 +148,3 @@ export const selectAllValuesByModuleAndProperty = createSelector(
 		return uniq(allValues);
 	},
 );
-

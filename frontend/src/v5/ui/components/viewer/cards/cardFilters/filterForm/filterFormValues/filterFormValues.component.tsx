@@ -48,7 +48,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFolrmValuesTy
 	const maxFields = getOperatorMaxFieldsAllowed(operator);
 	const isRangeOp = isRangeOperator(operator);
 	const emptyValue = { value: isRangeOp ? ['', ''] : '' };
-	const selectOptions = TicketsHooksSelectors.selectAllValuesByModuleAndProperty(containerOrFederation, module, property);
+	const selectOptions = TicketsHooksSelectors.selectAllValuesByModuleAndProperty(containerOrFederation, module, property, type);
 
 	useEffect(() => {
 		if (!fields.length && maxFields > 0) {
