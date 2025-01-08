@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const stringToStream = require('string-to-stream');
 const { getFileAsStream } = require('../../../../../src/v5/services/filesManager');
 const { src } = require('../../../helper/path');
 
@@ -46,8 +45,13 @@ const Mongo = require('mongodb');
 
 const UUIDParse = require('uuid-parse');
 
-jest.mock('combined-stream');
-const CombinedStream = require('combined-stream');
+const { PassThrough } = require('stream');
+
+jest.mock('../../../../../src/v5/utils/helper/binaryVector');
+const { BinToVector3dStringStream } = require(`${src}/utils/helper/binaryVector`);
+
+jest.mock('../../../../../src/v5/utils/helper/binaryFace');
+const { BinToFaceStringStream } = require(`${src}/utils/helper/binaryFace`);
 
 const testRemoveModelData = () => {
 	describe('Remove model data', () => {
@@ -139,9 +143,10 @@ const testRemoveModelData = () => {
 	});
 };
 
-const testGetMeshById = () => {
+const testGetMeshByIdSucc = (primitiveSet) => {
 	describe('Get mesh data from ref', () => {
-		test('should get streams for mesh data succesfully', async () => {
+		const primitiveStr = primitiveSet ? 'with primitive set' : 'with primitive not set';
+		test(`should get streams for mesh data succesfully ${primitiveStr}`, async () => {
 			const uuidStringToBinary = (uuidString) => {
 				const bytes = UUIDParse.parse(uuidString);
 				// eslint-disable-next-line new-cap
@@ -176,12 +181,22 @@ const testGetMeshById = () => {
 				elements,
 				buffer,
 			};
-			const mesh = {
-				primitive,
-				_blobRef,
-				rev_id: revId,
-				parents,
-			};
+
+			let mesh;
+			if (primitiveSet) {
+				mesh = {
+					primitive,
+					_blobRef,
+					rev_id: revId,
+					parents,
+				};
+			} else {
+				mesh = {
+					_blobRef,
+					rev_id: revId,
+					parents,
+				};
+			}
 
 			const projection = {
 				parents: 1,
@@ -208,22 +223,14 @@ const testGetMeshById = () => {
 				end: buffer.start + elements.faces.start + elements.faces.size - 1,
 			};
 
-			const vertexStream = [1, 2, 3];
-			const faceStream = [3, 2, 1];
+			const vertexStream = new PassThrough();
+			const faceStream = new PassThrough();
 
 			Scene.getNodeById.mockResolvedValue(mesh);
 			Scene.getParentMatrix.mockResolvedValue(matrix);
 
 			getFileAsStream.mockResolvedValueOnce({ readStream: vertexStream });
 			getFileAsStream.mockResolvedValueOnce({ readStream: faceStream });
-
-			// Trying to mock the interaction around combined stream
-			// No success though. This is hopelessly broken.
-			// Will need a new approach to this.
-			// Maybe mock the _transform method of the binary
-			const mockStream = {};
-			mockStream.append.mockReturnValue();
-			CombinedStream.create.mockReturnValue(mockStream);
 
 			const result = await ModelHelper.getMeshById(teamspace, container, meshId);
 
@@ -236,11 +243,11 @@ const testGetMeshById = () => {
 			);
 
 			expect(Scene.getParentMatrix).toHaveBeenCalledTimes(1);
-			expect(Scene.getNodeById).toHaveBeenCalledWith(
+			expect(Scene.getParentMatrix).toHaveBeenCalledWith(
 				teamspace,
 				container,
 				parents[0],
-				revId[0],
+				[revId],
 			);
 
 			expect(getFileAsStream).toHaveBeenCalledTimes(2);
@@ -257,14 +264,128 @@ const testGetMeshById = () => {
 				faceRegion,
 			);
 
-			expect(stringToStream).toHaveBeenCalledTimes(5);
+			expect(BinToVector3dStringStream).toHaveBeenCalledTimes(1);
+
+			expect(BinToFaceStringStream).toHaveBeenCalledTimes(1);
 
 			expect(result.mimeType).toEqual('"application/json; charset=utf-8"');
 		});
 	});
 };
 
+const testGetMeshByIdNoMesh = () => {
+	describe('Get mesh data from ref', () => {
+		test('should throw meshNotFound error if the mesh is not found', async () => {
+			const uuidStringToBinary = (uuidString) => {
+				const bytes = UUIDParse.parse(uuidString);
+				// eslint-disable-next-line new-cap
+				const buf = new Buffer.from(bytes);
+				return Mongo.Binary(buf, 3);
+			};
+
+			const teamspace = generateRandomString();
+			const container = generateRandomString();
+			const meshId = generateUUIDString();
+
+			const projection = {
+				parents: 1,
+				vertices: 1,
+				faces: 1,
+				_blobRef: 1,
+				primitive: 1,
+				rev_id: 1,
+			};
+
+			Scene.getNodeById.mockResolvedValue(undefined);
+
+			await expect(ModelHelper.getMeshById(teamspace, container, meshId))
+				.rejects.toBe(templates.meshNotFound);
+
+			expect(Scene.getNodeById).toHaveBeenCalledTimes(1);
+			expect(Scene.getNodeById).toHaveBeenCalledWith(
+				teamspace,
+				container,
+				uuidStringToBinary(meshId),
+				projection,
+			);
+		});
+	});
+};
+
+const testGetMeshByIdNoMeshData = () => {
+	describe('Get mesh data from ref', () => {
+		test('should throw meshDataNotFound error if the mesh has no _blobRef property', async () => {
+			const uuidStringToBinary = (uuidString) => {
+				const bytes = UUIDParse.parse(uuidString);
+				// eslint-disable-next-line new-cap
+				const buf = new Buffer.from(bytes);
+				return Mongo.Binary(buf, 3);
+			};
+
+			const teamspace = generateRandomString();
+			const container = generateRandomString();
+			const meshId = generateUUIDString();
+			const parents = [generateUUID()];
+			const revId = generateUUID();
+			const primitive = 3;
+
+			const mesh = {
+				primitive,
+				rev_id: revId,
+				parents,
+			};
+
+			const projection = {
+				parents: 1,
+				vertices: 1,
+				faces: 1,
+				_blobRef: 1,
+				primitive: 1,
+				rev_id: 1,
+			};
+
+			const matrix = [
+				[1, 0, 0, 0],
+				[0, 1, 0, 0],
+				[0, 0, 1, 0],
+				[0, 0, 0, 1],
+			];
+
+			const vertexStream = new PassThrough();
+			const faceStream = new PassThrough();
+
+			Scene.getNodeById.mockResolvedValue(mesh);
+			Scene.getParentMatrix.mockResolvedValue(matrix);
+
+			getFileAsStream.mockResolvedValueOnce({ readStream: vertexStream });
+			getFileAsStream.mockResolvedValueOnce({ readStream: faceStream });
+
+			await expect(ModelHelper.getMeshById(teamspace, container, meshId))
+				.rejects.toBe(templates.meshDataNotFound);
+
+			expect(Scene.getNodeById).toHaveBeenCalledTimes(1);
+			expect(Scene.getNodeById).toHaveBeenCalledWith(
+				teamspace,
+				container,
+				uuidStringToBinary(meshId),
+				projection,
+			);
+
+			expect(Scene.getParentMatrix).toHaveBeenCalledTimes(1);
+			expect(Scene.getParentMatrix).toHaveBeenCalledWith(
+				teamspace,
+				container,
+				parents[0],
+				[revId],
+			);
+		});
+	});
+};
+
 describe('utils/helper/models', () => {
 	testRemoveModelData();
-	testGetMeshById();
+	testGetMeshByIdSucc(true);
+	testGetMeshByIdSucc(false);
+	testGetMeshByIdNoMesh();
+	testGetMeshByIdNoMeshData();
 });
