@@ -21,41 +21,13 @@ const { src } = require('../../../helper/path');
 const { BinToVector3dStringStream } = require(`${src}/utils/helper/binaryVector`);
 const ServiceHelper = require('../../../helper/services');
 
-const createBinary3DVectorData = (size, isLittleEndian = false) => {
-	const vectorArray = [];
-	for (let i = 0; i < size; i++) {
-		const vec = [];
-		vec.push(ServiceHelper.generateRandomNumber());
-		vec.push(ServiceHelper.generateRandomNumber());
-		vec.push(ServiceHelper.generateRandomNumber());
-		vectorArray.push(vec);
-	}
-
-	const FLOAT_BYTE_SIZE = 4;
-	const VEC_SIZE = 3 * FLOAT_BYTE_SIZE;
-	const bufferLength = vectorArray.length * VEC_SIZE;
-
-	const buffer = Buffer.alloc(bufferLength);
-	const writeFloat32 = (!isLittleEndian ? buffer.writeFloatBE : buffer.writeFloatLE).bind(buffer);
-
-	for (let i = 0; i < vectorArray.length; i++) {
-		const faceOffset = i * VEC_SIZE;
-		const vec = vectorArray[i];
-		writeFloat32(vec[0], faceOffset);
-		writeFloat32(vec[1], faceOffset + (1 * FLOAT_BYTE_SIZE));
-		writeFloat32(vec[2], faceOffset + (2 * FLOAT_BYTE_SIZE));
-	}
-
-	return { vectorArray, buffer };
-};
-
 const testBinToJSONArrayVector3d = () => {
 	const noVectors = 10;
 
 	describe('Convert binary buffer of to JSON Array', () => {
 		test('should convert binary vectors in the little endian format to a JSON Array', () => {
 			const isLittleEndian = true;
-			const { vectorArray, buffer } = createBinary3DVectorData(noVectors, isLittleEndian);
+			const { vectorArray, buffer } = ServiceHelper.generateRandomBinary3DVectorData(noVectors, isLittleEndian);
 			const obj = new BinToVector3dStringStream({ isLittleEndian });
 
 			const result = obj.binToJSONArrayVector3d(buffer, isLittleEndian);
@@ -76,7 +48,7 @@ const testBinToJSONArrayVector3d = () => {
 
 		test('should convert binary vectors in the big endian format (explicit) to a JSON Array', () => {
 			const isLittleEndian = false;
-			const { vectorArray, buffer } = createBinary3DVectorData(noVectors, isLittleEndian);
+			const { vectorArray, buffer } = ServiceHelper.generateRandomBinary3DVectorData(noVectors, isLittleEndian);
 			const obj = new BinToVector3dStringStream({ isLittleEndian });
 
 			const result = obj.binToJSONArrayVector3d(buffer, isLittleEndian);
@@ -97,7 +69,7 @@ const testBinToJSONArrayVector3d = () => {
 
 		test('should convert binary vectors in the big endian format (implicit) to a JSON Array', () => {
 			const isLittleEndian = false;
-			const { vectorArray, buffer } = createBinary3DVectorData(noVectors, isLittleEndian);
+			const { vectorArray, buffer } = ServiceHelper.generateRandomBinary3DVectorData(noVectors, isLittleEndian);
 			const obj = new BinToVector3dStringStream();
 
 			const result = obj.binToJSONArrayVector3d(buffer);
@@ -124,7 +96,7 @@ const testBinaryToStream = () => {
 	describe('Convert binary vectors to string stream', () => {
 		test('should convert a single buffer of binary vectors in the little endian format to a string stream', async () => {
 			const isLittleEndian = true;
-			const { vectorArray, buffer } = createBinary3DVectorData(noVectors, isLittleEndian);
+			const { vectorArray, buffer } = ServiceHelper.generateRandomBinary3DVectorData(noVectors, isLittleEndian);
 			const vertStream = Readable.from(buffer);
 
 			const resultStream = vertStream.pipe(new BinToVector3dStringStream({ isLittleEndian }));
@@ -150,7 +122,7 @@ const testBinaryToStream = () => {
 
 		test('should convert a single buffer of binary vectors in the big endian format to a string stream', async () => {
 			const isLittleEndian = false;
-			const { vectorArray, buffer } = createBinary3DVectorData(noVectors, isLittleEndian);
+			const { vectorArray, buffer } = ServiceHelper.generateRandomBinary3DVectorData(noVectors, isLittleEndian);
 			const vertStream = Readable.from(buffer);
 
 			const resultStream = vertStream.pipe(new BinToVector3dStringStream({ isLittleEndian }));
@@ -176,7 +148,7 @@ const testBinaryToStream = () => {
 
 		test('should convert multiple buffers of binary vectors in the little endian format to a string stream', async () => {
 			const isLittleEndian = true;
-			const { vectorArray, buffer } = createBinary3DVectorData(noVectors, isLittleEndian);
+			const { vectorArray, buffer } = ServiceHelper.generateRandomBinary3DVectorData(noVectors, isLittleEndian);
 			const vertStream1 = Readable.from(buffer);
 			const vertStream2 = Readable.from(buffer);
 
@@ -205,7 +177,7 @@ const testBinaryToStream = () => {
 
 		test('should convert multiple buffers of binary vectors in the big endian format to a string stream', async () => {
 			const isLittleEndian = false;
-			const { vectorArray, buffer } = createBinary3DVectorData(noVectors, isLittleEndian);
+			const { vectorArray, buffer } = ServiceHelper.generateRandomBinary3DVectorData(noVectors, isLittleEndian);
 			const vertStream1 = Readable.from(buffer);
 			const vertStream2 = Readable.from(buffer);
 

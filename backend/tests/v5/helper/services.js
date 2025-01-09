@@ -411,6 +411,65 @@ ServiceHelper.generateRandomMatrix = (size) => {
 	return matrix;
 };
 
+ServiceHelper.generateRandomBinary3DVectorData = (size, isLittleEndian = false) => {
+	const vectorArray = [];
+	for (let i = 0; i < size; i++) {
+		const vec = [];
+		vec.push(ServiceHelper.generateRandomNumber());
+		vec.push(ServiceHelper.generateRandomNumber());
+		vec.push(ServiceHelper.generateRandomNumber());
+		vectorArray.push(vec);
+	}
+
+	const FLOAT_BYTE_SIZE = 4;
+	const VEC_SIZE = 3 * FLOAT_BYTE_SIZE;
+	const bufferLength = vectorArray.length * VEC_SIZE;
+
+	const buffer = Buffer.alloc(bufferLength);
+	const writeFloat32 = (!isLittleEndian ? buffer.writeFloatBE : buffer.writeFloatLE).bind(buffer);
+
+	for (let i = 0; i < vectorArray.length; i++) {
+		const faceOffset = i * VEC_SIZE;
+		const vec = vectorArray[i];
+		writeFloat32(vec[0], faceOffset);
+		writeFloat32(vec[1], faceOffset + (1 * FLOAT_BYTE_SIZE));
+		writeFloat32(vec[2], faceOffset + (2 * FLOAT_BYTE_SIZE));
+	}
+
+	return { vectorArray, buffer, bufferLength };
+};
+
+ServiceHelper.generateRandomBinaryFaceData = (size, isLittleEndian = false) => {
+	const faceArray = [];
+	for (let i = 0; i < size; i++) {
+		const face = [];
+		for (let e = 0; e < 3; e++) {
+			const randNum = ServiceHelper.generateRandomNumber(0, 4294967295);
+			const randInt = Math.round(randNum);
+			face.push(randInt);
+		}
+		faceArray.push(face);
+	}
+
+	const INT_BYTE_SIZE = 4;
+	const FACE_SIZE = 4 * INT_BYTE_SIZE;
+	const bufferLength = faceArray.length * FACE_SIZE;
+
+	const buffer = Buffer.alloc(bufferLength);
+	const writeUint32 = (!isLittleEndian ? buffer.writeUInt32BE : buffer.writeUInt32LE).bind(buffer);
+
+	for (let i = 0; i < faceArray.length; i++) {
+		const faceOffset = i * FACE_SIZE;
+		const face = faceArray[i];
+		writeUint32(3, faceOffset); // First of the face is the number of indices in the face
+		writeUint32(face[0], faceOffset + (1 * INT_BYTE_SIZE));
+		writeUint32(face[1], faceOffset + (2 * INT_BYTE_SIZE));
+		writeUint32(face[2], faceOffset + (3 * INT_BYTE_SIZE));
+	}
+
+	return { faceArray, buffer, bufferLength };
+};
+
 ServiceHelper.generateCustomStatusValues = () => Object.values(statusTypes).map((type) => ({
 	name: ServiceHelper.generateRandomString(15),
 	type,
