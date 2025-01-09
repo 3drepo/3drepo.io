@@ -24,7 +24,7 @@ const ServiceHelper = require('../../../helper/services');
 const testBinToJSONArrayVector3d = () => {
 	const noVectors = 10;
 
-	describe('Convert binary buffer of to JSON Array', () => {
+	describe('Convert binary buffer of vectors to JSON Array', () => {
 		test('should convert binary vectors in the little endian format to a JSON Array', () => {
 			const isLittleEndian = true;
 			const { vectorArray, buffer } = ServiceHelper.generateRandomBinary3DVectorData(noVectors, isLittleEndian);
@@ -207,6 +207,6 @@ const testBinaryToStream = () => {
 };
 
 describe('utils/helper/binaryVector', () => {
-	testBinaryToStream();
 	testBinToJSONArrayVector3d();
+	testBinaryToStream();
 });
