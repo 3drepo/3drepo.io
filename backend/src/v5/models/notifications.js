@@ -43,19 +43,21 @@ Notifications.removeAllTeamspaceNotifications = async (teamspace) => {
 	await db.deleteMany(INTERNAL_DB, NOTIFICATIONS_COL, { 'data.teamspace': teamspace });
 };
 
+const generateNotification = (type, user, data) => ({
+	_id: generateUUID(),
+	user,
+	type,
+	timestamp: new Date(),
+	data,
+});
+
 Notifications.insertTicketAssignedNotifications = async (teamspace, project, model, notifications) => {
-	const timestamp = new Date();
 	const records = notifications.flatMap(({ users, ticket, assignedBy }) => {
 		if (users?.length && ticket && assignedBy) {
-			return users.map((user) => ({
-				_id: generateUUID(),
+			return users.map((user) => generateNotification(
+				notificationTypes.TICKET_ASSIGNED,
 				user,
-				type: notificationTypes.TICKET_ASSIGNED,
-				timestamp,
-				data: {
-					teamspace, project, model, ticket, assignedBy,
-				},
-			}));
+				{ teamspace, project, model, ticket, assignedBy }));
 		}
 		return [];
 	});
@@ -66,18 +68,12 @@ Notifications.insertTicketAssignedNotifications = async (teamspace, project, mod
 };
 
 Notifications.insertTicketUpdatedNotifications = async (teamspace, project, model, notifications) => {
-	const timestamp = new Date();
-	const records = notifications.flatMap(({ users, ticket, author, changes }) => {
+	const records = notifications.flatMap(({ users, ticket, author, ...info }) => {
 		if (users?.length && ticket) {
-			return users.map((user) => ({
-				_id: generateUUID(),
+			return users.map((user) => generateNotification(
+				notificationTypes.TICKET_UPDATED,
 				user,
-				type: notificationTypes.TICKET_UPDATED,
-				timestamp,
-				data: {
-					teamspace, project, model, ticket, author, changes,
-				},
-			}));
+				{ teamspace, project, model, ticket, author, ...info }));
 		}
 		return [];
 	});
@@ -88,18 +84,12 @@ Notifications.insertTicketUpdatedNotifications = async (teamspace, project, mode
 };
 
 Notifications.insertTicketClosedNotifications = async (teamspace, project, model, notifications) => {
-	const timestamp = new Date();
 	const records = notifications.flatMap(({ users, ticket, author, status }) => {
 		if (users?.length && ticket) {
-			return users.map((user) => ({
-				_id: generateUUID(),
+			return users.map((user) => generateNotification(
+				notificationTypes.TICKET_CLOSED,
 				user,
-				type: notificationTypes.TICKET_CLOSED,
-				timestamp,
-				data: {
-					teamspace, project, model, ticket, author, status,
-				},
-			}));
+				{ teamspace, project, model, ticket, author, status }));
 		}
 		return [];
 	});

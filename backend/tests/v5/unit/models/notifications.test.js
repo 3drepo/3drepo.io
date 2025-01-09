@@ -235,6 +235,46 @@ const testInsertTicketUpdatedNotifications = () => {
 			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COL, expectedRecords);
 		});
 
+		test('Multiple userss should produce multiple records (comments)', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+
+			const fn = jest.spyOn(db, 'insertMany').mockResolvedValueOnce();
+			const input = [
+				{
+					users: times(10, () => generateRandomString()),
+					ticket: generateRandomString(),
+					author: generateRandomString(),
+					comment: generateRandomObject(),
+				},
+			];
+			await Notifications.insertTicketUpdatedNotifications(
+				teamspace,
+				project,
+				model,
+				input,
+			);
+
+			const expectedRecords = input[0].users.map((user) => ({
+				_id: expect.anything(),
+				type: notificationTypes.TICKET_UPDATED,
+				timestamp: expect.any(Date),
+				user,
+				data: {
+					teamspace,
+					project,
+					model,
+					ticket: input[0].ticket,
+					author: input[0].author,
+					comment: input[0].comment,
+				},
+			}));
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COL, expectedRecords);
+		});
+
 		test('Multiple notifications should work, missing data rows should be ignored', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();

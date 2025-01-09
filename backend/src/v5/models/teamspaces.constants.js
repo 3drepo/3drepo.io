@@ -36,7 +36,7 @@ TeamspaceConstants.ADD_ONS = {
 	SRC: 'srcEnabled',
 	HERE: 'hereEnabled',
 	MODULES: 'modules',
-	DAILY_DIGEST: 'dailyDigest',
+	DAILY_DIGEST: 'dailyDigestEnabled',
 };
 
 TeamspaceConstants.ADD_ONS_MODULES = {
