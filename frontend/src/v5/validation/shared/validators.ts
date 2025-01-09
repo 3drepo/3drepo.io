@@ -89,3 +89,15 @@ export const desc = Yup.lazy((value) => (
 				defaultMessage: 'Description is limited to 660 characters',
 			}))
 ));
+
+export const numberRange = (message?) => Yup.array().of(requiredNumber().test(
+	'invalidRange',
+	message || formatMessage({
+		id: 'validation.range.error.invalidRange',
+		defaultMessage: 'Invalid range',
+	}),
+	(v, ctx) => {
+		if (ctx.parent.some((x) => !isNumber(x))) return true;
+		return ctx.parent[0] < ctx.parent[1];
+	},
+));
