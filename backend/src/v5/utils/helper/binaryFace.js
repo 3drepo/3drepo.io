@@ -17,7 +17,7 @@
 
 const { Transform } = require('stream');
 
-const binToFacesString = (buffer, isLittleEndian = false) => {
+const binToFacesString = (buffer, isLittleEndian) => {
 	const bufferLength = buffer.length;
 	const getUint32 = (!isLittleEndian ? buffer.readUInt32BE : buffer.readUInt32LE).bind(buffer);
 
@@ -47,7 +47,7 @@ const binToFacesString = (buffer, isLittleEndian = false) => {
 };
 
 class BinToFaceStringStream extends Transform {
-	constructor(opts = {}) {
+	constructor(opts = { isLittleEndian: false }) {
 		super(opts);
 		this.started = false;
 		this.isLittleEndian = opts.isLittleEndian;
