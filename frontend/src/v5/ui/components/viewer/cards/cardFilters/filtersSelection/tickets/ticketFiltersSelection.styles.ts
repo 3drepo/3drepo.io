@@ -42,13 +42,18 @@ export const SearchInput = styled(SearchInputBase)`
 export const TicketsFiltersModalItem = styled.div<{ $visible: boolean }>`
 	transition: max-height .6s;
 	height: 100%;
+	width: 100%;
 	${({ $visible }) => $visible ? css`
 		max-height: 604px;
 	` : css`
 		max-height: 0;
 		overflow-y: hidden;
 	`};
-	width: 100%;
+
+	&:first-child {
+		display: grid;
+		grid-template-rows: 55px 1fr;
+	}
 `;
 
 // Very small viewports in chrome (and any viewport in Firefox) create a visual bug
