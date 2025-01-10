@@ -114,15 +114,16 @@ const generateEmails = (data, dataRef, usersToUserInfo) => Promise.all(
 				const ticketCodes = uniqueElements(ticketsArr.flatMap(
 					(ticketId) => tsData.tickets[(UUIDToString(ticketId))] ?? []));
 				if (!ticketCodes.length) return;
+				const ticketData = { count, link: `${uri}?ticketSearch=${ticketCodes.join(',')}` };
 				switch (type) {
 				case notificationTypes.TICKET_UPDATED:
-					tickets.updated = { count, link: `${uri}?ticketSearch=${ticketCodes.join(',')}` };
+					tickets.updated = ticketData;
 					break;
 				case notificationTypes.TICKET_CLOSED:
-					tickets.closed = { count, link: `${uri}?ticketSearch=${ticketCodes.join(',')}` };
+					tickets.closed = ticketData;
 					break;
 				case notificationTypes.TICKET_ASSIGNED:
-					tickets.assigned = { count, link: `${uri}?ticketSearch=${ticketCodes.join(',')}` };
+					tickets.assigned = ticketData;
 					break;
 				default:
 					logger.logInfo(`Unrecognised notification type ${type}, ignoring...`);
