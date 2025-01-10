@@ -31,7 +31,7 @@ const shapeSchema = yup.object().shape({
 	"normals": yup.array().of(coordinatesSchema),
 	"value": yup.number().min(0),
 	"color": colorSchema.required(),
-	"type": yup.mixed().oneOf([0, 1, 2]).required(),
+	"type": yup.mixed().oneOf([0, 1, 2, 3]).required(),
 	"name": yup.string()
 }).noUnknown();
 
