@@ -38,7 +38,7 @@ const { INTERNAL_DB } = require(`${src}/handler/db.constants`);
 const QueueHandler = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { editSubscriptions, grantAdminToUser } = require(`${src}/models/teamspaceSettings`);
+const { editSubscriptions, grantAdminToUser, updateAddOns } = require(`${src}/models/teamspaceSettings`);
 const { createTeamspaceRole } = require(`${src}/models/roles`);
 const { initTeamspace } = require(`${src}/processors/teamspaces/teamspaces`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
@@ -120,7 +120,7 @@ db.createUser = (userCredentials, tsList = [], customData = {}) => {
 
 db.createTeamspaceRole = (ts) => createTeamspaceRole(ts);
 
-db.createTeamspace = async (teamspace, admins = [], subscriptions, createUser = true) => {
+db.createTeamspace = async (teamspace, admins = [], subscriptions, createUser = true, addOns) => {
 	if (createUser) await ServiceHelper.db.createUser({ user: teamspace, password: teamspace });
 	await initTeamspace(teamspace);
 	await Promise.all(admins.map((adminUser) => grantAdminToUser(teamspace, adminUser)));
@@ -128,6 +128,10 @@ db.createTeamspace = async (teamspace, admins = [], subscriptions, createUser = 
 	if (subscriptions) {
 		await Promise.all(Object.keys(subscriptions).map((subType) => editSubscriptions(teamspace,
 			subType, subscriptions[subType])));
+	}
+
+	if (Object.keys(addOns ?? {}).length) {
+		await updateAddOns(teamspace, addOns);
 	}
 };
 

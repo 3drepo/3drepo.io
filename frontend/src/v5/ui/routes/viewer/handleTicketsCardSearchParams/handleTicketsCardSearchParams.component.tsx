@@ -29,7 +29,7 @@ export const HandleTicketsCardSearchParams = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const [ticketId, setTicketId] = useSearchParam('ticketId');
 
-	const [queriesParam, setQueriesParam] = useSearchParam('queries', Transformers.STRING_ARRAY);
+	const [ticketSearchParam, setTicketSearchParam] = useSearchParam('ticketSearch', Transformers.STRING_ARRAY);
 	const [templatesParam, setTemplatesParam] = useSearchParam('templates', Transformers.STRING_ARRAY);
 	const [completedParam, setCompletedParam] = useSearchParam('completed', Transformers.BOOLEAN);
 
@@ -52,20 +52,20 @@ export const HandleTicketsCardSearchParams = () => {
 	}, [hasTicketData]);
 	
 	useEffect(() => {
-		if (!templatesParam.length && !queriesParam.length && !completedParam) return;
+		if (!templatesParam.length && !ticketSearchParam.length && !completedParam) return;
 		ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.TICKETS, true);
 		TicketsCardActionsDispatchers.setTemplateFilters(templatesParam);
-		if (queriesParam.length) {
-			TicketsCardActionsDispatchers.setQueryFilters(queriesParam);
+		if (ticketSearchParam.length) {
+			TicketsCardActionsDispatchers.setQueryFilters(ticketSearchParam);
 		}
 		if (completedParam) {
 			TicketsCardActionsDispatchers.toggleCompleteFilter();
 		}
 
-		setQueriesParam();
+		setTicketSearchParam();
 		setCompletedParam();
 		setTemplatesParam();
-	}, [templatesParam, queriesParam, completedParam]);
+	}, [templatesParam, ticketSearchParam, completedParam]);
 
 	return <></>;
 };

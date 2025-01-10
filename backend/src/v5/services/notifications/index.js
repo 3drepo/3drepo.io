@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,22 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Yup = require('yup');
-const config = require('../../../utils/config');
+const { ensureIndicesExist } = require('../../models/notifications');
+const { subscribe: subscribeToTickets } = require('./tickets');
 
-const { generateTemplateFn } = require('./common');
+const NotificationService = {};
 
-const TEMPLATE_PATH = `${__dirname}/html/baseTemplate.html`;
+NotificationService.init = async () => {
+	await ensureIndicesExist();
+	subscribeToTickets();
+};
 
-const dataSchema = Yup.object({
-	domain: Yup.string().default(() => config.getBaseURL()),
-	firstName: Yup.string().required(),
-	emailContent: Yup.string().required(),
-	extraStyles: Yup.string().default(''),
-}).required(true);
-
-const BaseTemplate = {};
-
-BaseTemplate.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
-
-module.exports = BaseTemplate;
+module.exports = NotificationService;
