@@ -45,13 +45,15 @@ const getAssetListFromRef = async (teamspace, project, ref, username) => {
 
 	if (granted) {
 		// eslint-disable-next-line no-underscore-dangle
-		let revId = uuidHelper.UUIDToString(ref._rid);
-		if (revId === DbConstants.MASTER_BRANCH) {
-			revId = await History.findLatest(ref.owner, modelId, { _id: 1 });
+		let revId = ref._rid;
+		const revIdStr = uuidHelper.UUIDToString(revId);
+		if (revIdStr === DbConstants.MASTER_BRANCH) {
+			const history = await History.findLatest(ref.owner, modelId, { _id: 1 });
+			revId = history ? history._id : undefined;
 		}
 
 		if (revId) {
-			const listEntry = await getAssetListEntry(ref.owner, modelId, revId._id);
+			const listEntry = await getAssetListEntry(ref.owner, modelId, revId);
 			return listEntry;
 		}
 	}
