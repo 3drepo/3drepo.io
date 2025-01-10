@@ -95,9 +95,6 @@ export const UploadListItem = ({
 	});
 
 	useEffect(() => {
-		if (containerId) {
-			ContainerRevisionsActionsDispatchers.fetch(teamspace, projectId, containerId);
-		}
 		trigger(`${revisionPrefix}.revisionTag`);
 
 		for (const [key, val] of Object.entries(sanitiseContainer(selectedContainer))) {
@@ -108,11 +105,8 @@ export const UploadListItem = ({
 	useEffect(() => {
 		if (!containerId?.trim()) return;
 
-		ContainersActionsDispatchers.fetchContainerSettings(
-			teamspace,
-			projectId,
-			containerId,
-		);
+		ContainersActionsDispatchers.fetchContainerSettings(teamspace, projectId, containerId);
+		ContainerRevisionsActionsDispatchers.fetch(teamspace, projectId, containerId);
 	}, [containerId]);
 
 	useEffect(() => {
