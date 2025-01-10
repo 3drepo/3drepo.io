@@ -27,7 +27,7 @@ import { useFormContext } from 'react-hook-form';
 import { useEffect } from 'react';
 import { IContainer, UploadStatus } from '@/v5/store/containers/containers.types';
 import { UploadItemFields } from '@/v5/store/containers/revisions/containerRevisions.types';
-import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { ContainerRevisionsActionsDispatchers, ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { UploadListItemFileIcon } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemTitle } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemTitle/uploadListItemTitle.component';
 import { UploadProgress } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadProgress/uploadProgress.component';
@@ -95,6 +95,9 @@ export const UploadListItem = ({
 	});
 
 	useEffect(() => {
+		if (containerId) {
+			ContainerRevisionsActionsDispatchers.fetch(teamspace, projectId, containerId);
+		}
 		trigger(`${revisionPrefix}.revisionTag`);
 
 		for (const [key, val] of Object.entries(sanitiseContainer(selectedContainer))) {
