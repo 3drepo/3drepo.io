@@ -24,7 +24,9 @@ jest.mock('../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
 
 const { times } = require('lodash');
+
 const ServiceHelper = require('../../helper/services');
+
 const Ref = require(`${src}/models/ref`);
 
 const testGetRefNodes = () => {
