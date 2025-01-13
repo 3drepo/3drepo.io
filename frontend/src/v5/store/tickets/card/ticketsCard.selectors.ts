@@ -24,7 +24,7 @@ import { DEFAULT_PIN, getPinColorHex, formatPin, getTicketPins } from '@/v5/ui/r
 import { IPin } from '@/v4/services/viewer/viewer';
 import { selectSelectedDate } from '@/v4/modules/sequences';
 import { uniq } from 'lodash';
-import { ToTicketCardFilter, templatesToFilters } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
+import { toTicketCardFilter, templatesToFilters } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 
 const selectTicketsCardDomain = (state): ITicketsCardState => state.ticketsCard || {};
 
@@ -121,7 +121,7 @@ export const selectFilters = createSelector(
 
 export const selectCardFilters = createSelector(
 	selectFilters,
-	(filters) => ToTicketCardFilter(filters) || [],
+	(filters) => toTicketCardFilter(filters) || [],
 );
 
 export const selectTemplatesFilters = createSelector(

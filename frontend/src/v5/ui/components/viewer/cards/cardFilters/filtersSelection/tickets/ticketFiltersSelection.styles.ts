@@ -39,20 +39,25 @@ export const SearchInput = styled(SearchInputBase)`
 	}
 `;
 
-export const DrillDownItem = styled.div<{ $visible: boolean }>`
+export const TicketsFiltersModalItem = styled.div<{ $visible: boolean }>`
 	transition: max-height .6s;
 	height: 100%;
+	width: 100%;
 	${({ $visible }) => $visible ? css`
 		max-height: 604px;
 	` : css`
 		max-height: 0;
 		overflow-y: hidden;
 	`};
-	width: 100%;
+
+	&:first-child {
+		display: grid;
+		grid-template-rows: 55px 1fr;
+	}
 `;
 
 // Very small viewports in chrome (and any viewport in Firefox) create a visual bug
-// that prevents the `DrillDownItem`s from being correctly placed. As a result, the
+// that prevents the `TicketsFiltersModalItem`s from being correctly placed. As a result, the
 // filter list is always partly hidden and the filter form is visible since the beginning.
 // This fixes it.
 const spreadAnimation = css`
@@ -70,7 +75,7 @@ const spreadAnimation = css`
 	animation-delay: .1s;
 `;
 
-export const DrillDownList = styled.div<{ $visibleIndex: number }>`
+export const TicketsFiltersModal = styled.div<{ $visibleIndex: number }>`
 	height: fit-content;
 	overflow-x: hidden;
 	display: flex;

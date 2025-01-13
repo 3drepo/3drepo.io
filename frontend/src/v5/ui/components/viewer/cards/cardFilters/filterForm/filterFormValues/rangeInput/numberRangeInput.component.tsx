@@ -15,32 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { formatMessage } from '@/v5/services/intl';
-import styled, { css } from 'styled-components';
+import { RangeContainer, RangeInputSeparator } from './rangeInput.styles';
+import { useRangeEffect } from './useRangeEffect';
+import { FormNumberField } from '@controls/inputs/formInputs.component';
+import { INVALID_NUMBER_RANGE_MESSAGE } from '@/v5/validation/shared/validators';
 
-export const RangeContainer = styled.div<{ $showOneError: boolean }>`
-	display: grid;
-	grid-template-columns: 1fr auto 1fr;
-	width: 100%;
-	gap: 5px;
-	align-items: flex-start;
-	color: ${({ theme }) => theme.palette.secondary.main};
-
-	${({ $showOneError }) => $showOneError && css`
-		& > *:first-child .MuiFormHelperText-root {
-			min-width: 215%;
-		}
-
-		& > *:last-child .MuiFormHelperText-root {
-			display: none;
-		}
-	`}
-`;
-
-export const RangeInputSeparator = styled.span`
-	margin-top: 3px;
-
-	&::after {
-		content: "${formatMessage({ id: 'rangeInputs.to', defaultMessage: 'to' })}";
-	}
-`;
+export const NumberRangeInput = ({ name, formError }) => {
+	const isInvalidRangeError = formError?.[1]?.message === INVALID_NUMBER_RANGE_MESSAGE;
+	useRangeEffect({ name, formError });
+	return (
+		<RangeContainer $showOneError={isInvalidRangeError}>
+			<FormNumberField name={`${name}.0`} formError={formError?.[0]} />
+			<RangeInputSeparator />
+			<FormNumberField name={`${name}.1`} formError={formError?.[1]} />
+		</RangeContainer>
+	);
+};

@@ -17,13 +17,20 @@
 
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { getOperatorMaxFieldsAllowed } from '../filterForm.helpers';
-import { isRangeOperator, isTextType } from '../../cardFilters.helpers';
-import { FormNumberField, FormTextField } from '@controls/inputs/formInputs.component';
+import { isRangeOperator, isDateType, isTextType } from '../../cardFilters.helpers';
+import { FormDateTime, FormNumberField, FormTextField } from '@controls/inputs/formInputs.component';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
 import { useEffect } from 'react';
 import { isArray, range } from 'lodash';
 import { CardFilterType } from '../../cardFilters.types';
-import { RangeInput } from './rangeInput/rangeInput.component';
+import { NumberRangeInput } from './rangeInput/numberRangeInput.component';
+import { DateRangeInput } from './rangeInput/dateRangeInput.component';
+
+const getInputField = (type: CardFilterType) => {
+	if (type === 'number') return FormNumberField;
+	if (isDateType(type)) return FormDateTime;
+	return FormTextField;
+};
 
 const name = 'values';
 export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
@@ -56,10 +63,10 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 
 	if (maxFields === 0) return null;
 
-	if (type === 'number' || isTextType(type)) {
-		const InputField = type === 'number' ? FormNumberField : FormTextField;
+	if (type === 'number' || isDateType(type) || isTextType(type)) {
+		const InputField = getInputField(type);
 
-		if (maxFields === 1) return <InputField name={`${name}.0.value`} formError={!!error?.[0]} />;
+		if (maxFields === 1) return <InputField name={`${name}.0.value`} formError={error?.[0]} />;
 
 		const getFieldContainerProps = (field, i) => ({
 			key: field.id,
@@ -75,20 +82,23 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 		// useEffect that adapts fields' values to be arrays is async
 		// and it is only called later
 		// @ts-ignore
-		if (isRangeOp && isArray(fields[0]?.value)) return (
-			<>
-				{fields.map((field, i) => (
-					<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
-						<RangeInput Input={InputField} name={`${name}.${i}.value`} error={error?.[i]?.value} />
-					</ArrayFieldContainer>
-				))}
-			</>
-		);
+		if (isRangeOp && isArray(fields[0]?.value)) {
+			const RangeInput = isDateType(type) ? DateRangeInput : NumberRangeInput;
+			return (
+				<>
+					{fields.map((field, i) => (
+						<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
+							<RangeInput name={`${name}.${i}.value`} formError={error?.[i]?.value} />
+						</ArrayFieldContainer>
+					))}
+				</>
+			);
+		}
 		return (
 			<>
 				{fields.map((field, i) => (
 					<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
-						<InputField name={`${name}.${i}.value`} formError={!!error?.[i]} />
+						<InputField name={`${name}.${i}.value`} formError={error?.[i]?.value} />
 					</ArrayFieldContainer>
 				))}
 			</>

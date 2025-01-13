@@ -46,7 +46,7 @@ export const FILTER_OPERATOR_ICON: Record<CardFilterOperator, any> = {
 	nss: NotContainIcon,
 } as const;
 
-export const FILTER_OPERATOR_LABEL: Record<CardFilterOperator, string> = {
+const FILTER_OPERATOR_LABEL: Record<CardFilterOperator, string> = {
 	ex: formatMessage({ id: 'cardFilter.operator.exists', defaultMessage: 'Exists' }),
 	nex: formatMessage({ id: 'cardFilter.operator.doesNotExist', defaultMessage: 'Does not exist' }),
 	eq: formatMessage({ id: 'cardFilter.operator.equals', defaultMessage: 'Equals' }),
@@ -61,13 +61,23 @@ export const FILTER_OPERATOR_LABEL: Record<CardFilterOperator, string> = {
 	nss: formatMessage({ id: 'cardFilter.operator.notContain', defaultMessage: 'Does not contain' }),
 };
 
+const DATE_FILTER_OPERATOR_LABEL: Record<CardFilterOperator, string> = {
+	...FILTER_OPERATOR_LABEL,
+	gte: formatMessage({ id: 'cardFilter.date.operator.onOrAfter', defaultMessage: 'On or after' }),
+	lte: formatMessage({ id: 'cardFilter.date.operator.onOrBefore', defaultMessage: 'On or before' }),
+};
+
+export const isDateType = (type: CardFilterType) => ['date', 'pastDate', 'sequencing'].includes(type);
+export const isTextType = (type: CardFilterType) => ['template', 'ticketId', 'ticketTitle', 'text', 'longText'].includes(type);
+
+export const getFilterOperatorLabels = (type: CardFilterType) => isDateType(type) ? DATE_FILTER_OPERATOR_LABEL : FILTER_OPERATOR_LABEL;
+
 export const getFilterFormTitle = (elements: string[]) => compact(elements).join(' : ');
 
 export const isRangeOperator = (operator: CardFilterOperator) => ['rng', 'nrng'].includes(operator);
-
-export const isTextType = (type: CardFilterType) => ['template', 'ticketId', 'ticketTitle', 'text', 'longText'].includes(type);
 export const getValidOperators = (type: CardFilterType): CardFilterOperator[] => {
 	if (isTextType(type)) return ['eq', 'neq', 'ss', 'nss', 'ex', 'nex'];
 	if (type === 'number') return ['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'rng', 'nrng', 'ex', 'nex'];
+	if (isDateType(type)) return ['eq', 'lte', 'gte', 'rng', 'nrng', 'ex', 'nex'];
 	return Object.keys(FILTER_OPERATOR_LABEL) as CardFilterOperator[];
 };

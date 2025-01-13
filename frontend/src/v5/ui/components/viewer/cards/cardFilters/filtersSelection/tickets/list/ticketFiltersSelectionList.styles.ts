@@ -24,7 +24,6 @@ export const MenuList = styled(MenuListBase)`
 	padding: 0;
 	overflow-x: hidden;
 	border-radius: 0;
-	max-height: calc(70vh - 55px);
 `;
 
 export const EmptyListMessage = styled(EmptyListMessageBase)`
