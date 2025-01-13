@@ -1,4 +1,5 @@
 const Yup = require('yup');
+const { createResponseCode, templates } = require('../../utils/responseCodes');
 const { types } = require('../../utils/helper/yup');
 
 const Filters = {};
@@ -38,12 +39,14 @@ Filters.queryParamSchema = Yup.object().shape({
 			if (!value?.length) return value;
 
 			const propertyNameParts = value.split(':');
-			if (propertyNameParts.length === 2) {
+			if (propertyNameParts.length === 1) {
+				const propName = propertyNameParts[0];
+				return propName.startsWith('$') ? propName.substring(1) : `properties.${propName}`;
+			} if (propertyNameParts.length === 2) {
 				return `modules.${propertyNameParts[0]}.${propertyNameParts[1]}`;
 			}
 
-			const propName = propertyNameParts[0];
-			return propName.startsWith('$') ? propName.substring(1) : `properties.${propName}`;
+			throw createResponseCode(templates.invalidArguments, 'Property name cannot have more than one colon');
 		}).required(),
 	operator: Yup.string().required()
 		.when('propertyName', (propertyName, schema) => {

@@ -671,13 +671,13 @@ const testGetTicketList = () => {
 			const baseRouteParams = { key: users.tsAdmin.apiKey, modelType, projectId: project.id, model };
 
 			const checkTicketList = (ascending = true) => (tickets) => {
-				// check the list is sorted by updated at, ascending order
+				// check the list is sorted by created at, ascending order
 				let lastTicketTime;
 
 				for (const entry of tickets) {
-					const updatedAt = entry.properties[basePropertyLabels.UPDATED_AT];
-					if (lastTicketTime) expect(lastTicketTime < updatedAt).toBe(ascending);
-					lastTicketTime = updatedAt;
+					const createdAt = entry.properties[basePropertyLabels.CREATED_AT];
+					if (lastTicketTime) expect(lastTicketTime < createdAt).toBe(ascending);
+					lastTicketTime = createdAt;
 				}
 			};
 

@@ -18,7 +18,7 @@
 const { TICKETS_RESOURCES_COL, operatorToQuery } = require('../../../../../models/tickets.constants');
 const { UUIDToString, generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { addGroups, deleteGroups, getGroupsByIds } = require('./tickets.groups');
-const { addTicketsWithTemplate, getAllTickets, getTicketById, updateTickets } = require('../../../../../models/tickets');
+const { addTicketsWithTemplate, getAllTickets, getTicketById, getTicketsByFilter, updateTickets } = require('../../../../../models/tickets');
 const {
 	basePropertyLabels,
 	modulePropertyLabels,
@@ -329,26 +329,30 @@ const filtersToProjection = (filters) => {
 	return projectionObject;
 };
 
-const getQueryFromQueryFilters = async (teamspace, queryFilters) => {
-	let query = {};
+const getQueryInfoFromQueryFilters = async (teamspace, queryFilters) => {
+	const queries = [];
 	let templateQuery;
+	let ticketCodeQuery;
 
 	queryFilters.forEach(({ propertyName, operator, value }) => {
 		if (propertyName === specialQueryFields.TEMPLATE) {
-			const tempQuery = operatorToQuery[operator]('code', value);
-			templateQuery = { ...templateQuery, ...tempQuery };
+			templateQuery = operatorToQuery[operator]('code', value);
+		} else if (propertyName === specialQueryFields.TICKET_CODE) {
+			ticketCodeQuery = operatorToQuery[operator](propertyName, value);
 		} else {
-			const propQuery = operatorToQuery[operator](propertyName, value);
-			query = { ...query, ...propQuery };
+			queries.push({ ...operatorToQuery[operator](propertyName, value) });
 		}
 	});
 
 	if (templateQuery) {
 		const temps = await getTemplatesByQuery(teamspace, templateQuery, { _id: 1 });
-		query.type = { $in: temps.map(({ _id }) => _id) };
+		queries.push({ type: { $in: temps.map(({ _id }) => _id) } });
 	}
 
-	return query;
+	return {
+		query: queries.length ? { $and: queries } : {},
+		ticketCodeQuery,
+	};
 };
 
 Tickets.getTicketList = async (teamspace, project, model,
@@ -386,10 +390,14 @@ Tickets.getTicketList = async (teamspace, project, model,
 		sort = { [propertyToFilterName(sortBy)]: sortDesc ? -1 : 1 };
 	}
 
-	const query = await getQueryFromQueryFilters(teamspace, queryFilters);
+	if (queryFilters.length) {
+		const queryInfo = await getQueryInfoFromQueryFilters(teamspace, queryFilters);
+		return getTicketsByFilter(teamspace, project, model,
+			deleteIfUndefined({ projection, updatedSince, sort, limit, skip, ...queryInfo }));
+	}
 
 	return getAllTickets(teamspace, project, model,
-		deleteIfUndefined({ projection, updatedSince, sort, limit, skip, query }));
+		deleteIfUndefined({ projection, updatedSince, sort, limit, skip }));
 };
 
 Tickets.getOpenTicketsCount = async (teamspace, project, model) => {

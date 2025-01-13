@@ -71,6 +71,7 @@ const testValidateQueryString = () => {
 		['query string does not start with single quotes', generateRandomString(), false],
 		['query string is empty', "''", false],
 		['property name is empty', getQueryProp('', queryOperators.CONTAINS, stringPropValue), false],
+		['property name has two colons', getQueryProp(`${generateRandomString()}:${generateRandomString()}:${generateRandomString()}`, queryOperators.EXISTS), false],
 		['operator is empty', getQueryProp(generateRandomString(), '', generateRandomString()), false],
 		['value is empty', getQueryProp(generateRandomString(), queryOperators.CONTAINS, ''), false],
 		['title is queried and operator is invalid', getQueryProp(`$${specialQueryFields.TITLE}`, queryOperators.GREATER_OR_EQUAL_TO, generateRandomString()), false],

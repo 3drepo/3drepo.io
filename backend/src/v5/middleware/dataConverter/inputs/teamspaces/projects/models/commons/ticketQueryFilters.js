@@ -25,7 +25,7 @@ TicketQueryFilters.validateQueryString = async (req, res, next) => {
 	if (req.query.query) {
 		try {
 			const queryString = await querySchema.validate(decodeURIComponent(req.query.query));
-			const queryParams = queryString.slice(1, -1).split('&');
+			const queryParams = queryString.slice(1, -1).split('&&');
 			const queryFilters = [];
 
 			await Promise.all(queryParams.map(async (param) => {
