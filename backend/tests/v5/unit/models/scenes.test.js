@@ -19,8 +19,14 @@ const Mongo = require('mongodb');
 const UUIDParse = require('uuid-parse');
 const { times } = require('lodash');
 const { src } = require('../../helper/path');
-const { generateRandomString, generateRandomObject, determineTestGroup } = require('../../helper/services');
-const ServiceHelper = require('../../helper/services');
+const { generateRandomString,
+	generateRandomObject,
+	determineTestGroup,
+	generateUUIDString,
+	generateUUID,
+	generateRandomNumber,
+} = require('../../helper/services');
+
 const { UUIDToString } = require('../../../../src/v5/utils/helper/uuids');
 
 const Scenes = require(`${src}/models/scenes`);
@@ -61,8 +67,8 @@ const testGetNodeById = () => {
 	describe('Get singular node by Id', () => {
 		test('Should return the result from the database query', async () => {
 			const teamspace = generateRandomString();
-			const modelId = ServiceHelper.generateUUIDString();
-			const nodeId = ServiceHelper.generateUUID();
+			const modelId = generateUUIDString();
+			const nodeId = generateUUID();
 			const projection = generateRandomObject();
 
 			const expectedData = generateRandomObject();
@@ -84,8 +90,8 @@ const testGetNodeById = () => {
 
 		test('Should use {} as default projection when none is provided to return the result from the database query', async () => {
 			const teamspace = generateRandomString();
-			const modelId = ServiceHelper.generateUUIDString();
-			const nodeId = ServiceHelper.generateUUID();
+			const modelId = generateUUIDString();
+			const nodeId = generateUUID();
 
 			const expectedData = generateRandomObject();
 
@@ -110,9 +116,9 @@ const testGetNodesByIds = () => {
 	describe('Get multiple nodes by Id', () => {
 		test('Should return the result from the database query', async () => {
 			const teamspace = generateRandomString();
-			const projectId = ServiceHelper.generateUUID();
-			const modelId = ServiceHelper.generateUUIDString();
-			const nodeIds = times(10, ServiceHelper.generateUUID);
+			const projectId = generateUUID();
+			const modelId = generateUUIDString();
+			const nodeIds = times(10, generateUUID);
 			const projection = generateRandomObject();
 
 			const expectedData = times(10, generateRandomObject);
@@ -143,9 +149,9 @@ const stringToUUID = (string) => {
 const testFindStashNodesByType = () => {
 	describe('Find stash nodes by type', () => {
 		test('Should lookup the rev Id in the history and return the result of the database query.', async () => {
-			const teamspace = ServiceHelper.generateRandomString();
-			const modelId = ServiceHelper.generateUUIDString();
-			const revId = ServiceHelper.generateUUID();
+			const teamspace = generateRandomString();
+			const modelId = generateUUIDString();
+			const revId = generateUUID();
 			const branch = undefined;
 			const projection = generateRandomObject();
 			const regex = new RegExp('testSearchString', 'i');
@@ -182,9 +188,9 @@ const testFindStashNodesByType = () => {
 		});
 
 		test('If a node has an _id or parents field, they should be converted to strings', async () => {
-			const teamspace = ServiceHelper.generateRandomString();
-			const modelId = ServiceHelper.generateUUIDString();
-			const revId = ServiceHelper.generateUUID();
+			const teamspace = generateRandomString();
+			const modelId = generateUUIDString();
+			const revId = generateUUID();
 			const branch = undefined;
 			const projection = generateRandomObject();
 			const regex = new RegExp('testSearchString', 'i');
@@ -193,8 +199,8 @@ const testFindStashNodesByType = () => {
 				_id: revId,
 			};
 
-			const mockIdStr = ServiceHelper.generateUUIDString();
-			const mockParentStr = ServiceHelper.generateUUIDString();
+			const mockIdStr = generateUUIDString();
+			const mockParentStr = generateUUIDString();
 			const mockStashNode = {
 				_id: UUIDToString(mockIdStr),
 				parents: [UUIDToString(mockParentStr)],
@@ -233,9 +239,9 @@ const testFindStashNodesByType = () => {
 const testFindNodesByType = () => {
 	describe('Find nodes by type', () => {
 		test('Should lookup the rev Id in the history and return the result of the database query.', async () => {
-			const teamspace = ServiceHelper.generateRandomString();
-			const modelId = ServiceHelper.generateUUIDString();
-			const revId = ServiceHelper.generateUUID();
+			const teamspace = generateRandomString();
+			const modelId = generateUUIDString();
+			const revId = generateUUID();
 			const branch = undefined;
 			const projection = generateRandomObject();
 			const regex = new RegExp('testSearchString', 'i');
@@ -272,9 +278,9 @@ const testFindNodesByType = () => {
 		});
 
 		test('If a node has an _id or parents field, they should be converted to strings', async () => {
-			const teamspace = ServiceHelper.generateRandomString();
-			const modelId = ServiceHelper.generateUUIDString();
-			const revId = ServiceHelper.generateUUID();
+			const teamspace = generateRandomString();
+			const modelId = generateUUIDString();
+			const revId = generateUUID();
 			const branch = undefined;
 			const projection = generateRandomObject();
 			const regex = new RegExp('testSearchString', 'i');
@@ -283,8 +289,8 @@ const testFindNodesByType = () => {
 				_id: revId,
 			};
 
-			const mockIdStr = ServiceHelper.generateUUIDString();
-			const mockParentStr = ServiceHelper.generateUUIDString();
+			const mockIdStr = generateUUIDString();
+			const mockParentStr = generateUUIDString();
 			const mockNode = {
 				_id: UUIDToString(mockIdStr),
 				parents: [UUIDToString(mockParentStr)],
@@ -332,11 +338,11 @@ const testGetParentMatrix = () => {
 			}
 		};
 
-		const teamspace = ServiceHelper.generateRandomString();
-		const modelId = ServiceHelper.generateUUIDString();
-		const childId = ServiceHelper.generateUUIDString();
-		const parentId = ServiceHelper.generateUUID();
-		const revisionIds = [ServiceHelper.generateUUID()];
+		const teamspace = generateRandomString();
+		const modelId = generateUUIDString();
+		const childId = generateUUIDString();
+		const parentId = generateUUID();
+		const revisionIds = [generateUUID()];
 
 		const identityMatrix = [
 			[1, 0, 0, 0],
@@ -482,26 +488,26 @@ const subModelCheckHelper = (subModel, teamspace, cont, stashNode) => {
 
 const testGetContainerMeshInfo = () => {
 	describe('Get mesh info for a container', () => {
-		const teamspace = ServiceHelper.generateRandomString();
-		const modelId = ServiceHelper.generateUUIDString();
-		const revId = ServiceHelper.generateUUID();
+		const teamspace = generateRandomString();
+		const modelId = generateUUIDString();
+		const revId = generateUUID();
 		const branch = undefined;
 
 		const mockHistory = {
 			_id: revId,
 		};
 
-		const parentId = ServiceHelper.generateUUID();
+		const parentId = generateUUID();
 		const mockStashNode = {
-			_id: ServiceHelper.generateUUID(),
-			vertices_count: ServiceHelper.generateRandomNumber(),
-			faces_count: ServiceHelper.generateRandomNumber(),
-			uv_channels_count: ServiceHelper.generateRandomNumber(),
+			_id: generateUUID(),
+			vertices_count: generateRandomNumber(),
+			faces_count: generateRandomNumber(),
+			uv_channels_count: generateRandomNumber(),
 			bounding_box: [
-				ServiceHelper.generateRandomNumber(),
-				ServiceHelper, ServiceHelper.generateRandomNumber(),
+				generateRandomNumber(),
+				generateRandomNumber(),
 			],
-			primitive: ServiceHelper.generateRandomNumber(),
+			primitive: generateRandomNumber(),
 			parents: [parentId],
 		};
 
@@ -585,15 +591,15 @@ const testGetContainerMeshInfo = () => {
 
 const testGetFederationMeshInfo = () => {
 	describe('Get mesh info for a federation', () => {
-		const teamspace = ServiceHelper.generateRandomString();
-		const projectId = ServiceHelper.generateUUID();
-		const modelId = ServiceHelper.generateUUIDString();
-		const revId = ServiceHelper.generateUUID();
-		const username = ServiceHelper.generateRandomString();
+		const teamspace = generateRandomString();
+		const projectId = generateUUID();
+		const modelId = generateUUIDString();
+		const revId = generateUUID();
+		const username = generateRandomString();
 		const user = { username };
 
-		const contA = ServiceHelper.generateUUID();
-		const contB = ServiceHelper.generateUUID();
+		const contA = generateUUID();
+		const contB = generateUUID();
 
 		const branch = undefined;
 
@@ -609,29 +615,29 @@ const testGetFederationMeshInfo = () => {
 		};
 		const mockRefNodes = [mockRefNode1, mockRefNode2];
 
-		const parentId = ServiceHelper.generateUUID();
+		const parentId = generateUUID();
 		const mockStashNode1 = {
-			_id: ServiceHelper.generateUUID(),
-			vertices_count: ServiceHelper.generateRandomNumber(),
-			faces_count: ServiceHelper.generateRandomNumber(),
-			uv_channels_count: ServiceHelper.generateRandomNumber(),
+			_id: generateUUID(),
+			vertices_count: generateRandomNumber(),
+			faces_count: generateRandomNumber(),
+			uv_channels_count: generateRandomNumber(),
 			bounding_box: [
-				ServiceHelper.generateRandomNumber(),
-				ServiceHelper, ServiceHelper.generateRandomNumber(),
+				generateRandomNumber(),
+				generateRandomNumber(),
 			],
-			primitive: ServiceHelper.generateRandomNumber(),
+			primitive: generateRandomNumber(),
 			parents: [parentId],
 		};
 		const mockStashNode2 = {
-			_id: ServiceHelper.generateUUID(),
-			vertices_count: ServiceHelper.generateRandomNumber(),
-			faces_count: ServiceHelper.generateRandomNumber(),
-			uv_channels_count: ServiceHelper.generateRandomNumber(),
+			_id: generateUUID(),
+			vertices_count: generateRandomNumber(),
+			faces_count: generateRandomNumber(),
+			uv_channels_count: generateRandomNumber(),
 			bounding_box: [
-				ServiceHelper.generateRandomNumber(),
-				ServiceHelper, ServiceHelper.generateRandomNumber(),
+				generateRandomNumber(),
+				generateRandomNumber(),
 			],
-			primitive: ServiceHelper.generateRandomNumber(),
+			primitive: generateRandomNumber(),
 			parents: [parentId],
 		};
 
