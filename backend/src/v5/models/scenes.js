@@ -58,14 +58,14 @@ Scene.getNodesByIds = (teamspace, project, model, ids, projection) => db.find(
 
 const cleanAll = (nodesToClean) => nodesToClean.map(clean);
 
-const findNodes = async (account, model, branch, revision, query = {}, projection = {}) => {
+const findNodes = async (account, model, branch, revision, query, projection) => {
 	const history = await History.getHistory(account, model, branch, revision);
 
 	const nodes = await db.find(account, getCollection(model), { rev_id: history._id, ...query }, projection);
 	return cleanAll(nodes);
 };
 
-const findStashNodes = async (account, model, branch, revision, query = {}, projection = {}) => {
+const findStashNodes = async (account, model, branch, revision, query, projection) => {
 	const history = await History.getHistory(account, model, branch, revision);
 
 	const results = await db.find(
