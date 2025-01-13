@@ -694,8 +694,10 @@ const testGetTicketList = () => {
 				['the model returning only tickets updated since now', { ...baseRouteParams, options: { updatedSince: Date.now() + 1000000 } }, true, []],
 				['the model returning tickets sorted by updated at in ascending order', { ...baseRouteParams, options: { sortBy: basePropertyLabels.UPDATED_AT, sortDesc: false }, checkTicketList: checkTicketList() }, true, model.tickets],
 				['the model returning tickets sorted by updated at in descending order', { ...baseRouteParams, options: { sortBy: basePropertyLabels.UPDATED_AT, sortDesc: true }, checkTicketList: checkTicketList(false) }, true, model.tickets],
-				['the model has tickets with query filter imposed', { ...baseRouteParams, options: { query: `'${textProp.name}::${queryOperators.EQUALS}::${model.tickets[5].properties[textProp.name]}'` } }, true, [model.tickets[5]]],
-				['the model has tickets with template query filter imposed', { ...baseRouteParams, options: { query: `'$${specialQueryFields.TEMPLATE}::${queryOperators.EQUALS}::${templatesToUse[1].code}'` } }, true, model.tickets.filter((t) => t.type === templatesToUse[1]._id)],
+				['the model has tickets and query filter is imposed', { ...baseRouteParams, options: { query: `'${textProp.name}::${queryOperators.EQUALS}::${model.tickets[5].properties[textProp.name]}'` } }, true, [model.tickets[5]]],
+				['the model has tickets and template query filter is imposed', { ...baseRouteParams, options: { query: `'$${specialQueryFields.TEMPLATE}::${queryOperators.EQUALS}::${templatesToUse[1].code}'` } }, true, model.tickets.filter((t) => t.type === templatesToUse[1]._id)],
+				['the model has tickets and skip is provided', { ...baseRouteParams, options: { skip: 3, sortBy: textProp.name } }, true, model.tickets.sort((t1, t2) => String(t2.properties[textProp.name]).localeCompare(t1.properties[textProp.name])).slice(3)],
+				['the model has tickets and limit', { ...baseRouteParams, options: { limit: 2, sortBy: textProp.name } }, true, model.tickets.sort((t1, t2) => String(t2.properties[textProp.name]).localeCompare(t1.properties[textProp.name])).slice(0, 2)],
 			];
 		};
 

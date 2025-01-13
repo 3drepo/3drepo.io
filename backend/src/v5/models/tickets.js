@@ -170,7 +170,7 @@ Tickets.getTicketsByFilter = (
 		ticketCodeQuery,
 		projection = { teamspace: 0, project: 0, model: 0 },
 		updatedSince,
-		sort = { [`properties.${basePropertyLabels.Created_AT}`]: -1 },
+		sort = { [`properties.${basePropertyLabels.CREATED_AT}`]: -1 },
 		limit,
 		skip = 0,
 	} = {},

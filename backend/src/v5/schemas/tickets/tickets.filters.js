@@ -1,5 +1,6 @@
-const Yup = require('yup');
 const { createResponseCode, templates } = require('../../utils/responseCodes');
+
+const Yup = require('yup');
 const { types } = require('../../utils/helper/yup');
 
 const Filters = {};
@@ -63,8 +64,8 @@ Filters.queryParamSchema = Yup.object().shape({
 			}
 
 			if (operator === Filters.queryOperators.RANGE || operator === Filters.queryOperators.NOT_IN_RANGE) {
-				return Yup.array().of(types.range.required())
-					.transform((v, value) => (value ? value.split(/,(?=\[)/) : value));
+				return Yup.array().of(types.range).required()
+					.transform((v, value) => value.split(/,(?=\[)/));
 			}
 
 			if (operator === Filters.queryOperators.GREATER_OR_EQUAL_TO

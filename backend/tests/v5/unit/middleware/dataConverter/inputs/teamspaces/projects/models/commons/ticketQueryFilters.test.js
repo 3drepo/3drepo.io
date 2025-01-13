@@ -39,7 +39,8 @@ const testValidateQueryString = () => {
 	const stringPropValue = generateRandomString();
 	const stringPropValue2 = generateRandomString();
 	const numberPropValue = generateRandomNumber();
-	const rangePropValue = [generateRandomNumber(0, 10), generateRandomNumber(11, 20)];
+	const rangePropValue1 = [generateRandomNumber(0, 10), generateRandomNumber(11, 20)];
+	const rangePropValue2 = [generateRandomNumber(30, 40), generateRandomNumber(50, 60)];
 
 	const stringValueTests = (operator) => [
 		[`operator is ${operator} and a single value is provided`, getQueryProp(propName, operator, stringPropValue), true, [{ operator, propertyName: `properties.${propName}`, value: [stringPropValue] }]],
@@ -58,12 +59,13 @@ const testValidateQueryString = () => {
 	];
 
 	const rangeValueTests = (operator) => [
+		[`operator is ${operator} and value is empty`, getQueryProp(propName, operator), false],
 		[`operator is ${operator} and a non range value is provided`, getQueryProp(propName, operator, generateRandomString()), false],
-		[`operator is ${operator} and a range value is provided`, getQueryProp(propName, operator, `[${rangePropValue[0]},${rangePropValue[1]}]`), true, [{ operator, propertyName: `properties.${propName}`, value: rangePropValue }]],
+		[`operator is ${operator} and range values are provided`, getQueryProp(propName, operator, `[${rangePropValue1[0]},${rangePropValue1[1]}],[${rangePropValue2[0]},${rangePropValue2[1]}]`), true, [{ operator, propertyName: `properties.${propName}`, value: [rangePropValue1, rangePropValue2] }]],
 		[`operator is ${operator} and an invalid range value is provided`, getQueryProp(propName, operator, '[10,5]'), false],
 		[`operator is ${operator} and a non range value is provided (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, generateRandomString()), false],
-		[`operator is ${operator} and a range value is provided (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, `[${rangePropValue[0]},${rangePropValue[1]}]`), true, [{ operator, propertyName: `modules.${moduleName}.${propName}`, value: rangePropValue }]],
-		[`operator is ${operator} and an invalid range value is provided (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, '[10,5]'), false],
+		[`operator is ${operator} and range values are provided (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, `[${rangePropValue1[0]},${rangePropValue1[1]}],[${rangePropValue2[0]},${rangePropValue2[1]}]`), true, [{ operator, propertyName: `modules.${moduleName}.${propName}`, value: [rangePropValue1, rangePropValue2] }]],
+		[`operator is ${operator} and an invalid range value is provided (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, '[[10,5]'), false],
 	];
 
 	describe.each([
@@ -82,7 +84,7 @@ const testValidateQueryString = () => {
 		['template is queried and operator is valid', getQueryProp(`$${specialQueryFields.TEMPLATE}`, queryOperators.CONTAINS, stringPropValue), true, [{ operator: queryOperators.CONTAINS, propertyName: specialQueryFields.TEMPLATE, value: [stringPropValue] }]],
 		[`operator is ${queryOperators.EXISTS}`, getQueryProp(propName, queryOperators.EXISTS, ''), true, [{ operator: queryOperators.EXISTS, propertyName: `properties.${propName}` }]],
 		[`operator is ${queryOperators.NOT_EXISTS}`, getQueryProp(propName, queryOperators.NOT_EXISTS, ''), true, [{ operator: queryOperators.NOT_EXISTS, propertyName: `properties.${propName}` }]],
-		['multiple properties with different operators are provided', `'${propName}::${queryOperators.EQUALS}::${stringPropValue}&${moduleName}:${propName2}::${queryOperators.GREATER_OR_EQUAL_TO}::${numberPropValue}'`, true, [{ operator: queryOperators.GREATER_OR_EQUAL_TO, propertyName: `modules.${moduleName}.${propName2}`, value: numberPropValue }, { operator: queryOperators.EQUALS, propertyName: `properties.${propName}`, value: [stringPropValue] }]],
+		['multiple properties with different operators are provided', `'${propName}::${queryOperators.EQUALS}::${stringPropValue}&&${moduleName}:${propName2}::${queryOperators.GREATER_OR_EQUAL_TO}::${numberPropValue}'`, true, [{ operator: queryOperators.GREATER_OR_EQUAL_TO, propertyName: `modules.${moduleName}.${propName2}`, value: numberPropValue }, { operator: queryOperators.EQUALS, propertyName: `properties.${propName}`, value: [stringPropValue] }]],
 		...stringValueTests(queryOperators.EQUALS),
 		...stringValueTests(queryOperators.NOT_EQUALS),
 		...stringValueTests(queryOperators.CONTAINS),
