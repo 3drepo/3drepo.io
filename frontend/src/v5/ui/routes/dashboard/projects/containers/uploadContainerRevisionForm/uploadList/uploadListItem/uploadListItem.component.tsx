@@ -33,6 +33,7 @@ import { UploadListItemTitle } from '@components/shared/uploadFiles/uploadList/u
 import { UploadProgress } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadProgress/uploadProgress.component';
 import { formatMessage } from '@/v5/services/intl';
 import { get } from 'lodash';
+import { uploadFile } from '@/v5/validation/shared/validators';
 
 const UNEXPETED_STATUS_ERROR = undefined;
 const STATUS_TEXT_BY_UPLOAD = {
@@ -76,7 +77,7 @@ export const UploadListItem = ({
 }: IUploadListItem): JSX.Element => {
 	const revisionPrefix = `uploads.${index}`;
 	const uploadErrorMessage: string = ContainerRevisionsHooksSelectors.selectUploadError(uploadId);
-	const { watch, trigger, setValue, formState: { errors } } = useFormContext();
+	const { watch, trigger, setValue, setError, formState: { errors } } = useFormContext();
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const projectId = ProjectsHooksSelectors.selectCurrentProject();
 	const containerId = watch(`${revisionPrefix}.containerId`);
@@ -113,7 +114,11 @@ export const UploadListItem = ({
 	}, [containerId]);
 
 	useEffect(() => {
-		trigger(`${revisionPrefix}.file`);
+		try { 
+			uploadFile.validateSync(fileData);
+		} catch (e) {
+			setError(`${revisionPrefix}.file`, e);
+		}
 	}, []);
 
 	return (

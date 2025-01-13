@@ -39,6 +39,7 @@ import { isUniqueRevisionStatusError } from '@/v5/validation/drawingSchemes/draw
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectRevisionsPending } from '@/v5/store/drawings/revisions/drawingRevisions.selectors';
 import { selectAreSettingsPending } from '@/v5/store/drawings/drawings.selectors';
+import { uploadFile } from '@/v5/validation/shared/validators';
 
 const UNEXPETED_STATUS_ERROR = undefined;
 const STATUS_TEXT_BY_UPLOAD = {
@@ -84,7 +85,7 @@ export const UploadListItem = ({
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const projectId = ProjectsHooksSelectors.selectCurrentProject();
 	const uploadErrorMessage: string = DrawingRevisionsHooksSelectors.selectUploadError(uploadId);
-	const { trigger, setValue, formState: { errors } } = useFormContext();
+	const { trigger, watch, setValue, setError, formState: { errors } } = useFormContext();
 	const drawingId = useWatch({ name: `${revisionPrefix}.drawingId` });
 	const statusCode = useWatch({ name: `${revisionPrefix}.statusCode` });
 	const revCode = useWatch({ name: `${revisionPrefix}.revCode` });
@@ -94,6 +95,7 @@ export const UploadListItem = ({
 	const uploadStatus = getUploadStatus(progress, uploadErrorMessage);
 	const fileError = !!get(errors, `${revisionPrefix}.file`)?.message;
 	const disabled = fileError || isUploading;
+	const isMultiPagePdf = watch(`${revisionPrefix}.isMultiPagePdf`);
 
 	const sanitiseDrawing = (drawing: IDrawing) => ({
 		drawingNumber: drawing?.number || '',
@@ -156,9 +158,13 @@ export const UploadListItem = ({
 	}, [selectedDrawingRevisions]);
 
 	useEffect(() => {
-		trigger(`${revisionPrefix}.file`);
+		try { 
+			uploadFile.validateSync(fileData);
+		} catch (e) {
+			setError(`${revisionPrefix}.file`, e);
+		}
 	}, []);
-
+	
 	return (
 		<UploadListItemRow selected={isSelected}>
 			<UploadListItemFileIcon extension={fileData.extension} />
@@ -168,6 +174,7 @@ export const UploadListItem = ({
 				isSelected={isSelected}
 				name={fileData.name}
 				size={fileData.size}
+				isMultiPagePdf={isMultiPagePdf}
 			/>
 			<InputController
 				Input={UploadListItemDestination}
