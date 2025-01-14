@@ -19,7 +19,7 @@ const { cloneDeep } = require('lodash');
 const { src } = require('../../../helper/path');
 const { generateRandomString, generateCustomStatusValues } = require('../../../helper/services');
 
-const { statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
+const { statusTypes, statuses } = require(`${src}/schemas/tickets/templates.constants`);
 
 const TemplateSchema = require(`${src}/schemas/tickets/templates`);
 const { propTypes, getApplicableDefaultProperties, presetModules, presetEnumValues, presetModulesProperties, basePropertyLabels } = require(`${src}/schemas/tickets/templates.constants`);
@@ -1015,7 +1015,29 @@ const testGenerateFullSchema = () => {
 	});
 };
 
+const testGetClosedStatuses = () => {
+	const config = {
+		status: {
+			values: [...generateCustomStatusValues(), ...generateCustomStatusValues()],
+		},
+	};
+
+	const customClosedStatuses = config.status.values.flatMap(
+		({ type, name }) => (type === statusTypes.DONE || type === statusTypes.VOID
+			? name : []));
+
+	describe.each([
+		['when custom statuses are configured', { config }, customClosedStatuses],
+		['when custom statuses are not configured', {}, [statuses.CLOSED, statuses.VOID]],
+	])('Get ticket closed statuses', (desc, input, expectedOutput) => {
+		test(desc, () => {
+			expect(TemplateSchema.getClosedStatuses(input)).toEqual(expectedOutput);
+		});
+	});
+};
+
 describe('schema/tickets/templates', () => {
 	testValidate();
 	testGenerateFullSchema();
+	testGetClosedStatuses();
 });

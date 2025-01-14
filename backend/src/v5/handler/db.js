@@ -197,6 +197,11 @@ DBHandler.find = async (database, colName, query, projection, sort, limit, skip 
 	return limit ? cmd.limit(limit).toArray() : cmd.toArray();
 };
 
+DBHandler.distinct = async (database, colName, field, query) => {
+	const collection = await getCollection(database, colName);
+	return collection.distinct(field, query);
+};
+
 DBHandler.insertOne = async (database, colName, data) => {
 	const collection = await getCollection(database, colName);
 	await collection.insertOne(data);

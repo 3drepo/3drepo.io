@@ -24,18 +24,16 @@ const {
 	modulePropertyLabels,
 	presetModules,
 	propTypes,
-	statusTypes,
-	statuses,
 	viewGroups,
 } = require('../../../../../schemas/tickets/templates.constants');
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { deleteIfUndefined, isEmpty } = require('../../../../../utils/helper/objects');
-const { getAllTemplates, getTemplatesByQuery } = require('../../../../../models/tickets.templates');
+const { generateFullSchema, getClosedStatuses } = require('../../../../../schemas/tickets/templates');
 const { getFileWithMetaAsStream, removeFiles, storeFiles } = require('../../../../../services/filesManager');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
 const { isBuffer, isUUID } = require('../../../../../utils/helper/typeCheck');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
-const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
+const { getAllTemplates, getTemplatesByQuery } = require('../../../../../models/tickets.templates');
 const { getArrayDifference } = require('../../../../../utils/helper/arrays');
 const { importComments } = require('./tickets.comments');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
@@ -410,10 +408,7 @@ Tickets.getOpenTicketsCount = async (teamspace, project, model) => {
 	const allTemplates = await getAllTemplates(teamspace, true, { _id: 1, config: 1 });
 
 	const templateToClosedStatuses = allTemplates.reduce((obj, { _id, config }) => {
-		const closedStatuses = config.status
-			? config.status.values
-				.flatMap((s) => (s.type === statusTypes.DONE || s.type === statusTypes.VOID ? s.name : []))
-			: [statuses.CLOSED, statuses.VOID];
+		const closedStatuses = getClosedStatuses({ config });
 
 		return { ...obj, [UUIDToString(_id)]: closedStatuses };
 	}, {});
