@@ -63,6 +63,7 @@ type IUploadListItem = {
 	index: number;
 	isSelected: boolean;
 	isUploading: boolean;
+	isMultiPagePdf: boolean;
 	fileData: {
 		size: number;
 		name: string;
@@ -80,12 +81,13 @@ export const UploadListItem = ({
 	isSelected,
 	fileData,
 	isUploading,
+	isMultiPagePdf,
 }: IUploadListItem): JSX.Element => {
 	const revisionPrefix = `uploads.${index}`;
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const projectId = ProjectsHooksSelectors.selectCurrentProject();
 	const uploadErrorMessage: string = DrawingRevisionsHooksSelectors.selectUploadError(uploadId);
-	const { trigger, watch, setValue, setError, formState: { errors } } = useFormContext();
+	const { trigger, setValue, setError, formState: { errors } } = useFormContext();
 	const drawingId = useWatch({ name: `${revisionPrefix}.drawingId` });
 	const statusCode = useWatch({ name: `${revisionPrefix}.statusCode` });
 	const revCode = useWatch({ name: `${revisionPrefix}.revCode` });
@@ -95,7 +97,6 @@ export const UploadListItem = ({
 	const uploadStatus = getUploadStatus(progress, uploadErrorMessage);
 	const fileError = !!get(errors, `${revisionPrefix}.file`)?.message;
 	const disabled = fileError || isUploading;
-	const isMultiPagePdf = watch(`${revisionPrefix}.isMultiPagePdf`);
 
 	const sanitiseDrawing = (drawing: IDrawing) => ({
 		drawingNumber: drawing?.number || '',
