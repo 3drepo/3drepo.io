@@ -28,9 +28,10 @@ import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopover
 import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 import { Tooltip } from '@mui/material';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
-import { Row, Cell, CellChipText, CellOwner, OverflowContainer, SmallFont, CellDate } from './ticketsTableRow.styles';
+import { Row, Cell, CellOwner, OverflowContainer, SmallFont, CellDate } from './ticketsTableRow.styles';
 import { getChipPropsFromConfig } from '@controls/chip/statusChip/statusChip.helpers';
 import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.context';
+import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 
 type TicketsTableRowProps = {
 	ticket: ITicket,
@@ -80,10 +81,10 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelId, selec
 	return (
 		<TicketContextComponent containerOrFederation={modelId}>
 			<Row key={id} onClickCapture={handleClick} $selected={selected}>
-				<Cell width={80}>
+				<Cell name="id">
 					<Highlight search={query}>{`${template.code}:${number}`}</Highlight>
 				</Cell>
-				<Cell>
+				<Cell name={BaseProperties.TITLE}>
 					<Tooltip title={title}>
 						<OverflowContainer>
 							<Highlight search={query}>
@@ -92,7 +93,7 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelId, selec
 						</OverflowContainer>
 					</Tooltip>
 				</Cell>
-				<Cell width={145} hidden={!showModelName}>
+				<Cell name="modelName" hidden={!showModelName}>
 					<Tooltip title={modelName}>
 						<OverflowContainer>
 							<Highlight search={query}>
@@ -101,30 +102,30 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelId, selec
 						</OverflowContainer>
 					</Tooltip>
 				</Cell>
-				<Cell width={127}>
+				<Cell name={`properties.${BaseProperties.CREATED_AT}`}>
 					<SmallFont>
 						{formatDateTime(createdAt)}
 					</SmallFont>
 				</Cell>
-				<Cell width={96} hidden={!hasProperties}>
+				<Cell name={`properties.${IssueProperties.ASSIGNEES}`} hidden={!hasProperties}>
 					{!!assignees?.length && (<AssigneesSelect value={assignees} multiple disabled />)}
 				</Cell>
-				<CellOwner width={52}>
+				<CellOwner name={`properties.${BaseProperties.OWNER}`}>
 					<UserPopoverCircle user={ownerAsUser} />
 				</CellOwner>
-				<CellDate width={147} hidden={!hasProperties}>
+				<CellDate name={`properties.${IssueProperties.DUE_DATE}`} hidden={!hasProperties}>
 					{!!dueDate && (<DueDate value={dueDate} disabled />)}
 				</CellDate>
-				<CellChipText width={90} hidden={!hasProperties}>
+				<Cell name={`properties.${IssueProperties.PRIORITY}`} hidden={!hasProperties}>
 					<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />
-				</CellChipText>
-				<CellChipText width={150}>
+				</Cell>
+				<Cell name={`properties.${BaseProperties.STATUS}`}>
 					<Chip {...getChipPropsFromConfig(statusConfig, status)} />
-				</CellChipText>
-				<Cell width={137} hidden={!hasSafetibase}>
+				</Cell>
+				<Cell name={`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`} hidden={!hasSafetibase}>
 					<Chip {...RISK_LEVELS_MAP[levelOfRisk]} variant="filled" />
 				</Cell>
-				<Cell width={134} hidden={!hasSafetibase}>
+				<Cell name={`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`} hidden={!hasSafetibase}>
 					<Chip {...TREATMENT_LEVELS_MAP[treatmentStatus]} variant="filled" />
 				</Cell>
 			</Row>

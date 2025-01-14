@@ -27,6 +27,8 @@ import { TicketsTableGroup } from './ticketsTableGroup/ticketsTableGroup.compone
 import {  groupTickets, NEW_TICKET_ID, NONE_OPTION, SetTicketValue, UNSET } from '../ticketsTable.helper';
 import { EmptyPageView } from '../../../../../../components/shared/emptyPageView/emptyPageView.styles';
 import { Container, Title } from './ticketsTableContent.styles';
+import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { ResizableColumnsContextComponent } from '@controls/resizableColumnsContext/resizableColumnsContext';
 
 type TicketsTableContentProps = {
 	setTicketValue: SetTicketValue;
@@ -36,6 +38,20 @@ type TicketsTableContentProps = {
 export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy }: TicketsTableContentProps) => {
 	const { filteredItems } = useContext(SearchContext);
 	const { template } = useParams<DashboardTicketsParams>();
+	
+	const widths = {
+		id: { width: 80, min: 25 },
+		[BaseProperties.TITLE]: { width: 380, min: 25 },
+		modelName: { width: 145, min: 25 },
+		[`properties.${BaseProperties.CREATED_AT}`]: { width: 127, min: 25 },
+		[`properties.${IssueProperties.ASSIGNEES}`]: { width: 96, min: 25 }, 
+		[`properties.${BaseProperties.OWNER}`]: { width: 52, min: 25 },
+		[`properties.${IssueProperties.DUE_DATE}`]: { width: 147, min: 25 },
+		[`properties.${IssueProperties.PRIORITY}`]: { width: 90, min: 25 },
+		[`properties.${BaseProperties.STATUS}`]: { width: 150, min: 25 },
+		[`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`]: { width: 137, min: 25 },
+		[`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`]: { width: 134, min: 25 },
+	};
 	
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
 		setTicketValue(modelId, NEW_TICKET_ID, (groupByValue === UNSET) ? null : groupByValue);
@@ -54,38 +70,42 @@ export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy 
 
 	if (groupBy === NONE_OPTION || !groupBy) {
 		return (
-			<TicketsTableGroup
-				tickets={filteredItems}
-				onNewTicket={onGroupNewTicket('')}
-				onEditTicket={setTicketValue}
-				selectedTicketId={selectedTicketId}
-			/>
+			<ResizableColumnsContextComponent widths={widths}>
+				<TicketsTableGroup
+					tickets={filteredItems}
+					onNewTicket={onGroupNewTicket('')}
+					onEditTicket={setTicketValue}
+					selectedTicketId={selectedTicketId}
+				/>
+			</ResizableColumnsContextComponent>
 		);
 	}
 
 	const groups = groupTickets(groupBy, filteredItems);
 
 	return (
-		<Container>
-			{_.entries(groups).map(([groupName, tickets]) => (
-				<DashboardListCollapse
-					title={(
-						<>
-							<Title>{groupName}</Title>
-							<CircledNumber disabled={!tickets.length}>{tickets.length}</CircledNumber>
-						</>
-					)}
-					defaultExpanded={!!tickets.length}
-					key={groupBy + groupName + template + tickets}
-				>
-					<TicketsTableGroup
-						tickets={tickets}
-						onNewTicket={onGroupNewTicket(groupName)}
-						onEditTicket={setTicketValue}
-						selectedTicketId={selectedTicketId}
-					/>
-				</DashboardListCollapse>
-			))}
-		</Container>
+		<ResizableColumnsContextComponent widths={widths}>
+			<Container>
+				{_.entries(groups).map(([groupName, tickets]) => (
+					<DashboardListCollapse
+						title={(
+							<>
+								<Title>{groupName}</Title>
+								<CircledNumber disabled={!tickets.length}>{tickets.length}</CircledNumber>
+							</>
+						)}
+						defaultExpanded={!!tickets.length}
+						key={groupBy + groupName + template + tickets}
+					>
+						<TicketsTableGroup
+							tickets={tickets}
+							onNewTicket={onGroupNewTicket(groupName)}
+							onEditTicket={setTicketValue}
+							selectedTicketId={selectedTicketId}
+						/>
+					</DashboardListCollapse>
+				))}
+			</Container>
+		</ResizableColumnsContextComponent>
 	);
 };

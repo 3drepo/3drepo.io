@@ -15,16 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Container as FixedOrGrowContainer } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.styles';
+import { ResizableColumnsNonResizableItem } from '@controls/resizableColumnsContext/resizableColumnsNonResizableItem/resizableColumnsNonResizableItem.styles';
+import { ResizableColumnsRow } from '@controls/resizableColumnsContext/resizableColumnsRow/resizableColumnsRow.styles';
 import { Typography } from '@controls/typography';
 import styled, { css } from 'styled-components';
 
-export const Headers = styled.div`
-	display: flex;
+export const Headers = styled(ResizableColumnsRow)`
 	gap: 1px;
-	margin-bottom: 10px;
-	width: 100%;
-	width: min(90vw, 1289px);
+	width: fit-content;
 `;
 
 export const IconContainer = styled.div<{ $flip?: boolean }>`
@@ -37,10 +35,11 @@ export const IconContainer = styled.div<{ $flip?: boolean }>`
 	`}
 `;
 
-export const Header = styled(FixedOrGrowContainer)<{ $selectable: boolean }>`
+export const Header = styled.div<{ $selectable: boolean }>`
 	${({ theme }) => theme.typography.kicker};
 	color: ${({ theme }) => theme.palette.base.main};
 	padding-left: 10px;
+	padding-bottom: 10px;
 	text-align: start;
 	box-sizing: border-box;
 	user-select: none;
@@ -51,13 +50,6 @@ export const Header = styled(FixedOrGrowContainer)<{ $selectable: boolean }>`
 	${({ $selectable }) => $selectable && css`
 		cursor: pointer;
 	`}
-
-	${({ width }) => width ? css`
-		flex: 0 0 ${width};
-	` : css`
-		flex: 1;
-		min-width: 300px;
-	`}
 `;
 
 export const Group = styled.div`
@@ -65,10 +57,11 @@ export const Group = styled.div`
 	border-radius: 10px;
 	overflow: hidden;
 	gap: 1px;
+	width: fit-content;
 	background-color: transparent;
 `;
 
-export const NewTicketRow = styled.div<{ disabled?: boolean }>`
+export const NewTicketRow = styled(ResizableColumnsNonResizableItem)<{ disabled?: boolean }>`
 	width: 100%;
 	height: 37px;
 	font-weight: 600;
