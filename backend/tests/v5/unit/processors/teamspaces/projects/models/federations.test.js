@@ -162,7 +162,7 @@ jest.mock('../../../../../../../src/v5/utils/permissions/permissions', () => ({
 	...jest.requireActual('../../../../../../../src/v5/utils/permissions/permissions'),
 	isTeamspaceAdmin: jest.fn().mockImplementation((teamspace, user) => user === 'tsAdmin'),
 	hasProjectAdminPermissions: jest.fn().mockImplementation((perm, user) => user === 'projAdmin'),
-	hasReadAccessToContainer: jest.fn().mockImplementation((teamspace, project, modelID, username) => username === 'tsAdmin'
+	hasReadAccessToContainer: jest.fn().mockImplementation((teamspace, proj, modelID, username) => username === 'tsAdmin'
 	|| username === 'projAdmin' || mockContainers.filter((element) => element._id === modelID)[0].permissions.some((element) => element.user === username),
 	),
 }));
@@ -383,7 +383,7 @@ const testGetMD5Hash = () => {
 			return mockContainers.filter((container) => container._id === containers[0]);
 		});
 		ModelSettings.getContainerById.mockImplementation(
-			(ts, container, project) => mockContainers.filter((cntr) => cntr._id === container));
+			(ts, container, proj) => mockContainers.filter((cntr) => cntr._id === container));
 		ProjectSettings.modelsExistInProject.mockResolvedValue(true);
 
 		test('should get an empty array if user does not have rights to the container', async () => {
@@ -391,8 +391,9 @@ const testGetMD5Hash = () => {
 
 			await expect(Federations.getMD5Hash('teamspace', 'federation', 'NoAcessUser')).resolves.toEqual([]);
 			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(1);
-			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(0);
-			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(0);
+			expect(ModelSettings.getContainers).toHaveBeenCalledWith('teamspace', ['1', '2', '3'], { _id: 1, name: 1, permissions: 1 });
+			expect(Revisions.getRevisionByIdOrTag).not.toHaveBeenCalled();
+			expect(Revisions.getLatestRevision).not.toHaveBeenCalled();
 		});
 
 		test('it should return just the containers users have access to', async () => {
@@ -407,10 +408,14 @@ const testGetMD5Hash = () => {
 				filename: revisionMock.rFile[0],
 				size: fileEntry.size }]);
 			expect(ModelSettings.getFederationById).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.getFederationById).toHaveBeenCalledWith('teamspace', 'federation', { subModels: 1 });
 			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(1);
-			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(0);
+			expect(ModelSettings.getContainers).toHaveBeenCalledWith('teamspace', ['1', '2', '3'], { _id: 1, name: 1, permissions: 1 });
+			expect(Revisions.getRevisionByIdOrTag).not.toHaveBeenCalled();
 			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(1);
+			expect(Revisions.getLatestRevision).toHaveBeenCalledWith('teamspace', '1', 'container', { fileSize: 1, rFile: 1, tag: 1, timestamp: 1 });
 			expect(FilesManager.getMD5FileHash).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getMD5FileHash).toHaveBeenCalledWith('teamspace', '1', 'success!');
 		});
 
 		test('it should return an array with all the containers if admin', async () => {
@@ -443,9 +448,14 @@ const testGetMD5Hash = () => {
 					size: fileEntry.size,
 				}]);
 			expect(ModelSettings.getFederationById).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.getFederationById).toHaveBeenCalledWith('teamspace', 'federation', { subModels: 1 });
 			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(1);
-			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(0);
+			expect(ModelSettings.getContainers).toHaveBeenCalledWith('teamspace', ['1', '2', '3'], { _id: 1, name: 1, permissions: 1 });
+			expect(Revisions.getRevisionByIdOrTag).not.toHaveBeenCalled();
 			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(3);
+			expect(Revisions.getLatestRevision).toHaveBeenNthCalledWith(1, 'teamspace', '1', 'container', { fileSize: 1, rFile: 1, tag: 1, timestamp: 1 });
+			expect(Revisions.getLatestRevision).toHaveBeenNthCalledWith(2, 'teamspace', '2', 'container', { fileSize: 1, rFile: 1, tag: 1, timestamp: 1 });
+			expect(Revisions.getLatestRevision).toHaveBeenNthCalledWith(3, 'teamspace', '3', 'container', { fileSize: 1, rFile: 1, tag: 1, timestamp: 1 });
 		});
 	});
 };

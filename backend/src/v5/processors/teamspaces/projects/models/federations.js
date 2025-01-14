@@ -111,25 +111,29 @@ Federations.getSettings = (teamspace, federation) => getFederationById(teamspace
 
 Federations.getMD5Hash = async (teamspace, project, federation, user) => {
 	const { subModels: containers } = await getFederationById(teamspace, federation, { subModels: 1 });
-	const containerWithMetadata = await getContainers(
-		teamspace,
-		containers.map((container) => container._id),
-		{ _id: 1, name: 1, permissions: 1 });
 
-	const listOfPromises = containerWithMetadata.map(
-		async (container) => {
-			const hasAccess = await hasReadAccessToContainer(teamspace, project, container._id, user);
-			if (hasAccess) {
-				return getModelMD5Hash(teamspace, container._id);
-			}
-			return undefined;
-		},
-	);
+	if (containers) {
+		const containerWithMetadata = await getContainers(
+			teamspace,
+			containers.map((container) => container._id),
+			{ _id: 1, name: 1, permissions: 1 });
 
-	const promiseResponses = await Promise.allSettled(listOfPromises);
-	const responses = promiseResponses.flatMap(({ status, value }) => (status === 'fulfilled' && value ? value : []));
+		const listOfPromises = containerWithMetadata.map(
+			async (container) => {
+				const hasAccess = await hasReadAccessToContainer(teamspace, project, container._id, user);
+				if (hasAccess) {
+					return getModelMD5Hash(teamspace, container._id);
+				}
+				return undefined;
+			},
+		);
 
-	return responses;
+		const promiseResponses = await Promise.allSettled(listOfPromises);
+		const responses = promiseResponses.flatMap(({ status, value }) => (status === 'fulfilled' && value ? value : []));
+
+		return responses;
+	}
+	return [];
 };
 
 module.exports = Federations;

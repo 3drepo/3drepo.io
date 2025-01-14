@@ -61,6 +61,24 @@ const containers = [
 	},
 ];
 
+const containersNoRev = [
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		properties: {
+			...ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
+			permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
+		},
+	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		properties: {
+			...ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
+		},
+	},
+];
+
 const models = [
 	{
 		_id: ServiceHelper.generateUUIDString(),
@@ -79,17 +97,28 @@ const models = [
 			...ServiceHelper.generateRandomModelProperties(modelTypes.FEDERATION),
 			permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
 			federate: true,
-			subModels: containers.map((model) => ({ _id: model._id })),
+			subModels: containersNoRev.map((model) => ({ _id: model._id })),
 		},
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
-		properties: ServiceHelper.generateRandomModelProperties(),
+		properties: {
+			...ServiceHelper.generateRandomModelProperties(),
+			federate: true,
+			subModels: [],
+		},
+	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		properties: {
+			...ServiceHelper.generateRandomModelProperties(),
+		},
 	},
 ];
 
-const container = models[2];
+const container = models[3];
 const anotherFed = models[1];
 const conRevisions = ServiceHelper.generateRevisionEntry();
 
@@ -111,6 +140,12 @@ const setupData = async () => {
 		subModel.name,
 		subModel.properties,
 	));
+	const containerNoRevProms = containersNoRev.map((subModel) => ServiceHelper.db.createModel(
+		teamspace,
+		subModel._id,
+		subModel.name,
+		subModel.properties,
+	));
 	const revisionsProms = containers.map((subModel) => ServiceHelper.db.createRevision(
 		teamspace,
 		project.id,
@@ -119,12 +154,19 @@ const setupData = async () => {
 		modelTypes.CONTAINER,
 	));
 
+	const projectModels = [
+		...models.map(({ _id }) => _id),
+		...containers.map(({ _id }) => _id),
+		...containerNoRevProms.map(({ _id }) => _id),
+	];
+
 	return Promise.all([
 		...userProms,
 		...modelProms,
 		...containerProms,
+		...containerNoRevProms,
 		...revisionsProms,
-		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
+		ServiceHelper.db.createProject(teamspace, project.id, project.name, projectModels),
 		ServiceHelper.db.createUser(nobody),
 	]);
 };
@@ -248,13 +290,15 @@ const testGetFederationMD5Hash = () => {
 		}));
 
 		return [
-			// ['there is no valid session key.', { ...parameters, key: null }, false, templates.notLoggedIn],
-			// ['the user is not a member of the teamspace.', { ...parameters, key: nobody.apiKey }, false, templates.teamspaceNotFound],
-			// ['the user does not have access to the project.', { ...parameters, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
-			// ['the teamspace does not exist.', { ...parameters, ts: ServiceHelper.generateUUIDString() }, false, templates.teamspaceNotFound],
-			// ['the federation does not exist.', { ...parameters, modelId: ServiceHelper.generateUUIDString() }, false, templates.federationNotFound],
+			['there is no valid session key.', { ...parameters, key: null }, false, templates.notLoggedIn],
+			['the user is not a member of the teamspace.', { ...parameters, key: nobody.apiKey }, false, templates.teamspaceNotFound],
+			['the user does not have access to the project.', { ...parameters, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
+			['the teamspace does not exist.', { ...parameters, ts: ServiceHelper.generateUUIDString() }, false, templates.teamspaceNotFound],
+			['the federation does not exist.', { ...parameters, modelId: ServiceHelper.generateUUIDString() }, false, templates.federationNotFound],
 			['the viewer access it and return just that information.', { ...parameters, key: users.viewer.apiKey, response: viewerResponse }, true],
 			['the admin access it and return all the information.', { ...parameters, response: adminResponse }, true],
+			['the admin access it but the federation is empty.', { ...parameters, modelId: models[2]._id }, true],
+			['the admin access it but the containers in federation have no revisions.', { ...parameters, modelId: models[1]._id }, true],
 		];
 	};
 
@@ -287,6 +331,6 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		ServiceHelper.closeApp(server),
 	]));
 
-	// testNewRevision();
+	testNewRevision();
 	testGetFederationMD5Hash();
 });
