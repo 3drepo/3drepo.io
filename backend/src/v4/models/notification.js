@@ -443,6 +443,6 @@ module.exports = {
 			criteria._id = utils.stringToUUID(criteria._id);
 		}
 
-		return db.find(INTERNAL_DB, NOTIFICATIONS_COLL, { user, ...criteria }, undefined, {timestamp: -1}).then(fillModelData);
+		return db.find(INTERNAL_DB, NOTIFICATIONS_COLL, { user, type: {$in: Object.values(types)}, ...criteria }, undefined, {timestamp: -1}).then(fillModelData);
 	}
 };
