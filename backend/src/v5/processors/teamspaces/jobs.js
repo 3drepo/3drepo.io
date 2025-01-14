@@ -15,10 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { getJobs } = require('../../models/jobs');
+const { createJob, deleteJob, getJobs, updateJob } = require('../../models/jobs');
 
 const Jobs = {};
 
 Jobs.getJobList = getJobs;
+
+Jobs.createJob = createJob;
+
+Jobs.updateJob = updateJob;
+
+Jobs.deleteJob = deleteJob;
 
 module.exports = Jobs;

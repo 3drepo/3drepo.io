@@ -89,15 +89,19 @@ Teamspaces.getTeamspaceMembersInfo = async (teamspace) => {
 		getJobsToUsers(teamspace),
 	]);
 
-	const usersToJob = {};
+	const usersToJobs = {};
 	jobsList.forEach(({ _id, users }) => {
 		users.forEach((user) => {
-			usersToJob[user] = _id;
+			if (!usersToJobs[user]) {
+				usersToJobs[user] = [];
+			}
+
+			usersToJobs[user].push(_id);
 		});
 	});
 
 	return membersList.map(
-		(member) => (usersToJob[member.user] ? { ...member, job: usersToJob[member.user] } : member),
+		(member) => (usersToJobs[member.user] ? { ...member, jobs: usersToJobs[member.user] } : member),
 	);
 };
 
