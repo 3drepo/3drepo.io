@@ -29,11 +29,11 @@ const {
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { deleteIfUndefined, isEmpty } = require('../../../../../utils/helper/objects');
 const { generateFullSchema, getClosedStatuses } = require('../../../../../schemas/tickets/templates');
+const { getAllTemplates, getTemplatesByQuery } = require('../../../../../models/tickets.templates');
 const { getFileWithMetaAsStream, removeFiles, storeFiles } = require('../../../../../services/filesManager');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
 const { isBuffer, isUUID } = require('../../../../../utils/helper/typeCheck');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
-const { getAllTemplates, getTemplatesByQuery } = require('../../../../../models/tickets.templates');
 const { getArrayDifference } = require('../../../../../utils/helper/arrays');
 const { importComments } = require('./tickets.comments');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
