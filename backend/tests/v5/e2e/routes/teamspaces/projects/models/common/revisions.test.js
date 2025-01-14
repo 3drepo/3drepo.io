@@ -515,7 +515,7 @@ const testGetRevisionMD5Hash = () => {
 
 			const MD5HashResponseExpectation = {
 				container: model._id,
-				code: revision._id,
+				code: revision.tag,
 				uploadedAt: new Date(revision.timestamp).getTime(),
 				hash: CryptoJs.MD5(Buffer.from(revision.rFile[0])).toString(),
 				filename: revision.rFile[0],
@@ -532,7 +532,7 @@ const testGetRevisionMD5Hash = () => {
 
 			return [
 				['the user does not have a valid session.', { ...params, key: null }, false, templates.notLoggedIn],
-				['the teamspace does not exist.', { ...params, ts: 'not a valid ts' }, false, templates.teamspaceNotFound],
+				['the teamspace does not exist.', { ...params, ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
 				['the user is not a member of the teamspace.', { ...params, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
 				['the user does not have access to the model.', { ...params, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 				['the user is viewer.', { ...params, key: users.viewer.apiKey }, true],

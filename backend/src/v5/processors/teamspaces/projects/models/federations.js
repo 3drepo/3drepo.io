@@ -27,6 +27,7 @@ const { getLatestRevision } = require('../../../../models/revisions');
 const { getModelMD5Hash } = require('./commons/modelList');
 const { getOpenTicketsCount } = require('./commons/tickets');
 const { getProjectById } = require('../../../../models/projectSettings');
+const { hasReadAccessToContainer } = require('../../../../utils/permissions/permissions');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { queueFederationUpdate } = require('../../../../services/modelProcessing');
 
@@ -108,7 +109,7 @@ Federations.updateSettings = updateModelSettings;
 Federations.getSettings = (teamspace, federation) => getFederationById(teamspace,
 	federation, { corID: 0, account: 0, permissions: 0, subModels: 0, federate: 0 });
 
-Federations.getMD5Hash = async (teamspace, federation, user) => {
+Federations.getMD5Hash = async (teamspace, project, federation, user) => {
 	const { subModels: containers } = await getFederationById(teamspace, federation, { subModels: 1 });
 	const containerWithMetadata = await getContainers(
 		teamspace,
@@ -116,13 +117,17 @@ Federations.getMD5Hash = async (teamspace, federation, user) => {
 		{ _id: 1, name: 1, permissions: 1 });
 
 	const listOfPromises = containerWithMetadata.map(
-		(container) => getModelMD5Hash(teamspace, container._id, null, user));
+		async (container) => {
+			const hasAccess = await hasReadAccessToContainer(teamspace, project, container._id, user);
+			if (hasAccess) {
+				return getModelMD5Hash(teamspace, container._id);
+			}
+			return undefined;
+		},
+	);
 
 	const promiseResponses = await Promise.allSettled(listOfPromises);
-	const responses = promiseResponses
-		// make sure the promise is fulfilled and the value is not undefined or empty
-		.filter((response) => response.status === 'fulfilled' && response.value !== undefined)
-		.map((response) => response.value);
+	const responses = promiseResponses.flatMap(({ status, value }) => (status === 'fulfilled' && value ? value : []));
 
 	return responses;
 };

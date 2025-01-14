@@ -15,16 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addModel, getContainers } = require('../../../../../models/modelSettings');
 const { addModelToProject, getProjectById, removeModelFromProject } = require('../../../../../models/projectSettings');
 const { getLatestRevision, getRevisionByIdOrTag } = require('../../../../../models/revisions');
-const { getRefEntry, updateRef } = require('../../../../../models/fileRefs');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions/permissions');
-const CryptoJs = require('crypto-js');
 const { USERS_DB_NAME } = require('../../../../../models/users.constants');
-const UUIDParse = require('uuid-parse');
+const { addModel } = require('../../../../../models/modelSettings');
 const { getFavourites } = require('../../../../../models/users');
-const { getFile } = require('../../../../../services/filesManager');
+const { getMD5FileHash } = require('../../../../../services/filesManager');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { removeModelData } = require('../../../../../utils/helper/models');
 
@@ -65,68 +62,35 @@ ModelList.getModelList = async (teamspace, project, user, modelSettings) => {
 	});
 };
 
-ModelList.getModelMD5Hash = async (teamspace, container, revision, user) => {
-	const [isAdmin, containers] = await Promise.all([
-		isTeamspaceAdmin(teamspace, user),
-		getContainers(teamspace, [container], { _id: 1, name: 1, permissions: 1 }),
-	]);
+ModelList.getModelMD5Hash = async (teamspace, container, revision) => {
 	let rev;
-	let returnValue;
 
-	// if not allowed just return nothing
-	if (!isAdmin && !containers[0].permissions?.some((permission) => permission?.user === user)) return returnValue;
-
-	// retrieve the right revision
 	if (revision) {
 		rev = await getRevisionByIdOrTag(
 			teamspace, container, modelTypes.CONTAINER, revision,
-			{ rFile: 1, timestamp: 1, fileSize: 1 },
+			{ rFile: 1, timestamp: 1, fileSize: 1, tag: 1 },
 			{ includeVoid: false });
 	} else {
 		rev = await getLatestRevision(
 			teamspace, container, modelTypes.CONTAINER,
-			{ rFile: 1, timestamp: 1, fileSize: 1 });
+			{ rFile: 1, timestamp: 1, fileSize: 1, tag: 1 });
 	}
 
-	// check if anything is in there
-	if (!rev.rFile?.length) return returnValue;
+	if (!rev.rFile?.length) return {};
 
-	const code = UUIDParse.unparse(rev._id.buffer);
+	const code = rev.tag;
 	const uploadedAt = new Date(rev.timestamp).getTime();
 	const filename = rev.rFile[0];
+	const { hash, size } = await getMD5FileHash(teamspace, container, filename);
 
-	// check if the ref has the MD5 hash
-	const refEntry = await getRefEntry(teamspace, `${container}.history.ref`, filename);
-
-	if (Object.keys(refEntry).includes('MD5Hash')) {
-		// if the ref has the hash create the object
-		returnValue = {
-			container,
-			code,
-			uploadedAt,
-			hash: refEntry.MD5Hash,
-			filename,
-			size: refEntry.size,
-		};
-	} else {
-		// if the ref does not have the hash get the file, create the hash, set the return object and update the ref with the hash
-		const file = await getFile(teamspace, `${container}.history`, filename);
-
-		const hash = CryptoJs.MD5(file).toString();
-
-		returnValue = {
-			container,
-			code,
-			uploadedAt,
-			hash,
-			filename,
-			size: refEntry.size,
-		};
-
-		await updateRef(teamspace, `${container}.history.ref`, { _id: filename }, { $set: { MD5Hash: hash } });
-	}
-
-	return returnValue;
+	return {
+		container,
+		code,
+		uploadedAt,
+		hash,
+		filename,
+		size,
+	};
 };
 
 module.exports = ModelList;
