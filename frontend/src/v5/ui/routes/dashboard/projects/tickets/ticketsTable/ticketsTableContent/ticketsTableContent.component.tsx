@@ -48,7 +48,7 @@ export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy 
 		[`properties.${BaseProperties.OWNER}`]: { width: 52, min: 25 },
 		[`properties.${IssueProperties.DUE_DATE}`]: { width: 147, min: 25 },
 		[`properties.${IssueProperties.PRIORITY}`]: { width: 90, min: 25 },
-		[`properties.${BaseProperties.STATUS}`]: { width: 150, min: 25 },
+		[`properties.${BaseProperties.STATUS}`]: { width: 150, min: 52 },
 		[`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`]: { width: 137, min: 25 },
 		[`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`]: { width: 134, min: 25 },
 	};
