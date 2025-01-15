@@ -23,6 +23,7 @@ type ByteSizeType = {
 };
 
 const InformationUnits = {
+	B: formatMessage({ id: 'units.information.B', defaultMessage: 'B' }),
 	kB: formatMessage({ id: 'units.information.kB', defaultMessage: 'kB' }),
 	MB: formatMessage({ id: 'units.information.MB', defaultMessage: 'MB' }),
 	GB: formatMessage({ id: 'units.information.GB', defaultMessage: 'GB' }),
