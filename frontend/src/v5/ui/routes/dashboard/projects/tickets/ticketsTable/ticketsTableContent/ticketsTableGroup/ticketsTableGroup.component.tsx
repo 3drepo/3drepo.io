@@ -34,7 +34,7 @@ import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { ResizableColumnsItem } from '@controls/resizableColumnsContext/resizableColumnsItem/resizableColumnsItem.component';
 
-const SortingTableHeader = ({ name = null, children, hidden = false, ...props }) => {
+const SortingTableHeader = ({ name, children, hidden = false, disableSorting = false, ...props }) => {
 	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
 	const isSelected = name === sortingColumn;
 
@@ -42,7 +42,7 @@ const SortingTableHeader = ({ name = null, children, hidden = false, ...props })
 
 	return (
 		<ResizableColumnsItem name={name}>
-			<Header {...props} onClick={() => onColumnClick(name)} $selectable={!!name}>
+			<Header {...props} onClick={() => onColumnClick(name)} $selectable={!disableSorting}>
 				{name && isSelected && (
 					<IconContainer $flip={isDescendingOrder}>
 						<ArrowIcon />
@@ -79,7 +79,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 					<>
 						{!!tickets.length && (
 							<Headers>
-								<SortingTableHeader name="id">
+								<SortingTableHeader name="id" disableSorting>
 									<FormattedMessage id="ticketTable.column.header.id" defaultMessage="#id" />
 								</SortingTableHeader>
 								<SortingTableHeader name={BaseProperties.TITLE}>
