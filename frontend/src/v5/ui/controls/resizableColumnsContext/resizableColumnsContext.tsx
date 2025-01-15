@@ -22,8 +22,8 @@ export interface ResizableColumnsType {
 	getMinWidth: (name: string) => number;
 	setWidth: (name: string, width: number) => void;
 	widths: Record<string, number>;
-	setResizerOffset: (offset: number) => void,
-	resizerOffset: number,
+	setResizerName: (name: string) => void,
+	resizerName: string,
 	setIsResizing: (isResizing: boolean) => void,
 	isResizing: boolean,
 }
@@ -33,15 +33,14 @@ const defaultValue: ResizableColumnsType = {
 	getMinWidth: () => 0,
 	setWidth: () => {},
 	widths: {},
-	setResizerOffset: () => {},
-	resizerOffset: 0,
+	setResizerName: () => {},
+	resizerName: '',
 	setIsResizing: () => {},
 	isResizing: false,
 };
 export const ResizableColumnsContext = createContext(defaultValue);
 ResizableColumnsContext.displayName = 'ResizeableColumns';
 
-export const HIDDEN_RESIZER_OFFSET = -1;
 export interface Props {
 	children: any;
 	widths: Record<string, { min?: number, width: number }>;
@@ -49,7 +48,7 @@ export interface Props {
 export const ResizableColumnsContextComponent = ({ children, widths: initialWidths }: Props) => {
 	const [widths, setWidths] = useState({});
 	const [minWidths, setMinWidths] = useState({});
-	const [resizerOffset, setResizerOffset] = useState(HIDDEN_RESIZER_OFFSET);
+	const [resizerName, setResizerName] = useState('');
 	const [isResizing, setIsResizing] = useState(false);
 
 	const getWidth = (name) => widths?.[name] ?? 0;
@@ -77,8 +76,8 @@ export const ResizableColumnsContextComponent = ({ children, widths: initialWidt
 			getWidth,
 			getMinWidth,
 			widths,
-			setResizerOffset,
-			resizerOffset,
+			setResizerName,
+			resizerName,
 			setIsResizing,
 			isResizing,
 		}}>

@@ -16,7 +16,7 @@
  */
 
 import { memo, useContext, useEffect, useRef } from 'react';
-import { HIDDEN_RESIZER_OFFSET, ResizableColumnsContext } from '../resizableColumnsContext';
+import { ResizableColumnsContext } from '../resizableColumnsContext';
 import { Container, Item, Resizer, ResizerContainer } from './resizableColumnsItem.styles';
 import { useResizable } from '../useResizable';
 
@@ -35,24 +35,25 @@ type ResizableColumnsItemProps = {
 	className?: string;
 };
 export const ResizableColumnsItem = ({ name, children, className, hidden = false }: ResizableColumnsItemProps) => {
-	const { setWidth, getWidth, setIsResizing, setResizerOffset } = useContext(ResizableColumnsContext);
+	const { setWidth, getWidth, setIsResizing, isResizing: contextIsResizing, setResizerName, resizerName } = useContext(ResizableColumnsContext);
 	const ref = useRef<HTMLDivElement>();
 	const currentWidth = getWidth(name);
 
 	const onResize = (offset) => {
-		setResizerOffset(ref.current?.offsetLeft ?? 0);
+		setIsResizing(true);
+		setResizerName(name);
 		setWidth(name, currentWidth + offset);
 	};
 	const { isResizing, onMouseDown } = useResizable(onResize);
 
-	const handleMouseOver = () => setResizerOffset(ref.current.offsetLeft);
+	const handleMouseOver = () => setResizerName(name);
 	const handleMouseOut = () => {
-		if (!isResizing) setResizerOffset(HIDDEN_RESIZER_OFFSET);
+		if (!isResizing) setResizerName('');
 	};
 
 	useEffect(() => {
 		setIsResizing(isResizing);
-		if (!isResizing) setResizerOffset(HIDDEN_RESIZER_OFFSET);
+		if (!isResizing) setResizerName('');
 	}, [isResizing]);
 
 	if (hidden) return null;
@@ -60,7 +61,13 @@ export const ResizableColumnsItem = ({ name, children, className, hidden = false
 	return (
 		<Container $width={currentWidth}>
 			<MemoizedItem className={className}>{children}</MemoizedItem>
-			<ResizerContainer ref={ref} onMouseOver={handleMouseOver} onMouseOut={handleMouseOut}>
+			<ResizerContainer
+				ref={ref}
+				onMouseOver={handleMouseOver}
+				onMouseOut={handleMouseOut}
+				$isResizing={contextIsResizing}
+				$highlight={resizerName === name}
+			>
 				<Resizer onMouseDown={onMouseDown} />
 			</ResizerContainer>
 		</Container>
