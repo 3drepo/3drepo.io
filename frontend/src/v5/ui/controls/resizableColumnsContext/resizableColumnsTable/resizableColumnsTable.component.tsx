@@ -17,13 +17,13 @@
 
 import { useContext } from 'react';
 import { Container, Resizer } from './resizableColumnsTable.styles';
-import { ResizableColumnsContext } from '../resizableColumnsContext';
+import { HIDDEN_RESIZER_OFFSET, ResizableColumnsContext } from '../resizableColumnsContext';
 
 export const ResizableColumnsTable = ({ children }) => {
 	const { isResizing, resizerOffset } = useContext(ResizableColumnsContext);
 	return (
 		<Container>
-			{isResizing && <Resizer $offset={resizerOffset} />}
+			{(resizerOffset !== HIDDEN_RESIZER_OFFSET) && <Resizer $offset={resizerOffset} $isResizing={isResizing} />}
 			{children}
 		</Container>
 	);

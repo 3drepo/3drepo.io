@@ -16,7 +16,7 @@
  */
 
 import { memo, useContext, useEffect, useRef } from 'react';
-import { ResizableColumnsContext } from '../resizableColumnsContext';
+import { HIDDEN_RESIZER_OFFSET, ResizableColumnsContext } from '../resizableColumnsContext';
 import { Container, Item, Resizer, ResizerContainer } from './resizableColumnsItem.styles';
 import { useResizable } from '../useResizable';
 
@@ -35,30 +35,32 @@ type ResizableColumnsItemProps = {
 	className?: string;
 };
 export const ResizableColumnsItem = ({ name, children, className, hidden = false }: ResizableColumnsItemProps) => {
-	const { setWidth, getWidth, getMinWidth, setIsResizing, setResizerOffset } = useContext(ResizableColumnsContext);
+	const { setWidth, getWidth, setIsResizing, setResizerOffset } = useContext(ResizableColumnsContext);
 	const ref = useRef<HTMLDivElement>();
 	const currentWidth = getWidth(name);
 
 	const onResize = (offset) => {
-		const minWidth = getMinWidth(name);
-		const offsetExceedsMinWidth = currentWidth + offset < minWidth;
-		const newOffset = offsetExceedsMinWidth ? minWidth - currentWidth : offset;
-		setResizerOffset((ref.current?.offsetLeft ?? 0) + currentWidth + newOffset);
-		setWidth(name, currentWidth + newOffset);
+		setResizerOffset(ref.current?.offsetLeft ?? 0);
+		setWidth(name, currentWidth + offset);
 	};
-
 	const { isResizing, onMouseDown } = useResizable(onResize);
+
+	const handleMouseOver = () => setResizerOffset(ref.current.offsetLeft);
+	const handleMouseOut = () => {
+		if (!isResizing) setResizerOffset(HIDDEN_RESIZER_OFFSET);
+	};
 
 	useEffect(() => {
 		setIsResizing(isResizing);
+		if (!isResizing) setResizerOffset(HIDDEN_RESIZER_OFFSET);
 	}, [isResizing]);
 
 	if (hidden) return null;
 
 	return (
-		<Container $width={currentWidth} ref={ref}>
+		<Container $width={currentWidth}>
 			<MemoizedItem className={className}>{children}</MemoizedItem>
-			<ResizerContainer>
+			<ResizerContainer ref={ref} onMouseOver={handleMouseOver} onMouseOut={handleMouseOut}>
 				<Resizer onMouseDown={onMouseDown} />
 			</ResizerContainer>
 		</Container>

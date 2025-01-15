@@ -33,12 +33,16 @@ export const ResizerContainer = styled.div`
 	height: 100%;
 	z-index: 1;
 	position: relative;
+
+	&:hover {
+		background-color: red;
+	}
 `;
 
 export const Resizer = styled.div`
 	height: 100%;
 	position: absolute;
 	cursor: col-resize;
-	width: 4px;
-	left: -1.5px;
+	width: 6.5px;
+	left: -3px;
 `;

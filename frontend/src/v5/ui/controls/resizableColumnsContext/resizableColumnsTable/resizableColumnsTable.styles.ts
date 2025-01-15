@@ -17,12 +17,14 @@
 
 import styled from 'styled-components';
 
-export const Resizer = styled.div<{ $offset }>`
+export const Resizer = styled.div<{ $isResizing: boolean, $offset }>`
 	position: absolute;
 	width: 0;
 	height: 100vh;
-	border: solid 1px ${({ theme }) => theme.palette.primary.main};
-	left: ${({ $offset }) => $offset - 1}px;
+	left: ${({ $offset }) => $offset}px;
+	border-color: ${({ theme }) => theme.palette.primary.main};
+	border-width: 1px;
+	border-style: ${({ $isResizing }) => $isResizing ? 'solid' : 'dashed'};
 `; 
 
 export const Container = styled.div`
