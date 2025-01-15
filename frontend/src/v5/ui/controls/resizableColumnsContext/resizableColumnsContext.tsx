@@ -17,6 +17,8 @@
 
 import { createContext, useEffect, useState } from 'react';
 
+export type WidthsType = Record<string, { min?: number, initial: number }>;
+
 export interface ResizableColumnsType {
 	getWidth: (name: string) => number;
 	getMinWidth: (name: string) => number;
@@ -43,7 +45,7 @@ ResizableColumnsContext.displayName = 'ResizeableColumns';
 
 export interface Props {
 	children: any;
-	widths: Record<string, { min?: number, width: number }>;
+	widths: WidthsType;
 }
 export const ResizableColumnsContextComponent = ({ children, widths: initialWidths }: Props) => {
 	const [widths, setWidths] = useState({});
@@ -60,11 +62,11 @@ export const ResizableColumnsContextComponent = ({ children, widths: initialWidt
 	};
 
 	useEffect(() => {
-		Object.entries(initialWidths).forEach(([name, { min, width }]) => {
+		Object.entries(initialWidths).forEach(([name, { min, initial }]) => {
 			if (min) {
 				minWidths[name] = min;
 			}
-			widths[name] = width;
+			widths[name] = initial;
 		});
 		setWidths({ ...widths });
 		setMinWidths({ ...minWidths });

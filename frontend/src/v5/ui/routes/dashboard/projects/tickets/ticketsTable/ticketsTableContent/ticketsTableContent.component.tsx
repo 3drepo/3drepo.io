@@ -28,7 +28,7 @@ import {  groupTickets, NEW_TICKET_ID, NONE_OPTION, SetTicketValue, UNSET } from
 import { EmptyPageView } from '../../../../../../components/shared/emptyPageView/emptyPageView.styles';
 import { Container, Title } from './ticketsTableContent.styles';
 import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { ResizableColumnsContextComponent } from '@controls/resizableColumnsContext/resizableColumnsContext';
+import { ResizableColumnsContextComponent, WidthsType } from '@controls/resizableColumnsContext/resizableColumnsContext';
 
 type TicketsTableContentProps = {
 	setTicketValue: SetTicketValue;
@@ -39,18 +39,18 @@ export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy 
 	const { filteredItems } = useContext(SearchContext);
 	const { template } = useParams<DashboardTicketsParams>();
 	
-	const widths = {
-		id: { width: 80, min: 25 },
-		[BaseProperties.TITLE]: { width: 380, min: 25 },
-		modelName: { width: 145, min: 25 },
-		[`properties.${BaseProperties.CREATED_AT}`]: { width: 127, min: 25 },
-		[`properties.${IssueProperties.ASSIGNEES}`]: { width: 96, min: 25 }, 
-		[`properties.${BaseProperties.OWNER}`]: { width: 52, min: 25 },
-		[`properties.${IssueProperties.DUE_DATE}`]: { width: 147, min: 25 },
-		[`properties.${IssueProperties.PRIORITY}`]: { width: 90, min: 25 },
-		[`properties.${BaseProperties.STATUS}`]: { width: 150, min: 52 },
-		[`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`]: { width: 137, min: 25 },
-		[`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`]: { width: 134, min: 25 },
+	const widths: WidthsType = {
+		id: { initial: 80, min: 25 },
+		[BaseProperties.TITLE]: { initial: 380, min: 25 },
+		modelName: { initial: 145, min: 25 },
+		[`properties.${BaseProperties.CREATED_AT}`]: { initial: 127, min: 25 },
+		[`properties.${IssueProperties.ASSIGNEES}`]: { initial: 96, min: 25 }, 
+		[`properties.${BaseProperties.OWNER}`]: { initial: 52, min: 25 },
+		[`properties.${IssueProperties.DUE_DATE}`]: { initial: 147, min: 25 },
+		[`properties.${IssueProperties.PRIORITY}`]: { initial: 90, min: 25 },
+		[`properties.${BaseProperties.STATUS}`]: { initial: 150, min: 52 },
+		[`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`]: { initial: 137, min: 25 },
+		[`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`]: { initial: 134, min: 25 },
 	};
 	
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
