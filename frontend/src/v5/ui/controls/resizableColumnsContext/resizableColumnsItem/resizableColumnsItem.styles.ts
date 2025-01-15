@@ -21,7 +21,7 @@ export const Container = styled.div<{ $width }>`
 	display: inline-flex;
 	flex-direction: row;
 	min-width: ${({ $width }) => $width}px;
-	max-width: ${({ $width }) => $width}px;;
+	max-width: ${({ $width }) => $width}px;
 `;
 
 export const Item = styled.div`
