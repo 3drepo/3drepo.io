@@ -19,6 +19,8 @@ import { memo, useContext, useRef } from 'react';
 import { ResizableColumnsContext } from '../resizableColumnsContext';
 import { Container, Item, ResizerMouseLandingArea, ResizerLine } from './resizableColumnsItem.styles';
 
+// This is not to interfere with other components and to keep the cursor as
+// "col-resize" while resizing even when moving the mouse outside the table
 const overlayStyles = `
 	height: 100vh;
 	width: 100vw;
