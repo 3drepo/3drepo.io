@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ResizableColumnsNonResizableItem } from '@controls/resizableColumnsContext/resizableColumnsNonResizableItem/resizableColumnsNonResizableItem.styles';
 import { ResizableColumnsRow } from '@controls/resizableColumnsContext/resizableColumnsRow/resizableColumnsRow.styles';
 import { Typography } from '@controls/typography';
 import styled, { css } from 'styled-components';
@@ -61,7 +60,7 @@ export const Group = styled.div`
 	background-color: transparent;
 `;
 
-export const NewTicketRow = styled(ResizableColumnsNonResizableItem)<{ disabled?: boolean }>`
+export const NewTicketRow = styled.div<{ disabled?: boolean }>`
 	width: 100%;
 	height: 37px;
 	font-weight: 600;

@@ -42,7 +42,7 @@ export const ResizerLine = styled.div<{ $isResizing: boolean, $highlight: boolea
 	z-index: 1;
 	position: relative;
 	width: 0;
-	margin-left: .5px;
+	margin-left: -1px;
 	border: dashed 1px transparent;
 
 	${({ $highlight, theme }) => $highlight && css`
