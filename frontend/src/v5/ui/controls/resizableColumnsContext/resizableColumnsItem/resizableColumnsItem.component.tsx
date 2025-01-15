@@ -15,10 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { memo, useContext, useEffect, useRef } from 'react';
+import { memo, useContext, useRef } from 'react';
 import { ResizableColumnsContext } from '../resizableColumnsContext';
-import { Container, Item, Resizer, ResizerContainer } from './resizableColumnsItem.styles';
-import { useResizable } from '../useResizable';
+import { Container, Item, ResizerMouseLandingArea, ResizerLine } from './resizableColumnsItem.styles';
+
+const overlayStyles = `
+	height: 100vh;
+	width: 100vw;
+	cursor: col-resize;
+	pointer-events: all;
+	position: absolute;
+	z-index: 100;
+	top: 0;
+`;
 
 const MemoizedItem = memo(
 	({ children, className }: any) => <Item className={className}>{children}</Item>,
@@ -35,41 +44,63 @@ type ResizableColumnsItemProps = {
 	className?: string;
 };
 export const ResizableColumnsItem = ({ name, children, className, hidden = false }: ResizableColumnsItemProps) => {
-	const { setWidth, getWidth, setIsResizing, isResizing: contextIsResizing, setResizerName, resizerName } = useContext(ResizableColumnsContext);
+	const { setWidth, getWidth, setIsResizing, isResizing, setResizerName, resizerName } = useContext(ResizableColumnsContext);
 	const ref = useRef<HTMLDivElement>();
+	const initialPosition = useRef(null);
 	const currentWidth = getWidth(name);
 
-	const onResize = (offset) => {
-		setIsResizing(true);
-		setResizerName(name);
+	const onResize = (e) => {
+		const offset = !initialPosition.current ? 0 : e.clientX - initialPosition.current;
 		setWidth(name, currentWidth + offset);
 	};
-	const { isResizing, onMouseDown } = useResizable(onResize);
 
 	const handleMouseOver = () => setResizerName(name);
 	const handleMouseOut = () => {
 		if (!isResizing) setResizerName('');
 	};
 
-	useEffect(() => {
-		setIsResizing(isResizing);
-		if (!isResizing) setResizerName('');
-	}, [isResizing]);
+	const preventEventPropagation = (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+	};
+	
+	const onMouseDown = (e) => {
+		preventEventPropagation(e);
+		setIsResizing(true);
+		setResizerName(name);
+		initialPosition.current = e.clientX;
+
+		const overlay = document.createElement('div');
+		overlay.style.cssText = overlayStyles;
+		document.body.appendChild(overlay);
+
+		const onMouseUp = (ev) => {
+			preventEventPropagation(ev);
+			setIsResizing(false);
+			setResizerName('');
+			initialPosition.current = null;
+
+			document.body.removeChild(overlay);
+		};
+
+		overlay.addEventListener('mouseup', onMouseUp);
+		overlay.addEventListener('mousemove', onResize);
+	};
 
 	if (hidden) return null;
 
 	return (
 		<Container $width={currentWidth}>
 			<MemoizedItem className={className}>{children}</MemoizedItem>
-			<ResizerContainer
+			<ResizerLine
 				ref={ref}
 				onMouseOver={handleMouseOver}
 				onMouseOut={handleMouseOut}
-				$isResizing={contextIsResizing}
+				$isResizing={isResizing}
 				$highlight={resizerName === name}
 			>
-				<Resizer onMouseDown={onMouseDown} />
-			</ResizerContainer>
+				<ResizerMouseLandingArea onMouseDown={onMouseDown} />
+			</ResizerLine>
 		</Container>
 	);
 };

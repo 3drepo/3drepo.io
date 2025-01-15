@@ -21,7 +21,7 @@ export const Container = styled.div<{ $width }>`
 	display: inline-flex;
 	flex-direction: row;
 	min-width: ${({ $width }) => $width}px;
-	max-width: ${({ $width }) => $width}px;
+	max-width: ${({ $width }) => $width}px;;
 `;
 
 export const Item = styled.div`
@@ -29,22 +29,27 @@ export const Item = styled.div`
 	overflow: hidden;
 `;
 
-export const ResizerContainer = styled.div<{ $isResizing: boolean, $highlight: boolean }>`
+export const ResizerMouseLandingArea = styled.div`
+	height: 100%;
+	position: relative;
+	cursor: col-resize;
+	width: 7px;
+	left: -3px;
+`;
+
+export const ResizerLine = styled.div<{ $isResizing: boolean, $highlight: boolean }>`
 	height: 100%;
 	z-index: 1;
 	position: relative;
+	width: 0;
+	margin-left: .5px;
+	border: dashed 1px transparent;
 
-	${({ $highlight, $isResizing, theme }) => $highlight && css`
+	${({ $highlight, theme }) => $highlight && css`
 		border-color: ${theme.palette.primary.main};
-		border-width: 1px;
-		border-style: ${$isResizing ? 'solid' : 'dashed'};
 	`}
-`;
 
-export const Resizer = styled.div`
-	height: 100%;
-	position: absolute;
-	cursor: col-resize;
-	width: 6.5px;
-	left: -3px;
+	${({ $isResizing }) => $isResizing && css`
+		border-style: solid;
+	`}
 `;
