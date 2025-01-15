@@ -33,7 +33,16 @@ export const useResizable = (onResize: (offset: number) => void) => {
 		preventEventPropagation(e);
 
 		const overlay = document.createElement('div');
-		overlay.style.cssText = 'height:100vh;width:100vw;cursor:col-resize;pointer-events:all;background-color:#44000000;position:absolute;z-index:100;top:0';
+		overlay.style.cssText = `
+			height: 100vh;
+			width: 100vw;
+			cursor: col-resize;
+			pointer-events: all;
+			position: absolute;
+			z-index: 100;
+			top: 0;
+		`;
+
 		document.body.appendChild(overlay);
 
 		initialPosition.current = e.clientX;
