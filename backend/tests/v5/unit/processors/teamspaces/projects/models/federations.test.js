@@ -383,7 +383,7 @@ const testGetMD5Hash = () => {
 			return mockContainers.filter((container) => container._id === containers[0]);
 		});
 		ModelSettings.getContainerById.mockImplementation(
-			(ts, container, proj) => mockContainers.filter((cntr) => cntr._id === container));
+			(ts, container) => mockContainers.filter((cntr) => cntr._id === container));
 		ProjectSettings.modelsExistInProject.mockResolvedValue(true);
 
 		test('should get an empty array if user does not have rights to the container', async () => {
@@ -456,6 +456,18 @@ const testGetMD5Hash = () => {
 			expect(Revisions.getLatestRevision).toHaveBeenNthCalledWith(1, 'teamspace', '1', 'container', { fileSize: 1, rFile: 1, tag: 1, timestamp: 1 });
 			expect(Revisions.getLatestRevision).toHaveBeenNthCalledWith(2, 'teamspace', '2', 'container', { fileSize: 1, rFile: 1, tag: 1, timestamp: 1 });
 			expect(Revisions.getLatestRevision).toHaveBeenNthCalledWith(3, 'teamspace', '3', 'container', { fileSize: 1, rFile: 1, tag: 1, timestamp: 1 });
+		});
+
+		test('it should return an empty array if the federation has no containers added', async () => {
+			ModelSettings.getFederationById.mockResolvedValueOnce({ });
+
+			await expect(Federations.getMD5Hash('teamspace', 'project', 'federation', 'tsAdmin')).resolves.toEqual([]);
+
+			expect(ModelSettings.getFederationById).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.getFederationById).toHaveBeenCalledWith('teamspace', 'federation', { subModels: 1 });
+			expect(ModelSettings.getContainers).not.toHaveBeenCalled();
+			expect(Revisions.getRevisionByIdOrTag).not.toHaveBeenCalled();
+			expect(Revisions.getLatestRevision).not.toHaveBeenCalled();
 		});
 	});
 };
