@@ -40,10 +40,18 @@ const SortingTableHeader = ({ name, children, hidden = false, disableSorting = f
 
 	if (hidden) return (null);
 
+	if (disableSorting) return (
+		<ResizableColumnsItem name={name}>
+			<Header {...props}>
+				{children}
+			</Header>
+		</ResizableColumnsItem>
+	);
+
 	return (
 		<ResizableColumnsItem name={name}>
-			<Header {...props} onClick={() => onColumnClick(name)} $selectable={!disableSorting}>
-				{name && isSelected && (
+			<Header {...props} onClick={() => onColumnClick(name)} $selectable>
+				{isSelected && (
 					<IconContainer $flip={isDescendingOrder}>
 						<ArrowIcon />
 					</IconContainer>
