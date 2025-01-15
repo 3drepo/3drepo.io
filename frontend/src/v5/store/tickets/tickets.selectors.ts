@@ -130,8 +130,8 @@ export const selectAllValuesByModuleAndProperty = createSelector(
 	(state, modelId, module, property) => property,
 	(state, modelId, module, property, type) => type,
 	(templates, riskCategories, module, property, type) => {
-		if (type === 'template') return templates.map(({ name }) => name);
 		if (!type) return;
+		if (type === 'template') return templates.map(({ name }) => name);
 		const allValues = [];
 		templates.forEach((template) => {
 			const matchingModule = module ? template.modules.find((mod) => (mod.name || mod.type) === module)?.properties : template.properties;

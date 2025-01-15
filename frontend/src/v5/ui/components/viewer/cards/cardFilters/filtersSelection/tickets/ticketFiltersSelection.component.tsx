@@ -71,11 +71,13 @@ export const FilterSelection = () => {
 						<TicketFiltersSelectionList onFilterClick={setSelectedFilter} />
 					</DrillDownItem>
 					<DrillDownItem $visible={!showFiltersList}>
-						<FilterForm
-							{...(selectedFilter || {} as any)}
-							onSubmit={TicketsCardActionsDispatchers.upsertFilter}
-							onCancel={onCancel}
-						/>
+						{selectedFilter && (
+							<FilterForm
+								{...(selectedFilter || {} as any)}
+								onSubmit={TicketsCardActionsDispatchers.upsertFilter}
+								onCancel={onCancel}
+							/>
+						)}
 					</DrillDownItem>
 				</DrillDownList>
 			</SearchContextComponent>

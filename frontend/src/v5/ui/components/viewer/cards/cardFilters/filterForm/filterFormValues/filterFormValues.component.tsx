@@ -37,6 +37,7 @@ type FilterFolrmValuesType = {
 };
 
 export const FilterFormValues = ({ module, property, type }: FilterFolrmValuesType) => {
+	if (!property) return null;
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const { control, watch, formState: { errors } } = useFormContext();
 	const { fields, append, remove } = useFieldArray({
@@ -47,7 +48,12 @@ export const FilterFormValues = ({ module, property, type }: FilterFolrmValuesTy
 	const operator = watch('operator');
 	const maxFields = getOperatorMaxFieldsAllowed(operator);
 	const isRangeOp = isRangeOperator(operator);
-	const emptyValue = { value: isRangeOp ? ['', ''] : '' };
+	const getEmptyValue = () => {
+		if (isRangeOp) return ['', ''];
+		if (isSelectType(type)) return [];
+		return '';
+	};
+	const emptyValue = { value: getEmptyValue() };
 	const selectOptions = TicketsHooksSelectors.selectAllValuesByModuleAndProperty(containerOrFederation, module, property, type);
 
 	useEffect(() => {
@@ -106,9 +112,10 @@ export const FilterFormValues = ({ module, property, type }: FilterFolrmValuesTy
 			</>
 		);
 	}
-	if (isSelectType(type)) {
+	// @ts-ignore
+	if (isSelectType(type) && isArray(fields[0]?.value)) {
 		return (
-			<FormSelect name={`${name}.0.value`} formError={!!error?.[0]?.value}>
+			<FormSelect multiple name={`${name}.0.value`} formError={!!error?.[0]?.value}>
 				{selectOptions.map((val) => <MenuItem key={val} value={val}>{val}</MenuItem>)}
 			</FormSelect>
 		);
