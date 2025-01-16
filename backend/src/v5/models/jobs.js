@@ -43,7 +43,7 @@ Jobs.getJobById = async (teamspace, jobId, projection) => {
 };
 
 Jobs.addDefaultJobs = async (teamspace) => {
-	await db.insertMany(teamspace, COL_NAME, DEFAULT_JOBS.map((job) => ({ ...job, users: [] })));
+	await db.insertMany(teamspace, COL_NAME, DEFAULT_JOBS.map((job) => ({ ...job, _id: generateUUID(), users: [] })));
 };
 
 Jobs.assignUserToJob = async (teamspace, job, username) => {
@@ -67,6 +67,6 @@ Jobs.createJob = async (teamspace, job) => {
 
 Jobs.updateJob = (teamspace, job, updatedJob) => updateOne(teamspace, { _id: job }, { $set: updatedJob });
 
-Jobs.deleteJob = (teamspace, job) => db.deleteOne(teamspace, COL_NAME, { _id: job });
+Jobs.deleteJob = (teamspace, jobId) => db.deleteOne(teamspace, COL_NAME, { _id: jobId });
 
 module.exports = Jobs;
