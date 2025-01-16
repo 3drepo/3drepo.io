@@ -30,33 +30,24 @@ import { CardFilterActionMenu } from '../../filterForm/filterForm.styles';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 export const FilterSelection = () => {
-	const [open, setOpen] = useState(false);
 	const [selectedFilter, setSelectedFilter] = useState<CardFilter>(null);
 	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
 	const unusedFilters = TicketsCardHooksSelectors.selectAvailableTemplatesFilters();
 	const showFiltersList = !selectedFilter?.property;
 	const disabled = !unusedFilters.length || !tickets.length;
 
-	const onOpen = () => setOpen(true);
-	const onClose = () => {
-		setOpen(false);
-		setSelectedFilter(null);
-	};
-	const onCancel = () => setSelectedFilter(null);
+	const clearFilter = () => setSelectedFilter(null);
 
 	return (
 		<CardFilterActionMenu
 			TriggerButton={(
 				<Tooltip title={formatMessage({ id: 'viewer.card.tickets.addFilter', defaultMessage: 'Add Filter' })}>
-					<div>
-						<CardAction disabled={disabled} selected={open}>
-							<FunnelIcon />
-						</CardAction>
-					</div>
+					<CardAction disabled={disabled}>
+						<FunnelIcon />
+					</CardAction>
 				</Tooltip>
 			)}
-			onOpen={onOpen}
-			onClose={onClose}
+			onClose={clearFilter}
 			disabled={disabled}
 		>
 			<SearchContextComponent items={unusedFilters}>
@@ -74,7 +65,7 @@ export const FilterSelection = () => {
 						<FilterForm
 							{...(selectedFilter || {} as any)}
 							onSubmit={TicketsCardActionsDispatchers.upsertFilter}
-							onCancel={onCancel}
+							onCancel={clearFilter}
 						/>
 					</TicketsFiltersModalItem>
 				</TicketsFiltersModal>

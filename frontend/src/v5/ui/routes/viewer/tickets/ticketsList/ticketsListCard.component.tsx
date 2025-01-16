@@ -25,22 +25,15 @@ import { TicketsList } from './ticketsList.component';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { ViewerParams } from '../../../routes.constants';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { EllipsisMenu } from '@controls/ellipsisMenu';
 import { formatMessage } from '@/v5/services/intl';
-import PinIcon from '@assets/icons/filled/ticket_pin-filled.svg';
-import { EllipsisMenuItemSwitch } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenuItemSwitch.component';
 import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
+import { FilterEllipsisMenu } from '@components/viewer/cards/cardFilters/filterEllipsisMenu/filterEllipsisMenu.component';
 
 export const TicketsListCard = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
-	const isShowingPins = TicketsCardHooksSelectors.selectIsShowingPins();
-
-	const onClickShowPins = () => {
-		TicketsCardActionsDispatchers.setIsShowingPins(!isShowingPins);
-	};
 
 	return (
 		<CardContainer>
@@ -51,14 +44,7 @@ export const TicketsListCard = () => {
 					<>
 						{!readOnly && (<NewTicketMenu />)}
 						<FilterSelection />
-						<EllipsisMenu>
-							<EllipsisMenuItemSwitch
-								icon={<PinIcon />}
-								title={formatMessage({ id: 'viewer.cards.tickets.showPins', defaultMessage: 'Show Pins' })}
-								active={isShowingPins}
-								onClick={onClickShowPins}
-							/>
-						</EllipsisMenu>
+						<FilterEllipsisMenu />
 					</>
 				)}
 			/>
