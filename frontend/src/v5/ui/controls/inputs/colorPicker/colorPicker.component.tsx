@@ -22,6 +22,7 @@ import { Container } from './colorPicker.styles';
 import { ColorPickerPalette } from './colorPickerPalette/colorPickerPalette.component';
 import { ColorCircle } from './colorCircle/colorCircle.styles';
 import { hexGroupColorToRgb, RgbGroupColor, rgbGroupColorToHex } from '@/v5/helpers/colors.helper';
+import { defaults } from 'lodash';
 
 
 type ColorPickerPreviewProps = { color: string, selected: boolean, disabled?: boolean };
@@ -37,7 +38,7 @@ export const ColorPicker = ({ value: inputValue, defaultValue, onChange, disable
 	const [selected, setSelected] = useState(false);
 
 	const handleChange = (hexValue) => {
-		onChange?.(hexGroupColorToRgb(hexValue));
+		onChange?.(defaults(hexGroupColorToRgb(hexValue), { opacity: 1 }));
 	};
 
 	const value = rgbGroupColorToHex(inputValue || defaultValue);
