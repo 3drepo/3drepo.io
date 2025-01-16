@@ -77,23 +77,58 @@ const bodyContainsTicketsArray = async (req, res, next) => {
 	}
 };
 
+const extractUniqueProperties = (template) => {
+	const uniqueProps = new Map();
+
+	if (template.properties.length) {
+		template.properties.forEach((property) => {
+			if (property.unique) uniqueProps.set(property.name, new Set());
+		});
+	}
+	if (template.modules.length) {
+		template.modules.forEach((templateModule) => {
+			templateModule.properties.forEach((property) => {
+				if (property.unique) uniqueProps.set(`${templateModule}..${property}`, new Set());
+			});
+		});
+	}
+
+	return uniqueProps;
+};
+
+const checkDuplicateProps = (template, tickets) => {
+	const uniqueProps = extractUniqueProperties(template);
+
+	tickets.forEach((ticket) => {
+		const throwErrror = (tmplt, property) => {
+			throw createResponseCode(tmplt, `The value of ${property} must be unique in the list of tickets.`);
+		};
+		for (const [key, value] of uniqueProps) {
+			const keyArray = key.split('..');
+			if (keyArray.length > 1) {
+				if (value.has(ticket.modules[keyArray[0]][keyArray[1]])) {
+					throwErrror(templates.invalidArguments, keyArray[1]);
+				} else {
+					value.add(ticket.modules[keyArray[0]][keyArray[1]]);
+					break;
+				}
+			}
+			if (value.has(ticket.properties[keyArray[0]])) {
+				throwErrror(templates.invalidArguments, keyArray[0]);
+			} else {
+				value.add(ticket.properties[keyArray[0]]);
+			}
+		}
+	});
+};
+
 const validateTicketImportData = (isNew) => async (req, res, next) => {
 	const { teamspace, project, model } = req.params;
 	try {
 		const template = req.templateData;
 		const user = getUserFromSession(req.session);
 
-		template.properties.forEach((property) => {
-			if (property.unique) {
-				const uniqueProps = {};
-				req.body.tickets.forEach((ticket) => {
-					if (uniqueProps[ticket[property.name]]) {
-						throw createResponseCode(templates.invalidArguments, `Value '${property.name}' must be unique.`);
-					}
-					uniqueProps[ticket[property.name]] = true;
-				});
-			}
-		});
+		checkDuplicateProps(template, req.body.tickets);
 
 		if (isNew && template.deprecated) {
 			throw createResponseCode(templates.invalidArguments, 'Template has been deprecated');
