@@ -21,9 +21,21 @@ import { MAX_LONG_TEXT_LENGTH, MAX_TEXT_LENGTH } from '@/v5/store/tickets/ticket
 import { getOperatorMaxFieldsAllowed } from '@components/viewer/cards/cardFilters/filterForm/filterForm.helpers';
 import { isRangeOperator, isDateType, isTextType } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
 import { CardFilterOperator, CardFilterType } from '@components/viewer/cards/cardFilters/cardFilters.types';
+import { formatMessage } from '@/v5/services/intl';
 
 const getValueValidator = (type: CardFilterType) => {
-	if (isTextType(type)) return trimmedString.required(ERROR_REQUIRED_FIELD_MESSAGE).max(type === 'longText' ? MAX_LONG_TEXT_LENGTH : MAX_TEXT_LENGTH);
+	if (isTextType(type)) {
+		const maxLength = type === 'longText' ? MAX_LONG_TEXT_LENGTH : MAX_TEXT_LENGTH;
+		return trimmedString
+			.required(ERROR_REQUIRED_FIELD_MESSAGE)
+			.max(
+				maxLength,
+				formatMessage({
+					defaultMessage: 'This must be at max {maxLength} characters',
+					id: 'validators.text.maxLenght',
+				}, { maxLength }),
+			);
+	}
 	if (isDateType(type) || type === 'number') return requiredNumber();
 	return trimmedString;
 };
