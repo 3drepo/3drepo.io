@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2024 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,13 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormattedMessage } from 'react-intl';
-import { RangeContainer } from './rangeInput.styles';
+import { get } from 'lodash';
+import { useEffect } from 'react';
+import { useFormContext } from 'react-hook-form';
 
-export const RangeInput = ({ Input, name, error }) => (
-	<RangeContainer>
-		<Input name={`${name}.0`} formError={!!error} />
-		<FormattedMessage id="rangeInputs.to" defaultMessage="to" />
-		<Input name={`${name}.1`} formError={!!error} />
-	</RangeContainer>
-);
+export const useRangeEffect = ({ formError, name }) => {
+	const { trigger, getValues, formState: { dirtyFields } } = useFormContext();
+
+	const triggerFieldIfDirtyOrNotEmpty = (fieldName) => {
+		if (get(dirtyFields, fieldName) || getValues(fieldName)) {
+			trigger(fieldName);
+		}
+	};
+
+	useEffect(() => {
+		triggerFieldIfDirtyOrNotEmpty(`${name}.1`);
+	}, [formError?.[0]?.message]);
+
+	useEffect(() => {
+		triggerFieldIfDirtyOrNotEmpty(`${name}.0`);
+	}, [formError?.[1]?.message]);
+};

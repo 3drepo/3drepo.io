@@ -17,22 +17,23 @@
 
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { ChipContainer, DeleteButton, TextWrapper, OperatorIconContainer, DisplayValue, Property } from './filterChip.styles';
-import { FILTER_OPERATOR_ICON, FILTER_OPERATOR_LABEL, isRangeOperator } from '../cardFilters.helpers';
+import { FILTER_OPERATOR_ICON, getFilterOperatorLabels, isDateType, isRangeOperator } from '../cardFilters.helpers';
 import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { CardFilterType, BaseFilter, CardFilterOperator, CardFilterValue } from '../cardFilters.types';
 import { formatSimpleDate } from '@/v5/helpers/intl.helper';
+import { formatMessage } from '@/v5/services/intl';
+
+const valueToDisplayDate = (value) => formatSimpleDate(new Date(value));
+const formatDateRange = ([from, to]) => formatMessage(
+	{ defaultMessage: '{from} to {to}', id: 'cardFilter.dateRange.join' },
+	{ from: valueToDisplayDate(from), to: valueToDisplayDate(to) },
+);
 
 const getDisplayValue = (values: CardFilterValue[], operator: CardFilterOperator, type: CardFilterType) => {
 	const isRange = isRangeOperator(operator);
-	const vals = isRange
-		? (values as [number, number][]).map(([a, b]) => `[${a}, ${b}]`)
-		: values;
-	
-	const isDate = type === 'date';
-	return isDate
-		? vals.map((d) => formatSimpleDate(new Date(+d)))
-		: vals.join(', ') ?? '';
+	if (isDateType(type)) return values.map(isRange ? formatDateRange : valueToDisplayDate);
+	return (isRange ? values.map(([a, b]: any) => `[${a}, ${b}]`) : values).join(', ') ?? '';
 };
 
 type FilterChipProps = {
@@ -47,6 +48,7 @@ export const FilterChip = ({ property, onDelete, selected, type, filter }: Filte
 	const OperatorIcon = FILTER_OPERATOR_ICON[operator];
 	const hasMultipleValues = values.length > 1;
 	const displayValue = getDisplayValue(values, operator, type);
+	const labels = getFilterOperatorLabels(type);
 
 	const handleDelete = (e) => {
 		e.preventDefault();
@@ -56,7 +58,7 @@ export const FilterChip = ({ property, onDelete, selected, type, filter }: Filte
 
 	return (
 		<ChipContainer selected={selected}>
-			<Tooltip title={`${property} ${FILTER_OPERATOR_LABEL[operator]} ${displayValue}`}>
+			<Tooltip title={`${property} ${labels[operator]} ${displayValue}`}>
 				<TextWrapper>
 					<Property>{property}</Property>
 					<OperatorIconContainer>

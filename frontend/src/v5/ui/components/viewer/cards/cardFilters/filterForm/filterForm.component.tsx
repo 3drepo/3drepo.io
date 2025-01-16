@@ -23,7 +23,6 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { isEmpty } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { FilterFormValues } from './filterFormValues/filterFormValues.component';
-import { useEffect } from 'react';
 import { mapArrayToFormArray, mapFormArrayToArray } from '@/v5/helpers/form.helper';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FilterSchema } from '@/v5/validation/ticketSchemes/validators';
@@ -63,9 +62,10 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel 
 		onSubmit({ module, property, type, filter: { operator: body.operator, values: newValues } });
 	});
 
-	useEffect(() => {
-		if (type) reset();
-	}, [type]);
+	const handleCancel = () => {
+		reset();
+		onCancel();
+	};
 
 	return (
 		<FormProvider {...formData}>
@@ -76,7 +76,7 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel 
 				<FilterFormOperators type={type} />
 				<FilterFormValues module={module} property={property} type={type} />
 				<ButtonsContainer>
-					<Button onClick={onCancel} color="secondary">
+					<Button onClick={handleCancel} color="secondary">
 						{isUpdatingFilter
 							? <FormattedMessage id="viewer.card.tickets.filters.form.cancel" defaultMessage="Cancel" />
 							: <FormattedMessage id="viewer.card.tickets.filters.form.back" defaultMessage="Back" />
