@@ -15,7 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { isBooleanString, isNumberString } = require('../utils/helper/typeCheck');
 const { queryOperators } = require('../schemas/tickets/tickets.filters');
+const { toBoolean } = require('../utils/helper/strings');
 
 const Tickets = {};
 
@@ -29,10 +31,18 @@ Tickets.operatorToQuery = {
 		[propertyName]: { $not: { $exists: true } },
 	}),
 	[queryOperators.EQUALS]: (propertyName, value) => ({
-		[propertyName]: { $in: value },
+		[propertyName]: { $in: value.flatMap((v) => {
+			if (isNumberString(v)) return [v, Number(v), new Date(Number(v))];
+			if (isBooleanString(v)) return [v, toBoolean(v)];
+			return v;
+		}) },
 	}),
 	[queryOperators.NOT_EQUALS]: (propertyName, value) => ({
-		[propertyName]: { $not: { $in: value } },
+		[propertyName]: { $not: { $in: value.flatMap((v) => {
+			if (isNumberString(v)) return [v, Number(v), new Date(Number(v))];
+			if (isBooleanString(v)) return [v, toBoolean(v)];
+			return v;
+		}) } },
 	}),
 	[queryOperators.CONTAINS]: (propertyName, value) => ({
 		$or: value.map((val) => ({ [propertyName]: { $regex: val, $options: 'i' } })),

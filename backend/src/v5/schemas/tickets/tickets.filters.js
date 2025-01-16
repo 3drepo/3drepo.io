@@ -91,8 +91,10 @@ Filters.queryParamSchema = Yup.object().shape({
 			}
 
 			return Yup.array().of(types.strings.title).required()
-				.transform((v, value) => (value ? value.match(/([^",]+|"(.*?)")/g)
-					.map((val) => val.replace(/^"|"$/g, '').trim()) : value));
+				.transform((v, value) => (
+					value
+						? value.match(/([^",]+|"(.*?)")/g).map((val) => val.replace(/^"|"$/g, '').trim())
+						: value));
 		}),
 });
 
