@@ -21,7 +21,7 @@ import { isRangeOperator, isDateType, isTextType } from '../../cardFilters.helpe
 import { FormDateTime, FormNumberField, FormTextField } from '@controls/inputs/formInputs.component';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
 import { useEffect } from 'react';
-import { isArray, range } from 'lodash';
+import { isArray, range, isEmpty } from 'lodash';
 import { CardFilterType } from '../../cardFilters.types';
 import { NumberRangeInput } from './rangeInput/numberRangeInput.component';
 import { DateRangeInput } from './rangeInput/dateRangeInput.component';
@@ -34,7 +34,7 @@ const getInputField = (type: CardFilterType) => {
 
 const name = 'values';
 export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
-	const { control, watch, formState: { errors } } = useFormContext();
+	const { control, watch, formState: { errors, dirtyFields } } = useFormContext();
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name,
@@ -58,7 +58,9 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 	}, [maxFields]);
 
 	useEffect(() => {
-		remove();
+		if (!isEmpty(dirtyFields)) {
+			remove();
+		}
 	}, [isRangeOp]);
 
 	if (maxFields === 0) return null;
