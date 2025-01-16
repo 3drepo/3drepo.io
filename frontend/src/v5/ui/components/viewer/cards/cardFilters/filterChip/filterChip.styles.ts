@@ -24,18 +24,18 @@ export const TextWrapper = styled.div`
 `;
 
 export const Property = styled.span`
-	flex-shrink: 4;
+	flex-shrink: 0;
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
+	max-width: calc(100% - 37px);
 `;
 
 export const OperatorIconContainer = styled.div`
 	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
 	border-radius: 50%;
 	height: 18px;
-	width: 18px;
-	flex-shrink: 0;
+	aspect-ratio: 1;
 	display: inline-flex;
 	justify-content: center;
 	align-items: center;
@@ -44,14 +44,12 @@ export const OperatorIconContainer = styled.div`
 
 export const DisplayValue = styled.span<{ $multiple?: boolean }>`
 	margin-left: 3px;
-	flex-shrink: 1;
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	
 	${({ $multiple }) => $multiple && css`
 		text-decoration: underline;
-		flex-shrink: 0;
 	`}
 `;
 
