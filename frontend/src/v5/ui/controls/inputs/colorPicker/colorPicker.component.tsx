@@ -20,10 +20,9 @@ import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
 import { ActionMenu } from '@controls/actionMenu';
 import { Container } from './colorPicker.styles';
 import { ColorPickerPalette } from './colorPickerPalette/colorPickerPalette.component';
-import { UNSET_RGB_COLOR } from './colorPicker.helpers';
 import { ColorCircle } from './colorCircle/colorCircle.styles';
 import { hexGroupColorToRgb, RgbGroupColor, rgbGroupColorToHex } from '@/v5/helpers/colors.helper';
-import { defaults } from 'lodash';
+
 
 type ColorPickerPreviewProps = { color: string, selected: boolean, disabled?: boolean };
 const ColorPickerPreview = ({ color, selected, disabled }: ColorPickerPreviewProps) => (
@@ -33,8 +32,6 @@ const ColorPickerPreview = ({ color, selected, disabled }: ColorPickerPreviewPro
 	</Container>
 );
 
-const DEFAULT_VALUE = { color: UNSET_RGB_COLOR, opacity: 1 };
-
 type ColorPickerProps = { value?: RgbGroupColor, defaultValue?: RgbGroupColor, onChange?: (newVal: RgbGroupColor) => void, disabled?: boolean };
 export const ColorPicker = ({ value: inputValue, defaultValue, onChange, disabled }: ColorPickerProps) => {
 	const [selected, setSelected] = useState(false);
@@ -43,7 +40,7 @@ export const ColorPicker = ({ value: inputValue, defaultValue, onChange, disable
 		onChange?.(hexGroupColorToRgb(hexValue));
 	};
 
-	const value = rgbGroupColorToHex(defaults(inputValue || defaultValue, DEFAULT_VALUE));
+	const value = rgbGroupColorToHex(inputValue || defaultValue);
 
 	return (
 		<ActionMenu
