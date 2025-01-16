@@ -28,7 +28,7 @@ export const Property = styled.span`
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
-	max-width: calc(100% - 37px);
+	max-width: 129px;
 `;
 
 export const OperatorIconContainer = styled.div`
