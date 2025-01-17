@@ -219,7 +219,11 @@ FilesManager.storeFileStream = async (teamspace, collection, id, dataStream, met
 FilesManager.getMD5FileHash = async (teamspace, container, filename) => {
 	const refEntry = await getRefEntry(teamspace, `${container}.history.ref`, filename);
 
-	if (Object.keys(refEntry).includes('MD5Hash')) {
+const {size, md5Hash: hash }= await getRefEntry(teamspace, `${container}.history.ref`, filename);
+
+if(hash) {
+  return {size, hash};
+}
 		return {
 			hash: refEntry.MD5Hash,
 			size: refEntry.size,
