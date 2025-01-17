@@ -162,22 +162,25 @@ const testGetAllTickets = () => {
 		const teamspace = generateRandomString();
 		const project = generateRandomString();
 		const model = generateRandomString();
+
 		test('Should return whatever the query returns', async () => {
 			const projection = { [generateRandomString()]: generateRandomString() };
 			const sort = { [generateRandomString()]: generateRandomString() };
 			const expectedOutput = { [generateRandomString()]: generateRandomString() };
+			const limit = generateRandomNumber();
+			const skip = generateRandomNumber();
 
 			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
 
-			await expect(Ticket.getAllTickets(teamspace, project, model, { projection, sort }))
+			await expect(Ticket.getAllTickets(teamspace, project, model, { projection, sort, skip, limit }))
 				.resolves.toEqual(expectedOutput);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
-				{ teamspace, project, model }, projection, sort);
+				{ teamspace, project, model }, projection, sort, limit, skip);
 		});
 
-		test('Should impose default projection and sort if not provided', async () => {
+		test('Should impose default projection, skip and sort if not provided', async () => {
 			const expectedOutput = { [generateRandomString()]: generateRandomString() };
 
 			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
@@ -187,7 +190,63 @@ const testGetAllTickets = () => {
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
-				{ teamspace, project, model }, { teamspace: 0, project: 0, model: 0 }, { [`properties.${basePropertyLabels.Created_AT}`]: -1 });
+				{ teamspace, project, model }, { teamspace: 0, project: 0, model: 0 }, { [`properties.${basePropertyLabels.Created_AT}`]: -1 }, undefined, 0);
+		});
+
+		test('Should impose query for updated since a certain date if it is provided', async () => {
+			const expectedOutput = { [generateRandomString()]: generateRandomString() };
+			const limit = generateRandomNumber();
+			const skip = generateRandomNumber();
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
+
+			const date = new Date();
+			await expect(Ticket.getAllTickets(teamspace, project, model, { updatedSince: date, skip, limit }))
+				.resolves.toEqual(expectedOutput);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
+				{ teamspace, project, model, [`properties.${basePropertyLabels.UPDATED_AT}`]: { $gt: date } },
+				{ teamspace: 0, project: 0, model: 0 }, { [`properties.${basePropertyLabels.Created_AT}`]: -1 }, limit, skip);
+		});
+	});
+};
+
+const testGetTicketsByFilter = () => {
+	describe('Get tickets by filter', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+
+		test('Should return whatever the query returns', async () => {
+			const expectedOutput = { [generateRandomString()]: generateRandomString() };
+			const projection = { [generateRandomString()]: generateRandomString() };
+			const query = generateRandomObject();
+			const sort = { [generateRandomString()]: generateRandomString() };
+			const limit = generateRandomNumber();
+			const skip = generateRandomNumber();
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
+
+			await expect(Ticket.getTicketsByFilter(teamspace, project, model, { query, projection, sort, limit, skip }))
+				.resolves.toEqual(expectedOutput);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
+				{ teamspace, project, model, ...query }, projection, sort, limit, skip);
+		});
+
+		test('Should impose default projection skip and sort if not provided', async () => {
+			const expectedOutput = { [generateRandomString()]: generateRandomString() };
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
+
+			await expect(Ticket.getTicketsByFilter(teamspace, project, model))
+				.resolves.toEqual(expectedOutput);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
+				{ teamspace, project, model }, { teamspace: 0, project: 0, model: 0 }, { [`properties.${basePropertyLabels.CREATED_AT}`]: -1 }, undefined, 0);
 		});
 
 		test('Should impose query for updated since a certain date if it is provided', async () => {
@@ -196,13 +255,68 @@ const testGetAllTickets = () => {
 			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
 
 			const date = new Date();
-			await expect(Ticket.getAllTickets(teamspace, project, model, { updatedSince: date }))
+			await expect(Ticket.getTicketsByFilter(teamspace, project, model, { updatedSince: date }))
 				.resolves.toEqual(expectedOutput);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
 				{ teamspace, project, model, [`properties.${basePropertyLabels.UPDATED_AT}`]: { $gt: date } },
-				{ teamspace: 0, project: 0, model: 0 }, { [`properties.${basePropertyLabels.Created_AT}`]: -1 });
+				{ teamspace: 0, project: 0, model: 0 }, { [`properties.${basePropertyLabels.CREATED_AT}`]: -1 }, undefined, 0);
+		});
+
+		test('Should call db aggregate if ticketCodeQuery is provided', async () => {
+			const expectedOutput = { [generateRandomString()]: generateRandomString() };
+			const projection = { [generateRandomString()]: generateRandomString() };
+			const ticketCodeQuery = generateRandomObject();
+
+			const fn = jest.spyOn(db, 'aggregate').mockResolvedValueOnce(expectedOutput);
+
+			await expect(Ticket.getTicketsByFilter(teamspace, project, model,
+				{ projection, ticketCodeQuery })).resolves.toEqual(expectedOutput);
+
+			const pipelines = [
+				{ $match: { teamspace, project, model } },
+				{ $lookup: { from: 'templates', localField: 'type', foreignField: '_id', as: 'templateDetails' } },
+				{ $unwind: '$templateDetails' },
+				{ $addFields: { ticketCode: { $concat: ['$templateDetails.code', ':', { $toString: '$number' }] } } },
+				{ $match: ticketCodeQuery },
+				{ $project: projection },
+				{ $sort: { [`properties.${basePropertyLabels.CREATED_AT}`]: -1 } },
+				{ $skip: 0 },
+			];
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, pipelines);
+		});
+
+		test('Should call db aggregate if ticketCodeQuery is provided (limit, skip, sort provided)', async () => {
+			const expectedOutput = { [generateRandomString()]: generateRandomString() };
+			const projection = { [generateRandomString()]: generateRandomString() };
+			const query = generateRandomObject();
+			const ticketCodeQuery = generateRandomObject();
+			const limit = generateRandomNumber();
+			const skip = generateRandomNumber();
+			const sort = { [generateRandomString()]: generateRandomString() };
+
+			const fn = jest.spyOn(db, 'aggregate').mockResolvedValueOnce(expectedOutput);
+
+			await expect(Ticket.getTicketsByFilter(teamspace, project, model,
+				{ query, projection, ticketCodeQuery, limit, skip, sort })).resolves.toEqual(expectedOutput);
+
+			const pipelines = [
+				{ $match: { teamspace, project, model, ...query } },
+				{ $lookup: { from: 'templates', localField: 'type', foreignField: '_id', as: 'templateDetails' } },
+				{ $unwind: '$templateDetails' },
+				{ $addFields: { ticketCode: { $concat: ['$templateDetails.code', ':', { $toString: '$number' }] } } },
+				{ $match: ticketCodeQuery },
+				{ $project: projection },
+				{ $sort: sort },
+				{ $skip: skip },
+				{ $limit: limit },
+			];
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, pipelines);
 		});
 	});
 };
@@ -648,4 +762,5 @@ describe(determineTestGroup(__filename), () => {
 	testUpdateTickets();
 	testGetAllTickets();
 	testGetTicketsByQuery();
+	testGetTicketsByFilter();
 });

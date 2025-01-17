@@ -16,7 +16,7 @@
  */
 
 const { src } = require('../../../../../../../../helper/path');
-const { determineTestGroup, generateRandomString } = require('../../../../../../../../helper/services');
+const { determineTestGroup, generateRandomString, generateRandomNumber } = require('../../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -29,23 +29,33 @@ const UtilsMiddleware = require(`${src}/middleware/dataConverter/inputs/teamspac
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
 const testValidateListSortAndFilter = () => {
-	const validQuery = { filters: generateRandomString(), sortBy: generateRandomString(), sortDesc: 'true', updatedSince: Date.now().toString() };
+	const validQuery = {
+		filters: generateRandomString(),
+		sortBy: generateRandomString(),
+		sortDesc: 'true',
+		updatedSince: Date.now().toString(),
+		limit: Math.round(generateRandomNumber(1, 100)),
+		skip: Math.round(generateRandomNumber(1, 100)),
+	};
 	const validQueryCasted = {
 		filters: [validQuery.filters],
 		sortBy: validQuery.sortBy,
 		sortDesc: validQuery.sortDesc !== 'false',
 		updatedSince: new Date(Number(validQuery.updatedSince)),
+		limit: validQuery.limit,
+		skip: validQuery.skip,
 	};
 
 	describe.each([
 		['No query object', undefined, true, {}],
-		['query object has unrelated fields', { [generateRandomString()]: generateRandomString() }, true, {}],
+		['query object has unrelated fields', { [generateRandomString()]: generateRandomString() }, true, { skip: 0 }],
 		['query object has valid fields', { [generateRandomString()]: generateRandomString(), ...validQuery }, true, validQueryCasted],
 		['filters is empty', { filters: '' }, false],
 		['filters is full of commas', { filters: ',,,' }, false],
 		['sortBy is empty', { sortBy: '' }, false],
-		['sortBy is empty but sortDesc is provided', { sortDesc: true }, true, {}],
-		['sortBy is provided but sortDesc is empty', { sortBy: validQuery.sortBy }, true, { sortBy: validQueryCasted.sortBy, sortDesc: true }],
+		['skip is empty', { skip: undefined }, true, { skip: 0 }],
+		['sortBy is empty but sortDesc is provided', { sortDesc: true }, true, { skip: 0 }],
+		['sortBy is provided but sortDesc is empty', { sortBy: validQuery.sortBy }, true, { sortBy: validQueryCasted.sortBy, sortDesc: true, skip: 0 }],
 		['updatedSince is not a valid timestamp', { updatedSince: generateRandomString() }, false],
 	])('Validate list sort and filter options', (desc, query, success, expectedOutput) => {
 		test(`Should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {

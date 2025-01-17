@@ -16,30 +16,29 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
-const Yup = require('yup');
+const { queryParamSchema, querySchema } = require('../../../../../../../schemas/tickets/tickets.filters');
 const { respond } = require('../../../../../../../utils/responder');
-const { types } = require('../../../../../../../utils/helper/yup');
 
-const Utils = {};
+const TicketQueryFilters = {};
 
-Utils.validateListSortAndFilter = async (req, res, next) => {
-	req.listOptions = {};
-	if (req.query) {
-		const schema = Yup.object({
-			filters: Yup.array().of(Yup.string().min(1)).min(1).transform((v, val) => (val?.length ? val.split(',') : v))
-				.default(undefined),
-			sortBy: Yup.string().min(1),
-			sortDesc: Yup.boolean().when('sortBy', {
-				is: (val) => val === undefined,
-				then: (s) => s.strip(),
-				otherwise: (s) => s.default(true),
-			}),
-			updatedSince: types.date,
-			limit: Yup.number().integer().min(1),
-			skip: Yup.number().integer().min(0).default(0),
-		});
+TicketQueryFilters.validateQueryString = async (req, res, next) => {
+	if (req.query.query) {
 		try {
-			req.listOptions = await schema.validate(req.query, { stripUnknown: true });
+			const queryString = await querySchema.validate(decodeURIComponent(req.query.query));
+			const queryParams = queryString.slice(1, -1).split('&&');
+			const queryFilters = [];
+
+			await Promise.all(queryParams.map(async (param) => {
+				const [propertyName, operator, value] = param.split('::');
+				try {
+					const validatedQuery = await queryParamSchema.validate({ propertyName, operator, value });
+					queryFilters.push(validatedQuery);
+				} catch (err) {
+					throw createResponseCode(templates.invalidArguments, `Error at '${propertyName}' query filter: ${err.message}`);
+				}
+			}));
+
+			req.listOptions.queryFilters = queryFilters;
 		} catch (err) {
 			respond(req, res, createResponseCode(templates.invalidArguments, err.message));
 			return;
@@ -49,4 +48,4 @@ Utils.validateListSortAndFilter = async (req, res, next) => {
 	await next();
 };
 
-module.exports = Utils;
+module.exports = TicketQueryFilters;

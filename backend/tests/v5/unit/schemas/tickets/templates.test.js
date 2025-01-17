@@ -353,6 +353,24 @@ const testValidate = () => {
 				name: `${generateRandomString()}.`,
 				type: propTypes.TEXT,
 			}] }, false],
+		['property name starts with dollar sign', { name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: `$${generateRandomString()}`,
+				type: propTypes.TEXT,
+			}] }, false],
+		['property name contains colon', { name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: `${generateRandomString()}:`,
+				type: propTypes.TEXT,
+			}] }, false],
+		['property name contains double quotes', { name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: `${generateRandomString()}"`,
+				type: propTypes.TEXT,
+			}] }, false],
 		['property name contains square brackets', { name: generateRandomString(),
 			code: generateRandomString(3),
 			properties: [{

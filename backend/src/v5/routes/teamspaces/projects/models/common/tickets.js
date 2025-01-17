@@ -48,6 +48,7 @@ const { getAllTemplates: getAllTemplatesInProject } = require('../../../../../pr
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { templates } = require('../../../../../utils/responseCodes');
 const { validateListSortAndFilter } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/utils');
+const { validateQueryString } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/ticketQueryFilters');
 
 const createTicket = (isFed) => async (req, res) => {
 	const { teamspace, project, model } = req.params;
@@ -576,19 +577,19 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: updatedSince
-	 *         description: only return tickets that have been updated since a certain time (in epoch timestamp)
+	 *         description: Only return tickets that have been updated since a certain time (in epoch timestamp)
 	 *         in: query
 	 *         required: false
 	 *         schema:
 	 *           type: number
 	 *       - name: sortBy
-	 *         description: specify what property the tickets should be sorted by (default is created at)
+	 *         description: Specify what property the tickets should be sorted by (default is created at)
 	 *         in: query
 	 *         required: false
 	 *         schema:
 	 *           type: string
 	 *       - name: sortDesc
-	 *         description: specify whether the tickets should be sorted in descending order (default is true)
+	 *         description: Specify whether the tickets should be sorted in descending order (default is true)
 	 *         in: query
 	 *         required: false
 	 *         schema:
@@ -599,6 +600,24 @@ const establishRoutes = (isFed) => {
 	 *         required: false
 	 *         schema:
 	 *           type: string
+	 *       - name: query
+	 *         description: Query string that defies tickets to be included in the response. More information here https://github.com/3drepo/3drepo.io/wiki/Custom-Ticket-Query-Filters
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: string
+	 *       - name: skip
+	 *         description: Skip the first x tickets to be returned
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: number
+	 *       - name: limit
+	 *         description: Limit the amount of tickets to be returned
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: number
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -643,7 +662,7 @@ const establishRoutes = (isFed) => {
 	 *                         description: ticket modules and their properties
 	 *
 	 */
-	router.get('/', hasReadAccess, validateListSortAndFilter, getTicketsInModel(isFed), serialiseTicketList);
+	router.get('/', hasReadAccess, validateListSortAndFilter, validateQueryString, getTicketsInModel(isFed), serialiseTicketList);
 
 	/**
 	 * @openapi

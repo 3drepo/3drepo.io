@@ -21,6 +21,7 @@ const FS = require('fs');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src, image } = require('../../../../../../helper/path');
 const { serialiseTicketTemplate } = require('../../../../../../../../src/v5/middleware/dataConverter/outputs/common/tickets.templates');
+const { queryOperators, specialQueryFields } = require('../../../../../../../../src/v5/schemas/tickets/tickets.filters');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
@@ -616,7 +617,13 @@ const testGetTicketList = () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
 		const conNoTickets = ServiceHelper.generateRandomModel();
 		const fedNoTickets = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
-		const templatesToUse = times(3, () => ServiceHelper.generateTemplate());
+		const textProp = { name: ServiceHelper.generateRandomString(), type: propTypes.TEXT };
+
+		const templatesToUse = times(3, () => {
+			const template = ServiceHelper.generateTemplate();
+			template.properties.push(textProp);
+			return template;
+		});
 
 		con.tickets = times(10, (n) => ServiceHelper.generateTicket(templatesToUse[n % templatesToUse.length]));
 		fed.tickets = times(10, (n) => ServiceHelper.generateTicket(templatesToUse[n % templatesToUse.length]));
@@ -687,6 +694,10 @@ const testGetTicketList = () => {
 				['the model returning only tickets updated since now', { ...baseRouteParams, options: { updatedSince: Date.now() + 1000000 } }, true, []],
 				['the model returning tickets sorted by updated at in ascending order', { ...baseRouteParams, options: { sortBy: basePropertyLabels.UPDATED_AT, sortDesc: false }, checkTicketList: checkTicketList() }, true, model.tickets],
 				['the model returning tickets sorted by updated at in descending order', { ...baseRouteParams, options: { sortBy: basePropertyLabels.UPDATED_AT, sortDesc: true }, checkTicketList: checkTicketList(false) }, true, model.tickets],
+				['the model has tickets and query filter is imposed', { ...baseRouteParams, options: { query: `'${textProp.name}::${queryOperators.EQUALS}::${model.tickets[5].properties[textProp.name]}'` } }, true, [model.tickets[5]]],
+				['the model has tickets and template query filter is imposed', { ...baseRouteParams, options: { query: `'$${specialQueryFields.TEMPLATE}::${queryOperators.EQUALS}::${templatesToUse[1].code}'` } }, true, model.tickets.filter((t) => t.type === templatesToUse[1]._id)],
+				['the model has tickets and skip is provided', { ...baseRouteParams, options: { skip: 3, sortBy: textProp.name } }, true, model.tickets.sort((t1, t2) => String(t2.properties[textProp.name]).localeCompare(t1.properties[textProp.name])).slice(3)],
+				['the model has tickets and limit', { ...baseRouteParams, options: { limit: 2, sortBy: textProp.name } }, true, model.tickets.sort((t1, t2) => String(t2.properties[textProp.name]).localeCompare(t1.properties[textProp.name])).slice(0, 2)],
 			];
 		};
 
