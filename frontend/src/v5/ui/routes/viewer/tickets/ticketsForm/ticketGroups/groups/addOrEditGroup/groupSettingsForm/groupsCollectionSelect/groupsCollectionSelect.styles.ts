@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Select } from '@controls/inputs/select/select.component';
 import { MenuItem as MenuItemBase } from '@mui/material';
 import styled, { css } from 'styled-components';
 
@@ -25,4 +26,12 @@ export const MenuItemPrefix = styled(MenuItemBase)<{ $depth: number }>`
 			margin-left: ${$depth * 12}px;
 		}
 	`}
+`;
+
+export const CollectionSelect = styled(Select)`
+	.MuiInputBase-input {
+		text-overflow: ellipsis;  
+		direction: rtl;
+		text-align: left;
+	}
 `;
