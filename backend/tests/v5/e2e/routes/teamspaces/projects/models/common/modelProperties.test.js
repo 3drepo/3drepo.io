@@ -51,7 +51,9 @@ const createContainerObject = (teamspace, permissions, revisions) => {
 			const jsonFile = {
 				revId: rev._id,
 				fileName: `${rev._id}/modelProperties.json`,
-				fileContent: `{"testData": "${ServiceHelper.generateRandomString()}"}`,
+				fileContent: {
+					testData: ServiceHelper.generateRandomString(),
+				},
 			};
 			jsonFiles.push(jsonFile);
 		}
@@ -93,7 +95,9 @@ const createFederationObject = (teamspace, containers, permissions) => {
 	const fedJsonFile = {
 		revId,
 		fileName: `${revId}/modelProperties.json`,
-		fileContent: `{"testData": "${ServiceHelper.generateRandomString()}"}`,
+		fileContent: {
+			testData: ServiceHelper.generateRandomString(),
+		},
 	};
 
 	// Generate nodes for scene mock
@@ -308,7 +312,7 @@ const setupTestData = async ({ users, teamspace, project, containers, federation
 				teamspace,
 				containers[key]._id,
 				jsonFile.fileName,
-				jsonFile.fileContent,
+				JSON.stringify(jsonFile.fileContent),
 			));
 		}
 
@@ -327,7 +331,7 @@ const setupTestData = async ({ users, teamspace, project, containers, federation
 			teamspace,
 			federations[key].fedObj._id,
 			federations[key].fedJsonFile.fileName,
-			federations[key].fedJsonFile.fileContent,
+			JSON.stringify(federations[key].fedJsonFile.fileContent),
 		));
 		proms.push(ServiceHelper.db.createScene(
 			teamspace,
@@ -383,8 +387,6 @@ const testModelProperties = () => {
 			const getContResult = (cont, revId) => {
 				const { jsonFiles } = cont;
 
-				let result = '';
-
 				const findFirstValidRev = () => {
 					for (let i = 0; i < cont.revisions.length; i++) {
 						const rev = cont.revisions[i];
@@ -401,18 +403,20 @@ const testModelProperties = () => {
 					const jsonFile = jsonFiles.find((file) => file.revId === revisionId);
 
 					if (jsonFile) {
-						result += `{"properties":${jsonFile.fileContent}}`;
+						return {
+							properties: jsonFile.fileContent,
+						};
 					}
 				}
 
-				return result;
+				return undefined;
 			};
 
 			const getFedResult = (fed) => {
-				let result = '';
+				const result = {};
 
 				const { fedJsonFile } = fed;
-				result += `{"properties":${fedJsonFile.fileContent}`;
+				result.properties = fedJsonFile.fileContent;
 
 				const conts = fed.containers;
 				const subModelJsonFiles = [];
@@ -442,22 +446,20 @@ const testModelProperties = () => {
 					}
 				}
 
-				result += ',"subModels":[';
+				result.subModels = [];
 
 				if (subModelJsonFiles.length > 0) {
 					for (let i = 0; i < subModelJsonFiles.length; i++) {
-						if (i !== 0) {
-							result += ',';
-						}
-
 						const file = subModelJsonFiles[i];
-						const fileContent = file.fileContent.substring(1, file.fileContent.length - 1);
-						result += `{"account":"${teamspace}","model":"${file.contId}",${fileContent}}`;
+
+						result.subModels.push({
+							account: teamspace,
+							model: file.contId,
+							...file.fileContent,
+						});
 					}
 				}
-
-				result += ']}';
-
+				
 				return result;
 			};
 
@@ -533,9 +535,10 @@ const testModelProperties = () => {
 			];
 
 			// NoFile Container Tests
+			const noFileResult = { hiddenNodes: [] };
 			const contNoFileRevisions = [
-				['trying to access noFile revision via rev ID', getContRoute({ modelId: C4Id, revisionId: R6Id }), false, templates.fileNotFound],
-				['trying to access noFile revision via master/head', getContRoute({ modelId: C4Id, revisionId: masterRevId }), false, templates.fileNotFound],
+				['trying to access noFile revision via rev ID', getContRoute({ modelId: C4Id, revisionId: R6Id }), true, noFileResult],
+				['trying to access noFile revision via master/head', getContRoute({ modelId: C4Id, revisionId: masterRevId }), true, noFileResult],
 			];
 
 			// Federation tests
@@ -573,7 +576,7 @@ const testModelProperties = () => {
 
 				const res = await agent.get(route).expect(expectedStatus);
 				if (success) {
-					expect(res.text).toEqual(expectedOutput);
+					expect(res.body).toEqual(expectedOutput);
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}

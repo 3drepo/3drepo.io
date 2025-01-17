@@ -17,7 +17,7 @@
 
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { hasReadAccessToContainer, hasReadAccessToFederation } = require('../../../../../middleware/permissions/permissions');
-const { respond, writeCustomStreamRespond } = require('../../../../../utils/responder');
+const { respond, writeStreamRespond } = require('../../../../../utils/responder');
 const DbConstants = require('../../../../../handler/db.constants');
 const JSONAssets = require('../../../../../models/jsonAssets');
 const { Router } = require('express');
@@ -31,19 +31,15 @@ const getModelProperties = (modelType) => async (req, res) => {
 	try {
 		switch (modelType) {
 		case modelTypes.CONTAINER: {
-			const { readStream } = await JSONAssets.getModelProperties(
+			const { readStream, filename, size, mimeType } = await JSONAssets.getModelProperties(
 				teamspace, project, model, branch, revision, username, false);
-			const headers = { 'Content-Type': 'application/json' };
-			const mimeType = 'application/json';
-			writeCustomStreamRespond(req, res, templates.ok, readStream, undefined, { mimeType }, headers);
+			writeStreamRespond(req, res, templates.ok, readStream, filename, size, { mimeType });
 			break;
 		}
 		case modelTypes.FEDERATION: {
-			const { readStream } = await JSONAssets.getModelProperties(
+			const { readStream, filename, size, mimeType } = await JSONAssets.getModelProperties(
 				teamspace, project, model, branch, revision, username, true);
-			const headers = { 'Content-Type': 'application/json' };
-			const mimeType = 'application/json';
-			writeCustomStreamRespond(req, res, templates.ok, readStream, undefined, { mimeType }, headers);
+			writeStreamRespond(req, res, templates.ok, readStream, filename, size, { mimeType });
 			break;
 		}
 		default: {
