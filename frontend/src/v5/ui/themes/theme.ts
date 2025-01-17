@@ -249,10 +249,6 @@ export const palette = {
 		lightest: COLOR.FAVOURITE_LIGHTEST,
 		contrastText: COLOR.FAVOURITE_LIGHTEST,
 	},
-	gradient: {
-		main: GRADIENT.MAIN,
-		secondary: GRADIENT.SECONDARY,
-	},
 	shadows: {
 		level_1: SHADOW.LEVEL_1,
 		level_2: SHADOW.LEVEL_2,
