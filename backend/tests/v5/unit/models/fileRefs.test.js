@@ -200,6 +200,24 @@ const testRemoveRefsByQuery = () => {
 	});
 };
 
+const testUpdateRef = () => {
+	describe('Update the ref by query', () => {
+		test('should update file ref\'s', async () => {
+			const teamspace = generateRandomString();
+			const collection = `${generateRandomString()}.history.ref`;
+			const query = { _id: generateRandomString() };
+			const action = { $set: { [generateRandomString()]: generateRandomString() } };
+
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
+
+			await expect(FileRefs.updateRef(teamspace, collection, query, action)).resolves.toEqual(undefined);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, collection, query, action);
+		});
+	});
+};
+
 describe('models/fileRefs', () => {
 	testGetTotalSize();
 	testGetAllRemovableEntriesByType();
@@ -209,4 +227,5 @@ describe('models/fileRefs', () => {
 	testRemoveRef();
 	testGetRefsByQuery();
 	testRemoveRefsByQuery();
+	testUpdateRef();
 });

@@ -82,4 +82,10 @@ FileRefs.removeRefsByQuery = (teamspace, collection, query) => db.deleteMany(
 	teamspace, collectionName(collection), query,
 );
 
+FileRefs.updateRef = async (teamspace, collection, query, action) => {
+	await db.updateOne(
+		teamspace, collectionName(collection), query, action,
+	);
+};
+
 module.exports = FileRefs;

@@ -65,7 +65,6 @@ const modelPermCheck = (permCheck, modelType) => async (teamspace, project, mode
 	}
 
 	const model = await getModelFn(teamspace, modelID, { permissions: 1 });
-
 	const modelExists = await modelsExistInProject(teamspace, project, [modelID]);
 	if (!modelExists) {
 		return false;
