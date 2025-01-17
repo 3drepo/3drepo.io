@@ -86,6 +86,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	const isAdmin = !TicketsCardHooksSelectors.selectReadOnly();
 	const { teamspace, revision } = useParams<ViewerParams>();
 	const { containerOrFederation } = useContext(TicketContext);
+	const [basePrefixes, setBasePrefixes] = useState([]);
 
 	const formRef = useRef(null);
 
@@ -144,7 +145,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	};
 
 	const handleNewCollectionChange = (collection: string[]) => {
-		setNewPrefix([collection]);
+		setNewPrefix(collection);
 		setValue('prefix', collection, { shouldDirty: true });
 	};
 
@@ -183,7 +184,13 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		setIsSmart(!!value?.group?.rules?.length);
 		setInputObjects(convertToV4GroupNodes(value?.group?.objects));
 		setIsPastingRules(false);
+		setNewPrefix(newValue.prefix);
 	}, [value, isColored]);
+
+	useEffect(() => {
+		const theval = prefixes.filter((elem) => !isEqual(elem, value?.prefix));
+		setBasePrefixes(theval);
+	}, [prefixes, value?.prefix]);
 
 	useEffect(() => {
 		if (!formRef.current) return;
@@ -264,7 +271,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 							})}
 							formError={errors?.prefix}
 							disabled={!isAdmin}
-							prefixes={prefixes.concat(newPrefix).sort()}
+							prefixes={basePrefixes.concat([newPrefix]).sort()}
 						/>
 					</FormRow>
 					{
@@ -275,7 +282,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 										{newPrefix?.length ? (
 											<FormattedMessage
 												id="ticketsGroupSettings.link.editCollection"
-												defaultMessage="Edit new collection"
+												defaultMessage="Edit collection"
 											/>
 										) : (
 											<FormattedMessage
