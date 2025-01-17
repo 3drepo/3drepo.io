@@ -22,9 +22,9 @@ const { logger } = require(`${v5Path}/utils/logger`);
 
 const { getAddOns, removeAddOns, updateAddOns } = require(`${v5Path}/models/teamspaceSettings`);
 const { deleteIfUndefined } = require(`${v5Path}/utils/helper/objects`);
-const { ADD_ONS_MODULES } = require(`${v5Path}/models/teamspaces.constants`);
+const { ADD_ONS, ADD_ONS_MODULES } = require(`${v5Path}/models/teamspaces.constants`);
 
-const run = async (teamspace, vrEnabled, srcEnabled, hereEnabled, powerBIEnabled, modulesString, removeAll) => {
+const run = async (teamspace, removeAll, addOnsConfigured) => {
 	const addOns = await getAddOns(teamspace);
 	logger.logInfo(`${teamspace} currently has the following addOns(s): ${JSON.stringify(addOns)}`);
 
@@ -33,10 +33,10 @@ const run = async (teamspace, vrEnabled, srcEnabled, hereEnabled, powerBIEnabled
 	} else {
 		let modules;
 
-		if (modulesString === 'null') {
+		if (addOnsConfigured[ADD_ONS.MODULES] === 'null') {
 			modules = null;
-		} else if (modulesString) {
-			modules = modulesString?.split(',');
+		} else if (addOnsConfigured[ADD_ONS.MODULES]) {
+			modules = addOnsConfigured[ADD_ONS.MODULES].split(',');
 
 			if (!modules.every((m) => Object.values(ADD_ONS_MODULES).includes(m))) {
 				throw new Error(`Modules must be one of the following: ${Object.values(ADD_ONS_MODULES)}`);
@@ -44,10 +44,7 @@ const run = async (teamspace, vrEnabled, srcEnabled, hereEnabled, powerBIEnabled
 		}
 
 		const toUpdate = deleteIfUndefined({
-			vrEnabled,
-			hereEnabled,
-			srcEnabled,
-			powerBIEnabled,
+			...addOnsConfigured,
 			modules,
 		});
 
@@ -64,26 +61,31 @@ const run = async (teamspace, vrEnabled, srcEnabled, hereEnabled, powerBIEnabled
 
 const genYargs = /* istanbul ignore next */(yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
-	const argsSpec = (subYargs) => subYargs.option('vrEnabled',
+	const argsSpec = (subYargs) => subYargs.option(ADD_ONS.VR,
 		{
 			describe: 'Enable VR support',
 			type: 'boolean',
-		}).option('srcEnabled',
+		}).option(ADD_ONS.SRC,
 		{
 			describe: 'Enable SRC (unreal) support',
 			type: 'boolean',
-		}).option('hereEnabled',
+		}).option(ADD_ONS.HERE,
 		{
 			describe: 'Enable HERE maps support',
 			type: 'boolean',
-		}).option('powerBIEnabled',
+		}).option(ADD_ONS.POWERBI,
 		{
 			describe: 'Enable PowerBI support',
 			type: 'boolean',
 		})
-		.option('modules',
+		.option(ADD_ONS.DAILY_DIGEST,
 			{
-				describe: 'Comma seperated string of enabled modules',
+				describe: 'Enable daily email digest',
+				type: 'boolean',
+			})
+		.option(ADD_ONS.MODULES,
+			{
+				describe: 'Comma seperated string of enabled modules (null to remove all):',
 				type: 'string',
 			})
 		.option('teamspace',
@@ -101,8 +103,7 @@ const genYargs = /* istanbul ignore next */(yargs) => {
 	return yargs.command(commandName,
 		'Update addOns configurations on a teamspace',
 		argsSpec,
-		(argv) => run(argv.teamspace,
-			argv.vrEnabled, argv.srcEnabled, argv.hereEnabled, argv.powerBIEnabled, argv.modules, argv.removeAll));
+		({ teamspace, removeAll, ...addOns }) => run(teamspace, removeAll, addOns));
 };
 
 module.exports = {

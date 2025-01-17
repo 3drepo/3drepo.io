@@ -117,6 +117,22 @@ const setupData = async () => {
 	]);
 };
 
+const testEndpointRoutes = () => {
+	describe('Endpoint routes', () => {
+		test('should fail with an endpoint that does not exist', async () => {
+			await agent.post(`/v5/${ServiceHelper.generateRandomString()}/`)
+				.send({ user: testUser.user, password: testUser.password })
+				.expect(templates.pageNotFound.status);
+		});
+
+		test('should fail with an endpoint that does not exist (v4)', async () => {
+			await agent.post(`/${ServiceHelper.generateRandomString()}/`)
+				.send({ user: testUser.user, password: testUser.password })
+				.expect(templates.pageNotFound.status);
+		});
+	});
+};
+
 const testLogin = () => {
 	describe('Login user', () => {
 		test('should log in a user using username', async () => {
@@ -252,6 +268,16 @@ const testGetProfile = () => {
 	describe('Get profile of the logged in user', () => {
 		test('should fail if the user is not logged in', async () => {
 			const res = await agent.get('/v5/user/').expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if a different userAgent is provided', async () => {
+			const testSession = SessionTracker(agent);
+			await testSession.login(testUser.user, testUser.password);
+
+			const res = await testSession.get('/v5/user/')
+				.set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Edge/91.0.864.67 Safari/537.36')
+				.expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
@@ -524,7 +550,7 @@ const testDeleteApiKey = () => {
 		});
 
 		test('should fail if the user has a session via an API key', async () => {
-			const res = await agent.delete(`/v5/user?key=${testUser.apiKey}`)
+			const res = await agent.delete(`/v5/user/key?key=${testUser.apiKey}`)
 				.expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
@@ -777,8 +803,8 @@ const testVerify = () => {
 			// the invitation should be deleted after verification
 			const testSession = SessionTracker(agent);
 			await testSession.login(nonVerifiedUser.user, nonVerifiedUser.password);
-			const invitationsRes = await testSession.get('/invitations');
-			expect(invitationsRes.body).toEqual({});
+			const invitationsRes = await testSession.get(`/${teamspace.name}/invitations`);
+			expect(invitationsRes.body).toEqual([]);
 
 			const teamspacesRes = await testSession.get('/v5/teamspaces');
 			const expectedList = [
@@ -799,6 +825,7 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 
 	afterAll(() => ServiceHelper.closeApp(server));
 
+	testEndpointRoutes();
 	testLogin();
 	testLogout();
 	testGetUsername();

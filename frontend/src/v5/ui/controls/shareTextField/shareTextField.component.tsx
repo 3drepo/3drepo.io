@@ -24,10 +24,10 @@ import {
 	LinkBar,
 	CopyToClipboardIconContainer,
 	CopyToClipboardIcon,
-	Tick,
 	CopyToClipboardTooltip,
 	CopiedToClipboardTooltip,
 } from './shareTextField.styles';
+import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 
 type IShareTextField = {
 	/**
@@ -100,7 +100,7 @@ export const ShareTextField = ({ label, value, className, hideValue, disabled = 
 												open
 											>
 												<CopyToClipboardIconContainer>
-													<Tick />
+													<TickIcon />
 												</CopyToClipboardIconContainer>
 											</CopiedToClipboardTooltip>
 										)}

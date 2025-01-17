@@ -48,6 +48,10 @@ const PermissionTemplates = require("./permissionTemplates");
 const { get } = require("lodash");
 const { fileExists } = require("./fileRef");
 const {v5Path} = require("../../interop");
+const { types: { strings } } = require(`${v5Path}/utils/helper/yup.js`);
+const { sanitiseRegex } = require(`${v5Path}/utils/helper/strings.js`);
+const { events } = require(`${v5Path}/services/eventsManager/eventsManager.constants`);
+const { publish } = require(`${v5Path}/services/eventsManager/eventsManager.js`);
 const { getAddOns } = require(`${v5Path}/models/teamspaceSettings`);
 const { getSpaceUsed } = require(`${v5Path}/utils/quota.js`);
 const UserProcessorV5 = require(`${v5Path}/processors/users`);
@@ -144,7 +148,7 @@ User.authenticate =  async function (username, password) {
 
 	let user = null;
 
-	if (C.EMAIL_REGEXP.test(username)) { // if the submited username is the email
+	if(strings.email.isValidSync(username)) { // if the submited username is the email
 		user = await User.findByEmail(username);
 	} else {
 		user = await User.findByUserName(username);
@@ -333,7 +337,7 @@ User.checkUserNameAvailableAndValid = async function (username) {
 };
 
 User.checkEmailAvailableAndValid = async function (email, exceptUser) {
-	if (!C.EMAIL_REGEXP.test(email)) {
+	if (!strings.email.isValidSync(email)) {
 		throw(responseCodes.EMAIL_INVALID);
 	}
 
@@ -809,7 +813,7 @@ User.listAccounts = async function(user) {
 	return _createAccounts(user.roles, user.user);
 };
 
-User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove) {
+User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove, executor) {
 	if (teamspace.user === userToRemove) {
 		// The user should not be able to remove itself from the teamspace
 		return Promise.reject(responseCodes.SUBSCRIPTION_CANNOT_REMOVE_SELF);
@@ -837,7 +841,7 @@ User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove) 
 	} else {
 
 		await Promise.all([
-			teamspacePerm ? AccountPermissions.remove(teamspace, userToRemove) : Promise.resolve(),
+			teamspacePerm ? AccountPermissions.remove(teamspace, userToRemove, executor) : Promise.resolve(),
 			...models.map(model =>	changePermissions(teamspace.user, model._id, model.permissions.filter(p => p.user !== userToRemove))),
 			removeUserFromProjects(teamspace.user, userToRemove),
 			removeUserFromAnyJob(teamspace.user, userToRemove)
@@ -845,14 +849,16 @@ User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove) 
 		]);
 	}
 
+	publish(events.USER_REMOVED, { teamspace: teamspace.user, executor, user: userToRemove});
+
 	return Role.revokeTeamSpaceRoleFromUser(userToRemove, teamspace.user);
 };
 
-User.addTeamMember = async function(teamspace, userToAdd, job, permissions) {
+User.addTeamMember = async function(teamspace, userToAdd, job, permissions, executor) {
 	await hasReachedLicenceLimit(teamspace);
 
 	let userEntry = null;
-	if (C.EMAIL_REGEXP.test(userToAdd)) { // if the submited username is the email
+	if (strings.email.isValidSync(userToAdd)) { // if the submited username is the email
 		userEntry = await User.findByEmail(userToAdd);
 	} else {
 		userEntry = await User.findByUserName(userToAdd);
@@ -871,6 +877,7 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions) {
 	}
 
 	await Role.grantTeamSpaceRoleToUser(userEntry.user, teamspace);
+	publish(events.USER_ADDED, { teamspace, executor, user: userEntry.user});
 
 	const promises = [];
 	promises.push(addUserToJob(teamspace, job, userEntry.user));
@@ -878,7 +885,7 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions) {
 	const teamspaceSettings = await TeamspaceSettings.getTeamspaceSettings(teamspace);
 
 	if (permissions && permissions.length) {
-		promises.push(AccountPermissions.updateOrCreate(teamspaceSettings, userEntry.user, permissions));
+		promises.push(AccountPermissions.updateOrCreate(teamspaceSettings, userEntry.user, permissions, executor));
 	}
 
 	await Promise.all(promises);
@@ -994,7 +1001,8 @@ User.findByUserName = async function (username, projection) {
 };
 
 User.findByEmail = async function (email) {
-	return await findOne({ "customData.email":  new RegExp("^" + utils.sanitizeString(email) + "$", "i") });
+	const sanitisedEmail = sanitiseRegex(email);
+	return await findOne({ "customData.email":  new RegExp(`^${sanitisedEmail}$`, "i") });
 };
 
 User.findByUsernameOrEmail = async function (userNameOrEmail) {

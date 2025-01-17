@@ -307,6 +307,12 @@ const testRemoveSubscription = () => {
 	});
 };
 
+const addOnsProjection = {};
+
+Object.values(ADD_ONS).forEach((val) => {
+	addOnsProjection[`addOns.${val}`] = 1;
+});
+
 const testRemoveAddOns = () => {
 	describe('Remove teamspace addOns', () => {
 		test('should get rid of all addOns', async () => {
@@ -314,13 +320,7 @@ const testRemoveAddOns = () => {
 
 			const teamspace = generateRandomString();
 
-			const unsetObj = {
-				[`addOns.${ADD_ONS.VR}`]: 1,
-				[`addOns.${ADD_ONS.SRC}`]: 1,
-				[`addOns.${ADD_ONS.HERE}`]: 1,
-				[`addOns.${ADD_ONS.POWERBI}`]: 1,
-				[`addOns.${ADD_ONS.MODULES}`]: 1,
-			};
+			const unsetObj = addOnsProjection;
 
 			await expect(Teamspace.removeAddOns(teamspace)).resolves.toBeUndefined();
 			expect(fn).toHaveBeenCalledTimes(1);
@@ -339,6 +339,7 @@ const testGetAddOns = () => {
 					[ADD_ONS.SRC]: true,
 					[ADD_ONS.HERE]: true,
 					[ADD_ONS.POWERBI]: true,
+					[ADD_ONS.DAILY_DIGEST]: true,
 					[ADD_ONS.MODULES]: [ADD_ONS_MODULES.ISSUES],
 				} });
 
@@ -349,17 +350,13 @@ const testGetAddOns = () => {
 				[ADD_ONS.SRC]: true,
 				[ADD_ONS.HERE]: true,
 				[ADD_ONS.POWERBI]: true,
+				[ADD_ONS.DAILY_DIGEST]: true,
 				[ADD_ONS.MODULES]: [ADD_ONS_MODULES.ISSUES],
 			});
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace }, {
-				[`addOns.${ADD_ONS.VR}`]: 1,
-				[`addOns.${ADD_ONS.SRC}`]: 1,
-				[`addOns.${ADD_ONS.HERE}`]: 1,
-				[`addOns.${ADD_ONS.POWERBI}`]: 1,
-				[`addOns.${ADD_ONS.MODULES}`]: 1,
-			}, undefined);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
+				addOnsProjection, undefined);
 		});
 
 		test('should get all applicable addOns (no addOns)', async () => {
@@ -369,13 +366,8 @@ const testGetAddOns = () => {
 
 			await expect(Teamspace.getAddOns(teamspace)).resolves.toEqual({});
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace }, {
-				[`addOns.${ADD_ONS.VR}`]: 1,
-				[`addOns.${ADD_ONS.SRC}`]: 1,
-				[`addOns.${ADD_ONS.HERE}`]: 1,
-				[`addOns.${ADD_ONS.POWERBI}`]: 1,
-				[`addOns.${ADD_ONS.MODULES}`]: 1,
-			}, undefined);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
+				addOnsProjection, undefined);
 		});
 	});
 };
@@ -383,13 +375,6 @@ const testGetAddOns = () => {
 const testIsAddOnModuleEnabled = () => {
 	describe('Is addOn module enabled', () => {
 		const teamspace = generateRandomString();
-		const projection = {
-			[`addOns.${ADD_ONS.VR}`]: 1,
-			[`addOns.${ADD_ONS.SRC}`]: 1,
-			[`addOns.${ADD_ONS.HERE}`]: 1,
-			[`addOns.${ADD_ONS.POWERBI}`]: 1,
-			[`addOns.${ADD_ONS.MODULES}`]: 1,
-		};
 
 		test('should return true if module is enabled', async () => {
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ addOns: { [ADD_ONS.MODULES]: [ADD_ONS_MODULES.ISSUES] } });
@@ -399,7 +384,7 @@ const testIsAddOnModuleEnabled = () => {
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
-				projection, undefined);
+				addOnsProjection, undefined);
 		});
 
 		test('should return false if module is not enabled', async () => {
@@ -410,7 +395,7 @@ const testIsAddOnModuleEnabled = () => {
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
-				projection, undefined);
+				addOnsProjection, undefined);
 		});
 
 		test('should return false if no modules are enabled', async () => {
@@ -421,7 +406,7 @@ const testIsAddOnModuleEnabled = () => {
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
-				projection, undefined);
+				addOnsProjection, undefined);
 		});
 	});
 };

@@ -32,7 +32,7 @@ export default css`
 			letter-spacing: 0;
 			font-size: 14px;
 			font-weight: 500;
-			width: 310px;
+			width: 344px;
 
 			.MuiSnackbarContent-message {
 				max-width: 270px;

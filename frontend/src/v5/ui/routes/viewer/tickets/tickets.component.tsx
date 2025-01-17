@@ -28,7 +28,7 @@ import {
 	enableRealtimeFederationUpdateTicketGroup,
 } from '@/v5/services/realtime/ticket.events';
 import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { TicketsActionsDispatchers, TicketsCardActionsDispatchers, UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { JobsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers, UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsCardViews } from './tickets.constants';
 import { TicketsListCard } from './ticketsList/ticketsListCard.component';
 import { TicketDetailsCard } from './ticketDetailsCard/ticketsDetailsCard.component';
@@ -46,9 +46,10 @@ export const Tickets = () => {
 	const readOnly = isFederation
 		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
 		: !ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
-	TicketsCardActionsDispatchers.setReadOnly(readOnly);
 
 	useEffect(() => {
+		TicketsCardActionsDispatchers.setReadOnly(readOnly);
+		JobsActionsDispatchers.fetchJobs(teamspace);
 		UsersActionsDispatchers.fetchUsers(teamspace);
 		TicketsActionsDispatchers.fetchRiskCategories(teamspace);
 	}, []);

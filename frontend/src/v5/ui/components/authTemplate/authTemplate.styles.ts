@@ -24,12 +24,13 @@ import { Link } from 'react-router-dom';
 import { LOGIN_PATH } from '@/v5/ui/routes/routes.constants';
 import { Divider as DividerBase } from '@mui/material';
 import { AuthImg } from '@components/authenticatedResource/authImg.component';
+import { GRADIENT } from '../../themes/theme';
 
 const customLogoPath = clientConfigService.getCustomLogoPath();
 export const customBackgroundPath = clientConfigService.getCustomBackgroundImagePath();
 
 export const AuthForm = styled.form`
-	min-width: 408px;
+	min-width: 536px;
 	border-radius: 20px;
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	padding: 56px 64px 38px;
@@ -90,7 +91,7 @@ export const Background = styled.div`
 	background-position: center;
 	background-repeat: no-repeat;
 	background-size: cover;
-	background-image: ${({ theme }) => (customBackgroundPath ? `url('${customBackgroundPath}')` : theme.palette.gradient.secondary)};
+	background-image: ${customBackgroundPath ? `url('${customBackgroundPath}')` : GRADIENT.SECONDARY};
 `;
 
 const DefaultLogo = styled(DefaultLogoBase)`

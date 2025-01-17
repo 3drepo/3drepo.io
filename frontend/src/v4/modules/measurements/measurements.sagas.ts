@@ -17,11 +17,11 @@
 
  import { all, put, select, takeLatest } from 'redux-saga/effects';
 
+import { dispatch } from '@/v5/helpers/redux.helpers';
  import { VIEWER_EVENTS } from '../../constants/viewer';
  import { disableConflictingMeasurementActions, generateName } from '../../helpers/measurements';
  import { Viewer } from '../../services/viewer/viewer';
  import { DialogActions } from '../dialog';
- import { dispatch } from '../store';
  import { MEASURE_TYPE_STATE_MAP } from './measurements.constants';
  import {
 	 selectAreaMeasurements,
@@ -35,6 +35,7 @@
 	 MeasurementsTypes,
 	 selectXyzDisplay,
 	 selectAngleMeasurements,
+	 selectSlopeMeasurements,
  } from './';
 
 const onMeasurementCreated = (measure) => {
@@ -95,6 +96,17 @@ export function* setMeasureUnits({ units }) {
 	}
 }
 
+export function* setMeasureSlopeUnits({ slopeUnits }) {
+	try {
+		yield all([
+			Viewer.setMeasuringSlopeUnits(slopeUnits),
+			put(MeasurementsActions.setMeasureSlopeUnitsSuccess(slopeUnits))
+		]);
+	} catch (error) {
+		DialogActions.showErrorDialog('set', `measure slope slopeUnits to ${slopeUnits}`, error);
+	}
+}
+
 export function* addMeasurement({ measurement }) {
 	try {
 		const measurementStateName = MEASURE_TYPE_STATE_MAP[measurement.type];
@@ -146,6 +158,7 @@ export function* resetMeasurementColors() {
 		const lengthMeasurements = yield select(selectLengthMeasurements);
 		const pointMeasurements = yield select(selectPointMeasurements);
 		const angleMeasurements = yield select(selectAngleMeasurements);
+		const slopeMeasurements = yield select(selectSlopeMeasurements);
 
 		const setDefaultColor = async ({ uuid, color }) => {
 			await Viewer.setMeasurementColor(uuid, color);
@@ -165,6 +178,10 @@ export function* resetMeasurementColors() {
 
 		if (angleMeasurements.length) {
 			angleMeasurements.forEach(setDefaultColor);
+		}
+
+		if (slopeMeasurements.length) {
+			slopeMeasurements.forEach(setDefaultColor);
 		}
 
 		yield put(MeasurementsActions.resetMeasurementColorsSuccess());
@@ -206,8 +223,9 @@ export function* clearMeasurements() {
 		const areaMeasurements = yield select(selectAreaMeasurements);
 		const lengthMeasurements = yield select(selectLengthMeasurements);
 		const angleMeasurements = yield select(selectAngleMeasurements);
+		const slopeMeasurements = yield select(selectSlopeMeasurements);
 
-		[...areaMeasurements, ...lengthMeasurements, ...angleMeasurements].forEach(({uuid}) => Viewer.removeMeasurement(uuid));
+		[...areaMeasurements, ...lengthMeasurements, ...angleMeasurements, ...slopeMeasurements].forEach(({uuid}) => Viewer.removeMeasurement(uuid));
 		yield put(MeasurementsActions.clearMeasurementsSuccess());
 	} catch (error) {
 		DialogActions.showErrorDialog('clear', 'measurements', error);
@@ -227,6 +245,7 @@ export function* resetMeasurementTool() {
 export default function* MeasurementsSaga() {
 	yield takeLatest(MeasurementsTypes.SET_MEASURE_MODE, setMeasureMode);
 	yield takeLatest(MeasurementsTypes.SET_MEASURE_UNITS, setMeasureUnits);
+	yield takeLatest(MeasurementsTypes.SET_MEASURE_SLOPE_UNITS, setMeasureSlopeUnits);
 	yield takeLatest(MeasurementsTypes.ADD_MEASUREMENT, addMeasurement);
 	yield takeLatest(MeasurementsTypes.REMOVE_MEASUREMENT, removeMeasurement);
 	yield takeLatest(MeasurementsTypes.CLEAR_MEASUREMENTS, clearMeasurements);

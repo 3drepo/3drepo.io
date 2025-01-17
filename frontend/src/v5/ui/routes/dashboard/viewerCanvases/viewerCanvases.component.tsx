@@ -43,11 +43,12 @@ export const ViewerCanvases = () => {
 				size={is2DOpen ? leftPanelRatio * 100 + '%' : '100%'}
 				onDragFinished={dragFinish}
 				$isCalibrating={isCalibrating}
+				$is2DOpen={is2DOpen}
 			>
 				<LeftPane>
 					<Viewer3D location={{ pathname }} />
 				</LeftPane>
-				{is2DOpen && <Viewer2D />}
+				{is2DOpen ? <Viewer2D /> : <div />}
 			</SplitPane>
 		</>
 	);

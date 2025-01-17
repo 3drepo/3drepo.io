@@ -18,7 +18,7 @@
 import { put, takeLatest } from 'redux-saga/effects';
 
 import { getAPIUrl } from '@/v4/services/api/default';
-import { downloadAuthUrl } from '@components/authenticatedResource/authenticatedResource.hooks';
+import { downloadAuthUrl } from '@/v5/helpers/download.helper';
 import * as API from '../../services/api';
 import { clientConfigService } from '../../services/clientConfig';
 import { DialogActions } from '../dialog';

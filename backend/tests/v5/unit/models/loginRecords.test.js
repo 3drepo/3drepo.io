@@ -277,6 +277,14 @@ const testInitialise = () => {
 			expect(DBHandler.createIndex).toHaveBeenCalledWith(INTERNAL_DB, loginRecordsCol,
 				{ user: 1, loginTime: -1, failed: 1 }, { runInBackground: true });
 		});
+		test('should fail gracefully if there has been an error', async () => {
+			const err = { message: generateRandomString() };
+			DBHandler.createIndex.mockRejectedValueOnce(err);
+			await LoginRecord.initialise();
+			expect(DBHandler.createIndex).toHaveBeenCalledTimes(1);
+			expect(DBHandler.createIndex).toHaveBeenCalledWith(INTERNAL_DB, loginRecordsCol,
+				{ user: 1, loginTime: -1, failed: 1 }, { runInBackground: true });
+		});
 	});
 };
 

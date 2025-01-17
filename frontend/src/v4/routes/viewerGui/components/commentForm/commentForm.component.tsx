@@ -153,6 +153,7 @@ export class CommentForm extends PureComponent<IProps, IState> {
 		<TooltipButton
 			Icon={() => <FlippedIcon><CameraIcon /></FlippedIcon>}
 			label="Take a screenshot"
+			aria-modal="true"
 			action={this.handleNewScreenshot}
 			disabled={!this.props.canComment || !this.props.isModelLoaded}
 		/>
@@ -190,7 +191,7 @@ export class CommentForm extends PureComponent<IProps, IState> {
 					placeholder={this.commentPlaceholder}
 					multiline
 					fullWidth
-					inputProps={{ rowsMax: 4, maxLength: 220 }}
+					inputProps={{ maxLength: 220 }}
 					disabled={!this.props.canComment}
 					inputRef={ref}
 				/>

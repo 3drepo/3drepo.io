@@ -19,6 +19,7 @@ import { useRef, useEffect, forwardRef } from 'react';
 import { DrawingViewerImageProps } from '../drawingViewerImage/drawingViewerImage.component';
 import { ZoomableImage } from '../zoomableImage.types';
 import axios from 'axios';
+import DOMPurify from 'dompurify';
 
 type Transform = { x:number, y:number, scale:number };
 type Vector2 = { x:number, y:number };
@@ -564,7 +565,7 @@ export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ on
 		axios.get(src).then((response) => {
 			const svgContent = response.data;
 			const svgContainer  = document.createElement('div');
-			svgContainer.innerHTML = svgContent;
+			svgContainer.innerHTML = DOMPurify.sanitize(svgContent);
 			const svg = svgContainer.querySelector('svg') as SVGSVGElement;
 			svg.setAttribute('style', 'background-color: white;');
 			const width = Math.ceil(Number.parseFloat(svg.getAttribute('width')));

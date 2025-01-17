@@ -22,7 +22,8 @@ const {
 	presetModules,
 	presetModulesProperties,
 	propTypes,
-	statusTypes } = require('./templates.constants');
+	statusTypes,
+	statuses } = require('./templates.constants');
 
 const { isArray, isString } = require('../../utils/helper/typeCheck');
 const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
@@ -242,6 +243,16 @@ const schema = Yup.object().shape({
 	}),
 
 }).test(pinMappingTest).noUnknown();
+
+TemplateSchema.getClosedStatuses = (template) => {
+	if (template?.config?.status) {
+		return template.config.status.values.flatMap(
+			({ type, name }) => (type === statusTypes.DONE || type === statusTypes.VOID
+				? name : []));
+	}
+
+	return [statuses.CLOSED, statuses.VOID];
+};
 
 TemplateSchema.validate = (template) => schema.validateSync(template, { stripUnknown: true });
 

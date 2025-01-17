@@ -37,6 +37,9 @@ const TemplateSchema = require(`${src}/schemas/tickets/templates`);
 jest.mock('../../../../../src/v5/models/jobs');
 const JobsModel = require(`${src}/models/jobs`);
 
+jest.mock('../../../../../src/v5/processors/teamspaces/projects/models/commons/settings');
+const ModelSettingsProcessor = require(`${src}/processors/teamspaces/projects/models/commons/settings`);
+
 jest.mock('../../../../../src/v5/models/tickets');
 const TicketsModel = require(`${src}/models/tickets`);
 
@@ -285,8 +288,8 @@ const testPresetValues = () => {
 
 			const jobs = times(5, () => generateRandomString());
 			const users = times(5, () => generateRandomString());
-			JobsModel.getJobNames.mockResolvedValue(jobs);
-			TeamspaceModel.getAllUsersInTeamspace.mockResolvedValue(users);
+			JobsModel.getJobsByUsers.mockResolvedValue(jobs);
+			ModelSettingsProcessor.getUsersWithPermissions.mockResolvedValue(users);
 
 			const testCases = [
 				['With existing jobs', createData(jobs[2], jobs[4]), true],
@@ -1070,6 +1073,68 @@ const testValidateTicket = () => {
 			};
 			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
 				.resolves.toEqual({ ...input, properties: {}, modules: {} });
+		});
+
+		test(`[New ticket] Should strip the value of a ${propTypes.MANY_OF} property if it is empty array`, async () => {
+			const propName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{
+					name: propName,
+					type: propTypes.MANY_OF,
+					values: [generateRandomString()],
+				}],
+				modules: [],
+			};
+
+			const input = {
+				title: generateRandomString(),
+				type: template._id,
+				properties: {
+					[propName]: [],
+				},
+				modules: {},
+			};
+			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
+				.resolves.toEqual({ ...input, properties: {}, modules: {} });
+		});
+
+		test(`[Update ticket] Should nullify the value of a ${propTypes.MANY_OF} property if it is empty array`, async () => {
+			const propName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{
+					name: propName,
+					type: propTypes.MANY_OF,
+					values: ['a'],
+				}],
+				modules: [],
+			};
+
+			const input = {
+				title: generateRandomString(),
+				type: template._id,
+				properties: {
+					[propName]: [],
+				},
+				modules: {},
+			};
+
+			const old = {
+				...input,
+				properties: {
+					[propName]: ['a'],
+				},
+			};
+
+			const expected = {
+				properties: {
+					[propName]: null,
+				},
+				modules: {},
+			};
+			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input, old))
+				.resolves.toEqual(expected);
 		});
 	});
 };

@@ -66,13 +66,14 @@ export const getNewDrawnLine = (lineAttrs, color, type = ELEMENT_TYPES.DRAWING) 
 	return newLine;
 };
 
-export const getNewText = (color, size, position, text) => {
+export const getNewText = (color, size, position, text, width?) => {
 	const name = createUniqueName(ELEMENT_TYPES.TEXT);
 	const newText = {
 		type: ELEMENT_TYPES.TEXT,
 		text,
 		color,
 		name,
+		width,
 		fontFamily: 'Arial',
 		fontSize: size,
 		...position

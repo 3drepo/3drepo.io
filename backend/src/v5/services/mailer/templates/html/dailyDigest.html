@@ -1,0 +1,51 @@
+<p>Here is your daily digest based on your chosen notification preferences:</p>
+<p style="text-align: center"><span class="greeting"><%= teamspace %></span></p>
+<% for(const { project, model, tickets } of notifications) { %>
+	<div class="notifications">
+		<div class="notificationsTable">
+			<div class="notificationsHeader">
+				<div class="headerTitle">
+					<img src="<%= domain %>/assets/email-resources/notifications/tickets.png" style="margin-right:5px">
+					<p class="title"><%= project %>/<%= model %></p>
+				</div>
+			</div>
+			<div class="notificationsContent">
+
+				<% if(tickets.assigned) { %>
+				<div class="notificationsRow">
+					<div class="notificationIconBorder">
+						<img class="notificationType" src="<%= domain %>/assets/email-resources/notifications/new.png">
+					</div>
+					<div style="flex: 1 1 0">
+						<p class="notificationsText"><%= tickets.assigned.count %> <%= tickets.assigned.count === 1? "ticket" : "tickets" %> <%= tickets.assigned.count === 1? "was" : "were" %> assigned to you.</p>
+					</div>
+					<a href="<%= domain %><%= tickets.assigned.link %>" target="_blank"><img "margin-top: 4px" src="<%= domain %>/assets/email-resources/notifications/openLink.png"></a>
+				</div>
+				<% } %>
+				<% if(tickets.updated) { %>
+ 				 <div class="notificationsRow">
+					<div class="notificationIconBorder">
+						<img class="notificationType" src="<%= domain %>/assets/email-resources/notifications/edit.png">
+					</div>
+					<div style="flex: 1 1 0">
+						<p class="notificationsText"><%= tickets.updated.count %> <%= tickets.updated.count === 1? "ticket" : "tickets" %> you are associated with <%= tickets.updated.count === 1? "was" : "were" %> updated.</p>
+					</div>
+					<a href="<%= domain %><%= tickets.updated.link %>" target="_blank"><img "margin-top: 4px" src="<%= domain %>/assets/email-resources/notifications/openLink.png"></a>
+				</div>
+				<% } %>
+				<% if(tickets.closed) { %>
+				<div class="notificationsRow">
+					<div class="notificationIconBorder notificationDoneIconBorder">
+						<img class="notificationType" src="<%= domain %>/assets/email-resources/notifications/done.png">
+					</div>
+					<div style="flex: 1 1 0">
+					   <p class="notificationsText"><%= tickets.closed.count %> <%= tickets.closed.count === 1? "ticket" : "tickets" %> you are associated with <%= tickets.closed.count === 1? "was" : "were" %> closed.</p>
+					</div>
+					<a href="<%= domain %><%= tickets.closed.link %>" target="_blank"><img style="margin-top: 4px" src="<%= domain %>/assets/email-resources/notifications/openLink.png"></a>
+				</div>
+				<% } %>
+			</div>
+		</div>
+	</div>
+<% } %>
+

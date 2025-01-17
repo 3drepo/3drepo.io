@@ -27,15 +27,16 @@ const {
 	viewGroups,
 } = require('./templates.constants');
 const { deleteIfUndefined, isEqual } = require('../../utils/helper/objects');
-const { getAllUsersInTeamspace, getRiskCategories } = require('../../models/teamspaceSettings');
 const { isDate, isObject, isUUIDString } = require('../../utils/helper/typeCheck');
 const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
 const Yup = require('yup');
 const { deserialiseGroupSchema } = require('./tickets.groups');
 const { generateFullSchema } = require('./templates');
 const { getArrayDifference } = require('../../utils/helper/arrays');
-const { getJobNames } = require('../../models/jobs');
+const { getJobsByUsers } = require('../../models/jobs');
+const { getRiskCategories } = require('../../models/teamspaceSettings');
 const { getTicketsByQuery } = require('../../models/tickets');
+const { getUsersWithPermissions } = require('../../processors/teamspaces/projects/models/commons/settings');
 const { importCommentSchema } = require('./tickets.comments');
 const { logger } = require('../../utils/logger');
 const { propTypesToValidator } = require('./validators');
@@ -55,12 +56,11 @@ const generatePropertiesValidator = async (teamspace, project, model, templateId
 				switch (prop.values) {
 				case presetEnumValues.JOBS_AND_USERS:
 					{
-						const [jobs, users] = await Promise.all([
-							getJobNames(teamspace),
-							getAllUsersInTeamspace(teamspace),
-						]);
+						const excludeViewers = prop.name === basePropertyLabels.ASSIGNEES;
+						const users = await getUsersWithPermissions(teamspace, project, model, excludeViewers);
+						const accessibleJobs = await getJobsByUsers(teamspace, users);
 
-						values = [...jobs, ...users];
+						values = [...accessibleJobs, ...users];
 					}
 					break;
 				case presetEnumValues.RISK_CATEGORIES:
@@ -73,7 +73,11 @@ const generatePropertiesValidator = async (teamspace, project, model, templateId
 				if (prop.type === propTypes.ONE_OF) {
 					validator = validator.oneOf(isNewTicket || prop.required ? values : values.concat(null));
 				} else if (prop.type === propTypes.MANY_OF) {
-					validator = Yup.array().of(types.strings.title.oneOf(values));
+					validator = Yup.array().of(types.strings.title.oneOf(values),
+					).transform((v) => {
+						if (v?.length) return v;
+						return isNewTicket ? undefined : null;
+					});
 				} else {
 					logger.logError(`Property values found for a non selection type (${prop.type})`);
 				}
@@ -135,6 +139,7 @@ const generatePropertiesValidator = async (teamspace, project, model, templateId
 						// if the object becomes empty, we're effectively setting it to null
 						valueToEval = isEqual(valueToEval, {}) ? null : valueToEval;
 					}
+
 					return (valueToEval === null && oldValue === undefined && !prop.required)
 						|| isEqual(valueToEval, oldValue);
 				});

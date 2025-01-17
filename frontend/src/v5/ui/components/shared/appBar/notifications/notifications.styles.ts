@@ -20,6 +20,7 @@ import { Container as NotificationTeamspace, NotificationsPanelItem } from '@/v4
 import { Item, ItemSecondaryAction } from '@/v4/routes/components/notifications/components/notificationItem/notificationItem.styles';
 import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
 import { hexToOpacity } from '@/v5/helpers/colors.helper';
+import { GRADIENT } from '@/v5/ui/themes/theme';
 
 const navbarButtonStyles = css`
 	& > button {
@@ -76,7 +77,7 @@ const headerStyles = css`
 	}
 
 	.MuiToolbar-root {
-		background: ${({ theme }) => theme.palette.gradient.secondary};
+		background: ${GRADIENT.SECONDARY};
 		color: ${({ theme }) => theme.palette.primary.contrast};
 		min-height: unset;
 		height: 44px;
@@ -192,7 +193,8 @@ const avatarStyles = css`
 	}
 `;
 
-export const Container = styled(NavbarButton)`
+export const Container = styled(NavbarButton).attrs({ as: 'div' })`
+	box-sizing: border-box;
 	* {
 		text-transform: none;
 	}

@@ -15,16 +15,45 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { destroySession, isSessionValid } = require('../utils/sessions');
+const { USER_AGENT_HEADER } = require('../utils/sessions.constants');
 const { isAccountActive } = require('../models/users');
 const { isAccountLocked } = require('../models/loginRecords');
-const { isSessionValid } = require('../utils/sessions');
+const { logger } = require('../utils/logger');
 const { respond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');
 const { validateMany } = require('./common');
 
 const AuthMiddleware = {};
 
-AuthMiddleware.validSession = async (req, res, next) => {
+const validSessionDetails = async (req, res, next) => {
+	if (!req.session.user.isAPIKey) {
+		const { id: sessionId, ipAddress, user: { userAgent } } = req.session;
+		const reqUserAgent = req.headers[USER_AGENT_HEADER];
+
+		const ipMatch = ipAddress === (req.ips[0] || req.ip);
+		const userAgentMatch = reqUserAgent === userAgent;
+
+		if (!ipMatch || !userAgentMatch) {
+			try {
+				const callback = () => {
+					logger.logInfo(`Session ${sessionId} destroyed due to IP or user agent mismatch`);
+					respond(req, res, templates.notLoggedIn);
+				};
+
+				destroySession(req.session, res, callback);
+			} catch (err) {
+				respond(req, res, err);
+			}
+
+			return;
+		}
+	}
+
+	await next();
+};
+
+const validSession = async (req, res, next) => {
 	const { headers, session, cookies } = req;
 	if (isSessionValid(session, cookies, headers)) {
 		await next();
@@ -76,5 +105,6 @@ const accountNotLocked = async (req, res, next) => {
 };
 
 AuthMiddleware.canLogin = validateMany([AuthMiddleware.notLoggedIn, accountActive, accountNotLocked]);
+AuthMiddleware.validSession = validateMany([validSession, validSessionDetails]);
 
 module.exports = AuthMiddleware;

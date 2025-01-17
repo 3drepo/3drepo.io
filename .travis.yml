@@ -8,7 +8,7 @@ matrix:
       submodules: false
       depth: 1
       node_js:
-        - "18.12.1"
+        - "18.20.4"
       sudo: true
       addons:
         apt:

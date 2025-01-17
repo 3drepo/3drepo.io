@@ -82,6 +82,7 @@ export const EditableFieldStyles = css`
 		border-radius: 8px;
 		min-height: 32px;
 		padding: 4px 10px;
+		box-sizing: unset;
 		margin-top: 0px;
 		margin-bottom: 0px;
 		font-size: 0.75rem;

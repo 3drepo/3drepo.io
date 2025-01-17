@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
-import { defaults, isNumber } from 'lodash';
 import { ActionMenu } from '@controls/actionMenu';
 import { Container } from './colorPicker.styles';
 import { ColorPickerPalette } from './colorPickerPalette/colorPickerPalette.component';
-import { UNSET_RGB_COLOR } from './colorPicker.helpers';
 import { ColorCircle } from './colorCircle/colorCircle.styles';
-import { HexGroupColor, hexGroupColorToRgb, RgbGroupColor, rgbGroupColorToHex } from '@/v5/helpers/colors.helper';
+import { hexGroupColorToRgb, RgbGroupColor, rgbGroupColorToHex } from '@/v5/helpers/colors.helper';
+import { defaults } from 'lodash';
+
 
 type ColorPickerPreviewProps = { color: string, selected: boolean, disabled?: boolean };
 const ColorPickerPreview = ({ color, selected, disabled }: ColorPickerPreviewProps) => (
@@ -33,25 +33,15 @@ const ColorPickerPreview = ({ color, selected, disabled }: ColorPickerPreviewPro
 	</Container>
 );
 
-const DEFAULT_VALUE = { color: UNSET_RGB_COLOR, opacity: 1 };
-
 type ColorPickerProps = { value?: RgbGroupColor, defaultValue?: RgbGroupColor, onChange?: (newVal: RgbGroupColor) => void, disabled?: boolean };
 export const ColorPicker = ({ value: inputValue, defaultValue, onChange, disabled }: ColorPickerProps) => {
-	const [value, setValue] = useState<HexGroupColor>();
 	const [selected, setSelected] = useState(false);
 
 	const handleChange = (hexValue) => {
-		setValue(hexValue);
-		onChange?.(hexGroupColorToRgb(hexValue));
+		onChange?.(defaults(hexGroupColorToRgb(hexValue), { opacity: 1 }));
 	};
 
-	useEffect(() => {
-		if (isNumber(inputValue?.opacity)) {
-			setValue(rgbGroupColorToHex(inputValue));
-		} else {
-			setValue(defaults(rgbGroupColorToHex(inputValue || defaultValue), DEFAULT_VALUE));
-		}
-	}, [inputValue]);
+	const value = rgbGroupColorToHex(inputValue || defaultValue);
 
 	return (
 		<ActionMenu

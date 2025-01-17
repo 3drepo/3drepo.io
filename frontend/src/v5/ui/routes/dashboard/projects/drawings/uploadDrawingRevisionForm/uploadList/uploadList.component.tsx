@@ -74,7 +74,7 @@ export const UploadList = ({
 			</DashboardListHeader>
 			<ListContainer>
 				{
-					values.map(({ uploadId, file, extension }, index) => {
+					values.map(({ uploadId, file, extension, isMultiPagePdf }, index) => {
 						const onClickEdit = () => setSelectedId(uploadId);
 						const selected = !isUploading && uploadId === selectedId;
 						const onClickDelete = () => deleteItem(uploadId, selected);
@@ -92,6 +92,7 @@ export const UploadList = ({
 									onClickDelete={onClickDelete}
 									isSelected={selected}
 									isUploading={isUploading}
+									isMultiPagePdf={isMultiPagePdf}
 								/>
 							</UploadListItemRowWrapper>
 						);

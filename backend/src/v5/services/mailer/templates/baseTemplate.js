@@ -26,6 +26,7 @@ const dataSchema = Yup.object({
 	domain: Yup.string().default(() => config.getBaseURL()),
 	firstName: Yup.string().required(),
 	emailContent: Yup.string().required(),
+	extraStyles: Yup.string().default(''),
 }).required(true);
 
 const BaseTemplate = {};

@@ -25,7 +25,6 @@
 const {v5Path} = require("../../interop");
 const QueueV5 = require(`${v5Path}/handler/queue`);
 
-const { nanoid } = require("nanoid");
 const fs = require("fs").promises;
 const config = require("../config");
 const C = require("../constants");
@@ -51,7 +50,6 @@ class ImportQueue {
 		this.modelQName = config.cn_queue.model_queue;
 		this.eventExchange = config.cn_queue.event_exchange;
 		this.url = config.cn_queue.host;
-		this.uid = nanoid();
 	}
 
 	connect() {

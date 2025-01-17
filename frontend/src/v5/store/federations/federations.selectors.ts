@@ -17,12 +17,14 @@
 
 import { createSelector } from 'reselect';
 import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
-import { compact } from 'lodash';
+import { compact, isEmpty } from 'lodash';
 import { IFederationsState } from './federations.redux';
 import { IFederation } from './federations.types';
 import { selectContainers } from '../containers/containers.selectors';
 import { Role } from '../currentUser/currentUser.types';
 import { isCollaboratorRole, isCommenterRole } from '../store.helpers';
+import { selectJobsByIds } from '@/v4/modules/jobs';
+import { selectCurrentTeamspaceUsersByIds } from '../users/users.selectors';
 
 const selectFederationsDomain = (state): IFederationsState => state?.federations || ({ federationsByProject: {} });
 
@@ -84,4 +86,22 @@ export const selectHasCollaboratorAccess = createSelector(
 export const selectHasCommenterAccess = createSelector(
 	selectFederationRole,
 	(role): boolean => isCommenterRole(role),
+);
+
+export const selectFederationUsers = createSelector(
+	selectFederationById,
+	selectCurrentTeamspaceUsersByIds,
+	(federations, users) => {
+		if (isEmpty(users)) return [];
+		return (federations?.users || []).map((user) => ({ ...user, ...users[user.user], isNotTeamspaceMember: !users[user.user] }));
+	},
+);
+
+export const selectFederationJobs = createSelector(
+	selectFederationById,
+	selectJobsByIds,
+	(federation, jobs) => {
+		if (isEmpty(jobs)) return [];
+		return (federation?.jobs || []).map((job) => ({ ...job, ...jobs[job._id] }));
+	},
 );

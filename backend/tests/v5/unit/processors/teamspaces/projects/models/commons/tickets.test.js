@@ -46,7 +46,10 @@ const CommentsProcessor = require(`${src}/processors/teamspaces/projects/models/
 jest.mock('../../../../../../../../src/v5/models/tickets.groups');
 const TicketGroupsModel = require(`${src}/models/tickets.groups`);
 
-jest.mock('../../../../../../../../src/v5/schemas/tickets/templates');
+jest.mock('../../../../../../../../src/v5/schemas/tickets/templates', () => ({
+	...jest.requireActual('../../../../../../../../src/v5/schemas/tickets/templates'),
+	generateFullSchema: jest.fn(),
+}));
 const TemplatesSchema = require(`${src}/schemas/tickets/templates`);
 
 const { TICKETS_RESOURCES_COL } = require(`${src}/models/tickets.constants`);

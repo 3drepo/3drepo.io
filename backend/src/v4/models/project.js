@@ -18,14 +18,15 @@
 "use strict";
 (() => {
 
+	const { v5Path } = require("../../interop");
 	const C = require("../constants");
 	const db = require("../handler/db");
 	const responseCodes = require("../response_codes.js");
 	const utils = require("../utils");
 	const _ = require("lodash");
-	const { changePermissions, prepareDefaultView, findModelSettings, findPermissionByUser, removePermissionsFromModels } = require("./modelSetting");
-	const { getTeamspaceSettings } = require("./teamspaceSetting");
-	const PermissionTemplates = require("./permissionTemplates");
+	const { changePermissions, findModelSettings, removePermissionsFromModels } = require("./modelSetting");
+	const { publish } = require(`${v5Path}/services/eventsManager/eventsManager`);
+	const { events } = require(`${v5Path}/services/eventsManager/eventsManager.constants`);
 
 	const PROJECTS_COLLECTION_NAME = "projects";
 
@@ -299,61 +300,6 @@
 		return projects.map(p => p.name);
 	};
 
-	Project.listModels = async function(account, project, username, filters) {
-		const AccountPermissions = require("./accountPermissions");
-		const ModelHelper = require("./helper/model");
-
-		const [dbUser, projectObj] = await Promise.all([
-			getTeamspaceSettings(account),
-			Project.findOneProject(account, {name: project})
-		]);
-
-		if (!projectObj) {
-			throw responseCodes.PROJECT_NOT_FOUND;
-		}
-
-		if (filters && filters.name) {
-			filters.name = new RegExp(".*" + filters.name + ".*", "i");
-		}
-
-		let modelsSettings =  await findModelSettings(account, { _id: { $in : projectObj.models }, ...filters});
-		let permissions = [];
-
-		const accountPerm = AccountPermissions.findByUser(dbUser, username);
-		const projectPerm = projectObj.permissions.find(p=> p.user === username);
-
-		if (accountPerm && accountPerm.permissions) {
-			permissions = permissions.concat(ModelHelper.flattenPermissions(accountPerm.permissions));
-		}
-
-		if (projectPerm && projectPerm.permissions) {
-			permissions  = permissions.concat(ModelHelper.flattenPermissions(projectPerm.permissions));
-		}
-
-		modelsSettings = await Promise.all(modelsSettings.map(async setting => {
-			const template = await findPermissionByUser(account, setting._id, username);
-
-			let settingsPermissions = [];
-			if(template) {
-				const permissionTemplate = PermissionTemplates.findById(dbUser, template.permission);
-				if (permissionTemplate && permissionTemplate.permissions) {
-					settingsPermissions = settingsPermissions.concat(ModelHelper.flattenPermissions(permissionTemplate.permissions, true));
-				}
-			}
-
-			setting = await prepareDefaultView(account, setting._id, setting);
-			setting.permissions = _.uniq(permissions.concat(settingsPermissions));
-			setting.model = setting._id;
-			setting.account = account;
-			setting.subModels = await ModelHelper.listSubModels(account, setting._id, C.MASTER_BRANCH_NAME);
-			setting.headRevisions = {};
-
-			return setting;
-		}));
-
-		return modelsSettings;
-	};
-
 	Project.isProjectAdmin = async function(teamspace, model, user) {
 		const projection = { "permissions": { "$elemMatch": { user: user } }};
 		const project = await Project.findOneProject(teamspace, {models: model}, projection);
@@ -457,7 +403,7 @@
 		return project;
 	};
 
-	Project.updateProject = async function(account, projectName, data) {
+	Project.updateProject = async function(account, projectName, data, executor) {
 		const project = await Project.findOneProject(account, { name: projectName });
 
 		if (!project) {
@@ -468,9 +414,21 @@
 			project.name = data.name;
 		}
 
+		let permissionChange;
 		if (data.permissions) {
 			await Promise.all(data.permissions.map(async (permissionUpdate) => {
 				const userIndex = project.permissions.findIndex(x => x.user === permissionUpdate.user);
+
+				const fromVal = project.permissions[userIndex]?.permissions[0] ?? null;
+				const toVal = permissionUpdate.permissions.length ? permissionUpdate.permissions[0] : null;
+
+				if(fromVal !== toVal) {
+					if(!permissionChange) {
+						permissionChange = { from: fromVal ? [fromVal] : fromVal, to: toVal ? [toVal] : toVal, users: [] };
+					}
+
+					permissionChange.users.push(permissionUpdate.user);
+				}
 
 				if (-1 !== userIndex) {
 					if (permissionUpdate.permissions && permissionUpdate.permissions.length) {
@@ -485,7 +443,13 @@
 			}));
 		}
 
-		return Project.updateAttrs(account, projectName, project);
+		const updatedProject = await Project.updateAttrs(account, projectName, project);
+
+		if (permissionChange && executor) {
+			publish(events.PROJECT_PERMISSIONS_UPDATED, { teamspace: account, executor, project: project._id, ...permissionChange});
+		}
+
+		return updatedProject;
 	};
 
 	Project.removePermissionsFromAllProjects = async (account, userToRemove) => {

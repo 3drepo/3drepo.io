@@ -29,6 +29,7 @@ import * as DialogsSelectors from '@/v5/store/dialogs/dialogs.selectors';
 import * as ProjectsSelectors from '@/v5/store/projects/projects.selectors';
 import * as FederationsSelectors from '@/v5/store/federations/federations.selectors';
 import * as GroupsSelectors from '@/v4/modules/groups/groups.selectors';
+import * as JobsSelectors from '@/v4/modules/jobs/jobs.selectors';
 import * as ModelSelectors from '@/v4/modules/model/model.selectors';
 import * as RouterSelectors from '@/v4/modules/router/router.selectors';
 import * as SequencesSelctors from '@/v4/modules/sequences/sequences.selectors';
@@ -54,6 +55,7 @@ export const DrawingRevisionsHooksSelectors = createHooksSelectors(DrawingRevisi
 export const DialogsHooksSelectors = createHooksSelectors(DialogsSelectors);
 export const FederationsHooksSelectors = createHooksSelectors(FederationsSelectors);
 export const GroupsHooksSelectors = createHooksSelectors(GroupsSelectors);
+export const JobsHooksSelectors = createHooksSelectors(JobsSelectors);
 export const ModelHooksSelectors = createHooksSelectors(ModelSelectors);
 export const ProjectsHooksSelectors = createHooksSelectors(ProjectsSelectors);
 export const RouterHooksSelectors = createHooksSelectors(RouterSelectors);

@@ -102,7 +102,7 @@ export class PreviewDetails extends PureComponent<IProps, any> {
 
 	public renderNameField = renderWhenTrue(() => (
 		<Formik
-			initialValues={{name: this.props.name}}
+			initialValues={{name: this.props.name || ''}}
 			validationSchema={ValidationSchema}
 			onSubmit={() => {}}
 		>
