@@ -15,21 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { memo, useContext, useRef } from 'react';
+import { memo, useContext } from 'react';
 import { ResizableColumnsContext } from '../resizableColumnsContext';
 import { Container, Item, ResizerMouseLandingArea, ResizerLine } from './resizableColumnsItem.styles';
-
-// This is not to interfere with other components and to keep the cursor as
-// "col-resize" while resizing even when moving the mouse outside the table
-const overlayStyles = `
-	height: 100vh;
-	width: 100vw;
-	cursor: col-resize;
-	pointer-events: all;
-	position: absolute;
-	z-index: 100;
-	top: 0;
-`;
+import { useResizable } from '../useResizable';
 
 const MemoizedItem = memo(
 	({ children, className }: any) => <Item className={className}>{children}</Item>,
@@ -47,46 +36,22 @@ type ResizableColumnsItemProps = {
 };
 export const ResizableColumnsItem = ({ name, children, className, hidden = false }: ResizableColumnsItemProps) => {
 	const { setWidth, getWidth, setIsResizing, isResizing, setResizerName, resizerName } = useContext(ResizableColumnsContext);
-	const ref = useRef<HTMLDivElement>();
-	const initialPosition = useRef(null);
 	const currentWidth = getWidth(name);
-
-	const onResize = (e) => {
-		const offset = !initialPosition.current ? 0 : e.clientX - initialPosition.current;
-		setWidth(name, currentWidth + offset);
-	};
+	const onMouseDown = useResizable({
+		onResizeStart: () => {
+			setIsResizing(true);
+			setResizerName(name);
+		},
+		onResize: (offset) => setWidth(name, currentWidth + offset),
+		onResizeEnd: () => {
+			setIsResizing(false);
+			setResizerName('');
+		},
+	});
 
 	const handleMouseOver = () => setResizerName(name);
 	const handleMouseOut = () => {
 		if (!isResizing) setResizerName('');
-	};
-
-	const preventEventPropagation = (e) => {
-		e.preventDefault();
-		e.stopPropagation();
-	};
-	
-	const onMouseDown = (e) => {
-		preventEventPropagation(e);
-		setIsResizing(true);
-		setResizerName(name);
-		initialPosition.current = e.clientX;
-
-		const overlay = document.createElement('div');
-		overlay.style.cssText = overlayStyles;
-		document.body.appendChild(overlay);
-
-		const onMouseUp = (ev) => {
-			preventEventPropagation(ev);
-			setIsResizing(false);
-			setResizerName('');
-			initialPosition.current = null;
-
-			document.body.removeChild(overlay);
-		};
-
-		overlay.addEventListener('mouseup', onMouseUp);
-		overlay.addEventListener('mousemove', onResize);
 	};
 
 	if (hidden) return null;
@@ -95,7 +60,6 @@ export const ResizableColumnsItem = ({ name, children, className, hidden = false
 		<Container $width={currentWidth}>
 			<MemoizedItem className={className}>{children}</MemoizedItem>
 			<ResizerLine
-				ref={ref}
 				onMouseOver={handleMouseOver}
 				onMouseOut={handleMouseOut}
 				$isResizing={isResizing}
