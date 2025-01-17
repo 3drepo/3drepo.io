@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2024 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,23 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
-import { EllipsisMenuItem, EllipsisMenuItemProps } from './ellipsisMenutItem.component';
-import { ReactNode } from 'react';
-import { SwitchContainer } from './ellipsisMenuItem.styles';
+import styled from 'styled-components';
 
-type EllipsisMenuItemSwitchProps = Omit<EllipsisMenuItemProps, 'to'> & {
-	icon?: ReactNode,
-	active: boolean,
-};
-export const EllipsisMenuItemSwitch = ({ icon, title, active, ...props }: EllipsisMenuItemSwitchProps) => (
-	<EllipsisMenuItem 
-		title={
-			<SwitchContainer>
-				{icon}
-				{title}
-				{active && <TickIcon />}
-			</SwitchContainer>}
-		{...props}
-	/>
-);
+export const SwitchContainer = styled.span`
+	width: 100%;
+	height: 32px;
+	align-content: center;
+	text-align: left;
+	display: grid;
+	grid-template-columns: 26px auto 16px;
+	svg {
+		height: 16px;
+		width: 16px;
+	}
+`;

@@ -16,10 +16,13 @@
  */
 
 import styled from 'styled-components';
-import { CircleButton } from '@controls/circleButton';
 
-export const CardAction = styled(CircleButton)`
+export const CardAction = styled.button`
+	cursor: pointer;
+	background-color: transparent;
+	color: ${({ theme }) => theme.palette.secondary.main};
 	margin: 0;
+	height: 32px;
 
 	svg {
 		height: 13px;
