@@ -16,8 +16,8 @@
  */
 
 import { memo, useContext } from 'react';
-import { ResizableColumnsContext } from '../resizableColumnsContext';
-import { Container, Item, ResizerMouseLandingArea, ResizerLine } from './resizableColumnsItem.styles';
+import { ResizableTableContext } from '../resizableTableContext';
+import { Container, Item, ResizerMouseLandingArea, ResizerLine } from './resizableTableItem.styles';
 import { useResizable } from '../useResizable';
 
 const MemoizedItem = memo(
@@ -28,14 +28,14 @@ const MemoizedItem = memo(
 	),
 );
 
-type ResizableColumnsItemProps = {
+type ResizableTableItemProps = {
 	children: any;
 	name: string;
 	hidden?: boolean;
 	className?: string;
 };
-export const ResizableColumnsItem = ({ name, children, className, hidden = false }: ResizableColumnsItemProps) => {
-	const { setWidth, getWidth, setIsResizing, isResizing, setResizerName, resizerName } = useContext(ResizableColumnsContext);
+export const ResizableTableItem = ({ name, children, className, hidden = false }: ResizableTableItemProps) => {
+	const { setWidth, getWidth, setIsResizing, isResizing, setResizerName, resizerName } = useContext(ResizableTableContext);
 	const currentWidth = getWidth(name);
 	const onMouseDown = useResizable({
 		onResizeStart: () => {

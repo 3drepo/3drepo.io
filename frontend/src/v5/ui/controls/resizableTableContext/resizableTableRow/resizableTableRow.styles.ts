@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 
-export const ResizableColumnsRow = styled.div`
+export const ResizableTableRow = styled.div`
 	display: flex;
 	flex-direction: row;
 `;

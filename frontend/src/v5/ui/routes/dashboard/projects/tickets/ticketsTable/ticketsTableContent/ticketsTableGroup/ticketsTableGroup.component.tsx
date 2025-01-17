@@ -32,8 +32,8 @@ import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
 import { SetTicketValue } from '../../ticketsTable.helper';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
-import { ResizableColumnsItem } from '@controls/resizableColumnsContext/resizableColumnsItem/resizableColumnsItem.component';
-import { ResizableColumnsTable } from '@controls/resizableColumnsContext/resizableColumnsTable/resizableColumnsTable.styles';
+import { ResizableTableItem } from '@controls/resizableTableContext/resizableTableItem/resizableTableItem.component';
+import { ResizableTable } from '@controls/resizableTableContext/resizableTable/resizableTable.styles';
 
 const SortingTableHeader = ({ name, children, hidden = false, disableSorting = false, ...props }) => {
 	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
@@ -42,15 +42,15 @@ const SortingTableHeader = ({ name, children, hidden = false, disableSorting = f
 	if (hidden) return (null);
 
 	if (disableSorting) return (
-		<ResizableColumnsItem name={name}>
+		<ResizableTableItem name={name}>
 			<Header {...props}>
 				{children}
 			</Header>
-		</ResizableColumnsItem>
+		</ResizableTableItem>
 	);
 
 	return (
-		<ResizableColumnsItem name={name}>
+		<ResizableTableItem name={name}>
 			<Header {...props} onClick={() => onColumnClick(name)} $selectable>
 				{isSelected && (
 					<IconContainer $flip={isDescendingOrder}>
@@ -59,7 +59,7 @@ const SortingTableHeader = ({ name, children, hidden = false, disableSorting = f
 				)}
 				{children}
 			</Header>
-		</ResizableColumnsItem>
+		</ResizableTableItem>
 	);
 };
 
@@ -82,7 +82,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 	const hasSafetibase = template?.modules?.some((module) => module.type === 'safetibase');
 
 	return (
-		<ResizableColumnsTable>
+		<ResizableTable>
 			<SortedTableComponent items={tickets} sortingColumn={BaseProperties.CREATED_AT}>
 				<SortedTableContext.Consumer>
 					{({ sortedItems }: SortedTableType<ITicket>) => (
@@ -153,6 +153,6 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 					)}
 				</SortedTableContext.Consumer>
 			</SortedTableComponent>
-		</ResizableColumnsTable>
+		</ResizableTable>
 	);
 };

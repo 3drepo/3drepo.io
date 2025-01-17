@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 
-export const ResizableColumnsTable = styled.div`
+export const ResizableTable = styled.div`
 	width: 100%;
 	overflow-x: scroll;
 `;

@@ -17,10 +17,10 @@
 
 import { DueDateContainer } from '@controls/dueDate/dueDate.styles';
 import styled from 'styled-components';
-import { ResizableColumnsRow } from '@controls/resizableColumnsContext/resizableColumnsRow/resizableColumnsRow.styles';
-import { ResizableColumnsItem } from '@controls/resizableColumnsContext/resizableColumnsItem/resizableColumnsItem.component';
+import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.styles';
+import { ResizableTableItem } from '@controls/resizableTableContext/resizableTableItem/resizableTableItem.component';
 
-export const Cell = styled(ResizableColumnsItem)`
+export const Cell = styled(ResizableTableItem)`
 	color: ${({ theme }) => theme.palette.secondary.main};
 	height: 100%;
 	padding: 0 10px;
@@ -33,7 +33,7 @@ export const Cell = styled(ResizableColumnsItem)`
 `;
 
 // TODO - fix when new palette is released
-export const Row = styled(ResizableColumnsRow)<{ $selected?: boolean }>`
+export const Row = styled(ResizableTableRow)<{ $selected?: boolean }>`
 	gap: 1px;
 	height: 37px;
 	cursor: pointer;

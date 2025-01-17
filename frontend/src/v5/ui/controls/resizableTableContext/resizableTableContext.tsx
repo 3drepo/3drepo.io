@@ -19,7 +19,7 @@ import { createContext, useEffect, useState } from 'react';
 
 export type WidthsType = Record<string, { min?: number, initial: number }>;
 
-export interface ResizableColumnsType {
+export interface ResizableTableType {
 	getWidth: (name: string) => number;
 	getMinWidth: (name: string) => number;
 	setWidth: (name: string, width: number) => void;
@@ -30,7 +30,7 @@ export interface ResizableColumnsType {
 	isResizing: boolean,
 }
 
-const defaultValue: ResizableColumnsType = {
+const defaultValue: ResizableTableType = {
 	getWidth: () => 0,
 	getMinWidth: () => 0,
 	setWidth: () => {},
@@ -40,14 +40,14 @@ const defaultValue: ResizableColumnsType = {
 	setIsResizing: () => {},
 	isResizing: false,
 };
-export const ResizableColumnsContext = createContext(defaultValue);
-ResizableColumnsContext.displayName = 'ResizeableColumns';
+export const ResizableTableContext = createContext(defaultValue);
+ResizableTableContext.displayName = 'ResizeableColumns';
 
-export interface Props {
+interface Props {
 	children: any;
 	widths: WidthsType;
 }
-export const ResizableColumnsContextComponent = ({ children, widths: initialWidths }: Props) => {
+export const ResizableTableContextComponent = ({ children, widths: initialWidths }: Props) => {
 	const [widths, setWidths] = useState({});
 	const [minWidths, setMinWidths] = useState({});
 	const [resizerName, setResizerName] = useState('');
@@ -73,7 +73,7 @@ export const ResizableColumnsContextComponent = ({ children, widths: initialWidt
 	}, []);
 
 	return (
-		<ResizableColumnsContext.Provider value={{
+		<ResizableTableContext.Provider value={{
 			setWidth,
 			getWidth,
 			getMinWidth,
@@ -84,6 +84,6 @@ export const ResizableColumnsContextComponent = ({ children, widths: initialWidt
 			isResizing,
 		}}>
 			{children}
-		</ResizableColumnsContext.Provider>
+		</ResizableTableContext.Provider>
 	);
 };

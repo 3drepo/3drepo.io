@@ -28,7 +28,7 @@ import {  groupTickets, NEW_TICKET_ID, NONE_OPTION, SetTicketValue, UNSET } from
 import { EmptyPageView } from '../../../../../../components/shared/emptyPageView/emptyPageView.styles';
 import { Container, Title } from './ticketsTableContent.styles';
 import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { ResizableColumnsContextComponent, WidthsType } from '@controls/resizableColumnsContext/resizableColumnsContext';
+import { ResizableTableContextComponent, WidthsType } from '@controls/resizableTableContext/resizableTableContext';
 
 type TicketsTableContentProps = {
 	setTicketValue: SetTicketValue;
@@ -70,21 +70,21 @@ export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy 
 
 	if (groupBy === NONE_OPTION || !groupBy) {
 		return (
-			<ResizableColumnsContextComponent widths={widths}>
+			<ResizableTableContextComponent widths={widths}>
 				<TicketsTableGroup
 					tickets={filteredItems}
 					onNewTicket={onGroupNewTicket('')}
 					onEditTicket={setTicketValue}
 					selectedTicketId={selectedTicketId}
 				/>
-			</ResizableColumnsContextComponent>
+			</ResizableTableContextComponent>
 		);
 	}
 
 	const groups = groupTickets(groupBy, filteredItems);
 
 	return (
-		<ResizableColumnsContextComponent widths={widths}>
+		<ResizableTableContextComponent widths={widths}>
 			<Container>
 				{_.entries(groups).map(([groupName, tickets]) => (
 					<DashboardListCollapse
@@ -106,6 +106,6 @@ export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy 
 					</DashboardListCollapse>
 				))}
 			</Container>
-		</ResizableColumnsContextComponent>
+		</ResizableTableContextComponent>
 	);
 };

@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ResizableColumnsRow } from '@controls/resizableColumnsContext/resizableColumnsRow/resizableColumnsRow.styles';
+import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.styles';
 import { Typography } from '@controls/typography';
 import styled, { css } from 'styled-components';
 
-export const Headers = styled(ResizableColumnsRow)`
+export const Headers = styled(ResizableTableRow)`
 	gap: 1px;
 	width: fit-content;
 `;
