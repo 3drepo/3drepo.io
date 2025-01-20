@@ -27,6 +27,7 @@ const { Long } = DbHandler.dataTypes;
 
 const Tickets = {};
 const TICKETS_COL = 'tickets';
+const TEMPLATES_COL = 'templates';
 const TICKETS_COUNTER_COL = 'tickets.counters';
 
 const reserveTicketNumbers = async (teamspace, project, model, type, nToReserve) => {
@@ -184,7 +185,7 @@ Tickets.getTicketsByFilter = (
 	if (ticketCodeQuery) {
 		const pipelines = [
 			{ $match: formattedQuery },
-			{ $lookup: { from: 'templates', localField: 'type', foreignField: '_id', as: 'templateDetails' } },
+			{ $lookup: { from: TEMPLATES_COL, localField: 'type', foreignField: '_id', as: 'templateDetails' } },
 			{ $unwind: '$templateDetails' },
 			{ $addFields: { ticketCode: { $concat: ['$templateDetails.code', ':', { $toString: '$number' }] } } },
 			{ $match: ticketCodeQuery },

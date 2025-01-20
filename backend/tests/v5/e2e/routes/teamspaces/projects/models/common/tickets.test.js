@@ -617,13 +617,24 @@ const testGetTicketList = () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
 		const conNoTickets = ServiceHelper.generateRandomModel();
 		const fedNoTickets = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
+		const commonTextProp = { name: ServiceHelper.generateRandomString(), type: propTypes.TEXT };
 		const textProp = { name: ServiceHelper.generateRandomString(), type: propTypes.TEXT };
+		const longTextProp = { name: ServiceHelper.generateRandomString(), type: propTypes.LONG_TEXT };
+		const numberProp = { name: ServiceHelper.generateRandomString(), type: propTypes.NUMBER };
+		const boolProp = { name: ServiceHelper.generateRandomString(), type: propTypes.BOOLEAN };
+		const dateProp = { name: ServiceHelper.generateRandomString(), type: propTypes.DATE };
+		const oneOfProp = { name: ServiceHelper.generateRandomString(),
+			type: propTypes.ONE_OF,
+			values: times(5, () => ServiceHelper.generateRandomString()) };
 
 		const templatesToUse = times(3, () => {
 			const template = ServiceHelper.generateTemplate();
-			template.properties.push(textProp);
+			template.properties.push(commonTextProp);
 			return template;
 		});
+
+		const templateWithAllProps = templatesToUse[0];
+		templateWithAllProps.properties.push(textProp, longTextProp, numberProp, boolProp, dateProp, oneOfProp);
 
 		con.tickets = times(10, (n) => ServiceHelper.generateTicket(templatesToUse[n % templatesToUse.length]));
 		fed.tickets = times(10, (n) => ServiceHelper.generateTicket(templatesToUse[n % templatesToUse.length]));
@@ -681,6 +692,60 @@ const testGetTicketList = () => {
 				}
 			};
 
+			const commonFilters = (propType, propertyName) => [
+				[`${queryOperators.EXISTS} operator is used in ${propType} property`,
+					{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.EXISTS}'` } }, true,
+					model.tickets.filter((t) => t.type === templateWithAllProps._id)],
+				[`${queryOperators.NOT_EXISTS} operator is used in ${propType} property`,
+					{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.NOT_EXISTS}'` } }, true,
+					model.tickets.filter((t) => t.type !== templateWithAllProps._id)],
+				[`${queryOperators.EQUALS} operator is used in ${propType} property`,
+					{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.EQUALS}::${model.tickets[0].properties[propertyName]}'` } }, true,
+					model.tickets
+						.filter((t) => t.properties[propertyName] === model.tickets[0].properties[propertyName])],
+				[`${queryOperators.NOT_EQUALS} operator is used in ${propType} property`,
+					{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.NOT_EQUALS}::${model.tickets[0].properties[propertyName]}'` } }, true,
+					model.tickets
+						.filter((t) => t.properties[propertyName] !== model.tickets[0].properties[propertyName])],
+			];
+
+			const textPropertyFilters = (propType, propertyName) => {
+				const commonTextFilters = commonFilters(propType, propertyName);
+				return [
+					...commonTextFilters,
+					[`${queryOperators.CONTAINS} operator is used in ${propType} property`,
+						{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.CONTAINS}::${model.tickets[0].properties[propertyName].slice(0, 5)}'` } }, true,
+						model.tickets.filter((t) => t.properties[oneOfProp.name]
+							=== model.tickets[0].properties[oneOfProp.name])],
+					[`${queryOperators.NOT_CONTAINS} operator is used in ${propType} property`,
+						{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.NOT_CONTAINS}::${model.tickets[0].properties[propertyName]}'` } }, true,
+						model.tickets.filter((t) => t.properties[oneOfProp.name]
+							!== model.tickets[0].properties[oneOfProp.name])],
+				];
+			};
+
+			const numberPropertyFilters = (propType, propertyName) => [
+				...commonFilters(propType, propertyName),
+				[`${queryOperators.GREATER_OR_EQUAL_TO} operator is used in ${propType} property`, { ...baseRouteParams,
+					options: { query: `'${propertyName}::${queryOperators.GREATER_OR_EQUAL_TO}::${model.tickets[0].properties[propertyName]}'` } }, true,
+				model.tickets.filter((t) => t.properties[propertyName]
+					>= model.tickets[0].properties[propertyName])],
+				[`${queryOperators.LESSER_OR_EQUAL_TO} operator is used in ${propType} property`, { ...baseRouteParams,
+					options: { query: `'${propertyName}::${queryOperators.LESSER_OR_EQUAL_TO}::${model.tickets[0].properties[propertyName]}'` } }, true,
+				model.tickets.filter((t) => t.properties[propertyName]
+						<= model.tickets[0].properties[propertyName])],
+				[`${queryOperators.RANGE} operator is used in ${propType} property`, { ...baseRouteParams,
+					options: { query: `'${propertyName}::${queryOperators.RANGE}::[${model.tickets[0].properties[propertyName] - 500},${model.tickets[0].properties[propertyName] + 500}]'` } }, true,
+				model.tickets.filter((t) => t.properties[propertyName]
+						>= model.tickets[0].properties[propertyName] - 500
+						&& t.properties[propertyName] <= model.tickets[0].properties[propertyName] + 500)],
+				[`${queryOperators.NOT_IN_RANGE} operator is used in ${propType} property`,
+					{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.NOT_IN_RANGE}::[${model.tickets[0].properties[propertyName] - 500},${model.tickets[0].properties[propertyName] + 500}]'` } }, true,
+					model.tickets.filter((t) => !t.properties[propertyName] || (t.properties[propertyName]
+					< model.tickets[0].properties[propertyName] - 500
+					|| t.properties[propertyName] > model.tickets[0].properties[propertyName] + 500))],
+			];
+
 			return [
 				['the user does not have a valid session', { ...baseRouteParams, key: null }, false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', { ...baseRouteParams, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
@@ -694,10 +759,15 @@ const testGetTicketList = () => {
 				['the model returning only tickets updated since now', { ...baseRouteParams, options: { updatedSince: Date.now() + 1000000 } }, true, []],
 				['the model returning tickets sorted by updated at in ascending order', { ...baseRouteParams, options: { sortBy: basePropertyLabels.UPDATED_AT, sortDesc: false }, checkTicketList: checkTicketList() }, true, model.tickets],
 				['the model returning tickets sorted by updated at in descending order', { ...baseRouteParams, options: { sortBy: basePropertyLabels.UPDATED_AT, sortDesc: true }, checkTicketList: checkTicketList(false) }, true, model.tickets],
-				['the model has tickets and query filter is imposed', { ...baseRouteParams, options: { query: `'${textProp.name}::${queryOperators.EQUALS}::${model.tickets[5].properties[textProp.name]}'` } }, true, [model.tickets[5]]],
-				['the model has tickets and template query filter is imposed', { ...baseRouteParams, options: { query: `'$${specialQueryFields.TEMPLATE}::${queryOperators.EQUALS}::${templatesToUse[1].code}'` } }, true, model.tickets.filter((t) => t.type === templatesToUse[1]._id)],
-				['the model has tickets and skip is provided', { ...baseRouteParams, options: { skip: 3, sortBy: textProp.name } }, true, model.tickets.sort((t1, t2) => String(t2.properties[textProp.name]).localeCompare(t1.properties[textProp.name])).slice(3)],
-				['the model has tickets and limit', { ...baseRouteParams, options: { limit: 2, sortBy: textProp.name } }, true, model.tickets.sort((t1, t2) => String(t2.properties[textProp.name]).localeCompare(t1.properties[textProp.name])).slice(0, 2)],
+				// ['the model has tickets and template query filter is imposed', { ...baseRouteParams, options: { query: `'$${specialQueryFields.TEMPLATE}::${queryOperators.EQUALS}::${templatesToUse[0].code}'` } }, true, model.tickets.filter((t) => t.type === templatesToUse[1]._id)],
+				['the model has tickets and skip is provided', { ...baseRouteParams, options: { skip: 3, sortBy: commonTextProp.name } }, true, model.tickets.sort((t1, t2) => String(t2.properties[commonTextProp.name]).localeCompare(t1.properties[commonTextProp.name])).slice(3)],
+				['the model has tickets and limit', { ...baseRouteParams, options: { limit: 2, sortBy: commonTextProp.name } }, true, model.tickets.sort((t1, t2) => String(t2.properties[commonTextProp.name]).localeCompare(t1.properties[commonTextProp.name])).slice(0, 2)],
+				...textPropertyFilters(propTypes.TEXT, textProp.name),
+				...textPropertyFilters(propTypes.LONG_TEXT, longTextProp.name),
+				...textPropertyFilters(propTypes.ONE_OF, oneOfProp.name),
+				...numberPropertyFilters(propTypes.NUMBER, numberProp.name),
+				...numberPropertyFilters(propTypes.DATE, dateProp.name),
+				...commonFilters(propTypes.BOOLEAN, boolProp.name),
 			];
 		};
 

@@ -1202,11 +1202,27 @@ const testGetTicketList = () => {
 			queryFilters: [{ propertyName, operator: queryOperators.EQUALS, value: [propertyValue, propertyValue2] }],
 			expectedQuery: { $and: [{ [propertyName]: { $in: [propertyValue, propertyValue2] } }] },
 		}],
+		[`${queryOperators.EQUALS} query filter and boolean value`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.EQUALS, value: ['true'] }],
+			expectedQuery: { $and: [{ [propertyName]: { $in: ['true', true] } }] },
+		}],
+		[`${queryOperators.EQUALS} query filter and number value`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.EQUALS, value: [`${propertyNumberValue}`] }],
+			expectedQuery: { $and: [{ [propertyName]: { $in: [`${propertyNumberValue}`, propertyNumberValue, new Date(propertyNumberValue)] } }] },
+		}],
 		[`${queryOperators.NOT_EQUALS} query filter`, [], {}, undefined, { }, {
 			queryFilters: [
 				{ propertyName, operator: queryOperators.NOT_EQUALS, value: [propertyValue, propertyValue2] },
 			],
 			expectedQuery: { $and: [{ [propertyName]: { $not: { $in: [propertyValue, propertyValue2] } } }] },
+		}],
+		[`${queryOperators.NOT_EQUALS} query filter and boolean value`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.NOT_EQUALS, value: ['true'] }],
+			expectedQuery: { $and: [{ [propertyName]: { $not: { $in: ['true', true] } } }] },
+		}],
+		[`${queryOperators.NOT_EQUALS} query filter and number value`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.NOT_EQUALS, value: [`${propertyNumberValue}`] }],
+			expectedQuery: { $and: [{ [propertyName]: { $not: { $in: [`${propertyNumberValue}`, propertyNumberValue, new Date(propertyNumberValue)] } } }] },
 		}],
 		[`${queryOperators.CONTAINS} query filter`, [], {}, undefined, { }, {
 			queryFilters: [{ propertyName, operator: queryOperators.CONTAINS, value: [propertyValue, propertyValue2] }],
