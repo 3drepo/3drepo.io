@@ -27,17 +27,18 @@ type IUploadListItemTitle = {
 	size: number;
 	revisionPrefix: string;
 	isSelected: boolean;
+	isMultiPagePdf?: boolean;
 };
 
 export const UploadListItemTitle = ({
 	name,
 	size,
 	revisionPrefix,
+	isMultiPagePdf = false, 
 	isSelected,
 }: IUploadListItemTitle): JSX.Element => {
-	const { formState: { errors }, getValues } = useFormContext();
+	const { formState: { errors } } = useFormContext();
 	const errorMessage = get(errors, `${revisionPrefix}.file`)?.message;
-	const isMultiPagePdf = getValues(`${revisionPrefix}.isMultiPagePdf`);
 
 	const ErrorSubTitle = () => (
 		<>
