@@ -56,20 +56,20 @@ export const AllMeasurementsList = ({areaMeasurements, lengthMeasurements, point
 	return (
 		<div>
 			{
-				!isEmpty(pointMeasurements) &&
-				<MeasurementsList {...props} measureType={MEASURE_TYPE.POINT} measurements={pointMeasurements} colors={colors} />
-			}
-			{
-				!isEmpty(lengthMeasurements) &&
-				<MeasurementsList {...props} measureType={MEASURE_TYPE.LENGTH} measurements={lengthMeasurements} colors={colors} />
+				!isEmpty(angleMeasurements) &&
+				<MeasurementsList {...props} measureType={MEASURE_TYPE.ANGLE} measurements={angleMeasurements} colors={colors} />
 			}
 			{
 				!isEmpty(areaMeasurements) &&
 				<MeasurementsList {...props} measureType={MEASURE_TYPE.AREA} measurements={areaMeasurements} colors={colors} />
 			}
 			{
-				!isEmpty(angleMeasurements) &&
-				<MeasurementsList {...props} measureType={MEASURE_TYPE.ANGLE} measurements={angleMeasurements} colors={colors} />
+				!isEmpty(lengthMeasurements) &&
+				<MeasurementsList {...props} measureType={MEASURE_TYPE.LENGTH} measurements={lengthMeasurements} colors={colors} />
+			}
+			{
+				!isEmpty(pointMeasurements) &&
+				<MeasurementsList {...props} measureType={MEASURE_TYPE.POINT} measurements={pointMeasurements} colors={colors} />
 			}
 			{
 				!isEmpty(slopeMeasurements) &&
