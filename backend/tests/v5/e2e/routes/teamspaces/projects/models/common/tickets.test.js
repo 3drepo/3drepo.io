@@ -715,12 +715,12 @@ const testGetTicketList = () => {
 					...commonTextFilters,
 					[`${queryOperators.CONTAINS} operator is used in ${propType} property`,
 						{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.CONTAINS}::${model.tickets[0].properties[propertyName].slice(0, 5)}'` } }, true,
-						model.tickets.filter((t) => t.properties[oneOfProp.name]
-							=== model.tickets[0].properties[oneOfProp.name])],
+						model.tickets.filter((t) => t.properties[propertyName]
+							=== model.tickets[0].properties[propertyName])],
 					[`${queryOperators.NOT_CONTAINS} operator is used in ${propType} property`,
 						{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.NOT_CONTAINS}::${model.tickets[0].properties[propertyName]}'` } }, true,
-						model.tickets.filter((t) => t.properties[oneOfProp.name]
-							!== model.tickets[0].properties[oneOfProp.name])],
+						model.tickets.filter((t) => t.properties[propertyName]
+							!== model.tickets[0].properties[propertyName])],
 				];
 			};
 
@@ -759,15 +759,17 @@ const testGetTicketList = () => {
 				['the model returning only tickets updated since now', { ...baseRouteParams, options: { updatedSince: Date.now() + 1000000 } }, true, []],
 				['the model returning tickets sorted by updated at in ascending order', { ...baseRouteParams, options: { sortBy: basePropertyLabels.UPDATED_AT, sortDesc: false }, checkTicketList: checkTicketList() }, true, model.tickets],
 				['the model returning tickets sorted by updated at in descending order', { ...baseRouteParams, options: { sortBy: basePropertyLabels.UPDATED_AT, sortDesc: true }, checkTicketList: checkTicketList(false) }, true, model.tickets],
-				// ['the model has tickets and template query filter is imposed', { ...baseRouteParams, options: { query: `'$${specialQueryFields.TEMPLATE}::${queryOperators.EQUALS}::${templatesToUse[0].code}'` } }, true, model.tickets.filter((t) => t.type === templatesToUse[1]._id)],
-				['the model has tickets and skip is provided', { ...baseRouteParams, options: { skip: 3, sortBy: commonTextProp.name } }, true, model.tickets.sort((t1, t2) => String(t2.properties[commonTextProp.name]).localeCompare(t1.properties[commonTextProp.name])).slice(3)],
-				['the model has tickets and limit', { ...baseRouteParams, options: { limit: 2, sortBy: commonTextProp.name } }, true, model.tickets.sort((t1, t2) => String(t2.properties[commonTextProp.name]).localeCompare(t1.properties[commonTextProp.name])).slice(0, 2)],
+				['the model has tickets and template query filter is imposed', { ...baseRouteParams, options: { query: `'$${specialQueryFields.TEMPLATE}::${queryOperators.EQUALS}::${templatesToUse[1].code}'` } }, true, model.tickets.filter((t) => t.type === templatesToUse[1]._id)],
+				['the model has tickets and ticket code query filter is imposed', { ...baseRouteParams, options: { query: `'$${specialQueryFields.TICKET_CODE}::${queryOperators.CONTAINS}::${templateWithAllProps.code}'` } }, true, model.tickets.filter((t) => t.type === templateWithAllProps._id)],
+				['the model has tickets and title query filter is imposed', { ...baseRouteParams, options: { query: `'$${specialQueryFields.TITLE}::${queryOperators.EQUALS}::${model.tickets[5].title}'` } }, true, [model.tickets[5]]],
 				...textPropertyFilters(propTypes.TEXT, textProp.name),
 				...textPropertyFilters(propTypes.LONG_TEXT, longTextProp.name),
 				...textPropertyFilters(propTypes.ONE_OF, oneOfProp.name),
 				...numberPropertyFilters(propTypes.NUMBER, numberProp.name),
 				...numberPropertyFilters(propTypes.DATE, dateProp.name),
 				...commonFilters(propTypes.BOOLEAN, boolProp.name),
+				['the model has tickets and skip is provided', { ...baseRouteParams, options: { skip: 2, sortBy: commonTextProp.name } }, true, model.tickets.sort((t1, t2) => String(t2.properties[commonTextProp.name]).localeCompare(t1.properties[commonTextProp.name])).slice(2)],
+				['the model has tickets and limit', { ...baseRouteParams, options: { limit: 2, sortBy: commonTextProp.name } }, true, model.tickets.sort((t1, t2) => String(t2.properties[commonTextProp.name]).localeCompare(t1.properties[commonTextProp.name])).slice(0, 2)],
 			];
 		};
 
