@@ -18,6 +18,8 @@
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import { alphaNumericHyphens, stripIfBlankString } from '../shared/validators';
+import { selectRevisions } from '@/v5/store/containers/revisions/containerRevisions.selectors';
+import { getState } from '@/v5/helpers/redux.helpers';
 
 export const nullableNumberField = Yup.number()
 	.transform((value) => (Number.isNaN(value) ? null : value))
@@ -64,8 +66,8 @@ export const revisionTag = Yup.string()
 			defaultMessage: 'This tag is already used within this container',
 		}),
 		(value, testContext) => {
-			if (!testContext.options?.context) return true;
-			return !testContext.options.context.alreadyExistingTags?.map((n) => n.trim().toLocaleLowerCase()).includes(value?.toLocaleLowerCase());
+			const revisions = selectRevisions(getState(), testContext.parent.containerId);
+			return !revisions?.map(({ tag }) => tag.trim().toLocaleLowerCase()).includes(value?.toLocaleLowerCase());
 		},
 	);
 
