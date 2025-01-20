@@ -49,6 +49,13 @@ export const getMaxFileSizeMessage = (value) => formatMessage({
 export const uploadFile = Yup.mixed().nullable().test(
 	'fileSize',
 	formatMessage({
+		id: 'validation.revisions.file.error.emptyFile',
+		defaultMessage: 'File is empty',
+	}),
+	({ size }) => size > 0,
+).test(
+	'fileSize',
+	formatMessage({
 		id: 'validation.revisions.file.error.tooLarge',
 		defaultMessage: 'File exceeds size limit of {sizeLimit}',
 	}, { sizeLimit: formatInfoUnit(ClientConfig.uploadSizeLimit) }),
