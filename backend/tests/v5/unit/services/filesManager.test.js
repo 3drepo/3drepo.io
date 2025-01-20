@@ -711,9 +711,10 @@ const testGetMD5FileHash = () => {
 			expect(FileRefs.updateRef).toHaveBeenCalledTimes(1);
 		});
 		test('it should return straight away if the MD5 has has been cached', async () => {
-			FileRefs.getRefEntry.mockResolvedValueOnce({ ...mockRefEntry, MD5Hash: CryptoJS.MD5(mockId).toString() });
+			const mockRef = { ...mockRefEntry, MD5Hash: generateRandomString() };
+			FileRefs.getRefEntry.mockResolvedValueOnce(mockRef);
 
-			await expect(FilesManager.getMD5FileHash('teamspace', 'container', 'filename')).resolves.toEqual({ hash: CryptoJS.MD5(mockId).toString(), size: 100 });
+			await expect(FilesManager.getMD5FileHash('teamspace', 'container', 'filename')).resolves.toEqual({ hash: mockRef.MD5Hash, size: mockRef.size });
 
 			expect(FileRefs.getRefEntry).toHaveBeenCalledTimes(1);
 			expect(FSHandler.getFile).toHaveBeenCalledTimes(0);

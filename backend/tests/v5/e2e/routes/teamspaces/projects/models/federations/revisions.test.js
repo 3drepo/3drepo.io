@@ -270,24 +270,24 @@ const testGetFederationMD5Hash = () => {
 			modelId: models[0]._id,
 			revisionId: ServiceHelper.generateUUIDString(),
 			key: users.tsAdmin.apiKey,
-			response: [],
+			response: { revisions: [] },
 		};
-		const viewerResponse = [{
+		const viewerResponse = { revisions: [{
 			container: containers[0]._id,
-			code: conRevisions.tag,
-			uploadedAt: new Date(conRevisions.timestamp).getTime(),
+			tag: conRevisions.tag,
+			timestamp: new Date(conRevisions.timestamp).getTime(),
 			hash: CryptoJs.MD5(Buffer.from(conRevisions.rFile[0])).toString(),
 			filename: conRevisions.rFile[0],
 			size: 20,
-		}];
-		const adminResponse = containers.map((model) => ({
+		}] };
+		const adminResponse = { revisions: containers.map((model) => ({
 			container: model._id,
-			code: conRevisions.tag,
-			uploadedAt: new Date(conRevisions.timestamp).getTime(),
+			tag: conRevisions.tag,
+			timestamp: new Date(conRevisions.timestamp).getTime(),
 			hash: CryptoJs.MD5(Buffer.from(conRevisions.rFile[0])).toString(),
 			filename: conRevisions.rFile[0],
 			size: 20,
-		}));
+		})) };
 
 		return [
 			['there is no valid session key.', { ...parameters, key: null }, false, templates.notLoggedIn],
@@ -310,7 +310,8 @@ const testGetFederationMD5Hash = () => {
 			const res = await agent.get(`${route(parameters)}`).expect(expectedStatus);
 
 			if (success) {
-				outOfOrderArrayEqual(JSON.parse(res.text), parameters.response);
+				const result = JSON.parse(res.text);
+				outOfOrderArrayEqual(result.revisions, parameters.response.revisions);
 			} else {
 				expect(res.body.code).toEqual(error.code);
 			}

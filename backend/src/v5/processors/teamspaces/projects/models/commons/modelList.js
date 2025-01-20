@@ -78,15 +78,14 @@ ModelList.getModelMD5Hash = async (teamspace, container, revision) => {
 
 	if (!rev.rFile?.length) return {};
 
-	const code = rev.tag;
-	const uploadedAt = new Date(rev.timestamp).getTime();
+	const { tag, timestamp } = rev;
 	const filename = rev.rFile[0];
-	const { hash, size } = await getMD5FileHash(teamspace, container, filename);
+	const { hash, size } = await getMD5FileHash(teamspace, `${container}.history`, filename);
 
 	return {
 		container,
-		code,
-		uploadedAt,
+		tag,
+		timestamp,
 		hash,
 		filename,
 		size,

@@ -515,8 +515,8 @@ const testGetRevisionMD5Hash = () => {
 
 			const MD5HashResponseExpectation = {
 				container: model._id,
-				code: revision.tag,
-				uploadedAt: new Date(revision.timestamp).getTime(),
+				tag: revision.tag,
+				timestamp: new Date(revision.timestamp).getTime(),
 				hash: CryptoJs.MD5(Buffer.from(revision.rFile[0])).toString(),
 				filename: revision.rFile[0],
 				size: 20,

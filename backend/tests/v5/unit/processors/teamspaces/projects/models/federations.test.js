@@ -402,8 +402,8 @@ const testGetMD5Hash = () => {
 			FilesManager.getMD5FileHash.mockResolvedValueOnce(mockMD5Hash);
 
 			await expect(Federations.getMD5Hash('teamspace', 'project', 'federation', 'user1')).resolves.toEqual([{ container: '1',
-				code: revisionMock.tag,
-				uploadedAt: new Date(revisionMock.timestamp).getTime(),
+				tag: revisionMock.tag,
+				timestamp: revisionMock.timestamp,
 				hash: CryptoJs.MD5(revisionMock._id).toString(),
 				filename: revisionMock.rFile[0],
 				size: fileEntry.size }]);
@@ -415,7 +415,7 @@ const testGetMD5Hash = () => {
 			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(1);
 			expect(Revisions.getLatestRevision).toHaveBeenCalledWith('teamspace', '1', 'container', { fileSize: 1, rFile: 1, tag: 1, timestamp: 1 });
 			expect(FilesManager.getMD5FileHash).toHaveBeenCalledTimes(1);
-			expect(FilesManager.getMD5FileHash).toHaveBeenCalledWith('teamspace', '1', 'success!');
+			expect(FilesManager.getMD5FileHash).toHaveBeenCalledWith('teamspace', '1.history', 'success!');
 		});
 
 		test('it should return an array with all the containers if admin', async () => {
@@ -427,22 +427,22 @@ const testGetMD5Hash = () => {
 			outOfOrderArrayEqual(await Federations.getMD5Hash('teamspace', 'project', 'federation', 'tsAdmin'), [
 				{
 					container: '1',
-					code: revisionMock.tag,
-					uploadedAt: new Date(revisionMock.timestamp).getTime(),
+					tag: revisionMock.tag,
+					timestamp: revisionMock.timestamp,
 					hash: CryptoJs.MD5(revisionMock._id).toString(),
 					filename: revisionMock.rFile[0],
 					size: fileEntry.size,
 				}, {
 					container: '2',
-					code: revisionMock.tag,
-					uploadedAt: new Date(revisionMock.timestamp).getTime(),
+					tag: revisionMock.tag,
+					timestamp: revisionMock.timestamp,
 					hash: CryptoJs.MD5(revisionMock._id).toString(),
 					filename: revisionMock.rFile[0],
 					size: fileEntry.size,
 				}, {
 					container: '3',
-					code: revisionMock.tag,
-					uploadedAt: new Date(revisionMock.timestamp).getTime(),
+					tag: revisionMock.tag,
+					timestamp: revisionMock.timestamp,
 					hash: CryptoJs.MD5(revisionMock._id).toString(),
 					filename: revisionMock.rFile[0],
 					size: fileEntry.size,

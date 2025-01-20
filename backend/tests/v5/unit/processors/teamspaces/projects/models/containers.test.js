@@ -538,8 +538,8 @@ const testGetMD5Hash = () => {
 
 			await expect(Containers.getRevisionMD5Hash('teamspace', 'container', revisionCodeMock)).resolves.toEqual({
 				container: 'container',
-				code: revisionMock.tag,
-				uploadedAt: new Date(revisionMock.timestamp).getTime(),
+				tag: revisionMock.tag,
+				timestamp: revisionMock.timestamp,
 				hash: fileHash.hash,
 				filename: revisionMock.rFile[0],
 				size: fileHash.size,
@@ -548,7 +548,7 @@ const testGetMD5Hash = () => {
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith('teamspace', 'container', 'container', revisionCodeMock, { fileSize: 1, rFile: 1, tag: 1, timestamp: 1 }, { includeVoid: false });
 			expect(FilesManager.getMD5FileHash).toHaveBeenCalledTimes(1);
-			expect(FilesManager.getMD5FileHash).toHaveBeenCalledWith('teamspace', 'container', revisionMock.rFile[0]);
+			expect(FilesManager.getMD5FileHash).toHaveBeenCalledWith('teamspace', 'container.history', revisionMock.rFile[0]);
 		});
 	});
 };

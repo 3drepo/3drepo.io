@@ -17,12 +17,12 @@
 
 const { hasReadAccessToContainer, hasReadAccessToDrawing, hasWriteAccessToContainer, hasWriteAccessToDrawing } = require('../../../../../middleware/permissions/permissions');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
+const { serialiseRevision, serialiseRevisionArray } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions');
 const Containers = require('../../../../../processors/teamspaces/projects/models/containers');
 const Drawings = require('../../../../../processors/teamspaces/projects/models/drawings');
 const { Router } = require('express');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
-const { serialiseRevisionArray } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions');
 const { templates } = require('../../../../../utils/responseCodes');
 const { validateNewRevisionData: validateNewContainerRev } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { validateNewRevisionData: validateNewDrawingRev } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/drawings');
@@ -59,12 +59,13 @@ const getRevisions = (modelType) => async (req, res, next) => {
 	}
 };
 
-const getRevisionMD5Hash = () => async (req, res) => {
+const getRevisionMD5Hash = () => async (req, res, next) => {
 	const { teamspace, container, revision } = req.params;
 
 	try {
 		const response = await Containers.getRevisionMD5Hash(teamspace, container, revision);
-		respond(req, res, templates.ok, response);
+		req.outputData = response;
+		next();
 	} catch (err) {
 		/* istanbul ignore next */
 		respond(req, res, err);
@@ -498,11 +499,11 @@ const establishRoutes = (modelType) => {
 		 *                   type: string
 		 *                   description: Container ID
 		 *                   example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
-		 *                 code:
+		 *                 tag:
 		 *                   type: string
-		 *                   description: Revision Code
+		 *                   description: Revision Tag
 		 *                   example: X01
-		 *                 uploadedAt:
+		 *                 timestamp:
 		 *                   type: number
 		 *                   description: Upload date
 		 *                   example: 1435068682
@@ -519,7 +520,7 @@ const establishRoutes = (modelType) => {
 		 *                   description: File size in bytes
 		 *                   example: 329487234
 		 */
-		router.get('/:revision/files/original/info', hasReadAccessToContainer, getRevisionMD5Hash());
+		router.get('/:revision/files/original/info', hasReadAccessToContainer, getRevisionMD5Hash(), serialiseRevision);
 	}
 	if (modelType === modelTypes.DRAWING) {
 		/**

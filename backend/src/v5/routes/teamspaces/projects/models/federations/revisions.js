@@ -20,6 +20,7 @@ const Federations = require('../../../../../processors/teamspaces/projects/model
 const { Router } = require('express');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { respond } = require('../../../../../utils/responder');
+const { serialiseRevisionArray } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions');
 const { templates } = require('../../../../../utils/responseCodes');
 const { validateNewRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/federations');
 
@@ -36,13 +37,13 @@ const createNewFederationRevision = async (req, res) => {
 	}
 };
 
-const getFederationMD5Hash = async (req, res) => {
+const getFederationMD5Hash = async (req, res, next) => {
 	const { teamspace, project, federation } = req.params;
 	const user = getUserFromSession(req.session);
 
 	try {
-		const response = await Federations.getMD5Hash(teamspace, project, federation, user);
-		respond(req, res, templates.ok, response);
+		req.outputData = await Federations.getMD5Hash(teamspace, project, federation, user);
+		next();
 	} catch (err) {
 		/* istanbul ignore next */
 		respond(req, res, err);
@@ -155,49 +156,53 @@ const establishRoutes = () => {
 	 *         content:
 	 *           application/json:
 	 *             schema:
-	 *               type: array
-	 *               items:
-	 *                 - type: object
-	 *                   properties:
-	 *                     container:
-	 *                       type: string
-	 *                       description: Container ID
-	 *                       example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
-	 *                     code:
-	 *                       type: string
-	 *                       description: Revision Code
-	 *                       example: X01
-	 *                     uploadedAt:
-	 *                       type: number
-	 *                       description: Upload date
-	 *                       example: 1435068682
-	 *                     hash:
-	 *                       type: string
-	 *                       description: MD5 hash of the original file uploaded
-	 *                       example: 76dea970d89477ed03dc5289f297443c
-	 *                     filename:
-	 *                       type: string
-	 *                       description: Name of the file
-	 *                       example: test.rvt
-	 *                     size:
-	 *                       type: number
-	 *                       description: File size in bytes
-	 *                       example: 329487234
+	 *               type: object
+	 *               properties:
+	 *                 revisions:
+	 *                   type: array
+	 *                   items:
+	 *                     - type: object
+	 *                       properties:
+	 *                         container:
+	 *                           type: string
+	 *                           description: Container ID
+	 *                           example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                         tag:
+	 *                           type: string
+	 *                           description: Container tag
+	 *                           example: X01
+	 *                         timestamp:
+	 *                           type: number
+	 *                           description: Upload date
+	 *                           example: 1435068682
+	 *                         hash:
+	 *                           type: string
+	 *                           description: MD5 hash of the original file uploaded
+	 *                           example: 76dea970d89477ed03dc5289f297443c
+	 *                         filename:
+	 *                           type: string
+	 *                           description: Name of the file
+	 *                           example: test.rvt
+	 *                         size:
+	 *                           type: number
+	 *                           description: File size in bytes
+	 *                           example: 329487234
 	 *               example:
-	 *                 - container: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
-	 *                   code: X01
-	 *                   uploadedAt: 1711929600
-	 *                   hash: 14703cffd1a95017a95eb092315c3ee1
-	 *                   filename: test_1.rvt
-	 *                   size: 123456789
-	 *                 - container: ef0855b6-4bb7-4be1-b2d6-c032dce7806a
-	 *                   code: X01
-	 *                   uploadedAt: 1711929690
-	 *                   hash: 14703cffd1a95017a95eb092315c3ee1
-	 *                   filename: test_2.rvt
-	 *                   size: 123456780
+	 *                 revisions:
+	 *                   - container: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                     code: X01
+	 *                     uploadedAt: 1711929600
+	 *                     hash: 14703cffd1a95017a95eb092315c3ee1
+	 *                     filename: test_1.rvt
+	 *                     size: 123456789
+	 *                   - container: ef0855b6-4bb7-4be1-b2d6-c032dce7806a
+	 *                     code: X01
+	 *                     uploadedAt: 1711929690
+	 *                     hash: 14703cffd1a95017a95eb092315c3ee1
+	 *                     filename: test_2.rvt
+	 *                     size: 123456780
 	 */
-	router.get('/:revision/files/original/info', hasReadAccessToFederation, getFederationMD5Hash);
+	router.get('/:revision/files/original/info', hasReadAccessToFederation, getFederationMD5Hash, serialiseRevisionArray);
 
 	return router;
 };
