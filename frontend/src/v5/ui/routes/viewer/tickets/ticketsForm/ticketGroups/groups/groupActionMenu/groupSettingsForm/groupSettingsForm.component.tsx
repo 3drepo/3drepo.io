@@ -175,6 +175,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 				group: {},
 			});
 			setIsSmart(true);
+			setNewPrefix([]);
 			return;
 		}
 
