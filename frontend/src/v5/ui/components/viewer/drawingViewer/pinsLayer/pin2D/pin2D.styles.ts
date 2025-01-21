@@ -44,14 +44,8 @@ export const PinContainer = styled.div<{ height, width, colour, position, select
 		transform-origin: bottom center;
 		animation: ${popupAnimation} .8s forwards;
 
-		&::before {
-			content: '';
-			height: 63%;
-			width: 80%;
-			margin: 10%;
-			z-index: -1;
-			background: #000;
-			position: absolute;
+		#selectionFill {
+			stroke-width: 7px;
 		}
 	`}
 
