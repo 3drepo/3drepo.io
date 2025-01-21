@@ -217,7 +217,7 @@ FilesManager.storeFileStream = async (teamspace, collection, id, dataStream, met
 };
 
 FilesManager.getMD5FileHash = async (teamspace, collection, filename) => {
-	const { size, MD5Hash: hash } = await getRefEntry(teamspace, collection, filename);
+	const { size, md5Hash: hash } = await getRefEntry(teamspace, collection, filename);
 
 	if (hash) {
 		return { size, hash };
@@ -226,7 +226,7 @@ FilesManager.getMD5FileHash = async (teamspace, collection, filename) => {
 	const file = await FilesManager.getFile(teamspace, collection, filename);
 	const newHash = CryptoJs.MD5(file).toString();
 
-	await updateRef(teamspace, collection, { _id: filename }, { $set: { MD5Hash: hash } });
+	await updateRef(teamspace, collection, { _id: filename }, { $set: { md5Hash: hash } });
 
 	return {
 		hash: newHash,
