@@ -16,23 +16,24 @@
  */
 
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { IInfoModal, InfoModal } from '../modalsDispatcher/templates/infoModal/infoModal.component';
+import { InfoModal } from '../modalsDispatcher/templates/infoModal/infoModal.component';
 import { formatMessage } from '@/v5/services/intl';
 import { isPermissionModalSuppressed } from './updatePermissionModal.helpers';
 import { WarningIcon } from '../modalsDispatcher/modalsDispatcher.styles';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
+import { InfoModalProps } from '../modalsDispatcher/templates/infoModal/infoModal.types';
 
-type UpdatePermissionProps = {
+type UpdatePermissionProps = InfoModalProps &  {
 	onConfirm?: () => void,
 	permissionsType: string,
 	permissionsCount?: number,
 };
-export const UpdatePermissionModal = ({ onConfirm, permissionsType, permissionsCount = 1, ...props }: IInfoModal & UpdatePermissionProps) => (
+export const UpdatePermissionModal = ({ onConfirm, permissionsType, permissionsCount = 1, ...props }: UpdatePermissionProps) => (
 	<InfoModal
 		Icon={WarningIcon}
-		primaryButtonLabel='Cancel'
-		secondaryButtonLabel='Continue'
-		onClickSecondary={onConfirm}
+		closeButtonLabel='Cancel'
+		actionButtonLabel='Continue'
+		onClickAction={onConfirm}
 		message={formatMessage({
 			id: 'permissionsModal.message',
 			defaultMessage: `
@@ -44,13 +45,14 @@ export const UpdatePermissionModal = ({ onConfirm, permissionsType, permissionsC
 	/>
 );
 
+
 export const updatePermissionsOrTriggerModal = async (props: UpdatePermissionProps) => {
 	if (isPermissionModalSuppressed()) return true;
 
 	const { resolve, promiseToResolve } = getWaitablePromise();
 	let confirmed = false;
 	const onConfirm = () => { confirmed = true; };
-	DialogsActionsDispatchers.open(UpdatePermissionModal, { onConfirm, onClose: resolve, ...props });
+	DialogsActionsDispatchers.open(UpdatePermissionModal, { onConfirm, onClickClose: resolve, ...props });
 	await promiseToResolve;
 
 	return confirmed;

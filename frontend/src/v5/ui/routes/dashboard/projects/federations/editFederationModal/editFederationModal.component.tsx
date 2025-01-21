@@ -28,7 +28,7 @@ import { FormModal } from './editFederationModal.styles';
 import { EditFederationContext, EditFederationContextComponent, EditFederationContextType } from './editFederationContext';
 
 type EditFederationModalProps = IFormModal & {
-	open: boolean;
+	open?: boolean;
 	federation: IFederation;
 	onClickClose?: () => void;
 };

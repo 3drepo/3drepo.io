@@ -30,19 +30,8 @@ import {
 	BottomBar, ImageWithArrows, ImageThumbnailContainer, ImageContainer, CloseButton,
 } from './imagesModal.styles';
 import { ImageMarkup } from './imageMarkup/imageMarkup.component';
+import { ImagesModalProps } from './imagesModal.types';
 
-export type ImagesModalProps = {
-	onClickClose: () => void;
-	onClose?: () => void;
-	open: boolean;
-	images: string[];
-	// to use if the image to display is not the first one
-	displayImageIndex?: number;
-	onAddMarkup?: (img, index) => void;
-	onUpload?: () => void;
-	onDelete?: (index) => void;
-	disabledDeleteMessage?: string;
-};
 export const ImagesModal = ({
 	images,
 	displayImageIndex = 0,

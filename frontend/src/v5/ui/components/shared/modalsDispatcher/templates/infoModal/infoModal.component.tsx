@@ -19,60 +19,57 @@ import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/mate
 import { Modal, ModalContent, Actions, CloseButton } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
 import { formatMessage } from '@/v5/services/intl';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
-import { ReactNode } from 'react';
+import { InfoModalProps } from './infoModal.types';
 
-export interface IInfoModal {
-	title: string;
-	message: string | ReactNode;
-	primaryButtonLabel?: string;
-	secondaryButtonLabel?: string;
-	open: boolean,
-	onClickClose?: () => void;
-	onClickSecondary?: () => void;
-	Icon?: any;
-}
 
 export const InfoModal = ({
 	title,
 	message,
-	primaryButtonLabel = formatMessage({
+	closeButtonLabel = formatMessage({
 		id: 'infoModal.action.primaryDefault',
 		defaultMessage: 'Ok, close window',
 	}),
-	secondaryButtonLabel,
+	actionButtonLabel,
 	onClickClose,
-	onClickSecondary,
+	onClickAction,
+	highlightActionButton = false,
 	open,
 	Icon,
-}: IInfoModal) => (
-	<Modal open={open} onClose={onClickClose}>
-		<ModalContent>
-			{Icon && <Icon />}
-			<DialogTitle>
-				{ title }
-			</DialogTitle>
-			<CloseButton onClick={onClickClose}>
-				<CloseIcon />
-			</CloseButton>
-			<DialogContent>
-				<DialogContentText>
-					{ message }
-				</DialogContentText>
-			</DialogContent>
-			<Actions>
-				<Button autoFocus variant="contained" color="primary" onClick={onClickClose}>
-					{primaryButtonLabel}
-				</Button>
-				{secondaryButtonLabel && onClickSecondary && (
-					<Button
-						variant="outlined"
-						color="secondary"
-						onClick={() => { onClickClose(); onClickSecondary?.(); }}
-					>
-						{secondaryButtonLabel}
+}: InfoModalProps) => {
+	const highlightProps = { variant : 'contained', color : 'primary' };
+	const unhighlightedProps = { variant : 'outlined', color : 'secondary' };
+
+	const closeButtonStyleProps: any =  highlightActionButton ? unhighlightedProps : highlightProps ;
+	const actionButtonStyleProps: any = highlightActionButton ? highlightProps : unhighlightedProps;
+
+	return (
+		<Modal open={open} onClose={onClickClose}>
+			<ModalContent>
+				{Icon && <Icon />}
+				<DialogTitle>
+					{ title }
+				</DialogTitle>
+				<CloseButton onClick={onClickClose}>
+					<CloseIcon />
+				</CloseButton>
+				<DialogContent>
+					<DialogContentText>
+						{ message }
+					</DialogContentText>
+				</DialogContent>
+				<Actions>
+					<Button autoFocus {...closeButtonStyleProps} onClick={onClickClose}>
+						{closeButtonLabel}
 					</Button>
-				)}
-			</Actions>
-		</ModalContent>
-	</Modal>
-);
+					{actionButtonLabel && onClickAction && (
+						<Button {...actionButtonStyleProps}
+							onClick={() => { onClickClose(); onClickAction?.(); }}
+						>
+							{actionButtonLabel}
+						</Button>
+					)}
+				</Actions>
+			</ModalContent>
+		</Modal>
+	);
+};
