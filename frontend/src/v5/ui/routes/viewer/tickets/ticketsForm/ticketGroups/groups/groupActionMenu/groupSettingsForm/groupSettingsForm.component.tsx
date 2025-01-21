@@ -185,7 +185,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		setIsSmart(!!value?.group?.rules?.length);
 		setInputObjects(convertToV4GroupNodes(value?.group?.objects));
 		setIsPastingRules(false);
-		setNewPrefix(newValue.prefix);
+		setNewPrefix(newValue.prefix || []);
 	}, [value, isColored]);
 
 	useEffect(() => {
