@@ -95,6 +95,17 @@ export const DrawingsEllipsisMenu = ({
 			)}
 			<EllipsisMenuItem
 				title={formatMessage({
+					id: 'drawings.ellipsisMenu.editPermissions',
+					defaultMessage: 'Edit Permissions',
+				})}
+				to={{
+					pathname: './user_permissions',
+					search: `?modelId=${drawingId}`,
+				}}
+				hidden={!isProjectAdmin}
+			/>
+			<EllipsisMenuItem
+				title={formatMessage({
 					id: 'drawings.ellipsisMenu.settings',
 					defaultMessage: 'Settings',
 				})}
