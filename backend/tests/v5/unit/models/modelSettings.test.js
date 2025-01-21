@@ -681,20 +681,21 @@ const testUpdateModelSettings = () => {
 			const data = {
 				name: generateRandomString(),
 				unit: 'm',
-				code: generateRandomString(5),
+				code: null,
 				defaultView: null,
+				description: undefined,
 			};
 
 			const updateObject = {
 				$set: {
 					properties: {
 						unit: data.unit,
-						code: data.code,
 					},
 					name: data.name,
 				},
 				$unset: {
 					defaultView: 1,
+					'properties.code': 1,
 				},
 			};
 
