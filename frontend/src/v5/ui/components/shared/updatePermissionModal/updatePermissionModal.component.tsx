@@ -52,7 +52,7 @@ export const updatePermissionsOrTriggerModal = async (props: UpdatePermissionPro
 	const { resolve, promiseToResolve } = getWaitablePromise();
 	let confirmed = false;
 	const onConfirm = () => { confirmed = true; };
-	DialogsActionsDispatchers.open(UpdatePermissionModal, { onConfirm, onClickClose: resolve, ...props });
+	DialogsActionsDispatchers.open(UpdatePermissionModal, { onConfirm, onClose: resolve, ...props });
 	await promiseToResolve;
 
 	return confirmed;

@@ -36,7 +36,6 @@ export const ImagesModal = ({
 	images,
 	displayImageIndex = 0,
 	onClickClose,
-	onClose,
 	open,
 	onUpload,
 	onDelete,
@@ -56,11 +55,6 @@ export const ImagesModal = ({
 		setImageIndex(newIndex);
 	};
 
-	const handleClose = () => {
-		onClickClose();
-		onClose?.();
-	};
-
 	const handleKeyDown = ({ keyCode }) => {
 		const ESCAPE_KEY = 27;
 		const LEFT_KEY = 37;
@@ -68,7 +62,7 @@ export const ImagesModal = ({
 
 		switch (keyCode) {
 			case ESCAPE_KEY:
-				handleClose();
+				onClickClose();
 				break;
 			case LEFT_KEY:
 				changeImageIndex(-1);
@@ -115,7 +109,7 @@ export const ImagesModal = ({
 
 	useEffect(() => {
 		if (!imagesLength) {
-			handleClose();
+			onClickClose();
 		}
 
 		if (previousImagesLength.current < imagesLength) {
@@ -136,7 +130,7 @@ export const ImagesModal = ({
 	);
 
 	return (
-		<Modal open={open} onClose={handleClose}>
+		<Modal open={open} onClose={onClickClose}>
 			<TopBar>
 				<Buttons>
 					{hasManyImages && (
@@ -175,7 +169,7 @@ export const ImagesModal = ({
 						</Tooltip>
 					)}
 				</Buttons>
-				<CloseButton onClick={handleClose} />
+				<CloseButton onClick={onClickClose} />
 			</TopBar>
 			<CenterBar>
 				{!hasManyImages && (

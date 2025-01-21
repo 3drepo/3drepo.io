@@ -21,7 +21,6 @@ import { formatMessage } from '@/v5/services/intl';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { InfoModalProps } from './infoModal.types';
 
-
 export const InfoModal = ({
 	title,
 	message,
