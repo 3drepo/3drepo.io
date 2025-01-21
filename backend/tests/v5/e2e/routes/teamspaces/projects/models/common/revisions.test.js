@@ -19,6 +19,7 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src, dwgModel, dwgModelUppercaseExt, image } = require('../../../../../../helper/path');
 const { writeFileSync, unlinkSync } = require('fs');
+const CryptoJs = require('crypto-js');
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { modelTypes, statusCodes } = require(`${src}/models/modelSettings.constants`);
@@ -498,6 +499,72 @@ const testDownloadRevisionFiles = () => {
 	});
 };
 
+const testGetRevisionMD5Hash = () => {
+	describe('Get Revision MD5 Hash', () => {
+		const basicData = generateBasicData();
+		const { users, teamspace, project, models, conRevisions } = basicData;
+
+		beforeAll(async () => {
+			await setupData(basicData);
+		});
+
+		const generateTestData = () => {
+			const model = models.conWithRev;
+			const revision = conRevisions.nonVoidRevision;
+			const { voidRevision } = conRevisions;
+
+			const MD5HashResponseExpectation = {
+				container: model._id,
+				tag: revision.tag,
+				timestamp: new Date(revision.timestamp).getTime(),
+				hash: CryptoJs.MD5(Buffer.from(revision.rFile[0])).toString(),
+				filename: revision.rFile[0],
+				size: 20,
+			};
+
+			const params = {
+				key: users.tsAdmin.apiKey,
+				ts: teamspace,
+				projectId: project.id,
+				modelId: model._id,
+				revision: { ...conRevisions.nonVoidRevision, refData: MD5HashResponseExpectation },
+			};
+
+			return [
+				['the user does not have a valid session.', { ...params, key: null }, false, templates.notLoggedIn],
+				['the teamspace does not exist.', { ...params, ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
+				['the user is not a member of the teamspace.', { ...params, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
+				['the user does not have access to the model.', { ...params, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
+				['the user is viewer.', { ...params, key: users.viewer.apiKey }, true],
+				['the user is commenter.', { ...params, key: users.commenter.apiKey }, true],
+				['the project does not exist.', { ...params, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
+				['the model does not exist.', { ...params, modelId: ServiceHelper.generateRandomString() }, false, templates.containerNotFound],
+				['the model is of wrong type.', { ...params, modelId: models.federation._id }, false, templates.containerNotFound],
+				['the revision does not exist.', { ...params, revision: ServiceHelper.generateRevisionEntry() }, false, templates.revisionNotFound],
+				['the revision has a file.', params, true],
+				['the revision has a file (void revision).', { ...params, revision: voidRevision }, false, templates.revisionNotFound],
+			];
+		};
+
+		const runTest = (desc, params, success, error) => {
+			const route = ({ ts, projectId, modelId, revision, key }) => `/v5/teamspaces/${ts}/projects/${projectId}/containers/${modelId}/revisions/${revision._id}/files/original/info?key=${key}`;
+
+			test(`should ${success ? 'succeed' : `fail with ${error.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : error.status;
+				const res = await agent.get(`${route(params)}`).expect(expectedStatus);
+
+				if (success) {
+					expect(res.text).toEqual(JSON.stringify(params.revision.refData));
+				} else {
+					expect(res.body.code).toEqual(error.code);
+				}
+			});
+		};
+
+		describe.each(generateTestData())('Container', runTest);
+	});
+};
+
 const testGetImage = () => {
 	describe('Get Image', () => {
 		const basicData = generateBasicData();
@@ -523,7 +590,7 @@ const testGetImage = () => {
 
 			return [
 				['the user does not have a valid session', { ...params, key: null }, false, templates.notLoggedIn],
-				['the teamspace does not exist', { ...params, ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
+				['the teamspace does not exist', { ...params, ts: 'notAvalidTS' }, false, templates.teamspaceNotFound],
 				['the user is not a member of the teamspace', { ...params, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
 				['the user does not have access to the model', { ...params, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 				['the project does not exist', { ...params, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
@@ -573,4 +640,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	testUpdateRevisionStatus();
 	testDownloadRevisionFiles();
 	testGetImage();
+	testGetRevisionMD5Hash();
 });

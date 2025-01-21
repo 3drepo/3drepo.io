@@ -24,6 +24,7 @@ const {
 
 const fs = require('fs/promises');
 const path = require('path');
+const CryptoJs = require('crypto-js');
 
 jest.mock('../../../../../../../src/v5/utils/helper/models');
 const ModelHelper = require(`${src}/utils/helper/models`);
@@ -43,6 +44,7 @@ const Legends = require(`${src}/models/legends`);
 jest.mock('../../../../../../../src/v5/models/legends');
 jest.mock('../../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
+jest.mock('../../../../../../../src/v5/models/fileRefs');
 
 jest.mock('../../../../../../../src/v5/handler/queue');
 const QueueHandler = require(`${src}/handler/queue`);
@@ -431,7 +433,7 @@ const testNewRevision = () => {
 
 		test('v4 compatibility test', async () => {
 			await fs.copyFile(objModel, fileCreated);
-			ModelSettings.getContainerById.mockResolvedValueOnce({ });
+			ModelSettings.getContainerById.mockResolvedValueOnce({});
 			await expect(Containers.newRevision(teamspace, model, data, file)).resolves.toBe(undefined);
 			await expect(fileExists(fileCreated)).resolves.toBe(false);
 			expect(QueueHandler.queueMessage).toHaveBeenCalledTimes(1);
@@ -514,6 +516,43 @@ const testDownloadRevisionFiles = () => {
 	});
 };
 
+const testGetMD5Hash = () => {
+	describe('Get revision MD5 hash', () => {
+		test('should return empty if revision has no file', async () => {
+			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce(templates.revisionNotFound);
+			const randomRevision = generateUUIDString();
+
+			await expect(Containers.getRevisionMD5Hash('teamspace', 'container', randomRevision)).resolves.toEqual({});
+
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith('teamspace', 'container', 'container', randomRevision, { fileSize: 1, rFile: 1, tag: 1, timestamp: 1 }, { includeVoid: false });
+			expect(FilesManager.getMD5FileHash).not.toHaveBeenCalled();
+		});
+		test('should return an object if revision has a valid file and the file should be retrieved if no MD5Hash exists in the fileRef', async () => {
+			const revisionMock = { _id: generateRandomString(), rFile: ['success!'], timestamp: new Date(), tag: 'testTag' };
+			const revisionCodeMock = generateUUIDString();
+			const fileHash = { hash: CryptoJs.MD5(revisionMock._id).toString(), size: 100 };
+
+			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce(revisionMock);
+			FilesManager.getMD5FileHash.mockResolvedValueOnce(fileHash);
+
+			await expect(Containers.getRevisionMD5Hash('teamspace', 'container', revisionCodeMock)).resolves.toEqual({
+				container: 'container',
+				tag: revisionMock.tag,
+				timestamp: revisionMock.timestamp,
+				hash: fileHash.hash,
+				filename: revisionMock.rFile[0],
+				size: fileHash.size,
+			});
+
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith('teamspace', 'container', 'container', revisionCodeMock, { fileSize: 1, rFile: 1, tag: 1, timestamp: 1 }, { includeVoid: false });
+			expect(FilesManager.getMD5FileHash).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getMD5FileHash).toHaveBeenCalledWith('teamspace', 'container.history', revisionMock.rFile[0]);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetContainerList();
 	testGetContainerStats();
@@ -526,4 +565,5 @@ describe(determineTestGroup(__filename), () => {
 	testGetSettings();
 	testUpdateRevisionStatus();
 	testDownloadRevisionFiles();
+	testGetMD5Hash();
 });
