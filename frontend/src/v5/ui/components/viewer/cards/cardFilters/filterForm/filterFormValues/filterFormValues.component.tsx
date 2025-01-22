@@ -127,7 +127,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFolrmValuesTy
 	// @ts-ignore
 	if (isSelectType(type) && isArray(fields[0]?.value)) {
 		return (
-			<FormMultiSelect name={`${name}.0.value`} formError={!!error?.[0]?.value}>
+			<FormMultiSelect name={`${name}.0.value`} formError={error?.[0]?.value}>
 				{selectOptions.map((val) => <MultiSelectMenuItem key={val} value={val}>{val}</MultiSelectMenuItem>)}
 			</FormMultiSelect>
 		);
