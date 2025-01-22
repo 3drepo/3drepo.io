@@ -17,8 +17,8 @@
 
 import { memo, useContext } from 'react';
 import { ResizableTableContext } from '../resizableTableContext';
-import { Container, Item, ResizerMouseLandingArea, ResizerLine } from './resizableTableItem.styles';
-import { useResizable } from '../useResizable';
+import { Container, Item, ResizerLine } from './resizableTableItem.styles';
+import { Resizer } from '../resizer/resizer.component';
 
 const MemoizedItem = memo(
 	({ children, className }: any) => <Item className={className}>{children}</Item>,
@@ -37,18 +37,15 @@ type ResizableTableItemProps = {
 export const ResizableTableItem = ({ name, children, className, hidden = false }: ResizableTableItemProps) => {
 	const { setWidth, getWidth, setIsResizing, isResizing, setResizerName, resizerName } = useContext(ResizableTableContext);
 	const currentWidth = getWidth(name);
-	const onMouseDown = useResizable({
-		onResizeStart: () => {
-			setIsResizing(true);
-			setResizerName(name);
-		},
-		onResize: (offset) => setWidth(name, currentWidth + offset),
-		onResizeEnd: () => {
-			setIsResizing(false);
-			setResizerName('');
-		},
-	});
-
+	const onResizeStart = () => {
+		setIsResizing(true);
+		setResizerName(name);
+	};
+	const onResize = (offset) => setWidth(name, currentWidth + offset);
+	const onResizeEnd = () => {
+		setIsResizing(false);
+		setResizerName('');
+	};
 	const handleMouseOver = () => setResizerName(name);
 	const handleMouseOut = () => {
 		if (!isResizing) setResizerName('');
@@ -65,7 +62,11 @@ export const ResizableTableItem = ({ name, children, className, hidden = false }
 				$isResizing={isResizing}
 				$highlight={resizerName === name}
 			>
-				<ResizerMouseLandingArea onMouseDown={onMouseDown} />
+				<Resizer
+					onResizeStart={onResizeStart}
+					onResize={onResize}
+					onResizeEnd={onResizeEnd}
+				/>
 			</ResizerLine>
 		</Container>
 	);

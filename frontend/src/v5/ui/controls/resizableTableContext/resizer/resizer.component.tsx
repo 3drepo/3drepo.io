@@ -16,25 +16,14 @@
  */
 
 import { useRef } from 'react';
-
-// This is not to interfere with other components and to keep the cursor as
-// "col-resize" while resizing even when moving the mouse outside the table
-const overlayStyles = `
-	height: 100vh;
-	width: 100vw;
-	cursor: col-resize;
-	pointer-events: all;
-	position: absolute;
-	z-index: 100;
-	top: 0;
-`;
+import { overlayStyles, ResizerElement } from './resizer.styles';
 
 type UseResizableProps = {
 	onResizeStart: () => void,
 	onResize: (offset: number) => void,
 	onResizeEnd: () => void,
 };
-export const useResizable = ({ onResizeStart, onResize, onResizeEnd }: UseResizableProps) => {
+export const Resizer = ({ onResizeStart, onResize, onResizeEnd, ...props }: UseResizableProps) => {
 	const initialPosition = useRef(null);
 
 	const handleResize = (e) => onResize(!initialPosition.current ? 0 : e.clientX - initialPosition.current);
@@ -65,5 +54,5 @@ export const useResizable = ({ onResizeStart, onResize, onResizeEnd }: UseResiza
 		overlay.addEventListener('mousemove', handleResize);
 	};
 
-	return onMouseDown;
+	return (<ResizerElement {...props} onMouseDown={onMouseDown} />);
 };
