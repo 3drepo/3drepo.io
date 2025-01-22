@@ -88,11 +88,8 @@ export const name = trimmedString
 		},
 	);
 
-export const desc = Yup.lazy((value) => (
-	stripIfBlankString(value)
-		.max(660,
-			formatMessage({
-				id: 'validation.model.description.error.max',
-				defaultMessage: 'Description is limited to 660 characters',
-			}))
-));
+export const desc = nullableString.max(660,
+	formatMessage({
+		id: 'validation.model.description.error.max',
+		defaultMessage: 'Description is limited to 660 characters',
+	}));
