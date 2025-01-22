@@ -95,20 +95,28 @@ const establishRoutes = (modelType) => {
 		 *           type: string
 		 *     responses:
 		 *       401:
-		 *         oneOf:
-		 *           - $ref: "#/components/responses/notLoggedIn"
-		 *           - $ref: "#/components/responses/notAuthorized"
+		 *         description: 401 Unauthorized
+		 *         content:
+         *           application/json:
+         *             schema:
+         *               oneOf:
+         *                 - $ref: "#/components/responses/notLoggedIn"
+         *                 - $ref: "#/components/responses/notAuthorized"
 		 *       404:
-	 	 *         oneOf:
-	 	 *           - $ref: "#/components/responses/teamspaceNotFound"
-	 	 *           - $ref: "#/components/responses/projectNotFound"
-	 	 *           - $ref: "#components/responses/containerNotFound"
-	 	 *           - $ref: "#/components/responses/revisionNotFound"
-	 	 *           - $ref: "#/components/responses/fileNotFound"
+		 *         description: 404 Not Found
+		 *         content:
+		 *           application/json:
+		 *             schema:
+	 	 *               oneOf:
+	 	 *                 - $ref: "#/components/responses/teamspaceNotFound"
+	 	 *                 - $ref: "#/components/responses/projectNotFound"
+	 	 *                 - $ref: "#components/responses/containerNotFound"
+	 	 *                 - $ref: "#/components/responses/revisionNotFound"
+	 	 *                 - $ref: "#/components/responses/fileNotFound"
 		 *       200:
 		 *         description: Returns json file containing the properties of the specified container
 		 *         content:
-		 *           application/json
+		 *           application/json:
 		 *             schema:
 		 *               type: object
 		 *               properties:
@@ -141,12 +149,13 @@ const establishRoutes = (modelType) => {
 		 *         required: true
 		 *         schema:
 		 *           type: string
-		 *       - name: type:
-		 *         description: Model type
-		 *         in: path
-		 *         required: true
-		 *         type: string
-		 *         enum: [containers, federations]
+         *       - name: type
+         *         description: Model type
+         *         in: path
+         *         required: true
+         *         schema:
+         *           type: string
+         *           enum: [containers, federations]
 		 *       - name: model
 		 *         description: Model ID
 		 *         in: path
@@ -155,16 +164,24 @@ const establishRoutes = (modelType) => {
 		 *           type: string
 		 *     responses:
 		 *       401:
-		 *         oneOf:
-		 *           - $ref: "#/components/responses/notLoggedIn"
-		 *           - $ref: "#/components/responses/notAuthorized"
+		 *         description: 401 Unauthorized
+		 *         content:
+         *           application/json:
+         *             schema:
+         *               oneOf:
+         *                 - $ref: "#/components/responses/notLoggedIn"
+         *                 - $ref: "#/components/responses/notAuthorized"
 		 *       404:
-	 	 *         oneOf:
-	 	 *           - $ref: "#/components/responses/teamspaceNotFound"
-	 	 *           - $ref: "#/components/responses/projectNotFound"
-	 	 *           - $ref: "#components/responses/containerNotFound"
-	 	 *           - $ref: "#/components/responses/federationNotFound"
-	 	 *           - $ref: "#/components/responses/fileNotFound"
+		 *         description: 404 Not Found
+		 *         content:
+		 *           application/json:
+		 *             schema:
+	 	 *               oneOf:
+	 	 *                 - $ref: "#/components/responses/teamspaceNotFound"
+	 	 *                 - $ref: "#/components/responses/projectNotFound"
+	 	 *                 - $ref: "#components/responses/containerNotFound"
+	 	 *                 - $ref: "#/components/responses/revisionNotFound"
+	 	 *                 - $ref: "#/components/responses/fileNotFound"
 		 *       200:
 		 *         description: Returns json file containing the properties of the specified model.
 		 */

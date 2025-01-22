@@ -93,19 +93,27 @@ const establishRoutes = (modelType) => {
 	 *           type: string
 	 *     responses:
 	 *       401:
-	 *         oneOf:
-	 *           - $ref: "#/components/responses/notLoggedIn"
-	 *           - $ref: "#/components/responses/notAuthorized"
+	 *         description: 401 Unauthorized
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               oneOf:
+	 *                 - $ref: "#/components/responses/notLoggedIn"
+	 *                 - $ref: "#/components/responses/notAuthorized"
 	 *       404:
- 	 *         oneOf:
- 	 *           - $ref: "#/components/responses/teamspaceNotFound"
- 	 *           - $ref: "#/components/responses/projectNotFound"
- 	 *           - $ref: "#/components/responses/containerNotFound"
- 	 *           - $ref: "#/components/responses/revisionNotFound"
+	 *         description: 404 Not Found
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               oneOf:
+ 	 *                 - $ref: "#/components/responses/teamspaceNotFound"
+ 	 *                 - $ref: "#/components/responses/projectNotFound"
+ 	 *                 - $ref: "#/components/responses/containerNotFound"
+ 	 *                 - $ref: "#/components/responses/revisionNotFound"
 	 *       200:
 	 *         description: Returns list of submodels
 	 *         content:
-	 *           application/json
+	 *           application/json:
 	 *             schema:
 	 *               type: object
 	 *               properties:
@@ -122,46 +130,46 @@ const establishRoutes = (modelType) => {
 	 *                         type: string
 	 *                         description: Model ID
 	 *                         example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
-	 *                      superMeshes:
-	 *                        type: object
-	 *                        properties:
-	 *                          superMeshes:
-	 *                            type: array
-	 *                            items:
-	 *                              type: object
-	 *                              properties:
-	 *                                _id:
-	 *                                  type: string
-	 *                                  description: superMesh ID
-	 *                                  example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
-	 *                                nVertices:
-	 *                                  type: number
-	 *                                  description: number of vertices in the superMesh
-	 *                                  example: 811871
-	 *                                nFaces:
-	 *                                  type: number
-	 *                                  description: number of faces in the superMesh
-	 *                                  example: 1085576
-	 *                                nUVChannels:
-	 *                                  type: number
-	 *                                  description: number of UV Channels in the superMesh
-	 *                                  example: 1
-	 *                                primitive:
-	 *                                  type: number
-	 *                                  description: the primitive type of the superMesh
-	 *                                  example: 3
-	 *                                min:
-	 *                                  type: array
-	 *                                  items:
-	 *                                    type: number
-	 *                                    example: 23.45
-	 *                                  description: The minimum coordinates of the superMesh (x,y,z)
-     *                                max:
-	 *                                  type: array
-	 *                                  items:
-	 *                                    type: number
-	 *                                    example: 23.45
-	 *                                  description: The maximum coordinates of the superMesh (x,y,z)
+	 *                       superMeshes:
+	 *                         type: object
+	 *                         properties:
+	 *                           superMeshes:
+	 *                             type: array
+	 *                             items:
+	 *                               type: object
+	 *                               properties:
+	 *                                 _id:
+	 *                                   type: string
+	 *                                   description: superMesh ID
+	 *                                   example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
+	 *                                 nVertices:
+	 *                                   type: number
+	 *                                   description: number of vertices in the superMesh
+	 *                                   example: 811871
+	 *                                 nFaces:
+	 *                                   type: number
+	 *                                   description: number of faces in the superMesh
+	 *                                   example: 1085576
+	 *                                 nUVChannels:
+	 *                                   type: number
+	 *                                   description: number of UV Channels in the superMesh
+	 *                                   example: 1
+	 *                                 primitive:
+	 *                                   type: number
+	 *                                   description: the primitive type of the superMesh
+	 *                                   example: 3
+	 *                                 min:
+	 *                                   type: array
+	 *                                   items:
+	 *                                     type: number
+	 *                                     example: 23.45
+	 *                                   description: The minimum coordinates of the superMesh (x,y,z)
+     *                                 max:
+	 *                                   type: array
+	 *                                   items:
+	 *                                     type: number
+	 *                                     example: 23.45
+	 *                                   description: The maximum coordinates of the superMesh (x,y,z)
 	 *
 	 */
 		router.get('/revision/:rev', hasReadAccessToModel[modelType], getAssetsMeta(modelType));
@@ -202,20 +210,28 @@ const establishRoutes = (modelType) => {
 	 *         schema:
 	 *           type: string
 	 *     responses:
-		 *       401:
-		 *         oneOf:
-		 *           - $ref: "#/components/responses/notLoggedIn"
-		 *           - $ref: "#/components/responses/notAuthorized"
-		 *       404:
-	 	 *         oneOf:
-	 	 *           - $ref: "#/components/responses/teamspaceNotFound"
-	 	 *           - $ref: "#/components/responses/projectNotFound"
-	 	 *           - $ref: "#/components/responses/containerNotFound"
-	 	 *           - $ref: "#/components/responses/federationNotFound"
+	 *       401:
+	 *         description: 401 Unauthorized
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               oneOf:
+	 *                 - $ref: "#/components/responses/notLoggedIn"
+	 *                 - $ref: "#/components/responses/notAuthorized"
+	 *       404:
+	 *         description: 404 Not Found
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               oneOf:
+	 *                 - $ref: "#/components/responses/teamspaceNotFound"
+	 *                 - $ref: "#/components/responses/projectNotFound"
+	 *                 - $ref: "#/components/responses/containerNotFound"
+	 *                 - $ref: "#/components/responses/federationNotFound"
 	 *       200:
 	 *         description: Returns list of submodels
 	 *         content:
-	 *           application/json
+	 *           application/json:
 	 *             schema:
 	 *               type: object
 	 *               properties:
@@ -232,47 +248,46 @@ const establishRoutes = (modelType) => {
 	 *                         type: string
 	 *                         description: Model ID
 	 *                         example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
-	 *                      superMeshes:
-	 *                        type: object
-	 *                        properties:
-	 *                          superMeshes:
-	 *                            type: array
-	 *                            items:
-	 *                              type: object
-	 *                              properties:
-	 *                                _id:
-	 *                                  type: string
-	 *                                  description: superMesh ID
-	 *                                  example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
-	 *                                nVertices:
-	 *                                  type: number
-	 *                                  description: number of vertices in the superMesh
-	 *                                  example: 811871
-	 *                                nFaces:
-	 *                                  type: number
-	 *                                  description: number of faces in the superMesh
-	 *                                  example: 1085576
-	 *                                nUVChannels:
-	 *                                  type: number
-	 *                                  description: number of UV Channels in the superMesh
-	 *                                  example: 1
-	 *                                primitive:
-	 *                                  type: number
-	 *                                  description: the primitive type of the superMesh
-	 *                                  example: 3
-	 *                                min:
-	 *                                  type: array
-	 *                                  items:
-	 *                                    type: number
-	 *                                    example: 23.45
-	 *                                  description: The minimum coordinates of the superMesh (x,y,z)
-     *                                max:
-	 *                                  type: array
-	 *                                  items:
-	 *                                    type: number
-	 *                                    example: 23.45
-	 *                                  description: The maximum coordinates of the superMesh (x,y,z)
-	 *
+	 *                       superMeshes:
+	 *                         type: object
+	 *                         properties:
+	 *                           superMeshes:
+	 *                             type: array
+	 *                             items:
+	 *                               type: object
+	 *                               properties:
+	 *                                 _id:
+	 *                                   type: string
+	 *                                   description: superMesh ID
+	 *                                   example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
+	 *                                 nVertices:
+	 *                                   type: number
+	 *                                   description: number of vertices in the superMesh
+	 *                                   example: 811871
+	 *                                 nFaces:
+	 *                                   type: number
+	 *                                   description: number of faces in the superMesh
+	 *                                   example: 1085576
+	 *                                 nUVChannels:
+	 *                                   type: number
+	 *                                   description: number of UV Channels in the superMesh
+	 *                                   example: 1
+	 *                                 primitive:
+	 *                                   type: number
+	 *                                   description: the primitive type of the superMesh
+	 *                                   example: 3
+	 *                                 min:
+	 *                                   type: array
+	 *                                   items:
+	 *                                     type: number
+	 *                                     example: 23.45
+	 *                                   description: The minimum coordinates of the superMesh (x,y,z)
+     *                                 max:
+	 *                                   type: array
+	 *                                   items:
+	 *                                     type: number
+	 *                                     example: 23.45
+	 *                                   description: The maximum coordinates of the superMesh (x,y,z)
 	 */
 		router.get('/revision/master/head', hasReadAccessToModel[modelType], getAssetsMeta(modelType));
 	}

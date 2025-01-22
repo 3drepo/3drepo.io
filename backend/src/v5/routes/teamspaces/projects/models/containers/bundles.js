@@ -79,16 +79,24 @@ const establishRoutes = () => {
 	 *         schema:
 	 *           type: string
 	 *     responses:
-		 *       401:
-		 *         oneOf:
-		 *           - $ref: "#/components/responses/notLoggedIn"
-		 *           - $ref: "#/components/responses/notAuthorized"
-		 *       404:
-	 	 *         oneOf:
-	 	 *           - $ref: "#/components/responses/teamspaceNotFound"
-	 	 *           - $ref: "#/components/responses/projectNotFound"
-	 	 *           - $ref: "#components/responses/containerNotFound"
-	 	 *           - $ref: "#components/responses/fileNotFound"
+	 *       401:
+	 *         description: 401 Unauthorized
+	 *         content:
+     *           application/json:
+     *             schema:
+     *               oneOf:
+	 *                 - $ref: "#/components/responses/notLoggedIn"
+	 *                 - $ref: "#/components/responses/notAuthorized"
+	 *       404:
+	 *         description: 404 Not Found
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               oneOf:
+	 *                 - $ref: "#/components/responses/teamspaceNotFound"
+	 *                 - $ref: "#/components/responses/projectNotFound"
+	 *                 - $ref: "#components/responses/containerNotFound"
+	 *                 - $ref: "#components/responses/fileNotFound"
 	 *       200:
 	 *         description: returns the repobundle file containing the bundle with the specified ID for the specified model
 	 */
@@ -127,16 +135,24 @@ const establishRoutes = () => {
 	 *         schema:
 	 *           type: string
 	 *     responses:
-		 *       401:
-		 *         oneOf:
-		 *           - $ref: "#/components/responses/notLoggedIn"
-		 *           - $ref: "#/components/responses/notAuthorized"
-		 *       404:
-	 	 *         oneOf:
-	 	 *           - $ref: "#/components/responses/teamspaceNotFound"
-	 	 *           - $ref: "#/components/responses/projectNotFound"
-	 	 *           - $ref: "#components/responses/containerNotFound"
-	 	 *           - $ref: "#components/responses/fileNotFound"
+	 *       401:
+	 *         description: 401 Unauthorized
+	 *         content:
+     *           application/json:
+     *             schema:
+     *               oneOf:
+	 *                 - $ref: "#/components/responses/notLoggedIn"
+	 *                 - $ref: "#/components/responses/notAuthorized"
+	 *       404:
+	 *         description: 404 Not Found
+	 *         content:
+     *           application/json:
+     *             schema:
+     *               oneOf:
+	 *                 - $ref: "#/components/responses/teamspaceNotFound"
+	 *                 - $ref: "#/components/responses/projectNotFound"
+	 *                 - $ref: "#components/responses/containerNotFound"
+	 *                 - $ref: "#components/responses/fileNotFound"
 	 *       200:
 	 *         description: returns the unity3d file containing the bundle with the specified ID for the specified model
 	 */

@@ -68,22 +68,30 @@ const establishRoutes = () => {
 	 *         schema:
 	 *           type: string
 	 *     responses:
-		 *       401:
-		 *         oneOf:
-		 *           - $ref: "#/components/responses/notLoggedIn"
-		 *           - $ref: "#/components/responses/notAuthorized"
-		 *       404:
-	 	 *         oneOf:
-	 	 *           - $ref: "#/components/responses/teamspaceNotFound"
-	 	 *           - $ref: "#/components/responses/projectNotFound"
-	 	 *           - $ref: "#/components/responses/containerNotFound"
-	 	 *           - $ref: "#/components/responses/fileNotFound"
-		 *           - $ref: "#/components/responses/meshNotFound"
-		 *           - $ref: "#/components/responses/meshDataNotFound"
-	 *       200:
-	 *         description:
+	 *       401:
+	 *         description: 401 Unauthorized
 	 *         content:
-	 *           application/json
+	 *           application/json:
+	 *             schema:
+	 *               oneOf:
+	 *                 - $ref: "#/components/responses/notLoggedIn"
+	 *                 - $ref: "#/components/responses/notAuthorized"
+	 *       404:
+	 *         description: 404 Not Found
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               oneOf:
+	 *                 - $ref: "#/components/responses/teamspaceNotFound"
+	 *                 - $ref: "#/components/responses/projectNotFound"
+	 *                 - $ref: "#/components/responses/containerNotFound"
+	 *                 - $ref: "#/components/responses/fileNotFound"
+	 *                 - $ref: "#/components/responses/meshNotFound"
+	 *                 - $ref: "#/components/responses/meshDataNotFound"
+	 *       200:
+	 *         description: Returns json file containing the mesh info of the requested mesh.
+	 *         content:
+	 *           application/json:
 	 *             schema:
 	 *               type: object
 	 *               properties:

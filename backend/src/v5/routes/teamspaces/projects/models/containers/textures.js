@@ -69,17 +69,25 @@ const establishRoutes = () => {
 	 *           type: string
 	 *     responses:
 	 *       401:
-	 *         oneOf:
-	 *           - $ref: "#/components/responses/notLoggedIn"
-	 *           - $ref: "#/components/responses/notAuthorized"
+	 *         description: 401 Unauthorized
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               oneOf:
+	 *                 - $ref: "#/components/responses/notLoggedIn"
+	 *                 - $ref: "#/components/responses/notAuthorized"
 	 *       404:
- 	 *         oneOf:
- 	 *           - $ref: "#/components/responses/teamspaceNotFound"
- 	 *           - $ref: "#/components/responses/projectNotFound"
- 	 *           - $ref: "#components/responses/containerNotFound"
- 	 *           - $ref: "#components/responses/revisionNotFound"
- 	 *           - $ref: "#components/responses/fileNotFound"
-  	 *           - $ref: "#components/responses/textureNotFound"
+	 *         description: 404 Not Found
+	 *         content:
+	 *           application/json:
+	 *             schema:
+ 	 *               oneOf:
+ 	 *                 - $ref: "#/components/responses/teamspaceNotFound"
+ 	 *                 - $ref: "#/components/responses/projectNotFound"
+ 	 *                 - $ref: "#components/responses/containerNotFound"
+ 	 *                 - $ref: "#components/responses/revisionNotFound"
+ 	 *                 - $ref: "#components/responses/fileNotFound"
+  	 *                 - $ref: "#components/responses/textureNotFound"
 	 *       200:
 	 *         description: returns the texture file with the specified ID for the specified model
 	 */
