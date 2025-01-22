@@ -29,21 +29,12 @@ const getAssetsMeta = (modelType) => async (req, res) => {
 	const branch = rev ? undefined : DbConstants.MASTER_BRANCH_NAME;
 
 	try {
-		switch (modelType) {
-		case modelTypes.CONTAINER: {
+		if (modelType === modelTypes.CONTAINER) {
 			const obj = await Scene.getContainerMeshInfo(teamspace, model, branch, rev);
 			respond(req, res, templates.ok, obj);
-			break;
-		}
-		case modelTypes.FEDERATION: {
+		} else {
 			const obj = await Scene.getFederationMeshInfo(teamspace, project, model, branch, rev, username);
 			respond(req, res, templates.ok, obj);
-			break;
-		}
-		default: {
-			respond(req, res, createResponseCode(templates.invalidArguments, 'Model type is not Container or Federation'));
-			break;
-		}
 		}
 	} catch (err) {
 		respond(req, res, err);

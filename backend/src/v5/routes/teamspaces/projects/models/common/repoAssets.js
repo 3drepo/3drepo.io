@@ -29,21 +29,12 @@ const getRepoAssets = (modelType) => async (req, res) => {
 	const branch = revision ? undefined : DbConstants.MASTER_BRANCH_NAME;
 
 	try {
-		switch (modelType) {
-		case modelTypes.CONTAINER: {
+		if (modelType === modelTypes.CONTAINER) {
 			const obj = await UnityAssets.getAssetListForCont(teamspace, model, branch, revision);
 			respond(req, res, templates.ok, obj);
-			break;
-		}
-		case modelTypes.FEDERATION: {
+		} else {
 			const obj = await UnityAssets.getAssetListForFed(teamspace, project, model, branch, revision, username);
 			respond(req, res, templates.ok, obj);
-			break;
-		}
-		default: {
-			respond(req, res, createResponseCode(templates.invalidArguments, 'Model type is not Container or Federation'));
-			break;
-		}
 		}
 	} catch (err) {
 		respond(req, res, err);

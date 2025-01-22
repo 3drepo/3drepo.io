@@ -37,26 +37,18 @@ const getAssetMaps = (modelType) => async (req, res) => {
 	const branch = revision ? undefined : DbConstants.MASTER_BRANCH_NAME;
 
 	try {
-		switch (modelType) {
-		case modelTypes.CONTAINER: {
+		if (modelType === modelTypes.CONTAINER) {
 			const { readStream } = await JSONAssets.getAllSuperMeshMappingForContainer(
 				teamspace, model, branch, revision);
 			const headers = getHeaders(revision);
 			const mimeType = 'application/json';
 			writeCustomStreamRespond(req, res, templates.ok, readStream, undefined, { mimeType }, headers);
-			break;
 		}
-		case modelTypes.FEDERATION: {
+		else {
 			const { readStream } = await JSONAssets.getAllSuperMeshMappingForFederation(
 				teamspace, model, branch, revision);
 			const mimeType = 'application/json';
 			writeCustomStreamRespond(req, res, templates.ok, readStream, undefined, { mimeType });
-			break;
-		}
-		default: {
-			respond(req, res, createResponseCode(templates.invalidArguments, 'Model type is not Container or Federation'));
-			break;
-		}
 		}
 	} catch (err) {
 		respond(req, res, err);

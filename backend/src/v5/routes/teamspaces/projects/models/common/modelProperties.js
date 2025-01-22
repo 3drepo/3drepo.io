@@ -29,23 +29,14 @@ const getModelProperties = (modelType) => async (req, res) => {
 	const branch = revision ? undefined : DbConstants.MASTER_BRANCH_NAME;
 
 	try {
-		switch (modelType) {
-		case modelTypes.CONTAINER: {
+		if (modelType === modelTypes.CONTAINER) {
 			const { readStream, filename, size, mimeType } = await JSONAssets.getModelProperties(
 				teamspace, project, model, branch, revision, username, false);
 			writeStreamRespond(req, res, templates.ok, readStream, filename, size, { mimeType });
-			break;
-		}
-		case modelTypes.FEDERATION: {
+		} else {
 			const { readStream, filename, size, mimeType } = await JSONAssets.getModelProperties(
 				teamspace, project, model, branch, revision, username, true);
 			writeStreamRespond(req, res, templates.ok, readStream, filename, size, { mimeType });
-			break;
-		}
-		default: {
-			respond(req, res, createResponseCode(templates.invalidArguments, 'Model type is not Container or Federation'));
-			break;
-		}
 		}
 	} catch (err) {
 		respond(req, res, err);
