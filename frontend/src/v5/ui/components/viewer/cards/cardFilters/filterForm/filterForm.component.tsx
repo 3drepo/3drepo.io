@@ -17,7 +17,7 @@
 
 import { FormattedMessage } from 'react-intl';
 import { CardFilterOperator, CardFilterValue, CardFilterType, BaseFilter, CardFilter } from '../cardFilters.types';
-import { getFilterFormTitle } from '../cardFilters.helpers';
+import { getFilterFormTitle, isSelectType } from '../cardFilters.helpers';
 import { Container, ButtonsContainer, Button, TitleContainer } from './filterForm.styles';
 import { FormProvider, useForm } from 'react-hook-form';
 import { isEmpty } from 'lodash';
@@ -30,6 +30,7 @@ import { FilterFormOperators } from './filterFormValues/operators/filterFormOper
 
 const DEFAULT_OPERATOR = 'eq';
 const DEFAULT_VALUES = [''];
+const DEFAULT_SELECT_VALUES = [[]];
 type FormType = { values: { value: CardFilterValue }[], operator: CardFilterOperator };
 type FilterFormProps = {
 	module: string,
@@ -40,9 +41,10 @@ type FilterFormProps = {
 	onCancel: () => void,
 };
 export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel }: FilterFormProps) => {
+	// if (!type) return null;
 	const defaultValues = {
 		operator: filter?.operator || DEFAULT_OPERATOR,
-		values: mapArrayToFormArray(filter?.values || DEFAULT_VALUES),
+		values: mapArrayToFormArray(filter?.values || (isSelectType(type) ? DEFAULT_SELECT_VALUES : DEFAULT_VALUES)),
 	};
 
 	const formData = useForm<FormType>({
@@ -74,7 +76,9 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel 
 					{getFilterFormTitle([module, property])}
 				</TitleContainer>
 				<FilterFormOperators type={type} />
-				<FilterFormValues module={module} property={property} type={type} />
+				{property && (
+					<FilterFormValues module={module} property={property} type={type} />
+				)}
 				<ButtonsContainer>
 					<Button onClick={handleCancel} color="secondary">
 						{isUpdatingFilter

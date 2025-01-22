@@ -32,12 +32,18 @@ const getValueValidator = (type: CardFilterType) => {
 				maxLength,
 				formatMessage({
 					defaultMessage: 'This must be at max {maxLength} characters',
-					id: 'validators.text.maxLenght',
+					id: 'validators.text.maxLength',
 				}, { maxLength }),
 			);
 	}
 	if (isDateType(type) || type === 'number') return requiredNumber();
-	if (isSelectType(type)) return trimmedString.required();
+	if (isSelectType(type)) return Yup.array().of(trimmedString).required().test({
+		message: formatMessage({
+			defaultMessage: 'This must have at least one value',
+			id: 'validators.select.maxLength',
+		}),
+		test: (arr) => arr.length > 0,
+	  });
 	return trimmedString;
 };
 
