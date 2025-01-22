@@ -23,45 +23,36 @@ import { useState } from 'react';
 import FunnelIcon from '@assets/icons/filters/funnel.svg';
 import { Tooltip } from '@mui/material';
 import { TicketFiltersSelectionList } from './list/ticketFiltersSelectionList.component';
-import { SearchInput, DrillDownList, DrillDownItem } from './ticketFiltersSelection.styles';
+import { SearchInput, TicketsFiltersModal, TicketsFiltersModalItem } from './ticketFiltersSelection.styles';
 import { CardFilter } from '../../cardFilters.types';
 import { FilterForm } from '../../filterForm/filterForm.component';
 import { CardFilterActionMenu } from '../../filterForm/filterForm.styles';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 export const FilterSelection = () => {
-	const [open, setOpen] = useState(false);
 	const [selectedFilter, setSelectedFilter] = useState<CardFilter>(null);
 	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
 	const unusedFilters = TicketsCardHooksSelectors.selectAvailableTemplatesFilters();
 	const showFiltersList = !selectedFilter?.property;
 	const disabled = !unusedFilters.length || !tickets.length;
 
-	const onOpen = () => setOpen(true);
-	const onClose = () => {
-		setOpen(false);
-		setSelectedFilter(null);
-	};
-	const onCancel = () => setSelectedFilter(null);
+	const clearFilter = () => setSelectedFilter(null);
 
 	return (
 		<CardFilterActionMenu
 			TriggerButton={(
 				<Tooltip title={formatMessage({ id: 'viewer.card.tickets.addFilter', defaultMessage: 'Add Filter' })}>
-					<div>
-						<CardAction disabled={disabled} selected={open}>
-							<FunnelIcon />
-						</CardAction>
-					</div>
+					<CardAction disabled={disabled}>
+						<FunnelIcon />
+					</CardAction>
 				</Tooltip>
 			)}
-			onOpen={onOpen}
-			onClose={onClose}
+			onClose={clearFilter}
 			disabled={disabled}
 		>
 			<SearchContextComponent items={unusedFilters}>
-				<DrillDownList $visibleIndex={showFiltersList ? 0 : 1}>
-					<DrillDownItem $visible={showFiltersList}>
+				<TicketsFiltersModal $visibleIndex={showFiltersList ? 0 : 1}>
+					<TicketsFiltersModalItem $visible={showFiltersList}>
 						<SearchInput
 							placeholder={formatMessage({
 								id: 'viewer.card.tickets.filters.searchInputPlaceholder',
@@ -69,17 +60,19 @@ export const FilterSelection = () => {
 							})}
 						/>
 						<TicketFiltersSelectionList onFilterClick={setSelectedFilter} />
-					</DrillDownItem>
-					<DrillDownItem $visible={!showFiltersList}>
-						{selectedFilter && (
-							<FilterForm
-								{...(selectedFilter || {} as any)}
-								onSubmit={TicketsCardActionsDispatchers.upsertFilter}
-								onCancel={onCancel}
-							/>
-						)}
-					</DrillDownItem>
-				</DrillDownList>
+					</TicketsFiltersModalItem>
+					<TicketsFiltersModalItem $visible={!showFiltersList}>
+						{
+							selectedFilter && (
+								<FilterForm
+									{...(selectedFilter || {} as any)}
+									onSubmit={TicketsCardActionsDispatchers.upsertFilter}
+									onCancel={clearFilter}
+								/>
+							)
+						}
+					</TicketsFiltersModalItem>
+				</TicketsFiltersModal>
 			</SearchContextComponent>
 		</CardFilterActionMenu>
 	);

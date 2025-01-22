@@ -17,40 +17,48 @@
 
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { getOperatorMaxFieldsAllowed } from '../filterForm.helpers';
-import { isRangeOperator, isTextType, isSelectType } from '../../cardFilters.helpers';
-import { FormNumberField, FormTextField, FormSelect } from '@controls/inputs/formInputs.component';
+import { isRangeOperator, isTextType, isSelectType, isDateType } from '../../cardFilters.helpers';
+import { FormNumberField, FormTextField, FormMultiSelect, FormDateTime } from '@controls/inputs/formInputs.component';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
 import { useEffect } from 'react';
-import { isArray, range } from 'lodash';
+import { isArray, isEmpty } from 'lodash';
 import { CardFilterType } from '../../cardFilters.types';
-import { RangeInput } from './rangeInput/rangeInput.component';
-import { MenuItem } from '@mui/material';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useParams } from 'react-router-dom';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
+import { DateRangeInput } from './rangeInput/dateRangeInput.component';
+import { NumberRangeInput } from './rangeInput/numberRangeInput.component';
 
-const name = 'values';
 type FilterFolrmValuesType = {
 	module: string,
 	property: string,
 	type: CardFilterType,
 };
 
+const getInputField = (type: CardFilterType) => {
+	if (type === 'number') return FormNumberField;
+	if (isDateType(type)) return FormDateTime;
+	return FormTextField;
+};
+
+const name = 'values';
 export const FilterFormValues = ({ module, property, type }: FilterFolrmValuesType) => {
 	if (!property) return null;
 	const { containerOrFederation } = useParams<ViewerParams>();
-	const { control, watch, formState: { errors } } = useFormContext();
+	const { control, watch, formState: { errors, dirtyFields } } = useFormContext();
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name,
 	});
 	const error = errors.values || {};
 	const operator = watch('operator');
+	
 	const maxFields = getOperatorMaxFieldsAllowed(operator);
 	const isRangeOp = isRangeOperator(operator);
 	const getEmptyValue = () => {
-		if (isRangeOp) return ['', ''];
 		if (isSelectType(type)) return [];
+		if (isRangeOp) return ['', ''];
 		return '';
 	};
 	const emptyValue = { value: getEmptyValue() };
@@ -69,15 +77,17 @@ export const FilterFormValues = ({ module, property, type }: FilterFolrmValuesTy
 	}, [maxFields]);
 
 	useEffect(() => {
-		remove();
+		if (!isEmpty(dirtyFields)) {
+			remove();
+		}
 	}, [isRangeOp]);
 
 	if (maxFields === 0) return null;
 
-	if (type === 'number' || isTextType(type)) {
-		const InputField = type === 'number' ? FormNumberField : FormTextField;
+	if (type === 'number' || isDateType(type) || isTextType(type)) {
+		const InputField = getInputField(type);
 
-		if (maxFields === 1) return <InputField name={`${name}.0.value`} formError={!!error?.[0]} />;
+		if (maxFields === 1) return <InputField name={`${name}.0.value`} formError={error?.[0]} />;
 
 		const getFieldContainerProps = (field, i) => ({
 			key: field.id,
@@ -93,20 +103,23 @@ export const FilterFormValues = ({ module, property, type }: FilterFolrmValuesTy
 		// useEffect that adapts fields' values to be arrays is async
 		// and it is only called later
 		// @ts-ignore
-		if (isRangeOp && isArray(fields[0]?.value)) return (
-			<>
-				{fields.map((field, i) => (
-					<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
-						<RangeInput Input={InputField} name={`${name}.${i}.value`} error={error?.[i]?.value} />
-					</ArrayFieldContainer>
-				))}
-			</>
-		);
+		if (isRangeOp && isArray(fields[0]?.value)) {
+			const RangeInput = isDateType(type) ? DateRangeInput : NumberRangeInput;
+			return (
+				<>
+					{fields.map((field, i) => (
+						<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
+							<RangeInput name={`${name}.${i}.value`} formError={error?.[i]?.value} />
+						</ArrayFieldContainer>
+					))}
+				</>
+			);
+		}
 		return (
 			<>
 				{fields.map((field, i) => (
 					<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
-						<InputField name={`${name}.${i}.value`} formError={!!error?.[i]} />
+						<InputField name={`${name}.${i}.value`} formError={error?.[i]?.value} />
 					</ArrayFieldContainer>
 				))}
 			</>
@@ -115,18 +128,16 @@ export const FilterFormValues = ({ module, property, type }: FilterFolrmValuesTy
 	// @ts-ignore
 	if (isSelectType(type) && isArray(fields[0]?.value)) {
 		return (
-			<FormSelect multiple name={`${name}.0.value`} formError={!!error?.[0]?.value}>
-				{selectOptions.map((val) => <MenuItem key={val} value={val}>{val}</MenuItem>)}
-			</FormSelect>
+			<FormMultiSelect name={`${name}.0.value`} formError={error?.[0]?.value}>
+				{selectOptions.map((val) => <MultiSelectMenuItem key={val} value={val}>{val}</MultiSelectMenuItem>)}
+			</FormMultiSelect>
 		);
 	}
 
 	return (
 		<>
 			type not created yet: {type}
-			{range(0, Math.min(maxFields, 3)).map((i) => (
-				<FormTextField name={`values.${i}.value`} />
-			))}
+			<FormTextField name={`${name}.0.value`} />
 		</>
 	);
 };

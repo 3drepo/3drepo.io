@@ -15,16 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { RangeContainer, RangeInputSeparator } from './rangeInput.styles';
+import { useRangeEffect } from './useRangeEffect';
+import { FormNumberField } from '@controls/inputs/formInputs.component';
+import { INVALID_NUMBER_RANGE_MESSAGE } from '@/v5/validation/shared/validators';
 
-export const CardAction = styled.button`
-	cursor: pointer;
-	background-color: transparent;
-	color: ${({ theme }) => theme.palette.secondary.main};
-	margin: 0;
-	height: 32px;
-
-	svg {
-		height: 13px;
-	}
-`;
+export const NumberRangeInput = ({ name, formError }) => {
+	const isInvalidRangeError = formError?.[1]?.message === INVALID_NUMBER_RANGE_MESSAGE;
+	useRangeEffect({ name, formError });
+	return (
+		<RangeContainer $showOneError={isInvalidRangeError}>
+			<FormNumberField name={`${name}.0`} formError={formError?.[0]} />
+			<RangeInputSeparator />
+			<FormNumberField name={`${name}.1`} formError={formError?.[1]} />
+		</RangeContainer>
+	);
+};
