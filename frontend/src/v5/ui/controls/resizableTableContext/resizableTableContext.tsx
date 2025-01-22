@@ -15,73 +15,79 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useState } from 'react';
 
-export type WidthsType = Record<string, { min?: number, initial: number }>;
+export type TableElements = { name: string, minWidth?: number, width: number, hidden?: boolean };
 
 export interface ResizableTableType {
+	getWidths: () => number[];
 	getWidth: (name: string) => number;
 	getMinWidth: (name: string) => number;
 	setWidth: (name: string, width: number) => void;
-	widths: Record<string, number>;
 	setResizerName: (name: string) => void,
 	resizerName: string,
 	setIsResizing: (isResizing: boolean) => void,
 	isResizing: boolean,
+	isHidden: (name: string) => boolean,
+	setIsHidden: (name: string, hidden: boolean) => void,
 }
 
 const defaultValue: ResizableTableType = {
+	getWidths: () => [],
 	getWidth: () => 0,
 	getMinWidth: () => 0,
 	setWidth: () => {},
-	widths: {},
 	setResizerName: () => {},
 	resizerName: '',
 	setIsResizing: () => {},
 	isResizing: false,
+	isHidden: () => true,
+	setIsHidden: () => {},
 };
 export const ResizableTableContext = createContext(defaultValue);
 ResizableTableContext.displayName = 'ResizeableColumns';
 
 interface Props {
 	children: any;
-	widths: WidthsType;
+	elements: TableElements[];
 }
-export const ResizableTableContextComponent = ({ children, widths: initialWidths }: Props) => {
-	const [widths, setWidths] = useState({});
-	const [minWidths, setMinWidths] = useState({});
+export const ResizableTableContextComponent = ({ children, elements: inputElements }: Props) => {
+	const [elements, setElements] = useState([...inputElements]);
 	const [resizerName, setResizerName] = useState('');
 	const [isResizing, setIsResizing] = useState(false);
 
-	const getWidth = (name) => widths?.[name] ?? 0;
-	const getMinWidth = (name) => minWidths?.[name] ?? 0;
+	const getElementByName = (name) => elements.find((e) => e.name === name);
+	const getElementIndex = (name) => elements.findIndex((e) => e.name === name);
+
+	const getWidths = () => elements.map((e) => e.hidden ? 0 : e.width);
+	const isHidden = (name) => getElementByName(name).hidden ?? false;
+	const getMinWidth = (name) => getElementByName(name).minWidth ?? 0;
+	const getWidth = (name) => isHidden(name) ? 0 : getElementByName(name).width;
 
 	const setWidth = (name: string, width: number) => {
-		widths[name] = Math.max(getMinWidth(name), width);
-		setWidths({ ...widths });
+		const index = getElementIndex(name);
+		elements[index].width = Math.max(getMinWidth(name), width);
+		setElements([ ...elements ]);
 	};
 
-	useEffect(() => {
-		Object.entries(initialWidths).forEach(([name, { min, initial }]) => {
-			if (min) {
-				minWidths[name] = min;
-			}
-			widths[name] = initial;
-		});
-		setWidths({ ...widths });
-		setMinWidths({ ...minWidths });
-	}, []);
+	const setIsHidden = (name: string, hidden: boolean) => {
+		const index = getElementIndex(name);
+		elements[index].hidden = hidden;
+		setElements([ ...elements ]);
+	};
 
 	return (
 		<ResizableTableContext.Provider value={{
-			setWidth,
+			getWidths,
 			getWidth,
+			setWidth,
 			getMinWidth,
-			widths,
 			setResizerName,
 			resizerName,
 			setIsResizing,
 			isResizing,
+			isHidden,
+			setIsHidden,
 		}}>
 			{children}
 		</ResizableTableContext.Provider>

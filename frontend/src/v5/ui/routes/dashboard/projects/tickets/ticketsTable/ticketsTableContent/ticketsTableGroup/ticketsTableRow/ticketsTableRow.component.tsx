@@ -35,12 +35,11 @@ import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/r
 
 type TicketsTableRowProps = {
 	ticket: ITicket,
-	showModelName: boolean,
 	modelId: string,
 	selected: boolean,
 	onClick: () => void,
 };
-export const TicketsTableRow = ({ ticket, onClick, showModelName, modelId, selected }: TicketsTableRowProps) => {
+export const TicketsTableRow = ({ ticket, onClick, modelId, selected }: TicketsTableRowProps) => {
 	const { query } = useContext(SearchContext);
 	const { _id: id, title, properties, number, type, modules } = ticket;
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
@@ -70,9 +69,6 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelId, selec
 		levelOfRisk,
 	} = getPropertiesInCamelCase(modules?.safetibase || {});
 
-	const hasProperties = template?.config?.issueProperties;
-	const hasSafetibase = template?.modules?.some((module) => module.type === 'safetibase');
-
 	const handleClick = (e) => {
 		e.preventDefault();
 		onClick();
@@ -93,7 +89,7 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelId, selec
 						</OverflowContainer>
 					</Tooltip>
 				</Cell>
-				<Cell name="modelName" hidden={!showModelName}>
+				<Cell name="modelName">
 					<Tooltip title={modelName}>
 						<OverflowContainer>
 							<Highlight search={query}>
@@ -107,25 +103,25 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelId, selec
 						{formatDateTime(createdAt)}
 					</SmallFont>
 				</Cell>
-				<Cell name={`properties.${IssueProperties.ASSIGNEES}`} hidden={!hasProperties}>
+				<Cell name={`properties.${IssueProperties.ASSIGNEES}`}>
 					{!!assignees?.length && (<AssigneesSelect value={assignees} multiple disabled />)}
 				</Cell>
 				<CellOwner name={`properties.${BaseProperties.OWNER}`}>
 					<UserPopoverCircle user={ownerAsUser} />
 				</CellOwner>
-				<CellDate name={`properties.${IssueProperties.DUE_DATE}`} hidden={!hasProperties}>
+				<CellDate name={`properties.${IssueProperties.DUE_DATE}`}>
 					{!!dueDate && (<DueDate value={dueDate} disabled />)}
 				</CellDate>
-				<Cell name={`properties.${IssueProperties.PRIORITY}`} hidden={!hasProperties}>
+				<Cell name={`properties.${IssueProperties.PRIORITY}`}>
 					<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />
 				</Cell>
 				<Cell name={`properties.${BaseProperties.STATUS}`}>
 					<Chip {...getChipPropsFromConfig(statusConfig, status)} />
 				</Cell>
-				<Cell name={`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`} hidden={!hasSafetibase}>
+				<Cell name={`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`}>
 					<Chip {...RISK_LEVELS_MAP[levelOfRisk]} variant="filled" />
 				</Cell>
-				<Cell name={`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`} hidden={!hasSafetibase}>
+				<Cell name={`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`}>
 					<Chip {...TREATMENT_LEVELS_MAP[treatmentStatus]} variant="filled" />
 				</Cell>
 			</Row>

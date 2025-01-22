@@ -31,12 +31,13 @@ const MemoizedItem = memo(
 type ResizableTableItemProps = {
 	children: any;
 	name: string;
-	hidden?: boolean;
 	className?: string;
 };
-export const ResizableTableItem = ({ name, children, className, hidden = false }: ResizableTableItemProps) => {
-	const { setWidth, getWidth, setIsResizing, isResizing, setResizerName, resizerName } = useContext(ResizableTableContext);
+export const ResizableTableItem = ({ name, children, className }: ResizableTableItemProps) => {
+	const { setWidth, getWidth, setIsResizing, isResizing, setResizerName, resizerName, isHidden } = useContext(ResizableTableContext);
 	const currentWidth = getWidth(name);
+	const hidden = isHidden(name);
+
 	const onResizeStart = () => {
 		setIsResizing(true);
 		setResizerName(name);

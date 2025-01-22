@@ -28,7 +28,7 @@ import {  groupTickets, NEW_TICKET_ID, NONE_OPTION, SetTicketValue, UNSET } from
 import { EmptyPageView } from '../../../../../../components/shared/emptyPageView/emptyPageView.styles';
 import { Container, Title } from './ticketsTableContent.styles';
 import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { ResizableTableContextComponent, WidthsType } from '@controls/resizableTableContext/resizableTableContext';
+import { ResizableTableContextComponent, TableElements } from '@controls/resizableTableContext/resizableTableContext';
 
 type TicketsTableContentProps = {
 	setTicketValue: SetTicketValue;
@@ -39,19 +39,19 @@ export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy 
 	const { filteredItems } = useContext(SearchContext);
 	const { template } = useParams<DashboardTicketsParams>();
 	
-	const widths: WidthsType = {
-		id: { initial: 80, min: 25 },
-		[BaseProperties.TITLE]: { initial: 380, min: 25 },
-		modelName: { initial: 145, min: 25 },
-		[`properties.${BaseProperties.CREATED_AT}`]: { initial: 127, min: 25 },
-		[`properties.${IssueProperties.ASSIGNEES}`]: { initial: 96, min: 25 }, 
-		[`properties.${BaseProperties.OWNER}`]: { initial: 52, min: 25 },
-		[`properties.${IssueProperties.DUE_DATE}`]: { initial: 147, min: 25 },
-		[`properties.${IssueProperties.PRIORITY}`]: { initial: 90, min: 25 },
-		[`properties.${BaseProperties.STATUS}`]: { initial: 150, min: 52 },
-		[`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`]: { initial: 137, min: 25 },
-		[`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`]: { initial: 134, min: 25 },
-	};
+	const widths: TableElements[] = [
+		{ name: 'id', width: 80, minWidth: 25 },
+		{ name: BaseProperties.TITLE, width: 380, minWidth: 25 },
+		{ name: 'modelName', width: 145, minWidth: 25 },
+		{ name: `properties.${BaseProperties.CREATED_AT}`, width: 127, minWidth: 25 },
+		{ name: `properties.${IssueProperties.ASSIGNEES}`, width: 96, minWidth: 25 }, 
+		{ name: `properties.${BaseProperties.OWNER}`, width: 52, minWidth: 25 },
+		{ name: `properties.${IssueProperties.DUE_DATE}`, width: 147, minWidth: 25 },
+		{ name: `properties.${IssueProperties.PRIORITY}`, width: 90, minWidth: 25 },
+		{ name: `properties.${BaseProperties.STATUS}`, width: 150, minWidth: 52 },
+		{ name: `modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`, width: 137, minWidth: 25 },
+		{ name: `modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`, width: 134, minWidth: 25 },
+	];
 	
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
 		setTicketValue(modelId, NEW_TICKET_ID, (groupByValue === UNSET) ? null : groupByValue);
@@ -70,7 +70,7 @@ export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy 
 
 	if (groupBy === NONE_OPTION || !groupBy) {
 		return (
-			<ResizableTableContextComponent widths={widths}>
+			<ResizableTableContextComponent elements={widths}>
 				<TicketsTableGroup
 					tickets={filteredItems}
 					onNewTicket={onGroupNewTicket('')}
@@ -84,7 +84,7 @@ export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy 
 	const groups = groupTickets(groupBy, filteredItems);
 
 	return (
-		<ResizableTableContextComponent widths={widths}>
+		<ResizableTableContextComponent elements={widths}>
 			<Container>
 				{_.entries(groups).map(([groupName, tickets]) => (
 					<DashboardListCollapse

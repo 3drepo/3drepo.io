@@ -21,7 +21,7 @@ import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { isCommenterRole } from '@/v5/store/store.helpers';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { SortedTableComponent, SortedTableContext, SortedTableType } from '@controls/sortedTableContext/sortedTableContext';
 import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import ArrowIcon from '@assets/icons/outlined/arrow-outlined.svg';
@@ -34,10 +34,16 @@ import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { ResizableTableItem } from '@controls/resizableTableContext/resizableTableItem/resizableTableItem.component';
 import { ResizableTable } from '@controls/resizableTableContext/resizableTable/resizableTable.styles';
+import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 
 const SortingTableHeader = ({ name, children, hidden = false, disableSorting = false, ...props }) => {
 	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
+	const { setIsHidden } = useContext(ResizableTableContext);
 	const isSelected = name === sortingColumn;
+	
+	useEffect(() => {
+		setIsHidden(name, hidden);
+	}, [hidden]);
 
 	if (hidden) return (null);
 
@@ -130,7 +136,6 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 										key={ticket._id}
 										ticket={ticket}
 										modelId={modelId}
-										showModelName={showModelName}
 										onClick={() => onEditTicket(modelId, ticket._id)}
 										selected={selectedTicketId === ticket._id}
 									/>
