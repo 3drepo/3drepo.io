@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { isUUID, isUUIDString } = require('../utils/helper/typeCheck');
 const DbConstants = require('../handler/db.constants');
 const db = require('../handler/db');
 const responseCodes = require('../utils/responseCodes');
 const uuidHelper = require('../utils/helper/uuids');
-const { isUUID, isUUIDString } = require('../utils/helper/typeCheck');
 
 const History = {};
 
@@ -41,9 +41,6 @@ History.findByTag = async (account, model, tag, projection = {}) => {
 	return result;
 };
 
-// get the head of a branch
-// FIXME: findByBranch and listByBranch seem to be doing similar things
-// FIXME: maybe findByBranch can just take the 1st elem of listByBranch
 History.findByBranch = async (account, model, branch, projection, showVoid = false) => {
 	const query = { incomplete: { $exists: false } };
 
