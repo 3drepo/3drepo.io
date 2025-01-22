@@ -24,6 +24,7 @@ const Permissions = require('../utils/permissions/permissions');
 const Ref = require('./ref');
 const Stream = require('stream');
 const jsonAssetsConstants = require('./jsonAssets.constants');
+const util = require('util');
 const uuidHelper = require('../utils/helper/uuids');
 
 const JSONAssets = {};
@@ -33,6 +34,7 @@ const getJSONCollection = (model) => `${model}${jsonAssetsConstants.JSON_FILE_RE
 const getJSONFileStream = async (teamspace, model, fileName) => {
 	const collection = getJSONCollection(model);
 	const stream = await FilesManager.getFileAsStream(teamspace, collection, fileName);
+	stream.mimeType = 'application/json';
 	return stream;
 };
 
@@ -95,7 +97,7 @@ const generateSuperMeshMappings = async (teamspace, model, jsonFiles, outStream)
 
 			const regexRes = fileName.match(regex);
 			const id = regexRes[1];
-			if (file) {
+			if (file.readStream) {
 				outStream.write(`{"id":"${id}","data":`);
 				const { readStream } = file;
 
@@ -195,86 +197,6 @@ const getSuperMeshMappingForModels = async (modelsToProcess, outStream) => {
 	}
 };
 
-JSONAssets.getAllSuperMeshMappingForContainer = async (teamspace, container, branch, rev) => {
-	const history = await History.getHistory(teamspace, container, branch, rev, { _id: 1 });
-	const modelsToProcess = [{ teamspace, model: container, rev: history._id }];
-
-	const outStream = Stream.PassThrough();
-
-	try {
-		getSuperMeshMappingForModels(modelsToProcess, outStream).then(() => {
-			// NOTE: this is using a .then because we do not want to wait on this promise - we want to
-			// return the stream handler to the client before we start streaming data.
-
-			outStream.end();
-		});
-	} catch (err) {
-		outStream.emit('error', err);
-	}
-
-	return { readStream: outStream };
-};
-
-JSONAssets.getAllSuperMeshMappingForFederation = async (teamspace, federation, branch, rev) => {
-	const subModelRefs = await Ref.getRefNodes(teamspace, federation, branch, rev);
-
-	const getSubModelInfoProms = subModelRefs.map(async ({ owner, project }) => {
-		const revNode = await History.findLatest(owner, project, { _id: 1 });
-		if (revNode) {
-			return { teamspace: owner, model: project, rev: revNode._id };
-		}
-		return undefined;
-	});
-
-	const modelsToProcess = await Promise.all(getSubModelInfoProms);
-
-	const outStream = Stream.PassThrough();
-	outStream.write('{"submodels":[');
-
-	try {
-		getSuperMeshMappingForModels(modelsToProcess, outStream).then(() => {
-			// NOTE: this is using a .then because we do not want to wait on this promise - we want to
-			// return the stream handler to the client before we start streaming data.
-			outStream.write(']}');
-			outStream.end();
-		});
-	} catch (err) {
-		outStream.emit('error', err);
-	}
-
-	return { readStream: outStream };
-};
-
-const appendSubModelFiles = (subTreeFiles, outStream) => {
-	outStream.write('"subModels":[');
-	let subStreamPromise = Promise.resolve();
-	for (let i = 0; i < subTreeFiles.length; ++i) {
-		if (subTreeFiles[i]) {
-			subStreamPromise = subStreamPromise.then(() => new Promise((resolve) => {
-				if (i > 0) {
-					outStream.write(',');
-				}
-				let first = true;
-				subTreeFiles[i].readStream.on('data', (d) => {
-					if (first) {
-						outStream.write(`{"account":"${
-							subTreeFiles[i].account}","model":"${subTreeFiles[i].model}",`);
-						outStream.write(d.slice(1));
-						first = false;
-					} else {
-						outStream.write(d);
-					}
-				});
-				subTreeFiles[i].readStream.on('end', () => resolve());
-				subTreeFiles[i].readStream.on('error', (err) => outStream.emit('error', err));
-			}));
-		}
-	}
-	return subStreamPromise.then(() => {
-		outStream.write(']');
-	});
-};
-
 const getFileFromRef = async (teamspace, project, ref, username, filename) => {
 	const modelId = ref.project;
 
@@ -282,13 +204,15 @@ const getFileFromRef = async (teamspace, project, ref, username, filename) => {
 
 	if (granted) {
 		// eslint-disable-next-line no-underscore-dangle
-		let revId = uuidHelper.UUIDToString(ref._rid);
-		if (revId === DbConstants.MASTER_BRANCH) {
-			revId = await History.findLatest(ref.owner, modelId, { _id: 1 });
+		let revId = ref._rid;
+		const revIdStr = uuidHelper.UUIDToString(revId);
+		if (revIdStr === DbConstants.MASTER_BRANCH) {
+			const history = await History.findLatest(ref.owner, modelId, { _id: 1 });
+			revId = history ? history._id : undefined;
 		}
 
 		if (revId) {
-			const revision = uuidHelper.UUIDToString(revId._id);
+			const revision = uuidHelper.UUIDToString(revId);
 			const fullFileName = `${revision}/${filename}`;
 
 			const fileRef = await getJSONFileStream(ref.owner, modelId, fullFileName);
@@ -315,74 +239,195 @@ const getFileFromSubModels = async (teamspace, project, model, branch, revision,
 	return fileStreams.filter((stream) => stream);
 };
 
-const getHelperJSONFile = async (teamspace, project, model, branch, rev, username, filename, prefix = 'mainTree', isFed, allowNotFound, defaultValues = {}) => {
+const calculateStringLength = (str) => Buffer.byteLength(str, 'utf8');
+
+const getHelperJSONFile = async (teamspace,
+	project, model, branch, rev, username, filename, prefix, isFed, defaultValues) => {
 	const history = await History.getHistory(teamspace, model, branch, rev);
 
 	const revId = uuidHelper.UUIDToString(history._id);
 	const treeFileName = `${revId}/${filename}.json`;
-	let mainTreePromise;
 
-	if (allowNotFound) {
-		try {
-			mainTreePromise = getJSONFileStream(teamspace, model, treeFileName);
-		} catch {
-			const fakeStream = Stream.PassThrough();
-			fakeStream.write(JSON.stringify(defaultValues));
-			fakeStream.end();
-			return { fileName: treeFileName, readStream: fakeStream };
-		}
-	} else {
-		mainTreePromise = getJSONFileStream(teamspace, model, treeFileName);
+	let treeFile;
+	try {
+		treeFile = await getJSONFileStream(teamspace, model, treeFileName);
+	} catch {
+		const fakeStream = Stream.PassThrough();
+		const fakeContent = JSON.stringify(defaultValues);
+		fakeStream.write(fakeContent);
+		fakeStream.end();
+
+		const fakeFile = {
+			readStream: fakeStream,
+			size: calculateStringLength(fakeContent),
+			mimeType: 'application/json',
+			filename: treeFileName,
+		};
+
+		return fakeFile;
 	}
-
-	const file = await mainTreePromise;
 
 	const outStream = Stream.PassThrough();
-	const { readStream } = file;
-	file.readStream = outStream;
-	delete file.size;
 
-	try {
-		await new Promise((resolve) => {
-			outStream.write(`{"${prefix}":`);
-			if (readStream) {
-				readStream.on('data', (d) => outStream.write(d));
-				readStream.on('end', () => resolve());
-				readStream.on('error', (err) => outStream.emit('error', err));
-			} else {
-				resolve();
+	let finalSize = 0;
+
+	outStream.write('{');
+	finalSize++;
+
+	const treeStream = treeFile.readStream;
+
+	finalSize += await new Promise((resolve) => {
+		let streamSize = 0;
+		if (treeStream) {
+			const prefixStr = `"${prefix}":`;
+			outStream.write(prefixStr);
+			streamSize += calculateStringLength(prefixStr);
+
+			treeStream.on('data', (d) => {
+				outStream.write(d);
+				streamSize += d.length;
+			});
+			treeStream.on('end', () => resolve(streamSize));
+		} else {
+			let fakeContent = JSON.stringify(defaultValues);
+			fakeContent = fakeContent.slice(1, fakeContent.length - 1);
+			outStream.write(fakeContent);
+			resolve(calculateStringLength(fakeContent));
+		}
+	});
+
+	if (isFed) {
+		const fileStreams = await getFileFromSubModels(teamspace, project, model, branch, rev, username, `${filename}.json`);
+
+		const submodelPrefix = ',"subModels":[';
+		outStream.write(submodelPrefix);
+		finalSize += calculateStringLength(submodelPrefix);
+
+		// Create promises
+		const filePromises = [];
+		for (let i = 0; i < fileStreams.length; i++) {
+			const file = fileStreams[i];
+			const fileStream = file.readStream;
+
+			if (fileStream) {
+				const promise = new Promise((resolve) => {
+					let streamSize = 0;
+					let first = true;
+
+					fileStream.on('data', (d) => {
+						if (first) {
+							const header = `${(i > 0) ? ',' : ''}{"account":"${file.account}","model":"${file.model}",`;
+							const slice = d.slice(1);
+
+							outStream.write(header);
+							outStream.write(slice);
+
+							streamSize += calculateStringLength(header);
+							streamSize += slice.length;
+
+							first = false;
+						} else {
+							outStream.write(d);
+							streamSize += d.length;
+						}
+					});
+					fileStream.on('end', () => resolve(streamSize));
+				});
+
+				filePromises.push(promise);
 			}
-		});
-
-		if (isFed) {
-			const subTreesPromise = getFileFromSubModels(teamspace, project, model, branch, rev, username, `${filename}.json`);
-			const subTreeFiles = await subTreesPromise;
-			outStream.write(',');
-			await appendSubModelFiles(subTreeFiles, outStream);
 		}
 
-		outStream.write('}');
-		outStream.end();
-	} catch (err) {
-		outStream.emit('error', err);
-		outStream.end();
+		// Execute promises
+		for (let i = 0; i < filePromises.length; i++) {
+			const promise = filePromises[i];
+
+			// We want to await them sequentially to not mix the streams
+			// eslint-disable-next-line no-await-in-loop
+			const test = await promise;
+			finalSize += test;
+		}
+
+		outStream.write(']');
+		finalSize++;
 	}
 
-	return file;
+	outStream.write('}');
+	finalSize++;
+	outStream.end();
+
+	const outFile = {
+		readStream: outStream,
+		size: finalSize,
+		mimeType: treeFile.mimeType,
+		encoding: treeFile.encoding,
+		filename,
+	};
+
+	return outFile;
 };
 
-JSONAssets.getModelProperties = (teamspace, project, model, branch, rev, username, isFed) => getHelperJSONFile(
-	teamspace,
-	project,
-	model,
-	branch,
-	rev,
-	username,
-	'modelProperties',
-	'properties',
-	isFed,
-	true,
-	{ hiddenNodes: [] },
-);
+JSONAssets.getAllSuperMeshMappingForContainer = async (teamspace, container, branch, rev) => {
+	const history = await History.getHistory(teamspace, container, branch, rev, { _id: 1 });
+	const modelsToProcess = [{ teamspace, model: container, rev: history._id }];
+
+	const outStream = Stream.PassThrough();
+
+	getSuperMeshMappingForModels(modelsToProcess, outStream).then(() => {
+		// NOTE: this is using a .then because we do not want to wait on this promise - we want to
+		// return the stream handler to the client before we start streaming data.
+
+		outStream.end();
+	}).catch((err) => {
+		outStream.emit('error', err);
+	});
+
+	return { readStream: outStream };
+};
+
+JSONAssets.getAllSuperMeshMappingForFederation = async (teamspace, federation, branch, rev) => {
+	const subModelRefs = await Ref.getRefNodes(teamspace, federation, branch, rev);
+
+	const getSubModelInfoProms = subModelRefs.map(async ({ owner, project }) => {
+		const revNode = await History.findLatest(owner, project, { _id: 1 });
+		if (revNode) {
+			return { teamspace: owner, model: project, rev: revNode._id };
+		}
+		return undefined;
+	});
+
+	const modelsToProcess = await Promise.all(getSubModelInfoProms);
+
+	const outStream = Stream.PassThrough();
+	outStream.write('{"submodels":[');
+
+	getSuperMeshMappingForModels(modelsToProcess, outStream).then(() => {
+		// NOTE: this is using a .then because we do not want to wait on this promise - we want to
+		// return the stream handler to the client before we start streaming data.
+		outStream.write(']}');
+		outStream.end();
+	}).catch((err) => {
+		outStream.emit('error', err);
+	});
+
+	return { readStream: outStream };
+};
+
+JSONAssets.getModelProperties = async (
+	teamspace, project, model, branch, rev, username, isFed) => {
+	const jsonFile = await getHelperJSONFile(
+		teamspace,
+		project,
+		model,
+		branch,
+		rev,
+		username,
+		'modelProperties',
+		'properties',
+		isFed,
+		{ hiddenNodes: [] },
+	);
+	return jsonFile;
+};
 
 module.exports = JSONAssets;
