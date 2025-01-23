@@ -16,7 +16,6 @@
  */
 
 const Mongo = require('mongodb');
-const Objects = require('./objects');
 const UUIDParse = require('uuid-parse');
 const NodeUUID = require('uuid').v4;
 const { isUUIDString } = require('./typeCheck');

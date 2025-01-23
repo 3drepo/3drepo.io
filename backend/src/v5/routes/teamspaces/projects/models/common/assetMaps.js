@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { hasReadAccessToContainer, hasReadAccessToFederation } = require('../../../../../middleware/permissions/permissions');
 const { respond, writeCustomStreamRespond } = require('../../../../../utils/responder');
 const DbConstants = require('../../../../../handler/db.constants');
@@ -23,6 +22,7 @@ const JSONAssets = require('../../../../../models/jsonAssets');
 const { Router } = require('express');
 const config = require('../../../../../utils/config');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
+const { templates } = require('../../../../../utils/responseCodes');
 
 const getHeaders = (cache = false) => {
 	const headers = {};
@@ -43,8 +43,7 @@ const getAssetMaps = (modelType) => async (req, res) => {
 			const headers = getHeaders(revision);
 			const mimeType = 'application/json';
 			writeCustomStreamRespond(req, res, templates.ok, readStream, undefined, { mimeType }, headers);
-		}
-		else {
+		} else {
 			const { readStream } = await JSONAssets.getAllSuperMeshMappingForFederation(
 				teamspace, model, branch, revision);
 			const mimeType = 'application/json';

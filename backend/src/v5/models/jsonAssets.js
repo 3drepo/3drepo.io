@@ -24,7 +24,6 @@ const Permissions = require('../utils/permissions/permissions');
 const Ref = require('./ref');
 const Stream = require('stream');
 const jsonAssetsConstants = require('./jsonAssets.constants');
-const util = require('util');
 const uuidHelper = require('../utils/helper/uuids');
 
 const JSONAssets = {};

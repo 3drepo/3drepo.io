@@ -460,7 +460,6 @@ const testModelProperties = () => {
 						});
 					}
 				}
-				
 				return result;
 			};
 

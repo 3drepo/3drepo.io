@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { hasReadAccessToContainer, hasReadAccessToFederation } = require('../../../../../middleware/permissions/permissions');
 const DbConstants = require('../../../../../handler/db.constants');
 const { Router } = require('express');
 const UnityAssets = require('../../../../../models/unityAssets');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../utils/responder');
+const { templates } = require('../../../../../utils/responseCodes');
 
 const getRepoAssets = (modelType) => async (req, res) => {
 	const { teamspace, project, model, revision } = req.params;
