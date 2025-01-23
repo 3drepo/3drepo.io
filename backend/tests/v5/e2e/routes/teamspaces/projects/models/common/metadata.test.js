@@ -20,6 +20,7 @@ const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 const { isEmpty } = require('lodash');
 
+const Metadata = require(`${src}/routes/teamspaces/projects/models/common/metadata`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const uuidHelper = require(`${src}/utils/helper/uuids`);
@@ -580,6 +581,36 @@ const testAssetMetadata = () => {
 	});
 };
 
+const testEstablishRoutes = () => {
+	describe('Create routes for asset maps', () => {
+		test('Should create two routes for Containers', () => {
+			const router = Metadata(modelTypes.CONTAINER);
+
+			const { stack } = router;
+			expect(stack.length).toEqual(2);
+
+			expect(stack[0].route.path).toEqual('/revision/:rev');
+			expect(stack[1].route.path).toEqual('/revision/master/head');
+		});
+
+		test('Should create one route for Federations', () => {
+			const router = Metadata(modelTypes.FEDERATION);
+
+			const { stack } = router;
+			expect(stack.length).toEqual(1);
+
+			expect(stack[0].route.path).toEqual('/revision/master/head');
+		});
+
+		test('Should create no routes for Drawings', () => {
+			const router = Metadata(modelTypes.DRAWING);
+
+			const { stack } = router;
+			expect(stack.length).toEqual(0);
+		});
+	});
+};
+
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -589,4 +620,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	afterAll(() => ServiceHelper.closeApp(server));
 
 	testAssetMetadata();
+	testEstablishRoutes();
 });

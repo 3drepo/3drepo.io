@@ -19,6 +19,7 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 
+const AssetMaps = require(`${src}/routes/teamspaces/projects/models/common/assetMaps`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const uuidHelper = require(`${src}/utils/helper/uuids`);
@@ -565,6 +566,36 @@ const testGetAssetMaps = () => {
 	});
 };
 
+const testEstablishRoutes = () => {
+	describe('Create routes for asset maps', () => {
+		test('Should create two routes for Containers', () => {
+			const router = AssetMaps(modelTypes.CONTAINER);
+
+			const { stack } = router;
+			expect(stack.length).toEqual(2);
+
+			expect(stack[0].route.path).toEqual('/revision/:revision');
+			expect(stack[1].route.path).toEqual('/revision/master/head');
+		});
+
+		test('Should create one route for Federations', () => {
+			const router = AssetMaps(modelTypes.FEDERATION);
+
+			const { stack } = router;
+			expect(stack.length).toEqual(1);
+
+			expect(stack[0].route.path).toEqual('/revision/master/head');
+		});
+
+		test('Should create no routes for Drawings', () => {
+			const router = AssetMaps(modelTypes.DRAWING);
+
+			const { stack } = router;
+			expect(stack.length).toEqual(0);
+		});
+	});
+};
+
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -574,4 +605,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	afterAll(() => ServiceHelper.closeApp(server));
 
 	testGetAssetMaps();
+	testEstablishRoutes();
 });
