@@ -25,9 +25,6 @@ import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 
 type Pin2DProps = IPin & { scale: number };
 export const Pin2D = ({ id, isSelected, position, colour, scale }: Pin2DProps) => {
-	const selectedMagnifierFactor = isSelected ? 1.2 : 1;
-	const height = 23 / scale * selectedMagnifierFactor;
-	const width = 18 / scale * selectedMagnifierFactor;
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 
@@ -41,12 +38,10 @@ export const Pin2D = ({ id, isSelected, position, colour, scale }: Pin2DProps) =
 
 	return (
 		<PinContainer
-			height={height}
-			width={width}
 			colour={colour}
-			position={position}
 			onClick={handleClick}
 			selected={isSelected}
+			style={{ transform: `translate(${position[0]}px, ${position[1]}px) scale(${0.333 / scale})` }}
 		>
 			<PinIcon />
 		</PinContainer>

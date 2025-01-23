@@ -19,39 +19,46 @@ import styled, { css, keyframes } from 'styled-components';
 
 const popupAnimation = keyframes`
 	0% {
-		transform: scale(.9);
-	} 19% {
-		transform: scale(.6);
-	} 75% {
-		transform: scale(1.5);
-	} 90% {
-		transform: scale(.9);
+		transform: scale(1);
+		top: -64px;
+	} 20% {
+		transform: scale(.5);
+	} 38% {
+		top: -64px;
+	} 48% {
+		top: -59px;
+	} 50% {
+		transform: scale(2);
+	} 63% {
+		top: -84x;
+	} 78% {
+		top: -60px;
+	} 86% {
+		transform: scale(1.3);
 	} 100% {
-		transform: scale(1.1);
+		top: -64px;
+		transform: scale(1.5);
 	}
 `;
 
-export const PinContainer = styled.div<{ height, width, colour, position, selected?: boolean }>`
+export const PinContainer = styled.div<{ colour, selected?: boolean }>`
 	position: absolute;
-	display: flex;
-	height: ${({ height }) => height}px;
-	width: ${({ width }) => width}px;
-	left: ${({ position, width }) => position[0] - width / 2}px;
-	top: ${({ position, height }) => position[1] - height}px;
 	color: rgb(${({ colour }) => colour.map((val) => Math.round(val * 256)).join()});
-	
-	${({ selected }) => selected && css`
-		transform-origin: bottom center;
-		animation: ${popupAnimation} .8s forwards;
-
-		#selectionFill {
-			stroke-width: 7px;
-		}
-	`}
 
 	svg {
-		height: ${({ height }) => height}px;
-		width: ${({ width }) => width}px;
+		${({ selected }) => selected && css`
+			transform-origin: bottom center;
+			animation: ${popupAnimation} 1s forwards;
+	
+			#selectionFill {
+				stroke-width: 7px;
+			}
+		`}
+		position: absolute;
+	
+		left: -25px;
+		top: -64px;
+
 		stroke: #000;
 		stroke-width: 2%;
 		overflow: visible;
