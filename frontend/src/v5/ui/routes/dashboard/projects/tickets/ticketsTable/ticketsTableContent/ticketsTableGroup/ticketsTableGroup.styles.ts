@@ -18,6 +18,7 @@
 import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.component';
 import { Typography } from '@controls/typography';
 import styled, { css } from 'styled-components';
+import { ResizableTable } from '@controls/resizableTableContext/resizableTable/resizableTable.component';
 
 export const Headers = styled(ResizableTableRow)`
 	gap: 1px;
@@ -58,6 +59,16 @@ export const Group = styled.div`
 	gap: 1px;
 	width: fit-content;
 	background-color: transparent;
+`;
+
+export const Table = styled(ResizableTable)<{ $empty?: boolean }>`
+	${({ $empty }) => $empty && css`
+		overflow-x: hidden;
+
+		${Group} {
+			width: unset;
+		}
+	`}
 `;
 
 export const NewTicketRow = styled.div<{ disabled?: boolean }>`

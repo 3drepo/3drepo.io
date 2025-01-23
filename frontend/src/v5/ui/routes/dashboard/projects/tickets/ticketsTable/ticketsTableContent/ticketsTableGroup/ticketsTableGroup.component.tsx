@@ -23,13 +23,12 @@ import { useContext } from 'react';
 import { SortedTableComponent, SortedTableContext, SortedTableType } from '@controls/sortedTableContext/sortedTableContext';
 import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import ArrowIcon from '@assets/icons/outlined/arrow-outlined.svg';
-import { Header, Headers, Group, NewTicketRow, NewTicketText, IconContainer } from './ticketsTableGroup.styles';
+import { Table, Header, Headers, Group, NewTicketRow, NewTicketText, IconContainer } from './ticketsTableGroup.styles';
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
 import { SetTicketValue } from '../../ticketsTable.helper';
 import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
-import { ResizableTable } from '@controls/resizableTableContext/resizableTable/resizableTable.component';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 
 const SortingTableHeader = ({ name, children, disableSorting = false, ...props }) => {
@@ -72,7 +71,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;
 
 	return (
-		<ResizableTable>
+		<Table $empty={!tickets.length}>
 			<SortedTableComponent items={tickets} sortingColumn={BaseProperties.CREATED_AT}>
 				<SortedTableContext.Consumer>
 					{({ sortedItems }: SortedTableType<ITicket>) => (
@@ -142,6 +141,6 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 					)}
 				</SortedTableContext.Consumer>
 			</SortedTableComponent>
-		</ResizableTable>
+		</Table>
 	);
 };

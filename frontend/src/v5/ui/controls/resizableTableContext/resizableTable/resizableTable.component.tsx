@@ -20,11 +20,11 @@ import { useContext } from 'react';
 import { ResizableTableContext } from '../resizableTableContext';
 import { ResizersContainers, Table } from './resizableTable.styles';
 
-export const ResizableTable = ({ children }) => {
+export const ResizableTable = ({ className = '', children }) => {
 	const { getVisibleColumnsNames } = useContext(ResizableTableContext);
 
 	return (
-		<Table>
+		<Table className={className}>
 			{children}
 			<ResizersContainers>
 				{getVisibleColumnsNames().map((name) => (
