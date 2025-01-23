@@ -30,18 +30,22 @@ Tickets.operatorToQuery = {
 	[queryOperators.NOT_EXISTS]: (propertyName) => ({
 		[propertyName]: { $not: { $exists: true } },
 	}),
+	[queryOperators.IS]: (propertyName, value) => ({
+		[propertyName]: { $in: value },
+	}),
+	[queryOperators.NOT_IS]: (propertyName, value) => ({
+		[propertyName]: { $not: { $in: value } },
+	}),
 	[queryOperators.EQUALS]: (propertyName, value) => ({
 		[propertyName]: { $in: value.flatMap((v) => {
-			if (isNumberString(v)) return [v, Number(v), new Date(Number(v))];
-			if (isBooleanString(v)) return [v, toBoolean(v)];
-			return v;
+			if (isNumberString(v)) return [Number(v), new Date(Number(v))];
+			return toBoolean(v);
 		}) },
 	}),
 	[queryOperators.NOT_EQUALS]: (propertyName, value) => ({
 		[propertyName]: { $not: { $in: value.flatMap((v) => {
-			if (isNumberString(v)) return [v, Number(v), new Date(Number(v))];
-			if (isBooleanString(v)) return [v, toBoolean(v)];
-			return v;
+			if (isNumberString(v)) return [Number(v), new Date(Number(v))];
+			return toBoolean(v);
 		}) } },
 	}),
 	[queryOperators.CONTAINS]: (propertyName, value) => ({

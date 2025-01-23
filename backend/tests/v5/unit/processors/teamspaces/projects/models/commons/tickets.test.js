@@ -1198,31 +1198,35 @@ const testGetTicketList = () => {
 			queryFilters: [{ propertyName, operator: queryOperators.NOT_EXISTS }],
 			expectedQuery: { $and: [{ [propertyName]: { $not: { $exists: true } } }] },
 		}],
-		[`${queryOperators.EQUALS} query filter`, [], {}, undefined, { }, {
-			queryFilters: [{ propertyName, operator: queryOperators.EQUALS, value: [propertyValue, propertyValue2] }],
+		[`${queryOperators.IS} query filter`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.IS, value: [propertyValue, propertyValue2] }],
 			expectedQuery: { $and: [{ [propertyName]: { $in: [propertyValue, propertyValue2] } }] },
 		}],
 		[`${queryOperators.EQUALS} query filter and boolean value`, [], {}, undefined, { }, {
 			queryFilters: [{ propertyName, operator: queryOperators.EQUALS, value: ['true'] }],
-			expectedQuery: { $and: [{ [propertyName]: { $in: ['true', true] } }] },
+			expectedQuery: { $and: [{ [propertyName]: { $in: [true] } }] },
 		}],
 		[`${queryOperators.EQUALS} query filter and number value`, [], {}, undefined, { }, {
 			queryFilters: [{ propertyName, operator: queryOperators.EQUALS, value: [`${propertyNumberValue}`] }],
-			expectedQuery: { $and: [{ [propertyName]: { $in: [`${propertyNumberValue}`, propertyNumberValue, new Date(propertyNumberValue)] } }] },
+			expectedQuery: {
+				$and: [{ [propertyName]: { $in: [propertyNumberValue, new Date(propertyNumberValue)] } }],
+			},
 		}],
-		[`${queryOperators.NOT_EQUALS} query filter`, [], {}, undefined, { }, {
+		[`${queryOperators.NOT_IS} query filter`, [], {}, undefined, { }, {
 			queryFilters: [
-				{ propertyName, operator: queryOperators.NOT_EQUALS, value: [propertyValue, propertyValue2] },
+				{ propertyName, operator: queryOperators.NOT_IS, value: [propertyValue, propertyValue2] },
 			],
 			expectedQuery: { $and: [{ [propertyName]: { $not: { $in: [propertyValue, propertyValue2] } } }] },
 		}],
 		[`${queryOperators.NOT_EQUALS} query filter and boolean value`, [], {}, undefined, { }, {
 			queryFilters: [{ propertyName, operator: queryOperators.NOT_EQUALS, value: ['true'] }],
-			expectedQuery: { $and: [{ [propertyName]: { $not: { $in: ['true', true] } } }] },
+			expectedQuery: { $and: [{ [propertyName]: { $not: { $in: [true] } } }] },
 		}],
 		[`${queryOperators.NOT_EQUALS} query filter and number value`, [], {}, undefined, { }, {
 			queryFilters: [{ propertyName, operator: queryOperators.NOT_EQUALS, value: [`${propertyNumberValue}`] }],
-			expectedQuery: { $and: [{ [propertyName]: { $not: { $in: [`${propertyNumberValue}`, propertyNumberValue, new Date(propertyNumberValue)] } } }] },
+			expectedQuery: {
+				$and: [{ [propertyName]: { $not: { $in: [propertyNumberValue, new Date(propertyNumberValue)] } } }],
+			},
 		}],
 		[`${queryOperators.CONTAINS} query filter`, [], {}, undefined, { }, {
 			queryFilters: [{ propertyName, operator: queryOperators.CONTAINS, value: [propertyValue, propertyValue2] }],
@@ -1268,7 +1272,7 @@ const testGetTicketList = () => {
 		}],
 		['multiple query filters', [], {}, undefined, { }, {
 			queryFilters: [
-				{ propertyName, operator: queryOperators.EQUALS, value: [propertyValue, propertyValue2] },
+				{ propertyName, operator: queryOperators.IS, value: [propertyValue, propertyValue2] },
 				{ propertyName: propertyName2,
 					operator: queryOperators.LESSER_OR_EQUAL_TO,
 					value: propertyNumberValue },
@@ -1284,8 +1288,8 @@ const testGetTicketList = () => {
 		['template filter', [], {}, undefined, { }, {
 			isTemplateQuery: true,
 			queryFilters: [
-				{ propertyName: specialQueryFields.TEMPLATE, operator: queryOperators.EQUALS, value: [propertyValue] },
-				{ propertyName, operator: queryOperators.EQUALS, value: [propertyValue, propertyValue2] },
+				{ propertyName: specialQueryFields.TEMPLATE, operator: queryOperators.IS, value: [propertyValue] },
+				{ propertyName, operator: queryOperators.IS, value: [propertyValue, propertyValue2] },
 			],
 			expectedQuery: { $and: [
 				{ [propertyName]: { $in: [propertyValue, propertyValue2] } },
@@ -1297,7 +1301,7 @@ const testGetTicketList = () => {
 			isTemplateQuery: true,
 			queryFilters: [
 				{ propertyName: specialQueryFields.TICKET_CODE,
-					operator: queryOperators.EQUALS,
+					operator: queryOperators.IS,
 					value: [propertyValue] },
 			],
 			ticketCodeQuery: { ticketCode: { $in: [propertyValue] } },
@@ -1307,9 +1311,9 @@ const testGetTicketList = () => {
 			isTemplateQuery: true,
 			queryFilters: [
 				{ propertyName: specialQueryFields.TICKET_CODE,
-					operator: queryOperators.EQUALS,
+					operator: queryOperators.IS,
 					value: [propertyValue] },
-				{ propertyName, operator: queryOperators.EQUALS, value: [propertyValue, propertyValue2] },
+				{ propertyName, operator: queryOperators.IS, value: [propertyValue, propertyValue2] },
 			],
 			expectedQuery: { $and: [
 				{ [propertyName]: { $in: [propertyValue, propertyValue2] } },

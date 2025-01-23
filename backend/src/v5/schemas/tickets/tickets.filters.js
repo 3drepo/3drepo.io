@@ -16,6 +16,7 @@
  */
 
 const { createResponseCode, templates } = require('../../utils/responseCodes');
+const { isBooleanString, isNumberString } = require('../../utils/helper/typeCheck');
 
 const Yup = require('yup');
 const { types } = require('../../utils/helper/yup');
@@ -25,6 +26,8 @@ const Filters = {};
 Filters.queryOperators = {
 	EXISTS: 'ex',
 	NOT_EXISTS: 'nex',
+	IS: 'is',
+	NOT_IS: 'nis',
 	EQUALS: 'eq',
 	NOT_EQUALS: 'neq',
 	CONTAINS: 'ss',
@@ -42,8 +45,8 @@ Filters.specialQueryFields = {
 };
 
 Filters.specialQueryFieldsOperators = [
-	Filters.queryOperators.EQUALS,
-	Filters.queryOperators.NOT_EQUALS,
+	Filters.queryOperators.IS,
+	Filters.queryOperators.NOT_IS,
 	Filters.queryOperators.CONTAINS,
 	Filters.queryOperators.NOT_CONTAINS,
 ];
@@ -94,7 +97,17 @@ Filters.queryParamSchema = Yup.object().shape({
 				.transform((v, value) => (
 					value
 						? value.match(/([^",]+|"(.*?)")/g).map((val) => val.replace(/^"|"$/g, '').trim())
-						: value));
+						: value))
+				.test('all-bools-or-numbers', 'Values must be booleans or numbers', (value) => {
+					if (operator === Filters.queryOperators.EQUALS || operator === Filters.queryOperators.NOT_EQUALS) {
+						const allBooleans = value.every(isBooleanString);
+						const allNumbers = value.every(isNumberString);
+
+						return allBooleans || allNumbers;
+					}
+
+					return true;
+				});
 		}),
 });
 

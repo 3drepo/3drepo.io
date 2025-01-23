@@ -42,31 +42,47 @@ const testValidateQueryString = () => {
 	const rangePropValue1 = [generateRandomNumber(0, 10), generateRandomNumber(11, 20)];
 	const rangePropValue2 = [generateRandomNumber(30, 40), generateRandomNumber(50, 60)];
 
-	const stringValueTests = (operator) => [
-		[`operator is ${operator} and a single value is provided`, getQueryProp(propName, operator, stringPropValue), true, [{ operator, propertyName: `properties.${propName}`, value: [stringPropValue] }]],
-		[`operator is ${operator} and a multiple values are provided`, getQueryProp(propName, operator, `${stringPropValue},${stringPropValue2}`), true, [{ operator, propertyName: `properties.${propName}`, value: [stringPropValue, stringPropValue2] }]],
-		[`operator is ${operator} and a value contains a comma`, getQueryProp(propName, operator, `${stringPropValue},"one, two"`), true, [{ operator, propertyName: `properties.${propName}`, value: [stringPropValue, 'one, two'] }]],
-		[`operator is ${operator} and a single value is provided (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, stringPropValue), true, [{ operator, propertyName: `modules.${moduleName}.${propName}`, value: [stringPropValue] }]],
-		[`operator is ${operator} and a multiple values are provided (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, `${stringPropValue},${stringPropValue2}`), true, [{ operator, propertyName: `modules.${moduleName}.${propName}`, value: [stringPropValue, stringPropValue2] }]],
-		[`operator is ${operator} and a value contains a comma (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, `${stringPropValue},"one, two"`), true, [{ operator, propertyName: `modules.${moduleName}.${propName}`, value: [stringPropValue, 'one, two'] }]],
-	];
+	const stringValueTests = [queryOperators.IS, queryOperators.NOT_IS, queryOperators.CONTAINS,
+		queryOperators.NOT_CONTAINS]
+		.flatMap((operator) => ([
+			[`operator is ${operator} and a single value is provided`, getQueryProp(propName, operator, stringPropValue), true, [{ operator, propertyName: `properties.${propName}`, value: [stringPropValue] }]],
+			[`operator is ${operator} and a multiple values are provided`, getQueryProp(propName, operator, `${stringPropValue},${stringPropValue2}`), true, [{ operator, propertyName: `properties.${propName}`, value: [stringPropValue, stringPropValue2] }]],
+			[`operator is ${operator} and a value contains a comma`, getQueryProp(propName, operator, `${stringPropValue},"one, two"`), true, [{ operator, propertyName: `properties.${propName}`, value: [stringPropValue, 'one, two'] }]],
+			[`operator is ${operator} and a single value is provided (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, stringPropValue), true, [{ operator, propertyName: `modules.${moduleName}.${propName}`, value: [stringPropValue] }]],
+			[`operator is ${operator} and a multiple values are provided (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, `${stringPropValue},${stringPropValue2}`), true, [{ operator, propertyName: `modules.${moduleName}.${propName}`, value: [stringPropValue, stringPropValue2] }]],
+			[`operator is ${operator} and a value contains a comma (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, `${stringPropValue},"one, two"`), true, [{ operator, propertyName: `modules.${moduleName}.${propName}`, value: [stringPropValue, 'one, two'] }]],
+		]));
 
-	const numberValueTests = (operator) => [
-		[`operator is ${operator} and a non number value is provided`, getQueryProp(propName, operator, generateRandomString()), false],
-		[`operator is ${operator} and a number value is provided`, getQueryProp(propName, operator, numberPropValue), true, [{ operator, propertyName: `properties.${propName}`, value: numberPropValue }]],
-		[`operator is ${operator} and a non number value is provided (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, generateRandomString()), false],
-		[`operator is ${operator} and a number value is provided (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, numberPropValue), true, [{ operator, propertyName: `modules.${moduleName}.${propName}`, value: numberPropValue }]],
-	];
+	const numberValueTests = [queryOperators.GREATER_OR_EQUAL_TO, queryOperators.LESSER_OR_EQUAL_TO]
+		.flatMap((operator) => ([
+			[`operator is ${operator} and a non number value is provided`, getQueryProp(propName, operator, generateRandomString()), false],
+			[`operator is ${operator} and a number value is provided`, getQueryProp(propName, operator, numberPropValue), true, [{ operator, propertyName: `properties.${propName}`, value: numberPropValue }]],
+			[`operator is ${operator} and a non number value is provided (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, generateRandomString()), false],
+			[`operator is ${operator} and a number value is provided (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, numberPropValue), true, [{ operator, propertyName: `modules.${moduleName}.${propName}`, value: numberPropValue }]],
+		]));
 
-	const rangeValueTests = (operator) => [
-		[`operator is ${operator} and value is empty`, getQueryProp(propName, operator), false],
-		[`operator is ${operator} and a non range value is provided`, getQueryProp(propName, operator, generateRandomString()), false],
-		[`operator is ${operator} and range values are provided`, getQueryProp(propName, operator, `[${rangePropValue1[0]},${rangePropValue1[1]}],[${rangePropValue2[0]},${rangePropValue2[1]}]`), true, [{ operator, propertyName: `properties.${propName}`, value: [rangePropValue1, rangePropValue2] }]],
-		[`operator is ${operator} and an invalid range value is provided`, getQueryProp(propName, operator, '[10,5]'), false],
-		[`operator is ${operator} and a non range value is provided (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, generateRandomString()), false],
-		[`operator is ${operator} and range values are provided (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, `[${rangePropValue1[0]},${rangePropValue1[1]}],[${rangePropValue2[0]},${rangePropValue2[1]}]`), true, [{ operator, propertyName: `modules.${moduleName}.${propName}`, value: [rangePropValue1, rangePropValue2] }]],
-		[`operator is ${operator} and an invalid range value is provided (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, '[[10,5]'), false],
-	];
+	const rangeValueTests = [queryOperators.RANGE, queryOperators.NOT_IN_RANGE]
+		.flatMap((operator) => ([
+			[`operator is ${operator} and value is empty`, getQueryProp(propName, operator), false],
+			[`operator is ${operator} and a non range value is provided`, getQueryProp(propName, operator, generateRandomString()), false],
+			[`operator is ${operator} and range values are provided`, getQueryProp(propName, operator, `[${rangePropValue1[0]},${rangePropValue1[1]}],[${rangePropValue2[0]},${rangePropValue2[1]}]`), true, [{ operator, propertyName: `properties.${propName}`, value: [rangePropValue1, rangePropValue2] }]],
+			[`operator is ${operator} and an invalid range value is provided`, getQueryProp(propName, operator, '[10,5]'), false],
+			[`operator is ${operator} and a non range value is provided (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, generateRandomString()), false],
+			[`operator is ${operator} and range values are provided (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, `[${rangePropValue1[0]},${rangePropValue1[1]}],[${rangePropValue2[0]},${rangePropValue2[1]}]`), true, [{ operator, propertyName: `modules.${moduleName}.${propName}`, value: [rangePropValue1, rangePropValue2] }]],
+			[`operator is ${operator} and an invalid range value is provided (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, '[[10,5]'), false],
+		]));
+
+	const equalityValueTests = [queryOperators.EQUALS, queryOperators.NOT_EQUALS]
+		.flatMap((operator) => ([
+			[`operator is ${operator} and an invalid value is provided`, getQueryProp(propName, operator, `${generateRandomString()},${numberPropValue}`), false],
+			[`operator is ${operator} and number values are provided`, getQueryProp(propName, operator, `${numberPropValue},${numberPropValue}`), true, [{ operator, propertyName: `properties.${propName}`, value: [`${numberPropValue}`, `${numberPropValue}`] }]],
+			[`operator is ${operator} and boolean values are provided`, getQueryProp(propName, operator, 'true,false'), true, [{ operator, propertyName: `properties.${propName}`, value: ['true', 'false'] }]],
+			[`operator is ${operator} and capital case boolean values are provided`, getQueryProp(propName, operator, 'True,False'), true, [{ operator, propertyName: `properties.${propName}`, value: ['True', 'False'] }]],
+			[`operator is ${operator} and an invalid value is provided (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, `${generateRandomString()},${numberPropValue}`), false],
+			[`operator is ${operator} and number values are provided (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, `${numberPropValue},${numberPropValue}`), true, [{ operator, propertyName: `modules.${moduleName}.${propName}`, value: [`${numberPropValue}`, `${numberPropValue}`] }]],
+			[`operator is ${operator} and boolean values are provided (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, 'true,false'), true, [{ operator, propertyName: `modules.${moduleName}.${propName}`, value: ['true', 'false'] }]],
+			[`operator is ${operator} and capital case boolean values is provided (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, 'True,False'), true, [{ operator, propertyName: `modules.${moduleName}.${propName}`, value: ['True', 'False'] }]],
+		]));
 
 	describe.each([
 		['query is undefined', undefined, true],
@@ -84,15 +100,11 @@ const testValidateQueryString = () => {
 		['template is queried and operator is valid', getQueryProp(`$${specialQueryFields.TEMPLATE}`, queryOperators.CONTAINS, stringPropValue), true, [{ operator: queryOperators.CONTAINS, propertyName: specialQueryFields.TEMPLATE, value: [stringPropValue] }]],
 		[`operator is ${queryOperators.EXISTS}`, getQueryProp(propName, queryOperators.EXISTS, ''), true, [{ operator: queryOperators.EXISTS, propertyName: `properties.${propName}` }]],
 		[`operator is ${queryOperators.NOT_EXISTS}`, getQueryProp(propName, queryOperators.NOT_EXISTS, ''), true, [{ operator: queryOperators.NOT_EXISTS, propertyName: `properties.${propName}` }]],
-		['multiple properties with different operators are provided', `'${propName}::${queryOperators.EQUALS}::${stringPropValue}&&${moduleName}:${propName2}::${queryOperators.GREATER_OR_EQUAL_TO}::${numberPropValue}'`, true, [{ operator: queryOperators.GREATER_OR_EQUAL_TO, propertyName: `modules.${moduleName}.${propName2}`, value: numberPropValue }, { operator: queryOperators.EQUALS, propertyName: `properties.${propName}`, value: [stringPropValue] }]],
-		...stringValueTests(queryOperators.EQUALS),
-		...stringValueTests(queryOperators.NOT_EQUALS),
-		...stringValueTests(queryOperators.CONTAINS),
-		...stringValueTests(queryOperators.NOT_CONTAINS),
-		...numberValueTests(queryOperators.GREATER_OR_EQUAL_TO),
-		...numberValueTests(queryOperators.LESSER_OR_EQUAL_TO),
-		...rangeValueTests(queryOperators.RANGE),
-		...rangeValueTests(queryOperators.NOT_IN_RANGE),
+		['multiple properties with different operators are provided', `'${propName}::${queryOperators.IS}::${stringPropValue}&&${moduleName}:${propName2}::${queryOperators.GREATER_OR_EQUAL_TO}::${numberPropValue}'`, true, [{ operator: queryOperators.GREATER_OR_EQUAL_TO, propertyName: `modules.${moduleName}.${propName2}`, value: numberPropValue }, { operator: queryOperators.IS, propertyName: `properties.${propName}`, value: [stringPropValue] }]],
+		...stringValueTests,
+		...numberValueTests,
+		...rangeValueTests,
+		...equalityValueTests,
 	])('Validate query string', (desc, query, success, expectedOutput) => {
 		test(`Should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
 			const req = { query: { query }, listOptions: {} };

@@ -27,7 +27,7 @@ TypeChecker.isDate = _.isDate;
 TypeChecker.isString = (value) => _.isString(value);
 TypeChecker.isObject = (value) => _.isObject(value) && !TypeChecker.isArray(value);
 TypeChecker.isNumber = (value) => _.isNumber(value);
-TypeChecker.isBooleanString = (value) => value === 'true' || value === 'false';
+TypeChecker.isBooleanString = (value) => value?.toLowerCase() === 'true' || value?.toLowerCase() === 'false';
 TypeChecker.isNumberString = (value) => !_.isNaN(Number(value));
 TypeChecker.isUUIDString = (uuid) => {
 	if (!TypeChecker.isString(uuid)) return false;
