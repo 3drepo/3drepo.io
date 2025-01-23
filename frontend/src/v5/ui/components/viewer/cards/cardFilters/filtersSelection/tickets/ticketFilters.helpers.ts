@@ -37,6 +37,7 @@ export const TYPE_TO_ICON: Record<CardFilterType, any> = {
 	'sequencing': CalendarIcon,
 	'oneOf': ListIcon,
 	'manyOf': ListIcon,
+	'owner': ListIcon,
 	'boolean': BooleanIcon,
 	'number': NumberIcon,
 };
@@ -45,6 +46,7 @@ const DEFAULT_FILTERS: CardFilter[] = [
 	{ module: '', type: 'ticketTitle', property: formatMessage({ defaultMessage: 'Ticket title', id: 'viewer.card.filters.element.ticketTitle' }) },
 	{ module: '', type: 'ticketId', property: formatMessage({ defaultMessage: 'Ticket ID', id: 'viewer.card.filters.element.ticketId' }) },
 	{ module: '', type: 'template', property: formatMessage({ defaultMessage: 'Ticket template', id: 'viewer.card.filters.element.ticketTemplate' }) },
+	{ module: '', type: 'owner', property: formatMessage({ defaultMessage: 'Owner', id: 'viewer.card.filters.element.ticketTemplate' }) },
 ];
 
 const propertiesToValidFilters = (properties: { name: string, type: string }[], module: string = ''): CardFilter[] => properties
