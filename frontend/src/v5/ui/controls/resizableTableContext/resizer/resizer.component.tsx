@@ -15,18 +15,36 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useRef } from 'react';
-import { overlayStyles, ResizerElement } from './resizer.styles';
+import { useContext, useRef } from 'react';
+import { overlayStyles, ResizerElement, ResizerLine } from './resizer.styles';
+import { ResizableTableContext } from '../resizableTableContext';
 
-type ResizerProps = {
-	onResizeStart: () => void,
-	onResize: (offset: number) => void,
-	onResizeEnd: () => void,
-};
-export const Resizer = ({ onResizeStart, onResize, onResizeEnd, ...props }: ResizerProps) => {
+type ResizerProps = { name: string };
+export const Resizer = ({ name }: ResizerProps) => {
+	const { setWidth, getWidth, setIsResizing, isResizing, setResizerName, resizerName, isHidden } = useContext(ResizableTableContext);
+	const width = getWidth(name);
+	const hidden = isHidden(name);
 	const initialPosition = useRef(null);
 
-	const handleResize = (e) => onResize(!initialPosition.current ? 0 : e.clientX - initialPosition.current);
+	const onResizeStart = () => {
+		setIsResizing(true);
+		setResizerName(name);
+	};
+
+	const onResize = (e) => {
+		const offsetFromInitialPosition = e.clientX - initialPosition.current;
+		setWidth(name, width + offsetFromInitialPosition);
+	};
+
+	const onResizeEnd = () => {
+		setIsResizing(false);
+		setResizerName('');
+	};
+
+	const handleMouseOver = () => setResizerName(name);
+	const handleMouseOut = () => {
+		if (!isResizing) setResizerName('');
+	};
 
 	const preventEventPropagation = (e) => {
 		e.preventDefault();
@@ -51,8 +69,20 @@ export const Resizer = ({ onResizeStart, onResize, onResizeEnd, ...props }: Resi
 		};
 
 		overlay.addEventListener('mouseup', onMouseUp);
-		overlay.addEventListener('mousemove', handleResize);
+		overlay.addEventListener('mousemove', onResize);
 	};
+	
+	if (hidden) return null;
 
-	return (<ResizerElement {...props} onMouseDown={onMouseDown} />);
+	return (
+		<ResizerLine
+			$offset={width}
+			onMouseOver={handleMouseOver}
+			onMouseOut={handleMouseOut}
+			$isResizing={isResizing}
+			$highlight={resizerName === name}
+		>
+			<ResizerElement onMouseDown={onMouseDown} />
+		</ResizerLine>
+	);
 };

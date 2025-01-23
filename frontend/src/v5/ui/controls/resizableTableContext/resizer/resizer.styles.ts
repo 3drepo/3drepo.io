@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 // This is not to interfere with other components and to keep the cursor as
 // "col-resize" while resizing even when moving the mouse outside the table
@@ -35,4 +35,22 @@ export const ResizerElement = styled.div`
 	cursor: col-resize;
 	width: 7px;
 	left: -3px;
+`;
+
+export const ResizerLine = styled.div<{ $offset: number, $isResizing: boolean, $highlight: boolean }>`
+	position: relative;
+	z-index: 10;
+	width: 0;
+	height: 100%;
+	margin-left: ${({ $offset }) => $offset - 1}px;
+	border: dashed 1px transparent;
+	pointer-events: all;
+
+	${({ $highlight, theme }) => $highlight && css`
+		border-color: ${theme.palette.primary.main};
+	`}
+
+	${({ $isResizing }) => $isResizing && css`
+		border-style: solid;
+	`}
 `;
