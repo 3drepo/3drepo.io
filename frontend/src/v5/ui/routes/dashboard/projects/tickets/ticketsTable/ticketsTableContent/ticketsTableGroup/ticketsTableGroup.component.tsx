@@ -33,7 +33,7 @@ import { SetTicketValue } from '../../ticketsTable.helper';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { ResizableTableItem } from '@controls/resizableTableContext/resizableTableItem/resizableTableItem.component';
-import { ResizableTable } from '@controls/resizableTableContext/resizableTable/resizableTable.styles';
+import { ResizableTable } from '@controls/resizableTableContext/resizableTable/resizableTable.component';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 
 const SortingTableHeader = ({ name, children, hidden = false, disableSorting = false, ...props }) => {

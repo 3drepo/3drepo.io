@@ -15,9 +15,38 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-export const ResizableTable = styled.div`
+export const Table = styled.div`
 	width: 100%;
 	overflow-x: scroll;
+	position: relative;
+`;
+
+export const ResizerLine = styled.div<{ $offset: number, $isResizing: boolean, $highlight: boolean }>`
+	position: relative;
+	z-index: 10;
+	width: 0;
+	height: 100%;
+	margin-left: ${({ $offset }) => $offset - 1}px;
+	border: dashed 1px transparent;
+	pointer-events: all;
+
+	${({ $highlight, theme }) => $highlight && css`
+		border-color: ${theme.palette.primary.main};
+	`}
+
+	${({ $isResizing }) => $isResizing && css`
+		border-style: solid;
+	`}
+`;
+
+export const ResizersContainers = styled.div`
+	position: absolute;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	display: flex;
+	flex-direction: row;
 `;

@@ -71,6 +71,7 @@ export const NewTicketRow = styled.div<{ disabled?: boolean }>`
 	align-items: center;
 	padding-left: 15px;
 	gap: 6px;
+	z-index: 11;
 
 	${({ disabled }) => disabled && css`
 		cursor: initial;

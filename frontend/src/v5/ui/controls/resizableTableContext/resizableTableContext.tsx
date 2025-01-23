@@ -20,7 +20,7 @@ import { createContext, useState } from 'react';
 export type TableElements = { name: string, minWidth?: number, width: number, hidden?: boolean };
 
 export interface ResizableTableType {
-	getWidths: () => number[];
+	getElements: () => TableElements[];
 	getWidth: (name: string) => number;
 	getMinWidth: (name: string) => number;
 	setWidth: (name: string, width: number) => void;
@@ -33,7 +33,7 @@ export interface ResizableTableType {
 }
 
 const defaultValue: ResizableTableType = {
-	getWidths: () => [],
+	getElements: () => [],
 	getWidth: () => 0,
 	getMinWidth: () => 0,
 	setWidth: () => {},
@@ -57,28 +57,27 @@ export const ResizableTableContextComponent = ({ children, elements: inputElemen
 	const [isResizing, setIsResizing] = useState(false);
 
 	const getElementByName = (name) => elements.find((e) => e.name === name);
-	const getElementIndex = (name) => elements.findIndex((e) => e.name === name);
+	const getElementIndexByName = (name) => elements.findIndex((e) => e.name === name);
 
-	const getWidths = () => elements.map((e) => e.hidden ? 0 : e.width);
-	const isHidden = (name) => getElementByName(name).hidden ?? false;
-	const getMinWidth = (name) => getElementByName(name).minWidth ?? 0;
-	const getWidth = (name) => isHidden(name) ? 0 : getElementByName(name).width;
+	const isHidden = (name) => getElementByName(name)?.hidden ?? false;
+	const getMinWidth = (name) => getElementByName(name)?.minWidth ?? 0;
+	const getWidth = (name) => (!isHidden(name) && getElementByName(name)?.width) ?? 0;
 
 	const setWidth = (name: string, width: number) => {
-		const index = getElementIndex(name);
+		const index = getElementIndexByName(name);
 		elements[index].width = Math.max(getMinWidth(name), width);
 		setElements([ ...elements ]);
 	};
 
 	const setIsHidden = (name: string, hidden: boolean) => {
-		const index = getElementIndex(name);
+		const index = getElementIndexByName(name);
 		elements[index].hidden = hidden;
 		setElements([ ...elements ]);
 	};
 
 	return (
 		<ResizableTableContext.Provider value={{
-			getWidths,
+			getElements: () => [...elements],
 			getWidth,
 			setWidth,
 			getMinWidth,

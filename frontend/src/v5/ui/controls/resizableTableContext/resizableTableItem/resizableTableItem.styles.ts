@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 export const Container = styled.div<{ $width }>`
 	display: inline-flex;
@@ -27,21 +27,4 @@ export const Container = styled.div<{ $width }>`
 export const Item = styled.div`
 	width: 100%;
 	overflow: hidden;
-`;
-
-export const ResizerLine = styled.div<{ $isResizing: boolean, $highlight: boolean }>`
-	height: 100%;
-	z-index: 1;
-	position: relative;
-	width: 0;
-	margin-left: -1px;
-	border: dashed 1px transparent;
-
-	${({ $highlight, theme }) => $highlight && css`
-		border-color: ${theme.palette.primary.main};
-	`}
-
-	${({ $isResizing }) => $isResizing && css`
-		border-style: solid;
-	`}
 `;

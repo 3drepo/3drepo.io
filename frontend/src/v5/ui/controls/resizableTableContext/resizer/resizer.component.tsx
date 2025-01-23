@@ -18,12 +18,12 @@
 import { useRef } from 'react';
 import { overlayStyles, ResizerElement } from './resizer.styles';
 
-type UseResizableProps = {
+type ResizerProps = {
 	onResizeStart: () => void,
 	onResize: (offset: number) => void,
 	onResizeEnd: () => void,
 };
-export const Resizer = ({ onResizeStart, onResize, onResizeEnd, ...props }: UseResizableProps) => {
+export const Resizer = ({ onResizeStart, onResize, onResizeEnd, ...props }: ResizerProps) => {
 	const initialPosition = useRef(null);
 
 	const handleResize = (e) => onResize(!initialPosition.current ? 0 : e.clientX - initialPosition.current);
