@@ -28,7 +28,7 @@ import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
 import { SetTicketValue } from '../../ticketsTable.helper';
-import { ResizableTableItem } from '@controls/resizableTableContext/resizableTableItem/resizableTableItem.component';
+import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
 import { ResizableTable } from '@controls/resizableTableContext/resizableTable/resizableTable.component';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 
@@ -40,15 +40,15 @@ const SortingTableHeader = ({ name, children, disableSorting = false, ...props }
 	if (isHidden(name)) return (null);
 
 	if (disableSorting) return (
-		<ResizableTableItem name={name}>
+		<ResizableTableCell name={name}>
 			<Header {...props}>
 				{children}
 			</Header>
-		</ResizableTableItem>
+		</ResizableTableCell>
 	);
 
 	return (
-		<ResizableTableItem name={name}>
+		<ResizableTableCell name={name}>
 			<Header {...props} onClick={() => onColumnClick(name)} $selectable>
 				{isSelected && (
 					<IconContainer $flip={isDescendingOrder}>
@@ -57,7 +57,7 @@ const SortingTableHeader = ({ name, children, disableSorting = false, ...props }
 				)}
 				{children}
 			</Header>
-		</ResizableTableItem>
+		</ResizableTableCell>
 	);
 };
 

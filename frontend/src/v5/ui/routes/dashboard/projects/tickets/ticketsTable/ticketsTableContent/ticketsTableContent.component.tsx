@@ -28,7 +28,7 @@ import {  groupTickets, NEW_TICKET_ID, NONE_OPTION, SetTicketValue, UNSET } from
 import { EmptyPageView } from '../../../../../../components/shared/emptyPageView/emptyPageView.styles';
 import { Container, Title } from './ticketsTableContent.styles';
 import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { ResizableTableContextComponent, TableElements } from '@controls/resizableTableContext/resizableTableContext';
+import { ResizableTableContextComponent, TableColumn } from '@controls/resizableTableContext/resizableTableContext';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
@@ -48,7 +48,7 @@ export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy 
 	const hasProperties = config?.issueProperties;
 	const hasSafetibase = modules?.some((module) => module.type === 'safetibase');
 	
-	const widths: TableElements[] = [
+	const columns: TableColumn[] = [
 		{ name: 'id', width: 80, minWidth: 25 },
 		{ name: BaseProperties.TITLE, width: 380, minWidth: 25 },
 		{ name: 'modelName', width: 145, minWidth: 25, hidden: !showModelName },
@@ -79,7 +79,7 @@ export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy 
 
 	if (groupBy === NONE_OPTION || !groupBy) {
 		return (
-			<ResizableTableContextComponent elements={widths}>
+			<ResizableTableContextComponent columns={columns}>
 				<TicketsTableGroup
 					tickets={filteredItems}
 					onNewTicket={onGroupNewTicket('')}
@@ -93,7 +93,7 @@ export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy 
 	const groups = groupTickets(groupBy, filteredItems);
 
 	return (
-		<ResizableTableContextComponent elements={widths}>
+		<ResizableTableContextComponent columns={columns}>
 			<Container>
 				{_.entries(groups).map(([groupName, tickets]) => (
 					<DashboardListCollapse

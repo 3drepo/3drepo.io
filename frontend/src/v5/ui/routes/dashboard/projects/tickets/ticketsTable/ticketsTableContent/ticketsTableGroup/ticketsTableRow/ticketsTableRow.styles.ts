@@ -17,10 +17,10 @@
 
 import { DueDateContainer } from '@controls/dueDate/dueDate.styles';
 import styled from 'styled-components';
-import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.styles';
-import { ResizableTableItem } from '@controls/resizableTableContext/resizableTableItem/resizableTableItem.component';
+import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.component';
+import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
 
-export const Cell = styled(ResizableTableItem)`
+export const Cell = styled(ResizableTableCell)`
 	color: ${({ theme }) => theme.palette.secondary.main};
 	height: 100%;
 	padding: 0 10px;

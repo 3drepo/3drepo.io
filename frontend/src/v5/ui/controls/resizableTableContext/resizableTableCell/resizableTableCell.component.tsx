@@ -17,7 +17,7 @@
 
 import { memo, useContext } from 'react';
 import { ResizableTableContext } from '../resizableTableContext';
-import { Container, Item } from './resizableTableItem.styles';
+import { Container, Item } from './resizableTableCell.styles';
 
 const MemoizedItem = memo(
 	({ children, className }: any) => <Item className={className}>{children}</Item>,
@@ -27,12 +27,12 @@ const MemoizedItem = memo(
 	),
 );
 
-type ResizableTableItemProps = {
+type ResizableTableCellProps = {
 	children: any;
 	name: string;
 	className?: string;
 };
-export const ResizableTableItem = ({ name, children, className }: ResizableTableItemProps) => {
+export const ResizableTableCell = ({ name, children, className }: ResizableTableCellProps) => {
 	const { getWidth, isHidden } = useContext(ResizableTableContext);
 	const currentWidth = getWidth(name);
 	const hidden = isHidden(name);

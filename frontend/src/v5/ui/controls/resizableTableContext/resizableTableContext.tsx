@@ -17,10 +17,10 @@
 
 import { createContext, useState } from 'react';
 
-export type TableElements = { name: string, minWidth?: number, width: number, hidden?: boolean };
+export type TableColumn = { name: string, minWidth?: number, width: number, hidden?: boolean };
 
 export interface ResizableTableType {
-	getElements: () => TableElements[];
+	getElements: () => TableColumn[];
 	getWidth: (name: string) => number;
 	getMinWidth: (name: string) => number;
 	setWidth: (name: string, width: number) => void;
@@ -47,23 +47,21 @@ ResizableTableContext.displayName = 'ResizeableColumns';
 
 interface Props {
 	children: any;
-	elements: TableElements[];
+	columns: TableColumn[];
 }
-export const ResizableTableContextComponent = ({ children, elements: inputElements }: Props) => {
+export const ResizableTableContextComponent = ({ children, columns: inputElements }: Props) => {
 	const [elements, setElements] = useState([...inputElements]);
 	const [resizerName, setResizerName] = useState('');
 	const [isResizing, setIsResizing] = useState(false);
 
 	const getElementByName = (name) => elements.find((e) => e.name === name);
-	const getElementIndexByName = (name) => elements.findIndex((e) => e.name === name);
 
 	const isHidden = (name) => getElementByName(name)?.hidden ?? false;
 	const getMinWidth = (name) => getElementByName(name)?.minWidth ?? 0;
 	const getWidth = (name) => (!isHidden(name) && getElementByName(name)?.width) ?? 0;
 
 	const setWidth = (name: string, width: number) => {
-		const index = getElementIndexByName(name);
-		elements[index].width = Math.max(getMinWidth(name), width);
+		getElementByName(name).width = Math.max(getMinWidth(name), width);
 		setElements([ ...elements ]);
 	};
 
