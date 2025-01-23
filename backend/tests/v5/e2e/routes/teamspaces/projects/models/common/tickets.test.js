@@ -21,6 +21,7 @@ const FS = require('fs');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src, image } = require('../../../../../../helper/path');
 const { serialiseTicketTemplate } = require('../../../../../../../../src/v5/middleware/dataConverter/outputs/common/tickets.templates');
+const { queryOperators, specialQueryFields } = require('../../../../../../../../src/v5/schemas/tickets/tickets.filters');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
@@ -616,7 +617,28 @@ const testGetTicketList = () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
 		const conNoTickets = ServiceHelper.generateRandomModel();
 		const fedNoTickets = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
-		const templatesToUse = times(3, () => ServiceHelper.generateTemplate());
+		const commonTextProp = { name: ServiceHelper.generateRandomString(), type: propTypes.TEXT };
+		const textProp = { name: ServiceHelper.generateRandomString(), type: propTypes.TEXT };
+		const longTextProp = { name: ServiceHelper.generateRandomString(), type: propTypes.LONG_TEXT };
+		const numberProp = { name: ServiceHelper.generateRandomString(), type: propTypes.NUMBER };
+		const boolProp = { name: ServiceHelper.generateRandomString(), type: propTypes.BOOLEAN };
+		const dateProp = { name: ServiceHelper.generateRandomString(), type: propTypes.DATE };
+		const oneOfProp = { name: ServiceHelper.generateRandomString(),
+			type: propTypes.ONE_OF,
+			values: times(5, () => ServiceHelper.generateRandomString()) };
+		const manyOfProp = { name: ServiceHelper.generateRandomString(),
+			type: propTypes.MANY_OF,
+			values: times(5, () => ServiceHelper.generateRandomString()) };
+
+		const templatesToUse = times(3, () => {
+			const template = ServiceHelper.generateTemplate();
+			template.properties.push(commonTextProp);
+			return template;
+		});
+
+		const templateWithAllProps = templatesToUse[0];
+		templateWithAllProps.properties.push(textProp, longTextProp, numberProp, boolProp, dateProp,
+			oneOfProp, manyOfProp);
 
 		con.tickets = times(10, (n) => ServiceHelper.generateTicket(templatesToUse[n % templatesToUse.length]));
 		fed.tickets = times(10, (n) => ServiceHelper.generateTicket(templatesToUse[n % templatesToUse.length]));
@@ -674,6 +696,102 @@ const testGetTicketList = () => {
 				}
 			};
 
+			const existsPropertyFilters = (propType, propertyName) => [
+				[`${queryOperators.EXISTS} operator is used in ${propType} property`,
+					{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.EXISTS}'` } }, true,
+					model.tickets.filter((t) => t.type === templateWithAllProps._id)],
+				[`${queryOperators.NOT_EXISTS} operator is used in ${propType} property`,
+					{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.NOT_EXISTS}'` } }, true,
+					model.tickets.filter((t) => t.type !== templateWithAllProps._id)],
+			];
+
+			const equalsPropertyFilters = (propType, propertyName) => [
+				[`${queryOperators.EQUALS} operator is used in ${propType} property`,
+					{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.EQUALS}::${model.tickets[0].properties[propertyName]}'` } }, true,
+					model.tickets
+						.filter((t) => t.properties[propertyName] === model.tickets[0].properties[propertyName])],
+				[`${queryOperators.NOT_EQUALS} operator is used in ${propType} property`,
+					{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.NOT_EQUALS}::${model.tickets[0].properties[propertyName]}'` } }, true,
+					model.tickets
+						.filter((t) => t.properties[propertyName] !== model.tickets[0].properties[propertyName])],
+			];
+
+			const textPropertyFilters = (propType, propertyName) => {
+				const existTextFilters = existsPropertyFilters(propType, propertyName);
+				return [
+					...existTextFilters,
+					[`${queryOperators.IS} operator is used in ${propType} property`,
+						{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.IS}::${model.tickets[0].properties[propertyName]}'` } }, true,
+						model.tickets
+							.filter((t) => t.properties[propertyName] === model.tickets[0].properties[propertyName])],
+					[`${queryOperators.NOT_IS} operator is used in ${propType} property`,
+						{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.NOT_IS}::${model.tickets[0].properties[propertyName]}'` } }, true,
+						model.tickets
+							.filter((t) => t.properties[propertyName] !== model.tickets[0].properties[propertyName])],
+					[`${queryOperators.CONTAINS} operator is used in ${propType} property`,
+						{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.CONTAINS}::${model.tickets[0].properties[propertyName].slice(0, 5)}'` } }, true,
+						model.tickets.filter((t) => t.properties[propertyName]
+							=== model.tickets[0].properties[propertyName])],
+					[`${queryOperators.NOT_CONTAINS} operator is used in ${propType} property`,
+						{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.NOT_CONTAINS}::${model.tickets[0].properties[propertyName]}'` } }, true,
+						model.tickets.filter((t) => t.properties[propertyName]
+							!== model.tickets[0].properties[propertyName])],
+				];
+			};
+
+			const manyOfPropertyFilters = [
+				...existsPropertyFilters(propTypes.MANY_OF, manyOfProp.name),
+				[`${queryOperators.IS} operator is used in ${propTypes.MANY_OF} property`,
+					{ ...baseRouteParams, options: { query: `'${manyOfProp.name}::${queryOperators.IS}::${model.tickets[0].properties[manyOfProp.name][0]}'` } }, true,
+					model.tickets
+						.filter((t) => (t.properties[manyOfProp.name]
+							?.some((val) => val === model.tickets[0].properties[manyOfProp.name][0])))],
+				[`${queryOperators.NOT_IS} operator is used in ${propTypes.MANY_OF} property`,
+					{ ...baseRouteParams, options: { query: `'${manyOfProp.name}::${queryOperators.NOT_IS}::${model.tickets[0].properties[manyOfProp.name][0]}'` } }, true,
+					model.tickets
+						.filter((t) => (!t.properties[manyOfProp.name]
+							?.some((val) => val === model.tickets[0].properties[manyOfProp.name][0])))],
+				[`${queryOperators.CONTAINS} operator is used in ${propTypes.MANY_OF} property`,
+					{ ...baseRouteParams, options: { query: `'${manyOfProp.name}::${queryOperators.CONTAINS}::${model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)}'` } }, true,
+					model.tickets
+						.filter((t) => t.properties[manyOfProp.name]?.some((val) => val.slice(0, 5)
+							=== model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)))],
+				[`${queryOperators.NOT_CONTAINS} operator is used in ${propTypes.MANY_OF} property`,
+					{ ...baseRouteParams, options: { query: `'${manyOfProp.name}::${queryOperators.NOT_CONTAINS}::${model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)}'` } }, true,
+					model.tickets
+						.filter((t) => !t.properties[manyOfProp.name]
+							?.some((val) => val.slice(0, 5)
+								=== model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)))],
+			];
+
+			const numberPropertyFilters = (propType, propertyName) => [
+				...existsPropertyFilters(propType, propertyName),
+				...equalsPropertyFilters(propType, propertyName),
+				[`${queryOperators.GREATER_OR_EQUAL_TO} operator is used in ${propType} property`, { ...baseRouteParams,
+					options: { query: `'${propertyName}::${queryOperators.GREATER_OR_EQUAL_TO}::${model.tickets[0].properties[propertyName]}'` } }, true,
+				model.tickets.filter((t) => t.properties[propertyName]
+					>= model.tickets[0].properties[propertyName])],
+				[`${queryOperators.LESSER_OR_EQUAL_TO} operator is used in ${propType} property`, { ...baseRouteParams,
+					options: { query: `'${propertyName}::${queryOperators.LESSER_OR_EQUAL_TO}::${model.tickets[0].properties[propertyName]}'` } }, true,
+				model.tickets.filter((t) => t.properties[propertyName]
+						<= model.tickets[0].properties[propertyName])],
+				[`${queryOperators.RANGE} operator is used in ${propType} property`, { ...baseRouteParams,
+					options: { query: `'${propertyName}::${queryOperators.RANGE}::[${model.tickets[0].properties[propertyName] - 500},${model.tickets[0].properties[propertyName] + 500}]'` } }, true,
+				model.tickets.filter((t) => t.properties[propertyName]
+						>= model.tickets[0].properties[propertyName] - 500
+						&& t.properties[propertyName] <= model.tickets[0].properties[propertyName] + 500)],
+				[`${queryOperators.NOT_IN_RANGE} operator is used in ${propType} property`,
+					{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.NOT_IN_RANGE}::[${model.tickets[0].properties[propertyName] - 500},${model.tickets[0].properties[propertyName] + 500}]'` } }, true,
+					model.tickets.filter((t) => !t.properties[propertyName] || (t.properties[propertyName]
+					< model.tickets[0].properties[propertyName] - 500
+					|| t.properties[propertyName] > model.tickets[0].properties[propertyName] + 500))],
+			];
+
+			const booleanPropertyFilters = [
+				...existsPropertyFilters(propTypes.BOOLEAN, boolProp.name),
+				...equalsPropertyFilters(propTypes.BOOLEAN, boolProp.name),
+			];
+
 			return [
 				['the user does not have a valid session', { ...baseRouteParams, key: null }, false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', { ...baseRouteParams, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
@@ -687,6 +805,18 @@ const testGetTicketList = () => {
 				['the model returning only tickets updated since now', { ...baseRouteParams, options: { updatedSince: Date.now() + 1000000 } }, true, []],
 				['the model returning tickets sorted by updated at in ascending order', { ...baseRouteParams, options: { sortBy: basePropertyLabels.UPDATED_AT, sortDesc: false }, checkTicketList: checkTicketList() }, true, model.tickets],
 				['the model returning tickets sorted by updated at in descending order', { ...baseRouteParams, options: { sortBy: basePropertyLabels.UPDATED_AT, sortDesc: true }, checkTicketList: checkTicketList(false) }, true, model.tickets],
+				['the model has tickets and template query filter is imposed', { ...baseRouteParams, options: { query: `'$${specialQueryFields.TEMPLATE}::${queryOperators.IS}::${templatesToUse[1].code}'` } }, true, model.tickets.filter((t) => t.type === templatesToUse[1]._id)],
+				['the model has tickets and ticket code query filter is imposed', { ...baseRouteParams, options: { query: `'$${specialQueryFields.TICKET_CODE}::${queryOperators.CONTAINS}::${templateWithAllProps.code}'` } }, true, model.tickets.filter((t) => t.type === templateWithAllProps._id)],
+				['the model has tickets and title query filter is imposed', { ...baseRouteParams, options: { query: `'$${specialQueryFields.TITLE}::${queryOperators.IS}::${model.tickets[5].title}'` } }, true, [model.tickets[5]]],
+				...textPropertyFilters(propTypes.TEXT, textProp.name),
+				...textPropertyFilters(propTypes.LONG_TEXT, longTextProp.name),
+				...textPropertyFilters(propTypes.ONE_OF, oneOfProp.name),
+				...manyOfPropertyFilters,
+				...numberPropertyFilters(propTypes.NUMBER, numberProp.name),
+				...numberPropertyFilters(propTypes.DATE, dateProp.name),
+				...booleanPropertyFilters,
+				['the model has tickets and skip is provided', { ...baseRouteParams, options: { skip: 2, sortBy: commonTextProp.name } }, true, model.tickets.sort((t1, t2) => String(t2.properties[commonTextProp.name]).localeCompare(t1.properties[commonTextProp.name])).slice(2)],
+				['the model has tickets and limit', { ...baseRouteParams, options: { limit: 2, sortBy: commonTextProp.name } }, true, model.tickets.sort((t1, t2) => String(t2.properties[commonTextProp.name]).localeCompare(t1.properties[commonTextProp.name])).slice(0, 2)],
 			];
 		};
 
