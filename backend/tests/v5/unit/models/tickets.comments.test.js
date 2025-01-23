@@ -181,7 +181,7 @@ const testImportComments = () => {
 				})),
 			}));
 
-			const fn = jest.spyOn(db, 'insertMany');
+			const fn = jest.spyOn(db, 'insertMany').mockImplementation(() => undefined);
 
 			const returnedComments = await Comments.importComments(teamspace, project, model, newComments, author);
 
