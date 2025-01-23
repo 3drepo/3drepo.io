@@ -18,12 +18,13 @@
 import { StoryObj, Meta } from '@storybook/react';
 import { CentredContainer } from '@controls/centredContainer/centredContainer.component';
 import styled from 'styled-components';
+import { GRADIENT } from '@/v5/ui/themes/theme';
 
 const ParentComponent = styled.div`
 	height: 300px;
 	width: 100%;
 	border: 2px solid hotpink;
-	background: ${({ theme }) => theme.palette.gradient.secondary};
+	background: ${GRADIENT.SECONDARY};
 `;
 
 const TextContainer = styled.div`

@@ -18,7 +18,7 @@
 import * as Yup from 'yup';
 import { SettingsSchemaWithGeoPosition } from './settingsSchemes';
 import { type, unit, code, revisionDesc, revisionTag, lod  } from './validators';
-import { desc, name, uploadFile } from '../shared/validators';
+import { desc, name } from '../shared/validators';
 
 export const ContainerSettingsSchema = SettingsSchemaWithGeoPosition.shape({ type: Yup.string() });
 
@@ -31,7 +31,6 @@ export const CreateContainerSchema = Yup.object().shape({
 });
 
 export const ListItemSchema = Yup.object().shape({
-	file: uploadFile,
 	revisionTag,
 	containerName: name,
 });

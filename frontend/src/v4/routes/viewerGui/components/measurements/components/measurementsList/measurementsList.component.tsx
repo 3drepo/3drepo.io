@@ -59,7 +59,7 @@ export const MeasurementsList = ({
 
 	const handleOnClick = () => setExpanded(!expanded);
 
-	const isCountable = ![MEASURE_TYPE.POINT, MEASURE_TYPE.ANGLE].includes(measureType);
+	const isCountable = ![MEASURE_TYPE.POINT, MEASURE_TYPE.ANGLE, MEASURE_TYPE.SLOPE].includes(measureType);
 
 	return (
 		<Container>

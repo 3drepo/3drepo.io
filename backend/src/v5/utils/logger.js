@@ -41,6 +41,7 @@ Logger.labels = {
 	modelProcessing: 'MODPRO',
 	aad: 'AAD',
 	journaling: 'JRN',
+	notifications: 'NOTIF',
 };
 
 module.exports = Logger;

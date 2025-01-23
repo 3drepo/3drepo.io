@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const CryptoJS = require('crypto-js');
 const { times } = require('lodash');
 const { src } = require('../../helper/path');
 const config = require('../../../../src/v5/utils/config');
@@ -695,6 +696,33 @@ const testRemoveFilesWithMeta = () => {
 	});
 };
 
+const testGetMD5FileHash = () => {
+	describe('Get a file\'s MD5 hash', () => {
+		const mockId = Buffer.from('testBuffer');
+		const mockRefEntry = { type: 'fs', link: 'mockLink', size: 100 };
+		test('it should create the MD5 hash if it has not been chached', async () => {
+			FileRefs.getRefEntry.mockImplementation(() => mockRefEntry);
+			FSHandler.getFile.mockResolvedValueOnce(mockId);
+
+			await expect(FilesManager.getMD5FileHash('teamspace', 'container', 'filename')).resolves.toEqual({ hash: CryptoJS.MD5(mockId).toString(), size: 100 });
+
+			expect(FileRefs.getRefEntry).toHaveBeenCalledTimes(2);
+			expect(FSHandler.getFile).toHaveBeenCalledTimes(1);
+			expect(FileRefs.updateRef).toHaveBeenCalledTimes(1);
+		});
+		test('it should return straight away if the MD5 has has been cached', async () => {
+			const mockRef = { ...mockRefEntry, md5Hash: generateRandomString() };
+			FileRefs.getRefEntry.mockResolvedValueOnce(mockRef);
+
+			await expect(FilesManager.getMD5FileHash('teamspace', 'container', 'filename')).resolves.toEqual({ hash: mockRef.md5Hash, size: mockRef.size });
+
+			expect(FileRefs.getRefEntry).toHaveBeenCalledTimes(1);
+			expect(FSHandler.getFile).toHaveBeenCalledTimes(0);
+			expect(FileRefs.updateRef).toHaveBeenCalledTimes(0);
+		});
+	});
+};
+
 describe('services/filesManager', () => {
 	testRemoveFilesWithMeta();
 	testRemoveAllFilesFromModel();
@@ -706,4 +734,5 @@ describe('services/filesManager', () => {
 	testStoreFiles();
 	testStoreFileStream();
 	testFileExists();
+	testGetMD5FileHash();
 });

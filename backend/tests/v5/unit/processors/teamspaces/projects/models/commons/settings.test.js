@@ -47,14 +47,50 @@ const testGetUsersWithPermissions = () => {
 
 			const tsAdmins = times(5, () => generateRandomString());
 			const projAdmins = times(5, () => generateRandomString());
-			const modelMembers = times(5, () => generateRandomString());
+			const usersWithModelPriv = times(5, () => generateRandomString());
+
+			const tsMembers = [...tsAdmins, ...projAdmins, ...usersWithModelPriv];
+			TeamspaceSettings.getAllUsersInTeamspace.mockResolvedValueOnce(tsMembers);
+
 			TeamspaceSettings.getTeamspaceAdmins.mockResolvedValueOnce(tsAdmins);
 			ProjectSettings.getProjectAdmins.mockResolvedValueOnce(projAdmins);
-			ModelSettings.getUsersWithPermissions.mockResolvedValueOnce(modelMembers);
+			ModelSettings.getUsersWithPermissions.mockResolvedValueOnce(usersWithModelPriv);
 
 			await expect(Settings.getUsersWithPermissions(teamspace, project, model, excludeViewers))
-				.resolves.toEqual([...tsAdmins, ...projAdmins, ...modelMembers]);
+				.resolves.toEqual([...tsAdmins, ...projAdmins, ...usersWithModelPriv]);
 
+			expect(TeamspaceSettings.getAllUsersInTeamspace).toHaveBeenCalledTimes(1);
+			expect(TeamspaceSettings.getAllUsersInTeamspace).toHaveBeenCalledWith(teamspace);
+			expect(TeamspaceSettings.getTeamspaceAdmins).toHaveBeenCalledTimes(1);
+			expect(TeamspaceSettings.getTeamspaceAdmins).toHaveBeenCalledWith(teamspace);
+			expect(ProjectSettings.getProjectAdmins).toHaveBeenCalledTimes(1);
+			expect(ProjectSettings.getProjectAdmins).toHaveBeenCalledWith(teamspace, project);
+			expect(ModelSettings.getUsersWithPermissions).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.getUsersWithPermissions).toHaveBeenCalledWith(teamspace, model, excludeViewers);
+		});
+
+		test('should filter out any users who are not a ts member', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const excludeViewers = true;
+
+			const tsAdmins = times(5, () => generateRandomString());
+			const projAdmins = times(5, () => generateRandomString());
+			const usersWithModelPriv = times(5, () => generateRandomString());
+
+			const tsMembers = [...tsAdmins, ...usersWithModelPriv];
+			TeamspaceSettings.getAllUsersInTeamspace.mockResolvedValueOnce(tsMembers);
+
+			TeamspaceSettings.getTeamspaceAdmins.mockResolvedValueOnce(tsAdmins);
+			ProjectSettings.getProjectAdmins.mockResolvedValueOnce(projAdmins);
+			ModelSettings.getUsersWithPermissions.mockResolvedValueOnce(usersWithModelPriv);
+
+			await expect(Settings.getUsersWithPermissions(teamspace, project, model, excludeViewers))
+				.resolves.toEqual([...tsAdmins, ...usersWithModelPriv]);
+
+			expect(TeamspaceSettings.getAllUsersInTeamspace).toHaveBeenCalledTimes(1);
+			expect(TeamspaceSettings.getAllUsersInTeamspace).toHaveBeenCalledWith(teamspace);
 			expect(TeamspaceSettings.getTeamspaceAdmins).toHaveBeenCalledTimes(1);
 			expect(TeamspaceSettings.getTeamspaceAdmins).toHaveBeenCalledWith(teamspace);
 			expect(ProjectSettings.getProjectAdmins).toHaveBeenCalledTimes(1);
@@ -75,16 +111,22 @@ const testGetJobsWithAccess = () => {
 
 			const tsAdmins = times(5, () => generateRandomString());
 			const projAdmins = times(5, () => generateRandomString());
-			const modelMembers = times(5, () => generateRandomString());
+			const usersWithModelPriv = times(5, () => generateRandomString());
 			const jobs = times(5, () => generateRandomString());
+
+			const tsMembers = [...tsAdmins, ...projAdmins, ...usersWithModelPriv];
+			TeamspaceSettings.getAllUsersInTeamspace.mockResolvedValueOnce(tsMembers);
+
 			TeamspaceSettings.getTeamspaceAdmins.mockResolvedValueOnce(tsAdmins);
 			ProjectSettings.getProjectAdmins.mockResolvedValueOnce(projAdmins);
-			ModelSettings.getUsersWithPermissions.mockResolvedValueOnce(modelMembers);
+			ModelSettings.getUsersWithPermissions.mockResolvedValueOnce(usersWithModelPriv);
 			Jobs.getJobsByUsers.mockResolvedValueOnce(jobs);
 
 			await expect(Settings.getJobsWithAccess(teamspace, project, model, excludeViewers))
 				.resolves.toEqual(jobs);
 
+			expect(TeamspaceSettings.getAllUsersInTeamspace).toHaveBeenCalledTimes(1);
+			expect(TeamspaceSettings.getAllUsersInTeamspace).toHaveBeenCalledWith(teamspace);
 			expect(TeamspaceSettings.getTeamspaceAdmins).toHaveBeenCalledTimes(1);
 			expect(TeamspaceSettings.getTeamspaceAdmins).toHaveBeenCalledWith(teamspace);
 			expect(ProjectSettings.getProjectAdmins).toHaveBeenCalledTimes(1);
@@ -93,7 +135,7 @@ const testGetJobsWithAccess = () => {
 			expect(ModelSettings.getUsersWithPermissions).toHaveBeenCalledWith(teamspace, model, excludeViewers);
 			expect(Jobs.getJobsByUsers).toHaveBeenCalledTimes(1);
 			expect(Jobs.getJobsByUsers).toHaveBeenCalledWith(teamspace,
-				[...tsAdmins, ...projAdmins, ...modelMembers]);
+				[...tsAdmins, ...projAdmins, ...usersWithModelPriv]);
 		});
 	});
 };
