@@ -24,7 +24,7 @@ const { getArrayDifference } = require('../../../v5/utils/helper/arrays');
 const { deleteIfUndefined, isEmpty } = require('../../../v5/utils/helper/objects');
 const { isArray } = require('../../../v5/utils/helper/typeCheck');
 const { UUIDToString, stringToUUID } = require('../../../v5/utils/helper/uuids');
-const { getTeamspaceList } = require('../../utils');
+const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 const { getJobs } = require(`${v5Path}/models/jobs`);
@@ -103,6 +103,34 @@ const updateTicketProperties = async (teamspace, jobNamesToIds) => {
 	}
 };
 
+const updateIssuesAndRisks = async (teamspace, jobNamesToIds) => {
+	const colUpdates = {};
+
+	const issueCollections = await getCollectionsEndsWith(teamspace, '.issues');
+	const riskCollections = await getCollectionsEndsWith(teamspace, '.risks');
+
+	const processCollection = async (colName) => {
+		const colItems = await DBHandler.find(teamspace, colName, {}, { assigned_roles: 1 });
+
+		colItems.forEach((item) => {
+			const newAssignedRole = jobNamesToIds[item.assigned_roles[0]];
+			if (newAssignedRole) {
+				if (!colUpdates[colName]) {
+					colUpdates[colName] = [];
+				}
+
+				colUpdates[colName].push({
+					updateOne: { filter: { _id: item._id }, update: { $set: { assigned_roles: [newAssignedRole] } } },
+				});
+			}
+		});
+	};
+
+	await Promise.all([...issueCollections, ...riskCollections].flatMap(({ name }) => processCollection(name)));
+
+	await Promise.all(Object.keys(colUpdates).map((col) => DBHandler.bulkWrite(teamspace, col, colUpdates[col])));
+};
+
 const addNamesToJobs = async (teamspace) => {
 	const jobNamesToIds = {};
 	const jobs = await getJobs(teamspace, {});
@@ -135,6 +163,9 @@ const run = async () => {
 
 		// eslint-disable-next-line no-await-in-loop
 		await updateTicketProperties(teamspace, jobNamesToIds);
+
+		// eslint-disable-next-line no-await-in-loop
+		await updateIssuesAndRisks(teamspace, jobNamesToIds);
 	}
 };
 
