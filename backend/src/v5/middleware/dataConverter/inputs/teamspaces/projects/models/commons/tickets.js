@@ -80,46 +80,42 @@ const bodyContainsTicketsArray = async (req, res, next) => {
 const extractUniqueProperties = (template) => {
 	const uniqueProps = new Map();
 
-	if (template.properties.length) {
-		template.properties.forEach((property) => {
-			if (property.unique) uniqueProps.set(property.name, new Set());
+	template.properties.forEach((property) => {
+		if (property.unique) uniqueProps.set(property.name, new Set());
+	});
+	template.modules.forEach((templateModule) => {
+		templateModule.properties.forEach((property) => {
+			if (property.unique) uniqueProps.set(`${templateModule.name}..${property.name}`, new Set());
 		});
-	}
-	if (template.modules.length) {
-		template.modules.forEach((templateModule) => {
-			templateModule.properties.forEach((property) => {
-				if (property.unique) uniqueProps.set(`${templateModule}..${property}`, new Set());
-			});
-		});
-	}
+	});
 
 	return uniqueProps;
 };
 
-const checkDuplicateProps = (template, tickets) => {
+const hasDuplicateUniqueProps = (template, tickets) => {
+	// console.log(template);
 	const uniqueProps = extractUniqueProperties(template);
+	let hasDuplicate = false;
 
 	tickets.forEach((ticket) => {
-		const throwErrror = (tmplt, property) => {
-			throw createResponseCode(tmplt, `The value of ${property} must be unique in the list of tickets.`);
-		};
 		for (const [key, value] of uniqueProps) {
 			const keyArray = key.split('..');
 			if (keyArray.length > 1) {
 				if (value.has(ticket.modules[keyArray[0]][keyArray[1]])) {
-					throwErrror(templates.invalidArguments, keyArray[1]);
-				} else {
-					value.add(ticket.modules[keyArray[0]][keyArray[1]]);
+					hasDuplicate = true;
 					break;
 				}
+				value.add(ticket.modules[keyArray[0]][keyArray[1]]);
+				break;
 			}
 			if (value.has(ticket.properties[keyArray[0]])) {
-				throwErrror(templates.invalidArguments, keyArray[0]);
-			} else {
-				value.add(ticket.properties[keyArray[0]]);
+				hasDuplicate = true;
+				break;
 			}
+			value.add(ticket.properties[keyArray[0]]);
 		}
 	});
+	return hasDuplicate;
 };
 
 const validateTicketImportData = (isNew) => async (req, res, next) => {
@@ -128,10 +124,12 @@ const validateTicketImportData = (isNew) => async (req, res, next) => {
 		const template = req.templateData;
 		const user = getUserFromSession(req.session);
 
-		checkDuplicateProps(template, req.body.tickets);
-
 		if (isNew && template.deprecated) {
 			throw createResponseCode(templates.invalidArguments, 'Template has been deprecated');
+		}
+
+		if (template && hasDuplicateUniqueProps(template, req.body.tickets)) {
+			throw createResponseCode(templates.invalidArguments, 'The unique property can not have the same value multiple times.');
 		}
 
 		req.body.tickets = await Promise.all(req.body.tickets.map((ticket, i) => {
@@ -143,6 +141,7 @@ const validateTicketImportData = (isNew) => async (req, res, next) => {
 		await next();
 	} catch (err) {
 		const response = codeExists(err.code) ? err : createResponseCode(templates.invalidArguments, err.message);
+
 		respond(req, res, response);
 	}
 };
