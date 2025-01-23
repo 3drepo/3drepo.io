@@ -17,7 +17,6 @@
 
 type IProps = {
 	className?: any;
-	selected
 };
 
 export default ({ className }: IProps) => (
