@@ -51,16 +51,37 @@ export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy 
 	const columns: TableColumn[] = [
 		{ name: 'id', width: 80, minWidth: 25 },
 		{ name: BaseProperties.TITLE, width: 380, minWidth: 25 },
-		{ name: 'modelName', width: 145, minWidth: 25, hidden: !showModelName },
+		{ name: 'modelName', width: 145, minWidth: 25 },
 		{ name: `properties.${BaseProperties.CREATED_AT}`, width: 127, minWidth: 25 },
-		{ name: `properties.${IssueProperties.ASSIGNEES}`, width: 96, minWidth: 25, hidden: !hasProperties }, 
+		{ name: `properties.${IssueProperties.ASSIGNEES}`, width: 96, minWidth: 25 }, 
 		{ name: `properties.${BaseProperties.OWNER}`, width: 52, minWidth: 25 },
-		{ name: `properties.${IssueProperties.DUE_DATE}`, width: 147, minWidth: 25, hidden: !hasProperties },
-		{ name: `properties.${IssueProperties.PRIORITY}`, width: 90, minWidth: 25, hidden: !hasProperties },
+		{ name: `properties.${IssueProperties.DUE_DATE}`, width: 147, minWidth: 25 },
+		{ name: `properties.${IssueProperties.PRIORITY}`, width: 90, minWidth: 25 },
 		{ name: `properties.${BaseProperties.STATUS}`, width: 150, minWidth: 52 },
-		{ name: `modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`, width: 137, minWidth: 25, hidden: !hasSafetibase },
-		{ name: `modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`, width: 134, minWidth: 25, hidden: !hasSafetibase },
+		{ name: `modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`, width: 137, minWidth: 25 },
+		{ name: `modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`, width: 134, minWidth: 25 },
 	];
+
+	const getHiddenColumns = () => {
+		const cols = [];
+		if (!showModelName) {
+			cols.push('modelName');
+		}
+		if (!hasProperties) {
+			cols.push(
+				`properties.${IssueProperties.ASSIGNEES}`,
+				`properties.${IssueProperties.DUE_DATE}`,
+				`properties.${IssueProperties.PRIORITY}`,
+			);
+		}
+		if (!hasSafetibase) {
+			cols.push(
+				`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`,
+				`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`,
+			);
+		}
+		return cols;
+	};
 	
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
 		setTicketValue(modelId, NEW_TICKET_ID, (groupByValue === UNSET) ? null : groupByValue);
@@ -79,7 +100,7 @@ export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy 
 
 	if (groupBy === NONE_OPTION || !groupBy) {
 		return (
-			<ResizableTableContextComponent columns={columns}>
+			<ResizableTableContextComponent columns={columns} hiddenColumns={getHiddenColumns()}>
 				<TicketsTableGroup
 					tickets={filteredItems}
 					onNewTicket={onGroupNewTicket('')}
@@ -93,7 +114,7 @@ export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy 
 	const groups = groupTickets(groupBy, filteredItems);
 
 	return (
-		<ResizableTableContextComponent columns={columns}>
+		<ResizableTableContextComponent columns={columns} hiddenColumns={getHiddenColumns()}>
 			<Container>
 				{_.entries(groups).map(([groupName, tickets]) => (
 					<DashboardListCollapse

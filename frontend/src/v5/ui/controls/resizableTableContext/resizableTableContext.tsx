@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useState } from 'react';
+import { isEqual } from 'lodash';
+import { createContext, useEffect, useState } from 'react';
 
-export type TableColumn = { name: string, minWidth?: number, width: number, hidden?: boolean };
+export type TableColumn = { name: string, minWidth?: number, width: number };
 
 export interface ResizableTableType {
 	getVisibleColumnsWidths: () => number[];
@@ -50,19 +51,21 @@ ResizableTableContext.displayName = 'ResizeableColumns';
 interface Props {
 	children: any;
 	columns: TableColumn[];
+	hiddenColumns: string[];
 }
-export const ResizableTableContextComponent = ({ children, columns: inputColumns }: Props) => {
+export const ResizableTableContextComponent = ({ children, columns: inputColumns, hiddenColumns: inputHiddenColumns }: Props) => {
 	const [columns, setColumns] = useState([...inputColumns]);
+	const [hiddenColumns, setHiddenColumns] = useState(inputHiddenColumns);
 	const [resizerName, setResizerName] = useState('');
 	const [isResizing, setIsResizing] = useState(false);
 
 	const getElementByName = (name) => columns.find((e) => e.name === name);
 
-	const isHidden = (name) => getElementByName(name)?.hidden ?? false;
+	const isHidden = (name) => hiddenColumns.includes(name);
 	const getMinWidth = (name) => getElementByName(name)?.minWidth ?? 0;
 	const getWidth = (name) => (!isHidden(name) && getElementByName(name)?.width) ?? 0;
 
-	const getVisibleColumns = () => columns.filter((c) => !c.hidden);
+	const getVisibleColumns = () => columns.filter((c) => !isHidden(c.name));
 	const getVisibleColumnsWidths = () => getVisibleColumns().map((c) => c.width);
 	const getVisibleColumnsNames = () => getVisibleColumns().map((c) => c.name);
 
@@ -70,6 +73,12 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 		getElementByName(name).width = Math.max(getMinWidth(name), width);
 		setColumns([ ...columns ]);
 	};
+
+	useEffect(() => {
+		if (!isEqual(inputHiddenColumns, hiddenColumns)) {
+			setHiddenColumns(inputHiddenColumns);
+		}
+	}, [inputHiddenColumns]);
 
 	return (
 		<ResizableTableContext.Provider value={{
