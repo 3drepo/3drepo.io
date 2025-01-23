@@ -16,10 +16,13 @@
  */
 
 const { addModelToProject, getProjectById, removeModelFromProject } = require('../../../../../models/projectSettings');
+const { getLatestRevision, getRevisionByIdOrTag } = require('../../../../../models/revisions');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions/permissions');
 const { USERS_DB_NAME } = require('../../../../../models/users.constants');
 const { addModel } = require('../../../../../models/modelSettings');
 const { getFavourites } = require('../../../../../models/users');
+const { getMD5FileHash } = require('../../../../../services/filesManager');
+const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { removeModelData } = require('../../../../../utils/helper/models');
 
 const ModelList = {};
@@ -50,11 +53,43 @@ ModelList.getModelList = async (teamspace, project, user, modelSettings) => {
 	return modelSettings.flatMap(({ _id, name, permissions: modelPerms }) => {
 		const perm = modelPerms ? modelPerms.find((entry) => entry.user === user) : undefined;
 		return (!isAdmin && !perm)
-			? [] : { _id,
+			? [] : {
+				_id,
 				name,
 				role: isAdmin ? USERS_DB_NAME : perm.permission,
-				isFavourite: favourites.includes(_id) };
+				isFavourite: favourites.includes(_id),
+			};
 	});
+};
+
+ModelList.getModelMD5Hash = async (teamspace, container, revision) => {
+	let rev;
+
+	if (revision) {
+		rev = await getRevisionByIdOrTag(
+			teamspace, container, modelTypes.CONTAINER, revision,
+			{ rFile: 1, timestamp: 1, fileSize: 1, tag: 1 },
+			{ includeVoid: false });
+	} else {
+		rev = await getLatestRevision(
+			teamspace, container, modelTypes.CONTAINER,
+			{ rFile: 1, timestamp: 1, fileSize: 1, tag: 1 });
+	}
+
+	if (!rev.rFile?.length) return {};
+
+	const { tag, timestamp } = rev;
+	const filename = rev.rFile[0];
+	const { hash, size } = await getMD5FileHash(teamspace, `${container}.history`, filename);
+
+	return {
+		container,
+		tag,
+		timestamp,
+		hash,
+		filename,
+		size,
+	};
 };
 
 module.exports = ModelList;
