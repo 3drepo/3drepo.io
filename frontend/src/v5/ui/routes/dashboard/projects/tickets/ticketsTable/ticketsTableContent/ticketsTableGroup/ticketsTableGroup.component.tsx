@@ -18,10 +18,8 @@
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { FormattedMessage } from 'react-intl';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
-import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { isCommenterRole } from '@/v5/store/store.helpers';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { SortedTableComponent, SortedTableContext, SortedTableType } from '@controls/sortedTableContext/sortedTableContext';
 import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import ArrowIcon from '@assets/icons/outlined/arrow-outlined.svg';
@@ -30,22 +28,16 @@ import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
 import { SetTicketValue } from '../../ticketsTable.helper';
-import { useParams } from 'react-router-dom';
-import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { ResizableTableItem } from '@controls/resizableTableContext/resizableTableItem/resizableTableItem.component';
 import { ResizableTable } from '@controls/resizableTableContext/resizableTable/resizableTable.component';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 
-const SortingTableHeader = ({ name, children, hidden = false, disableSorting = false, ...props }) => {
+const SortingTableHeader = ({ name, children, disableSorting = false, ...props }) => {
 	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
-	const { setIsHidden } = useContext(ResizableTableContext);
+	const { isHidden } = useContext(ResizableTableContext);
 	const isSelected = name === sortingColumn;
-	
-	useEffect(() => {
-		setIsHidden(name, hidden);
-	}, [hidden]);
 
-	if (hidden) return (null);
+	if (isHidden(name)) return (null);
 
 	if (disableSorting) return (
 		<ResizableTableItem name={name}>
@@ -76,16 +68,8 @@ type TicketsTableGroupProps = {
 	onNewTicket: (modelId: string) => void;
 };
 export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
-	const { template: templateId } = useParams<DashboardTicketsParams>();
-	const [modelsIds] = useSearchParam('models', Transformers.STRING_ARRAY);
-
-	const showModelName = modelsIds.length > 1;
 	const models = useSelectedModels();
-
 	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;
-	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
-	const hasProperties = template?.config?.issueProperties;
-	const hasSafetibase = template?.modules?.some((module) => module.type === 'safetibase');
 
 	return (
 		<ResizableTable>
@@ -101,31 +85,31 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 									<SortingTableHeader name={BaseProperties.TITLE}>
 										<FormattedMessage id="ticketTable.column.header.title" defaultMessage="title" />
 									</SortingTableHeader>
-									<SortingTableHeader name="modelName" hidden={!showModelName}>
+									<SortingTableHeader name="modelName">
 										<FormattedMessage id="ticketTable.column.header.federationContainer" defaultMessage="federation / container" />
 									</SortingTableHeader>
 									<SortingTableHeader name={`properties.${BaseProperties.CREATED_AT}`}>
 										<FormattedMessage id="ticketTable.column.header.createdAt" defaultMessage="created at" />
 									</SortingTableHeader>
-									<SortingTableHeader name={`properties.${IssueProperties.ASSIGNEES}`} hidden={!hasProperties}> 
+									<SortingTableHeader name={`properties.${IssueProperties.ASSIGNEES}`}> 
 										<FormattedMessage id="ticketTable.column.header.assignees" defaultMessage="assignees" />
 									</SortingTableHeader>
 									<SortingTableHeader name={`properties.${BaseProperties.OWNER}`}>
 										<FormattedMessage id="ticketTable.column.header.owner" defaultMessage="owner" />
 									</SortingTableHeader>
-									<SortingTableHeader name={`properties.${IssueProperties.DUE_DATE}`} hidden={!hasProperties}>
+									<SortingTableHeader name={`properties.${IssueProperties.DUE_DATE}`}>
 										<FormattedMessage id="ticketTable.column.header.dueDate" defaultMessage="due date" />
 									</SortingTableHeader>
-									<SortingTableHeader name={`properties.${IssueProperties.PRIORITY}`} hidden={!hasProperties}>
+									<SortingTableHeader name={`properties.${IssueProperties.PRIORITY}`}>
 										<FormattedMessage id="ticketTable.column.header.priority" defaultMessage="priority" />
 									</SortingTableHeader>
 									<SortingTableHeader name={`properties.${BaseProperties.STATUS}`}>
 										<FormattedMessage id="ticketTable.column.header.status" defaultMessage="status" />
 									</SortingTableHeader>
-									<SortingTableHeader name={`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`} hidden={!hasSafetibase}>
+									<SortingTableHeader name={`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`}>
 										<FormattedMessage id="ticketTable.column.header.levelOfRisk" defaultMessage="level of risk" />
 									</SortingTableHeader>
-									<SortingTableHeader name={`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`} hidden={!hasSafetibase}>
+									<SortingTableHeader name={`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`}>
 										<FormattedMessage id="ticketTable.column.header.treatmentStatus" defaultMessage="treatment status" />
 									</SortingTableHeader>
 								</Headers>

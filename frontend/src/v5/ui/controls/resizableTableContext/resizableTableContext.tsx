@@ -29,7 +29,6 @@ export interface ResizableTableType {
 	setIsResizing: (isResizing: boolean) => void,
 	isResizing: boolean,
 	isHidden: (name: string) => boolean,
-	setIsHidden: (name: string, hidden: boolean) => void,
 }
 
 const defaultValue: ResizableTableType = {
@@ -42,7 +41,6 @@ const defaultValue: ResizableTableType = {
 	setIsResizing: () => {},
 	isResizing: false,
 	isHidden: () => true,
-	setIsHidden: () => {},
 };
 export const ResizableTableContext = createContext(defaultValue);
 ResizableTableContext.displayName = 'ResizeableColumns';
@@ -69,12 +67,6 @@ export const ResizableTableContextComponent = ({ children, elements: inputElemen
 		setElements([ ...elements ]);
 	};
 
-	const setIsHidden = (name: string, hidden: boolean) => {
-		const index = getElementIndexByName(name);
-		elements[index].hidden = hidden;
-		setElements([ ...elements ]);
-	};
-
 	return (
 		<ResizableTableContext.Provider value={{
 			getElements: () => [...elements],
@@ -86,7 +78,6 @@ export const ResizableTableContextComponent = ({ children, elements: inputElemen
 			setIsResizing,
 			isResizing,
 			isHidden,
-			setIsHidden,
 		}}>
 			{children}
 		</ResizableTableContext.Provider>
