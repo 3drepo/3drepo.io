@@ -20,7 +20,8 @@ import { createContext, useState } from 'react';
 export type TableColumn = { name: string, minWidth?: number, width: number, hidden?: boolean };
 
 export interface ResizableTableType {
-	getElements: () => TableColumn[];
+	getVisibleColumnsWidths: () => number[];
+	getVisibleColumnsNames: () => string[];
 	getWidth: (name: string) => number;
 	getMinWidth: (name: string) => number;
 	setWidth: (name: string, width: number) => void;
@@ -32,7 +33,8 @@ export interface ResizableTableType {
 }
 
 const defaultValue: ResizableTableType = {
-	getElements: () => [],
+	getVisibleColumnsWidths: () => [],
+	getVisibleColumnsNames: () => [],
 	getWidth: () => 0,
 	getMinWidth: () => 0,
 	setWidth: () => {},
@@ -49,25 +51,30 @@ interface Props {
 	children: any;
 	columns: TableColumn[];
 }
-export const ResizableTableContextComponent = ({ children, columns: inputElements }: Props) => {
-	const [elements, setElements] = useState([...inputElements]);
+export const ResizableTableContextComponent = ({ children, columns: inputColumns }: Props) => {
+	const [columns, setColumns] = useState([...inputColumns]);
 	const [resizerName, setResizerName] = useState('');
 	const [isResizing, setIsResizing] = useState(false);
 
-	const getElementByName = (name) => elements.find((e) => e.name === name);
+	const getElementByName = (name) => columns.find((e) => e.name === name);
 
 	const isHidden = (name) => getElementByName(name)?.hidden ?? false;
 	const getMinWidth = (name) => getElementByName(name)?.minWidth ?? 0;
 	const getWidth = (name) => (!isHidden(name) && getElementByName(name)?.width) ?? 0;
 
+	const getVisibleColumns = () => columns.filter((c) => !c.hidden);
+	const getVisibleColumnsWidths = () => getVisibleColumns().map((c) => c.width);
+	const getVisibleColumnsNames = () => getVisibleColumns().map((c) => c.name);
+
 	const setWidth = (name: string, width: number) => {
 		getElementByName(name).width = Math.max(getMinWidth(name), width);
-		setElements([ ...elements ]);
+		setColumns([ ...columns ]);
 	};
 
 	return (
 		<ResizableTableContext.Provider value={{
-			getElements: () => [...elements],
+			getVisibleColumnsWidths,
+			getVisibleColumnsNames,
 			getWidth,
 			setWidth,
 			getMinWidth,

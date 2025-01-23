@@ -15,8 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { useContext } from 'react';
+import { ResizableTableContext } from '../resizableTableContext';
+import { Row } from './resizableTableRow.styles';
 
-export const Row = styled.div`
-	display: grid;
-`;
+export const ResizableTableRow = (props) => {
+	const { getVisibleColumnsWidths } = useContext(ResizableTableContext);
+	const gridTemplateColumns = getVisibleColumnsWidths().map((w) => `${w}px`).join(' ');
+	
+	return (<Row style={{ gridTemplateColumns }} {...props} />);
+};

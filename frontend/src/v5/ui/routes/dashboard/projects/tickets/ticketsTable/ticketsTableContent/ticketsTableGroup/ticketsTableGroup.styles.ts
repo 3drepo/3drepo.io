@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.styles';
+import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.component';
 import { Typography } from '@controls/typography';
 import styled, { css } from 'styled-components';
 

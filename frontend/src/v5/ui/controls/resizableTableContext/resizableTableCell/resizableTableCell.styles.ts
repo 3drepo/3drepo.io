@@ -17,13 +17,6 @@
 
 import styled from 'styled-components';
 
-export const Container = styled.div<{ $width }>`
-	display: inline-flex;
-	flex-direction: row;
-	min-width: ${({ $width }) => $width}px;
-	max-width: ${({ $width }) => $width}px;
-`;
-
 export const Item = styled.div`
 	width: 100%;
 	overflow: hidden;

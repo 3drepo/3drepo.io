@@ -26,9 +26,16 @@ export const Resizer = ({ name }: ResizerProps) => {
 	const hidden = isHidden(name);
 	const initialPosition = useRef(null);
 
-	const onResizeStart = () => {
+	const preventEventPropagation = (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+	};
+
+	const onResizeStart = (e) => {
+		preventEventPropagation(e);
 		setIsResizing(true);
 		setResizerName(name);
+		initialPosition.current = e.clientX;
 	};
 
 	const onResize = (e) => {
@@ -36,40 +43,32 @@ export const Resizer = ({ name }: ResizerProps) => {
 		setWidth(name, width + offsetFromInitialPosition);
 	};
 
-	const onResizeEnd = () => {
+	const onResizeEnd = (e) => {
+		preventEventPropagation(e);
 		setIsResizing(false);
 		setResizerName('');
+		initialPosition.current = null;
 	};
 
 	const handleMouseOver = () => setResizerName(name);
 	const handleMouseOut = () => {
 		if (!isResizing) setResizerName('');
 	};
-
-	const preventEventPropagation = (e) => {
-		e.preventDefault();
-		e.stopPropagation();
-	};
 	
 	const onMouseDown = (e) => {
-		preventEventPropagation(e);
-		onResizeStart();
-		initialPosition.current = e.clientX;
+		onResizeStart(e);
 
 		const overlay = document.createElement('div');
 		overlay.style.cssText = overlayStyles;
 		document.body.appendChild(overlay);
 
 		const onMouseUp = (ev) => {
-			preventEventPropagation(ev);
-			onResizeEnd();
-			initialPosition.current = null;
-
+			onResizeEnd(ev);
 			document.body.removeChild(overlay);
 		};
 
-		overlay.addEventListener('mouseup', onMouseUp);
 		overlay.addEventListener('mousemove', onResize);
+		overlay.addEventListener('mouseup', onMouseUp);
 	};
 	
 	if (hidden) return null;
@@ -79,8 +78,8 @@ export const Resizer = ({ name }: ResizerProps) => {
 			$offset={width}
 			onMouseOver={handleMouseOver}
 			onMouseOut={handleMouseOut}
-			$isResizing={isResizing}
 			$highlight={resizerName === name}
+			$isResizing={isResizing}
 		>
 			<ResizerElement onMouseDown={onMouseDown} />
 		</ResizerLine>

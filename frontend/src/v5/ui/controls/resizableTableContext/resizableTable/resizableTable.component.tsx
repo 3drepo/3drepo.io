@@ -21,14 +21,13 @@ import { ResizableTableContext } from '../resizableTableContext';
 import { ResizersContainers, Table } from './resizableTable.styles';
 
 export const ResizableTable = ({ children }) => {
-	const { getElements } = useContext(ResizableTableContext);
-	const resizableElements = getElements().filter((e) => !e.hidden);
+	const { getVisibleColumnsNames } = useContext(ResizableTableContext);
 
 	return (
 		<Table>
 			{children}
 			<ResizersContainers>
-				{resizableElements.map(({ name }) => (
+				{getVisibleColumnsNames().map((name) => (
 					<Resizer name={name} key={name} />
 				))}
 			</ResizersContainers>

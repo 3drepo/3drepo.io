@@ -15,17 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { memo, useContext } from 'react';
+import { useContext } from 'react';
 import { ResizableTableContext } from '../resizableTableContext';
-import { Container, Item } from './resizableTableCell.styles';
-
-const MemoizedItem = memo(
-	({ children, className }: any) => <Item className={className}>{children}</Item>,
-	(prevProps, nextProps) => (
-		prevProps.children === nextProps.children
-		&& prevProps.className === nextProps.className
-	),
-);
+import { Item } from './resizableTableCell.styles';
 
 type ResizableTableCellProps = {
 	children: any;
@@ -33,15 +25,9 @@ type ResizableTableCellProps = {
 	className?: string;
 };
 export const ResizableTableCell = ({ name, children, className }: ResizableTableCellProps) => {
-	const { getWidth, isHidden } = useContext(ResizableTableContext);
-	const currentWidth = getWidth(name);
-	const hidden = isHidden(name);
+	const { isHidden } = useContext(ResizableTableContext);
 
-	if (hidden) return null;
+	if (isHidden(name)) return null;
 
-	return (
-		<Container $width={currentWidth}>
-			<MemoizedItem className={className}>{children}</MemoizedItem>
-		</Container>
-	);
+	return (<Item className={className}>{children}</Item>);
 };
