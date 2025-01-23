@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { isBooleanString, isNumberString } = require('../utils/helper/typeCheck');
+const { isNumberString } = require('../utils/helper/typeCheck');
 const { queryOperators } = require('../schemas/tickets/tickets.filters');
 const { toBoolean } = require('../utils/helper/strings');
 
