@@ -24,58 +24,9 @@ const C = require("../constants.js");
 const db = require("../handler/db");
 const { sanitiseRegex } = require(`${v5Path}/utils/helper/strings.js`);
 
-function validateJobName(jobName) {
-	const regex = "^[^/?=#+]{0,119}[^/?=#+ ]{1}$";
-	return jobName && jobName.match(regex);
-}
-
 const JOBS_COLLECTION_NAME = "jobs";
 
 const Job = {};
-
-const isColorValid = (color) => {
-	const hexRegex = /^#[0-9A-F]{6}$/i;
-
-	return !!color?.match(hexRegex);
-
-};
-
-Job.addDefaultJobs = function(teamspace) {
-	const promises = [];
-
-	C.DEFAULT_JOBS.forEach(job => {
-		promises.push(Job.addJob(teamspace, job));
-	});
-
-	return Promise.all(promises);
-};
-
-Job.addJob = async function(teamspace, jobData) {
-	if (!jobData._id || !validateJobName(jobData._id)) {
-		throw responseCodes.JOB_ID_INVALID;
-	}
-
-	const foundJob = await Job.findByJob(teamspace, jobData._id, false);
-
-	if (foundJob) {
-		throw responseCodes.DUP_JOB;
-	}
-
-	const newJobEntry = {
-		_id: jobData._id,
-		users: []
-	};
-
-	if (jobData.color) {
-		if(isColorValid(jobData.color)) {
-			newJobEntry.color = jobData.color;
-		} else {
-			throw responseCodes.INVALID_ARGUMENTS;
-		}
-	}
-
-	return db.insertOne(teamspace, JOBS_COLLECTION_NAME, newJobEntry);
-};
 
 Job.addUserToJob = async function(teamspace, jobName, user) {
 	// Check if user is member of teamspace
@@ -122,19 +73,6 @@ Job.findUsersWithJobs = async function(teamspace, jobNames) {
 	return foundJobs.reduce((users, jobItem) => users.concat(jobItem.users), []);
 };
 
-Job.getAllColors = async function(teamspace) {
-	const jobs = await Job.getAllJobs(teamspace);
-	return compact(uniq(map(jobs, "color")));
-};
-
-Job.getAllJobs = async function(teamspace) {
-	const foundJobs = await db.find(teamspace, JOBS_COLLECTION_NAME, {});
-
-	return foundJobs.map(({_id, color}) => {
-		return {_id, color};
-	});
-};
-
 Job.getUserJob = async function(teamspace, user) {
 	const foundJob = await Job.findJobByUser(teamspace, user);
 
@@ -142,20 +80,6 @@ Job.getUserJob = async function(teamspace, user) {
 		_id: foundJob._id,
 		color: foundJob.color
 	} : {};
-};
-
-Job.removeJob = async function(teamspace, jobName) {
-	const foundJob = await Job.findByJob(teamspace, jobName);
-
-	if (!foundJob) {
-		throw responseCodes.JOB_NOT_FOUND;
-	}
-
-	if (foundJob.users.length > 0) {
-		throw responseCodes.JOB_ASSIGNED;
-	}
-
-	return db.deleteOne(teamspace, JOBS_COLLECTION_NAME, {_id: jobName});
 };
 
 Job.removeUserFromAnyJob = async function(teamspace, user) {
@@ -177,35 +101,6 @@ Job.removeUserFromJob = async function(teamspace, jobName, user) {
 	if (job.users) {
 		job.users.splice(job.users.indexOf(user), 1);
 		result = await db.updateOne(teamspace, JOBS_COLLECTION_NAME, {_id: jobName}, {$set: {users: job.users}});
-	}
-
-	return result;
-};
-
-Job.updateJob = async function(teamspace, jobName, updatedData) {
-	if (!jobName) {
-		throw responseCodes.JOB_ID_INVALID;
-	}
-
-	if (updatedData._id && updatedData._id !== jobName) {
-		throw responseCodes.INVALID_ARGUMENTS;
-	}
-
-	const foundJob = await Job.findByJob(teamspace, jobName);
-	let result;
-
-	if (!foundJob) {
-		throw responseCodes.JOB_NOT_FOUND;
-	}
-
-	if (updatedData.color) {
-
-		if(isColorValid(updatedData.color)) {
-			result = await db.updateOne(teamspace, JOBS_COLLECTION_NAME, {_id: jobName}, {$set: {color: updatedData.color}});
-		} else {
-			throw responseCodes.INVALID_ARGUMENTS;
-		}
-
 	}
 
 	return result;

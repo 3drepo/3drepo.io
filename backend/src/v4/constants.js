@@ -633,19 +633,6 @@
 
 	define("DEFAULT_OWNER_JOB",  "Admin");
 
-	define("DEFAULT_JOBS",[
-		{ _id: "Admin", "color": "#f7f7b2" },
-		{ _id: "Client", "color": "#a6cee3" },
-		{ _id: "Architect", "color": "#213f99"},
-		{ _id: "Structural Engineer", "color" : "#33a02c"},
-		{ _id: "MEP Engineer", "color": "#fb9a99"},
-		{ _id: "Project Manager", "color": "#e31a1c"},
-		{ _id: "Quantity Surveyor", "color": "#ff7f00"},
-		{ _id: "Asset Manager", "color" : "#ffff99"},
-		{ _id: "Main Contractor", "color": "#b15928"},
-		{ _id: "Supplier", "color": "#6a3d9a"}
-	]);
-
 	define("ACCEPTED_IMAGE_FORMATS",  ["png", "jpg", "jpeg", "gif"]);
 
 	// -----------------------------------------------------------------------------

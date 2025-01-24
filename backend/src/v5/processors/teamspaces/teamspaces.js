@@ -22,6 +22,7 @@ const { createTeamspaceSettings, getAddOns, getMembersInfo, grantAdminToUser, re
 const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
+const { UUIDToString } = require('../../utils/helper/uuids');
 const { addDefaultTemplates } = require('../../models/tickets.templates');
 const { deleteFavourites } = require('../../models/users');
 const { dropDatabase } = require('../../handler/db');
@@ -96,7 +97,7 @@ Teamspaces.getTeamspaceMembersInfo = async (teamspace) => {
 				usersToJobs[user] = [];
 			}
 
-			usersToJobs[user].push(_id);
+			usersToJobs[user].push(UUIDToString(_id));
 		});
 	});
 

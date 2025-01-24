@@ -31,17 +31,8 @@ const validateJob = (isUpdate) => async (req, res, next) => {
 				try {
 					if (!value) return true;
 
-					const lowercaseValue = value.toLowerCase();
 					const jobs = await getJobs(req.params.teamspace, { _id: 1, name: 1 });
-
-					for (let i = 0; i < jobs.length; i++) {
-						const jobName = jobs[i].name ?? jobs[i]._id;
-						if (lowercaseValue === jobName.toLowerCase()) {
-							return false;
-						}
-					}
-
-					return true;
+					return jobs.every(({ name }) => name.toLowerCase() !== value.toLowerCase());
 				} catch {
 					return true;
 				}

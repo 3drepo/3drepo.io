@@ -60,7 +60,7 @@ const generatePropertiesValidator = async (teamspace, project, model, templateId
 						const users = await getUsersWithPermissions(teamspace, project, model, excludeViewers);
 						const accessibleJobs = await getJobsByUsers(teamspace, users);
 
-						values = [...accessibleJobs, ...users];
+						values = [...accessibleJobs.map(UUIDToString), ...users];
 					}
 					break;
 				case presetEnumValues.RISK_CATEGORIES:

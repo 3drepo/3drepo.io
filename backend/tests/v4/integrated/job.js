@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  *  Copyright (C) 2014 3D Repo Ltd
@@ -17,31 +17,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const request = require("supertest");
-const SessionTracker = require("../../v5/helper/sessionTracker")
-const expect = require("chai").expect;
-const app = require("../../../src/v4/services/api.js").createApp();
-const logger = require("../../../src/v4/logger.js");
-const systemLogger = logger.systemLogger;
-const responseCodes = require("../../../src/v4/response_codes.js");
-const async = require("async");
+const request = require('supertest');
+const SessionTracker = require('../../v5/helper/sessionTracker');
+const { expect } = require('chai');
+const app = require('../../../src/v4/services/api.js').createApp();
+const logger = require('../../../src/v4/logger.js');
 
+const { systemLogger } = logger;
+const responseCodes = require('../../../src/v4/response_codes.js');
+const async = require('async');
 
-const defaultAdmin = { "_id": "Admin", "color": "#f7f7b2"};
-describe("Job", function () {
-
+const defaultAdmin = { _id: 'Admin', color: '#f7f7b2' };
+describe('Job', () => {
 	let server;
 	let agent;
-	const username = "job";
-	const password = "job";
-	const job = { _id: "job1", color: "#000000"};
-	const job2 = { _id: "job2", color: "#000000"};
+	const username = 'job';
+	const password = 'job';
+	const job = { _id: 'job1', color: '#000000' };
+	const job2 = { _id: 'job2', color: '#000000' };
 
-	before(async function() {
-
+	before(async () => {
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
-				console.log("API test server is listening on port 8080!");
+				console.log('API test server is listening on port 8080!');
 				resolve();
 			});
 		});
@@ -50,312 +48,288 @@ describe("Job", function () {
 		await agent.login(username, password);
 	});
 
-	after(function(done) {
-		server.close(function() {
-			console.log("API test server is closed");
+	after((done) => {
+		server.close(() => {
+			console.log('API test server is closed');
 			done();
 		});
 	});
 
-	it("should able to create new job", function(done) {
-
+	it('should able to create new job', (done) => {
 		agent.post(`/${username}/jobs`)
 			.send(job)
-			.expect(200, function(err, res) {
+			.expect(200, (err, res) => {
 				done(err);
 			});
-
 	});
 
-	it("should able to create second job", function(done) {
-
+	it('should able to create second job', (done) => {
 		agent.post(`/${username}/jobs`)
 			.send(job2)
-			.expect(200, function(err, res) {
+			.expect(200, (err, res) => {
 				done(err);
 			});
-
 	});
 
-	it("should not able to create duplicated job", function(done) {
-
+	it('should not able to create duplicated job', (done) => {
 		agent.post(`/${username}/jobs`)
 			.send(job)
-			.expect(400 , function(err, res) {
+			.expect(400, (err, res) => {
 				expect(res.body.value).to.equal(responseCodes.DUP_JOB.value);
 				done(err);
 			});
-
 	});
 
-	it("should not able to create job with invalid name", function(done) {
+	it('should not able to create job with invalid name', (done) => {
 		agent.post(`/${username}/jobs`)
-			.send({ _id: " ", color: "#000000"})
-			.expect(400 , function(err, res) {
+			.send({ _id: ' ', color: '#000000' })
+			.expect(400, (err, res) => {
 				expect(res.body.value).to.equal(responseCodes.JOB_ID_INVALID.value);
 				done(err);
 			});
 	});
 
-	it("should not able to create job with invalid color", function(done) {
+	it('should not able to create job with invalid color', (done) => {
 		agent.post(`/${username}/jobs`)
-			.send({ _id: "abcd", color: "000000"})
-			.expect(400 , function(err, res) {
+			.send({ _id: 'abcd', color: '000000' })
+			.expect(400, (err, res) => {
 				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 				done(err);
 			});
 	});
 
-	it("should not able to create job with no name", function(done) {
+	it('should not able to create job with no name', (done) => {
 		agent.post(`/${username}/jobs`)
-			.send({ _id: "", color: "#000000"})
-			.expect(400 , function(err, res) {
+			.send({ _id: '', color: '#000000' })
+			.expect(400, (err, res) => {
 				expect(res.body.value).to.equal(responseCodes.JOB_ID_INVALID.value);
 				done(err);
 			});
 	});
 
-	it("get job assigned to current user should succeed", function(done) {
+	it('get job assigned to current user should succeed', (done) => {
 		agent.get(`/${username}/myJob`)
-			.expect(200, function(err, res) {
+			.expect(200, (err, res) => {
 				expect(res.body).to.deep.equal(defaultAdmin);
 				done(err);
 			});
 	});
 
-	it("get job assigned to current user after job assignment should succeed", function(done) {
+	it('get job assigned to current user after job assignment should succeed', (done) => {
 		async.series([
-			function(done) {
+			function (done) {
 				agent.post(`/${username}/jobs/${job2._id}/${username}`)
 					.expect(200, done);
 			},
-			function(done) {
+			function (done) {
 				agent.get(`/${username}/myJob`)
-					.expect(200, function(err, res) {
+					.expect(200, (err, res) => {
 						expect(res.body).to.deep.equal(job2);
 						done(err);
 					});
-			}
+			},
 		], done);
 	});
 
-	it("update job colour should succeed", function(done) {
+	it('update job colour should succeed', (done) => {
 		const updatedJob = {
 			_id: job2._id,
-			color: "#aaaaaa"
+			color: '#aaaaaa',
 		};
 
 		let oldJobs;
 
 		async.series([
-			function(done) {
+			function (done) {
 				agent.get(`/${username}/jobs`)
-					.expect(200, function(err, res) {
+					.expect(200, (err, res) => {
 						oldJobs = res.body;
 						done(err);
 					});
 			},
-			function(done) {
+			function (done) {
 				agent.put(`/${username}/jobs/${job2._id}`)
 					.send(updatedJob)
 					.expect(200, done);
 			},
-			function(done) {
+			function (done) {
 				agent.get(`/${username}/jobs`)
-					.expect(200, function(err, res) {
+					.expect(200, (err, res) => {
 						const newJobs = [
 							defaultAdmin,
 							job,
-							updatedJob
+							updatedJob,
 						];
 
 						expect(res.body).to.deep.equal(newJobs);
 						done(err);
 					});
 			},
-			function(done) {
+			function (done) {
 				agent.put(`/${username}/jobs/${job2._id}`)
 					.send(oldJobs[2])
 					.expect(200, done);
 			},
-			function(done) {
+			function (done) {
 				agent.get(`/${username}/jobs`)
-					.expect(200, function(err, res) {
+					.expect(200, (err, res) => {
 						expect(res.body).to.deep.equal(oldJobs);
 						done(err);
 					});
-			}
+			},
 		], done);
 	});
 
-	it("update job id should fail", function(done) {
+	it('update job id should fail', (done) => {
 		const updatedJob = {
-			_id: "new name",
-			color: job2._id
+			_id: 'new name',
+			color: job2._id,
 		};
 
 		let oldJobs;
 
 		async.series([
-			function(done) {
+			function (done) {
 				agent.get(`/${username}/jobs`)
-					.expect(200, function(err, res) {
+					.expect(200, (err, res) => {
 						oldJobs = res.body;
 						done(err);
 					});
 			},
-			function(done) {
+			function (done) {
 				agent.put(`/${username}/jobs/${job2._id}`)
 					.send(updatedJob)
-					.expect(400, function(err, res) {
+					.expect(400, (err, res) => {
 						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 						done(err);
 					});
 			},
-			function(done) {
+			function (done) {
 				agent.get(`/${username}/jobs`)
-					.expect(200, function(err, res) {
+					.expect(200, (err, res) => {
 						expect(res.body).to.deep.equal(oldJobs);
 						done(err);
 					});
-			}
+			},
 		], done);
 	});
 
-	it("should able to list the job created", function(done) {
+	it('should able to list the job created', (done) => {
 		agent.get(`/${username}/jobs`)
-			.expect(200, function(err, res) {
+			.expect(200, (err, res) => {
 				expect(res.body).to.deep.equal([defaultAdmin, job, job2]);
 				done(err);
 			});
 	});
 
-	it("should fail to assign a job that doesnt exist to a licence(user)", function(done) {
+	it('should fail to assign a job that doesnt exist to a licence(user)', (done) => {
 		agent.post(`/${username}/jobs/nonsense/user1`)
-			.expect(404, function(err, res) {
+			.expect(404, (err, res) => {
 				expect(res.body.value).to.equal(responseCodes.JOB_NOT_FOUND.value);
 				done(err);
 			});
 	});
 
-	it("should able to assign a job to a licence(user)", function(done) {
-
+	it('should able to assign a job to a licence(user)', (done) => {
 		async.series([
-			callback => {
+			(callback) => {
 				agent.post(`/${username}/jobs/${job._id}/user1`)
-					.expect(200, function(err, res) {
+					.expect(200, (err, res) => {
 						callback(err);
 					});
 			},
 
-			callback => {
+			(callback) => {
 				agent.get(`/${username}/members`)
-					.expect(200, function(err, res) {
-						const entry = res.body.members.find(entry => entry.user === "user1");
+					.expect(200, (err, res) => {
+						const entry = res.body.members.find((entry) => entry.user === 'user1');
 						expect(entry.job).to.equal(job._id);
 						callback(err);
 					});
-			}
+			},
 
 		], (err, res) => done(err));
-
 	});
 
-	it("should able to change assignment to another job", function(done) {
+	it('should able to change assignment to another job', (done) => {
 		async.series([
-			callback => {
+			(callback) => {
 				agent.post(`/${username}/jobs/${job2._id}/user1`)
-					.expect(200, function(err, res) {
+					.expect(200, (err, res) => {
 						callback(err);
 					});
 			},
 
-			callback => {
+			(callback) => {
 				agent.get(`/${username}/members`)
-					.expect(200, function(err, res) {
-						for(let i = 0; i < res.body.length; ++i) {
-							const entry = res.body.members.find(entry => entry.user === "user1");
+					.expect(200, (err, res) => {
+						for (let i = 0; i < res.body.length; ++i) {
+							const entry = res.body.members.find((entry) => entry.user === 'user1');
 							expect(entry.job).to.equal(job2._id);
 						}
 
 						callback(err);
 					});
-			}
+			},
 
 		], (err, res) => done(err));
 	});
 
-	// is the functionality of this endpoint useful?
-	it("list job colours should show unique list and succeed", function(done) {
-		agent.get(`/${username}/jobs/colors`)
-			.expect(200, function(err, res) {
-				expect(res.body).to.deep.equal([defaultAdmin.color, job.color]);
-				done(err);
-			});
-	});
-
-	it("list job colours should succeed", function(done) {
+	it('list job colours should succeed', (done) => {
 		const updatedJob = {
 			_id: job2._id,
-			color: "#aaaaaa"
+			color: '#aaaaaa',
 		};
 
 		let oldJobs;
 
 		async.series([
-			function(done) {
+			function (done) {
 				agent.get(`/${username}/jobs`)
-					.expect(200, function(err, res) {
+					.expect(200, (err, res) => {
 						oldJobs = res.body;
 						done(err);
 					});
 			},
-			function(done) {
+			function (done) {
 				agent.put(`/${username}/jobs/${job2._id}`)
 					.send(updatedJob)
 					.expect(200, done);
 			},
-			function(done) {
-				agent.get(`/${username}/jobs/colors`)
-					.expect(200, function(err, res) {
-						expect(res.body).to.deep.equal([defaultAdmin.color, job.color, updatedJob.color]);
-						done(err);
-					});
-			},
-			function(done) {
+			function (done) {
 				agent.put(`/${username}/jobs/${job2._id}`)
 					.send(oldJobs[2])
 					.expect(200, done);
-			}
+			},
 		], done);
 	});
 
-	it("should fail to remove a job if it is assigned to someone", function(done) {
+	it('should fail to remove a job if it is assigned to someone', (done) => {
 		agent.delete(`/${username}/jobs/${job2._id}`)
-			.expect(400, function(err, res) {
+			.expect(400, (err, res) => {
 				expect(res.body.value).to.equal(responseCodes.JOB_ASSIGNED.value);
 				done(err);
 			});
 	});
 
-	it("should able to remove a job", function(done) {
+	it('should able to remove a job', (done) => {
 		agent.delete(`/${username}/jobs/${job._id}`)
-			.expect(200, function(err, res) {
+			.expect(200, (err, res) => {
 				done(err);
 			});
 	});
 
-	it("should not able to remove a job that doesnt exist", function(done) {
+	it('should not able to remove a job that doesnt exist', (done) => {
 		agent.delete(`/${username}/jobs/nonsense`)
-			.expect(404, function(err, res) {
+			.expect(404, (err, res) => {
 				expect(res.body.value).to.equal(responseCodes.JOB_NOT_FOUND.value);
 				done(err);
 			});
 	});
 
-	it("job should be removed from the list", function(done) {
+	it('job should be removed from the list', (done) => {
 		agent.get(`/${username}/jobs`)
-			.expect(200, function(err, res) {
+			.expect(200, (err, res) => {
 				expect(res.body).to.deep.equal([defaultAdmin, job2]);
 				done(err);
 			});

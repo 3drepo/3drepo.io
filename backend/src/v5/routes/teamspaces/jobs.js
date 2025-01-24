@@ -22,14 +22,16 @@ const Jobs = require('../../processors/teamspaces/jobs');
 const { Router } = require('express');
 const { UUIDToString } = require('../../utils/helper/uuids');
 const { respond } = require('../../utils/responder');
+const { serialiseJobs } = require('../../middleware/dataConverter/outputs/teamspaces/jobs');
 const { templates } = require('../../utils/responseCodes');
 
-const getJobList = async (req, res) => {
+const getJobs = async (req, res, next) => {
 	const { teamspace } = req.params;
 
 	try {
-		const jobs = await Jobs.getJobList(teamspace);
-		respond(req, res, templates.ok, { jobs });
+		const jobs = await Jobs.getJobs(teamspace);
+		req.jobs = jobs;
+		await next();
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -108,6 +110,11 @@ const establishRoutes = () => {
 	*                     properties:
 	*                       _id:
 	*                         type: string
+	*                         format: uuid
+	*                         description: Job id
+	*                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+	*                       name:
+	*                         type: string
 	*                         description: Job name
 	*                         example: Architect
 	*                       color:
@@ -115,7 +122,7 @@ const establishRoutes = () => {
 	*                         description: Color that represents the job, in hex
 	*                         example: "#AA00BB"
 	*/
-	router.get('/', hasAccessToTeamspace, getJobList);
+	router.get('/', hasAccessToTeamspace, getJobs, serialiseJobs);
 
 	/**
 	* @openapi

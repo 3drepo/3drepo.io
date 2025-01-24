@@ -34,6 +34,7 @@ const Drawings = require('../../../../../processors/teamspaces/projects/models/d
 const Federations = require('../../../../../processors/teamspaces/projects/models/federations');
 const ModelSettings = require('../../../../../processors/teamspaces/projects/models/commons/settings');
 const { Router } = require('express');
+const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const { canDeleteContainer } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { isArray } = require('../../../../../utils/helper/typeCheck');
@@ -220,7 +221,7 @@ const getJobsWithAccess = async (req, res) => {
 
 	try {
 		const jobs = await ModelSettings.getJobsWithAccess(teamspace, project, model, excludeViewers);
-		respond(req, res, templates.ok, { jobs });
+		respond(req, res, templates.ok, { jobs: jobs.map(UUIDToString) });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -1039,7 +1040,7 @@ const establishRoutes = (modelType) => {
 	 *                   type: array
 	 *                   items:
 	 *                     type: string
-	 *                     example: Architect
+	 *                     example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 */
 	router.get('/:model/jobs', hasReadAccessToModel[modelType], getJobsWithAccess);
 

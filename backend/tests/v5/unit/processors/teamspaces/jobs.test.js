@@ -24,13 +24,13 @@ const JobsModel = require(`${src}/models/jobs`);
 
 const Jobs = require(`${src}/processors/teamspaces/jobs`);
 
-const testGetJobList = () => {
-	describe('Get job list', () => {
+const testGetJobs = () => {
+	describe('Get jobs', () => {
 		test('should call getJobs with the teamspace provided', async () => {
 			const teamspace = generateRandomString();
 			const data = generateRandomString();
 			JobsModel.getJobs.mockResolvedValueOnce(data);
-			await expect(Jobs.getJobList(teamspace)).resolves.toEqual(data);
+			await expect(Jobs.getJobs(teamspace)).resolves.toEqual(data);
 
 			expect(JobsModel.getJobs).toHaveBeenCalledTimes(1);
 			expect(JobsModel.getJobs).toHaveBeenCalledWith(teamspace);
@@ -39,5 +39,5 @@ const testGetJobList = () => {
 };
 
 describe('processors/teamspaces/jobs', () => {
-	testGetJobList();
+	testGetJobs();
 });

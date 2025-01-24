@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,16 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createJob, deleteJob, getJobs, updateJob } = require('../../models/jobs');
+const { UUIDToString } = require('../../../../utils/helper/uuids');
+const { respond } = require('../../../../utils/responder');
+const { templates } = require('../../../../utils/responseCodes');
 
 const Jobs = {};
 
-Jobs.getJobs = getJobs;
-
-Jobs.createJob = createJob;
-
-Jobs.updateJob = updateJob;
-
-Jobs.deleteJob = deleteJob;
+Jobs.serialiseJobs = (req, res) => {
+	const jobs = req.jobs.map((job) => ({ ...job, _id: UUIDToString(job._id) }));
+	respond(req, res, templates.ok, { jobs });
+};
 
 module.exports = Jobs;

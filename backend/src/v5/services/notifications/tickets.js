@@ -21,6 +21,7 @@ const {
 	insertTicketClosedNotifications,
 	insertTicketUpdatedNotifications,
 } = require('../../models/notifications');
+const { UUIDToString } = require('../../utils/helper/uuids');
 const { basePropertyLabels } = require('../../schemas/tickets/templates.constants');
 const { events } = require('../eventsManager/eventsManager.constants');
 const { getClosedStatuses } = require('../../schemas/tickets/templates');
@@ -50,7 +51,7 @@ const generateTicketNotifications = async (teamspace, project, model, actionedBy
 
 	const jobToUsers = {};
 	jobList.forEach(({ _id, users }) => {
-		jobToUsers[_id] = users;
+		jobToUsers[UUIDToString(_id)] = users;
 	});
 
 	await Promise.all(notificationData.map(async ({ info, notifyFn }) => {
