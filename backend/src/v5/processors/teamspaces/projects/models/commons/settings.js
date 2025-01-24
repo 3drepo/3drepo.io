@@ -15,20 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { getAllUsersInTeamspace, getTeamspaceAdmins } = require('../../../../../models/teamspaceSettings');
+const { getCommonElements } = require('../../../../../utils/helper/arrays');
 const { getJobsByUsers } = require('../../../../../models/jobs');
 const { getProjectAdmins } = require('../../../../../models/projectSettings');
-const { getTeamspaceAdmins } = require('../../../../../models/teamspaceSettings');
 const { getUsersWithPermissions } = require('../../../../../models/modelSettings');
 
 const Settings = {};
 
 Settings.getUsersWithPermissions = async (teamspace, project, model, excludeViewers) => {
-	const [tsAdmins, projectAdmins, modelMembers] = await Promise.all([
+	const [tsMembers, tsAdmins, projectAdmins, modelMembers] = await Promise.all([
+		getAllUsersInTeamspace(teamspace),
 		getTeamspaceAdmins(teamspace),
 		getProjectAdmins(teamspace, project),
 		getUsersWithPermissions(teamspace, model, excludeViewers),
 	]);
-	return [...tsAdmins, ...projectAdmins, ...modelMembers];
+	return getCommonElements([...tsAdmins, ...projectAdmins, ...modelMembers], tsMembers);
 };
 
 Settings.getJobsWithAccess = async (teamspace, project, model, excludeViewers) => {

@@ -33,6 +33,9 @@ YupHelper.validators.alphanumeric = (yupObj, allowFullStops) => yupObj.matches(
 
 YupHelper.types.id = Yup.string().uuid('ids are expected to be of uuid format').transform((val, org) => UUIDToString(org));
 
+YupHelper.types.range = Yup.array().of(Yup.number()).length(2)
+	.test('valid-verticalRange', 'The second number of the range must be larger than the first', (value) => value[0] <= value[1]);
+
 YupHelper.types.colorArr = Yup.array()
 	.of(Yup.number().min(0).max(255).integer())
 	.min(3).max(4);

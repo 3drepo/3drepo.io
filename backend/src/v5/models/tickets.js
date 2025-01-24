@@ -27,6 +27,7 @@ const { Long } = DbHandler.dataTypes;
 
 const Tickets = {};
 const TICKETS_COL = 'tickets';
+const TEMPLATES_COL = 'templates';
 const TICKETS_COUNTER_COL = 'tickets.counters';
 
 const reserveTicketNumbers = async (teamspace, project, model, type, nToReserve) => {
@@ -161,6 +162,48 @@ Tickets.getTicketById = async (
 Tickets.getTicketsByQuery = (teamspace, project, model, query, projection) => DbHandler.find(teamspace,
 	TICKETS_COL, { teamspace, project, model, ...query }, projection);
 
+Tickets.getTicketsByFilter = (
+	teamspace,
+	project,
+	model,
+	{
+		query,
+		ticketCodeQuery,
+		projection = { teamspace: 0, project: 0, model: 0 },
+		updatedSince,
+		sort = { [`properties.${basePropertyLabels.CREATED_AT}`]: -1 },
+		limit,
+		skip = 0,
+	} = {},
+) => {
+	const formattedQuery = { teamspace, project, model, ...query };
+
+	if (updatedSince) {
+		formattedQuery[`properties.${basePropertyLabels.UPDATED_AT}`] = { $gt: updatedSince };
+	}
+
+	if (ticketCodeQuery) {
+		const pipelines = [
+			{ $match: formattedQuery },
+			{ $lookup: { from: TEMPLATES_COL, localField: 'type', foreignField: '_id', as: 'templateDetails' } },
+			{ $unwind: '$templateDetails' },
+			{ $addFields: { ticketCode: { $concat: ['$templateDetails.code', ':', { $toString: '$number' }] } } },
+			{ $match: ticketCodeQuery },
+			{ $project: projection },
+			{ $sort: sort },
+			{ $skip: skip },
+		];
+
+		if (limit) {
+			pipelines.push({ $limit: limit });
+		}
+
+		return DbHandler.aggregate(teamspace, TICKETS_COL, pipelines);
+	}
+
+	return DbHandler.find(teamspace, TICKETS_COL, formattedQuery, projection, sort, limit, skip);
+};
+
 Tickets.getAllTickets = (
 	teamspace,
 	project,
@@ -169,8 +212,9 @@ Tickets.getAllTickets = (
 		projection = { teamspace: 0, project: 0, model: 0 },
 		updatedSince,
 		sort = { [`properties.${basePropertyLabels.Created_AT}`]: -1 },
+		limit,
+		skip = 0,
 	} = {},
-
 ) => {
 	const query = { teamspace, project, model };
 
@@ -178,7 +222,7 @@ Tickets.getAllTickets = (
 		query[`properties.${basePropertyLabels.UPDATED_AT}`] = { $gt: updatedSince };
 	}
 
-	return DbHandler.find(teamspace, TICKETS_COL, query, projection, sort);
+	return DbHandler.find(teamspace, TICKETS_COL, query, projection, sort, limit, skip);
 };
 
 module.exports = Tickets;

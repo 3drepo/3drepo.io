@@ -23,6 +23,7 @@ import { LifoQueue } from '@/v5/helpers/functions.helpers';
 import { dispatch } from '@/v5/helpers/redux.helpers';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { useViewerCalibrationSetup } from '@/v5/ui/routes/dashboard/projects/calibration/useViewerCalibrationSetup';
+import { MeasurementsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import {queuableFunction} from '../../helpers/async';
 
 import { ROUTES } from '../../constants/routes';
@@ -51,6 +52,7 @@ interface IProps {
 	riskPins: any[];
 	measurementPins: any[];
 	measurementsAngle: any[];
+	measurementsSlope: any[];
 	measurementsArea: any[];
 	measurementsLength: any[];
 	transformations: any[];
@@ -104,6 +106,7 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 	public componentDidMount() {
 		const { viewer } = this.props;
 		viewer.setupInstance(this.containerRef.current, this.handleUnityError);
+		MeasurementsActionsDispatchers.setMeasureSlopeUnits('Percentage');
 	}
 
 	public async renderGisCoordinates(coordinates) {
@@ -196,7 +199,7 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 			gisCoordinates, gisLayers, transparencies, transformations,
 			viewerManipulationEnabled, viewer, issuesShapes, issuesHighlightedShapes,
 			risksShapes, risksHighlightedShapes,
-			ticketPins, measurementsAngle, measurementsArea, measurementsLength
+			ticketPins, measurementsAngle, measurementsSlope, measurementsArea, measurementsLength
 		} = currProps;
 
 		if (colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
@@ -255,6 +258,10 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 			await this.renderMeasurements(prevProps.measurementsAngle, measurementsAngle);
 		}
 
+		if (!isEqual(prevProps.measurementsSlope, measurementsSlope)) {
+			await this.renderMeasurements(prevProps.measurementsSlope, measurementsSlope);
+		}
+
 		if (!isEqual(prevProps.measurementsLength, measurementsLength)) {
 			await this.renderMeasurements(prevProps.measurementsLength, measurementsLength);
 		}
@@ -292,6 +299,7 @@ const getCalibrationProps = (props) => ({
 	measurementsArea: [],
 	measurementsLength: [],
 	measurementsAngle: [],
+	measurementsSlope: [],
 });
 
 export const Viewer3D = (props: Omit<IProps, 'isCalibrating'>) => {

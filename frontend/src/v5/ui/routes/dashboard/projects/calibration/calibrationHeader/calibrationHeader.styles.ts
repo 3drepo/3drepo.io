@@ -18,6 +18,7 @@
 import { StepConnector, Stepper as StepperBase } from '@mui/material';
 import { Button } from '@controls/button';
 import styled from 'styled-components';
+import { GRADIENT } from '@/v5/ui/themes/theme';
 
 export const StepperWrapper = styled.div`
 	width: calc(100% - 295px);
@@ -94,7 +95,7 @@ export const Container = styled.div`
 	flex-direction: row;
 	justify-content: space-between;
 	height: 58px;
-	background-image: ${({ theme }) => theme.palette.gradient.secondary};
+	background-image: ${GRADIENT.SECONDARY};
 `;
 
 export const ButtonsContainer = styled.div`

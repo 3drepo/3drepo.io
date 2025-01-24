@@ -28,6 +28,8 @@ export type HexGroupColor = GroupColor & { color?: string };
 
 // Misc
 export const contrastColor = ({ hex = '#FFFFFF', threshold }) => {
+	if (!hex) return '#000000';
+
 	if (hex.indexOf('#') === 0) {
 		hex = hex.slice(1);
 	}
