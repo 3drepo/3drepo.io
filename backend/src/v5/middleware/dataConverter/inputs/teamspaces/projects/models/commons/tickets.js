@@ -93,7 +93,6 @@ const extractUniqueProperties = (template) => {
 };
 
 const hasDuplicateUniqueProps = (template, tickets) => {
-	// console.log(template);
 	const uniqueProps = extractUniqueProperties(template);
 	let hasDuplicate = false;
 
