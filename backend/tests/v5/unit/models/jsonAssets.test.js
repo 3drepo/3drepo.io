@@ -2288,8 +2288,8 @@ const testGetModelPropertiesForFederation = () => {
 };
 
 describe('models/jsonAssets', () => {
-	// testGetAllSuperMeshMappingForContainer();
-	// testGetAllSuperMeshMappingForFederation();
+	testGetAllSuperMeshMappingForContainer();
+	testGetAllSuperMeshMappingForFederation();
 	testGetModelPropertiesForContainer();
 	testGetModelPropertiesForFederation();
 });
