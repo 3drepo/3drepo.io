@@ -249,10 +249,6 @@ export const palette = {
 		lightest: COLOR.FAVOURITE_LIGHTEST,
 		contrastText: COLOR.FAVOURITE_LIGHTEST,
 	},
-	gradient: {
-		main: GRADIENT.MAIN,
-		secondary: GRADIENT.SECONDARY,
-	},
 	shadows: {
 		level_1: SHADOW.LEVEL_1,
 		level_2: SHADOW.LEVEL_2,
@@ -520,7 +516,6 @@ export const theme = createTheme({
 				openText: '',
 				closeText: '',
 				clearText: '',
-				handleHomeEndKeys: true,
 			},
 			styleOverrides: {
 				root: {
@@ -545,7 +540,6 @@ export const theme = createTheme({
 					},
 				},
 				endAdornment: {
-					position: 'static',
 					color: 'inherit',
 					paddingLeft: 3,
 					marginRight: 5,

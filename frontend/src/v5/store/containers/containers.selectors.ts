@@ -23,7 +23,7 @@ import { Role } from '../currentUser/currentUser.types';
 import { isCollaboratorRole, isCommenterRole, isViewerRole } from '../store.helpers';
 import { selectJobsByIds } from '@/v4/modules/jobs';
 import { selectCurrentTeamspaceUsersByIds } from '../users/users.selectors';
-import { isEmpty, some } from 'lodash';
+import { isEmpty } from 'lodash';
 
 const selectContainersDomain = (state): IContainersState => state?.containers || ({ containersByProject: {} });
 

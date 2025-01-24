@@ -1143,7 +1143,7 @@ export class UnityUtil {
 	 * Set the measure tool mode.
 	 * @category Measuring tool
 	 * @param mode - The measuring mode, accepted values are "Point", "Raycast", "MinimumDistance",
-	 * "SurfaceArea", "PolygonArea", "PolyLine" or "Angle".
+	 * "SurfaceArea", "PolygonArea", "PolyLine", "Angle" or "Slope".
 	 */
 	public static setMeasureToolMode(mode) {
 		UnityUtil.toUnity('SetMeasureToolMode', undefined, mode);
@@ -1156,6 +1156,15 @@ export class UnityUtil {
 	 */
 	public static setMeasureToolUnits(units) {
 		UnityUtil.toUnity('SetMeasureToolUnits', undefined, units);
+	}
+
+	/**
+	 * Set the measure tool units for the slope measurements.
+	 * @category Measuring tool
+	 * @param units - The measuring units accepted values are "Degrees", "Percentage"
+	 */
+	public static setMeasureToolSlopeUnits(units) {
+		UnityUtil.toUnity('SetMeasureToolSlopeUnits', undefined, units);
 	}
 
 	/**
@@ -1172,6 +1181,26 @@ export class UnityUtil {
 	 */
 	public static disableSnapping() {
 		UnityUtil.toUnity('DisableSnapping', undefined, undefined);
+	}
+
+	 /**
+	 * Enable Cursor
+	 * Note: Changing the snap mode can affect the cursor.
+	 * Call this after setting snapping.
+	 * @category Configurations
+	 */
+	public static enableCursor() {
+		UnityUtil.toUnity('EnableCursor', undefined, undefined);
+	}
+
+	/**
+	 * Disable Cursor
+	 * Note: Changing the snap mode can affect the cursor.
+	 * Call this after setting snapping.
+	 * @category Configurations
+	 */
+	public static disableCursor() {
+		UnityUtil.toUnity('DisableCursor', undefined, undefined);
 	}
 
 	/**
