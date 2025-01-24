@@ -47,16 +47,6 @@ export const MeasurementValue = styled.div`
 	margin-left: 10px;
 `;
 
-export const DegreesSymbol = styled.span`
-	position: relative;
-
-	&::after {
-		content: "°";
-		position: absolute;
-		top: -3px;
-	}
-`;
-
 export const AxisLabel = styled.div`
 	margin-right: 5px;
 `;

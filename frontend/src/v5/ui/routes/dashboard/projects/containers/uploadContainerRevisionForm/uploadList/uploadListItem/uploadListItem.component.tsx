@@ -27,12 +27,13 @@ import { useFormContext } from 'react-hook-form';
 import { useEffect } from 'react';
 import { IContainer, UploadStatus } from '@/v5/store/containers/containers.types';
 import { UploadItemFields } from '@/v5/store/containers/revisions/containerRevisions.types';
-import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { ContainerRevisionsActionsDispatchers, ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { UploadListItemFileIcon } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemTitle } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemTitle/uploadListItemTitle.component';
 import { UploadProgress } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadProgress/uploadProgress.component';
 import { formatMessage } from '@/v5/services/intl';
 import { get } from 'lodash';
+import { uploadFile } from '@/v5/validation/shared/validators';
 
 const UNEXPETED_STATUS_ERROR = undefined;
 const STATUS_TEXT_BY_UPLOAD = {
@@ -76,7 +77,7 @@ export const UploadListItem = ({
 }: IUploadListItem): JSX.Element => {
 	const revisionPrefix = `uploads.${index}`;
 	const uploadErrorMessage: string = ContainerRevisionsHooksSelectors.selectUploadError(uploadId);
-	const { watch, trigger, setValue, formState: { errors } } = useFormContext();
+	const { watch, trigger, setValue, setError, formState: { errors } } = useFormContext();
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const projectId = ProjectsHooksSelectors.selectCurrentProject();
 	const containerId = watch(`${revisionPrefix}.containerId`);
@@ -105,15 +106,16 @@ export const UploadListItem = ({
 	useEffect(() => {
 		if (!containerId?.trim()) return;
 
-		ContainersActionsDispatchers.fetchContainerSettings(
-			teamspace,
-			projectId,
-			containerId,
-		);
+		ContainersActionsDispatchers.fetchContainerSettings(teamspace, projectId, containerId);
+		ContainerRevisionsActionsDispatchers.fetch(teamspace, projectId, containerId);
 	}, [containerId]);
 
 	useEffect(() => {
-		trigger(`${revisionPrefix}.file`);
+		try { 
+			uploadFile.validateSync(fileData);
+		} catch (e) {
+			setError(`${revisionPrefix}.file`, e);
+		}
 	}, []);
 
 	return (

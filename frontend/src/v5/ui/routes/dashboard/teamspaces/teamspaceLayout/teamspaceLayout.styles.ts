@@ -19,6 +19,7 @@ import styled from 'styled-components';
 import { hexToOpacity } from '@/v5/helpers/colors.helper';
 import { CoverImage } from '@controls/coverImage/coverImage.component';
 import { Content as ProjectContent } from '../../projects/projectContent/projectContent.styles';
+import { GRADIENT } from '@/v5/ui/themes/theme';
 
 export const Container = styled.div`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
@@ -37,7 +38,7 @@ export const Content = styled(ProjectContent)`
 `;
 
 export const TopBar = styled.div`
-	background: ${({ theme }) => theme.palette.gradient.secondary};
+	background: ${GRADIENT.SECONDARY};
 	padding: 30px 75px;
 	display: flex;
 	flex-direction: row;

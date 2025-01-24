@@ -23,7 +23,8 @@
 			"request": "launch",
 			"name": "Launch Chrome",
 			"url": "https://3drepo.lan",
-			"webRoot": "${workspaceFolder}"
+			"webRoot": "${workspaceFolder}",
+			"runtimeArgs": ["--ignore-certificate-errors"]
 		}
 	]
 }

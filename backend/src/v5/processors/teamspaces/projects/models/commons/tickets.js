@@ -15,30 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { TICKETS_RESOURCES_COL, operatorToQuery } = require('../../../../../models/tickets.constants');
 const { UUIDToString, generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { addGroups, deleteGroups, getGroupsByIds } = require('./tickets.groups');
-const { addTicketsWithTemplate, getAllTickets, getTicketById, updateTickets } = require('../../../../../models/tickets');
+const { addTicketsWithTemplate, getAllTickets, getTicketById, getTicketsByFilter, updateTickets } = require('../../../../../models/tickets');
 const {
 	basePropertyLabels,
 	modulePropertyLabels,
 	presetModules,
 	propTypes,
-	statusTypes,
-	statuses,
 	viewGroups,
 } = require('../../../../../schemas/tickets/templates.constants');
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { deleteIfUndefined, isEmpty } = require('../../../../../utils/helper/objects');
+const { generateFullSchema, getClosedStatuses } = require('../../../../../schemas/tickets/templates');
+const { getAllTemplates, getTemplatesByQuery } = require('../../../../../models/tickets.templates');
 const { getFileWithMetaAsStream, removeFiles, storeFiles } = require('../../../../../services/filesManager');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
 const { isBuffer, isUUID } = require('../../../../../utils/helper/typeCheck');
-const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
-const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
-const { getAllTemplates } = require('../../../../../models/tickets.templates');
 const { getArrayDifference } = require('../../../../../utils/helper/arrays');
 const { importComments } = require('./tickets.comments');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
+const { specialQueryFields } = require('../../../../../schemas/tickets/tickets.filters');
 
 const Tickets = {};
 
@@ -328,8 +327,34 @@ const filtersToProjection = (filters) => {
 	return projectionObject;
 };
 
-Tickets.getTicketList = (teamspace, project, model,
-	{ filters = [], updatedSince, sortBy, sortDesc }) => {
+const getQueryInfoFromQueryFilters = async (teamspace, queryFilters) => {
+	const queries = [];
+	let templateQuery;
+	let ticketCodeQuery;
+
+	queryFilters.forEach(({ propertyName, operator, value }) => {
+		if (propertyName === specialQueryFields.TEMPLATE) {
+			templateQuery = operatorToQuery[operator]('code', value);
+		} else if (propertyName === specialQueryFields.TICKET_CODE) {
+			ticketCodeQuery = operatorToQuery[operator](propertyName, value);
+		} else {
+			queries.push({ ...operatorToQuery[operator](propertyName, value) });
+		}
+	});
+
+	if (templateQuery) {
+		const temps = await getTemplatesByQuery(teamspace, templateQuery, { _id: 1 });
+		queries.push({ type: { $in: temps.map(({ _id }) => _id) } });
+	}
+
+	return {
+		query: queries.length ? { $and: queries } : {},
+		ticketCodeQuery,
+	};
+};
+
+Tickets.getTicketList = async (teamspace, project, model,
+	{ filters = [], queryFilters = [], updatedSince, sortBy, sortDesc, limit, skip }) => {
 	const { SAFETIBASE, SEQUENCING } = presetModules;
 	const {
 		[SAFETIBASE]: safetibaseProps,
@@ -363,7 +388,14 @@ Tickets.getTicketList = (teamspace, project, model,
 		sort = { [propertyToFilterName(sortBy)]: sortDesc ? -1 : 1 };
 	}
 
-	return getAllTickets(teamspace, project, model, deleteIfUndefined({ projection, updatedSince, sort }));
+	if (queryFilters.length) {
+		const queryInfo = await getQueryInfoFromQueryFilters(teamspace, queryFilters);
+		return getTicketsByFilter(teamspace, project, model,
+			deleteIfUndefined({ projection, updatedSince, sort, limit, skip, ...queryInfo }));
+	}
+
+	return getAllTickets(teamspace, project, model,
+		deleteIfUndefined({ projection, updatedSince, sort, limit, skip }));
 };
 
 Tickets.getOpenTicketsCount = async (teamspace, project, model) => {
@@ -376,10 +408,7 @@ Tickets.getOpenTicketsCount = async (teamspace, project, model) => {
 	const allTemplates = await getAllTemplates(teamspace, true, { _id: 1, config: 1 });
 
 	const templateToClosedStatuses = allTemplates.reduce((obj, { _id, config }) => {
-		const closedStatuses = config.status
-			? config.status.values
-				.flatMap((s) => (s.type === statusTypes.DONE || s.type === statusTypes.VOID ? s.name : []))
-			: [statuses.CLOSED, statuses.VOID];
+		const closedStatuses = getClosedStatuses({ config });
 
 		return { ...obj, [UUIDToString(_id)]: closedStatuses };
 	}, {});
