@@ -29,7 +29,7 @@ import { CardFilterType, BaseFilter, CardFilter } from '../../cardFilters.types'
 export const TYPE_TO_ICON: Record<CardFilterType, any> = {
 	'template': TemplateIcon,
 	'ticketTitle': TextIcon,
-	'ticketId': TextIcon,
+	'ticketCode': TextIcon,
 	'text': TextIcon,
 	'longText': TextIcon,
 	'date': CalendarIcon,
@@ -43,7 +43,7 @@ export const TYPE_TO_ICON: Record<CardFilterType, any> = {
 
 const DEFAULT_FILTERS: CardFilter[] = [
 	{ module: '', type: 'ticketTitle', property: formatMessage({ defaultMessage: 'Ticket title', id: 'viewer.card.filters.element.ticketTitle' }) },
-	{ module: '', type: 'ticketId', property: formatMessage({ defaultMessage: 'Ticket ID', id: 'viewer.card.filters.element.ticketId' }) },
+	{ module: '', type: 'ticketCode', property: formatMessage({ defaultMessage: 'Ticket ID', id: 'viewer.card.filters.element.ticketCode' }) },
 	{ module: '', type: 'template', property: formatMessage({ defaultMessage: 'Ticket template', id: 'viewer.card.filters.element.ticketTemplate' }) },
 ];
 
