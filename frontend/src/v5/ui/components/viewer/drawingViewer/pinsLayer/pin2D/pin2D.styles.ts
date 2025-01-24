@@ -30,7 +30,7 @@ const popupAnimation = keyframes`
 	} 50% {
 		transform: scale(2);
 	} 63% {
-		top: -84x;
+		top: -84px;
 	} 78% {
 		top: -60px;
 	} 86% {
