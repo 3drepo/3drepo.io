@@ -20,7 +20,8 @@ const { getJobById, getJobs } = require('../../../../models/jobs');
 const Yup = require('yup');
 const { respond } = require('../../../../utils/responder');
 const { types } = require('../../../../utils/helper/yup');
-const { uniqueElements } = require('../../../../utils/helper/arrays');
+const { getArrayDifference, uniqueElements } = require('../../../../utils/helper/arrays');
+const { getAllUsersInTeamspace } = require('../../../../models/teamspaceSettings');
 
 const Jobs = {};
 
@@ -41,7 +42,19 @@ const validateJob = (isUpdate) => async (req, res, next) => {
 			.test('users-uniqueness-check', 'users must be unique', (values) => {
 				if (!values?.length) return true;
 				return values.length === uniqueElements(values).length;
+			})
+			.test('check-users-teamspace-access', async (values, context) => {
+				if (values?.length) {
+					const teamspaceUsers = await getAllUsersInTeamspace(req.params.teamspace);
+					const usersWithNoAccess = getArrayDifference(teamspaceUsers, values);
+					if (usersWithNoAccess.length) {
+						return context.createError({ message: `User(s) ${usersWithNoAccess} have no access to the teamspace` });
+					}
+				}
+
+				return true;
 			}),
+
 		color: Yup.string().matches(/^#[0-9A-Fa-f]{6}$/, 'color is not a valid RGB hex format'),
 	}).strict(true).noUnknown();
 

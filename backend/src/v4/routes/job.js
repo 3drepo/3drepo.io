@@ -44,34 +44,6 @@
 	 */
 	router.get("/myJob", middlewares.isTeamspaceMember, getUserJob);
 
-	/**
-	 * @api {post} /:teamspace/jobs/:jobId/:user Assign a job
-	 * @apiName addUserToJob
-	 * @apiGroup Jobs
-	 * @apiDescription Assign a job to a user.
-	 *
-	 * @apiUse Jobs
-	 *
-	 * @apiParam jobId Job ID
-	 * @apiParam {String} user User
-	 *
-	 * @apiExample {post} Example usage:
-	 * POST /acme/jobs/Job1/alice HTTP/1.1
-	 *
-	 * @apiSuccessExample {json} Success-Response
-	 * HTTP/1.1 200 OK
-	 * {}
-	 */
-	router.post("/jobs/:jobId/:user", middlewares.job.canCreate, addUserToJob);
-
-	function addUserToJob(req, res, next) {
-		Job.addUserToJob(req.params.account, req.params.jobId, req.params.user).then(() => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
-		}).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
-	}
-
 	function getUserJob(req, res, next) {
 		// middleware checks if user is in teamspace, so this member check should not be necessary here.
 		Job.getUserJob(req.params.account, req.session.user.username).then((job) => {
