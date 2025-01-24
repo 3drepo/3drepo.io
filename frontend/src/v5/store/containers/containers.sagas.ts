@@ -163,7 +163,7 @@ export function* fetchContainerUsers({
 		const { users: nonViewerUsers } = yield API.Containers.fetchContainerUsers(teamspace, projectId, containerId, true);
 		const { users: allUsers } = yield API.Containers.fetchContainerUsers(teamspace, projectId, containerId);
 		const users = allUsers.map((user) => ({ user, isViewer: !nonViewerUsers.includes(user) }));
-
+		
 		yield put(ContainersActions.updateContainerSuccess(projectId, containerId, { users }));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -246,8 +246,8 @@ export default function* ContainersSaga() {
 	yield takeEvery(ContainersTypes.FETCH_CONTAINER_VIEWS, fetchContainerViews);
 	yield takeEvery(ContainersTypes.FETCH_CONTAINER_SETTINGS, fetchContainerSettings);
 	yield takeLatest(ContainersTypes.UPDATE_CONTAINER_SETTINGS, updateContainerSettings);
-	yield takeLatest(ContainersTypes.FETCH_CONTAINER_USERS, fetchContainerUsers);
-	yield takeLatest(ContainersTypes.FETCH_CONTAINER_JOBS, fetchContainerJobs);
+	yield takeEvery(ContainersTypes.FETCH_CONTAINER_USERS, fetchContainerUsers);
+	yield takeEvery(ContainersTypes.FETCH_CONTAINER_JOBS, fetchContainerJobs);
 	yield takeEvery(ContainersTypes.CREATE_CONTAINER, createContainer);
 	yield takeLatest(ContainersTypes.DELETE_CONTAINER, deleteContainer);
 	yield takeEvery(ContainersTypes.RESET_CONTAINER_STATS_QUEUE, resetContainerStatsQueue);

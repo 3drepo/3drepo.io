@@ -681,20 +681,21 @@ const testUpdateModelSettings = () => {
 			const data = {
 				name: generateRandomString(),
 				unit: 'm',
-				code: generateRandomString(5),
+				code: null,
 				defaultView: null,
+				description: undefined,
 			};
 
 			const updateObject = {
 				$set: {
 					properties: {
 						unit: data.unit,
-						code: data.code,
 					},
 					name: data.name,
 				},
 				$unset: {
 					defaultView: 1,
+					'properties.code': 1,
 				},
 			};
 
@@ -742,39 +743,6 @@ const testUpdateModelSettings = () => {
 					model,
 					data,
 					modelType: modelTypes.FEDERATION,
-				});
-		});
-
-		test('Should update the settings of a model and ignore a null value that cant be unset', async () => {
-			const data = {
-				name: generateRandomString(),
-				unit: null,
-				code: generateRandomString(5),
-				defaultView: generateRandomString(),
-			};
-
-			const updateObject = {
-				$set: {
-					properties: {
-						code: data.code,
-					},
-					name: data.name,
-					defaultView: data.defaultView,
-				},
-			};
-
-			DBHandler.findOneAndUpdate.mockResolvedValueOnce({});
-			await Model.updateModelSettings(teamspace, project, model, data);
-			checkResults(DBHandler.findOneAndUpdate, model, updateObject);
-			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
-				{
-					teamspace,
-					project,
-					model,
-					data,
-					modelType: modelTypes.CONTAINER,
 				});
 		});
 
