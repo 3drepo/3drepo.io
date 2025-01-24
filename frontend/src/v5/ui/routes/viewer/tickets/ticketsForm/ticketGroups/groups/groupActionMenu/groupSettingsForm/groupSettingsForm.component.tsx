@@ -26,7 +26,7 @@ import { Button } from '@controls/button';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { GroupSettingsSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { cloneDeep, isEqual, isUndefined, omitBy, sortBy } from 'lodash';
+import { cloneDeep, isEqual, isUndefined, omitBy, sortBy, uniqBy } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { Group, IGroupRule, IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
 import { InputController } from '@controls/inputs/inputController.component';
@@ -75,9 +75,31 @@ type GroupSettingsFormProps = {
 	prefixes: string[][],
 	isColored?: boolean,
 };
+
+const subPrefixes = (path:string[]) => {
+	const prefixes: string[][] = [];
+
+	path.forEach((element, index) => {
+		for (let i = index; i < path.length; i++) {
+			if (index === 0) {
+				prefixes.push([element]);
+			} else {
+				prefixes[i].push(element);
+			}
+		}
+	});
+
+	return prefixes;
+};
+
+const mergePrefixes = (prefixesA: string[][], prefixesB: string[][]) => {
+	return uniqBy(prefixesA.concat(prefixesB).sort(), JSON.stringify);
+};
+ 
 export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColored }: GroupSettingsFormProps) => {
 	const [isSmart, setIsSmart] = useState(true);
 	const [newPrefix, setNewPrefix] = useState([]);
+	const [currentPrefixes, setCurrentPrefixes] = useState([]);
 	const [filterMenuCoords, setFilterMenuCoords] = useState({ left: 0, bottom: 0 });
 	const [filterMenuOpen, setFilterMenuOpen] = useState(false);
 	const [inputObjects, setInputObjects] = useState([]);
@@ -86,6 +108,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	const isAdmin = !TicketsCardHooksSelectors.selectReadOnly();
 	const { teamspace, revision } = useParams<ViewerParams>();
 	const { containerOrFederation } = useContext(TicketContext);
+
 
 	const formRef = useRef(null);
 
@@ -144,7 +167,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	};
 
 	const handleNewCollectionChange = (collection: string[]) => {
-		setNewPrefix([collection]);
+		setNewPrefix(collection);
 		setValue('prefix', collection, { shouldDirty: true });
 	};
 
@@ -174,6 +197,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 				group: {},
 			});
 			setIsSmart(true);
+			setNewPrefix([]);
 			return;
 		}
 
@@ -183,6 +207,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		setIsSmart(!!value?.group?.rules?.length);
 		setInputObjects(convertToV4GroupNodes(value?.group?.objects));
 		setIsPastingRules(false);
+		setNewPrefix([]);
 	}, [value, isColored]);
 
 	useEffect(() => {
@@ -195,6 +220,12 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 			left: rect.x + rect.width + PADDING,
 		});
 	}, []);
+
+
+	useEffect(() => {
+		setCurrentPrefixes(mergePrefixes(prefixes, subPrefixes(newPrefix)));
+	}, [prefixes, newPrefix]);
+
 	return (
 		<form ref={formRef}>
 			<FormProvider {...formData}>
@@ -264,7 +295,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 							})}
 							formError={errors?.prefix}
 							disabled={!isAdmin}
-							prefixes={prefixes.concat(newPrefix).sort()}
+							prefixes={currentPrefixes}
 						/>
 					</FormRow>
 					{
@@ -272,24 +303,16 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 							<NewCollectionActionMenu
 								TriggerButton={(
 									<NewCollectionLink>
-										{newPrefix?.length ? (
-											<FormattedMessage
-												id="ticketsGroupSettings.link.editCollection"
-												defaultMessage="Edit new collection"
-											/>
-										) : (
-											<FormattedMessage
-												id="ticketsGroupSettings.link.createCollection"
-												defaultMessage="Create new collection"
-											/>
-										)}
+										<FormattedMessage
+											id="ticketsGroupSettings.link.createCollection"
+											defaultMessage="Create new collection"
+										/>
 									</NewCollectionLink>
 								)}
 							>
 								<NewCollectionForm
-									value={newPrefix}
 									onChange={handleNewCollectionChange}
-									prefixesCombinations={prefixes}
+									prefixesCombinations={currentPrefixes}
 								/>
 							</NewCollectionActionMenu>
 						)

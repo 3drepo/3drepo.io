@@ -19,6 +19,7 @@ import { useRef, useEffect, forwardRef } from 'react';
 import { DrawingViewerImageProps } from '../drawingViewerImage/drawingViewerImage.component';
 import { ZoomableImage } from '../zoomableImage.types';
 import axios from 'axios';
+import DOMPurify from 'dompurify';
 
 type Transform = { x:number, y:number, scale:number };
 type Vector2 = { x:number, y:number };
@@ -59,7 +60,8 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 	let origin: Transform;
 	let D : Transform;
 	let projection: Transform;
-	let tframe = 0;
+	let currentTransformId = 0;
+	let latestDrawnTransformId = 0; // The frame Id of the D used to draw the canvas that is currently visible
 	let drawing = false; // Same flag should act as a mutex for both drawing and resizing redraws
 	let onResizeEventId = 0;
 	let onResizeDebounceEventId = 0;
@@ -284,7 +286,7 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 
 		// Draw the image with the full desired projection
 
-		const tn = tframe;
+		const drawRequestTransformId = currentTransformId;
 
 		// Flag that we are waiting on a render, which may take a number of
 		// animation frames.
@@ -292,11 +294,12 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 
 		drawImage(D, context, (p) => {
 			projection = p;
+			latestDrawnTransformId = drawRequestTransformId;
 			updateCanvasTransform();
 
 			// Check if we've updated the transform since the last render.
 			// If so, issue the request again.
-			if (tn !== tframe) {
+			if (drawRequestTransformId !== currentTransformId) {
 				transformAnimationFrameId = requestAnimationFrame(onAnimationFrame);
 			} else {
 				drawing = false;
@@ -330,6 +333,7 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 			y: newOrigin.y + transform.y,
 			scale: transform.scale,
 		};
+		const newDFrameId = currentTransformId;
 
 		// Create the canvas and context
 		const newCanvas = document.createElement('canvas');
@@ -365,15 +369,22 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 			origin = newOrigin;
 			D = newD;
 			projection = np;
+			latestDrawnTransformId = newDFrameId;
 
 			// Once projection, D & the canvas itself are replaced, we can use
 			// this regular call to update the DOM transform
 			updateCanvasTransform();
 
 			// Issue the callbacks
-			requestCanvasPendingCallbacks.forEach((cb) => {
-				cb?.();
-			});
+
+			// Note that the array is being treated as a stack - this is acceptable
+			// because callers should not be assuming that each request takes the
+			// same amount of time!
+
+			while (requestCanvasPendingCallbacks.length > 0) {
+				const cb = requestCanvasPendingCallbacks.pop();
+				cb?.(requestCanvasPendingCallbacks.length == 0);
+			}
 		});
 	};
 
@@ -432,7 +443,7 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 
 		updateCanvasTransform();
 
-		tframe++;
+		currentTransformId++;
 
 		if (!drawing) {
 			drawing = true;
@@ -451,11 +462,17 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		// Rebuilding and rendering is expensive, so don't remake the canvas until
 		// the user has stopped moving.
 		if (onResizeDebounceFrameCounter > onResizeDebounceFrameThreshold) {
-			requestCanvas(() => {
-				if (onResizeDebounceEventId != onResizeEventId) { // If during the canvas rebuild, the user has resized again
-					resizeAnimationFrameId = requestAnimationFrame(onResizeDebounce);
-				} else {
-					drawing = false;
+			requestCanvas((isLast) => {
+				if (isLast) { // requestCanvas may end up called a number of times while rendering. We only care about the last callback for deciding what to do next.
+					if (onResizeDebounceEventId != onResizeEventId) { // If during the canvas rebuild, the user has resized again
+						resizeAnimationFrameId = requestAnimationFrame(onResizeDebounce);
+					} else {
+						if (latestDrawnTransformId != currentTransformId) { // Check if during this canvas rebuild the transform has been updated
+							transformAnimationFrameId = requestAnimationFrame(onAnimationFrame);
+						} else {
+							drawing = false;
+						}
+					}
 				}
 			});
 		} else {
@@ -564,7 +581,7 @@ export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ on
 		axios.get(src).then((response) => {
 			const svgContent = response.data;
 			const svgContainer  = document.createElement('div');
-			svgContainer.innerHTML = svgContent;
+			svgContainer.innerHTML = DOMPurify.sanitize(svgContent);
 			const svg = svgContainer.querySelector('svg') as SVGSVGElement;
 			svg.setAttribute('style', 'background-color: white;');
 			const width = Math.ceil(Number.parseFloat(svg.getAttribute('width')));

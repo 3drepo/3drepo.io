@@ -24,7 +24,7 @@ import { hexToGLColor, rgbToHex } from '@/v5/helpers/colors.helper';
 export const NEW_TICKET_ID = 'temporaryIdForNewTickets';
 const DEFAULT_COLOR = COLOR.PRIMARY_MAIN;
 
-const findByName = (array: any[], name: string) => array.find(({ name: n }) => n === name);
+const findByName = (array: any[], name: string) => array.find(({ name: n, type: t }) => [n, t].includes(name));
 
 export const DEFAULT_PIN = `${TicketBaseKeys.PROPERTIES}.${AdditionalProperties.PIN}`;
 

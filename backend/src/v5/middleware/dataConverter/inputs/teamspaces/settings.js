@@ -17,8 +17,10 @@
 
 const { createResponseCode, templates } = require('../../../../utils/responseCodes');
 const { getTemplateByCode, getTemplateById, getTemplateByName } = require('../../../../models/tickets.templates');
+const Yup = require('yup');
 const { deleteIfUndefined } = require('../../../../utils/helper/objects');
 const { respond } = require('../../../../utils/responder');
+const { types } = require('../../../../utils/helper/yup');
 const { validate } = require('../../../../schemas/tickets/templates');
 const { validateMany } = require('../../../common');
 
@@ -116,5 +118,19 @@ Settings.checkTicketTemplateExists = async (req, res, next) => {
 };
 
 Settings.validateUpdateTicketSchema = validateMany([Settings.checkTicketTemplateExists, validateUpdateTemplateSchema]);
+
+Settings.validateGetAuditLogParams = async (req, res, next) => {
+	const schema = Yup.object({
+		from: types.date,
+		to: types.date,
+	}).test('valid-dates', 'The end date must be greater than the first.', (value) => !value.from || !value.to || value.to > value.from);
+
+	try {
+		req.query = await schema.validate(req.query);
+		await next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err.message));
+	}
+};
 
 module.exports = Settings;

@@ -43,6 +43,10 @@ export const { Types: FederationsTypes, Creators: FederationsActions } = createA
 	fetchFederationViewsSuccess: ['projectId', 'federationId', 'views'],
 	fetchFederationSettings: ['teamspace', 'projectId', 'federationId'],
 	fetchFederationSettingsSuccess: ['projectId', 'federationId', 'settings'],
+	fetchFederationUsers: ['teamspace', 'projectId', 'federationId'],
+	fetchFederationUsersSuccess: ['projectId', 'federationId', 'users'],
+	fetchFederationJobs: ['teamspace', 'projectId', 'federationId'],
+	fetchFederationJobsSuccess: ['projectId', 'federationId', 'jobs'],
 	updateFederationSettings: ['teamspace', 'projectId', 'federationId', 'settings', 'onSuccess', 'onError'],
 	updateFederationSettingsSuccess: ['projectId', 'federationId', 'settings'],
 	deleteFederation: ['teamspace', 'projectId', 'federationId', 'onSuccess', 'onError'],
@@ -175,6 +179,8 @@ export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & Projec
 export type FetchFederationsSuccessAction = Action<'FETCH_FEDERATIONS_SUCCESS'> & { projectId: string, federations: IFederation[] };
 export type FetchFederationStatsAction = Action<'FETCH_FEDERATION_STATS'> & TeamspaceProjectAndFederationId;
 export type FetchFederationStatsSuccessAction = Action<'FETCH_FEDERATION_STATS_SUCCESS'> & ProjectAndFederationId & { stats: FederationStats };
+export type FetchFederationUsersAction = Action<'FETCH_FEDERATION_USERS'> & TeamspaceProjectAndFederationId;
+export type FetchFederationJobsAction = Action<'FETCH_FEDERATION_JOBS'> & TeamspaceProjectAndFederationId;
 export type UpdateFederationContainersAction = Action<'UPDATE_FEDERATION_CONTAINERS'> & TeamspaceProjectAndFederationId & { containers: GroupedContainer[] };
 export type UpdateFederationContainersActionSuccess = Action<'UPDATE_FEDERATION_CONTAINERS_SUCCESS'> & ProjectAndFederationId & { containers: GroupedContainer[] };
 export type FetchFederationViewsAction = Action<'FETCH_FEDERATION_VIEWS'> & TeamspaceProjectAndFederationId;
@@ -228,6 +234,16 @@ export interface IFederationsActionCreators {
 		federationId: string,
 		settings: FederationSettings,
 	) => FetchFederationSettingsSuccessAction;
+	fetchFederationUsers: (
+		teamspace: string,
+		projectId: string,
+		federationId: string,
+	) => FetchFederationUsersAction,
+	fetchFederationJobs: (
+		teamspace: string,
+		projectId: string,
+		federationId: string,
+	) => FetchFederationJobsAction,
 	updateFederationSettings: (
 		teamspace: string,
 		projectId: string,

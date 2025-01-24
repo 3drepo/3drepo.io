@@ -16,15 +16,17 @@
  */
 
 const { initialise: initInvites } = require('../models/invitations');
+const { init: initJournalingService } = require('./journaling');
 const { initialise: initLoginRecs } = require('../models/loginRecords');
-const { initialise: initNotifs } = require('../models/notifications');
+const { init: initNotificationService } = require('./notifications');
 
 const Initialiser = {};
 
 Initialiser.initialiseSystem = () => Promise.all([
 	initLoginRecs(),
 	initInvites(),
-	initNotifs(),
+	initJournalingService(),
+	initNotificationService(),
 ]);
 
 module.exports = Initialiser;

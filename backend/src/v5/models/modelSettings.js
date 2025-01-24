@@ -109,6 +109,11 @@ Models.getModelType = async (ts, model) => {
 	return getModelType(item);
 };
 
+Models.getUsersWithPermissions = async (ts, model, excludeViewers) => {
+	const { permissions = [] } = await findOneModel(ts, { _id: model }, { permissions: 1 });
+	return permissions.flatMap((p) => (!excludeViewers || p.permission !== 'viewer' ? p.user : []));
+};
+
 Models.getContainerById = async (ts, container, projection) => {
 	try {
 		return await Models.getModelByQuery(ts, { _id: container, ...noFederations, ...noDrawings }, projection);
@@ -236,7 +241,11 @@ Models.updateModelSettings = async (teamspace, project, model, data) => {
 
 	Object.keys(data).forEach((key) => {
 		const value = data[key];
-		if (value !== undefined && value !== null) {
+		if (value === null) {
+			if (key === 'unit' || key === 'code') {
+				toUnset[`properties.${key}`] = 1;
+			} else toUnset[key] = 1;
+		} else if (value !== undefined) {
 			if (key === 'unit' || key === 'code') {
 				if (!toUpdate.properties) {
 					toUpdate.properties = {};
@@ -245,8 +254,6 @@ Models.updateModelSettings = async (teamspace, project, model, data) => {
 			} else {
 				toUpdate[key] = value;
 			}
-		} else if (key === 'defaultView') {
-			toUnset[key] = 1;
 		}
 	});
 

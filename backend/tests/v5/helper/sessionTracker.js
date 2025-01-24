@@ -27,8 +27,9 @@ class SessionTracker {
 		this.agent = agent;
 	}
 
-	async login(user, password) {
+	async login(user, password, headers = {}) {
 		const resp = await this.agent.post('/v5/login/')
+			.set(headers)
 			.send({ user, password })
 			.expect(templates.ok.status);
 
