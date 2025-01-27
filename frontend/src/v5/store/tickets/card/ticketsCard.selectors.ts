@@ -18,7 +18,7 @@
 import { selectCurrentModel } from '@/v4/modules/model';
 import { SequencingProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { createSelector } from 'reselect';
-import { selectTemplateById, selectTemplates, selectTicketById, selectTickets } from '../tickets.selectors';
+import { selectRiskCategories, selectTemplateById, selectTemplates, selectTicketById, selectTickets } from '../tickets.selectors';
 import { ITicketsCardState } from './ticketsCard.redux';
 import { DEFAULT_PIN, getPinColorHex, formatPin, getTicketPins } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { IPin } from '@/v4/services/viewer/viewer';
@@ -196,4 +196,28 @@ export const selectNewTicketPins = createSelector(
 	selectUnsavedTicket,
 	selectSelectedTicketPinId,
 	getTicketPins,
+);
+
+export const selectPropertyOptions = createSelector(
+	selectTemplates,
+	selectRiskCategories,
+	(state, modelId, module) => module,
+	(state, modelId, module, property) => property,
+	(state, modelId, module, property, type) => type,
+	(templates, riskCategories, module, property, type) => {
+		if (type === 'template') return templates.map(({ name }) => name);
+		if (!type) return;
+		const allValues = [];
+		templates.forEach((template) => {
+			const matchingModule = module ? template.modules.find((mod) => (mod.name || mod.type) === module)?.properties : template.properties;
+			const matchingProperty = matchingModule?.find(({ name, type: t }) => (name === property) && (['manyOf', 'oneOf'].includes(t)));
+			if (!matchingProperty) return;
+			if (matchingProperty.values === 'riskCategories') {
+				allValues.push(...riskCategories);
+				return;
+			}
+			allValues.push(...matchingProperty.values);
+		});
+		return uniq(allValues);
+	},
 );
