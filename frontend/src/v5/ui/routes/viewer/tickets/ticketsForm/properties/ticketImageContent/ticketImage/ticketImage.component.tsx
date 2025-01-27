@@ -27,7 +27,8 @@ import { ImagesModal } from '@components/shared/modalsDispatcher/templates/image
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useSyncProps } from '@/v5/helpers/syncProps.hooks';
 
-export const TicketImage = ({ value, onChange, onBlur, disabled, label, helperText, ...props }: FormInputProps) => {
+type TicketImageProps = FormInputProps & { onImageClick: () => void; inputRef? };
+export const TicketImage = ({ value, onChange, onBlur, disabled, label, helperText, onImageClick, inputRef = undefined, ...props }: TicketImageProps) => {
 	const imgSrc = getImgSrc(value);
 	const imgInModal = useRef(imgSrc);
 	const syncProps = useSyncProps({ images: [imgInModal.current] });
@@ -55,19 +56,17 @@ export const TicketImage = ({ value, onChange, onBlur, disabled, label, helperTe
 	useEffect(() => { imgInModal.current = imgSrc; }, [imgSrc]);
 
 	return (
-		<>
-			<InputContainer disabled={disabled} {...props}>
-				<Label>{label}</Label>
-				<TicketImageContent
-					value={imgSrc}
-					onChange={onUploadNewImage}
-					disabled={disabled}
-					onImageClick={handleImageClick}
-				>
-					<TicketImageActionMenu value={imgSrc} onChange={onUploadNewImage} disabled={disabled} onClick={handleImageClick} />
-				</TicketImageContent>
-				<FormHelperText>{helperText}</FormHelperText>
-			</InputContainer>
-		</>
+		<InputContainer disabled={disabled} ref={inputRef} {...props}>
+			<Label>{label}</Label>
+			<TicketImageContent
+				value={imgSrc}
+				onChange={onUploadNewImage}
+				disabled={disabled}
+				onImageClick={handleImageClick}
+			>
+				<TicketImageActionMenu value={imgSrc} onChange={onUploadNewImage} disabled={disabled} onClick={handleImageClick} />
+			</TicketImageContent>
+			<FormHelperText>{helperText}</FormHelperText>
+		</InputContainer>
 	);
 };

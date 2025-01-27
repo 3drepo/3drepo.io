@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,20 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect } from 'react';
+import { AvatarProps } from '@mui/material';
+import { forwardRef } from 'react';
+import { Popover } from './popoverCircle.styles';
 
-export const useOutsideClick = (ref: any, callback: () => void) => {
-	const handleClick = (e) => {
-		if (ref.current && !ref.current.contains(e.target)) {
-			callback();
-		}
-	};
-
-	useEffect(() => {
-		document.addEventListener('mouseup', handleClick);
-
-		return () => {
-			document.removeEventListener('mouseup', handleClick);
-		};
-	});
+export type IPopoverCircle = AvatarProps & {
+	size?: 'small' | 'medium';
+	backgroundColor?: string;
 };
+
+export const PopoverCircle = forwardRef(({ backgroundColor, ...props }: IPopoverCircle, ref) => (
+	<Popover {...props} $backgroundColor={backgroundColor} ref={ref} />
+));

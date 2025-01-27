@@ -23,6 +23,7 @@ const {
 	generateRandomBuffer,
 	generateRandomString,
 	generateUserCredentials,
+	outOfOrderArrayEqual,
 	db: dbHelper,
 } = require('../../helper/services');
 
@@ -358,6 +359,38 @@ const testAggregate = () => {
 			];
 			const res = await DB.aggregate(generateRandomString(), col, pipeline);
 			expect(res).toEqual([]);
+		});
+	});
+};
+
+const testDistinct = () => {
+	const dbName = generateRandomString();
+	const col = generateRandomString();
+	const label1 = generateRandomString();
+	const label2 = generateRandomString();
+	const label3 = generateRandomString();
+
+	const data = [
+		{ num: 1, label: label1 },
+		{ num: 1, label: label1 },
+		{ num: 1, label: label2 },
+		{ num: 2, label: label3 },
+		{ num: 1, label: label2 },
+	];
+
+	describe.each([
+		['Should return empty array on an empty collection', generateRandomString(), generateRandomString(), undefined, []],
+		['Should return list of distinct values from label', col, 'label', undefined, [label1, label2, label3]],
+		['Should return list of distinct values from label that satisfied the query', col, 'label', { num: 2 }, [label3]],
+
+	])('Distinct', (desc, collection, key, query, expectedOutput) => {
+		beforeAll(async () => {
+			await dbHelper.reset();
+			await DB.insertMany(dbName, col, data);
+		});
+		test(desc, async () => {
+			const output = await DB.distinct(dbName, collection, key, query);
+			outOfOrderArrayEqual(expectedOutput, output);
 		});
 	});
 };
@@ -920,6 +953,7 @@ describe(determineTestGroup(__filename), () => {
 	testReplaceOne();
 	testBulkWrite();
 	testAggregate();
+	testDistinct();
 	testFind();
 	testFindOne();
 	testFindOneAndUpdate();

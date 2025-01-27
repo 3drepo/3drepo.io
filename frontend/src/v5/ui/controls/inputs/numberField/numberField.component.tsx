@@ -17,9 +17,19 @@
 
 import { TextField, TextFieldProps } from '@controls/inputs/textField/textField.component';
 
+const VALID_CODES = ['Backspace', 'Tab', 'Delete', 'ArrowLeft', 'ArrowRight'];
+const META_KEYS = ['altKey', 'ctrlKey', 'metaKey', 'shiftKey'];
+const isValidCharacterOrDigit = (val) => /[0-9\.+-]/.test(val);
+
 export const NumberField = (props: TextFieldProps) => {
 	const handleKeyDown = (event) => {
-		if (event.key === 'e') {
+		// type="number" does not prevent letters or special characters from being
+		// inputed in browsers that are not Chrome, hence, we filter them manually 
+		if (
+			!isValidCharacterOrDigit(event.key)
+			&& !VALID_CODES.includes(event.code)
+			&& !META_KEYS.some((k) => event[k])
+		) {
 			event.preventDefault();
 		}
 	};

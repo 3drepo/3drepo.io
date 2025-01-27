@@ -106,13 +106,11 @@ TeamspaceSetting.removeSubscription = (ts, type) => {
 	return teamspaceSettingUpdate(ts, { _id: ts }, { $unset: { [field]: 1 } });
 };
 
-const possibleAddOns = {
-	[`addOns.${ADD_ONS.VR}`]: 1,
-	[`addOns.${ADD_ONS.HERE}`]: 1,
-	[`addOns.${ADD_ONS.SRC}`]: 1,
-	[`addOns.${ADD_ONS.POWERBI}`]: 1,
-	[`addOns.${ADD_ONS.MODULES}`]: 1,
-};
+const possibleAddOns = {};
+
+Object.values(ADD_ONS).forEach((addOnVal) => {
+	possibleAddOns[`addOns.${addOnVal}`] = 1;
+});
 
 TeamspaceSetting.getAddOns = async (teamspace) => {
 	const { addOns } = await TeamspaceSetting.getTeamspaceSetting(teamspace, possibleAddOns);

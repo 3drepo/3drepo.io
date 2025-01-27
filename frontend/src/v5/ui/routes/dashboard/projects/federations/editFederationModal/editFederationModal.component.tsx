@@ -28,7 +28,7 @@ import { FormModal } from './editFederationModal.styles';
 import { EditFederationContext, EditFederationContextComponent, EditFederationContextType } from './editFederationContext';
 
 type EditFederationModalProps = IFormModal & {
-	open: boolean;
+	open?: boolean;
 	federation: IFederation;
 	onClickClose?: () => void;
 };
@@ -55,7 +55,7 @@ export const EditFederationModal = ({
 	return (
 		<EditFederationContextComponent federation={federation}>
 			<EditFederationContext.Consumer>
-				{({ getGroupedContainers, includedContainers, isReadOnly }: EditFederationContextType) => (
+				{({ getGroupedContainers, includedContainersIds, isReadOnly }: EditFederationContextType) => (
 					<FormModal
 						open={open}
 						title={ isReadOnly ? 
@@ -70,7 +70,7 @@ export const EditFederationModal = ({
 						confirmLabel={formatMessage({ id: 'modal.editFederation.confirm', defaultMessage: 'Save Changes' })}
 						onClickClose={onClickClose}
 						onSubmit={(e) => saveChanges(e, getGroupedContainers())}
-						isValid={includedContainers.length && !isEqual(getGroupedContainers(), federation.containers)}
+						isValid={includedContainersIds.length && !isEqual(getGroupedContainers(), federation.containers)}
 						maxWidth="lg"
 						isReadOnly={isReadOnly}
 						{...otherProps}

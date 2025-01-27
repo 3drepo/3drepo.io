@@ -36,7 +36,7 @@ interface IProps {
 	disabled: boolean;
 	handleNewDrawnShape: (shape: number, attrs, updateState?: boolean) => void;
 	handleNewDrawnLine: (line, type?, updateState?: boolean) => void;
-	handleNewText: (position, text?: string, updateState?: boolean) => void;
+	handleNewText: (position, text: string, width?: number, updateState?: boolean) => void;
 }
 
 const COMPONENTS_MAP = {

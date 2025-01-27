@@ -49,13 +49,20 @@ export const getMaxFileSizeMessage = (value) => formatMessage({
 export const uploadFile = Yup.mixed().nullable().test(
 	'fileSize',
 	formatMessage({
+		id: 'validation.revisions.file.error.emptyFile',
+		defaultMessage: 'File is empty',
+	}),
+	({ size }) => size > 0,
+).test(
+	'fileSize',
+	formatMessage({
 		id: 'validation.revisions.file.error.tooLarge',
 		defaultMessage: 'File exceeds size limit of {sizeLimit}',
 	}, { sizeLimit: formatInfoUnit(ClientConfig.uploadSizeLimit) }),
 	({ size }) => size && (size < ClientConfig.uploadSizeLimit),
 );
 
-export const alphaNumericHyphens = /^[\w|_|-]*$/;
+export const alphaNumericHyphens = /^[\w-]*$/;
 
 export const name = trimmedString
 	.max(120,
@@ -81,11 +88,8 @@ export const name = trimmedString
 		},
 	);
 
-export const desc = Yup.lazy((value) => (
-	stripIfBlankString(value)
-		.max(660,
-			formatMessage({
-				id: 'validation.model.description.error.max',
-				defaultMessage: 'Description is limited to 660 characters',
-			}))
-));
+export const desc = nullableString.max(660,
+	formatMessage({
+		id: 'validation.model.description.error.max',
+		defaultMessage: 'Description is limited to 660 characters',
+	}));

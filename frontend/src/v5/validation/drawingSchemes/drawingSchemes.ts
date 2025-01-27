@@ -16,10 +16,10 @@
  */
 import * as Yup from 'yup';
 import { revisionDesc } from '../containerAndFederationSchemes/validators';
-import { desc, name, alphaNumericHyphens, uploadFile, trimmedString, requiredNumber } from '../shared/validators';
+import { desc, name, alphaNumericHyphens, trimmedString, requiredNumber } from '../shared/validators';
 import { formatMessage } from '@/v5/services/intl';
 import { selectRevisions } from '@/v5/store/drawings/revisions/drawingRevisions.selectors';
-import { getState } from '@/v4/modules/store';
+import { getState } from '@/v5/helpers/redux.helpers';
 
 const number = Yup.string()
 	.matches(alphaNumericHyphens,
@@ -77,18 +77,20 @@ const testCombinationIsUnique = (val, testContext) => {
 	const revisions = selectRevisions(getState(), testContext.parent.drawingId);
 	return !revisions.some((rev) => isSameCode(rev.statusCode, testContext.parent.statusCode) && isSameCode(rev.revCode, testContext.parent.revCode));
 };
+
 const statusCodeAndRevisionCodeMustBeUniqueMessage = formatMessage({
 	id: 'validation.drawing.statusCode.error.characters',
-	defaultMessage: 'The conmbination of Status Code and Revision Code must be unique',
+	defaultMessage: 'The combination of Status Code and Revision Code must be unique',
 });
+
+export const isUniqueRevisionStatusError = (error) => error === statusCodeAndRevisionCodeMustBeUniqueMessage;
+
 export const ListItemSchema = Yup.object().shape({
-	file: uploadFile,
 	statusCode: Yup.string().required(
 		formatMessage({
 			id: 'validation.drawing.statusCode.error.required',
 			defaultMessage: 'Status Code is a required field',
-		}),
-	).test(
+		})).test(
 		'statusCodeAndRevisionCodeAreUnique',
 		statusCodeAndRevisionCodeMustBeUniqueMessage,
 		testCombinationIsUnique,
@@ -97,22 +99,18 @@ export const ListItemSchema = Yup.object().shape({
 		formatMessage({
 			id: 'validation.drawing.revCode.error.characters',
 			defaultMessage: 'Revision Code can only consist of letters, numbers, hyphens or underscores',
-		}),
-	).required(
+		})).required(
 		formatMessage({
 			id: 'validation.drawing.revCode.error.required',
 			defaultMessage: 'Revision Code is a required field',
-		}),
-	).max(10,
+		})).max(10,
 		formatMessage({
 			id: 'validation.drawing.revCode.error.max',
 			defaultMessage: 'Revision Code is limited to 10 characters',
-		}),
-	).test(
+		})).test(
 		'statusCodeAndRevisionCodeAreUnique',
 		statusCodeAndRevisionCodeMustBeUniqueMessage,
-		testCombinationIsUnique,
-	),
+		testCombinationIsUnique),
 	revisionDesc,
 });
 

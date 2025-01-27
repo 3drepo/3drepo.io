@@ -1,22 +1,22 @@
-{ "VERSION" : "5.12.1",
+{ "VERSION" : "5.14.0",
   "unity" : {
-	"current" : "2.20.0",
+	"current" : "5.20.0",
 	"supported": []
   },
   "civil" :{
-	"current" : "5.10.1",
-	"supported": []
+	"current" : "5.14.0",
+	"supported": ["5.10.1"]
   },
   "navis" :{
-	"current" : "5.10.2",
-	"supported": []
+	"current" : "5.14.0",
+	"supported": ["5.10.2"]
   },
    "revit" :{
-	"current" : "5.10.1",
-	"supported": []
+	"current" : "5.14.0",
+	"supported": ["5.10.1"]
   },
   "unitydll" : {
-	"current": "4.4.0",
+	"current": "5.4.0",
 	"supported" : []
   },
   "vba" : {
@@ -24,8 +24,8 @@
 	"supported": []
   },
   "unreal" : {
-    "current" : "1.2.2",
-    "supported": ["1.2.1", "1.2.0", "1.0.1"]
+    "current" : "5.2.2",
+    "supported": []
   },
   "powerbi" : {
 	  "current": "5.10.0",

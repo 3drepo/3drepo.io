@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { DialogContent } from '@mui/material';
-import Dropzone from 'react-dropzone';
 import styled, { css } from 'styled-components';
 import { DashedContainer } from '@controls/dashedContainer/dashedContainer.component';
 
@@ -39,7 +38,7 @@ export const ResourcesContainer = styled.div`
 	width: 520px;
 `;
 
-export const StyledDropZone = styled(Dropzone)`
+export const DropZone = styled.div`
 	margin-left: 20px;
 	margin-top: 20px;
 	margin-right: 20px;
@@ -90,11 +89,11 @@ export const DropzoneContent = styled(DashedContainer).attrs<{ error?: boolean, 
 	error,
 	isDragActive,
 }) => ({
-	strokeWidth: 2,
-	dashSize: 5,
-	gapSize: 5,
-	zeroPadding: true,
-	strokeColor: dropZoneColors(primary.main, primary.dark, errorPalette.main)({ error, isDragActive }),
+	$strokeWidth: 2,
+	$dashSize: 5,
+	$gapSize: 5,
+	$zeroPadding: true,
+	$strokeColor: dropZoneColors(primary.main, primary.dark, errorPalette.main)({ error, isDragActive }),
 }))`
 	${({ theme: { palette: { primary, secondary, error } } }) => css`
 		background-color: ${dropZoneColors(primary.contrast, primary.lightest, error.lightest)};

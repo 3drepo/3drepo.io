@@ -28,6 +28,7 @@ const { dropDatabase } = require('../../handler/db');
 const { getAccessibleTeamspaces } = require('../../models/users');
 const { isTeamspaceAdmin } = require('../../utils/permissions/permissions');
 const { logger } = require('../../utils/logger');
+const { removeAllTeamspaceNotifications } = require('../../models/notifications');
 const { removeUserFromAllModels } = require('../../models/modelSettings');
 const { removeUserFromAllProjects } = require('../../models/projectSettings');
 
@@ -69,6 +70,7 @@ Teamspaces.removeTeamspace = async (teamspace) => {
 	await Promise.all([
 		removeAllUsersFromTS(teamspace),
 		removeAllFilesFromTeamspace(teamspace),
+		removeAllTeamspaceNotifications(teamspace),
 	]);
 	await Promise.all([
 		dropDatabase(teamspace),
