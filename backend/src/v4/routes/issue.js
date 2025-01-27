@@ -268,7 +268,7 @@ router.get("/issues/:issueId/viewpoints/:vid/screenshotSmall.png", issuesMiddlew
  *		"number":3,
  *		"rev_id":"9cf31c6e-37cc-4625-8cee-270cf731059e",
  *		"__v":0,
- *		"assigned_roles":["Architect"],
+ *		"assigned_roles":["1cf31c6e-37cc-4625-8cee-270cf731059e"],
  *		"viewCount":1,"commentCount":0,
  *		"thumbnail":"ACCOUNT/MODEL_ID/issues/ISSUE_ID/thumbnail.png",
  *		"position":[],
@@ -379,7 +379,7 @@ router.get("/revision/:rid/issues.html", issuesMiddleware.canView, renderIssuesH
  * {
  *    "name": "Amazing issue",
  *    "assigned_roles": [
- *       "jobA"
+ *       "1cf31c6e-37cc-4625-8cee-270cf731059e"
  *    ],
  *    "status": "open",
  *    "priority": "none",
@@ -522,7 +522,7 @@ router.get("/revision/:rid/issues.html", issuesMiddleware.canView, renderIssuesH
  * {
  *    "name": "Amazing issue",
  *    "assigned_roles": [
- *       "jobA"
+ *       "1cf31c6e-37cc-4625-8cee-270cf731059e"
  *    ],
  *    "status": "open",
  *    "priority": "none",
@@ -530,7 +530,7 @@ router.get("/revision/:rid/issues.html", issuesMiddleware.canView, renderIssuesH
  *    "owner": "teamSpace1",
  *    "desc": "This is the most awesome issue ever",
  *    "rev_id": "330f909b-9279-41aa-a87c-1c46f53a8e93",
- *    "creator_role": "jobA",
+ *    "creator_role": "1cf31c6e-37cc-4625-8cee-270cf731059e",
  *    "scale": 1,
  *    "position": [
  *       -3960.10205078125,
@@ -638,7 +638,7 @@ router.post("/issues", issuesMiddleware.canCreate, storeIssue, middlewares.notif
  *    "_id": "98c39770-c8e2-11e9-8f2a-ada77612c97e",
  *    "name": "issue 2",
  *    "assigned_roles": [
- *       "jobC"
+ *       "1cf31c6e-37cc-4625-8cee-270cf731059e"
  *    ],
  *    "status": "in progress",
  *    "priority": "none",
@@ -659,7 +659,7 @@ router.post("/issues", issuesMiddleware.canCreate, storeIssue, middlewares.notif
  *          "action": {
  *             "property": "assigned_roles",
  *             "from": "",
- *             "to": "jobB"
+ *             "to": "1cf31c6e-37cc-4625-8cee-270cf731059e"
  *          },
  *          "sealed": true
  *       },
@@ -669,8 +669,8 @@ router.post("/issues", issuesMiddleware.canCreate, storeIssue, middlewares.notif
  *          "owner": "teamSpace1",
  *          "action": {
  *             "property": "assigned_roles",
- *             "from": "jobB",
- *             "to": "jobC"
+ *             "from": "1cf31c6e-37cc-4625-8cee-270cf731059e",
+ *             "to": "2cf31c6e-37cc-4625-8cee-270cf731059e"
  *          },
  *          "sealed": true
  *       },

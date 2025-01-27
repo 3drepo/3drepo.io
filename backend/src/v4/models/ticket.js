@@ -42,6 +42,8 @@ const config = require("../config.js");
 const extensionRe = /\.(\w+)$/;
 const AccountPermissions = require("./accountPermissions");
 const { cleanViewpoint } = require("./viewpoint");
+const { v5Path } = require("../../interop");
+const { UUIDToString } = require(`${v5Path}/utils/helper/uuids.js`);
 
 const getResponse = (responseCodeType) => (type) => responseCodes[responseCodeType + "_" + type];
 
@@ -196,9 +198,9 @@ class Ticket extends View {
 		const accountPerm = AccountPermissions.findByUser(dbUser, user);
 		const tsAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
 		const isAdmin = projAdmin || tsAdmin;
-		const hasOwnerJob = oldTicket.creator_role === job;
+		const hasOwnerJob = UUIDToString(oldTicket.creator_role) === UUIDToString(job);
 		const hasAdminPrivileges = isAdmin || hasOwnerJob;
-		const hasAssignedJob = job === oldTicket.assigned_roles[0];
+		const hasAssignedJob = UUIDToString(job) === UUIDToString(oldTicket.assigned_roles[0]);
 		const userPermissions = { hasAdminPrivileges, hasAssignedJob };
 
 		const _id = utils.stringToUUID(id);

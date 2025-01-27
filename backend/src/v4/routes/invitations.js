@@ -42,14 +42,14 @@ const utils = require("../utils");
  * [
  *   {
  *     "email": "7e634bae01db4f@mail.com",
- *     "job": "jobA",
+ *     "job": 6bfc11fa-50ac-b7e7-4328-83aa11fa50ac,
  *     "permissions": {
  *       "teamspace_admin": true
  *     }
  *   },
  *   {
  *     "email": "93393d28f953@mail.com",
- *     "job": "jobA",
+ *     "job": 6bfc11fa-50ac-b7e7-4328-83aa11fa50ac,
  *     "permissions": {
  *       "projects": [
  *         {
@@ -61,7 +61,7 @@ const utils = require("../utils");
  *   },
  *   {
  *     "email": "48bc8da2f3bc@mail.com",
- *     "job": "jobA",
+ *     "job": 6bfc11fa-50ac-b7e7-4328-83aa11fa50ac,
  *     "permissions": {
  *       "projects": [
  *         {
@@ -110,7 +110,7 @@ router.get("/invitations", middlewares.isAccountAdmin, getInvitations);
  * POST /teamSpace1/invitations HTTP/1.1
  *	{
  *		email:'invited@enterprise.com'
- *		job: 'jobA',
+ *		job: 6bfc11fa-50ac-b7e7-4328-83aa11fa50ac,
  *		permissions:{
  *			projects:[
  *				{
@@ -132,7 +132,7 @@ router.get("/invitations", middlewares.isAccountAdmin, getInvitations);
  * POST /teamSpace1/invitations HTTP/1.1
  *	{
  *		email:'anotherinvited@enterprise.com'
- *		job: 'jobA',
+ *		job: 6bfc11fa-50ac-b7e7-4328-83aa11fa50ac,
  *		permissions: {
  *			teamspace_admin: true
  *		}
@@ -142,7 +142,7 @@ router.get("/invitations", middlewares.isAccountAdmin, getInvitations);
  * HTTP/1.1 200 OK
  *	{
  *		email:'invited@enterprise.com'
- *		job: 'jobA',
+ *		job: 6bfc11fa-50ac-b7e7-4328-83aa11fa50ac,
  *		permissions:{
  *			projects:[
  *				{
@@ -164,7 +164,7 @@ router.get("/invitations", middlewares.isAccountAdmin, getInvitations);
  * HTTP/1.1 200 OK
  *	{
  *		email:'anotherinvited@enterprise.com'
- *		job: 'jobA',
+ *		job: 6bfc11fa-50ac-b7e7-4328-83aa11fa50ac,
  *		permissions: {
  *			teamspace_admin: true
  *		}

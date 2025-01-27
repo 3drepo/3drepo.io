@@ -36,8 +36,6 @@ const APIService = {};
 const addV4Routes = (app) => {
 	app.use("/", require("../routes/user"));
 
-	app.use("/:account", require("../routes/job"));
-
 	app.use("/", require("../routes/plan"));
 
 	app.use("/", require("../routes/auth"));

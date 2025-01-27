@@ -16,12 +16,12 @@
  */
 
 const { createResponseCode, templates } = require('../../../../utils/responseCodes');
+const { getArrayDifference, uniqueElements } = require('../../../../utils/helper/arrays');
 const { getJobById, getJobs } = require('../../../../models/jobs');
 const Yup = require('yup');
+const { getAllUsersInTeamspace } = require('../../../../models/teamspaceSettings');
 const { respond } = require('../../../../utils/responder');
 const { types } = require('../../../../utils/helper/yup');
-const { getArrayDifference, uniqueElements } = require('../../../../utils/helper/arrays');
-const { getAllUsersInTeamspace } = require('../../../../models/teamspaceSettings');
 
 const Jobs = {};
 

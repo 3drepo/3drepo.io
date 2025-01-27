@@ -48,6 +48,7 @@ const PermissionTemplates = require("./permissionTemplates");
 const { get } = require("lodash");
 const { fileExists } = require("./fileRef");
 const {v5Path} = require("../../interop");
+const { UUIDToString } = require(`${v5Path}/utils/helper/uuids.js`);
 const { types: { strings } } = require(`${v5Path}/utils/helper/yup.js`);
 const { sanitiseRegex } = require(`${v5Path}/utils/helper/strings.js`);
 const { events } = require(`${v5Path}/services/eventsManager/eventsManager.constants`);
@@ -990,7 +991,7 @@ User.getTeamMemberInfo = async function(teamspace, user) {
 		};
 
 		if(job) {
-			result.job = {_id: job._id, color: job.color};
+			result.job = {_id: UUIDToString(job._id), color: job.color};
 		}
 		return result;
 	}

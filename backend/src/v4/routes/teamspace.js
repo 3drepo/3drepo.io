@@ -219,7 +219,7 @@
 	 *          permissions: [
 	 *             "teamspace_admin"
  	 *          ],
- 	 *          job: "jobA",
+ 	 *          job: "8f3dab17-d38e-498e-95a7-1dcd5a16f149",
 	 *          isCurrentUser: true
 	 *       },
 	 *       {
@@ -228,7 +228,7 @@
  	 *          lastName: "Williams",
  	 *          company: "Teamspace One",
 	 *          permissions: [],
-	 *          job: "jobA",
+	 *          job: "8f3dab17-d38e-498e-95a7-1dcd5a16f149",
 	 *          isCurrentUser: false
 	 *       },
 	 *       {
@@ -237,7 +237,7 @@
 	 *          lastName: "Stratford",
 	 *          company: "Teamspace one",
 	 *          permissions: [],
-	 *          job: "jobB",
+	 *          job: "8f3dab17-d38e-498e-95a7-1dcd5a16f149",
 	 *          isCurrentUser: false
 	 *       }
 	 *    ]
@@ -403,14 +403,14 @@
 	 * @apiExample {post} Example usage:
 	 * POST /teamSpace1/members HTTP/1.1
 	 * {
-	 *    job: "jobA",
+	 *    job: "8f3dab17-d38e-498e-95a7-1dcd5a16f149",
 	 *    user: "projectshared",
 	 *    permissions: []
 	 * }
 	 *
 	 * @apiSuccessExample {json} Success
 	 * {
-	 *    job: "jobA",
+	 *    job: "8f3dab17-d38e-498e-95a7-1dcd5a16f149",
 	 *    permissions: [],
 	 *    user: "projectshared",
 	 *    firstName: "Drink",

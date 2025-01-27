@@ -35,6 +35,7 @@ const { contains: setContains } = require("./helper/set");
 
 const responseCodes = require("../response_codes.js");
 const { omit } = require("lodash");
+const { stringToUUID, UUIDToString } = require(`${v5Path}/utils/helper/uuids.js`);
 
 const MODELS_PERMISSION = ["collaborator", "commenter", "viewer"];
 
@@ -129,7 +130,7 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 	const coll = await getCollection();
 	coll.ensureIndex({ "teamSpaces.teamspace": 1 }, { "background": true });
 	const result = await coll.findOne({_id:email});
-	const teamspaceEntry = { teamspace, job, permissions };
+	const teamspaceEntry = { teamspace, job: stringToUUID(job), permissions };
 
 	if (result) {
 		const teamSpaces = result.teamSpaces.filter(entry => entry.teamspace !== teamspace);
@@ -149,7 +150,7 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 		await coll.insertOne(invitation);
 		await sendInvitationEmail(email, username, teamspace);
 
-		publish(events.INVITATION_ADDED, { teamspace, executor: username, email, job, permissions});
+		publish(events.INVITATION_ADDED, { teamspace, executor: username, email, job: stringToUUID(job), permissions});
 	}
 
 	return {email, job, permissions};
@@ -178,34 +179,6 @@ invitations.removeTeamspaceFromInvitation = async (email, teamspace, executor) =
 
 	return {};
 
-};
-
-invitations.setJob = async (email, teamspace, job) => {
-	const coll = await getCollection();
-	const invitation = await coll.findOne({_id:email});
-	invitation.teamSpaces[teamspace].job = job;
-	await coll.updateOne({_id:email}, { $set: invitation });
-	return true;
-};
-
-invitations.setTeamspacePermission = async (email, teamspace, permissions) => {
-	await invitations.teamspaceInvitationCheck(email, teamspace);
-	const permissionsField = "teamSpaces." + teamspace + ".permissions.teamspace";
-	const coll = await getCollection();
-	await coll.updateOne({}, { $set: { [permissionsField]: permissions } });
-	return {user:email, permissions};
-};
-
-invitations.teamspaceInvitationCheck = async (email, teamspace) => {
-	const queryField = "teamSpaces." + teamspace ;
-	const coll = await getCollection();
-	const invitation = await coll.findOne({_id:email, [queryField]: {$exists:true}}, {_id: true});
-
-	if (!invitation) {
-		throw responseCodes.USER_NOT_FOUND;
-	}
-
-	return true;
 };
 
 const applyModelPermissions = (teamspace, invitedUser, modelsPermissions) => async modelSetting=> {
@@ -259,7 +232,7 @@ invitations.getInvitationsByTeamspace = async (teamspaceName) => {
 	return results.map(invitationEntry => {
 		const email = invitationEntry._id;
 		const teamspaceData =  omit(invitationEntry.teamSpaces.find(({teamspace}) => teamspace === teamspaceName), "teamspace");
-		return { email, ...teamspaceData };
+		return { email, ...teamspaceData, job: UUIDToString(teamspaceData.job) };
 	});
 };
 
