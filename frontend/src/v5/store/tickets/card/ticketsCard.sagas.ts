@@ -24,6 +24,9 @@ import { TicketsActions, TicketsTypes } from '../tickets.redux';
 import { DialogsActions } from '../../dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 import { selectTemplates } from '../tickets.selectors';
+import { selectCardFilters } from './ticketsCard.selectors';
+import * as API from '@/v5/services/api';
+import { filtersToQuery } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 
 export function* openTicket({ ticketId }: OpenTicketAction) {
 	yield put(TicketsCardActions.setSelectedTicket(ticketId));
@@ -53,7 +56,26 @@ export function* fetchTicketsList({ teamspace, projectId, modelId, isFederation 
 	}
 }
 
+export function* fetchFilteredTickets({ teamspace, projectId, modelId, isFederation }: FetchTicketsListAction) {
+	try {
+		const filters = yield select(selectCardFilters);
+		const fetchModelTickets = isFederation
+			? API.Tickets.fetchFederationTickets
+			: API.Tickets.fetchContainerTickets;
+		const tickets = yield fetchModelTickets(teamspace, projectId, modelId, filtersToQuery(filters));
+		const ticketIds = tickets.map((t) => t._id);
+		yield put(TicketsCardActions.setFilteredTicketIds(ticketIds));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'tickets.fetchFilteredTickets.error', defaultMessage: 'trying to fetch the filtered tickets' }),
+			error,
+		}));
+	}
+}
+
+
 export default function* ticketsCardSaga() {
 	yield takeLatest(TicketsCardTypes.OPEN_TICKET, openTicket);
 	yield takeLatest(TicketsCardTypes.FETCH_TICKETS_LIST, fetchTicketsList);
+	yield takeLatest(TicketsCardTypes.FETCH_FILTERED_TICKETS, fetchFilteredTickets);
 }
