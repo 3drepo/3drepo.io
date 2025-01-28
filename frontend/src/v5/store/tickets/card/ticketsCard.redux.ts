@@ -92,7 +92,7 @@ export const setSelectedTicketPin = (state: ITicketsCardState, { pinId }: SetSel
 	state.selectedTicketPinId = pinId;
 };
 
-export const setFilteredTicketIds = (state: ITicketsCardState, { ticketIds, ...args }: SetFilteredTicketIdsAction) => {
+export const setFilteredTicketIds = (state: ITicketsCardState, { ticketIds }: SetFilteredTicketIdsAction) => {
 	state.filteredTicketIds = ticketIds;
 };
 
