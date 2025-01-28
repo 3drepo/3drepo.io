@@ -310,31 +310,19 @@ const modelDeletedTest = () => {
 	});
 };
 
-// describe(ServiceHelper.determineTestGroup(__filename), () => {
-// 	let server;
-// 	let chatApp;
-// 	beforeAll(async () => {
-// 		server = await ServiceHelper.app();
-// 		chatApp = await ServiceHelper.chatApp();
-// 		agent = await SuperTest(server);
-// 		await setupData();
-// 	});
-// 	afterAll(() => Promise.all([
-// 		ServiceHelper.closeApp(server),
-// 		chatApp.close()]));
-// 	modelSettingsTest();
-// 	modelAddedTest();
-// 	modelDeletedTest();
-// });
-
-const dummyTest = () => {
-	describe('dummy test', () => {
-		test('should succeed', () => {
-			expect(true).toEqual(true);
-		});
-	});
-};
-
 describe(ServiceHelper.determineTestGroup(__filename), () => {
-	dummyTest();
+	let server;
+	let chatApp;
+	beforeAll(async () => {
+		server = await ServiceHelper.app();
+		chatApp = await ServiceHelper.chatApp();
+		agent = await SuperTest(server);
+		await setupData();
+	});
+	afterAll(() => Promise.all([
+		ServiceHelper.closeApp(server),
+		chatApp.close()]));
+	modelSettingsTest();
+	modelAddedTest();
+	modelDeletedTest();
 });
