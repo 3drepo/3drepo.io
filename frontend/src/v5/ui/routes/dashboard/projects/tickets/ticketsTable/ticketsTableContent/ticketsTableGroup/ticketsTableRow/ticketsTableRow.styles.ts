@@ -60,7 +60,7 @@ export const CellOwner = styled(Cell)`
 
 export const CellDate = styled(Cell)`
 	${DueDateContainer} {
-		height: 18px;
+		height: unset;
 	}
 `;
 
