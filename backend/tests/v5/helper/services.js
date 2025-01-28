@@ -66,6 +66,7 @@ queue.purgeQueues = async () => {
 	try {
 		// eslint-disable-next-line
 		const { host, worker_queue, model_queue, callback_queue } = config.cn_queue;
+		console.log(`AMQP Host: ${host}`);
 		const conn = await amqp.connect(host);
 		const channel = await conn.createChannel();
 
@@ -80,6 +81,7 @@ queue.purgeQueues = async () => {
 		await channel.close();
 		await conn.close();
 	} catch (err) {
+		console.log(`Error while purging queue: ${err.message}`);
 		// doesn't really matter if purge queue failed. it's just for clean up.
 	}
 };
