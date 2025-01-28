@@ -47,7 +47,7 @@ export const FiltersSection = ({ filters }: FiltersSectionProps) => {
 					)}
 				>
 					<ActionMenuContext.Consumer>
-						{({ close }) => filter && (
+						{({ close }) => (
 							<FilterForm
 								{...filter as any}
 								onCancel={close}
