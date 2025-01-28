@@ -28,7 +28,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { FilterSchema } from '@/v5/validation/ticketSchemes/validators';
 import { FilterFormOperators } from './filterFormValues/operators/filterFormOperators.component';
 
-const DEFAULT_OPERATOR = 'eq';
+const DEFAULT_OPERATOR = 'is';
 const DEFAULT_VALUES = [''];
 type FormType = { values: { value: CardFilterValue }[], operator: CardFilterOperator };
 type FilterFormProps = {

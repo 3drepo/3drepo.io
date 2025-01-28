@@ -34,6 +34,8 @@ import { compact } from 'lodash';
 export const FILTER_OPERATOR_ICON: Record<CardFilterOperator, any> = {
 	eq: EqualIcon,
 	neq: NotEqualIcon,
+	is: EqualIcon,
+	nis: NotEqualIcon,
 	gt: GreaterEqualIcon,
 	gte: GreaterEqualThanIcon,
 	lt: LessThanIcon,
@@ -51,6 +53,8 @@ const FILTER_OPERATOR_LABEL: Record<CardFilterOperator, string> = {
 	nex: formatMessage({ id: 'cardFilter.operator.doesNotExist', defaultMessage: 'Does not exist' }),
 	eq: formatMessage({ id: 'cardFilter.operator.equals', defaultMessage: 'Equals' }),
 	neq: formatMessage({ id: 'cardFilter.operator.doesNotEqual', defaultMessage: 'Does not equal' }),
+	is: formatMessage({ id: 'cardFilter.operator.is', defaultMessage: 'Is' }),
+	nis: formatMessage({ id: 'cardFilter.operator.isNot', defaultMessage: 'Is not' }),
 	gt: formatMessage({ id: 'cardFilter.operator.greaterThan', defaultMessage: 'Greater than' }),
 	gte: formatMessage({ id: 'cardFilter.operator.greaterOrEqualTo', defaultMessage: 'Greater or equal to' }),
 	lt: formatMessage({ id: 'cardFilter.operator.lessThan', defaultMessage: 'Less than' }),
@@ -68,7 +72,7 @@ const DATE_FILTER_OPERATOR_LABEL: Record<CardFilterOperator, string> = {
 };
 
 export const isDateType = (type: CardFilterType) => ['date', 'pastDate', 'sequencing'].includes(type);
-export const isTextType = (type: CardFilterType) => ['template', 'ticketCode', 'ticketTitle', 'text', 'longText'].includes(type);
+export const isTextType = (type: CardFilterType) => ['ticketCode', 'title', 'text', 'longText'].includes(type);
 
 export const getFilterOperatorLabels = (type: CardFilterType) => isDateType(type) ? DATE_FILTER_OPERATOR_LABEL : FILTER_OPERATOR_LABEL;
 
@@ -76,8 +80,8 @@ export const getFilterFormTitle = (elements: string[]) => compact(elements).join
 
 export const isRangeOperator = (operator: CardFilterOperator) => ['rng', 'nrng'].includes(operator);
 export const getValidOperators = (type: CardFilterType): CardFilterOperator[] => {
-	if (isTextType(type)) return ['eq', 'neq', 'ss', 'nss', 'ex', 'nex'];
-	if (type === 'number') return ['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'rng', 'nrng', 'ex', 'nex'];
-	if (isDateType(type)) return ['eq', 'lte', 'gte', 'rng', 'nrng', 'ex', 'nex'];
+	if (isTextType(type)) return ['ex', 'nex', 'is', 'nis', 'ss', 'nss'];
+	if (type === 'number') return ['ex', 'nex', 'eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'rng', 'nrng'];
+	if (isDateType(type)) return ['ex', 'nex', 'eq', 'neq', 'gte', 'lte', 'rng', 'nrng'];
 	return Object.keys(FILTER_OPERATOR_LABEL) as CardFilterOperator[];
 };
