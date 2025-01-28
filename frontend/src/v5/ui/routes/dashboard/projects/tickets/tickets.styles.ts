@@ -84,7 +84,7 @@ export const SidePanel = styled(Drawer).attrs({
 			width: 410,
 			height: 'calc(100vh - 112px)',
 			top: 112,
-			zIndex: 3,
+			zIndex: 12,
 		},
 	},
 })``;
