@@ -41,7 +41,7 @@ export const FilterSelection = () => {
 	return (
 		<CardFilterActionMenu
 			TriggerButton={(
-				<Tooltip title={formatMessage({ id: 'viewer.card.tickets.addFilter', defaultMessage: 'Add Filter' })}>
+				<Tooltip title={disabled ? '' : formatMessage({ id: 'viewer.card.tickets.addFilter', defaultMessage: 'Add Filter' })}>
 					<CardAction disabled={disabled}>
 						<FunnelIcon />
 					</CardAction>
