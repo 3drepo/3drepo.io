@@ -23,7 +23,9 @@ const {
 	insertManyRefs,
 	insertRef,
 	removeRefsByQuery,
+	updateRef,
 } = require('../models/fileRefs');
+const CryptoJs = require('crypto-js');
 const FSHandler = require('../handler/fs');
 const GridFSHandler = require('../handler/gridfs');
 const config = require('../utils/config');
@@ -212,6 +214,24 @@ FilesManager.storeFileStream = async (teamspace, collection, id, dataStream, met
 	const mimeType = DEFAULT_MIME_TYPE;
 
 	await insertRef(teamspace, collection, { ...meta, ...refInfo, _id: id, mimeType });
+};
+
+FilesManager.getMD5FileHash = async (teamspace, collection, filename) => {
+	const { size, md5Hash: hash } = await getRefEntry(teamspace, collection, filename);
+
+	if (hash) {
+		return { size, hash };
+	}
+
+	const file = await FilesManager.getFile(teamspace, collection, filename);
+	const newHash = CryptoJs.MD5(file).toString();
+
+	await updateRef(teamspace, collection, { _id: filename }, { $set: { md5Hash: hash } });
+
+	return {
+		hash: newHash,
+		size,
+	};
 };
 
 module.exports = FilesManager;

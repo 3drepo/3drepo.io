@@ -72,6 +72,40 @@ const testIsObject = () => {
 	});
 };
 
+const testIsBooleanString = () => {
+	describe.each(
+		[
+			['abc', false],
+			['true', true],
+			['True', true],
+			['TRUE', true],
+			['false', true],
+			['False', true],
+			['FALSE', true],
+			[undefined, false],
+		],
+	)('Is Boolean String', (item, isTrue) => {
+		test(`${item} should return ${isTrue}`, () => {
+			expect(TypeChecker.isBooleanString(item)).toBe(isTrue);
+		});
+	});
+};
+
+const testIsNumberString = () => {
+	describe.each(
+		[
+			['abc', false],
+			['true', false],
+			['12345', true],
+			[undefined, false],
+		],
+	)('Is Number String', (item, isTrue) => {
+		test(`${item} should return ${isTrue}`, () => {
+			expect(TypeChecker.isNumberString(item)).toBe(isTrue);
+		});
+	});
+};
+
 const testIsUUIDString = () => {
 	describe.each(
 		[
@@ -147,6 +181,8 @@ describe('utils/helpers/typeCheck', () => {
 	testIsString();
 	testIsObject();
 	testIsUUIDString();
+	testIsBooleanString();
+	testIsNumberString();
 	testFileMimeFromBuffer();
 	testFileExtensionFromBuffer();
 	testIsUUID();
