@@ -8,7 +8,7 @@
   "scripts": {
     "gen-docs": "yarn apidoc -i src/v4/routes/ -o docs/ ",
     "test": "yarn test:unit && yarn test:int",
-    "test:v5": "yarn test:v5-drivers && yarn test:v5-unit && yarn test:v5-e2e && yarn test:v5-scripts",
+    "test:v5": "yarn test:v5-drivers --detectOpenHandles && yarn test:v5-unit --detectOpenHandles && yarn test:v5-e2e --detectOpenHandles && yarn test:v5-scripts --detectOpenHandles",
     "test:v5-unit": "cross-env NODE_ENV=testV5 NODE_CONFIG_DIR=../config yarn jest -c ./jest.config.unit.js",
     "test:v5-e2e": "cross-env NODE_ENV=testV5 NODE_CONFIG_DIR=../config yarn jest -c ./jest.config.e2e.js --runInBand",
     "test:v5-drivers": "cross-env NODE_ENV=testV5 NODE_CONFIG_DIR=../config yarn jest -c ./jest.config.drivers.js --runInBand",
