@@ -31,12 +31,14 @@ const LoginRecords = {};
 const LOGIN_RECORDS_COL = 'loginRecords';
 
 LoginRecords.getLastLoginDate = async (user) => {
+	console.log('!!!Get last login DAte');
 	const lastRecord = await db.findOne(INTERNAL_DB, LOGIN_RECORDS_COL,
 		{ user, failed: { $ne: true } }, { loginTime: 1 }, { loginTime: -1 });
 	return lastRecord?.loginTime;
 };
 
 LoginRecords.removeAllUserRecords = async (user) => {
+	console.log('!!!Remove all users');
 	await db.deleteMany(INTERNAL_DB, LOGIN_RECORDS_COL, { user });
 };
 
@@ -54,6 +56,7 @@ const getFailedAttemptsSince = async (user, limit, dateFrom) => {
 };
 
 LoginRecords.isAccountLocked = async (user) => {
+	console.log('!!!Is Account locked');
 	const lastLogin = await LoginRecords.getLastLoginDate(user);
 	const {
 		maxUnsuccessfulLoginAttempts: maxAttempts,
@@ -101,6 +104,7 @@ const generateRecord = (_id, ipAddr, userAgent, referer) => {
 };
 
 LoginRecords.saveSuccessfulLoginRecord = async (user, sessionId, ipAddress, userAgent, referer) => {
+	console.log('!!!On successful login');
 	const loginRecord = generateRecord(sessionId, ipAddress, userAgent, referer);
 
 	// This is something we're trying to debug adding more info in the log so we can track
@@ -125,6 +129,7 @@ LoginRecords.saveSuccessfulLoginRecord = async (user, sessionId, ipAddress, user
 };
 
 LoginRecords.recordFailedAttempt = async (user, ipAddress, userAgent, referer) => {
+	console.log('!!! failed login');
 	const loginRecord = generateRecord(generateUUIDString(), ipAddress, userAgent, referer);
 
 	await db.insertOne(INTERNAL_DB, LOGIN_RECORDS_COL, { failed: true, user, ...loginRecord });
@@ -135,6 +140,7 @@ LoginRecords.recordFailedAttempt = async (user, ipAddress, userAgent, referer) =
 };
 
 LoginRecords.initialise = async () => {
+	console.log('!!!Init');
 	try {
 		await db.createIndex(INTERNAL_DB, LOGIN_RECORDS_COL,
 			{ user: 1, loginTime: -1, failed: 1 }, { runInBackground: true });

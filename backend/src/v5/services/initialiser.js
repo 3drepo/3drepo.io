@@ -22,11 +22,14 @@ const { init: initNotificationService } = require('./notifications');
 
 const Initialiser = {};
 
-Initialiser.initialiseSystem = () => Promise.all([
-	initLoginRecs(),
-	initInvites(),
-	initJournalingService(),
-	initNotificationService(),
-]);
+Initialiser.initialiseSystem = () => {
+	console.log('!!! running initialiser...');
+	return Promise.all([
+		initLoginRecs(),
+		initInvites(),
+		initJournalingService(),
+		initNotificationService(),
+	]);
+};
 
 module.exports = Initialiser;
