@@ -47,7 +47,7 @@ jobs:
         run: cd backend ; yarn install --network-timeout 100000 --frozen-lockfile --immutable --immutable-cache --non-interactive
 
       - name: Run Backend test:v5
-        run: cd backend ; yarn test:v5
+        run: cd backend ; yarn test:v5 --detectOpenHandles
 
   run-backend-lint:
     name: Run Backend lint
