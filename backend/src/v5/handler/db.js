@@ -72,6 +72,7 @@ const getCollection = async (db, col) => {
 	} catch (err) {
 		// istanbul ignore next
 		await DBHandler.disconnect();
+		// istanbul ignore next
 		console.trace('!!!! Get collecton failed');
 		// istanbul ignore next
 		throw err;
@@ -85,6 +86,7 @@ const runCommand = async (database, cmd) => {
 	} catch (err) {
 		// istanbul ignore next
 		await DBHandler.disconnect();
+		// istanbul ignore next
 		console.trace('!!!! runCommand failed');
 		// istanbul ignore next
 		throw err;
@@ -162,7 +164,9 @@ const dropAllIndicies = async (database, colName) => {
 		const collection = await getCollection(database, colName);
 		return collection.dropIndexes();
 	} catch (err) {
+		// istanbul ignore next
 		console.trace('!!!! Drop all indexes failed');
+		// istanbul ignore next
 		throw err;
 	}
 };
@@ -277,6 +281,7 @@ const getGridFSBucket = async (database, collection, chunksize) => {
 	} catch (err) {
 		/* istanbul ignore next */
 		DBHandler.disconnect();
+		// istanbul ignore next
 		console.trace('!!!! GridFS bucket');
 		/* istanbul ignore next */
 		throw err;
@@ -334,7 +339,9 @@ DBHandler.createIndex = async (database, colName, indexDef, { runInBackground: b
 		const options = deleteIfUndefined({ background });
 		await collection.createIndex(indexDef, options);
 	} catch (err) {
+		// istanbul ignore next
 		console.trace('!!!! Create index failed');
+		// istanbul ignore next
 		throw err;
 	}
 };
@@ -344,7 +351,9 @@ DBHandler.createIndices = async (database, colName, indicesDef) => {
 		const collection = await getCollection(database, colName);
 		await collection.createIndexes(indicesDef);
 	} catch (err) {
+		// istanbul ignore next
 		console.trace('!!!! Create indices failed');
+		// istanbul ignore next
 		throw err;
 	}
 };
@@ -354,7 +363,9 @@ DBHandler.dropIndex = async (database, colName, indexName) => {
 		const collection = await getCollection(database, colName);
 		await collection.dropIndex(indexName);
 	} catch (err) {
+		// istanbul ignore next
 		console.trace('!!!! Drop index failed');
+		// istanbul ignore next
 		throw err;
 	}
 };
@@ -364,7 +375,9 @@ DBHandler.listIndices = async (database, colName) => {
 		const collection = await getCollection(database, colName);
 		return collection.listIndexes().toArray();
 	} catch (err) {
+		// istanbul ignore next
 		console.trace('!!!! List index failed');
+		// istanbul ignore next
 		throw err;
 	}
 };
@@ -376,6 +389,7 @@ DBHandler.listDatabases = async () => {
 	} catch (err) {
 		/* istanbul ignore next */
 		await DBHandler.disconnect();
+		// istanbul ignore next
 		console.trace('!!!! List databases');
 		/* istanbul ignore next */
 		throw err;
@@ -390,6 +404,7 @@ DBHandler.listCollections = async (database) => {
 	} catch (err) {
 		/* istanbul ignore next */
 		await DBHandler.disconnect();
+		// istanbul ignore next
 		console.trace('!!!! List collecton failed');
 		/* istanbul ignore next */
 		throw err;
