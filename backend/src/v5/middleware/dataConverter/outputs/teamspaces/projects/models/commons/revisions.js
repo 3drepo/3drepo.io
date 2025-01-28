@@ -40,4 +40,11 @@ Revision.serialiseRevisionArray = (req, res) => {
 	respond(req, res, templates.ok, { revisions });
 };
 
+Revision.serialiseRevision = (req, res) => {
+	const rev = req.outputData;
+	const revision = serialiseRevision(rev);
+
+	respond(req, res, templates.ok, revision);
+};
+
 module.exports = Revision;
