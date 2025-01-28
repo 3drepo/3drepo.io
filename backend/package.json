@@ -42,7 +42,6 @@
     "cors": "2.8.5",
     "countries-and-timezones": "3.6.0",
     "crypto-js": "4.2.0",
-    "cryptolens": "1.0.14",
     "csv-parse": "4.16.3",
     "dayjs": "1.11.11",
     "device": "0.3.12",
