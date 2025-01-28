@@ -39,14 +39,14 @@ export function* fetchTicketsList({ teamspace, projectId, modelId, isFederation 
 		yield put(TicketsActions.fetchTemplates(teamspace, projectId, modelId, isFederation, true));
 		yield take(TicketsTypes.FETCH_TEMPLATES_SUCCESS);
 		const templates = yield select(selectTemplates, modelId);
-		const requiredProperties = templates.reduce((acc, template) => {
+		const extraProperties = templates.reduce((acc, template) => {
 			const configColor = template.config?.pin?.color;
 			if (!configColor?.property) return acc;
 			const { property: { module, name } } = configColor;
 			const path = module ? `${module}.${name}` : name;
 			return [...acc, path];
 		}, [BaseProperties.DESCRIPTION]);
-		yield put(TicketsActions.fetchTickets(teamspace, projectId, modelId, isFederation, requiredProperties));
+		yield put(TicketsActions.fetchTickets(teamspace, projectId, modelId, isFederation, extraProperties));
 
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -62,7 +62,7 @@ export function* fetchFilteredTickets({ teamspace, projectId, modelId, isFederat
 		const fetchModelTickets = isFederation
 			? API.Tickets.fetchFederationTickets
 			: API.Tickets.fetchContainerTickets;
-		const tickets = yield fetchModelTickets(teamspace, projectId, modelId, filtersToQuery(filters));
+		const tickets = yield fetchModelTickets(teamspace, projectId, modelId, { filters: filtersToQuery(filters) });
 		const ticketIds = tickets.map((t) => t._id);
 		yield put(TicketsCardActions.setFilteredTicketIds(ticketIds));
 	} catch (error) {

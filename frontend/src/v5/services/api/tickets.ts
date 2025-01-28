@@ -59,15 +59,23 @@ export const fetchFederationTemplate = async (
 	return data;
 };
 
+type TicketsQueryParams = {
+	extraProperties?: string[],
+	filters?: string,
+};
 export const fetchContainerTickets = async (
 	teamspace: string,
 	projectId: string,
 	containerId: string,
-	query?: string,
+	queryParams: TicketsQueryParams,
 ): Promise<FetchTicketsResponse> => {
 	let path = `teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets`;
-	if (query) {
-		path += `?query=${query}`;
+	const { extraProperties, filters } = queryParams || {};
+	if (extraProperties?.length) {
+		path += `?filters=${extraProperties.join()}`;
+	}
+	if (filters) {
+		path += `?query=${filters}`;
 	}
 	const { data } = await api.get(path);
 	return data.tickets;
@@ -77,11 +85,15 @@ export const fetchFederationTickets = async (
 	teamspace: string,
 	projectId: string,
 	federationId: string,
-	query?: string,
+	queryParams: TicketsQueryParams,
 ): Promise<FetchTicketsResponse> => {
 	let path = `teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets`;
-	if (query) {
-		path += `?query=${query}`;
+	const { extraProperties, filters } = queryParams || {};
+	if (extraProperties?.length) {
+		path += `?filters=${extraProperties.join()}`;
+	}
+	if (filters) {
+		path += `?query=${filters}`;
 	}
 	const { data } = await api.get(path);
 	return data.tickets;
