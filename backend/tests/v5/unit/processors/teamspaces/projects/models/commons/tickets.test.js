@@ -43,8 +43,8 @@ const TemplatesModel = require(`${src}/models/tickets.templates`);
 jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects/models/commons/tickets.comments');
 const CommentsProcessor = require(`${src}/processors/teamspaces/projects/models/commons/tickets.comments`);
 
-jest.mock('../../../../../../../../src/v5/models/tickets.groups');
-const TicketGroupsModel = require(`${src}/models/tickets.groups`);
+jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects/models/commons/tickets.groups');
+const TicketGroupsModel = require(`${src}/processors/teamspaces/projects/models/commons/tickets.groups`);
 
 jest.mock('../../../../../../../../src/v5/schemas/tickets/templates');
 const TemplatesSchema = require(`${src}/schemas/tickets/templates`);
@@ -834,7 +834,7 @@ const insertTicketsTestHelper = (isImport) => {
 	test('should process images and store refs (image list property type)', () => insertTicketsImageTest(isImport, propTypes.IMAGE_LIST));
 	test('should process screenshots from view data and store refs', () => insertTicketsImageTest(isImport, propTypes.VIEW));
 
-	insertTicketsGroupTests();
+	insertTicketsGroupTests(isImport);
 };
 
 const testAddTicket = () => {

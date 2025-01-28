@@ -55,7 +55,7 @@ const testAddTicketsWithTemplate = () => {
 			const tickets = times(10, generateRandomObject);
 			const number = generateRandomNumber();
 
-			const fn = jest.spyOn(db, 'insertMany');
+			const fn = jest.spyOn(db, 'insertMany').mockImplementation(() => undefined);
 			const getLastNumber = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValueOnce({ seq: number - 1 });
 
 			const res = await Ticket.addTicketsWithTemplate(teamspace, project, model, templateType, tickets);
@@ -106,7 +106,7 @@ const testRemoveAllTickets = () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
-			const fn = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce(undefined);
+			const fn = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce(undefined).mockImplementation(() => undefined);
 			await Ticket.removeAllTicketsInModel(teamspace, project, model);
 			expect(fn).toHaveBeenCalledTimes(2);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { teamspace, project, model });
