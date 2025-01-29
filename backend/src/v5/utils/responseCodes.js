@@ -97,6 +97,9 @@ ResponseCodes.templates = {
 	// Invalid Arguments
 	invalidArguments: { message: 'The arguments provided are not valid.', status: 400 },
 
+	// Resource not available
+	resourceNotAvailable: { message: 'Resource not available.', status: 410 },
+
 	// Queue related
 	queueConnectionError: { message: 'There was a problem connecting to the queue. Please contact support.', status: 500 },
 	queueInsertionFailed: { message: 'Failed to insert an item into the queue. Please contact support.', status: 500 },

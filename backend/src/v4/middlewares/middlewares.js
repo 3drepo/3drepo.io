@@ -33,6 +33,8 @@ const isAccountAdminHelper = require("./checkPermissions").isAccountAdminHelper;
 
 const { validSession } = require(`${v5Path}/middleware/auth`);
 const { hasAccessToTeamspace } = require(`${v5Path}/middleware/permissions/permissions`);
+const { respond } = require(`${v5Path}/utils/responder`);
+const { templates, createResponseCode } = require(`${v5Path}/utils/responseCodes`);
 
 const readAccessToModel = [C.PERM_VIEW_MODEL];
 
@@ -195,6 +197,10 @@ async function formatV5NewFedRevisionsData(req, res, next) {
 	next();
 }
 
+const resourceNotAvailable = (newEndpoint) => (req, res) => {
+	respond(req, res, createResponseCode(templates.resourceNotAvailable, `This resource is no longer available. Please use ${newEndpoint} instead.`));
+};
+
 const middlewares = {
 
 	project: require("./project"),
@@ -235,7 +241,10 @@ const middlewares = {
 	formatV5NewModelParams,
 	formatV5NewModelRevisionsData,
 	formatV5NewFedRevisionsData,
-	flagAsV4Request
+	flagAsV4Request,
+
+	// Deprecated Endpoints
+	resourceNotAvailable
 
 };
 
