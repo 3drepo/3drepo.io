@@ -97,10 +97,10 @@ const establishRoutes = (modelType) => {
 	 *           application/json:
 	 *             schema:
 	 *               oneOf:
- 	 *                 - $ref: "#/components/responses/teamspaceNotFound"
- 	 *                 - $ref: "#/components/responses/projectNotFound"
- 	 *                 - $ref: "#/components/responses/containerNotFound"
- 	 *                 - $ref: "#/components/responses/revisionNotFound"
+	 *                 - $ref: "#/components/responses/teamspaceNotFound"
+	 *                 - $ref: "#/components/responses/projectNotFound"
+	 *                 - $ref: "#/components/responses/containerNotFound"
+	 *                 - $ref: "#/components/responses/revisionNotFound"
 	 *       200:
 	 *         description: Returns list of submodels
 	 *         content:
@@ -155,7 +155,7 @@ const establishRoutes = (modelType) => {
 	 *                                     type: number
 	 *                                     example: 23.45
 	 *                                   description: The minimum coordinates of the superMesh (x,y,z)
-     *                                 max:
+	 *                                 max:
 	 *                                   type: array
 	 *                                   items:
 	 *                                     type: number
@@ -273,7 +273,7 @@ const establishRoutes = (modelType) => {
 	 *                                     type: number
 	 *                                     example: 23.45
 	 *                                   description: The minimum coordinates of the superMesh (x,y,z)
-     *                                 max:
+	 *                                 max:
 	 *                                   type: array
 	 *                                   items:
 	 *                                     type: number

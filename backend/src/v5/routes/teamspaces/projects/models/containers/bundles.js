@@ -72,7 +72,7 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
- 	 *       - name: bundle
+	 *       - name: bundle
 	 *         description: Bundle ID
 	 *         in: path
 	 *         required: true
@@ -82,9 +82,9 @@ const establishRoutes = () => {
 	 *       401:
 	 *         description: 401 Unauthorized
 	 *         content:
-     *           application/json:
-     *             schema:
-     *               oneOf:
+	 *           application/json:
+	 *             schema:
+	 *               oneOf:
 	 *                 - $ref: "#/components/responses/notLoggedIn"
 	 *                 - $ref: "#/components/responses/notAuthorized"
 	 *       404:
@@ -128,7 +128,7 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
- 	 *       - name: bundle
+	 *       - name: bundle
 	 *         description: Bundle ID
 	 *         in: path
 	 *         required: true
@@ -138,17 +138,17 @@ const establishRoutes = () => {
 	 *       401:
 	 *         description: 401 Unauthorized
 	 *         content:
-     *           application/json:
-     *             schema:
-     *               oneOf:
+	 *           application/json:
+	 *             schema:
+	 *               oneOf:
 	 *                 - $ref: "#/components/responses/notLoggedIn"
 	 *                 - $ref: "#/components/responses/notAuthorized"
 	 *       404:
 	 *         description: 404 Not Found
 	 *         content:
-     *           application/json:
-     *             schema:
-     *               oneOf:
+	 *           application/json:
+	 *             schema:
+	 *               oneOf:
 	 *                 - $ref: "#/components/responses/teamspaceNotFound"
 	 *                 - $ref: "#/components/responses/projectNotFound"
 	 *                 - $ref: "#components/responses/containerNotFound"

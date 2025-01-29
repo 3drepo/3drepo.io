@@ -84,6 +84,7 @@ Scene.findStashNodesByType = async (account, model, branch, revision, type, sear
 	};
 
 	if (searchString) {
+		// eslint-disable-next-line security/detect-non-literal-regexp
 		query.name = new RegExp(searchString, 'i');
 	}
 
@@ -97,6 +98,7 @@ Scene.findNodesByType = async (account, model, branch, revision, type, searchStr
 	};
 
 	if (searchString) {
+		// eslint-disable-next-line security/detect-non-literal-regexp
 		query.name = new RegExp(searchString, 'i');
 	}
 

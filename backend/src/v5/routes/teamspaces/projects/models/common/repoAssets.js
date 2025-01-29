@@ -86,9 +86,9 @@ const establishRoutes = (modelType) => {
 		 *       401:
 		 *         description: 401 Unauthorized
 		 *         content:
-         *           application/json:
-         *             schema:
-         *               oneOf:
+		 *           application/json:
+		 *             schema:
+		 *               oneOf:
 		 *                 - $ref: "#/components/responses/notLoggedIn"
 		 *                 - $ref: "#/components/responses/notAuthorized"
 		 *       404:
@@ -96,11 +96,11 @@ const establishRoutes = (modelType) => {
 		 *         content:
 		 *           application/json:
 		 *             schema:
-	 	 *               oneOf:
-	 	 *                 - $ref: "#/components/responses/teamspaceNotFound"
-	 	 *                 - $ref: "#/components/responses/projectNotFound"
-	 	 *                 - $ref: "#/components/responses/containerNotFound"
-	 	 *                 - $ref: "#/components/responses/revisionNotFound"
+		 *               oneOf:
+		 *                 - $ref: "#/components/responses/teamspaceNotFound"
+		 *                 - $ref: "#/components/responses/projectNotFound"
+		 *                 - $ref: "#/components/responses/containerNotFound"
+		 *                 - $ref: "#/components/responses/revisionNotFound"
 		 *       200:
 		 *         description: Returns json file containing the list of assets associated with this container and revision
 		 *         content:
@@ -181,9 +181,9 @@ const establishRoutes = (modelType) => {
 		 *       401:
 		 *         description: 401 Unauthorized
 		 *         content:
-         *           application/json:
-         *             schema:
-         *               oneOf:
+		 *           application/json:
+		 *             schema:
+		 *               oneOf:
 		 *                 - $ref: "#/components/responses/notLoggedIn"
 		 *                 - $ref: "#/components/responses/notAuthorized"
 		 *       404:
@@ -191,10 +191,10 @@ const establishRoutes = (modelType) => {
 		 *         content:
 		 *           application/json:
 		 *             schema:
-	 	 *               oneOf:
-	 	 *                 - $ref: "#/components/responses/teamspaceNotFound"
-	 	 *                 - $ref: "#/components/responses/projectNotFound"
-	 	 *                 - $ref: "#/components/responses/containerNotFound"
+		 *               oneOf:
+		 *                 - $ref: "#/components/responses/teamspaceNotFound"
+		 *                 - $ref: "#/components/responses/projectNotFound"
+		 *                 - $ref: "#/components/responses/containerNotFound"
 		 *                 - $ref: "#/components/responses/federationNotFound"
 		 *       200:
 		 *         description: Returns json file containing the list of assets associated with this container and revision

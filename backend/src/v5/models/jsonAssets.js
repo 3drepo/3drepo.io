@@ -375,7 +375,6 @@ JSONAssets.getAllSuperMeshMappingForContainer = async (teamspace, container, bra
 	getSuperMeshMappingForModels(modelsToProcess, outStream).then(() => {
 		// NOTE: this is using a .then because we do not want to wait on this promise - we want to
 		// return the stream handler to the client before we start streaming data.
-
 		outStream.end();
 	}).catch((err) => {
 		outStream.emit('error', err);
