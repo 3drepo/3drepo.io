@@ -365,6 +365,7 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		await setupData();
 	});
 	afterAll(() => Promise.all([
+		ServiceHelper.queue.purgeQueues(),
 		ServiceHelper.closeApp(server),
 		chatApp.close()]));
 	modelUploadTest();
