@@ -29,7 +29,6 @@ const UnityAssets = require("../models/unityAssets");
 const Scene = require("../models/scene");
 const SrcAssets = require("../models/srcAssets");
 const JSONAssets = require("../models/jsonAssets");
-const Upload = require("../models/upload");
 const config = require("../config");
 const {v5Path} = require("../../interop");
 const { validateNewRevisionData : validateNewModelRevisionData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/containers`);
@@ -788,117 +787,6 @@ router.get("/:model/revision/master/head/srcAssets.json", middlewares.hasReadAcc
 router.put("/:model", middlewares.hasEditAccessToFedModel, middlewares.formatV5NewFedRevisionsData, validateNewFedRevisionData, updateModel);
 
 /**
- * @api {post} /:teamspace/models/permissions Update multiple models permissions
- * @apiName updateMultiplePermissions
- * @apiGroup Model
- * @apiDeprecated use now (#Model:batchUpdateModelPermissions)
- *
- * @apiParam {String} teamspace Name of teamspace.
- * @apiParam (Request body) {[]ModelPermissions} BODY Its an array with a list of model ids and their permissions.
- *
- * @apiParam (Request body: ModelPermissions) {String} model The model id of the model that will have their permission changed. If it's a federation the entry in the response corresponding with the model will have the 'federated' field set to true.
- * @apiParam (Request body: ModelPermissions) {[]Permission} permissions An array indicating the new permissions.
- *
- * @apiUse PermissionObject
- *
- * @apiExample {post} Example usage:
- * POST /teamSpace1/models/permissions HTTP/1.1
- * [
- *    {
- *       model: "5ce7dd19-1252-4548-a9c9-4a5414f2e0c5",
- *       permissions: [
- *          {
- *             user: "viewerTeamspace1Model1JobA",
- *             permission: "viewer"
- *          },
- *          {
- *             user: "commenterTeamspace1Model1JobA",
- *             permission: "viewer"
- *          },
- *          {
- *             user: "collaboratorTeamspace1Model1JobA",
- *             permission: "collaborator"
- *          },
- *          {
- *             user: "commenterTeamspace1Model1JobB",
- *             permission: "commenter"
- *          },
- *          {
- *             user: "collaboratorTeamspace1Model1JobB",
- *             permission: "collaborator"
- *          }
- *       ]
- *    }
- * ]
- *
- * @apiSuccessExample {json} Success:
- * [
- *    {
- *       name: "Full Logo ",
- *       federate: true,
- *       model: "5ce7dd19-1252-4548-a9c9-4a5414f2e0c5",
- *       permissions: [
- *          {
- *             user: "viewerTeamspace1Model1JobA",
- *             permission: "viewer"
- *          },
- *          {
- *             user: "commenterTeamspace1Model1JobA",
- *             permission: "viewer"
- *          },
- *          {
- *             user: "collaboratorTeamspace1Model1JobA",
- *             permission: "collaborator"
- *          },
- *          {
- *             user: "commenterTeamspace1Model1JobB",
- *             permission: "commenter"
- *          },
- *          {
- *             user: "collaboratorTeamspace1Model1JobB",
- *             permission: "collaborator"
- *          },
- *          {
- *             user: "projectshared"
- *          },
- *          {
- *             user: "fed"
- *          },
- *          {
- *             user: "teamSpace1"
- *          },
- *          {
- *             user: "unassignedTeamspace1UserJobA"
- *          },
- *          {
- *             user: "viewerTeamspace1Model1JobB"
- *          },
- *          {
- *             user: "adminTeamspace1JobA"
- *          },
- *          {
- *             user: "adminTeamspace1JobB"
- *          },
- *          {
- *             user: "weirdTeamspace"
- *          }
- *       ],
- *       subModels: [
- *          {
- *             database: "teamSpace1",
- *             model: "7cf61b4f-acdf-4295-b2d0-9b45f9f27418"
- *          },
- *          {
- *             database: "teamSpace1",
- *             model: "b1fceab8-b0e9-4e45-850b-b9888efd6521"
- *          }
- *       ]
- *    }
- * ]
- */
-router.post("/models/permissions", middlewares.hasEditPermissionsAccessToMulitpleModels, updateMultiplePermissions);
-
-/**
  * @api {patch} /:teamspace/models/permissions Batch update model permissions
  * @apiName batchUpdateModelPermissions
  * @apiGroup Model
@@ -962,95 +850,6 @@ router.post("/models/permissions", middlewares.hasEditPermissionsAccessToMulitpl
  * }
  */
 router.patch("/models/permissions", middlewares.hasEditPermissionsAccessToMulitpleModels, batchUpdatePermissions);
-
-/**
- * @api {post} /:teamspace/:model/permissions Update model permissions
- * @apiName updatePermissions
- * @apiGroup Model
- * @apiDeprecated use now (#Model:updateModelPermissions)
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model The model id of the model to be updated
- *
- * @apiParam (Request body) {[]Permissions} BODY Its an array with a list of users and their permission type.
- *
- * @apiUse PermissionObject
- *
- * @apiExample {post} Example usage:
- * POST /teamSpace1/5ce7dd19-1252-4548-a9c9-4a5414f2e0c5/permissions HTTP/1.1
- * [
- *    {
- *       user: "viewerTeamspace1Model1JobA",
- *       permission: "collaborator"
- *    },
- *    {
- *       user: "commenterTeamspace1Model1JobA",
- *       permission: "viewer"
- *    },
- *    {
- *       user: "collaboratorTeamspace1Model1JobA",
- *       permission: "collaborator"
- *    },
- *    {
- *       user: "commenterTeamspace1Model1JobB",
- *       permission: "commenter"
- *    },
- *    {
- *       user: "collaboratorTeamspace1Model1JobB",
- *       permission: "collaborator"
- *    }
- * ]
- *
- * @apiSuccessExample {json} Success:
- * {
- *    _id: "2710bd65-37d3-4e7f-b2e0-ffe743ce943f",
- *    timestamp: "2019-05-02T16:17:14.000Z",
- *    type: "Architectural",
- *    desc: "",
- *    name: "pipes",
- *    subModels: [],
- *    surveyPoints: [
- *       {
- *          position: [
- *             0,
- *             0,
- *             0
- *          ],
- *          latLong: [
- *             0,
- *             0
- *          ]
- *       }
- *    ],
- *    properties: {
- *       unit: "mm"
- *    },
- *    permissions: [
- *       {
- *          user: "viewerTeamspace1Model1JobA",
- *          permission: "collaborator"
- *       },
- *       {
- *          user: "commenterTeamspace1Model1JobA",
- *          permission: "viewer"
- *       },
- *       {
- *          user: "collaboratorTeamspace1Model1JobA",
- *          permission: "collaborator"
- *       },
- *       {
- *          user: "commenterTeamspace1Model1JobB",
- *          permission: "commenter"
- *       },
- *       {
- *          user: "collaboratorTeamspace1Model1JobB",
- *          permission: "collaborator"
- *       }
- *    ],
- *    status: "ok"
- * }
- */
-router.post("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, changePermissions);
 
 /**
  * @api {patch} /:teamspace/:model/permissions Update model permissions
@@ -1754,109 +1553,6 @@ router.get("/:model/revision/:revId/subModelRevisions", middlewares.hasReadAcces
 router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
 
 /**
- * @api {post} /:teamspace/:model/upload/ms-chunking Initialise MS chunking request
- * @apiName initChunking
- * @apiGroup Model
- * @apiDescription Initiate model revision data for MS Logic Apps chunked upload.
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model id to upload.
- * @apiParam (Request body) {String} filename Filename of content to upload
- * @apiParam (Request body) {String} tag Tag name for new revision
- * @apiParam (Request body) {String} [desc] Description for new revision
- * @apiParam (Request body) {Boolean} [importAnimations] Whether to import animations within a sequence
- *
- * @apiExample {post} Example usage:
- * POST /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking HTTP/1.1
- * {
- * 	"filename": "structure.ifc",
- * 	"tag": "rev001",
- * 	"desc": "Revision 2"
- * }
- *
- * @apiSuccessExample {json} Success-Response:
- * HTTP/1.1 200 OK
- * {
- * 	"corID": "00000000-0000-1111-2222-333333333333"
- * }
- */
-router.post("/:model/upload/ms-chunking", middlewares.hasUploadAccessToModel, initChunking);
-
-/**
- * @api {post} /:teamspace/:model/upload/ms-chunking/:corID Start MS chunking upload
- * @apiName uploadChunksStart
- * @apiGroup Model
- * @apiDescription Start chunked model upload for Microsoft Logic Apps.
- * Max chunk size defined as 52,428,800 bytes (52 MB) based on
- * https://docs.microsoft.com/en-us/azure/logic-apps/logic-apps-limits-and-config?tabs=azure-portal
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID to upload
- * @apiParam {String} corID Upload correlation ID
- * @apiParam (Request header) {String} x-ms-transfer-mode Indicates that the content is uploaded in chunks; value="chunked"
- * @apiParam (Request header) {Number} x-ms-content-length The entire content size in bytes before chunking
- *
- * @apiSuccess (200) {Number} [x-ms-chunk-size] Suggested chunk size in bytes
- * @apiSuccess (200) {String} Location The URL location where to send the HTTP PATCH messages
- *
- * @apiExample {post} Example usage:
- * POST /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking/00000000-0000-1111-2222-333333333333 HTTP/1.1
- *
- * header: {
- * 	"x-ms-transfer-mode": "chunked",
- * 	"x-ms-content-length": 10100
- * }
- *
- * @apiSuccessExample {json} Success-Response:
- * HTTP/1.1 200 OK
- * {
- * 	"x-ms-chunk-size": 1024,
- * 	"Location": "/teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking/00000000-0000-1111-2222-333333333333"
- * }
- */
-router.post("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToModel, uploadChunksStart);
-
-/**
- * @api {patch} /:teamspace/:model/upload/ms-chunking/:corID Upload model chunk
- * @apiName uploadChunk
- * @apiGroup Model
- * @apiDescription Upload model chunk for Microsoft Logic Apps.
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID to upload
- * @apiParam {String} corID Upload correlation ID
- * @apiParam (Request header) {String} Content-Range Byte range for the current content chunk, including the starting value, ending value, and the total content size, for example: "bytes 0-1023/10100"
- * @apiParam (Request header) {String} Content-Type Type of chunked content
- * @apiParam (Request header) {String} Content-Length Length of size in bytes of the current chunk
- *
- * @apiParam (Request body: Attachment) {binary} FILE the file to be uploaded
- *
- * @apiSuccess (200) {String} Range Byte range for content that has been received by the endpoint, for example: "bytes=0-1023"
- * @apiSuccess (200) {Number} [x-ms-chunk-size] Suggested chunk size in bytes
- *
- * @apiExample {patch} Example usage:
- * PATCH /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking/00000000-0000-1111-2222-333333333333 HTTP/1.1
- *
- * header: {
- * 	"Content-Range": "bytes 0-1023/10100",
- * 	"Content-Type": "application/octet-stream",
- * 	"Content-Length": "bytes=1024"
- * }
- *
- * body: {
- * 	"file": <FILE CHUNK CONTENTS>
- * }
- *
- * @apiSuccessExample {json} Success-Response:
- * HTTP/1.1 200 OK
- * {
- * 	"Range": "bytes=0-1023",
- * 	"x-ms-chunk-size": 1024
- * }
- */
-router.patch("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToModel, uploadChunk);
-
-/**
  * @api {post} /:teamspace/:model/upload Upload Model.
  * @apiName uploadModel
  * @apiGroup Model
@@ -2182,48 +1878,6 @@ function downloadLatest(req, res, next) {
 	});
 }
 
-async function initChunking(req, res, next) {
-	const responsePlace = utils.APIInfo(req);
-	const {account, model} = req.params;
-	const username = req.session.user.username;
-
-	try {
-		const corID = await Upload.initChunking(account, model, username, req.body);
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, corID);
-	} catch(err) {
-		const errMsg = err.resCode ? err.resCode : err;
-		responseCodes.respond(responsePlace, req, res, next, errMsg, errMsg);
-	}
-}
-
-async function uploadChunksStart(req, res, next) {
-	const responsePlace = utils.APIInfo(req);
-	const { account, model, corID } = req.params;
-	const user = req.session.user.username;
-
-	try {
-		const initHeader = await Upload.uploadChunksStart(account, model, corID, user, req.headers);
-		initHeader.Location = `${config.public_protocol}://${req.headers.host}${req.originalUrl}`;
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, undefined, undefined, undefined, initHeader);
-	} catch(err) {
-		const errMsg = err.resCode ? err.resCode : err;
-		responseCodes.respond(responsePlace, req, res, next, errMsg, errMsg);
-	}
-}
-
-async function uploadChunk(req, res, next) {
-	const responsePlace = utils.APIInfo(req);
-	const { account, model, corID } = req.params;
-
-	try {
-		const chunkingHeader = await Upload.uploadChunk(account, model, corID, req);
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, undefined, undefined, undefined, chunkingHeader);
-	} catch(err) {
-		const errMsg = err.resCode ? err.resCode : err;
-		responseCodes.respond(responsePlace, req, res, next, errMsg, errMsg);
-	}
-}
-
 function uploadModel(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 	const { file } = req;
@@ -2242,36 +1896,16 @@ function uploadModel(req, res, next) {
 function updatePermissions(req, res, next) {
 	const { account, model } = req.params;
 
-	return ModelSetting.updatePermissions(account, model, req.body).then(response => {
+	return ModelSetting.updatePermissions(account, model, req.body, req.session.user.username).then(response => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, response);
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-	});
-}
-
-function changePermissions(req, res, next) {
-	const { account, model } = req.params;
-
-	return ModelSetting.changePermissions(account, model, req.body).then(permission => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }
 
 function batchUpdatePermissions(req, res, next) {
-	return ModelSetting.batchUpdatePermissions(req.params.account, req.body).then(response => {
+	return ModelSetting.batchUpdatePermissions(req.params.account, req.body,req.session.user.username).then(response => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, response);
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-	});
-}
-
-function updateMultiplePermissions(req, res, next) {
-	const modelsIds = req.body.map(({model}) => model);
-
-	return ModelSetting.updateMultiplePermissions(req.params.account, modelsIds, res.body).then(permissions => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permissions);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});

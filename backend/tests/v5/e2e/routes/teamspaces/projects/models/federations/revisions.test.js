@@ -18,8 +18,11 @@
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
+const CryptoJs = require('crypto-js');
+const { outOfOrderArrayEqual } = require('../../../../../../helper/services');
 
 const { templates } = require(`${src}/utils/responseCodes`);
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
 let server;
 let agent;
@@ -40,14 +43,61 @@ const project = {
 	name: ServiceHelper.generateRandomString(),
 };
 
+const containers = [
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		properties: {
+			...ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
+			permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
+		},
+	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		properties: {
+			...ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
+		},
+	},
+];
+
+const containersNoRev = [
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		properties: {
+			...ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
+			permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
+		},
+	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		properties: {
+			...ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
+		},
+	},
+];
+
 const models = [
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
 		properties: {
 			...ServiceHelper.generateRandomModelProperties(),
-			permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
+			permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
 			federate: true,
+			subModels: containers.map((model) => ({ _id: model._id })),
+		},
+	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		properties: {
+			...ServiceHelper.generateRandomModelProperties(modelTypes.FEDERATION),
+			permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
+			federate: true,
+			subModels: containersNoRev.map((model) => ({ _id: model._id })),
 		},
 	},
 	{
@@ -55,19 +105,22 @@ const models = [
 		name: ServiceHelper.generateRandomString(),
 		properties: {
 			...ServiceHelper.generateRandomModelProperties(),
-			permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
 			federate: true,
+			subModels: [],
 		},
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
-		properties: ServiceHelper.generateRandomModelProperties(),
+		properties: {
+			...ServiceHelper.generateRandomModelProperties(),
+		},
 	},
 ];
 
-const container = models[2];
+const container = models[3];
 const anotherFed = models[1];
+const conRevisions = ServiceHelper.generateRevisionEntry();
 
 const setupData = async () => {
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
@@ -81,11 +134,40 @@ const setupData = async () => {
 		model.name,
 		model.properties,
 	));
+	const containerProms = containers.map((subModel) => ServiceHelper.db.createModel(
+		teamspace,
+		subModel._id,
+		subModel.name,
+		subModel.properties,
+	));
+	const containerNoRevProms = containersNoRev.map((subModel) => ServiceHelper.db.createModel(
+		teamspace,
+		subModel._id,
+		subModel.name,
+		subModel.properties,
+	));
+	const revisionsProms = containers.map((subModel) => ServiceHelper.db.createRevision(
+		teamspace,
+		project.id,
+		subModel._id,
+		conRevisions,
+		modelTypes.CONTAINER,
+	));
+
+	const projectModels = [
+		...models.map(({ _id }) => _id),
+		...containers.map(({ _id }) => _id),
+		...containerNoRevProms.map(({ _id }) => _id),
+	];
+
 	return Promise.all([
 		...userProms,
 		...modelProms,
+		...containerProms,
+		...containerNoRevProms,
+		...revisionsProms,
+		ServiceHelper.db.createProject(teamspace, project.id, project.name, projectModels),
 		ServiceHelper.db.createUser(nobody),
-		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
 	]);
 };
 
@@ -180,6 +262,65 @@ const testNewRevision = () => {
 	});
 };
 
+const testGetFederationMD5Hash = () => {
+	const generateTestData = () => {
+		const parameters = {
+			ts: teamspace,
+			projectId: project.id,
+			modelId: models[0]._id,
+			revisionId: ServiceHelper.generateUUIDString(),
+			key: users.tsAdmin.apiKey,
+			response: { revisions: [] },
+		};
+		const viewerResponse = { revisions: [{
+			container: containers[0]._id,
+			tag: conRevisions.tag,
+			timestamp: new Date(conRevisions.timestamp).getTime(),
+			hash: CryptoJs.MD5(Buffer.from(conRevisions.rFile[0])).toString(),
+			filename: conRevisions.rFile[0],
+			size: 20,
+		}] };
+		const adminResponse = { revisions: containers.map((model) => ({
+			container: model._id,
+			tag: conRevisions.tag,
+			timestamp: new Date(conRevisions.timestamp).getTime(),
+			hash: CryptoJs.MD5(Buffer.from(conRevisions.rFile[0])).toString(),
+			filename: conRevisions.rFile[0],
+			size: 20,
+		})) };
+
+		return [
+			['there is no valid session key.', { ...parameters, key: null }, false, templates.notLoggedIn],
+			['the user is not a member of the teamspace.', { ...parameters, key: nobody.apiKey }, false, templates.teamspaceNotFound],
+			['the user does not have access to the project.', { ...parameters, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
+			['the teamspace does not exist.', { ...parameters, ts: ServiceHelper.generateUUIDString() }, false, templates.teamspaceNotFound],
+			['the federation does not exist.', { ...parameters, modelId: ServiceHelper.generateUUIDString() }, false, templates.federationNotFound],
+			['the viewer access it and return just that information.', { ...parameters, key: users.viewer.apiKey, response: viewerResponse }, true],
+			['the admin access it and return all the information.', { ...parameters, response: adminResponse }, true],
+			['the admin access it but the federation is empty.', { ...parameters, modelId: models[2]._id }, true],
+			['the admin access it but the containers in federation have no revisions.', { ...parameters, modelId: models[1]._id }, true],
+		];
+	};
+
+	const runTest = (description, parameters, success, error) => {
+		const route = ({ ts, projectId, modelId, revisionId, key }) => `/v5/teamspaces/${ts}/projects/${projectId}/federations/${modelId}/revisions/${revisionId}/files/original/info${key ? `?key=${key}` : ''}`;
+
+		test(`should ${success ? 'succeed' : `fail with ${error.code}`} if ${description}`, async () => {
+			const expectedStatus = success ? templates.ok.status : error.status;
+			const res = await agent.get(`${route(parameters)}`).expect(expectedStatus);
+
+			if (success) {
+				const result = JSON.parse(res.text);
+				outOfOrderArrayEqual(result.revisions, parameters.response.revisions);
+			} else {
+				expect(res.body.code).toEqual(error.code);
+			}
+		});
+	};
+
+	describe.each(generateTestData())('Get Federation MD5 Files', runTest);
+};
+
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -189,5 +330,7 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	afterAll(() => Promise.all([
 		ServiceHelper.closeApp(server),
 	]));
+
 	testNewRevision();
+	testGetFederationMD5Hash();
 });

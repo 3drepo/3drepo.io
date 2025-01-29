@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { Link } from 'react-router-dom';
-import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
-import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { AuthHooksSelectors, CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DASHBOARD_ROUTE, LOGIN_PATH } from '@/v5/ui/routes/routes.constants';
 import { UserMenu } from '../userMenu';
 import { AppBarContainer, Items, LogoIcon } from './appBar.styles';
 import { BreadcrumbsRouting } from '../breadcrumbsRouting/breadcrumbsRouting.component';
@@ -25,20 +25,25 @@ import { Intercom } from './intercom/intercom.component';
 
 export const AppBar = (): JSX.Element => {
 	const user = CurrentUserHooksSelectors.selectCurrentUser();
+	const isAuthenticated = AuthHooksSelectors.selectIsAuthenticated();
 
 	return (
 		<AppBarContainer>
 			<Items>
-				<Link to={DASHBOARD_ROUTE}>
+				<Link to={isAuthenticated ? DASHBOARD_ROUTE : LOGIN_PATH}>
 					<LogoIcon />
 				</Link>
-				<BreadcrumbsRouting />
+				{ isAuthenticated && (
+					<BreadcrumbsRouting />
+				)}
 			</Items>
-			<Items>
-				<Intercom />
-				<Notifications />
-				<UserMenu user={user} />
-			</Items>
+			{ isAuthenticated && (
+				<Items>
+					<Intercom />
+					<Notifications />
+					<UserMenu user={user} />
+				</Items>
+			)}
 		</AppBarContainer>
 	);
 };

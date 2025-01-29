@@ -18,6 +18,7 @@
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import { selectMeasureSlopeUnits } from '@/v4/modules/measurements';
 import { selectUsername } from '../../../../../../modules/currentUser';
 import { DialogActions } from '../../../../../../modules/dialog';
 import {
@@ -67,6 +68,7 @@ const mapStateToProps = createStructuredSelector({
 	selectedDate: selectSelectedStartingDate,
 	sequences: selectSequences,
 	units: selectUnit,
+	slopeUnits: selectMeasureSlopeUnits,
 	measureMode: selectMeasureMode,
 });
 

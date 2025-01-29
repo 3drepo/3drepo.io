@@ -17,7 +17,10 @@
 
 const { cloneDeep, times, isBuffer } = require('lodash');
 const { src } = require('../../../../../../helper/path');
-const { generateRandomObject, generateUUID, generateRandomString, generateTemplate, generateTicket, generateGroup } = require('../../../../../../helper/services');
+const { generateRandomObject, generateUUID, generateRandomString, generateTemplate, generateTicket, generateGroup, generateRandomNumber } = require('../../../../../../helper/services');
+
+const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
+const { queryOperators, specialQueryFields } = require(`${src}/schemas/tickets/tickets.filters`);
 
 const { statuses, statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
 
@@ -46,7 +49,10 @@ const CommentsProcessor = require(`${src}/processors/teamspaces/projects/models/
 jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects/models/commons/tickets.groups');
 const TicketGroupsModel = require(`${src}/processors/teamspaces/projects/models/commons/tickets.groups`);
 
-jest.mock('../../../../../../../../src/v5/schemas/tickets/templates');
+jest.mock('../../../../../../../../src/v5/schemas/tickets/templates', () => ({
+	...jest.requireActual('../../../../../../../../src/v5/schemas/tickets/templates'),
+	generateFullSchema: jest.fn(),
+}));
 const TemplatesSchema = require(`${src}/schemas/tickets/templates`);
 
 const { TICKETS_RESOURCES_COL } = require(`${src}/models/tickets.constants`);
@@ -1161,7 +1167,12 @@ const testGetTicketById = () => {
 
 const testGetTicketList = () => {
 	const propertyName = generateRandomString();
+	const propertyName2 = generateRandomString();
 	const moduleName = generateRandomString();
+	const propertyValue = generateRandomString();
+	const propertyValue2 = generateRandomString();
+	const propertyNumberValue = generateRandomNumber();
+	const ticketTemplates = times(5, () => generateTemplate());
 
 	describe.each([
 		['the default projection (undefined filter)', undefined, {}],
@@ -1177,17 +1188,156 @@ const testGetTicketList = () => {
 		['sortBy is provided', [], {}, undefined, { sortBy: generateRandomString() }],
 		['sortDesc is provided', [], {}, undefined, { sortDesc: false }],
 		['sortBy and sortDesc is provided', [], {}, undefined, { sortBy: generateRandomString(), sortDesc: true }],
-	])('Get ticket list', (desc, filters, customProjection, updatedSince, { sortBy, sortDesc } = {}) => {
-		test(`Should call getAllTickets in model with ${desc}`, async () => {
+		['limit is provided', [], {}, undefined, { limit: generateRandomNumber() }],
+		['skip is provided', [], {}, undefined, { skip: generateRandomNumber() }],
+		[`${queryOperators.EXISTS} query filter`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.EXISTS }],
+			expectedQuery: { $and: [{ [propertyName]: { $exists: true } }] },
+		}],
+		[`${queryOperators.NOT_EXISTS} query filter`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.NOT_EXISTS }],
+			expectedQuery: { $and: [{ [propertyName]: { $not: { $exists: true } } }] },
+		}],
+		[`${queryOperators.IS} query filter`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.IS, value: [propertyValue, propertyValue2] }],
+			expectedQuery: { $and: [{ [propertyName]: { $in: [propertyValue, propertyValue2] } }] },
+		}],
+		[`${queryOperators.EQUALS} query filter and boolean value`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.EQUALS, value: ['true'] }],
+			expectedQuery: { $and: [{ [propertyName]: { $in: [true] } }] },
+		}],
+		[`${queryOperators.EQUALS} query filter and number value`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.EQUALS, value: [`${propertyNumberValue}`] }],
+			expectedQuery: {
+				$and: [{ [propertyName]: { $in: [propertyNumberValue, new Date(propertyNumberValue)] } }],
+			},
+		}],
+		[`${queryOperators.NOT_IS} query filter`, [], {}, undefined, { }, {
+			queryFilters: [
+				{ propertyName, operator: queryOperators.NOT_IS, value: [propertyValue, propertyValue2] },
+			],
+			expectedQuery: { $and: [{ [propertyName]: { $not: { $in: [propertyValue, propertyValue2] } } }] },
+		}],
+		[`${queryOperators.NOT_EQUALS} query filter and boolean value`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.NOT_EQUALS, value: ['true'] }],
+			expectedQuery: { $and: [{ [propertyName]: { $not: { $in: [true] } } }] },
+		}],
+		[`${queryOperators.NOT_EQUALS} query filter and number value`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.NOT_EQUALS, value: [`${propertyNumberValue}`] }],
+			expectedQuery: {
+				$and: [{ [propertyName]: { $not: { $in: [propertyNumberValue, new Date(propertyNumberValue)] } } }],
+			},
+		}],
+		[`${queryOperators.CONTAINS} query filter`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.CONTAINS, value: [propertyValue, propertyValue2] }],
+			expectedQuery: { $and: [{ $or: [{ [propertyName]: { $regex: propertyValue, $options: 'i' } }, { [propertyName]: { $regex: propertyValue2, $options: 'i' } }] }] },
+		}],
+		[`${queryOperators.NOT_CONTAINS} query filter`, [], {}, undefined, { }, {
+			queryFilters: [
+				{ propertyName, operator: queryOperators.NOT_CONTAINS, value: [propertyValue, propertyValue2] },
+			],
+			expectedQuery: { $and: [{ $nor: [{ [propertyName]: { $regex: propertyValue, $options: 'i' } }, { [propertyName]: { $regex: propertyValue2, $options: 'i' } }] }] },
+		}],
+		[`${queryOperators.RANGE} query filter`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.RANGE, value: [[0, 10], [20, 30]] }],
+			expectedQuery: { $and: [{ $or: [
+				{ [propertyName]: { $gte: 0, $lte: 10 } },
+				{ [propertyName]: { $gte: new Date(0), $lte: new Date(10) } },
+				{ [propertyName]: { $gte: 20, $lte: 30 } },
+				{ [propertyName]: { $gte: new Date(20), $lte: new Date(30) } },
+			] }] },
+		}],
+		[`${queryOperators.NOT_IN_RANGE} query filter`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.NOT_IN_RANGE, value: [[0, 10], [20, 30]] }],
+			expectedQuery: { $and: [{ $nor: [
+				{ [propertyName]: { $gte: 0, $lte: 10 } },
+				{ [propertyName]: { $gte: new Date(0), $lte: new Date(10) } },
+				{ [propertyName]: { $gte: 20, $lte: 30 } },
+				{ [propertyName]: { $gte: new Date(20), $lte: new Date(30) } },
+			] }] },
+		}],
+		[`${queryOperators.GREATER_OR_EQUAL_TO} query filter`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.GREATER_OR_EQUAL_TO, value: propertyNumberValue }],
+			expectedQuery: { $and: [{ $or: [
+				{ [propertyName]: { $gte: propertyNumberValue } },
+				{ [propertyName]: { $gte: new Date(propertyNumberValue) } },
+			] }] },
+		}],
+		[`${queryOperators.LESSER_OR_EQUAL_TO} query filter`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.LESSER_OR_EQUAL_TO, value: propertyNumberValue }],
+			expectedQuery: { $and: [{ $or: [
+				{ [propertyName]: { $lte: propertyNumberValue } },
+				{ [propertyName]: { $lte: new Date(propertyNumberValue) } },
+			] }] },
+		}],
+		['multiple query filters', [], {}, undefined, { }, {
+			queryFilters: [
+				{ propertyName, operator: queryOperators.IS, value: [propertyValue, propertyValue2] },
+				{ propertyName: propertyName2,
+					operator: queryOperators.LESSER_OR_EQUAL_TO,
+					value: propertyNumberValue },
+			],
+			expectedQuery: { $and: [
+				{ [propertyName]: { $in: [propertyValue, propertyValue2] } },
+				{ $or: [
+					{ [propertyName2]: { $lte: propertyNumberValue } },
+					{ [propertyName2]: { $lte: new Date(propertyNumberValue) } },
+				] },
+			] },
+		}],
+		['template filter', [], {}, undefined, { }, {
+			isTemplateQuery: true,
+			queryFilters: [
+				{ propertyName: specialQueryFields.TEMPLATE, operator: queryOperators.IS, value: [propertyValue] },
+				{ propertyName, operator: queryOperators.IS, value: [propertyValue, propertyValue2] },
+			],
+			expectedQuery: { $and: [
+				{ [propertyName]: { $in: [propertyValue, propertyValue2] } },
+				{ type: { $in: ticketTemplates.map((t) => t._id) } },
+			],
+			},
+		}],
+		['ticket code filter', [], {}, undefined, { }, {
+			isTemplateQuery: true,
+			queryFilters: [
+				{ propertyName: specialQueryFields.TICKET_CODE,
+					operator: queryOperators.IS,
+					value: [propertyValue] },
+			],
+			ticketCodeQuery: { ticketCode: { $in: [propertyValue] } },
+			expectedQuery: {},
+		}],
+		['ticket code filter with multiple filters', [], {}, undefined, { }, {
+			isTemplateQuery: true,
+			queryFilters: [
+				{ propertyName: specialQueryFields.TICKET_CODE,
+					operator: queryOperators.IS,
+					value: [propertyValue] },
+				{ propertyName, operator: queryOperators.IS, value: [propertyValue, propertyValue2] },
+			],
+			expectedQuery: { $and: [
+				{ [propertyName]: { $in: [propertyValue, propertyValue2] } },
+			] },
+			ticketCodeQuery: { ticketCode: { $in: [propertyValue] } },
+		}],
+	])('Get ticket list', (desc, filters, customProjection, updatedSince, { sortBy, sortDesc, limit, skip } = {}, { queryFilters, expectedQuery, ticketCodeQuery, isTemplateQuery } = {}) => {
+		test(`Should call getAllTickets/getTicketsByFilter in model with ${desc}`, async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
-
 			const expectedOutput = generateRandomString();
 
-			TicketsModel.getAllTickets.mockResolvedValueOnce(expectedOutput);
+			if (queryFilters?.length) {
+				TicketsModel.getTicketsByFilter.mockResolvedValueOnce(expectedOutput);
+				if (isTemplateQuery) {
+					TemplatesModel.getTemplatesByQuery.mockResolvedValueOnce(ticketTemplates);
+				}
+			} else {
+				TicketsModel.getAllTickets.mockResolvedValueOnce(expectedOutput);
+			}
 
-			await expect(Tickets.getTicketList(teamspace, project, model, { filters, updatedSince, sortBy, sortDesc }))
+			await expect(Tickets.getTicketList(teamspace, project, model,
+				{ filters, updatedSince, sortBy, limit, skip, sortDesc, queryFilters }))
 				.resolves.toEqual(expectedOutput);
 
 			const { SAFETIBASE, SEQUENCING } = presetModules;
@@ -1212,7 +1362,6 @@ const testGetTicketList = () => {
 				[`modules.${SAFETIBASE}.${safetibaseProps.TREATMENT_STATUS}`]: 1,
 				[`modules.${SEQUENCING}.${seqProps.START_TIME}`]: 1,
 				[`modules.${SEQUENCING}.${seqProps.END_TIME}`]: 1,
-
 			};
 
 			let sort;
@@ -1221,9 +1370,21 @@ const testGetTicketList = () => {
 				sort = { [`properties.${sortBy}`]: sortOrder };
 			}
 
-			expect(TicketsModel.getAllTickets).toHaveBeenCalledTimes(1);
-			expect(TicketsModel.getAllTickets).toHaveBeenCalledWith(teamspace, project, model,
-				{ projection, updatedSince, sort });
+			if (queryFilters?.length) {
+				expect(TicketsModel.getTicketsByFilter).toHaveBeenCalledTimes(1);
+				expect(TicketsModel.getTicketsByFilter).toHaveBeenCalledWith(teamspace, project, model,
+					deleteIfUndefined({ projection,
+						updatedSince,
+						sort,
+						limit,
+						skip,
+						query: expectedQuery,
+						ticketCodeQuery }));
+			} else {
+				expect(TicketsModel.getAllTickets).toHaveBeenCalledTimes(1);
+				expect(TicketsModel.getAllTickets).toHaveBeenCalledWith(teamspace, project, model,
+					deleteIfUndefined({ projection, updatedSince, sort, limit, skip }));
+			}
 		});
 	});
 };

@@ -23,7 +23,7 @@ import StepBackIcon from '@mui/icons-material/FastRewind';
 import PlayArrow from '@mui/icons-material/PlayArrow';
 import Replay from '@mui/icons-material/Replay';
 import Stop from '@mui/icons-material/Stop';
-import { debounce } from 'lodash';
+import { clamp, debounce } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { DialogsActionsDispatchers, SequencesActionsDispatchers, ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
@@ -71,6 +71,8 @@ interface IProps {
 	draggablePanels: string[];
 	toggleLegend: () => void;
 	viewpoint: any;
+	teamspace: string;
+	model: string;
 }
 
 interface IState {
@@ -81,6 +83,7 @@ interface IState {
 	stepScale: STEP_SCALE;
 	waitingForFrameLoad: boolean;
 	sliderValue: number | number[] | null;
+
 }
 
 export class SequencePlayer extends PureComponent<IProps, IState> {
@@ -172,7 +175,7 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 		}
 
 		if ((prevProps.viewpoint !== this.props.viewpoint)) {
-			ViewpointsActionsDispatchers.showViewpoint(null, null, { viewpoint: this.props.viewpoint });
+			ViewpointsActionsDispatchers.showViewpoint(this.props.teamspace, this.props.model, { viewpoint: this.props.viewpoint });
 		}
 	}
 
@@ -210,7 +213,8 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 		} else {
 			const { frames } = this.props;
 			const index = getSelectedFrameIndex(frames, value);
-			const newValue = frames[index + stepInterval * direction]?.dateTime;
+			const newIndex = clamp(index + stepInterval * direction, 0, frames.length - 1);
+			const newValue = frames[newIndex]?.dateTime;
 			if (newValue) {
 				this.setValue(newValue);
 			}

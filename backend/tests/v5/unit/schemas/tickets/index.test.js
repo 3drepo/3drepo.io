@@ -1074,6 +1074,68 @@ const testValidateTicket = () => {
 			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
 				.resolves.toEqual({ ...input, properties: {}, modules: {} });
 		});
+
+		test(`[New ticket] Should strip the value of a ${propTypes.MANY_OF} property if it is empty array`, async () => {
+			const propName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{
+					name: propName,
+					type: propTypes.MANY_OF,
+					values: [generateRandomString()],
+				}],
+				modules: [],
+			};
+
+			const input = {
+				title: generateRandomString(),
+				type: template._id,
+				properties: {
+					[propName]: [],
+				},
+				modules: {},
+			};
+			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
+				.resolves.toEqual({ ...input, properties: {}, modules: {} });
+		});
+
+		test(`[Update ticket] Should nullify the value of a ${propTypes.MANY_OF} property if it is empty array`, async () => {
+			const propName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{
+					name: propName,
+					type: propTypes.MANY_OF,
+					values: ['a'],
+				}],
+				modules: [],
+			};
+
+			const input = {
+				title: generateRandomString(),
+				type: template._id,
+				properties: {
+					[propName]: [],
+				},
+				modules: {},
+			};
+
+			const old = {
+				...input,
+				properties: {
+					[propName]: ['a'],
+				},
+			};
+
+			const expected = {
+				properties: {
+					[propName]: null,
+				},
+				modules: {},
+			};
+			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input, old))
+				.resolves.toEqual(expected);
+		});
 	});
 };
 

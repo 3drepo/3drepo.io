@@ -79,6 +79,7 @@ interface IProps {
 	selectedDate: Date;
 	sequences: any[];
 	units: any;
+	slopeUnits: string;
 	measureMode: string;
 }
 
@@ -179,6 +180,7 @@ class IssueDetailsFormComponent extends PureComponent<IProps, IState> {
 		<ShapesFormTab
 			active={active}
 			units={this.props.units}
+			slopeUnits={this.props.slopeUnits}
 			measureMode={this.props.measureMode}
 			removeMeasurement={this.props.removeMeasurement}
 			setMeasurementColor={this.props.setMeasurementColor}

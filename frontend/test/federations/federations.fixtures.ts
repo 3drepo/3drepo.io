@@ -69,6 +69,14 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 		],
 	},
 	unit: faker.random.arrayElement(['mm', 'cm', 'dm', 'm', 'ft']),
+	jobs: [
+		{ _id: faker.random.word(), isViewer: true },
+		{ _id: faker.random.word(), isViewer: false },
+	],
+	users: [
+		{ user: faker.random.word(), isViewer: true },
+		{ user: faker.random.word(), isViewer: false },
+	],
 	...overrides,
 });
 
