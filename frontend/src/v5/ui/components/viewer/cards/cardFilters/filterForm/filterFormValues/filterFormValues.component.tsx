@@ -23,7 +23,7 @@ import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayF
 import { useEffect } from 'react';
 import { compact, isArray, isEmpty } from 'lodash';
 import { CardFilterType } from '../../cardFilters.types';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useParams } from 'react-router-dom';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
@@ -57,7 +57,9 @@ export const FilterFormValues = ({ module, property, type }: FilterFolrmValuesTy
 	const maxFields = getOperatorMaxFieldsAllowed(operator);
 	const isRangeOp = isRangeOperator(operator);
 	const emptyValue = { value: (isRangeOp ? ['', ''] : '') };
-	const selectOptions = TicketsCardHooksSelectors.selectPropertyOptions(containerOrFederation, module, property, type);
+	const selectOptions = type === 'template' ?
+		TicketsHooksSelectors.selectTemplatesNames(containerOrFederation)
+		: TicketsCardHooksSelectors.selectPropertyOptions(containerOrFederation, module, property);
 
 	useEffect(() => {
 		if (!fields.length && maxFields > 0) {
@@ -128,7 +130,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFolrmValuesTy
 				transformValueIn={mapFormArrayToArray}
 				transformChangeEvent={(e) => mapArrayToFormArray(compact(e.target.value))}
 			>
-				{selectOptions.map((val) => <MultiSelectMenuItem key={val} value={val}>{val}</MultiSelectMenuItem>)}
+				{(selectOptions || []).map((val) => <MultiSelectMenuItem key={val} value={val}>{val}</MultiSelectMenuItem>)}
 			</FormMultiSelect>
 		);
 	}

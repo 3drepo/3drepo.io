@@ -52,6 +52,11 @@ export const selectTemplates = createSelector(
 	(state, modelId) => state.templatesByModelId[modelId] || [],
 );
 
+export const selectTemplatesNames = createSelector(
+	selectTemplates,
+	(templates) => templates.map(({ name }) => name),
+);
+
 export const selectTemplateById = createSelector(
 	selectTicketsDomain,
 	selectTemplates,
