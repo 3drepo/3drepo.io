@@ -268,7 +268,8 @@ const testOnUpdatedTicket = () => {
 
 			TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(owner,
 				[assigned1, assignedNoPerm, role]));
-			RolesModels.getRolesToUsers.mockResolvedValueOnce([{ _id: role, users: [assignedRoleNoPerm, ...roleMembers] }]);
+			RolesModels.getRolesToUsers.mockResolvedValueOnce(
+				[{ _id: role, users: [assignedRoleNoPerm, ...roleMembers] }]);
 			SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([owner, assigned1, ...roleMembers]);
 
 			const eventData = createEventData();
