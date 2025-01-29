@@ -611,26 +611,14 @@ const testEstablishRoutes = () => {
 	});
 };
 
-// describe(ServiceHelper.determineTestGroup(__filename), () => {
-// 	beforeAll(async () => {
-// 		server = await ServiceHelper.app();
-// 		agent = await SuperTest(server);
-// 	});
-
-// 	afterAll(() => ServiceHelper.closeApp(server));
-
-// 	testAssetMetadata();
-// 	testEstablishRoutes();
-// });
-
-const dummyTest = () => {
-	describe('dummy test', () => {
-		test('should succeed', () => {
-			expect(true).toEqual(true);
-		});
-	});
-};
-
 describe(ServiceHelper.determineTestGroup(__filename), () => {
-	dummyTest();
+	beforeAll(async () => {
+		server = await ServiceHelper.app();
+		agent = await SuperTest(server);
+	});
+
+	afterAll(() => ServiceHelper.closeApp(server));
+
+	testAssetMetadata();
+	testEstablishRoutes();
 });
