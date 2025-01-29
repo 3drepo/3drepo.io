@@ -31,11 +31,14 @@ const validateComment = async (req, res, next) => {
 	try {
 		req.body = await validateCommentSchema(req.body, req.commentData);
 		if (req.commentData) {
-			const { message, images } = req.body;
+			const { message, images, views } = req.body;
 			const existingImgRefs = req.commentData.images?.map(UUIDToString).sort();
 			const newImgRefs = images?.map(UUIDToString).sort();
 
-			if (isEqual(req.commentData.message, message) && isEqual(existingImgRefs, newImgRefs)) {
+			if (isEqual(req.commentData.message, message)
+				&& isEqual(existingImgRefs, newImgRefs)
+				&& isEqual(req.commentData.views, views)
+			) {
 				throw createResponseCode(templates.invalidArguments, 'No valid properties to update');
 			}
 		}

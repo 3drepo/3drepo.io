@@ -16,8 +16,10 @@
  */
 
 const { UUIDToString } = require('../../utils/helper/uuids');
+const Validators = require('./validators');
 const Yup = require('yup');
 const { isUUIDString } = require('../../utils/helper/typeCheck');
+const { propTypes } = require('./templates.constants');
 const { types } = require('../../utils/helper/yup');
 
 const Comments = {};
@@ -40,7 +42,9 @@ const generateCommentSchema = (existingComment, isImport = false) => {
 					.test('Image ref test', 'One or more image refs do not correspond to a current comment image ref',
 						(value, { originalValue }) => !isUUIDString(originalValue)
 								|| acceptableRefs.includes(originalValue)),
-		) };
+		),
+		views: Validators.propTypesToValidator(propTypes.VIEW, !isNewComment, true, false),
+	};
 
 	if (isImport) {
 		schemaObj.originalAuthor = types.strings.title.required();
@@ -49,8 +53,8 @@ const generateCommentSchema = (existingComment, isImport = false) => {
 
 	return Yup.object().shape(schemaObj).test(
 		'at-least-one-property',
-		'You must provide at least a message or a set of images',
-		({ message, images }) => message || images,
+		'You must provide at least a message, a set of images or a viewpoint',
+		({ message, images, views }) => message || images || views,
 	).required()
 		.noUnknown();
 };
