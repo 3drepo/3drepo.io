@@ -85,8 +85,8 @@ ResponseCodes.templates = {
 	// View related error
 	viewNotFound: { message: 'View not found.', status: 404 },
 
-	// Job related error
-	jobNotFound: { message: 'Job not found.', status: 404 },
+	// Role related error
+	roleNotFound: { message: 'Role not found.', status: 404 },
 
 	// Image related error
 	thumbnailNotFound: { message: 'Thumbnail not available.', status: 404 },

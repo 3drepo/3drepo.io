@@ -21,7 +21,7 @@ const { image, src } = require('../../../helper/path');
 const fs = require('fs');
 const { generateRandomNumber, generateRandomModel, generateRandomProject, generateRandomString } = require('../../../helper/services');
 
-const { DEFAULT_OWNER_JOB } = require(`${src}/models/jobs.constants`);
+const { DEFAULT_OWNER_ROLE } = require(`${src}/models/roles.constants`);
 const config = require(`${src}/utils/config`);
 const { updateSecurityRestrictions } = require(`${src}/models/teamspaceSettings`);
 
@@ -82,10 +82,10 @@ const tsWithUsersToRemove = { name: ServiceHelper.generateRandomString(), isAdmi
 
 const userCollabs = 10;
 
-const jobToUsers = [
-	{ _id: 'jobA', users: [testUser, usersInFirstTeamspace[0]] },
-	{ _id: 'jobB', users: [usersInFirstTeamspace[1]] },
-	{ _id: 'jobC', users: [] },
+const roleToUsers = [
+	{ _id: 'roleA', users: [testUser, usersInFirstTeamspace[0]] },
+	{ _id: 'roleB', users: [usersInFirstTeamspace[1]] },
+	{ _id: 'roleC', users: [] },
 ];
 
 const project = generateRandomProject();
@@ -199,7 +199,7 @@ const setupData = async () => {
 		ServiceHelper.db.createAvatar(tsWithFsAvatar.name, 'fs', fsAvatarData),
 		ServiceHelper.db.createAvatar(tsWithGridFsAvatar.name, 'gridfs', gridFsAvatarData),
 
-		ServiceHelper.db.createJobs(teamspaces[0].name, jobToUsers),
+		ServiceHelper.db.createRoles(teamspaces[0].name, roleToUsers),
 	]);
 
 	await Promise.all([
@@ -252,12 +252,12 @@ const testGetTeamspaceMembers = () => {
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
-		test('should return list of users with their jobs with valid access rights', async () => {
+		test('should return list of users with their roles with valid access rights', async () => {
 			const res = await agent.get(`${route()}/?key=${testUser.apiKey}`).expect(templates.ok.status);
 
-			const userToJob = {};
+			const userToRole = {};
 
-			jobToUsers.forEach(({ _id, users }) => users.forEach((user) => { userToJob[user] = _id; }));
+			roleToUsers.forEach(({ _id, users }) => users.forEach((user) => { userToRole[user] = _id; }));
 
 			const expectedData = [...usersInFirstTeamspace, testUser].map(({ user, basicData }) => {
 				const { firstName, lastName, billing } = basicData;
@@ -268,13 +268,13 @@ const testGetTeamspaceMembers = () => {
 					company: billing?.billingInfo?.company,
 				};
 
-				if (userToJob[user]) {
-					data.job = userToJob;
+				if (userToRole[user]) {
+					data.role = userToRole;
 				}
 
 				return data;
 			});
-			expectedData.push({ job: DEFAULT_OWNER_JOB, user: teamspaces[0].name });
+			expectedData.push({ role: DEFAULT_OWNER_ROLE, user: teamspaces[0].name });
 			expect(res.body.members.length).toBe(expectedData.length);
 			expect(res.body.members).toEqual(expect.arrayContaining(expectedData));
 		});

@@ -22,7 +22,7 @@ const { findModelSettingById } = require("./modelSetting");
 const User = require ("./user");
 const config = require("../config");
 const C = require("../constants");
-const Job = require("./job");
+const Role = require("./role");
 const utils = require("../utils");
 
 const ReportType = {
@@ -102,7 +102,7 @@ class ReportGenerator {
 		this.reportDate = formatDate(new Date(), false);
 
 		this.getModelName();
-		this.getUsersToJobs();
+		this.getUsersToRoles();
 	}
 
 	getModelName() {
@@ -125,16 +125,16 @@ class ReportGenerator {
 		);
 	}
 
-	getUsersToJobs() {
+	getUsersToRoles() {
 		this.promises.push(
-			Job.usersWithJob(this.teamspace).then((usersToJob) => {
-				this.userToJob = usersToJob;
+			Role.usersWithRole(this.teamspace).then((usersToRole) => {
+				this.userToRole = usersToRole;
 			})
 		);
 	}
 
-	getUserJob(user) {
-		return utils.hasField(this.userToJob, user) ? this.userToJob[user] : "Unknown";
+	getUserRole(user) {
+		return utils.hasField(this.userToRole, user) ? this.userToRole[user] : "Unknown";
 	}
 
 	addEntries(entries) {

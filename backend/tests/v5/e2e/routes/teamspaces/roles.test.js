@@ -30,7 +30,7 @@ const [tsAdmin, normalUser, nobody] = times(3, ServiceHelper.generateUserCredent
 
 const teamspace = { name: ServiceHelper.generateRandomString() };
 
-const jobs = times(10, () => ({
+const roles = times(10, () => ({
 	_id: ServiceHelper.generateRandomString(), color: ServiceHelper.generateRandomString(),
 }));
 
@@ -50,13 +50,13 @@ const setupData = async () => {
 			nobody,
 			[],
 		),
-		ServiceHelper.db.createJobs(teamspace.name, jobs),
+		ServiceHelper.db.createRoles(teamspace.name, roles),
 	]);
 };
 
-const testGetJobList = () => {
-	const route = (key, ts = teamspace.name) => `/v5/teamspaces/${ts}/jobs${key ? `?key=${key}` : ''}`;
-	describe('Get job list', () => {
+const testGetRoleList = () => {
+	const route = (key, ts = teamspace.name) => `/v5/teamspaces/${ts}/roles${key ? `?key=${key}` : ''}`;
+	describe('Get role list', () => {
 		describe.each([
 			['user does not have a valid session', undefined, undefined, false, templates.notLoggedIn],
 			['teamspace does not exist', tsAdmin.apiKey, generateRandomString(), false, templates.teamspaceNotFound],
@@ -68,7 +68,7 @@ const testGetJobList = () => {
 				const expectedStatus = success ? templates.ok.status : expectedRes.status;
 				const res = await agent.get(route(key, ts)).expect(expectedStatus);
 				if (success) {
-					expect(res.body.jobs).toEqual(expect.arrayContaining(jobs));
+					expect(res.body.roles).toEqual(expect.arrayContaining(roles));
 				} else {
 					expect(res.body.code).toEqual(expectedRes.code);
 				}
@@ -84,5 +84,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		await setupData();
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
-	testGetJobList();
+	testGetRoleList();
 });

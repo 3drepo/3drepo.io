@@ -16,12 +16,12 @@
  */
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../models/users.constants');
-const { addDefaultJobs, assignUserToJob, getJobsToUsers, removeUserFromJobs } = require('../../models/jobs');
-const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revokeTeamspaceRoleFromUser } = require('../../models/roles');
+const { addDefaultRoles, assignUserToRole, createTeamspaceRole, getRolesToUsers,
+	grantTeamspaceRoleToUser, removeTeamspaceRole, removeUserFromRoles, revokeTeamspaceRoleFromUser } = require('../../models/roles');
 const { createTeamspaceSettings, getAddOns, getMembersInfo, grantAdminToUser, removeUserFromAdminPrivilege } = require('../../models/teamspaceSettings');
 const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
-const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
+const { DEFAULT_OWNER_ROLE } = require('../../models/roles.constants');
 const { UUIDToString } = require('../../utils/helper/uuids');
 const { addDefaultTemplates } = require('../../models/tickets.templates');
 const { deleteFavourites } = require('../../models/users');
@@ -53,12 +53,12 @@ Teamspaces.initTeamspace = async (username) => {
 	try {
 		await Promise.all([
 			createTeamspaceRole(username),
-			addDefaultJobs(username),
+			addDefaultRoles(username),
 		]);
 		await Promise.all([
 			grantTeamspaceRoleToUser(username, username),
 			createTeamspaceSettings(username),
-			assignUserToJob(username, DEFAULT_OWNER_JOB, username),
+			assignUserToRole(username, DEFAULT_OWNER_ROLE, username),
 			addDefaultTemplates(username),
 		]);
 		await grantAdminToUser(username, username);
@@ -85,24 +85,24 @@ Teamspaces.getTeamspaceListByUser = async (user) => {
 };
 
 Teamspaces.getTeamspaceMembersInfo = async (teamspace) => {
-	const [membersList, jobsList] = await Promise.all([
+	const [membersList, rolesList] = await Promise.all([
 		getMembersInfo(teamspace),
-		getJobsToUsers(teamspace),
+		getRolesToUsers(teamspace),
 	]);
 
-	const usersToJobs = {};
-	jobsList.forEach(({ _id, users }) => {
+	const usersToRoles = {};
+	rolesList.forEach(({ _id, users }) => {
 		users.forEach((user) => {
-			if (!usersToJobs[user]) {
-				usersToJobs[user] = [];
+			if (!usersToRoles[user]) {
+				usersToRoles[user] = [];
 			}
 
-			usersToJobs[user].push(UUIDToString(_id));
+			usersToRoles[user].push(UUIDToString(_id));
 		});
 	});
 
 	return membersList.map(
-		(member) => (usersToJobs[member.user] ? { ...member, jobs: usersToJobs[member.user] } : member),
+		(member) => (usersToRoles[member.user] ? { ...member, roles: usersToRoles[member.user] } : member),
 	);
 };
 
@@ -127,7 +127,7 @@ Teamspaces.removeTeamspaceMember = async (teamspace, userToRemove) => {
 	]);
 
 	await Promise.all([
-		await removeUserFromJobs(teamspace, userToRemove),
+		await removeUserFromRoles(teamspace, userToRemove),
 		await revokeTeamspaceRoleFromUser(teamspace, userToRemove),
 	]);
 };

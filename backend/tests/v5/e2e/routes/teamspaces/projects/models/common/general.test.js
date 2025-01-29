@@ -65,7 +65,7 @@ const generateBasicData = () => {
 		calibration: ServiceHelper.generateCalibration(),
 	};
 
-	data.jobs = [
+	data.roles = [
 		{ _id: ServiceHelper.generateRandomString(), users: [viewer.user] },
 		{ _id: ServiceHelper.generateRandomString(), users: [collaborator.user] },
 		{ _id: ServiceHelper.generateRandomString(), users: Object.values(data.users).map(({ user }) => user) },
@@ -1103,13 +1103,13 @@ const testGetUsersWithPermissions = () => {
 	});
 };
 
-const testGetJobsWithAccess = () => {
-	describe('Get jobs with access', () => {
-		const { users, teamspace, project, con, fed, draw, jobs } = generateBasicData();
+const testGetRolesWithAccess = () => {
+	describe('Get roles with access', () => {
+		const { users, teamspace, project, con, fed, draw, roles } = generateBasicData();
 
 		beforeAll(async () => {
-			await setupBasicData(users, teamspace, project, [con, fed, draw], jobs);
-			await ServiceHelper.db.createJobs(teamspace, jobs);
+			await setupBasicData(users, teamspace, project, [con, fed, draw], roles);
+			await ServiceHelper.db.createRoles(teamspace, roles);
 		});
 
 		const generateTestData = (modelType) => {
@@ -1136,7 +1136,7 @@ const testGetJobsWithAccess = () => {
 				key = users.tsAdmin.apiKey,
 				modelId = model._id,
 				excludeViewers,
-			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/jobs${key ? `?key=${key}${excludeViewers ? '&excludeViewers=true' : ''}` : ''}`;
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/roles${key ? `?key=${key}${excludeViewers ? '&excludeViewers=true' : ''}` : ''}`;
 
 			return [
 				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
@@ -1145,8 +1145,8 @@ const testGetJobsWithAccess = () => {
 				['the user does not have access to the model', getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
 				['the model does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
 				['the model is of wrong type', getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
-				['excludeViewers is set to false', getRoute(), true, { jobs: ['Admin', ...jobs.map(({ _id }) => _id)] }],
-				['excludeViewers is set to true', getRoute({ excludeViewers: true }), true, { jobs: ['Admin', ...jobs.slice(1).map(({ _id }) => _id)] }],
+				['excludeViewers is set to false', getRoute(), true, { roles: ['Admin', ...roles.map(({ _id }) => _id)] }],
+				['excludeViewers is set to true', getRoute({ excludeViewers: true }), true, { roles: ['Admin', ...roles.slice(1).map(({ _id }) => _id)] }],
 			];
 		};
 
@@ -1184,5 +1184,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	testGetSettings();
 	testGetThumbnail();
 	testGetUsersWithPermissions();
-	testGetJobsWithAccess();
+	testGetRolesWithAccess();
 });

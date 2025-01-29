@@ -16,11 +16,19 @@
  */
 
 const { src } = require('../../helper/path');
-const { TEAM_MEMBER } = require('../../../../src/v5/models/roles.constants');
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomObject, generateRandomString } = require('../../helper/services');
+const { times } = require('lodash');
 
 const Roles = require(`${src}/models/roles`);
 const db = require(`${src}/handler/db`);
+
+const { DEFAULT_ROLES, TEAM_MEMBER } = require(`${src}/models/roles.constants`);
+const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
+const { templates } = require(`${src}/utils/responseCodes`);
+
+const ROLE_COL = 'roles';
+
+// --- LICENSING ROLES --- TO BE DELETED
 
 const testCreateTeamspaceRole = () => {
 	describe('Create teamspace role', () => {
@@ -75,9 +83,228 @@ const testRevokeTeamspaceRoleFromUser = () => {
 	});
 };
 
+// --- JOBS RENAMED TO ROLES --- TO BE KEPT
+
+const testGetRolesToUsers = () => {
+	describe('Get Roles to users', () => {
+		test('should get list of roles within the teamspace with the users', async () => {
+			const expectedResult = [
+				{ _id: 'roleA', users: ['a', 'b', 'c'] },
+			];
+			const fn = jest.spyOn(db, 'find').mockImplementation(() => expectedResult);
+			const teamspace = 'ts';
+			const res = await Roles.getRolesToUsers(teamspace);
+			expect(res).toEqual(expectedResult);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][1]).toEqual(ROLE_COL);
+			expect(fn.mock.calls[0][2]).toEqual({});
+		});
+	});
+};
+
+const testAddDefaultRoles = () => {
+	describe('Add default roles', () => {
+		test('should add the default roles', async () => {
+			const teamspace = generateRandomString();
+			const fn = jest.spyOn(db, 'insertMany').mockImplementation(() => {});
+			await Roles.addDefaultRoles(teamspace);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual(ROLE_COL);
+
+			const defaultRoles = fn.mock.calls[0][2];
+			defaultRoles.forEach((role, index) => {
+				expect(role).toMatchObject({
+					name: DEFAULT_ROLES[index].name,
+					_id: expect.anything(),
+					users: [],
+				});
+			});
+		});
+	});
+};
+
+const testAssignUserToRole = () => {
+	describe('Assign user to role', () => {
+		test('should assign a user to a role', async () => {
+			const teamspace = generateRandomString();
+			const roleName = generateRandomString();
+			const username = generateRandomString();
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
+			await Roles.assignUserToRole(teamspace, roleName, username);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ROLE_COL, { name: roleName }, { $push: { users: username } });
+		});
+	});
+};
+
+const testRemoveUserFromRoles = () => {
+	describe('Remove user from role', () => {
+		test('should remove user from roles', async () => {
+			const teamspace = generateRandomString();
+			const userToRemove = generateRandomString();
+			const fn = jest.spyOn(db, 'updateMany').mockImplementation(() => {});
+			await Roles.removeUserFromRoles(teamspace, userToRemove);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ROLE_COL,
+				{ users: userToRemove }, { $pull: { users: userToRemove } });
+		});
+	});
+};
+
+const testGetRolesByUsers = () => {
+	describe('Get roles by users', () => {
+		test('return names of all roles thats users have access', async () => {
+			const teamspace = generateRandomString();
+			const users = times(5, () => generateRandomString());
+			const roles = times(5, () => ({ _id: generateRandomString(), ...generateRandomObject() }));
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(roles);
+			await expect(Roles.getRolesByUsers(teamspace, users)).resolves.toEqual(roles.map((j) => j._id));
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ROLE_COL, { users: { $in: users } }, { _id: 1 }, undefined);
+		});
+
+		test('return an empty array if there are no roles', async () => {
+			const teamspace = generateRandomString();
+			const users = times(5, () => generateRandomString());
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce([]);
+			await expect(Roles.getRolesByUsers(teamspace, users)).resolves.toEqual([]);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ROLE_COL, { users: { $in: users } }, { _id: 1 }, undefined);
+		});
+	});
+};
+
+const testGetRoles = () => {
+	describe('Get roles', () => {
+		test('return all available roles', async () => {
+			const teamspace = generateRandomString();
+			const roles = [generateRandomString(), generateRandomString(), generateRandomString()];
+			const findFn = jest.spyOn(db, 'find').mockResolvedValueOnce(roles);
+			await expect(Roles.getRoles(teamspace)).resolves.toEqual(roles);
+			expect(findFn).toHaveBeenCalledTimes(1);
+			expect(findFn).toHaveBeenCalledWith(teamspace, ROLE_COL, {}, { _id: 1, color: 1, name: 1 }, undefined);
+		});
+
+		test('return an empty array if there are no roles', async () => {
+			const teamspace = generateRandomString();
+			const findFn = jest.spyOn(db, 'find').mockResolvedValueOnce([]);
+			await expect(Roles.getRoles(teamspace)).resolves.toEqual([]);
+			expect(findFn).toHaveBeenCalledTimes(1);
+			expect(findFn).toHaveBeenCalledWith(teamspace, ROLE_COL, {}, { _id: 1, color: 1, name: 1 }, undefined);
+		});
+	});
+};
+
+const testGetRoleById = () => {
+	describe('Get role by Id', () => {
+		test('return a role', async () => {
+			const teamspace = generateRandomString();
+			const roleId = generateRandomString();
+			const projection = generateRandomObject();
+			const role = generateRandomObject();
+			const findFn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(role);
+			await expect(Roles.getRoleById(teamspace, roleId, projection)).resolves.toEqual(role);
+			expect(findFn).toHaveBeenCalledTimes(1);
+			expect(findFn).toHaveBeenCalledWith(teamspace, ROLE_COL, { _id: roleId }, projection);
+		});
+
+		test('return roleNotFound if a role is not found', async () => {
+			const teamspace = generateRandomString();
+			const roleId = generateRandomString();
+			const projection = generateRandomObject();
+			const findFn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
+			await expect(Roles.getRoleById(teamspace, roleId, projection)).rejects.toEqual(templates.roleNotFound);
+			expect(findFn).toHaveBeenCalledTimes(1);
+			expect(findFn).toHaveBeenCalledWith(teamspace, ROLE_COL, { _id: roleId }, projection);
+		});
+	});
+};
+
+const testGetRoleByName = () => {
+	describe('Get role by name', () => {
+		test('return a role', async () => {
+			const teamspace = generateRandomString();
+			const roleName = generateRandomString();
+			const projection = generateRandomObject();
+			const role = generateRandomObject();
+			const findFn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(role);
+			await expect(Roles.getRoleByName(teamspace, roleName, projection)).resolves.toEqual(role);
+			expect(findFn).toHaveBeenCalledTimes(1);
+			expect(findFn).toHaveBeenCalledWith(teamspace, ROLE_COL, { name: roleName }, projection);
+		});
+
+		test('return roleNotFound if a role is not found', async () => {
+			const teamspace = generateRandomString();
+			const roleName = generateRandomString();
+			const projection = generateRandomObject();
+			const findFn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
+			await expect(Roles.getRoleByName(teamspace, roleName, projection)).rejects.toEqual(templates.roleNotFound);
+			expect(findFn).toHaveBeenCalledTimes(1);
+			expect(findFn).toHaveBeenCalledWith(teamspace, ROLE_COL, { name: roleName }, projection);
+		});
+	});
+};
+
+const testCreateRole = () => {
+	describe('Create role', () => {
+		test('should create a new role', async () => {
+			const teamspace = generateRandomString();
+			const role = generateRandomObject();
+			const fn = jest.spyOn(db, 'insertOne').mockImplementation(() => {});
+			const res = await Roles.createRole(teamspace, role);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ROLE_COL, expect.any(Object));
+			const newId = fn.mock.calls[0][2]._id;
+			expect(isUUIDString(newId));
+			expect(res).toEqual(newId);
+		});
+	});
+};
+
+const testUpdateRole = () => {
+	describe('Update role', () => {
+		test('should update a role', async () => {
+			const teamspace = generateRandomString();
+			const roleId = generateRandomString();
+			const updatedRole = generateRandomObject();
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
+			await Roles.updateRole(teamspace, roleId, updatedRole);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ROLE_COL, { _id: roleId }, { $set: updatedRole });
+		});
+	});
+};
+
+const testDeleteRole = () => {
+	describe('Delete role', () => {
+		test('should delete a role', async () => {
+			const teamspace = generateRandomString();
+			const roleId = generateRandomString();
+			const fn = jest.spyOn(db, 'deleteOne').mockImplementation(() => {});
+			await Roles.deleteRole(teamspace, roleId);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ROLE_COL, { _id: roleId });
+		});
+	});
+};
+
 describe('models/roles', () => {
 	testCreateTeamspaceRole();
 	testRemoveTeamspaceRole();
 	testGrantTeamspaceRoleToUser();
 	testRevokeTeamspaceRoleFromUser();
+	testGetRolesToUsers();
+	testAddDefaultRoles();
+	testAssignUserToRole();
+	testRemoveUserFromRoles();
+	testGetRolesByUsers();
+	testGetRoles();
+	testGetRoleById();
+	testGetRoleByName();
+	testCreateRole();
+	testUpdateRole();
+	testDeleteRole();
 });

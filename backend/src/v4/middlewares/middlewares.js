@@ -198,7 +198,6 @@ async function formatV5NewFedRevisionsData(req, res, next) {
 const middlewares = {
 
 	project: require("./project"),
-	job: require("./job"),
 	notification: require("./notification"),
 	chat: require("./chat"),
 

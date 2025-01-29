@@ -33,7 +33,7 @@ const Yup = require('yup');
 const { deserialiseGroupSchema } = require('./tickets.groups');
 const { generateFullSchema } = require('./templates');
 const { getArrayDifference } = require('../../utils/helper/arrays');
-const { getJobsByUsers } = require('../../models/jobs');
+const { getRolesByUsers } = require('../../models/roles');
 const { getRiskCategories } = require('../../models/teamspaceSettings');
 const { getTicketsByQuery } = require('../../models/tickets');
 const { getUsersWithPermissions } = require('../../processors/teamspaces/projects/models/commons/settings');
@@ -54,13 +54,13 @@ const generatePropertiesValidator = async (teamspace, project, model, templateId
 			if (prop.values) {
 				let values;
 				switch (prop.values) {
-				case presetEnumValues.JOBS_AND_USERS:
+				case presetEnumValues.ROLES_AND_USERS:
 					{
 						const excludeViewers = prop.name === basePropertyLabels.ASSIGNEES;
 						const users = await getUsersWithPermissions(teamspace, project, model, excludeViewers);
-						const accessibleJobs = await getJobsByUsers(teamspace, users);
+						const accessibleRoles = await getRolesByUsers(teamspace, users);
 
-						values = [...accessibleJobs.map(UUIDToString), ...users];
+						values = [...accessibleRoles.map(UUIDToString), ...users];
 					}
 					break;
 				case presetEnumValues.RISK_CATEGORIES:

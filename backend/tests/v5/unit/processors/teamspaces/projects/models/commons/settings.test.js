@@ -34,8 +34,8 @@ const ProjectSettings = require(`${src}/models/projectSettings`);
 jest.mock('../../../../../../../../src/v5/models/teamspaceSettings');
 const TeamspaceSettings = require(`${src}/models/teamspaceSettings`);
 
-jest.mock('../../../../../../../../src/v5/models/jobs');
-const Jobs = require(`${src}/models/jobs`);
+jest.mock('../../../../../../../../src/v5/models/roles');
+const Roles = require(`${src}/models/roles`);
 
 const testGetUsersWithPermissions = () => {
 	describe('Get users with permissions', () => {
@@ -101,9 +101,9 @@ const testGetUsersWithPermissions = () => {
 	});
 };
 
-const testGetJobsWithAccess = () => {
-	describe('Get jobs with access', () => {
-		test('should get the all jobs of users who have access to a model', async () => {
+const testGetRolesWithAccess = () => {
+	describe('Get roles with access', () => {
+		test('should get the all roles of users who have access to a model', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
@@ -112,7 +112,7 @@ const testGetJobsWithAccess = () => {
 			const tsAdmins = times(5, () => generateRandomString());
 			const projAdmins = times(5, () => generateRandomString());
 			const usersWithModelPriv = times(5, () => generateRandomString());
-			const jobs = times(5, () => generateRandomString());
+			const roles = times(5, () => generateRandomString());
 
 			const tsMembers = [...tsAdmins, ...projAdmins, ...usersWithModelPriv];
 			TeamspaceSettings.getAllUsersInTeamspace.mockResolvedValueOnce(tsMembers);
@@ -120,10 +120,10 @@ const testGetJobsWithAccess = () => {
 			TeamspaceSettings.getTeamspaceAdmins.mockResolvedValueOnce(tsAdmins);
 			ProjectSettings.getProjectAdmins.mockResolvedValueOnce(projAdmins);
 			ModelSettings.getUsersWithPermissions.mockResolvedValueOnce(usersWithModelPriv);
-			Jobs.getJobsByUsers.mockResolvedValueOnce(jobs);
+			Roles.getRolesByUsers.mockResolvedValueOnce(roles);
 
-			await expect(Settings.getJobsWithAccess(teamspace, project, model, excludeViewers))
-				.resolves.toEqual(jobs);
+			await expect(Settings.getRolesWithAccess(teamspace, project, model, excludeViewers))
+				.resolves.toEqual(roles);
 
 			expect(TeamspaceSettings.getAllUsersInTeamspace).toHaveBeenCalledTimes(1);
 			expect(TeamspaceSettings.getAllUsersInTeamspace).toHaveBeenCalledWith(teamspace);
@@ -133,8 +133,8 @@ const testGetJobsWithAccess = () => {
 			expect(ProjectSettings.getProjectAdmins).toHaveBeenCalledWith(teamspace, project);
 			expect(ModelSettings.getUsersWithPermissions).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.getUsersWithPermissions).toHaveBeenCalledWith(teamspace, model, excludeViewers);
-			expect(Jobs.getJobsByUsers).toHaveBeenCalledTimes(1);
-			expect(Jobs.getJobsByUsers).toHaveBeenCalledWith(teamspace,
+			expect(Roles.getRolesByUsers).toHaveBeenCalledTimes(1);
+			expect(Roles.getRolesByUsers).toHaveBeenCalledWith(teamspace,
 				[...tsAdmins, ...projAdmins, ...usersWithModelPriv]);
 		});
 	});
@@ -142,5 +142,5 @@ const testGetJobsWithAccess = () => {
 
 describe(determineTestGroup(__filename), () => {
 	testGetUsersWithPermissions();
-	testGetJobsWithAccess();
+	testGetRolesWithAccess();
 });

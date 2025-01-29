@@ -363,7 +363,7 @@ router.get("/revision/:rid/issues.html", issuesMiddleware.canView, renderIssuesH
  * @apiUse Issues
  *
  * @apiParam (Request body) {String} name The name of the issue
- * @apiParam (Request body) {String[]} assigned_roles The roles assigned to the issue. Even though its an array (this is for future support of multiple assigned jobs), currently it has one or none elements correspoing to the available jobs in the teamaspace.
+ * @apiParam (Request body) {String[]} assigned_roles The roles assigned to the issue. Even though its an array (this is for future support of multiple assigned roles), currently it has one or none elements correspoing to the available roles in the teamaspace.
  * @apiParam (Request body) {String} status The status of the issue. It can have a value of "open","in progress","for approval", "void" or "closed".
  * @apiParam (Request body) {String} priority The priority of the issue. It can have a value of "none", String"low", "medium" or "high".
  * @apiParam (Request body) {String} topic_type Type of the issue. It's value has to be one of the defined topic_types for the model. See <a href='#api-Model-createModel'>here</a> for more details.
@@ -606,16 +606,16 @@ router.post("/issues", issuesMiddleware.canCreate, storeIssue, middlewares.notif
  * @apiGroup Issues
  * @apiDescription Updates an issue. It takes the part of the issue that can be updated.
  * The system will create a system comment within the issue describing which values were changed.
- * The user needs to be the teamspace administrator, the project administrator, has the same job as the creator of the issue, or has the issue assigned. In the case that the issue has been assigned to the user, the user cannot change it to the "closed" status.
+ * The user needs to be the teamspace administrator, the project administrator, has the same role as the creator of the issue, or has the issue assigned. In the case that the issue has been assigned to the user, the user cannot change it to the "closed" status.
  *
- * If the issue is being updated to assigned to a job and the status of the issue has the value "for_approval", then the status of the issue is automatically changed to "in_progress".
+ * If the issue is being updated to assigned to a role and the status of the issue has the value "for_approval", then the status of the issue is automatically changed to "in_progress".
  *
- * If the user is changing the issue to the "for_approval" status, the issue will be assigned to the job that the creator of the issue.
+ * If the user is changing the issue to the "for_approval" status, the issue will be assigned to the role that the creator of the issue.
  *
  * @apiUse Issues
  * @apiUse IssueIdParam
  *
- * @apiParam (Request body) {[]String} [assigned_roles] Job roles assigned to the issue
+ * @apiParam (Request body) {[]String} [assigned_roles] Role roles assigned to the issue
  * @apiParam (Request body) {String} [desc] Description of issue
  * @apiParam (Request body) {String} [status] The status of issue (values: "open", "in progress", "for approval", "closed")
  * @apiParam (Request body) {String} [topic_type] Topic type of issue (see <a href='#api-Model-createModel'>here</a> for available types)
@@ -645,7 +645,7 @@ router.post("/issues", issuesMiddleware.canCreate, storeIssue, middlewares.notif
  *    "topic_type": "for_information",
  *    "owner": "teamSpace1",
  *    "rev_id": "330f909b-9279-41aa-a87c-1c46f53a8e93",
- *    "creator_role": "jobA",
+ *    "creator_role": "roleA",
  *    "scale": 1,
  *    "created": 1566921116263,
  *    "desc": "(No Description)",

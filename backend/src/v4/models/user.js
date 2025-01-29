@@ -23,7 +23,7 @@ const db = require("../handler/db");
 const zxcvbn = require("zxcvbn");
 const utils = require("../utils");
 const Role = require("./role");
-const { findJobByUser, usersWithJob, removeUserFromAnyJob, addUserToJob } = require("./job");
+const { findRoleByUser, usersWithRole, removeUserFromAnyRole, addUserToRole } = require("./role");
 
 const Intercom = require("./intercom");
 
@@ -845,7 +845,7 @@ User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove, 
 			teamspacePerm ? AccountPermissions.remove(teamspace, userToRemove, executor) : Promise.resolve(),
 			...models.map(model =>	changePermissions(teamspace.user, model._id, model.permissions.filter(p => p.user !== userToRemove))),
 			removeUserFromProjects(teamspace.user, userToRemove),
-			removeUserFromAnyJob(teamspace.user, userToRemove)
+			removeUserFromAnyRole(teamspace.user, userToRemove)
 
 		]);
 	}
@@ -855,7 +855,7 @@ User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove, 
 	return Role.revokeTeamSpaceRoleFromUser(userToRemove, teamspace.user);
 };
 
-User.addTeamMember = async function(teamspace, userToAdd, job, permissions, executor) {
+User.addTeamMember = async function(teamspace, userToAdd, role, permissions, executor) {
 	await hasReachedLicenceLimit(teamspace);
 
 	let userEntry = null;
@@ -869,8 +869,8 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions, exec
 		throw (responseCodes.USER_NOT_FOUND);
 	}
 
-	if (!job) {
-		throw (responseCodes.USER_NOT_ASSIGNED_JOB);
+	if (!role) {
+		throw (responseCodes.USER_NOT_ASSIGNED_ROLE);
 	}
 
 	if (isMemberOfTeamspace(userEntry, teamspace)) {
@@ -881,7 +881,7 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions, exec
 	publish(events.USER_ADDED, { teamspace, executor, user: userEntry.user});
 
 	const promises = [];
-	promises.push(addUserToJob(teamspace, job, userEntry.user));
+	promises.push(addUserToRole(teamspace, role, userEntry.user));
 
 	const teamspaceSettings = await TeamspaceSettings.getTeamspaceSettings(teamspace);
 
@@ -891,7 +891,7 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions, exec
 
 	await Promise.all(promises);
 
-	return  { job, permissions, ... User.getBasicDetails(userEntry) };
+	return  { role, permissions, ... User.getBasicDetails(userEntry) };
 };
 
 User.getBasicDetails = function(userObj) {
@@ -929,17 +929,17 @@ User.getMembers = async function (teamspace) {
 		user: 1,
 		customData: 1
 	});
-	const getJobInfo = usersWithJob(teamspace);
+	const getRoleInfo = usersWithRole(teamspace);
 
 	const getTeamspacePermissions = TeamspaceSettings.getTeamspaceSettings(teamspace).then(({permissions}) => permissions);
 
 	promises.push(
 		getTeamspaceMembers,
 		getTeamspacePermissions,
-		getJobInfo
+		getRoleInfo
 	);
 
-	const [members = [], teamspacePermissions, memToJob = {}] = await Promise.all(promises);
+	const [members = [], teamspacePermissions, memToRole = {}] = await Promise.all(promises);
 
 	return members.map(({user, customData}) => {
 		const permissions = _.find(teamspacePermissions, {user});
@@ -950,7 +950,7 @@ User.getMembers = async function (teamspace) {
 			lastName: customData.lastName,
 			company: _.get(customData, "billing.billingInfo.company", null),
 			permissions: _.get(permissions, "permissions", []),
-			job: _.get(memToJob, user)
+			role: _.get(memToRole, user)
 		};
 	});
 };
@@ -982,7 +982,7 @@ User.getTeamMemberInfo = async function(teamspace, user) {
 	if(!userEntry || !isMemberOfTeamspace(userEntry,teamspace)) {
 		throw responseCodes.USER_NOT_FOUND;
 	} else {
-		const job = await findJobByUser(teamspace, user);
+		const role = await findRoleByUser(teamspace, user);
 		const result = {
 			user,
 			firstName: userEntry.customData.firstName,
@@ -990,8 +990,8 @@ User.getTeamMemberInfo = async function(teamspace, user) {
 			company: _.get(userEntry.customData, "billing.billingInfo.company", null)
 		};
 
-		if(job) {
-			result.job = {_id: UUIDToString(job._id), color: job.color};
+		if(role) {
+			result.role = {_id: UUIDToString(role._id), color: role.color};
 		}
 		return result;
 	}

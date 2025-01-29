@@ -90,14 +90,14 @@ const multer = require("multer");
  * 	"_id":"00000000-0000-0000-0000-000000000002",
  * 	"account":"acme",
  * 	"assigned_roles":[
- * 		"Job1"
+ * 		"Role1"
  * 	],
  * 	"associated_activity":"Column casting",
  * 	"category":"safety_fall",
  * 	"comments":[],
  * 	"consequence":0,
  * 	"created":1567156228976,
- * 	"creator_role":"Job4",
+ * 	"creator_role":"Role4",
  * 	"desc":"Risk description that describes the risk",
  * 	"element":"Doors",
  * 	"level_of_risk":0,
@@ -199,14 +199,14 @@ router.get("/risks/:riskId/thumbnail.png", risksMiddleware.canView, getThumbnail
  * 		"_id":"00000000-0000-0000-0000-000000000002",
  * 		"account":"acme",
  * 		"assigned_roles":[
- * 			"Job1"
+ * 			"Role1"
  * 		],
  * 		"associated_activity":"Column casting",
  * 		"category":"safety_fall",
  * 		"comments":[],
  * 		"consequence":0,
  * 		"created":1567156228976,
- * 		"creator_role":"Job4",
+ * 		"creator_role":"Role4",
  * 		"desc":"Risk description that describes the risk",
  * 		"element":"Doors",
  * 		"level_of_risk":0,
@@ -336,13 +336,13 @@ router.get("/revision/:rid/risks.html", risksMiddleware.canView, renderRisksHTML
  * POST /acme/00000000-0000-0000-0000-000000000000/risks HTTP/1.1
  * {
  * 	"assigned_roles":[
- * 		"Job1"
+ * 		"Role1"
  * 	],
  * 	"associated_activity":"",
  * 	"category":"safety_fall",
  * 	"comments":[],
  * 	"consequence":0,
- * 	"creator_role":"Job4",
+ * 	"creator_role":"Role4",
  * 	"desc":"Risk description that describes the risk",
  * 	"element":"Doors",
  * 	"level_of_risk":0,
@@ -384,13 +384,13 @@ router.get("/revision/:rid/risks.html", risksMiddleware.canView, renderRisksHTML
  * POST /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/risks HTTP/1.1
  * {
  * 	"assigned_roles":[
- * 		"Job1"
+ * 		"Role1"
  * 	],
  * 	"associated_activity":"",
  * 	"category":"safety_fall",
  * 	"comments":[],
  * 	"consequence":0,
- * 	"creator_role":"Job4",
+ * 	"creator_role":"Role4",
  * 	"desc":"Risk description that describes the risk",
  * 	"element":"Doors",
  * 	"level_of_risk":0,
@@ -434,14 +434,14 @@ router.get("/revision/:rid/risks.html", risksMiddleware.canView, renderRisksHTML
  * 	"_id":"00000000-0000-0000-0000-000000000002",
  * 	"account":"acme",
  * 	"assigned_roles":[
- * 		"Job1"
+ * 		"Role1"
  * 	],
  * 	"associated_activity":"",
  * 	"category":"safety_fall",
  * 	"comments":[],
  * 	"consequence":0,
  * 	"created":1567156228976,
- * 	"creator_role":"Job4",
+ * 	"creator_role":"Role4",
  * 	"desc":"Risk description that describes the risk",
  * 	"element":"Doors",
  * 	"level_of_risk":0,
@@ -517,14 +517,14 @@ router.post("/risks", risksMiddleware.canCreate, storeRisk);
  * 	"_id":"00000000-0000-0000-0000-000000000002",
  * 	"account":"acme",
  * 	"assigned_roles":[
- * 		"Job1"
+ * 		"Role1"
  * 	],
  * 	"associated_activity":"",
  * 	"category":"safety_fall",
  * 	"comments":[],
  * 	"consequence":0,
  * 	"created":1567156228976,
- * 	"creator_role":"Job4",
+ * 	"creator_role":"Role4",
  * 	"desc":"Risk description that describes the risk",
  * 	"element":"Doors",
  * 	"level_of_risk":0,

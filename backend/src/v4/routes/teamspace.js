@@ -198,7 +198,7 @@
 	 * @api {get} /:teamspace/members Get members list
 	 * @apiName getMemberList
 	 * @apiGroup Teamspace
-	 * @apiDescription It returns a list of members identifying which of them are teamspace administrators, and their jobs.
+	 * @apiDescription It returns a list of members identifying which of them are teamspace administrators, and their roles.
 	 *
 	 * @apiPermission teamSpaceMember
 	 *
@@ -219,25 +219,25 @@
 	 *          permissions: [
 	 *             "teamspace_admin"
  	 *          ],
- 	 *          job: "8f3dab17-d38e-498e-95a7-1dcd5a16f149",
+ 	 *          role: "8f3dab17-d38e-498e-95a7-1dcd5a16f149",
 	 *          isCurrentUser: true
 	 *       },
 	 *       {
-	 *          user: "unassignedTeamspace1UserJobA",
+	 *          user: "unassignedTeamspace1UserRoleA",
  	 *          firstName: "John",
  	 *          lastName: "Williams",
  	 *          company: "Teamspace One",
 	 *          permissions: [],
-	 *          job: "8f3dab17-d38e-498e-95a7-1dcd5a16f149",
+	 *          role: "8f3dab17-d38e-498e-95a7-1dcd5a16f149",
 	 *          isCurrentUser: false
 	 *       },
 	 *       {
-	 *          user: "viewerTeamspace1Model1JobB",
+	 *          user: "viewerTeamspace1Model1RoleB",
 	 *          firstName: "Alice",
 	 *          lastName: "Stratford",
 	 *          company: "Teamspace one",
 	 *          permissions: [],
-	 *          job: "8f3dab17-d38e-498e-95a7-1dcd5a16f149",
+	 *          role: "8f3dab17-d38e-498e-95a7-1dcd5a16f149",
 	 *          isCurrentUser: false
 	 *       }
 	 *    ]
@@ -288,16 +288,16 @@
 	 * @apiParam {String} user The username of the user you wish to query
 	 *
 	 * @apiExample {get} Example usage:
-	 * GET /teamSpace1/members/viewerTeamspace1Model1JobB HTTP/1.1
+	 * GET /teamSpace1/members/viewerTeamspace1Model1RoleB HTTP/1.1
 	 *
 	 * @apiSuccessExample {json} Success
 	 * HTTP/1.1 200 OK
 	 * {
-	 *    user: "viewerTeamspace1Model1JobB",
+	 *    user: "viewerTeamspace1Model1RoleB",
 	 *    firstName: "Alice",
 	 *    lastName: "Stratford",
 	 *    company: "Teamspace one",
-	 *    job: {"_id": "Job1", color: "#FFFFFF"}
+	 *    role: {"_id": "Role1", color: "#FFFFFF"}
 	 * }
 	 */
 	router.get("/members/:user", middlewares.isTeamspaceMember, getTeamMemberInfo);
@@ -315,12 +315,12 @@
 	 * @apiParam {String} user Username of the member to remove
 	 *
 	 * @apiExample {delete} Example usage:
-	 * DELETE /teamSpace1/members/viewerTeamspace1Model1JobB HTTP/1.1
+	 * DELETE /teamSpace1/members/viewerTeamspace1Model1RoleB HTTP/1.1
 	 *
 	 * @apiSuccessExample {json} Success
 	 * HTTP/1.1 200 OK
 	 * {
-	 *    user: "viewerTeamspace1Model1JobB",
+	 *    user: "viewerTeamspace1Model1RoleB",
 	 * }
 	 */
 	router.delete("/members/:user", middlewares.isAccountAdminOrSameUser , removeTeamMember);
@@ -391,26 +391,26 @@
 	 * @api {post} /:teamspace/members Add a team member
 	 * @apiName addTeamMember
 	 * @apiGroup Teamspace
-	 * @apiDescription Adds a user to a teamspace and assign it a job.
+	 * @apiDescription Adds a user to a teamspace and assign it a role.
 	 *
 	 * @apiPermission teamSpaceAdmin
 	 *
 	 * @apiParam {String} teamspace Name of teamspace
-	 * @apiParam (Request body) {String} job The job that the users going to have assigned
+	 * @apiParam (Request body) {String} role The role that the users going to have assigned
 	 * @apiParam (Request body) {String} user The username of the user to become a member
 	 * @apiParam (Request body) {String[]} permissions The permisions to be assigned to the member it can be an empty array or have a "teamspace_admin" value.
 	 *
 	 * @apiExample {post} Example usage:
 	 * POST /teamSpace1/members HTTP/1.1
 	 * {
-	 *    job: "8f3dab17-d38e-498e-95a7-1dcd5a16f149",
+	 *    role: "8f3dab17-d38e-498e-95a7-1dcd5a16f149",
 	 *    user: "projectshared",
 	 *    permissions: []
 	 * }
 	 *
 	 * @apiSuccessExample {json} Success
 	 * {
-	 *    job: "8f3dab17-d38e-498e-95a7-1dcd5a16f149",
+	 *    role: "8f3dab17-d38e-498e-95a7-1dcd5a16f149",
 	 *    permissions: [],
 	 *    user: "projectshared",
 	 *    firstName: "Drink",
@@ -505,7 +505,7 @@
 
 	function addTeamMember(req, res, next) {
 		const responsePlace = utils.APIInfo(req);
-		User.addTeamMember(req.params.account, req.body.user, req.body.job, req.body.permissions, req.session.user.username)
+		User.addTeamMember(req.params.account, req.body.user, req.body.role, req.body.permissions, req.session.user.username)
 			.then((user) => {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, user);
 			})

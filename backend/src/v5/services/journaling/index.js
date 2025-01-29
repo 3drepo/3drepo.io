@@ -89,17 +89,17 @@ const modelsPermissionsUpdated = async ({ teamspace, executor, users, permission
 	}
 };
 
-const invitationAdded = async ({ teamspace, executor, email, job, permissions }) => {
+const invitationAdded = async ({ teamspace, executor, email, role, permissions }) => {
 	try {
-		await logUserInvited(teamspace, executor, email, job, permissions);
+		await logUserInvited(teamspace, executor, email, role, permissions);
 	} catch (err) {
 		logger.logError(`Failed to add a ${actions.INVITATION_ADDED} audit log`);
 	}
 };
 
-const invitationRevoked = async ({ teamspace, executor, email, job, permissions }) => {
+const invitationRevoked = async ({ teamspace, executor, email, role, permissions }) => {
 	try {
-		await logUserUninvited(teamspace, executor, email, job, permissions);
+		await logUserUninvited(teamspace, executor, email, role, permissions);
 	} catch (err) {
 		logger.logError(`Failed to add a ${actions.INVITATION_REVOKED} audit log`);
 	}

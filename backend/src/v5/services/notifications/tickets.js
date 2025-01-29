@@ -25,7 +25,7 @@ const { UUIDToString } = require('../../utils/helper/uuids');
 const { basePropertyLabels } = require('../../schemas/tickets/templates.constants');
 const { events } = require('../eventsManager/eventsManager.constants');
 const { getClosedStatuses } = require('../../schemas/tickets/templates');
-const { getJobsToUsers } = require('../../models/jobs');
+const { getRolesToUsers } = require('../../models/roles');
 const { getTemplateById } = require('../../models/tickets.templates');
 const { getTicketById } = require('../../models/tickets');
 const { getUsersWithPermissions } = require('../../processors/teamspaces/projects/models/commons/settings');
@@ -35,8 +35,8 @@ const logger = require('../../utils/logger').logWithLabel(chatLabel);
 
 const TicketNotifications = {};
 
-const getUserList = (jobToUsers, toNotify) => toNotify.flatMap(
-	(entry) => (jobToUsers[entry] ? jobToUsers[entry] : entry));
+const getUserList = (roleToUsers, toNotify) => toNotify.flatMap(
+	(entry) => (roleToUsers[entry] ? roleToUsers[entry] : entry));
 
 /*
  * notificationData is an array of { info, notifyFn }
@@ -44,19 +44,19 @@ const getUserList = (jobToUsers, toNotify) => toNotify.flatMap(
  * and notifyFn is a function to call to add the notification (assigned, updateTicket etc)
  */
 const generateTicketNotifications = async (teamspace, project, model, actionedBy, notificationData) => {
-	const [jobList, usersWithAccess] = await Promise.all([
-		getJobsToUsers(teamspace),
+	const [roleList, usersWithAccess] = await Promise.all([
+		getRolesToUsers(teamspace),
 		getUsersWithPermissions(teamspace, project, model, false),
 	]);
 
-	const jobToUsers = {};
-	jobList.forEach(({ _id, users }) => {
-		jobToUsers[UUIDToString(_id)] = users;
+	const roleToUsers = {};
+	roleList.forEach(({ _id, users }) => {
+		roleToUsers[UUIDToString(_id)] = users;
 	});
 
 	await Promise.all(notificationData.map(async ({ info, notifyFn }) => {
 		const notifications = info.flatMap(({ toNotify, ...data }) => {
-			const users = getCommonElements(getUserList(jobToUsers, toNotify), usersWithAccess)
+			const users = getCommonElements(getUserList(roleToUsers, toNotify), usersWithAccess)
 				.filter((user) => user !== actionedBy);
 			return users.length ? { ...data, users } : [];
 		});

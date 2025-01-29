@@ -94,15 +94,15 @@
 	 *          ]
 	 *       },
 	 *       {
-	 *          user: "viewerTeamspace1Model1JobA",
+	 *          user: "viewerTeamspace1Model1RoleA",
 	 *          permissions: []
 	 *       },
 	 *       {
-	 *          user: "commenterTeamspace1Model1JobB",
+	 *          user: "commenterTeamspace1Model1RoleB",
 	 *          permissions: []
 	 *       },
 	 *       {
-	 *          user: "collaboratorTeamspace1Model1JobA",
+	 *          user: "collaboratorTeamspace1Model1RoleA",
 	 *          permissions: []
 	 *       }
 	 *    ]
@@ -255,27 +255,27 @@
 	 *             permissions: []
 	 *          },
 	 *          {
-	 *             user: "commenterTeamspace1Model1JobA",
+	 *             user: "commenterTeamspace1Model1RoleA",
 	 *             permissions: []
 	 *          },
 	 *          {
-	 *             user: "commenterTeamspace1Model1JobB",
+	 *             user: "commenterTeamspace1Model1RoleB",
 	 *             permissions: []
 	 *          },
 	 *          {
-	 *             user: "collaboratorTeamspace1Model1JobA",
+	 *             user: "collaboratorTeamspace1Model1RoleA",
 	 *             permissions: []
 	 *          },
 	 *          {
-	 *             user: "collaboratorTeamspace1Model1JobB",
+	 *             user: "collaboratorTeamspace1Model1RoleB",
 	 *             permissions: []
 	 *          },
 	 *          {
-	 *             user: "adminTeamspace1JobA",
+	 *             user: "adminTeamspace1RoleA",
 	 *             permissions: []
 	 *          },
 	 *          {
-	 *             user: "adminTeamspace1JobB",
+	 *             user: "adminTeamspace1RoleB",
 	 *             permissions: []
 	 *          },
 	 *          {
@@ -301,15 +301,15 @@
 	 *          ]
 	 *       },
 	 *       {
-	 *          user: "viewerTeamspace1Model1JobA",
+	 *          user: "viewerTeamspace1Model1RoleA",
 	 *          permissions: []
 	 *       },
 	 *       {
-	 *          user: "commenterTeamspace1Model1JobB",
+	 *          user: "commenterTeamspace1Model1RoleB",
 	 *          permissions: []
 	 *       },
 	 *       {
-	 *          user: "collaboratorTeamspace1Model1JobA",
+	 *          user: "collaboratorTeamspace1Model1RoleA",
 	 *          permissions: []
 	 *       }
 	 *    ],
@@ -347,15 +347,15 @@
 	 *          ]
 	 *       },
 	 *       {
-	 *          user: "viewerTeamspace1Model1JobA",
+	 *          user: "viewerTeamspace1Model1RoleA",
 	 *          permissions: []
 	 *       },
 	 *       {
-	 *          user: "commenterTeamspace1Model1JobB",
+	 *          user: "commenterTeamspace1Model1RoleB",
 	 *          permissions: []
 	 *       },
 	 *       {
-	 *          user: "collaboratorTeamspace1Model1JobA",
+	 *          user: "collaboratorTeamspace1Model1RoleA",
 	 *          permissions: []
 	 *       }
 	 *    ],

@@ -21,7 +21,7 @@ const _ = require("lodash");
 const { isProjectAdmin } = require("./project");
 const View = require("./view");
 const User = require("./user");
-const { findJobByUser } = require("./job");
+const { findRoleByUser } = require("./role");
 const History = require("./history");
 
 const { findModelSettingById } = require("./modelSetting");
@@ -175,7 +175,7 @@ class Ticket extends View {
 			this.findByUID(account, model, id, {}, true),
 			// 2. Get user permissions
 			getTeamspaceSettings(account),
-			findJobByUser(account, user),
+			findRoleByUser(account, user),
 			isProjectAdmin(
 				account,
 				model,
@@ -188,20 +188,20 @@ class Ticket extends View {
 			// eslint-disable-next-line prefer-const
 			dbUser,
 			// eslint-disable-next-line prefer-const
-			job,
+			role,
 			// eslint-disable-next-line prefer-const
 			projAdmin
 		] = results;
 
-		job = (job || {})._id;
+		role = (role || {})._id;
 
 		const accountPerm = AccountPermissions.findByUser(dbUser, user);
 		const tsAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
 		const isAdmin = projAdmin || tsAdmin;
-		const hasOwnerJob = UUIDToString(oldTicket.creator_role) === UUIDToString(job);
-		const hasAdminPrivileges = isAdmin || hasOwnerJob;
-		const hasAssignedJob = UUIDToString(job) === UUIDToString(oldTicket.assigned_roles[0]);
-		const userPermissions = { hasAdminPrivileges, hasAssignedJob };
+		const hasOwnerRole = UUIDToString(oldTicket.creator_role) === UUIDToString(role);
+		const hasAdminPrivileges = isAdmin || hasOwnerRole;
+		const hasAssignedRole = UUIDToString(role) === UUIDToString(oldTicket.assigned_roles[0]);
+		const userPermissions = { hasAdminPrivileges, hasAssignedRole };
 
 		const _id = utils.stringToUUID(id);
 
@@ -457,9 +457,9 @@ class Ticket extends View {
 			delete newTicket.shapes; // In order to not get inserted in the ticket definition
 		}
 
-		const ownerJob = await findJobByUser(account, newTicket.owner);
-		if (ownerJob) {
-			newTicket.creator_role = ownerJob._id;
+		const ownerRole = await findRoleByUser(account, newTicket.owner);
+		if (ownerRole) {
+			newTicket.creator_role = ownerRole._id;
 		} else {
 			delete newTicket.creator_role;
 		}

@@ -28,7 +28,7 @@ const utils = require("../utils");
  * @api {get} /:teamspace/invitations Get invitations list
  * @apiName getInvitations
  * @apiGroup Invitations
- * @apiDescription It returns a list of invitations with their permissions and their jobs.
+ * @apiDescription It returns a list of invitations with their permissions and their roles.
  *
  * @apiPermission teamSpaceAdmin
  *
@@ -42,14 +42,14 @@ const utils = require("../utils");
  * [
  *   {
  *     "email": "7e634bae01db4f@mail.com",
- *     "job": 6bfc11fa-50ac-b7e7-4328-83aa11fa50ac,
+ *     "role": 6bfc11fa-50ac-b7e7-4328-83aa11fa50ac,
  *     "permissions": {
  *       "teamspace_admin": true
  *     }
  *   },
  *   {
  *     "email": "93393d28f953@mail.com",
- *     "job": 6bfc11fa-50ac-b7e7-4328-83aa11fa50ac,
+ *     "role": 6bfc11fa-50ac-b7e7-4328-83aa11fa50ac,
  *     "permissions": {
  *       "projects": [
  *         {
@@ -61,7 +61,7 @@ const utils = require("../utils");
  *   },
  *   {
  *     "email": "48bc8da2f3bc@mail.com",
- *     "job": 6bfc11fa-50ac-b7e7-4328-83aa11fa50ac,
+ *     "role": 6bfc11fa-50ac-b7e7-4328-83aa11fa50ac,
  *     "permissions": {
  *       "projects": [
  *         {
@@ -86,14 +86,14 @@ router.get("/invitations", middlewares.isAccountAdmin, getInvitations);
  * @api {post} /:teamspace/invitations Create/Update invitation
  * @apiName createInvitation
  * @apiGroup Invitations
- * @apiDescription It creates or updates an invitation with the permissions  and a job assigned to the invited email
+ * @apiDescription It creates or updates an invitation with the permissions  and a role assigned to the invited email
  *
  * @apiPermission teamSpaceAdmin
  *
  * @apiParam {String} teamspace Name of teamspace
  *
  * @apiParam (Request body) {String} email The email to which the invitation will be sent
- * @apiParam (Request body) {String} job An existing job for the teamspace
+ * @apiParam (Request body) {String} role An existing role for the teamspace
  * @apiParam (Request body) {Permissions} permissions Valid permissions for the invited. If there is a teamspace_admin: true the rest of the permissions for that teamspace are ignored.
  *
  * @apiParam (Request body: Permisssions) {Boolean} [teamspace_admin] Flag indicating if the invited user will become a teamspace administrator. If this flag is true the rest of the permissions are ignored.
@@ -110,7 +110,7 @@ router.get("/invitations", middlewares.isAccountAdmin, getInvitations);
  * POST /teamSpace1/invitations HTTP/1.1
  *	{
  *		email:'invited@enterprise.com'
- *		job: 6bfc11fa-50ac-b7e7-4328-83aa11fa50ac,
+ *		role: 6bfc11fa-50ac-b7e7-4328-83aa11fa50ac,
  *		permissions:{
  *			projects:[
  *				{
@@ -132,7 +132,7 @@ router.get("/invitations", middlewares.isAccountAdmin, getInvitations);
  * POST /teamSpace1/invitations HTTP/1.1
  *	{
  *		email:'anotherinvited@enterprise.com'
- *		job: 6bfc11fa-50ac-b7e7-4328-83aa11fa50ac,
+ *		role: 6bfc11fa-50ac-b7e7-4328-83aa11fa50ac,
  *		permissions: {
  *			teamspace_admin: true
  *		}
@@ -142,7 +142,7 @@ router.get("/invitations", middlewares.isAccountAdmin, getInvitations);
  * HTTP/1.1 200 OK
  *	{
  *		email:'invited@enterprise.com'
- *		job: 6bfc11fa-50ac-b7e7-4328-83aa11fa50ac,
+ *		role: 6bfc11fa-50ac-b7e7-4328-83aa11fa50ac,
  *		permissions:{
  *			projects:[
  *				{
@@ -164,7 +164,7 @@ router.get("/invitations", middlewares.isAccountAdmin, getInvitations);
  * HTTP/1.1 200 OK
  *	{
  *		email:'anotherinvited@enterprise.com'
- *		job: 6bfc11fa-50ac-b7e7-4328-83aa11fa50ac,
+ *		role: 6bfc11fa-50ac-b7e7-4328-83aa11fa50ac,
  *		permissions: {
  *			teamspace_admin: true
  *		}
@@ -204,10 +204,10 @@ function getInvitations(req, res, next) {
 
 function sendInvitation(req, res, next) {
 	const { account } = req.params;
-	const { email, job, permissions } = req.body;
+	const { email, role, permissions } = req.body;
 	const username = req.session.user.username;
 
-	Invitations.create(email, account, job, username, permissions).then(invitation=> {
+	Invitations.create(email, account, role, username, permissions).then(invitation=> {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, invitation);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);

@@ -19,25 +19,25 @@ const { src } = require('../../../helper/path');
 
 const { generateRandomString } = require('../../../helper/services');
 
-jest.mock('../../../../../src/v5/models/jobs');
-const JobsModel = require(`${src}/models/jobs`);
+jest.mock('../../../../../src/v5/models/roles');
+const RolesModel = require(`${src}/models/roles`);
 
-const Jobs = require(`${src}/processors/teamspaces/jobs`);
+const Roles = require(`${src}/processors/teamspaces/roles`);
 
-const testGetJobs = () => {
-	describe('Get jobs', () => {
-		test('should call getJobs with the teamspace provided', async () => {
+const testGetRoles = () => {
+	describe('Get roles', () => {
+		test('should call getRoles with the teamspace provided', async () => {
 			const teamspace = generateRandomString();
 			const data = generateRandomString();
-			JobsModel.getJobs.mockResolvedValueOnce(data);
-			await expect(Jobs.getJobs(teamspace)).resolves.toEqual(data);
+			RolesModel.getRoles.mockResolvedValueOnce(data);
+			await expect(Roles.getRoles(teamspace)).resolves.toEqual(data);
 
-			expect(JobsModel.getJobs).toHaveBeenCalledTimes(1);
-			expect(JobsModel.getJobs).toHaveBeenCalledWith(teamspace);
+			expect(RolesModel.getRoles).toHaveBeenCalledTimes(1);
+			expect(RolesModel.getRoles).toHaveBeenCalledWith(teamspace);
 		});
 	});
 };
 
-describe('processors/teamspaces/jobs', () => {
-	testGetJobs();
+describe('processors/teamspaces/roles', () => {
+	testGetRoles();
 });

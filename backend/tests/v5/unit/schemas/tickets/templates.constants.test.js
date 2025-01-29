@@ -37,7 +37,7 @@ const testGetApplicableDefaultProperties = () => {
 		const issueProp = [{ name: baseProps.PRIORITY, type: TemplateConstants.propTypes.ONE_OF, values: ['None', 'Low', 'Medium', 'High'], default: 'None' },
 			{ name: baseProps.ASSIGNEES,
 				type: TemplateConstants.propTypes.MANY_OF,
-				values: TemplateConstants.presetEnumValues.JOBS_AND_USERS },
+				values: TemplateConstants.presetEnumValues.ROLES_AND_USERS },
 			{ name: baseProps.DUE_DATE, type: TemplateConstants.propTypes.DATE }];
 
 		test('Should only return the basic properties if none of the optional flags are configured', () => {

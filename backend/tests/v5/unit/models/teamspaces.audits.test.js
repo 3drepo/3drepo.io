@@ -136,17 +136,17 @@ const testLogUserInvited = () => {
 			const teamspace = generateRandomString();
 			const executor = generateRandomString();
 			const email = generateRandomString();
-			const job = generateRandomString();
+			const role = generateRandomString();
 			const permissions = times(5, () => generateRandomObject());
 
 			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
 
-			await Audits.logUserInvited(teamspace, executor, email, job, permissions);
+			await Audits.logUserInvited(teamspace, executor, email, role, permissions);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			const { _id, timestamp } = fn.mock.calls[0][2];
 			expect(fn).toHaveBeenCalledWith(teamspace, AUDITS_COL,
-				{ action: actions.INVITATION_ADDED, executor, data: { email, job, permissions }, _id, timestamp });
+				{ action: actions.INVITATION_ADDED, executor, data: { email, role, permissions }, _id, timestamp });
 		});
 	});
 };
@@ -157,17 +157,17 @@ const testLogUserUninvited = () => {
 			const teamspace = generateRandomString();
 			const executor = generateRandomString();
 			const email = generateRandomString();
-			const job = generateRandomString();
+			const role = generateRandomString();
 			const permissions = times(5, () => generateRandomObject());
 
 			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
 
-			await Audits.logUserUninvited(teamspace, executor, email, job, permissions);
+			await Audits.logUserUninvited(teamspace, executor, email, role, permissions);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			const { _id, timestamp } = fn.mock.calls[0][2];
 			expect(fn).toHaveBeenCalledWith(teamspace, AUDITS_COL,
-				{ action: actions.INVITATION_REVOKED, executor, data: { email, job, permissions }, _id, timestamp });
+				{ action: actions.INVITATION_REVOKED, executor, data: { email, role, permissions }, _id, timestamp });
 		});
 	});
 };

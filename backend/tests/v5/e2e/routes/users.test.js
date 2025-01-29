@@ -785,7 +785,7 @@ const testVerify = () => {
 				teamSpaces: [
 					{
 						teamspace: teamspace.name,
-						job: 'Main Contractor',
+						role: 'Main Contractor',
 						permissions: {
 							teamspace_admin: true,
 						},

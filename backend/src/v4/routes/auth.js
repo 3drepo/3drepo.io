@@ -212,15 +212,15 @@ router.get("/version", printVersion);
  * 	"firstName":"Alice",
  * 	"lastName":"Allen",
  * 	"hasAvatar": true,
- * 	"jobs": [
+ * 	"roles": [
  * 		{
- * 			"_id": "Director"
+ * 			"_id": "3549ddf6-885d-4977-87f1-eeac43a0e818"
  * 		},
  * 		{
- * 			"_id": "Actor"
+ * 			"_id": "4549ddf6-885d-4977-87f1-eeac43a0e818"
  * 		},
  * 		{
- * 			"_id": "Producer
+ * 			"_id": "5549ddf6-885d-4977-87f1-eeac43a0e818"
  * 		}
  * 	]
  * }

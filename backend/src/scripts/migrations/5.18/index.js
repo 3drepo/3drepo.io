@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const addNamesToJobs = require('./addNamesToJobs');
+const refactorJobs = require('./refactorJobs');
 
 const scripts = [
-	{ script: addNamesToJobs, desc: 'Add names to jobs' },
+	{ script: refactorJobs, desc: 'Rename jobs collection to roles and add UUID ids' },
 ];
 
 module.exports = scripts;

@@ -17,26 +17,30 @@
 
 const { createResponseCode, templates } = require('../../../../utils/responseCodes');
 const { getArrayDifference, uniqueElements } = require('../../../../utils/helper/arrays');
-const { getJobById, getJobs } = require('../../../../models/jobs');
+const { getRoleById, getRoleByName } = require('../../../../models/roles');
 const Yup = require('yup');
 const { getAllUsersInTeamspace } = require('../../../../models/teamspaceSettings');
 const { respond } = require('../../../../utils/responder');
 const { types } = require('../../../../utils/helper/yup');
+const { validateMany } = require('../../../common');
 
-const Jobs = {};
+const Roles = {};
 
-const validateJob = (isUpdate) => async (req, res, next) => {
+const nameExists = (teamspace, name) => getRoleByName(teamspace, name, { _id: 1 })
+	.then(() => true).catch(() => false);
+
+const validateRole = async (req, res, next) => {
+	const isUpdate = !!req.roleData;
+
 	let schema = Yup.object().shape({
 		name: (isUpdate ? types.strings.title : types.strings.title.required())
-			.test('check-name-is-unique', 'Job with the same name already exists', async (value) => {
-				try {
-					if (!value) return true;
-
-					const jobs = await getJobs(req.params.teamspace, { _id: 1, name: 1 });
-					return jobs.every(({ name }) => name.toLowerCase() !== value.toLowerCase());
-				} catch {
-					return true;
+			.test('check-name-is-unique', 'Role with the same name already exists', async (value) => {
+				if (value !== req.roleData?.name) {
+					const nameTaken = await nameExists(req.params.teamspace, value);
+					return !nameTaken;
 				}
+
+				return true;
 			}),
 		users: Yup.array().of(types.strings.title)
 			.test('users-uniqueness-check', 'users must be unique', (values) => {
@@ -61,7 +65,7 @@ const validateJob = (isUpdate) => async (req, res, next) => {
 	if (isUpdate) {
 		schema = schema.test(
 			'at-least-one-property',
-			'You must provide at least one update value',
+			'You must provide at least one role value',
 			(value) => Object.keys(value).length,
 		);
 	}
@@ -74,18 +78,18 @@ const validateJob = (isUpdate) => async (req, res, next) => {
 	}
 };
 
-Jobs.validateNewJob = (req, res, next) => validateJob()(req, res, next);
-Jobs.validateUpdateJob = (req, res, next) => validateJob(true)(req, res, next);
-
-Jobs.jobExists = async (req, res, next) => {
+Roles.roleExists = async (req, res, next) => {
 	try {
-		const { teamspace, job } = req.params;
+		const { teamspace, role } = req.params;
 
-		await getJobById(teamspace, job, { _id: 1 });
+		req.roleData = await getRoleById(teamspace, role, { _id: 1, name: 1 });
 		await next();
 	} catch (err) {
 		respond(req, res, err);
 	}
 };
 
-module.exports = Jobs;
+Roles.validateNewRole = validateRole;
+Roles.validateUpdateRole = validateMany([Roles.roleExists, validateRole]);
+
+module.exports = Roles;

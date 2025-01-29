@@ -19,7 +19,7 @@
 const { hasWriteAccessToModelHelper, hasReadAccessToModelHelper } = require("../middlewares/checkPermissions");
 const { getModelsData } = require("./modelSetting");
 const { listProjects } = require("./project");
-const { findByJob, findUsersWithJobs } = require("./job");
+const { findByRole, findUsersWithRoles } = require("./role");
 const utils = require("../utils");
 const db = require("../handler/db");
 const _ = require("lodash");
@@ -276,7 +276,7 @@ module.exports = {
 	 */
 	upsertIssueAssignedNotifications : async function(username, teamSpace, modelId, issue) {
 		const assignedRole = issue.assigned_roles[0];
-		const rs = await findByJob(teamSpace,assignedRole);
+		const rs = await findByRole(teamSpace,assignedRole);
 		if (!rs || !rs.users) {
 			return [];
 		}
@@ -346,7 +346,7 @@ module.exports = {
 
 		const assignedRole = issue.assigned_roles[0];
 
-		return findByJob(teamSpace,assignedRole)
+		return findByRole(teamSpace,assignedRole)
 			.then(rs => {
 				if (!rs || !rs.users) {
 					return [];
@@ -373,7 +373,7 @@ module.exports = {
 		const assignedRoles = getHistoricAssignedRoles(issue);
 		const issueType = types.ISSUE_CLOSED;
 
-		const matchedUsers = await findUsersWithJobs(teamSpace, [...assignedRoles]);
+		const matchedUsers = await findUsersWithRoles(teamSpace, [...assignedRoles]);
 
 		// Leave out the current user , closing the issue.
 		const users = matchedUsers.filter(m => m !== username);
@@ -393,7 +393,7 @@ module.exports = {
 
 	upsertIssueClosedNotifications: async function (username, teamSpace, modelId, issue) {
 		const assignedRoles = getHistoricAssignedRoles(issue);
-		const matchedUsers = await findUsersWithJobs(teamSpace, [...assignedRoles]);
+		const matchedUsers = await findUsersWithRoles(teamSpace, [...assignedRoles]);
 
 		const users = [];
 		const getUserPromises = [];

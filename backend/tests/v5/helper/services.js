@@ -278,7 +278,7 @@ db.createComment = (teamspace, project, model, ticket, comment) => {
 	return DbHandler.insertOne(teamspace, 'tickets.comments', formattedComment);
 };
 
-db.createJobs = (teamspace, jobs) => DbHandler.insertMany(teamspace, 'jobs', jobs);
+db.createRoles = (teamspace, roles) => DbHandler.insertMany(teamspace, 'roles', roles);
 
 db.createIssue = (teamspace, modelId, issue) => {
 	const formattedIssue = { ...issue, _id: stringToUUID(issue._id) };
@@ -653,12 +653,12 @@ ServiceHelper.generateAuditAction = (actionType) => {
 		[actionTypes.USER_REMOVED]: { user: ServiceHelper.generateRandomString() },
 		[actionTypes.INVITATION_ADDED]: {
 			email: ServiceHelper.generateRandomString(),
-			job: ServiceHelper.generateRandomString(),
+			role: ServiceHelper.generateRandomString(),
 			permissions: { teamspace_admin: true },
 		},
 		[actionTypes.INVITATION_REVOKED]: {
 			email: ServiceHelper.generateRandomString(),
-			job: ServiceHelper.generateRandomString(),
+			role: ServiceHelper.generateRandomString(),
 			permissions: { teamspace_admin: true },
 		},
 		[actionTypes.PERMISSIONS_UPDATED]: { users: [ServiceHelper.generateRandomString()],

@@ -16,47 +16,45 @@
  */
 
 const { hasAccessToTeamspace, isTeamspaceAdmin } = require('../../middleware/permissions/permissions');
-const { jobExists, validateNewJob, validateUpdateJob } = require('../../middleware/dataConverter/inputs/teamspaces/jobs');
+const { roleExists, validateNewRole, validateUpdateRole } = require('../../middleware/dataConverter/inputs/teamspaces/roles');
 
-const Jobs = require('../../processors/teamspaces/jobs');
+const Roles = require('../../processors/teamspaces/roles');
 const { Router } = require('express');
 const { UUIDToString } = require('../../utils/helper/uuids');
 const { respond } = require('../../utils/responder');
-const { serialiseJobs } = require('../../middleware/dataConverter/outputs/teamspaces/jobs');
 const { templates } = require('../../utils/responseCodes');
 
-const getJobs = async (req, res, next) => {
+const getRoles = async (req, res) => {
 	const { teamspace } = req.params;
 
 	try {
-		const jobs = await Jobs.getJobs(teamspace);
-		req.jobs = jobs;
-		await next();
+		const roles = await Roles.getRoles(teamspace);
+		respond(req, res, templates.ok, { roles: roles.map(({ _id, rest }) => ({ _id: UUIDToString(_id), ...rest })) });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
 	}
 };
 
-const createJob = async (req, res) => {
+const createRole = async (req, res) => {
 	const { teamspace } = req.params;
-	const job = req.body;
+	const role = req.body;
 
 	try {
-		const jobId = await Jobs.createJob(teamspace, job);
-		respond(req, res, templates.ok, { _id: UUIDToString(jobId) });
+		const roleId = await Roles.createRole(teamspace, role);
+		respond(req, res, templates.ok, { _id: UUIDToString(roleId) });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
 	}
 };
 
-const updateJob = async (req, res) => {
-	const { teamspace, job } = req.params;
-	const updatedJob = req.body;
+const updateRole = async (req, res) => {
+	const { teamspace, role } = req.params;
+	const updatedRole = req.body;
 
 	try {
-		await Jobs.updateJob(teamspace, job, updatedJob);
+		await Roles.updateRole(teamspace, role, updatedRole);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
@@ -64,12 +62,12 @@ const updateJob = async (req, res) => {
 	}
 };
 
-const deleteJob = async (req, res) => {
-	const { teamspace, job } = req.params;
-	const updatedJob = req.body;
+const deleteRole = async (req, res) => {
+	const { teamspace, role } = req.params;
+	const updatedRole = req.body;
 
 	try {
-		await Jobs.deleteJob(teamspace, job, updatedJob);
+		await Roles.deleteRole(teamspace, role, updatedRole);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
@@ -81,9 +79,9 @@ const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 	/**
 	* @openapi
-	* /teamspaces/{teamspace}/jobs:
+	* /teamspaces/{teamspace}/roles:
 	*   get:
-	*     description: Get the list of jobs within this teamspace
+	*     description: Get the list of roles within this teamspace
 	*     tags: [Teamspaces]
 	*     parameters:
 	*       - name: teamspace
@@ -92,18 +90,18 @@ const establishRoutes = () => {
 	*         required: true
 	*         schema:
 	*           type: string
-	*     operationId: jobList
+	*     operationId: roleList
 	*     responses:
 	*       401:
 	*         $ref: "#/components/responses/notLoggedIn"
 	*       200:
-	*         description: Return the list of jobs within the teamspace
+	*         description: Return the list of roles within the teamspace
 	*         content:
 	*           application/json:
 	*             schema:
 	*               type: object
 	*               properties:
-	*                 jobs:
+	*                 roles:
 	*                   type: array
 	*                   items:
 	*                     type: object
@@ -111,24 +109,24 @@ const establishRoutes = () => {
 	*                       _id:
 	*                         type: string
 	*                         format: uuid
-	*                         description: Job id
+	*                         description: Role id
 	*                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	*                       name:
 	*                         type: string
-	*                         description: Job name
+	*                         description: Role name
 	*                         example: Architect
 	*                       color:
 	*                         type: string
-	*                         description: Color that represents the job, in hex
+	*                         description: Color that represents the role, in hex
 	*                         example: "#AA00BB"
 	*/
-	router.get('/', hasAccessToTeamspace, getJobs, serialiseJobs);
+	router.get('/', hasAccessToTeamspace, getRoles);
 
 	/**
 	* @openapi
-	* /teamspaces/{teamspace}/jobs:
+	* /teamspaces/{teamspace}/roles:
 	*   post:
-	*     description: Creates a new job
+	*     description: Creates a new role
 	*     tags: [Teamspaces]
 	*     parameters:
 	*       - name: teamspace
@@ -147,24 +145,24 @@ const establishRoutes = () => {
 	*             properties:
 	*               name:
 	*                 type: string
-	*                 description: The name of the new job
+	*                 description: The name of the new role
 	*                 example: Master Engineer
 	*               color:
 	*                 type: string
-	*                 description: The color of the new job in RGB hex
+	*                 description: The color of the new role in RGB hex
 	*                 example: #808080
 	*               users:
 	*                 type: array
-	*                 description: The users the job is assigned to
+	*                 description: The users the role is assigned to
 	*                 items:
 	*                   type: string
 	*                   example: user1
-	*     operationId: createJob
+	*     operationId: createRole
 	*     responses:
 	*       401:
 	*         $ref: "#/components/responses/notLoggedIn"
 	*       200:
-	*         description: Create a new job
+	*         description: Create a new role
 	*         content:
 	*           application/json:
 	*             schema:
@@ -173,16 +171,16 @@ const establishRoutes = () => {
 	*                 _id:
 	*                   type: string
 	*                   format: uuid
-	*                   description: The id of the new job
+	*                   description: The id of the new role
 	*                   example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
 	*/
-	router.post('/', isTeamspaceAdmin, validateNewJob, createJob);
+	router.post('/', isTeamspaceAdmin, validateNewRole, createRole);
 
 	/**
 	* @openapi
-	* /teamspaces/{teamspace}/jobs/{job}:
+	* /teamspaces/{teamspace}/roles/{role}:
 	*   patch:
-	*     description: Updates a job
+	*     description: Updates a role
 	*     tags: [Teamspaces]
 	*     parameters:
 	*       - name: teamspace
@@ -191,8 +189,8 @@ const establishRoutes = () => {
 	*         required: true
 	*         schema:
 	*           type: string
-	*       - name: job
-	*         description: id of the job
+	*       - name: role
+	*         description: id of the role
 	*         in: path
 	*         required: true
 	*         schema:
@@ -205,32 +203,32 @@ const establishRoutes = () => {
 	*             properties:
 	*               name:
 	*                 type: string
-	*                 description: The updated name of the job
+	*                 description: The updated name of the role
 	*                 example: Master Engineer
 	*               color:
 	*                 type: string
-	*                 description: The updated color of the job
+	*                 description: The updated color of the role
 	*                 example: #808080
 	*               users:
 	*                 type: array
-	*                 description: The updated user list of the job
+	*                 description: The updated user list of the role
 	*                 items:
 	*                   type: string
 	*                   example: user1
-	*     operationId: updateJob
+	*     operationId: updateRole
 	*     responses:
 	*       401:
 	*         $ref: "#/components/responses/notLoggedIn"
 	*       200:
-	*         description: Updates a job
+	*         description: Updates a role
 	*/
-	router.patch('/:job', isTeamspaceAdmin, jobExists, validateUpdateJob, updateJob);
+	router.patch('/:role', isTeamspaceAdmin, validateUpdateRole, updateRole);
 
 	/**
 	* @openapi
-	* /teamspaces/{teamspace}/jobs/{job}:
+	* /teamspaces/{teamspace}/roles/{role}:
 	*   delete:
-	*     description: Deletes a job
+	*     description: Deletes a role
 	*     tags: [Teamspaces]
 	*     parameters:
 	*       - name: teamspace
@@ -239,20 +237,20 @@ const establishRoutes = () => {
 	*         required: true
 	*         schema:
 	*           type: string
-	*       - name: job
-	*         description: id of the job
+	*       - name: role
+	*         description: id of the role
 	*         in: path
 	*         required: true
 	*         schema:
 	*           type: string
-	*     operationId: deleteJob
+	*     operationId: deleteRole
 	*     responses:
 	*       401:
 	*         $ref: "#/components/responses/notLoggedIn"
 	*       200:
-	*         description: Deletes a job
+	*         description: Deletes a role
 	*/
-	router.delete('/:job', isTeamspaceAdmin, jobExists, deleteJob);
+	router.delete('/:role', isTeamspaceAdmin, roleExists, deleteRole);
 
 	return router;
 };

@@ -258,9 +258,6 @@
 	define("PERM_REVOKE_LICENCE","revoke_licence");
 	define("PERM_TEAMSPACE_ADMIN","teamspace_admin"); // have total control for projects and models under its teamspace
 	define("PERM_CREATE_PROJECT", "create_project");
-	define("PERM_CREATE_JOB","create_job");
-	define("PERM_DELETE_JOB","delete_job");
-	define("PERM_ASSIGN_JOB","assign_job");
 	define("PERM_VIEW_PROJECTS", "view_projects"),
 
 	// project level permission
@@ -298,9 +295,6 @@
 		module.exports.PERM_REVOKE_LICENCE,
 		module.exports.PERM_TEAMSPACE_ADMIN,
 		module.exports.PERM_CREATE_PROJECT,
-		module.exports.PERM_CREATE_JOB,
-		module.exports.PERM_DELETE_JOB,
-		module.exports.PERM_ASSIGN_JOB,
 		module.exports.PERM_VIEW_PROJECTS
 	]);
 
@@ -630,8 +624,6 @@
 		"model": data => `/viewer/${data.model}`,
 		"signup": () => "/sign-up"
 	});
-
-	define("DEFAULT_OWNER_JOB",  "Admin");
 
 	define("ACCEPTED_IMAGE_FORMATS",  ["png", "jpg", "jpeg", "gif"]);
 
