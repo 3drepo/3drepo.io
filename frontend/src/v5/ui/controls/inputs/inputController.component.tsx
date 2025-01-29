@@ -36,8 +36,8 @@ export type InputControllerProps<T,> = T & FormInputProps & {
 	defaultValue?: any,
 	onChange?: (event) => void,
 	onBlur?: () => void,
-	transformValueIn?: (val) => void,
-	transformChangeEvent?: (val) => void,
+	transformValueIn?: (val) => any,
+	transformChangeEvent?: (val) => any,
 	children?: any,
 };
 
