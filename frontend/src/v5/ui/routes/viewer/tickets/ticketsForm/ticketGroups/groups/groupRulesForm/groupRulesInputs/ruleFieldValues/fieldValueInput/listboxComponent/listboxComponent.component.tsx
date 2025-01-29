@@ -55,9 +55,9 @@ export const ListboxComponent = forwardRef<HTMLDivElement, any>(({ children, ...
 	const itemData = children.flatMap((item) => [item, ...(item.children || [])]);
 	const itemCount = itemData.length;
 
-	const getChildSize = () => 12 + (LISTBOX_PADDING * 2);
+	const getChildSize = () => 30;
 
-	const getHeight = () => Math.min(itemCount * getChildSize(), MAX_HEIGHT);
+	const getHeight = () => Math.min((itemCount * getChildSize())  +  (LISTBOX_PADDING * 2), MAX_HEIGHT);
 
 	return (
 		<div ref={ref}>
@@ -68,7 +68,7 @@ export const ListboxComponent = forwardRef<HTMLDivElement, any>(({ children, ...
 					width="100%"
 					outerElementType={OuterElementType}
 					innerElementType={InnerElementType}
-					itemSize={() => getChildSize()}
+					itemSize={getChildSize}
 					overscanCount={5}
 					itemCount={itemCount}
 				>

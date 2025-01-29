@@ -28,6 +28,8 @@ const { getSecurityRestrictions }  = require(`${v5Path}/models/teamspaceSettings
 const { SECURITY_SETTINGS: { SSO_RESTRICTED } }  = require(`${v5Path}/models/teamspaces.constants`);
 const systemLogger = require("../logger.js").systemLogger;
 const Mailer = require("../mailer/mailer");
+const { publish } = require(`${v5Path}/services/eventsManager/eventsManager`);
+const { events } = require(`${v5Path}/services/eventsManager/eventsManager.constants`);
 
 const { contains: setContains } = require("./helper/set");
 
@@ -146,12 +148,14 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 		const invitation = {_id:email ,teamSpaces: [teamspaceEntry] };
 		await coll.insertOne(invitation);
 		await sendInvitationEmail(email, username, teamspace);
+
+		publish(events.INVITATION_ADDED, { teamspace, executor: username, email, job, permissions});
 	}
 
 	return {email, job, permissions};
 };
 
-invitations.removeTeamspaceFromInvitation = async (email, teamspace) => {
+invitations.removeTeamspaceFromInvitation = async (email, teamspace, executor) => {
 	email = email.toLowerCase();
 	const coll = await getCollection();
 	const result = await coll.findOne({_id:email});
@@ -160,15 +164,20 @@ invitations.removeTeamspaceFromInvitation = async (email, teamspace) => {
 		return null;
 	}
 
+	const entryToRemove = result.teamSpaces.find(entry => entry.teamspace === teamspace);
+
 	const data =  { _id: email, teamSpaces: result.teamSpaces.filter(teamspaceEntry => teamspaceEntry.teamspace !== teamspace) };
 
 	if (data.teamSpaces.length === 0) {
 		await coll.deleteOne({_id: email});
-		return {};
 	} else {
 		await coll.updateOne({_id:email}, { $set: data });
-		return {};
 	}
+
+	publish(events.INVITATION_REVOKED, { teamspace, executor, email, job: entryToRemove.job, permissions: entryToRemove.permissions});
+
+	return {};
+
 };
 
 invitations.setJob = async (email, teamspace, job) => {

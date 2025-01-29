@@ -27,11 +27,13 @@ import { useFormContext } from 'react-hook-form';
 import { useEffect } from 'react';
 import { IContainer, UploadStatus } from '@/v5/store/containers/containers.types';
 import { UploadItemFields } from '@/v5/store/containers/revisions/containerRevisions.types';
-import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { ContainerRevisionsActionsDispatchers, ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { UploadListItemFileIcon } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemTitle } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemTitle/uploadListItemTitle.component';
 import { UploadProgress } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadProgress/uploadProgress.component';
 import { formatMessage } from '@/v5/services/intl';
+import { get } from 'lodash';
+import { uploadFile } from '@/v5/validation/shared/validators';
 
 const UNEXPETED_STATUS_ERROR = undefined;
 const STATUS_TEXT_BY_UPLOAD = {
@@ -75,12 +77,14 @@ export const UploadListItem = ({
 }: IUploadListItem): JSX.Element => {
 	const revisionPrefix = `uploads.${index}`;
 	const uploadErrorMessage: string = ContainerRevisionsHooksSelectors.selectUploadError(uploadId);
-	const { watch, trigger, setValue } = useFormContext();
+	const { watch, trigger, setValue, setError, formState: { errors } } = useFormContext();
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const projectId = ProjectsHooksSelectors.selectCurrentProject();
 	const containerId = watch(`${revisionPrefix}.containerId`);
 	const selectedContainer = ContainersHooksSelectors.selectContainerById(containerId);
 	const progress = ContainerRevisionsHooksSelectors.selectUploadProgress(uploadId);
+	const fileError = !!get(errors, `${revisionPrefix}.file`)?.message;
+	const disabled = fileError || isUploading;
 
 	const uploadStatus = getUploadStatus(progress, uploadErrorMessage);
 
@@ -102,12 +106,17 @@ export const UploadListItem = ({
 	useEffect(() => {
 		if (!containerId?.trim()) return;
 
-		ContainersActionsDispatchers.fetchContainerSettings(
-			teamspace,
-			projectId,
-			containerId,
-		);
+		ContainersActionsDispatchers.fetchContainerSettings(teamspace, projectId, containerId);
+		ContainerRevisionsActionsDispatchers.fetch(teamspace, projectId, containerId);
 	}, [containerId]);
+
+	useEffect(() => {
+		try { 
+			uploadFile.validateSync(fileData);
+		} catch (e) {
+			setError(`${revisionPrefix}.file`, e);
+		}
+	}, []);
 
 	return (
 		<UploadListItemRow selected={isSelected}>
@@ -125,12 +134,12 @@ export const UploadListItem = ({
 				key={`${uploadId}.dest`}
 				index={index}
 				revisionPrefix={revisionPrefix}
-				disabled={isUploading}
+				disabled={disabled}
 			/>
 			<UploadListItemRevisionTag
 				key={`${uploadId}.revisionTag`}
 				revisionPrefix={revisionPrefix}
-				disabled={isUploading}
+				disabled={disabled}
 			/>
 			{isUploading
 				? (
@@ -144,7 +153,7 @@ export const UploadListItem = ({
 					/>
 				) : (
 					<>
-						<UploadListItemButton variant={isSelected ? 'secondary' : 'primary'} onClick={onClickEdit}>
+						<UploadListItemButton variant={isSelected ? 'secondary' : 'primary'} onClick={onClickEdit} disabled={disabled}>
 							<EditIcon />
 						</UploadListItemButton>
 						<UploadListItemButton variant={isSelected ? 'secondary' : 'primary'} onClick={onClickDelete}>

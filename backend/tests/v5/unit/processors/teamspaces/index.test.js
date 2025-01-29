@@ -30,6 +30,9 @@ const UsersModel = require(`${src}/models/users`);
 jest.mock('../../../../../src/v5/models/jobs');
 const JobsModel = require(`${src}/models/jobs`);
 
+jest.mock('../../../../../src/v5/models/notifications');
+const NotificationsModel = require(`${src}/models/notifications`);
+
 jest.mock('../../../../../src/v5/models/teamspaceSettings');
 const TeamspacesModel = require(`${src}/models/teamspaceSettings`);
 
@@ -265,6 +268,9 @@ const testRemoveTeamspace = () => {
 
 			expect(RolesModel.removeTeamspaceRole).toHaveBeenCalledTimes(1);
 			expect(RolesModel.removeTeamspaceRole).toHaveBeenCalledWith(teamspace);
+
+			expect(NotificationsModel.removeAllTeamspaceNotifications).toHaveBeenCalledTimes(1);
+			expect(NotificationsModel.removeAllTeamspaceNotifications).toHaveBeenCalledWith(teamspace);
 
 			expect(DB.dropDatabase).toHaveBeenCalledTimes(1);
 			expect(DB.dropDatabase).toHaveBeenCalledWith(teamspace);

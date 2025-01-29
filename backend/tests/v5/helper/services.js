@@ -38,16 +38,18 @@ const { INTERNAL_DB } = require(`${src}/handler/db.constants`);
 const QueueHandler = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { editSubscriptions, grantAdminToUser } = require(`${src}/models/teamspaceSettings`);
+const { editSubscriptions, grantAdminToUser, updateAddOns } = require(`${src}/models/teamspaceSettings`);
 const { createTeamspaceRole } = require(`${src}/models/roles`);
 const { initTeamspace } = require(`${src}/processors/teamspaces/teamspaces`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
-const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
+const { MODEL_COMMENTER, MODEL_VIEWER, PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { isArray } = require(`${src}/utils/helper/typeCheck`);
-const FilesManager = require('../../../src/v5/services/filesManager');
-const { modelTypes, statusCodes } = require('../../../src/v5/models/modelSettings.constants');
-const DbConstants = require('../../../src/v5/handler/db.constants');
+
+const FilesManager = require(`${src}/services/filesManager`);
+const { modelTypes, statusCodes } = require(`${src}/models/modelSettings.constants`);
+const { actions: actionTypes } = require(`${src}/models/teamspaces.audits.constants`);
+const DbConstants = require(`${src}/handler/db.constants`);
 
 const { statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
 const { generateFullSchema } = require(`${src}/schemas/tickets/templates`);
@@ -125,7 +127,7 @@ db.createUser = (userCredentials, tsList = [], customData = {}) => {
 
 db.createTeamspaceRole = (ts) => createTeamspaceRole(ts);
 
-db.createTeamspace = async (teamspace, admins = [], subscriptions, createUser = true) => {
+db.createTeamspace = async (teamspace, admins = [], subscriptions, createUser = true, addOns) => {
 	if (createUser) await ServiceHelper.db.createUser({ user: teamspace, password: teamspace });
 	await initTeamspace(teamspace);
 	await Promise.all(admins.map((adminUser) => grantAdminToUser(teamspace, adminUser)));
@@ -133,6 +135,10 @@ db.createTeamspace = async (teamspace, admins = [], subscriptions, createUser = 
 	if (subscriptions) {
 		await Promise.all(Object.keys(subscriptions).map((subType) => editSubscriptions(teamspace,
 			subType, subscriptions[subType])));
+	}
+
+	if (Object.keys(addOns ?? {}).length) {
+		await updateAddOns(teamspace, addOns);
 	}
 };
 
@@ -222,6 +228,15 @@ db.createCalibration = async (teamspace, project, drawing, revision, calibration
 	});
 
 	await DbHandler.insertOne(teamspace, 'drawings.calibrations', formattedCalibration);
+};
+
+db.createAuditAction = (teamspace, action) => {
+	const formattedAction = {
+		_id: stringToUUID(action._id),
+		...action,
+	};
+
+	return DbHandler.insertOne(teamspace, 'auditing', formattedAction);
 };
 
 db.createSequence = async (teamspace, model, { sequence, states, activities, activityTree }) => {
@@ -400,6 +415,7 @@ ServiceHelper.generateRandomBuffer = (length = 20) => Buffer.from(ServiceHelper.
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
 	+ Math.random() * (end.getTime() - start.getTime()));
 ServiceHelper.generateRandomNumber = (min = -1000, max = 1000) => Math.random() * (max - min) + min;
+ServiceHelper.generateRandomBoolean = () => Math.random() < 0.5;
 ServiceHelper.generateRandomIfcGuid = () => ServiceHelper.generateRandomString(22);
 ServiceHelper.generateRandomRvtId = () => Math.floor(Math.random() * 10000);
 
@@ -763,10 +779,14 @@ const generateProperties = (propTemplate, internalType, container) => {
 		if (deprecated || readOnly) return;
 		if (type === propTypes.TEXT) {
 			properties[name] = ServiceHelper.generateRandomString();
+		} if (type === propTypes.LONG_TEXT) {
+			properties[name] = ServiceHelper.generateRandomString();
 		} else if (type === propTypes.DATE) {
 			properties[name] = internalType ? new Date() : Date.now();
 		} else if (type === propTypes.NUMBER) {
 			properties[name] = ServiceHelper.generateRandomNumber();
+		} else if (type === propTypes.BOOLEAN) {
+			properties[name] = ServiceHelper.generateRandomBoolean();
 		} else if (type === propTypes.ONE_OF && isArray(values)) {
 			properties[name] = values[values.length - 1];
 		} else if (type === propTypes.MANY_OF && isArray(values)) {
@@ -791,6 +811,38 @@ const generateProperties = (propTemplate, internalType, container) => {
 	});
 
 	return properties;
+};
+
+ServiceHelper.generateAuditAction = (actionType) => {
+	const actionData = {
+		[actionTypes.USER_ADDED]: { user: ServiceHelper.generateRandomString() },
+		[actionTypes.USER_REMOVED]: { user: ServiceHelper.generateRandomString() },
+		[actionTypes.INVITATION_ADDED]: {
+			email: ServiceHelper.generateRandomString(),
+			job: ServiceHelper.generateRandomString(),
+			permissions: { teamspace_admin: true },
+		},
+		[actionTypes.INVITATION_REVOKED]: {
+			email: ServiceHelper.generateRandomString(),
+			job: ServiceHelper.generateRandomString(),
+			permissions: { teamspace_admin: true },
+		},
+		[actionTypes.PERMISSIONS_UPDATED]: { users: [ServiceHelper.generateRandomString()],
+			permissions: [{
+				model: ServiceHelper.generateUUID(),
+				project: ServiceHelper.generateUUID(),
+				from: [MODEL_COMMENTER],
+				to: [MODEL_VIEWER],
+			}] },
+	};
+
+	return {
+		_id: ServiceHelper.generateUUIDString(),
+		action: actionType,
+		executor: ServiceHelper.generateRandomString(),
+		timestamp: ServiceHelper.generateRandomDate(),
+		data: actionData[actionType],
+	};
 };
 
 ServiceHelper.generateRandomObject = () => ({

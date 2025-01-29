@@ -18,8 +18,7 @@
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import { alphaNumericHyphens, stripIfBlankString } from '../shared/validators';
-import { selectRevisions, selectRevisionsPending } from '@/v5/store/containers/revisions/containerRevisions.selectors';
-import { ContainerRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { selectRevisions } from '@/v5/store/containers/revisions/containerRevisions.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 
 export const nullableNumberField = Yup.number()
@@ -66,20 +65,9 @@ export const revisionTag = Yup.string()
 			id: 'validation.model.tag.alreadyExisting',
 			defaultMessage: 'This tag is already used within this container',
 		}),
-		async (tagValue, testContext) => {
-			const { containerId } = testContext.parent;
-
-			if (!containerId) return true; // Is a new container, it has no revisions
-
-			const isPending = selectRevisionsPending(getState(), containerId);
-
-			if (isPending) {
-				const { teamspace, project }  = testContext.options.context;
-				await new Promise((resolve) => ContainerRevisionsActionsDispatchers.fetch(teamspace, project, containerId, resolve as any));
-			}
-
-			const revisions = selectRevisions(getState(), containerId);
-			return !revisions.find(({ tag }) => tagValue === tag);
+		(value, testContext) => {
+			const revisions = selectRevisions(getState(), testContext.parent.containerId);
+			return !revisions?.map(({ tag }) => tag.trim().toLocaleLowerCase()).includes(value?.toLocaleLowerCase());
 		},
 	);
 

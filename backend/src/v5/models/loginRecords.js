@@ -134,7 +134,12 @@ LoginRecords.recordFailedAttempt = async (user, ipAddress, userAgent, referer) =
 	}
 };
 
-LoginRecords.initialise = () => db.createIndex(INTERNAL_DB, LOGIN_RECORDS_COL,
-	{ user: 1, loginTime: -1, failed: 1 }, { runInBackground: true });
-
+LoginRecords.initialise = async () => {
+	try {
+		await db.createIndex(INTERNAL_DB, LOGIN_RECORDS_COL,
+			{ user: 1, loginTime: -1, failed: 1 }, { runInBackground: true });
+	} catch (err) {
+		logger.logError(`Failed to create index in login records: ${err.message}`);
+	}
+};
 module.exports = LoginRecords;

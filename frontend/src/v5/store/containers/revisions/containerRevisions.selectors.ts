@@ -38,7 +38,7 @@ export const selectRevisions = createSelector(
 export const selectRevisionsPending = createSelector(
 	selectRevisions,
 	selectContainerById,
-	(revisions, container) => revisions.length !== container.revisionsCount,
+	(revisions, container) => revisions.length !== container?.revisionsCount,
 );
 
 export const selectIsPending: (any, string) => boolean = createSelector(

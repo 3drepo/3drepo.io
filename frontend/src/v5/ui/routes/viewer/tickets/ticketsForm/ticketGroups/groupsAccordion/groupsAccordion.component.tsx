@@ -18,7 +18,7 @@
 import { useContext, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
-import { ProjectsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import AddCircleIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import ColoredGroupsIcon from '@assets/icons/outlined/boxes-outlined.svg';
 import HiddenGroupsIcon from '@assets/icons/outlined/boxes_disabled-outlined.svg';
@@ -38,7 +38,7 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 		highlightedIndex,
 		clearHighlightedIndex,
 	} = useContext(TicketGroupsContext);
-	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
+	const isAdmin = !TicketsCardHooksSelectors.selectReadOnly();
 	const hasClearedOverrides = TicketsCardHooksSelectors.selectTicketHasClearedOverrides();
 	const indexes = indexedOverrides.map(({ index }) => index);
 	const overridesCount = indexedOverrides.length;
@@ -86,8 +86,7 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 					/>
 				</EmptyListMessage>
 			)}
-			{isAdmin
-			&& (
+			{isAdmin && (
 				<NewGroupButton startIcon={<AddCircleIcon />} onClick={addNewGroup}>
 					<FormattedMessage
 						id="ticketCard.groups.addGroup"

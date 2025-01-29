@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const auditLogPassword = require('./templates/auditLogPassword');
+const dailyDigest = require('./templates/dailyDigest');
 const errorNotification = require('./templates/errorNotification');
 const forgotPassword = require('./templates/forgotPassword');
 const forgotPasswordSso = require('./templates/forgotPasswordSSO');
@@ -27,11 +29,13 @@ const MailerConstants = {};
 
 const templates = {
 	verifyUser,
+	dailyDigest,
 	forgotPassword,
 	forgotPasswordSso,
 	errorNotification,
 	modelImportError,
 	zombieProcessingStatuses,
+	auditLogPassword,
 };
 
 MailerConstants.templates = {};

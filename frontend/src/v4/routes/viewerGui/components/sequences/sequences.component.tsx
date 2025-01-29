@@ -59,12 +59,14 @@ interface IProps extends RouteComponentProps<any> {
 	resetLegendPanel: () => void;
 	clearTransformations: () => void;
 	viewpoint: any;
+	teamspace: string;
+	model: string;
 }
 
 const SequenceDetails = ({
 	startDate, endDate, selectedDate, selectedStartDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
 	setStepScale, currentTasks, loadingFrame, rightPanels, toggleActivitiesPanel,
-	fetchActivityDetails, frames, isActivitiesPending, toggleLegend, draggablePanels, viewpoint,
+	fetchActivityDetails, frames, isActivitiesPending, toggleLegend, draggablePanels, viewpoint, teamspace, model
 }) => (
 	<>
 		<SequenceForm />
@@ -86,6 +88,8 @@ const SequenceDetails = ({
 			toggleLegend={toggleLegend}
 			draggablePanels={draggablePanels}
 			viewpoint={viewpoint}
+			teamspace={teamspace}
+			model={model}
 		/>
 		<TasksList
 			tasks={currentTasks}

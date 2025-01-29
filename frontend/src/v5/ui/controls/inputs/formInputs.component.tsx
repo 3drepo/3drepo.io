@@ -18,7 +18,6 @@
 import { ChipSelect, ChipSelectProps } from '@controls/chip/chipSelect/chipSelect.component';
 import { DueDate, DueDateProps } from '@controls/dueDate/dueDate.component';
 import { forwardRef } from 'react';
-import { AssigneesSelect, AssigneesSelectProps } from '@controls/assigneesSelect/assigneesSelect.component';
 import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
 import { Checkbox, CheckboxProps } from './checkbox/checkbox.component';
 import { InputController, InputControllerProps } from './inputController.component';
@@ -44,7 +43,6 @@ export const FormDueDate = (props: InputControllerProps<DueDateProps>) => (<Inpu
 export const FormSelectView = (props: InputControllerProps<SelectViewProps>) => (<InputController Input={SelectView} {...props} />);
 export const FormSelect = (props: InputControllerProps<SelectProps>) => (<InputController Input={Select} {...props} />);
 export const FormChipSelect = (props: InputControllerProps<ChipSelectProps>) => (<InputController Input={({ inputRef, ...chipProps }: any) => <ChipSelect {...chipProps} />} {...props} />);
-export const FormAssigneesSelect = (props: InputControllerProps<AssigneesSelectProps>) => (<InputController Input={AssigneesSelect} {...props} />);
 export const FormSearchSelect = (props: InputControllerProps<SelectProps>) => (<InputController Input={SearchSelect} {...props} />);
 
 // control inputs

@@ -20,13 +20,12 @@ import { PureComponent } from 'react';
 import Check from '@mui/icons-material/Check';
 import { isEmpty } from 'lodash';
 
-import { MEASURE_ACTIONS_ITEMS, MEASURE_ACTIONS_MENU } from '../../../../constants/measure';
+import { MEASURE_ACTIONS_ITEMS, MEASURE_ACTIONS_MENU, SLOPE_UNITS, slopeUnitsToSymbol } from '../../../../constants/measure';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { Viewer } from '../../../../services/viewer/viewer';
 import { EmptyStateInfo } from '../../../components/components.styles';
 import {
-	IconWrapper,
 	MenuList, StyledItemText,
 	StyledListItem
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
@@ -41,6 +40,7 @@ import {
 	MeasureUnit,
 	ViewerBottomActions,
 	ViewsContainer,
+	IconWrapper,
 } from './measurements.styles';
 
 interface IProps {
@@ -50,6 +50,7 @@ interface IProps {
 	measurements: IMeasure[];
 	areaMeasurements: IMeasure[];
 	angleMeasurements: IMeasure[];
+	slopeMeasurements: IMeasure[];
 	lengthMeasurements: IMeasure[];
 	pointMeasurements: IMeasure[];
 	removeMeasurement: (uuid) => void;
@@ -60,6 +61,8 @@ interface IProps {
 	resetMeasurementColors: () => void;
 	measureUnits: string;
 	setMeasureUnits: (units: string) => void;
+	measureSlopeUnits: string;
+	setMeasureSlopeUnits: (units: string) => void;
 	setMeasureEdgeSnapping: (edgeSnapping: boolean) => void;
 	edgeSnappingEnabled: boolean;
 	setMeasureXYZDisplay: (XYZDisplay: boolean) => void;
@@ -88,6 +91,7 @@ export class Measurements extends PureComponent<IProps, IState> {
 			[MEASURE_ACTIONS_ITEMS.EDGE_SNAPPING]: this.handleToggleEdgeSnapping,
 			[MEASURE_ACTIONS_ITEMS.SHOW_XYZ]: this.handleToggleXYZdisplay,
 			[MEASURE_ACTIONS_ITEMS.UNITS_DISPLAYED_IN]: this.handleToggleMeasureUnits,
+			[MEASURE_ACTIONS_ITEMS.SLOPE_UNITS_DISPLAYED_IN]: this.handleToggleMeasureSlopeUnits,
 			[MEASURE_ACTIONS_ITEMS.RESET_COLOURS]: this.handleResetMeasurementColors,
 			[MEASURE_ACTIONS_ITEMS.DELETE_ALL]: this.handleClearMeasurements,
 		};
@@ -114,6 +118,8 @@ export class Measurements extends PureComponent<IProps, IState> {
 
 	private handleToggleMeasureUnits = () => this.props.setMeasureUnits(this.props.measureUnits === 'm' ? 'mm' : 'm' );
 
+	private handleToggleMeasureSlopeUnits = () => this.props.setMeasureSlopeUnits(this.props.measureSlopeUnits === SLOPE_UNITS.DEGREES ? SLOPE_UNITS.PERCENTAGE : SLOPE_UNITS.DEGREES);
+
 	private handleClearMeasurements = () => this.props.clearMeasurements();
 
 	private handleResetMeasurementColors = () => this.props.resetMeasurementColors();
@@ -125,7 +131,7 @@ export class Measurements extends PureComponent<IProps, IState> {
 	private getTitleIcon = () => <MeasureIcon />;
 
 	private renderMeasurementDetails = renderWhenTrue(() => (
-		<AllMeasurementsList {...this.props} units={this.props.measureUnits} />
+		<AllMeasurementsList {...this.props} units={this.props.measureUnits} slopeUnits={this.props.measureSlopeUnits} />
 	));
 
 	private renderFooterContent = () => (
@@ -142,16 +148,17 @@ export class Measurements extends PureComponent<IProps, IState> {
 				// When the model is in feet there shouldnt be the options of change the units
 				.filter(({name}) => name !== MEASURE_ACTIONS_ITEMS.UNITS_DISPLAYED_IN || this.props.modelUnit !== 'ft')
 				.map(( {name, Icon, label }) => (
-				<StyledListItem key={name} onClick={this.menuActionsMap[name]}>
-					<IconWrapper><Icon /></IconWrapper>
-					<StyledItemText>
-						{label}
-						{(name === MEASURE_ACTIONS_ITEMS.EDGE_SNAPPING && this.props.edgeSnappingEnabled) && <Check fontSize="small" />}
-						{(name === MEASURE_ACTIONS_ITEMS.SHOW_XYZ && this.props.XYZdisplay) && <Check fontSize="small" />}
-						{name === MEASURE_ACTIONS_ITEMS.UNITS_DISPLAYED_IN && <MeasureUnit>{this.props.measureUnits}</MeasureUnit>}
-					</StyledItemText>
-				</StyledListItem>
-			))}
+					<StyledListItem key={name} onClick={this.menuActionsMap[name]}>
+						<IconWrapper><Icon /></IconWrapper>
+						<StyledItemText>
+							{label}
+							{(name === MEASURE_ACTIONS_ITEMS.EDGE_SNAPPING && this.props.edgeSnappingEnabled) && <Check fontSize="small" />}
+							{(name === MEASURE_ACTIONS_ITEMS.SHOW_XYZ && this.props.XYZdisplay) && <Check fontSize="small" />}
+							{name === MEASURE_ACTIONS_ITEMS.UNITS_DISPLAYED_IN && <MeasureUnit>{this.props.measureUnits}</MeasureUnit>}
+							{name === MEASURE_ACTIONS_ITEMS.SLOPE_UNITS_DISPLAYED_IN && <MeasureUnit>{slopeUnitsToSymbol(this.props.measureSlopeUnits)}</MeasureUnit>}
+						</StyledItemText>
+					</StyledListItem>
+				))}
 		</MenuList>
 	)
 
@@ -166,7 +173,7 @@ export class Measurements extends PureComponent<IProps, IState> {
 
 	public render() {
 		const { isViewerReady } = this.state;
-		const { areaMeasurements, lengthMeasurements, pointMeasurements, angleMeasurements } = this.props;
+		const { areaMeasurements, lengthMeasurements, pointMeasurements, angleMeasurements, slopeMeasurements } = this.props;
 		return (
 			<ViewsContainer
 				Icon={this.getTitleIcon()}
@@ -175,9 +182,19 @@ export class Measurements extends PureComponent<IProps, IState> {
 				id={this.props.id}
 			>
 				<Container>
-					{this.renderEmptyState(isEmpty(areaMeasurements) && isEmpty(lengthMeasurements) && isEmpty(pointMeasurements) && isEmpty(angleMeasurements))}
+					{this.renderEmptyState(
+						isEmpty(areaMeasurements)
+						&& isEmpty(lengthMeasurements)
+						&& isEmpty(pointMeasurements)
+						&& isEmpty(angleMeasurements)
+						&& isEmpty(slopeMeasurements)
+					)}
 					{this.renderMeasurementDetails(
-							!isEmpty(areaMeasurements) || !isEmpty(lengthMeasurements) || !isEmpty(pointMeasurements) || !isEmpty(angleMeasurements)
+							!isEmpty(areaMeasurements)
+							|| !isEmpty(lengthMeasurements)
+							|| !isEmpty(pointMeasurements)
+							|| !isEmpty(angleMeasurements)
+							|| !isEmpty(slopeMeasurements)
 					)}
 				</Container>
 				{this.renderFooterContent()}

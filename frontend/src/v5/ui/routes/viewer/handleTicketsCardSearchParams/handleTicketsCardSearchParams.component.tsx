@@ -29,9 +29,9 @@ export const HandleTicketsCardSearchParams = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const [ticketId, setTicketId] = useSearchParam('ticketId');
 
-	const [queriesParam, setQueriesParam] = useSearchParam('queries', Transformers.STRING_ARRAY);
-	const [templatesParam, setTemplatesParam] = useSearchParam('templates', Transformers.STRING_ARRAY);
-	const [completedParam, setCompletedParam] = useSearchParam('completed', Transformers.BOOLEAN);
+	const [ticketSearchParam, setTicketSearchParam] = useSearchParam('ticketSearch', Transformers.STRING_ARRAY);
+	const [ticketTemplatesParam, setTicketTemplatesParam] = useSearchParam('ticketTemplates', Transformers.STRING_ARRAY);
+	const [ticketCompletedParam, setTicketCompletedParam] = useSearchParam('ticketCompleted', Transformers.BOOLEAN);
 
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
@@ -52,20 +52,20 @@ export const HandleTicketsCardSearchParams = () => {
 	}, [hasTicketData]);
 	
 	useEffect(() => {
-		if (!templatesParam.length && !queriesParam.length && !completedParam) return;
+		if (!ticketTemplatesParam.length && !ticketSearchParam.length && !ticketCompletedParam) return;
 		ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.TICKETS, true);
-		TicketsCardActionsDispatchers.setTemplateFilters(templatesParam);
-		if (queriesParam.length) {
-			TicketsCardActionsDispatchers.setQueryFilters(queriesParam);
+		TicketsCardActionsDispatchers.setTemplateFilters(ticketTemplatesParam);
+		if (ticketSearchParam.length) {
+			TicketsCardActionsDispatchers.setQueryFilters(ticketSearchParam);
 		}
-		if (completedParam) {
+		if (ticketCompletedParam) {
 			TicketsCardActionsDispatchers.toggleCompleteFilter();
 		}
 
-		setQueriesParam();
-		setCompletedParam();
-		setTemplatesParam();
-	}, [templatesParam, queriesParam, completedParam]);
+		setTicketSearchParam();
+		setTicketCompletedParam();
+		setTicketTemplatesParam();
+	}, [ticketTemplatesParam, ticketSearchParam, ticketCompletedParam]);
 
 	return <></>;
 };
