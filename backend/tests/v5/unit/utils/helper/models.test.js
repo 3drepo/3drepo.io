@@ -382,22 +382,10 @@ const testGetMeshByIdNoMeshData = () => {
 	});
 };
 
-// describe('utils/helper/models', () => {
-// 	testRemoveModelData();
-// 	testGetMeshByIdSucc(true);
-// 	testGetMeshByIdSucc(false);
-// 	testGetMeshByIdNoMesh();
-// 	testGetMeshByIdNoMeshData();
-// });
-
-const dummyTest = () => {
-	describe('dummy test', () => {
-		test('should succeed', () => {
-			expect(true).toEqual(true);
-		});
-	});
-};
-
-describe(determineTestGroup(__filename), () => {
-	dummyTest();
+describe('utils/helper/models', () => {
+	testRemoveModelData();
+	testGetMeshByIdSucc(true);
+	testGetMeshByIdSucc(false);
+	testGetMeshByIdNoMesh();
+	testGetMeshByIdNoMeshData();
 });

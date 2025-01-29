@@ -833,25 +833,13 @@ const testGetFederationMeshInfo = () => {
 	});
 };
 
-// describe(determineTestGroup(__filename), () => {
-// 	testGetNodesBySharedIds();
-// 	testGetNodeById();
-// 	testGetNodesByIds();
-// 	testFindNodesByType();
-// 	testFindStashNodesByType();
-// 	testGetParentMatrix();
-// 	testGetContainerMeshInfo();
-// 	testGetFederationMeshInfo();
-// });
-
-const dummyTest = () => {
-	describe('dummy test', () => {
-		test('should succeed', () => {
-			expect(true).toEqual(true);
-		});
-	});
-};
-
 describe(determineTestGroup(__filename), () => {
-	dummyTest();
+	testGetNodesBySharedIds();
+	testGetNodeById();
+	testGetNodesByIds();
+	testFindNodesByType();
+	testFindStashNodesByType();
+	testGetParentMatrix();
+	testGetContainerMeshInfo();
+	testGetFederationMeshInfo();
 });

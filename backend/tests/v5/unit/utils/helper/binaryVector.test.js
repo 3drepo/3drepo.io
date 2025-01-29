@@ -206,19 +206,7 @@ const testBinaryToStream = () => {
 	});
 };
 
-// describe('utils/helper/binaryVector', () => {
-// 	testBinToJSONArrayVector3d();
-// 	testBinaryToStream();
-// });
-
-const dummyTest = () => {
-	describe('dummy test', () => {
-		test('should succeed', () => {
-			expect(true).toEqual(true);
-		});
-	});
-};
-
-describe(ServiceHelper.determineTestGroup(__filename), () => {
-	dummyTest();
+describe('utils/helper/binaryVector', () => {
+	testBinToJSONArrayVector3d();
+	testBinaryToStream();
 });

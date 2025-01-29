@@ -232,23 +232,11 @@ const testVecTransform = () => {
 	});
 };
 
-// describe('utils/helper/matrix', () => {
-// 	testGetIdentity();
-// 	testMatMultiply();
-// 	testVecMultiply();
-// 	testVecAddition();
-// 	testVecSubtraction();
-// 	testVecTransform();
-// });
-
-const dummyTest = () => {
-	describe('dummy test', () => {
-		test('should succeed', () => {
-			expect(true).toEqual(true);
-		});
-	});
-};
-
-describe(ServiceHelper.determineTestGroup(__filename), () => {
-	dummyTest();
+describe('utils/helper/matrix', () => {
+	testGetIdentity();
+	testMatMultiply();
+	testVecMultiply();
+	testVecAddition();
+	testVecSubtraction();
+	testVecTransform();
 });

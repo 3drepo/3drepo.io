@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/* istanbul ignore file */
+
 const { removeAllFilesFromModel, removeFilesWithMeta } = require('../../services/filesManager');
 const { BinToFaceStringStream } = require('./binaryFace');
 const { BinToVector3dStringStream } = require('./binaryVector');

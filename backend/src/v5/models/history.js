@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* istanbul ignore file */
-
 const { isUUID, isUUIDString } = require('../utils/helper/typeCheck');
 const DbConstants = require('../handler/db.constants');
 const db = require('../handler/db');

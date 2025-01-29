@@ -87,18 +87,6 @@ const testGetRefNodes = () => {
 	});
 };
 
-// describe('models/ref', () => {
-// 	testGetRefNodes();
-// });
-
-const dummyTest = () => {
-	describe('dummy test', () => {
-		test('should succeed', () => {
-			expect(true).toEqual(true);
-		});
-	});
-};
-
-describe(ServiceHelper.determineTestGroup(__filename), () => {
-	dummyTest();
+describe('models/ref', () => {
+	testGetRefNodes();
 });
