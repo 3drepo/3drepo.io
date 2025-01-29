@@ -21,14 +21,15 @@ import { isRangeOperator, isTextType, isSelectType, isDateType } from '../../car
 import { FormNumberField, FormTextField, FormMultiSelect, FormDateTime } from '@controls/inputs/formInputs.component';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
 import { useEffect } from 'react';
-import { isArray, isEmpty } from 'lodash';
+import { compact, isArray, isEmpty } from 'lodash';
 import { CardFilterType } from '../../cardFilters.types';
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useParams } from 'react-router-dom';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { DateRangeInput } from './rangeInput/dateRangeInput.component';
 import { NumberRangeInput } from './rangeInput/numberRangeInput.component';
+import { mapArrayToFormArray, mapFormArrayToArray } from '@/v5/helpers/form.helper';
 
 type FilterFolrmValuesType = {
 	module: string,
@@ -56,13 +57,10 @@ export const FilterFormValues = ({ module, property, type }: FilterFolrmValuesTy
 	
 	const maxFields = getOperatorMaxFieldsAllowed(operator);
 	const isRangeOp = isRangeOperator(operator);
-	const getEmptyValue = () => {
-		if (isSelectType(type)) return [];
-		if (isRangeOp) return ['', ''];
-		return '';
-	};
-	const emptyValue = { value: getEmptyValue() };
-	const selectOptions = TicketsHooksSelectors.selectAllValuesByModuleAndProperty(containerOrFederation, module, property, type);
+	const emptyValue = { value: (isRangeOp ? ['', ''] : '') };
+	const selectOptions = type === 'template' ?
+		TicketsHooksSelectors.selectTemplatesNames(containerOrFederation)
+		: TicketsCardHooksSelectors.selectPropertyOptions(containerOrFederation, module, property);
 
 	useEffect(() => {
 		if (!fields.length && maxFields > 0) {
@@ -125,11 +123,15 @@ export const FilterFormValues = ({ module, property, type }: FilterFolrmValuesTy
 			</>
 		);
 	}
-	// @ts-ignore
-	if (isSelectType(type) && isArray(fields[0]?.value)) {
+	if (isSelectType(type)) {
 		return (
-			<FormMultiSelect name={`${name}.0.value`} formError={error?.[0]?.value}>
-				{selectOptions.map((val) => <MultiSelectMenuItem key={val} value={val}>{val}</MultiSelectMenuItem>)}
+			<FormMultiSelect
+				name={name}
+				formError={error?.[0]}
+				transformValueIn={mapFormArrayToArray}
+				transformChangeEvent={(e) => mapArrayToFormArray(compact(e.target.value))}
+			>
+				{(selectOptions || []).map((val) => <MultiSelectMenuItem key={val} value={val}>{val}</MultiSelectMenuItem>)}
 			</FormMultiSelect>
 		);
 	}

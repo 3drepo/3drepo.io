@@ -90,9 +90,7 @@ export const UploadContainerRevisionForm = ({
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const allUploadsComplete = ContainerRevisionsHooksSelectors.selectUploadIsComplete();
 	const revisionsArePending = ContainerRevisionsHooksSelectors.selectRevisionsPending(presetContainerId);
-	const revisions = ContainerRevisionsHooksSelectors.selectRevisions(presetContainerId);
 	const presetContainer = ContainersHooksSelectors.selectContainerById(presetContainerId);
-	const [alreadyExistingTags, setAlreadyExistingTags] = useState([]);
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 
 	const formData = useForm<FormType>({
@@ -100,7 +98,6 @@ export const UploadContainerRevisionForm = ({
 		resolver: !isUploading ? yupResolver(UploadsSchema) : undefined,
 		context: {
 			alreadyExistingNames: [],
-			alreadyExistingTags,
 			teamspace,
 			project,
 		},
@@ -200,11 +197,6 @@ export const UploadContainerRevisionForm = ({
 		if (!presetContainerId || !revisionsArePending) return;
 		ContainerRevisionsActionsDispatchers.fetch(teamspace, project, presetContainerId);
 	}, []);
-
-	useEffect(() => {
-		if (!revisions.length) return;
-		setAlreadyExistingTags(revisions.map((r) => r.tag));
-	}, [revisions.length]);
 
 	return (
 		<FormProvider {...formData}>

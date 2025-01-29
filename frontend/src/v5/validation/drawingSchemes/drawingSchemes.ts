@@ -16,7 +16,7 @@
  */
 import * as Yup from 'yup';
 import { revisionDesc } from '../containerAndFederationSchemes/validators';
-import { desc, name, alphaNumericHyphens, uploadFile, trimmedString, numberRange } from '../shared/validators';
+import { desc, name, alphaNumericHyphens, trimmedString, numberRange } from '../shared/validators';
 import { formatMessage } from '@/v5/services/intl';
 import { selectRevisions } from '@/v5/store/drawings/revisions/drawingRevisions.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
@@ -84,7 +84,6 @@ const statusCodeAndRevisionCodeMustBeUniqueMessage = formatMessage({
 export const isUniqueRevisionStatusError = (error) => error === statusCodeAndRevisionCodeMustBeUniqueMessage;
 
 export const ListItemSchema = Yup.object().shape({
-	file: uploadFile,
 	statusCode: Yup.string().required(
 		formatMessage({
 			id: 'validation.drawing.statusCode.error.required',

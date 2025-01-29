@@ -16,7 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { orderBy, uniq } from 'lodash';
+import { orderBy } from 'lodash';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ITicketsState } from './tickets.redux';
 import { ticketWithGroups } from './ticketsGroups.helpers';
@@ -50,6 +50,11 @@ export const selectTemplates = createSelector(
 	selectTicketsDomain,
 	(state, modelId) => modelId,
 	(state, modelId) => state.templatesByModelId[modelId] || [],
+);
+
+export const selectTemplatesNames = createSelector(
+	selectTemplates,
+	(templates) => templates.map(({ name }) => name),
 );
 
 export const selectTemplateById = createSelector(
@@ -121,30 +126,4 @@ export const selectStatusConfigByTemplateId = createSelector(
 	// select template by project
 	(state, ...args) => selectCurrentProjectTemplateById(state, args.at(-1)),
 	(ticketTemplate, projectTemplate) => ticketTemplate?.config?.status || projectTemplate?.config?.status || DEFAULT_STATUS_CONFIG,
-);
-
-export const selectAllValuesByModuleAndProperty = createSelector(
-	selectTemplates,
-	selectRiskCategories,
-	(state, modelId, module) => module,
-	(state, modelId, module, property) => property,
-	(state, modelId, module, property, type) => type,
-	(templates, riskCategories, module, property, type) => {
-		if (!type) return;
-		if (type === 'template') return templates.map(({ name }) => name);
-		const allValues = [];
-		templates.forEach((template) => {
-			const matchingModule = module ? template.modules.find((mod) => (mod.name || mod.type) === module)?.properties : template.properties;
-			const matchingProperty = matchingModule?.find(({ name, type: t }) => (name === property) && (['manyOf', 'oneOf'].includes(t)));
-			if (!matchingProperty) return;
-			const values = matchingProperty?.values;
-			if (values === 'riskCategories') {
-				allValues.push(...riskCategories);
-				return;
-			}
-			if (values.length < 1) return;
-			allValues.push(...values);
-		});
-		return uniq(allValues);
-	},
 );

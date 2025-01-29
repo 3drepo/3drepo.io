@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addModel, deleteModel, getModelList } = require('./commons/modelList');
+const { addModel, deleteModel, getModelList, getModelMD5Hash } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getContainerById, getContainers, updateModelSettings } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisionFormat, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
@@ -132,5 +132,7 @@ Containers.updateSettings = updateModelSettings;
 
 Containers.getSettings = (teamspace, container) => getContainerById(teamspace,
 	container, { corID: 0, account: 0, permissions: 0 });
+
+Containers.getRevisionMD5Hash = getModelMD5Hash;
 
 module.exports = Containers;

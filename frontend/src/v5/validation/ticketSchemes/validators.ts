@@ -19,7 +19,7 @@ import * as Yup from 'yup';
 import { requiredNumber, numberRange, trimmedString, INVALID_DATE_RANGE_MESSAGE, INVALID_NUMBER_RANGE_MESSAGE, ERROR_REQUIRED_FIELD_MESSAGE } from '../shared/validators';
 import { MAX_LONG_TEXT_LENGTH, MAX_TEXT_LENGTH } from '@/v5/store/tickets/tickets.validators';
 import { getOperatorMaxFieldsAllowed } from '@components/viewer/cards/cardFilters/filterForm/filterForm.helpers';
-import { isRangeOperator, isDateType, isSelectType, isTextType } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
+import { isRangeOperator, isDateType, isTextType } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
 import { CardFilterOperator, CardFilterType } from '@components/viewer/cards/cardFilters/cardFilters.types';
 import { formatMessage } from '@/v5/services/intl';
 
@@ -37,13 +37,6 @@ const getValueValidator = (type: CardFilterType) => {
 			);
 	}
 	if (isDateType(type) || type === 'number') return requiredNumber();
-	if (isSelectType(type)) return Yup.array().of(trimmedString).required().test({
-		message: formatMessage({
-			defaultMessage: 'This must have at least one value',
-			id: 'validators.select.maxLength',
-		}),
-		test: (arr) => arr.length > 0,
-	  });
 	return trimmedString;
 };
 

@@ -68,7 +68,7 @@ const DATE_FILTER_OPERATOR_LABEL: Record<CardFilterOperator, string> = {
 };
 
 export const isDateType = (type: CardFilterType) => ['date', 'pastDate', 'sequencing'].includes(type);
-export const isTextType = (type: CardFilterType) => ['template', 'ticketId', 'ticketTitle', 'text', 'longText'].includes(type);
+export const isTextType = (type: CardFilterType) => ['ticketId', 'ticketTitle', 'text', 'longText'].includes(type);
 export const isSelectType = (type: CardFilterType) => ['template', 'owner', 'oneOf', 'manyOf'].includes(type);
 
 export const getFilterOperatorLabels = (type: CardFilterType) => isDateType(type) ? DATE_FILTER_OPERATOR_LABEL : FILTER_OPERATOR_LABEL;

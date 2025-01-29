@@ -62,15 +62,11 @@ export const FilterSelection = () => {
 						<TicketFiltersSelectionList onFilterClick={setSelectedFilter} />
 					</TicketsFiltersModalItem>
 					<TicketsFiltersModalItem $visible={!showFiltersList}>
-						{
-							selectedFilter && (
-								<FilterForm
-									{...(selectedFilter || {} as any)}
-									onSubmit={TicketsCardActionsDispatchers.upsertFilter}
-									onCancel={clearFilter}
-								/>
-							)
-						}
+						<FilterForm
+							{...(selectedFilter || {} as any)}
+							onSubmit={TicketsCardActionsDispatchers.upsertFilter}
+							onCancel={clearFilter}
+						/>
 					</TicketsFiltersModalItem>
 				</TicketsFiltersModal>
 			</SearchContextComponent>
