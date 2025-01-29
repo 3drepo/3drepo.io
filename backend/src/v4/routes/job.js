@@ -16,10 +16,13 @@
  */
 
 "use strict";
+
+const { v5Path } = require("../../interop");
+const { routeDeprecated } = require(`${v5Path}/middleware/common`);
+
 (function () {
 	const express = require("express");
 	const router = express.Router({ mergeParams: true });
-	const { resourceNotAvailable } = require("../middlewares/middlewares");
 
 	/**
 	 * @apiDefine Jobs Jobs
@@ -54,7 +57,7 @@
 	 * 	color:"#ffff00"
 	 * }
 	 */
-	router.post("/jobs", resourceNotAvailable("POST: /v5/teamspaces/{teamspace}/roles"));
+	router.post("/jobs", routeDeprecated("POST: /v5/teamspaces/{teamspace}/roles"));
 
 	/**
 	 * @api {put} /:teamspace/jobs/:jobId Update job
@@ -79,7 +82,7 @@
 	 * HTTP/1.1 200 OK
 	 * {}
 	 */
-	router.put("/jobs/:jobId", resourceNotAvailable("PATCH: /v5/teamspaces/{teamspace}/roles/{role}"));
+	router.put("/jobs/:jobId", routeDeprecated("PATCH: /v5/teamspaces/{teamspace}/roles/{role}"));
 
 	/**
 	 * @api {get} /:teamspace/jobs List all jobs
@@ -112,7 +115,7 @@
 	 * 	}
 	 * ]
 	 */
-	router.get("/jobs", resourceNotAvailable("GET: /v5/teamspaces/{teamspace}/roles"));
+	router.get("/jobs", routeDeprecated("GET: /v5/teamspaces/{teamspace}/roles"));
 
 	/**
 	 * @api {post} /:teamspace/jobs/:jobId/:user Assign a job
@@ -132,7 +135,7 @@
 	 * HTTP/1.1 200 OK
 	 * {}
 	 */
-	router.post("/jobs/:jobId/:user", resourceNotAvailable("PATCH: /v5/teamspaces/{teamspace}/roles/{role}"));
+	router.post("/jobs/:jobId/:user", routeDeprecated("PATCH: /v5/teamspaces/{teamspace}/roles/{role}"));
 
 	/**
 	 * @api {delete} /:teamspace/jobs/:jobId Delete a job
@@ -151,7 +154,7 @@
 	 * HTTP/1.1 200 OK
 	 * {}
 	 */
-	router.delete("/jobs/:jobId", resourceNotAvailable("DELETE: /v5/teamspaces/{teamspace}/roles/{role}"));
+	router.delete("/jobs/:jobId", routeDeprecated("DELETE: /v5/teamspaces/{teamspace}/roles/{role}"));
 
 	module.exports = router;
 }());

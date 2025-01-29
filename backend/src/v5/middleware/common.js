@@ -15,6 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { createResponseCode, templates } = require('../utils/responseCodes');
+const { respond } = require('../utils/responder');
+
 const Common = {};
 
 Common.validateMany = (validators) => {
@@ -26,6 +29,11 @@ Common.validateMany = (validators) => {
 		}
 	};
 	return validateAll;
+};
+
+Common.routeDeprecated = (newEndpoint) => (req, res) => {
+	const errorMessage = `This route is deprecated${newEndpoint ? `, please use ${newEndpoint} instead.` : '.'}`;
+	respond(req, res, createResponseCode(templates.resourceNotAvailable, errorMessage));
 };
 
 module.exports = Common;
