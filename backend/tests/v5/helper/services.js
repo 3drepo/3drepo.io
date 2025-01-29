@@ -1018,6 +1018,7 @@ ServiceHelper.socket.joinRoom = (socket, data) => new Promise((resolve, reject) 
 });
 
 ServiceHelper.closeApp = async (server) => {
+	await queue.purgeQueues();
 	if (server) await server.close();
 	await db.reset();
 	EventsManager.reset();
