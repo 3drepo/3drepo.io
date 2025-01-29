@@ -18,7 +18,7 @@
 const { getFileAsStream } = require('../../../../../src/v5/services/filesManager');
 const { src } = require('../../../helper/path');
 
-const { generateRandomString, generateRandomNumber, generateUUID, generateUUIDString, determineTestGroup } = require('../../../helper/services');
+const { generateRandomString, generateRandomNumber, generateUUID, generateUUIDString } = require('../../../helper/services');
 
 const ModelHelper = require(`${src}/utils/helper/models`);
 
