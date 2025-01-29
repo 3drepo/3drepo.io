@@ -411,6 +411,12 @@ JSONAssets.getAllSuperMeshMappingForFederation = async (teamspace, federation, b
 	return { readStream: outStream };
 };
 
+JSONAssets.getBundleMappings = async (teamspace, container, bundleID) => {
+	const fileName = `${bundleID}.json.mpc`;
+	const file = await getJSONFileStream(teamspace, container, fileName);
+	return file;
+};
+
 JSONAssets.getModelProperties = async (
 	teamspace, project, model, branch, rev, username, isFed) => {
 	const jsonFile = await getHelperJSONFile(

@@ -362,6 +362,12 @@ db.createUnityBundle = async (teamspace, modelId, bundleId, data) => {
 	await FilesManager.storeFile(teamspace, collection, bundleFileName, data);
 };
 
+db.createBundleMapping = async (teamspace, modelId, bundleId, data) => {
+	const fileName = `${bundleId}.json.mpc`;
+	const collection = `${modelId}.stash.json_mpc.ref`;
+	await FilesManager.storeFile(teamspace, collection, fileName, data);
+};
+
 db.createFile = async (teamspace, modelId, fileId, data) => {
 	const collection = `${modelId}.scene.ref`;
 	await FilesManager.storeFile(teamspace, collection, fileId, data);

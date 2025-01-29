@@ -1521,6 +1521,38 @@ const testGetAllSuperMeshMappingForFederation = () => {
 	});
 };
 
+const testGetBundleMappings = () => {
+	describe('Get the mapping for a bunle', () => {
+		const teamspace = ServiceHelper.generateRandomString();
+		const contId = ServiceHelper.generateUUIDString();
+		const bundleId = ServiceHelper.generateUUIDString();
+
+		const mockFile = {
+			readStream: ServiceHelper.generateRandomString(),
+		};
+
+		const fileExp = {
+			readStream: mockFile.readStream,
+			mimeType: 'application/json',
+		};
+
+		test('should assemble the file name, retrieve the stream, and return it', async () => {
+			FilesManager.getFileAsStream.mockResolvedValueOnce(mockFile);
+
+			const file = await JSONAssets.getBundleMappings(teamspace, contId, bundleId);
+
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(
+				teamspace,
+				`${contId}.stash.json_mpc.ref`,
+				`${bundleId}.json.mpc`,
+			);
+
+			expect(file).toEqual(fileExp);
+		});
+	});
+};
+
 const testGetModelPropertiesForContainer = () => {
 	describe('Get model properties for Container from JSON Files', () => {
 		const teamspace = ServiceHelper.generateRandomString();
@@ -2290,6 +2322,7 @@ const testGetModelPropertiesForFederation = () => {
 describe('models/jsonAssets', () => {
 	testGetAllSuperMeshMappingForContainer();
 	testGetAllSuperMeshMappingForFederation();
+	testGetBundleMappings();
 	testGetModelPropertiesForContainer();
 	testGetModelPropertiesForFederation();
 });
