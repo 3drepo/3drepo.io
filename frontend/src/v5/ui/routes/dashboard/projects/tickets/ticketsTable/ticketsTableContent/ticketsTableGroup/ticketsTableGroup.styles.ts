@@ -16,7 +16,6 @@
  */
 
 import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.component';
-import { Typography } from '@controls/typography';
 import styled, { css } from 'styled-components';
 import { ResizableTable } from '@controls/resizableTableContext/resizableTable/resizableTable.component';
 
@@ -64,7 +63,7 @@ export const Group = styled.div`
 `;
 
 export const Table = styled(ResizableTable)<{ $empty?: boolean }>`
-	overflow-x: hidden;
+	overflow-x: unset;
 	${({ $empty }) => $empty && css`
 		${Group} {
 			width: unset;
@@ -75,14 +74,11 @@ export const Table = styled(ResizableTable)<{ $empty?: boolean }>`
 export const NewTicketRow = styled.div<{ disabled?: boolean }>`
 	width: 100%;
 	height: 37px;
-	font-weight: 600;
 	cursor: pointer;
 	color: ${({ theme }) => theme.palette.base.main};
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	display: flex;
-	align-items: center;
-	padding-left: 15px;
-	gap: 6px;
+	display: grid;
+	position: relative;
 	z-index: 11;
 
 	${({ disabled }) => disabled && css`
@@ -92,8 +88,14 @@ export const NewTicketRow = styled.div<{ disabled?: boolean }>`
 	`}
 `;
 
-export const NewTicketText = styled(Typography).attrs({
-	variant: 'body1',
-})`
+export const NewTicketText = styled.div`
 	font-weight: 600;
+	${({ theme }) => theme.typography.body1}
+
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	position: sticky;
+	left: 15px;
+	width: fit-content;
 `;

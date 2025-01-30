@@ -129,8 +129,8 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 									disabled={newTicketButtonIsDisabled}
 									TriggerButton={(
 										<NewTicketRow disabled={newTicketButtonIsDisabled}>
-											<AddCircleIcon />
 											<NewTicketText>
+												<AddCircleIcon />
 												<FormattedMessage id="ticketTable.row.newTicket" defaultMessage="New ticket" />
 											</NewTicketText>
 										</NewTicketRow>

@@ -45,9 +45,14 @@ export const Container = styled(ScrollableContainer)`
 			padding-top: 17px;
 		}
 		
-		&:not(:last-of-type) {
-			padding-bottom: 17px;
+		&:not(:last-of-type)::after {
+			content: '';
+			display: block;
+			position: sticky;
+			left: 0;
 			border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
+			height: 17px;
+			width: calc(100vw - 161px);
 		}
 
 		${CollapsedItemContainer} {
