@@ -497,12 +497,12 @@ const testGetAssetMaps = () => {
 			const prevRevResult = getContResult(C1, R2Id);
 			const contValidRevs = [
 				['trying to access current rev via rev ID', getContRoute(), true, curRevResult],
-				['trying to access current without supplying a revision', getContRoute({ revisionId: undefined }), true, curRevResult],
+				['trying to access current without supplying a revision', getContRoute({ revisionId: null }), true, curRevResult],
 				['trying to access previous via rev ID', getContRoute({ revisionId: R2Id }), true, prevRevResult],
 				['trying to access current with viewer via rev ID', getContRoute({ key: viewerKey }), true, curRevResult],
 				['trying to access current with commenter without supplying a revision', getContRoute({ key: commenterKey }), true, curRevResult],
-				['trying to access current with viewer without supplying a revision', getContRoute({ revisionId: undefined, key: viewerKey }), true, curRevResult],
-				['trying to access current with commenter without supplying a revision', getContRoute({ revisionId: undefined, key: commenterKey }), true, curRevResult],
+				['trying to access current with viewer without supplying a revision', getContRoute({ revisionId: null, key: viewerKey }), true, curRevResult],
+				['trying to access current with commenter without supplying a revision', getContRoute({ revisionId: null, key: commenterKey }), true, curRevResult],
 			];
 
 			// Void Container Tests
@@ -512,9 +512,9 @@ const testGetAssetMaps = () => {
 				['trying to access void revision via rev ID (admin)', getContRoute({ modelId: C3Id, revisionId: R4Id }), true, voidRevResult],
 				['trying to access void revision via rev ID (viewer)', getContRoute({ modelId: C3Id, revisionId: R4Id, key: viewerKey }), true, voidRevResult],
 				['trying to access void revision via rev ID (commenter)', getContRoute({ modelId: C3Id, revisionId: R4Id, key: commenterKey }), true, voidRevResult],
-				['getting latest form container with newer void revision without supplying a revision (admin)', getContRoute({ modelId: C3Id, revisionId: undefined }), true, validRevResultC3],
-				['getting latest form container with newer void revision without supplying a revision (viewer)', getContRoute({ modelId: C3Id, revisionId: undefined, key: viewerKey }), true, validRevResultC3],
-				['getting latest form container with newer void revision without supplying a revision (commenter)', getContRoute({ modelId: C3Id, revisionId: undefined, key: commenterKey }), true, validRevResultC3],
+				['getting latest form container with newer void revision without supplying a revision (admin)', getContRoute({ modelId: C3Id, revisionId: null }), true, validRevResultC3],
+				['getting latest form container with newer void revision without supplying a revision (viewer)', getContRoute({ modelId: C3Id, revisionId: null, key: viewerKey }), true, validRevResultC3],
+				['getting latest form container with newer void revision without supplying a revision (commenter)', getContRoute({ modelId: C3Id, revisionId: null, key: commenterKey }), true, validRevResultC3],
 			];
 
 			// NoFile Container Tests
@@ -523,9 +523,9 @@ const testGetAssetMaps = () => {
 				['trying to access noFile revision via rev ID (admin)', getContRoute({ modelId: C4Id, revisionId: R6Id }), true, noFileRevResult],
 				['trying to access noFile revision via rev ID (viewer)', getContRoute({ modelId: C4Id, revisionId: R6Id, key: viewerKey }), true, noFileRevResult],
 				['trying to access noFile revision via rev ID (commenter)', getContRoute({ modelId: C4Id, revisionId: R6Id, key: commenterKey }), true, noFileRevResult],
-				['trying to access noFile revision without supplying a revision (admin)', getContRoute({ modelId: C4Id, revisionId: undefined }), true, noFileRevResult],
-				['trying to access noFile revision without supplying a revision (viewer)', getContRoute({ modelId: C4Id, revisionId: undefined, key: viewerKey }), true, noFileRevResult],
-				['trying to access noFile revision without supplying a revision (commenter)', getContRoute({ modelId: C4Id, revisionId: undefined, key: commenterKey }), true, noFileRevResult],
+				['trying to access noFile revision without supplying a revision (admin)', getContRoute({ modelId: C4Id, revisionId: null }), true, noFileRevResult],
+				['trying to access noFile revision without supplying a revision (viewer)', getContRoute({ modelId: C4Id, revisionId: null, key: viewerKey }), true, noFileRevResult],
+				['trying to access noFile revision without supplying a revision (commenter)', getContRoute({ modelId: C4Id, revisionId: null, key: commenterKey }), true, noFileRevResult],
 			];
 
 			// Federation tests
