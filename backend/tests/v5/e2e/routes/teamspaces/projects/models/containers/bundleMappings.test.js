@@ -129,7 +129,7 @@ const testBundleMappings = () => {
 				modelId = container._id,
 				bundleId = container.bundle.id,
 				key = users.tsAdmin.apiKey,
-			} = {}) => `/v5/teamspaces/${ts}/projects/${projectId}/containers/${modelId}/bundleMappings/${bundleId}?key=${key}`;
+			} = {}) => `/v5/teamspaces/${ts}/projects/${projectId}/containers/${modelId}/assets/bundleMappings/${bundleId}?key=${key}`;
 
 			// Basic tests
 			const randomString = ServiceHelper.generateRandomString();

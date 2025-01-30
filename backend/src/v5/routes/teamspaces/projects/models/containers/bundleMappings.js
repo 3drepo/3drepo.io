@@ -37,7 +37,7 @@ const establishRoutes = () => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/containers/{model}/bundleMappings/{bundle}:
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{model}/assets/bundleMappings/{bundle}:
 	 *   get:
 	 *     description: Get the unity bundle or repo bundle mpc json file.
 	 *     tags: [Models]

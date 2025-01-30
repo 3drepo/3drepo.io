@@ -65,7 +65,7 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/views', CreateViewRoutes());
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/revisions', CreateGeneralRevisionRoutes(modelTypes.CONTAINER));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/metadata', MetadataRoutes);
-	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/bundleMappings', BundleMappingsRoutes);
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/assets/bundleMappings', BundleMappingsRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/assets', BundleRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/assets/textures', TextureRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/assets/meshes', MeshRoutes);
