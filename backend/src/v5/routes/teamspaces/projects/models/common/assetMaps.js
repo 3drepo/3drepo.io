@@ -33,19 +33,23 @@ const getHeaders = (cache = false) => {
 };
 
 const getAssetMaps = (modelType) => async (req, res) => {
-	const { teamspace, model, revision } = req.params;
-	const branch = revision ? undefined : DbConstants.MASTER_BRANCH_NAME;
+	const { teamspace, model } = req.params;
 
 	try {
 		if (modelType === modelTypes.CONTAINER) {
+			const { revision } = req.query;
+			const branch = revision ? undefined : DbConstants.MASTER_BRANCH_NAME;
+
 			const { readStream } = await JSONAssets.getAllSuperMeshMappingForContainer(
 				teamspace, model, branch, revision);
 			const headers = getHeaders(revision);
 			const mimeType = 'application/json';
 			writeCustomStreamRespond(req, res, templates.ok, readStream, undefined, { mimeType }, headers);
 		} else {
+			const branch = DbConstants.MASTER_BRANCH_NAME;
+
 			const { readStream } = await JSONAssets.getAllSuperMeshMappingForFederation(
-				teamspace, model, branch, revision);
+				teamspace, model, branch);
 			const mimeType = 'application/json';
 			writeCustomStreamRespond(req, res, templates.ok, readStream, undefined, { mimeType });
 		}
@@ -62,130 +66,12 @@ const establishRoutes = (modelType) => {
 		[modelTypes.FEDERATION]: hasReadAccessToFederation,
 	};
 
-	if (modelType === modelTypes.CONTAINER) {
-		/**
-		 * @openapi
-		 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/assetMaps/revision/{revision}:
-		 *   get:
-		 *     description: Get asset maps for the specified model and revision.
-		 *     tags: [Models]
-		 *     operationId: getAssetMaps
-		 *     parameters:
-		 *       - name: teamspace
-		 *         description: Name of teamspace
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *       - name: project
-		 *         description: Project ID
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *       - name: container
-		 *         description: Container ID
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *       - name: revision
-		 *         description: Revision ID
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *     responses:
-		 *       401:
-		 *         description: 401 Unauthorized
-		 *         content:
-		 *           application/json:
-		 *             schema:
-		 *               oneOf:
-		 *                 - $ref: "#/components/responses/notLoggedIn"
-		 *                 - $ref: "#/components/responses/notAuthorized"
-		 *       404:
-		 *         description: 404 Not Found
-		 *         content:
-		 *           application/json:
-		 *             schema:
-	 	 *               oneOf:
-	 	 *                 - $ref: "#/components/responses/teamspaceNotFound"
-	 	 *                 - $ref: "#/components/responses/projectNotFound"
-	 	 *                 - $ref: "#components/responses/containerNotFound"
-	 	 *                 - $ref: "#components/responses/revisionNotFound"
-		 *       200:
-		 *         description: Returns list of supermeshes and their attributes
-		 *         content:
-		 *           application/json:
-		 *             schema:
-		 *               type: object
-		 *               properties:
-		 *                 model:
-		 *                   type: string
-		 *                   description: Model ID
-		 *                   example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
-		 *                 supermeshes:
-		 *                   type: array
-		 *                   items:
-		 *                     type: object
-		 *                     properties:
-		 *                       id:
-		 *                         type: string
-		 *                         description: ID of the supermesh
-		 *                         example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
-		 *                       data:
-		 *                         type: object
-		 *                         description: data describing this supermesh
-		 *                         properties:
-		 *                           numberOfIDs:
-		 *                             type: number
-		 *                             description: number of IDs in this mapping
-		 *                             example: 5000
-		 *                           maxGeoCount:
-		 *                             type: number
-		 *                             description: number of maximum geometry
-		 *                             example: 5000
-		 *                           mapping:
-		 *                             type: array
-		 *                             description: Array containing the mapping of geometry to supermesh
-		 *                             items:
-		 *                               type: object
-		 *                               properties:
-		 *                                 name:
-		 *                                   type: string
-		 *                                   description: geometry ID
-		 *                                   example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
-		 *                                 sharedID:
-		 *                                   type: string
-		 *                                   description: shared ID
-		 *                                   example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
-		 *                                 min:
-		 *                                  type: array
-		 *                                  description: The minimum coordinates of the geometry (x,y,z)
-		 *                                  items:
-		 *                                    type: number
-		 *                                    example: 23.45
-		 *                                 max:
-		 *                                  type: array
-		 *                                  description: The maximum coordinates of the geometry (x,y,z)
-		 *                                  items:
-		 *                                    type: number
-		 *                                    example: 23.45
-		 *                                 usage:
-		 *                                   type: string
-		 *                                   description: ID of the supermesh using this geometry object.
-		 *                                   example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
-		 */
-		router.get('/revision/:revision', hasReadAccessToModel[modelType], getAssetMaps(modelType));
-	}
-
 	if (modelType === modelTypes.CONTAINER || modelType === modelTypes.FEDERATION) {
 		/**
 		 * @openapi
-		 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/assetMaps/:
+		 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/assets/supermeshes:
 		 *   get:
-		 *     description: Get asset maps for the specified model and revision.
+		 *     description: Get asset maps for the specified model for the head revision or a specific revision.
 		 *     tags: [Models]
 		 *     operationId: getAssetMaps
 		 *     parameters:
@@ -210,6 +96,12 @@ const establishRoutes = (modelType) => {
 		 *           enum: [containers, federations]
 		 *       - name: model
 		 *         description: Model ID
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: revision
+		 *         description: Revision ID
 		 *         in: path
 		 *         required: true
 		 *         schema:
@@ -302,7 +194,7 @@ const establishRoutes = (modelType) => {
 		 *                                         description: ID of the supermesh using this geometry object.
 		 *                                         example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
 		 */
-		router.get('/revision/master/head', hasReadAccessToModel[modelType], getAssetMaps(modelType));
+		router.get('/', hasReadAccessToModel[modelType], getAssetMaps(modelType));
 	}
 
 	return router;

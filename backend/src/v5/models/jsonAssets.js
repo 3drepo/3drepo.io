@@ -383,8 +383,8 @@ JSONAssets.getAllSuperMeshMappingForContainer = async (teamspace, container, bra
 	return { readStream: outStream };
 };
 
-JSONAssets.getAllSuperMeshMappingForFederation = async (teamspace, federation, branch, rev) => {
-	const subModelRefs = await Ref.getRefNodes(teamspace, federation, branch, rev);
+JSONAssets.getAllSuperMeshMappingForFederation = async (teamspace, federation, branch) => {
+	const subModelRefs = await Ref.getRefNodes(teamspace, federation, branch, undefined);
 
 	const getSubModelInfoProms = subModelRefs.map(async ({ owner, project }) => {
 		const revNode = await History.findLatest(owner, project, { _id: 1 });

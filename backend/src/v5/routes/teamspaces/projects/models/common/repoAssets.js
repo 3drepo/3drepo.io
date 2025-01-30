@@ -58,7 +58,7 @@ const establishRoutes = (modelType) => {
 		 * @openapi
 		 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/assets/properties:
 		 *   get:
-		 *     description: Get list of repo assets for the specified model for the head revision or a specific revision
+		 *     description: Get list of repo assets for the specified model for the head revision or a specific revision.
 		 *     tags: [Models]
 		 *     operationId: getRepoAssets
 		 *     parameters:
