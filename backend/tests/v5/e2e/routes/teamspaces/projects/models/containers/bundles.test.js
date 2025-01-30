@@ -193,7 +193,7 @@ const testAssetBundles = () => {
 				['the Unity bundle does not exist', getContRoute({ bundleId: invalidBundleId, path: repoPath }), false, templates.fileNotFound],
 				['the user is not a member of the teamspace', getContRoute({ bundleId: repoBundleId, path: repoPath, key: nobodyKey }), false, templates.teamspaceNotFound],
 				['the user does not have access to the model', getContRoute({ bundleId: repoBundleId, path: repoPath, key: noProjAccKey }), false, templates.notAuthorized],
-				['the bundle is of wrong type', getContRoute({ bundleId: repoBundleId, path: repoPath }), false, templates.fileNotFound],
+				['the bundle is of wrong type', getContRoute({ bundleId: repoBundleId }), false, templates.fileNotFound],
 			];
 
 			// Valid Unitybundle tests
