@@ -18,7 +18,7 @@
 const { v5Path } = require('../../../interop');
 
 const DBHandler = require(`${v5Path}/handler/db`);
-const { createRole } = require(`${v5Path}/models/jobs`);
+const { createRole } = require(`${v5Path}/models/roles`);
 const { getAllTemplates } = require(`${v5Path}/models/tickets.templates`);
 const { basePropertyLabels, presetEnumValues, propTypes } = require(`${v5Path}/schemas/tickets/templates.constants`);
 const { getArrayDifference } = require(`${v5Path}/utils/helper/arrays`);
@@ -41,7 +41,7 @@ const updateTicketProperties = async (teamspace, templateToRoleProps, roleNamesT
 
 		const roleProps = templateToRoleProps[UUIDToString(ticket.type)];
 		roleProps.forEach(({ moduleName, propertyName }) => {
-			const propValue = moduleName ? ticket.modules[moduleName][propertyName] : ticket.properties[propertyName];
+			const propValue = moduleName ? ticket.modules[moduleName]?.[propertyName] : ticket.properties[propertyName];
 
 			if (!propValue) {
 				return;
@@ -84,13 +84,16 @@ const updateTemplateProperties = async (teamspace) => {
 
 	const templateUpdates = [];
 
-	const updateTemplateProps = (templateId, moduleName, properties, templateUpdate) => {
-		properties.forEach((prop) => {
+	const updateTemplateProps = (templateId, moduleName, moduleIndex, properties, templateUpdate) => {
+		properties.forEach((prop, index) => {
 			if ((prop.type === propTypes.ONE_OF || prop.type === propTypes.MANY_OF) && prop.values === 'jobsAndUsers') {
-				templateToRoleProps[templateId] = templateToRoleProps[templateId] ?? [];
+				if (!templateToRoleProps[templateId]) {
+					templateToRoleProps[templateId] = [];
+				}
+
 				templateToRoleProps[templateId].push(deleteIfUndefined({ moduleName, propertyName: prop.name }));
 
-				const path = moduleName ? `modules.${moduleName}.${prop.name}` : `properties.${prop.name}`;
+				const path = moduleName ? `modules.${moduleIndex}.properties.${index}.values` : `properties.${index}.values`;
 				// eslint-disable-next-line no-param-reassign
 				templateUpdate[path] = presetEnumValues.ROLES_AND_USERS;
 			}
@@ -102,11 +105,12 @@ const updateTemplateProperties = async (teamspace) => {
 		const templateId = UUIDToString(template._id);
 
 		if (template.config.issueProperties) {
-			templateToRoleProps[templateId].push({ propertyName: basePropertyLabels.ASSIGNEES });
+			templateToRoleProps[templateId] = [{ propertyName: basePropertyLabels.ASSIGNEES }];
 		}
 
-		updateTemplateProps(templateId, undefined, template.properties, templateUpdate);
-		template.modules.forEach((mod) => updateTemplateProps(templateId, mod.name, mod.properties, templateUpdate));
+		updateTemplateProps(templateId, undefined, undefined, template.properties, templateUpdate);
+		template.modules.forEach(({ name, type, properties }, index) => updateTemplateProps(templateId,
+			name ?? type, index, properties, templateUpdate));
 
 		if (!isEmpty(templateUpdate)) {
 			templateUpdates.push({ updateOne: { filter: { _id: template._id }, update: { $set: templateUpdate } } });
@@ -127,17 +131,44 @@ const updateIssuesAndRisks = async (teamspace, roleNamesToIds) => {
 	const riskCollections = await getCollectionsEndsWith(teamspace, '.risks');
 
 	const processCollection = async (colName) => {
-		const colItems = await DBHandler.find(teamspace, colName, {}, { assigned_roles: 1 });
+		const colItems = await DBHandler.find(teamspace, colName,
+			{ },
+			{ assigned_roles: 1, creator_role: 1, comments: 1 });
 
-		colItems.forEach((item) => {
-			const newAssignedRole = roleNamesToIds[item.assigned_roles[0]];
+		colItems.forEach(({ _id, creator_role, assigned_roles, comments }) => {
+			const itemUpdate = {};
+
+			if (!colUpdates[colName]) {
+				colUpdates[colName] = [];
+			}
+
+			const newAssignedRole = roleNamesToIds[assigned_roles[0]];
 			if (newAssignedRole) {
-				if (!colUpdates[colName]) {
-					colUpdates[colName] = [];
-				}
+				itemUpdate.assigned_roles = [newAssignedRole];
+			}
 
+			const newCreatorRole = roleNamesToIds[creator_role];
+			if (newCreatorRole) {
+				itemUpdate.creator_role = newCreatorRole;
+			}
+
+			comments.forEach(({ action }, index) => {
+				if (action.property === 'assigned_roles' || action.property === 'creator_role') {
+					const newFrom = roleNamesToIds[action.from];
+					if (newFrom) {
+						itemUpdate[`comments.${index}.action.from`] = newFrom;
+					}
+
+					const newTo = roleNamesToIds[action.to];
+					if (newTo) {
+						itemUpdate[`comments.${index}.action.to`] = newTo;
+					}
+				}
+			});
+
+			if (!isEmpty(itemUpdate)) {
 				colUpdates[colName].push({
-					updateOne: { filter: { _id: item._id }, update: { $set: { assigned_roles: [newAssignedRole] } } },
+					updateOne: { filter: { _id }, update: { $set: itemUpdate } },
 				});
 			}
 		});
