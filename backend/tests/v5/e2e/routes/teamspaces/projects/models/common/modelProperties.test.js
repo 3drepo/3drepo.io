@@ -375,7 +375,7 @@ const testModelProperties = () => {
 				modelId = containers.C1._id,
 				revisionId = containers.C1.revisions[0]._id,
 				key = users.tsAdmin.apiKey,
-			} = {}) => `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/modelProperties/revision/${revisionId}?key=${key}`;
+			} = {}) => `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/assets/properties?revision=${revisionId}&key=${key}`;
 
 			const getFedRoute = ({
 				ts = teamspace,
@@ -383,7 +383,7 @@ const testModelProperties = () => {
 				modelType = modelTypes.FEDERATION,
 				modelId = federations.F1.fedObj._id,
 				key = users.tsAdmin.apiKey,
-			} = {}) => `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/modelProperties/revision/master/head?key=${key}`;
+			} = {}) => `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/assets/properties?key=${key}`;
 
 			const getContResult = (cont, revId) => {
 				const { jsonFiles } = cont;
@@ -588,14 +588,13 @@ const testModelProperties = () => {
 
 const testEstablishRoutes = () => {
 	describe('Create routes for asset maps', () => {
-		test('Should create two routes for Containers', () => {
+		test('Should create one route for Containers', () => {
 			const router = ModelProperties(modelTypes.CONTAINER);
 
 			const { stack } = router;
-			expect(stack.length).toEqual(2);
+			expect(stack.length).toEqual(1);
 
-			expect(stack[0].route.path).toEqual('/revision/:revision');
-			expect(stack[1].route.path).toEqual('/revision/master/head');
+			expect(stack[0].route.path).toEqual('/');
 		});
 
 		test('Should create one route for Federations', () => {
@@ -604,7 +603,7 @@ const testEstablishRoutes = () => {
 			const { stack } = router;
 			expect(stack.length).toEqual(1);
 
-			expect(stack[0].route.path).toEqual('/revision/master/head');
+			expect(stack[0].route.path).toEqual('/');
 		});
 
 		test('Should create no routes for Drawings', () => {
