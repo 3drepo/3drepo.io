@@ -205,7 +205,7 @@ const testMesh = () => {
 				contId = container._id,
 				meshId = meshData.meshId,
 				key = users.tsAdmin.apiKey,
-			} = {}) => `/v5/teamspaces/${ts}/projects/${projectId}/containers/${contId}/meshes/${meshId}?key=${key}`;
+			} = {}) => `/v5/teamspaces/${ts}/projects/${projectId}/containers/${contId}/assets/meshes/${meshId}?key=${key}`;
 
 			const getMeshResult = () => ({
 				matrix: meshData.matrix,

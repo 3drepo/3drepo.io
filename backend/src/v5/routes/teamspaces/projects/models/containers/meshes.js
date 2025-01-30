@@ -37,7 +37,7 @@ const establishRoutes = () => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/containers/{model}/meshes/{mesh}:
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{model}/assets/meshes/{mesh}:
 	 *   get:
 	 *     description: Get the mesh with the specified ID for the specified model
 	 *     tags: [Models]
