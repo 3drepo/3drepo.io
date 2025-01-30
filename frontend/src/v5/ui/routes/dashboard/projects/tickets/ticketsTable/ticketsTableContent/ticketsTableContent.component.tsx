@@ -100,7 +100,7 @@ export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy 
 
 	if (groupBy === NONE_OPTION || !groupBy) {
 		return (
-			<ResizableTableContextComponent columns={columns} hiddenColumns={getHiddenColumns()} gutter={1}>
+			<ResizableTableContextComponent columns={columns} hiddenColumns={getHiddenColumns()} columnGap={1}>
 				<ScrollableContainer>
 					<TicketsTableGroup
 						tickets={filteredItems}
@@ -116,7 +116,7 @@ export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy 
 	const groups = groupTickets(groupBy, filteredItems);
 
 	return (
-		<ResizableTableContextComponent columns={columns} hiddenColumns={getHiddenColumns()} gutter={1}>
+		<ResizableTableContextComponent columns={columns} hiddenColumns={getHiddenColumns()} columnGap={1}>
 			<Container>
 				{_.entries(groups).map(([groupName, tickets]) => (
 					<DashboardListCollapse

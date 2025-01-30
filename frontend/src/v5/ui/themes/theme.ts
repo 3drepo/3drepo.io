@@ -1360,7 +1360,7 @@ export const theme = createTheme({
 		},
 		MuiAccordion: {
 			defaultProps: {
-				disableGutters: true,
+				disablecolumnGaps: true,
 			},
 			styleOverrides: {
 				root: {

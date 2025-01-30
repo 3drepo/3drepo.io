@@ -31,7 +31,7 @@ export interface ResizableTableType {
 	setIsResizing: (isResizing: boolean) => void,
 	isResizing: boolean,
 	isHidden: (name: string) => boolean,
-	gutter: number,
+	columnGap: number,
 	getRowWidth: () => number,
 }
 
@@ -46,7 +46,7 @@ const defaultValue: ResizableTableType = {
 	setIsResizing: () => {},
 	isResizing: false,
 	isHidden: () => true,
-	gutter: 0,
+	columnGap: 0,
 	getRowWidth: () => 0,
 };
 export const ResizableTableContext = createContext(defaultValue);
@@ -56,9 +56,9 @@ interface Props {
 	children: any;
 	columns: TableColumn[];
 	hiddenColumns: string[];
-	gutter?: number;
+	columnGap?: number;
 }
-export const ResizableTableContextComponent = ({ children, columns: inputColumns, hiddenColumns: inputHiddenColumns, gutter = 0 }: Props) => {
+export const ResizableTableContextComponent = ({ children, columns: inputColumns, hiddenColumns: inputHiddenColumns, columnGap = 0 }: Props) => {
 	const [columns, setColumns] = useState([...inputColumns]);
 	const [hiddenColumns, setHiddenColumns] = useState(inputHiddenColumns);
 	const [resizerName, setResizerName] = useState('');
@@ -75,8 +75,8 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 	const getVisibleColumnsNames = () => getVisibleColumns().map((c) => c.name);
 	const getRowWidth = () => {
 		const visibleColumnswidths = getVisibleColumnsWidths();
-		const gutterSpacing = (visibleColumnswidths.length - 1) * gutter;
-		return sum(visibleColumnswidths) + gutterSpacing;
+		const gaps = (visibleColumnswidths.length - 1) * columnGap;
+		return sum(visibleColumnswidths) + gaps;
 	};
 
 	const setWidth = (name: string, width: number) => {
@@ -103,7 +103,7 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 			isResizing,
 			isHidden,
 			getRowWidth,
-			gutter,
+			columnGap,
 		}}>
 			{children}
 		</ResizableTableContext.Provider>

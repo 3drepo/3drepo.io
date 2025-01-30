@@ -37,12 +37,12 @@ export const ResizerElement = styled.div`
 	left: -3px;
 `;
 
-export const ResizerLine = styled.div<{ $offset: number, $isResizing: boolean, $highlight: boolean, $gutter }>`
+export const ResizerLine = styled.div<{ $offset: number, $isResizing: boolean, $highlight: boolean, $columnGap }>`
 	position: relative;
 	z-index: 10;
 	width: 0;
 	height: 100%;
-	margin-left: ${({ $offset, $gutter }) => $offset - 1 + $gutter / 2}px;
+	margin-left: ${({ $offset, $columnGap }) => $offset - 1 + $columnGap / 2}px;
 	border: dashed 1px transparent;
 	pointer-events: all;
 

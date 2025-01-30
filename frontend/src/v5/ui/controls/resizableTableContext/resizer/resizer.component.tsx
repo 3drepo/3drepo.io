@@ -21,7 +21,7 @@ import { ResizableTableContext } from '../resizableTableContext';
 
 type ResizerProps = { name: string };
 export const Resizer = ({ name }: ResizerProps) => {
-	const { setWidth, getWidth, setIsResizing, isResizing, setResizerName, resizerName, isHidden, gutter } = useContext(ResizableTableContext);
+	const { setWidth, getWidth, setIsResizing, isResizing, setResizerName, resizerName, isHidden, columnGap } = useContext(ResizableTableContext);
 	const width = getWidth(name);
 	const hidden = isHidden(name);
 	const initialPosition = useRef(null);
@@ -80,7 +80,7 @@ export const Resizer = ({ name }: ResizerProps) => {
 			onMouseOut={handleMouseOut}
 			$highlight={resizerName === name}
 			$isResizing={isResizing}
-			$gutter={gutter}
+			$columnGap={columnGap}
 		>
 			<ResizerElement onMouseDown={onMouseDown} />
 		</ResizerLine>
