@@ -48,7 +48,7 @@ const establishRoutes = () => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/containers/{model}/bundle/{bundle}.repobundle:
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{model}/assets/repobundles/{bundle}:
 	 *   get:
 	 *     description: Get the repo bundle with the specified ID for the specified model
 	 *     tags: [Models]
@@ -100,11 +100,11 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: returns the repobundle file containing the bundle with the specified ID for the specified model
 	 */
-	router.get('/:bundle.repobundle', hasReadAccessToContainer, getRepoBundle);
+	router.get('/repobundles/:bundle', hasReadAccessToContainer, getRepoBundle);
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/containers/{model}/bundle/{bundle}.unity3d:
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{model}/assets/unitybundles/{bundle}:
 	 *   get:
 	 *     description: Get the unity bundle with the specified ID for the specified model
 	 *     tags: [Models]
@@ -156,7 +156,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: returns the unity3d file containing the bundle with the specified ID for the specified model
 	 */
-	router.get('/:bundle.unity3d', hasReadAccessToContainer, getUnityBundle);
+	router.get('/unitybundles/:bundle', hasReadAccessToContainer, getUnityBundle);
 
 	return router;
 };

@@ -152,8 +152,8 @@ const testAssetBundles = () => {
 			await setupTestData(testEnvData);
 		});
 
-		const unityEnding = 'unity3d';
-		const repoEnding = 'repobundle';
+		const unityPath = 'unitybundles';
+		const repoPath = 'repobundles';
 
 		const generateTestData = () => {
 			const getContRoute = ({
@@ -161,9 +161,9 @@ const testAssetBundles = () => {
 				projectId = project.id,
 				modelId = containers.C1._id,
 				bundleId = containers.C1.unityBundle.id,
-				fileEnding = unityEnding,
+				path = unityPath,
 				key = users.tsAdmin.apiKey,
-			} = {}) => `/v5/teamspaces/${ts}/projects/${projectId}/containers/${modelId}/bundles/${bundleId}.${fileEnding}?key=${key}`;
+			} = {}) => `/v5/teamspaces/${ts}/projects/${projectId}/containers/${modelId}/assets/${path}/${bundleId}?key=${key}`;
 
 			// Basic tests
 			const randomString = ServiceHelper.generateRandomString();
@@ -181,19 +181,19 @@ const testAssetBundles = () => {
 				['the Unity bundle does not exist', getContRoute({ bundleId: invalidBundleId }), false, templates.fileNotFound],
 				['the user is not a member of the teamspace', getContRoute({ key: nobodyKey }), false, templates.teamspaceNotFound],
 				['the user does not have access to the model', getContRoute({ key: noProjAccKey }), false, templates.notAuthorized],
-				['the bundle is of wrong type', getContRoute({ fileEnding: repoEnding }), false, templates.fileNotFound],
+				['the bundle is of wrong type', getContRoute({ path: repoPath }), false, templates.fileNotFound],
 			];
 
 			const repoBundleId = containers.C1.repoBundle.id;
 			const basicFailCasesRepo = [
-				['the user does not have a valid session', getContRoute({ bundleId: repoBundleId, fileEnding: repoEnding, key: null }), false, templates.notLoggedIn],
-				['the teamspace does not exist', getContRoute({ ts: randomString, bundleId: repoBundleId, fileEnding: repoEnding }), false, templates.teamspaceNotFound],
-				['the project does not exist', getContRoute({ projectId: randomString, bundleId: repoBundleId, fileEnding: repoEnding }), false, templates.projectNotFound],
-				['the Container does not exist', getContRoute({ modelId: randomString, bundleId: repoBundleId, fileEnding: repoEnding }), false, templates.containerNotFound],
-				['the Unity bundle does not exist', getContRoute({ bundleId: invalidBundleId, fileEnding: repoEnding }), false, templates.fileNotFound],
-				['the user is not a member of the teamspace', getContRoute({ bundleId: repoBundleId, fileEnding: repoEnding, key: nobodyKey }), false, templates.teamspaceNotFound],
-				['the user does not have access to the model', getContRoute({ bundleId: repoBundleId, fileEnding: repoEnding, key: noProjAccKey }), false, templates.notAuthorized],
-				['the bundle is of wrong type', getContRoute({ bundleId: repoBundleId, fileEnding: unityEnding }), false, templates.fileNotFound],
+				['the user does not have a valid session', getContRoute({ bundleId: repoBundleId, path: repoPath, key: null }), false, templates.notLoggedIn],
+				['the teamspace does not exist', getContRoute({ ts: randomString, bundleId: repoBundleId, path: repoPath }), false, templates.teamspaceNotFound],
+				['the project does not exist', getContRoute({ projectId: randomString, bundleId: repoBundleId, path: repoPath }), false, templates.projectNotFound],
+				['the Container does not exist', getContRoute({ modelId: randomString, bundleId: repoBundleId, path: repoPath }), false, templates.containerNotFound],
+				['the Unity bundle does not exist', getContRoute({ bundleId: invalidBundleId, path: repoPath }), false, templates.fileNotFound],
+				['the user is not a member of the teamspace', getContRoute({ bundleId: repoBundleId, path: repoPath, key: nobodyKey }), false, templates.teamspaceNotFound],
+				['the user does not have access to the model', getContRoute({ bundleId: repoBundleId, path: repoPath, key: noProjAccKey }), false, templates.notAuthorized],
+				['the bundle is of wrong type', getContRoute({ bundleId: repoBundleId, path: repoPath }), false, templates.fileNotFound],
 			];
 
 			// Valid Unitybundle tests
@@ -207,9 +207,9 @@ const testAssetBundles = () => {
 			// Valid Repobundle tests
 			const repoFile = containers.C1.repoBundle.data;
 			const validRepoBundleCases = [
-				['the repo bundle is accessed (admin)', getContRoute({ bundleId: repoBundleId, fileEnding: repoEnding }), true, repoFile],
-				['the repo bundle is accessed (viewer)', getContRoute({ bundleId: repoBundleId, fileEnding: repoEnding, key: viewerKey }), true, repoFile],
-				['the repo bundle is accessed (commenter)', getContRoute({ bundleId: repoBundleId, fileEnding: repoEnding, key: commenterKey }), true, repoFile],
+				['the repo bundle is accessed (admin)', getContRoute({ bundleId: repoBundleId, path: repoPath }), true, repoFile],
+				['the repo bundle is accessed (viewer)', getContRoute({ bundleId: repoBundleId, path: repoPath, key: viewerKey }), true, repoFile],
+				['the repo bundle is accessed (commenter)', getContRoute({ bundleId: repoBundleId, path: repoPath, key: commenterKey }), true, repoFile],
 			];
 
 			return [
