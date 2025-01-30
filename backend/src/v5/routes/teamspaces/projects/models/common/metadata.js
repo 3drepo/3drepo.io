@@ -56,7 +56,7 @@ const establishRoutes = (modelType) => {
 	if (modelType === modelTypes.CONTAINER || modelType === modelTypes.FEDERATION) {
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/assets/streamingMetadata:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/assets/legacyBundleMetadata:
 	 *   get:
 	 *     description: Get asset streaming metadata on the specified model for the most current revision or a specific revision.
 	 *     tags: [Metadata]

@@ -382,9 +382,9 @@ const testAssetMetadata = () => {
 			} = {}) => {
 				let route;
 				if (revisionId) {
-					route = `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/assets/streamingMetadata?revision=${revisionId}&key=${key}`;
+					route = `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/assets/legacyBundleMetadata?revision=${revisionId}&key=${key}`;
 				} else {
-					route = `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/assets/streamingMetadata?key=${key}`;
+					route = `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/assets/legacyBundleMetadata?key=${key}`;
 				}
 				return route;
 			};
@@ -395,7 +395,7 @@ const testAssetMetadata = () => {
 				modelType = modelTypes.FEDERATION,
 				modelId = federations.F1.fedObj._id,
 				key = users.tsAdmin.apiKey,
-			} = {}) => `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/assets/streamingMetadata?key=${key}`;
+			} = {}) => `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/assets/legacyBundleMetadata?key=${key}`;
 
 			const getContResult = (cont, revId) => {
 				const { stashNodes } = cont;
