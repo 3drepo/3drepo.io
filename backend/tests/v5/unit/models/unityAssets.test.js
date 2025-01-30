@@ -186,14 +186,14 @@ const testGetAssetList = () => {
 			History.findLatest.mockResolvedValue(mockHistory);
 			db.findOne.mockResolvedValue(mockDBEntry);
 
-			const assets = await UnityAssets.getAssetListForFed(teamspace, projectId, modelId, branch, revId, username);
+			const assets = await UnityAssets.getAssetListForFed(teamspace, projectId, modelId, branch, username);
 
 			expect(Ref.getRefNodes).toHaveBeenCalledTimes(1);
 			expect(Ref.getRefNodes).toHaveBeenCalledWith(
 				teamspace,
 				modelId,
 				branch,
-				revId,
+				undefined,
 			);
 
 			expect(Permissions.hasReadAccessToContainer).toHaveBeenCalledTimes(2);
@@ -252,14 +252,14 @@ const testGetAssetList = () => {
 				return mockDBEntry;
 			});
 
-			const assets = await UnityAssets.getAssetListForFed(teamspace, projectId, modelId, branch, revId, username);
+			const assets = await UnityAssets.getAssetListForFed(teamspace, projectId, modelId, branch, username);
 
 			expect(Ref.getRefNodes).toHaveBeenCalledTimes(1);
 			expect(Ref.getRefNodes).toHaveBeenCalledWith(
 				teamspace,
 				modelId,
 				branch,
-				revId,
+				undefined,
 			);
 
 			expect(Permissions.hasReadAccessToContainer).toHaveBeenCalledTimes(2);
@@ -318,14 +318,14 @@ const testGetAssetList = () => {
 		test('should return an empty list if no ref nodes are found', async () => {
 			Ref.getRefNodes.mockResolvedValue([]);
 
-			const assets = await UnityAssets.getAssetListForFed(teamspace, projectId, modelId, branch, revId, username);
+			const assets = await UnityAssets.getAssetListForFed(teamspace, projectId, modelId, branch, username);
 
 			expect(Ref.getRefNodes).toHaveBeenCalledTimes(1);
 			expect(Ref.getRefNodes).toHaveBeenCalledWith(
 				teamspace,
 				modelId,
 				branch,
-				revId,
+				undefined,
 			);
 
 			expect(Permissions.hasReadAccessToContainer).toHaveBeenCalledTimes(0);
@@ -342,14 +342,14 @@ const testGetAssetList = () => {
 
 			Permissions.hasReadAccessToContainer.mockResolvedValue(false);
 
-			const assets = await UnityAssets.getAssetListForFed(teamspace, projectId, modelId, branch, revId, username);
+			const assets = await UnityAssets.getAssetListForFed(teamspace, projectId, modelId, branch, username);
 
 			expect(Ref.getRefNodes).toHaveBeenCalledTimes(1);
 			expect(Ref.getRefNodes).toHaveBeenCalledWith(
 				teamspace,
 				modelId,
 				branch,
-				revId,
+				undefined,
 			);
 
 			expect(Permissions.hasReadAccessToContainer).toHaveBeenCalledTimes(2);
@@ -383,14 +383,14 @@ const testGetAssetList = () => {
 			Permissions.hasReadAccessToContainer.mockResolvedValue(true);
 			db.findOne.mockResolvedValue(mockDBEntry);
 
-			const assets = await UnityAssets.getAssetListForFed(teamspace, projectId, modelId, branch, revId, username);
+			const assets = await UnityAssets.getAssetListForFed(teamspace, projectId, modelId, branch, username);
 
 			expect(Ref.getRefNodes).toHaveBeenCalledTimes(1);
 			expect(Ref.getRefNodes).toHaveBeenCalledWith(
 				teamspace,
 				modelId,
 				branch,
-				revId,
+				undefined,
 			);
 
 			expect(Permissions.hasReadAccessToContainer).toHaveBeenCalledTimes(1);
@@ -420,14 +420,14 @@ const testGetAssetList = () => {
 			Permissions.hasReadAccessToContainer.mockResolvedValue(true);
 			History.findLatest.mockResolvedValue(undefined);
 
-			const assets = await UnityAssets.getAssetListForFed(teamspace, projectId, modelId, branch, revId, username);
+			const assets = await UnityAssets.getAssetListForFed(teamspace, projectId, modelId, branch, username);
 
 			expect(Ref.getRefNodes).toHaveBeenCalledTimes(1);
 			expect(Ref.getRefNodes).toHaveBeenCalledWith(
 				teamspace,
 				modelId,
 				branch,
-				revId,
+				undefined,
 			);
 
 			expect(Permissions.hasReadAccessToContainer).toHaveBeenCalledTimes(1);

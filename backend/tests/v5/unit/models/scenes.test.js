@@ -657,14 +657,14 @@ const testGetFederationMeshInfo = () => {
 			db.find.mockResolvedValueOnce([mockStashNode1]);
 			db.find.mockResolvedValueOnce([mockStashNode2]);
 
-			const meshInfo = await Scenes.getFederationMeshInfo(teamspace, projectId, modelId, branch, revId, user);
+			const meshInfo = await Scenes.getFederationMeshInfo(teamspace, projectId, modelId, branch, user);
 
 			expect(History.getHistory).toHaveBeenCalledTimes(3);
 			expect(History.getHistory).toHaveBeenCalledWith(
 				teamspace,
 				modelId,
 				branch,
-				revId,
+				undefined,
 			);
 			expect(History.getHistory).toHaveBeenCalledWith(
 				teamspace,
@@ -727,14 +727,14 @@ const testGetFederationMeshInfo = () => {
 			Permissions.hasReadAccessToContainer.mockResolvedValue(false);
 
 			// Actual call
-			const meshInfo = await Scenes.getFederationMeshInfo(teamspace, projectId, modelId, branch, revId, user);
+			const meshInfo = await Scenes.getFederationMeshInfo(teamspace, projectId, modelId, branch, user);
 
 			expect(History.getHistory).toHaveBeenCalledTimes(1);
 			expect(History.getHistory).toHaveBeenCalledWith(
 				teamspace,
 				modelId,
 				branch,
-				revId,
+				undefined,
 			);
 
 			expect(db.find).toHaveBeenCalledTimes(1);
@@ -772,14 +772,14 @@ const testGetFederationMeshInfo = () => {
 			});
 
 			// Actual call
-			const meshInfo = await Scenes.getFederationMeshInfo(teamspace, projectId, modelId, branch, revId, user);
+			const meshInfo = await Scenes.getFederationMeshInfo(teamspace, projectId, modelId, branch, user);
 
 			expect(History.getHistory).toHaveBeenCalledTimes(3);
 			expect(History.getHistory).toHaveBeenCalledWith(
 				teamspace,
 				modelId,
 				branch,
-				revId,
+				undefined,
 			);
 			expect(History.getHistory).toHaveBeenCalledWith(
 				teamspace,

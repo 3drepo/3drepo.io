@@ -684,7 +684,7 @@ const testGetAllSuperMeshMappingForFederation = () => {
 			FilesManager.getFileAsStream.mockResolvedValueOnce({ readStream: mockCacheFileStreams[0] });
 			FilesManager.getFileAsStream.mockResolvedValueOnce({ readStream: mockCacheFileStreams[1] });
 
-			const mappingStream = await JSONAssets.getAllSuperMeshMappingForFederation(teamspace, fedId, branch, revId);
+			const mappingStream = await JSONAssets.getAllSuperMeshMappingForFederation(teamspace, fedId, branch);
 
 			let resultStr = '';
 			for await (const chunk of mappingStream.readStream) {
@@ -696,7 +696,7 @@ const testGetAllSuperMeshMappingForFederation = () => {
 				teamspace,
 				fedId,
 				branch,
-				revId,
+				undefined,
 			);
 
 			expect(History.findLatest).toHaveBeenCalledTimes(2);
@@ -785,7 +785,7 @@ const testGetAllSuperMeshMappingForFederation = () => {
 			FilesManager.getFileAsStream.mockResolvedValueOnce({ readStream: mockCacheFileStreams[0] });
 			FilesManager.getFileAsStream.mockResolvedValueOnce({ readStream: mockCacheFileStreams[1] });
 
-			const mappingStream = await JSONAssets.getAllSuperMeshMappingForFederation(teamspace, fedId, branch, revId);
+			const mappingStream = await JSONAssets.getAllSuperMeshMappingForFederation(teamspace, fedId, branch);
 
 			let resultStr = '';
 			for await (const chunk of mappingStream.readStream) {
@@ -797,7 +797,7 @@ const testGetAllSuperMeshMappingForFederation = () => {
 				teamspace,
 				fedId,
 				branch,
-				revId,
+				undefined,
 			);
 
 			expect(History.findLatest).toHaveBeenCalledTimes(2);
@@ -879,7 +879,7 @@ const testGetAllSuperMeshMappingForFederation = () => {
 
 			db.findOne.mockResolvedValue(undefined);
 
-			const mappingStream = await JSONAssets.getAllSuperMeshMappingForFederation(teamspace, fedId, branch, revId);
+			const mappingStream = await JSONAssets.getAllSuperMeshMappingForFederation(teamspace, fedId, branch);
 
 			let resultStr = '';
 			for await (const chunk of mappingStream.readStream) {
@@ -891,7 +891,7 @@ const testGetAllSuperMeshMappingForFederation = () => {
 				teamspace,
 				fedId,
 				branch,
-				revId,
+				undefined,
 			);
 
 			expect(History.findLatest).toHaveBeenCalledTimes(2);
@@ -970,7 +970,7 @@ const testGetAllSuperMeshMappingForFederation = () => {
 				FilesManager.getFileAsStream.mockResolvedValueOnce({ readStream: cont2MockFiles.mockFileStreams[i] });
 			}
 
-			const mappingStream = await JSONAssets.getAllSuperMeshMappingForFederation(teamspace, fedId, branch, revId);
+			const mappingStream = await JSONAssets.getAllSuperMeshMappingForFederation(teamspace, fedId, branch);
 
 			let resultStr = '';
 			for await (const chunk of mappingStream.readStream) {
@@ -982,7 +982,7 @@ const testGetAllSuperMeshMappingForFederation = () => {
 				teamspace,
 				fedId,
 				branch,
-				revId,
+				undefined,
 			);
 
 			expect(History.findLatest).toHaveBeenCalledTimes(2);
@@ -1087,7 +1087,7 @@ const testGetAllSuperMeshMappingForFederation = () => {
 			};
 			FilesManager.fileExists.mockResolvedValue(mockFileRef);
 
-			const mappingStream = await JSONAssets.getAllSuperMeshMappingForFederation(teamspace, fedId, branch, revId);
+			const mappingStream = await JSONAssets.getAllSuperMeshMappingForFederation(teamspace, fedId, branch);
 
 			let resultStr = '';
 			for await (const chunk of mappingStream.readStream) {
@@ -1099,7 +1099,7 @@ const testGetAllSuperMeshMappingForFederation = () => {
 				teamspace,
 				fedId,
 				branch,
-				revId,
+				undefined,
 			);
 
 			expect(History.findLatest).toHaveBeenCalledTimes(2);
@@ -1179,7 +1179,7 @@ const testGetAllSuperMeshMappingForFederation = () => {
 				throw new Error('mockError');
 			});
 
-			const mappingStream = await JSONAssets.getAllSuperMeshMappingForFederation(teamspace, fedId, branch, revId);
+			const mappingStream = await JSONAssets.getAllSuperMeshMappingForFederation(teamspace, fedId, branch);
 
 			const targetStream = Stream.PassThrough();
 
@@ -1220,7 +1220,7 @@ const testGetAllSuperMeshMappingForFederation = () => {
 			Ref.getRefNodes.mockResolvedValue(mockRefNodes);
 			History.findLatest.mockResolvedValue(undefined);
 
-			const mappingStream = await JSONAssets.getAllSuperMeshMappingForFederation(teamspace, fedId, branch, revId);
+			const mappingStream = await JSONAssets.getAllSuperMeshMappingForFederation(teamspace, fedId, branch);
 
 			let resultStr = '';
 			for await (const chunk of mappingStream.readStream) {
@@ -1232,7 +1232,7 @@ const testGetAllSuperMeshMappingForFederation = () => {
 				teamspace,
 				fedId,
 				branch,
-				revId,
+				undefined,
 			);
 
 			expect(History.findLatest).toHaveBeenCalledTimes(2);
@@ -1278,7 +1278,7 @@ const testGetAllSuperMeshMappingForFederation = () => {
 			};
 			FilesManager.getFileAsStream.mockResolvedValueOnce({ readStream: mockFileStream });
 
-			const mappingStream = await JSONAssets.getAllSuperMeshMappingForFederation(teamspace, fedId, branch, revId);
+			const mappingStream = await JSONAssets.getAllSuperMeshMappingForFederation(teamspace, fedId, branch);
 
 			const targetStream = Stream.PassThrough();
 
@@ -1300,7 +1300,7 @@ const testGetAllSuperMeshMappingForFederation = () => {
 				teamspace,
 				fedId,
 				branch,
-				revId,
+				undefined,
 			);
 
 			expect(History.findLatest).toHaveBeenCalledTimes(2);
@@ -1360,7 +1360,7 @@ const testGetAllSuperMeshMappingForFederation = () => {
 			};
 			FilesManager.getFileAsStream.mockResolvedValueOnce({ readStream: mockFileStream });
 
-			const mappingStream = await JSONAssets.getAllSuperMeshMappingForFederation(teamspace, fedId, branch, revId);
+			const mappingStream = await JSONAssets.getAllSuperMeshMappingForFederation(teamspace, fedId, branch);
 
 			const targetStream = Stream.PassThrough();
 
@@ -1382,7 +1382,7 @@ const testGetAllSuperMeshMappingForFederation = () => {
 				teamspace,
 				fedId,
 				branch,
-				revId,
+				undefined,
 			);
 
 			expect(History.findLatest).toHaveBeenCalledTimes(2);
@@ -1435,7 +1435,7 @@ const testGetAllSuperMeshMappingForFederation = () => {
 
 			FilesManager.getFileAsStream.mockResolvedValue({ readStream: undefined });
 
-			const mappingStream = await JSONAssets.getAllSuperMeshMappingForFederation(teamspace, fedId, branch, revId);
+			const mappingStream = await JSONAssets.getAllSuperMeshMappingForFederation(teamspace, fedId, branch);
 
 			let resultStr = '';
 			for await (const chunk of mappingStream.readStream) {
@@ -1447,7 +1447,7 @@ const testGetAllSuperMeshMappingForFederation = () => {
 				teamspace,
 				fedId,
 				branch,
-				revId,
+				undefined,
 			);
 
 			expect(History.findLatest).toHaveBeenCalledTimes(2);
