@@ -46,7 +46,7 @@ export const postActions = {
 };
 
 const SSO_ROUTE = 'sso';
-const AAD_ROUTE = `${SSO_ROUTE}/aad`;
+const AAD_ROUTE = `authentication`;
 
 export const signup = (data): Promise<AxiosResponse<{ link: string }>> => api.post(`${AAD_ROUTE}/signup?redirectUri=${getCurrentUrl(`?${postActions.SIGNUP_POST}=1`)}`, data);
 

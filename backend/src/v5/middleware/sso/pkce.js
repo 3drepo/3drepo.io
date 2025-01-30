@@ -15,17 +15,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { CryptoProvider } = require('@azure/msal-node');
 const config = require('../../utils/config');
+const { generateHashString } = require('../../utils/helper/strings');
+const { generateUUID } = require('../../utils/helper/uuids');
+const { subtle } = require('crypto');
 
 const Sso = {};
 
-const cryptoProvider = new CryptoProvider();
+const generatePkceCodes = async () => {
+	const verifier = generateHashString(16);
+
+	const digest = await subtle.digest('SHA-256',
+		new TextEncoder().encode(verifier));
+
+	const challenge = Buffer.from(String.fromCharCode(...new Uint8Array(digest))).toString('base64')
+		.replace(/=/g, '')
+		.replace(/\+/g, '-')
+		.replace(/\//g, '_');
+
+	return { verifier, challenge };
+};
 
 Sso.addPkceProtection = async (req, res, next) => {
-	const { verifier, challenge } = await cryptoProvider.generatePkceCodes();
+	const { verifier, challenge } = await generatePkceCodes();
 
-	req.session.csrfToken = cryptoProvider.createNewGuid();
+	req.session.csrfToken = generateUUID();
 	req.session.pkceCodes = { challengeMethod: 'S256', verifier, challenge };
 	req.session.cookie.domain = config.cookie_domain;
 
