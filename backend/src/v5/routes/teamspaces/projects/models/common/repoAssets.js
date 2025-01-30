@@ -56,7 +56,7 @@ const establishRoutes = (modelType) => {
 	if (modelType === modelTypes.CONTAINER || modelType === modelTypes.FEDERATION) {
 		/**
 		 * @openapi
-		 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/modelProperties/revision/master/head:
+		 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/assets/properties:
 		 *   get:
 		 *     description: Get list of repo assets for the specified model for the head revision or a specific revision
 		 *     tags: [Models]
