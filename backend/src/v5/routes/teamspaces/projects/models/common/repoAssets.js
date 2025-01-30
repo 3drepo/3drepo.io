@@ -24,16 +24,20 @@ const { respond } = require('../../../../../utils/responder');
 const { templates } = require('../../../../../utils/responseCodes');
 
 const getRepoAssets = (modelType) => async (req, res) => {
-	const { teamspace, project, model, revision } = req.params;
+	const { teamspace, project, model } = req.params;
 	const { username } = req.session.user;
-	const branch = revision ? undefined : DbConstants.MASTER_BRANCH_NAME;
 
 	try {
 		if (modelType === modelTypes.CONTAINER) {
+			const { revision } = req.query;
+			const branch = revision ? undefined : DbConstants.MASTER_BRANCH_NAME;
+
 			const obj = await UnityAssets.getAssetListForCont(teamspace, model, branch, revision);
 			respond(req, res, templates.ok, obj);
 		} else {
-			const obj = await UnityAssets.getAssetListForFed(teamspace, project, model, branch, revision, username);
+			const branch = DbConstants.MASTER_BRANCH_NAME;
+
+			const obj = await UnityAssets.getAssetListForFed(teamspace, project, model, branch, undefined, username);
 			respond(req, res, templates.ok, obj);
 		}
 	} catch (err) {
@@ -49,106 +53,12 @@ const establishRoutes = (modelType) => {
 		[modelTypes.FEDERATION]: hasReadAccessToFederation,
 	};
 
-	if (modelType === modelTypes.CONTAINER) {
-		/**
-		 * @openapi
-		 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/repoAssets/revision/{revision}:
-		 *   get:
-		 *     description: Get list of repo assets for the specified model and revision. Falls back on Unity assets if RepoBundles are not available.
-		 *     tags: [Models]
-		 *     operationId: getRepoAssets
-		 *     parameters:
-		 *       - name: teamspace
-		 *         description: Name of teamspace
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *       - name: project
-		 *         description: Project ID
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *       - name: container
-		 *         description: Container ID
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *       - name: revision
-		 *         description: Revision ID
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *     responses:
-		 *       401:
-		 *         description: 401 Unauthorized
-		 *         content:
-		 *           application/json:
-		 *             schema:
-		 *               oneOf:
-		 *                 - $ref: "#/components/responses/notLoggedIn"
-		 *                 - $ref: "#/components/responses/notAuthorized"
-		 *       404:
-		 *         description: 404 Not Found
-		 *         content:
-		 *           application/json:
-		 *             schema:
-		 *               oneOf:
-		 *                 - $ref: "#/components/responses/teamspaceNotFound"
-		 *                 - $ref: "#/components/responses/projectNotFound"
-		 *                 - $ref: "#/components/responses/containerNotFound"
-		 *                 - $ref: "#/components/responses/revisionNotFound"
-		 *       200:
-		 *         description: Returns json file containing the list of assets associated with this container and revision
-		 *         content:
-		 *           application/json:
-		 *             schema:
-		 *               type: object
-		 *               properties:
-		 *                 models:
-		 *                   type: array
-		 *                   items:
-		 *                     type: object
-		 *                     properties:
-		 *                       _id:
-		 *                         type: string
-		 *                         description: the ID of the revision
-		 *                       assets:
-		 *                         type: array
-		 *                         description: Array of asset bundles associated with this revision
-		 *                         items:
-		 *                           type: string
-		 *                           description: the path of the asset bundle
-		 *                       database:
-		 *                         type: string
-		 *                         description: teamspace name
-		 *                       model:
-		 *                         type: string
-		 *                         description: model ID
-		 *                       offset:
-		 *                         type: array
-		 *                         description: offset of the asset bundle
-		 *                         items:
-		 *                           type: number
-		 *                       jsonFiles:
-		 *                         type: array
-		 *                         description: Array of json files containing the asset bundles.
-		 *                         items:
-		 *                           type: string
-		 *                           description: the path of the json file.
-		 */
-		router.get('/revision/:revision', hasReadAccessToModel[modelType], getRepoAssets(modelType));
-	}
-
 	if (modelType === modelTypes.CONTAINER || modelType === modelTypes.FEDERATION) {
 		/**
 		 * @openapi
 		 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/modelProperties/revision/master/head:
 		 *   get:
-		 *     description: Get list of repo assets for the specified model for the head revision
+		 *     description: Get list of repo assets for the specified model for the head revision or a specific revision
 		 *     tags: [Models]
 		 *     operationId: getRepoAssets
 		 *     parameters:
@@ -175,6 +85,11 @@ const establishRoutes = (modelType) => {
 		 *         description: Model ID
 		 *         in: path
 		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *         description: Revision ID
+		 *         in: query
+		 *         required: false
 		 *         schema:
 		 *           type: string
 		 *     responses:
@@ -236,7 +151,7 @@ const establishRoutes = (modelType) => {
 		 *                           type: string
 		 *                           description: the path of the json file.
 		 */
-		router.get('/revision/master/head', hasReadAccessToModel[modelType], getRepoAssets(modelType));
+		router.get('/', hasReadAccessToModel[modelType], getRepoAssets(modelType));
 	}
 
 	return router;

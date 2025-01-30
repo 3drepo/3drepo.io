@@ -72,7 +72,7 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assetsMeta', CreateAssetMetaRoutes(modelTypes.CONTAINER));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assetMaps', CreateAssetMapRoutes(modelTypes.CONTAINER));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assets/properties', CreateModelPropertiesRoutes(modelTypes.CONTAINER));
-	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/repoAssets', CreateRepoAssetRoutes(modelTypes.CONTAINER));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assets/repobundles', CreateRepoAssetRoutes(modelTypes.CONTAINER));
 
 	// Federations
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations', CreateModelGeneralRoutes(modelTypes.FEDERATION));
@@ -85,7 +85,7 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/assetsMeta', CreateAssetMetaRoutes(modelTypes.FEDERATION));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/assetMaps', CreateAssetMapRoutes(modelTypes.FEDERATION));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/assets/properties', CreateModelPropertiesRoutes(modelTypes.FEDERATION));
-	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/repoAssets', CreateRepoAssetRoutes(modelTypes.FEDERATION));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/assets/repobundles', CreateRepoAssetRoutes(modelTypes.FEDERATION));
 
 	// Drawings
 	app.use('/v5/teamspaces/:teamspace/projects/:project/drawings', CreateModelGeneralRoutes(modelTypes.DRAWING));
