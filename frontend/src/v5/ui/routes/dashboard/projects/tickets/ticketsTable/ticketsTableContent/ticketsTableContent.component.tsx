@@ -26,7 +26,7 @@ import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { TicketsTableGroup } from './ticketsTableGroup/ticketsTableGroup.component';
 import {  groupTickets, NEW_TICKET_ID, NONE_OPTION, SetTicketValue, UNSET } from '../ticketsTable.helper';
 import { EmptyPageView } from '../../../../../../components/shared/emptyPageView/emptyPageView.styles';
-import { Container, Title } from './ticketsTableContent.styles';
+import { Container, ScrollableContainer, Title } from './ticketsTableContent.styles';
 import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ResizableTableContextComponent, TableColumn } from '@controls/resizableTableContext/resizableTableContext';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -101,12 +101,14 @@ export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy 
 	if (groupBy === NONE_OPTION || !groupBy) {
 		return (
 			<ResizableTableContextComponent columns={columns} hiddenColumns={getHiddenColumns()}>
-				<TicketsTableGroup
-					tickets={filteredItems}
-					onNewTicket={onGroupNewTicket('')}
-					onEditTicket={setTicketValue}
-					selectedTicketId={selectedTicketId}
-				/>
+				<ScrollableContainer>
+					<TicketsTableGroup
+						tickets={filteredItems}
+						onNewTicket={onGroupNewTicket('')}
+						onEditTicket={setTicketValue}
+						selectedTicketId={selectedTicketId}
+					/>
+				</ScrollableContainer>
 			</ResizableTableContextComponent>
 		);
 	}

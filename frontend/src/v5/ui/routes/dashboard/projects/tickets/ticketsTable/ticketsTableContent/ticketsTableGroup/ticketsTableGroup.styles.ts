@@ -25,6 +25,8 @@ export const Headers = styled(ResizableTableRow)`
 	width: fit-content;
 `;
 
+export const PlaceholderForStickyFunctionality = styled(Headers)``;
+
 export const IconContainer = styled.div<{ $flip?: boolean }>`
 	animation: all .2s;
 	display: inline-flex;
@@ -62,9 +64,8 @@ export const Group = styled.div`
 `;
 
 export const Table = styled(ResizableTable)<{ $empty?: boolean }>`
+	overflow-x: hidden;
 	${({ $empty }) => $empty && css`
-		overflow-x: hidden;
-
 		${Group} {
 			width: unset;
 		}

@@ -16,10 +16,31 @@
  */
 
 import styled from 'styled-components';
-import { CollapsedItemContainer, Container as DashboardList } from '@components/dashboard/dashboardList/dashboardListCollapse/dashboardListCollapse.styles';
+import { CollapsedItemContainer, ControlsContainer as GroupCollapseHeader, Container as DashboardList } from '@components/dashboard/dashboardList/dashboardListCollapse/dashboardListCollapse.styles';
 
-export const Container = styled.div`
+export const ScrollableContainer = styled.div`
+	width: 100vw;
+	padding: 0 75px 30px;
+	margin-bottom: -30px;
+	overflow: scroll;
+	height: calc(100vh - 287px);
+	position: relative;
+	left: -75px;
+
+	${GroupCollapseHeader} {
+		position: sticky;
+		left: 0;
+		overflow: unset;
+		width: calc(100vw - 161px);
+		margin-right: 0;
+	}
+`;
+
+export const Container = styled(ScrollableContainer)`
 	${DashboardList} {
+		width: fit-content;
+		position: relative;
+
 		&:not(:first-of-type) {
 			padding-top: 17px;
 		}
