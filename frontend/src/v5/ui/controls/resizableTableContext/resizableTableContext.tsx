@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isEqual } from 'lodash';
+import { isEqual, sum } from 'lodash';
 import { createContext, useEffect, useState } from 'react';
 
 export type TableColumn = { name: string, minWidth?: number, width: number };
@@ -31,6 +31,8 @@ export interface ResizableTableType {
 	setIsResizing: (isResizing: boolean) => void,
 	isResizing: boolean,
 	isHidden: (name: string) => boolean,
+	gutter: number,
+	getRowWidth: () => number,
 }
 
 const defaultValue: ResizableTableType = {
@@ -44,6 +46,8 @@ const defaultValue: ResizableTableType = {
 	setIsResizing: () => {},
 	isResizing: false,
 	isHidden: () => true,
+	gutter: 0,
+	getRowWidth: () => 0,
 };
 export const ResizableTableContext = createContext(defaultValue);
 ResizableTableContext.displayName = 'ResizeableColumns';
@@ -52,8 +56,9 @@ interface Props {
 	children: any;
 	columns: TableColumn[];
 	hiddenColumns: string[];
+	gutter?: number;
 }
-export const ResizableTableContextComponent = ({ children, columns: inputColumns, hiddenColumns: inputHiddenColumns }: Props) => {
+export const ResizableTableContextComponent = ({ children, columns: inputColumns, hiddenColumns: inputHiddenColumns, gutter = 0 }: Props) => {
 	const [columns, setColumns] = useState([...inputColumns]);
 	const [hiddenColumns, setHiddenColumns] = useState(inputHiddenColumns);
 	const [resizerName, setResizerName] = useState('');
@@ -68,6 +73,11 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 	const getVisibleColumns = () => columns.filter((c) => !isHidden(c.name));
 	const getVisibleColumnsWidths = () => getVisibleColumns().map((c) => c.width);
 	const getVisibleColumnsNames = () => getVisibleColumns().map((c) => c.name);
+	const getRowWidth = () => {
+		const visibleColumnswidths = getVisibleColumnsWidths();
+		const gutterSpacing = (visibleColumnswidths.length - 1) * gutter;
+		return sum(visibleColumnswidths) + gutterSpacing;
+	};
 
 	const setWidth = (name: string, width: number) => {
 		getElementByName(name).width = Math.max(getMinWidth(name), width);
@@ -92,6 +102,8 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 			setIsResizing,
 			isResizing,
 			isHidden,
+			getRowWidth,
+			gutter,
 		}}>
 			{children}
 		</ResizableTableContext.Provider>

@@ -67,6 +67,7 @@ type TicketsTableGroupProps = {
 	onNewTicket: (modelId: string) => void;
 };
 export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
+	const { getRowWidth } = useContext(ResizableTableContext);
 	const models = useSelectedModels();
 	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;
 
@@ -128,7 +129,10 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 								<NewTicketMenu
 									disabled={newTicketButtonIsDisabled}
 									TriggerButton={(
-										<NewTicketRow disabled={newTicketButtonIsDisabled}>
+										<NewTicketRow
+											disabled={newTicketButtonIsDisabled}
+											style={{ width: getRowWidth() }}
+										>
 											<NewTicketText>
 												<AddCircleIcon />
 												<FormattedMessage id="ticketTable.row.newTicket" defaultMessage="New ticket" />
