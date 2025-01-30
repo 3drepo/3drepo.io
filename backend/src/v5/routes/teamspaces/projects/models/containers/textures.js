@@ -37,7 +37,7 @@ const establishRoutes = () => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/containers/{model}/textures/{texture}.texture:
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{model}/assets/textures/{texture}:
 	 *   get:
 	 *     description: Get the texture with the specified ID for the specified model
 	 *     tags: [Models]
@@ -91,7 +91,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: returns the texture file with the specified ID for the specified model
 	 */
-	router.get('/:texture.texture', hasReadAccessToContainer, getTexture);
+	router.get('/:texture', hasReadAccessToContainer, getTexture);
 
 	return router;
 };

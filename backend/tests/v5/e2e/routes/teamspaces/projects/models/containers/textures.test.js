@@ -189,7 +189,7 @@ const testTextures = () => {
 				contId = container._id,
 				textureId = texData.texId,
 				key = users.tsAdmin.apiKey,
-			} = {}) => `/v5/teamspaces/${ts}/projects/${projectId}/containers/${contId}/textures/${textureId}.texture?key=${key}`;
+			} = {}) => `/v5/teamspaces/${ts}/projects/${projectId}/containers/${contId}/assets/textures/${textureId}?key=${key}`;
 
 			// Basic tests
 			const randomString = ServiceHelper.generateRandomString();

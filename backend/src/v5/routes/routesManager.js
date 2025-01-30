@@ -67,7 +67,7 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/metadata', MetadataRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/bundleMappings', BundleMappingsRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/assets', BundleRoutes);
-	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/textures', TextureRoutes);
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/assets/textures', TextureRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/assets/meshes', MeshRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assets/streamingMetadata', CreateAssetMetaRoutes(modelTypes.CONTAINER));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assets/supermeshes', CreateAssetMapRoutes(modelTypes.CONTAINER));
