@@ -378,6 +378,7 @@ const testGetRepoAssets = () => {
 				} else {
 					route = `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/assets/repobundles?key=${key}`;
 				}
+				console.log(route);
 				return route;
 			};
 
