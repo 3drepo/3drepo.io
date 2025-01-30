@@ -92,31 +92,6 @@ const extractUniqueProperties = (template) => {
 	return uniqueProps;
 };
 
-const hasDuplicateUniqueProps = (template, tickets) => {
-	const uniqueProps = extractUniqueProperties(template);
-	let hasDuplicate = false;
-
-	tickets.forEach((ticket) => {
-		for (const [key, value] of uniqueProps) {
-			const keyArray = key.split('..');
-			if (keyArray.length > 1) {
-				if (value.has(ticket.modules[keyArray[0]][keyArray[1]])) {
-					hasDuplicate = true;
-					break;
-				}
-				value.add(ticket.modules[keyArray[0]][keyArray[1]]);
-				break;
-			}
-			if (value.has(ticket.properties[keyArray[0]])) {
-				hasDuplicate = true;
-				break;
-			}
-			value.add(ticket.properties[keyArray[0]]);
-		}
-	});
-	return hasDuplicate;
-};
-
 const validateTicketImportData = (isNew) => async (req, res, next) => {
 	const { teamspace, project, model } = req.params;
 	try {
@@ -127,8 +102,24 @@ const validateTicketImportData = (isNew) => async (req, res, next) => {
 			throw createResponseCode(templates.invalidArguments, 'Template has been deprecated');
 		}
 
-		if (template && hasDuplicateUniqueProps(template, req.body.tickets)) {
-			throw createResponseCode(templates.invalidArguments, 'The unique property can not have the same value multiple times.');
+		const uniqueProps = extractUniqueProperties(template);
+
+		for (const { modules, properties } of req.body.tickets) {
+			for (const [key, value] of uniqueProps) {
+				const keyArray = key.split('..');
+
+				if (keyArray.length > 1) {
+					if (value.has(modules[keyArray[0]][keyArray[1]])) {
+						throw createResponseCode(templates.invalidArguments, `The unique property ${keyArray[0]}.${keyArray[1]} can not have the same value multiple times.`);
+					}
+					value.add(modules[keyArray[0]][keyArray[1]]);
+				} else {
+					if (value.has(properties[keyArray[0]])) {
+						throw createResponseCode(templates.invalidArguments, `The unique property ${keyArray[0]} can not have the same value multiple times.`);
+					}
+					value.add(properties[keyArray[0]]);
+				}
+			}
 		}
 
 		req.body.tickets = await Promise.all(req.body.tickets.map((ticket, i) => {
