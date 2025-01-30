@@ -87,6 +87,7 @@ const establishRoutes = (modelType) => {
 		 *         required: true
 		 *         schema:
 		 *           type: string
+		 *       - name: revision
 		 *         description: Revision ID
 		 *         in: query
 		 *         required: false
