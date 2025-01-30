@@ -37,7 +37,7 @@ const getRepoAssets = (modelType) => async (req, res) => {
 		} else {
 			const branch = DbConstants.MASTER_BRANCH_NAME;
 
-			const obj = await UnityAssets.getAssetListForFed(teamspace, project, model, branch, undefined, username);
+			const obj = await UnityAssets.getAssetListForFed(teamspace, project, model, branch, username);
 			respond(req, res, templates.ok, obj);
 		}
 	} catch (err) {

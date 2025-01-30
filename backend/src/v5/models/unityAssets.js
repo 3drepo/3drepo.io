@@ -119,8 +119,8 @@ UnityAssets.getAssetListForCont = async (teamspace, model, branch, rev) => {
 	return { models };
 };
 
-UnityAssets.getAssetListForFed = async (teamspace, project, model, branch, rev, username) => {
-	const subModelRefs = await Ref.getRefNodes(teamspace, model, branch, rev);
+UnityAssets.getAssetListForFed = async (teamspace, project, model, branch, username) => {
+	const subModelRefs = await Ref.getRefNodes(teamspace, model, branch, undefined);
 
 	const fetchPromise = [];
 	subModelRefs.forEach((ref) => {
