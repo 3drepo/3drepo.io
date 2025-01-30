@@ -379,7 +379,15 @@ const testAssetMetadata = () => {
 				modelId = containers.C1._id,
 				revisionId = containers.C1.revisions[0]._id,
 				key = users.tsAdmin.apiKey,
-			} = {}) => `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/assetsMeta/revision/${revisionId}?key=${key}`;
+			} = {}) => {
+				let route;
+				if (revisionId) {
+					route = `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/assets/streamingMetadata?revision=${revisionId}&key=${key}`;
+				} else {
+					route = `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/assets/streamingMetadata?key=${key}`;
+				}
+				return route;
+			};
 
 			const getFedRoute = ({
 				ts = teamspace,
@@ -387,7 +395,7 @@ const testAssetMetadata = () => {
 				modelType = modelTypes.FEDERATION,
 				modelId = federations.F1.fedObj._id,
 				key = users.tsAdmin.apiKey,
-			} = {}) => `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/assetsMeta/revision/master/head?key=${key}`;
+			} = {}) => `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/assets/streamingMetadata?key=${key}`;
 
 			const getContResult = (cont, revId) => {
 				const { stashNodes } = cont;
@@ -463,7 +471,6 @@ const testAssetMetadata = () => {
 			const detachedRev = ServiceHelper.generateRevisionEntry()._id;
 			const { containerNotFound, federationNotFound } = templates;
 			const contId = containers.C1._id;
-			const masterRevId = 'master/head';
 
 			const basicFailCasesCont = [
 				['the user does not have a valid session', getContRoute({ key: null }), false, templates.notLoggedIn],
@@ -504,12 +511,12 @@ const testAssetMetadata = () => {
 			const prevRevResult = JSON.stringify(getContResult(C1, R2Id));
 			const contValidRevs = [
 				['trying to access current rev via rev ID', getContRoute(), true, curRevResult],
-				['trying to access current via master/head', getContRoute({ revisionId: masterRevId }), true, curRevResult],
+				['trying to access current without supplying a revision', getContRoute({ revisionId: undefined }), true, curRevResult],
 				['trying to access previous via rev ID', getContRoute({ revisionId: R2Id }), true, prevRevResult],
 				['trying to access current with viewer via rev ID', getContRoute({ key: viewerKey }), true, curRevResult],
 				['trying to access current with commenter via rev ID', getContRoute({ key: commenterKey }), true, curRevResult],
-				['trying to access current with viewer via master/head', getContRoute({ revisionId: masterRevId, key: viewerKey }), true, curRevResult],
-				['trying to access current with commenter via master/head', getContRoute({ revisionId: masterRevId, key: commenterKey }), true, curRevResult],
+				['trying to access current with viewer without supplying a revision', getContRoute({ revisionId: undefined, key: viewerKey }), true, curRevResult],
+				['trying to access current with commenter without supplying a revision', getContRoute({ revisionId: undefined, key: commenterKey }), true, curRevResult],
 			];
 
 			// Void Container Tests
@@ -519,9 +526,9 @@ const testAssetMetadata = () => {
 				['trying to access void revision via rev ID (admin)', getContRoute({ modelId: C3Id, revisionId: R4Id }), true, voidRevResult],
 				['trying to access void revision via rev ID (viewer)', getContRoute({ modelId: C3Id, revisionId: R4Id, key: viewerKey }), true, voidRevResult],
 				['trying to access void revision via rev ID (commenter)', getContRoute({ modelId: C3Id, revisionId: R4Id, key: commenterKey }), true, voidRevResult],
-				['trying to get latest form container with newer void revision via master/head (admin)', getContRoute({ modelId: C3Id, revisionId: masterRevId }), true, validRevResultC3],
-				['trying to get latest form container with newer void revision via master/head (viewer)', getContRoute({ modelId: C3Id, revisionId: masterRevId, key: viewerKey }), true, validRevResultC3],
-				['trying to get latest form container with newer void revision via master/head (commenter)', getContRoute({ modelId: C3Id, revisionId: masterRevId, key: commenterKey }), true, validRevResultC3],
+				['trying to get latest form container with newer void revision via without supplying a revision', getContRoute({ modelId: C3Id, revisionId: undefined }), true, validRevResultC3],
+				['trying to get latest form container with newer void revision without supplying a revision', getContRoute({ modelId: C3Id, revisionId: undefined, key: viewerKey }), true, validRevResultC3],
+				['trying to get latest form container with newer void revision without supplying a revision', getContRoute({ modelId: C3Id, revisionId: undefined, key: commenterKey }), true, validRevResultC3],
 			];
 
 			// NoFile Container Tests
@@ -530,9 +537,9 @@ const testAssetMetadata = () => {
 				['Try to access noFile revision via rev ID (admin)', getContRoute({ modelId: C4Id, revisionId: R6Id }), true, noFileRevResult],
 				['Try to access noFile revision via rev ID (viewer)', getContRoute({ modelId: C4Id, revisionId: R6Id, key: viewerKey }), true, noFileRevResult],
 				['Try to access noFile revision via rev ID (commenter)', getContRoute({ modelId: C4Id, revisionId: R6Id, key: commenterKey }), true, noFileRevResult],
-				['Try to access noFile revision via master/head (admin)', getContRoute({ modelId: C4Id, revisionId: masterRevId }), true, noFileRevResult],
-				['Try to access noFile revision via master/head (viewer)', getContRoute({ modelId: C4Id, revisionId: masterRevId, key: viewerKey }), true, noFileRevResult],
-				['Try to access noFile revision via master/head (commenter)', getContRoute({ modelId: C4Id, revisionId: masterRevId, key: commenterKey }), true, noFileRevResult],
+				['Try to access noFile revision without supplying a revision (admin)', getContRoute({ modelId: C4Id, revisionId: undefined }), true, noFileRevResult],
+				['Try to access noFile revision without supplying a revision (viewer)', getContRoute({ modelId: C4Id, revisionId: undefined, key: viewerKey }), true, noFileRevResult],
+				['Try to access noFile revision without supplying a revision (commenter)', getContRoute({ modelId: C4Id, revisionId: undefined, key: commenterKey }), true, noFileRevResult],
 			];
 
 			// Federation tests
@@ -587,10 +594,9 @@ const testEstablishRoutes = () => {
 			const router = Metadata(modelTypes.CONTAINER);
 
 			const { stack } = router;
-			expect(stack.length).toEqual(2);
+			expect(stack.length).toEqual(1);
 
-			expect(stack[0].route.path).toEqual('/revision/:rev');
-			expect(stack[1].route.path).toEqual('/revision/master/head');
+			expect(stack[0].route.path).toEqual('/');
 		});
 
 		test('Should create one route for Federations', () => {
@@ -599,7 +605,7 @@ const testEstablishRoutes = () => {
 			const { stack } = router;
 			expect(stack.length).toEqual(1);
 
-			expect(stack[0].route.path).toEqual('/revision/master/head');
+			expect(stack[0].route.path).toEqual('/');
 		});
 
 		test('Should create no routes for Drawings', () => {

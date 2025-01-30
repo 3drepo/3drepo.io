@@ -136,8 +136,8 @@ Scene.getContainerMeshInfo = async (teamspace, model, branch, rev) => {
 	};
 };
 
-Scene.getFederationMeshInfo = async (ts, proj, federation, branch, rev, user) => {
-	const refNodes = await Scene.findNodesByType(ts, federation, branch, rev, 'ref', undefined, { project: 1 });
+Scene.getFederationMeshInfo = async (ts, proj, federation, branch, user) => {
+	const refNodes = await Scene.findNodesByType(ts, federation, branch, undefined, 'ref', undefined, { project: 1 });
 
 	const subModelMeshes = await Promise.all(refNodes.map(async (node) => {
 		// Note that in this table, the "project" column actually contains the IDs of containers

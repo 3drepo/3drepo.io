@@ -69,7 +69,7 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/bundles', BundleRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/textures', TextureRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/meshes', MeshRoutes);
-	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assetsMeta', CreateAssetMetaRoutes(modelTypes.CONTAINER));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assets/streamingMetadata', CreateAssetMetaRoutes(modelTypes.CONTAINER));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assetMaps', CreateAssetMapRoutes(modelTypes.CONTAINER));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assets/properties', CreateModelPropertiesRoutes(modelTypes.CONTAINER));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assets/repobundles', CreateRepoAssetRoutes(modelTypes.CONTAINER));
@@ -82,7 +82,7 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/groups', CreateGroupRoutes(true));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/views', CreateViewRoutes(true));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:federation/revisions', FederationRevisionRoutes);
-	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/assetsMeta', CreateAssetMetaRoutes(modelTypes.FEDERATION));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/assets/streamingMetadata', CreateAssetMetaRoutes(modelTypes.FEDERATION));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/assetMaps', CreateAssetMapRoutes(modelTypes.FEDERATION));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/assets/properties', CreateModelPropertiesRoutes(modelTypes.FEDERATION));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/assets/repobundles', CreateRepoAssetRoutes(modelTypes.FEDERATION));

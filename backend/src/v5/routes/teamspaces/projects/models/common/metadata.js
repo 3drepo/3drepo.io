@@ -24,16 +24,20 @@ const { respond } = require('../../../../../utils/responder');
 const { templates } = require('../../../../../utils/responseCodes');
 
 const getAssetsMeta = (modelType) => async (req, res) => {
-	const { teamspace, project, model, rev } = req.params;
+	const { teamspace, project, model } = req.params;
 	const username = req.session.user;
-	const branch = rev ? undefined : DbConstants.MASTER_BRANCH_NAME;
 
 	try {
 		if (modelType === modelTypes.CONTAINER) {
-			const obj = await Scene.getContainerMeshInfo(teamspace, model, branch, rev);
+			const { revision } = req.query;
+			const branch = revision ? undefined : DbConstants.MASTER_BRANCH_NAME;
+
+			const obj = await Scene.getContainerMeshInfo(teamspace, model, branch, revision);
 			respond(req, res, templates.ok, obj);
 		} else {
-			const obj = await Scene.getFederationMeshInfo(teamspace, project, model, branch, rev, username);
+			const branch = DbConstants.MASTER_BRANCH_NAME;
+
+			const obj = await Scene.getFederationMeshInfo(teamspace, project, model, branch, username);
 			respond(req, res, templates.ok, obj);
 		}
 	} catch (err) {
@@ -49,129 +53,12 @@ const establishRoutes = (modelType) => {
 		[modelTypes.FEDERATION]: hasReadAccessToFederation,
 	};
 
-	if (modelType === modelTypes.CONTAINER) {
-	/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/assetsMeta/revision/{revision}:
-	 *   get:
-	 *     description: Get asset metadata on the specified model and revision.
-	 *     tags: [Metadata]
-	 *     operationId: getAssetsMeta
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: Name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: project
-	 *         description: Project ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: container
-	 *         description: Container ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: revision
-	 *         description: Revision ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *     responses:
-	 *       401:
-	 *         description: 401 Unauthorized
-	 *         content:
-	 *           application/json:
-	 *             schema:
-	 *               oneOf:
-	 *                 - $ref: "#/components/responses/notLoggedIn"
-	 *                 - $ref: "#/components/responses/notAuthorized"
-	 *       404:
-	 *         description: 404 Not Found
-	 *         content:
-	 *           application/json:
-	 *             schema:
-	 *               oneOf:
-	 *                 - $ref: "#/components/responses/teamspaceNotFound"
-	 *                 - $ref: "#/components/responses/projectNotFound"
-	 *                 - $ref: "#/components/responses/containerNotFound"
-	 *                 - $ref: "#/components/responses/revisionNotFound"
-	 *       200:
-	 *         description: Returns list of submodels
-	 *         content:
-	 *           application/json:
-	 *             schema:
-	 *               type: object
-	 *               properties:
-	 *                 subModels:
-	 *                   type: array
-	 *                   items:
-	 *                     type: object
-	 *                     properties:
-	 *                       teamspace:
-	 *                         type: string
-	 *                         description: teamspace
-	 *                         example: teamspace1
-	 *                       model:
-	 *                         type: string
-	 *                         description: Model ID
-	 *                         example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
-	 *                       superMeshes:
-	 *                         type: object
-	 *                         properties:
-	 *                           superMeshes:
-	 *                             type: array
-	 *                             items:
-	 *                               type: object
-	 *                               properties:
-	 *                                 _id:
-	 *                                   type: string
-	 *                                   description: superMesh ID
-	 *                                   example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
-	 *                                 nVertices:
-	 *                                   type: number
-	 *                                   description: number of vertices in the superMesh
-	 *                                   example: 811871
-	 *                                 nFaces:
-	 *                                   type: number
-	 *                                   description: number of faces in the superMesh
-	 *                                   example: 1085576
-	 *                                 nUVChannels:
-	 *                                   type: number
-	 *                                   description: number of UV Channels in the superMesh
-	 *                                   example: 1
-	 *                                 primitive:
-	 *                                   type: number
-	 *                                   description: the primitive type of the superMesh
-	 *                                   example: 3
-	 *                                 min:
-	 *                                   type: array
-	 *                                   items:
-	 *                                     type: number
-	 *                                     example: 23.45
-	 *                                   description: The minimum coordinates of the superMesh (x,y,z)
-	 *                                 max:
-	 *                                   type: array
-	 *                                   items:
-	 *                                     type: number
-	 *                                     example: 23.45
-	 *                                   description: The maximum coordinates of the superMesh (x,y,z)
-	 *
-	 */
-		router.get('/revision/:rev', hasReadAccessToModel[modelType], getAssetsMeta(modelType));
-	}
-
 	if (modelType === modelTypes.CONTAINER || modelType === modelTypes.FEDERATION) {
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/assetsMeta/revision/master/head:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/assets/streamingMetadata:
 	 *   get:
-	 *     description: Get asset metadata on the specified model for the most current revision.
+	 *     description: Get asset streaming metadata on the specified model for the most current revision or a specific revision.
 	 *     tags: [Metadata]
 	 *     operationId: getAssetsMeta
 	 *     parameters:
@@ -196,6 +83,12 @@ const establishRoutes = (modelType) => {
 	 *           enum: [containers, federations]
 	 *       - name: model
 	 *         description: Model ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: revision
+	 *         description: Revision ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -280,7 +173,7 @@ const establishRoutes = (modelType) => {
 	 *                                     example: 23.45
 	 *                                   description: The maximum coordinates of the superMesh (x,y,z)
 	 */
-		router.get('/revision/master/head', hasReadAccessToModel[modelType], getAssetsMeta(modelType));
+		router.get('/', hasReadAccessToModel[modelType], getAssetsMeta(modelType));
 	}
 
 	return router;
