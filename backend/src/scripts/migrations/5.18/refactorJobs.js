@@ -29,14 +29,73 @@ const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 
+const updateTicketLogs = async (teamspace, affectedTickets, templateToRoleProps, roleNamesToIds) => {
+	const ticketsToTemplates = affectedTickets.reduce((acc, { _id, type }) => {
+		acc[UUIDToString(_id)] = UUIDToString(type);
+		return acc;
+	}, {});
+
+	const logUpdates = [];
+	const logs = await DBHandler.find(teamspace, 'tickets.logs', { ticket: { $in: affectedTickets.map(({ _id }) => _id) } });
+
+	const addLogUpdate = (propValue, propPath, logUpdate) => {
+		if (isArray(propValue)) {
+			const updatedValue = [];
+
+			propValue.forEach((valueItem) => {
+				updatedValue.push(roleNamesToIds[valueItem] || valueItem);
+			});
+
+			if (getArrayDifference(propValue, updatedValue).length) {
+				// eslint-disable-next-line no-param-reassign
+				logUpdate[propPath] = updatedValue;
+			}
+		} else {
+			const roleId = roleNamesToIds[propValue];
+			if (roleId) {
+				// eslint-disable-next-line no-param-reassign
+				logUpdate[propPath] = stringToUUID(roleId);
+			}
+		}
+	};
+
+	logs.forEach((log) => {
+		const logUpdate = {};
+
+		const template = ticketsToTemplates[UUIDToString(log.ticket)];
+		const roleProps = templateToRoleProps[template];
+
+		roleProps.forEach(({ moduleName, propertyName }) => {
+			const propValue = moduleName
+				? log.changes?.modules?.[moduleName]?.[propertyName]
+				: log.changes?.properties?.[propertyName];
+
+			if (!propValue) {
+				return;
+			}
+			const propPath = moduleName ? `changes.modules.${moduleName}.${propertyName}` : `changes.properties.${propertyName}`;
+			addLogUpdate(propValue.from, `${propPath}.from`, logUpdate);
+			addLogUpdate(propValue.to, `${propPath}.to`, logUpdate);
+		});
+
+		if (!isEmpty(logUpdate)) {
+			logUpdates.push({ updateOne: { filter: { _id: log._id }, update: { $set: logUpdate } } });
+		}
+	});
+
+	if (logUpdates.length) {
+		await DBHandler.bulkWrite(teamspace, 'tickets.logs', logUpdates);
+	}
+};
+
 const updateTicketProperties = async (teamspace, templateToRoleProps, roleNamesToIds) => {
 	const ticketUpdates = [];
 
-	const tickets = await DBHandler.find(teamspace, 'tickets',
+	const affectedTickets = await DBHandler.find(teamspace, 'tickets',
 		{ teamspace, type: { $in: Object.keys(templateToRoleProps).map(stringToUUID) } },
 		{ type: 1, properties: 1, modules: 1 });
 
-	tickets.forEach((ticket) => {
+	affectedTickets.forEach((ticket) => {
 		const ticketUpdate = {};
 
 		const roleProps = templateToRoleProps[UUIDToString(ticket.type)];
@@ -53,8 +112,7 @@ const updateTicketProperties = async (teamspace, templateToRoleProps, roleNamesT
 				const updatedValue = [];
 
 				propValue.forEach((valueItem) => {
-					const roleId = roleNamesToIds[valueItem];
-					updatedValue.push(roleId || valueItem);
+					updatedValue.push(roleNamesToIds[valueItem] || valueItem);
 				});
 
 				if (getArrayDifference(propValue, updatedValue).length) {
@@ -76,6 +134,8 @@ const updateTicketProperties = async (teamspace, templateToRoleProps, roleNamesT
 	if (ticketUpdates.length) {
 		await DBHandler.bulkWrite(teamspace, 'tickets', ticketUpdates);
 	}
+
+	return affectedTickets;
 };
 
 const updateTemplateProperties = async (teamspace) => {
@@ -138,10 +198,6 @@ const updateIssuesAndRisks = async (teamspace, roleNamesToIds) => {
 		colItems.forEach(({ _id, creator_role, assigned_roles, comments }) => {
 			const itemUpdate = {};
 
-			if (!colUpdates[colName]) {
-				colUpdates[colName] = [];
-			}
-
 			const newAssignedRole = roleNamesToIds[assigned_roles[0]];
 			if (newAssignedRole) {
 				itemUpdate.assigned_roles = [newAssignedRole];
@@ -167,6 +223,10 @@ const updateIssuesAndRisks = async (teamspace, roleNamesToIds) => {
 			});
 
 			if (!isEmpty(itemUpdate)) {
+				if (!colUpdates[colName]) {
+					colUpdates[colName] = [];
+				}
+
 				colUpdates[colName].push({
 					updateOne: { filter: { _id }, update: { $set: itemUpdate } },
 				});
@@ -176,7 +236,8 @@ const updateIssuesAndRisks = async (teamspace, roleNamesToIds) => {
 
 	await Promise.all([...issueCollections, ...riskCollections].flatMap(({ name }) => processCollection(name)));
 
-	await Promise.all(Object.keys(colUpdates).map((col) => DBHandler.bulkWrite(teamspace, col, colUpdates[col])));
+	await Promise.all(Object.keys(colUpdates)
+		.map((colName) => DBHandler.bulkWrite(teamspace, colName, colUpdates[colName])));
 };
 
 const replaceJobsWithRoles = async (teamspace) => {
@@ -203,17 +264,21 @@ const run = async () => {
 	const teamspaces = await getTeamspaceList();
 	for (const teamspace of teamspaces) {
 		logger.logInfo(`-${teamspace}`);
-		// eslint-disable-next-line no-await-in-loop
-		const roleNamesToIds = await replaceJobsWithRoles(teamspace);
 
 		// eslint-disable-next-line no-await-in-loop
-		const templateToRoleProps = await updateTemplateProperties(teamspace);
+		const [roleNamesToIds, templateToRoleProps] = await Promise.all([
+			replaceJobsWithRoles(teamspace),
+			updateTemplateProperties(teamspace),
+		]);
 
 		// eslint-disable-next-line no-await-in-loop
-		await updateTicketProperties(teamspace, templateToRoleProps, roleNamesToIds);
+		const [affectedTickets] = await Promise.all([
+			updateTicketProperties(teamspace, templateToRoleProps, roleNamesToIds),
+			updateIssuesAndRisks(teamspace, roleNamesToIds),
+		]);
 
 		// eslint-disable-next-line no-await-in-loop
-		await updateIssuesAndRisks(teamspace, roleNamesToIds);
+		await updateTicketLogs(teamspace, affectedTickets, templateToRoleProps, roleNamesToIds);
 	}
 };
 
