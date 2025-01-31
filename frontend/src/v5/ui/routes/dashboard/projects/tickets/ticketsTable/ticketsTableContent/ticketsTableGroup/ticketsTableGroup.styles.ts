@@ -18,6 +18,7 @@
 import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.component';
 import styled, { css } from 'styled-components';
 import { ResizableTable } from '@controls/resizableTableContext/resizableTable/resizableTable.component';
+import { Row } from './ticketsTableRow/ticketsTableRow.styles';
 
 export const Headers = styled(ResizableTableRow)`
 	gap: 1px;
@@ -53,24 +54,6 @@ export const Header = styled.div<{ $selectable?: boolean }>`
 	`}
 `;
 
-export const Group = styled.div`
-	display: grid;
-	border-radius: 10px;
-	overflow: hidden;
-	gap: 1px;
-	width: fit-content;
-	background-color: transparent;
-`;
-
-export const Table = styled(ResizableTable)<{ $empty?: boolean }>`
-	overflow-x: unset;
-	${({ $empty }) => $empty && css`
-		${Group} {
-			width: unset;
-		}
-	`}
-`;
-
 export const NewTicketRow = styled.div<{ disabled?: boolean }>`
 	width: 100%;
 	height: 37px;
@@ -98,4 +81,38 @@ export const NewTicketText = styled.div`
 	position: sticky;
 	left: 15px;
 	width: fit-content;
+`;
+
+const roundBorderTop = css`
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+`;
+
+export const Group = styled.div<{ $empty: boolean }>`
+	display: grid;
+	gap: 1px;
+	width: fit-content;
+	background-color: transparent;
+
+	${({ $empty }) => !$empty && css`
+		& > ${/* sc-selector */Row}:first-child {
+			${roundBorderTop}
+			overflow: hidden;
+		}
+	`}
+
+	${NewTicketRow} {
+		border-bottom-left-radius: 10px;
+		border-bottom-right-radius: 10px;
+		${({ $empty }) => $empty && roundBorderTop}
+	}
+`;
+
+export const Table = styled(ResizableTable)<{ $empty?: boolean }>`
+	overflow-x: unset;
+	${({ $empty }) => $empty && css`
+		${Group} {
+			width: unset;
+		}
+	`}
 `;

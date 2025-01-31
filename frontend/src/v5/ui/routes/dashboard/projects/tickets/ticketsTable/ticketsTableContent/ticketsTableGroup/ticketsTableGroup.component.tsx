@@ -116,7 +116,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 										</SortingTableHeader>
 									</Headers>
 								)}
-							<Group>
+							<Group $empty={!sortedItems?.length}>
 								{sortedItems.map(({ modelId, ...ticket }) => (
 									<TicketsTableRow
 										key={ticket._id}
