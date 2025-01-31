@@ -58,7 +58,7 @@ const propertiesToValidFilters = (properties: { name: string, type: string }[], 
 	}) as CardFilter);
 
 const templateToFilters = (template: ITemplate): CardFilter[] => [
-	...propertiesToValidFilters(template.properties, ''),
+	...propertiesToValidFilters(template.properties.filter(({ name }) => name !== 'Owner'), ''),
 	...template.modules.flatMap(({ properties, name, type }) => propertiesToValidFilters(properties, name || type)),
 ];
 
