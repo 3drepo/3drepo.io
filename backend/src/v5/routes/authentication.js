@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { getLinkToAuthenticator, hasAssociatedAccount, redirectToStateURL } = require('../middleware/sso/frontegg');
+const { generateLinkToAuthenticator, generateToken, redirectToStateURL } = require('../middleware/sso/frontegg');
 const { Router } = require('express');
 const { apiUrls } = require('../utils/config');
 const { notLoggedIn } = require('../middleware/auth');
@@ -23,7 +23,8 @@ const { updateSession } = require('../middleware/sessions');
 
 const createUri = (redirectEndpoint) => `${apiUrls.all[0]}/v5/${redirectEndpoint}`;
 
-const authenticateRedirectUrl = createUri('authentication/authenticate-post');
+const AUTH_POST = '/authenticate-post';
+const authenticateRedirectUrl = createUri(`authentication${AUTH_POST}`);
 
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
@@ -54,10 +55,10 @@ const establishRoutes = () => {
 	*                   description: link to 3D Repo's authenticator
 	*
 	*/
-	router.get('/authenticate', getLinkToAuthenticator(authenticateRedirectUrl));
+	router.get('/authenticate', notLoggedIn, generateLinkToAuthenticator(authenticateRedirectUrl));
 
-	//	router.post(authenticateRedirectUrl, notLoggedIn, hasAssociatedAccount,
-	//	updateSession, redirectToStateURL);
+	// This endpoint is not exposed in swagger as it is not designed to be called by clients
+	router.get(AUTH_POST, notLoggedIn, generateToken(authenticateRedirectUrl), updateSession, redirectToStateURL);
 
 	return router;
 };

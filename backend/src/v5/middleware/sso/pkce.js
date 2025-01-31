@@ -17,7 +17,7 @@
 
 const config = require('../../utils/config');
 const { generateHashString } = require('../../utils/helper/strings');
-const { generateUUID } = require('../../utils/helper/uuids');
+const { generateUUIDString } = require('../../utils/helper/uuids');
 const { subtle } = require('crypto');
 
 const Sso = {};
@@ -39,7 +39,7 @@ const generatePkceCodes = async () => {
 Sso.addPkceProtection = async (req, res, next) => {
 	const { verifier, challenge } = await generatePkceCodes();
 
-	req.session.csrfToken = generateUUID();
+	req.session.csrfToken = generateUUIDString();
 	req.session.pkceCodes = { challengeMethod: 'S256', verifier, challenge };
 	req.session.cookie.domain = config.cookie_domain;
 

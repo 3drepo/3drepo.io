@@ -15,15 +15,51 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createResponseCode, templates } = require('../../utils/responseCodes');
+const { codeExists, createResponseCode, templates } = require('../../utils/responseCodes');
+const { fromBase64, toBase64 } = require('../../utils/helper/strings');
+const { generateToken, getAuthenticationCodeUrl } = require('../../services/sso/frontegg');
 const { addPkceProtection } = require('./pkce');
-const { getAuthenticationCodeUrl } = require('../../services/sso/frontegg');
+const { logger } = require('../../utils/logger');
 const { respond } = require('../../utils/responder');
 const { setSessionInfo } = require('.');
-const { toBase64 } = require('../../utils/helper/strings');
 const { validateMany } = require('../common');
 
 const AuthSSO = {};
+
+const checkStateIsValid = async (req, res, next) => {
+	try {
+		const { state, code } = req.query;
+
+		if (!(state && code)) {
+			throw createResponseCode(templates.invalidArguments, 'Response body does not contain code or state');
+		}
+		req.state = { ...JSON.parse(fromBase64(state)), code };
+		if (req.session.csrfToken !== req.state.csrfToken) {
+			throw createResponseCode(templates.invalidArguments, 'CSRF Token mismatched. Please clear your cookies and try again');
+		}
+
+		await next();
+	} catch (err) {
+		const response = codeExists(err.code) ? err
+			: createResponseCode(templates.invalidArguments, 'state is required and must be a valid encoded JSON');
+
+		respond(req, res, response);
+	}
+};
+
+const getToken = (urlUsed) => async (req, res, next) => {
+	try {
+		const token = await generateToken(urlUsed, req.state.code, req.session.pkceCodes.challenge);
+		req.loginData = {
+			token,
+		};
+
+		await next();
+	} catch (err) {
+		logger.logError(`Failed to generate token from vendor: ${err.message}`);
+		respond(req, res, templates.unknown);
+	}
+};
 
 const redirectForAuth = (redirectURL) => (req, res) => {
 	try {
@@ -31,6 +67,7 @@ const redirectForAuth = (redirectURL) => (req, res) => {
 			respond(req, res, createResponseCode(templates.invalidArguments, 'redirectUri(query string) is required'));
 			return;
 		}
+		console.log('Session CSRF', req.session.csrfToken);
 
 		req.authParams = {
 			redirectURL,
@@ -48,7 +85,18 @@ const redirectForAuth = (redirectURL) => (req, res) => {
 	}
 };
 
-AuthSSO.getLinkToAuthenticator = (redirectURL) => validateMany([addPkceProtection, setSessionInfo,
+AuthSSO.redirectToStateURL = (req, res) => {
+	try {
+		res.redirect(req.state.redirectUri);
+	} catch (err) {
+		logger.logError(`Failed to redirect user back to the specified URL: ${err.message}`);
+		respond(req, res, templates.unknown);
+	}
+};
+
+AuthSSO.generateLinkToAuthenticator = (redirectURL) => validateMany([addPkceProtection, setSessionInfo,
 	redirectForAuth(redirectURL)]);
+
+AuthSSO.generateToken = (redirectURLUsed) => validateMany([checkStateIsValid, getToken(redirectURLUsed)]);
 
 module.exports = AuthSSO;

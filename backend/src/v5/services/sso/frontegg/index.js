@@ -15,31 +15,45 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// appUrl, key , clientId
+const { IdentityClient } = require('@frontegg/client');
 const { sso: { frontegg: config } } = require('../../../utils/config');
+const { post } = require('../../../utils/webRequests');
 const queryString = require('querystring');
+const { toBase64 } = require('../../../utils/helper/strings');
 
 const FrontEgg = {};
-/*
-FrontEgg.authenticate = async () => {
-	const headers = {
-   		Authorization: `Basic ${config.key}`,
-   	};
 
-   	const payload = {
-   		grant_type: 'authorization_code',
-   		code,
-   		redirect_uri: 'https://www.3drepo.local:443/api/v5/sso/aad/authenticate-post',
-   		code_challenge: challenge,
-   	};
+const identityClient = new IdentityClient({ FRONTEGG_CLIENT_ID: config.clientId, FRONTEGG_API_KEY: config.key });
+
+FrontEgg.getUserInfoFromToken = async (token) => {
+	const user = await identityClient.validateIdentityOnToken(token);
+	console.log('User identity...');
+	console.log(user);
 };
-*/
+
+FrontEgg.generateToken = async (urlUsed, code, challenge) => {
+	const headers = {
+		Authorization: `Basic ${toBase64(`${config.clientId}:${config.key}`)}`,
+	};
+
+	const payload = {
+		grant_type: 'authorization_code',
+		code,
+		redirect_uri: urlUsed,
+		code_challenge: challenge,
+	};
+
+	const { data } = await post(`${config.appUrl}/oauth/token`, payload, { headers });
+	await FrontEgg.getUserInfoFromToken(data.access_token);
+
+	return data.access_token;
+};
 
 FrontEgg.getAuthenticationCodeUrl = ({ state, redirectURL, codeChallenge }) => {
 	const qsObj = {
 		response_type: 'code',
 		scope: 'openId',
-		client_id: config.clientId,
+		client_id: config.appId,
 		state,
 		redirect_uri: redirectURL,
 		code_challenge: codeChallenge,
