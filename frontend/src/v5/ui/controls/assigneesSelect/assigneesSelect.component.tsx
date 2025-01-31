@@ -26,6 +26,7 @@ import { TicketContext } from '../../routes/viewer/tickets/ticket.context';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { AssigneesValuesDisplay } from './assigneeValuesDisplay/assigneeValuesDisplay.component';
 import { getInvalidValues, getModelJobsAndUsers, getValidValues } from './assignees.helpers';
+import { FormControl, FormHelperText } from '@mui/material';
 
 export type AssigneesSelectProps = Pick<FormInputProps, 'value'> & SelectProps & {
 	maxItems?: number;
@@ -45,6 +46,7 @@ export const AssigneesSelect = ({
 	onBlur,
 	className,
 	excludeViewers = false,
+	helperText,
 	onChange,
 	...props
 }: AssigneesSelectProps) => {
@@ -89,26 +91,28 @@ export const AssigneesSelect = ({
 		</AssigneesListContainer>
 	);
 	return (
-		<SearchContextComponent fieldsToFilter={['_id', 'firstName', 'lastName', 'job', 'notFoundName']} items={allJobsAndUsersToDisplay}>
-			<AssigneesListContainer onClick={handleOpen} className={className}>
-				<AssigneesSelectMenu
-					open={open}
-					value={value}
-					onClose={handleClose}
-					onOpen={handleOpen}
-					disabled={disabled}
-					multiple={multiple}
-					isInvalid={(v) => invalidValues.includes(v)}
-					onChange={handleChange}
-					{...props}
-				/>
-				<AssigneesValuesDisplay
-					value={valueAsArray}
-					maxItems={maxItems}
-					showEmptyText={showEmptyText}
-					disabled={disabled || !showAddButton}
-				/>
-			</AssigneesListContainer>
-		</SearchContextComponent>
+		<FormControl required={false} disabled={disabled} error={props.error} className={className}>
+			<SearchContextComponent fieldsToFilter={['_id', 'firstName', 'lastName', 'job', 'notFoundName']} items={allJobsAndUsersToDisplay}>
+				<AssigneesListContainer onClick={handleOpen}>
+					<AssigneesSelectMenu
+						open={open}
+						value={value}
+						onClose={handleClose}
+						onOpen={handleOpen}
+						multiple={multiple}
+						isInvalid={(v) => invalidValues.includes(v)}
+						onChange={handleChange}
+						{...props}
+					/>
+					<AssigneesValuesDisplay
+						value={valueAsArray}
+						maxItems={maxItems}
+						showEmptyText={showEmptyText}
+						disabled={disabled || !showAddButton}
+					/>
+				</AssigneesListContainer>
+				<FormHelperText>{helperText}</FormHelperText>
+			</SearchContextComponent>
+		</FormControl>
 	);
 };

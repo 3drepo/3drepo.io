@@ -25,6 +25,9 @@ import { IPin } from '@/v4/services/viewer/viewer';
 import { selectSelectedDate } from '@/v4/modules/sequences';
 import { uniq } from 'lodash';
 import { toTicketCardFilter, templatesToFilters } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
+import { selectFederationById, selectFederationJobs, selectFederationUsers } from '../../federations/federations.selectors';
+import { selectContainerJobs, selectContainerUsers } from '../../containers/containers.selectors';
+import { IJobOrUserList } from '../../jobs/jobs.types';
 
 const selectTicketsCardDomain = (state): ITicketsCardState => state.ticketsCard || {};
 
@@ -197,23 +200,41 @@ export const selectNewTicketPins = createSelector(
 	selectSelectedTicketPinId,
 	getTicketPins,
 );
+const selectJobsAndUsersByModelId = createSelector(
+	selectFederationById,
+	selectFederationJobs,
+	selectContainerJobs,
+	selectFederationUsers,
+	selectContainerUsers,
+	(fed, fedJobs, contJobs, fedUsers, contUsers) => {
+		const isFed = !!fed;
+		const jobs = isFed ? fedJobs : contJobs;
+		const users = isFed ? fedUsers : contUsers;
+		return [...jobs, ...users] as IJobOrUserList;
+	},
+);
 
 export const selectPropertyOptions = createSelector(
 	selectTemplates,
 	selectRiskCategories,
+	selectJobsAndUsersByModelId,
 	(state, modelId, module) => module,
 	(state, modelId, module, property) => property,
-	(templates, riskCategories, module, property) => {
+	(templates, riskCategories, jobsAndUsers, module, property) => {
 		const allValues = [];
 		templates.forEach((template) => {
 			const matchingModule = module ? template.modules.find((mod) => (mod.name || mod.type) === module)?.properties : template.properties;
 			const matchingProperty = matchingModule?.find(({ name, type: t }) => (name === property) && (['manyOf', 'oneOf'].includes(t)));
 			if (!matchingProperty) return;
 			if (matchingProperty.values === 'riskCategories') {
-				allValues.push(...riskCategories);
+				allValues.push(...riskCategories.map((value) => ({ value, type: 'riskCategories' })));
 				return;
 			}
-			allValues.push(...matchingProperty.values);
+			if (matchingProperty.values === 'jobsAndUsers') {
+				allValues.push(...jobsAndUsers.map((ju) => ({ value: ju?.user || ju?._id, type: 'jobsAndUsers' })));
+				return;
+			}
+			allValues.push(...matchingProperty.values.map((value) => ({ value, type: 'default' })));
 		});
 		return uniq(allValues);
 	},

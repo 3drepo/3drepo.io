@@ -18,7 +18,7 @@
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { getOperatorMaxFieldsAllowed } from '../filterForm.helpers';
 import { isRangeOperator, isTextType, isSelectType, isDateType } from '../../cardFilters.helpers';
-import { FormNumberField, FormTextField, FormMultiSelect, FormDateTime } from '@controls/inputs/formInputs.component';
+import { FormNumberField, FormTextField, FormMultiSelect, FormDateTime, FormAssigneesSelect } from '@controls/inputs/formInputs.component';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
 import { useEffect } from 'react';
 import { compact, isArray, isEmpty } from 'lodash';
@@ -123,15 +123,28 @@ export const FilterFormValues = ({ module, property, type }: FilterFolrmValuesTy
 			</>
 		);
 	}
+
 	if (isSelectType(type)) {
+		const allJobsAndUsers = selectOptions.every(({ type: t }) => t === 'jobsAndUsers');
+		if (allJobsAndUsers || type === 'owner') return (
+			<FormAssigneesSelect
+				multiple
+				showAddButton
+				maxItems={19}
+				name={name}
+				transformValueIn={(v) => compact(mapFormArrayToArray(v))}
+				transformChangeEvent={(e) => mapArrayToFormArray(compact(e.target.value))}
+				formError={error?.[0]}
+			/>
+		);
 		return (
 			<FormMultiSelect
 				name={name}
-				formError={error?.[0]}
 				transformValueIn={mapFormArrayToArray}
 				transformChangeEvent={(e) => mapArrayToFormArray(compact(e.target.value))}
+				formError={error?.[0]}
 			>
-				{(selectOptions || []).map((val) => <MultiSelectMenuItem key={val} value={val}>{val}</MultiSelectMenuItem>)}
+				{(selectOptions || []).map(({ value: val }) => <MultiSelectMenuItem key={val} value={val}>{val}</MultiSelectMenuItem>)}
 			</FormMultiSelect>
 		);
 	}
