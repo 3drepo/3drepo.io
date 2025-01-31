@@ -110,6 +110,7 @@ export const Group = styled.div<{ $empty: boolean }>`
 
 export const Table = styled(ResizableTable)<{ $empty?: boolean }>`
 	overflow-x: unset;
+	width: fit-content;
 	${({ $empty }) => $empty && css`
 		${Group} {
 			width: unset;

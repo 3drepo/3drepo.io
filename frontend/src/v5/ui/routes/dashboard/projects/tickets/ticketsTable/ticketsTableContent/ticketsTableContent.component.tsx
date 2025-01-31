@@ -31,6 +31,8 @@ import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/r
 import { ResizableTableContextComponent, TableColumn } from '@controls/resizableTableContext/resizableTableContext';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
+import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 
 type TicketsTableContentProps = {
 	setTicketValue: SetTicketValue;
@@ -39,18 +41,19 @@ type TicketsTableContentProps = {
 };
 export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy }: TicketsTableContentProps) => {
 	const { filteredItems } = useContext(SearchContext);
-	const { template } = useParams<DashboardTicketsParams>();
+	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const [modelsIds] = useSearchParam('models', Transformers.STRING_ARRAY);
 	
 	const showModelName = modelsIds.length > 1;
 
-	const { config, modules } = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
+	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
+	const { config, modules } = template;
 	const hasProperties = config?.issueProperties;
 	const hasSafetibase = modules?.some((module) => module.type === 'safetibase');
 	
 	const columns: TableColumn[] = [
 		{ name: 'id', width: 80, minWidth: 25 },
-		{ name: BaseProperties.TITLE, width: 380, minWidth: 25 },
+		{ name: BaseProperties.TITLE, width: 380, minWidth: 25, stretch: true },
 		{ name: 'modelName', width: 145, minWidth: 25 },
 		{ name: `properties.${BaseProperties.CREATED_AT}`, width: 127, minWidth: 25 },
 		{ name: `properties.${IssueProperties.ASSIGNEES}`, width: 96, minWidth: 25 }, 
@@ -86,6 +89,14 @@ export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy 
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
 		setTicketValue(modelId, NEW_TICKET_ID, (groupByValue === UNSET) ? null : groupByValue);
 	};
+
+	if (!templateAlreadyFetched(template)) {
+		return (
+			<EmptyPageView>
+				<Spinner />
+			</EmptyPageView>
+		);
+	}
 
 	if (!filteredItems.length) {
 		return (
@@ -127,7 +138,7 @@ export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy 
 							</>
 						)}
 						defaultExpanded={!!tickets.length}
-						key={groupBy + groupName + template + tickets}
+						key={groupBy + groupName + templateId + tickets}
 					>
 						<TicketsTableGroup
 							tickets={tickets}

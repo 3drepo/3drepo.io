@@ -64,6 +64,7 @@ export const NewTicketButton = styled(Button).attrs({
 	color: 'primary',
 })`
 	width: 119px;
+	margin-right: 0;
 `;
 
 export const OpenInViewerButton = styled(Button).attrs({

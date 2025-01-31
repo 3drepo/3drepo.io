@@ -16,9 +16,10 @@
  */
 
 import { isEqual, sum } from 'lodash';
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useEffect, useRef, useState } from 'react';
+import { RefHolder } from './resizableTableContext.styles';
 
-export type TableColumn = { name: string, minWidth?: number, width: number };
+export type TableColumn = { name: string, minWidth?: number, width: number, stretch?: boolean };
 
 export interface ResizableTableType {
 	getVisibleColumnsWidths: () => number[];
@@ -63,6 +64,7 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 	const [hiddenColumns, setHiddenColumns] = useState(inputHiddenColumns);
 	const [resizerName, setResizerName] = useState('');
 	const [isResizing, setIsResizing] = useState(false);
+	const ref = useRef<HTMLDivElement>();
 
 	const getElementByName = (name) => columns.find((e) => e.name === name);
 
@@ -90,6 +92,22 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 		}
 	}, [inputHiddenColumns]);
 
+	useEffect(() => {
+		const stretchableColumns = getVisibleColumns().filter((c) => c.stretch);
+		if (!stretchableColumns.length) return;
+
+		const parentWidth = +getComputedStyle(ref.current).width.replace('px', '');
+		const tableWidth = getRowWidth();
+		if (tableWidth >= parentWidth) return;
+
+		const gap = parentWidth - tableWidth;
+		const gapFraction = gap / stretchableColumns.length;
+		stretchableColumns.forEach((c) => {
+			getElementByName(c.name).width += gapFraction;
+		});
+		setColumns([ ...columns ]);
+	}, [inputColumns]);
+
 	return (
 		<ResizableTableContext.Provider value={{
 			getVisibleColumnsWidths,
@@ -106,6 +124,7 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 			columnGap,
 		}}>
 			{children}
+			<RefHolder ref={ref} />
 		</ResizableTableContext.Provider>
 	);
 };

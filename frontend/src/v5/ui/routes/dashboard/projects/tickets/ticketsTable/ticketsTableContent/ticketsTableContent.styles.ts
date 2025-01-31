@@ -19,13 +19,13 @@ import styled from 'styled-components';
 import { CollapsedItemContainer, ControlsContainer as GroupCollapseHeader, Container as DashboardList } from '@components/dashboard/dashboardList/dashboardListCollapse/dashboardListCollapse.styles';
 
 export const ScrollableContainer = styled.div`
-	width: 100vw;
-	padding: 0 75px 30px;
 	margin-bottom: -30px;
 	overflow: scroll;
-	height: calc(100vh - 287px);
 	position: relative;
+	height: calc(100vh - 287px);
+	width: 100vw;
 	left: -75px;
+	padding: 0 64px 30px 75px;
 
 	${GroupCollapseHeader} {
 		position: sticky;
