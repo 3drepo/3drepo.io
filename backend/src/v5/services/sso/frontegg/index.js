@@ -26,9 +26,8 @@ const FrontEgg = {};
 const identityClient = new IdentityClient({ FRONTEGG_CLIENT_ID: config.clientId, FRONTEGG_API_KEY: config.key });
 
 FrontEgg.getUserInfoFromToken = async (token) => {
-	const user = await identityClient.validateIdentityOnToken(token);
-	console.log('User identity...');
-	console.log(user);
+	const { sub: userId, email } = await identityClient.validateIdentityOnToken(token);
+	return { userId, email };
 };
 
 FrontEgg.generateToken = async (urlUsed, code, challenge) => {
@@ -44,12 +43,11 @@ FrontEgg.generateToken = async (urlUsed, code, challenge) => {
 	};
 
 	const { data } = await post(`${config.appUrl}/oauth/token`, payload, { headers });
-	await FrontEgg.getUserInfoFromToken(data.access_token);
 
 	return data.access_token;
 };
 
-FrontEgg.getAuthenticationCodeUrl = ({ state, redirectURL, codeChallenge }) => {
+FrontEgg.generateAuthenticationCodeUrl = ({ state, redirectURL, codeChallenge }) => {
 	const qsObj = {
 		response_type: 'code',
 		scope: 'openId',

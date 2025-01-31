@@ -17,7 +17,7 @@
 
 const { codeExists, createResponseCode, templates } = require('../../utils/responseCodes');
 const { fromBase64, toBase64 } = require('../../utils/helper/strings');
-const { generateToken, getAuthenticationCodeUrl } = require('../../services/sso/frontegg');
+const { generateAuthenticationCodeUrl, generateToken, getUserInfoFromToken } = require('../../services/sso/frontegg');
 const { addPkceProtection } = require('./pkce');
 const { logger } = require('../../utils/logger');
 const { respond } = require('../../utils/responder');
@@ -50,8 +50,9 @@ const checkStateIsValid = async (req, res, next) => {
 const getToken = (urlUsed) => async (req, res, next) => {
 	try {
 		const token = await generateToken(urlUsed, req.state.code, req.session.pkceCodes.challenge);
+		const { userId, email } = await getUserInfoFromToken(token);
 		req.loginData = {
-			token,
+			token, userId, email,
 		};
 
 		await next();
@@ -67,7 +68,6 @@ const redirectForAuth = (redirectURL) => (req, res) => {
 			respond(req, res, createResponseCode(templates.invalidArguments, 'redirectUri(query string) is required'));
 			return;
 		}
-		console.log('Session CSRF', req.session.csrfToken);
 
 		req.authParams = {
 			redirectURL,
@@ -78,7 +78,7 @@ const redirectForAuth = (redirectURL) => (req, res) => {
 			codeChallenge: req.session.pkceCodes.challenge,
 		};
 
-		const link = getAuthenticationCodeUrl(req.authParams);
+		const link = generateAuthenticationCodeUrl(req.authParams);
 		respond(req, res, templates.ok, { link });
 	} catch (err) {
 		respond(req, res, err);
