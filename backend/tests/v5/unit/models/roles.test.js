@@ -181,19 +181,21 @@ const testGetRoles = () => {
 	describe('Get roles', () => {
 		test('return all available roles', async () => {
 			const teamspace = generateRandomString();
+			const projection = generateRandomObject();
 			const roles = [generateRandomString(), generateRandomString(), generateRandomString()];
 			const findFn = jest.spyOn(db, 'find').mockResolvedValueOnce(roles);
-			await expect(Roles.getRoles(teamspace)).resolves.toEqual(roles);
+			await expect(Roles.getRoles(teamspace, projection)).resolves.toEqual(roles);
 			expect(findFn).toHaveBeenCalledTimes(1);
-			expect(findFn).toHaveBeenCalledWith(teamspace, ROLE_COL, {}, { _id: 1, color: 1, name: 1 }, undefined);
+			expect(findFn).toHaveBeenCalledWith(teamspace, ROLE_COL, {}, projection, undefined);
 		});
 
 		test('return an empty array if there are no roles', async () => {
 			const teamspace = generateRandomString();
+			const projection = generateRandomObject();
 			const findFn = jest.spyOn(db, 'find').mockResolvedValueOnce([]);
-			await expect(Roles.getRoles(teamspace)).resolves.toEqual([]);
+			await expect(Roles.getRoles(teamspace, projection)).resolves.toEqual([]);
 			expect(findFn).toHaveBeenCalledTimes(1);
-			expect(findFn).toHaveBeenCalledWith(teamspace, ROLE_COL, {}, { _id: 1, color: 1, name: 1 }, undefined);
+			expect(findFn).toHaveBeenCalledWith(teamspace, ROLE_COL, {}, projection, undefined);
 		});
 	});
 };

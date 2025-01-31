@@ -51,7 +51,7 @@ Roles.revokeTeamspaceRoleFromUser = (teamspace, username) => db.revokeRole(teams
 
 Roles.getRolesToUsers = (teamspace) => findMany(teamspace, {}, { _id: 1, users: 1 });
 
-Roles.getRoles = (teamspace, projection = { _id: 1, name: 1, color: 1 }) => findMany(teamspace, {}, projection);
+Roles.getRoles = (teamspace, projection) => findMany(teamspace, {}, projection);
 
 Roles.getRoleById = (teamspace, roleId, projection) => findOne(teamspace, { _id: roleId }, projection);
 Roles.getRoleByName = (teamspace, roleName, projection) => findOne(teamspace, { name: roleName }, projection);

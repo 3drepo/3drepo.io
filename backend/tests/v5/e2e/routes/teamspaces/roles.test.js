@@ -21,48 +21,61 @@ const ServiceHelper = require('../../../helper/services');
 const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
 
+const { DEFAULT_ROLES } = require(`${src}/models/roles.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 let server;
 let agent;
 
-const [tsAdmin, normalUser, nobody] = times(3, ServiceHelper.generateUserCredentials);
+const generateBasicData = () => {
+	const users = {
+		tsAdmin: ServiceHelper.generateUserCredentials(),
+		normalUser: ServiceHelper.generateUserCredentials(),
+		nobody: ServiceHelper.generateUserCredentials(),
+	};
 
-const teamspace = { name: ServiceHelper.generateRandomString() };
+	const teamspace = ServiceHelper.generateRandomString();
 
-const roles = times(10, () => ({
-	_id: ServiceHelper.generateRandomString(), color: ServiceHelper.generateRandomString(),
-}));
+	const roles = times(10, () => ({
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		color: ServiceHelper.generateRandomString(),
+	}));
 
-const setupData = async () => {
-	await ServiceHelper.db.createTeamspace(teamspace.name, [tsAdmin.user]);
+	return {
+		users,
+		teamspace,
+		roles,
+	};
+};
+
+const setupData = async ({ users, teamspace, roles }) => {
+	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
 
 	await Promise.all([
-		ServiceHelper.db.createUser(
-			tsAdmin,
-			[teamspace.name],
-		),
-		ServiceHelper.db.createUser(
-			normalUser,
-			[teamspace.name],
-		),
-		ServiceHelper.db.createUser(
-			nobody,
-			[],
-		),
-		ServiceHelper.db.createRoles(teamspace.name, roles),
+		ServiceHelper.db.createUser(users.tsAdmin, [teamspace]),
+		ServiceHelper.db.createUser(users.normalUser, [teamspace]),
+		ServiceHelper.db.createUser(users.nobody, []),
+		ServiceHelper.db.createRoles(teamspace, roles),
 	]);
 };
 
 const testGetRoleList = () => {
-	const route = (key, ts = teamspace.name) => `/v5/teamspaces/${ts}/roles${key ? `?key=${key}` : ''}`;
+	const basicData = generateBasicData();
+	const { users, teamspace, roles } = basicData;
+	beforeAll(async () => {
+		await setupData(basicData);
+	});
+
+	const route = (key, ts = teamspace) => `/v5/teamspaces/${ts}/roles${key ? `?key=${key}` : ''}`;
+
 	describe('Get role list', () => {
 		describe.each([
 			['user does not have a valid session', undefined, undefined, false, templates.notLoggedIn],
-			['teamspace does not exist', tsAdmin.apiKey, generateRandomString(), false, templates.teamspaceNotFound],
-			['user is not a member of the teamspace', nobody.apiKey, undefined, false, templates.teamspaceNotFound],
-			['user is a ts admin', tsAdmin.apiKey, undefined, true],
-			['user is a member', normalUser.apiKey, undefined, true],
+			['teamspace does not exist', users.tsAdmin.apiKey, generateRandomString(), false, templates.teamspaceNotFound],
+			['user is not a member of the teamspace', users.nobody.apiKey, undefined, false, templates.teamspaceNotFound],
+			['user is a ts admin', users.tsAdmin.apiKey, undefined, true],
+			['user is a member', users.normalUser.apiKey, undefined, true],
 		])('', (desc, key, ts, success, expectedRes) => {
 			test(`should ${success ? 'succeed' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : expectedRes.status;
@@ -77,12 +90,125 @@ const testGetRoleList = () => {
 	});
 };
 
+const testAddRole = () => {
+	const basicData = generateBasicData();
+	const { users, teamspace } = basicData;
+
+	beforeAll(async () => {
+		await setupData(basicData);
+	});
+
+	const roleData = {
+		name: ServiceHelper.generateRandomString(),
+		color: DEFAULT_ROLES[0].color,
+		users: [users.tsAdmin.user],
+	};
+
+	const getRolesRoute = (key, ts = teamspace) => `/v5/teamspaces/${ts}/roles${key ? `?key=${key}` : ''}`;
+	const addRoleRoute = (key, ts = teamspace) => `/v5/teamspaces/${ts}/roles${key ? `?key=${key}` : ''}`;
+
+	describe.each([
+		['user does not have a valid session', undefined, undefined, roleData, false, templates.notLoggedIn],
+		['teamspace does not exist', users.tsAdmin.apiKey, generateRandomString(), roleData, false, templates.teamspaceNotFound],
+		['user is not a member of the teamspace', users.nobody.apiKey, undefined, roleData, false, templates.teamspaceNotFound],
+		['user is not a teamspace admin', users.normalUser.apiKey, undefined, roleData, false, templates.notAuthorized],
+		['user is a ts admin and data is valid', users.tsAdmin.apiKey, undefined, roleData, true],
+		['data is invalid (missing name)', users.tsAdmin.apiKey, undefined, { ...roleData, name: undefined }, false, templates.invalidArguments],
+		['data is invalid (users with non ts members)', users.tsAdmin.apiKey, undefined, { ...roleData, users: [users.nobody.user] }, false, templates.invalidArguments],
+	])('Create role', (desc, key, ts, data, success, expectedRes) => {
+		test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
+			const expectedStatus = success ? templates.ok.status : expectedRes.status;
+			const res = await agent.post(addRoleRoute(key, ts)).send(data).expect(expectedStatus);
+
+			if (success) {
+				expect(res.body?._id).not.toBeUndefined();
+				const { _id } = res.body;
+				const rolesRes = await agent.get(getRolesRoute(key, ts)).expect(templates.ok.status);
+				const role = rolesRes.body.roles.find((r) => r._id === _id);
+				expect(role).toEqual({ _id, ...data });
+			} else {
+				expect(res.body.code).toEqual(expectedRes.code);
+			}
+		});
+	});
+};
+
+const testUpdateRole = () => {
+	const basicData = generateBasicData();
+	const { users, teamspace, roles } = basicData;
+
+	beforeAll(async () => {
+		await setupData(basicData);
+	});
+
+	const roleData = { name: ServiceHelper.generateRandomString() };
+	const updateRoleRoute = (key, roleId, ts = teamspace) => `/v5/teamspaces/${ts}/roles/${roleId}${key ? `?key=${key}` : ''}`;
+
+	describe.each([
+		['user does not have a valid session', undefined, undefined, roles[0]._id, roleData, false, templates.notLoggedIn],
+		['teamspace does not exist', users.tsAdmin.apiKey, generateRandomString(), roles[0]._id, roleData, false, templates.teamspaceNotFound],
+		['user is not a member of the teamspace', users.nobody.apiKey, undefined, roles[0]._id, roleData, false, templates.teamspaceNotFound],
+		['user is not a teamspace admin', users.normalUser.apiKey, undefined, roles[0]._id, roleData, false, templates.notAuthorized],
+		['user is a ts admin and data is valid', users.tsAdmin.apiKey, undefined, roles[0]._id, roleData, true],
+		['role does not exist', users.tsAdmin.apiKey, undefined, generateRandomString(), roleData, false, templates.roleNotFound],
+		['data is invalid (empty body)', users.tsAdmin.apiKey, undefined, roles[0]._id, { }, false, templates.invalidArguments],
+		['data is invalid (users with non ts members)', users.tsAdmin.apiKey, undefined, roles[0]._id, { ...roleData, users: [users.nobody.user] }, false, templates.invalidArguments],
+	])('Update role', (desc, key, ts, roleId, data, success, expectedRes) => {
+		test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
+			const expectedStatus = success ? templates.ok.status : expectedRes.status;
+			const res = await agent.patch(updateRoleRoute(key, roleId, ts)).send(data).expect(expectedStatus);
+
+			if (!success) {
+				expect(res.body.code).toEqual(expectedRes.code);
+			}
+		});
+	});
+};
+
+const testDeleteRole = () => {
+	const basicData = generateBasicData();
+	const { users, teamspace, roles } = basicData;
+
+	beforeAll(async () => {
+		await setupData(basicData);
+	});
+
+	const roleData = { name: ServiceHelper.generateRandomString() };
+
+	const deleteRoleRoute = (key, roleId, ts = teamspace) => `/v5/teamspaces/${ts}/roles/${roleId}${key ? `?key=${key}` : ''}`;
+	const getRolesRoute = (key, ts = teamspace) => `/v5/teamspaces/${ts}/roles${key ? `?key=${key}` : ''}`;
+
+	describe.each([
+		['user does not have a valid session', undefined, undefined, roles[0]._id, roleData, false, templates.notLoggedIn],
+		['teamspace does not exist', users.tsAdmin.apiKey, generateRandomString(), roles[0]._id, roleData, false, templates.teamspaceNotFound],
+		['user is not a member of the teamspace', users.nobody.apiKey, undefined, roles[0]._id, roleData, false, templates.teamspaceNotFound],
+		['user is not a teamspace admin', users.normalUser.apiKey, undefined, roles[0]._id, roleData, false, templates.notAuthorized],
+		['user is a ts admin', users.tsAdmin.apiKey, undefined, roles[0]._id, roleData, true],
+		['role does not exist', users.tsAdmin.apiKey, undefined, generateRandomString(), roleData, false, templates.roleNotFound],
+	])('Delete role', (desc, key, ts, roleId, data, success, expectedRes) => {
+		test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
+			const expectedStatus = success ? templates.ok.status : expectedRes.status;
+			const res = await agent.delete(deleteRoleRoute(key, roleId, ts)).send(data).expect(expectedStatus);
+
+			if (success) {
+				const rolesRes = await agent.get(getRolesRoute(key, ts)).expect(templates.ok.status);
+				const role = rolesRes.body.roles.find((r) => r._id === roleId);
+				expect(role).toBeUndefined();
+			} else {
+				expect(res.body.code).toEqual(expectedRes.code);
+			}
+		});
+	});
+};
+
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);
-		await setupData();
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
 	testGetRoleList();
+	testAddRole();
+	testUpdateRole();
+	testDeleteRole();
 });

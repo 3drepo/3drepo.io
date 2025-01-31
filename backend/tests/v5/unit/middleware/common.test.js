@@ -16,8 +16,14 @@
  */
 
 const { src } = require('../../helper/path');
+const { generateRandomString } = require('../../helper/services');
+
+const { templates } = require(`${src}/utils/responseCodes`);
 
 const Common = require(`${src}/middleware/common`);
+
+jest.mock('../../../../src/v5/utils/responder');
+const Responder = require(`${src}/utils/responder`);
 
 const testValidateMany = () => {
 	const mockValidatorTruthy = jest.fn((req, res, next) => { next(); });
@@ -59,6 +65,27 @@ const testValidateMany = () => {
 			expect(mockCBNext.mock.calls.length).toBe(0);
 			expect(mockValidatorTruthy.mock.calls.length).toBe(0);
 			expect(mockValidatorFalsey.mock.calls.length).toBe(1);
+		});
+	});
+
+	describe('Route Deprecated', () => {
+		test('with no newEndpoint suggestion should respond with resourceNotAvailable', async () => {
+			Responder.respond.mockResolvedValueOnce(undefined);
+
+			await Common.routeDeprecated()({}, {});
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond.mock.calls[0][2].code).toEqual(templates.resourceNotAvailable.code);
+			expect(Responder.respond.mock.calls[0][2].message).toEqual('This route is deprecated.');
+		});
+
+		test('with newEndpoint suggestion should respond with resourceNotAvailable and custom message', async () => {
+			Responder.respond.mockResolvedValueOnce(undefined);
+			const newEndpoint = generateRandomString();
+
+			await Common.routeDeprecated(newEndpoint)({}, {});
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond.mock.calls[0][2].code).toEqual(templates.resourceNotAvailable.code);
+			expect(Responder.respond.mock.calls[0][2].message).toEqual(`This route is deprecated, please use ${newEndpoint} instead.`);
 		});
 	});
 };

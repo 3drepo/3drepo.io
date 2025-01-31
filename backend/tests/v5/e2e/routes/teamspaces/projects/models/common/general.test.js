@@ -20,6 +20,8 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 
+const { DEFAULT_OWNER_ROLE } = require(`${src}/models/roles.constants`);
+
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
@@ -66,9 +68,15 @@ const generateBasicData = () => {
 	};
 
 	data.roles = [
-		{ _id: ServiceHelper.generateRandomString(), users: [viewer.user] },
-		{ _id: ServiceHelper.generateRandomString(), users: [collaborator.user] },
-		{ _id: ServiceHelper.generateRandomString(), users: Object.values(data.users).map(({ user }) => user) },
+		{ _id: ServiceHelper.generateUUIDString(),
+			name: ServiceHelper.generateRandomString(),
+			users: [viewer.user] },
+		{ _id: ServiceHelper.generateUUIDString(),
+			name: ServiceHelper.generateRandomString(),
+			users: [collaborator.user] },
+		{ _id: ServiceHelper.generateUUIDString(),
+			name: ServiceHelper.generateRandomString(),
+			users: Object.values(data.users).map(({ user }) => user) },
 	];
 
 	return data;
@@ -1145,8 +1153,8 @@ const testGetRolesWithAccess = () => {
 				['the user does not have access to the model', getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
 				['the model does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
 				['the model is of wrong type', getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
-				['excludeViewers is set to false', getRoute(), true, { roles: ['Admin', ...roles.map(({ _id }) => _id)] }],
-				['excludeViewers is set to true', getRoute({ excludeViewers: true }), true, { roles: ['Admin', ...roles.slice(1).map(({ _id }) => _id)] }],
+				['excludeViewers is set to false', getRoute(), true, roles.map(({ _id }) => _id)],
+				['excludeViewers is set to true', getRoute({ excludeViewers: true }), true, roles.slice(1).map(({ _id }) => _id)],
 			];
 		};
 
@@ -1155,7 +1163,10 @@ const testGetRolesWithAccess = () => {
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
 				const res = await agent.get(route).expect(expectedStatus);
 				if (success) {
-					expect(res.body).toEqual(expectedOutput);
+					const allRoles = await agent.get(`/v5/teamspaces/${teamspace}/roles?key=${users.tsAdmin.apiKey}`);
+					const adminRoleId = allRoles.body.roles.find((r) => r.name === DEFAULT_OWNER_ROLE)._id;
+
+					expect(res.body).toEqual({ roles: [adminRoleId, ...expectedOutput] });
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}

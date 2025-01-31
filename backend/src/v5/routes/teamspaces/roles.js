@@ -29,7 +29,8 @@ const getRoles = async (req, res) => {
 
 	try {
 		const roles = await Roles.getRoles(teamspace);
-		respond(req, res, templates.ok, { roles: roles.map(({ _id, rest }) => ({ _id: UUIDToString(_id), ...rest })) });
+		respond(req, res, templates.ok,
+			{ roles: roles.map(({ _id, ...rest }) => ({ _id: UUIDToString(_id), ...rest })) });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -119,6 +120,12 @@ const establishRoutes = () => {
 	*                         type: string
 	*                         description: Color that represents the role, in hex
 	*                         example: "#AA00BB"
+	*                       users:
+	*                         type: array
+	*                         items:
+	*                           type: string
+	*                           description: A user the role is assigned to
+	*                           example: user1
 	*/
 	router.get('/', hasAccessToTeamspace, getRoles);
 
@@ -140,8 +147,6 @@ const establishRoutes = () => {
 	*         application/json:
 	*           schema:
 	*             type: object
-	*             required:
-	*               -name
 	*             properties:
 	*               name:
 	*                 type: string
@@ -153,10 +158,12 @@ const establishRoutes = () => {
 	*                 example: #808080
 	*               users:
 	*                 type: array
-	*                 description: The users the role is assigned to
 	*                 items:
 	*                   type: string
+	*                   description: A user the role is assigned to
 	*                   example: user1
+	*             required:
+	*               - name
 	*     operationId: createRole
 	*     responses:
 	*       401:

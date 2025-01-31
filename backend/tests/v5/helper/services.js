@@ -278,7 +278,10 @@ db.createComment = (teamspace, project, model, ticket, comment) => {
 	return DbHandler.insertOne(teamspace, 'tickets.comments', formattedComment);
 };
 
-db.createRoles = (teamspace, roles) => DbHandler.insertMany(teamspace, 'roles', roles);
+db.createRoles = (teamspace, roles) => {
+	const formattedRoles = roles.map((role) => ({ ...role, _id: stringToUUID(role._id) }));
+	return DbHandler.insertMany(teamspace, 'roles', formattedRoles);
+};
 
 db.createIssue = (teamspace, modelId, issue) => {
 	const formattedIssue = { ...issue, _id: stringToUUID(issue._id) };
