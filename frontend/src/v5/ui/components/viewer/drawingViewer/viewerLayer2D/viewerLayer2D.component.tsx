@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CSSProperties, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { CSSProperties, useContext, useEffect, useRef, useState } from 'react';
 import { Container, LayerLevel, Viewport } from './viewerLayer2D.styles';
 import { isEqual } from 'lodash';
 import { SnapCursor } from './snapCursor/snapCursor.component';
@@ -105,7 +105,7 @@ export const ViewerLayer2D = ({ viewBox, snapHandler, viewport }: ViewerLayer2DP
 		return mousePosition;
 	};
 
-	const handleMouseUp = useCallback((e) => {
+	const handleMouseUp = (e) => {
 		// check if mouse up was fired after dragging or if it was an actual click
 		if (!isEqual(viewBox, previousViewBox.current)) return;
 		let mousePosition = getCursorOffset(e);
@@ -117,12 +117,12 @@ export const ViewerLayer2D = ({ viewBox, snapHandler, viewport }: ViewerLayer2DP
 			DrawingViewerService.emitClickPointEvent(pin3D);
 		}
 
-	}, [viewBox, verticalRange, transform2DTo3D]);
+	};
 
-	const handleMouseMove = useCallback((e) => {
+	const handleMouseMove = (e) => {
 		let mousePos = getCursorOffset(e);
 		DrawingViewerService.setMousePosition(mousePos);
-	}, [snapHandler, snapType, snapping, viewBox]);
+	};
 
 	const handleMouseLeave = () => DrawingViewerService.setMousePosition(undefined);
 

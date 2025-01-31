@@ -241,7 +241,11 @@ Models.updateModelSettings = async (teamspace, project, model, data) => {
 
 	Object.keys(data).forEach((key) => {
 		const value = data[key];
-		if (value !== undefined && value !== null) {
+		if (value === null) {
+			if (key === 'unit' || key === 'code') {
+				toUnset[`properties.${key}`] = 1;
+			} else toUnset[key] = 1;
+		} else if (value !== undefined) {
 			if (key === 'unit' || key === 'code') {
 				if (!toUpdate.properties) {
 					toUpdate.properties = {};
@@ -250,8 +254,6 @@ Models.updateModelSettings = async (teamspace, project, model, data) => {
 			} else {
 				toUpdate[key] = value;
 			}
-		} else if (key === 'defaultView') {
-			toUnset[key] = 1;
 		}
 	});
 

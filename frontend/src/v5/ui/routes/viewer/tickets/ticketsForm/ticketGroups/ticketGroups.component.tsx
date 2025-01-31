@@ -35,7 +35,7 @@ import { GroupSettingsForm } from './groups/groupActionMenu/groupSettingsForm/gr
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 
-const getPossiblePrefixes = (overrides: GroupOverride[] = []): string[][] => {
+export const getPossiblePrefixes = (overrides: GroupOverride[] = []): string[][] => {
 	const prefixes = overrides.map(({ prefix }) => (prefix)).filter(Boolean);
 	const uniquePrefixes = uniqBy(prefixes, JSON.stringify);
 	const allPrefixesWithDuplicates: string[][] = [];

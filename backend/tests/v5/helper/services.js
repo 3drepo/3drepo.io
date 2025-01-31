@@ -362,6 +362,7 @@ ServiceHelper.generateRandomBuffer = (length = 20) => Buffer.from(ServiceHelper.
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
 	+ Math.random() * (end.getTime() - start.getTime()));
 ServiceHelper.generateRandomNumber = (min = -1000, max = 1000) => Math.random() * (max - min) + min;
+ServiceHelper.generateRandomBoolean = () => Math.random() < 0.5;
 ServiceHelper.generateRandomIfcGuid = () => ServiceHelper.generateRandomString(22);
 ServiceHelper.generateRandomRvtId = () => Math.floor(Math.random() * 10000);
 
@@ -620,10 +621,14 @@ const generateProperties = (propTemplate, internalType, container) => {
 		if (deprecated || readOnly) return;
 		if (type === propTypes.TEXT) {
 			properties[name] = ServiceHelper.generateRandomString();
+		} if (type === propTypes.LONG_TEXT) {
+			properties[name] = ServiceHelper.generateRandomString();
 		} else if (type === propTypes.DATE) {
 			properties[name] = internalType ? new Date() : Date.now();
 		} else if (type === propTypes.NUMBER) {
 			properties[name] = ServiceHelper.generateRandomNumber();
+		} else if (type === propTypes.BOOLEAN) {
+			properties[name] = ServiceHelper.generateRandomBoolean();
 		} else if (type === propTypes.ONE_OF && isArray(values)) {
 			properties[name] = values[values.length - 1];
 		} else if (type === propTypes.MANY_OF && isArray(values)) {

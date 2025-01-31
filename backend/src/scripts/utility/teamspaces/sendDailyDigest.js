@@ -121,6 +121,7 @@ const generateEmails = (data, dataRef, usersToUserInfo) => Promise.all(
 					break;
 				case notificationTypes.TICKET_CLOSED:
 					tickets.closed = ticketData;
+					tickets.closed.link = `${tickets.closed.link}&ticketCompleted=true`;
 					break;
 				case notificationTypes.TICKET_ASSIGNED:
 					tickets.assigned = ticketData;

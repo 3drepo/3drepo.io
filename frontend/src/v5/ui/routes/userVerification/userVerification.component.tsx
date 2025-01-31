@@ -52,7 +52,7 @@ export const UserVerification = () => {
 				}));
 				setMessage(formatMessage({
 					id: 'userVerification.success.message',
-					defaultMessage: 'Your account has been verified. You can now login.',
+					defaultMessage: 'Your account has been verified. You can now log in.',
 				}));
 			})
 			.catch((e) => {

@@ -72,4 +72,5 @@ export type UploadItemFields = CreateDrawingRevisionBody & {
 	uploadId: string;
 	progress: number;
 	extension: string;
+	isMultiPagePdf?: boolean;
 };
