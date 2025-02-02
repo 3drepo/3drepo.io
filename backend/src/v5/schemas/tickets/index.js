@@ -73,7 +73,11 @@ const generatePropertiesValidator = async (teamspace, project, model, templateId
 				if (prop.type === propTypes.ONE_OF) {
 					validator = validator.oneOf(isNewTicket || prop.required ? values : values.concat(null));
 				} else if (prop.type === propTypes.MANY_OF) {
-					validator = Yup.array().of(types.strings.title.oneOf(values));
+					validator = Yup.array().of(types.strings.title.oneOf(values),
+					).transform((v) => {
+						if (v?.length) return v;
+						return isNewTicket ? undefined : null;
+					});
 				} else {
 					logger.logError(`Property values found for a non selection type (${prop.type})`);
 				}
@@ -135,6 +139,7 @@ const generatePropertiesValidator = async (teamspace, project, model, templateId
 						// if the object becomes empty, we're effectively setting it to null
 						valueToEval = isEqual(valueToEval, {}) ? null : valueToEval;
 					}
+
 					return (valueToEval === null && oldValue === undefined && !prop.required)
 						|| isEqual(valueToEval, oldValue);
 				});

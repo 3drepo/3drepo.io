@@ -64,6 +64,33 @@ const testSerialiseRevisionArray = () => {
 	});
 };
 
+const testSerialiseRevision = () => {
+	const noTs = generateRevisionEntry();
+	delete noTs.timestamp;
+	describe.each([
+		[{}, 'no revision'],
+		[noTs, 'no timestamp revision'],
+		[generateRevisionEntry(), 'regual revision'],
+	])('Serialize revision data', (data, desc) => {
+		test(`should serialise correctly with ${desc}`, () => {
+			const nextIdx = respondFn.mock.calls.length;
+			RevisionOutputMiddlewares.serialiseRevision({ outputData: cloneDeep(data) }, {}, () => {});
+
+			expect(respondFn.mock.calls.length).toBe(nextIdx + 1);
+			expect(respondFn.mock.calls[nextIdx][2]).toEqual(templates.ok);
+
+			const serialisedRev = {
+				...data,
+				_id: UUIDToString(data._id),
+				timestamp: data.timestamp ? data.timestamp.getTime() : data.timestamp,
+			};
+
+			expect(respondFn.mock.calls[nextIdx][3]).toEqual(serialisedRev);
+		});
+	});
+};
+
 describe('middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions', () => {
 	testSerialiseRevisionArray();
+	testSerialiseRevision();
 });
