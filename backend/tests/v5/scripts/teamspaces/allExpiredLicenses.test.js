@@ -69,87 +69,87 @@ const runTest = (testData) => {
 
 const randomDateInFuture = () => generateRandomDate(new Date(), new Date(Date.now() + 1000000));
 
-const createData = () => ({
-	validLicenses: [{
-		name: generateRandomString(),
-		expiryDate: randomDateInFuture(),
-		type: 'enterprise',
-		collaborators: 'unlimited',
-		data: Math.round(generateRandomNumber(0)),
+const createTeamspaceLicenseData = () => [
+	{
+		teamspaceName: generateRandomString(),
+		validLicenses: [
+			{
+				expiryDate: randomDateInFuture(),
+				type: 'enterprise',
+				collaborators: 'unlimited',
+				data: Math.round(generateRandomNumber(0)),
+			},
+		],
+		expiredLicenses: [
+			{
+				expiryDate: generateRandomDate(),
+				type: 'discretionary',
+				collaborators: 'unlimited',
+				data: Math.round(generateRandomNumber(0)),
+			},
+			{
+				expiryDate: generateRandomDate(),
+				type: 'pilot',
+				collaborators: 'unlimited',
+				data: Math.round(generateRandomNumber(0)),
+			},
+		],
+		invalidLicenses: [
+			{
+				expiryDate: generateRandomDate(),
+				type: generateRandomString(),
+				collaborators: 'unlimited',
+				data: Math.round(generateRandomNumber(0)),
+			},
+		],
 	},
 	{
-		name: generateRandomString(),
-		expiryDate: randomDateInFuture(),
-		type: 'discretionary',
-		collaborators: 3,
-		data: Math.round(generateRandomNumber(0)),
+		teamspaceName: generateRandomString(),
+		validLicenses: [
+			{
+				expiryDate: randomDateInFuture(),
+				type: 'enterprise',
+				data: Math.round(generateRandomNumber(0)),
+			},
+			{
+				name: generateRandomString(),
+				expiryDate: randomDateInFuture(),
+				type: 'discretionary',
+				collaborators: 5,
+			},
+		],
+		expiredLicenses: [
+			{
+				expiryDate: generateRandomDate(),
+				type: 'internal',
+				collaborators: 3,
+				data: Math.round(generateRandomNumber(0)),
+			},
+		],
 	},
 	{
-		name: generateRandomString(),
-		expiryDate: randomDateInFuture(),
-		type: 'enterprise',
-		data: Math.round(generateRandomNumber(0)),
-	}, {
-		name: generateRandomString(),
-		expiryDate: randomDateInFuture(),
-		type: 'enterprise',
-		collaborators: 'unlimited',
+		teamspaceName: generateRandomString(),
 	},
-	{
-		name: generateRandomString(),
-		type: 'enterprise',
-		collaborators: 'unlimited',
-		data: Math.round(generateRandomNumber(0)),
-	},
-	],
-	expiredLicenses: [
-		{
-			name: generateRandomString(),
-			expiryDate: generateRandomDate(),
-			type: 'enterprise',
-			collaborators: 'unlimited',
-			data: Math.round(generateRandomNumber(0)),
-		},
-		{
-			name: generateRandomString(),
-			expiryDate: generateRandomDate(),
-			type: 'discretionary',
-			collaborators: 'unlimited',
-			data: Math.round(generateRandomNumber(0)),
-		}],
-	invalidLicenses: [
-		{
-			name: generateRandomString(),
-			expiryDate: generateRandomDate(),
-			type: generateRandomString(),
-			collaborators: 'unlimited',
-			data: Math.round(generateRandomNumber(0)),
-		},
-		{
-			// no license
-			name: generateRandomString(),
-		},
-	],
+];
 
-});
-
-const setupData = async ({ validLicenses, invalidLicenses, expiredLicenses }) => {
-	const allTeamspaces = [...validLicenses, ...invalidLicenses, ...expiredLicenses];
-	await Promise.all(allTeamspaces.map(async ({ name, type, ...subData }) => {
-		await createTeamspace(name);
-		if (type) {
-			await editSubscriptions(name, type, subData);
-		}
+const setupTeamspacesAndLicenseData = async (teamspaceLicenseData) => {
+	// eslint-disable-next-line max-len
+	await Promise.all(teamspaceLicenseData.map(async ({ teamspaceName, validLicenses = [], expiredLicenses = [], invalidLicenses = [] }) => {
+		// create the teamspace
+		await createTeamspace(teamspaceName);
+		// create the licenses for the above teamspace
+		const licenses = [...validLicenses, ...expiredLicenses, ...invalidLicenses];
+		await Promise.all(licenses.map(({ type, ...subData }) => editSubscriptions(teamspaceName, type, subData)));
 	}));
 };
 
 describe(determineTestGroup(__filename), () => {
-	const data = createData();
+	const teamspaceLicenseData = createTeamspaceLicenseData();
 	beforeAll(async () => {
 		resetFileshare();
 		await resetDB();
-		await setupData(data);
+		await setupTeamspacesAndLicenseData(teamspaceLicenseData);
 	});
-	runTest(data);
+	runTest(teamspaceLicenseData);
 	afterAll(disconnect);
 });
