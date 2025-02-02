@@ -393,7 +393,7 @@ describe('Check DB handler', () => {
 
 	describe('insertOne', () => {
 		const newRole = {
-			_id: 'Test Role,
+			_id: 'Test Role',
 			users: [],
 		};
 
@@ -479,7 +479,7 @@ describe('Check DB handler', () => {
 
 	describe('updateOne', () => {
 		it('update one should succeed', async () => {
-			const query = { _id: 'Test Role };
+			const query = { _id: 'Test Role' };
 			const newData = { $set: { users: ['updateOne'] } };
 			const result = await db.updateOne(account, 'roles', query, newData);
 			expect(result.result.n).to.equal(1);
@@ -488,7 +488,7 @@ describe('Check DB handler', () => {
 		});
 
 		it('upsert on existing record should succeed', async () => {
-			const query = { _id: 'Test Role };
+			const query = { _id: 'Test Role' };
 			const newData = { $set: { users: ['updateOne', 'updateTwo'] } };
 			const result = await db.updateOne(account, 'roles', query, newData, true);
 			expect(result.result.n).to.equal(1);
@@ -580,7 +580,7 @@ describe('Check DB handler', () => {
 		});
 
 		it('deleteOne with incorrect username should succeed', async () => {
-			const query = { _id: 'Test Role };
+			const query = { _id: 'Test Role' };
 			const result = await db.deleteOne('wrong', 'roles', query);
 			expect(result.result.n).to.equal(1);
 			expect(result.result.ok).to.equal(1);
@@ -618,7 +618,7 @@ describe('Check DB handler', () => {
 		});
 
 		it('non-existent DB should return null', async () => {
-			const query = { _id: 'Test Role };
+			const query = { _id: 'Test Role' };
 			const result = await db.findOneAndDelete('badDB', 'roles', query);
 			expect(result).to.be.null;
 		});
