@@ -30,6 +30,49 @@ const testValidateComment = () => {
 		images: [existingRef],
 		history: [{ images: [existingRef2] }, { message: generateRandomString() }],
 	};
+	const viewComment = {
+		camera: {
+			position: [
+				0,
+				0,
+				0,
+			],
+			up: [
+				0,
+				0,
+				0,
+			],
+			forward: [
+				0,
+				0,
+				0,
+			],
+			type: 'perspective',
+		},
+		clippingPlanes: [],
+	};
+	const invalidViewComment = {
+		screenshot: [existingRef2],
+		camera: {
+			position: [
+				0,
+				0,
+				0,
+			],
+			up: [
+				0,
+				0,
+				0,
+			],
+			forward: [
+				0,
+				0,
+				0,
+			],
+			type: 'perspective',
+		},
+		clippingPlanes: [],
+	};
 	describe.each([
 		['with empty message (new comment)', false, { message: '' }],
 		['with no object (undefined)', false, undefined],
@@ -49,6 +92,16 @@ const testValidateComment = () => {
 		['with valid image ref from history (update comment)', true, { images: [existingRef2] }, existingComment],
 		['with invalid image ref (update comment)', false, { images: [generateUUIDString()] }, existingComment],
 		['with both an image ref and a new message', true, { images: [existingRef2], message: generateRandomString() }, existingComment],
+		['with just view', true, { views: viewComment }],
+		['with just view and existing comment', true, { views: viewComment }, existingComment],
+		['with view and image', true, { views: viewComment, images: [existingRef2] }],
+		['with view and image with an existing comment', true, { views: viewComment, images: [existingRef2] }, existingComment],
+		['with view and message', true, { views: viewComment, message: generateRandomString() }],
+		['with view and message with an existing comment', true, { views: viewComment, message: generateRandomString() }, existingComment],
+		['with view, image and message', true, { views: viewComment, images: [existingRef2], message: generateRandomString() }],
+		['with view, image and message with an existing comment', true, { views: viewComment, images: [existingRef2], message: generateRandomString() }, existingComment],
+		['with an invalid view without existing comments', false, { views: invalidViewComment }],
+		['with an invalid view with existing comments', false, { views: invalidViewComment }, existingComment],
 	])('Validate comment', (desc, success, newData, existingData) => {
 		test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
 			const test = expect(CommentSchema.validateComment(newData, existingData));

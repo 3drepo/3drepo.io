@@ -29,7 +29,7 @@ const CommentsMiddleware = {};
 
 const validateComment = async (req, res, next) => {
 	try {
-		if (req.templateData.config.comments) {
+		if (req.templateData?.config.comments) {
 			req.body = await validateCommentSchema(req.body, req.commentData);
 			if (req.commentData) {
 				const { message, images, views } = req.body;
@@ -44,8 +44,9 @@ const validateComment = async (req, res, next) => {
 				}
 			}
 			await next();
+		} else {
+			throw createResponseCode(templates.invalidArguments, 'This ticket does not support comments.');
 		}
-		throw createResponseCode(templates.invalidArguments, 'This ticket does not support comments.');
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err.message));
 	}

@@ -79,11 +79,13 @@ const generateViewValidator = (isUpdate, required, isComment) => {
 		clippingPlanes,
 	}).default(undefined);
 
-	const commentValidator = Yup.object().shape({
+	const commentValidator = Yup.object({
 		state,
 		camera: !isUpdate && required ? camera.required() : camera,
 		clippingPlanes,
-	}).default(undefined);
+	}).default(undefined)
+		.noUnknown(true)
+		.strict();
 
 	return imposeNullableRule(isComment ? commentValidator : defaultValidator);
 };
