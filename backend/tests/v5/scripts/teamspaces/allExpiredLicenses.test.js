@@ -36,6 +36,7 @@ const AllExpiredLicenses = require(`${utilScripts}/teamspaces/allExpiredLicenses
 
 const { editSubscriptions } = require(`${src}/models/teamspaceSettings`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
+const config = require('../../../../src/v5/utils/config');
 
 const runTest = (testData) => {
 	describe('Get all expired license', () => {
@@ -44,30 +45,39 @@ const runTest = (testData) => {
 			await AllExpiredLicenses.run(outFile);
 			expect(fileExists(outFile)).toBeTruthy();
 
-			// first line is csv titles, last line is always empty
+			// read in the expired licenses produced by the script, first line is csv titles, last line is always empty
 			const content = readFileSync(outFile).toString().split('\n').slice(1, -1);
-			expect(content.length).toBe(testData.expiredLicenses.length);
-			const result = content.map((str) => {
-				const [name, type, data, collaborators, expiryDate] = str.split(',');
-				return deleteIfUndefined({ name, type, data, collaborators, expiryDate });
+			const actualExpiredLicenses = content.map((str) => {
+				const [teamspaceName, licenseCount, teamspaceDataTotalMB, teamspaceDataUsedMB, licenseType, licenseDataTotalMB, collaborators, expiryDate] = str.split(',');
+				// eslint-disable-next-line max-len
+				return deleteIfUndefined({ teamspaceName, licenseCount, teamspaceDataTotalMB, teamspaceDataUsedMB, licenseType, licenseDataTotalMB, collaborators, expiryDate });
 			});
 
-			const goldenData = testData.expiredLicenses.map(
-				({ expiryDate, collaborators, data, ...others }) => deleteIfUndefined({
-					...others,
-					collaborators: String(collaborators),
-					data: String(data),
-					expiryDate: expiryDate ? DayJS(expiryDate).format('DD/MM/YYYY') : '',
-
-				}),
+			// compute the expected expired licenses that the script should produce
+			const expectedExpiredLicenses = testData.flatMap(
+				({ teamspaceName, expiredLicenses = [], licenseCount, dataTotalMB }) => expiredLicenses.map(
+					({ expiryDate, type, collaborators, data }) => deleteIfUndefined({
+						teamspaceName,
+						licenseCount,
+						teamspaceDataTotalMB: dataTotalMB,
+						teamspaceDataUsedMB: '0',
+						licenseType: type,
+						licenseDataTotalMB: String(data),
+						collaborators: String(collaborators),
+						expiryDate: expiryDate ? DayJS(expiryDate).format('DD/MM/YYYY') : '',
+					}),
+				),
 			);
 
-			expect(result).toEqual(expect.arrayContaining(goldenData));
+			expect(actualExpiredLicenses.length).toBe(expectedExpiredLicenses.length);
+			expect(actualExpiredLicenses).toEqual(expect.arrayContaining(expectedExpiredLicenses));
 		});
 	});
 };
 
 const randomDateInFuture = () => generateRandomDate(new Date(), new Date(Date.now() + 1000000));
+
+const computeDataAvailableMB = (dataAvailableMB) => String(dataAvailableMB + config.subscriptions?.basic?.data ?? 0);
 
 const createTeamspaceLicenseData = () => [
 	{
@@ -77,7 +87,7 @@ const createTeamspaceLicenseData = () => [
 				expiryDate: randomDateInFuture(),
 				type: 'enterprise',
 				collaborators: 'unlimited',
-				data: Math.round(generateRandomNumber(0)),
+				data: 100,
 			},
 		],
 		expiredLicenses: [
@@ -102,6 +112,8 @@ const createTeamspaceLicenseData = () => [
 				data: Math.round(generateRandomNumber(0)),
 			},
 		],
+		licenseCount: '3',
+		dataTotalMB: computeDataAvailableMB(100),
 	},
 	{
 		teamspaceName: generateRandomString(),
@@ -109,13 +121,14 @@ const createTeamspaceLicenseData = () => [
 			{
 				expiryDate: randomDateInFuture(),
 				type: 'enterprise',
-				data: Math.round(generateRandomNumber(0)),
+				data: 100,
 			},
 			{
 				name: generateRandomString(),
 				expiryDate: randomDateInFuture(),
 				type: 'discretionary',
 				collaborators: 5,
+				data: 100,
 			},
 		],
 		expiredLicenses: [
@@ -126,6 +139,8 @@ const createTeamspaceLicenseData = () => [
 				data: Math.round(generateRandomNumber(0)),
 			},
 		],
+		licenseCount: '3',
+		dataTotalMB: computeDataAvailableMB(200),
 	},
 	{
 		teamspaceName: generateRandomString(),

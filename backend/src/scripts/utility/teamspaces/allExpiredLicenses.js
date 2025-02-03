@@ -31,12 +31,12 @@ const formatDate = (date) => DayJS(date).format('DD/MM/YYYY');
 const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 	logger.logInfo(`Writing results to ${outFile}`);
 	const writeStream = FS.createWriteStream(outFile);
-	writeStream.write('Teamspace,LicenseCount,TeamspaceDataAvailable(MB),TeamspaceDataUsed(MB),Type,LicenseDataUsed(MB),Collabarators,ExpiryDate\n');
+	writeStream.write('TeamspaceName,LicenseCount,TeamspaceDataTotal(MB),TeamspaceDataUsed(MB),LicenseType,LicenseDataTotal(MB),Collaborators,ExpiryDate\n');
 	// for each teamspace, write each expired license along with some teamspace aggregate data
-	results.forEach(({ teamspaceName, licenseCount, dataAvailableMB, dataUsedMB, expiredLicenses }) => {
+	results.forEach(({ teamspaceName, licenseCount, dataTotalMB, dataUsedMB, expiredLicenses }) => {
 		Object.entries(expiredLicenses).forEach(([licenseType, license]) => {
-			const { collaborators, expiryDate, data: licenseDataUsedMB } = license;
-			writeStream.write(`${teamspaceName},${licenseCount},${dataAvailableMB},${dataUsedMB},${licenseType},${licenseDataUsedMB},${collaborators},${formatDate(expiryDate)}\n`);
+			const { collaborators, expiryDate, data } = license;
+			writeStream.write(`${teamspaceName},${licenseCount},${dataTotalMB},${dataUsedMB},${licenseType},${data},${collaborators},${formatDate(expiryDate)}\n`);
 		});
 	});
 
@@ -51,7 +51,7 @@ const run = async (outFile) => {
 		return {
 			teamspaceName,
 			licenseCount,
-			dataAvailableMB: quotaInfo.data / (1024 * 1024),
+			dataTotalMB: quotaInfo.data / (1024 * 1024),
 			dataUsedMB: spaceUsed,
 			expiredLicenses,
 		}
