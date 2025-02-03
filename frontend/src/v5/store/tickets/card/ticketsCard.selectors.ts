@@ -236,6 +236,6 @@ export const selectPropertyOptions = createSelector(
 			}
 			allValues.push(...matchingProperty.values.map((value) => ({ value, type: 'default' })));
 		});
-		return uniq(allValues);
+		return sortedUniq(sortBy(allValues, ({ value }) => value));
 	},
 );
