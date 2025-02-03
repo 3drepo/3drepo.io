@@ -22,7 +22,8 @@ const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const { getTeamspaceExpiredLicenses } = require(`${v5Path}/models/teamspaceSettings`);
+const { getTeamspaceExpiredLicenses, countLicenses } = require(`${v5Path}/models/teamspaceSettings`);
+const { getQuotaInfo, getSpaceUsed } = require(`${v5Path}/utils/quota`);
 const { getTeamspaceList, parsePath } = require('../../utils');
 
 const formatDate = (date) => DayJS(date).format('DD/MM/YYYY');
@@ -30,11 +31,12 @@ const formatDate = (date) => DayJS(date).format('DD/MM/YYYY');
 const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 	logger.logInfo(`Writing results to ${outFile}`);
 	const writeStream = FS.createWriteStream(outFile);
-	writeStream.write('Teamspace,Type, Data(MB),Seats,ExpiryDate\n');
-	results.forEach(({ _id, subscriptions }) => {
-		Object.keys(subscriptions).forEach((subType) => {
-			const { collaborators, expiryDate, data } = subscriptions[subType];
-			writeStream.write(`${_id},${subType},${data},${collaborators},${formatDate(expiryDate)}\n`);
+	writeStream.write('Teamspace,LicenseCount,TeamspaceDataAvailable(MB),TeamspaceDataUsed(MB),Type,LicenseDataUsed(MB),Collabarators,ExpiryDate\n');
+	// for each teamspace, write each expired license along with some teamspace aggregate data
+	results.forEach(({ teamspaceName, licenseCount, dataAvailableMB, dataUsedMB, expiredLicenses }) => {
+		Object.entries(expiredLicenses).forEach(([licenseType, license]) => {
+			const { collaborators, expiryDate, data: licenseDataUsedMB } = license;
+			writeStream.write(`${teamspaceName},${licenseCount},${dataAvailableMB},${dataUsedMB},${licenseType},${licenseDataUsedMB},${collaborators},${formatDate(expiryDate)}\n`);
 		});
 	});
 
@@ -43,16 +45,18 @@ const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 
 const run = async (outFile) => {
 	const teamspaces = await getTeamspaceList();
-	const res = [];
-	for (const teamspace of teamspaces) {
-		logger.logInfo(`\t-${teamspace}`);
-		// eslint-disable-next-line no-await-in-loop
-		const tsLicenses = await getTeamspaceExpiredLicenses(teamspace);
-		if (tsLicenses) {
-			res.push(tsLicenses);
+	// map each teamspace to its name, aggregates (license count, quota info), and expired licenses
+	const results = await Promise.all(teamspaces.map(async (teamspaceName) => {
+		const [licenseCount, quotaInfo, spaceUsed, expiredLicenses] = await Promise.all([countLicenses(teamspaceName), getQuotaInfo(teamspaceName), getSpaceUsed(teamspaceName), getTeamspaceExpiredLicenses(teamspaceName)])
+		return {
+			teamspaceName,
+			licenseCount,
+			dataAvailableMB: quotaInfo.data / (1024 * 1024),
+			dataUsedMB: spaceUsed,
+			expiredLicenses,
 		}
-	}
-	await writeResultsToFile(res, parsePath(outFile));
+	}));
+	await writeResultsToFile(results, parsePath(outFile));
 };
 
 const genYargs = /* istanbul ignore next */ (yargs) => {
