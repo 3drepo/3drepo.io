@@ -208,7 +208,7 @@ const updateIssuesAndRisks = async (teamspace, roleNamesToIds) => {
 				itemUpdate.creator_role = newCreatorRole;
 			}
 
-			comments.forEach(({ action }, index) => {
+			comments?.forEach(({ action }, index) => {
 				if (action.property === 'assigned_roles' || action.property === 'creator_role') {
 					const newFrom = roleNamesToIds[action.from];
 					if (newFrom) {
