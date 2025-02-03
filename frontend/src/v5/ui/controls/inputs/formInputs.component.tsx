@@ -30,6 +30,7 @@ import { TextAreaFixedSize, TextAreaFixedSizeProps } from './textArea/textAreaFi
 import { TextField, TextFieldProps } from './textField/textField.component';
 import { DateTimePicker, DateTimePickerProps } from './datePicker/dateTimePicker.component';
 import { BooleanSelect, BooleanSelectProps } from './booleanSelect/booleanSelect.component';
+import { MultiSelect } from './multiSelect/multiSelect.component';
 
 // text inputs
 export const FormNumberField = (props: InputControllerProps<TextFieldProps>) => (<InputController Input={NumberField} {...props} />);
@@ -45,6 +46,7 @@ export const FormDateTime = (props: InputControllerProps<DateTimePickerProps>) =
 // select inputs
 export const FormSelectView = (props: InputControllerProps<SelectViewProps>) => (<InputController Input={SelectView} {...props} />);
 export const FormSelect = (props: InputControllerProps<SelectProps>) => (<InputController Input={Select} {...props} />);
+export const FormMultiSelect = (props: InputControllerProps<SelectProps>) => (<InputController Input={MultiSelect} {...props} />);
 export const FormChipSelect = (props: InputControllerProps<ChipSelectProps>) => (<InputController Input={({ inputRef, ...chipProps }: any) => <ChipSelect {...chipProps} />} {...props} />);
 export const FormSearchSelect = (props: InputControllerProps<SelectProps>) => (<InputController Input={SearchSelect} {...props} />);
 export const FormBooleanSelect = (props: InputControllerProps<BooleanSelectProps>) => (<InputController Input={BooleanSelect} {...props} />);

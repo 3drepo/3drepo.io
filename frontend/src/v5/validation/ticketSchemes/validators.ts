@@ -32,7 +32,7 @@ const getValueValidator = (type: CardFilterType) => {
 				maxLength,
 				formatMessage({
 					defaultMessage: 'This must be at max {maxLength} characters',
-					id: 'validators.text.maxLenght',
+					id: 'validators.text.maxLength',
 				}, { maxLength }),
 			);
 	}

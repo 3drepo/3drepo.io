@@ -17,14 +17,25 @@
 
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { getOperatorMaxFieldsAllowed } from '../filterForm.helpers';
-import { isRangeOperator, isDateType, isTextType } from '../../cardFilters.helpers';
-import { FormBooleanSelect, FormDateTime, FormNumberField, FormTextField } from '@controls/inputs/formInputs.component';
+import { isRangeOperator, isTextType, isSelectType, isDateType } from '../../cardFilters.helpers';
+import { FormBooleanSelect, FormMultiSelect, FormDateTime, FormNumberField, FormTextField } from '@controls/inputs/formInputs.component';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
 import { useEffect } from 'react';
-import { isArray, isEmpty } from 'lodash';
+import { compact, isArray, isEmpty } from 'lodash';
 import { CardFilterType } from '../../cardFilters.types';
-import { NumberRangeInput } from './rangeInput/numberRangeInput.component';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { useParams } from 'react-router-dom';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { DateRangeInput } from './rangeInput/dateRangeInput.component';
+import { NumberRangeInput } from './rangeInput/numberRangeInput.component';
+import { mapArrayToFormArray, mapFormArrayToArray } from '@/v5/helpers/form.helper';
+
+type FilterFolrmValuesType = {
+	module: string,
+	property: string,
+	type: CardFilterType,
+};
 
 const getInputField = (type: CardFilterType) => {
 	if (type === 'number') return FormNumberField;
@@ -33,7 +44,8 @@ const getInputField = (type: CardFilterType) => {
 };
 
 const name = 'values';
-export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
+export const FilterFormValues = ({ module, property, type }: FilterFolrmValuesType) => {
+	const { containerOrFederation } = useParams<ViewerParams>();
 	const { control, watch, formState: { errors, dirtyFields } } = useFormContext();
 	const { fields, append, remove } = useFieldArray({
 		control,
@@ -41,9 +53,13 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 	});
 	const error = errors.values || {};
 	const operator = watch('operator');
+	
 	const maxFields = getOperatorMaxFieldsAllowed(operator);
 	const isRangeOp = isRangeOperator(operator);
-	const emptyValue = { value: isRangeOp ? ['', ''] : '' };
+	const emptyValue = { value: (isRangeOp ? ['', ''] : '') };
+	const selectOptions = type === 'template' ?
+		TicketsHooksSelectors.selectTemplatesNames(containerOrFederation)
+		: TicketsCardHooksSelectors.selectPropertyOptions(containerOrFederation, module, property);
 
 	useEffect(() => {
 		if (!fields.length && maxFields > 0) {
@@ -104,6 +120,18 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 					</ArrayFieldContainer>
 				))}
 			</>
+		);
+	}
+	if (isSelectType(type)) {
+		return (
+			<FormMultiSelect
+				name={name}
+				formError={error?.[0]}
+				transformValueIn={mapFormArrayToArray}
+				transformChangeEvent={(e) => mapArrayToFormArray(compact(e.target.value))}
+			>
+				{(selectOptions || []).map((val) => <MultiSelectMenuItem key={val} value={val}>{val}</MultiSelectMenuItem>)}
+			</FormMultiSelect>
 		);
 	}
 
