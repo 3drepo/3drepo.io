@@ -74,7 +74,9 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel 
 					{getFilterFormTitle([module, property])}
 				</TitleContainer>
 				<FilterFormOperators type={type} />
-				<FilterFormValues type={type} />
+				{property && (
+					<FilterFormValues module={module} property={property} type={type} />
+				)}
 				<ButtonsContainer>
 					<Button onClick={handleCancel} color="secondary">
 						{isUpdatingFilter
