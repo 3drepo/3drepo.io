@@ -118,7 +118,7 @@ const testValidateUpdateComment = () => {
 			[{ ...req, body: { message: generateRandomString() } }, false, true, 'with an imported comment', { ...existingComment, importedAt: new Date() }, templates.notAuthorized],
 			[{ ...req, body: { message: '' } }, false, false, 'with invalid message', existingComment, templates.invalidArguments],
 			[{ ...req, body: { message: generateRandomString() } }, true, true, 'with a message'],
-			[{ ...req, body: { views: viewComment } }, true, true, 'with a message'],
+			[{ ...req, body: { views: viewComment } }, true, true, 'with a view'],
 			[{ ...req, body: { images: [UUIDToString(existingRef)], message: existingComment.message } }, false, true, 'with no actual changes', { ...existingComment, history: undefined }],
 		])('Check if req arguments for updating a comment are valid', (request, shouldPass, passValidation, desc, comment = existingComment, error = templates.invalidArguments) => {
 			afterEach(() => { jest.resetAllMocks(); });

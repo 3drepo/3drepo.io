@@ -43,7 +43,7 @@ const generateCommentSchema = (existingComment, isImport = false) => {
 						(value, { originalValue }) => !isUUIDString(originalValue)
 								|| acceptableRefs.includes(originalValue)),
 		),
-		views: Validators.propTypesToValidator(propTypes.VIEW, !isNewComment, true, false),
+		views: Validators.propTypesToValidator(propTypes.VIEW, !isNewComment, true, true),
 	};
 
 	if (isImport) {
