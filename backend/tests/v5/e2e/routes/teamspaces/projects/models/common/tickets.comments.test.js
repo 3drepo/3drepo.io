@@ -61,7 +61,7 @@ const setupBasicData = async (users, teamspace, project, models) => {
 const testGetComment = () => {
 	describe('Get comment', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
-		const template = ServiceHelper.generateTemplate();
+		const template = ServiceHelper.generateTemplate(false, false, { comments: true });
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed]);
@@ -140,7 +140,7 @@ const testGetComment = () => {
 const testGetCommentsList = () => {
 	describe('Get comments list', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
-		const template = ServiceHelper.generateTemplate();
+		const template = ServiceHelper.generateTemplate(false, false, { comments: true });
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed]);
@@ -252,7 +252,7 @@ const testGetCommentsList = () => {
 const testCreateComment = () => {
 	describe('Create comment', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
-		const template = ServiceHelper.generateTemplate();
+		const template = ServiceHelper.generateTemplate(false, false, { comments: true });
 		const comment = ServiceHelper.generateComment();
 
 		beforeAll(async () => {
@@ -319,7 +319,7 @@ const testCreateComment = () => {
 const testUpdateComment = () => {
 	describe('Update comment', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
-		const template = ServiceHelper.generateTemplate();
+		const template = ServiceHelper.generateTemplate(false, false, { comments: true });
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed]);
@@ -413,7 +413,7 @@ const testUpdateComment = () => {
 const testDeleteComment = () => {
 	describe('Delete comment', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
-		const template = ServiceHelper.generateTemplate();
+		const template = ServiceHelper.generateTemplate(false, false, { comments: true });
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed]);

@@ -498,7 +498,7 @@ const establishRoutes = (isFed) => {
 	 *       200:
 	 *         description: comment has been successfully updated
 	 */
-	router.put('/:comment', hasCommenterAccess, validateUpdateComment, updateComment(isFed));
+	router.put('/:comment', hasCommenterAccess, checkTicketExists, validateUpdateComment, updateComment(isFed));
 
 	/**
 	 * @openapi
