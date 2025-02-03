@@ -51,22 +51,23 @@ const checkStateIsValid = async (req, res, next) => {
 
 const getUserDetails = async (req, res, next) => {
 	try {
-		const { frontegg } = req;
-		const { userId, email } = await getUserInfoFromToken(frontegg.token);
-		const { username } = await getUserByEmail(email, { user: 1 }).catch((err) => {
+		const { auth } = req;
+		const { userId, email } = await getUserInfoFromToken(auth.token);
+		const { user: username } = await getUserByEmail(email, { user: 1 }).catch((err) => {
 			if (err.code !== templates.userNotFound.code) {
 				throw err;
 			}
 			// TODO: create user on the fly
+			logger.logError(`User not found: ${email}`);
 		});
-		frontegg.userId = userId;
+		auth.userId = userId;
 
 		req.loginData = {
-			frontegg, username,
+			auth, username,
 		};
-
 		await next();
 	} catch (err) {
+		logger.logError(`Failed to fetch user information: ${err.message}`);
 		redirectWithError(res, req.state.redirectUri, errorCodes.UNKNOWN);
 	}
 };
@@ -74,12 +75,12 @@ const getUserDetails = async (req, res, next) => {
 const getToken = (urlUsed) => async (req, res, next) => {
 	try {
 		const token = await generateToken(urlUsed, req.state.code, req.session.pkceCodes.challenge);
-		req.frontEgg = { token };
+		req.auth = { token };
 
 		await next();
 	} catch (err) {
 		logger.logError(`Failed to generate token from vendor: ${err.message}`);
-		respond(req, res, templates.unknown);
+		redirectWithError(res, req.state.redirectUri, errorCodes.UNKNOWN);
 	}
 };
 
