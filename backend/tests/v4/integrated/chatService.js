@@ -343,7 +343,7 @@ describe('Chat service', () => {
 		let issueId2 = null;
 		const notificationUpsertEvent = `${username}::notificationUpserted`;
 		const notificationDeleteEvent = `${username}::notificationDeleted`;
-		const roleAIssue = {"n me":'notification issue' ,"asigned_roles":" r'ole"]};' 
+		const roleAIssue = { name: 'notification issue', assigned_roles: ['roleA'] };
 
 		const testForChatEvent = (eventTrigger, eventName, onEventReceived) => (done) => {
 			const events = [];
