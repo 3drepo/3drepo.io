@@ -23,6 +23,8 @@ import { FormattedMessage } from 'react-intl';
 import { CardFilterType, BaseFilter, CardFilterOperator, CardFilterValue } from '../cardFilters.types';
 import { formatSimpleDate } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
+import { isBoolean } from 'lodash';
+import { FALSE_LABEL, TRUE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
 
 const valueToDisplayDate = (value) => formatSimpleDate(new Date(value));
 const formatDateRange = ([from, to]) => formatMessage(
@@ -33,6 +35,7 @@ const formatDateRange = ([from, to]) => formatMessage(
 const getDisplayValue = (values: CardFilterValue[], operator: CardFilterOperator, type: CardFilterType) => {
 	const isRange = isRangeOperator(operator);
 	if (isDateType(type)) return values.map(isRange ? formatDateRange : valueToDisplayDate);
+	if (type === 'boolean' && isBoolean(values[0])) return values[0] ? TRUE_LABEL : FALSE_LABEL; 
 	return (isRange ? values.map(([a, b]: any) => `[${a}, ${b}]`) : values).join(', ') ?? '';
 };
 

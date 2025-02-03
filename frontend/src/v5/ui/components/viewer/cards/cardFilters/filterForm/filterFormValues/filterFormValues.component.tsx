@@ -18,7 +18,7 @@
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { getOperatorMaxFieldsAllowed } from '../filterForm.helpers';
 import { isRangeOperator, isDateType, isTextType } from '../../cardFilters.helpers';
-import { FormDateTime, FormNumberField, FormTextField } from '@controls/inputs/formInputs.component';
+import { FormBooleanSelect, FormDateTime, FormNumberField, FormTextField } from '@controls/inputs/formInputs.component';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
 import { useEffect } from 'react';
 import { isArray, isEmpty } from 'lodash';
@@ -106,6 +106,8 @@ export const FilterFormValues = ({ type }: { type: CardFilterType }) => {
 			</>
 		);
 	}
+
+	if (type === 'boolean') return (<FormBooleanSelect name={`${name}.0.value`} />);
 
 	return (
 		<>
