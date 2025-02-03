@@ -27,7 +27,7 @@
   "dependencies": {
     "@azure/msal-node": "1.18.4",
     "@elastic/elasticsearch": "7.17.14",
-    "amqplib": "0.8.0",
+    "amqplib": "0.10.5",
     "apidoc": "0.29.0",
     "app-config": "1.0.1",
     "archiver": "6.0.2",
