@@ -31,7 +31,7 @@ import { DateRangeInput } from './rangeInput/dateRangeInput.component';
 import { NumberRangeInput } from './rangeInput/numberRangeInput.component';
 import { mapArrayToFormArray, mapFormArrayToArray } from '@/v5/helpers/form.helper';
 
-type FilterFolrmValuesType = {
+type FilterFormValuesProps = {
 	module: string,
 	property: string,
 	type: CardFilterType,
@@ -44,7 +44,7 @@ const getInputField = (type: CardFilterType) => {
 };
 
 const name = 'values';
-export const FilterFormValues = ({ module, property, type }: FilterFolrmValuesType) => {
+export const FilterFormValues = ({ module, property, type }: FilterFormValuesProps) => {
 	if (!property) return null;
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const { control, watch, formState: { errors, dirtyFields } } = useFormContext();
