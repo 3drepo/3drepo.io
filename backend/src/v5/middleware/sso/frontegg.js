@@ -18,10 +18,12 @@
 const { codeExists, createResponseCode, templates } = require('../../utils/responseCodes');
 const { fromBase64, toBase64 } = require('../../utils/helper/strings');
 const { generateAuthenticationCodeUrl, generateToken, getUserInfoFromToken } = require('../../services/sso/frontegg');
+const { redirectWithError, setSessionInfo } = require('.');
 const { addPkceProtection } = require('./pkce');
+const { errorCodes } = require('../../services/sso/sso.constants');
+const { getUserByEmail } = require('../../models/users');
 const { logger } = require('../../utils/logger');
 const { respond } = require('../../utils/responder');
-const { setSessionInfo } = require('.');
 const { validateMany } = require('../common');
 
 const AuthSSO = {};
@@ -47,13 +49,32 @@ const checkStateIsValid = async (req, res, next) => {
 	}
 };
 
+const getUserDetails = async (req, res, next) => {
+	try {
+		const { frontegg } = req;
+		const { userId, email } = await getUserInfoFromToken(frontegg.token);
+		const { username } = await getUserByEmail(email, { user: 1 }).catch((err) => {
+			if (err.code !== templates.userNotFound.code) {
+				throw err;
+			}
+			// TODO: create user on the fly
+		});
+		frontegg.userId = userId;
+
+		req.loginData = {
+			frontegg, username,
+		};
+
+		await next();
+	} catch (err) {
+		redirectWithError(res, req.state.redirectUri, errorCodes.UNKNOWN);
+	}
+};
+
 const getToken = (urlUsed) => async (req, res, next) => {
 	try {
 		const token = await generateToken(urlUsed, req.state.code, req.session.pkceCodes.challenge);
-		const { userId, email } = await getUserInfoFromToken(token);
-		req.loginData = {
-			token, userId, email,
-		};
+		req.frontEgg = { token };
 
 		await next();
 	} catch (err) {
@@ -97,6 +118,7 @@ AuthSSO.redirectToStateURL = (req, res) => {
 AuthSSO.generateLinkToAuthenticator = (redirectURL) => validateMany([addPkceProtection, setSessionInfo,
 	redirectForAuth(redirectURL)]);
 
-AuthSSO.generateToken = (redirectURLUsed) => validateMany([checkStateIsValid, getToken(redirectURLUsed)]);
+AuthSSO.generateToken = (redirectURLUsed) => validateMany([checkStateIsValid, getToken(redirectURLUsed),
+	getUserDetails]);
 
 module.exports = AuthSSO;
