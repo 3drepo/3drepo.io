@@ -23,7 +23,7 @@ import { ITicketsCardState } from './ticketsCard.redux';
 import { DEFAULT_PIN, getPinColorHex, formatPin, getTicketPins } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { IPin } from '@/v4/services/viewer/viewer';
 import { selectSelectedDate } from '@/v4/modules/sequences';
-import { sortBy, sortedUniq } from 'lodash';
+import { sortBy, uniq, sortedUniqBy } from 'lodash';
 import { toTicketCardFilter, templatesToFilters } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { selectFederationById, selectFederationJobs, selectFederationUsers } from '../../federations/federations.selectors';
 import { selectContainerJobs, selectContainerUsers } from '../../containers/containers.selectors';
@@ -243,6 +243,6 @@ export const selectPropertyOptions = createSelector(
 			}
 			allValues.push(...matchingProperty.values.map((value) => ({ value, type: 'default' })));
 		});
-		return sortedUniq(sortBy(allValues, ({ value }) => value));
+		return sortedUniqBy(sortBy(allValues, ({ value }) => value), ({ value }) => value);
 	},
 );
