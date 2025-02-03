@@ -144,7 +144,9 @@ export const FilterFormValues = ({ module, property, type }: FilterFolrmValuesTy
 				transformChangeEvent={(e) => mapArrayToFormArray(compact(e.target.value))}
 				formError={error?.[0]}
 			>
-				{(selectOptions || []).map(({ value: val }) => <MultiSelectMenuItem key={val} value={val}>{val}</MultiSelectMenuItem>)}
+				{(selectOptions || []).map(
+					(option) => <MultiSelectMenuItem key={option.value} value={option.value}>{option.displayValue ?? option.value}</MultiSelectMenuItem>,
+				)}
 			</FormMultiSelect>
 		);
 	}

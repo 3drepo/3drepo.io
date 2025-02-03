@@ -23,7 +23,7 @@ import { ITicketsCardState } from './ticketsCard.redux';
 import { DEFAULT_PIN, getPinColorHex, formatPin, getTicketPins } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { IPin } from '@/v4/services/viewer/viewer';
 import { selectSelectedDate } from '@/v4/modules/sequences';
-import { uniq } from 'lodash';
+import { sortBy, sortedUniq } from 'lodash';
 import { toTicketCardFilter, templatesToFilters } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { selectFederationById, selectFederationJobs, selectFederationUsers } from '../../federations/federations.selectors';
 import { selectContainerJobs, selectContainerUsers } from '../../containers/containers.selectors';
@@ -231,7 +231,14 @@ export const selectPropertyOptions = createSelector(
 				return;
 			}
 			if (matchingProperty.values === 'jobsAndUsers') {
-				allValues.push(...jobsAndUsers.map((ju) => ({ value: ju?.user || ju?._id, type: 'jobsAndUsers' })));
+				allValues.push(...jobsAndUsers.map((ju) => {
+					const isUser = !!ju.firstName;
+					return ({
+						value: isUser ? ju.user : ju._id,
+						displayValue: isUser ? `${ju?.firstName} ${ju?.lastName}` : null,
+						type: 'jobsAndUsers',
+					});
+				}));
 				return;
 			}
 			allValues.push(...matchingProperty.values.map((value) => ({ value, type: 'default' })));
