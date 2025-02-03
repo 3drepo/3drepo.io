@@ -19,17 +19,14 @@ import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { unit, code, nullableNumberField } from './validators';
-import { desc, name } from '../shared/validators';
+import { name, nullableDesc } from '../shared/validators';
 import { isNumber } from 'lodash';
 
-export const SettingsSchema = Yup.object().shape({
+export const SettingsSchemaWithGeoPosition = Yup.object().shape({
 	name,
-	desc,
+	desc: nullableDesc,
 	unit,
 	code,
-});
-
-export const SettingsSchemaWithGeoPosition = SettingsSchema.shape({
 	defaultView: Yup.string()
 		.nullable()
 		.transform((value) => (value === EMPTY_VIEW._id ? null : value)),
