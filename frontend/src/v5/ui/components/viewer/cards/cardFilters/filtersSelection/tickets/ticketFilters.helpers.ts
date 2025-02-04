@@ -23,7 +23,7 @@ import NumberIcon from '@assets/icons/filters/number.svg';
 import TemplateIcon from '@assets/icons/filters/template.svg';
 import TextIcon from '@assets/icons/filters/text.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
-import { sortBy, uniqBy } from 'lodash';
+import { compact, sortBy, uniqBy } from 'lodash';
 import { CardFilterType, BaseFilter, CardFilter } from '../../cardFilters.types';
 
 export const TYPE_TO_ICON: Record<CardFilterType, any> = {
@@ -84,3 +84,9 @@ export const toTicketCardFilter = (filters: Record<string, BaseFilter>): CardFil
 			filter,
 		}))
 );
+
+export const getOptionFromValue = (value, options) => options.find(({ value: optionValue }) => value === optionValue);
+export const selectTypeOnChange = (event, options) => compact(event.target.value).map((value) => {
+	const option = getOptionFromValue(value, options);
+	return { value, displayValue: option?.displayValue ?? value };
+});

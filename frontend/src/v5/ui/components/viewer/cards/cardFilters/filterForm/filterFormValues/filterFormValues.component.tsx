@@ -29,7 +29,8 @@ import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { DateRangeInput } from './rangeInput/dateRangeInput.component';
 import { NumberRangeInput } from './rangeInput/numberRangeInput.component';
-import { mapArrayToFormArray, mapFormArrayToArray } from '@/v5/helpers/form.helper';
+import { mapFormArrayToArray } from '@/v5/helpers/form.helper';
+import { getOptionFromValue, selectTypeOnChange } from '../../filtersSelection/tickets/ticketFilters.helpers';
 
 type FilterFormValuesProps = {
 	module: string,
@@ -133,7 +134,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 				maxItems={19}
 				name={name}
 				transformValueIn={(v) => compact(mapFormArrayToArray(v))}
-				transformChangeEvent={(e) => mapArrayToFormArray(compact(e.target.value))}
+				transformChangeEvent={(e) => selectTypeOnChange(e, selectOptions)}
 				formError={error?.[0]}
 			/>
 		);
@@ -141,7 +142,8 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 			<FormMultiSelect
 				name={name}
 				transformValueIn={mapFormArrayToArray}
-				transformChangeEvent={(e) => mapArrayToFormArray(compact(e.target.value))}
+				transformChangeEvent={(e) => selectTypeOnChange(e, selectOptions)}
+				renderValue={(values: string[]) => values.map((value) => getOptionFromValue(value, selectOptions)?.displayValue ?? value).join(', ')}
 				formError={error?.[0]}
 			>
 				{(selectOptions || []).map(

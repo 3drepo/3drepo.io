@@ -17,24 +17,10 @@
 
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { ChipContainer, DeleteButton, TextWrapper, OperatorIconContainer, DisplayValue, Property } from './filterChip.styles';
-import { FILTER_OPERATOR_ICON, getFilterOperatorLabels, isDateType, isRangeOperator } from '../cardFilters.helpers';
+import { FILTER_OPERATOR_ICON, getFilterOperatorLabels } from '../cardFilters.helpers';
 import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
-import { CardFilterType, BaseFilter, CardFilterOperator, CardFilterValue } from '../cardFilters.types';
-import { formatSimpleDate } from '@/v5/helpers/intl.helper';
-import { formatMessage } from '@/v5/services/intl';
-
-const valueToDisplayDate = (value) => formatSimpleDate(new Date(value));
-const formatDateRange = ([from, to]) => formatMessage(
-	{ defaultMessage: '{from} to {to}', id: 'cardFilter.dateRange.join' },
-	{ from: valueToDisplayDate(from), to: valueToDisplayDate(to) },
-);
-
-const getDisplayValue = (values: CardFilterValue[], operator: CardFilterOperator, type: CardFilterType) => {
-	const isRange = isRangeOperator(operator);
-	if (isDateType(type)) return values.map(isRange ? formatDateRange : valueToDisplayDate);
-	return (isRange ? values.map(([a, b]: any) => `[${a}, ${b}]`) : values).join(', ') ?? '';
-};
+import { CardFilterType, BaseFilter } from '../cardFilters.types';
 
 type FilterChipProps = {
 	property: string;
@@ -44,10 +30,9 @@ type FilterChipProps = {
 	onDelete: () => void;
 };
 export const FilterChip = ({ property, onDelete, selected, type, filter }: FilterChipProps) => {
-	const { operator, values } = filter;
+	const { operator, values, displayValues } = filter;
 	const OperatorIcon = FILTER_OPERATOR_ICON[operator];
 	const hasMultipleValues = values.length > 1;
-	const displayValue = getDisplayValue(values, operator, type);
 	const labels = getFilterOperatorLabels(type);
 
 	const handleDelete = (e) => {
@@ -58,7 +43,7 @@ export const FilterChip = ({ property, onDelete, selected, type, filter }: Filte
 
 	return (
 		<ChipContainer selected={selected}>
-			<Tooltip title={`${property} ${labels[operator]} ${displayValue}`}>
+			<Tooltip title={`${property} ${labels[operator]} ${displayValues}`}>
 				<TextWrapper>
 					<Property>{property}</Property>
 					<OperatorIconContainer>
@@ -70,7 +55,7 @@ export const FilterChip = ({ property, onDelete, selected, type, filter }: Filte
 						</DisplayValue>
 					)}
 					{!hasMultipleValues && !!values?.length && (
-						<DisplayValue>{displayValue}</DisplayValue>
+						<DisplayValue>{displayValues}</DisplayValue>
 					)}
 				</TextWrapper>
 			</Tooltip>
