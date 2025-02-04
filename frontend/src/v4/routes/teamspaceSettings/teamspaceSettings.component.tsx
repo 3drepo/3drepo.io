@@ -319,16 +319,18 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 									id: 'teamspaceSettings.permissionsLog.modal.message',
 									defaultMessage: 'A password will be sent to your email for this encrypted download.',
 								}),
-								primaryButtonLabel: formatMessage({
+								closeButtonLabel: formatMessage({
 									id: 'teamspaceSettings.permissionsLog.modal.primaryLabel',
 									defaultMessage: 'Cancel',
 								}),
-								secondaryButtonLabel: formatMessage({
+								actionButtonLabel: formatMessage({
 									id: 'teamspaceSettings.permissionsLog.modal',
 									defaultMessage: 'Continue',
 								}),
-								onClickSecondary: () => TeamspacesActionsDispatchers.fetchActivityLog(this.teamspace, this.state.permissionsLogStart, this.state.permissionsLogEnd)
-							})}
+								highlightActionButton: true,
+								onClickAction: () => TeamspacesActionsDispatchers.fetchActivityLog(this.teamspace, this.state.permissionsLogStart, this.state.permissionsLogEnd)
+							},
+						)}
 						>
 							<FormattedMessage id="teamspaceSettings.permissionsLog.download" defaultMessage="Download" />
 						</Button>

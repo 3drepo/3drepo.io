@@ -57,7 +57,7 @@ export const password = () => Yup.string()
 	.required(
 		formatMessage({
 			id: 'validation.password.error.required',
-			defaultMessage: 'password is a required field',
+			defaultMessage: 'Password is a required field',
 		}),
 	)
 	.min(8,

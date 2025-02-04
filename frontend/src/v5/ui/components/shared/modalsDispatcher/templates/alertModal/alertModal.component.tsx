@@ -18,23 +18,16 @@ import { FC, useEffect } from 'react';
 import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { Modal, Actions, Details, Status, WarningIcon, ModalContent, CloseButton } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
-import { AxiosError } from 'axios';
 import { getErrorCode, getErrorMessage, getErrorStatus, isPathNotFound, isPathNotAuthorized, isProjectNotFound, isModelNotFound, isTeamspaceInvalid } from '@/v5/validation/errors.helpers';
 import { generatePath, useHistory } from 'react-router';
 import { DASHBOARD_ROUTE, TEAMSPACE_ROUTE_BASE, PROJECT_ROUTE_BASE } from '@/v5/ui/routes/routes.constants';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatMessage } from '@/v5/services/intl';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
+import { AlertModalProps } from './alertModal.types';
 
-interface IAlertModal {
-	onClickClose?: () => void,
-	currentActions?: string,
-	error: AxiosError,
-	details?: string,
-	open: boolean,
-}
 
-export const AlertModal: FC<IAlertModal> = ({ onClickClose, currentActions = '', error, details, open }) => {
+export const AlertModal: FC<AlertModalProps> = ({ onClickClose, currentActions = '', error, details, open }) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const accessibleProjects = ProjectsHooksSelectors.selectProjects()[teamspace] || [];
