@@ -202,7 +202,8 @@ TeamspaceSetting.getTeamspaceActiveLicenses = async (teamspace) => {
 	const currentDate = new Date();
 	return Object.fromEntries(
 		Object.entries(licenses).filter(
-			([licenseType, license]) => SUBSCRIPTION_TYPES.includes(licenseType) && license.expiryDate > currentDate,
+			([licenseType, license]) => SUBSCRIPTION_TYPES.includes(licenseType)
+				&& (license.expiryDate === undefined || license.expiryDate > currentDate),
 		),
 	);
 };

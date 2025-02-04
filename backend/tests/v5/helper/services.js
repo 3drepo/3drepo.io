@@ -997,7 +997,6 @@ ServiceHelper.generateTeamspaceLicenseData = () => [
 			},
 			{
 				name: ServiceHelper.generateRandomString(),
-				expiryDate: ServiceHelper.generateRandomDateInFuture(),
 				type: 'discretionary',
 				collaborators: 5,
 				data: 100,
