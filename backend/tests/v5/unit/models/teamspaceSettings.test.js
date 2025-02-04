@@ -19,7 +19,7 @@ const { times } = require('lodash');
 
 const { src } = require('../../helper/path');
 
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString, generateRandomDateInFuture, generateRandomDate } = require('../../helper/services');
 
 const Teamspace = require(`${src}/models/teamspaceSettings`);
 const { ADD_ONS, DEFAULT_TOPIC_TYPES, DEFAULT_RISK_CATEGORIES, SECURITY, SECURITY_SETTINGS } = require(`${src}/models/teamspaces.constants`);
@@ -534,31 +534,42 @@ const testGetTeamspaceActiveLicenses = () => {
 	describe('Get active licenses in teamspace', () => {
 		test('Should perform a query to find all active subscriptions', async () => {
 			const teamspace = generateRandomString();
-			const dayMS = 1000 * 60 * 60 * 24;
-			const validDate = new Date(new Date().getTime() + dayMS);
-			const expectedRes = { subscription: {
-				discretionary: { expiryDate: validDate },
-				enterprise: { expiryDate: validDate },
-			} };
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(expectedRes);
-			await expect(Teamspace.getTeamspaceActiveLicenses(teamspace)).resolves.toEqual(expectedRes);
+			const expiryDateA = generateRandomDateInFuture();
+			const expiryDateB = generateRandomDateInFuture();
+			const expiryDateC = generateRandomDate();
+			const mockLicenses = {
+				discretionary: { expiryDate: expiryDateA },
+				enterprise: { expiryDate: expiryDateB },
+				internal: { expiryDate: expiryDateC },
+			};
+			const expectedLicenses = {
+				discretionary: { expiryDate: expiryDateA },
+				enterprise: { expiryDate: expiryDateB },
+			};
+			const fn = jest.spyOn(Teamspace, 'getSubscriptions').mockResolvedValue(mockLicenses);
+			await expect(Teamspace.getTeamspaceActiveLicenses(teamspace)).resolves.toEqual(expectedLicenses);
 			expect(fn).toHaveBeenCalledTimes(1);
 		});
 	});
 };
 
 const testGetTeamspaceExpiredLicenses = () => {
-	describe('Get active licenses in teamspace', () => {
-		test('Should perform a query to find all active subscriptions', async () => {
+	describe('Get expired licenses in teamspace', () => {
+		test('Should perform a query to find all expired subscriptions', async () => {
 			const teamspace = generateRandomString();
-			const dayMS = 1000 * 60 * 60 * 24;
-			const validDate = new Date(new Date().getTime() + dayMS);
-			const expectedRes = { subscription: {
-				discretionary: { expiryDate: validDate },
-				enterprise: { expiryDate: validDate },
-			} };
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(expectedRes);
-			await expect(Teamspace.getTeamspaceExpiredLicenses(teamspace)).resolves.toEqual(expectedRes);
+			const expiryDateA = generateRandomDateInFuture();
+			const expiryDateB = generateRandomDateInFuture();
+			const expiryDateC = generateRandomDate();
+			const mockLicenses = {
+				discretionary: { expiryDate: expiryDateA },
+				enterprise: { expiryDate: expiryDateB },
+				internal: { expiryDate: expiryDateC },
+			};
+			const expectedLicenses = {
+				internal: { expiryDate: expiryDateC },
+			};
+			const fn = jest.spyOn(Teamspace, 'getSubscriptions').mockResolvedValue(mockLicenses);
+			await expect(Teamspace.getTeamspaceExpiredLicenses(teamspace)).resolves.toEqual(expectedLicenses);
 			expect(fn).toHaveBeenCalledTimes(1);
 		});
 	});
