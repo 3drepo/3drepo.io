@@ -18,7 +18,7 @@
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../models/users.constants');
 const { addDefaultJobs, assignUserToJob, getJobsToUsers, removeUserFromJobs } = require('../../models/jobs');
 const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revokeTeamspaceRoleFromUser } = require('../../models/roles');
-const { createTeamspaceSettings, getAddOns, getMembersInfo, grantAdminToUser, removeUserFromAdminPrivilege } = require('../../models/teamspaceSettings');
+const { countLicenses, createTeamspaceSettings, getAddOns, getMembersInfo, grantAdminToUser, removeUserFromAdminPrivilege } = require('../../models/teamspaceSettings');
 const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
@@ -128,5 +128,23 @@ Teamspaces.removeTeamspaceMember = async (teamspace, userToRemove) => {
 };
 
 Teamspaces.getAddOns = getAddOns;
+
+// map each teamspace to its name, aggregates (license count, quota info), and licenses based on the passed-in function
+Teamspaces.getTeamspaceAggregatesAndLicenses = (teamspaces, getLicensesFunc) => Promise.all(
+	teamspaces.map(async (teamspaceName) => {
+		const [licenseCount, quotaInfo, spaceUsed, licenses] = await Promise.all([
+			countLicenses(teamspaceName),
+			getQuotaInfo(teamspaceName),
+			getSpaceUsed(teamspaceName),
+			getLicensesFunc(teamspaceName),
+		]);
+		return {
+			teamspaceName,
+			licenseCount,
+			dataTotalMB: quotaInfo.data / (1024 * 1024),
+			dataUsedMB: spaceUsed,
+			licenses,
+		};
+	}));
 
 module.exports = Teamspaces;

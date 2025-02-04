@@ -326,6 +326,17 @@ db.createScene = (teamspace, project, modelId, rev, nodes, meshMap) => Promise.a
 	FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, `${UUIDToString(rev._id)}/idToMeshes.json`, JSON.stringify(meshMap)),
 
 ]);
+
+db.createTeamspaceLicenseData = (teamspaceLicenseData) => Promise.all(teamspaceLicenseData.map(
+	async ({ teamspaceName, activeLicenses = [], expiredLicenses = [], invalidLicenses = [] }) => {
+		// create the teamspace
+		await db.createTeamspace(teamspaceName);
+		// create the licenses for the above teamspace
+		const licenses = [...activeLicenses, ...expiredLicenses, ...invalidLicenses];
+		await Promise.all(licenses.map(({ type, ...subData }) => editSubscriptions(teamspaceName, type, subData)));
+	}),
+);
+
 ServiceHelper.createQueryString = (options) => {
 	const keys = Object.keys(deleteIfUndefined(options, true));
 
@@ -358,6 +369,7 @@ ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ce
 ServiceHelper.generateRandomBuffer = (length = 20) => Buffer.from(ServiceHelper.generateRandomString(length));
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
 	+ Math.random() * (end.getTime() - start.getTime()));
+ServiceHelper.generateRandomDateInFuture = () => ServiceHelper.generateRandomDate(new Date(), new Date(Date.now() + 1000000));
 ServiceHelper.generateRandomNumber = (min = -1000, max = 1000) => Math.random() * (max - min) + min;
 ServiceHelper.generateRandomBoolean = () => Math.random() < 0.5;
 ServiceHelper.generateRandomIfcGuid = () => ServiceHelper.generateRandomString(22);
@@ -935,5 +947,74 @@ ServiceHelper.generateBasicNode = (type, rev_id, parents, additionalData = {}) =
 	parents,
 	...additionalData,
 });
+
+const computeDataAvailableMB = (dataAvailableMB) => String(dataAvailableMB + config.subscriptions?.basic?.data ?? 0);
+ServiceHelper.generateTeamspaceLicenseData = () => [
+	{
+		teamspaceName: ServiceHelper.generateRandomString(),
+		activeLicenses: [
+			{
+				expiryDate: ServiceHelper.generateRandomDateInFuture(),
+				type: 'enterprise',
+				collaborators: 'unlimited',
+				data: 100,
+			},
+		],
+		expiredLicenses: [
+			{
+				expiryDate: ServiceHelper.generateRandomDate(),
+				type: 'discretionary',
+				collaborators: 'unlimited',
+				data: Math.round(ServiceHelper.generateRandomNumber(0)),
+			},
+			{
+				expiryDate: ServiceHelper.generateRandomDate(),
+				type: 'pilot',
+				collaborators: 'unlimited',
+				data: Math.round(ServiceHelper.generateRandomNumber(0)),
+			},
+		],
+		invalidLicenses: [
+			{
+				expiryDate: ServiceHelper.generateRandomDate(),
+				type: ServiceHelper.generateRandomString(),
+				collaborators: 'unlimited',
+				data: Math.round(ServiceHelper.generateRandomNumber(0)),
+			},
+		],
+		licenseCount: '3',
+		dataTotalMB: computeDataAvailableMB(100),
+	},
+	{
+		teamspaceName: ServiceHelper.generateRandomString(),
+		activeLicenses: [
+			{
+				expiryDate: ServiceHelper.generateRandomDateInFuture(),
+				type: 'enterprise',
+				data: 100,
+			},
+			{
+				name: ServiceHelper.generateRandomString(),
+				expiryDate: ServiceHelper.generateRandomDateInFuture(),
+				type: 'discretionary',
+				collaborators: 5,
+				data: 100,
+			},
+		],
+		expiredLicenses: [
+			{
+				expiryDate: ServiceHelper.generateRandomDate(),
+				type: 'internal',
+				collaborators: 3,
+				data: Math.round(ServiceHelper.generateRandomNumber(0)),
+			},
+		],
+		licenseCount: '3',
+		dataTotalMB: computeDataAvailableMB(200),
+	},
+	{
+		teamspaceName: ServiceHelper.generateRandomString(),
+	},
+];
 
 module.exports = ServiceHelper;

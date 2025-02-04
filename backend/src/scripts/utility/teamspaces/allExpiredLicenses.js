@@ -22,9 +22,11 @@ const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const { getTeamspaceExpiredLicenses, countLicenses } = require(`${v5Path}/models/teamspaceSettings`);
-const { getQuotaInfo, getSpaceUsed } = require(`${v5Path}/utils/quota`);
 const { getTeamspaceList, parsePath } = require('../../utils');
+
+const { getTeamspaceAggregatesAndLicenses } = require(`${v5Path}/processors/teamspaces/teamspaces`);
+
+const { getTeamspaceExpiredLicenses } = require(`${v5Path}/models/teamspaceSettings`);
 
 const formatDate = (date) => DayJS(date).format('DD/MM/YYYY');
 
@@ -33,8 +35,8 @@ const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 	const writeStream = FS.createWriteStream(outFile);
 	writeStream.write('TeamspaceName,LicenseCount,TeamspaceDataTotal(MB),TeamspaceDataUsed(MB),LicenseType,LicenseDataTotal(MB),Collaborators,ExpiryDate\n');
 	// for each teamspace, write each expired license along with some teamspace aggregate data
-	results.forEach(({ teamspaceName, licenseCount, dataTotalMB, dataUsedMB, expiredLicenses }) => {
-		Object.entries(expiredLicenses).forEach(([licenseType, license]) => {
+	results.forEach(({ teamspaceName, licenseCount, dataTotalMB, dataUsedMB, licenses }) => {
+		Object.entries(licenses).forEach(([licenseType, license]) => {
 			const { collaborators, expiryDate, data } = license;
 			writeStream.write(`${teamspaceName},${licenseCount},${dataTotalMB},${dataUsedMB},${licenseType},${data},${collaborators},${formatDate(expiryDate)}\n`);
 		});
@@ -45,17 +47,7 @@ const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 
 const run = async (outFile) => {
 	const teamspaces = await getTeamspaceList();
-	// map each teamspace to its name, aggregates (license count, quota info), and expired licenses
-	const results = await Promise.all(teamspaces.map(async (teamspaceName) => {
-		const [licenseCount, quotaInfo, spaceUsed, expiredLicenses] = await Promise.all([countLicenses(teamspaceName), getQuotaInfo(teamspaceName), getSpaceUsed(teamspaceName), getTeamspaceExpiredLicenses(teamspaceName)])
-		return {
-			teamspaceName,
-			licenseCount,
-			dataTotalMB: quotaInfo.data / (1024 * 1024),
-			dataUsedMB: spaceUsed,
-			expiredLicenses,
-		}
-	}));
+	const results = await getTeamspaceAggregatesAndLicenses(teamspaces, getTeamspaceExpiredLicenses);
 	await writeResultsToFile(results, parsePath(outFile));
 };
 

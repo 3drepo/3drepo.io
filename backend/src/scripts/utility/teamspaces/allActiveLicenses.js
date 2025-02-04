@@ -25,16 +25,19 @@ const { logger } = require(`${v5Path}/utils/logger`);
 const { getTeamspaceActiveLicenses } = require(`${v5Path}/models/teamspaceSettings`);
 const { getTeamspaceList, parsePath } = require('../../utils');
 
+const { getTeamspaceAggregatesAndLicenses } = require(`${v5Path}/processors/teamspaces/teamspaces`);
+
 const formatDate = (date) => (date ? DayJS(date).format('DD/MM/YYYY') : '');
 
 const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 	logger.logInfo(`Writing results to ${outFile}`);
 	const writeStream = FS.createWriteStream(outFile);
-	writeStream.write('Teamspace,Type, Data(MB),Seats,ExpiryDate\n');
-	results.forEach(({ _id, subscriptions }) => {
-		Object.keys(subscriptions).forEach((subType) => {
-			const { collaborators, expiryDate, data } = subscriptions[subType];
-			writeStream.write(`${_id},${subType},${data},${collaborators},${formatDate(expiryDate)}\n`);
+	writeStream.write('TeamspaceName,LicenseCount,TeamspaceDataTotal(MB),TeamspaceDataUsed(MB),LicenseType,LicenseDataTotal(MB),Collaborators,ExpiryDate\n');
+	// for each teamspace, write each active license along with some teamspace aggregate data
+	results.forEach(({ teamspaceName, licenseCount, dataTotalMB, dataUsedMB, licenses }) => {
+		Object.entries(licenses).forEach(([licenseType, license]) => {
+			const { collaborators, expiryDate, data } = license;
+			writeStream.write(`${teamspaceName},${licenseCount},${dataTotalMB},${dataUsedMB},${licenseType},${data},${collaborators},${formatDate(expiryDate)}\n`);
 		});
 	});
 
@@ -43,16 +46,8 @@ const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 
 const run = async (outFile) => {
 	const teamspaces = await getTeamspaceList();
-	const res = [];
-	for (const teamspace of teamspaces) {
-		logger.logInfo(`\t-${teamspace}`);
-		// eslint-disable-next-line no-await-in-loop
-		const tsLicenses = await getTeamspaceActiveLicenses(teamspace);
-		if (tsLicenses) {
-			res.push(tsLicenses);
-		}
-	}
-	await writeResultsToFile(res, parsePath(outFile));
+	const results = await getTeamspaceAggregatesAndLicenses(teamspaces, getTeamspaceActiveLicenses);
+	await writeResultsToFile(results, parsePath(outFile));
 };
 
 const genYargs = /* istanbul ignore next */ (yargs) => {

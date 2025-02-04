@@ -196,12 +196,15 @@ TeamspaceSetting.getMembersInfo = async (teamspace) => {
 	});
 };
 
-TeamspaceSetting.getTeamspaceActiveLicenses = (teamspace) => {
+TeamspaceSetting.getTeamspaceActiveLicenses = async (teamspace) => {
+	// get all licenses, filter them to includes ones with a valid type and an expiry date in the future
+	const licenses = await TeamspaceSetting.getSubscriptions(teamspace);
 	const currentDate = new Date();
-	const query = { $or: SUBSCRIPTION_TYPES.flatMap((type) => [{ [`subscriptions.${type}`]: { $exists: true }, [`subscriptions.${type}.expiryDate`]: null },
-		{ [`subscriptions.${type}.expiryDate`]: { $gt: currentDate } },
-	]) };
-	return teamspaceSettingQuery(teamspace, query, { _id: 1, subscriptions: 1 });
+	return Object.fromEntries(
+		Object.entries(licenses).filter(
+			([licenseType, license]) => SUBSCRIPTION_TYPES.includes(licenseType) && license.expiryDate > currentDate,
+		),
+	);
 };
 
 TeamspaceSetting.getTeamspaceExpiredLicenses = async (teamspace) => {
@@ -210,7 +213,7 @@ TeamspaceSetting.getTeamspaceExpiredLicenses = async (teamspace) => {
 	const currentDate = new Date();
 	return Object.fromEntries(
 		Object.entries(licenses).filter(
-			([licenseType, license]) => SUBSCRIPTION_TYPES.includes(licenseType) && license.expiryDate < currentDate
+			([licenseType, license]) => SUBSCRIPTION_TYPES.includes(licenseType) && license.expiryDate < currentDate,
 		),
 	);
 };

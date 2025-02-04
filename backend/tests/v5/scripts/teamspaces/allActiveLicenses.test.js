@@ -19,10 +19,9 @@ const {
 	determineTestGroup,
 	fileExists,
 	resetFileshare,
-	db: { reset: resetDB, createTeamspace },
+	db: { reset: resetDB, createTeamspaceLicenseData },
 	generateRandomString,
-	generateRandomDate,
-	generateRandomNumber,
+	generateTeamspaceLicenseData,
 } = require('../../helper/services');
 
 const { readFileSync } = require('fs');
@@ -34,7 +33,6 @@ const { disconnect } = require(`${src}/handler/db`);
 
 const AllActiveLicenses = require(`${utilScripts}/teamspaces/allActiveLicenses`);
 
-const { editSubscriptions } = require(`${src}/models/teamspaceSettings`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 
 const runTest = (testData) => {
@@ -44,111 +42,51 @@ const runTest = (testData) => {
 			await AllActiveLicenses.run(outFile);
 			expect(fileExists(outFile)).toBeTruthy();
 
-			// first line is csv titles, last line is always empty
+			// read in the active licenses produced by the script, first line is csv titles, last line is always empty
 			const content = readFileSync(outFile).toString().split('\n').slice(1, -1);
-			expect(content.length).toBe(testData.validLicenses.length);
-			const result = content.map((str) => {
-				const [name, type, data, collaborators, expiryDate] = str.split(',');
-				return deleteIfUndefined({ name, type, data, collaborators, expiryDate });
+			const actualActiveLicenses = content.map((str) => {
+				const [teamspaceName, licenseCount, teamspaceDataTotalMB, teamspaceDataUsedMB, licenseType, licenseDataTotalMB, collaborators, expiryDate] = str.split(',');
+				return deleteIfUndefined({
+					teamspaceName,
+					licenseCount,
+					teamspaceDataTotalMB,
+					teamspaceDataUsedMB,
+					licenseType,
+					licenseDataTotalMB,
+					collaborators,
+					expiryDate,
+				});
 			});
 
-			const goldenData = testData.validLicenses.map(
-				({ expiryDate, collaborators, data, ...others }) => deleteIfUndefined({
-					...others,
-					collaborators: String(collaborators),
-					data: String(data),
-					expiryDate: expiryDate ? DayJS(expiryDate).format('DD/MM/YYYY') : '',
-
-				}),
+			// compute the expected active licenses that the script should produce
+			const expectedActiveLicenses = testData.flatMap(
+				({ teamspaceName, activeLicenses = [], licenseCount, dataTotalMB }) => activeLicenses.map(
+					({ expiryDate, type, collaborators, data }) => deleteIfUndefined({
+						teamspaceName,
+						licenseCount,
+						teamspaceDataTotalMB: dataTotalMB,
+						teamspaceDataUsedMB: '0',
+						licenseType: type,
+						licenseDataTotalMB: String(data),
+						collaborators: String(collaborators),
+						expiryDate: expiryDate ? DayJS(expiryDate).format('DD/MM/YYYY') : '',
+					}),
+				),
 			);
 
-			expect(result).toEqual(expect.arrayContaining(goldenData));
+			expect(actualActiveLicenses.length).toBe(expectedActiveLicenses.length);
+			expect(actualActiveLicenses).toEqual(expect.arrayContaining(expectedActiveLicenses));
 		});
 	});
 };
 
-const randomDateInFuture = () => generateRandomDate(new Date(), new Date(Date.now() + 1000000));
-
-const createData = () => ({
-	validLicenses: [{
-		name: generateRandomString(),
-		expiryDate: randomDateInFuture(),
-		type: 'enterprise',
-		collaborators: 'unlimited',
-		data: Math.round(generateRandomNumber(0)),
-	},
-	{
-		name: generateRandomString(),
-		expiryDate: randomDateInFuture(),
-		type: 'discretionary',
-		collaborators: 3,
-		data: Math.round(generateRandomNumber(0)),
-	},
-	{
-		name: generateRandomString(),
-		expiryDate: randomDateInFuture(),
-		type: 'enterprise',
-		data: Math.round(generateRandomNumber(0)),
-	}, {
-		name: generateRandomString(),
-		expiryDate: randomDateInFuture(),
-		type: 'enterprise',
-		collaborators: 'unlimited',
-	},
-	{
-		name: generateRandomString(),
-		type: 'enterprise',
-		collaborators: 'unlimited',
-		data: Math.round(generateRandomNumber(0)),
-	},
-	],
-	invalidLicenses: [
-		{
-			name: generateRandomString(),
-			expiryDate: generateRandomDate(),
-			type: 'enterprise',
-			collaborators: 'unlimited',
-			data: Math.round(generateRandomNumber(0)),
-		},
-		{
-			name: generateRandomString(),
-			expiryDate: generateRandomDate(),
-			type: 'discretionary',
-			collaborators: 'unlimited',
-			data: Math.round(generateRandomNumber(0)),
-		},
-		{
-			name: generateRandomString(),
-			expiryDate: generateRandomDate(),
-			type: generateRandomString(),
-			collaborators: 'unlimited',
-			data: Math.round(generateRandomNumber(0)),
-		},
-		{
-			// no license
-			name: generateRandomString(),
-		},
-	],
-
-});
-
-const setupData = async ({ validLicenses, invalidLicenses }) => {
-	const allTeamspaces = [...validLicenses, ...invalidLicenses];
-	await Promise.all(allTeamspaces.map(async ({ name, type, ...subData }) => {
-		await createTeamspace(name);
-		if (type) {
-			await editSubscriptions(name, type, subData);
-		}
-	}));
-};
-
 describe(determineTestGroup(__filename), () => {
-	const data = createData();
+	const teamspaceLicenseData = generateTeamspaceLicenseData();
 	beforeAll(async () => {
 		resetFileshare();
 		await resetDB();
-		await setupData(data);
+		await createTeamspaceLicenseData(teamspaceLicenseData);
 	});
-	runTest(data);
+	runTest(teamspaceLicenseData);
 	afterAll(disconnect);
 });
