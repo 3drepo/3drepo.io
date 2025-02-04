@@ -369,7 +369,9 @@ ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ce
 ServiceHelper.generateRandomBuffer = (length = 20) => Buffer.from(ServiceHelper.generateRandomString(length));
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
 	+ Math.random() * (end.getTime() - start.getTime()));
-ServiceHelper.generateRandomDateInFuture = () => ServiceHelper.generateRandomDate(new Date(), new Date(Date.now() + 1000000));
+ServiceHelper.generateRandomDateInFuture = () => ServiceHelper.generateRandomDate(
+	new Date(), new Date(Date.now() + 1000000),
+);
 ServiceHelper.generateRandomNumber = (min = -1000, max = 1000) => Math.random() * (max - min) + min;
 ServiceHelper.generateRandomBoolean = () => Math.random() < 0.5;
 ServiceHelper.generateRandomIfcGuid = () => ServiceHelper.generateRandomString(22);
