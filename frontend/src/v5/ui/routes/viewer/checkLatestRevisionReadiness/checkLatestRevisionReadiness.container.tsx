@@ -39,15 +39,15 @@ export const CheckLatestRevisionReadiness = (): JSX.Element => {
 					id: 'viewer.latestRevisionNotReady.message',
 					defaultMessage: 'Until processing has completed, we can only show the latest available revision.',
 				}),
-				primaryButtonLabel: formatMessage({
+				closeButtonLabel: formatMessage({
 					id: 'viewer.latestRevisionNotReady.primaryLabel',
 					defaultMessage: 'Go to viewer',
 				}), 
-				secondaryButtonLabel: formatMessage({
+				actionButtonLabel: formatMessage({
 					id: 'infoModal.action.secondaryDefault',
 					defaultMessage: 'Go back to Teamspace',
 				}),
-				onClickSecondary: () => {
+				onClickAction: () => {
 					history.push(generatePath(TEAMSPACE_ROUTE_BASE, { teamspace }));
 				},
 			});

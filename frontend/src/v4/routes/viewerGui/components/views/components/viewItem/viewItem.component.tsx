@@ -62,7 +62,6 @@ interface IProps {
 	onClick?: (viewpoint) => void;
 	onChangeName?: (viewpointName) => void;
 	defaultView?: boolean;
-	displayShare?: boolean;
 }
 
 const ViewItemSchema = Yup.object().shape({
@@ -142,30 +141,21 @@ export class ViewItem extends PureComponent<IProps, any> {
 		<Small>(Home View)</Small>
 	));
 
-	public renderViewpointNameWithShare = renderWhenTrue(() => (
-		<NameRow>
-			{this.renderViewpointName(true)}
-				<IconsGroup disabled={this.state.isDeletePending}>
-					{this.props.onShare && <StyledShareIcon onClick={this.handleShareLink} />}
-				</IconsGroup>
-		</NameRow>
-	));
-
 	public renderViewpointData = renderWhenTrue(() => (
 		<NameRow>
 			{this.renderViewpointName(true)}
-			{this.props.isCommenter &&
-				<IconsGroup disabled={this.state.isDeletePending}>
-					<StyledEditIcon onClick={this.props.onOpenEditMode} />
-					<StyledShareIcon onClick={this.handleShareLink} />
+			<IconsGroup disabled={this.state.isDeletePending}>
+				{this.props.isCommenter && <StyledEditIcon onClick={this.props.onOpenEditMode} />}
+				<StyledShareIcon onClick={this.handleShareLink} />
+				{this.props.isCommenter && (
 					<HamburgerMenu
 						onDelete={this.handleDelete}
 						onSetAsDefault={this.handleSetDefault}
 						isAdmin={this.props.isAdmin}
 						defaultView={this.props.defaultView}
 					/>
-				</IconsGroup>
-			}
+				)}
+			</IconsGroup>
 		</NameRow>
 	));
 
@@ -267,8 +257,7 @@ export class ViewItem extends PureComponent<IProps, any> {
 				{this.renderScreenshotPlaceholder(!this.screenshot)}
 				{this.renderViewpointForm(this.props.active && this.props.editMode)}
 				{this.renderViewpointData(this.props.active && !this.props.editMode)}
-				{this.renderViewpointName(!this.props.active && !this.props.displayShare)}
-				{this.renderViewpointNameWithShare(this.props.displayShare)}
+				{this.renderViewpointName(!this.props.active)}
 			</ViewpointItem>
 		);
 	}
