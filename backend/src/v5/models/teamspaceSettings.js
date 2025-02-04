@@ -209,8 +209,9 @@ TeamspaceSetting.getTeamspaceExpiredLicenses = async (teamspace) => {
 	const licenses = await TeamspaceSetting.getSubscriptions(teamspace);
 	const currentDate = new Date();
 	return Object.fromEntries(
-		// eslint-disable-next-line max-len
-		Object.entries(licenses).filter(([licenseType, license]) => SUBSCRIPTION_TYPES.includes(licenseType) && license.expiryDate < currentDate),
+		Object.entries(licenses).filter(
+			([licenseType, license]) => SUBSCRIPTION_TYPES.includes(licenseType) && license.expiryDate < currentDate
+		),
 	);
 };
 

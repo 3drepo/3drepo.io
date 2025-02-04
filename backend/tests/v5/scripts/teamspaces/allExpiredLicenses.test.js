@@ -49,8 +49,16 @@ const runTest = (testData) => {
 			const content = readFileSync(outFile).toString().split('\n').slice(1, -1);
 			const actualExpiredLicenses = content.map((str) => {
 				const [teamspaceName, licenseCount, teamspaceDataTotalMB, teamspaceDataUsedMB, licenseType, licenseDataTotalMB, collaborators, expiryDate] = str.split(',');
-				// eslint-disable-next-line max-len
-				return deleteIfUndefined({ teamspaceName, licenseCount, teamspaceDataTotalMB, teamspaceDataUsedMB, licenseType, licenseDataTotalMB, collaborators, expiryDate });
+				return deleteIfUndefined({
+					teamspaceName,
+					licenseCount,
+					teamspaceDataTotalMB,
+					teamspaceDataUsedMB,
+					licenseType,
+					licenseDataTotalMB,
+					collaborators,
+					expiryDate,
+				});
 			});
 
 			// compute the expected expired licenses that the script should produce
@@ -148,14 +156,15 @@ const createTeamspaceLicenseData = () => [
 ];
 
 const setupTeamspacesAndLicenseData = async (teamspaceLicenseData) => {
-	// eslint-disable-next-line max-len
-	await Promise.all(teamspaceLicenseData.map(async ({ teamspaceName, validLicenses = [], expiredLicenses = [], invalidLicenses = [] }) => {
-		// create the teamspace
-		await createTeamspace(teamspaceName);
-		// create the licenses for the above teamspace
-		const licenses = [...validLicenses, ...expiredLicenses, ...invalidLicenses];
-		await Promise.all(licenses.map(({ type, ...subData }) => editSubscriptions(teamspaceName, type, subData)));
-	}));
+	await Promise.all(teamspaceLicenseData.map(
+		async ({ teamspaceName, validLicenses = [], expiredLicenses = [], invalidLicenses = [] }) => {
+			// create the teamspace
+			await createTeamspace(teamspaceName);
+			// create the licenses for the above teamspace
+			const licenses = [...validLicenses, ...expiredLicenses, ...invalidLicenses];
+			await Promise.all(licenses.map(({ type, ...subData }) => editSubscriptions(teamspaceName, type, subData)));
+		}),
+	);
 };
 
 describe(determineTestGroup(__filename), () => {
