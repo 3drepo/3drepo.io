@@ -14,7 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { SettingsSchemaWithGeoPosition, SettingsSchema } from './settingsSchemes';
+import { name, desc } from '../shared/validators';
+import { SettingsSchemaWithGeoPosition } from './settingsSchemes';
+import * as Yup from 'yup';
+import { unit, code } from './validators';
 
-export const NewFederationSettingsSchema = SettingsSchema;
+
+export const NewFederationSettingsSchema = Yup.object().shape({
+	name,
+	desc,
+	unit,
+	code,
+});
+
 export const FederationSettingsSchema = SettingsSchemaWithGeoPosition;
