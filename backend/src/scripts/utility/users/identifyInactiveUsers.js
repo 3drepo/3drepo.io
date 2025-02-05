@@ -1,12 +1,13 @@
 const Path = require('path');
 const { v5Path } = require('../../../interop');
 const FS = require('fs');
+const DBHandler = require('../../../v5/handler/db');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 const { getUsersByQuery } = require(`${v5Path}/models/users`);
 const { getLastLoginDate } = require(`${v5Path}/models/loginRecords`);
 
-const DEFAULT_OUT_FILE = 'orphanedUsers.csv';
+const DEFAULT_OUT_FILE = 'inactiveUsers.csv';
 
 const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 	logger.logInfo(`Writing results to ${outFile}`);
@@ -26,25 +27,11 @@ const getFileEntry = async ({ user, customData }) => {
 	return { user, firstName, lastName, email, company: company ?? '', lastLogin: lastLogin ?? '' };
 };
 
-const run = async (outFile = DEFAULT_OUT_FILE) => {
-	const query = {
-		$expr: {
-			$not: {
-				$gt: [
-					{
-						$size: {
-							$filter: {
-								input: '$roles',
-								as: 'role',
-								cond: { $ne: ['$$role.db', 'admin'] },
-							},
-						},
-					},
-					0,
-				],
-			},
-		},
-	};
+const run = async (monthsOfInactivity, outFile = DEFAULT_OUT_FILE) => {
+	const dateSinceLogin = new Date();
+	dateSinceLogin.setMonth(dateSinceLogin.getMonth() - monthsOfInactivity);
+
+	const activeUsernames = await DBHandler.distinct('internal', 'loginRecords', 'user', { loginTime: { $gt: dateSinceLogin } });
 
 	const projection = {
 		user: 1,
@@ -54,8 +41,8 @@ const run = async (outFile = DEFAULT_OUT_FILE) => {
 		'customData.billing.billingInfo.company': 1,
 	};
 
-	const orphanedUsers = await getUsersByQuery(query, projection);
-	const entries = await Promise.all(orphanedUsers.map(getFileEntry));
+	const inactiveUsers = await getUsersByQuery({ user: { $not: { $in: activeUsernames } } }, projection);
+	const entries = await Promise.all(inactiveUsers.map(getFileEntry));
 
 	await writeResultsToFile(entries, outFile);
 };
@@ -63,14 +50,13 @@ const run = async (outFile = DEFAULT_OUT_FILE) => {
 const genYargs = /* istanbul ignore next */ (yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
 
-	const argsSpec = (subYargs) => subYargs.option('outFile', {
-		describe: 'Name of output file',
-		type: 'string',
-		default: DEFAULT_OUT_FILE,
+	const argsSpec = (subYargs) => subYargs.option('monthsOfInactivity', {
+		describe: 'Months passed since the user last logged in',
+		type: 'number',
 	});
 
 	return yargs.command(commandName,
-		'Identify users that do not belong to any teamspace',
+		'Identify users that have not logged in a specified number of months',
 		argsSpec,
 		(subYargs) => subYargs, run);
 };
