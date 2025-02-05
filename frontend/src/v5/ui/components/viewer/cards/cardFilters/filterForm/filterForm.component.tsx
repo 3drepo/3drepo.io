@@ -20,7 +20,7 @@ import { CardFilterOperator, CardFilterValue, CardFilterType, BaseFilter, CardFi
 import { getFilterFormTitle, isDateType, isRangeOperator } from '../cardFilters.helpers';
 import { Container, ButtonsContainer, Button, TitleContainer } from './filterForm.styles';
 import { FormProvider, useForm } from 'react-hook-form';
-import { isEmpty } from 'lodash';
+import { isBoolean, isEmpty } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { FilterFormValues } from './filterFormValues/filterFormValues.component';
 import { mapArrayToFormArray, mapFormArrayToArray } from '@/v5/helpers/form.helper';
@@ -30,6 +30,7 @@ import { FilterFormOperators } from './filterFormValues/operators/filterFormOper
 import { getOptionFromValue } from '../filtersSelection/tickets/ticketFilters.helpers';
 import { formatSimpleDate } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
+import { TRUE_LABEL, FALSE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
 
 const DEFAULT_OPERATOR = 'eq';
 const DEFAULT_VALUES = [''];
@@ -73,6 +74,7 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel 
 		const displayValues = newValues.map((newVal) => {
 			const option = getOptionFromValue(newVal, body.values);
 			if (isDateType(type)) return (isRange ? formatDateRange(newVal) : valueToDisplayDate(newVal));
+			if (type === 'boolean' && isBoolean(newValues[0])) return newValues[0] ? TRUE_LABEL : FALSE_LABEL; 
 			if (isRange) {
 				const [a, b] = newVal;
 				return `[${a}, ${b}]`;

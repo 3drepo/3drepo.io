@@ -23,6 +23,7 @@ import { LoginPrompt, Title } from '../userSignupForm/userSignupForm.styles';
 
 export const Container = styled(ContainerBase)`
 	padding:50px 65px;
+	box-sizing: content-box;
 
 	${LoginPrompt} {
 		margin-top:15px;

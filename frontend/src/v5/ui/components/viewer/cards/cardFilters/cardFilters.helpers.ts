@@ -82,6 +82,7 @@ export const getValidOperators = (type: CardFilterType): CardFilterOperator[] =>
 	if (isTextType(type)) return ['eq', 'neq', 'ss', 'nss', 'ex', 'nex'];
 	if (type === 'number') return ['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'rng', 'nrng', 'ex', 'nex'];
 	if (isDateType(type)) return ['eq', 'lte', 'gte', 'rng', 'nrng', 'ex', 'nex'];
+	if (type === 'boolean') return ['eq', 'ex', 'nex'];
 	if (isSelectType(type)) {
 		if (['template', 'owner'].includes(type)) return ['eq', 'neq'];
 		return ['eq', 'neq', 'ex', 'nex'];

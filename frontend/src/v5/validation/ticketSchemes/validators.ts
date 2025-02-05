@@ -37,6 +37,7 @@ const getValueValidator = (type: CardFilterType) => {
 			);
 	}
 	if (isDateType(type) || type === 'number') return requiredNumber();
+	if (type === 'boolean') return Yup.bool().required(ERROR_REQUIRED_FIELD_MESSAGE);
 	return trimmedString;
 };
 
