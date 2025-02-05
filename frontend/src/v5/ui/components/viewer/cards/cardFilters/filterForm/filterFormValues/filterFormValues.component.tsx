@@ -133,16 +133,16 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 				showAddButton
 				maxItems={19}
 				name={name}
-				transformValueIn={(v) => compact(mapFormArrayToArray(v))}
-				transformChangeEvent={(e) => selectTypeOnChange(e, selectOptions)}
+				transformInputValue={(v) => compact(mapFormArrayToArray(v))}
+				transformOutputValue={(e) => selectTypeOnChange(e, selectOptions)}
 				formError={error?.[0]}
 			/>
 		);
 		return (
 			<FormMultiSelect
 				name={name}
-				transformValueIn={mapFormArrayToArray}
-				transformChangeEvent={(e) => selectTypeOnChange(e, selectOptions)}
+				transformInputValue={mapFormArrayToArray}
+				transformOutputValue={(e) => selectTypeOnChange(e, selectOptions)}
 				renderValue={(values: string[]) => values.map((value) => getOptionFromValue(value, selectOptions)?.displayValue ?? value).join(', ')}
 				formError={error?.[0]}
 			>
