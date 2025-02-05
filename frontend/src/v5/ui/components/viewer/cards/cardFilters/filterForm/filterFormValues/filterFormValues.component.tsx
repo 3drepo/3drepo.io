@@ -18,7 +18,7 @@
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { getOperatorMaxFieldsAllowed } from '../filterForm.helpers';
 import { isRangeOperator, isTextType, isSelectType, isDateType } from '../../cardFilters.helpers';
-import { FormNumberField, FormTextField, FormMultiSelect, FormDateTime } from '@controls/inputs/formInputs.component';
+import { FormBooleanSelect, FormMultiSelect, FormDateTime, FormNumberField, FormTextField } from '@controls/inputs/formInputs.component';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
 import { useEffect } from 'react';
 import { compact, isArray, isEmpty } from 'lodash';
@@ -134,6 +134,8 @@ export const FilterFormValues = ({ module, property, type }: FilterFolrmValuesTy
 			</FormMultiSelect>
 		);
 	}
+
+	if (type === 'boolean') return (<FormBooleanSelect name={`${name}.0.value`} />);
 
 	return (
 		<>
