@@ -39,14 +39,14 @@ export function* fetchTicketsList({ teamspace, projectId, modelId, isFederation 
 		yield put(TicketsActions.fetchTemplates(teamspace, projectId, modelId, isFederation, true));
 		yield take(TicketsTypes.FETCH_TEMPLATES_SUCCESS);
 		const templates = yield select(selectTemplates, modelId);
-		const extraProperties = templates.reduce((acc, template) => {
+		const propertiesToInclude = templates.reduce((acc, template) => {
 			const configColor = template.config?.pin?.color;
 			if (!configColor?.property) return acc;
 			const { property: { module, name } } = configColor;
 			const path = module ? `${module}.${name}` : name;
 			return [...acc, path];
 		}, [BaseProperties.DESCRIPTION]);
-		yield put(TicketsActions.fetchTickets(teamspace, projectId, modelId, isFederation, extraProperties));
+		yield put(TicketsActions.fetchTickets(teamspace, projectId, modelId, isFederation, propertiesToInclude));
 
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {

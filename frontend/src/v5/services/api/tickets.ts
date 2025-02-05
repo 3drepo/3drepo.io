@@ -60,8 +60,27 @@ export const fetchFederationTemplate = async (
 };
 
 type TicketsQueryParams = {
-	extraProperties?: string[],
+	propertiesToInclude?: string[],
 	filters?: string,
+};
+
+const getTicketsSearchParams = (params: TicketsQueryParams) => {
+	const { propertiesToInclude, filters } = params || {};
+	const searchParams = [];
+	// fetching the tickets list for a model, only the most basic
+	// properties are included as part of that ticket. Anything other
+	// property can be fetched in the same request specifying it as
+	// as a "property to include"
+	if (propertiesToInclude?.length) {
+		searchParams.push(`filters=${propertiesToInclude.join()}`);
+	}
+	// filters are a set of rules that can be passed to the backend
+	// to filter out tickets based on their: title, template, ticketCode,
+	// and ticket code. 
+	if (filters) {
+		searchParams.push(`query=${filters}`);
+	}
+	return searchParams.length ? `?${searchParams.join('&')}` : '';
 };
 export const fetchContainerTickets = async (
 	teamspace: string,
@@ -69,14 +88,7 @@ export const fetchContainerTickets = async (
 	containerId: string,
 	queryParams: TicketsQueryParams,
 ): Promise<FetchTicketsResponse> => {
-	let path = `teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets`;
-	const { extraProperties, filters } = queryParams || {};
-	if (extraProperties?.length) {
-		path += `?filters=${extraProperties.join()}`;
-	}
-	if (filters) {
-		path += `?query=${filters}`;
-	}
+	const path = `teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets${getTicketsSearchParams(queryParams)}`;
 	const { data } = await api.get(path);
 	return data.tickets;
 };
@@ -87,14 +99,7 @@ export const fetchFederationTickets = async (
 	federationId: string,
 	queryParams: TicketsQueryParams,
 ): Promise<FetchTicketsResponse> => {
-	let path = `teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets`;
-	const { extraProperties, filters } = queryParams || {};
-	if (extraProperties?.length) {
-		path += `?filters=${extraProperties.join()}`;
-	}
-	if (filters) {
-		path += `?query=${filters}`;
-	}
+	const path = `teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets${getTicketsSearchParams(queryParams)}`;
 	const { data } = await api.get(path);
 	return data.tickets;
 };
