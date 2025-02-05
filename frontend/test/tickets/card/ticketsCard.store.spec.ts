@@ -64,7 +64,7 @@ describe('Tickets: store', () => {
 		});
 
 		describe('filters', () => {
-			const [ticketTitleFilter, ticketIdFilter, templateIdFilter] = templatesToFilters([]);
+			const [ticketTitleFilter, ticketIdFilter, templateIdFilter, ownerFilter] = templatesToFilters([]);
 			const baseFilter: BaseFilter = {
 				operator: 'eq',
 				values: [],
@@ -102,15 +102,15 @@ describe('Tickets: store', () => {
 			describe('available template filters', () => {
 				const getAvailableFilters = () => selectAvailableTemplatesFilters(getState());
 				it('all the default filters should be available originally', () => {
-					expect(getAvailableFilters()).toEqual([ticketTitleFilter, ticketIdFilter, templateIdFilter]);
+					expect(getAvailableFilters()).toEqual([ticketTitleFilter, ticketIdFilter, templateIdFilter, ownerFilter]);
 				})
 				it('adding filters should make the unavailable', () => {
 					// add first filter
 					dispatch(TicketsCardActions.upsertFilter(ticketTitleCardFilter));
-					expect(getAvailableFilters()).toEqual([ticketIdFilter, templateIdFilter]);
+					expect(getAvailableFilters()).toEqual([ticketIdFilter, templateIdFilter, ownerFilter]);
 					// add second filter
 					dispatch(TicketsCardActions.upsertFilter(ticketIdCardFilter));
-					expect(getAvailableFilters()).toEqual([templateIdFilter]);
+					expect(getAvailableFilters()).toEqual([templateIdFilter, ownerFilter]);
 				})
 				it('editing a filter shouldn\'t affect the available filters', () => {
 					dispatch(TicketsCardActions.upsertFilter(ticketTitleCardFilter));
@@ -125,7 +125,7 @@ describe('Tickets: store', () => {
 					dispatch(TicketsCardActions.upsertFilter(ticketIdCardFilter));
 					// delete filter
 					dispatch(TicketsCardActions.deleteFilter(ticketTitleCardFilter));
-					expect(getAvailableFilters()).toEqual([ticketTitleFilter, templateIdFilter]);
+					expect(getAvailableFilters()).toEqual([ticketTitleFilter, templateIdFilter, ownerFilter]);
 				})
 			});
 		})
