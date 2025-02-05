@@ -67,27 +67,25 @@ export const InputController: InputControllerType = forwardRef(<T,>({
 			name={name}
 			control={control}
 			defaultValue={defaultValue}
-			render={({ field: { ref: fieldRef, ...field } }) => {
-				return (
+			render={({ field: { ref: fieldRef, ...field } }) => (
 				// @ts-ignore
-					<Input
-						{...field}
-						{...props}
-						value={transformInputValue(field.value) ?? ''}
-						onChange={(event) => {
-							field.onChange(transformOutputValue(event));
-							onChange?.(transformOutputValue(event));
-						}}
-						onBlur={() => {
-							field.onBlur();
-							onBlur?.();
-						}}
-						inputRef={ref || fieldRef}
-						error={!!error}
-						helperText={error?.message}
-					/>
-				);
-			}}
+				<Input
+					{...field}
+					{...props}
+					value={transformInputValue(field.value) ?? ''}
+					onChange={(event) => {
+						field.onChange(transformOutputValue(event));
+						onChange?.(transformOutputValue(event));
+					}}
+					onBlur={() => {
+						field.onBlur();
+						onBlur?.();
+					}}
+					inputRef={ref || fieldRef}
+					error={!!error}
+					helperText={error?.message}
+				/>
+			)}
 		/>
 	);
 });
