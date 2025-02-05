@@ -122,7 +122,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 										key={ticket._id}
 										ticket={ticket}
 										modelId={modelId}
-										onClick={() => onEditTicket(modelId, ticket._id)}
+										onClick={onEditTicket}
 										selected={selectedTicketId === ticket._id}
 									/>
 								))}

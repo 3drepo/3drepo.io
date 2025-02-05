@@ -18,7 +18,7 @@
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors, TicketsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
-import { useContext } from 'react';
+import { memo, useContext } from 'react';
 import { SearchContext } from '@controls/search/searchContext';
 import { Highlight } from '@controls/highlight';
 import { DueDate } from '@controls/dueDate/dueDate.component';
@@ -32,14 +32,15 @@ import { Row, Cell, CellOwner, OverflowContainer, SmallFont, CellDate } from './
 import { getChipPropsFromConfig } from '@controls/chip/statusChip/statusChip.helpers';
 import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { isEqual } from 'lodash';
 
 type TicketsTableRowProps = {
 	ticket: ITicket,
 	modelId: string,
 	selected: boolean,
-	onClick: () => void,
+	onClick: (modelId, ticketId) => void,
 };
-export const TicketsTableRow = ({ ticket, onClick, modelId, selected }: TicketsTableRowProps) => {
+export const TicketsTableRow = memo(({ ticket, onClick, modelId, selected }: TicketsTableRowProps) => {
 	const { query } = useContext(SearchContext);
 	const { _id: id, title, properties, number, type, modules } = ticket;
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
@@ -71,7 +72,7 @@ export const TicketsTableRow = ({ ticket, onClick, modelId, selected }: TicketsT
 
 	const handleClick = (e) => {
 		e.preventDefault();
-		onClick();
+		onClick(modelId, ticket._id);
 	};
 
 	return (
@@ -127,4 +128,4 @@ export const TicketsTableRow = ({ ticket, onClick, modelId, selected }: TicketsT
 			</Row>
 		</TicketContextComponent>
 	);
-};
+}, isEqual);
