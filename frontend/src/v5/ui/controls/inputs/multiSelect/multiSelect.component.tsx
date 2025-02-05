@@ -17,16 +17,12 @@
 
 import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
 import { SelectProps } from '../select/select.component';
-import { FormControl, FormHelperText } from '@mui/material';
 
-export const MultiSelect = ({ defaultValue = [], className, helperText, ...props }: SelectProps) => (
-	<FormControl required={false} disabled={props.disabled} error={props.error} className={className}>
-		<SearchSelect
-			defaultValue={defaultValue}
-			renderValue={(val) => (val as any[]).join(', ')}
-			{...props}
-			multiple
-		/>
-		<FormHelperText>{helperText}</FormHelperText>
-	</FormControl>
+export const MultiSelect = ({ defaultValue = [], className, ...props }: SelectProps) => (
+	<SearchSelect
+		defaultValue={defaultValue}
+		renderValue={(val) => (val as any[]).join(', ')}
+		{...props}
+		multiple
+	/>
 );
