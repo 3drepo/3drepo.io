@@ -46,7 +46,7 @@ export function* fetchTickets({ teamspace, projectId, modelId, isFederation, pro
 		const fetchModelTickets = isFederation
 			? API.Tickets.fetchFederationTickets
 			: API.Tickets.fetchContainerTickets;
-		const tickets = yield fetchModelTickets(teamspace, projectId, modelId, { propertiesToInclude: propertiesToInclude });
+		const tickets = yield fetchModelTickets(teamspace, projectId, modelId, { propertiesToInclude });
 		yield put(TicketsActions.fetchTicketsSuccess(modelId, tickets));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
