@@ -67,19 +67,22 @@ const run = async (monthsOfInactivity, outFile) => {
 const genYargs = /* istanbul ignore next */ (yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
 
-	const argsSpec = (subYargs) => subYargs.option('monthsOfInactivity', {
-		describe: 'Months passed since the user last logged in',
-		type: 'number',
-	}).option('outFile', {
-		describe: 'Name of output file',
-		type: 'string',
-		default: DEFAULT_OUT_FILE,
-	});
+	const argsSpec = (subYargs) => subYargs
+		.option('monthsOfInactivity', {
+			describe: 'Months passed since the user last logged in',
+			type: 'number',
+		})
+		.option('outFile', {
+			describe: 'Name of output file',
+			type: 'string',
+			default: DEFAULT_OUT_FILE,
+		});
 
-	return yargs.command(commandName,
+	return yargs.command(
+		commandName,
 		'Identify users that have not logged in a specified number of months',
 		argsSpec,
-		(subYargs) => subYargs, run);
+		({ monthsOfInactivity, outFile }) => run(monthsOfInactivity, outFile));
 };
 
 module.exports = {

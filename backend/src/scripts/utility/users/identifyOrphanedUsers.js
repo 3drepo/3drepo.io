@@ -89,7 +89,7 @@ const genYargs = /* istanbul ignore next */ (yargs) => {
 	return yargs.command(commandName,
 		'Identify users that do not belong to any teamspace',
 		argsSpec,
-		(subYargs) => subYargs, run);
+		({ outFile }) => run(outFile));
 };
 
 module.exports = {
