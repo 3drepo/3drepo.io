@@ -34,6 +34,7 @@ export interface ResizableTableType {
 	isHidden: (name: string) => boolean,
 	columnGap: number,
 	getRowWidth: () => number,
+	stretchTable: () => void,
 }
 
 const defaultValue: ResizableTableType = {
@@ -49,6 +50,7 @@ const defaultValue: ResizableTableType = {
 	isHidden: () => true,
 	columnGap: 0,
 	getRowWidth: () => 0,
+	stretchTable: () => {},
 };
 export const ResizableTableContext = createContext(defaultValue);
 ResizableTableContext.displayName = 'ResizeableColumns';
@@ -86,13 +88,7 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 		setColumns([ ...columns ]);
 	};
 
-	useEffect(() => {
-		if (!isEqual(inputHiddenColumns, hiddenColumns)) {
-			setHiddenColumns(inputHiddenColumns);
-		}
-	}, [inputHiddenColumns]);
-
-	useEffect(() => {
+	const stretchTable = () => {
 		const stretchableColumns = getVisibleColumns().filter((c) => c.stretch);
 		if (!stretchableColumns.length) return;
 
@@ -106,7 +102,13 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 			getElementByName(c.name).width += gapFraction;
 		});
 		setColumns([ ...columns ]);
-	}, [inputColumns]);
+	};
+
+	useEffect(() => {
+		if (!isEqual(inputHiddenColumns, hiddenColumns)) {
+			setHiddenColumns(inputHiddenColumns);
+		}
+	}, [inputHiddenColumns]);
 
 	return (
 		<ResizableTableContext.Provider value={{
@@ -122,6 +124,7 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 			isHidden,
 			getRowWidth,
 			columnGap,
+			stretchTable,
 		}}>
 			{children}
 			<RefHolder ref={ref} />
