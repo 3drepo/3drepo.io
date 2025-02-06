@@ -17,9 +17,10 @@
 
 const { codeExists, createResponseCode, templates } = require('../../utils/responseCodes');
 const { fromBase64, toBase64 } = require('../../utils/helper/strings');
-const { generateAuthenticationCodeUrl, generateToken, getUserInfoFromToken } = require('../../services/sso/frontegg');
+const { generateAuthenticationCodeUrl, generateToken, getUserById, getUserInfoFromToken } = require('../../services/sso/frontegg');
 const { redirectWithError, setSessionInfo } = require('.');
 const { addPkceProtection } = require('./pkce');
+const { createNewUserRecord } = require('../../processors/users');
 const { errorCodes } = require('../../services/sso/sso.constants');
 const { getUserByEmail } = require('../../models/users');
 const { logger } = require('../../utils/logger');
@@ -49,17 +50,27 @@ const checkStateIsValid = async (req, res, next) => {
 	}
 };
 
+const determineUsername = async (userId, email) => {
+	try {
+		const { user: username } = await getUserByEmail(email, { user: 1 });
+		return username;
+	} catch (err) {
+		if (err.code !== templates.userNotFound.code) {
+			throw err;
+		}
+		logger.logDebug(`User not found: ${userId}, creating user based on info from IDP...`);
+		const userData = await getUserById(userId);
+
+		return createNewUserRecord(userData);
+	}
+};
+
 const getUserDetails = async (req, res, next) => {
 	try {
 		const { auth } = req;
 		const { userId, email } = await getUserInfoFromToken(auth.token);
-		const { user: username } = await getUserByEmail(email, { user: 1 }).catch((err) => {
-			if (err.code !== templates.userNotFound.code) {
-				throw err;
-			}
-			// TODO: create user on the fly
-			logger.logError(`User not found: ${email}`);
-		});
+		const username = await determineUsername(userId, email);
+
 		auth.userId = userId;
 
 		req.loginData = {

@@ -18,7 +18,6 @@
 const { USERS_COL, USERS_DB_NAME } = require('./users.constants');
 const { createResponseCode, templates } = require('../utils/responseCodes');
 const { generateHashString, sanitiseRegex } = require('../utils/helper/strings');
-const config = require('../utils/config');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { publish } = require('../services/eventsManager/eventsManager');
@@ -146,7 +145,8 @@ User.deleteApiKey = (username) => updateUser(username, { $unset: { 'customData.a
 
 User.addUser = async (newUserData) => {
 	const customData = {
-		createdAt: new Date(),
+		createdAt: newUserData.createdAt ?? new Date(),
+		userId: newUserData.userId,
 		firstName: newUserData.firstName,
 		lastName: newUserData.lastName,
 		email: newUserData.email,
@@ -159,14 +159,7 @@ User.addUser = async (newUserData) => {
 				company: newUserData.company,
 			},
 		},
-		...(newUserData.sso ? { sso: newUserData.sso } : { inactive: true }),
 	};
-
-	if (!newUserData.sso) {
-		const expiryAt = new Date();
-		expiryAt.setHours(expiryAt.getHours() + config.tokenExpiry.emailVerify);
-		customData.emailVerifyToken = { token: newUserData.token, expiredAt: expiryAt };
-	}
 
 	await db.createUser(newUserData.username, newUserData.password, customData);
 };

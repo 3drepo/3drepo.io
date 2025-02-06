@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { get, post } = require('../../../utils/webRequests');
 const { IdentityClient } = require('@frontegg/client');
 const { sso: { frontegg: config } } = require('../../../utils/config');
-const { post } = require('../../../utils/webRequests');
 const queryString = require('querystring');
 const { toBase64 } = require('../../../utils/helper/strings');
 
@@ -25,9 +25,37 @@ const FrontEgg = {};
 
 const identityClient = new IdentityClient({ FRONTEGG_CLIENT_ID: config.clientId, FRONTEGG_API_KEY: config.key });
 
+const generateVendorToken = async () => {
+	const payload = {
+		clientId: config.clientId,
+		secret: config.key,
+	};
+	try {
+		const { data } = await post(`${config.vendorDomain}/auth/vendor`, payload);
+		return data.token;
+	} catch (err) {
+		throw new Error(`Failed to generate vendor token from FrontEgg: ${err.message}`);
+	}
+};
+
 FrontEgg.getUserInfoFromToken = async (token) => {
 	const { sub: userId, email } = await identityClient.validateIdentityOnToken(token);
 	return { userId, email };
+};
+
+FrontEgg.getUserById = async (userId) => {
+	const token = await generateVendorToken();
+	const headers = {
+		Authorization: `Bearer ${token}`,
+	};
+
+	try {
+		const { data } = await get(`${config.vendorDomain}/identity/resources/vendor-only/users/v1/${userId}`, headers);
+		console.log(data);
+		return data;
+	} catch (err) {
+		throw new Error(`Failed to get user(${userId}) from FrontEgg: ${err.message}`);
+	}
 };
 
 FrontEgg.generateToken = async (urlUsed, code, challenge) => {

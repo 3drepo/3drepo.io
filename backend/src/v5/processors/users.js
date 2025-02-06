@@ -32,6 +32,29 @@ const { removeAllUserRecords } = require('../models/loginRecords');
 const { sendEmail } = require('../services/mailer');
 const { templates } = require('../services/mailer/mailer.constants');
 
+// This is used for the situation where a user has a record from
+// the IDP but we don't have a matching record in the db. We need
+// to create a record (for now, at least) to know the username mapping
+// and also to store info such as API Key.
+Users.createNewUserRecord = async (idpUserData) => {
+	const { id, email, name, createdAt } = idpUserData;
+	const [firstName, ...renaming] = name?.split(' ') ?? ['Anonymous', 'User'];
+	const lastName = renaming?.join(' ') ?? '';
+
+	const userData = {
+		username: id,
+		password: generateHashString(),
+		firstName,
+		lastName,
+		email,
+		createdAt: new Date(createdAt),
+		userId: id,
+	};
+
+	await addUser(userData);
+	return id;
+};
+
 Users.signUp = async (newUserData) => {
 	const isSso = !!newUserData.sso;
 	const formattedNewUserData = { ...newUserData };
