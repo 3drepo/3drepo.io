@@ -25,7 +25,7 @@ import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { FormHelperText, Tooltip } from '@mui/material';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { CoordsAction, CoordsActionLabel, CoordsActions, CoordsInputContainer, Label, FlexRow, SelectPinButton } from './coordsProperty.styles';
-import { DEFAULT_PIN, getLinkedValuePath, getPinColorHex, NEW_TICKET_ID } from './coordsProperty.helpers';
+import { getPinColorPropPath, getPinColorHex, NEW_TICKET_ID, toPin, getPinId } from './coordsProperty.helpers';
 import { TicketContext } from '../../../ticket.context';
 import { formatMessage } from '@/v5/services/intl';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -35,7 +35,6 @@ import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { isEqual } from 'lodash';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { DrawingViewerService } from '@components/viewer/drawingViewer/drawingViewer.service';
-import { hexToGLColor } from '@/v5/helpers/colors.helper';
 
 export const CoordsProperty = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
 	const { isViewer, containerOrFederation } = useContext(TicketContext);
@@ -47,12 +46,12 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, selectedTemplateId);
 	const selectedPin = TicketsCardHooksSelectors.selectSelectedTicketPinId();
 
-	const linkedPath = getLinkedValuePath(name, template);
-	useWatch({ name:linkedPath });
+	const colourPropPath = getPinColorPropPath(name, template);
+	useWatch({ name:colourPropPath });
 
 	const isNewTicket = !ticket?._id;
 	const ticketId = !isNewTicket ? ticket._id : NEW_TICKET_ID;
-	const pinId = name === DEFAULT_PIN ? ticketId : `${ticketId}.${name}`;
+	const pinId = getPinId(name, ticket);
 	const editMode = pinToDrop === pinId;
 	const isSelected = selectedPin === pinId;
 	const hasPin = !!value;
@@ -104,8 +103,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 		}
 
 		if (hasPin) {
-			ViewerService.showPin({
-				id: pinId, position: value, colour: hexToGLColor(colorHex), type: 'ticket' });
+			ViewerService.showPin(toPin(name, template, ticket, false, value));
 		}
 
 		if (isSelected) ViewerService.setSelectionPin({ id: pinId, isSelected });

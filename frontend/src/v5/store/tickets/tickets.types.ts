@@ -69,10 +69,17 @@ export type IPinColorMapping = {
 	]
 };
 
-export type IPinSchema = {
+export enum PinIcon {
+	'DEFAULT', 
+	'RISK',
+	'ISSUE',
+	'MARKER',
+}
+
+export type PinConfig = {
 	name: string;
-	type: 'coords';
 	color: RgbArray | IPinColorMapping;
+	icon: PinIcon;
 };
 
 export type StatusValue = {
@@ -96,7 +103,7 @@ export interface ITemplate {
 		comments?: boolean;
 		defaultView?: boolean;
 		issueProperties?: boolean;
-		pin?: boolean | IPinSchema;
+		pin?: boolean | PinConfig;
 		status?: IStatusConfig;
 	};
 }
