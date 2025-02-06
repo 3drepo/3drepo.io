@@ -82,7 +82,10 @@ export const getFilterFormTitle = (elements: string[]) => compact(elements).join
 export const isRangeOperator = (operator: CardFilterOperator) => ['rng', 'nrng'].includes(operator);
 	
 export const getValidOperators = (type: CardFilterType): CardFilterOperator[] => {
-	if (isTextType(type)) return ['ex', 'nex', 'is', 'nis', 'ss', 'nss'];
+	if (isTextType(type)) {
+		if (type === 'title') return ['is', 'nis', 'ss', 'nss'];
+		return ['ex', 'nex', 'is', 'nis', 'ss', 'nss'];
+	}
 	if (type === 'number') return ['ex', 'nex', 'eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'rng', 'nrng'];
 	if (isDateType(type)) return ['ex', 'nex', 'eq', 'neq', 'gte', 'lte', 'rng', 'nrng'];
 	if (isSelectType(type)) {
