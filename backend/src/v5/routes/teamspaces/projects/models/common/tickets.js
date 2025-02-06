@@ -428,6 +428,204 @@ const establishRoutes = (isFed) => {
 	 *                               items:
 	 *                                 type: string
 	 *                                 description: Image in a Base64 format or an ID of an image currently used in the comment
+	 *                             views:
+	 *                               description: Spacial coordinates for the comment
+	 *                               type: object
+	 *                               properties:
+	 *                                 camera:
+	 *                                   description: Details about the position and type of view
+	 *                                   type: object
+	 *                                   properties:
+	 *                                     position:
+	 *                                       type: array
+	 *                                       description: Contains the X, Y, Z coordinates
+	 *                                       items:
+	 *                                         type: number
+	 *                                         description: X, Y, Z coordinates
+	 *                                       minItems: 3
+	 *                                       maxItems: 3
+	 *                                     up:
+	 *                                       type: array
+	 *                                       description: Contains the X, Y, Z coordinates
+	 *                                       items:
+	 *                                         type: number
+	 *                                         description: X, Y, Z coordinates
+	 *                                       minItems: 3
+	 *                                       maxItems: 3
+	 *                                     forward:
+	 *                                       type: array
+	 *                                       description: Contains the X, Y, Z coordinates
+	 *                                       items:
+	 *                                         type: number
+	 *                                         description: X, Y, Z coordinates
+	 *                                       minItems: 3
+	 *                                       maxItems: 3
+	 *                                     type:
+	 *                                       type: string
+	 *                                       description: The type of camera view
+	 *                                 clippingPlanes:
+	 *                                   description: Some text
+	 *                                   type: array
+	 *                                   items:
+	 *                                     type: object
+	 *                                     properties:
+	 *                                       normal:
+	 *                                         type: array
+	 *                                         items:
+	 *                                           type: number
+	 *                                         maxItems: 3
+	 *                                       distance:
+	 *                                         type: number
+	 *                                       clipDirection:
+	 *                                         type: number
+	 *                                         minimum: -1
+	 *                                         maximum: 1
+	 *                                   minItems: 0
+	 *                                 state:
+	 *                                   description: Details about the position and type of view
+	 *                                   type: object
+	 *                                   properties:
+	 *                                     showHidden:
+	 *                                       type: boolean
+	 *                                     colored:
+	 *                                       type: array
+	 *                                       items:
+	 *                                         type: object
+	 *                                         properties:
+	 *                                           color:
+	 *                                             type: array
+	 *                                             items:
+	 *                                               type: number
+	 *                                               minimum: 0
+	 *                                               maximum: 255
+	 *                                             minItems: 3
+	 *                                             maxItems: 3
+	 *                                           opacity:
+	 *                                             type: number
+	 *                                             minimum: 0
+	 *                                             maximum: 1
+	 *                                           group:
+	 *                                             type: object
+	 *                                             properties:
+	 *                                               name:
+	 *                                                 type: string
+	 *                                               description:
+	 *                                                 type: string
+	 *                                               rules:
+	 *                                                 type: array
+	 *                                                 items:
+	 *                                                   type: object
+	 *                                                   properties:
+	 *                                                     name:
+	 *                                                       type: string
+	 *                                                     field:
+	 *                                                       type: object
+	 *                                                       properties:
+	 *                                                         operator:
+	 *                                                           type: string
+	 *                                                         values:
+	 *                                                           type: string
+	 *                                                     operator:
+	 *                                                       type: string
+	 *                                                     values:
+	 *                                                       type: any
+	 *                                               objects:
+	 *                                                 type: array
+	 *                                                 items:
+	 *                                                   type: object
+	 *                                                   properties:
+	 *                                                     container:
+	 *                                                       types: string
+	 *                                                     _ids:
+	 *                                                       types: array
+	 *                                                       items:
+	 *                                                         type: string
+	 *                                     hidden:
+	 *                                       type: array
+	 *                                       items:
+	 *                                         type: object
+	 *                                         properties:
+	 *                                           group:
+	 *                                             type: object
+	 *                                             properties:
+	 *                                               name:
+	 *                                                 type: string
+	 *                                               description:
+	 *                                                 type: string
+	 *                                               rules:
+	 *                                                 type: array
+	 *                                                 items:
+	 *                                                   type: object
+	 *                                                   properties:
+	 *                                                     name:
+	 *                                                       type: string
+	 *                                                     field:
+	 *                                                       type: object
+	 *                                                       properties:
+	 *                                                         operator:
+	 *                                                           type: string
+	 *                                                         values:
+	 *                                                           type: string
+	 *                                                     operator:
+	 *                                                       type: string
+	 *                                                     values:
+	 *                                                       type: any
+	 *                                               objects:
+	 *                                                 type: array
+	 *                                                 items:
+	 *                                                   type: object
+	 *                                                   properties:
+	 *                                                     container:
+	 *                                                       types: string
+	 *                                                     _ids:
+	 *                                                       types: array
+	 *                                                       items:
+	 *                                                         type: string
+	 *                                     transformed:
+	 *                                       type: array
+	 *                                       items:
+	 *                                         type: object
+	 *                                         properties:
+	 *                                           transformation:
+	 *                                             type: array
+	 *                                             items:
+	 *                                               type: number
+	 *                                           group:
+	 *                                             type: object
+	 *                                             properties:
+	 *                                               name:
+	 *                                                 type: string
+	 *                                               description:
+	 *                                                 type: string
+	 *                                               rules:
+	 *                                                 type: array
+	 *                                                 items:
+	 *                                                   type: object
+	 *                                                   properties:
+	 *                                                     name:
+	 *                                                       type: string
+	 *                                                     field:
+	 *                                                       type: object
+	 *                                                       properties:
+	 *                                                         operator:
+	 *                                                           type: string
+	 *                                                         values:
+	 *                                                           type: string
+	 *                                                     operator:
+	 *                                                       type: string
+	 *                                                     values:
+	 *                                                       type: any
+	 *                                               objects:
+	 *                                                 type: array
+	 *                                                 items:
+	 *                                                   type: object
+	 *                                                   properties:
+	 *                                                     container:
+	 *                                                       types: string
+	 *                                                     _ids:
+	 *                                                       types: array
+	 *                                                       items:
+	 *                                                         type: string
 	 *
 	 *
 	 *     responses:
@@ -769,6 +967,204 @@ const establishRoutes = (isFed) => {
 	 *                               items:
 	 *                                 type: string
 	 *                                 description: Image in a Base64 format or an ID of an image currently used in the comment
+	 *                             views:
+	 *                               description: Spacial coordinates for the comment
+	 *                               type: object
+	 *                               properties:
+	 *                                 camera:
+	 *                                   description: Details about the position and type of view
+	 *                                   type: object
+	 *                                   properties:
+	 *                                     position:
+	 *                                       type: array
+	 *                                       description: Contains the X, Y, Z coordinates
+	 *                                       items:
+	 *                                         type: number
+	 *                                         description: X, Y, Z coordinates
+	 *                                       minItems: 3
+	 *                                       maxItems: 3
+	 *                                     up:
+	 *                                       type: array
+	 *                                       description: Contains the X, Y, Z coordinates
+	 *                                       items:
+	 *                                         type: number
+	 *                                         description: X, Y, Z coordinates
+	 *                                       minItems: 3
+	 *                                       maxItems: 3
+	 *                                     forward:
+	 *                                       type: array
+	 *                                       description: Contains the X, Y, Z coordinates
+	 *                                       items:
+	 *                                         type: number
+	 *                                         description: X, Y, Z coordinates
+	 *                                       minItems: 3
+	 *                                       maxItems: 3
+	 *                                     type:
+	 *                                       type: string
+	 *                                       description: The type of camera view
+	 *                                 clippingPlanes:
+	 *                                   description: Some text
+	 *                                   type: array
+	 *                                   items:
+	 *                                     type: object
+	 *                                     properties:
+	 *                                       normal:
+	 *                                         type: array
+	 *                                         items:
+	 *                                           type: number
+	 *                                         maxItems: 3
+	 *                                       distance:
+	 *                                         type: number
+	 *                                       clipDirection:
+	 *                                         type: number
+	 *                                         minimum: -1
+	 *                                         maximum: 1
+	 *                                   minItems: 0
+	 *                                 state:
+	 *                                   description: Details about the position and type of view
+	 *                                   type: object
+	 *                                   properties:
+	 *                                     showHidden:
+	 *                                       type: boolean
+	 *                                     colored:
+	 *                                       type: array
+	 *                                       items:
+	 *                                         type: object
+	 *                                         properties:
+	 *                                           color:
+	 *                                             type: array
+	 *                                             items:
+	 *                                               type: number
+	 *                                               minimum: 0
+	 *                                               maximum: 255
+	 *                                             minItems: 3
+	 *                                             maxItems: 3
+	 *                                           opacity:
+	 *                                             type: number
+	 *                                             minimum: 0
+	 *                                             maximum: 1
+	 *                                           group:
+	 *                                             type: object
+	 *                                             properties:
+	 *                                               name:
+	 *                                                 type: string
+	 *                                               description:
+	 *                                                 type: string
+	 *                                               rules:
+	 *                                                 type: array
+	 *                                                 items:
+	 *                                                   type: object
+	 *                                                   properties:
+	 *                                                     name:
+	 *                                                       type: string
+	 *                                                     field:
+	 *                                                       type: object
+	 *                                                       properties:
+	 *                                                         operator:
+	 *                                                           type: string
+	 *                                                         values:
+	 *                                                           type: string
+	 *                                                     operator:
+	 *                                                       type: string
+	 *                                                     values:
+	 *                                                       type: any
+	 *                                               objects:
+	 *                                                 type: array
+	 *                                                 items:
+	 *                                                   type: object
+	 *                                                   properties:
+	 *                                                     container:
+	 *                                                       types: string
+	 *                                                     _ids:
+	 *                                                       types: array
+	 *                                                       items:
+	 *                                                         type: string
+	 *                                     hidden:
+	 *                                       type: array
+	 *                                       items:
+	 *                                         type: object
+	 *                                         properties:
+	 *                                           group:
+	 *                                             type: object
+	 *                                             properties:
+	 *                                               name:
+	 *                                                 type: string
+	 *                                               description:
+	 *                                                 type: string
+	 *                                               rules:
+	 *                                                 type: array
+	 *                                                 items:
+	 *                                                   type: object
+	 *                                                   properties:
+	 *                                                     name:
+	 *                                                       type: string
+	 *                                                     field:
+	 *                                                       type: object
+	 *                                                       properties:
+	 *                                                         operator:
+	 *                                                           type: string
+	 *                                                         values:
+	 *                                                           type: string
+	 *                                                     operator:
+	 *                                                       type: string
+	 *                                                     values:
+	 *                                                       type: any
+	 *                                               objects:
+	 *                                                 type: array
+	 *                                                 items:
+	 *                                                   type: object
+	 *                                                   properties:
+	 *                                                     container:
+	 *                                                       types: string
+	 *                                                     _ids:
+	 *                                                       types: array
+	 *                                                       items:
+	 *                                                         type: string
+	 *                                     transformed:
+	 *                                       type: array
+	 *                                       items:
+	 *                                         type: object
+	 *                                         properties:
+	 *                                           transformation:
+	 *                                             type: array
+	 *                                             items:
+	 *                                               type: number
+	 *                                           group:
+	 *                                             type: object
+	 *                                             properties:
+	 *                                               name:
+	 *                                                 type: string
+	 *                                               description:
+	 *                                                 type: string
+	 *                                               rules:
+	 *                                                 type: array
+	 *                                                 items:
+	 *                                                   type: object
+	 *                                                   properties:
+	 *                                                     name:
+	 *                                                       type: string
+	 *                                                     field:
+	 *                                                       type: object
+	 *                                                       properties:
+	 *                                                         operator:
+	 *                                                           type: string
+	 *                                                         values:
+	 *                                                           type: string
+	 *                                                     operator:
+	 *                                                       type: string
+	 *                                                     values:
+	 *                                                       type: any
+	 *                                               objects:
+	 *                                                 type: array
+	 *                                                 items:
+	 *                                                   type: object
+	 *                                                   properties:
+	 *                                                     container:
+	 *                                                       types: string
+	 *                                                     _ids:
+	 *                                                       types: array
+	 *                                                       items:
+	 *                                                         type: string
 	 *
 	 *
 	 *     responses:
