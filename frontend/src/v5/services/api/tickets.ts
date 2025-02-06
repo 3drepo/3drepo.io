@@ -14,10 +14,52 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ITicket, ITemplate, NewTicket, Group } from '@/v5/store/tickets/tickets.types';
+import { ITicket, ITemplate, NewTicket, Group, PinIcon, PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import api from './default';
+import { isObject } from 'lodash';
 
 export const modelType = (isFed: boolean) => (isFed ? 'federations' : 'containers');
+
+/*************** TEMPORAL CODE FOR MOCKING PIN ICONS  *****************/
+const templates = {};
+const pinIcons = [PinIcon.DEFAULT, PinIcon.ISSUE, PinIcon.RISK, PinIcon.MARKER];
+let pinIndex = 0;
+
+const getCoords = (properties: PropertyDefinition[]) => (properties||[]).filter((p) => p.type === 'coords');
+
+//.filter(p => )
+	
+
+const fillDummyIconInProp = (prop) =>  ( {...prop, icon: pinIcons[(pinIndex++) % 4], color: [212, 0, 208] });
+
+const fillDummyPinIcon = (template:ITemplate): ITemplate => {
+	if (templates[template._id]) return templates[template._id];
+
+
+	if (template.config.pin) {
+		if (isObject(template.config.pin)) {
+			template.config.pin.icon = pinIcons[(pinIndex++) % 4];
+		} else {
+			template.config.pin = fillDummyIconInProp(template.config.pin);
+		}
+
+		// template.modules?.forEach((module) => {
+		// 	if (module.type === 'safetibase')
+
+		// });
+	}
+
+	getCoords(template.properties).forEach((p) => Object.assign(p, fillDummyIconInProp(p)));
+
+	template.modules.forEach((module) => {
+		getCoords(module.properties).forEach((p) => Object.assign(p, fillDummyIconInProp(p)));
+	});
+
+	return template;
+};
+
+/*********************************************************************/
+
 
 export const fetchContainerTemplates = async (
 	teamspace: string,
@@ -26,7 +68,7 @@ export const fetchContainerTemplates = async (
 	getDetails?: boolean,
 ): Promise<FetchTemplatesResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets/templates?getDetails=${getDetails}`);
-	return data.templates;
+	return data.templates.map(fillDummyPinIcon);
 };
 
 export const fetchContainerTemplate = async (
@@ -36,7 +78,7 @@ export const fetchContainerTemplate = async (
 	templateId:string,
 ): Promise<ITemplate> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets/templates/${templateId}`);
-	return data;
+	return fillDummyPinIcon(data);
 };
 
 export const fetchFederationTemplates = async (
@@ -46,7 +88,7 @@ export const fetchFederationTemplates = async (
 	getDetails?: boolean,
 ): Promise<FetchTemplatesResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/templates?getDetails=${getDetails}`);
-	return data.templates;
+	return data.templates.map(fillDummyPinIcon);
 };
 
 export const fetchFederationTemplate = async (
@@ -56,7 +98,7 @@ export const fetchFederationTemplate = async (
 	templateId: string,
 ): Promise<ITemplate> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/templates/${templateId}`);
-	return data;
+	return fillDummyPinIcon(data);
 };
 
 export const fetchContainerTickets = async (

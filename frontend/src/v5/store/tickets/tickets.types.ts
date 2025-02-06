@@ -77,9 +77,9 @@ export enum PinIcon {
 }
 
 export type PinConfig = {
-	name: string;
-	color: RgbArray | IPinColorMapping;
-	icon: PinIcon;
+	name?: string;
+	color?: RgbArray | IPinColorMapping;
+	icon?: PinIcon;
 };
 
 export type StatusValue = {
