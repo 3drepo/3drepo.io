@@ -68,15 +68,15 @@ const getTicketsSearchParams = (params: TicketsQueryParams) => {
 	const { propertiesToInclude, filters } = params || {};
 	const searchParams = [];
 	// fetching the tickets list for a model, only the most basic
-	// properties are included as part of that ticket. Anything other
-	// property can be fetched in the same request specifying it as
+	// properties are included as part of that ticket. Any other
+	// property can be fetched in the same request specifying it
 	// as a "property to include"
 	if (propertiesToInclude?.length) {
 		searchParams.push(`filters=${propertiesToInclude.join()}`);
 	}
 	// filters are a set of rules that can be passed to the backend
-	// to filter out tickets based on their: title, template, ticketCode,
-	// and ticket code. 
+	// to filter out tickets based on their: template, ticketCode,
+	// and properties. 
 	if (filters) {
 		searchParams.push(`query=${filters}`);
 	}
