@@ -23,11 +23,11 @@ import PinIcon from '@assets/icons/filled/ticket_pin-filled.svg';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ActionMenu } from '@controls/actionMenu';
-import { SwitchContainer } from './filterEllipsisMenu.styles';
+import { SwitchContainer } from './ticketsEllipsisMenu.styles';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 
-export const FilterEllipsisMenu = () => {
+export const TicketsEllipsisMenu = () => {
 	const isShowingPins = TicketsCardHooksSelectors.selectIsShowingPins();
 	const onClickShowPins = () => TicketsCardActionsDispatchers.setIsShowingPins(!isShowingPins);
 

@@ -28,7 +28,7 @@ import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers'
 import { formatMessage } from '@/v5/services/intl';
 import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
-import { FilterEllipsisMenu } from '@components/viewer/cards/cardFilters/filterEllipsisMenu/filterEllipsisMenu.component';
+import { TicketsEllipsisMenu } from '@components/viewer/cards/tickets/ticketsEllipsisMenu/ticketsEllipsisMenu.component';
 
 export const TicketsListCard = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
@@ -44,7 +44,7 @@ export const TicketsListCard = () => {
 					<>
 						{!readOnly && (<NewTicketMenu />)}
 						<FilterSelection />
-						<FilterEllipsisMenu />
+						<TicketsEllipsisMenu />
 					</>
 				)}
 			/>
