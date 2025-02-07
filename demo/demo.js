@@ -41,20 +41,20 @@ function init() {
     }
 
     function handleModelInput() {
-
-        var account = document.getElementById("teamspace").value;
+        var teamspace = document.getElementById("teamspace").value;
+        var project = document.getElementById("project").value;
         var model = document.getElementById("model").value;
-		changeStatus("Loading Model...", account, model);
+		changeStatus("Loading Model...", teamspace, project, model);
         document.getElementById("modelSubmit").disabled = true;
-        if (account && model) {
-            UnityUtil.loadModel(account, model)
+        if (teamspace && project && model) {
+            UnityUtil.loadModel(teamspace, project, model)
             .then(function(){
                 console.log("Model loaded")
                 document.getElementById("modelSubmit").disabled = false;
                 changeStatus("");
             });
         } else {
-            console.error("Model or account not valid: ", account, model);
+            console.error("Teamspace, project, or model not valid: ", teamspace, project, model);
         }
 
     }
