@@ -99,7 +99,7 @@ export const DefaultTicketFiltersSetter = () => {
 		if (hasTicketData) {
 			const ticketCodes = ticketSearchParam.filter((query) => TICKET_CODE_REGEX.test(query)).map((q) => q.toUpperCase());
 			const filters: CardFilter[] = ticketCodes.length ? getTicketFiltersFromURL(ticketCodes) : getNonCompletedTicketFilters();
-			TicketsCardActionsDispatchers.setFilters(filters);
+			filters.forEach(TicketsCardActionsDispatchers.upsertFilter);
 			ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.TICKETS, true);
 			setTicketSearchParam();
 		}
