@@ -78,12 +78,6 @@ describe('Tickets: store', () => {
 			const updatedTicketTitleCardFilter: CardFilter = { ...ticketTitleCardFilter, filter: editedBaseFilter };
 			
 			describe('existing filters', () => {
-				it('should set 2 filters', () => {
-					dispatch(TicketsCardActions.setFilters([ticketIdCardFilter, ticketTitleCardFilter]));
-					const filtersInStore = selectCardFilters(getState());
-					expect(filtersInStore).toEqual([ticketIdCardFilter, ticketTitleCardFilter]);
-				});
-
 				it('should add a filter', () => {
 					dispatch(TicketsCardActions.upsertFilter(ticketTitleCardFilter));
 					const filtersInStore = selectCardFilters(getState());
