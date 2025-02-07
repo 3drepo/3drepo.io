@@ -526,9 +526,9 @@ const establishRoutes = (isFed) => {
 	 *                                     type: object
 	 *                                     properties:
 	 *                                       container:
-	 *                                         types: string
+	 *                                         type: string
 	 *                                       _ids:
-	 *                                         types: array
+	 *                                         type: array
 	 *                                         items:
 	 *                                           type: string
 	 *                       hidden:
@@ -567,9 +567,9 @@ const establishRoutes = (isFed) => {
 	 *                                     type: object
 	 *                                     properties:
 	 *                                       container:
-	 *                                         types: string
+	 *                                         type: string
 	 *                                       _ids:
-	 *                                         types: array
+	 *                                         type: array
 	 *                                         items:
 	 *                                           type: string
 	 *                       transformed:
@@ -612,9 +612,9 @@ const establishRoutes = (isFed) => {
 	 *                                     type: object
 	 *                                     properties:
 	 *                                       container:
-	 *                                         types: string
+	 *                                         type: string
 	 *                                       _ids:
-	 *                                         types: array
+	 *                                         type: array
 	 *                                         items:
 	 *                                           type: string
 	 *     responses:
@@ -795,9 +795,9 @@ const establishRoutes = (isFed) => {
 	 *                                       type: object
 	 *                                       properties:
 	 *                                         container:
-	 *                                           types: string
+	 *                                           type: string
 	 *                                         _ids:
-	 *                                           types: array
+	 *                                           type: array
 	 *                                           items:
 	 *                                             type: string
 	 *                         hidden:
@@ -836,9 +836,9 @@ const establishRoutes = (isFed) => {
 	 *                                       type: object
 	 *                                       properties:
 	 *                                         container:
-	 *                                           types: string
+	 *                                           type: string
 	 *                                         _ids:
-	 *                                           types: array
+	 *                                           type: array
 	 *                                           items:
 	 *                                             type: string
 	 *                         transformed:
@@ -881,9 +881,9 @@ const establishRoutes = (isFed) => {
 	 *                                       type: object
 	 *                                       properties:
 	 *                                         container:
-	 *                                           types: string
+	 *                                           type: string
 	 *                                         _ids:
-	 *                                           types: array
+	 *                                           type: array
 	 *                                           items:
 	 *                                             type: string
 	 *     responses:
