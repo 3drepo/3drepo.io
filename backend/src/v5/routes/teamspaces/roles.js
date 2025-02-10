@@ -65,10 +65,9 @@ const updateRole = async (req, res) => {
 
 const deleteRole = async (req, res) => {
 	const { teamspace, role } = req.params;
-	const updatedRole = req.body;
 
 	try {
-		await Roles.deleteRole(teamspace, role, updatedRole);
+		await Roles.deleteRole(teamspace, role);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
@@ -83,7 +82,7 @@ const establishRoutes = () => {
 	* /teamspaces/{teamspace}/roles:
 	*   get:
 	*     description: Get the list of roles within this teamspace
-	*     tags: [Teamspaces]
+	*     tags: [Roles]
 	*     parameters:
 	*       - name: teamspace
 	*         description: name of teamspace
@@ -134,7 +133,7 @@ const establishRoutes = () => {
 	* /teamspaces/{teamspace}/roles:
 	*   post:
 	*     description: Creates a new role
-	*     tags: [Teamspaces]
+	*     tags: [Roles]
 	*     parameters:
 	*       - name: teamspace
 	*         description: name of teamspace
@@ -188,7 +187,7 @@ const establishRoutes = () => {
 	* /teamspaces/{teamspace}/roles/{role}:
 	*   patch:
 	*     description: Updates a role
-	*     tags: [Teamspaces]
+	*     tags: [Roles]
 	*     parameters:
 	*       - name: teamspace
 	*         description: name of teamspace
@@ -236,7 +235,7 @@ const establishRoutes = () => {
 	* /teamspaces/{teamspace}/roles/{role}:
 	*   delete:
 	*     description: Deletes a role
-	*     tags: [Teamspaces]
+	*     tags: [Roles]
 	*     parameters:
 	*       - name: teamspace
 	*         description: name of teamspace

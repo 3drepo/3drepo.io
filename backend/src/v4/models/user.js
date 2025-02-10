@@ -48,6 +48,7 @@ const PermissionTemplates = require("./permissionTemplates");
 const { get } = require("lodash");
 const { fileExists } = require("./fileRef");
 const {v5Path} = require("../../interop");
+const { deleteIfUndefined } = require(`${v5Path}/utils/helper/objects.js`);
 const { UUIDToString } = require(`${v5Path}/utils/helper/uuids.js`);
 const { types: { strings } } = require(`${v5Path}/utils/helper/yup.js`);
 const { sanitiseRegex } = require(`${v5Path}/utils/helper/strings.js`);
@@ -869,10 +870,6 @@ User.addTeamMember = async function(teamspace, userToAdd, role, permissions, exe
 		throw (responseCodes.USER_NOT_FOUND);
 	}
 
-	if (!role) {
-		throw (responseCodes.USER_NOT_ASSIGNED_ROLE);
-	}
-
 	if (isMemberOfTeamspace(userEntry, teamspace)) {
 		throw (responseCodes.USER_ALREADY_ASSIGNED);
 	}
@@ -881,7 +878,10 @@ User.addTeamMember = async function(teamspace, userToAdd, role, permissions, exe
 	publish(events.USER_ADDED, { teamspace, executor, user: userEntry.user});
 
 	const promises = [];
-	promises.push(addUserToRole(teamspace, role, userEntry.user));
+
+	if(role) {
+		promises.push(addUserToRole(teamspace, role, userEntry.user));
+	}
 
 	const teamspaceSettings = await TeamspaceSettings.getTeamspaceSettings(teamspace);
 
@@ -891,7 +891,7 @@ User.addTeamMember = async function(teamspace, userToAdd, role, permissions, exe
 
 	await Promise.all(promises);
 
-	return  { role, permissions, ... User.getBasicDetails(userEntry) };
+	return  deleteIfUndefined({ role, permissions, ... User.getBasicDetails(userEntry) });
 };
 
 User.getBasicDetails = function(userObj) {

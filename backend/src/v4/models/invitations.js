@@ -21,10 +21,11 @@ const { v5Path } = require("../../interop");
 
 const db = require("../handler/db");
 const User = require("./user");
-const Role = require("./role");
+
 const { changePermissions, findModelSettings } = require("./modelSetting");
 const { findProjectsById, setUserAsProjectAdminById } = require("./project");
 const { getSecurityRestrictions }  = require(`${v5Path}/models/teamspaceSettings`);
+const Roles  = require(`${v5Path}/models/roles`);
 const { SECURITY_SETTINGS: { SSO_RESTRICTED } }  = require(`${v5Path}/models/teamspaces.constants`);
 const systemLogger = require("../logger.js").systemLogger;
 const Mailer = require("../mailer/mailer");
@@ -97,10 +98,11 @@ invitations.create = async (email, teamspace, role, username, permissions = {}) 
 	const projectsPermissions = permissions.projects || [];
 
 	const projectIds = projectsPermissions.map(pr => pr.project);
+	const roleId = stringToUUID(role);
 
 	const [emailUser, teamspaceRole, projects] = await Promise.all([
 		User.findByEmail(email),
-		Role.findByRole(teamspace, role),
+		Roles.getRoleById(teamspace, roleId, { _id: 1 }),
 		findProjectsById(teamspace, projectIds)
 	]);
 
@@ -130,7 +132,7 @@ invitations.create = async (email, teamspace, role, username, permissions = {}) 
 	const coll = await getCollection();
 	coll.ensureIndex({ "teamSpaces.teamspace": 1 }, { "background": true });
 	const result = await coll.findOne({_id:email});
-	const teamspaceEntry = { teamspace, role: stringToUUID(role), permissions };
+	const teamspaceEntry = { teamspace, role: roleId, permissions };
 
 	if (result) {
 		const teamSpaces = result.teamSpaces.filter(entry => entry.teamspace !== teamspace);
@@ -150,7 +152,7 @@ invitations.create = async (email, teamspace, role, username, permissions = {}) 
 		await coll.insertOne(invitation);
 		await sendInvitationEmail(email, username, teamspace);
 
-		publish(events.INVITATION_ADDED, { teamspace, executor: username, email, role: stringToUUID(role), permissions});
+		publish(events.INVITATION_ADDED, { teamspace, executor: username, email, role: roleId, permissions});
 	}
 
 	return {email, role, permissions};

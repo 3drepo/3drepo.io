@@ -69,23 +69,24 @@ const testValidateMany = () => {
 	});
 
 	describe('Route Deprecated', () => {
-		test('with no newEndpoint suggestion should respond with resourceNotAvailable', async () => {
+		test('with no newEndpoint suggestion should respond with endpointDecomissioned', async () => {
 			Responder.respond.mockResolvedValueOnce(undefined);
 
 			await Common.routeDeprecated()({}, {});
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond.mock.calls[0][2].code).toEqual(templates.resourceNotAvailable.code);
+			expect(Responder.respond.mock.calls[0][2].code).toEqual(templates.endpointDecomissioned.code);
 			expect(Responder.respond.mock.calls[0][2].message).toEqual('This route is deprecated.');
 		});
 
-		test('with newEndpoint suggestion should respond with resourceNotAvailable and custom message', async () => {
+		test('with newEndpoint suggestion should respond with endpointDecomissioned and custom message', async () => {
 			Responder.respond.mockResolvedValueOnce(undefined);
+			const httpVerb = generateRandomString();
 			const newEndpoint = generateRandomString();
 
-			await Common.routeDeprecated(newEndpoint)({}, {});
+			await Common.routeDeprecated(httpVerb, newEndpoint)({}, {});
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond.mock.calls[0][2].code).toEqual(templates.resourceNotAvailable.code);
-			expect(Responder.respond.mock.calls[0][2].message).toEqual(`This route is deprecated, please use ${newEndpoint} instead.`);
+			expect(Responder.respond.mock.calls[0][2].code).toEqual(templates.endpointDecomissioned.code);
+			expect(Responder.respond.mock.calls[0][2].message).toEqual(`This route is deprecated, please use ${httpVerb}: ${newEndpoint} instead.`);
 		});
 	});
 };

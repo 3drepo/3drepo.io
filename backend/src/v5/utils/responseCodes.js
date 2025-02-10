@@ -97,8 +97,8 @@ ResponseCodes.templates = {
 	// Invalid Arguments
 	invalidArguments: { message: 'The arguments provided are not valid.', status: 400 },
 
-	// Resource not available
-	resourceNotAvailable: { message: 'Resource not available.', status: 410 },
+	// Endpoint Decomissioned
+	endpointDecomissioned: { message: 'Endpoint no longer available.', status: 410 },
 
 	// Queue related
 	queueConnectionError: { message: 'There was a problem connecting to the queue. Please contact support.', status: 500 },

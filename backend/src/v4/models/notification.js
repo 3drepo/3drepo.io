@@ -19,14 +19,16 @@
 const { hasWriteAccessToModelHelper, hasReadAccessToModelHelper } = require("../middlewares/checkPermissions");
 const { getModelsData } = require("./modelSetting");
 const { listProjects } = require("./project");
-const { findByRole, findUsersWithRoles } = require("./role");
 const utils = require("../utils");
 const db = require("../handler/db");
 const _ = require("lodash");
 const User = require("./user");
 
 const {v5Path} = require("../../interop");
+const { stringToUUID } = require(`${v5Path}/utils/helper/uuids`);
 const { INTERNAL_DB } = require(`${v5Path}/handler/db.constants`);
+
+const { getRoleById, getUsersByRoles } = require(`${v5Path}/models/roles`);
 
 const types = {
 	ISSUE_ASSIGNED : "ISSUE_ASSIGNED",
@@ -275,8 +277,8 @@ module.exports = {
 	 * @returns {Promise< Array<username:string,notification:Notification> >} It contains the newly created notifications and usernames
 	 */
 	upsertIssueAssignedNotifications : async function(username, teamSpace, modelId, issue) {
-		const assignedRole = issue.assigned_roles[0];
-		const rs = await findByRole(teamSpace,assignedRole);
+		const assignedRole = stringToUUID(issue.assigned_roles[0]);
+		const rs = await getRoleById(teamSpace, assignedRole);
 		if (!rs || !rs.users) {
 			return [];
 		}
@@ -344,9 +346,9 @@ module.exports = {
 			return Promise.resolve([]);
 		}
 
-		const assignedRole = issue.assigned_roles[0];
+		const assignedRole = stringToUUID(issue.assigned_roles[0]);
 
-		return findByRole(teamSpace,assignedRole)
+		return getRoleById(teamSpace,assignedRole)
 			.then(rs => {
 				if (!rs || !rs.users) {
 					return [];
@@ -373,7 +375,7 @@ module.exports = {
 		const assignedRoles = getHistoricAssignedRoles(issue);
 		const issueType = types.ISSUE_CLOSED;
 
-		const matchedUsers = await findUsersWithRoles(teamSpace, [...assignedRoles]);
+		const matchedUsers = await getUsersByRoles(teamSpace, [...assignedRoles].map(stringToUUID));
 
 		// Leave out the current user , closing the issue.
 		const users = matchedUsers.filter(m => m !== username);
@@ -393,7 +395,7 @@ module.exports = {
 
 	upsertIssueClosedNotifications: async function (username, teamSpace, modelId, issue) {
 		const assignedRoles = getHistoricAssignedRoles(issue);
-		const matchedUsers = await findUsersWithRoles(teamSpace, [...assignedRoles]);
+		const matchedUsers = await getUsersByRoles(teamSpace, [...assignedRoles].map(stringToUUID));
 
 		const users = [];
 		const getUserPromises = [];

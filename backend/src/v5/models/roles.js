@@ -21,6 +21,7 @@ const COL_NAME = 'roles';
 const db = require('../handler/db');
 const { generateUUID } = require('../utils/helper/uuids');
 const { templates } = require('../utils/responseCodes');
+const { uniqueElements } = require('../utils/helper/arrays');
 
 const Roles = {};
 
@@ -53,8 +54,9 @@ Roles.getRolesToUsers = (teamspace) => findMany(teamspace, {}, { _id: 1, users: 
 
 Roles.getRoles = (teamspace, projection) => findMany(teamspace, {}, projection);
 
-Roles.getRoleById = (teamspace, roleId, projection) => findOne(teamspace, { _id: roleId }, projection);
-Roles.getRoleByName = (teamspace, roleName, projection) => findOne(teamspace, { name: roleName }, projection);
+Roles.getRoleById = (teamspace, _id, projection) => findOne(teamspace, { _id }, projection);
+
+Roles.getRoleByName = (teamspace, name, projection) => findOne(teamspace, { name }, projection);
 
 Roles.createRoles = async (teamspace, roles) => {
 	await db.insertMany(teamspace, COL_NAME, roles);
@@ -80,6 +82,11 @@ Roles.removeUserFromRoles = async (teamspace, userToRemove) => {
 Roles.getRolesByUsers = async (teamspace, users) => {
 	const roles = await findMany(teamspace, { users: { $in: users } }, { _id: 1 });
 	return roles.map((j) => j._id);
+};
+
+Roles.getUsersByRoles = async (teamspace, roleIds) => {
+	const roles = await findMany(teamspace, { _id: { $in: roleIds } }, { users: 1 });
+	return uniqueElements(roles.reduce((users, roleItem) => users.concat(roleItem.users), []));
 };
 
 Roles.updateRole = (teamspace, role, updatedRole) => updateOne(teamspace, { _id: role }, { $set: updatedRole });

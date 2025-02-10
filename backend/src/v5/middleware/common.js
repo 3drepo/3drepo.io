@@ -31,9 +31,17 @@ Common.validateMany = (validators) => {
 	return validateAll;
 };
 
-Common.routeDeprecated = (newEndpoint) => (req, res) => {
-	const errorMessage = `This route is deprecated${newEndpoint ? `, please use ${newEndpoint} instead.` : '.'}`;
-	respond(req, res, createResponseCode(templates.resourceNotAvailable, errorMessage));
+Common.httpVerbs = {
+	GET: 'GET',
+	POST: 'POST',
+	PATCH: 'PATCH',
+	PUT: 'PUT',
+	DELETE: 'DELETE',
+};
+
+Common.routeDeprecated = (httpVerb, newEndpoint) => (req, res) => {
+	const errorMessage = `This route is deprecated${newEndpoint ? `, please use ${httpVerb}: ${newEndpoint} instead.` : '.'}`;
+	respond(req, res, createResponseCode(templates.endpointDecomissioned, errorMessage));
 };
 
 module.exports = Common;
