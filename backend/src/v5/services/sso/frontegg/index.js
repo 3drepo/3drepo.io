@@ -38,20 +38,44 @@ const generateVendorToken = async () => {
 	}
 };
 
+const standardHeaders = async () => {
+	const token = await generateVendorToken();
+	return {
+		Authorization: `Bearer ${token}`,
+	};
+};
+
 FrontEgg.getUserInfoFromToken = async (token) => {
 	const { sub: userId, email } = await identityClient.validateIdentityOnToken(token);
 	return { userId, email };
 };
 
-FrontEgg.getUserById = async (userId) => {
-	const token = await generateVendorToken();
-	const headers = {
-		Authorization: `Bearer ${token}`,
-	};
-
+FrontEgg.validateAndRefreshToken = async ({ token, refreshToken }) => {
 	try {
-		const { data } = await get(`${config.vendorDomain}/identity/resources/vendor-only/users/v1/${userId}`, headers);
-		console.log(data);
+		const user = await identityClient.validateToken(token);
+		/*		const payload = {
+		};
+		const headers = {
+			...await standardHeaders(),
+			'Content-Type': 'application/json',
+			'frontegg-vendor-host': 'https://www.3drepo.local',
+			Cookie: `refresh_token=${refreshToken};`,
+
+		};
+
+		try {
+			const { data } = await post(`${config.vendorDomain}/identity/resources/auth/v1/user/token/refresh`, payload, { headers });
+		} catch (err) {
+			console.log('Failed: ', err);
+		} */
+	} catch (err) {
+		console.log('???', err);
+	}
+};
+
+FrontEgg.getUserById = async (userId) => {
+	try {
+		const { data } = await get(`${config.vendorDomain}/identity/resources/vendor-only/users/v1/${userId}`, await standardHeaders());
 		return data;
 	} catch (err) {
 		throw new Error(`Failed to get user(${userId}) from FrontEgg: ${err.message}`);
@@ -71,8 +95,10 @@ FrontEgg.generateToken = async (urlUsed, code, challenge) => {
 	};
 
 	const { data } = await post(`${config.appUrl}/oauth/token`, payload, { headers });
+	const expiry = new Date(Date.now() + data.expires_in * 1000);
+	console.log(data);
 
-	return data.access_token;
+	return { token: data.access_token, refreshToken: data.refresh_token, expiry };
 };
 
 FrontEgg.generateAuthenticationCodeUrl = ({ state, redirectURL, codeChallenge }) => {

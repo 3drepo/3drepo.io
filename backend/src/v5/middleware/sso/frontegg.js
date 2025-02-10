@@ -68,7 +68,7 @@ const determineUsername = async (userId, email) => {
 const getUserDetails = async (req, res, next) => {
 	try {
 		const { auth } = req;
-		const { userId, email } = await getUserInfoFromToken(auth.token);
+		const { userId, email } = await getUserInfoFromToken(auth.tokenInfo.token);
 		const username = await determineUsername(userId, email);
 
 		auth.userId = userId;
@@ -85,8 +85,8 @@ const getUserDetails = async (req, res, next) => {
 
 const getToken = (urlUsed) => async (req, res, next) => {
 	try {
-		const token = await generateToken(urlUsed, req.state.code, req.session.pkceCodes.challenge);
-		req.auth = { token };
+		const tokenInfo = await generateToken(urlUsed, req.state.code, req.session.pkceCodes.challenge);
+		req.auth = { tokenInfo };
 
 		await next();
 	} catch (err) {

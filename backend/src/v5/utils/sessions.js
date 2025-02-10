@@ -20,6 +20,7 @@ const { cookie, cookie_domain } = require('./config');
 const { escapeRegexChrs, getURLDomain } = require('./helper/strings');
 const { deleteIfUndefined } = require('./helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
+const { validateAndRefreshToken } = require('../services/sso/frontegg');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { v4Path } = require('../../interop');
 
@@ -35,26 +36,34 @@ const referrerMatch = (sessionReferrer, headerReferrer) => {
 
 const SessionUtils = {};
 
-const validateCookie = (session, cookies, headers) => {
+const validateCookie = async (session, cookies, headers) => {
 	const referrerMatched = !headers.referer || referrerMatch(session.user.referer, headers.referer);
 
 	const headerToken = headers[CSRF_HEADER] || headers[CSRF_HEADER.toLowerCase()];
 
 	const csrfMatched = !!session.token && (headerToken === session.token);
 
-	return csrfMatched && referrerMatched;
+	const internalSessionValid = csrfMatched && referrerMatched;
+
+	if (internalSessionValid) {
+		try {
+			const user = await validateAndRefreshToken(session.user.auth.tokenInfo);
+			return user.userId === session.user.auth.userId;
+		} catch (err) {
+			return false;
+		}
+	}
+	return false;
 };
 
 SessionUtils.isSessionValid = (session, cookies, headers, ignoreApiKey = false) => {
 	const user = session?.user;
-
 	if (user) {
-		const validSession = session.user.isAPIKey ? !ignoreApiKey
+		return session.user.isAPIKey ? !ignoreApiKey
 			: validateCookie(session, cookies, headers);
-		return validSession;
 	}
 
-	return false;
+	return Promise.resolve(false);
 };
 
 SessionUtils.getUserFromSession = ({ user } = {}) => (user ? user.username : undefined);
