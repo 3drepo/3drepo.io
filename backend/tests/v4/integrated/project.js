@@ -616,6 +616,77 @@ describe('Projects', () => {
 			});
 	});
 
+	it('list all project models should succeed', (done) => {
+		agent.get(`/${username}/projects/${projectName}/models`)
+			.expect(200, (err, res) => {
+				expect(res.body).to.deep.equal(goldenFullModelList);
+				done(err);
+			});
+	});
+
+	it("list all project models from project that doesn't exist should fail", async () => {
+		const { body } = await agent.get(`/${username}/projects/notexist/models`)
+			.expect(404);
+
+		expect(body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
+	});
+
+	it('list project models matching query name should succeed', (done) => {
+		agent.get(`/${username}/projects/${projectName}/models?name=RandomName`)
+			.expect(200, (err, res) => {
+				expect(res.body).to.deep.equal(goldenRandomNameList);
+				done(err);
+			});
+	});
+
+	it('list project models matching partial query name (start) should succeed', (done) => {
+		agent.get(`/${username}/projects/${projectName}/models?name=TestModel`)
+			.expect(200, (err, res) => {
+				expect(res.body).to.deep.equal(goldenTestModelList);
+				done(err);
+			});
+	});
+
+	it('list project models matching partial query name (middle) should succeed', (done) => {
+		agent.get(`/${username}/projects/${projectName}/models?name=Model`)
+			.expect(200, (err, res) => {
+				expect(res.body).to.deep.equal(goldenTestModelList);
+				done(err);
+			});
+	});
+
+	it('list project models matching partial query name (end) should succeed', (done) => {
+		agent.get(`/${username}/projects/${projectName}/models?name=Name`)
+			.expect(200, (err, res) => {
+				expect(res.body).to.deep.equal(goldenRandomNameList);
+				done(err);
+			});
+	});
+
+	it('list project models query with different casing should succeed', (done) => {
+		agent.get(`/${username}/projects/${projectName}/models?name=testmodel`)
+			.expect(200, (err, res) => {
+				expect(res.body).to.deep.equal(goldenTestModelList);
+				done(err);
+			});
+	});
+
+	it('list project models matching no names should succeed', (done) => {
+		agent.get(`/${username}/projects/${projectName}/models?name=DOESNTEXIST`)
+			.expect(200, (err, res) => {
+				expect(res.body).to.deep.equal([]);
+				done(err);
+			});
+	});
+
+	it("list all project models with name query from project that doesn't exist should fail", (done) => {
+		agent.get(`/${username}/projects/notexist/models?name=TestModel`)
+			.expect(404, (err, res) => {
+				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
+				done(err);
+			});
+	});
+
 	it('should able to delete project', (done) => {
 		const project = {
 			name: 'project_exists',

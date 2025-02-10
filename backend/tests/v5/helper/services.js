@@ -65,7 +65,6 @@ const queue = {};
 const ServiceHelper = { db, queue, socket: {} };
 
 queue.purgeQueues = async () => {
-	// eslint-disable-next-line
 	const { host, worker_queue, model_queue, callback_queue } = config.cn_queue;
 	const conn = await amqp.connect(host);
 
