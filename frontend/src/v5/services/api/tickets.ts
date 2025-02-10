@@ -22,7 +22,7 @@ export const modelType = (isFed: boolean) => (isFed ? 'federations' : 'container
 
 /*************** TEMPORAL CODE FOR MOCKING PIN ICONS  *****************/
 const templates = {};
-const pinIcons = [PinIcon.DEFAULT, PinIcon.ISSUE, PinIcon.RISK, PinIcon.MARKER];
+const pinIcons = [ 'DEFAULT', 'ISSUE', 'RISK', 'MARKER'];
 let pinIndex = 0;
 
 const getCoords = (properties: PropertyDefinition[]) => (properties||[]).filter((p) => p.type === 'coords');
@@ -38,15 +38,10 @@ const fillDummyPinIcon = (template:ITemplate): ITemplate => {
 
 	if (template.config.pin) {
 		if (isObject(template.config.pin)) {
-			template.config.pin.icon = pinIcons[(pinIndex++) % 4];
+			template.config.pin.icon = pinIcons[(pinIndex++) % 4] as PinIcon;
 		} else {
 			template.config.pin = fillDummyIconInProp(template.config.pin);
 		}
-
-		// template.modules?.forEach((module) => {
-		// 	if (module.type === 'safetibase')
-
-		// });
 	}
 
 	getCoords(template.properties).forEach((p) => Object.assign(p, fillDummyIconInProp(p)));

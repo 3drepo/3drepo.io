@@ -69,12 +69,7 @@ export type IPinColorMapping = {
 	]
 };
 
-export enum PinIcon {
-	'DEFAULT', 
-	'RISK',
-	'ISSUE',
-	'MARKER',
-}
+export type PinIcon =  'DEFAULT' | 'RISK' | 'ISSUE' | 'MARKER';
 
 export type PinConfig = {
 	name?: string;

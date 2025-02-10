@@ -17,7 +17,11 @@
 
 import { useContext, useEffect, useRef } from 'react';
 import CircledPlusIcon from '@assets/icons/outlined/add_circle-outlined.svg';
-import PinIcon from '@assets/icons/filled/ticket_pin-filled.svg';
+import TicketPin from '@assets/icons/filled/pin_ticket-filled.svg';
+import IssuePin from '@assets/icons/filled/pin_issue-filled.svg';
+import RiskPin from '@assets/icons/filled/pin_risk-filled.svg';
+import MarkerPin from '@assets/icons/filled/pin_marker-filled.svg';
+
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import MoveIcon from '@assets/icons/outlined/arrow_cross-outlined.svg';
 import { FormattedMessage } from 'react-intl';
@@ -25,7 +29,7 @@ import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { FormHelperText, Tooltip } from '@mui/material';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { CoordsAction, CoordsActionLabel, CoordsActions, CoordsInputContainer, Label, FlexRow, SelectPinButton } from './coordsProperty.styles';
-import { getPinColorPropPath, getPinColorHex, NEW_TICKET_ID, toPin, getPinId } from './coordsProperty.helpers';
+import { getPinColorPropPath, getPinColorHex, NEW_TICKET_ID, toPin, getPinId, getPinIcon } from './coordsProperty.helpers';
 import { TicketContext } from '../../../ticket.context';
 import { formatMessage } from '@/v5/services/intl';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -35,6 +39,17 @@ import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { isEqual } from 'lodash';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { DrawingViewerService } from '@components/viewer/drawingViewer/drawingViewer.service';
+
+
+const PinPerType = 
+{
+	'ISSUE': IssuePin,
+	'RISK': RiskPin,
+	'DEFAULT': TicketPin,
+	'MARKER': MarkerPin,
+};
+
+
 
 export const CoordsProperty = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
 	const { isViewer, containerOrFederation } = useContext(TicketContext);
@@ -56,6 +71,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const isSelected = selectedPin === pinId;
 	const hasPin = !!value;
 	const colorHex = getPinColorHex(name, template, ticket);
+	const pinIcon = getPinIcon(name, template);
 
 	const cancelEdit = () => {
 		if (!editMode) return;
@@ -138,6 +154,8 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 		if (isNewTicket) ViewerService.removePin(pinId);
 	}, []);
 
+	const PinIcon = PinPerType[pinIcon];
+	
 	return (
 		<CoordsInputContainer required={required} selected={editMode} error={error} disabled={disabled}>
 			<FlexRow>

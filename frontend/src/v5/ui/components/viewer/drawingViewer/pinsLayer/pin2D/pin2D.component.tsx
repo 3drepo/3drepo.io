@@ -16,7 +16,7 @@
  */
 
 import { IPin } from '@/v4/services/viewer/viewer';
-import PinIcon from '@assets/icons/filled/ticket_pin-filled.svg';
+import PinIcon from '@assets/icons/filled/pin_ticket-filled.svg';
 import { PinContainer } from './pin2D.styles';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';

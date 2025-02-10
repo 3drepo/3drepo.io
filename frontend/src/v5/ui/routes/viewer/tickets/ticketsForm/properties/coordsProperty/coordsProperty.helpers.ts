@@ -72,7 +72,7 @@ export const getPinColorHex = (name: string, template: ITemplate, ticket: ITicke
 export const getPinIcon =  (name: string, template: ITemplate): PinIcon => {
 	const pinConfig = getPinConfig(name, template);
 	if (isObject(pinConfig) && pinConfig.icon) return pinConfig.icon;
-	return PinIcon.DEFAULT;
+	return 'DEFAULT';
 };
 
 export const getPinId = (propPath, ticketOrId?: ITicket | string) => {
@@ -81,10 +81,10 @@ export const getPinId = (propPath, ticketOrId?: ITicket | string) => {
 };
 
 const pinIconToType = {
-	[PinIcon.DEFAULT] : 'ticket',
-	[PinIcon.ISSUE] : 'issue',
-	[PinIcon.RISK] : 'risk',
-	[PinIcon.MARKER] : 'bookmark',
+	'DEFAULT' : 'ticket',
+	'ISSUE' : 'issue',
+	'RISK' : 'risk',
+	'MARKER' : 'bookmark',
 };
 
 export const toPin = (propPath: string, template: ITemplate,  ticket: ITicket, isSelected:boolean = false, coordValue?: number[]): IPin => {
