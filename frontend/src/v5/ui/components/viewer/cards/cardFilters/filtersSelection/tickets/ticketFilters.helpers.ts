@@ -23,13 +23,13 @@ import NumberIcon from '@assets/icons/filters/number.svg';
 import TemplateIcon from '@assets/icons/filters/template.svg';
 import TextIcon from '@assets/icons/filters/text.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
-import { sortBy, uniqBy } from 'lodash';
+import { isString, sortBy, uniqBy } from 'lodash';
 import { CardFilterType, BaseFilter, CardFilter } from '../../cardFilters.types';
 
 export const TYPE_TO_ICON: Record<CardFilterType, any> = {
 	'template': TemplateIcon,
-	'ticketTitle': TextIcon,
-	'ticketId': TextIcon,
+	'title': TextIcon,
+	'ticketCode': TextIcon,
 	'text': TextIcon,
 	'longText': TextIcon,
 	'date': CalendarIcon,
@@ -42,9 +42,9 @@ export const TYPE_TO_ICON: Record<CardFilterType, any> = {
 };
 
 const DEFAULT_FILTERS: CardFilter[] = [
-	{ module: '', type: 'ticketTitle', property: formatMessage({ defaultMessage: 'Ticket title', id: 'viewer.card.filters.element.ticketTitle' }) },
-	{ module: '', type: 'ticketId', property: formatMessage({ defaultMessage: 'Ticket ID', id: 'viewer.card.filters.element.ticketId' }) },
-	{ module: '', type: 'template', property: formatMessage({ defaultMessage: 'Ticket template', id: 'viewer.card.filters.element.ticketTemplate' }) },
+	{ module: '', type: 'title', property: formatMessage({ defaultMessage: 'Ticket title', id: 'viewer.card.filters.element.title' }) },
+	{ module: '', type: 'ticketCode', property: formatMessage({ defaultMessage: 'Ticket ID', id: 'viewer.card.filters.element.ticketCode' }) },
+	{ module: '', type: 'template', property: formatMessage({ defaultMessage: 'Ticket template', id: 'viewer.card.filters.element.template' }) },
 ];
 
 const propertiesToValidFilters = (properties: { name: string, type: string }[], module: string = ''): CardFilter[] => properties
@@ -82,3 +82,30 @@ export const toTicketCardFilter = (filters: Record<string, BaseFilter>): CardFil
 			filter,
 		}))
 );
+
+const wrapWith = (text, wrappingChar) => wrappingChar + text + wrappingChar;
+// This code, copied from MDN https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent#encoding_for_rfc3986 
+// is due to `encodeURIComponent` not encoding all the chars
+const encodeRFC3986URIComponent = (str) => encodeURIComponent(str).replace(
+	/[!'()*]/g,
+	(c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
+);
+
+const getFilterPropertyAsQuery = ({ module, property, type }: CardFilter) => {
+	if (['template', 'ticketCode', 'title'].includes(type)) return `$${type}`;
+	if (module) return `${module}:${property}`;
+	return property;
+};
+
+const filterToQueryElement = ({ filter: { operator, values }, ...moduelPropertyAndType }: CardFilter) => {
+	const query = [getFilterPropertyAsQuery(moduelPropertyAndType), operator];
+	if (values?.length) {
+		query.push(values?.map((v) => (isString(v) && v.includes(',')) ? wrapWith(v, '"') : v).join(','));
+	}
+	return query.join('::');
+};
+export const filtersToQuery = (filters: CardFilter[]) => {
+	if (!filters?.length) return '';
+	const query = filters.map(filterToQueryElement).join('&&');
+	return encodeRFC3986URIComponent(wrapWith(query, "'"));
+};

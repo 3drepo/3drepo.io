@@ -66,7 +66,7 @@ describe('Tickets: store', () => {
 		describe('filters', () => {
 			const [ticketTitleFilter, ticketIdFilter, templateIdFilter] = templatesToFilters([]);
 			const baseFilter: BaseFilter = {
-				operator: 'eq',
+				operator: 'is',
 				values: [],
 			};
 			const editedBaseFilter: BaseFilter = {
@@ -133,7 +133,7 @@ describe('Tickets: store', () => {
 		it('should reset the state', () => {
 			const [ticketTitleFilter] = templatesToFilters([]);
 			const baseFilter: BaseFilter = {
-				operator: 'eq',
+				operator: 'is',
 				values: [],
 			};
 			const ticketTitleCardFilter: CardFilter = { ...ticketTitleFilter, filter: baseFilter };

@@ -27,8 +27,7 @@ import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.co
 
 export const TicketsList = () => {
 	const selectedTicket = TicketsCardHooksSelectors.selectSelectedTicket();
-
-	const filteredItems = TicketsCardHooksSelectors.selectFilteredTickets();
+	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
 
 	useEffect(() => {
 		TicketsCardActionsDispatchers.setSelectedTicketPin(selectedTicket?._id);
@@ -41,9 +40,9 @@ export const TicketsList = () => {
 	return (
 		<>
 			<CardFilters />
-			{filteredItems.length ? (
+			{filteredTickets.length ? (
 				<List>
-					{filteredItems.map((ticket) => <TicketItem ticket={ticket} key={ticket._id} />)}
+					{filteredTickets.map((ticket) => <TicketItem ticket={ticket} key={ticket._id} />)}
 				</List>
 			) : (
 				<EmptyListMessage>

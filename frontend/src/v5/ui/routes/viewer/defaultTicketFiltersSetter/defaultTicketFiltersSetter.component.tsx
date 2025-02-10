@@ -41,7 +41,7 @@ export const DefaultTicketFiltersSetter = () => {
 	const getTicketFiltersFromURL = (values): CardFilter[] => [{
 		module: '',
 		property: 'Ticket ID',
-		type: 'ticketId',
+		type: 'ticketCode',
 		filter: {
 			operator: 'eq',
 			values,
@@ -68,7 +68,7 @@ export const DefaultTicketFiltersSetter = () => {
 			property: 'Status',
 			type: 'oneOf',
 			filter: {
-				operator: 'neq',
+				operator: 'nis',
 				values,
 			},
 		};
@@ -78,7 +78,7 @@ export const DefaultTicketFiltersSetter = () => {
 		property: 'Treatment Status',
 		type: 'oneOf',
 		filter: {
-			operator: 'neq',
+			operator: 'nis',
 			values: [
 				TreatmentStatuses.REJECTED,
 				TreatmentStatuses.VOID,
