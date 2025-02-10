@@ -46,11 +46,11 @@ const DEFAULT_FILTERS: CardFilter[] = [
 	{ module: '', type: 'ticketTitle', property: formatMessage({ defaultMessage: 'Ticket title', id: 'viewer.card.filters.element.ticketTitle' }) },
 	{ module: '', type: 'ticketId', property: formatMessage({ defaultMessage: 'Ticket ID', id: 'viewer.card.filters.element.ticketId' }) },
 	{ module: '', type: 'template', property: formatMessage({ defaultMessage: 'Ticket template', id: 'viewer.card.filters.element.ticketTemplate' }) },
-	{ module: '', type: 'owner', property: formatMessage({ defaultMessage: 'Owner', id: 'viewer.card.filters.element.ticketTemplate' }) },
+	{ module: '', type: 'owner', property: formatMessage({ defaultMessage: 'Owner', id: 'viewer.card.filters.element.owner' }) },
 ];
 
 const propertiesToValidFilters = (properties: { name: string, type: string }[], module: string = ''): CardFilter[] => properties
-	.filter(({ type }) => Object.keys(TYPE_TO_ICON).includes(type))
+	.filter(({ name, type }) => name !== 'Owner' && Object.keys(TYPE_TO_ICON).includes(type))
 	.map(({ name, type }) => ({
 		module,
 		property: name,
@@ -58,7 +58,7 @@ const propertiesToValidFilters = (properties: { name: string, type: string }[], 
 	}) as CardFilter);
 
 const templateToFilters = (template: ITemplate): CardFilter[] => [
-	...propertiesToValidFilters(template.properties.filter(({ name }) => name !== 'Owner'), ''),
+	...propertiesToValidFilters(template.properties, ''),
 	...template.modules.flatMap(({ properties, name, type }) => propertiesToValidFilters(properties, name || type)),
 ];
 
