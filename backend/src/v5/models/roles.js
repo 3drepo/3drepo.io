@@ -56,10 +56,18 @@ Roles.getRoles = (teamspace, projection) => findMany(teamspace, {}, projection);
 Roles.getRoleById = (teamspace, roleId, projection) => findOne(teamspace, { _id: roleId }, projection);
 Roles.getRoleByName = (teamspace, roleName, projection) => findOne(teamspace, { name: roleName }, projection);
 
-Roles.addDefaultRoles = async (teamspace) => {
-	await db.insertMany(teamspace, COL_NAME,
-		DEFAULT_ROLES.map((role) => ({ ...role, _id: generateUUID(), users: [] })));
+Roles.createRoles = async (teamspace, roles) => {
+	await db.insertMany(teamspace, COL_NAME, roles);
 };
+
+Roles.createRole = async (teamspace, role) => {
+	const addedRole = { _id: generateUUID(), ...role };
+	await db.insertOne(teamspace, COL_NAME, addedRole);
+	return addedRole._id;
+};
+
+Roles.addDefaultRoles = (teamspace) => Roles.createRoles(teamspace,
+	DEFAULT_ROLES.map((role) => ({ ...role, _id: generateUUID(), users: [] })));
 
 Roles.assignUserToRole = async (teamspace, roleName, username) => {
 	await updateOne(teamspace, { name: roleName }, { $push: { users: username } });
@@ -72,12 +80,6 @@ Roles.removeUserFromRoles = async (teamspace, userToRemove) => {
 Roles.getRolesByUsers = async (teamspace, users) => {
 	const roles = await findMany(teamspace, { users: { $in: users } }, { _id: 1 });
 	return roles.map((j) => j._id);
-};
-
-Roles.createRole = async (teamspace, role) => {
-	const addedRole = { _id: generateUUID(), ...role };
-	await db.insertOne(teamspace, COL_NAME, addedRole);
-	return addedRole._id;
 };
 
 Roles.updateRole = (teamspace, role, updatedRole) => updateOne(teamspace, { _id: role }, { $set: updatedRole });
