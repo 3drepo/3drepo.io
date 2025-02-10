@@ -48,7 +48,7 @@ const validateCookie = async (session, cookies, headers) => {
 	if (internalSessionValid) {
 		try {
 			const user = await validateAndRefreshToken(session.user.auth.tokenInfo);
-			return user.userId === session.user.auth.userId;
+			return user.sub === session.user.auth.userId;
 		} catch (err) {
 			return false;
 		}

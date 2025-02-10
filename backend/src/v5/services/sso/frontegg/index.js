@@ -68,6 +68,8 @@ FrontEgg.validateAndRefreshToken = async ({ token, refreshToken }) => {
 		} catch (err) {
 			console.log('Failed: ', err);
 		} */
+
+		return user;
 	} catch (err) {
 		console.log('???', err);
 	}
@@ -96,7 +98,6 @@ FrontEgg.generateToken = async (urlUsed, code, challenge) => {
 
 	const { data } = await post(`${config.appUrl}/oauth/token`, payload, { headers });
 	const expiry = new Date(Date.now() + data.expires_in * 1000);
-	console.log(data);
 
 	return { token: data.access_token, refreshToken: data.refresh_token, expiry };
 };
