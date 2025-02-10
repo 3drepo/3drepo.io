@@ -20,12 +20,13 @@ import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketSortingProperty, TicketsSortingProperty } from '@/v5/store/tickets/card/ticketsCard.types';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import { SortingArrow } from '@controls/sortingArrow/sortingArrow.component';
-import { ActionMenu, ActionMenuItem } from '@controls/actionMenu';
+import { ActionMenuItem } from '@controls/actionMenu';
 import { MenuList } from '@mui/material';
 import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
 import { ExpandIconContainer } from './sortingMenu.styles';
 import { useContext } from 'react';
 import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
+import { PopoverHoveringContent } from '@controls/hoverPopover/popoverHoveringContent.component';
 
 export const SortingProperty = ({ property, title }) => {
 	const sorting = TicketsHooksSelectors.selectSorting();
@@ -52,8 +53,8 @@ export const SortingProperty = ({ property, title }) => {
 };
 
 export const SortingMenu = () => (
-	<ActionMenu
-		TriggerButton={(
+	<PopoverHoveringContent
+		anchor={() => (
 			<EllipsisMenuItem
 				title={
 					<>
@@ -80,5 +81,5 @@ export const SortingMenu = () => (
 				title={formatMessage({ id: 'viewer.cards.tickets.sortBy.ticketId', defaultMessage: 'Ticket ID' })}
 			/>
 		</MenuList>
-	</ActionMenu>
+	</PopoverHoveringContent>
 );
