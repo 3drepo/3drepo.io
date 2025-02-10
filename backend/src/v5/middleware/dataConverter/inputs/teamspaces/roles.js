@@ -43,10 +43,7 @@ const validateRole = async (req, res, next) => {
 				return true;
 			}),
 		users: Yup.array().of(types.strings.title)
-			.test('users-uniqueness-check', 'users must be unique', (values) => {
-				if (!values?.length) return true;
-				return values.length === uniqueElements(values).length;
-			})
+			.transform(uniqueElements)
 			.test('check-users-teamspace-access', async (values, context) => {
 				if (values?.length) {
 					const teamspaceUsers = await getAllUsersInTeamspace(req.params.teamspace);
@@ -60,7 +57,7 @@ const validateRole = async (req, res, next) => {
 			}),
 
 		color: Yup.string().matches(/^#[0-9A-Fa-f]{6}$/, 'color is not a valid RGB hex format'),
-	}).strict(true).noUnknown();
+	}).noUnknown();
 
 	if (isUpdate) {
 		schema = schema.test(

@@ -29,6 +29,9 @@
 	const User = require("../models/user");
 	const utils = require("../utils");
 
+	const { v5Path } = require("../../interop");
+	const { httpVerbs, routeDeprecated } = require(`${v5Path}/middleware/common`);
+
 	/**
 	 * @apiDefine Teamspace Teamspace
 	 *
@@ -244,7 +247,7 @@
 	 * }
 	 *
 	 */
-	router.get("/members", middlewares.isTeamspaceMember, getMemberList);
+	router.get("/members", routeDeprecated(httpVerbs.GET, "/v5/teamspaces/{teamspace}/members"));
 
 	/**
 	 *
@@ -300,7 +303,7 @@
 	 *    role: {"_id": "Role1", color: "#FFFFFF"}
 	 * }
 	 */
-	router.get("/members/:user", middlewares.isTeamspaceMember, getTeamMemberInfo);
+	router.get("/members/:user",  routeDeprecated(httpVerbs.GET, "/v5/teamspaces/{teamspace}/members"));
 
 	/**
 	 *

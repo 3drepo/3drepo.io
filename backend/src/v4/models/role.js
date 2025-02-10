@@ -31,53 +31,6 @@ const Role = {};
 
 const ROLES_COLLECTION_NAME = "roles";
 
-// --- LICENSING ROLES --- TO BE DELETED
-
-Role.createTeamSpaceRole = async function (account) {
-	const roleId = `${account}.${C.DEFAULT_MEMBER_ROLE}`;
-
-	const roleFound = await findByRoleID(roleId);
-
-	if(roleFound) {
-		return ;
-	}
-
-	const roleName = C.DEFAULT_MEMBER_ROLE;
-	const createRoleCmd = {
-		"createRole": roleName,
-		"privileges":[{
-			"resource":{
-				"db": account,
-				"collection": "settings"
-			},
-			"actions": ["find"]}
-		],
-		"roles": []
-	};
-
-	await db.runCommand(account, createRoleCmd);
-};
-
-Role.grantTeamSpaceRoleToUser = async function (username, account) {
-	const grantRoleCmd = {
-		grantRolesToUser: username,
-		roles: [{role: C.DEFAULT_MEMBER_ROLE, db: account}]
-	};
-
-	return await db.runCommand("admin", grantRoleCmd);
-};
-
-Role.revokeTeamSpaceRoleFromUser = async function(username, account) {
-	const cmd = {
-		revokeRolesFromUser: username,
-		roles: [{role: C.DEFAULT_MEMBER_ROLE, db: account}]
-	};
-
-	return await db.runCommand("admin", cmd);
-};
-
-// --- JOBS RENAMED TO ROLES --- TO BE KEPT
-
 Role.addUserToRole = async function(teamspace, roleId, user) {
 	// Check if user is member of teamspace
 	const User = require("./user");

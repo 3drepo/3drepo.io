@@ -22,7 +22,6 @@ const _ = require("lodash");
 const db = require("../handler/db");
 const zxcvbn = require("zxcvbn");
 const utils = require("../utils");
-const Role = require("./role");
 const { findRoleByUser, usersWithRole, removeUserFromAnyRole, addUserToRole } = require("./role");
 
 const Intercom = require("./intercom");
@@ -48,6 +47,7 @@ const PermissionTemplates = require("./permissionTemplates");
 const { get } = require("lodash");
 const { fileExists } = require("./fileRef");
 const {v5Path} = require("../../interop");
+const { grantTeamspaceRoleToUser, revokeTeamspaceRoleFromUser } = require(`${v5Path}/models/roles.js`);
 const { deleteIfUndefined } = require(`${v5Path}/utils/helper/objects.js`);
 const { UUIDToString } = require(`${v5Path}/utils/helper/uuids.js`);
 const { types: { strings } } = require(`${v5Path}/utils/helper/yup.js`);
@@ -853,7 +853,7 @@ User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove, 
 
 	publish(events.USER_REMOVED, { teamspace: teamspace.user, executor, user: userToRemove});
 
-	return Role.revokeTeamSpaceRoleFromUser(userToRemove, teamspace.user);
+	return revokeTeamspaceRoleFromUser(teamspace.user, userToRemove);
 };
 
 User.addTeamMember = async function(teamspace, userToAdd, role, permissions, executor) {
@@ -874,7 +874,7 @@ User.addTeamMember = async function(teamspace, userToAdd, role, permissions, exe
 		throw (responseCodes.USER_ALREADY_ASSIGNED);
 	}
 
-	await Role.grantTeamSpaceRoleToUser(userEntry.user, teamspace);
+	await grantTeamspaceRoleToUser(teamspace, userEntry.user);
 	publish(events.USER_ADDED, { teamspace, executor, user: userEntry.user});
 
 	const promises = [];

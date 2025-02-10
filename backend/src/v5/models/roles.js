@@ -26,12 +26,12 @@ const { uniqueElements } = require('../utils/helper/arrays');
 const Roles = {};
 
 const findOne = async (teamspace, query, projection) => {
-	const template = await db.findOne(teamspace, COL_NAME, query, projection);
-	if (!template) {
+	const role = await db.findOne(teamspace, COL_NAME, query, projection);
+	if (!role) {
 		throw templates.roleNotFound;
 	}
 
-	return template;
+	return role;
 };
 
 const findMany = (ts, query, projection, sort) => db.find(ts, COL_NAME, query, projection, sort);
