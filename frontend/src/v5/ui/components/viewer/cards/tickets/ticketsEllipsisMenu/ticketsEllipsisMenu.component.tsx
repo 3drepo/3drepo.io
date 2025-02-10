@@ -26,6 +26,7 @@ import { ActionMenu } from '@controls/actionMenu';
 import { SwitchContainer } from './ticketsEllipsisMenu.styles';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
+import { SortingMenu } from './sortingMenu/sortingMenu.component';
 
 export const TicketsEllipsisMenu = () => {
 	const isShowingPins = TicketsCardHooksSelectors.selectIsShowingPins();
@@ -52,6 +53,7 @@ export const TicketsEllipsisMenu = () => {
 						</SwitchContainer>
 					}
 				/>
+				<SortingMenu />
 			</MenuList>
 		</ActionMenu>
 	);

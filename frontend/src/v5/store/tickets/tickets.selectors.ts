@@ -23,6 +23,8 @@ import { ticketWithGroups } from './ticketsGroups.helpers';
 import { ITemplate, ITicket } from './tickets.types';
 import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
 import { selectCurrentProjectTemplateById } from '../projects/projects.selectors';
+import { getState } from '@/v5/helpers/redux.helpers';
+import { TicketSortingProperty } from './card/ticketsCard.types';
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
 
@@ -75,18 +77,35 @@ export const selectTicketsRaw = createSelector(
 	(state, modelId) => state.ticketsByModelId[modelId] || [],
 );
 
-export const selectTickets = createSelector(
+export const selectTicketsWithGroups = createSelector(
 	selectTicketsRaw,
 	selectTicketsGroups,
 	(state, modelId) => modelId,
-	(state) => state,
-	(ticketsList, groups, modelId, storeState): ITicket[] => {
-		const tickets = ticketsList.map((ticket) => {
+	(ticketsList, groups, modelId): ITicket[] => {
+		const storeState = getState();
+		return ticketsList.map((ticket) => {
 			const ticketWithStatus = getTicketWithStatus(ticket, selectTemplateById(storeState, modelId, ticket.type));
 			return ticketWithGroups(({ ...ticketWithStatus, modelId }), groups);
 		});
+	},
+);
+export const selectSorting = createSelector(
+	selectTicketsDomain,
+	(state) => state.sorting,
+);
 
-		return orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
+export const selectTickets = createSelector(
+	selectTicketsWithGroups,
+	selectSorting,
+	(tickets, { property, order }) => {
+		if (property === TicketSortingProperty.TICKET_CODE) {
+			const ticketCodeSorting = [
+				(ticket) => selectTemplateById(getState(), ticket.modelId, ticket.type).code,
+				(ticket) => ticket.number,
+			];
+			return orderBy(tickets, ticketCodeSorting, [order, order]);
+		}
+		return orderBy(tickets, property, order);
 	},
 );
 

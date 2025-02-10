@@ -42,7 +42,7 @@ export function* fetchTicketsList({ teamspace, projectId, modelId, isFederation 
 			const { property: { module, name } } = configColor;
 			const path = module ? `${module}.${name}` : name;
 			return [...acc, path];
-		}, [BaseProperties.DESCRIPTION]);
+		}, [BaseProperties.DESCRIPTION, BaseProperties.UPDATED_AT]);
 		yield put(TicketsActions.fetchTickets(teamspace, projectId, modelId, isFederation, requiredProperties));
 
 	} catch (error) {
