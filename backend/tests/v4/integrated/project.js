@@ -25,6 +25,7 @@ const logger = require('../../../src/v4/logger.js');
 
 const { systemLogger } = logger;
 const responseCodes = require('../../../src/v4/response_codes.js');
+const { templates:v5Responses } = require('../../../src/v5/utils/responseCodes.js');
 const async = require('async');
 const C = require('../../../src/v4/constants');
 const { findModelSettings } = require('../../../src/v4/models/modelSetting.js');
