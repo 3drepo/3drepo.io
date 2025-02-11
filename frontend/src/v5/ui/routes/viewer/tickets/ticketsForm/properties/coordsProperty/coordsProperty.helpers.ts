@@ -100,6 +100,8 @@ export const toPin = (propPath: string, template: ITemplate,  ticket: ITicket, i
 	};
 };
 
+export const toPinIcon = (type: PinType) => (Object.keys(pinIconToType).find((key) => pinIconToType[key] === type) || 'DEFAULT') as PinIcon;
+
 export const getTicketPins = (templates, ticket, ticketPinId) => {
 	const pinArray = [];
 	const selectedTemplate = templates?.find(({ _id }) => _id === ticket?.type);

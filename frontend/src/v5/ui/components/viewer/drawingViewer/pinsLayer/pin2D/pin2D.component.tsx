@@ -16,15 +16,16 @@
  */
 
 import { IPin } from '@/v4/services/viewer/viewer';
-import PinIcon from '@assets/icons/filled/pin_ticket-filled.svg';
 import { PinContainer } from './pin2D.styles';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { Pin } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/pin';
+import { toPinIcon } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 
 type Pin2DProps = IPin & { scale: number };
-export const Pin2D = ({ id, isSelected, position, colour, scale }: Pin2DProps) => {
+export const Pin2D = ({ id, isSelected, position, colour, scale, type }: Pin2DProps) => {
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 
@@ -43,7 +44,7 @@ export const Pin2D = ({ id, isSelected, position, colour, scale }: Pin2DProps) =
 			selected={isSelected}
 			style={{ transform: `translate(${position[0]}px, ${position[1]}px) scale(${0.333 / scale})` }}
 		>
-			<PinIcon />
+			<Pin type={toPinIcon(type)} />
 		</PinContainer>
 	);
 };

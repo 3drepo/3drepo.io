@@ -17,10 +17,6 @@
 
 import { useContext, useEffect, useRef } from 'react';
 import CircledPlusIcon from '@assets/icons/outlined/add_circle-outlined.svg';
-import TicketPin from '@assets/icons/filled/pin_ticket-filled.svg';
-import IssuePin from '@assets/icons/filled/pin_issue-filled.svg';
-import RiskPin from '@assets/icons/filled/pin_risk-filled.svg';
-import MarkerPin from '@assets/icons/filled/pin_marker-filled.svg';
 
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import MoveIcon from '@assets/icons/outlined/arrow_cross-outlined.svg';
@@ -39,17 +35,7 @@ import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { isEqual } from 'lodash';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { DrawingViewerService } from '@components/viewer/drawingViewer/drawingViewer.service';
-
-
-const PinPerType = 
-{
-	'ISSUE': IssuePin,
-	'RISK': RiskPin,
-	'DEFAULT': TicketPin,
-	'MARKER': MarkerPin,
-};
-
-
+import { Pin } from './pin';
 
 export const CoordsProperty = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
 	const { isViewer, containerOrFederation } = useContext(TicketContext);
@@ -154,8 +140,6 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 		if (isNewTicket) ViewerService.removePin(pinId);
 	}, []);
 
-	const PinIcon = PinPerType[pinIcon];
-	
 	return (
 		<CoordsInputContainer required={required} selected={editMode} error={error} disabled={disabled}>
 			<FlexRow>
@@ -207,7 +191,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 							onClick={onClickSelectPin}
 							disabled={!hasPin}
 						>
-							<PinIcon />
+							<Pin type={pinIcon}/>
 						</SelectPinButton>
 					</Tooltip>
 				)}
