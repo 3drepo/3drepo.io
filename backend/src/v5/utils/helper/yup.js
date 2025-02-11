@@ -40,6 +40,8 @@ YupHelper.types.colorArr = Yup.array()
 	.of(Yup.number().min(0).max(255).integer())
 	.min(3).max(4);
 
+YupHelper.types.rgbColor = Yup.string().matches(/^#[0-9A-Fa-f]{6}$/, 'Color is not a valid RGB hex format');
+
 YupHelper.types.color3Arr = Yup.array()
 	.of(Yup.number().min(0).max(255).integer())
 	.length(3);

@@ -34,6 +34,7 @@ const TeamspaceRoutes = require('./teamspaces/teamspaces');
 const TeamspaceSettingsRoutes = require('./teamspaces/settings');
 const UserRoutes = require('./users');
 const { modelTypes } = require('../models/modelSettings.constants');
+const { routeDeprecated } = require('../middleware/common');
 
 RoutesManager.init = (app) => {
 	// Auth
@@ -45,6 +46,7 @@ RoutesManager.init = (app) => {
 
 	app.use('/v5/teamspaces/', TeamspaceRoutes);
 	app.use('/v5/teamspaces/:teamspace/settings', TeamspaceSettingsRoutes);
+	app.use('/v5/teamspaces/:teamspace/jobs', (req, res) => routeDeprecated()(req, res));
 	app.use('/v5/teamspaces/:teamspace/roles', TeamspaceRoleRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects', ProjectRoutes);
 

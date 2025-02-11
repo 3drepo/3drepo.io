@@ -16,12 +16,12 @@
  */
 
 const { createResponseCode, templates } = require('../../../../utils/responseCodes');
-const { getArrayDifference, uniqueElements } = require('../../../../utils/helper/arrays');
 const { getRoleById, getRoleByName } = require('../../../../models/roles');
 const Yup = require('yup');
-const { getAllUsersInTeamspace } = require('../../../../models/teamspaceSettings');
+const { getUsersWithNoAccess } = require('../../../../models/teamspaceSettings');
 const { respond } = require('../../../../utils/responder');
 const { types } = require('../../../../utils/helper/yup');
+const { uniqueElements } = require('../../../../utils/helper/arrays');
 const { validateMany } = require('../../../common');
 
 const Roles = {};
@@ -46,8 +46,7 @@ const validateRole = async (req, res, next) => {
 			.transform(uniqueElements)
 			.test('check-users-teamspace-access', async (values, context) => {
 				if (values?.length) {
-					const teamspaceUsers = await getAllUsersInTeamspace(req.params.teamspace);
-					const usersWithNoAccess = getArrayDifference(teamspaceUsers, values);
+					const usersWithNoAccess = await getUsersWithNoAccess(req.params.teamspace, values);
 					if (usersWithNoAccess.length) {
 						return context.createError({ message: `User(s) ${usersWithNoAccess} have no access to the teamspace` });
 					}
@@ -56,7 +55,7 @@ const validateRole = async (req, res, next) => {
 				return true;
 			}),
 
-		color: Yup.string().matches(/^#[0-9A-Fa-f]{6}$/, 'color is not a valid RGB hex format'),
+		color: types.rgbColor,
 	}).noUnknown();
 
 	if (isUpdate) {
