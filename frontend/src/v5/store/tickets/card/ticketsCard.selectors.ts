@@ -127,9 +127,24 @@ export const selectCardFilters = createSelector(
 	(filters) => toTicketCardFilter(filters) || [],
 );
 
-export const selectTemplatesFilters = createSelector(
-	selectCurrentTemplates,
+const selectFilteredTicketIds = createSelector(
+	selectTicketsCardDomain,
+	(ticketCardState) => ticketCardState.filteredTicketIds || [],
+);
+
+export const selectFilteredTickets = createSelector(
+	selectCardFilters,
 	selectCurrentTickets,
+	selectFilteredTicketIds,
+	(filters, tickets, ids) => {
+		if (!filters.length) return tickets;
+		return tickets.filter((t) => ids.includes(t._id));
+	},
+);
+
+const selectTemplatesFilters = createSelector(
+	selectCurrentTemplates,
+	selectFilteredTickets,
 	(templates, tickets) => {
 		const idsOfTemplatesWithAtLeastOneTicket = uniq(tickets.map((t) => t.type));
 		const templatesWithAtLeastOneTicket = templates.filter((t) => idsOfTemplatesWithAtLeastOneTicket.includes(t._id));
@@ -141,11 +156,6 @@ export const selectAvailableTemplatesFilters = createSelector(
 	selectFilters,
 	selectTemplatesFilters,
 	(usedFilters, allFilters) => allFilters.filter(({ module, property, type }) => !usedFilters[`${module}.${property}.${type}`]),
-);
-
-export const selectFilteredTickets = createSelector(
-	selectCurrentTickets,
-	(tickets) => tickets,
 );
 
 export const selectIsShowingPins = createSelector(

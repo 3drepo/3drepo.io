@@ -32,7 +32,7 @@ import { formatSimpleDate } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
 import { TRUE_LABEL, FALSE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
 
-const DEFAULT_OPERATOR = 'eq';
+const DEFAULT_OPERATOR = 'is';
 const DEFAULT_VALUES = [''];
 type FormType = { values: { value: CardFilterValue, displayValue?: string }[], operator: CardFilterOperator };
 type FilterFormProps = {
