@@ -32,7 +32,7 @@ const { generateFullSchema, getClosedStatuses } = require('../../../../../schema
 const { getAllTemplates, getTemplatesByQuery } = require('../../../../../models/tickets.templates');
 const { getFileWithMetaAsStream, removeFiles, storeFiles } = require('../../../../../services/filesManager');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
-const { isBuffer, isUUID } = require('../../../../../utils/helper/typeCheck');
+const { isArray, isBuffer, isUUID } = require('../../../../../utils/helper/typeCheck');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
 const { getArrayDifference } = require('../../../../../utils/helper/arrays');
 const { importComments } = require('./tickets.comments');
@@ -82,12 +82,12 @@ const processSpecialProperties = (template, oldTickets, updatedTickets) => {
 
 	const updateReferences = (templateProperties, externalReferences, oldProperties = {}, updatedProperties = {}) => {
 		templateProperties.forEach(({ type, name }) => {
-			const processImageUpdate = (isArray, field) => {
+			const processImageUpdate = (isArrayValue, field) => {
 				const oldProp = field ? getNestedProperty(oldProperties[name], field) : oldProperties[name];
 				const newProp = field ? getNestedProperty(updatedProperties[name], field) : updatedProperties[name];
 
 				if (oldProp && newProp !== undefined) {
-					const idsToRemove = isArray
+					const idsToRemove = isArrayValue
 						? getArrayDifference(newProp?.map(UUIDToString), oldProp.map(UUIDToString)).map(stringToUUID)
 						: [oldProp];
 
@@ -105,7 +105,7 @@ const processSpecialProperties = (template, oldTickets, updatedTickets) => {
 						return data;
 					};
 
-					if (isArray) {
+					if (isArrayValue) {
 						// eslint-disable-next-line no-param-reassign
 						updatedProperties[name] = newProp.map(getRefFromBuffer);
 					} else if (field) {
@@ -122,11 +122,13 @@ const processSpecialProperties = (template, oldTickets, updatedTickets) => {
 			} else if (type === propTypes.VIEW) {
 				// Make constants out of these
 				processImageUpdate(false, 'screenshot');
-				processGroupsUpdate(oldProperties[name], updatedProperties[name],
-					Object.values(viewGroups).map((groupName) => `state.${groupName}`),
-					externalReferences.groups);
+				processGroupsUpdate(oldProperties[name], updatedProperties[name], Object.values(viewGroups).map((groupName) => `state.${groupName}`), externalReferences.groups);
 			} else if (type === propTypes.IMAGE_LIST) {
 				processImageUpdate(true);
+			} else if ((type === propTypes.ONE_OF || type === propTypes.MANY_OF) && updatedProperties[name]) {
+				const newValue = updatedProperties[name];
+				// eslint-disable-next-line no-param-reassign
+				updatedProperties[name] = isArray(newValue) ? newValue.map(stringToUUID) : stringToUUID(newValue);
 			}
 		});
 	};

@@ -299,9 +299,9 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 						[viewGroups.TRANSFORMED]: groupCast,
 					}).default(undefined),
 				}).nullable().default(undefined);
-			} else if (type === propTypes.IMAGE) {
+			} else if (type === propTypes.IMAGE || type === propTypes.ONE_OF) {
 				res[name] = uuidString.nullable();
-			} else if (type === propTypes.IMAGE_LIST) {
+			} else if (type === propTypes.IMAGE_LIST || type === propTypes.MANY_OF) {
 				res[name] = Yup.array().of(uuidString).nullable();
 			}
 		});
