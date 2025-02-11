@@ -68,15 +68,9 @@ const generateBasicData = () => {
 	};
 
 	data.roles = [
-		{ _id: ServiceHelper.generateUUIDString(),
-			name: ServiceHelper.generateRandomString(),
-			users: [viewer.user] },
-		{ _id: ServiceHelper.generateUUIDString(),
-			name: ServiceHelper.generateRandomString(),
-			users: [collaborator.user] },
-		{ _id: ServiceHelper.generateUUIDString(),
-			name: ServiceHelper.generateRandomString(),
-			users: Object.values(data.users).map(({ user }) => user) },
+		ServiceHelper.generateRole([viewer.user]),
+		ServiceHelper.generateRole([collaborator.user]),
+		ServiceHelper.generateRole(Object.values(data.users).map(({ user }) => user)),
 	];
 
 	return data;

@@ -57,6 +57,7 @@ const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules
 const { USERS_DB_NAME, USERS_COL, AVATARS_COL_NAME } = require(`${src}/models/users.constants`);
 const { COL_NAME } = require(`${src}/models/projectSettings.constants`);
 const { propTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
+const { DEFAULT_ROLES } = require(`${src}/models/roles.constants`);
 
 const db = {};
 const queue = {};
@@ -372,6 +373,13 @@ ServiceHelper.generateCustomStatusValues = () => Object.values(statusTypes).map(
 	name: ServiceHelper.generateRandomString(15),
 	type,
 }));
+
+ServiceHelper.generateRole = (users = []) => ({
+	_id: ServiceHelper.generateUUIDString(),
+	name: ServiceHelper.generateRandomString(),
+	color: DEFAULT_ROLES[0].color,
+	users,
+});
 
 ServiceHelper.generateSequenceEntry = (rid) => {
 	const startDate = ServiceHelper.generateRandomDate();

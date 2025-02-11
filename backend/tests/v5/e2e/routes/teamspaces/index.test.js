@@ -84,9 +84,9 @@ const tsWithUsersToRemove = { name: ServiceHelper.generateRandomString(), isAdmi
 const userCollabs = 10;
 
 const roles = [
-	{ _id: generateUUIDString(), name: generateRandomString(), users: [testUser.user, usersInFirstTeamspace[0].user] },
-	{ _id: generateUUIDString(), name: generateRandomString(), users: [usersInFirstTeamspace[1].user] },
-	{ _id: generateUUIDString(), name: generateRandomString(), users: [] },
+	ServiceHelper.generateRole([testUser.user, usersInFirstTeamspace[0].user]),
+	ServiceHelper.generateRole([usersInFirstTeamspace[1].user]),
+	ServiceHelper.generateRole(),
 ];
 
 const project = generateRandomProject();

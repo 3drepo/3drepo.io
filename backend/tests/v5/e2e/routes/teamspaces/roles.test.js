@@ -36,11 +36,7 @@ const generateBasicData = () => {
 
 	const teamspace = ServiceHelper.generateRandomString();
 
-	const roles = times(10, () => ({
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
-		color: ServiceHelper.generateRandomString(),
-	}));
+	const roles = times(10, ServiceHelper.generateRole());
 
 	return {
 		users,

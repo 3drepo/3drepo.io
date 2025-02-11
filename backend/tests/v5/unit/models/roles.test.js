@@ -16,7 +16,7 @@
  */
 
 const { src } = require('../../helper/path');
-const { generateRandomObject, generateRandomString } = require('../../helper/services');
+const { generateRandomObject, generateRandomString, generateRole } = require('../../helper/services');
 const { times } = require('lodash');
 
 const Roles = require(`${src}/models/roles`);
@@ -157,7 +157,7 @@ const testGetRolesByUsers = () => {
 		test('return names of all roles thats users have access', async () => {
 			const teamspace = generateRandomString();
 			const users = times(5, () => generateRandomString());
-			const roles = times(5, () => ({ _id: generateRandomString(), ...generateRandomObject() }));
+			const roles = times(5, () => generateRole());
 
 			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(roles);
 			await expect(Roles.getRolesByUsers(teamspace, users)).resolves.toEqual(roles.map((j) => j._id));
