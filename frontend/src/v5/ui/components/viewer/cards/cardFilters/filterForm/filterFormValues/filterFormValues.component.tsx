@@ -30,7 +30,7 @@ import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMen
 import { DateRangeInput } from './rangeInput/dateRangeInput.component';
 import { NumberRangeInput } from './rangeInput/numberRangeInput.component';
 import { mapArrayToFormArray, mapFormArrayToArray } from '@/v5/helpers/form.helper';
-import { getOptionFromValue, selectTypeOnChange } from '../../filtersSelection/tickets/ticketFilters.helpers';
+import { getOptionFromValue, getFilterFromEvent } from '../../filtersSelection/tickets/ticketFilters.helpers';
 
 type FilterFormValuesProps = {
 	module: string,
@@ -134,7 +134,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 				maxItems={19}
 				name={name}
 				transformInputValue={(v) => compact(mapFormArrayToArray(v))}
-				transformOutputValue={(e) => selectTypeOnChange(e, selectOptions)}
+				transformOutputValue={(e) =>  getFilterFromEvent(e, selectOptions)}
 				formError={error?.[0]}
 			/>
 		);
@@ -142,7 +142,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 			<FormMultiSelect
 				name={name}
 				transformInputValue={mapFormArrayToArray}
-				transformOutputValue={(e) => selectTypeOnChange(e, selectOptions)}
+				transformOutputValue={(e) => getFilterFromEvent(e, selectOptions)}
 				renderValue={(values: string[]) => values.map((value) => getOptionFromValue(value, selectOptions)?.displayValue ?? value).join(', ')}
 				formError={error?.[0]}
 			>
