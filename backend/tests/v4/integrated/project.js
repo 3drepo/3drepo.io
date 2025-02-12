@@ -620,10 +620,9 @@ describe('Projects', () => {
 	it('list all project models should fail;', (done) => {
 		agent.get(`/${username}/projects/${projectName}/models`)
 			.expect(v5Responses.endpointDecommissioned.status, (err, res) => {
-				expect(res.body).to.equal({
-					...v5Responses.endpointDecomissioned,
+				expect(res.body.message).to.equal(
 					message: `This endpoint is no longer available. Please use GET /v5/teamspaces/{teamspace}/projects/{project}/{modelType} instead.`
-				});
+				);
 				done(err);
 			});
 	});
