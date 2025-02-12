@@ -142,20 +142,19 @@ export const selectFilteredTickets = createSelector(
 	},
 );
 
-const selectTemplatesFilters = createSelector(
+export const selectTemplatesWithTickets = createSelector(
 	selectCurrentTemplates,
 	selectFilteredTickets,
 	(templates, tickets) => {
 		const idsOfTemplatesWithAtLeastOneTicket = uniq(tickets.map((t) => t.type));
-		const templatesWithAtLeastOneTicket = templates.filter((t) => idsOfTemplatesWithAtLeastOneTicket.includes(t._id));
-		return templatesToFilters(templatesWithAtLeastOneTicket);
+		return templates.filter((t) => idsOfTemplatesWithAtLeastOneTicket.includes(t._id));
 	},
 );
 
 export const selectAvailableTemplatesFilters = createSelector(
 	selectFilters,
-	selectTemplatesFilters,
-	(usedFilters, allFilters) => allFilters.filter(({ module, property, type }) => !usedFilters[`${module}.${property}.${type}`]),
+	selectTemplatesWithTickets,
+	(usedFilters, allFilters) => templatesToFilters(allFilters).filter(({ module, property, type }) => !usedFilters[`${module}.${property}.${type}`]),
 );
 
 export const selectIsShowingPins = createSelector(
@@ -225,7 +224,7 @@ const selectJobsAndUsersByModelId = createSelector(
 );
 
 export const selectPropertyOptions = createSelector(
-	selectTemplates,
+	selectTemplatesWithTickets,
 	selectRiskCategories,
 	selectJobsAndUsersByModelId,
 	(state, modelId, module) => module,
