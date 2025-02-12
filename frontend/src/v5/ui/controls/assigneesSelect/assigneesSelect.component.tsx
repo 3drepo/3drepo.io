@@ -91,8 +91,8 @@ export const AssigneesSelect = ({
 		</AssigneesListContainer>
 	);
 	return (
-		<SearchContextComponent fieldsToFilter={['_id', 'firstName', 'lastName', 'job', 'notFoundName']} items={allJobsAndUsersToDisplay} className={className}>
-			<AssigneesListContainer onClick={handleOpen}>
+		<SearchContextComponent fieldsToFilter={['_id', 'firstName', 'lastName', 'job', 'notFoundName']} items={allJobsAndUsersToDisplay}>
+			<AssigneesListContainer onClick={handleOpen} className={className}>
 				<AssigneesSelectMenu
 					open={open}
 					value={value}
