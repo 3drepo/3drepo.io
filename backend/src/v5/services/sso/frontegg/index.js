@@ -46,20 +46,25 @@ const standardHeaders = async () => {
 };
 
 FrontEgg.getUserInfoFromToken = async (token) => {
-	const { sub: userId, email } = await identityClient.validateIdentityOnToken(token);
-	return { userId, email };
+	try {
+		const { sub: userId, email } = await identityClient.validateIdentityOnToken(token);
+		return { userId, email };
+	} catch (err) {
+		console.log('!!!', err, token);
+	}
 };
 
 FrontEgg.validateAndRefreshToken = async ({ token, refreshToken }) => {
 	try {
 		const user = await identityClient.validateToken(token);
-		/*		const payload = {
+
+		const payload = {
 		};
 		const headers = {
 			...await standardHeaders(),
 			'Content-Type': 'application/json',
-			'frontegg-vendor-host': 'https://www.3drepo.local',
-			Cookie: `refresh_token=${refreshToken};`,
+			'frontegg-vendor-host': 'https://app-3nkr2y3u4iwm.frontegg.com',
+			Cookie: `fe_refresh_${config.clientId}=${refreshToken};`,
 
 		};
 
@@ -67,7 +72,7 @@ FrontEgg.validateAndRefreshToken = async ({ token, refreshToken }) => {
 			const { data } = await post(`${config.vendorDomain}/identity/resources/auth/v1/user/token/refresh`, payload, { headers });
 		} catch (err) {
 			console.log('Failed: ', err);
-		} */
+		}
 
 		return user;
 	} catch (err) {
