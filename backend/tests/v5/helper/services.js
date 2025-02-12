@@ -63,25 +63,29 @@ const queue = {};
 const ServiceHelper = { db, queue, socket: {} };
 
 queue.purgeQueues = async () => {
-	try {
-		// eslint-disable-next-line
-		const { host, worker_queue, model_queue, callback_queue } = config.cn_queue;
-		const conn = await amqp.connect(host);
-		const channel = await conn.createChannel();
+	const { host, worker_queue, model_queue, callback_queue } = config.cn_queue;
+	const conn = await amqp.connect(host);
 
-		channel.on('error', () => { });
+	const purgeQueue = async (queueName) => {
+		try {
+			const channel = await conn.createChannel();
+			channel.on('error', () => { });
+			await channel.purgeQueue(queueName);
+			await channel.close();
+		} catch (err) {
+			// Skip channels that don't exists
+			// No need to raise an error since channels that
+			// don't exist can be considered cleaned up already.
+		}
+	};
 
-		await Promise.all([
-			channel.purgeQueue(worker_queue),
-			channel.purgeQueue(model_queue),
-			channel.purgeQueue(callback_queue),
-		]);
+	await Promise.all([
+		purgeQueue(worker_queue),
+		purgeQueue(model_queue),
+		purgeQueue(callback_queue),
+	]);
 
-		await channel.close();
-		await conn.close();
-	} catch (err) {
-		// doesn't really matter if purge queue failed. it's just for clean up.
-	}
+	await conn.close();
 };
 
 db.reset = async () => {
@@ -923,6 +927,7 @@ ServiceHelper.socket.joinRoom = (socket, data) => new Promise((resolve, reject) 
 });
 
 ServiceHelper.closeApp = async (server) => {
+	await queue.purgeQueues();
 	if (server) await server.close();
 	await db.reset();
 	EventsManager.reset();
