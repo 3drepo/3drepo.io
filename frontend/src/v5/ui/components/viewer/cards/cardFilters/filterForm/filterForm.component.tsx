@@ -61,6 +61,7 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel 
 		mode: 'onChange',
 		resolver: yupResolver(FilterSchema),
 		context: { type },
+		shouldUnregister: true,
 	});
 	const { formState: { isValid, dirtyFields }, reset } = formData;
 
