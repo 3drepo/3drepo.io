@@ -24,7 +24,7 @@ import { DEFAULT_PIN, getPinColorHex, formatPin, getTicketPins } from '@/v5/ui/r
 import { IPin } from '@/v4/services/viewer/viewer';
 import { selectSelectedDate } from '@/v4/modules/sequences';
 import { sortBy, uniq, sortedUniqBy } from 'lodash';
-import { toTicketCardFilter, templatesToFilters } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
+import { toTicketCardFilter, templatesToFilters, getFiltersFromJobsAndUsers } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { selectFederationById, selectFederationJobs, selectFederationUsers } from '../../federations/federations.selectors';
 import { selectContainerJobs, selectContainerUsers } from '../../containers/containers.selectors';
 import { IJobOrUserList } from '../../jobs/jobs.types';
@@ -231,6 +231,8 @@ export const selectPropertyOptions = createSelector(
 	(state, modelId, module, property) => property,
 	(templates, riskCategories, jobsAndUsers, module, property) => {
 		const allValues = [];
+		if (!module && property === 'Owner') return getFiltersFromJobsAndUsers(
+			jobsAndUsers.filter((ju) => !!ju.firstName));
 		templates.forEach((template) => {
 			const matchingModule = module ? template.modules.find((mod) => (mod.name || mod.type) === module)?.properties : template.properties;
 			const matchingProperty = matchingModule?.find(({ name, type: t }) => (name === property) && (['manyOf', 'oneOf'].includes(t)));
@@ -240,18 +242,11 @@ export const selectPropertyOptions = createSelector(
 				return;
 			}
 			if (matchingProperty.values === 'jobsAndUsers') {
-				allValues.push(...jobsAndUsers.map((ju) => {
-					const isUser = !!ju.firstName;
-					return ({
-						value: isUser ? ju.user : ju._id,
-						displayValue: isUser ? `${ju?.firstName} ${ju?.lastName}` : null,
-						type: 'jobsAndUsers',
-					});
-				}));
+				allValues.push(...getFiltersFromJobsAndUsers(jobsAndUsers));
 				return;
 			}
 			allValues.push(...matchingProperty.values.map((value) => ({ value, type: 'default' })));
 		});
-		return sortedUniqBy(sortBy(allValues, ({ value }) => value), ({ value }) => value);
+		return sortedUniqBy(sortBy(allValues, 'value'), 'value');
 	},
 );

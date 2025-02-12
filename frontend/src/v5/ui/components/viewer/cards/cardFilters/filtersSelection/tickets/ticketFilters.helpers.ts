@@ -91,6 +91,15 @@ export const getFilterFromEvent = (event, options) => compact(event.target.value
 	return { value, displayValue: option?.displayValue ?? value };
 });
 
+export const getFiltersFromJobsAndUsers = (jobsAndUsers) => jobsAndUsers.map((ju) => {
+	const isUser = !!ju.firstName;
+	return ({
+		value: isUser ? ju.user : ju._id,
+		displayValue: isUser ? `${ju?.firstName} ${ju?.lastName}` : null,
+		type: 'jobsAndUsers',
+	});
+});
+
 const wrapWith = (text, wrappingChar) => wrappingChar + text + wrappingChar;
 // This code, copied from MDN https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent#encoding_for_rfc3986 
 // is due to `encodeURIComponent` not encoding all the chars

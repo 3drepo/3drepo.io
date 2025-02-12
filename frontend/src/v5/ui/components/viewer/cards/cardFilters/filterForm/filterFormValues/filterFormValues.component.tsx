@@ -131,6 +131,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 			<FormAssigneesSelect
 				multiple
 				showAddButton
+				excludeJobs={property === 'Owner'}
 				maxItems={19}
 				name={name}
 				transformInputValue={(v) => compact(mapFormArrayToArray(v))}
@@ -146,7 +147,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 				renderValue={(values: string[]) => values.map((value) => getOptionFromValue(value, selectOptions)?.displayValue ?? value).join(', ')}
 				formError={error?.[0]}
 			>
-				{(selectOptions || []).map(
+				{(selectOptions).map(
 					(option) => <MultiSelectMenuItem key={option.value} value={option.value}>{option.displayValue ?? option.value}</MultiSelectMenuItem>,
 				)}
 			</FormMultiSelect>
