@@ -29,7 +29,7 @@ import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { DateRangeInput } from './rangeInput/dateRangeInput.component';
 import { NumberRangeInput } from './rangeInput/numberRangeInput.component';
-import { mapArrayToFormArray, mapFormArrayToArray } from '@/v5/helpers/form.helper';
+import { mapFormArrayToArray } from '@/v5/helpers/form.helper';
 import { getOptionFromValue, getFilterFromEvent } from '../../filtersSelection/tickets/ticketFilters.helpers';
 
 type FilterFormValuesProps = {
@@ -60,7 +60,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 	const isRangeOp = isRangeOperator(operator);
 	const emptyValue = { value: (isRangeOp ? ['', ''] : '') };
 	const selectOptions = type === 'template' ?
-		TicketsCardHooksSelectors.selectTemplatesWithTickets();
+		TicketsCardHooksSelectors.selectTemplatesWithTickets().map(({ code: value, name: displayValue }) => ({ value, displayValue, type: 'template' }))
 		: TicketsCardHooksSelectors.selectPropertyOptions(containerOrFederation, module, property);
 
 	useEffect(() => {
