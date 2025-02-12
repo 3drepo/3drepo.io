@@ -317,6 +317,11 @@ const testImportTickets = () => {
 		const template = ServiceHelper.generateTemplate(false, false, { comments: true });
 		const templateWithoutComments = ServiceHelper.generateTemplate();
 		template.properties.push({ name: uniquePropertyName, type: propTypes.TEXT, unique: true });
+		template.modules.push({
+			name: uniquePropertyName,
+			properties: [{ name: uniquePropertyName, type: propTypes.TEXT, unique: true }],
+		});
+		const duplicateValue = ServiceHelper.generateRandomString();
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed],
@@ -328,6 +333,11 @@ const testImportTickets = () => {
 			const wrongTypeModel = isFed ? con : fed;
 			const modelWithTemplates = isFed ? fed : con;
 			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const duplicateUniquePropTicket = ServiceHelper.generateTicket(template);
+			duplicateUniquePropTicket.properties[uniquePropertyName] = duplicateValue;
+
+			const duplicateUniqueModulePropTicket = ServiceHelper.generateTicket(template);
+			duplicateUniqueModulePropTicket.modules[uniquePropertyName][uniquePropertyName] = duplicateValue;
 
 			const getRoute = ({ key = users.tsAdmin.apiKey, projectId = project.id, modelId = modelWithTemplates._id, templateId = template._id } = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/import${ServiceHelper.createQueryString({ key, template: templateId })}`;
 
@@ -349,6 +359,8 @@ const testImportTickets = () => {
 					...ServiceHelper.generateTicket(templateWithoutComments),
 					comments: times(10, ServiceHelper.generateImportedComment) }],
 				['the ticket data contains invalid comments', false, getRoute(), templates.invalidArguments, { comments: times(10, ServiceHelper.generateComment) }],
+				['the ticket data contains duplicate unique properties', false, getRoute(), templates.invalidArguments, { ...duplicateUniquePropTicket }],
+				['the ticket data contains duplicate unique module properties', false, getRoute(), templates.invalidArguments, { ...duplicateUniqueModulePropTicket }],
 			];
 		};
 
@@ -1066,7 +1078,16 @@ const testUpdateTicket = () => {
 const testUpdateManyTickets = () => {
 	describe('Update many tickets', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
+		const uniquePropertyName = ServiceHelper.generateRandomString();
 		const template = ServiceHelper.generateTemplate(false, false, { comments: true });
+		const duplicateTemplate = ServiceHelper.generateTemplate();
+		duplicateTemplate.properties.push({ name: uniquePropertyName, type: propTypes.TEXT, unique: true });
+		duplicateTemplate.modules.push({
+			name: uniquePropertyName,
+			properties: [{ name: uniquePropertyName, type: 'text', unique: true }],
+		});
+		const duplicateValue = ServiceHelper.generateRandomString();
+
 		const nTickets = 10;
 
 		const deprecatedTemplate = ServiceHelper.generateTemplate(false);
@@ -1079,9 +1100,31 @@ const testUpdateManyTickets = () => {
 		fed.ticketsCommentTest1 = times(nTickets, () => ServiceHelper.generateTicket(template));
 		con.ticketsCommentTest2 = times(nTickets, () => ServiceHelper.generateTicket(template));
 		fed.ticketsCommentTest2 = times(nTickets, () => ServiceHelper.generateTicket(template));
+		con.ticketsDuplicateUniqueProp = times(nTickets, () => {
+			const ticket = ServiceHelper.generateTicket(duplicateTemplate);
+			ticket.properties[uniquePropertyName] = duplicateValue;
+			return ticket;
+		});
+		fed.ticketsDuplicateUniqueProp = times(nTickets, () => {
+			const ticket = ServiceHelper.generateTicket(duplicateTemplate);
+			ticket.properties[uniquePropertyName] = duplicateValue;
+			return ticket;
+		});
+		con.ticketsDuplicateUniqueModuleProp = times(nTickets, () => {
+			const ticket = ServiceHelper.generateTicket(duplicateTemplate);
+			ticket.modules[uniquePropertyName][uniquePropertyName] = duplicateValue;
+			return ticket;
+		});
+		fed.ticketsDuplicateUniqueModuleProp = times(nTickets, () => {
+			const ticket = ServiceHelper.generateTicket(duplicateTemplate);
+			ticket.modules[uniquePropertyName][uniquePropertyName] = duplicateValue;
+			return ticket;
+		});
 
 		beforeAll(async () => {
-			await setupBasicData(users, teamspace, project, [con, fed], [template, deprecatedTemplate]);
+			await setupBasicData(
+				users, teamspace, project, [con, fed], [template, deprecatedTemplate, duplicateTemplate],
+			);
 
 			await Promise.all([fed, con].map(async (model) => {
 				const modelType = fed === model ? 'federation' : 'container';
@@ -1141,6 +1184,8 @@ const testUpdateManyTickets = () => {
 				['the ticket data conforms to the template but the user is a viewer', false, { ...baseRouteParams, key: users.viewer.apiKey }, templates.notAuthorized, () => ({ title: ServiceHelper.generateRandomString() })],
 				['the ticket data contains comments but the template does not support it', false, { ...baseRouteParams, templateId: deprecatedTemplate._id, tickets: [model.depTemTicket] }, templates.invalidArguments, () => ({ title: ServiceHelper.generateRandomString(), comments: times(10, ServiceHelper.generateImportedComment) })],
 				['the ticket data contains invalid comments', false, baseRouteParams, templates.invalidArguments, () => ({ comments: times(10, ServiceHelper.generateComment) })],
+				['the ticket data contains duplicate unique property', false, { ...baseRouteParams, tickets: model.ticketsDuplicateUniqueProp }, templates.invalidArguments],
+				['the ticket data contains duplicate module unique property', false, { ...baseRouteParams, tickets: model.ticketsDuplicateUniqueModuleProp }, templates.invalidArguments],
 				['the ticket data conforms to the template', true, baseRouteParams, undefined, () => ({ title: ServiceHelper.generateRandomString() })],
 				['the ticket data contains just comments', true, { ...baseRouteParams, tickets: model.ticketsCommentTest1 }, undefined, () => ({ comments: times(10, ServiceHelper.generateImportedComment) })],
 				['the ticket data contains comments', true, { ...baseRouteParams, tickets: model.ticketsCommentTest2 }, undefined, () => ({ title: ServiceHelper.generateRandomString(), comments: times(10, ServiceHelper.generateImportedComment) })],
