@@ -34,6 +34,7 @@ export type AssigneesSelectProps = Pick<FormInputProps, 'value'> & SelectProps &
 	showEmptyText?: boolean;
 	onBlur?: () => void;
 	excludeViewers?: boolean;
+	excludeJobs?: boolean;
 };
 
 export const AssigneesSelect = ({
