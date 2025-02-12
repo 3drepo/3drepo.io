@@ -146,7 +146,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 				renderValue={(values: string[]) => values.map((value) => getOptionFromValue(value, selectOptions)?.displayValue ?? value).join(', ')}
 				formError={error?.[0]}
 			>
-				{(selectOptions).map(
+				{selectOptions.map(
 					(option) => <MultiSelectMenuItem key={option.value} value={option.value}>{option.displayValue ?? option.value}</MultiSelectMenuItem>,
 				)}
 			</FormMultiSelect>

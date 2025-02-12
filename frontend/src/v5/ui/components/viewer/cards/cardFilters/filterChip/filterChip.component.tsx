@@ -30,7 +30,7 @@ type FilterChipProps = {
 	onDelete: () => void;
 };
 export const FilterChip = ({ property, onDelete, selected, type, filter }: FilterChipProps) => {
-	const { operator, values, displayValues } = filter;
+	const { operator, values, displayValues = values.join(', ') } = filter;
 	const OperatorIcon = FILTER_OPERATOR_ICON[operator];
 	const hasMultipleValues = values.length > 1;
 	const labels = getFilterOperatorLabels(type);
