@@ -23,6 +23,7 @@ const { generateRandomString } = require('../../../helper/services');
 
 const { DEFAULT_ROLES } = require(`${src}/models/roles.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
+const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 
 let server;
 let agent;
@@ -36,7 +37,7 @@ const generateBasicData = () => {
 
 	const teamspace = ServiceHelper.generateRandomString();
 
-	const roles = times(10, ServiceHelper.generateRole());
+	const roles = times(10, () => ServiceHelper.generateRole());
 
 	return {
 		users,
@@ -77,7 +78,12 @@ const testGetRoleList = () => {
 				const expectedStatus = success ? templates.ok.status : expectedRes.status;
 				const res = await agent.get(route(key, ts)).expect(expectedStatus);
 				if (success) {
-					expect(res.body.roles).toEqual(expect.arrayContaining(roles));
+					const resultData = res.body.roles
+						.map((r) => (deleteIfUndefined({ ...r, _id: undefined, users: [] })));
+					const expectedData = [...DEFAULT_ROLES, ...roles]
+						.map((r) => (deleteIfUndefined({ ...r, _id: undefined, users: [] })));
+
+					ServiceHelper.outOfOrderArrayEqual(resultData, expectedData);
 				} else {
 					expect(res.body.code).toEqual(expectedRes.code);
 				}
@@ -88,7 +94,7 @@ const testGetRoleList = () => {
 
 const testAddRole = () => {
 	const basicData = generateBasicData();
-	const { users, teamspace } = basicData;
+	const { users, teamspace, roles } = basicData;
 
 	beforeAll(async () => {
 		await setupData(basicData);
@@ -109,8 +115,9 @@ const testAddRole = () => {
 		['user is not a member of the teamspace', users.nobody.apiKey, undefined, roleData, false, templates.teamspaceNotFound],
 		['user is not a teamspace admin', users.normalUser.apiKey, undefined, roleData, false, templates.notAuthorized],
 		['user is a ts admin and data is valid', users.tsAdmin.apiKey, undefined, roleData, true],
-		['data is invalid (missing name)', users.tsAdmin.apiKey, undefined, { ...roleData, name: undefined }, false, templates.invalidArguments],
-		['data is invalid (users with non ts members)', users.tsAdmin.apiKey, undefined, { ...roleData, users: [users.nobody.user] }, false, templates.invalidArguments],
+		['name is missing', users.tsAdmin.apiKey, undefined, { ...roleData, name: undefined }, false, templates.invalidArguments],
+		['name is taken', users.tsAdmin.apiKey, undefined, { ...roleData, name: roles[0].name }, false, templates.invalidArguments],
+		['users include a non ts member', users.tsAdmin.apiKey, undefined, { ...roleData, users: [users.nobody.user] }, false, templates.invalidArguments],
 	])('Create role', (desc, key, ts, data, success, expectedRes) => {
 		test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
 			const expectedStatus = success ? templates.ok.status : expectedRes.status;
@@ -147,8 +154,10 @@ const testUpdateRole = () => {
 		['user is not a teamspace admin', users.normalUser.apiKey, undefined, roles[0]._id, roleData, false, templates.notAuthorized],
 		['user is a ts admin and data is valid', users.tsAdmin.apiKey, undefined, roles[0]._id, roleData, true],
 		['role does not exist', users.tsAdmin.apiKey, undefined, generateRandomString(), roleData, false, templates.roleNotFound],
-		['data is invalid (empty body)', users.tsAdmin.apiKey, undefined, roles[0]._id, { }, false, templates.invalidArguments],
-		['data is invalid (users with non ts members)', users.tsAdmin.apiKey, undefined, roles[0]._id, { ...roleData, users: [users.nobody.user] }, false, templates.invalidArguments],
+		['body is empty', users.tsAdmin.apiKey, undefined, roles[0]._id, { }, false, templates.invalidArguments],
+		['name is taken', users.tsAdmin.apiKey, undefined, roles[0]._id, { name: roles[1].name }, false, templates.invalidArguments],
+		['name is the same', users.tsAdmin.apiKey, undefined, roles[0]._id, { name: roles[0].name }, true],
+		['users include a non ts member', users.tsAdmin.apiKey, undefined, roles[0]._id, { ...roleData, users: [users.nobody.user] }, false, templates.invalidArguments],
 	])('Update role', (desc, key, ts, roleId, data, success, expectedRes) => {
 		test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
 			const expectedStatus = success ? templates.ok.status : expectedRes.status;

@@ -85,7 +85,7 @@ const userCollabs = 10;
 
 const roles = [
 	ServiceHelper.generateRole([testUser.user, usersInFirstTeamspace[0].user]),
-	ServiceHelper.generateRole([usersInFirstTeamspace[1].user]),
+	ServiceHelper.generateRole([testUser.user, usersInFirstTeamspace[1].user]),
 	ServiceHelper.generateRole(),
 ];
 
@@ -259,7 +259,13 @@ const testGetTeamspaceMembers = () => {
 
 			const userToRoles = {};
 
-			roles.forEach(({ _id, users }) => users.forEach((user) => { userToRoles[user] = [_id]; }));
+			roles.forEach(({ _id, users }) => users.forEach((user) => {
+				if (!userToRoles[user]) {
+					userToRoles[user] = [];
+				}
+
+				userToRoles[user].push(_id);
+			}));
 
 			const expectedData = [...usersInFirstTeamspace, testUser].map(({ user, basicData }) => {
 				const { firstName, lastName, billing } = basicData;

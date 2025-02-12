@@ -88,16 +88,14 @@ const testRevokeTeamspaceRoleFromUser = () => {
 const testGetRolesToUsers = () => {
 	describe('Get Roles to users', () => {
 		test('should get list of roles within the teamspace with the users', async () => {
-			const expectedResult = [
-				{ _id: 'roleA', users: ['a', 'b', 'c'] },
-			];
+			const expectedResult = [{ _id: generateRandomString(), users: times(3, () => generateRandomString()) }];
+			const teamspace = generateRandomString();
+
 			const fn = jest.spyOn(db, 'find').mockImplementation(() => expectedResult);
-			const teamspace = 'ts';
 			const res = await Roles.getRolesToUsers(teamspace);
 			expect(res).toEqual(expectedResult);
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][1]).toEqual(ROLE_COL);
-			expect(fn.mock.calls[0][2]).toEqual({});
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ROLE_COL, { });
 		});
 	});
 };

@@ -484,13 +484,19 @@ const testGetTicketResource = () => {
 
 const testGetTicket = () => {
 	describe('Get ticket', () => {
+		const rolesOneOfPropName = ServiceHelper.generateRandomString();
 		const deprecatedPropName = ServiceHelper.generateRandomString();
 		const deprecatedModule = ServiceHelper.generateRandomString();
 		const moduleName = ServiceHelper.generateRandomString();
 
 		const templateToUse = {
-			...ServiceHelper.generateTemplate(),
+			...ServiceHelper.generateTemplate(false, false, { issueProperties: true }),
 			properties: [
+				{
+					name: rolesOneOfPropName,
+					type: propTypes.ONE_OF,
+					values: presetEnumValues.ROLES_AND_USERS,
+				},
 				{
 					name: ServiceHelper.generateRandomString(),
 					type: propTypes.TEXT,
@@ -531,12 +537,14 @@ const testGetTicket = () => {
 		};
 
 		const { users, teamspace, project, con, fed } = generateBasicData();
+		const roles = times(5, () => ServiceHelper.generateRole([users.tsAdmin.user]));
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed], [templateToUse]);
-
+			await ServiceHelper.db.createRoles(teamspace, roles);
 			await Promise.all([fed, con].map(async (model) => {
 				const ticket = ServiceHelper.generateTicket(templateToUse);
+				ticket.properties[rolesOneOfPropName] = roles[0]._id;
 
 				const modelType = fed === model ? 'federation' : 'container';
 				const addTicketRoute = (modelId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets?key=${users.tsAdmin.apiKey}`;
