@@ -25,12 +25,9 @@ const templates = {};
 const pinIcons = [ 'DEFAULT', 'ISSUE', 'RISK', 'MARKER'];
 let pinIndex = 0;
 
-const getCoords = (properties: PropertyDefinition[]) => (properties||[]).filter((p) => p.type === 'coords');
+const getCoords = (properties: PropertyDefinition[]) => (properties || []).filter((p) => p.type === 'coords');
 
-//.filter(p => )
-	
-
-const fillDummyIconInProp = (prop) =>  ( {...prop, icon: pinIcons[(pinIndex++) % 4], color: [212, 0, 208] });
+const fillDummyIconInProp = (prop) =>  ( { ...prop, icon: pinIcons[(pinIndex++) % 4] });
 
 const fillDummyPinIcon = (template:ITemplate): ITemplate => {
 	if (templates[template._id]) return templates[template._id];

@@ -35,7 +35,7 @@ import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { isEqual } from 'lodash';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { DrawingViewerService } from '@components/viewer/drawingViewer/drawingViewer.service';
-import { Pin } from './pin';
+import { Pin } from '../../../pin';
 
 export const CoordsProperty = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
 	const { isViewer, containerOrFederation } = useContext(TicketContext);
@@ -191,7 +191,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 							onClick={onClickSelectPin}
 							disabled={!hasPin}
 						>
-							<Pin type={pinIcon}/>
+							<Pin pinIcon={pinIcon}/>
 						</SelectPinButton>
 					</Tooltip>
 				)}

@@ -29,8 +29,7 @@ const PinPerType =
 	'MARKER': MarkerPin,
 };
 
-
-export const Pin = ({ type }: { type:PinIcon }) => {
-	const Icon = PinPerType[type];
+export const Pin = ({ pinIcon }: { pinIcon:PinIcon }) => {
+	const Icon = PinPerType[pinIcon];
 	return (<Icon />);
 };

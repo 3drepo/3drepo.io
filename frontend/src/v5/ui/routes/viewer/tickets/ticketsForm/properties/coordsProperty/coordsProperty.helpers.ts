@@ -80,6 +80,7 @@ export const getPinId = (propPath, ticketOrId?: ITicket | string) => {
 	return propPath === DEFAULT_PIN ? id : `${id}.${propPath}`;
 };
 
+// PinIcon is the pin type that comes from the backend
 const pinIconToType = {
 	'DEFAULT' : 'ticket',
 	'ISSUE' : 'issue',
