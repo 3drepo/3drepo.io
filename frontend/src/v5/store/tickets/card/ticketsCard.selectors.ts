@@ -237,15 +237,23 @@ export const selectPropertyOptions = createSelector(
 			const matchingModule = module ? template.modules.find((mod) => (mod.name || mod.type) === module)?.properties : template.properties;
 			const matchingProperty = matchingModule?.find(({ name, type: t }) => (name === property) && (['manyOf', 'oneOf'].includes(t)));
 			if (!matchingProperty) return;
-			if (matchingProperty.values === 'riskCategories') {
-				allValues.push(...riskCategories.map((value) => ({ value, type: 'riskCategories' })));
-				return;
+			switch (matchingProperty.values) {
+				case 'riskCategories':
+					allValues.push(...riskCategories.map((value) => ({ value, type: 'riskCategories' })));
+					break;
+				case 'jobsAndUsers':
+					allValues.push(...jobsAndUsers.map((ju) => {
+						const isUser = !!ju.firstName;
+						return ({
+							value: isUser ? ju.user : ju._id,
+							displayValue: isUser ? `${ju?.firstName} ${ju?.lastName}` : null,
+							type: 'jobsAndUsers',
+						});
+					}));
+					break;
+				default:
+					allValues.push(...matchingProperty.values.map((value) => ({ value, type: 'default' })));
 			}
-			if (matchingProperty.values === 'jobsAndUsers') {
-				allValues.push(...getFiltersFromJobsAndUsers(jobsAndUsers));
-				return;
-			}
-			allValues.push(...matchingProperty.values.map((value) => ({ value, type: 'default' })));
 		});
 		return sortedUniqBy(sortBy(allValues, 'value'), 'value');
 	},
