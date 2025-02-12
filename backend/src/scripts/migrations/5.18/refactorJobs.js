@@ -15,19 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
+
 const { v5Path } = require('../../../interop');
-const { createRoles, getRoles } = require('../../../v5/models/roles');
-const { generateUUID } = require('../../../v5/utils/helper/uuids');
 
 const DBHandler = require(`${v5Path}/handler/db`);
 const { getAllTemplates } = require(`${v5Path}/models/tickets.templates`);
 const { basePropertyLabels, presetEnumValues, propTypes } = require(`${v5Path}/schemas/tickets/templates.constants`);
-const { getArrayDifference } = require(`${v5Path}/utils/helper/arrays`);
 const { deleteIfUndefined, isEmpty } = require(`${v5Path}/utils/helper/objects`);
 const { isArray } = require(`${v5Path}/utils/helper/typeCheck`);
 const { UUIDToString, stringToUUID } = require(`${v5Path}/utils/helper/uuids`);
-const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
-
+const { createRoles, getRoles, createIndex } = require(`${v5Path}/models/roles`);
+const { generateUUID } = require(`${v5Path}/utils/helper/uuids`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const updateTicketLogs = async (teamspace, ticketIds, ticketsToTemplates, templateToRoleProps, roleNamesToIds) => {
@@ -196,12 +195,12 @@ const updateTickets = async (teamspace, roleNamesToIds) => {
 };
 
 const updateIssuesAndRisks = async (teamspace, roleNamesToIds) => {
-	const colUpdates = {};
-
 	const issueCollections = await getCollectionsEndsWith(teamspace, '.issues');
 	const riskCollections = await getCollectionsEndsWith(teamspace, '.risks');
 
 	const processCollection = async (colName) => {
+		const colUpdates = [];
+
 		const colItems = await DBHandler.find(teamspace, colName,
 			{ },
 			{ assigned_roles: 1, creator_role: 1, comments: 1 });
@@ -234,21 +233,18 @@ const updateIssuesAndRisks = async (teamspace, roleNamesToIds) => {
 			});
 
 			if (!isEmpty(itemUpdate)) {
-				if (!colUpdates[colName]) {
-					colUpdates[colName] = [];
-				}
-
-				colUpdates[colName].push({
+				colUpdates.push({
 					updateOne: { filter: { _id }, update: { $set: itemUpdate } },
 				});
 			}
 		});
+
+		if (colUpdates.length) {
+			await DBHandler.bulkWrite(teamspace, colName, colUpdates);
+		}
 	};
 
 	await Promise.all([...issueCollections, ...riskCollections].flatMap(({ name }) => processCollection(name)));
-
-	await Promise.all(Object.keys(colUpdates)
-		.map((colName) => DBHandler.bulkWrite(teamspace, colName, colUpdates[colName])));
 };
 
 const replaceJobsWithRoles = async (teamspace) => {
@@ -279,6 +275,9 @@ const run = async () => {
 	const teamspaces = await getTeamspaceList();
 	for (const teamspace of teamspaces) {
 		logger.logInfo(`-${teamspace}`);
+
+		// eslint-disable-next-line no-await-in-loop
+		await createIndex(teamspace);
 
 		// eslint-disable-next-line no-await-in-loop
 		const roleNamesToIds = await replaceJobsWithRoles(teamspace);

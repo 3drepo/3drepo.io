@@ -50,6 +50,8 @@ Roles.revokeTeamspaceRoleFromUser = (teamspace, username) => db.revokeRole(teams
 
 // --- JOBS RENAMED TO ROLES --- TO BE KEPT
 
+Roles.createIndex = (teamspace) => db.createIndex(teamspace, COL_NAME, { name: 1 }, { unique: true });
+
 Roles.getRolesToUsers = (teamspace) => findMany(teamspace, {}, { _id: 1, users: 1 });
 
 Roles.getRoles = (teamspace, projection) => findMany(teamspace, {}, projection);

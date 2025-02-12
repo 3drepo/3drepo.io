@@ -16,8 +16,9 @@
  */
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../models/users.constants');
-const { addDefaultRoles, assignUserToRole, createTeamspaceRole, getRolesToUsers,
-	grantTeamspaceRoleToUser, removeTeamspaceRole, removeUserFromRoles, revokeTeamspaceRoleFromUser } = require('../../models/roles');
+const { addDefaultRoles, assignUserToRole, createIndex, createTeamspaceRole,
+	getRolesToUsers, grantTeamspaceRoleToUser, removeTeamspaceRole, removeUserFromRoles,
+	revokeTeamspaceRoleFromUser } = require('../../models/roles');
 const { createTeamspaceSettings, getAddOns, getMembersInfo, grantAdminToUser, removeUserFromAdminPrivilege } = require('../../models/teamspaceSettings');
 const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
@@ -52,6 +53,7 @@ Teamspaces.getAvatar = (teamspace) => getFile(USERS_DB_NAME, AVATARS_COL_NAME, t
 Teamspaces.initTeamspace = async (username) => {
 	try {
 		await Promise.all([
+			createIndex(username),
 			createTeamspaceRole(username),
 			addDefaultRoles(username),
 		]);
