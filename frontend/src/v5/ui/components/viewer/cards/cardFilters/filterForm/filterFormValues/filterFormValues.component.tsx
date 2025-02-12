@@ -46,7 +46,6 @@ const getInputField = (type: CardFilterType) => {
 
 const name = 'values';
 export const FilterFormValues = ({ module, property, type }: FilterFormValuesProps) => {
-	if (!property) return null;
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const { control, watch, formState: { errors, dirtyFields } } = useFormContext();
 	const { fields, append, remove } = useFieldArray({
