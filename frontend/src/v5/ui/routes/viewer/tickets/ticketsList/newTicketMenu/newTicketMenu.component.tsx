@@ -27,7 +27,7 @@ import { ViewerParams } from '../../../../routes.constants';
 
 export const NewTicketMenu = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
-	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
+	const templates = TicketsHooksSelectors.selectActiveTemplates(containerOrFederation);
 
 	const goToNewTicket = ({ _id }) => {
 		TicketsCardActionsDispatchers.setSelectedTemplate(_id);

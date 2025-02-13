@@ -122,6 +122,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 									selected={selectedTicketId === ticket._id}
 								/>
 							))}
+							{!template.deprecated &&
 							<NewTicketMenu
 								disabled={newTicketButtonIsDisabled}
 								TriggerButton={(
@@ -134,7 +135,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 								)}
 								useMousePosition
 								onContainerOrFederationClick={onNewTicket}
-							/>
+							/>}
 						</Group>
 					</>
 				)}

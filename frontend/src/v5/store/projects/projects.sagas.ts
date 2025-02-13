@@ -116,7 +116,7 @@ export function* fetchTemplates({ teamspace, projectId, getDetails = false }) {
 		const modelId = models[0]._id;
 		const isFed = !!(yield select(selectFederationById, modelId));
 		const fetchModelTemplates = isFed ? API.Tickets.fetchFederationTemplates : API.Tickets.fetchContainerTemplates;
-		const templates = yield fetchModelTemplates(teamspace, projectId, modelId, getDetails);
+		const templates = yield fetchModelTemplates(teamspace, projectId, modelId, getDetails, true);
 		yield put(ProjectsActions.fetchTemplatesSuccess(projectId, templates));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
