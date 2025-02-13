@@ -6,7 +6,6 @@ jobs:
   destroy-deployed-branch:
     name: Call Azure Destroy Pipeline
     runs-on: ubuntu-latest
-    needs: get-details
     steps:
     - name: Azure Pipelines Action
       uses: Azure/pipelines@v1.2
