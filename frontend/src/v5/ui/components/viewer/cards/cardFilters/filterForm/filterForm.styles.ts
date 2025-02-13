@@ -31,6 +31,7 @@ export const Container = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
+	max-width: 365px;
 `;
 
 export const TitleContainer = styled.div`

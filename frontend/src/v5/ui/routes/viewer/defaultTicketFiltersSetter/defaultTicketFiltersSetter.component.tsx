@@ -16,7 +16,7 @@
  */
 
 import { TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEmpty, uniq } from 'lodash';
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
@@ -35,7 +35,7 @@ export const DefaultTicketFiltersSetter = () => {
 	const [ticketSearchParam, setTicketSearchParam] = useSearchParam('ticketSearch', Transformers.STRING_ARRAY);
 
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
-	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
+	const templates = TicketsCardHooksSelectors.selectTemplatesWithTickets();
 	const hasTicketData = !isEmpty(tickets) && !isEmpty(templates);
 
 	const getTicketFiltersFromURL = (values): CardFilter[] => [{
