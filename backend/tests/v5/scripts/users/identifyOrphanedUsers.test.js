@@ -26,6 +26,7 @@ const {
 
 const { times } = require('lodash');
 const { readFileSync } = require('fs');
+const DayJS = require('dayjs');
 
 const { src, utilScripts, tmpDir } = require('../../helper/path');
 
@@ -44,7 +45,7 @@ const setupData = async () => {
 	const orphanedUsers = times(10, () => generateUserCredentials());
 	delete orphanedUsers[0].basicData.billing.billingInfo.company;
 
-	await createTeamspace(teamspace);
+	await createTeamspace(teamspace, [], undefined, false);
 
 	await Promise.all(normalUsers.map((user) => createUser(user, [teamspace])));
 
@@ -73,6 +74,8 @@ const runTest = () => {
 			orphanedUsers = await setupData();
 		});
 
+		const formatDate = (date) => (date ? DayJS(date).format('DD/MM/YYYY') : '');
+
 		test('should provide a list of users with no access to teamspace', async () => {
 			const outFile = `${tmpDir}/${generateRandomString()}.csv`;
 			await IdentifyOrphanedUsers.run(outFile);
@@ -87,7 +90,7 @@ const runTest = () => {
 
 			const expectedResult = orphanedUsers.map(({ user, basicData, lastLogin }) => {
 				const { email, firstName, lastName, billing } = basicData;
-				return { user, email, firstName, lastName, company: billing.billingInfo.company ?? '', lastLogin: lastLogin?.toString() ?? '' };
+				return { user, email, firstName, lastName, company: billing.billingInfo.company ?? '', lastLogin: formatDate(lastLogin) };
 			});
 
 			expect(res.length).toBe(expectedResult.length);

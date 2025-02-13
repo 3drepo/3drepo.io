@@ -26,6 +26,7 @@ const {
 
 const { times } = require('lodash');
 const { readFileSync } = require('fs');
+const DayJS = require('dayjs');
 
 const { src, utilScripts, tmpDir } = require('../../helper/path');
 
@@ -40,13 +41,17 @@ const generateLoginRecord = (user) => {
 
 const setupData = async () => {
 	const teamspace = generateRandomString();
+	const teamspace2 = generateRandomString();
 	const users = times(20, () => generateUserCredentials());
 	delete users[0].basicData.billing.billingInfo.company;
 
-	await createTeamspace(teamspace, [], undefined, false);
+	await Promise.all([
+		createTeamspace(teamspace, [], undefined, false),
+		createTeamspace(teamspace2, [], undefined, false),
+	]);
 
 	await Promise.all(users.map(async (user, index) => {
-		await createUser(user, [teamspace]);
+		await createUser(user, [teamspace, teamspace2]);
 
 		if (index % 2 === 0) {
 			const loginRecords = times(5, () => generateLoginRecord(user.user));
@@ -70,6 +75,8 @@ const runTest = () => {
 			users = await setupData();
 		});
 
+		const formatDate = (date) => (date ? DayJS(date).format('DD/MM/YYYY') : '');
+
 		test('should provide a list of users that have not logged in for a specified number of months', async () => {
 			const outFile = `${tmpDir}/${generateRandomString()}.csv`;
 			const monthsOfInactivity = Math.round(generateRandomNumber(1, 5));
@@ -81,8 +88,8 @@ const runTest = () => {
 			// first line is csv titles, last line is always empty
 			const content = readFileSync(outFile).toString().split('\n').slice(1, -1);
 			const res = content.map((str) => {
-				const [user, firstName, lastName, email, company, lastLogin] = str.split(',');
-				return { user, firstName, lastName, email, company, lastLogin };
+				const [user, firstName, lastName, email, company, lastLogin, teamspaceNumber] = str.split(',');
+				return { user, firstName, lastName, email, company, lastLogin, teamspaceNumber };
 			});
 
 			const thresholdDate = new Date();
@@ -91,7 +98,7 @@ const runTest = () => {
 			const expectedResult = users.flatMap(({ user, basicData, lastLogin }) => {
 				if (!lastLogin || lastLogin < thresholdDate) {
 					const { email, firstName, lastName, billing } = basicData;
-					return { user, email, firstName, lastName, company: billing.billingInfo.company ?? '', lastLogin: lastLogin?.toString() ?? '' };
+					return { user, email, firstName, lastName, company: billing.billingInfo.company ?? '', lastLogin: formatDate(lastLogin), teamspaceNumber: '2' };
 				}
 
 				return [];
