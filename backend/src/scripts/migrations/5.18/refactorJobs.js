@@ -28,7 +28,7 @@ const { UUIDToString, stringToUUID } = require(`${v5Path}/utils/helper/uuids`);
 const { createRoles, getRoles, createIndex } = require(`${v5Path}/models/roles`);
 const { generateUUID } = require(`${v5Path}/utils/helper/uuids`);
 const { logger } = require(`${v5Path}/utils/logger`);
-const { actions } = require(`${v5Path}/teamspaces.audits.constants`);
+const { actions } = require(`${v5Path}/models/teamspaces.audits.constants`);
 
 const updateActivityLogs = async (teamspace, roleNamesToIds) => {
 	const logUpdates = [];

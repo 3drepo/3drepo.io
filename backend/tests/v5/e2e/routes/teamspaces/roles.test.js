@@ -134,6 +134,20 @@ const testAddRole = () => {
 			}
 		});
 	});
+
+	test('should not allow two roles with the same name to be added', async () => {
+		const name = generateRandomString();
+
+		const [res1, res2] = await Promise.all([
+			agent.post(addRoleRoute(users.tsAdmin.apiKey)).send({ name }),
+			agent.post(addRoleRoute(users.tsAdmin.apiKey)).send({ name }),
+		]);
+
+		const res1Failed = (res1.status === templates.unknown.status && res2.status === templates.ok.status);
+		const res2Failed = (res1.status === templates.ok.status && res2.status === templates.unknown.status);
+
+		expect(res1Failed || res2Failed).toBe(true);
+	});
 };
 
 const testUpdateRole = () => {
