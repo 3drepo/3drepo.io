@@ -9,54 +9,9 @@ jobs:
     needs: get-details
     steps:
     - name: Azure Pipelines Action
-      if: needs.get-details.outputs.issue-number
       uses: Azure/pipelines@v1.2
       with:
         azure-devops-project-url: https://dev.azure.com/3drepo/3drepo.io
         azure-pipeline-name: 'destroy'
         azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}
         azure-pipeline-variables:  '{"branchName": ${{ github.head_ref || github.ref_name }}}'
-
-  get-details:
-    name: Get Current Issue Details
-    runs-on: ubuntu-latest
-    outputs:
-      issue-number: ${{ steps.commitMsgParser.outputs.issue-number }}
-      issue-content-id: ${{ steps.commitMsgParser.outputs.issue-content-id }}
-    steps:
-      - name: Extract Issue Number from PR
-        uses: 3drepo/extract-pr-information@v1
-        with:
-          pr: ${{ github.event.number }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-        id: commitMsgParser
-
-  tag-on-pr-merge:
-    name: Tag merged issues as In staging if applicable
-    runs-on: ubuntu-latest
-    needs: get-details
-    steps:
-      - name: Apply in staging label
-        if: ${{github.event.pull_request.merged && github.event.pull_request.base.ref == 'staging'}}
-        uses: carmenfan/any-issue-labeller@v1.1
-        with:
-          issue-number: ${{ needs.get-details.outputs.issue-number }}
-          label: 'in staging'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-  update-project-status:
-    name: Update status of the issue in the project
-    runs-on: ubuntu-latest
-    needs: get-details
-    steps:
-      - name: Update status in the Project
-        if: ${{github.event.pull_request.merged}}
-        id: update_status
-        uses: 3drepo/update-project-action@v1.1
-        with:
-          github_token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
-          organization: 3drepo
-          project_number: 22
-          content_id: ${{ needs.get-details.outputs.issue-content-id }}
-          field: Status
-          value: Merged
