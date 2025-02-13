@@ -17,7 +17,7 @@
 
 import { SearchInput as SearchInputBase } from '@controls/searchSelect/searchSelect.styles';
 import { MenuItem as MenuItemBase } from '@mui/material';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 export const IconContainer = styled.div`
 	cursor: pointer;
