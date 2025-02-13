@@ -43,7 +43,6 @@ const validateRole = async (req, res, next) => {
 				return true;
 			}),
 		users: Yup.array().of(types.strings.title)
-			.transform(uniqueElements)
 			.test('check-users-teamspace-access', async (values, context) => {
 				if (values?.length) {
 					const usersWithNoAccess = await getUsersWithNoAccess(req.params.teamspace, values);
@@ -54,9 +53,8 @@ const validateRole = async (req, res, next) => {
 
 				return true;
 			}),
-
 		color: types.rgbColor,
-	}).noUnknown();
+	}).strict(true).noUnknown();
 
 	if (isUpdate) {
 		schema = schema.test(
@@ -68,6 +66,11 @@ const validateRole = async (req, res, next) => {
 
 	try {
 		await schema.validate(req.body);
+
+		if (req.body.users) {
+			req.body.users = uniqueElements(req.body.users);
+		}
+
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));

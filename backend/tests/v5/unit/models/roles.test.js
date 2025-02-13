@@ -85,17 +85,29 @@ const testRevokeTeamspaceRoleFromUser = () => {
 
 // --- JOBS RENAMED TO ROLES --- TO BE KEPT
 
+const testCreateIndex = () => {
+	describe('Create Index', () => {
+		test('should create an index for role collection', async () => {
+			const teamspace = generateRandomString();
+			const fn = jest.spyOn(db, 'createIndex').mockImplementationOnce(() => {});
+			await Roles.createIndex(teamspace);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ROLE_COL, { name: 1 }, { unique: true });
+		});
+	});
+};
+
 const testGetRolesToUsers = () => {
 	describe('Get Roles to users', () => {
 		test('should get list of roles within the teamspace with the users', async () => {
 			const expectedResult = [{ _id: generateRandomString(), users: times(3, () => generateRandomString()) }];
 			const teamspace = generateRandomString();
 
-			const fn = jest.spyOn(db, 'find').mockImplementation(() => expectedResult);
+			const fn = jest.spyOn(db, 'find').mockImplementationOnce(() => expectedResult);
 			const res = await Roles.getRolesToUsers(teamspace);
 			expect(res).toEqual(expectedResult);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, ROLE_COL, { });
+			expect(fn).toHaveBeenCalledWith(teamspace, ROLE_COL, { }, { _id: 1, users: 1 }, undefined);
 		});
 	});
 };
@@ -104,7 +116,7 @@ const testAddDefaultRoles = () => {
 	describe('Add default roles', () => {
 		test('should add the default roles', async () => {
 			const teamspace = generateRandomString();
-			const fn = jest.spyOn(db, 'insertMany').mockImplementation(() => {});
+			const fn = jest.spyOn(db, 'insertMany').mockImplementationOnce(() => {});
 			await Roles.addDefaultRoles(teamspace);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn.mock.calls[0][0]).toEqual(teamspace);
@@ -128,7 +140,7 @@ const testAssignUserToRole = () => {
 			const teamspace = generateRandomString();
 			const roleName = generateRandomString();
 			const username = generateRandomString();
-			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
+			const fn = jest.spyOn(db, 'updateOne').mockImplementationOnce(() => {});
 			await Roles.assignUserToRole(teamspace, roleName, username);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ROLE_COL, { name: roleName }, { $push: { users: username } });
@@ -141,7 +153,7 @@ const testRemoveUserFromRoles = () => {
 		test('should remove user from roles', async () => {
 			const teamspace = generateRandomString();
 			const userToRemove = generateRandomString();
-			const fn = jest.spyOn(db, 'updateMany').mockImplementation(() => {});
+			const fn = jest.spyOn(db, 'updateMany').mockImplementationOnce(() => {});
 			await Roles.removeUserFromRoles(teamspace, userToRemove);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ROLE_COL,
@@ -253,7 +265,7 @@ const testCreateRole = () => {
 		test('should create a new role', async () => {
 			const teamspace = generateRandomString();
 			const role = generateRandomObject();
-			const fn = jest.spyOn(db, 'insertOne').mockImplementation(() => {});
+			const fn = jest.spyOn(db, 'insertOne').mockImplementationOnce(() => {});
 			const res = await Roles.createRole(teamspace, role);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ROLE_COL, expect.any(Object));
@@ -270,10 +282,31 @@ const testUpdateRole = () => {
 			const teamspace = generateRandomString();
 			const roleId = generateRandomString();
 			const updatedRole = generateRandomObject();
-			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
+			const fn = jest.spyOn(db, 'updateOne').mockImplementationOnce(() => {});
 			await Roles.updateRole(teamspace, roleId, updatedRole);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ROLE_COL, { _id: roleId }, { $set: updatedRole });
+		});
+	});
+};
+
+const testGetUsersByRoles = () => {
+	describe('Get users by roles', () => {
+		test('should get users by roles', async () => {
+			const teamspace = generateRandomString();
+			const user1 = generateRandomString();
+			const user2 = generateRandomString();
+			const roleIds = times(5, () => generateRandomString());
+			const roles = [
+				{ _id: generateRandomString(), users: [user1, user2] },
+				{ _id: generateRandomString(), users: [user1] },
+				{ _id: generateRandomString(), users: [] },
+			];
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(roles);
+			const res = await Roles.getUsersByRoles(teamspace, roleIds);
+			expect(res).toEqual([user1, user2]);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ROLE_COL, { _id: { $in: roleIds } }, { users: 1 }, undefined);
 		});
 	});
 };
@@ -283,7 +316,7 @@ const testDeleteRole = () => {
 		test('should delete a role', async () => {
 			const teamspace = generateRandomString();
 			const roleId = generateRandomString();
-			const fn = jest.spyOn(db, 'deleteOne').mockImplementation(() => {});
+			const fn = jest.spyOn(db, 'deleteOne').mockImplementationOnce(() => {});
 			await Roles.deleteRole(teamspace, roleId);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ROLE_COL, { _id: roleId });
@@ -296,6 +329,7 @@ describe('models/roles', () => {
 	testRemoveTeamspaceRole();
 	testGrantTeamspaceRoleToUser();
 	testRevokeTeamspaceRoleFromUser();
+	testCreateIndex();
 	testGetRolesToUsers();
 	testAddDefaultRoles();
 	testAssignUserToRole();
@@ -305,6 +339,7 @@ describe('models/roles', () => {
 	testGetRoleById();
 	testGetRoleByName();
 	testCreateRole();
+	testGetUsersByRoles();
 	testUpdateRole();
 	testDeleteRole();
 });

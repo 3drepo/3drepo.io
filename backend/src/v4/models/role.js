@@ -17,15 +17,10 @@
 
 "use strict";
 
-const C = require("../constants");
 const db = require("../handler/db");
 const { v5Path } = require("../../interop");
 const responseCodes = require("../response_codes.js");
 const { UUIDToString, stringToUUID } = require(`${v5Path}/utils/helper/uuids.js`);
-
-const findByRoleID = async function(id) {
-	return await db.findOne("admin", "system.roles", { _id: id});
-};
 
 const Role = {};
 

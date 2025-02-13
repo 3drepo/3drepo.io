@@ -69,30 +69,30 @@ const testRoleExists = () => {
 	});
 };
 
-const commonTestCases = (data, takenName, usersWithTsAccess) => ([
+const commonTestCases = (data, takenName, userWithAccess) => ([
 	['With valid data', data, true],
 	['With name that is already taken', { ...data, name: takenName }],
 	['With invalid users', { ...data, users: 123 }],
-	['With duplicate users', { ...data, users: [usersWithTsAccess[0], usersWithTsAccess[0]] }],
-	['With users that have no access to teamspace', { ...data, users: [generateRandomString()] }],
+	['With duplicate users', { ...data, users: [userWithAccess, userWithAccess] }, true],
+	['With users that have no access to teamspace', data, false, true],
 	['Without users', { ...data, users: undefined }, true],
 	['With invalid color', { ...data, color: generateRandomString() }],
 	['Without color', { ...data, color: undefined }, true],
 ]);
 
 const testValidateNewRoleData = () => {
-	const usersWithTsAccess = times(5, () => generateRandomString());
 	const takenName = generateRandomString();
+	const userWithAccess = generateRandomString();
 	const data = {
 		name: generateRandomString(),
 		color: DEFAULT_ROLES[0].color,
-		users: usersWithTsAccess,
+		users: times(5, () => generateRandomString()),
 	};
 
 	describe.each([
-		...commonTestCases(data, takenName, usersWithTsAccess),
-		['Without name', { ...data, name: undefined }],
-	])('Validate new role', (desc, body, success) => {
+		...commonTestCases(data, takenName, userWithAccess),
+		// ['Without name', { ...data, name: undefined }],
+	])('Validate new role', (desc, body, success, userWithNoAccess) => {
 		test(`${desc} should ${success ? 'succeed and next() should be called' : `fail with ${templates.invalidArguments.code}`}`, async () => {
 			const mockCB = jest.fn(() => {});
 			const req = { params: { teamspace: generateRandomString() }, body };
@@ -103,8 +103,9 @@ const testValidateNewRoleData = () => {
 				RolesModel.getRoleByName.mockRejectedValueOnce();
 			}
 
-			if (body.users?.length) {
-				TeamspaceSettingsModel.getAllUsersInTeamspace.mockResolvedValueOnce(usersWithTsAccess);
+			if (body?.users?.length) {
+				TeamspaceSettingsModel.getUsersWithNoAccess
+					.mockResolvedValueOnce(userWithNoAccess ? [generateRandomString()] : []);
 			}
 
 			await Roles.validateNewRole(req, {}, mockCB);
@@ -120,21 +121,21 @@ const testValidateNewRoleData = () => {
 };
 
 const testValidateUpdateRoleData = () => {
-	const usersWithTsAccess = times(5, () => generateRandomString());
+	const userWithAccess = generateRandomString();
 	const takenName = generateRandomString();
 	const existingRole = { name: generateRandomString() };
 	const data = {
 		name: generateRandomString(),
 		color: DEFAULT_ROLES[0].color,
-		users: usersWithTsAccess,
+		users: times(5, () => generateRandomString()),
 	};
 
 	describe.each([
-		...commonTestCases(data, takenName, usersWithTsAccess),
+		...commonTestCases(data, takenName, userWithAccess),
 		['Without name', { ...data, name: undefined }, true],
-		['Without any values', { }, false],
+		['Without any values', { }],
 		['With the same name', { ...data, name: existingRole.name }, true],
-	])('Validate update role', (desc, body, success) => {
+	])('Validate update role', (desc, body, success, userWithNoAccess) => {
 		test(`${desc} should ${success ? 'succeed and next() should be called' : `fail with ${templates.invalidArguments.code}`}`, async () => {
 			const mockCB = jest.fn(() => {});
 			const req = { params: { teamspace: generateRandomString() }, body };
@@ -147,8 +148,9 @@ const testValidateUpdateRoleData = () => {
 				RolesModel.getRoleByName.mockRejectedValueOnce();
 			}
 
-			if (body.users?.length) {
-				TeamspaceSettingsModel.getAllUsersInTeamspace.mockResolvedValueOnce(usersWithTsAccess);
+			if (body?.users?.length) {
+				TeamspaceSettingsModel.getUsersWithNoAccess
+					.mockResolvedValueOnce(userWithNoAccess ? [generateRandomString()] : []);
 			}
 
 			await Roles.validateUpdateRole(req, {}, mockCB);

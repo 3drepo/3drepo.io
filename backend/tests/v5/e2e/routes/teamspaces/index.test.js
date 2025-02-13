@@ -19,8 +19,7 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../helper/services');
 const { image, src } = require('../../../helper/path');
 const fs = require('fs');
-const { generateRandomNumber, generateRandomModel, generateRandomProject,
-	generateUUIDString, generateRandomString } = require('../../../helper/services');
+const { generateRandomNumber, generateRandomModel, generateRandomProject, generateRandomString } = require('../../../helper/services');
 
 const { DEFAULT_OWNER_ROLE } = require(`${src}/models/roles.constants`);
 const config = require(`${src}/utils/config`);

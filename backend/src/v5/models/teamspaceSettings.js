@@ -27,8 +27,8 @@ const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants'
 const { TEAM_MEMBER } = require('./roles.constants');
 const { USERS_DB_NAME } = require('./users.constants');
 const db = require('../handler/db');
-const { templates } = require('../utils/responseCodes');
 const { getArrayDifference } = require('../utils/helper/arrays');
+const { templates } = require('../utils/responseCodes');
 
 const TEAMSPACE_SETTINGS_COL = 'teamspace';
 

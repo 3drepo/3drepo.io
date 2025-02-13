@@ -27,6 +27,7 @@ const {
 	hasReadAccessToFederation,
 	isAdminToProject,
 } = require('../../../../../middleware/permissions/permissions');
+const { httpVerbs, routeDeprecated } = require('../../../../../middleware/common');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
 const { validateAddModelData, validateUpdateSettingsData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings');
 const Containers = require('../../../../../processors/teamspaces/projects/models/containers');
@@ -39,7 +40,6 @@ const { canDeleteContainer } = require('../../../../../middleware/dataConverter/
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { isArray } = require('../../../../../utils/helper/typeCheck');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
-const { httpVerbs, routeDeprecated } = require('../../../../../middleware/common');
 
 const getThumbnail = async (req, res) => {
 	const { teamspace, project, drawing } = req.params;

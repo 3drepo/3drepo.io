@@ -482,30 +482,6 @@
 		});
 	}
 
-	function getTeamMemberInfo(req, res, next) {
-		User.getTeamMemberInfo(
-			req.params.account,
-			req.params.user
-		).then(info => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, info);
-		}).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
-
-	}
-
-	function getMemberList(req, res, next) {
-		User.getMembers(req.params.account).then(memArray => {
-			const members = memArray.map((userData) => {
-				userData.isCurrentUser = req.session.user.username === userData.user;
-				return userData;
-			});
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {members});
-		}).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
-	}
-
 	function addTeamMember(req, res, next) {
 		const responsePlace = utils.APIInfo(req);
 		User.addTeamMember(req.params.account, req.body.user, req.body.role, req.body.permissions, req.session.user.username)
