@@ -6,16 +6,14 @@ jobs:
   destroy-deployed-branch:
     name: Call Azure Destroy Pipeline
     runs-on: ubuntu-latest
-    needs: get-details
     steps:
     - name: Azure Pipelines Action
-      if: needs.get-details.outputs.issue-number
       uses: Azure/pipelines@v1.2
       with:
         azure-devops-project-url: https://dev.azure.com/3drepo/3drepo.io
         azure-pipeline-name: 'destroy'
         azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}
-        azure-pipeline-variables:  '{"branchName": ${{ github.head_ref || github.ref_name }}}'
+        azure-pipeline-variables:  '{"branchName": "${{ github.head_ref || github.ref_name }}"}'
 
   get-details:
     name: Get Current Issue Details
