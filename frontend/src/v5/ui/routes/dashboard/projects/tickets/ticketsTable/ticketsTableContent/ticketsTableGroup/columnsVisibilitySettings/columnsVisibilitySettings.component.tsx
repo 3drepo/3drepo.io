@@ -18,7 +18,7 @@
 import GearIcon from '@assets/icons/outlined/gear-outlined.svg';
 import { ActionMenu } from '@controls/actionMenu';
 import { SearchContext, SearchContextComponent } from '@controls/search/searchContext';
-import { COLUMN_NAME_TO_SETTINGS_FORMATTED_LABEL, getAllColumnsName, getAvailableColumnsForTemplate } from '../../../ticketsTable.helper';
+import { COLUMN_NAME_TO_SETTINGS_LABEL, getAllColumnsNames, getAvailableColumnsForTemplate } from '../../../ticketsTable.helper';
 import { SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
 import { MenuItem, IconContainer, SearchInput } from './columnsVisibilitySettings.styles';
 import { Checkbox } from '@controls/inputs/checkbox/checkbox.component';
@@ -30,9 +30,9 @@ import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { matchesQuery } from '@controls/search/searchContext.helpers';
 
-export const ColumnsVisibilitySettingsContent = ({ newHiddenColumns, setNewHiddenColumns }) => {
+export const ColumnsVisibilitySettingsMenu = ({ newHiddenColumns, setNewHiddenColumns }) => {
 	const { hiddenColumns } = useContext(ResizableTableContext);
-	const allColumns = getAllColumnsName();
+	const columns = getAllColumnsNames();
 
 	const onChange = (columnName) => setNewHiddenColumns(xor(newHiddenColumns, [columnName]));
 	const isVisible = (columnName) => !newHiddenColumns.includes(columnName);
@@ -50,10 +50,10 @@ export const ColumnsVisibilitySettingsContent = ({ newHiddenColumns, setNewHidde
 				{({ filteredItems }) => filteredItems.map((columnName) => (
 					<MenuItem key={columnName}>
 						<Checkbox
-							disabled={(allColumns.length - newHiddenColumns.length) === 1 && isVisible(columnName)}
+							disabled={(columns.length - newHiddenColumns.length) === 1 && isVisible(columnName)}
 							onChange={() => onChange(columnName)}
 							value={isVisible(columnName)}
-							label={COLUMN_NAME_TO_SETTINGS_FORMATTED_LABEL[columnName]}
+							label={COLUMN_NAME_TO_SETTINGS_LABEL[columnName]}
 						/>
 					</MenuItem>
 				))}
@@ -70,7 +70,7 @@ export const ColumnsVisibilitySettings = () => {
 
 	const onClose = () => setHiddenColumns(newHiddenColumns);
 	const filteringFunction = (cols, query) => (
-		cols.filter((col) => matchesQuery(COLUMN_NAME_TO_SETTINGS_FORMATTED_LABEL[col], query))
+		cols.filter((col) => matchesQuery(COLUMN_NAME_TO_SETTINGS_LABEL[col], query))
 	);
 
 	return (
@@ -89,7 +89,7 @@ export const ColumnsVisibilitySettings = () => {
 				}}
 				onClose={onClose}
 			>
-				<ColumnsVisibilitySettingsContent newHiddenColumns={newHiddenColumns} setNewHiddenColumns={setNewHiddenColumns} />
+				<ColumnsVisibilitySettingsMenu newHiddenColumns={newHiddenColumns} setNewHiddenColumns={setNewHiddenColumns} />
 			</ActionMenu>
 		</SearchContextComponent>
 	);

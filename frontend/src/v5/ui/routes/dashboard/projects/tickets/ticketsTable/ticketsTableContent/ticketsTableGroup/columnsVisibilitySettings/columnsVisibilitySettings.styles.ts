@@ -34,7 +34,7 @@ export const SearchInput = styled(SearchInputBase)`
 	margin: 0;
 `;
 
-export const MenuItem = styled(MenuItemBase)<{ hidden?: boolean }>`
+export const MenuItem = styled(MenuItemBase)`
 	padding: 0;
 
 	label {
@@ -48,11 +48,6 @@ export const MenuItem = styled(MenuItemBase)<{ hidden?: boolean }>`
 		text-overflow: ellipsis;
 		white-space: nowrap;
 		max-width: 100%;
-		text-transform: capitalize;
 	}
-
-	${({ hidden }) => hidden && css`
-		display: none;
-	`}
 `;
 

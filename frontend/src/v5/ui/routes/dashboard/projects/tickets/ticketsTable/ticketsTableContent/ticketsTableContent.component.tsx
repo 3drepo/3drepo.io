@@ -16,7 +16,7 @@
  */
 
 import { SearchContext } from '@controls/search/searchContext';
-import { useCallback, useContext } from 'react';
+import { useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
@@ -50,14 +50,14 @@ export const TicketsTableContent = (props: TicketsTableResizableContentProps) =>
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const [modelsIds] = useSearchParam('models', Transformers.STRING_ARRAY);
 
-	const getHiddenColumns = useCallback(() => {
+	const getHiddenColumns = () => {
 		const showModelName = modelsIds.length > 1;
 		const hiddenCols = getUnavailableColumnsForTemplate(template);
 		if (!showModelName) {
 			hiddenCols.push('modelName');
 		}
 		return hiddenCols;
-	}, [template]);
+	};
 
 	if (!templateAlreadyFetched(template)) {
 		return (

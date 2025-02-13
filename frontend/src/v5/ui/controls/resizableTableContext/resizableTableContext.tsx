@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isEqual, sum } from 'lodash';
-import { createContext, useEffect, useRef, useState } from 'react';
+import { sum } from 'lodash';
+import { createContext, useRef, useState } from 'react';
 import { RefHolder } from './resizableTableContext.styles';
 
 export type TableColumn = { name: string, minWidth?: number, width: number, stretch?: boolean };
