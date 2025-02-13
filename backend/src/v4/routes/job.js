@@ -16,13 +16,13 @@
  */
 
 "use strict";
-(function() {
+
+const { v5Path } = require("../../interop");
+const { httpVerbs, routeDeprecated } = require(`${v5Path}/middleware/common`);
+
+(function () {
 	const express = require("express");
-	const router = express.Router({mergeParams: true});
-	const responseCodes = require("../response_codes");
-	const middlewares = require("../middlewares/middlewares");
-	const Job = require("../models/job");
-	const utils = require("../utils");
+	const router = express.Router({ mergeParams: true });
 
 	/**
 	 * @apiDefine Jobs Jobs
@@ -57,27 +57,7 @@
 	 * 	color:"#ffff00"
 	 * }
 	 */
-	router.post("/jobs", middlewares.job.canCreate, createJob);
-
-	/**
-	 * @api {get} /:teamspace/myJob Get user job
-	 * @apiName getUserJob
-	 * @apiGroup Jobs
-	 * @apiDescription Get job assigned to current user.
-	 *
-	 * @apiUse Jobs
-	 *
-	 * @apiExample {get} Example usage:
-	 * GET /acme/myJob HTTP/1.1
-	 *
-	 * @apiSuccessExample {json} Success-Response
-	 * HTTP/1.1 200 OK
-	 * {
-	 * 	_id":"Job1",
-	 * 	"color":"ff00000"
-	 * }
-	 */
-	router.get("/myJob", middlewares.isTeamspaceMember, getUserJob);
+	router.post("/jobs", routeDeprecated(httpVerbs.POST, "/v5/teamspaces/{teamspace}/roles"));
 
 	/**
 	 * @api {put} /:teamspace/jobs/:jobId Update job
@@ -102,7 +82,7 @@
 	 * HTTP/1.1 200 OK
 	 * {}
 	 */
-	router.put("/jobs/:jobId", middlewares.job.canCreate, updateJob);
+	router.put("/jobs/:jobId", routeDeprecated(httpVerbs.PATCH, "/v5/teamspaces/{teamspace}/roles/{role}"));
 
 	/**
 	 * @api {get} /:teamspace/jobs List all jobs
@@ -135,7 +115,7 @@
 	 * 	}
 	 * ]
 	 */
-	router.get("/jobs", middlewares.isTeamspaceMember, listJobs);
+	router.get("/jobs", routeDeprecated(httpVerbs.GET, "/v5/teamspaces/{teamspace}/roles"));
 
 	/**
 	 * @api {post} /:teamspace/jobs/:jobId/:user Assign a job
@@ -155,7 +135,7 @@
 	 * HTTP/1.1 200 OK
 	 * {}
 	 */
-	router.post("/jobs/:jobId/:user", middlewares.job.canCreate, addUserToJob);
+	router.post("/jobs/:jobId/:user", routeDeprecated(httpVerbs.PATCH, "/v5/teamspaces/{teamspace}/roles/{role}"));
 
 	/**
 	 * @api {delete} /:teamspace/jobs/:jobId Delete a job
@@ -174,92 +154,7 @@
 	 * HTTP/1.1 200 OK
 	 * {}
 	 */
-	router.delete("/jobs/:jobId", middlewares.job.canDelete, deleteJob);
-
-	/**
-	 * @api {get} /:teamspace/jobs/colors List colours
-	 * @apiName listColors
-	 * @apiGroup Jobs
-	 * @apiDescription List job colours.
-	 *
-	 * @apiUse Jobs
-	 *
-	 * @apiSuccess {String[]} colors List of job colours
-	 *
-	 * @apiExample {get} Example usage:
-	 * GET /acme/jobs/colors HTTP/1.1
-	 *
-	 * @apiSuccessExample {json} Success-Response
-	 * HTTP/1.1 200 OK
-	 * [
-	 * 	"#ff0000",
-	 * 	"#00ff00",
-	 * 	"#0000ff"
-	 * ]
-	 */
-	router.get("/jobs/colors", middlewares.isTeamspaceMember, listColors);
-
-	function addUserToJob(req, res, next) {
-		Job.addUserToJob(req.params.account, req.params.jobId, req.params.user).then(() => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
-		}).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
-	}
-
-	function getUserJob(req, res, next) {
-		// middleware checks if user is in teamspace, so this member check should not be necessary here.
-		Job.getUserJob(req.params.account, req.session.user.username).then((job) => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, job);
-		}).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
-	}
-
-	function createJob(req, res, next) {
-		const newJob = {
-			_id: req.body._id,
-			color: req.body.color
-		};
-
-		Job.addJob(req.params.account, newJob).then(() => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, newJob);
-		}).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
-	}
-
-	function updateJob(req, res, next) {
-		Job.updateJob(req.params.account, req.params.jobId, req.body).then(() => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
-		}).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
-	}
-
-	function deleteJob(req, res, next) {
-		Job.removeJob(req.params.account, req.params.jobId).then(() => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
-		}).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
-	}
-
-	function listJobs(req, res, next) {
-		Job.getAllJobs(req.params.account).then(jobs => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, jobs);
-		}).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
-	}
-
-	function listColors(req, res, next) {
-		Job.getAllColors(req.params.account).then(colors => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, colors);
-		}).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
-	}
+	router.delete("/jobs/:jobId", routeDeprecated(httpVerbs.DELETE, "/v5/teamspaces/{teamspace}/roles/{role}"));
 
 	module.exports = router;
 }());

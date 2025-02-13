@@ -85,6 +85,9 @@ ResponseCodes.templates = {
 	// View related error
 	viewNotFound: { message: 'View not found.', status: 404 },
 
+	// Role related error
+	roleNotFound: { message: 'Role not found.', status: 404 },
+
 	// Image related error
 	thumbnailNotFound: { message: 'Thumbnail not available.', status: 404 },
 
@@ -93,6 +96,9 @@ ResponseCodes.templates = {
 
 	// Invalid Arguments
 	invalidArguments: { message: 'The arguments provided are not valid.', status: 400 },
+
+	// Endpoint Decomissioned
+	endpointDecomissioned: { message: 'Endpoint no longer available.', status: 410 },
 
 	// Queue related
 	queueConnectionError: { message: 'There was a problem connecting to the queue. Please contact support.', status: 500 },

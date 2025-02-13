@@ -17,56 +17,74 @@
 
 "use strict";
 
-const C = require("../constants");
 const db = require("../handler/db");
-
-const findByRoleID = async function(id) {
-	return await db.findOne("admin", "system.roles", { _id: id});
-};
+const { v5Path } = require("../../interop");
+const responseCodes = require("../response_codes.js");
+const { UUIDToString, stringToUUID } = require(`${v5Path}/utils/helper/uuids.js`);
 
 const Role = {};
 
-Role.createTeamSpaceRole = async function (account) {
-	const roleId = `${account}.${C.DEFAULT_MEMBER_ROLE}`;
+const ROLES_COLLECTION_NAME = "roles";
 
-	const roleFound = await findByRoleID(roleId);
+Role.addUserToRole = async function(teamspace, roleId, user) {
+	// Check if user is member of teamspace
+	const User = require("./user");
+	await User.teamspaceMemberCheck(user, teamspace);
 
-	if(roleFound) {
-		return ;
+	const role = await Role.findByRole(teamspace, roleId);
+
+	if (!role) {
+		return Promise.reject(responseCodes.ROLE_NOT_FOUND);
 	}
 
-	const roleName = C.DEFAULT_MEMBER_ROLE;
-	const createRoleCmd = {
-		"createRole": roleName,
-		"privileges":[{
-			"resource":{
-				"db": account,
-				"collection": "settings"
-			},
-			"actions": ["find"]}
-		],
-		"roles": []
-	};
+	if(!role.users.includes(user)) {
+		role.users.push(user);
 
-	await db.runCommand(account, createRoleCmd);
+		await db.updateOne(teamspace, ROLES_COLLECTION_NAME, {_id: role._id}, {$set: {users: role.users}});
+	}
 };
 
-Role.grantTeamSpaceRoleToUser = async function (username, account) {
-	const grantRoleCmd = {
-		grantRolesToUser: username,
-		roles: [{role: C.DEFAULT_MEMBER_ROLE, db: account}]
-	};
+Role.findByRole = async function(teamspace, roleId) {
+	const foundRole = await db.findOne(teamspace, ROLES_COLLECTION_NAME,  { _id: stringToUUID(roleId) });
 
-	return await db.runCommand("admin", grantRoleCmd);
+	if (foundRole && !foundRole.users) {
+		foundRole.users = [];
+	}
+
+	return foundRole;
 };
 
-Role.revokeTeamSpaceRoleFromUser = async function(username, account) {
-	const cmd = {
-		revokeRolesFromUser: username,
-		roles: [{role: C.DEFAULT_MEMBER_ROLE, db: account}]
-	};
+Role.findRoleByUser = async function(teamspace, user) {
+	const foundRole = await db.findOne(teamspace, ROLES_COLLECTION_NAME, {users: user});
 
-	return await db.runCommand("admin", cmd);
+	if (foundRole && !foundRole.users) {
+		foundRole.users = [];
+	}
+
+	return foundRole;
+};
+
+Role.findUsersWithRoles = async function(teamspace, roleIds) {
+	const foundRoles = await db.find(teamspace, ROLES_COLLECTION_NAME, { _id: { $in: roleIds.map(stringToUUID) } });
+
+	return foundRoles.reduce((users, roleItem) => users.concat(roleItem.users), []);
+};
+
+Role.removeUserFromAnyRole = (teamspace, userToRemove) => db.updateMany(teamspace, ROLES_COLLECTION_NAME, { users: userToRemove }, { $pull: { users: userToRemove } });
+
+Role.usersWithRole = async function(teamspace) {
+	const foundRoles = await db.find(teamspace, ROLES_COLLECTION_NAME, {}, {_id: 1, users : 1});
+	const userToRole = {};
+
+	foundRoles.forEach(role => {
+		if (role.users) {
+			role.users.forEach(user => {
+				userToRole[user] = UUIDToString(role._id);
+			});
+		}
+	});
+
+	return userToRole;
 };
 
 module.exports = Role;

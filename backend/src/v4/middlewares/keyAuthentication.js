@@ -41,10 +41,6 @@ const BLACK_LIST = [
 	"POST /*/avatar",
 	"GET /*/invoices",
 	"GET /*/invoices/*",
-	"* /*/jobs",
-	"* /*/jobs/*",
-	"* /*/jobs/*/*",
-	"GET /*/myJob",
 	"* /*/subscriptions",
 	"GET /*/quota"
 ];

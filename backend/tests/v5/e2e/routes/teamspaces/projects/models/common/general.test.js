@@ -20,6 +20,8 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 
+const { DEFAULT_OWNER_ROLE } = require(`${src}/models/roles.constants`);
+
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
@@ -65,10 +67,10 @@ const generateBasicData = () => {
 		calibration: ServiceHelper.generateCalibration(),
 	};
 
-	data.jobs = [
-		{ _id: ServiceHelper.generateRandomString(), users: [viewer.user] },
-		{ _id: ServiceHelper.generateRandomString(), users: [collaborator.user] },
-		{ _id: ServiceHelper.generateRandomString(), users: Object.values(data.users).map(({ user }) => user) },
+	data.roles = [
+		ServiceHelper.generateRole([viewer.user]),
+		ServiceHelper.generateRole([collaborator.user]),
+		ServiceHelper.generateRole(Object.values(data.users).map(({ user }) => user)),
 	];
 
 	return data;
@@ -1103,13 +1105,13 @@ const testGetUsersWithPermissions = () => {
 	});
 };
 
-const testGetJobsWithAccess = () => {
-	describe('Get jobs with access', () => {
-		const { users, teamspace, project, con, fed, draw, jobs } = generateBasicData();
+const testGetRolesWithAccess = () => {
+	describe('Get roles with access', () => {
+		const { users, teamspace, project, con, fed, draw, roles } = generateBasicData();
 
 		beforeAll(async () => {
-			await setupBasicData(users, teamspace, project, [con, fed, draw], jobs);
-			await ServiceHelper.db.createJobs(teamspace, jobs);
+			await setupBasicData(users, teamspace, project, [con, fed, draw], roles);
+			await ServiceHelper.db.createRoles(teamspace, roles);
 		});
 
 		const generateTestData = (modelType) => {
@@ -1136,7 +1138,7 @@ const testGetJobsWithAccess = () => {
 				key = users.tsAdmin.apiKey,
 				modelId = model._id,
 				excludeViewers,
-			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/jobs${key ? `?key=${key}${excludeViewers ? '&excludeViewers=true' : ''}` : ''}`;
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/roles${key ? `?key=${key}${excludeViewers ? '&excludeViewers=true' : ''}` : ''}`;
 
 			return [
 				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
@@ -1145,8 +1147,8 @@ const testGetJobsWithAccess = () => {
 				['the user does not have access to the model', getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
 				['the model does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
 				['the model is of wrong type', getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
-				['excludeViewers is set to false', getRoute(), true, { jobs: ['Admin', ...jobs.map(({ _id }) => _id)] }],
-				['excludeViewers is set to true', getRoute({ excludeViewers: true }), true, { jobs: ['Admin', ...jobs.slice(1).map(({ _id }) => _id)] }],
+				['excludeViewers is set to false', getRoute(), true, roles.map(({ _id }) => _id)],
+				['excludeViewers is set to true', getRoute({ excludeViewers: true }), true, roles.slice(1).map(({ _id }) => _id)],
 			];
 		};
 
@@ -1155,7 +1157,10 @@ const testGetJobsWithAccess = () => {
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
 				const res = await agent.get(route).expect(expectedStatus);
 				if (success) {
-					expect(res.body).toEqual(expectedOutput);
+					const allRoles = await agent.get(`/v5/teamspaces/${teamspace}/roles?key=${users.tsAdmin.apiKey}`);
+					const adminRoleId = allRoles.body.roles.find((r) => r.name === DEFAULT_OWNER_ROLE)._id;
+
+					expect(res.body).toEqual({ roles: [adminRoleId, ...expectedOutput] });
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}
@@ -1184,5 +1189,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	testGetSettings();
 	testGetThumbnail();
 	testGetUsersWithPermissions();
-	testGetJobsWithAccess();
+	testGetRolesWithAccess();
 });

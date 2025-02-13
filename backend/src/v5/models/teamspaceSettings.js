@@ -27,6 +27,7 @@ const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants'
 const { TEAM_MEMBER } = require('./roles.constants');
 const { USERS_DB_NAME } = require('./users.constants');
 const db = require('../handler/db');
+const { getArrayDifference } = require('../utils/helper/arrays');
 const { templates } = require('../utils/responseCodes');
 
 const TEAMSPACE_SETTINGS_COL = 'teamspace';
@@ -231,6 +232,11 @@ TeamspaceSetting.getAllUsersInTeamspace = async (teamspace) => {
 	const users = await findMany(query, { user: 1 });
 
 	return users.map(({ user }) => user);
+};
+
+TeamspaceSetting.getUsersWithNoAccess = async (teamspace, usernames) => {
+	const teamspaceUsers = await TeamspaceSetting.getAllUsersInTeamspace(teamspace);
+	return getArrayDifference(teamspaceUsers, usernames);
 };
 
 TeamspaceSetting.removeUserFromAdminPrivilege = async (teamspace, user) => {

@@ -26,7 +26,7 @@ const { statuses, statusTypes } = require(`${src}/schemas/tickets/templates.cons
 
 const Tickets = require(`${src}/processors/teamspaces/projects/models/commons/tickets`);
 
-const { basePropertyLabels, modulePropertyLabels, presetModules, propTypes, viewGroups } = require(`${src}/schemas/tickets/templates.constants`);
+const { basePropertyLabels, modulePropertyLabels, presetModules, presetEnumValues, propTypes, viewGroups } = require(`${src}/schemas/tickets/templates.constants`);
 
 const { isUUID } = require(`${src}/utils/helper/typeCheck`);
 const { UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
@@ -789,14 +789,30 @@ const updateGroupTestsHelper = (updateMany) => {
 
 const insertTicketsTestHelper = (isImport) => {
 	const template = generateTemplate();
-	const tickets = times(isImport ? 10 : 1, () => generateTicket(template));
+	const oneOfProp = generateRandomString();
+	template.properties.push({ name: oneOfProp, type: propTypes.ONE_OF, values: presetEnumValues.ROLES_AND_USERS });
+	const manyOfProp = generateRandomString();
+	template.properties.push({ name: manyOfProp, type: propTypes.MANY_OF, values: presetEnumValues.ROLES_AND_USERS });
+
+	const tickets = times(isImport ? 10 : 1, () => {
+		const ticket = generateTicket(template);
+		ticket.properties[oneOfProp] = generateUUID();
+		ticket.properties[manyOfProp] = times(5, () => generateUUID());
+		return ticket;
+	});
+
 	test('should call addTicketsWithTemplate in model and return whatever it returns', async () => {
 		const teamspace = generateRandomString();
 		const project = generateRandomString();
 		const model = generateRandomString();
 		const author = generateRandomString();
 
-		const expectedOutput = tickets.map((ticketData) => ({ ...ticketData, _id: generateRandomString() }));
+		const expectedOutput = tickets.map((ticketData) => {
+			const formattedData = { ...ticketData, _id: generateRandomString() };
+			formattedData.properties[oneOfProp] = stringToUUID(ticketData.properties[oneOfProp]);
+			formattedData.properties[manyOfProp] = ticketData.properties[manyOfProp].map(stringToUUID);
+			return formattedData;
+		});
 
 		TicketsModel.addTicketsWithTemplate.mockResolvedValueOnce(expectedOutput);
 		TemplatesSchema.generateFullSchema.mockImplementationOnce((t) => t);

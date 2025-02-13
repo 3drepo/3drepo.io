@@ -15,10 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { getJobs } = require('../../models/jobs');
+const { createRole, deleteRole, getRoles, updateRole } = require('../../models/roles');
 
-const Jobs = {};
+const Roles = {};
 
-Jobs.getJobList = getJobs;
+Roles.getRoles = getRoles;
 
-module.exports = Jobs;
+Roles.createRole = createRole;
+
+Roles.updateRole = updateRole;
+
+Roles.deleteRole = deleteRole;
+
+module.exports = Roles;
