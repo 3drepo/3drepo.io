@@ -33,7 +33,7 @@ const fillDummyPinIcon = (template:ITemplate): ITemplate => {
 	if (templates[template._id]) return templates[template._id];
 
 
-	if (template.config.pin) {
+	if (template?.config?.pin) {
 		if (isObject(template.config.pin)) {
 			template.config.pin.icon = pinIcons[(pinIndex++) % 4] as PinIcon;
 		} else {
@@ -41,9 +41,9 @@ const fillDummyPinIcon = (template:ITemplate): ITemplate => {
 		}
 	}
 
-	getCoords(template.properties).forEach((p) => Object.assign(p, fillDummyIconInProp(p)));
+	getCoords(template?.properties).forEach((p) => Object.assign(p, fillDummyIconInProp(p)));
 
-	template.modules.forEach((module) => {
+	template?.modules?.forEach((module) => {
 		getCoords(module.properties).forEach((p) => Object.assign(p, fillDummyIconInProp(p)));
 	});
 
