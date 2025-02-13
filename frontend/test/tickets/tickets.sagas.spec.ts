@@ -435,7 +435,7 @@ describe('Tickets: sagas', () => {
 		// Basic Container templates
 		it('should call fetchContainerTemplates endpoint', async () => {
 			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates?getDetails=false`)
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates?showDeprecated=true`)
 				.reply(200, { templates })
 
 			await waitForActions(() => {
@@ -445,7 +445,7 @@ describe('Tickets: sagas', () => {
 
 		it('should call fetchContainerTemplates endpoint with a 404', async () => {
 			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates?getDetails=false`)
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates?showDeprecated=true`)
 				.reply(404);
 
 			await waitForActions(() => {
