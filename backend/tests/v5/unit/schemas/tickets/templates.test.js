@@ -63,6 +63,30 @@ const testValidate = () => {
 			properties: undefined,
 			modules: undefined,
 		}, true],
+		['pin with a colour and icon defined', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: {
+					color: [50, 50, 50],
+					icon: 'RISK',
+				},
+			},
+			properties: undefined,
+			modules: undefined,
+		}, true],
+		['pin with a colour defined but icon is wrong', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: {
+					color: [50, 50, 50],
+					icon: generateRandomString(),
+				},
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
 		['pin with a colour logic defined', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
@@ -92,6 +116,68 @@ const testValidate = () => {
 			}],
 			modules: undefined,
 		}, true],
+		['pin with a colour logic and icon defined ', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: { color: {
+					property: {
+						name: 'fixedName',
+					},
+					mapping: [
+						{
+							default: [255, 255, 255],
+						},
+						{
+							value: generateRandomString(),
+							color: [50, 50, 50],
+						},
+						{
+							value: generateRandomString(),
+							color: [0, 0, 50],
+						},
+					],
+				},
+				icon: 'ISSUE',
+				},
+			},
+			properties: [{
+				name: 'fixedName',
+				type: propTypes.TEXT,
+			}],
+			modules: undefined,
+		}, true],
+		['pin with a colour logic definde but the icon is wrong ', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: { color: {
+					property: {
+						name: 'fixedName',
+					},
+					mapping: [
+						{
+							default: [255, 255, 255],
+						},
+						{
+							value: generateRandomString(),
+							color: [50, 50, 50],
+						},
+						{
+							value: generateRandomString(),
+							color: [0, 0, 50],
+						},
+					],
+				},
+				icon: generateRandomString(),
+				},
+			},
+			properties: [{
+				name: 'fixedName',
+				type: propTypes.TEXT,
+			}],
+			modules: undefined,
+		}, false],
 		['pin with a colour logic defined but no default specified', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
@@ -178,7 +264,7 @@ const testValidate = () => {
 			name: generateRandomString(),
 			code: generateRandomString(3),
 			config: {
-				pin: { color: 'hi' },
+				pin: { color: generateRandomString() },
 			},
 			properties: undefined,
 			modules: undefined,
