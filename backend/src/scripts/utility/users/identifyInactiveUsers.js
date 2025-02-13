@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const DayJS = require('dayjs');
 const Path = require('path');
 const { v5Path } = require('../../../interop');
 const FS = require('fs');
@@ -26,22 +27,25 @@ const { getLastLoginDate } = require(`${v5Path}/models/loginRecords`);
 
 const DEFAULT_OUT_FILE = 'inactiveUsers.csv';
 
+const formatDate = (date) => (date ? DayJS(date).format('DD/MM/YYYY') : '');
+
 const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 	logger.logInfo(`Writing results to ${outFile}`);
 	const writeStream = FS.createWriteStream(outFile);
-	writeStream.write('Username,First Name,Last Name,Email,Company,Last Login\n');
-	results.forEach(({ user, firstName, lastName, email, company, lastLogin }) => {
-		writeStream.write(`${user},${firstName},${lastName},${email},${company},${lastLogin}\n`);
+	writeStream.write('Username,First Name,Last Name,Email,Company,Last Login,Number of Teamspaces\n');
+	results.forEach(({ user, firstName, lastName, email, company, lastLogin, teamspaceNumber }) => {
+		writeStream.write(`${user},${firstName},${lastName},${email},${company},${formatDate(lastLogin)},${teamspaceNumber}\n`);
 	});
 
 	writeStream.end(resolve);
 });
 
-const getFileEntry = async ({ user, customData }) => {
+const getFileEntry = async ({ user, roles, customData }) => {
 	const lastLogin = await getLastLoginDate(user);
 	const { firstName, lastName, email, billing: { billingInfo: { company } } } = customData;
+	const teamspaceNumber = roles.filter((role) => role.db !== 'admin').length;
 
-	return { user, firstName, lastName, email, company: company ?? '', lastLogin: lastLogin ?? '' };
+	return { user, firstName, lastName, email, teamspaceNumber, company: company ?? '', lastLogin: lastLogin ?? '' };
 };
 
 const run = async (monthsOfInactivity, outFile) => {
@@ -52,6 +56,7 @@ const run = async (monthsOfInactivity, outFile) => {
 
 	const projection = {
 		user: 1,
+		roles: 1,
 		'customData.firstName': 1,
 		'customData.lastName': 1,
 		'customData.email': 1,

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const DayJS = require('dayjs');
 const Path = require('path');
 const { v5Path } = require('../../../interop');
 const FS = require('fs');
@@ -25,12 +26,14 @@ const { getLastLoginDate } = require(`${v5Path}/models/loginRecords`);
 
 const DEFAULT_OUT_FILE = 'orphanedUsers.csv';
 
+const formatDate = (date) => (date ? DayJS(date).format('DD/MM/YYYY') : '');
+
 const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 	logger.logInfo(`Writing results to ${outFile}`);
 	const writeStream = FS.createWriteStream(outFile);
 	writeStream.write('Username,First Name,Last Name,Email,Company,Last Login\n');
 	results.forEach(({ user, firstName, lastName, email, company, lastLogin }) => {
-		writeStream.write(`${user},${firstName},${lastName},${email},${company},${lastLogin}\n`);
+		writeStream.write(`${user},${firstName},${lastName},${email},${company},${formatDate(lastLogin)}\n`);
 	});
 
 	writeStream.end(resolve);
@@ -44,25 +47,6 @@ const getFileEntry = async ({ user, customData }) => {
 };
 
 const run = async (outFile) => {
-	const query = {
-		$expr: {
-			$not: {
-				$gt: [
-					{
-						$size: {
-							$filter: {
-								input: '$roles',
-								as: 'role',
-								cond: { $ne: ['$$role.db', 'admin'] },
-							},
-						},
-					},
-					0,
-				],
-			},
-		},
-	};
-
 	const projection = {
 		user: 1,
 		'customData.firstName': 1,
@@ -71,7 +55,7 @@ const run = async (outFile) => {
 		'customData.billing.billingInfo.company': 1,
 	};
 
-	const orphanedUsers = await getUsersByQuery(query, projection);
+	const orphanedUsers = await getUsersByQuery({ roles: [{ role: 'user', db: 'admin' }] }, projection);
 	const entries = await Promise.all(orphanedUsers.map(getFileEntry));
 
 	await writeResultsToFile(entries, outFile);
