@@ -17,9 +17,9 @@
 
 import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { formatMessage } from '@/v5/services/intl';
-import _ from 'lodash';
+import _, { xor } from 'lodash';
 import { PriorityLevels, RiskLevels, TreatmentStatuses } from '@controls/chip/chip.types';
-import { IStatusConfig, ITicket } from '@/v5/store/tickets/tickets.types';
+import { IStatusConfig, ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
 import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 
@@ -141,3 +141,43 @@ export const hasRequiredViewerProperties = (template) => {
 	const properties = modules.concat(template.properties || []);
 	return properties.some(({ required, type }) => required && ['view', 'coords'].includes(type));
 };
+
+export const COLUMN_NAME_TO_SETTINGS_FORMATTED_LABEL = {
+	id: formatMessage({ id: 'ticketTable.column.visibility.id', defaultMessage: 'ID' }),
+	[BaseProperties.TITLE]: formatMessage({ id: 'ticketTable.column.visibility.title', defaultMessage: 'Title' }),
+	modelName: formatMessage({ id: 'ticketTable.column.visibility.federationContainer', defaultMessage: 'Federation / Container' }),
+	[`properties.${BaseProperties.CREATED_AT}`]: formatMessage({ id: 'ticketTable.column.visibility.createdAt', defaultMessage: 'Created At' }),
+	[`properties.${IssueProperties.ASSIGNEES}`]: formatMessage({ id: 'ticketTable.column.visibility.assignees', defaultMessage: 'Assignees' }),
+	[`properties.${BaseProperties.OWNER}`]: formatMessage({ id: 'ticketTable.column.visibility.owner', defaultMessage: 'Owner' }),
+	[`properties.${IssueProperties.DUE_DATE}`]: formatMessage({ id: 'ticketTable.column.visibility.dueDate', defaultMessage: 'Due Date' }),
+	[`properties.${IssueProperties.PRIORITY}`]: formatMessage({ id: 'ticketTable.column.visibility.priority', defaultMessage: 'Priority' }),
+	[`properties.${BaseProperties.STATUS}`]: formatMessage({ id: 'ticketTable.column.visibility.status', defaultMessage: 'Status' }),
+	[`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`]: formatMessage({ id: 'ticketTable.column.visibility.levelOfRisk', defaultMessage: 'Level of Risk' }),
+	[`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`]: formatMessage({ id: 'ticketTable.column.visibility.treatmentStatus', defaultMessage: 'Treatment Status' }),
+} as const;
+
+export const getAllColumnsName = () => Object.keys(COLUMN_NAME_TO_SETTINGS_FORMATTED_LABEL);
+
+export const getUnavailableColumnsForTemplate = (template: ITemplate) => {
+	const { config, modules } = template;
+	const hasProperties = config?.issueProperties;
+	const hasSafetibase = modules?.some((module) => module.type === 'safetibase');
+
+	const unavailableColumns = [];
+	if (!hasProperties) {
+		unavailableColumns.push(
+			`properties.${IssueProperties.ASSIGNEES}`,
+			`properties.${IssueProperties.DUE_DATE}`,
+			`properties.${IssueProperties.PRIORITY}`,
+		);
+	}
+	if (!hasSafetibase) {
+		unavailableColumns.push(
+			`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`,
+			`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`,
+		);
+	}
+	return unavailableColumns;
+};
+
+export const getAvailableColumnsForTemplate = (template: ITemplate) => xor(getAllColumnsName(), getUnavailableColumnsForTemplate(template));
