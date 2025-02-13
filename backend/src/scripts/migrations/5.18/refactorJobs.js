@@ -28,6 +28,23 @@ const { UUIDToString, stringToUUID } = require(`${v5Path}/utils/helper/uuids`);
 const { createRoles, getRoles, createIndex } = require(`${v5Path}/models/roles`);
 const { generateUUID } = require(`${v5Path}/utils/helper/uuids`);
 const { logger } = require(`${v5Path}/utils/logger`);
+const { actions } = require(`${v5Path}/teamspaces.audits.constants`);
+
+const updateActivityLogs = async (teamspace, roleNamesToIds) => {
+	const logUpdates = [];
+	const query = { $and: [{ action: { $in: [actions.INVITATION_ADDED, actions.INVITATION_REVOKED] } }, { 'data.job': { $exists: true } }] };
+	const logs = await DBHandler.find(teamspace, 'auditing', query, { data: 1 });
+
+	logs.forEach(({ _id, data }) => {
+		if (roleNamesToIds[data.job]) {
+			logUpdates.push({ updateOne: { filter: { _id }, update: { $set: { 'data.role': roleNamesToIds[data.job] }, $unset: { 'data.job': 1 } } } });
+		}
+	});
+
+	if (logUpdates.length) {
+		await DBHandler.bulkWrite(teamspace, 'auditing', logUpdates);
+	}
+};
 
 const updateTicketLogs = async (teamspace, ticketIds, ticketsToTemplates, templateToRoleProps, roleNamesToIds) => {
 	const logUpdates = [];
@@ -286,6 +303,7 @@ const run = async () => {
 		await Promise.all([
 			updateIssuesAndRisks(teamspace, roleNamesToIds),
 			updateTickets(teamspace, roleNamesToIds),
+			updateActivityLogs(teamspace, roleNamesToIds),
 		]);
 	}
 };
