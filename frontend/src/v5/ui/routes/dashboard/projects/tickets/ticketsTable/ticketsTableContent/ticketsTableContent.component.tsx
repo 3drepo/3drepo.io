@@ -16,7 +16,7 @@
  */
 
 import { SearchContext } from '@controls/search/searchContext';
-import { useContext } from 'react';
+import { useCallback, useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
@@ -24,56 +24,40 @@ import { EmptyPageView } from '../../../../../../components/shared/emptyPageView
 import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ResizableTableContextComponent, TableColumn } from '@controls/resizableTableContext/resizableTableContext';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsTableResizableContent, TicketsTableResizableContentProps } from './ticketsTableResizableContent/ticketsTableResizableContent.component';
+import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { getUnavailableColumnsForTemplate } from '../ticketsTable.helper';
+
+const COLUMNS: TableColumn[] = [
+	{ name: 'id', width: 80, minWidth: 25 },
+	{ name: BaseProperties.TITLE, width: 380, minWidth: 25, stretch: true },
+	{ name: 'modelName', width: 145, minWidth: 25 },
+	{ name: `properties.${BaseProperties.CREATED_AT}`, width: 127, minWidth: 25 },
+	{ name: `properties.${IssueProperties.ASSIGNEES}`, width: 96, minWidth: 25 }, 
+	{ name: `properties.${BaseProperties.OWNER}`, width: 52, minWidth: 25 },
+	{ name: `properties.${IssueProperties.DUE_DATE}`, width: 147, minWidth: 25 },
+	{ name: `properties.${IssueProperties.PRIORITY}`, width: 90, minWidth: 25 },
+	{ name: `properties.${BaseProperties.STATUS}`, width: 150, minWidth: 52 },
+	{ name: `modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`, width: 137, minWidth: 25 },
+	{ name: `modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`, width: 134, minWidth: 25 },
+];
 
 export const TicketsTableContent = (props: TicketsTableResizableContentProps) => {
 	const { filteredItems } = useContext(SearchContext);
 	const { template: templateId } = useParams<DashboardTicketsParams>();
+	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const [modelsIds] = useSearchParam('models', Transformers.STRING_ARRAY);
 
-	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
-	const { config, modules } = template;
-	const hasProperties = config?.issueProperties;
-	const hasSafetibase = modules?.some((module) => module.type === 'safetibase');
-	const showModelName = modelsIds.length > 1;
-	
-	const columns: TableColumn[] = [
-		{ name: 'id', width: 80, minWidth: 25 },
-		{ name: BaseProperties.TITLE, width: 380, minWidth: 25, stretch: true },
-		{ name: 'modelName', width: 145, minWidth: 25 },
-		{ name: `properties.${BaseProperties.CREATED_AT}`, width: 127, minWidth: 25 },
-		{ name: `properties.${IssueProperties.ASSIGNEES}`, width: 96, minWidth: 25 }, 
-		{ name: `properties.${BaseProperties.OWNER}`, width: 52, minWidth: 25 },
-		{ name: `properties.${IssueProperties.DUE_DATE}`, width: 147, minWidth: 25 },
-		{ name: `properties.${IssueProperties.PRIORITY}`, width: 90, minWidth: 25 },
-		{ name: `properties.${BaseProperties.STATUS}`, width: 150, minWidth: 52 },
-		{ name: `modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`, width: 137, minWidth: 25 },
-		{ name: `modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`, width: 134, minWidth: 25 },
-	];
-
-	const getHiddenColumns = () => {
-		const cols = [];
+	const getHiddenColumns = useCallback(() => {
+		const showModelName = modelsIds.length > 1;
+		const hiddenCols = getUnavailableColumnsForTemplate(template);
 		if (!showModelName) {
-			cols.push('modelName');
+			hiddenCols.push('modelName');
 		}
-		if (!hasProperties) {
-			cols.push(
-				`properties.${IssueProperties.ASSIGNEES}`,
-				`properties.${IssueProperties.DUE_DATE}`,
-				`properties.${IssueProperties.PRIORITY}`,
-			);
-		}
-		if (!hasSafetibase) {
-			cols.push(
-				`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`,
-				`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`,
-			);
-		}
-		return cols;
-	};
+		return hiddenCols;
+	}, [template]);
 
 	if (!templateAlreadyFetched(template)) {
 		return (
@@ -95,7 +79,7 @@ export const TicketsTableContent = (props: TicketsTableResizableContentProps) =>
 	}
 
 	return (
-		<ResizableTableContextComponent columns={columns} hiddenColumns={getHiddenColumns()} columnGap={1}>
+		<ResizableTableContextComponent columns={COLUMNS} hiddenColumns={getHiddenColumns()} columnGap={1}>
 			<TicketsTableResizableContent {...props} />
 		</ResizableTableContextComponent>
 	);

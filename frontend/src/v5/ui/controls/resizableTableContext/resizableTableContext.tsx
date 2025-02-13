@@ -31,6 +31,8 @@ export interface ResizableTableType {
 	resizerName: string,
 	setIsResizing: (isResizing: boolean) => void,
 	isResizing: boolean,
+	setHiddenColumns: (hiddenColumnsState: React.SetStateAction<string[]>) => void,
+	hiddenColumns: string[],
 	isHidden: (name: string) => boolean,
 	columnGap: number,
 	getRowWidth: () => number,
@@ -47,6 +49,8 @@ const defaultValue: ResizableTableType = {
 	resizerName: '',
 	setIsResizing: () => {},
 	isResizing: false,
+	setHiddenColumns: () => {},
+	hiddenColumns: [],
 	isHidden: () => true,
 	columnGap: 0,
 	getRowWidth: () => 0,
@@ -58,10 +62,10 @@ ResizableTableContext.displayName = 'ResizeableColumns';
 interface Props {
 	children: any;
 	columns: TableColumn[];
-	hiddenColumns: string[];
+	hiddenColumns?: string[];
 	columnGap?: number;
 }
-export const ResizableTableContextComponent = ({ children, columns: inputColumns, hiddenColumns: inputHiddenColumns, columnGap = 0 }: Props) => {
+export const ResizableTableContextComponent = ({ children, columns: inputColumns, hiddenColumns: inputHiddenColumns = [], columnGap = 0 }: Props) => {
 	const [columns, setColumns] = useState([...inputColumns]);
 	const [hiddenColumns, setHiddenColumns] = useState(inputHiddenColumns);
 	const [resizerName, setResizerName] = useState('');
@@ -104,12 +108,6 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 		setColumns([ ...columns ]);
 	};
 
-	useEffect(() => {
-		if (!isEqual(inputHiddenColumns, hiddenColumns)) {
-			setHiddenColumns(inputHiddenColumns);
-		}
-	}, [inputHiddenColumns]);
-
 	return (
 		<ResizableTableContext.Provider value={{
 			getVisibleColumnsWidths,
@@ -121,6 +119,8 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 			resizerName,
 			setIsResizing,
 			isResizing,
+			setHiddenColumns,
+			hiddenColumns,
 			isHidden,
 			getRowWidth,
 			columnGap,
