@@ -130,6 +130,11 @@ const testEndpointRoutes = () => {
 				.send({ user: testUser.user, password: testUser.password })
 				.expect(templates.pageNotFound.status);
 		});
+
+		test('should fail with deprecated jobs endpoints', async () => {
+			await agent.get(`/v5/teamspaces/${ServiceHelper.generateRandomString()}/jobs`)
+				.expect(templates.endpointDecomissioned.status);
+		});
 	});
 };
 
