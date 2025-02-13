@@ -25,7 +25,7 @@ import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { FormHelperText, Tooltip } from '@mui/material';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { CoordsAction, CoordsActionLabel, CoordsActions, CoordsInputContainer, Label, FlexRow, SelectPinButton } from './coordsProperty.styles';
-import { getPinColorPropPath, getPinColorHex, NEW_TICKET_ID, toPin, getPinId, getPinIcon } from './coordsProperty.helpers';
+import { getColorTriggerPropName, getPinColorHexForProperty, NEW_TICKET_ID, toPin, getPinId, getPinIconForProperty } from './coordsProperty.helpers';
 import { TicketContext } from '../../../ticket.context';
 import { formatMessage } from '@/v5/services/intl';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -47,7 +47,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, selectedTemplateId);
 	const selectedPin = TicketsCardHooksSelectors.selectSelectedTicketPinId();
 
-	const colourPropPath = getPinColorPropPath(name, template);
+	const colourPropPath = getColorTriggerPropName(name, template);
 	useWatch({ name:colourPropPath });
 
 	const isNewTicket = !ticket?._id;
@@ -56,8 +56,8 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const editMode = pinToDrop === pinId;
 	const isSelected = selectedPin === pinId;
 	const hasPin = !!value;
-	const colorHex = getPinColorHex(name, template, ticket);
-	const pinIcon = getPinIcon(name, template);
+	const colorHex = getPinColorHexForProperty(name, template, ticket);
+	const pinIcon = getPinIconForProperty(name, template);
 
 	const cancelEdit = () => {
 		if (!editMode) return;

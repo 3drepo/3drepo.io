@@ -40,13 +40,13 @@ const getPinConfig = (pinPath: string, template: ITemplate): PinConfig | boolean
 	return findByName(module.properties, path[2]);
 };
 
-export const getPinColorPropPath = (name, template): string => {
-	const pinConfig = getPinConfig(name, template);
+export const getColorTriggerPropName = (pinPropName, template): string => {
+	const pinConfig = getPinConfig(pinPropName, template);
 	const property = get(pinConfig, 'color.property');
 	if (!property) return '';
 	const module = property.module ? `${TicketBaseKeys.MODULES}.${property.module}` : TicketBaseKeys.PROPERTIES;
-	const propName = property.name;
-	return `${module}.${propName}`;
+	const triggerPropertyName = property.name;
+	return `${module}.${triggerPropertyName}`;
 };
 
 const getColorFromMapping = (ticket: ITicket, pinMapping: IPinColorMapping) => {
@@ -61,16 +61,16 @@ const getColorFromMapping = (ticket: ITicket, pinMapping: IPinColorMapping) => {
 	return rgb ? rgbToHex(rgb) : defaultColorHex;
 };
 
-export const getPinColorHex = (name: string, template: ITemplate, ticket: ITicket) => {
-	const pinConfig = getPinConfig(name, template);
+export const getPinColorHexForProperty = (propertyName: string, template: ITemplate, ticket: ITicket) => {
+	const pinConfig = getPinConfig(propertyName, template);
 	if (typeof pinConfig === 'boolean') return DEFAULT_COLOR; // if default pin with no colouring set
 	if (isArray(pinConfig?.color)) return rgbToHex(pinConfig.color); // a custom colour is set, no mapping
 	if (isObject(pinConfig?.color)) return getColorFromMapping(ticket, pinConfig.color); // a custom colour is set with mapping
 	return DEFAULT_COLOR; // if custom pin with no colouring set
 };
 
-export const getPinIcon =  (name: string, template: ITemplate): PinIcon => {
-	const pinConfig = getPinConfig(name, template);
+export const getPinIconForProperty =  (propertyName: string, template: ITemplate): PinIcon => {
+	const pinConfig = getPinConfig(propertyName, template);
 	if (isObject(pinConfig) && pinConfig.icon) return pinConfig.icon;
 	return 'DEFAULT';
 };
@@ -88,20 +88,20 @@ const pinIconToType = {
 	'MARKER' : 'bookmark',
 };
 
-export const toPin = (propPath: string, template: ITemplate,  ticket: ITicket, isSelected:boolean = false, coordValue?: number[]): IPin => {
-	const colour = hexToGLColor(getPinColorHex(propPath, template, ticket));
-	const icon = getPinIcon(propPath, template);
-	const id = getPinId(propPath, ticket);
+export const toPin = (propName: string, template: ITemplate,  ticket: ITicket, isSelected:boolean = false, coordValue?: number[]): IPin => {
+	const colour = hexToGLColor(getPinColorHexForProperty(propName, template, ticket));
+	const icon = getPinIconForProperty(propName, template);
+	const id = getPinId(propName, ticket);
 	return {
 		id, 
-		position: (coordValue || get(ticket, propPath) as number[]), 
+		position: (coordValue || get(ticket, propName) as number[]), 
 		isSelected,
 		type: pinIconToType[icon] as PinType,
 		colour,
 	};
 };
 
-export const toPinIcon = (type: PinType) => (Object.keys(pinIconToType).find((key) => pinIconToType[key] === type) || 'DEFAULT') as PinIcon;
+export const pinTypeToPinIcon = (type: PinType) => (Object.keys(pinIconToType).find((key) => pinIconToType[key] === type) || 'DEFAULT') as PinIcon;
 
 export const getTicketPins = (templates, ticket, ticketPinId) => {
 	const pinArray = [];
