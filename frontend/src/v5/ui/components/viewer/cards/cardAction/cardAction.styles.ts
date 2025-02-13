@@ -17,10 +17,10 @@
 
 import styled from 'styled-components';
 
-export const CardAction = styled.button`
-	cursor: pointer;
+export const CardAction = styled.button<{ disabled?: boolean }>`
+	color: ${({ theme, disabled }) => disabled ? theme.palette.base.main : theme.palette.secondary.main};
+	cursor: ${({ disabled }) => disabled ? 'unset' : 'pointer'};
 	background-color: transparent;
-	color: ${({ theme }) => theme.palette.secondary.main};
 	margin: 0;
 	height: 32px;
 
