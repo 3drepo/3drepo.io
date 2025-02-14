@@ -225,18 +225,20 @@ export const TicketsTable = () => {
 					<SearchInput
 						placeholder={formatMessage({ id: 'ticketsTable.search.placeholder', defaultMessage: 'Search...' })}
 					/>
-					<NewTicketMenu
-						TriggerButton={(
-							<NewTicketButton
-								startIcon={<AddCircleIcon />}
-								disabled={newTicketButtonIsDisabled}
-							>
-								<FormattedMessage id="ticketsTable.button.newTicket" defaultMessage="New Ticket" />
-							</NewTicketButton>
-						)}
-						disabled={newTicketButtonIsDisabled}
-						onContainerOrFederationClick={setTicketValue}
-					/>
+					{!selectedTemplate.deprecated 
+						&&
+						<NewTicketMenu
+							TriggerButton={(
+								<NewTicketButton
+									startIcon={<AddCircleIcon />}
+									disabled={newTicketButtonIsDisabled}
+								>
+									<FormattedMessage id="ticketsTable.button.newTicket" defaultMessage="New Ticket" />
+								</NewTicketButton>
+							)}
+							disabled={newTicketButtonIsDisabled}
+							onContainerOrFederationClick={setTicketValue}
+						/>}
 				</FlexContainer>
 			</FiltersContainer>
 			<TicketsTableContent setTicketValue={setTicketValue} selectedTicketId={ticketId} groupBy={groupBy}/>

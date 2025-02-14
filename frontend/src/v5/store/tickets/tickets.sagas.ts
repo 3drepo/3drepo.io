@@ -102,7 +102,7 @@ export function* fetchTemplates({ teamspace, projectId, modelId, isFederation, g
 		const fetchModelTemplates = isFederation
 			? API.Tickets.fetchFederationTemplates
 			: API.Tickets.fetchContainerTemplates;
-		const templates = yield fetchModelTemplates(teamspace, projectId, modelId, getDetails);
+		const templates = yield fetchModelTemplates(teamspace, projectId, modelId, getDetails, true);
 
 		yield put(TicketsActions.fetchTemplatesSuccess(modelId, templates));
 	} catch (error) {
