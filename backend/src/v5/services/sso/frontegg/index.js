@@ -61,10 +61,10 @@ FrontEgg.validateAndRefreshToken = async ({ token, refreshToken }) => {
 		const payload = {
 		};
 		const headers = {
-			...await standardHeaders(),
+			Authorization: `Bearer ${token}`,
 			'Content-Type': 'application/json',
-			'frontegg-vendor-host': 'https://app-3nkr2y3u4iwm.frontegg.com',
-			Cookie: `fe_refresh_${config.clientId}=${refreshToken};`,
+			'frontegg-vendor-host': 'https://www.3drepo.local',
+			Cookie: `fe_refresh_${config.clientId.replace('-', '')}=${refreshToken};`,
 
 		};
 
@@ -104,6 +104,7 @@ FrontEgg.generateToken = async (urlUsed, code, challenge) => {
 	const { data } = await post(`${config.appUrl}/oauth/token`, payload, { headers });
 	const expiry = new Date(Date.now() + data.expires_in * 1000);
 
+	console.log(data);
 	return { token: data.access_token, refreshToken: data.refresh_token, expiry };
 };
 
