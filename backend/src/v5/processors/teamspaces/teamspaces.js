@@ -23,6 +23,7 @@ const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { addDefaultTemplates } = require('../../models/tickets.templates');
+const { createAccount } = require('../../services/sso/frontegg');
 const { deleteFavourites } = require('../../models/users');
 const { dropDatabase } = require('../../handler/db');
 const { getAccessibleTeamspaces } = require('../../models/users');
@@ -48,21 +49,23 @@ const removeAllUsersFromTS = async (teamspace) => {
 
 Teamspaces.getAvatar = (teamspace) => getFile(USERS_DB_NAME, AVATARS_COL_NAME, teamspace);
 
-Teamspaces.initTeamspace = async (username) => {
+Teamspaces.initTeamspace = async (teamspaceName, owner) => {
 	try {
+		const teamspaceId = await createAccount(teamspaceName);
 		await Promise.all([
-			createTeamspaceRole(username),
-			addDefaultJobs(username),
+			createTeamspaceRole(teamspaceName),
+			addDefaultJobs(teamspaceName),
 		]);
 		await Promise.all([
-			grantTeamspaceRoleToUser(username, username),
-			createTeamspaceSettings(username),
-			assignUserToJob(username, DEFAULT_OWNER_JOB, username),
-			addDefaultTemplates(username),
+			grantTeamspaceRoleToUser(teamspaceName, owner),
+			createTeamspaceSettings(teamspaceName),
+			assignUserToJob(teamspaceName, DEFAULT_OWNER_JOB, teamspaceName),
+			addDefaultTemplates(teamspaceName),
 		]);
-		await grantAdminToUser(username, username);
+		await grantAdminToUser(teamspaceName, teamspaceName);
 	} catch (err) {
-		logger.logError(`Failed to initialize teamspace for ${username}:${err.message}`);
+		logger.logError(`Failed to initialize teamspace for ${teamspaceName}:${err.message}`);
+		throw err;
 	}
 };
 

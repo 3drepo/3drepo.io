@@ -17,6 +17,7 @@
 
 const { get, post } = require('../../../utils/webRequests');
 const { IdentityClient } = require('@frontegg/client');
+const { generateUUIDString } = require('../../../utils/helper/uuids');
 const { sso: { frontegg: config } } = require('../../../utils/config');
 const queryString = require('querystring');
 const { toBase64 } = require('../../../utils/helper/strings');
@@ -86,6 +87,20 @@ FrontEgg.getUserById = async (userId) => {
 		return data;
 	} catch (err) {
 		throw new Error(`Failed to get user(${userId}) from FrontEgg: ${err.message}`);
+	}
+};
+
+FrontEgg.createAccount = async (name) => {
+	try {
+		const payload = {
+			tenantId: generateUUIDString(),
+			name,
+		};
+		await post(`${config.vendorDomain}/tenants/resources/tenants/v1`, payload, { headers: await standardHeaders() });
+		return payload.tenantId;
+	} catch (err) {
+		console.log(err.response.data);
+		throw new Error(`Failed to create account on FrontEgg: ${err.message}`);
 	}
 };
 
