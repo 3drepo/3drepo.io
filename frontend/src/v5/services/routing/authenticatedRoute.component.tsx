@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { LOGIN_PATH } from '@/v5/ui/routes/routes.constants';
 import { useEffect } from 'react';
 import axios from 'axios';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -27,6 +26,7 @@ import { Route, RouteProps } from './route.component';
 import { useSSOParams } from '../sso.hooks';
 import { postActions } from '../api/sso';
 import { enableKickedOutEvent } from '../realtime/auth.events';
+import { AUTH_PATH } from '@/v5/ui/routes/routes.constants';
 
 const cleanSSOParams = (location) => {
 	const searchParams = new URLSearchParams(location.search);
@@ -46,7 +46,7 @@ const WrapAuthenticationRedirect = ({ children }) => {
 	useEffect(() => {
 		AuthActionsDispatchers.setReturnUrl(cleanSSOParams(location));
 		if (!isAuthenticated && authenticationFetched) {
-			const url = ssoError ? pathName(addParams(LOGIN_PATH, searchParams)) : LOGIN_PATH;
+			const url = ssoError ? pathName(addParams(AUTH_PATH, searchParams)) : AUTH_PATH;
 			history.replace(url);
 		}
 	}, [isAuthenticated, authenticationFetched]);
