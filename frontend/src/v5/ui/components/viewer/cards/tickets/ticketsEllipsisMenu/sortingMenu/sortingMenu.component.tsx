@@ -24,13 +24,10 @@ import { ActionMenuItem } from '@controls/actionMenu';
 import { MenuList } from '@mui/material';
 import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
 import { ExpandIconContainer } from './sortingMenu.styles';
-import { useContext } from 'react';
-import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
 import { PopoverHoveringContent } from '@controls/hoverPopover/popoverHoveringContent.component';
 
 export const SortingProperty = ({ property, title }) => {
 	const sorting = TicketsHooksSelectors.selectSorting();
-	const {} = useContext(ActionMenuContext);
 
 	const sortBy = (prop: TicketsSortingProperty) => {
 		const shouldBeAsc = sorting.property === prop && sorting.order === 'desc';
