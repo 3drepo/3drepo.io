@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,11 +14,23 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
 
-export const Content = styled.div`
-	padding: 18px 75px;
-	height: auto;
-	min-height: calc(100% - 42px);
-	width: 100%;
-`;
+import { Resizer } from '../resizer/resizer.component';
+import { useContext } from 'react';
+import { ResizableTableContext } from '../resizableTableContext';
+import { ResizersContainers, Table } from './resizableTable.styles';
+
+export const ResizableTable = ({ className = '', children }) => {
+	const { getVisibleColumnsNames } = useContext(ResizableTableContext);
+
+	return (
+		<Table className={className}>
+			{children}
+			<ResizersContainers>
+				{getVisibleColumnsNames().map((name) => (
+					<Resizer name={name} key={name} />
+				))}
+			</ResizersContainers>
+		</Table>
+	);
+};

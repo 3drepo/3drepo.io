@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,29 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { CollapsedItemContainer, Container as DashboardList } from '@components/dashboard/dashboardList/dashboardListCollapse/dashboardListCollapse.styles';
 
-export const Container = styled.div`
-	${DashboardList} {
-		&:not(:first-of-type) {
-			padding-top: 17px;
-		}
-		
-		&:not(:last-of-type) {
-			padding-bottom: 17px;
-			border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
-		}
-
-		${CollapsedItemContainer} {
-			margin-top: 28px;
-		}
-	}
-`;
-
-export const Title = styled.div`
-	display: inline;
-	max-width: calc(100% - 30px);
-	text-overflow: ellipsis;
-	overflow: hidden;
-	margin-right: 5px;
+export const Row = styled.div`
+	display: grid;
 `;
