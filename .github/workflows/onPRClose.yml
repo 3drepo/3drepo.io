@@ -54,10 +54,11 @@ jobs:
     - name: Set new branch name value
       run: |
         echo '##vso[task.setvariable variable=branchName]'$( echo ${{ github.head_ref || github.ref_name }} | sed "s/_/-/" | awk '{print tolower($0)}' )
+      id: getChartName
     - name: Azure Pipelines Action
       uses: Azure/pipelines@v1.2
       with:
         azure-devops-project-url: https://dev.azure.com/3drepo/3drepo.io
         azure-pipeline-name: 'destroy'
         azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}
-        azure-pipeline-variables:  '{"branchName": "${{ branchName }}"}'
+        azure-pipeline-variables:  '{"branchName": "${{ steps.getChartName.outputs.stdout }}"}'
