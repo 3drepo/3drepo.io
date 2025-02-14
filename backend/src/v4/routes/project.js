@@ -17,13 +17,14 @@
 
 "use strict";
 (function() {
-
+	const { v5Path } = require("../../interop");
 	const express = require("express");
 	const router = express.Router({mergeParams: true});
 	const responseCodes = require("../response_codes");
 	const middlewares = require("../middlewares/middlewares");
 	const Project = require("../models/project");
 	const utils = require("../utils");
+	const { routeDecommissioned } = require(`${v5Path}/middleware/common`);
 
 	/**
 	 * @api {post} /:teamspace/projects Create project
@@ -204,6 +205,8 @@
 	 * }
 	 */
 	router.patch("/projects/:project", middlewares.project.canUpdate, updateProject);
+
+	router.get("/projects/:project/models", routeDecommissioned("GET", "/v5/teamspaces/{teamspace}/projects/{project}/{modelType}"));
 
 	/**
 	 * @api {get} /:teamspace/projects List projects

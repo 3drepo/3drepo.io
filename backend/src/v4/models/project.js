@@ -24,9 +24,9 @@
 	const responseCodes = require("../response_codes.js");
 	const utils = require("../utils");
 	const _ = require("lodash");
-	const { changePermissions, findModelSettings, removePermissionsFromModels } = require("./modelSetting");
 	const { publish } = require(`${v5Path}/services/eventsManager/eventsManager`);
 	const { events } = require(`${v5Path}/services/eventsManager/eventsManager.constants`);
+	const { changePermissions, findModelSettings, removePermissionsFromModels } = require("./modelSetting");
 
 	const PROJECTS_COLLECTION_NAME = "projects";
 

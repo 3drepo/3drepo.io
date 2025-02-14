@@ -25,6 +25,7 @@ const logger = require('../../../src/v4/logger.js');
 
 const { systemLogger } = logger;
 const responseCodes = require('../../../src/v4/response_codes.js');
+const { templates:v5Responses } = require('../../../src/v5/utils/responseCodes.js');
 const async = require('async');
 const C = require('../../../src/v4/constants');
 const { findModelSettings } = require('../../../src/v4/models/modelSetting.js');
@@ -615,6 +616,17 @@ describe('Projects', () => {
 				done(err);
 			});
 	});
+
+	it('list all project models should fail;', (done) => {
+		agent.get(`/${username}/projects/${projectName}/models`)
+			.expect(v5Responses.endpointDecommissioned.status, (err, res) => {
+				expect(res.body.message).to.equal(
+					'This endpoint is no longer available. Please use GET /v5/teamspaces/{teamspace}/projects/{project}/{modelType} instead.'
+				);
+				done(err);
+			});
+	});
+
 
 	it('should able to delete project', (done) => {
 		const project = {
