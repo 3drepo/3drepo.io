@@ -196,32 +196,22 @@ TeamspaceSetting.getMembersInfo = async (teamspace) => {
 	});
 };
 
-TeamspaceSetting.getTeamspaceActiveLicenses = async (teamspace) => {
-	// get all licenses, filter them to includes ones with a valid type and an expiry date in the future
+// get licenses with a valid type, return as entries [[licenseType, licenseObject]]
+TeamspaceSetting.getTeamspaceValidLicenses = async (teamspace) => {
 	const licenses = await TeamspaceSetting.getSubscriptions(teamspace);
-	const currentDate = new Date();
-	return Object.fromEntries(
-		Object.entries(licenses).filter(
-			([licenseType, license]) => SUBSCRIPTION_TYPES.includes(licenseType)
-				&& (license.expiryDate === undefined || license.expiryDate > currentDate),
-		),
-	);
+	return Object.entries(licenses).filter(([licenseType]) => SUBSCRIPTION_TYPES.includes(licenseType));
 };
 
-TeamspaceSetting.getTeamspaceExpiredLicenses = async (teamspace) => {
-	// get all licenses, filter them to includes ones with a valid type and an expiry date in the past
-	const licenses = await TeamspaceSetting.getSubscriptions(teamspace);
+// filter license entries to only include active ones
+TeamspaceSetting.extractTeamspaceActiveLicenses = (licenseEntries) => {
 	const currentDate = new Date();
-	return Object.fromEntries(
-		Object.entries(licenses).filter(
-			([licenseType, license]) => SUBSCRIPTION_TYPES.includes(licenseType) && license.expiryDate < currentDate,
-		),
-	);
+	return licenseEntries.filter(([, license]) => license.expiryDate === undefined || license.expiryDate > currentDate);
 };
 
-TeamspaceSetting.countLicenses = async (teamspace) => {
-	const licenses = await TeamspaceSetting.getSubscriptions(teamspace);
-	return Object.keys(licenses).filter((licenceType) => SUBSCRIPTION_TYPES.includes(licenceType)).length;
+// filter license entries to only include expired ones
+TeamspaceSetting.extractTeamspaceExpiredLicenses = (licenseEntries) => {
+	const currentDate = new Date();
+	return licenseEntries.filter(([, license]) => license.expiryDate < currentDate);
 };
 
 TeamspaceSetting.createTeamspaceSettings = async (teamspace) => {

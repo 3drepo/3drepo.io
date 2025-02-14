@@ -15,39 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const DayJS = require('dayjs');
 const Path = require('path');
-const FS = require('fs');
 const { v5Path } = require('../../../interop');
 
-const { logger } = require(`${v5Path}/utils/logger`);
-
-const { getTeamspaceActiveLicenses } = require(`${v5Path}/models/teamspaceSettings`);
-const { getTeamspaceList, parsePath } = require('../../utils');
+const { extractTeamspaceActiveLicenses } = require(`${v5Path}/models/teamspaceSettings`);
+const { getTeamspaceList, parsePath, writeLicensesToFile } = require('../../utils');
 
 const { getTeamspaceAggregatesAndLicenses } = require(`${v5Path}/processors/teamspaces/teamspaces`);
 
-const formatDate = (date) => (date ? DayJS(date).format('DD/MM/YYYY') : '');
-
-const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
-	logger.logInfo(`Writing results to ${outFile}`);
-	const writeStream = FS.createWriteStream(outFile);
-	writeStream.write('TeamspaceName,LicenseCount,TeamspaceDataTotal(MB),TeamspaceDataUsed(MB),LicenseType,LicenseDataTotal(MB),Collaborators,ExpiryDate\n');
-	// for each teamspace, write each active license along with some teamspace aggregate data
-	results.forEach(({ teamspaceName, licenseCount, dataTotalMB, dataUsedMB, licenses }) => {
-		Object.entries(licenses).forEach(([licenseType, license]) => {
-			const { collaborators, expiryDate, data } = license;
-			writeStream.write(`${teamspaceName},${licenseCount},${dataTotalMB},${dataUsedMB},${licenseType},${data},${collaborators},${formatDate(expiryDate)}\n`);
-		});
-	});
-
-	writeStream.end(resolve);
-});
-
 const run = async (outFile) => {
-	const teamspaces = await getTeamspaceList();
-	const results = await getTeamspaceAggregatesAndLicenses(teamspaces, getTeamspaceActiveLicenses);
-	await writeResultsToFile(results, parsePath(outFile));
+	const teamspaceNames = await getTeamspaceList();
+	const results = await getTeamspaceAggregatesAndLicenses(teamspaceNames, extractTeamspaceActiveLicenses);
+	await writeLicensesToFile(results, parsePath(outFile));
 };
 
 const genYargs = /* istanbul ignore next */ (yargs) => {
@@ -56,10 +35,10 @@ const genYargs = /* istanbul ignore next */ (yargs) => {
 		{
 			describe: 'name of output CSV',
 			type: 'string',
-			default: 'licensedTeamspaces.csv',
+			default: 'activeLicenses.csv',
 		});
 	return yargs.command(commandName,
-		'Get a list of all teamspaces with active license',
+		'Get a list of all active licenses',
 		argsSpec,
 		(argv) => run(argv.outFile));
 };
