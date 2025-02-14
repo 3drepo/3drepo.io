@@ -51,9 +51,9 @@ jobs:
     name: Call Azure Destroy Pipeline
     runs-on: ubuntu-latest
     steps:
-    - script: |
+    - name: Set new branch name value
+      run: |
         echo '##vso[task.setvariable variable=branchName]'$( echo ISSUE_123 | sed "s/_/-/" | awk '{print tolower($0)}' )
-      displayName: Set new branch name value
     - name: Azure Pipelines Action
       uses: Azure/pipelines@v1.2
       with:
