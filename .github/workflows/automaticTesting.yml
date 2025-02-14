@@ -14,7 +14,7 @@ permissions:
 jobs:
   run-backend-tests:
     name: Run Backend tests
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     services:
       rabbitmq:
         image: rabbitmq:3.10.5-management
