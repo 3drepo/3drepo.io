@@ -65,14 +65,31 @@ const validateTicket = (isNewTicket) => async (req, res, next) => {
 const bodyContainsTicketsArray = async (req, res, next) => {
 	try {
 		const tickets = req?.body?.tickets;
+
 		if (!tickets || !isArray(tickets) || !tickets.length) {
 			throw createResponseCode(
 				templates.invalidArguments, 'Expected body to contain an array of tickets');
 		}
+
 		await next();
 	} catch (err) {
 		respond(req, res, err);
 	}
+};
+
+const extractUniqueProperties = (template) => {
+	const uniqueProps = new Map();
+
+	template.properties.forEach((property) => {
+		if (property.unique) uniqueProps.set(property.name, new Set());
+	});
+	template.modules.forEach((templateModule) => {
+		templateModule.properties.forEach((property) => {
+			if (property.unique) uniqueProps.set(`${templateModule.name}..${property.name}`, new Set());
+		});
+	});
+
+	return uniqueProps;
 };
 
 const validateTicketImportData = (isNew) => async (req, res, next) => {
@@ -85,6 +102,26 @@ const validateTicketImportData = (isNew) => async (req, res, next) => {
 			throw createResponseCode(templates.invalidArguments, 'Template has been deprecated');
 		}
 
+		const uniqueProps = extractUniqueProperties(template);
+
+		for (const { modules, properties } of req.body.tickets) {
+			for (const [key, value] of uniqueProps) {
+				const keyArray = key.split('..');
+
+				if (keyArray.length > 1) {
+					if (value.has(modules[keyArray[0]][keyArray[1]])) {
+						throw createResponseCode(templates.invalidArguments, `The unique property ${keyArray[0]}.${keyArray[1]} can not have the same value multiple times.`);
+					}
+					value.add(modules[keyArray[0]][keyArray[1]]);
+				} else {
+					if (value.has(properties[keyArray[0]])) {
+						throw createResponseCode(templates.invalidArguments, `The unique property ${keyArray[0]} can not have the same value multiple times.`);
+					}
+					value.add(properties[keyArray[0]]);
+				}
+			}
+		}
+
 		req.body.tickets = await Promise.all(req.body.tickets.map((ticket, i) => {
 			const existingData = isNew ? undefined : req.ticketsData[i];
 			return processTicket(teamspace,
@@ -94,6 +131,7 @@ const validateTicketImportData = (isNew) => async (req, res, next) => {
 		await next();
 	} catch (err) {
 		const response = codeExists(err.code) ? err : createResponseCode(templates.invalidArguments, err.message);
+
 		respond(req, res, response);
 	}
 };

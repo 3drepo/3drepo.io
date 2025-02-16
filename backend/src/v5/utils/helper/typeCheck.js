@@ -27,6 +27,8 @@ TypeChecker.isDate = _.isDate;
 TypeChecker.isString = (value) => _.isString(value);
 TypeChecker.isObject = (value) => _.isObject(value) && !TypeChecker.isArray(value);
 TypeChecker.isNumber = (value) => _.isNumber(value);
+TypeChecker.isBooleanString = (value) => value?.toLowerCase() === 'true' || value?.toLowerCase() === 'false';
+TypeChecker.isNumberString = (value) => !_.isNaN(Number(value));
 TypeChecker.isUUIDString = (uuid) => {
 	if (!TypeChecker.isString(uuid)) return false;
 	const hasMatch = uuid.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);

@@ -67,6 +67,23 @@ const testToConstantCase = () => {
 	});
 };
 
+const testToBoolean = () => {
+	describe.each([
+		[undefined, false],
+		['one two three', false],
+		['TRUE', true],
+		['True', true],
+		['true', true],
+		['FALSE', false],
+		['False', false],
+		['false', false],
+	])('To Boolean', (source, target) => {
+		test(`with ${source} should result in ${target}`, () => {
+			matchHelper(StringHelper.toBoolean, source, target);
+		});
+	});
+};
+
 const testGenerateHashString = () => {
 	describe('Generate Hash String', () => {
 		test('with no length parameter passed', () => {
@@ -119,6 +136,7 @@ describe('utils/helper/strings', () => {
 	testGetURLDomain();
 	testToCamelCase();
 	testToConstantCase();
+	testToBoolean();
 	testGenerateHashString();
 	testFormatPronouns();
 	testEscapeRegexChrs();
