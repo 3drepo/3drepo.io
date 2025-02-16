@@ -50,6 +50,11 @@ User.getUserByQuery = async (query, projection) => {
 	return userDoc;
 };
 
+User.getUserRefId = async (user) => {
+	const { customData: { userId } } = await User.getUserByUsername(user, { 'customData.userId': 1 });
+	return userId;
+};
+
 User.getUserByUsername = (user, projection) => User.getUserByQuery({ user }, projection);
 
 User.getUserByEmail = (email, projection) => User.getUserByQuery({ 'customData.email': email }, projection);

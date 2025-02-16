@@ -17,16 +17,23 @@
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../models/users.constants');
 const { addDefaultJobs, assignUserToJob, getJobsToUsers, removeUserFromJobs } = require('../../models/jobs');
+const { addUserToAccount, createAccount } = require('../../services/sso/frontegg');
 const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revokeTeamspaceRoleFromUser } = require('../../models/roles');
-const { createTeamspaceSettings, getAddOns, getMembersInfo, grantAdminToUser, removeUserFromAdminPrivilege } = require('../../models/teamspaceSettings');
+const {
+	createTeamspaceSettings,
+	getAddOns,
+	getMembersInfo,
+	getTeamspaceRefId,
+	grantAdminToUser,
+	removeUserFromAdminPrivilege,
+} = require('../../models/teamspaceSettings');
+const { getAccessibleTeamspaces, getUserRefId } = require('../../models/users');
 const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { addDefaultTemplates } = require('../../models/tickets.templates');
-const { createAccount } = require('../../services/sso/frontegg');
 const { deleteFavourites } = require('../../models/users');
 const { dropDatabase } = require('../../handler/db');
-const { getAccessibleTeamspaces } = require('../../models/users');
 const { isTeamspaceAdmin } = require('../../utils/permissions/permissions');
 const { logger } = require('../../utils/logger');
 const { removeAllTeamspaceNotifications } = require('../../models/notifications');
@@ -57,12 +64,14 @@ Teamspaces.initTeamspace = async (teamspaceName, owner) => {
 			addDefaultJobs(teamspaceName),
 		]);
 		await Promise.all([
-			grantTeamspaceRoleToUser(teamspaceName, owner),
-			createTeamspaceSettings(teamspaceName),
+			createTeamspaceSettings(teamspaceName, teamspaceId),
 			assignUserToJob(teamspaceName, DEFAULT_OWNER_JOB, teamspaceName),
 			addDefaultTemplates(teamspaceName),
 		]);
-		await grantAdminToUser(teamspaceName, teamspaceName);
+		await Promise.all([
+			Teamspaces.addTeamspaceMember(teamspaceName, owner),
+			grantAdminToUser(teamspaceName, owner),
+		]);
 	} catch (err) {
 		logger.logError(`Failed to initialize teamspace for ${teamspaceName}:${err.message}`);
 		throw err;
@@ -115,6 +124,18 @@ Teamspaces.getQuotaInfo = async (teamspace) => {
 		data: { available: quotaInfo.data, used: spaceUsed },
 		seats: { available: quotaInfo.collaborators, used: collaboratorsUsed },
 	};
+};
+
+Teamspaces.addTeamspaceMember = async (teamspace, userToAdd) => {
+	const [accountId, userId] = await Promise.all([
+		getTeamspaceRefId(teamspace),
+		getUserRefId(userToAdd),
+
+	]);
+	await Promise.all([
+		addUserToAccount(accountId, userId),
+		grantTeamspaceRoleToUser(teamspace, userToAdd),
+	]);
 };
 
 Teamspaces.removeTeamspaceMember = async (teamspace, userToRemove) => {

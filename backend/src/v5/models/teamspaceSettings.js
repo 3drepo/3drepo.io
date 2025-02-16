@@ -210,12 +210,18 @@ TeamspaceSetting.getTeamspaceExpiredLicenses = (teamspace) => {
 	return teamspaceSettingQuery(teamspace, query, { _id: 1, subscriptions: 1 });
 };
 
-TeamspaceSetting.createTeamspaceSettings = async (teamspace) => {
+TeamspaceSetting.createTeamspaceSettings = async (teamspace, teamspaceId) => {
 	const settings = { _id: teamspace,
+		refId: teamspaceId,
 		topicTypes: DEFAULT_TOPIC_TYPES,
 		riskCategories: DEFAULT_RISK_CATEGORIES,
 		permissions: [] };
 	await db.insertOne(teamspace, TEAMSPACE_SETTINGS_COL, settings);
+};
+
+TeamspaceSetting.getTeamspaceRefId = async (teamspace) => {
+	const { refId } = await teamspaceSettingQuery(teamspace, { _id: teamspace }, { refId: 1 });
+	return refId;
 };
 
 const grantPermissionToUser = async (teamspace, username, permission) => {

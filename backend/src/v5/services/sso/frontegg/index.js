@@ -21,6 +21,7 @@ const { generateUUIDString } = require('../../../utils/helper/uuids');
 const { sso: { frontegg: config } } = require('../../../utils/config');
 const queryString = require('querystring');
 const { toBase64 } = require('../../../utils/helper/strings');
+const { logger } = require('../../../utils/logger');
 
 const FrontEgg = {};
 
@@ -99,8 +100,23 @@ FrontEgg.createAccount = async (name) => {
 		await post(`${config.vendorDomain}/tenants/resources/tenants/v1`, payload, { headers: await standardHeaders() });
 		return payload.tenantId;
 	} catch (err) {
-		console.log(err.response.data);
+		logger.logError(`Failed to create account: ${err?.response?.data} `);
 		throw new Error(`Failed to create account on FrontEgg: ${err.message}`);
+	}
+};
+
+FrontEgg.addUserToAccount = async (accountId, userId) => {
+	try {
+		const payload = {
+			tenantId: accountId,
+			validateTenantExist: true,
+			skipInviteEmail: false,
+		};
+		await post(`${config.vendorDomain}/identity/resources/users/v1/${userId}/tenant`, payload, { headers: await standardHeaders() });
+		return payload.tenantId;
+	} catch (err) {
+		logger.logError(`Failed to add user to account: ${JSON.stringify(err?.response?.data)} `);
+		throw new Error(`Failed to add ${userId} to ${account} on Frontegg: ${err.message}`);
 	}
 };
 
