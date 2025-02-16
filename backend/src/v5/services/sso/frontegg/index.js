@@ -113,7 +113,6 @@ FrontEgg.addUserToAccount = async (accountId, userId) => {
 			skipInviteEmail: false,
 		};
 		await post(`${config.vendorDomain}/identity/resources/users/v1/${userId}/tenant`, payload, { headers: await standardHeaders() });
-		return payload.tenantId;
 	} catch (err) {
 		logger.logError(`Failed to add user to account: ${JSON.stringify(err?.response?.data)} `);
 		throw new Error(`Failed to add ${userId} to ${account} on Frontegg: ${err.message}`);
