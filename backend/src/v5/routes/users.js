@@ -47,7 +47,7 @@ const getProfile = async (req, res) => {
 	try {
 		const user = getUserFromSession(req.session);
 		const profile = await Users.getProfileByUsername(user);
-		respond(req, res, templates.ok, profile);
+		respond(req, res, templates.ok, { ...profile, authorisedTeamspace: req.session.user.auth.authorisedTeamspace });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);

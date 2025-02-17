@@ -17,7 +17,13 @@
 
 const { codeExists, createResponseCode, templates } = require('../../utils/responseCodes');
 const { fromBase64, toBase64 } = require('../../utils/helper/strings');
-const { generateAuthenticationCodeUrl, generateToken, getUserById, getUserInfoFromToken } = require('../../services/sso/frontegg');
+const {
+	generateAuthenticationCodeUrl,
+	generateToken,
+	getTeamspaceByAccount,
+	getUserById,
+	getUserInfoFromToken,
+} = require('../../services/sso/frontegg');
 const { redirectWithError, setSessionInfo } = require('.');
 const { addPkceProtection } = require('./pkce');
 const { createNewUserRecord } = require('../../processors/users');
@@ -68,10 +74,14 @@ const determineUsername = async (userId, email) => {
 const getUserDetails = async (req, res, next) => {
 	try {
 		const { auth } = req;
-		const { userId, email } = await getUserInfoFromToken(auth.tokenInfo.token);
+		const { userId, email, authAccount, accounts } = await getUserInfoFromToken(auth.tokenInfo.token);
 		const username = await determineUsername(userId, email);
 
+		const teamspaces = await Promise.all(accounts.map(getTeamspaceByAccount));
+
 		auth.userId = userId;
+		auth.teamspaces = teamspaces.filter((entry) => !!entry);
+		auth.authorisedTeamspace = await getTeamspaceByAccount(authAccount);
 
 		req.loginData = {
 			auth, username,
