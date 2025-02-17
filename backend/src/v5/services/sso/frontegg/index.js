@@ -26,7 +26,7 @@ const { toBase64 } = require('../../../utils/helper/strings');
 
 const Frontegg = {};
 
-const identityClient = new IdentityClient({ FRONTEGG_CLIENT_ID: config.clientId, FRONTEGG_API_KEY: config.key });
+const identityClient = config ? new IdentityClient({ FRONTEGG_CLIENT_ID: config.clientId, FRONTEGG_API_KEY: config.key }) : null;
 
 const generateVendorToken = async () => {
 	const payload = {
