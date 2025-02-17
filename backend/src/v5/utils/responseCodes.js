@@ -100,6 +100,13 @@ ResponseCodes.templates = {
 	// Queue related
 	queueConnectionError: { message: 'There was a problem connecting to the queue. Please contact support.', status: 500 },
 	queueInsertionFailed: { message: 'Failed to insert an item into the queue. Please contact support.', status: 500 },
+
+	// Texture related
+	textureNotFound: { message: 'Texture not found.', status: 404 },
+
+	// Mesh related
+	meshNotFound: { message: 'Mesh not found.', status: 404 },
+	meshDataNotFound: { message: 'Could not find mesh data for the mesh', status: 404 },
 };
 
 Object.keys(ResponseCodes.templates).forEach((key) => {

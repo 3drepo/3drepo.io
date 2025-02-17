@@ -45,9 +45,11 @@ const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helpe
 const { MODEL_COMMENTER, MODEL_VIEWER, PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { isArray } = require(`${src}/utils/helper/typeCheck`);
+
 const FilesManager = require(`${src}/services/filesManager`);
 const { modelTypes, statusCodes } = require(`${src}/models/modelSettings.constants`);
 const { actions: actionTypes } = require(`${src}/models/teamspaces.audits.constants`);
+const DbConstants = require(`${src}/handler/db.constants`);
 
 const { statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
 const { generateFullSchema } = require(`${src}/schemas/tickets/templates`);
@@ -186,6 +188,32 @@ db.createRevision = async (teamspace, project, model, revision, modelType) => {
 	delete formattedRevision.imageData;
 	delete formattedRevision.thumbnailData;
 	await DbHandler.insertOne(teamspace, historyCol, formattedRevision);
+};
+
+db.createStash = async (teamspace, stashEntry) => {
+	const modelId = stashEntry.model;
+	const stashCol = stashEntry.repobundleStash ? `${modelId}.stash.repobundles` : `${modelId}.stash.unity3d`;
+
+	if (stashEntry.jsonFiles) {
+		for (let i = 0; i < stashEntry.jsonFiles.length; i++) {
+			db.createJsonFile(teamspace, modelId, stashEntry.jsonFiles[i], stashEntry.jsonData[i]);
+		}
+	}
+
+	const formattedStashEntry = {
+		...stashEntry,
+		_id: stringToUUID(stashEntry._id),
+		model: modelId,
+	};
+
+	delete formattedStashEntry.jsonData;
+	delete formattedStashEntry.repobundleStash;
+	await DbHandler.insertOne(teamspace, stashCol, formattedStashEntry);
+};
+
+db.createJsonFile = (teamspace, modelId, filename, buffer) => {
+	const stashFileCol = `${modelId}.stash.json_mpc.ref`;
+	FilesManager.storeFile(teamspace, stashFileCol, filename, buffer);
 };
 
 db.createCalibration = async (teamspace, project, drawing, revision, calibration) => {
@@ -330,6 +358,35 @@ db.createScene = (teamspace, project, modelId, rev, nodes, meshMap) => Promise.a
 	FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, `${UUIDToString(rev._id)}/idToMeshes.json`, JSON.stringify(meshMap)),
 
 ]);
+
+db.createStashNodes = async (teamspace, modelId, nodes) => {
+	const collection = `${modelId}.stash.3drepo`;
+	await DbHandler.insertMany(teamspace, collection, nodes);
+};
+
+db.createRepoBundle = async (teamspace, modelId, bundleId, data) => {
+	const bundleFileName = `${bundleId}`;
+	const collection = `${modelId}.stash.repobundles.ref`;
+	await FilesManager.storeFile(teamspace, collection, bundleFileName, data);
+};
+
+db.createUnityBundle = async (teamspace, modelId, bundleId, data) => {
+	const bundleFileName = `${bundleId}.unity3d`;
+	const collection = `${modelId}.stash.unity3d.ref`;
+	await FilesManager.storeFile(teamspace, collection, bundleFileName, data);
+};
+
+db.createBundleMapping = async (teamspace, modelId, bundleId, data) => {
+	const fileName = `${bundleId}.json.mpc`;
+	const collection = `${modelId}.stash.json_mpc.ref`;
+	await FilesManager.storeFile(teamspace, collection, fileName, data);
+};
+
+db.createFile = async (teamspace, modelId, fileId, data) => {
+	const collection = `${modelId}.scene.ref`;
+	await FilesManager.storeFile(teamspace, collection, fileId, data);
+};
+
 ServiceHelper.createQueryString = (options) => {
 	const keys = Object.keys(deleteIfUndefined(options, true));
 
@@ -368,6 +425,76 @@ ServiceHelper.generateRandomIfcGuid = () => ServiceHelper.generateRandomString(2
 ServiceHelper.generateRandomRvtId = () => Math.floor(Math.random() * 10000);
 
 ServiceHelper.generateRandomURL = () => `http://${ServiceHelper.generateRandomString()}.com/`;
+
+ServiceHelper.generateRandomMatrix = (size) => {
+	const matrix = new Array(size);
+	for (let i = 0; i < size; i++) {
+		matrix[i] = new Array(size);
+		for (let j = 0; j < size; j++) {
+			matrix[i][j] = ServiceHelper.generateRandomNumber();
+		}
+	}
+	return matrix;
+};
+
+ServiceHelper.generateRandomBinary3DVectorData = (size, isLittleEndian = false) => {
+	const vectorArray = [];
+	for (let i = 0; i < size; i++) {
+		const vec = [];
+		vec.push(ServiceHelper.generateRandomNumber());
+		vec.push(ServiceHelper.generateRandomNumber());
+		vec.push(ServiceHelper.generateRandomNumber());
+		vectorArray.push(vec);
+	}
+
+	const FLOAT_BYTE_SIZE = 4;
+	const VEC_SIZE = 3 * FLOAT_BYTE_SIZE;
+	const bufferLength = vectorArray.length * VEC_SIZE;
+
+	const buffer = Buffer.alloc(bufferLength);
+	const writeFloat32 = (!isLittleEndian ? buffer.writeFloatBE : buffer.writeFloatLE).bind(buffer);
+
+	for (let i = 0; i < vectorArray.length; i++) {
+		const faceOffset = i * VEC_SIZE;
+		const vec = vectorArray[i];
+		writeFloat32(vec[0], faceOffset);
+		writeFloat32(vec[1], faceOffset + (1 * FLOAT_BYTE_SIZE));
+		writeFloat32(vec[2], faceOffset + (2 * FLOAT_BYTE_SIZE));
+	}
+
+	return { vectorArray, buffer, bufferLength };
+};
+
+ServiceHelper.generateRandomBinaryFaceData = (size, isLittleEndian = false) => {
+	const faceArray = [];
+	for (let i = 0; i < size; i++) {
+		const face = [];
+		for (let e = 0; e < 3; e++) {
+			const randNum = ServiceHelper.generateRandomNumber(0, 4294967295);
+			const randInt = Math.round(randNum);
+			face.push(randInt);
+		}
+		faceArray.push(face);
+	}
+
+	const INT_BYTE_SIZE = 4;
+	const FACE_SIZE = 4 * INT_BYTE_SIZE;
+	const bufferLength = faceArray.length * FACE_SIZE;
+
+	const buffer = Buffer.alloc(bufferLength);
+	const writeUint32 = (!isLittleEndian ? buffer.writeUInt32BE : buffer.writeUInt32LE).bind(buffer);
+
+	for (let i = 0; i < faceArray.length; i++) {
+		const faceOffset = i * FACE_SIZE;
+		const face = faceArray[i];
+		writeUint32(3, faceOffset); // First of the face is the number of indices in the face
+		writeUint32(face[0], faceOffset + (1 * INT_BYTE_SIZE));
+		writeUint32(face[1], faceOffset + (2 * INT_BYTE_SIZE));
+		writeUint32(face[2], faceOffset + (3 * INT_BYTE_SIZE));
+	}
+
+	return { faceArray, buffer, bufferLength };
+};
 
 ServiceHelper.generateCustomStatusValues = () => Object.values(statusTypes).map((type) => ({
 	name: ServiceHelper.generateRandomString(15),
@@ -480,8 +607,11 @@ ServiceHelper.generateRandomModel = ({ modelType = modelTypes.CONTAINER, viewers
 
 ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, modelType, timestamp, status) => {
 	const _id = ServiceHelper.generateUUIDString();
+	const shared_id = stringToUUID(DbConstants.MASTER_BRANCH);
 	const entry = deleteIfUndefined({
 		_id,
+		shared_id,
+		type: 'revision',
 		tag: modelType === modelTypes.DRAWING ? undefined : ServiceHelper.generateRandomString(),
 		status,
 		statusCode: modelType === modelTypes.DRAWING ? statusCodes[0].code : undefined,
@@ -505,6 +635,38 @@ ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, modelType
 			entry.thumbnailData = ServiceHelper.generateRandomString();
 		}
 	}
+
+	return entry;
+};
+
+ServiceHelper.generateStashEntry = (revId, modelId, teamspace, repobundleStash) => {
+	const _id = revId;
+	const asset1Id = ServiceHelper.generateUUIDString();
+	const asset1Data = `{"testData": "${ServiceHelper.generateRandomString()}"}`;
+
+	const asset2Id = ServiceHelper.generateUUIDString();
+	const asset2Data = `{"testData": "${ServiceHelper.generateRandomString()}"}`;
+
+	const assets = [asset1Id, asset2Id];
+	const jsonFiles = [asset1Id, asset2Id];
+	const jsonData = [asset1Data, asset2Data];
+
+	const offset = [
+		ServiceHelper.generateRandomNumber(),
+		ServiceHelper.generateRandomNumber(),
+		ServiceHelper.generateRandomNumber(),
+	];
+
+	const entry = deleteIfUndefined({
+		_id,
+		assets,
+		database: teamspace,
+		model: modelId,
+		offset,
+		jsonFiles,
+		jsonData,
+		repobundleStash,
+	});
 
 	return entry;
 };

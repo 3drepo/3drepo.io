@@ -262,7 +262,6 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	});
 
 	afterAll(() => Promise.all([
-		ServiceHelper.queue.purgeQueues(),
 		ServiceHelper.closeApp(server),
 	]));
 

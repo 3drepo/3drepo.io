@@ -23,6 +23,14 @@ const { generateRandomString, generateUUID, generateRandomDate, generateRandomOb
 
 const { modelTypes, getInfoFromCode, processStatuses } = require(`${src}/models/modelSettings.constants`);
 
+// Inclusion of Chat and EventsListener below includes session downstream. Need to mock
+// these two to ensure we are not trying to create a real session configuration there
+jest.mock('express-session', () => () => {});
+jest.mock('../../../../../src/v5/handler/db', () => ({
+	...jest.requireActual('../../../../../src/v5/handler/db'),
+	getSessionStore: () => {},
+}));
+
 jest.mock('../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
 

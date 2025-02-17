@@ -31,6 +31,8 @@ Objects.getNestedProperty = _.get;
 
 Objects.setNestedProperty = _.set;
 
+Objects.isObject = _.isObject;
+
 Objects.deleteIfUndefined = (obj, includeNull) => {
 	const res = { ...obj };
 	Object.keys(obj).forEach((key) => {

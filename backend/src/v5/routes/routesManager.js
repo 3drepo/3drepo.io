@@ -17,21 +17,29 @@
 
 const RoutesManager = {};
 const AadRoutes = require('./sso/aad');
+const BundleMappingsRoutes = require('./teamspaces/projects/models/containers/bundleMappings');
+const BundleRoutes = require('./teamspaces/projects/models/containers/bundles');
 const CalibrationRoutes = require('./teamspaces/projects/models/drawings/calibrations');
+const CreateAssetMapRoutes = require('./teamspaces/projects/models/common/assetMaps');
+const CreateAssetMetaRoutes = require('./teamspaces/projects/models/common/metadata');
 const CreateGeneralRevisionRoutes = require('./teamspaces/projects/models/common/revisions');
 const CreateGroupRoutes = require('./teamspaces/projects/models/common/groups');
 const CreateModelGeneralRoutes = require('./teamspaces/projects/models/common/general');
+const CreateModelPropertiesRoutes = require('./teamspaces/projects/models/common/modelProperties');
+const CreateRepoAssetRoutes = require('./teamspaces/projects/models/common/repoAssets');
 const CreateTicketCommentsRoutes = require('./teamspaces/projects/models/common/tickets.comments');
 const CreateTicketGroupsRoutes = require('./teamspaces/projects/models/common/tickets.groups');
 const CreateTicketRoutes = require('./teamspaces/projects/models/common/tickets');
 const CreateViewRoutes = require('./teamspaces/projects/models/common/views');
 const FederationRevisionRoutes = require('./teamspaces/projects/models/federations/revisions');
+const MeshRoutes = require('./teamspaces/projects/models/containers/meshes');
 const MetadataRoutes = require('./teamspaces/projects/models/containers/metadata');
 const ProjectRoutes = require('./teamspaces/projects/projects');
 const SsoRoutes = require('./sso');
 const TeamspaceJobRoutes = require('./teamspaces/jobs');
 const TeamspaceRoutes = require('./teamspaces/teamspaces');
 const TeamspaceSettingsRoutes = require('./teamspaces/settings');
+const TextureRoutes = require('./teamspaces/projects/models/containers/textures');
 const UserRoutes = require('./users');
 const { modelTypes } = require('../models/modelSettings.constants');
 
@@ -57,6 +65,14 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/views', CreateViewRoutes());
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/revisions', CreateGeneralRevisionRoutes(modelTypes.CONTAINER));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/metadata', MetadataRoutes);
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/assets/bundleMappings', BundleMappingsRoutes);
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/assets', BundleRoutes);
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/assets/textures', TextureRoutes);
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/assets/meshes', MeshRoutes);
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assets/legacyBundleMetadata', CreateAssetMetaRoutes(modelTypes.CONTAINER));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assets/supermeshes', CreateAssetMapRoutes(modelTypes.CONTAINER));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assets/properties', CreateModelPropertiesRoutes(modelTypes.CONTAINER));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assets/repobundles', CreateRepoAssetRoutes(modelTypes.CONTAINER));
 
 	// Federations
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations', CreateModelGeneralRoutes(modelTypes.FEDERATION));
@@ -66,6 +82,10 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/groups', CreateGroupRoutes(true));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/views', CreateViewRoutes(true));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:federation/revisions', FederationRevisionRoutes);
+	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/assets/legacyBundleMetadata', CreateAssetMetaRoutes(modelTypes.FEDERATION));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/assets/supermeshes', CreateAssetMapRoutes(modelTypes.FEDERATION));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/assets/properties', CreateModelPropertiesRoutes(modelTypes.FEDERATION));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/assets/repobundles', CreateRepoAssetRoutes(modelTypes.FEDERATION));
 
 	// Drawings
 	app.use('/v5/teamspaces/:teamspace/projects/:project/drawings', CreateModelGeneralRoutes(modelTypes.DRAWING));
