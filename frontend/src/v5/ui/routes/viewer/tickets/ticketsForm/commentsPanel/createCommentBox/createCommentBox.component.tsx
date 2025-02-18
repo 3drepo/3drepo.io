@@ -16,6 +16,7 @@
  */
 import SendIcon from '@assets/icons/outlined/send_message-outlined.svg';
 import FileIcon from '@assets/icons/outlined/file-outlined.svg';
+import CameraIcon from '@assets/icons/outlined/camera_side-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
@@ -56,6 +57,7 @@ import { TicketContext } from '../../../ticket.context';
 import { useSyncProps } from '@/v5/helpers/syncProps.hooks';
 import { DrawingViewerService } from '@components/viewer/drawingViewer/drawingViewer.service';
 import { ViewerCanvasesContext } from '../../../../viewerCanvases.context';
+import { FormCheckbox } from '@controls/inputs/formInputs.component';
 
 type ImageToUpload = {
 	id: string,
@@ -75,11 +77,12 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 	const containerRef = useRef<HTMLElement>();
 	const inputRef = useRef<any>();
 	const { isViewer, containerOrFederation } = useContext(TicketContext);
-	const { watch, reset, control } = useForm<{ message: string, images: File[] }>({
+	const { watch, reset, control } = useForm<{ message: string, images: File[], saveView: boolean }>({
 		mode: 'all',
 		defaultValues: { message: '' },
 	});
 	const messageInput = watch('message');
+	const saveView = watch('saveView');
 
 	const { teamspace, project } = useParams<ViewerParams>();
 	const { is2DOpen } = useContext(ViewerCanvasesContext);
@@ -105,12 +108,14 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 		setImagesToUpload([]);
 	};
 
-	const createComment = () => {
+	const createComment = async () => {
 		setIsSubmittingMessage(true);
+		const views = saveView ? await ViewerService.getViewpoint() : null;
 		const newComment: Partial<ITicketComment> = {
 			author: currentUser.username,
 			images: imagesToUpload.map(({ src }) => src),
 			message: messageInput,
+			views,
 		};
 		if (commentReply) {
 			newComment.message = addReply(createMetadata(commentReply), newComment.message);
@@ -272,6 +277,11 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 						</MenuItem>
 					</ActionMenuItem>
 				</ActionMenu>
+				<FormCheckbox
+					name="saveView"
+					control={control}
+					label={<CameraIcon />}
+				/>
 				<CharsCounter $error={charsLimitIsReached}>{charsCount}/{MAX_MESSAGE_LENGTH}</CharsCounter>
 				<SendButton
 					disabled={disableSendMessage}

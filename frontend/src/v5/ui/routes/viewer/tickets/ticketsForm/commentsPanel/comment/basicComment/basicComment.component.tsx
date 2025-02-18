@@ -18,8 +18,9 @@
 import { ITicketComment, TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
 import { editedCommentMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown.component';
-import { CommentContainer, CommentAge, EditedCommentLabel } from './basicComment.styles';
+import { CommentContainer, CommentAge, EditedCommentLabel, ViewpointIcon } from './basicComment.styles';
 import { CommentNonMessageContent } from '../commentNonMessageContent/commentNonMessageContent.component';
+import { goToView } from '@/v5/helpers/viewpoint.helpers';
 
 export type BasicCommentProps = Partial<Omit<ITicketComment, 'history' | '_id'>> & {
 	children?: any;
@@ -38,6 +39,7 @@ export const BasicComment = ({
 	updatedAt,
 	className,
 	originalAuthor,
+	views,
 	...props
 }: BasicCommentProps) => {
 	const isEdited = updatedAt && (createdAt !== updatedAt);
@@ -46,7 +48,12 @@ export const BasicComment = ({
 			<CommentNonMessageContent {...props} originalAuthor={originalAuthor} hasMessage={!!message} />
 			{isEdited && !originalAuthor && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
 			{message && (<CommentMarkDown>{message}</CommentMarkDown>)}
-			<CommentAge>{commentAge}</CommentAge>
+			<CommentAge>
+				{commentAge}
+				{!!views && (
+					<ViewpointIcon onClick={() => goToView(views)} />
+				)}
+			</CommentAge>
 		</CommentContainer>
 	);
 };
