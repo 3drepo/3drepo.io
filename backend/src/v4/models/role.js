@@ -17,56 +17,17 @@
 
 "use strict";
 
-const C = require("../constants");
-const db = require("../handler/db");
-
-const findByRoleID = async function(id) {
-	return await db.findOne("admin", "system.roles", { _id: id});
-};
+const {v5Path} = require("../../interop");
+const {addTeamspaceMember, removeTeamspaceMember} = require(`${v5Path}/processors/teamspaces/teamspaces`);
 
 const Role = {};
 
-Role.createTeamSpaceRole = async function (account) {
-	const roleId = `${account}.${C.DEFAULT_MEMBER_ROLE}`;
-
-	const roleFound = await findByRoleID(roleId);
-
-	if(roleFound) {
-		return ;
-	}
-
-	const roleName = C.DEFAULT_MEMBER_ROLE;
-	const createRoleCmd = {
-		"createRole": roleName,
-		"privileges":[{
-			"resource":{
-				"db": account,
-				"collection": "settings"
-			},
-			"actions": ["find"]}
-		],
-		"roles": []
-	};
-
-	await db.runCommand(account, createRoleCmd);
-};
-
 Role.grantTeamSpaceRoleToUser = async function (username, account) {
-	const grantRoleCmd = {
-		grantRolesToUser: username,
-		roles: [{role: C.DEFAULT_MEMBER_ROLE, db: account}]
-	};
-
-	return await db.runCommand("admin", grantRoleCmd);
+	return addTeamspaceMember(account, username);
 };
 
 Role.revokeTeamSpaceRoleFromUser = async function(username, account) {
-	const cmd = {
-		revokeRolesFromUser: username,
-		roles: [{role: C.DEFAULT_MEMBER_ROLE, db: account}]
-	};
-
-	return await db.runCommand("admin", cmd);
+	return removeTeamspaceMember(account, username);
 };
 
 module.exports = Role;

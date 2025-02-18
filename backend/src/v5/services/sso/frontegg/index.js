@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { get, post } = require('../../../utils/webRequests');
+const { HEADER_TENANT_ID, META_LABEL_TEAMSPACE } = require('./frontegg.constants');
+const { get, delete: httpDelete, post } = require('../../../utils/webRequests');
 const { IdentityClient } = require('@frontegg/client');
-const { META_LABEL_TEAMSPACE } = require('./frontegg.constants');
 const { generateUUIDString } = require('../../../utils/helper/uuids');
 const { logger } = require('../../../utils/logger');
 const { sso: { frontegg: config } } = require('../../../utils/config');
@@ -26,7 +26,7 @@ const { toBase64 } = require('../../../utils/helper/strings');
 
 const Frontegg = {};
 
-const identityClient = config ? new IdentityClient({ FRONTEGG_CLIENT_ID: config.clientId, FRONTEGG_API_KEY: config.key }) : null;
+const identityClient = new IdentityClient({ FRONTEGG_CLIENT_ID: config.clientId, FRONTEGG_API_KEY: config.key });
 
 const generateVendorToken = async () => {
 	const payload = {
@@ -138,7 +138,30 @@ Frontegg.addUserToAccount = async (accountId, userId) => {
 		await post(`${config.vendorDomain}/identity/resources/users/v1/${userId}/tenant`, payload, { headers: await standardHeaders() });
 	} catch (err) {
 		logger.logError(`Failed to add user to account: ${JSON.stringify(err?.response?.data)} `);
-		throw new Error(`Failed to add ${userId} to ${account} on Frontegg: ${err.message}`);
+		throw new Error(`Failed to add ${userId} to ${accountId} on Frontegg: ${err.message}`);
+	}
+};
+
+Frontegg.removeUserFromAccount = async (accountId, userId) => {
+	try {
+		const headers = {
+			...await standardHeaders(),
+			[HEADER_TENANT_ID]: accountId,
+		};
+
+		await httpDelete(`${config.vendorDomain}/identity/resources/users/v1/${userId}`, headers);
+	} catch (err) {
+		logger.logError(`Failed to remove user from account: ${JSON.stringify(err?.response?.data)} `);
+		throw new Error(`Failed to remove ${userId} from ${accountId} on Frontegg: ${err.message}`);
+	}
+};
+
+Frontegg.removeAccount = async (accountId) => {
+	try {
+		await httpDelete(`${config.vendorDomain}/tenants/resources/tenants/v1/${accountId}`, await standardHeaders());
+	} catch (err) {
+		logger.logError(`Failed to remove account: ${JSON.stringify(err?.response?.data)} `);
+		throw new Error(`Failed to remove ${accountId} on Frontegg: ${err.message}`);
 	}
 };
 

@@ -17,7 +17,7 @@
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../models/users.constants');
 const { addDefaultJobs, assignUserToJob, getJobsToUsers, removeUserFromJobs } = require('../../models/jobs');
-const { addUserToAccount, createAccount } = require('../../services/sso/frontegg');
+const { addUserToAccount, createAccount, removeAccount, removeUserFromAccount } = require('../../services/sso/frontegg');
 const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revokeTeamspaceRoleFromUser } = require('../../models/roles');
 const {
 	createTeamspaceSettings,
@@ -79,6 +79,7 @@ Teamspaces.initTeamspace = async (teamspaceName, owner) => {
 };
 
 Teamspaces.removeTeamspace = async (teamspace) => {
+	const teamspaceRef = await getTeamspaceRefId(teamspace);
 	await Promise.all([
 		removeAllUsersFromTS(teamspace),
 		removeAllFilesFromTeamspace(teamspace),
@@ -87,6 +88,7 @@ Teamspaces.removeTeamspace = async (teamspace) => {
 	await Promise.all([
 		dropDatabase(teamspace),
 		removeTeamspaceRole(teamspace),
+		removeAccount(teamspaceRef),
 	]);
 };
 
@@ -138,16 +140,21 @@ Teamspaces.addTeamspaceMember = async (teamspace, userToAdd) => {
 	]);
 };
 
-Teamspaces.removeTeamspaceMember = async (teamspace, userToRemove) => {
-	await Promise.all([
-		removeUserFromAllModels(teamspace, userToRemove),
-		removeUserFromAllProjects(teamspace, userToRemove),
-		removeUserFromAdminPrivilege(teamspace, userToRemove),
+Teamspaces.removeTeamspaceMember = async (teamspace, userToRemove, removePermissions = true) => {
+	const [accountId, userId] = await Promise.all([
+		getTeamspaceRefId(teamspace),
+		getUserRefId(userToRemove),
+		...(removePermissions ? [
+			removeUserFromAllModels(teamspace, userToRemove),
+			removeUserFromAllProjects(teamspace, userToRemove),
+			removeUserFromAdminPrivilege(teamspace, userToRemove),
+		] : []),
 	]);
 
 	await Promise.all([
-		await removeUserFromJobs(teamspace, userToRemove),
-		await revokeTeamspaceRoleFromUser(teamspace, userToRemove),
+		removePermissions ? removeUserFromJobs(teamspace, userToRemove) : Promise.resolve(),
+		removeUserFromAccount(accountId, userId),
+		revokeTeamspaceRoleFromUser(teamspace, userToRemove),
 	]);
 };
 

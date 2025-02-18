@@ -18,5 +18,6 @@
 const FronteggConstants = {};
 
 FronteggConstants.META_LABEL_TEAMSPACE = '3DR_Teamspace';
+FronteggConstants.HEADER_TENANT_ID = 'frontegg-tenant-id';
 
 module.exports = FronteggConstants;
