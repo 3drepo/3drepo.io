@@ -23,7 +23,7 @@ const db = require("../handler/db");
 const zxcvbn = require("zxcvbn");
 const utils = require("../utils");
 const Role = require("./role");
-const { findJobByUser, usersWithJob, removeUserFromAnyJob, addUserToJob } = require("./job");
+const { findJobByUser, usersWithJob, addUserToJob } = require("./job");
 
 const Intercom = require("./intercom");
 
@@ -33,16 +33,14 @@ const systemLogger = require("../logger.js").systemLogger;
 
 const config = require("../config");
 
-const { changePermissions, findModelSettingById, findModelSettings, findPermissionByUser } = require("./modelSetting");
+const { findModelSettingById, findModelSettings, findPermissionByUser } = require("./modelSetting");
 const C = require("../constants");
 const UserBilling = require("./userBilling");
 const AccountPermissions = require("./accountPermissions");
 const {
 	findOneProject,
 	getProjectsAndModelsForUser,
-	getProjectNamesAccessibleToUser,
-	getProjectsForAccountsList,
-	removeUserFromProjects
+	getProjectsForAccountsList
 } = require("./project");
 const PermissionTemplates = require("./permissionTemplates");
 const { get } = require("lodash");
@@ -55,7 +53,7 @@ const { publish } = require(`${v5Path}/services/eventsManager/eventsManager.js`)
 const { getAddOns } = require(`${v5Path}/models/teamspaceSettings`);
 const { getSpaceUsed } = require(`${v5Path}/utils/quota.js`);
 const UserProcessorV5 = require(`${v5Path}/processors/users`);
-const TSProcessorV5 = require(`${v5Path}/processors/teamspaces/teamspaces`);
+const { removeTeamspaceMember, addTeamspaceMember, getTeamspaceListByUser} = require(`${v5Path}/processors/teamspaces/teamspaces`);
 
 const COLL_NAME = "system.users";
 
@@ -645,7 +643,7 @@ function _findModel(id, account) {
 async function _createAccounts(roles, userName) {
 	const accounts = [];
 
-	const teamspaces = await TSProcessorV5.getTeamspaceListByUser(userName);
+	const teamspaces = await getTeamspaceListByUser(userName);
 
 	await Promise.all(teamspaces.map(async ({name: teamspace}) => {
 		const tsPromises = [];
@@ -806,44 +804,9 @@ User.listAccounts = async function(user) {
 };
 
 User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove, executor) {
-	if (teamspace.user === userToRemove) {
-		// The user should not be able to remove itself from the teamspace
-		return Promise.reject(responseCodes.SUBSCRIPTION_CANNOT_REMOVE_SELF);
-	}
+	await removeTeamspaceMember(teamspace, userToRemove);
+	publish(events.USER_REMOVED, { teamspace, executor, user: userToRemove});
 
-	const teamspacePerm = AccountPermissions.findByUser(teamspace, userToRemove);
-
-	// check if they have any permissions assigned
-	const [projectNames, models] = await Promise.all([
-		getProjectNamesAccessibleToUser(teamspace.user, userToRemove),
-		findModelSettings(teamspace.user, { "permissions.user": userToRemove })
-	]);
-
-	if (!cascadeRemove && (models.length || projectNames.length || teamspacePerm)) {
-		throw({
-			resCode: responseCodes.USER_IN_COLLABORATOR_LIST,
-			info: {
-				models: models.map(m => {
-					return { model: m.name };
-				}),
-				projects: projectNames,
-				teamspace: teamspacePerm
-			}
-		});
-	} else {
-
-		await Promise.all([
-			teamspacePerm ? AccountPermissions.remove(teamspace, userToRemove, executor) : Promise.resolve(),
-			...models.map(model =>	changePermissions(teamspace.user, model._id, model.permissions.filter(p => p.user !== userToRemove))),
-			removeUserFromProjects(teamspace.user, userToRemove),
-			removeUserFromAnyJob(teamspace.user, userToRemove)
-
-		]);
-	}
-
-	publish(events.USER_REMOVED, { teamspace: teamspace.user, executor, user: userToRemove});
-
-	return Role.revokeTeamSpaceRoleFromUser(userToRemove, teamspace.user);
 };
 
 User.addTeamMember = async function(teamspace, userToAdd, job, permissions, executor) {
@@ -868,7 +831,7 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions, exec
 		throw (responseCodes.USER_ALREADY_ASSIGNED);
 	}
 
-	await Role.grantTeamSpaceRoleToUser(userEntry.user, teamspace);
+	await addTeamspaceMember(teamspace, userToAdd);
 	publish(events.USER_ADDED, { teamspace, executor, user: userEntry.user});
 
 	const promises = [];
