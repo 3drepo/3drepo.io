@@ -2,13 +2,13 @@ matrix:
   include:
     # tests (v4)
     - language: node_js
-      dist: jammy
+      dist: noble
       name: Backend tests (V4)
       git:
       submodules: false
       depth: 1
       node_js:
-        - "18.20.4"
+        - "18.20.6"
       sudo: true
       addons:
         apt:
