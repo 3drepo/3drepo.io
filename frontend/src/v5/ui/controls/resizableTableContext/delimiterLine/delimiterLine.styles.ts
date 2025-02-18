@@ -16,19 +16,13 @@
  */
 
 import styled from 'styled-components';
-import { DraggingContainer } from '../draggingContainer/draggingContainer.component';
-import { DelimiterLine } from '../delimiterLine/delimiterLine.styles';
 
-export const ResizerLine = styled(DelimiterLine)<{ $highlight: boolean, $isResizing?: boolean }>`
-	border-color: ${({ $highlight, theme }) => $highlight ? theme.palette.primary.main : 'transparent'};
-	border-style: ${({ $isResizing }) => $isResizing ? 'solid' : 'dashed'};
-	position: absolute;
-`;
-
-export const ResizerElement = styled(DraggingContainer).attrs({ cursor: 'col-resize' })`
-	height: 100%;
+export const DelimiterLine = styled.div<{ $offset: number }>`
 	position: relative;
-	cursor: col-resize;
-	width: 7px;
-	left: -3px;
+	z-index: 10;
+	width: 0;
+	height: 100%;
+	margin-left: ${({ $offset }) => $offset}px;
+	pointer-events: all;
+	border: solid 1px ${({ theme }) => theme.palette.primary.main};
 `;
