@@ -23,7 +23,7 @@ const { toBase64 } = require('../../../utils/helper/strings');
 
 const FrontEgg = {};
 
-const identityClient = config ? new IdentityClient({ FRONTEGG_CLIENT_ID: config.clientId, FRONTEGG_API_KEY: config.key }) : null;
+const identityClient = new IdentityClient({ FRONTEGG_CLIENT_ID: config.clientId, FRONTEGG_API_KEY: config.key });
 
 const generateVendorToken = async () => {
 	const payload = {
@@ -50,14 +50,14 @@ FrontEgg.getUserInfoFromToken = async (token) => {
 		const { sub: userId, email } = await identityClient.validateIdentityOnToken(token);
 		return { userId, email };
 	} catch (err) {
-		console.log('!!!', err, token);
+		throw new Error(`Failed to validate user token: ${err.message}`);
 	}
 };
 
 FrontEgg.validateAndRefreshToken = async ({ token, refreshToken }) => {
 	try {
 		const user = await identityClient.validateToken(token);
-
+		/*
 		const payload = {
 		};
 		const headers = {
@@ -73,10 +73,10 @@ FrontEgg.validateAndRefreshToken = async ({ token, refreshToken }) => {
 		} catch (err) {
 			console.log('Failed: ', err);
 		}
-
+		*/
 		return user;
 	} catch (err) {
-		console.log('???', err);
+		throw new Error(`Failed to validate user token: ${err.message}`);
 	}
 };
 
@@ -104,7 +104,6 @@ FrontEgg.generateToken = async (urlUsed, code, challenge) => {
 	const { data } = await post(`${config.appUrl}/oauth/token`, payload, { headers });
 	const expiry = new Date(Date.now() + data.expires_in * 1000);
 
-	console.log(data);
 	return { token: data.access_token, refreshToken: data.refresh_token, expiry };
 };
 
