@@ -904,13 +904,8 @@ User.getBasicDetails = function(userObj) {
 };
 
 User.getQuotaInfo = async function (teamspace) {
-	const teamspaceUser = await User.findByUserName(teamspace);
 
-	if (!teamspaceUser) {
-		throw responseCodes.USER_NOT_FOUND;
-	}
-
-	return _calSpace(teamspaceUser.user);
+	return _calSpace(teamspace);
 };
 
 User.hasSufficientQuota = async (teamspace, size) => {
