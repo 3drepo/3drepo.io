@@ -77,7 +77,7 @@ export const createFederationComment = async (
 ): Promise<CreateCommentsResponse> => {
 	const { data } = await api.post(
 		`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/${ticketId}/comments`,
-		pick(comment, ['message', 'images']),
+		pick(comment, ['message', 'images', 'views']),
 	);
 	return data;
 };
@@ -91,7 +91,7 @@ export const createContainerComment = async (
 ): Promise<CreateCommentsResponse> => {
 	const { data } = await api.post(
 		`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets/${ticketId}/comments`,
-		pick(comment, ['message', 'images']),
+		pick(comment, ['message', 'images', 'views']),
 	);
 	return data;
 };

@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Viewpoint } from '../tickets.types';
+
 export type TicketCommentHistoryBlock = {
 	message: string,
 	images: string[],
@@ -25,6 +27,7 @@ export type ITicketComment = {
 	_id: string,
 	message?: string,
 	images?: string[],
+	views?: Viewpoint,
 	author: string,
 	createdAt: Date,
 	updatedAt: Date,
