@@ -25,11 +25,9 @@ const { generateUUIDString } = require('../utils/helper/uuids');
 const { getURLDomain } = require('../utils/helper/strings');
 const { session: initSession } = require('../services/sessions');
 const { isFromWebBrowser } = require('../utils/helper/userAgent');
-const { logger } = require('../utils/logger');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { respond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');
-const { validateMany } = require('./common');
 
 const Sessions = {};
 
@@ -92,18 +90,6 @@ const updateSessionDetails = (req) => {
 	return session;
 };
 
-const createSession = (req, res) => {
-	req.session.regenerate((err) => {
-		if (err) {
-			logger.logError(`Failed to regenerate session: ${err.message}`);
-			respond(req, res, err);
-		} else {
-			const session = updateSessionDetails(req);
-			respond(req, res, templates.ok, req.v4 ? session.user : undefined);
-		}
-	});
-};
-
 Sessions.destroySession = (req, res) => {
 	const username = req.session?.user?.username;
 
@@ -130,7 +116,5 @@ Sessions.updateSession = async (req, res, next) => {
 	updateSessionDetails(req);
 	await next();
 };
-
-Sessions.createSession = validateMany([Sessions.appendCSRFToken, createSession]);
 
 module.exports = Sessions;

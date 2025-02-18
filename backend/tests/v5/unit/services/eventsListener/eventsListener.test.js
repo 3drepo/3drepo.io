@@ -134,25 +134,6 @@ const testAuthEventsListener = () => {
 				);
 			});
 		});
-
-		describe(events.FAILED_LOGIN_ATTEMPT, () => {
-			test(`Should trigger recordFailedAttempt if there is a ${events.FAILED_LOGIN_ATTEMPT}`, async () => {
-				const waitOnEvent = eventTriggeredPromise(events.FAILED_LOGIN_ATTEMPT);
-				const data = {
-					user: generateRandomString(),
-					ipAddress: generateRandomString(),
-					userAgent: generateRandomString(),
-					referer: generateRandomString(),
-				};
-				EventsManager.publish(events.FAILED_LOGIN_ATTEMPT, data);
-
-				await waitOnEvent;
-
-				expect(LoginRecords.recordFailedAttempt).toHaveBeenCalledTimes(1);
-				expect(LoginRecords.recordFailedAttempt).toHaveBeenCalledWith(data.user,
-					data.ipAddress, data.userAgent, data.referer);
-			});
-		});
 	});
 };
 

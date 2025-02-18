@@ -17,8 +17,6 @@
 
 const { destroySession, isSessionValid } = require('../utils/sessions');
 const { USER_AGENT_HEADER } = require('../utils/sessions.constants');
-const { isAccountActive } = require('../models/users');
-const { isAccountLocked } = require('../models/loginRecords');
 const { logger } = require('../utils/logger');
 const { respond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');
@@ -82,31 +80,6 @@ AuthMiddleware.notLoggedIn = async (req, res, next) => {
 	}
 };
 
-const accountActive = async (req, res, next) => {
-	const { user } = req.body;
-	try {
-		if (!await isAccountActive(user)) {
-			throw templates.userNotVerified;
-		}
-		await next();
-	} catch (err) {
-		respond(req, res, err);
-	}
-};
-
-const accountNotLocked = async (req, res, next) => {
-	const { user } = req.body;
-	try {
-		if (await isAccountLocked(user)) {
-			throw templates.tooManyLoginAttempts;
-		}
-		await next();
-	} catch (err) {
-		respond(req, res, err);
-	}
-};
-
-AuthMiddleware.canLogin = validateMany([AuthMiddleware.notLoggedIn, accountActive, accountNotLocked]);
 AuthMiddleware.validSession = validateMany([validSession, validSessionDetails]);
 
 module.exports = AuthMiddleware;

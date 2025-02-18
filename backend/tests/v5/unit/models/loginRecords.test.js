@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { times } = require('lodash');
 const { src } = require('../../helper/path');
 const { generateRandomString } = require('../../helper/services');
 
@@ -28,8 +27,6 @@ jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
-const { loginPolicy } = require(`${src}/utils/config`);
-
 UserAgentHelper.getUserAgentInfo.mockImplementation(() => ({ data: 'plugin ua data' }));
 
 const LoginRecord = require(`${src}/models/loginRecords`);
@@ -122,113 +119,9 @@ const testSaveRecordHelper = (testFailed = false) => {
 	});
 };
 
-const testRecordFailedAttempt = () => {
-	describe('Record failed login record', () => {
-		testSaveRecordHelper(true);
-
-		test(`Should emit ${events.ACCOUNT_LOCKED} event if the account becomes locked`, async () => {
-			let date = Date.now();
-			const records = times(loginPolicy.maxUnsuccessfulLoginAttempts, () => {
-				date -= 60000;
-				return { loginTime: new Date(date) };
-			});
-
-			const user = generateRandomString();
-
-			// for all failed login since last login
-			DBHandler.find.mockResolvedValueOnce(records);
-			await LoginRecord.recordFailedAttempt(user,
-				generateRandomString(), generateRandomString(), generateRandomString());
-
-			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-			expect(EventsManager.publish).toHaveBeenCalledWith(
-				events.ACCOUNT_LOCKED, { user },
-			);
-		});
-	});
-};
-
 const testSaveLoginRecord = () => {
 	describe('Save new login record', () => {
 		testSaveRecordHelper();
-	});
-};
-const testIsAccountLocked = () => {
-	describe('Is account locked', () => {
-		const user = generateRandomString();
-		test('Should return false if there is no failed login records', async () => {
-			DBHandler.find.mockResolvedValueOnce([]);
-			await expect(LoginRecord.isAccountLocked(user)).resolves.toBeFalsy();
-
-			expect(DBHandler.findOne).toHaveBeenCalledTimes(1);
-
-			expect(DBHandler.find).toHaveBeenCalledTimes(1);
-			expect(DBHandler.find).toHaveBeenCalledWith(INTERNAL_DB, loginRecordsCol,
-				{ user, failed: true }, { loginTime: 1 }, { loginTime: -1 }, loginPolicy.maxUnsuccessfulLoginAttempts);
-		});
-
-		test('Should only search through failed records since the last successful login', async () => {
-			const date = new Date();
-			DBHandler.findOne.mockResolvedValueOnce({ loginTime: date });
-
-			DBHandler.find.mockResolvedValueOnce([]);
-			await expect(LoginRecord.isAccountLocked(user)).resolves.toBeFalsy();
-
-			expect(DBHandler.findOne).toHaveBeenCalledTimes(1);
-
-			expect(DBHandler.find).toHaveBeenCalledTimes(1);
-			expect(DBHandler.find).toHaveBeenCalledWith(INTERNAL_DB, loginRecordsCol,
-				{ user, failed: true, loginTime: { $gt: date } }, { loginTime: 1 },
-				{ loginTime: -1 }, loginPolicy.maxUnsuccessfulLoginAttempts);
-		});
-
-		test(`Should return true if there has been ${loginPolicy.maxUnsuccessfulLoginAttempts} failed attempts without timeouts`, async () => {
-			let ts = Date.now();
-			const records = times(loginPolicy.maxUnsuccessfulLoginAttempts, () => {
-				ts -= 60000;
-				return { loginTime: new Date(ts) };
-			});
-
-			DBHandler.find.mockResolvedValueOnce(records);
-
-			await expect(LoginRecord.isAccountLocked(user)).resolves.toBeTruthy();
-		});
-
-		test(`Should return false if there has been less than ${loginPolicy.maxUnsuccessfulLoginAttempts} failed attempts without timeouts`, async () => {
-			let ts = Date.now();
-			const records = times(loginPolicy.maxUnsuccessfulLoginAttempts - 1, () => {
-				ts -= 60000;
-				return { loginTime: new Date(ts) };
-			});
-
-			DBHandler.find.mockResolvedValueOnce(records);
-
-			await expect(LoginRecord.isAccountLocked(user)).resolves.toBeFalsy();
-		});
-
-		test('Should return false if sufficient time has lapsed since the account has been locked', async () => {
-			let ts = Date.now() - loginPolicy.lockoutDuration;
-			const records = times(loginPolicy.maxUnsuccessfulLoginAttempts, () => {
-				ts -= 60000;
-				return { loginTime: new Date(ts) };
-			});
-
-			DBHandler.find.mockResolvedValueOnce(records);
-
-			await expect(LoginRecord.isAccountLocked(user)).resolves.toBeFalsy();
-		});
-
-		test('Should return false if sufficient time has lapsed in between attempts', async () => {
-			let ts = Date.now() - loginPolicy.lockoutDuration;
-			const records = times(loginPolicy.maxUnsuccessfulLoginAttempts, () => {
-				ts -= loginPolicy.lockoutDuration;
-				return { loginTime: new Date(ts) };
-			});
-
-			DBHandler.find.mockResolvedValueOnce(records);
-
-			await expect(LoginRecord.isAccountLocked(user)).resolves.toBeFalsy();
-		});
 	});
 };
 
@@ -290,9 +183,7 @@ const testInitialise = () => {
 
 describe('models/loginRecords', () => {
 	testSaveLoginRecord();
-	testRecordFailedAttempt();
 	testRemoveAllUserRecords();
 	testGetLastLoginDate();
-	testIsAccountLocked();
 	testInitialise();
 });

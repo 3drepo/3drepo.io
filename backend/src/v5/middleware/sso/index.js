@@ -15,15 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createResponseCode, templates } = require('../../utils/responseCodes');
 const { URL } = require('url');
-const Yup = require('yup');
 const { appendCSRFToken } = require('../sessions');
 const { getURLDomain } = require('../../utils/helper/strings');
-const { getUserFromSession } = require('../../utils/sessions');
-const { isSsoUser } = require('../../models/users');
-const { respond } = require('../../utils/responder');
-const { types } = require('../../utils/helper/yup');
 const { validateMany } = require('../common');
 
 const Sso = {};
@@ -47,45 +41,5 @@ const setSessionInfo = async (req, res, next) => {
 };
 
 Sso.setSessionInfo = validateMany([appendCSRFToken, setSessionInfo]);
-
-Sso.isSsoUser = async (req, res, next) => {
-	try {
-		const username = getUserFromSession(req.session);
-		if (!await isSsoUser(username)) {
-			throw templates.nonSsoUser;
-		}
-
-		await next();
-	} catch (err) {
-		respond(req, res, err);
-	}
-};
-
-Sso.isNonSsoUser = async (req, res, next) => {
-	try {
-		const username = getUserFromSession(req.session);
-		if (await isSsoUser(username)) {
-			throw templates.ssoUser;
-		}
-
-		await next();
-	} catch (err) {
-		respond(req, res, err);
-	}
-};
-
-Sso.validateUnlinkData = async (req, res, next) => {
-	const schema = Yup.object().shape({
-		password: types.strings.password.required(),
-	}).strict(true).noUnknown()
-		.required();
-
-	try {
-		await schema.validate(req.body);
-		await next();
-	} catch (err) {
-		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
-	}
-};
 
 module.exports = Sso;

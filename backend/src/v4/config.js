@@ -314,10 +314,4 @@ config.liveChatLicense = config.liveChatLicense || 0;
 
 config.cachePolicy = config.cachePolicy || {maxAge: 60 * 60 * 24 * 30};
 
-// login lockout policy
-config.loginPolicy = config.loginPolicy || {};
-config.loginPolicy.maxUnsuccessfulLoginAttempts = config.loginPolicy.maxUnsuccessfulLoginAttempts || 10;
-config.loginPolicy.remainingLoginAttemptsPromptThreshold = config.loginPolicy.remainingLoginAttemptsPromptThreshold || 5;
-config.loginPolicy.lockoutDuration = config.loginPolicy.lockoutDuration || 900000; // milliseconds
-
 module.exports = config;
