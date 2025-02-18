@@ -24,7 +24,7 @@ export const Container = styled.nav`
 	padding-left: 79px;
 	box-shadow: 0 0 13px -7px;
 	position: relative;
-	z-index: 5;
+	z-index: 15;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 `;
 
