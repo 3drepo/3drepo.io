@@ -30,9 +30,6 @@ ResponseCodes.templates = {
 	licenceExpired: { message: 'Licence expired.', status: 401 },
 	incorrectUsernameOrPassword: { message: 'Incorrect username or password.', status: 400 },
 	incorrectPassword: { message: 'Incorrect password.', status: 400 },
-	ssoNotAvailable: { message: 'Single sign on provider not available.', status: 500 },
-	nonSsoUser: { message: 'Single sign on is not enabled for this user.', status: 400 },
-	ssoUser: { message: 'Single sign on is already enabled for this user.', status: 400 },
 
 	// Fail safe
 	pageNotFound: { message: 'Page not found.', status: 404 },
