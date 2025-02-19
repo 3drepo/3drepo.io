@@ -17,13 +17,30 @@
 
 const { get, post } = require('../../../utils/webRequests');
 const { IdentityClient } = require('@frontegg/client');
-const { sso: { frontegg: config } } = require('../../../utils/config');
+const Yup = require('yup');
+const { sso: { frontegg } } = require('../../../utils/config');
 const queryString = require('querystring');
 const { toBase64 } = require('../../../utils/helper/strings');
 
-const FrontEgg = {};
+const Frontegg = {};
 
-const identityClient = new IdentityClient({ FRONTEGG_CLIENT_ID: config.clientId, FRONTEGG_API_KEY: config.key });
+let identityClient;
+let config;
+
+const getIdentityClient = async () => {
+	if (identityClient) return identityClient;
+
+	await Frontegg.init();
+	return identityClient;
+};
+
+const configSchema = Yup.object({
+	appUrl: Yup.string().required(), // https://{appId}.frontegg.com
+	appId: Yup.string().required(), // appId from the application created
+	clientId: Yup.string().required(), // clientId is the the vendor clientId
+	key: Yup.string().required(), // vendor API key
+	vendorDomain: Yup.string().required(), // the API server to connect to for vendor API
+}).required();
 
 const generateVendorToken = async () => {
 	const payload = {
@@ -34,7 +51,7 @@ const generateVendorToken = async () => {
 		const { data } = await post(`${config.vendorDomain}/auth/vendor`, payload);
 		return data.token;
 	} catch (err) {
-		throw new Error(`Failed to generate vendor token from FrontEgg: ${err.message}`);
+		throw new Error(`Failed to generate vendor token from Frontegg: ${err.message}`);
 	}
 };
 
@@ -45,18 +62,37 @@ const standardHeaders = async () => {
 	};
 };
 
-FrontEgg.getUserInfoFromToken = async (token) => {
+Frontegg.init = async () => {
 	try {
-		const { sub: userId, email } = await identityClient.validateIdentityOnToken(token);
+		config = configSchema.validateSync(frontegg, { stripUnknown: true });
+	} catch (err) {
+		throw new Error(`Failed to validate Frontegg config: ${err.message}`);
+	}
+
+	try {
+		identityClient = new IdentityClient({ FRONTEGG_CLIENT_ID: config.clientId, FRONTEGG_API_KEY: config.key });
+
+		// verify the vendor credentials are valid by generating a vendor jwt
+		await standardHeaders();
+	} catch (err) {
+		throw new Error(`Failed to initialise Frontegg client: ${err.message}`);
+	}
+};
+
+Frontegg.getUserInfoFromToken = async (token) => {
+	try {
+		const client = await getIdentityClient();
+		const { sub: userId, email } = await client.validateIdentityOnToken(token);
 		return { userId, email };
 	} catch (err) {
 		throw new Error(`Failed to validate user token: ${err.message}`);
 	}
 };
 
-FrontEgg.validateAndRefreshToken = async ({ token, refreshToken }) => {
+Frontegg.validateAndRefreshToken = async ({ token/* , refreshToken */ }) => {
 	try {
-		const user = await identityClient.validateToken(token);
+		const client = await getIdentityClient();
+		const user = await client.validateToken(token);
 		/*
 		const payload = {
 		};
@@ -80,16 +116,16 @@ FrontEgg.validateAndRefreshToken = async ({ token, refreshToken }) => {
 	}
 };
 
-FrontEgg.getUserById = async (userId) => {
+Frontegg.getUserById = async (userId) => {
 	try {
 		const { data } = await get(`${config.vendorDomain}/identity/resources/vendor-only/users/v1/${userId}`, await standardHeaders());
 		return data;
 	} catch (err) {
-		throw new Error(`Failed to get user(${userId}) from FrontEgg: ${err.message}`);
+		throw new Error(`Failed to get user(${userId}) from Frontegg: ${err.message}`);
 	}
 };
 
-FrontEgg.generateToken = async (urlUsed, code, challenge) => {
+Frontegg.generateToken = async (urlUsed, code, challenge) => {
 	const headers = {
 		Authorization: `Basic ${toBase64(`${config.clientId}:${config.key}`)}`,
 	};
@@ -107,7 +143,7 @@ FrontEgg.generateToken = async (urlUsed, code, challenge) => {
 	return { token: data.access_token, refreshToken: data.refresh_token, expiry };
 };
 
-FrontEgg.generateAuthenticationCodeUrl = ({ state, redirectURL, codeChallenge }) => {
+Frontegg.generateAuthenticationCodeUrl = ({ state, redirectURL, codeChallenge }) => {
 	const qsObj = {
 		response_type: 'code',
 		scope: 'openId',
@@ -120,4 +156,4 @@ FrontEgg.generateAuthenticationCodeUrl = ({ state, redirectURL, codeChallenge })
 	return `${config.appUrl}/oauth/authorize?${queryString.encode(qsObj)}`;
 };
 
-module.exports = FrontEgg;
+module.exports = Frontegg;

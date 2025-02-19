@@ -139,10 +139,10 @@ const testAuthEventsListener = () => {
 
 const testUserEventsListener = () => {
 	describe('User Events', () => {
-		test(`Should trigger userVerified if there is a ${events.USER_VERIFIED}`, async () => {
-			const waitOnEvent = eventTriggeredPromise(events.USER_VERIFIED);
+		test(`Should trigger userVerified if there is a ${events.USER_CREATED}`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.USER_CREATED);
 			const username = generateRandomString();
-			EventsManager.publish(events.USER_VERIFIED, { username });
+			EventsManager.publish(events.USER_CREATED, { username });
 			await waitOnEvent;
 			expect(Teamspaces.initTeamspace).not.toHaveBeenCalled();
 			expect(Invitations.unpack).toHaveBeenCalledTimes(1);

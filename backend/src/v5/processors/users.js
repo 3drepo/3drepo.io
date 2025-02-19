@@ -22,8 +22,10 @@ const { addUser, deleteApiKey, generateApiKey,
 	getUserByUsername, removeUser, updatePassword, updateProfile } = require('../models/users');
 const { fileExists, getFile, removeFile, storeFile } = require('../services/filesManager');
 const { isEmpty, removeFields } = require('../utils/helper/objects');
+const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
 const { generateUserHash } = require('../services/intercom');
+const { publish } = require('../services/eventsManager/eventsManager');
 const { removeAllUserNotifications } = require('../models/notifications');
 const { removeAllUserRecords } = require('../models/loginRecords');
 
@@ -47,6 +49,8 @@ Users.createNewUserRecord = async (idpUserData) => {
 	};
 
 	await addUser(userData);
+
+	publish(events.USER_CREATED, { id, email, fullName: name, createdAt: userData.createdAt });
 	return id;
 };
 
