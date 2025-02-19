@@ -19,6 +19,9 @@ import { ResizableTableRow } from '@controls/resizableTableContext/resizableTabl
 import styled, { css } from 'styled-components';
 import { ResizableTable } from '@controls/resizableTableContext/resizableTable/resizableTable.component';
 import { Row } from './ticketsTableRow/ticketsTableRow.styles';
+import { ResizableTableHeader } from '@controls/resizableTableContext/resizableTableHeader/resizableTableHeader.component';
+import { Highlighter } from '@controls/resizableTableContext/movingColumn/movingColumnHighlighter/movingColumnHighlighter.styles';
+import { Placeholder } from '@controls/resizableTableContext/movingColumn/movingColumnPlaceholder/movingColumnPlaceholder.styles';
 
 export const Headers = styled(ResizableTableRow)`
 	gap: 1px;
@@ -37,7 +40,7 @@ export const IconContainer = styled.div<{ $flip?: boolean }>`
 	`}
 `;
 
-export const Header = styled.div<{ $selectable?: boolean }>`
+export const Header = styled(ResizableTableHeader)<{ $selectable?: boolean }>`
 	${({ theme }) => theme.typography.kicker};
 	color: ${({ theme }) => theme.palette.base.main};
 	padding: 10px 0 10px 10px;
@@ -53,9 +56,10 @@ export const Header = styled.div<{ $selectable?: boolean }>`
 	`}
 `;
 
+const NEW_TICKET_ROW_HEIGHT = '37px';
 export const NewTicketRow = styled.div<{ disabled?: boolean }>`
 	width: 100%;
-	height: 37px;
+	height: ${NEW_TICKET_ROW_HEIGHT};
 	cursor: pointer;
 	color: ${({ theme }) => theme.palette.base.main};
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
@@ -107,12 +111,25 @@ export const Group = styled.div<{ $empty: boolean }>`
 	}
 `;
 
-export const Table = styled(ResizableTable)<{ $empty?: boolean }>`
+export const Table = styled(ResizableTable)<{ $empty?: boolean, $canCreateTicket?: boolean }>`
 	overflow-x: unset;
 	width: fit-content;
+
 	${({ $empty }) => $empty && css`
 		${Group} {
 			width: unset;
 		}
 	`}
+
+	${Highlighter} {
+		border-radius: 10px;
+
+		${({ $canCreateTicket }) => $canCreateTicket && css`
+			height: calc(100% - ${NEW_TICKET_ROW_HEIGHT});
+		`}
+	}
+
+	${Placeholder} {
+		height: calc(100% - ${NEW_TICKET_ROW_HEIGHT});
+	}
 `;
