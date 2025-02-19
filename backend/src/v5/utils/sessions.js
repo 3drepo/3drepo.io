@@ -20,9 +20,9 @@ const { cookie, cookie_domain } = require('./config');
 const { escapeRegexChrs, getURLDomain } = require('./helper/strings');
 const { deleteIfUndefined } = require('./helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
-const { validateAndRefreshToken } = require('../services/sso/frontegg');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { v4Path } = require('../../interop');
+const { validateAndRefreshToken } = require('../services/sso/frontegg');
 
 // FIXME: can remove the disable once we migrated config
 // eslint-disable-next-line

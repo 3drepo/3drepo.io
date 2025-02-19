@@ -22,6 +22,7 @@ const { getUserByEmail, updateUserId } = require('../../models/users');
 const { redirectWithError, setSessionInfo } = require('.');
 const { addPkceProtection } = require('./pkce');
 const { createNewUserRecord } = require('../../processors/users');
+const { destroySession } = require('../../utils/sessions');
 const { errorCodes } = require('../../services/sso/sso.constants');
 const { logger } = require('../../utils/logger');
 const { respond } = require('../../utils/responder');
@@ -46,7 +47,9 @@ const checkStateIsValid = async (req, res, next) => {
 		const response = codeExists(err.code) ? err
 			: createResponseCode(templates.invalidArguments, 'state is required and must be a valid encoded JSON');
 
-		respond(req, res, response);
+		destroySession(req.session, res, () => {
+			respond(req, res, response);
+		});
 	}
 };
 
