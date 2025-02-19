@@ -120,6 +120,10 @@ User.updateProfile = async (username, updatedProfile) => {
 	await updateUser(username, { $set: updateData });
 };
 
+User.updateUserId = async (username, userId) => {
+	await updateUser(username, { $set: { 'customData.userId': userId } });
+};
+
 User.generateApiKey = async (username) => {
 	const apiKey = generateHashString();
 	await updateUser(username, { $set: { 'customData.apiKey': apiKey } });

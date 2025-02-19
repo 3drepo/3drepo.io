@@ -18,11 +18,11 @@
 const { codeExists, createResponseCode, templates } = require('../../utils/responseCodes');
 const { fromBase64, toBase64 } = require('../../utils/helper/strings');
 const { generateAuthenticationCodeUrl, generateToken, getUserById, getUserInfoFromToken } = require('../../services/sso/frontegg');
+const { getUserByEmail, updateUserId } = require('../../models/users');
 const { redirectWithError, setSessionInfo } = require('.');
 const { addPkceProtection } = require('./pkce');
 const { createNewUserRecord } = require('../../processors/users');
 const { errorCodes } = require('../../services/sso/sso.constants');
-const { getUserByEmail } = require('../../models/users');
 const { logger } = require('../../utils/logger');
 const { respond } = require('../../utils/responder');
 const { validateMany } = require('../common');
@@ -52,7 +52,15 @@ const checkStateIsValid = async (req, res, next) => {
 
 const determineUsername = async (userId, email) => {
 	try {
-		const { user: username } = await getUserByEmail(email, { user: 1 });
+		const { user: username, customData } = await getUserByEmail(email, { user: 1, 'customData.userId': 1 });
+
+		if (!customData?.userId) {
+			updateUserId(username, userId);
+		} else if (userId !== customData.userId) {
+			logger.logError(`Found user(${username}) with email but with a mismatch user ID. Expected ${userId}, found ${customData.userId}`);
+			throw new Error('User ID mismatch');
+		}
+
 		return username;
 	} catch (err) {
 		if (err.code !== templates.userNotFound.code) {
