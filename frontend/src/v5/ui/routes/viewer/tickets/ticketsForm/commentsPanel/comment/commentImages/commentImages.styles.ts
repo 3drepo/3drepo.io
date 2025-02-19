@@ -39,7 +39,7 @@ export const CommentImage = styled(CommentImageBase).attrs({
 
 
 export const SingleImage = styled(CommentImage)`
-	width: 241px;
+	width: 236px;
 	margin: -10px 0 10px -12px;
 	border-radius: inherit;
 	border-bottom-right-radius: 0;
