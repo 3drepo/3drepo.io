@@ -97,7 +97,7 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 	const charsLimitIsReached = charsCount > MAX_MESSAGE_LENGTH;
 
 	const erroredImages = imagesToUpload.filter(({ error }) => error);
-	const disableSendMessage = (!messageInput?.trim()?.length && !imagesToUpload.length)
+	const disableSendMessage = (!messageInput?.trim()?.length && !imagesToUpload.length && !saveView)
 		|| charsLimitIsReached
 		|| erroredImages.length > 0;
 
