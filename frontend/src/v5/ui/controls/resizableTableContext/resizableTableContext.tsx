@@ -22,34 +22,38 @@ import { RefHolder } from './resizableTableContext.styles';
 export type TableColumn = { name: string, minWidth?: number, width: number, stretch?: boolean };
 
 export interface ResizableTableType {
-	getVisibleColumnsWidths: () => number[];
-	getVisibleColumnsNames: () => string[];
+	getVisibleColumns: () => TableColumn[];
 	getWidth: (name: string) => number;
 	getMinWidth: (name: string) => number;
 	setWidth: (name: string, width: number) => void;
+	isHidden: (name: string) => boolean,
+	columnGap: number,
+	getRowWidth: () => number,
+	getOffset: (name: string) => number,
+
+	// resizing
 	setResizerName: (name: string) => void,
 	resizerName: string,
 	setIsResizing: (isResizing: boolean) => void,
 	isResizing: boolean,
-	isHidden: (name: string) => boolean,
-	columnGap: number,
-	getRowWidth: () => number,
 	stretchTable: () => void,
 }
 
 const defaultValue: ResizableTableType = {
-	getVisibleColumnsWidths: () => [],
-	getVisibleColumnsNames: () => [],
+	getVisibleColumns: () => [],
 	getWidth: () => 0,
 	getMinWidth: () => 0,
 	setWidth: () => {},
+	isHidden: () => true,
+	columnGap: 0,
+	getRowWidth: () => 0,
+	getOffset: () => 0,
+
+	// resizing
 	setResizerName: () => {},
 	resizerName: '',
 	setIsResizing: () => {},
 	isResizing: false,
-	isHidden: () => true,
-	columnGap: 0,
-	getRowWidth: () => 0,
 	stretchTable: () => {},
 };
 export const ResizableTableContext = createContext(defaultValue);
@@ -68,15 +72,14 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 	const [isResizing, setIsResizing] = useState(false);
 	const ref = useRef<HTMLDivElement>();
 
-	const getElementByName = (name) => columns.find((e) => e.name === name);
+	const getColumnByName = (name) => columns.find((e) => e.name === name);
 
 	const isHidden = (name) => hiddenColumns.includes(name);
-	const getMinWidth = (name) => getElementByName(name)?.minWidth ?? 0;
-	const getWidth = (name) => (!isHidden(name) && getElementByName(name)?.width) ?? 0;
+	const getMinWidth = (name) => getColumnByName(name)?.minWidth ?? 0;
+	const getWidth = (name) => (!isHidden(name) && getColumnByName(name)?.width) ?? 0;
 
 	const getVisibleColumns = () => columns.filter((c) => !isHidden(c.name));
 	const getVisibleColumnsWidths = () => getVisibleColumns().map((c) => c.width);
-	const getVisibleColumnsNames = () => getVisibleColumns().map((c) => c.name);
 	const getRowWidth = () => {
 		const visibleColumnswidths = getVisibleColumnsWidths();
 		const gaps = (visibleColumnswidths.length - 1) * columnGap;
@@ -84,8 +87,19 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 	};
 
 	const setWidth = (name: string, width: number) => {
-		getElementByName(name).width = Math.max(getMinWidth(name), width);
+		getColumnByName(name).width = Math.max(getMinWidth(name), width);
 		setColumns([ ...columns ]);
+	};
+
+	const getOffset = (name: string) => {
+		let offset = 0;
+		for (const col of getVisibleColumns()) {
+			if (col.name === name) {
+				break;
+			}
+			offset += col.width + columnGap;
+		}
+		return offset;
 	};
 
 	const stretchTable = () => {
@@ -99,7 +113,7 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 		const gap = parentWidth - tableWidth;
 		const gapFraction = gap / stretchableColumns.length;
 		stretchableColumns.forEach((c) => {
-			getElementByName(c.name).width += gapFraction;
+			getColumnByName(c.name).width += gapFraction;
 		});
 		setColumns([ ...columns ]);
 	};
@@ -112,12 +126,12 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 
 	return (
 		<ResizableTableContext.Provider value={{
-			getVisibleColumnsWidths,
-			getVisibleColumnsNames,
+			getVisibleColumns,
 			getWidth,
 			setWidth,
 			getMinWidth,
 			setResizerName,
+			getOffset,
 			resizerName,
 			setIsResizing,
 			isResizing,
