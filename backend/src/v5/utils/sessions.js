@@ -18,15 +18,11 @@
 const { CSRF_COOKIE, CSRF_HEADER, SESSION_HEADER } = require('./sessions.constants');
 const { cookie, cookie_domain } = require('./config');
 const { escapeRegexChrs, getURLDomain } = require('./helper/strings');
+const { apiUrls } = require('./config');
 const { deleteIfUndefined } = require('./helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { publish } = require('../services/eventsManager/eventsManager');
-const { v4Path } = require('../../interop');
 const { validateAndRefreshToken } = require('../services/sso/frontegg');
-
-// FIXME: can remove the disable once we migrated config
-// eslint-disable-next-line
-const { apiUrls } = require(`${v4Path}/config`);
 
 const referrerMatch = (sessionReferrer, headerReferrer) => {
 	const domain = getURLDomain(headerReferrer);

@@ -22,7 +22,6 @@ const { deleteIfUndefined } = require('../utils/helper/objects');
 const { destroySession } = require('../utils/sessions');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUIDString } = require('../utils/helper/uuids');
-const { getURLDomain } = require('../utils/helper/strings');
 const { session: initSession } = require('../services/sessions');
 const { isFromWebBrowser } = require('../utils/helper/userAgent');
 const { publish } = require('../services/eventsManager/eventsManager');
@@ -46,19 +45,13 @@ Sessions.manageSessions = async (req, res, next) => {
 const updateSessionDetails = (req) => {
 	const updatedUser = { ...req.loginData, webSession: false };
 	const { session } = req;
-	let userAgent = req.headers['user-agent'];
 
-	const { ssoInfo } = req.session;
-	if (ssoInfo) {
-		userAgent = ssoInfo.userAgent;
-		if (ssoInfo.referer) {
-			updatedUser.referer = ssoInfo.referer;
-		}
-
-		delete req.session.ssoInfo;
-	} else if (req.headers.referer) {
-		updatedUser.referer = getURLDomain(req.headers.referer);
+	const { ssoInfo: { userAgent, referer } } = req.session;
+	if (referer) {
+		updatedUser.referer = referer;
 	}
+
+	delete req.session.ssoInfo;
 
 	if (userAgent) {
 		updatedUser.webSession = isFromWebBrowser(userAgent);
