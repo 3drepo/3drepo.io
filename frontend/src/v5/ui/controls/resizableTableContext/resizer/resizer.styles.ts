@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 import { DraggingContainer } from '../draggingContainer/draggingContainer.component';
-import { DelimiterLine } from '../delimiterLine/delimiterLine.styles';
+import { DelimiterLine } from '../delimiterLine/delimiterLine.component';
 
 export const ResizerLine = styled(DelimiterLine)<{ $highlight: boolean, $isResizing?: boolean }>`
 	border-color: ${({ $highlight, theme }) => $highlight ? theme.palette.primary.main : 'transparent'};

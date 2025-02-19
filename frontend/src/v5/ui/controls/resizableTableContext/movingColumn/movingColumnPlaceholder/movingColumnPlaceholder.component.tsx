@@ -15,18 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Placeholder } from './movingColumnPlaceholder.styles';
 import { useContext } from 'react';
-import { ResizableTableContext } from '../resizableTableContext';
-import { Item } from './resizableTableCell.styles';
+import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 
-export type ResizableTableCellProps = {
-	children: any;
-	name: string;
-};
-export const ResizableTableCell = ({ name, ...props }: ResizableTableCellProps) => {
-	const { movingColumn, isHidden } = useContext(ResizableTableContext);
-
-	if (isHidden(name)) return null;
-
-	return (<Item $isMoving={movingColumn === name} {...props} />);
+export const MovingColumnPlaceholder = () => {
+	const { movingColumn, columnAfterMovingColumn, getOffset, getRowWidth } = useContext(ResizableTableContext);
+	if (!movingColumn || movingColumn === columnAfterMovingColumn) return null;
+	if (columnAfterMovingColumn) return (<Placeholder offset={getOffset(columnAfterMovingColumn)} />);
+	return <Placeholder offset={getRowWidth()} />;
 };

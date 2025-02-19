@@ -16,21 +16,11 @@
  */
 
 import { DueDateContainer } from '@controls/dueDate/dueDate.styles';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.component';
-import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
+import { TicketsTableCell } from './ticketsTableCell/ticketsTableCell.component';
 
-export const Cell = styled(ResizableTableCell)`
-	color: ${({ theme }) => theme.palette.secondary.main};
-	height: 100%;
-	padding: 0 10px;
-	display: flex;
-	align-items: center;
-	justify-content: flex-start;
-	font-weight: 500;
-	overflow: hidden;
-	box-sizing: border-box;
-`;
+export const Cell = styled(TicketsTableCell)``;
 
 // TODO - fix when new palette is released
 export const Row = styled(ResizableTableRow)<{ $selected?: boolean }>`
@@ -39,9 +29,11 @@ export const Row = styled(ResizableTableRow)<{ $selected?: boolean }>`
 	cursor: pointer;
 	width: fit-content;
 
-	${Cell} {
-		background: ${({ $selected, theme }) => ($selected ? '#edf0f8' : theme.palette.primary.contrast)};
-	}
+	${({ $selected }) => $selected && css`
+		${Cell} {
+			background-color: #edf0f8;
+		}
+	`}
 `;
 
 export const OverflowContainer = styled.div`

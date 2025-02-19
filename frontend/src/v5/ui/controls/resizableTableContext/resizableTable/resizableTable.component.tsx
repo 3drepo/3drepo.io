@@ -18,7 +18,9 @@
 import { Resizer } from '../resizer/resizer.component';
 import { useContext } from 'react';
 import { ResizableTableContext } from '../resizableTableContext';
-import { ResizersContainers, Table } from './resizableTable.styles';
+import { OverlayElementsContainers, Table } from './resizableTable.styles';
+import { MovingColumnPlaceholder } from '../movingColumn/movingColumnPlaceholder/movingColumnPlaceholder.component';
+import { MovingColumnHighlighter } from '../movingColumn/movingColumnHighlighter/movingColumnHighlighter.component';
 
 export const ResizableTable = ({ className = '', children }) => {
 	const { getVisibleColumns } = useContext(ResizableTableContext);
@@ -26,11 +28,13 @@ export const ResizableTable = ({ className = '', children }) => {
 	return (
 		<Table className={className}>
 			{children}
-			<ResizersContainers>
+			<OverlayElementsContainers>
+				<MovingColumnHighlighter />
+				<MovingColumnPlaceholder />
 				{getVisibleColumns().map(({ name }) => (
 					<Resizer name={name} key={name} />
 				))}
-			</ResizersContainers>
+			</OverlayElementsContainers>
 		</Table>
 	);
 };

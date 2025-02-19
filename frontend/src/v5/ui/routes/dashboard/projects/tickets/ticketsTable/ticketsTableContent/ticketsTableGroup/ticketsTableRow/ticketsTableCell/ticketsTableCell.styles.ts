@@ -15,18 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext } from 'react';
-import { ResizableTableContext } from '../resizableTableContext';
-import { Item } from './resizableTableCell.styles';
+import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
+import styled, { css } from 'styled-components';
 
-export type ResizableTableCellProps = {
-	children: any;
-	name: string;
-};
-export const ResizableTableCell = ({ name, ...props }: ResizableTableCellProps) => {
-	const { movingColumn, isHidden } = useContext(ResizableTableContext);
+export const Container = styled(ResizableTableCell)<{ $isMoving?: boolean }>`
+	color: ${({ theme }) => theme.palette.secondary.main};
+	height: 100%;
+	padding: 0 10px;
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	font-weight: 500;
+	overflow: hidden;
+	box-sizing: border-box;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
 
-	if (isHidden(name)) return null;
-
-	return (<Item $isMoving={movingColumn === name} {...props} />);
-};
+	${({ $isMoving, theme }) => $isMoving && css`
+		&& {
+			background-color: ${theme.palette.primary.lightest};
+		}
+	`}
+`;

@@ -15,18 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext } from 'react';
+import { HTMLAttributes, useContext } from 'react';
 import { ResizableTableContext } from '../resizableTableContext';
-import { Item } from './resizableTableCell.styles';
+import { Line } from './delimiterLine.styles';
 
-export type ResizableTableCellProps = {
-	children: any;
-	name: string;
-};
-export const ResizableTableCell = ({ name, ...props }: ResizableTableCellProps) => {
-	const { movingColumn, isHidden } = useContext(ResizableTableContext);
-
-	if (isHidden(name)) return null;
-
-	return (<Item $isMoving={movingColumn === name} {...props} />);
+type DelimiterLineProps = { offset: number } & HTMLAttributes<HTMLDivElement>;
+export const DelimiterLine = ({ offset, ...props }: DelimiterLineProps) => {
+	const { columnGap } = useContext(ResizableTableContext);
+	return (<Line $offset={offset - columnGap / 2} {...props} />);
 };

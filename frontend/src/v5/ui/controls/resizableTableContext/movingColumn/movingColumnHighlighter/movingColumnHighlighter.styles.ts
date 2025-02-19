@@ -15,18 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext } from 'react';
-import { ResizableTableContext } from '../resizableTableContext';
-import { Item } from './resizableTableCell.styles';
+import styled from 'styled-components';
 
-export type ResizableTableCellProps = {
-	children: any;
-	name: string;
-};
-export const ResizableTableCell = ({ name, ...props }: ResizableTableCellProps) => {
-	const { movingColumn, isHidden } = useContext(ResizableTableContext);
-
-	if (isHidden(name)) return null;
-
-	return (<Item $isMoving={movingColumn === name} {...props} />);
-};
+export const Highlighter = styled.div<{ $offset: number, $columnWidth: number, $gap: number }>`
+	border: solid 2px ${({ theme }) => theme.palette.primary.main};
+	width: ${({ $columnWidth, $gap }) => $columnWidth + 2 * $gap}px;
+	position: relative;
+	left: ${({ $offset }) => $offset}px;
+	margin-left: ${({ $gap }) => -$gap}px;
+`;

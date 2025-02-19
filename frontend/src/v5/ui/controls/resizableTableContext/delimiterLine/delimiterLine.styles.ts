@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 
-export const DelimiterLine = styled.div<{ $offset: number }>`
+export const Line = styled.div<{ $offset: number }>`
 	position: relative;
 	z-index: 10;
 	width: 0;

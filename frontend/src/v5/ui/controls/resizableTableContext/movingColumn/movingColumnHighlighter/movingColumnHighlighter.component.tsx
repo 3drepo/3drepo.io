@@ -16,17 +16,15 @@
  */
 
 import { useContext } from 'react';
-import { ResizableTableContext } from '../resizableTableContext';
-import { Item } from './resizableTableCell.styles';
+import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
+import { Highlighter } from './movingColumnHighlighter.styles';
 
-export type ResizableTableCellProps = {
-	children: any;
-	name: string;
-};
-export const ResizableTableCell = ({ name, ...props }: ResizableTableCellProps) => {
-	const { movingColumn, isHidden } = useContext(ResizableTableContext);
+export const MovingColumnHighlighter = (props) => {
+	const { getOffset, movingColumn, getWidth, columnGap } = useContext(ResizableTableContext);
+	const width = getWidth(movingColumn);
+	const offset = getOffset(movingColumn);
 
-	if (isHidden(name)) return null;
+	if (!movingColumn) return (<></>);
 
-	return (<Item $isMoving={movingColumn === name} {...props} />);
+	return (<Highlighter $offset={offset} $columnWidth={width} $gap={columnGap} {...props} />);
 };

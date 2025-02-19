@@ -37,6 +37,13 @@ export interface ResizableTableType {
 	setIsResizing: (isResizing: boolean) => void,
 	isResizing: boolean,
 	stretchTable: () => void,
+
+	// moving columns
+	movingColumn: string,
+	setMovingColumn: (name: string) => void,
+	moveColumn: (name: string, newIndex) => void,
+	columnAfterMovingColumn: string,
+	setColumnAfterMovingColumn: (name: string) => void,
 }
 
 const defaultValue: ResizableTableType = {
@@ -55,6 +62,13 @@ const defaultValue: ResizableTableType = {
 	setIsResizing: () => {},
 	isResizing: false,
 	stretchTable: () => {},
+
+	// moving columns
+	movingColumn: '',
+	setMovingColumn: () => {},
+	moveColumn: () => {},
+	columnAfterMovingColumn: '',
+	setColumnAfterMovingColumn: () => {},
 };
 export const ResizableTableContext = createContext(defaultValue);
 ResizableTableContext.displayName = 'ResizeableColumns';
@@ -70,6 +84,8 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 	const [hiddenColumns, setHiddenColumns] = useState(inputHiddenColumns);
 	const [resizerName, setResizerName] = useState('');
 	const [isResizing, setIsResizing] = useState(false);
+	const [movingColumn, setMovingColumn] = useState('');
+	const [columnAfterMovingColumn, setColumnAfterMovingColumn] = useState('');
 	const ref = useRef<HTMLDivElement>();
 
 	const getColumnByName = (name) => columns.find((e) => e.name === name);
@@ -118,6 +134,23 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 		setColumns([ ...columns ]);
 	};
 
+	const moveColumn = (name: string, columnBeforeName: string) => {
+		if (name === columnBeforeName) return;
+
+		const columnToMove = getColumnByName(name);
+		const columnToMoveIndex = columns.findIndex((c) => c.name === name);
+		const columnBeforeIndex = columns.findIndex((c) => c.name === columnBeforeName);
+
+		const newColumns = [...columns];
+		newColumns.splice(columnToMoveIndex, 1);
+		if (columnToMoveIndex < columnBeforeIndex) {
+			newColumns.splice(columnBeforeIndex + 1, 0, columnToMove);
+		} else {
+			newColumns.splice(columnBeforeIndex, 0, columnToMove);
+		}
+		setColumns(newColumns);
+	};
+
 	useEffect(() => {
 		if (!isEqual(inputHiddenColumns, hiddenColumns)) {
 			setHiddenColumns(inputHiddenColumns);
@@ -139,6 +172,11 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 			getRowWidth,
 			columnGap,
 			stretchTable,
+			moveColumn,
+			movingColumn,
+			setMovingColumn,
+			columnAfterMovingColumn,
+			setColumnAfterMovingColumn,
 		}}>
 			{children}
 			<RefHolder ref={ref} />
