@@ -17,14 +17,12 @@
 
 const { generateLinkToAuthenticator, generateToken, redirectToStateURL } = require('../middleware/sso/frontegg');
 const { Router } = require('express');
-const { apiUrls } = require('../utils/config');
+const { createEndpointURL } = require('../utils/config');
 const { notLoggedIn } = require('../middleware/auth');
 const { updateSession } = require('../middleware/sessions');
 
-const createUri = (redirectEndpoint) => `${apiUrls.all[0]}/v5/${redirectEndpoint}`;
-
 const AUTH_POST = '/authenticate-post';
-const authenticateRedirectUrl = createUri(`authentication${AUTH_POST}`);
+const authenticateRedirectUrl = createEndpointURL(`authentication${AUTH_POST}`);
 
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
