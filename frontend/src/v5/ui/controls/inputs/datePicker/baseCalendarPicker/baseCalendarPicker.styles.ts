@@ -17,6 +17,10 @@
 import styled from 'styled-components';
 import TextFieldBase from '@mui/material/TextField';
 
+export const Container = styled.div`
+	width: 100%;
+`;
+
 export const TextField = styled(TextFieldBase)`
 	caret-color: transparent;
 

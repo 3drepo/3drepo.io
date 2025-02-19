@@ -18,13 +18,14 @@ import { useState } from 'react';
 import dayjs from 'dayjs';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { formatMessage } from '@/v5/services/intl';
-import { TextField } from './baseCalendarPicker.styles';
+import { TextField, Container } from './baseCalendarPicker.styles';
 import { formatDayOfWeek } from '../dateFormatHelper';
 import { StopBackgroundInteraction } from '@controls/dueDate/dueDate.styles';
 
 export type BaseCalendarPickerProps = FormInputProps & {
 	defaultValue?: Date;
 	PickerComponent: any;
+	placeholder?: string;
 };
 
 export const BaseCalendarPicker = ({
@@ -37,6 +38,7 @@ export const BaseCalendarPicker = ({
 	value,
 	onChange,
 	onBlur,
+	placeholder,
 	...props
 }: BaseCalendarPickerProps) => {
 	const [open, setOpen] = useState(false);
@@ -66,7 +68,7 @@ export const BaseCalendarPicker = ({
 	};
 
 	return (
-		<div onClick={handleClick} aria-hidden="true">
+		<Container onClick={handleClick} aria-hidden="true">
 			<StopBackgroundInteraction open={open} onClick={closePicker} />
 			<PickerComponent
 				renderInput={({ ref, inputRef, ...textFieldProps }) => (
@@ -81,7 +83,7 @@ export const BaseCalendarPicker = ({
 						required={required}
 						inputProps={{
 							...textFieldProps.inputProps,
-							placeholder: formatMessage({
+							placeholder: placeholder ?? formatMessage({
 								id: 'calendarPicker.placeholder',
 								defaultMessage: 'Choose a date',
 							}),
@@ -111,6 +113,6 @@ export const BaseCalendarPicker = ({
 					setOpen(false);
 				}}
 			/>
-		</div>
+		</Container>
 	);
 };

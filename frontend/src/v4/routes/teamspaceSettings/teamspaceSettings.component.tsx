@@ -41,6 +41,7 @@ import {
 	ButtonContainer,
 	Container,
 	CreateMitigationsGrid,
+	DateInputsGrid,
 	DataText,
 	FileGrid,
 	Headline,
@@ -294,7 +295,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 					/>
 				</DataText>
 				<FileGrid container direction="row" justifyContent="space-between" alignItems="center" wrap="nowrap">
-					<Grid gap="10px" container alignItems="end" wrap="nowrap">
+					<DateInputsGrid>
 						<DateTimePicker
 							disableFuture
 							label={formatMessage({ id: 'teamspaceSettings.permissionsLog.startDate', defaultMessage: 'Start Date' })}
@@ -334,7 +335,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 						>
 							<FormattedMessage id="teamspaceSettings.permissionsLog.download" defaultMessage="Download" />
 						</Button>
-					</Grid>
+					</DateInputsGrid>
 				</FileGrid>
 			</PermissionsLogContainer>
 		);

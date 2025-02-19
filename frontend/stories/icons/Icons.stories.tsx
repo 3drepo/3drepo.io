@@ -45,6 +45,13 @@ export const Controls = {
 	},
 };
 
+export const Filters = {
+	title: 'Icons/Filters',
+	args: {
+		icons: getIcons(require.context('@assets/icons/filters/', false, /\.*(svg)/), 'filters'),
+	},
+};
+
 export const Filled = {
 	title: 'Icons/Filled',
 	args: {

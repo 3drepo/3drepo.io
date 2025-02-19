@@ -58,7 +58,7 @@ export const TicketsTopPanel = ({
 	const updatedAt = getValues(`properties.${BaseProperties.UPDATED_AT}`);
 
 	const topPanelProperties: string[] = Object.values({ ...BaseProperties, ...IssueProperties });
-	const extraProperties = properties.filter(({ name }) => !topPanelProperties.includes(name));
+	const propertiesToInclude = properties.filter(({ name }) => !topPanelProperties.includes(name));
 	const hasIssueProperties = properties.some((property) => property.name === IssueProperties.PRIORITY);
 
 	useEffect(() => {
@@ -104,7 +104,7 @@ export const TicketsTopPanel = ({
 				)}
 			</FlexContainer>
 			{hasIssueProperties && (<AssigneesProperty onBlur={onPropertyBlur} readOnly={readOnly} />)}
-			<PropertiesList module="properties" properties={extraProperties} onPropertyBlur={onPropertyBlur} />
+			<PropertiesList module="properties" properties={propertiesToInclude} onPropertyBlur={onPropertyBlur} />
 		</TopPanel>
 	);
 };

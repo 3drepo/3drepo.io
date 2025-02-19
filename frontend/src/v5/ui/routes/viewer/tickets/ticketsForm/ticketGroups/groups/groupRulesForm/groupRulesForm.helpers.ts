@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { mapArrayToFormArray, mapFormArrayToArray } from '@/v5/helpers/form.helper';
 import { formatMessage } from '@/v5/services/intl';
 import { FieldOperator, IGroupRule, Operator } from '@/v5/store/tickets/tickets.types';
 
@@ -52,18 +53,18 @@ export const formRuleToGroupRule = ({ values, field, ...rule }: IFormRule): IGro
 	...rule,
 	field: {
 		operator: field.operator,
-		values: field.values.map((v) => v.value),
+		values: mapFormArrayToArray(field.values),
 	},
-	values: (values || []).map((v) => v.value),
+	values: mapFormArrayToArray(values),
 });
 
 export const groupRuleToFormRule = ({ values, field, ...rule }: IGroupRule): IFormRule => ({
 	...rule,
 	field: {
 		operator: field.operator,
-		values: (field.values || []).map((value) => ({ value })),
+		values: mapArrayToFormArray(field.values),
 	},
-	values: (values || []).map((value) => ({ value })),
+	values: mapArrayToFormArray(values),
 });
 
 export const appendCopySuffixToDuplicateNames = (existingRules: IGroupRule[], newRules: IGroupRule[]) => {
