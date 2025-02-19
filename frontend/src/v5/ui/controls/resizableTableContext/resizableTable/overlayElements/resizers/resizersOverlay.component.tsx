@@ -15,20 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { DraggingContainer } from '../draggingContainer/draggingContainer.component';
-import { DelimiterLine } from '../delimiterLine/delimiterLine.component';
+import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
+import { useContext } from 'react';
+import { Resizer } from './resizer/resizer.component';
 
-export const ResizerLine = styled(DelimiterLine)<{ $highlight: boolean, $isResizing?: boolean }>`
-	border-color: ${({ $highlight, theme }) => $highlight ? theme.palette.primary.main : 'transparent'};
-	border-style: ${({ $isResizing }) => $isResizing ? 'solid' : 'dashed'};
-	position: absolute;
-`;
+export const ResizersOverlay = () => {
+	const { getVisibleColumns } = useContext(ResizableTableContext);
 
-export const ResizerElement = styled(DraggingContainer).attrs({ cursor: 'col-resize' })`
-	height: 100%;
-	position: relative;
-	cursor: col-resize;
-	width: 7px;
-	left: -3px;
-`;
+	return (
+		<>
+			{getVisibleColumns().map(({ name }) => (
+				<Resizer name={name} key={name} />
+			))}
+		</>
+	);
+};

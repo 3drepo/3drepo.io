@@ -17,7 +17,7 @@
 
 import { useContext } from 'react';
 import { ResizerElement, ResizerLine } from './resizer.styles';
-import { ResizableTableContext } from '../resizableTableContext';
+import { ResizableTableContext } from '../../../../resizableTableContext';
 
 type ResizerProps = { name: string };
 export const Resizer = ({ name }: ResizerProps) => {

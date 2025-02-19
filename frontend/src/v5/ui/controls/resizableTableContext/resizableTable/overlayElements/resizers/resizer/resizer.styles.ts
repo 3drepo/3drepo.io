@@ -16,19 +16,19 @@
  */
 
 import styled from 'styled-components';
+import { DraggingContainer } from '../../../../draggingContainer/draggingContainer.component';
+import { DelimiterLine } from '../../../../delimiterLine/delimiterLine.component';
 
-export const Table = styled.div`
-	width: 100%;
-	overflow-x: scroll;
-	position: relative;
+export const ResizerLine = styled(DelimiterLine)<{ $highlight: boolean, $isResizing?: boolean }>`
+	border-color: ${({ $highlight, theme }) => $highlight ? theme.palette.primary.main : 'transparent'};
+	border-style: ${({ $isResizing }) => $isResizing ? 'solid' : 'dashed'};
+	position: absolute;
 `;
 
-export const OverlayElements = styled.div`
-	position: absolute;
-	top: 0;
-	width: 100%;
+export const ResizerElement = styled(DraggingContainer).attrs({ cursor: 'col-resize' })`
 	height: 100%;
-	pointer-events: none;
-	display: flex;
-	flex-direction: row;
+	position: relative;
+	cursor: col-resize;
+	width: 7px;
+	left: -3px;
 `;

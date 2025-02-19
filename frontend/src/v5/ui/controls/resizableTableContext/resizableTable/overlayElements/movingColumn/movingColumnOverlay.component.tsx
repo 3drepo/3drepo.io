@@ -15,20 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { MovingColumnHighlighter } from '@controls/resizableTableContext/movingColumn/movingColumnHighlighter/movingColumnHighlighter.component';
+import { MovingColumnPlaceholder } from '@controls/resizableTableContext/movingColumn/movingColumnPlaceholder/movingColumnPlaceholder.component';
+import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
+import { useContext } from 'react';
 
-export const Table = styled.div`
-	width: 100%;
-	overflow-x: scroll;
-	position: relative;
-`;
+export const MovingColumnOverlay = () => {
+	const { movingColumn } = useContext(ResizableTableContext);
+	if (!movingColumn) return null;
 
-export const OverlayElements = styled.div`
-	position: absolute;
-	top: 0;
-	width: 100%;
-	height: 100%;
-	pointer-events: none;
-	display: flex;
-	flex-direction: row;
-`;
+	return (
+		<>
+			<MovingColumnHighlighter />
+			<MovingColumnPlaceholder />
+		</>
+	);
+};

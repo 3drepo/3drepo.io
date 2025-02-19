@@ -15,26 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Resizer } from '../resizer/resizer.component';
-import { useContext } from 'react';
-import { ResizableTableContext } from '../resizableTableContext';
-import { OverlayElementsContainers, Table } from './resizableTable.styles';
-import { MovingColumnPlaceholder } from '../movingColumn/movingColumnPlaceholder/movingColumnPlaceholder.component';
-import { MovingColumnHighlighter } from '../movingColumn/movingColumnHighlighter/movingColumnHighlighter.component';
+import { OverlayElements, Table } from './resizableTable.styles';
+import { ResizersOverlay } from './overlayElements/resizers/resizersOverlay.component';
+import { MovingColumnOverlay } from './overlayElements/movingColumn/movingColumnOverlay.component';
 
-export const ResizableTable = ({ className = '', children }) => {
-	const { getVisibleColumns } = useContext(ResizableTableContext);
-
-	return (
-		<Table className={className}>
-			{children}
-			<OverlayElementsContainers>
-				<MovingColumnHighlighter />
-				<MovingColumnPlaceholder />
-				{getVisibleColumns().map(({ name }) => (
-					<Resizer name={name} key={name} />
-				))}
-			</OverlayElementsContainers>
-		</Table>
-	);
-};
+export const ResizableTable = ({ className = '', children }) => (
+	<Table className={className}>
+		{children}
+		<OverlayElements>
+			<MovingColumnOverlay />
+			<ResizersOverlay />
+		</OverlayElements>
+	</Table>
+);
