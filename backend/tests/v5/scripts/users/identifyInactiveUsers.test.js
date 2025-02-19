@@ -47,7 +47,7 @@ const setupData = async () => {
 	const teamspace = generateRandomString();
 	const teamspace2 = generateRandomString();
 	const users = times(20, () => generateUserCredentials());
-	delete users[0].basicData.billing.billingInfo.company;
+	delete users[1].basicData.billing.billingInfo.company;
 
 	await Promise.all([
 		createTeamspace(teamspace, [], undefined, false),
@@ -66,7 +66,7 @@ const setupData = async () => {
 			user.lastLogin = lastLoginRecord.loginTime;
 		}
 
-		if (index % 5 === 0) {
+		if (index % 10 === 0) {
 			await DBHandler.updateOne(ADMIN_DB, USERS_COL, { user: user.user }, { $set: { roles: [] } });
 			// eslint-disable-next-line no-param-reassign
 			user.invalidUser = true;
