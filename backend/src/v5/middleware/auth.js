@@ -24,6 +24,11 @@ const { validateMany } = require('./common');
 
 const AuthMiddleware = {};
 
+const destroySessionIfExists = (req, res) => new Promise((resolve) => {
+	if (req.session) destroySession(req.session, res, () => resolve());
+	else resolve();
+});
+
 const validSessionDetails = async (req, res, next) => {
 	if (!req.session.user.isAPIKey) {
 		const { id: sessionId, ipAddress, user: { userAgent } } = req.session;
@@ -34,12 +39,9 @@ const validSessionDetails = async (req, res, next) => {
 
 		if (!ipMatch || !userAgentMatch) {
 			try {
-				const callback = () => {
-					logger.logInfo(`Session ${sessionId} destroyed due to IP or user agent mismatch`);
-					respond(req, res, templates.notLoggedIn);
-				};
-
-				destroySession(req.session, res, callback);
+				await destroySessionIfExists(req, res);
+				logger.logInfo(`Session ${sessionId} destroyed due to IP or user agent mismatch`);
+				respond(req, res, templates.notLoggedIn);
 			} catch (err) {
 				respond(req, res, err);
 			}
@@ -60,6 +62,7 @@ const validSession = async (req, res, next) => {
 	if (await checkValidSession(req)) {
 		await next();
 	} else {
+		await destroySessionIfExists(req, res);
 		respond(req, res, templates.notLoggedIn);
 	}
 };
@@ -68,6 +71,7 @@ AuthMiddleware.isLoggedIn = async (req, res, next) => {
 	if (await checkValidSession(req, true)) {
 		await next();
 	} else {
+		await destroySessionIfExists(req, res);
 		respond(req, res, templates.notLoggedIn);
 	}
 };
