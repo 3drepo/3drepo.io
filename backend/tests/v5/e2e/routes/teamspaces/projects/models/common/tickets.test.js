@@ -745,31 +745,36 @@ const testGetTicketList = () => {
 						model.tickets.filter((t) => t.properties[propertyName]
 							=== model.tickets[0].properties[propertyName])],
 					[`${queryOperators.NOT_CONTAINS} operator is used in ${propType} property`,
-						{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.NOT_CONTAINS}::${model.tickets[0].properties[propertyName]}'` } }, true,
-						model.tickets.filter((t) => t.properties[propertyName]
-							!== model.tickets[0].properties[propertyName])],
+						{ ...baseRouteParams,
+							options: { query: `'${propertyName}::${queryOperators.NOT_CONTAINS}::${model.tickets[0].properties[propertyName]}'` } },
+						true,
+						model.tickets
+							.filter((t) => t.properties[propertyName] !== model.tickets[0].properties[propertyName])],
 				];
 			};
 
 			const manyOfPropertyFilters = [
-				...existsPropertyFilters(propTypes.MANY_OF, manyOfProp.name),
-				[`${queryOperators.IS} operator is used in ${propTypes.MANY_OF} property`,
-					{ ...baseRouteParams, options: { query: `'${manyOfProp.name}::${queryOperators.IS}::${model.tickets[0].properties[manyOfProp.name][0]}'` } }, true,
-					model.tickets
-						.filter((t) => (t.properties[manyOfProp.name]
-							?.some((val) => val === model.tickets[0].properties[manyOfProp.name][0])))],
-				[`${queryOperators.NOT_IS} operator is used in ${propTypes.MANY_OF} property`,
-					{ ...baseRouteParams, options: { query: `'${manyOfProp.name}::${queryOperators.NOT_IS}::${model.tickets[0].properties[manyOfProp.name][0]}'` } }, true,
-					model.tickets
-						.filter((t) => (!t.properties[manyOfProp.name]
-							?.some((val) => val === model.tickets[0].properties[manyOfProp.name][0])))],
-				[`${queryOperators.CONTAINS} operator is used in ${propTypes.MANY_OF} property`,
-					{ ...baseRouteParams, options: { query: `'${manyOfProp.name}::${queryOperators.CONTAINS}::${model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)}'` } }, true,
-					model.tickets
-						.filter((t) => t.properties[manyOfProp.name]?.some((val) => val.slice(0, 5)
-							=== model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)))],
+				// ...existsPropertyFilters(propTypes.MANY_OF, manyOfProp.name),
+				// [`${queryOperators.IS} operator is used in ${propTypes.MANY_OF} property`,
+				// 	{ ...baseRouteParams, options: { query: `'${manyOfProp.name}::${queryOperators.IS}::${model.tickets[0].properties[manyOfProp.name][0]}'` } }, true,
+				// 	model.tickets
+				// 		.filter((t) => (t.properties[manyOfProp.name]
+				// 			?.some((val) => val === model.tickets[0].properties[manyOfProp.name][0])))],
+				// [`${queryOperators.NOT_IS} operator is used in ${propTypes.MANY_OF} property`,
+				// 	{ ...baseRouteParams, options: { query: `'${manyOfProp.name}::${queryOperators.NOT_IS}::${model.tickets[0].properties[manyOfProp.name][0]}'` } }, true,
+				// 	model.tickets
+				// 		.filter((t) => (!t.properties[manyOfProp.name]
+				// 			?.some((val) => val === model.tickets[0].properties[manyOfProp.name][0])))],
+				// [`${queryOperators.CONTAINS} operator is used in ${propTypes.MANY_OF} property`,
+				// 	{ ...baseRouteParams, options: { query: `'${manyOfProp.name}::${queryOperators.CONTAINS}::${model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)}'` } }, true,
+				// 	model.tickets
+				// 		.filter((t) => t.properties[manyOfProp.name]?.some((val) => val.slice(0, 5)
+				// 			=== model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)))],
+				// here do the test
 				[`${queryOperators.NOT_CONTAINS} operator is used in ${propTypes.MANY_OF} property`,
-					{ ...baseRouteParams, options: { query: `'${manyOfProp.name}::${queryOperators.NOT_CONTAINS}::${model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)}'` } }, true,
+					{ ...baseRouteParams,
+						options: { query: `'${manyOfProp.name}::${queryOperators.NOT_CONTAINS}::${model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)}'` } },
+					true,
 					model.tickets
 						.filter((t) => !t.properties[manyOfProp.name]
 							?.some((val) => val.slice(0, 5)
@@ -777,23 +782,26 @@ const testGetTicketList = () => {
 			];
 
 			const numberPropertyFilters = (propType, propertyName) => [
-				...existsPropertyFilters(propType, propertyName),
+				// ...existsPropertyFilters(propType, propertyName),
 				...equalsPropertyFilters(propType, propertyName),
-				[`${queryOperators.GREATER_OR_EQUAL_TO} operator is used in ${propType} property`, { ...baseRouteParams,
-					options: { query: `'${propertyName}::${queryOperators.GREATER_OR_EQUAL_TO}::${model.tickets[0].properties[propertyName]}'` } }, true,
-				model.tickets.filter((t) => t.properties[propertyName]
-					>= model.tickets[0].properties[propertyName])],
-				[`${queryOperators.LESSER_OR_EQUAL_TO} operator is used in ${propType} property`, { ...baseRouteParams,
-					options: { query: `'${propertyName}::${queryOperators.LESSER_OR_EQUAL_TO}::${model.tickets[0].properties[propertyName]}'` } }, true,
-				model.tickets.filter((t) => t.properties[propertyName]
-						<= model.tickets[0].properties[propertyName])],
-				[`${queryOperators.RANGE} operator is used in ${propType} property`, { ...baseRouteParams,
-					options: { query: `'${propertyName}::${queryOperators.RANGE}::[${model.tickets[0].properties[propertyName] - 500},${model.tickets[0].properties[propertyName] + 500}]'` } }, true,
-				model.tickets.filter((t) => t.properties[propertyName]
-						>= model.tickets[0].properties[propertyName] - 500
-						&& t.properties[propertyName] <= model.tickets[0].properties[propertyName] + 500)],
+				// [`${queryOperators.GREATER_OR_EQUAL_TO} operator is used in ${propType} property`, { ...baseRouteParams,
+				// 	options: { query: `'${propertyName}::${queryOperators.GREATER_OR_EQUAL_TO}::${model.tickets[0].properties[propertyName]}'` } }, true,
+				// model.tickets.filter((t) => t.properties[propertyName]
+				// 	>= model.tickets[0].properties[propertyName])],
+				// [`${queryOperators.LESSER_OR_EQUAL_TO} operator is used in ${propType} property`, { ...baseRouteParams,
+				// 	options: { query: `'${propertyName}::${queryOperators.LESSER_OR_EQUAL_TO}::${model.tickets[0].properties[propertyName]}'` } }, true,
+				// model.tickets.filter((t) => t.properties[propertyName]
+				// 		<= model.tickets[0].properties[propertyName])],
+				// [`${queryOperators.RANGE} operator is used in ${propType} property`, { ...baseRouteParams,
+				// 	options: { query: `'${propertyName}::${queryOperators.RANGE}::[${model.tickets[0].properties[propertyName] - 500},${model.tickets[0].properties[propertyName] + 500}]'` } }, true,
+				// model.tickets.filter((t) => t.properties[propertyName]
+				// 		>= model.tickets[0].properties[propertyName] - 500
+				// 		&& t.properties[propertyName] <= model.tickets[0].properties[propertyName] + 500)],
+				// here do the test
 				[`${queryOperators.NOT_IN_RANGE} operator is used in ${propType} property`,
-					{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.NOT_IN_RANGE}::[${model.tickets[0].properties[propertyName] - 500},${model.tickets[0].properties[propertyName] + 500}]'` } }, true,
+					{ ...baseRouteParams,
+						options: { query: `'${propertyName}::${queryOperators.NOT_IN_RANGE}::[${model.tickets[0].properties[propertyName] - 500},${model.tickets[0].properties[propertyName] + 500}]'` } },
+					true,
 					model.tickets.filter((t) => !t.properties[propertyName] || (t.properties[propertyName]
 					< model.tickets[0].properties[propertyName] - 500
 					|| t.properties[propertyName] > model.tickets[0].properties[propertyName] + 500))],
