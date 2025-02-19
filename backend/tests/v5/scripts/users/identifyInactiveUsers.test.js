@@ -66,7 +66,7 @@ const setupData = async () => {
 			user.lastLogin = lastLoginRecord.loginTime;
 		}
 
-		if (index % 10 === 0) {
+		if (index % 5 === 0) {
 			await DBHandler.updateOne(ADMIN_DB, USERS_COL, { user: user.user }, { $set: { roles: [] } });
 			// eslint-disable-next-line no-param-reassign
 			user.invalidUser = true;
