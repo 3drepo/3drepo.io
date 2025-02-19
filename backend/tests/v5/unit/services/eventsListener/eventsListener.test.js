@@ -17,7 +17,7 @@
 
 const { src } = require('../../../helper/path');
 
-const { generateRandomString } = require('../../../helper/services');
+const { generateRandomString, determineTestGroup } = require('../../../helper/services');
 
 jest.mock('../../../../../src/v5/models/loginRecords');
 const LoginRecords = require(`${src}/models/loginRecords`);
@@ -139,7 +139,7 @@ const testAuthEventsListener = () => {
 
 const testUserEventsListener = () => {
 	describe('User Events', () => {
-		test(`Should trigger userVerified if there is a ${events.USER_CREATED}`, async () => {
+		test(`Should trigger userCreated if there is a ${events.USER_CREATED}`, async () => {
 			const waitOnEvent = eventTriggeredPromise(events.USER_CREATED);
 			const username = generateRandomString();
 			EventsManager.publish(events.USER_CREATED, { username });
@@ -151,7 +151,7 @@ const testUserEventsListener = () => {
 	});
 };
 
-describe('services/eventsListener/eventsListener', () => {
+describe(determineTestGroup(__filename), () => {
 	EventsListener.init();
 	testAuthEventsListener();
 	testUserEventsListener();
