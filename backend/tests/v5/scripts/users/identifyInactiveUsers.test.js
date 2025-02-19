@@ -30,6 +30,10 @@ const DayJS = require('dayjs');
 
 const { src, utilScripts, tmpDir } = require('../../helper/path');
 
+const DBHandler = require(`${src}/handler/db`);
+const { ADMIN_DB } = require(`${src}/handler/db.constants`);
+const { USERS_COL } = require(`${src}/models/users.constants`);
+
 const IdentifyInactiveUsers = require(`${utilScripts}/users/identifyInactiveUsers`);
 const { disconnect } = require(`${src}/handler/db`);
 
@@ -60,6 +64,12 @@ const setupData = async () => {
 			const [lastLoginRecord] = loginRecords.sort((a, b) => b.loginTime - a.loginTime);
 			// eslint-disable-next-line no-param-reassign
 			user.lastLogin = lastLoginRecord.loginTime;
+		}
+
+		if (index % 10 === 0) {
+			await DBHandler.updateOne(ADMIN_DB, USERS_COL, { user: user.user }, { $set: { roles: [] } });
+			// eslint-disable-next-line no-param-reassign
+			user.invalidUser = true;
 		}
 	}));
 
@@ -95,8 +105,8 @@ const runTest = () => {
 			const thresholdDate = new Date();
 			thresholdDate.setMonth(thresholdDate.getMonth() - monthsOfInactivity);
 
-			const expectedResult = users.flatMap(({ user, basicData, lastLogin }) => {
-				if (!lastLogin || lastLogin < thresholdDate) {
+			const expectedResult = users.flatMap(({ user, invalidUser, basicData, lastLogin }) => {
+				if (!invalidUser && (!lastLogin || lastLogin < thresholdDate)) {
 					const { email, firstName, lastName, billing } = basicData;
 					return { user, email, firstName, lastName, company: billing.billingInfo.company ?? '', lastLogin: formatDate(lastLogin), teamspaceNumber: '2' };
 				}

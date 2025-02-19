@@ -63,7 +63,7 @@ const run = async (monthsOfInactivity, outFile) => {
 		'customData.billing.billingInfo.company': 1,
 	};
 
-	const inactiveUsers = await getUsersByQuery({ user: { $not: { $in: activeUsernames } } }, projection);
+	const inactiveUsers = await getUsersByQuery({ user: { $not: { $in: activeUsernames } }, roles: { role: 'user', db: 'admin' } }, projection);
 	const entries = await Promise.all(inactiveUsers.map(getFileEntry));
 
 	await writeResultsToFile(entries, outFile);
