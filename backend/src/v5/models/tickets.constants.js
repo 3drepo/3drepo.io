@@ -49,7 +49,6 @@ Tickets.operatorToQuery = {
 				return toBoolean(v);
 			}) } } },
 			{ [propertyName]: { $exists: false } },
-			{ [propertyName]: null },
 		],
 	}
 	),
@@ -62,7 +61,6 @@ Tickets.operatorToQuery = {
 				[propertyName]: { $regex: val, $options: 'i' },
 			})) },
 			{ [propertyName]: { $exists: false } },
-			{ [propertyName]: null },
 		],
 	}),
 	[queryOperators.RANGE]: (propertyName, value) => ({
@@ -80,7 +78,6 @@ Tickets.operatorToQuery = {
 				]),
 			},
 			{ [propertyName]: { $exists: false } },
-			{ [propertyName]: null },
 		],
 	}),
 	[queryOperators.GREATER_OR_EQUAL_TO]: (propertyName, value) => ({
