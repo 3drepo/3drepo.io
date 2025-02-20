@@ -17,6 +17,7 @@
 
 import styled from 'styled-components';
 import { Backdrop } from '@mui/material';
+import { DelimiterLine } from '@controls/resizableTableContext/delimiterLine/delimiterLine.component';
 
 export const Container = styled(Backdrop).attrs({ open: true })`
 	cursor: grabbing;
@@ -25,7 +26,7 @@ export const Container = styled(Backdrop).attrs({ open: true })`
 	display: block;
 `;
 
-export const Areas = styled.div`
+export const DropAreas = styled.div`
 	width: fit-content;
 	height: 100%;
 `;
@@ -34,4 +35,8 @@ export const Area = styled.div<{ $width: number }>`
 	width: ${({ $width }) => $width}px;
 	height: 100%;
 	display: inline-block;
+`;
+
+export const DropLine = styled(DelimiterLine)`
+	position: absolute;
 `;
