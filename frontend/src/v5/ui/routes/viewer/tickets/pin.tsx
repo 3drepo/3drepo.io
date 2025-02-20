@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,20 +14,22 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import TicketPin from '@assets/icons/filled/pin_ticket-filled.svg';
+import IssuePin from '@assets/icons/filled/pin_issue-filled.svg';
+import RiskPin from '@assets/icons/filled/pin_risk-filled.svg';
+import MarkerPin from '@assets/icons/filled/pin_marker-filled.svg';
+import { PinIcon } from '@/v5/store/tickets/tickets.types';
 
-module.exports = {
-	mongodbMemoryServerOptions: {
-		binary: {
-			version: '8.0.4',
-			skipMD5: true,
-			downloadDir: './node_modules/.cache',
-		},
-		instance: {
-			auth: false,
-			dbName: 'admin',
-			ip: '127.0.0.1',
-			port: 27227,
-		},
-		autoStart: false,
-	},
+
+const PinPerType = 
+{
+	'ISSUE': IssuePin,
+	'RISK': RiskPin,
+	'DEFAULT': TicketPin,
+	'MARKER': MarkerPin,
+};
+
+export const Pin = ({ pinIcon }: { pinIcon:PinIcon }) => {
+	const Icon = PinPerType[pinIcon];
+	return (<Icon />);
 };
