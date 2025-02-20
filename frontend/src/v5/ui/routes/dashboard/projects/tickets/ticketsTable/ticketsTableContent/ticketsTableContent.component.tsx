@@ -43,7 +43,7 @@ export const TicketsTableContent = (props: TicketsTableResizableContentProps) =>
 	const columns: TableColumn[] = [
 		{ name: 'id', width: 80, minWidth: 25 },
 		{ name: BaseProperties.TITLE, width: 380, minWidth: 25, stretch: true },
-		{ name: 'modelName', width: 145, minWidth: 25 },
+		{ name: 'modelName', width: 170, minWidth: 25 },
 		{ name: `properties.${BaseProperties.CREATED_AT}`, width: 127, minWidth: 25 },
 		{ name: `properties.${IssueProperties.ASSIGNEES}`, width: 96, minWidth: 25 }, 
 		{ name: `properties.${BaseProperties.OWNER}`, width: 52, minWidth: 25 },
