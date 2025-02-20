@@ -21,6 +21,8 @@ import { CommentMarkDown } from '../commentMarkDown/commentMarkDown.component';
 import { CommentContainer, CommentAge, EditedCommentLabel, ViewpointIcon } from './basicComment.styles';
 import { CommentNonMessageContent } from '../commentNonMessageContent/commentNonMessageContent.component';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
+import { Tooltip } from '@mui/material';
+import { formatMessage } from '@/v5/services/intl';
 
 export type BasicCommentProps = Partial<Omit<ITicketComment, 'history' | '_id'>> & {
 	children?: any;
@@ -51,7 +53,11 @@ export const BasicComment = ({
 			<CommentAge>
 				{commentAge}
 				{!!views && (
-					<ViewpointIcon onClick={() => goToView(views)} />
+					<Tooltip title={formatMessage({ id: 'basicComment.viewpoint', defaultMessage: 'Go to viewpoint' })} placement="top" arrow>
+						<span>
+							<ViewpointIcon onClick={() => goToView(views)} />
+						</span>
+					</Tooltip>
 				)}
 			</CommentAge>
 		</CommentContainer>
