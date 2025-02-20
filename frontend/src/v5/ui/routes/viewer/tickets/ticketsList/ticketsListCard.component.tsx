@@ -27,7 +27,7 @@ import { ViewerParams } from '../../../routes.constants';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { EllipsisMenu } from '@controls/ellipsisMenu';
 import { formatMessage } from '@/v5/services/intl';
-import PinIcon from '@assets/icons/filled/ticket_pin-filled.svg';
+import PinIcon from '@assets/icons/filled/pin_ticket-filled.svg';
 import { EllipsisMenuItemSwitch } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenuItemSwitch.component';
 import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 
