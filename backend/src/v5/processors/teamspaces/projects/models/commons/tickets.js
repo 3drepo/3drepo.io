@@ -387,9 +387,9 @@ Tickets.getTicketList = async (teamspace, project, model,
 	if (sortBy && propertyToFilterName(sortBy)) {
 		sort = { [propertyToFilterName(sortBy)]: sortDesc ? -1 : 1 };
 	}
-
 	if (queryFilters.length) {
 		const queryInfo = await getQueryInfoFromQueryFilters(teamspace, queryFilters);
+
 		return getTicketsByFilter(teamspace, project, model,
 			deleteIfUndefined({ projection, updatedSince, sort, limit, skip, ...queryInfo }));
 	}
