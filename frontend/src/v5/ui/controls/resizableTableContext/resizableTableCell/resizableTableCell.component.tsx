@@ -15,18 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext } from 'react';
+import { HTMLAttributes, useContext } from 'react';
 import { ResizableTableContext } from '../resizableTableContext';
 import { Item } from './resizableTableCell.styles';
 
-export type ResizableTableCellProps = {
-	children: any;
+export type ResizableTableCellProps = HTMLAttributes<HTMLDivElement> & {
 	name: string;
 };
 export const ResizableTableCell = ({ name, ...props }: ResizableTableCellProps) => {
-	const { movingColumn, isHidden } = useContext(ResizableTableContext);
+	const { movingColumn, isHidden, getIndex } = useContext(ResizableTableContext);
 
 	if (isHidden(name)) return null;
 
-	return (<Item $isMoving={movingColumn === name} {...props} />);
+	return (<Item $isMoving={movingColumn === name} $index={getIndex(name)} {...props} />);
 };

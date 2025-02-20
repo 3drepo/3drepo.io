@@ -17,9 +17,9 @@
 
 import styled from 'styled-components';
 
-export const Highlighter = styled.div<{ $offset: number, $columnWidth: number, $gap: number }>`
+export const Highlighter = styled.div<{ $offset: number, $width: number, $gap: number }>`
 	border: solid 2px ${({ theme }) => theme.palette.primary.main};
-	width: ${({ $columnWidth, $gap }) => $columnWidth + 2 * $gap}px;
+	min-width: ${({ $width, $gap }) => $width + 2 * $gap}px;
 	position: relative;
 	left: ${({ $offset }) => $offset}px;
 	margin-left: ${({ $gap }) => -$gap}px;

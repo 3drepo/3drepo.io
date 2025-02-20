@@ -22,7 +22,6 @@ import { DelimiterLine } from '../../../../delimiterLine/delimiterLine.component
 export const ResizerLine = styled(DelimiterLine)<{ $highlight: boolean, $isResizing?: boolean }>`
 	border-color: ${({ $highlight, theme }) => $highlight ? theme.palette.primary.main : 'transparent'};
 	border-style: ${({ $isResizing }) => $isResizing ? 'solid' : 'dashed'};
-	position: absolute;
 `;
 
 export const ResizerElement = styled(DraggingContainer).attrs({ cursor: 'col-resize' })`

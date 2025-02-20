@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isEqual, sum } from 'lodash';
+import { compact, isEqual, sum } from 'lodash';
 import { createContext, useEffect, useRef, useState } from 'react';
 import { RefHolder } from './resizableTableContext.styles';
 
@@ -30,6 +30,7 @@ export interface ResizableTableType {
 	columnGap: number,
 	getRowWidth: () => number,
 	getOffset: (name: string) => number,
+	getIndex: (name: string) => number,
 
 	// resizing
 	setResizerName: (name: string) => void,
@@ -41,9 +42,9 @@ export interface ResizableTableType {
 	// moving columns
 	movingColumn: string,
 	setMovingColumn: (name: string) => void,
-	moveColumn: (name: string, newIndex) => void,
-	columnAfterMovingColumn: string,
-	setColumnAfterMovingColumn: (name: string) => void,
+	moveColumn: (name: string, dropIndex: number) => void,
+	movingColumnDropIndex: number,
+	setMovingColumnDropIndex: (dropIndex: number) => void,
 }
 
 const defaultValue: ResizableTableType = {
@@ -55,6 +56,7 @@ const defaultValue: ResizableTableType = {
 	columnGap: 0,
 	getRowWidth: () => 0,
 	getOffset: () => 0,
+	getIndex: () => -1,
 
 	// resizing
 	setResizerName: () => {},
@@ -67,8 +69,8 @@ const defaultValue: ResizableTableType = {
 	movingColumn: '',
 	setMovingColumn: () => {},
 	moveColumn: () => {},
-	columnAfterMovingColumn: '',
-	setColumnAfterMovingColumn: () => {},
+	movingColumnDropIndex: -1,
+	setMovingColumnDropIndex: () => {},
 };
 export const ResizableTableContext = createContext(defaultValue);
 ResizableTableContext.displayName = 'ResizeableColumns';
@@ -85,7 +87,7 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 	const [resizerName, setResizerName] = useState('');
 	const [isResizing, setIsResizing] = useState(false);
 	const [movingColumn, setMovingColumn] = useState('');
-	const [columnAfterMovingColumn, setColumnAfterMovingColumn] = useState('');
+	const [movingColumnDropIndex, setMovingColumnDropIndex] = useState(-1);
 	const ref = useRef<HTMLDivElement>();
 
 	const getColumnByName = (name) => columns.find((e) => e.name === name);
@@ -134,21 +136,13 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 		setColumns([ ...columns ]);
 	};
 
-	const moveColumn = (name: string, columnBeforeName: string) => {
-		if (name === columnBeforeName) return;
+	const getIndex = (name: string) => getVisibleColumns().findIndex((c) => c.name === name);
 
-		const columnToMove = getColumnByName(name);
-		const columnToMoveIndex = columns.findIndex((c) => c.name === name);
-		const columnBeforeIndex = columns.findIndex((c) => c.name === columnBeforeName);
-
-		const newColumns = [...columns];
-		newColumns.splice(columnToMoveIndex, 1);
-		if (columnToMoveIndex < columnBeforeIndex) {
-			newColumns.splice(columnBeforeIndex + 1, 0, columnToMove);
-		} else {
-			newColumns.splice(columnBeforeIndex, 0, columnToMove);
-		}
-		setColumns(newColumns);
+	const moveColumn = (name: string, to: number) => {
+		const newColumns = getVisibleColumns();
+		delete newColumns[getIndex(name)];
+		newColumns.splice(to, 0, getColumnByName(name));
+		setColumns(compact(newColumns));
 	};
 
 	useEffect(() => {
@@ -165,6 +159,7 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 			getMinWidth,
 			setResizerName,
 			getOffset,
+			getIndex,
 			resizerName,
 			setIsResizing,
 			isResizing,
@@ -175,8 +170,8 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 			moveColumn,
 			movingColumn,
 			setMovingColumn,
-			columnAfterMovingColumn,
-			setColumnAfterMovingColumn,
+			movingColumnDropIndex,
+			setMovingColumnDropIndex,
 		}}>
 			{children}
 			<RefHolder ref={ref} />

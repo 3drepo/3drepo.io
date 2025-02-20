@@ -15,15 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
+import { Backdrop } from '@mui/material';
 
-export const Item = styled.div<{ $isMoving?: boolean, $index: number }>`
-	width: 100%;
-	overflow: hidden;
-	grid-row: 1;
-	grid-column: ${({ $index }) => $index + 1};
+export const Container = styled(Backdrop).attrs({ open: true })`
+	cursor: grabbing;
+	z-index: 1000;
+	pointer-events: all;
+	display: block;
+`;
 
-	${({ $isMoving, theme }) => $isMoving && css`
-		background-color: ${theme.palette.primary.lightest};
-	`};
+export const Areas = styled.div`
+	width: fit-content;
+	height: 100%;
+`;
+
+export const Area = styled.div<{ $width: number }>`
+	width: ${({ $width }) => $width}px;
+	height: 100%;
+	display: inline-block;
 `;

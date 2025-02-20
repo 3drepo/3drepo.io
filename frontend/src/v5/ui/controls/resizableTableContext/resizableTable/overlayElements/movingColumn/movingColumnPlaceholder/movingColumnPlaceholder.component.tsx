@@ -20,8 +20,13 @@ import { useContext } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 
 export const MovingColumnPlaceholder = () => {
-	const { movingColumn, columnAfterMovingColumn, getOffset, getRowWidth } = useContext(ResizableTableContext);
-	if (!movingColumn || movingColumn === columnAfterMovingColumn) return null;
-	if (columnAfterMovingColumn) return (<Placeholder offset={getOffset(columnAfterMovingColumn)} />);
-	return <Placeholder offset={getRowWidth()} />;
+	const { movingColumn, movingColumnDropIndex, getOffset, getRowWidth, getIndex, getVisibleColumns } = useContext(ResizableTableContext);
+	const movingColumnIndex = getIndex(movingColumn);
+	const visibleColumns = getVisibleColumns();
+
+	if (movingColumnIndex === movingColumnDropIndex || movingColumnIndex === movingColumnDropIndex - 1) return null;
+
+	const offset = getOffset(visibleColumns[movingColumnDropIndex]?.name) ?? getRowWidth();
+
+	return <Placeholder offset={offset} />;
 };

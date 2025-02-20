@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { MovingColumnHighlighter } from '@controls/resizableTableContext/movingColumn/movingColumnHighlighter/movingColumnHighlighter.component';
-import { MovingColumnPlaceholder } from '@controls/resizableTableContext/movingColumn/movingColumnPlaceholder/movingColumnPlaceholder.component';
+import { MovingColumnHighlighter } from '@controls/resizableTableContext/resizableTable/overlayElements/movingColumn/movingColumnHighlighter/movingColumnHighlighter.component';
+import { MovingColumnPlaceholder } from '@controls/resizableTableContext/resizableTable/overlayElements/movingColumn/movingColumnPlaceholder/movingColumnPlaceholder.component';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { useContext } from 'react';
+import { MovingColumnDropAreas } from './movingColumnDropAreas/movingColumnDropAreas.component';
 
 export const MovingColumnOverlay = () => {
 	const { movingColumn } = useContext(ResizableTableContext);
@@ -28,6 +29,7 @@ export const MovingColumnOverlay = () => {
 		<>
 			<MovingColumnHighlighter />
 			<MovingColumnPlaceholder />
+			<MovingColumnDropAreas />
 		</>
 	);
 };

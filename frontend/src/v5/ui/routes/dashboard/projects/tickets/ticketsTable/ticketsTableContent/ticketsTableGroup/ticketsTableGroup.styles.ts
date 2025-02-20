@@ -20,8 +20,8 @@ import styled, { css } from 'styled-components';
 import { ResizableTable } from '@controls/resizableTableContext/resizableTable/resizableTable.component';
 import { Row } from './ticketsTableRow/ticketsTableRow.styles';
 import { ResizableTableHeader } from '@controls/resizableTableContext/resizableTableHeader/resizableTableHeader.component';
-import { Highlighter } from '@controls/resizableTableContext/movingColumn/movingColumnHighlighter/movingColumnHighlighter.styles';
-import { Placeholder } from '@controls/resizableTableContext/movingColumn/movingColumnPlaceholder/movingColumnPlaceholder.styles';
+import { Highlighter } from '@controls/resizableTableContext/resizableTable/overlayElements/movingColumn/movingColumnHighlighter/movingColumnHighlighter.styles';
+import { Placeholder } from '@controls/resizableTableContext/resizableTable/overlayElements/movingColumn/movingColumnPlaceholder/movingColumnPlaceholder.styles';
 
 export const Headers = styled(ResizableTableRow)`
 	gap: 1px;

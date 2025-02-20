@@ -20,11 +20,9 @@ import { ResizableTableContext } from '@controls/resizableTableContext/resizable
 import { Highlighter } from './movingColumnHighlighter.styles';
 
 export const MovingColumnHighlighter = (props) => {
-	const { getOffset, movingColumn, getWidth, columnGap } = useContext(ResizableTableContext);
+	const { movingColumn, getOffset, getWidth, columnGap } = useContext(ResizableTableContext);
 	const width = getWidth(movingColumn);
 	const offset = getOffset(movingColumn);
 
-	if (!movingColumn) return (<></>);
-
-	return (<Highlighter $offset={offset} $columnWidth={width} $gap={columnGap} {...props} />);
+	return (<Highlighter $offset={offset} $width={width} $gap={columnGap} {...props} />);
 };
