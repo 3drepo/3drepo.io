@@ -1223,7 +1223,6 @@ const testGetTicketList = () => {
 			expectedQuery: { $and: [{ $or: [
 				{ [propertyName]: { $not: { $in: [true] } } },
 				{ [propertyName]: { $exists: false } },
-				{ [propertyName]: null },
 			] }] },
 		}],
 		[`${queryOperators.NOT_EQUALS} query filter and number value`, [], {}, undefined, { }, {
@@ -1232,7 +1231,6 @@ const testGetTicketList = () => {
 				$and: [{ $or: [
 					{ [propertyName]: { $not: { $in: [propertyNumberValue, new Date(propertyNumberValue)] } } },
 					{ [propertyName]: { $exists: false } },
-					{ [propertyName]: null },
 				],
 				}],
 			},
@@ -1254,7 +1252,6 @@ const testGetTicketList = () => {
 						],
 					},
 					{ [propertyName]: { $exists: false } },
-					{ [propertyName]: null },
 				],
 			}] },
 		}],
@@ -1280,7 +1277,6 @@ const testGetTicketList = () => {
 						],
 					},
 					{ [propertyName]: { $exists: false } },
-					{ [propertyName]: null },
 				],
 			}] },
 		}],

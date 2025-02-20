@@ -652,8 +652,22 @@ const testGetTicketList = () => {
 		templateWithAllProps.properties.push(textProp, longTextProp, numberProp, boolProp, dateProp,
 			oneOfProp, manyOfProp);
 
-		con.tickets = times(10, (n) => ServiceHelper.generateTicket(templatesToUse[n % templatesToUse.length]));
-		fed.tickets = times(10, (n) => ServiceHelper.generateTicket(templatesToUse[n % templatesToUse.length]));
+		con.tickets = times(13, (n) => ServiceHelper.generateTicket(templatesToUse[n % templatesToUse.length]));
+		fed.tickets = times(13, (n) => ServiceHelper.generateTicket(templatesToUse[n % templatesToUse.length]));
+
+		delete con.tickets[12].properties[textProp.name];
+		delete con.tickets[12].properties[longTextProp.name];
+		delete con.tickets[12].properties[numberProp.name];
+		delete con.tickets[12].properties[dateProp.name];
+		delete con.tickets[12].properties[oneOfProp.name];
+		delete con.tickets[12].properties[manyOfProp.name];
+
+		delete fed.tickets[12].properties[textProp.name];
+		delete fed.tickets[12].properties[longTextProp.name];
+		delete fed.tickets[12].properties[numberProp.name];
+		delete fed.tickets[12].properties[dateProp.name];
+		delete fed.tickets[12].properties[oneOfProp.name];
+		delete fed.tickets[12].properties[manyOfProp.name];
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed, conNoTickets, fedNoTickets],
@@ -711,10 +725,12 @@ const testGetTicketList = () => {
 			const existsPropertyFilters = (propType, propertyName) => [
 				[`${queryOperators.EXISTS} operator is used in ${propType} property`,
 					{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.EXISTS}'` } }, true,
-					model.tickets.filter((t) => t.type === templateWithAllProps._id)],
+					model.tickets.filter((t) => t.type === templateWithAllProps._id
+						&& Object.hasOwn(t.properties, propertyName))],
 				[`${queryOperators.NOT_EXISTS} operator is used in ${propType} property`,
 					{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.NOT_EXISTS}'` } }, true,
-					model.tickets.filter((t) => t.type !== templateWithAllProps._id)],
+					model.tickets.filter((t) => t.type !== templateWithAllProps._id
+					|| !Object.hasOwn(t.properties, propertyName))],
 			];
 
 			const equalsPropertyFilters = (propType, propertyName) => [
