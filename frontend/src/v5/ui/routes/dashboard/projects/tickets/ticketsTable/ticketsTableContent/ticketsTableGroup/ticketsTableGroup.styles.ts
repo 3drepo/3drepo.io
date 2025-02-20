@@ -40,8 +40,7 @@ export const IconContainer = styled.div<{ $flip?: boolean }>`
 export const Header = styled.div<{ $selectable?: boolean }>`
 	${({ theme }) => theme.typography.kicker};
 	color: ${({ theme }) => theme.palette.base.main};
-	padding-left: 10px;
-	padding-bottom: 10px;
+	padding: 2px 0 8px 10px;
 	text-align: start;
 	box-sizing: border-box;
 	user-select: none;
