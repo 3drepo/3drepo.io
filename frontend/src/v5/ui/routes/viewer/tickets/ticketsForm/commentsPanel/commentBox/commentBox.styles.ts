@@ -27,8 +27,6 @@ import { DashedContainer } from '@controls/dragAndDrop/dragAndDrop.styles';
 export const Container = styled.section`
 	display: flex;
 	flex-direction: column;
-	border: solid 0 ${({ theme }) => theme.palette.secondary.lightest};
-	border-top-width: 1px;
 	padding: 0 0 11px;
 	overflow-x: hidden;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
@@ -173,4 +171,10 @@ export const SendButton = styled(SubmitButton).attrs({
 	min-width: unset;
 	width: 34px;
 	height: 34px;
+`;
+
+export const EditCommentButtons = styled.div`
+	margin: 4px 5px 0 auto;
+	display: flex;
+	flex-direction: row;
 `;

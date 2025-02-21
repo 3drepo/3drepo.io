@@ -22,8 +22,7 @@ import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { TicketCommentReplyMetadata, ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketButton } from '../../../../ticketButton/ticketButton.styles';
-import { Comment, CommentWithButtonsContainer } from './currentUserComment.styles';
-import { EditComment } from './editComment/editComment.component';
+import { Comment, CommentWithButtonsContainer, EditComment } from './currentUserComment.styles';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 import { CommentButtons } from '../basicComment/basicComment.styles';
 import { uploadImages } from '@controls/fileUploader/uploadImages';
@@ -34,7 +33,7 @@ export type CurrentUserCommentProps = ITicketComment & {
 	isFirstOfBlock: boolean;
 	onDelete: (commentId) => void;
 	onReply: (commentId) => void;
-	onEdit: (commentId, newMessage, newImages) => void;
+	onEdit: (commentId, newMessage, newImages, newViewpoint) => void;
 };
 export const CurrentUserComment = ({
 	_id,
@@ -43,6 +42,7 @@ export const CurrentUserComment = ({
 	message,
 	metadata,
 	images,
+	views,
 	onDelete,
 	onReply,
 	onEdit,
@@ -54,13 +54,13 @@ export const CurrentUserComment = ({
 	const onEditImage = (img, index) => {
 		const newImages = [...images];
 		newImages[index] = img;
-		onEdit(_id, message, newImages);
+		onEdit(_id, message, newImages, views);
 	};
 
 	// @ts-ignore
 	const onDeleteImage = (index) => onEdit(_id, message, images.toSpliced(index, 1));
 
-	const onUploadImages = async () => uploadImages((imagesToUpload) => onEdit(_id, message, images.concat(imagesToUpload)));
+	const onUploadImages = async () => uploadImages((imagesToUpload) => onEdit(_id, message, images.concat(imagesToUpload), views));
 	const imagesEditingFunctions = { onDeleteImage, onUploadImages, onEditImage };
 
 	if (deleted) return (<DeletedComment author={author} />);
@@ -68,13 +68,12 @@ export const CurrentUserComment = ({
 	if (isEditMode) {
 		return (
 			<EditComment
+				commentId={_id}
 				message={message}
 				images={images}
-				author={author}
-				metadata={metadata}
-				onEditMessage={(newMessage) => onEdit(_id, newMessage, images)}
-				{...imagesEditingFunctions}
-				onClose={() => setIsEditMode(false)}
+				commentReply={metadata}
+				views={views}
+				onCancel={() => setIsEditMode(false)}
 			/>
 		);
 	}
@@ -98,6 +97,7 @@ export const CurrentUserComment = ({
 				message={message}
 				images={images}
 				metadata={metadata}
+				views={views}
 				{...(!readOnly ? imagesEditingFunctions : {})}
 				{...props}
 			/>
