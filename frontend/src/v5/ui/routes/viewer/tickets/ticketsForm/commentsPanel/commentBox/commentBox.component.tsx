@@ -18,7 +18,7 @@ import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import CancelIcon from '@assets/icons/outlined/cross_sharp_edges-outlined.svg';
 import SendIcon from '@assets/icons/outlined/send_message-outlined.svg';
 import FileIcon from '@assets/icons/outlined/file-outlined.svg';
-import CameraIcon from '@assets/icons/outlined/camera_side-outlined.svg';
+import ViewpointIcon from '@assets/icons/outlined/camera_side-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
@@ -53,6 +53,7 @@ import {
 	ErroredImageMessages,
 	FileIconInput,
 	EditCommentButtons,
+	FormCheckbox,
 } from './commentBox.styles';
 import { CommentReply } from '../comment/commentReply/commentReply.component';
 import { ActionMenu } from '../../../ticketsList/ticketsList.styles';
@@ -60,7 +61,6 @@ import { TicketContext } from '../../../ticket.context';
 import { useSyncProps } from '@/v5/helpers/syncProps.hooks';
 import { DrawingViewerService } from '@components/viewer/drawingViewer/drawingViewer.service';
 import { ViewerCanvasesContext } from '../../../../viewerCanvases.context';
-import { FormCheckbox } from '@controls/inputs/formInputs.component';
 import { TicketButton } from '../../../ticketButton/ticketButton.styles';
 
 type ImageToUpload = {
@@ -324,7 +324,7 @@ export const CommentBox = ({ message = '', images = [], views, commentReply, del
 				<FormCheckbox
 					name="saveViewpoint"
 					control={control}
-					label={<CameraIcon />}
+					label={<ViewpointIcon />}
 				/>
 				<CharsCounter $error={charsLimitIsReached}>{charsCount}/{MAX_MESSAGE_LENGTH}</CharsCounter>
 				{ isEditMode ? (

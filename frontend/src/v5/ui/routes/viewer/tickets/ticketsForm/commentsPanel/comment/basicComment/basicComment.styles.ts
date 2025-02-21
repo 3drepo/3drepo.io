@@ -79,5 +79,8 @@ export const CommentWithButtonsContainer = styled.div`
 `;
 
 export const ViewpointIcon = styled(CameraIcon)`
+	width: 14px;
+	height: 14px;
 	cursor: pointer;
+	margin: 0 0 -3px 8px;
 `;

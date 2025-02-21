@@ -17,7 +17,7 @@
 
 import styled, { css } from 'styled-components';
 import { Typography } from '@controls/typography';
-import { FormTextAreaFixedSize } from '@controls/inputs/formInputs.component';
+import { FormCheckbox as BaseFormCheckbox, FormTextAreaFixedSize } from '@controls/inputs/formInputs.component';
 import { Container as TextAreaContainer } from '@controls/inputs/textArea/textAreaFixedSize.styles';
 import { SubmitButton } from '@controls/submitButton';
 import { ImageWithSkeleton } from '@controls/imageWithSkeleton/imageWithSkeleton.component';
@@ -177,4 +177,18 @@ export const EditCommentButtons = styled.div`
 	margin: 4px 5px 0 auto;
 	display: flex;
 	flex-direction: row;
+`;
+
+export const FormCheckbox = styled(BaseFormCheckbox)`
+	margin: 0;
+	.MuiButtonBase-root {
+		padding: 0;
+	}
+	.MuiFormControlLabel-label svg {
+		display: flex;
+		align-self: center;;
+		width: 15px;
+		height: 15px;
+		color: ${({ theme }) => theme.palette.secondary.main};
+	}
 `;
