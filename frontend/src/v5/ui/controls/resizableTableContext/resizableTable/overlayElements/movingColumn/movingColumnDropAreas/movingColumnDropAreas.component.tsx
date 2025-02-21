@@ -15,28 +15,39 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { DropAreas, Area, Container, DropLine } from './movingColumnDropAreas.styles';
+import { TableCorner, DropAreas, Area, Container, DropLine } from './movingColumnDropAreas.styles';
 
 export const MovingColumnDropAreas = () => {
-	const [dropIndex, setDropIndex] = useState(-1);
 	const {
 		getVisibleColumns, setMovingColumn, movingColumn, moveColumn,
 		columnGap, getIndex, getOffset, getRowWidth,
 	} = useContext(ResizableTableContext);
+	const [dropIndex, setDropIndex] = useState(getVisibleColumns().length);
+	const tableOffsetRef = useRef<HTMLDivElement>(null);
 	
 	const columns = getVisibleColumns();
 	const movingColumnIndex = getIndex(movingColumn);
-	const newIndexIsValid = movingColumnIndex !== dropIndex && movingColumnIndex !== dropIndex - 1;
 	const offset = getOffset(columns[dropIndex]?.name) ?? getRowWidth();
-	
-	// TODO - find this value
-	const getTableOffsetLeft = () => 75;
+	const isDropIndexValid = movingColumnIndex !== dropIndex && movingColumnIndex !== dropIndex - 1;
 
+	const getTableOffsetX = () => {
+		const elem = tableOffsetRef.current;
+		if (!elem) return 0;
+		
+		const box = elem.getBoundingClientRect();
+		const { body, documentElement } = document;
+	
+		const scrollLeft = documentElement.scrollLeft || body.scrollLeft;
+		const clientLeft = documentElement.clientLeft || body.clientLeft || 0;
+		const left = box.left + scrollLeft - clientLeft;
+	
+		return Math.round(left);
+	};
+	
 	const getDropAreas = () => {
-		// start this with the table offset from the first column
-		let previousColHalfWidth = getTableOffsetLeft();
+		let previousColHalfWidth = getTableOffsetX() - columnGap;
 		return columns.map(({ width }) => {
 			const colHalfWidth = width / 2;
 			const areaWidth = previousColHalfWidth + colHalfWidth + columnGap;
@@ -52,13 +63,13 @@ export const MovingColumnDropAreas = () => {
 	};
 
 	const dropColumn = () => {
-		setDropIndex(-1);
 		setMovingColumn(null);
 		moveColumn(movingColumn, dropIndex);
 	};
 
 	return (
 		<>
+			<TableCorner ref={tableOffsetRef} />
 			<Container onMouseUp={dropColumn}>
 				<DropAreas onMouseLeave={(e) => setDropColumnIndex(e, columns.length)}>
 					{getDropAreas().map((width, index) => (
@@ -66,7 +77,7 @@ export const MovingColumnDropAreas = () => {
 					))}
 				</DropAreas>
 			</Container>
-			{newIndexIsValid && <DropLine offset={offset} />}
+			{isDropIndexValid && <DropLine offset={offset} />}
 		</>
 	);
 };

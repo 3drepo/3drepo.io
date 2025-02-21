@@ -19,6 +19,10 @@ import styled from 'styled-components';
 import { Backdrop } from '@mui/material';
 import { DelimiterLine } from '@controls/resizableTableContext/delimiterLine/delimiterLine.component';
 
+export const TableCorner = styled.div`
+	position: absolute;
+`;
+
 export const Container = styled(Backdrop).attrs({ open: true })`
 	cursor: grabbing;
 	z-index: 1000;

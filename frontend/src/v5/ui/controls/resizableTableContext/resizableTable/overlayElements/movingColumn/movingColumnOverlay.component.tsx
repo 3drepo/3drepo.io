@@ -26,8 +26,8 @@ export const MovingColumnOverlay = () => {
 
 	return (
 		<>
-			<MovingColumnHighlighter />
 			<MovingColumnDropAreas />
+			<MovingColumnHighlighter />
 		</>
 	);
 };
