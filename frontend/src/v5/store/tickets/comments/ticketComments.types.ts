@@ -38,10 +38,4 @@ export type ITicketComment = {
 	importedAt?: Date,
 };
 
-export type TicketCommentReplyMetadata = {
-	_id: string,
-	message?: string,
-	author: string,
-	originalAuthor?: string,
-	images?: string[],
-};
+export type TicketCommentReplyMetadata = Pick<ITicketComment, '_id' | 'message' | 'author' | 'originalAuthor' | 'images'>;
