@@ -36,7 +36,7 @@ import { FormattedMessage } from 'react-intl';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { ActionMenuItem } from '@controls/actionMenu';
-import { MenuItem } from '@mui/material';
+import { MenuItem, Tooltip } from '@mui/material';
 import { ImagesModal } from '@components/shared/modalsDispatcher/templates/imagesModal/imagesModal.component';
 import {
 	Controls,
@@ -124,10 +124,9 @@ export const CommentBox = ({ message = '', images = [], views, commentReply, del
 	const disableSendMessage = (!newMessage?.trim()?.length && !imagesToUpload.length && !views)
 		|| charsLimitIsReached
 		|| erroredImages.length > 0
-		|| messageIsUnchanged; // TODO 5309 fix
+		|| messageIsUnchanged;
 
 	const resetCommentBox = () => {
-		console.log('Reset!');
 		reset();
 		deleteCommentReply?.();
 		setIsSubmittingMessage(false);
@@ -321,11 +320,15 @@ export const CommentBox = ({ message = '', images = [], views, commentReply, del
 						</MenuItem>
 					</ActionMenuItem>
 				</ActionMenu>
-				<FormCheckbox
-					name="saveViewpoint"
-					control={control}
-					label={<ViewpointIcon />}
-				/>
+				<Tooltip title={formatMessage({ id: 'customTicket.comments.action.useViewpoint', defaultMessage: 'Include viewpoint' })} arrow>
+					<div>
+						<FormCheckbox
+							name="saveViewpoint"
+							control={control}
+							label={<ViewpointIcon />}
+						/>
+					</div>
+				</Tooltip>
 				<CharsCounter $error={charsLimitIsReached}>{charsCount}/{MAX_MESSAGE_LENGTH}</CharsCounter>
 				{ isEditMode ? (
 					<EditCommentButtons>
