@@ -76,9 +76,9 @@ type CommentBoxProps = Pick<ITicketComment, 'message' | 'images' | 'views'> & {
 	commentId?: string;
 	commentReply?: TicketCommentReplyMetadata | null;
 	deleteCommentReply?: () => void; // TODO 5309 make this work for editting
-	metadata?: any; // TODO 5309
 	className?: string;
 };
+
 export const CommentBox = ({ message = '', images = [], views, commentReply, deleteCommentReply, onCancel, onEditMessage, commentId, className, ...other }: CommentBoxProps) => {
 	const { teamspace, project } = useParams<ViewerParams>();
 	const { isViewer, containerOrFederation } = useContext(TicketContext);
@@ -133,9 +133,18 @@ export const CommentBox = ({ message = '', images = [], views, commentReply, del
 		setImagesToUpload([]);
 	};
 
-	const updateMessage = async ( ) => {
-		const newViewpoint = saveViewpoint ? await ViewerService.getViewpoint() : null;
-		console.log('@@ Updating comment with', imagesToUpload.length, 'images and a viewpoint of', newViewpoint);
+	const updateMessage = async () => {
+		const newComment = {
+			message: newMessage,
+			images: imagesToUpload.map(({ src }) => src),
+			views: null,
+		};
+		if (commentReply) {
+			newComment.message = addReply(commentReply, newComment.message);
+		}
+		if (saveViewpoint) {
+			newComment.views = ViewerService.getViewpoint();
+		}
 		TicketCommentsActionsDispatchers.updateComment(
 			teamspace,
 			project,
@@ -143,21 +152,22 @@ export const CommentBox = ({ message = '', images = [], views, commentReply, del
 			ticketId,
 			isFederation,
 			commentId,
-			{ message: sanitiseMessage(newMessage), images: imagesToUpload.map(({ src }) => src), views: newViewpoint },
+			newComment,
 		);
 		onCancel();
 	};
 	const createComment = async () => {
 		setIsSubmittingMessage(true);
-		const newViewpoint = saveViewpoint ? await ViewerService.getViewpoint() : null;
 		const newComment: Partial<ITicketComment> = {
 			author: currentUser.username,
 			images: imagesToUpload.map(({ src }) => src),
 			message: newMessage,
-			views: newViewpoint,
 		};
 		if (commentReply) {
 			newComment.message = addReply(commentReply, newComment.message);
+		}
+		if (saveViewpoint) {
+			newComment.views = await ViewerService.getViewpoint();
 		}
 		TicketCommentsActionsDispatchers.createComment(
 			teamspace,
@@ -252,7 +262,7 @@ export const CommentBox = ({ message = '', images = [], views, commentReply, del
 			ref={containerRef}
 			className={className}
 		>
-			{commentReply?._id && ( // TODO sort out metadata/comment reply. extractMetadata from ticketComments.helpers sets the values to '' in an obj instead of returning null
+			{commentReply?._id && (
 				<CommentReplyContainer>
 					<CommentReply {...commentReply} shortMessage />
 					<DeleteButton onClick={deleteCommentReply}>
@@ -320,15 +330,17 @@ export const CommentBox = ({ message = '', images = [], views, commentReply, del
 						</MenuItem>
 					</ActionMenuItem>
 				</ActionMenu>
-				<Tooltip title={formatMessage({ id: 'customTicket.comments.action.useViewpoint', defaultMessage: 'Include viewpoint' })} arrow>
-					<div>
-						<FormCheckbox
-							name="saveViewpoint"
-							control={control}
-							label={<ViewpointIcon />}
-						/>
-					</div>
-				</Tooltip>
+				{isViewer && (
+					<Tooltip title={formatMessage({ id: 'customTicket.comments.action.useViewpoint', defaultMessage: 'Include viewpoint' })} arrow>
+						<div>
+							<FormCheckbox
+								name="saveViewpoint"
+								control={control}
+								label={<ViewpointIcon />}
+							/>
+						</div>
+					</Tooltip>
+				)}
 				<CharsCounter $error={charsLimitIsReached}>{charsCount}/{MAX_MESSAGE_LENGTH}</CharsCounter>
 				{ isEditMode ? (
 					<EditCommentButtons>

@@ -126,7 +126,7 @@ export const updateFederationComment = async (
 ) => (
 	api.put(
 		`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/${ticketId}/comments/${commentId}`,
-		pick(comment, ['message', 'images']),
+		pick(comment, ['message', 'images', 'views']),
 	)
 );
 
@@ -140,7 +140,7 @@ export const updateContainerComment = async (
 ) => (
 	api.put(
 		`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets/${ticketId}/comments/${commentId}`,
-		pick(comment, ['message', 'images']),
+		pick(comment, ['message', 'images', 'views']),
 	)
 );
 
