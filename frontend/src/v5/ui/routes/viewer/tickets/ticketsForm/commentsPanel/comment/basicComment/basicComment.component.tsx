@@ -23,6 +23,8 @@ import { CommentNonMessageContent } from '../commentNonMessageContent/commentNon
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { Tooltip } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
+import { TicketContext } from '../../../../ticket.context';
+import { useContext } from 'react';
 
 export type BasicCommentProps = Partial<Omit<ITicketComment, 'history' | '_id'>> & {
 	children?: any;
@@ -44,6 +46,7 @@ export const BasicComment = ({
 	views,
 	...props
 }: BasicCommentProps) => {
+	const { isViewer } = useContext(TicketContext);
 	const isEdited = updatedAt && (createdAt !== updatedAt);
 	return (
 		<CommentContainer className={className}>
@@ -53,9 +56,9 @@ export const BasicComment = ({
 			<CommentAge>
 				{commentAge}
 				{!!views && (
-					<Tooltip title={formatMessage({ id: 'basicComment.viewpoint', defaultMessage: 'Go to viewpoint' })} placement="top" arrow>
+					<Tooltip title={isViewer && formatMessage({ id: 'basicComment.viewpoint', defaultMessage: 'Go to viewpoint' })} placement="top" arrow>
 						<span>
-							<ViewpointIcon onClick={() => goToView(views)} />
+							<ViewpointIcon disabled={!isViewer} onClick={() => goToView(views)} />
 						</span>
 					</Tooltip>
 				)}

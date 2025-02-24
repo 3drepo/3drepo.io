@@ -78,9 +78,10 @@ export const CommentWithButtonsContainer = styled.div`
 	}
 `;
 
-export const ViewpointIcon = styled(CameraIcon)`
+export const ViewpointIcon = styled(CameraIcon)<{ disabled?: boolean; }>`
 	width: 14px;
 	height: 14px;
-	cursor: pointer;
+	cursor: ${({ disabled }) => disabled ? 'auto' : 'pointer'};
+	opacity: ${({ disabled }) => disabled ? 0.3 : 1};
 	margin: 0 0 -3px 8px;
 `;
