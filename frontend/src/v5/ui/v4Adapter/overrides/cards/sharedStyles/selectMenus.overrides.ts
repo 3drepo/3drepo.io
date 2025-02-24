@@ -125,6 +125,9 @@ export const FieldsRowStyles = css`
 		}
 		${StyledFormControl} {
 			margin: 0;
+			.MuiOutlinedInput-root {
+				width: 100%;
+			}
 			&:last-child {
 				margin-left: 5px;
 			}
@@ -174,12 +177,4 @@ export default css`
 		${EditableFieldStyles}
 	}
 	${FieldsRowStyles}
-
-	.MuiSelect-select {
-		border: 1px solid ${({ theme }) => theme.palette.base.lightest};
-	}
-
-	.Mui-focused .MuiSelect-select {
-		border-color: ${({ theme }) => theme.palette.primary.main};
-	}
 `;
