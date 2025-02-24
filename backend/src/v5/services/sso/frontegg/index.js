@@ -59,15 +59,22 @@ const generateVendorToken = async () => {
 };
 
 const getBearerHeader = async () => {
+	await Frontegg.init();
 	const token = await generateVendorToken();
 	return {
 		Authorization: `Bearer ${token}`,
 	};
 };
 
-let basicHeader;
+const basicHeader = async () => {
+	await Frontegg.init();
+	return {
+		Authorization: `Basic ${toBase64(`${config.clientId}:${config.key}`)}`,
+	};
+};
 
 Frontegg.init = async () => {
+	if (identityClient) return;
 	try {
 		config = configSchema.validateSync(frontegg, { stripUnknown: true });
 	} catch (err) {
@@ -78,20 +85,18 @@ Frontegg.init = async () => {
 		identityClient = new IdentityClient({ FRONTEGG_CLIENT_ID: config.clientId, FRONTEGG_API_KEY: config.key });
 
 		// verify the vendor credentials are valid by generating a vendor jwt
+		// This needs to be called after identityClient is assigned to avoid circular dependency
 		await getBearerHeader();
 	} catch (err) {
 		throw new Error(`Failed to initialise Frontegg client: ${err.message}`);
 	}
-	basicHeader = {
-		Authorization: `Basic ${toBase64(`${config.clientId}:${config.key}`)}`,
-	};
 };
 
 Frontegg.getUserInfoFromToken = async (token) => {
 	try {
 		const client = await getIdentityClient();
-		const { sub: userId, email } = await client.validateIdentityOnToken(token);
-		return { userId, email };
+		const { sub: userId, email, tenantId, tenantIds } = await client.validateIdentityOnToken(token);
+		return { userId, email, authAccount: tenantId, accounts: tenantIds };
 	} catch (err) {
 		throw new Error(`Failed to validate user token: ${err.message}`);
 	}
@@ -108,7 +113,7 @@ Frontegg.validateAndRefreshToken = async ({ token /* refreshToken */ }) => {
 				refresh_token: refreshToken,
 			};
 
-			const { data } = await post(`${config.appUrl}/oauth/token`, payload, { headers: basicHeader });
+			const { data } = await post(`${config.appUrl}/oauth/token`, payload, { headers: await basicHeader() });
 		} catch (err) {
 
 			console.log(err);
@@ -210,7 +215,7 @@ Frontegg.generateToken = async (urlUsed, code, challenge) => {
 		code_challenge: challenge,
 	};
 
-	const { data } = await post(`${config.appUrl}/oauth/token`, payload, { headers: basicHeader });
+	const { data } = await post(`${config.appUrl}/oauth/token`, payload, { headers: await basicHeader() });
 	const expiry = new Date(Date.now() + data.expires_in * 1000);
 
 	return { token: data.access_token, refreshToken: data.refresh_token, expiry };

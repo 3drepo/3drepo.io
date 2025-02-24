@@ -21,13 +21,13 @@ const { v5Path } = require('../../../interop');
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const { initTeamspace } = require(`${v5Path}/processors/teamspaces/teamspaces`);
-const { isAccountActive } = require(`${v5Path}/models/users`);
+const { getUserByUsername } = require(`${v5Path}/models/users`);
 const { getTeamspaceSetting } = require(`${v5Path}/models/teamspaceSettings`);
 
 const run = async (teamspace, user) => {
-	logger.logInfo(`Checking ${user} is an active user...`);
-	if (!(await isAccountActive(user))) {
-		throw new Error(`${user} is not an active user of 3D Repo.`);
+	logger.logInfo(`Checking ${user} is exists...`);
+	if (!(await getUserByUsername(user))) {
+		throw new Error(`${user} is not an user of 3D Repo.`);
 	}
 
 	logger.logInfo(`Checking if teamspace ${teamspace} already exists...`);
