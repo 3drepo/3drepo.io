@@ -98,7 +98,7 @@ export const CommentBox = ({ message = '', images = [], views, commentReply, del
 		defaultValues: {
 			message: desanitiseMessage(message),
 			images,
-			saveViewpoint: isEditMode ? !!views : true,
+			saveViewpoint: isViewer && (!isEditMode || !!views),
 		},
 	});
 	console.log('@@ existing views', views);
