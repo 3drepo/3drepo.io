@@ -55,12 +55,14 @@ const generateVendorToken = async () => {
 	}
 };
 
-const standardHeaders = async () => {
+const getBearerHeader = async () => {
 	const token = await generateVendorToken();
 	return {
 		Authorization: `Bearer ${token}`,
 	};
 };
+
+let basicHeader;
 
 Frontegg.init = async () => {
 	try {
@@ -73,10 +75,13 @@ Frontegg.init = async () => {
 		identityClient = new IdentityClient({ FRONTEGG_CLIENT_ID: config.clientId, FRONTEGG_API_KEY: config.key });
 
 		// verify the vendor credentials are valid by generating a vendor jwt
-		await standardHeaders();
+		await getBearerHeader();
 	} catch (err) {
 		throw new Error(`Failed to initialise Frontegg client: ${err.message}`);
 	}
+	basicHeader = {
+		Authorization: `Basic ${toBase64(`${config.clientId}:${config.key}`)}`,
+	};
 };
 
 Frontegg.getUserInfoFromToken = async (token) => {
@@ -89,27 +94,22 @@ Frontegg.getUserInfoFromToken = async (token) => {
 	}
 };
 
-Frontegg.validateAndRefreshToken = async ({ token/* , refreshToken */ }) => {
+Frontegg.validateAndRefreshToken = async ({ token /* refreshToken */ }) => {
 	try {
 		const client = await getIdentityClient();
 		const user = await client.validateToken(token);
-		/*
-		const payload = {
-		};
-		const headers = {
-			Authorization: `Bearer ${token}`,
-			'Content-Type': 'application/json',
-			'frontegg-vendor-host': 'https://www.3drepo.local',
-			Cookie: `fe_refresh_${config.clientId.replace('-', '')}=${refreshToken};`,
 
-		};
+		/*		try {
+			const payload = {
+				grant_type: 'refresh_token',
+				refresh_token: refreshToken,
+			};
 
-		try {
-			const { data } = await post(`${config.vendorDomain}/identity/resources/auth/v1/user/token/refresh`, payload, { headers });
+			const { data } = await post(`${config.appUrl}/oauth/token`, payload, { headers: basicHeader });
 		} catch (err) {
-			console.log('Failed: ', err);
-		}
-		*/
+			console.log(err);
+		} */
+
 		return user;
 	} catch (err) {
 		throw new Error(`Failed to validate user token: ${err.message}`);
@@ -118,7 +118,7 @@ Frontegg.validateAndRefreshToken = async ({ token/* , refreshToken */ }) => {
 
 Frontegg.getUserById = async (userId) => {
 	try {
-		const { data } = await get(`${config.vendorDomain}/identity/resources/vendor-only/users/v1/${userId}`, await standardHeaders());
+		const { data } = await get(`${config.vendorDomain}/identity/resources/vendor-only/users/v1/${userId}`, await getBearerHeader());
 		return data;
 	} catch (err) {
 		throw new Error(`Failed to get user(${userId}) from Frontegg: ${err.message}`);
@@ -126,10 +126,6 @@ Frontegg.getUserById = async (userId) => {
 };
 
 Frontegg.generateToken = async (urlUsed, code, challenge) => {
-	const headers = {
-		Authorization: `Basic ${toBase64(`${config.clientId}:${config.key}`)}`,
-	};
-
 	const payload = {
 		grant_type: 'authorization_code',
 		code,
@@ -137,7 +133,7 @@ Frontegg.generateToken = async (urlUsed, code, challenge) => {
 		code_challenge: challenge,
 	};
 
-	const { data } = await post(`${config.appUrl}/oauth/token`, payload, { headers });
+	const { data } = await post(`${config.appUrl}/oauth/token`, payload, { headers: basicHeader });
 	const expiry = new Date(Date.now() + data.expires_in * 1000);
 
 	return { token: data.access_token, refreshToken: data.refresh_token, expiry };
