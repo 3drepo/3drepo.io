@@ -21,7 +21,7 @@ import { ResizableTable } from '@controls/resizableTableContext/resizableTable/r
 import { Row } from './ticketsTableRow/ticketsTableRow.styles';
 import { ResizableTableHeader } from '@controls/resizableTableContext/resizableTableHeader/resizableTableHeader.component';
 import { Highlighter } from '@controls/resizableTableContext/resizableTable/overlayElements/movingColumn/movingColumnHighlighter/movingColumnHighlighter.styles';
-import { DropAreas, DropLine } from '@controls/resizableTableContext/resizableTable/overlayElements/movingColumn/movingColumnDropAreas/movingColumnDropAreas.styles';
+import { DropLine } from '@controls/resizableTableContext/resizableTable/overlayElements/movingColumn/movingColumnDropAreas/movingColumnDropAreas.styles';
 
 export const Headers = styled(ResizableTableRow)`
 	gap: 1px;

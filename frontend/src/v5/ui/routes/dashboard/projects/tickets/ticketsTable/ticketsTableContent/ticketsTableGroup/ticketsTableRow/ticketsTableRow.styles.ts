@@ -19,8 +19,7 @@ import { DueDateContainer } from '@controls/dueDate/dueDate.styles';
 import styled, { css } from 'styled-components';
 import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.component';
 import { TicketsTableCell } from './ticketsTableCell/ticketsTableCell.component';
-
-export const Cell = styled(TicketsTableCell)``;
+import { Item as Cell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.styles';
 
 // TODO - fix when new palette is released
 export const Row = styled(ResizableTableRow)<{ $selected?: boolean }>`
@@ -30,7 +29,7 @@ export const Row = styled(ResizableTableRow)<{ $selected?: boolean }>`
 	width: fit-content;
 
 	${({ $selected }) => $selected && css`
-		${Cell} {
+		&& ${Cell} {
 			background-color: #edf0f8;
 		}
 	`}
@@ -43,14 +42,14 @@ export const OverflowContainer = styled.div`
 	display: inline-block;
 `;
 
-export const CellOwner = styled(Cell)`
+export const CellOwner = styled(TicketsTableCell)`
 	.MuiAvatar-root {
 		width: 24px;
 		height: 24px;
 	}
 `;
 
-export const CellDate = styled(Cell)`
+export const CellDate = styled(TicketsTableCell)`
 	${DueDateContainer} {
 		height: unset;
 	}

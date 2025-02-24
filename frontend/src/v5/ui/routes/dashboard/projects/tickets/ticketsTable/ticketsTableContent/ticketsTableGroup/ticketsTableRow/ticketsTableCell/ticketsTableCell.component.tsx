@@ -18,8 +18,13 @@
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { useContext } from 'react';
 import { Container } from './ticketsTableCell.styles';
+import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
 
 export const TicketsTableCell = (props) => {
 	const { movingColumn } = useContext(ResizableTableContext);
-	return (<Container {...props} $isMoving={props.name === movingColumn} />);
+	return (
+		<Container $isMoving={props.name === movingColumn}>
+			<ResizableTableCell {...props} />
+		</Container>
+	);
 };
