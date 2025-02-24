@@ -556,41 +556,41 @@ const testAllProperties = () => {
 		const imageRef = generateUUIDString();
 
 		const propertyTypeSetData = [
-			// ['Text', { type: propTypes.TEXT }, generateRandomString(), generateRandomString(121)],
-			// ['Long text', { type: propTypes.LONG_TEXT }, generateRandomString(), generateRandomString(1201)],
-			// ['Boolean', { type: propTypes.BOOLEAN }, true, new Date()],
-			// ['Date', { type: propTypes.DATE }, Date.now(), generateRandomString()],
-			// ['Past Date', { type: propTypes.PAST_DATE }, Date.now(), Date.now() + 1000],
-			// ['Number', { type: propTypes.NUMBER }, generateRandomNumber(), generateRandomString()],
-			// ['Coordinates', { type: propTypes.COORDS }, [1, 2, 3], [2, 3]],
-			// ['One Of', { type: propTypes.ONE_OF, values: ['a', 'b'] }, 'a', generateRandomString()],
-			// ['Many Of', { type: propTypes.MANY_OF, values: ['a', 'b', 'c'] }, ['a'], ['b', generateRandomString()]],
-			// ['Image', { type: propTypes.IMAGE }, FS.readFileSync(image, { encoding: 'base64' }), generateRandomString()],
-			// ['Image List', { type: propTypes.IMAGE_LIST }, times(5, FS.readFileSync(image, { encoding: 'base64' })), generateRandomString()],
-			// ['View (empty)', { type: propTypes.VIEW }, {}, 123],
+			['Text', { type: propTypes.TEXT }, generateRandomString(), generateRandomString(121)],
+			['Long text', { type: propTypes.LONG_TEXT }, generateRandomString(), generateRandomString(1201)],
+			['Boolean', { type: propTypes.BOOLEAN }, true, new Date()],
+			['Date', { type: propTypes.DATE }, Date.now(), generateRandomString()],
+			['Past Date', { type: propTypes.PAST_DATE }, Date.now(), Date.now() + 1000],
+			['Number', { type: propTypes.NUMBER }, generateRandomNumber(), generateRandomString()],
+			['Coordinates', { type: propTypes.COORDS }, [1, 2, 3], [2, 3]],
+			['One Of', { type: propTypes.ONE_OF, values: ['a', 'b'] }, 'a', generateRandomString()],
+			['Many Of', { type: propTypes.MANY_OF, values: ['a', 'b', 'c'] }, ['a'], ['b', generateRandomString()]],
+			['Image', { type: propTypes.IMAGE }, FS.readFileSync(image, { encoding: 'base64' }), generateRandomString()],
+			['Image List', { type: propTypes.IMAGE_LIST }, times(5, FS.readFileSync(image, { encoding: 'base64' })), generateRandomString()],
+			['View (empty)', { type: propTypes.VIEW }, {}, 123],
 			['View (Image only)', { type: propTypes.VIEW }, { screenshot: FS.readFileSync(image, { encoding: 'base64' }) }, { screenshot: 'abc' }],
-			// ['View', { type: propTypes.VIEW }, {
-			// 	camera: { position: [1, 1, 1], forward: [1, 1, 1], up: [1, 1, 1] },
-			// 	clippingPlanes: [{ normal: [1, 1, 1], clipDirection: -1, distance: 100 }],
-			// 	state: {
-			// 		[viewGroups.HIDDEN]: [
-			// 			{
-			// 				group: generateGroup(false, { hasId: false }),
-			// 				prefix: [generateRandomString()],
-			// 			},
-			// 		],
-			// 	},
-			// }, { camera: {} }],
-			// ['View (orthographic)', { type: propTypes.VIEW }, { camera: { type: 'orthographic', size: 5, position: [1, 1, 1], forward: [1, 1, 1], up: [1, 1, 1] } }, { camera: { type: 'orthographic' } }],
-			// ['Measurements', { type: propTypes.MEASUREMENTS }, [
-			// 	{
-			// 		positions: [[0, 0, 0], [1, 1, 1]],
-			// 		value: generateRandomNumber(),
-			// 		color: [1, 1, 1, 1],
-			// 		type: 0,
-			// 		name: generateRandomString(),
-			// 	},
-			// ], [{}]],
+			['View', { type: propTypes.VIEW }, {
+				camera: { position: [1, 1, 1], forward: [1, 1, 1], up: [1, 1, 1] },
+				clippingPlanes: [{ normal: [1, 1, 1], clipDirection: -1, distance: 100 }],
+				state: {
+					[viewGroups.HIDDEN]: [
+						{
+							group: generateGroup(false, { hasId: false }),
+							prefix: [generateRandomString()],
+						},
+					],
+				},
+			}, { camera: {} }],
+			['View (orthographic)', { type: propTypes.VIEW }, { camera: { type: 'orthographic', size: 5, position: [1, 1, 1], forward: [1, 1, 1], up: [1, 1, 1] } }, { camera: { type: 'orthographic' } }],
+			['Measurements', { type: propTypes.MEASUREMENTS }, [
+				{
+					positions: [[0, 0, 0], [1, 1, 1]],
+					value: generateRandomNumber(),
+					color: [1, 1, 1, 1],
+					type: 0,
+					name: generateRandomString(),
+				},
+			], [{}]],
 		];
 
 		const propertyTypeUnsetData = [
@@ -614,12 +614,12 @@ const testAllProperties = () => {
 
 		testPropertyTypes(propertyTypeSetData, false, true);
 		testPropertyTypes(propertyTypeSetData, true, true);
-		// testPropertyTypes(propertyTypeUnsetData, false, false);
-		// testPropertyTypes(propertyTypeUnsetData, true, false);
-		// testPropertyTypes(updateOnlyCases, false, false);
-		// testPropertyTypes(updateOnlyCases, true, false);
+		testPropertyTypes(propertyTypeUnsetData, false, false);
+		testPropertyTypes(propertyTypeUnsetData, true, false);
+		testPropertyTypes(updateOnlyCases, false, false);
+		testPropertyTypes(updateOnlyCases, true, false);
 
-		// testGroups();
+		testGroups();
 	});
 };
 
@@ -1026,116 +1026,116 @@ const testValidateTicket = () => {
 		const project = generateRandomString();
 		const model = generateRandomString();
 		testAllProperties();
-		// testPropertyConditions();
-		// testPresetValues();
-		// testUniqueProperties();
-		// testCompositeTypes();
-		// testImportedTickets();
+		testPropertyConditions();
+		testPresetValues();
+		testUniqueProperties();
+		testCompositeTypes();
+		testImportedTickets();
 
-		// test('Should ignore deprecated modules', async () => {
-		// 	const template = {
-		// 		_id: generateUUID(),
-		// 		properties: [],
-		// 		modules: [{
-		// 			name: generateRandomString(),
-		// 			properties: [{
-		// 				name: generateRandomString(),
-		// 				required: true,
-		// 				type: propTypes.TEXT,
-		// 			}],
-		// 			deprecated: true,
-		// 		}],
-		// 	};
+		test('Should ignore deprecated modules', async () => {
+			const template = {
+				_id: generateUUID(),
+				properties: [],
+				modules: [{
+					name: generateRandomString(),
+					properties: [{
+						name: generateRandomString(),
+						required: true,
+						type: propTypes.TEXT,
+					}],
+					deprecated: true,
+				}],
+			};
 
-		// 	const input = {
-		// 		title: generateRandomString(),
-		// 		type: generateUUID(),
-		// 		properties: {},
-		// 		modules: {},
-		// 	};
-		// 	await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
-		// 		.resolves.toEqual({ ...input, type: template._id });
-		// });
+			const input = {
+				title: generateRandomString(),
+				type: generateUUID(),
+				properties: {},
+				modules: {},
+			};
+			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
+				.resolves.toEqual({ ...input, type: template._id });
+		});
 
-		// test('Should created default properties/modules object if it is not present', async () => {
-		// 	const template = {
-		// 		_id: generateUUID(),
-		// 		properties: [{
-		// 			name: generateRandomString(),
-		// 			type: propTypes.TEXT,
-		// 		}],
-		// 		modules: [],
-		// 	};
+		test('Should created default properties/modules object if it is not present', async () => {
+			const template = {
+				_id: generateUUID(),
+				properties: [{
+					name: generateRandomString(),
+					type: propTypes.TEXT,
+				}],
+				modules: [],
+			};
 
-		// 	const input = {
-		// 		title: generateRandomString(),
-		// 		type: template._id,
-		// 	};
-		// 	await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
-		// 		.resolves.toEqual({ ...input, properties: {}, modules: {} });
-		// });
+			const input = {
+				title: generateRandomString(),
+				type: template._id,
+			};
+			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
+				.resolves.toEqual({ ...input, properties: {}, modules: {} });
+		});
 
-		// test(`[New ticket] Should strip the value of a ${propTypes.MANY_OF} property if it is empty array`, async () => {
-		// 	const propName = generateRandomString();
-		// 	const template = {
-		// 		_id: generateUUID(),
-		// 		properties: [{
-		// 			name: propName,
-		// 			type: propTypes.MANY_OF,
-		// 			values: [generateRandomString()],
-		// 		}],
-		// 		modules: [],
-		// 	};
+		test(`[New ticket] Should strip the value of a ${propTypes.MANY_OF} property if it is empty array`, async () => {
+			const propName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{
+					name: propName,
+					type: propTypes.MANY_OF,
+					values: [generateRandomString()],
+				}],
+				modules: [],
+			};
 
-		// 	const input = {
-		// 		title: generateRandomString(),
-		// 		type: template._id,
-		// 		properties: {
-		// 			[propName]: [],
-		// 		},
-		// 		modules: {},
-		// 	};
-		// 	await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
-		// 		.resolves.toEqual({ ...input, properties: {}, modules: {} });
-		// });
+			const input = {
+				title: generateRandomString(),
+				type: template._id,
+				properties: {
+					[propName]: [],
+				},
+				modules: {},
+			};
+			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
+				.resolves.toEqual({ ...input, properties: {}, modules: {} });
+		});
 
-		// test(`[Update ticket] Should nullify the value of a ${propTypes.MANY_OF} property if it is empty array`, async () => {
-		// 	const propName = generateRandomString();
-		// 	const template = {
-		// 		_id: generateUUID(),
-		// 		properties: [{
-		// 			name: propName,
-		// 			type: propTypes.MANY_OF,
-		// 			values: ['a'],
-		// 		}],
-		// 		modules: [],
-		// 	};
+		test(`[Update ticket] Should nullify the value of a ${propTypes.MANY_OF} property if it is empty array`, async () => {
+			const propName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{
+					name: propName,
+					type: propTypes.MANY_OF,
+					values: ['a'],
+				}],
+				modules: [],
+			};
 
-		// 	const input = {
-		// 		title: generateRandomString(),
-		// 		type: template._id,
-		// 		properties: {
-		// 			[propName]: [],
-		// 		},
-		// 		modules: {},
-		// 	};
+			const input = {
+				title: generateRandomString(),
+				type: template._id,
+				properties: {
+					[propName]: [],
+				},
+				modules: {},
+			};
 
-		// 	const old = {
-		// 		...input,
-		// 		properties: {
-		// 			[propName]: ['a'],
-		// 		},
-		// 	};
+			const old = {
+				...input,
+				properties: {
+					[propName]: ['a'],
+				},
+			};
 
-		// 	const expected = {
-		// 		properties: {
-		// 			[propName]: null,
-		// 		},
-		// 		modules: {},
-		// 	};
-		// 	await expect(TicketSchema.validateTicket(teamspace, project, model, template, input, old))
-		// 		.resolves.toEqual(expected);
-		// });
+			const expected = {
+				properties: {
+					[propName]: null,
+				},
+				modules: {},
+			};
+			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input, old))
+				.resolves.toEqual(expected);
+		});
 	});
 };
 
@@ -1443,7 +1443,7 @@ const testSerialiseTicket = () => {
 
 describe(determineTestGroup(__filename), () => {
 	testValidateTicket();
-	// testProcessReadOnlyValues();
-	// testDeserialiseUUIDsInTicket();
-	// testSerialiseTicket();
+	testProcessReadOnlyValues();
+	testDeserialiseUUIDsInTicket();
+	testSerialiseTicket();
 });
