@@ -16,15 +16,26 @@
  */
 
 import styled from 'styled-components';
-import { DraggingContainer } from '../../../../draggingContainer/draggingContainer.component';
 import { DelimiterLine } from '../../../../delimiterLine/delimiterLine.component';
+
+// This is not to interfere with other components and to keep the cursor as
+// "col-resize" while resizing even when moving the mouse outside the table
+export const overlayStyles = `
+	height: 100vh;
+	width: 100vw;
+	cursor: col-resize;
+	pointer-events: all;
+	position: absolute;
+	z-index: 100;
+	top: 0;
+`;
 
 export const ResizerLine = styled(DelimiterLine)<{ $highlight: boolean, $isResizing?: boolean }>`
 	border-color: ${({ $highlight, theme }) => $highlight ? theme.palette.primary.main : 'transparent'};
 	border-style: ${({ $isResizing }) => $isResizing ? 'solid' : 'dashed'};
 `;
 
-export const ResizerElement = styled(DraggingContainer).attrs({ cursor: 'col-resize' })`
+export const ResizerElement = styled.div`
 	height: 100%;
 	position: relative;
 	cursor: col-resize;

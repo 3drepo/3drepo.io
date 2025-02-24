@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext } from 'react';
-import { ResizerElement, ResizerLine } from './resizer.styles';
+import { useContext, useRef } from 'react';
+import { overlayStyles, ResizerElement, ResizerLine } from './resizer.styles';
 import { ResizableTableContext } from '../../../../resizableTableContext';
 
 type ResizerProps = { name: string };
@@ -24,24 +24,51 @@ export const Resizer = ({ name }: ResizerProps) => {
 	const { setWidth, getWidth, setIsResizing, isResizing, setResizerName, resizerName, isHidden } = useContext(ResizableTableContext);
 	const width = getWidth(name);
 	const hidden = isHidden(name);
+	const initialPosition = useRef(null);
 
-	const onResizeStart = () => {
-		setIsResizing(true);
-		setResizerName(name);
+	const preventEventPropagation = (e) => {
+		e.preventDefault();
+		e.stopPropagation();
 	};
 
-	const onResize = (offsetFromInitialPosition) => {
+	const onResizeStart = (e) => {
+		preventEventPropagation(e);
+		setIsResizing(true);
+		setResizerName(name);
+		initialPosition.current = e.clientX;
+	};
+
+	const onResize = (e) => {
+		const offsetFromInitialPosition = e.clientX - initialPosition.current;
 		setWidth(name, width + offsetFromInitialPosition);
 	};
 
-	const onResizeEnd = () => {
+	const onResizeEnd = (e) => {
+		preventEventPropagation(e);
 		setIsResizing(false);
 		setResizerName('');
+		initialPosition.current = null;
 	};
 
 	const handleMouseOver = () => setResizerName(name);
 	const handleMouseOut = () => {
 		if (!isResizing) setResizerName('');
+	};
+	
+	const onMouseDown = (e) => {
+		onResizeStart(e);
+
+		const overlay = document.createElement('div');
+		overlay.style.cssText = overlayStyles;
+		document.body.appendChild(overlay);
+
+		const onMouseUp = (ev) => {
+			onResizeEnd(ev);
+			document.body.removeChild(overlay);
+		};
+
+		overlay.addEventListener('mousemove', onResize);
+		overlay.addEventListener('mouseup', onMouseUp);
 	};
 	
 	if (hidden) return null;
@@ -54,11 +81,7 @@ export const Resizer = ({ name }: ResizerProps) => {
 			$highlight={resizerName === name}
 			$isResizing={isResizing}
 		>
-			<ResizerElement
-				onDragStart={onResizeStart}
-				onDrag={onResize}
-				onDragEnd={onResizeEnd}
-			/>
+			<ResizerElement onMouseDown={onMouseDown} />
 		</ResizerLine>
 	);
 };
