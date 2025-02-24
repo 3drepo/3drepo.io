@@ -698,8 +698,8 @@ const commentAddedTest = () => {
 		const { user, teamspace, project, container, federation,
 			template, templateWithComments } = generateBasicData();
 
-		const containerTicket = ServiceHelper.generateTicket(template);
-		const federationTicket = ServiceHelper.generateTicket(template);
+		const containerTicket = ServiceHelper.generateTicket(templateWithComments);
+		const federationTicket = ServiceHelper.generateTicket(templateWithComments);
 		const containerComment = ServiceHelper.generateComment(user.user);
 		const federationComment = ServiceHelper.generateComment(user.user);
 
@@ -810,8 +810,8 @@ const commentUpdatedTest = () => {
 		const { user, teamspace, project, container, federation,
 			template, templateWithComments } = generateBasicData();
 
-		const containerTicket = ServiceHelper.generateTicket(template);
-		const federationTicket = ServiceHelper.generateTicket(template);
+		const containerTicket = ServiceHelper.generateTicket(templateWithComments);
+		const federationTicket = ServiceHelper.generateTicket(templateWithComments);
 		const containerComment = ServiceHelper.generateComment(user.user);
 		const federationComment = ServiceHelper.generateComment(user.user);
 
@@ -857,6 +857,7 @@ const commentUpdatedTest = () => {
 			});
 
 			const updateData = { message: generateRandomString() };
+
 			await agent.put(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/tickets/${containerTicket._id}/comments/${containerComment._id}?key=${user.apiKey}`)
 				.send(updateData)
 				.expect(templates.ok.status);
