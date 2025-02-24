@@ -123,8 +123,9 @@ export const ErroredImageMessages = styled.div`
 `;
 
 export const MessageInput = styled(FormTextAreaFixedSize)`
+	padding: 8px 15px 6px;
 	.MuiInputBase-multiline {
-		padding: 8px 15px 6px;
+		padding: 0;
 		line-height: 16px;
 	}
 

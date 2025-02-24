@@ -52,7 +52,7 @@ export const SingleImage = styled(CommentImage)`
 `;
 
 export const MultiImagesContainer = styled.div`
-	width: 231px;
+	width: 225px;
 	margin-top: -5px;
 	margin-left: -7px;
 	margin-bottom: 3px;
