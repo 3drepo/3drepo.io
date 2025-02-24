@@ -67,10 +67,6 @@ async function sendEmail(template, to, data, attachments) {
 	});
 }
 
-function rejectNoUrl(name) {
-	return Promise.reject({ message: `config.mails.urls[${name}] is not defined` });
-}
-
 function getURL(urlName, params) {
 
 	if (!C.MAIL_URLS || !C.MAIL_URLS[urlName]) {
@@ -80,123 +76,6 @@ function getURL(urlName, params) {
 	return getBaseURL() + C.MAIL_URLS[urlName](params);
 }
 
-function sendQueueFailedEmail(err) {
-	if (config.contact) {
-		const template = require("./templates/queueFailed");
-		return sendEmail(template, config.contact.email, { domain: config.host, err: JSON.stringify(err) });
-	} else {
-		return Promise.reject({ message: "config.contact is not set" });
-	}
-}
-
-async function sendVerifyUserEmail(to, data) {
-	try {
-		data.url = getURL("verify", { token: data.token, username: data.username, pay: data.pay });
-
-		if (!data.url) {
-			return rejectNoUrl("verify");
-		}
-
-		const template = require("./templates/verifyUser");
-		const emailRes = await sendEmail(template, to, data);
-
-		systemLogger.logInfo(`Email info - ${JSON.stringify(emailRes)}`);
-
-		return emailRes;
-	} catch (err) {
-		systemLogger.logError(`Email error - ${err.message}`);
-	}
-}
-
-function sendWelcomeUserEmail(to, data) {
-	const template = require("./templates/uponVerified");
-	return sendEmail(template, to, data);
-}
-
-function sendResetPasswordEmail(to, data) {
-
-	data.url = getURL("forgotPassword", { token: data.token, username: data.username });
-
-	if (!data.url) {
-		return rejectNoUrl("forgotPassword");
-	}
-	const template = require("./templates/forgotPassword");
-	return sendEmail(template, to, data);
-}
-
-function sendPaymentReceivedEmail(to, data, attachments) {
-
-	const template = require("./templates/paymentReceived");
-
-	return sendEmail(template, to, data, attachments);
-}
-
-function sendPaymentReceivedEmailToSales(data, attachments) {
-
-	let template = require("./templates/paymentReceived");
-
-	if (data.type === "refund") {
-		template = require("./templates/paymentRefunded");
-	}
-
-	const salesTemplate = {
-		html: template.html,
-		subject: function (_data) {
-			return `[${_data.type}] [${_data.invoiceNo}] ${_data.email}`;
-		}
-	};
-
-	if (config.contact && config.contact.sales) {
-		// console.log(config.contact.sales);
-		return sendEmail(salesTemplate, config.contact.sales, data, attachments);
-	} else {
-		return Promise.resolve();
-	}
-
-}
-
-function sendNewUser(data) {
-
-	const template = require("./templates/newUser");
-
-	data.url = getBaseURL();
-
-	if (config.contact && config.contact.sales) {
-		// console.log(config.contact.sales);
-		return sendEmail(template, config.contact.sales, data);
-	} else {
-		return Promise.resolve();
-	}
-}
-
-function sendPaymentFailedEmail(to, data) {
-
-	const template = require("./templates/paymentFailed");
-	return sendEmail(template, to, data);
-
-}
-
-function sendPaymentRefundedEmail(to, data, attachments) {
-
-	const template = require("./templates/paymentRefunded");
-	return sendEmail(template, to, data, attachments);
-
-}
-
-function sendSubscriptionSuspendedEmail(to, data) {
-
-	const template = require("./templates/paymentSuspended");
-	data.url = getBaseURL() + `/${data.billingUser}/?page=billing`;
-
-	return sendEmail(template, to, data);
-
-}
-
-function sendPaymentErrorEmail(data) {
-	const template = require("./templates/paymentError");
-	return sendEmail(template, config.contact.email, data);
-}
-
 function sendTeamspaceInvitation(to, data) {
 	data.url = `${getURL("signup")}?email=${to}`;
 
@@ -204,42 +83,6 @@ function sendTeamspaceInvitation(to, data) {
 	return sendEmail(template, to, data);
 }
 
-function sendModelInvitation(to, data) {
-
-	data.url = getURL("model", { account: data.account, model: data.model });
-
-	if (!data.url) {
-		return rejectNoUrl("model");
-	}
-
-	const template = require("./templates/invitedToModel");
-	return sendEmail(template, to, data);
-}
-
-function sendImportError(data) {
-
-	if (config.contact) {
-		const template = require("./templates/importError");
-		data.domain = config.host;
-		return sendEmail(template, config.contact.email, data, data.attachments);
-	} else {
-		return Promise.reject({ message: "config.mail.sender is not set" });
-	}
-}
-
 module.exports = {
-	sendVerifyUserEmail,
-	sendWelcomeUserEmail,
-	sendResetPasswordEmail,
-	sendPaymentReceivedEmail,
-	sendPaymentFailedEmail,
-	sendPaymentErrorEmail,
-	sendModelInvitation,
-	sendSubscriptionSuspendedEmail,
-	sendPaymentReceivedEmailToSales,
-	sendPaymentRefundedEmail,
-	sendImportError,
-	sendNewUser,
-	sendQueueFailedEmail,
 	sendTeamspaceInvitation
 };

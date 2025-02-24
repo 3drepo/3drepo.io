@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,20 +14,20 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-"use strict";
-const html = data => `
-	Hi there,<br>
-	<br>
-	Your model ${data.model} has been processed successfully without errors and is now ready.<br><br>
-	<a href="${data.url}">Go to my model</a>
-	<br><br>
-	Best,<br>
-	3D Repo
-`;
 
-const subject = data => `Your model ${data.model} is now ready`;
+import { useContext } from 'react';
+import { ResizableTableContext } from '../resizableTableContext';
+import { Item } from './resizableTableCell.styles';
 
-module.exports =  {
-	html: html,
-	subject: subject
+type ResizableTableCellProps = {
+	children: any;
+	name: string;
+	className?: string;
+};
+export const ResizableTableCell = ({ name, children, className }: ResizableTableCellProps) => {
+	const { isHidden } = useContext(ResizableTableContext);
+
+	if (isHidden(name)) return null;
+
+	return (<Item className={className}>{children}</Item>);
 };

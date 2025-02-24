@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,23 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Yup = require('yup');
-const config = require('../../../utils/config');
-const { generateTemplateFn } = require('./common');
+import { Resizer } from '../resizer/resizer.component';
+import { useContext } from 'react';
+import { ResizableTableContext } from '../resizableTableContext';
+import { ResizersContainers, Table } from './resizableTable.styles';
 
-const dataSchema = Yup.object({
-	username: Yup.string().required(),
-	token: Yup.string().required(),
-	domain: Yup.string().default(() => config.getBaseURL()),
-	supportEmail: Yup.string().default(() => config.contact.support),
-}).required(true);
+export const ResizableTable = ({ className = '', children }) => {
+	const { getVisibleColumnsNames } = useContext(ResizableTableContext);
 
-const TEMPLATE_PATH = `${__dirname}/html/forgotPassword.html`;
-
-const ForgotPasswordTemplate = {};
-
-ForgotPasswordTemplate.subject = () => 'Reset your password';
-
-ForgotPasswordTemplate.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
-
-module.exports = ForgotPasswordTemplate;
+	return (
+		<Table className={className}>
+			{children}
+			<ResizersContainers>
+				{getVisibleColumnsNames().map((name) => (
+					<Resizer name={name} key={name} />
+				))}
+			</ResizersContainers>
+		</Table>
+	);
+};

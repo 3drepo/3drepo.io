@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,22 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-"use strict";
-const html = data => `
-	Billing User: ${data.billingUser}
-	<br><br>
-	Email: ${data.email}
-	<br><br>
-	billingAgreementId: ${data.billingAgreementId}
-	<br><br>
-	Error: ${data.errmsg}
-	<br><br>
-	Raw ipn message: ${data.ipn}
+import styled from 'styled-components';
+
+export const Table = styled.div`
+	width: 100%;
+	overflow-x: scroll;
+	position: relative;
 `;
 
-const subject = "[System] Unexpected PayPal Payment IPN";
-
-module.exports =  {
-	html: html,
-	subject: subject
-};
+export const ResizersContainers = styled.div`
+	position: absolute;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	display: flex;
+	flex-direction: row;
+`;

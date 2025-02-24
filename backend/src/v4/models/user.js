@@ -20,18 +20,10 @@
 const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
 const db = require("../handler/db");
-const zxcvbn = require("zxcvbn");
 const utils = require("../utils");
-const Role = require("./role");
 const { findJobByUser, usersWithJob, addUserToJob } = require("./job");
 
-const Intercom = require("./intercom");
-
 const TeamspaceSettings = require("./teamspaceSetting");
-
-const systemLogger = require("../logger.js").systemLogger;
-
-const config = require("../config");
 
 const { findModelSettingById, findModelSettings, findPermissionByUser } = require("./modelSetting");
 const C = require("../constants");
@@ -43,7 +35,6 @@ const {
 	getProjectsForAccountsList
 } = require("./project");
 const PermissionTemplates = require("./permissionTemplates");
-const { get } = require("lodash");
 const { fileExists } = require("./fileRef");
 const {v5Path} = require("../../interop");
 const { types: { strings } } = require(`${v5Path}/utils/helper/yup.js`);
@@ -57,35 +48,8 @@ const { removeTeamspaceMember, addTeamspaceMember, getTeamspaceListByUser} = req
 
 const COLL_NAME = "system.users";
 
-const appendRemainingLoginsInfo = function (resCode, remaining) {
-	return {
-		...resCode,
-		message: `${resCode.message} (Remaining attempts: ${remaining})`
-	};
-};
-
-const checkPasswordStrength = function (password) {
-	if (utils.isString(password) && password.length < C.MIN_PASSWORD_LENGTH) {
-		throw responseCodes.PASSWORD_TOO_SHORT;
-	}
-
-	const passwordScore = zxcvbn(password).score;
-	if (passwordScore < C.MIN_PASSWORD_STRENGTH) {
-		throw responseCodes.PASSWORD_TOO_WEAK;
-	}
-};
-
 const isMemberOfTeamspace = function (user, teamspace) {
 	return user.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
-};
-
-const isAccountLocked = function (user) {
-	const currentTime = new Date();
-
-	return user && user.customData && user.customData.loginInfo &&
-		user.customData.loginInfo.failedLoginCount && user.customData.loginInfo.lastFailedLoginAt &&
-		user.customData.loginInfo.failedLoginCount >= config.loginPolicy.maxUnsuccessfulLoginAttempts &&
-		currentTime - user.customData.loginInfo.lastFailedLoginAt < config.loginPolicy.lockoutDuration;
 };
 
 const hasReachedLicenceLimit = async function (teamspace) {
@@ -110,80 +74,9 @@ const findOne = async function (query, projection) {
 	return await db.findOne("admin", COLL_NAME, query, projection);
 };
 
-const handleAuthenticateFail = async function (user, username) {
-	const currentTime = new Date();
-
-	const elapsedTime = user.customData.loginInfo && user.customData.loginInfo.lastFailedLoginAt ?
-		currentTime - user.customData.loginInfo.lastFailedLoginAt : undefined;
-
-	const failedLoginCount = user.customData.loginInfo && user.customData.loginInfo.failedLoginCount &&
-		elapsedTime && elapsedTime < config.loginPolicy.lockoutDuration ?
-		user.customData.loginInfo.failedLoginCount + 1 : 1;
-
-	await db.updateOne("admin", COLL_NAME, {user: username}, {$set: {
-		"customData.loginInfo.lastFailedLoginAt": currentTime,
-		"customData.loginInfo.failedLoginCount": failedLoginCount
-	}});
-
-	if (failedLoginCount >= config.loginPolicy.maxUnsuccessfulLoginAttempts) {
-		try {
-			await Intercom.submitLoginLockoutEvent(user.customData.email);
-		} catch (err) {
-			systemLogger.logError("Failed to submit login lockout event in intercom", username, err);
-		}
-	}
-
-	return Math.max(config.loginPolicy.maxUnsuccessfulLoginAttempts - failedLoginCount, 0);
-};
-
 const User = {};
 
 User.getTeamspaceSpaceUsed = (dbName) => getSpaceUsed(dbName);
-
-User.authenticate =  async function (username, password) {
-	if (!username || !password) {
-		throw({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
-	}
-
-	let user = null;
-
-	if(strings.email.isValidSync(username)) { // if the submited username is the email
-		user = await User.findByEmail(username);
-	} else {
-		user = await User.findByUserName(username);
-	}
-
-	if (!user) {
-		throw responseCodes.INCORRECT_USERNAME_OR_PASSWORD;
-	}
-
-	if (isAccountLocked(user)) {
-		throw responseCodes.TOO_MANY_LOGIN_ATTEMPTS;
-	}
-
-	try {
-		await db.authenticate(user.user, password);
-	} catch (err) {
-		const remainingLoginAttempts = await handleAuthenticateFail(user, user.user);
-
-		if (err.value === responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value &&
-			remainingLoginAttempts <= config.loginPolicy.remainingLoginAttemptsPromptThreshold) {
-			throw appendRemainingLoginsInfo(err, remainingLoginAttempts);
-		}
-
-		throw { resCode: err };
-	}
-
-	if (user.customData && user.customData.inactive) {
-		throw responseCodes.USER_NOT_VERIFIED;
-	}
-
-	if (!user.customData) {
-		user.customData = {};
-	}
-
-	return { username: user.user };
-};
 
 User.getProfileByUsername = async function (username) {
 	if (!username) {
@@ -350,149 +243,7 @@ User.checkEmailAvailableAndValid = async function (email, exceptUser) {
 	}
 };
 
-User.updatePassword = async function (username, oldPassword, token, newPassword) {
-	if (!((oldPassword || token) && newPassword)) {
-		throw ({ resCode: responseCodes.INVALID_INPUTS_TO_PASSWORD_UPDATE });
-	}
-
-	checkPasswordStrength(newPassword);
-
-	let user;
-
-	if (oldPassword) {
-		if (oldPassword === newPassword) {
-			throw (responseCodes.NEW_OLD_PASSWORD_SAME);
-		}
-
-		await User.authenticate(username, oldPassword);
-	} else if (token) {
-		user = await User.findByUserName(username);
-
-		const tokenData = user.customData.resetPasswordToken;
-
-		if (!tokenData || tokenData.token !== token || tokenData.expiredAt < new Date()) {
-			throw ({ resCode: responseCodes.TOKEN_INVALID });
-		}
-	}
-
-	const updateUserCmd = {
-		"updateUser": username,
-		"pwd": newPassword
-	};
-	try {
-		await db.runCommand("admin", updateUserCmd);
-
-		if (user) {
-			await db.updateOne("admin", COLL_NAME, {user: username}, {$set: {"customData.resetPasswordToken" : undefined }});
-		}
-
-	} catch(err) {
-		throw (err.resCode ? err : { resCode: utils.mongoErrorToResCode(err) });
-	}
-};
-
 User.usernameRegExp = /^[a-zA-Z][\w]{1,63}$/;
-
-User.createUser = async function (username, password, customData, tokenExpiryTime) {
-	const Invitations =  require("./invitations");
-	if (!customData) {
-		throw ({ resCode: responseCodes.EMAIL_INVALID });
-	}
-
-	checkPasswordStrength(password);
-
-	await Promise.all([
-		User.checkUserNameAvailableAndValid(username),
-		User.checkEmailAvailableAndValid(customData.email)
-	]);
-
-	const cleanedCustomData = {
-		createdAt: new Date(),
-		inactive: true
-		// extras: {}
-	};
-
-	["firstName", "lastName", "email", "mailListOptOut"]
-		.forEach(key => {
-			if (customData[key]) {
-				cleanedCustomData[key] = customData[key];
-			}
-		});
-
-	const billingInfo = {};
-
-	["firstName", "lastName", "countryCode", "company"].forEach(key => {
-		if (customData[key]) {
-			billingInfo[key] = customData[key];
-		}
-	});
-
-	const expiryAt = new Date();
-	expiryAt.setHours(expiryAt.getHours() + tokenExpiryTime);
-
-	cleanedCustomData.emailVerifyToken = {
-		token: utils.generateHashString(),
-		expiredAt: expiryAt
-	};
-
-	cleanedCustomData.billing = await UserBilling.changeBillingAddress(cleanedCustomData.billing || {}, billingInfo);
-
-	try {
-		await db.createUser(username, password, cleanedCustomData);
-	} catch(err) {
-		throw ({ resCode: utils.mongoErrorToResCode(err) });
-	}
-
-	const user = await User.findByUserName(username);
-
-	await Invitations.unpack(user);
-
-	return cleanedCustomData.emailVerifyToken;
-};
-
-function formatPronouns(str) {
-	const strArr = str.toLowerCase().split(" ");
-	return strArr.map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
-}
-
-User.verify = async function (username, token, options) {
-	options = options || {};
-
-	const allowRepeatedVerify = options.allowRepeatedVerify;
-
-	const user = await User.findByUserName(username);
-
-	const tokenData = user && user.customData && user.customData.emailVerifyToken;
-
-	if (!user) {
-
-		throw ({ resCode: responseCodes.TOKEN_INVALID });
-
-	} else if (!user.customData.inactive && !allowRepeatedVerify) {
-
-		throw ({ resCode: responseCodes.ALREADY_VERIFIED });
-
-	} else if (tokenData.token === token && tokenData.expiredAt > new Date()) {
-
-		await db.updateOne("admin", COLL_NAME, { user: username },
-			{ $unset: {"customData.inactive": "", "customData.emailVerifyToken": "" }});
-
-	} else {
-		throw ({ resCode: responseCodes.TOKEN_INVALID });
-	}
-
-	try {
-		const { customData: {firstName, lastName, email, billing, mailListOptOut, createdAt } } = user;
-
-		const subscribed = !mailListOptOut;
-		const company = get(billing, "billingInfo.company");
-
-		await Intercom.createContact(username, formatPronouns(firstName + " " + lastName), email,
-			subscribed, company, createdAt);
-	} catch (err) {
-		systemLogger.logError("Failed to create contact in intercom when verifying user", username, err);
-	}
-};
 
 User.getAvatarStream = UserProcessorV5.getAvatarStream;
 
@@ -521,41 +272,6 @@ User.updateInfo = async function(username, updateObj) {
 	}
 
 	await db.updateOne("admin", COLL_NAME, {user: username}, {$set: updateData});
-};
-
-User.getForgotPasswordToken = async function (userNameOrEmail) {
-	const expiryAt = new Date();
-	expiryAt.setHours(expiryAt.getHours() + config.tokenExpiry.forgotPassword);
-
-	const resetPasswordToken = {
-		token: utils.generateHashString(64),
-		expiredAt: expiryAt
-	};
-
-	let resetPasswordUserInfo = {};
-
-	const user = await User.findByUsernameOrEmail(userNameOrEmail);
-
-	// set token only if username is found.
-	if (user) {
-		if (isAccountLocked(user)) {
-			throw responseCodes.ACCOUNT_LOGIN_LOCKED;
-		}
-
-		user.customData.resetPasswordToken = resetPasswordToken;
-		resetPasswordUserInfo = {
-			token: resetPasswordToken.token,
-			email: user.customData.email,
-			username: user.user,
-			firstName:user.customData.firstName
-		};
-
-		await db.updateOne("admin", COLL_NAME, {user: user.user}, {$set: { "customData.resetPasswordToken": resetPasswordToken }});
-
-		return resetPasswordUserInfo;
-	}
-
-	return {};
 };
 
 // find projects and put models into project

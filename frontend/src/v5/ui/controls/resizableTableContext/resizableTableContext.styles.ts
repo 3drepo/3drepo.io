@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,15 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-"use strict";
-const html = data => `
-	Failed to send work into queue: ${data.err} in ${data.domain}<br><br>
-	Please look into it!
+import styled from 'styled-components';
+
+export const RefHolder = styled.div`
+	width: 100%;
 `;
-
-const subject = data => `[System][${data.domain}] Queue connection failed`;
-
-module.exports =  {
-	html: html,
-	subject: subject
-};

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,23 +14,22 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import TicketPin from '@assets/icons/filled/pin_ticket-filled.svg';
+import IssuePin from '@assets/icons/filled/pin_issue-filled.svg';
+import RiskPin from '@assets/icons/filled/pin_risk-filled.svg';
+import MarkerPin from '@assets/icons/filled/pin_marker-filled.svg';
+import { PinIcon } from '@/v5/store/tickets/tickets.types';
 
-"use strict";
-const html = data => `
-	Hi there,<br>
-	<br>
-	Your subscription is now suspended.
-	<br>
-	Please click on the following link if you would like to subscribe again.
-	<br><a href="${data.url}">${data.url}</a>
-	<br><br>
-	Best,<br>
-	3D Repo
-`;
 
-const subject = "Your 3D Repo subscription is suspended";
+const PinPerType = 
+{
+	'ISSUE': IssuePin,
+	'RISK': RiskPin,
+	'DEFAULT': TicketPin,
+	'MARKER': MarkerPin,
+};
 
-module.exports =  {
-	html: html,
-	subject: subject
+export const Pin = ({ pinIcon }: { pinIcon:PinIcon }) => {
+	const Icon = PinPerType[pinIcon];
+	return (<Icon />);
 };

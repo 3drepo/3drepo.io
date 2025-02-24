@@ -22,14 +22,11 @@ const { deleteIfUndefined } = require('../utils/helper/objects');
 const { destroySession } = require('../utils/sessions');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUIDString } = require('../utils/helper/uuids');
-const { getURLDomain } = require('../utils/helper/strings');
 const { session: initSession } = require('../services/sessions');
 const { isFromWebBrowser } = require('../utils/helper/userAgent');
-const { logger } = require('../utils/logger');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { respond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');
-const { validateMany } = require('./common');
 
 const Sessions = {};
 
@@ -48,19 +45,13 @@ Sessions.manageSessions = async (req, res, next) => {
 const updateSessionDetails = (req) => {
 	const updatedUser = { ...req.loginData, webSession: false };
 	const { session } = req;
-	let userAgent = req.headers['user-agent'];
 
-	const { ssoInfo } = req.session;
-	if (ssoInfo) {
-		userAgent = ssoInfo.userAgent;
-		if (ssoInfo.referer) {
-			updatedUser.referer = ssoInfo.referer;
-		}
-
-		delete req.session.ssoInfo;
-	} else if (req.headers.referer) {
-		updatedUser.referer = getURLDomain(req.headers.referer);
+	const { ssoInfo: { userAgent, referer } } = req.session;
+	if (referer) {
+		updatedUser.referer = referer;
 	}
+
+	delete req.session.ssoInfo;
 
 	if (userAgent) {
 		updatedUser.webSession = isFromWebBrowser(userAgent);
@@ -92,18 +83,6 @@ const updateSessionDetails = (req) => {
 	return session;
 };
 
-const createSession = (req, res) => {
-	req.session.regenerate((err) => {
-		if (err) {
-			logger.logError(`Failed to regenerate session: ${err.message}`);
-			respond(req, res, err);
-		} else {
-			const session = updateSessionDetails(req);
-			respond(req, res, templates.ok, req.v4 ? session.user : undefined);
-		}
-	});
-};
-
 Sessions.destroySession = (req, res) => {
 	const username = req.session?.user?.username;
 
@@ -130,7 +109,5 @@ Sessions.updateSession = async (req, res, next) => {
 	updateSessionDetails(req);
 	await next();
 };
-
-Sessions.createSession = validateMany([Sessions.appendCSRFToken, createSession]);
 
 module.exports = Sessions;

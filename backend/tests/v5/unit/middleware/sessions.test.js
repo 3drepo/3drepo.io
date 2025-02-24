@@ -31,7 +31,6 @@ const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager.constants');
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const { SOCKET_HEADER } = require(`${src}/services/chat/chat.constants`);
-const { CSRF_COOKIE } = require(`${src}/utils/sessions.constants`);
 const { USER_AGENT_HEADER } = require(`${src}/utils/sessions.constants`);
 
 // Need to mock these 2 to ensure we are not trying to create a real session configuration
@@ -63,94 +62,6 @@ const pluginAgent = generateRandomString();
 const webBrowserUserAgent = generateRandomString();
 
 UserAgentHelper.isFromWebBrowser.mockImplementation((userAgent) => userAgent === webBrowserUserAgent);
-
-const checkCSRFCookieCreated = (cookieFn) => {
-	const { maxAge, domain } = config.cookie;
-	expect(cookieFn).toHaveBeenCalledWith(CSRF_COOKIE, expect.any(String),
-		{ httpOnly: false, secure: true, sameSite: 'Strict', maxAge, domain },
-	);
-};
-
-const testCreateSession = () => {
-	const checkResults = (request) => {
-		expect(Responder.respond).toHaveBeenCalledTimes(1);
-		expect(Responder.respond.mock.results[0].value.code).toBe(templates.ok.code);
-		expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-		expect(EventsManager.publish).toHaveBeenCalledWith(events.SESSION_CREATED,
-			{
-				username: request.loginData.username,
-				sessionID: request.sessionID,
-				ipAddress: request.ips[0] || request.ip,
-				userAgent: request.headers[USER_AGENT_HEADER],
-				referer: request?.session?.user?.referer,
-				socketId: request.headers[SOCKET_HEADER],
-			});
-	};
-
-	const req = {
-		loginData: { username: generateRandomString() },
-		session: { regenerate: (callback) => { callback(); }, cookie: { domain: undefined } },
-		body: { user: 'user1' },
-		sessionID: '123',
-		ips: ['0.1.2.3'],
-		ip: '0.1.2.3',
-		headers: {},
-	};
-
-	describe('Regenerate auth session', () => {
-		describe.each([
-			['the request has a referer', true, { ...req, headers: { ...req.headers, referer: 'http://abc.com/' } }],
-			['the request has socket id', true, { ...req, headers: { ...req.headers, [SOCKET_HEADER]: 'socketsdlfkdsj' } }],
-			['the request has user agent', true, { ...req, headers: { ...req.headers, [USER_AGENT_HEADER]: 'some user agent' } }],
-			['the request has web user agent', true, { ...req, headers: { ...req.headers, [USER_AGENT_HEADER]: webBrowserUserAgent } }],
-			['the request has empty ips array', true, { ...req, ips: [] }],
-			['v4 is flagged', true, { ...req, v4: true }],
-			['the session cannot be regenerated', false, { ...req, session: { regenerate: (callback) => { callback(1); } } }, 1],
-		])('Regenerate Session', (desc, success, request, error) => {
-			test(`should ${success ? 'succeed if' : `fail with ${error}`} if ${desc}`, async () => {
-				const res = { cookie: jest.fn() };
-
-				if (request.headers[USER_AGENT_HEADER]) {
-					UserAgentHelper.getUserAgentInfo.mockImplementationOnce(() => ({
-						application: { name: generateRandomString() },
-					}));
-				}
-
-				await Sessions.createSession(request, res);
-				if (success) {
-					checkResults(request);
-				} else {
-					expect(Responder.respond).toHaveBeenCalledTimes(1);
-					expect(Responder.respond).toHaveBeenCalledWith(request, res, 1);
-				}
-				expect(res.cookie).toHaveBeenCalledTimes(1);
-				checkCSRFCookieCreated(res.cookie);
-			});
-		});
-
-		test('Should regenerate session with cookie.maxAge', async () => {
-			const initialMaxAge = config.cookie.maxAge;
-			config.cookie.maxAge = 100;
-			const res = { cookie: jest.fn() };
-			await Sessions.createSession(req, res);
-			checkResults(req);
-			expect(res.cookie).toHaveBeenCalledTimes(1);
-			checkCSRFCookieCreated(res.cookie);
-			config.cookie.maxAge = initialMaxAge;
-		});
-
-		test('Should regenerate session without cookie.maxAge', async () => {
-			const initialMaxAge = config.cookie.maxAge;
-			config.cookie.maxAge = undefined;
-			const res = { cookie: jest.fn() };
-			await Sessions.createSession(req, res);
-			checkResults(req);
-			expect(res.cookie).toHaveBeenCalledTimes(1);
-			checkCSRFCookieCreated(res.cookie);
-			config.cookie.maxAge = initialMaxAge;
-		});
-	});
-};
 
 const testDestroySession = () => {
 	const req = {
@@ -278,7 +189,6 @@ const testUpdateSession = () => {
 };
 
 describe('middleware/sessions', () => {
-	testCreateSession();
 	testDestroySession();
 	testManageSession();
 	testUpdateSession();

@@ -17,14 +17,17 @@
 
 const { destroySession, isSessionValid } = require('../utils/sessions');
 const { USER_AGENT_HEADER } = require('../utils/sessions.constants');
-const { isAccountActive } = require('../models/users');
-const { isAccountLocked } = require('../models/loginRecords');
 const { logger } = require('../utils/logger');
 const { respond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');
 const { validateMany } = require('./common');
 
 const AuthMiddleware = {};
+
+const destroySessionIfExists = (req, res) => new Promise((resolve) => {
+	if (req.session) destroySession(req.session, res, () => resolve());
+	else resolve();
+});
 
 const validSessionDetails = async (req, res, next) => {
 	if (!req.session.user.isAPIKey) {
@@ -36,12 +39,9 @@ const validSessionDetails = async (req, res, next) => {
 
 		if (!ipMatch || !userAgentMatch) {
 			try {
-				const callback = () => {
-					logger.logInfo(`Session ${sessionId} destroyed due to IP or user agent mismatch`);
-					respond(req, res, templates.notLoggedIn);
-				};
-
-				destroySession(req.session, res, callback);
+				await destroySessionIfExists(req, res);
+				logger.logInfo(`Session ${sessionId} destroyed due to IP or user agent mismatch`);
+				respond(req, res, templates.notLoggedIn);
 			} catch (err) {
 				respond(req, res, err);
 			}
@@ -62,6 +62,7 @@ const validSession = async (req, res, next) => {
 	if (await checkValidSession(req)) {
 		await next();
 	} else {
+		await destroySessionIfExists(req, res);
 		respond(req, res, templates.notLoggedIn);
 	}
 };
@@ -70,6 +71,7 @@ AuthMiddleware.isLoggedIn = async (req, res, next) => {
 	if (await checkValidSession(req, true)) {
 		await next();
 	} else {
+		await destroySessionIfExists(req, res);
 		respond(req, res, templates.notLoggedIn);
 	}
 };
@@ -82,31 +84,6 @@ AuthMiddleware.notLoggedIn = async (req, res, next) => {
 	}
 };
 
-const accountActive = async (req, res, next) => {
-	const { user } = req.body;
-	try {
-		if (!await isAccountActive(user)) {
-			throw templates.userNotVerified;
-		}
-		await next();
-	} catch (err) {
-		respond(req, res, err);
-	}
-};
-
-const accountNotLocked = async (req, res, next) => {
-	const { user } = req.body;
-	try {
-		if (await isAccountLocked(user)) {
-			throw templates.tooManyLoginAttempts;
-		}
-		await next();
-	} catch (err) {
-		respond(req, res, err);
-	}
-};
-
-AuthMiddleware.canLogin = validateMany([AuthMiddleware.notLoggedIn, accountActive, accountNotLocked]);
 AuthMiddleware.validSession = validateMany([validSession, validSessionDetails]);
 
 module.exports = AuthMiddleware;

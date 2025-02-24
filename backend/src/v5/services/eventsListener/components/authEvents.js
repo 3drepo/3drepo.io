@@ -16,7 +16,7 @@
  */
 
 const { createDirectMessage, createInternalMessage } = require('../../chat');
-const { recordFailedAttempt, saveSuccessfulLoginRecord } = require('../../../models/loginRecords');
+const { saveSuccessfulLoginRecord } = require('../../../models/loginRecords');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { removeOldSessions } = require('../../sessions');
@@ -35,16 +35,11 @@ const sessionsRemoved = async ({ ids, elective }) => {
 	await createInternalMessage(chatEvents.LOGGED_OUT, { sessionIds: ids });
 };
 
-const loginFailed = async ({ user, ipAddress, userAgent, referer }) => {
-	await recordFailedAttempt(user, ipAddress, userAgent, referer);
-};
-
 const AuthEventsListener = {};
 
 AuthEventsListener.init = () => {
 	subscribe(events.SESSION_CREATED, userLoggedIn);
 	subscribe(events.SESSIONS_REMOVED, sessionsRemoved);
-	subscribe(events.FAILED_LOGIN_ATTEMPT, loginFailed);
 };
 
 module.exports = AuthEventsListener;

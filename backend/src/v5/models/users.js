@@ -19,26 +19,11 @@ const { USERS_COL, USERS_DB_NAME } = require('./users.constants');
 const { createResponseCode, templates } = require('../utils/responseCodes');
 const { generateHashString, sanitiseRegex } = require('../utils/helper/strings');
 const db = require('../handler/db');
-const { events } = require('../services/eventsManager/eventsManager.constants');
-const { publish } = require('../services/eventsManager/eventsManager');
 
 const User = {};
 
 const userQuery = (query, projection, sort) => db.findOne(USERS_DB_NAME, USERS_COL, query, projection, sort);
 const updateUser = (username, action) => db.updateOne(USERS_DB_NAME, USERS_COL, { user: username }, action);
-
-User.isAccountActive = async (user) => {
-	const projection = { 'customData.inactive': 1 };
-	const { customData: { inactive } = {} } = await User.getUserByUsername(user, projection);
-	return !inactive;
-};
-
-User.authenticate = async (user, password) => {
-	if (await db.authenticate(user, password)) return;
-
-	publish(events.FAILED_LOGIN_ATTEMPT, { user });
-	throw templates.incorrectUsernameOrPassword;
-};
 
 User.getUsersByQuery = (query, projection) => db.find(USERS_DB_NAME, USERS_COL, query, projection);
 
@@ -140,6 +125,10 @@ User.updateProfile = async (username, updatedProfile) => {
 	await updateUser(username, { $set: updateData });
 };
 
+User.updateUserId = async (username, userId) => {
+	await updateUser(username, { $set: { 'customData.userId': userId } });
+};
+
 User.generateApiKey = async (username) => {
 	const apiKey = generateHashString();
 	await updateUser(username, { $set: { 'customData.apiKey': apiKey } });
@@ -171,48 +160,5 @@ User.addUser = async (newUserData) => {
 
 User.removeUser = (user) => db.deleteOne(USERS_DB_NAME, USERS_COL, { user });
 User.removeUsers = (users) => db.deleteMany(USERS_DB_NAME, USERS_COL, { user: { $in: users } });
-
-User.verify = async (username) => {
-	const { customData } = await db.findOneAndUpdate(USERS_DB_NAME, USERS_COL, { user: username },
-		{
-			$unset: {
-				'customData.inactive': 1,
-				'customData.emailVerifyToken': 1,
-			},
-		},
-		{ projection: {
-			'customData.firstName': 1,
-			'customData.lastName': 1,
-			'customData.email': 1,
-			'customData.billing.billingInfo.company': 1,
-			'customData.mailListOptOut': 1,
-			'customData.createdAt': 1,
-		} });
-
-	return customData;
-};
-
-User.updateResetPasswordToken = (username, resetPasswordToken) => updateUser(username,
-	{ $set: { 'customData.resetPasswordToken': resetPasswordToken } });
-
-User.unlinkFromSso = async (username, newPassword) => {
-	await updateUser(username, { $unset: { 'customData.sso': 1 } });
-	await User.updatePassword(username, newPassword);
-};
-
-User.linkToSso = (username, email, firstName, lastName, ssoData) => updateUser(username,
-	{
-		$set: {
-			'customData.email': email,
-			'customData.firstName': firstName,
-			'customData.lastName': lastName,
-			'customData.sso': ssoData,
-		},
-	});
-
-User.isSsoUser = async (username) => {
-	const { customData: { sso } } = await User.getUserByUsername(username, { 'customData.sso': 1 });
-	return !!sso;
-};
 
 module.exports = User;

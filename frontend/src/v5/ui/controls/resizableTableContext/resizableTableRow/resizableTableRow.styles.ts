@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,21 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-"use strict";
-const html = data => `
-	Hi there,<br>
-	<br>
-	Your payment of ${data.amount} is failed. Please make sure you have enough credits in your PayPal account and have
-	your account verified.
-	<br><br> We will reattempt to collect your recurring payments again within five days.
-	<br><br>
-	Best,<br>
-	3D Repo
+import styled from 'styled-components';
+
+export const Row = styled.div`
+	display: grid;
 `;
-
-const subject = "Your payment to 3D Repo is failed";
-
-module.exports =  {
-	html: html,
-	subject: subject
-};

@@ -18,19 +18,16 @@
 const Users = {};
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../models/users.constants');
-const { addUser, authenticate, deleteApiKey, generateApiKey,
-	getUserByUsername, linkToSso, removeUser, unlinkFromSso, updatePassword, updateProfile, updateResetPasswordToken, verify } = require('../models/users');
+const { addUser, deleteApiKey, generateApiKey,
+	getUserByUsername, removeUser, updatePassword, updateProfile } = require('../models/users');
 const { fileExists, getFile, removeFile, storeFile } = require('../services/filesManager');
 const { isEmpty, removeFields } = require('../utils/helper/objects');
-const config = require('../utils/config');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
 const { generateUserHash } = require('../services/intercom');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { removeAllUserNotifications } = require('../models/notifications');
 const { removeAllUserRecords } = require('../models/loginRecords');
-const { sendEmail } = require('../services/mailer');
-const { templates } = require('../services/mailer/mailer.constants');
 
 // This is used for the situation where a user has a record from
 // the IDP but we don't have a matching record in the db. We need
@@ -52,50 +49,9 @@ Users.createNewUserRecord = async (idpUserData) => {
 	};
 
 	await addUser(userData);
+
+	publish(events.USER_CREATED, { id, email, fullName: name, createdAt: userData.createdAt });
 	return id;
-};
-
-Users.signUp = async (newUserData) => {
-	const isSso = !!newUserData.sso;
-	const formattedNewUserData = { ...newUserData };
-	if (isSso) {
-		formattedNewUserData.password = generateHashString();
-	} else {
-		formattedNewUserData.token = generateHashString();
-	}
-
-	await addUser(formattedNewUserData);
-
-	if (isSso) {
-		publish(events.USER_VERIFIED, {
-			username: newUserData.username,
-			email: newUserData.email,
-			fullName: `${newUserData.firstName} ${newUserData.lastName}`,
-			company: newUserData.company,
-			mailListOptOut: newUserData.mailListOptOut,
-			createdAt: new Date(),
-		});
-	} else {
-		await sendEmail(templates.VERIFY_USER.name, newUserData.email, {
-			token: formattedNewUserData.token,
-			email: newUserData.email,
-			firstName: newUserData.firstName,
-			username: newUserData.username,
-		});
-	}
-};
-
-Users.verify = async (username, token) => {
-	const customData = await verify(username, token);
-
-	publish(events.USER_VERIFIED, {
-		username,
-		email: customData.email,
-		fullName: `${customData.firstName} ${customData.lastName}`,
-		company: customData.billing.billingInfo.company,
-		mailListOptOut: customData.mailListOptOut,
-		createdAt: customData.createdAt,
-	});
 };
 
 Users.remove = async (username) => {
@@ -106,8 +62,6 @@ Users.remove = async (username) => {
 		removeUser(username),
 	]);
 };
-
-Users.login = authenticate;
 
 Users.getProfileByUsername = async (username) => {
 	const user = await getUserByUsername(username, {
@@ -162,26 +116,6 @@ Users.getAvatar = (username) => getFile(USERS_DB_NAME, AVATARS_COL_NAME, usernam
 
 Users.uploadAvatar = (username, avatarBuffer) => storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, avatarBuffer);
 
-Users.generateResetPasswordToken = async (username) => {
-	const expiredAt = new Date();
-	expiredAt.setHours(expiredAt.getHours() + config.tokenExpiry.forgotPassword);
-	const resetPasswordToken = { token: generateHashString(), expiredAt };
-
-	await updateResetPasswordToken(username, resetPasswordToken);
-
-	const { customData: { email, firstName } } = await getUserByUsername(username, { user: 1,
-		'customData.email': 1,
-		'customData.firstName': 1 });
-	await sendEmail(templates.FORGOT_PASSWORD.name, email, { token: resetPasswordToken.token,
-		email,
-		username,
-		firstName });
-};
-
 Users.updatePassword = updatePassword;
-
-Users.unlinkFromSso = unlinkFromSso;
-
-Users.linkToSso = linkToSso;
 
 module.exports = Users;

@@ -18,15 +18,32 @@
 const { HEADER_TENANT_ID, META_LABEL_TEAMSPACE } = require('./frontegg.constants');
 const { get, delete: httpDelete, post } = require('../../../utils/webRequests');
 const { IdentityClient } = require('@frontegg/client');
+const Yup = require('yup');
 const { generateUUIDString } = require('../../../utils/helper/uuids');
 const { logger } = require('../../../utils/logger');
-const { sso: { frontegg: config } } = require('../../../utils/config');
+const { sso: { frontegg } } = require('../../../utils/config');
 const queryString = require('querystring');
 const { toBase64 } = require('../../../utils/helper/strings');
 
 const Frontegg = {};
 
-const identityClient = new IdentityClient({ FRONTEGG_CLIENT_ID: config.clientId, FRONTEGG_API_KEY: config.key });
+let identityClient;
+let config;
+
+const getIdentityClient = async () => {
+	if (identityClient) return identityClient;
+
+	await Frontegg.init();
+	return identityClient;
+};
+
+const configSchema = Yup.object({
+	appUrl: Yup.string().required(), // https://{appId}.frontegg.com
+	appId: Yup.string().required(), // appId from the application created
+	clientId: Yup.string().required(), // clientId is the the vendor clientId
+	key: Yup.string().required(), // vendor API key
+	vendorDomain: Yup.string().required(), // the API server to connect to for vendor API
+}).required();
 
 const generateVendorToken = async () => {
 	const payload = {
@@ -41,51 +58,71 @@ const generateVendorToken = async () => {
 	}
 };
 
-const standardHeaders = async () => {
+const getBearerHeader = async () => {
 	const token = await generateVendorToken();
 	return {
 		Authorization: `Bearer ${token}`,
 	};
 };
 
+let basicHeader;
+
+Frontegg.init = async () => {
+	try {
+		config = configSchema.validateSync(frontegg, { stripUnknown: true });
+	} catch (err) {
+		throw new Error(`Failed to validate Frontegg config: ${err.message}`);
+	}
+
+	try {
+		identityClient = new IdentityClient({ FRONTEGG_CLIENT_ID: config.clientId, FRONTEGG_API_KEY: config.key });
+
+		// verify the vendor credentials are valid by generating a vendor jwt
+		await getBearerHeader();
+	} catch (err) {
+		throw new Error(`Failed to initialise Frontegg client: ${err.message}`);
+	}
+	basicHeader = {
+		Authorization: `Basic ${toBase64(`${config.clientId}:${config.key}`)}`,
+	};
+};
+
 Frontegg.getUserInfoFromToken = async (token) => {
 	try {
-		const { sub: userId, email, tenantId, tenantIds } = await identityClient.validateIdentityOnToken(token);
-		return { userId, email, authAccount: tenantId, accounts: tenantIds };
+		const client = await getIdentityClient();
+		const { sub: userId, email } = await client.validateIdentityOnToken(token);
+		return { userId, email };
 	} catch (err) {
-		console.log('!!!', err, token);
+		throw new Error(`Failed to validate user token: ${err.message}`);
 	}
 };
 
-Frontegg.validateAndRefreshToken = async ({ token, refreshToken }) => {
+Frontegg.validateAndRefreshToken = async ({ token /* refreshToken */ }) => {
 	try {
-		const user = await identityClient.validateToken(token);
-		/*
-		const payload = {
-		};
-		const headers = {
-			Authorization: `Bearer ${token}`,
-			'Content-Type': 'application/json',
-			'frontegg-vendor-host': 'https://www.3drepo.local',
-			Cookie: `fe_refresh_${config.clientId.replace('-', '')}=${refreshToken};`,
+		const client = await getIdentityClient();
+		const user = await client.validateToken(token);
 
-		};
+		/* try {
+			const payload = {
+				grant_type: 'refresh_token',
+				refresh_token: refreshToken,
+			};
 
-		try {
-			const { data } = await post(`${config.vendorDomain}/identity/resources/auth/v1/user/token/refresh`, payload, { headers });
+			const { data } = await post(`${config.appUrl}/oauth/token`, payload, { headers: basicHeader });
 		} catch (err) {
-			console.log('Failed: ', err);
-		}
-		 * */
+
+			console.log(err);
+		} */
+
 		return user;
 	} catch (err) {
-		console.log('???', err);
+		throw new Error(`Failed to validate user token: ${err.message}`);
 	}
 };
 
 Frontegg.getUserById = async (userId) => {
 	try {
-		const { data } = await get(`${config.vendorDomain}/identity/resources/vendor-only/users/v1/${userId}`, await standardHeaders());
+		const { data } = await get(`${config.vendorDomain}/identity/resources/vendor-only/users/v1/${userId}`, await getBearerHeader());
 		return data;
 	} catch (err) {
 		throw new Error(`Failed to get user(${userId}) from Frontegg: ${err.message}`);
@@ -94,7 +131,7 @@ Frontegg.getUserById = async (userId) => {
 
 Frontegg.getTeamspaceByAccount = async (accountId) => {
 	try {
-		const { data: { metadata } } = await get(`${config.vendorDomain}/tenants/resources/tenants/v2/${accountId}`, await standardHeaders());
+		const { data: { metadata } } = await get(`${config.vendorDomain}/tenants/resources/tenants/v2/${accountId}`, await getBearerHeader());
 		const metaJson = JSON.parse(metadata);
 		return metaJson[META_LABEL_TEAMSPACE];
 	} catch (err) {
@@ -109,7 +146,7 @@ Frontegg.createAccount = async (name) => {
 			name,
 		};
 
-		const headers = await standardHeaders();
+		const headers = await getBearerHeader();
 		await post(`${config.vendorDomain}/tenants/resources/tenants/v1`, payload, { headers });
 
 		// add teamspace name as a metadata
@@ -135,7 +172,7 @@ Frontegg.addUserToAccount = async (accountId, userId) => {
 			validateTenantExist: true,
 			skipInviteEmail: false,
 		};
-		await post(`${config.vendorDomain}/identity/resources/users/v1/${userId}/tenant`, payload, { headers: await standardHeaders() });
+		await post(`${config.vendorDomain}/identity/resources/users/v1/${userId}/tenant`, payload, { headers: await getBearerHeader() });
 	} catch (err) {
 		logger.logError(`Failed to add user to account: ${JSON.stringify(err?.response?.data)} `);
 		throw new Error(`Failed to add ${userId} to ${accountId} on Frontegg: ${err.message}`);
@@ -145,7 +182,7 @@ Frontegg.addUserToAccount = async (accountId, userId) => {
 Frontegg.removeUserFromAccount = async (accountId, userId) => {
 	try {
 		const headers = {
-			...await standardHeaders(),
+			...await getBearerHeader(),
 			[HEADER_TENANT_ID]: accountId,
 		};
 
@@ -158,7 +195,7 @@ Frontegg.removeUserFromAccount = async (accountId, userId) => {
 
 Frontegg.removeAccount = async (accountId) => {
 	try {
-		await httpDelete(`${config.vendorDomain}/tenants/resources/tenants/v1/${accountId}`, await standardHeaders());
+		await httpDelete(`${config.vendorDomain}/tenants/resources/tenants/v1/${accountId}`, await getBearerHeader());
 	} catch (err) {
 		logger.logError(`Failed to remove account: ${JSON.stringify(err?.response?.data)} `);
 		throw new Error(`Failed to remove ${accountId} on Frontegg: ${err.message}`);
@@ -166,10 +203,6 @@ Frontegg.removeAccount = async (accountId) => {
 };
 
 Frontegg.generateToken = async (urlUsed, code, challenge) => {
-	const headers = {
-		Authorization: `Basic ${toBase64(`${config.clientId}:${config.key}`)}`,
-	};
-
 	const payload = {
 		grant_type: 'authorization_code',
 		code,
@@ -177,7 +210,7 @@ Frontegg.generateToken = async (urlUsed, code, challenge) => {
 		code_challenge: challenge,
 	};
 
-	const { data } = await post(`${config.appUrl}/oauth/token`, payload, { headers });
+	const { data } = await post(`${config.appUrl}/oauth/token`, payload, { headers: basicHeader });
 	const expiry = new Date(Date.now() + data.expires_in * 1000);
 
 	return { token: data.access_token, refreshToken: data.refresh_token, expiry };
