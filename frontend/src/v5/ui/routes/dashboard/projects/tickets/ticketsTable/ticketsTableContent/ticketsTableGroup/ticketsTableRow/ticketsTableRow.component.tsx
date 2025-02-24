@@ -28,11 +28,12 @@ import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopover
 import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 import { Tooltip } from '@mui/material';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
-import { Row, Cell, CellOwner, OverflowContainer, SmallFont, CellDate } from './ticketsTableRow.styles';
+import { Row, CellOwner, OverflowContainer, SmallFont, CellDate } from './ticketsTableRow.styles';
 import { getChipPropsFromConfig } from '@controls/chip/statusChip/statusChip.helpers';
 import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { isEqual } from 'lodash';
+import { TicketsTableCell as Cell } from './ticketsTableCell/ticketsTableCell.component';
 
 type TicketsTableRowProps = {
 	ticket: ITicket,

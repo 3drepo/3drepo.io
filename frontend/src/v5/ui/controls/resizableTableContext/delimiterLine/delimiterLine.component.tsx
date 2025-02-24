@@ -15,13 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext } from 'react';
+import { HTMLAttributes, useContext } from 'react';
 import { ResizableTableContext } from '../resizableTableContext';
-import { Row } from './resizableTableRow.styles';
+import { Line } from './delimiterLine.styles';
 
-export const ResizableTableRow = (props) => {
-	const { getVisibleColumns, columnGap } = useContext(ResizableTableContext);
-	const gridTemplateColumns = getVisibleColumns().map(({ width }) => `${width}px`).join(' ');
-	
-	return (<Row style={{ gridTemplateColumns, gap: columnGap }} {...props} />);
+type DelimiterLineProps = { offset: number } & HTMLAttributes<HTMLDivElement>;
+export const DelimiterLine = ({ offset, ...props }: DelimiterLineProps) => {
+	const { columnGap } = useContext(ResizableTableContext);
+	return (<Line $offset={offset - columnGap / 2} {...props} />);
 };

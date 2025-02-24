@@ -17,11 +17,16 @@
 
 import { useContext } from 'react';
 import { ResizableTableContext } from '../resizableTableContext';
-import { Row } from './resizableTableRow.styles';
+import { ResizableTableCell } from '../resizableTableCell/resizableTableCell.component';
 
-export const ResizableTableRow = (props) => {
-	const { getVisibleColumns, columnGap } = useContext(ResizableTableContext);
-	const gridTemplateColumns = getVisibleColumns().map(({ width }) => `${width}px`).join(' ');
-	
-	return (<Row style={{ gridTemplateColumns, gap: columnGap }} {...props} />);
+export const ResizableTableHeader = ({ name, children, ...props }) => {
+	const { setMovingColumn } = useContext(ResizableTableContext);
+
+	const onDragStart = () => setMovingColumn(name);
+
+	return (
+		<ResizableTableCell draggable onDragStart={onDragStart} name={name} {...props}>
+			{children}
+		</ResizableTableCell>
+	);
 };
