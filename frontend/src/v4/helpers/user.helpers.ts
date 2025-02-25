@@ -19,9 +19,9 @@ import { getState } from '@/v5/helpers/redux.helpers';
 import { formatMessage } from '@/v5/services/intl';
 import { selectCurrentTeamspaceUsersByIds } from '@/v5/store/users/users.selectors';
 
-const USER_NOT_FOUND = formatMessage({ id: 'v4.unknownUser', defaultMessage: 'Unknown user' });
+const UNKNOWN_USER = formatMessage({ id: 'v4.unknownUser', defaultMessage: 'Unknown user' });
 
 export const getUserFullName = (username) => {
 	const user = selectCurrentTeamspaceUsersByIds(getState())[username];
-	return (!user || user?.isNotTeamspaceMember) ? USER_NOT_FOUND : `${user.firstName} ${user.lastName}`;
+	return (!user || user?.isNotTeamspaceMember) ? UNKNOWN_USER : `${user.firstName} ${user.lastName}`;
 };
