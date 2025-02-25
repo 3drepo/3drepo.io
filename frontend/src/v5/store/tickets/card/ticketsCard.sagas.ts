@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
+import { put, race, select, take, takeLatest } from 'redux-saga/effects';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { AdditionalProperties, BaseProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ViewerGuiActions } from '@/v4/modules/viewerGui/viewerGui.redux';
@@ -108,6 +108,6 @@ export function* upsertFilter({ filter }: UpsertFilterAction) {
 export default function* ticketsCardSaga() {
 	yield takeLatest(TicketsCardTypes.OPEN_TICKET, openTicket);
 	yield takeLatest(TicketsCardTypes.FETCH_TICKETS_LIST, fetchTicketsList);
-	yield takeEvery(TicketsCardTypes.FETCH_FILTERED_TICKETS, fetchFilteredTickets);
+	yield takeLatest(TicketsCardTypes.FETCH_FILTERED_TICKETS, fetchFilteredTickets);
 	yield takeLatest(TicketsCardTypes.UPSERT_FILTER, upsertFilter);
 }
