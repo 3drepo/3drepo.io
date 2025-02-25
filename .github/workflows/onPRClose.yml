@@ -51,12 +51,12 @@ jobs:
     name: Call Azure Destroy Pipeline
     runs-on: ubuntu-latest
     steps:
-    - name: Set new branch name value
+    - name: Set branch name to destroy
       run: |
         echo 'chartName='$( echo ${{ github.head_ref || github.ref_name }} | sed "s/_/-/" | awk '{print tolower($0)}' ) >> "$GITHUB_OUTPUT"
       id: getChartName
     - name: Azure Pipelines Action
-      if: steps.getChartName.outputs.chartName != 'staging'
+      if: ${{ (steps.getChartName.outputs.chartName != 'staging') && (steps.getChartName.outputs.chartName != 'master') && (steps.getChartName.outputs.chartName != 'testbranch') }}
       uses: Azure/pipelines@v1.2
       with:
         azure-devops-project-url: https://dev.azure.com/3drepo/3drepo.io
