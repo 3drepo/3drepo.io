@@ -416,6 +416,10 @@
 	 */
 	responseCodes.respond = function (place, req, res, next, resCode, extraInfo, format, cache, customHeaders) {
 
+		// Topology is closed mongo error is typically coming from the session management and the library
+		// doesn't let us recover from it (so far). So kill this pod and let it respawn.
+		const killServer = resCode?.name === "MongoError" && resCode?.message?.includes && resCode.message.includes("Topology is closed") ? resCode : false;
+
 		resCode = utils.mongoErrorToResCode(resCode);
 
 		if (!resCode || valid_values.indexOf(resCode.value) === -1) {
@@ -489,6 +493,10 @@
 
 			// log bandwidth and http status code
 			systemLogger.logInfo(genResponseLogging(resCode, meta, req), undefined, logLabels.network);
+		}
+
+		if (killServer) {
+			return Promise.reject(killServer);
 		}
 	};
 
