@@ -27,16 +27,6 @@ export const Headers = styled.div`
 	width: min(90vw, 1289px);
 `;
 
-export const IconContainer = styled.div<{ $flip?: boolean }>`
-	animation: all .2s;
-	display: inline-flex;
-	margin-right: 5px;
-
-	${({ $flip }) => $flip && css`
-		transform: rotate(180deg);
-	`}
-`;
-
 export const Header = styled(FixedOrGrowContainer)<{ $selectable: boolean }>`
 	${({ theme }) => theme.typography.kicker};
 	color: ${({ theme }) => theme.palette.base.main};

@@ -16,6 +16,7 @@
  */
 import { PureComponent, ReactNode } from 'react';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
+import { getUserFullName } from '@/v4/helpers/user.helpers';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { UserMarker } from '../../../components/messagesList/components/message/components/userMarker';
 import { Author, Container, Date, Details, ExtraInfo, Icon, Status, OpenInViewerButton, UserAndModelDetails } from './previewItemInfo.styles';
@@ -85,7 +86,7 @@ export class PreviewItemInfo extends PureComponent<IProps, any> {
 			panelType,
 			showModelButton,
 			urlParams
-			} = this.props;
+		} = this.props;
 
 		return(
 			<Container>
@@ -94,7 +95,7 @@ export class PreviewItemInfo extends PureComponent<IProps, any> {
 						<UserMarker name={author}>
 							<Status color={statusColor}>
 								{this.renderStatusIcon(StatusIconComponent)}
-								<Author>{author}</Author>
+								<Author>{getUserFullName(author)}</Author>
 							</Status>
 						</UserMarker>
 						{this.renderExtraInfo(extraInfo)}

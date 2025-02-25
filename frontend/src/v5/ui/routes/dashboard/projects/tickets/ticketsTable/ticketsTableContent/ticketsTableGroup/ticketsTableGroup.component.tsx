@@ -24,14 +24,14 @@ import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useContext } from 'react';
 import { SortedTableComponent, SortedTableContext, SortedTableType } from '@controls/sortedTableContext/sortedTableContext';
 import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import ArrowIcon from '@assets/icons/outlined/arrow-outlined.svg';
-import { Header, Headers, Group, NewTicketRow, NewTicketText, IconContainer } from './ticketsTableGroup.styles';
+import { Header, Headers, Group, NewTicketRow, NewTicketText } from './ticketsTableGroup.styles';
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
 import { SetTicketValue } from '../../ticketsTable.helper';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
+import { SortingArrow } from '@controls/sortingArrow/sortingArrow.component';
 
 const SortingTableHeader = ({ name = null, children, hidden = false, ...props }) => {
 	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
@@ -41,11 +41,7 @@ const SortingTableHeader = ({ name = null, children, hidden = false, ...props })
 
 	return (
 		<Header {...props} onClick={() => onColumnClick(name)} $selectable={!!name}>
-			{name && isSelected && (
-				<IconContainer $flip={isDescendingOrder}>
-					<ArrowIcon />
-				</IconContainer>
-			)}
+			{name && isSelected && (<SortingArrow ascendingOrder={isDescendingOrder} />)}
 			{children}
 		</Header>
 	);

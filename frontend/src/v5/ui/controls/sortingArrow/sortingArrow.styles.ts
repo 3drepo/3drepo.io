@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,35 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ReactChild } from 'react';
-import { AvatarWrapper, Container, Details, Name, UserData } from './userPopover.styles';
 
-export interface IUser {
-	user: string;
-	firstName: string;
-	lastName: string;
-	company?: string;
-	job?: {
-		_id: string;
-	};
-}
+import styled, { css } from 'styled-components';
 
-interface IProps {
-	user: IUser;
-	children: ReactChild;
-}
+export const IconContainer = styled.div<{ $ascendingOrder?: boolean }>`
+	animation: all .2s;
+	display: inline-flex;
+	margin-right: 5px;
 
-export const UserPopover = ({ user: { firstName, lastName, company, job }, children }: IProps) => {
-	return (
-		<Container>
-			<AvatarWrapper>
-				{children}
-			</AvatarWrapper>
-			<UserData>
-				<Name>{lastName}, {firstName}</Name>
-				<Details>{company}</Details>
-				<Details>{job?._id}</Details>
-			</UserData>
-		</Container>
-	);
-};
+	${({ $ascendingOrder }) => $ascendingOrder && css`
+		transform: rotate(180deg);
+	`}
+`;
