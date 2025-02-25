@@ -18,7 +18,7 @@
 import GearIcon from '@assets/icons/outlined/gear-outlined.svg';
 import { ActionMenu } from '@controls/actionMenu';
 import { SearchContext, SearchContextComponent } from '@controls/search/searchContext';
-import { COLUMN_NAME_TO_SETTINGS_LABEL, getAllColumnsNames, getAvailableColumnsForTemplate } from '../../../ticketsTable.helper';
+import { TICKETS_TABLE_COLUMNS_LABEL, getAllColumnsNames, getAvailableColumnsForTemplate } from '../../../ticketsTable.helper';
 import { SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
 import { MenuItem, IconContainer, SearchInput } from './columnsVisibilitySettings.styles';
 import { Checkbox } from '@controls/inputs/checkbox/checkbox.component';
@@ -29,6 +29,7 @@ import { useParams } from 'react-router';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { matchesQuery } from '@controls/search/searchContext.helpers';
+import { formatMessage } from '@/v5/services/intl';
 
 export const ColumnsVisibilitySettingsMenu = ({ newHiddenColumns, setNewHiddenColumns }) => {
 	const { hiddenColumns } = useContext(ResizableTableContext);
@@ -44,7 +45,10 @@ export const ColumnsVisibilitySettingsMenu = ({ newHiddenColumns, setNewHiddenCo
 	return (
 		<>
 			<SearchInputContainer>
-				<SearchInput />
+				<SearchInput
+					placeholder={formatMessage({ id: 'ticketsTable.columnsVisibilitySettings.search.placeholder', defaultMessage: 'Search...' })}
+				
+				/>
 			</SearchInputContainer>
 			<SearchContext.Consumer>
 				{({ filteredItems }) => filteredItems.map((columnName) => (
@@ -53,7 +57,7 @@ export const ColumnsVisibilitySettingsMenu = ({ newHiddenColumns, setNewHiddenCo
 							disabled={(columns.length - newHiddenColumns.length) === 1 && isVisible(columnName)}
 							onChange={() => onChange(columnName)}
 							value={isVisible(columnName)}
-							label={COLUMN_NAME_TO_SETTINGS_LABEL[columnName]}
+							label={TICKETS_TABLE_COLUMNS_LABEL[columnName]}
 						/>
 					</MenuItem>
 				))}
@@ -70,7 +74,7 @@ export const ColumnsVisibilitySettings = () => {
 
 	const onClose = () => setHiddenColumns(newHiddenColumns);
 	const filteringFunction = (cols, query) => (
-		cols.filter((col) => matchesQuery(COLUMN_NAME_TO_SETTINGS_LABEL[col], query))
+		cols.filter((col) => matchesQuery(TICKETS_TABLE_COLUMNS_LABEL[col], query))
 	);
 
 	return (

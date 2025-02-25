@@ -142,7 +142,7 @@ export const hasRequiredViewerProperties = (template) => {
 	return properties.some(({ required, type }) => required && ['view', 'coords'].includes(type));
 };
 
-export const COLUMN_NAME_TO_SETTINGS_LABEL = {
+export const TICKETS_TABLE_COLUMNS_LABEL = {
 	id: formatMessage({ id: 'ticketTable.column.visibility.id', defaultMessage: 'ID' }),
 	[BaseProperties.TITLE]: formatMessage({ id: 'ticketTable.column.visibility.title', defaultMessage: 'Title' }),
 	modelName: formatMessage({ id: 'ticketTable.column.visibility.federationContainer', defaultMessage: 'Federation / Container' }),
@@ -156,7 +156,7 @@ export const COLUMN_NAME_TO_SETTINGS_LABEL = {
 	[`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`]: formatMessage({ id: 'ticketTable.column.visibility.treatmentStatus', defaultMessage: 'Treatment Status' }),
 } as const;
 
-export const getAllColumnsNames = () => Object.keys(COLUMN_NAME_TO_SETTINGS_LABEL);
+export const getAllColumnsNames = () => Object.keys(TICKETS_TABLE_COLUMNS_LABEL);
 
 export const getUnavailableColumnsForTemplate = (template: ITemplate) => {
 	const { config, modules } = template;

@@ -27,7 +27,7 @@ import { Table, Header, Headers, Group, NewTicketRow, NewTicketText, IconContain
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
-import { SetTicketValue } from '../../ticketsTable.helper';
+import { TICKETS_TABLE_COLUMNS_LABEL, SetTicketValue } from '../../ticketsTable.helper';
 import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { ColumnsVisibilitySettings } from './columnsVisibilitySettings/columnsVisibilitySettings.component';
@@ -87,34 +87,34 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 												<FormattedMessage id="ticketTable.column.header.id" defaultMessage="#id" />
 											</SortingTableHeader>
 											<SortingTableHeader name={BaseProperties.TITLE}>
-												<FormattedMessage id="ticketTable.column.header.title" defaultMessage="title" />
+												{TICKETS_TABLE_COLUMNS_LABEL[BaseProperties.TITLE]}
 											</SortingTableHeader>
 											<SortingTableHeader name="modelName">
-												<FormattedMessage id="ticketTable.column.header.federationContainer" defaultMessage="federation / container" />
+												{TICKETS_TABLE_COLUMNS_LABEL.modelName}
 											</SortingTableHeader>
 											<SortingTableHeader name={`properties.${BaseProperties.CREATED_AT}`}>
-												<FormattedMessage id="ticketTable.column.header.createdAt" defaultMessage="created at" />
+												{TICKETS_TABLE_COLUMNS_LABEL[`properties.${BaseProperties.CREATED_AT}`]}
 											</SortingTableHeader>
 											<SortingTableHeader name={`properties.${IssueProperties.ASSIGNEES}`}> 
-												<FormattedMessage id="ticketTable.column.header.assignees" defaultMessage="assignees" />
+												{TICKETS_TABLE_COLUMNS_LABEL[`properties.${IssueProperties.ASSIGNEES}`]}
 											</SortingTableHeader>
 											<SortingTableHeader name={`properties.${BaseProperties.OWNER}`}>
-												<FormattedMessage id="ticketTable.column.header.owner" defaultMessage="owner" />
+												{TICKETS_TABLE_COLUMNS_LABEL[`properties.${BaseProperties.OWNER}`]}
 											</SortingTableHeader>
 											<SortingTableHeader name={`properties.${IssueProperties.DUE_DATE}`}>
-												<FormattedMessage id="ticketTable.column.header.dueDate" defaultMessage="due date" />
+												{TICKETS_TABLE_COLUMNS_LABEL[`properties.${IssueProperties.DUE_DATE}`]}
 											</SortingTableHeader>
 											<SortingTableHeader name={`properties.${IssueProperties.PRIORITY}`}>
-												<FormattedMessage id="ticketTable.column.header.priority" defaultMessage="priority" />
+												{TICKETS_TABLE_COLUMNS_LABEL[`properties.${IssueProperties.PRIORITY}`]}
 											</SortingTableHeader>
 											<SortingTableHeader name={`properties.${BaseProperties.STATUS}`}>
-												<FormattedMessage id="ticketTable.column.header.status" defaultMessage="status" />
+												{TICKETS_TABLE_COLUMNS_LABEL[`properties.${BaseProperties.STATUS}`]}
 											</SortingTableHeader>
 											<SortingTableHeader name={`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`}>
-												<FormattedMessage id="ticketTable.column.header.levelOfRisk" defaultMessage="level of risk" />
+												{TICKETS_TABLE_COLUMNS_LABEL[`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`]}
 											</SortingTableHeader>
 											<SortingTableHeader name={`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`}>
-												<FormattedMessage id="ticketTable.column.header.treatmentStatus" defaultMessage="treatment status" />
+												{TICKETS_TABLE_COLUMNS_LABEL[`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`]}
 											</SortingTableHeader>
 											<ColumnsVisibilitySettings />
 										</Headers>
