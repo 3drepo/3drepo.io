@@ -36,6 +36,7 @@ const TemplateSchema = {};
 
 const defaultFalse = stripWhen(Yup.boolean().default(false), (v) => !v);
 const nameSchema = types.strings.title.min(1);
+const pinIconSchema = Yup.string().oneOf(['DEFAULT', 'RISK', 'ISSUE', 'MARKER']).default('DEFAULT');
 
 const pinColSchema = Yup.lazy((val) => {
 	if (val === undefined) return Yup.mixed().strip();
@@ -103,6 +104,7 @@ const propSchema = Yup.object().shape({
 		return schema.strip();
 	}),
 	color: Yup.mixed().when('type', (val, schema) => (val === propTypes.COORDS ? pinColSchema : schema.strip())),
+	icon: Yup.mixed().when('type', (val, schema) => (val === propTypes.COORDS ? pinIconSchema : schema.strip())),
 
 	default: Yup.mixed().when(['type', 'values'], (type, values) => {
 		const res = propTypesToValidator(type);
@@ -177,7 +179,9 @@ const configSchema = Yup.object().shape({
 	attachments: defaultFalse,
 	defaultView: defaultFalse,
 	defaultImage: Yup.boolean().when('defaultView', (defaultView, schema) => (defaultView ? schema.strip() : defaultFalse)),
-	pin: Yup.lazy((val) => (val?.color ? Yup.object({ color: pinColSchema }) : defaultFalse)),
+	pin: Yup.lazy((val) => (val?.color || val?.icon
+		? Yup.object({ color: pinColSchema, icon: pinIconSchema })
+		: defaultFalse)),
 	status: Yup.object({
 		values: Yup.array().of(customStatus).min(1).required()
 			.test('Custom status', 'values must be unique', (vals) => uniqueElements(vals.map(({ name }) => name)).length === vals.length),
