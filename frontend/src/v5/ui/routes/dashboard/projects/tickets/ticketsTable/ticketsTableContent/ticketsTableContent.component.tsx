@@ -27,7 +27,6 @@ import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsTableResizableContent, TicketsTableResizableContentProps } from './ticketsTableResizableContent/ticketsTableResizableContent.component';
-import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { getUnavailableColumnsForTemplate } from '../ticketsTable.helper';
 
 const COLUMNS: TableColumn[] = [
@@ -48,39 +47,37 @@ export const TicketsTableContent = (props: TicketsTableResizableContentProps) =>
 	const { filteredItems } = useContext(SearchContext);
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
-	const [modelsIds] = useSearchParam('models', Transformers.STRING_ARRAY);
 
-	const getHiddenColumns = () => {
-		const showModelName = modelsIds.length > 1;
-		const hiddenCols = getUnavailableColumnsForTemplate(template);
-		if (!showModelName) {
-			hiddenCols.push('modelName');
+	const TableContent = () => {
+		if (!templateAlreadyFetched(template)) {
+			return (
+				<EmptyPageView>
+					<Spinner />
+				</EmptyPageView>
+			);
 		}
-		return hiddenCols;
+
+		if (!filteredItems.length) {
+			return (
+				<EmptyPageView>
+					<FormattedMessage
+						id="ticketTable.emptyView"
+						defaultMessage="We couldn't find any tickets to show. Please refine your selection."
+					/>
+				</EmptyPageView>
+			);
+		}
+
+		return <TicketsTableResizableContent {...props} />;
 	};
 
-	if (!templateAlreadyFetched(template)) {
-		return (
-			<EmptyPageView>
-				<Spinner />
-			</EmptyPageView>
-		);
-	}
-
-	if (!filteredItems.length) {
-		return (
-			<EmptyPageView>
-				<FormattedMessage
-					id="ticketTable.emptyView"
-					defaultMessage="We couldn't find any tickets to show. Please refine your selection."
-				/>
-			</EmptyPageView>
-		);
-	}
-
 	return (
-		<ResizableTableContextComponent columns={COLUMNS} hiddenColumns={getHiddenColumns()} columnGap={1}>
-			<TicketsTableResizableContent {...props} />
+		<ResizableTableContextComponent
+			columns={COLUMNS}
+			unavailableColumns={getUnavailableColumnsForTemplate(template)}
+			columnGap={1}
+		>
+			<TableContent />
 		</ResizableTableContextComponent>
 	);
 };
