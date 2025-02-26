@@ -33,7 +33,7 @@ import { ITemplate } from '@/v5/store/tickets/tickets.types';
 const COLUMNS: TableColumn[] = [
 	{ name: 'id', width: 80, minWidth: 25 },
 	{ name: BaseProperties.TITLE, width: 380, minWidth: 25, stretch: true },
-	{ name: 'modelName', width: 145, minWidth: 25 },
+	{ name: 'modelName', width: 170, minWidth: 25 },
 	{ name: `properties.${BaseProperties.CREATED_AT}`, width: 127, minWidth: 25 },
 	{ name: `properties.${IssueProperties.ASSIGNEES}`, width: 96, minWidth: 25 }, 
 	{ name: `properties.${BaseProperties.OWNER}`, width: 52, minWidth: 25 },
@@ -46,13 +46,18 @@ const COLUMNS: TableColumn[] = [
 
 const TableContent = ({ template, ...props }: TicketsTableResizableContentProps & { template: ITemplate }) => {
 	const { filteredItems } = useContext(SearchContext);
-	const { setHiddenColumns, hiddenColumns, unavailableColumns, getVisibleColumnsNames } = useContext(ResizableTableContext);
+	const { setHiddenColumns, hiddenColumns, unavailableColumns, getVisibleColumnsNames, stretchTable } = useContext(ResizableTableContext);
 
 	useEffect(() => {
 		if (templateAlreadyFetched(template) && !getVisibleColumnsNames().length) {
 			setHiddenColumns(hiddenColumns.filter((col) => col !== 'id'));
 		}
 	}, [unavailableColumns.length, template]);
+
+	useEffect(() => {
+		if (templateAlreadyFetched(template)) return;
+		stretchTable();
+	}, [template]);
 
 	if (!templateAlreadyFetched(template)) {
 		return (
