@@ -22,7 +22,7 @@ const { apiUrls } = require('./config');
 const { deleteIfUndefined } = require('./helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { publish } = require('../services/eventsManager/eventsManager');
-const { validateAndRefreshToken } = require('../services/sso/frontegg');
+const { validateToken } = require('../services/sso/frontegg');
 
 const referrerMatch = (sessionReferrer, headerReferrer) => {
 	const domain = getURLDomain(headerReferrer);
@@ -43,8 +43,8 @@ const validateCookie = async (session, cookies, headers) => {
 
 	if (internalSessionValid) {
 		try {
-			const user = await validateAndRefreshToken(session.user.auth.tokenInfo);
-			return user.sub === session.user.auth.userId;
+			await validateToken(session.user.auth.tokenInfo, session.user.auth.userId);
+			return true;
 		} catch (err) {
 			return false;
 		}
