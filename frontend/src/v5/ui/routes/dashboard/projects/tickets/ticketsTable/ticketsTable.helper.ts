@@ -20,7 +20,8 @@ import { formatMessage } from '@/v5/services/intl';
 import _ from 'lodash';
 import { PriorityLevels, RiskLevels, TreatmentStatuses } from '@controls/chip/chip.types';
 import { IStatusConfig, ITicket } from '@/v5/store/tickets/tickets.types';
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
+import { getState } from '@/v5/helpers/redux.helpers';
 
 export const NONE_OPTION = 'None';
 
@@ -127,7 +128,7 @@ export const groupTickets = (groupBy: string, tickets: ITicket[]): Record<string
 			return groupByDate(tickets);
 		case BaseProperties.STATUS:
 			const { type } = tickets[0];
-			const config: IStatusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(type);
+			const config: IStatusConfig = selectStatusConfigByTemplateId(getState(), type);
 			const labels = config.values.map(({ name, label }) => label || name);
 			return groupByList(tickets, groupBy, labels);
 		default:

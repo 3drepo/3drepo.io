@@ -64,6 +64,7 @@ export const NewTicketButton = styled(Button).attrs({
 	color: 'primary',
 })`
 	width: 119px;
+	margin-right: 0;
 `;
 
 export const OpenInViewerButton = styled(Button).attrs({
@@ -84,7 +85,7 @@ export const SidePanel = styled(Drawer).attrs({
 			width: 410,
 			height: 'calc(100vh - 112px)',
 			top: 112,
-			zIndex: 3,
+			zIndex: 12,
 		},
 	},
 })``;

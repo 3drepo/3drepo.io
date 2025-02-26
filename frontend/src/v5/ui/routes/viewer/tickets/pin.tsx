@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,11 +14,22 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
+import TicketPin from '@assets/icons/filled/pin_ticket-filled.svg';
+import IssuePin from '@assets/icons/filled/pin_issue-filled.svg';
+import RiskPin from '@assets/icons/filled/pin_risk-filled.svg';
+import MarkerPin from '@assets/icons/filled/pin_marker-filled.svg';
+import { PinIcon } from '@/v5/store/tickets/tickets.types';
 
-export const Content = styled.div`
-	padding: 18px 75px;
-	height: auto;
-	min-height: calc(100% - 42px);
-	width: 100%;
-`;
+
+const PinPerType = 
+{
+	'ISSUE': IssuePin,
+	'RISK': RiskPin,
+	'DEFAULT': TicketPin,
+	'MARKER': MarkerPin,
+};
+
+export const Pin = ({ pinIcon }: { pinIcon:PinIcon }) => {
+	const Icon = PinPerType[pinIcon];
+	return (<Icon />);
+};

@@ -19,7 +19,6 @@ const { UUIDToString } = require('../../utils/helper/uuids');
 const Validators = require('./validators');
 const Yup = require('yup');
 const { isUUIDString } = require('../../utils/helper/typeCheck');
-const { propTypes } = require('./templates.constants');
 const { types } = require('../../utils/helper/yup');
 
 const Comments = {};
@@ -43,7 +42,7 @@ const generateCommentSchema = (existingComment, isImport = false) => {
 						(value, { originalValue }) => !isUUIDString(originalValue)
 								|| acceptableRefs.includes(originalValue)),
 		),
-		views: Validators.propTypesToValidator(propTypes.VIEW, !isNewComment, true, true),
+		view: Validators.generateViewValidator(!isNewComment, true, true).noUnknown(true).strict(),
 	};
 
 	if (isImport) {
@@ -54,7 +53,7 @@ const generateCommentSchema = (existingComment, isImport = false) => {
 	return Yup.object().shape(schemaObj).test(
 		'at-least-one-property',
 		'You must provide at least a message, a set of images or a viewpoint',
-		({ message, images, views }) => message || images || views,
+		({ message, images, view }) => message || images || view,
 	).required()
 		.noUnknown();
 };

@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { compact, get, isArray, isEmpty, isObject } from 'lodash';
-import { IPinColorMapping, IPinSchema, ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
+import { IPinColorMapping, PinConfig, ITemplate, ITicket, PinIcon } from '@/v5/store/tickets/tickets.types';
 import { AdditionalProperties, TicketBaseKeys } from '../../../tickets.constants';
-import { IPin } from '@/v4/services/viewer/viewer';
+import { IPin, PinType } from '@/v4/services/viewer/viewer';
 import { COLOR } from '@/v5/ui/themes/theme';
 import { hexToGLColor, rgbToHex } from '@/v5/helpers/colors.helper';
 
@@ -30,23 +30,23 @@ export const DEFAULT_PIN = `${TicketBaseKeys.PROPERTIES}.${AdditionalProperties.
 
 export const hasDefaultPin = (ticket: ITicket) => !!get(ticket, [TicketBaseKeys.PROPERTIES, AdditionalProperties.PIN]);
 
-const getPinSchema = (name: string, template: ITemplate): IPinSchema | boolean => {
+const getPinConfig = (pinPath: string, template: ITemplate): PinConfig | boolean => {
 	if (!template) return;
-	if (name === DEFAULT_PIN) return template.config?.pin;
-	const path = name.split('.');
+	if (pinPath === DEFAULT_PIN) return template.config?.pin;
+	const path = pinPath.split('.');
 	if (path[0] === TicketBaseKeys.PROPERTIES) return findByName(template.properties, path[1]);
 	const module = findByName(template.modules, path[1]);
 	if (!module) return;
 	return findByName(module.properties, path[2]);
 };
 
-export const getLinkedValuePath = (name, template): string => {
-	const pinSchema = getPinSchema(name, template);
-	const property = get(pinSchema, 'color.property');
+export const getColorTriggerPropName = (pinPropName, template): string => {
+	const pinConfig = getPinConfig(pinPropName, template);
+	const property = get(pinConfig, 'color.property');
 	if (!property) return '';
 	const module = property.module ? `${TicketBaseKeys.MODULES}.${property.module}` : TicketBaseKeys.PROPERTIES;
-	const linkedValueName = property.name;
-	return `${module}.${linkedValueName}`;
+	const triggerPropertyName = property.name;
+	return `${module}.${triggerPropertyName}`;
 };
 
 const getColorFromMapping = (ticket: ITicket, pinMapping: IPinColorMapping) => {
@@ -61,21 +61,47 @@ const getColorFromMapping = (ticket: ITicket, pinMapping: IPinColorMapping) => {
 	return rgb ? rgbToHex(rgb) : defaultColorHex;
 };
 
-export const getPinColorHex = (name: string, template: ITemplate, ticket: ITicket) => {
-	const pinSchema = getPinSchema(name, template);
-	if (typeof pinSchema === 'boolean') return DEFAULT_COLOR; // if default pin with no colouring set
-	if (isArray(pinSchema?.color)) return rgbToHex(pinSchema.color); // a custom colour is set, no mapping
-	if (isObject(pinSchema?.color)) return getColorFromMapping(ticket, pinSchema.color); // a custom colour is set with mapping
+export const getPinColorHexForProperty = (propertyName: string, template: ITemplate, ticket: ITicket) => {
+	const pinConfig = getPinConfig(propertyName, template);
+	if (typeof pinConfig === 'boolean') return DEFAULT_COLOR; // if default pin with no colouring set
+	if (isArray(pinConfig?.color)) return rgbToHex(pinConfig.color); // a custom colour is set, no mapping
+	if (isObject(pinConfig?.color)) return getColorFromMapping(ticket, pinConfig.color); // a custom colour is set with mapping
 	return DEFAULT_COLOR; // if custom pin with no colouring set
 };
 
-export const formatPin = (pinId, position, isSelected: boolean, color: string): IPin => ({
-	id: pinId,
-	position,
-	isSelected,
-	type: 'ticket',
-	colour: hexToGLColor(color),
-});
+export const getPinIconForProperty =  (propertyName: string, template: ITemplate): PinIcon => {
+	const pinConfig = getPinConfig(propertyName, template);
+	if (isObject(pinConfig) && pinConfig.icon) return pinConfig.icon;
+	return 'DEFAULT';
+};
+
+export const getPinId = (propPath, ticketOrId?: ITicket | string) => {
+	const id = (isObject(ticketOrId) ? ticketOrId._id : ticketOrId ) || NEW_TICKET_ID  ;
+	return propPath === DEFAULT_PIN ? id : `${id}.${propPath}`;
+};
+
+// PinIcon is the pin type that comes from the backend
+const pinIconToType = {
+	'DEFAULT' : 'ticket',
+	'ISSUE' : 'issue',
+	'RISK' : 'risk',
+	'MARKER' : 'bookmark',
+};
+
+export const toPin = (propName: string, template: ITemplate,  ticket: ITicket, isSelected:boolean = false, coordValue?: number[]): IPin => {
+	const colour = hexToGLColor(getPinColorHexForProperty(propName, template, ticket));
+	const icon = getPinIconForProperty(propName, template);
+	const id = getPinId(propName, ticket);
+	return {
+		id, 
+		position: (coordValue || get(ticket, propName) as number[]), 
+		isSelected,
+		type: pinIconToType[icon] as PinType,
+		colour,
+	};
+};
+
+export const pinTypeToPinIcon = (type: PinType) => (Object.keys(pinIconToType).find((key) => pinIconToType[key] === type) || 'DEFAULT') as PinIcon;
 
 export const getTicketPins = (templates, ticket, ticketPinId) => {
 	const pinArray = [];
@@ -83,16 +109,13 @@ export const getTicketPins = (templates, ticket, ticketPinId) => {
 
 	if (isEmpty(ticket) || !selectedTemplate) return [];
 
-	const selectedTicketId = ticket?._id || NEW_TICKET_ID;
-
 	const moduleToPins = (modulePath) => ({ name, type }) => {
 		const pinPath = `${modulePath}.${name}`;
 		if (type !== 'coords' || !get(ticket, pinPath)) return;
-		const pinId = pinPath === DEFAULT_PIN ? selectedTicketId : `${selectedTicketId}.${pinPath}`;
-		const color = getPinColorHex(pinPath, selectedTemplate, ticket);
-		const isSelected = pinId === ticketPinId;
-		return formatPin(pinId, get(ticket, pinPath), isSelected, color);
+		const isSelected = getPinId(pinPath, ticket) === ticketPinId;
+		return toPin(pinPath, selectedTemplate, ticket, isSelected);
 	};
+
 	pinArray.push(...selectedTemplate.properties.map(moduleToPins(TicketBaseKeys.PROPERTIES)));
 	selectedTemplate.modules.forEach((module) => {
 		const moduleName = module.name || module.type;
