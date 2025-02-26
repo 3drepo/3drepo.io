@@ -16,9 +16,10 @@
  */
 
 import { formatDateTime } from '@/v5/helpers/intl.helper';
+import { getUserFullName } from '@/v4/helpers/user.helpers';
 import { VIEWPOINT_ID_REGEX } from '../../../../../../../helpers/comments';
 import { COMMENT_FIELD_NAME } from '../../../../../../viewerGui/components/commentForm/commentForm.constants';
-import { Container, Date, IconButton, StyledQuoteIcon, StyledReplyIcon, Username } from './footer.styles';
+import { Container, Date, IconButton, StyledQuoteIcon, StyledReplyIcon, Fullname } from './footer.styles';
 
 interface IProps {
 	name: string;
@@ -72,7 +73,7 @@ export const Footer = ({ name, created, formRef, commentRef, comment, ...props }
 
 	return (
         <Container>
-			<Username>{name}</Username>
+			<Fullname>{getUserFullName(name)}</Fullname>
 			<Date>
 				{formatDateTime(created)}
 			</Date>

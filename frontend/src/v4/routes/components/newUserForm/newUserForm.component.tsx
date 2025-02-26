@@ -119,8 +119,8 @@ export class NewUserForm extends PureComponent<IProps, IState> {
 		return suggestion.user;
 	}
 
-	public onSuggestionSelected = (event, {suggestion}) => {
-		this.setState({name: this.getSuggestionValue(suggestion)});
+	public onSuggestionSelected = (event) => {
+		this.setState({ name: this.state.name });
 	}
 
 	private debounceUsersSuggestion = debounce(this.props.getUsersSuggestions, 1000);
@@ -194,7 +194,7 @@ export class NewUserForm extends PureComponent<IProps, IState> {
 							renderSuggestion={this.renderUserSuggestion}
 							inputProps={ {
 								onChange: this.handleChange('name'),
-								label: 'Username or email address',
+								label: 'Email address',
 								value: this.state.name,
 								inputRef: (node) => {
 									this.popperNode = node;

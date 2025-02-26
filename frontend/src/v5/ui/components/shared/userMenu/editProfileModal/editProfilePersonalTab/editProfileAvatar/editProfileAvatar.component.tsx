@@ -22,7 +22,6 @@ import { Controller, useFormContext } from 'react-hook-form';
 import {
 	Header,
 	ProfilePicture,
-	Username,
 	UserInfo,
 	FullName,
 	UserIcon,
@@ -86,7 +85,6 @@ export const EditProfileAvatar = ({ user }: EditProfilePersonalTabProps) => {
 					)}
 				</ProfilePicture>
 				<UserInfo>
-					<Username>{user.username}</Username>
 					<FullName>
 						<TruncatableName>{user.firstName}</TruncatableName>
 						<TruncatableName>{user.lastName}</TruncatableName>
