@@ -18,7 +18,7 @@
 import GearIcon from '@assets/icons/outlined/gear-outlined.svg';
 import { ActionMenu } from '@controls/actionMenu';
 import { SearchContext, SearchContextComponent } from '@controls/search/searchContext';
-import { TICKETS_TABLE_COLUMNS_LABEL, getAllColumnsNames, getAvailableColumnsForTemplate } from '../../../ticketsTable.helper';
+import { TICKETS_TABLE_COLUMNS_LABEL, getAvailableColumnsForTemplate } from '../../../ticketsTable.helper';
 import { SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
 import { MenuItem, IconContainer, SearchInput } from './columnsVisibilitySettings.styles';
 import { Checkbox } from '@controls/inputs/checkbox/checkbox.component';
@@ -33,17 +33,23 @@ import { formatMessage } from '@/v5/services/intl';
 
 export const ColumnsVisibilitySettingsMenu = ({ newHiddenColumns, setNewHiddenColumns }) => {
 	const { hiddenColumns } = useContext(ResizableTableContext);
-	const columns = getAllColumnsNames();
+	const { template: templateId } = useParams<DashboardTicketsParams>();
+	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
+	const columns = getAvailableColumnsForTemplate(template);
+	const newVisibleColumnsCount = columns.filter((c) => !newHiddenColumns.includes(c)).length;
 
 	const onChange = (columnName) => setNewHiddenColumns(xor(newHiddenColumns, [columnName]));
 	const isVisible = (columnName) => !newHiddenColumns.includes(columnName);
+	const filteringFunction = (cols, query) => (
+		cols.filter((col) => matchesQuery(TICKETS_TABLE_COLUMNS_LABEL[col], query))
+	);
 
 	useEffect(() => {
 		setNewHiddenColumns(hiddenColumns);
 	}, []);
 
 	return (
-		<>
+		<SearchContextComponent items={columns} filteringFunction={filteringFunction}>
 			<SearchInputContainer>
 				<SearchInput
 					placeholder={formatMessage({ id: 'ticketsTable.columnsVisibilitySettings.search.placeholder', defaultMessage: 'Search...' })}
@@ -54,7 +60,7 @@ export const ColumnsVisibilitySettingsMenu = ({ newHiddenColumns, setNewHiddenCo
 				{({ filteredItems }) => filteredItems.map((columnName) => (
 					<MenuItem key={columnName}>
 						<Checkbox
-							disabled={(columns.length - newHiddenColumns.length) === 1 && isVisible(columnName)}
+							disabled={newVisibleColumnsCount === 1 && isVisible(columnName)}
 							onChange={() => onChange(columnName)}
 							value={isVisible(columnName)}
 							label={TICKETS_TABLE_COLUMNS_LABEL[columnName]}
@@ -62,39 +68,32 @@ export const ColumnsVisibilitySettingsMenu = ({ newHiddenColumns, setNewHiddenCo
 					</MenuItem>
 				))}
 			</SearchContext.Consumer>
-		</>
+		</SearchContextComponent>
 	);
 };
+
 export const ColumnsVisibilitySettings = () => {
 	const { setHiddenColumns } = useContext(ResizableTableContext);
 	const [newHiddenColumns, setNewHiddenColumns] = useState([]);
-	const { template: templateId } = useParams<DashboardTicketsParams>();
-	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
-	const columns = getAvailableColumnsForTemplate(template);
 
 	const onClose = () => setHiddenColumns(newHiddenColumns);
-	const filteringFunction = (cols, query) => (
-		cols.filter((col) => matchesQuery(TICKETS_TABLE_COLUMNS_LABEL[col], query))
-	);
 
 	return (
-		<SearchContextComponent items={columns} filteringFunction={filteringFunction}>
-			<ActionMenu
-				TriggerButton={(
-					<IconContainer>
-						<GearIcon />
-					</IconContainer>
-				)}
-				PopoverProps={{
-					transformOrigin: {
-						vertical: 'top',
-						horizontal: 'left',
-					},
-				}}
-				onClose={onClose}
-			>
-				<ColumnsVisibilitySettingsMenu newHiddenColumns={newHiddenColumns} setNewHiddenColumns={setNewHiddenColumns} />
-			</ActionMenu>
-		</SearchContextComponent>
+		<ActionMenu
+			TriggerButton={(
+				<IconContainer>
+					<GearIcon />
+				</IconContainer>
+			)}
+			PopoverProps={{
+				transformOrigin: {
+					vertical: 'top',
+					horizontal: 'left',
+				},
+			}}
+			onClose={onClose}
+		>
+			<ColumnsVisibilitySettingsMenu newHiddenColumns={newHiddenColumns} setNewHiddenColumns={setNewHiddenColumns} />
+		</ActionMenu>
 	);
 };

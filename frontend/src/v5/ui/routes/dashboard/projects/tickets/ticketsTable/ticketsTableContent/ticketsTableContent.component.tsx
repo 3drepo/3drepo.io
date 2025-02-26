@@ -16,18 +16,19 @@
  */
 
 import { SearchContext } from '@controls/search/searchContext';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { EmptyPageView } from '../../../../../../components/shared/emptyPageView/emptyPageView.styles';
 import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { ResizableTableContextComponent, TableColumn } from '@controls/resizableTableContext/resizableTableContext';
+import { ResizableTableContext, ResizableTableContextComponent, TableColumn } from '@controls/resizableTableContext/resizableTableContext';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsTableResizableContent, TicketsTableResizableContentProps } from './ticketsTableResizableContent/ticketsTableResizableContent.component';
 import { getUnavailableColumnsForTemplate } from '../ticketsTable.helper';
+import { ITemplate } from '@/v5/store/tickets/tickets.types';
 
 const COLUMNS: TableColumn[] = [
 	{ name: 'id', width: 80, minWidth: 25 },
@@ -43,33 +44,41 @@ const COLUMNS: TableColumn[] = [
 	{ name: `modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`, width: 134, minWidth: 25 },
 ];
 
-export const TicketsTableContent = (props: TicketsTableResizableContentProps) => {
+const TableContent = ({ template, ...props }: TicketsTableResizableContentProps & { template: ITemplate }) => {
 	const { filteredItems } = useContext(SearchContext);
+	const { setHiddenColumns, hiddenColumns, unavailableColumns, getVisibleColumnsNames } = useContext(ResizableTableContext);
+
+	useEffect(() => {
+		if (templateAlreadyFetched(template) && !getVisibleColumnsNames().length) {
+			setHiddenColumns(hiddenColumns.filter((col) => col !== 'id'));
+		}
+	}, [unavailableColumns.length, template]);
+
+	if (!templateAlreadyFetched(template)) {
+		return (
+			<EmptyPageView>
+				<Spinner />
+			</EmptyPageView>
+		);
+	}
+
+	if (!filteredItems.length) {
+		return (
+			<EmptyPageView>
+				<FormattedMessage
+					id="ticketTable.emptyView"
+					defaultMessage="We couldn't find any tickets to show. Please refine your selection."
+				/>
+			</EmptyPageView>
+		);
+	}
+
+	return <TicketsTableResizableContent {...props} />;
+};
+
+export const TicketsTableContent = (props: TicketsTableResizableContentProps) => {
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
-
-	const TableContent = () => {
-		if (!templateAlreadyFetched(template)) {
-			return (
-				<EmptyPageView>
-					<Spinner />
-				</EmptyPageView>
-			);
-		}
-
-		if (!filteredItems.length) {
-			return (
-				<EmptyPageView>
-					<FormattedMessage
-						id="ticketTable.emptyView"
-						defaultMessage="We couldn't find any tickets to show. Please refine your selection."
-					/>
-				</EmptyPageView>
-			);
-		}
-
-		return <TicketsTableResizableContent {...props} />;
-	};
 
 	return (
 		<ResizableTableContextComponent
@@ -77,7 +86,7 @@ export const TicketsTableContent = (props: TicketsTableResizableContentProps) =>
 			unavailableColumns={getUnavailableColumnsForTemplate(template)}
 			columnGap={1}
 		>
-			<TableContent />
+			<TableContent {...props} template={template} />
 		</ResizableTableContextComponent>
 	);
 };

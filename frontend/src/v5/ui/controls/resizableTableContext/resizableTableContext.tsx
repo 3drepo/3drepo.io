@@ -33,6 +33,7 @@ export interface ResizableTableType {
 	isResizing: boolean,
 	setHiddenColumns: (hiddenColumnsState: React.SetStateAction<string[]>) => void,
 	hiddenColumns: string[],
+	unavailableColumns: string[],
 	isHidden: (name: string) => boolean,
 	columnGap: number,
 	getRowWidth: () => number,
@@ -50,7 +51,12 @@ const defaultValue: ResizableTableType = {
 	setIsResizing: () => {},
 	isResizing: false,
 	setHiddenColumns: () => {},
+	// `hiddenColumns` are set by descendant components accessing the context.
+	// `unavailableColumns` are forced to be "hidden" by the component rendering
+	// the contextComponent. Changing the value of `unavailableColumns` does not
+	// affect `hiddenColumns` and viceversa, so the 2 states can be mutated independently
 	hiddenColumns: [],
+	unavailableColumns: [],
 	isHidden: () => true,
 	columnGap: 0,
 	getRowWidth: () => 0,
@@ -62,19 +68,19 @@ ResizableTableContext.displayName = 'ResizeableColumns';
 interface Props {
 	children: any;
 	columns: TableColumn[];
-	hiddenColumns?: string[];
+	unavailableColumns?: string[];
 	columnGap?: number;
 }
-export const ResizableTableContextComponent = ({ children, columns: inputColumns, hiddenColumns: inputHiddenColumns = [], columnGap = 0 }: Props) => {
+export const ResizableTableContextComponent = ({ children, columns: inputColumns, unavailableColumns = [], columnGap = 0 }: Props) => {
 	const [columns, setColumns] = useState([...inputColumns]);
-	const [hiddenColumns, setHiddenColumns] = useState(inputHiddenColumns);
+	const [hiddenColumns, setHiddenColumns] = useState([]);
 	const [resizerName, setResizerName] = useState('');
 	const [isResizing, setIsResizing] = useState(false);
 	const ref = useRef<HTMLDivElement>();
 
 	const getElementByName = (name) => columns.find((e) => e.name === name);
 
-	const isHidden = (name) => hiddenColumns.includes(name);
+	const isHidden = (name) => [...hiddenColumns, ...unavailableColumns].includes(name);
 	const getMinWidth = (name) => getElementByName(name)?.minWidth ?? 0;
 	const getWidth = (name) => (!isHidden(name) && getElementByName(name)?.width) ?? 0;
 
@@ -121,6 +127,7 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 			isResizing,
 			setHiddenColumns,
 			hiddenColumns,
+			unavailableColumns,
 			isHidden,
 			getRowWidth,
 			columnGap,

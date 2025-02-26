@@ -156,8 +156,6 @@ export const TICKETS_TABLE_COLUMNS_LABEL = {
 	[`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`]: formatMessage({ id: 'ticketTable.column.visibility.treatmentStatus', defaultMessage: 'Treatment Status' }),
 } as const;
 
-export const getAllColumnsNames = () => Object.keys(TICKETS_TABLE_COLUMNS_LABEL);
-
 export const getUnavailableColumnsForTemplate = (template: ITemplate) => {
 	const { config, modules } = template;
 	const hasProperties = config?.issueProperties;
@@ -180,4 +178,5 @@ export const getUnavailableColumnsForTemplate = (template: ITemplate) => {
 	return unavailableColumns;
 };
 
+const getAllColumnsNames = () => Object.keys(TICKETS_TABLE_COLUMNS_LABEL);
 export const getAvailableColumnsForTemplate = (template: ITemplate) => xor(getAllColumnsNames(), getUnavailableColumnsForTemplate(template));
