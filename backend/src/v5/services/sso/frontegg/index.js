@@ -94,23 +94,13 @@ Frontegg.getUserInfoFromToken = async (token) => {
 	}
 };
 
-Frontegg.validateAndRefreshToken = async ({ token /* refreshToken */ }) => {
+Frontegg.validateToken = async ({ token }, userId) => {
 	try {
 		const client = await getIdentityClient();
-		const user = await client.validateToken(token);
-
-		/*		try {
-			const payload = {
-				grant_type: 'refresh_token',
-				refresh_token: refreshToken,
-			};
-
-			const { data } = await post(`${config.appUrl}/oauth/token`, payload, { headers: basicHeader });
-		} catch (err) {
-			console.log(err);
-		} */
-
-		return user;
+		const { sub } = await client.validateToken(token);
+		if (sub !== userId) {
+			throw new Error('User ID mismatched');
+		}
 	} catch (err) {
 		throw new Error(`Failed to validate user token: ${err.message}`);
 	}
