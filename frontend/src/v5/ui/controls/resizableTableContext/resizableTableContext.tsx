@@ -40,8 +40,10 @@ export interface ResizableTableType {
 	stretchTable: () => void,
 
 	// moving columns
-	movingColumn: string,
 	setMovingColumn: (name: string) => void,
+	movingColumn: string,
+	setMovingColumnDropIndex: (index: number) => void,
+	movingColumnDropIndex: number,
 	moveColumn: (name: string, dropIndex: number) => void,
 }
 
@@ -66,6 +68,8 @@ const defaultValue: ResizableTableType = {
 	// moving columns
 	movingColumn: '',
 	setMovingColumn: () => {},
+	movingColumnDropIndex: -1,
+	setMovingColumnDropIndex: () => {},
 	moveColumn: () => {},
 };
 export const ResizableTableContext = createContext(defaultValue);
@@ -83,6 +87,7 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 	const [resizerName, setResizerName] = useState('');
 	const [isResizing, setIsResizing] = useState(false);
 	const [movingColumn, setMovingColumn] = useState('');
+	const [movingColumnDropIndex, setMovingColumnDropIndex] = useState(-1);
 	const ref = useRef<HTMLDivElement>();
 
 	const getColumnByName = (name) => columns.find((e) => e.name === name);
@@ -162,9 +167,11 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 			getRowWidth,
 			columnGap,
 			stretchTable,
-			moveColumn,
 			movingColumn,
 			setMovingColumn,
+			movingColumnDropIndex,
+			setMovingColumnDropIndex,
+			moveColumn,
 		}}>
 			{children}
 			<RefHolder ref={ref} />

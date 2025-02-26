@@ -15,28 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useRef, useState } from 'react';
+import { useContext, useState } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { TableCorner, DropAreas, Area, Container, DropLine } from './movingColumnDropAreas.styles';
+import { isNumber } from 'lodash';
 
 export const MovingColumnDropAreas = () => {
 	const {
-		getVisibleColumns, setMovingColumn, movingColumn, moveColumn,
-		columnGap, getIndex, getOffset, getRowWidth,
+		setMovingColumn, movingColumn, moveColumn,
+		movingColumnDropIndex, setMovingColumnDropIndex,
+		columnGap, getIndex, getOffset, getRowWidth, getVisibleColumns,
 	} = useContext(ResizableTableContext);
-	const [dropIndex, setDropIndex] = useState(getVisibleColumns().length);
-	const tableOffsetRef = useRef<HTMLDivElement>(null);
+	const [tableOffset, setTableOffset] = useState(0);
 	
 	const columns = getVisibleColumns();
 	const movingColumnIndex = getIndex(movingColumn);
-	const offset = getOffset(columns[dropIndex]?.name) ?? getRowWidth();
-	const isDropIndexValid = movingColumnIndex !== dropIndex && movingColumnIndex !== dropIndex - 1;
+	const offset = getOffset(columns[movingColumnDropIndex]?.name) ?? getRowWidth();
+	const isDropIndexValid = (
+		movingColumnDropIndex >= 0
+		&& movingColumnIndex !== movingColumnDropIndex
+		&& movingColumnIndex !== movingColumnDropIndex - 1
+	);
 
-	const getTableOffsetX = () => {
-		const elem = tableOffsetRef.current;
-		if (!elem) return 0;
-		
-		const box = elem.getBoundingClientRect();
+	const getTableOffset = (el) => {
+		const box = el.getBoundingClientRect();
 		const { body, documentElement } = document;
 	
 		const scrollLeft = documentElement.scrollLeft || body.scrollLeft;
@@ -45,9 +47,14 @@ export const MovingColumnDropAreas = () => {
 	
 		return Math.round(left);
 	};
+
+	const onRender = (el) => {
+		if (!el) return;
+		setTableOffset(getTableOffset(el));
+	};
 	
 	const getDropAreas = () => {
-		let previousColHalfWidth = getTableOffsetX() - columnGap;
+		let previousColHalfWidth = tableOffset - columnGap;
 		return columns.map(({ width }) => {
 			const colHalfWidth = width / 2;
 			const areaWidth = previousColHalfWidth + colHalfWidth + columnGap;
@@ -59,17 +66,18 @@ export const MovingColumnDropAreas = () => {
 	const setDropColumnIndex = (e, index) => {
 		e.stopPropagation();
 		e.preventDefault();
-		setDropIndex(index);
+		setMovingColumnDropIndex(index);
 	};
 
 	const dropColumn = () => {
 		setMovingColumn(null);
-		moveColumn(movingColumn, dropIndex);
+		setMovingColumnDropIndex(-1);
+		moveColumn(movingColumn, movingColumnDropIndex);
 	};
 
 	return (
 		<>
-			<TableCorner ref={tableOffsetRef} />
+			<TableCorner ref={onRender} />
 			<Container onMouseUp={dropColumn}>
 				<DropAreas onMouseLeave={(e) => setDropColumnIndex(e, columns.length)}>
 					{getDropAreas().map((width, index) => (

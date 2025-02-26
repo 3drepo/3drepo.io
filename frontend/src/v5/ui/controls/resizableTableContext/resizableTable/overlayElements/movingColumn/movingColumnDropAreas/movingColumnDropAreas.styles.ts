@@ -39,6 +39,8 @@ export const Area = styled.div<{ $width: number }>`
 	width: ${({ $width }) => $width}px;
 	height: 100%;
 	display: inline-block;
+	border: solid 2px red;
+	background-color:rgba(42, 209, 145, 0.37);
 `;
 
 export const DropLine = styled(DelimiterLine)`
