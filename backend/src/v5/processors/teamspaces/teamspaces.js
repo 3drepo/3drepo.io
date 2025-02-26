@@ -17,14 +17,15 @@
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../models/users.constants');
 const { addDefaultJobs, assignUserToJob, getJobsToUsers, removeUserFromJobs } = require('../../models/jobs');
+const { createIndex, dropDatabase } = require('../../handler/db');
 const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revokeTeamspaceRoleFromUser } = require('../../models/roles');
 const { createTeamspaceSettings, getAddOns, getMembersInfo, grantAdminToUser, removeUserFromAdminPrivilege } = require('../../models/teamspaceSettings');
 const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
+const { COL_NAME } = require('../../models/projectSettings.constants');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { addDefaultTemplates } = require('../../models/tickets.templates');
 const { deleteFavourites } = require('../../models/users');
-const { dropDatabase } = require('../../handler/db');
 const { getAccessibleTeamspaces } = require('../../models/users');
 const { isTeamspaceAdmin } = require('../../utils/permissions/permissions');
 const { logger } = require('../../utils/logger');
@@ -53,6 +54,7 @@ Teamspaces.initTeamspace = async (username) => {
 		await Promise.all([
 			createTeamspaceRole(username),
 			addDefaultJobs(username),
+			createIndex(username, COL_NAME, { name: 1 }, { unique: true }),
 		]);
 		await Promise.all([
 			grantTeamspaceRoleToUser(username, username),
