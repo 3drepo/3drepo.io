@@ -21,16 +21,32 @@ import { FormInputProps } from '@controls/inputs/inputController.component';
 import { Select } from '@controls/inputs/select/select.component';
 import { MenuItem } from '@mui/material';
 import { JobsAndUsersProperty } from './jobsAndUsersProperty.component';
+import ClearIcon from '@assets/icons/controls/clear_circle.svg';
+import { ClearIconContainer } from './selectProperty.styles';
 
 type OneOfPropertyProps = FormInputProps & { values: PropertyDefinition['values']; onBlur: () => void };
 export const OneOfProperty = ({ values, value, ...props }: OneOfPropertyProps) => {
+	const showClear = !props.required && !props.disabled && !!value;
+	const onClear = () => {
+		props.onChange('');
+		props.onBlur();
+	};
+	
 	if (values === 'jobsAndUsers') {
 		return (<JobsAndUsersProperty value={value} {...props} />);
 	}
 	
 	const items = (values === 'riskCategories') ? TicketsHooksSelectors.selectRiskCategories() : values;
 	return (
-		<Select {...props} value={value ?? ''}>
+		<Select
+			{...props}
+			value={value ?? ''}
+			endAdornment={showClear && (
+				<ClearIconContainer onClick={onClear}>
+					<ClearIcon />
+				</ClearIconContainer>
+			)}
+		>
 			{(items as string[]).map((propValue) => (
 				<MenuItem key={propValue} value={propValue}>
 					{propValue}
