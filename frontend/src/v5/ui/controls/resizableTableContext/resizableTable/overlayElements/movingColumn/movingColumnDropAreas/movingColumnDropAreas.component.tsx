@@ -18,7 +18,7 @@
 import { useContext, useState } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { TableCorner, DropAreas, Area, Container, DropLine } from './movingColumnDropAreas.styles';
-import { isNumber } from 'lodash';
+import { blockEvent } from '@/v5/helpers/events.helpers';
 
 export const MovingColumnDropAreas = () => {
 	const {
@@ -64,8 +64,7 @@ export const MovingColumnDropAreas = () => {
 	};
 
 	const setDropColumnIndex = (e, index) => {
-		e.stopPropagation();
-		e.preventDefault();
+		blockEvent(e);
 		setMovingColumnDropIndex(index);
 	};
 
@@ -78,7 +77,9 @@ export const MovingColumnDropAreas = () => {
 	return (
 		<>
 			<TableCorner ref={onRender} />
-			<Container onMouseUp={dropColumn}>
+			{/* The drag over is to fix a bug in firefox where dragging the column
+				gets stuck with a "no-drop" cursor and the column can't be dropped */}
+			<Container onMouseUp={dropColumn} onDragOver={blockEvent}>
 				<DropAreas onMouseLeave={(e) => setDropColumnIndex(e, columns.length)}>
 					{getDropAreas().map((width, index) => (
 						<Area key={index} $width={width} onMouseEnter={(e) => setDropColumnIndex(e, index)} />
