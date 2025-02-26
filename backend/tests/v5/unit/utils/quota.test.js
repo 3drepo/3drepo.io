@@ -213,7 +213,11 @@ const testSufficientQuota = () => {
 		});
 
 		test('should succeed if quota does not exceed the limit', async () => {
-			DBHandler.findOne.mockResolvedValueOnce({ subscriptions: [{ data: 1, collaborators: 2 }] });
+			DBHandler.findOne.mockResolvedValueOnce({
+				subscriptions: {
+					enterprise: { data: 1, collaborators: 2 },
+				},
+			});
 
 			DBHandler.listCollections.mockResolvedValueOnce([
 				{ name: 'a.issues.ref' },

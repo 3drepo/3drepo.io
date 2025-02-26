@@ -20,6 +20,8 @@ const { v5Path } = require('../interop');
 const { listDatabases, listCollections } = require(`${v5Path}/handler/db`);
 const { USERNAME_BLACKLIST } = require(`${v5Path}/models/users.constants`);
 const { logger } = require(`${v5Path}/utils/logger`);
+const FS = require('fs');
+const DayJS = require('dayjs');
 
 const Utils = {};
 
@@ -99,5 +101,22 @@ Utils.handleErrorBeforeExit = (err) => {
 	// eslint-disable-next-line no-process-exit
 	process.exit(1);
 };
+
+const formatDate = (date) => (date ? DayJS(date).format('DD/MM/YYYY') : '');
+
+Utils.writeLicensesToFile = (results, outFile) => new Promise((resolve) => {
+	logger.logInfo(`Writing results to ${outFile}`);
+	const writeStream = FS.createWriteStream(outFile);
+	writeStream.write('TeamspaceName,LicenseCount,TeamspaceDataTotal(MB),TeamspaceDataUsed(MB),LicenseType,LicenseDataTotal(MB),Collaborators,ExpiryDate\n');
+	// for each teamspace, write each license along with some teamspace aggregate data
+	results.forEach(({ teamspaceName, licenseCount, dataTotalMB, dataUsedMB, licenses }) => {
+		licenses.forEach(([licenseType, license]) => {
+			const { collaborators, expiryDate, data } = license;
+			writeStream.write(`${teamspaceName},${licenseCount},${dataTotalMB},${dataUsedMB},${licenseType},${data},${collaborators},${formatDate(expiryDate)}\n`);
+		});
+	});
+
+	writeStream.end(resolve);
+});
 
 module.exports = Utils;

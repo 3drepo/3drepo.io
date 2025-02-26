@@ -20,7 +20,7 @@ const _ = require('lodash');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../../../../src/v5/models/users.constants');
-const { generateRandomString, generateRandomNumber } = require('../../../helper/services');
+const { generateRandomString, generateRandomNumber, generateRandomDate, generateRandomDateInFuture } = require('../../../helper/services');
 
 const Teamspaces = require(`${src}/processors/teamspaces/teamspaces`);
 
@@ -278,6 +278,49 @@ const testRemoveTeamspace = () => {
 	});
 };
 
+const testGetTeamspaceAggregatesAndLicenses = () => {
+	describe('Get teamspace aggregates and licenses given a list of teamspace names', () => {
+		test('should return teamspace aggregates and licenses', () => {
+			const teamspaceNames = [generateRandomString(), generateRandomString()];
+			// mock getting valid licenses
+			const dateInFuture = generateRandomDateInFuture();
+			TeamspacesModel.getTeamspaceValidLicenses
+				.mockResolvedValueOnce([['discretionary', { expiryDate: generateRandomDate() }], ['pilot', { expiryDate: dateInFuture }]])
+				.mockResolvedValueOnce([['internal', { expiryDate: generateRandomDate() }], ['pilot', { expiryDate: dateInFuture }]]);
+			// mock quota info
+			const ONE_MB_IN_BYTES = 1024 * 1024;
+			Quota.getQuotaInfo
+				.mockResolvedValueOnce({ data: ONE_MB_IN_BYTES })
+				.mockResolvedValueOnce({ data: ONE_MB_IN_BYTES });
+			// mock space used
+			Quota.getSpaceUsed
+				.mockResolvedValueOnce(0)
+				.mockResolvedValueOnce(0);
+			// test function
+			const { extractTeamspaceActiveLicenses } = jest.requireActual('../../../../../src/v5/models/teamspaceSettings');
+			const expectedResult = [
+				{
+					teamspaceName: teamspaceNames[0],
+					licenseCount: 2,
+					dataTotalMB: 1,
+					dataUsedMB: 0,
+					licenses: [['pilot', { expiryDate: dateInFuture }]],
+				},
+				{
+					teamspaceName: teamspaceNames[1],
+					licenseCount: 2,
+					dataTotalMB: 1,
+					dataUsedMB: 0,
+					licenses: [['pilot', { expiryDate: dateInFuture }]],
+				},
+			];
+			expect(Teamspaces.getTeamspaceAggregatesAndLicenses(teamspaceNames, extractTeamspaceActiveLicenses))
+				.resolves
+				.toEqual(expectedResult);
+		});
+	});
+};
+
 describe('processors/teamspaces', () => {
 	testGetTeamspaceListByUser();
 	testGetTeamspaceMembersInfo();
@@ -286,4 +329,5 @@ describe('processors/teamspaces', () => {
 	testGetAvatarStream();
 	testGetQuotaInfo();
 	testRemoveTeamspace();
+	testGetTeamspaceAggregatesAndLicenses();
 });
