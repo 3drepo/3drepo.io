@@ -18,7 +18,6 @@ import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import CancelIcon from '@assets/icons/outlined/cross_sharp_edges-outlined.svg';
 import SendIcon from '@assets/icons/outlined/send_message-outlined.svg';
 import FileIcon from '@assets/icons/outlined/file-outlined.svg';
-import ViewpointIcon from '@assets/icons/outlined/camera_side-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
@@ -36,7 +35,7 @@ import { FormattedMessage } from 'react-intl';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { ActionMenuItem } from '@controls/actionMenu';
-import { MenuItem, Tooltip } from '@mui/material';
+import { MenuItem } from '@mui/material';
 import { ImagesModal } from '@components/shared/modalsDispatcher/templates/imagesModal/imagesModal.component';
 import {
 	Controls,
@@ -53,7 +52,6 @@ import {
 	ErroredImageMessages,
 	FileIconInput,
 	EditCommentButtons,
-	FormCheckbox,
 } from './commentBox.styles';
 import { CommentReply } from '../comment/commentReply/commentReply.component';
 import { ActionMenu } from '../../../ticketsList/ticketsList.styles';
@@ -62,6 +60,9 @@ import { useSyncProps } from '@/v5/helpers/syncProps.hooks';
 import { DrawingViewerService } from '@components/viewer/drawingViewer/drawingViewer.service';
 import { ViewerCanvasesContext } from '../../../../viewerCanvases.context';
 import { TicketButton } from '../../../ticketButton/ticketButton.styles';
+import { Viewpoint } from '@/v5/store/tickets/tickets.types';
+import { ViewpointActionMenu } from './viewpointActionMenu/viewpointActionMenu.component';
+import { isEqual } from 'lodash';
 
 type ImageToUpload = {
 	id: string,
@@ -79,7 +80,7 @@ type CommentBoxProps = Pick<ITicketComment, 'message' | 'images' | 'views'> & {
 	className?: string;
 };
 
-export const CommentBox = ({ message = '', images = [], views, commentReply, deleteCommentReply, onCancel, onEditMessage, commentId, className, ...other }: CommentBoxProps) => {
+export const CommentBox = ({ message = '', images = [], views: existingViewpoint, commentReply, deleteCommentReply, onCancel, onEditMessage, commentId, className }: CommentBoxProps) => {
 	const { teamspace, project } = useParams<ViewerParams>();
 	const { isViewer, containerOrFederation } = useContext(TicketContext);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
@@ -89,24 +90,18 @@ export const CommentBox = ({ message = '', images = [], views, commentReply, del
 	const [imagesToUpload, setImagesToUpload] = useState<ImageToUpload[]>(imagesWithSrcs);
 	const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
 	const [isDraggingFile, setIsDraggingFile] = useState(false);
+	const [viewpoint, setViewpoint] = useState<Viewpoint>(existingViewpoint);
 	const containerRef = useRef<HTMLElement>();
 	const inputRef = useRef<any>();
 	const isEditMode = !!commentId;
-	const { watch, reset, control } = useForm<{ message: string, images: File[], saveViewpoint: boolean
-	 }>({
+	const { watch, reset, control } = useForm<{ message: string, images: File[] }>({
 		mode: 'all',
 		defaultValues: {
 			message: desanitiseMessage(message),
 			images,
-			saveViewpoint: isViewer && (!isEditMode || !!views),
 		},
 	});
-	console.log('@@ existing views', views);
-	console.log('@@ existing images', imagesToUpload);
-	console.log('@@ existing commentReply', commentReply);
-	console.log('@@ existing other', other);
 	const newMessage = watch('message');
-	const saveViewpoint = watch('saveViewpoint');
 
 	const { is2DOpen } = useContext(ViewerCanvasesContext);
 	
@@ -117,11 +112,11 @@ export const CommentBox = ({ message = '', images = [], views, commentReply, del
 	const charsLimitIsReached = charsCount > MAX_MESSAGE_LENGTH;
 
 	const messageIsUnchanged = message === newMessage
-		&& images === imagesToUpload.map(({ src }) => src);
-		// && isEqual(views, newViewpoint); // TODO 5309 check if viewpoint is new
+		&& isEqual(images, imagesToUpload.map(({ src }) => src))
+		&& isEqual(existingViewpoint, viewpoint);
 
 	const erroredImages = imagesToUpload.filter(({ error }) => error);
-	const disableSendMessage = (!newMessage?.trim()?.length && !imagesToUpload.length && !views)
+	const disableSendMessage = (!newMessage?.trim()?.length && !imagesToUpload.length && !viewpoint)
 		|| charsLimitIsReached
 		|| erroredImages.length > 0
 		|| messageIsUnchanged;
@@ -134,16 +129,15 @@ export const CommentBox = ({ message = '', images = [], views, commentReply, del
 	};
 
 	const updateMessage = async () => {
-		const newComment = {
+		const newComment: Partial<ITicketComment> = {
 			message: newMessage,
 			images: imagesToUpload.map(({ src }) => src),
-			views: null,
 		};
 		if (commentReply) {
 			newComment.message = addReply(commentReply, newComment.message);
 		}
-		if (saveViewpoint) {
-			newComment.views = ViewerService.getViewpoint();
+		if (viewpoint) {
+			newComment.views = viewpoint;
 		}
 		TicketCommentsActionsDispatchers.updateComment(
 			teamspace,
@@ -161,13 +155,13 @@ export const CommentBox = ({ message = '', images = [], views, commentReply, del
 		const newComment: Partial<ITicketComment> = {
 			author: currentUser.username,
 			images: imagesToUpload.map(({ src }) => src),
-			message: newMessage,
+			message: newMessage, // TODO 5309 figure out whether i need sanitiseMessage and if so where
 		};
 		if (commentReply) {
 			newComment.message = addReply(commentReply, newComment.message);
 		}
-		if (saveViewpoint) {
-			newComment.views = await ViewerService.getViewpoint();
+		if (viewpoint) {
+			newComment.views = viewpoint;
 		}
 		TicketCommentsActionsDispatchers.createComment(
 			teamspace,
@@ -331,15 +325,7 @@ export const CommentBox = ({ message = '', images = [], views, commentReply, del
 					</ActionMenuItem>
 				</ActionMenu>
 				{isViewer && (
-					<Tooltip title={formatMessage({ id: 'customTicket.comments.action.useViewpoint', defaultMessage: 'Include viewpoint' })} arrow>
-						<div>
-							<FormCheckbox
-								name="saveViewpoint"
-								control={control}
-								label={<ViewpointIcon />}
-							/>
-						</div>
-					</Tooltip>
+					<ViewpointActionMenu viewpoint={viewpoint} setViewpoint={setViewpoint} />
 				)}
 				<CharsCounter $error={charsLimitIsReached}>{charsCount}/{MAX_MESSAGE_LENGTH}</CharsCounter>
 				{ isEditMode ? (
