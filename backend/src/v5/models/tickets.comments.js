@@ -140,7 +140,7 @@ TicketComments.updateComment = async (teamspace, project, model, ticket, oldComm
 TicketComments.deleteComment = async (teamspace, project, model, ticket, oldComment) => {
 	const formattedComment = getUpdatedComment(oldComment, { deleted: true });
 	await updateOne(teamspace, { _id: oldComment._id },
-		{ $set: { ...formattedComment }, $unset: { message: 1, images: 1 } });
+		{ $set: { ...formattedComment }, $unset: { message: 1, images: 1, view: 1 } });
 
 	publish(events.UPDATE_COMMENT, { teamspace,
 		project,
