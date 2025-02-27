@@ -15,13 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { useContext } from 'react';
-import { ResizableTableContext } from '../resizableTableContext';
-import { Row } from './resizableTableRow.styles';
+import { Container } from './ticketsTableCell.styles';
+import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
 
-export const ResizableTableRow = (props) => {
-	const { getVisibleColumns, columnGap } = useContext(ResizableTableContext);
-	const gridTemplateColumns = getVisibleColumns().map(({ width }) => `${width}px`).join(' ');
-	
-	return (<Row style={{ gridTemplateColumns, gap: columnGap }} {...props} />);
+export const TicketsTableCell = (props) => {
+	const { movingColumn } = useContext(ResizableTableContext);
+	return (
+		<Container $isMoving={props.name === movingColumn}>
+			<ResizableTableCell {...props} />
+		</Container>
+	);
 };

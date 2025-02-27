@@ -23,7 +23,7 @@ export const Table = styled.div`
 	position: relative;
 `;
 
-export const ResizersContainers = styled.div`
+export const OverlayElements = styled.div`
 	position: absolute;
 	top: 0;
 	width: 100%;

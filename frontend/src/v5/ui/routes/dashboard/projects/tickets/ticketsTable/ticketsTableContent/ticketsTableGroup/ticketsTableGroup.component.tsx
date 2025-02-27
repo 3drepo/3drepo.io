@@ -28,7 +28,6 @@ import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
 import { SetTicketValue } from '../../ticketsTable.helper';
-import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 
 const SortingTableHeader = ({ name, children, disableSorting = false, ...props }) => {
@@ -39,24 +38,20 @@ const SortingTableHeader = ({ name, children, disableSorting = false, ...props }
 	if (isHidden(name)) return (null);
 
 	if (disableSorting) return (
-		<ResizableTableCell name={name}>
-			<Header {...props}>
-				{children}
-			</Header>
-		</ResizableTableCell>
+		<Header {...props} name={name}>
+			{children}
+		</Header>
 	);
 
 	return (
-		<ResizableTableCell name={name}>
-			<Header {...props} onClick={() => onColumnClick(name)} $selectable>
-				{isSelected && (
-					<IconContainer $flip={isDescendingOrder}>
-						<ArrowIcon />
-					</IconContainer>
-				)}
-				{children}
-			</Header>
-		</ResizableTableCell>
+		<Header {...props} name={name} onClick={() => onColumnClick(name)} $selectable>
+			{isSelected && (
+				<IconContainer $flip={isDescendingOrder}>
+					<ArrowIcon />
+				</IconContainer>
+			)}
+			{children}
+		</Header>
 	);
 };
 
@@ -72,7 +67,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;
 
 	return (
-		<Table $empty={!tickets.length}>
+		<Table $empty={!tickets.length} $canCreateTicket={!newTicketButtonIsDisabled}>
 			<SortedTableComponent items={tickets} sortingColumn={BaseProperties.CREATED_AT}>
 				<SortedTableContext.Consumer>
 					{({ sortedItems }: SortedTableType<ITicket>) => (

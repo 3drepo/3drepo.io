@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2024 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,35 +16,27 @@
  */
 
 import styled, { css } from 'styled-components';
+import { Item as Cell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.styles';
 
-export const FloatingButtonsContainer = styled.div`
-	display: flex;
-	flex-direction: column;
-	position: absolute;
-	bottom: 44px;
-	z-index: 16;
-`;
+export const Container = styled.div<{ $isMoving?: boolean }>`
+	display: contents;
 
-export const subMenuIndicatorStyles = css<{ $expanded?: boolean }>`
-	content: '';
-	position: absolute;
-	height: 0;
-	width: 0;
-	top: 6px;
-	right: 6px;
-	color: ${({ theme }) => theme.palette.base.main};
-	border: solid 3px currentColor;
-	${({ $expanded, theme }) => $expanded && css`
-		border-color: ${theme.palette.primary.main};
-	`}
-	border-left-color: transparent;
-	border-bottom-color: transparent;
-`;
-
-export const Container = styled.div<{ disabled?: boolean; $expanded?: boolean }>`
-	position: relative;
-
-	&::after {
-		${subMenuIndicatorStyles}
+	${Cell} {
+		color: ${({ theme }) => theme.palette.secondary.main};
+		height: 100%;
+		padding: 0 10px;
+		display: flex;
+		align-items: center;
+		justify-content: flex-start;
+		font-weight: 500;
+		overflow: hidden;
+		box-sizing: border-box;
+		background-color: ${({ $isMoving, theme }) => $isMoving ? theme.palette.primary.lightest : theme.palette.primary.contrast};
 	}
+
+	${({ $isMoving, theme }) => $isMoving && css`
+		&&& ${Cell} {
+			background-color: ${theme.palette.primary.lightest};
+		}
+	`}
 `;
