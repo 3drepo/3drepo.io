@@ -99,6 +99,7 @@ const getUpdatedComment = (oldComment, updateData) => {
 		timestamp: oldComment.updatedAt,
 		message: oldComment.message,
 		images: oldComment.images,
+		view: oldComment.view,
 	});
 
 	formattedComment.history = [...(oldComment.history ?? []), historyEntry];
@@ -114,6 +115,7 @@ TicketComments.updateComment = async (teamspace, project, model, ticket, oldComm
 		$unset: {
 			...(updateData.message ? { } : { message: 1 }),
 			...(updateData.images ? { } : { images: 1 }),
+			...(updateData.view ? { } : { view: 1 }),
 		},
 	};
 
@@ -128,6 +130,7 @@ TicketComments.updateComment = async (teamspace, project, model, ticket, oldComm
 			_id: oldComment._id,
 			message: updateData.message,
 			images: updateData.images,
+			view: updateData.view,
 			author: oldComment.author,
 			updatedAt: formattedComment.updatedAt,
 		},
