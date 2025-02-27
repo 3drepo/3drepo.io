@@ -127,6 +127,7 @@ export const CommentBox = ({ message = '', images = [], view: existingView, comm
 		deleteCommentReply?.();
 		setIsSubmittingMessage(false);
 		setImagesToUpload([]);
+		setViewpoint(null);
 	};
 
 	const updateMessage = async () => {

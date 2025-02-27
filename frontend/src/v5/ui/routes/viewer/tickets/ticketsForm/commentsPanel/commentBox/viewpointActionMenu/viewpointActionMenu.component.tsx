@@ -26,17 +26,13 @@ import { MenuList, Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 
 export const ViewpointActionMenu = ({ viewpoint, setViewpoint }) => {
-	const updateViewpoint = async () => {
-		setViewpoint(await ViewerService.getViewpoint());
-	};
-	const deleteViewpoint = async () => {
-		setViewpoint(null);
-	};
+	const updateViewpoint = async () => setViewpoint(await ViewerService.getViewpoint());
+	const deleteViewpoint = () => setViewpoint(null);
 
 	if (!viewpoint) return (
-		<Tooltip title={formatMessage({ id: 'customTicket.comments.action.useViewpoint', defaultMessage: 'Add viewpoint' })}>
+		<Tooltip title={formatMessage({ id: 'customTicket.comments.action.addViewpoint', defaultMessage: 'Add viewpoint' })} arrow>
 			<div>
-				<AddViewpointIcon onClick={setViewpoint} />
+				<AddViewpointIcon onClick={updateViewpoint} />
 			</div>
 		</Tooltip>
 	);
