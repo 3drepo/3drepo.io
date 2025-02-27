@@ -42,7 +42,7 @@ export const CurrentUserComment = ({
 	message,
 	metadata,
 	images,
-	views,
+	view,
 	onDelete,
 	onReply,
 	onEdit,
@@ -54,13 +54,13 @@ export const CurrentUserComment = ({
 	const onEditImage = (img, index) => {
 		const newImages = [...images];
 		newImages[index] = img;
-		onEdit(_id, message, newImages, views);
+		onEdit(_id, message, newImages, view);
 	};
 
 	// @ts-ignore
 	const onDeleteImage = (index) => onEdit(_id, message, images.toSpliced(index, 1));
 
-	const onUploadImages = async () => uploadImages((imagesToUpload) => onEdit(_id, message, images.concat(imagesToUpload), views));
+	const onUploadImages = async () => uploadImages((imagesToUpload) => onEdit(_id, message, images.concat(imagesToUpload), view));
 	const imagesEditingFunctions = { onDeleteImage, onUploadImages, onEditImage };
 
 	if (deleted) return (<DeletedComment author={author} />);
@@ -72,7 +72,7 @@ export const CurrentUserComment = ({
 				message={message}
 				images={images}
 				commentReply={metadata}
-				views={views}
+				view={view}
 				onCancel={() => setIsEditMode(false)}
 			/>
 		);
@@ -97,7 +97,7 @@ export const CurrentUserComment = ({
 				message={message}
 				images={images}
 				metadata={metadata}
-				views={views}
+				view={view}
 				{...(!readOnly ? imagesEditingFunctions : {})}
 				{...props}
 			/>

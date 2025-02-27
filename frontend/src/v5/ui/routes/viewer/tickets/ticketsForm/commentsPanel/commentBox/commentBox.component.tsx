@@ -71,7 +71,7 @@ type ImageToUpload = {
 	error?: boolean,
 };
 
-type CommentBoxProps = Pick<ITicketComment, 'message' | 'images' | 'views'> & {
+type CommentBoxProps = Pick<ITicketComment, 'message' | 'images' | 'view'> & {
 	onCancel?: () => void;
 	onEditMessage?: (message) => void;
 	commentId?: string;
@@ -80,7 +80,7 @@ type CommentBoxProps = Pick<ITicketComment, 'message' | 'images' | 'views'> & {
 	className?: string;
 };
 
-export const CommentBox = ({ message = '', images = [], views: existingViewpoint, commentReply, deleteCommentReply, onCancel, onEditMessage, commentId, className }: CommentBoxProps) => {
+export const CommentBox = ({ message = '', images = [], view: existingView, commentReply, deleteCommentReply, onCancel, onEditMessage, commentId, className }: CommentBoxProps) => {
 	const { teamspace, project } = useParams<ViewerParams>();
 	const { isViewer, containerOrFederation } = useContext(TicketContext);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
@@ -90,7 +90,7 @@ export const CommentBox = ({ message = '', images = [], views: existingViewpoint
 	const [imagesToUpload, setImagesToUpload] = useState<ImageToUpload[]>(imagesWithSrcs);
 	const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
 	const [isDraggingFile, setIsDraggingFile] = useState(false);
-	const [viewpoint, setViewpoint] = useState<Viewpoint>(existingViewpoint);
+	const [viewpoint, setViewpoint] = useState<Viewpoint>(existingView);
 	const containerRef = useRef<HTMLElement>();
 	const inputRef = useRef<any>();
 	const isEditMode = !!commentId;
@@ -111,9 +111,10 @@ export const CommentBox = ({ message = '', images = [], views: existingViewpoint
 	const charsCount = (newMessage?.length || 0) + commentReplyLength;
 	const charsLimitIsReached = charsCount > MAX_MESSAGE_LENGTH;
 
+	const viewIsUnchanged = isEqual(existingView, viewpoint);
 	const messageIsUnchanged = message === newMessage
 		&& isEqual(images, imagesToUpload.map(({ src }) => src))
-		&& isEqual(existingViewpoint, viewpoint);
+		&& viewIsUnchanged;
 
 	const erroredImages = imagesToUpload.filter(({ error }) => error);
 	const disableSendMessage = (!newMessage?.trim()?.length && !imagesToUpload.length && !viewpoint)
@@ -132,12 +133,13 @@ export const CommentBox = ({ message = '', images = [], views: existingViewpoint
 		const newComment: Partial<ITicketComment> = {
 			message: newMessage,
 			images: imagesToUpload.map(({ src }) => src),
+			view: viewpoint,
 		};
 		if (commentReply) {
 			newComment.message = addReply(commentReply, newComment.message);
 		}
-		if (viewpoint) {
-			newComment.views = viewpoint;
+		if (!viewIsUnchanged) {
+			newComment.view = viewpoint;
 		}
 		TicketCommentsActionsDispatchers.updateComment(
 			teamspace,
@@ -161,7 +163,7 @@ export const CommentBox = ({ message = '', images = [], views: existingViewpoint
 			newComment.message = addReply(commentReply, newComment.message);
 		}
 		if (viewpoint) {
-			newComment.views = viewpoint;
+			newComment.view = viewpoint;
 		}
 		TicketCommentsActionsDispatchers.createComment(
 			teamspace,

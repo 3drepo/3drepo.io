@@ -43,7 +43,7 @@ export const BasicComment = ({
 	updatedAt,
 	className,
 	originalAuthor,
-	views,
+	view,
 	...props
 }: BasicCommentProps) => {
 	const { isViewer } = useContext(TicketContext);
@@ -55,10 +55,10 @@ export const BasicComment = ({
 			{message && (<CommentMarkDown>{message}</CommentMarkDown>)}
 			<CommentAge>
 				{commentAge}
-				{!!views && (
+				{!!view && (
 					<Tooltip title={isViewer && formatMessage({ id: 'basicComment.viewpoint', defaultMessage: 'Go to viewpoint' })} placement="top" arrow>
 						<span>
-							<ViewpointIcon disabled={!isViewer} onClick={() => goToView(views)} />
+							<ViewpointIcon disabled={!isViewer} onClick={() => goToView(view)} />
 						</span>
 					</Tooltip>
 				)}
