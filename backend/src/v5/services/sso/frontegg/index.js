@@ -19,6 +19,7 @@ const { HEADER_TENANT_ID, META_LABEL_TEAMSPACE } = require('./frontegg.constants
 const { get, delete: httpDelete, post } = require('../../../utils/webRequests');
 const { IdentityClient } = require('@frontegg/client');
 const Yup = require('yup');
+const { deleteIfUndefined } = require('../../../utils/helper/objects');
 const { generateUUIDString } = require('../../../utils/helper/uuids');
 const { logger } = require('../../../utils/logger');
 const { sso: { frontegg } } = require('../../../utils/config');
@@ -123,6 +124,27 @@ Frontegg.getUserById = async (userId) => {
 	}
 };
 
+Frontegg.createUser = async (accountId, email, name, userData, privateUserData, bypassVerification = false) => {
+	try {
+		const payload = deleteIfUndefined({
+			email,
+			name,
+			tenantId: accountId,
+			metadata: userData,
+			vendorMetadata: privateUserData,
+			roleIds: ['APP_USER'],
+
+		});
+
+		// using the migration endpoint will automatically activate the user
+		const url = bypassVerification ? `${config.vendorDomain}/identity/resources/migrations/v1/local` : `${config.vendorDomain}/identity/resources/vendor-only/users/v1`;
+		const { data } = await post(url, payload, { headers: await getBearerHeader() });
+		return data.id;
+	} catch (err) {
+		throw new Error(`Failed to create user(${email}) on Frontegg: ${err.message}`);
+	}
+};
+
 Frontegg.getTeamspaceByAccount = async (accountId) => {
 	try {
 		const { data: { metadata } } = await get(`${config.vendorDomain}/tenants/resources/tenants/v2/${accountId}`, await getBearerHeader());
@@ -159,12 +181,48 @@ Frontegg.createAccount = async (name) => {
 	}
 };
 
-Frontegg.addUserToAccount = async (accountId, userId) => {
+Frontegg.getAllUsersInAccount = async (accountId) => {
+	try {
+		const header = {
+			...await getBearerHeader(),
+			'frontegg-tenant-id': accountId,
+
+		};
+
+		const initialQuery = {
+			_limit: 200,
+			_offset: 0,
+			_sortBy: 'email',
+			_order: 'ASC',
+		};
+
+		let query = new URLSearchParams(initialQuery).toString();
+		const entries = [];
+
+		while (query?.length) {
+			// eslint-disable-next-line no-await-in-loop
+			const { data: { items, _links } } = await get(`${config.vendorDomain}/identity/resources/users/v3?${query}`,
+				header);
+
+			items.forEach(({ id, email }) => {
+				entries.push({ id, email });
+			});
+
+			query = _links.next;
+		}
+
+		return entries;
+	} catch (err) {
+		throw new Error(`Failed to get users from account(${accountId}) from Frontegg: ${err.message}`);
+	}
+};
+
+Frontegg.addUserToAccount = async (accountId, userId, sendInvite = true) => {
 	try {
 		const payload = {
 			tenantId: accountId,
 			validateTenantExist: true,
-			skipInviteEmail: false,
+			skipInviteEmail: !sendInvite,
 		};
 		await post(`${config.vendorDomain}/identity/resources/users/v1/${userId}/tenant`, payload, { headers: await getBearerHeader() });
 	} catch (err) {

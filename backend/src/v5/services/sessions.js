@@ -23,10 +23,12 @@ const { events } = require('./eventsManager/eventsManager.constants');
 const expressSession = require('express-session');
 const { generateUUID } = require('../utils/helper/uuids');
 const { publish } = require('./eventsManager/eventsManager');
+const { ensureIndicesExist } = require('../models/users');
 
 const Sessions = { };
 const initialiseSession = async () => {
 	const store = await db.getSessionStore(expressSession);
+	await ensureIndicesExist();
 	const secure = config.public_protocol === 'https';
 	const { secret, maxAge, domain } = config.cookie;
 

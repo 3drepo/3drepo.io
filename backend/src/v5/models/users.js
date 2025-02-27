@@ -161,4 +161,8 @@ User.addUser = async (newUserData) => {
 User.removeUser = (user) => db.deleteOne(USERS_DB_NAME, USERS_COL, { user });
 User.removeUsers = (users) => db.deleteMany(USERS_DB_NAME, USERS_COL, { user: { $in: users } });
 
+User.ensureIndicesExist = async () => {
+	await db.createIndex(USERS_DB_NAME, USERS_COL, { 'customData.userId': 1 }, { runInBackground: true, unique: true });
+};
+
 module.exports = User;
