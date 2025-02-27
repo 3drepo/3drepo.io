@@ -86,36 +86,41 @@ const groupByList = (tickets: ITicket[], groupType: string, groupValues: string[
 		);
 		groups[groupValue] = currentTickets;
 	});
-	groups[UNSET] = remainingTickets;
 	return groups;
 };
 const getAssignees = (t) => _.get(t, `properties.${IssueProperties.ASSIGNEES}`);
+
+const sortAssignees = (tickets: ITicket[]) => tickets.map((ticket) => {
+	const ticketWithSortedAssignees = _.cloneDeep(ticket);
+	const sortedAssignees = _.orderBy(getAssignees(ticket), (assignee) => assignee.trim().toLowerCase());
+	ticketWithSortedAssignees.properties[IssueProperties.ASSIGNEES] = sortedAssignees;
+	return ticketWithSortedAssignees;
+});
+
+const sortByAssignees = (tickets: ITicket[]) => _.orderBy(
+	tickets,
+	(ticket) => {
+		const assignees = getAssignees(ticket).map((assignee) => assignee.trim().toLowerCase());
+		return _.orderBy(assignees).join();
+	},
+);
+
+const getAssigneesCountLabel = (count: number) => formatMessage({
+	id: 'groupBy.assignees',
+	defaultMessage: '{count} {count, plural, one {Assignee} other {Assignees}}',
+}, { count });
 const groupByAssignees = (tickets: ITicket[]) => {
 	const [ticketsWithAssignees, unsetAssignees] = _.partition(tickets, (ticket) => getAssignees(ticket)?.length > 0);
-
-	const ticketsWithSortedAssignees = ticketsWithAssignees.map((ticket) => {
-		const ticketWithSortedAssignees = _.cloneDeep(ticket);
-		const sortedAssignees = _.orderBy(getAssignees(ticket), (assignee) => assignee.trim().toLowerCase());
-		ticketWithSortedAssignees.properties[IssueProperties.ASSIGNEES] = sortedAssignees;
-		return ticketWithSortedAssignees;
-	});
-
-	const ticketsSortedByAssignees = _.orderBy(
-		ticketsWithSortedAssignees,
-		(ticket) => {
-			const assignees = getAssignees(ticket).map((assignee) => assignee.trim().toLowerCase());
-			return _.orderBy(assignees).join();
-		},
+	const groups = _.groupBy(ticketsWithAssignees, (ticket) => getAssignees(ticket).length);
+	if (unsetAssignees.length) {
+		groups[0] = unsetAssignees;
+	}
+	const sortedAndLabelledGroups = Object.fromEntries(Object.entries(groups)
+		.sort(([countA], [countB]) => +countA - +countB)
+		.map(([count, tckts]) => [getAssigneesCountLabel(+count), sortByAssignees(sortAssignees(tckts))]),
 	);
 
-	const groups = _.groupBy(ticketsSortedByAssignees, (ticket) => {
-		const assignees = getAssignees(ticket);
-		return assignees.join(', ');
-	});
-	if (unsetAssignees.length) {
-		groups[UNSET] = unsetAssignees;
-	}
-	return groups;
+	return sortedAndLabelledGroups;
 };
 
 export const groupTickets = (groupBy: string, tickets: ITicket[]): Record<string, ITicket[]> => {
