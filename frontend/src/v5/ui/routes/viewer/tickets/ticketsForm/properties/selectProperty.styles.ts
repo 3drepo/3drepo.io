@@ -26,6 +26,6 @@ export const ClearIconContainer = styled.div`
 
 	svg {
 		width: 16px;
-		height: 16px
+		height: 16px;
 	}
 `; 
