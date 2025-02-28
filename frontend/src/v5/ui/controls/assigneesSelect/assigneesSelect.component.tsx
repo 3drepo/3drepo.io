@@ -20,17 +20,16 @@ import { useContext } from 'react';
 import { SelectProps } from '@controls/inputs/select/select.component';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { FormInputProps } from '@controls/inputs/inputController.component';
-import { AssigneesListContainer, ButtonsContainer, ClearIconContainer } from './assigneesSelect.styles';
+import { AssigneesListContainer } from './assigneesSelect.styles';
 import { AssigneesSelectMenu } from './assigneesSelectMenu/assigneesSelectMenu.component';
 import { TicketContext } from '../../routes/viewer/tickets/ticket.context';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { AssigneesValuesDisplay } from './assigneeValuesDisplay/assigneeValuesDisplay.component';
 import { getInvalidValues, getModelJobsAndUsers, getValidValues } from './assignees.helpers';
-import ClearIcon from '@assets/icons/controls/clear_circle.svg';
 
 export type AssigneesSelectProps = Pick<FormInputProps, 'value'> & SelectProps & {
 	maxItems?: number;
-	showAddButton?: boolean;
+	canClear?: boolean;
 	onBlur?: () => void;
 	excludeViewers?: boolean;
 };
@@ -38,17 +37,16 @@ export type AssigneesSelectProps = Pick<FormInputProps, 'value'> & SelectProps &
 export const AssigneesSelect = ({
 	value: valueRaw,
 	maxItems,
-	showAddButton,
 	multiple,
-	disabled,
-	onBlur,
 	className,
 	excludeViewers = false,
 	onChange,
+	onBlur,
+	canClear = false,
+	disabled,
 	...props
 }: AssigneesSelectProps) => {
 	const { containerOrFederation } = useContext(TicketContext);
-
 	const { jobs, users } = getModelJobsAndUsers(containerOrFederation);
 
 	const emptyValue = multiple ? [] : '';
@@ -71,7 +69,8 @@ export const AssigneesSelect = ({
 	};
 
 	const handleClear = () => {
-		onChange({ target: { value: multiple ? [] : '' } });
+		onChange({ target: { value: emptyValue } });
+		onBlur?.();
 	};
 
 	if (!users.length || !jobs.length) return (
@@ -85,17 +84,17 @@ export const AssigneesSelect = ({
 				<AssigneesValuesDisplay
 					value={valueAsArray}
 					maxItems={maxItems}
+					onClear={canClear && !disabled && valueAsArray?.length ? handleClear : undefined}
 				/>
-				<ButtonsContainer onClick={(e) => e.stopPropagation()}>
-					<AssigneesSelectMenu
-						value={value}
-						multiple={multiple}
-						isInvalid={(v) => invalidValues.includes(v)}
-						onChange={handleChange}
-						disabled={disabled || !showAddButton}
-						{...props}
-					/>
-				</ButtonsContainer>
+				<AssigneesSelectMenu
+					value={value}
+					multiple={multiple}
+					isInvalid={(v) => invalidValues.includes(v)}
+					onChange={handleChange}
+					onBlur={onBlur}
+					disabled={disabled}
+					{...props}
+				/>
 			</AssigneesListContainer>
 		</SearchContextComponent>
 	);

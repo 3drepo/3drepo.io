@@ -18,20 +18,23 @@
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import styled from 'styled-components';
 
-export const ButtonsContainer = styled.div`
+export const ValuesAndClearButton = styled.div`
 	display: inline-flex;
 	flex-direction: row;
+	align-items: center;
 `;
 
 export const AssigneesListContainer = styled.div`
 	display: inline-flex;
 	justify-content: space-between;
+	align-items: center;
 	position: relative;
 	user-select: none;
 	color: ${({ theme }) => theme.palette.base.main};
 	font-size: 10px;
 	line-height: 100%;
 	width: 100%;
+	height: 24px;
 
 	${Spinner} {
 		margin: 6px 0;

@@ -24,6 +24,7 @@ export const AddUserButton = styled(PopoverCircle).attrs({
 	padding: 5px;
 	box-sizing: border-box;
 	color: ${({ theme }) => theme.palette.base.main};
+	cursor: pointer;
 
 	&& {
 		border: 1px dashed ${({ theme }) => theme.palette.base.light};

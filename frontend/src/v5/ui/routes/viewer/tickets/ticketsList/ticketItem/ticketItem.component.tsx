@@ -96,9 +96,8 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 								value={assignees}
 								maxItems={5}
 								multiple
-								showAddButton
 								onBlur={onBlurAssignees}
-								disabled={readOnly}
+								disabled
 								excludeViewers
 							/>
 							<FlexRow>

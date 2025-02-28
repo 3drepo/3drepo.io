@@ -34,11 +34,11 @@ type ManyOfPropertyProps = FormInputProps & {
 };
 
 export const ManyOfProperty = ({ values, ...props }: ManyOfPropertyProps) => {
-	const showClear = !props.required && !props.disabled && !!props.value?.length;
+	const canClear = !props.required && !props.disabled && !!props.value?.length;
 	const onClear = () => props.onChange([]);
 
 	if (values === 'jobsAndUsers') {
-		return (<JobsAndUsersProperty maxItems={17} multiple {...props} />);
+		return (<JobsAndUsersProperty maxItems={17} multiple canClear={canClear} {...props} />);
 	}
 
 	const items = (values === 'riskCategories') ? TicketsHooksSelectors.selectRiskCategories() : values;
@@ -46,7 +46,7 @@ export const ManyOfProperty = ({ values, ...props }: ManyOfPropertyProps) => {
 		<MultiSelect
 			{...props}
 			value={props.value || []}
-			endAdornment={showClear && (
+			endAdornment={canClear && (
 				<ClearIconContainer onClick={onClear}>
 					<ClearIcon />
 				</ClearIconContainer>

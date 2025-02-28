@@ -19,11 +19,18 @@ import styled from 'styled-components';
 
 export const Container = styled.div`
 	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+`;
+
+export const AvatarsOpacityHandler = styled.div`
+	display: contents;
 
 	.MuiAvatar-root {
 		z-index: 2;
 		margin-right: -8px;
 		outline: 2px solid ${({ theme }) => theme.palette.primary.contrast};
+
 		&:hover {
 			z-index: 3; /* avatar appears on top when hovered */
 		}
@@ -41,6 +48,7 @@ export const Container = styled.div`
 			z-index: 10;
 		}
 	}
+
 	span:last-child .MuiAvatar-root {
 		margin: 0;
 	}
@@ -53,4 +61,13 @@ export const Container = styled.div`
 			opacity: 0;
 		}
 	}
+`;
+
+export const ClearIconContainer = styled.div`
+	aspect-ratio: 1;
+	margin-left: 12.5px;
+	width: 15px;
+	position: unset;
+	cursor: pointer;
+	color: ${({ theme }) => theme.palette.base.main};
 `;

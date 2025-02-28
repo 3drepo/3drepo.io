@@ -56,6 +56,11 @@ export const AssigneesSelectMenu = ({
 	const { filteredItems } = useContext(SearchContext);
 	const { users, jobs, notFound } = groupJobsAndUsers(filteredItems);
 
+	const openSelect = (e) => {
+		e.stopPropagation();
+		setOpen(true);
+	};
+
 	const handleClose = (e) => {
 		e.stopPropagation();
 		setOpen(false);
@@ -66,7 +71,7 @@ export const AssigneesSelectMenu = ({
 
 	return (
 		<>
-			<AssigneesSelectMenuTriggerButton onClick={() => setOpen(true)} />
+			<AssigneesSelectMenuTriggerButton onClick={openSelect} />
 			{/* @ts-ignore */}
 			<HiddenSelect
 				value={value}

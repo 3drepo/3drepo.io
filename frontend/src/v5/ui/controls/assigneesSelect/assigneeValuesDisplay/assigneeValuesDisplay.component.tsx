@@ -20,18 +20,18 @@ import { FormattedMessage } from 'react-intl';
 import { AssigneeCircle } from '../assigneeCircle/assigneeCircle.component';
 import { ExtraAssigneesPopover } from '../extraAssigneesCircle/extraAssigneesPopover.component';
 import { ExtraAssigneesCircle } from '../extraAssigneesCircle/extraAssignees.styles';
-import { Container } from './assigneeValuesDisplay.styles';
+import { AvatarsOpacityHandler, ClearIconContainer, Container } from './assigneeValuesDisplay.styles';
+import ClearIcon from '@assets/icons/controls/clear_circle.svg';
 
 export type AssigneesValuesDisplayProps = {
 	value: any[];
-	disabled?: boolean;
 	maxItems?: number;
-	showEmptyText?: boolean;
+	onClear?: () => void;
 };
 export const AssigneesValuesDisplay = ({
 	value,
 	maxItems = 3,
-	showEmptyText = false,
+	onClear,
 }) => {
 	// Using this logic instead of a simple partition because ExtraAssigneesCircle needs to occupy
 	// the last position when the overflow value is 2+. There is no point showing +1 overflow
@@ -41,18 +41,25 @@ export const AssigneesValuesDisplay = ({
 	const overflowValue = overflowRequired ? value.slice(maxItems - 1).length : 0;
 	return (
 		<Container>
-			{!listedAssignees.length && showEmptyText && (
-				<FormattedMessage id="assignees.circleList.none" defaultMessage="None Selected" />
-			)}
-			{listedAssignees.map((assignee) => (
-				<AssigneeCircle key={assignee} assignee={assignee} size="small" />
-			))}
-			{overflowRequired && (
-				<HoverPopover
-					anchor={(attrs) => <ExtraAssigneesCircle {...attrs}> +{overflowValue} </ExtraAssigneesCircle>}
-				>
-					<ExtraAssigneesPopover assignees={value} />
-				</HoverPopover>
+			<AvatarsOpacityHandler>
+				{!listedAssignees.length && (
+					<FormattedMessage id="assignees.circleList.none" defaultMessage="None Selected" />
+				)}
+				{listedAssignees.map((assignee) => (
+					<AssigneeCircle key={assignee} assignee={assignee} size="small" />
+				))}
+				{overflowRequired && (
+					<HoverPopover
+						anchor={(attrs) => <ExtraAssigneesCircle {...attrs}> +{overflowValue} </ExtraAssigneesCircle>}
+					>
+						<ExtraAssigneesPopover assignees={value} />
+					</HoverPopover>
+				)}
+			</AvatarsOpacityHandler>
+			{onClear && (
+				<ClearIconContainer onClick={onClear}>
+					<ClearIcon />
+				</ClearIconContainer>
 			)}
 		</Container>
 	);

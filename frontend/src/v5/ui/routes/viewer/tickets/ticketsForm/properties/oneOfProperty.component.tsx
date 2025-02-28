@@ -26,14 +26,14 @@ import { ClearIconContainer } from './selectProperty.styles';
 
 type OneOfPropertyProps = FormInputProps & { values: PropertyDefinition['values']; onBlur: () => void };
 export const OneOfProperty = ({ values, value, ...props }: OneOfPropertyProps) => {
-	const showClear = !props.required && !props.disabled && !!value;
+	const canClear = !props.required && !props.disabled && !!value;
 	const onClear = () => {
 		props.onChange('');
 		props.onBlur();
 	};
 	
 	if (values === 'jobsAndUsers') {
-		return (<JobsAndUsersProperty value={value} {...props} />);
+		return (<JobsAndUsersProperty value={value} canClear={canClear} {...props} />);
 	}
 	
 	const items = (values === 'riskCategories') ? TicketsHooksSelectors.selectRiskCategories() : values;
@@ -41,7 +41,7 @@ export const OneOfProperty = ({ values, value, ...props }: OneOfPropertyProps) =
 		<Select
 			{...props}
 			value={value ?? ''}
-			endAdornment={showClear && (
+			endAdornment={canClear && (
 				<ClearIconContainer onClick={onClear}>
 					<ClearIcon />
 				</ClearIconContainer>

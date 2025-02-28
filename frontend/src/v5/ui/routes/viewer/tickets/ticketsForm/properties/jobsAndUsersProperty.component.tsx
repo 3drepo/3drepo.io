@@ -18,11 +18,11 @@ import { AssigneesSelect, AssigneesSelectProps } from '@controls/assigneesSelect
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { FormControl, FormHelperText, InputLabel } from '@mui/material';
 
-export type JobsAndUsersPropertyProps = FormInputProps & AssigneesSelectProps;
+type JobsAndUsersPropertyProps = FormInputProps & AssigneesSelectProps;
 export const JobsAndUsersProperty = ({ value, ...props }: JobsAndUsersPropertyProps) => (
 	<FormControl required={props.required} disabled={props.disabled} error={props.error} className={props.className}>
 		<InputLabel id={`${props.name}-label`}>{props.label}</InputLabel>
-		<AssigneesSelect value={value} showAddButton {...props} />
+		<AssigneesSelect value={value} {...props} />
 		<FormHelperText>{props.helperText}</FormHelperText>
 	</FormControl>
 );
