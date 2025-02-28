@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,25 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
+import { PopoverCircle } from '@components/shared/popoverCircles/popoverCircle.component';
 import styled from 'styled-components';
 
-export const ButtonsContainer = styled.div`
-	display: inline-flex;
-	flex-direction: row;
-`;
-
-export const AssigneesListContainer = styled.div`
-	display: inline-flex;
-	justify-content: space-between;
-	position: relative;
-	user-select: none;
+export const AddUserButton = styled(PopoverCircle).attrs({
+	size: 'small',
+})`
+	padding: 5px;
+	box-sizing: border-box;
 	color: ${({ theme }) => theme.palette.base.main};
-	font-size: 10px;
-	line-height: 100%;
-	width: 100%;
 
-	${Spinner} {
-		margin: 6px 0;
+	&& {
+		border: 1px dashed ${({ theme }) => theme.palette.base.light};
+		outline: none;
+		margin: 0;
 	}
 `;

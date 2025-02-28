@@ -43,8 +43,8 @@ export const HiddenSelect = styled(Select).attrs({
 	width: 0;
 	overflow: hidden;
 	position: absolute;
-	right: 0;
-	top: 0;
+	right: 24px;
+	top: 26px;
 `;
 
 export const SearchInput = styled(SearchInputBase).attrs({

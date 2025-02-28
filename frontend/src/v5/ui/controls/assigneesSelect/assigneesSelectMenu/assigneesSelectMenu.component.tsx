@@ -19,11 +19,12 @@ import { NoResults, SearchInputContainer } from '@controls/searchSelect/searchSe
 import { ListSubheader } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { SelectProps } from '@controls/inputs/select/select.component';
-import { useCallback, useContext } from 'react';
+import { useContext, useState } from 'react';
 import { AssigneesSelectMenuItem } from './assigneesSelectMenuItem/assigneesSelectMenuItem.component';
 import { HiddenSelect, HorizontalRule, SearchInput } from './assigneesSelectMenu.styles';
 import { groupJobsAndUsers } from '../assignees.helpers';
 import { SearchContext } from '@controls/search/searchContext';
+import { AssigneesSelectMenuTriggerButton } from './assigneesSelectMenuTriggerButton/assigneesSelectMenuTriggerButton.component';
 
 const NoResultsMessage = () => (
 	<NoResults>
@@ -43,85 +44,95 @@ type AssigneesSelectMenuProps = SelectProps & {
 	isInvalid: (val: string) => boolean;
 };
 export const AssigneesSelectMenu = ({
-	open,
 	value,
 	onClick,
 	multiple,
 	isInvalid,
+	disabled,
+	onBlur,
 	...props
 }: AssigneesSelectMenuProps) => {
+	const [open, setOpen] = useState(false);
 	const { filteredItems } = useContext(SearchContext);
 	const { users, jobs, notFound } = groupJobsAndUsers(filteredItems);
-	const onClickList = useCallback((e) => {
-		preventPropagation(e);
-		onClick?.(e);
-	}, []);
+
+	const handleClose = (e) => {
+		e.stopPropagation();
+		setOpen(false);
+		onBlur?.();
+	};
+
+	if (disabled) return null;
 
 	return (
-		// @ts-ignore
-		<HiddenSelect
-			open={open}
-			value={value}
-			onClick={onClickList}
-			multiple={multiple}
-			{...props}
-		>
-			<SearchInputContainer>
-				<SearchInput onClick={preventPropagation} onKeyDown={preventPropagation} />
-			</SearchInputContainer>
-			{/* The following "invalid" components cannot be grouped together inside a fragment
-				Because MuiSelect passes props to the MenuItem components and it can
-				only do so if they are direct children */}
-			{notFound.length > 0 && (
+		<>
+			<AssigneesSelectMenuTriggerButton onClick={() => setOpen(true)} />
+			{/* @ts-ignore */}
+			<HiddenSelect
+				value={value}
+				onClick={onClick}
+				multiple={multiple}
+				onClose={handleClose}
+				open={open}
+				{...props}
+			>
+				<SearchInputContainer>
+					<SearchInput onClick={preventPropagation} onKeyDown={preventPropagation} />
+				</SearchInputContainer>
+				{/* The following "invalid" components cannot be grouped together inside a fragment
+					Because MuiSelect passes props to the MenuItem components and it can
+					only do so if they are direct children */}
+				{notFound.length > 0 && (
+					<ListSubheader>
+						<FormattedMessage id="assigneesSelectMenu.notFoundHeading" defaultMessage="Users and Jobs not found" />
+					</ListSubheader>
+				)}
+				{notFound.map(({ notFoundName: ju }) => (
+					<AssigneesSelectMenuItem
+						key={ju}
+						assignee={ju}
+						value={ju}
+						title={ju}
+						multiple={multiple}
+						selected
+						error
+					/>
+				))}
+				{notFound.length > 0 && (<HorizontalRule />)}
+
 				<ListSubheader>
-					<FormattedMessage id="assigneesSelectMenu.notFoundHeading" defaultMessage="Users and Jobs not found" />
+					<FormattedMessage id="assigneesSelectMenu.jobsHeading" defaultMessage="Jobs" />
 				</ListSubheader>
-			)}
-			{notFound.map(({ notFoundName: ju }) => (
-				<AssigneesSelectMenuItem
-					key={ju}
-					assignee={ju}
-					value={ju}
-					title={ju}
-					multiple={multiple}
-					selected
-					error
-				/>
-			))}
-			{notFound.length > 0 && (<HorizontalRule />)}
+				{jobs.length > 0 && jobs.map(({ _id }) => (
+					<AssigneesSelectMenuItem
+						key={_id}
+						assignee={_id}
+						value={_id}
+						title={_id}
+						multiple={multiple}
+						error={isInvalid(_id)}
+					/>
+				))}
+				{!jobs.length && (<NoResultsMessage />)}
 
-			<ListSubheader>
-				<FormattedMessage id="assigneesSelectMenu.jobsHeading" defaultMessage="Jobs" />
-			</ListSubheader>
-			{jobs.length > 0 && jobs.map(({ _id }) => (
-				<AssigneesSelectMenuItem
-					key={_id}
-					assignee={_id}
-					value={_id}
-					title={_id}
-					multiple={multiple}
-					error={isInvalid(_id)}
-				/>
-			))}
-			{!jobs.length && (<NoResultsMessage />)}
+				<HorizontalRule />
 
-			<HorizontalRule />
-
-			<ListSubheader>
-				<FormattedMessage id="assigneesSelectMenu.usersHeading" defaultMessage="Users" />
-			</ListSubheader>
-			{users.length > 0 && users.map((user) => (
-				<AssigneesSelectMenuItem
-					key={user.user}
-					value={user.user}
-					assignee={user.user}
-					title={`${user.firstName} ${user.lastName}`}
-					subtitle={user.job}
-					multiple={multiple}
-					error={isInvalid(user.user)}
-				/>
-			))}
-			{!users.length && (<NoResultsMessage />)}
-		</HiddenSelect>
+				<ListSubheader>
+					<FormattedMessage id="assigneesSelectMenu.usersHeading" defaultMessage="Users" />
+				</ListSubheader>
+				{users.length > 0 && users.map((user) => (
+					<AssigneesSelectMenuItem
+						key={user.user}
+						value={user.user}
+						assignee={user.user}
+						title={`${user.firstName} ${user.lastName}`}
+						subtitle={user.job}
+						multiple={multiple}
+						error={isInvalid(user.user)}
+					/>
+				))}
+				{!users.length && (<NoResultsMessage />)}
+			</HiddenSelect>
+		</>
 	);
 };

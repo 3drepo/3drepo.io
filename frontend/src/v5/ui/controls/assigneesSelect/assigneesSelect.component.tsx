@@ -16,21 +16,21 @@
  */
 
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useCallback, useContext, useState } from 'react';
+import { useContext } from 'react';
 import { SelectProps } from '@controls/inputs/select/select.component';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { FormInputProps } from '@controls/inputs/inputController.component';
-import { AssigneesListContainer } from './assigneesSelect.styles';
+import { AssigneesListContainer, ButtonsContainer, ClearIconContainer } from './assigneesSelect.styles';
 import { AssigneesSelectMenu } from './assigneesSelectMenu/assigneesSelectMenu.component';
 import { TicketContext } from '../../routes/viewer/tickets/ticket.context';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { AssigneesValuesDisplay } from './assigneeValuesDisplay/assigneeValuesDisplay.component';
 import { getInvalidValues, getModelJobsAndUsers, getValidValues } from './assignees.helpers';
+import ClearIcon from '@assets/icons/controls/clear_circle.svg';
 
 export type AssigneesSelectProps = Pick<FormInputProps, 'value'> & SelectProps & {
 	maxItems?: number;
 	showAddButton?: boolean;
-	showEmptyText?: boolean;
 	onBlur?: () => void;
 	excludeViewers?: boolean;
 };
@@ -39,7 +39,6 @@ export const AssigneesSelect = ({
 	value: valueRaw,
 	maxItems,
 	showAddButton,
-	showEmptyText,
 	multiple,
 	disabled,
 	onBlur,
@@ -48,7 +47,6 @@ export const AssigneesSelect = ({
 	onChange,
 	...props
 }: AssigneesSelectProps) => {
-	const [open, setOpen] = useState(false);
 	const { containerOrFederation } = useContext(TicketContext);
 
 	const { jobs, users } = getModelJobsAndUsers(containerOrFederation);
@@ -72,15 +70,8 @@ export const AssigneesSelect = ({
 		onChange({ target: { value: validVals } });
 	};
 
-	const handleOpen = useCallback((e) => {
-		if (disabled) return;
-		e.stopPropagation();
-		setOpen(true);
-	}, [disabled]);
-
-	const handleClose = () => {
-		setOpen(false);
-		onBlur();
+	const handleClear = () => {
+		onChange({ target: { value: multiple ? [] : '' } });
 	};
 
 	if (!users.length || !jobs.length) return (
@@ -90,24 +81,21 @@ export const AssigneesSelect = ({
 	);
 	return (
 		<SearchContextComponent fieldsToFilter={['_id', 'firstName', 'lastName', 'job', 'notFoundName']} items={allJobsAndUsersToDisplay}>
-			<AssigneesListContainer onClick={handleOpen} className={className}>
-				<AssigneesSelectMenu
-					open={open}
-					value={value}
-					onClose={handleClose}
-					onOpen={handleOpen}
-					disabled={disabled}
-					multiple={multiple}
-					isInvalid={(v) => invalidValues.includes(v)}
-					onChange={handleChange}
-					{...props}
-				/>
+			<AssigneesListContainer className={className}>
 				<AssigneesValuesDisplay
 					value={valueAsArray}
 					maxItems={maxItems}
-					showEmptyText={showEmptyText}
-					disabled={disabled || !showAddButton}
 				/>
+				<ButtonsContainer onClick={(e) => e.stopPropagation()}>
+					<AssigneesSelectMenu
+						value={value}
+						multiple={multiple}
+						isInvalid={(v) => invalidValues.includes(v)}
+						onChange={handleChange}
+						disabled={disabled || !showAddButton}
+						{...props}
+					/>
+				</ButtonsContainer>
 			</AssigneesListContainer>
 		</SearchContextComponent>
 	);

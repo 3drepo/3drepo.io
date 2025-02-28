@@ -17,12 +17,10 @@
 
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { FormattedMessage } from 'react-intl';
-import { formatMessage } from '@/v5/services/intl';
-import AddUserIcon from '@assets/icons/outlined/add_user-outlined.svg';
-import { AddUserButton, Tooltip } from '../assigneesSelect.styles';
 import { AssigneeCircle } from '../assigneeCircle/assigneeCircle.component';
 import { ExtraAssigneesPopover } from '../extraAssigneesCircle/extraAssigneesPopover.component';
 import { ExtraAssigneesCircle } from '../extraAssigneesCircle/extraAssignees.styles';
+import { Container } from './assigneeValuesDisplay.styles';
 
 export type AssigneesValuesDisplayProps = {
 	value: any[];
@@ -34,7 +32,6 @@ export const AssigneesValuesDisplay = ({
 	value,
 	maxItems = 3,
 	showEmptyText = false,
-	disabled,
 }) => {
 	// Using this logic instead of a simple partition because ExtraAssigneesCircle needs to occupy
 	// the last position when the overflow value is 2+. There is no point showing +1 overflow
@@ -43,9 +40,9 @@ export const AssigneesValuesDisplay = ({
 	const listedAssignees = overflowRequired ? value.slice(0, maxItems - 1) : value;
 	const overflowValue = overflowRequired ? value.slice(maxItems - 1).length : 0;
 	return (
-		<>
+		<Container>
 			{!listedAssignees.length && showEmptyText && (
-				<FormattedMessage id="assignees.circleList.unassigned" defaultMessage="Unassigned" />
+				<FormattedMessage id="assignees.circleList.none" defaultMessage="None Selected" />
 			)}
 			{listedAssignees.map((assignee) => (
 				<AssigneeCircle key={assignee} assignee={assignee} size="small" />
@@ -57,19 +54,6 @@ export const AssigneesValuesDisplay = ({
 					<ExtraAssigneesPopover assignees={value} />
 				</HoverPopover>
 			)}
-			{!disabled && (
-				<Tooltip
-					title={formatMessage({
-						id: 'customTicket.topPanel.addAssignees.tooltip',
-						defaultMessage: 'Assign',
-					})}
-					arrow
-				>
-					<AddUserButton>
-						<AddUserIcon />
-					</AddUserButton>
-				</Tooltip>
-			)}
-		</>
+		</Container>
 	);
 };
