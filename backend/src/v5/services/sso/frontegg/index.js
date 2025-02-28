@@ -138,7 +138,9 @@ Frontegg.createUser = async (accountId, email, name, userData, privateUserData, 
 		});
 
 		// using the migration endpoint will automatically activate the user
-		const url = bypassVerification ? `${config.vendorDomain}/identity/resources/migrations/v1/local` : `${config.vendorDomain}/identity/resources/vendor-only/users/v1`;
+		const url = bypassVerification
+			? `${config.vendorDomain}/identity/resources/migrations/v1/local`
+			: `${config.vendorDomain}/identity/resources/vendor-only/users/v1`;
 		const { data } = await post(url, payload, { headers: await getBearerHeader() });
 		return data.id;
 	} catch (err) {
