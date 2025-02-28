@@ -145,6 +145,18 @@ Frontegg.createUser = async (accountId, email, name, userData, privateUserData, 
 			? `${config.vendorDomain}/identity/resources/migrations/v1/local`
 			: `${config.vendorDomain}/identity/resources/vendor-only/users/v1`;
 		const { data } = await post(url, payload, { headers: await getBearerHeader() });
+
+		// assign user to the application - this shouldn't be needed but it's not working through account entitlement
+		await post(`${config.vendorDomain}/identity/resources/applications/v1`,
+			{
+				appId: config.appId,
+				tenantId: accountId,
+				userIds: [
+					data.id,
+				],
+			},
+			{ headers: await getBearerHeader() });
+
 		return data.id;
 	} catch (err) {
 		throw new Error(`Failed to create user(${email}) on Frontegg: ${err.message}`);
