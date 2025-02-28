@@ -84,6 +84,9 @@ Frontegg.init = async () => {
 	}
 
 	try {
+		if (!process.env.FRONTEGG_API_GATEWAY_URL) {
+			throw new Error('Envar FRONTEGG_API_GATEWAY_URL is not set. This is required (Most likely, it should be the UK DC: https://api.uk.frontegg.com)');
+		}
 		identityClient = new IdentityClient({ FRONTEGG_CLIENT_ID: config.clientId, FRONTEGG_API_KEY: config.key });
 
 		// verify the vendor credentials are valid by generating a vendor jwt
