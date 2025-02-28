@@ -43,6 +43,7 @@ const configSchema = Yup.object({
 	appId: Yup.string().required(), // appId from the application created
 	clientId: Yup.string().required(), // clientId is the the vendor clientId
 	key: Yup.string().required(), // vendor API key
+	userRole: Yup.string().required(), // Default role an application user is assigned to by default
 	vendorDomain: Yup.string().required(), // the API server to connect to for vendor API
 }).required();
 
@@ -132,7 +133,7 @@ Frontegg.createUser = async (accountId, email, name, userData, privateUserData, 
 			tenantId: accountId,
 			metadata: userData,
 			vendorMetadata: privateUserData,
-			roleIds: ['APP_USER'],
+			roleIds: [config.userRole],
 
 		});
 
@@ -172,7 +173,14 @@ Frontegg.createAccount = async (name) => {
 			},
 		};
 
-		await post(`${config.vendorDomain}/tenants/resources/tenants/v1/${payload.tenantId}/metadata`, metadataPayload, { headers });
+		const applicationPayload = {
+			tenantId: payload.tenantId,
+		};
+
+		await Promise.all([
+			post(`${config.vendorDomain}/tenants/resources/tenants/v1/${payload.tenantId}/metadata`, metadataPayload, { headers }),
+			post(`${config.vendorDomain}/applications/resources/applications/tenant-assignments/v1/${config.appId}`, applicationPayload, { headers }),
+		]);
 
 		return payload.tenantId;
 	} catch (err) {
@@ -268,15 +276,16 @@ Frontegg.generateToken = async (urlUsed, code, challenge) => {
 	return { token: data.access_token, refreshToken: data.refresh_token, expiry };
 };
 
-Frontegg.generateAuthenticationCodeUrl = ({ state, redirectURL, codeChallenge }) => {
-	const qsObj = {
+Frontegg.generateAuthenticationCodeUrl = ({ state, redirectURL, codeChallenge }, tenantId) => {
+	const qsObj = deleteIfUndefined({
 		response_type: 'code',
 		scope: 'openId',
 		client_id: config.appId,
 		state,
 		redirect_uri: redirectURL,
 		code_challenge: codeChallenge,
-	};
+		tenantId,
+	});
 
 	return `${config.appUrl}/oauth/authorize?${queryString.encode(qsObj)}`;
 };
