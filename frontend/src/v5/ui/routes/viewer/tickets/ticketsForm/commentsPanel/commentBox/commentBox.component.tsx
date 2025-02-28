@@ -134,12 +134,11 @@ export const CommentBox = ({ message = '', images = [], view: existingView, comm
 		const newComment: Partial<ITicketComment> = {
 			message: newMessage,
 			images: imagesToUpload.map(({ src }) => src),
-			view: viewpoint,
 		};
 		if (commentReply) {
 			newComment.message = addReply(commentReply, newComment.message);
 		}
-		if (!viewIsUnchanged) {
+		if (viewpoint) {
 			newComment.view = viewpoint;
 		}
 		TicketCommentsActionsDispatchers.updateComment(
