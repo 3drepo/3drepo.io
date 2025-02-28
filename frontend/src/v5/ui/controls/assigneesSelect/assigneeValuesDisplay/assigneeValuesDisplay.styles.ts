@@ -25,6 +25,7 @@ export const Container = styled.div`
 
 export const AvatarsOpacityHandler = styled.div`
 	display: contents;
+	color: ${({ theme }) => theme.palette.base.light};
 
 	.MuiAvatar-root {
 		z-index: 2;

@@ -32,6 +32,7 @@ export type AssigneesSelectProps = Pick<FormInputProps, 'value'> & SelectProps &
 	canClear?: boolean;
 	onBlur?: () => void;
 	excludeViewers?: boolean;
+	emptyListMessage?: string;
 };
 
 export const AssigneesSelect = ({
@@ -44,6 +45,7 @@ export const AssigneesSelect = ({
 	onBlur,
 	canClear = false,
 	disabled,
+	emptyListMessage,
 	...props
 }: AssigneesSelectProps) => {
 	const { containerOrFederation } = useContext(TicketContext);
@@ -85,6 +87,7 @@ export const AssigneesSelect = ({
 					value={valueAsArray}
 					maxItems={maxItems}
 					onClear={canClear && !disabled && valueAsArray?.length ? handleClear : undefined}
+					emptyListMessage={emptyListMessage}
 				/>
 				<AssigneesSelectMenu
 					value={value}

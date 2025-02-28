@@ -16,22 +16,26 @@
  */
 
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
-import { FormattedMessage } from 'react-intl';
 import { AssigneeCircle } from '../assigneeCircle/assigneeCircle.component';
 import { ExtraAssigneesPopover } from '../extraAssigneesCircle/extraAssigneesPopover.component';
 import { ExtraAssigneesCircle } from '../extraAssigneesCircle/extraAssignees.styles';
 import { AvatarsOpacityHandler, ClearIconContainer, Container } from './assigneeValuesDisplay.styles';
 import ClearIcon from '@assets/icons/controls/clear_circle.svg';
+import { formatMessage } from '@/v5/services/intl';
+
+const DEFAULT_EMPTY_LIST_MESSAGE = formatMessage({ id: 'assignees.circleList.none', defaultMessage: 'None Selected' });
 
 export type AssigneesValuesDisplayProps = {
 	value: any[];
 	maxItems?: number;
 	onClear?: () => void;
+	emptyListMessage?: string;
 };
 export const AssigneesValuesDisplay = ({
 	value,
 	maxItems = 3,
 	onClear,
+	emptyListMessage = DEFAULT_EMPTY_LIST_MESSAGE,
 }) => {
 	// Using this logic instead of a simple partition because ExtraAssigneesCircle needs to occupy
 	// the last position when the overflow value is 2+. There is no point showing +1 overflow
@@ -42,9 +46,7 @@ export const AssigneesValuesDisplay = ({
 	return (
 		<Container>
 			<AvatarsOpacityHandler>
-				{!listedAssignees.length && (
-					<FormattedMessage id="assignees.circleList.none" defaultMessage="None Selected" />
-				)}
+				{!listedAssignees.length && emptyListMessage}
 				{listedAssignees.map((assignee) => (
 					<AssigneeCircle key={assignee} assignee={assignee} size="small" />
 				))}
