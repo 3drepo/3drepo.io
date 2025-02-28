@@ -63,8 +63,7 @@ const processTeamspace = async (ts) => {
 		} else if (!userId) {
 			// user does not exist in frontegg, we need to create an entry
 			logger.logInfo(`\tCreating ${user}...`);
-			const newUserId = await createUser(refId, email, [firstName, lastName].join(' '));
-			console.log(newUserId);
+			const newUserId = await createUser(refId, email, [firstName, lastName].join(' '), undefined, undefined, true);
 			if (newUserId) await updateUserId(user, newUserId);
 		} else {
 			logger.logInfo(`\tAdding ${user} to account...`);
