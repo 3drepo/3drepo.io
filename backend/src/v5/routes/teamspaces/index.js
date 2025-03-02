@@ -19,7 +19,7 @@ const { canRemoveTeamspaceMember, memberExists } = require('../../middleware/dat
 const { Router } = require('express');
 const Teamspaces = require('../../processors/teamspaces');
 const { fileExtensionFromBuffer } = require('../../utils/helper/typeCheck');
-const { hasAccessToTeamspace } = require('../../middleware/permissions');
+const { hasAccessToTeamspace, isMemberOfTeamspace } = require('../../middleware/permissions');
 const { isTeamspaceAdmin } = require('../../middleware/permissions');
 const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
@@ -224,7 +224,7 @@ const establishRoutes = () => {
 	*               type: string
 	*               format: binary
 	*/
-	router.get('/:teamspace/avatar', hasAccessToTeamspace, getAvatar);
+	router.get('/:teamspace/avatar', isMemberOfTeamspace, getAvatar);
 
 	/**
 	* @openapi
