@@ -21,7 +21,7 @@ jest.mock('../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
 jest.mock('../../../../../../src/v5/utils/webRequests');
 const WebRequests = require(`${src}/utils/webRequests`);
-jest.mock('../../../../../../src/v5/utils/permissions/permissions');
+jest.mock('../../../../../../src/v5/utils/permissions');
 const { cloneDeep } = require(`${src}/utils/helper/objects`);
 const { templates } = require(`${src}/utils/responseCodes`);
 

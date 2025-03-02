@@ -18,7 +18,7 @@
 "use strict";
 
 const {v5Path} = require("../../interop");
-const {addTeamspaceMember, removeTeamspaceMember} = require(`${v5Path}/processors/teamspaces/teamspaces`);
+const {addTeamspaceMember, removeTeamspaceMember} = require(`${v5Path}/processors/teamspaces`);
 
 const Role = {};
 

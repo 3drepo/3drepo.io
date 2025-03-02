@@ -20,7 +20,7 @@ const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const { initTeamspace } = require(`${v5Path}/processors/teamspaces/teamspaces`);
+const { initTeamspace } = require(`${v5Path}/processors/teamspaces`);
 const { getUserByUsername } = require(`${v5Path}/models/users`);
 const { getTeamspaceSetting } = require(`${v5Path}/models/teamspaceSettings`);
 

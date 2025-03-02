@@ -22,7 +22,7 @@ const {
 	hasProjectAdminPermissions,
 	hasReadAccessToSomeModels,
 	isTeamspaceAdmin,
-} = require('../../../utils/permissions/permissions');
+} = require('../../../utils/permissions');
 const { COL_NAME } = require('../../../models/projectSettings.constants');
 const { getAllTemplates } = require('../../../models/tickets.templates');
 const { removeModelData } = require('../../../utils/helper/models');

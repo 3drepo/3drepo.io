@@ -30,7 +30,7 @@ const {
 	hasCommenterAccessToFederation,
 	hasReadAccessToContainer,
 	hasReadAccessToFederation,
-} = require('../../../../../middleware/permissions/permissions');
+} = require('../../../../../middleware/permissions');
 
 const { validateGroupsExportData, validateGroupsImportData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups');
 const { Router } = require('express');

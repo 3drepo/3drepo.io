@@ -19,7 +19,7 @@ const { generateLinkToAuthenticator, generateToken, redirectToStateURL } = requi
 const { isLoggedIn, notLoggedIn } = require('../middleware/auth');
 const { Router } = require('express');
 const { createEndpointURL } = require('../utils/config');
-const { isMemberOfTeamspace } = require('../middleware/permissions/permissions');
+const { isMemberOfTeamspace } = require('../middleware/permissions');
 const { updateSession } = require('../middleware/sessions');
 
 const AUTH_POST = '/authenticate-post';

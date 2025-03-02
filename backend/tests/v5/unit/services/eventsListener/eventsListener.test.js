@@ -34,8 +34,8 @@ jest.mock('../../../../../src/v5/handler/db', () => ({
 }));
 jest.mock('../../../../../src/v5/services/sessions');
 const Sessions = require(`${src}/services/sessions`);
-jest.mock('../../../../../src/v5/processors/teamspaces/teamspaces');
-const Teamspaces = require(`${src}/processors/teamspaces/teamspaces`);
+jest.mock('../../../../../src/v5/processors/teamspaces');
+const Teamspaces = require(`${src}/processors/teamspaces`);
 jest.mock('../../../../../src/v5/processors/teamspaces/invitations');
 const Invitations = require(`${src}/processors/teamspaces/invitations`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);

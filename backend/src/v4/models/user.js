@@ -44,7 +44,7 @@ const { publish } = require(`${v5Path}/services/eventsManager/eventsManager.js`)
 const { getAddOns } = require(`${v5Path}/models/teamspaceSettings`);
 const { getSpaceUsed } = require(`${v5Path}/utils/quota.js`);
 const UserProcessorV5 = require(`${v5Path}/processors/users`);
-const { removeTeamspaceMember, addTeamspaceMember, getTeamspaceListByUser} = require(`${v5Path}/processors/teamspaces/teamspaces`);
+const { removeTeamspaceMember, addTeamspaceMember, getTeamspaceListByUser} = require(`${v5Path}/processors/teamspaces`);
 
 const COLL_NAME = "system.users";
 

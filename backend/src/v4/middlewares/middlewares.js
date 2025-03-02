@@ -32,7 +32,7 @@ const hasReadAccessToModelHelper = require("./checkPermissions").hasReadAccessTo
 const isAccountAdminHelper = require("./checkPermissions").isAccountAdminHelper;
 
 const { validSession } = require(`${v5Path}/middleware/auth`);
-const { hasAccessToTeamspace } = require(`${v5Path}/middleware/permissions/permissions`);
+const { hasAccessToTeamspace } = require(`${v5Path}/middleware/permissions`);
 
 const readAccessToModel = [C.PERM_VIEW_MODEL];
 

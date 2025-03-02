@@ -18,7 +18,7 @@
 const { createResponseCode, templates } = require('../../../../utils/responseCodes');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { hasAccessToTeamspace } = require('../../../../models/teamspaceSettings');
-const { isTeamspaceAdmin } = require('../../../../utils/permissions/permissions');
+const { isTeamspaceAdmin } = require('../../../../utils/permissions');
 const { respond } = require('../../../../utils/responder');
 
 const Teamspaces = {};

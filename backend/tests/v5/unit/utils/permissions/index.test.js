@@ -19,8 +19,8 @@ const { times } = require('lodash');
 const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
 
-const Permissions = require(`${src}/utils/permissions/permissions`);
-const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
+const Permissions = require(`${src}/utils/permissions`);
+const { PROJECT_ADMIN } = require(`${src}/utils/permissions.constants`);
 jest.mock('../../../../../src/v5/models/teamspaceSettings');
 const Teamspaces = require(`${src}/models/teamspaceSettings`);
 jest.mock('../../../../../src/v5/models/projectSettings');

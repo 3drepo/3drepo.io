@@ -23,7 +23,7 @@ const {
 	SECURITY_SETTINGS,
 	SUBSCRIPTION_TYPES,
 } = require('./teamspaces.constants');
-const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
+const { TEAMSPACE_ADMIN } = require('../utils/permissions.constants');
 const { TEAM_MEMBER } = require('./roles.constants');
 const { USERS_DB_NAME } = require('./users.constants');
 const db = require('../handler/db');
