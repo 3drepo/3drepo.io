@@ -32,7 +32,7 @@ jest.mock('../../../../../../src/v5/utils/helper/models');
 const ModelHelper = require(`${src}/utils/helper/models`);
 
 const Projects = require(`${src}/processors/teamspaces/projects`);
-const { PROJECT_ADMIN } = require(`${src}/utils/permissions.constants`);
+const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 
 const { MODEL_CATEGORIES, statusCodes } = require(`${src}/models/modelSettings.constants`);
 

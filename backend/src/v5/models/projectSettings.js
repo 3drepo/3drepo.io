@@ -17,7 +17,7 @@
 
 const Projects = {};
 const { COL_NAME } = require('./projectSettings.constants');
-const { PROJECT_ADMIN } = require('../utils/permissions.constants');
+const { PROJECT_ADMIN } = require('../utils/permissions/permissions.constants');
 const db = require('../handler/db');
 const { generateUUID } = require('../utils/helper/uuids');
 const { getCommonElements } = require('../utils/helper/arrays');

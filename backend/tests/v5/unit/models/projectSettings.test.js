@@ -21,7 +21,7 @@ const { generateRandomString } = require('../../helper/services');
 const Project = require(`${src}/models/projectSettings`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { PROJECT_ADMIN } = require(`${src}/utils/permissions.constants`);
+const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 
 const testProjectAdmins = () => {

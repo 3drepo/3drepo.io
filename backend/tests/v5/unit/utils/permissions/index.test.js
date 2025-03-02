@@ -20,7 +20,7 @@ const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
 
 const Permissions = require(`${src}/utils/permissions`);
-const { PROJECT_ADMIN } = require(`${src}/utils/permissions.constants`);
+const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 jest.mock('../../../../../src/v5/models/teamspaceSettings');
 const Teamspaces = require(`${src}/models/teamspaceSettings`);
 jest.mock('../../../../../src/v5/models/projectSettings');

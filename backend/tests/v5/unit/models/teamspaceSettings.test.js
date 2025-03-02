@@ -26,7 +26,7 @@ const { ADD_ONS, DEFAULT_TOPIC_TYPES, DEFAULT_RISK_CATEGORIES, SECURITY, SECURIT
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
-const { TEAMSPACE_ADMIN } = require(`${src}/utils/permissions.constants`);
+const { TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 const { TEAM_MEMBER } = require(`${src}/models/roles.constants`);
 const { ADD_ONS_MODULES } = require(`${src}/models/teamspaces.constants`);
 
