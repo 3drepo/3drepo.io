@@ -65,7 +65,7 @@ Teamspaces.initTeamspace = async (teamspaceName, owner) => {
 		]);
 		await Promise.all([
 			createTeamspaceSettings(teamspaceName, teamspaceId),
-			assignUserToJob(teamspaceName, DEFAULT_OWNER_JOB, teamspaceName),
+			assignUserToJob(teamspaceName, DEFAULT_OWNER_JOB, owner),
 			addDefaultTemplates(teamspaceName),
 		]);
 		await Promise.all([

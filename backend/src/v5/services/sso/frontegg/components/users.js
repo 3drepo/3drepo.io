@@ -23,7 +23,7 @@ const Users = {};
 
 Users.getUserById = async (userId) => {
 	try {
-		const config = getConfig();
+		const config = await getConfig();
 		const { data } = await get(`${config.vendorDomain}/identity/resources/vendor-only/users/v1/${userId}`, await getBearerHeader());
 		return data;
 	} catch (err) {
@@ -33,7 +33,7 @@ Users.getUserById = async (userId) => {
 
 Users.createUser = async (accountId, email, name, userData, privateUserData, bypassVerification = false) => {
 	try {
-		const config = getConfig();
+		const config = await getConfig();
 		const payload = deleteIfUndefined({
 			email,
 			name,

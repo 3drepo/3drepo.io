@@ -70,11 +70,8 @@ const init = async () => {
 	}
 };
 
-Connection.getConfig = () => {
-	if (!config) {
-		throw new Error('Cannot get config before initialising');
-	}
-
+Connection.getConfig = async () => {
+	await init();
 	return config;
 };
 

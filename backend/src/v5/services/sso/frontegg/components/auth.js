@@ -44,8 +44,8 @@ Auth.validateToken = async ({ token }, userId) => {
 	}
 };
 
-Auth.generateAuthenticationCodeUrl = ({ state, redirectURL, codeChallenge }, tenantId) => {
-	const config = getConfig();
+Auth.generateAuthenticationCodeUrl = async ({ state, redirectURL, codeChallenge }, tenantId) => {
+	const config = await getConfig();
 	const qsObj = deleteIfUndefined({
 		response_type: 'code',
 		scope: 'openId',
@@ -60,7 +60,7 @@ Auth.generateAuthenticationCodeUrl = ({ state, redirectURL, codeChallenge }, ten
 };
 
 Auth.generateToken = async (urlUsed, code, challenge) => {
-	const config = getConfig();
+	const config = await getConfig();
 	const payload = {
 		grant_type: 'authorization_code',
 		code,

@@ -25,7 +25,7 @@ const Accounts = {};
 
 Accounts.getTeamspaceByAccount = async (accountId) => {
 	try {
-		const config = getConfig();
+		const config = await getConfig();
 		const { data: { metadata } } = await get(`${config.vendorDomain}/tenants/resources/tenants/v2/${accountId}`, await getBearerHeader());
 		const metaJson = JSON.parse(metadata);
 		return metaJson[META_LABEL_TEAMSPACE];
@@ -36,7 +36,7 @@ Accounts.getTeamspaceByAccount = async (accountId) => {
 
 Accounts.createAccount = async (name) => {
 	try {
-		const config = getConfig();
+		const config = await getConfig();
 		const payload = {
 			tenantId: generateUUIDString(),
 			name,
@@ -70,7 +70,7 @@ Accounts.createAccount = async (name) => {
 
 Accounts.getAllUsersInAccount = async (accountId) => {
 	try {
-		const config = getConfig();
+		const config = await getConfig();
 		const header = {
 			...await getBearerHeader(),
 			'frontegg-tenant-id': accountId,
@@ -107,7 +107,7 @@ Accounts.getAllUsersInAccount = async (accountId) => {
 
 Accounts.addUserToAccount = async (accountId, userId, sendInvite = true) => {
 	try {
-		const config = getConfig();
+		const config = await getConfig();
 		const payload = {
 			tenantId: accountId,
 			validateTenantExist: true,
@@ -122,7 +122,7 @@ Accounts.addUserToAccount = async (accountId, userId, sendInvite = true) => {
 
 Accounts.removeUserFromAccount = async (accountId, userId) => {
 	try {
-		const config = getConfig();
+		const config = await getConfig();
 		const headers = {
 			...await getBearerHeader(),
 			[HEADER_TENANT_ID]: accountId,
@@ -137,7 +137,7 @@ Accounts.removeUserFromAccount = async (accountId, userId) => {
 
 Accounts.removeAccount = async (accountId) => {
 	try {
-		const config = getConfig();
+		const config = await getConfig();
 		await httpDelete(`${config.vendorDomain}/tenants/resources/tenants/v1/${accountId}`, await getBearerHeader());
 	} catch (err) {
 		logger.logError(`Failed to remove account: ${JSON.stringify(err?.response?.data)} `);

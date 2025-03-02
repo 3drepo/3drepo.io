@@ -139,7 +139,7 @@ const redirectForAuth = (redirectURL) => async (req, res) => {
 			codeChallenge: req.session.pkceCodes.challenge,
 		};
 
-		const link = generateAuthenticationCodeUrl(req.authParams, accountId);
+		const link = await generateAuthenticationCodeUrl(req.authParams, accountId);
 		respond(req, res, templates.ok, { link });
 	} catch (err) {
 		respond(req, res, err);
