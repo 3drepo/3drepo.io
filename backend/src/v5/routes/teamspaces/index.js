@@ -16,10 +16,10 @@
  */
 
 const { canRemoveTeamspaceMember, memberExists } = require('../../middleware/dataConverter/inputs/teamspaces');
+const { hasAccessToTeamspace, isMemberOfTeamspace } = require('../../middleware/permissions');
 const { Router } = require('express');
 const Teamspaces = require('../../processors/teamspaces');
 const { fileExtensionFromBuffer } = require('../../utils/helper/typeCheck');
-const { hasAccessToTeamspace, isMemberOfTeamspace } = require('../../middleware/permissions');
 const { isTeamspaceAdmin } = require('../../middleware/permissions');
 const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
