@@ -35,8 +35,8 @@ const setSessionInfo = async (req, res, next) => {
 	};
 
 	req.session.ssoInfo = ssoInfo;
-	req.session.token = req.token;
 
+	req.session.token = req.token;
 	await next();
 };
 

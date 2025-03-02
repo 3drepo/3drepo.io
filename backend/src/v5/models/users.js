@@ -162,7 +162,12 @@ User.removeUser = (user) => db.deleteOne(USERS_DB_NAME, USERS_COL, { user });
 User.removeUsers = (users) => db.deleteMany(USERS_DB_NAME, USERS_COL, { user: { $in: users } });
 
 User.ensureIndicesExist = async () => {
-	await db.createIndex(USERS_DB_NAME, USERS_COL, { 'customData.userId': 1 }, { runInBackground: true, unique: true });
+	try {
+		await db.createIndex(USERS_DB_NAME, USERS_COL, { 'customData.userId': 1 }, { runInBackground: true, unique: true });
+	} catch (err) {
+		// Note this will fail pre 5.16 migration.
+		logger.logWarning('Failed to create index on user ID. Please ensure 5.16 migration script has been executed.');
+	}
 };
 
 module.exports = User;

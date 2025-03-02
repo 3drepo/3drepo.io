@@ -42,47 +42,6 @@ Sessions.manageSessions = async (req, res, next) => {
 	middleware(req, res, next);
 };
 
-const updateSessionDetails = (req) => {
-	const updatedUser = { ...req.loginData, webSession: false };
-	const { session } = req;
-
-	const { ssoInfo: { userAgent, referer } } = req.session;
-	if (referer) {
-		updatedUser.referer = referer;
-	}
-
-	delete req.session.ssoInfo;
-
-	if (userAgent) {
-		updatedUser.webSession = isFromWebBrowser(userAgent);
-		updatedUser.userAgent = userAgent;
-	}
-
-	if (req.token) {
-		session.token = req.token;
-	}
-
-	session.user = deleteIfUndefined(updatedUser);
-	session.cookie.domain = config.cookie_domain;
-
-	if (config.cookie.maxAge) {
-		session.cookie.maxAge = config.cookie.maxAge;
-	}
-
-	const ipAddress = req.ips[0] || req.ip;
-	session.ipAddress = ipAddress;
-
-	publish(events.SESSION_CREATED, {
-		username: updatedUser.username,
-		sessionID: req.sessionID,
-		ipAddress,
-		userAgent,
-		socketId: req.headers[SOCKET_HEADER],
-		referer: updatedUser.referer });
-
-	return session;
-};
-
 Sessions.destroySession = (req, res) => {
 	const username = req.session?.user?.username;
 
@@ -106,7 +65,47 @@ Sessions.appendCSRFToken = async (req, res, next) => {
 };
 
 Sessions.updateSession = async (req, res, next) => {
-	updateSessionDetails(req);
+	const { session } = req;
+	if (req.token) {
+		session.token = req.token;
+	}
+
+	const updatedUser = { ...req.loginData, webSession: session?.user?.webSession || false };
+	// If there is ssoInfo, this is a new session
+	const { ssoInfo: { userAgent, referer } } = session;
+	if (referer) {
+		updatedUser.referer = referer;
+	}
+
+	if (userAgent) {
+		updatedUser.webSession = isFromWebBrowser(userAgent);
+		updatedUser.userAgent = userAgent;
+	}
+
+	delete req.session.ssoInfo;
+
+	session.cookie.domain = config.cookie_domain;
+
+	if (config.cookie.maxAge) {
+		session.cookie.maxAge = config.cookie.maxAge;
+	}
+
+	const ipAddress = req.ips[0] || req.ip;
+	session.ipAddress = ipAddress;
+
+	if (!session.reAuth) {
+		publish(events.SESSION_CREATED, {
+			username: updatedUser.username,
+			sessionID: req.sessionID,
+			ipAddress,
+			userAgent,
+			socketId: req.headers[SOCKET_HEADER],
+			referer: updatedUser.referer });
+	}
+
+	delete req.session.reAuth;
+	session.user = deleteIfUndefined(updatedUser);
+
 	await next();
 };
 

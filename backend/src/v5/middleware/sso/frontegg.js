@@ -30,6 +30,7 @@ const { addPkceProtection } = require('./pkce');
 const { createNewUserRecord } = require('../../processors/users');
 const { destroySession } = require('../../utils/sessions');
 const { errorCodes } = require('../../services/sso/sso.constants');
+const { getTeamspaceRefId } = require('../../models/teamspaceSettings');
 const { logger } = require('../../utils/logger');
 const { respond } = require('../../utils/responder');
 const { validateMany } = require('../common');
@@ -116,11 +117,17 @@ const getToken = (urlUsed) => async (req, res, next) => {
 	}
 };
 
-const redirectForAuth = (redirectURL) => (req, res) => {
+const redirectForAuth = (redirectURL) => async (req, res) => {
 	try {
 		if (!req.query.redirectUri) {
 			respond(req, res, createResponseCode(templates.invalidArguments, 'redirectUri(query string) is required'));
 			return;
+		}
+
+		let accountId;
+		if (req.params.teamspace) {
+			accountId = await getTeamspaceRefId(req.params.teamspace);
+			req.session.reAuth = true;
 		}
 
 		req.authParams = {
@@ -132,7 +139,7 @@ const redirectForAuth = (redirectURL) => (req, res) => {
 			codeChallenge: req.session.pkceCodes.challenge,
 		};
 
-		const link = generateAuthenticationCodeUrl(req.authParams);
+		const link = generateAuthenticationCodeUrl(req.authParams, accountId);
 		respond(req, res, templates.ok, { link });
 	} catch (err) {
 		respond(req, res, err);

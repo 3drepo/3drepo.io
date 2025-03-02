@@ -16,9 +16,10 @@
  */
 
 const { generateLinkToAuthenticator, generateToken, redirectToStateURL } = require('../middleware/sso/frontegg');
+const { isLoggedIn, notLoggedIn } = require('../middleware/auth');
 const { Router } = require('express');
 const { createEndpointURL } = require('../utils/config');
-const { notLoggedIn } = require('../middleware/auth');
+const { isMemberOfTeamspace } = require('../middleware/permissions/permissions');
 const { updateSession } = require('../middleware/sessions');
 
 const AUTH_POST = '/authenticate-post';
@@ -31,7 +32,7 @@ const establishRoutes = () => {
 	* @openapi
 	* /authentication/authenticate:
 	*   get:
-	*     description: Returns a link 3DR's authentication page and then to a URI provided upon success. The process works like the standard SSO protocol.
+	*     description: General authentication route to establish a session.
 	*     tags: [Authentication]
 	*     operationId: authenticate
 	*     parameters:
@@ -42,7 +43,7 @@ const establishRoutes = () => {
 	*         description: a URI to redirect to when authentication finished
 	*     responses:
 	*       200:
-	*         description: returns a link to 3D Repo's authentication page and then to a provided URI upon success
+	*         description: Returns a link to 3DR's authentication page and then redirects to a URI provided upon success. The process works like the standard SSO protocol.
 	*         content:
 	*           application/json:
 	*             schema:
@@ -55,8 +56,42 @@ const establishRoutes = () => {
 	*/
 	router.get('/authenticate', notLoggedIn, generateLinkToAuthenticator(authenticateRedirectUrl));
 
+	/**
+	* @openapi
+	* /authentication/authenticate/{teamspace}:
+	*   get:
+	*     description: Authenticates a user against a particular teamspace, the user has to have already established a session to use this endpoint.
+	*     tags: [Authentication]
+	*     operationId: authenticate
+	*     parameters:
+	*       - in: path
+	*         name: teamspace
+	*         description: Name of the teamspace to authenticate against
+	*         required: true
+	*         schema:
+	*           type: string
+	*       - in: query
+	*         name: redirectUri
+	*         schema:
+	*           type: string
+	*         description: a URI to redirect to when authentication finished
+	*     responses:
+	*       200:
+	*         description: Returns a link to 3DR's authentication page and then redirects to a URI provided upon success. The process works like the standard SSO protocol.
+	*         content:
+	*           application/json:
+	*             schema:
+	*               type: object
+	*               properties:
+	*                 link:
+	*                   type: string
+	*                   description: link to 3D Repo's authenticator
+	*
+	*/
+	router.get('/authenticate/:teamspace', isLoggedIn, isMemberOfTeamspace, generateLinkToAuthenticator(authenticateRedirectUrl));
+
 	// This endpoint is not exposed in swagger as it is not designed to be called by clients
-	router.get(AUTH_POST, notLoggedIn, generateToken(authenticateRedirectUrl), updateSession, redirectToStateURL);
+	router.get(AUTH_POST, generateToken(authenticateRedirectUrl), updateSession, redirectToStateURL);
 
 	return router;
 };

@@ -24,12 +24,32 @@ const {
 const { isTeamspaceAdmin, isTeamspaceMember } = require('./components/teamspaces');
 const { isProjectAdmin } = require('./components/projects');
 const { modelTypes } = require('../../models/modelSettings.constants');
+const { respond } = require('../../utils/responder');
+const { templates } = require('../../utils/responseCodes');
 const { validSession } = require('../auth');
 const { validateMany } = require('../common');
 
 const Permissions = {};
 
-Permissions.hasAccessToTeamspace = validateMany([convertAllUUIDs, validSession, isTeamspaceMember]);
+const isCookieAuthenticatedAgainstTS = async (req, res, next) => {
+	if (!req.session.user?.auth) {
+		// No auth info - this is an apiKey.
+		await next();
+	}
+
+	const authenticatedTeamspace = req.session.user.auth?.authorisedTeamspace;
+	if (authenticatedTeamspace === req.params.teamspace) {
+		await next();
+	} else {
+		respond(req, res, templates.notAuthenticatedAgainstTeamspace);
+	}
+};
+
+// Use this one when you don't care if the user is authenticated against the teamspace
+Permissions.isMemberOfTeamspace = validateMany([convertAllUUIDs, validSession, isTeamspaceMember]);
+// Use this one when you want to make sure the user session is authenticated against the teamspace
+Permissions.hasAccessToTeamspace = validateMany([
+	Permissions.isMemberOfTeamspace, isCookieAuthenticatedAgainstTS]);
 Permissions.isTeamspaceAdmin = validateMany([Permissions.hasAccessToTeamspace, isTeamspaceAdmin]);
 Permissions.isAdminToProject = validateMany([Permissions.hasAccessToTeamspace, isProjectAdmin]);
 

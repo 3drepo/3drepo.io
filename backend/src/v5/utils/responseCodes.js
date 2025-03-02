@@ -26,8 +26,9 @@ ResponseCodes.templates = {
 	// Auth
 	notLoggedIn: { message: 'You are not logged in.', status: 401 },
 	alreadyLoggedIn: { message: 'You are already logged in.', status: 401 },
-	notAuthorized: { message: 'You do not have sufficient access rights for this action.', status: 401 },
-	licenceExpired: { message: 'Licence expired.', status: 401 },
+	notAuthenticatedAgainstTeamspace: { message: 'You are not authenticated against this teamspace.', status: 401 },
+	notAuthorized: { message: 'You do not have sufficient access rights for this action.', status: 403 },
+	licenceExpired: { message: 'Licence expired.', status: 403 },
 	incorrectUsernameOrPassword: { message: 'Incorrect username or password.', status: 400 },
 	incorrectPassword: { message: 'Incorrect password.', status: 400 },
 
