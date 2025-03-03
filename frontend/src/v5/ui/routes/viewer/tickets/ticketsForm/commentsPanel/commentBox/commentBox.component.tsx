@@ -28,8 +28,8 @@ import { uuid } from '@/v4/helpers/uuid';
 import { convertFileToImageSrc, getSupportedImageExtensions } from '@controls/fileUploader/imageFile.helper';
 import { uploadFile } from '@controls/fileUploader/uploadFile';
 import { ITicketComment, TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
-import { addReply, imageIsTooBig, IMAGE_MAX_SIZE_MESSAGE, MAX_MESSAGE_LENGTH, sanitiseMessage, desanitiseMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
-import { getTicketResourceUrl, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { addReply, imageIsTooBig, IMAGE_MAX_SIZE_MESSAGE, MAX_MESSAGE_LENGTH, desanitiseMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
+import { getTicketResourceUrl, isResourceId, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import DeleteIcon from '@assets/icons/outlined/close-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import { useContext, useEffect, useRef, useState } from 'react';
@@ -73,27 +73,29 @@ type ImageToUpload = {
 
 type CommentBoxProps = Pick<ITicketComment, 'message' | 'images' | 'view'> & {
 	onCancel?: () => void;
-	onEditMessage?: (message) => void;
 	commentId?: string;
 	commentReply?: TicketCommentReplyMetadata | null;
 	deleteCommentReply?: () => void; // TODO 5309 make this work for editting
 	className?: string;
 };
 
-export const CommentBox = ({ message = '', images = [], view: existingView, commentReply, deleteCommentReply, onCancel, onEditMessage, commentId, className }: CommentBoxProps) => {
+export const CommentBox = ({ message = '', images = [], view: existingView, commentReply, deleteCommentReply, onCancel, commentId, className }: CommentBoxProps) => {
 	const { teamspace, project } = useParams<ViewerParams>();
 	const { isViewer, containerOrFederation } = useContext(TicketContext);
+	const { is2DOpen } = useContext(ViewerCanvasesContext);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const currentUser = CurrentUserHooksSelectors.selectCurrentUser();
 	const isFederation = modelIsFederation(containerOrFederation);
 
-	const imagesWithSrcs = images.map((id) => ({ id, src: getTicketResourceUrl(teamspace, project, containerOrFederation, ticketId, id, isFederation) }));
-	const [imagesToUpload, setImagesToUpload] = useState<ImageToUpload[]>(imagesWithSrcs);
 	const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
 	const [isDraggingFile, setIsDraggingFile] = useState(false);
 	const [viewpoint, setViewpoint] = useState<Viewpoint>(existingView);
-	const containerRef = useRef<HTMLElement>();
-	const inputRef = useRef<any>();
-	const isEditMode = !!commentId;
+	const [imagesToUpload, setImagesToUpload] = useState<ImageToUpload[]>(images.map((id) => ({ id, src: id })));
+	const imagesToDisplay = imagesToUpload.map((image) => {
+		if (!isResourceId(image.src)) return image;
+		return { ...image, src: getTicketResourceUrl(teamspace, project, containerOrFederation, ticketId, image.id, isFederation) };
+	});
+	
 	const { watch, reset, control } = useForm<{ message: string, images: File[] }>({
 		mode: 'all',
 		defaultValues: {
@@ -101,21 +103,19 @@ export const CommentBox = ({ message = '', images = [], view: existingView, comm
 			images,
 		},
 	});
-	const newMessage = watch('message');
-
-	const { is2DOpen } = useContext(ViewerCanvasesContext);
 	
-	const currentUser = CurrentUserHooksSelectors.selectCurrentUser();
+	const containerRef = useRef<HTMLElement>();
+	const inputRef = useRef<any>();
+	const isEditMode = !!commentId;
+	const newMessage = watch('message');
 
 	const commentReplyLength = commentReply ? addReply(commentReply, '').length : 0;
 	const charsCount = (newMessage?.length || 0) + commentReplyLength;
 	const charsLimitIsReached = charsCount > MAX_MESSAGE_LENGTH;
-
 	const viewIsUnchanged = isEqual(existingView, viewpoint);
 	const messageIsUnchanged = message === newMessage
 		&& isEqual(images, imagesToUpload.map(({ src }) => src))
 		&& viewIsUnchanged;
-
 	const erroredImages = imagesToUpload.filter(({ error }) => error);
 	const disableSendMessage = (!newMessage?.trim()?.length && !imagesToUpload.length && !viewpoint)
 		|| charsLimitIsReached
@@ -201,7 +201,7 @@ export const CommentBox = ({ message = '', images = [], view: existingView, comm
 	};
 
 	const syncProps = useSyncProps({
-		images: imagesToUpload.map(({ src }) => src),
+		images: imagesToDisplay.map(({ src }) => src),
 		onUpload: uploadImages,
 		onDelete: deleteImage,
 		onAddMarkup: editImage,
@@ -286,7 +286,7 @@ export const CommentBox = ({ message = '', images = [], view: existingView, comm
 			</DragAndDrop>
 			{imagesToUpload.length > 0 && (
 				<Images>
-					{imagesToUpload.map(({ src, id, error }, index) => (
+					{imagesToDisplay.map(({ src, id, error }, index) => (
 						<ImageContainer key={id}>
 							<Image src={src} $error={error} onClick={() => openImagesDialog(index)} draggable={false} />
 							<DeleteButton onClick={() => deleteImage(index)} error={error}>

@@ -24,14 +24,16 @@ import { formatMessage } from '@/v5/services/intl';
 import { CommentImages } from '../commentImages/commentImages.component';
 import { CommentAuthor } from './commentNonMessageContent.styles';
 import { CommentReply } from '../commentReply/commentReply.component';
-import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DialogsActionsDispatchers, TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useSyncProps } from '@/v5/helpers/syncProps.hooks';
 import { ExternalLabel } from '../otherUserComment/importedUserPopover/importedUserPopover.styles';
 import { useContext } from 'react';
 import { TicketContext } from '../../../../ticket.context';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { uploadImages } from '@controls/fileUploader/uploadImages';
 
 export type CommentNonMessageContentProps = Partial<Omit<ITicketComment, 'history' | '_id'>> & {
+	commentId?: string;
 	metadata?: TicketCommentReplyMetadata;
 	isCurrentUserComment?: boolean;
 	onUploadImages?: () => void;
@@ -40,20 +42,19 @@ export type CommentNonMessageContentProps = Partial<Omit<ITicketComment, 'histor
 	hasMessage: boolean;
 };
 export const CommentNonMessageContent = ({
+	commentId,
 	author,
 	images = [],
 	metadata,
 	isCurrentUserComment = true,
 	hasMessage,
-	onUploadImages,
-	onDeleteImage,
-	onEditImage,
 	originalAuthor,
 }: CommentNonMessageContentProps) => {
 	const { teamspace, project } = useParams<ViewerParams>();
 	const { containerOrFederation } = useContext(TicketContext);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const isFederation = modelIsFederation(containerOrFederation);
+	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 
 	const disabledDeleteMessage = (hasMessage || images.length > 1) ? null : formatMessage({
 		id: 'comment.deleteImage.disabled.emptyMessage',
@@ -65,12 +66,29 @@ export const CommentNonMessageContent = ({
 		return getTicketResourceUrl(teamspace, project, containerOrFederation, ticketId, img, isFederation);
 	});
 
+	const onEdit = (imgs: string[]) => TicketCommentsActionsDispatchers.updateComment(
+		teamspace,
+		project,
+		containerOrFederation,
+		ticketId,
+		isFederation,
+		commentId,
+		{ images: imgs },
+	);
+	const onEditImage = (img, index) => {
+		const newImages = [...images];
+		newImages[index] = img;
+		onEdit(newImages);
+	};
+
+	// @ts-ignore
+	const onDeleteImage = (index) => onEdit(images.toSpliced(index, 1));
+	const onUploadImages = async () => uploadImages((imagesToUpload) => onEdit(images.concat(imagesToUpload)));
+	const imagesEditingFunctions = readOnly ? {} : { onDeleteImage, onUploadImages, onEditImage };
 	const syncProps = useSyncProps({
 		images: imgsSrcs,
-		onUpload: onUploadImages,
-		onDelete: onDeleteImage,
-		onAddMarkup: onEditImage,
 		disabledDeleteMessage: disabledDeleteMessage,
+		...imagesEditingFunctions,
 	});
 	const openImagesModal = (index) => DialogsActionsDispatchers.open(ImagesModal, { displayImageIndex: index },  syncProps);
 

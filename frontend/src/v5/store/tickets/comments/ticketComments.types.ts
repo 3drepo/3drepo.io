@@ -21,6 +21,7 @@ export type TicketCommentHistoryBlock = {
 	message: string,
 	images: string[],
 	timestamp: Date,
+	view: Viewpoint,
 };
 
 export type ITicketComment = {

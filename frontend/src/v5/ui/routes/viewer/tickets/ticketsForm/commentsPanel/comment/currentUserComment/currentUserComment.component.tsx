@@ -25,7 +25,7 @@ import { TicketButton } from '../../../../ticketButton/ticketButton.styles';
 import { Comment, CommentWithButtonsContainer, EditComment } from './currentUserComment.styles';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 import { CommentButtons } from '../basicComment/basicComment.styles';
-import { uploadImages } from '@controls/fileUploader/uploadImages';
+
 
 export type CurrentUserCommentProps = ITicketComment & {
 	commentAge: string;
@@ -33,7 +33,6 @@ export type CurrentUserCommentProps = ITicketComment & {
 	isFirstOfBlock: boolean;
 	onDelete: (commentId) => void;
 	onReply: (commentId) => void;
-	onEdit: (commentId, newMessage, newImages, newViewpoint) => void;
 };
 export const CurrentUserComment = ({
 	_id,
@@ -45,23 +44,10 @@ export const CurrentUserComment = ({
 	view,
 	onDelete,
 	onReply,
-	onEdit,
 	...props
 }: CurrentUserCommentProps) => {
 	const [isEditMode, setIsEditMode] = useState(false);
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
-
-	const onEditImage = (img, index) => {
-		const newImages = [...images];
-		newImages[index] = img;
-		onEdit(_id, message, newImages, view);
-	};
-
-	// @ts-ignore
-	const onDeleteImage = (index) => onEdit(_id, message, images.toSpliced(index, 1));
-
-	const onUploadImages = async () => uploadImages((imagesToUpload) => onEdit(_id, message, images.concat(imagesToUpload), view));
-	const imagesEditingFunctions = { onDeleteImage, onUploadImages, onEditImage };
 
 	if (deleted) return (<DeletedComment author={author} />);
 
@@ -94,11 +80,11 @@ export const CurrentUserComment = ({
 				</CommentButtons>
 			)}
 			<Comment
+				commentId={_id}
 				message={message}
 				images={images}
 				metadata={metadata}
 				view={view}
-				{...(!readOnly ? imagesEditingFunctions : {})}
 				{...props}
 			/>
 		</CommentWithButtonsContainer>

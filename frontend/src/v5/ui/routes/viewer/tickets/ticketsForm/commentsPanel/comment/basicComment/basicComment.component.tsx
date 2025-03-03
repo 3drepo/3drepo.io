@@ -29,6 +29,7 @@ import { useContext } from 'react';
 export type BasicCommentProps = Partial<Omit<ITicketComment, 'history' | '_id'>> & {
 	children?: any;
 	className?: string;
+	commentId?: string;
 	commentAge: string;
 	metadata?: TicketCommentReplyMetadata;
 	isCurrentUserComment?: boolean;
