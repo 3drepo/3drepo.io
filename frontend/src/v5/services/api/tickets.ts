@@ -55,8 +55,19 @@ export const fetchFederationTemplates = async (
 	projectId: string,
 	federationId: string,
 	getDetails?: boolean,
+	showDeprecated?: boolean,
 ): Promise<FetchTemplatesResponse> => {
-	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/templates?getDetails=${getDetails}`);
+	const urlSearchParams = new URLSearchParams();
+
+	if (getDetails) {
+		urlSearchParams.set('getDetails', getDetails.toString());
+	}
+
+	if (showDeprecated) {
+		urlSearchParams.set('showDeprecated', showDeprecated.toString());
+	}
+
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/templates?${urlSearchParams}`);
 	return data.templates;
 };
 
