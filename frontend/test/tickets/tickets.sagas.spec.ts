@@ -481,7 +481,7 @@ describe('Tickets: sagas', () => {
 		// Basic Federation templates
 		it('should call fetchFederationTemplates endpoint', async () => {
 			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates?getDetails=false`)
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates?showDeprecated=true`)
 				.reply(200, { templates });
 
 			await waitForActions(() => {
@@ -491,7 +491,7 @@ describe('Tickets: sagas', () => {
 
 		it('should call fetchFederationTemplates endpoint with a 404', async () => {
 			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates?getDetails=false`)
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates?showDeprecated=true`)
 				.reply(404);
 
 			await waitForActions(() => {
