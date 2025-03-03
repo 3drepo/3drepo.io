@@ -79,7 +79,7 @@ describe("Default permission assignment", function () {
 
 	let modelId;
 
-	it("user should be able to create model", function(done) {
+	it("user should be able to create model - should fail as endpoint is decommissioned", function(done) {
 
 		agent.post(`/${username}/model`)
 			.send({
@@ -87,34 +87,10 @@ describe("Default permission assignment", function () {
 				unit: "m",
 				project: "project1"
 			})
-			.expect(200, function(err, res) {
-				modelId = res.body.model;
-				done(err);
-			});
-	});
-
-	it("the model created should filled with correct permissions (account listing)", function(done) {
-		agent.get(`/${username}.json`)
-			.expect(200, function(err, res) {
-
-				const account = res.body.accounts.find(account => account.account === username);
-				expect(account).to.exist;
-
-				const project = account.projects.find(project => project.name === "project1");
-				expect(project).to.exist;
-				const model = project.models.find(model => model.model === modelId);
-				expect(model).to.exist;
-				expect(model.permissions).to.deep.equal(C.MODEL_PERM_LIST);
-				done(err);
-			});
-	});
-
-	it("the model created should filled with correct permissions (model info)", function(done) {
-		agent.get(`/${username}/${modelId}.json`)
-			.expect(200, function(err, res) {
-				expect(res.body.permissions).to.deep.equal(C.MODEL_PERM_LIST);
-				done(err);
-			});
+			.expect(410, function(err ,res) {
+				expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
+				callback(err);
+			})
 	});
 
 	it("user should have default permission templates created", function(done) {
