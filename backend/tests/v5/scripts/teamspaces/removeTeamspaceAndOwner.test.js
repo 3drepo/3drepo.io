@@ -18,7 +18,7 @@
 const {
 	determineTestGroup,
 	resetFileshare,
-	db: { reset: resetDB, createTeamspace, createTeamspaceRole, createUser },
+	db: { reset: resetDB, createTeamspace, createUser },
 	generateRandomString,
 	generateUserCredentials,
 } = require('../../helper/services');
@@ -65,7 +65,6 @@ const setupTeamspaces = async ({ normal, partial }) => {
 					}));
 				}
 			} else {
-				await createTeamspaceRole(name);
 				await createUser({ ...generateUserCredentials(), user: name }, [name]);
 			}
 			await addTeamspaceMember(randomTS, name);

@@ -93,7 +93,7 @@ const getUserDetails = async (req, res, next) => {
 
 		auth.userId = userId;
 		auth.teamspaces = teamspaces.filter((entry) => !!entry);
-		auth.authorisedTeamspace = await getTeamspaceByAccount(authAccount);
+		auth.authenticatedTeamspace = await getTeamspaceByAccount(authAccount);
 
 		req.loginData = {
 			auth, username,

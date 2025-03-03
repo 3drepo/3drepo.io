@@ -39,7 +39,6 @@ const QueueHandler = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { editSubscriptions, grantAdminToUser, updateAddOns } = require(`${src}/models/teamspaceSettings`);
-const { createTeamspaceRole } = require(`${src}/models/roles`);
 const { initTeamspace } = require(`${src}/processors/teamspaces`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { MODEL_COMMENTER, MODEL_VIEWER, PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
@@ -121,8 +120,6 @@ db.createUser = (userCredentials, tsList = [], customData = {}) => {
 		apiKey,
 	}, roles);
 };
-
-db.createTeamspaceRole = (ts) => createTeamspaceRole(ts);
 
 db.createTeamspace = async (teamspace, admins = [], subscriptions, createUser = true, addOns) => {
 	if (createUser) await ServiceHelper.db.createUser({ user: teamspace, password: teamspace });

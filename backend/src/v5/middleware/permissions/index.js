@@ -37,7 +37,7 @@ const isCookieAuthenticatedAgainstTS = async (req, res, next) => {
 		await next();
 	}
 
-	const authenticatedTeamspace = req.session.user.auth?.authorisedTeamspace;
+	const authenticatedTeamspace = req.session.user.auth?.authenticatedTeamspace;
 	if (authenticatedTeamspace === req.params.teamspace) {
 		await next();
 	} else {

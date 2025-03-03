@@ -27,15 +27,20 @@ const { singleImageUpload } = require('../middleware/dataConverter/multer');
 const { templates } = require('../utils/responseCodes');
 const { validateUpdateData } = require('../middleware/dataConverter/inputs/users');
 
-const getUsername = (req, res) => {
-	respond(req, res, templates.ok, { username: req.session.user.username });
+const getLoginInfo = (req, res) => {
+	const response = {
+		username: req.session.user.username,
+		authenticatedTeamspace: req.session.user.auth.authenticatedTeamspace,
+	};
+
+	respond(req, res, templates.ok, response);
 };
 
 const getProfile = async (req, res) => {
 	try {
 		const user = getUserFromSession(req.session);
 		const profile = await Users.getProfileByUsername(user);
-		respond(req, res, templates.ok, { ...profile, authorisedTeamspace: req.session.user.auth.authorisedTeamspace });
+		respond(req, res, templates.ok, profile);
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -124,7 +129,7 @@ const establishRoutes = () => {
 	 *   get:
 	 *     description: Gets the username of the logged in user
 	 *     tags: [Auth]
-	 *     operationId: getUsername
+	 *     operationId: getLoginInfo
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -132,16 +137,20 @@ const establishRoutes = () => {
 	 *         description: Returns the username of the user currently logged in
 	 *         content:
 	 *           application/json:
-	 *             schema:
+	 authenticatedTeamspace             schema:
 	 *               type: object
 	 *               properties:
 	 *                 username:
 	 *                   type: string
 	 *                   description: The username of the user
 	 *                   example: Username1
+	 *                 authenticatedTeamspace:
+	 *                   type: string
+	 *                   description: The teamspace the user is authenticated against
+	 *                   example: BuildingProject
 	 *
 	 */
-	router.get('/login', isLoggedIn, getUsername);
+	router.get('/login', isLoggedIn, getLoginInfo);
 
 	/**
 	 * @openapi
