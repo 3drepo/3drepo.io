@@ -24,10 +24,7 @@ const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../../src/v4/services/api.js").createApp();
 const responseCodes = require("../../../src/v4/response_codes.js");
-const {templates: responseCodesV5} = require("../../../src/v5/utils/responseCodes");
 const async = require("async");
-const ModelSetting = require("../../../src/v4/models/modelSetting");
-const User = require("../../../src/v4/models/user");
 describe("Model", function () {
 	let server;
 	let agent;
@@ -65,99 +62,25 @@ describe("Model", function () {
 			});
 		});
 	});
-
-	it("should be created successfully", function(done) {
-
-		async.series([
-			callback => {
-
-				agent.post(`/${username}/model`)
+	
+	it("should fail as enpoint has been decommissioned", () => {
+		agent.post(`/${username}/model`)
 					.send({ modelName: model, desc, type, unit, code, project })
-					.expect(200, function(err ,res) {
-						expect(res.body.name).to.equal(model);
-						modelId = res.body.model;
+					.expect(410, function(err ,res) {
+						expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
 						callback(err);
-					});
-
-			},
-			callback => {
-				agent.get(`/${username}/${modelId}.json`)
-					.expect(200, function(err, res) {
-						expect(res.body.desc).to.equal(desc);
-						expect(res.body.type).to.equal(type);
-						expect(res.body.properties.unit).to.equal(unit);
-						expect(res.body.properties.code).to.equal(code);
-						callback(err);
-					});
-			},
-
-			callback => {
-				agent.get(`/${username}.json`)
-					.expect(200, function(err, res) {
-
-						const account = res.body.accounts.find(account => account.account === username);
-						expect(account).to.exist;
-
-						const pg = account.projects.find(pg => pg.name === project);
-						expect(pg).to.exist;
-
-						const myModel = pg.models.find(_model => _model.model === modelId);
-						expect(myModel).to.exist;
-						expect(myModel.name).to.equal(model);
-
-						callback(err);
-					});
-			}
-		] , err => done(err));
-
+					})
 	});
 
 	describe("Model name tests ", function() {
-		const nameTest = function(modelName, expectSuccess, callback) {
-			if(expectSuccess) {
-				agent.post(`/${username}/model`)
-					.send({ modelName, desc, type, unit, code, project })
-					.expect(200, function(err ,res) {
-						expect(res.body.name).to.equal(modelName);
-						callback(err);
-				});
-			} else {
-				agent.post(`/${username}/model`)
-					.send({ modelName, desc, type, unit, code, project })
-					.expect(responseCodes.INVALID_MODEL_NAME.status, function(err ,res) {
-						expect(res.body.value).to.equal(responseCodes.INVALID_MODEL_NAME.value);
-						callback(err);
-				});
-			}
-		};
-		it("blank test model name format should fail", function(done) {
-			nameTest("", false, done);
-		});
 
-		it("plain test model name format should succeed", function(done) {
-			nameTest("abc", true, done);
-		});
-
-		it("hyphens dashes and underscores in test model name format should succeed", function(done) {
-			nameTest("123-_[/%4a",true, done);
-		});
-
-		it("non-ASCII characters should fail", function(done) {
-			nameTest("失败",false, done);
-		});
-
-		it("long strings less than 120 characters in test model name format should succeed", function(done) {
-			nameTest("aaaaaaaaaaaaaaaaaaaaa",true, done);
-		});
-
-		it("long strings more than 120 characters in test model name format should fail", function(done) {
-			nameTest(
-				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
-				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
-				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
-				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
-				"aaaaaaaaaaaaaaaaa"
-			,false, done);
+		it("should fail as enpoint has been decommissioned", () => {
+			agent.post(`/${username}/model`)
+						.send({ modelName: model, desc, type, unit, code, project })
+						.expect(410, function(err ,res) {
+							expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
+							callback(err);
+						})
 		});
 
 	});
@@ -238,28 +161,23 @@ describe("Model", function () {
 			});
 	});
 
-	it("should fail if project supplied is not found", function(done) {
-
+	it("should fail as enpoint has been decommissioned", () => {
 		agent.post(`/${username}/model`)
-			.send({ modelName: "model2", desc, type, unit, code, project: "noexist" })
-			.expect(404, function(err ,res) {
-				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
-				done(err);
-			});
-
+					.send({ modelName: model, desc, type, unit, code, project })
+					.expect(410, function(err ,res) {
+						expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
+						callback(err);
+					})
 	});
 
-	it("should fail if no unit specified", function(done) {
-
-		agent.post(`/${username}/model`)
-			.send({ desc, type, project, modelName: "model3" })
-			.expect(400, function(err ,res) {
-
-				expect(res.body.value).to.equal(responseCodes.MODEL_NO_UNIT.value);
-				done(err);
-
-			});
-	});
+	it("should fail as enpoint has been decommissioned", () => {
+			agent.post(`/${username}/model`)
+						.send({ modelName: model, desc, type, unit, code, project })
+						.expect(410, function(err ,res) {
+							expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
+							callback(err);
+						})
+		});
 
 	it("update model code with invalid format", function(done) {
 
@@ -351,37 +269,32 @@ describe("Model", function () {
 		], done);
 	});
 
-	it("should return error message if model name already exists", function(done) {
 
-		const model = "project7";
-
+	it("should fail as enpoint has been decommissioned", () => {
 		agent.post(`/${username}/model`)
-			.send({ desc, type, unit, project, modelName: model })
-			.expect(400, function(err ,res) {
-				expect(res.body.value).to.equal(responseCodes.MODEL_EXIST.value);
-				done(err);
-			});
+					.send({ modelName: model, desc, type, unit, code, project })
+					.expect(410, function(err ,res) {
+						expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
+						callback(err);
+					})
 	});
 
-	it("should succeed if model name contains spaces", function(done) {
-
-		const spacedName = "you are genius";
+	it("should fail as enpoint has been decommissioned", () => {
 		agent.post(`/${username}/model`)
-			.send({ desc, type, project, unit, modelName: spacedName })
-			.expect(200, function(err ,res) {
-				expect(res.body.name).to.equal(spacedName);
-				done(err);
-			});
+					.send({ modelName: model, desc, type, unit, code, project })
+					.expect(410, function(err ,res) {
+						expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
+						callback(err);
+					})
 	});
 
-	it("should return error if creating a model in a database that doesn't exists", function(done) {
-
-		agent.post(`/${username}_someonelese/model`)
-			.send({ modelName: "testmodel", desc, type, unit, project })
-			.expect(404, function(err ,res) {
-				expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
-				done(err);
-			});
+	it("should fail as enpoint has been decommissioned", () => {
+		agent.post(`/${username}_someone/model`)
+					.send({ modelName: model, desc, type, unit, code, project })
+					.expect(410, function(err ,res) {
+						expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
+						callback(err);
+					})
 	});
 
 	describe("Setting a default viewpoint", function() {
