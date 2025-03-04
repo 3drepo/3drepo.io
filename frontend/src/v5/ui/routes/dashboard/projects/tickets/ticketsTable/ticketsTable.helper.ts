@@ -86,7 +86,6 @@ const groupByList = (tickets: ITicket[], groupType: string, groupValues: string[
 		);
 		groups[groupValue] = currentTickets;
 	});
-	groups[UNSET] = remainingTickets;
 	return groups;
 };
 const getAssignees = (t) => _.get(t, `properties.${IssueProperties.ASSIGNEES}`);
