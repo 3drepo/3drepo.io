@@ -50,7 +50,7 @@ import {
 	Image,
 	ImageContainer,
 	ErroredImageMessages,
-	FileIconInput,
+	ActionIcon,
 	EditCommentButtons,
 } from './commentBox.styles';
 import { CommentReply } from '../comment/commentReply/commentReply.component';
@@ -313,7 +313,7 @@ export const CommentBox = ({ commentId, message = '', images = [], view: existin
 				</ErroredImageMessages>
 			)}
 			<Controls>
-				<ActionMenu TriggerButton={<FileIconInput><FileIcon /></FileIconInput>}>
+				<ActionMenu TriggerButton={<ActionIcon><FileIcon /></ActionIcon>}>
 					<ActionMenuItem>
 						{is2DOpen && (
 							<MenuItem onClick={upload2DScreenshot} disabled={!isViewer}>

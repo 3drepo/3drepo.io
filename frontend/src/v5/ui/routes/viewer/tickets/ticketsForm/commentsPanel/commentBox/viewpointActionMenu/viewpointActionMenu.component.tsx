@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ViewpointIcon from '@assets/icons/outlined/camera_side-outlined.svg';
 import AddViewpointIcon from '@assets/icons/outlined/camera_side_with_plus-outlined.svg';
 
 import { formatMessage } from '@/v5/services/intl';
@@ -24,6 +23,8 @@ import { ActionMenu } from '@controls/actionMenu';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import { MenuList, Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
+import { ActionIcon } from '../commentBox.styles';
+import { ViewpointIcon } from './viewpointActionMenu.styles';
 
 export const ViewpointActionMenu = ({ viewpoint, setViewpoint }) => {
 	const updateViewpoint = async () => setViewpoint(await ViewerService.getViewpoint());
@@ -31,15 +32,17 @@ export const ViewpointActionMenu = ({ viewpoint, setViewpoint }) => {
 
 	if (!viewpoint) return (
 		<Tooltip title={formatMessage({ id: 'customTicket.comments.action.addViewpoint', defaultMessage: 'Add viewpoint' })} arrow>
-			<div>
+			<ActionIcon>
 				<AddViewpointIcon onClick={updateViewpoint} />
-			</div>
+			</ActionIcon>
 		</Tooltip>
 	);
 	return (
 		<ActionMenu
 			TriggerButton={(
-				<ViewpointIcon />
+				<ActionIcon>
+					<ViewpointIcon />
+				</ActionIcon>
 			)}
 		>
 			<MenuList>
