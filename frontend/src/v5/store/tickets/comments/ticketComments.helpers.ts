@@ -17,7 +17,6 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { formatInfoUnit } from '@/v5/helpers/intl.helper';
-import _ from 'lodash';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { TicketCommentReplyMetadata, ITicketComment } from './ticketComments.types';
@@ -48,8 +47,6 @@ export const extractMetadata = (message: string): TicketCommentReplyMetadata => 
 	message: extractMetadataValue(message, 'message'),
 	images: extractMetadataImages(message),
 });
-
-export const createMetadata = (comment: ITicketComment): TicketCommentReplyMetadata => _.pick(comment, '_id', 'message', 'images', 'author', 'originalAuthor');
 
 export const stripMetadata = (message: string = '') => message.replaceAll(/\[[_a-zA-Z]*\]:- "([^"]*)"(\n)+/g, '');
 export const sanitiseMessage = (message: string = '') => message.replaceAll('"', '&#34;');

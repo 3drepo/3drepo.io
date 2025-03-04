@@ -25,6 +25,7 @@ import { TicketButton } from '../../../../ticketButton/ticketButton.styles';
 import { Comment, CommentWithButtonsContainer, EditComment } from './currentUserComment.styles';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 import { CommentButtons } from '../basicComment/basicComment.styles';
+import { desanitiseMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
 
 
 export type CurrentUserCommentProps = ITicketComment & {
@@ -55,7 +56,7 @@ export const CurrentUserComment = ({
 		return (
 			<EditComment
 				commentId={_id}
-				message={message}
+				message={desanitiseMessage(message)}
 				images={images}
 				metadata={metadata}
 				view={view}

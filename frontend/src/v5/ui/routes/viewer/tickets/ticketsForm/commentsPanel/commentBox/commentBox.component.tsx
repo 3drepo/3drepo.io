@@ -28,7 +28,7 @@ import { uuid } from '@/v4/helpers/uuid';
 import { convertFileToImageSrc, getSupportedImageExtensions } from '@controls/fileUploader/imageFile.helper';
 import { uploadFile } from '@controls/fileUploader/uploadFile';
 import { ITicketComment, TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
-import { addReply, imageIsTooBig, IMAGE_MAX_SIZE_MESSAGE, MAX_MESSAGE_LENGTH, desanitiseMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
+import { addReply, imageIsTooBig, IMAGE_MAX_SIZE_MESSAGE, MAX_MESSAGE_LENGTH, desanitiseMessage, sanitiseMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { getTicketResourceUrl, isResourceId, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import DeleteIcon from '@assets/icons/outlined/close-outlined.svg';
 import { FormattedMessage } from 'react-intl';
@@ -137,7 +137,7 @@ export const CommentBox = ({ commentId, message = '', images = [], view: existin
 			images: imagesToUpload.map(({ src }) => src),
 		};
 		if (commentreply) {
-			newComment.message = addReply(commentreply, newComment.message);
+			newComment.message = addReply(commentreply, sanitiseMessage(newComment.message));
 		}
 		if (viewpoint) {
 			newComment.view = viewpoint;
@@ -158,7 +158,7 @@ export const CommentBox = ({ commentId, message = '', images = [], view: existin
 		const newComment: Partial<ITicketComment> = {
 			author: currentUser.username,
 			images: imagesToUpload.map(({ src }) => src),
-			message: newMessage, // TODO 5309 figure out whether i need sanitiseMessage and if so where
+			message: newMessage,
 		};
 		if (commentreply) {
 			newComment.message = addReply(commentreply, newComment.message);
