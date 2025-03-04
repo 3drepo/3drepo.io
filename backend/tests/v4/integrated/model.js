@@ -161,23 +161,13 @@ describe("Model", function () {
 			});
 	});
 
-	it("should fail as enpoint has been decommissioned", () => {
-		agent.post(`/${username}/model`)
+	it("should fail as enpoint has been decommissioned", async () => {
+		const res = await agent.post(`/${username}/model`)
 					.send({ modelName: model, desc, type, unit, code, project })
-					.expect(410, function(err ,res) {
-						expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
-						callback(err);
-					})
+		
+		expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
+		expect(res.body.status).to.equal(410)
 	});
-
-	it("should fail as enpoint has been decommissioned", () => {
-			agent.post(`/${username}/model`)
-						.send({ modelName: model, desc, type, unit, code, project })
-						.expect(410, function(err ,res) {
-							expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
-							callback(err);
-						})
-		});
 
 	it("update model code with invalid format", function(done) {
 
@@ -270,31 +260,12 @@ describe("Model", function () {
 	});
 
 
-	it("should fail as enpoint has been decommissioned", () => {
-		agent.post(`/${username}/model`)
+	it("should not be able to access the endpoint- enpoint decommissioned", async () => {
+		const res = await agent.post(`/${username}/model`)
 					.send({ modelName: model, desc, type, unit, code, project })
-					.expect(410, function(err ,res) {
-						expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
-						callback(err);
-					})
-	});
-
-	it("should fail as enpoint has been decommissioned", () => {
-		agent.post(`/${username}/model`)
-					.send({ modelName: model, desc, type, unit, code, project })
-					.expect(410, function(err ,res) {
-						expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
-						callback(err);
-					})
-	});
-
-	it("should fail as enpoint has been decommissioned", () => {
-		agent.post(`/${username}_someone/model`)
-					.send({ modelName: model, desc, type, unit, code, project })
-					.expect(410, function(err ,res) {
-						expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
-						callback(err);
-					})
+					
+		expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
+		expect(res.body.status).to.equal(410)
 	});
 
 	describe("Setting a default viewpoint", function() {

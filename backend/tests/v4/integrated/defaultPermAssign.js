@@ -79,18 +79,16 @@ describe("Default permission assignment", function () {
 
 	let modelId;
 
-	it("user should be able to create model - should fail as endpoint is decommissioned", function(done) {
-
-		agent.post(`/${username}/model`)
+	it("user should be able to create model - endpoint decommissioned", async function(done) {
+		const res = await agent.post(`/${username}/model`)
 			.send({
 				modelName: "model1",
 				unit: "m",
 				project: "project1"
-			})
-			.expect(410, function(err ,res) {
-				expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
-				callback(err);
-			})
+			})		
+
+		expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
+		expect(res.body.status).to.equal(410)
 	});
 
 	it("user should have default permission templates created", function(done) {

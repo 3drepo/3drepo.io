@@ -508,7 +508,7 @@ describe("Chat service", function () {
 
 		describe("of model type", () => {
 
-			it("should receive a model uploaded notification if a model has been uploaded", done => {
+			it("should receive a model uploaded notification if a model has been uploaded - endpoint decommissioned", done => {
 				const eventName = `${username}::notificationUpserted`;
 				socket.on(eventName, function(notification) {
 					socket.off(eventName);
@@ -524,13 +524,13 @@ describe("Chat service", function () {
 					next => teamSpace1Agent.post(`/${account}/${model}/upload`)
 						.field("tag", "onetag")
 						.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
-						.expect(200, function(err, res) {
+						.expect(410, function(err, res) {
 							next(err);
 						})
 					])
 			}).timeout('60s');
 
-			it("should receive a model FAILED uploaded notification if a model uploaded had failed", done => {
+			it("should receive a model FAILED uploaded notification if a model uploaded had failed - endpoint decommissioned", done => {
 				const eventName = `${username}::notificationUpserted`;
 
 				socket.on(eventName, function(notification) {
@@ -547,7 +547,7 @@ describe("Chat service", function () {
 					next => testSession.post(`/${account}/${model}/upload`)
 						.field("tag", "onetag")
 						.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
-						.expect(200, function(err, res) {
+						.expect(410, function(err, res) {
 							next(err);
 						})
 					])
