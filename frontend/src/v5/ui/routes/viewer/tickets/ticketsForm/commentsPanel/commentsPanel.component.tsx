@@ -141,12 +141,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 					</EmptyCommentsBox>
 				)}
 			</Comments>
-			{!readOnly && (
-				<CreateCommentBox
-					commentReply={commentReply}
-					deleteCommentReply={() => setCommentReply(null)}
-				/>
-			)}
+			{!readOnly && <CreateCommentBox metadata={commentReply} />}
 		</Accordion>
 	);
 };

@@ -57,7 +57,7 @@ export const CurrentUserComment = ({
 				commentId={_id}
 				message={message}
 				images={images}
-				commentReply={metadata}
+				metadata={metadata}
 				view={view}
 				onCancel={() => setIsEditMode(false)}
 			/>

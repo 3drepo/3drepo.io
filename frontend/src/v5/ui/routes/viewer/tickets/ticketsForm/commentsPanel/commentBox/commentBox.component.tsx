@@ -74,18 +74,18 @@ type ImageToUpload = {
 type CommentBoxProps = Pick<ITicketComment, 'message' | 'images' | 'view'> & {
 	onCancel?: () => void;
 	commentId?: string;
-	commentReply?: TicketCommentReplyMetadata | null;
-	deleteCommentReply?: () => void; // TODO 5309 make this work for editting
+	metadata?: TicketCommentReplyMetadata | null;
 	className?: string;
 };
 
-export const CommentBox = ({ message = '', images = [], view: existingView, commentReply, deleteCommentReply, onCancel, commentId, className }: CommentBoxProps) => {
+export const CommentBox = ({ commentId, message = '', images = [], view: existingView, metadata, onCancel, className }: CommentBoxProps) => {
 	const { teamspace, project } = useParams<ViewerParams>();
 	const { isViewer, containerOrFederation } = useContext(TicketContext);
 	const { is2DOpen } = useContext(ViewerCanvasesContext);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const currentUser = CurrentUserHooksSelectors.selectCurrentUser();
 	const isFederation = modelIsFederation(containerOrFederation);
+	const [commentreply, setReply] = useState(metadata);
 
 	const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
 	const [isDraggingFile, setIsDraggingFile] = useState(false);
@@ -109,12 +109,13 @@ export const CommentBox = ({ message = '', images = [], view: existingView, comm
 	const isEditMode = !!commentId;
 	const newMessage = watch('message');
 
-	const commentReplyLength = commentReply ? addReply(commentReply, '').length : 0;
+	const commentReplyLength = commentreply ? addReply(commentreply, '').length : 0;
 	const charsCount = (newMessage?.length || 0) + commentReplyLength;
 	const charsLimitIsReached = charsCount > MAX_MESSAGE_LENGTH;
 	const viewIsUnchanged = isEqual(existingView, viewpoint);
 	const messageIsUnchanged = message === newMessage
 		&& isEqual(images, imagesToUpload.map(({ src }) => src))
+		&& commentreply?._id === metadata?._id
 		&& viewIsUnchanged;
 	const erroredImages = imagesToUpload.filter(({ error }) => error);
 	const disableSendMessage = (!newMessage?.trim()?.length && !imagesToUpload.length && !viewpoint)
@@ -124,7 +125,7 @@ export const CommentBox = ({ message = '', images = [], view: existingView, comm
 
 	const resetCommentBox = () => {
 		reset();
-		deleteCommentReply?.();
+		setReply(null);
 		setIsSubmittingMessage(false);
 		setImagesToUpload([]);
 		setViewpoint(null);
@@ -135,8 +136,8 @@ export const CommentBox = ({ message = '', images = [], view: existingView, comm
 			message: newMessage,
 			images: imagesToUpload.map(({ src }) => src),
 		};
-		if (commentReply) {
-			newComment.message = addReply(commentReply, newComment.message);
+		if (commentreply) {
+			newComment.message = addReply(commentreply, newComment.message);
 		}
 		if (viewpoint) {
 			newComment.view = viewpoint;
@@ -159,8 +160,8 @@ export const CommentBox = ({ message = '', images = [], view: existingView, comm
 			images: imagesToUpload.map(({ src }) => src),
 			message: newMessage, // TODO 5309 figure out whether i need sanitiseMessage and if so where
 		};
-		if (commentReply) {
-			newComment.message = addReply(commentReply, newComment.message);
+		if (commentreply) {
+			newComment.message = addReply(commentreply, newComment.message);
 		}
 		if (viewpoint) {
 			newComment.view = viewpoint;
@@ -245,10 +246,11 @@ export const CommentBox = ({ message = '', images = [], view: existingView, comm
 	}, [ticketId, isEditMode]);
 
 	useEffect(() => {
-		if (commentReply?.message || commentReply?.images?.length) {
+		if (metadata?.message || metadata?.images?.length) {
+			setReply(metadata);
 			inputRef.current.focus();
 		}
-	}, [commentReply?._id]);
+	}, [metadata?._id]);
 
 	return (
 		<Container
@@ -258,10 +260,10 @@ export const CommentBox = ({ message = '', images = [], view: existingView, comm
 			ref={containerRef}
 			className={className}
 		>
-			{commentReply?._id && (
+			{commentreply?._id && (
 				<CommentReplyContainer>
-					<CommentReply {...commentReply} shortMessage />
-					<DeleteButton onClick={deleteCommentReply}>
+					<CommentReply {...commentreply} shortMessage />
+					<DeleteButton onClick={() => setReply(null)}>
 						<DeleteIcon />
 					</DeleteButton>
 				</CommentReplyContainer>
