@@ -25,9 +25,14 @@ import { MenuList, Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { ActionIcon } from '../commentBox.styles';
 import { ViewpointIcon } from './viewpointActionMenu.styles';
+import { getViewerState } from '@/v5/helpers/viewpoint.helpers';
 
 export const ViewpointActionMenu = ({ viewpoint, setViewpoint }) => {
-	const updateViewpoint = async () => setViewpoint(await ViewerService.getViewpoint());
+	const updateViewpoint = async () => {
+		const state = await getViewerState();
+		const cameraAndClipping = await ViewerService.getViewpoint();
+		setViewpoint({ ...cameraAndClipping, state });
+	};
 	const deleteViewpoint = () => setViewpoint(null);
 
 	if (!viewpoint) return (
