@@ -19,6 +19,7 @@ const { USERS_COL, USERS_DB_NAME } = require('./users.constants');
 const { createResponseCode, templates } = require('../utils/responseCodes');
 const { generateHashString, sanitiseRegex } = require('../utils/helper/strings');
 const db = require('../handler/db');
+const { logger } = require('../utils/logger');
 
 const User = {};
 
