@@ -31,12 +31,19 @@ SortedTableContext.displayName = 'SortedTable';
 
 export interface Props<T> {
 	items: T[];
+	customSortingFunctions?: Record<string, (items: T[], order: string, column: string, ) => any | any[]>;
 	sortingColumn?: string;
 	isDescendingOrder?: boolean;
 	children: any;
 }
 // eslint-disable-next-line @typescript-eslint/comma-dangle
-export const SortedTableComponent = <T,>({ items, sortingColumn: initialSortingColumn, isDescendingOrder: initialIsDescendingOrder, children }: Props<T>) => {
+export const SortedTableComponent = <T,>({
+	items,
+	customSortingFunctions,
+	sortingColumn: initialSortingColumn,
+	isDescendingOrder: initialIsDescendingOrder,
+	children,
+}: Props<T>) => {
 	const [isDescendingOrder, setIsDescendingOrder] = useState(initialIsDescendingOrder ?? true);
 	const [sortingColumn, setSortingColumn] = useState(initialSortingColumn || '');
 
@@ -46,17 +53,23 @@ export const SortedTableComponent = <T,>({ items, sortingColumn: initialSortingC
 		setIsDescendingOrder(col === sortingColumn ? !isDescendingOrder : false);
 	};
 
-	const sortedItems = orderBy(
-		items as T[],
-		(item) => {
-			const sortingElement = get(item, sortingColumn);
-			return sortingElement?.toLowerCase?.() ?? sortingElement;
-		},
-		isDescendingOrder ? 'desc' : 'asc',
-	);
+	const sortingOrder = isDescendingOrder ? 'desc' : 'asc';
+
+	const getSortedItems = () => {
+		const customSortingFn = customSortingFunctions[sortingColumn];
+		if (customSortingFn) return customSortingFn(items, sortingOrder, sortingColumn);
+		return orderBy(
+			items as T[],
+			(item) => {
+				const sortingElement = get(item, sortingColumn);
+				return sortingElement?.toLowerCase?.() ?? sortingElement;
+			},
+			sortingOrder,
+		);
+	};
 
 	return (
-		<SortedTableContext.Provider value={{ onColumnClick, sortingColumn, isDescendingOrder, sortedItems }}>
+		<SortedTableContext.Provider value={{ onColumnClick, sortingColumn, isDescendingOrder, sortedItems: getSortedItems() }}>
 			{children}
 		</SortedTableContext.Provider>
 	);

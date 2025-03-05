@@ -88,16 +88,18 @@ const groupByList = (tickets: ITicket[], groupType: string, groupValues: string[
 	});
 	return groups;
 };
-const getAssignees = (t) => _.get(t, `properties.${IssueProperties.ASSIGNEES}`);
+
+const ASSIGNEES_PATH = `properties.${IssueProperties.ASSIGNEES}`;
+export const getAssignees = (t) => _.get(t, ASSIGNEES_PATH);
+
+export const sortAssignees = (ticket: ITicket) => {
+	const sortedAssignees = _.orderBy(getAssignees(ticket), (assignee) => assignee.trim().toLowerCase());
+	return _.set(_.cloneDeep(ticket), ASSIGNEES_PATH, sortedAssignees);
+};
 const groupByAssignees = (tickets: ITicket[]) => {
 	const [ticketsWithAssignees, unsetAssignees] = _.partition(tickets, (ticket) => getAssignees(ticket)?.length > 0);
 
-	const ticketsWithSortedAssignees = ticketsWithAssignees.map((ticket) => {
-		const ticketWithSortedAssignees = _.cloneDeep(ticket);
-		const sortedAssignees = _.orderBy(getAssignees(ticket), (assignee) => assignee.trim().toLowerCase());
-		ticketWithSortedAssignees.properties[IssueProperties.ASSIGNEES] = sortedAssignees;
-		return ticketWithSortedAssignees;
-	});
+	const ticketsWithSortedAssignees = ticketsWithAssignees.map(sortAssignees);
 
 	const ticketsSortedByAssignees = _.orderBy(
 		ticketsWithSortedAssignees,
