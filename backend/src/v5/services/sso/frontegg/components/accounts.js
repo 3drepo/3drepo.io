@@ -30,7 +30,11 @@ Accounts.getTeamspaceByAccount = async (accountId) => {
 		const metaJson = JSON.parse(metadata);
 		return metaJson[META_LABEL_TEAMSPACE];
 	} catch (err) {
-		throw new Error(`Failed to get account(${accountId}) from Accounts: ${err.message}`);
+		// I've seen frontegg to be in a state where it's giving me account ID that no longer exist, we also
+		// could possibly run into a race condition where the account has been deleted since we've got this ID
+		// So just return undefined instead of causing trouble elsewhere.
+		logger.logError(`Failed to get account(${accountId}) from Accounts: ${err.message}`);
+		return undefined;
 	}
 };
 
