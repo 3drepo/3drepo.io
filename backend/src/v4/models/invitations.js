@@ -24,10 +24,7 @@ const User = require("./user");
 const Job = require("./job");
 const { changePermissions, findModelSettings } = require("./modelSetting");
 const { findProjectsById, setUserAsProjectAdminById } = require("./project");
-const { getSecurityRestrictions }  = require(`${v5Path}/models/teamspaceSettings`);
-const { SECURITY_SETTINGS: { SSO_RESTRICTED } }  = require(`${v5Path}/models/teamspaces.constants`);
 const systemLogger = require("../logger.js").systemLogger;
-const Mailer = require("../mailer/mailer");
 const { publish } = require(`${v5Path}/services/eventsManager/eventsManager`);
 const { events } = require(`${v5Path}/services/eventsManager/eventsManager.constants`);
 
@@ -35,7 +32,8 @@ const { getTeamspaceRefId } = require(`${v5Path}/models/teamspaceSettings`);
 const {
 	doesUserExist,
 	createUser,
-	addUserToAccount
+	addUserToAccount,
+	removeUserFromAccount
 } = require(`${v5Path}/services/sso/frontegg`);
 
 const { contains: setContains } = require("./helper/set");
@@ -84,12 +82,14 @@ const cleanPermissions = (permissions) => {
 	return { projects: projectsPermissions};
 };
 
+const getUserAndTeamspaceRefs = (email, teamspace) => Promise.all([
+	doesUserExist(email),
+	getTeamspaceRefId(teamspace)
+]);
+
 const sendInvitationEmail = async (email, username, teamspace) => {
 	// Frontegg may be aware of the user already (due to a different application)
-	const [userId, refId] = await Promise.all([
-		doesUserExist(email),
-		getTeamspaceRefId(teamspace)
-	]);
+	const [userId, refId] = await getUserAndTeamspaceRefs(email, teamspace);
 	if(!userId) {
 		await createUser(refId, email);
 	} else {
@@ -185,7 +185,8 @@ invitations.removeTeamspaceFromInvitation = async (email, teamspace, executor) =
 	} else {
 		await coll.updateOne({_id:email}, { $set: data });
 	}
-
+	const [userId, refId] = await getUserAndTeamspaceRefs(email, teamspace);
+	await removeUserFromAccount(refId, userId);
 	publish(events.INVITATION_REVOKED, { teamspace, executor, email, job: entryToRemove.job, permissions: entryToRemove.permissions});
 
 	return {};
