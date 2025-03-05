@@ -35,7 +35,7 @@ const {
 	hasCommenterAccessToFederation,
 	hasReadAccessToContainer,
 	hasReadAccessToFederation,
-} = require('../../../../../middleware/permissions/permissions');
+} = require('../../../../../middleware/permissions');
 const { serialiseComment, serialiseCommentList } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets.comments');
 
 const { Router } = require('express');

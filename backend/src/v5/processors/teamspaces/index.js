@@ -17,16 +17,24 @@
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../models/users.constants');
 const { addDefaultJobs, assignUserToJob, getJobsToUsers, removeUserFromJobs } = require('../../models/jobs');
+const { addUserToAccount, createAccount, removeAccount, removeUserFromAccount } = require('../../services/sso/frontegg');
 const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revokeTeamspaceRoleFromUser } = require('../../models/roles');
-const { createTeamspaceSettings, getAddOns, getMembersInfo, grantAdminToUser, removeUserFromAdminPrivilege } = require('../../models/teamspaceSettings');
+const {
+	createTeamspaceSettings,
+	getAddOns,
+	getMembersInfo,
+	getTeamspaceRefId,
+	grantAdminToUser,
+	removeUserFromAdminPrivilege,
+} = require('../../models/teamspaceSettings');
+const { getAccessibleTeamspaces, getUserRefId } = require('../../models/users');
 const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { addDefaultTemplates } = require('../../models/tickets.templates');
 const { deleteFavourites } = require('../../models/users');
 const { dropDatabase } = require('../../handler/db');
-const { getAccessibleTeamspaces } = require('../../models/users');
-const { isTeamspaceAdmin } = require('../../utils/permissions/permissions');
+const { isTeamspaceAdmin } = require('../../utils/permissions');
 const { logger } = require('../../utils/logger');
 const { removeAllTeamspaceNotifications } = require('../../models/notifications');
 const { removeUserFromAllModels } = require('../../models/modelSettings');
@@ -48,25 +56,30 @@ const removeAllUsersFromTS = async (teamspace) => {
 
 Teamspaces.getAvatar = (teamspace) => getFile(USERS_DB_NAME, AVATARS_COL_NAME, teamspace);
 
-Teamspaces.initTeamspace = async (username) => {
+Teamspaces.initTeamspace = async (teamspaceName, owner) => {
 	try {
+		const teamspaceId = await createAccount(teamspaceName);
 		await Promise.all([
-			createTeamspaceRole(username),
-			addDefaultJobs(username),
+			createTeamspaceRole(teamspaceName),
+			addDefaultJobs(teamspaceName),
 		]);
 		await Promise.all([
-			grantTeamspaceRoleToUser(username, username),
-			createTeamspaceSettings(username),
-			assignUserToJob(username, DEFAULT_OWNER_JOB, username),
-			addDefaultTemplates(username),
+			createTeamspaceSettings(teamspaceName, teamspaceId),
+			assignUserToJob(teamspaceName, DEFAULT_OWNER_JOB, owner),
+			addDefaultTemplates(teamspaceName),
 		]);
-		await grantAdminToUser(username, username);
+		await Promise.all([
+			Teamspaces.addTeamspaceMember(teamspaceName, owner),
+			grantAdminToUser(teamspaceName, owner),
+		]);
 	} catch (err) {
-		logger.logError(`Failed to initialize teamspace for ${username}:${err.message}`);
+		logger.logError(`Failed to initialize teamspace for ${teamspaceName}:${err.message}`);
+		throw err;
 	}
 };
 
 Teamspaces.removeTeamspace = async (teamspace) => {
+	const teamspaceRef = await getTeamspaceRefId(teamspace);
 	await Promise.all([
 		removeAllUsersFromTS(teamspace),
 		removeAllFilesFromTeamspace(teamspace),
@@ -75,6 +88,7 @@ Teamspaces.removeTeamspace = async (teamspace) => {
 	await Promise.all([
 		dropDatabase(teamspace),
 		removeTeamspaceRole(teamspace),
+		removeAccount(teamspaceRef),
 	]);
 };
 
@@ -114,16 +128,33 @@ Teamspaces.getQuotaInfo = async (teamspace) => {
 	};
 };
 
-Teamspaces.removeTeamspaceMember = async (teamspace, userToRemove) => {
+Teamspaces.addTeamspaceMember = async (teamspace, userToAdd) => {
+	const [accountId, userId] = await Promise.all([
+		getTeamspaceRefId(teamspace),
+		getUserRefId(userToAdd),
+
+	]);
 	await Promise.all([
-		removeUserFromAllModels(teamspace, userToRemove),
-		removeUserFromAllProjects(teamspace, userToRemove),
-		removeUserFromAdminPrivilege(teamspace, userToRemove),
+		addUserToAccount(accountId, userId),
+		grantTeamspaceRoleToUser(teamspace, userToAdd),
+	]);
+};
+
+Teamspaces.removeTeamspaceMember = async (teamspace, userToRemove, removePermissions = true) => {
+	const [accountId, userId] = await Promise.all([
+		getTeamspaceRefId(teamspace),
+		getUserRefId(userToRemove),
+		...(removePermissions ? [
+			removeUserFromAllModels(teamspace, userToRemove),
+			removeUserFromAllProjects(teamspace, userToRemove),
+			removeUserFromAdminPrivilege(teamspace, userToRemove),
+		] : []),
 	]);
 
 	await Promise.all([
-		await removeUserFromJobs(teamspace, userToRemove),
-		await revokeTeamspaceRoleFromUser(teamspace, userToRemove),
+		removePermissions ? removeUserFromJobs(teamspace, userToRemove) : Promise.resolve(),
+		removeUserFromAccount(accountId, userId),
+		revokeTeamspaceRoleFromUser(teamspace, userToRemove),
 	]);
 };
 

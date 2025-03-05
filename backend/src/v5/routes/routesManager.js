@@ -16,7 +16,7 @@
  */
 
 const RoutesManager = {};
-const AadRoutes = require('./sso/aad');
+const AuthRoutes = require('./authentication');
 const CalibrationRoutes = require('./teamspaces/projects/models/drawings/calibrations');
 const CreateGeneralRevisionRoutes = require('./teamspaces/projects/models/common/revisions');
 const CreateGroupRoutes = require('./teamspaces/projects/models/common/groups');
@@ -28,9 +28,8 @@ const CreateViewRoutes = require('./teamspaces/projects/models/common/views');
 const FederationRevisionRoutes = require('./teamspaces/projects/models/federations/revisions');
 const MetadataRoutes = require('./teamspaces/projects/models/containers/metadata');
 const ProjectRoutes = require('./teamspaces/projects/projects');
-const SsoRoutes = require('./sso');
 const TeamspaceJobRoutes = require('./teamspaces/jobs');
-const TeamspaceRoutes = require('./teamspaces/teamspaces');
+const TeamspaceRoutes = require('./teamspaces');
 const TeamspaceSettingsRoutes = require('./teamspaces/settings');
 const UserRoutes = require('./users');
 const { modelTypes } = require('../models/modelSettings.constants');
@@ -40,8 +39,7 @@ RoutesManager.init = (app) => {
 	app.use('/v5/', UserRoutes);
 
 	// Single Sign On
-	app.use('/v5/sso', SsoRoutes);
-	app.use('/v5/sso/aad', AadRoutes);
+	app.use('/v5/authentication', AuthRoutes);
 
 	app.use('/v5/teamspaces/', TeamspaceRoutes);
 	app.use('/v5/teamspaces/:teamspace/settings', TeamspaceSettingsRoutes);

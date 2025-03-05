@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,22 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-"use strict";
-const html = data => `
-	Billing User: ${data.billingUser}
-	<br><br>
-	Email: ${data.email}
-	<br><br>
-	billingAgreementId: ${data.billingAgreementId}
-	<br><br>
-	Error: ${data.errmsg}
-	<br><br>
-	Raw ipn message: ${data.ipn}
-`;
+const FronteggConstants = {};
 
-const subject = "[System] Unexpected PayPal Payment IPN";
+FronteggConstants.META_LABEL_TEAMSPACE = '3DR_Teamspace';
+FronteggConstants.HEADER_TENANT_ID = 'frontegg-tenant-id';
 
-module.exports =  {
-	html: html,
-	subject: subject
-};
+module.exports = FronteggConstants;

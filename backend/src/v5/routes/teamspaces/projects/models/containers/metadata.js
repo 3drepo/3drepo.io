@@ -17,7 +17,7 @@
 
 const Metadata = require('../../../../../processors/teamspaces/projects/models/metadata');
 const { Router } = require('express');
-const { hasWriteAccessToContainer } = require('../../../../../middleware/permissions/permissions');
+const { hasWriteAccessToContainer } = require('../../../../../middleware/permissions');
 const { respond } = require('../../../../../utils/responder');
 const { templates } = require('../../../../../utils/responseCodes');
 const { validateUpdateCustomMetadata } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/metadata');

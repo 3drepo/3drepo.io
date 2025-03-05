@@ -27,7 +27,7 @@ const { getLatestRevision } = require('../../../../models/revisions');
 const { getModelMD5Hash } = require('./commons/modelList');
 const { getOpenTicketsCount } = require('./commons/tickets');
 const { getProjectById } = require('../../../../models/projectSettings');
-const { hasReadAccessToContainer } = require('../../../../utils/permissions/permissions');
+const { hasReadAccessToContainer } = require('../../../../utils/permissions');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { queueFederationUpdate } = require('../../../../services/modelProcessing');
 

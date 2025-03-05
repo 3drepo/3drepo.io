@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-"use strict";
-const html = data => `
-	Failed to send work into queue: ${data.err} in ${data.domain}<br><br>
-	Please look into it!
-`;
+const Accounts = require('./components/accounts');
+const Auth = require('./components/auth');
+const Users = require('./components/users');
+const { getIdentityClient } = require('./components/connections');
 
-const subject = data => `[System][${data.domain}] Queue connection failed`;
+const Frontegg = { ...Auth, ...Users, ...Accounts };
 
-module.exports =  {
-	html: html,
-	subject: subject
+Frontegg.init = async () => {
+	await getIdentityClient();
 };
+
+module.exports = Frontegg;

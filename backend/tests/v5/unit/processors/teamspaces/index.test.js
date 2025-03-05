@@ -22,7 +22,7 @@ const { src } = require('../../../helper/path');
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../../../../src/v5/models/users.constants');
 const { generateRandomString, generateRandomNumber } = require('../../../helper/services');
 
-const Teamspaces = require(`${src}/processors/teamspaces/teamspaces`);
+const Teamspaces = require(`${src}/processors/teamspaces`);
 
 jest.mock('../../../../../src/v5/models/users');
 const UsersModel = require(`${src}/models/users`);
@@ -48,8 +48,8 @@ const ProjectSettings = require(`${src}/models/projectSettings`);
 jest.mock('../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
 
-jest.mock('../../../../../src/v5/utils/permissions/permissions');
-const Permissions = require(`${src}/utils/permissions/permissions`);
+jest.mock('../../../../../src/v5/utils/permissions');
+const Permissions = require(`${src}/utils/permissions`);
 
 jest.mock('../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);

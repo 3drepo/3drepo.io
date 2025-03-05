@@ -22,14 +22,11 @@ const { deleteIfUndefined } = require('../utils/helper/objects');
 const { destroySession } = require('../utils/sessions');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUIDString } = require('../utils/helper/uuids');
-const { getURLDomain } = require('../utils/helper/strings');
 const { session: initSession } = require('../services/sessions');
 const { isFromWebBrowser } = require('../utils/helper/userAgent');
-const { logger } = require('../utils/logger');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { respond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');
-const { validateMany } = require('./common');
 
 const Sessions = {};
 
@@ -43,65 +40,6 @@ Sessions.manageSessions = async (req, res, next) => {
 	const { middleware } = await initSession;
 
 	middleware(req, res, next);
-};
-
-const updateSessionDetails = (req) => {
-	const updatedUser = { ...req.loginData, webSession: false };
-	const { session } = req;
-	let userAgent = req.headers['user-agent'];
-
-	const { ssoInfo } = req.session;
-	if (ssoInfo) {
-		userAgent = ssoInfo.userAgent;
-		if (ssoInfo.referer) {
-			updatedUser.referer = ssoInfo.referer;
-		}
-
-		delete req.session.ssoInfo;
-	} else if (req.headers.referer) {
-		updatedUser.referer = getURLDomain(req.headers.referer);
-	}
-
-	if (userAgent) {
-		updatedUser.webSession = isFromWebBrowser(userAgent);
-		updatedUser.userAgent = userAgent;
-	}
-
-	if (req.token) {
-		session.token = req.token;
-	}
-
-	session.user = deleteIfUndefined(updatedUser);
-	session.cookie.domain = config.cookie_domain;
-
-	if (config.cookie.maxAge) {
-		session.cookie.maxAge = config.cookie.maxAge;
-	}
-
-	const ipAddress = req.ips[0] || req.ip;
-	session.ipAddress = ipAddress;
-
-	publish(events.SESSION_CREATED, {
-		username: updatedUser.username,
-		sessionID: req.sessionID,
-		ipAddress,
-		userAgent,
-		socketId: req.headers[SOCKET_HEADER],
-		referer: updatedUser.referer });
-
-	return session;
-};
-
-const createSession = (req, res) => {
-	req.session.regenerate((err) => {
-		if (err) {
-			logger.logError(`Failed to regenerate session: ${err.message}`);
-			respond(req, res, err);
-		} else {
-			const session = updateSessionDetails(req);
-			respond(req, res, templates.ok, req.v4 ? session.user : undefined);
-		}
-	});
 };
 
 Sessions.destroySession = (req, res) => {
@@ -127,10 +65,48 @@ Sessions.appendCSRFToken = async (req, res, next) => {
 };
 
 Sessions.updateSession = async (req, res, next) => {
-	updateSessionDetails(req);
+	const { session } = req;
+	if (req.token) {
+		session.token = req.token;
+	}
+
+	const updatedUser = { ...req.loginData, webSession: session?.user?.webSession || false };
+	// If there is ssoInfo, this is a new session
+	const { ssoInfo: { userAgent, referer } } = session;
+	if (referer) {
+		updatedUser.referer = referer;
+	}
+
+	if (userAgent) {
+		updatedUser.webSession = isFromWebBrowser(userAgent);
+		updatedUser.userAgent = userAgent;
+	}
+
+	delete req.session.ssoInfo;
+
+	session.cookie.domain = config.cookie_domain;
+
+	if (config.cookie.maxAge) {
+		session.cookie.maxAge = config.cookie.maxAge;
+	}
+
+	const ipAddress = req.ips[0] || req.ip;
+	session.ipAddress = ipAddress;
+
+	if (!session.reAuth) {
+		publish(events.SESSION_CREATED, {
+			username: updatedUser.username,
+			sessionID: req.sessionID,
+			ipAddress,
+			userAgent,
+			socketId: req.headers[SOCKET_HEADER],
+			referer: updatedUser.referer });
+	}
+
+	delete req.session.reAuth;
+	session.user = deleteIfUndefined(updatedUser);
+
 	await next();
 };
-
-Sessions.createSession = validateMany([Sessions.appendCSRFToken, createSession]);
 
 module.exports = Sessions;

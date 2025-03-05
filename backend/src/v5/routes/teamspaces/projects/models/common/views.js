@@ -17,7 +17,7 @@
 
 const { getThumbnail: conGetThumbnail, getViewList: conGetViewList } = require('../../../../../processors/teamspaces/projects/models/containers');
 const { getThumbnail: fedGetThumbnail, getViewList: fedGetViewList } = require('../../../../../processors/teamspaces/projects/models/federations');
-const { hasReadAccessToContainer, hasReadAccessToFederation } = require('../../../../../middleware/permissions/permissions');
+const { hasReadAccessToContainer, hasReadAccessToFederation } = require('../../../../../middleware/permissions');
 const { mimeTypes, respond } = require('../../../../../utils/responder');
 const { Router } = require('express');
 const { fileMimeFromBuffer } = require('../../../../../utils/helper/typeCheck');

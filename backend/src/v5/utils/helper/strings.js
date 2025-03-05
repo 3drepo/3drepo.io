@@ -33,6 +33,8 @@ StringHelper.getURLDomain = (url) => {
 };
 
 StringHelper.generateHashString = (length = 32) => crypto.randomBytes(length / 2).toString('hex');
+StringHelper.toBase64 = (str) => Buffer.from(str).toString('base64');
+StringHelper.fromBase64 = (str) => Buffer.from(str, 'base64').toString('ascii');
 
 StringHelper.formatPronouns = (str) => {
 	const strArr = str.toLowerCase().split(' ');

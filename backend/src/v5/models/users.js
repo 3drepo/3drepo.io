@@ -18,28 +18,13 @@
 const { USERS_COL, USERS_DB_NAME } = require('./users.constants');
 const { createResponseCode, templates } = require('../utils/responseCodes');
 const { generateHashString, sanitiseRegex } = require('../utils/helper/strings');
-const config = require('../utils/config');
 const db = require('../handler/db');
-const { events } = require('../services/eventsManager/eventsManager.constants');
-const { publish } = require('../services/eventsManager/eventsManager');
+const { logger } = require('../utils/logger');
 
 const User = {};
 
 const userQuery = (query, projection, sort) => db.findOne(USERS_DB_NAME, USERS_COL, query, projection, sort);
 const updateUser = (username, action) => db.updateOne(USERS_DB_NAME, USERS_COL, { user: username }, action);
-
-User.isAccountActive = async (user) => {
-	const projection = { 'customData.inactive': 1 };
-	const { customData: { inactive } = {} } = await User.getUserByUsername(user, projection);
-	return !inactive;
-};
-
-User.authenticate = async (user, password) => {
-	if (await db.authenticate(user, password)) return;
-
-	publish(events.FAILED_LOGIN_ATTEMPT, { user });
-	throw templates.incorrectUsernameOrPassword;
-};
 
 User.getUsersByQuery = (query, projection) => db.find(USERS_DB_NAME, USERS_COL, query, projection);
 
@@ -49,6 +34,11 @@ User.getUserByQuery = async (query, projection) => {
 		throw templates.userNotFound;
 	}
 	return userDoc;
+};
+
+User.getUserRefId = async (user) => {
+	const { customData: { userId } } = await User.getUserByUsername(user, { 'customData.userId': 1 });
+	return userId;
 };
 
 User.getUserByUsername = (user, projection) => User.getUserByQuery({ user }, projection);
@@ -136,6 +126,10 @@ User.updateProfile = async (username, updatedProfile) => {
 	await updateUser(username, { $set: updateData });
 };
 
+User.updateUserId = async (username, userId) => {
+	await updateUser(username, { $set: { 'customData.userId': userId } });
+};
+
 User.generateApiKey = async (username) => {
 	const apiKey = generateHashString();
 	await updateUser(username, { $set: { 'customData.apiKey': apiKey } });
@@ -146,7 +140,8 @@ User.deleteApiKey = (username) => updateUser(username, { $unset: { 'customData.a
 
 User.addUser = async (newUserData) => {
 	const customData = {
-		createdAt: new Date(),
+		createdAt: newUserData.createdAt ?? new Date(),
+		userId: newUserData.userId,
 		firstName: newUserData.firstName,
 		lastName: newUserData.lastName,
 		email: newUserData.email,
@@ -159,14 +154,7 @@ User.addUser = async (newUserData) => {
 				company: newUserData.company,
 			},
 		},
-		...(newUserData.sso ? { sso: newUserData.sso } : { inactive: true }),
 	};
-
-	if (!newUserData.sso) {
-		const expiryAt = new Date();
-		expiryAt.setHours(expiryAt.getHours() + config.tokenExpiry.emailVerify);
-		customData.emailVerifyToken = { token: newUserData.token, expiredAt: expiryAt };
-	}
 
 	await db.createUser(newUserData.username, newUserData.password, customData);
 };
@@ -174,47 +162,13 @@ User.addUser = async (newUserData) => {
 User.removeUser = (user) => db.deleteOne(USERS_DB_NAME, USERS_COL, { user });
 User.removeUsers = (users) => db.deleteMany(USERS_DB_NAME, USERS_COL, { user: { $in: users } });
 
-User.verify = async (username) => {
-	const { customData } = await db.findOneAndUpdate(USERS_DB_NAME, USERS_COL, { user: username },
-		{
-			$unset: {
-				'customData.inactive': 1,
-				'customData.emailVerifyToken': 1,
-			},
-		},
-		{ projection: {
-			'customData.firstName': 1,
-			'customData.lastName': 1,
-			'customData.email': 1,
-			'customData.billing.billingInfo.company': 1,
-			'customData.mailListOptOut': 1,
-			'customData.createdAt': 1,
-		} });
-
-	return customData;
-};
-
-User.updateResetPasswordToken = (username, resetPasswordToken) => updateUser(username,
-	{ $set: { 'customData.resetPasswordToken': resetPasswordToken } });
-
-User.unlinkFromSso = async (username, newPassword) => {
-	await updateUser(username, { $unset: { 'customData.sso': 1 } });
-	await User.updatePassword(username, newPassword);
-};
-
-User.linkToSso = (username, email, firstName, lastName, ssoData) => updateUser(username,
-	{
-		$set: {
-			'customData.email': email,
-			'customData.firstName': firstName,
-			'customData.lastName': lastName,
-			'customData.sso': ssoData,
-		},
-	});
-
-User.isSsoUser = async (username) => {
-	const { customData: { sso } } = await User.getUserByUsername(username, { 'customData.sso': 1 });
-	return !!sso;
+User.ensureIndicesExist = async () => {
+	try {
+		await db.createIndex(USERS_DB_NAME, USERS_COL, { 'customData.userId': 1 }, { runInBackground: true, unique: true });
+	} catch (err) {
+		// Note this will fail pre 5.16 migration.
+		logger.logWarning('Failed to create index on user ID. Please ensure 5.16 migration script has been executed.');
+	}
 };
 
 module.exports = User;
