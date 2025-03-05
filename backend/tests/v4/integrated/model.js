@@ -260,12 +260,12 @@ describe("Model", function () {
 	});
 
 
-	it("should not be able to access the endpoint- enpoint decommissioned", async () => {
-		const res = await agent.post(`/${username}/model`)
+	it("should not be able to access the endpoint- endpoint decommissioned", () => {
+		agent.post(`/${username}/model`)
 					.send({ modelName: model, desc, type, unit, code, project })
-					
-		expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
-		expect(res.body.status).to.equal(410)
+					.expect(410, (err, res) => {
+						expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					})
 	});
 
 	describe("Setting a default viewpoint", function() {

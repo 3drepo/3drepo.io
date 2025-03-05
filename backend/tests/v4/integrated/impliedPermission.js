@@ -150,25 +150,25 @@ describe("Implied permission::", function () {
 				.expect(200, done);
 		});
 
-		it("can create a model - endpoint decommissioned", async function(done) {
+		it("can create a model - endpoint decommissioned", function(done) {
 
 			const modelName = "model123";
-			const res = await agent
+			agent
 				.post(`/${sharedTeamspace}/model`)
 				.send(Object.assign({
 					modelName: modelName,
 					"project": "Sample_Project"
 				}, model))
-				
-			expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
-			expect(res.body.status).to.equal(410)
+				.expect(410, (err, res) => {
+					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					done(err)
+				})
 		});
 
-		it("can create federation - endpoint decommissioned", async function(done) {
+		it("can create federation - endpoint decommissioned",  function(done) {
 
 			const modelName = "fedmodel123";
-
-			const res = agent
+			agent
 				.post(`/${sharedTeamspace}/model`)
 				.send(Object.assign({
 					modelName: modelName,
@@ -178,9 +178,10 @@ describe("Implied permission::", function () {
 						"model": modelId
 					}]
 				}, model))
-				
-				expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
-				expect(res.body.status).to.equal(410)
+				.expect(410, (err, res) => {
+					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					done(err)
+				})
 		});
 
 		it("can view model", function(done) {
@@ -195,14 +196,15 @@ describe("Implied permission::", function () {
 				.expect(404, done);
 		});
 
-		it("can upload model - endpoint decommissioned", async function(done) {
-			const res = await agent
+		it("can upload model - endpoint decommissioned", function(done) {
+			agent
 				.post(`/${sharedTeamspace}/${modelId}/upload`)
 				.field("tag", "teamspace_admin_upload")
 				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/dummy.ifc")
-				
-			expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
-			expect(res.body.status).to.equal(410)
+				.expect(410, (err, res) => {
+					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					done(err)
+				})
 		});
 
 		it("can edit model setting", function(done) {
@@ -389,26 +391,28 @@ describe("Implied permission::", function () {
 				.expect(401, done);
 		});
 
-		it("cannot create a model - endpoint is decommissioned", async function(done) {
+		it("cannot create a model - endpoint is decommissioned", function(done) {
 
 			const modelName = "model123";
-			const res = await agent
+			agent
 				.post(`/${sharedTeamspace}/model`)
 				.send(Object.assign({modelName: modelName, project: "Sample_Project"}, model))
-				
-				expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
-				expect(res.body.status).to.equal(410)
+				.expect(410, (err, res) => {
+					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					done(err)
+				})
 		});
 
-		it("can create a model - endpoint is decommissioned", async function(done) {
+		it("can create a model - endpoint is decommissioned",  function(done) {
 
 			const modelName = "model123";
-			const res = await agent
+			agent
 				.post(`/${sharedTeamspace}/model`)
 				.send(Object.assign({project: project2, modelName: modelName}, model))
-				
-				expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
-				expect(res.body.status).to.equal(410)
+				.expect(410, (err, res) => {
+					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					done(err)
+				})
 		});
 
 		it("can view model in your project", function(done) {
@@ -435,22 +439,24 @@ describe("Implied permission::", function () {
 				.expect(401, done);
 		});
 
-		it("can upload model in your project - endpoint is decommissioned", async function(done) {
-			const res = await agent
+		it("can upload model in your project - endpoint is decommissioned", function(done) {
+			agent
 				.post(`/${sharedTeamspace}/${modelId}/upload`)
 				.field("tag", "project_admin_upload")
 				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/dummy.ifc")
-				
-				expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
-				expect(res.body.status).to.equal(410)
+				.expect(410, (err, res) => {
+					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					done(err)
+				})
 		});
 
-		it("cannot upload model - endpoint is decommissioned", async function(done) {
-			const res = await agent
+		it("cannot upload model - endpoint is decommissioned", function(done) {
+			agent
 				.post(`/${sharedTeamspace}/${modelNoAccess}/upload`)
-				
-				expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
-				expect(res.body.status).to.equal(410)
+				.expect(410, (err, res) => {
+					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					done(err)
+				})
 		});
 
 		it("can edit model setting in your project", function(done) {
@@ -708,16 +714,17 @@ describe("Implied permission::", function () {
 				.expect(401, done);
 		});
 
-		it("cannot access endpoint to create a model - endpoint is decommissioned", async function(done) {
+		it("cannot access endpoint to create a model - endpoint is decommissioned", function(done) {
 
 			const modelName = "model123";
 
-			const res = await agent
+			agent
 				.post(`/${sharedTeamspace}/model`)
 				.send(Object.assign({modelName: modelName}, model))
-				
-				expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
-				expect(res.body.status).to.equal(410)
+				.expect(410, (err, res) => {
+					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					done(err)
+				})
 		});
 
 		it("can view model assigned to you", function(done) {
@@ -744,14 +751,15 @@ describe("Implied permission::", function () {
 				.expect(401, done);
 		});
 
-		it("cannot access the endpoint to upload model - endpoint is decommissioned", async function(done) {
-			const res = await agent
+		it("cannot access the endpoint to upload model - endpoint is decommissioned", function(done) {
+			agent
 				.post(`/${sharedTeamspace}/${modelId}/upload`)
 				.field("tag", "model_admin_upload")
 				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/dummy.ifc")
-				
-				expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
-				expect(res.body.status).to.equal(410)
+				.expect(410, (err, res) => {
+					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					done(err)
+				})
 		});
 
 		it("can edit model setting", function(done) {
@@ -1006,15 +1014,16 @@ describe("Implied permission::", function () {
 				.expect(401, done);
 		});
 
-		it("cannot access the endpoint to create a model - endpoint is decommissioned", async function(done) {
+		it("cannot access the endpoint to create a model - endpoint is decommissioned", function(done) {
 
 			const modelName = "model123";
-			const res = await agent
+			agent
 				.post(`/${sharedTeamspace}/model`)
 				.send(Object.assign({modelName: modelName}, model))
-				
-				expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
-				expect(res.body.status).to.equal(410)
+				.expect(410, (err, res) => {
+					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					done(err)
+				})
 		});
 
 		it("can view model assigned to you", function(done) {
@@ -1041,12 +1050,13 @@ describe("Implied permission::", function () {
 				.expect(401, done);
 		});
 
-		it("cannot access endpoint to upload model - endpoint decommissioned", async function(done) {
-			const res = await agent
+		it("cannot access endpoint to upload model - endpoint decommissioned", function(done) {
+			agent
 				.post(`/${sharedTeamspace}/${modelId}/upload`)
-				
-				expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
-				expect(res.body.status).to.equal(410)
+				.expect(410, (err, res) => {
+					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					done(err)
+				})
 		});
 
 		it("cannot edit model setting", function(done) {
@@ -1287,15 +1297,16 @@ describe("Implied permission::", function () {
 				.expect(401, done);
 		});
 
-		it("cannot access endpoint to create a model - endpoint decommissioned", async function(done) {
+		it("cannot access endpoint to create a model - endpoint decommissioned", function(done) {
 
 			const modelName = "model123";
-			const res  = await agent
+			agent
 				.post(`/${sharedTeamspace}/model`)
 				.send(Object.assign({modelName: modelName}, model))
-				
-				expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
-				expect(res.body.status).to.equal(410)
+				.expect(410, (err, res) => {
+					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					done(err)
+				})
 		});
 
 		it("cannot view model", function(done) {
@@ -1322,14 +1333,15 @@ describe("Implied permission::", function () {
 				.expect(401, done);
 		});
 
-		it("cannot access endpoint to upload model - endpoint decommissioned", async function(done) {
-			const res = await agent
+		it("cannot access endpoint to upload model - endpoint decommissioned", function(done) {
+			agent
 				.post(`/${sharedTeamspace}/${modelId}/upload`)
 				.field("tag", "project_upload")
 				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/dummy.ifc")
-				
-				expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
-				expect(res.body.status).to.equal(410)
+				.expect(410, (err, res) => {
+					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					done(err)
+				})
 		});
 
 		it("cannot edit model setting", function(done) {

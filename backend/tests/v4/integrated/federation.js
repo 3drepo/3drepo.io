@@ -70,10 +70,10 @@ describe("Federated Model", function () {
 		});
 	});
 
-	it("should fail as endpoint is decommissioned", async function(done) {
+	it("should fail as endpoint is decommissioned", function(done) {
 		this.timeout(5000);
 
-		const res = await agent.post(`/${username}/model`)
+		agent.post(`/${username}/model`)
 			.send({
 				modelName : `${fedModelName}`,
 				desc,
@@ -85,9 +85,10 @@ describe("Federated Model", function () {
 					"model": subModels[0]
 				}]
 			})
-
-		expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
-		expect(res.body.status).to.equal(410)
+			.expect(410, (err, res) => {
+				expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+				done(err)
+			})
 	});
 
 	it("update should fail if model is not a fed", function(done) {

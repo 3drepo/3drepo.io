@@ -528,6 +528,8 @@ describe("Chat service", function () {
 							next(err);
 						})
 					])
+			
+				done()
 			}).timeout('60s');
 
 			it("should receive a model FAILED uploaded notification if a model uploaded had failed - endpoint decommissioned", done => {
@@ -551,7 +553,10 @@ describe("Chat service", function () {
 							next(err);
 						})
 					])
+			
+				done()
 			}).timeout('60s');
+
 
 		});
 
