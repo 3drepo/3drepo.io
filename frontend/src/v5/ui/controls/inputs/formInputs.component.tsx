@@ -50,7 +50,7 @@ export const FormSelect = (props: InputControllerProps<SelectProps>) => (<InputC
 export const FormMultiSelect = (props: InputControllerProps<SelectProps>) => (<InputController Input={MultiSelect} {...props} />);
 export const FormChipSelect = (props: InputControllerProps<ChipSelectProps>) => (<InputController Input={({ inputRef, ...chipProps }: any) => <ChipSelect {...chipProps} />} {...props} />);
 export const FormSearchSelect = (props: InputControllerProps<SelectProps>) => (<InputController Input={SearchSelect} {...props} />);
-export const FormAssigneesSelect = (props: InputControllerProps<JobsAndUsersPropertyProps>) => (<InputController Input={JobsAndUsersProperty} {...props} />);
+export const FormJobsAndUsersSelect = (props: InputControllerProps<JobsAndUsersPropertyProps>) => (<InputController Input={JobsAndUsersProperty} {...props} />);
 export const FormBooleanSelect = (props: InputControllerProps<BooleanSelectProps>) => (<InputController Input={BooleanSelect} {...props} />);
 
 // control inputs

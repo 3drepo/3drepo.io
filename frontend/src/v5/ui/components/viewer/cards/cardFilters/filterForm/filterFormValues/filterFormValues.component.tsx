@@ -18,7 +18,7 @@
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { getOperatorMaxFieldsAllowed } from '../filterForm.helpers';
 import { isRangeOperator, isTextType, isSelectType, isDateType } from '../../cardFilters.helpers';
-import { FormBooleanSelect, FormMultiSelect, FormDateTime, FormNumberField, FormTextField, FormAssigneesSelect } from '@controls/inputs/formInputs.component';
+import { FormBooleanSelect, FormMultiSelect, FormDateTime, FormNumberField, FormTextField, FormJobsAndUsersSelect } from '@controls/inputs/formInputs.component';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
 import { useEffect } from 'react';
 import { compact, isArray, isEmpty } from 'lodash';
@@ -127,7 +127,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 	if (isSelectType(type)) {
 		const allJobsAndUsers = selectOptions.every(({ type: t }) => t === 'jobsAndUsers');
 		if (allJobsAndUsers || type === 'owner') return (
-			<FormAssigneesSelect
+			<FormJobsAndUsersSelect
 				multiple
 				showAddButton
 				excludeJobs={property === 'Owner'}
