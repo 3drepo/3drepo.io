@@ -20,14 +20,14 @@ const { v5Path } = require('../../../interop');
 const { getTeamspaceList } = require('../../utils');
 
 const { getTeamspaceRefId, setTeamspaceRefId, getAllUsersInTeamspace } = require(`${v5Path}/models/teamspaceSettings`);
-const { doesUserExist, addUserToAccount, createAccount, createUser, getAllUsersInAccount } = require(`${v5Path}/services/sso/frontegg`);
+const { getTeamspaceByAccount, doesUserExist, addUserToAccount, createAccount, createUser, getAllUsersInAccount } = require(`${v5Path}/services/sso/frontegg`);
 
 const { logger } = require(`${v5Path}/utils/logger`);
 const { updateUserId } = require(`${v5Path}/models/users`);
-
 const processTeamspace = async (ts, userMapping) => {
 	let refId = await getTeamspaceRefId(ts);
-	const isNew = !refId;
+
+	const isNew = !refId || await getTeamspaceByAccount(refId).then(() => false).catch(() => true);
 	if (isNew) {
 		logger.logInfo('\t creating Frontegg account...');
 		refId = await createAccount(ts);
@@ -68,7 +68,7 @@ const processTeamspace = async (ts, userMapping) => {
 			userMapping[user] = newUserId;
 		} else {
 			// eslint-disable-next-line no-param-reassign
-			userMapping = emailToUserId[email];
+			userMapping[user] = emailToUserId[email];
 		}
 
 		if (userId !== userMapping[user]) {
