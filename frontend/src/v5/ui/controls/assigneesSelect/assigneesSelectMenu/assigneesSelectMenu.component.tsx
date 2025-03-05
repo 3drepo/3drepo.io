@@ -92,24 +92,23 @@ export const AssigneesSelectMenu = ({
 			))}
 			{notFound.length > 0 && (<HorizontalRule />)}
 			{!excludeJobs && (
-				<>
-					<ListSubheader>
-						<FormattedMessage id="assigneesSelectMenu.jobsHeading" defaultMessage="Jobs" />
-					</ListSubheader>
-					{jobs.length > 0 && jobs.map(({ _id }) => (
-						<AssigneesSelectMenuItem
-							key={_id}
-							assignee={_id}
-							value={_id}
-							title={_id}
-							multiple={multiple}
-							error={isInvalid(_id)}
-						/>
-					))}
-					{!jobs.length && (<NoResultsMessage />)}
-
-					<HorizontalRule />
-				</>
+				<ListSubheader>
+					<FormattedMessage id="assigneesSelectMenu.jobsHeading" defaultMessage="Jobs" />
+				</ListSubheader>
+			)}
+			{!excludeJobs && jobs.length > 0 && jobs.map(({ _id }) => (
+				<AssigneesSelectMenuItem
+					key={_id}
+					assignee={_id}
+					value={_id}
+					title={_id}
+					multiple={multiple}
+					error={isInvalid(_id)}
+				/>
+			))}
+			{!excludeJobs && !jobs.length && (<NoResultsMessage />)}
+			{!excludeJobs && (
+				<HorizontalRule />
 			)}
 
 			<ListSubheader>
