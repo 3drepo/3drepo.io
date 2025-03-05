@@ -250,14 +250,7 @@ export const selectPropertyOptions = createSelector(
 					allValues.push(...riskCategories.map((value) => ({ value, type: 'riskCategories' })));
 					break;
 				case 'jobsAndUsers':
-					allValues.push(...jobsAndUsers.map((ju) => {
-						const isUser = !!ju.firstName;
-						return ({
-							value: isUser ? ju.user : ju._id,
-							displayValue: isUser ? `${ju?.firstName} ${ju?.lastName}` : null,
-							type: 'jobsAndUsers',
-						});
-					}));
+					allValues.push(...getFiltersFromJobsAndUsers(jobsAndUsers));
 					break;
 				default:
 					allValues.push(...matchingProperty.values.map((value) => ({ value, type: 'default' })));

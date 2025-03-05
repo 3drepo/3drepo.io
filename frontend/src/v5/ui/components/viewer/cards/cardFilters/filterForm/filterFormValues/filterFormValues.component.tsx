@@ -126,11 +126,11 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 
 	if (isSelectType(type)) {
 		const allJobsAndUsers = selectOptions.every(({ type: t }) => t === 'jobsAndUsers');
-		if (allJobsAndUsers || type === 'owner') return (
+		if (allJobsAndUsers) return (
 			<FormJobsAndUsersSelect
 				multiple
 				showAddButton
-				excludeJobs={property === 'Owner'}
+				excludeJobs={type === 'owner'}
 				maxItems={19}
 				name={name}
 				transformInputValue={(v) => compact(mapFormArrayToArray(v))}
