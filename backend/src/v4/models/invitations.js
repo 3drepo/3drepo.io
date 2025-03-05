@@ -31,6 +31,13 @@ const Mailer = require("../mailer/mailer");
 const { publish } = require(`${v5Path}/services/eventsManager/eventsManager`);
 const { events } = require(`${v5Path}/services/eventsManager/eventsManager.constants`);
 
+const { getTeamspaceRefId } = require(`${v5Path}/models/teamspaceSettings`);
+const {
+	doesUserExist,
+	createUser,
+	addUserToAccount
+} = require(`${v5Path}/services/sso/frontegg`);
+
 const { contains: setContains } = require("./helper/set");
 
 const responseCodes = require("../response_codes.js");
@@ -78,12 +85,16 @@ const cleanPermissions = (permissions) => {
 };
 
 const sendInvitationEmail = async (email, username, teamspace) => {
-	const { customData: {firstName, lastName, billing} } = await User.findByUserName(username);
-	const name = firstName + " " + lastName;
-	const company = ((billing || {}).billingInfo || {}).company || username;
-	const secRes = await getSecurityRestrictions(teamspace);
-
-	Mailer.sendTeamspaceInvitation(email, {name, company, teamspace, needSSO: !!secRes[SSO_RESTRICTED]});
+	// Frontegg may be aware of the user already (due to a different application)
+	const [userId, refId] = await Promise.all([
+		doesUserExist(email),
+		getTeamspaceRefId(teamspace)
+	]);
+	if(!userId) {
+		await createUser(refId, email);
+	} else {
+		await addUserToAccount(refId, userId, true);
+	}
 };
 
 invitations.create = async (email, teamspace, job, username, permissions = {}) => {
@@ -141,6 +152,7 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 		// if its a new teamspace that the user has been invited send an invitation email
 		if (result.teamSpaces.every(t=> t.teamspace !== teamspace)) {
 			await sendInvitationEmail(email, username, teamspace);
+			publish(events.INVITATION_ADDED, { teamspace, executor: username, email, job, permissions});
 		}
 
 	} else {

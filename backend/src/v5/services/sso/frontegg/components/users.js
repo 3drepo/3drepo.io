@@ -31,6 +31,17 @@ Users.getUserById = async (userId) => {
 	}
 };
 
+Users.doesUserExist = async (email) => {
+	try {
+		const config = await getConfig();
+		const { data } = await get(`${config.vendorDomain}/identity/resources/users/v1/email?email=${email}`,
+			await getBearerHeader());
+		return data.id;
+	} catch (err) {
+		return false;
+	}
+};
+
 Users.createUser = async (accountId, email, name, userData, privateUserData, bypassVerification = false) => {
 	try {
 		const config = await getConfig();
@@ -52,7 +63,7 @@ Users.createUser = async (accountId, email, name, userData, privateUserData, byp
 
 		return data.id;
 	} catch (err) {
-		throw new Error(`Failed to create user(${email}) on Users: ${err.message}`);
+		throw new Error(`Failed to create user(${email}) on Users: ${JSON.stringify(err?.response?.data) || err.message}`);
 	}
 };
 
