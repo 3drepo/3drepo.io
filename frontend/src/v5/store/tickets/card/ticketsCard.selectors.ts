@@ -144,6 +144,15 @@ export const selectFilteredTickets = createSelector(
 
 export const selectTemplatesWithTickets = createSelector(
 	selectCurrentTemplates,
+	selectCurrentTickets,
+	(templates, tickets) => {
+		const idsOfTemplatesWithAtLeastOneTicket = uniq(tickets.map((t) => t.type));
+		return templates.filter((t) => idsOfTemplatesWithAtLeastOneTicket.includes(t._id));
+	},
+);
+
+export const selectTemplatesWithFilteredTickets = createSelector(
+	selectCurrentTemplates,
 	selectFilteredTickets,
 	(templates, tickets) => {
 		const idsOfTemplatesWithAtLeastOneTicket = uniq(tickets.map((t) => t.type));
@@ -153,7 +162,7 @@ export const selectTemplatesWithTickets = createSelector(
 
 export const selectAvailableTemplatesFilters = createSelector(
 	selectFilters,
-	selectTemplatesWithTickets,
+	selectTemplatesWithFilteredTickets,
 	(usedFilters, allFilters) => templatesToFilters(allFilters).filter(({ module, property, type }) => !usedFilters[`${module}.${property}.${type}`]),
 );
 
@@ -231,8 +240,7 @@ export const selectPropertyOptions = createSelector(
 	(state, modelId, module, property) => property,
 	(templates, riskCategories, jobsAndUsers, module, property) => {
 		const allValues = [];
-		if (!module && property === 'Owner') return getFiltersFromJobsAndUsers(
-			jobsAndUsers.filter((ju) => !!ju.firstName));
+		if (!module && property === 'Owner') return getFiltersFromJobsAndUsers(jobsAndUsers.filter((ju) => !!ju.firstName));
 		templates.forEach((template) => {
 			const matchingModule = module ? template.modules.find((mod) => (mod.name || mod.type) === module)?.properties : template.properties;
 			const matchingProperty = matchingModule?.find(({ name, type: t }) => (name === property) && (['manyOf', 'oneOf'].includes(t)));

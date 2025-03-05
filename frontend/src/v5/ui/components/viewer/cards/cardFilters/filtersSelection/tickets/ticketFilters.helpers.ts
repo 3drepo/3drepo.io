@@ -86,7 +86,7 @@ export const toTicketCardFilter = (filters: Record<string, BaseFilter>): CardFil
 );
 
 export const getOptionFromValue = (value, options) => options.find(({ value: optionValue }) => value === optionValue);
-export const getFilterFromEvent = (event, options) => compact(event.target.value).map((value) => { //TODO DAN rename
+export const getFilterFromEvent = (event, options) => compact(event.target.value).map((value) => {
 	const option = getOptionFromValue(value, options);
 	return { value, displayValue: option?.displayValue ?? value };
 });
