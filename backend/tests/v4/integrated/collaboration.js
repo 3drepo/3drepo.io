@@ -428,8 +428,9 @@ describe("Sharing/Unsharing a model", function () {
 		it("and the collaborator should be able to upload model - endpoint decommissioned", function(done) {
 			collaboratorAgent.post(`/${username}/${model}/upload`)
 				.field("tag", "collab_upload")
-				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
-				.expect(410, done);
+				.expect(410, (err, res) => {
+					done(err)
+				});
 		});
 
 		it("and the collaborator should be able to download the model", function(done) {

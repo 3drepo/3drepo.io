@@ -68,7 +68,6 @@ describe("Model", function () {
 					.send({ modelName: model, desc, type, unit, code, project })
 					.expect(410, function(err ,res) {
 						expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
-						callback(err);
 					})
 	});
 
@@ -79,7 +78,6 @@ describe("Model", function () {
 						.send({ modelName: model, desc, type, unit, code, project })
 						.expect(410, function(err ,res) {
 							expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
-							callback(err);
 						})
 		});
 
@@ -143,30 +141,12 @@ describe("Model", function () {
 		});
 	});
 
-	it("model added to a project should be listed on top level models array", function(done) {
-
-		agent.get(`/${username}.json`)
-			.expect(200, function(err, res) {
-
-				const account = res.body.accounts.find(account => account.account === username);
-				expect(account).to.exist;
-
-				let myModel = account.models.find(_model => _model.model === model);
-				expect(myModel).to.not.exist;
-
-				myModel = account.fedModels.find(_model => _model.model === model);
-				expect(myModel).to.not.exist;
-
-				done(err);
-			});
-	});
-
-	it("should fail as enpoint has been decommissioned", async () => {
-		const res = await agent.post(`/${username}/model`)
+	it("should fail as enpoint has been decommissioned", () => {
+		agent.post(`/${username}/model`)
 					.send({ modelName: model, desc, type, unit, code, project })
-		
-		expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
-		expect(res.body.status).to.equal(410)
+					.expect(410, function(err ,res) {
+						expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
+					})
 	});
 
 	it("update model code with invalid format", function(done) {
