@@ -39,8 +39,6 @@ const BLACK_LIST = [
 	"POS /*/verify",
 	"POST /forgot-password",
 	"POST /*/avatar",
-	"GET /*/invoices",
-	"GET /*/invoices/*",
 	"* /*/jobs",
 	"* /*/jobs/*",
 	"* /*/jobs/*/*",

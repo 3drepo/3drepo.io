@@ -83,11 +83,6 @@ function updateSubscription(req, res, next) {
 			const resData = {
 				url: agreement.url
 			};
-
-			if (config.paypal.debug && config.paypal.debug.showFullAgreement) {
-				resData.agreement = agreement.agreement;
-			}
-
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, resData);
 
 		})
