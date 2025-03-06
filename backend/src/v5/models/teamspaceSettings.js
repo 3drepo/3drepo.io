@@ -224,7 +224,7 @@ TeamspaceSetting.setTeamspaceRefId = async (teamspace, refId) => {
 };
 
 TeamspaceSetting.getTeamspaceRefId = async (teamspace) => {
-	const { refId } = await teamspaceSettingQuery(teamspace, { _id: teamspace }, { refId: 1 });
+	const { refId } = await TeamspaceSetting.getTeamspaceSetting(teamspace, { refId: 1 });
 	return refId;
 };
 
