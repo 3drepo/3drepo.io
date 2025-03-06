@@ -50,7 +50,7 @@ Users.createNewUserRecord = async (idpUserData) => {
 
 	await addUser(userData);
 
-	publish(events.USER_CREATED, { id, email, fullName: name, createdAt: userData.createdAt });
+	publish(events.USER_CREATED, { username: id, email, fullName: name, createdAt: userData.createdAt });
 	return id;
 };
 
