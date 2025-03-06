@@ -17,10 +17,10 @@
 
 import { FormattedMessage } from 'react-intl';
 import { CardFilterOperator, CardFilterValue, CardFilterType, BaseFilter, CardFilter } from '../cardFilters.types';
-import { getFilterFormTitle, isDateType, isRangeOperator } from '../cardFilters.helpers';
+import { getFilterFormTitle, getValidOperators, isDateType, isRangeOperator } from '../cardFilters.helpers';
 import { Container, ButtonsContainer, Button, TitleContainer } from './filterForm.styles';
 import { FormProvider, useForm } from 'react-hook-form';
-import { isBoolean, isEmpty } from 'lodash';
+import { intersection, isBoolean, isEmpty } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { FilterFormValues } from './filterFormValues/filterFormValues.component';
 import { mapArrayToFormArray, mapFormArrayToArray } from '@/v5/helpers/form.helper';
@@ -32,7 +32,7 @@ import { formatSimpleDate } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
 import { TRUE_LABEL, FALSE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
 
-const DEFAULT_OPERATOR = 'is';
+const DEFAULT_OPERATORS: CardFilterOperator[] = ['is', 'eq'];
 const DEFAULT_VALUES = [''];
 type FormType = { values: { value: CardFilterValue, displayValue?: string }[], operator: CardFilterOperator };
 type FilterFormProps = {
@@ -51,8 +51,8 @@ const formatDateRange = ([from, to]) => formatMessage(
 );
 
 export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel }: FilterFormProps) => {
-	const defaultValues = {
-		operator: filter?.operator || DEFAULT_OPERATOR,
+	const defaultValues: FormType = {
+		operator: filter?.operator || intersection(getValidOperators(type), DEFAULT_OPERATORS)[0],
 		values: mapArrayToFormArray(filter?.values || DEFAULT_VALUES),
 	};
 
@@ -63,7 +63,12 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel 
 		context: { type },
 		shouldUnregister: true,
 	});
-	const { formState: { isValid, dirtyFields }, reset } = formData;
+	const { formState: { isValid, dirtyFields }, reset, getValues } = formData;
+
+	const operatorValue = getValues('operator');
+	if (!getValidOperators(type).includes(operatorValue)) {
+		reset(defaultValues);
+	}
 
 	const isUpdatingFilter = !!filter;
 	const canSubmit = isValid && !isEmpty(dirtyFields);
