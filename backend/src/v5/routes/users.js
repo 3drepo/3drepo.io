@@ -230,11 +230,6 @@ const establishRoutes = () => {
 	*                 type: string
 	*                 description: The last name of the user (applies only to non SSO users)
 	*                 example: Voorhees
-	*               email:
-	*                 type: string
-	*                 description: The email of the user (applies only to non SSO users)
-	*                 example: jason@vorhees.com
-	*                 format: email
 	*               company:
 	*                 type: string
 	*                 description: Name of the company
@@ -243,16 +238,7 @@ const establishRoutes = () => {
 	*                 type: string
 	*                 description: Country Code
 	*                 example: GB
-	*               oldPassword:
-	*                 type: string
-	*                 description: The old password of the user (applies only to non SSO users)
-	*                 example: password12345
-    *                 format: password
-	*               newPassword:
-	*                 type: string
-	*                 description: The new password of the user (applies only to non SSO users)
-	*                 example: password12345
-    *                 format: password
+
 	*     responses:
 	*       401:
 	*         $ref: "#/components/responses/notLoggedIn"

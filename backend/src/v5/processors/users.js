@@ -21,7 +21,6 @@ const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../models/users.constants')
 const { addUser, deleteApiKey, generateApiKey,
 	getUserByUsername, removeUser, updatePassword, updateProfile } = require('../models/users');
 const { fileExists, getFile, removeFile, storeFile } = require('../services/filesManager');
-const { isEmpty, removeFields } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
 const { generateUserHash } = require('../services/intercom');
@@ -95,15 +94,8 @@ Users.getProfileByUsername = async (username) => {
 	};
 };
 
-Users.updateProfile = async (username, updatedProfile) => {
-	if (updatedProfile.oldPassword) {
-		await updatePassword(username, updatedProfile.newPassword);
-	}
-
-	const fieldsToUpdate = removeFields(updatedProfile, 'oldPassword', 'newPassword');
-	if (!isEmpty(fieldsToUpdate)) {
-		await updateProfile(username, fieldsToUpdate);
-	}
+Users.updateProfile = async (username, fieldsToUpdate) => {
+	await updateProfile(username, fieldsToUpdate);
 };
 
 Users.generateApiKey = generateApiKey;
