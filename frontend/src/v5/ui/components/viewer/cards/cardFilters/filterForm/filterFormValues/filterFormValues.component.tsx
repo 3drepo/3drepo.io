@@ -18,20 +18,21 @@
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { getOperatorMaxFieldsAllowed } from '../filterForm.helpers';
 import { isRangeOperator, isTextType, isSelectType, isDateType } from '../../cardFilters.helpers';
-import { FormBooleanSelect, FormMultiSelect, FormDateTime, FormNumberField, FormTextField } from '@controls/inputs/formInputs.component';
+import { FormBooleanSelect, FormMultiSelect, FormDateTime, FormNumberField, FormTextField, FormJobsAndUsersSelect } from '@controls/inputs/formInputs.component';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
 import { useEffect } from 'react';
 import { compact, isArray, isEmpty } from 'lodash';
 import { CardFilterType } from '../../cardFilters.types';
-import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useParams } from 'react-router-dom';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { DateRangeInput } from './rangeInput/dateRangeInput.component';
 import { NumberRangeInput } from './rangeInput/numberRangeInput.component';
-import { mapArrayToFormArray, mapFormArrayToArray } from '@/v5/helpers/form.helper';
+import { mapFormArrayToArray } from '@/v5/helpers/form.helper';
+import { getOptionFromValue, getFilterFromEvent } from '../../filtersSelection/tickets/ticketFilters.helpers';
 
-type FilterFolrmValuesType = {
+type FilterFormValuesProps = {
 	module: string,
 	property: string,
 	type: CardFilterType,
@@ -44,7 +45,7 @@ const getInputField = (type: CardFilterType) => {
 };
 
 const name = 'values';
-export const FilterFormValues = ({ module, property, type }: FilterFolrmValuesType) => {
+export const FilterFormValues = ({ module, property, type }: FilterFormValuesProps) => {
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const { control, watch, formState: { errors, dirtyFields } } = useFormContext();
 	const { fields, append, remove } = useFieldArray({
@@ -58,7 +59,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFolrmValuesTy
 	const isRangeOp = isRangeOperator(operator);
 	const emptyValue = { value: (isRangeOp ? ['', ''] : '') };
 	const selectOptions = type === 'template' ?
-		TicketsHooksSelectors.selectTemplatesNames(containerOrFederation)
+		TicketsCardHooksSelectors.selectTemplatesWithTickets().map(({ code: value, name: displayValue }) => ({ value, displayValue, type: 'template' }))
 		: TicketsCardHooksSelectors.selectPropertyOptions(containerOrFederation, module, property);
 
 	useEffect(() => {
@@ -122,15 +123,32 @@ export const FilterFormValues = ({ module, property, type }: FilterFolrmValuesTy
 			</>
 		);
 	}
+
 	if (isSelectType(type)) {
+		const allJobsAndUsers = selectOptions.every(({ type: t }) => t === 'jobsAndUsers');
+		if (allJobsAndUsers) return (
+			<FormJobsAndUsersSelect
+				multiple
+				showAddButton
+				excludeJobs={type === 'owner'}
+				maxItems={19}
+				name={name}
+				transformInputValue={(v) => compact(mapFormArrayToArray(v))}
+				transformOutputValue={(e) =>  getFilterFromEvent(e, selectOptions)}
+				formError={error?.[0]}
+			/>
+		);
 		return (
 			<FormMultiSelect
 				name={name}
+				transformInputValue={mapFormArrayToArray}
+				transformOutputValue={(e) => getFilterFromEvent(e, selectOptions)}
+				renderValue={(values: string[]) => values.map((value) => getOptionFromValue(value, selectOptions)?.displayValue ?? value).join(', ')}
 				formError={error?.[0]}
-				transformValueIn={mapFormArrayToArray}
-				transformChangeEvent={(e) => mapArrayToFormArray(compact(e.target.value))}
 			>
-				{(selectOptions || []).map((val) => <MultiSelectMenuItem key={val} value={val}>{val}</MultiSelectMenuItem>)}
+				{selectOptions.map(
+					(option) => <MultiSelectMenuItem key={option.value} value={option.value}>{option.displayValue ?? option.value}</MultiSelectMenuItem>,
+				)}
 			</FormMultiSelect>
 		);
 	}

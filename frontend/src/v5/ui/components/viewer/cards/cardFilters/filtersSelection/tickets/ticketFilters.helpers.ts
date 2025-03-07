@@ -23,7 +23,7 @@ import NumberIcon from '@assets/icons/filters/number.svg';
 import TemplateIcon from '@assets/icons/filters/template.svg';
 import TextIcon from '@assets/icons/filters/text.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
-import { isString, sortBy, uniqBy } from 'lodash';
+import { isString, sortBy, uniqBy, compact } from 'lodash';
 import { CardFilterType, BaseFilter, CardFilter } from '../../cardFilters.types';
 
 export const TYPE_TO_ICON: Record<CardFilterType, any> = {
@@ -37,6 +37,7 @@ export const TYPE_TO_ICON: Record<CardFilterType, any> = {
 	'sequencing': CalendarIcon,
 	'oneOf': ListIcon,
 	'manyOf': ListIcon,
+	'owner': ListIcon,
 	'boolean': BooleanIcon,
 	'number': NumberIcon,
 };
@@ -45,10 +46,11 @@ const DEFAULT_FILTERS: CardFilter[] = [
 	{ module: '', type: 'title', property: formatMessage({ defaultMessage: 'Ticket title', id: 'viewer.card.filters.element.title' }) },
 	{ module: '', type: 'ticketCode', property: formatMessage({ defaultMessage: 'Ticket ID', id: 'viewer.card.filters.element.ticketCode' }) },
 	{ module: '', type: 'template', property: formatMessage({ defaultMessage: 'Ticket template', id: 'viewer.card.filters.element.template' }) },
+	{ module: '', type: 'owner', property: formatMessage({ defaultMessage: 'Owner', id: 'viewer.card.filters.element.owner' }) },
 ];
 
 const propertiesToValidFilters = (properties: { name: string, type: string }[], module: string = ''): CardFilter[] => properties
-	.filter(({ type }) => Object.keys(TYPE_TO_ICON).includes(type))
+	.filter(({ name, type }) => name !== 'Owner' && Object.keys(TYPE_TO_ICON).includes(type))
 	.map(({ name, type }) => ({
 		module,
 		property: name,
@@ -82,6 +84,21 @@ export const toTicketCardFilter = (filters: Record<string, BaseFilter>): CardFil
 			filter,
 		}))
 );
+
+export const getOptionFromValue = (value, options) => options.find(({ value: optionValue }) => value === optionValue);
+export const getFilterFromEvent = (event, options) => compact(event.target.value).map((value) => {
+	const option = getOptionFromValue(value, options);
+	return { value, displayValue: option?.displayValue ?? value };
+});
+
+export const getFiltersFromJobsAndUsers = (jobsAndUsers) => jobsAndUsers.map((ju) => {
+	const isUser = !!ju.firstName;
+	return ({
+		value: isUser ? ju.user : ju._id,
+		displayValue: isUser ? `${ju?.firstName} ${ju?.lastName}` : null,
+		type: 'jobsAndUsers',
+	});
+});
 
 const wrapWith = (text, wrappingChar) => wrappingChar + text + wrappingChar;
 // This code, copied from MDN https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent#encoding_for_rfc3986 
