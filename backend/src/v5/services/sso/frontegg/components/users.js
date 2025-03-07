@@ -67,4 +67,21 @@ Users.createUser = async (accountId, email, name, userData, privateUserData, byp
 	}
 };
 
+Users.triggerPasswordReset = async (email) => {
+	try {
+		const config = await getConfig();
+		const payload = deleteIfUndefined({
+			email,
+
+		});
+
+		const url = `${config.vendorDomain}/identity/resources/users/v1/passwords/reset`;
+		const { data } = await post(url, payload, { headers: await getBearerHeader() });
+
+		return data.id;
+	} catch (err) {
+		throw new Error(`Failed to create user(${email}) on Users: ${JSON.stringify(err?.response?.data) || err.message}`);
+	}
+};
+
 module.exports = Users;

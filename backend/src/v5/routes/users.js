@@ -103,10 +103,19 @@ const uploadAvatar = async (req, res) => {
 	}
 };
 
+const resetPassword = async (req, res) => {
+	try {
+		const user = getUserFromSession(req.session);
+		await Users.resetPassword(user);
+		respond(req, res, templates.ok);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
-
-	router.post('/login', routeDecommissioned());
 
 	/**
 	 * @openapi
@@ -331,13 +340,27 @@ const establishRoutes = () => {
 	*/
 	router.put('/user/avatar', isLoggedIn, singleImageUpload('file'), uploadAvatar);
 
+	/**
+	* @openapi
+	* /user/password/reset:
+	*   post:
+	*     description: Triggers a password reset email to the user
+	*     tags: [User]
+	*     operationId: resetPassword
+	*     responses:
+	*       401:
+	*         $ref: "#/components/responses/notLoggedIn"
+	*       200:
+	*         description: A password reset email will be sent to the logged in user
+	*/
+	router.post('/user/password/reset', isLoggedIn, resetPassword);
+
+	router.post('/login', routeDecommissioned());
 	router.post('/user/password', routeDecommissioned());
-
 	router.put('/user/password', routeDecommissioned());
-
 	router.post('/user', routeDecommissioned());
-
 	router.post('/user/verify', routeDecommissioned());
+
 	return router;
 };
 
