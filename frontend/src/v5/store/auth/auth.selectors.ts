@@ -24,6 +24,10 @@ export const selectIsAuthenticated = createSelector(
 	selectAuthDomain, (state) => !!state.isAuthenticated,
 );
 
+export const selectAuthenticatedTeamspace = createSelector(
+	selectAuthDomain, (state) => state.authenticatedTeamspace,
+);
+
 export const selectAuthenticationFetched = createSelector(
 	selectAuthDomain, (state) => !(state.isAuthenticated === null),
 );

@@ -19,12 +19,12 @@ import { FormattedMessage } from 'react-intl';
 import { AuthTemplate } from '@components/authTemplate';
 import { Button, Footer, Container, Heading, Link } from './authPage.styles';
 import { COOKIES_ROUTE, PRIVACY_ROUTE, RELEASE_NOTES_ROUTE, TERMS_ROUTE } from '../routes.constants';
-import { useSSOLogin } from '@/v5/services/sso.hooks';
+import { useSSOAuth } from '@/v5/services/sso.hooks';
 
 const APP_VERSION = ClientConfig.VERSION;
 
 export const AuthPage = () => {
-	const [, loginWithSSO] = useSSOLogin();
+	const [authWithSSO] = useSSOAuth();
 	return (
 		<AuthTemplate
 			footer={(
@@ -37,7 +37,7 @@ export const AuthPage = () => {
 				<Heading>
 					<FormattedMessage id="authPage.heading" defaultMessage="Welcome to 3D Repo" />
 				</Heading>
-				<Button onClick={loginWithSSO}>
+				<Button onClick={authWithSSO}>
 					<FormattedMessage id="authPage.button" defaultMessage="Log in / Sign up" />
 				</Button>
 				<Footer>

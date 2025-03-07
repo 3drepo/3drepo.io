@@ -21,11 +21,11 @@ import { TabContext } from '@mui/lab';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useErrorInterceptor } from '@controls/errorMessage/useErrorInterceptor';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { EditProfileUpdatePasswordSchema, EditProfileUpdatePersonalSchema, EditProfileUpdateSSOPasswordSchema } from '@/v5/validation/userSchemes/editProfileSchemes';
+import { EditProfileUpdatePersonalSchema } from '@/v5/validation/userSchemes/editProfileSchemes';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormModal, TabList, Tab, TabPanel, TruncatableName } from './editProfileModal.styles';
 import { EditProfilePersonalTab, IUpdatePersonalInputs } from './editProfilePersonalTab/editProfilePersonalTab.component';
-import { EditProfileAuthenticationTab, EMPTY_PASSWORDS, IUpdatePasswordInputs } from './editProfileAuthenticationTab/editProfileAuthenticationTab.component';
+import { EditProfileAuthenticationTab } from './editProfileAuthenticationTab/editProfileAuthenticationTab.component';
 import { EditProfileIntegrationsTab } from './editProfileIntegrationsTab/editProfileIntegrationsTab.component';
 
 const PERSONAL_TAB = 'personal';
@@ -51,15 +51,13 @@ type EditProfileModalProps = {
 };
 export const EditProfileModal = ({ open, onClickClose, initialTab }: EditProfileModalProps) => {
 	const [activeTab, setActiveTab] = useState(initialTab || PERSONAL_TAB);
-	const [incorrectPassword, setIncorrectPassword] = useState(false);
-	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
 	const [unexpectedErrors, setUnexpectedErrors] = useState<EditProfileUnexpectedErrors>({});
 	const interceptedError = useErrorInterceptor();
 	const user = CurrentUserHooksSelectors.selectCurrentUser();
 
 	const defaultPersonalValues = defaults(
 		pick(omitBy(user, isNull), ['firstName', 'lastName', 'email', 'company', 'countryCode']),
-		{ company: '', countryCode: 'GB', avatarFile: '' },
+		{ company: '', avatarFile: '' },
 	);
 
 	const onTabChange = (_, selectedTab) => setActiveTab(selectedTab);
@@ -67,21 +65,10 @@ export const EditProfileModal = ({ open, onClickClose, initialTab }: EditProfile
 	const personalFormData = useForm<IUpdatePersonalInputs>({
 		mode: 'all',
 		resolver: yupResolver(EditProfileUpdatePersonalSchema),
-		context: { alreadyExistingEmails },
 		defaultValues: defaultPersonalValues,
 	});
 
-	const authenticationFormData = useForm<IUpdatePasswordInputs>({
-		mode: 'all',
-		resolver: yupResolver(
-			user.sso
-				? EditProfileUpdateSSOPasswordSchema
-				: EditProfileUpdatePasswordSchema(incorrectPassword),
-		),
-		defaultValues: EMPTY_PASSWORDS,
-	});
-
-	const isSubmitting = personalFormData.formState.isSubmitting || authenticationFormData.formState.isSubmitting;
+	const isSubmitting = personalFormData.formState.isSubmitting;
 
 	useEffect(() => {
 		setUnexpectedErrors({ ...unexpectedErrors, [activeTab]: interceptedError });
@@ -107,23 +94,14 @@ export const EditProfileModal = ({ open, onClickClose, initialTab }: EditProfile
 				<FormProvider {...personalFormData}>
 					<TabPanel value={PERSONAL_TAB} $personalTab>
 						<EditProfilePersonalTab
-							alreadyExistingEmails={alreadyExistingEmails}
-							setAlreadyExistingEmails={setAlreadyExistingEmails}
 							unexpectedError={unexpectedErrors[PERSONAL_TAB]}
 							onClickClose={onClickClose}
 						/>
 					</TabPanel>
 				</FormProvider>
-				<FormProvider {...authenticationFormData}>
-					<TabPanel value={AUTHENTICATION_TAB}>
-						<EditProfileAuthenticationTab
-							incorrectPassword={incorrectPassword}
-							setIncorrectPassword={setIncorrectPassword}
-							unexpectedError={unexpectedErrors[AUTHENTICATION_TAB]}
-							onClickClose={onClickClose}
-						/>
-					</TabPanel>
-				</FormProvider>
+				<TabPanel value={AUTHENTICATION_TAB}>
+					<EditProfileAuthenticationTab onClickClose={onClickClose} />
+				</TabPanel>
 				<TabPanel value={INTEGRATIONS_TAB}>
 					<EditProfileIntegrationsTab
 						unexpectedError={unexpectedErrors[INTEGRATIONS_TAB]}

@@ -18,7 +18,7 @@
 import { isNull, omitBy, values } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { addParams, getParams } from '../helpers/url.helper';
-import { errorMessages, postActions, signin } from './api/sso';
+import { errorMessages, postActions, ssoAuth } from './api/sso';
 import { formatMessage } from './intl';
 import { AuthHooksSelectors } from './selectorsHooks';
 
@@ -41,7 +41,7 @@ export const useSSOParams = () => {
 	[{ searchParams: string, error: string | null, action: string | null }, () => void ];
 };
 
-export const useSSOLogin = () => {
+export const useSSOAuth = () => {
 	const [{ error }] = useSSOParams();
 
 	const returnUrl = AuthHooksSelectors.selectReturnUrl();
@@ -55,7 +55,10 @@ export const useSSOLogin = () => {
 
 	const redirectUri = addParams(returnUrl.pathname, returnUrl.search);
 
-	return [errorMessage, () => signin(redirectUri).then(({ data }) => {
-		window.location.href = data.link;
-	})] as [ string | null, ()=> void];
+	return [
+		(teamspace?) => ssoAuth(redirectUri, teamspace).then(({ data }) => {
+			window.location.href = data.link;
+		}),
+		errorMessage,
+	] as [(teamspace?: string) => void, string | null];
 };

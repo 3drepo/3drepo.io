@@ -22,7 +22,6 @@ import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
 import { Checkbox, CheckboxProps } from './checkbox/checkbox.component';
 import { InputController, InputControllerProps } from './inputController.component';
 import { NumberField } from './numberField/numberField.component';
-import { PasswordField } from './passwordField/passwordField.component';
 import { Select, SelectProps } from './select/select.component';
 import { SelectView, SelectViewProps } from './selectView/selectView.component';
 import { TextArea, TextAreaProps } from './textArea/textArea.component';
@@ -31,7 +30,6 @@ import { TextField, TextFieldProps } from './textField/textField.component';
 
 // text inputs
 export const FormNumberField = (props: InputControllerProps<TextFieldProps>) => (<InputController Input={NumberField} {...props} />);
-export const FormPasswordField = (props: InputControllerProps<TextFieldProps>) => (<InputController Input={PasswordField} {...props} />);
 export const FormTextField = (props: InputControllerProps<TextFieldProps>) => (<InputController Input={TextField} {...props} />);
 export const FormTextArea = forwardRef((props: InputControllerProps<TextAreaProps>, ref: any) => (<InputController Input={TextArea} {...props} ref={ref} />));
 export const FormTextAreaFixedSize = forwardRef((props: InputControllerProps<TextAreaFixedSizeProps>, ref) => (<InputController Input={TextAreaFixedSize} {...props} ref={ref} />));

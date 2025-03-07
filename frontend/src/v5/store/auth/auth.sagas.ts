@@ -15,26 +15,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
+import { put, select, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
-import { AuthActions, AuthTypes, LoginAction } from './auth.redux';
+import { AuthActions, AuthTypes } from './auth.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { CurrentUserActions } from '../currentUser/currentUser.redux';
 import { cookies } from '@/v5/helpers/cookie.helper';
 import axios from 'axios';
 import { setPermissionModalSuppressed } from '@components/shared/updatePermissionModal/updatePermissionModal.helpers';
+import { selectAuthenticatedTeamspace } from './auth.selectors';
 
 const CSRF_TOKEN = 'csrf_token';
 const TOKEN_HEADER = 'X-CSRF-TOKEN';
 
-
 function* authenticate() {
 	yield put(AuthActions.setPendingStatus(true));
+	const authenticatedTeamspace = yield select(selectAuthenticatedTeamspace);
+	if (!authenticatedTeamspace) {
+		setPermissionModalSuppressed(false);
+	}
 
 	try {
 		axios.defaults.headers[TOKEN_HEADER] = cookies(CSRF_TOKEN);
-		yield API.Auth.authenticate();
+		const s = yield API.Auth.authenticate();
+		yield put(AuthActions.setAuthenticatedTeamspace(s.data.authenticatedTeamspace));
 		yield put(CurrentUserActions.fetchUser());
 		yield put(AuthActions.setAuthenticationStatus(true));
 	} catch (error) {
@@ -45,54 +50,6 @@ function* authenticate() {
 			}));
 		}
 		yield put(AuthActions.setAuthenticationStatus(false));
-	}
-	yield put(AuthActions.setPendingStatus(false));
-}
-
-function* login({ username, password }: LoginAction) {
-	yield put(AuthActions.setPendingStatus(true));
-
-	try {
-		yield API.Auth.login(username, password);
-		axios.defaults.headers[TOKEN_HEADER] = cookies(CSRF_TOKEN);
-		yield put(CurrentUserActions.fetchUser());
-		yield put(AuthActions.setAuthenticationStatus(true));
-		setPermissionModalSuppressed(false);
-	} catch (error) {
-		const data = error.response?.data;
-		const lockoutDuration = Math.round(ClientConfig.loginPolicy.lockoutDuration / 1000 / 60);
-
-		switch (data?.code) {
-			case 'INCORRECT_USERNAME_OR_PASSWORD':
-				yield put(AuthActions.loginFailed(
-					formatMessage({ id: 'auth.login.error.badFields', defaultMessage: 'Incorrect username or password. Please try again.' }),
-				));
-				break;
-			case 'ALREADY_LOGGED_IN':
-				yield put(AuthActions.authenticate());
-				break;
-			case 'TOO_MANY_LOGIN_ATTEMPTS':
-				yield put(AuthActions.loginFailed(
-					formatMessage(
-						{
-							id: 'auth.login.error.tooManyAttempts',
-							defaultMessage: 'Too many unsuccessful login attempts! Account locked for {time} minutes.',
-						}, { time: lockoutDuration },
-					),
-				));
-				break;
-			case 'USER_NOT_VERIFIED':
-				yield put(AuthActions.loginFailed(
-					formatMessage({
-						id: 'auth.login.error.userNotVerified',
-						defaultMessage: 'Account not yet verified. Please check your email',
-					}),
-				));
-				break;
-			default:
-				// network or unexpected error
-				yield put(AuthActions.loginFailed(null));
-		}
 	}
 	yield put(AuthActions.setPendingStatus(false));
 }
@@ -131,7 +88,6 @@ function* kickedOut() {
 
 export default function* AuthSaga() {
 	yield takeLatest(AuthTypes.AUTHENTICATE, authenticate);
-	yield takeLatest(AuthTypes.LOGIN, login);
 	yield takeLatest(AuthTypes.LOGOUT, logout);
 	yield takeLatest(AuthTypes.KICKED_OUT, kickedOut);
 }

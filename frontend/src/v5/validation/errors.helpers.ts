@@ -20,8 +20,6 @@ export const getErrorStatus = (error: any) => error?.response?.status;
 
 export const isInvalidArguments = (error: any): boolean => getErrorCode(error) === 'INVALID_ARGUMENTS';
 
-export const isPasswordIncorrect = (error: any): boolean => getErrorCode(error) === 'INCORRECT_PASSWORD';
-
 export const isFileFormatUnsupported = (error: any): boolean => getErrorCode(error) === 'UNSUPPORTED_FILE_FORMAT';
 
 export const isNotLoggedIn = (error: any): boolean => getErrorCode(error) === 'NOT_LOGGED_IN';
@@ -37,8 +35,6 @@ const fieldAlreadyExists = (error: any, field: string): boolean => {
 };
 
 export const nameAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'name');
-export const usernameAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'username');
-export const emailAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'email');
 export const projectAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'project');
 export const numberAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'number');
 

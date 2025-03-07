@@ -18,8 +18,8 @@
 import styled from 'styled-components';
 import { Typography } from '@controls/typography';
 import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
-import { Link as LinkBase } from '@components/shared/sso/microsoftText.styles';
 import { Button as ButtonBase } from '@controls/button';
+import { Link as LinkBase } from 'react-router-dom';
 
 export const Container = styled.div`
 	border-radius: 20px;

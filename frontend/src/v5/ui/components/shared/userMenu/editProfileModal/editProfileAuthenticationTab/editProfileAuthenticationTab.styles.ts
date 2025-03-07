@@ -14,13 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { Typography } from '@controls/typography';
 import styled from 'styled-components';
-import { MicrosoftText as MicrosoftTextBase } from '@components/shared/sso/microsoftText.component';
-import { MicrosoftTitleText } from '@components/shared/sso/microsoftText.styles';
 
-export const MicrosoftText = styled(MicrosoftTextBase)`
-	${MicrosoftTitleText} {
-		margin-top: 10px;
-		${({ theme }) => theme.typography.h3}
-	}
-`;
+export const FronteggTitleText = styled(Typography).attrs({
+	variant: 'h3',
+})``;

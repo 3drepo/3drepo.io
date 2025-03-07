@@ -23,10 +23,10 @@ import { MenuItem } from '@mui/material';
 import { useFormContext } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { pickBy, isEmpty, isMatch, mapValues, omit } from 'lodash';
+import { pickBy, isEmpty, isMatch, mapValues } from 'lodash';
 import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
 import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
-import { emailAlreadyExists, isFileFormatUnsupported } from '@/v5/validation/errors.helpers';
+import { isFileFormatUnsupported } from '@/v5/validation/errors.helpers';
 import { FormModalActions } from '@controls/formModal/modalButtons/modalButtons.styles';
 import { ModalCancelButton, ModalSubmitButton } from '@controls/formModal/modalButtons/modalButtons.component';
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
@@ -42,15 +42,11 @@ export type IUpdatePersonalInputs = Partial<{
 }>;
 
 type EditProfilePersonalTabProps = {
-	alreadyExistingEmails: string[];
-	setAlreadyExistingEmails: (emails: string[]) => void;
 	unexpectedError: any,
 	onClickClose: () => void,
 };
 
 export const EditProfilePersonalTab = ({
-	alreadyExistingEmails,
-	setAlreadyExistingEmails,
 	unexpectedError,
 	onClickClose,
 }: EditProfilePersonalTabProps) => {
@@ -58,7 +54,6 @@ export const EditProfilePersonalTab = ({
 	const [submitWasSuccessful, setSubmitWasSuccessful] = useState(false);
 	const {
 		getValues,
-		trigger,
 		handleSubmit,
 		reset,
 		setError: setFormError,
@@ -81,10 +76,6 @@ export const EditProfilePersonalTab = ({
 
 	const onSubmissionError = (apiError, reject) => {
 		setSubmitWasSuccessful(false);
-		if (emailAlreadyExists(apiError)) {
-			setAlreadyExistingEmails([...alreadyExistingEmails, getValues('email')]);
-			trigger('email');
-		}
 		if (isFileFormatUnsupported(apiError)) {
 			setFormError('avatarFile', {
 				type: 'custom',
@@ -99,9 +90,6 @@ export const EditProfilePersonalTab = ({
 
 	const onSubmit = async () => {
 		let values = getSubmittableValues();
-		if (user.sso) {
-			values = omit(values, ['firstName', 'lastName', 'email']);
-		}
 		await new Promise((resolve, reject) => {
 			CurrentUserActionsDispatchers.updatePersonalData(
 				values,
@@ -134,7 +122,7 @@ export const EditProfilePersonalTab = ({
 				)}
 				<UnhandledError
 					error={unexpectedError}
-					expectedErrorValidators={[emailAlreadyExists, isFileFormatUnsupported]}
+					expectedErrorValidators={[isFileFormatUnsupported]}
 				/>
 				<FormTextField
 					name="firstName"
@@ -145,7 +133,7 @@ export const EditProfilePersonalTab = ({
 					})}
 					required
 					formError={formErrors.firstName}
-					disabled={!!user.sso}
+					disabled
 				/>
 				<FormTextField
 					name="lastName"
@@ -156,7 +144,7 @@ export const EditProfilePersonalTab = ({
 					})}
 					required
 					formError={formErrors.lastName}
-					disabled={!!user.sso}
+					disabled
 				/>
 				<FormTextField
 					name="email"
@@ -167,7 +155,7 @@ export const EditProfilePersonalTab = ({
 					})}
 					required
 					formError={formErrors.email}
-					disabled={!!user.sso}
+					disabled
 				/>
 				<FormTextField
 					name="company"
@@ -185,7 +173,6 @@ export const EditProfilePersonalTab = ({
 						id: 'editProfile.form.countryCode',
 						defaultMessage: 'Country',
 					})}
-					required
 				>
 					{clientConfigService.countries.map((country) => (
 						<MenuItem key={country.code} value={country.code}>

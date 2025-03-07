@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,46 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useEffect } from 'react';
-import { useSSOParams } from '@/v5/services/sso.hooks';
-import { EditProfileAuthenticationSSOTab } from './editProfileAuthenticationSSOTab.component';
-import { EditProfileAuthenticationNonSSOTab } from './editProfileAuthenticationNonSSOTab.component';
-
-export interface IUpdatePasswordInputs {
-	oldPassword: string;
-	newPassword: string;
-}
-
-export const EMPTY_PASSWORDS = {
-	oldPassword: '',
-	newPassword: '',
-};
+import { FormattedMessage } from 'react-intl';
+import { FormModalActions } from '@controls/formModal/modalButtons/modalButtons.styles';
+import { ModalCancelButton } from '@controls/formModal/modalButtons/modalButtons.component';
+import { TabContent } from '../editProfileModal.styles';
+import { FronteggTitleText } from './editProfileAuthenticationTab.styles';
 
 type EditProfileAuthenticationTabProps = {
-	incorrectPassword: boolean;
-	setIncorrectPassword: (isIncorrect: boolean) => void;
-	unexpectedError: any,
 	onClickClose: () => void,
 };
 
-export const EditProfileAuthenticationTab = ({
-	incorrectPassword,
-	setIncorrectPassword,
-	...props
-}: EditProfileAuthenticationTabProps) => {
-	const [, resetSSOParams] = useSSOParams();
-	const { sso } = CurrentUserHooksSelectors.selectCurrentUser();
-
-	useEffect(() => resetSSOParams, []);
-
-	if (sso) return (<EditProfileAuthenticationSSOTab {...props} />);
-
-	return (
-		<EditProfileAuthenticationNonSSOTab
-			incorrectPassword={incorrectPassword}
-			setIncorrectPassword={setIncorrectPassword}
-			{...props}
-		/>
-	);
-};
+export const EditProfileAuthenticationTab = ({ onClickClose }: EditProfileAuthenticationTabProps) => (
+	<>
+		<TabContent>
+			<FronteggTitleText>
+				<FormattedMessage
+					id="editProfile.authentication.title"
+					defaultMessage="Edit password"
+				/>
+			</FronteggTitleText>
+			<button>click me to reach frontegg</button>
+		</TabContent>
+		<FormModalActions>
+			<ModalCancelButton onClick={onClickClose} />
+		</FormModalActions>
+	</>
+);
