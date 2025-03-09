@@ -15,8 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { cloneDeep } = require('lodash');
+
 const { src } = require('../../helper/path');
-const { generateRandomString } = require('../../helper/services');
+const { determineTestGroup, generateRandomString } = require('../../helper/services');
 
 jest.mock('../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -31,7 +33,6 @@ const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager.constants');
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const { SOCKET_HEADER } = require(`${src}/services/chat/chat.constants`);
-const { USER_AGENT_HEADER } = require(`${src}/utils/sessions.constants`);
 
 // Need to mock these 2 to ensure we are not trying to create a real session configuration
 jest.mock('express-session', () => () => { });
@@ -137,7 +138,7 @@ const testUpdateSession = () => {
 
 	const req = {
 		loginData: { username: generateRandomString() },
-		session: { cookie: { domain: generateRandomString() } },
+		session: { cookie: { domain: generateRandomString() }, ssoInfo: { referer: 'http://abc.com/' } },
 		body: { user: 'user1' },
 		sessionID: '123',
 		ips: ['0.1.2.3'],
@@ -145,50 +146,50 @@ const testUpdateSession = () => {
 		headers: {},
 	};
 
-	describe.each([
-		['the request has a referer (SSO)', { ...req, session: { ...req.session, ssoInfo: { referer: 'http://abc.com/' } } }],
-		['the session has a referer', { ...req, headers: { ...req.headers, referer: generateRandomString() } }],
-		['the request has socket id', { ...req, headers: { ...req.headers, [SOCKET_HEADER]: 'socketsdlfkdsj' } }],
-		['the request has user agent from the plugin', { ...req, headers: { ...req.headers, [USER_AGENT_HEADER]: pluginAgent } }, pluginAgent],
-		['the request has user agent from the plugin (SSO)', { ...req, session: { ...req.session, ssoInfo: { userAgent: pluginAgent } } }, pluginAgent],
-		['the request has web user agent', { ...req, headers: { ...req.headers, [USER_AGENT_HEADER]: webBrowserUserAgent } }, webBrowserUserAgent],
-		['the request has web user agent (SSO)', { ...req, session: { ...req.session, ssoInfo: { userAgent: webBrowserUserAgent } } }, webBrowserUserAgent],
-		['the request has empty ips array', { ...req, ips: [] }],
-	])('Update Session', (desc, request, userAgent) => {
-		test(`should update session if ${desc}`, async () => {
-			const mockCB = jest.fn();
+	describe('Update session', () => {
+		describe.each([
+			['the request has a referer (SSO)', cloneDeep(req)],
+			['the request has socket id', { ...cloneDeep(req), headers: { ...req.headers, [SOCKET_HEADER]: 'socketsdlfkdsj' } }],
+			['the request has user agent from the plugin (SSO)', { ...cloneDeep(req), session: { ...req.session, ssoInfo: { userAgent: pluginAgent } } }, pluginAgent],
+			['the request has web user agent (SSO)', { ...cloneDeep(req), session: { ...req.session, ssoInfo: { userAgent: webBrowserUserAgent } } }, webBrowserUserAgent],
+			['the request has empty ips array', { ...cloneDeep(req), ips: [] }],
+		])('', (desc, request, userAgent) => {
+			test(`should update session if ${desc}`, async () => {
+				const mockCB = jest.fn();
 
-			if (userAgent) {
-				UserAgentHelper.getUserAgentInfo.mockImplementationOnce(() => ({
-					application: { name: generateRandomString() },
-				}));
-			}
+				if (userAgent) {
+					UserAgentHelper.getUserAgentInfo.mockImplementationOnce(() => ({
+						application: { name: generateRandomString() },
+					}));
+				}
 
-			await Sessions.updateSession(request, {}, mockCB);
-			checkResults(request, userAgent, mockCB);
+				await Sessions.updateSession(request, {}, mockCB);
+				checkResults(request, userAgent, mockCB);
+			});
 		});
-	});
+		test('Should update session with cookie.maxAge', async () => {
+			const mockCB = jest.fn();
+			const initialMaxAge = config.cookie.maxAge;
+			config.cookie.maxAge = 100;
+			const request = cloneDeep(req);
+			await Sessions.updateSession(request, {}, mockCB);
+			checkResults(request, undefined, mockCB);
+			config.cookie.maxAge = initialMaxAge;
+		});
 
-	test('Should update session with cookie.maxAge', async () => {
-		const mockCB = jest.fn();
-		const initialMaxAge = config.cookie.maxAge;
-		config.cookie.maxAge = 100;
-		await Sessions.updateSession(req, {}, mockCB);
-		checkResults(req, undefined, mockCB);
-		config.cookie.maxAge = initialMaxAge;
-	});
-
-	test('Should update session without cookie.maxAge', async () => {
-		const mockCB = jest.fn();
-		const initialMaxAge = config.cookie.maxAge;
-		config.cookie.maxAge = undefined;
-		await Sessions.updateSession(req, {}, mockCB);
-		checkResults(req, undefined, mockCB);
-		config.cookie.maxAge = initialMaxAge;
+		test('Should update session without cookie.maxAge', async () => {
+			const mockCB = jest.fn();
+			const initialMaxAge = config.cookie.maxAge;
+			config.cookie.maxAge = undefined;
+			const request = cloneDeep(req);
+			await Sessions.updateSession(request, {}, mockCB);
+			checkResults(request, undefined, mockCB);
+			config.cookie.maxAge = initialMaxAge;
+		});
 	});
 };
 
-describe('middleware/sessions', () => {
+describe(determineTestGroup(__filename), () => {
 	testDestroySession();
 	testManageSession();
 	testUpdateSession();
