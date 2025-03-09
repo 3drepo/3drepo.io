@@ -130,7 +130,7 @@ const redirectForAuth = (redirectURL) => async (req, res) => {
 			req.session.reAuth = true;
 		}
 
-		req.authParams = {
+		const authParams = {
 			redirectURL,
 			state: toBase64(JSON.stringify({
 				csrfToken: req.session.csrfToken,
@@ -139,7 +139,7 @@ const redirectForAuth = (redirectURL) => async (req, res) => {
 			codeChallenge: req.session.pkceCodes.challenge,
 		};
 
-		const link = await generateAuthenticationCodeUrl(req.authParams, accountId);
+		const link = await generateAuthenticationCodeUrl(authParams, accountId);
 		respond(req, res, templates.ok, { link });
 	} catch (err) {
 		respond(req, res, err);
