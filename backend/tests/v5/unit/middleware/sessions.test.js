@@ -16,7 +16,6 @@
  */
 
 const { cloneDeep } = require('lodash');
-
 const { src } = require('../../helper/path');
 const { determineTestGroup, generateRandomString } = require('../../helper/services');
 
@@ -36,18 +35,14 @@ const { SOCKET_HEADER } = require(`${src}/services/chat/chat.constants`);
 
 // Need to mock these 2 to ensure we are not trying to create a real session configuration
 jest.mock('express-session', () => () => { });
-jest.mock('../../../../src/v5/handler/db', () => ({
-	...jest.requireActual('../../../../src/v5/handler/db'),
-	getSessionStore: () => { },
-}));
-
-jest.mock('../../../../src/v5/services/sessions');
+jest.mock('../../../../src/v5/handler/db');
 
 jest.mock('../../../../src/v5/utils/helper/strings', () => ({
 	...jest.requireActual('../../../../src/v5/utils/helper/strings'),
 	getURLDomain: () => 'abc.com',
 }));
 
+jest.mock('../../../../src/v5/services/sessions');
 const SessionService = require(`${src}/services/sessions`);
 
 const sessionMiddleware = jest.fn().mockImplementation((req, res, next) => next());
@@ -63,7 +58,6 @@ const pluginAgent = generateRandomString();
 const webBrowserUserAgent = generateRandomString();
 
 UserAgentHelper.isFromWebBrowser.mockImplementation((userAgent) => userAgent === webBrowserUserAgent);
-
 const testDestroySession = () => {
 	const req = {
 		session: { destroy: (callback) => { callback(); }, user: { username: 'user1' } },

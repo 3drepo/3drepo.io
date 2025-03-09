@@ -19,11 +19,11 @@ const { USERS_DB_NAME } = require('../models/users.constants');
 const config = require('../utils/config');
 const db = require('../handler/db');
 
+const { ensureIndicesExist } = require('../models/users');
 const { events } = require('./eventsManager/eventsManager.constants');
 const expressSession = require('express-session');
 const { generateUUID } = require('../utils/helper/uuids');
 const { publish } = require('./eventsManager/eventsManager');
-const { ensureIndicesExist } = require('../models/users');
 
 const Sessions = { };
 const initialiseSession = async () => {
