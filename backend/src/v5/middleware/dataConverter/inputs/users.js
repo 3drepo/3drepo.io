@@ -64,17 +64,8 @@ Users.validateUpdateData = async (req, res, next) => {
 		const schema = generateUpdateSchema(username);
 		await schema.validate(req.body);
 
-		/* if (req.body.oldPassword) {
-			await authenticate(username, req.body.oldPassword);
-		} */
-
 		await next();
 	} catch (err) {
-		if (err.code === templates.incorrectUsernameOrPassword.code) {
-			respond(req, res, templates.incorrectPassword);
-			return;
-		}
-
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };

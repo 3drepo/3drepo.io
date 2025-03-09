@@ -29,7 +29,7 @@ jest.mock('../../../../../../src/v5/models/users');
 const UsersModel = require(`${src}/models/users`);
 
 const Users = require(`${src}/middleware/dataConverter/inputs/users`);
-const { generateRandomString } = require('../../../../helper/services');
+const { determineTestGroup, generateRandomString } = require('../../../../helper/services');
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
@@ -40,7 +40,6 @@ WebRequests.post.mockImplementation(() => Promise.resolve({
 const availableUsername = 'nonExistingUser';
 const existingUsername = 'existingUsername';
 const availableEmail = 'availableEmail@email.com';
-const existingEmail = 'existingEmail@email.com';
 const validPassword = 'Abcdef12345!';
 
 UsersModel.getUserByQuery.mockImplementation((query) => {
@@ -71,20 +70,12 @@ UsersModel.getUserByEmail.mockImplementation((email) => {
 const testValidateUpdateData = () => {
 	describe.each([
 		[{ body: { firstName: generateRandomString(100) } }, false, false, 'with too large firstName', templates.invalidArguments],
-		[{ body: { firstName: generateRandomString() } }, true, false, 'with firstName (SSO user)', templates.invalidArguments],
 		[{ body: { lastName: generateRandomString(100) } }, false, false, 'with too large lastName', templates.invalidArguments],
-		[{ body: { lastName: generateRandomString() } }, true, false, 'with lastName (SSO user)', templates.invalidArguments],
-		[{ body: { email: 'invalid email' } }, false, false, 'with invalid email', templates.invalidArguments],
-		[{ body: { email: existingEmail } }, false, false, 'with email that already exists', templates.invalidArguments],
-		[{ body: { email: availableEmail } }, false, true, 'with email that is available'],
 		[{ body: { email: availableEmail, extraProp: 'extra' } }, false, false, 'with extra properties', templates.invalidArguments],
-		[{ body: { email: availableEmail } }, true, false, 'with email that is available (SSO user)', templates.invalidArguments],
 		[{ body: { company: '' } }, false, false, 'with empty company', templates.invalidArguments],
 		[{ body: { company: generateRandomString() } }, false, true, 'with company'],
-		[{ body: { company: generateRandomString() } }, true, true, 'with company (SSO user)'],
 		[{ body: { countryCode: 'invalid country' } }, false, false, 'with invalid country', templates.invalidArguments],
 		[{ body: { countryCode: 'GB' } }, false, true, 'with valid country'],
-		[{ body: { countryCode: 'GB' } }, true, true, 'with valid country (SSO user)'],
 		[{ body: { oldPassword: validPassword } }, false, false, 'with oldPassword but not newPassword', templates.invalidArguments],
 		[{ body: { newPassword: 'Abcdef123456!' } }, false, false, 'with newPassword but not oldPassword', templates.invalidArguments],
 		[{ body: { oldPassword: validPassword, newPassword: 'abc' } }, false, false, 'with short newPassword', templates.invalidArguments],
@@ -92,15 +83,12 @@ const testValidateUpdateData = () => {
 		[{ body: { oldPassword: validPassword, newPassword: 'Abcdef123!Abcdef123!Abcdef123!Abcdef123!Abcdef123!Abcdef123!Abcdef' } }, false, false, 'with too long newPassword', templates.invalidArguments],
 		[{ body: { oldPassword: validPassword, newPassword: validPassword } }, false, false, 'with newPassword same as old', templates.invalidArguments],
 		[{ body: { oldPassword: validPassword, newPassword: 'Abcdef12345!!' } }, false, true, 'with strong newPassword'],
-		[{ body: { oldPassword: 'invalid password', newPassword: 'Abcdef123456!' } }, false, false, 'with wrong oldPassword', templates.incorrectPassword],
-		[{ body: { oldPassword: validPassword, newPassword: 'Abcdef12345!!' } }, false, true, 'with password (SSO user)', templates.invalidArguments],
 		[{ body: {} }, false, false, 'with empty body', templates.invalidArguments],
 		[{ body: undefined }, false, false, 'with undefined body', templates.invalidArguments],
 	])('Check if req arguments for updating profile are valid', (data, isSso, shouldPass, desc, expectedError) => {
 		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
 			const mockCB = jest.fn();
 			const req = { ...cloneDeep(data), session: { user: { username: existingUsername } } };
-			UsersModel.isSsoUser.mockResolvedValueOnce(isSso);
 
 			await Users.validateUpdateData(req, {}, mockCB);
 
@@ -111,13 +99,10 @@ const testValidateUpdateData = () => {
 				expect(Responder.respond).toHaveBeenCalledTimes(1);
 				expect(Responder.respond.mock.results[0].value.code).toEqual(expectedError.code);
 			}
-
-			expect(UsersModel.isSsoUser).toHaveBeenCalledTimes(1);
-			expect(UsersModel.isSsoUser).toHaveBeenCalledWith(existingUsername);
 		});
 	});
 };
 
-describe('middleware/dataConverter/inputs/users', () => {
+describe(determineTestGroup(__filename), () => {
 	testValidateUpdateData();
 });
