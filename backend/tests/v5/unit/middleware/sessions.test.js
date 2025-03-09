@@ -27,6 +27,7 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const config = require(`${src}/utils/config`);
 jest.mock('../../../../src/v5/utils/helper/userAgent');
 const UserAgentHelper = require(`${src}/utils/helper/userAgent`);
+const { CSRF_COOKIE } = require(`${src}/utils/sessions.constants`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager.constants');
@@ -114,19 +115,42 @@ const testManageSession = () => {
 	});
 };
 
+const testAppendCSRFToken = () => {
+	describe('Append CSRF token', () => {
+		test('Should set the cookie and store the token in the session', async () => {
+			const req = {};
+			const res = { cookie: jest.fn() };
+			const next = jest.fn();
+
+			await Sessions.appendCSRFToken(req, res, next);
+
+			expect(next).toHaveBeenCalledTimes(1);
+			expect(req.token).not.toBeUndefined();
+
+			expect(res.cookie).toHaveBeenCalledTimes(1);
+			expect(res.cookie).toHaveBeenCalledWith(CSRF_COOKIE, req.token, expect.any(Object));
+		});
+	});
+};
+
 const testUpdateSession = () => {
-	const checkResults = (request, userAgent, mockCB) => {
+	const checkResults = (request, userAgent, mockCB, expectEvent = true) => {
 		expect(mockCB).toHaveBeenCalledTimes(1);
-		expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-		expect(EventsManager.publish).toHaveBeenCalledWith(events.SESSION_CREATED,
-			{
-				username: request.loginData.username,
-				sessionID: request.sessionID,
-				ipAddress: request.ips[0] || request.ip,
-				...(userAgent ? { userAgent } : { }),
-				referer: request.session?.user?.referer,
-				socketId: request.headers[SOCKET_HEADER],
-			});
+
+		if (expectEvent) {
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.SESSION_CREATED,
+				{
+					username: request.loginData.username,
+					sessionID: request.sessionID,
+					ipAddress: request.ips[0] || request.ip,
+					...(userAgent ? { userAgent } : { }),
+					referer: request.session?.user?.referer,
+					socketId: request.headers[SOCKET_HEADER],
+				});
+		} else {
+			expect(EventsManager.publish).not.toHaveBeenCalled();
+		}
 		expect(request.session?.ssoInfo).toEqual(undefined);
 	};
 
@@ -142,7 +166,7 @@ const testUpdateSession = () => {
 
 	describe('Update session', () => {
 		describe.each([
-			['the request has a referer (SSO)', cloneDeep(req)],
+			['the request has a referer', cloneDeep(req)],
 			['the request has socket id', { ...cloneDeep(req), headers: { ...req.headers, [SOCKET_HEADER]: 'socketsdlfkdsj' } }],
 			['the request has user agent from the plugin (SSO)', { ...cloneDeep(req), session: { ...req.session, ssoInfo: { userAgent: pluginAgent } } }, pluginAgent],
 			['the request has web user agent (SSO)', { ...cloneDeep(req), session: { ...req.session, ssoInfo: { userAgent: webBrowserUserAgent } } }, webBrowserUserAgent],
@@ -161,6 +185,15 @@ const testUpdateSession = () => {
 				checkResults(request, userAgent, mockCB);
 			});
 		});
+
+		test('Should not trigger an event if it is an reauthentication', async () => {
+			const mockCB = jest.fn();
+			const request = cloneDeep(req);
+			request.session.reAuth = true;
+			await Sessions.updateSession(request, {}, mockCB);
+			checkResults(request, undefined, mockCB, false);
+		});
+
 		test('Should update session with cookie.maxAge', async () => {
 			const mockCB = jest.fn();
 			const initialMaxAge = config.cookie.maxAge;
@@ -180,6 +213,14 @@ const testUpdateSession = () => {
 			checkResults(request, undefined, mockCB);
 			config.cookie.maxAge = initialMaxAge;
 		});
+
+		test('Should set the token if it is available', async () => {
+			const mockCB = jest.fn();
+			const request = cloneDeep(req);
+			request.token = generateRandomString();
+			await Sessions.updateSession(request, {}, mockCB);
+			expect(request.session.token).toEqual(request.token);
+		});
 	});
 };
 
@@ -187,4 +228,5 @@ describe(determineTestGroup(__filename), () => {
 	testDestroySession();
 	testManageSession();
 	testUpdateSession();
+	testAppendCSRFToken();
 });
