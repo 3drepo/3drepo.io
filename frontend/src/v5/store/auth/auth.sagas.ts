@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, select, takeLatest } from 'redux-saga/effects';
+import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { AuthActions, AuthTypes } from './auth.redux';
@@ -24,24 +24,20 @@ import { CurrentUserActions } from '../currentUser/currentUser.redux';
 import { cookies } from '@/v5/helpers/cookie.helper';
 import axios from 'axios';
 import { setPermissionModalSuppressed } from '@components/shared/updatePermissionModal/updatePermissionModal.helpers';
-import { selectAuthenticatedTeamspace } from './auth.selectors';
 
 const CSRF_TOKEN = 'csrf_token';
 const TOKEN_HEADER = 'X-CSRF-TOKEN';
 
 function* authenticate() {
 	yield put(AuthActions.setIsAuthenticationPending(true));
-	const authenticatedTeamspace = yield select(selectAuthenticatedTeamspace);
-	if (!authenticatedTeamspace) {
-		setPermissionModalSuppressed(false);
-	}
 
 	try {
 		axios.defaults.headers[TOKEN_HEADER] = cookies(CSRF_TOKEN);
-		const s = yield API.Auth.authenticate();
-		yield put(AuthActions.setAuthenticatedTeamspace(s.data.authenticatedTeamspace));
+		const { data: { authenticatedTeamspace } } = yield API.Auth.authenticate();
+		yield put(AuthActions.setAuthenticatedTeamspace(authenticatedTeamspace));
 		yield put(CurrentUserActions.fetchUser());
 		yield put(AuthActions.setIsAuthenticated(true));
+		setPermissionModalSuppressed(false);
 	} catch (error) {
 		if (error.response?.status !== 401) {
 			yield put(DialogsActions.open('alert', {
@@ -70,6 +66,7 @@ function* logout() {
 	}
 	yield put(AuthActions.setIsAuthenticated(false));
 	yield put(AuthActions.setIsAuthenticationPending(false));
+	yield put(AuthActions.setAuthenticatedTeamspace(null));
 }
 
 function* kickedOut() {
