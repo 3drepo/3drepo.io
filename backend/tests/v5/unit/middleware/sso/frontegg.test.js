@@ -17,15 +17,23 @@
 
 const { cloneDeep } = require('lodash');
 const { src } = require('../../../helper/path');
-const { determineTestGroup, generateRandomString } = require('../../../helper/services');
+const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../../helper/services');
+
+const { errorCodes } = require(`${src}/services/sso/sso.constants`);
 
 const { toBase64 } = require(`${src}/utils/helper/strings`);
 
-// This prevents the session service from trigger a mongo service.
+// This prevents the session service from triggering a mongo service.
 jest.mock('../../../../../src/v5/handler/db');
 
 jest.mock('../../../../../src/v5/middleware/sso/pkce');
 const PKCEMiddleware = require(`${src}/middleware/sso/pkce`);
+
+jest.mock('../../../../../src/v5/models/users');
+const UserModel = require(`${src}/models/users`);
+
+jest.mock('../../../../../src/v5/processors/users');
+const UserProcessor = require(`${src}/processors/users`);
 
 jest.mock('../../../../../src/v5/middleware/sso');
 const SSOMiddleware = require(`${src}/middleware/sso`);
@@ -35,6 +43,9 @@ const TeamspaceModel = require(`${src}/models/teamspaceSettings`);
 
 jest.mock('../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
+
+jest.mock('../../../../../src/v5/utils/sessions');
+const SessionsUtils = require(`${src}/utils/sessions`);
 
 jest.mock('../../../../../src/v5/services/sso/frontegg');
 const FronteggService = require(`${src}/services/sso/frontegg`);
@@ -168,7 +179,344 @@ const testGenerateLinkToAuthenticator = () => {
 	});
 };
 
+const testGenerateToken = () => {
+	const redirectURLUsed = generateRandomString();
+	const redirectUri = generateRandomString();
+	const csrfToken = generateRandomString();
+	const sampleReq = {
+		query: {
+			code: generateRandomString(),
+			state: toBase64(JSON.stringify({
+				csrfToken,
+				redirectUri,
+			})),
+		},
+		session: { csrfToken, pkceCodes: { challenge: generateRandomString() } },
+	};
+	describe('Generate token', () => {
+		const missingQueryResponse = createResponseCode(templates.invalidArguments, 'Response body does not contain code or state');
+
+		beforeEach(() => {
+			jest.resetAllMocks();
+		});
+
+		describe.each([
+			['query.state does not exist', { ...sampleReq, query: { code: generateRandomString() } }, missingQueryResponse],
+			['query.code does not exist', { ...sampleReq, query: { state: generateRandomString() } }, missingQueryResponse],
+			['state is not JSON parsable', { ...sampleReq, query: { ...sampleReq.query, state: generateRandomString() } },
+				createResponseCode(templates.invalidArguments, 'state is required and must be a valid encoded JSON')],
+			['csrfToken does not match', { ...sampleReq, session: { csrfToken: generateRandomString() } },
+				createResponseCode(templates.invalidArguments, 'CSRF Token mismatched. Please clear your cookies and try again')],
+		])('Check state is valid', (desc, request, expectedResponse) => {
+			test(`Should respond with ${expectedResponse.code} if ${desc}`, async () => {
+				SessionsUtils.destroySession.mockImplementationOnce((sess, res, callback) => callback());
+				const res = {};
+				const next = jest.fn();
+
+				const req = cloneDeep(request);
+
+				await Frontegg.generateToken(redirectURLUsed)(req, res, next);
+
+				expect(next).not.toHaveBeenCalled();
+
+				expect(Responder.respond).toHaveBeenCalledTimes(1);
+				expect(Responder.respond).toHaveBeenCalledWith(req, res, expectedResponse);
+
+				expect(SessionsUtils.destroySession).toHaveBeenCalledTimes(1);
+				expect(SessionsUtils.destroySession).toHaveBeenCalledWith(req.session, res, expect.anything());
+			});
+		});
+
+		test('Should call redirectWithError if it failed to generate a token', async () => {
+			FronteggService.generateToken.mockRejectedValueOnce({ message: generateRandomString() });
+			const res = {};
+			const next = jest.fn();
+
+			const req = cloneDeep(sampleReq);
+
+			await Frontegg.generateToken(redirectURLUsed)(req, res, next);
+
+			expect(next).not.toHaveBeenCalled();
+			expect(Responder.respond).not.toHaveBeenCalled();
+
+			expect(FronteggService.generateToken).toHaveBeenCalledTimes(1);
+			expect(FronteggService.generateToken).toHaveBeenCalledWith(redirectURLUsed, req.query.code,
+				req.session.pkceCodes.challenge);
+
+			expect(SSOMiddleware.redirectWithError).toHaveBeenCalledTimes(1);
+			expect(SSOMiddleware.redirectWithError).toHaveBeenCalledWith(res, redirectUri, errorCodes.UNKNOWN);
+		});
+
+		test('Should call redirectWithError if it failed to get user details', async () => {
+			FronteggService.getUserInfoFromToken.mockRejectedValueOnce({ message: generateRandomString() });
+			const res = {};
+			const next = jest.fn();
+
+			const req = cloneDeep(sampleReq);
+			req.auth = { tokenInfo: {
+				token: generateRandomString(),
+			} };
+
+			await Frontegg.generateToken(redirectURLUsed)(req, res, next);
+
+			expect(next).not.toHaveBeenCalled();
+			expect(Responder.respond).not.toHaveBeenCalled();
+
+			expect(FronteggService.generateToken).toHaveBeenCalledTimes(1);
+			expect(FronteggService.generateToken).toHaveBeenCalledWith(redirectURLUsed, req.query.code,
+				req.session.pkceCodes.challenge);
+
+			expect(SSOMiddleware.redirectWithError).toHaveBeenCalledTimes(1);
+			expect(SSOMiddleware.redirectWithError).toHaveBeenCalledWith(res, redirectUri, errorCodes.UNKNOWN);
+		});
+
+		test('Should call next() if everything ran successfully', async () => {
+			const authAccount = generateRandomString();
+			const authTS = generateRandomString();
+			const otherTS = generateRandomString();
+			const username = generateRandomString();
+			const userInfo = {
+				userId: generateRandomString(),
+				email: generateRandomString(),
+				authAccount,
+				accounts: [authAccount, generateRandomString()],
+			};
+			const tokenInfo = {
+				token: generateRandomString(),
+			};
+
+			FronteggService.generateToken.mockResolvedValueOnce(tokenInfo);
+			FronteggService.getUserInfoFromToken.mockResolvedValueOnce(userInfo);
+			FronteggService.getTeamspaceByAccount.mockImplementation(
+				(account) => Promise.resolve(account === authAccount ? authTS : otherTS));
+
+			UserModel.getUserByEmail.mockResolvedValueOnce({ user: username, customData: { userId: userInfo.userId } });
+
+			const res = {};
+			const next = jest.fn();
+
+			const req = cloneDeep(sampleReq);
+			req.auth = { tokenInfo: {
+				token: generateRandomString(),
+			} };
+
+			await Frontegg.generateToken(redirectURLUsed)(req, res, next);
+
+			expect(next).toHaveBeenCalled();
+			expect(Responder.respond).not.toHaveBeenCalled();
+			expect(SSOMiddleware.redirectWithError).not.toHaveBeenCalled();
+
+			expect(req.loginData).toEqual({
+				auth: {
+					userId: userInfo.userId,
+					teamspaces: expect.arrayContaining([authTS, otherTS]),
+					authenticatedTeamspace: authTS,
+					tokenInfo,
+				},
+				username,
+
+			});
+		});
+		test('Should filter out accountIds that has no matching teamspace', async () => {
+			const authAccount = generateRandomString();
+			const otherTS = generateRandomString();
+			const username = generateRandomString();
+			const userInfo = {
+				userId: generateRandomString(),
+				email: generateRandomString(),
+				authAccount,
+				accounts: [authAccount, generateRandomString()],
+			};
+			const tokenInfo = {
+				token: generateRandomString(),
+			};
+
+			FronteggService.generateToken.mockResolvedValueOnce(tokenInfo);
+			FronteggService.getUserInfoFromToken.mockResolvedValueOnce(userInfo);
+			FronteggService.getTeamspaceByAccount.mockImplementation(
+				(account) => Promise.resolve(account === authAccount ? undefined : otherTS));
+
+			UserModel.getUserByEmail.mockResolvedValueOnce({ user: username, customData: { userId: userInfo.userId } });
+
+			const res = {};
+			const next = jest.fn();
+
+			const req = cloneDeep(sampleReq);
+			req.auth = { tokenInfo: {
+				token: generateRandomString(),
+			} };
+
+			await Frontegg.generateToken(redirectURLUsed)(req, res, next);
+
+			expect(next).toHaveBeenCalled();
+			expect(Responder.respond).not.toHaveBeenCalled();
+			expect(SSOMiddleware.redirectWithError).not.toHaveBeenCalled();
+
+			expect(req.loginData).toEqual({
+				auth: {
+					userId: userInfo.userId,
+					teamspaces: expect.arrayContaining([otherTS]),
+					authenticatedTeamspace: undefined,
+					tokenInfo,
+				},
+				username,
+
+			});
+		});
+
+		test('Should update the userId if it is not stored in mongo', async () => {
+			const authAccount = generateRandomString();
+			const otherTS = generateRandomString();
+			const authTS = generateRandomString();
+			const username = generateRandomString();
+			const userInfo = {
+				userId: generateRandomString(),
+				email: generateRandomString(),
+				authAccount,
+				accounts: [authAccount, generateRandomString()],
+			};
+			const tokenInfo = {
+				token: generateRandomString(),
+			};
+
+			FronteggService.generateToken.mockResolvedValueOnce(tokenInfo);
+			FronteggService.getUserInfoFromToken.mockResolvedValueOnce(userInfo);
+			FronteggService.getTeamspaceByAccount.mockImplementation(
+				(account) => Promise.resolve(account === authAccount ? authTS : otherTS));
+
+			UserModel.getUserByEmail.mockResolvedValueOnce({ user: username,
+				customData: { userId: generateRandomString() } });
+
+			const res = {};
+			const next = jest.fn();
+
+			const req = cloneDeep(sampleReq);
+			req.auth = { tokenInfo: {
+				token: generateRandomString(),
+			} };
+
+			await Frontegg.generateToken(redirectURLUsed)(req, res, next);
+
+			expect(next).toHaveBeenCalled();
+			expect(Responder.respond).not.toHaveBeenCalled();
+			expect(SSOMiddleware.redirectWithError).not.toHaveBeenCalled();
+
+			expect(req.loginData).toEqual({
+				auth: {
+					userId: userInfo.userId,
+					teamspaces: expect.arrayContaining([authTS, otherTS]),
+					authenticatedTeamspace: authTS,
+					tokenInfo,
+				},
+				username,
+
+			});
+
+			expect(UserModel.updateUserId).toHaveBeenCalledTimes(1);
+			expect(UserModel.updateUserId).toHaveBeenCalledWith(username, userInfo.userId);
+		});
+		test('Should create a new user record it is not stored in mongo', async () => {
+			const authAccount = generateRandomString();
+			const otherTS = generateRandomString();
+			const authTS = generateRandomString();
+			const username = generateRandomString();
+			const userInfo = {
+				userId: generateRandomString(),
+				email: generateRandomString(),
+				authAccount,
+				accounts: [authAccount, generateRandomString()],
+			};
+			const tokenInfo = {
+				token: generateRandomString(),
+			};
+
+			const userData = generateRandomObject();
+
+			FronteggService.getUserById.mockResolvedValueOnce(userData);
+			FronteggService.generateToken.mockResolvedValueOnce(tokenInfo);
+			FronteggService.getUserInfoFromToken.mockResolvedValueOnce(userInfo);
+			FronteggService.getTeamspaceByAccount.mockImplementation(
+				(account) => Promise.resolve(account === authAccount ? authTS : otherTS));
+
+			UserProcessor.createNewUserRecord.mockResolvedValueOnce(username);
+
+			UserModel.getUserByEmail.mockRejectedValueOnce(templates.userNotFound);
+
+			const res = {};
+			const next = jest.fn();
+
+			const req = cloneDeep(sampleReq);
+			req.auth = { tokenInfo: {
+				token: generateRandomString(),
+			} };
+
+			await Frontegg.generateToken(redirectURLUsed)(req, res, next);
+
+			expect(next).toHaveBeenCalled();
+			expect(Responder.respond).not.toHaveBeenCalled();
+			expect(SSOMiddleware.redirectWithError).not.toHaveBeenCalled();
+
+			expect(req.loginData).toEqual({
+				auth: {
+					userId: userInfo.userId,
+					teamspaces: expect.arrayContaining([authTS, otherTS]),
+					authenticatedTeamspace: authTS,
+					tokenInfo,
+				},
+				username,
+
+			});
+
+			expect(FronteggService.getUserById).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getUserById).toHaveBeenCalledWith(userInfo.userId);
+
+			expect(UserProcessor.createNewUserRecord).toHaveBeenCalledTimes(1);
+			expect(UserProcessor.createNewUserRecord).toHaveBeenCalledWith(userData);
+		});
+
+		test('Should redirect with error if determineUsername threw an unexpected error', async () => {
+			const authAccount = generateRandomString();
+			const username = generateRandomString();
+			const userInfo = {
+				userId: generateRandomString(),
+				email: generateRandomString(),
+				authAccount,
+				accounts: [authAccount, generateRandomString()],
+			};
+			const tokenInfo = {
+				token: generateRandomString(),
+			};
+
+			const userData = generateRandomObject();
+
+			FronteggService.getUserById.mockResolvedValueOnce(userData);
+			FronteggService.generateToken.mockResolvedValueOnce(tokenInfo);
+			FronteggService.getUserInfoFromToken.mockResolvedValueOnce(userInfo);
+
+			UserProcessor.createNewUserRecord.mockResolvedValueOnce(username);
+
+			UserModel.getUserByEmail.mockRejectedValueOnce(templates.unknown);
+
+			const res = {};
+			const next = jest.fn();
+
+			const req = cloneDeep(sampleReq);
+			req.auth = { tokenInfo: {
+				token: generateRandomString(),
+			} };
+
+			await Frontegg.generateToken(redirectURLUsed)(req, res, next);
+
+			expect(next).not.toHaveBeenCalled();
+			expect(Responder.respond).not.toHaveBeenCalled();
+			expect(SSOMiddleware.redirectWithError).toHaveBeenCalledTimes(1);
+			expect(SSOMiddleware.redirectWithError).toHaveBeenCalledWith(res, redirectUri, errorCodes.UNKNOWN);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testRedirectToStateURL();
 	testGenerateLinkToAuthenticator();
+	testGenerateToken();
 });

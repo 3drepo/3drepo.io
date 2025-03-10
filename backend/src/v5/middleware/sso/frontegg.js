@@ -64,13 +64,9 @@ const determineUsername = async (userId, email) => {
 	try {
 		const { user: username, customData } = await getUserByEmail(email, { user: 1, 'customData.userId': 1 });
 
-		if (!customData?.userId) {
-			updateUserId(username, userId);
-		} else if (userId !== customData.userId) {
-			logger.logError(`Found user(${username}) with email but with a mismatch user ID. Expected ${userId}, found ${customData.userId}`);
-			throw new Error('User ID mismatch');
+		if (userId !== customData.userId) {
+			await updateUserId(username, userId);
 		}
-
 		return username;
 	} catch (err) {
 		if (err.code !== templates.userNotFound.code) {
@@ -109,7 +105,6 @@ const getToken = (urlUsed) => async (req, res, next) => {
 	try {
 		const tokenInfo = await generateToken(urlUsed, req.state.code, req.session.pkceCodes.challenge);
 		req.auth = { tokenInfo };
-
 		await next();
 	} catch (err) {
 		logger.logError(`Failed to generate token from vendor: ${err.message}`);
