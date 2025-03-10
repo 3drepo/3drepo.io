@@ -30,7 +30,7 @@ const CSRF_TOKEN = 'csrf_token';
 const TOKEN_HEADER = 'X-CSRF-TOKEN';
 
 function* authenticate() {
-	yield put(AuthActions.setPendingStatus(true));
+	yield put(AuthActions.setIsAuthenticationPending(true));
 	const authenticatedTeamspace = yield select(selectAuthenticatedTeamspace);
 	if (!authenticatedTeamspace) {
 		setPermissionModalSuppressed(false);
@@ -41,7 +41,7 @@ function* authenticate() {
 		const s = yield API.Auth.authenticate();
 		yield put(AuthActions.setAuthenticatedTeamspace(s.data.authenticatedTeamspace));
 		yield put(CurrentUserActions.fetchUser());
-		yield put(AuthActions.setAuthenticationStatus(true));
+		yield put(AuthActions.setIsAuthenticated(true));
 	} catch (error) {
 		if (error.response?.status !== 401) {
 			yield put(DialogsActions.open('alert', {
@@ -49,13 +49,13 @@ function* authenticate() {
 				error,
 			}));
 		}
-		yield put(AuthActions.setAuthenticationStatus(false));
+		yield put(AuthActions.setIsAuthenticated(false));
 	}
-	yield put(AuthActions.setPendingStatus(false));
+	yield put(AuthActions.setIsAuthenticationPending(false));
 }
 
 function* logout() {
-	yield put(AuthActions.setPendingStatus(true));
+	yield put(AuthActions.setIsAuthenticationPending(true));
 	try {
 		yield API.Auth.logout();
 		yield put({ type: 'RESET_APP' });
@@ -68,8 +68,8 @@ function* logout() {
 			yield put({ type: 'RESET_APP' });
 		}
 	}
-	yield put(AuthActions.setAuthenticationStatus(false));
-	yield put(AuthActions.setPendingStatus(false));
+	yield put(AuthActions.setIsAuthenticated(false));
+	yield put(AuthActions.setIsAuthenticationPending(false));
 }
 
 function* kickedOut() {

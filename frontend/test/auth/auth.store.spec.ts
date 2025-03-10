@@ -31,7 +31,7 @@ describe('Auth: store', () => {
 		const authFetchedBefore = selectAuthenticationFetched(getState());
 		expect(authFetchedBefore).toEqual(false);
 
-		dispatch(AuthActions.setAuthenticationStatus(mockAuth.isAuthenticated));
+		dispatch(AuthActions.setIsAuthenticated(mockAuth.isAuthenticated));
 		const authStatus = selectIsAuthenticated(getState());
 		expect(authStatus).toEqual(mockAuth.isAuthenticated);
 
@@ -40,9 +40,9 @@ describe('Auth: store', () => {
 	});
 
 	it('should set pending status successfully', () => {
-		dispatch(AuthActions.setPendingStatus(mockAuth.isPending));
-		const pendingStatus = selectIsPending(getState());
-		expect(pendingStatus).toEqual(mockAuth.isPending);
+		dispatch(AuthActions.setIsAuthenticationPending(mockAuth.isPending));
+		const isAuthenticationPending = selectIsPending(getState());
+		expect(isAuthenticationPending).toEqual(mockAuth.isPending);
 	});
 
 	it('should set an error message when login fails', () => {

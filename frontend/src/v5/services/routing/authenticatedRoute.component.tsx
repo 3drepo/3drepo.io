@@ -67,7 +67,7 @@ const WrapAuthenticationRedirect = ({ children }) => {
 	axios.interceptors.response.use(
 		(response) => response,
 		(error) => {
-			if (isNotLoggedIn(error)) AuthActionsDispatchers.setAuthenticationStatus(false);
+			if (isNotLoggedIn(error)) AuthActionsDispatchers.setIsAuthenticated(false);
 			return Promise.reject(error);
 		},
 	);

@@ -39,7 +39,7 @@ describe('Auth: sagas', () => {
 
 			await waitForActions(() => {
 				dispatch(AuthActions.authenticate());
-			}, [AuthActions.setPendingStatus(false)]);
+			}, [AuthActions.setIsAuthenticationPending(false)]);
 
 			const isAuthenticated = selectIsAuthenticated(getState());
 
@@ -53,7 +53,7 @@ describe('Auth: sagas', () => {
 
 			await waitForActions(() => {
 				dispatch(AuthActions.authenticate());
-			}, [DialogsTypes.OPEN, AuthActions.setPendingStatus(false)]);
+			}, [DialogsTypes.OPEN, AuthActions.setIsAuthenticationPending(false)]);
 		});
 	});
 
@@ -65,7 +65,7 @@ describe('Auth: sagas', () => {
 
 			await waitForActions(() => {
 				dispatch(AuthActions.login(username, password));
-			}, [AuthActions.setPendingStatus(false)]);
+			}, [AuthActions.setIsAuthenticationPending(false)]);
 
 			const isAuthenticated = selectIsAuthenticated(getState());
 
@@ -80,7 +80,7 @@ describe('Auth: sagas', () => {
 
 			await waitForActions(() => {
 				dispatch(AuthActions.login(username, password));
-			}, [AuthActions.setPendingStatus(false)]);
+			}, [AuthActions.setIsAuthenticationPending(false)]);
 
 			const isAuthenticated = selectIsAuthenticated(getState());
 
@@ -100,7 +100,7 @@ describe('Auth: sagas', () => {
 
 			await waitForActions(() => {
 				dispatch(AuthActions.login(username, password));
-			}, [AuthActions.setPendingStatus(false)]);
+			}, [AuthActions.setIsAuthenticationPending(false)]);
 
 			const isAuthenticated = selectIsAuthenticated(getState());
 			const errorMessage = selectLoginError(getState());
@@ -120,7 +120,7 @@ describe('Auth: sagas', () => {
 
 			await waitForActions(() => {
 				dispatch(AuthActions.logout());
-			}, [AuthActions.setPendingStatus(false)]);
+			}, [AuthActions.setIsAuthenticationPending(false)]);
 
 			const isAuthenticated = selectIsAuthenticated(getState());
 
@@ -133,7 +133,7 @@ describe('Auth: sagas', () => {
 
 			await waitForActions(() => {
 				dispatch(AuthActions.logout());
-			}, [DialogsTypes.OPEN, AuthActions.setPendingStatus(false)]);
+			}, [DialogsTypes.OPEN, AuthActions.setIsAuthenticationPending(false)]);
 
 			const isAuthenticated = selectIsAuthenticated(getState());
 			expect(isAuthenticated).toBeFalsy();

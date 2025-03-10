@@ -32,12 +32,8 @@ export const selectAuthenticationFetched = createSelector(
 	selectAuthDomain, (state) => !(state.isAuthenticated === null),
 );
 
-export const selectIsPending = createSelector(
-	selectAuthDomain, (state) => state.isPending,
-);
-
-export const selectLoginError = createSelector(
-	selectAuthDomain, (state) => state.errorMessage,
+export const selectIsAuthenticationPending = createSelector(
+	selectAuthDomain, (state) => state.isAuthenticationPending,
 );
 
 export const selectReturnUrl = createSelector(

@@ -24,8 +24,8 @@ export const { Types: AuthTypes, Creators: AuthActions } = createActions({
 	authenticate: [],
 	setAuthenticatedTeamspace: ['teamspace'],
 	logout: [],
-	setPendingStatus: ['isPending'],
-	setAuthenticationStatus: ['status'],
+	setIsAuthenticationPending: ['isPending'],
+	setIsAuthenticated: ['isAuthenticated'],
 	sessionExpired: [],
 	setReturnUrl: ['url'],
 	kickedOut: [],
@@ -34,20 +34,19 @@ export const { Types: AuthTypes, Creators: AuthActions } = createActions({
 export const INITIAL_STATE: IAuthState = {
 	isAuthenticated: null,
 	authenticatedTeamspace: null,
-	isPending: false,
-	errorMessage: null,
+	isAuthenticationPending: false,
 	returnUrl: null,
 };
 
-export const setAuthenticationStatus = (state, { status }: SetAuthenticationStatusAction) => {
-	state.isAuthenticated = status;
+export const setIsAuthenticated = (state, { isAuthenticated }: SetIsAuthenticatedAction) => {
+	state.isAuthenticated = isAuthenticated;
 };
 
 export const setAuthenticatedTeamspace = (state, { teamspace }: SetAuthenticatedTeamspaceAction) => {
 	state.authenticatedTeamspace = teamspace;
 };
 
-export const setPendingStatus = (state, { isPending }: SetPendingStatusAction) => {
+export const setIsAuthenticationPending = (state, { isPending }: SetIsAuthenticationPendingAction) => {
 	state.isPending = isPending;
 };
 
@@ -57,8 +56,8 @@ export const setReturnUrl = (state, { url }: SetReturnUrlAction) => {
 
 export const authReducer = createReducer(INITIAL_STATE, produceAll({
 	[AuthTypes.SET_AUTHENTICATED_TEAMSPACE]: setAuthenticatedTeamspace,
-	[AuthTypes.SET_PENDING_STATUS]: setPendingStatus,
-	[AuthTypes.SET_AUTHENTICATION_STATUS]: setAuthenticationStatus,
+	[AuthTypes.SET_IS_AUTHENTICATION_PENDING]: setIsAuthenticationPending,
+	[AuthTypes.SET_IS_AUTHENTICATED]: setIsAuthenticated,
 	[AuthTypes.SET_RETURN_URL]: setReturnUrl,
 }));
 
@@ -69,8 +68,7 @@ export const authReducer = createReducer(INITIAL_STATE, produceAll({
 export interface IAuthState {
 	isAuthenticated: boolean;
 	authenticatedTeamspace: string;
-	isPending: boolean;
-	errorMessage: string;
+	isAuthenticationPending: boolean;
 	returnUrl: {
 		pathname: string,
 		search?: string,
@@ -81,16 +79,16 @@ export interface IAuthState {
 export type AuthenticateAction = Action<'AUTHENTICATE'>;
 export type SetAuthenticatedTeamspaceAction = Action<'SET_AUTHENTICATED_TEAMSPACE'> & { teamspace: string };
 export type LogoutAction = Action<'LOGOUT'>;
-export type SetPendingStatusAction = Action<'SET_PENDING_STATUS'> & { isPending: boolean };
-export type SetAuthenticationStatusAction = Action<'SET_AUTHENTICATION_STATUS'> & { status: boolean };
+export type SetIsAuthenticationPendingAction = Action<'SET_IS_AUTHENTICATION_PENDING'> & { isPending: boolean };
+export type SetIsAuthenticatedAction = Action<'SET_AUTHENTICATION_STATUS'> & { isAuthenticated: boolean };
 export type SetReturnUrlAction = Action<'SET_RETURN_URL'> & { url: string };
 
 export interface IAuthActionCreators {
 	authenticate: () => AuthenticateAction;
 	setAuthenticatedTeamspace: (teamspace: string) => SetAuthenticatedTeamspaceAction;
 	logout: () => LogoutAction;
-	setPendingStatus: (isPending: boolean) => SetPendingStatusAction;
-	setAuthenticationStatus: (status: boolean) => SetAuthenticationStatusAction;
+	setIsAuthenticationPending: (isPending: boolean) => SetIsAuthenticationPendingAction;
+	setIsAuthenticated: (isAuthenticated: boolean) => SetIsAuthenticatedAction;
 	sessionExpired: () => void;
 	setReturnUrl: (url: IAuthState['returnUrl']) => SetReturnUrlAction;
 	kickedOut: () => void;
