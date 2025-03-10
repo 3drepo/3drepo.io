@@ -15,16 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
-import { Display } from '@/v5/ui/themes/media';
 
 export const Content = styled.div`
-	max-width: 1289px;
-	margin: 18px auto;
+	padding: 18px 75px;
 	height: auto;
-	min-height: calc(100% - 78px);
-	width: 90vw;
-
-	@media (max-width: ${Display.Desktop}px) {
-		margin-top: 30px;
-	}
+	min-height: calc(100% - 42px);
+	width: 100%;
 `;
