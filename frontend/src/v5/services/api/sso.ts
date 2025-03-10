@@ -45,8 +45,6 @@ export const postActions = {
 	SIGNUP_POST: 'signupPost',
 };
 
-const AAD_ROUTE = 'authentication';
-
 export const ssoAuth = (redirect, teamspace?): Promise<AxiosResponse<{ link: string }>> => (
-	api.get(`${AAD_ROUTE}/authenticate${teamspace ? `/${teamspace}` : ''}?redirectUri=${addParams(redirect, `${postActions.LOGIN_POST}=1`)}`)
+	api.get(`authentication/authenticate${teamspace ? `/${teamspace}` : ''}?redirectUri=${addParams(redirect, `${postActions.LOGIN_POST}=1`)}`)
 );

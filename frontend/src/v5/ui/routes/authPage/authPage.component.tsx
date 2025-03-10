@@ -16,15 +16,25 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { AuthTemplate } from '@components/authTemplate';
+import { AuthTemplate } from '@components/authTemplate/authTemplate.component';
 import { Button, Footer, Container, Heading, Link } from './authPage.styles';
 import { COOKIES_ROUTE, PRIVACY_ROUTE, RELEASE_NOTES_ROUTE, TERMS_ROUTE } from '../routes.constants';
 import { useSSOAuth } from '@/v5/services/sso.hooks';
+import { Redirect, useRouteMatch } from 'react-router';
+import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 
 const APP_VERSION = ClientConfig.VERSION;
 
 export const AuthPage = () => {
 	const [authWithSSO] = useSSOAuth();
+	const { url } = useRouteMatch();
+	const returnUrl = AuthHooksSelectors.selectReturnUrl();
+	const isAuthenticated = AuthHooksSelectors.selectIsAuthenticated();
+
+	if (isAuthenticated) {
+		return (<Redirect to={{ ...returnUrl, state: { referrer: url } }} />);
+	}
+
 	return (
 		<AuthTemplate
 			footer={(
