@@ -37,7 +37,7 @@ export const AuthPage = () => {
 				<Heading>
 					<FormattedMessage id="authPage.heading" defaultMessage="Welcome to 3D Repo" />
 				</Heading>
-				<Button onClick={authWithSSO}>
+				<Button onClick={() => authWithSSO()}>
 					<FormattedMessage id="authPage.button" defaultMessage="Log in / Sign up" />
 				</Button>
 				<Footer>
