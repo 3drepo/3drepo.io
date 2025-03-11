@@ -20,6 +20,10 @@ const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../../../src/v5/models/u
 const { src } = require('../../helper/path');
 
 const Users = require(`${src}/processors/users`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+
+jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 
 jest.mock('../../../../src/v5/models/users');
 const UsersModel = require(`${src}/models/users`);
@@ -36,7 +40,7 @@ const Notifications = require(`${src}/models/notifications`);
 jest.mock('../../../../src/v5/services/intercom');
 const Intercom = require(`${src}/services/intercom`);
 
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString, determineTestGroup } = require('../../helper/services');
 
 const user = {
 	user: generateRandomString(),
@@ -217,10 +221,115 @@ const testRemoveUser = () => {
 	});
 };
 
-describe('processors/users', () => {
+const testCreateNewUserRecord = () => {
+	describe('Create new user record', () => {
+		test(`Should create a new user record and trigger the ${events.USER_CREATED} event`, async () => {
+			const firstName = generateRandomString();
+			const lastName = generateRandomString();
+			const userData = {
+				id: generateRandomString(),
+				name: `${firstName} ${lastName}`,
+				createdAt: Date.now(),
+				email: generateRandomString(),
+			};
+
+			await expect(Users.createNewUserRecord(userData)).resolves.toEqual(userData.id);
+
+			expect(UsersModel.addUser).toHaveBeenCalledTimes(1);
+			expect(UsersModel.addUser).toHaveBeenCalledWith({
+				username: userData.id,
+				password: expect.any(String),
+				firstName,
+				lastName,
+				email: userData.email,
+				createdAt: new Date(userData.createdAt),
+				userId: userData.id,
+			});
+
+			const eventData = {
+				username: userData.id,
+				email: userData.email,
+				createdAt: new Date(userData.createdAt),
+				fullName: userData.name,
+			};
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.USER_CREATED, eventData);
+		});
+
+		test('Should generate a name if none is provided', async () => {
+			const userData = {
+				id: generateRandomString(),
+				createdAt: Date.now(),
+				email: generateRandomString(),
+			};
+			const firstName = 'Anonymous';
+			const lastName = 'User';
+
+			await expect(Users.createNewUserRecord(userData)).resolves.toEqual(userData.id);
+
+			expect(UsersModel.addUser).toHaveBeenCalledTimes(1);
+			expect(UsersModel.addUser).toHaveBeenCalledWith({
+				username: userData.id,
+				password: expect.any(String),
+				firstName,
+				lastName,
+				email: userData.email,
+				createdAt: new Date(userData.createdAt),
+				userId: userData.id,
+			});
+
+			const eventData = {
+				username: userData.id,
+				email: userData.email,
+				createdAt: new Date(userData.createdAt),
+				fullName: `${firstName} ${lastName}`,
+			};
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.USER_CREATED, eventData);
+		});
+
+		test('Should work if only a first name is provided', async () => {
+			const firstName = generateRandomString();
+			const userData = {
+				id: generateRandomString(),
+				createdAt: Date.now(),
+				email: generateRandomString(),
+				name: firstName,
+			};
+
+			await expect(Users.createNewUserRecord(userData)).resolves.toEqual(userData.id);
+
+			expect(UsersModel.addUser).toHaveBeenCalledTimes(1);
+			expect(UsersModel.addUser).toHaveBeenCalledWith({
+				username: userData.id,
+				password: expect.any(String),
+				firstName,
+				lastName: '',
+				email: userData.email,
+				createdAt: new Date(userData.createdAt),
+				userId: userData.id,
+			});
+
+			const eventData = {
+				username: userData.id,
+				email: userData.email,
+				createdAt: new Date(userData.createdAt),
+				fullName: `${firstName} `,
+			};
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.USER_CREATED, eventData);
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	tesGetProfileByUsername();
 	tesUpdateProfile();
 	testGetAvatarStream();
 	testUploadAvatar();
 	testRemoveUser();
+	testCreateNewUserRecord();
 });
