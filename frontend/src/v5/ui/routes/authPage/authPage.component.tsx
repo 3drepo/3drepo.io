@@ -22,6 +22,7 @@ import { COOKIES_ROUTE, PRIVACY_ROUTE, RELEASE_NOTES_ROUTE, TERMS_ROUTE } from '
 import { useSSOAuth } from '@/v5/services/sso.hooks';
 import { Redirect, useRouteMatch } from 'react-router';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
+import { addParams } from '@/v5/helpers/url.helper';
 
 const APP_VERSION = ClientConfig.VERSION;
 
@@ -30,6 +31,7 @@ export const AuthPage = () => {
 	const { url } = useRouteMatch();
 	const returnUrl = AuthHooksSelectors.selectReturnUrl();
 	const isAuthenticated = AuthHooksSelectors.selectIsAuthenticated();
+	const redirectUri = addParams(returnUrl.pathname, returnUrl.search);
 
 	if (isAuthenticated) {
 		return (<Redirect to={{ ...returnUrl, state: { referrer: url } }} />);
@@ -47,7 +49,7 @@ export const AuthPage = () => {
 				<Heading>
 					<FormattedMessage id="authPage.heading" defaultMessage="Welcome to 3D Repo" />
 				</Heading>
-				<Button onClick={() => authWithSSO()}>
+				<Button onClick={() => authWithSSO(redirectUri)}>
 					<FormattedMessage id="authPage.button" defaultMessage="Log in / Sign up" />
 				</Button>
 				<Footer>

@@ -44,8 +44,6 @@ export const useSSOParams = () => {
 export const useSSOAuth = () => {
 	const [{ error }] = useSSOParams();
 
-	const returnUrl = AuthHooksSelectors.selectReturnUrl();
-
 	const errorMessage = error
 		? formatMessage({
 			id: 'auth.ssoerror',
@@ -53,12 +51,10 @@ export const useSSOAuth = () => {
 		},
 		{ errorMessage: errorMessages[error] }) : null;
 
-	const redirectUri = addParams(returnUrl.pathname, returnUrl.search);
-
 	return [
-		(teamspace?) => ssoAuth(redirectUri, teamspace).then(({ data }) => {
+		(redirectUri, teamspace?) => ssoAuth(redirectUri, teamspace).then(({ data }) => {
 			window.location.href = data.link;
 		}),
 		errorMessage,
-	] as [(teamspace?: string) => void, string | null];
+	] as [(redirectUri: string, teamspace?: string) => void, string | null];
 };
