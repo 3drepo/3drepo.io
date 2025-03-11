@@ -224,7 +224,7 @@ TeamspaceSetting.setTeamspaceRefId = async (teamspace, refId) => {
 };
 
 TeamspaceSetting.getTeamspaceRefId = async (teamspace) => {
-	const { refId } = await teamspaceSettingQuery(teamspace, { _id: teamspace }, { refId: 1 });
+	const { refId } = await TeamspaceSetting.getTeamspaceSetting(teamspace, { refId: 1 });
 	return refId;
 };
 
@@ -236,11 +236,9 @@ const grantPermissionToUser = async (teamspace, username, permission) => {
 TeamspaceSetting.grantAdminToUser = (teamspace, username) => grantPermissionToUser(teamspace,
 	username, TEAMSPACE_ADMIN);
 
-TeamspaceSetting.getAllUsersInTeamspace = async (teamspace, projection) => {
+TeamspaceSetting.getAllUsersInTeamspace = (teamspace, projection = { user: 1 }) => {
 	const query = { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER };
-	const users = await findMany(query, projection ?? { user: 1 });
-
-	return projection ? users : users.map(({ user }) => user);
+	return findMany(query, projection);
 };
 
 TeamspaceSetting.removeUserFromAdminPrivilege = async (teamspace, user) => {

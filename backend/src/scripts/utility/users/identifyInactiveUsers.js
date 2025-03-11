@@ -42,10 +42,10 @@ const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 
 const getFileEntry = async ({ user, roles, customData }) => {
 	const lastLogin = await getLastLoginDate(user);
-	const { firstName, lastName, email, billing: { billingInfo: { company } } } = customData;
+	const { firstName, lastName, email, billing } = customData;
 	const teamspaceNumber = roles.filter((role) => role.db !== 'admin').length;
 
-	return { user, firstName, lastName, email, teamspaceNumber, company: company ?? '', lastLogin: lastLogin ?? '' };
+	return { user, firstName, lastName, email, teamspaceNumber, company: billing?.billingInfo?.company ?? '', lastLogin: lastLogin ?? '' };
 };
 
 const run = async (monthsOfInactivity, outFile) => {

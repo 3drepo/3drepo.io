@@ -30,7 +30,7 @@ Settings.getUsersWithPermissions = async (teamspace, project, model, excludeView
 		getProjectAdmins(teamspace, project),
 		getUsersWithPermissions(teamspace, model, excludeViewers),
 	]);
-	return getCommonElements([...tsAdmins, ...projectAdmins, ...modelMembers], tsMembers);
+	return getCommonElements([...tsAdmins, ...projectAdmins, ...modelMembers], tsMembers.filter(({ user }) => user));
 };
 
 Settings.getJobsWithAccess = async (teamspace, project, model, excludeViewers) => {

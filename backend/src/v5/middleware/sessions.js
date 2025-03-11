@@ -57,22 +57,23 @@ Sessions.destroySession = (req, res) => {
 };
 
 Sessions.appendCSRFToken = async (req, res, next) => {
-	const { domain, maxAge } = config.cookie;
-	const token = generateUUIDString();
-	res.cookie(CSRF_COOKIE, token, { httpOnly: false, secure: true, sameSite: 'Strict', maxAge, domain });
-	req.token = token;
+	if (!req.session.reAuth) {
+		const { domain, maxAge } = config.cookie;
+		const token = generateUUIDString();
+		res.cookie(CSRF_COOKIE, token, { httpOnly: false, secure: true, sameSite: 'Strict', maxAge, domain });
+		req.token = token;
+	}
 	await next();
 };
 
 Sessions.updateSession = async (req, res, next) => {
 	const { session } = req;
-	if (req.token) {
-		session.token = req.token;
-	}
 
 	const updatedUser = { ...req.loginData, webSession: session?.user?.webSession || false };
 	// If there is ssoInfo, this is a new session
-	const { ssoInfo: { userAgent, referer } } = session;
+	const { ssoInfo } = session;
+	const referer = session.user.referer ?? ssoInfo?.referer;
+	const userAgent = session.user.userAgent ?? ssoInfo?.userAgent;
 	if (referer) {
 		updatedUser.referer = referer;
 	}
@@ -94,6 +95,9 @@ Sessions.updateSession = async (req, res, next) => {
 	session.ipAddress = ipAddress;
 
 	if (!session.reAuth) {
+		if (req.token) {
+			session.token = req.token;
+		}
 		publish(events.SESSION_CREATED, {
 			username: updatedUser.username,
 			sessionID: req.sessionID,
