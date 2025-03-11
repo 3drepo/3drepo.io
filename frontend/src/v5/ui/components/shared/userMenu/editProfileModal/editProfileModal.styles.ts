@@ -20,7 +20,6 @@ import TabPanelBase from '@mui/lab/TabPanel';
 import TabListBase from '@mui/lab/TabList';
 import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 import { FormModalNoButtons } from '@controls/formModal/formModalNoButtons/formModalNoButtons.component';
-import { Typography } from '@controls/typography';
 
 export const FormModal = styled(FormModalNoButtons)`
 	.MuiDialogContent-root {
