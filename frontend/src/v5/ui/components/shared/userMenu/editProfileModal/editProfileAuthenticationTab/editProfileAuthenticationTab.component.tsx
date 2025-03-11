@@ -34,7 +34,7 @@ export const EditProfileAuthenticationTab = ({ onClickClose }: EditProfileAuthen
 					defaultMessage="Edit password"
 				/>
 			</FronteggTitleText>
-			<button>click me to reach frontegg</button>
+			To be implemented
 		</TabContent>
 		<FormModalActions>
 			<ModalCancelButton onClick={onClickClose} />
