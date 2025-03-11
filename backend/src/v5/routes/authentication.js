@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { generateLinkToAuthenticator, generateToken, redirectToStateURL } = require('../middleware/sso/frontegg');
+const { generateLinkToAuthenticator, generateLinkToTeamspaceAuthenticator, generateToken, redirectToStateURL } = require('../middleware/sso/frontegg');
 const { isLoggedIn, notLoggedIn } = require('../middleware/auth');
 const { Router } = require('express');
 const { createEndpointURL } = require('../utils/config');
@@ -88,7 +88,7 @@ const establishRoutes = () => {
 	*                   description: link to 3D Repo's authenticator
 	*
 	*/
-	router.get('/authenticate/:teamspace', isLoggedIn, isMemberOfTeamspace, generateLinkToAuthenticator(authenticateRedirectUrl));
+	router.get('/authenticate/:teamspace', isLoggedIn, isMemberOfTeamspace, generateLinkToTeamspaceAuthenticator(authenticateRedirectUrl));
 
 	// This endpoint is not exposed in swagger as it is not designed to be called by clients
 	router.get(AUTH_POST, generateToken(authenticateRedirectUrl), updateSession, redirectToStateURL);

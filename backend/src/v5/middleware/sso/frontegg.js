@@ -153,6 +153,8 @@ AuthSSO.redirectToStateURL = (req, res) => {
 AuthSSO.generateLinkToAuthenticator = (redirectURL) => validateMany([addPkceProtection, setSessionInfo,
 	redirectForAuth(redirectURL)]);
 
+AuthSSO.generateLinkToTeamspaceAuthenticator = (redirectURL) => validateMany([redirectForAuth(redirectURL)]);
+
 AuthSSO.generateToken = (redirectURLUsed) => validateMany([checkStateIsValid, getToken(redirectURLUsed),
 	getUserDetails]);
 
