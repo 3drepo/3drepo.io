@@ -91,6 +91,9 @@ ResponseCodes.templates = {
 	// Legend related error
 	legendNotFound: { message: 'Legend not found.', status: 404 },
 
+	// endpoint decommissioned
+	endpointDecommissioned: { message: 'Endpoint no longer available.', status: 410 },
+
 	// Invalid Arguments
 	invalidArguments: { message: 'The arguments provided are not valid.', status: 400 },
 

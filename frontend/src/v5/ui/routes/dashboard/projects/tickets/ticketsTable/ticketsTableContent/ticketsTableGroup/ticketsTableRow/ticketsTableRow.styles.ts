@@ -16,10 +16,11 @@
  */
 
 import { DueDateContainer } from '@controls/dueDate/dueDate.styles';
-import styled, { css } from 'styled-components';
-import { Container as FixedOrGrowContainer } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.styles';
+import styled from 'styled-components';
+import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.component';
+import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
 
-export const Cell = styled(FixedOrGrowContainer)<{ hidden?: boolean }>`
+export const Cell = styled(ResizableTableCell)`
 	color: ${({ theme }) => theme.palette.secondary.main};
 	height: 100%;
 	padding: 0 10px;
@@ -29,26 +30,14 @@ export const Cell = styled(FixedOrGrowContainer)<{ hidden?: boolean }>`
 	font-weight: 500;
 	overflow: hidden;
 	box-sizing: border-box;
-
-	${({ width }) => width ? css`
-		flex: 0 0 ${width};
-	` : css`
-		flex: 1;
-		min-width: 300px;
-	`}
-
-	${({ hidden }) => hidden && css`
-		display: none;
-	`}
 `;
 
 // TODO - fix when new palette is released
-export const Row = styled.div<{ $selected?: boolean }>`
-	display: flex;
+export const Row = styled(ResizableTableRow)<{ $selected?: boolean }>`
 	gap: 1px;
 	height: 37px;
 	cursor: pointer;
-	width: min(90vw, 1289px);
+	width: fit-content;
 
 	${Cell} {
 		background: ${({ $selected, theme }) => ($selected ? '#edf0f8' : theme.palette.primary.contrast)};
@@ -62,12 +51,6 @@ export const OverflowContainer = styled.div`
 	display: inline-block;
 `;
 
-export const CellChipText = styled(Cell)`
-	>.MuiChip-root {
-		padding-left: 0;
-	}
-`;
-
 export const CellOwner = styled(Cell)`
 	.MuiAvatar-root {
 		width: 24px;
@@ -77,7 +60,7 @@ export const CellOwner = styled(Cell)`
 
 export const CellDate = styled(Cell)`
 	${DueDateContainer} {
-		height: 18px;
+		height: unset;
 	}
 `;
 
