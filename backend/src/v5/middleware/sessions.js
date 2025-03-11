@@ -72,8 +72,8 @@ Sessions.updateSession = async (req, res, next) => {
 	const updatedUser = { ...req.loginData, webSession: session?.user?.webSession || false };
 	// If there is ssoInfo, this is a new session
 	const { ssoInfo } = session;
-	const referer = session.user.referer ?? ssoInfo?.referer;
-	const userAgent = session.user.userAgent ?? ssoInfo?.userAgent;
+	const referer = session.user?.referer ?? ssoInfo?.referer;
+	const userAgent = session.user?.userAgent ?? ssoInfo?.userAgent;
 	if (referer) {
 		updatedUser.referer = referer;
 	}
