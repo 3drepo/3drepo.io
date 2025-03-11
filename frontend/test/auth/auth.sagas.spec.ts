@@ -78,7 +78,7 @@ describe('Auth: sagas', () => {
 			const teamspace = selectAuthenticatedTeamspace(getState());
 
 			expect(isAuthenticated).toBeFalsy();
-			expect(teamspace).toEqual(authenticatedTeamspace);
+			expect(teamspace).toEqual(null);
 		});
 		it('should fail to logout and open alert modal', async () => {
 			mockServer
@@ -94,7 +94,7 @@ describe('Auth: sagas', () => {
 			const teamspace = selectAuthenticatedTeamspace(getState());
 
 			expect(isAuthenticated).toBeFalsy();
-			expect(teamspace).toEqual(authenticatedTeamspace);
+			expect(teamspace).toEqual(null);
 		});
 	});
 });
