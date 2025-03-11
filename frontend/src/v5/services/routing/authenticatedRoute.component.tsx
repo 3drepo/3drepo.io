@@ -62,12 +62,12 @@ const WrapAuthenticationRedirect = ({ children }) => {
 	useEffect(enableKickedOutEvent);
 
 	useEffect(() => {
-		if (teamspace && teamspace !== authenticatedTeamspace) {
+		if (authenticationFetched && teamspace && teamspace !== authenticatedTeamspace) {
 			const returnUrl = cleanSSOParams(location);
 			const redirectUri = addParams(returnUrl.pathname, returnUrl.search);
 			authenticateTeamspace(redirectUri, teamspace);
 		}
-	}, [teamspace]);
+	}, [teamspace, authenticationFetched]);
 
 	if (!isAuthenticated) {
 		return (<></>);
