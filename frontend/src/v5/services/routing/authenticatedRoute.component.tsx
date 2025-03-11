@@ -17,16 +17,16 @@
 
 import { useEffect } from 'react';
 import axios from 'axios';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { AuthActionsDispatchers, TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isNotLoggedIn } from '@/v5/validation/errors.helpers';
 import { addParams, pathName } from '@/v5/helpers/url.helper';
 import { Route, RouteProps } from './route.component';
-import { useSSOParams } from '../sso.hooks';
+import { useSSOAuth, useSSOParams } from '../sso.hooks';
 import { postActions } from '../api/sso';
 import { enableKickedOutEvent } from '../realtime/auth.events';
-import { AUTH_PATH } from '@/v5/ui/routes/routes.constants';
+import { AUTH_PATH, DashboardParams } from '@/v5/ui/routes/routes.constants';
 
 const cleanSSOParams = (location) => {
 	const searchParams = new URLSearchParams(location.search);
@@ -37,10 +37,12 @@ const cleanSSOParams = (location) => {
 
 const WrapAuthenticationRedirect = ({ children }) => {
 	const history = useHistory();
-	const isAuthenticated: boolean = AuthHooksSelectors.selectIsAuthenticated();
-	const authenticationFetched: boolean = AuthHooksSelectors.selectAuthenticationFetched();
+	const [authenticateTeamspace] = useSSOAuth();
+	const isAuthenticated = AuthHooksSelectors.selectIsAuthenticated();
+	const authenticationFetched = AuthHooksSelectors.selectAuthenticationFetched();
+	const authenticatedTeamspace = AuthHooksSelectors.selectAuthenticatedTeamspace();
 	const [{ error: ssoError, searchParams }] = useSSOParams();
-
+	const { teamspace } = useParams<DashboardParams>();
 	const location = useLocation();
 
 	useEffect(() => {
@@ -58,6 +60,12 @@ const WrapAuthenticationRedirect = ({ children }) => {
 	}, [isAuthenticated]);
 
 	useEffect(enableKickedOutEvent);
+
+	useEffect(() => {
+		if (teamspace && teamspace !== authenticatedTeamspace) {
+			authenticateTeamspace(teamspace);
+		}
+	}, [teamspace]);
 
 	if (!isAuthenticated) {
 		return (<></>);
