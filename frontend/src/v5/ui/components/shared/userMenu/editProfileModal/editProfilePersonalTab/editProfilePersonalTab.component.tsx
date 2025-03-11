@@ -133,7 +133,6 @@ export const EditProfilePersonalTab = ({
 					})}
 					required
 					formError={formErrors.firstName}
-					disabled
 				/>
 				<FormTextField
 					name="lastName"
@@ -144,7 +143,6 @@ export const EditProfilePersonalTab = ({
 					})}
 					required
 					formError={formErrors.lastName}
-					disabled
 				/>
 				<FormTextField
 					name="email"
