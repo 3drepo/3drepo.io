@@ -29,6 +29,16 @@ export interface ICurrentUser {
 	apiKeyIsUpdating?: boolean,
 }
 
+export type UpdatePersonalData = Partial<Pick<ICurrentUser, 'firstName' | 'lastName' | 'company' >> & {
+	avatarFile?: File,
+};
+
+export type UpdateApiKey = Pick<ICurrentUser, 'apiKey'>;
+
+export type UpdateUser = UpdatePersonalData | UpdateApiKey;
+
+export type UpdateUserSuccess = Partial<ICurrentUser>;
+
 export enum Role {
 	ADMIN = 'admin',
 	COLLABORATOR = 'collaborator',
