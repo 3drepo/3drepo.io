@@ -29,7 +29,7 @@ export interface ICurrentUser {
 	apiKeyIsUpdating?: boolean,
 }
 
-export type UpdatePersonalData = Partial<Pick<ICurrentUser, 'firstName' | 'lastName' | 'company' >> & {
+export type UpdatePersonalData = Partial<Pick<ICurrentUser, 'firstName' | 'lastName' | 'company' | 'countryCode' >> & {
 	avatarFile?: File,
 };
 

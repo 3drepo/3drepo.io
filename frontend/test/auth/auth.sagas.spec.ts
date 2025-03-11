@@ -15,15 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AuthActions } from '@/v5/store/auth/auth.redux';
+import { AuthActions, setAuthenticatedTeamspace } from '@/v5/store/auth/auth.redux';
 import { mockServer } from '../../internals/testing/mockServer';
 import { createTestStore } from '../test.helpers'
-import { selectIsAuthenticated, selectLoginError } from '@/v5/store/auth/auth.selectors';
+import { selectAuthenticatedTeamspace, selectIsAuthenticated } from '@/v5/store/auth/auth.selectors';
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
 
 describe('Auth: sagas', () => {
-	const username = 'Jason';
-	const password = 'Friday13';
+	const authenticatedTeamspace = 'WE_HATE_PINEAPPLE_ON_PIZZA_TEAMSPACE';
 	
 	let dispatch, getState, waitForActions;
 
@@ -57,62 +56,11 @@ describe('Auth: sagas', () => {
 		});
 	});
 
-	describe('login', () => {
-		it('should login successfully', async () => {
-			mockServer
-				.post('/login')
-				.reply(200);
-
-			await waitForActions(() => {
-				dispatch(AuthActions.login(username, password));
-			}, [AuthActions.setIsAuthenticationPending(false)]);
-
-			const isAuthenticated = selectIsAuthenticated(getState());
-
-			expect(isAuthenticated).toBeTruthy();
-		});
-
-		it('should fail to log in with unexpected error', async () => {
-			mockServer
-				.post('/login')
-				.reply(500);
-			ClientConfig.loginPolicy = { lockoutDuration: 10 };
-
-			await waitForActions(() => {
-				dispatch(AuthActions.login(username, password));
-			}, [AuthActions.setIsAuthenticationPending(false)]);
-
-			const isAuthenticated = selectIsAuthenticated(getState());
-
-			expect(isAuthenticated).toBeFalsy();
-
-			delete ClientConfig.loginPolicy;
-		});
-
-		it('should fail to log in with expected error', async () => {
-			const errorCode = { code: 'INCORRECT_USERNAME_OR_PASSWORD' };
-			const expectedErrorMessage = 'Incorrect username or password. Please try again.';
-
-			mockServer
-				.post('/login')
-				.reply(400, errorCode);
-			ClientConfig.loginPolicy = { lockoutDuration: 10 };
-
-			await waitForActions(() => {
-				dispatch(AuthActions.login(username, password));
-			}, [AuthActions.setIsAuthenticationPending(false)]);
-
-			const isAuthenticated = selectIsAuthenticated(getState());
-			const errorMessage = selectLoginError(getState());
-
-			expect(isAuthenticated).toBeFalsy();
-			expect(errorMessage).toEqual(expectedErrorMessage);
-
-			delete ClientConfig.loginPolicy;
-		});
-	});
-
 	describe('logout', () => {
+		beforeEach(() => {
+			dispatch(AuthActions.setAuthenticatedTeamspace(authenticatedTeamspace));
+			dispatch(AuthActions.setIsAuthenticated(true));
+		})
 		it('should logout successfully', async () => {
 			mockServer
 				.post('/logout')
@@ -120,11 +68,17 @@ describe('Auth: sagas', () => {
 
 			await waitForActions(() => {
 				dispatch(AuthActions.logout());
-			}, [AuthActions.setIsAuthenticationPending(false)]);
+			}, [
+				AuthActions.setIsAuthenticated(false),
+				AuthActions.setIsAuthenticationPending(false),
+				AuthActions.setAuthenticatedTeamspace(null),
+			]);
 
 			const isAuthenticated = selectIsAuthenticated(getState());
+			const teamspace = selectAuthenticatedTeamspace(getState());
 
 			expect(isAuthenticated).toBeFalsy();
+			expect(teamspace).toEqual(authenticatedTeamspace);
 		});
 		it('should fail to logout and open alert modal', async () => {
 			mockServer
@@ -135,8 +89,12 @@ describe('Auth: sagas', () => {
 				dispatch(AuthActions.logout());
 			}, [DialogsTypes.OPEN, AuthActions.setIsAuthenticationPending(false)]);
 
+
 			const isAuthenticated = selectIsAuthenticated(getState());
+			const teamspace = selectAuthenticatedTeamspace(getState());
+
 			expect(isAuthenticated).toBeFalsy();
+			expect(teamspace).toEqual(authenticatedTeamspace);
 		});
 	});
 });

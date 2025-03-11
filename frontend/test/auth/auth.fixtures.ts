@@ -20,9 +20,10 @@ import faker from 'faker';
 
 export const authMockFactory = (overrides?: Partial<IAuthState>): IAuthState => ({
     isAuthenticated: faker.datatype.boolean(),
-	isPending: faker.datatype.boolean(),
-	errorMessage: faker.random.words(10),
+	isAuthenticationPending: faker.datatype.boolean(),
+	authenticatedTeamspace: faker.datatype.string(),
 	returnUrl: {
 		pathname: faker.internet.url(),
 	},
+	...overrides,
 });
