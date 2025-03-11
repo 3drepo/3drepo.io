@@ -18,7 +18,7 @@ import { FC, useEffect } from 'react';
 import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { Modal, Actions, Details, Status, WarningIcon, ModalContent, CloseButton } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
-import { getErrorCode, getErrorMessage, getErrorStatus, isPathNotFound, isPathNotAuthorized, isProjectNotFound, isModelNotFound, isTeamspaceInvalid } from '@/v5/validation/errors.helpers';
+import { getErrorCode, getErrorMessage, getErrorStatus, isPathNotFound, isPathNotAuthorized, isProjectNotFound, isModelNotFound, isTeamspaceInvalid, isTeamspaceUnauthenticated } from '@/v5/validation/errors.helpers';
 import { generatePath, useHistory } from 'react-router';
 import { DASHBOARD_ROUTE, TEAMSPACE_ROUTE_BASE, PROJECT_ROUTE_BASE } from '@/v5/ui/routes/routes.constants';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -42,6 +42,7 @@ export const AlertModal: FC<AlertModalProps> = ({ onClickClose, currentActions =
 	const modelNotFound = isModelNotFound(code);
 	const projectNotFound = isProjectNotFound(code);
 	const teamspaceInvalid = isTeamspaceInvalid(code);
+	const teamspaceUnauthenticated = isTeamspaceUnauthenticated(code);
 	const unauthorized = isPathNotAuthorized(error);
 
 	const getSafePath = () => {
@@ -73,6 +74,8 @@ export const AlertModal: FC<AlertModalProps> = ({ onClickClose, currentActions =
 		}
 	}, []);
 
+	if (teamspaceUnauthenticated) return (<></>);
+
 	return (
 		<Modal open={open} onClose={onClickClose}>
 			<ModalContent>
@@ -83,7 +86,7 @@ export const AlertModal: FC<AlertModalProps> = ({ onClickClose, currentActions =
 						defaultMessage="Something went wrong when {currentActions}"
 						values={{ currentActions }}
 					/>
-					{(pathNotFound || unauthorized || teamspaceInvalid) && (
+					{pathNotFound || unauthorized || teamspaceInvalid && (
 						<>.
 							<br />
 							<FormattedMessage

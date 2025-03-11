@@ -17,10 +17,9 @@
 
 import { isNull, omitBy, values } from 'lodash';
 import { useHistory } from 'react-router-dom';
-import { addParams, getParams } from '../helpers/url.helper';
+import { getParams } from '../helpers/url.helper';
 import { errorMessages, postActions, ssoAuth } from './api/sso';
 import { formatMessage } from './intl';
-import { AuthHooksSelectors } from './selectorsHooks';
 
 export const useSSOParams = () => {
 	const history = useHistory();
