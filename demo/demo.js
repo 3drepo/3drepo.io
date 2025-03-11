@@ -1,5 +1,5 @@
 var PREFIX = "https://www.3drepo.io";
-var API_PREFIX = "https://api1.www.3drepo.io";
+var API_PREFIX = "https://www.3drepo.io";
 
 init();
 
