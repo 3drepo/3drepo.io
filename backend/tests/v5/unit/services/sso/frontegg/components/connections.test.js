@@ -33,22 +33,30 @@ const testGetConfig = () => {
 	describe('Get config', () => {
 		const origConfigSSO = cloneDeep(Config.sso);
 		const origEnvar = cloneDeep(process.env);
+		beforeEach(() => {
+			Connections.reset();
+		});
 		afterEach(() => {
 			Config.sso = origConfigSSO;
 			process.env = origEnvar;
 		});
 		test('Should fail if config validation failed', async () => {
-			Config.sso = {};
+			Config.sso = { frontegg: {} };
 			await expect(Connections.getConfig()).rejects.not.toBeUndefined();
 		});
 		test('Should succeed and return the config', async () => {
 			const token = generateRandomString();
-			WebRequests.post.mockResolvedValueOnce({ data: { token } });
+			WebRequests.post.mockResolvedValue({ data: { token } });
 			await expect(Connections.getConfig()).resolves.toEqual(Config.sso.frontegg);
 
 			expect(Connections.getIdentityClient()).not.toBeUndefined();
 			expect(Connections.getBasicHeader()).not.toBeUndefined();
 			expect(Connections.getBearerHeader()).not.toBeUndefined();
+		});
+
+		test('Should fail if we failed to generate vendor token', async () => {
+			WebRequests.post.mockRejectedValueOnce({ message: generateRandomString() });
+			await expect(Connections.getConfig()).rejects.not.toBeUndefined();
 		});
 	});
 };
