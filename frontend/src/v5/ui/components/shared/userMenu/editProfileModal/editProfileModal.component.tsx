@@ -27,6 +27,7 @@ import { FormModal, TabList, Tab, TabPanel, TruncatableName } from './editProfil
 import { EditProfilePersonalTab, IUpdatePersonalInputs } from './editProfilePersonalTab/editProfilePersonalTab.component';
 import { EditProfilePasswordTab } from './editProfilePasswordTab/editProfilePasswordTab.component';
 import { EditProfileIntegrationsTab } from './editProfileIntegrationsTab/editProfileIntegrationsTab.component';
+import { userHasMissingRequiredData } from '@/v5/store/users/users.helpers';
 
 const PERSONAL_TAB = 'personal';
 const PASSWORD_TAB = 'password';
@@ -48,16 +49,17 @@ type EditProfileModalProps = {
 	onClickClose: () => void;
 	initialTab?: 'password' | 'integrations';
 };
-export const EditProfileModal = ({ open, onClickClose, initialTab }: EditProfileModalProps) => {
+export const EditProfileModal = ({ open, onClickClose: defaultOnClickClose, initialTab }: EditProfileModalProps) => {
 	const [activeTab, setActiveTab] = useState(initialTab || PERSONAL_TAB);
 	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
 	const [unexpectedErrors, setUnexpectedErrors] = useState<EditProfileUnexpectedErrors>({});
 	const interceptedError = useErrorInterceptor();
 	const user = CurrentUserHooksSelectors.selectCurrentUser();
+	const onClickClose = userHasMissingRequiredData(user) ? null : defaultOnClickClose;
 
 	const defaultPersonalValues = defaults(
 		pick(omitBy(user, isNull), ['firstName', 'lastName', 'email', 'company', 'countryCode']),
-		{ company: '', countryCode: 'GB', avatarFile: '' },
+		{ company: '', avatarFile: '' },
 	);
 
 	const onTabChange = (_, selectedTab) => setActiveTab(selectedTab);

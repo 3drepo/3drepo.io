@@ -31,6 +31,7 @@ import { FormModalActions } from '@controls/formModal/modalButtons/modalButtons.
 import { ModalCancelButton, ModalSubmitButton } from '@controls/formModal/modalButtons/modalButtons.component';
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
 import { TabContent } from '../editProfileModal.styles';
+import { userHasMissingRequiredData } from '@/v5/store/users/users.helpers';
 
 export type IUpdatePersonalInputs = Partial<{
 	firstName: string;
@@ -45,7 +46,7 @@ type EditProfilePersonalTabProps = {
 	alreadyExistingEmails: string[];
 	setAlreadyExistingEmails: (emails: string[]) => void;
 	unexpectedError: any,
-	onClickClose: () => void,
+	onClickClose?: () => void,
 };
 
 export const EditProfilePersonalTab = ({
@@ -119,6 +120,12 @@ export const EditProfilePersonalTab = ({
 			setSubmitWasSuccessful(false);
 		}
 	}, [JSON.stringify(isDirty), touchedFields]);
+
+	useEffect(() => {
+		if (userHasMissingRequiredData(user)) {
+			trigger();
+		}
+	}, []);
 
 	return (
 		<>
@@ -195,7 +202,7 @@ export const EditProfilePersonalTab = ({
 				</FormSelect>
 			</TabContent>
 			<FormModalActions>
-				<ModalCancelButton onClick={onClickClose} />
+				<ModalCancelButton disabled={!onClickClose} onClick={onClickClose} />
 				<ModalSubmitButton disabled={!canSubmit} onClick={handleSubmit(onSubmit)} isPending={isSubmitting}>
 					<FormattedMessage
 						defaultMessage="Update profile"

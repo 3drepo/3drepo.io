@@ -37,3 +37,5 @@ export const getDefaultUserNotFound = (name: string): IUser => ({
 	avatarUrl: '',
 	user: name,
 });
+
+export const userHasMissingRequiredData = ({ lastName }: ICurrentUser) => !lastName;

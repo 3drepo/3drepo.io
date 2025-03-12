@@ -15,22 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { Button } from '@controls/button';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
+import { userHasMissingRequiredData } from '@/v5/store/users/users.helpers';
+import { EditProfileModal } from '@components/shared/userMenu/editProfileModal/editProfileModal.component';
+import { useEffect } from 'react';
 
-export const MicrosoftButton = styled(Button).attrs({
-	variant: 'contained',
-	color: 'primary',
-})`
-	display: flex;
-	width: fit-content;
-	font-weight: 500;
-	font-size: 12px;
-	padding: 20px;
-	margin: 0;
-	background-color: #2F2F2F; /* The colour is hardcoded as these are microsoft specs and not part of the theme */
+export const NewUserHandler = () => {
+	const user = CurrentUserHooksSelectors.selectCurrentUser();
 
-	&:hover, &:active {
-		background-color: #2F2F2FF0; 
-	}
-`;
+	useEffect(() => {
+		if (!user.username) return;
+		if (userHasMissingRequiredData(user)) {
+			DialogsActionsDispatchers.open(EditProfileModal);
+		}
+	}, [user.username]);
+
+	return (<></>);
+};

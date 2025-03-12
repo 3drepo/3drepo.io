@@ -27,7 +27,7 @@ import { Button, Title } from './editProfilePasswordTab.styles';
 import { Gap } from '@controls/gap';
 
 type EditProfilePasswordTabProps = {
-	onClickClose: () => void,
+	onClickClose?: () => void,
 };
 	
 export const EditProfilePasswordTab = ({ onClickClose }: EditProfilePasswordTabProps) => {
@@ -75,7 +75,7 @@ export const EditProfilePasswordTab = ({ onClickClose }: EditProfilePasswordTabP
 				)}
 			</TabContent>
 			<FormModalActions>
-				<ModalCancelButton onClick={onClickClose} />
+				<ModalCancelButton disabled={!onClickClose} onClick={onClickClose} />
 			</FormModalActions>
 		</>
 	);
