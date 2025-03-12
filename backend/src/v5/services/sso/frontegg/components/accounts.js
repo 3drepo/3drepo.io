@@ -77,7 +77,7 @@ Accounts.getAllUsersInAccount = async (accountId) => {
 		const config = await getConfig();
 		const header = {
 			...await getBearerHeader(),
-			'frontegg-tenant-id': accountId,
+			[HEADER_TENANT_ID]: accountId,
 
 		};
 
@@ -99,7 +99,6 @@ Accounts.getAllUsersInAccount = async (accountId) => {
 			items.forEach(({ id, email }) => {
 				entries.push({ id, email });
 			});
-
 			query = _links.next;
 		}
 
