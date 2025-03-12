@@ -18,13 +18,9 @@
 
 const { deleteNotifications, fetchNotification } = require("../helpers/notifications");
 const { loginUsers } = require("../helpers/users.js");
-const { createModel, createFederation, updateFederation } = require("../helpers/models");
-const request = require("supertest");
 const bouncerHelper = require("../helpers/bouncerHelper");
 const expect = require("chai").expect;
-const app = require("../../../src/v4/services/api.js").createApp();
 const async = require("async");
-const newId = require("uuid").v1;
 
 
 let agents = {};
