@@ -62,7 +62,7 @@ export const EditProfilePersonalTab = ({
 	} = useFormContext();
 
 	const getSubmittableValues = (): IUpdatePersonalInputs => {
-		const values = getValues();
+		const { email, ...values } = getValues();
 		const trimmedValues = mapValues(values, (value) => value?.trim?.() ?? value);
 		return pickBy(trimmedValues) as IUpdatePersonalInputs;
 	};
