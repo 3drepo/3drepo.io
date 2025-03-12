@@ -28,7 +28,7 @@ const testInit = () => {
 	describe('Test init', () => {
 		test('Should initialise the frontegg connections', async () => {
 			await Frontegg.init();
-			expect(Connections.getIdentityClient()).toHaveBeenCalledTimes(1);
+			expect(Connections.getIdentityClient).toHaveBeenCalledTimes(1);
 		});
 	});
 };
