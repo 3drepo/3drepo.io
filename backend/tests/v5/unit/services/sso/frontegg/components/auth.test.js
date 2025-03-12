@@ -181,10 +181,16 @@ const testGenerateToken = () => {
 			const expectedToken = {
 				token: data.access_token,
 				refreshToken: data.refresh_token,
-				expiry: new Date(Date.now() + data.expires_in * 1000),
+				expiry: expect.any(Date),
 			};
 
-			await expect(Auth.generateToken(urlUsed, code, challenge)).resolves.toEqual(expectedToken);
+			const expectedExpiry = new Date(Date.now() + data.expires_in * 1000);
+
+			const response = await Auth.generateToken(urlUsed, code, challenge);
+			expect(response).toEqual(expectedToken);
+
+			// the expected expiry might be off by a split second.
+			expect(Math.abs(expectedExpiry.getTime() - response.expiry.getTime()) < 100).toBeTruthy();
 
 			const expectedPayload = {
 				grant_type: 'authorization_code',
