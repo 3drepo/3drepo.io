@@ -30,6 +30,7 @@ const Accounts = require(`${src}/services/sso/frontegg/components/accounts`);
 const { HEADER_TENANT_ID, META_LABEL_TEAMSPACE } = require(`${src}/services/sso/frontegg/components/accounts.constants`);
 
 const bearerHeader = { [generateRandomString()]: generateRandomString() };
+const postOptions = { headers: bearerHeader };
 
 Connections.getBearerHeader.mockResolvedValue(bearerHeader);
 Connections.getConfig.mockResolvedValue({});
@@ -88,8 +89,6 @@ const testCreateAccount = () => {
 			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
 
 			expect(WebRequests.post).toHaveBeenCalledTimes(3);
-
-			const postOptions = { headers: bearerHeader };
 
 			// the call to create the account
 			expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String),
@@ -210,8 +209,139 @@ const testGetAllUsersInAccount = () => {
 	});
 };
 
+const testAddUserToAccount = () => {
+	describe('Add user to account', () => {
+		[true, false].forEach((sendEmail) => {
+			test(`Should send request to add user to the account (Send invite: ${sendEmail})`, async () => {
+				const userId = generateRandomString();
+				const accountId = generateRandomString();
+
+				await Accounts.addUserToAccount(accountId, userId, sendEmail);
+				const expectedPayload = {
+					tenantId: accountId,
+					validateTenantExist: true,
+					skipInviteEmail: !sendEmail,
+				};
+
+				expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+				expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+				expect(WebRequests.post).toHaveBeenCalledTimes(1);
+				expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String), expectedPayload, postOptions);
+
+				expect(WebRequests.post.mock.calls[0][0].includes(userId)).toBeTruthy();
+			});
+		});
+
+		test('Should throw error if post request failed', async () => {
+			const userId = generateRandomString();
+			const accountId = generateRandomString();
+
+			WebRequests.post.mockRejectedValueOnce({ message: generateRandomString() });
+
+			await expect(Accounts.addUserToAccount(accountId, userId)).rejects.not.toBeUndefined();
+			const expectedPayload = {
+				tenantId: accountId,
+				validateTenantExist: true,
+				skipInviteEmail: false,
+			};
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			expect(WebRequests.post).toHaveBeenCalledTimes(1);
+			expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String), expectedPayload, postOptions);
+
+			expect(WebRequests.post.mock.calls[0][0].includes(userId)).toBeTruthy();
+		});
+	});
+};
+
+const testRemoveUserFromAccount = () => {
+	describe('Remove user from account', () => {
+		test('Should send request to remove user from the account', async () => {
+			const userId = generateRandomString();
+			const accountId = generateRandomString();
+
+			const header = {
+				...bearerHeader,
+				[HEADER_TENANT_ID]: accountId,
+			};
+
+			await Accounts.removeUserFromAccount(accountId, userId);
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			expect(WebRequests.delete).toHaveBeenCalledTimes(1);
+			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), header);
+
+			expect(WebRequests.delete.mock.calls[0][0].includes(userId)).toBeTruthy();
+		});
+
+		test('Should throw error if post request failed', async () => {
+			const userId = generateRandomString();
+			const accountId = generateRandomString();
+
+			const header = {
+				...bearerHeader,
+				[HEADER_TENANT_ID]: accountId,
+			};
+
+			WebRequests.delete.mockRejectedValueOnce({ message: generateRandomString() });
+
+			await expect(Accounts.removeUserFromAccount(accountId, userId)).rejects.not.toBeUndefined();
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			expect(WebRequests.delete).toHaveBeenCalledTimes(1);
+			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), header);
+
+			expect(WebRequests.delete.mock.calls[0][0].includes(userId)).toBeTruthy();
+		});
+	});
+};
+
+const testRemoveAccount = () => {
+	describe('Remove account', () => {
+		test('Should send request to remove account', async () => {
+			const accountId = generateRandomString();
+
+			await Accounts.removeAccount(accountId);
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			expect(WebRequests.delete).toHaveBeenCalledTimes(1);
+			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), bearerHeader);
+
+			expect(WebRequests.delete.mock.calls[0][0].includes(accountId)).toBeTruthy();
+		});
+
+		test('Should throw error if post request failed', async () => {
+			const accountId = generateRandomString();
+
+			WebRequests.delete.mockRejectedValueOnce({ message: generateRandomString() });
+
+			await expect(Accounts.removeAccount(accountId)).rejects.not.toBeUndefined();
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			expect(WebRequests.delete).toHaveBeenCalledTimes(1);
+			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), bearerHeader);
+
+			expect(WebRequests.delete.mock.calls[0][0].includes(accountId)).toBeTruthy();
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetTeamspaceByAccount();
 	testCreateAccount();
 	testGetAllUsersInAccount();
+	testAddUserToAccount();
+	testRemoveUserFromAccount();
+	testRemoveAccount();
 });
