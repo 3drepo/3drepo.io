@@ -52,14 +52,16 @@ const validateCookie = async (session, cookies, headers) => {
 	return false;
 };
 
-SessionUtils.isSessionValid = (session, cookies, headers, ignoreApiKey = false) => {
+SessionUtils.isSessionValid = async (session, cookies, headers, ignoreApiKey = false) => {
 	const user = session?.user;
 	if (user) {
-		return session.user.isAPIKey ? !ignoreApiKey
-			: validateCookie(session, cookies, headers);
+		const res = session.user.isAPIKey ? !ignoreApiKey
+			: await validateCookie(session, cookies, headers);
+
+		return res;
 	}
 
-	return Promise.resolve(false);
+	return false;
 };
 
 SessionUtils.getUserFromSession = ({ user } = {}) => (user ? user.username : undefined);
