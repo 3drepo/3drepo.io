@@ -70,7 +70,7 @@ describe("Federated Model", function () {
 		});
 	});
 
-	it("should fail as endpoint is decommissioned", function(done) {
+	it("should not be able to create the model - endpoint decommissioned", function(done) {
 		this.timeout(5000);
 
 		agent.post(`/${username}/model`)

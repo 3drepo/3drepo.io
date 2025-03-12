@@ -77,9 +77,7 @@ describe("Default permission assignment", function () {
 			});
 	});
 
-	let modelId;
-
-	it("user should be able to create model - endpoint decommissioned", function(done) {
+	it("user should not be able to reach the enpoint and create model - endpoint decommissioned", function(done) {
 		agent.post(`/${username}/model`)
 			.send({
 				modelName: "model1",

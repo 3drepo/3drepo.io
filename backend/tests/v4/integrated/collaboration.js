@@ -137,7 +137,7 @@ describe("Sharing/Unsharing a model", function () {
 			viewerAgent.get(`/${username}/${model}/download/latest`).expect(401, done);
 		});
 
-		it("and the viewer should NOT be able to upload model - endpoint decommissioned", function(done) {
+		it("and the viewer should not be able to upload model on the V4 endpoint - endpoint decommissioned", function(done) {
 			viewerAgent.post(`/${username}/${model}/upload`)
 				.expect(410, done);
 		});
@@ -286,7 +286,7 @@ describe("Sharing/Unsharing a model", function () {
 				.expect(200 , done);
 		});
 
-		it("and the commenter should NOT be able to upload model - endpoint decommissioned", function(done) {
+		it("and the commenter should not be able to upload model on the V4 endpoint - endpoint decommissioned", function(done) {
 			commenterAgent.post(`/${username}/${model}/upload`)
 				.expect(410, done);
 		});
@@ -425,12 +425,10 @@ describe("Sharing/Unsharing a model", function () {
 				.expect(200 , done);
 		});
 
-		it("and the collaborator should be able to upload model - endpoint decommissioned", function(done) {
+		it("and the collaborator should not be able to upload model on the V4 endpoint - endpoint decommissioned", function(done) {
 			collaboratorAgent.post(`/${username}/${model}/upload`)
 				.field("tag", "collab_upload")
-				.expect(410, (err, res) => {
-					done(err)
-				});
+				.expect(410, done);
 		});
 
 		it("and the collaborator should be able to download the model", function(done) {

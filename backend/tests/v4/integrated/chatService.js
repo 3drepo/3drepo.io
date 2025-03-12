@@ -508,16 +508,14 @@ describe("Chat service", function () {
 
 		describe("of model type", () => {
 
-			it("should receive a model uploaded notification if a model has been uploaded - endpoint decommissioned", done => {
+			it("should not receive a model uploaded notification if a model tries to be uploaded on the V4 endpoint - endpoint decommissioned", done => {
 				const eventName = `${username}::notificationUpserted`;
-				socket.on(eventName, function(notification) {
+				let socketActivity = false;
+
+				socket.on(eventName, function() {
 					socket.off(eventName);
-					expect(notification).to.exist;
-
-					expect(notification.type).to.equals("MODEL_UPDATED");
-
+					socketActivity = true;
 					bouncerHelper.stopBouncerWorker();
-					done();
 				});
 
 				async.series([bouncerHelper.startBouncerWorker,
@@ -525,39 +523,12 @@ describe("Chat service", function () {
 						.field("tag", "onetag")
 						.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
 						.expect(410, function(err, res) {
-							next(err);
+							expect(socketActivity).to.be.false;
+							done();
 						})
 					])
 			
-				done()
 			}).timeout('60s');
-
-			it("should receive a model FAILED uploaded notification if a model uploaded had failed - endpoint decommissioned", done => {
-				const eventName = `${username}::notificationUpserted`;
-
-				socket.on(eventName, function(notification) {
-					socket.off(eventName);
-					expect(notification).to.exist;
-
-					expect(notification.type).to.equals("MODEL_UPDATED_FAILED");
-
-					bouncerHelper.stopBouncerWorker();
-					done();
-				});
-
-				async.series([next => bouncerHelper.startBouncerWorker(next, 1),
-					next => testSession.post(`/${account}/${model}/upload`)
-						.field("tag", "onetag")
-						.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
-						.expect(410, function(err, res) {
-							next(err);
-						})
-					])
-			
-				done()
-			}).timeout('60s');
-
-
 		});
 
 	});

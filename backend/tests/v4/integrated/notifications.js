@@ -127,7 +127,7 @@ describe("Notifications", function() {
 
 		before(assignIssue(model));
 
-		it("should not be created for viewers and jobB type users", function(done) {
+		it("should not be created for viewers and job type users", function(done) {
 			const users = ["unassignedTeamspace1UserJobA",
 				"viewerTeamspace1Model1JobA",
 				"viewerTeamspace1Model1JobB",
@@ -541,81 +541,7 @@ describe("Notifications", function() {
 	// ========================================
 	describe("of type model update", ()=> {
 		before(bouncerHelper.startBouncerWorker);
-
-		const pollForNotification = (type, testFunction) => username => next => {
-			const intervalHandle = setInterval(() => {
-
-				agents[username].get(NOTIFICATIONS_URL)
-					.expect(200, function(err, res) {
-
-						const notifications =  res.body.filter(n => n.type === type);
-
-						if (notifications.length > 0) {
-							testFunction(notifications, ()=> {
-								clearInterval(intervalHandle);
-								next();
-							});
-						}
-					});
-			}, 500);
-		};
-
-		const upload = tag => agents.teamSpace1.post(`/${account}/${model}/upload?tag=${tag}`)
-		.field("tag", tag)
-		.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
-		.expect(200, function(err, res) {
-			if(err) {done(err);}
-		});
-
-		const usersWithPermission = ["viewerTeamspace1Model1JobA",
-		"viewerTeamspace1Model1JobB",
-		"commenterTeamspace1Model1JobA",
-		"commenterTeamspace1Model1JobB",
-		"collaboratorTeamspace1Model1JobA",
-		"collaboratorTeamspace1Model1JobB",
-		"adminTeamspace1JobA",
-		"adminTeamspace1JobB",
-		"teamSpace1"];
-
-		it("should be created for users with access to the model", done => {
-
-			async.parallel(
-				usersWithPermission.map(pollForNotification("MODEL_UPDATED", (notifications, next) => {
-					expect(notifications.length).to.equal(1);
-					expect(notifications[0].revisions.length).to.equal(1);
-					next();
-				} )),
-				() => {
-					bouncerHelper.stopBouncerWorker();
-					done();
-				}
-			);
-
-			upload('first');
-
-		}).timeout(60000);
-
-		it("should have one upload notification but with two revisions", done => {
-			bouncerHelper.startBouncerWorker(() => {
-
-				async.parallel(
-					usersWithPermission.map(pollForNotification("MODEL_UPDATED", (notifications, next) => {
-						expect(notifications.length).to.equal(1);
-						if(notifications[0].revisions.length===2) {
-							next();
-						}
-					})),
-					() => {
-						bouncerHelper.stopBouncerWorker();
-						done();
-					}
-				);
-
-				upload('second');
-			});
-
-		}).timeout(60000);
-
+		
 		it("should be not be created for users without access to the model", done => {
 			agents.unassignedTeamspace1UserJobA.get(NOTIFICATIONS_URL)
 				.expect(200, (err, res) => {
@@ -624,33 +550,5 @@ describe("Notifications", function() {
 					done(err);
 				});
 			});
-
-		/*
-		it("should have a notification when a federation has been updated", done => {
-			bouncerHelper.startBouncerWorker(() => {
-
-				pollForNotification("MODEL_UPDATED", (notifications, next) => {
-					notifications = notifications.filter(n => (n.modelName || '').includes('myNewFed'));
-					if (notifications.length !== 1) return;
-					const notification =  notifications[0];
-					expect(notification.federation, 'Should be a federation').to.equal(true);
-					bouncerHelper.stopBouncerWorker();
-					next();
-				})('teamSpace1')(done);
-
-
-				Promise.all([
-					createModel(agents.teamSpace1, 'teamSpace1','oneModel.' + newId()),
-					createModel(agents.teamSpace1, 'teamSpace1','anotherModel.' + newId())
-				])
-					.then(resArr => resArr.map(r=> ({database: r.body.account, model: r.body.model})))
-					.then(subModels => createFederation(agents.teamSpace1,'teamSpace1', 'myNewFed.' + newId(), subModels)
-						.then(resFederation => updateFederation(agents.teamSpace1, 'teamSpace1',resFederation.body.model,[subModels[0]]))
-					);
-			});
-		}) */
 	});
-
-
-
 });
