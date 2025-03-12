@@ -27,7 +27,7 @@ import { addParams } from '@/v5/helpers/url.helper';
 const APP_VERSION = ClientConfig.VERSION;
 
 export const AuthPage = () => {
-	const [authWithSSO] = useSSOAuth();
+	const [login] = useSSOAuth();
 	const { url } = useRouteMatch();
 	const returnUrl = AuthHooksSelectors.selectReturnUrl();
 	const isAuthenticated = AuthHooksSelectors.selectIsAuthenticated();
@@ -49,8 +49,8 @@ export const AuthPage = () => {
 				<Heading>
 					<FormattedMessage id="authPage.heading" defaultMessage="Welcome to 3D Repo" />
 				</Heading>
-				<Button onClick={() => authWithSSO(redirectUri)}>
-					<FormattedMessage id="authPage.button" defaultMessage="Log in / Sign up" />
+				<Button onClick={() => login(redirectUri)}>
+					<FormattedMessage id="authPage.button" defaultMessage="Log in" />
 				</Button>
 				<Footer>
 					<FormattedMessage
