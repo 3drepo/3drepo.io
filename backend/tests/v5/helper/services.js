@@ -115,6 +115,7 @@ db.createUser = (userCredentials, tsList = [], customData = {}) => {
 	const roles = tsList.map((ts) => ({ db: ts, role: 'team_member' }));
 	return DbHandler.createUser(user, password, {
 		billing: { billingInfo: {} },
+		userId: user,
 		...basicData,
 		...customData,
 		apiKey,

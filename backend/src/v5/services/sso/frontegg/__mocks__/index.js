@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,16 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const config = require('./jest.config');
+jest.mock('../components/accounts');
+const Accounts = require('../components/accounts');
 
-config.coveragePathIgnorePatterns = [
-	...config.coveragePathIgnorePatterns,
-	// require code coverage on routes folder and services/chat folder
-	'^((?!routes|services\/chat).)*$'
-];
+jest.mock('../components/auth');
+const Auth = require('../components/auth');
 
-config.testMatch = ['**/tests/**/e2e/**/*.test.[jt]s?(x)'];
-config.testSequencer = './jest.sequencer.e2e.js'
-config.setupFiles = ["./tests/v5/e2e/setup.js"];
+jest.mock('../components/users');
+const Users = require('../components/users');
 
-module.exports = config;
+const Frontegg = { ...Auth, ...Users, ...Accounts };
+
+Frontegg.init = () => {
+	return Promise.resolve();
+};
+
+module.exports = Frontegg;

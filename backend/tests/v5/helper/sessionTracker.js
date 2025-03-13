@@ -22,19 +22,32 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const { CSRF_HEADER } = require(`${src}/utils/sessions.constants`);
 const { generateUUIDString } = require(`${src}/utils/helper/uuids`);
 
+const { getUserInfoFromToken } = require(`${src}/services/sso/frontegg`);
+
 class SessionTracker {
 	constructor(agent) {
 		this.agent = agent;
 	}
 
-	async login(user, password, headers = {}) {
-		const resp = await this.agent.post('/v5/login/')
+	// We expect the user data to be the same format as the data returned by
+	// generateUserCredentials in serviceHelper
+	async login({ user: userId, basicData: { email } }, headers = {}) {
+		const resp = await this.agent.get('/v5/authentication/authenticate?redirectUri=https://localhost:3200')
 			.set(headers)
-			.send({ user, password })
 			.expect(templates.ok.status);
 
 		this.extractSessionFromResponse(resp);
-		return resp;
+
+		const url = new URL(resp.body.link);
+		const state = url.searchParams.get('state');
+		const code = url.searchParams.get('code');
+
+		getUserInfoFromToken.mockResolvedValueOnce({ userId, email, accounts: [], authAccount: 'abc' });
+
+		const resp2 = await this.get(`/v5/authentication/authenticate-post?state=${state}&code=${code}`)
+			.expect(302);
+
+		const respLogin = await this.get('/v5/login');
 	}
 
 	extractSessionFromResponse(resp, fabricateCSRF) {
