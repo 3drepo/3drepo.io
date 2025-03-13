@@ -24,7 +24,8 @@ import TemplateIcon from '@assets/icons/filters/template.svg';
 import TextIcon from '@assets/icons/filters/text.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
 import { isString, sortBy, uniqBy, compact } from 'lodash';
-import { CardFilterType, BaseFilter, CardFilter } from '../../cardFilters.types';
+import { CardFilterType, BaseFilter, CardFilter, CardFilterOperator } from '../../cardFilters.types';
+import { isRangeOperator } from '../../cardFilters.helpers';
 
 export const TYPE_TO_ICON: Record<CardFilterType, any> = {
 	'template': TemplateIcon,
@@ -114,10 +115,16 @@ const getFilterPropertyAsQuery = ({ module, property, type }: CardFilter) => {
 	return property;
 };
 
+const valueToQueryValueFormat = (value, operator: CardFilterOperator) => {
+	if (isString(value) && value.includes(',')) return wrapWith(value, '"');
+	if (isRangeOperator(operator)) return `[${value[0]},${value[1]}]`;
+	return value;
+};
+
 const filterToQueryElement = ({ filter: { operator, values }, ...moduelPropertyAndType }: CardFilter) => {
 	const query = [getFilterPropertyAsQuery(moduelPropertyAndType), operator];
 	if (values?.length) {
-		query.push(values?.map((v) => (isString(v) && v.includes(',')) ? wrapWith(v, '"') : v).join(','));
+		query.push(values?.map((v) => valueToQueryValueFormat(v, operator)).join(','));
 	}
 	return query.join('::');
 };
