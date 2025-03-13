@@ -145,16 +145,28 @@ const testGenerateLinkToAuthenticator = () => {
 			expect(FronteggService.generateAuthenticationCodeUrl).toHaveBeenCalledTimes(1);
 			expect(FronteggService.generateAuthenticationCodeUrl).toHaveBeenCalledWith(authParams, undefined);
 		});
+	});
+};
 
+const testGenerateLinkToTeamspaceAuthenticator = () => {
+	describe('Generate link to authenticate against a teamspace', () => {
+		const ssoPostRedirect = generateRandomString();
 		test('Should flag reAuth if teamspace is provided', async () => {
 			const teamspace = generateRandomString();
 			const accountId = generateRandomString();
-			const req = { ...cloneDeep(reqSample), params: { teamspace } };
+			const redirectUri = generateRandomString();
+			const req = {
+				query: { redirectUri },
+				session: {
+					pkceCodes: { challenge: generateRandomString() },
+					csrfToken: generateRandomString(),
+				},
+				params: { teamspace } };
 			const res = {};
 
 			TeamspaceModel.getTeamspaceRefId.mockResolvedValueOnce(accountId);
 
-			await Frontegg.generateLinkToAuthenticator(ssoPostRedirect)(req, res);
+			await Frontegg.generateLinkToTeamspaceAuthenticator(ssoPostRedirect)(req, res);
 
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.ok, { link: expect.any(String) });
@@ -175,6 +187,9 @@ const testGenerateLinkToAuthenticator = () => {
 
 			expect(FronteggService.generateAuthenticationCodeUrl).toHaveBeenCalledTimes(1);
 			expect(FronteggService.generateAuthenticationCodeUrl).toHaveBeenCalledWith(authParams, accountId);
+
+			expect(PKCEMiddleware.addPkceProtection).not.toHaveBeenCalled();
+			expect(SSOMiddleware.setSessionInfo).not.toHaveBeenCalled();
 		});
 	});
 };
@@ -518,5 +533,6 @@ const testGenerateToken = () => {
 describe(determineTestGroup(__filename), () => {
 	testRedirectToStateURL();
 	testGenerateLinkToAuthenticator();
+	testGenerateLinkToTeamspaceAuthenticator();
 	testGenerateToken();
 });

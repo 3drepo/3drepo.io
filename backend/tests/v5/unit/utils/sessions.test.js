@@ -48,8 +48,8 @@ const testIsSessionValid = () => {
 	describe.each([
 		['a valid session', session, cookies, headers, true],
 		['a valid session but frontegg token is invalid', session, cookies, headers, false, true],
-		['a valid session but the CRSF token is in lower case', session, cookies, { ...headers, [CSRF_HEADER.toLowerCase()]: token }, true],
-		['a valid session but the CRSF token is in upper case', session, cookies, { ...headers, [CSRF_HEADER.toUpperCase()]: token }, true],
+		['!a valid session but the CRSF token is in lower case', session, cookies, { ...headers, [CSRF_HEADER]: undefined, [CSRF_HEADER.toLowerCase()]: token }, true],
+		['a valid session but the CRSF token is in upper case', session, cookies, { ...headers, [CSRF_HEADER]: undefined, [CSRF_HEADER.toUpperCase()]: token }, true],
 		['a valid session but with mismatched CRSF token', session, cookies, { ...headers, [CSRF_HEADER]: generateRandomString() }, false],
 		['a valid session but no csrf cookie', { user: session.user }, {}, headers, false],
 		['a valid session with a matching domain in the referer', session, cookies, { ...headers, referer: 'http://abc.com/xyz' }, true],

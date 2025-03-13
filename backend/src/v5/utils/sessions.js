@@ -34,7 +34,6 @@ const SessionUtils = {};
 
 const validateCookie = async (session, cookies, headers) => {
 	const referrerMatched = !headers.referer || referrerMatch(session.user.referer, headers.referer);
-
 	const headerToken = headers[CSRF_HEADER] || headers[CSRF_HEADER.toLowerCase()];
 
 	const csrfMatched = !!session.token && (headerToken === session.token);
