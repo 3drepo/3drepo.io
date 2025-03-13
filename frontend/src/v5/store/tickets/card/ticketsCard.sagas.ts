@@ -27,6 +27,7 @@ import { selectTemplates } from '../tickets.selectors';
 import { selectCardFilters } from './ticketsCard.selectors';
 import * as API from '@/v5/services/api';
 import { filtersToQuery } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
+import { isEqual, pick } from 'lodash';
 
 export function* openTicket({ ticketId }: OpenTicketAction) {
 	yield put(TicketsCardActions.setSelectedTicket(ticketId));
@@ -75,14 +76,20 @@ export function* fetchFilteredTickets({ teamspace, projectId, modelId, isFederat
 
 export function* upsertFilter({ filter }: UpsertFilterAction) {
 	try {
+		const filters = yield select(selectCardFilters);
+		const getPath = (f) => pick(f, ['module', 'property', 'type']);
+		const oldFilter = filters.find((f) => isEqual(getPath(filter), getPath(f)));
+
 		yield put(TicketsCardActions.upsertFilterSuccess(filter));
 		const { failure } = yield race({
 			success: take(TicketsCardTypes.SET_FILTERED_TICKET_IDS),
 			failure: take(DialogsTypes.OPEN),
 		});
-		if (failure) {
-			yield put(TicketsCardActions.deleteFilter(filter));
-		}
+		if (!failure) return;
+		// if editing a filter then revert it, else delete the invalid filter
+		yield oldFilter ?
+			put(TicketsCardActions.upsertFilter(oldFilter)) :
+			put(TicketsCardActions.deleteFilter(filter));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'tickets.upsertFilter.error', defaultMessage: 'trying to upsert a filter' }),
