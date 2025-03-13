@@ -50,7 +50,7 @@ export const FilterSelection = () => {
 			onClose={clearFilter}
 			disabled={disabled}
 		>
-			<SearchContextComponent items={unusedFilters}>
+			<SearchContextComponent items={unusedFilters} fieldsToFilter={['property', 'module']}>
 				<TicketsFiltersModal $visibleIndex={showFiltersList ? 0 : 1}>
 					<TicketsFiltersModalItem $visible={showFiltersList}>
 						<SearchInput
