@@ -29,7 +29,6 @@ export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createA
 	setSelectedTemplate: ['templateId'],
 	setSelectedTicketPin: ['pinId'],
 	setFilteredTicketIds: ['ticketIds'],
-	upsertFilterSuccess: ['filter'],
 	upsertFilter: ['filter'],
 	deleteFilter: ['filter'],
 	resetFilters: [],
@@ -102,7 +101,7 @@ export const setPinToDrop = (state: ITicketsCardState, { pinToDrop }: SetPinToDr
 };
 
 const getFilterKey = ({ module, property, type }: CardFilter): TicketFilterKey => `${module}.${property}.${type}`;
-export const upsertFilterSuccess = (state: ITicketsCardState, { filter }: UpsertFilterSuccessAction) => {
+export const upsertFilter = (state: ITicketsCardState, { filter }: UpsertFilterAction) => {
 	const path = getFilterKey(filter);
 	state.filters[path] = filter.filter;
 };
@@ -155,7 +154,7 @@ export const ticketsCardReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsCardTypes.SET_SELECTED_TICKET_PIN]: setSelectedTicketPin,
 	[TicketsCardTypes.SET_FILTERED_TICKET_IDS]: setFilteredTicketIds,
 	[TicketsCardTypes.SET_PIN_TO_DROP]: setPinToDrop,
-	[TicketsCardTypes.UPSERT_FILTER_SUCCESS]: upsertFilterSuccess,
+	[TicketsCardTypes.UPSERT_FILTER]: upsertFilter,
 	[TicketsCardTypes.DELETE_FILTER]: deleteFilter,
 	[TicketsCardTypes.RESET_FILTERS]: resetFilters,
 	[TicketsCardTypes.SET_CARD_VIEW]: setCardView,
@@ -172,7 +171,6 @@ export type SetSelectedTemplateAction = Action<'SET_SELECTED_TEMPLATE'> & { temp
 export type SetSelectedTicketPinAction = Action<'SET_SELECTED_TICKET_PIN'> & { pinId: string };
 export type SetFilteredTicketIdsAction = Action<'SET_FILTERED_TICKET_IDS'> & { ticketIds: string[] };
 export type SetPinToDropAction = Action<'SET_PIN_TO_DROP'> & { pinToDrop: string };
-export type UpsertFilterSuccessAction = Action<'UPSERT_FILTER_SUCCESS'> & { filter: CardFilter };
 export type UpsertFilterAction = Action<'UPSERT_FILTER'> & { filter: CardFilter };
 export type DeleteFilterAction = Action<'DELETE_FILTER'> & { filter: CardFilter };
 export type ResetFiltersAction = Action<'RESET_FILTERS'>;
@@ -194,7 +192,6 @@ export interface ITicketsCardActionCreators {
 	setSelectedTicketPin: (pinId: string) => SetSelectedTicketPinAction,
 	setFilteredTicketIds: (ticketIds: string[]) => SetFilteredTicketIdsAction
 	setPinToDrop: (pinToDrop: string) => SetPinToDropAction,
-	upsertFilterSuccess: (filter: CardFilter) => UpsertFilterSuccessAction,
 	upsertFilter: (filter: CardFilter) => UpsertFilterAction,
 	deleteFilter: (filter: CardFilter) => DeleteFilterAction,
 	resetFilters: () => ResetFiltersAction,
