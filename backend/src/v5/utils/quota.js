@@ -17,6 +17,7 @@
 const { createResponseCode, templates } = require('./responseCodes');
 const { getAllUsersInTeamspace, getSubscriptions } = require('../models/teamspaceSettings');
 const DBHandler = require('../handler/db');
+const { SUBSCRIPTION_TYPES } = require('../models/teamspaces.constants');
 const config = require('./config');
 const { getInvitationsByTeamspace } = require('../models/invitations');
 const { getTotalSize } = require('../models/fileRefs');
@@ -33,7 +34,7 @@ Quota.getQuotaInfo = async (teamspace) => {
 	const subs = await getSubscriptions(teamspace);
 	Object.keys(subs).forEach((key) => {
 		// paypal subs have a different schema - and no oen should have an active paypal sub. Skip.
-		if (key !== 'paypal') {
+		if (key !== 'paypal' && SUBSCRIPTION_TYPES.includes(key)) {
 			userHasHadPaidPlan = true;
 			const { expiryDate, data = 0, collaborators: subCollaborators = 0 } = subs[key];
 

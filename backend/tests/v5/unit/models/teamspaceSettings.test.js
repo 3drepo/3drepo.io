@@ -19,7 +19,7 @@ const { times } = require('lodash');
 
 const { src } = require('../../helper/path');
 
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString, generateRandomDateInFuture, generateRandomDate } = require('../../helper/services');
 
 const Teamspace = require(`${src}/models/teamspaceSettings`);
 const { ADD_ONS, DEFAULT_TOPIC_TYPES, DEFAULT_RISK_CATEGORIES, SECURITY, SECURITY_SETTINGS } = require(`${src}/models/teamspaces.constants`);
@@ -530,36 +530,44 @@ const testRemoveUserFromAdminPrivileges = () => {
 	});
 };
 
-const testGetTeamspaceActiveLicenses = () => {
-	describe('Get active licenses in teamspace', () => {
-		test('Should perform a query to find all active subscriptions', async () => {
+const testGetTeamspaceValidLicenses = () => {
+	describe('Get valid licenses from teamspace', () => {
+		test('Should query teamspace settings for licenses and filter them to only include valid ones', async () => {
 			const teamspace = generateRandomString();
-			const dayMS = 1000 * 60 * 60 * 24;
-			const validDate = new Date(new Date().getTime() + dayMS);
-			const expectedRes = { subscription: {
-				discretionary: { expiryDate: validDate },
-				enterprise: { expiryDate: validDate },
-			} };
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(expectedRes);
-			await expect(Teamspace.getTeamspaceActiveLicenses(teamspace)).resolves.toEqual(expectedRes);
+			const mockLicenses = {
+				discretionary: {},
+				pilot: {},
+				[generateRandomString()]: {},
+			};
+			const filteredLicenseEntries = [['discretionary', {}], ['pilot', {}]];
+			const fn = jest.spyOn(Teamspace, 'getSubscriptions').mockResolvedValueOnce(mockLicenses);
+			await expect(Teamspace.getTeamspaceValidLicenses(teamspace)).resolves.toEqual(filteredLicenseEntries);
 			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace);
 		});
 	});
 };
 
-const testGetTeamspaceExpiredLicenses = () => {
-	describe('Get active licenses in teamspace', () => {
-		test('Should perform a query to find all active subscriptions', async () => {
-			const teamspace = generateRandomString();
-			const dayMS = 1000 * 60 * 60 * 24;
-			const validDate = new Date(new Date().getTime() + dayMS);
-			const expectedRes = { subscription: {
-				discretionary: { expiryDate: validDate },
-				enterprise: { expiryDate: validDate },
-			} };
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(expectedRes);
-			await expect(Teamspace.getTeamspaceExpiredLicenses(teamspace)).resolves.toEqual(expectedRes);
-			expect(fn).toHaveBeenCalledTimes(1);
+const testExtractTeamspaceActiveLicenses = () => {
+	describe('Extract active licenses from license entries', () => {
+		test('Should filter license entries to only include active ones', async () => {
+			const dateInFuture = generateRandomDateInFuture();
+			const dateInPast = generateRandomDate();
+			const licenseEntries = [['discretionary', { expiryDate: dateInFuture }], ['pilot', { expiryDate: dateInPast }]];
+			const filteredLicenseEntries = [['discretionary', { expiryDate: dateInFuture }]];
+			await expect(Teamspace.extractTeamspaceActiveLicenses(licenseEntries)).toEqual(filteredLicenseEntries);
+		});
+	});
+};
+
+const testExtractTeamspaceExpiredLicenses = () => {
+	describe('Extract expired licenses from license entries', () => {
+		test('Should filter license entries to only include expired ones', async () => {
+			const dateInFuture = generateRandomDateInFuture();
+			const dateInPast = generateRandomDate();
+			const licenseEntries = [['discretionary', { expiryDate: dateInFuture }], ['pilot', { expiryDate: dateInPast }]];
+			const filteredLicenseEntries = [['pilot', { expiryDate: dateInPast }]];
+			await expect(Teamspace.extractTeamspaceExpiredLicenses(licenseEntries)).toEqual(filteredLicenseEntries);
 		});
 	});
 };
@@ -727,8 +735,9 @@ describe('models/teamspaceSettings', () => {
 	testCreateTeamspaceSettings();
 	testGetAllUsersInTeamspace();
 	testRemoveUserFromAdminPrivileges();
-	testGetTeamspaceActiveLicenses();
-	testGetTeamspaceExpiredLicenses();
+	testGetTeamspaceValidLicenses();
+	testExtractTeamspaceActiveLicenses();
+	testExtractTeamspaceExpiredLicenses();
 	testGetRiskCategories();
 	testGrantAdminPermissionToUser();
 	testGetSecurityRestrictions();

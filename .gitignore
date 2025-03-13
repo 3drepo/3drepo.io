@@ -35,6 +35,7 @@ sessions
 build/config.gypi
 obj/Debug
 
+.idea/
 .idea/.name
 .idea/3drepo.io.iml
 .idea/codeStyleSettings.xml

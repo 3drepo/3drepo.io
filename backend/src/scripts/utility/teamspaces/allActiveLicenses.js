@@ -15,44 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const DayJS = require('dayjs');
 const Path = require('path');
-const FS = require('fs');
 const { v5Path } = require('../../../interop');
 
-const { logger } = require(`${v5Path}/utils/logger`);
+const { extractTeamspaceActiveLicenses } = require(`${v5Path}/models/teamspaceSettings`);
+const { getTeamspaceList, parsePath, writeLicensesToFile } = require('../../utils');
 
-const { getTeamspaceActiveLicenses } = require(`${v5Path}/models/teamspaceSettings`);
-const { getTeamspaceList, parsePath } = require('../../utils');
-
-const formatDate = (date) => (date ? DayJS(date).format('DD/MM/YYYY') : '');
-
-const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
-	logger.logInfo(`Writing results to ${outFile}`);
-	const writeStream = FS.createWriteStream(outFile);
-	writeStream.write('Teamspace,Type, Data(MB),Seats,ExpiryDate\n');
-	results.forEach(({ _id, subscriptions }) => {
-		Object.keys(subscriptions).forEach((subType) => {
-			const { collaborators, expiryDate, data } = subscriptions[subType];
-			writeStream.write(`${_id},${subType},${data},${collaborators},${formatDate(expiryDate)}\n`);
-		});
-	});
-
-	writeStream.end(resolve);
-});
+const { getTeamspaceAggregatesAndLicenses } = require(`${v5Path}/processors/teamspaces/teamspaces`);
 
 const run = async (outFile) => {
-	const teamspaces = await getTeamspaceList();
-	const res = [];
-	for (const teamspace of teamspaces) {
-		logger.logInfo(`\t-${teamspace}`);
-		// eslint-disable-next-line no-await-in-loop
-		const tsLicenses = await getTeamspaceActiveLicenses(teamspace);
-		if (tsLicenses) {
-			res.push(tsLicenses);
-		}
-	}
-	await writeResultsToFile(res, parsePath(outFile));
+	const teamspaceNames = await getTeamspaceList();
+	const results = await getTeamspaceAggregatesAndLicenses(teamspaceNames, extractTeamspaceActiveLicenses);
+	await writeLicensesToFile(results, parsePath(outFile));
 };
 
 const genYargs = /* istanbul ignore next */ (yargs) => {
@@ -61,10 +35,10 @@ const genYargs = /* istanbul ignore next */ (yargs) => {
 		{
 			describe: 'name of output CSV',
 			type: 'string',
-			default: 'licensedTeamspaces.csv',
+			default: 'activeLicenses.csv',
 		});
 	return yargs.command(commandName,
-		'Get a list of all teamspaces with active license',
+		'Get a list of all active licenses',
 		argsSpec,
 		(argv) => run(argv.outFile));
 };
