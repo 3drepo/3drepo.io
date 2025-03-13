@@ -23,7 +23,6 @@ import { FormattedMessage } from 'react-intl';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List } from './ticketsList.styles';
-import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
 
 export const TicketsList = () => {
 	const selectedTicket = TicketsCardHooksSelectors.selectSelectedTicket();
@@ -39,7 +38,6 @@ export const TicketsList = () => {
 
 	return (
 		<>
-			<CardFilters />
 			{filteredTickets.length ? (
 				<List>
 					{filteredTickets.map((ticket) => <TicketItem ticket={ticket} key={ticket._id} />)}

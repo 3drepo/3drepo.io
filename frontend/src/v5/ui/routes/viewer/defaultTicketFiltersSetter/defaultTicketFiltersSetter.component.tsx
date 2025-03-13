@@ -16,8 +16,8 @@
  */
 
 import { TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { isEmpty, uniq } from 'lodash';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { uniq } from 'lodash';
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { ViewerParams } from '../../routes.constants';
@@ -33,10 +33,7 @@ const TICKET_CODE_REGEX = /^[a-zA-Z]{3}:\d+$/;
 export const DefaultTicketFiltersSetter = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const [ticketSearchParam, setTicketSearchParam] = useSearchParam('ticketSearch', Transformers.STRING_ARRAY);
-
-	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
-	const templates = TicketsCardHooksSelectors.selectTemplatesWithTickets();
-	const hasTicketData = !isEmpty(tickets) && !isEmpty(templates);
+	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
 
 	const getTicketFiltersFromURL = (values): CardFilter[] => [{
 		module: '',
@@ -96,14 +93,14 @@ export const DefaultTicketFiltersSetter = () => {
 	};
 
 	useEffect(() => {
-		if (hasTicketData) {
+		if (templates.length) {
 			const ticketCodes = ticketSearchParam.filter((query) => TICKET_CODE_REGEX.test(query)).map((q) => q.toUpperCase());
 			const filters: CardFilter[] = ticketCodes.length ? getTicketFiltersFromURL(ticketCodes) : getNonCompletedTicketFilters();
 			filters.forEach(TicketsCardActionsDispatchers.upsertFilter);
 			ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.TICKETS, true);
 			setTicketSearchParam();
 		}
-	}, [hasTicketData]); 
+	}, [templates.length]); 
 
 	return <></>;
 };
