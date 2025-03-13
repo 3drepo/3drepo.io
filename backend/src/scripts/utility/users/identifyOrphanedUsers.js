@@ -41,9 +41,9 @@ const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 
 const getFileEntry = async ({ user, customData }) => {
 	const lastLogin = await getLastLoginDate(user);
-	const { firstName, lastName, email, billing: { billingInfo: { company } } } = customData;
+	const { firstName, lastName, email, billing } = customData;
 
-	return { user, firstName, lastName, email, company: company ?? '', lastLogin: lastLogin ?? '' };
+	return { user, firstName, lastName, email, company: billing?.billingInfo?.company ?? '', lastLogin: lastLogin ?? '' };
 };
 
 const run = async (outFile) => {
