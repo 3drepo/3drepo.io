@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { isFirefox } from '@/v4/styles';
 import { Typography } from '@controls/typography';
 import styled, { css } from 'styled-components';
 
@@ -26,6 +27,7 @@ export const CollapsibleContainer = styled.div<{ $collapsed: boolean }>`
 	overflow-y: scroll;
 	max-height: ${({ $collapsed }) => $collapsed ? '50px' : 'calc(100% - 14px)'};
 	padding-bottom: 10px;
+	${isFirefox('padding-right: 13px;')}
 `;
 
 export const BottomSection = styled.div`
