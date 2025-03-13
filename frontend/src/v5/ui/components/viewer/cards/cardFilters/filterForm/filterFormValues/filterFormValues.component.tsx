@@ -63,6 +63,12 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 		: TicketsCardHooksSelectors.selectPropertyOptions(containerOrFederation, module, property);
 
 	useEffect(() => {
+		if (!isEmpty(dirtyFields)) {
+			remove();
+		}
+	}, [isRangeOp]);
+
+	useEffect(() => {
 		if (!fields.length && maxFields > 0) {
 			append(emptyValue);
 		}
@@ -73,12 +79,6 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 			remove();
 		}
 	}, [maxFields]);
-
-	useEffect(() => {
-		if (!isEmpty(dirtyFields)) {
-			remove();
-		}
-	}, [isRangeOp]);
 
 	if (maxFields === 0) return null;
 
