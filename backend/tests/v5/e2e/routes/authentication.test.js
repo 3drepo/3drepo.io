@@ -151,9 +151,13 @@ const testAuthenticate = () => {
 				message: 'redirectUri(query string) is required' }));
 		});
 
-		test(`!Should respond with ${templates.alreadyLoggedIn.code} if the user is logged in`, async () => {
+		test(`Should respond with ${templates.alreadyLoggedIn.code} if the user is logged in`, async () => {
 			const sessionedAgent = SessionTracker(agent);
 			await sessionedAgent.login(testUser);
+			const res = await sessionedAgent.get('/v5/authentication/authenticate')
+				.expect(templates.alreadyLoggedIn.status);
+
+			expect(res.body).toEqual(expect.objectContaining(templates.alreadyLoggedIn));
 		});
 	});
 };
