@@ -14,9 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const { src } = require('../../path');
 
-const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
-const { generateHashString } = require('../../../../../utils/helper/strings');
+const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
+const { generateHashString } = require(`${src}/utils/helper/strings`);
 const queryString = require('querystring');
 
 const Auth = {};

@@ -14,8 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-// const { HEADER_TENANT_ID, META_LABEL_TEAMSPACE } = require('./accounts.constants');
-const { generateUUIDString } = require('../../../../../utils/helper/uuids');
+
+const { src } = require('../../path');
+
+const { generateUUIDString } = require(`${src}/utils/helper/uuids`);
 
 const Accounts = {};
 

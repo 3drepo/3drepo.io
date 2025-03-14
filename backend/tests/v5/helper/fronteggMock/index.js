@@ -15,19 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-jest.mock('../components/accounts');
-const Accounts = require('../components/accounts');
-
-jest.mock('../components/auth');
-const Auth = require('../components/auth');
-
-jest.mock('../components/users');
-const Users = require('../components/users');
+const Accounts = require('./components/accounts');
+const Auth = require('./components/auth');
+const Users = require('./components/users');
 
 const Frontegg = { ...Auth, ...Users, ...Accounts };
 
-Frontegg.init = () => {
-	return Promise.resolve();
-};
+Frontegg.init = () => Promise.resolve();
 
 module.exports = Frontegg;

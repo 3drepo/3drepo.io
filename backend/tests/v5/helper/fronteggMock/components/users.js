@@ -19,7 +19,6 @@ const { get, post } = require('../../../../utils/webRequests');
 const { getBearerHeader, getConfig } = require('./connections');
 const { deleteIfUndefined } = require('../../../../utils/helper/objects');
 
-
 Users.getUserById = async (userId) => {
 	try {
 		const config = await getConfig();
