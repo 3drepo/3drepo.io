@@ -86,7 +86,7 @@ const setupData = async () => {
 const modelSettingsTest = () => {
 	describe('On updating model settings', () => {
 		test(`should trigger a ${EVENTS.CONTAINER_SETTINGS_UPDATE} event when settings have been updated`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user);
 
 			const data = { teamspace, project: project.id, model: container._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
@@ -107,7 +107,7 @@ const modelSettingsTest = () => {
 		});
 
 		test(`should trigger a ${EVENTS.FEDERATION_SETTINGS_UPDATE} event when settings have been updated`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user);
 
 			const data = { teamspace, project: project.id, model: federation._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
@@ -128,7 +128,7 @@ const modelSettingsTest = () => {
 		});
 
 		test(`should trigger a ${EVENTS.DRAWING_SETTINGS_UPDATE} event when settings have been updated`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user);
 
 			const data = { teamspace, project: project.id, model: drawing._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
@@ -153,7 +153,7 @@ const modelSettingsTest = () => {
 const modelAddedTest = () => {
 	describe('On adding a new model', () => {
 		test(`should trigger a ${EVENTS.NEW_CONTAINER} event when a new container has been added`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user);
 
 			const data = { teamspace, project: project.id };
 			await ServiceHelper.socket.joinRoom(socket, data);
@@ -183,7 +183,7 @@ const modelAddedTest = () => {
 		});
 
 		test(`should trigger a ${EVENTS.NEW_FEDERATION} event when a new federation has been added`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user);
 
 			const data = { teamspace, project: project.id };
 			await ServiceHelper.socket.joinRoom(socket, data);
@@ -213,7 +213,7 @@ const modelAddedTest = () => {
 		});
 
 		test(`should trigger a ${EVENTS.NEW_DRAWING} event when a new drawing has been added`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user);
 
 			const data = { teamspace, project: project.id };
 			await ServiceHelper.socket.joinRoom(socket, data);
@@ -252,7 +252,7 @@ const modelAddedTest = () => {
 const modelDeletedTest = () => {
 	describe('On deleting a model', () => {
 		test(`should trigger a ${EVENTS.CONTAINER_REMOVED} event when a container has been deleted`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user);
 
 			const data = { teamspace, project: project.id, model: containerToBeDeleted._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
@@ -271,7 +271,7 @@ const modelDeletedTest = () => {
 		});
 
 		test(`should trigger a ${EVENTS.FEDERATION_REMOVED} event when a federation has been deleted`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user);
 
 			const data = { teamspace, project: project.id, model: federationToBeDeleted._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
@@ -290,7 +290,7 @@ const modelDeletedTest = () => {
 		});
 
 		test(`should trigger a ${EVENTS.DRAWING_REMOVED} event when a drawing has been deleted`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user);
 
 			const data = { teamspace, project: project.id, model: drawingToBeDeleted._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
