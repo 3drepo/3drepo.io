@@ -24,6 +24,7 @@ const { CSRF_HEADER } = require(`${src}/utils/sessions.constants`);
 const { generateUUIDString } = require(`${src}/utils/helper/uuids`);
 
 const { getUserInfoFromToken } = require(`${src}/services/sso/frontegg`);
+const { getTeamspaceRefId } = require(`${src}/models/teamspaceSettings`);
 
 const parseSetCookie = (arr) => {
 	let token; let session;
@@ -52,7 +53,7 @@ class SessionTracker {
 
 	// We expect the user data to be the same format as the data returned by
 	// generateUserCredentials in serviceHelper
-	async login({ user: userId, basicData: { email } }, headers = {}) {
+	async login({ user: userId, basicData: { email } }, { headers = {}, teamspace } = {}) {
 		const resp = await this.agent.get('/v5/authentication/authenticate?redirectUri=https://localhost:3200')
 			.set(headers)
 			.expect(templates.ok.status);
@@ -63,12 +64,23 @@ class SessionTracker {
 		const state = url.searchParams.get('state');
 		const code = url.searchParams.get('code');
 
-		getUserInfoFromToken.mockResolvedValueOnce({ userId, email, accounts: [], authAccount: 'abc' });
+		const accounts = [];
+		let authAccount = 'abc';
+
+		if (teamspace) {
+			authAccount = await getTeamspaceRefId(teamspace);
+			accounts.push(authAccount);
+		}
+
+		getUserInfoFromToken.mockResolvedValueOnce({ userId, email, accounts, authAccount });
 
 		await this.get(`/v5/authentication/authenticate-post?state=${state}&code=${code}`)
 			.expect(302);
 
-		await this.get('/v5/login').expect(200);
+		const { body } = await this.get('/v5/login').expect(200);
+		if (teamspace) {
+			expect(body.authenticatedTeamspace).toEqual(teamspace);
+		}
 	}
 
 	getCookies() {

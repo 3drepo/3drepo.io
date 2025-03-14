@@ -127,7 +127,7 @@ db.createTeamspace = async (teamspace, admins = [], subscriptions, createUser = 
 		throw Error('an admin needs to be provided, or createUser needs to be set to true.');
 	}
 	const firstAdmin = createUser ? teamspace : admins[0];
-	await initTeamspace(teamspace, firstAdmin);
+	const accountId = await initTeamspace(teamspace, firstAdmin);
 	await Promise.all(admins.map((adminUser) => (firstAdmin !== adminUser
 		? grantAdminToUser(teamspace, adminUser) : Promise.resolve())));
 
@@ -139,6 +139,8 @@ db.createTeamspace = async (teamspace, admins = [], subscriptions, createUser = 
 	if (Object.keys(addOns ?? {}).length) {
 		await updateAddOns(teamspace, addOns);
 	}
+
+	return accountId;
 };
 
 db.createProject = (teamspace, _id, name, models = [], admins = []) => {
@@ -846,9 +848,9 @@ ServiceHelper.chatApp = () => {
 	return ChatService.createApp(server);
 };
 
-ServiceHelper.loginAndGetCookie = async (agent, user, headers) => {
+ServiceHelper.loginAndGetCookie = async (agent, user, options) => {
 	const session = SessionTracker(agent);
-	await session.login(user, headers);
+	await session.login(user, options);
 	return session.getCookies();
 };
 

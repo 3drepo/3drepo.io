@@ -64,7 +64,7 @@ const setupData = async () => {
 const revisionUpdateTest = () => {
 	describe('On updating a revision', () => {
 		test(`should trigger a ${EVENTS.CONTAINER_REVISION_UPDATE} event when a revision has been updated using revision Id`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user);
 
 			const data = { teamspace, project: project.id, model: container._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
@@ -90,7 +90,7 @@ const revisionUpdateTest = () => {
 		});
 
 		test(`should trigger a ${EVENTS.CONTAINER_REVISION_UPDATE} event when a revision has been updated using revision tag`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user);
 
 			const data = { teamspace, project: project.id, model: container._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
@@ -116,7 +116,7 @@ const revisionUpdateTest = () => {
 		});
 
 		test(`should trigger a ${EVENTS.DRAWING_REVISION_UPDATE} event when a calibration has been updated`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user);
 
 			const data = { teamspace, project: project.id, model: drawing._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
@@ -175,7 +175,7 @@ const revisionUpdateTest = () => {
 		});
 
 		test(`should trigger a ${EVENTS.DRAWING_REVISION_UPDATE} event when a drawing revision has been updated using revision Id`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user);
 
 			const data = { teamspace, project: project.id, model: drawing._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
