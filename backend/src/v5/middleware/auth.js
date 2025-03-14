@@ -25,7 +25,7 @@ const { validateMany } = require('./common');
 const AuthMiddleware = {};
 
 const destroySessionIfExists = (req, res) => new Promise((resolve) => {
-	if (req.session) destroySession(req.session, res, () => resolve());
+	if (req.session && !req.session.user?.isAPIKey) destroySession(req.session, res, () => resolve());
 	else resolve();
 });
 
