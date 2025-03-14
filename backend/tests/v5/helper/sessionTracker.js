@@ -75,6 +75,7 @@ class SessionTracker {
 		getUserInfoFromToken.mockResolvedValueOnce({ userId, email, accounts, authAccount });
 
 		await this.get(`/v5/authentication/authenticate-post?state=${state}&code=${code}`)
+			.set(headers)
 			.expect(302);
 
 		const { body } = await this.get('/v5/login').expect(200);

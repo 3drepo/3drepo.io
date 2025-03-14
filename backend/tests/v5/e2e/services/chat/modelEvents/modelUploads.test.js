@@ -105,7 +105,7 @@ const modelUploadTest = () => {
 		const route = (ts = teamspace, proj = project.id, cont = container._id) => `/v5/teamspaces/${ts}/projects/${proj}/containers/${cont}/revisions`;
 		const fedRoute = `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federation._id}/revisions`;
 		test(`should receive a ${EVENTS.CONTAINER_SETTINGS_UPDATE} event after revision upload if the user has joined the room`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 			const data = { teamspace, project: project.id, model: container._id };
 
 			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
@@ -122,7 +122,7 @@ const modelUploadTest = () => {
 		});
 
 		test(`should receive a ${EVENTS.FEDERATION_SETTINGS_UPDATE} event after revision upload if the user has joined the room`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 			const data = { teamspace, project: project.id, model: federation._id };
 
 			const joinPromise = ServiceHelper.socket.joinRoom(socket, data);
@@ -139,7 +139,7 @@ const modelUploadTest = () => {
 		});
 
 		test(`should receive a ${EVENTS.DRAWING_SETTINGS_UPDATE} event after revision upload if the user has joined the room`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 
 			const data = { teamspace, project: project.id, model: drawing._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
@@ -165,7 +165,7 @@ const modelUploadTest = () => {
 		});
 
 		test(`should not receive a ${EVENTS.CONTAINER_SETTINGS_UPDATE} event after revision upload if the user has left the room`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 			const data = { teamspace, project: project.id, model: container._id };
 
 			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
@@ -204,7 +204,7 @@ const modelUploadTest = () => {
 const queueUpdateTest = () => {
 	describe('On callback queue update', () => {
 		test(`should receive a ${EVENTS.CONTAINER_SETTINGS_UPDATE} event if a container status has been updated`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 			const data = { teamspace, project: project.id, model: container._id };
 			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
 
@@ -219,7 +219,7 @@ const queueUpdateTest = () => {
 		});
 
 		test(`should receive a ${EVENTS.FEDERATION_SETTINGS_UPDATE} event if a federation status has been updated`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 			const data = { teamspace, project: project.id, model: federation._id };
 			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
 
@@ -234,7 +234,7 @@ const queueUpdateTest = () => {
 		});
 
 		test(`should receive a ${EVENTS.DRAWING_SETTINGS_UPDATE} event if a drawing status has been updated`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 			const data = { teamspace, project: project.id, model: drawing._id };
 			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
 
@@ -253,7 +253,7 @@ const queueUpdateTest = () => {
 const queueFinishedTest = () => {
 	describe('On callback queue task finished', () => {
 		test(`should receive a ${EVENTS.CONTAINER_SETTINGS_UPDATE} event if a container revision has finished`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 			const data = { teamspace, project: project.id, model: container._id };
 			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
 
@@ -286,7 +286,7 @@ const queueFinishedTest = () => {
 		});
 
 		test(`should receive a ${EVENTS.DRAWING_SETTINGS_UPDATE} event if a drawing revision has finished`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 			const data = { teamspace, project: project.id, model: drawing._id };
 			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
 
@@ -319,7 +319,7 @@ const queueFinishedTest = () => {
 		});
 
 		test(`should receive a ${EVENTS.FEDERATION_SETTINGS_UPDATE} event if a federation revision has finished`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 			const data = { teamspace, project: project.id, model: federation._id };
 			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
 
