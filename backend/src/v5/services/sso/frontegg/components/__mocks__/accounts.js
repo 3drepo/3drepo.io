@@ -40,7 +40,7 @@ Accounts.addUserToAccount = (accountId, userId) => {
 
 Accounts.removeUserFromAccount = (accountId, userId) => {
 	usersInAccount[accountId] = usersInAccount[accountId] ?? [];
-	usersInAccount[accountId] = usersInAccount.filter((u) => u !== userId);
+	usersInAccount[accountId] = usersInAccount[accountId].filter((u) => u !== userId);
 };
 
 Accounts.removeAccount = (accountId) => {

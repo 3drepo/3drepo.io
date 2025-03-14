@@ -167,10 +167,6 @@ TeamspaceSetting.hasAccessToTeamspace = async (teamspace, username) => {
 
 	const restrictions = await TeamspaceSetting.getSecurityRestrictions(teamspace);
 
-	if (restrictions[SECURITY_SETTINGS.SSO_RESTRICTED] && !userDoc.customData.sso) {
-		throw templates.ssoRestricted;
-	}
-
 	if (restrictions[SECURITY_SETTINGS.DOMAIN_WHITELIST]) {
 		const userDomain = userDoc.customData.email.split('@')[1].toLowerCase();
 		if (!restrictions[SECURITY_SETTINGS.DOMAIN_WHITELIST].includes(userDomain)) {

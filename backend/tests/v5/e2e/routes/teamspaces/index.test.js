@@ -23,8 +23,6 @@ const { generateRandomNumber, generateRandomModel, generateRandomProject, genera
 
 const { DEFAULT_OWNER_JOB } = require(`${src}/models/jobs.constants`);
 const config = require(`${src}/utils/config`);
-const { updateSecurityRestrictions } = require(`${src}/models/teamspaceSettings`);
-
 const { templates } = require(`${src}/utils/responseCodes`);
 const { ADD_ONS, ADD_ONS_MODULES } = require(`${src}/models/teamspaces.constants`);
 const { updateAddOns } = require(`${src}/models/teamspaceSettings`);
@@ -513,67 +511,6 @@ const testGetMemberAvatar = () => {
 	});
 };
 
-const testSSORestriction = () => {
-	describe('On security restricted teamspace', () => {
-		const route = (ts, key) => `/v5/teamspaces/${ts}/members?key=${key}`;
-		const user = ServiceHelper.generateUserCredentials();
-		const userSso = ServiceHelper.generateUserCredentials();
-		const userSsoWL = ServiceHelper.generateUserCredentials();
-		const teamspaceData = {
-			ssoRestricted: generateRandomString(),
-			whiteListedSso: generateRandomString(),
-			whiteListed: generateRandomString(),
-		};
-
-		const approvedDomainSSO = userSsoWL.basicData.email.split('@')[1];
-		const approvedDomain = user.basicData.email.split('@')[1];
-
-		beforeAll(async () => {
-			await Promise.all([
-				ServiceHelper.db.createTeamspace(teamspaceData.ssoRestricted, [user.user, userSso.user]),
-				ServiceHelper.db.createTeamspace(teamspaceData.whiteListedSso,
-					[user.user, userSso.user, userSsoWL.user]),
-				ServiceHelper.db.createTeamspace(teamspaceData.whiteListed,
-					[user.user, userSso.user, userSsoWL.user]),
-			]);
-
-			await Promise.all([
-				ServiceHelper.db.createUser(user, Object.values(teamspaceData)),
-				ServiceHelper.db.createUser(userSso, Object.values(teamspaceData)),
-				ServiceHelper.db.createUser(userSsoWL, Object.values(teamspaceData)),
-			]);
-
-			await Promise.all([
-				ServiceHelper.db.addSSO(userSso.user),
-				ServiceHelper.db.addSSO(userSsoWL.user),
-				updateSecurityRestrictions(teamspaceData.ssoRestricted, true),
-				updateSecurityRestrictions(teamspaceData.whiteListedSso, true, [approvedDomainSSO]),
-				updateSecurityRestrictions(teamspaceData.whiteListed, undefined, [approvedDomain, approvedDomainSSO]),
-			]);
-		});
-
-		const testCases = [
-			['a non SSO user tries to access teamspace endpoints', teamspaceData.ssoRestricted, user.apiKey, false, templates.ssoRestricted],
-			['a SSO user tries to access teamspace endpoints', teamspaceData.ssoRestricted, userSso.apiKey, true],
-			['a non SSO user tries to access teamspace endpoints', teamspaceData.whiteListedSso, user.apiKey, false, templates.ssoRestricted],
-			['a SSO user not in the white listed domain tries to access teamspace endpoints', teamspaceData.whiteListedSso, userSso.apiKey, false, templates.domainRestricted],
-			['a SSO user in the white listed domain tries to access teamspace endpoints', teamspaceData.whiteListedSso, userSsoWL.apiKey, true],
-			['a non SSO user in the white listed domain tries to access teamspace endpoints', teamspaceData.whiteListed, user.apiKey, true],
-			['a SSO user not in the white listed domain tries to access teamspace endpoints', teamspaceData.whiteListed, userSso.apiKey, false, templates.domainRestricted],
-			['a SSO user in the white listed domain tries to access teamspace endpoints', teamspaceData.whiteListed, userSsoWL.apiKey, true],
-		];
-
-		testCases.forEach(([desc, teamspaceName, key, success, retVal]) => {
-			test(`Should ${success ? 'succeed' : `fail with ${retVal.code}`} on a ${teamspaceData.whiteListed === teamspaceName ? 'un' : 'SSO '}restricted teamspace ${teamspaceName !== teamspaceData.ssoRestricted ? 'with white list' : ''} if ${desc}`, async () => {
-				const res = await agent.get(route(teamspaceName, key)).expect(
-					success ? templates.ok.status : retVal.status);
-
-				if (!success) expect(res.body.code).toEqual(retVal.code);
-			});
-		});
-	});
-};
-
 const testGetAddOns = () => {
 	describe('Get add ons', () => {
 		const route = (key, ts) => `/v5/teamspaces/${ts}/addOns${key ? `?key=${key}` : ''}`;
@@ -611,6 +548,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	testGetQuotaInfo();
 	testRemoveTeamspaceMember();
 	testGetMemberAvatar();
-	testSSORestriction();
 	testGetAddOns();
 });
