@@ -15,24 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- *  Copyright (C) 2021 3D Repo Ltd
- *
- *  This program is free software: you can redistribute it and/or modify
- *
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
- *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../helper/services');
@@ -41,7 +23,7 @@ const SessionTracker = require('../../helper/sessionTracker');
 const fs = require('fs');
 const { providers } = require('../../../../src/v5/services/sso/sso.constants');
 
-const { templates } = require(`${src}/utils/responseCodes`);
+const { templates, createResponseCode } = require(`${src}/utils/responseCodes`);
 
 const { loginPolicy } = require(`${src}/utils/config`);
 
@@ -132,32 +114,31 @@ const setupData = async () => {
 const testAuthenticate = () => {
 	describe('Get authenticate link', () => {
 		const testUser = ServiceHelper.generateUserCredentials();
+		const redirectURI = ServiceHelper.generateRandomString();
+		let sessionedAgent;
 
 		beforeAll(async () => {
 			await ServiceHelper.db.createUser(testUser);
-		});
-
-		test('Should respond with the link to the authenticator if the user is not logged in', async () => {
-			const redirectURI = ServiceHelper.generateRandomString();
-			const res = await agent.get(`/v5/authentication/authenticate?redirectUri=${redirectURI}`)
-				.expect(templates.ok.status);
-			expect(res.body).toEqual({ link: expect.any(String) });
-		});
-
-		test(`Should respond with ${templates.invalidArguments.code} if redirectUri is not provided`, async () => {
-			const res = await agent.get('/v5/authentication/authenticate')
-				.expect(templates.invalidArguments.status);
-			expect(res.body).toEqual(expect.objectContaining({ ...templates.invalidArguments,
-				message: 'redirectUri(query string) is required' }));
-		});
-
-		test(`Should respond with ${templates.alreadyLoggedIn.code} if the user is logged in`, async () => {
-			const sessionedAgent = SessionTracker(agent);
+			sessionedAgent = SessionTracker(agent);
 			await sessionedAgent.login(testUser);
-			const res = await sessionedAgent.get('/v5/authentication/authenticate')
-				.expect(templates.alreadyLoggedIn.status);
+		});
 
-			expect(res.body).toEqual(expect.objectContaining(templates.alreadyLoggedIn));
+		const generateURL = (redirect = redirectURI) => `/v5/authentication/authenticate?${redirect ? `redirectUri=${redirectURI}` : ''}`;
+
+		describe.each([
+			['the user is not logged in', false, generateURL(), true],
+			['redirectURL is not provided', false, generateURL(false), false, createResponseCode(templates.invalidArguments, 'redirectUri(query string) is required')],
+			['the user already logged in', true, generateURL(), false, templates.alreadyLoggedIn],
+		])('', (desc, useSessionedAgent, url, success, err = templates.ok) => {
+			test(`Should ${success ? 'respond with the link' : `fail with ${err.code}`} if ${desc}`, async () => {
+				const testAgent = useSessionedAgent ? sessionedAgent : agent;
+				const res = await testAgent.get(url).expect(err.status);
+				if (success) {
+					expect(res.body).toEqual({ link: expect.any(String) });
+				} else {
+					expect(res.body).toEqual(expect.objectContaining(err));
+				}
+			});
 		});
 	});
 };
