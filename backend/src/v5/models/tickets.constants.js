@@ -43,25 +43,16 @@ Tickets.operatorToQuery = {
 		}) },
 	}),
 	[queryOperators.NOT_EQUALS]: (propertyName, value) => ({
-		$or: [
-			{ [propertyName]: { $not: { $in: value.flatMap((v) => {
-				if (isNumberString(v)) return [Number(v), new Date(Number(v))];
-				return toBoolean(v);
-			}) } } },
-			{ [propertyName]: { $exists: false } },
-		],
-	}
-	),
+		[propertyName]: { $not: { $in: value.flatMap((v) => {
+			if (isNumberString(v)) return [Number(v), new Date(Number(v))];
+			return toBoolean(v);
+		}) } },
+	}),
 	[queryOperators.CONTAINS]: (propertyName, value) => ({
 		$or: value.map((val) => ({ [propertyName]: { $regex: val, $options: 'i' } })),
 	}),
 	[queryOperators.NOT_CONTAINS]: (propertyName, value) => ({
-		$or: [
-			{ $nor: value.map((val) => ({
-				[propertyName]: { $regex: val, $options: 'i' },
-			})) },
-			{ [propertyName]: { $exists: false } },
-		],
+		$nor: value.map((val) => ({ [propertyName]: { $regex: val, $options: 'i' } })),
 	}),
 	[queryOperators.RANGE]: (propertyName, value) => ({
 		$or: value.flatMap((range) => [
@@ -70,15 +61,10 @@ Tickets.operatorToQuery = {
 		]),
 	}),
 	[queryOperators.NOT_IN_RANGE]: (propertyName, value) => ({
-		$or: [
-			{
-				$nor: value.flatMap((range) => [
-					{ [propertyName]: { $gte: range[0], $lte: range[1] } },
-					{ [propertyName]: { $gte: new Date(range[0]), $lte: new Date(range[1]) } },
-				]),
-			},
-			{ [propertyName]: { $exists: false } },
-		],
+		$nor: value.flatMap((range) => [
+			{ [propertyName]: { $gte: range[0], $lte: range[1] } },
+			{ [propertyName]: { $gte: new Date(range[0]), $lte: new Date(range[1]) } },
+		]),
 	}),
 	[queryOperators.GREATER_OR_EQUAL_TO]: (propertyName, value) => ({
 		$or: [

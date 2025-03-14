@@ -1220,19 +1220,12 @@ const testGetTicketList = () => {
 		}],
 		[`${queryOperators.NOT_EQUALS} query filter and boolean value`, [], {}, undefined, { }, {
 			queryFilters: [{ propertyName, operator: queryOperators.NOT_EQUALS, value: ['true'] }],
-			expectedQuery: { $and: [{ $or: [
-				{ [propertyName]: { $not: { $in: [true] } } },
-				{ [propertyName]: { $exists: false } },
-			] }] },
+			expectedQuery: { $and: [{ [propertyName]: { $not: { $in: [true] } } }] },
 		}],
 		[`${queryOperators.NOT_EQUALS} query filter and number value`, [], {}, undefined, { }, {
 			queryFilters: [{ propertyName, operator: queryOperators.NOT_EQUALS, value: [`${propertyNumberValue}`] }],
 			expectedQuery: {
-				$and: [{ $or: [
-					{ [propertyName]: { $not: { $in: [propertyNumberValue, new Date(propertyNumberValue)] } } },
-					{ [propertyName]: { $exists: false } },
-				],
-				}],
+				$and: [{ [propertyName]: { $not: { $in: [propertyNumberValue, new Date(propertyNumberValue)] } } }],
 			},
 		}],
 		[`${queryOperators.CONTAINS} query filter`, [], {}, undefined, { }, {
@@ -1243,17 +1236,7 @@ const testGetTicketList = () => {
 			queryFilters: [
 				{ propertyName, operator: queryOperators.NOT_CONTAINS, value: [propertyValue, propertyValue2] },
 			],
-			expectedQuery: { $and: [{
-				$or: [
-					{
-						$nor: [
-							{ [propertyName]: { $regex: propertyValue, $options: 'i' } },
-							{ [propertyName]: { $regex: propertyValue2, $options: 'i' } },
-						],
-					},
-					{ [propertyName]: { $exists: false } },
-				],
-			}] },
+			expectedQuery: { $and: [{ $nor: [{ [propertyName]: { $regex: propertyValue, $options: 'i' } }, { [propertyName]: { $regex: propertyValue2, $options: 'i' } }] }] },
 		}],
 		[`${queryOperators.RANGE} query filter`, [], {}, undefined, { }, {
 			queryFilters: [{ propertyName, operator: queryOperators.RANGE, value: [[0, 10], [20, 30]] }],
@@ -1266,19 +1249,12 @@ const testGetTicketList = () => {
 		}],
 		[`${queryOperators.NOT_IN_RANGE} query filter`, [], {}, undefined, { }, {
 			queryFilters: [{ propertyName, operator: queryOperators.NOT_IN_RANGE, value: [[0, 10], [20, 30]] }],
-			expectedQuery: { $and: [{
-				$or: [
-					{
-						$nor: [
-							{ [propertyName]: { $gte: 0, $lte: 10 } },
-							{ [propertyName]: { $gte: new Date(0), $lte: new Date(10) } },
-							{ [propertyName]: { $gte: 20, $lte: 30 } },
-							{ [propertyName]: { $gte: new Date(20), $lte: new Date(30) } },
-						],
-					},
-					{ [propertyName]: { $exists: false } },
-				],
-			}] },
+			expectedQuery: { $and: [{ $nor: [
+				{ [propertyName]: { $gte: 0, $lte: 10 } },
+				{ [propertyName]: { $gte: new Date(0), $lte: new Date(10) } },
+				{ [propertyName]: { $gte: 20, $lte: 30 } },
+				{ [propertyName]: { $gte: new Date(20), $lte: new Date(30) } },
+			] }] },
 		}],
 		[`${queryOperators.GREATER_OR_EQUAL_TO} query filter`, [], {}, undefined, { }, {
 			queryFilters: [{ propertyName, operator: queryOperators.GREATER_OR_EQUAL_TO, value: propertyNumberValue }],
