@@ -34,10 +34,8 @@ const user = generateUserCredentials();
 const teamspace = generateRandomString();
 
 const setupData = async () => {
-	await Promise.all([
-		createTeamspace(teamspace, [user]),
-		createUser(user),
-	]);
+	await createUser(user);
+	await createTeamspace(teamspace, [user.user]);
 };
 
 const runTest = () => {
@@ -48,7 +46,7 @@ const runTest = () => {
 	});
 
 	describe.each([
-		['!teamspace does not exist but the user exists', true, undefined, generateRandomString(), user.user],
+		['teamspace does not exist but the user exists', true, undefined, generateRandomString(), user.user],
 		['teamspace does not exist and the user does not exists', false, templates.userNotFound, generateRandomString(), generateRandomString()],
 		['teamspace already exists', false, new Error('Teamspace already exists'), teamspace, user.user],
 	])('Create Teamspace', (desc, success, expectedOutput, teamspaceName, userName) => {

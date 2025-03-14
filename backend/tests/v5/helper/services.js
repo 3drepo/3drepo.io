@@ -38,7 +38,7 @@ const { INTERNAL_DB } = require(`${src}/handler/db.constants`);
 const QueueHandler = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
 const { editSubscriptions, grantAdminToUser, updateAddOns } = require(`${src}/models/teamspaceSettings`);
-const { initTeamspace } = require(`${src}/processors/teamspaces`);
+const { initTeamspace, addTeamspaceMember } = require(`${src}/processors/teamspaces`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { MODEL_COMMENTER, MODEL_VIEWER, PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
@@ -109,16 +109,18 @@ db.addSSO = async (user, id = ServiceHelper.generateRandomString()) => {
 };
 
 // userCredentials should be the same format as the return value of generateUserCredentials
-db.createUser = (userCredentials, tsList = [], customData = {}) => {
+db.createUser = async (userCredentials, tsList = [], customData = {}) => {
 	const { user, password, apiKey, basicData = {} } = userCredentials;
-	const roles = tsList.map((ts) => ({ db: ts, role: 'team_member' }));
-	return DbHandler.createUser(user, password, {
+
+	await DbHandler.createUser(user, password, {
 		billing: { billingInfo: {} },
 		userId: user,
 		...basicData,
 		...customData,
 		apiKey,
-	}, roles);
+	}, []);
+
+	await Promise.all(tsList.map((ts) => addTeamspaceMember(ts, user)));
 };
 
 db.createTeamspace = async (teamspace, admins = [], subscriptions, createUser = true, addOns) => {
@@ -128,8 +130,12 @@ db.createTeamspace = async (teamspace, admins = [], subscriptions, createUser = 
 	}
 	const firstAdmin = createUser ? teamspace : admins[0];
 	const accountId = await initTeamspace(teamspace, firstAdmin);
-	await Promise.all(admins.map((adminUser) => (firstAdmin !== adminUser
-		? grantAdminToUser(teamspace, adminUser) : Promise.resolve())));
+	await Promise.all(admins.map(async (adminUser) => {
+		if (firstAdmin !== adminUser) {
+			await addTeamspaceMember(teamspace, adminUser);
+			await grantAdminToUser(teamspace, adminUser);
+		}
+	}));
 
 	if (subscriptions) {
 		await Promise.all(Object.keys(subscriptions).map((subType) => editSubscriptions(teamspace,
