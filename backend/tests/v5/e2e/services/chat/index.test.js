@@ -131,14 +131,13 @@ const testUnauthenticatedUser = () => {
 			});
 		});
 
-		test('!should be able to join rooms after login', async () => {
+		test('should be able to join rooms after login', async () => {
 			const socket = await ServiceHelper.socket.connectToSocket();
 			await ServiceHelper.loginAndGetCookie(agent, tsAdmin,
 				{ headers: { [SOCKET_HEADER]: socket.id }, teamspace });
 
 			// introduce a delay to let backend sort out their events (i.e. hooking the session with the socket)
 			await ServiceHelper.sleepMS(100);
-			console.log('Checking');
 			await expect(onJoinSuccessCheck(socket, { notifications: true })).resolves.toBeUndefined();
 			socket.close();
 		});
