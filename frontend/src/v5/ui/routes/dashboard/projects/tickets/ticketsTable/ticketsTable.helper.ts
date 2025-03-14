@@ -22,6 +22,7 @@ import { PriorityLevels, RiskLevels, TreatmentStatuses } from '@controls/chip/ch
 import { IStatusConfig, ITicket } from '@/v5/store/tickets/tickets.types';
 import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
+import { selectCurrentProjectTemplateById } from '@/v5/store/projects/projects.selectors';
 
 export const NONE_OPTION = 'None';
 
@@ -74,7 +75,16 @@ const groupByDate = (tickets: ITicket[]) => {
 	return groups;
 };
 
-const groupByList = (tickets: ITicket[], groupType: string, groupValues: string[]) => {
+const groupHasDefaultValue = (groupBy, templateId) => {
+	const template = selectCurrentProjectTemplateById(getState(), templateId);
+	const property = [
+		...template.properties,
+		...(template.modules.find(({ type }) => type === 'safetibase')?.properties || []),
+	].find(({ name }) => name === groupBy);
+	return _.has(property, 'default');
+};
+
+const groupByList = (tickets: ITicket[], groupBy: string, groupValues: string[]) => {
 	const groups = {};
 	let remainingTickets = tickets;
 	let currentTickets = [];
@@ -82,10 +92,13 @@ const groupByList = (tickets: ITicket[], groupType: string, groupValues: string[
 	groupValues.forEach((groupValue) => {
 		[currentTickets, remainingTickets] = _.partition(
 			remainingTickets,
-			({ properties, modules }) => ({ ...modules?.safetibase, ...properties })?.[groupType] === groupValue,
+			({ properties, modules }) => ({ ...modules?.safetibase, ...properties })?.[groupBy] === groupValue,
 		);
 		groups[groupValue] = currentTickets;
 	});
+	if (!groupHasDefaultValue(groupBy, tickets[0].type)) {
+		groups[UNSET] = remainingTickets;
+	}
 	return groups;
 };
 
