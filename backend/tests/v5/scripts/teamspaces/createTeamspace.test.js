@@ -30,32 +30,30 @@ const CreateTeamspace = require(`${utilScripts}/teamspaces/createTeamspace`);
 const { disconnect } = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
-const setupData = async ({ userWithTeamspace, userWithNoTeamspace, inactiveUser }) => {
-	await Promise.all([
-		createUser(userWithTeamspace),
-		createUser(userWithNoTeamspace),
-		createUser(inactiveUser, [], { inactive: true }),
-	]);
+const user = generateUserCredentials();
+const teamspace = generateRandomString();
 
-	await createTeamspace(userWithTeamspace.user, [], undefined, false);
+const setupData = async () => {
+	await Promise.all([
+		createTeamspace(teamspace, [user]),
+		createUser(user),
+	]);
 };
 
-const runTest = (testData) => {
+const runTest = () => {
 	beforeAll(async () => {
 		resetFileshare();
 		await resetDB();
-		await setupData(testData);
+		await setupData();
 	});
 
 	describe.each([
-		['teamspace does not exist but the user exists', true, undefined, testData.userWithNoTeamspace.user],
-		['teamspace already exists', false, new Error('Teamspace already exists'), testData.userWithTeamspace.user],
-		['user does not exist', false, templates.userNotFound, generateRandomString()],
-		['user is inactive', false, new Error('There is no matching user account or the user is not verified'), testData.inactiveUser.user],
-
-	])('Create Teamspace', (desc, success, expectedOutput, teamspace) => {
+		['!teamspace does not exist but the user exists', true, undefined, generateRandomString(), user.user],
+		['teamspace does not exist and the user does not exists', false, templates.userNotFound, generateRandomString(), generateRandomString()],
+		['teamspace already exists', false, new Error('Teamspace already exists'), teamspace, user.user],
+	])('Create Teamspace', (desc, success, expectedOutput, teamspaceName, userName) => {
 		test(`Should ${success ? 'succeed' : 'fail with an error'} if ${desc}`, async () => {
-			const exe = CreateTeamspace.run(teamspace);
+			const exe = CreateTeamspace.run(teamspaceName, userName);
 			if (success) {
 				await expect(exe).resolves.toBeUndefined();
 			} else {
@@ -65,14 +63,7 @@ const runTest = (testData) => {
 	});
 };
 
-const createData = () => ({
-	userWithNoTeamspace: generateUserCredentials(),
-	userWithTeamspace: generateUserCredentials(),
-	inactiveUser: generateUserCredentials(),
-});
-
 describe(determineTestGroup(__filename), () => {
-	const data = createData();
-	runTest(data);
+	runTest();
 	afterAll(disconnect);
 });

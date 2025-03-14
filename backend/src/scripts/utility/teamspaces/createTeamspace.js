@@ -26,9 +26,7 @@ const { getTeamspaceSetting } = require(`${v5Path}/models/teamspaceSettings`);
 
 const run = async (teamspace, user) => {
 	logger.logInfo(`Checking ${user} is exists...`);
-	if (!(await getUserByUsername(user))) {
-		throw new Error(`${user} is not an user of 3D Repo.`);
-	}
+	await getUserByUsername(user);
 
 	logger.logInfo(`Checking if teamspace ${teamspace} already exists...`);
 	const teamspaceExists = await getTeamspaceSetting(teamspace, { _id: 1 }).catch(() => false);
