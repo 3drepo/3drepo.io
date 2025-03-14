@@ -207,7 +207,7 @@ const testUpdateProject = () => {
 
 		test('should fail if the user is not project admin', async () => {
 			const res = await agent.patch(route(teamspace, projects.testProject.id,
-				users.nonAdminUser.apiKey)).expect(templates.notLoggedIn.status);
+				users.nonAdminUser.apiKey)).expect(templates.notAuthorized.status);
 			expect(res.body.code).toEqual(templates.notAuthorized.code);
 		});
 
