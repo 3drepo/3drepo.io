@@ -16,7 +16,8 @@
  */
 
 const { src } = require('./path');
-const { parseSetCookie, generateCookieArray } = require('./services');
+
+const { CSRF_COOKIE, SESSION_HEADER } = require(`${src}/utils/sessions.constants`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { CSRF_HEADER } = require(`${src}/utils/sessions.constants`);
@@ -24,6 +25,26 @@ const { generateUUIDString } = require(`${src}/utils/helper/uuids`);
 
 const { getUserInfoFromToken } = require(`${src}/services/sso/frontegg`);
 
+const parseSetCookie = (arr) => {
+	let token; let session;
+	arr.forEach((instr) => {
+		const matchSession = instr.match(/connect.sid=([^;]*)/);
+		if (matchSession) {
+			[, session] = matchSession;
+		}
+
+		const matchToken = instr.match(/csrf_token=([^;]*)/);
+		if (matchToken) {
+			[, token] = matchToken;
+		}
+	});
+
+	return { token, session };
+};
+const generateCookieArray = ({ token, session }) => [
+	`${CSRF_COOKIE}=${token}`,
+	`${SESSION_HEADER}=${session}`,
+];
 class SessionTracker {
 	constructor(agent) {
 		this.agent = agent;
@@ -48,6 +69,10 @@ class SessionTracker {
 			.expect(302);
 
 		await this.get('/v5/login').expect(200);
+	}
+
+	getCookies() {
+		return this.cookies;
 	}
 
 	extractSessionFromResponse(resp, fabricateCSRF) {
