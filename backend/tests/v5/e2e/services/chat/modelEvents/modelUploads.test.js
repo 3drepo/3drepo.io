@@ -48,6 +48,7 @@ const calibration = ServiceHelper.generateCalibration();
 
 let agent;
 const setupData = async () => {
+	await ServiceHelper.db.createUser(user);
 	await ServiceHelper.db.createTeamspace(teamspace, [user.user]);
 
 	await Promise.all([
@@ -77,7 +78,6 @@ const setupData = async () => {
 		),
 	]);
 	await Promise.all([
-		ServiceHelper.db.createUser(user, [teamspace]),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name,
 			[container._id, container2._id, federation._id, drawing._id]),
 		ServiceHelper.db.createRevision(teamspace, project.id, container._id,

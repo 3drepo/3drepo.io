@@ -37,7 +37,7 @@ const drawingToBeDeleted = ServiceHelper.generateRandomModel({ modelType: modelT
 
 let agent;
 const setupData = async () => {
-	await ServiceHelper.db.createTeamspace(teamspace, [user.user]);
+	await ServiceHelper.db.createTeamspace(teamspace);
 	await Promise.all([
 		ServiceHelper.db.createModel(
 			teamspace,

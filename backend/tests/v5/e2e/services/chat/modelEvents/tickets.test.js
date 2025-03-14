@@ -53,6 +53,7 @@ const ticketAddedTest = () => {
 		const containerComment = ServiceHelper.generateComment(user.user);
 		const federationComment = ServiceHelper.generateComment(user.user);
 		beforeAll(async () => {
+			await ServiceHelper.db.createUser(user);
 			await ServiceHelper.db.createTeamspace(teamspace, [user.user]);
 			await Promise.all([
 				ServiceHelper.db.createModel(
@@ -69,7 +70,6 @@ const ticketAddedTest = () => {
 				),
 			]);
 			await Promise.all([
-				ServiceHelper.db.createUser(user, [teamspace]),
 				ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, federation._id],
 					[user.user]),
 			]);
@@ -176,6 +176,7 @@ const ticketsImportedTest = () => {
 		const federationComment = ServiceHelper.generateComment(user.user);
 
 		beforeAll(async () => {
+			await ServiceHelper.db.createUser(user);
 			await ServiceHelper.db.createTeamspace(teamspace, [user.user]);
 			await Promise.all([
 				ServiceHelper.db.createModel(
@@ -192,7 +193,6 @@ const ticketsImportedTest = () => {
 				),
 			]);
 			await Promise.all([
-				ServiceHelper.db.createUser(user, [teamspace]),
 				ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, federation._id],
 					[user.user]),
 			]);
@@ -435,6 +435,7 @@ const ticketUpdatedTest = () => {
 		const federationComment = ServiceHelper.generateComment(user.user);
 
 		beforeAll(async () => {
+			await ServiceHelper.db.createUser(user);
 			await ServiceHelper.db.createTeamspace(teamspace, [user.user]);
 			await Promise.all([
 				ServiceHelper.db.createModel(
@@ -451,7 +452,6 @@ const ticketUpdatedTest = () => {
 				),
 			]);
 			await Promise.all([
-				ServiceHelper.db.createUser(user, [teamspace]),
 				ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, federation._id],
 					[user.user]),
 			]);
@@ -535,6 +535,7 @@ const ticketsUpdatedTest = () => {
 		const federationTickets = times(nTickets, () => ServiceHelper.generateTicket(templateWithComments));
 
 		beforeAll(async () => {
+			await ServiceHelper.db.createUser(user);
 			await ServiceHelper.db.createTeamspace(teamspace, [user.user]);
 			await Promise.all([
 				ServiceHelper.db.createModel(
@@ -551,7 +552,6 @@ const ticketsUpdatedTest = () => {
 				),
 			]);
 			await Promise.all([
-				ServiceHelper.db.createUser(user, [teamspace]),
 				ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, federation._id],
 					[user.user]),
 			]);
@@ -704,6 +704,7 @@ const commentAddedTest = () => {
 		const federationComment = ServiceHelper.generateComment(user.user);
 
 		beforeAll(async () => {
+			await ServiceHelper.db.createUser(user);
 			await ServiceHelper.db.createTeamspace(teamspace, [user.user]);
 			await Promise.all([
 				ServiceHelper.db.createModel(
@@ -720,7 +721,6 @@ const commentAddedTest = () => {
 				),
 			]);
 			await Promise.all([
-				ServiceHelper.db.createUser(user, [teamspace]),
 				ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, federation._id],
 					[user.user]),
 			]);
@@ -816,6 +816,7 @@ const commentUpdatedTest = () => {
 		const federationComment = ServiceHelper.generateComment(user.user);
 
 		beforeAll(async () => {
+			await ServiceHelper.db.createUser(user);
 			await ServiceHelper.db.createTeamspace(teamspace, [user.user]);
 			await Promise.all([
 				ServiceHelper.db.createModel(
@@ -832,7 +833,6 @@ const commentUpdatedTest = () => {
 				),
 			]);
 			await Promise.all([
-				ServiceHelper.db.createUser(user, [teamspace]),
 				ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, federation._id],
 					[user.user]),
 			]);
@@ -952,6 +952,7 @@ const groupUpdatedTest = () => {
 		const federationTicketWithView = ServiceHelper.generateTicket(templateWithView);
 
 		beforeAll(async () => {
+			await ServiceHelper.db.createUser(user);
 			await ServiceHelper.db.createTeamspace(teamspace, [user.user]);
 			await Promise.all([
 				ServiceHelper.db.createModel(
@@ -968,7 +969,6 @@ const groupUpdatedTest = () => {
 				),
 			]);
 			await Promise.all([
-				ServiceHelper.db.createUser(user, [teamspace]),
 				ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, federation._id],
 					[user.user]),
 			]);
