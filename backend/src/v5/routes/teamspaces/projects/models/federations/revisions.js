@@ -161,7 +161,7 @@ const establishRoutes = () => {
 	 *                 revisions:
 	 *                   type: array
 	 *                   items:
-	 *                     - type: object
+	 *                       type: object
 	 *                       properties:
 	 *                         container:
 	 *                           type: string

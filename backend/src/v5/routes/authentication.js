@@ -62,7 +62,7 @@ const establishRoutes = () => {
 	*   get:
 	*     description: Authenticates a user against a particular teamspace, the user has to have already established a session to use this endpoint.
 	*     tags: [Authentication]
-	*     operationId: authenticate
+	*     operationId: authenticateTeamspace
 	*     parameters:
 	*       - in: path
 	*         name: teamspace
