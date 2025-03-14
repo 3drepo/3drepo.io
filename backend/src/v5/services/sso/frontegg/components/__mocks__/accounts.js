@@ -19,58 +19,32 @@ const { generateUUIDString } = require('../../../../../utils/helper/uuids');
 
 const Accounts = {};
 
-// const accountByTeamspace = {};
 const teamspaceByAccount = {};
+const usersInAccount = {};
 
 Accounts.getTeamspaceByAccount = (accountId) => teamspaceByAccount[accountId];
 
 Accounts.createAccount = (name) => {
 	const accountId = generateUUIDString();
 	teamspaceByAccount[accountId] = name;
-	//	accountsByTeamspace[name] = accountId;
 
 	return Promise.resolve(accountId);
 };
-/*
-Accounts.getAllUsersInAccount = async (accountId) => [];
 
-Accounts.addUserToAccount = async (accountId, userId, sendInvite = true) => {
-	try {
-		const config = await getConfig();
-		const payload = {
-			tenantId: accountId,
-			validateTenantExist: true,
-			skipInviteEmail: !sendInvite,
-		};
-		await post(`${config.vendorDomain}/identity/resources/users/v1/${userId}/tenant`, payload, { headers: await getBearerHeader() });
-	} catch (err) {
-		logger.logError(`Failed to add user to account: ${JSON.stringify(err?.response?.data)} `);
-		throw new Error(`Failed to add ${userId} to ${accountId} on Accounts: ${err.message}`);
-	}
+Accounts.getAllUsersInAccount = (accountId) => Promise.resolve(usersInAccount[accountId] ?? []);
+
+Accounts.addUserToAccount = (accountId, userId) => {
+	usersInAccount[accountId] = usersInAccount[accountId] ?? [];
+	usersInAccount[accountId].push(userId);
 };
 
-Accounts.removeUserFromAccount = async (accountId, userId) => {
-	try {
-		const config = await getConfig();
-		const headers = {
-			...await getBearerHeader(),
-			[HEADER_TENANT_ID]: accountId,
-		};
-
-		await httpDelete(`${config.vendorDomain}/identity/resources/users/v1/${userId}`, headers);
-	} catch (err) {
-		logger.logError(`Failed to remove user from account: ${JSON.stringify(err?.response?.data)} `);
-		throw new Error(`Failed to remove ${userId} from ${accountId} on Accounts: ${err.message}`);
-	}
+Accounts.removeUserFromAccount = (accountId, userId) => {
+	usersInAccount[accountId] = usersInAccount[accountId] ?? [];
+	usersInAccount[accountId] = usersInAccount.filter((u) => u !== userId);
 };
 
-Accounts.removeAccount = async (accountId) => {
-	try {
-		const config = await getConfig();
-		await httpDelete(`${config.vendorDomain}/tenants/resources/tenants/v1/${accountId}`, await getBearerHeader());
-	} catch (err) {
-		logger.logError(`Failed to remove account: ${JSON.stringify(err?.response?.data)} `);
-		throw new Error(`Failed to remove ${accountId} on Accounts: ${err.message}`);
-	}
-}; */
+Accounts.removeAccount = (accountId) => {
+	delete usersInAccount[accountId];
+	delete teamspaceByAccount[accountId];
+};
 module.exports = Accounts;

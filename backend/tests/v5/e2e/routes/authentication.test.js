@@ -15,101 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../helper/services');
-const { src, image } = require('../../helper/path');
+const { src } = require('../../helper/path');
 const SessionTracker = require('../../helper/sessionTracker');
-const fs = require('fs');
-const { providers } = require('../../../../src/v5/services/sso/sso.constants');
 
 const { templates, createResponseCode } = require(`${src}/utils/responseCodes`);
 
-const { loginPolicy } = require(`${src}/utils/config`);
-
 let server;
 let agent;
-/*
-// This is the user being used for tests
-const ssoTestUser = ServiceHelper.generateUserCredentials();
-const userWithFsAvatar = ServiceHelper.generateUserCredentials();
-const userWithGridFsAvatar = ServiceHelper.generateUserCredentials();
-const nonVerifiedUser = ServiceHelper.generateUserCredentials();
-const nonVerifiedUserWithExpiredToken = ServiceHelper.generateUserCredentials();
-const testUserWithToken = ServiceHelper.generateUserCredentials();
-const testUserWithExpiredToken = ServiceHelper.generateUserCredentials();
-const lockedUser = ServiceHelper.generateUserCredentials();
-const lockedUserWithExpiredLock = ServiceHelper.generateUserCredentials();
-const nonVerifiedUserEmail = 'nonverifieduser@email.com';
-const teamspace = { name: ServiceHelper.generateRandomString() };
-
-const ssoUserId = ServiceHelper.generateRandomString();
-const fsAvatarData = ServiceHelper.generateRandomString();
-const gridFsAvatarData = ServiceHelper.generateRandomString();
-const validPasswordToken = { token: ServiceHelper.generateRandomString(), expiredAt: new Date(2030, 12, 12) };
-const validEmailToken = { token: ServiceHelper.generateRandomString(), expiredAt: new Date(2030, 12, 12) };
-const expiredEmailToken = { token: ServiceHelper.generateRandomString(), expiredAt: new Date(2020, 12, 12) };
-const expiredPasswordToken = { token: ServiceHelper.generateRandomString(), expiredAt: new Date(2020, 12, 12) };
-
-const setupData = async () => {
-	await ServiceHelper.db.createTeamspace(teamspace.name, [nonVerifiedUser.user], {
-		discretionary: {
-			collaborators: 'unlimited',
-			data: 10,
-			expiryDate: Date.now() + 100000,
-		},
-	});
-
-	await Promise.all([
-		ServiceHelper.db.createUser(testUser),
-		ServiceHelper.db.createUser(ssoTestUser, [], {
-			sso: { type: providers.AAD, id: ssoUserId },
-		}),
-		ServiceHelper.db.createUser(userWithFsAvatar, []),
-		ServiceHelper.db.createUser(userWithGridFsAvatar, []),
-		ServiceHelper.db.createUser(nonVerifiedUser, [teamspace.name], {
-			inactive: true,
-			emailVerifyToken: {
-				token: validEmailToken.token,
-				expiredAt: validEmailToken.expiredAt,
-			},
-			email: nonVerifiedUserEmail,
-		}),
-		ServiceHelper.db.createUser(nonVerifiedUserWithExpiredToken, [], {
-			inactive: true,
-			emailVerifyToken: {
-				token: expiredEmailToken.token,
-				expiredAt: expiredEmailToken.expiredAt,
-			},
-		}),
-		ServiceHelper.db.createUser(testUserWithToken, [], {
-			resetPasswordToken: {
-				token: validPasswordToken.token,
-				expiredAt: validPasswordToken.expiredAt,
-			},
-		}),
-		ServiceHelper.db.createUser(testUserWithExpiredToken, [], {
-			resetPasswordToken: {
-				token: expiredPasswordToken.token, expiredAt: expiredPasswordToken.expiredAt,
-			},
-		}),
-		ServiceHelper.db.createUser(lockedUser, []),
-		ServiceHelper.db.createUser(lockedUserWithExpiredLock, []),
-
-		ServiceHelper.db.createAvatar(userWithFsAvatar.user, 'fs', fsAvatarData),
-		ServiceHelper.db.createAvatar(userWithGridFsAvatar.user, 'gridfs', gridFsAvatarData),
-		ServiceHelper.db.addLoginRecords(times(loginPolicy.maxUnsuccessfulLoginAttempts, (count) => ({
-			user: lockedUser.user,
-			loginTime: new Date(Date.now() - count),
-			failed: true,
-		}))),
-		ServiceHelper.db.addLoginRecords(times(loginPolicy.maxUnsuccessfulLoginAttempts, () => ({
-			user: lockedUserWithExpiredLock.user,
-			loginTime: new Date(1 / 1 / 18),
-			failed: true,
-		}))),
-	]);
-}; */
 
 const testAuthenticate = () => {
 	describe('Get authenticate link', () => {
@@ -143,6 +57,47 @@ const testAuthenticate = () => {
 	});
 };
 
+const testAuthenticateAgainstTeamspace = () => {
+	describe('Get authenticate by teamspace link', () => {
+		const tsUser = ServiceHelper.generateUserCredentials();
+		const noAccessUser = ServiceHelper.generateUserCredentials();
+		const teamspace = ServiceHelper.generateRandomString();
+		const redirectURI = ServiceHelper.generateRandomString();
+
+		beforeAll(async () => {
+			await Promise.all([
+				ServiceHelper.db.createUser(tsUser),
+				ServiceHelper.db.createUser(noAccessUser),
+			]);
+
+			await ServiceHelper.db.createTeamspace(teamspace, [tsUser.user], undefined, false);
+		});
+
+		const generateURL = (authTeamspace = teamspace, redirect = redirectURI) => `/v5/authentication/authenticate/${authTeamspace}?${redirect ? `redirectUri=${redirectURI}` : ''}`;
+
+		describe.each([
+			['the user is not logged in', undefined, generateURL(), false, templates.notLoggedIn],
+			['redirectURL is not provided', tsUser, generateURL(teamspace, false), false, createResponseCode(templates.invalidArguments, 'redirectUri(query string) is required')],
+			['teamspace is not found', tsUser, generateURL(ServiceHelper.generateRandomString()), false, templates.teamspaceNotFound],
+			['the user is not a member of the teamspace', noAccessUser, generateURL(), false, templates.teamspaceNotFound],
+			['the user is a member of the teamspace', tsUser, generateURL(), true],
+		])('', (desc, user, url, success, err = templates.ok) => {
+			test(`Should ${success ? 'respond with the link' : `fail with ${err.code}`} if ${desc}`, async () => {
+				const testAgent = user ? SessionTracker(agent) : agent;
+				if (user) {
+					await testAgent.login(user);
+				}
+				const res = await testAgent.get(url).expect(err.status);
+				if (success) {
+					expect(res.body).toEqual({ link: expect.any(String) });
+				} else {
+					expect(res.body).toEqual(expect.objectContaining(err));
+				}
+			});
+		});
+	});
+};
+
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -150,6 +105,7 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	});
 
 	testAuthenticate();
+	testAuthenticateAgainstTeamspace();
 
 	afterAll(() => ServiceHelper.closeApp(server));
 });

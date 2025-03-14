@@ -124,8 +124,13 @@ db.createUser = (userCredentials, tsList = [], customData = {}) => {
 
 db.createTeamspace = async (teamspace, admins = [], subscriptions, createUser = true, addOns) => {
 	if (createUser) await ServiceHelper.db.createUser({ user: teamspace, password: teamspace });
-	await initTeamspace(teamspace);
-	await Promise.all(admins.map((adminUser) => grantAdminToUser(teamspace, adminUser)));
+	else if (admins.length === 0) {
+		throw Error('an admin needs to be provided, or createUser needs to be set to true.');
+	}
+	const firstAdmin = createUser ? teamspace : admins[0];
+	await initTeamspace(teamspace, firstAdmin);
+	await Promise.all(admins.map((adminUser) => (firstAdmin !== adminUser
+		? grantAdminToUser(teamspace, adminUser) : Promise.resolve())));
 
 	if (subscriptions) {
 		await Promise.all(Object.keys(subscriptions).map((subType) => editSubscriptions(teamspace,

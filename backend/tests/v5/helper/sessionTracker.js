@@ -44,10 +44,10 @@ class SessionTracker {
 
 		getUserInfoFromToken.mockResolvedValueOnce({ userId, email, accounts: [], authAccount: 'abc' });
 
-		const resp2 = await this.get(`/v5/authentication/authenticate-post?state=${state}&code=${code}`)
+		await this.get(`/v5/authentication/authenticate-post?state=${state}&code=${code}`)
 			.expect(302);
 
-		const respLogin = await this.get('/v5/login');
+		await this.get('/v5/login').expect(200);
 	}
 
 	extractSessionFromResponse(resp, fabricateCSRF) {
