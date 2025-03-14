@@ -13,16 +13,18 @@
 		}
 
 		img.logo {
-			height: 50px;
+			max-height: 50px;
+			max-width: 80%;
 			margin-left: auto;
 			margin-right: auto;
 			display: block;
 		}
 
 		.content {
-			width: 100%;
 			height: 100%;
 			margin: auto;
+			padding-left: 5%;
+			padding-right: 5%;
 			font-family: 'Inter', 'Roboto', 'inherit', Helvetica;
 			font-style: normal;
 			opacity: 1;
@@ -34,8 +36,7 @@
 			/* 01 dp */
 			box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.14);
 			border-radius: 10px;
-			margin-left: 50px;
-			margin-right: 50px;
+			margin: auto;
 			overflow: auto;
 		}
 
@@ -53,13 +54,17 @@
 			align-items: center;
 		}
 
-		p {
+		p, li {
 			margin-top: 20px;
 			color: rgba(107,119,140,1);
 			font-size: 12px;
 			opacity: 1;
 			text-align: left;
 			overflow-wrap: normal;
+		}
+
+		li {
+			margin-top: 5px;
 		}
 
 		.textBold {
@@ -127,10 +132,8 @@
 		}
 
 		.footNotes {
-			width: 407px;
+			width: max-content;
 			color: rgba(188,190,202,1);
-			top: 565px;
-			left: 63px;
 			font-weight: Medium;
 			font-size: 10px;
 			text-align: center;
@@ -220,7 +223,7 @@
 			</div>
 
 			<p class="footNotes">
-				Copyright &#0064; 2022 Asite 3D Repo Ltd. all rights reserved.
+				Copyright &#0064; 2025 Asite 3D Repo Ltd. all rights reserved.
 			</p>
 			<p class="footNotes">
 				Asite 3D Repo, 7th Floor, Leconfield House, Curzon Street<br />
