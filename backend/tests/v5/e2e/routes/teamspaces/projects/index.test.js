@@ -34,10 +34,10 @@ let server;
 let agent;
 
 const setupBasicData = async ({ users, teamspace, projects, model, imageData }) => {
+	await ServiceHelper.db.createUser(users.tsAdmin);
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
 
 	await Promise.all([
-		ServiceHelper.db.createUser(users.tsAdmin, [teamspace]),
 		ServiceHelper.db.createUser(users.projectAdmin, [teamspace]),
 		ServiceHelper.db.createUser(users.nonAdminUser, [teamspace]),
 		ServiceHelper.db.createUser(users.unlicencedUser),
