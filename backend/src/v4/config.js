@@ -262,12 +262,6 @@ config.auth = coalesce(config.auth, {});
 config.auth.captcha = coalesce(config.auth.captcha, false);
 config.auth.register = coalesce(config.auth.register,true);
 
-// paypal
-config.paypal = coalesce(config.paypal, null);
-if(config.paypal) {
-	config.paypal.validateIPN = coalesce(config.paypal.validateIPN, true);
-}
-
 config.cn_queue = { maxRetries: 3, ...config.cn_queue};
 
 // upload size limit
