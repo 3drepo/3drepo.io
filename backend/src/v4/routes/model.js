@@ -2045,7 +2045,7 @@ function getSRC(req, res, next) {
 	const {account, model, uid} = req.params;
 
 	// FIXME: We should probably generalise this and have a model assets object.
-	SrcAssets.getSRC(account, model, uid).then(({ readStream, size, mimeType, encoding }) => {
+	SrcAssets.getSRC(account, model, utils.uuidToString(uid)).then(({ readStream, size, mimeType, encoding }) => {
 		req.params.format = "src";
 		ResponderV5.writeStreamRespond(req, res, ResponseCodes.templates.ok, readStream, undefined, size, { mimeType, encoding });
 	}).catch(err => {

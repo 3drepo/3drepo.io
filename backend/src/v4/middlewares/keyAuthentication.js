@@ -34,7 +34,6 @@ const BLACK_LIST = [
 	"* /apikey",
 	"* /login",
 	"* /logout",
-	"PUT /*",
 	"PUT /*/password",
 	"POS /*/verify",
 	"POST /forgot-password",

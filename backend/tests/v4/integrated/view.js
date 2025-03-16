@@ -178,7 +178,7 @@ describe("Views", function () {
 
 			agent2.get(`/invalidTeamspace/${teamSpace1Model}/viewpoints/`)
 				.expect(404, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 					return done(err);
 				});
 		});

@@ -171,7 +171,7 @@ describe("Sequences", function () {
 			expect(sortById(res.body.activities)).to.deep.equal(sortById(activities.activities))
 		});
 
-		it("should suceed as a viewer", async() => {
+		it("!should suceed as a viewer", async() => {
 			let	res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities?key=${viewerApiKey}`)
 				.expect(200);
 

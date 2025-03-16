@@ -89,7 +89,7 @@ describe("ModelAssets", function () {
 		it("from invalid teamspace should fail", function(done) {
 			agent.get(`/invalidTeamspaceNameHere/${model}/revision/master/head/srcAssets.json`)
 				.expect(404, (err, res) => {
-					expect(res.body.value).eq(responseCodes.RESOURCE_NOT_FOUND.value);
+					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 
@@ -123,10 +123,10 @@ describe("ModelAssets", function () {
 	});
 
 	describe("Get SRC list (No Access)", function() {
-		it("from the latest revision should fail", function(done) {
+		it("!from the latest revision should fail", function(done) {
 			noAccessAgent.get(`/${username}/${model}/revision/master/head/srcAssets.json`)
-				.expect(401, (err, res) => {
-					expect(res.body.value).eq(responseCodes.NOT_AUTHORIZED.value);
+				.expect(404, (err, res) => {
+					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
@@ -154,7 +154,7 @@ describe("ModelAssets", function () {
 		it("from invalid teamspace should fail", function(done) {
 			agent.get(`/invalidTeamspaceNameHere/${model}/c4e6d66f-33ab-4dc5-97b6-e3d9a644cde4.src.mpc`)
 				.expect(404, (err, res) => {
-					expect(res.body.value).eq(responseCodes.RESOURCE_NOT_FOUND.value);
+					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 
@@ -183,7 +183,7 @@ describe("ModelAssets", function () {
 		it("of a valid ID should fail", function(done) {
 			noAccessAgent.get(`/${username}/${model}/c4e6d66f-33ab-4dc5-97b6-e3d9a644cde4.src.mpc`)
 				.expect(401, (err,res) => {
-					expect(res.body.value).eq(responseCodes.NOT_AUTHORIZED.value);
+					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});

@@ -37,7 +37,7 @@ class SessionTracker {
 	}
 
 	setApiKey(url) {
-		if(this.apiKey) {
+		if(this.apiKey && !url.includes("key=")) {
 			const keyword = url.includes("?") ? "&" : "?" ;
 			return `${url}${keyword}key=${this.apiKey}`
 		}

@@ -453,8 +453,8 @@ describe("Teamspace", function() {
 		it("set defaults if user is not member of teamspace should fail", function(done) {
 			agent.patch(`/${notMemberOfTeamspace}/settings`)
 				.send({ topicTypes: defaultTopicTypes, riskCategories: defaultRiskCategories })
-				.expect(401, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.NOT_AUTHORIZED.value);
+				.expect(404, function(err, res) {
+					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
@@ -463,7 +463,7 @@ describe("Teamspace", function() {
 			agent.patch(`/${fakeTeamspace}/settings`)
 				.send({ topicTypes: defaultTopicTypes, riskCategories: defaultRiskCategories })
 				.expect(404, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
@@ -708,8 +708,8 @@ describe("Teamspace", function() {
 
 		it("if user is not member of teamspace should fail", function(done) {
 			agent.get(`/${notMemberOfTeamspace}/settings/mitigations.csv`)
-				.expect(401, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.NOT_AUTHORIZED.value);
+				.expect(404, function(err, res) {
+					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
@@ -717,7 +717,7 @@ describe("Teamspace", function() {
 		it("if user doesn't exist should fail", function(done) {
 			agent.get(`/${fakeTeamspace}/settings/mitigations.csv`)
 				.expect(404, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
@@ -788,8 +788,8 @@ describe("Teamspace", function() {
 		it("if user is not member of teamspace should fail", function(done) {
 			agent.post(`/${notMemberOfTeamspace}/settings/mitigations.csv`)
 				.attach("file", __dirname + mitigationsFile)
-				.expect(401, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.NOT_AUTHORIZED.value);
+				.expect(404, function(err, res) {
+					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
@@ -798,7 +798,7 @@ describe("Teamspace", function() {
 			agent.post(`/${fakeTeamspace}/settings/mitigations.csv`)
 				.attach("file", __dirname + mitigationsFile)
 				.expect(404, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
