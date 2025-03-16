@@ -26,6 +26,8 @@ const { templates } = require(`${src}/utils/responseCodes`);
 let server;
 let agent;
 
+const FronteggService = require(`${src}/services/sso/frontegg`);
+
 // This is the user being used for tests
 const testUser = ServiceHelper.generateUserCredentials();
 const userWithFsAvatar = ServiceHelper.generateUserCredentials();
@@ -358,6 +360,32 @@ const testDeleteApiKey = () => {
 	});
 };
 
+const testTriggerResetPassword = () => {
+	describe('Trigger reset password (Known user)', () => {
+		const route = '/v5/user/password/reset';
+		test('Should fail the user is not logged in', async () => {
+			const res = await agent.post(route).send({})
+				.expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('Should fail the user is not logged in (api key)', async () => {
+			const res = await agent.post(`${route}?key=${testUser.apiKey}`).send({})
+				.expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('Should trigger email if the user is logged in', async () => {
+			const testSession = SessionTracker(agent);
+			await testSession.login(testUser);
+			await testSession.post(route).send({})
+				.expect(templates.ok.status);
+			expect(FronteggService.triggerPasswordReset).toHaveBeenCalledTimes(1);
+			expect(FronteggService.triggerPasswordReset).toHaveBeenCalledWith(testUser.basicData.email);
+		});
+	});
+};
+
 const testForgotPassword = () => {
 	describe('Send forgot password email', () => {
 		test(`should fail if ${templates.endpointDecommissioned.code}`, async () => {
@@ -412,6 +440,7 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	testLogout();
 	testGetUsername();
 	testGetProfile();
+	testTriggerResetPassword();
 	testUpdateProfile();
 	testGetAvatar();
 	testUploadAvatar();
