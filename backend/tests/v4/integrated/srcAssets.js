@@ -182,7 +182,7 @@ describe("ModelAssets", function () {
 	describe("Get SRC file (No Access)", function() {
 		it("of a valid ID should fail", function(done) {
 			noAccessAgent.get(`/${username}/${model}/c4e6d66f-33ab-4dc5-97b6-e3d9a644cde4.src.mpc`)
-				.expect(401, (err,res) => {
+				.expect(404, (err,res) => {
 					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
