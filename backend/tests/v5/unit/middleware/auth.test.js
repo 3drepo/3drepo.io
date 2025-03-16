@@ -24,18 +24,19 @@ const Responder = require(`${src}/utils/responder`);
 
 const { CSRF_HEADER, CSRF_COOKIE } = require(`${src}/utils/sessions.constants`);
 
+jest.mock('../../../../src/v5/utils/sessions');
+const SessionUtils = require(`${src}/utils/sessions`);
+
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const AuthMiddlewares = require(`${src}/middleware/auth`);
 
-const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const { USER_AGENT_HEADER } = require(`${src}/utils/sessions.constants`);
-
-jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
-const EventManager = require(`${src}/services/eventsManager/eventsManager`);
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
+
+SessionUtils.destroySession.mockImplementation((arg1, arg2, callback) => callback());
 
 const ipAddress = generateRandomString();
 const token = generateRandomString();
@@ -47,29 +48,32 @@ const headers = { referer: 'http://abc.com/', [CSRF_HEADER]: token, [USER_AGENT_
 
 const testValidSession = () => {
 	describe('Valid sessions', () => {
-		test('next() should be called if the session is valid', () => {
+		test('next() should be called if the session is valid', async () => {
+			SessionUtils.isSessionValid.mockResolvedValueOnce(true);
 			const mockCB = jest.fn(() => {});
-			AuthMiddlewares.validSession(
+			await AuthMiddlewares.validSession(
 				{ ips: [ipAddress], headers, session, cookies },
 				{},
 				mockCB,
 			);
-			expect(mockCB.mock.calls.length).toBe(1);
+			expect(mockCB).toHaveBeenCalledTimes(1);
 		});
 
-		test('next() should be called if there is an apiKey session', () => {
+		test('next() should be called if there is an apiKey session', async () => {
 			const mockCB = jest.fn(() => {});
-			AuthMiddlewares.validSession(
+			SessionUtils.isSessionValid.mockResolvedValueOnce(true);
+			await AuthMiddlewares.validSession(
 				{ headers, session: { user: { referer: 'http://abc.com', isAPIKey: true }, ipAddress } },
 				{},
 				mockCB,
 			);
-			expect(mockCB.mock.calls.length).toBe(1);
+			expect(mockCB).toHaveBeenCalledTimes(1);
 		});
 
-		test('should respond with notLoggedIn errCode if the ip address mismatched', () => {
+		test('should respond with notLoggedIn errCode if the ip address mismatched', async () => {
+			SessionUtils.isSessionValid.mockResolvedValueOnce(true);
 			const mockCB = jest.fn(() => {});
-			AuthMiddlewares.validSession(
+			await AuthMiddlewares.validSession(
 				{ ips: [],
 					ip: generateRandomString(),
 					headers,
@@ -82,14 +86,13 @@ const testValidSession = () => {
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond.mock.results[0].value).toEqual(templates.notLoggedIn);
-			expect(EventManager.publish).toHaveBeenCalledTimes(1);
-			expect(EventManager.publish).toHaveBeenCalledWith(events.SESSIONS_REMOVED, { ids: [sessionID] });
 		});
 
-		test('should respond with notLoggedIn errCode if the user agent mismatched', () => {
+		test('should respond with notLoggedIn errCode if the user agent mismatched', async () => {
+			SessionUtils.isSessionValid.mockResolvedValueOnce(true);
 			const mockCB = jest.fn(() => {});
 
-			AuthMiddlewares.validSession(
+			await AuthMiddlewares.validSession(
 				{
 					ips: [ipAddress],
 					headers: { ...headers, [USER_AGENT_HEADER]: generateRandomString() },
@@ -103,150 +106,80 @@ const testValidSession = () => {
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond.mock.results[0].value).toEqual(templates.notLoggedIn);
-			expect(EventManager.publish).toHaveBeenCalledTimes(1);
-			expect(EventManager.publish).toHaveBeenCalledWith(events.SESSIONS_REMOVED, { ids: [sessionID] });
-		});
-
-		test('should respond with whatever error destroySession throws', () => {
-			const error = new Error();
-			const mockCB = jest.fn(() => {});
-			AuthMiddlewares.validSession({ ips: [generateRandomString()],
-				headers,
-				session: { ...session, destroy: () => { throw error; } },
-				cookies },
-			{ clearCookie: () => {} },
-			mockCB);
-			expect(mockCB).not.toHaveBeenCalled();
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(error);
-		});
-
-		test('should respond with notLoggedIn errCode if the referrer mismatched', () => {
-			const mockCB = jest.fn(() => {});
-			AuthMiddlewares.validSession(
-				{ ips: [ipAddress], headers: { ...headers, referer: 'http://xyz.com' }, session, cookies },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.notLoggedIn);
-		});
-
-		test('should respond with notLoggedIn errCode if csrf token mismatched', () => {
-			const mockCB = jest.fn(() => {});
-			AuthMiddlewares.validSession(
-				{ ips: [ipAddress], headers: { ...headers, [CSRF_HEADER]: generateRandomString() }, session, cookies },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.notLoggedIn);
-		});
-
-		test('next should be called if csrf token is provided in upper case', () => {
-			const mockCB = jest.fn(() => {});
-			AuthMiddlewares.validSession(
-				{ ips: [ipAddress], headers: { ...headers, [CSRF_HEADER.toUpperCase()]: token }, session, cookies },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(1);
-		});
-
-		test('next should be called if csrf token is provided in lower case', () => {
-			const mockCB = jest.fn(() => {});
-			AuthMiddlewares.validSession(
-				{ ips: [ipAddress], headers: { ...headers, [CSRF_HEADER.toLowerCase()]: token }, session, cookies },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(1);
 		});
 	});
 };
 
 const testNotLoggedIn = () => {
 	describe('Not logged in middleware', () => {
-		test('next() should be called if the session is invalid', () => {
+		const req = {};
+		const res = {};
+		test('next() should be called if the session is invalid', async () => {
+			SessionUtils.isSessionValid.mockResolvedValueOnce(false);
 			const mockCB = jest.fn(() => {});
-			AuthMiddlewares.notLoggedIn(
-				{ ips: [ipAddress], headers: { referer: 'http://xyz.com' }, session, cookies },
-				{},
-				mockCB,
+			await AuthMiddlewares.notLoggedIn(
+				req, res, mockCB,
 			);
-			expect(mockCB.mock.calls.length).toBe(1);
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).not.toHaveBeenCalled();
 		});
 
-		test('next() should be called if there is no session in the req', () => {
+		test('should respond with alreadyLoggedIn errCode if the session is valid', async () => {
+			SessionUtils.isSessionValid.mockResolvedValueOnce(true);
 			const mockCB = jest.fn(() => {});
-			AuthMiddlewares.notLoggedIn(
-				{ ips: [ipAddress], headers: { referer: 'http://xyz.com' }, cookies },
-				{},
-				mockCB,
+			await AuthMiddlewares.notLoggedIn(
+				req, res, mockCB,
 			);
-			expect(mockCB.mock.calls.length).toBe(1);
-		});
-
-		test('next() should be called if the session is invalid and there is an API key', () => {
-			const mockCB = jest.fn(() => {});
-			AuthMiddlewares.notLoggedIn(
-				{ ips: [ipAddress], headers: { referer: 'http://xyz.com' }, session: { user: { referer: 'http://abc.com', isAPIKey: true } } },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(1);
-		});
-
-		test('should respond with alreadyLoggedIn errCode if the session is valid', () => {
-			const mockCB = jest.fn(() => {});
-			AuthMiddlewares.notLoggedIn(
-				{ ips: [ipAddress], headers, session, cookies },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.alreadyLoggedIn);
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.alreadyLoggedIn);
 		});
 	});
 };
 
 const testIsLoggedIn = () => {
 	describe('Is logged in middleware', () => {
-		test('next() should be called if the session is valid', () => {
+		const req = { ips: [ipAddress], headers, session, cookies };
+		const res = {};
+		test('next() should be called if the session is valid', async () => {
 			const mockCB = jest.fn(() => {});
-			AuthMiddlewares.isLoggedIn(
-				{ ips: [ipAddress], headers, session, cookies },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(1);
+			SessionUtils.isSessionValid.mockResolvedValueOnce(true);
+			await AuthMiddlewares.isLoggedIn(req, res, mockCB);
+
+			expect(SessionUtils.isSessionValid).toHaveBeenCalledTimes(1);
+			expect(SessionUtils.isSessionValid).toHaveBeenCalledWith(session, cookies, headers, true);
+			expect(mockCB).toHaveBeenCalledTimes(1);
+
+			expect(SessionUtils.destroySession).not.toHaveBeenCalled();
 		});
 
-		test('should respond with notLoggedIn errCode if the session is invalid', () => {
+		test('should respond with notLoggedIn errCode if the session is invalid', async () => {
 			const mockCB = jest.fn(() => {});
-			AuthMiddlewares.isLoggedIn(
-				{ ips: [ipAddress], headers: { ...headers, referer: 'http://xyz.com' }, session, cookies },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.notLoggedIn);
+			SessionUtils.isSessionValid.mockResolvedValueOnce(false);
+			await AuthMiddlewares.isLoggedIn(req, res, mockCB);
+
+			expect(SessionUtils.isSessionValid).toHaveBeenCalledTimes(1);
+			expect(SessionUtils.isSessionValid).toHaveBeenCalledWith(session, cookies, headers, true);
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.notLoggedIn);
+
+			expect(SessionUtils.destroySession).toHaveBeenCalledTimes(1);
 		});
 
-		test('should respond with notLoggedIn errCode if the session is invalid and there is an API key', () => {
+		test('should respond with notLoggedIn errCode if there is no session', async () => {
 			const mockCB = jest.fn(() => {});
-			AuthMiddlewares.isLoggedIn(
-				{ ips: [ipAddress], headers, session: { user: { referer: 'http://abc.com', isAPIKey: true } } },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.notLoggedIn);
+			SessionUtils.isSessionValid.mockResolvedValueOnce(false);
+			const { session: ses, ...reqNoSession } = req;
+			await AuthMiddlewares.isLoggedIn(reqNoSession, res, mockCB);
+
+			expect(SessionUtils.isSessionValid).toHaveBeenCalledTimes(1);
+			expect(SessionUtils.isSessionValid).toHaveBeenCalledWith(undefined, cookies, headers, true);
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(reqNoSession, res, templates.notLoggedIn);
+
+			expect(SessionUtils.destroySession).not.toHaveBeenCalled();
 		});
 	});
 };

@@ -20,7 +20,7 @@
 const request = require("supertest");
 const expect = require("chai").expect;
 
-const SessionTracker = require("../../v5/helper/sessionTracker");
+const SessionTracker = require("../../v4/helpers/sessionTracker");
 const app = require("../../../src/v4/services/api.js").createApp();
 const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
@@ -44,7 +44,6 @@ describe("Account permission::", function () {
 			console.log("API test server is listening on port 8080!");
 
 			agent = request(server);
-
 			testSession = SessionTracker(agent);
 			testSession.login(username, password).then(()=> {done()});
 		});

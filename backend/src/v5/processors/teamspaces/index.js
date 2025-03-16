@@ -27,7 +27,7 @@ const {
 	grantAdminToUser,
 	removeUserFromAdminPrivilege,
 } = require('../../models/teamspaceSettings');
-const { getAccessibleTeamspaces, getUserRefId } = require('../../models/users');
+const { getAccessibleTeamspaces, getUserId } = require('../../models/users');
 const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
@@ -131,7 +131,7 @@ Teamspaces.getQuotaInfo = async (teamspace) => {
 Teamspaces.addTeamspaceMember = async (teamspace, userToAdd) => {
 	const [accountId, userId] = await Promise.all([
 		getTeamspaceRefId(teamspace),
-		getUserRefId(userToAdd),
+		getUserId(userToAdd),
 
 	]);
 	await Promise.all([
@@ -143,7 +143,7 @@ Teamspaces.addTeamspaceMember = async (teamspace, userToAdd) => {
 Teamspaces.removeTeamspaceMember = async (teamspace, userToRemove, removePermissions = true) => {
 	const [accountId, userId] = await Promise.all([
 		getTeamspaceRefId(teamspace),
-		getUserRefId(userToRemove),
+		getUserId(userToRemove),
 		...(removePermissions ? [
 			removeUserFromAllModels(teamspace, userToRemove),
 			removeUserFromAllProjects(teamspace, userToRemove),

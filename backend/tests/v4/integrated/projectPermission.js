@@ -18,7 +18,7 @@
  */
 
 const request = require("supertest");
-const SessionTracker = require("../../v5/helper/sessionTracker")
+const SessionTracker = require("../../v4/helpers/sessionTracker")
 const expect = require("chai").expect;
 const app = require("../../../src/v4/services/api.js").createApp();
 const logger = require("../../../src/v4/logger.js");
@@ -114,7 +114,7 @@ describe("Project Permissions::", function () {
 		agentNoPermission
 			.post(`/${teamspace}/model`)
 			.send(Object.assign({modelName: modelName}, modelDetail))
-			.expect(401, function(err, res) {
+			.expect(404, function(err, res) {
 				done(err);
 			});
 
@@ -127,7 +127,7 @@ describe("Project Permissions::", function () {
 		agentNoPermission
 			.post(`/${teamspace}/model`)
 			.send(Object.assign({modelName: modelName, subModels: [] }, modelDetail))
-			.expect(401, function(err, res) {
+			.expect(404, function(err, res) {
 				done(err);
 			});
 

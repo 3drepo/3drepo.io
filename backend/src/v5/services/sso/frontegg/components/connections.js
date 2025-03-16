@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { IdentityClient } = require('@frontegg/client');
+const Config = require('../../../../utils/config');
+const FronteggClient = require('@frontegg/client');
 const Yup = require('yup');
-const { sso: { frontegg } } = require('../../../../utils/config');
 const { post } = require('../../../../utils/webRequests');
 const { toBase64 } = require('../../../../utils/helper/strings');
 
@@ -51,16 +51,19 @@ const generateVendorToken = async () => {
 const init = async () => {
 	if (identityClient) return;
 	try {
-		config = configSchema.validateSync(frontegg, { stripUnknown: true });
+		config = configSchema.validateSync(Config?.sso?.frontegg, { stripUnknown: true });
 	} catch (err) {
 		throw new Error(`Failed to validate Frontegg config: ${err.message}`);
 	}
 
 	try {
+		// Getting jest to tamper with env var is too much trouble.
+		/* istanbul ignore if */
 		if (!process.env.FRONTEGG_API_GATEWAY_URL) {
 			throw new Error('Envar FRONTEGG_API_GATEWAY_URL is not set. This is required (Most likely, it should be the UK DC: https://api.uk.frontegg.com)');
 		}
-		identityClient = new IdentityClient({ FRONTEGG_CLIENT_ID: config.clientId, FRONTEGG_API_KEY: config.key });
+		identityClient = new FronteggClient.IdentityClient(
+			{ FRONTEGG_CLIENT_ID: config.clientId, FRONTEGG_API_KEY: config.key });
 
 		// verify the vendor credentials are valid by generating a vendor jwt
 		// This needs to be called after identityClient is assigned to avoid circular dependency
@@ -68,6 +71,10 @@ const init = async () => {
 	} catch (err) {
 		throw new Error(`Failed to initialise Frontegg client: ${err.message}`);
 	}
+};
+
+Connection.reset = () => {
+	identityClient = undefined;
 };
 
 Connection.getConfig = async () => {
@@ -91,8 +98,6 @@ Connection.getBasicHeader = async () => {
 };
 
 Connection.getIdentityClient = async () => {
-	if (identityClient) return identityClient;
-
 	await init();
 	return identityClient;
 };

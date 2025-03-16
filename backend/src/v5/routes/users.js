@@ -137,7 +137,7 @@ const establishRoutes = () => {
 	 *         description: Returns the username of the user currently logged in
 	 *         content:
 	 *           application/json:
-	 authenticatedTeamspace             schema:
+     *             schema:
 	 *               type: object
 	 *               properties:
 	 *                 username:
