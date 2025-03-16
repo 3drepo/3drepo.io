@@ -14,56 +14,32 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/*
-const { get, post } = require('../../../../utils/webRequests');
-const { getBearerHeader, getConfig } = require('./connections');
-const { deleteIfUndefined } = require('../../../../utils/helper/objects');
+const { src } = require('../../path');
 
-Users.getUserById = async (userId) => {
-	try {
-		const config = await getConfig();
-		const { data } = await get(`${config.vendorDomain}/identity/resources/vendor-only/users/v1/${userId}`, await getBearerHeader());
-		return data;
-	} catch (err) {
-		throw new Error(`Failed to get user(${userId}) from Users: ${err.message}`);
-	}
-};
+const { generateUUIDString } = require(`${src}/utils/helper/uuids`);
+const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 
-Users.doesUserExist = async (email) => {
-	try {
-		const config = await getConfig();
-		const { data } = await get(`${config.vendorDomain}/identity/resources/users/v1/email?email=${email}`,
-			await getBearerHeader());
-		return data.id;
-	} catch (err) {
-		return false;
-	}
-};
-
-Users.createUser = async (accountId, email, name, userData, privateUserData, bypassVerification = false) => {
-	try {
-		const config = await getConfig();
-		const payload = deleteIfUndefined({
-			email,
-			name,
-			tenantId: accountId,
-			metadata: userData,
-			vendorMetadata: privateUserData,
-			roleIds: [config.userRole],
-
-		});
-
-		// using the migration endpoint will automatically activate the user
-		const url = bypassVerification
-			? `${config.vendorDomain}/identity/resources/migrations/v1/local`
-			: `${config.vendorDomain}/identity/resources/vendor-only/users/v1`;
-		const { data } = await post(url, payload, { headers: await getBearerHeader() });
-
-		return data.id;
-	} catch (err) {
-		throw new Error(`Failed to create user(${email}) on Users: ${JSON.stringify(err?.response?.data) || err.message}`);
-	}
-};
-*/
+const usersById = {};
+const usersByEmail = {};
 const Users = {};
+Users.getUserById = (userId) => Promise.resolve(usersById[userId]);
+
+Users.doesUserExist = (email) => {
+	const user = usersByEmail[email];
+
+	return Promise.resolve(user.id ?? false);
+};
+
+Users.createUser = (accountId, email, name) => {
+	const data = deleteIfUndefined({
+		id: generateUUIDString(),
+		email,
+		name,
+		tenantId: accountId,
+	});
+
+	usersById[data.id] = data;
+	usersById[data.email] = data;
+	return Promise.resolve(data.id);
+};
 module.exports = Users;
