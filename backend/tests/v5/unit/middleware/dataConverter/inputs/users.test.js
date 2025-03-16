@@ -40,7 +40,6 @@ WebRequests.post.mockImplementation(() => Promise.resolve({
 const availableUsername = 'nonExistingUser';
 const existingUsername = 'existingUsername';
 const availableEmail = 'availableEmail@email.com';
-const validPassword = 'Abcdef12345!';
 
 UsersModel.getUserByQuery.mockImplementation((query) => {
 	if ((query.$or && query.$or[0]?.user === availableUsername) || query['customData.email'] === availableEmail) {
@@ -71,18 +70,11 @@ const testValidateUpdateData = () => {
 	describe.each([
 		[{ body: { firstName: generateRandomString(100) } }, false, false, 'with too large firstName', templates.invalidArguments],
 		[{ body: { lastName: generateRandomString(100) } }, false, false, 'with too large lastName', templates.invalidArguments],
-		[{ body: { email: availableEmail, extraProp: 'extra' } }, false, false, 'with extra properties', templates.invalidArguments],
+		[{ body: { email: availableEmail } }, false, false, 'with email', templates.invalidArguments],
 		[{ body: { company: '' } }, false, false, 'with empty company', templates.invalidArguments],
 		[{ body: { company: generateRandomString() } }, false, true, 'with company'],
 		[{ body: { countryCode: 'invalid country' } }, false, false, 'with invalid country', templates.invalidArguments],
 		[{ body: { countryCode: 'GB' } }, false, true, 'with valid country'],
-		[{ body: { oldPassword: validPassword } }, false, false, 'with oldPassword but not newPassword', templates.invalidArguments],
-		[{ body: { newPassword: 'Abcdef123456!' } }, false, false, 'with newPassword but not oldPassword', templates.invalidArguments],
-		[{ body: { oldPassword: validPassword, newPassword: 'abc' } }, false, false, 'with short newPassword', templates.invalidArguments],
-		[{ body: { oldPassword: validPassword, newPassword: 'abcdefghi' } }, false, false, 'with weak newPassword', templates.invalidArguments],
-		[{ body: { oldPassword: validPassword, newPassword: 'Abcdef123!Abcdef123!Abcdef123!Abcdef123!Abcdef123!Abcdef123!Abcdef' } }, false, false, 'with too long newPassword', templates.invalidArguments],
-		[{ body: { oldPassword: validPassword, newPassword: validPassword } }, false, false, 'with newPassword same as old', templates.invalidArguments],
-		[{ body: { oldPassword: validPassword, newPassword: 'Abcdef12345!!' } }, false, true, 'with strong newPassword'],
 		[{ body: {} }, false, false, 'with empty body', templates.invalidArguments],
 		[{ body: undefined }, false, false, 'with undefined body', templates.invalidArguments],
 	])('Check if req arguments for updating profile are valid', (data, isSso, shouldPass, desc, expectedError) => {

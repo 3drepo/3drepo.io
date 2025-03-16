@@ -17,6 +17,7 @@
 
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
 const Yup = require('yup');
+const { deleteIfUndefined } = require('../../../utils/helper/objects');
 const { respond } = require('../../../utils/responder');
 const { types } = require('../../../utils/helper/yup');
 
@@ -32,7 +33,7 @@ const schema = Yup.object().shape({
 
 Users.validateUpdateData = async (req, res, next) => {
 	try {
-		req.body = await schema.validate(req.body, { stripUnknown: true });
+		req.body = deleteIfUndefined(await schema.validate(req.body, { stripUnknown: true }));
 
 		if (!Object.keys(req.body).length) throw new Error('Nothing to update');
 		await next();
