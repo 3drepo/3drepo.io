@@ -38,10 +38,8 @@ class SessionTracker {
 
 	setApiKey(url) {
 		if(this.apiKey) {
-			const [uri, queries] = url.split("?");
-			const searchParams = new URLSearchParams(queries);
-			searchParams.append("key", this.apiKey);
-			return `${uri}?${searchParams.toString()}`;
+			const keyword = url.includes("?") ? "&" : "?" ;
+			return `${url}${keyword}key=${this.apiKey}`
 		}
 		return url;
 	}
