@@ -20,7 +20,7 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../helper/services');
 const { image, src } = require('../../../helper/path');
 const fs = require('fs');
-const { generateRandomNumber, generateRandomModel, generateRandomProject, generateRandomString } = require('../../../helper/services');
+const { generateRandomModel, generateRandomProject, generateRandomString } = require('../../../helper/services');
 
 const { DEFAULT_OWNER_JOB } = require(`${src}/models/jobs.constants`);
 const config = require(`${src}/utils/config`);
@@ -30,193 +30,6 @@ const { updateAddOns } = require(`${src}/models/teamspaceSettings`);
 
 let server;
 let agent;
-/*
-const testUser = ServiceHelper.generateUserCredentials();
-const testUser2 = ServiceHelper.generateUserCredentials();
-const userWithLicense = ServiceHelper.generateUserCredentials();
-const userWithMultipleLicenses = ServiceHelper.generateUserCredentials();
-const userWithLicenseUnlimitedCollabs = ServiceHelper.generateUserCredentials();
-const userWithExpiredLicense = ServiceHelper.generateUserCredentials();
-const userToRemoveFromTs = ServiceHelper.generateUserCredentials();
-
-const usersInFirstTeamspace = [
-	ServiceHelper.generateUserCredentials(),
-	ServiceHelper.generateUserCredentials(),
-	ServiceHelper.generateUserCredentials(),
-];
-const userWithFsAvatar = ServiceHelper.generateUserCredentials();
-const userWithNoAvatar = ServiceHelper.generateUserCredentials();
-const userWithGridFsAvatar = ServiceHelper.generateUserCredentials();
-
-// This is the list of teamspaces the user has access to
-const teamspaces = [
-	{ name: ServiceHelper.generateRandomString(), isAdmin: true },
-	{ name: ServiceHelper.generateRandomString(), isAdmin: false },
-	{ name: ServiceHelper.generateRandomString(), isAdmin: true },
-];
-const teamspaceWithAddOns = teamspaces[0];
-
-const addOns = {
-	[ADD_ONS.VR]: true,
-	[ADD_ONS.SRC]: true,
-	[ADD_ONS.HERE]: true,
-	[ADD_ONS.POWERBI]: true,
-	[ADD_ONS.MODULES]: Object.values(ADD_ONS_MODULES),
-};
-
-const fsAvatarData = ServiceHelper.generateRandomString();
-const gridFsAvatarData = ServiceHelper.generateRandomString();
-const tsWithFsAvatar = { name: ServiceHelper.generateRandomString() };
-const tsWithGridFsAvatar = { name: ServiceHelper.generateRandomString() };
-
-// license related
-const licenseData = generateRandomNumber(0);
-const tsWithLicense = { name: ServiceHelper.generateRandomString() };
-const tsWithMultipleLicenses = { name: ServiceHelper.generateRandomString() };
-const tsWithLicenseUnlimitedCollabs = { name: ServiceHelper.generateRandomString() };
-const tsWithExpiredLicense = { name: ServiceHelper.generateRandomString() };
-
-// some of its members will be removed after testRemoveTeamspaceMember
-const tsWithUsersToRemove = { name: ServiceHelper.generateRandomString(), isAdmin: true };
-
-const userCollabs = 10;
-
-const jobToUsers = [
-	{ _id: 'jobA', users: [testUser, usersInFirstTeamspace[0]] },
-	{ _id: 'jobB', users: [usersInFirstTeamspace[1]] },
-	{ _id: 'jobC', users: [] },
-];
-
-const project = generateRandomProject();
-const projectWithImage = generateRandomProject();
-
-const model = generateRandomModel({ collaborators: [userToRemoveFromTs.user] });
-const modelWithRev = generateRandomModel();
-const validExpiryDate = Date.now() + 100000;
-*/
-/*	await Promise.all(teamspaces.map(
-		({ name, isAdmin }) => {
-			const perms = isAdmin ? [testUser.user] : [];
-			return ServiceHelper.db.createTeamspace(name, perms);
-		},
-	));
-
-	await updateAddOns(teamspaceWithAddOns.name, addOns);
-
-	await Promise.all([
-		ServiceHelper.db.createTeamspace(tsWithFsAvatar.name, [userWithFsAvatar.user]),
-		ServiceHelper.db.createTeamspace(tsWithGridFsAvatar.name, [userWithGridFsAvatar.user]),
-		ServiceHelper.db.createTeamspace(tsWithLicense.name, [userWithLicense.user], {
-			discretionary: {
-				collaborators: userCollabs,
-				data: licenseData,
-				expiryDate: validExpiryDate,
-			},
-		}),
-		ServiceHelper.db.createTeamspace(
-			tsWithMultipleLicenses.name,
-			[userWithMultipleLicenses.user],
-			{
-				discretionary: {
-					collaborators: userCollabs,
-					data: licenseData,
-					expiryDate: validExpiryDate,
-				},
-				enterprise: {
-					collaborators: userCollabs,
-					data: licenseData,
-					expiryDate: validExpiryDate - 10,
-				},
-			},
-		),
-		ServiceHelper.db.createTeamspace(tsWithLicenseUnlimitedCollabs.name,
-			[userWithLicenseUnlimitedCollabs.user], {
-				discretionary: {
-					collaborators: 'unlimited',
-					data: licenseData,
-					expiryDate: validExpiryDate,
-				},
-			}),
-		ServiceHelper.db.createTeamspace(tsWithExpiredLicense.name, [userWithExpiredLicense.user], {
-			discretionary: {
-				collaborators: 'unlimited',
-				data: licenseData,
-				expiryDate: Date.now() - 100000,
-			},
-		}),
-		ServiceHelper.db.createTeamspace(tsWithUsersToRemove.name, [
-			userToRemoveFromTs.user,
-			testUser.user,
-		])]);
-
-	await Promise.all([
-		ServiceHelper.db.createUser(
-			testUser,
-			[...teamspaces.map(({ name }) => name), tsWithUsersToRemove.name],
-		),
-		ServiceHelper.db.createUser(
-			userWithLicense,
-			[tsWithLicense.name],
-		),
-		ServiceHelper.db.createUser(
-			userWithMultipleLicenses,
-			[tsWithMultipleLicenses.name],
-		),
-		ServiceHelper.db.createUser(
-			userWithLicenseUnlimitedCollabs,
-			[tsWithLicenseUnlimitedCollabs.name, tsWithLicense.name],
-		),
-		ServiceHelper.db.createUser(
-			userWithExpiredLicense,
-			[tsWithExpiredLicense.name],
-		),
-		ServiceHelper.db.createUser(
-			testUser2,
-			[tsWithUsersToRemove.name],
-		),
-		ServiceHelper.db.createUser(
-			userToRemoveFromTs,
-			[tsWithUsersToRemove.name],
-		),
-		...usersInFirstTeamspace.map((user) => ServiceHelper.db.createUser(
-			user,
-			[teamspaces[0].name],
-		)),
-		ServiceHelper.db.createUser(
-			userWithFsAvatar,
-			[tsWithFsAvatar.name],
-		),
-		ServiceHelper.db.createUser(
-			userWithNoAvatar,
-			[tsWithGridFsAvatar.name],
-		),
-		ServiceHelper.db.createUser(
-			userWithGridFsAvatar,
-			[tsWithGridFsAvatar.name],
-		),
-		ServiceHelper.db.createAvatar(tsWithFsAvatar.name, 'fs', fsAvatarData),
-		ServiceHelper.db.createAvatar(tsWithGridFsAvatar.name, 'gridfs', gridFsAvatarData),
-
-		ServiceHelper.db.createJobs(teamspaces[0].name, jobToUsers),
-	]);
-
-	await Promise.all([
-		ServiceHelper.db.createProject(tsWithUsersToRemove.name, project.id, project.name,
-			[], [userToRemoveFromTs.user]),
-		ServiceHelper.db.createProject(tsWithLicense.name, projectWithImage.id, projectWithImage.name,
-			[], [userWithLicense.user]),
-	]);
-
-	await Promise.all([
-		ServiceHelper.db.createProjectImage(tsWithLicense.name, projectWithImage.id, 'fs', fs.readFileSync(image)),
-		ServiceHelper.db.createModel(tsWithUsersToRemove.name, model._id, model.name, model.properties),
-		ServiceHelper.db.createModel(tsWithLicense.name, modelWithRev._id, modelWithRev.name,
-			modelWithRev.properties),
-	]);
-
-	await ServiceHelper.db.createRevision(tsWithLicense.name, project.id, modelWithRev._id,
-		ServiceHelper.generateRevisionEntry(false, true));
-}; */
 
 const testGetTeamspaceList = () => {
 	describe('Get teamspace list', () => {
@@ -320,7 +133,6 @@ const testGetTeamspaceMembers = () => {
 			});
 			expectedData.push({ job: DEFAULT_OWNER_JOB, user: teamspace });
 
-			console.log(res.body.members, expectedData);
 			ServiceHelper.outOfOrderArrayEqual(res.body.members, expectedData);
 		});
 	});
@@ -402,7 +214,7 @@ const testGetQuotaInfo = () => {
 			expiryDate: null,
 			freeTier: true,
 			data: { used: 0, available: freeSpaceLimitInBytes },
-			seats: { used: 1, available: config.subscriptions.basic.collaborators },
+			seats: { used: 3, available: config.subscriptions.basic.collaborators },
 		};
 
 		beforeAll(async () => {
@@ -412,8 +224,8 @@ const testGetQuotaInfo = () => {
 			]);
 			await Promise.all([
 				ServiceHelper.db.createTeamspace(teamspaceWithLicense, [testUser.user], activeLicense),
-				ServiceHelper.db.createTeamspace(teamspaceWithExpiredLicense, [testUser.user]),
-				ServiceHelper.db.createTeamspace(teamspaceWithoutLicense, [testUser.user], { discretionary: {
+				ServiceHelper.db.createTeamspace(teamspaceWithoutLicense, [testUser.user]),
+				ServiceHelper.db.createTeamspace(teamspaceWithExpiredLicense, [testUser.user], { discretionary: {
 					collaborators: 'unlimited',
 					data: 1024,
 					expiryDate: Date.now() - 100000,
@@ -427,11 +239,11 @@ const testGetQuotaInfo = () => {
 			const modelWithRev = generateRandomModel();
 			await ServiceHelper.db.createProject(teamspaceWithLicense, projectWithImage.id, projectWithImage.name);
 			await Promise.all([
-				ServiceHelper.db.createProjectImage(teamspaceWithLicense.name,
+				ServiceHelper.db.createProjectImage(teamspaceWithLicense,
 					projectWithImage.id, 'fs', fs.readFileSync(image)),
 				ServiceHelper.db.createModel(teamspaceWithLicense, modelWithRev._id, modelWithRev.name,
 					modelWithRev.properties)]);
-			await ServiceHelper.db.createRevision(teamspaceWithLicense.name, projectWithImage.id, modelWithRev._id,
+			await ServiceHelper.db.createRevision(teamspaceWithLicense, projectWithImage.id, modelWithRev._id,
 				ServiceHelper.generateRevisionEntry(false, true));
 		});
 		const route = (key, ts = teamspaceWithLicense) => `/v5/teamspaces/${ts}/quota${key ? `?key=${key}` : ''}`;
@@ -461,121 +273,138 @@ const testGetQuotaInfo = () => {
 
 const testRemoveTeamspaceMember = () => {
 	describe('Remove teamspace member', () => {
-		const route = (ts = tsWithUsersToRemove.name,
-			username = userToRemoveFromTs.user) => `/v5/teamspaces/${ts}/members/${username}`;
+		const testUser = ServiceHelper.generateUserCredentials();
+		const userNoAccess = ServiceHelper.generateUserCredentials();
+		const userNotAdmin = ServiceHelper.generateUserCredentials();
+		const userToRemove = ServiceHelper.generateUserCredentials();
+		const testUser2 = ServiceHelper.generateUserCredentials();
 
-		test('should fail without a valid session', async () => {
-			const res = await agent.delete(route()).expect(templates.notLoggedIn.status);
-			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		const teamspace = ServiceHelper.generateRandomString();
+
+		const route = (key, ts = teamspace, username = userToRemove.user) => `/v5/teamspaces/${ts}/members/${username}${key ? `?key=${key}` : ''}`;
+
+		beforeAll(async () => {
+			await Promise.all([
+				ServiceHelper.db.createUser(testUser),
+				ServiceHelper.db.createUser(userNoAccess),
+			]);
+			await ServiceHelper.db.createTeamspace(teamspace, [testUser.user]);
+			await Promise.all([
+				ServiceHelper.db.createUser(userToRemove, [teamspace]),
+				ServiceHelper.db.createUser(userNotAdmin, [teamspace]),
+				ServiceHelper.db.createUser(testUser2, [teamspace]),
+			]);
 		});
 
-		test('should fail if the user does not have access to the teamspace', async () => {
-			const res = await agent.delete(`${route()}/?key=${userWithLicense.apiKey}`).expect(templates.teamspaceNotFound.status);
-			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
-		});
+		describe.each([
+			['the user does not have a valid session', route(), false, templates.notLoggedIn],
+			['the teamspace does not exist', route(userNoAccess.apiKey, ServiceHelper.generateRandomString()), false, templates.teamspaceNotFound],
+			['the user does not have access to the teamspace', route(userNoAccess.apiKey), false, templates.teamspaceNotFound],
+			['the user does not have admin permissions to the teamspace', route(userNotAdmin.apiKey), false, templates.notAuthorized],
+			['the user is admin', route(testUser.apiKey), true, userToRemove.user],
+			['the user is admin but the user to remove does not exist', route(testUser.apiKey, teamspace, ServiceHelper.generateRandomString()), false, templates.notAuthorized],
+			['the user is admin but the user is not a member', route(testUser.apiKey, teamspace, userNoAccess.user), false, templates.notAuthorized],
+			['the user tries to remove themselves even if they are not admin', route(testUser2.apiKey, teamspace, testUser2.user), true, testUser2.user],
 
-		test('should fail if the user does not have admin permissions to the teamspace', async () => {
-			const res = await agent.delete(`${route()}/?key=${testUser2.apiKey}`).expect(templates.notAuthorized.status);
-			expect(res.body.code).toEqual(templates.notAuthorized.code);
-		});
-
-		test('should fail if the teamspace does not exist', async () => {
-			const res = await agent.delete(`${route('sldkfjdl')}/?key=${testUser.apiKey}`).expect(templates.teamspaceNotFound.status);
-			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
-		});
-
-		test('should fail if the user to be removed does not exist', async () => {
-			const res = await agent.delete(`${route(tsWithUsersToRemove.name, generateRandomString())}/?key=${testUser.apiKey}`)
-				.expect(templates.notAuthorized.status);
-			expect(res.body.code).toEqual(templates.notAuthorized.code);
-		});
-
-		test('should fail if the user to be removed is not a member of the teamspace', async () => {
-			const res = await agent.delete(`${route(tsWithUsersToRemove.name, userWithLicense.user)}/?key=${testUser.apiKey}`)
-				.expect(templates.notAuthorized.status);
-			expect(res.body.code).toEqual(templates.notAuthorized.code);
-		});
-
-		test('should fail if the the user to remove is the owner of the teamspace', async () => {
-			const res = await agent.delete(`${route(tsWithUsersToRemove.name, tsWithUsersToRemove.name)}/?key=${testUser.apiKey}`).expect(templates.notAuthorized.status);
-			expect(res.body.code).toEqual(templates.notAuthorized.code);
-		});
-
-		test('should remove another user from the teamspace', async () => {
-			await agent.delete(`${route()}/?key=${testUser.apiKey}`).expect(templates.ok.status);
-			const tsMembersRes = await agent.get(`/v5/teamspaces/${tsWithUsersToRemove.name}/members?key=${testUser.apiKey}`);
-			const removedUser = tsMembersRes.body.members.find((m) => m.user === userToRemoveFromTs.user);
-			expect(removedUser).toEqual(undefined);
-			const projectDataRes = await agent.get(`/${tsWithUsersToRemove.name}/projects?key=${testUser.apiKey}`);
-			const projectPermissions = projectDataRes.body.find((p) => p._id === project.id).permissions;
-			const removedProjectPermission = projectPermissions.find((p) => p.user === userToRemoveFromTs.user);
-			expect(removedProjectPermission).toEqual(undefined);
-			const modelPermissionsRes = await agent.get(`/${tsWithUsersToRemove.name}/${model._id}/permissions?key=${testUser.apiKey}`);
-			const removedModelPermission = modelPermissionsRes.body.find((p) => p.user === userToRemoveFromTs.user);
-			expect(removedModelPermission).toEqual(undefined);
-		});
-
-		test('should remove themselves from the teamspace (team member)', async () => {
-			await agent.delete(`${route(tsWithUsersToRemove.name, testUser2.user)}/?key=${testUser2.apiKey}`).expect(templates.ok.status);
-			const tsMembersRes = await agent.get(`/v5/teamspaces/${tsWithUsersToRemove.name}/members?key=${testUser.apiKey}`);
-			const removedUser = tsMembersRes.body.members.find((m) => m.user === testUser2.user);
-			expect(removedUser).toEqual(undefined);
-			const projectDataRes = await agent.get(`/${tsWithUsersToRemove.name}/projects?key=${testUser.apiKey}`);
-			const projectPermissions = projectDataRes.body.find((p) => p._id === project.id).permissions;
-			const removedProjectPermission = projectPermissions.find((p) => p.user === testUser2.user);
-			expect(removedProjectPermission).toEqual(undefined);
-			const modelPermissionsRes = await agent.get(`/${tsWithUsersToRemove.name}/${model._id}/permissions?key=${testUser.apiKey}`);
-			const removedModelPermission = modelPermissionsRes.body.find((p) => p.user === testUser2.user);
-			expect(removedModelPermission).toEqual(undefined);
+		])('', (desc, url, success, expectedData) => {
+			test(`Should ${success ? 'succeed' : `fail with ${expectedData?.code}`} if ${desc}`, async () => {
+				const expectedStatus = expectedData?.status ?? templates.ok.status;
+				const res = await agent.delete(url).expect(expectedStatus);
+				if (success) {
+					const tsMembersRes = await agent.get(`/v5/teamspaces/${teamspace}/members?key=${testUser.apiKey}`);
+					const removedUser = tsMembersRes.body.members.find((m) => m.user === expectedData);
+					expect(removedUser).toEqual(undefined);
+				} else {
+					expect(res.body.code).toEqual(expectedData.code);
+				}
+			});
 		});
 	});
 };
 
 const testGetMemberAvatar = () => {
 	describe('Get teamspace member avatar', () => {
-		const route = (ts = tsWithGridFsAvatar.name, member = tsWithGridFsAvatar.name) => `/v5/teamspaces/${ts}/members/${member}/avatar`;
-		test('should fail without a valid session', async () => {
-			const res = await agent.get(route()).expect(templates.notLoggedIn.status);
-			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		const testUser = ServiceHelper.generateUserCredentials();
+		const userNoAccess = ServiceHelper.generateUserCredentials();
+		const userNotAdmin = ServiceHelper.generateUserCredentials();
+		const userWithAvatar = ServiceHelper.generateUserCredentials();
+
+		const teamspace = ServiceHelper.generateRandomString();
+		const avatar = ServiceHelper.generateRandomString();
+
+		const route = (key, member = userWithAvatar, ts = teamspace) => `/v5/teamspaces/${ts}/members/${member}/avatar${key ? `?key=${key}` : ''}`;
+
+		beforeAll(async () => {
+			await Promise.all([
+				ServiceHelper.db.createUser(testUser),
+				ServiceHelper.db.createUser(userNoAccess),
+			]);
+			await ServiceHelper.db.createTeamspace(teamspace, [testUser.user]);
+			await Promise.all([
+				ServiceHelper.db.createUser(userWithAvatar, [teamspace]),
+				ServiceHelper.db.createUser(userNotAdmin, [teamspace]),
+			]);
+			await ServiceHelper.db.createAvatar(userWithAvatar.user, 'fs', avatar);
 		});
 
-		test('should fail if the user does not have access to the teamspace', async () => {
-			const res = await agent.get(`${route()}/?key=${testUser.apiKey}`).expect(templates.teamspaceNotFound.status);
-			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
-		});
-
-		test('should fail the requested user is not a member of the teamspace', async () => {
-			const res = await agent.get(`${route(tsWithGridFsAvatar.name, testUser.user)}/?key=${userWithGridFsAvatar.apiKey}`).expect(templates.userNotFound.status);
-			expect(res.body.code).toEqual(templates.userNotFound.code);
-		});
-
-		test('should fail if the teamspace does not exist', async () => {
-			const res = await agent.get(`${route('sldkfjdl')}/?key=${userWithGridFsAvatar.apiKey}`).expect(templates.teamspaceNotFound.status);
-			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
-		});
-
-		test(`should return ${templates.fileNotFound.code} if the member does not have an avatar`, async () => {
-			const res = await agent.get(`${route(tsWithGridFsAvatar.name, userWithNoAvatar.user)}/?key=${userWithGridFsAvatar.apiKey}`).expect(templates.fileNotFound.status);
-			expect(res.body.code).toEqual(templates.fileNotFound.code);
-		});
-
-		test('should return member avatar', async () => {
-			const res = await agent.get(`${route()}/?key=${userWithGridFsAvatar.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual(Buffer.from(gridFsAvatarData));
+		describe.each([
+			['the user does not have a valid session', route(), false, templates.notLoggedIn],
+			['the teamspace does not exist', route(userNoAccess.apiKey, ServiceHelper.generateRandomString()), false, templates.teamspaceNotFound],
+			['the user does not have access to the teamspace', route(userNoAccess.apiKey), false, templates.teamspaceNotFound],
+			['the user requested does not have access to the teamspace', route(testUser.apiKey, userNoAccess.user), false, templates.userNotFound],
+			['the user requested does not have an avatar', route(testUser.apiKey, userNotAdmin.user), false, templates.fileNotFound],
+			['the user has an avatar (admin requested)', route(testUser.apiKey, userWithAvatar.user), true, Buffer.from(avatar)],
+			['the user has an avatar (team member requested)', route(userNotAdmin.apiKey, userWithAvatar.user), true, Buffer.from(avatar)],
+		])('', (desc, url, success, expectedData) => {
+			test(`Should ${success ? 'succeed' : `fail with ${expectedData?.code}`} if ${desc}`, async () => {
+				const expectedStatus = expectedData?.status ?? templates.ok.status;
+				const res = await agent.get(url).expect(expectedStatus);
+				if (success) {
+					const tsMembersRes = await agent.get(`/v5/teamspaces/${teamspace}/members?key=${testUser.apiKey}`);
+					const removedUser = tsMembersRes.body.members.find((m) => m.user === expectedData);
+					expect(removedUser).toEqual(undefined);
+				} else {
+					expect(res.body.code).toEqual(expectedData.code);
+				}
+			});
 		});
 	});
 };
 
 const testGetAddOns = () => {
 	describe('Get add ons', () => {
+		const testUser = ServiceHelper.generateUserCredentials();
+		const userNoAccess = ServiceHelper.generateUserCredentials();
+
+		const teamspace = ServiceHelper.generateRandomString();
+		const teamspaceNoAddOns = ServiceHelper.generateRandomString();
+
 		const route = (key, ts) => `/v5/teamspaces/${ts}/addOns${key ? `?key=${key}` : ''}`;
 
+		const addOns = {
+			[ADD_ONS.VR]: true,
+			[ADD_ONS.SRC]: true,
+			[ADD_ONS.HERE]: true,
+			[ADD_ONS.POWERBI]: true,
+			[ADD_ONS.MODULES]: Object.values(ADD_ONS_MODULES),
+		};
+
+		beforeAll(async () => {
+			await Promise.all([
+				ServiceHelper.db.createUser(testUser),
+				ServiceHelper.db.createUser(userNoAccess),
+			]);
+			await ServiceHelper.db.createTeamspace(teamspace, [testUser.user]);
+			await ServiceHelper.db.createTeamspace(teamspaceNoAddOns, [testUser.user]);
+			await updateAddOns(teamspace, addOns);
+		});
+
 		describe.each([
-			['user does not have a valid session', undefined, teamspaceWithAddOns.name, false, templates.notLoggedIn],
+			['user does not have a valid session', undefined, teamspace, false, templates.notLoggedIn],
 			['teamspace does not exist', testUser.apiKey, generateRandomString(), false, templates.teamspaceNotFound],
-			['user is not a member of the teamspace', testUser2.apiKey, teamspaceWithAddOns.name, false, templates.teamspaceNotFound],
-			['teamspace has add ons', testUser.apiKey, teamspaceWithAddOns.name, true, addOns],
-			['teamspace has no add ons', testUser.apiKey, teamspaces[2].name, true, {}],
+			['user is not a member of the teamspace', userNoAccess.apiKey, teamspace, false, templates.teamspaceNotFound],
+			['teamspace has add ons', testUser.apiKey, teamspace, true, addOns],
+			['teamspace has no add ons', testUser.apiKey, teamspaceNoAddOns, true, {}],
 		])('', (desc, key, ts, success, expectedRes) => {
 			test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : expectedRes.status;
@@ -600,7 +429,7 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	testGetTeamspaceMembers();
 	testGetAvatar();
 	testGetQuotaInfo();
-	/* testRemoveTeamspaceMember();
+	testRemoveTeamspaceMember();
 	testGetMemberAvatar();
-	testGetAddOns(); */
+	testGetAddOns();
 });
