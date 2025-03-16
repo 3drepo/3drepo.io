@@ -42,15 +42,5 @@
 		"require-sort/require-sort": "error",
 		"security/detect-non-literal-fs-filename": 0,
 		"security/detect-object-injection": 0
-	},
-	"overrides": [
-		{
-			"files": [
-				"**/__mocks__/**"
-			],
-			"env": {
-			"jest": true
-			}
-		}
-	]
+	}
 }
