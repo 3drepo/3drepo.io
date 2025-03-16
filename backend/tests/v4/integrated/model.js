@@ -379,7 +379,7 @@ describe("Model", function () {
 		agent.post(`/${username}_someonelese/model`)
 			.send({ modelName: "testmodel", desc, type, unit, project })
 			.expect(404, function(err ,res) {
-				expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+				expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 				done(err);
 			});
 	});
