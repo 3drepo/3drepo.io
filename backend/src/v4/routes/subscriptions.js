@@ -22,7 +22,6 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 const User = require("../models/user");
 const responseCodes = require("../response_codes.js");
-const config = require("../config");
 const utils = require("../utils");
 const UserBilling = require("../models/userBilling");
 
