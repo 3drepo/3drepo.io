@@ -114,7 +114,7 @@ describe("Project Permissions::", function () {
 		agentNoPermission
 			.post(`/${teamspace}/model`)
 			.send(Object.assign({modelName: modelName}, modelDetail))
-			.expect(401, function(err, res) {
+			.expect(404, function(err, res) {
 				done(err);
 			});
 
@@ -127,7 +127,7 @@ describe("Project Permissions::", function () {
 		agentNoPermission
 			.post(`/${teamspace}/model`)
 			.send(Object.assign({modelName: modelName, subModels: [] }, modelDetail))
-			.expect(401, function(err, res) {
+			.expect(404, function(err, res) {
 				done(err);
 			});
 
