@@ -123,11 +123,15 @@ const anotherFed = models[1];
 const conRevisions = ServiceHelper.generateRevisionEntry();
 
 const setupData = async () => {
-	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
 	const customData = { starredModels: {
 		[teamspace]: models.flatMap(({ _id, isFavourite }) => (isFavourite ? _id : [])),
 	} };
-	const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], [teamspace], customData));
+	const { tsAdmin, ...otherUsers } = users;
+	await ServiceHelper.db.createUser(tsAdmin, [], customData);
+	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
+
+	const userProms = Object.keys(otherUsers).map(
+		(key) => ServiceHelper.db.createUser(users[key], [teamspace], customData));
 	const modelProms = models.map((model) => ServiceHelper.db.createModel(
 		teamspace,
 		model._id,

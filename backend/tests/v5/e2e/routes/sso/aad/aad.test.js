@@ -27,7 +27,7 @@ let agent;
 const testAuthenticate = () => {
 	describe('Authenticate', () => {
 		test(`should respond with ${templates.endpointDecommissioned.code}`, async () => {
-			const res = await agent.get('/sso/aad/authenticate')
+			const res = await agent.get('/v5/sso/aad/authenticate')
 				.expect(templates.endpointDecommissioned.status);
 			expect(res.body.code).toEqual(templates.endpointDecommissioned.code);
 		});

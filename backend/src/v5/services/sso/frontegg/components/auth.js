@@ -44,7 +44,7 @@ Auth.validateToken = async ({ token }, userId) => {
 	}
 };
 
-Auth.generateAuthenticationCodeUrl = async ({ state, redirectURL, codeChallenge }, tenantId) => {
+Auth.generateAuthenticationCodeUrl = async ({ state, redirectURL, codeChallenge }, accountId) => {
 	const config = await getConfig();
 	const qsObj = deleteIfUndefined({
 		response_type: 'code',
@@ -53,7 +53,7 @@ Auth.generateAuthenticationCodeUrl = async ({ state, redirectURL, codeChallenge 
 		state,
 		redirect_uri: redirectURL,
 		code_challenge: codeChallenge,
-		tenantId,
+		tenantId: accountId,
 	});
 
 	return `${config.appUrl}/oauth/authorize?${queryString.encode(qsObj)}`;

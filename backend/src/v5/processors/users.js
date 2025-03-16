@@ -35,8 +35,8 @@ const { triggerPasswordReset } = require('../services/sso/frontegg');
 // and also to store info such as API Key.
 Users.createNewUserRecord = async (idpUserData) => {
 	const { id, email, name, createdAt } = idpUserData;
-	const [firstName, ...renaming] = name?.split(' ') ?? ['Anonymous', 'User'];
-	const lastName = renaming?.join(' ') ?? '';
+	const [firstName, ...remaining] = name?.split(' ') ?? ['Anonymous', 'User'];
+	const lastName = remaining?.join(' ');
 
 	const userData = {
 		username: id,
@@ -50,7 +50,7 @@ Users.createNewUserRecord = async (idpUserData) => {
 
 	await addUser(userData);
 
-	publish(events.USER_CREATED, { id, email, fullName: name, createdAt: userData.createdAt });
+	publish(events.USER_CREATED, { username: id, email, fullName: [firstName, remaining].join(' '), createdAt: userData.createdAt });
 	return id;
 };
 

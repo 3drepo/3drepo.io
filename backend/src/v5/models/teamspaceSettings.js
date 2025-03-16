@@ -167,10 +167,6 @@ TeamspaceSetting.hasAccessToTeamspace = async (teamspace, username) => {
 
 	const restrictions = await TeamspaceSetting.getSecurityRestrictions(teamspace);
 
-	if (restrictions[SECURITY_SETTINGS.SSO_RESTRICTED] && !userDoc.customData.sso) {
-		throw templates.ssoRestricted;
-	}
-
 	if (restrictions[SECURITY_SETTINGS.DOMAIN_WHITELIST]) {
 		const userDomain = userDoc.customData.email.split('@')[1].toLowerCase();
 		if (!restrictions[SECURITY_SETTINGS.DOMAIN_WHITELIST].includes(userDomain)) {
@@ -236,11 +232,9 @@ const grantPermissionToUser = async (teamspace, username, permission) => {
 TeamspaceSetting.grantAdminToUser = (teamspace, username) => grantPermissionToUser(teamspace,
 	username, TEAMSPACE_ADMIN);
 
-TeamspaceSetting.getAllUsersInTeamspace = async (teamspace, projection) => {
+TeamspaceSetting.getAllUsersInTeamspace = (teamspace, projection = { user: 1 }) => {
 	const query = { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER };
-	const users = await findMany(query, projection ?? { user: 1 });
-
-	return projection ? users : users.map(({ user }) => user);
+	return findMany(query, projection);
 };
 
 TeamspaceSetting.removeUserFromAdminPrivilege = async (teamspace, user) => {

@@ -120,9 +120,12 @@ const generateBasicData = () => {
 };
 
 const setupData = async ({ users, teamspace, project, models, drawRevisions, conRevisions, calibration }) => {
-	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
+	const { tsAdmin, ...otherUsers } = users;
 
-	const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], key !== 'nobody' ? [teamspace] : []));
+	await ServiceHelper.db.createUser(tsAdmin);
+	await ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user]);
+
+	const userProms = Object.keys(otherUsers).map((key) => ServiceHelper.db.createUser(users[key], key !== 'nobody' ? [teamspace] : []));
 
 	const modelProms = Object.keys(models).map((key) => ServiceHelper.db.createModel(
 		teamspace,

@@ -728,7 +728,7 @@ function getSequenceState(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, stateId } = req.params;
 
-	Sequence.getSequenceState(account, model, stateId).then(state => {
+	Sequence.getSequenceState(account, model, utils.uuidToString(stateId)).then(state => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, state);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -739,7 +739,7 @@ function getLegend(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, sequenceId } = req.params;
 
-	Sequence.getLegend(account, model, sequenceId).then(({ legend }) => {
+	Sequence.getLegend(account, model, utils.uuidToString(sequenceId)).then(({ legend }) => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, legend);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -750,7 +750,7 @@ function deleteLegend(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, sequenceId } = req.params;
 
-	Sequence.deleteLegend(account, model, sequenceId).then(() => {
+	Sequence.deleteLegend(account, model, utils.uuidToString(sequenceId)).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -761,7 +761,7 @@ function updateLegend(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, sequenceId } = req.params;
 
-	Sequence.updateLegend(account, model, sequenceId, req.body).then(() => {
+	Sequence.updateLegend(account, model, utils.uuidToString(sequenceId), req.body).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -772,7 +772,7 @@ function updateSequence(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, sequenceId } = req.params;
 
-	Sequence.updateSequence(account, model, sequenceId, req.body).then(() => {
+	Sequence.updateSequence(account, model, utils.uuidToString(sequenceId), req.body).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -795,7 +795,7 @@ function getSequenceActivityDetail(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, activityId, sequenceId } = req.params;
 
-	SequenceActivities.getSequenceActivityDetail(account, model, sequenceId, activityId).then(activity => {
+	SequenceActivities.getSequenceActivityDetail(account, model, utils.uuidToString(sequenceId), utils.uuidToString(activityId)).then(activity => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, activity);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -806,7 +806,7 @@ function getSequenceActivities(req, res, next) {
 	const { account, model, sequenceId } = req.params;
 	const place = utils.APIInfo(req);
 
-	SequenceActivities.get(account, model, sequenceId).then(activites => {
+	SequenceActivities.get(account, model, utils.uuidToString(sequenceId)).then(activites => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, activites);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -817,7 +817,7 @@ function createActivities(req, res, next) {
 	const { account, model, sequenceId } = req.params;
 	const place = utils.APIInfo(req);
 
-	SequenceActivities.createActivities(account, model, sequenceId, req.body.activities, req.body.overwrite).then(() => {
+	SequenceActivities.createActivities(account, model, utils.uuidToString(sequenceId), req.body.activities, req.body.overwrite).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -828,7 +828,7 @@ function editActivity(req, res, next) {
 	const { account, model, sequenceId, activityId } = req.params;
 	const place = utils.APIInfo(req);
 
-	SequenceActivities.edit(account, model, sequenceId, activityId, req.body).then(() => {
+	SequenceActivities.edit(account, model, utils.uuidToString(sequenceId), utils.uuidToString(activityId), req.body).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -839,7 +839,7 @@ function removeActivity(req, res, next) {
 	const { account, model, sequenceId, activityId } = req.params;
 	const place = utils.APIInfo(req);
 
-	SequenceActivities.remove(account, model, sequenceId, activityId).then(() => {
+	SequenceActivities.remove(account, model, utils.uuidToString(sequenceId), utils.uuidToString(activityId)).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

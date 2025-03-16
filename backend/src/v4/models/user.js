@@ -687,10 +687,6 @@ User.findByAPIKey = async function (key) {
 	return await findOne({"customData.apiKey" : key});
 };
 
-User.findByPaypalPaymentToken = async function (token) {
-	return await findOne({ "customData.billing.paypalPaymentToken": token });
-};
-
 User.findUserByBillingId = async function (billingAgreementId) {
 	return await findOne({ "customData.billing.billingAgreementId": billingAgreementId });
 };

@@ -24,10 +24,7 @@ const User = require("./user");
 const Job = require("./job");
 const { changePermissions, findModelSettings } = require("./modelSetting");
 const { findProjectsById, setUserAsProjectAdminById } = require("./project");
-const { getSecurityRestrictions }  = require(`${v5Path}/models/teamspaceSettings`);
-const { SECURITY_SETTINGS: { SSO_RESTRICTED } }  = require(`${v5Path}/models/teamspaces.constants`);
 const systemLogger = require("../logger.js").systemLogger;
-const Mailer = require("../mailer/mailer");
 const { publish } = require(`${v5Path}/services/eventsManager/eventsManager`);
 const { events } = require(`${v5Path}/services/eventsManager/eventsManager.constants`);
 
@@ -35,7 +32,8 @@ const { getTeamspaceRefId } = require(`${v5Path}/models/teamspaceSettings`);
 const {
 	doesUserExist,
 	createUser,
-	addUserToAccount
+	addUserToAccount,
+	removeUserFromAccount
 } = require(`${v5Path}/services/sso/frontegg`);
 
 const { contains: setContains } = require("./helper/set");
@@ -84,12 +82,14 @@ const cleanPermissions = (permissions) => {
 	return { projects: projectsPermissions};
 };
 
+const getUserAndTeamspaceRefs = (email, teamspace) => Promise.all([
+	doesUserExist(email),
+	getTeamspaceRefId(teamspace)
+]);
+
 const sendInvitationEmail = async (email, username, teamspace) => {
 	// Frontegg may be aware of the user already (due to a different application)
-	const [userId, refId] = await Promise.all([
-		doesUserExist(email),
-		getTeamspaceRefId(teamspace)
-	]);
+	const [userId, refId] = await getUserAndTeamspaceRefs(email, teamspace);
 	if(!userId) {
 		await createUser(refId, email);
 	} else {
@@ -143,24 +143,23 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 	const teamspaceEntry = { teamspace, job, permissions };
 
 	if (result) {
-		const teamSpaces = result.teamSpaces.filter(entry => entry.teamspace !== teamspace);
-		teamSpaces.push(teamspaceEntry);
-
-		const invitation = { teamSpaces };
-		await coll.updateOne({_id:email}, { $set: invitation });
 
 		// if its a new teamspace that the user has been invited send an invitation email
 		if (result.teamSpaces.every(t=> t.teamspace !== teamspace)) {
 			await sendInvitationEmail(email, username, teamspace);
 			publish(events.INVITATION_ADDED, { teamspace, executor: username, email, job, permissions});
 		}
+		const teamSpaces = result.teamSpaces.filter(entry => entry.teamspace !== teamspace);
+		teamSpaces.push(teamspaceEntry);
+
+		const invitation = { teamSpaces };
+		await coll.updateOne({_id:email}, { $set: invitation });
 
 	} else {
 		await User.hasReachedLicenceLimitCheck(teamspace);
 		const invitation = {_id:email ,teamSpaces: [teamspaceEntry] };
-		await coll.insertOne(invitation);
 		await sendInvitationEmail(email, username, teamspace);
-
+		await coll.insertOne(invitation);
 		publish(events.INVITATION_ADDED, { teamspace, executor: username, email, job, permissions});
 	}
 
@@ -177,6 +176,9 @@ invitations.removeTeamspaceFromInvitation = async (email, teamspace, executor) =
 	}
 
 	const entryToRemove = result.teamSpaces.find(entry => entry.teamspace === teamspace);
+
+	const [userId, refId] = await getUserAndTeamspaceRefs(email, teamspace);
+	await removeUserFromAccount(refId, userId);
 
 	const data =  { _id: email, teamSpaces: result.teamSpaces.filter(teamspaceEntry => teamspaceEntry.teamspace !== teamspace) };
 
