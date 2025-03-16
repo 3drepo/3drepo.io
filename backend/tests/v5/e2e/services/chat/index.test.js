@@ -32,6 +32,7 @@ const container = ServiceHelper.generateRandomModel();
 
 let agent;
 const setupData = async () => {
+	await ServiceHelper.db.createUser(tsAdmin);
 	await ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user]);
 	await ServiceHelper.db.createModel(
 		teamspace,
@@ -40,7 +41,6 @@ const setupData = async () => {
 		container.properties,
 	);
 	await Promise.all([
-		ServiceHelper.db.createUser(tsAdmin, [teamspace]),
 		ServiceHelper.db.createUser(nobody),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id]),
 	]);
