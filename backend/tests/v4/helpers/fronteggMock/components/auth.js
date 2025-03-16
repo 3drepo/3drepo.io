@@ -22,8 +22,7 @@ const queryString = require('querystring');
 
 const Auth = {};
 
-// v4 tests uses mocha
-Auth.getUserInfoFromToken = process.env.NODE_ENV === 'testV5' ? jest.fn() : (() => {});
+Auth.getUserInfoFromToken = () => {};
 
 Auth.validateToken = () => Promise.resolve();
 

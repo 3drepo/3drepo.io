@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { queue: {purgeQueues}} = require("../../v5/helper/services");
-const SessionTracker = require("../../v5/helper/sessionTracker")
+const SessionTracker = require("../../v4/helpers/sessionTracker")
 const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../../src/v4/services/api.js").createApp();
@@ -25,7 +25,6 @@ const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
 const responseCodes = require("../../../src/v4/response_codes.js");
 const { templates: responseCodesV5 } = require("../../../src/v5/utils/responseCodes");
-const helpers = require("../helpers/signUp");
 const C = require("../../../src/v4/constants");
 const async = require("async");
 const User = require("../../../src/v4/models/user");
