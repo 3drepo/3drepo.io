@@ -31,15 +31,6 @@ jest.mock('../../../../src/v5/utils/helper/strings', () => ({
 	generateHashString: jest.fn().mockImplementation(() => apiKey),
 }));
 
-const invalidEmail = 'invalid email';
-jest.doMock('../../../../src/v4/mailer/mailer', () => ({
-	...jest.requireActual('../../../../src/v4/mailer/mailer'),
-	sendResetPasswordEmail: jest.fn().mockImplementation((email) => {
-		if (email === invalidEmail) {
-			throw templates.unknown;
-		}
-	}),
-}));
 const User = require(`${src}/models/users`);
 
 const testGetAccessibleTeamspaces = () => {
