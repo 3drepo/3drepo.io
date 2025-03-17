@@ -35,7 +35,7 @@ export const FiltersAccordion = ({ children, onClear }: FiltersAccordionProps) =
 	useEffect(() => {
 		if (!filterContainerRef.current) return;
 		const filtersContainerHeight = Number(getComputedStyle(filterContainerRef.current).height.replace('px', ''));
-		setCanCollapse(filtersContainerHeight > 35);
+		setCanCollapse(filtersContainerHeight > 60);
 	}, [children]);
 
 	return (
