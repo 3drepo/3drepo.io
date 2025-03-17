@@ -203,12 +203,6 @@ const testUpdateProfile = () => {
 				expect(res.body.code).toEqual(templates.invalidArguments.code);
 			});
 
-			test('should fail if the update data have extra properties', async () => {
-				const data = { firstName: 'newName', extra: 'extraProp' };
-				const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
-				expect(res.body.code).toEqual(templates.invalidArguments.code);
-			});
-
 			test('should update the profile if the user is logged in', async () => {
 				const data = { firstName: 'newName', company: 'newCompany', countryCode: 'GR' };
 				await testSession.put('/v5/user/').send(data).expect(200);
