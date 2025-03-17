@@ -24,9 +24,11 @@ const { fileExists, getFile, removeFile, storeFile } = require('../services/file
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
 const { generateUserHash } = require('../services/intercom');
+const { logger } = require('../utils/logger');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { removeAllUserNotifications } = require('../models/notifications');
 const { removeAllUserRecords } = require('../models/loginRecords');
+const { templates } = require('../utils/responseCodes');
 const { triggerPasswordReset } = require('../services/sso/frontegg');
 
 // This is used for the situation where a user has a record from
@@ -100,10 +102,16 @@ Users.updateProfile = async (username, fieldsToUpdate) => {
 };
 
 Users.resetPassword = async (user) => {
-	const { customData: { email } } = await getUserByUsername(user, {
-		'customData.email': 1,
-	});
-	await triggerPasswordReset(email);
+	try {
+		const { customData: { email } } = await getUserByUsername(user, {
+			'customData.email': 1,
+		});
+		await triggerPasswordReset(email);
+	} catch (err) {
+		logger.logError(`Failed to reset password: ${err.message}`);
+
+		throw templates.unknown;
+	}
 };
 
 Users.generateApiKey = generateApiKey;

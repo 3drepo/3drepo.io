@@ -326,6 +326,18 @@ const testResetPassword = () => {
 			expect(FronteggService.triggerPasswordReset).toHaveBeenCalledTimes(1);
 			expect(FronteggService.triggerPasswordReset).toHaveBeenCalledWith(email);
 		});
+
+		test(`Should throw with ${templates.unknown.code} if it failed`, async () => {
+			const username = generateRandomString();
+			UsersModel.getUserByUsername.mockRejectedValueOnce({ message: generateRandomString() });
+
+			await expect(Users.resetPassword(username)).rejects.toEqual(templates.unknown);
+
+			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(username, { 'customData.email': 1 });
+
+			expect(FronteggService.triggerPasswordReset).not.toHaveBeenCalled();
+		});
 	});
 };
 
