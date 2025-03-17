@@ -57,7 +57,6 @@ const setupTeamspaces = async ({ normal, partial }) => {
 		[...normal, ...partial].map(async ({ name, hasTS, hasUsers }) => {
 			if (hasTS) {
 				await createTeamspace(name);
-				await addTeamspaceMember(name, name);
 
 				if (hasUsers) {
 					await Promise.all(times(2, async () => {
@@ -65,7 +64,7 @@ const setupTeamspaces = async ({ normal, partial }) => {
 					}));
 				}
 			} else {
-				await createUser({ ...generateUserCredentials(), user: name }, [name]);
+				await createUser({ ...generateUserCredentials(), user: name });
 			}
 			await addTeamspaceMember(randomTS, name);
 		}),
@@ -103,7 +102,7 @@ const runTest = () => {
 		});
 		const expectedError = new Error('A list of teamspaces must be provided');
 
-		test('should throw error if teamspaces is undefined', async () => {
+		test('!should throw error if teamspaces is undefined', async () => {
 			await expect(RemoveTeamspace.run()).rejects.toEqual(expectedError);
 			await checkTeamspaces(tsList, true);
 		});

@@ -37,6 +37,7 @@ const testSendEmail = () => {
 		const recipient = 'example@email.com';
 		const attachments = { attachment: generateRandomString() };
 		const data = {
+			firstName: generateRandomString(),
 			err: new Error(generateRandomString()),
 		};
 
@@ -141,9 +142,9 @@ const testSendSystemEmail = () => {
 		const mailerConfig = { ...config.mail };
 
 		beforeEach(() => {
+			Mailer.reset();
 			config.mail = { ...mailerConfig };
 		});
-
 		test('should fail if config.mail.sender is not set', async () => {
 			Mailer.reset();
 			config.mail.sender = undefined;
@@ -209,7 +210,7 @@ const testSendSystemEmail = () => {
 		});
 
 		test('should log the error and throw it back if sendSystemMail fails', async () => {
-			sendMailMock.mockImplementationOnce(() => { throw templates.unknown; });
+			sendMailMock.mockRejectedValueOnce(templates.unknown);
 
 			await expect(Mailer.sendSystemEmail(emailTemplates.ERROR_NOTIFICATION.name, data, attachments))
 				.rejects.toEqual(templates.unknown);
@@ -219,9 +220,9 @@ const testSendSystemEmail = () => {
 			await expect(Mailer.sendSystemEmail(generateRandomString(), data, attachments))
 				.rejects.toEqual(templates.unknown);
 		});
-
 		test('should throw error if the data does not provide sufficient info for the template', async () => {
-			await expect(Mailer.sendSystemEmail(emailTemplates.ERROR_NOTIFICATION.name, undefined, attachments))
+			await expect(Mailer.sendSystemEmail(emailTemplates.MODEL_IMPORT_ERROR.name,
+				{ }, attachments))
 				.rejects.toThrow();
 		});
 	});

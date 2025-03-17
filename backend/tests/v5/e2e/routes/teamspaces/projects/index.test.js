@@ -34,10 +34,10 @@ let server;
 let agent;
 
 const setupBasicData = async ({ users, teamspace, projects, model, imageData }) => {
+	await ServiceHelper.db.createUser(users.tsAdmin);
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
 
 	await Promise.all([
-		ServiceHelper.db.createUser(users.tsAdmin, [teamspace]),
 		ServiceHelper.db.createUser(users.projectAdmin, [teamspace]),
 		ServiceHelper.db.createUser(users.nonAdminUser, [teamspace]),
 		ServiceHelper.db.createUser(users.unlicencedUser),
@@ -207,7 +207,7 @@ const testUpdateProject = () => {
 
 		test('should fail if the user is not project admin', async () => {
 			const res = await agent.patch(route(teamspace, projects.testProject.id,
-				users.nonAdminUser.apiKey)).expect(templates.notLoggedIn.status);
+				users.nonAdminUser.apiKey)).expect(templates.notAuthorized.status);
 			expect(res.body.code).toEqual(templates.notAuthorized.code);
 		});
 

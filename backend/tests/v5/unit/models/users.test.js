@@ -31,15 +31,6 @@ jest.mock('../../../../src/v5/utils/helper/strings', () => ({
 	generateHashString: jest.fn().mockImplementation(() => apiKey),
 }));
 
-const invalidEmail = 'invalid email';
-jest.doMock('../../../../src/v4/mailer/mailer', () => ({
-	...jest.requireActual('../../../../src/v4/mailer/mailer'),
-	sendResetPasswordEmail: jest.fn().mockImplementation((email) => {
-		if (email === invalidEmail) {
-			throw templates.unknown;
-		}
-	}),
-}));
 const User = require(`${src}/models/users`);
 
 const testGetAccessibleTeamspaces = () => {
@@ -383,12 +374,13 @@ const testGetUsersByQuery = () => {
 	});
 };
 
-const formatNewUserData = (newUserData, createdAt, emailExpiredAt) => {
+const formatNewUserData = (newUserData, createdAt) => {
 	const formattedData = {
 		createdAt,
 		firstName: newUserData.firstName,
 		lastName: newUserData.lastName,
 		email: newUserData.email,
+		userId: newUserData.userId,
 		mailListOptOut: !newUserData.mailListAgreed,
 		billing: {
 			billingInfo: {
@@ -399,18 +391,6 @@ const formatNewUserData = (newUserData, createdAt, emailExpiredAt) => {
 			},
 		},
 	};
-
-	if (newUserData.sso) {
-		formattedData.sso = newUserData.sso;
-	} else {
-		formattedData.emailVerifyToken = {
-			token: newUserData.token,
-			expiredAt: emailExpiredAt,
-		};
-
-		formattedData.inactive = true;
-	}
-
 	return formattedData;
 };
 
@@ -419,6 +399,7 @@ const testAddUser = () => {
 		test('should add a new user', async () => {
 			const newUserData = {
 				username: generateRandomString(),
+				userId: generateRandomString(),
 				email: 'example@email.com',
 				password: generateRandomString(),
 				firstName: generateRandomString(),
@@ -433,15 +414,15 @@ const testAddUser = () => {
 			expect(fn).toHaveBeenCalledTimes(1);
 			const userCustomData = fn.mock.calls[0][2];
 			expect(userCustomData).toHaveProperty('createdAt');
-			expect(userCustomData).toHaveProperty('emailVerifyToken.expiredAt');
-			const expectedCustomData = formatNewUserData(newUserData, userCustomData.createdAt,
-				userCustomData.emailVerifyToken.expiredAt);
+			const expectedCustomData = formatNewUserData(newUserData, userCustomData.createdAt);
 			expect(fn).toHaveBeenCalledWith(newUserData.username, newUserData.password, expectedCustomData);
 		});
 
-		test('should add a new user created with SSO', async () => {
+		test('should add a new user with the specified createdAt timestamp if it is provided', async () => {
 			const newUserData = {
 				username: generateRandomString(),
+				userId: generateRandomString(),
+				createdAt: new Date(),
 				email: 'example@email.com',
 				password: generateRandomString(),
 				firstName: generateRandomString(),
@@ -449,19 +430,12 @@ const testAddUser = () => {
 				mailListAgreed: true,
 				countryCode: 'GB',
 				company: generateRandomString(),
-				sso: {
-					type: generateRandomString(),
-					id: generateRandomString(),
-				},
 			};
 
 			const fn = jest.spyOn(db, 'createUser');
 			await User.addUser(newUserData);
 			expect(fn).toHaveBeenCalledTimes(1);
-			const userCustomData = fn.mock.calls[0][2];
-			expect(userCustomData).toHaveProperty('createdAt');
-			expect(userCustomData).not.toHaveProperty('emailVerifyToken.expiredAt');
-			const expectedCustomData = formatNewUserData(newUserData, userCustomData.createdAt);
+			const expectedCustomData = formatNewUserData(newUserData, newUserData.createdAt);
 			expect(fn).toHaveBeenCalledWith(newUserData.username, newUserData.password, expectedCustomData);
 		});
 	});
@@ -495,6 +469,55 @@ const testRemoveUsers = () => {
 	});
 };
 
+const testUpdateUserId = () => {
+	describe('Set user ref Id', () => {
+		test('Should update the reference ID as instructed', async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce();
+			const refId = generateRandomString();
+			const user = generateRandomString();
+			await User.updateUserId(user, refId);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { user }, { $set: { 'customData.userId': refId } });
+		});
+	});
+};
+
+const testGetUserId = () => {
+	describe('Get user ref Id', () => {
+		test('Should get the reference ID as instructed', async () => {
+			const refId = generateRandomString();
+			const user = generateRandomString();
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ customData: { userId: refId } });
+			await expect(User.getUserId(user)).resolves.toEqual(refId);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { user },
+				{ 'customData.userId': 1 }, undefined);
+		});
+	});
+};
+
+const testEnsureIndicesExist = () => {
+	describe('Ensure indices exist', () => {
+		test('Should call createIndex', async () => {
+			const fn = jest.spyOn(db, 'createIndex');
+			await User.ensureIndicesExist();
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { 'customData.userId': 1 }, { runInBackground: true });
+		});
+
+		test('Should fail gracefully if it failed', async () => {
+			const fn = jest.spyOn(db, 'createIndex').mockRejectedValue({ message: generateRandomString() });
+			await User.ensureIndicesExist();
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { 'customData.userId': 1 }, { runInBackground: true });
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetAccessibleTeamspaces();
 	testGetFavourites();
@@ -510,4 +533,7 @@ describe(determineTestGroup(__filename), () => {
 	testAddUser();
 	testRemoveUser();
 	testRemoveUsers();
+	testGetUserId();
+	testUpdateUserId();
+	testEnsureIndicesExist();
 });

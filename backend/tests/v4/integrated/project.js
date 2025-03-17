@@ -18,7 +18,7 @@
  */
 
 const request = require('supertest');
-const SessionTracker = require('../../v5/helper/sessionTracker');
+const SessionTracker = require('../../v4/helpers/sessionTracker');
 const { expect } = require('chai');
 const app = require('../../../src/v4/services/api.js').createApp();
 const logger = require('../../../src/v4/logger.js');

@@ -45,7 +45,7 @@ const testHasAccessToTeamspace = () => {
 		['session is invalid', { ...reqSample, session: undefined }, false, templates.notLoggedIn],
 		['user does not have access', { ...reqSample, params: { teamspace: generateRandomString() } }, false, templates.teamspaceNotFound],
 		['user is not authenticated to the teamspace', { ...reqSample, session: { ...reqSample.session, user: { ...reqSample.session.user, auth: { authenticatedTeamspace: generateRandomString() } } } }, false, templates.notAuthenticatedAgainstTeamspace],
-		['user is using API Key', { ...reqSample, session: { ...reqSample.session, user: { ...reqSample.session.user, auth: undefined } } }, true],
+		['user is using API Key', { ...reqSample, session: { ...reqSample.session, user: { isAPIKey: true, ...reqSample.session.user, auth: undefined } } }, true],
 	])('Has access to teamspace', (desc, req, success, expectedErr) => {
 		test(`Should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
 			const mockCB = jest.fn(() => {});

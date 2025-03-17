@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { queue: {purgeQueues}} = require("../../v5/helper/services");
-const SessionTracker = require("../../v5/helper/sessionTracker")
+const SessionTracker = require("../../v4/helpers/sessionTracker")
 const request = require("supertest");
 const expect = require("chai").expect;
 const responseCodes = require("../../../src/v4/response_codes.js");

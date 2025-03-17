@@ -36,7 +36,7 @@ User.getUserByQuery = async (query, projection) => {
 	return userDoc;
 };
 
-User.getUserRefId = async (user) => {
+User.getUserId = async (user) => {
 	const { customData: { userId } } = await User.getUserByUsername(user, { 'customData.userId': 1 });
 	return userId;
 };
@@ -166,8 +166,7 @@ User.ensureIndicesExist = async () => {
 	try {
 		await db.createIndex(USERS_DB_NAME, USERS_COL, { 'customData.userId': 1 }, { runInBackground: true });
 	} catch (err) {
-		// Note this will fail pre 5.16 migration.
-		logger.logWarning('Failed to create index on user ID. Please ensure 5.16 migration script has been executed.');
+		logger.logWarning(`Failed to create index on user ID: ${err?.message}`);
 	}
 };
 

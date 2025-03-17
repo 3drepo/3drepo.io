@@ -32,16 +32,15 @@ const { validateMany } = require('../common');
 const Permissions = {};
 
 const isCookieAuthenticatedAgainstTS = async (req, res, next) => {
-	if (!req.session.user?.auth) {
-		// No auth info - this is an apiKey.
-		await next();
-	}
-
-	const authenticatedTeamspace = req.session.user.auth?.authenticatedTeamspace;
-	if (authenticatedTeamspace === req.params.teamspace) {
+	if (req.session.user.isAPIKey) {
 		await next();
 	} else {
-		respond(req, res, templates.notAuthenticatedAgainstTeamspace);
+		const authenticatedTeamspace = req.session.user.auth?.authenticatedTeamspace;
+		if (authenticatedTeamspace === req.params.teamspace) {
+			await next();
+		} else {
+			respond(req, res, templates.notAuthenticatedAgainstTeamspace);
+		}
 	}
 };
 

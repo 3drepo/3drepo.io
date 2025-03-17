@@ -118,7 +118,7 @@ const testManageSession = () => {
 const testAppendCSRFToken = () => {
 	describe('Append CSRF token', () => {
 		test('Should set the cookie and store the token in the session', async () => {
-			const req = {};
+			const req = { session: {} };
 			const res = { cookie: jest.fn() };
 			const next = jest.fn();
 
@@ -129,6 +129,19 @@ const testAppendCSRFToken = () => {
 
 			expect(res.cookie).toHaveBeenCalledTimes(1);
 			expect(res.cookie).toHaveBeenCalledWith(CSRF_COOKIE, req.token, expect.any(Object));
+		});
+
+		test('Should do nothing if it is a reAuth', async () => {
+			const req = { session: { reAuth: true } };
+			const res = { cookie: jest.fn() };
+			const next = jest.fn();
+
+			await Sessions.appendCSRFToken(req, res, next);
+
+			expect(next).toHaveBeenCalledTimes(1);
+			expect(req.token).toBeUndefined();
+
+			expect(res.cookie).not.toHaveBeenCalled();
 		});
 	});
 };

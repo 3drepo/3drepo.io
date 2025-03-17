@@ -68,16 +68,11 @@ const testHasAccessToTeamspace = () => {
 		});
 
 		describe.each([
-			['non SSO user has access to a teamspace with no restriction', genUserData(), {}, true],
-			['non SSO-user has access to the SSO restricted teamspace', genUserData(), generateSecurityConfig(true), false, templates.ssoRestricted],
-			['SSO-user has access to the SSO restricted teamspace', genUserData({ sso: true }), generateSecurityConfig(true), true],
-			['SSO-user has access to the SSO restricted teamspace but not in whitelist domain', genUserData({ sso: true }), generateSecurityConfig(true, [domain]), false, templates.domainRestricted],
-			['SSO-user has access to the SSO restricted teamspace and is in whitelist domain', genUserData({ sso: true, inDomain: true }), generateSecurityConfig(true, [domain]), true],
-			['non SSO-user has access to the SSO restricted teamspace and is in whitelist domain', genUserData({ inDomain: true }), generateSecurityConfig(true, [domain]), false, templates.ssoRestricted],
-			['non SSO-user has access to the teamspace and is in whitelist domain', genUserData({ inDomain: true }), generateSecurityConfig(false, [domain]), true],
-			['non SSO-user has access to the teamspace but is not in whitelist domain', genUserData({ }), generateSecurityConfig(false, [domain]), false, templates.domainRestricted],
-			['SSO-user has access to the teamspace and is in whitelist domain', genUserData({ inDomain: true, sso: true }), generateSecurityConfig(false, [domain]), true],
-			['SSO-user has access to the teamspace but is not in whitelist domain', genUserData({ sso: true }), generateSecurityConfig(false, [domain]), false, templates.domainRestricted],
+			['user has access to a teamspace with no restriction', genUserData(), {}, true],
+			['user has access to the teamspace and is in whitelist domain', genUserData({ inDomain: true }), generateSecurityConfig(false, [domain]), true],
+			['user has access to the teamspace but is not in whitelist domain', genUserData({ }), generateSecurityConfig(false, [domain]), false, templates.domainRestricted],
+			['user has access to the teamspace and is in whitelist domain', genUserData({ inDomain: true, sso: true }), generateSecurityConfig(false, [domain]), true],
+			['user has access to the teamspace but is not in whitelist domain', genUserData({ sso: true }), generateSecurityConfig(false, [domain]), false, templates.domainRestricted],
 		])('', (desc, userData, teamspaceSettings, success, retVal) => {
 			test(`Should ${success ? 'return true' : `throw with ${retVal.code}`} if ${desc}`, async () => {
 				const findFn = jest.spyOn(db, 'findOne');

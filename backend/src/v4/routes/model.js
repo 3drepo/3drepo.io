@@ -31,19 +31,11 @@ const SrcAssets = require("../models/srcAssets");
 const JSONAssets = require("../models/jsonAssets");
 const config = require("../config");
 const {v5Path} = require("../../interop");
-const { validateNewRevisionData : validateNewModelRevisionData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/containers`);
 const { validateNewRevisionData : validateNewFedRevisionData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/federations`);
-const ContainersV5 = require(`${v5Path}/processors/teamspaces/projects/models/containers`);
 const FederationsV5 = require(`${v5Path}/processors/teamspaces/projects/models/federations`);
 const ResponderV5 = require(`${v5Path}/utils/responder`);
 const ResponseCodes = require(`${v5Path}/utils/responseCodes`);
-
-function convertProjectToParam(req, res, next) {
-	if (req.body.project) {
-		req.params.project = req.body.project;
-	}
-	next();
-}
+const { routeDecommissioned } = require(`${v5Path}/middleware/common`);
 
 /**
  * @apiDefine PermissionObject
@@ -190,67 +182,7 @@ router.put("/:model/settings/heliSpeed", middlewares.hasReadAccessToModel, updat
 
 router.put("/:model/settings", middlewares.hasWriteAccessToModelSettings, updateSettings);
 
-/**
- * @api {post} /:teamspace/model Create a model
- * @apiName createModel
- * @apiGroup Model
- *
- * @apiParam {String} teamspace Name of teamspace
- *
- * @apiParam (Request body) {String} project Name of project in which the model will be created
- * @apiParam (Request body) {String} modelName Name of the model to be created
- * @apiParam (Request body) {String} unit The unit in which the model is specified
- * @apiParam (Request body) {String} [desc] A description of the model
- * @apiParam (Request body) {String} [code] A code to be associated with the model; it can be of maximum 5 letters (a-z) and numbers
- * @apiParam (Request body) {String} type The type of the model
- *
- * @apiExample {post} Example usage:
- * POST /teamSpace1/model HTTP/1.1
- * {
- *    project: "classic project",
- *    modelName: "awesomeModel",
- *    unit: "ft",
- *    desc: "This is an awesome model!",
- *    code: "awe12",
- *    type: "Mechanical"
- * }
- *
- * @apiSuccessExample {json} Success:
- * {
- *    account: "teamSpace1",
- *    model: "17d09947-368e-4748-877f-d105842c6681",
- *    name: "awesomeModel",
- *    permissions: [
- *       "change_model_settings",
- *       "upload_files",
- *       "create_issue",
- *       "comment_issue",
- *       "view_issue",
- *       "view_model",
- *       "download_model",
- *       "edit_federation",
- *       "delete_federation",
- *       "delete_model",
- *       "manage_model_permission"
- *    ],
- *    setting: {
- *       type: "Mechanical",
- *       desc: "",
- *       name: "awesomeModel",
- *       _id: "17d09947-368e-4748-877f-d105842c6681",
- *       subModels: [],
- *       surveyPoints: [],
- *       properties: {
- *          unit: "ft"
- *       },
- *       permissions: [],
- *       status: "ok"
- *    }
- * }
- *
- */
-
-router.post("/model",convertProjectToParam,middlewares.canCreateModel,createModel);
+router.post("/model", routeDecommissioned("POST", "/v5/teamspaces/{teamspace}/projects/{project}/{type}"));
 
 // Unity information
 
@@ -1552,41 +1484,7 @@ router.get("/:model/revision/:revId/subModelRevisions", middlewares.hasReadAcces
  */
 router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
 
-/**
- * @api {post} /:teamspace/:model/upload Upload Model.
- * @apiName uploadModel
- * @apiGroup Model
- * @apiDescription It uploads a model file and creates a new revision for that model.
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model id to upload.
- * @apiParam (Request body) {String} tag the tag name for the new revision
- * @apiParam (Request body) {String} desc the description for the new revision
- * @apiParam (Request body) {Boolean} [importAnimations] whether to import animations within a sequence
- *
- * @apiParam (Request body: Attachment) {binary} FILE the file to be uploaded
- *
- * @apiExample {post} Example usage:
- * POST /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload HTTP/1.1
- * Content-Type: multipart/form-data; boundary=----WebKitFormBoundarySos0xligf1T8Sy8I
- *
- * ------WebKitFormBoundarySos0xligf1T8Sy8I
- * Content-Disposition: form-data; name="file"; filename="3DrepoBIM.obj"
- * Content-Type: application/octet-stream
- *
- * <binary content>
- * ------WebKitFormBoundarySos0xligf1T8Sy8I
- * Content-Disposition: form-data; name="tag"
- *
- * rev1
- * ------WebKitFormBoundarySos0xligf1T8Sy8I
- * Content-Disposition: form-data; name="desc"
- *
- * el paso
- * ------WebKitFormBoundarySos0xligf1T8Sy8I-- *
- *
- */
-router.post("/:model/upload",  middlewares.hasUploadAccessToModel, middlewares.formatV5NewModelRevisionsData, validateNewModelRevisionData, uploadModel);
+router.post("/:model/upload",  routeDecommissioned("POST", "/v5/teamspaces/{teamspace}/projects/{project}/{type}/{model}/revisions"));
 /**
  * @api {get} /:teamspace/:model/download/latest Download model
  * @apiName downloadModel
@@ -1661,60 +1559,6 @@ function getModelSetting(req, res, next) {
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
-}
-
-function createModel(req, res, next) {
-	const responsePlace = utils.APIInfo(req);
-
-	if (Object.keys(req.body).length >= 1 &&
-			Object.prototype.toString.call(req.body.modelName) === "[object String]" &&
-			(!req.body.desc || Object.prototype.toString.call(req.body.desc) === "[object String]") &&
-			(!req.body.type || Object.prototype.toString.call(req.body.type) === "[object String]") &&
-			(!req.body.unit || Object.prototype.toString.call(req.body.unit) === "[object String]") &&
-			(!req.body.subModels || Object.prototype.toString.call(req.body.subModels) === "[object Array]") &&
-			(!req.body.code || Object.prototype.toString.call(req.body.code) === "[object String]") &&
-			(!req.body.project || Object.prototype.toString.call(req.body.project) === "[object String]")) {
-		const modelName = req.body.modelName;
-		const account = req.params.account;
-		const username = req.session.user.username;
-
-		const data = {
-			desc: req.body.desc,
-			type: req.body.type,
-			unit: req.body.unit,
-			subModels: req.body.subModels,
-			code: req.body.code,
-			project: req.body.project
-		};
-
-		data.sessionId = req.headers[C.HEADER_SOCKET_ID];
-		data.userPermissions = req.session.user.permissions;
-
-		let createModelPromise;
-		const isFed = !!req.body.subModels;
-		if (isFed) {
-			createModelPromise = ModelHelpers.createNewFederation(account, modelName, username, data);
-		} else {
-			createModelPromise = ModelHelpers.createNewModel(account, modelName, data);
-		}
-
-		createModelPromise.then(result => {
-			const modelData = result.modelData;
-			modelData.setting = result.settings;
-
-			if (isFed) {
-				// hack: we need to wire federations properly onto the queue and follow the same process as model uploads. But it's
-				//       not happening right now.
-				modelData.setting.timestamp = new Date();
-			}
-
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, modelData);
-		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		});
-	} else {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
-	}
 }
 
 async function updateModel(req, res, next) {
@@ -1878,21 +1722,6 @@ function downloadLatest(req, res, next) {
 	});
 }
 
-function uploadModel(req, res, next) {
-	const responsePlace = utils.APIInfo(req);
-	const { file } = req;
-	const revInfo = req.body;
-	const { teamspace, container } = req.params;
-	const owner = req.session.user ? req.session.user.username : undefined;
-
-	ContainersV5.newRevision(teamspace, container, { ...revInfo, owner }, file).then(() => {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "uploaded"});
-	}).catch(err => {
-		err = err.resCode ? err.resCode : err;
-		responseCodes.respond(responsePlace, req, res, next, err, err);
-	});
-}
-
 function updatePermissions(req, res, next) {
 	const { account, model } = req.params;
 
@@ -2045,7 +1874,7 @@ function getSRC(req, res, next) {
 	const {account, model, uid} = req.params;
 
 	// FIXME: We should probably generalise this and have a model assets object.
-	SrcAssets.getSRC(account, model, uid).then(({ readStream, size, mimeType, encoding }) => {
+	SrcAssets.getSRC(account, model, utils.uuidToString(uid)).then(({ readStream, size, mimeType, encoding }) => {
 		req.params.format = "src";
 		ResponderV5.writeStreamRespond(req, res, ResponseCodes.templates.ok, readStream, undefined, size, { mimeType, encoding });
 	}).catch(err => {

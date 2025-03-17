@@ -25,7 +25,7 @@ const { validateMany } = require('./common');
 const AuthMiddleware = {};
 
 const destroySessionIfExists = (req, res) => new Promise((resolve) => {
-	if (req.session) destroySession(req.session, res, () => resolve());
+	if (req.session && !req.session.user?.isAPIKey) destroySession(req.session, res, () => resolve());
 	else resolve();
 });
 
@@ -38,14 +38,9 @@ const validSessionDetails = async (req, res, next) => {
 		const userAgentMatch = reqUserAgent === userAgent;
 
 		if (!ipMatch || !userAgentMatch) {
-			try {
-				await destroySessionIfExists(req, res);
-				logger.logInfo(`Session ${sessionId} destroyed due to IP or user agent mismatch`);
-				respond(req, res, templates.notLoggedIn);
-			} catch (err) {
-				respond(req, res, err);
-			}
-
+			await destroySessionIfExists(req, res);
+			logger.logInfo(`Session ${sessionId} destroyed due to IP or user agent mismatch`);
+			respond(req, res, templates.notLoggedIn);
 			return;
 		}
 	}

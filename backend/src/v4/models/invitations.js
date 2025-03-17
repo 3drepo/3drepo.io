@@ -143,24 +143,23 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 	const teamspaceEntry = { teamspace, job, permissions };
 
 	if (result) {
-		const teamSpaces = result.teamSpaces.filter(entry => entry.teamspace !== teamspace);
-		teamSpaces.push(teamspaceEntry);
-
-		const invitation = { teamSpaces };
-		await coll.updateOne({_id:email}, { $set: invitation });
 
 		// if its a new teamspace that the user has been invited send an invitation email
 		if (result.teamSpaces.every(t=> t.teamspace !== teamspace)) {
 			await sendInvitationEmail(email, username, teamspace);
 			publish(events.INVITATION_ADDED, { teamspace, executor: username, email, job, permissions});
 		}
+		const teamSpaces = result.teamSpaces.filter(entry => entry.teamspace !== teamspace);
+		teamSpaces.push(teamspaceEntry);
+
+		const invitation = { teamSpaces };
+		await coll.updateOne({_id:email}, { $set: invitation });
 
 	} else {
 		await User.hasReachedLicenceLimitCheck(teamspace);
 		const invitation = {_id:email ,teamSpaces: [teamspaceEntry] };
-		await coll.insertOne(invitation);
 		await sendInvitationEmail(email, username, teamspace);
-
+		await coll.insertOne(invitation);
 		publish(events.INVITATION_ADDED, { teamspace, executor: username, email, job, permissions});
 	}
 
@@ -178,6 +177,9 @@ invitations.removeTeamspaceFromInvitation = async (email, teamspace, executor) =
 
 	const entryToRemove = result.teamSpaces.find(entry => entry.teamspace === teamspace);
 
+	const [userId, refId] = await getUserAndTeamspaceRefs(email, teamspace);
+	await removeUserFromAccount(refId, userId);
+
 	const data =  { _id: email, teamSpaces: result.teamSpaces.filter(teamspaceEntry => teamspaceEntry.teamspace !== teamspace) };
 
 	if (data.teamSpaces.length === 0) {
@@ -185,8 +187,7 @@ invitations.removeTeamspaceFromInvitation = async (email, teamspace, executor) =
 	} else {
 		await coll.updateOne({_id:email}, { $set: data });
 	}
-	const [userId, refId] = await getUserAndTeamspaceRefs(email, teamspace);
-	await removeUserFromAccount(refId, userId);
+
 	publish(events.INVITATION_REVOKED, { teamspace, executor, email, job: entryToRemove.job, permissions: entryToRemove.permissions});
 
 	return {};
