@@ -64,6 +64,7 @@ const templateToFilters = (template: ITemplate): CardFilter[] => [
 ];
 
 export const templatesToFilters = (templates: ITemplate[]): CardFilter[] => {
+	if (!templates.length) return [];
 	let filters = templates.flatMap(templateToFilters);
 	filters = uniqBy(filters, (f) => f.module + f.property + f.type);
 	filters = sortBy(filters, 'module');
