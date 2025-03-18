@@ -20,6 +20,11 @@ import styled from 'styled-components';
 
 export const Section = styled.div`
 	display: flex;
-	flex-wrap: wrap;
 	gap: 5px;
+	flex-flow: row wrap;
+	>* {
+		display: flex;
+		flex: 1 1 calc(50% - 5px);
+		min-width: calc(50% - 5px);
+	}
 `;

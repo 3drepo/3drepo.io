@@ -23,11 +23,11 @@ export const TextWrapper = styled.div`
 `;
 
 export const Property = styled.span`
-	flex-shrink: 0;
+	flex-shrink: 1;
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
-	max-width: 265px;
+	min-width: 19px;
 `;
 
 export const OperatorIconContainer = styled.div`
