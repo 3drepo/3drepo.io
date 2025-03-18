@@ -24,6 +24,7 @@ export const CardFilterActionMenu = styled(ActionMenu)`
 	.MuiPaper-root {
 		left: 88px !important;
 		width: 365px;
+		max-height: calc(100% - 130px);
 	}
 `;
 
