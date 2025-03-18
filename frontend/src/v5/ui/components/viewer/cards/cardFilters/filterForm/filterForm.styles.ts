@@ -21,10 +21,6 @@ import { TextOverflow } from '@controls/textOverflow';
 import styled from 'styled-components';
 
 export const CardFilterActionMenu = styled(ActionMenu)`
-	width: auto;
-	display: flex;
-	flex: 1 1 calc(50% - 5px);
-	min-width: calc(50% - 5px);
 	.MuiPaper-root {
 		left: 88px !important;
 		width: 365px;

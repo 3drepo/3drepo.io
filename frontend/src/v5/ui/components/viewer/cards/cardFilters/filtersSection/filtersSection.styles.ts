@@ -24,7 +24,8 @@ export const Section = styled.div`
 	flex-flow: row wrap;
 	>* {
 		display: flex;
-		flex: 1 1 calc(50% - 5px);
-		min-width: calc(50% - 5px);
+		flex: 1 1 90px;
+		min-width: 90px;
+		max-width: fit-content;
 	}
 `;
