@@ -17,7 +17,7 @@
 
 import { FormattedMessage } from 'react-intl';
 import { CardFilterOperator, CardFilterValue, CardFilterType, BaseFilter, CardFilter } from '../cardFilters.types';
-import { getFilterFormTitle, getValidOperators, isDateType, isRangeOperator } from '../cardFilters.helpers';
+import { amendDateUpperBounds, floorToMinute, getDefaultOperator, getFilterFormTitle, getValidOperators, isDateType, isRangeOperator } from '../cardFilters.helpers';
 import { Container, ButtonsContainer, Button, TitleContainer } from './filterForm.styles';
 import { FormProvider, useForm } from 'react-hook-form';
 import { intersection, isBoolean, isEmpty } from 'lodash';
@@ -74,8 +74,27 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel 
 	const canSubmit = isValid && !isEmpty(dirtyFields);
 
 	const handleSubmit = formData.handleSubmit((body: FormType) => {
-		const newValues = mapFormArrayToArray(body.values)
+		let newValues = mapFormArrayToArray(body.values)
 			.filter((x) => ![undefined, ''].includes(x as any));
+
+		// We need to adjust the upper bounds of date values since some dates (e.g. Created At) include milliseconds whereas the datePicker
+		// only goes down to minutes. So we need to extend the upper bound values to the maximum millisecond possible to include all of that minute
+		if (isDateType(type)) {
+			switch (body.operator) {
+				case 'rng':
+				case 'nrng':
+					newValues = newValues.map(amendDateUpperBounds);
+					break;
+				case 'lte':
+					newValues = amendDateUpperBounds(newValues);
+					break;
+				case 'gte': // This is required for when a chip is editted from lte to gte so that it is no longer at the very last millisecond
+					newValues = newValues.map(floorToMinute);
+					break;
+				default:
+					break;
+			}
+		}
 		const isRange = isRangeOperator(body.operator);
 		const displayValues = newValues.map((newVal) => {
 			const option = getOptionFromValue(newVal, body.values);

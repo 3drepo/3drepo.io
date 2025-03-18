@@ -29,7 +29,7 @@ import ContainIcon from '@assets/icons/filters/contain.svg';
 import NotContainIcon from '@assets/icons/filters/not_contain.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { CardFilterOperator, CardFilterType } from './cardFilters.types';
-import { compact } from 'lodash';
+import { compact, floor } from 'lodash';
 
 export const FILTER_OPERATOR_ICON: Record<CardFilterOperator, any> = {
 	eq: EqualIcon,
@@ -79,6 +79,14 @@ export const getFilterOperatorLabels = (type: CardFilterType) => isDateType(type
 
 export const getFilterFormTitle = (elements: string[]) => compact(elements).join(' : ');
 
+export const floorToMinute = (time) => 60000 * floor(time / 60000);
+export const amendDateUpperBounds = (bounds) => {
+	return bounds.map((bound, i) => {
+		if (i !== bounds.length - 1) return bound;
+		return floorToMinute(bound) + 59999;
+	});
+};
+
 export const isRangeOperator = (operator: CardFilterOperator) => ['rng', 'nrng'].includes(operator);
 	
 export const getValidOperators = (type: CardFilterType): CardFilterOperator[] => {
@@ -87,7 +95,7 @@ export const getValidOperators = (type: CardFilterType): CardFilterOperator[] =>
 		return ['ex', 'nex', 'is', 'nis', 'ss', 'nss'];
 	}
 	if (type === 'number') return ['ex', 'nex', 'eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'rng', 'nrng'];
-	if (isDateType(type)) return ['ex', 'nex', 'eq', 'neq', 'gte', 'lte', 'rng', 'nrng'];
+	if (isDateType(type)) return ['ex', 'nex', 'gte', 'lte', 'rng', 'nrng'];
 	if (type === 'boolean') return ['eq', 'ex', 'nex'];
 	if (isSelectType(type)) {
 		if (['template', 'owner', 'ticketCode'].includes(type)) return ['is', 'nis'];
