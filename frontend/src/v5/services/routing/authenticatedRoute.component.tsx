@@ -18,7 +18,7 @@
 import { useEffect } from 'react';
 import axios from 'axios';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { AuthActionsDispatchers, TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { AuthActionsDispatchers, DialogsActionsDispatchers, TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isNotLoggedIn } from '@/v5/validation/errors.helpers';
 import { addParams, pathName } from '@/v5/helpers/url.helper';
@@ -27,6 +27,7 @@ import { useSSOAuth, useSSOParams } from '../sso.hooks';
 import { postActions } from '../api/sso';
 import { enableKickedOutEvent } from '../realtime/auth.events';
 import { AUTH_PATH, DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { formatMessage } from '../intl';
 
 const cleanSSOParams = (location) => {
 	const searchParams = new URLSearchParams(location.search);
@@ -62,9 +63,20 @@ const WrapAuthenticationRedirect = ({ children }) => {
 	useEffect(enableKickedOutEvent);
 
 	useEffect(() => {
-		if (authenticationFetched && teamspace && teamspace !== authenticatedTeamspace) {
+		if (authenticationFetched && teamspace && teamspace !== authenticatedTeamspace && isAuthenticated) {
 			const returnUrl = cleanSSOParams(location);
 			const redirectUri = addParams(returnUrl.pathname, returnUrl.search);
+			DialogsActionsDispatchers.open('info', {
+				disableClose: true,
+				title: formatMessage({
+					defaultMessage: 'Teamspace Authentication',
+					id: 'teamspace.authentication.modal.title',
+				}),
+				message: formatMessage({
+					defaultMessage: 'We\'re authenticating you against this teamspace, this may take a few seconds',
+					id: 'teamspace.authentication.modal.description',
+				}),
+			});
 			authenticateTeamspace(redirectUri, teamspace);
 		}
 	}, [teamspace, authenticationFetched]);
