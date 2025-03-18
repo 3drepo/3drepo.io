@@ -24,8 +24,6 @@
 	const middlewares = require("../middlewares/middlewares");
 	const utils = require("../utils");
 	const C = require("../constants");
-	const config = require("../config");
-
 	// Get metadata
 
 	/**
@@ -440,8 +438,7 @@
 					next,
 					responseCodes.OK,
 					{ meta: [meta] },
-					undefined,
-					{maxAge: 60 * 60 * 24}
+					undefined
 				);
 			})
 			.catch(err => {
@@ -474,9 +471,6 @@
 					"Content-Type" : "application/json"
 				};
 
-				if(req.params.rev) {
-					headers["Cache-Control"] = "private, max-age=" + config.cachePolicy.maxAge;
-				}
 				responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, stream, headers);
 			})
 			.catch(err => {
@@ -518,7 +512,7 @@
 
 		Meta.getAllIdsWith4DSequenceTag(req.params.account, req.params.model, branch, req.params.rev)
 			.then(obj => {
-				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, req.param.rev ? config.cachePolicy : undefined);
+				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 			})
 			.catch(err => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -534,7 +528,7 @@
 
 		Meta.getAllIdsWithMetadataField(req.params.account, req.params.model, branch, req.params.rev, req.params.metaKey)
 			.then(obj => {
-				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, req.param.rev ? config.cachePolicy : undefined);
+				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 			})
 			.catch(err => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -545,7 +539,7 @@
 		const dbCol = getDbColOptions(req);
 
 		Meta.getMetadataFields(dbCol.account, dbCol.model).then(obj => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined,  {maxAge: 360});
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
