@@ -28,4 +28,5 @@ export interface InfoModalProps {
 	onClickAction?: () => void;
 	Icon?: any;
 	highlightActionButton?: boolean;
+	disableClose?: boolean;
 }

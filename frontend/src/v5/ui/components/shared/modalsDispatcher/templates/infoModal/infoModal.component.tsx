@@ -34,6 +34,7 @@ export const InfoModal = ({
 	highlightActionButton = false,
 	open,
 	Icon,
+	disableClose = false,
 }: InfoModalProps) => {
 	const highlightProps = { variant : 'contained', color : 'primary' };
 	const unhighlightedProps = { variant : 'outlined', color : 'secondary' };
@@ -48,26 +49,30 @@ export const InfoModal = ({
 				<DialogTitle>
 					{ title }
 				</DialogTitle>
-				<CloseButton onClick={onClickClose}>
-					<CloseIcon />
-				</CloseButton>
+				{!disableClose && (
+					<CloseButton onClick={onClickClose}>
+						<CloseIcon />
+					</CloseButton>
+				)}
 				<DialogContent>
 					<DialogContentText>
 						{ message }
 					</DialogContentText>
 				</DialogContent>
-				<Actions>
-					<Button autoFocus {...closeButtonStyleProps} onClick={onClickClose}>
-						{closeButtonLabel}
-					</Button>
-					{actionButtonLabel && onClickAction && (
-						<Button {...actionButtonStyleProps}
-							onClick={() => { onClickClose(); onClickAction?.(); }}
-						>
-							{actionButtonLabel}
+				{!disableClose && (
+					<Actions>
+						<Button autoFocus {...closeButtonStyleProps} onClick={onClickClose}>
+							{closeButtonLabel}
 						</Button>
-					)}
-				</Actions>
+						{actionButtonLabel && onClickAction && (
+							<Button {...actionButtonStyleProps}
+								onClick={() => { onClickClose(); onClickAction?.(); }}
+							>
+								{actionButtonLabel}
+							</Button>
+						)}
+					</Actions>
+				)}
 			</ModalContent>
 		</Modal>
 	);
