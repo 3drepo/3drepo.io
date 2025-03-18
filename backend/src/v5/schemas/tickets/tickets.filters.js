@@ -55,7 +55,7 @@ Filters.querySchema = Yup.string()
 	.matches(/^'.+'$/, 'Query must start and end with a single quote and cannot be empty');
 
 Filters.queryParamSchema = Yup.object().shape({
-	propertyName: types.strings.title
+	propertyName: Yup.string()
 		.transform((value) => {
 			if (!value?.length) return value;
 
