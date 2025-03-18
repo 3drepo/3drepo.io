@@ -38,7 +38,6 @@ export const TicketFiltersSelectionItem = ({ module, property, type, onClick }: 
 				<Icon />
 			</FilterIconContainer>
 			<TextOverflowContainer tooltipText={getFilterFormTitle([module, property])}>
-				_______________________: 
 				{module && (<>
 					<Highlight search={query}>{module}</Highlight>
 					&nbsp;:&nbsp; 
