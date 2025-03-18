@@ -94,10 +94,12 @@ Filters.queryParamSchema = Yup.object().shape({
 			}
 
 			return Yup.array().of(types.strings.title).required()
-				.transform((v, value) => (
-					value
-						? value.match(/([^",]+|"(.*?)")/g).map((val) => val.replace(/^"|"$/g, '').trim())
-						: value))
+				.transform((v, value) => {
+					if (!value) return value;
+					const commaSeparatedValues = value.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+					const valQuotesRemoved = commaSeparatedValues.map((val) => val.replace(/^"|"$/g, '').trim());
+					return valQuotesRemoved;
+				})
 				.test('all-bools-or-numbers', 'Values must be booleans or numbers', (value) => {
 					if (operator === Filters.queryOperators.EQUALS || operator === Filters.queryOperators.NOT_EQUALS) {
 						const allBooleans = value.every(isBooleanString);
