@@ -20,7 +20,7 @@ import { CardFilterOperator, CardFilterValue, CardFilterType, BaseFilter, CardFi
 import { amendDateUpperBounds, floorToMinute, getDefaultOperator, getFilterFormTitle, getValidOperators, isDateType, isRangeOperator } from '../cardFilters.helpers';
 import { Container, ButtonsContainer, Button, TitleContainer } from './filterForm.styles';
 import { FormProvider, useForm } from 'react-hook-form';
-import { intersection, isBoolean, isEmpty } from 'lodash';
+import { isBoolean, isEmpty } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { FilterFormValues } from './filterFormValues/filterFormValues.component';
 import { mapArrayToFormArray, mapFormArrayToArray } from '@/v5/helpers/form.helper';
@@ -32,7 +32,6 @@ import { formatSimpleDate } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
 import { TRUE_LABEL, FALSE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
 
-const DEFAULT_OPERATORS: CardFilterOperator[] = ['is', 'eq'];
 const DEFAULT_VALUES = [''];
 type FormType = { values: { value: CardFilterValue, displayValue?: string }[], operator: CardFilterOperator };
 type FilterFormProps = {
@@ -52,7 +51,7 @@ const formatDateRange = ([from, to]) => formatMessage(
 
 export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel }: FilterFormProps) => {
 	const defaultValues: FormType = {
-		operator: filter?.operator || intersection(getValidOperators(type), DEFAULT_OPERATORS)[0],
+		operator: filter?.operator || getDefaultOperator(type),
 		values: mapArrayToFormArray(filter?.values || DEFAULT_VALUES),
 	};
 

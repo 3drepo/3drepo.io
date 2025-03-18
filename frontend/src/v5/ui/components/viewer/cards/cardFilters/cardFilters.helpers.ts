@@ -103,3 +103,9 @@ export const getValidOperators = (type: CardFilterType): CardFilterOperator[] =>
 	}
 	return Object.keys(FILTER_OPERATOR_LABEL) as CardFilterOperator[];
 };
+
+export const getDefaultOperator = (type) => {
+	if (isTextType(type) || isSelectType(type)) return 'is';
+	if (isDateType(type)) return 'lte';
+	return 'eq';
+};
