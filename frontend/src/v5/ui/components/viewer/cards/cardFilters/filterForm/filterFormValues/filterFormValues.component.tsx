@@ -70,7 +70,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 	}, [isRangeOp]);
 
 	useEffect(() => {
-		if (!fields.length && maxFields > 0) {
+		if (!fields.length && maxFields > 0 && !isSelectType(type)) {
 			append(emptyValue);
 		}
 	}, [fields.length, operator]);
