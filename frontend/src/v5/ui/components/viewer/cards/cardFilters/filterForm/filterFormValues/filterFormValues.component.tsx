@@ -31,6 +31,7 @@ import { DateRangeInput } from './rangeInput/dateRangeInput.component';
 import { NumberRangeInput } from './rangeInput/numberRangeInput.component';
 import { mapFormArrayToArray } from '@/v5/helpers/form.helper';
 import { getOptionFromValue, getFilterFromEvent } from '../../filtersSelection/tickets/ticketFilters.helpers';
+import { Value } from './filterFormValues.styles';
 
 type FilterFormValuesProps = {
 	module: string,
@@ -147,7 +148,13 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 				formError={error?.[0]}
 			>
 				{selectOptions.map(
-					(option) => <MultiSelectMenuItem key={option.value} value={option.value}>{option.displayValue ?? option.value}</MultiSelectMenuItem>,
+					(option) => (
+						<MultiSelectMenuItem key={option.value} value={option.value}>
+							<Value>
+								{option.displayValue ?? option.value}
+							</Value>
+						</MultiSelectMenuItem>
+					),
 				)}
 			</FormMultiSelect>
 		);

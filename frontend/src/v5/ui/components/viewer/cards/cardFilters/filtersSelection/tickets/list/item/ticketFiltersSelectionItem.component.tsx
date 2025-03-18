@@ -23,6 +23,7 @@ import { Highlight } from '@controls/highlight';
 import { useContext } from 'react';
 import { SearchContext } from '@controls/search/searchContext';
 import { FilterIconContainer } from '@components/viewer/cards/cardFilters/filterForm/filterFormValues/operators/filterFormOperators.styles';
+import { getFilterFormTitle } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
 
 type TicketFiltersSelectionItemProps = CardFilter & {
 	onClick: () => void;
@@ -36,7 +37,7 @@ export const TicketFiltersSelectionItem = ({ module, property, type, onClick }: 
 			<FilterIconContainer>
 				<Icon />
 			</FilterIconContainer>
-			<TextOverflowContainer>
+			<TextOverflowContainer tooltipText={getFilterFormTitle([module, property])}>
 				{module && (<>
 					<Highlight search={query}>{module}</Highlight>
 					&nbsp;:&nbsp; 
