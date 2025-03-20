@@ -14,6 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import { getState } from '../helpers/redux.helpers';
+import { selectAuthenticatedTeamspace } from '../store/auth/auth.selectors';
+import { selectCurrentTeamspace } from '../store/teamspaces/teamspaces.selectors';
+
 export const getErrorMessage = (error: any) => error.response?.data?.message || error.message;
 export const getErrorCode = (error: any) => error?.response?.data?.code || '';
 export const getErrorStatus = (error: any) => error?.response?.status;
@@ -47,3 +52,12 @@ export const isProjectNotFound = (code: string): boolean => code === 'PROJECT_NO
 export const isModelNotFound = (code: string): boolean => ['RESOURCE_NOT_FOUND', 'CONTAINER_NOT_FOUND'].includes(code);
 
 export const isContainerPartOfFederation = (error): boolean => getErrorCode(error).endsWith('CONTAINER_IS_SUB_MODEL');
+
+export const isTeamspaceUnuthenticatedBySameUserOnDifferentSession = (error) => {
+	const teamspace = selectCurrentTeamspace(getState());
+	const authenticatedTeamspace = selectAuthenticatedTeamspace(getState());
+	const code = getErrorCode(error);
+	const teamspaceUnauthenticatedError = isTeamspaceUnauthenticated(code);
+
+	return (teamspace === authenticatedTeamspace) && teamspaceUnauthenticatedError;
+};

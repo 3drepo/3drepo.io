@@ -18,63 +18,38 @@ import { FC, useEffect } from 'react';
 import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { Modal, Actions, Details, Status, WarningIcon, ModalContent, CloseButton } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
-import { getErrorCode, getErrorMessage, getErrorStatus, isPathNotFound, isPathNotAuthorized, isProjectNotFound, isModelNotFound, isTeamspaceInvalid, isTeamspaceUnauthenticated } from '@/v5/validation/errors.helpers';
-import { generatePath, useHistory } from 'react-router';
-import { DASHBOARD_ROUTE, TEAMSPACE_ROUTE_BASE, PROJECT_ROUTE_BASE } from '@/v5/ui/routes/routes.constants';
-import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { formatMessage } from '@/v5/services/intl';
+import { getErrorCode, getErrorMessage, getErrorStatus, isPathNotFound, isPathNotAuthorized, isTeamspaceInvalid, isTeamspaceUnauthenticated, isTeamspaceUnuthenticatedBySameUserOnDifferentSession } from '@/v5/validation/errors.helpers';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { AlertModalProps } from './alertModal.types';
+import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { useSafePath } from '@/v5/validation/useSafePath';
 
 
 export const AlertModal: FC<AlertModalProps> = ({ onClickClose, currentActions = '', error, details, open }) => {
-	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
-	const project = ProjectsHooksSelectors.selectCurrentProject();
-	const accessibleProjects = ProjectsHooksSelectors.selectProjects()[teamspace] || [];
-	const hasAccessToProject = accessibleProjects.some(({ _id }) => _id === project);
-	const history = useHistory();
+	const [redirectToSafePath, getSafePathName] = useSafePath(error);
 
 	const message = getErrorMessage(error);
 	const code = getErrorCode(error);
 	const status = getErrorStatus(error);
 	const errorStatus = status && code ? `${status} - ${code}` : '';
 	const pathNotFound = isPathNotFound(error);
-	const modelNotFound = isModelNotFound(code);
-	const projectNotFound = isProjectNotFound(code);
 	const teamspaceInvalid = isTeamspaceInvalid(code);
-	const teamspaceUnauthenticated = isTeamspaceUnauthenticated(code);
+	const teamspaceUnauthenticatedError = isTeamspaceUnauthenticated(code);
 	const unauthorized = isPathNotAuthorized(error);
-
-	const getSafePath = () => {
-		if ((modelNotFound || unauthorized) && hasAccessToProject) return generatePath(PROJECT_ROUTE_BASE, { teamspace, project });
-		if ((projectNotFound || unauthorized) && teamspace) return generatePath(TEAMSPACE_ROUTE_BASE, { teamspace });
-		// Teamspace not found
-		return generatePath(DASHBOARD_ROUTE);
-	};
-
-	const getSafePathName = () => {
-		if ((modelNotFound || unauthorized) && hasAccessToProject) {
-			return formatMessage({ id: 'alertModal.redirect.project', defaultMessage: 'the project page' });
-		}
-		if ((projectNotFound || unauthorized) && teamspace) {
-			return formatMessage({ id: 'alertModal.redirect.teamspace', defaultMessage: 'the teamspace page' });
-		}
-		// teamspace not found
-		return formatMessage({ id: 'alertModal.redirect.dashboard', defaultMessage: 'the dashboard' });
-	};
-
-	const redirectToSafePath = () => {
-		const path = getSafePath();
-		history.push(path);
-	};
+	const sessionIsValidButTeamspaceHasLostAuthentication = isTeamspaceUnuthenticatedBySameUserOnDifferentSession(error);
 
 	useEffect(() => () => {
-		if (pathNotFound || unauthorized || teamspaceInvalid) {
+		if (sessionIsValidButTeamspaceHasLostAuthentication) {
+			AuthActionsDispatchers.setAuthenticatedTeamspace(null);
+		}
+		if (pathNotFound || unauthorized || teamspaceInvalid || sessionIsValidButTeamspaceHasLostAuthentication) {
 			redirectToSafePath();
 		}
 	}, []);
 
-	if (teamspaceUnauthenticated) return (<></>);
+	if (teamspaceUnauthenticatedError && !sessionIsValidButTeamspaceHasLostAuthentication) {
+		return (<></>);
+	}
 
 	return (
 		<Modal open={open} onClose={onClickClose}>
@@ -86,7 +61,7 @@ export const AlertModal: FC<AlertModalProps> = ({ onClickClose, currentActions =
 						defaultMessage="Something went wrong when {currentActions}"
 						values={{ currentActions }}
 					/>
-					{pathNotFound || unauthorized || teamspaceInvalid && (
+					{pathNotFound || unauthorized || teamspaceInvalid || sessionIsValidButTeamspaceHasLostAuthentication && (
 						<>.
 							<br />
 							<FormattedMessage
