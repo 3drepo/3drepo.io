@@ -48,26 +48,30 @@ const getInputField = (type: CardFilterType) => {
 const name = 'values';
 export const FilterFormValues = ({ module, property, type }: FilterFormValuesProps) => {
 	const { containerOrFederation } = useParams<ViewerParams>();
-	const { control, watch, formState: { errors, dirtyFields } } = useFormContext();
+	const { setValue, control, watch, formState: { errors, dirtyFields } } = useFormContext();
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name,
 	});
 	const error = errors.values || {};
 	const operator = watch('operator');
-	
+
 	const maxFields = getOperatorMaxFieldsAllowed(operator);
 	const isRangeOp = isRangeOperator(operator);
 	const emptyValue = { value: (isRangeOp ? ['', ''] : '') };
 	const selectOptions = type === 'template' ?
 		TicketsCardHooksSelectors.selectTemplatesWithTickets().map(({ code: value, name: displayValue }) => ({ value, displayValue, type: 'template' }))
-		: TicketsCardHooksSelectors.selectPropertyOptions(containerOrFederation, module, property);
+		: isSelectType(type) ? TicketsCardHooksSelectors.selectPropertyOptions(containerOrFederation, module, property) : [];
 
 	useEffect(() => {
 		if (!isEmpty(dirtyFields)) {
 			remove();
 		}
 	}, [isRangeOp]);
+
+	useEffect(() => {
+		setValue('selectOptions', selectOptions);
+	}, [selectOptions]);
 
 	useEffect(() => {
 		if (!fields.length && maxFields > 0 && !isSelectType(type)) {
@@ -135,7 +139,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 				maxItems={19}
 				name={name}
 				transformInputValue={(v) => compact(mapFormArrayToArray(v))}
-				transformOutputValue={(e) =>  getFilterFromEvent(e, selectOptions)}
+				transformOutputValue={(e) =>  getFilterFromEvent(e)}
 				formError={error?.[0]}
 			/>
 		);
@@ -143,7 +147,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 			<FormMultiSelect
 				name={name}
 				transformInputValue={mapFormArrayToArray}
-				transformOutputValue={(e) => getFilterFromEvent(e, selectOptions)}
+				transformOutputValue={(e) => getFilterFromEvent(e)}
 				renderValue={(values: string[]) => values.map((value) => getOptionFromValue(value, selectOptions)?.displayValue ?? value).join(', ')}
 				formError={error?.[0]}
 			>

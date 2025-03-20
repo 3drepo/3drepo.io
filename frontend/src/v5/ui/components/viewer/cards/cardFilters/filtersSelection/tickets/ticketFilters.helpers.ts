@@ -88,10 +88,7 @@ export const toTicketCardFilter = (filters: Record<string, BaseFilter>): CardFil
 );
 
 export const getOptionFromValue = (value, options) => options.find(({ value: optionValue }) => value === optionValue);
-export const getFilterFromEvent = (event, options) => compact(event.target.value).map((value) => {
-	const option = getOptionFromValue(value, options);
-	return { value, displayValue: option?.displayValue ?? value };
-});
+export const getFilterFromEvent = (event) => compact(event.target.value).map((value) => ({ value }));
 
 export const getFiltersFromJobsAndUsers = (jobsAndUsers) => jobsAndUsers.map((ju) => {
 	const isUser = !!ju.firstName;

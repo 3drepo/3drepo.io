@@ -33,7 +33,14 @@ import { formatMessage } from '@/v5/services/intl';
 import { TRUE_LABEL, FALSE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
 
 const DEFAULT_VALUES = [''];
-type FormType = { values: { value: CardFilterValue, displayValue?: string }[], operator: CardFilterOperator };
+
+type Option = { 
+	value: string,
+	displayValue: string,
+	type: string
+};
+
+type FormType = { selectOptions?: Option[], values: { value: CardFilterValue, displayValue?: string }[], operator: CardFilterOperator };
 type FilterFormProps = {
 	module: string,
 	property: string,
@@ -72,14 +79,14 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel 
 	const isUpdatingFilter = !!filter;
 	const canSubmit = isValid && !isEmpty(dirtyFields);
 
-	const handleSubmit = formData.handleSubmit((body: FormType) => {
-		let newValues = mapFormArrayToArray(body.values)
+	const handleSubmit = formData.handleSubmit((filledForm: FormType) => {
+		let newValues = mapFormArrayToArray(filledForm.values)
 			.filter((x) => ![undefined, ''].includes(x as any));
 
 		// We need to adjust the upper bounds of date values since some dates (e.g. Created At) include milliseconds whereas the datePicker
 		// only goes down to minutes. So we need to extend the upper bound values to the maximum millisecond possible to include all of that minute
 		if (isDateType(type)) {
-			switch (body.operator) {
+			switch (filledForm.operator) {
 				case 'rng':
 				case 'nrng':
 					newValues = newValues.map(amendDateUpperBounds);
@@ -94,9 +101,9 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel 
 					break;
 			}
 		}
-		const isRange = isRangeOperator(body.operator);
+		const isRange = isRangeOperator(filledForm.operator);
 		const displayValues = newValues.map((newVal) => {
-			const option = getOptionFromValue(newVal, body.values);
+			const option = getOptionFromValue(newVal, filledForm.selectOptions);
 			if (isDateType(type)) return (isRange ? formatDateRange(newVal) : valueToDisplayDate(newVal));
 			if (type === 'boolean' && isBoolean(newValues[0])) return newValues[0] ? TRUE_LABEL : FALSE_LABEL; 
 			if (isRange) {
@@ -105,7 +112,7 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel 
 			}
 			return option.displayValue ?? newVal;
 		}).join(', ');
-		onSubmit({ module, property, type, filter: { operator: body.operator, values: newValues, displayValues } });
+		onSubmit({ module, property, type, filter: { operator: filledForm.operator, values: newValues, displayValues } });
 	});
 
 	const handleCancel = () => {
