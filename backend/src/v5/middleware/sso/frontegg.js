@@ -52,7 +52,7 @@ const checkStateIsValid = async (req, res, next) => {
 		await next();
 	} catch (err) {
 		const response = codeExists(err.code) ? err
-			: createResponseCode(templates.invalidArguments, 'state is required and must be a valid encoded JSON');
+			: createResponseCode(templates.invalidArguments, 'Variable "state" is required and must be a valid encoded JSON');
 
 		destroySession(req.session, res, () => {
 			respond(req, res, response);
