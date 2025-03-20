@@ -63,7 +63,7 @@ export const DefaultTicketFiltersSetter = () => {
 		return {
 			module: '',
 			property: 'Status',
-			type: 'oneOf',
+			type: 'status',
 			filter: {
 				operator: 'nis',
 				values,
