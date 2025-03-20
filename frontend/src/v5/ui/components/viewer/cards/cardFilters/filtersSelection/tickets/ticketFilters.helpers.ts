@@ -117,7 +117,7 @@ const getFilterPropertyAsQuery = ({ module, property, type }: CardFilter) => {
 };
 
 const valueToQueryValueFormat = (value, operator: CardFilterOperator) => {
-	if (isString(value) && value.includes(',')) return wrapWith(value, '"');
+	if (isString(value)) return wrapWith(value, '"');
 	if (isRangeOperator(operator)) return `[${value[0]},${value[1]}]`;
 	return value;
 };
