@@ -219,7 +219,7 @@ const testGenerateToken = () => {
 			['query.state does not exist', { ...sampleReq, query: { code: generateRandomString() } }, missingQueryResponse],
 			['query.code does not exist', { ...sampleReq, query: { state: generateRandomString() } }, missingQueryResponse],
 			['state is not JSON parsable', { ...sampleReq, query: { ...sampleReq.query, state: generateRandomString() } },
-				createResponseCode(templates.invalidArguments, 'state is required and must be a valid encoded JSON')],
+				createResponseCode(templates.invalidArguments, 'Variable "state" is required and must be a valid encoded JSON')],
 			['csrfToken does not match', { ...sampleReq, session: { csrfToken: generateRandomString() } },
 				createResponseCode(templates.invalidArguments, 'CSRF Token mismatched. Please clear your cookies and try again')],
 		])('Check state is valid', (desc, request, expectedResponse) => {
