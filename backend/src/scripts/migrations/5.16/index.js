@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -18,7 +18,7 @@
 const migrateUsers = require('./migrateUsersToFrontegg');
 
 const scripts = [
-	{ script: migrateUsers, desc: 'migrate users and teamspaces to Frontegg' },
+	{ script: migrateUsers, desc: 'Migrate users and teamspaces to Frontegg' },
 ];
 
 module.exports = scripts;
