@@ -30,6 +30,7 @@ import NotContainIcon from '@assets/icons/filters/not_contain.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { CardFilterOperator, CardFilterType } from './cardFilters.types';
 import { compact, floor } from 'lodash';
+import { isBaseProperty } from './filtersSelection/tickets/ticketFilters.helpers';
 
 export const FILTER_OPERATOR_ICON: Record<CardFilterOperator, any> = {
 	eq: EqualIcon,
@@ -71,9 +72,9 @@ const DATE_FILTER_OPERATOR_LABEL: Record<CardFilterOperator, string> = {
 	lte: formatMessage({ id: 'cardFilter.date.operator.onOrBefore', defaultMessage: 'On or before' }),
 };
 
-export const isDateType = (type: CardFilterType) => ['date', 'pastDate', 'sequencing'].includes(type);
+export const isDateType = (type: CardFilterType) => ['date', 'pastDate', 'createdAt', 'updatedAt', 'sequencing'].includes(type);
 export const isTextType = (type: CardFilterType) => ['ticketCode', 'title', 'text', 'longText'].includes(type);
-export const isSelectType = (type: CardFilterType) => ['template', 'oneOf', 'manyOf', 'owner'].includes(type);
+export const isSelectType = (type: CardFilterType) => ['template', 'oneOf', 'manyOf', 'owner', 'status'].includes(type);
 
 export const getFilterOperatorLabels = (type: CardFilterType) => isDateType(type) ? DATE_FILTER_OPERATOR_LABEL : FILTER_OPERATOR_LABEL;
 
@@ -91,14 +92,17 @@ export const isRangeOperator = (operator: CardFilterOperator) => ['rng', 'nrng']
 	
 export const getValidOperators = (type: CardFilterType): CardFilterOperator[] => {
 	if (isTextType(type)) {
-		if (type === 'title') return ['is', 'nis', 'ss', 'nss'];
+		if (isBaseProperty(type)) return ['is', 'nis', 'ss', 'nss'];
 		return ['ex', 'nex', 'is', 'nis', 'ss', 'nss'];
 	}
-	if (type === 'number') return ['ex', 'nex', 'eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'rng', 'nrng'];
-	if (isDateType(type)) return ['ex', 'nex', 'gte', 'lte', 'rng', 'nrng'];
+	if (type === 'number') return ['ex', 'nex', 'eq', 'neq', 'gte', 'lte', 'rng', 'nrng'];
+	if (isDateType(type)) {
+		if (isBaseProperty(type)) return ['gte', 'lte', 'rng', 'nrng'];
+		return ['ex', 'nex', 'gte', 'lte', 'rng', 'nrng'];
+	}
 	if (type === 'boolean') return ['eq', 'ex', 'nex'];
 	if (isSelectType(type)) {
-		if (['template', 'owner', 'ticketCode'].includes(type)) return ['is', 'nis'];
+		if (isBaseProperty(type)) return ['is', 'nis'];
 		return ['ex', 'nex', 'is', 'nis'];
 	}
 	return Object.keys(FILTER_OPERATOR_LABEL) as CardFilterOperator[];

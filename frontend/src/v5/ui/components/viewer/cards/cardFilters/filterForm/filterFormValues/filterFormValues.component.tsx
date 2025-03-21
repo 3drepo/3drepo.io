@@ -90,7 +90,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 	if (type === 'number' || isDateType(type) || isTextType(type)) {
 		const InputField = getInputField(type);
 
-		if (maxFields === 1) return <InputField name={`${name}.0.value`} formError={error?.[0]} />;
+		if (maxFields === 1) return <InputField key={fields[0]?.id} name={`${name}.0.value`} formError={error?.[0]} />;
 
 		const getFieldContainerProps = (field, i) => ({
 			key: field.id,
@@ -164,7 +164,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 		);
 	}
 
-	if (type === 'boolean') return (<FormBooleanSelect name={`${name}.0.value`} />);
+	if (type === 'boolean') return (<FormBooleanSelect key={fields[0]?.id} name={`${name}.0.value`} />);
 
 	return (
 		<>

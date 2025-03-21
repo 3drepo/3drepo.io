@@ -94,7 +94,7 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel 
 				case 'lte':
 					newValues = amendDateUpperBounds(newValues);
 					break;
-				case 'gte': // This is required for when a chip is editted from lte to gte so that it is no longer at the very last millisecond
+				case 'gte': // This is required for when a chip is edited from lte to gte so that it is no longer at the very last millisecond
 					newValues = newValues.map(floorToMinute);
 					break;
 				default:
