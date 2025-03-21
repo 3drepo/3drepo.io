@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const migrateUsers = require('./migrateUsersToFrontegg');
+const FronteggConstants = {};
 
-const scripts = [
-	{ script: migrateUsers, desc: 'Migrate users and teamspaces to Frontegg' },
-];
+// https://developers.frontegg.com/guides/troubleshoot/errors/error-codes
+FronteggConstants.errCodes = {
+	USER_NOT_FOUND: 'ER-01089',
+};
 
-module.exports = scripts;
+module.exports = FronteggConstants;

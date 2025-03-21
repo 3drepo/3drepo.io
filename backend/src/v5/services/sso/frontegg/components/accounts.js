@@ -18,6 +18,7 @@
 const { HEADER_TENANT_ID, META_LABEL_TEAMSPACE } = require('./accounts.constants');
 const { get, delete: httpDelete, post } = require('../../../../utils/webRequests');
 const { getBearerHeader, getConfig } = require('./connections');
+const { errCodes } = require('../frontegg.constants');
 const { generateUUIDString } = require('../../../../utils/helper/uuids');
 const { logger } = require('../../../../utils/logger');
 
@@ -25,8 +26,8 @@ const Accounts = {};
 
 Accounts.getTeamspaceByAccount = async (accountId) => {
 	try {
-		const config = await getConfig();
-		const { data: { metadata } } = await get(`${config.vendorDomain}/tenants/resources/tenants/v2/${accountId}`, await getBearerHeader());
+		const { vendorDomain } = await getConfig();
+		const { data: { metadata } } = await get(`${vendorDomain}/tenants/resources/tenants/v2/${accountId}`, await getBearerHeader());
 		const metaJson = JSON.parse(metadata);
 		return metaJson[META_LABEL_TEAMSPACE];
 	} catch (err) {
@@ -41,13 +42,10 @@ Accounts.getTeamspaceByAccount = async (accountId) => {
 Accounts.createAccount = async (name) => {
 	try {
 		const config = await getConfig();
-		const payload = {
-			tenantId: generateUUIDString(),
-			name,
-		};
+		const tenantId = generateUUIDString();
 
 		const headers = await getBearerHeader();
-		await post(`${config.vendorDomain}/tenants/resources/tenants/v1`, payload, { headers });
+		await post(`${config.vendorDomain}/tenants/resources/tenants/v1`, { tenantId, name }, { headers });
 
 		// add teamspace name as a metadata
 		const metadataPayload = {
@@ -56,16 +54,12 @@ Accounts.createAccount = async (name) => {
 			},
 		};
 
-		const applicationPayload = {
-			tenantId: payload.tenantId,
-		};
-
 		await Promise.all([
-			post(`${config.vendorDomain}/tenants/resources/tenants/v1/${payload.tenantId}/metadata`, metadataPayload, { headers }),
-			post(`${config.vendorDomain}/applications/resources/applications/tenant-assignments/v1/${config.appId}`, applicationPayload, { headers }),
+			post(`${config.vendorDomain}/tenants/resources/tenants/v1/${tenantId}/metadata`, metadataPayload, { headers }),
+			post(`${config.vendorDomain}/applications/resources/applications/tenant-assignments/v1/${config.appId}`, { tenantId }, { headers }),
 		]);
 
-		return payload.tenantId;
+		return tenantId;
 	} catch (err) {
 		logger.logError(`Failed to create account: ${err?.response?.data} `);
 		throw new Error(`Failed to create account on Accounts: ${err.message}`);
@@ -133,6 +127,12 @@ Accounts.removeUserFromAccount = async (accountId, userId) => {
 
 		await httpDelete(`${config.vendorDomain}/identity/resources/users/v1/${userId}`, headers);
 	} catch (err) {
+		const errCode = err?.response?.data?.errorCode;
+
+		if (errCode === errCodes.USER_NOT_FOUND) {
+			// we're trying to remove a user frontegg doesn't recognise, just treat it as success.
+			return;
+		}
 		logger.logError(`Failed to remove user from account: ${JSON.stringify(err?.response?.data)} `);
 		throw new Error(`Failed to remove ${userId} from ${accountId} on Accounts: ${err.message}`);
 	}
@@ -143,8 +143,10 @@ Accounts.removeAccount = async (accountId) => {
 		const config = await getConfig();
 		await httpDelete(`${config.vendorDomain}/tenants/resources/tenants/v1/${accountId}`, await getBearerHeader());
 	} catch (err) {
-		logger.logError(`Failed to remove account: ${JSON.stringify(err?.response?.data)} `);
-		throw new Error(`Failed to remove ${accountId} on Accounts: ${err.message}`);
+		if (err.response.status !== 404) {
+			logger.logError(`Failed to remove account: ${JSON.stringify(err?.response?.data)} `);
+			throw new Error(`Failed to remove ${accountId} on Accounts: ${err.message}`);
+		}
 	}
 };
 
