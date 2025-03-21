@@ -32,6 +32,7 @@ import { ModalCancelButton, ModalSubmitButton } from '@controls/formModal/modalB
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
 import { TabContent } from '../editProfileModal.styles';
 import { userHasMissingRequiredData } from '@/v5/store/users/users.helpers';
+import { WelcomeMessage } from './editProfilePersonalTab.styles';
 
 export type IUpdatePersonalInputs = Partial<{
 	firstName: string;
@@ -139,10 +140,19 @@ export const EditProfilePersonalTab = ({
 						/>
 					</SuccessMessage>
 				)}
-				<UnhandledError
-					error={unexpectedError}
-					expectedErrorValidators={[emailAlreadyExists, isFileFormatUnsupported]}
-				/>
+				{userHasMissingRequiredData(user) ? (
+					<WelcomeMessage>
+						<FormattedMessage
+							id="editProfile.form.newUserMessage"
+							defaultMessage="Welcome to 3DR, please tell us more about yourself..."
+						/>
+					</WelcomeMessage>
+				) : (
+					<UnhandledError
+						error={unexpectedError}
+						expectedErrorValidators={[emailAlreadyExists, isFileFormatUnsupported]}
+					/>
+				)}
 				<FormTextField
 					name="firstName"
 					control={control}
