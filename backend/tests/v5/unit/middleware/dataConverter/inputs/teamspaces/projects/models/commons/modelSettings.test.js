@@ -28,7 +28,7 @@ jest.mock('../../../../../../../../../../src/v5/models/modelSettings');
 const ModelSettingsModel = require(`${src}/models/modelSettings`);
 jest.mock('../../../../../../../../../../src/v5/models/projectSettings');
 const Projects = require(`${src}/models/projectSettings`);
-jest.mock('../../../../../../../../../../src/v5/utils/permissions/permissions');
+jest.mock('../../../../../../../../../../src/v5/utils/permissions');
 const ModelSettings = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings`);
 const { cloneDeep } = require(`${src}/utils/helper/objects`);
 const { templates } = require(`${src}/utils/responseCodes`);

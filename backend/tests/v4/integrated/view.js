@@ -18,7 +18,7 @@
  */
 
 const request = require("supertest");
-const SessionTracker = require("../../v5/helper/sessionTracker")
+const SessionTracker = require("../../v4/helpers/sessionTracker")
 const expect = require("chai").expect;
 const app = require("../../../src/v4/services/api.js").createApp();
 const responseCodes = require("../../../src/v4/response_codes.js");
@@ -178,7 +178,7 @@ describe("Views", function () {
 
 			agent2.get(`/invalidTeamspace/${teamSpace1Model}/viewpoints/`)
 				.expect(404, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 					return done(err);
 				});
 		});

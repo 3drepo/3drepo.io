@@ -198,8 +198,8 @@ Users.deleteFavourites.mockImplementation((username, teamspace, favouritesToAdd)
 });
 
 // Permissions mock
-jest.mock('../../../../../../../src/v5/utils/permissions/permissions', () => ({
-	...jest.requireActual('../../../../../../../src/v5/utils/permissions/permissions'),
+jest.mock('../../../../../../../src/v5/utils/permissions', () => ({
+	...jest.requireActual('../../../../../../../src/v5/utils/permissions'),
 	isTeamspaceAdmin: jest.fn().mockImplementation((teamspace, user) => user === 'tsAdmin'),
 	hasProjectAdminPermissions: jest.fn().mockImplementation((perm, user) => user === 'projAdmin'),
 }));

@@ -18,7 +18,11 @@
 jest.mock('axios');
 const axios = require('axios');
 const { src } = require('../../helper/path');
-const { generateRandomString } = require('../../helper/services');
+const Crypto = require('crypto');
+
+// We can't use the one from service helper because mocking axios upsets
+// frontegg, which is a dependence of something that is being imported in that file...
+const generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex').substring(0, length);
 
 const WebRequests = require(`${src}/utils/webRequests`);
 
@@ -49,6 +53,33 @@ const testGetRequest = () => {
 	});
 };
 
+const testDeleteRequest = () => {
+	describe('Delete request', () => {
+		test('Should make a delete request', async () => {
+			const deleteResponse = generateRandomString();
+			axios.delete.mockResolvedValueOnce(deleteResponse);
+
+			const uri = generateRandomString();
+			const res = await WebRequests.delete(uri);
+			expect(res).toEqual(deleteResponse);
+			expect(axios.delete).toHaveBeenCalledTimes(1);
+			expect(axios.delete).toHaveBeenCalledWith(uri, {});
+		});
+
+		test('Should make a delete request with headers', async () => {
+			const deleteResponse = generateRandomString();
+			axios.delete.mockResolvedValueOnce(deleteResponse);
+
+			const uri = generateRandomString();
+			const headers = { Authorisation: `Bearer ${generateRandomString()}` };
+			const res = await WebRequests.delete(uri, headers);
+			expect(res).toEqual(deleteResponse);
+			expect(axios.delete).toHaveBeenCalledTimes(1);
+			expect(axios.delete).toHaveBeenCalledWith(uri, { headers });
+		});
+	});
+};
+
 const testPostRequest = () => {
 	describe('Post request', () => {
 		test('Should make a post request with body params', async () => {
@@ -72,4 +103,5 @@ const testPostRequest = () => {
 describe('utils/webRequests', () => {
 	testGetRequest();
 	testPostRequest();
+	testDeleteRequest();
 });
