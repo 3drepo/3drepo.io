@@ -33,17 +33,13 @@ const LoginRecord = require(`${src}/models/loginRecords`);
 
 const loginRecordsCol = 'loginRecords';
 
-const testSaveRecordHelper = (testFailed = false) => {
+const testSaveRecordHelper = () => {
 	const sessionId = generateRandomString();
 	const username = generateRandomString();
 	const ipAddress = generateRandomString();
 	const browserUserAgent = generateRandomString();
 	const pluginUserAgent = `PLUGIN: ${generateRandomString()}`;
 	const referrer = generateRandomString();
-
-	if (testFailed) {
-		DBHandler.find.mockResolvedValue([]);
-	}
 
 	const formatLoginRecord = (userAgentInfo, referer, ipAddr = ipAddress) => {
 		const formattedLoginRecord = {
@@ -56,32 +52,25 @@ const testSaveRecordHelper = (testFailed = false) => {
 			formattedLoginRecord.referrer = referer;
 		}
 
-		if (!testFailed) {
-			formattedLoginRecord._id = sessionId;
-		}
+		formattedLoginRecord._id = sessionId;
 
 		return formattedLoginRecord;
 	};
 
-	const callFunction = (user, id, ip, userAgent, ref) => (testFailed
-		? LoginRecord.recordFailedAttempt(user, ip, userAgent, ref)
-		: LoginRecord.saveSuccessfulLoginRecord(user, id, ip, userAgent, ref));
+	const callFunction = (user, id, ip, userAgent, ref) => LoginRecord.saveSuccessfulLoginRecord(
+		user, id, ip, userAgent, ref);
 
 	const checkResults = (fn, user, expectedResult) => {
 		expect(fn).toHaveBeenCalledTimes(1);
-		const { loginTime, _id } = fn.mock.calls[0][2];
-		const baseProps = testFailed ? { failed: true, _id, loginTime } : { loginTime };
+		const { loginTime } = fn.mock.calls[0][2];
+		const baseProps = { loginTime };
 		const loginRecord = { ...expectedResult, ...baseProps };
 		expect(fn).toHaveBeenCalledWith(INTERNAL_DB, loginRecordsCol, { ...loginRecord, user });
 
-		if (testFailed) {
-			expect(EventsManager.publish).not.toHaveBeenCalled();
-		} else {
-			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-			expect(EventsManager.publish).toHaveBeenCalledWith(
-				events.SUCCESSFUL_LOGIN_ATTEMPT, { username: user, loginRecord },
-			);
-		}
+		expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+		expect(EventsManager.publish).toHaveBeenCalledWith(
+			events.SUCCESSFUL_LOGIN_ATTEMPT, { username: user, loginRecord },
+		);
 	};
 
 	test('Should save a new login record if user agent is from plugin', async () => {
