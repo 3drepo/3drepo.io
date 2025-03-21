@@ -167,6 +167,21 @@ const testCreateProject = () => {
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
+		test('should fail if multiple projects are being sent at similar times with the same name', async () => {
+			const validName = ServiceHelper.generateRandomString();
+			await Promise.all([
+				agent.post(route()).send({
+					name: validName,
+				}).expect(templates.ok.status),
+				agent.post(route()).send({
+					name: validName,
+				}).expect(templates.unknown.status),
+				agent.post(route()).send({
+					name: validName,
+				}).expect(templates.unknown.status),
+			]);
+		});
+
 		test('should create new project if new project data are valid', async () => {
 			const res = await agent.post(route())
 				.send({ name: 'Valid Name' }).expect(templates.ok.status);
