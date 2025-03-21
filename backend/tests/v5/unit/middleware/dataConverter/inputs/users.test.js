@@ -69,23 +69,23 @@ UsersModel.getUserByEmail.mockImplementation((email) => {
 
 const testValidateUpdateData = () => {
 	describe.each([
-		[{ body: { firstName: generateRandomString(100) } }, false, false, 'with too large firstName', templates.invalidArguments],
-		[{ body: { lastName: generateRandomString(100) } }, false, false, 'with too large lastName', templates.invalidArguments],
-		[{ body: { email: availableEmail, extraProp: 'extra' } }, false, false, 'with extra properties', templates.invalidArguments],
-		[{ body: { company: '' } }, false, false, 'with empty company', templates.invalidArguments],
-		[{ body: { company: generateRandomString() } }, false, true, 'with company'],
-		[{ body: { countryCode: 'invalid country' } }, false, false, 'with invalid country', templates.invalidArguments],
-		[{ body: { countryCode: 'GB' } }, false, true, 'with valid country'],
-		[{ body: { oldPassword: validPassword } }, false, false, 'with oldPassword but not newPassword', templates.invalidArguments],
-		[{ body: { newPassword: 'Abcdef123456!' } }, false, false, 'with newPassword but not oldPassword', templates.invalidArguments],
-		[{ body: { oldPassword: validPassword, newPassword: 'abc' } }, false, false, 'with short newPassword', templates.invalidArguments],
-		[{ body: { oldPassword: validPassword, newPassword: 'abcdefghi' } }, false, false, 'with weak newPassword', templates.invalidArguments],
-		[{ body: { oldPassword: validPassword, newPassword: 'Abcdef123!Abcdef123!Abcdef123!Abcdef123!Abcdef123!Abcdef123!Abcdef' } }, false, false, 'with too long newPassword', templates.invalidArguments],
-		[{ body: { oldPassword: validPassword, newPassword: validPassword } }, false, false, 'with newPassword same as old', templates.invalidArguments],
-		[{ body: { oldPassword: validPassword, newPassword: 'Abcdef12345!!' } }, false, true, 'with strong newPassword'],
-		[{ body: {} }, false, false, 'with empty body', templates.invalidArguments],
-		[{ body: undefined }, false, false, 'with undefined body', templates.invalidArguments],
-	])('Check if req arguments for updating profile are valid', (data, isSso, shouldPass, desc, expectedError) => {
+		[{ body: { firstName: generateRandomString(100) } }, false, 'with too large firstName', templates.invalidArguments],
+		[{ body: { lastName: generateRandomString(100) } }, false, 'with too large lastName', templates.invalidArguments],
+		[{ body: { email: availableEmail, extraProp: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
+		[{ body: { company: '' } }, false, 'with empty company', templates.invalidArguments],
+		[{ body: { company: generateRandomString() } }, true, 'with company'],
+		[{ body: { countryCode: 'invalid country' } }, false, 'with invalid country', templates.invalidArguments],
+		[{ body: { countryCode: 'GB' } }, true, 'with valid country'],
+		[{ body: { oldPassword: validPassword } }, false, 'with oldPassword but not newPassword', templates.invalidArguments],
+		[{ body: { newPassword: 'Abcdef123456!' } }, false, 'with newPassword but not oldPassword', templates.invalidArguments],
+		[{ body: { oldPassword: validPassword, newPassword: 'abc' } }, false, 'with short newPassword', templates.invalidArguments],
+		[{ body: { oldPassword: validPassword, newPassword: 'abcdefghi' } }, false, 'with weak newPassword', templates.invalidArguments],
+		[{ body: { oldPassword: validPassword, newPassword: 'Abcdef123!Abcdef123!Abcdef123!Abcdef123!Abcdef123!Abcdef123!Abcdef' } }, false, 'with too long newPassword', templates.invalidArguments],
+		[{ body: { oldPassword: validPassword, newPassword: validPassword } }, false, 'with newPassword same as old', templates.invalidArguments],
+		[{ body: { oldPassword: validPassword, newPassword: 'Abcdef12345!!' } }, true, 'with strong newPassword'],
+		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
+		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
+	])('Check if req arguments for updating profile are valid', (data, shouldPass, desc, expectedError) => {
 		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
 			const mockCB = jest.fn();
 			const req = { ...cloneDeep(data), session: { user: { username: existingUsername } } };

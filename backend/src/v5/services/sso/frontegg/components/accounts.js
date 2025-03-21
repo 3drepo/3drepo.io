@@ -25,8 +25,8 @@ const Accounts = {};
 
 Accounts.getTeamspaceByAccount = async (accountId) => {
 	try {
-		const config = await getConfig();
-		const { data: { metadata } } = await get(`${config.vendorDomain}/tenants/resources/tenants/v2/${accountId}`, await getBearerHeader());
+		const { vendorDomain } = await getConfig();
+		const { data: { metadata } } = await get(`${vendorDomain}/tenants/resources/tenants/v2/${accountId}`, await getBearerHeader());
 		const metaJson = JSON.parse(metadata);
 		return metaJson[META_LABEL_TEAMSPACE];
 	} catch (err) {
@@ -41,13 +41,10 @@ Accounts.getTeamspaceByAccount = async (accountId) => {
 Accounts.createAccount = async (name) => {
 	try {
 		const config = await getConfig();
-		const payload = {
-			tenantId: generateUUIDString(),
-			name,
-		};
+		const tenantId = generateUUIDString();
 
 		const headers = await getBearerHeader();
-		await post(`${config.vendorDomain}/tenants/resources/tenants/v1`, payload, { headers });
+		await post(`${config.vendorDomain}/tenants/resources/tenants/v1`, { tenantId, name }, { headers });
 
 		// add teamspace name as a metadata
 		const metadataPayload = {
@@ -56,16 +53,12 @@ Accounts.createAccount = async (name) => {
 			},
 		};
 
-		const applicationPayload = {
-			tenantId: payload.tenantId,
-		};
-
 		await Promise.all([
-			post(`${config.vendorDomain}/tenants/resources/tenants/v1/${payload.tenantId}/metadata`, metadataPayload, { headers }),
-			post(`${config.vendorDomain}/applications/resources/applications/tenant-assignments/v1/${config.appId}`, applicationPayload, { headers }),
+			post(`${config.vendorDomain}/tenants/resources/tenants/v1/${tenantId}/metadata`, metadataPayload, { headers }),
+			post(`${config.vendorDomain}/applications/resources/applications/tenant-assignments/v1/${config.appId}`, { tenantId }, { headers }),
 		]);
 
-		return payload.tenantId;
+		return tenantId;
 	} catch (err) {
 		logger.logError(`Failed to create account: ${err?.response?.data} `);
 		throw new Error(`Failed to create account on Accounts: ${err.message}`);

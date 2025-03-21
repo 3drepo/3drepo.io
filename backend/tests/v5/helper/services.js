@@ -29,8 +29,6 @@ const { createAppAsync: createServer } = require(`${srcV4}/services/api`);
 const { createApp: createFrontend } = require(`${srcV4}/services/frontend`);
 const { io: ioClient } = require('socket.io-client');
 
-const { providers } = require(`${src}/services/sso/sso.constants`);
-
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
@@ -52,7 +50,7 @@ const { generateFullSchema } = require(`${src}/schemas/tickets/templates`);
 
 const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
 
-const { USERS_DB_NAME, USERS_COL, AVATARS_COL_NAME } = require(`${src}/models/users.constants`);
+const { USERS_DB_NAME, AVATARS_COL_NAME } = require(`${src}/models/users.constants`);
 const { COL_NAME } = require(`${src}/models/projectSettings.constants`);
 const { propTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 
@@ -102,10 +100,6 @@ db.reset = async () => {
 
 	await Promise.all([...dbProms, ...colProms]);
 	await DbHandler.disconnect();
-};
-
-db.addSSO = async (user, id = ServiceHelper.generateRandomString()) => {
-	await DbHandler.updateOne(USERS_DB_NAME, USERS_COL, { user }, { $set: { 'customData.sso': { type: providers.AAD, id } } });
 };
 
 // userCredentials should be the same format as the return value of generateUserCredentials
