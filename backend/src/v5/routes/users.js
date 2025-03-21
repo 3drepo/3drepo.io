@@ -210,10 +210,6 @@ const establishRoutes = () => {
 	 *                   type: string
 	 *                   description: The API key of the user
 	 *                   example: 23b61deadbba098fec517dc4fcc84d68
-	 *                 isSso:
-	 *                   type: boolean
-	 *                   description: Whether or not the user is an SSO user
-	 *                   example: true
 	 *
 	 */
 	router.get('/user', validSession, getProfile);

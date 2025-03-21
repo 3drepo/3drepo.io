@@ -102,7 +102,7 @@ const runTest = () => {
 		});
 		const expectedError = new Error('A list of teamspaces must be provided');
 
-		test('!should throw error if teamspaces is undefined', async () => {
+		test('should throw error if teamspaces is undefined', async () => {
 			await expect(RemoveTeamspace.run()).rejects.toEqual(expectedError);
 			await checkTeamspaces(tsList, true);
 		});

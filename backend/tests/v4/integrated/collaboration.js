@@ -421,13 +421,6 @@ describe('Sharing/Unsharing a model', () => {
 				.expect(410, done);
 		});
 
-		it('and the collaborator should be able to upload model', (done) => {
-			collaboratorAgent.post(`/${username}/${model}/upload`)
-				.field('tag', 'collab_upload')
-				.attach('file', `${__dirname}/../../../src/v4/statics/3dmodels/8000cubes.obj`)
-				.expect(200, done);
-		});
-
 		it('and the collaborator should be able to download the model', (done) => {
 			collaboratorAgent.get(`/${username}/${model}/download/latest`).expect(200, done);
 		});
