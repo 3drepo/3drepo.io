@@ -17,7 +17,7 @@
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../models/users.constants');
 const { addDefaultJobs, assignUserToJob, getJobsToUsers, removeUserFromJobs } = require('../../models/jobs');
-const { addUserToAccount, createAccount, removeAccount, removeUserFromAccount } = require('../../services/sso/frontegg');
+const { addUserToAccount, createAccount, createUser, getUserById, removeAccount, removeUserFromAccount } = require('../../services/sso/frontegg');
 const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revokeTeamspaceRoleFromUser } = require('../../models/roles');
 const {
 	createTeamspaceSettings,
@@ -27,12 +27,11 @@ const {
 	grantAdminToUser,
 	removeUserFromAdminPrivilege,
 } = require('../../models/teamspaceSettings');
-const { getAccessibleTeamspaces, getUserId } = require('../../models/users');
+const { deleteFavourites, getAccessibleTeamspaces, getUserByUsername, getUserId, updateUserId } = require('../../models/users');
 const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { addDefaultTemplates } = require('../../models/tickets.templates');
-const { deleteFavourites } = require('../../models/users');
 const { dropDatabase } = require('../../handler/db');
 const { isTeamspaceAdmin } = require('../../utils/permissions');
 const { logger } = require('../../utils/logger');
@@ -134,10 +133,26 @@ Teamspaces.addTeamspaceMember = async (teamspace, userToAdd) => {
 		getUserId(userToAdd),
 
 	]);
-	await Promise.all([
-		addUserToAccount(accountId, userId),
-		grantTeamspaceRoleToUser(teamspace, userToAdd),
-	]);
+
+	// double check the user is known in frontegg, it could've been deleted
+	// and we are out of sync.
+	const userExistsInFrontegg = await getUserById(userId).catch(() => false);
+
+	if (userExistsInFrontegg) {
+		await addUserToAccount(accountId, userId);
+	} else {
+		const { customData: { email, firstName, lastName } } = await getUserByUsername(userToAdd, {
+			'customData.email': 1,
+			'customData.firstName': 1,
+			'customData.lastName': 1,
+		});
+
+		const newUserId = await createUser(accountId, email, [firstName, lastName].join(' '));
+
+		await updateUserId(userToAdd, newUserId);
+	}
+
+	await grantTeamspaceRoleToUser(teamspace, userToAdd);
 };
 
 Teamspaces.removeTeamspaceMember = async (teamspace, userToRemove, removePermissions = true) => {
