@@ -136,6 +136,7 @@ const testInitTeamspace = () => {
 			const teamspaceId = generateRandomString();
 
 			FronteggService.createAccount.mockResolvedValueOnce(teamspaceId);
+			FronteggService.getUserById.mockResolvedValueOnce(true);
 			TeamspacesModel.getTeamspaceRefId.mockResolvedValueOnce(teamspaceId);
 			UsersModel.getUserId.mockResolvedValueOnce(userId);
 

@@ -280,7 +280,7 @@ const testRemoveUserFromAccount = () => {
 			expect(WebRequests.delete.mock.calls[0][0].includes(userId)).toBeTruthy();
 		});
 
-		test('Should throw error if post request failed', async () => {
+		test('Should throw error if delete request failed', async () => {
 			const userId = generateRandomString();
 			const accountId = generateRandomString();
 
@@ -302,7 +302,7 @@ const testRemoveUserFromAccount = () => {
 			expect(WebRequests.delete.mock.calls[0][0].includes(userId)).toBeTruthy();
 		});
 
-		test('Should not throw error if post request failed with user not found', async () => {
+		test('Should not throw error if delete request failed with user not found', async () => {
 			const userId = generateRandomString();
 			const accountId = generateRandomString();
 
@@ -343,10 +343,10 @@ const testRemoveAccount = () => {
 			expect(WebRequests.delete.mock.calls[0][0].includes(accountId)).toBeTruthy();
 		});
 
-		test('Should throw error if post request failed', async () => {
+		test('Should throw error if delete request failed', async () => {
 			const accountId = generateRandomString();
 
-			WebRequests.delete.mockRejectedValueOnce({ message: generateRandomString() });
+			WebRequests.delete.mockRejectedValueOnce({ message: generateRandomString(), response: { status: 403 } });
 
 			await expect(Accounts.removeAccount(accountId)).rejects.not.toBeUndefined();
 
@@ -359,7 +359,7 @@ const testRemoveAccount = () => {
 			expect(WebRequests.delete.mock.calls[0][0].includes(accountId)).toBeTruthy();
 		});
 
-		test('Should not throw error if post request failed with a 404', async () => {
+		test('Should not throw error if delete request failed with a 404', async () => {
 			const accountId = generateRandomString();
 
 			WebRequests.delete.mockRejectedValueOnce({ message: generateRandomString(), response: { status: 404 } });
