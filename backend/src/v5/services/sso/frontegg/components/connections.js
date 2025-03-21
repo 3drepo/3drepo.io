@@ -26,6 +26,8 @@ const Connection = {};
 let identityClient;
 let config;
 
+let activeToken;
+
 const configSchema = Yup.object({
 	appUrl: Yup.string().required(), // https://{appId}.frontegg.com
 	appId: Yup.string().required(), // appId from the application created
@@ -36,13 +38,21 @@ const configSchema = Yup.object({
 }).required();
 
 const generateVendorToken = async () => {
-	const payload = {
-		clientId: config.clientId,
-		secret: config.key,
-	};
 	try {
-		const { data } = await post(`${config.vendorDomain}/auth/vendor`, payload);
-		return data.token;
+		if (activeToken?.expiry > Date.now() + 60000) {
+			// if the token is not expiring within the next minute, reuse it.
+			return activeToken.token;
+		}
+
+		const payload = {
+			clientId: config.clientId,
+			secret: config.key,
+		};
+		const { data: { token, expiresIn } } = await post(`${config.vendorDomain}/auth/vendor`, payload);
+
+		activeToken = { token, expiry: expiresIn * 1000 + Date.now() };
+
+		return token;
 	} catch (err) {
 		throw new Error(`Failed to generate vendor token from Frontegg: ${err.message}`);
 	}
@@ -75,6 +85,7 @@ const init = async () => {
 
 Connection.reset = () => {
 	identityClient = undefined;
+	activeToken = undefined;
 };
 
 Connection.getConfig = async () => {

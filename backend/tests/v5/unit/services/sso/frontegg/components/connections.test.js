@@ -61,6 +61,39 @@ const testGetConfig = () => {
 	});
 };
 
+const testGetBearerToken = () => {
+	describe('Get bearer token', () => {
+		beforeEach(() => {
+			Connections.reset();
+		});
+
+		const generateHeader = (token) => ({
+			Authorization: `Bearer ${token}`,
+		});
+
+		test('Should reuse the existing token if it is still active', async () => {
+			const token = generateRandomString();
+			WebRequests.post.mockResolvedValue({ data: { token, expiresIn: 6000000 } });
+
+			await expect(Connections.getBearerHeader()).resolves.toEqual(generateHeader(token));
+
+			// one time for init, 2nd time it should reuse the token
+			expect(WebRequests.post).toHaveBeenCalledTimes(1);
+		});
+
+		test('Should call for another token if it has expired ', async () => {
+			const token = generateRandomString();
+			WebRequests.post.mockResolvedValue({ data: { token, expiresIn: 1 } });
+
+			await expect(Connections.getBearerHeader()).resolves.toEqual(generateHeader(token));
+
+			// one time for init, 2nd time should trigger a fetch
+			expect(WebRequests.post).toHaveBeenCalledTimes(2);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetConfig();
+	testGetBearerToken();
 });
