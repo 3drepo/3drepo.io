@@ -143,8 +143,10 @@ Accounts.removeAccount = async (accountId) => {
 		const config = await getConfig();
 		await httpDelete(`${config.vendorDomain}/tenants/resources/tenants/v1/${accountId}`, await getBearerHeader());
 	} catch (err) {
-		logger.logError(`Failed to remove account: ${JSON.stringify(err?.response?.data)} `);
-		throw new Error(`Failed to remove ${accountId} on Accounts: ${err.message}`);
+		if (err.response.status !== 404) {
+			logger.logError(`Failed to remove account: ${JSON.stringify(err?.response?.data)} `);
+			throw new Error(`Failed to remove ${accountId} on Accounts: ${err.message}`);
+		}
 	}
 };
 
