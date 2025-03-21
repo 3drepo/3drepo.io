@@ -27,6 +27,7 @@ jest.mock('../../../../../../../src/v5/utils/webRequests');
 const WebRequests = require(`${src}/utils/webRequests`);
 
 const Accounts = require(`${src}/services/sso/frontegg/components/accounts`);
+const { errCodes } = require(`${src}/services/sso/frontegg/frontegg.constants`);
 const { HEADER_TENANT_ID, META_LABEL_TEAMSPACE } = require(`${src}/services/sso/frontegg/components/accounts.constants`);
 
 const bearerHeader = { [generateRandomString()]: generateRandomString() };
@@ -300,6 +301,29 @@ const testRemoveUserFromAccount = () => {
 
 			expect(WebRequests.delete.mock.calls[0][0].includes(userId)).toBeTruthy();
 		});
+
+		test('Should not throw error if post request failed with user not found', async () => {
+			const userId = generateRandomString();
+			const accountId = generateRandomString();
+
+			const header = {
+				...bearerHeader,
+				[HEADER_TENANT_ID]: accountId,
+			};
+
+			WebRequests.delete.mockRejectedValueOnce({ message: generateRandomString(),
+				response: { data: { errorCode: errCodes.USER_NOT_FOUND } } });
+
+			await Accounts.removeUserFromAccount(accountId, userId);
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			expect(WebRequests.delete).toHaveBeenCalledTimes(1);
+			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), header);
+
+			expect(WebRequests.delete.mock.calls[0][0].includes(userId)).toBeTruthy();
+		});
 	});
 };
 
@@ -325,6 +349,22 @@ const testRemoveAccount = () => {
 			WebRequests.delete.mockRejectedValueOnce({ message: generateRandomString() });
 
 			await expect(Accounts.removeAccount(accountId)).rejects.not.toBeUndefined();
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			expect(WebRequests.delete).toHaveBeenCalledTimes(1);
+			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), bearerHeader);
+
+			expect(WebRequests.delete.mock.calls[0][0].includes(accountId)).toBeTruthy();
+		});
+
+		test('Should not throw error if post request failed with a 404', async () => {
+			const accountId = generateRandomString();
+
+			WebRequests.delete.mockRejectedValueOnce({ message: generateRandomString(), response: { status: 404 } });
+
+			await Accounts.removeAccount(accountId);
 
 			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
 			expect(Connections.getConfig).toHaveBeenCalledTimes(1);

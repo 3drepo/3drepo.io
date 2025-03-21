@@ -228,6 +228,74 @@ const testGetQuotaInfo = () => {
 	});
 };
 
+const testAddTeamspaceMember = () => {
+	describe('Add teamspace member', () => {
+		test('Should add user to the account if the user exists in frontegg', async () => {
+			const username = generateRandomString();
+			const teamspace = generateRandomString();
+			const userId = generateRandomString();
+			const accountId = generateRandomString();
+
+			UsersModel.getUserId.mockResolvedValueOnce(userId);
+			TeamspacesModel.getTeamspaceRefId.mockResolvedValueOnce(accountId);
+			FronteggService.getUserById.mockResolvedValueOnce(true);
+
+			await Teamspaces.addTeamspaceMember(teamspace, username);
+
+			expect(FronteggService.addUserToAccount).toHaveBeenCalledTimes(1);
+			expect(FronteggService.addUserToAccount).toHaveBeenCalledWith(accountId, userId);
+
+			expect(UsersModel.getUserId).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getUserId).toHaveBeenCalledWith(username);
+
+			expect(TeamspacesModel.getTeamspaceRefId).toHaveBeenCalledTimes(1);
+			expect(TeamspacesModel.getTeamspaceRefId).toHaveBeenCalledWith(teamspace);
+
+			expect(FronteggService.getUserById).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getUserById).toHaveBeenCalledWith(userId);
+		});
+
+		test('Should create the user if the user does not exist in frontegg', async () => {
+			const username = generateRandomString();
+			const teamspace = generateRandomString();
+			const userId = generateRandomString();
+			const newUserId = generateRandomString();
+			const accountId = generateRandomString();
+
+			const email = generateRandomString();
+			const firstName = generateRandomString();
+			const lastName = generateRandomString();
+
+			UsersModel.getUserId.mockResolvedValueOnce(userId);
+			UsersModel.getUserByUsername.mockResolvedValueOnce({
+				customData: { email, firstName, lastName },
+			});
+			TeamspacesModel.getTeamspaceRefId.mockResolvedValueOnce(accountId);
+			FronteggService.getUserById.mockRejectedValueOnce(undefined);
+			FronteggService.createUser.mockResolvedValueOnce(newUserId);
+
+			await Teamspaces.addTeamspaceMember(teamspace, username);
+
+			expect(FronteggService.addUserToAccount).not.toHaveBeenCalled();
+
+			expect(FronteggService.createUser).toHaveBeenCalledTimes(1);
+			expect(FronteggService.createUser).toHaveBeenCalledWith(accountId, email, `${firstName} ${lastName}`);
+
+			expect(UsersModel.getUserId).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getUserId).toHaveBeenCalledWith(username);
+
+			expect(TeamspacesModel.getTeamspaceRefId).toHaveBeenCalledTimes(1);
+			expect(TeamspacesModel.getTeamspaceRefId).toHaveBeenCalledWith(teamspace);
+
+			expect(FronteggService.getUserById).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getUserById).toHaveBeenCalledWith(userId);
+
+			expect(UsersModel.updateUserId).toHaveBeenCalledTimes(1);
+			expect(UsersModel.updateUserId).toHaveBeenCalledWith(username, newUserId);
+		});
+	});
+};
+
 const testRemoveTeamspaceMember = () => {
 	describe('Remove user from teamspace', () => {
 		test('should remove all possible permissions then remove the user from the teamspace', async () => {
@@ -347,6 +415,7 @@ describe(determineTestGroup(__filename), () => {
 	testGetTeamspaceListByUser();
 	testGetTeamspaceMembersInfo();
 	testInitTeamspace();
+	testAddTeamspaceMember();
 	testRemoveTeamspaceMember();
 	testGetAvatarStream();
 	testGetQuotaInfo();
