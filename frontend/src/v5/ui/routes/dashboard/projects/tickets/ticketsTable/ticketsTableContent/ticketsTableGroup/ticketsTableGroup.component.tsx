@@ -30,6 +30,9 @@ import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
 import { SetTicketValue } from '../../ticketsTable.helper';
 import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
+import { useParams } from 'react-router';
 
 const SortingTableHeader = ({ name, children, disableSorting = false, ...props }) => {
 	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
@@ -67,6 +70,8 @@ type TicketsTableGroupProps = {
 	onNewTicket: (modelId: string) => void;
 };
 export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
+	const { template: templateId } = useParams<DashboardTicketsParams>();
+	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const { getRowWidth } = useContext(ResizableTableContext);
 	const models = useSelectedModels();
 	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;
@@ -126,6 +131,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 										selected={selectedTicketId === ticket._id}
 									/>
 								))}
+								{!template.deprecated &&
 								<NewTicketMenu
 									disabled={newTicketButtonIsDisabled}
 									TriggerButton={(
@@ -142,6 +148,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 									useMousePosition
 									onContainerOrFederationClick={onNewTicket}
 								/>
+								}
 							</Group>
 						</>
 					)}

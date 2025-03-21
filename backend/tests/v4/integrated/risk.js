@@ -2422,13 +2422,14 @@ describe("Risks", function () {
 		describe("Search", function () {
 			const teamspace = "teamSpace1";
 			const password = "password";
+			const project = '5BF7DF65-F3A8-4337-8016-A63F00000000'
 			let model = "";
 
 			before(function (done) {
 				async.series([
 					(next) => {
-						createModel(agent2, teamspace, 'Query risks').then((res) => {
-							model = res.body.model;
+						createModel(agent2, teamspace, project, 'Query risks').then((res) => {
+							model = res;
 							let createRiskTeamspace1 = createRisk(teamspace, model);
 
 							async.series([
