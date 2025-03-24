@@ -27,7 +27,7 @@ import { useSSOAuth, useSSOParams } from '../sso.hooks';
 import { postActions } from '../api/sso';
 import { enableKickedOutEvent } from '../realtime/auth.events';
 import { AUTH_PATH, DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { formatMessage } from '../intl';
+import { AuthenticatingModal } from '@components/shared/modalsDispatcher/templates/infoModal/authenticatingModal/authenticatingModal.component';
 
 const cleanSSOParams = (location) => {
 	const searchParams = new URLSearchParams(location.search);
@@ -63,23 +63,12 @@ const WrapAuthenticationRedirect = ({ children }) => {
 	useEffect(enableKickedOutEvent);
 
 	useEffect(() => {
-		if (authenticationFetched && teamspace && teamspace !== authenticatedTeamspace && isAuthenticated) {
-			const returnUrl = cleanSSOParams(location);
-			const redirectUri = addParams(returnUrl.pathname, returnUrl.search);
-			DialogsActionsDispatchers.open('info', {
-				disableClose: true,
-				title: formatMessage({
-					defaultMessage: 'Teamspace Authentication',
-					id: 'teamspace.authentication.modal.title',
-				}),
-				message: formatMessage({
-					defaultMessage: 'We\'re authenticating you against this teamspace, this may take a few seconds',
-					id: 'teamspace.authentication.modal.description',
-				}),
-			});
+		if (isAuthenticated && teamspace && teamspace !== authenticatedTeamspace) {
+			const redirectUri = addParams(location.pathname, location.search);
 			authenticateTeamspace(redirectUri, teamspace);
+			DialogsActionsDispatchers.open(AuthenticatingModal);
 		}
-	}, [teamspace, authenticationFetched]);
+	}, [teamspace, authenticatedTeamspace]);
 
 	if (!isAuthenticated) {
 		return (<></>);
