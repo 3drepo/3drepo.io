@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AuthActions, setAuthenticatedTeamspace } from '@/v5/store/auth/auth.redux';
+import { AuthActions } from '@/v5/store/auth/auth.redux';
 import { mockServer } from '../../internals/testing/mockServer';
 import { createTestStore } from '../test.helpers'
 import { selectAuthenticatedTeamspace, selectIsAuthenticated } from '@/v5/store/auth/auth.selectors';

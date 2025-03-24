@@ -18,12 +18,16 @@
 import { IAuthState } from '@/v5/store/auth/auth.redux';
 import faker from 'faker';
 
-export const authMockFactory = (overrides?: Partial<IAuthState>): IAuthState => ({
-    isAuthenticated: faker.datatype.boolean(),
-	isAuthenticationPending: faker.datatype.boolean(),
-	authenticatedTeamspace: faker.datatype.string(),
-	returnUrl: {
-		pathname: faker.internet.url(),
-	},
-	...overrides,
-});
+export const authMockFactory = (overrides?: Partial<IAuthState>): IAuthState => {
+	const teamspace = faker.datatype.string();
+	return {
+		isAuthenticated: faker.datatype.boolean(),
+		isAuthenticationPending: faker.datatype.boolean(),
+		authenticatedTeamspace: teamspace,
+		sessionAuthenticatedTeamspace: teamspace,
+		returnUrl: {
+			pathname: faker.internet.url(),
+		},
+		...overrides,
+	};
+};
