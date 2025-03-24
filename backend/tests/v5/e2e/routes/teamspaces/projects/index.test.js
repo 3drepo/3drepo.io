@@ -169,17 +169,23 @@ const testCreateProject = () => {
 
 		test('should fail if multiple projects are being sent at similar times with the same name', async () => {
 			const validName = ServiceHelper.generateRandomString();
-			await Promise.all([
+			const res = await Promise.all([
 				agent.post(route()).send({
 					name: validName,
-				}).expect(templates.ok.status),
+				}),
 				agent.post(route()).send({
 					name: validName,
-				}).expect(templates.unknown.status),
+				}),
 				agent.post(route()).send({
 					name: validName,
-				}).expect(templates.unknown.status),
+				}),
 			]);
+
+			expect(res[0].statusCode).toBe(templates.ok.status);
+			expect(res[1].statusCode).toBe(templates.invalidArguments.status);
+			expect(res[1].body.message).toBe(templates.invalidArguments.message);
+			expect(res[2].statusCode).toBe(templates.invalidArguments.status);
+			expect(res[2].body.message).toBe(templates.invalidArguments.message);
 		});
 
 		test('should create new project if new project data are valid', async () => {

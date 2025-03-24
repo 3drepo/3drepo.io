@@ -18,7 +18,7 @@
 const createIndexOnProjectName = require('./createIndexOnProjectsName');
 
 const scripts = [
-	{ script: createIndexOnProjectName, desc: 'ensure that each teamspace has an index on project name' },
+	{ script: createIndexOnProjectName, desc: 'Ensure that each teamspace has an index on project name' },
 ];
 
 module.exports = scripts;

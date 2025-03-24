@@ -203,8 +203,13 @@ DBHandler.distinct = async (database, colName, field, query) => {
 };
 
 DBHandler.insertOne = async (database, colName, data) => {
-	const collection = await getCollection(database, colName);
-	await collection.insertOne(data);
+	try {
+		const collection = await getCollection(database, colName);
+		await collection.insertOne(data);
+	} catch (error) {
+		if (error.code === 11000) throw templates.invalidArguments;
+		throw error;
+	}
 };
 
 DBHandler.insertMany = async (database, colName, data, ordered) => {
