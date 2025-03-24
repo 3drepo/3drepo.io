@@ -25,7 +25,7 @@ const { getUserByUsername } = require(`${v5Path}/models/users`);
 const { getTeamspaceSetting } = require(`${v5Path}/models/teamspaceSettings`);
 
 const run = async (teamspace, user) => {
-	logger.logInfo(`Checking ${user} is exists...`);
+	logger.logInfo(`Checking ${user} exists...`);
 	await getUserByUsername(user);
 
 	logger.logInfo(`Checking if teamspace ${teamspace} already exists...`);

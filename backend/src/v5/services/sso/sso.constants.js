@@ -17,19 +17,6 @@
 
 const SsoConstants = {};
 
-SsoConstants.providers = {
-	AAD: 'aad',
-};
-
-SsoConstants.getProviderLabel = (provider) => {
-	switch (provider) {
-	case SsoConstants.providers.AAD:
-		return 'Microsoft';
-	default:
-		return undefined;
-	}
-};
-
 SsoConstants.errorCodes = {
 	EMAIL_EXISTS: 1,
 	EMAIL_EXISTS_WITH_SSO: 2,
