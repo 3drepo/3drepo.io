@@ -110,7 +110,7 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel 
 				const [a, b] = newVal;
 				return `[${a}, ${b}]`;
 			}
-			return option.displayValue ?? newVal;
+			return option?.displayValue ?? newVal;
 		}).join(', ');
 		onSubmit({ module, property, type, filter: { operator: filledForm.operator, values: newValues, displayValues } });
 	});
