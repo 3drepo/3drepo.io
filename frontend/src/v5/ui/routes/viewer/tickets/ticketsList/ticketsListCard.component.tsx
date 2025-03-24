@@ -31,6 +31,7 @@ import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSel
 import { FilterEllipsisMenu } from '@components/viewer/cards/cardFilters/filterEllipsisMenu/filterEllipsisMenu.component';
 import { useEffect } from 'react';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
 
 export const TicketsListCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
@@ -57,6 +58,7 @@ export const TicketsListCard = () => {
 				)}
 			/>
 			<CardContent onClick={TicketsCardActionsDispatchers.resetState}>
+				<CardFilters />
 				{tickets.length ? (
 					<TicketsList />
 				) : (

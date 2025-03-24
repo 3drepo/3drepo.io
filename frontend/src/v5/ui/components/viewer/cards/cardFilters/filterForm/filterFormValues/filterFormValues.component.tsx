@@ -31,6 +31,7 @@ import { DateRangeInput } from './rangeInput/dateRangeInput.component';
 import { NumberRangeInput } from './rangeInput/numberRangeInput.component';
 import { mapFormArrayToArray } from '@/v5/helpers/form.helper';
 import { getOptionFromValue, getFilterFromEvent } from '../../filtersSelection/tickets/ticketFilters.helpers';
+import { Value } from './filterFormValues.styles';
 
 type FilterFormValuesProps = {
 	module: string,
@@ -47,23 +48,33 @@ const getInputField = (type: CardFilterType) => {
 const name = 'values';
 export const FilterFormValues = ({ module, property, type }: FilterFormValuesProps) => {
 	const { containerOrFederation } = useParams<ViewerParams>();
-	const { control, watch, formState: { errors, dirtyFields } } = useFormContext();
+	const { setValue, control, watch, formState: { errors, dirtyFields } } = useFormContext();
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name,
 	});
 	const error = errors.values || {};
 	const operator = watch('operator');
-	
+
 	const maxFields = getOperatorMaxFieldsAllowed(operator);
 	const isRangeOp = isRangeOperator(operator);
 	const emptyValue = { value: (isRangeOp ? ['', ''] : '') };
 	const selectOptions = type === 'template' ?
-		TicketsCardHooksSelectors.selectTemplatesWithTickets().map(({ code: value, name: displayValue }) => ({ value, displayValue, type: 'template' }))
-		: TicketsCardHooksSelectors.selectPropertyOptions(containerOrFederation, module, property);
+		TicketsCardHooksSelectors.selectCurrentTemplates().map(({ code: value, name: displayValue }) => ({ value, displayValue, type: 'template' }))
+		: isSelectType(type) ? TicketsCardHooksSelectors.selectPropertyOptions(containerOrFederation, module, property) : [];
 
 	useEffect(() => {
-		if (!fields.length && maxFields > 0) {
+		if (!isEmpty(dirtyFields)) {
+			remove();
+		}
+	}, [isRangeOp]);
+
+	useEffect(() => {
+		setValue('selectOptions', selectOptions);
+	}, [selectOptions]);
+
+	useEffect(() => {
+		if (!fields.length && maxFields > 0 && !isSelectType(type)) {
 			append(emptyValue);
 		}
 	}, [fields.length, operator]);
@@ -74,18 +85,12 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 		}
 	}, [maxFields]);
 
-	useEffect(() => {
-		if (!isEmpty(dirtyFields)) {
-			remove();
-		}
-	}, [isRangeOp]);
-
 	if (maxFields === 0) return null;
 
 	if (type === 'number' || isDateType(type) || isTextType(type)) {
 		const InputField = getInputField(type);
 
-		if (maxFields === 1) return <InputField name={`${name}.0.value`} formError={error?.[0]} />;
+		if (maxFields === 1) return <InputField key={fields[0]?.id} name={`${name}.0.value`} formError={error?.[0]?.value} />;
 
 		const getFieldContainerProps = (field, i) => ({
 			key: field.id,
@@ -134,7 +139,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 				maxItems={19}
 				name={name}
 				transformInputValue={(v) => compact(mapFormArrayToArray(v))}
-				transformOutputValue={(e) =>  getFilterFromEvent(e, selectOptions)}
+				transformOutputValue={(e) =>  getFilterFromEvent(e)}
 				formError={error?.[0]}
 			/>
 		);
@@ -142,18 +147,24 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 			<FormMultiSelect
 				name={name}
 				transformInputValue={mapFormArrayToArray}
-				transformOutputValue={(e) => getFilterFromEvent(e, selectOptions)}
+				transformOutputValue={(e) => getFilterFromEvent(e)}
 				renderValue={(values: string[]) => values.map((value) => getOptionFromValue(value, selectOptions)?.displayValue ?? value).join(', ')}
 				formError={error?.[0]}
 			>
 				{selectOptions.map(
-					(option) => <MultiSelectMenuItem key={option.value} value={option.value}>{option.displayValue ?? option.value}</MultiSelectMenuItem>,
+					(option) => (
+						<MultiSelectMenuItem key={option.value} value={option.value}>
+							<Value>
+								{option.displayValue ?? option.value}
+							</Value>
+						</MultiSelectMenuItem>
+					),
 				)}
 			</FormMultiSelect>
 		);
 	}
 
-	if (type === 'boolean') return (<FormBooleanSelect name={`${name}.0.value`} />);
+	if (type === 'boolean') return (<FormBooleanSelect key={fields[0]?.id} name={`${name}.0.value`} />);
 
 	return (
 		<>

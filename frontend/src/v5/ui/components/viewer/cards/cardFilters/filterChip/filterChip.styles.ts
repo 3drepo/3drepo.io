@@ -18,17 +18,16 @@
 import styled, { css } from 'styled-components';
 
 export const TextWrapper = styled.div`
-	max-width: 150px;
 	overflow: hidden;
 	display: inline-flex;
 `;
 
 export const Property = styled.span`
-	flex-shrink: 0;
+	flex-shrink: 1;
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
-	max-width: 129px;
+	min-width: 19px;
 `;
 
 export const OperatorIconContainer = styled.div`
@@ -47,6 +46,7 @@ export const DisplayValue = styled.span<{ $multiple?: boolean }>`
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
+	min-width: 19px;
 	
 	${({ $multiple }) => $multiple && css`
 		text-decoration: underline;
@@ -59,7 +59,7 @@ export const DeleteButton = styled.div`
 	background-color: ${({ theme }) => theme.palette.base.main};
 	border-radius: 50%;
 	height: 16px;
-	width: 16px;
+	aspect-ratio: 1;
 	display: grid;
 	place-content: center;
 
@@ -105,6 +105,7 @@ export const ChipContainer = styled.div<{ selected: boolean }>`
 	align-items: center;
 	gap: 4px;
 	cursor: pointer;
+	max-width: 100%;
 
 	${({ selected }) => selected && selectedOrHoveredStyles}
 	&:hover {

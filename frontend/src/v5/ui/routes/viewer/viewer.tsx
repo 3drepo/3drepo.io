@@ -33,6 +33,7 @@ import { ViewerGui } from '@/v4/routes/viewerGui';
 import { CalibrationContext } from '../dashboard/projects/calibration/calibrationContext';
 import { OpenDrawingFromUrl } from './openDrawingFromUrl/openDrawingFromUrl.component';
 import { CalibrationHandler } from '../dashboard/projects/calibration/calibrationHandler.component';
+import { OpenTicketFromUrl } from './openTicketFromUrl/openTicketFromUrl.component';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
@@ -113,6 +114,7 @@ export const Viewer = () => {
 		<>
 			<DefaultTicketFiltersSetter />
 			<OpenDrawingFromUrl />
+			<OpenTicketFromUrl />
 			<CheckLatestRevisionReadiness />
 			<ViewerCanvases />
 			<ViewerGui match={v4Match} key={containerOrFederation} />

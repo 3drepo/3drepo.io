@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { TextOverflow } from '@controls/textOverflow';
 import { MenuItem as MenuItemBase } from '@mui/material';
 import styled from 'styled-components';
 
@@ -22,13 +23,23 @@ export const MenuItem = styled(MenuItemBase)`
 	display: flex;
 	height: 32px;
 	padding-right: 3px;
+	width: 100%;
+	position: relative;
+`;
+
+export const TextOverflowContainer = styled(TextOverflow)`
+	width: 100%;
+	max-width: 305px;
+	height: 32px;
+	line-height: 32px;
 `;
 
 export const ExpandIconContainer = styled.div`
 	transform: rotate(-90deg);
 	height: 11px;
-	margin-left: auto;
 	color: ${({ theme }) => theme.palette.base.main};
+	position: absolute;
+	left: 340px;
 `;
 
 export const FilterName = styled.div`

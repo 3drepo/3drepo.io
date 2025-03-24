@@ -17,12 +17,14 @@
 
 import { ActionMenu } from '@controls/actionMenu';
 import { Button as ButtonBase } from '@controls/button';
+import { TextOverflow } from '@controls/textOverflow';
 import styled from 'styled-components';
 
 export const CardFilterActionMenu = styled(ActionMenu)`
 	.MuiPaper-root {
 		left: 88px !important;
 		width: 365px;
+		max-height: calc(100% - 130px);
 	}
 `;
 
@@ -34,8 +36,9 @@ export const Container = styled.div`
 	max-width: 365px;
 `;
 
-export const TitleContainer = styled.div`
+export const TitleContainer = styled(TextOverflow)`
 	height: 15px;
+	line-height: 15px;
 `;
 
 export const Button = styled(ButtonBase)`

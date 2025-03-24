@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2024 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,17 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
+import { TextOverflow } from '@controls/textOverflow';
 import styled from 'styled-components';
 
-export const Section = styled.div`
-	display: flex;
-	gap: 5px;
-	flex-flow: row wrap;
-	>* {
-		display: flex;
-		flex: 1 1 90px;
-		min-width: 90px;
-		max-width: fit-content;
-	}
+export const Value = styled(TextOverflow)`
+	height: fit-content;
+	max-width: 299px;
 `;

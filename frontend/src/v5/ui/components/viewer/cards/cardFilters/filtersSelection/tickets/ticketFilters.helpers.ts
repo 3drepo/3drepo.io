@@ -24,7 +24,8 @@ import TemplateIcon from '@assets/icons/filters/template.svg';
 import TextIcon from '@assets/icons/filters/text.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
 import { isString, sortBy, uniqBy, compact } from 'lodash';
-import { CardFilterType, BaseFilter, CardFilter } from '../../cardFilters.types';
+import { CardFilterType, BaseFilter, CardFilter, CardFilterOperator } from '../../cardFilters.types';
+import { isRangeOperator } from '../../cardFilters.helpers';
 
 export const TYPE_TO_ICON: Record<CardFilterType, any> = {
 	'template': TemplateIcon,
@@ -34,9 +35,12 @@ export const TYPE_TO_ICON: Record<CardFilterType, any> = {
 	'longText': TextIcon,
 	'date': CalendarIcon,
 	'pastDate': CalendarIcon,
+	'createdAt': CalendarIcon,
+	'updatedAt': CalendarIcon,
 	'sequencing': CalendarIcon,
 	'oneOf': ListIcon,
 	'manyOf': ListIcon,
+	'status': ListIcon,
 	'owner': ListIcon,
 	'boolean': BooleanIcon,
 	'number': NumberIcon,
@@ -47,10 +51,15 @@ const DEFAULT_FILTERS: CardFilter[] = [
 	{ module: '', type: 'ticketCode', property: formatMessage({ defaultMessage: 'Ticket ID', id: 'viewer.card.filters.element.ticketCode' }) },
 	{ module: '', type: 'template', property: formatMessage({ defaultMessage: 'Ticket template', id: 'viewer.card.filters.element.template' }) },
 	{ module: '', type: 'owner', property: formatMessage({ defaultMessage: 'Owner', id: 'viewer.card.filters.element.owner' }) },
+	{ module: '', type: 'createdAt', property: formatMessage({ defaultMessage: 'Created at', id: 'viewer.card.filters.element.createdAt' }) },
+	{ module: '', type: 'updatedAt', property: formatMessage({ defaultMessage: 'Updated at', id: 'viewer.card.filters.element.updatedAt' }) },
+	{ module: '', type: 'status', property: formatMessage({ defaultMessage: 'Status', id: 'viewer.card.filters.element.status' }) },
 ];
+export const isBaseProperty = (propertyType) => DEFAULT_FILTERS.some(({ type }) => type === propertyType);
+const isBasePropertyName = (name) => ['Owner', 'Created at', 'Updated at', 'Status'].includes(name);
 
 const propertiesToValidFilters = (properties: { name: string, type: string }[], module: string = ''): CardFilter[] => properties
-	.filter(({ name, type }) => name !== 'Owner' && Object.keys(TYPE_TO_ICON).includes(type))
+	.filter(({ name, type }) => !(!module && isBasePropertyName(name)) && Object.keys(TYPE_TO_ICON).includes(type))
 	.map(({ name, type }) => ({
 		module,
 		property: name,
@@ -63,6 +72,7 @@ const templateToFilters = (template: ITemplate): CardFilter[] => [
 ];
 
 export const templatesToFilters = (templates: ITemplate[]): CardFilter[] => {
+	if (!templates.length) return [];
 	let filters = templates.flatMap(templateToFilters);
 	filters = uniqBy(filters, (f) => f.module + f.property + f.type);
 	filters = sortBy(filters, 'module');
@@ -86,10 +96,7 @@ export const toTicketCardFilter = (filters: Record<string, BaseFilter>): CardFil
 );
 
 export const getOptionFromValue = (value, options) => options.find(({ value: optionValue }) => value === optionValue);
-export const getFilterFromEvent = (event, options) => compact(event.target.value).map((value) => {
-	const option = getOptionFromValue(value, options);
-	return { value, displayValue: option?.displayValue ?? value };
-});
+export const getFilterFromEvent = (event) => compact(event.target.value).map((value) => ({ value }));
 
 export const getFiltersFromJobsAndUsers = (jobsAndUsers) => jobsAndUsers.map((ju) => {
 	const isUser = !!ju.firstName;
@@ -114,10 +121,16 @@ const getFilterPropertyAsQuery = ({ module, property, type }: CardFilter) => {
 	return property;
 };
 
+const valueToQueryValueFormat = (value, operator: CardFilterOperator) => {
+	if (isString(value)) return wrapWith(value, '"');
+	if (isRangeOperator(operator)) return `[${value[0]},${value[1]}]`;
+	return value;
+};
+
 const filterToQueryElement = ({ filter: { operator, values }, ...moduelPropertyAndType }: CardFilter) => {
 	const query = [getFilterPropertyAsQuery(moduelPropertyAndType), operator];
 	if (values?.length) {
-		query.push(values?.map((v) => (isString(v) && v.includes(',')) ? wrapWith(v, '"') : v).join(','));
+		query.push(values?.map((v) => valueToQueryValueFormat(v, operator)).join(','));
 	}
 	return query.join('::');
 };

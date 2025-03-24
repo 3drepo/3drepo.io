@@ -17,12 +17,13 @@
 
 import { CardFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
 import { TYPE_TO_ICON } from '../../ticketFilters.helpers';
-import { ExpandIconContainer, MenuItem } from './ticketFiltersSelectionItem.styles';
+import { ExpandIconContainer, MenuItem, TextOverflowContainer } from './ticketFiltersSelectionItem.styles';
 import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
 import { Highlight } from '@controls/highlight';
 import { useContext } from 'react';
 import { SearchContext } from '@controls/search/searchContext';
 import { FilterIconContainer } from '@components/viewer/cards/cardFilters/filterForm/filterFormValues/operators/filterFormOperators.styles';
+import { getFilterFormTitle } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
 
 type TicketFiltersSelectionItemProps = CardFilter & {
 	onClick: () => void;
@@ -36,13 +37,13 @@ export const TicketFiltersSelectionItem = ({ module, property, type, onClick }: 
 			<FilterIconContainer>
 				<Icon />
 			</FilterIconContainer>
-			<span>
+			<TextOverflowContainer tooltipText={getFilterFormTitle([module, property])}>
 				{module && (<>
 					<Highlight search={query}>{module}</Highlight>
 					&nbsp;:&nbsp; 
 				</>)}
 				<Highlight search={query}>{property}</Highlight>
-			</span>
+			</TextOverflowContainer>
 			<ExpandIconContainer>
 				<ChevronIcon />
 			</ExpandIconContainer>
