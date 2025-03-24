@@ -68,7 +68,7 @@ const WrapAuthenticationRedirect = ({ children }) => {
 			authenticateTeamspace(redirectUri, teamspace);
 			DialogsActionsDispatchers.open(AuthenticatingModal);
 		}
-	}, [teamspace, authenticatedTeamspace]);
+	}, [isAuthenticated, teamspace, authenticatedTeamspace]);
 
 	if (!isAuthenticated) {
 		return (<></>);
