@@ -54,6 +54,7 @@ interface IDialogState {
 export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	showDialog: ['config'],
 	showEndpointErrorDialog: ['method', 'dataType', 'error'],
+	showEndpointErrorDialogSuccess: ['method', 'dataType', 'error'],
 	showErrorDialog: ['method', 'dataType', 'message', 'status'],
 	showConfirmDialog: ['config'],
 	showRevisionsDialog: ['config'],
@@ -100,7 +101,7 @@ const showErrorDialog = (state = INITIAL_STATE, action) => {
 	return showDialog(state, {config});
 };
 
-const showEndpointErrorDialog = (state = INITIAL_STATE, { method, dataType, error }) => {
+const showEndpointErrorDialogSuccess = (state = INITIAL_STATE, { method, dataType, error }) => {
 	const isImplementationError = !error.response;
 	if (isImplementationError) {
 		console.error(error);
@@ -195,7 +196,7 @@ export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.HIDE_DIALOG]: hideDialog,
 	[DialogTypes.SHOW_DIALOG]: showDialog,
 	[DialogTypes.SHOW_ERROR_DIALOG]: showErrorDialog,
-	[DialogTypes.SHOW_ENDPOINT_ERROR_DIALOG]: showEndpointErrorDialog,
+	[DialogTypes.SHOW_ENDPOINT_ERROR_DIALOG_SUCCESS]: showEndpointErrorDialogSuccess,
 	[DialogTypes.SHOW_CONFIRM_DIALOG]: showConfirmDialog,
 	[DialogTypes.SHOW_REVISIONS_DIALOG]: showRevisionsDialog,
 	[DialogTypes.SHOW_SCREENSHOT_DIALOG]: showScreenshotDialog,

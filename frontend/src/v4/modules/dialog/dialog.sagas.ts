@@ -17,6 +17,8 @@
 
 import { put, takeLatest } from 'redux-saga/effects';
 
+import { isNotAuthed } from '@/v5/validation/errors.helpers';
+import { DialogsActions as V5DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { TYPES } from '../../routes/components/dialogContainer/components/revisionsDialog/revisionsDialog.constants';
 import { ModelActions } from '../model';
 import { DialogActions, DialogTypes } from './dialog.redux';
@@ -33,6 +35,19 @@ function* showRevisionsDialog({ config }) {
 	}
 }
 
+function* showEndpointErrorDialog(data) {
+	const { error, method, dataType } = data;
+	if (isNotAuthed(error)) {
+		yield put(V5DialogsActions.open('alert', {
+			currentActions: `trying to ${method} the ${dataType}:`,
+			error,
+		}));
+	} else {
+		yield put(DialogActions.showEndpointErrorDialogSuccess(data));
+	}
+};
+
 export default function* DialogSaga() {
 	yield takeLatest(DialogTypes.SHOW_REVISIONS_DIALOG, showRevisionsDialog);
+	yield takeLatest(DialogTypes.SHOW_ENDPOINT_ERROR_DIALOG, showEndpointErrorDialog);
 }
