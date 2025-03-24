@@ -14,10 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { getErrorCode, isPathNotAuthorized, isProjectNotFound, isModelNotFound, isTeamspaceUnuthenticatedBySameUserOnDifferentSession } from '@/v5/validation/errors.helpers';
+import { getErrorCode, isProjectNotFound, isModelNotFound, isNotAuthed } from '@/v5/validation/errors.helpers';
 import { generatePath, useHistory } from 'react-router';
 import { DASHBOARD_ROUTE, TEAMSPACE_ROUTE_BASE, PROJECT_ROUTE_BASE } from '@/v5/ui/routes/routes.constants';
-import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { AuthHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatMessage } from '@/v5/services/intl';
 
 export const useSafePath = (error) => {
@@ -26,14 +26,16 @@ export const useSafePath = (error) => {
 	const accessibleProjects = ProjectsHooksSelectors.selectProjects()[teamspace] || [];
 	const hasAccessToProject = accessibleProjects.some(({ _id }) => _id === project);
 	const history = useHistory();
+	const authedTeamspaceMatchesSessionOne = AuthHooksSelectors.selectAuthedTeamspaceMatchesSessionOne();
 
 	const code = getErrorCode(error);
 	const modelNotFound = isModelNotFound(code);
 	const projectNotFound = isProjectNotFound(code);
-	const unauthorized = isPathNotAuthorized(error);
-	const sessionIsValidButTeamspaceHasLostAuthentication = isTeamspaceUnuthenticatedBySameUserOnDifferentSession(error);
+	const unauthorized = isNotAuthed(error);
 
 	const getPathName = () => {
+		const dashboardPathName = formatMessage({ id: 'alertModal.redirect.dashboard', defaultMessage: 'the dashboard page' });
+		if (!authedTeamspaceMatchesSessionOne) return dashboardPathName;
 		if ((modelNotFound || unauthorized) && hasAccessToProject) {
 			return formatMessage({ id: 'alertModal.redirect.project', defaultMessage: 'the project page' });
 		}
@@ -41,11 +43,11 @@ export const useSafePath = (error) => {
 			return formatMessage({ id: 'alertModal.redirect.teamspace', defaultMessage: 'the teamspace page' });
 		}
 		// teamspace not found
-		return formatMessage({ id: 'alertModal.redirect.dashboard', defaultMessage: 'the dashboard' });
+		return dashboardPathName;
 	};
 
 	const getPath = () => {
-		if (sessionIsValidButTeamspaceHasLostAuthentication) return generatePath(DASHBOARD_ROUTE);
+		if (!authedTeamspaceMatchesSessionOne) return generatePath(DASHBOARD_ROUTE);
 		if ((modelNotFound || unauthorized) && hasAccessToProject) return generatePath(PROJECT_ROUTE_BASE, { teamspace, project });
 		if ((projectNotFound || unauthorized) && teamspace) return generatePath(TEAMSPACE_ROUTE_BASE, { teamspace });
 		// Teamspace not found
