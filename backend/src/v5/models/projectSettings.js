@@ -17,6 +17,7 @@
 
 const Projects = {};
 const { COL_NAME } = require('./projectSettings.constants');
+const DbConstants = require('../handler/db.constants');
 const { PROJECT_ADMIN } = require('../utils/permissions/permissions.constants');
 const db = require('../handler/db');
 const { generateUUID } = require('../utils/helper/uuids');
@@ -76,9 +77,14 @@ Projects.getProjectAdmins = async (ts, project) => {
 };
 
 Projects.createProject = async (teamspace, name) => {
-	const addedProject = { _id: generateUUID(), createdAt: new Date(), name, models: [], permissions: [] };
-	await db.insertOne(teamspace, COL_NAME, addedProject);
-	return addedProject._id;
+	try {
+		const addedProject = { _id: generateUUID(), createdAt: new Date(), name, models: [], permissions: [] };
+		await db.insertOne(teamspace, COL_NAME, addedProject);
+		return addedProject._id;
+	} catch (error) {
+		if (error.code === DbConstants.DUPLICATE_CODE) throw templates.invalidArguments;
+		throw error;
+	}
 };
 
 Projects.deleteProject = (teamspace, projectId) => db.deleteOne(teamspace, COL_NAME, { _id: projectId });

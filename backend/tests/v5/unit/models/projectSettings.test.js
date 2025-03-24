@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const DbConstants = require('../../../../src/v5/handler/db.constants');
 const { src } = require('../../helper/path');
 const { generateRandomString } = require('../../helper/services');
 
@@ -190,6 +191,13 @@ const testModelsExistInProject = () => {
 
 const testCreateProject = () => {
 	describe('Create New Project', () => {
+		class CustomTestError extends Error {
+			constructor(message, code) {
+				super(message);
+				this.name = this.constructor.name;
+				this.code = code;
+			}
+		}
 		test('should add and return a project', async () => {
 			const fn = jest.spyOn(db, 'insertOne').mockResolvedValue();
 
@@ -203,6 +211,34 @@ const testCreateProject = () => {
 			expect(fn.mock.calls[0][2]).toHaveProperty('createdAt');
 			expect(isUUIDString(fn.mock.calls[0][2]._id));
 			expect(res).toEqual(fn.mock.calls[0][2]._id);
+		});
+		test('should throw invalidArguments if duplicate index', async () => {
+			const fn = jest.spyOn(db, 'insertOne').mockRejectedValue(new CustomTestError('Some index duplicate error message', DbConstants.DUPLICATE_CODE));
+
+			const res = await Project.createProject('otherTS', { name: 'newNameTheSequel' }).catch((err) => err);
+
+			expect(res.message).toBe(templates.invalidArguments.message);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual('otherTS');
+			expect(fn.mock.calls[0][1]).toEqual('projects');
+			expect(fn.mock.calls[0][2].name).toEqual({ name: 'newNameTheSequel' });
+			expect(fn.mock.calls[0][2]).toHaveProperty('_id');
+			expect(fn.mock.calls[0][2]).toHaveProperty('createdAt');
+			expect(isUUIDString(fn.mock.calls[0][2]._id));
+		});
+		test('should throw the error that the db has thrown', async () => {
+			const fn = jest.spyOn(db, 'insertOne').mockRejectedValue(new CustomTestError('Some db error message', 123456));
+
+			const res = await Project.createProject('otherTS', { name: 'newNameTheSequel' }).catch((err) => err);
+
+			expect(res.message).toBe('Some db error message');
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual('otherTS');
+			expect(fn.mock.calls[0][1]).toEqual('projects');
+			expect(fn.mock.calls[0][2].name).toEqual({ name: 'newNameTheSequel' });
+			expect(fn.mock.calls[0][2]).toHaveProperty('_id');
+			expect(fn.mock.calls[0][2]).toHaveProperty('createdAt');
+			expect(isUUIDString(fn.mock.calls[0][2]._id));
 		});
 	});
 };

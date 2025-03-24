@@ -19,5 +19,6 @@ const DbConstants = {};
 
 DbConstants.ADMIN_DB = 'admin';
 DbConstants.INTERNAL_DB = 'internal';
+DbConstants.DUPLICATE_CODE = 11000;
 
 module.exports = DbConstants;
