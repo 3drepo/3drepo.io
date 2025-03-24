@@ -95,6 +95,7 @@ export interface ITemplate {
 	code: string;
 	properties?: PropertyDefinition[];
 	modules?: TemplateModule[];
+	deprecated?: boolean;
 	config?: {
 		comments?: boolean;
 		defaultView?: boolean;
