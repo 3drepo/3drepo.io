@@ -15,15 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const DbConstants = require('../../../../src/v5/handler/db.constants');
+const { errCodes } = require('../../../../src/v5/handler/db.constants');
 const { src } = require('../../helper/path');
 const { generateRandomString } = require('../../helper/services');
 
 const Project = require(`${src}/models/projectSettings`);
 const db = require(`${src}/handler/db`);
-const { templates } = require(`${src}/utils/responseCodes`);
+const { templates, createResponseCode } = require(`${src}/utils/responseCodes`);
 const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
+
+const PROJECT_COL = 'projects';
 
 const testProjectAdmins = () => {
 	describe('Get project admins', () => {
@@ -67,7 +69,7 @@ const testGetProjectList = () => {
 			expect(res).toEqual(expectedData);
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][0]).toEqual(teamspace);
-			expect(fn.mock.calls[0][1]).toEqual('projects');
+			expect(fn.mock.calls[0][1]).toEqual(PROJECT_COL);
 			expect(fn.mock.calls[0][2]).toEqual({});
 			expect(fn.mock.calls[0][3]).toEqual({ _id: 1, name: 1 });
 		});
@@ -84,7 +86,7 @@ const testFindProjectByModelId = () => {
 			const model = generateRandomString();
 			const projection = { _id: 1 };
 			await expect(Project.findProjectByModelId(teamspace, model, projection)).resolves.toEqual(data);
-			expect(fn).toHaveBeenCalledWith(teamspace, 'projects', { models: model }, projection);
+			expect(fn).toHaveBeenCalledWith(teamspace, PROJECT_COL, { models: model }, projection);
 		});
 
 		test('should throw project not found if it is not available', async () => {
@@ -96,7 +98,7 @@ const testFindProjectByModelId = () => {
 			await expect(Project.findProjectByModelId(
 				teamspace, model, projection,
 			)).rejects.toEqual(templates.projectNotFound);
-			expect(fn).toHaveBeenCalledWith(teamspace, 'projects', { models: model }, projection);
+			expect(fn).toHaveBeenCalledWith(teamspace, PROJECT_COL, { models: model }, projection);
 		});
 	});
 };
@@ -118,7 +120,7 @@ const testAddProjectModel = () => {
 			expect(res).toEqual(expectedData);
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][0]).toEqual(teamspace);
-			expect(fn.mock.calls[0][1]).toEqual('projects');
+			expect(fn.mock.calls[0][1]).toEqual(PROJECT_COL);
 			expect(fn.mock.calls[0][2]).toEqual({ _id: projectId });
 			expect(fn.mock.calls[0][3]).toEqual({ $push: { models: modelId } });
 		});
@@ -136,7 +138,7 @@ const testRemoveProjectModel = () => {
 			await Project.removeModelFromProject(teamspace, projectId, modelId);
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][0]).toEqual(teamspace);
-			expect(fn.mock.calls[0][1]).toEqual('projects');
+			expect(fn.mock.calls[0][1]).toEqual(PROJECT_COL);
 			expect(fn.mock.calls[0][2]).toEqual({ _id: projectId });
 			expect(fn.mock.calls[0][3]).toEqual({ $pull: { models: modelId } });
 		});
@@ -191,13 +193,9 @@ const testModelsExistInProject = () => {
 
 const testCreateProject = () => {
 	describe('Create New Project', () => {
-		class CustomTestError extends Error {
-			constructor(message, code) {
-				super(message);
-				this.name = this.constructor.name;
-				this.code = code;
-			}
-		}
+		const teamspace = generateRandomString();
+		const name = generateRandomString();
+
 		test('should add and return a project', async () => {
 			const fn = jest.spyOn(db, 'insertOne').mockResolvedValue();
 
@@ -205,7 +203,7 @@ const testCreateProject = () => {
 
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][0]).toEqual('someTS');
-			expect(fn.mock.calls[0][1]).toEqual('projects');
+			expect(fn.mock.calls[0][1]).toEqual(PROJECT_COL);
 			expect(fn.mock.calls[0][2].name).toEqual({ name: 'newName' });
 			expect(fn.mock.calls[0][2]).toHaveProperty('_id');
 			expect(fn.mock.calls[0][2]).toHaveProperty('createdAt');
@@ -213,32 +211,23 @@ const testCreateProject = () => {
 			expect(res).toEqual(fn.mock.calls[0][2]._id);
 		});
 		test('should throw invalidArguments if duplicate index', async () => {
-			const fn = jest.spyOn(db, 'insertOne').mockRejectedValue(new CustomTestError('Some index duplicate error message', DbConstants.DUPLICATE_CODE));
+			const fn = jest.spyOn(db, 'insertOne').mockRejectedValue({ message: generateRandomString(), code: errCodes.DUPLICATE_KEY });
 
-			const res = await Project.createProject('otherTS', { name: 'newNameTheSequel' }).catch((err) => err);
+			await expect(Project.createProject(teamspace, name)).rejects.toEqual(createResponseCode(templates.invalidArguments, 'Project name is taken'));
 
-			expect(res.message).toBe(templates.invalidArguments.message);
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][0]).toEqual('otherTS');
-			expect(fn.mock.calls[0][1]).toEqual('projects');
-			expect(fn.mock.calls[0][2].name).toEqual({ name: 'newNameTheSequel' });
-			expect(fn.mock.calls[0][2]).toHaveProperty('_id');
-			expect(fn.mock.calls[0][2]).toHaveProperty('createdAt');
-			expect(isUUIDString(fn.mock.calls[0][2]._id));
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, PROJECT_COL,
+				expect.objectContaining({ name, _id: expect.anything(), createdAt: expect.any(Date) }));
 		});
 		test('should throw the error that the db has thrown', async () => {
-			const fn = jest.spyOn(db, 'insertOne').mockRejectedValue(new CustomTestError('Some db error message', 123456));
+			const rejectedErr = { message: generateRandomString(), code: 12345678 };
+			const fn = jest.spyOn(db, 'insertOne').mockRejectedValue(rejectedErr);
 
-			const res = await Project.createProject('otherTS', { name: 'newNameTheSequel' }).catch((err) => err);
+			await expect(Project.createProject(teamspace, name)).rejects.toEqual(rejectedErr);
 
-			expect(res.message).toBe('Some db error message');
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][0]).toEqual('otherTS');
-			expect(fn.mock.calls[0][1]).toEqual('projects');
-			expect(fn.mock.calls[0][2].name).toEqual({ name: 'newNameTheSequel' });
-			expect(fn.mock.calls[0][2]).toHaveProperty('_id');
-			expect(fn.mock.calls[0][2]).toHaveProperty('createdAt');
-			expect(isUUIDString(fn.mock.calls[0][2]._id));
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, PROJECT_COL,
+				expect.objectContaining({ name, _id: expect.anything(), createdAt: expect.any(Date) }));
 		});
 	});
 };
@@ -250,7 +239,7 @@ const testDeleteProject = () => {
 			await Project.deleteProject('someTS', 'project Id');
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][0]).toEqual('someTS');
-			expect(fn.mock.calls[0][1]).toEqual('projects');
+			expect(fn.mock.calls[0][1]).toEqual(PROJECT_COL);
 			expect(fn.mock.calls[0][2]).toEqual({ _id: 'project Id' });
 		});
 	});
@@ -263,7 +252,7 @@ const testUpdateProject = () => {
 			await Project.updateProject('someTS', 'project Id', { name: 'newName' });
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][0]).toEqual('someTS');
-			expect(fn.mock.calls[0][1]).toEqual('projects');
+			expect(fn.mock.calls[0][1]).toEqual(PROJECT_COL);
 			expect(fn.mock.calls[0][2]).toEqual({ _id: 'project Id' });
 			expect(fn.mock.calls[0][3]).toEqual({ $set: { name: 'newName' } });
 		});
@@ -279,7 +268,7 @@ const testGetProjectByName = () => {
 			await Project.getProjectByName(teamspace, project);
 			expect(fn).toHaveBeenCalledTimes(1);
 			// eslint-disable-next-line security/detect-non-literal-regexp
-			expect(fn).toHaveBeenCalledWith(teamspace, 'projects', { name: new RegExp(`^${project}$`, 'i') }, undefined);
+			expect(fn).toHaveBeenCalledWith(teamspace, PROJECT_COL, { name: new RegExp(`^${project}$`, 'i') }, undefined);
 		});
 
 		test('should return error if project is not found', async () => {
@@ -296,7 +285,7 @@ const testGetProjectById = () => {
 			await Project.getProjectById('someTS', 'project id');
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][0]).toEqual('someTS');
-			expect(fn.mock.calls[0][1]).toEqual('projects');
+			expect(fn.mock.calls[0][1]).toEqual(PROJECT_COL);
 			expect(fn.mock.calls[0][2]).toEqual({ _id: 'project id' });
 		});
 
@@ -316,7 +305,7 @@ const testRemoveUserFromAllProjects = () => {
 			await expect(Project.removeUserFromAllProjects(teamspace, user)).resolves.toBeUndefined();
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, 'projects',
+			expect(fn).toHaveBeenCalledWith(teamspace, PROJECT_COL,
 				{ 'permissions.user': user },
 				{ $pull: { permissions: { user } } });
 		});

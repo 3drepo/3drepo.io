@@ -17,12 +17,12 @@
 
 const Projects = {};
 const { COL_NAME } = require('./projectSettings.constants');
-const DbConstants = require('../handler/db.constants');
 const { PROJECT_ADMIN } = require('../utils/permissions/permissions.constants');
 const db = require('../handler/db');
+const { errCodes } = require('../handler/db.constants');
 const { generateUUID } = require('../utils/helper/uuids');
 const { getCommonElements } = require('../utils/helper/arrays');
-const { templates } = require('../utils/responseCodes');
+const { createResponseCode, templates } = require('../utils/responseCodes');
 
 const findProjects = (ts, query, projection, sort) => db.find(ts, COL_NAME, query, projection, sort);
 const findOneProject = (ts, query, projection) => db.findOne(ts, COL_NAME, query, projection);
@@ -82,7 +82,7 @@ Projects.createProject = async (teamspace, name) => {
 		await db.insertOne(teamspace, COL_NAME, addedProject);
 		return addedProject._id;
 	} catch (error) {
-		if (error.code === DbConstants.DUPLICATE_CODE) throw templates.invalidArguments;
+		if (error.code === errCodes.DUPLICATE_KEY) throw createResponseCode(templates.invalidArguments, 'Project name is taken');
 		throw error;
 	}
 };
