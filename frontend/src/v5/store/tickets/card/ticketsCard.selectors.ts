@@ -153,7 +153,7 @@ export const selectTemplatesWithTickets = createSelector(
 
 export const selectTemplatesWithFilteredTickets = createSelector(
 	selectCurrentTemplates,
-	selectFilteredTickets,
+	selectCurrentTickets,
 	(templates, tickets) => {
 		const idsOfTemplatesWithAtLeastOneTicket = uniq(tickets.map((t) => t.type));
 		return templates.filter((t) => idsOfTemplatesWithAtLeastOneTicket.includes(t._id));

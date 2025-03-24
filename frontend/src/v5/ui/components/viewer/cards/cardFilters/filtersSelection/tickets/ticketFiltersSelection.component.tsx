@@ -31,10 +31,9 @@ import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers'
 
 export const FilterSelection = () => {
 	const [selectedFilter, setSelectedFilter] = useState<CardFilter>(null);
-	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
 	const unusedFilters = TicketsCardHooksSelectors.selectAvailableTemplatesFilters();
 	const showFiltersList = !selectedFilter?.property;
-	const disabled = !unusedFilters.length || !tickets.length;
+	const disabled = !unusedFilters.length;
 
 	const clearFilter = () => setSelectedFilter(null);
 
