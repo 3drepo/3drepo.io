@@ -15,10 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { getState } from '../helpers/redux.helpers';
-import { selectAuthenticatedTeamspace } from '../store/auth/auth.selectors';
-import { selectCurrentTeamspace } from '../store/teamspaces/teamspaces.selectors';
-
 export const getErrorMessage = (error: any) => error.response?.data?.message || error.message;
 export const getErrorCode = (error: any) => error?.response?.data?.code || '';
 export const getErrorStatus = (error: any) => error?.response?.status;
@@ -46,18 +42,19 @@ export const numberAlreadyExists = (error: any): boolean => fieldAlreadyExists(e
 export const isPathNotFound = (error): boolean => getErrorStatus(error) === 404;
 export const isPathNotAuthorized = (error): boolean => getErrorCode(error).endsWith('NOT_AUTHORIZED') || getErrorStatus(error) === 401;
 
-export const isTeamspaceUnauthenticated = (code: string): boolean => code === 'NOT_AUTHENTICATED_AGAINST_TEAMSPACE';
+export const isTeamspaceNotAuthenticated = (code: string): boolean => code === 'NOT_AUTHENTICATED_AGAINST_TEAMSPACE';
 export const isTeamspaceInvalid = (code: string): boolean => ['SSO_RESTRICTED'].includes(code);
 export const isProjectNotFound = (code: string): boolean => code === 'PROJECT_NOT_FOUND';
 export const isModelNotFound = (code: string): boolean => ['RESOURCE_NOT_FOUND', 'CONTAINER_NOT_FOUND'].includes(code);
 
 export const isContainerPartOfFederation = (error): boolean => getErrorCode(error).endsWith('CONTAINER_IS_SUB_MODEL');
 
-export const isTeamspaceUnuthenticatedBySameUserOnDifferentSession = (error) => {
-	const teamspace = selectCurrentTeamspace(getState());
-	const authenticatedTeamspace = selectAuthenticatedTeamspace(getState());
-	const code = getErrorCode(error);
-	const teamspaceUnauthenticatedError = isTeamspaceUnauthenticated(code);
+export const isNotAuthed = (error) => isPathNotAuthorized(error) || isTeamspaceNotAuthenticated(getErrorCode(error));
 
-	return (teamspace === authenticatedTeamspace) && teamspaceUnauthenticatedError;
+export const errorNeedsRedirecting = (error) => {
+	const code = getErrorCode(error);
+	const teamspaceInvalid = isTeamspaceInvalid(code);
+	const pathNotFound = isPathNotFound(error);
+	const unauthorized = isNotAuthed(error);
+	return pathNotFound || teamspaceInvalid || unauthorized;
 };

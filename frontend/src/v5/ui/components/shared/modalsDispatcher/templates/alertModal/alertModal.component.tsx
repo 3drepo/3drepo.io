@@ -14,42 +14,35 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FC, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
-import { Modal, Actions, Details, Status, WarningIcon, ModalContent, CloseButton } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
-import { getErrorCode, getErrorMessage, getErrorStatus, isPathNotFound, isPathNotAuthorized, isTeamspaceInvalid, isTeamspaceUnauthenticated, isTeamspaceUnuthenticatedBySameUserOnDifferentSession } from '@/v5/validation/errors.helpers';
+import { Actions, Details, Status, CloseButton, Modal, WarningIcon, ModalContent } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
+import { errorNeedsRedirecting, getErrorCode, getErrorMessage, getErrorStatus } from '@/v5/validation/errors.helpers';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
-import { AlertModalProps } from './alertModal.types';
-import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useSafePath } from '@/v5/validation/useSafePath';
+import { AlertModalProps } from './alertModal.types';
+import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
+import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
-
-export const AlertModal: FC<AlertModalProps> = ({ onClickClose, currentActions = '', error, details, open }) => {
+export const AlertModal = ({ onClickClose, currentActions = '', error, details, open }: AlertModalProps) => {
 	const [redirectToSafePath, getSafePathName] = useSafePath(error);
 
 	const message = getErrorMessage(error);
 	const code = getErrorCode(error);
 	const status = getErrorStatus(error);
 	const errorStatus = status && code ? `${status} - ${code}` : '';
-	const pathNotFound = isPathNotFound(error);
-	const teamspaceInvalid = isTeamspaceInvalid(code);
-	const teamspaceUnauthenticatedError = isTeamspaceUnauthenticated(code);
-	const unauthorized = isPathNotAuthorized(error);
-	const sessionIsValidButTeamspaceHasLostAuthentication = isTeamspaceUnuthenticatedBySameUserOnDifferentSession(error);
+	const needsRedirect = errorNeedsRedirecting(error);
+	const authedTeamspaceMatchesSessionOne = AuthHooksSelectors.selectAuthedTeamspaceMatchesSessionOne();
 
 	useEffect(() => () => {
-		if (sessionIsValidButTeamspaceHasLostAuthentication) {
-			AuthActionsDispatchers.setAuthenticatedTeamspace(null);
-		}
-		if (pathNotFound || unauthorized || teamspaceInvalid || sessionIsValidButTeamspaceHasLostAuthentication) {
+		if (needsRedirect) {
 			redirectToSafePath();
 		}
+		if (!authedTeamspaceMatchesSessionOne) {
+			AuthActionsDispatchers.setAuthenticatedTeamspace(null);
+		}
 	}, []);
-
-	if (teamspaceUnauthenticatedError && !sessionIsValidButTeamspaceHasLostAuthentication) {
-		return (<></>);
-	}
 
 	return (
 		<Modal open={open} onClose={onClickClose}>
@@ -61,7 +54,7 @@ export const AlertModal: FC<AlertModalProps> = ({ onClickClose, currentActions =
 						defaultMessage="Something went wrong when {currentActions}"
 						values={{ currentActions }}
 					/>
-					{pathNotFound || unauthorized || teamspaceInvalid || sessionIsValidButTeamspaceHasLostAuthentication && (
+					{needsRedirect && (
 						<>.
 							<br />
 							<FormattedMessage

@@ -28,6 +28,10 @@ export const selectAuthenticatedTeamspace = createSelector(
 	selectAuthDomain, (state) => state.authenticatedTeamspace,
 );
 
+export const selectSessionAuthenticatedTeamspace = createSelector(
+	selectAuthDomain, (state) => state.sessionAuthenticatedTeamspace,
+);
+
 export const selectAuthenticationFetched = createSelector(
 	selectAuthDomain, (state) => !(state.isAuthenticated === null),
 );
@@ -38,4 +42,14 @@ export const selectIsAuthenticationPending = createSelector(
 
 export const selectReturnUrl = createSelector(
 	selectAuthDomain, (state) => state.returnUrl || ({ pathname: DASHBOARD_ROUTE, search: '' }),
+);
+
+export const selectAuthedTeamspaceMatchesSessionOne = createSelector(
+	selectAuthenticatedTeamspace,
+	selectSessionAuthenticatedTeamspace,
+	(authedTeamspace, sessionAuthedTeamspace) => (
+		authedTeamspace
+		&& sessionAuthedTeamspace
+		&& sessionAuthedTeamspace === authedTeamspace
+	),
 );

@@ -44,6 +44,7 @@ import { useEffect } from 'react';
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CalibrationContextComponent } from './projects/calibration/calibrationContext';
+import { authBroadcastChannel } from '@/v5/store/auth/authBrodcastChannel';
 
 export const MainRoute = () => {
 	const { path } = useRouteMatch();
@@ -53,6 +54,8 @@ export const MainRoute = () => {
 	useEffect(() => {
 		if (!authenticationFetched) {
 			AuthActionsDispatchers.authenticate();
+		} else {
+			authBroadcastChannel.onmessage = (ev) => AuthActionsDispatchers.setSessionAuthenticatedTeamspaceSuccess(ev.data);
 		}
 	}, [authenticationFetched]);
 
