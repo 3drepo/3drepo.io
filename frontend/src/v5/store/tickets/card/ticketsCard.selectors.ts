@@ -23,7 +23,7 @@ import { ITicketsCardState } from './ticketsCard.redux';
 import { DEFAULT_PIN, getTicketPins, toPin } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { IPin } from '@/v4/services/viewer/viewer';
 import { selectSelectedDate } from '@/v4/modules/sequences';
-import { sortBy, uniq, sortedUniqBy } from 'lodash';
+import { sortBy, sortedUniqBy } from 'lodash';
 import { toTicketCardFilter, templatesToFilters, getFiltersFromJobsAndUsers } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { selectFederationById, selectFederationJobs, selectFederationUsers } from '../../federations/federations.selectors';
 import { selectContainerJobs, selectContainerUsers } from '../../containers/containers.selectors';
@@ -142,27 +142,9 @@ export const selectFilteredTickets = createSelector(
 	},
 );
 
-export const selectTemplatesWithTickets = createSelector(
-	selectCurrentTemplates,
-	selectCurrentTickets,
-	(templates, tickets) => {
-		const idsOfTemplatesWithAtLeastOneTicket = uniq(tickets.map((t) => t.type));
-		return templates.filter((t) => idsOfTemplatesWithAtLeastOneTicket.includes(t._id));
-	},
-);
-
-export const selectTemplatesWithFilteredTickets = createSelector(
-	selectCurrentTemplates,
-	selectCurrentTickets,
-	(templates, tickets) => {
-		const idsOfTemplatesWithAtLeastOneTicket = uniq(tickets.map((t) => t.type));
-		return templates.filter((t) => idsOfTemplatesWithAtLeastOneTicket.includes(t._id));
-	},
-);
-
 export const selectAvailableTemplatesFilters = createSelector(
 	selectFilters,
-	selectTemplatesWithFilteredTickets,
+	selectCurrentTemplates,
 	(usedFilters, allFilters) => templatesToFilters(allFilters).filter(({ module, property, type }) => !usedFilters[`${module}.${property}.${type}`]),
 );
 
@@ -233,7 +215,7 @@ const selectJobsAndUsersByModelId = createSelector(
 );
 
 export const selectPropertyOptions = createSelector(
-	selectTemplatesWithTickets,
+	selectCurrentTemplates,
 	selectRiskCategories,
 	selectJobsAndUsersByModelId,
 	(state, modelId, module) => module,

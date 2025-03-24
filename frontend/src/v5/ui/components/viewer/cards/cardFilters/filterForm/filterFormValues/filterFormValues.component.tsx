@@ -60,7 +60,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 	const isRangeOp = isRangeOperator(operator);
 	const emptyValue = { value: (isRangeOp ? ['', ''] : '') };
 	const selectOptions = type === 'template' ?
-		TicketsCardHooksSelectors.selectTemplatesWithTickets().map(({ code: value, name: displayValue }) => ({ value, displayValue, type: 'template' }))
+		TicketsCardHooksSelectors.selectCurrentTemplates().map(({ code: value, name: displayValue }) => ({ value, displayValue, type: 'template' }))
 		: isSelectType(type) ? TicketsCardHooksSelectors.selectPropertyOptions(containerOrFederation, module, property) : [];
 
 	useEffect(() => {
