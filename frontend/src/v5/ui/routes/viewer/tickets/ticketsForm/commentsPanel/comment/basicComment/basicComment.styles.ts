@@ -17,6 +17,7 @@
 
 import styled from 'styled-components';
 import { Typography } from '@controls/typography';
+import CameraIcon from '@assets/icons/outlined/camera_side-outlined.svg';
 
 export const CommentMessage = styled(Typography).attrs({ variant: 'body1' })`
 	word-break: break-word;
@@ -75,4 +76,12 @@ export const CommentWithButtonsContainer = styled.div`
 		animation: activateButtons forwards;
 		animation-delay: .5s;
 	}
+`;
+
+export const ViewpointIcon = styled(CameraIcon)<{ disabled?: boolean; }>`
+	width: 14px;
+	height: 14px;
+	cursor: ${({ disabled }) => disabled ? 'auto' : 'pointer'};
+	opacity: ${({ disabled }) => disabled ? 0.3 : 1};
+	margin: 0 0 -3px 8px;
 `;
