@@ -15,13 +15,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext } from 'react';
-import { ResizableTableContext } from '../resizableTableContext';
-import { Row } from './resizableTableRow.styles';
+import styled from 'styled-components';
+import { Backdrop } from '@mui/material';
+import { DelimiterLine } from '@controls/resizableTableContext/delimiterLine/delimiterLine.component';
 
-export const ResizableTableRow = (props) => {
-	const { getVisibleColumns, columnGap } = useContext(ResizableTableContext);
-	const gridTemplateColumns = getVisibleColumns().map(({ width }) => `${width}px`).join(' ');
-	
-	return (<Row style={{ gridTemplateColumns, gap: columnGap }} {...props} />);
-};
+export const TableCorner = styled.div`
+	position: absolute;
+`;
+
+export const Container = styled(Backdrop).attrs({ open: true })`
+	cursor: grabbing;
+	z-index: 1000;
+	pointer-events: all;
+	display: block;
+`;
+
+export const DropAreas = styled.div`
+	width: fit-content;
+	height: 100%;
+`;
+
+export const Area = styled.div<{ $width: number }>`
+	width: ${({ $width }) => $width}px;
+	height: 100%;
+	display: inline-block;
+`;
+
+export const DropLine = styled(DelimiterLine)`
+	position: absolute;
+`;

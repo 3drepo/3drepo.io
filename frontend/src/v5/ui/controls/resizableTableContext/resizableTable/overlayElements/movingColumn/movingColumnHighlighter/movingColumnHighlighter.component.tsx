@@ -16,12 +16,13 @@
  */
 
 import { useContext } from 'react';
-import { ResizableTableContext } from '../resizableTableContext';
-import { Row } from './resizableTableRow.styles';
+import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
+import { Highlighter } from './movingColumnHighlighter.styles';
 
-export const ResizableTableRow = (props) => {
-	const { getVisibleColumns, columnGap } = useContext(ResizableTableContext);
-	const gridTemplateColumns = getVisibleColumns().map(({ width }) => `${width}px`).join(' ');
-	
-	return (<Row style={{ gridTemplateColumns, gap: columnGap }} {...props} />);
+export const MovingColumnHighlighter = (props) => {
+	const { movingColumn, getOffset, getWidth, columnGap } = useContext(ResizableTableContext);
+	const width = getWidth(movingColumn);
+	const offset = getOffset(movingColumn);
+
+	return (<Highlighter $offset={offset} $width={width} $gap={columnGap} {...props} />);
 };

@@ -15,13 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext } from 'react';
-import { ResizableTableContext } from '../resizableTableContext';
-import { Row } from './resizableTableRow.styles';
+import styled from 'styled-components';
 
-export const ResizableTableRow = (props) => {
-	const { getVisibleColumns, columnGap } = useContext(ResizableTableContext);
-	const gridTemplateColumns = getVisibleColumns().map(({ width }) => `${width}px`).join(' ');
-	
-	return (<Row style={{ gridTemplateColumns, gap: columnGap }} {...props} />);
-};
+export const Highlighter = styled.div<{ $offset: number, $width: number, $gap: number }>`
+	border: solid 2px ${({ theme }) => theme.palette.primary.main};
+	min-width: ${({ $width, $gap }) => $width + 2 * $gap}px;
+	position: relative;
+	left: ${({ $offset }) => $offset}px;
+	margin-left: ${({ $gap }) => -$gap}px;
+`;
