@@ -16,7 +16,7 @@
  */
 
 import { formatDateTime } from '@/v5/helpers/intl.helper';
-import { getUserFullName } from '@/v4/helpers/user.helpers';
+import { getUserFullName, getUserLastName } from '@/v4/helpers/user.helpers';
 import { VIEWPOINT_ID_REGEX } from '../../../../../../../helpers/comments';
 import { COMMENT_FIELD_NAME } from '../../../../../../viewerGui/components/commentForm/commentForm.constants';
 import { Container, Date, IconButton, StyledQuoteIcon, StyledReplyIcon, Fullname } from './footer.styles';
@@ -37,7 +37,7 @@ export const Footer = ({ name, created, formRef, commentRef, comment, ...props }
 		const commentTextarea = commentRef.current.textareaRef;
 		const currentFormCommentValue = commentForm.values[COMMENT_FIELD_NAME];
 
-		commentForm.setFieldValue(COMMENT_FIELD_NAME, `${currentFormCommentValue}@${name} `);
+		commentForm.setFieldValue(COMMENT_FIELD_NAME, `${currentFormCommentValue}@${getUserLastName(name)} `);
 		commentTextarea.focus();
 		setTimeout(() => {
 			commentTextarea.scrollTop = commentTextarea.scrollHeight;
