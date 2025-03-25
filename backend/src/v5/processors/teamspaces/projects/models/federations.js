@@ -17,15 +17,17 @@
 
 const { addModel, deleteModel, getModelList } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
-const { getFederationById, getFederations, updateModelSettings } = require('../../../../models/modelSettings');
+const { getContainers, getFederationById, getFederations, updateModelSettings } = require('../../../../models/modelSettings');
 const Comments = require('./commons/tickets.comments');
 const Groups = require('./commons/groups');
 const TicketGroups = require('./commons/tickets.groups');
 const Tickets = require('./commons/tickets');
 const Views = require('./commons/views');
 const { getLatestRevision } = require('../../../../models/revisions');
+const { getModelMD5Hash } = require('./commons/modelList');
 const { getOpenTicketsCount } = require('./commons/tickets');
 const { getProjectById } = require('../../../../models/projectSettings');
+const { hasReadAccessToContainer } = require('../../../../utils/permissions/permissions');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { queueFederationUpdate } = require('../../../../services/modelProcessing');
 
@@ -75,7 +77,7 @@ const getLastUpdatesFromModels = async (teamspace, models) => {
 	}
 
 	return lastUpdates.length ? lastUpdates.sort((a, b) => b.timestamp
-        - a.timestamp)[0].timestamp : undefined;
+		- a.timestamp)[0].timestamp : undefined;
 };
 
 Federations.getFederationStats = async (teamspace, project, federation) => {
@@ -106,5 +108,32 @@ Federations.updateSettings = updateModelSettings;
 
 Federations.getSettings = (teamspace, federation) => getFederationById(teamspace,
 	federation, { corID: 0, account: 0, permissions: 0, subModels: 0, federate: 0 });
+
+Federations.getMD5Hash = async (teamspace, project, federation, user) => {
+	const { subModels: containers } = await getFederationById(teamspace, federation, { subModels: 1 });
+
+	if (containers) {
+		const containerWithMetadata = await getContainers(
+			teamspace,
+			containers.map((container) => container._id),
+			{ _id: 1, name: 1, permissions: 1 });
+
+		const listOfPromises = containerWithMetadata.map(
+			async (container) => {
+				const hasAccess = await hasReadAccessToContainer(teamspace, project, container._id, user);
+				if (hasAccess) {
+					return getModelMD5Hash(teamspace, container._id);
+				}
+				return undefined;
+			},
+		);
+
+		const promiseResponses = await Promise.allSettled(listOfPromises);
+		const responses = promiseResponses.flatMap(({ status, value }) => (status === 'fulfilled' && value ? value : []));
+
+		return responses;
+	}
+	return [];
+};
 
 module.exports = Federations;

@@ -69,10 +69,12 @@ export type IPinColorMapping = {
 	]
 };
 
-export type IPinSchema = {
-	name: string;
-	type: 'coords';
-	color: RgbArray | IPinColorMapping;
+export type PinIcon =  'DEFAULT' | 'RISK' | 'ISSUE' | 'MARKER';
+
+export type PinConfig = {
+	name?: string;
+	color?: RgbArray | IPinColorMapping;
+	icon?: PinIcon;
 };
 
 export type StatusValue = {
@@ -92,11 +94,12 @@ export interface ITemplate {
 	code: string;
 	properties?: PropertyDefinition[];
 	modules?: TemplateModule[];
+	deprecated?: boolean;
 	config?: {
 		comments?: boolean;
 		defaultView?: boolean;
 		issueProperties?: boolean;
-		pin?: boolean | IPinSchema;
+		pin?: boolean | PinConfig;
 		status?: IStatusConfig;
 	};
 }

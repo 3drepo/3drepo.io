@@ -107,30 +107,14 @@ describe("Project Permissions::", function () {
 		});
 	});
 
-	it("user without create_model permission on a project cannot create model", function(done) {
+	it("user without create_model permission on a project cannot create model/federation using V4 endpoints - endpoint decommissioned", function(done) {
 
 		const modelName = "model001";
 
 		agentNoPermission
 			.post(`/${teamspace}/model`)
 			.send(Object.assign({modelName: modelName}, modelDetail))
-			.expect(401, function(err, res) {
-				done(err);
-			});
-
-	});
-
-	it("user without create_federation permission on a project cannot create federation", function(done) {
-
-		const modelName = "model001";
-
-		agentNoPermission
-			.post(`/${teamspace}/model`)
-			.send(Object.assign({modelName: modelName, subModels: [] }, modelDetail))
-			.expect(401, function(err, res) {
-				done(err);
-			});
-
+			.expect(410, done);
 	});
 
 	it("user without edit_project permission on a project cannot edit project", function(done) {
@@ -146,27 +130,14 @@ describe("Project Permissions::", function () {
 
 	let modelId;
 
-	it("user with create_model permission on a project can create model", function(done) {
+	it("user with create_model permission on a project cannot create model/federation using V4 endpoints - endpoint decommissioned", function(done) {
 
 		const modelName = "model001";
 
 		agentCanCreateModel
 			.post(`/${teamspace}/model`)
 			.send(Object.assign({modelName: modelName}, modelDetail))
-			.expect(200, function(err, res) {
-				modelId = res.body.model;
-				done(err);
-			});
-	});
-
-	it("user with create_model permission on a project cannot create fed model", function(done) {
-
-		const modelName = "fedmodel001";
-
-		agentCanCreateModel
-			.post(`/${teamspace}/model`)
-			.send(Object.assign({ modelName: modelName, subModels: [] }, modelDetail))
-			.expect(401, done);
+			.expect(410, done);
 	});
 
 	it("get project permissions will show all subscription users", function(done) {
@@ -199,13 +170,14 @@ describe("Project Permissions::", function () {
 
 			callback => {
 				agentTeamspaceAdmin
-					.get(`/${teamspace}/projects/${project}`)
+					.get(`/${teamspace}/projects/project3`)
 					.expect(200, function(err, res) {
 
 						expect(err).to.be.null;
 						expect(res.body.permissions).to.exist;
 
 						permissions = res.body.permissions;
+						modelId = res.body.models;
 
 						const userPerm = permissions.find(p => p.user === userCanCreateModel.username);
 						expect(userPerm).to.exist;
@@ -217,7 +189,7 @@ describe("Project Permissions::", function () {
 
 			callback => {
 				agentTeamspaceAdmin
-					.put(`/${teamspace}/projects/${project}`)
+					.put(`/${teamspace}/projects/project3`)
 					.send({ permissions })
 					.expect(200, callback);
 			},
@@ -233,25 +205,14 @@ describe("Project Permissions::", function () {
 
 	});
 
-	it("user with create_federation permission on a project can create fed model", function(done) {
+	it("user with create_federation permission on a project cannot create fed model on v4 endpoints - endpoint decommissioned", function(done) {
 
 		const modelName = "fedmodel002";
 
 		agentCanCreateFed
 			.post(`/${teamspace}/model`)
 			.send(Object.assign({ subModels: [], modelName: modelName }, modelDetail))
-			.expect(200, done);
-
-	});
-
-	it("user with create_federation permission on a project cannot create model", function(done) {
-
-		const modelName = "fedmodel002";
-
-		agentCanCreateFed
-			.post(`/${teamspace}/model`)
-			.send(Object.assign({ modelName: modelName }, modelDetail))
-			.expect(401, done);
+			.expect(410, done);
 
 	});
 
@@ -276,17 +237,14 @@ describe("Project Permissions::", function () {
 			.expect(200, done);
 	});
 
-	it("Users with admin_project permission on a project can create models in it", function(done) {
+	it("Users with admin_project permission on a project cannot create models using v4 endpoints - endpoint decommissioned", function(done) {
 
 		const modelName = "model002";
 
 		agentProjectAdmin
 			.post(`/${teamspace}/model`)
 			.send(Object.assign({modelName: modelName}, modelDetail))
-			.expect(200, function(err, res) {
-				modelId = res.body.model;
-				done(err);
-			});
+			.expect(410, done);
 	});
 
 	it("Users with admin_project permission on a project can access a model in it", function(done) {

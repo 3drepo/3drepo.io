@@ -18,7 +18,7 @@
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors, TicketsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
-import { useContext } from 'react';
+import { memo, useContext } from 'react';
 import { SearchContext } from '@controls/search/searchContext';
 import { Highlight } from '@controls/highlight';
 import { DueDate } from '@controls/dueDate/dueDate.component';
@@ -28,18 +28,19 @@ import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopover
 import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 import { Tooltip } from '@mui/material';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
-import { Row, Cell, CellChipText, CellOwner, OverflowContainer, SmallFont, CellDate } from './ticketsTableRow.styles';
+import { Row, Cell, CellOwner, OverflowContainer, SmallFont, CellDate } from './ticketsTableRow.styles';
 import { getChipPropsFromConfig } from '@controls/chip/statusChip/statusChip.helpers';
 import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.context';
+import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { isEqual } from 'lodash';
 
 type TicketsTableRowProps = {
 	ticket: ITicket,
-	showModelName: boolean,
 	modelId: string,
 	selected: boolean,
-	onClick: () => void,
+	onClick: (modelId, ticketId) => void,
 };
-export const TicketsTableRow = ({ ticket, onClick, showModelName, modelId, selected }: TicketsTableRowProps) => {
+export const TicketsTableRow = memo(({ ticket, onClick, modelId, selected }: TicketsTableRowProps) => {
 	const { query } = useContext(SearchContext);
 	const { _id: id, title, properties, number, type, modules } = ticket;
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
@@ -69,21 +70,18 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelId, selec
 		levelOfRisk,
 	} = getPropertiesInCamelCase(modules?.safetibase || {});
 
-	const hasProperties = template?.config?.issueProperties;
-	const hasSafetibase = template?.modules?.some((module) => module.type === 'safetibase');
-
 	const handleClick = (e) => {
 		e.preventDefault();
-		onClick();
+		onClick(modelId, ticket._id);
 	};
 
 	return (
 		<TicketContextComponent containerOrFederation={modelId}>
 			<Row key={id} onClickCapture={handleClick} $selected={selected}>
-				<Cell width={80}>
+				<Cell name="id">
 					<Highlight search={query}>{`${template.code}:${number}`}</Highlight>
 				</Cell>
-				<Cell>
+				<Cell name={BaseProperties.TITLE}>
 					<Tooltip title={title}>
 						<OverflowContainer>
 							<Highlight search={query}>
@@ -92,7 +90,7 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelId, selec
 						</OverflowContainer>
 					</Tooltip>
 				</Cell>
-				<Cell width={145} hidden={!showModelName}>
+				<Cell name="modelName">
 					<Tooltip title={modelName}>
 						<OverflowContainer>
 							<Highlight search={query}>
@@ -101,33 +99,33 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelId, selec
 						</OverflowContainer>
 					</Tooltip>
 				</Cell>
-				<Cell width={127}>
+				<Cell name={`properties.${BaseProperties.CREATED_AT}`}>
 					<SmallFont>
 						{formatDateTime(createdAt)}
 					</SmallFont>
 				</Cell>
-				<Cell width={96} hidden={!hasProperties}>
+				<Cell name={`properties.${IssueProperties.ASSIGNEES}`}>
 					{!!assignees?.length && (<AssigneesSelect value={assignees} multiple disabled />)}
 				</Cell>
-				<CellOwner width={52}>
+				<CellOwner name={`properties.${BaseProperties.OWNER}`}>
 					<UserPopoverCircle user={ownerAsUser} />
 				</CellOwner>
-				<CellDate width={147} hidden={!hasProperties}>
+				<CellDate name={`properties.${IssueProperties.DUE_DATE}`}>
 					{!!dueDate && (<DueDate value={dueDate} disabled />)}
 				</CellDate>
-				<CellChipText width={90} hidden={!hasProperties}>
+				<Cell name={`properties.${IssueProperties.PRIORITY}`}>
 					<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />
-				</CellChipText>
-				<CellChipText width={150}>
+				</Cell>
+				<Cell name={`properties.${BaseProperties.STATUS}`}>
 					<Chip {...getChipPropsFromConfig(statusConfig, status)} />
-				</CellChipText>
-				<Cell width={137} hidden={!hasSafetibase}>
+				</Cell>
+				<Cell name={`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`}>
 					<Chip {...RISK_LEVELS_MAP[levelOfRisk]} variant="filled" />
 				</Cell>
-				<Cell width={134} hidden={!hasSafetibase}>
+				<Cell name={`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`}>
 					<Chip {...TREATMENT_LEVELS_MAP[treatmentStatus]} variant="filled" />
 				</Cell>
 			</Row>
 		</TicketContextComponent>
 	);
-};
+}, isEqual);
