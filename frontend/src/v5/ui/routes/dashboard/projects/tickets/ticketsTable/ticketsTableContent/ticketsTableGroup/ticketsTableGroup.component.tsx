@@ -27,9 +27,10 @@ import { Table, Header, Headers, Group, NewTicketRow, NewTicketText, IconContain
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
-import { SetTicketValue } from '../../ticketsTable.helper';
+import { getAssignees, SetTicketValue, sortAssignees } from '../../ticketsTable.helper';
 import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
+import { orderBy } from 'lodash';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router';
@@ -76,9 +77,22 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 	const models = useSelectedModels();
 	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;
 
+	const assigneesSort = (items: ITicket[], order) => orderBy(
+		items.map(sortAssignees),
+		[
+			(item) => getAssignees(item).length,
+			(item) => getAssignees(item).join(),
+		],
+		[order, order],
+	);
+
+	const customSortingFunctions = {
+		[`properties.${IssueProperties.ASSIGNEES}`]: assigneesSort,
+	};
+
 	return (
 		<Table $empty={!tickets.length}>
-			<SortedTableComponent items={tickets} sortingColumn={BaseProperties.CREATED_AT}>
+			<SortedTableComponent items={tickets} sortingColumn={BaseProperties.CREATED_AT} customSortingFunctions={customSortingFunctions}>
 				<SortedTableContext.Consumer>
 					{({ sortedItems }: SortedTableType<ITicket>) => (
 						<>
