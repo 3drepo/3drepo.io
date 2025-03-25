@@ -42,14 +42,8 @@ const testValidateComment = () => {
 		clippingPlanes: [],
 	};
 	const invalidViewComment = {
+		...viewComment,
 		screenshot: [existingRef2],
-		camera: {
-			position: times(3, () => generateRandomNumber()),
-			up: times(3, () => generateRandomNumber()),
-			forward: times(3, () => generateRandomNumber()),
-			type: 'perspective',
-		},
-		clippingPlanes: [],
 	};
 	describe.each([
 		['with empty message (new comment)', false, { message: '' }],
