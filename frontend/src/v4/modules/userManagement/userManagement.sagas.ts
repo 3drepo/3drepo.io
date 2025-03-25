@@ -204,7 +204,6 @@ export function* removeUser({ username }) {
 					id: 'deleteModal.teamspaceUser.message',
 					defaultMessage: 'Are you sure you want to remove this user?',
 				}),
-				confidenceCheck: true,
 			});
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('remove', 'licence', error));
