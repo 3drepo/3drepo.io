@@ -144,7 +144,7 @@ export const EditProfilePersonalTab = ({
 					<WelcomeMessage>
 						<FormattedMessage
 							id="editProfile.form.newUserMessage"
-							defaultMessage="Welcome to 3DR, please tell us more about yourself..."
+							defaultMessage="Welcome to 3D Repo, please tell us more about yourself..."
 						/>
 					</WelcomeMessage>
 				) : (
