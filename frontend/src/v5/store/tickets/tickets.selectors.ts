@@ -54,6 +54,11 @@ export const selectTemplates = createSelector(
 	(state, modelId) => state.templatesByModelId[modelId] || [],
 );
 
+export const selectActiveTemplates = createSelector(
+	selectTemplates,
+	(templates) => templates.filter(({ deprecated }) => !deprecated),
+);
+
 export const selectTemplateById = createSelector(
 	selectTicketsDomain,
 	selectTemplates,
