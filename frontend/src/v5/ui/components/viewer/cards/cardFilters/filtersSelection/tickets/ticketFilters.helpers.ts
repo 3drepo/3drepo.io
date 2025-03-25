@@ -46,10 +46,12 @@ export const TYPE_TO_ICON: Record<CardFilterType, any> = {
 	'number': NumberIcon,
 };
 
-const DEFAULT_FILTERS: CardFilter[] = [
+export const DEFAULT_FILTERS: CardFilter[] = [
 	{ module: '', type: 'title', property: formatMessage({ defaultMessage: 'Ticket title', id: 'viewer.card.filters.element.title' }) },
 	{ module: '', type: 'ticketCode', property: formatMessage({ defaultMessage: 'Ticket ID', id: 'viewer.card.filters.element.ticketCode' }) },
 	{ module: '', type: 'template', property: formatMessage({ defaultMessage: 'Ticket template', id: 'viewer.card.filters.element.template' }) },
+
+	// These are for having a custom filter form for each of these properties 
 	{ module: '', type: 'owner', property: formatMessage({ defaultMessage: 'Owner', id: 'viewer.card.filters.element.owner' }) },
 	{ module: '', type: 'createdAt', property: formatMessage({ defaultMessage: 'Created at', id: 'viewer.card.filters.element.createdAt' }) },
 	{ module: '', type: 'updatedAt', property: formatMessage({ defaultMessage: 'Updated at', id: 'viewer.card.filters.element.updatedAt' }) },
@@ -72,7 +74,6 @@ const templateToFilters = (template: ITemplate): CardFilter[] => [
 ];
 
 export const templatesToFilters = (templates: ITemplate[]): CardFilter[] => {
-	if (!templates.length) return [];
 	let filters = templates.flatMap(templateToFilters);
 	filters = uniqBy(filters, (f) => f.module + f.property + f.type);
 	filters = sortBy(filters, 'module');
