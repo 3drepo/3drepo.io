@@ -137,9 +137,9 @@ describe("Sharing/Unsharing a model", function () {
 			viewerAgent.get(`/${username}/${model}/download/latest`).expect(401, done);
 		});
 
-		it("and the viewer should NOT be able to upload model", function(done) {
+		it("and the viewer should not be able to upload model on the V4 endpoint - endpoint decommissioned", function(done) {
 			viewerAgent.post(`/${username}/${model}/upload`)
-				.expect(401, done);
+				.expect(410, done);
 		});
 
 		it("and the viewer should NOT be able to see raise issue", function(done) {
@@ -286,9 +286,9 @@ describe("Sharing/Unsharing a model", function () {
 				.expect(200 , done);
 		});
 
-		it("and the commenter should NOT be able to upload model", function(done) {
+		it("and the commenter should not be able to upload model on the V4 endpoint - endpoint decommissioned", function(done) {
 			commenterAgent.post(`/${username}/${model}/upload`)
-				.expect(401, done);
+				.expect(410, done);
 		});
 
 		it("and the commenter should NOT be able to delete the model", function(done) {
@@ -425,11 +425,10 @@ describe("Sharing/Unsharing a model", function () {
 				.expect(200 , done);
 		});
 
-		it("and the collaborator should be able to upload model", function(done) {
+		it("and the collaborator should not be able to upload model on the V4 endpoint - endpoint decommissioned", function(done) {
 			collaboratorAgent.post(`/${username}/${model}/upload`)
 				.field("tag", "collab_upload")
-				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
-				.expect(200, done);
+				.expect(410, done);
 		});
 
 		it("and the collaborator should be able to download the model", function(done) {
