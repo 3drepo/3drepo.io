@@ -26,6 +26,8 @@ import { dispatch } from '@/v5/helpers/redux.helpers';
 import { updatePermissionsOrTriggerModal } from '@components/shared/updatePermissionModal/updatePermissionModal.component';
 import { getProjectPermissionLabelFromType } from '@/v4/constants/project-permissions';
 import { getModelPermissionLabelFromType } from '@/v4/constants/model-permissions';
+import { getUserFullName } from '@/v4/helpers/user.helpers';
+import { selectCurrentTeamspaceUsersByIds, selectUser, selectUsersByTeamspace } from '@/v5/store/users/users.selectors';
 import {
 	FederationReminderDialog
 } from '../../routes/modelsPermissions/components/federationReminderDialog/federationReminderDialog.component';
@@ -39,6 +41,7 @@ import {
 	selectInvitations,
 	selectProject,
 	selectUserNotExists,
+	selectUsers,
 	UserManagementActions,
 	UserManagementTypes,
 } from '../userManagement';
@@ -179,32 +182,34 @@ export function* removeUser({ username }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
 		const { used } = yield select(selectCurrentQuotaSeats);
-			DialogsActionsDispatchers.open('delete', {
-				name: username,
-				onClickConfirm: () => new Promise<void>(
-					(accept, reject) => {
-						try {
-							dispatch(UserManagementActions.removeUserCascade(username));
-							dispatch(TeamspacesActions.setUsedQuotaSeats(teamspace, used - 1));
-							accept();
-						} catch {
-							reject();
-						}
-					},
-				),
-				titleLabel: formatMessage({
-					id: 'deleteModal.teamspaceUser.title',
-					defaultMessage: 'Remove {username}',
-				}, { username }),
-				confirmLabel: formatMessage({
-					id: 'deleteModal.teamspaceUser.confirm',
-					defaultMessage: 'Remove',
-				}),
-				message: formatMessage({
-					id: 'deleteModal.teamspaceUser.message',
-					defaultMessage: 'Are you sure you want to remove this user?',
-				}),
-			});
+		const user = yield select(selectUser, teamspace, username)
+		const fullName = `${user.firstName} ${user.lastName}`
+		DialogsActionsDispatchers.open('delete', {
+			// name: getUserFullName(username),
+			onClickConfirm: () => new Promise<void>(
+				(accept, reject) => {
+					try {
+						dispatch(UserManagementActions.removeUserCascade(username));
+						dispatch(TeamspacesActions.setUsedQuotaSeats(teamspace, used - 1));
+						accept();
+					} catch {
+						reject();
+					}
+				},
+			),
+			titleLabel: formatMessage({
+				id: 'deleteModal.teamspaceUser.title',
+				defaultMessage: 'Remove {user}',
+			}, { user: fullName }),
+			confirmLabel: formatMessage({
+				id: 'deleteModal.teamspaceUser.confirm',
+				defaultMessage: 'Remove',
+			}),
+			message: formatMessage({
+				id: 'deleteModal.teamspaceUser.message',
+				defaultMessage: 'Are you sure you want to remove this user?',
+			}),
+		});
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('remove', 'licence', error));
 	}

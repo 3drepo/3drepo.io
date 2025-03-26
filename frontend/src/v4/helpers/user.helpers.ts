@@ -21,11 +21,6 @@ import { selectCurrentTeamspaceUsersByIds } from '@/v5/store/users/users.selecto
 
 const UNKNOWN_USER = formatMessage({ id: 'v4.unknownUser', defaultMessage: 'Unknown user' });
 
-export const getUserLastName = (username) => {
-	const user = selectCurrentTeamspaceUsersByIds(getState())[username];
-	return (!user || user?.isNotTeamspaceMember) ? UNKNOWN_USER : user.lastName;
-};
-
 export const getUserFullName = (username) => {
 	const user = selectCurrentTeamspaceUsersByIds(getState())[username];
 	return (!user || user?.isNotTeamspaceMember) ? UNKNOWN_USER : `${user.firstName} ${user.lastName}`;
