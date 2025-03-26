@@ -23,8 +23,8 @@ import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isNotLoggedIn } from '@/v5/validation/errors.helpers';
 import { addParams, pathName } from '@/v5/helpers/url.helper';
 import { Route, RouteProps } from './route.component';
-import { useSSOAuth, useSSOParams } from '../sso.hooks';
-import { postActions } from '../api/sso';
+import { useSSOParams } from '../sso.hooks';
+import { postActions, ssoAuth } from '../api/sso';
 import { enableKickedOutEvent } from '../realtime/auth.events';
 import { AUTH_PATH, DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { AuthenticatingModal } from '@components/shared/modalsDispatcher/templates/infoModal/authenticatingModal/authenticatingModal.component';
@@ -38,7 +38,6 @@ const cleanSSOParams = (location) => {
 
 const WrapAuthenticationRedirect = ({ children }) => {
 	const history = useHistory();
-	const [authenticateTeamspace] = useSSOAuth();
 	const isAuthenticated = AuthHooksSelectors.selectIsAuthenticated();
 	const authenticationFetched = AuthHooksSelectors.selectAuthenticationFetched();
 	const authenticatedTeamspace = AuthHooksSelectors.selectAuthenticatedTeamspace();
@@ -65,7 +64,9 @@ const WrapAuthenticationRedirect = ({ children }) => {
 	useEffect(() => {
 		if (isAuthenticated && teamspace && teamspace !== authenticatedTeamspace) {
 			const redirectUri = addParams(location.pathname, location.search);
-			authenticateTeamspace(redirectUri, teamspace);
+			ssoAuth(redirectUri, teamspace).then(({ data }) => {
+				window.location.replace(data.link);
+			});
 			DialogsActionsDispatchers.open(AuthenticatingModal);
 		}
 	}, [isAuthenticated, teamspace, authenticatedTeamspace]);

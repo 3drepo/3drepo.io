@@ -51,9 +51,9 @@ export const useSSOAuth = () => {
 		{ errorMessage: errorMessages[error] }) : null;
 
 	return [
-		(redirectUri, teamspace?) => ssoAuth(redirectUri, teamspace).then(({ data }) => {
+		(redirectUri) => ssoAuth(redirectUri).then(({ data }) => {
 			window.location.href = data.link;
 		}),
 		errorMessage,
-	] as [(redirectUri: string, teamspace?: string) => void, string | null];
+	] as [(redirectUri: string) => void, string | null];
 };
