@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const getErrorMessage = (error: any) => error.response?.data?.message || error.message;
+export const getErrorMessage = (error: any) => error?.response?.data?.message || error?.message;
 export const getErrorCode = (error: any) => error?.response?.data?.code || '';
 export const getErrorStatus = (error: any) => error?.response?.status;
 
@@ -26,6 +26,7 @@ export const isFileFormatUnsupported = (error: any): boolean => getErrorCode(err
 export const isNotLoggedIn = (error: any): boolean => getErrorCode(error) === 'NOT_LOGGED_IN';
 
 export const isNetworkError = (error: any): boolean => getErrorMessage(error) === 'Network Error';
+export const isRequestAborted = (error: any) => getErrorMessage(error) === 'Request aborted';
 
 const fieldAlreadyExists = (error: any, field: string): boolean => {
 	const errorMessage = getErrorMessage(error).toLowerCase();

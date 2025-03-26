@@ -16,7 +16,7 @@
  */
 
 import { produceAll } from '@/v5/helpers/reducers.helper';
-import { errorNeedsRedirecting, getErrorCode, isNotAuthed } from '@/v5/validation/errors.helpers';
+import { errorNeedsRedirecting, getErrorCode, isNotAuthed, isRequestAborted } from '@/v5/validation/errors.helpers';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import uuid from 'uuidv4';
@@ -40,12 +40,15 @@ export const { Types: DialogsTypes, Creators: DialogsActions } = createActions({
 }, { prefix: 'MODALS/' }) as { Types: Constants<IDialogsActionCreators>; Creators: IDialogsActionCreators };
 
 export const openHandler = (state, { modalType, props, syncProps }: OpenAction) => {
-	if (getErrorCode(props?.error)) {
+	const errorCode = getErrorCode(props?.error);
+	if (errorCode || isRequestAborted(props?.error)) {
 		// avoid other modals when authenticating
 		const authModalIsAlreadyOpen = state.dialogs.find((dialog) => (
 			dialog.modalType?.name === 'AuthenticatingModal' || isNotAuthed(dialog.props?.error)
 		));
 		if (authModalIsAlreadyOpen) return;
+	}
+	if (errorCode) {
 		// avoid opening 2+ redirect modals
 		const needsRedirecting = errorNeedsRedirecting(props?.error);
 		const redirectModalIsAlreadyOpen = state.dialogs.find((dialog) => errorNeedsRedirecting(dialog.props?.error));
