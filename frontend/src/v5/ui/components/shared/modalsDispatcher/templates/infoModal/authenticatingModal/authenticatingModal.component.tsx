@@ -14,20 +14,31 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { useEffect, useRef } from 'react';
 import { InfoModal } from '../../infoModal/infoModal.component';
 import { formatMessage } from '@/v5/services/intl';
+import { useLocation } from 'react-router';
 
-export const AuthenticatingModal = () => (
-	<InfoModal
-		disableClose
-		open
-		title={formatMessage({
-			id: 'unauthorizedModal.unauthTeamspace.header',
-			defaultMessage: 'Teamspace Authentication',
-		})}
-		message={formatMessage({
-			defaultMessage: "We're authenticating you against this teamspace, this may take a few seconds",
-			id: 'unauthorizedModal.unauthTeamspace.description',
-		})}
-	/>
-);
+export const AuthenticatingModal = ({ onClickClose }) => {
+	const location = useLocation();
+	const initialLocation = useRef(location);
+
+	useEffect(() => {
+		if (location !== initialLocation.current) onClickClose();
+	}, [location]);
+
+	return (
+		<InfoModal
+			disableClose
+			open
+			title={formatMessage({
+				id: 'unauthorizedModal.unauthTeamspace.header',
+				defaultMessage: 'Teamspace Authentication',
+			})}
+			message={formatMessage({
+				defaultMessage: "We're authenticating you against this teamspace, this may take a few seconds",
+				id: 'unauthorizedModal.unauthTeamspace.description',
+			})}
+		/>
+	);
+};
