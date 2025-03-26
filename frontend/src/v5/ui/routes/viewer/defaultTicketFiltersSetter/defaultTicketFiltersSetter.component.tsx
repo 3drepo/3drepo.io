@@ -32,6 +32,7 @@ import { getState } from '@/v5/helpers/redux.helpers';
 const TICKET_CODE_REGEX = /^[a-zA-Z]{3}:\d+$/;
 export const DefaultTicketFiltersSetter = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
+	const [ticketId] = useSearchParam('ticketId');
 	const [ticketSearchParam, setTicketSearchParam] = useSearchParam('ticketSearch', Transformers.STRING_ARRAY);
 	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
 
@@ -97,7 +98,6 @@ export const DefaultTicketFiltersSetter = () => {
 			const ticketCodes = ticketSearchParam.filter((query) => TICKET_CODE_REGEX.test(query)).map((q) => q.toUpperCase());
 			const filters: CardFilter[] = ticketCodes.length ? getTicketFiltersFromURL(ticketCodes) : getNonCompletedTicketFilters();
 			filters.forEach(TicketsCardActionsDispatchers.upsertFilter);
-			ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.TICKETS, true);
 			setTicketSearchParam();
 		}
 	}, [templates.length]); 
