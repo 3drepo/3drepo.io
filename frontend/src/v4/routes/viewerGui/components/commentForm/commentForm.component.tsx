@@ -133,7 +133,7 @@ export class CommentForm extends PureComponent<IProps, IState> {
 	}
 
 	private filteredUsersList = (token) => this.props.teamspaceUsers.filter((user) =>
-			_values(pick(user, ['user', 'firstName', 'lastName']))
+			_values(pick(user, ['firstName', 'lastName']))
 				.map(lowerCase).some((value) => value.includes(lowerCase(token)))).slice(0, 5)
 
 	private filteredTicketsList = (token) =>
@@ -200,7 +200,7 @@ export class CommentForm extends PureComponent<IProps, IState> {
 		);
 	});
 
-	private outputUser = (item, trigger) => ({ text: `${trigger}${item.user}`, caretPosition: 'end' });
+	private outputUser = (item, trigger) => ({ text: `${trigger}${item.lastName}`, caretPosition: 'end' });
 
 	private outputIssue = (item, trigger) => ({ text: `${trigger}${item.number}`, caretPosition: 'end' });
 
