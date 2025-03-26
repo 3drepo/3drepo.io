@@ -32,7 +32,8 @@ export const ActionMenuSection = styled.div`
 	}
 `;
 
-export const Menu = styled.div`
+export const Menu = styled.div<{ top }>`
 	display: flex;
 	flex-direction: column;
+	max-height: ${({ top }) => `calc(100vh - ${+top}px) - 10px`};
 `;
