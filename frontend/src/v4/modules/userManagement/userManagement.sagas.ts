@@ -185,7 +185,6 @@ export function* removeUser({ username }) {
 		const user = yield select(selectUser, teamspace, username)
 		const fullName = `${user.firstName} ${user.lastName}`
 		DialogsActionsDispatchers.open('delete', {
-			// name: getUserFullName(username),
 			onClickConfirm: () => new Promise<void>(
 				(accept, reject) => {
 					try {

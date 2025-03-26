@@ -200,7 +200,7 @@ export class CommentForm extends PureComponent<IProps, IState> {
 		);
 	});
 
-	private outputUser = (item, trigger) => ({ text: `${trigger}${item.lastName}`, caretPosition: 'end' });
+	private outputUser = (item, trigger) => ({ text: `${trigger}${item.firstName} ${item.lastName}`, caretPosition: 'end' });
 
 	private outputIssue = (item, trigger) => ({ text: `${trigger}${item.number}`, caretPosition: 'end' });
 
