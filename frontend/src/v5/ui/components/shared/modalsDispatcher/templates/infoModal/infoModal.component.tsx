@@ -35,6 +35,7 @@ export const InfoModal = ({
 	open,
 	Icon,
 	disableClose = false,
+	className,
 }: InfoModalProps) => {
 	const highlightProps = { variant : 'contained', color : 'primary' };
 	const unhighlightedProps = { variant : 'outlined', color : 'secondary' };
@@ -43,7 +44,7 @@ export const InfoModal = ({
 	const actionButtonStyleProps: any = highlightActionButton ? highlightProps : unhighlightedProps;
 
 	return (
-		<Modal open={open} onClose={onClickClose}>
+		<Modal open={open} onClose={onClickClose} className={className}>
 			<ModalContent>
 				{Icon && <Icon />}
 				<DialogTitle>

@@ -14,10 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { InfoModal } from '../../infoModal/infoModal.component';
 import { formatMessage } from '@/v5/services/intl';
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router';
+import { AuthModal } from './authenticatingModal.styles';
 
 export const AuthenticatingModal = ({ onClickClose }) => {
 	const currentLocation = useLocation();
@@ -28,7 +28,7 @@ export const AuthenticatingModal = ({ onClickClose }) => {
 	}, [currentLocation]);
 
 	return (
-		<InfoModal
+		<AuthModal
 			disableClose
 			open
 			title={formatMessage({

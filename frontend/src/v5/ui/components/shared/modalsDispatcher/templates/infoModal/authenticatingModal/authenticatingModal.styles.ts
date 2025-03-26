@@ -14,20 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import styled from 'styled-components';
+import { InfoModal } from '../infoModal.component';
 
-import { ReactNode } from 'react';
-
-
-export interface InfoModalProps {
-	title?: string;
-	message?: string | ReactNode;
-	closeButtonLabel?: string;
-	actionButtonLabel?: string;
-	open?: boolean,
-	onClickClose?: () => void;
-	onClickAction?: () => void;
-	Icon?: any;
-	highlightActionButton?: boolean;
-	disableClose?: boolean;
-	className?: string;
-}
+export const AuthModal = styled(InfoModal)`
+	.MuiDialogTitle-root {
+		padding-top: 3px;
+		padding-bottom: 16px;
+	}
+`;
