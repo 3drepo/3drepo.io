@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,12 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const DbConstants = {};
+const createIndexOnProjectName = require('./createIndexOnProjectsName');
 
-DbConstants.ADMIN_DB = 'admin';
-DbConstants.INTERNAL_DB = 'internal';
-DbConstants.errCodes = {
-	DUPLICATE_KEY: 11000,
-};
+const scripts = [
+	{ script: createIndexOnProjectName, desc: 'Ensure that each teamspace has an index on project name' },
+];
 
-module.exports = DbConstants;
+module.exports = scripts;
