@@ -19,10 +19,11 @@ import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
+import { OnError } from '../store.types';
 
 export const { Types: AuthTypes, Creators: AuthActions } = createActions({
 	authenticate: [],
-	authenticateTeamspace: ['redirectUri', 'teamspace'],
+	authenticateTeamspace: ['redirectUri', 'teamspace', 'onError'],
 	setAuthenticatedTeamspace: ['teamspace'],
 	setAuthenticatedTeamspaceSuccess: ['teamspace'],
 	setSessionAuthenticatedTeamspaceSuccess: ['teamspace'],
@@ -87,7 +88,7 @@ export interface IAuthState {
 }
 
 export type AuthenticateAction = Action<'AUTHENTICATE'>;
-export type AuthenticateTeamspaceAction = Action<'AUTHENTICATE_TEAMSPACE'> & { redirectUri: string, teamspace: string };
+export type AuthenticateTeamspaceAction = Action<'AUTHENTICATE_TEAMSPACE'> & OnError & { redirectUri: string, teamspace: string };
 export type SetAuthenticatedTeamspaceAction = Action<'SET_AUTHENTICATED_TEAMSPACE'> & { teamspace: string };
 export type SetAuthenticatedTeamspaceSuccessAction = Action<'SET_AUTHENTICATED_TEAMSPACE_SUCCESS'> & { teamspace: string };
 export type SetSessionAuthenticatedTeamspaceSuccessAction = Action<'SET_DIFFERENT_SESSION_AUTHENTICATED_TEAMSPACE_SUCCESS'> & { teamspace: string };
@@ -98,7 +99,7 @@ export type SetReturnUrlAction = Action<'SET_RETURN_URL'> & { url: string };
 
 export interface IAuthActionCreators {
 	authenticate: () => AuthenticateAction;
-	authenticateTeamspace: (redirectUri: string, teamspace: string) => AuthenticateTeamspaceAction;
+	authenticateTeamspace: (redirectUri: string, teamspace: string, onError?: () => void) => AuthenticateTeamspaceAction;
 	setAuthenticatedTeamspace: (teamspace: string) => SetAuthenticatedTeamspaceAction;
 	setAuthenticatedTeamspaceSuccess: (teamspace: string) => SetAuthenticatedTeamspaceSuccessAction;
 	setSessionAuthenticatedTeamspaceSuccess: (teamspace: string) => SetSessionAuthenticatedTeamspaceSuccessAction;

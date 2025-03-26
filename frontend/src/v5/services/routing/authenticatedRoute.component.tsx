@@ -64,7 +64,7 @@ const WrapAuthenticationRedirect = ({ children }) => {
 	useEffect(() => {
 		if (isAuthenticated && teamspace && teamspace !== authenticatedTeamspace) {
 			const redirectUri = addParams(location.pathname, location.search);
-			AuthActionsDispatchers.authenticateTeamspace(redirectUri, teamspace);
+			AuthActionsDispatchers.authenticateTeamspace(redirectUri, teamspace, DialogsActionsDispatchers.closeAll);
 			DialogsActionsDispatchers.open(AuthenticatingModal);
 		}
 	}, [isAuthenticated, teamspace, authenticatedTeamspace]);

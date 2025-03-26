@@ -30,13 +30,12 @@ import { ssoAuth } from '@/v5/services/api/sso';
 const CSRF_TOKEN = 'csrf_token';
 const TOKEN_HEADER = 'X-CSRF-TOKEN';
 
-function* authenticateTeamspace({ redirectUri, teamspace }: AuthenticateTeamspaceAction) {
+function* authenticateTeamspace({ redirectUri, teamspace, onError }: AuthenticateTeamspaceAction) {
 	try {
 		const { data } = yield ssoAuth(redirectUri, teamspace);
-		// window.history.back();
 		window.location.href = data.link;
 	} catch (error) {
-		yield put(DialogsActions.closeAll());
+		onError?.(error);
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'auth.authenticate.error', defaultMessage: 'trying to authenticate teamspace' }),
 			error,
