@@ -18,16 +18,29 @@
 import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
-import { AuthActions, AuthTypes, SetAuthenticatedTeamspaceAction } from './auth.redux';
+import { AuthActions, AuthenticateTeamspaceAction, AuthTypes, SetAuthenticatedTeamspaceAction } from './auth.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { CurrentUserActions } from '../currentUser/currentUser.redux';
 import { cookies } from '@/v5/helpers/cookie.helper';
 import axios from 'axios';
 import { setPermissionModalSuppressed } from '@components/shared/updatePermissionModal/updatePermissionModal.helpers';
 import { authBroadcastChannel } from './authBrodcastChannel';
+import { ssoAuth } from '@/v5/services/api/sso';
 
 const CSRF_TOKEN = 'csrf_token';
 const TOKEN_HEADER = 'X-CSRF-TOKEN';
+
+function* authenticateTeamspace({ redirectUri, teamspace }: AuthenticateTeamspaceAction) {
+	try {
+		const { data } = yield ssoAuth(redirectUri, teamspace);
+		window.location.href = data.link;
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'auth.authenticate.error', defaultMessage: 'trying to authenticate teamspace' }),
+			error,
+		}));
+	}
+}
 
 function* setAuthenticatedTeamspace({ teamspace }: SetAuthenticatedTeamspaceAction) {
 	yield put(AuthActions.setAuthenticatedTeamspaceSuccess(teamspace));
@@ -92,6 +105,7 @@ function* kickedOut() {
 
 export default function* AuthSaga() {
 	yield takeLatest(AuthTypes.SET_AUTHENTICATED_TEAMSPACE, setAuthenticatedTeamspace);
+	yield takeLatest(AuthTypes.AUTHENTICATE_TEAMSPACE, authenticateTeamspace);
 	yield takeLatest(AuthTypes.AUTHENTICATE, authenticate);
 	yield takeLatest(AuthTypes.LOGOUT, logout);
 	yield takeLatest(AuthTypes.KICKED_OUT, kickedOut);
