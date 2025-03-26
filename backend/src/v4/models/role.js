@@ -22,8 +22,8 @@ const {addTeamspaceMember, removeTeamspaceMember} = require(`${v5Path}/processor
 
 const Role = {};
 
-Role.grantTeamSpaceRoleToUser = async function (username, account) {
-	return addTeamspaceMember(account, username);
+Role.grantTeamSpaceRoleToUser = async function (username, account, invitedBy) {
+	return addTeamspaceMember(account, username, invitedBy);
 };
 
 Role.revokeTeamSpaceRoleFromUser = async function(username, account) {

@@ -23,6 +23,7 @@ const Accounts = {};
 
 const teamspaceByAccount = {};
 const usersInAccount = {};
+const emailToUser = {};
 
 Accounts.getTeamspaceByAccount = (accountId) => teamspaceByAccount[accountId];
 
@@ -35,9 +36,12 @@ Accounts.createAccount = (name) => {
 
 Accounts.getAllUsersInAccount = (accountId) => Promise.resolve(usersInAccount[accountId] ?? []);
 
-Accounts.addUserToAccount = (accountId, userId) => {
+Accounts.addUserToAccount = (accountId, email) => {
+	const id = emailToUser[email] ?? generateUUIDString();
+	emailToUser[email] = id;
 	usersInAccount[accountId] = usersInAccount[accountId] ?? [];
-	usersInAccount[accountId].push(userId);
+	usersInAccount[accountId].push(id);
+	return id;
 };
 
 Accounts.removeUserFromAccount = (accountId, userId) => {

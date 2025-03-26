@@ -102,18 +102,34 @@ Accounts.getAllUsersInAccount = async (accountId) => {
 	}
 };
 
-Accounts.addUserToAccount = async (accountId, userId, sendInvite = true) => {
+Accounts.addUserToAccount = async (accountId, email, name, emailData) => {
 	try {
 		const config = await getConfig();
-		const payload = {
-			tenantId: accountId,
-			validateTenantExist: true,
-			skipInviteEmail: !sendInvite,
+		const headers = {
+			...await getBearerHeader(),
+			[HEADER_TENANT_ID]: accountId,
 		};
-		await post(`${config.vendorDomain}/identity/resources/users/v1/${userId}/tenant`, payload, { headers: await getBearerHeader() });
+		const skipInviteEmail = !emailData;
+
+		let emailMetadata = {};
+		if (emailData) {
+			const { sender, teamspace } = emailData;
+			emailMetadata = { sender, teamspace };
+		}
+
+		const payload = {
+			email,
+			skipInviteEmail,
+			name,
+			roleIds: [config.userRole],
+			emailMetadata,
+		};
+
+		const res = await post(`${config.vendorDomain}/identity/resources/users/v2`, payload, { headers });
+		return res.data.id;
 	} catch (err) {
 		logger.logError(`Failed to add user to account: ${JSON.stringify(err?.response?.data)} `);
-		throw new Error(`Failed to add ${userId} to ${accountId} on Accounts: ${err.message}`);
+		throw new Error(`Failed to add user to ${accountId} on Accounts: ${err.message}`);
 	}
 };
 

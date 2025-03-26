@@ -547,7 +547,7 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions, exec
 		throw (responseCodes.USER_ALREADY_ASSIGNED);
 	}
 
-	await addTeamspaceMember(teamspace, userToAdd);
+	await addTeamspaceMember(teamspace, userToAdd, executor);
 	publish(events.USER_ADDED, { teamspace, executor, user: userEntry.user});
 
 	const promises = [];

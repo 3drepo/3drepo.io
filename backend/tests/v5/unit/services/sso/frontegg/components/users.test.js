@@ -28,7 +28,6 @@ const WebRequests = require(`${src}/utils/webRequests`);
 const Users = require(`${src}/services/sso/frontegg/components/users`);
 
 const bearerHeader = { [generateRandomString()]: generateRandomString() };
-const postOptions = { headers: bearerHeader };
 
 Connections.getBearerHeader.mockResolvedValue(bearerHeader);
 Connections.getConfig.mockResolvedValue({});
@@ -95,73 +94,7 @@ const testDoesUserExist = () => {
 	});
 };
 
-const testCreateUser = () => {
-	describe('Create user', () => {
-		[undefined, true].forEach((bypassVerification) => {
-			test(`Should create the user and return the user ID ${bypassVerification ? '(Via migration endpoint)' : ''}`, async () => {
-				const accountId = generateRandomString();
-				const email = generateRandomString();
-				const name = generateRandomString();
-				const userData = generateRandomString();
-				const privateUserData = generateRandomString();
-
-				const userId = generateRandomString();
-				const expectedPayload = {
-					email,
-					name,
-					tenantId: accountId,
-					metadata: userData,
-					vendorMetadata: privateUserData,
-
-				};
-
-				WebRequests.post.mockResolvedValueOnce({ data: { id: userId } });
-
-				await expect(Users.createUser(accountId, email, name, userData, privateUserData, bypassVerification))
-					.resolves.toEqual(userId);
-
-				expect(WebRequests.post).toHaveBeenCalledTimes(1);
-				expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String),
-					expect.objectContaining(expectedPayload), postOptions);
-
-				// not using migration endpoint by default
-				expect(WebRequests.post.mock.calls[0][0].includes('migrations')).toBe(!!bypassVerification);
-			});
-		});
-
-		test('Should throw error if it failed', async () => {
-			const accountId = generateRandomString();
-			const email = generateRandomString();
-			const name = generateRandomString();
-			const userData = generateRandomString();
-			const privateUserData = generateRandomString();
-
-			const expectedPayload = {
-				email,
-				name,
-				tenantId: accountId,
-				metadata: userData,
-				vendorMetadata: privateUserData,
-
-			};
-
-			WebRequests.post.mockRejectedValueOnce({ message: generateRandomString() });
-
-			await expect(Users.createUser(accountId, email, name, userData, privateUserData, false))
-				.rejects.not.toBeUndefined();
-
-			expect(WebRequests.post).toHaveBeenCalledTimes(1);
-			expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String),
-				expect.objectContaining(expectedPayload), postOptions);
-
-			// not using migration endpoint by default
-			expect(WebRequests.post.mock.calls[0][0].includes('migrations')).toBeFalsy();
-		});
-	});
-};
-
 describe(determineTestGroup(__filename), () => {
 	testGetUserById();
 	testDoesUserExist();
-	testCreateUser();
 });

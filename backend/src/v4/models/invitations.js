@@ -31,7 +31,6 @@ const { events } = require(`${v5Path}/services/eventsManager/eventsManager.const
 const { getTeamspaceRefId } = require(`${v5Path}/models/teamspaceSettings`);
 const {
 	doesUserExist,
-	createUser,
 	addUserToAccount,
 	removeUserFromAccount
 } = require(`${v5Path}/services/sso/frontegg`);
@@ -82,19 +81,12 @@ const cleanPermissions = (permissions) => {
 	return { projects: projectsPermissions};
 };
 
-const getUserAndTeamspaceRefs = (email, teamspace) => Promise.all([
-	doesUserExist(email),
-	getTeamspaceRefId(teamspace)
-]);
-
 const sendInvitationEmail = async (email, username, teamspace) => {
-	// Frontegg may be aware of the user already (due to a different application)
-	const [userId, refId] = await getUserAndTeamspaceRefs(email, teamspace);
-	if(!userId) {
-		await createUser(refId, email);
-	} else {
-		await addUserToAccount(refId, userId, true);
-	}
+	const refId = await getTeamspaceRefId(teamspace);
+	const { customData: { firstName, lastName }} = await User.findByUserName(username, { "customData.firstName": 1, "customData.lastName": 1});
+	const sender = [firstName, lastName].join(" ");
+
+	await addUserToAccount(refId, email, undefined, {teamspace, sender  });
 };
 
 invitations.create = async (email, teamspace, job, username, permissions = {}) => {
@@ -177,8 +169,12 @@ invitations.removeTeamspaceFromInvitation = async (email, teamspace, executor) =
 
 	const entryToRemove = result.teamSpaces.find(entry => entry.teamspace === teamspace);
 
-	const [userId, refId] = await getUserAndTeamspaceRefs(email, teamspace);
-	await removeUserFromAccount(refId, userId);
+	const userId = await doesUserExist(email);
+	const refId = await getTeamspaceRefId(teamspace);
+
+	if(userId) {
+		await removeUserFromAccount(refId, userId);
+	}
 
 	const data =  { _id: email, teamSpaces: result.teamSpaces.filter(teamspaceEntry => teamspaceEntry.teamspace !== teamspace) };
 

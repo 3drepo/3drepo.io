@@ -15,9 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { get, post } = require('../../../../utils/webRequests');
 const { getBearerHeader, getConfig } = require('./connections');
-const { deleteIfUndefined } = require('../../../../utils/helper/objects');
+const { get } = require('../../../../utils/webRequests');
 
 const Users = {};
 
@@ -39,31 +38,6 @@ Users.doesUserExist = async (email) => {
 		return data.id;
 	} catch (err) {
 		return false;
-	}
-};
-
-Users.createUser = async (accountId, email, name, userData, privateUserData, bypassVerification = false) => {
-	try {
-		const config = await getConfig();
-		const payload = deleteIfUndefined({
-			email,
-			name,
-			tenantId: accountId,
-			metadata: userData,
-			vendorMetadata: privateUserData,
-			roleIds: [config.userRole],
-
-		});
-
-		// using the migration endpoint will automatically activate the user
-		const url = bypassVerification
-			? `${config.vendorDomain}/identity/resources/migrations/v1/local`
-			: `${config.vendorDomain}/identity/resources/vendor-only/users/v1`;
-		const { data } = await post(url, payload, { headers: await getBearerHeader() });
-
-		return data.id;
-	} catch (err) {
-		throw new Error(`Failed to create user(${email}) on Users: ${JSON.stringify(err?.response?.data) || err.message}`);
 	}
 };
 
