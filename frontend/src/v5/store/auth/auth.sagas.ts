@@ -33,7 +33,7 @@ const TOKEN_HEADER = 'X-CSRF-TOKEN';
 function* authenticateTeamspace({ redirectUri, teamspace, onError }: AuthenticateTeamspaceAction) {
 	try {
 		const { data } = yield ssoAuth(redirectUri, teamspace);
-		window.location.href = data.link;
+		window.location.replace(data.link);
 	} catch (error) {
 		onError?.(error);
 		yield put(DialogsActions.open('alert', {

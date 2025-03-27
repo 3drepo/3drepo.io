@@ -24,7 +24,7 @@ import { isNotLoggedIn } from '@/v5/validation/errors.helpers';
 import { addParams, pathName } from '@/v5/helpers/url.helper';
 import { Route, RouteProps } from './route.component';
 import { useSSOParams } from '../sso.hooks';
-import { postActions, ssoAuth } from '../api/sso';
+import { postActions } from '../api/sso';
 import { enableKickedOutEvent } from '../realtime/auth.events';
 import { AUTH_PATH, DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { AuthenticatingModal } from '@components/shared/modalsDispatcher/templates/infoModal/authenticatingModal/authenticatingModal.component';
