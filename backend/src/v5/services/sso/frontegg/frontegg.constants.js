@@ -19,6 +19,7 @@ const FronteggConstants = {};
 
 // https://developers.frontegg.com/guides/troubleshoot/errors/error-codes
 FronteggConstants.errCodes = {
+	USER_ALREADY_EXIST: 'ER-01086',
 	USER_NOT_FOUND: 'ER-01089',
 };
 

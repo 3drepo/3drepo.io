@@ -128,6 +128,13 @@ Accounts.addUserToAccount = async (accountId, email, name, emailData) => {
 		const res = await post(`${config.vendorDomain}/identity/resources/users/v2`, payload, { headers });
 		return res.data.id;
 	} catch (err) {
+		const errCode = err?.response?.data?.errorCode;
+
+		if (errCode === errCodes.USER_ALREADY_EXIST) {
+			// The user is already in the account it's not really an error
+			return undefined;
+		}
+
 		logger.logError(`Failed to add user to account: ${JSON.stringify(err?.response?.data)} `);
 		throw new Error(`Failed to add user to ${accountId} on Accounts: ${err.message}`);
 	}

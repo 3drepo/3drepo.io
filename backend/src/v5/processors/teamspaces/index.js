@@ -156,7 +156,8 @@ Teamspaces.addTeamspaceMember = async (teamspace, userToAdd, invitedBy) => {
 
 	const newUserId = await addUserToAccount(accountId, inviteeDetails.email, inviteeName, emailData);
 
-	if (newUserId !== inviteeDetails.userId) {
+	// if the user already exists, newUserId is undefined, so update required
+	if (newUserId && newUserId !== inviteeDetails.userId) {
 		await updateUserId(userToAdd, newUserId);
 	}
 	await grantTeamspaceRoleToUser(teamspace, userToAdd);
