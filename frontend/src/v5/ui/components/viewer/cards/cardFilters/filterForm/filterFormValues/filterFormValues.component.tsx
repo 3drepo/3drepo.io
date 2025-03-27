@@ -66,6 +66,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 	useEffect(() => {
 		if (!isEmpty(dirtyFields)) {
 			remove();
+			return () => remove();
 		}
 	}, [isRangeOp]);
 
