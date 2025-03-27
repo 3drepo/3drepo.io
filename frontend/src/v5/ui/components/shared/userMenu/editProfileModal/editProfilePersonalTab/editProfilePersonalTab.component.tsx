@@ -67,6 +67,7 @@ export const EditProfilePersonalTab = ({
 		control,
 		formState: { errors: formErrors, isDirty, touchedFields, isSubmitting },
 	} = useFormContext();
+	const userIsMissingRequiredData = userHasMissingRequiredData(user);
 
 	const getSubmittableValues = (): IUpdatePersonalInputs => {
 		const values = getValues();
@@ -123,7 +124,7 @@ export const EditProfilePersonalTab = ({
 	}, [JSON.stringify(isDirty), touchedFields]);
 
 	useEffect(() => {
-		if (userHasMissingRequiredData(user)) {
+		if (userIsMissingRequiredData) {
 			trigger();
 		}
 	}, []);
@@ -212,7 +213,7 @@ export const EditProfilePersonalTab = ({
 				</FormSelect>
 			</TabContent>
 			<FormModalActions>
-				<ModalCancelButton disabled={!onClickClose} onClick={onClickClose} />
+				<ModalCancelButton disabled={userIsMissingRequiredData} onClick={onClickClose} />
 				<ModalSubmitButton disabled={!canSubmit} onClick={handleSubmit(onSubmit)} isPending={isSubmitting}>
 					<FormattedMessage
 						defaultMessage="Update profile"
