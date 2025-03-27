@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,22 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { PostSubmitSuccessfulMessage } from '@controls/successMessage/successMessage.styles';
 import styled from 'styled-components';
-import { Button } from '@controls/button';
 
-export const MicrosoftButton = styled(Button).attrs({
-	variant: 'contained',
-	color: 'primary',
-})`
+export const WelcomeMessage = styled(PostSubmitSuccessfulMessage)`
 	display: flex;
-	width: fit-content;
-	font-weight: 500;
-	font-size: 12px;
-	padding: 20px;
-	margin: 0;
-	background-color: #2F2F2F; /* The colour is hardcoded as these are microsoft specs and not part of the theme */
-
-	&:hover, &:active {
-		background-color: #2F2F2FF0; 
-	}
+	align-items: center;
 `;

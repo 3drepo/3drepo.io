@@ -106,11 +106,6 @@ User.deleteFavourites = async (username, teamspace, favouritesToRemove) => {
 	}
 };
 
-User.updatePassword = async (username, newPassword) => {
-	await db.setPassword(username, newPassword);
-	await updateUser(username, { $unset: { 'customData.resetPasswordToken': 1 } });
-};
-
 User.updateProfile = async (username, updatedProfile) => {
 	const updateData = {};
 	const billingInfoFields = ['countryCode', 'company'];

@@ -160,8 +160,33 @@ const testCreateUser = () => {
 	});
 };
 
+const testTriggerPasswordReset = () => {
+	describe('Trigger password reset', () => {
+		test('Should trigger password reset with the email provided', async () => {
+			const email = generateRandomString();
+
+			await Users.triggerPasswordReset(email);
+
+			expect(WebRequests.post).toHaveBeenCalledTimes(1);
+			expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String), { email }, postOptions);
+		});
+
+		test('Should throw error it failed to trigger password reset', async () => {
+			const email = generateRandomString();
+
+			WebRequests.post.mockRejectedValueOnce({ message: generateRandomString() });
+
+			await expect(Users.triggerPasswordReset(email)).rejects.not.toBeUndefined();
+
+			expect(WebRequests.post).toHaveBeenCalledTimes(1);
+			expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String), { email }, postOptions);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetUserById();
 	testDoesUserExist();
 	testCreateUser();
+	testTriggerPasswordReset();
 });

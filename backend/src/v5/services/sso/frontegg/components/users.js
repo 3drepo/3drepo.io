@@ -67,4 +67,10 @@ Users.createUser = async (accountId, email, name, userData, privateUserData, byp
 	}
 };
 
+Users.triggerPasswordReset = async (email) => {
+	const config = await getConfig();
+	const url = `${config.vendorDomain}/identity/resources/users/v1/passwords/reset`;
+	await post(url, { email }, { headers: await getBearerHeader() });
+};
+
 module.exports = Users;
