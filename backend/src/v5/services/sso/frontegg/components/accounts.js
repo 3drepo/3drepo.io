@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { HEADER_TENANT_ID, META_LABEL_TEAMSPACE } = require('./accounts.constants');
+const { HEADER_TENANT_ID, META_LABEL_TEAMSPACE } = require('../frontegg.constants');
 const { get, delete: httpDelete, post } = require('../../../../utils/webRequests');
 const { getBearerHeader, getConfig } = require('./connections');
 const { errCodes } = require('../frontegg.constants');

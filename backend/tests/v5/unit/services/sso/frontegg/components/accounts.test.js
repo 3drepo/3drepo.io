@@ -27,8 +27,7 @@ jest.mock('../../../../../../../src/v5/utils/webRequests');
 const WebRequests = require(`${src}/utils/webRequests`);
 
 const Accounts = require(`${src}/services/sso/frontegg/components/accounts`);
-const { errCodes } = require(`${src}/services/sso/frontegg/frontegg.constants`);
-const { HEADER_TENANT_ID, META_LABEL_TEAMSPACE } = require(`${src}/services/sso/frontegg/components/accounts.constants`);
+const { errCodes, HEADER_TENANT_ID, META_LABEL_TEAMSPACE } = require(`${src}/services/sso/frontegg/frontegg.constants`);
 
 const bearerHeader = { [generateRandomString()]: generateRandomString() };
 const postOptions = { headers: bearerHeader };

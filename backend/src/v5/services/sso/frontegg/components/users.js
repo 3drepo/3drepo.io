@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { delete: deleteReq, get } = require('../../../../utils/webRequests');
 const { getBearerHeader, getConfig } = require('./connections');
-const { get } = require('../../../../utils/webRequests');
+const { HEADER_USER_ID } = require('../frontegg.constants');
 
 const Users = {};
 
@@ -38,6 +39,21 @@ Users.doesUserExist = async (email) => {
 		return data.id;
 	} catch (err) {
 		return false;
+	}
+};
+
+Users.destroyAllSessions = async (userId) => {
+	try {
+		const config = await getConfig();
+		const header = {
+			...await getBearerHeader(),
+			[HEADER_USER_ID]: userId,
+
+		};
+		const { data } = await deleteReq(`${config.vendorDomain}/identity/resources/users/sessions/v1/me/all`, header);
+		return data;
+	} catch (err) {
+		throw new Error(`Failed to destroy sessions for user(${userId}): ${err.message}`);
 	}
 };
 

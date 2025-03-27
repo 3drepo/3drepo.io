@@ -22,4 +22,8 @@ FronteggConstants.errCodes = {
 	USER_NOT_FOUND: 'ER-01089',
 };
 
+FronteggConstants.HEADER_USER_ID = 'frontegg-user-id';
+FronteggConstants.META_LABEL_TEAMSPACE = '3DR_Teamspace';
+FronteggConstants.HEADER_TENANT_ID = 'frontegg-tenant-id';
+
 module.exports = FronteggConstants;
