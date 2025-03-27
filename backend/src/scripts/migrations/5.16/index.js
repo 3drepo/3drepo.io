@@ -16,9 +16,11 @@
  */
 
 const migrateUsers = require('./migrateUsersToFrontegg');
+const createIndexOnProjectName = require('./createIndexOnProjectsName');
 
 const scripts = [
 	{ script: migrateUsers, desc: 'Migrate users and teamspaces to Frontegg' },
+	{ script: createIndexOnProjectName, desc: 'Ensure that each teamspace has an index on project name' },
 ];
 
 module.exports = scripts;
