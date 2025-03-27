@@ -25,6 +25,7 @@ import { IntercomProvider } from 'react-use-intercom';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { MainRoute } from './dashboard';
 import { V4Adapter } from '../v4Adapter/v4Adapter';
+import { NewUserHandler } from '@components/shared/sso/newUserHandler/newUserHandler.component';
 
 export const Root = () => {
 	const { intercomLicense } = clientConfigService;
@@ -35,6 +36,7 @@ export const Root = () => {
 				<V4Adapter>
 					<IntercomProvider appId={intercomLicense}>
 						<MainRoute />
+						<NewUserHandler />
 						<SSOResponseHandler />
 						<ModalsDispatcher />
 					</IntercomProvider>

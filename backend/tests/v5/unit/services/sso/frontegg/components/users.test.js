@@ -31,6 +31,8 @@ const Users = require(`${src}/services/sso/frontegg/components/users`);
 
 const bearerHeader = { [generateRandomString()]: generateRandomString() };
 
+const postOptions = { headers: bearerHeader };
+
 Connections.getBearerHeader.mockResolvedValue(bearerHeader);
 Connections.getConfig.mockResolvedValue({});
 
@@ -128,8 +130,33 @@ const testDestroyAllSessions = () => {
 	});
 };
 
+const testTriggerPasswordReset = () => {
+	describe('Trigger password reset', () => {
+		test('Should trigger password reset with the email provided', async () => {
+			const email = generateRandomString();
+
+			await Users.triggerPasswordReset(email);
+
+			expect(WebRequests.post).toHaveBeenCalledTimes(1);
+			expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String), { email }, postOptions);
+		});
+
+		test('Should throw error it failed to trigger password reset', async () => {
+			const email = generateRandomString();
+
+			WebRequests.post.mockRejectedValueOnce({ message: generateRandomString() });
+
+			await expect(Users.triggerPasswordReset(email)).rejects.not.toBeUndefined();
+
+			expect(WebRequests.post).toHaveBeenCalledTimes(1);
+			expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String), { email }, postOptions);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetUserById();
 	testDoesUserExist();
 	testDestroyAllSessions();
+	testTriggerPasswordReset();
 });

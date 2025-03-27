@@ -17,53 +17,25 @@
 
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
 const Yup = require('yup');
-const { getUserFromSession } = require('../../../utils/sessions');
+const { deleteIfUndefined } = require('../../../utils/helper/objects');
 const { respond } = require('../../../utils/responder');
 const { types } = require('../../../utils/helper/yup');
 
 const Users = {};
 
-const generateUpdateSchema = () => {
-	const schema = Yup.object().shape({
-		oldPassword: Yup.string().optional().when('newPassword', {
-			is: (newPass) => newPass?.length > 0,
-			then: Yup.string().required(),
-		}),
-		newPassword: types.strings.password.optional().when('oldPassword', {
-			is: (oldPass) => oldPass?.length > 0,
-			then: types.strings.password.required(),
-		}).test({
-			name: 'notTheSameAsOldPassword',
-			exclusive: false,
-			params: {},
-			message: 'New password must be different than the old one',
-			test(value) {
-				const { oldPassword } = this.parent;
-				return !oldPassword || (value !== oldPassword);
-			},
-		}),
-		firstName: types.strings.name,
-		lastName: types.strings.name,
+const schema = Yup.object().shape({
+	firstName: types.strings.name,
+	lastName: types.strings.name,
 
-		company: types.strings.title,
-		countryCode: types.strings.countryCode.optional(),
-	}, [['oldPassword', 'newPassword']]).strict(true).noUnknown()
-		.test(
-			'at-least-one-property',
-			'You must provide at least one setting value',
-			(value) => Object.keys(value).length,
-		)
-		.required();
-
-	return schema;
-};
+	company: types.strings.title,
+	countryCode: types.strings.countryCode.optional(),
+}).required();
 
 Users.validateUpdateData = async (req, res, next) => {
 	try {
-		const username = getUserFromSession(req.session);
-		const schema = generateUpdateSchema(username);
-		await schema.validate(req.body);
+		req.body = deleteIfUndefined(await schema.validate(req.body, { stripUnknown: true }));
 
+		if (!Object.keys(req.body).length) throw new Error('Nothing to update');
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));

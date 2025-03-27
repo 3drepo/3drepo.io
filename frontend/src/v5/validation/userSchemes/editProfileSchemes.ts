@@ -16,8 +16,7 @@
  */
 
 import * as Yup from 'yup';
-import { formatMessage } from '@/v5/services/intl';
-import { firstName, lastName, email, company, countryCode, password } from './validators';
+import { firstName, lastName, email, company, countryCode } from './validators';
 
 export const EditProfileUpdatePersonalSchema = Yup.object().shape({
 	firstName,
@@ -25,34 +24,4 @@ export const EditProfileUpdatePersonalSchema = Yup.object().shape({
 	email,
 	company,
 	countryCode,
-});
-
-export const EditProfileUpdatePasswordSchema = (incorrectPassword) => Yup.object().shape({
-	oldPassword: Yup.string()
-		.min(1,
-			formatMessage({
-				id: 'editProfile.password.error.empty',
-				defaultMessage: 'Current password is a required field',
-			}))
-		.test(
-			'incorrectPassword',
-			formatMessage({
-				id: 'editProfile.password.error.incorrectPassword',
-				defaultMessage: 'Your existing password was incorrect. Please try again',
-			}),
-			() => !incorrectPassword,
-		),
-	newPassword: password()
-		.test(
-			'newPasswordIsDifferent',
-			formatMessage({
-				id: 'editProfile.password.error.samePassword',
-				defaultMessage: 'New password must be different from the old one',
-			}),
-			(value, testContext) => value !== testContext.parent.oldPassword,
-		),
-});
-
-export const EditProfileUpdateSSOPasswordSchema = Yup.object().shape({
-	newPassword: password(),
 });

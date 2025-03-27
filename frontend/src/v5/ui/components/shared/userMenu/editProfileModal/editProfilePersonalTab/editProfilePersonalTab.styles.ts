@@ -15,18 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const usersById = {};
-const usersByEmail = {};
-const Users = {};
-Users.getUserById = (userId) => Promise.resolve(usersById[userId]);
+import { PostSubmitSuccessfulMessage } from '@controls/successMessage/successMessage.styles';
+import styled from 'styled-components';
 
-Users.doesUserExist = (email) => {
-	const user = usersByEmail[email];
-
-	return Promise.resolve(user.id ?? false);
-};
-
-Users.destroyAllSessions = () => Promise.resolve();
-
-Users.triggerPasswordReset = process.env.NODE_ENV === 'testV5' ? jest.fn() : (() => {});
-module.exports = Users;
+export const WelcomeMessage = styled(PostSubmitSuccessfulMessage)`
+	display: flex;
+	align-items: center;
+`;
