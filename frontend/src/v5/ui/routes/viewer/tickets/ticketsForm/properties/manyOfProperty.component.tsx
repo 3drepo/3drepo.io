@@ -21,6 +21,8 @@ import { MultiSelect } from '@controls/inputs/multiSelect/multiSelect.component'
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { JobsAndUsersProperty } from './jobsAndUsersProperty.component';
+import ClearIcon from '@assets/icons/controls/clear_circle.svg';
+import { ClearIconContainer } from './selectProperty.styles';
 
 type ManyOfPropertyProps = FormInputProps & {
 	open?: boolean;
@@ -32,13 +34,24 @@ type ManyOfPropertyProps = FormInputProps & {
 };
 
 export const ManyOfProperty = ({ values, ...props }: ManyOfPropertyProps) => {
+	const canClear = !props.required && !props.disabled && !!props.value?.length;
+	const onClear = () => props.onChange([]);
+
 	if (values === 'jobsAndUsers') {
-		return (<JobsAndUsersProperty maxItems={17} multiple {...props} />);
+		return (<JobsAndUsersProperty maxItems={17} multiple canClear={canClear} {...props} />);
 	}
 
 	const items = (values === 'riskCategories') ? TicketsHooksSelectors.selectRiskCategories() : values;
 	return (
-		<MultiSelect {...props} value={props.value || []}>
+		<MultiSelect
+			{...props}
+			value={props.value || []}
+			endAdornment={canClear && (
+				<ClearIconContainer onClick={onClear}>
+					<ClearIcon />
+				</ClearIconContainer>
+			)}
+		>
 			{(items).map((value) => <MultiSelectMenuItem key={value} value={value}>{value}</MultiSelectMenuItem>)}
 		</MultiSelect>
 	);
