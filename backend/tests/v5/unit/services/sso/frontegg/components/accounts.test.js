@@ -253,6 +253,37 @@ const testAddUserToAccount = () => {
 			});
 		});
 
+		test('Should not fail if the user is already in the tenant', async () => {
+			const email = generateRandomString();
+			const name = generateRandomString();
+			const accountId = generateRandomString();
+
+			WebRequests.post.mockRejectedValueOnce({ message: generateRandomString(),
+				response: { data: { errorCode: errCodes.USER_ALREADY_EXIST } } });
+
+			await expect(Accounts.addUserToAccount(accountId, email, name)).resolves.toBeUndefined();
+
+			const expectedHeader = {
+				...bearerHeader,
+				[HEADER_TENANT_ID]: accountId,
+			};
+
+			const expectedPayload = {
+				email,
+				name,
+				skipInviteEmail: true,
+				roleIds: [role],
+				emailMetadata: {},
+			};
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			expect(WebRequests.post).toHaveBeenCalledTimes(1);
+			expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String), expectedPayload,
+				{ headers: expectedHeader });
+		});
+
 		test('Should throw error if post request failed', async () => {
 			const email = generateRandomString();
 			const accountId = generateRandomString();
