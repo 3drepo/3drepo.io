@@ -55,6 +55,7 @@ const processTeamspace = async (ts, userMapping) => {
 
 	await Promise.all(membersInTs.map(async ({ user, customData: { email, userId, firstName, lastName } }) => {
 		if (!emailToUserId[email]) {
+			logger.logInfo(`\tAdding ${user} to frontegg account...`);
 			// eslint-disable-next-line no-param-reassign
 			userMapping[user] = await addUserToAccount(refId, email, [firstName, lastName].join(' '));
 		} else {
@@ -63,6 +64,7 @@ const processTeamspace = async (ts, userMapping) => {
 		}
 
 		if (userId !== userMapping[user]) {
+			logger.logInfo(`\tUpdating ${user}'s user ID...`);
 			await updateUserId(user, userMapping[user]);
 		}
 	}));
