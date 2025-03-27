@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { delete: deleteReq, get } = require('../../../../utils/webRequests');
+const { delete: deleteReq, get, post } = require('../../../../utils/webRequests');
 const { getBearerHeader, getConfig } = require('./connections');
 const { HEADER_USER_ID } = require('../frontegg.constants');
 
