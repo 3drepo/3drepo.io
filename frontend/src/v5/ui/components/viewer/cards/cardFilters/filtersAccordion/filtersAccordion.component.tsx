@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CollapsibleContainer, CollapseButton, ClearButton, CollapseButtonContainer, BottomSection, ChevronIconContainer } from './filtersAccordion.styles';
+import { CollapsibleContainer, CollapseButton, ClearButton, CollapseButtonContainer, BottomSection, ChevronIconContainer, Contents } from './filtersAccordion.styles';
 import { useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
@@ -35,13 +35,15 @@ export const FiltersAccordion = ({ children, onClear }: FiltersAccordionProps) =
 	useEffect(() => {
 		if (!filterContainerRef.current) return;
 		const filtersContainerHeight = Number(getComputedStyle(filterContainerRef.current).height.replace('px', ''));
-		setCanCollapse(filtersContainerHeight > 60);
+		setCanCollapse(filtersContainerHeight > 53);
 	}, [children]);
 
 	return (
 		<>
-			<CollapsibleContainer $collapsed={collapsed} ref={filterContainerRef}>
-				{children}
+			<CollapsibleContainer $collapsed={collapsed}>
+				<Contents ref={filterContainerRef}>
+					{children}
+				</Contents>
 			</CollapsibleContainer>
 			<BottomSection>
 				{canCollapse && (
