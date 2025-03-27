@@ -49,12 +49,12 @@ type EditProfileModalProps = {
 	onClickClose: () => void;
 	initialTab?: 'password' | 'integrations';
 };
-export const EditProfileModal = ({ open, onClickClose: defaultOnClickClose, initialTab }: EditProfileModalProps) => {
+export const EditProfileModal = ({ open, onClickClose, initialTab }: EditProfileModalProps) => {
 	const [activeTab, setActiveTab] = useState(initialTab || PERSONAL_TAB);
 	const [unexpectedErrors, setUnexpectedErrors] = useState<EditProfileUnexpectedErrors>({});
 	const interceptedError = useErrorInterceptor();
 	const user = CurrentUserHooksSelectors.selectCurrentUser();
-	const onClickClose = userHasMissingRequiredData(user) ? null : defaultOnClickClose;
+	const userIsMissingRequiredData = userHasMissingRequiredData(user);
 
 	const defaultPersonalValues = defaults(
 		pick(omitBy(user, isNull), ['firstName', 'lastName', 'email', 'company', 'countryCode']),
@@ -83,14 +83,14 @@ export const EditProfileModal = ({ open, onClickClose: defaultOnClickClose, init
 				{ firstName: <TruncatableName>{user.firstName}</TruncatableName> },
 			)}
 			onClickClose={onClickClose}
-			disableClosing={isSubmitting}
+			disableClosing={isSubmitting || userIsMissingRequiredData}
 			contrastColorHeader
 		>
 			<TabContext value={activeTab}>
 				<TabList onChange={onTabChange} textColor="primary" indicatorColor="primary">
 					<Tab value={PERSONAL_TAB} label={TAB_LABELS.personal} disabled={isSubmitting} />
-					<Tab value={PASSWORD_TAB} label={TAB_LABELS.password} disabled={isSubmitting} />
-					<Tab value={INTEGRATIONS_TAB} label={TAB_LABELS.integrations} disabled={isSubmitting} />
+					<Tab value={PASSWORD_TAB} label={TAB_LABELS.password} disabled={isSubmitting || userIsMissingRequiredData} />
+					<Tab value={INTEGRATIONS_TAB} label={TAB_LABELS.integrations} disabled={isSubmitting || userIsMissingRequiredData} />
 				</TabList>
 				<FormProvider {...personalFormData}>
 					<TabPanel value={PERSONAL_TAB} $personalTab>
