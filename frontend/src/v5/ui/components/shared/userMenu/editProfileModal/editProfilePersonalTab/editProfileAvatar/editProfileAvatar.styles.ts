@@ -62,11 +62,6 @@ export const TruncatableName = styled(Truncate).attrs({
 	width: fit-content;
 `;
 
-export const Username = styled.div`
-	font-size: ${({ theme }) => theme.typography.h3};
-	color: ${({ theme }) => theme.palette.secondary.main};
-`;
-
 export const FullName = styled.div`
 	font-size: ${({ theme }) => theme.typography.body1.fontSize};
 	color: ${({ theme }) => theme.palette.base.main};
