@@ -25,6 +25,8 @@ const Connections = require(`${src}/services/sso/frontegg/components/connections
 jest.mock('../../../../../../../src/v5/utils/webRequests');
 const WebRequests = require(`${src}/utils/webRequests`);
 
+const { HEADER_USER_ID } = require(`${src}/services/sso/frontegg/frontegg.constants`);
+
 const Users = require(`${src}/services/sso/frontegg/components/users`);
 
 const bearerHeader = { [generateRandomString()]: generateRandomString() };
@@ -94,7 +96,40 @@ const testDoesUserExist = () => {
 	});
 };
 
+const testDestroyAllSessions = () => {
+	describe('Destroy all sessions', () => {
+		test('Should destroy sessions for the user ID specified', async () => {
+			const userId = generateRandomString();
+
+			await Users.destroyAllSessions(userId);
+
+			const expectedHeader = { ...bearerHeader,
+				[HEADER_USER_ID]: userId,
+			};
+
+			expect(WebRequests.delete).toHaveBeenCalledTimes(1);
+			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), expectedHeader);
+		});
+
+		test('Should reject if something went wrong', async () => {
+			const userId = generateRandomString();
+
+			WebRequests.delete.mockRejectedValueOnce({ message: generateRandomString() });
+
+			await expect(Users.destroyAllSessions(userId)).rejects.not.toBeUndefined();
+
+			const expectedHeader = { ...bearerHeader,
+				[HEADER_USER_ID]: userId,
+			};
+
+			expect(WebRequests.delete).toHaveBeenCalledTimes(1);
+			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), expectedHeader);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetUserById();
 	testDoesUserExist();
+	testDestroyAllSessions();
 });
