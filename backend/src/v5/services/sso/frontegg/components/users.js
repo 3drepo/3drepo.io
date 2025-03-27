@@ -50,8 +50,7 @@ Users.destroyAllSessions = async (userId) => {
 			[HEADER_USER_ID]: userId,
 
 		};
-		const { data } = await deleteReq(`${config.vendorDomain}/identity/resources/users/sessions/v1/me/all`, header);
-		return data;
+		await deleteReq(`${config.vendorDomain}/identity/resources/users/sessions/v1/me/all`, header);
 	} catch (err) {
 		throw new Error(`Failed to destroy sessions for user(${userId}): ${err.message}`);
 	}
