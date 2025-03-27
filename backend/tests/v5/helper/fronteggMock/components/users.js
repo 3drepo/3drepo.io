@@ -42,4 +42,6 @@ Users.createUser = (accountId, email, name) => {
 	usersById[data.email] = data;
 	return Promise.resolve(data.id);
 };
+
+Users.triggerPasswordReset = process.env.NODE_ENV === 'testV5' ? jest.fn() : (() => {});
 module.exports = Users;

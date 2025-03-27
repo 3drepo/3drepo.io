@@ -31,6 +31,8 @@ import { FormModalActions } from '@controls/formModal/modalButtons/modalButtons.
 import { ModalCancelButton, ModalSubmitButton } from '@controls/formModal/modalButtons/modalButtons.component';
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
 import { TabContent } from '../editProfileModal.styles';
+import { userHasMissingRequiredData } from '@/v5/store/users/users.helpers';
+import { WelcomeMessage } from './editProfilePersonalTab.styles';
 
 export type IUpdatePersonalInputs = Partial<{
 	firstName: string;
@@ -43,7 +45,7 @@ export type IUpdatePersonalInputs = Partial<{
 
 type EditProfilePersonalTabProps = {
 	unexpectedError: any,
-	onClickClose: () => void,
+	onClickClose?: () => void,
 };
 
 export const EditProfilePersonalTab = ({
@@ -54,12 +56,14 @@ export const EditProfilePersonalTab = ({
 	const [submitWasSuccessful, setSubmitWasSuccessful] = useState(false);
 	const {
 		getValues,
+		trigger,
 		handleSubmit,
 		reset,
 		setError: setFormError,
 		control,
 		formState: { errors: formErrors, isDirty, touchedFields, isSubmitting },
 	} = useFormContext();
+	const userIsMissingRequiredData = userHasMissingRequiredData(user);
 
 	const getSubmittableValues = (): IUpdatePersonalInputs => {
 		const { email, ...values } = getValues();
@@ -108,6 +112,12 @@ export const EditProfilePersonalTab = ({
 		}
 	}, [JSON.stringify(isDirty), touchedFields]);
 
+	useEffect(() => {
+		if (userIsMissingRequiredData) {
+			trigger();
+		}
+	}, []);
+
 	return (
 		<>
 			<TabContent>
@@ -120,10 +130,19 @@ export const EditProfilePersonalTab = ({
 						/>
 					</SuccessMessage>
 				)}
-				<UnhandledError
-					error={unexpectedError}
-					expectedErrorValidators={[isFileFormatUnsupported]}
-				/>
+				{userHasMissingRequiredData(user) ? (
+					<WelcomeMessage>
+						<FormattedMessage
+							id="editProfile.form.newUserMessage"
+							defaultMessage="Welcome to 3D Repo, please tell us more about yourself..."
+						/>
+					</WelcomeMessage>
+				) : (
+					<UnhandledError
+						error={unexpectedError}
+						expectedErrorValidators={[isFileFormatUnsupported]}
+					/>
+				)}
 				<FormTextField
 					name="firstName"
 					control={control}
@@ -180,7 +199,7 @@ export const EditProfilePersonalTab = ({
 				</FormSelect>
 			</TabContent>
 			<FormModalActions>
-				<ModalCancelButton onClick={onClickClose} />
+				<ModalCancelButton disabled={userIsMissingRequiredData} onClick={onClickClose} />
 				<ModalSubmitButton disabled={!canSubmit} onClick={handleSubmit(onSubmit)} isPending={isSubmitting}>
 					<FormattedMessage
 						defaultMessage="Update profile"

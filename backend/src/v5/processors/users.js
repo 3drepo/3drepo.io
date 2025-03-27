@@ -18,16 +18,18 @@
 const Users = {};
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../models/users.constants');
-const { addUser, deleteApiKey, generateApiKey,
-	getUserByUsername, removeUser, updatePassword, updateProfile } = require('../models/users');
+const { addUser, deleteApiKey, generateApiKey, getUserByUsername,
+	removeUser, updatePassword, updateProfile } = require('../models/users');
 const { fileExists, getFile, removeFile, storeFile } = require('../services/filesManager');
-const { isEmpty, removeFields } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
 const { generateUserHash } = require('../services/intercom');
+const { logger } = require('../utils/logger');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { removeAllUserNotifications } = require('../models/notifications');
 const { removeAllUserRecords } = require('../models/loginRecords');
+const { templates } = require('../utils/responseCodes');
+const { triggerPasswordReset } = require('../services/sso/frontegg');
 
 // This is used for the situation where a user has a record from
 // the IDP but we don't have a matching record in the db. We need
@@ -93,14 +95,20 @@ Users.getProfileByUsername = async (username) => {
 	};
 };
 
-Users.updateProfile = async (username, updatedProfile) => {
-	if (updatedProfile.oldPassword) {
-		await updatePassword(username, updatedProfile.newPassword);
-	}
+Users.updateProfile = async (username, fieldsToUpdate) => {
+	await updateProfile(username, fieldsToUpdate);
+};
 
-	const fieldsToUpdate = removeFields(updatedProfile, 'oldPassword', 'newPassword');
-	if (!isEmpty(fieldsToUpdate)) {
-		await updateProfile(username, fieldsToUpdate);
+Users.resetPassword = async (user) => {
+	try {
+		const { customData: { email } } = await getUserByUsername(user, {
+			'customData.email': 1,
+		});
+		await triggerPasswordReset(email);
+	} catch (err) {
+		logger.logError(`Failed to reset password: ${err.message}`);
+
+		throw templates.unknown;
 	}
 };
 

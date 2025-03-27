@@ -40,6 +40,9 @@ const Notifications = require(`${src}/models/notifications`);
 jest.mock('../../../../src/v5/services/intercom');
 const Intercom = require(`${src}/services/intercom`);
 
+jest.mock('../../../../src/v5/services/sso/frontegg');
+const FronteggService = require(`${src}/services/sso/frontegg`);
+
 const { generateRandomString, determineTestGroup } = require('../../helper/services');
 
 const user = {
@@ -148,23 +151,6 @@ const tesUpdateProfile = () => {
 			await Users.updateProfile(user.user, updatedProfile);
 			expect(UsersModel.updateProfile.mock.calls.length).toBe(1);
 			expect(UsersModel.updateProfile.mock.calls[0][1]).toEqual(updatedProfile);
-		});
-
-		test('should update user profile and password', async () => {
-			const updatedProfile = { firstName: 'Nick', oldPassword: 'oldPass', newPassword: 'newPass' };
-			await Users.updateProfile(user.user, updatedProfile);
-			expect(UsersModel.updateProfile.mock.calls.length).toBe(1);
-			expect(UsersModel.updateProfile.mock.calls[0][1]).toEqual({ firstName: 'Nick' });
-			expect(UsersModel.updatePassword.mock.calls.length).toBe(1);
-			expect(UsersModel.updatePassword.mock.calls[0][1]).toEqual('newPass');
-		});
-
-		test('should update password', async () => {
-			const updatedProfile = { oldPassword: 'oldPass', newPassword: 'newPass' };
-			await Users.updateProfile(user.user, updatedProfile);
-			expect(UsersModel.updateProfile.mock.calls.length).toBe(0);
-			expect(UsersModel.updatePassword.mock.calls.length).toBe(1);
-			expect(UsersModel.updatePassword.mock.calls[0][1]).toEqual('newPass');
 		});
 	});
 };
@@ -320,6 +306,36 @@ const testCreateNewUserRecord = () => {
 	});
 };
 
+const testResetPassword = () => {
+	describe('Reset password', () => {
+		test('Should get the email from the database then trigger a password reset', async () => {
+			const username = generateRandomString();
+			const email = generateRandomString();
+			UsersModel.getUserByUsername.mockResolvedValueOnce({ customData: { email } });
+
+			await Users.resetPassword(username);
+
+			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(username, { 'customData.email': 1 });
+
+			expect(FronteggService.triggerPasswordReset).toHaveBeenCalledTimes(1);
+			expect(FronteggService.triggerPasswordReset).toHaveBeenCalledWith(email);
+		});
+
+		test(`Should throw with ${templates.unknown.code} if it failed`, async () => {
+			const username = generateRandomString();
+			UsersModel.getUserByUsername.mockRejectedValueOnce({ message: generateRandomString() });
+
+			await expect(Users.resetPassword(username)).rejects.toEqual(templates.unknown);
+
+			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(username, { 'customData.email': 1 });
+
+			expect(FronteggService.triggerPasswordReset).not.toHaveBeenCalled();
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	tesGetProfileByUsername();
 	tesUpdateProfile();
@@ -327,4 +343,5 @@ describe(determineTestGroup(__filename), () => {
 	testUploadAvatar();
 	testRemoveUser();
 	testCreateNewUserRecord();
+	testResetPassword();
 });

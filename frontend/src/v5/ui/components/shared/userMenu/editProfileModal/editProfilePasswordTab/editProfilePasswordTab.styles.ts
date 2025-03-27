@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,9 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Typography } from '@controls/typography';
+
+import { SubmitButton } from '@controls/submitButton';
 import styled from 'styled-components';
 
-export const FronteggTitleText = styled(Typography).attrs({
-	variant: 'h3',
-})``;
+export const Button = styled(SubmitButton)`
+	margin-bottom: 0;
+	width: fit-content;
+`;
+
+export const Title = styled.div`
+	${({ theme }) => theme.typography.caption};
+	color: ${({ theme }) => theme.palette.base.main};
+	font-size: 11px;
+`;

@@ -247,22 +247,6 @@ const testDeleteFromFavourites = () => {
 	});
 };
 
-const testUpdatePassword = () => {
-	describe('Update user password', () => {
-		test('should update a user password', async () => {
-			const fn1 = jest.spyOn(db, 'updateOne').mockImplementationOnce(() => { });
-			const fn2 = jest.spyOn(db, 'setPassword').mockImplementationOnce(() => { });
-			const user = generateRandomString();
-			const newPassword = generateRandomString();
-			await expect(User.updatePassword(user, newPassword)).resolves.toBeUndefined();
-			expect(fn1).toHaveBeenCalledTimes(1);
-			expect(fn1).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { user }, { $unset: { 'customData.resetPasswordToken': 1 } });
-			expect(fn2).toHaveBeenCalledTimes(1);
-			expect(fn2).toHaveBeenCalledWith(user, newPassword);
-		});
-	});
-};
-
 const testUpdateProfile = () => {
 	describe('Update user profile', () => {
 		test('should update a user profile', async () => {
@@ -526,7 +510,6 @@ describe(determineTestGroup(__filename), () => {
 	testUpdateProfile();
 	testGenerateApiKey();
 	testDeleteApiKey();
-	testUpdatePassword();
 	testGetUserByUsernameOrEmail();
 	testGetUserByEmail();
 	testGetUsersByQuery();
