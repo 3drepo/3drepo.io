@@ -56,7 +56,7 @@ export const setSessionAuthenticatedTeamspaceSuccess = (state, { teamspace }: Se
 };
 
 export const setIsAuthenticationPending = (state, { isPending }: SetIsAuthenticationPendingAction) => {
-	state.isPending = isPending;
+	state.isAuthenticationPending = isPending;
 };
 
 export const setReturnUrl = (state, { url }: SetReturnUrlAction) => {
