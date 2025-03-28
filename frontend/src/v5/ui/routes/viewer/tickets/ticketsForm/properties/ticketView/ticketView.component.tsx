@@ -19,7 +19,7 @@ import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import ViewpointIcon from '@assets/icons/outlined/aim-outlined.svg';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
-import { useContext, useEffect, useRef } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { cloneDeep, isEmpty } from 'lodash';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
@@ -65,8 +65,8 @@ export const TicketView = ({
 	const { setDetailViewAndProps } = useContext(TicketContext);
 	const hasViewpoint = value?.camera;
 	const imgSrc = getImgSrc(value?.screenshot);
-	const imgInModal = useRef(imgSrc);
-	const syncProps = useSyncProps({ images: [imgInModal.current] });
+	const [imgInModal, setImgInModal] = useState(imgSrc);
+	const syncProps = useSyncProps({ images: [imgInModal] });
 
 	// Image
 	const handleImageClick = () => DialogsActionsDispatchers.open(ImagesModal, {
@@ -76,10 +76,10 @@ export const TicketView = ({
 	}, syncProps);
 
 	const handleNewImageUpload = (newImage, onSave) => {
-		imgInModal.current = newImage;
+		setImgInModal(newImage);
 		DialogsActionsDispatchers.open(ImagesModal, {
-			onClose: () => onSave(stripBase64Prefix(imgInModal.current)),
-			onAddMarkup: (newImg) => { imgInModal.current = newImg; },
+			onClose: (newImages) => onSave(stripBase64Prefix(newImages[0])),
+			onAddMarkup: setImgInModal,
 		}, syncProps);
 	};
 
@@ -130,7 +130,7 @@ export const TicketView = ({
 	};
 
 	useEffect(() => onBlur?.(), [value]);
-	useEffect(() => { imgInModal.current = imgSrc; }, [imgSrc]);
+	useEffect(() => { setImgInModal(imgSrc); }, [imgSrc]);
 
 	const onGroupsClick = () => {
 		setDetailViewAndProps(TicketDetailsView.Groups, props);
