@@ -30,7 +30,6 @@ import NotContainIcon from '@assets/icons/filters/not_contain.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { CardFilterOperator, CardFilterType } from './cardFilters.types';
 import { compact, floor } from 'lodash';
-import { isBaseProperty } from './filtersSelection/tickets/ticketFilters.helpers';
 
 export const FILTER_OPERATOR_ICON: Record<CardFilterOperator, any> = {
 	eq: EqualIcon,
@@ -49,7 +48,7 @@ export const FILTER_OPERATOR_ICON: Record<CardFilterOperator, any> = {
 	nss: NotContainIcon,
 } as const;
 
-const FILTER_OPERATOR_LABEL: Record<CardFilterOperator, string> = {
+export const FILTER_OPERATOR_LABEL: Record<CardFilterOperator, string> = {
 	ex: formatMessage({ id: 'cardFilter.operator.exists', defaultMessage: 'Exists' }),
 	nex: formatMessage({ id: 'cardFilter.operator.doesNotExist', defaultMessage: 'Does not exist' }),
 	eq: formatMessage({ id: 'cardFilter.operator.equals', defaultMessage: 'Equals' }),
@@ -90,24 +89,6 @@ export const amendDateUpperBounds = (bounds) => {
 
 export const isRangeOperator = (operator: CardFilterOperator) => ['rng', 'nrng'].includes(operator);
 	
-export const getValidOperators = (type: CardFilterType): CardFilterOperator[] => {
-	if (isTextType(type)) {
-		if (isBaseProperty(type)) return ['is', 'nis', 'ss', 'nss'];
-		return ['ex', 'nex', 'is', 'nis', 'ss', 'nss'];
-	}
-	if (type === 'number') return ['ex', 'nex', 'eq', 'neq', 'gte', 'lte', 'rng', 'nrng'];
-	if (isDateType(type)) {
-		if (isBaseProperty(type)) return ['gte', 'lte', 'rng', 'nrng'];
-		return ['ex', 'nex', 'gte', 'lte', 'rng', 'nrng'];
-	}
-	if (type === 'boolean') return ['eq', 'ex', 'nex'];
-	if (isSelectType(type)) {
-		if (isBaseProperty(type)) return ['is', 'nis'];
-		return ['ex', 'nex', 'is', 'nis'];
-	}
-	return Object.keys(FILTER_OPERATOR_LABEL) as CardFilterOperator[];
-};
-
 export const getDefaultOperator = (type) => {
 	if (isTextType(type) || isSelectType(type)) return 'is';
 	if (isDateType(type)) return 'lte';

@@ -17,7 +17,8 @@
 
 import { FormattedMessage } from 'react-intl';
 import { CardFilterOperator, CardFilterValue, CardFilterType, BaseFilter, CardFilter } from '../cardFilters.types';
-import { amendDateUpperBounds, floorToMinute, getDefaultOperator, getFilterFormTitle, getValidOperators, isDateType, isRangeOperator } from '../cardFilters.helpers';
+import { amendDateUpperBounds, floorToMinute, getDefaultOperator, getFilterFormTitle, isDateType, isRangeOperator } from '../cardFilters.helpers';
+import { getValidOperators } from '../filtersSelection/tickets/ticketFilters.helpers';
 import { Container, ButtonsContainer, Button, TitleContainer } from './filterForm.styles';
 import { FormProvider, useForm } from 'react-hook-form';
 import { isBoolean, isEmpty } from 'lodash';

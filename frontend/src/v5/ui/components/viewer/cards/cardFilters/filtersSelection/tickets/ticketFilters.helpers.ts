@@ -25,7 +25,7 @@ import TextIcon from '@assets/icons/filters/text.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
 import { isString, sortBy, uniqBy, compact } from 'lodash';
 import { CardFilterType, BaseFilter, CardFilter, CardFilterOperator } from '../../cardFilters.types';
-import { isRangeOperator } from '../../cardFilters.helpers';
+import { FILTER_OPERATOR_LABEL, isDateType, isRangeOperator, isSelectType, isTextType } from '../../cardFilters.helpers';
 
 export const TYPE_TO_ICON: Record<CardFilterType, any> = {
 	'template': TemplateIcon,
@@ -139,4 +139,22 @@ export const filtersToQuery = (filters: CardFilter[]) => {
 	if (!filters?.length) return '';
 	const query = filters.map(filterToQueryElement).join('&&');
 	return encodeRFC3986URIComponent(wrapWith(query, "'"));
+};
+
+export const getValidOperators = (type: CardFilterType): CardFilterOperator[] => {
+	if (isTextType(type)) {
+		if (isBaseProperty(type)) return ['is', 'nis', 'ss', 'nss'];
+		return ['ex', 'nex', 'is', 'nis', 'ss', 'nss'];
+	}
+	if (type === 'number') return ['ex', 'nex', 'eq', 'neq', 'gte', 'lte', 'rng', 'nrng'];
+	if (isDateType(type)) {
+		if (isBaseProperty(type)) return ['gte', 'lte', 'rng', 'nrng'];
+		return ['ex', 'nex', 'gte', 'lte', 'rng', 'nrng'];
+	}
+	if (type === 'boolean') return ['eq', 'ex', 'nex'];
+	if (isSelectType(type)) {
+		if (isBaseProperty(type)) return ['is', 'nis'];
+		return ['ex', 'nex', 'is', 'nis'];
+	}
+	return Object.keys(FILTER_OPERATOR_LABEL) as CardFilterOperator[];
 };

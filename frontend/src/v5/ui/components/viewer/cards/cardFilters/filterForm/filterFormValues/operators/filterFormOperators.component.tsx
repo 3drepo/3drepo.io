@@ -16,7 +16,8 @@
  */
 
 import { FormSelect } from '@controls/inputs/formInputs.component';
-import { FILTER_OPERATOR_ICON, getFilterOperatorLabels, getValidOperators } from '../../../cardFilters.helpers';
+import { FILTER_OPERATOR_ICON, getFilterOperatorLabels } from '../../../cardFilters.helpers';
+import { getValidOperators } from '../../../filtersSelection/tickets/ticketFilters.helpers';
 import { MenuItem } from '@mui/material';
 import { CardFilterOperator, CardFilterType } from '../../../cardFilters.types';
 import { FilterIconContainer } from './filterFormOperators.styles';
