@@ -40,6 +40,7 @@ export const nameAlreadyExists = (error: any): boolean => fieldAlreadyExists(err
 export const projectAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'project');
 export const numberAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'number');
 
+export const isForbidden = (error) => getErrorStatus(error) === 403;
 export const isPathNotFound = (error): boolean => getErrorStatus(error) === 404;
 export const isPathNotAuthorized = (error): boolean => getErrorCode(error).endsWith('NOT_AUTHORIZED') || getErrorStatus(error) === 401;
 
@@ -57,5 +58,6 @@ export const errorNeedsRedirecting = (error) => {
 	const teamspaceInvalid = isTeamspaceInvalid(code);
 	const pathNotFound = isPathNotFound(error);
 	const unauthorized = isNotAuthed(error);
-	return pathNotFound || teamspaceInvalid || unauthorized;
+	const forbidden = isForbidden(error);
+	return pathNotFound || teamspaceInvalid || unauthorized || forbidden;
 };
