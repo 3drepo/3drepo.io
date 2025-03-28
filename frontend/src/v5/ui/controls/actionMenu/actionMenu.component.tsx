@@ -47,9 +47,7 @@ export const ActionMenu = ({
 		e.preventDefault();
 		if (disabled) return;
 		setAnchorEl(e.currentTarget.children[0]);
-		if (useMousePosition) {
-			setAnchorPosition({ left: e.clientX, top: e.clientY });
-		}
+		setAnchorPosition({ left: e.clientX, top: e.clientY });
 		onOpen?.();
 	};
 
@@ -89,7 +87,7 @@ export const ActionMenu = ({
 				{...PopoverProps}
 				onClick={handlePopoverClick}
 			>
-				<Menu onClick={(e) => e.stopPropagation()}>
+				<Menu top={anchorPosition?.top} onClick={(e) => e.stopPropagation()}>
 					{children}
 				</Menu>
 			</Popover>

@@ -127,3 +127,6 @@ export const diffObjects = (objec1, object2) => {
 		return { ...accum, [key]: objec1[key] };
 	}, {});
 };
+
+export const mapArrayToFormArray = (arr = []) => arr.map((value) => ({ value }));
+export const mapFormArrayToArray = (arr = []) => arr.map((v) => v.value);
