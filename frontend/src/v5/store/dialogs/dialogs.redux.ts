@@ -29,6 +29,7 @@ import { WarningModalProps } from '@components/shared/modalsDispatcher/templates
 import { DeleteModalProps } from '@components/shared/modalsDispatcher/templates/deleteModal/deleteModal.types';
 import { ShareModalProps } from '@components/shared/modalsDispatcher/templates/shareModal/shareModal.types';
 import { ImagesModalProps } from '@components/shared/modalsDispatcher/templates/imagesModal/imagesModal.types';
+import { AuthenticatingModal } from '@components/shared/modalsDispatcher/templates/infoModal/authenticatingModal/authenticatingModal.component';
 
 export const INITIAL_STATE: IDialogState = {
 	dialogs: [],
@@ -45,7 +46,7 @@ export const openHandler = (state, { modalType, props, syncProps }: OpenAction) 
 	if (errorCode || isRequestAborted(props?.error)) {
 		// avoid other modals when authenticating
 		const authModalIsAlreadyOpen = state.dialogs.find((dialog) => (
-			dialog.modalType?.name === 'AuthenticatingModal' || isNotAuthed(dialog.props?.error)
+			dialog.modalType === AuthenticatingModal || isNotAuthed(dialog.props?.error)
 		));
 		if (authModalIsAlreadyOpen) return;
 	}
