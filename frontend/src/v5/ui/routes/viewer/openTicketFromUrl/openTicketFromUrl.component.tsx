@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,24 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DialogsActionsDispatchers, TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DialogsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { useEffect } from 'react';
+import { useSearchParam } from '../../useSearchParam';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEmpty } from 'lodash';
-import { useParams } from 'react-router-dom';
-import { useEffect } from 'react';
 import { formatMessage } from '@/v5/services/intl';
+import { useParams } from 'react-router-dom';
 import { ViewerParams } from '../../routes.constants';
-import { Transformers, useSearchParam } from '../../useSearchParam';
-import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 
-export const HandleTicketsCardSearchParams = () => {
+export const OpenTicketFromUrl = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const [ticketId, setTicketId] = useSearchParam('ticketId');
-
-	const [ticketSearchParam, setTicketSearchParam] = useSearchParam('ticketSearch', Transformers.STRING_ARRAY);
-	const [ticketTemplatesParam, setTicketTemplatesParam] = useSearchParam('ticketTemplates', Transformers.STRING_ARRAY);
-	const [ticketCompletedParam, setTicketCompletedParam] = useSearchParam('ticketCompleted', Transformers.BOOLEAN);
-
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
 	const hasTicketData = !isEmpty(tickets) && !isEmpty(templates);
@@ -50,22 +44,6 @@ export const HandleTicketsCardSearchParams = () => {
 			TicketsCardActionsDispatchers.openTicket(ticketId);
 		}
 	}, [hasTicketData]);
-	
-	useEffect(() => {
-		if (!ticketTemplatesParam.length && !ticketSearchParam.length && !ticketCompletedParam) return;
-		ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.TICKETS, true);
-		TicketsCardActionsDispatchers.setTemplateFilters(ticketTemplatesParam);
-		if (ticketSearchParam.length) {
-			TicketsCardActionsDispatchers.setQueryFilters(ticketSearchParam);
-		}
-		if (ticketCompletedParam) {
-			TicketsCardActionsDispatchers.toggleCompleteFilter();
-		}
-
-		setTicketSearchParam();
-		setTicketCompletedParam();
-		setTicketTemplatesParam();
-	}, [ticketTemplatesParam, ticketSearchParam, ticketCompletedParam]);
 
 	return <></>;
 };

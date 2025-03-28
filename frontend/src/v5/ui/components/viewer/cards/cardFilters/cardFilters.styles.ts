@@ -15,23 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
-import { EllipsisMenuItem, EllipsisMenuItemProps } from './ellipsisMenutItem.component';
-import { ReactNode } from 'react';
-import { SwitchContainer } from './ellipsisMenuItem.styles';
+import styled from 'styled-components';
+import { Section } from './filtersSection/filtersSection.styles';
 
-type EllipsisMenuItemSwitchProps = Omit<EllipsisMenuItemProps, 'to'> & {
-	icon?: ReactNode,
-	active: boolean,
-};
-export const EllipsisMenuItemSwitch = ({ icon, title, active, ...props }: EllipsisMenuItemSwitchProps) => (
-	<EllipsisMenuItem 
-		title={
-			<SwitchContainer>
-				{icon}
-				{title}
-				{active && <TickIcon />}
-			</SwitchContainer>}
-		{...props}
-	/>
-);
+export const ModuleTitle = styled.p`
+	color: ${({ theme }) => theme.palette.base.main};
+	text-transform: uppercase;
+	margin-top: 0;
+	margin-bottom: 10px;
+	font-size: 9px;
+	line-height: 12px;
+	letter-spacing: 3px;
+
+	${Section} + & {
+		margin-top: 10px;
+	}
+`;

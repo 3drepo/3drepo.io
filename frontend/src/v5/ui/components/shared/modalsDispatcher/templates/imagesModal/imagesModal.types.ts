@@ -16,7 +16,7 @@
  */
 
 export type ImagesModalProps = {
-	onClickClose?: () => void;
+	onClickClose?: (imgs: string[]) => void;
 	onClose?: () => void;
 	open?: boolean;
 	images: string[];
