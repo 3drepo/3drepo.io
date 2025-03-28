@@ -15,14 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { uniq } from 'lodash';
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { ViewerParams } from '../../routes.constants';
 import { Transformers, useSearchParam } from '../../useSearchParam';
-import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { CardFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
 import { StatusValue } from '@/v5/store/tickets/tickets.types';
 import { TicketStatusDefaultValues, TicketStatusTypes, TreatmentStatuses } from '@controls/chip/chip.types';
@@ -32,7 +31,6 @@ import { getState } from '@/v5/helpers/redux.helpers';
 const TICKET_CODE_REGEX = /^[a-zA-Z]{3}:\d+$/;
 export const DefaultTicketFiltersSetter = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
-	const [ticketId] = useSearchParam('ticketId');
 	const [ticketSearchParam, setTicketSearchParam] = useSearchParam('ticketSearch', Transformers.STRING_ARRAY);
 	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
 
