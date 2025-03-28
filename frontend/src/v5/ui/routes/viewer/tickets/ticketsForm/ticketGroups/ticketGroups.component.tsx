@@ -206,12 +206,21 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		};
 	}, []);
 
+	const addKeyToGroupsWithoutIdentifier = (groups) => {
+		const group = groups[0];
+		if (!group || groupHasId(group) || groupHasKey(group)) return groups;
+		return groups.map((groupOverride) => ({ ...groupOverride, key: count++ }));
+	};
+
 	useEffect(() => {
-		const groups = (state.colored || []).concat(state.hidden || []);
-		const [group] = groups;
-		if (!group || groupHasId(group) || groupHasKey(group)) return;
-		groups.forEach((groupOverride) => groupOverride.key = count++);
-		onChange({ ...value, state });
+		const stateWithGroupsWithKeys = { ...state };
+		if (state.colored) {
+			stateWithGroupsWithKeys.colored = addKeyToGroupsWithoutIdentifier(state.colored);
+		}
+		if (state.hidden) {
+			stateWithGroupsWithKeys.hidden = addKeyToGroupsWithoutIdentifier(state.hidden);
+		}
+		onChange({ ...value, state: stateWithGroupsWithKeys });
 	}, []);
 
 	if (isLoading) return (<Loader />);
