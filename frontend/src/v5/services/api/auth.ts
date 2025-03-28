@@ -18,16 +18,12 @@
 import { AxiosResponse } from 'axios';
 import api from './default';
 
-
-export const authenticate = async (): Promise<string> => {
-	const { data } = await api.get('login');
-	return data.username;
+type AuthenticateReturnType = {
+	authenticatedTeamspace: string;
+	username: string;
 };
-
-export const login = (user, password): Promise<AxiosResponse<void>> => api.post('login', { user, password });
+export const authenticate = (): Promise<AxiosResponse<AuthenticateReturnType>> => api.get('login');
 
 export const logout = (): Promise<AxiosResponse<void>> => api.post('logout');
 
 export const resetPassword = () => api.post('user/password/reset');
-
-export const changePassword = (user, newPassword, token) => api.put('user/password', { user, newPassword, token });

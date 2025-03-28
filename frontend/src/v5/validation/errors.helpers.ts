@@ -14,19 +14,19 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-export const getErrorMessage = (error: any) => error.response?.data?.message || error.message;
+
+export const getErrorMessage = (error: any) => error?.response?.data?.message || error?.message;
 export const getErrorCode = (error: any) => error?.response?.data?.code || '';
 export const getErrorStatus = (error: any) => error?.response?.status;
 
 export const isInvalidArguments = (error: any): boolean => getErrorCode(error) === 'INVALID_ARGUMENTS';
-
-export const isPasswordIncorrect = (error: any): boolean => getErrorCode(error) === 'INCORRECT_PASSWORD';
 
 export const isFileFormatUnsupported = (error: any): boolean => getErrorCode(error) === 'UNSUPPORTED_FILE_FORMAT';
 
 export const isNotLoggedIn = (error: any): boolean => getErrorCode(error) === 'NOT_LOGGED_IN';
 
 export const isNetworkError = (error: any): boolean => getErrorMessage(error) === 'Network Error';
+export const isRequestAborted = (error: any) => getErrorMessage(error) === 'Request aborted';
 
 const fieldAlreadyExists = (error: any, field: string): boolean => {
 	const errorMessage = getErrorMessage(error).toLowerCase();
@@ -37,16 +37,25 @@ const fieldAlreadyExists = (error: any, field: string): boolean => {
 };
 
 export const nameAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'name');
-export const usernameAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'username');
-export const emailAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'email');
 export const projectAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'project');
 export const numberAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'number');
 
 export const isPathNotFound = (error): boolean => getErrorStatus(error) === 404;
 export const isPathNotAuthorized = (error): boolean => getErrorCode(error).endsWith('NOT_AUTHORIZED') || getErrorStatus(error) === 401;
 
+export const isTeamspaceNotAuthenticated = (code: string): boolean => code === 'NOT_AUTHENTICATED_AGAINST_TEAMSPACE';
 export const isTeamspaceInvalid = (code: string): boolean => ['SSO_RESTRICTED'].includes(code);
 export const isProjectNotFound = (code: string): boolean => code === 'PROJECT_NOT_FOUND';
 export const isModelNotFound = (code: string): boolean => ['RESOURCE_NOT_FOUND', 'CONTAINER_NOT_FOUND'].includes(code);
 
 export const isContainerPartOfFederation = (error): boolean => getErrorCode(error).endsWith('CONTAINER_IS_SUB_MODEL');
+
+export const isNotAuthed = (error) => isPathNotAuthorized(error) || isTeamspaceNotAuthenticated(getErrorCode(error));
+
+export const errorNeedsRedirecting = (error) => {
+	const code = getErrorCode(error);
+	const teamspaceInvalid = isTeamspaceInvalid(code);
+	const pathNotFound = isPathNotFound(error);
+	const unauthorized = isNotAuthed(error);
+	return pathNotFound || teamspaceInvalid || unauthorized;
+};

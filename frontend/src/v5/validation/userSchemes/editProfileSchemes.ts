@@ -16,12 +16,10 @@
  */
 
 import * as Yup from 'yup';
-import { firstName, lastName, email, company, countryCode } from './validators';
+import { firstName, lastName, company } from './validators';
 
 export const EditProfileUpdatePersonalSchema = Yup.object().shape({
 	firstName,
 	lastName,
-	email,
 	company,
-	countryCode,
 });

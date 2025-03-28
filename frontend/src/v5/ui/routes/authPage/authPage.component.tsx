@@ -16,15 +16,27 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { AuthTemplate } from '@components/authTemplate';
+import { AuthTemplate } from '@components/authTemplate/authTemplate.component';
 import { Button, Footer, Container, Heading, Link } from './authPage.styles';
 import { COOKIES_ROUTE, PRIVACY_ROUTE, RELEASE_NOTES_ROUTE, TERMS_ROUTE } from '../routes.constants';
-import { useSSOLogin } from '@/v5/services/sso.hooks';
+import { useSSOAuth } from '@/v5/services/sso.hooks';
+import { Redirect, useRouteMatch } from 'react-router';
+import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
+import { addParams } from '@/v5/helpers/url.helper';
 
 const APP_VERSION = ClientConfig.VERSION;
 
 export const AuthPage = () => {
-	const [, loginWithSSO] = useSSOLogin();
+	const [login] = useSSOAuth();
+	const { url } = useRouteMatch();
+	const returnUrl = AuthHooksSelectors.selectReturnUrl();
+	const isAuthenticated = AuthHooksSelectors.selectIsAuthenticated();
+	const redirectUri = addParams(returnUrl.pathname, returnUrl.search);
+
+	if (isAuthenticated) {
+		return (<Redirect to={{ ...returnUrl, state: { referrer: url } }} />);
+	}
+
 	return (
 		<AuthTemplate
 			footer={(
@@ -37,8 +49,8 @@ export const AuthPage = () => {
 				<Heading>
 					<FormattedMessage id="authPage.heading" defaultMessage="Welcome to 3D Repo" />
 				</Heading>
-				<Button onClick={loginWithSSO}>
-					<FormattedMessage id="authPage.button" defaultMessage="Log in / Sign up" />
+				<Button onClick={() => login(redirectUri)}>
+					<FormattedMessage id="authPage.button" defaultMessage="Log in" />
 				</Button>
 				<Footer>
 					<FormattedMessage

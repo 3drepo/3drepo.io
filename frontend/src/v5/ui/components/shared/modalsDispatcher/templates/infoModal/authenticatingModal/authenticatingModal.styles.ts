@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,10 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import styled from 'styled-components';
+import { InfoModal } from '../infoModal.component';
 
-export const IconContainer = styled.div`
-	cursor: pointer;
-	display: flex;
+export const AuthModal = styled(InfoModal)`
+	.MuiDialogTitle-root {
+		padding-top: 3px;
+		padding-bottom: 16px;
+	}
 `;

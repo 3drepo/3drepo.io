@@ -17,8 +17,8 @@
 
 import { useEffect } from 'react';
 import axios from 'axios';
-import { useHistory, useLocation } from 'react-router-dom';
-import { AuthActionsDispatchers, TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { AuthActionsDispatchers, DialogsActionsDispatchers, TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isNotLoggedIn } from '@/v5/validation/errors.helpers';
 import { addParams, pathName } from '@/v5/helpers/url.helper';
@@ -26,7 +26,8 @@ import { Route, RouteProps } from './route.component';
 import { useSSOParams } from '../sso.hooks';
 import { postActions } from '../api/sso';
 import { enableKickedOutEvent } from '../realtime/auth.events';
-import { AUTH_PATH } from '@/v5/ui/routes/routes.constants';
+import { AUTH_PATH, DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { AuthenticatingModal } from '@components/shared/modalsDispatcher/templates/infoModal/authenticatingModal/authenticatingModal.component';
 
 const cleanSSOParams = (location) => {
 	const searchParams = new URLSearchParams(location.search);
@@ -37,10 +38,11 @@ const cleanSSOParams = (location) => {
 
 const WrapAuthenticationRedirect = ({ children }) => {
 	const history = useHistory();
-	const isAuthenticated: boolean = AuthHooksSelectors.selectIsAuthenticated();
-	const authenticationFetched: boolean = AuthHooksSelectors.selectAuthenticationFetched();
+	const isAuthenticated = AuthHooksSelectors.selectIsAuthenticated();
+	const authenticationFetched = AuthHooksSelectors.selectAuthenticationFetched();
+	const authenticatedTeamspace = AuthHooksSelectors.selectAuthenticatedTeamspace();
 	const [{ error: ssoError, searchParams }] = useSSOParams();
-
+	const { teamspace } = useParams<DashboardParams>();
 	const location = useLocation();
 
 	useEffect(() => {
@@ -59,6 +61,14 @@ const WrapAuthenticationRedirect = ({ children }) => {
 
 	useEffect(enableKickedOutEvent);
 
+	useEffect(() => {
+		if (isAuthenticated && teamspace && teamspace !== authenticatedTeamspace) {
+			const redirectUri = addParams(location.pathname, location.search);
+			AuthActionsDispatchers.authenticateTeamspace(redirectUri, teamspace, DialogsActionsDispatchers.closeAll);
+			DialogsActionsDispatchers.open(AuthenticatingModal);
+		}
+	}, [isAuthenticated, teamspace, authenticatedTeamspace]);
+
 	if (!isAuthenticated) {
 		return (<></>);
 	}
@@ -67,7 +77,7 @@ const WrapAuthenticationRedirect = ({ children }) => {
 	axios.interceptors.response.use(
 		(response) => response,
 		(error) => {
-			if (isNotLoggedIn(error)) AuthActionsDispatchers.setAuthenticationStatus(false);
+			if (isNotLoggedIn(error)) AuthActionsDispatchers.setIsAuthenticated(false);
 			return Promise.reject(error);
 		},
 	);
