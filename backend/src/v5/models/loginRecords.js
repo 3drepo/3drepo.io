@@ -17,6 +17,7 @@
 
 const { INTERNAL_DB } = require('../handler/db.constants');
 const db = require('../handler/db');
+const { errCodes } = require('../handler/db.constants');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const geoip = require('geoip-lite');
 const { getUserAgentInfo } = require('../utils/helper/userAgent');
@@ -71,14 +72,12 @@ LoginRecords.saveSuccessfulLoginRecord = async (user, sessionId, ipAddress, user
 	try {
 		await db.insertOne(INTERNAL_DB, LOGIN_RECORDS_COL, { user, ...loginRecord });
 	} catch (err) {
-		// E110000 is monogo's dup key error
-		if (err.message.includes('E11000')) {
-			const existingRec = await db.find(INTERNAL_DB, LOGIN_RECORDS_COL, { _id: sessionId });
-
-			logger.logError(`Session ID clash detected! Trying to add ${JSON.stringify({ user, ...loginRecord })}`);
-			logger.logError(`Existing record found ${JSON.stringify(existingRec)}`);
-			await sendSystemEmail(mailTemplates.ERROR_NOTIFICATION.name, { err, title: 'Duplicate session ID found', message: `Duplicate session ID found\nSession ID clash detected! Trying to add ${JSON.stringify({ user, ...loginRecord })}\nExisting record found ${JSON.stringify(existingRec)}` });
-		} else {
+		// Post ISSUE #5356: This can happen when we reauthenticate against a teamspace.
+		// reAuth is flagged in the session data to avoid this from happening, but
+		// for some reason express session (or mongo-connect, not sure which one is at fault here)
+		// doesn't seem to always commit the data, making it trigger this situation more often
+		// This seems to happen more often with a replica set, so most likely mongo-connect.
+		if (!err.code === errCodes.DUPLICATE_KEY) {
 			throw err;
 		}
 	}
