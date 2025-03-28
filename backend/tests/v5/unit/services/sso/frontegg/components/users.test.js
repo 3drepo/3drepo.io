@@ -25,9 +25,12 @@ const Connections = require(`${src}/services/sso/frontegg/components/connections
 jest.mock('../../../../../../../src/v5/utils/webRequests');
 const WebRequests = require(`${src}/utils/webRequests`);
 
+const { HEADER_USER_ID } = require(`${src}/services/sso/frontegg/frontegg.constants`);
+
 const Users = require(`${src}/services/sso/frontegg/components/users`);
 
 const bearerHeader = { [generateRandomString()]: generateRandomString() };
+
 const postOptions = { headers: bearerHeader };
 
 Connections.getBearerHeader.mockResolvedValue(bearerHeader);
@@ -95,67 +98,34 @@ const testDoesUserExist = () => {
 	});
 };
 
-const testCreateUser = () => {
-	describe('Create user', () => {
-		[undefined, true].forEach((bypassVerification) => {
-			test(`Should create the user and return the user ID ${bypassVerification ? '(Via migration endpoint)' : ''}`, async () => {
-				const accountId = generateRandomString();
-				const email = generateRandomString();
-				const name = generateRandomString();
-				const userData = generateRandomString();
-				const privateUserData = generateRandomString();
+const testDestroyAllSessions = () => {
+	describe('Destroy all sessions', () => {
+		test('Should destroy sessions for the user ID specified', async () => {
+			const userId = generateRandomString();
 
-				const userId = generateRandomString();
-				const expectedPayload = {
-					email,
-					name,
-					tenantId: accountId,
-					metadata: userData,
-					vendorMetadata: privateUserData,
+			await Users.destroyAllSessions(userId);
 
-				};
-
-				WebRequests.post.mockResolvedValueOnce({ data: { id: userId } });
-
-				await expect(Users.createUser(accountId, email, name, userData, privateUserData, bypassVerification))
-					.resolves.toEqual(userId);
-
-				expect(WebRequests.post).toHaveBeenCalledTimes(1);
-				expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String),
-					expect.objectContaining(expectedPayload), postOptions);
-
-				// not using migration endpoint by default
-				expect(WebRequests.post.mock.calls[0][0].includes('migrations')).toBe(!!bypassVerification);
-			});
-		});
-
-		test('Should throw error if it failed', async () => {
-			const accountId = generateRandomString();
-			const email = generateRandomString();
-			const name = generateRandomString();
-			const userData = generateRandomString();
-			const privateUserData = generateRandomString();
-
-			const expectedPayload = {
-				email,
-				name,
-				tenantId: accountId,
-				metadata: userData,
-				vendorMetadata: privateUserData,
-
+			const expectedHeader = { ...bearerHeader,
+				[HEADER_USER_ID]: userId,
 			};
 
-			WebRequests.post.mockRejectedValueOnce({ message: generateRandomString() });
+			expect(WebRequests.delete).toHaveBeenCalledTimes(1);
+			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), expectedHeader);
+		});
 
-			await expect(Users.createUser(accountId, email, name, userData, privateUserData, false))
-				.rejects.not.toBeUndefined();
+		test('Should reject if something went wrong', async () => {
+			const userId = generateRandomString();
 
-			expect(WebRequests.post).toHaveBeenCalledTimes(1);
-			expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String),
-				expect.objectContaining(expectedPayload), postOptions);
+			WebRequests.delete.mockRejectedValueOnce({ message: generateRandomString() });
 
-			// not using migration endpoint by default
-			expect(WebRequests.post.mock.calls[0][0].includes('migrations')).toBeFalsy();
+			await expect(Users.destroyAllSessions(userId)).rejects.not.toBeUndefined();
+
+			const expectedHeader = { ...bearerHeader,
+				[HEADER_USER_ID]: userId,
+			};
+
+			expect(WebRequests.delete).toHaveBeenCalledTimes(1);
+			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), expectedHeader);
 		});
 	});
 };
@@ -187,6 +157,6 @@ const testTriggerPasswordReset = () => {
 describe(determineTestGroup(__filename), () => {
 	testGetUserById();
 	testDoesUserExist();
-	testCreateUser();
+	testDestroyAllSessions();
 	testTriggerPasswordReset();
 });

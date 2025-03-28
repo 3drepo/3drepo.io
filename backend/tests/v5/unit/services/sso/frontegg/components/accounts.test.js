@@ -27,14 +27,15 @@ jest.mock('../../../../../../../src/v5/utils/webRequests');
 const WebRequests = require(`${src}/utils/webRequests`);
 
 const Accounts = require(`${src}/services/sso/frontegg/components/accounts`);
-const { errCodes } = require(`${src}/services/sso/frontegg/frontegg.constants`);
-const { HEADER_TENANT_ID, META_LABEL_TEAMSPACE } = require(`${src}/services/sso/frontegg/components/accounts.constants`);
+const { errCodes, HEADER_TENANT_ID, META_LABEL_TEAMSPACE } = require(`${src}/services/sso/frontegg/frontegg.constants`);
 
 const bearerHeader = { [generateRandomString()]: generateRandomString() };
 const postOptions = { headers: bearerHeader };
 
+const role = generateRandomString();
+
 Connections.getBearerHeader.mockResolvedValue(bearerHeader);
-Connections.getConfig.mockResolvedValue({});
+Connections.getConfig.mockResolvedValue({ userRole: role });
 
 const testGetTeamspaceByAccount = () => {
 	describe('Get teamspace by account', () => {
@@ -214,46 +215,109 @@ const testAddUserToAccount = () => {
 	describe('Add user to account', () => {
 		[true, false].forEach((sendEmail) => {
 			test(`Should send request to add user to the account (Send invite: ${sendEmail})`, async () => {
-				const userId = generateRandomString();
+				const email = generateRandomString();
+				const name = generateRandomString();
 				const accountId = generateRandomString();
+				const teamspace = generateRandomString();
+				const sender = generateRandomString();
+				const userId = generateRandomString();
 
-				await Accounts.addUserToAccount(accountId, userId, sendEmail);
+				WebRequests.post.mockResolvedValueOnce({ data: { id: userId } });
+
+				await expect(Accounts.addUserToAccount(accountId, email, name,
+					sendEmail ? { teamspace, sender } : undefined)).resolves.toEqual(userId);
+				const expectedHeader = {
+					...bearerHeader,
+					[HEADER_TENANT_ID]: accountId,
+				};
+
+				const emailMetadata = sendEmail ? {
+					sender,
+					teamspace,
+				} : {};
+
 				const expectedPayload = {
-					tenantId: accountId,
-					validateTenantExist: true,
+					email,
+					name,
 					skipInviteEmail: !sendEmail,
+					roleIds: [role],
+					emailMetadata,
 				};
 
 				expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
 				expect(Connections.getConfig).toHaveBeenCalledTimes(1);
 
 				expect(WebRequests.post).toHaveBeenCalledTimes(1);
-				expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String), expectedPayload, postOptions);
-
-				expect(WebRequests.post.mock.calls[0][0].includes(userId)).toBeTruthy();
+				expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String), expectedPayload,
+					{ headers: expectedHeader });
 			});
 		});
 
-		test('Should throw error if post request failed', async () => {
-			const userId = generateRandomString();
+		test('Should not fail if the user is already in the tenant', async () => {
+			const email = generateRandomString();
+			const name = generateRandomString();
 			const accountId = generateRandomString();
 
-			WebRequests.post.mockRejectedValueOnce({ message: generateRandomString() });
+			WebRequests.post.mockRejectedValueOnce({ message: generateRandomString(),
+				response: { data: { errorCode: errCodes.USER_ALREADY_EXIST } } });
 
-			await expect(Accounts.addUserToAccount(accountId, userId)).rejects.not.toBeUndefined();
+			await expect(Accounts.addUserToAccount(accountId, email, name)).resolves.toBeUndefined();
+
+			const expectedHeader = {
+				...bearerHeader,
+				[HEADER_TENANT_ID]: accountId,
+			};
+
 			const expectedPayload = {
-				tenantId: accountId,
-				validateTenantExist: true,
-				skipInviteEmail: false,
+				email,
+				name,
+				skipInviteEmail: true,
+				roleIds: [role],
+				emailMetadata: {},
 			};
 
 			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
 			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
 
 			expect(WebRequests.post).toHaveBeenCalledTimes(1);
-			expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String), expectedPayload, postOptions);
+			expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String), expectedPayload,
+				{ headers: expectedHeader });
+		});
 
-			expect(WebRequests.post.mock.calls[0][0].includes(userId)).toBeTruthy();
+		test('Should throw error if post request failed', async () => {
+			const email = generateRandomString();
+			const accountId = generateRandomString();
+			const teamspace = generateRandomString();
+			const sender = generateRandomString();
+
+			WebRequests.post.mockRejectedValueOnce({ message: generateRandomString() });
+
+			await expect(Accounts.addUserToAccount(accountId, email, undefined, { teamspace, sender }))
+				.rejects.not.toBeUndefined();
+			const expectedHeader = {
+				...bearerHeader,
+				[HEADER_TENANT_ID]: accountId,
+			};
+
+			const emailMetadata = {
+				sender,
+				teamspace,
+			};
+
+			const expectedPayload = {
+				email,
+				name: undefined,
+				skipInviteEmail: false,
+				roleIds: [role],
+				emailMetadata,
+			};
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			expect(WebRequests.post).toHaveBeenCalledTimes(1);
+			expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String), expectedPayload,
+				{ headers: expectedHeader });
 		});
 	});
 };

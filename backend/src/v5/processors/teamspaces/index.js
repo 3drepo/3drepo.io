@@ -17,7 +17,7 @@
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../models/users.constants');
 const { addDefaultJobs, assignUserToJob, getJobsToUsers, removeUserFromJobs } = require('../../models/jobs');
-const { addUserToAccount, createAccount, createUser, getUserById, removeAccount, removeUserFromAccount } = require('../../services/sso/frontegg');
+const { addUserToAccount, createAccount, removeAccount, removeUserFromAccount } = require('../../services/sso/frontegg');
 const { createIndex, dropDatabase } = require('../../handler/db');
 const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revokeTeamspaceRoleFromUser } = require('../../models/roles');
 const {
@@ -129,31 +129,37 @@ Teamspaces.getQuotaInfo = async (teamspace) => {
 	};
 };
 
-Teamspaces.addTeamspaceMember = async (teamspace, userToAdd) => {
-	const [accountId, userId] = await Promise.all([
-		getTeamspaceRefId(teamspace),
-		getUserId(userToAdd),
+Teamspaces.addTeamspaceMember = async (teamspace, userToAdd, invitedBy) => {
+	const userQueryProjection = {
+		'customData.email': 1,
+		'customData.userId': 1,
+		'customData.firstName': 1,
+		'customData.lastName': 1,
+	};
 
+	const [
+		accountId,
+		{ customData: inviteeDetails },
+		{ customData: inviterDetails },
+	] = await Promise.all([
+		getTeamspaceRefId(teamspace),
+		getUserByUsername(userToAdd, userQueryProjection),
+		invitedBy ? getUserByUsername(invitedBy, userQueryProjection) : Promise.resolve({}),
 	]);
 
-	// double check the user is known in frontegg, it could've been deleted
-	// and we are out of sync.
-	const userExistsInFrontegg = await getUserById(userId).catch(() => false);
+	const emailData = invitedBy ? {
+		teamspace,
+		sender: [inviterDetails.firstName, inviterDetails.lastName].join(' '),
 
-	if (userExistsInFrontegg) {
-		await addUserToAccount(accountId, userId);
-	} else {
-		const { customData: { email, firstName, lastName } } = await getUserByUsername(userToAdd, {
-			'customData.email': 1,
-			'customData.firstName': 1,
-			'customData.lastName': 1,
-		});
+	} : undefined;
+	const inviteeName = [inviteeDetails.firstName, inviteeDetails.lastName].join(' ');
 
-		const newUserId = await createUser(accountId, email, [firstName, lastName].join(' '));
+	const newUserId = await addUserToAccount(accountId, inviteeDetails.email, inviteeName, emailData);
 
+	// if the user already exists, newUserId is undefined, so update required
+	if (newUserId && newUserId !== inviteeDetails.userId) {
 		await updateUserId(userToAdd, newUserId);
 	}
-
 	await grantTeamspaceRoleToUser(teamspace, userToAdd);
 };
 

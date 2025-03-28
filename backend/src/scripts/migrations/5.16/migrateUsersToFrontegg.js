@@ -20,7 +20,7 @@ const { v5Path } = require('../../../interop');
 const { getTeamspaceList } = require('../../utils');
 
 const { getTeamspaceRefId, setTeamspaceRefId, getAllUsersInTeamspace } = require(`${v5Path}/models/teamspaceSettings`);
-const { getTeamspaceByAccount, doesUserExist, addUserToAccount, createAccount, createUser, getAllUsersInAccount } = require(`${v5Path}/services/sso/frontegg`);
+const { getTeamspaceByAccount, addUserToAccount, createAccount, getAllUsersInAccount } = require(`${v5Path}/services/sso/frontegg`);
 
 const { logger } = require(`${v5Path}/utils/logger`);
 const { updateUserId } = require(`${v5Path}/models/users`);
@@ -55,23 +55,16 @@ const processTeamspace = async (ts, userMapping) => {
 
 	await Promise.all(membersInTs.map(async ({ user, customData: { email, userId, firstName, lastName } }) => {
 		if (!emailToUserId[email]) {
-			let newUserId = userMapping[user] || await doesUserExist(email);
-
-			if (!newUserId) {
-				logger.logInfo(`\tCreating user entry for ${user}`);
-				newUserId = await createUser(refId, email, [firstName, lastName].join(' '), undefined, undefined, true);
-			} else {
-				logger.logInfo(`\tUser entry found for ${user}, adding them to the account...`);
-				await addUserToAccount(refId, newUserId, false);
-			}
+			logger.logInfo(`\tAdding ${user} to frontegg account...`);
 			// eslint-disable-next-line no-param-reassign
-			userMapping[user] = newUserId;
+			userMapping[user] = await addUserToAccount(refId, email, [firstName, lastName].join(' '));
 		} else {
 			// eslint-disable-next-line no-param-reassign
 			userMapping[user] = emailToUserId[email];
 		}
 
 		if (userId !== userMapping[user]) {
+			logger.logInfo(`\tUpdating ${user}'s user ID...`);
 			await updateUserId(user, userMapping[user]);
 		}
 	}));

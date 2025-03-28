@@ -24,8 +24,12 @@ const { v4Path } = require(`${src}/../interop`);
 jest.mock('../../../../src/v5/services/sso/frontegg');
 const FronteggService = require(`${src}/services/sso/frontegg`);
 
+jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+
 const SessionUtils = require(`${src}/utils/sessions`);
-const { CSRF_COOKIE, CSRF_HEADER } = require(`${src}/utils/sessions.constants`);
+const { SESSION_HEADER, CSRF_COOKIE, CSRF_HEADER } = require(`${src}/utils/sessions.constants`);
 const apiUrls = require(`${v4Path}/config`).apiUrls.all;
 
 const testIsSessionValid = () => {
@@ -87,7 +91,115 @@ const testGetUserFromSession = () => {
 	});
 };
 
+const testDestroySession = () => {
+	describe('Destroy session', () => {
+		test('Session should be destroyed even if the user is not logged in', async () => {
+			const session = {
+				destroy: jest.fn().mockImplementation((cb) => cb()),
+				id: generateRandomString(),
+			};
+
+			const res = {
+				clearCookie: jest.fn(),
+			};
+
+			const elective = true;
+
+			await new Promise((resolve) => {
+				SessionUtils.destroySession(session, res, resolve, elective);
+			});
+
+			expect(session.destroy).toHaveBeenCalledTimes(1);
+			expect(res.clearCookie).toHaveBeenCalledTimes(2);
+			expect(res.clearCookie).toHaveBeenCalledWith(CSRF_COOKIE, expect.any(Object));
+			expect(res.clearCookie).toHaveBeenCalledWith(SESSION_HEADER, expect.any(Object));
+
+			expect(FronteggService.destroyAllSessions).not.toHaveBeenCalled();
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.SESSIONS_REMOVED,
+				{ ids: [session.id], elective });
+		});
+
+		test('Session should be destroyed even if the user is logged in', async () => {
+			const userId = generateRandomString();
+			const session = {
+				destroy: jest.fn().mockImplementation((cb) => cb()),
+				id: generateRandomString(),
+				user: {
+					username: generateRandomString(),
+					auth: {
+						userId,
+					},
+				},
+			};
+
+			const res = {
+				clearCookie: jest.fn(),
+			};
+
+			const elective = true;
+			FronteggService.destroyAllSessions.mockResolvedValueOnce();
+
+			await new Promise((resolve) => {
+				SessionUtils.destroySession(session, res, resolve, elective);
+			});
+
+			expect(session.destroy).toHaveBeenCalledTimes(1);
+			expect(res.clearCookie).toHaveBeenCalledTimes(2);
+			expect(res.clearCookie).toHaveBeenCalledWith(CSRF_COOKIE, expect.any(Object));
+			expect(res.clearCookie).toHaveBeenCalledWith(SESSION_HEADER, expect.any(Object));
+
+			expect(FronteggService.destroyAllSessions).toHaveBeenCalledTimes(1);
+			expect(FronteggService.destroyAllSessions).toHaveBeenCalledWith(userId);
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.SESSIONS_REMOVED,
+				{ ids: [session.id], elective });
+		});
+
+		test('Session should be destroyed as if there is no error if frontegg failed', async () => {
+			const userId = generateRandomString();
+			const session = {
+				destroy: jest.fn().mockImplementation((cb) => cb()),
+				id: generateRandomString(),
+				user: {
+					username: generateRandomString(),
+					auth: {
+						userId,
+					},
+				},
+			};
+
+			const res = {
+				clearCookie: jest.fn(),
+			};
+
+			const elective = true;
+
+			FronteggService.destroyAllSessions.mockRejectedValueOnce();
+
+			await new Promise((resolve) => {
+				SessionUtils.destroySession(session, res, resolve, elective);
+			});
+
+			expect(session.destroy).toHaveBeenCalledTimes(1);
+			expect(res.clearCookie).toHaveBeenCalledTimes(2);
+			expect(res.clearCookie).toHaveBeenCalledWith(CSRF_COOKIE, expect.any(Object));
+			expect(res.clearCookie).toHaveBeenCalledWith(SESSION_HEADER, expect.any(Object));
+
+			expect(FronteggService.destroyAllSessions).toHaveBeenCalledTimes(1);
+			expect(FronteggService.destroyAllSessions).toHaveBeenCalledWith(userId);
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.SESSIONS_REMOVED,
+				{ ids: [session.id], elective });
+		});
+	});
+};
+
 describe('utils/sessions', () => {
 	testIsSessionValid();
 	testGetUserFromSession();
+	testDestroySession();
 });

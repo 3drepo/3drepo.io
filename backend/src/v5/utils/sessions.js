@@ -17,12 +17,12 @@
 
 const { CSRF_COOKIE, CSRF_HEADER, SESSION_HEADER } = require('./sessions.constants');
 const { cookie, cookie_domain } = require('./config');
+const { destroyAllSessions, validateToken } = require('../services/sso/frontegg');
 const { escapeRegexChrs, getURLDomain } = require('./helper/strings');
 const { apiUrls } = require('./config');
 const { deleteIfUndefined } = require('./helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { publish } = require('../services/eventsManager/eventsManager');
-const { validateToken } = require('../services/sso/frontegg');
 
 const referrerMatch = (sessionReferrer, headerReferrer) => {
 	const domain = getURLDomain(headerReferrer);
@@ -66,9 +66,16 @@ SessionUtils.isSessionValid = async (session, cookies, headers, ignoreApiKey = f
 SessionUtils.getUserFromSession = ({ user } = {}) => (user ? user.username : undefined);
 
 SessionUtils.destroySession = (session, res, callback, elective) => {
-	session.destroy(() => {
+	session.destroy(async () => {
 		res.clearCookie(CSRF_COOKIE, { domain: cookie.domain });
 		res.clearCookie(SESSION_HEADER, { domain: cookie_domain, path: '/' });
+
+		const userId = session?.user?.auth?.userId;
+		if (userId) {
+			await destroyAllSessions(userId).catch(() => {
+				// if it failed, we don't really care, keep going and destroy the 3DR session.
+			});
+		}
 
 		publish(events.SESSIONS_REMOVED, deleteIfUndefined({ ids: [session.id], elective }));
 

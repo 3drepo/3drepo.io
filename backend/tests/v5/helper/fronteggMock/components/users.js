@@ -14,10 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { src } = require('../../path');
-
-const { generateUUIDString } = require(`${src}/utils/helper/uuids`);
-const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 
 const usersById = {};
 const usersByEmail = {};
@@ -30,18 +26,7 @@ Users.doesUserExist = (email) => {
 	return Promise.resolve(user.id ?? false);
 };
 
-Users.createUser = (accountId, email, name) => {
-	const data = deleteIfUndefined({
-		id: generateUUIDString(),
-		email,
-		name,
-		tenantId: accountId,
-	});
-
-	usersById[data.id] = data;
-	usersById[data.email] = data;
-	return Promise.resolve(data.id);
-};
+Users.destroyAllSessions = () => Promise.resolve();
 
 Users.triggerPasswordReset = process.env.NODE_ENV === 'testV5' ? jest.fn() : (() => {});
 module.exports = Users;

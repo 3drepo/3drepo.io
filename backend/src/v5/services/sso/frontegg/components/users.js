@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { get, post } = require('../../../../utils/webRequests');
+const { delete: deleteReq, get, post } = require('../../../../utils/webRequests');
 const { getBearerHeader, getConfig } = require('./connections');
-const { deleteIfUndefined } = require('../../../../utils/helper/objects');
+const { HEADER_USER_ID } = require('../frontegg.constants');
 
 const Users = {};
 
@@ -42,28 +42,17 @@ Users.doesUserExist = async (email) => {
 	}
 };
 
-Users.createUser = async (accountId, email, name, userData, privateUserData, bypassVerification = false) => {
+Users.destroyAllSessions = async (userId) => {
 	try {
 		const config = await getConfig();
-		const payload = deleteIfUndefined({
-			email,
-			name,
-			tenantId: accountId,
-			metadata: userData,
-			vendorMetadata: privateUserData,
-			roleIds: [config.userRole],
+		const header = {
+			...await getBearerHeader(),
+			[HEADER_USER_ID]: userId,
 
-		});
-
-		// using the migration endpoint will automatically activate the user
-		const url = bypassVerification
-			? `${config.vendorDomain}/identity/resources/migrations/v1/local`
-			: `${config.vendorDomain}/identity/resources/vendor-only/users/v1`;
-		const { data } = await post(url, payload, { headers: await getBearerHeader() });
-
-		return data.id;
+		};
+		await deleteReq(`${config.vendorDomain}/identity/resources/users/sessions/v1/me/all`, header);
 	} catch (err) {
-		throw new Error(`Failed to create user(${email}) on Users: ${JSON.stringify(err?.response?.data) || err.message}`);
+		throw new Error(`Failed to destroy sessions for user(${userId}): ${err.message}`);
 	}
 };
 
