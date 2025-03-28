@@ -22,9 +22,7 @@ const { events } = require('../services/eventsManager/eventsManager.constants');
 const geoip = require('geoip-lite');
 const { getUserAgentInfo } = require('../utils/helper/userAgent');
 const { logger } = require('../utils/logger');
-const { templates: mailTemplates } = require('../services/mailer/mailer.constants');
 const { publish } = require('../services/eventsManager/eventsManager');
-const { sendSystemEmail } = require('../services/mailer');
 
 const LoginRecords = {};
 const LOGIN_RECORDS_COL = 'loginRecords';
