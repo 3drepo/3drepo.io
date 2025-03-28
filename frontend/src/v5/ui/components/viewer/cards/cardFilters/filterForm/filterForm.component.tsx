@@ -18,7 +18,7 @@
 import { FormattedMessage } from 'react-intl';
 import { CardFilterOperator, CardFilterValue, CardFilterType, BaseFilter, CardFilter } from '../cardFilters.types';
 import { amendDateUpperBounds, floorToMinute, getDefaultOperator, getFilterFormTitle, isDateType, isRangeOperator } from '../cardFilters.helpers';
-import { getValidOperators } from '../filtersSelection/tickets/ticketFilters.helpers';
+import { getValidOperators, getOptionFromValue } from '../filtersSelection/tickets/ticketFilters.helpers';
 import { Container, ButtonsContainer, Button, TitleContainer } from './filterForm.styles';
 import { FormProvider, useForm } from 'react-hook-form';
 import { isBoolean, isEmpty } from 'lodash';
@@ -28,7 +28,6 @@ import { mapArrayToFormArray, mapFormArrayToArray } from '@/v5/helpers/form.help
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FilterSchema } from '@/v5/validation/ticketSchemes/validators';
 import { FilterFormOperators } from './filterFormValues/operators/filterFormOperators.component';
-import { getOptionFromValue } from '../filtersSelection/tickets/ticketFilters.helpers';
 import { formatSimpleDate } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
 import { TRUE_LABEL, FALSE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
