@@ -220,7 +220,7 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 
 export function* fetchViewpointGroups({teamspace, modelId, view}) {
 	try  {
-		const groupsObject = getViewpointWithGroups({teamspace, modelId, view});
+		const groupsObject = yield getViewpointWithGroups({teamspace, modelId, view});
 		mergeGroupsDataFromViewpoint(view.viewpoint, groupsObject);
 	} catch {
 		// groups doesnt exists, still continue
