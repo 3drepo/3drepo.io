@@ -195,7 +195,7 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 		let viewpointsGroups = yield select(selectViewpointsGroups);
 
 		while (!isViewpointLoaded(viewpoint, viewpointsGroups)) {
-			yield take(ViewpointsTypes.FETCH_GROUP_SUCCESS);
+			yield take(ViewpointsTypes.VIEWPOINT_READY);
 			viewpointsGroups = yield select(selectViewpointsGroups);
 		}
 
@@ -222,6 +222,7 @@ export function* fetchViewpointGroups({teamspace, modelId, view}) {
 	try  {
 		const groupsObject = yield getViewpointWithGroups({teamspace, modelId, view});
 		mergeGroupsDataFromViewpoint(view.viewpoint, groupsObject);
+		yield put(ViewpointsActions.viewpointReady());
 	} catch {
 		// groups doesnt exists, still continue
 	}
