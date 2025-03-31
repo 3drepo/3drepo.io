@@ -23,14 +23,16 @@ import { MenuItem } from '@mui/material';
 import { useFormContext } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { pickBy, isEmpty, isMatch, mapValues, omit } from 'lodash';
+import { pickBy, isEmpty, isMatch, mapValues } from 'lodash';
 import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
 import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
-import { emailAlreadyExists, isFileFormatUnsupported } from '@/v5/validation/errors.helpers';
+import { isFileFormatUnsupported } from '@/v5/validation/errors.helpers';
 import { FormModalActions } from '@controls/formModal/modalButtons/modalButtons.styles';
 import { ModalCancelButton, ModalSubmitButton } from '@controls/formModal/modalButtons/modalButtons.component';
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
 import { TabContent } from '../editProfileModal.styles';
+import { userHasMissingRequiredData } from '@/v5/store/users/users.helpers';
+import { WelcomeMessage } from './editProfilePersonalTab.styles';
 
 export type IUpdatePersonalInputs = Partial<{
 	firstName: string;
@@ -42,15 +44,11 @@ export type IUpdatePersonalInputs = Partial<{
 }>;
 
 type EditProfilePersonalTabProps = {
-	alreadyExistingEmails: string[];
-	setAlreadyExistingEmails: (emails: string[]) => void;
 	unexpectedError: any,
-	onClickClose: () => void,
+	onClickClose?: () => void,
 };
 
 export const EditProfilePersonalTab = ({
-	alreadyExistingEmails,
-	setAlreadyExistingEmails,
 	unexpectedError,
 	onClickClose,
 }: EditProfilePersonalTabProps) => {
@@ -65,6 +63,7 @@ export const EditProfilePersonalTab = ({
 		control,
 		formState: { errors: formErrors, isDirty, touchedFields, isSubmitting },
 	} = useFormContext();
+	const userIsMissingRequiredData = userHasMissingRequiredData(user);
 
 	const getSubmittableValues = (): IUpdatePersonalInputs => {
 		const values = getValues();
@@ -81,10 +80,6 @@ export const EditProfilePersonalTab = ({
 
 	const onSubmissionError = (apiError, reject) => {
 		setSubmitWasSuccessful(false);
-		if (emailAlreadyExists(apiError)) {
-			setAlreadyExistingEmails([...alreadyExistingEmails, getValues('email')]);
-			trigger('email');
-		}
 		if (isFileFormatUnsupported(apiError)) {
 			setFormError('avatarFile', {
 				type: 'custom',
@@ -99,9 +94,6 @@ export const EditProfilePersonalTab = ({
 
 	const onSubmit = async () => {
 		let values = getSubmittableValues();
-		if (user.sso) {
-			values = omit(values, ['firstName', 'lastName', 'email']);
-		}
 		await new Promise((resolve, reject) => {
 			CurrentUserActionsDispatchers.updatePersonalData(
 				values,
@@ -120,6 +112,12 @@ export const EditProfilePersonalTab = ({
 		}
 	}, [JSON.stringify(isDirty), touchedFields]);
 
+	useEffect(() => {
+		if (userIsMissingRequiredData) {
+			trigger();
+		}
+	}, []);
+
 	return (
 		<>
 			<TabContent>
@@ -132,10 +130,19 @@ export const EditProfilePersonalTab = ({
 						/>
 					</SuccessMessage>
 				)}
-				<UnhandledError
-					error={unexpectedError}
-					expectedErrorValidators={[emailAlreadyExists, isFileFormatUnsupported]}
-				/>
+				{userHasMissingRequiredData(user) ? (
+					<WelcomeMessage>
+						<FormattedMessage
+							id="editProfile.form.newUserMessage"
+							defaultMessage="Welcome to 3D Repo, please tell us more about yourself..."
+						/>
+					</WelcomeMessage>
+				) : (
+					<UnhandledError
+						error={unexpectedError}
+						expectedErrorValidators={[isFileFormatUnsupported]}
+					/>
+				)}
 				<FormTextField
 					name="firstName"
 					control={control}
@@ -145,7 +152,6 @@ export const EditProfilePersonalTab = ({
 					})}
 					required
 					formError={formErrors.firstName}
-					disabled={!!user.sso}
 				/>
 				<FormTextField
 					name="lastName"
@@ -156,7 +162,6 @@ export const EditProfilePersonalTab = ({
 					})}
 					required
 					formError={formErrors.lastName}
-					disabled={!!user.sso}
 				/>
 				<FormTextField
 					name="email"
@@ -167,7 +172,7 @@ export const EditProfilePersonalTab = ({
 					})}
 					required
 					formError={formErrors.email}
-					disabled={!!user.sso}
+					disabled
 				/>
 				<FormTextField
 					name="company"
@@ -185,7 +190,6 @@ export const EditProfilePersonalTab = ({
 						id: 'editProfile.form.countryCode',
 						defaultMessage: 'Country',
 					})}
-					required
 				>
 					{clientConfigService.countries.map((country) => (
 						<MenuItem key={country.code} value={country.code}>
@@ -195,7 +199,7 @@ export const EditProfilePersonalTab = ({
 				</FormSelect>
 			</TabContent>
 			<FormModalActions>
-				<ModalCancelButton onClick={onClickClose} />
+				<ModalCancelButton disabled={userIsMissingRequiredData} onClick={onClickClose} />
 				<ModalSubmitButton disabled={!canSubmit} onClick={handleSubmit(onSubmit)} isPending={isSubmitting}>
 					<FormattedMessage
 						defaultMessage="Update profile"

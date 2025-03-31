@@ -23,6 +23,7 @@ import { ticketWithGroups } from './ticketsGroups.helpers';
 import { ITemplate, ITicket } from './tickets.types';
 import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
 import { selectCurrentProjectTemplateById } from '../projects/projects.selectors';
+import { getState } from '@/v5/helpers/redux.helpers';
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
 
@@ -52,6 +53,11 @@ export const selectTemplates = createSelector(
 	(state, modelId) => state.templatesByModelId[modelId] || [],
 );
 
+export const selectActiveTemplates = createSelector(
+	selectTemplates,
+	(templates) => templates.filter(({ deprecated }) => !deprecated),
+);
+
 export const selectTemplateById = createSelector(
 	selectTicketsDomain,
 	selectTemplates,
@@ -74,8 +80,8 @@ export const selectTickets = createSelector(
 	selectTicketsRaw,
 	selectTicketsGroups,
 	(state, modelId) => modelId,
-	(state) => state,
-	(ticketsList, groups, modelId, storeState): ITicket[] => {
+	(ticketsList, groups, modelId): ITicket[] => {
+		const storeState = getState();
 		const tickets = ticketsList.map((ticket) => {
 			const ticketWithStatus = getTicketWithStatus(ticket, selectTemplateById(storeState, modelId, ticket.type));
 			return ticketWithGroups(({ ...ticketWithStatus, modelId }), groups);

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { hasReadAccessToFederation, hasWriteAccessToFederation } = require('../../../../../middleware/permissions/permissions');
+const { hasReadAccessToFederation, hasWriteAccessToFederation } = require('../../../../../middleware/permissions');
 const Federations = require('../../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
 const { getUserFromSession } = require('../../../../../utils/sessions');
@@ -161,7 +161,7 @@ const establishRoutes = () => {
 	 *                 revisions:
 	 *                   type: array
 	 *                   items:
-	 *                     - type: object
+	 *                       type: object
 	 *                       properties:
 	 *                         container:
 	 *                           type: string
