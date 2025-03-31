@@ -85,7 +85,7 @@ export const CommentBox = ({ commentId, message = '', images = [], view: existin
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const currentUser = CurrentUserHooksSelectors.selectCurrentUser();
 	const isFederation = modelIsFederation(containerOrFederation);
-	const [commentreply, setReply] = useState(metadata);
+	const [commentReply, setReply] = useState(metadata);
 
 	const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
 	const [isDraggingFile, setIsDraggingFile] = useState(false);
@@ -109,13 +109,13 @@ export const CommentBox = ({ commentId, message = '', images = [], view: existin
 	const isEditMode = !!commentId;
 	const newMessage = watch('message');
 
-	const commentReplyLength = commentreply ? addReply(commentreply, '').length : 0;
+	const commentReplyLength = commentReply ? addReply(commentReply, '').length : 0;
 	const charsCount = (newMessage?.length || 0) + commentReplyLength;
 	const charsLimitIsReached = charsCount > MAX_MESSAGE_LENGTH;
 	const viewIsUnchanged = isEqual(existingView, viewpoint);
 	const messageIsUnchanged = message === newMessage
 		&& isEqual(images, imagesToUpload.map(({ src }) => src))
-		&& commentreply?._id === metadata?._id
+		&& commentReply?._id === metadata?._id
 		&& viewIsUnchanged;
 	const erroredImages = imagesToUpload.filter(({ error }) => error);
 	const disableSendMessage = (!newMessage?.trim()?.length && !imagesToUpload.length && !viewpoint)
@@ -136,8 +136,8 @@ export const CommentBox = ({ commentId, message = '', images = [], view: existin
 			message: newMessage,
 			images: imagesToUpload.map(({ src }) => src),
 		};
-		if (commentreply) {
-			newComment.message = addReply(commentreply, sanitiseMessage(newComment.message));
+		if (commentReply) {
+			newComment.message = addReply(commentReply, sanitiseMessage(newComment.message));
 		}
 		if (viewpoint) {
 			newComment.view = viewpoint;
@@ -160,8 +160,8 @@ export const CommentBox = ({ commentId, message = '', images = [], view: existin
 			images: imagesToUpload.map(({ src }) => src),
 			message: newMessage,
 		};
-		if (commentreply) {
-			newComment.message = addReply(commentreply, newComment.message);
+		if (commentReply) {
+			newComment.message = addReply(commentReply, newComment.message);
 		}
 		if (viewpoint) {
 			newComment.view = viewpoint;
@@ -260,9 +260,9 @@ export const CommentBox = ({ commentId, message = '', images = [], view: existin
 			ref={containerRef}
 			className={className}
 		>
-			{commentreply?._id && (
+			{commentReply?._id && (
 				<CommentReplyContainer>
-					<CommentReply {...commentreply} shortMessage />
+					<CommentReply {...commentReply} shortMessage />
 					<DeleteButton onClick={() => setReply(null)}>
 						<DeleteIcon />
 					</DeleteButton>
