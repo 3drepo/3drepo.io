@@ -1809,7 +1809,7 @@ function getSrcAssets(req, res, next) {
 function getJsonMpc(req, res, next) {
 	const {account, model, uid} = req.params;
 
-	JSONAssets.getSuperMeshMapping(account, model, uid).then(file => {
+	JSONAssets.getSuperMeshMapping(account, model, utils.uuidToString(uid)).then(file => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file, undefined, config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -1843,7 +1843,7 @@ function getSubModelRevisions(req, res, next) {
 function getUnityBundle(req, res, next) {
 	const {account, model, uid} = req.params;
 
-	UnityAssets.getUnityBundle(account, model, uid).then(({ readStream, size, mimeType, encoding }) => {
+	UnityAssets.getUnityBundle(account, model, utils.uuidToString(uid)).then(({ readStream, size, mimeType, encoding }) => {
 		ResponderV5.writeStreamRespond(req, res, ResponseCodes.templates.ok, readStream, undefined, size, { mimeType, encoding });
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -1853,7 +1853,7 @@ function getUnityBundle(req, res, next) {
 function getRepoBundle(req, res, next) {
 	const {account, model, uid} = req.params;
 
-	UnityAssets.getRepoBundle(account, model, uid).then(({ readStream, size, mimeType, encoding }) => {
+	UnityAssets.getRepoBundle(account, model, utils.uuidToString(uid)).then(({ readStream, size, mimeType, encoding }) => {
 		ResponderV5.writeStreamRespond(req, res, ResponseCodes.templates.ok, readStream, undefined, size, { mimeType, encoding });
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -1863,7 +1863,7 @@ function getRepoBundle(req, res, next) {
 function getTexture(req, res, next) {
 	const {account, model, uid} = req.params;
 
-	UnityAssets.getTexture(account, model, uid).then(({ readStream, size, mimeType, encoding }) => {
+	UnityAssets.getTexture(account, model, utils.uuidToString(uid)).then(({ readStream, size, mimeType, encoding }) => {
 		ResponderV5.writeStreamRespond(req, res, ResponseCodes.templates.ok, readStream, undefined, size, { mimeType, encoding });
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -1874,7 +1874,7 @@ function getSRC(req, res, next) {
 	const {account, model, uid} = req.params;
 
 	// FIXME: We should probably generalise this and have a model assets object.
-	SrcAssets.getSRC(account, model, uid).then(({ readStream, size, mimeType, encoding }) => {
+	SrcAssets.getSRC(account, model, utils.uuidToString(uid)).then(({ readStream, size, mimeType, encoding }) => {
 		req.params.format = "src";
 		ResponderV5.writeStreamRespond(req, res, ResponseCodes.templates.ok, readStream, undefined, size, { mimeType, encoding });
 	}).catch(err => {

@@ -4,16 +4,16 @@
 	"supported": []
   },
   "civil" :{
-	"current" : "5.14.0",
-	"supported": ["5.10.1"]
+	"current" : "5.16.0",
+	"supported": []
   },
   "navis" :{
-	"current" : "5.14.0",
-	"supported": ["5.10.2"]
+	"current" : "5.16.0",
+	"supported": []
   },
    "revit" :{
-	"current" : "5.14.0",
-	"supported": ["5.10.1"]
+	"current" : "5.16.0",
+	"supported": []
   },
   "unitydll" : {
 	"current": "5.4.0",
@@ -29,6 +29,6 @@
   },
   "powerbi" : {
 	  "current": "5.10.0",
-	  "supported": ["5.10.0"]
+	  "supported": []
   }
 }

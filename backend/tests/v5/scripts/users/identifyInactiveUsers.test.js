@@ -49,13 +49,11 @@ const setupData = async () => {
 	const users = times(20, () => generateUserCredentials());
 	delete users[1].basicData.billing.billingInfo.company;
 
-	await Promise.all([
-		createTeamspace(teamspace, [], undefined, false),
-		createTeamspace(teamspace2, [], undefined, false),
-	]);
+	const userList = [];
 
 	await Promise.all(users.map(async (user, index) => {
-		await createUser(user, [teamspace, teamspace2]);
+		userList.push(user.user);
+		await createUser(user);
 
 		if (index % 2 === 0) {
 			const loginRecords = times(5, () => generateLoginRecord(user.user));
@@ -72,6 +70,11 @@ const setupData = async () => {
 			user.invalidUser = true;
 		}
 	}));
+
+	await Promise.all([
+		createTeamspace(teamspace, userList, undefined, false),
+		createTeamspace(teamspace2, userList, undefined, false),
+	]);
 
 	return users;
 };

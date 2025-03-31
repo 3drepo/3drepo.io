@@ -22,7 +22,7 @@ const { cloneDeep, times } = require('lodash');
 jest.mock('../../../../src/v5/handler/db');
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString, determineTestGroup } = require('../../helper/services');
 const { USERS_DB_NAME, USERS_COL } = require('../../../../src/v5/models/users.constants');
 
 const apiKey = 'b284ab93f936815306fbe5b2ad3e447d';
@@ -31,15 +31,6 @@ jest.mock('../../../../src/v5/utils/helper/strings', () => ({
 	generateHashString: jest.fn().mockImplementation(() => apiKey),
 }));
 
-const invalidEmail = 'invalid email';
-jest.doMock('../../../../src/v4/mailer/mailer', () => ({
-	...jest.requireActual('../../../../src/v4/mailer/mailer'),
-	sendResetPasswordEmail: jest.fn().mockImplementation((email) => {
-		if (email === invalidEmail) {
-			throw templates.unknown;
-		}
-	}),
-}));
 const User = require(`${src}/models/users`);
 
 const testGetAccessibleTeamspaces = () => {
@@ -256,47 +247,6 @@ const testDeleteFromFavourites = () => {
 	});
 };
 
-const testAuthenticate = () => {
-	describe('Authenticate user', () => {
-		const user = generateRandomString();
-		const pw = generateRandomString();
-		test('should log in successfully with user', async () => {
-			const dbAuthFn = jest.spyOn(db, 'authenticate').mockResolvedValueOnce(true);
-			const res = await User.authenticate(user, pw);
-			expect(res).toBeUndefined();
-
-			expect(dbAuthFn).toHaveBeenCalledTimes(1);
-			expect(dbAuthFn).toHaveBeenCalledWith(user, pw);
-		});
-
-		test('should return error if username is incorrect', async () => {
-			jest.spyOn(db, 'authenticate').mockResolvedValueOnce(false);
-			await expect(User.authenticate(user, pw)).rejects.toEqual(templates.incorrectUsernameOrPassword);
-		});
-
-		test('should return error if db.authenticate throws an error', async () => {
-			jest.spyOn(db, 'authenticate').mockRejectedValueOnce(templates.unknown);
-			await expect(User.authenticate(user, pw)).rejects.toEqual(templates.unknown);
-		});
-	});
-};
-
-const testUpdatePassword = () => {
-	describe('Update user password', () => {
-		test('should update a user password', async () => {
-			const fn1 = jest.spyOn(db, 'updateOne').mockImplementationOnce(() => { });
-			const fn2 = jest.spyOn(db, 'setPassword').mockImplementationOnce(() => { });
-			const user = generateRandomString();
-			const newPassword = generateRandomString();
-			await expect(User.updatePassword(user, newPassword)).resolves.toBeUndefined();
-			expect(fn1).toHaveBeenCalledTimes(1);
-			expect(fn1).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { user }, { $unset: { 'customData.resetPasswordToken': 1 } });
-			expect(fn2).toHaveBeenCalledTimes(1);
-			expect(fn2).toHaveBeenCalledWith(user, newPassword);
-		});
-	});
-};
-
 const testUpdateProfile = () => {
 	describe('Update user profile', () => {
 		test('should update a user profile', async () => {
@@ -342,19 +292,6 @@ const testDeleteApiKey = () => {
 			await User.deleteApiKey('user1');
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][3]).toEqual({ $unset: { 'customData.apiKey': 1 } });
-		});
-	});
-};
-
-const testUpdateResetPasswordToken = () => {
-	describe('Reset password token', () => {
-		test('should update user password', async () => {
-			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
-			const resetPasswordToken = { token: apiKey, expiredAt: new Date() };
-			await User.updateResetPasswordToken('user1', resetPasswordToken);
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][2]).toEqual({ user: 'user1' });
-			expect(fn.mock.calls[0][3]).toEqual({ $set: { 'customData.resetPasswordToken': resetPasswordToken } });
 		});
 	});
 };
@@ -421,12 +358,13 @@ const testGetUsersByQuery = () => {
 	});
 };
 
-const formatNewUserData = (newUserData, createdAt, emailExpiredAt) => {
+const formatNewUserData = (newUserData, createdAt) => {
 	const formattedData = {
 		createdAt,
 		firstName: newUserData.firstName,
 		lastName: newUserData.lastName,
 		email: newUserData.email,
+		userId: newUserData.userId,
 		mailListOptOut: !newUserData.mailListAgreed,
 		billing: {
 			billingInfo: {
@@ -437,18 +375,6 @@ const formatNewUserData = (newUserData, createdAt, emailExpiredAt) => {
 			},
 		},
 	};
-
-	if (newUserData.sso) {
-		formattedData.sso = newUserData.sso;
-	} else {
-		formattedData.emailVerifyToken = {
-			token: newUserData.token,
-			expiredAt: emailExpiredAt,
-		};
-
-		formattedData.inactive = true;
-	}
-
 	return formattedData;
 };
 
@@ -457,6 +383,7 @@ const testAddUser = () => {
 		test('should add a new user', async () => {
 			const newUserData = {
 				username: generateRandomString(),
+				userId: generateRandomString(),
 				email: 'example@email.com',
 				password: generateRandomString(),
 				firstName: generateRandomString(),
@@ -471,59 +398,29 @@ const testAddUser = () => {
 			expect(fn).toHaveBeenCalledTimes(1);
 			const userCustomData = fn.mock.calls[0][2];
 			expect(userCustomData).toHaveProperty('createdAt');
-			expect(userCustomData).toHaveProperty('emailVerifyToken.expiredAt');
-			const expectedCustomData = formatNewUserData(newUserData, userCustomData.createdAt,
-				userCustomData.emailVerifyToken.expiredAt);
-			expect(fn).toHaveBeenCalledWith(newUserData.username, newUserData.password, expectedCustomData);
-		});
-
-		test('should add a new user created with SSO', async () => {
-			const newUserData = {
-				username: generateRandomString(),
-				email: 'example@email.com',
-				password: generateRandomString(),
-				firstName: generateRandomString(),
-				lastName: generateRandomString(),
-				mailListAgreed: true,
-				countryCode: 'GB',
-				company: generateRandomString(),
-				sso: {
-					type: generateRandomString(),
-					id: generateRandomString(),
-				},
-			};
-
-			const fn = jest.spyOn(db, 'createUser');
-			await User.addUser(newUserData);
-			expect(fn).toHaveBeenCalledTimes(1);
-			const userCustomData = fn.mock.calls[0][2];
-			expect(userCustomData).toHaveProperty('createdAt');
-			expect(userCustomData).not.toHaveProperty('emailVerifyToken.expiredAt');
 			const expectedCustomData = formatNewUserData(newUserData, userCustomData.createdAt);
 			expect(fn).toHaveBeenCalledWith(newUserData.username, newUserData.password, expectedCustomData);
 		});
-	});
-};
 
-const testVerify = () => {
-	describe('Verify a user', () => {
-		test('should verify a user', async () => {
-			const customData = { firstName: generateRandomString(), lastName: generateRandomString() };
-			const username = generateRandomString();
-			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementation(() => ({ customData }));
-			const res = await User.verify(username);
-			expect(res).toEqual(customData);
+		test('should add a new user with the specified createdAt timestamp if it is provided', async () => {
+			const newUserData = {
+				username: generateRandomString(),
+				userId: generateRandomString(),
+				createdAt: new Date(),
+				email: 'example@email.com',
+				password: generateRandomString(),
+				firstName: generateRandomString(),
+				lastName: generateRandomString(),
+				mailListAgreed: true,
+				countryCode: 'GB',
+				company: generateRandomString(),
+			};
+
+			const fn = jest.spyOn(db, 'createUser');
+			await User.addUser(newUserData);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { user: username },
-				{ $unset: { 'customData.inactive': 1, 'customData.emailVerifyToken': 1 } },
-				{ projection: {
-					'customData.firstName': 1,
-					'customData.lastName': 1,
-					'customData.email': 1,
-					'customData.billing.billingInfo.company': 1,
-					'customData.mailListOptOut': 1,
-					'customData.createdAt': 1,
-				} });
+			const expectedCustomData = formatNewUserData(newUserData, newUserData.createdAt);
+			expect(fn).toHaveBeenCalledWith(newUserData.username, newUserData.password, expectedCustomData);
 		});
 	});
 };
@@ -556,104 +453,70 @@ const testRemoveUsers = () => {
 	});
 };
 
-const testIsAccountActive = () => {
-	describe.each([
-		['inactive is set to true', { customData: { inactive: true } }, false],
-		['inactive is set to false', { customData: { inactive: false } }, true],
-		['inactive flag is not set', { customData: { } }, true],
-		["customData doesn't exist", {}, true],
-	])('Is account active', (desc, mockRetVal, success) => {
-		test(`Should return ${success ? 'true' : 'false'} if ${desc}`, async () => {
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(mockRetVal);
-			const username = generateRandomString();
-			await expect(User.isAccountActive(username)).resolves.toBe(success);
+const testUpdateUserId = () => {
+	describe('Set user ref Id', () => {
+		test('Should update the reference ID as instructed', async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce();
+			const refId = generateRandomString();
+			const user = generateRandomString();
+			await User.updateUserId(user, refId);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { user: username }, { 'customData.inactive': 1 }, undefined);
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { user }, { $set: { 'customData.userId': refId } });
 		});
 	});
 };
 
-const testUnlinkFromSso = () => {
-	describe('Unlink user from SSO', () => {
-		test('Should unlink user from SSO', async () => {
-			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
-			const fn2 = jest.spyOn(db, 'setPassword').mockImplementationOnce(() => { });
-			const username = generateRandomString();
-			const password = generateRandomString();
-			await User.unlinkFromSso(username, password);
+const testGetUserId = () => {
+	describe('Get user ref Id', () => {
+		test('Should get the reference ID as instructed', async () => {
+			const refId = generateRandomString();
+			const user = generateRandomString();
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ customData: { userId: refId } });
+			await expect(User.getUserId(user)).resolves.toEqual(refId);
 
-			expect(fn).toHaveBeenCalledTimes(2);
-			expect(fn).toHaveBeenNthCalledWith(1, USERS_DB_NAME, USERS_COL, { user: username }, { $unset: { 'customData.sso': 1 } });
-			expect(fn).toHaveBeenNthCalledWith(2, USERS_DB_NAME, USERS_COL, { user: username }, { $unset: { 'customData.resetPasswordToken': 1 } });
-			expect(fn2).toHaveBeenCalledTimes(1);
-			expect(fn2).toHaveBeenCalledWith(username, password);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { user },
+				{ 'customData.userId': 1 }, undefined);
 		});
 	});
 };
 
-const testLinkToSso = () => {
-	describe('Link user to SSO', () => {
-		test('Should link user to SSO', async () => {
-			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
-			const firstName = generateRandomString();
-			const lastName = generateRandomString();
-			const username = generateRandomString();
-			const email = generateRandomString();
-			const ssoData = { type: generateRandomString(), id: generateRandomString() };
-			await User.linkToSso(username, email, firstName, lastName, ssoData);
+const testEnsureIndicesExist = () => {
+	describe('Ensure indices exist', () => {
+		test('Should call createIndex', async () => {
+			const fn = jest.spyOn(db, 'createIndex');
+			await User.ensureIndicesExist();
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { user: username },
-				{ $set: { 'customData.email': email, 'customData.firstName': firstName, 'customData.lastName': lastName, 'customData.sso': ssoData } });
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { 'customData.userId': 1 }, { runInBackground: true });
+		});
+
+		test('Should fail gracefully if it failed', async () => {
+			const fn = jest.spyOn(db, 'createIndex').mockRejectedValue({ message: generateRandomString() });
+			await User.ensureIndicesExist();
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { 'customData.userId': 1 }, { runInBackground: true });
 		});
 	});
 };
 
-const testIsSso = () => {
-	describe('Check if user is SSO', () => {
-		test('Should return true if user is SSO', async () => {
-			const username = generateRandomString();
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ customData: { sso: { id: generateRandomString() } } });
-
-			await User.isSsoUser(username);
-
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { user: username }, { 'customData.sso': 1 }, undefined);
-		});
-
-		test('Should return false if user is non SSO', async () => {
-			const username = generateRandomString();
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ customData: { } });
-
-			await User.isSsoUser(username);
-
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { user: username }, { 'customData.sso': 1 }, undefined);
-		});
-	});
-};
-
-describe('models/users', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetAccessibleTeamspaces();
 	testGetFavourites();
 	testAppendFavourites();
 	testDeleteFromFavourites();
-	testAuthenticate();
 	testUpdateProfile();
 	testGenerateApiKey();
 	testDeleteApiKey();
-	testUpdatePassword();
-	testUpdateResetPasswordToken();
 	testGetUserByUsernameOrEmail();
 	testGetUserByEmail();
 	testGetUsersByQuery();
 	testAddUser();
 	testRemoveUser();
 	testRemoveUsers();
-	testVerify();
-	testIsAccountActive();
-	testUnlinkFromSso();
-	testLinkToSso();
-	testIsSso();
+	testGetUserId();
+	testUpdateUserId();
+	testEnsureIndicesExist();
 });

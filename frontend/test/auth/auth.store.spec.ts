@@ -17,7 +17,7 @@
 
 import { AuthActions } from '@/v5/store/auth/auth.redux';
 import { authMockFactory } from './auth.fixtures';
-import { selectAuthenticationFetched, selectIsAuthenticated, selectIsPending, selectLoginError, selectReturnUrl } from '@/v5/store/auth/auth.selectors';
+import { selectAuthenticationFetched, selectIsAuthenticated, selectIsAuthenticationPending, selectReturnUrl } from '@/v5/store/auth/auth.selectors';
 import { createTestStore } from '../test.helpers';
 
 describe('Auth: store', () => {
@@ -27,11 +27,11 @@ describe('Auth: store', () => {
 
 	beforeEach(() => ({ dispatch, getState } = createTestStore()));
 
-	it('should set authentication status successfully', () => {
+	it('should set is authenticated successfully', () => {
 		const authFetchedBefore = selectAuthenticationFetched(getState());
 		expect(authFetchedBefore).toEqual(false);
 
-		dispatch(AuthActions.setAuthenticationStatus(mockAuth.isAuthenticated));
+		dispatch(AuthActions.setIsAuthenticated(mockAuth.isAuthenticated));
 		const authStatus = selectIsAuthenticated(getState());
 		expect(authStatus).toEqual(mockAuth.isAuthenticated);
 
@@ -39,16 +39,10 @@ describe('Auth: store', () => {
 		expect(authFetchedAfter).toEqual(true);
 	});
 
-	it('should set pending status successfully', () => {
-		dispatch(AuthActions.setPendingStatus(mockAuth.isPending));
-		const pendingStatus = selectIsPending(getState());
-		expect(pendingStatus).toEqual(mockAuth.isPending);
-	});
-
-	it('should set an error message when login fails', () => {
-		dispatch(AuthActions.loginFailed(mockAuth.errorMessage));
-		const errorMessage = selectLoginError(getState());
-		expect(errorMessage).toEqual(mockAuth.errorMessage);
+	it('should set authentication pending status successfully', () => {
+		dispatch(AuthActions.setIsAuthenticationPending(mockAuth.isAuthenticationPending));
+		const isAuthenticationPending = selectIsAuthenticationPending(getState());
+		expect(isAuthenticationPending).toEqual(mockAuth.isAuthenticationPending);
 	});
 	
 	it('should set the return URL successfully', () => {

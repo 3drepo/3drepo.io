@@ -40,7 +40,7 @@ const teamspaceSettingUpdate = (ts, query, actions) => db.updateOne(ts, TEAMSPAC
 const teamspaceSettingQuery = (ts, query, projection, sort) => db.findOne(ts,
 	TEAMSPACE_SETTINGS_COL, query, projection, sort);
 
-TeamspaceSetting.getTeamspaceSetting = async (ts, projection) => {
+TeamspaceSetting.getTeamspaceSetting = async (ts, projection = { refId: 0 }) => {
 	const tsDoc = await teamspaceSettingQuery(ts, { _id: ts }, projection);
 	if (!tsDoc) {
 		throw templates.teamspaceNotFound;
@@ -167,10 +167,6 @@ TeamspaceSetting.hasAccessToTeamspace = async (teamspace, username) => {
 
 	const restrictions = await TeamspaceSetting.getSecurityRestrictions(teamspace);
 
-	if (restrictions[SECURITY_SETTINGS.SSO_RESTRICTED] && !userDoc.customData.sso) {
-		throw templates.ssoRestricted;
-	}
-
 	if (restrictions[SECURITY_SETTINGS.DOMAIN_WHITELIST]) {
 		const userDomain = userDoc.customData.email.split('@')[1].toLowerCase();
 		if (!restrictions[SECURITY_SETTINGS.DOMAIN_WHITELIST].includes(userDomain)) {
@@ -210,12 +206,22 @@ TeamspaceSetting.getTeamspaceExpiredLicenses = (teamspace) => {
 	return teamspaceSettingQuery(teamspace, query, { _id: 1, subscriptions: 1 });
 };
 
-TeamspaceSetting.createTeamspaceSettings = async (teamspace) => {
+TeamspaceSetting.createTeamspaceSettings = async (teamspace, teamspaceId) => {
 	const settings = { _id: teamspace,
+		refId: teamspaceId,
 		topicTypes: DEFAULT_TOPIC_TYPES,
 		riskCategories: DEFAULT_RISK_CATEGORIES,
 		permissions: [] };
 	await db.insertOne(teamspace, TEAMSPACE_SETTINGS_COL, settings);
+};
+
+TeamspaceSetting.setTeamspaceRefId = async (teamspace, refId) => {
+	await teamspaceSettingUpdate(teamspace, { _id: teamspace }, { $set: { refId } });
+};
+
+TeamspaceSetting.getTeamspaceRefId = async (teamspace) => {
+	const { refId } = await TeamspaceSetting.getTeamspaceSetting(teamspace, { refId: 1 });
+	return refId;
 };
 
 const grantPermissionToUser = async (teamspace, username, permission) => {
@@ -226,11 +232,9 @@ const grantPermissionToUser = async (teamspace, username, permission) => {
 TeamspaceSetting.grantAdminToUser = (teamspace, username) => grantPermissionToUser(teamspace,
 	username, TEAMSPACE_ADMIN);
 
-TeamspaceSetting.getAllUsersInTeamspace = async (teamspace) => {
+TeamspaceSetting.getAllUsersInTeamspace = (teamspace, projection = { user: 1 }) => {
 	const query = { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER };
-	const users = await findMany(query, { user: 1 });
-
-	return users.map(({ user }) => user);
+	return findMany(query, projection);
 };
 
 TeamspaceSetting.removeUserFromAdminPrivilege = async (teamspace, user) => {

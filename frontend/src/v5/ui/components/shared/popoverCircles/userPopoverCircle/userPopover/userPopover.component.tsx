@@ -40,7 +40,7 @@ export const UserPopover = ({ user }: IUserPopover) => {
 		);
 	}
 
-	const { firstName, lastName, company, job, user: username } = user;
+	const { firstName, lastName, company, job } = user;
 	return (
 		<PopoverContainer>
 			<AvatarWrapper>
@@ -48,7 +48,6 @@ export const UserPopover = ({ user }: IUserPopover) => {
 			</AvatarWrapper>
 			<Data>
 				<Heading>{firstName} {lastName}</Heading>
-				<Username>{username}</Username>
 				<Employment>{compact([job, company]).join(', ')}</Employment>
 			</Data>
 		</PopoverContainer>
