@@ -43,7 +43,7 @@ function* showEndpointErrorDialog(data) {
 			error,
 		}));
 	} else {
-		yield put(DialogActions.showEndpointErrorDialogSuccess(data));
+		yield put(DialogActions.showEndpointErrorDialogSuccess(method, dataType, error));
 	}
 };
 
