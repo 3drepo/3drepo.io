@@ -66,7 +66,7 @@ export const EditProfilePersonalTab = ({
 	const userIsMissingRequiredData = userHasMissingRequiredData(user);
 
 	const getSubmittableValues = (): IUpdatePersonalInputs => {
-		const { email, ...values } = getValues();
+		const values = getValues();
 		const trimmedValues = mapValues(values, (value) => value?.trim?.() ?? value);
 		return pickBy(trimmedValues) as IUpdatePersonalInputs;
 	};
