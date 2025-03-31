@@ -15,18 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, select, take, takeLatest } from 'redux-saga/effects';
+import { put, race, select, take, takeLatest } from 'redux-saga/effects';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { BaseProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ViewerGuiActions } from '@/v4/modules/viewerGui/viewerGui.redux';
-import { FetchTicketsListAction, OpenTicketAction, TicketsCardActions, TicketsCardTypes } from './ticketsCard.redux';
+import { FetchTicketsListAction, OpenTicketAction, TicketsCardActions, TicketsCardTypes, UpsertFilterAction } from './ticketsCard.redux';
 import { TicketsActions, TicketsTypes } from '../tickets.redux';
-import { DialogsActions } from '../../dialogs/dialogs.redux';
+import { DialogsActions, DialogsTypes } from '../../dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 import { selectTemplates } from '../tickets.selectors';
 import { selectCardFilters } from './ticketsCard.selectors';
 import * as API from '@/v5/services/api';
 import { filtersToQuery } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
+import { isEqual, pick } from 'lodash';
 
 export function* openTicket({ ticketId }: OpenTicketAction) {
 	yield put(TicketsCardActions.setSelectedTicket(ticketId));
@@ -73,9 +74,33 @@ export function* fetchFilteredTickets({ teamspace, projectId, modelId, isFederat
 	}
 }
 
+export function* upsertFilter({ filter }: UpsertFilterAction) {
+	try {
+		const filters = yield select(selectCardFilters);
+		const getPath = (f) => pick(f, ['module', 'property', 'type']);
+		const oldFilter = filters.find((f) => isEqual(getPath(filter), getPath(f)));
+
+		yield put(TicketsCardActions.upsertFilterSuccess(filter));
+		const { failure } = yield race({
+			success: take(TicketsCardTypes.SET_FILTERED_TICKET_IDS),
+			failure: take(DialogsTypes.OPEN),
+		});
+		if (!failure) return;
+		// if editing a filter then revert it, else delete the invalid filter
+		yield oldFilter ?
+			put(TicketsCardActions.upsertFilter(oldFilter)) :
+			put(TicketsCardActions.deleteFilter(filter));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'tickets.upsertFilter.error', defaultMessage: 'trying to upsert a filter' }),
+			error,
+		}));
+	}
+}
 
 export default function* ticketsCardSaga() {
 	yield takeLatest(TicketsCardTypes.OPEN_TICKET, openTicket);
 	yield takeLatest(TicketsCardTypes.FETCH_TICKETS_LIST, fetchTicketsList);
 	yield takeLatest(TicketsCardTypes.FETCH_FILTERED_TICKETS, fetchFilteredTickets);
+	yield takeLatest(TicketsCardTypes.UPSERT_FILTER, upsertFilter);
 }

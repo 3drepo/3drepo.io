@@ -17,20 +17,30 @@
 
 import { FormattedMessage } from 'react-intl';
 import { CardFilterOperator, CardFilterValue, CardFilterType, BaseFilter, CardFilter } from '../cardFilters.types';
-import { getFilterFormTitle } from '../cardFilters.helpers';
+import { amendDateUpperBounds, floorToMinute, getDefaultOperator, getFilterFormTitle, isDateType, isRangeOperator } from '../cardFilters.helpers';
+import { getValidOperators, getOptionFromValue } from '../filtersSelection/tickets/ticketFilters.helpers';
 import { Container, ButtonsContainer, Button, TitleContainer } from './filterForm.styles';
 import { FormProvider, useForm } from 'react-hook-form';
-import { isEmpty } from 'lodash';
+import { isBoolean, isEmpty } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { FilterFormValues } from './filterFormValues/filterFormValues.component';
 import { mapArrayToFormArray, mapFormArrayToArray } from '@/v5/helpers/form.helper';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FilterSchema } from '@/v5/validation/ticketSchemes/validators';
 import { FilterFormOperators } from './filterFormValues/operators/filterFormOperators.component';
+import { formatSimpleDate } from '@/v5/helpers/intl.helper';
+import { formatMessage } from '@/v5/services/intl';
+import { TRUE_LABEL, FALSE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
 
-const DEFAULT_OPERATOR = 'is';
 const DEFAULT_VALUES = [''];
-type FormType = { values: { value: CardFilterValue }[], operator: CardFilterOperator };
+
+type Option = { 
+	value: string,
+	displayValue: string,
+	type: string
+};
+
+type FormType = { selectOptions?: Option[], values: { value: CardFilterValue, displayValue?: string }[], operator: CardFilterOperator };
 type FilterFormProps = {
 	module: string,
 	property: string,
@@ -39,9 +49,16 @@ type FilterFormProps = {
 	onSubmit: (newFilter: CardFilter) => void,
 	onCancel: () => void,
 };
+
+const valueToDisplayDate = (value) => formatSimpleDate(new Date(value));
+const formatDateRange = ([from, to]) => formatMessage(
+	{ defaultMessage: '{from} to {to}', id: 'cardFilter.dateRange.join' },
+	{ from: valueToDisplayDate(from), to: valueToDisplayDate(to) },
+);
+
 export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel }: FilterFormProps) => {
-	const defaultValues = {
-		operator: filter?.operator || DEFAULT_OPERATOR,
+	const defaultValues: FormType = {
+		operator: filter?.operator || getDefaultOperator(type),
 		values: mapArrayToFormArray(filter?.values || DEFAULT_VALUES),
 	};
 
@@ -50,16 +67,52 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel 
 		mode: 'onChange',
 		resolver: yupResolver(FilterSchema),
 		context: { type },
+		shouldUnregister: true,
 	});
-	const { formState: { isValid, dirtyFields }, reset } = formData;
+	const { formState: { isValid, dirtyFields }, reset, getValues } = formData;
+
+	const operatorValue = getValues('operator');
+	if (!getValidOperators(type).includes(operatorValue)) {
+		reset(defaultValues);
+	}
 
 	const isUpdatingFilter = !!filter;
 	const canSubmit = isValid && !isEmpty(dirtyFields);
 
-	const handleSubmit = formData.handleSubmit((body: FormType) => {
-		const newValues = mapFormArrayToArray(body.values)
+	const handleSubmit = formData.handleSubmit((filledForm: FormType) => {
+		let newValues = mapFormArrayToArray(filledForm.values)
 			.filter((x) => ![undefined, ''].includes(x as any));
-		onSubmit({ module, property, type, filter: { operator: body.operator, values: newValues } });
+
+		// We need to adjust the upper bounds of date values since some dates (e.g. Created At) include milliseconds whereas the datePicker
+		// only goes down to minutes. So we need to extend the upper bound values to the maximum millisecond possible to include all of that minute
+		if (isDateType(type)) {
+			switch (filledForm.operator) {
+				case 'rng':
+				case 'nrng':
+					newValues = newValues.map(amendDateUpperBounds);
+					break;
+				case 'lte':
+					newValues = amendDateUpperBounds(newValues);
+					break;
+				case 'gte': // This is required for when a chip is edited from lte to gte so that it is no longer at the very last millisecond
+					newValues = newValues.map(floorToMinute);
+					break;
+				default:
+					break;
+			}
+		}
+		const isRange = isRangeOperator(filledForm.operator);
+		const displayValues = newValues.map((newVal) => {
+			const option = getOptionFromValue(newVal, filledForm.selectOptions);
+			if (isDateType(type)) return (isRange ? formatDateRange(newVal) : valueToDisplayDate(newVal));
+			if (type === 'boolean' && isBoolean(newValues[0])) return newValues[0] ? TRUE_LABEL : FALSE_LABEL; 
+			if (isRange) {
+				const [a, b] = newVal;
+				return `[${a}, ${b}]`;
+			}
+			return option?.displayValue ?? newVal;
+		}).join(', ');
+		onSubmit({ module, property, type, filter: { operator: filledForm.operator, values: newValues, displayValues } });
 	});
 
 	const handleCancel = () => {

@@ -38,7 +38,6 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { getSocket, initializeSocket, SocketEvents, subscribeToSocketEvent } from './v5/services/realtime/realtime.service';
 import { setSocket } from './v4/modules/chat/chat.sagas';
 import { ROUTES } from './v4/constants/routes';
-import { LOGIN_PATH as V5_LOGIN_PATH, SIGN_UP_PATH as V5_SIGN_UP_PATH } from './v5/ui/routes/routes.constants';
 import configAxios from './v4/services/api/config-axios';
 import { setSocketIdHeader } from './v5/services/api/default';
 import rootSaga from './v4/modules/sagas';
@@ -47,6 +46,7 @@ import { initializeGoogleTagManager } from './v5/services/googleTagManager';
 import { initializeHotjar } from './v5/services/hotjar';
 import { dispatch } from './v5/helpers/redux.helpers';
 import { Route } from './v5/services/routing/route.component';
+import { AUTH_PATH as V5_AUTH_PATH } from './v5/ui/routes/routes.constants';
 
 window.UnityUtil = UnityUtil;
 
@@ -76,10 +76,10 @@ const render = () => {
 								<Redirect to={{ pathname:'v5/' }} />
 							</Route>
 							<Route path={ROUTES.SIGN_UP}>
-								<Redirect to={{ pathname: V5_SIGN_UP_PATH, search: window.location.search }} />
+								<Redirect to={{ pathname: V5_AUTH_PATH, search: window.location.search }} />
 							</Route>
 							<Route exact path={ROUTES.LOGIN}>
-								<Redirect to={{ pathname: V5_LOGIN_PATH }} />
+								<Redirect to={{ pathname: V5_AUTH_PATH }} />
 							</Route>
 							<Route path="/v5">
 								<V5Root />

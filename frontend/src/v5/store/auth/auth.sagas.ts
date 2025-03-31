@@ -18,25 +18,47 @@
 import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
-import { AuthActions, AuthTypes, LoginAction } from './auth.redux';
+import { AuthActions, AuthenticateTeamspaceAction, AuthTypes, SetAuthenticatedTeamspaceAction } from './auth.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { CurrentUserActions } from '../currentUser/currentUser.redux';
 import { cookies } from '@/v5/helpers/cookie.helper';
 import axios from 'axios';
 import { setPermissionModalSuppressed } from '@components/shared/updatePermissionModal/updatePermissionModal.helpers';
+import { authBroadcastChannel } from './authBrodcastChannel';
+import { ssoAuth } from '@/v5/services/api/sso';
 
 const CSRF_TOKEN = 'csrf_token';
 const TOKEN_HEADER = 'X-CSRF-TOKEN';
 
+function* authenticateTeamspace({ redirectUri, teamspace, onError }: AuthenticateTeamspaceAction) {
+	try {
+		const { data } = yield ssoAuth(redirectUri, teamspace);
+		window.location.replace(data.link);
+	} catch (error) {
+		onError?.(error);
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'auth.authenticate.error', defaultMessage: 'trying to authenticate teamspace' }),
+			error,
+		}));
+	}
+}
+
+function* setAuthenticatedTeamspace({ teamspace }: SetAuthenticatedTeamspaceAction) {
+	yield put(AuthActions.setAuthenticatedTeamspaceSuccess(teamspace));
+	yield put(AuthActions.setSessionAuthenticatedTeamspaceSuccess(teamspace));
+	authBroadcastChannel.postMessage(teamspace);
+}
 
 function* authenticate() {
-	yield put(AuthActions.setPendingStatus(true));
+	yield put(AuthActions.setIsAuthenticationPending(true));
 
 	try {
 		axios.defaults.headers[TOKEN_HEADER] = cookies(CSRF_TOKEN);
-		yield API.Auth.authenticate();
+		const { data: { authenticatedTeamspace } } = yield API.Auth.authenticate();
+		yield put(AuthActions.setAuthenticatedTeamspace(authenticatedTeamspace));
 		yield put(CurrentUserActions.fetchUser());
-		yield put(AuthActions.setAuthenticationStatus(true));
+		yield put(AuthActions.setIsAuthenticated(true));
+		setPermissionModalSuppressed(false);
 	} catch (error) {
 		if (error.response?.status !== 401) {
 			yield put(DialogsActions.open('alert', {
@@ -44,61 +66,13 @@ function* authenticate() {
 				error,
 			}));
 		}
-		yield put(AuthActions.setAuthenticationStatus(false));
+		yield put(AuthActions.setIsAuthenticated(false));
 	}
-	yield put(AuthActions.setPendingStatus(false));
-}
-
-function* login({ username, password }: LoginAction) {
-	yield put(AuthActions.setPendingStatus(true));
-
-	try {
-		yield API.Auth.login(username, password);
-		axios.defaults.headers[TOKEN_HEADER] = cookies(CSRF_TOKEN);
-		yield put(CurrentUserActions.fetchUser());
-		yield put(AuthActions.setAuthenticationStatus(true));
-		setPermissionModalSuppressed(false);
-	} catch (error) {
-		const data = error.response?.data;
-		const lockoutDuration = Math.round(ClientConfig.loginPolicy.lockoutDuration / 1000 / 60);
-
-		switch (data?.code) {
-			case 'INCORRECT_USERNAME_OR_PASSWORD':
-				yield put(AuthActions.loginFailed(
-					formatMessage({ id: 'auth.login.error.badFields', defaultMessage: 'Incorrect username or password. Please try again.' }),
-				));
-				break;
-			case 'ALREADY_LOGGED_IN':
-				yield put(AuthActions.authenticate());
-				break;
-			case 'TOO_MANY_LOGIN_ATTEMPTS':
-				yield put(AuthActions.loginFailed(
-					formatMessage(
-						{
-							id: 'auth.login.error.tooManyAttempts',
-							defaultMessage: 'Too many unsuccessful login attempts! Account locked for {time} minutes.',
-						}, { time: lockoutDuration },
-					),
-				));
-				break;
-			case 'USER_NOT_VERIFIED':
-				yield put(AuthActions.loginFailed(
-					formatMessage({
-						id: 'auth.login.error.userNotVerified',
-						defaultMessage: 'Account not yet verified. Please check your email',
-					}),
-				));
-				break;
-			default:
-				// network or unexpected error
-				yield put(AuthActions.loginFailed(null));
-		}
-	}
-	yield put(AuthActions.setPendingStatus(false));
+	yield put(AuthActions.setIsAuthenticationPending(false));
 }
 
 function* logout() {
-	yield put(AuthActions.setPendingStatus(true));
+	yield put(AuthActions.setIsAuthenticationPending(true));
 	try {
 		yield API.Auth.logout();
 		yield put({ type: 'RESET_APP' });
@@ -111,8 +85,9 @@ function* logout() {
 			yield put({ type: 'RESET_APP' });
 		}
 	}
-	yield put(AuthActions.setAuthenticationStatus(false));
-	yield put(AuthActions.setPendingStatus(false));
+	yield put(AuthActions.setIsAuthenticated(false));
+	yield put(AuthActions.setIsAuthenticationPending(false));
+	yield put(AuthActions.setAuthenticatedTeamspace(null));
 }
 
 function* kickedOut() {
@@ -130,8 +105,9 @@ function* kickedOut() {
 }
 
 export default function* AuthSaga() {
+	yield takeLatest(AuthTypes.SET_AUTHENTICATED_TEAMSPACE, setAuthenticatedTeamspace);
+	yield takeLatest(AuthTypes.AUTHENTICATE_TEAMSPACE, authenticateTeamspace);
 	yield takeLatest(AuthTypes.AUTHENTICATE, authenticate);
-	yield takeLatest(AuthTypes.LOGIN, login);
 	yield takeLatest(AuthTypes.LOGOUT, logout);
 	yield takeLatest(AuthTypes.KICKED_OUT, kickedOut);
 }

@@ -15,22 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Container as FixedOrGrowContainer } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.styles';
-import { Typography } from '@controls/typography';
+import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.component';
 import styled, { css } from 'styled-components';
+import { ResizableTable } from '@controls/resizableTableContext/resizableTable/resizableTable.component';
+import { Row } from './ticketsTableRow/ticketsTableRow.styles';
 
-export const Headers = styled.div`
-	display: flex;
+export const Headers = styled(ResizableTableRow)`
 	gap: 1px;
-	margin-bottom: 10px;
-	width: 100%;
-	width: min(90vw, 1289px);
+	width: fit-content;
 `;
 
-export const Header = styled(FixedOrGrowContainer)<{ $selectable: boolean }>`
+export const PlaceholderForStickyFunctionality = styled(Headers)``;
+
+export const Header = styled.div<{ $selectable?: boolean }>`
 	${({ theme }) => theme.typography.kicker};
 	color: ${({ theme }) => theme.palette.base.main};
 	padding-left: 10px;
+	padding-bottom: 10px;
 	text-align: start;
 	box-sizing: border-box;
 	user-select: none;
@@ -41,34 +42,17 @@ export const Header = styled(FixedOrGrowContainer)<{ $selectable: boolean }>`
 	${({ $selectable }) => $selectable && css`
 		cursor: pointer;
 	`}
-
-	${({ width }) => width ? css`
-		flex: 0 0 ${width};
-	` : css`
-		flex: 1;
-		min-width: 300px;
-	`}
-`;
-
-export const Group = styled.div`
-	display: grid;
-	border-radius: 10px;
-	overflow: hidden;
-	gap: 1px;
-	background-color: transparent;
 `;
 
 export const NewTicketRow = styled.div<{ disabled?: boolean }>`
 	width: 100%;
 	height: 37px;
-	font-weight: 600;
 	cursor: pointer;
 	color: ${({ theme }) => theme.palette.base.main};
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	display: flex;
-	align-items: center;
-	padding-left: 15px;
-	gap: 6px;
+	display: grid;
+	position: relative;
+	z-index: 11;
 
 	${({ disabled }) => disabled && css`
 		cursor: initial;
@@ -77,8 +61,49 @@ export const NewTicketRow = styled.div<{ disabled?: boolean }>`
 	`}
 `;
 
-export const NewTicketText = styled(Typography).attrs({
-	variant: 'body1',
-})`
+export const NewTicketText = styled.div`
 	font-weight: 600;
+	${({ theme }) => theme.typography.body1}
+
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	position: sticky;
+	left: 15px;
+	width: fit-content;
+`;
+
+const roundBorderTop = css`
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+`;
+
+export const Group = styled.div<{ $empty: boolean }>`
+	display: grid;
+	gap: 1px;
+	width: fit-content;
+	background-color: transparent;
+
+	${({ $empty }) => !$empty && css`
+		& > ${/* sc-selector */Row}:first-child {
+			${roundBorderTop}
+			overflow: hidden;
+		}
+	`}
+
+	${NewTicketRow} {
+		border-bottom-left-radius: 10px;
+		border-bottom-right-radius: 10px;
+		${({ $empty }) => $empty && roundBorderTop}
+	}
+`;
+
+export const Table = styled(ResizableTable)<{ $empty?: boolean }>`
+	overflow-x: unset;
+	width: fit-content;
+	${({ $empty }) => $empty && css`
+		${Group} {
+			width: unset;
+		}
+	`}
 `;

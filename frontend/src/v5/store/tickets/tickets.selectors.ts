@@ -30,7 +30,7 @@ export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `p
 
 const getTemplateDefaultStatus = (template: ITemplate) => template.properties?.find(({ name }) => name === BaseProperties.STATUS)?.default;
 
-export const getTicketWithStatus = (ticket: ITicket, template: ITemplate) => {
+const getTicketWithStatus = (ticket: ITicket, template: ITemplate) => {
 	if (ticket.properties[BaseProperties.STATUS] || !template) return ticket;
 	return {
 		...ticket,
@@ -54,9 +54,9 @@ export const selectTemplates = createSelector(
 	(state, modelId) => state.templatesByModelId[modelId] || [],
 );
 
-export const selectTemplatesNames = createSelector(
+export const selectActiveTemplates = createSelector(
 	selectTemplates,
-	(templates) => templates.map(({ name }) => name),
+	(templates) => templates.filter(({ deprecated }) => !deprecated),
 );
 
 export const selectTemplateById = createSelector(

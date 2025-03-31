@@ -34,10 +34,10 @@ let server;
 let agent;
 
 const setupBasicData = async ({ users, teamspace, projects, model, imageData }) => {
+	await ServiceHelper.db.createUser(users.tsAdmin);
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
 
 	await Promise.all([
-		ServiceHelper.db.createUser(users.tsAdmin, [teamspace]),
 		ServiceHelper.db.createUser(users.projectAdmin, [teamspace]),
 		ServiceHelper.db.createUser(users.nonAdminUser, [teamspace]),
 		ServiceHelper.db.createUser(users.unlicencedUser),
@@ -167,6 +167,17 @@ const testCreateProject = () => {
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
+		test('should fail if multiple projects are being sent at similar times with the same name', async () => {
+			const payload = { name: ServiceHelper.generateRandomString() };
+			const [res1, res2, res3] = await Promise.all(times(3, () => agent.post(route()).send(payload)));
+
+			expect(res1.statusCode).toBe(templates.ok.status);
+			expect(res2.statusCode).toBe(templates.invalidArguments.status);
+			expect(res2.body.code).toBe(templates.invalidArguments.code);
+			expect(res3.statusCode).toBe(templates.invalidArguments.status);
+			expect(res3.body.code).toBe(templates.invalidArguments.code);
+		});
+
 		test('should create new project if new project data are valid', async () => {
 			const res = await agent.post(route())
 				.send({ name: 'Valid Name' }).expect(templates.ok.status);
@@ -207,7 +218,7 @@ const testUpdateProject = () => {
 
 		test('should fail if the user is not project admin', async () => {
 			const res = await agent.patch(route(teamspace, projects.testProject.id,
-				users.nonAdminUser.apiKey)).expect(templates.notLoggedIn.status);
+				users.nonAdminUser.apiKey)).expect(templates.notAuthorized.status);
 			expect(res.body.code).toEqual(templates.notAuthorized.code);
 		});
 

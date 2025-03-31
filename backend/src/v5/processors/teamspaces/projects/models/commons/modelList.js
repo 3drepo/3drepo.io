@@ -17,7 +17,7 @@
 
 const { addModelToProject, getProjectById, removeModelFromProject } = require('../../../../../models/projectSettings');
 const { getLatestRevision, getRevisionByIdOrTag } = require('../../../../../models/revisions');
-const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions/permissions');
+const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions');
 const { USERS_DB_NAME } = require('../../../../../models/users.constants');
 const { addModel } = require('../../../../../models/modelSettings');
 const { getFavourites } = require('../../../../../models/users');

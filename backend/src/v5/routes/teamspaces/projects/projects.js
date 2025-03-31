@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { hasAccessToTeamspace, isAdminToProject, isTeamspaceAdmin } = require('../../../middleware/permissions/permissions');
+const { hasAccessToTeamspace, isAdminToProject, isTeamspaceAdmin } = require('../../../middleware/permissions');
 const { projectExists, validateProjectData } = require('../../../middleware/dataConverter/inputs/teamspaces/projects');
 const Projects = require('../../../processors/teamspaces/projects');
 const { Router } = require('express');

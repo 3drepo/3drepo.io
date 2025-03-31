@@ -27,7 +27,7 @@ const {
 	hasWriteAccessToContainer,
 	hasWriteAccessToDrawing,
 	hasWriteAccessToFederation,
-} = require('../../../utils/permissions/permissions');
+} = require('../../../utils/permissions');
 const { getUserFromSession } = require('../../../utils/sessions');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');

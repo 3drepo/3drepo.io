@@ -50,9 +50,12 @@ const generateBasicData = () => ({
 });
 
 const setupBasicData = async (users, teamspace, project, models, templatesToAdd) => {
-	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
+	const { tsAdmin, ...otherUsers } = users;
 
-	const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], key !== 'nobody' ? [teamspace] : []));
+	await ServiceHelper.db.createUser(tsAdmin);
+	await ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user]);
+
+	const userProms = Object.keys(otherUsers).map((key) => ServiceHelper.db.createUser(users[key], key !== 'nobody' ? [teamspace] : []));
 	const modelProms = models.map((model) => ServiceHelper.db.createModel(
 		teamspace,
 		model._id,
@@ -317,6 +320,11 @@ const testImportTickets = () => {
 		const template = ServiceHelper.generateTemplate(false, false, { comments: true });
 		const templateWithoutComments = ServiceHelper.generateTemplate();
 		template.properties.push({ name: uniquePropertyName, type: propTypes.TEXT, unique: true });
+		template.modules.push({
+			name: uniquePropertyName,
+			properties: [{ name: uniquePropertyName, type: propTypes.TEXT, unique: true }],
+		});
+		const duplicateValue = ServiceHelper.generateRandomString();
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed],
@@ -328,6 +336,11 @@ const testImportTickets = () => {
 			const wrongTypeModel = isFed ? con : fed;
 			const modelWithTemplates = isFed ? fed : con;
 			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const duplicateUniquePropTicket = ServiceHelper.generateTicket(template);
+			duplicateUniquePropTicket.properties[uniquePropertyName] = duplicateValue;
+
+			const duplicateUniqueModulePropTicket = ServiceHelper.generateTicket(template);
+			duplicateUniqueModulePropTicket.modules[uniquePropertyName][uniquePropertyName] = duplicateValue;
 
 			const getRoute = ({ key = users.tsAdmin.apiKey, projectId = project.id, modelId = modelWithTemplates._id, templateId = template._id } = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/import${ServiceHelper.createQueryString({ key, template: templateId })}`;
 
@@ -349,6 +362,8 @@ const testImportTickets = () => {
 					...ServiceHelper.generateTicket(templateWithoutComments),
 					comments: times(10, ServiceHelper.generateImportedComment) }],
 				['the ticket data contains invalid comments', false, getRoute(), templates.invalidArguments, { comments: times(10, ServiceHelper.generateComment) }],
+				['the ticket data contains duplicate unique properties', false, getRoute(), templates.invalidArguments, { ...duplicateUniquePropTicket }],
+				['the ticket data contains duplicate unique module properties', false, getRoute(), templates.invalidArguments, { ...duplicateUniqueModulePropTicket }],
 			];
 		};
 
@@ -640,8 +655,22 @@ const testGetTicketList = () => {
 		templateWithAllProps.properties.push(textProp, longTextProp, numberProp, boolProp, dateProp,
 			oneOfProp, manyOfProp);
 
-		con.tickets = times(10, (n) => ServiceHelper.generateTicket(templatesToUse[n % templatesToUse.length]));
-		fed.tickets = times(10, (n) => ServiceHelper.generateTicket(templatesToUse[n % templatesToUse.length]));
+		con.tickets = times(13, (n) => ServiceHelper.generateTicket(templatesToUse[n % templatesToUse.length]));
+		fed.tickets = times(13, (n) => ServiceHelper.generateTicket(templatesToUse[n % templatesToUse.length]));
+
+		delete con.tickets[12].properties[textProp.name];
+		delete con.tickets[12].properties[longTextProp.name];
+		delete con.tickets[12].properties[numberProp.name];
+		delete con.tickets[12].properties[dateProp.name];
+		delete con.tickets[12].properties[oneOfProp.name];
+		delete con.tickets[12].properties[manyOfProp.name];
+
+		delete fed.tickets[12].properties[textProp.name];
+		delete fed.tickets[12].properties[longTextProp.name];
+		delete fed.tickets[12].properties[numberProp.name];
+		delete fed.tickets[12].properties[dateProp.name];
+		delete fed.tickets[12].properties[oneOfProp.name];
+		delete fed.tickets[12].properties[manyOfProp.name];
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed, conNoTickets, fedNoTickets],
@@ -699,10 +728,12 @@ const testGetTicketList = () => {
 			const existsPropertyFilters = (propType, propertyName) => [
 				[`${queryOperators.EXISTS} operator is used in ${propType} property`,
 					{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.EXISTS}'` } }, true,
-					model.tickets.filter((t) => t.type === templateWithAllProps._id)],
+					model.tickets.filter((t) => t.type === templateWithAllProps._id
+						&& Object.hasOwn(t.properties, propertyName))],
 				[`${queryOperators.NOT_EXISTS} operator is used in ${propType} property`,
 					{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.NOT_EXISTS}'` } }, true,
-					model.tickets.filter((t) => t.type !== templateWithAllProps._id)],
+					model.tickets.filter((t) => t.type !== templateWithAllProps._id
+					|| !Object.hasOwn(t.properties, propertyName))],
 			];
 
 			const equalsPropertyFilters = (propType, propertyName) => [
@@ -733,9 +764,11 @@ const testGetTicketList = () => {
 						model.tickets.filter((t) => t.properties[propertyName]
 							=== model.tickets[0].properties[propertyName])],
 					[`${queryOperators.NOT_CONTAINS} operator is used in ${propType} property`,
-						{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.NOT_CONTAINS}::${model.tickets[0].properties[propertyName]}'` } }, true,
-						model.tickets.filter((t) => t.properties[propertyName]
-							!== model.tickets[0].properties[propertyName])],
+						{ ...baseRouteParams,
+							options: { query: `'${propertyName}::${queryOperators.NOT_CONTAINS}::${model.tickets[0].properties[propertyName]}'` } },
+						true,
+						model.tickets
+							.filter((t) => t.properties[propertyName] !== model.tickets[0].properties[propertyName])],
 				];
 			};
 
@@ -757,7 +790,9 @@ const testGetTicketList = () => {
 						.filter((t) => t.properties[manyOfProp.name]?.some((val) => val.slice(0, 5)
 							=== model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)))],
 				[`${queryOperators.NOT_CONTAINS} operator is used in ${propTypes.MANY_OF} property`,
-					{ ...baseRouteParams, options: { query: `'${manyOfProp.name}::${queryOperators.NOT_CONTAINS}::${model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)}'` } }, true,
+					{ ...baseRouteParams,
+						options: { query: `'${manyOfProp.name}::${queryOperators.NOT_CONTAINS}::${model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)}'` } },
+					true,
 					model.tickets
 						.filter((t) => !t.properties[manyOfProp.name]
 							?.some((val) => val.slice(0, 5)
@@ -781,7 +816,9 @@ const testGetTicketList = () => {
 						>= model.tickets[0].properties[propertyName] - 500
 						&& t.properties[propertyName] <= model.tickets[0].properties[propertyName] + 500)],
 				[`${queryOperators.NOT_IN_RANGE} operator is used in ${propType} property`,
-					{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.NOT_IN_RANGE}::[${model.tickets[0].properties[propertyName] - 500},${model.tickets[0].properties[propertyName] + 500}]'` } }, true,
+					{ ...baseRouteParams,
+						options: { query: `'${propertyName}::${queryOperators.NOT_IN_RANGE}::[${model.tickets[0].properties[propertyName] - 500},${model.tickets[0].properties[propertyName] + 500}]'` } },
+					true,
 					model.tickets.filter((t) => !t.properties[propertyName] || (t.properties[propertyName]
 					< model.tickets[0].properties[propertyName] - 500
 					|| t.properties[propertyName] > model.tickets[0].properties[propertyName] + 500))],
@@ -1058,7 +1095,16 @@ const testUpdateTicket = () => {
 const testUpdateManyTickets = () => {
 	describe('Update many tickets', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
+		const uniquePropertyName = ServiceHelper.generateRandomString();
 		const template = ServiceHelper.generateTemplate(false, false, { comments: true });
+		const duplicateTemplate = ServiceHelper.generateTemplate();
+		duplicateTemplate.properties.push({ name: uniquePropertyName, type: propTypes.TEXT, unique: true });
+		duplicateTemplate.modules.push({
+			name: uniquePropertyName,
+			properties: [{ name: uniquePropertyName, type: 'text', unique: true }],
+		});
+		const duplicateValue = ServiceHelper.generateRandomString();
+
 		const nTickets = 10;
 
 		const deprecatedTemplate = ServiceHelper.generateTemplate(false);
@@ -1071,9 +1117,31 @@ const testUpdateManyTickets = () => {
 		fed.ticketsCommentTest1 = times(nTickets, () => ServiceHelper.generateTicket(template));
 		con.ticketsCommentTest2 = times(nTickets, () => ServiceHelper.generateTicket(template));
 		fed.ticketsCommentTest2 = times(nTickets, () => ServiceHelper.generateTicket(template));
+		con.ticketsDuplicateUniqueProp = times(nTickets, () => {
+			const ticket = ServiceHelper.generateTicket(duplicateTemplate);
+			ticket.properties[uniquePropertyName] = duplicateValue;
+			return ticket;
+		});
+		fed.ticketsDuplicateUniqueProp = times(nTickets, () => {
+			const ticket = ServiceHelper.generateTicket(duplicateTemplate);
+			ticket.properties[uniquePropertyName] = duplicateValue;
+			return ticket;
+		});
+		con.ticketsDuplicateUniqueModuleProp = times(nTickets, () => {
+			const ticket = ServiceHelper.generateTicket(duplicateTemplate);
+			ticket.modules[uniquePropertyName][uniquePropertyName] = duplicateValue;
+			return ticket;
+		});
+		fed.ticketsDuplicateUniqueModuleProp = times(nTickets, () => {
+			const ticket = ServiceHelper.generateTicket(duplicateTemplate);
+			ticket.modules[uniquePropertyName][uniquePropertyName] = duplicateValue;
+			return ticket;
+		});
 
 		beforeAll(async () => {
-			await setupBasicData(users, teamspace, project, [con, fed], [template, deprecatedTemplate]);
+			await setupBasicData(
+				users, teamspace, project, [con, fed], [template, deprecatedTemplate, duplicateTemplate],
+			);
 
 			await Promise.all([fed, con].map(async (model) => {
 				const modelType = fed === model ? 'federation' : 'container';
@@ -1133,6 +1201,8 @@ const testUpdateManyTickets = () => {
 				['the ticket data conforms to the template but the user is a viewer', false, { ...baseRouteParams, key: users.viewer.apiKey }, templates.notAuthorized, () => ({ title: ServiceHelper.generateRandomString() })],
 				['the ticket data contains comments but the template does not support it', false, { ...baseRouteParams, templateId: deprecatedTemplate._id, tickets: [model.depTemTicket] }, templates.invalidArguments, () => ({ title: ServiceHelper.generateRandomString(), comments: times(10, ServiceHelper.generateImportedComment) })],
 				['the ticket data contains invalid comments', false, baseRouteParams, templates.invalidArguments, () => ({ comments: times(10, ServiceHelper.generateComment) })],
+				['the ticket data contains duplicate unique property', false, { ...baseRouteParams, tickets: model.ticketsDuplicateUniqueProp }, templates.invalidArguments],
+				['the ticket data contains duplicate module unique property', false, { ...baseRouteParams, tickets: model.ticketsDuplicateUniqueModuleProp }, templates.invalidArguments],
 				['the ticket data conforms to the template', true, baseRouteParams, undefined, () => ({ title: ServiceHelper.generateRandomString() })],
 				['the ticket data contains just comments', true, { ...baseRouteParams, tickets: model.ticketsCommentTest1 }, undefined, () => ({ comments: times(10, ServiceHelper.generateImportedComment) })],
 				['the ticket data contains comments', true, { ...baseRouteParams, tickets: model.ticketsCommentTest2 }, undefined, () => ({ title: ServiceHelper.generateRandomString(), comments: times(10, ServiceHelper.generateImportedComment) })],

@@ -36,8 +36,8 @@ export type InputControllerProps<T,> = T & FormInputProps & {
 	defaultValue?: any,
 	onChange?: (event) => void,
 	onBlur?: () => void,
-	transformValueIn?: (val) => any,
-	transformChangeEvent?: (val) => any,
+	transformInputValue?: (val) => any,
+	transformOutputValue?: (val) => any,
 	children?: any,
 };
 
@@ -55,8 +55,8 @@ export const InputController: InputControllerType = forwardRef(<T,>({
 	defaultValue,
 	onChange,
 	onBlur,
-	transformValueIn = (val) => val,
-	transformChangeEvent = (val) => val,
+	transformInputValue = (val) => val,
+	transformOutputValue = (val) => val,
 	...props
 }: Props<T>, ref) => {
 	const ctx = useFormContext();
@@ -67,27 +67,25 @@ export const InputController: InputControllerType = forwardRef(<T,>({
 			name={name}
 			control={control}
 			defaultValue={defaultValue}
-			render={({ field: { ref: fieldRef, ...field } }) => {
-				return (
+			render={({ field: { ref: fieldRef, ...field } }) => (
 				// @ts-ignore
-					<Input
-						{...field}
-						{...props}
-						value={transformValueIn(field.value) ?? ''}
-						onChange={(event) => {
-							field.onChange(transformChangeEvent(event));
-							onChange?.(transformChangeEvent(event));
-						}}
-						onBlur={() => {
-							field.onBlur();
-							onBlur?.();
-						}}
-						inputRef={ref || fieldRef}
-						error={!!error}
-						helperText={error?.message}
-					/>
-				);
-			}}
+				<Input
+					{...field}
+					{...props}
+					value={transformInputValue(field.value) ?? ''}
+					onChange={(event) => {
+						field.onChange(transformOutputValue(event));
+						onChange?.(transformOutputValue(event));
+					}}
+					onBlur={() => {
+						field.onBlur();
+						onBlur?.();
+					}}
+					inputRef={ref || fieldRef}
+					error={!!error}
+					helperText={error?.message}
+				/>
+			)}
 		/>
 	);
 });

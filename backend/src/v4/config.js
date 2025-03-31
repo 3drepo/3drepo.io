@@ -262,12 +262,6 @@ config.auth = coalesce(config.auth, {});
 config.auth.captcha = coalesce(config.auth.captcha, false);
 config.auth.register = coalesce(config.auth.register,true);
 
-// paypal
-config.paypal = coalesce(config.paypal, null);
-if(config.paypal) {
-	config.paypal.validateIPN = coalesce(config.paypal.validateIPN, true);
-}
-
 config.cn_queue = { maxRetries: 3, ...config.cn_queue};
 
 // upload size limit
@@ -313,11 +307,5 @@ config.imageSizeLimit = coalesce(config.imageSizeLimit, 1048576);
 config.liveChatLicense = config.liveChatLicense || 0;
 
 config.cachePolicy = config.cachePolicy || {maxAge: 60 * 60 * 24 * 30};
-
-// login lockout policy
-config.loginPolicy = config.loginPolicy || {};
-config.loginPolicy.maxUnsuccessfulLoginAttempts = config.loginPolicy.maxUnsuccessfulLoginAttempts || 10;
-config.loginPolicy.remainingLoginAttemptsPromptThreshold = config.loginPolicy.remainingLoginAttemptsPromptThreshold || 5;
-config.loginPolicy.lockoutDuration = config.loginPolicy.lockoutDuration || 900000; // milliseconds
 
 module.exports = config;
