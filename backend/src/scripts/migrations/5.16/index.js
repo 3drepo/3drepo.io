@@ -15,9 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const migrateUsers = require('./migrateUsersToFrontegg');
 const createIndexOnProjectName = require('./createIndexOnProjectsName');
 
 const scripts = [
+	{ script: migrateUsers, desc: 'Migrate users and teamspaces to Frontegg' },
 	{ script: createIndexOnProjectName, desc: 'Ensure that each teamspace has an index on project name' },
 ];
 

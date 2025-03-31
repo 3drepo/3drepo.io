@@ -20,7 +20,7 @@ const {
 	validateNewTicketSchema,
 	validateUpdateTicketSchema,
 } = require('../../middleware/dataConverter/inputs/teamspaces/settings');
-const { hasAccessToTeamspace, isTeamspaceAdmin } = require('../../middleware/permissions/permissions');
+const { hasAccessToTeamspace, isTeamspaceAdmin } = require('../../middleware/permissions');
 const { respond, writeStreamRespond } = require('../../utils/responder');
 const Audit = require('../../processors/teamspaces/audits');
 const { Router } = require('express');

@@ -87,17 +87,7 @@ Intercom.submitLoginLockoutEvent = async (email) => {
 };
 
 Intercom.subscribeToV5Events = () => {
-	EventsManager.subscribe(EventsV5.ACCOUNT_LOCKED, async ({user}) => {
-		try {
-			const {findByUserName} = require("./user");
-			const { customData: { email } } = await findByUserName(user);
-			await Intercom.submitLoginLockoutEvent(email);
-		} catch (err) {
-			systemLogger.logError(`Failed to submit lockout event to intercome: ${err?.message}`);
-		}
-	});
-
-	EventsManager.subscribe(EventsV5.USER_VERIFIED, async ({username, email, fullName, company, mailListOptOut, createdAt}) => {
+	EventsManager.subscribe(EventsV5.USER_CREATED, async ({username, email, fullName, company, mailListOptOut, createdAt}) => {
 		try{
 			await Intercom.createContact (username, fullName, email, !mailListOptOut, company, createdAt);
 		} catch (err) {

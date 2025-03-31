@@ -71,6 +71,7 @@
 		"history": "4.9.0",
 		"idb": "6.0.0",
 		"immer": "9.0.15",
+		"jest-fixed-jsdom": "0.0.9",
 		"konva": "7.2.5",
 		"lodash": "4.17.21",
 		"markdown-linkify": "1.0.3",
