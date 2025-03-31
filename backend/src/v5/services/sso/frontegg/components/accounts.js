@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { HEADER_TENANT_ID, META_LABEL_TEAMSPACE } = require('../frontegg.constants');
+const { HEADER_APP_ID, HEADER_TENANT_ID, META_LABEL_TEAMSPACE } = require('../frontegg.constants');
 const { get, delete: httpDelete, post } = require('../../../../utils/webRequests');
 const { getBearerHeader, getConfig } = require('./connections');
 const { errCodes } = require('../frontegg.constants');
@@ -108,6 +108,7 @@ Accounts.addUserToAccount = async (accountId, email, name, emailData) => {
 		const headers = {
 			...await getBearerHeader(),
 			[HEADER_TENANT_ID]: accountId,
+			[HEADER_APP_ID]: config.appId,
 		};
 		const skipInviteEmail = !emailData;
 

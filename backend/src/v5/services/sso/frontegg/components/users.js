@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { HEADER_APP_ID, HEADER_USER_ID } = require('../frontegg.constants');
 const { delete: deleteReq, get, post } = require('../../../../utils/webRequests');
 const { getBearerHeader, getConfig } = require('./connections');
-const { HEADER_USER_ID } = require('../frontegg.constants');
 
 const Users = {};
 
@@ -59,7 +59,11 @@ Users.destroyAllSessions = async (userId) => {
 Users.triggerPasswordReset = async (email) => {
 	const config = await getConfig();
 	const url = `${config.vendorDomain}/identity/resources/users/v1/passwords/reset`;
-	await post(url, { email }, { headers: await getBearerHeader() });
+	const headers = {
+		...await getBearerHeader(),
+		[HEADER_APP_ID]: config.appId,
+	};
+	await post(url, { email }, { headers });
 };
 
 module.exports = Users;
