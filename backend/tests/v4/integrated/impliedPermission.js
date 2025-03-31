@@ -1,6 +1,6 @@
 "use strict";
 
-const SessionTracker = require("../../v5/helper/sessionTracker")
+const SessionTracker = require("../../v4/helpers/sessionTracker")
 const { queue: {purgeQueues}} = require("../../v5/helper/services");
 
 // test implied permission like admin of teamspace can do everything in their own teamspace and

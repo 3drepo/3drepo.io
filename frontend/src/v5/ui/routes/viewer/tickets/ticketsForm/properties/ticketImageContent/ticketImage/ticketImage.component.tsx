@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
@@ -30,8 +30,8 @@ import { useSyncProps } from '@/v5/helpers/syncProps.hooks';
 type TicketImageProps = FormInputProps & { onImageClick: () => void; inputRef? };
 export const TicketImage = ({ value, onChange, onBlur, disabled, label, helperText, onImageClick, inputRef = undefined, ...props }: TicketImageProps) => {
 	const imgSrc = getImgSrc(value);
-	const imgInModal = useRef(imgSrc);
-	const syncProps = useSyncProps({ images: [imgInModal.current] });
+	const [imgInModal, setImgInModal] = useState(imgSrc);
+	const syncProps = useSyncProps({ images: [imgInModal] });
 	
 	const handleImageClick = () => DialogsActionsDispatchers.open(ImagesModal, {
 		onAddMarkup: disabled
@@ -45,15 +45,15 @@ export const TicketImage = ({ value, onChange, onBlur, disabled, label, helperTe
 			return;
 		}
 
-		imgInModal.current = newValue;
+		setImgInModal(newValue);
 		DialogsActionsDispatchers.open(ImagesModal, {
-			onClose: () => onChange(stripBase64Prefix(imgInModal.current)),
-			onAddMarkup: (newImg) => { imgInModal.current = newImg; },
+			onClose: (newImages) => onChange(stripBase64Prefix(newImages[0])),
+			onAddMarkup: setImgInModal,
 		}, syncProps);
 	};
 
 	useEffect(() => onBlur?.(), [value]);
-	useEffect(() => { imgInModal.current = imgSrc; }, [imgSrc]);
+	useEffect(() => { setImgInModal(imgSrc); }, [imgSrc]);
 
 	return (
 		<InputContainer disabled={disabled} ref={inputRef} {...props}>

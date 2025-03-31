@@ -24,8 +24,8 @@ const Responder = require(`${src}/utils/responder`);
 jest.mock('../../../../../../../src/v5/models/teamspaceSettings');
 const TeamspacesModel = require(`${src}/models/teamspaceSettings`);
 
-jest.mock('../../../../../../../src/v5/utils/permissions/permissions');
-const PermissionsUtils = require(`${src}/utils/permissions/permissions`);
+jest.mock('../../../../../../../src/v5/utils/permissions');
+const PermissionsUtils = require(`${src}/utils/permissions`);
 
 const Teamspaces = require(`${src}/middleware/dataConverter/inputs/teamspaces`);
 const { templates } = require(`${src}/utils/responseCodes`);

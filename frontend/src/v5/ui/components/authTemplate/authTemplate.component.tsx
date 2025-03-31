@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useRouteMatch, Redirect } from 'react-router-dom';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { Background, Footer, Logo, BackgroundOverlay, LogoContainer } from './authTemplate.styles';
 
@@ -26,13 +24,6 @@ interface IAuthTemplate {
 }
 
 export const AuthTemplate = ({ footer, children }: IAuthTemplate): JSX.Element => {
-	const { url } = useRouteMatch();
-	const returnUrl = AuthHooksSelectors.selectReturnUrl();
-
-	if (AuthHooksSelectors.selectIsAuthenticated()) {
-		return (<Redirect to={{ ...returnUrl, state: { referrer: url } }} />);
-	}
-
 	const backgroundSrc = clientConfigService.getCustomBackgroundImagePath();
 
 	return (

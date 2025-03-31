@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const request = require("supertest");
-const SessionTracker = require("../../v5/helper/sessionTracker")
+const SessionTracker = require("../../v4/helpers/sessionTracker")
 const expect = require("chai").expect;
 const app = require("../../../src/v4/services/api.js").createApp();
 const responseCodes = require("../../../src/v4/response_codes");
@@ -46,71 +46,6 @@ describe('User ', () => {
 	});
 	after(done => server.close(done));
 
-	describe("using an API Key" , () => {
-		let apikey = null;
-		const APIKEY_URL = "/apikey";
-
-		it("should be able to generated it sucessfully", done => {
-			teamSpace1.post(APIKEY_URL)
-				.send({})
-				.expect(200, function(err, res) {
-					expect(res.body.apiKey).to.not.be.null;
-					apikey = res.body.apiKey;
-					done(err);
-				});
-		});
-
-		it("should fail at generating it using a key", done => {
-			unlogged_Agent.post(APIKEY_URL+"?key="+apikey)
-				.send({})
-				.expect(401, done);
-		});
-
-		it("should be not be able to delete one using a key", done => {
-			async.series(
-				[next =>
-					unlogged_Agent.delete(APIKEY_URL+"?key="+apikey)
-						.send({})
-						.expect(401, next),
-				next =>
-					teamSpace1.get("/me")
-						.expect(200, (err, res) => {
-						expect(res.body.apikey).to.not.be.null;
-						next(err);
-					})],
-			done)
-		});
-
-		it("should work when querying the api with the key attached",  done => {
-			async.parallel(
-				[
-					next =>
-						unlogged_Agent.get("/notifications?key="+apikey)
-							.expect(200, next),
-					next =>
-						unlogged_Agent.get("/me?key="+apikey)
-						.expect(200, (err, res) => {
-							expect(res.body.username).to.equals(username);
-							next(err);
-						})
-				],
-			done)
-		});
-
-		it("should be sucessfully deleted when logged in", done => {
-			async.series(
-				[next =>
-					teamSpace1.delete(APIKEY_URL)
-						.send({})
-						.expect(200, next),
-				next =>
-					teamSpace1.get("/me").expect(200,(err, res) => {
-						expect(res.body.apikey).to.be.undefined;
-						next(err);
-				})],
-			done);
-		});
-	});
 
 	describe('using starred metadata', () => {
 		const FAVOURITE_URL = "/starredMeta";

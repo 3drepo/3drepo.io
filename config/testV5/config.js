@@ -185,10 +185,15 @@ module.exports = {
 	},
 
 	sso: {
-		aad: {
-			clientId: "abc",
-			authority: "https://login.microsoftonline.com/common",
-			clientSecret: "xyz"
+	frontegg: {
+			appUrl: "https://localhost",
+			appId: "384eaa91-5d56-42bc-ad91-d27984a679a5",
+			clientId: "d3cbc66a-33a4-4e5b-8c24-32331944b228",
+			key: "bf8dfa6c-b2c1-4546-92ee-14999ddab6b1",
+			vendorDomain: "https://localhost",
+			userRole: "APP_USER",
+
 		}
+
 	}
 }
