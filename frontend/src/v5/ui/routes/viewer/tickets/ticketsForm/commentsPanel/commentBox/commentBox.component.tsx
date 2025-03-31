@@ -72,13 +72,13 @@ type ImageToUpload = {
 };
 
 type CommentBoxProps = Pick<ITicketComment, 'message' | 'images' | 'view'> & {
-	onCancel?: () => void;
+	onCancelEdit?: () => void;
 	commentId?: string;
 	metadata?: TicketCommentReplyMetadata | null;
 	className?: string;
 };
 
-export const CommentBox = ({ commentId, message = '', images = [], view: existingView, metadata, onCancel, className }: CommentBoxProps) => {
+export const CommentBox = ({ commentId, message = '', images = [], view: existingView, metadata, onCancelEdit, className }: CommentBoxProps) => {
 	const { teamspace, project } = useParams<ViewerParams>();
 	const { isViewer, containerOrFederation } = useContext(TicketContext);
 	const { is2DOpen } = useContext(ViewerCanvasesContext);
@@ -151,7 +151,7 @@ export const CommentBox = ({ commentId, message = '', images = [], view: existin
 			commentId,
 			newComment,
 		);
-		onCancel();
+		onCancelEdit();
 	};
 	const createComment = async () => {
 		setIsSubmittingMessage(true);
@@ -334,7 +334,7 @@ export const CommentBox = ({ commentId, message = '', images = [], view: existin
 				<CharsCounter $error={charsLimitIsReached}>{charsCount}/{MAX_MESSAGE_LENGTH}</CharsCounter>
 				{ isEditMode ? (
 					<EditCommentButtons>
-						<TicketButton variant="error" onClick={onCancel}>
+						<TicketButton variant="error" onClick={onCancelEdit}>
 							<CancelIcon />
 						</TicketButton>
 						<TicketButton variant="primary" onClick={updateMessage} disabled={disableSendMessage}>
