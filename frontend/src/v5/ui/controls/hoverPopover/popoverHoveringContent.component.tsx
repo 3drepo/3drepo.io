@@ -18,6 +18,9 @@
 import { useState, useRef } from 'react';
 import { PopoverHoveringContentContainer } from './hoverPopover.styles';
 
+// Similar to HoverPopover, but the Popover content is hoverable
+// as the latter stays open
+// TODO - merge with HoverPopover and use a prop to allow hovering content
 export const PopoverHoveringContent = ({ anchor: AnchorEl, children, ...props }) => {
 	const [open, setOpen] = useState(false);
 	const anchor = useRef(null);
