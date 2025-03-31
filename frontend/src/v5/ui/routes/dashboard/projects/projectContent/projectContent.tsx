@@ -15,9 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useEffect } from 'react';
+import { useParams } from 'react-router';
 import { useRouteMatch, Switch, Redirect, useLocation } from 'react-router-dom';
 
-import { NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
+import { DashboardParams, NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
+import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { DashboardFooter } from '@components/shared/dashboardFooter';
 import { formatMessage } from '@/v5/services/intl';
 import { Route } from '@/v5/services/routing/route.component';
@@ -34,11 +37,16 @@ import { Drawings } from '../drawings/drawings.component';
 import { useKanbanNavigationData } from '@/v5/helpers/kanban.hooks';
 
 export const ProjectContent = () => {
+	const { teamspace } = useParams<DashboardParams>();
 	const { pathname } = useLocation();
 	const { title:kanbanTitle,  shouldRenderContent: shouldRenderKanbanContent, issuesOrRisksEnabled, riskEnabled, issuesEnabled } = useKanbanNavigationData();
 
 	let { path } = useRouteMatch();
 	path = discardSlash(path);
+
+	useEffect(() => {
+		UsersActionsDispatchers.fetchUsers(teamspace);
+	}, [teamspace]);
 
 	return (
 		<>
