@@ -53,7 +53,7 @@
 		"@popperjs/core": "2.6.0",
 		"@types/three": "0.167.1",
 		"@webscopeio/react-textarea-autocomplete": "4.9.0",
-		"axios": "1.7.4",
+		"axios": "1.8.3",
 		"babel-jest": "29.7.0",
 		"bezier-easing": "2.1.0",
 		"byte-size": "8.1.0",
