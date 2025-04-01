@@ -102,7 +102,7 @@ const PermissionTemplates = require("../models/permissionTemplates");
 						return projectPerms;
 					}
 
-					return projectPerms.concat(PermissionTemplates.findById(user, perm.permission).permissions);
+					return projectPerms.concat(PermissionTemplates.findById(perm.permission).permissions);
 				});
 			}
 		};

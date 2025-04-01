@@ -300,7 +300,7 @@ async function _findModelDetails(dbUserCache, username, model) {
 		const template = await findPermissionByUser(model.account, model.model, username);
 
 		if (template) {
-			permissions = PermissionTemplates.findById(user, template.permission).permissions;
+			permissions = PermissionTemplates.findById(template.permission).permissions;
 		}
 	}
 
