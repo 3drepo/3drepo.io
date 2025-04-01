@@ -15,19 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { destroySession, isSessionValid } = require('../utils/sessions');
 const { USER_AGENT_HEADER } = require('../utils/sessions.constants');
+const { isSessionValid } = require('../utils/sessions');
 const { logger } = require('../utils/logger');
 const { respond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');
 const { validateMany } = require('./common');
 
 const AuthMiddleware = {};
-
-const destroySessionIfExists = (req, res) => new Promise((resolve) => {
-	if (req.session && !req.session.user?.isAPIKey) destroySession(req.session, res, () => resolve());
-	else resolve();
-});
 
 const validSessionDetails = async (req, res, next) => {
 	if (!req.session.user.isAPIKey) {
@@ -38,7 +33,6 @@ const validSessionDetails = async (req, res, next) => {
 		const userAgentMatch = reqUserAgent === userAgent;
 
 		if (!ipMatch || !userAgentMatch) {
-			await destroySessionIfExists(req, res);
 			logger.logInfo(`Session ${sessionId} destroyed due to IP or user agent mismatch`);
 			respond(req, res, templates.notLoggedIn);
 			return;
@@ -57,7 +51,6 @@ const validSession = async (req, res, next) => {
 	if (await checkValidSession(req)) {
 		await next();
 	} else {
-		await destroySessionIfExists(req, res);
 		respond(req, res, templates.notLoggedIn);
 	}
 };
@@ -66,7 +59,6 @@ AuthMiddleware.isLoggedIn = async (req, res, next) => {
 	if (await checkValidSession(req, true)) {
 		await next();
 	} else {
-		await destroySessionIfExists(req, res);
 		respond(req, res, templates.notLoggedIn);
 	}
 };
