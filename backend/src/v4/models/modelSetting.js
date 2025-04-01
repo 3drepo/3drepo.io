@@ -127,8 +127,8 @@ ModelSetting.batchUpdatePermissions = async function(account, batchPermissions =
 	}
 };
 
-const checkUserHasPermissionTemplate = (dbUser, permission) => {
-	if (permission.permission && !PermissionTemplates.findById(dbUser, permission.permission)) {
+const checkUserHasPermissionTemplate = (permission) => {
+	if (permission.permission && !PermissionTemplates.findById(permission.permission)) {
 		throw responseCodes.PERM_NOT_FOUND;
 	}
 };
@@ -146,7 +146,7 @@ ModelSetting.changePermissions = async function(account, model, permissions) {
 		throw responseCodes.MODEL_NOT_FOUND;
 	}
 
-	const { findByUserName, teamspaceMemberCheck } = require("./user");
+	const { teamspaceMemberCheck } = require("./user");
 
 	if (!Array.isArray(permissions)) {
 		throw responseCodes.INVALID_ARGUMENTS;
@@ -154,25 +154,22 @@ ModelSetting.changePermissions = async function(account, model, permissions) {
 
 	// get list of valid permission name
 	permissions = _.uniq(permissions, "user");
-	return findByUserName(account).then(dbUser => {
-		const promises = [];
+	const promises = [];
 
-		permissions.forEach(permission => {
-			checkPermissionIsValid(permission);
-			checkUserHasPermissionTemplate(dbUser, permission);
+	permissions.forEach(permission => {
+		checkPermissionIsValid(permission);
+		checkUserHasPermissionTemplate(permission);
 
-			promises.push(teamspaceMemberCheck(permission.user, dbUser.user).then(() => {
-				const perm = setting.permissions.find(_perm => _perm.user === permission.user);
+		promises.push(teamspaceMemberCheck(permission.user, account).then(() => {
+			const perm = setting.permissions.find(_perm => _perm.user === permission.user);
+			if (perm) {
+				perm.permission = permission.permission;
+			}
+		}));
+	});
 
-				if (perm) {
-					perm.permission = permission.permission;
-				}
-			}));
-		});
-
-		return Promise.all(promises).then(() => {
-			return ModelSetting.updateModelSetting(account, model, { permissions });
-		});
+	return Promise.all(promises).then(() => {
+		return ModelSetting.updateModelSetting(account, model, { permissions });
 	});
 };
 
@@ -461,7 +458,7 @@ ModelSetting.updateHeliSpeed = async function(account, model, newSpeed) {
 };
 
 ModelSetting.updatePermissions = async function(account, model, permissions = [], executor) {
-	const { findByUserName, teamspaceMemberCheck } = require("./user");
+	const { teamspaceMemberCheck } = require("./user");
 
 	if (!Array.isArray(permissions)) {
 		throw responseCodes.INVALID_ARGUMENTS;
@@ -475,13 +472,12 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 	}
 
 	permissions = _.uniq(permissions, "user");
-	const dbUser = await findByUserName(account);
 
 	const promises = permissions.map(async (permission) => {
 		checkPermissionIsValid(permission);
-		checkUserHasPermissionTemplate(dbUser, permission);
+		checkUserHasPermissionTemplate(permission);
 
-		await teamspaceMemberCheck(permission.user, dbUser.user);
+		await teamspaceMemberCheck(permission.user, account);
 		const index = setting.permissions.findIndex(x => x.user === permission.user);
 		if (index !== -1) {
 			if (permission.permission) {
