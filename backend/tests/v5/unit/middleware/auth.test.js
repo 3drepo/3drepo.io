@@ -36,6 +36,8 @@ const { USER_AGENT_HEADER } = require(`${src}/utils/sessions.constants`);
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
+SessionUtils.destroySession.mockImplementation((arg1, arg2, callback) => callback());
+
 const ipAddress = generateRandomString();
 const token = generateRandomString();
 const userAgent = generateRandomString();
