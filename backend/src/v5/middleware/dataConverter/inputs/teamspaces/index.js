@@ -39,7 +39,7 @@ Teamspaces.canRemoveTeamspaceMember = async (req, res, next) => {
 	}
 
 	// ensure the user to be removed has access to teamspace
-	const userIsTsMember = await hasAccessToTeamspace(teamspace, username);
+	const userIsTsMember = await hasAccessToTeamspace(teamspace, username, true);
 	if (!userIsTsMember) {
 		respond(req, res, createResponseCode(templates.notAuthorized,
 			'The user to be removed is not a member of the teamspace.'));

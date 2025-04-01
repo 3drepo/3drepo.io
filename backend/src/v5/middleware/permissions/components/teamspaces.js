@@ -41,13 +41,15 @@ TeamspacePerms.isTeamspaceAdmin = async (req, res, next) => {
 	}
 };
 
-TeamspacePerms.isTeamspaceMember = async (req, res, next) => {
+// bypassStatusCheck will not check if the status of the membership is active (i.e. could be
+// pending invite, inactive etc). Used for checking if the user is associated with the teamspace at all
+const checkTeamspaceMembership = (bypassStatusCheck) => async (req, res, next) => {
 	const { session, params } = req;
 	const user = getUserFromSession(session);
 	const { teamspace } = params;
 
 	try {
-		const hasAccess = await hasAccessToTeamspace(teamspace, user);
+		const hasAccess = await hasAccessToTeamspace(teamspace, user, bypassStatusCheck);
 		if (teamspace && user && hasAccess) {
 			await next();
 		} else {
@@ -57,6 +59,10 @@ TeamspacePerms.isTeamspaceMember = async (req, res, next) => {
 		respond(req, res, err);
 	}
 };
+
+TeamspacePerms.isTeamspaceMember = checkTeamspaceMembership(true);
+
+TeamspacePerms.isActiveTeamspaceMember = checkTeamspaceMembership(false);
 
 TeamspacePerms.isAddOnModuleEnabled = (moduleName) => async (req, res, next) => {
 	try {
