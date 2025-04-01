@@ -481,7 +481,7 @@ const testGetUserStatusInAccount = () => {
 			['data is empty', [], membershipStatus.NOT_MEMBER],
 			['user is not associated with any tenants', [{ userId, tenantsStatuses: [] }], membershipStatus.NOT_MEMBER],
 			['user is not associated with the tenant', [{ userId, tenantsStatuses: [{ tenantId: generateRandomString(), status: 'activated' }] }], membershipStatus.NOT_MEMBER],
-			['user membership is not active', [{ userId, tenantsStatuses: [{ tenantId: accountId, status: 'NotActivated' }] }], membershipStatus.NOT_ACTIVE],
+			['user membership is not active', [{ userId, tenantsStatuses: [{ tenantId: accountId, status: 'NotActivated' }] }], membershipStatus.INACTIVE],
 			['user membership is active', [{ userId, tenantsStatuses: [{ tenantId: accountId, status: 'activated' }] }], membershipStatus.ACTIVE],
 			['user membership is pending login', [{ userId, tenantsStatuses: [{ tenantId: accountId, status: 'PendingLogin' }] }], membershipStatus.PENDING_LOGIN],
 			['user membership is pending invite acceptance', [{ userId, tenantsStatuses: [{ tenantId: accountId, status: 'PendingInvitation' }] }], membershipStatus.PENDING_INVITE],
