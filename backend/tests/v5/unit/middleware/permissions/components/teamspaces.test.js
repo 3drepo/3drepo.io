@@ -103,7 +103,7 @@ const testIsActiveTeamspaceMember = () => {
 			);
 			expect(mockCB).toHaveBeenCalledTimes(1);
 			expect(Permissions.hasAccessToTeamspace).toHaveBeenCalledTimes(1);
-			expect(Permissions.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, username, false);
+			expect(Permissions.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, username, true);
 		});
 
 		test('should respond with teamspace not found if the user has no access', async () => {

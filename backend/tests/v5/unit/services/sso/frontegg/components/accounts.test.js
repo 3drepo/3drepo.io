@@ -479,18 +479,19 @@ const testGetUserStatusInAccount = () => {
 
 		describe.each([
 			['data is empty', [], membershipStatus.NOT_MEMBER],
-			['user is not associated with the tenant', [{ userId, tenantStatuses: [{ tenantId: generateRandomString(), status: 'activated' }] }], membershipStatus.NOT_MEMBER],
-			['user membership is not active', [{ userId, tenantStatuses: [{ tenantId: accountId, status: 'NotActivated' }] }], membershipStatus.NOT_ACTIVE],
-			['user membership is active', [{ userId, tenantStatuses: [{ tenantId: accountId, status: 'activated' }] }], membershipStatus.ACTIVE],
-			['user membership is pending login', [{ userId, tenantStatuses: [{ tenantId: accountId, status: 'PendingLogin' }] }], membershipStatus.PENDING_LOGIN],
-			['user membership is pending invite acceptance', [{ userId, tenantStatuses: [{ tenantId: accountId, status: 'PendingInvitation' }] }], membershipStatus.PENDING_INVITE],
-			['user membership is in an unknown state', [{ userId, tenantStatuses: [{ tenantId: accountId, status: generateRandomString() }] }], membershipStatus.NOT_MEMBER],
+			['user is not associated with any tenants', [{ userId, tenantsStatuses: [] }], membershipStatus.NOT_MEMBER],
+			['user is not associated with the tenant', [{ userId, tenantsStatuses: [{ tenantId: generateRandomString(), status: 'activated' }] }], membershipStatus.NOT_MEMBER],
+			['user membership is not active', [{ userId, tenantsStatuses: [{ tenantId: accountId, status: 'NotActivated' }] }], membershipStatus.NOT_ACTIVE],
+			['user membership is active', [{ userId, tenantsStatuses: [{ tenantId: accountId, status: 'activated' }] }], membershipStatus.ACTIVE],
+			['user membership is pending login', [{ userId, tenantsStatuses: [{ tenantId: accountId, status: 'PendingLogin' }] }], membershipStatus.PENDING_LOGIN],
+			['user membership is pending invite acceptance', [{ userId, tenantsStatuses: [{ tenantId: accountId, status: 'PendingInvitation' }] }], membershipStatus.PENDING_INVITE],
+			['user membership is in an unknown state', [{ userId, tenantsStatuses: [{ tenantId: accountId, status: generateRandomString() }] }], membershipStatus.NOT_MEMBER],
 		])('', (desc, data, memStatus) => {
 			test(`should return membership enum ${memStatus} if ${desc}`, async () => {
 				WebRequests.get.mockResolvedValueOnce({ data });
 
 				await expect(Accounts.getUserStatusInAccount(accountId, userId))
-					.resolves.toEqual(membershipStatus.NOT_MEMBER);
+					.resolves.toEqual(memStatus);
 
 				expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
 				expect(Connections.getConfig).toHaveBeenCalledTimes(1);

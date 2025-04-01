@@ -53,7 +53,7 @@ Teamspaces.memberExists = async (req, res, next) => {
 	const { params } = req;
 	const { teamspace, member } = params;
 	try {
-		if (await hasAccessToTeamspace(teamspace, member)) {
+		if (await hasAccessToTeamspace(teamspace, member, true)) {
 			await next();
 		} else {
 			throw templates.userNotFound;
