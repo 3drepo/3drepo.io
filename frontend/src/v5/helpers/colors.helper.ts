@@ -89,13 +89,20 @@ export const rgbGroupColorToHex = ({ opacity, color }: RgbGroupColor): HexGroupC
 
 // Hex converters
 const rgbaValuesRE = /\((.*)\)/;
-export const hexToRgb = (color) => color && muiHexToRgb(color).match(rgbaValuesRE)[1].split(',').map(Number) as RgbArray;
-export const hexToRgbWithOpacity = (hex, opacity) => hexToRgb(hexToOpacity(hex, opacity * 100));
+export const hexToRgb = (color) => {
+	const rgbcolor = color && muiHexToRgb(color).match(rgbaValuesRE)[1].split(',').map(Number);
+	if (rgbcolor.length === 4 ) {
+		rgbcolor[3] = (rgbcolor[3] ?? 1) * 255;
+	}
+
+	return rgbcolor;
+};
+
 export const hexGroupColorToRgb = ({ opacity, color }: HexGroupColor): RgbGroupColor => ({
 	opacity,
-	color: hexToRgb(color),
+	color: hexToRgb(color) as any,
 });
-export const hexToGLColor = (hex) => hexToRgb(hex).map((v, idx) => idx !== 3 ? v / 255 : v);
+export const hexToGLColor = (hex) => hexToRgb(hex).map((v) =>  v / 255);
 export const hexToDecimal = (hex) => parseInt(hex, 16);
 
 // GL Converters
