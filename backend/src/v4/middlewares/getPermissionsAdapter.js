@@ -74,7 +74,6 @@ const PermissionTemplates = require("../models/permissionTemplates");
 
 			modelLevel: function(username, model) {
 
-				let user;
 				let projectPerms = [];
 
 				const projectQuery = { models: model, "permissions.user": username };
@@ -84,11 +83,6 @@ const PermissionTemplates = require("../models/permissionTemplates");
 						projectPerms = project.permissions[0].permissions;
 					}
 
-					return this.getUser();
-
-				}).then(_user => {
-
-					user = _user;
 					return findModelSettingById(account, model);
 
 				}).then(async setting => {
