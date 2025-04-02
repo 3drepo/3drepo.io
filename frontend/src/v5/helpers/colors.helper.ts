@@ -90,7 +90,9 @@ export const rgbGroupColorToHex = ({ opacity, color }: RgbGroupColor): HexGroupC
 // Hex converters
 const rgbaValuesRE = /\((.*)\)/;
 export const hexToRgb = (color) => {
-	const rgbcolor = color && muiHexToRgb(color).match(rgbaValuesRE)[1].split(',').map(Number);
+	if (!color) return color;
+
+	const rgbcolor = muiHexToRgb(color).match(rgbaValuesRE)[1].split(',').map(Number);
 	if (rgbcolor.length === 4 ) {
 		rgbcolor[3] = (rgbcolor[3] ?? 1) * 255;
 	}
