@@ -43,7 +43,7 @@ import { ViewerGuiActions } from '../viewerGui';
 import { ChatActions } from '../chat/chat.redux';
 import { PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
-import { isViewpointLoaded, selectSelectedViewpoint, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded } from '.';
+import { isViewpointReady, selectSelectedViewpoint, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded } from '.';
 
 export const getThumbnailUrl = (thumbnail) => getAPIUrl(thumbnail);
 
@@ -194,7 +194,7 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 
 		let viewpointsGroups = yield select(selectViewpointsGroups);
 
-		while (!isViewpointLoaded(viewpoint, viewpointsGroups)) {
+		while (!isViewpointReady(viewpoint, viewpointsGroups)) {
 			yield take(ViewpointsTypes.VIEWPOINT_READY);
 			viewpointsGroups = yield select(selectViewpointsGroups);
 		}
