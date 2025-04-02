@@ -53,8 +53,8 @@ export const MovingColumnDropAreas = () => {
 		setTableOffset(getTableOffset(el));
 	};
 	
-	const getDropAreas = () => {
-		let previousColHalfWidth = tableOffset - columnGap;
+	const getDropAreasWidths = () => {
+		let previousColHalfWidth = 0;
 		return columns.map(({ width }) => {
 			const colHalfWidth = width / 2;
 			const areaWidth = previousColHalfWidth + colHalfWidth + columnGap;
@@ -66,6 +66,19 @@ export const MovingColumnDropAreas = () => {
 	const setDropColumnIndex = (e, index) => {
 		blockEvent(e);
 		setMovingColumnDropIndex(index);
+	};
+
+	const onMouseLeaveDropArea = (e) => {
+		const dropAreas = e.currentTarget.getBoundingClientRect();  
+		const leftEdge = dropAreas.left;
+		const rightEdge = dropAreas.right;
+
+		const mouseX = e.clientX;
+		const leftEdgeDistance = Math.abs(leftEdge - mouseX);
+		const rightEdgeDistance = Math.abs(rightEdge - mouseX);
+	  
+		const index = (leftEdgeDistance < rightEdgeDistance) ? 0 : columns.length;
+		setDropColumnIndex(e, index);
 	};
 
 	const dropColumn = () => {
@@ -80,8 +93,8 @@ export const MovingColumnDropAreas = () => {
 			{/* The drag over is to fix a bug in firefox where dragging the column
 				gets stuck with a "no-drop" cursor and the column can't be dropped */}
 			<Container onMouseUp={dropColumn} onDragOver={blockEvent}>
-				<DropAreas onMouseLeave={(e) => setDropColumnIndex(e, columns.length)}>
-					{getDropAreas().map((width, index) => (
+				<DropAreas $offset={tableOffset} onMouseLeave={onMouseLeaveDropArea}>
+					{getDropAreasWidths().map((width, index) => (
 						<Area key={index} $width={width} onMouseEnter={(e) => setDropColumnIndex(e, index)} />
 					))}
 				</DropAreas>

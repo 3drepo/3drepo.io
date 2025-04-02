@@ -30,7 +30,8 @@ export const Container = styled(Backdrop).attrs({ open: true })`
 	display: block;
 `;
 
-export const DropAreas = styled.div`
+export const DropAreas = styled.div<{ $offset: number }>`
+	margin-left: ${({ $offset }) => $offset}px;
 	width: fit-content;
 	height: 100%;
 `;
