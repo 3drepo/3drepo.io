@@ -194,7 +194,7 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 
 		let viewpointsGroups = yield select(selectViewpointsGroups);
 
-		while (!isViewpointReady(viewpoint, viewpointsGroups)) {
+		while (!isViewpointReady(viewpoint)) {
 			yield take(ViewpointsTypes.VIEWPOINT_READY);
 			viewpointsGroups = yield select(selectViewpointsGroups);
 		}

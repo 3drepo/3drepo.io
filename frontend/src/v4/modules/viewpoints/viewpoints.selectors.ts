@@ -72,9 +72,9 @@ export const getLoadedGroupsIds = function (viewpoint) {
 	return ids;
 };
 
-export const isViewpointReady = (viewpoint, groups) => {
-	let areGroupsLoaded = true;
+export const isViewpointReady = (viewpoint) => {
 	const loadedGroupsIds = getLoadedGroupsIds(viewpoint);
+	let areGroupsLoaded = true;
 
 	getGroupsIDsOfViewpoint(viewpoint).forEach((id) => {
 		areGroupsLoaded =  areGroupsLoaded && loadedGroupsIds.has(id);

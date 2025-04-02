@@ -16,7 +16,7 @@
  */
 
 import { rgbToHex as muiRgbToHex, hexToRgb as muiHexToRgb } from '@mui/material';
-import { isNumber, memoize } from 'lodash';
+import { isArray, isNumber, memoize } from 'lodash';
 
 type GroupColor = {
 	color?: any,
@@ -90,7 +90,7 @@ export const rgbGroupColorToHex = ({ opacity, color }: RgbGroupColor): HexGroupC
 // Hex converters
 const rgbaValuesRE = /\((.*)\)/;
 export const hexToRgb = (color) => {
-	if (!color) return color;
+	if (!color || isArray(color)) return color;
 
 	const rgbcolor = muiHexToRgb(color).match(rgbaValuesRE)[1].split(',').map(Number);
 	if (rgbcolor.length === 4 ) {
