@@ -19,14 +19,13 @@
 
 
 
-const SessionTracker = require("../../v5/helper/sessionTracker")
+const SessionTracker = require("../../v4/helpers/sessionTracker")
 const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../../src/v4/services/api.js").createApp();
 const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
 const responseCodes = require("../../../src/v4/response_codes.js");
-const helpers = require("../helpers/signUp");
 const C = require("../../../src/v4/constants");
 const async = require("async");
 const User = require("../../../src/v4/models/user");

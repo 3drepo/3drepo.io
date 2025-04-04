@@ -67,6 +67,23 @@ const testToConstantCase = () => {
 	});
 };
 
+const testToBoolean = () => {
+	describe.each([
+		[undefined, false],
+		['one two three', false],
+		['TRUE', true],
+		['True', true],
+		['true', true],
+		['FALSE', false],
+		['False', false],
+		['false', false],
+	])('To Boolean', (source, target) => {
+		test(`with ${source} should result in ${target}`, () => {
+			matchHelper(StringHelper.toBoolean, source, target);
+		});
+	});
+};
+
 const testGenerateHashString = () => {
 	describe('Generate Hash String', () => {
 		test('with no length parameter passed', () => {
@@ -115,11 +132,36 @@ const testEscapeRegexChrs = () => {
 	});
 };
 
+const testToBase64 = () => {
+	describe.each([
+		['', ''],
+		['This is a testing string', 'VGhpcyBpcyBhIHRlc3Rpbmcgc3RyaW5n'],
+	])('To base 64', (source, target) => {
+		test(`with ${source} should result in ${target}`, () => {
+			expect(StringHelper.toBase64(source)).toEqual(target);
+		});
+	});
+};
+
+const testFromBase64 = () => {
+	describe.each([
+		['', ''],
+		['VGhpcyBpcyBhIHRlc3Rpbmcgc3RyaW5n', 'This is a testing string'],
+	])('From base 64', (source, target) => {
+		test(`with ${source} should result in ${target}`, () => {
+			expect(StringHelper.fromBase64(source)).toEqual(target);
+		});
+	});
+};
+
 describe('utils/helper/strings', () => {
 	testGetURLDomain();
 	testToCamelCase();
 	testToConstantCase();
+	testToBoolean();
 	testGenerateHashString();
 	testFormatPronouns();
 	testEscapeRegexChrs();
+	testToBase64();
+	testFromBase64();
 });

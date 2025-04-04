@@ -42,6 +42,15 @@ export const TextOverflow = ({ children, className, tooltipText, lines }: ITextO
 	useEffect(() => {
 		setIsTruncated(checkIfTruncated());
 	}, [checkIfTruncated, setIsTruncated, children]);
+	
+	useEffect(() => {
+		if (!ref.current) return;
+		const resizeObserver = new ResizeObserver(() => {
+			setIsTruncated(checkIfTruncated());
+		});
+		resizeObserver.observe(ref.current);
+		return () => resizeObserver.disconnect();
+	}, [checkIfTruncated]);
 
 	return (
 		<>

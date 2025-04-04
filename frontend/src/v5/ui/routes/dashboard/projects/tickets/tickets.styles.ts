@@ -19,7 +19,7 @@ import { SearchInput as SearchInputBase } from '@controls/search/searchInput';
 import styled, { css } from 'styled-components';
 import { Drawer } from '@mui/material';
 import { Link as LinkBase } from 'react-router-dom';
-import { CompletedFilterChip } from '../../../viewer/tickets/ticketsList/ticketsList.styles';
+import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
 
 export const Link = styled(LinkBase)<{ disabled?: boolean }>`
 	${({ disabled }) => disabled && css`
@@ -64,6 +64,7 @@ export const NewTicketButton = styled(Button).attrs({
 	color: 'primary',
 })`
 	width: 119px;
+	margin-right: 0;
 `;
 
 export const OpenInViewerButton = styled(Button).attrs({
@@ -84,7 +85,7 @@ export const SidePanel = styled(Drawer).attrs({
 			width: 410,
 			height: 'calc(100vh - 112px)',
 			top: 112,
-			zIndex: 3,
+			zIndex: 12,
 		},
 	},
 })``;
@@ -103,9 +104,21 @@ export const SlidePanelHeader = styled.div`
 	background: ${({ theme }) => theme.palette.primary.contrast};
 `;
 
-export const CompletedChip = styled(CompletedFilterChip)`
+export const CompletedChip = styled(FilterChip).attrs(({ selected, theme }: any) => ({
+	color: theme.palette.success.main,
+	variant: selected ? 'filled' : 'outlined',
+}))<{ selected: boolean }>`
 	.MuiChip-root {
 		align-self: flex-end;
 		margin: 0 0 18px 15px;
+
+		&, &:hover {
+			color: ${({ theme }) => theme.palette.success.main};
+			border: 1px solid ${({ theme }) => theme.palette.success.main};
+			${({ selected, theme: { palette } }) => selected && css`
+				color: ${palette.primary.contrast};
+				background-color: ${palette.success.main};
+			`}
+		}
 	}
 `;

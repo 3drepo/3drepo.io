@@ -23,6 +23,7 @@ const StringHelper = {};
 StringHelper.toConstantCase = (str) => snakeCase(str).toUpperCase();
 StringHelper.toCamelCase = (str) => camelCase(str);
 StringHelper.sanitiseRegex = (str) => str.replace(/(\W)/g, '\\$1');
+StringHelper.toBoolean = (str) => str?.toLowerCase() === 'true';
 
 // e.g. URL `https://3drepo.org/abc/xyz` this returns `https://3drepo.org`
 // returns the whole string if the regex is not matched
@@ -32,6 +33,8 @@ StringHelper.getURLDomain = (url) => {
 };
 
 StringHelper.generateHashString = (length = 32) => crypto.randomBytes(length / 2).toString('hex');
+StringHelper.toBase64 = (str) => Buffer.from(str).toString('base64');
+StringHelper.fromBase64 = (str) => Buffer.from(str, 'base64').toString('ascii');
 
 StringHelper.formatPronouns = (str) => {
 	const strArr = str.toLowerCase().split(' ');

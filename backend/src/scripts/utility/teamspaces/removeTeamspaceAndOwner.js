@@ -22,7 +22,7 @@ const { v5Path } = require('../../../interop');
 const { getTeamspaceList } = require('../../utils');
 
 const { logger } = require(`${v5Path}/utils/logger`);
-const { getTeamspaceListByUser, removeTeamspaceMember, removeTeamspace } = require(`${v5Path}/processors/teamspaces/teamspaces`);
+const { getTeamspaceListByUser, removeTeamspaceMember, removeTeamspace } = require(`${v5Path}/processors/teamspaces`);
 const { remove: deleteUser, getUserByUsername } = require(`${v5Path}/processors/users`);
 
 const removeUserFromAllTeamspaces = async (user) => {

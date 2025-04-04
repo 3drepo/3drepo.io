@@ -20,7 +20,6 @@ const { fileExtensionFromBuffer, isString, isUUID, isUUIDString } = require('./t
 const Yup = require('yup');
 const { fileUploads } = require('../config');
 const tz = require('countries-and-timezones');
-const zxcvbn = require('zxcvbn');
 
 const YupHelper = { validators: {}, types: { strings: {} }, utils: {} };
 
@@ -32,6 +31,9 @@ YupHelper.validators.alphanumeric = (yupObj, allowFullStops) => yupObj.matches(
 	`\${path} can only contain alpha-numeric characters, ${allowFullStops ? 'full stops, ' : ''}hyphens or underscores`);
 
 YupHelper.types.id = Yup.string().uuid('ids are expected to be of uuid format').transform((val, org) => UUIDToString(org));
+
+YupHelper.types.range = Yup.array().of(Yup.number()).length(2)
+	.test('valid-verticalRange', 'The second number of the range must be larger than the first', (value) => value[0] <= value[1]);
 
 YupHelper.types.colorArr = Yup.array()
 	.of(Yup.number().min(0).max(255).integer())
@@ -93,17 +95,6 @@ YupHelper.types.surveyPoints = Yup.array()
 
 YupHelper.types.strings.unit = Yup.string()
 	.oneOf(['mm', 'cm', 'dm', 'm', 'ft']);
-
-YupHelper.types.strings.password = Yup.string().max(65)
-	.test('checkPasswordStrength', 'Password is too weak',
-		(value) => {
-			if (value) {
-				if (value.length < 8) return false;
-				const passwordScore = zxcvbn(value).score;
-				return passwordScore >= 2;
-			}
-			return true;
-		});
 
 YupHelper.types.strings.email = Yup.string().email();
 

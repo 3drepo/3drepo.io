@@ -163,10 +163,32 @@ const testValidateNewTicket = () => {
 
 const testValidateImportTickets = () => {
 	const template = generateTemplate();
+	const uniquePropName = generateRandomString();
+	const uniqueModuleName = generateRandomString();
+	template.properties.push({ name: uniquePropName, type: 'text', unique: true });
+	template.modules.push({
+		name: uniqueModuleName,
+		properties: [{ name: uniqueModuleName, type: 'text', unique: true }],
+	});
+
 	const knownTemplateID = generateUUIDString();
 	const deprecatedTemplateID = generateUUIDString();
 
+	const duplicateUniqueValue = generateRandomString();
+	const duplicateUniqueProp = [];
+	const duplicateModuleUniqueProp = [];
+
 	const goodTickets = times(5, () => generateTicket(template));
+
+	times(3, () => {
+		const duplicatePropTicket = generateTicket(template);
+		duplicatePropTicket.properties[uniquePropName] = duplicateUniqueValue;
+		const duplicateModulePropTicket = generateTicket(template);
+		duplicateModulePropTicket.modules[uniqueModuleName][uniqueModuleName] = duplicateUniqueValue;
+
+		duplicateUniqueProp.push(duplicatePropTicket);
+		duplicateModuleUniqueProp.push(duplicateModulePropTicket);
+	});
 
 	const badTicket = generateTicket(template);
 	const throwTicket = generateTicket(template);
@@ -210,6 +232,8 @@ const testValidateImportTickets = () => {
 		['tickets is not an array', { body: { tickets: 1 } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['ticket array is empty', { body: { tickets: [] } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['ticket array contains a bad ticket', { body: { tickets: [...goodTickets, badTicket] } }, false, templates.invalidArguments],
+		['ticket array contains duplicate unique properties', { body: { tickets: duplicateUniqueProp } }, false, createResponseCode(templates.invalidArguments, `The unique property ${uniquePropName} can not have the same value multiple times.`)],
+		['ticket array contains duplicate unique module properties', { body: { tickets: duplicateModuleUniqueProp } }, false, createResponseCode(templates.invalidArguments, `The unique property ${uniqueModuleName}.${uniqueModuleName} can not have the same value multiple times.`)],
 		['all tickets are valid', {}, true],
 	])('Validate import tickets', (desc, additionalReq, success, expectedRes) => {
 		afterEach(() => {
@@ -381,14 +405,36 @@ const testValidateUpdateTicket = () => {
 
 const testValidateUpdateMultipleTickets = () => {
 	const template = generateTemplate();
+	const uniquePropName = generateRandomString();
+	const uniqueModuleName = generateRandomString();
+	template.properties.push({ name: uniquePropName, type: 'text', unique: true });
+	template.modules.push({
+		name: uniqueModuleName,
+		properties: [{ name: uniqueModuleName, type: 'text', unique: true }],
+	});
+
 	const knownTemplateID = generateUUIDString();
 	const deprecatedTemplateID = generateUUIDString();
+	const duplicateUniqueValue = generateRandomString();
 	const existingTickets = [];
+	const duplicateUniqueProp = [];
+	const duplicateModuleUniqueProp = [];
 
 	const goodTickets = times(5, () => {
 		const ticket = generateTicket(template);
 
-		existingTickets.push({ ...generateTicket(template), _id: stringToUUID(ticket._id) });
+		const duplicatePropTicket = generateTicket(template);
+		duplicatePropTicket.properties[uniquePropName] = duplicateUniqueValue;
+
+		const duplicateModulePropTicket = generateTicket(template);
+		duplicateModulePropTicket.modules[uniqueModuleName][uniqueModuleName] = duplicateUniqueValue;
+
+		existingTickets.push(
+			{ ...generateTicket(template), _id: stringToUUID(ticket._id) },
+			{ ...generateTicket(template), _id: stringToUUID(duplicateModulePropTicket._id) },
+			{ ...generateTicket(template), _id: stringToUUID(duplicatePropTicket._id) });
+		duplicateUniqueProp.push(duplicatePropTicket);
+		duplicateModuleUniqueProp.push(duplicateModulePropTicket);
 
 		return ticket;
 	});
@@ -434,6 +480,8 @@ const testValidateUpdateMultipleTickets = () => {
 		['ticket array contains a ticket with no _id', { body: { tickets: [{ ...goodTickets[0], _id: undefined }] } }, false, createResponseCode(templates.invalidArguments, '_id field must be provided for all tickets')],
 		['ticket array contains a ticket with invalid _id', { body: { tickets: [{ ...goodTickets[0], _id: idNotFound }] } }, false, createResponseCode(templates.invalidArguments, `The following IDs were not found: ${idNotFound}`)],
 		['ticket array contains a bad ticket', { body: { tickets: [badTicket] } }, false, createResponseCode(templates.invalidArguments)],
+		['ticket array contains duplicate unique properties', { body: { tickets: duplicateUniqueProp } }, false, createResponseCode(templates.invalidArguments, `The unique property ${uniquePropName} can not have the same value multiple times.`)],
+		['ticket array contains duplicate unique module properties', { body: { tickets: duplicateModuleUniqueProp } }, false, createResponseCode(templates.invalidArguments, `The unique property ${uniqueModuleName}.${uniqueModuleName} can not have the same value multiple times.`)],
 		['all tickets are valid', {}, true],
 		['a deprecated template is provided', { query: { template: deprecatedTemplateID } }, true],
 	])('Validate update multiple tickets', (desc, additionalReq, success, expectedRes) => {
@@ -454,6 +502,7 @@ const testValidateUpdateMultipleTickets = () => {
 			TicketSchema.validateTicket.mockImplementation(validation);
 			TicketSchema.deserialiseUUIDsInTicket.mockImplementation((t) => t);
 			TicketSchema.processReadOnlyValues.mockImplementation(processReadOnly);
+			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
 			TicketModelSchema.getTicketsByQuery.mockResolvedValueOnce(existingTickets);
 
 			await Tickets.validateUpdateMultipleTickets(req, res, fn);

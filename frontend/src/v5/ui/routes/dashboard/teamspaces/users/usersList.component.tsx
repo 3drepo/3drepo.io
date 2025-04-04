@@ -24,6 +24,7 @@ import { CurrentUserHooksSelectors, TeamspacesHooksSelectors } from '@/v5/servic
 import { FormattedMessage } from 'react-intl';
 import { V5UserListOverrides } from '@/v5/ui/v4Adapter/overrides/userList.overrides';
 import { Header, Title } from '../projects/projectsList.styles';
+import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 export const UsersList = () => {
 	const dispatch = useDispatch();
@@ -33,7 +34,8 @@ export const UsersList = () => {
 	useEffect(() => {
 		if (!teamspace) return;
 
-		dispatch(UserManagementActions.fetchTeamspaceUsers());
+		UsersActionsDispatchers.fetchUsers(teamspace); // V5
+		dispatch(UserManagementActions.fetchTeamspaceUsers()); // V4
 		dispatch(TeamspacesActions.fetchTeamspacesIfNecessary(username));
 	}, [teamspace, username]);
 

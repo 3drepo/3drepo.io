@@ -56,8 +56,8 @@ const getProjectByIdMock = ProjectsModel.getProjectById
 const removeModelDataMock = ModelHelper.removeModelData.mockImplementation(() => {});
 
 // Permissions mock
-jest.mock('../../../../../../src/v5/utils/permissions/permissions', () => ({
-	...jest.requireActual('../../../../../../src/v5/utils/permissions/permissions'),
+jest.mock('../../../../../../src/v5/utils/permissions', () => ({
+	...jest.requireActual('../../../../../../src/v5/utils/permissions'),
 	isTeamspaceAdmin: jest.fn().mockImplementation((teamspace, user) => user === 'tsAdmin'),
 	hasReadAccessToSomeModels: jest.fn()
 		.mockImplementation((teamspace, project, models, user) => models.some(

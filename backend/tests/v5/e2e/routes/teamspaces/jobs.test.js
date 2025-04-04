@@ -35,13 +35,13 @@ const jobs = times(10, () => ({
 }));
 
 const setupData = async () => {
+	await ServiceHelper.db.createUser(
+		tsAdmin,
+	);
 	await ServiceHelper.db.createTeamspace(teamspace.name, [tsAdmin.user]);
 
 	await Promise.all([
-		ServiceHelper.db.createUser(
-			tsAdmin,
-			[teamspace.name],
-		),
+
 		ServiceHelper.db.createUser(
 			normalUser,
 			[teamspace.name],

@@ -39,9 +39,11 @@ interface IViewerConstructor {
 	name?: string;
 }
 
+export type PinType = 'issue' | 'risk' | 'bookmark' | 'ticket' | null;
+
 export interface IPin {
 	id: string;
-	type?: 'issue' | 'risk' | 'bookmark' | 'ticket' | null;
+	type?: PinType
 	position: number[];
 	norm?: number[];
 	colour: number[];

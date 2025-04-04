@@ -24,7 +24,7 @@ import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { CheckLatestRevisionReadiness } from './checkLatestRevisionReadiness/checkLatestRevisionReadiness.container';
 import { ViewerParams } from '../routes.constants';
 import { InvalidContainerOverlay, InvalidFederationOverlay } from './invalidViewerOverlay';
-import { HandleTicketsCardSearchParams } from './handleTicketsCardSearchParams/handleTicketsCardSearchParams.component';
+import { DefaultTicketFiltersSetter } from './defaultTicketFiltersSetter/defaultTicketFiltersSetter.component';
 import { SpinnerLoader } from '@controls/spinnerLoader';
 import { CentredContainer } from '@controls/centredContainer';
 import { TicketsCardViews } from './tickets/tickets.constants';
@@ -33,6 +33,7 @@ import { ViewerGui } from '@/v4/routes/viewerGui';
 import { CalibrationContext } from '../dashboard/projects/calibration/calibrationContext';
 import { OpenDrawingFromUrl } from './openDrawingFromUrl/openDrawingFromUrl.component';
 import { CalibrationHandler } from '../dashboard/projects/calibration/calibrationHandler.component';
+import { OpenTicketFromUrl } from './openTicketFromUrl/openTicketFromUrl.component';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
@@ -111,8 +112,9 @@ export const Viewer = () => {
 
 	return (
 		<>
-			<HandleTicketsCardSearchParams />
+			<DefaultTicketFiltersSetter />
 			<OpenDrawingFromUrl />
+			<OpenTicketFromUrl />
 			<CheckLatestRevisionReadiness />
 			<ViewerCanvases />
 			<ViewerGui match={v4Match} key={containerOrFederation} />

@@ -28,7 +28,7 @@ import { TabContent } from '../editProfileModal.styles';
 
 type EditProfileIntegrationsTabProps = {
 	unexpectedError: any,
-	onClickClose: () => void,
+	onClickClose?: () => void,
 };
 
 export const EditProfileIntegrationsTab = ({
@@ -72,7 +72,7 @@ export const EditProfileIntegrationsTab = ({
 				<UnhandledError error={unexpectedError} />
 			</TabContent>
 			<FormModalActions>
-				<ModalCancelButton onClick={onClickClose} />
+				<ModalCancelButton disabled={!onClickClose} onClick={onClickClose} />
 			</FormModalActions>
 		</>
 	);
