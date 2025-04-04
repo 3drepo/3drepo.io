@@ -428,7 +428,7 @@ const establishRoutes = (isFed) => {
 	 *                               items:
 	 *                                 type: string
 	 *                                 description: Image in a Base64 format or an ID of an image currently used in the comment
-	 *                             views:
+	 *                             view:
 	 *                               description: Spacial coordinates for the comment
 	 *                               type: object
 	 *                               properties:
@@ -967,7 +967,7 @@ const establishRoutes = (isFed) => {
 	 *                               items:
 	 *                                 type: string
 	 *                                 description: Image in a Base64 format or an ID of an image currently used in the comment
-	 *                             views:
+	 *                             view:
 	 *                               description: Spacial coordinates for the comment
 	 *                               type: object
 	 *                               properties:
