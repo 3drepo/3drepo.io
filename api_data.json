@@ -2197,7 +2197,7 @@
       "examples": [
         {
           "title": "Success",
-          "content": "HTTP/1.1 200 OK\n[\n  {\n    \"email\": \"7e634bae01db4f@mail.com\",\n    \"job\": \"jobA\",\n    \"permissions\": {\n      \"teamspace_admin\": true\n    }\n  },\n  {\n    \"email\": \"93393d28f953@mail.com\",\n    \"job\": \"jobA\",\n    \"permissions\": {\n      \"projects\": [\n        {\n          \"project\": \"Bim Logo\",\n          \"project_admin\": true\n        }\n      ]\n    }\n  },\n  {\n    \"email\": \"48bc8da2f3bc@mail.com\",\n    \"job\": \"jobA\",\n    \"permissions\": {\n      \"projects\": [\n        {\n          \"project\": \"Bim Logo\",\n          \"models\": [\n            {\n              \"model\": \"2710bd65-37d3-4e7f-b2e0-ffe743ce943f\",\n              \"permission\": \"collaborator\"\n            }\n          ]\n        }\n      ]\n    }\n  }\n]",
+          "content": "HTTP/1.1 200 OK\n[\n  {\n    \"email\": \"7e634bae01db4f@mail.com\",\n    \"job\": \"jobA\",\n    \"permissions\": {\n      \"teamspace_admin\": true\n    }\n  },\n  {\n    \"email\": \"93393d28f953@mail.com\",\n    \"job\": \"jobA\",\n    \"permissions\": {\n      \"projects\": [\n        {\n          \"project\": '5bf7df65-f3a8-4337-8016-a63f00000000',\n          \"project_admin\": true\n        }\n      ]\n    }\n  },\n  {\n    \"email\": \"48bc8da2f3bc@mail.com\",\n    \"job\": \"jobA\",\n    \"permissions\": {\n      \"projects\": [\n        {\n          \"project\": '5bf7df65-f3a8-4337-8016-a63f00000000',\n          \"models\": [\n            {\n              \"model\": \"2710bd65-37d3-4e7f-b2e0-ffe743ce943f\",\n              \"permission\": \"collaborator\"\n            }\n          ]\n        }\n      ]\n    }\n  }\n]",
           "type": "json"
         }
       ]
@@ -14051,7 +14051,7 @@
     "type": "delete",
     "url": "/apikey",
     "title": "Deletes the current apikey for the logged user",
-    "name": "deleteApiKey_HTTP/1.1_200_OK_{}",
+    "name": "deleteApiKey_HTTP_1_1_200_OK___",
     "group": "User",
     "version": "0.0.0",
     "filename": "src/v4/routes/user.js",

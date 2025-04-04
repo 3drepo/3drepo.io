@@ -8,13 +8,11 @@ require.config({
         locales: './locales/locale',
         lodash: './vendor/lodash.custom.min',
         pathToRegexp: './vendor/path-to-regexp/index',
-        prismjs: './vendor/prism',
+        prettify: './vendor/prettify/prettify',
         semver: './vendor/semver.min',
         utilsSampleRequest: './utils/send_sample_request',
         webfontloader: './vendor/webfontloader',
-        list: './vendor/list.min',
-        apiData: './api_data',
-        apiProject: './api_project',
+        list: './vendor/list.min'
     },
     shim: {
         bootstrap: {
@@ -30,12 +28,12 @@ require.config({
             deps: ['jquery', 'handlebars'],
             exports: 'Handlebars'
         },
-        prismjs: {
-            exports: 'Prism'
-        },
+        prettify: {
+            exports: 'prettyPrint'
+        }
     },
     urlArgs: 'v=' + (new Date()).getTime(),
-    waitSeconds: 150
+    waitSeconds: 15
 });
 
 require([
@@ -43,34 +41,20 @@ require([
     'lodash',
     'locales',
     'handlebarsExtended',
-    'apiProject',
-    'apiData',
-    'prismjs',
+    './api_project.js',
+    './api_data.js',
+    'prettify',
     'utilsSampleRequest',
     'semver',
     'webfontloader',
     'bootstrap',
     'pathToRegexp',
     'list'
-], function($, _, locale, Handlebars, apiProject, apiData, Prism, sampleRequest, semver, WebFont) {
+], function($, _, locale, Handlebars, apiProject, apiData, prettyPrint, sampleRequest, semver, WebFont) {
 
-    // Load google web fonts.
-    WebFont.load({
-        active: function() {
-            // Only init after fonts are loaded.
-            init($, _, locale, Handlebars, apiProject, apiData, Prism, sampleRequest, semver);
-        },
-        inactive: function() {
-            // Run init, even if loading fonts fails
-            init($, _, locale, Handlebars, apiProject, apiData, Prism, sampleRequest, semver);
-        },
-        google: {
-            families: ['Source Code Pro', 'Source Sans Pro:n4,n6,n7']
-        }
-    });
-});
+    // load google web fonts
+    loadGoogleFontCss();
 
-function init($, _, locale, Handlebars, apiProject, apiData, Prism, sampleRequest, semver) {
     var api = apiData.api;
 
     //
@@ -86,11 +70,6 @@ function init($, _, locale, Handlebars, apiProject, apiData, Prism, sampleReques
     var templateSidenav        = Handlebars.compile( $('#template-sidenav').html() );
 
     //
-    // Default host url used if no sampleUrl is present in config
-    //
-    var baseURL = window.location.origin;
-
-    //
     // apiProject defaults
     //
     if ( ! apiProject.template)
@@ -104,9 +83,6 @@ function init($, _, locale, Handlebars, apiProject, apiData, Prism, sampleReques
 
     if (apiProject.template.forceLanguage)
         locale.setLanguage(apiProject.template.forceLanguage);
-
-    if (apiProject.template.aloneDisplay == null)
-        apiProject.template.aloneDisplay = false;
 
     // Setup jQuery Ajax
     $.ajaxSetup(apiProject.template.jQueryAjaxSetup);
@@ -210,8 +186,7 @@ function init($, _, locale, Handlebars, apiProject, apiData, Prism, sampleReques
                         group: group,
                         name: entry.name,
                         type: entry.type,
-                        version: entry.version,
-                        url: entry.url
+                        version: entry.version
                     });
                 } else {
                     nav.push({
@@ -220,8 +195,7 @@ function init($, _, locale, Handlebars, apiProject, apiData, Prism, sampleReques
                         hidden: true,
                         name: entry.name,
                         type: entry.type,
-                        version: entry.version,
-                        url: entry.url
+                        version: entry.version
                     });
                 }
                 oldName = entry.name;
@@ -367,20 +341,9 @@ function init($, _, locale, Handlebars, apiProject, apiData, Prism, sampleReques
                     };
                 }
 
-                if (apiProject.sampleUrl == false) {
-                    fields.article.sampleRequest = [
-                        {
-                            "url": baseURL + fields.article.url
-                        }
-                    ];
-                }
-
-                // add prefix URL for endpoint unless it's already absolute
-                if (apiProject.url) {
-                    if (fields.article.url.substr(0, 4).toLowerCase() !== 'http') {
-                        fields.article.url = apiProject.url + fields.article.url;
-                    }
-                }
+                // add prefix URL for endpoint
+                if (apiProject.url)
+                    fields.article.url = apiProject.url + fields.article.url;
 
                 addArticleSettings(fields, entry);
 
@@ -394,8 +357,7 @@ function init($, _, locale, Handlebars, apiProject, apiData, Prism, sampleReques
                 articles.push({
                     article: templateArticle(fields),
                     group: entry.group,
-                    name: entry.name,
-                    aloneDisplay: apiProject.template.aloneDisplay
+                    name: entry.name
                 });
                 oldName = entry.name;
             }
@@ -406,15 +368,14 @@ function init($, _, locale, Handlebars, apiProject, apiData, Prism, sampleReques
             group: groupEntry,
             title: title,
             description: description,
-            articles: articles,
-            aloneDisplay: apiProject.template.aloneDisplay
+            articles: articles
         };
         content += templateSections(fields);
     });
     $('#sections').append( content );
 
     // Bootstrap Scrollspy
-    $(this).scrollspy({ target: '#scrollingNav' });
+    $(this).scrollspy({ target: '#scrollingNav', offset: 18 });
 
     // Content-Scroll on Navigation click.
     $('.sidenav').find('a').on('click', function(e) {
@@ -424,6 +385,13 @@ function init($, _, locale, Handlebars, apiProject, apiData, Prism, sampleReques
             $('html,body').animate({ scrollTop: parseInt($(id).offset().top) }, 400);
         window.location.hash = $(this).attr('href');
     });
+
+    // Quickjump on Pageload to hash position.
+    if(window.location.hash) {
+        var id = window.location.hash;
+        if ($(id).length > 0)
+            $('html,body').animate({ scrollTop: parseInt($(id).offset().top) }, 0);
+    }
 
     /**
      * Check if Parameter (sub) List has a type Field.
@@ -469,99 +437,33 @@ function init($, _, locale, Handlebars, apiProject, apiData, Prism, sampleReques
         });
         $('.nav-tabs-examples').find('a:first').tab('show');
 
-        // sample header-content-type switch
-        $('.sample-header-content-type-switch').change(function () {
-            var paramName = '.' + $(this).attr('name') + '-fields';
-            var bodyName = '.' + $(this).attr('name') + '-body';
-            var selectName = 'select[name=' + $(this).attr('name') + ']';
-            if ($(this).val() == 'body-json') {
-                $(selectName).val('undefined');
-                $(this).val('body-json');
-                $(paramName).removeClass('hide');
-                $(this).parent().nextAll(paramName).first().addClass('hide');
-                $(bodyName).addClass('hide');
-                $(this).parent().nextAll(bodyName).first().removeClass('hide');
-            } else if ($(this).val() == "body-form-data") {
-                $(selectName).val('undefined');
-                $(this).val('body-form-data');
-                $(bodyName).addClass('hide');
-                $(paramName).removeClass('hide');
-            } else {
-                $(this).parent().nextAll(paramName).first().removeClass('hide')
-                $(this).parent().nextAll(bodyName).first().addClass('hide');
-            }
-            $(this).prev('.sample-request-switch').prop('checked', true);
-        });
-
         // sample request switch
         $('.sample-request-switch').click(function (e) {
-            var paramName = '.' + $(this).attr('name') + '-fields';
-            var bodyName = '.' + $(this).attr('name') + '-body';
-            var select = $(this).next('.' + $(this).attr('name') + '-select').val();
-            if($(this).prop("checked")){
-                if (select == 'body-json'){
-                    $(this).parent().nextAll(bodyName).first().removeClass('hide');
-                }else {
-                    $(this).parent().nextAll(paramName).first().removeClass('hide');
-                }
-            }else {
-                if (select == 'body-json'){
-                    $(this).parent().nextAll(bodyName).first().addClass('hide');
-                }else {
-                    $(this).parent().nextAll(paramName).first().addClass('hide');
-                }
-            }
+            var name = '.' + $(this).attr('name') + '-fields';
+            $(name).addClass('hide');
+            $(this).parent().next(name).removeClass('hide');
         });
-
-        if (apiProject.template.aloneDisplay){
-            //show group
-            $('.show-group').click(function () {
-                var apiGroup = '.' + $(this).attr('data-group') + '-group';
-                var apiGroupArticle = '.' + $(this).attr('data-group') + '-article';
-                $(".show-api-group").addClass('hide');
-                $(apiGroup).removeClass('hide');
-                $(".show-api-article").addClass('hide');
-                $(apiGroupArticle).removeClass('hide');
-            });
-
-            //show api
-            $('.show-api').click(function () {
-                var apiName = '.' + $(this).attr('data-name') + '-article';
-                var apiGroup = '.' + $(this).attr('data-group') + '-group';
-                $(".show-api-group").addClass('hide');
-                $(apiGroup).removeClass('hide');
-                $(".show-api-article").addClass('hide');
-                $(apiName).removeClass('hide');
-            });
-        }
 
         // call scrollspy refresh method
         $(window).scrollspy('refresh');
 
         // init modules
         sampleRequest.initDynamic();
-        Prism.highlightAll()
     }
     initDynamic();
 
-    if (apiProject.template.aloneDisplay) {
-        var hashVal = window.location.hash;
-        if (hashVal != null && hashVal.length !== 0) {
-            $("." + hashVal.slice(1) + "-init").click();
-        }
-    }
+    // Pre- / Code-Format
+    prettyPrint();
 
     //
     // HTML-Template specific jQuery-Functions
     //
     // Change Main Version
-    function setMainVersion(selectedVersion) {
-        if (typeof(selectedVersion) === 'undefined') {
-            selectedVersion = $('#version strong').html();
-        }
-        else {
-            $('#version strong').html(selectedVersion);
-        }
+    $('#versions li.version a').on('click', function(e) {
+        e.preventDefault();
+
+        var selectedVersion = $(this).html();
+        $('#version strong').html(selectedVersion);
 
         // hide all
         $('article').addClass('hide');
@@ -597,13 +499,6 @@ function init($, _, locale, Handlebars, apiProject, apiData, Prism, sampleReques
 
         initDynamic();
         return;
-    }
-    setMainVersion();
-
-    $('#versions li.version a').on('click', function(e) {
-        e.preventDefault();
-
-        setMainVersion($(this).html());
     });
 
     // compare all article with their predecessor
@@ -621,24 +516,18 @@ function init($, _, locale, Handlebars, apiProject, apiData, Prism, sampleReques
     if ($.urlParam('compare')) {
         // URL Paramter ?compare=1 is set
         $('#compareAllWithPredecessor').trigger('click');
-    }
 
-    // Quick jump on page load to hash position.
-    // Should happen after setting the main version
-    // and after triggering the click on the compare button,
-    // as these actions modify the content
-    // and would make it jump to the wrong position or not jump at all.
-    if (window.location.hash) {
-        var id = decodeURI(window.location.hash);
-        if ($(id).length > 0)
-            $('html,body').animate({ scrollTop: parseInt($(id).offset().top) }, 0);
+        if (window.location.hash) {
+            var id = window.location.hash;
+            $('html,body').animate({ scrollTop: parseInt($(id).offset().top) - 18 }, 0);
+        }
     }
 
     /**
      * Initialize search
      */
     var options = {
-      valueNames: [ 'nav-list-item','nav-list-url-item']
+      valueNames: [ 'nav-list-item' ]
     };
     var endpointsList = new List('scrollingNav', options);
 
@@ -787,57 +676,28 @@ function init($, _, locale, Handlebars, apiProject, apiData, Prism, sampleReques
      */
     function sortFields(fields_object) {
         $.each(fields_object, function (key, fields) {
-            // Find only object fields
-            var objects = fields.filter(function(item) { return item.type === "Object"; });
 
-            // Check if has any object
-            if (objects.length === 0) {
-                return;
-            }
+            var reversed = fields.slice().reverse()
 
-            // Iterate over all objects
-            for(var object of objects) {
-                // Retrieve the index
-                var index = fields.indexOf(object);
+            var max_dot_count = Math.max.apply(null, reversed.map(function (item) {
+                return item.field.split(".").length - 1;
+            }))
 
-                // Find all child fields for this object
-                var objectFields = fields.filter(function(item) { return item.field.indexOf(object.field + ".") > -1; });
-
-                // Get the child index
-                var firstIndex = fields.indexOf(objectFields[0]);
-
-                // Put the object it before the first child index
-                fields.splice(index, 1);
-                fields.splice(firstIndex, 0, object);
-
-                // Startup the last index with the object index 
-                var lastIndex = firstIndex;
-
-                // Iterate over all children
-                for(var child of objectFields) {
-                    lastIndex++;
-
-                    // Retrieve the index
-                    var childIndex = fields.indexOf(child);
-
-                    // Put it after the object declaration
-                    fields.splice(childIndex, 1);
-                    fields.splice(lastIndex, 0, child);
-                }
-            }
-
-            // Retrieve the first object field index
-            var firstObjectIndex = fields.indexOf(objects[0]);
-
-            // Find all non-object fields that doesn't contain dot notation
-            var nonObjects = fields.filter(function(item) { return item.field.indexOf(".") === -1 && item.type !== "Object"; });
-
-            // Iterate over all non-objects
-            for(var nonObject of nonObjects) {
-                // Put it before the first object field
-                var index = fields.indexOf(nonObject);
-                fields.splice(index, 1);
-                fields.splice(firstObjectIndex, 0, nonObject);
+            for (var dot_count = 1; dot_count <= max_dot_count; dot_count++) {
+                reversed.forEach(function (item, index) {
+                    var parts = item.field.split(".");
+                    if (parts.length - 1 == dot_count) {
+                        var fields_names = fields.map(function (item) { return item.field; });
+                        if (parts.slice(1).length  >= 1) {
+                            var prefix = parts.slice(0, parts.length - 1).join(".");
+                            var prefix_index = fields_names.indexOf(prefix);
+                            if (prefix_index > -1) {
+                                fields.splice(fields_names.indexOf(item.field), 1);
+                                fields.splice(prefix_index + 1, 0, item);
+                            }
+                        }
+                    }
+                });
             }
         });
     }
@@ -909,13 +769,28 @@ function init($, _, locale, Handlebars, apiProject, apiData, Prism, sampleReques
         $root.after(content);
         var $content = $root.next();
 
-        // Event on.click needs to be reassigned (should actually work with on ... automatically)
+        // Event on.click muss neu zugewiesen werden (sollte eigentlich mit on automatisch funktionieren... sollte)
         $content.find('.versions li.version a').on('click', changeVersionCompareTo);
 
         $('#sidenav li[data-group=\'' + group + '\'][data-name=\'' + name + '\'][data-version=\'' + version + '\']').removeClass('has-modifications');
 
         $root.remove();
         return;
+    }
+
+    /**
+     * Load google fonts.
+     */
+    function loadGoogleFontCss() {
+        WebFont.load({
+            active: function() {
+                // Update scrollspy
+                $(window).scrollspy('refresh')
+            },
+            google: {
+                families: ['Source Code Pro', 'Source Sans Pro:n4,n6,n7']
+            }
+        });
     }
 
     /**
@@ -931,8 +806,8 @@ function init($, _, locale, Handlebars, apiProject, apiData, Prism, sampleReques
             if (splitBy)
                 elements.forEach (function(element) {
                     var parts = element.split(splitBy);
-                    var key = parts[0]; // reference keep for sorting
-                    if (key == name || parts[1] == name)
+                    var key = parts[1]; // reference keep for sorting
+                    if (key == name)
                         results.push(element);
                 });
             else
@@ -948,5 +823,5 @@ function init($, _, locale, Handlebars, apiProject, apiData, Prism, sampleReques
         });
         return results;
     }
-    Prism.highlightAll()
-}
+
+});

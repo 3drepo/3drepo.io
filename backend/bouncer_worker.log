@@ -1,0 +1,975 @@
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Stoping bouncer client queue..."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":" [x] Received %s from %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"sending to reply queue(%s): %s"}
+{"level":"info","message":"Initialising bouncer client queue..."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in %s of %s...."}
