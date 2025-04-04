@@ -298,58 +298,6 @@ define({ "api": [
     "groupTitle": "Account_Permission"
   },
   {
-    "type": "post",
-    "url": "/forgot-password",
-    "title": "Forgot password",
-    "name": "forgotPassword",
-    "group": "Account",
-    "description": "<p>Send a password reset link to account's e-mail.</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "username",
-            "description": "<p>Account username</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "email",
-            "description": "<p>E-mail address registered with account</p>"
-          }
-        ]
-      }
-    },
-    "examples": [
-      {
-        "title": "Example usage (with username):",
-        "content": "POST /forgot-password HTTP/1.1\n{\n\t\"username: \"alice\"\n}",
-        "type": "get"
-      },
-      {
-        "title": "Example usage (with e-mail):",
-        "content": "POST /forgot-password HTTP/1.1\n{\n\t\"email: \"alice@acme.co.uk\"\n}",
-        "type": "get"
-      }
-    ],
-    "success": {
-      "examples": [
-        {
-          "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n{}",
-          "type": "json"
-        }
-      ]
-    },
-    "version": "0.0.0",
-    "filename": "src/v4/routes/auth.js",
-    "groupTitle": "Account"
-  },
-  {
     "type": "get",
     "url": "/:user/avatar",
     "title": "Get avatar",
@@ -506,303 +454,6 @@ define({ "api": [
     "groupTitle": "Account"
   },
   {
-    "type": "put",
-    "url": "/:user/password",
-    "title": "Reset password",
-    "name": "resetPassword",
-    "group": "Account",
-    "description": "<p>Reset user account password. New password must be different.</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "user",
-            "description": "<p>User account</p>"
-          }
-        ],
-        "Request body": [
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "oldPassword",
-            "description": "<p>Old password</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "newPassword",
-            "description": "<p>New password</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "token",
-            "description": "<p>Password reset token</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "200": [
-          {
-            "group": "200",
-            "optional": false,
-            "field": "account",
-            "description": "<p>Account username</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n{\n\t\"account\":\"alice\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "error": {
-      "fields": {
-        "Error 4xx": [
-          {
-            "group": "Error 4xx",
-            "optional": false,
-            "field": "TOKEN_INVALID",
-            "description": "<p>Token is invalid or has expired</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Error-Response",
-          "content": "HTTP/1.1 400 Bad Request\n{\n\t\"message\":\"Token is invalid or expired\",\n\t\"status\":400,\n\t\"code\":\"TOKEN_INVALID\",\n\t\"value\":59,\n\t\"place\": \"PUT /alice/password\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "examples": [
-      {
-        "title": "Example usage (with old password):",
-        "content": "PUT /alice/password HTTP/1.1\n{\n\t\"oldPassword\":\"AW96B6\",\n\t\"newPassword\":\"TrustNo1\"\n}",
-        "type": "post"
-      },
-      {
-        "title": "Example usage (with token):",
-        "content": "PUT /alice/password HTTP/1.1\n{\n\t\"token\":\"1234567890\",\n\t\"newPassword\":\"TrustNo1\"\n}",
-        "type": "post"
-      }
-    ],
-    "version": "0.0.0",
-    "filename": "src/v4/routes/auth.js",
-    "groupTitle": "Account"
-  },
-  {
-    "type": "post",
-    "url": "/:user",
-    "title": "Sign up",
-    "name": "signUp",
-    "group": "Account",
-    "description": "<p>Sign up for a new user account.</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "user",
-            "description": "<p>New account username to register</p>"
-          }
-        ],
-        "Request body": [
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "password",
-            "description": "<p>Password</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "email",
-            "description": "<p>Valid e-mail address</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "firstName",
-            "description": "<p>First name</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "lastName",
-            "description": "<p>Surname</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "company",
-            "description": "<p>Company</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "jobTitle",
-            "description": "<p>Job title</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "countryCode",
-            "description": "<p>ISO 3166-1 alpha-2</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "captcha",
-            "description": "<p>Google reCAPTCHA response token</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "200": [
-          {
-            "group": "200",
-            "optional": false,
-            "field": "account",
-            "description": "<p>New Account username</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n{\n\t\"account\":\"alice\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "error": {
-      "fields": {
-        "Error 4xx": [
-          {
-            "group": "Error 4xx",
-            "optional": false,
-            "field": "SIGN_UP_PASSWORD_MISSING",
-            "description": "<p>Password is missing</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Error-Response",
-          "content": "\nHTTP/1.1 400 Bad Request\n{\n\t\"message\": \"Password is missing\",\n\t\"status\": 400,\n\t\"code\": \"SIGN_UP_PASSWORD_MISSING\",\n\t\"value\": 57,\n\t\"place\": \"POST /nabile\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "examples": [
-      {
-        "title": "Example usage:",
-        "content": "POST /alice HTTP/1.1\n{\n\t\"email\":\"alice@acme.co.uk\",\n\t\"password\":\"AW96B6\",\n\t\"firstName\":\"Alice\",\n\t\"lastName\":\"Allen\",\n\t\"company\":\"Acme Corporation\",\n\t\"countryCode\":\"GB\",\n\t\"jobTitle\":\"CEO\",\n\t\"captcha\":\"1234567890qwertyuiop\"\n}",
-        "type": "post"
-      }
-    ],
-    "version": "0.0.0",
-    "filename": "src/v4/routes/auth.js",
-    "groupTitle": "Account"
-  },
-  {
-    "type": "put",
-    "url": "/:user",
-    "title": "Update user account",
-    "name": "updateUser",
-    "group": "Account",
-    "description": "<p>Update account information.</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "user",
-            "description": "<p>Account username</p>"
-          }
-        ],
-        "Request body": [
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "email",
-            "description": "<p>Valid e-mail address</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "firstName",
-            "description": "<p>First name</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "lastName",
-            "description": "<p>Surname</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "200": [
-          {
-            "group": "200",
-            "optional": false,
-            "field": "account",
-            "description": "<p>Account username</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n{\n\t\"account\":\"alice\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "examples": [
-      {
-        "title": "Example usage:",
-        "content": "PUT /alice HTTP/1.1\n{\n\t\"email\":\"alice@3drepo.org\",\n\t\"firstName\":\"Alice\",\n\t\"lastName\":\"Anderson\"\n}",
-        "type": "post"
-      }
-    ],
-    "version": "0.0.0",
-    "filename": "src/v4/routes/auth.js",
-    "groupTitle": "Account"
-  },
-  {
     "type": "post",
     "url": "/:user/avatar",
     "title": "Upload avatar",
@@ -861,218 +512,6 @@ define({ "api": [
     "version": "0.0.0",
     "filename": "src/v4/routes/auth.js",
     "groupTitle": "Account"
-  },
-  {
-    "type": "post",
-    "url": "/:user/verify",
-    "title": "Verify",
-    "name": "verify",
-    "group": "Account",
-    "description": "<p>Verify an account after signing up.</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "user",
-            "description": "<p>Account username</p>"
-          }
-        ],
-        "Request body": [
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "token",
-            "description": "<p>Account verification token</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "200": [
-          {
-            "group": "200",
-            "optional": false,
-            "field": "account",
-            "description": "<p>Account username</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n{\n\t\"account\":\"alice\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "error": {
-      "fields": {
-        "Error 4xx": [
-          {
-            "group": "Error 4xx",
-            "optional": false,
-            "field": "ALREADY_VERIFIED",
-            "description": "<p>User already verified</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Error-Response",
-          "content": "HTTP/1.1 400 Bad Request\n{\n\t\"message\": \"Already verified\",\n\t\"status\": 400,\n\t\"code\": \"ALREADY_VERIFIED\",\n\t\"value\": 60,\n\t\"place\": \"POST /alice/verify\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "examples": [
-      {
-        "title": "Example usage:",
-        "content": "POST /alice/verify HTTP/1.1\n{\n\t\"token\":\"1234567890\"\n}",
-        "type": "post"
-      }
-    ],
-    "version": "0.0.0",
-    "filename": "src/v4/routes/auth.js",
-    "groupTitle": "Account"
-  },
-  {
-    "type": "get",
-    "url": "/login",
-    "title": "Get current username",
-    "name": "checkLogin",
-    "group": "Authentication",
-    "description": "<p>Get the username of the logged in user.</p>",
-    "success": {
-      "fields": {
-        "200": [
-          {
-            "group": "200",
-            "type": "String",
-            "optional": false,
-            "field": "username",
-            "description": "<p>Account username</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n{\n\t\"username\": \"alice\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "examples": [
-      {
-        "title": "Example usage:",
-        "content": "GET /login HTTP/1.1\n{}",
-        "type": "get"
-      }
-    ],
-    "version": "0.0.0",
-    "filename": "src/v4/routes/auth.js",
-    "groupTitle": "Authentication"
-  },
-  {
-    "type": "post",
-    "url": "/login",
-    "title": "Login",
-    "name": "login",
-    "group": "Authentication",
-    "description": "<p>3D Repo account login. Logging in generates a token that can be used for cookie-based authentication. To authentication subsequent API calls using cookie-based authentication, simply put the following into the HTTP header: <code>Cookie: connect.sid=:sessionId</code></p> <p>NOTE: If you use a modern browser’s XMLHttpRequest object to make API calls, you don’t need to take care of the authentication process after calling /login.</p>",
-    "parameter": {
-      "fields": {
-        "Request body": [
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "username",
-            "description": "<p>Account username</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "password",
-            "description": "<p>Account password</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "200": [
-          {
-            "group": "200",
-            "type": "String",
-            "optional": false,
-            "field": "username",
-            "description": "<p>Account username</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\nset-cookie:connect.sid=12345678901234567890;\n{\n\t\"username\": \"alice\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "examples": [
-      {
-        "title": "Example usage:",
-        "content": "POST /login HTTP/1.1\n{\n\t\"username\": \"alice\",\n\t\"password\": \"AW96B6\"\n}",
-        "type": "post"
-      }
-    ],
-    "version": "0.0.0",
-    "filename": "src/v4/routes/auth.js",
-    "groupTitle": "Authentication"
-  },
-  {
-    "type": "post",
-    "url": "/logout",
-    "title": "Logout",
-    "name": "logout",
-    "group": "Authentication",
-    "description": "<p>Invalidate the authenticated session.</p>",
-    "success": {
-      "fields": {
-        "200": [
-          {
-            "group": "200",
-            "type": "String",
-            "optional": false,
-            "field": "username",
-            "description": "<p>Account username</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n{\n\t\"username\": \"alice\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "examples": [
-      {
-        "title": "Example usage:",
-        "content": "POST /logout HTTP/1.1\n{}",
-        "type": "post"
-      }
-    ],
-    "version": "0.0.0",
-    "filename": "src/v4/routes/auth.js",
-    "groupTitle": "Authentication"
   },
   {
     "type": "post",
@@ -2257,123 +1696,6 @@ define({ "api": [
     "version": "0.0.0",
     "filename": "src/v4/routes/invitations.js",
     "groupTitle": "Invitations"
-  },
-  {
-    "type": "get",
-    "url": "/:teamspace/invoices",
-    "title": "List all invoices",
-    "name": "listInvoices",
-    "group": "Invoice",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          }
-        ]
-      }
-    },
-    "description": "<p>List all invoices if available, to current logged in user.</p>",
-    "success": {
-      "fields": {
-        "200": [
-          {
-            "group": "200",
-            "type": "Object",
-            "optional": false,
-            "field": "Invoice",
-            "description": "<p>Object</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n[\n\t{\n\t\"_id\":\"invoice_ID\",\n\t\"invoiceNo\":\"AA-111\",\n\t\"nextPaymentAmount\":00,\n\t\"taxAmount\":0,\n\t\"amount\":00,\n\t\"currency\":\"GBP\",\n\t\"transactionId\":\"transaction_ID\",\n\t\"gateway\":\"GATEWAY_PROVIDER\",\n\t\"billingAgreementId\":\"billing_agreement_ID\",\n\t\"periodEnd\":\"2018-06-03\",\n\t\"periodStart\":\"2018-05-04\",\n\t  \"info\":\n\t\t{\n\t\t  \"vat\":\"\",\n\t\t  \"countryCode\":\"AO\",\n\t\t  \"postalCode\":\"SW11 1BQ\",\n\t\t  \"city\":\"London\",\n\t\t  \"line2\":\"1 Street Road\",\n\t\t  \"line1\":\"London\",\n\t\t  \"company\":\"Comapny\",\n\t\t  \"lastName\":\"User Lastname\",\n\t\t  \"firstName\":\"User Firstname\",\n\t\t  \"_id\":\"invoice_ID\",\n\t\t  \"countryName\":\"United Kingdom\"\n\t\t},\n\t \"nextPaymentDate\":\"2018-06-04\",\n\t \"createdAt\":\"04-05-2018 15:59\",\n\t \"__v\":0,\"state\":\"complete\",\n\t \"items\":\n\t\t[{\n\t\t\t \"name\":\"pricingPlanName\",\n\t\t\t\"currency\":\"GBP\",\n\t\t\t\"amount\":00,\n\t\t\t\"taxAmount\":0,\n\t\t\t\"_id\":\"invoice_ID\",\n\t\t\t\"description\":\"Advance License (from 2018)\",\n\t\t\t\"id\":\"invoice_ID\"},\n\t\t\t  {\n\t\t\t\t\"name\":\"pricingPlanName\",\n\t\t\t\t\"currency\":\"GBP\",\n\t\t\t\t\"amount\":29,\n\t\t\t\t\"taxAmount\":0,\n\t\t\t\t\"_id\":\"invoice_ID\",\n\t\t\t\t\"description\":\"This is a dummy invoice for use with API Documentation\",\n\t\t\t\t\"id\":\"invoice_ID\"\n\t\t}],\n\t\t\t\t\"type\":\"invoice\",\n\t\t\t\t\"proRata\":false,\n\t\t\t\t\"pending\":false,\n\t\t\t\t\"unitPrice\":\"29.00\",\n\t\t\t\t\"B2B_EU\":false,\n\t\t\t\t\"taxPercentage\":0,\n\t\t\t\t\"createdAtDate\":\"2018-05-04\",\n\t\t\t\t\"netAmount\":00\n\t}\n]",
-          "type": "json"
-        }
-      ]
-    },
-    "error": {
-      "fields": {
-        "401": [
-          {
-            "group": "401",
-            "optional": false,
-            "field": "NOT_AUTHORIZED",
-            "description": "<p>Not Authorized</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Error-Response",
-          "content": "\nHTTP/1.1 401 Not Authorized\n{\n\t\"message\":\"Not Authorized\",\n\t\"status\":401,\"code\":\n\t\"NOT_AUTHORIZED\",\n\t\"value\":9,\n\t\"place\":\"GET /nabile/subscriptions\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "version": "0.0.0",
-    "filename": "src/v4/routes/invoice.js",
-    "groupTitle": "Invoice"
-  },
-  {
-    "type": "get",
-    "url": "/:teamspace/invoices/:invoiceNo.html",
-    "title": "Render invoices as HTML",
-    "name": "renderInvoice",
-    "group": "Invoice",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "invoiceNo",
-            "description": "<p>Invoice number to render.</p>"
-          }
-        ]
-      }
-    },
-    "description": "<p>Render a HTML web page of the requested invoice.</p>",
-    "version": "0.0.0",
-    "filename": "src/v4/routes/invoice.js",
-    "groupTitle": "Invoice"
-  },
-  {
-    "type": "get",
-    "url": "/:teamspace/invoices/:invoiceNo.pdf",
-    "title": "Render invoices as PDF",
-    "name": "renderInvoicePDF",
-    "group": "Invoice",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "optional": false,
-            "field": "invoiceNo.pdf",
-            "description": "<p>Invoice to render.</p>"
-          }
-        ]
-      }
-    },
-    "description": "<p>Render out a PDF version of the requested invocie.</p>",
-    "version": "0.0.0",
-    "filename": "src/v4/routes/invoice.js",
-    "groupTitle": "Invoice"
   },
   {
     "type": "post",
@@ -4715,137 +4037,6 @@ define({ "api": [
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/maps/hereadminlabeloverlay/:zoomLevel/:gridx/:gridy.png?[query]",
-    "title": "Here admin layer",
-    "name": "getHereAdminOverlayTile",
-    "group": "Maps",
-    "description": "<p>Retrieve a Here Maps administrative labels overlay tile image.</p>",
-    "examples": [
-      {
-        "title": "Example usage:",
-        "content": "GET /acme/00000000-0000-0000-0000-000000000000/maps/hereadminlabeloverlay/17/65485/43574.png HTTP/1.1",
-        "type": "get"
-      }
-    ],
-    "version": "0.0.0",
-    "filename": "src/v4/routes/maps.js",
-    "groupTitle": "Maps",
-    "groupDescription": "<p>Geographic information system (GIS) resources from Open Street Maps (OSM) and Here are supported. Please note that an app_id and app_code from Here are required to access Here resources.</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Number",
-            "optional": false,
-            "field": "zoomLevel",
-            "description": "<p>Zoom level</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Number",
-            "optional": false,
-            "field": "gridx",
-            "description": "<p>Longitudinal (X) grid reference</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Number",
-            "optional": false,
-            "field": "gridy",
-            "description": "<p>Latitudinal (Y) grid reference</p>"
-          }
-        ],
-        "Query": [
-          {
-            "group": "Query",
-            "type": "Boolean",
-            "optional": true,
-            "field": "congestion",
-            "description": "<p>Flag that enables congestion and environmental zone display</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg",
-            "description": "<p>MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg2",
-            "description": "<p>Secondary MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pois",
-            "description": "<p>Mask for Here Maps POIs categories</p>"
-          },
-          {
-            "group": "Query",
-            "type": "Number",
-            "optional": true,
-            "field": "ppi",
-            "description": "<p>Tile resolution in pixels per inch (72, 250, 320, 500)</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pview",
-            "description": "<p>Render map boundaries based on internal or local views</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "style",
-            "description": "<p>Select style used to render map tile</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "png",
-            "optional": false,
-            "field": "image",
-            "description": "<p>Map tile image</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n<binary image>",
-          "type": "png"
-        }
-      ]
-    }
-  },
-  {
-    "type": "get",
     "url": "/:teamspace/:model/maps/hereaerial/:zoomLevel/:gridx/:gridy.png?[query]",
     "title": "Here aerial tile",
     "name": "getHereAerialMapsTile",
@@ -4899,57 +4090,6 @@ define({ "api": [
             "optional": false,
             "field": "gridy",
             "description": "<p>Latitudinal (Y) grid reference</p>"
-          }
-        ],
-        "Query": [
-          {
-            "group": "Query",
-            "type": "Boolean",
-            "optional": true,
-            "field": "congestion",
-            "description": "<p>Flag that enables congestion and environmental zone display</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg",
-            "description": "<p>MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg2",
-            "description": "<p>Secondary MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pois",
-            "description": "<p>Mask for Here Maps POIs categories</p>"
-          },
-          {
-            "group": "Query",
-            "type": "Number",
-            "optional": true,
-            "field": "ppi",
-            "description": "<p>Tile resolution in pixels per inch (72, 250, 320, 500)</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pview",
-            "description": "<p>Render map boundaries based on internal or local views</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "style",
-            "description": "<p>Select style used to render map tile</p>"
           }
         ]
       }
@@ -5141,188 +4281,6 @@ define({ "api": [
             "field": "gridy",
             "description": "<p>Latitudinal (Y) grid reference</p>"
           }
-        ],
-        "Query": [
-          {
-            "group": "Query",
-            "type": "Boolean",
-            "optional": true,
-            "field": "congestion",
-            "description": "<p>Flag that enables congestion and environmental zone display</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg",
-            "description": "<p>MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg2",
-            "description": "<p>Secondary MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pois",
-            "description": "<p>Mask for Here Maps POIs categories</p>"
-          },
-          {
-            "group": "Query",
-            "type": "Number",
-            "optional": true,
-            "field": "ppi",
-            "description": "<p>Tile resolution in pixels per inch (72, 250, 320, 500)</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pview",
-            "description": "<p>Render map boundaries based on internal or local views</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "style",
-            "description": "<p>Select style used to render map tile</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "png",
-            "optional": false,
-            "field": "image",
-            "description": "<p>Map tile image</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n<binary image>",
-          "type": "png"
-        }
-      ]
-    }
-  },
-  {
-    "type": "get",
-    "url": "/:teamspace/:model/maps/heregreytransit/:zoomLevel/:gridx/:gridy.png?[query]",
-    "title": "Here transit (grey) tile",
-    "name": "getHereGreyTransitTile",
-    "group": "Maps",
-    "description": "<p>Retrieve a Here Maps grey transit map tile image.</p>",
-    "examples": [
-      {
-        "title": "Example usage:",
-        "content": "GET /acme/00000000-0000-0000-0000-000000000000/maps/heregreytransit/17/65485/43574.png HTTP/1.1",
-        "type": "get"
-      }
-    ],
-    "version": "0.0.0",
-    "filename": "src/v4/routes/maps.js",
-    "groupTitle": "Maps",
-    "groupDescription": "<p>Geographic information system (GIS) resources from Open Street Maps (OSM) and Here are supported. Please note that an app_id and app_code from Here are required to access Here resources.</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Number",
-            "optional": false,
-            "field": "zoomLevel",
-            "description": "<p>Zoom level</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Number",
-            "optional": false,
-            "field": "gridx",
-            "description": "<p>Longitudinal (X) grid reference</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Number",
-            "optional": false,
-            "field": "gridy",
-            "description": "<p>Latitudinal (Y) grid reference</p>"
-          }
-        ],
-        "Query": [
-          {
-            "group": "Query",
-            "type": "Boolean",
-            "optional": true,
-            "field": "congestion",
-            "description": "<p>Flag that enables congestion and environmental zone display</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg",
-            "description": "<p>MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg2",
-            "description": "<p>Secondary MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pois",
-            "description": "<p>Mask for Here Maps POIs categories</p>"
-          },
-          {
-            "group": "Query",
-            "type": "Number",
-            "optional": true,
-            "field": "ppi",
-            "description": "<p>Tile resolution in pixels per inch (72, 250, 320, 500)</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pview",
-            "description": "<p>Render map boundaries based on internal or local views</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "style",
-            "description": "<p>Select style used to render map tile</p>"
-          }
         ]
       }
     },
@@ -5402,57 +4360,6 @@ define({ "api": [
             "optional": false,
             "field": "gridy",
             "description": "<p>Latitudinal (Y) grid reference</p>"
-          }
-        ],
-        "Query": [
-          {
-            "group": "Query",
-            "type": "Boolean",
-            "optional": true,
-            "field": "congestion",
-            "description": "<p>Flag that enables congestion and environmental zone display</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg",
-            "description": "<p>MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg2",
-            "description": "<p>Secondary MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pois",
-            "description": "<p>Mask for Here Maps POIs categories</p>"
-          },
-          {
-            "group": "Query",
-            "type": "Number",
-            "optional": true,
-            "field": "ppi",
-            "description": "<p>Tile resolution in pixels per inch (72, 250, 320, 500)</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pview",
-            "description": "<p>Render map boundaries based on internal or local views</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "style",
-            "description": "<p>Select style used to render map tile</p>"
           }
         ]
       }
@@ -5534,188 +4441,6 @@ define({ "api": [
             "field": "gridy",
             "description": "<p>Latitudinal (Y) grid reference</p>"
           }
-        ],
-        "Query": [
-          {
-            "group": "Query",
-            "type": "Boolean",
-            "optional": true,
-            "field": "congestion",
-            "description": "<p>Flag that enables congestion and environmental zone display</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg",
-            "description": "<p>MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg2",
-            "description": "<p>Secondary MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pois",
-            "description": "<p>Mask for Here Maps POIs categories</p>"
-          },
-          {
-            "group": "Query",
-            "type": "Number",
-            "optional": true,
-            "field": "ppi",
-            "description": "<p>Tile resolution in pixels per inch (72, 250, 320, 500)</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pview",
-            "description": "<p>Render map boundaries based on internal or local views</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "style",
-            "description": "<p>Select style used to render map tile</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "png",
-            "optional": false,
-            "field": "image",
-            "description": "<p>Map tile image</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n<binary image>",
-          "type": "png"
-        }
-      ]
-    }
-  },
-  {
-    "type": "get",
-    "url": "/:teamspace/:model/maps/herelinelabeloverlay/:zoomLevel/:gridx/:gridy.png?[query]",
-    "title": "Here line & label layer",
-    "name": "getHereLineLabelOverlayTile",
-    "group": "Maps",
-    "description": "<p>Retrieve a Here Maps line and label overlay tile image of street lines, city centre labels, and item labels.</p>",
-    "examples": [
-      {
-        "title": "Example usage:",
-        "content": "GET /acme/00000000-0000-0000-0000-000000000000/maps/herelinelabeloverlay/17/65485/43574.png HTTP/1.1",
-        "type": "get"
-      }
-    ],
-    "version": "0.0.0",
-    "filename": "src/v4/routes/maps.js",
-    "groupTitle": "Maps",
-    "groupDescription": "<p>Geographic information system (GIS) resources from Open Street Maps (OSM) and Here are supported. Please note that an app_id and app_code from Here are required to access Here resources.</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Number",
-            "optional": false,
-            "field": "zoomLevel",
-            "description": "<p>Zoom level</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Number",
-            "optional": false,
-            "field": "gridx",
-            "description": "<p>Longitudinal (X) grid reference</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Number",
-            "optional": false,
-            "field": "gridy",
-            "description": "<p>Latitudinal (Y) grid reference</p>"
-          }
-        ],
-        "Query": [
-          {
-            "group": "Query",
-            "type": "Boolean",
-            "optional": true,
-            "field": "congestion",
-            "description": "<p>Flag that enables congestion and environmental zone display</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg",
-            "description": "<p>MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg2",
-            "description": "<p>Secondary MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pois",
-            "description": "<p>Mask for Here Maps POIs categories</p>"
-          },
-          {
-            "group": "Query",
-            "type": "Number",
-            "optional": true,
-            "field": "ppi",
-            "description": "<p>Tile resolution in pixels per inch (72, 250, 320, 500)</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pview",
-            "description": "<p>Render map boundaries based on internal or local views</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "style",
-            "description": "<p>Select style used to render map tile</p>"
-          }
         ]
       }
     },
@@ -5795,57 +4520,6 @@ define({ "api": [
             "optional": false,
             "field": "gridy",
             "description": "<p>Latitudinal (Y) grid reference</p>"
-          }
-        ],
-        "Query": [
-          {
-            "group": "Query",
-            "type": "Boolean",
-            "optional": true,
-            "field": "congestion",
-            "description": "<p>Flag that enables congestion and environmental zone display</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg",
-            "description": "<p>MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg2",
-            "description": "<p>Secondary MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pois",
-            "description": "<p>Mask for Here Maps POIs categories</p>"
-          },
-          {
-            "group": "Query",
-            "type": "Number",
-            "optional": true,
-            "field": "ppi",
-            "description": "<p>Tile resolution in pixels per inch (72, 250, 320, 500)</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pview",
-            "description": "<p>Render map boundaries based on internal or local views</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "style",
-            "description": "<p>Select style used to render map tile</p>"
           }
         ]
       }
@@ -5927,57 +4601,6 @@ define({ "api": [
             "field": "gridy",
             "description": "<p>Latitudinal (Y) grid reference</p>"
           }
-        ],
-        "Query": [
-          {
-            "group": "Query",
-            "type": "Boolean",
-            "optional": true,
-            "field": "congestion",
-            "description": "<p>Flag that enables congestion and environmental zone display</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg",
-            "description": "<p>MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg2",
-            "description": "<p>Secondary MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pois",
-            "description": "<p>Mask for Here Maps POIs categories</p>"
-          },
-          {
-            "group": "Query",
-            "type": "Number",
-            "optional": true,
-            "field": "ppi",
-            "description": "<p>Tile resolution in pixels per inch (72, 250, 320, 500)</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pview",
-            "description": "<p>Render map boundaries based on internal or local views</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "style",
-            "description": "<p>Select style used to render map tile</p>"
-          }
         ]
       }
     },
@@ -6057,57 +4680,6 @@ define({ "api": [
             "optional": false,
             "field": "gridy",
             "description": "<p>Latitudinal (Y) grid reference</p>"
-          }
-        ],
-        "Query": [
-          {
-            "group": "Query",
-            "type": "Boolean",
-            "optional": true,
-            "field": "congestion",
-            "description": "<p>Flag that enables congestion and environmental zone display</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg",
-            "description": "<p>MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg2",
-            "description": "<p>Secondary MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pois",
-            "description": "<p>Mask for Here Maps POIs categories</p>"
-          },
-          {
-            "group": "Query",
-            "type": "Number",
-            "optional": true,
-            "field": "ppi",
-            "description": "<p>Tile resolution in pixels per inch (72, 250, 320, 500)</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pview",
-            "description": "<p>Render map boundaries based on internal or local views</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "style",
-            "description": "<p>Select style used to render map tile</p>"
           }
         ]
       }
@@ -6189,57 +4761,6 @@ define({ "api": [
             "field": "gridy",
             "description": "<p>Latitudinal (Y) grid reference</p>"
           }
-        ],
-        "Query": [
-          {
-            "group": "Query",
-            "type": "Boolean",
-            "optional": true,
-            "field": "congestion",
-            "description": "<p>Flag that enables congestion and environmental zone display</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg",
-            "description": "<p>MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg2",
-            "description": "<p>Secondary MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pois",
-            "description": "<p>Mask for Here Maps POIs categories</p>"
-          },
-          {
-            "group": "Query",
-            "type": "Number",
-            "optional": true,
-            "field": "ppi",
-            "description": "<p>Tile resolution in pixels per inch (72, 250, 320, 500)</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pview",
-            "description": "<p>Render map boundaries based on internal or local views</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "style",
-            "description": "<p>Select style used to render map tile</p>"
-          }
         ]
       }
     },
@@ -6319,71 +4840,6 @@ define({ "api": [
             "optional": false,
             "field": "gridy",
             "description": "<p>Latitudinal (Y) grid reference</p>"
-          }
-        ],
-        "Query": [
-          {
-            "group": "Query",
-            "type": "Boolean",
-            "optional": true,
-            "field": "congestion",
-            "description": "<p>Flag that enables congestion and environmental zone display</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg",
-            "description": "<p>MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg2",
-            "description": "<p>Secondary MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pois",
-            "description": "<p>Mask for Here Maps POIs categories</p>"
-          },
-          {
-            "group": "Query",
-            "type": "Number",
-            "optional": true,
-            "field": "ppi",
-            "description": "<p>Tile resolution in pixels per inch (72, 250, 320, 500)</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pview",
-            "description": "<p>Render map boundaries based on internal or local views</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "style",
-            "description": "<p>Select style used to render map tile</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "min_traffic_congestion",
-            "description": "<p>Specifies the minimum traffic congestion level to use for rendering traffic flow (free, heavy, queuing, blocked)</p>"
-          },
-          {
-            "group": "Query",
-            "type": "DateTime",
-            "optional": true,
-            "field": "time",
-            "description": "<p>Date and time for showing historical traffic patterns</p>"
           }
         ]
       }
@@ -6465,71 +4921,6 @@ define({ "api": [
             "field": "gridy",
             "description": "<p>Latitudinal (Y) grid reference</p>"
           }
-        ],
-        "Query": [
-          {
-            "group": "Query",
-            "type": "Boolean",
-            "optional": true,
-            "field": "congestion",
-            "description": "<p>Flag that enables congestion and environmental zone display</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg",
-            "description": "<p>MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg2",
-            "description": "<p>Secondary MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pois",
-            "description": "<p>Mask for Here Maps POIs categories</p>"
-          },
-          {
-            "group": "Query",
-            "type": "Number",
-            "optional": true,
-            "field": "ppi",
-            "description": "<p>Tile resolution in pixels per inch (72, 250, 320, 500)</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pview",
-            "description": "<p>Render map boundaries based on internal or local views</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "style",
-            "description": "<p>Select style used to render map tile</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "min_traffic_congestion",
-            "description": "<p>Specifies the minimum traffic congestion level to use for rendering traffic flow (free, heavy, queuing, blocked)</p>"
-          },
-          {
-            "group": "Query",
-            "type": "DateTime",
-            "optional": true,
-            "field": "time",
-            "description": "<p>Date and time for showing historical traffic patterns</p>"
-          }
         ]
       }
     },
@@ -6610,57 +5001,6 @@ define({ "api": [
             "field": "gridy",
             "description": "<p>Latitudinal (Y) grid reference</p>"
           }
-        ],
-        "Query": [
-          {
-            "group": "Query",
-            "type": "Boolean",
-            "optional": true,
-            "field": "congestion",
-            "description": "<p>Flag that enables congestion and environmental zone display</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg",
-            "description": "<p>MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg2",
-            "description": "<p>Secondary MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pois",
-            "description": "<p>Mask for Here Maps POIs categories</p>"
-          },
-          {
-            "group": "Query",
-            "type": "Number",
-            "optional": true,
-            "field": "ppi",
-            "description": "<p>Tile resolution in pixels per inch (72, 250, 320, 500)</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pview",
-            "description": "<p>Render map boundaries based on internal or local views</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "style",
-            "description": "<p>Select style used to render map tile</p>"
-          }
         ]
       }
     },
@@ -6740,57 +5080,6 @@ define({ "api": [
             "optional": false,
             "field": "gridy",
             "description": "<p>Latitudinal (Y) grid reference</p>"
-          }
-        ],
-        "Query": [
-          {
-            "group": "Query",
-            "type": "Boolean",
-            "optional": true,
-            "field": "congestion",
-            "description": "<p>Flag that enables congestion and environmental zone display</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg",
-            "description": "<p>MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "lg2",
-            "description": "<p>Secondary MARC three-letter language code for labels</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pois",
-            "description": "<p>Mask for Here Maps POIs categories</p>"
-          },
-          {
-            "group": "Query",
-            "type": "Number",
-            "optional": true,
-            "field": "ppi",
-            "description": "<p>Tile resolution in pixels per inch (72, 250, 320, 500)</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "pview",
-            "description": "<p>Render map boundaries based on internal or local views</p>"
-          },
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "style",
-            "description": "<p>Select style used to render map tile</p>"
           }
         ]
       }
@@ -7515,89 +5804,6 @@ define({ "api": [
     "groupTitle": "Model"
   },
   {
-    "type": "post",
-    "url": "/:teamspace/model",
-    "title": "Create a model",
-    "name": "createModel",
-    "group": "Model",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          }
-        ],
-        "Request body": [
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "project",
-            "description": "<p>Name of project in which the model will be created</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "modelName",
-            "description": "<p>Name of the model to be created</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "unit",
-            "description": "<p>The unit in which the model is specified</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": true,
-            "field": "desc",
-            "description": "<p>A description of the model</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": true,
-            "field": "code",
-            "description": "<p>A code to be associated with the model; it can be of maximum 5 letters (a-z) and numbers</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "type",
-            "description": "<p>The type of the model</p>"
-          }
-        ]
-      }
-    },
-    "examples": [
-      {
-        "title": "Example usage:",
-        "content": "POST /teamSpace1/model HTTP/1.1\n{\n   project: \"classic project\",\n   modelName: \"awesomeModel\",\n   unit: \"ft\",\n   desc: \"This is an awesome model!\",\n   code: \"awe12\",\n   type: \"Mechanical\"\n}",
-        "type": "post"
-      }
-    ],
-    "success": {
-      "examples": [
-        {
-          "title": "Success:",
-          "content": "{\n   account: \"teamSpace1\",\n   model: \"17d09947-368e-4748-877f-d105842c6681\",\n   name: \"awesomeModel\",\n   permissions: [\n      \"change_model_settings\",\n      \"upload_files\",\n      \"create_issue\",\n      \"comment_issue\",\n      \"view_issue\",\n      \"view_model\",\n      \"download_model\",\n      \"edit_federation\",\n      \"delete_federation\",\n      \"delete_model\",\n      \"manage_model_permission\"\n   ],\n   setting: {\n      type: \"Mechanical\",\n      desc: \"\",\n      name: \"awesomeModel\",\n      _id: \"17d09947-368e-4748-877f-d105842c6681\",\n      subModels: [],\n      surveyPoints: [],\n      properties: {\n         unit: \"ft\"\n      },\n      permissions: [],\n      status: \"ok\"\n   }\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "version": "0.0.0",
-    "filename": "src/v4/routes/model.js",
-    "groupTitle": "Model"
-  },
-  {
     "type": "delete",
     "url": "/:teamspace/:model",
     "title": "Delete Model.",
@@ -8075,6 +6281,91 @@ define({ "api": [
   },
   {
     "type": "get",
+    "url": "/:teamspace/:model/revision/master/head/repoAssets.json",
+    "title": "Get unity assets",
+    "name": "getRepoAssets",
+    "group": "Model",
+    "description": "<p>Get the lastest model's version assets. If RepoBundles are available, they are returned, otherwise AssetBundles are returned.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>The model Id to get unity assets for.</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example usage:",
+        "content": "GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/repoAssets.json HTTP/1.1",
+        "type": "get"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success:",
+          "content": "{\n   models: [\n      {\n         _id: \"Mw+Qm5J5QaqofBxG9TqOkw==\",\n         assets: [\n            \"92fc213b-1bab-49a4-b10e-f4368a52d500\"\n         ],\n         database: \"teamSpace1\",\n         model: \"3549ddf6-885d-4977-87f1-eeac43a0e818\",\n         offset: [\n            -688.095458984375,\n            6410.9140625,\n            683.460205078125\n         ],\n         jsonFiles: [\n            \"92fc213b-1bab-49a4-b10e-f4368a52d500\"\n         ]\n      }\n   ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "src/v4/routes/model.js",
+    "groupTitle": "Model"
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/:uid.repobundle",
+    "title": "Get RepoBundle by Id",
+    "name": "getRepoBundle",
+    "group": "Model",
+    "description": "<p>Gets an actual Repo Bundle file containing a set of assets. The path for this api is provided in the data retrieved by either one of the endpoints /:teamspace/:model/revision/master/head/unityAssets.json or /:teamspace/:model/revision/:rev/unityAssets.json</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>id of the model</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "uid",
+            "description": "<p>id of the repo bundle file.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "src/v4/routes/model.js",
+    "groupTitle": "Model"
+  },
+  {
+    "type": "get",
     "url": "/:teamspace/:model/revision/:rev/idMap.json",
     "title": "Get tree path by revision",
     "name": "getRevIdMap",
@@ -8325,6 +6616,60 @@ define({ "api": [
         {
           "title": "Success:",
           "content": "{\n   models: [\n      {\n         _id: \"Mw+Qm5J5QaqofBxG9TqOkw==\",\n         assets: [\n            \"/teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/92fc213b-1bab-49a4-b10e-f4368a52d500.unity3d\"\n         ],\n         database: \"teamSpace1\",\n         model: \"3549ddf6-885d-4977-87f1-eeac43a0e818\",\n         offset: [\n            -688.095458984375,\n            6410.9140625,\n            683.460205078125\n         ],\n         jsonFiles: [\n            \"/teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/92fc213b-1bab-49a4-b10e-f4368a52d500_unity.json.mpc\"\n         ]\n      }\n   ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "src/v4/routes/model.js",
+    "groupTitle": "Model"
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/revision/:rev/unityAssets.json",
+    "title": "Get revision's unity assets",
+    "name": "getRevUnityAssets",
+    "group": "Model",
+    "description": "<p>Get the model's assets but of a particular revision. If RepoBundles are available, they are returned, otherwise AssetBundles are returned.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>The model Id to get unity assets for.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "rev",
+            "description": "<p>The revision of the model to get unity assets for</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example usage:",
+        "content": "GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/unityAssets.json HTTP/1.1",
+        "type": "get"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success:",
+          "content": "{\n   models: [\n      {\n         _id: \"Mw+Qm5J5QaqofBxG9TqOkw==\",\n         assets: [\n            \"92fc213b-1bab-49a4-b10e-f4368a52d500\"\n         ],\n         database: \"teamSpace1\",\n         model: \"3549ddf6-885d-4977-87f1-eeac43a0e818\",\n         offset: [\n            -688.095458984375,\n            6410.9140625,\n            683.460205078125\n         ],\n         jsonFiles: [\n            \"92fc213b-1bab-49a4-b10e-f4368a52d500\"\n         ]\n      }\n   ]\n}",
           "type": "json"
         }
       ]
@@ -8606,6 +6951,44 @@ define({ "api": [
   },
   {
     "type": "get",
+    "url": "/:teamspace/:model/:uid.texture",
+    "title": "Get a Texture by Id",
+    "name": "getTexture",
+    "group": "Model",
+    "description": "<p>Gets a texture by id. The id may be provided from a number of sources but most likely will be given in a mappings material properties. The metadata of the texture is provided in the response headers.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>id of the model</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "uid",
+            "description": "<p>id of the texture file.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "src/v4/routes/model.js",
+    "groupTitle": "Model"
+  },
+  {
+    "type": "get",
     "url": "/:teamspace/:model/revision/master/head/tree_path.json",
     "title": "Get tree paths",
     "name": "getTreePath",
@@ -8828,83 +7211,6 @@ define({ "api": [
           }
         ]
       }
-    },
-    "version": "0.0.0",
-    "filename": "src/v4/routes/model.js",
-    "groupTitle": "Model"
-  },
-  {
-    "type": "post",
-    "url": "/:teamspace/:model/upload/ms-chunking",
-    "title": "Initialise MS chunking request",
-    "name": "initChunking",
-    "group": "Model",
-    "description": "<p>Initiate model revision data for MS Logic Apps chunked upload.</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model id to upload.</p>"
-          }
-        ],
-        "Request body": [
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "filename",
-            "description": "<p>Filename of content to upload</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "tag",
-            "description": "<p>Tag name for new revision</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": true,
-            "field": "desc",
-            "description": "<p>Description for new revision</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "Boolean",
-            "optional": true,
-            "field": "importAnimations",
-            "description": "<p>Whether to import animations within a sequence</p>"
-          }
-        ]
-      }
-    },
-    "examples": [
-      {
-        "title": "Example usage:",
-        "content": "POST /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking HTTP/1.1\n{\n\t\"filename\": \"structure.ifc\",\n\t\"tag\": \"rev001\",\n\t\"desc\": \"Revision 2\"\n}",
-        "type": "post"
-      }
-    ],
-    "success": {
-      "examples": [
-        {
-          "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n\t\"corID\": \"00000000-0000-1111-2222-333333333333\"\n}",
-          "type": "json"
-        }
-      ]
     },
     "version": "0.0.0",
     "filename": "src/v4/routes/model.js",
@@ -9214,163 +7520,6 @@ define({ "api": [
     "groupTitle": "Model"
   },
   {
-    "type": "post",
-    "url": "/:teamspace/models/permissions",
-    "title": "Update multiple models permissions",
-    "name": "updateMultiplePermissions",
-    "group": "Model",
-    "deprecated": {
-      "content": "use now (#Model:batchUpdateModelPermissions)"
-    },
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace.</p>"
-          }
-        ],
-        "Request body": [
-          {
-            "group": "Request body",
-            "type": "[]ModelPermissions",
-            "optional": false,
-            "field": "BODY",
-            "description": "<p>Its an array with a list of model ids and their permissions.</p>"
-          }
-        ],
-        "Request body: ModelPermissions": [
-          {
-            "group": "Request body: ModelPermissions",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>The model id of the model that will have their permission changed. If it's a federation the entry in the response corresponding with the model will have the 'federated' field set to true.</p>"
-          },
-          {
-            "group": "Request body: ModelPermissions",
-            "type": "[]Permission",
-            "optional": false,
-            "field": "permissions",
-            "description": "<p>An array indicating the new permissions.</p>"
-          }
-        ],
-        "Request body: Permission": [
-          {
-            "group": "Request body: Permission",
-            "type": "string",
-            "optional": false,
-            "field": "user",
-            "description": "<p>User ID</p>"
-          },
-          {
-            "group": "Request body: Permission",
-            "type": "string",
-            "optional": false,
-            "field": "permission",
-            "description": "<p>Permission type ('viewer'|'commenter'|'collaborator'|'').</p>"
-          }
-        ]
-      }
-    },
-    "examples": [
-      {
-        "title": "Example usage:",
-        "content": "POST /teamSpace1/models/permissions HTTP/1.1\n[\n   {\n      model: \"5ce7dd19-1252-4548-a9c9-4a5414f2e0c5\",\n      permissions: [\n         {\n            user: \"viewerTeamspace1Model1JobA\",\n            permission: \"viewer\"\n         },\n         {\n            user: \"commenterTeamspace1Model1JobA\",\n            permission: \"viewer\"\n         },\n         {\n            user: \"collaboratorTeamspace1Model1JobA\",\n            permission: \"collaborator\"\n         },\n         {\n            user: \"commenterTeamspace1Model1JobB\",\n            permission: \"commenter\"\n         },\n         {\n            user: \"collaboratorTeamspace1Model1JobB\",\n            permission: \"collaborator\"\n         }\n      ]\n   }\n]",
-        "type": "post"
-      }
-    ],
-    "success": {
-      "examples": [
-        {
-          "title": "Success:",
-          "content": "[\n   {\n      name: \"Full Logo \",\n      federate: true,\n      model: \"5ce7dd19-1252-4548-a9c9-4a5414f2e0c5\",\n      permissions: [\n         {\n            user: \"viewerTeamspace1Model1JobA\",\n            permission: \"viewer\"\n         },\n         {\n            user: \"commenterTeamspace1Model1JobA\",\n            permission: \"viewer\"\n         },\n         {\n            user: \"collaboratorTeamspace1Model1JobA\",\n            permission: \"collaborator\"\n         },\n         {\n            user: \"commenterTeamspace1Model1JobB\",\n            permission: \"commenter\"\n         },\n         {\n            user: \"collaboratorTeamspace1Model1JobB\",\n            permission: \"collaborator\"\n         },\n         {\n            user: \"projectshared\"\n         },\n         {\n            user: \"fed\"\n         },\n         {\n            user: \"teamSpace1\"\n         },\n         {\n            user: \"unassignedTeamspace1UserJobA\"\n         },\n         {\n            user: \"viewerTeamspace1Model1JobB\"\n         },\n         {\n            user: \"adminTeamspace1JobA\"\n         },\n         {\n            user: \"adminTeamspace1JobB\"\n         },\n         {\n            user: \"weirdTeamspace\"\n         }\n      ],\n      subModels: [\n         {\n            database: \"teamSpace1\",\n            model: \"7cf61b4f-acdf-4295-b2d0-9b45f9f27418\"\n         },\n         {\n            database: \"teamSpace1\",\n            model: \"b1fceab8-b0e9-4e45-850b-b9888efd6521\"\n         }\n      ]\n   }\n]",
-          "type": "json"
-        }
-      ]
-    },
-    "version": "0.0.0",
-    "filename": "src/v4/routes/model.js",
-    "groupTitle": "Model"
-  },
-  {
-    "type": "post",
-    "url": "/:teamspace/:model/permissions",
-    "title": "Update model permissions",
-    "name": "updatePermissions",
-    "group": "Model",
-    "deprecated": {
-      "content": "use now (#Model:updateModelPermissions)"
-    },
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>The model id of the model to be updated</p>"
-          }
-        ],
-        "Request body": [
-          {
-            "group": "Request body",
-            "type": "[]Permissions",
-            "optional": false,
-            "field": "BODY",
-            "description": "<p>Its an array with a list of users and their permission type.</p>"
-          }
-        ],
-        "Request body: Permission": [
-          {
-            "group": "Request body: Permission",
-            "type": "string",
-            "optional": false,
-            "field": "user",
-            "description": "<p>User ID</p>"
-          },
-          {
-            "group": "Request body: Permission",
-            "type": "string",
-            "optional": false,
-            "field": "permission",
-            "description": "<p>Permission type ('viewer'|'commenter'|'collaborator'|'').</p>"
-          }
-        ]
-      }
-    },
-    "examples": [
-      {
-        "title": "Example usage:",
-        "content": "POST /teamSpace1/5ce7dd19-1252-4548-a9c9-4a5414f2e0c5/permissions HTTP/1.1\n[\n   {\n      user: \"viewerTeamspace1Model1JobA\",\n      permission: \"collaborator\"\n   },\n   {\n      user: \"commenterTeamspace1Model1JobA\",\n      permission: \"viewer\"\n   },\n   {\n      user: \"collaboratorTeamspace1Model1JobA\",\n      permission: \"collaborator\"\n   },\n   {\n      user: \"commenterTeamspace1Model1JobB\",\n      permission: \"commenter\"\n   },\n   {\n      user: \"collaboratorTeamspace1Model1JobB\",\n      permission: \"collaborator\"\n   }\n]",
-        "type": "post"
-      }
-    ],
-    "success": {
-      "examples": [
-        {
-          "title": "Success:",
-          "content": "{\n   _id: \"2710bd65-37d3-4e7f-b2e0-ffe743ce943f\",\n   timestamp: \"2019-05-02T16:17:14.000Z\",\n   type: \"Architectural\",\n   desc: \"\",\n   name: \"pipes\",\n   subModels: [],\n   surveyPoints: [\n      {\n         position: [\n            0,\n            0,\n            0\n         ],\n         latLong: [\n            0,\n            0\n         ]\n      }\n   ],\n   properties: {\n      unit: \"mm\"\n   },\n   permissions: [\n      {\n         user: \"viewerTeamspace1Model1JobA\",\n         permission: \"collaborator\"\n      },\n      {\n         user: \"commenterTeamspace1Model1JobA\",\n         permission: \"viewer\"\n      },\n      {\n         user: \"collaboratorTeamspace1Model1JobA\",\n         permission: \"collaborator\"\n      },\n      {\n         user: \"commenterTeamspace1Model1JobB\",\n         permission: \"commenter\"\n      },\n      {\n         user: \"collaboratorTeamspace1Model1JobB\",\n         permission: \"collaborator\"\n      }\n   ],\n   status: \"ok\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "version": "0.0.0",
-    "filename": "src/v4/routes/model.js",
-    "groupTitle": "Model"
-  },
-  {
     "type": "put",
     "url": "/:teamspace/:model/settings/",
     "title": "Update Model Settings",
@@ -9472,268 +7621,6 @@ define({ "api": [
         }
       ]
     },
-    "version": "0.0.0",
-    "filename": "src/v4/routes/model.js",
-    "groupTitle": "Model"
-  },
-  {
-    "type": "patch",
-    "url": "/:teamspace/:model/upload/ms-chunking/:corID",
-    "title": "Upload model chunk",
-    "name": "uploadChunk",
-    "group": "Model",
-    "description": "<p>Upload model chunk for Microsoft Logic Apps.</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID to upload</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "corID",
-            "description": "<p>Upload correlation ID</p>"
-          }
-        ],
-        "Request header": [
-          {
-            "group": "Request header",
-            "type": "String",
-            "optional": false,
-            "field": "Content-Range",
-            "description": "<p>Byte range for the current content chunk, including the starting value, ending value, and the total content size, for example: &quot;bytes 0-1023/10100&quot;</p>"
-          },
-          {
-            "group": "Request header",
-            "type": "String",
-            "optional": false,
-            "field": "Content-Type",
-            "description": "<p>Type of chunked content</p>"
-          },
-          {
-            "group": "Request header",
-            "type": "String",
-            "optional": false,
-            "field": "Content-Length",
-            "description": "<p>Length of size in bytes of the current chunk</p>"
-          }
-        ],
-        "Request body: Attachment": [
-          {
-            "group": "Request body: Attachment",
-            "type": "binary",
-            "optional": false,
-            "field": "FILE",
-            "description": "<p>the file to be uploaded</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "200": [
-          {
-            "group": "200",
-            "type": "String",
-            "optional": false,
-            "field": "Range",
-            "description": "<p>Byte range for content that has been received by the endpoint, for example: &quot;bytes=0-1023&quot;</p>"
-          },
-          {
-            "group": "200",
-            "type": "Number",
-            "optional": true,
-            "field": "x-ms-chunk-size",
-            "description": "<p>Suggested chunk size in bytes</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n\t\"Range\": \"bytes=0-1023\",\n\t\"x-ms-chunk-size\": 1024\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "examples": [
-      {
-        "title": "Example usage:",
-        "content": "PATCH /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking/00000000-0000-1111-2222-333333333333 HTTP/1.1\n\nheader: {\n\t\"Content-Range\": \"bytes 0-1023/10100\",\n\t\"Content-Type\": \"application/octet-stream\",\n\t\"Content-Length\": \"bytes=1024\"\n}\n\nbody: {\n\t\"file\": <FILE CHUNK CONTENTS>\n}",
-        "type": "patch"
-      }
-    ],
-    "version": "0.0.0",
-    "filename": "src/v4/routes/model.js",
-    "groupTitle": "Model"
-  },
-  {
-    "type": "post",
-    "url": "/:teamspace/:model/upload/ms-chunking/:corID",
-    "title": "Start MS chunking upload",
-    "name": "uploadChunksStart",
-    "group": "Model",
-    "description": "<p>Start chunked model upload for Microsoft Logic Apps. Max chunk size defined as 52,428,800 bytes (52 MB) based on https://docs.microsoft.com/en-us/azure/logic-apps/logic-apps-limits-and-config?tabs=azure-portal</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID to upload</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "corID",
-            "description": "<p>Upload correlation ID</p>"
-          }
-        ],
-        "Request header": [
-          {
-            "group": "Request header",
-            "type": "String",
-            "optional": false,
-            "field": "x-ms-transfer-mode",
-            "description": "<p>Indicates that the content is uploaded in chunks; value=&quot;chunked&quot;</p>"
-          },
-          {
-            "group": "Request header",
-            "type": "Number",
-            "optional": false,
-            "field": "x-ms-content-length",
-            "description": "<p>The entire content size in bytes before chunking</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "200": [
-          {
-            "group": "200",
-            "type": "Number",
-            "optional": true,
-            "field": "x-ms-chunk-size",
-            "description": "<p>Suggested chunk size in bytes</p>"
-          },
-          {
-            "group": "200",
-            "type": "String",
-            "optional": false,
-            "field": "Location",
-            "description": "<p>The URL location where to send the HTTP PATCH messages</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n\t\"x-ms-chunk-size\": 1024,\n\t\"Location\": \"/teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking/00000000-0000-1111-2222-333333333333\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "examples": [
-      {
-        "title": "Example usage:",
-        "content": "POST /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking/00000000-0000-1111-2222-333333333333 HTTP/1.1\n\nheader: {\n\t\"x-ms-transfer-mode\": \"chunked\",\n\t\"x-ms-content-length\": 10100\n}",
-        "type": "post"
-      }
-    ],
-    "version": "0.0.0",
-    "filename": "src/v4/routes/model.js",
-    "groupTitle": "Model"
-  },
-  {
-    "type": "post",
-    "url": "/:teamspace/:model/upload",
-    "title": "Upload Model.",
-    "name": "uploadModel",
-    "group": "Model",
-    "description": "<p>It uploads a model file and creates a new revision for that model.</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model id to upload.</p>"
-          }
-        ],
-        "Request body": [
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "tag",
-            "description": "<p>the tag name for the new revision</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "desc",
-            "description": "<p>the description for the new revision</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "Boolean",
-            "optional": true,
-            "field": "importAnimations",
-            "description": "<p>whether to import animations within a sequence</p>"
-          }
-        ],
-        "Request body: Attachment": [
-          {
-            "group": "Request body: Attachment",
-            "type": "binary",
-            "optional": false,
-            "field": "FILE",
-            "description": "<p>the file to be uploaded</p>"
-          }
-        ]
-      }
-    },
-    "examples": [
-      {
-        "title": "Example usage:",
-        "content": "POST /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload HTTP/1.1\nContent-Type: multipart/form-data; boundary=----WebKitFormBoundarySos0xligf1T8Sy8I\n\n------WebKitFormBoundarySos0xligf1T8Sy8I\nContent-Disposition: form-data; name=\"file\"; filename=\"3DrepoBIM.obj\"\nContent-Type: application/octet-stream\n\n<binary content>\n------WebKitFormBoundarySos0xligf1T8Sy8I\nContent-Disposition: form-data; name=\"tag\"\n\nrev1\n------WebKitFormBoundarySos0xligf1T8Sy8I\nContent-Disposition: form-data; name=\"desc\"\n\nel paso\n------WebKitFormBoundarySos0xligf1T8Sy8I-- *",
-        "type": "post"
-      }
-    ],
     "version": "0.0.0",
     "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
@@ -10178,67 +8065,6 @@ define({ "api": [
         {
           "title": "Success:",
           "content": "{\n   _id: \"5d5bec491c15383184eb7521\",\n   name: \"Classic project renamed\",\n   permissions: [\n      {\n         user: \"projectshared\",\n         permissions: [\n            \"admin_project\"\n         ]\n      }\n   ],\n   models: []\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "version": "0.0.0",
-    "filename": "src/v4/routes/project.js",
-    "groupTitle": "Project"
-  },
-  {
-    "type": "get",
-    "url": "/:teamspace/projects/:project/models",
-    "title": "List models of the project",
-    "name": "listModels",
-    "group": "Project",
-    "description": "<p>It returns a list of models .</p>",
-    "permission": [
-      {
-        "name": "canListProjects"
-      }
-    ],
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of the teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "project",
-            "description": "<p>The name of the project to list models</p>"
-          }
-        ],
-        "Query": [
-          {
-            "group": "Query",
-            "type": "String",
-            "optional": true,
-            "field": "name",
-            "description": "<p>Filters models by name</p>"
-          }
-        ]
-      }
-    },
-    "examples": [
-      {
-        "title": "Example usage:",
-        "content": "GET /teamSpace1/projects/Bim%20Logo/models?name=log HTTP/1.1",
-        "type": "get"
-      }
-    ],
-    "success": {
-      "examples": [
-        {
-          "title": "Success:",
-          "content": "[\n  {\n    \"_id\": \"5ce7dd19-1252-4548-a9c9-4a5414f2e0c5\",\n    \"federate\": true,\n    \"desc\": \"\",\n    \"name\": \"Full Logo\",\n    \"__v\": 17,\n    \"timestamp\": \"2019-05-02T16:17:37.902Z\",\n    \"type\": \"Federation\",\n    \"subModels\": [\n      {\n        \"database\": \"teamSpace1\",\n        \"model\": \"b1fceab8-b0e9-4e45-850b-b9888efd6521\",\n        \"name\": \"block\"\n      },\n      {\n        \"database\": \"teamSpace1\",\n        \"model\": \"7cf61b4f-acdf-4295-b2d0-9b45f9f27418\",\n        \"name\": \"letters\"\n      },\n      {\n        \"database\": \"teamSpace1\",\n        \"model\": \"2710bd65-37d3-4e7f-b2e0-ffe743ce943f\",\n        \"name\": \"pipes\"\n      }\n    ],\n    \"surveyPoints\": [\n      {\n        \"position\": [\n          0,\n          0,\n          0\n        ],\n        \"latLong\": [\n          -34.459127,\n          0\n        ]\n      }\n    ],\n    \"properties\": {\n      \"unit\": \"mm\",\n      \"topicTypes\": [\n        {\n          \"label\": \"Clash\",\n          \"value\": \"clash\"\n        },\n        {\n          \"label\": \"Diff\",\n          \"value\": \"diff\"\n        },\n        {\n          \"label\": \"RFI\",\n          \"value\": \"rfi\"\n        },\n        {\n          \"label\": \"Risk\",\n          \"value\": \"risk\"\n        },\n        {\n          \"label\": \"H&S\",\n          \"value\": \"hs\"\n        },\n        {\n          \"label\": \"Design\",\n          \"value\": \"design\"\n        },\n        {\n          \"label\": \"Constructibility\",\n          \"value\": \"constructibility\"\n        },\n        {\n          \"label\": \"GIS\",\n          \"value\": \"gis\"\n        },\n        {\n          \"label\": \"For information\",\n          \"value\": \"for_information\"\n        },\n        {\n          \"label\": \"VR\",\n          \"value\": \"vr\"\n        }\n      ]\n    },\n    \"permissions\": [\n      \"change_model_settings\",\n      \"upload_files\",\n      \"create_issue\",\n      \"comment_issue\",\n      \"view_issue\",\n      \"view_model\",\n      \"download_model\",\n      \"edit_federation\",\n      \"delete_federation\",\n      \"delete_model\",\n      \"manage_model_permission\"\n    ],\n    \"status\": \"ok\",\n    \"id\": \"5ce7dd19-1252-4548-a9c9-4a5414f2e0c5\",\n    \"model\": \"5ce7dd19-1252-4548-a9c9-4a5414f2e0c5\",\n    \"account\": \"teamSpace1\",\n    \"headRevisions\": {\n    }\n  }\n]\t *",
           "type": "json"
         }
       ]
@@ -14051,7 +11877,7 @@ define({ "api": [
     "type": "delete",
     "url": "/apikey",
     "title": "Deletes the current apikey for the logged user",
-    "name": "deleteApiKey_HTTP_1_1_200_OK___",
+    "name": "deleteApiKey_HTTP/1.1_200_OK_{}",
     "group": "User",
     "version": "0.0.0",
     "filename": "src/v4/routes/user.js",
